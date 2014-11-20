@@ -2301,7 +2301,8 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
 
   start_pc_sal = find_pc_sect_line (start_pc, NULL, 0);
   if (start_pc_sal.symtab == NULL
-      || producer_is_gcc_ge_4 (start_pc_sal.symtab->producer) < 6
+      || producer_is_gcc_ge_4 (COMPUNIT_PRODUCER
+	   (SYMTAB_COMPUNIT (start_pc_sal.symtab))) < 6
       || start_pc_sal.pc != start_pc || pc >= start_pc_sal.end)
     return pc;
 
@@ -2364,14 +2365,15 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
     {
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
-      struct symtab *s = find_pc_symtab (func_addr);
+      struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
       /* Clang always emits a line note before the prologue and another
 	 one after.  We trust clang to emit usable line notes.  */
       if (post_prologue_pc
-	  && (s != NULL
-	      && s->producer != NULL
-	      && strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
+	  && (cust != NULL
+	      && COMPUNIT_PRODUCER (cust) != NULL
+	      && strncmp (COMPUNIT_PRODUCER (cust), "clang ",
+			  sizeof ("clang ") - 1) == 0))
         return max (start_pc, post_prologue_pc);
     }
 
@@ -2713,10 +2715,10 @@ static int
 amd64_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
-  struct symtab *symtab;
+  struct compunit_symtab *cust;
 
-  symtab = find_pc_symtab (pc);
-  if (symtab && symtab->epilogue_unwind_valid)
+  cust = find_pc_compunit_symtab (pc);
+  if (cust != NULL && COMPUNIT_EPILOGUE_UNWIND_VALID (cust))
     return 0;
 
   if (target_read_memory (pc, &insn, 1))

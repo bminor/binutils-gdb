@@ -97,6 +97,7 @@ print_objfile_statistics (void)
 {
   struct program_space *pspace;
   struct objfile *objfile;
+  struct compunit_symtab *cu;
   struct symtab *s;
   int i, linetables, blockvectors;
 
@@ -123,14 +124,14 @@ print_objfile_statistics (void)
     if (objfile->sf)
       objfile->sf->qf->print_stats (objfile);
     i = linetables = blockvectors = 0;
-    ALL_OBJFILE_SYMTABS (objfile, s)
+    ALL_OBJFILE_FILETABS (objfile, cu, s)
       {
         i++;
         if (SYMTAB_LINETABLE (s) != NULL)
           linetables++;
-        if (s->primary == 1)
-          blockvectors++;
       }
+    ALL_OBJFILE_COMPUNITS (objfile, cu)
+      blockvectors++;
     printf_filtered (_("  Number of symbol tables: %d\n"), i);
     printf_filtered (_("  Number of symbol tables with line tables: %d\n"),
                      linetables);
@@ -159,6 +160,7 @@ print_objfile_statistics (void)
 static void
 dump_objfile (struct objfile *objfile)
 {
+  struct compunit_symtab *cust;
   struct symtab *symtab;
 
   printf_filtered ("\nObject file %s:  ", objfile_name (objfile));
@@ -172,12 +174,10 @@ dump_objfile (struct objfile *objfile)
   if (objfile->sf)
     objfile->sf->qf->dump (objfile);
 
-  if (objfile->symtabs)
+  if (objfile->compunit_symtabs != NULL)
     {
       printf_filtered ("Symtabs:\n");
-      for (symtab = objfile->symtabs;
-	   symtab != NULL;
-	   symtab = symtab->next)
+      ALL_OBJFILE_FILETABS (objfile, cust, symtab)
 	{
 	  printf_filtered ("%s at ", symtab_to_filename_for_display (symtab));
 	  gdb_print_host_address (symtab, gdb_stdout);
@@ -320,9 +320,9 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	  fprintf_filtered (outfile, "\n");
 	}
     }
-  /* Now print the block info, but only for primary symtabs since we will
+  /* Now print the block info, but only for compunit symtabs since we will
      print lots of duplicate info otherwise.  */
-  if (symtab->primary)
+  if (symtab == COMPUNIT_FILETABS (SYMTAB_COMPUNIT (symtab)))
     {
       fprintf_filtered (outfile, "\nBlockvector:\n\n");
       bv = SYMTAB_BLOCKVECTOR (symtab);
@@ -413,6 +413,7 @@ maintenance_print_symbols (char *args, int from_tty)
   char *symname = NULL;
   char *filename = DEV_TTY;
   struct objfile *objfile;
+  struct compunit_symtab *cu;
   struct symtab *s;
 
   dont_repeat ();
@@ -443,7 +444,7 @@ maintenance_print_symbols (char *args, int from_tty)
     perror_with_name (filename);
   make_cleanup_ui_file_delete (outfile);
 
-  ALL_SYMTABS (objfile, s)
+  ALL_FILETABS (objfile, cu, s)
     {
       QUIT;
       if (symname == NULL
@@ -725,50 +726,71 @@ maintenance_info_symtabs (char *regexp, int from_tty)
   ALL_PSPACES (pspace)
     ALL_PSPACE_OBJFILES (pspace, objfile)
     {
+      struct compunit_symtab *cust;
       struct symtab *symtab;
 
       /* We don't want to print anything for this objfile until we
          actually find a symtab whose name matches.  */
       int printed_objfile_start = 0;
 
-      ALL_OBJFILE_SYMTABS (objfile, symtab)
+      ALL_OBJFILE_COMPUNITS (objfile, cust)
 	{
-	  QUIT;
+	  int printed_compunit_symtab_start = 0;
 
-	  if (! regexp
-	      || re_exec (symtab_to_filename_for_display (symtab)))
+	  ALL_COMPUNIT_FILETABS (cust, symtab)
 	    {
-	      if (! printed_objfile_start)
-		{
-		  printf_filtered ("{ objfile %s ", objfile_name (objfile));
-		  wrap_here ("  ");
-		  printf_filtered ("((struct objfile *) %s)\n",
-				   host_address_to_string (objfile));
-		  printed_objfile_start = 1;
-		}
+	      QUIT;
 
-	      printf_filtered ("	{ symtab %s ",
-			       symtab_to_filename_for_display (symtab));
-	      wrap_here ("    ");
-	      printf_filtered ("((struct symtab *) %s)\n",
-			       host_address_to_string (symtab));
-	      printf_filtered ("	  dirname %s\n",
-			       SYMTAB_DIRNAME (symtab) != NULL
-			       ? SYMTAB_DIRNAME (symtab) : "(null)");
-	      printf_filtered ("	  fullname %s\n",
-			       symtab->fullname ? symtab->fullname : "(null)");
-	      printf_filtered ("	  "
-			       "blockvector ((struct blockvector *) %s)%s\n",
-			       host_address_to_string (symtab->blockvector),
-			       symtab->primary ? " (primary)" : "");
-	      printf_filtered ("	  "
-			       "linetable ((struct linetable *) %s)\n",
-			       host_address_to_string
-				 (SYMTAB_LINETABLE (symtab)));
-	      printf_filtered ("	  debugformat %s\n",
-			       symtab->debugformat);
-	      printf_filtered ("	}\n");
+	      if (! regexp
+		  || re_exec (symtab_to_filename_for_display (symtab)))
+		{
+		  if (! printed_objfile_start)
+		    {
+		      printf_filtered ("{ objfile %s ", objfile_name (objfile));
+		      wrap_here ("  ");
+		      printf_filtered ("((struct objfile *) %s)\n",
+				       host_address_to_string (objfile));
+		      printed_objfile_start = 1;
+		    }
+		  if (! printed_compunit_symtab_start)
+		    {
+		      printf_filtered ("  { ((struct compunit_symtab *) %s)\n",
+				       host_address_to_string (cust));
+		      printf_filtered ("    debugformat %s\n",
+				       COMPUNIT_DEBUGFORMAT (cust));
+		      printf_filtered ("    producer %s\n",
+				       COMPUNIT_PRODUCER (cust) != NULL
+				       ? COMPUNIT_PRODUCER (cust)
+				       : "(null)");
+		      printf_filtered ("    dirname %s\n",
+				       COMPUNIT_DIRNAME (cust) != NULL
+				       ? COMPUNIT_DIRNAME (cust)
+				       : "(null)");
+		      printf_filtered ("    blockvector"
+				       " ((struct blockvector *) %s)\n",
+				       host_address_to_string
+				         (COMPUNIT_BLOCKVECTOR (cust)));
+		      printed_compunit_symtab_start = 1;
+		    }
+
+		  printf_filtered ("\t{ symtab %s ",
+				   symtab_to_filename_for_display (symtab));
+		  wrap_here ("    ");
+		  printf_filtered ("((struct symtab *) %s)\n",
+				   host_address_to_string (symtab));
+		  printf_filtered ("\t  fullname %s\n",
+				   symtab->fullname != NULL
+				   ? symtab->fullname
+				   : "(null)");
+		  printf_filtered ("\t  "
+				   "linetable ((struct linetable *) %s)\n",
+				   host_address_to_string (symtab->linetable));
+		  printf_filtered ("\t}\n");
+		}
 	    }
+
+	  if (printed_compunit_symtab_start)
+	    printf_filtered ("  }\n");
 	}
 
       if (printed_objfile_start)
@@ -793,19 +815,20 @@ maintenance_check_symtabs (char *ignore, int from_tty)
   ALL_PSPACES (pspace)
     ALL_PSPACE_OBJFILES (pspace, objfile)
     {
-      struct symtab *symtab;
+      struct compunit_symtab *cust;
 
       /* We don't want to print anything for this objfile until we
          actually find something worth printing.  */
       int printed_objfile_start = 0;
 
-      ALL_OBJFILE_SYMTABS (objfile, symtab)
+      ALL_OBJFILE_COMPUNITS (objfile, cust)
 	{
 	  int found_something = 0;
+	  struct symtab *symtab = compunit_primary_filetab (cust);
 
 	  QUIT;
 
-	  if (symtab->blockvector == NULL)
+	  if (COMPUNIT_BLOCKVECTOR (cust) == NULL)
 	    found_something = 1;
 	  /* Add more checks here.  */
 
@@ -821,7 +844,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 		}
 	      printf_filtered ("  { symtab %s\n",
 			       symtab_to_filename_for_display (symtab));
-	      if (symtab->blockvector == NULL)
+	      if (COMPUNIT_BLOCKVECTOR (cust) == NULL)
 		printf_filtered ("    NULL blockvector\n");
 	      printf_filtered ("  }\n");
 	    }

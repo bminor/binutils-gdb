@@ -67,8 +67,8 @@ static struct partial_symbol *find_pc_sect_psymbol (struct objfile *,
 static void fixup_psymbol_section (struct partial_symbol *psym,
 				   struct objfile *objfile);
 
-static struct symtab *psymtab_to_symtab (struct objfile *objfile,
-					 struct partial_symtab *pst);
+static struct compunit_symtab *psymtab_to_symtab (struct objfile *objfile,
+						  struct partial_symtab *pst);
 
 /* Ensure that the partial symbols for OBJFILE have been loaded.  This
    function always returns its argument, as a convenience.  */
@@ -135,7 +135,7 @@ partial_map_expand_apply (struct objfile *objfile,
 			  int (*callback) (struct symtab *, void *),
 			  void *data)
 {
-  struct symtab *last_made = objfile->symtabs;
+  struct compunit_symtab *last_made = objfile->compunit_symtabs;
 
   /* Shared psymtabs should never be seen here.  Instead they should
      be handled properly by the caller.  */
@@ -150,7 +150,7 @@ partial_map_expand_apply (struct objfile *objfile,
   psymtab_to_symtab (objfile, pst);
 
   return iterate_over_some_symtabs (name, real_path, callback, data,
-				    objfile->symtabs, last_made);
+				    objfile->compunit_symtabs, last_made);
 }
 
 /* Implementation of the map_symtabs_matching_filename method.  */
@@ -370,11 +370,12 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
   return NULL;
 }
 
-static struct symtab *
-find_pc_sect_symtab_from_partial (struct objfile *objfile,
-				  struct bound_minimal_symbol msymbol,
-				  CORE_ADDR pc, struct obj_section *section,
-				  int warn_if_readin)
+static struct compunit_symtab *
+find_pc_sect_compunit_symtab_from_partial (struct objfile *objfile,
+					   struct bound_minimal_symbol msymbol,
+					   CORE_ADDR pc,
+					   struct obj_section *section,
+					   int warn_if_readin)
 {
   struct partial_symtab *ps = find_pc_sect_psymtab (objfile, pc, section,
 						    msymbol);
@@ -388,7 +389,7 @@ find_pc_sect_symtab_from_partial (struct objfile *objfile,
 (Internal error: pc %s in read in psymtab, but not in symtab.)\n"),
 		 paddress (get_objfile_arch (objfile), pc));
       psymtab_to_symtab (objfile, ps);
-      return ps->symtab;
+      return ps->compunit_symtab;
     }
   return NULL;
 }
@@ -494,14 +495,14 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
   fixup_section (&psym->ginfo, addr, objfile);
 }
 
-static struct symtab *
+static struct compunit_symtab *
 lookup_symbol_aux_psymtabs (struct objfile *objfile,
 			    int block_index, const char *name,
 			    const domain_enum domain)
 {
   struct partial_symtab *ps;
   const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
-  struct symtab *stab_best = NULL;
+  struct compunit_symtab *stab_best = NULL;
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
   {
@@ -509,11 +510,11 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 					      psymtab_index, domain))
       {
 	struct symbol *sym = NULL;
-	struct symtab *stab = psymtab_to_symtab (objfile, ps);
+	struct compunit_symtab *stab = psymtab_to_symtab (objfile, ps);
 	/* Note: While psymtab_to_symtab can return NULL if the partial symtab
 	   is empty, we can assume it won't here because lookup_partial_symbol
 	   succeeded.  */
-	const struct blockvector *bv = SYMTAB_BLOCKVECTOR (stab);
+	const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
 	struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	/* Some caution must be observed with overloaded functions
@@ -760,7 +761,7 @@ lookup_partial_symbol (struct objfile *objfile,
    which can happen.  Otherwise the result is the primary symtab
    that contains PST.  */
 
-static struct symtab *
+static struct compunit_symtab *
 psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
   /* If it is a shared psymtab, find an unshared psymtab that includes
@@ -769,8 +770,8 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
     pst = pst->user;
 
   /* If it's been looked up before, return it.  */
-  if (pst->symtab)
-    return pst->symtab;
+  if (pst->compunit_symtab)
+    return pst->compunit_symtab;
 
   /* If it has not yet been read in, read it.  */
   if (!pst->readin)
@@ -781,10 +782,7 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
       do_cleanups (back_to);
     }
 
-  if (pst->symtab != NULL)
-    gdb_assert (pst->symtab->primary);
-
-  return pst->symtab;
+  return pst->compunit_symtab;
 }
 
 static void
@@ -846,7 +844,13 @@ find_last_source_symtab_from_partial (struct objfile *ofp)
 			  "readin pst found and no symtabs."));
 	}
       else
-	return psymtab_to_symtab (ofp, cs_pst);
+	{
+	  struct compunit_symtab *cust = psymtab_to_symtab (ofp, cs_pst);
+
+	  if (cust == NULL)
+	    return NULL;
+	  return compunit_primary_filetab (cust);
+	}
     }
   return NULL;
 }
@@ -986,7 +990,7 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
     {
       fprintf_filtered (outfile,
 			"  Full symtab was read (at ");
-      gdb_print_host_address (psymtab->symtab, outfile);
+      gdb_print_host_address (psymtab->compunit_symtab, outfile);
       fprintf_filtered (outfile, " by function at ");
       gdb_print_host_address (psymtab->read_symtab, outfile);
       fprintf_filtered (outfile, ")\n");
@@ -1261,12 +1265,12 @@ map_matching_symbols_psymtab (struct objfile *objfile,
 	  || match_partial_symbol (objfile, ps, global, name, namespace, match,
 				   ordered_compare))
 	{
-	  struct symtab *s = psymtab_to_symtab (objfile, ps);
+	  struct compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
 	  struct block *block;
 
-	  if (s == NULL)
+	  if (cust == NULL)
 	    continue;
-	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), block_kind);
+	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
 	  if (map_block (name, namespace, objfile, block,
 			 callback, data, match))
 	    return;
@@ -1436,7 +1440,7 @@ const struct quick_symbol_functions psym_functions =
   read_psymtabs_with_fullname,
   map_matching_symbols_psymtab,
   expand_symtabs_matching_via_partial,
-  find_pc_sect_symtab_from_partial,
+  find_pc_sect_compunit_symtab_from_partial,
   map_symbol_filenames_psymtab
 };
 
@@ -1748,7 +1752,7 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
   memset (psymtab, 0, sizeof (struct partial_symtab));
   psymtab->filename = bcache (filename, strlen (filename) + 1,
 			      objfile->per_bfd->filename_cache);
-  psymtab->symtab = NULL;
+  psymtab->compunit_symtab = NULL;
 
   /* Prepend it to the psymtab list for the objfile it belongs to.
      Psymtabs are searched in most recent inserted -> least recent
@@ -2005,7 +2009,7 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
 {
   struct symbol *sym;
   struct partial_symbol **psym;
-  struct symtab *s = NULL;
+  struct compunit_symtab *cust = NULL;
   struct partial_symtab *ps;
   const struct blockvector *bv;
   struct objfile *objfile;
@@ -2019,7 +2023,7 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
     /* We don't call psymtab_to_symtab here because that may cause symtab
        expansion.  When debugging a problem it helps if checkers leave
        things unchanged.  */
-    s = ps->symtab;
+    cust = ps->compunit_symtab;
 
     /* First do some checks that don't require the associated symtab.  */
     if (ps->texthigh < ps->textlow)
@@ -2035,9 +2039,9 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
       }
 
     /* Now do checks requiring the associated symtab.  */
-    if (s == NULL)
+    if (cust == NULL)
       continue;
-    bv = SYMTAB_BLOCKVECTOR (s);
+    bv = COMPUNIT_BLOCKVECTOR (cust);
     b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
     psym = objfile->static_psymbols.list + ps->statics_offset;
     length = ps->n_static_syms;

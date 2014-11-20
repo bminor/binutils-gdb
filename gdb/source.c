@@ -259,6 +259,7 @@ select_source_symtab (struct symtab *s)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct objfile *ofp;
+  struct compunit_symtab *cu;
 
   if (s)
     {
@@ -291,7 +292,7 @@ select_source_symtab (struct symtab *s)
 
   current_source_line = 1;
 
-  ALL_SYMTABS (ofp, s)
+  ALL_FILETABS (ofp, cu, s)
     {
       const char *name = s->filename;
       int len = strlen (name);
@@ -369,9 +370,10 @@ show_directories_command (struct ui_file *file, int from_tty,
 void
 forget_cached_source_info_for_objfile (struct objfile *objfile)
 {
+  struct compunit_symtab *cu;
   struct symtab *s;
 
-  ALL_OBJFILE_SYMTABS (objfile, s)
+  ALL_OBJFILE_FILETABS (objfile, cu, s)
     {
       if (s->line_charpos != NULL)
 	{
@@ -668,9 +670,11 @@ source_info (char *ignore, int from_tty)
 		     s->nlines == 1 ? "" : "s");
 
   printf_filtered (_("Source language is %s.\n"), language_str (s->language));
-  printf_filtered (_("Compiled with %s debugging format.\n"), s->debugformat);
+  printf_filtered (_("Compiled with %s debugging format.\n"),
+		   COMPUNIT_DEBUGFORMAT (SYMTAB_COMPUNIT (s)));
   printf_filtered (_("%s preprocessor macro info.\n"),
-                   s->macro_table ? "Includes" : "Does not include");
+		   COMPUNIT_MACRO_TABLE (SYMTAB_COMPUNIT (s)) != NULL
+		   ? "Includes" : "Does not include");
 }
 
 

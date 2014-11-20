@@ -781,7 +781,6 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   struct coff_symbol fcn_cs_saved;
   static struct internal_syment fcn_sym_saved;
   static union internal_auxent fcn_aux_saved;
-  struct symtab *s;
   /* A .file is open.  */
   int in_source_file = 0;
   int next_file_symnum = -1;
@@ -1200,8 +1199,13 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
   /* Patch up any opaque types (references to types that are not defined
      in the file where they are referenced, e.g. "struct foo *bar").  */
-  ALL_OBJFILE_SYMTABS (objfile, s)
-    patch_opaque_types (s);
+  {
+    struct compunit_symtab *cu;
+    struct symtab *s;
+
+    ALL_OBJFILE_FILETABS (objfile, cu, s)
+      patch_opaque_types (s);
+  }
 
   coffread_objfile = NULL;
 }

@@ -1398,7 +1398,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
-      struct symtab *s = find_pc_symtab (func_addr);
+      struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
       if (post_prologue_pc)
 	post_prologue_pc
@@ -1412,10 +1412,12 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	 will have producer information for most binaries; if it is
 	 missing (e.g. for -gstabs), assuming the GNU tools.  */
       if (post_prologue_pc
-	  && (s == NULL
-	      || s->producer == NULL
-	      || strncmp (s->producer, "GNU ", sizeof ("GNU ") - 1) == 0 
-	      || strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
+	  && (cust == NULL
+	      || COMPUNIT_PRODUCER (cust) == NULL
+	      || strncmp (COMPUNIT_PRODUCER (cust), "GNU ",
+			  sizeof ("GNU ") - 1) == 0
+	      || strncmp (COMPUNIT_PRODUCER (cust), "clang ",
+			  sizeof ("clang ") - 1) == 0))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)

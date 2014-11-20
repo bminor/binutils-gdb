@@ -1,3 +1,7 @@
+2014-11-20  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/maint.exp: Update expected output.
+
 2014-11-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/bp-permanent.c (NOP): Define as 2-byte instead of

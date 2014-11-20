@@ -156,20 +156,21 @@ find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
 
 const struct blockvector *
 blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
-			 const struct block **pblock, struct symtab *symtab)
+			 const struct block **pblock,
+			 struct compunit_symtab *cust)
 {
   const struct blockvector *bl;
   struct block *b;
 
-  if (symtab == 0)		/* if no symtab specified by caller */
+  if (cust == NULL)
     {
       /* First search all symtabs for one whose file contains our pc */
-      symtab = find_pc_sect_symtab (pc, section);
-      if (symtab == 0)
+      cust = find_pc_sect_compunit_symtab (pc, section);
+      if (cust == NULL)
 	return 0;
     }
 
-  bl = SYMTAB_BLOCKVECTOR (symtab);
+  bl = COMPUNIT_BLOCKVECTOR (cust);
 
   /* Then search that symtab for the smallest block that wins.  */
   b = find_block_in_blockvector (bl, pc);
@@ -196,14 +197,14 @@ blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc)
 struct call_site *
 call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct symtab *symtab;
+  struct compunit_symtab *cust;
   void **slot = NULL;
 
   /* -1 as tail call PC can be already after the compilation unit range.  */
-  symtab = find_pc_symtab (pc - 1);
+  cust = find_pc_compunit_symtab (pc - 1);
 
-  if (symtab != NULL && symtab->call_site_htab != NULL)
-    slot = htab_find_slot (symtab->call_site_htab, &pc, NO_INSERT);
+  if (cust != NULL && COMPUNIT_CALL_SITE_HTAB (cust) != NULL)
+    slot = htab_find_slot (COMPUNIT_CALL_SITE_HTAB (cust), &pc, NO_INSERT);
 
   if (slot == NULL)
     {
@@ -388,30 +389,30 @@ allocate_global_block (struct obstack *obstack)
   return &bl->block;
 }
 
-/* Set the symtab of the global block.  */
+/* Set the compunit of the global block.  */
 
 void
-set_block_symtab (struct block *block, struct symtab *symtab)
+set_block_compunit_symtab (struct block *block, struct compunit_symtab *cu)
 {
   struct global_block *gb;
 
   gdb_assert (BLOCK_SUPERBLOCK (block) == NULL);
   gb = (struct global_block *) block;
-  gdb_assert (gb->symtab == NULL);
-  gb->symtab = symtab;
+  gdb_assert (gb->compunit_symtab == NULL);
+  gb->compunit_symtab = cu;
 }
 
-/* Return the symtab of the global block.  */
+/* Return the compunit of the global block.  */
 
-static struct symtab *
-get_block_symtab (const struct block *block)
+static struct compunit_symtab *
+get_block_compunit_symtab (const struct block *block)
 {
   struct global_block *gb;
 
   gdb_assert (BLOCK_SUPERBLOCK (block) == NULL);
   gb = (struct global_block *) block;
-  gdb_assert (gb->symtab != NULL);
-  return gb->symtab;
+  gdb_assert (gb->compunit_symtab != NULL);
+  return gb->compunit_symtab;
 }
 
 
@@ -425,19 +426,19 @@ initialize_block_iterator (const struct block *block,
 			   struct block_iterator *iter)
 {
   enum block_enum which;
-  struct symtab *symtab;
+  struct compunit_symtab *cu;
 
   iter->idx = -1;
 
   if (BLOCK_SUPERBLOCK (block) == NULL)
     {
       which = GLOBAL_BLOCK;
-      symtab = get_block_symtab (block);
+      cu = get_block_compunit_symtab (block);
     }
   else if (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL)
     {
       which = STATIC_BLOCK;
-      symtab = get_block_symtab (BLOCK_SUPERBLOCK (block));
+      cu = get_block_compunit_symtab (BLOCK_SUPERBLOCK (block));
     }
   else
     {
@@ -450,14 +451,14 @@ initialize_block_iterator (const struct block *block,
 
   /* If this is an included symtab, find the canonical includer and
      use it instead.  */
-  while (symtab->user != NULL)
-    symtab = symtab->user;
+  while (cu->user != NULL)
+    cu = cu->user;
 
   /* Putting this check here simplifies the logic of the iterator
      functions.  If there are no included symtabs, we only need to
      search a single block, so we might as well just do that
      directly.  */
-  if (symtab->includes == NULL)
+  if (cu->includes == NULL)
     {
       iter->d.block = block;
       /* A signal value meaning that we're iterating over a single
@@ -466,20 +467,20 @@ initialize_block_iterator (const struct block *block,
     }
   else
     {
-      iter->d.symtab = symtab;
+      iter->d.compunit_symtab = cu;
       iter->which = which;
     }
 }
 
-/* A helper function that finds the current symtab over whose static
+/* A helper function that finds the current compunit over whose static
    or global block we should iterate.  */
 
-static struct symtab *
-find_iterator_symtab (struct block_iterator *iterator)
+static struct compunit_symtab *
+find_iterator_compunit_symtab (struct block_iterator *iterator)
 {
   if (iterator->idx == -1)
-    return iterator->d.symtab;
-  return iterator->d.symtab->includes[iterator->idx];
+    return iterator->d.compunit_symtab;
+  return iterator->d.compunit_symtab->includes[iterator->idx];
 }
 
 /* Perform a single step for a plain block iterator, iterating across
@@ -497,14 +498,15 @@ block_iterator_step (struct block_iterator *iterator, int first)
     {
       if (first)
 	{
-	  struct symtab *symtab = find_iterator_symtab (iterator);
+	  struct compunit_symtab *cust
+	    = find_iterator_compunit_symtab (iterator);
 	  const struct block *block;
 
 	  /* Iteration is complete.  */
-	  if (symtab == NULL)
+	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
+	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 				     iterator->which);
 	  sym = dict_iterator_first (BLOCK_DICT (block), &iterator->dict_iter);
 	}
@@ -563,14 +565,15 @@ block_iter_name_step (struct block_iterator *iterator, const char *name,
     {
       if (first)
 	{
-	  struct symtab *symtab = find_iterator_symtab (iterator);
+	  struct compunit_symtab *cust
+	    = find_iterator_compunit_symtab (iterator);
 	  const struct block *block;
 
 	  /* Iteration is complete.  */
-	  if (symtab == NULL)
+	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
+	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 				     iterator->which);
 	  sym = dict_iter_name_first (BLOCK_DICT (block), name,
 				      &iterator->dict_iter);
@@ -633,14 +636,15 @@ block_iter_match_step (struct block_iterator *iterator,
     {
       if (first)
 	{
-	  struct symtab *symtab = find_iterator_symtab (iterator);
+	  struct compunit_symtab *cust
+	    = find_iterator_compunit_symtab (iterator);
 	  const struct block *block;
 
 	  /* Iteration is complete.  */
-	  if (symtab == NULL)
+	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
+	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 				     iterator->which);
 	  sym = dict_iter_match_first (BLOCK_DICT (block), name,
 				       compare, &iterator->dict_iter);

@@ -237,7 +237,7 @@ enum block_type { FUNCTION_BLOCK, NON_FUNCTION_BLOCK };
 
 static struct block *new_block (enum block_type);
 
-static struct symtab *new_symtab (const char *, int, struct objfile *);
+static struct compunit_symtab *new_symtab (const char *, int, struct objfile *);
 
 static struct linetable *new_linetable (int);
 
@@ -1922,7 +1922,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
    in question, or NULL to use top_stack->cur_block.  */
 
 static void
-parse_procedure (PDR *pr, struct symtab *search_symtab,
+parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 		 struct partial_symtab *pst)
 {
   struct symbol *s, *i;
@@ -1984,7 +1984,8 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 #else
       s = mylookup_symbol
 	(sh_name,
-	 BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (search_symtab), STATIC_BLOCK),
+	 BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (search_symtab),
+			    STATIC_BLOCK),
 	 VAR_DOMAIN,
 	 LOC_BLOCK);
 #endif
@@ -3929,7 +3930,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
   void (*swap_sym_in) (bfd *, void *, SYMR *);
   void (*swap_pdr_in) (bfd *, void *, PDR *);
   int i;
-  struct symtab *st = NULL;
+  struct compunit_symtab *cust = NULL;
   FDR *fh;
   struct linetable *lines;
   CORE_ADDR lowest_pdr_addr = 0;
@@ -4053,7 +4054,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		      valu += ANOFFSET (pst->section_offsets,
 					SECT_OFF_TEXT (objfile));
 		      previous_stab_code = N_SO;
-		      st = end_symtab (valu, SECT_OFF_TEXT (objfile));
+		      cust = end_symtab (valu, SECT_OFF_TEXT (objfile));
 		      end_stabs ();
 		      last_symtab_ended = 1;
 		    }
@@ -4117,7 +4118,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
       if (! last_symtab_ended)
 	{
-	  st = end_symtab (pst->texthigh, SECT_OFF_TEXT (objfile));
+	  cust = end_symtab (pst->texthigh, SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 	}
 
@@ -4161,7 +4162,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	  pdr_in = pr_block;
 	  pdr_in_end = pdr_in + fh->cpd;
 	  for (; pdr_in < pdr_in_end; pdr_in++)
-	    parse_procedure (pdr_in, st, pst);
+	    parse_procedure (pdr_in, cust, pst);
 
 	  do_cleanups (old_chain);
 	}
@@ -4176,28 +4177,28 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       if (fh == 0)
 	{
 	  maxlines = 0;
-	  st = new_symtab ("unknown", 0, objfile);
+	  cust = new_symtab ("unknown", 0, objfile);
 	}
       else
 	{
 	  maxlines = 2 * fh->cline;
-	  st = new_symtab (pst->filename, maxlines, objfile);
+	  cust = new_symtab (pst->filename, maxlines, objfile);
 
 	  /* The proper language was already determined when building
 	     the psymtab, use it.  */
-	  st->language = PST_PRIVATE (pst)->pst_language;
+	  COMPUNIT_FILETABS (cust)->language = PST_PRIVATE (pst)->pst_language;
 	}
 
-      psymtab_language = st->language;
+      psymtab_language = COMPUNIT_FILETABS (cust)->language;
 
-      lines = SYMTAB_LINETABLE (st);
+      lines = SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust));
 
       /* Get a new lexical context.  */
 
       push_parse_stack ();
-      top_stack->cur_st = st;
-      top_stack->cur_block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (st),
-						STATIC_BLOCK);
+      top_stack->cur_st = COMPUNIT_FILETABS (cust);
+      top_stack->cur_block
+	= BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
       BLOCK_START (top_stack->cur_block) = pst->textlow;
       BLOCK_END (top_stack->cur_block) = 0;
       top_stack->blocktype = stFile;
@@ -4271,7 +4272,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	      pdr_in = pr_block;
 	      pdr_in_end = pdr_in + fh->cpd;
 	      for (; pdr_in < pdr_in_end; pdr_in++)
-		parse_procedure (pdr_in, 0, pst);
+		parse_procedure (pdr_in, NULL, pst);
 
 	      do_cleanups (old_chain);
 	    }
@@ -4280,7 +4281,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       size = lines->nitems;
       if (size > 1)
 	--size;
-      SYMTAB_LINETABLE (st)
+      SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust))
 	= obstack_copy (&mdebugread_objfile->objfile_obstack,
 			lines,
 			(sizeof (struct linetable)
@@ -4290,7 +4291,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       /* .. and our share of externals.
          XXX use the global list to speed up things here.  How?
          FIXME, Maybe quit once we have found the right number of ext's?  */
-      top_stack->cur_st = st;
+      top_stack->cur_st = COMPUNIT_FILETABS (cust);
       top_stack->cur_block
 	= BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
 			     GLOBAL_BLOCK);
@@ -4307,7 +4308,8 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       if (info_verbose && n_undef_symbols)
 	{
 	  printf_filtered (_("File %s contains %d unresolved references:"),
-			   symtab_to_filename_for_display (st),
+			   symtab_to_filename_for_display
+			     (COMPUNIT_FILETABS (cust)),
 			   n_undef_symbols);
 	  printf_filtered ("\n\t%4d variables\n\t%4d "
 			   "procedures\n\t%4d labels\n",
@@ -4317,13 +4319,11 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	}
       pop_parse_stack ();
 
-      set_symtab_primary (st, 1);
-
-      sort_blocks (st);
+      sort_blocks (COMPUNIT_FILETABS (cust));
     }
 
   /* Now link the psymtab and the symtab.  */
-  pst->symtab = st;
+  pst->compunit_symtab = cust;
 
   mdebugread_objfile = NULL;
 }
@@ -4726,13 +4726,17 @@ sort_blocks (struct symtab *s)
 /* Allocate a new symtab for NAME.  Needs an estimate of how many
    linenumbers MAXLINES we'll put in it.  */
 
-static struct symtab *
+static struct compunit_symtab *
 new_symtab (const char *name, int maxlines, struct objfile *objfile)
 {
-  struct symtab *s = allocate_symtab (name, objfile);
+  struct compunit_symtab *cust = allocate_compunit_symtab (objfile, name);
+  struct symtab *symtab;
   struct blockvector *bv;
 
-  SYMTAB_LINETABLE (s) = new_linetable (maxlines);
+  add_compunit_symtab_to_objfile (cust);
+  symtab = allocate_symtab (cust, name);
+
+  SYMTAB_LINETABLE (symtab) = new_linetable (maxlines);
 
   /* All symtabs must have at least two blocks.  */
   bv = new_bvect (2);
@@ -4740,10 +4744,10 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK);
   BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
     BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-  SYMTAB_BLOCKVECTOR (s) = bv;
+  COMPUNIT_BLOCKVECTOR (cust) = bv;
 
-  s->debugformat = "ECOFF";
-  return (s);
+  COMPUNIT_DEBUGFORMAT (cust) = "ECOFF";
+  return cust;
 }
 
 /* Allocate a new partial_symtab NAME.  */

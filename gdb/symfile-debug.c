@@ -151,13 +151,13 @@ debug_qf_map_symtabs_matching_filename (struct objfile *objfile,
   return retval;
 }
 
-static struct symtab *
+static struct compunit_symtab *
 debug_qf_lookup_symbol (struct objfile *objfile, int kind, const char *name,
 			domain_enum domain)
 {
   const struct debug_sym_fns_data *debug_data =
     objfile_data (objfile, symfile_debug_objfile_data_key);
-  struct symtab *retval;
+  struct compunit_symtab *retval;
 
   fprintf_filtered (gdb_stdlog,
 		    "qf->lookup_symbol (%s, %d, \"%s\", %s)\n",
@@ -168,7 +168,9 @@ debug_qf_lookup_symbol (struct objfile *objfile, int kind, const char *name,
 						   domain);
 
   fprintf_filtered (gdb_stdlog, "qf->lookup_symbol (...) = %s\n",
-		    retval ? debug_symtab_name (retval) : "NULL");
+		    retval
+		    ? debug_symtab_name (compunit_primary_filetab (retval))
+		    : "NULL");
 
   return retval;
 }
@@ -306,31 +308,35 @@ debug_qf_expand_symtabs_matching
 						    kind, data);
 }
 
-static struct symtab *
-debug_qf_find_pc_sect_symtab (struct objfile *objfile,
-			      struct bound_minimal_symbol msymbol,
-			      CORE_ADDR pc,
-			      struct obj_section *section,
-			      int warn_if_readin)
+static struct compunit_symtab *
+debug_qf_find_pc_sect_compunit_symtab (struct objfile *objfile,
+				       struct bound_minimal_symbol msymbol,
+				       CORE_ADDR pc,
+				       struct obj_section *section,
+				       int warn_if_readin)
 {
   const struct debug_sym_fns_data *debug_data =
     objfile_data (objfile, symfile_debug_objfile_data_key);
-  struct symtab *retval;
+  struct compunit_symtab *retval;
 
   fprintf_filtered (gdb_stdlog,
-		    "qf->find_pc_sect_symtab (%s, %s, %s, %s, %d)\n",
+		    "qf->find_pc_sect_compunit_symtab (%s, %s, %s, %s, %d)\n",
 		    debug_objfile_name (objfile),
 		    host_address_to_string (msymbol.minsym),
 		    hex_string (pc),
 		    host_address_to_string (section),
 		    warn_if_readin);
 
-  retval = debug_data->real_sf->qf->find_pc_sect_symtab (objfile, msymbol,
-							 pc, section,
-							 warn_if_readin);
+  retval
+    = debug_data->real_sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
+							     pc, section,
+							     warn_if_readin);
 
-  fprintf_filtered (gdb_stdlog, "qf->find_pc_sect_symtab (...) = %s\n",
-		    retval ? debug_symtab_name (retval) : "NULL");
+  fprintf_filtered (gdb_stdlog,
+		    "qf->find_pc_sect_compunit_symtab (...) = %s\n",
+		    retval
+		    ? debug_symtab_name (compunit_primary_filetab (retval))
+		    : "NULL");
 
   return retval;
 }
@@ -368,7 +374,7 @@ static const struct quick_symbol_functions debug_sym_quick_functions =
   debug_qf_expand_symtabs_with_fullname,
   debug_qf_map_matching_symbols,
   debug_qf_expand_symtabs_matching,
-  debug_qf_find_pc_sect_symtab,
+  debug_qf_find_pc_sect_compunit_symtab,
   debug_qf_map_symbol_filenames
 };
 

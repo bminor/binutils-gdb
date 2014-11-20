@@ -6153,7 +6153,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   int encoded_p;
   VEC(char_ptr) *completions = VEC_alloc (char_ptr, 128);
   struct symbol *sym;
-  struct symtab *s;
+  struct compunit_symtab *s;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
   const struct block *b, *surrounding_static_block = 0;
@@ -6232,14 +6232,12 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
 
   /* Go through the symtabs and check the externs and statics for
-     symbols which match.
-     Non-primary symtabs share the block vector with their primary symtabs
-     so we use ALL_PRIMARY_SYMTABS here instead of ALL_SYMTABS.  */
+     symbols which match.  */
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_COMPUNITS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), GLOBAL_BLOCK);
+    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
@@ -6248,10 +6246,10 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
   }
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_COMPUNITS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
+    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
@@ -12943,14 +12941,14 @@ static void
 ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 {
   struct objfile *objfile;
-  struct symtab *s;
+  struct compunit_symtab *s;
 
   expand_symtabs_matching (NULL, ada_exc_search_name_matches,
 			   VARIABLES_DOMAIN, preg);
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_COMPUNITS (objfile, s)
     {
-      const struct blockvector *bv = SYMTAB_BLOCKVECTOR (s);
+      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (s);
       int i;
 
       for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)

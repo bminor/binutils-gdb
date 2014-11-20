@@ -2344,7 +2344,7 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 	subpst->n_static_syms = 0;
 
       subpst->readin = 0;
-      subpst->symtab = 0;
+      subpst->compunit_symtab = 0;
       subpst->read_symtab = pst->read_symtab;
     }
 
@@ -2644,8 +2644,8 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
   if (last_source_start_addr > text_offset)
     last_source_start_addr = text_offset;
 
-  pst->symtab = end_symtab (text_offset + text_size,
-			    SECT_OFF_TEXT (objfile));
+  pst->compunit_symtab = end_symtab (text_offset + text_size,
+				     SECT_OFF_TEXT (objfile));
 
   end_stabs ();
 

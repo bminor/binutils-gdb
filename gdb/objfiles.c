@@ -740,12 +740,12 @@ objfile_relocate1 (struct objfile *objfile,
 
   /* OK, get all the symtabs.  */
   {
+    struct compunit_symtab *cust;
     struct symtab *s;
 
-    ALL_OBJFILE_SYMTABS (objfile, s)
+    ALL_OBJFILE_FILETABS (objfile, cust, s)
     {
       struct linetable *l;
-      const struct blockvector *bv;
       int i;
 
       /* First the line table.  */
@@ -753,17 +753,20 @@ objfile_relocate1 (struct objfile *objfile,
       if (l)
 	{
 	  for (i = 0; i < l->nitems; ++i)
-	    l->item[i].pc += ANOFFSET (delta, s->block_line_section);
+	    l->item[i].pc += ANOFFSET (delta,
+				       COMPUNIT_BLOCK_LINE_SECTION
+					 (cust));
 	}
+    }
 
-      /* Don't relocate a shared blockvector more than once.  */
-      if (!s->primary)
-	continue;
+    ALL_OBJFILE_COMPUNITS (objfile, cust)
+    {
+      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
+      int block_line_section = COMPUNIT_BLOCK_LINE_SECTION (cust);
 
-      bv = SYMTAB_BLOCKVECTOR (s);
       if (BLOCKVECTOR_MAP (bv))
 	addrmap_relocate (BLOCKVECTOR_MAP (bv),
-			  ANOFFSET (delta, s->block_line_section));
+			  ANOFFSET (delta, block_line_section));
 
       for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); ++i)
 	{
@@ -772,8 +775,8 @@ objfile_relocate1 (struct objfile *objfile,
 	  struct dict_iterator iter;
 
 	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  BLOCK_START (b) += ANOFFSET (delta, s->block_line_section);
-	  BLOCK_END (b) += ANOFFSET (delta, s->block_line_section);
+	  BLOCK_START (b) += ANOFFSET (delta, block_line_section);
+	  BLOCK_END (b) += ANOFFSET (delta, block_line_section);
 
 	  /* We only want to iterate over the local symbols, not any
 	     symbols in included symtabs.  */
@@ -939,7 +942,7 @@ objfile_has_partial_symbols (struct objfile *objfile)
 int
 objfile_has_full_symbols (struct objfile *objfile)
 {
-  return objfile->symtabs != NULL;
+  return objfile->compunit_symtabs != NULL;
 }
 
 /* Return non-zero if OBJFILE has full or partial symbols, either directly

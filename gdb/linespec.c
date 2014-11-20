@@ -1023,7 +1023,7 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 
     ALL_OBJFILES (objfile)
     {
-      struct symtab *symtab;
+      struct compunit_symtab *cu;
 
       if (objfile->sf)
 	objfile->sf->qf->expand_symtabs_matching (objfile, NULL,
@@ -1031,8 +1031,10 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 						  ALL_DOMAIN,
 						  &matcher_data);
 
-      ALL_OBJFILE_PRIMARY_SYMTABS (objfile, symtab)
+      ALL_OBJFILE_COMPUNITS (objfile, cu)
 	{
+	  struct symtab *symtab = COMPUNIT_FILETABS (cu);
+
 	  iterate_over_file_blocks (symtab, name, domain, callback, data);
 
 	  if (include_inline)

@@ -542,17 +542,19 @@ bkscm_print_block_syms_progress_smob (SCM self, SCM port,
 	case GLOBAL_BLOCK:
 	case STATIC_BLOCK:
 	  {
-	    struct symtab *s;
+	    struct compunit_symtab *cust;
 
 	    gdbscm_printf (port, " %s", 
 			   i_smob->iter.which == GLOBAL_BLOCK
 			   ? "global" : "static");
 	    if (i_smob->iter.idx != -1)
 	      gdbscm_printf (port, " @%d", i_smob->iter.idx);
-	    s = (i_smob->iter.idx == -1
-		 ? i_smob->iter.d.symtab
-		 : i_smob->iter.d.symtab->includes[i_smob->iter.idx]);
-	    gdbscm_printf (port, " %s", symtab_to_filename_for_display (s));
+	    cust = (i_smob->iter.idx == -1
+		    ? i_smob->iter.d.compunit_symtab
+		    : i_smob->iter.d.compunit_symtab->includes[i_smob->iter.idx]);
+	    gdbscm_printf (port, " %s",
+			   symtab_to_filename_for_display
+			     (compunit_primary_filetab (cust)));
 	    break;
 	  }
 	case FIRST_LOCAL_BLOCK:
@@ -675,30 +677,28 @@ gdbscm_lookup_block (SCM pc_scm)
 {
   CORE_ADDR pc;
   const struct block *block = NULL;
-  struct obj_section *section = NULL;
-  struct symtab *symtab = NULL;
+  struct compunit_symtab *cust = NULL;
   volatile struct gdb_exception except;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "U", pc_scm, &pc);
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      section = find_pc_mapped_section (pc);
-      symtab = find_pc_sect_symtab (pc, section);
+      cust = find_pc_compunit_symtab (pc);
 
-      if (symtab != NULL && SYMTAB_OBJFILE (symtab) != NULL)
+      if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
 	block = block_for_pc (pc);
     }
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
-  if (symtab == NULL || SYMTAB_OBJFILE (symtab) == NULL)
+  if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, pc_scm,
 				 _("cannot locate object file for block"));
     }
 
   if (block != NULL)
-    return bkscm_scm_from_block (block, SYMTAB_OBJFILE (symtab));
+    return bkscm_scm_from_block (block, COMPUNIT_OBJFILE (cust));
   return SCM_BOOL_F;
 }
 

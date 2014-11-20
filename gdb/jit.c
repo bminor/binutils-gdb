@@ -633,7 +633,7 @@ jit_symtab_close_impl (struct gdb_symbol_callbacks *cb,
 static void
 finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 {
-  struct symtab *symtab;
+  struct compunit_symtab *cust;
   struct gdb_block *gdb_block_iter, *gdb_block_iter_tmp;
   struct block *block_iter;
   int actual_nblocks, i;
@@ -643,9 +643,12 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
   actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
 
-  symtab = allocate_symtab (stab->file_name, objfile);
+  cust = allocate_compunit_symtab (objfile, stab->file_name);
+  allocate_symtab (cust, stab->file_name);
+  add_compunit_symtab_to_objfile (cust);
+
   /* JIT compilers compile in memory.  */
-  SYMTAB_DIRNAME (symtab) = NULL;
+  COMPUNIT_DIRNAME (cust) = NULL;
 
   /* Copy over the linetable entry if one was provided.  */
   if (stab->linetable)
@@ -653,23 +656,19 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       size_t size = ((stab->linetable->nitems - 1)
 		     * sizeof (struct linetable_entry)
 		     + sizeof (struct linetable));
-      SYMTAB_LINETABLE (symtab) = obstack_alloc (&objfile->objfile_obstack,
-						 size);
-      memcpy (SYMTAB_LINETABLE (symtab), stab->linetable, size);
-    }
-  else
-    {
-      SYMTAB_LINETABLE (symtab) = NULL;
+      SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust))
+	= obstack_alloc (&objfile->objfile_obstack, size);
+      memcpy (SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust)), stab->linetable,
+	      size);
     }
 
   blockvector_size = (sizeof (struct blockvector)
                       + (actual_nblocks - 1) * sizeof (struct block *));
   bv = obstack_alloc (&objfile->objfile_obstack, blockvector_size);
-  symtab->blockvector = bv;
+  COMPUNIT_BLOCKVECTOR (cust) = bv;
 
   /* (begin, end) will contain the PC range this entire blockvector
      spans.  */
-  set_symtab_primary (symtab, 1);
   BLOCKVECTOR_MAP (bv) = NULL;
   begin = stab->blocks->begin;
   end = stab->blocks->end;
@@ -698,7 +697,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       /* The name.  */
       SYMBOL_DOMAIN (block_name) = VAR_DOMAIN;
       SYMBOL_ACLASS_INDEX (block_name) = LOC_BLOCK;
-      SYMBOL_SYMTAB (block_name) = symtab;
+      SYMBOL_SYMTAB (block_name) = COMPUNIT_FILETABS (cust);
       SYMBOL_TYPE (block_name) = lookup_function_type (block_type);
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
@@ -737,7 +736,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCKVECTOR_BLOCK (bv, i) = new_block;
 
       if (i == GLOBAL_BLOCK)
-	set_block_symtab (new_block, symtab);
+	set_block_compunit_symtab (new_block, cust);
     }
 
   /* Fill up the superblock fields for the real blocks, using the

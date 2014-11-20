@@ -25,7 +25,7 @@
 /* Opaque declarations.  */
 
 struct symbol;
-struct symtab;
+struct compunit_symtab;
 struct block_namespace_info;
 struct using_direct;
 struct obstack;
@@ -100,7 +100,7 @@ struct block
 };
 
 /* The global block is singled out so that we can provide a back-link
-   to the primary symtab.  */
+   to the compunit symtab.  */
 
 struct global_block
 {
@@ -108,10 +108,9 @@ struct global_block
 
   struct block block;
 
-  /* This holds a pointer to the primary symtab holding this
-     block.  */
+  /* This holds a pointer to the compunit symtab holding this block.  */
 
-  struct symtab *symtab;
+  struct compunit_symtab *compunit_symtab;
 };
 
 #define BLOCK_START(bl)		(bl)->startaddr
@@ -148,10 +147,9 @@ extern int contained_in (const struct block *, const struct block *);
 extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
 					       const struct block **);
 
-extern const struct blockvector *blockvector_for_pc_sect (CORE_ADDR, 
-							  struct obj_section *,
-							  const struct block **,
-							  struct symtab *);
+extern const struct blockvector *
+  blockvector_for_pc_sect (CORE_ADDR, struct obj_section *,
+			   const struct block **, struct compunit_symtab *);
 
 extern int blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc);
 
@@ -181,7 +179,8 @@ extern struct block *allocate_block (struct obstack *obstack);
 
 extern struct block *allocate_global_block (struct obstack *obstack);
 
-extern void set_block_symtab (struct block *, struct symtab *);
+extern void set_block_compunit_symtab (struct block *,
+				       struct compunit_symtab *);
 
 /* A block iterator.  This structure should be treated as though it
    were opaque; it is only defined here because we want to support
@@ -190,11 +189,11 @@ extern void set_block_symtab (struct block *, struct symtab *);
 struct block_iterator
 {
   /* If we're iterating over a single block, this holds the block.
-     Otherwise, it holds the canonical symtab.  */
+     Otherwise, it holds the canonical compunit.  */
 
   union
   {
-    struct symtab *symtab;
+    struct compunit_symtab *compunit_symtab;
     const struct block *block;
   } d;
 

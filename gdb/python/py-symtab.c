@@ -132,11 +132,13 @@ static PyObject *
 stpy_get_producer (PyObject *self, void *closure)
 {
   struct symtab *symtab = NULL;
+  struct compunit_symtab *cust;
 
   STPY_REQUIRE_VALID (self, symtab);
-  if (symtab->producer != NULL)
+  cust = SYMTAB_COMPUNIT (symtab);
+  if (COMPUNIT_PRODUCER (cust) != NULL)
     {
-      const char *producer = symtab->producer;
+      const char *producer = COMPUNIT_PRODUCER (cust);
 
       return PyString_Decode (producer, strlen (producer),
 			      host_charset (), NULL);

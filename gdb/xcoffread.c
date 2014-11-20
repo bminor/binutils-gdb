@@ -1136,8 +1136,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	{
 	  if (get_last_source_file ())
 	    {
-	      pst->symtab = end_symtab (cur_src_end_addr,
-					SECT_OFF_TEXT (objfile));
+	      pst->compunit_symtab = end_symtab (cur_src_end_addr,
+						 SECT_OFF_TEXT (objfile));
 	      end_stabs ();
 	    }
 
@@ -1194,8 +1194,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 			{
 			  complete_symtab (filestring, file_start_addr);
 			  cur_src_end_addr = file_end_addr;
-			  end_symtab (file_end_addr,
-				      SECT_OFF_TEXT (objfile));
+			  end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
 			  end_stabs ();
 			  start_stabs ();
 			  /* Give all csects for this source file the same
@@ -1504,17 +1503,17 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
   if (get_last_source_file ())
     {
-      struct symtab *s;
+      struct compunit_symtab *cust;
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      s = end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+      cust = end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
       /* When reading symbols for the last C_FILE of the objfile, try
-         to make sure that we set pst->symtab to the symtab for the
+         to make sure that we set pst->compunit_symtab to the symtab for the
          file, not to the _globals_ symtab.  I'm not sure whether this
          actually works right or when/if it comes up.  */
-      if (pst->symtab == NULL)
-	pst->symtab = s;
+      if (pst->compunit_symtab == NULL)
+	pst->compunit_symtab = cust;
       end_stabs ();
     }
 }
@@ -2107,7 +2106,7 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 	subpst->n_static_syms = 0;
 
       subpst->readin = 0;
-      subpst->symtab = 0;
+      subpst->compunit_symtab = NULL;
       subpst->read_symtab = pst->read_symtab;
     }
 

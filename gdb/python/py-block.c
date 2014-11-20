@@ -372,8 +372,7 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
 {
   gdb_py_ulongest pc;
   const struct block *block = NULL;
-  struct obj_section *section = NULL;
-  struct symtab *symtab = NULL;
+  struct compunit_symtab *cust = NULL;
   volatile struct gdb_exception except;
 
   if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
@@ -381,15 +380,14 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      section = find_pc_mapped_section (pc);
-      symtab = find_pc_sect_symtab (pc, section);
+      cust = find_pc_compunit_symtab (pc);
 
-      if (symtab != NULL && SYMTAB_OBJFILE (symtab) != NULL)
+      if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
 	block = block_for_pc (pc);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  if (!symtab || SYMTAB_OBJFILE (symtab) == NULL)
+  if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Cannot locate object file for block."));
@@ -397,7 +395,7 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
     }
 
   if (block)
-    return block_to_block_object (block, SYMTAB_OBJFILE (symtab));
+    return block_to_block_object (block, COMPUNIT_OBJFILE (cust));
 
   Py_RETURN_NONE;
 }

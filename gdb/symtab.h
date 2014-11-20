@@ -870,6 +870,7 @@ struct section_offsets
    + sizeof (((struct section_offsets *) 0)->offsets) * ((n)-1))
 
 /* Each source file or header is represented by a struct symtab.
+   The name "symtab" is historical, another name for it is "filetab".
    These objects are chained through the `next' field.  */
 
 struct symtab
@@ -878,51 +879,18 @@ struct symtab
 
   struct symtab *next;
 
-  /* List of all symbol scope blocks for this symtab.  May be shared
-     between different symtabs (and normally is for all the symtabs
-     in a given compilation unit).  */
+  /* Backlink to containing compunit symtab.  */
 
-  const struct blockvector *blockvector;
+  struct compunit_symtab *compunit_symtab;
 
   /* Table mapping core addresses to line numbers for this file.
      Can be NULL if none.  Never shared between different symtabs.  */
 
   struct linetable *linetable;
 
-  /* Section in objfile->section_offsets for the blockvector and
-     the linetable.  Probably always SECT_OFF_TEXT.  */
-
-  int block_line_section;
-
-  /* If several symtabs share a blockvector, exactly one of them
-     should be designated the primary, so that the blockvector
-     is relocated exactly once by objfile_relocate.  */
-
-  unsigned int primary : 1;
-
-  /* Symtab has been compiled with both optimizations and debug info so that
-     GDB may stop skipping prologues as variables locations are valid already
-     at function entry points.  */
-
-  unsigned int locations_valid : 1;
-
-  /* DWARF unwinder for this CU is valid even for epilogues (PC at the return
-     instruction).  This is supported by GCC since 4.5.0.  */
-
-  unsigned int epilogue_unwind_valid : 1;
-
-  /* The macro table for this symtab.  Like the blockvector, this
-     may be shared between different symtabs --- and normally is for
-     all the symtabs in a given compilation unit.  */
-  struct macro_table *macro_table;
-
   /* Name of this source file.  This pointer is never NULL.  */
 
   const char *filename;
-
-  /* Directory in which it was compiled, or NULL if we don't know.  */
-
-  const char *dirname;
 
   /* Total number of lines found in source file.  */
 
@@ -938,59 +906,169 @@ struct symtab
 
   enum language language;
 
-  /* String that identifies the format of the debugging information, such
-     as "stabs", "dwarf 1", "dwarf 2", "coff", etc.  This is mostly useful
-     for automated testing of gdb but may also be information that is
-     useful to the user.  */
-
-  const char *debugformat;
-
-  /* String of producer version information.  May be zero.  */
-
-  const char *producer;
-
   /* Full name of file as found by searching the source path.
      NULL if not yet known.  */
 
   char *fullname;
-
-  /* Object file from which this symbol information was read.  */
-
-  struct objfile *objfile;
-
-  /* struct call_site entries for this compilation unit or NULL.  */
-
-  htab_t call_site_htab;
-
-  /* If non-NULL, then this points to a NULL-terminated vector of
-     included symbol tables.  When searching the static or global
-     block of this symbol table, the corresponding block of all
-     included symbol tables will also be searched.  Note that this
-     list must be flattened -- the symbol reader is responsible for
-     ensuring that this vector contains the transitive closure of all
-     included symbol tables.  */
-
-  struct symtab **includes;
-
-  /* If this is an included symbol table, this points to one includer
-     of the table.  This user is considered the canonical symbol table
-     containing this one.  An included symbol table may itself be
-     included by another.  */
-
-  struct symtab *user;
 };
 
-#define SYMTAB_BLOCKVECTOR(symtab) ((symtab)->blockvector)
+#define SYMTAB_COMPUNIT(symtab) ((symtab)->compunit_symtab)
 #define SYMTAB_LINETABLE(symtab) ((symtab)->linetable)
-#define SYMTAB_OBJFILE(symtab)	((symtab)->objfile)
-#define SYMTAB_PSPACE(symtab)	(SYMTAB_OBJFILE (symtab)->pspace)
-#define SYMTAB_DIRNAME(symtab)	((symtab)->dirname)
-
-/* Call this to set the "primary" field in struct symtab.  */
-extern void set_symtab_primary (struct symtab *, int primary);
+#define SYMTAB_LANGUAGE(symtab) ((symtab)->language)
+#define SYMTAB_BLOCKVECTOR(symtab) \
+  COMPUNIT_BLOCKVECTOR (SYMTAB_COMPUNIT (symtab))
+#define SYMTAB_OBJFILE(symtab) \
+  COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (symtab))
+#define SYMTAB_PSPACE(symtab) (SYMTAB_OBJFILE (symtab)->pspace)
+#define SYMTAB_DIRNAME(symtab) \
+  COMPUNIT_DIRNAME (SYMTAB_COMPUNIT (symtab))
 
 typedef struct symtab *symtab_ptr;
 DEF_VEC_P (symtab_ptr);
+
+/* Compunit symtabs contain the actual "symbol table", aka blockvector, as well
+   as the list of all source files (what gdb has historically associated with
+   the term "symtab").
+   Additional information is recorded here that is common to all symtabs in a
+   compilation unit (DWARF or otherwise).
+
+   Example:
+   For the case of a program built out of these files:
+
+   foo.c
+     foo1.h
+     foo2.h
+   bar.c
+     foo1.h
+     bar.h
+
+   This is recorded as:
+
+   objfile -> foo.c(cu) -> bar.c(cu) -> NULL
+                |            |
+                v            v
+              foo.c        bar.c
+                |            |
+                v            v
+              foo1.h       foo1.h
+                |            |
+                v            v
+              foo2.h       bar.h
+                |            |
+                v            v
+               NULL         NULL
+
+   where "foo.c(cu)" and "bar.c(cu)" are struct compunit_symtab objects,
+   and the files foo.c, etc. are struct symtab objects.  */
+
+struct compunit_symtab
+{
+  /* Unordered chain of all compunit symtabs of this objfile.  */
+  struct compunit_symtab *next;
+
+  /* Object file from which this symtab information was read.  */
+  struct objfile *objfile;
+
+  /* Name of the symtab.
+     This is *not* intended to be a usable filename, and is
+     for debugging purposes only.  */
+  const char *name;
+
+  /* Unordered list of file symtabs, except that by convention the "main"
+     source file (e.g., .c, .cc) is guaranteed to be first.
+     Each symtab is a file, either the "main" source file (e.g., .c, .cc)
+     or header (e.g., .h).  */
+  struct symtab *filetabs;
+
+  /* Last entry in FILETABS list.
+     Subfiles are added to the end of the list so they accumulate in order,
+     with the main source subfile living at the front.
+     The main reason is so that the main source file symtab is at the head
+     of the list, and the rest appear in order for debugging convenience.  */
+  struct symtab *last_filetab;
+
+  /* Non-NULL string that identifies the format of the debugging information,
+     such as "stabs", "dwarf 1", "dwarf 2", "coff", etc.  This is mostly useful
+     for automated testing of gdb but may also be information that is
+     useful to the user.  */
+  const char *debugformat;
+
+  /* String of producer version information, or NULL if we don't know.  */
+  const char *producer;
+
+  /* Directory in which it was compiled, or NULL if we don't know.  */
+  const char *dirname;
+
+  /* List of all symbol scope blocks for this symtab.  It is shared among
+     all symtabs in a given compilation unit.  */
+  const struct blockvector *blockvector;
+
+  /* Section in objfile->section_offsets for the blockvector and
+     the linetable.  Probably always SECT_OFF_TEXT.  */
+  int block_line_section;
+
+  /* Symtab has been compiled with both optimizations and debug info so that
+     GDB may stop skipping prologues as variables locations are valid already
+     at function entry points.  */
+  unsigned int locations_valid : 1;
+
+  /* DWARF unwinder for this CU is valid even for epilogues (PC at the return
+     instruction).  This is supported by GCC since 4.5.0.  */
+  unsigned int epilogue_unwind_valid : 1;
+
+  /* struct call_site entries for this compilation unit or NULL.  */
+  htab_t call_site_htab;
+
+  /* The macro table for this symtab.  Like the blockvector, this
+     is shared between different symtabs in a given compilation unit.
+     It's debatable whether it *should* be shared among all the symtabs in
+     the given compilation unit, but it currently is.  */
+  struct macro_table *macro_table;
+
+  /* If non-NULL, then this points to a NULL-terminated vector of
+     included compunits.  When searching the static or global
+     block of this compunit, the corresponding block of all
+     included compunits will also be searched.  Note that this
+     list must be flattened -- the symbol reader is responsible for
+     ensuring that this vector contains the transitive closure of all
+     included compunits.  */
+  struct compunit_symtab **includes;
+
+  /* If this is an included compunit, this points to one includer
+     of the table.  This user is considered the canonical compunit
+     containing this one.  An included compunit may itself be
+     included by another.  */
+  struct compunit_symtab *user;
+};
+
+#define COMPUNIT_OBJFILE(cust) ((cust)->objfile)
+#define COMPUNIT_FILETABS(cust) ((cust)->filetabs)
+#define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
+#define COMPUNIT_PRODUCER(cust) ((cust)->producer)
+#define COMPUNIT_DIRNAME(cust) ((cust)->dirname)
+#define COMPUNIT_BLOCKVECTOR(cust) ((cust)->blockvector)
+#define COMPUNIT_BLOCK_LINE_SECTION(cust) ((cust)->block_line_section)
+#define COMPUNIT_LOCATIONS_VALID(cust) ((cust)->locations_valid)
+#define COMPUNIT_EPILOGUE_UNWIND_VALID(cust) ((cust)->epilogue_unwind_valid)
+#define COMPUNIT_CALL_SITE_HTAB(cust) ((cust)->call_site_htab)
+#define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)
+
+/* Iterate over all file tables (struct symtab) within a compunit.  */
+
+#define ALL_COMPUNIT_FILETABS(cu, s) \
+  for ((s) = (cu) -> filetabs; (s) != NULL; (s) = (s) -> next)
+
+/* Return the primary symtab of CUST.  */
+
+extern struct symtab *
+  compunit_primary_filetab (const struct compunit_symtab *cust);
+
+/* Return the language of CUST.  */
+
+extern enum language compunit_language (const struct compunit_symtab *cust);
+
+typedef struct compunit_symtab *compunit_symtab_ptr;
+DEF_VEC_P (compunit_symtab_ptr);
 
 
 
@@ -1171,11 +1249,12 @@ extern void expand_symtab_containing_pc (CORE_ADDR, struct obj_section *);
 
 /* lookup full symbol table by address.  */
 
-extern struct symtab *find_pc_symtab (CORE_ADDR);
+extern struct compunit_symtab *find_pc_compunit_symtab (CORE_ADDR);
 
 /* lookup full symbol table by address and section.  */
 
-extern struct symtab *find_pc_sect_symtab (CORE_ADDR, struct obj_section *);
+extern struct compunit_symtab *
+  find_pc_sect_compunit_symtab (CORE_ADDR, struct obj_section *);
 
 extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
@@ -1432,8 +1511,8 @@ int iterate_over_some_symtabs (const char *name,
 			       int (*callback) (struct symtab *symtab,
 						void *data),
 			       void *data,
-			       struct symtab *first,
-			       struct symtab *after_last);
+			       struct compunit_symtab *first,
+			       struct compunit_symtab *after_last);
 
 void iterate_over_symtabs (const char *name,
 			   int (*callback) (struct symtab *symtab,

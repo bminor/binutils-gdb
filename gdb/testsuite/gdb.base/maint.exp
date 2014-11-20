@@ -72,7 +72,7 @@ gdb_test "maint print registers" "Name.*Nr.*Rel.*Offset.*Size.*Type.*"
 gdb_test_no_output "mt set per on" "mt set per on for expand-symtabs"
 gdb_test_multiple "mt expand-symtabs $subdir/break\[.\]c$" \
     "mt expand-symtabs" {
-	-re "#primary symtabs: (1|2) \\(\[+\](0|1|2)\\),.*$gdb_prompt $" {
+	-re "#compunits: (1|2) \\(\[+\](0|1|2)\\),.*$gdb_prompt $" {
 	    # This should expand at most two primary symtabs.
 	    # "Normally" it will not expand any, because the symtab
 	    # holding "main" will already have been expanded, but if the
@@ -133,7 +133,7 @@ gdb_test_no_output "maint check-symtabs"
 # Test per-command stats.
 gdb_test_no_output "maint set per-command on"
 gdb_test "pwd" \
-    "Command execution time: \[0-9.\]+ \\(cpu\\), \[0-9.\]+ \\(wall\\)\[\r\n\]+Space used: $decimal \\(\\+$decimal for this command\\)\[\r\n\]+#symtabs: $decimal \\(\\+$decimal\\), #primary symtabs: $decimal \\(\\+$decimal\\), #blocks: $decimal \\(\\+$decimal\\)"
+    "Command execution time: \[0-9.\]+ \\(cpu\\), \[0-9.\]+ \\(wall\\)\[\r\n\]+Space used: $decimal \\(\\+$decimal for this command\\)\[\r\n\]+#symtabs: $decimal \\(\\+$decimal\\), #compunits: $decimal \\(\\+$decimal\\), #blocks: $decimal \\(\\+$decimal\\)"
 gdb_test_no_output "maint set per-command off"
 
 gdb_test "maint demangle" \

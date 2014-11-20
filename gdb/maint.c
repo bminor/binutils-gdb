@@ -794,8 +794,8 @@ struct cmd_stats
   long start_space;
   /* Total number of symtabs (over all objfiles).  */
   int start_nr_symtabs;
-  /* Of those, a count of just the primary ones.  */
-  int start_nr_primary_symtabs;
+  /* A count of the compunits.  */
+  int start_nr_compunit_symtabs;
   /* Total number of blocks.  */
   int start_nr_blocks;
 };
@@ -821,13 +821,14 @@ set_per_command_space (int new_value)
 /* Count the number of symtabs and blocks.  */
 
 static void
-count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_primary_symtabs_ptr,
+count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
 			  int *nr_blocks_ptr)
 {
   struct objfile *o;
+  struct compunit_symtab *cu;
   struct symtab *s;
   int nr_symtabs = 0;
-  int nr_primary_symtabs = 0;
+  int nr_compunit_symtabs = 0;
   int nr_blocks = 0;
 
   /* When collecting statistics during startup, this is called before
@@ -835,19 +836,17 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_primary_symtabs_ptr,
      current_program_space may be NULL.  */
   if (current_program_space != NULL)
     {
-      ALL_SYMTABS (o, s)
+      ALL_COMPUNITS (o, cu)
 	{
-	  ++nr_symtabs;
-	  if (s->primary)
-	    {
-	      ++nr_primary_symtabs;
-	      nr_blocks += BLOCKVECTOR_NBLOCKS (SYMTAB_BLOCKVECTOR (s));
-	    }
+	  ++nr_compunit_symtabs;
+	  nr_blocks += BLOCKVECTOR_NBLOCKS (COMPUNIT_BLOCKVECTOR (cu));
+	  ALL_COMPUNIT_FILETABS (cu, s)
+	    ++nr_symtabs;
 	}
     }
 
   *nr_symtabs_ptr = nr_symtabs;
-  *nr_primary_symtabs_ptr = nr_primary_symtabs;
+  *nr_compunit_symtabs_ptr = nr_compunit_symtabs;
   *nr_blocks_ptr = nr_blocks;
 }
 
@@ -902,16 +901,17 @@ report_command_stats (void *arg)
 
   if (start_stats->symtab_enabled && per_command_symtab)
     {
-      int nr_symtabs, nr_primary_symtabs, nr_blocks;
+      int nr_symtabs, nr_compunit_symtabs, nr_blocks;
 
-      count_symtabs_and_blocks (&nr_symtabs, &nr_primary_symtabs, &nr_blocks);
+      count_symtabs_and_blocks (&nr_symtabs, &nr_compunit_symtabs, &nr_blocks);
       printf_unfiltered (_("#symtabs: %d (+%d),"
-			   " #primary symtabs: %d (+%d),"
+			   " #compunits: %d (+%d),"
 			   " #blocks: %d (+%d)\n"),
 			 nr_symtabs,
 			 nr_symtabs - start_stats->start_nr_symtabs,
-			 nr_primary_symtabs,
-			 nr_primary_symtabs - start_stats->start_nr_primary_symtabs,
+			 nr_compunit_symtabs,
+			 (nr_compunit_symtabs
+			  - start_stats->start_nr_compunit_symtabs),
 			 nr_blocks,
 			 nr_blocks - start_stats->start_nr_blocks);
     }
@@ -960,11 +960,11 @@ make_command_stats_cleanup (int msg_type)
 
   if (msg_type == 0 || per_command_symtab)
     {
-      int nr_symtabs, nr_primary_symtabs, nr_blocks;
+      int nr_symtabs, nr_compunit_symtabs, nr_blocks;
 
-      count_symtabs_and_blocks (&nr_symtabs, &nr_primary_symtabs, &nr_blocks);
+      count_symtabs_and_blocks (&nr_symtabs, &nr_compunit_symtabs, &nr_blocks);
       new_stat->start_nr_symtabs = nr_symtabs;
-      new_stat->start_nr_primary_symtabs = nr_primary_symtabs;
+      new_stat->start_nr_compunit_symtabs = nr_compunit_symtabs;
       new_stat->start_nr_blocks = nr_blocks;
       new_stat->symtab_enabled = 1;
     }

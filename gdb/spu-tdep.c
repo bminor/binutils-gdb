@@ -1953,7 +1953,7 @@ static void
 spu_catch_start (struct objfile *objfile)
 {
   struct bound_minimal_symbol minsym;
-  struct symtab *symtab;
+  struct compunit_symtab *cust;
   CORE_ADDR pc;
   char buf[32];
 
@@ -1978,11 +1978,12 @@ spu_catch_start (struct objfile *objfile)
   /* If we have debugging information, try to use it -- this
      will allow us to properly skip the prologue.  */
   pc = BMSYMBOL_VALUE_ADDRESS (minsym);
-  symtab = find_pc_sect_symtab (pc, MSYMBOL_OBJ_SECTION (minsym.objfile,
-							 minsym.minsym));
-  if (symtab != NULL)
+  cust
+    = find_pc_sect_compunit_symtab (pc, MSYMBOL_OBJ_SECTION (minsym.objfile,
+							     minsym.minsym));
+  if (cust != NULL)
     {
-      const struct blockvector *bv = SYMTAB_BLOCKVECTOR (symtab);
+      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
       struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       struct symbol *sym;
       struct symtab_and_line sal;
