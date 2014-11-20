@@ -1,3 +1,9 @@
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/ld-lib.exp (check_ifunc_available): New.
+	* ld-ifunc/ifunc.exp: Run IFUNC run-time tests only if IFUNC
+	is supported.
+
 2014-11-20  Terry Guo  <terry.guo@arm.com>
 
 	* ld-arm/attr-merge-nosection-1.d: New file.
