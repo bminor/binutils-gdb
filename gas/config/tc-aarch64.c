@@ -5490,7 +5490,7 @@ programmer_friendly_fixup (aarch64_instruction *instr)
   return TRUE;
 }
 
-/* Check for loads and stores that will cause unpredictable behavior */
+/* Check for loads and stores that will cause unpredictable behavior.  */
 
 static void
 warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
@@ -5504,17 +5504,24 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
     case ldst_imm9:
     case ldst_unscaled:
     case ldst_unpriv:
-      if (opnds[0].reg.regno == opnds[1].reg.regno
+      /* Loading/storing the base register is unpredictable if writeback.  */
+      if ((aarch64_get_operand_class (opnds[0].type)
+	   == AARCH64_OPND_CLASS_INT_REG)
+	  && opnds[0].reg.regno == opnds[1].addr.base_regno
 	  && opnds[1].addr.writeback)
-	as_warn (_("unpredictable register after writeback -- `%s'"), str);
+	as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
       break;
     case ldstpair_off:
     case ldstnapair_offs:
     case ldstpair_indexed:
-      if ((opnds[0].reg.regno == opnds[2].reg.regno
-	    || opnds[1].reg.regno == opnds[2].reg.regno)
+      /* Loading/storing the base register is unpredictable if writeback.  */
+      if ((aarch64_get_operand_class (opnds[0].type)
+	   == AARCH64_OPND_CLASS_INT_REG)
+	  && (opnds[0].reg.regno == opnds[2].addr.base_regno
+	    || opnds[1].reg.regno == opnds[2].addr.base_regno)
 	  && opnds[2].addr.writeback)
-	    as_warn (_("unpredictable register after writeback -- `%s'"), str);
+	    as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
+      /* Load operations must load different registers.  */
       if ((opcode->opcode & (1 << 22))
 	  && opnds[0].reg.regno == opnds[1].reg.regno)
 	    as_warn (_("unpredictable load of register pair -- `%s'"), str);

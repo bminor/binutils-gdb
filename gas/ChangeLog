@@ -1,3 +1,10 @@
+2014-11-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-aarch64.c (warn_unpredictable_ldst): Check that transfer
+	registers are in the GP register set.  Adjust warnings.  Use correct
+	field member for address register.
+	* testsuite/gas/aarch64/diagnostic.l: Update.
+
 2014-11-19  Ryan Mansfield  <rmansfield@qnx.com>
 
 	* config/tc-aarch64.c (md_assemble): Call warn_unpredictable_ldst.
