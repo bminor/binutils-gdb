@@ -1,6 +1,16 @@
 2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/10737
+	* xml-syscall.c (set_xml_syscall_file_name): Remove "const"
+	modifier from "struct gdbarch" when compiling without Expat (XML)
+	support.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+
+2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/10737
 	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Adjust call to
 	set_xml_syscall_file_name to provide gdbarch.
 	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.

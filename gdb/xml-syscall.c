@@ -47,14 +47,13 @@ syscall_warn_user (void)
 }
 
 void
-set_xml_syscall_file_name (const struct gdbarch *gdbarch,
-			   const char *name)
+set_xml_syscall_file_name (struct gdbarch *gdbarch, const char *name)
 {
   return;
 }
 
 void
-get_syscall_by_number (const struct gdbarch *gdbarch,
+get_syscall_by_number (struct gdbarch *gdbarch,
 		       int syscall_number, struct syscall *s)
 {
   syscall_warn_user ();
@@ -63,8 +62,8 @@ get_syscall_by_number (const struct gdbarch *gdbarch,
 }
 
 void
-get_syscall_by_name (const struct gdbarch *gdbarch,
-		     const char *syscall_name, struct syscall *s)
+get_syscall_by_name (struct gdbarch *gdbarch, const char *syscall_name,
+		     struct syscall *s)
 {
   syscall_warn_user ();
   s->number = UNKNOWN_SYSCALL;
@@ -72,7 +71,7 @@ get_syscall_by_name (const struct gdbarch *gdbarch,
 }
 
 const char **
-get_syscall_names (const struct gdbarch *gdbarch)
+get_syscall_names (struct gdbarch *gdbarch)
 {
   syscall_warn_user ();
   return NULL;
