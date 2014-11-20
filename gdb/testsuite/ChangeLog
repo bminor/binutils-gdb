@@ -1,3 +1,10 @@
+2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/10737
+	* gdb.base/catch-syscall.exp (do_syscall_tests): Call
+	test_catch_syscall_multi_arch.
+	(test_catch_syscall_multi_arch): New function.
+
 2014-11-20  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.base/maint.exp: Update expected output.

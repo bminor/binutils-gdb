@@ -1,3 +1,69 @@
+2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/10737
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Adjust call to
+	set_xml_syscall_file_name to provide gdbarch.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* bfin-linux-tdep.c (bfin_linux_init_abi): Likewise.
+	* breakpoint.c (print_it_catch_syscall): Adjust call to
+	get_syscall_by_number to provide gdbarch.
+	(print_one_catch_syscall): Likewise.
+	(print_mention_catch_syscall): Likewise.
+	(print_recreate_catch_syscall): Likewise.
+	(catch_syscall_split_args): Adjust calls to get_syscall_by_number
+	and get_syscall_by_name to provide gdbarch.
+	(catch_syscall_completer): Adjust call to get_syscall_names to
+	provide gdbarch.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* gdbarch.sh: Forward declare "struct syscalls_info".
+	(xml_syscall_file): New variable.
+	(syscalls_info): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Adjust call to
+	set_xml_syscall_file_name to provide gdbarch.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Likewise.
+	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Likewise.
+	* xml-syscall.c: Include gdbarch.h.
+	(set_xml_syscall_file_name): Accept gdbarch parameter.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+	(my_gdb_datadir): Delete global variable.
+	(struct syscalls_info) <my_gdb_datadir>: New variable.
+	(struct syscalls_info) <sysinfo>: Rename variable to
+	"syscalls_info".
+	(sysinfo): Delete global variable.
+	(have_initialized_sysinfo): Likewise.
+	(xml_syscall_file): Likewise.
+	(sysinfo_free_syscalls_desc): Rename to...
+	(syscalls_info_free_syscalls_desc): ... this.
+	(free_syscalls_info): Rename "sysinfo" to "syscalls_info".  Adjust
+	code to the new layout of "struct syscalls_info".
+	(make_cleanup_free_syscalls_info): Rename parameter "sysinfo" to
+	"syscalls_info".
+	(syscall_create_syscall_desc): Likewise.
+	(syscall_start_syscall): Likewise.
+	(syscall_parse_xml): Likewise.
+	(xml_init_syscalls_info): Likewise.  Drop "const" from return value.
+	(init_sysinfo): Rename to...
+	(init_syscalls_info): ...this.  Add gdbarch as a parameter.
+	Adjust function to deal with gdbarch.
+	(xml_get_syscall_number): Delete parameter sysinfo.  Accept
+	gdbarch as a parameter.  Adjust code.
+	(xml_get_syscall_name): Likewise.
+	(xml_list_of_syscalls): Likewise.
+	(set_xml_syscall_file_name): Accept gdbarch as parameter.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+	* xml-syscall.h (set_xml_syscall_file_name): Likewise.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+
 2014-11-20  Doug Evans  <xdje42@gmail.com>
 
 	Split struct symtab into two: struct symtab and compunit_symtab.

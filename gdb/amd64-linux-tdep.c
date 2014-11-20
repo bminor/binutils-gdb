@@ -1663,7 +1663,7 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->register_reggroup_p = amd64_linux_register_reggroup_p;
 
   /* Functions for 'catch syscall'.  */
-  set_xml_syscall_file_name (XML_SYSCALL_FILENAME_AMD64);
+  set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_AMD64);
   set_gdbarch_get_syscall_number (gdbarch,
                                   amd64_linux_get_syscall_number);
 

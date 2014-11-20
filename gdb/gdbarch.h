@@ -60,6 +60,7 @@ struct stap_parse_info;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
 struct mem_range;
+struct syscalls_info;
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -1055,6 +1056,16 @@ extern int gdbarch_get_syscall_number_p (struct gdbarch *gdbarch);
 typedef LONGEST (gdbarch_get_syscall_number_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
 extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
+
+/* The filename of the XML syscall for this architecture. */
+
+extern const char * gdbarch_xml_syscall_file (struct gdbarch *gdbarch);
+extern void set_gdbarch_xml_syscall_file (struct gdbarch *gdbarch, const char * xml_syscall_file);
+
+/* Information about system calls from this architecture */
+
+extern struct syscalls_info * gdbarch_syscalls_info (struct gdbarch *gdbarch);
+extern void set_gdbarch_syscalls_info (struct gdbarch *gdbarch, struct syscalls_info * syscalls_info);
 
 /* SystemTap related fields and functions.
    A NULL-terminated array of prefixes used to mark an integer constant

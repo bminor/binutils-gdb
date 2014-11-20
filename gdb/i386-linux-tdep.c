@@ -994,7 +994,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                        displaced_step_at_entry_point);
 
   /* Functions for 'catch syscall'.  */
-  set_xml_syscall_file_name (XML_SYSCALL_FILENAME_I386);
+  set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_I386);
   set_gdbarch_get_syscall_number (gdbarch,
                                   i386_linux_get_syscall_number);
 

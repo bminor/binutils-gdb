@@ -8607,10 +8607,11 @@ print_it_catch_syscall (bpstat bs)
   ptid_t ptid;
   struct target_waitstatus last;
   struct syscall s;
+  struct gdbarch *gdbarch = bs->bp_location_at->gdbarch;
 
   get_last_target_status (&ptid, &last);
 
-  get_syscall_by_number (last.value.syscall_number, &s);
+  get_syscall_by_number (gdbarch, last.value.syscall_number, &s);
 
   annotate_catchpoint (b->number);
 
@@ -8653,6 +8654,7 @@ print_one_catch_syscall (struct breakpoint *b,
   struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
+  struct gdbarch *gdbarch = b->loc->gdbarch;
 
   get_user_print_options (&opts);
   /* Field 4, the address, is omitted (which makes the columns not
@@ -8679,7 +8681,7 @@ print_one_catch_syscall (struct breakpoint *b,
         {
           char *x = text;
           struct syscall s;
-          get_syscall_by_number (iter, &s);
+          get_syscall_by_number (gdbarch, iter, &s);
 
           if (s.name != NULL)
             text = xstrprintf ("%s%s, ", text, s.name);
@@ -8710,6 +8712,7 @@ static void
 print_mention_catch_syscall (struct breakpoint *b)
 {
   struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
+  struct gdbarch *gdbarch = b->loc->gdbarch;
 
   if (c->syscalls_to_be_caught)
     {
@@ -8725,7 +8728,7 @@ print_mention_catch_syscall (struct breakpoint *b)
            i++)
         {
           struct syscall s;
-          get_syscall_by_number (iter, &s);
+          get_syscall_by_number (gdbarch, iter, &s);
 
           if (s.name)
             printf_filtered (" '%s' [%d]", s.name, s.number);
@@ -8746,6 +8749,7 @@ static void
 print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
 {
   struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
+  struct gdbarch *gdbarch = b->loc->gdbarch;
 
   fprintf_unfiltered (fp, "catch syscall");
 
@@ -8759,7 +8763,7 @@ print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
         {
           struct syscall s;
 
-          get_syscall_by_number (iter, &s);
+          get_syscall_by_number (gdbarch, iter, &s);
           if (s.name)
             fprintf_unfiltered (fp, " %s", s.name);
           else
@@ -12037,6 +12041,7 @@ catch_syscall_split_args (char *arg)
 {
   VEC(int) *result = NULL;
   struct cleanup *cleanup = make_cleanup (VEC_cleanup (int), &result);
+  struct gdbarch *gdbarch = target_gdbarch ();
 
   while (*arg != '\0')
     {
@@ -12056,12 +12061,12 @@ catch_syscall_split_args (char *arg)
       /* Check if the user provided a syscall name or a number.  */
       syscall_number = (int) strtol (cur_name, &endptr, 0);
       if (*endptr == '\0')
-	get_syscall_by_number (syscall_number, &s);
+	get_syscall_by_number (gdbarch, syscall_number, &s);
       else
 	{
 	  /* We have a name.  Let's check if it's valid and convert it
 	     to a number.  */
-	  get_syscall_by_name (cur_name, &s);
+	  get_syscall_by_name (gdbarch, cur_name, &s);
 
 	  if (s.number == UNKNOWN_SYSCALL)
 	    /* Here we have to issue an error instead of a warning,
@@ -12102,7 +12107,7 @@ this architecture yet."));
      to get the syscall XML file loaded or, most important,
      to display a warning to the user if there's no XML file
      for his/her architecture.  */
-  get_syscall_by_number (0, &s);
+  get_syscall_by_number (gdbarch, 0, &s);
 
   /* The allowed syntax is:
      catch syscall
@@ -15345,7 +15350,7 @@ static VEC (char_ptr) *
 catch_syscall_completer (struct cmd_list_element *cmd,
                          const char *text, const char *word)
 {
-  const char **list = get_syscall_names ();
+  const char **list = get_syscall_names (get_current_arch ());
   VEC (char_ptr) *retlist
     = (list == NULL) ? NULL : complete_on_enum (list, word, word);
 

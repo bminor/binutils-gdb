@@ -845,6 +845,12 @@ M:void:record_special_symbol:struct objfile *objfile, asymbol *sym:objfile, sym
 # Get architecture-specific system calls information from registers.
 M:LONGEST:get_syscall_number:ptid_t ptid:ptid
 
+# The filename of the XML syscall for this architecture.
+v:const char *:xml_syscall_file:::0:0::0:pstring (gdbarch->xml_syscall_file)
+
+# Information about system calls from this architecture
+v:struct syscalls_info *:syscalls_info:::0:0::0:host_address_to_string (gdbarch->syscalls_info)
+
 # SystemTap related fields and functions.
 
 # A NULL-terminated array of prefixes used to mark an integer constant
@@ -1156,6 +1162,7 @@ struct stap_parse_info;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
 struct mem_range;
+struct syscalls_info;
 
 /* The architecture associated with the inferior through the
    connection to the target.
