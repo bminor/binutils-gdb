@@ -1,5 +1,10 @@
 2014-11-20  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (group_sections): Init stub14_group_size from
+	--stub-group-size parameter divided by 1024.
+
+2014-11-20  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_relax_section): Correct ppc476 workaround
 	alignment calculation.
 
