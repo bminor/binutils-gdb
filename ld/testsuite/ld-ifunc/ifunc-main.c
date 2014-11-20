@@ -3,12 +3,21 @@
 extern int foo(void);
 extern int bar(void);
 
-int (*foo_ptr)(void) = foo;
+typedef int (*func_p) (void);
+
+func_p foo_ptr = foo;
+
+func_p
+__attribute__((noinline))
+get_bar (void)
+{
+  return bar;
+}
 
 int
 main (void)
 {
-  int (*bar_ptr)(void) = bar;
+  func_p bar_ptr = get_bar ();
   if (bar_ptr != bar)
     __builtin_abort ();
   if (bar_ptr() != -1)
