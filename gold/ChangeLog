@@ -1,3 +1,8 @@
+2014-11-21  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Correct test
+	for undefined weaks.
+
 2014-11-20  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Stub_control::Stub_control): Init stub14_group_size_
