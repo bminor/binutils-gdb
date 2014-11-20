@@ -1,3 +1,8 @@
+2014-12-02  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Only check for
+	overflow on non-weak undefined symbols.
+
 2014-12-02  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (OPD_NDX): Define.  Use throughout for sizing/indexing
