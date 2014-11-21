@@ -1711,14 +1711,14 @@ _bfd_coff_read_string_table (bfd *abfd)
     }
 
   strings = (char *) bfd_malloc (strsize + 1);
+  if (strings == NULL)
+    return NULL;
+
   /* PR 17521 file: 079-54929-0.004.
      A corrupt file could contain an index that points into the first
      STRING_SIZE_SIZE bytes of the string table, so make sure that
      they are zero.  */
   memset (strings, 0, STRING_SIZE_SIZE);
-
-  if (strings == NULL)
-    return NULL;
 
   if (bfd_bread (strings + STRING_SIZE_SIZE, strsize - STRING_SIZE_SIZE, abfd)
       != strsize - STRING_SIZE_SIZE)
