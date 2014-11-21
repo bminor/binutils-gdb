@@ -1,3 +1,9 @@
+2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/17619
+	* x86_64.cc (Output_data_plt_x86_64_standard<size>::do_fill_plt_entry):
+	Check PC-relative offset overflow in PLT entry.
+
 2014-11-21  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Correct test

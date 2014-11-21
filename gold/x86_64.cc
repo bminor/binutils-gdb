@@ -1516,11 +1516,16 @@ Output_data_plt_x86_64_standard<size>::do_fill_plt_entry(
     unsigned int plt_offset,
     unsigned int plt_index)
 {
+  // Check PC-relative offset overflow in PLT entry.
+  uint64_t plt_got_pcrel_offset = (got_address + got_offset
+				   - (plt_address + plt_offset + 6));
+  if (Bits<32>::has_overflow(plt_got_pcrel_offset))
+    gold_error(_("PC-relative offset overflow in PLT entry %d"),
+	       plt_index + 1);
+
   memcpy(pov, plt_entry, plt_entry_size);
   elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
-					      (got_address + got_offset
-					       - (plt_address + plt_offset
-						  + 6)));
+					      plt_got_pcrel_offset);
 
   elfcpp::Swap_unaligned<32, false>::writeval(pov + 7, plt_index);
   elfcpp::Swap<32, false>::writeval(pov + 12,
