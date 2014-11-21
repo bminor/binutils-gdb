@@ -29,15 +29,6 @@ gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
 #include "version.h"
 
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
-/* On some systems such as MinGW, alloca is declared in malloc.h
-   (there is no alloca.h).  */
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #if !HAVE_DECL_STRERROR
 #ifndef strerror
 extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */

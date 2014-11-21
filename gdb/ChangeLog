@@ -1,5 +1,14 @@
 2014-11-21  Yao Qi  <yao@codesourcery.com>
 
+	* common/common-defs.h: Include alloca.h
+	* configure.ac: Don't invoke AC_FUNC_ALLOCA.
+	* configure: Re-generated.
+	* defs.h: Remove code handling alloca.
+	* utils.c (gdb_realpath): Don't check HAVE_ALLOCA is defined
+	or not.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULE): Add
 	alloca.
 	* gnulib/import/Makefile.am: Re-generated.

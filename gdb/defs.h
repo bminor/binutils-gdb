@@ -548,27 +548,6 @@ enum gdb_osabi
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 #endif
 
-/* Various possibilities for alloca.  */
-#ifndef alloca
-#ifdef __GNUC__
-#define alloca __builtin_alloca
-#else /* Not GNU C */
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#else
-#ifdef _AIX
-#pragma alloca
-#else
-
-/* We need to be careful not to declare this in a way which conflicts with
-   bison.  Bison never declares it as char *, but under various circumstances
-   (like __hpux) we need to use void *.  */
-extern void *alloca ();
-#endif /* Not _AIX */
-#endif /* Not HAVE_ALLOCA_H */
-#endif /* Not GNU C */
-#endif /* alloca not defined */
-
 /* Dynamic target-system-dependent parameters for GDB.  */
 #include "gdbarch.h"
 
