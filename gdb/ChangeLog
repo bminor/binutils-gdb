@@ -1,5 +1,12 @@
 2014-11-21  Yao Qi  <yao@codesourcery.com>
 
+	* gdb_wchar.h: Include wchar.h and wctype.h.
+	[HAVE_ICONV && HAVE_BTOWC]: Don't check HAVE_WCHAR_T and don't
+	include wchar.h and wctype.h.
+	Don't check HAVE_WCHAR_H.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add wchar
 	and wctype-h.
 	* gnulib/import/Makefile.am: Re-generated.
