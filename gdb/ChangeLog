@@ -1,3 +1,12 @@
+2014-12-31  Joel Brobecker  <brobecker@adacore.com>
+
+	PR backtrace/16215:
+	* dwarf2-frame.c (dwarf2_frame_cfa): Remove the restriction
+	the frame unwinder must either be the dwarf2_frame_unwind
+	or the dwarf2_tailcall_frame_unwind.  Verify that this_frame's
+	stack_addr is valid before calling get_frame_base.  Throw
+	an error if not valid.
+
 2014-12-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR symtab/17642
