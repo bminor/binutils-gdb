@@ -1,5 +1,21 @@
 2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-i386/plt-lib.c: New file.
+	* ld-i386/plt-main.out: Likewise.
+	* ld-i386/plt-main1.c: Likewise.
+	* ld-i386/plt-main1.rd: Likewise.
+	* ld-i386/plt-main2.c: Likewise.
+	* ld-i386/plt-main2.rd: Likewise.
+	* ld-i386/plt-main3.c: Likewise.
+	* ld-i386/plt-main3.rd: Likewise.
+	* ld-i386/plt-main4.c: Likewise.
+	* ld-i386/plt-main4.rd: Likewise.
+	* ld-i386/plt-main5.c: Likewise.
+
+	* ld-i386/i386.exp: Run plt-main tests.
+
+2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-x86-64/x86-64.exp: Run plt-main test with -pie.
 
 2014-11-21  Terry Guo  <terry.guo@arm.com>
