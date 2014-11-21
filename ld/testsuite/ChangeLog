@@ -1,5 +1,12 @@
 2014-11-21  Terry Guo  <terry.guo@arm.com>
 
+	* ld-arm/tls-longplt-lib.s: Require ARMv6T2.
+	* ld-arm/tls-longplt.s: Likewise.
+	* ld-arm/tls-longplt-lib.d: Updated.
+	* ld-arm/tls-longplt.d: Likewise.
+
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
 	* ld-arm/attr-merge-vfp-4-sp.s: New test source file.
 	* ld-arm/attr-merge-vfp-5-sp.s: Likewise.
 	* ld-arm/attr-merge-vfp-5.s: Likewise.

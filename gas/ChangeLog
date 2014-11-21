@@ -1,5 +1,13 @@
 2014-11-21  Terry Guo  <terry.guo@arm.com>
 
+	* config/tc-arm.c (md_assemble): Do not consider relaxation.
+	(md_convert_frag): Test and set target arch attribute accordingly.
+	(aeabi_set_attribute_string): Turn it into a global function.
+	* config/tc-arm.h (md_post_relax_hook): Enable it for ARM target.
+	(aeabi_set_public_attributes): Declare it.
+
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
 	* config/tc-arm.c (fpu_vfp_ext_armv8xd): New.
 	(arm_cpus): Support cortex-m7.
 	(arm_fpus): Support fpv5-sp-d16 and fpv5-d16.
