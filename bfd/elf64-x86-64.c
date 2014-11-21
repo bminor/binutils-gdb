@@ -4749,8 +4749,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       bfd_byte *loc;
       asection *plt, *gotplt, *relplt, *resolved_plt;
       const struct elf_backend_data *bed;
-      bfd_boolean gotplt_after_plt;
-      int32_t plt_got_pcrel_offset;
+      bfd_vma plt_got_pcrel_offset;
 
       /* When building a static executable, use .iplt, .igot.plt and
 	 .rela.iplt sections for STT_GNU_IFUNC symbols.  */
@@ -4864,10 +4863,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 			      - plt_got_insn_size);
 
       /* Check PC-relative offset overflow in PLT entry.  */
-      gotplt_after_plt = (gotplt->output_section->vma
-			  > resolved_plt->output_section->vma);
-      if ((gotplt_after_plt && plt_got_pcrel_offset < 0)
-	  || (!gotplt_after_plt && plt_got_pcrel_offset > 0))
+      if ((plt_got_pcrel_offset + 0x80000000) > 0xffffffff)
 	info->callbacks->einfo (_("%F%B: PC-relative offset overflow in PLT entry for `%s'\n"),
 				output_bfd, h->root.root.string);
 

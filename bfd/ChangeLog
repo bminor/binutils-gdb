@@ -1,3 +1,8 @@
+2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Optimize
+	PC-relative offset overflow check.
+
 2014-11-21  Alexander Cherepanov  <cherepan@mccme.ru>
 
 	PR binutils/17512
