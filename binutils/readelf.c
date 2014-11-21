@@ -9133,6 +9133,10 @@ process_version_sections (FILE * file)
 		if (j < ent.vd_cnt)
 		  printf (_("  Version def aux past end of section\n"));
 
+		/* PR 17531: file: id:000001,src:000172+005151,op:splice,rep:2.  */
+		if (idx + ent.vd_next <= idx)
+		  break;
+
 		idx += ent.vd_next;
 	      }
 
@@ -14686,6 +14690,9 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 
       if (inote.descdata < (char *) external + min_notesz
 	  || next < (char *) external + min_notesz
+	  /* PR binutils/17531: file: id:000000,sig:11,src:006986,op:havoc,rep:4.  */
+	  || inote.namedata + inote.namesz < inote.namedata
+	  || inote.descdata + inote.descsz < inote.descdata
 	  || data_remaining < (size_t)(next - (char *) external))
 	{
 	  warn (_("note with invalid namesz and/or descsz found at offset 0x%lx\n"),
@@ -14704,7 +14711,6 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
       if (inote.namedata[inote.namesz - 1] != '\0')
 	{
 	  temp = (char *) malloc (inote.namesz + 1);
-
 	  if (temp == NULL)
 	    {
 	      error (_("Out of memory allocating space for inote name\n"));
