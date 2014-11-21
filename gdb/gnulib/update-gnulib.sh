@@ -43,6 +43,8 @@ IMPORTED_GNULIB_MODULES="\
     sys_stat \
     unistd \
     update-copyright \
+    wchar \
+    wctype-h \
 "
 
 # The gnulib commit ID to use for the update.
