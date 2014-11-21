@@ -1,3 +1,24 @@
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-vfp-4-sp.s: New test source file.
+	* ld-arm/attr-merge-vfp-5-sp.s: Likewise.
+	* ld-arm/attr-merge-vfp-5.s: Likewise.
+	* ld-arm/attr-merge-vfp-8.d: New test.
+	* ld-arm/attr-merge-vfp-8r.d: Likewise.
+	* ld-arm/attr-merge-vfp-9.d: Likewise.
+	* ld-arm/attr-merge-vfp-9r.d: Likewise.
+	* ld-arm/attr-merge-vfp-10.d: Likewise.
+	* ld-arm/attr-merge-vfp-10r.d: Likewise.
+	* ld-arm/attr-merge-vfp-11.d: Likewise.
+	* ld-arm/attr-merge-vfp-11r.d: Likewise.
+	* ld-arm/attr-merge-vfp-12.d: Likewise.
+	* ld-arm/attr-merge-vfp-12r.d: Likewise.
+	* ld-arm/attr-merge-vfp-13.d: Likewise.
+	* ld-arm/attr-merge-vfp-13r.d: Likewise.
+	* ld-arm/attr-merge-vfp-14.d: Likewise.
+	* ld-arm/attr-merge-vfp-14r.d: Likewise.
+	* ld-arm/arm-elf.exp: Run the new tests.
+
 2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/pr17618.d: Don't run on x32.

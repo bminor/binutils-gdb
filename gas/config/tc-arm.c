@@ -236,6 +236,8 @@ static const arm_feature_set fpu_neon_ext_fma = ARM_FEATURE (0, FPU_NEON_EXT_FMA
 static const arm_feature_set fpu_vfp_ext_fma = ARM_FEATURE (0, FPU_VFP_EXT_FMA);
 static const arm_feature_set fpu_vfp_ext_armv8 =
   ARM_FEATURE (0, FPU_VFP_EXT_ARMV8);
+static const arm_feature_set fpu_vfp_ext_armv8xd =
+  ARM_FEATURE (0, FPU_VFP_EXT_ARMV8xD);
 static const arm_feature_set fpu_neon_ext_armv8 =
   ARM_FEATURE (0, FPU_NEON_EXT_ARMV8);
 static const arm_feature_set fpu_crypto_ext_armv8 =
@@ -15032,6 +15034,13 @@ do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
   int sz, op;
   int rm;
 
+  /* Targets like FPv5-SP-D16 don't support FP v8 instructions with
+     D register operands.  */
+  if (flavour == neon_cvt_flavour_s32_f64
+      || flavour == neon_cvt_flavour_u32_f64)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
+
   set_it_insn_type (OUTSIDE_IT_INSN);
 
   switch (flavour)
@@ -15296,11 +15305,21 @@ do_neon_cvttb_1 (bfd_boolean t)
     }
   else if (neon_check_type (2, rs, N_F16, N_F64 | N_VFP).type != NT_invtype)
     {
+      /* The VCVTB and VCVTT instructions with D-register operands
+         don't work for SP only targets.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		  _(BAD_FPU));
+
       inst.error = NULL;
       do_neon_cvttb_2 (t, /*to=*/TRUE, /*is_double=*/TRUE);
     }
   else if (neon_check_type (2, rs, N_F64 | N_VFP, N_F16).type != NT_invtype)
     {
+      /* The VCVTB and VCVTT instructions with D-register operands
+         don't work for SP only targets.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		  _(BAD_FPU));
+
       inst.error = NULL;
       do_neon_cvttb_2 (t, /*to=*/FALSE, /*is_double=*/TRUE);
     }
@@ -16427,6 +16446,12 @@ do_neon_ldx_stx (void)
 static void
 do_vfp_nsyn_fpv8 (enum neon_shape rs)
 {
+  /* Targets like FPv5-SP-D16 don't support FP v8 instructions with
+     D register operands.  */
+  if (neon_shape_class[rs] == SC_DOUBLE)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
+
   NEON_ENCODE (FPV8, inst);
 
   if (rs == NS_FFF)
@@ -16471,6 +16496,12 @@ do_vrint_1 (enum neon_cvt_mode mode)
 
   if (rs == NS_NULL)
     return;
+
+  /* Targets like FPv5-SP-D16 don't support FP v8 instructions with
+     D register operands.  */
+  if (neon_shape_class[rs] == SC_DOUBLE)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
 
   et = neon_check_type (2, rs, N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
   if (et.type != NT_invtype)
@@ -18953,9 +18984,9 @@ static const struct asm_opcode insns[] =
 
   /* FP for ARMv8.  */
 #undef  ARM_VARIANT
-#define ARM_VARIANT   & fpu_vfp_ext_armv8
+#define ARM_VARIANT   & fpu_vfp_ext_armv8xd
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT & fpu_vfp_ext_armv8
+#define THUMB_VARIANT & fpu_vfp_ext_armv8xd
 
   nUF(vseleq, _vseleq, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vselvs, _vselvs, 3, (RVSD, RVSD, RVSD),		vsel),
@@ -24406,6 +24437,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-r7",	ARM_ARCH_V7R_IDIV,
 						 FPU_ARCH_VFP_V3D16,
 								  "Cortex-R7"),
+  ARM_CPU_OPT ("cortex-m7",	ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M7"),
   ARM_CPU_OPT ("cortex-m4",	ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M4"),
   ARM_CPU_OPT ("cortex-m3",	ARM_ARCH_V7M,	 FPU_NONE,	  "Cortex-M3"),
   ARM_CPU_OPT ("cortex-m1",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M1"),
@@ -24574,6 +24606,8 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"vfpv4",		FPU_ARCH_VFP_V4},
   {"vfpv4-d16",		FPU_ARCH_VFP_V4D16},
   {"fpv4-sp-d16",	FPU_ARCH_VFP_V4_SP_D16},
+  {"fpv5-d16",		FPU_ARCH_VFP_V5D16},
+  {"fpv5-sp-d16",	FPU_ARCH_VFP_V5_SP_D16},
   {"neon-vfpv4",	FPU_ARCH_NEON_VFP_V4},
   {"fp-armv8",		FPU_ARCH_VFP_ARMV8},
   {"neon-fp-armv8",	FPU_ARCH_NEON_VFP_ARMV8},
@@ -25199,8 +25233,10 @@ aeabi_set_public_attributes (void)
 	ARM_CPU_HAS_FEATURE (flags, arm_arch_t2) ? 2 : 1);
 
   /* Tag_VFP_arch.  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_armv8))
-    aeabi_set_attribute_int (Tag_VFP_arch, 7);
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_armv8xd))
+    aeabi_set_attribute_int (Tag_VFP_arch,
+			     ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32)
+			     ? 7 : 8);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_fma))
     aeabi_set_attribute_int (Tag_VFP_arch,
 			     ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32)

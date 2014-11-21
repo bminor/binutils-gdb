@@ -1,3 +1,7 @@
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* readelf.c (arm_attr_tag_FP_arch): Extended to support FPv5.
+
 2014-11-19  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* dwarf.c (process_extended_line_op): Fix signedness warning.

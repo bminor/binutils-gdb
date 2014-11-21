@@ -1,3 +1,16 @@
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* config/tc-arm.c (fpu_vfp_ext_armv8xd): New.
+	(arm_cpus): Support cortex-m7.
+	(arm_fpus): Support fpv5-sp-d16 and fpv5-d16.
+	(do_vfp_nsyn_cvt_fpv8): Generate error when use D register for S
+	register only target like FPv5-SP-D16.
+	(do_neon_cvttb_1): Likewise.
+	(do_vfp_nsyn_fpv8): Likewise.
+	(do_vrint_1): Likewise.
+	(aeabi_set_public_attributes): Set proper FP arch for FPv5.
+	* doc/c-arm.texi: Document new cpu and fpu names for cortex-m7.
+
 2014-11-20  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/tc-arm.c (rotate_left): Avoid undefined behaviour when
