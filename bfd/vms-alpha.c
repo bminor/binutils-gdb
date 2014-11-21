@@ -364,9 +364,9 @@ struct vms_section_data_struct
   ((struct vms_section_data_struct *)sec->used_by_bfd)
 
 /* To be called from the debugger.  */
-struct vms_private_data_struct *bfd_vms_get_data (bfd *abfd);
+struct vms_private_data_struct *bfd_vms_get_data (bfd *);
 
-static int vms_get_remaining_object_record (bfd *abfd, int read_so_far);
+static int vms_get_remaining_object_record (bfd *, unsigned int);
 static bfd_boolean _bfd_vms_slurp_object_records (bfd * abfd);
 static void alpha_vms_add_fixup_lp (struct bfd_link_info *, bfd *, bfd *);
 static void alpha_vms_add_fixup_ca (struct bfd_link_info *, bfd *, bfd *);
@@ -374,8 +374,8 @@ static void alpha_vms_add_fixup_qr (struct bfd_link_info *, bfd *, bfd *,
                                     bfd_vma);
 static void alpha_vms_add_fixup_lr (struct bfd_link_info *, unsigned int,
                                     bfd_vma);
-static void alpha_vms_add_lw_reloc (struct bfd_link_info *info);
-static void alpha_vms_add_qw_reloc (struct bfd_link_info *info);
+static void alpha_vms_add_lw_reloc (struct bfd_link_info *);
+static void alpha_vms_add_qw_reloc (struct bfd_link_info *);
 
 struct vector_type
 {
@@ -788,7 +788,7 @@ _bfd_vms_get_object_record (bfd *abfd)
    Return the size of the record or 0 on failure.  */
 
 static int
-vms_get_remaining_object_record (bfd *abfd, int read_so_far)
+vms_get_remaining_object_record (bfd *abfd, unsigned int read_so_far)
 {
   unsigned int to_read;
 
@@ -824,7 +824,10 @@ vms_get_remaining_object_record (bfd *abfd, int read_so_far)
         return 0;
       PRIV (recrd.buf_size) = to_read;
     }
-
+  /* PR 17512: file: 025-1974-0.004.  */
+  else if (to_read <= read_so_far)
+    return 0;
+  
   /* Read the remaining record.  */
   to_read -= read_so_far;
 

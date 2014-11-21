@@ -1363,9 +1363,11 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 	}
       else
         {
+	  /* PR 17512: file: 006-2964-0.004.  */
+	  if (num >= mdata->nsects)
+	    return -1;
+	  
 	  /* A section number.  */
-          BFD_ASSERT (num <= mdata->nsects);
-
           sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
           /* For a symbol defined in section S, the addend (stored in the
              binary) contains the address of the section.  To comply with
@@ -3660,10 +3662,8 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
   unsigned long i;
 
   if (sym == NULL || sym->symbols)
-    {
-      /* Return now if there are no symbols or if already loaded.  */
-      return TRUE;
-    }
+    /* Return now if there are no symbols or if already loaded.  */
+    return TRUE;
 
   sym->symbols = bfd_alloc (abfd, sym->nsyms * sizeof (bfd_mach_o_asymbol));
 
@@ -3674,12 +3674,18 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
     }
 
   if (!bfd_mach_o_read_symtab_strtab (abfd))
-    return FALSE;
+    {
+      sym->symbols = NULL;
+      return FALSE;
+    }
 
   for (i = 0; i < sym->nsyms; i++)
     {
       if (!bfd_mach_o_read_symtab_symbol (abfd, sym, &sym->symbols[i], i))
-	return FALSE;
+	{
+	  sym->symbols = NULL;
+	  return FALSE;
+	}
     }
 
   return TRUE;

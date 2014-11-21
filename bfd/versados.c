@@ -430,7 +430,8 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
       else
 	{
 	  need_contents = 1;
-	  if (dst_idx < esdid->section->size)
+	  
+	  if (esdid->section && dst_idx < esdid->section->size)
 	    if (pass == 2)
 	      {
 		/* Absolute code, comes in 16 bit lumps.  */
@@ -445,8 +446,15 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 
   if (!contents && need_contents)
     {
-      bfd_size_type size = esdid->section->size;
-      esdid->contents = bfd_alloc (abfd, size);
+      if (esdid->section)
+	{
+	  bfd_size_type size;
+
+	  size = esdid->section->size;
+	  esdid->contents = bfd_alloc (abfd, size);
+	}
+      else
+	esdid->contents = NULL;
     }
 }
 
@@ -582,6 +590,13 @@ versados_object_p (bfd *abfd)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
+
+  /* PR 17512: file: 726-2128-0.004.  */
+  if (len < 13)
+    {
+      bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 

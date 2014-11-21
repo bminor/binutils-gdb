@@ -1808,6 +1808,16 @@ coff_get_normalized_symtab (bfd *abfd)
       symbol_ptr = internal_ptr;
       internal_ptr->is_sym = TRUE;
 
+      /* PR 17512: file: 1353-1166-0.004.  */
+      if (symbol_ptr->u.syment.n_sclass == C_FILE
+	  && symbol_ptr->u.syment.n_numaux > 0
+	  && raw_src + symesz + symbol_ptr->u.syment.n_numaux
+	  * sizeof (union internal_auxent) >= raw_end)
+	{
+	  bfd_release (abfd, internal);
+	  return NULL;
+	}
+
       for (i = 0;
 	   i < symbol_ptr->u.syment.n_numaux;
 	   i++)
@@ -1815,14 +1825,19 @@ coff_get_normalized_symtab (bfd *abfd)
 	  internal_ptr++;
 	  /* PR 17512: Prevent buffer overrun.  */
 	  if (internal_ptr >= internal_end)
-	    return NULL;
+	    {
+	      bfd_release (abfd, internal);
+	      return NULL;
+	    }
 
 	  raw_src += symesz;
+
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,
 				symbol_ptr->u.syment.n_sclass,
 				(int) i, symbol_ptr->u.syment.n_numaux,
 				&(internal_ptr->u.auxent));
+
 	  internal_ptr->is_sym = FALSE;
 	  coff_pointerize_aux (abfd, internal, symbol_ptr, i,
 			       internal_ptr);
