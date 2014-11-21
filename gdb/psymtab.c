@@ -633,13 +633,13 @@ psymtab_search_name (const char *name)
     case language_cplus:
     case language_java:
       {
-       if (strchr (name, '('))
-         {
-           char *ret = cp_remove_params (name);
+	if (strchr (name, '('))
+	  {
+	    char *ret = cp_remove_params (name);
 
-           if (ret)
-             return ret;
-         }
+	    if (ret)
+	      return ret;
+	  }
       }
       break;
 
