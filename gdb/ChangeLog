@@ -1,3 +1,61 @@
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	errno.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Likewise.
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gdb_wchar.h: Include wchar.h and wctype.h.
+	[HAVE_ICONV && HAVE_BTOWC]: Don't check HAVE_WCHAR_T and don't
+	include wchar.h and wctype.h.
+	Don't check HAVE_WCHAR_H.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add wchar
+	and wctype-h.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Likewise.
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	memchr.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Likewise.
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* common/common-defs.h: Include alloca.h
+	* configure.ac: Don't invoke AC_FUNC_ALLOCA.
+	* configure: Re-generated.
+	* defs.h: Remove code handling alloca.
+	* utils.c (gdb_realpath): Don't check HAVE_ALLOCA is defined
+	or not.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULE): Add
+	alloca.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Likewise..
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh: Make IMPORTED_GNULIB_MODULES in
+	alphabetical order.
+
+2014-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (create_range_type): Unset RESULT_TYPE's
+	flag_unsigned if HIGH_BOUND is constant and negative.
+
 2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/10737

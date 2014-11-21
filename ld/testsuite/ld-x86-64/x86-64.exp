@@ -386,6 +386,16 @@ if { [isnative] && [which $CC] != 0 } {
 	    "plt-main" \
 	    "plt-main.out" \
 	] \
+	[list \
+	    "Run plt-main with PIE" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "" \
+	    { plt-main5.c } \
+	    "plt-main-pie" \
+	    "plt-main.out" \
+	    "-fPIC" \
+	] \
     ]
 }
 

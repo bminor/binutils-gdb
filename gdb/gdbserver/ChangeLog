@@ -1,3 +1,13 @@
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac: Don't invoke AC_FUNC_ALLOCA.
+	(AC_CHECK_HEADERS): Remove malloc.h.
+	* configure: Re-generated.
+	* config.in: Re-generated.
+	* server.h: Don't include alloca.h and malloc.h.
+	* gdbreplay.c: Don't check HAVE_ALLOCA_H is defined.
+	Don't include malloc.h.
+
 2014-11-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-low.c (lynx_write_memory): Put lynx_read_memory and

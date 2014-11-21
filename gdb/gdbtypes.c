@@ -821,6 +821,13 @@ create_range_type (struct type *result_type, struct type *index_type,
   if (low_bound->kind == PROP_CONST && low_bound->data.const_val >= 0)
     TYPE_UNSIGNED (result_type) = 1;
 
+  /* Ada allows the declaration of range types whose upper bound is
+     less than the lower bound, so checking the lower bound is not
+     enough.  Make sure we do not mark a range type whose upper bound
+     is negative as unsigned.  */
+  if (high_bound->kind == PROP_CONST && high_bound->data.const_val < 0)
+    TYPE_UNSIGNED (result_type) = 0;
+
   return result_type;
 }
 

@@ -1,3 +1,15 @@
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* gas/arm/attr-arch-assumption.d: New file.
+	* gas/arm/attr-arch-assumption.s: Likewise.
+
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* gas/arm/armv7e-m+fpv5-d16.s: New.
+	* gas/arm/armv7e-m+fpv5-d16.d: Likewise.
+	* gas/arm/armv7e-m+fpv5-sp-d16.s: Likewise.
+	* gas/arm/armv7e-m+fpv5-sp-d16.d: Likewise.
+
 2014-11-19  Ryan Mansfield  <rmansfield@qnx.com>
 
 	* gas/aarch64/diagnostic.s: Add new warnings test patterns.

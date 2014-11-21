@@ -1,3 +1,13 @@
+2014-11-21  Alexander Cherepanov  <cherepan@mccme.ru>
+
+	PR binutils/17512
+	* coffgen.c (_bfd_coff_read_string_table): Test allocation of
+	string table before clearing the first few bytes.
+
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Support FPv5.
+
 2014-11-20  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (group_sections): Init stub14_group_size from

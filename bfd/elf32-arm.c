@@ -11955,7 +11955,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		 when it's 0.  It might mean absence of FP hardware if
 		 Tag_FP_arch is zero, otherwise it is effectively SP + DP.  */
 
-#define VFP_VERSION_COUNT 8
+#define VFP_VERSION_COUNT 9
 	      static const struct
 	      {
 		  int ver;
@@ -11969,7 +11969,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		  {3, 16},
 		  {4, 32},
 		  {4, 16},
-		  {8, 32}
+		  {8, 32},
+		  {8, 16}
 		};
 	      int ver;
 	      int regs;
