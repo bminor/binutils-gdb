@@ -36,6 +36,7 @@ IMPORTED_GNULIB_MODULES="\
     fnmatch-gnu \
     frexpl \
     inttypes \
+    memchr \
     memmem \
     pathmax \
     strstr \

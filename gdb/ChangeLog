@@ -1,5 +1,13 @@
 2014-11-21  Yao Qi  <yao@codesourcery.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	memchr.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Likewise.
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
 	* common/common-defs.h: Include alloca.h
 	* configure.ac: Don't invoke AC_FUNC_ALLOCA.
 	* configure: Re-generated.
