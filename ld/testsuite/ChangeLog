@@ -1,3 +1,7 @@
+2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/x86-64.exp: Run plt-main test with -pie.
+
 2014-11-21  Terry Guo  <terry.guo@arm.com>
 
 	* ld-arm/tls-longplt-lib.s: Require ARMv6T2.
