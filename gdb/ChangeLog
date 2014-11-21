@@ -1,3 +1,8 @@
+2014-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh: Make IMPORTED_GNULIB_MODULES in
+	alphabetical order.
+
 2014-11-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (create_range_type): Unset RESULT_TYPE's

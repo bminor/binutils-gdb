@@ -30,17 +30,17 @@
 
 # The list of gnulib modules we are importing in GDB.
 IMPORTED_GNULIB_MODULES="\
+    dirent \
     dirfd \
     fnmatch-gnu \
     frexpl \
     inttypes \
     memmem \
-    update-copyright \
-    unistd \
     pathmax \
     strstr \
-    dirent \
     sys_stat \
+    unistd \
+    update-copyright \
 "
 
 # The gnulib commit ID to use for the update.
