@@ -33,6 +33,7 @@ IMPORTED_GNULIB_MODULES="\
     alloca \
     dirent \
     dirfd \
+    errno \
     fnmatch-gnu \
     frexpl \
     inttypes \
