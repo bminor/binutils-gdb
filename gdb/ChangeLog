@@ -1,3 +1,7 @@
+2014-11-22  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): Fix comment.
+
 2014-11-21  Doug Evans  <dje@google.com>
 
 	* psymtab.c (psymtab_search_name): Fix whitespace.
