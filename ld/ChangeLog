@@ -1,3 +1,9 @@
+2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* emultempl/avrelf.em: Add include of elf/avr.h.
+	(avr_finish): New function.
+	(LDEMUL_FINISH): Added.
+
 2014-12-23  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (update_definedness): Return false if script symbol is
