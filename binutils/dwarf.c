@@ -142,6 +142,14 @@ get_encoded_value (unsigned char **pdata,
       return 0;
     }
 
+  /* PR 17512: file: 1085-5603-0.004.  */
+  if (size == 0)
+    {
+      warn (_("Encoded size of 0 is too small to read\n"));
+      * pdata = end;
+      return 0;
+    }
+
   if (encoding & DW_EH_PE_signed)
     val = byte_get_signed (data, size);
   else
@@ -2785,6 +2793,13 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Line Base:                   %d\n"), linfo.li_line_base);
 	  printf (_("  Line Range:                  %d\n"), linfo.li_line_range);
 	  printf (_("  Opcode Base:                 %d\n"), linfo.li_opcode_base);
+
+	  /* PR 17512: file: 1665-6428-0.004.  */
+	  if (linfo.li_line_range == 0)
+	    {
+	      warn (_("Line range of 0 is invalid, using 1 instead\n"));
+	      linfo.li_line_range = 1;
+	    }
 
 	  reset_state_machine (linfo.li_default_is_stmt);
 
@@ -5697,6 +5712,15 @@ display_debug_frames (struct dwarf_section *section,
 	      augmentation_data_len = LEB ();
 	      augmentation_data = start;
 	      start += augmentation_data_len;
+	      /* PR 17512: file: 722-8446-0.004.  */
+	      if (start >= end)
+		{
+		  warn (_("Corrupt augmentation data length: %lx\n"),
+			augmentation_data_len);
+		  start = end;
+		  augmentation_data = NULL;
+		  augmentation_data_len = 0;
+		}
 	    }
 
 	  printf ("\n%08lx %s %s FDE cie=%08lx pc=",

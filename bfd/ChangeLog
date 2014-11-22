@@ -1,3 +1,42 @@
+2014-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffgen.c (coff_get_normalized_symtab): Check for an excessive
+	number of auxillary entries.
+	* ieee.c (next_byte): Convert to a function.  Return FALSE if the
+	next byte is beyond the end of the buffer.
+	(parse_int): Test the return value of next_byte.
+	(parse_expression): Convert to boolean.  Return FALSE if the
+	parsing failed.  Test the return value of next_byte.
+	(ieee_seek): Convert to a function.  Return FALSE if the seek goes
+	beyond the end of the buffer.
+	(ieee_slurp_external_symbols): Test the return value of ieee_seek
+	and next_byte.
+	(ieee_slurp_sections): Convert to boolean.  Return FALSE if the
+	operation failed.  Test the return value of ieee_seek and
+	next_byte.
+	(ieee_archive_p): Test the return value of ieee_seek and
+	next_byte.
+	(do_one): Likewise.
+	(ieee_slurp_section_data): Likewise.
+	(ieee_object_p): Likewise.  Store the size of the buffer in the
+	total_amt field in the header.
+	* libieee.h (common_header_type): Add amt field.
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Check that the
+	reloc's value is within range.
+	(bfd_mach_o_read_symtab_symbols): Nullify the symbols field if the
+	operation fails.
+	* pei-x86_64.c (pex64_xdata_print_uwd_codes): Replace abort with
+	an error message.
+	(pex64_dump_xdata): Check for buffer overflows.
+	* versados.c (process_otr): Check that the section exists before
+	taking its size.
+	(versados_object_p): Make sure that enough data was read for the
+	header to be checked.
+	* vms-alpha.c (vms_get_remaining_object_record): Change
+	read_so_far parameter to an unsigned int.  Check that the amount
+	read is in range.
+
 2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Optimize
