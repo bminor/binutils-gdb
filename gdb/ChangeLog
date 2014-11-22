@@ -1,5 +1,11 @@
 2014-11-22  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (lookup_symbol_in_objfile_from_linkage_name): Improve
+	function comment.
+	(search_symbols): Fix comments and whitespace.
+
+2014-11-22  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c (cp_lookup_symbol_nonlocal): Fix comment.
 
 2014-11-21  Doug Evans  <dje@google.com>

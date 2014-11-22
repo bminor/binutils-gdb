@@ -1639,7 +1639,12 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
 
 /* Wrapper around lookup_symbol_in_objfile_symtabs for search_symbols.
    Look up LINKAGE_NAME in DOMAIN in the global and static blocks of OBJFILE
-   and all related objfiles.  */
+   and all associated separate debug objfiles.
+
+   Normally we only look in OBJFILE, and not any separate debug objfiles
+   because the outer loop will cause them to be searched too.  This case is
+   different.  Here we're called from search_symbols where it will only
+   call us for the the objfile that contains a matching minsym.  */
 
 static struct symbol *
 lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
@@ -3756,8 +3761,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 			    e.g., c++ static const members.
 			    We only want to skip enums here.  */
 			 && !(SYMBOL_CLASS (sym) == LOC_CONST
-			      && TYPE_CODE (SYMBOL_TYPE (sym))
-			      == TYPE_CODE_ENUM))
+			      && (TYPE_CODE (SYMBOL_TYPE (sym))
+				  == TYPE_CODE_ENUM)))
 			|| (kind == FUNCTIONS_DOMAIN 
 			    && SYMBOL_CLASS (sym) == LOC_BLOCK)
 			|| (kind == TYPES_DOMAIN
@@ -3789,7 +3794,7 @@ search_symbols (const char *regexp, enum search_domain kind,
     }
 
   /* If there are no eyes, avoid all contact.  I mean, if there are
-     no debug symbols, then print directly from the msymbol_vector.  */
+     no debug symbols, then add matching minsyms.  */
 
   if (found_misc || (nfiles == 0 && kind != FUNCTIONS_DOMAIN))
     {
