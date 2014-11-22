@@ -4906,11 +4906,19 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       /* Don't fill PLT entry for static executables.  */
       if (plt == htab->elf.splt)
 	{
+	  bfd_vma plt0_offset = h->plt.offset + plt_plt_insn_end;
+
 	  /* Put relocation index.  */
 	  bfd_put_32 (output_bfd, plt_index,
 		      plt->contents + h->plt.offset + abed->plt_reloc_offset);
-	  /* Put offset for jmp .PLT0.  */
-	  bfd_put_32 (output_bfd, - (h->plt.offset + plt_plt_insn_end),
+
+	  /* Put offset for jmp .PLT0 and check for overflow.  We don't
+	     check relocation index for overflow since branch displacement
+	     will overflow first.  */
+	  if (plt0_offset > 0x80000000)
+	    info->callbacks->einfo (_("%F%B: branch displacement overflow in PLT entry for `%s'\n"),
+				    output_bfd, h->root.root.string);
+	  bfd_put_32 (output_bfd, - plt0_offset,
 		      plt->contents + h->plt.offset + plt_plt_offset);
 	}
 
