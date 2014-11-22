@@ -1,3 +1,9 @@
+2014-11-22  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dw2-compdir-oldgcc.S: Define label .Lgcc42_procstart
+	and .Lgcc43_procstart.  Use .Lgcc42_procstart instead of gcc42.
+	Use .Lgcc43_procstart instead of gcc43.
+
 2014-11-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/n_arr_bound: New testcase.
