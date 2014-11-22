@@ -1522,7 +1522,6 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
   elf_elfheader (abfd)->e_machine = EM_AVR;
   elf_elfheader (abfd)->e_flags &= ~ EF_AVR_MACH;
   elf_elfheader (abfd)->e_flags |= val;
-  elf_elfheader (abfd)->e_flags |= EF_AVR_LINKRELAX_PREPARED;
 }
 
 /* Set the right machine number.  */

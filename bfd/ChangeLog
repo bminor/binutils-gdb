@@ -1,3 +1,8 @@
+2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-avr.c (bfd_elf_avr_final_write_processing): Don't set
+	EF_AVR_LINKRELAX_PREPARED unconditionally.
+
 2014-12-23  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_define_linkage_sym): Set linker_def.

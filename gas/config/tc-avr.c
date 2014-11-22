@@ -25,7 +25,7 @@
 #include "subsegs.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
-
+#include "elf/avr.h"
 
 struct avr_opcodes_s
 {
@@ -1847,4 +1847,11 @@ avr_allow_local_subtract (expressionS * left,
      two symbols and that relaxation may increase the distance between
      them.  */
   return FALSE;
+}
+
+void
+avr_elf_final_processing (void)
+{
+  if (linkrelax)
+    elf_elfheader (stdoutput)->e_flags |= EF_AVR_LINKRELAX_PREPARED;
 }

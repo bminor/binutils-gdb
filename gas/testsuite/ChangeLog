@@ -1,3 +1,9 @@
+2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gas/avr/link-relax-elf-flag-clear.d: New file.
+	* gas/avr/link-relax-elf-flag-set.d: New file.
+	* gas/avr/link-relax-elf-flag.s: New file.
+
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/r6-64.s: Remove .align directives from LDPC
