@@ -40,6 +40,7 @@ AC_DEFUN([gl_EARLY],
   AC_REQUIRE([gl_PROG_AR_RANLIB])
   # Code from module alloca:
   # Code from module alloca-opt:
+  # Code from module canonicalize-lgpl:
   # Code from module configmake:
   # Code from module dirent:
   # Code from module dirfd:
@@ -65,6 +66,7 @@ AC_DEFUN([gl_EARLY],
   AC_REQUIRE([AC_SYS_LARGEFILE])
   # Code from module localcharset:
   # Code from module lstat:
+  # Code from module malloca:
   # Code from module math:
   # Code from module mbrtowc:
   # Code from module mbsinit:
@@ -73,8 +75,10 @@ AC_DEFUN([gl_EARLY],
   # Code from module memmem:
   # Code from module memmem-simple:
   # Code from module multiarch:
+  # Code from module nocrash:
   # Code from module pathmax:
   # Code from module readlink:
+  # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
@@ -83,6 +87,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module stdbool:
   # Code from module stddef:
   # Code from module stdint:
+  # Code from module stdlib:
   # Code from module streq:
   # Code from module string:
   # Code from module strnlen1:
@@ -115,6 +120,13 @@ AC_DEFUN([gl_INIT],
   gl_COMMON
   gl_source_base='import'
   gl_FUNC_ALLOCA
+  gl_CANONICALIZE_LGPL
+  if test $HAVE_CANONICALIZE_FILE_NAME = 0 || test $REPLACE_CANONICALIZE_FILE_NAME = 1; then
+    AC_LIBOBJ([canonicalize-lgpl])
+  fi
+  gl_MODULE_INDICATOR([canonicalize-lgpl])
+  gl_STDLIB_MODULE_INDICATOR([canonicalize_file_name])
+  gl_STDLIB_MODULE_INDICATOR([realpath])
   gl_CONFIGMAKE_PREP
   gl_DIRENT_H
   gl_FUNC_DIRFD
@@ -174,6 +186,7 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_LSTAT
   fi
   gl_SYS_STAT_MODULE_INDICATOR([lstat])
+  gl_MALLOCA
   gl_MATH_H
   gl_FUNC_MBRTOWC
   if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
@@ -227,6 +240,7 @@ AC_DEFUN([gl_INIT],
   AM_STDBOOL_H
   gl_STDDEF_H
   gl_STDINT_H
+  gl_STDLIB_H
   gl_HEADER_STRING_H
   gl_FUNC_STRSTR
   if test $REPLACE_STRSTR = 1; then
@@ -385,12 +399,14 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  build-aux/snippet/_Noreturn.h
   build-aux/snippet/arg-nonnull.h
   build-aux/snippet/c++defs.h
   build-aux/snippet/warn-on-use.h
   build-aux/update-copyright
   lib/alloca.c
   lib/alloca.in.h
+  lib/canonicalize-lgpl.c
   lib/config.charset
   lib/dirent.in.h
   lib/dirfd.c
@@ -415,6 +431,9 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/localcharset.c
   lib/localcharset.h
   lib/lstat.c
+  lib/malloca.c
+  lib/malloca.h
+  lib/malloca.valgrind
   lib/math.c
   lib/math.in.h
   lib/mbrtowc.c
@@ -433,6 +452,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/stdbool.in.h
   lib/stddef.in.h
   lib/stdint.in.h
+  lib/stdlib.in.h
   lib/str-two-way.h
   lib/streq.h
   lib/string.in.h
@@ -450,10 +470,13 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/wctype.in.h
   m4/00gnulib.m4
   m4/alloca.m4
+  m4/canonicalize.m4
   m4/codeset.m4
   m4/configmake.m4
   m4/dirent_h.m4
   m4/dirfd.m4
+  m4/double-slash-root.m4
+  m4/eealloc.m4
   m4/errno_h.m4
   m4/exponentd.m4
   m4/exponentl.m4
@@ -479,6 +502,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/locale-zh.m4
   m4/longlong.m4
   m4/lstat.m4
+  m4/malloca.m4
   m4/math_h.m4
   m4/mbrtowc.m4
   m4/mbsinit.m4
@@ -488,6 +512,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/memmem.m4
   m4/mmap-anon.m4
   m4/multiarch.m4
+  m4/nocrash.m4
   m4/off_t.m4
   m4/pathmax.m4
   m4/readlink.m4
@@ -496,6 +521,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/stdbool.m4
   m4/stddef_h.m4
   m4/stdint.m4
+  m4/stdlib_h.m4
   m4/string_h.m4
   m4/strstr.m4
   m4/sys_stat_h.m4

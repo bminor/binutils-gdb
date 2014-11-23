@@ -31,6 +31,7 @@
 # The list of gnulib modules we are importing in GDB.
 IMPORTED_GNULIB_MODULES="\
     alloca \
+    canonicalize-lgpl \
     dirent \
     dirfd \
     errno \

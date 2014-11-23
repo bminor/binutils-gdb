@@ -1,5 +1,28 @@
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	canonicalize-lgpl.
+	* aclocal.m4: Re-generated.
+	* config.in: Re-generated.
+	* configure: Re-generated.
+	* import/Makefile.am: Re-generated.
+	* import/Makefile.in: Re-generated.
+	* import/m4/gnulib-cache.m4: Re-generated.
+	* import/m4/gnulib-comp.m4: Re-generated.
+	* import/canonicalize-lgpl.c: New file.
+	* import/extra/snippet/_Noreturn.h: New file.
+	* import/m4/canonicalize.m4: New file.
+	* import/m4/double-slash-root.m4: New file.
+	* import/m4/eealloc.m4: New file.
+	* import/m4/malloca.m4: New file.
+	* import/m4/nocrash.m4: New file.
+	* import/m4/stdlib_h.m4: New file.
+	* import/malloca.c: New file.
+	* import/malloca.h: New file.
+	* import/malloca.valgrind: New file.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
 	* configure.ac (AC_CHECK_FUNCS): Remove lstat.
 	* config.in, configure: Regenerate.
 	* symfile.c (find_separate_debug_file_by_debuglink): Remove

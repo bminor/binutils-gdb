@@ -27,12 +27,13 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=import --m4-base=import/m4 --doc-base=doc --tests-base=tests --aux-dir=import/extra --no-conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files alloca dirent dirfd errno fnmatch-gnu frexpl inttypes lstat memchr memmem pathmax readlink strstr sys_stat unistd update-copyright wchar wctype-h
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=import --m4-base=import/m4 --doc-base=doc --tests-base=tests --aux-dir=import/extra --no-conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files alloca canonicalize-lgpl dirent dirfd errno fnmatch-gnu frexpl inttypes lstat memchr memmem pathmax readlink strstr sys_stat unistd update-copyright wchar wctype-h
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
   alloca
+  canonicalize-lgpl
   dirent
   dirfd
   errno
