@@ -1649,17 +1649,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      const struct elf_backend_data *bed;
 
 		      bed = get_elf_backend_data (info->output_bfd);
-		      switch (sizeof (elf_x86_64_bnd_plt2_entry))
-			{
-			case 8:
-			  plt_bnd_align = 3;
-			  break;
-			case 16:
-			  plt_bnd_align = 4;
-			  break;
-			default:
-			  abort ();
-			}
+		      BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
+				  && (sizeof (elf_x86_64_bnd_plt2_entry)
+				      == sizeof (elf_x86_64_legacy_plt2_entry)));
+		      plt_bnd_align = 3;
 
 		      if (htab->elf.dynobj == NULL)
 			htab->elf.dynobj = abfd;
@@ -2500,11 +2493,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  /* Make room for this entry.  */
 	  s->size += plt_entry_size;
 	  if (bnd_s)
-	    {
-	      BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry)
-			  == sizeof (elf_x86_64_legacy_plt2_entry));
-	      bnd_s->size += sizeof (elf_x86_64_legacy_plt2_entry);
-	    }
+	    bnd_s->size += sizeof (elf_x86_64_legacy_plt2_entry);
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */

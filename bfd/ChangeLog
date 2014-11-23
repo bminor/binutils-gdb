@@ -1,3 +1,10 @@
+2014-11-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Assert size of
+	elf_x86_64_bnd_plt2_entry and elf_x86_64_legacy_plt2_entry.
+	(elf_x86_64_allocate_dynrelocs): Don't assert size of
+	elf_x86_64_bnd_plt2_entry and elf_x86_64_legacy_plt2_entry.
+
 2014-11-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Check
