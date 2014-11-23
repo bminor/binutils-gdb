@@ -43,6 +43,7 @@ IMPORTED_GNULIB_MODULES="\
     memmem \
     pathmax \
     readlink \
+    rename \
     strstr \
     sys_stat \
     unistd \
