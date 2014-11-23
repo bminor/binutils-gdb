@@ -1,5 +1,14 @@
 2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* event-top.h (call_stdin_event_handler_again_p): Declare.
+	* event-top.c (call_stdin_event_handler_again_p): Define.
+	(stdin_event_handler): Use it.
+	* tui/tui-io.c (tui_getc): Prepare to call the stdin event
+	handler again if there is pending input following a
+	start sequence.
+
+2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
+
 	Pushed by Joel Brobecker  <brobecker@adacore.com>
 	* linux-fork.c (checkpoint_command): Print index of new
 	checkpoint in response message.

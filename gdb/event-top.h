@@ -61,6 +61,7 @@ extern void (*call_readline) (void *);
 extern void (*input_handler) (char *);
 extern int input_fd;
 extern void (*after_char_processing_hook) (void);
+extern int call_stdin_event_handler_again_p;
 
 /* Wrappers for rl_callback_handler_remove and
    rl_callback_handler_install that keep track of whether the callback

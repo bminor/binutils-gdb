@@ -119,6 +119,11 @@ int exec_done_display_p = 0;
    read commands from.  */
 int input_fd;
 
+/* Used by the stdin event handler to compensate for missed stdin events.
+   Setting this to a non-zero value inside an stdin callback makes the callback
+   run again.  */
+int call_stdin_event_handler_again_p;
+
 /* Signal handling variables.  */
 /* Each of these is a pointer to a function that the event loop will
    invoke if the corresponding signal has received.  The real signal
@@ -420,7 +425,13 @@ stdin_event_handler (int error, gdb_client_data client_data)
       quit_command ((char *) 0, stdin == instream);
     }
   else
-    (*call_readline) (client_data);
+    {
+      do
+	{
+	  call_stdin_event_handler_again_p = 0;
+	  (*call_readline) (client_data);
+	} while (call_stdin_event_handler_again_p != 0);
+    }
 }
 
 /* Re-enable stdin after the end of an execution command in
