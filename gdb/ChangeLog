@@ -1,3 +1,12 @@
+2014-11-24  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>
+	* gdb/gnu-nat.c (inf_validate_procinfo): Multiply the number of
+	elements pi_len by the size of the elements before calling
+	vm_deallocate.
+	(inf_validate_task_sc): Likewise, and properly deallocate the
+	noise array.
+
 2014-11-23  Doug Evans  <xdje42@gmail.com>
 
 	* gdbtypes.c (print_args): Renamed from print_arg_types.  Print arg
