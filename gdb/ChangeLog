@@ -1,3 +1,20 @@
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add readlink.
+	* gnulib/aclocal.m4: Re-generated.
+	* gnulib/config.in: Likewise.
+	* gnulib/configure: Likewise.
+	* gnulib/import/Makefile.am: Likewise.
+	* gnulib/import/Makefile.in: Likewise.
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+	* gnulib/import/m4/gnulib-comp.m4: Likewise.
+	* gnulib/import/dosname.h: New file
+	* gnulib/import/m4/largefile.m4: New file.
+	* gnulib/import/m4/readlink.m4: New file.
+	* gnulib/import/m4/stat.m4: New file.
+	* gnulib/import/readlink.c: New file.
+	* gnulib/import/stat.c: New file.
+
 2014-11-26  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2read.c (set_cu_language): Recognize DW_LANG_C11,

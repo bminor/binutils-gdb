@@ -43,6 +43,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module configmake:
   # Code from module dirent:
   # Code from module dirfd:
+  # Code from module dosname:
   # Code from module errno:
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
@@ -60,6 +61,8 @@ AC_DEFUN([gl_EARLY],
   # Code from module inttypes-incomplete:
   # Code from module isnand-nolibm:
   # Code from module isnanl-nolibm:
+  # Code from module largefile:
+  AC_REQUIRE([AC_SYS_LARGEFILE])
   # Code from module localcharset:
   # Code from module math:
   # Code from module mbrtowc:
@@ -70,10 +73,12 @@ AC_DEFUN([gl_EARLY],
   # Code from module memmem-simple:
   # Code from module multiarch:
   # Code from module pathmax:
+  # Code from module readlink:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
   # Code from module ssize_t:
+  # Code from module stat:
   # Code from module stdbool:
   # Code from module stddef:
   # Code from module stdint:
@@ -158,6 +163,7 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([isnanl])
     gl_PREREQ_ISNANL
   fi
+  AC_REQUIRE([gl_LARGEFILE])
   gl_LOCALCHARSET
   LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
   AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
@@ -198,7 +204,19 @@ AC_DEFUN([gl_INIT],
   gl_STRING_MODULE_INDICATOR([memmem])
   gl_MULTIARCH
   gl_PATHMAX
+  gl_FUNC_READLINK
+  if test $HAVE_READLINK = 0 || test $REPLACE_READLINK = 1; then
+    AC_LIBOBJ([readlink])
+    gl_PREREQ_READLINK
+  fi
+  gl_UNISTD_MODULE_INDICATOR([readlink])
   gt_TYPE_SSIZE_T
+  gl_FUNC_STAT
+  if test $REPLACE_STAT = 1; then
+    AC_LIBOBJ([stat])
+    gl_PREREQ_STAT
+  fi
+  gl_SYS_STAT_MODULE_INDICATOR([stat])
   AM_STDBOOL_H
   gl_STDDEF_H
   gl_STDINT_H
@@ -369,6 +387,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/config.charset
   lib/dirent.in.h
   lib/dirfd.c
+  lib/dosname.h
   lib/errno.in.h
   lib/float+.h
   lib/float.c
@@ -399,8 +418,10 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/memchr.valgrind
   lib/memmem.c
   lib/pathmax.h
+  lib/readlink.c
   lib/ref-add.sin
   lib/ref-del.sin
+  lib/stat.c
   lib/stdbool.in.h
   lib/stddef.in.h
   lib/stdint.in.h
@@ -443,6 +464,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/inttypes.m4
   m4/isnand.m4
   m4/isnanl.m4
+  m4/largefile.m4
   m4/localcharset.m4
   m4/locale-fr.m4
   m4/locale-ja.m4
@@ -459,7 +481,9 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/multiarch.m4
   m4/off_t.m4
   m4/pathmax.m4
+  m4/readlink.m4
   m4/ssize_t.m4
+  m4/stat.m4
   m4/stdbool.m4
   m4/stddef_h.m4
   m4/stdint.m4
