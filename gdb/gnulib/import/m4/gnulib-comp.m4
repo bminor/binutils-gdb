@@ -64,6 +64,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module largefile:
   AC_REQUIRE([AC_SYS_LARGEFILE])
   # Code from module localcharset:
+  # Code from module lstat:
   # Code from module math:
   # Code from module mbrtowc:
   # Code from module mbsinit:
@@ -167,6 +168,12 @@ AC_DEFUN([gl_INIT],
   gl_LOCALCHARSET
   LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
   AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
+  gl_FUNC_LSTAT
+  if test $REPLACE_LSTAT = 1; then
+    AC_LIBOBJ([lstat])
+    gl_PREREQ_LSTAT
+  fi
+  gl_SYS_STAT_MODULE_INDICATOR([lstat])
   gl_MATH_H
   gl_FUNC_MBRTOWC
   if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
@@ -407,6 +414,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/itold.c
   lib/localcharset.c
   lib/localcharset.h
+  lib/lstat.c
   lib/math.c
   lib/math.in.h
   lib/mbrtowc.c
@@ -470,6 +478,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/locale-ja.m4
   m4/locale-zh.m4
   m4/longlong.m4
+  m4/lstat.m4
   m4/math_h.m4
   m4/mbrtowc.m4
   m4/mbsinit.m4

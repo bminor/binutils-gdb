@@ -1,5 +1,19 @@
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	lstat.
+	* gnulib/aclocal.m4: Re-generated.
+	* gnulib/config.in: Re-generated.
+	* gnulib/configure: Re-generated.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Re-generated.
+	* gnulib/import/m4/gnulib-cache.m4: Re-generated.
+	* gnulib/import/m4/gnulib-comp.m4: Re-generated.
+	* gnulib/import/lstat.c: New file.
+	* gnulib/import/m4/lstat.m4: New file.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
 	* configure.ac (AC_CHECK_FUNCS): Remove readlink.
 	* config.in, configure: Re-generate.
 	* inf-child.c (inf_child_fileio_readlink): Don't check

@@ -52,6 +52,9 @@
 /* Define to 1 when the gnulib module frexpl should be tested. */
 #undef GNULIB_TEST_FREXPL
 
+/* Define to 1 when the gnulib module lstat should be tested. */
+#undef GNULIB_TEST_LSTAT
+
 /* Define to 1 when the gnulib module mbrtowc should be tested. */
 #undef GNULIB_TEST_MBRTOWC
 
@@ -942,6 +945,10 @@
 
 /* Define as the word index where to find the exponent of 'long double'. */
 #undef LDBL_EXPBIT0_WORD
+
+/* Define to 1 if 'lstat' dereferences a symlink specified with a trailing
+   slash. */
+#undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
 /* Define to a substitute value for mmap()'s MAP_ANONYMOUS flag. */
 #undef MAP_ANONYMOUS
