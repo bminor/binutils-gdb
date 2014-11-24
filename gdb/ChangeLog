@@ -1,3 +1,9 @@
+2014-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.c (print_args): Renamed from print_arg_types.  Print arg
+	number and name if present.  All callers updated.
+	(dump_fn_fieldlists): Fix indentation of args.
+
 2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* MAINTAINERS (Write After Approval): Add myself.
