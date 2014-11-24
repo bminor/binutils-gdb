@@ -1,3 +1,8 @@
+2014-11-24  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* elfnn-aarch64.c (elf_aarch64_compare_mapping): New.
+	(erratum_835769_scan): Sort map list.
+
 2014-11-24  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (plt_stub_pad): Correct.
