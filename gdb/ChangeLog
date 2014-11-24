@@ -1,3 +1,7 @@
+2014-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbtypes.c (resolve_dynamic_type_internal): Reindent the code.
+
 2014-11-24  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>

@@ -1877,31 +1877,31 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
 
   switch (TYPE_CODE (type))
     {
-      case TYPE_CODE_TYPEDEF:
+    case TYPE_CODE_TYPEDEF:
+      resolved_type = copy_type (type);
+      TYPE_TARGET_TYPE (resolved_type)
+	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr,
+					 top_level);
+      break;
+
+    case TYPE_CODE_REF:
+      {
+	CORE_ADDR target_addr = read_memory_typed_address (addr, type);
+
 	resolved_type = copy_type (type);
 	TYPE_TARGET_TYPE (resolved_type)
-	  = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr,
-					   top_level);
+	  = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
+					   target_addr, top_level);
 	break;
+      }
 
-      case TYPE_CODE_REF:
-	{
-	  CORE_ADDR target_addr = read_memory_typed_address (addr, type);
+    case TYPE_CODE_ARRAY:
+      resolved_type = resolve_dynamic_array (type, addr);
+      break;
 
-	  resolved_type = copy_type (type);
-	  TYPE_TARGET_TYPE (resolved_type)
-	    = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
-					     target_addr, top_level);
-	  break;
-	}
-
-      case TYPE_CODE_ARRAY:
-	resolved_type = resolve_dynamic_array (type, addr);
-	break;
-
-      case TYPE_CODE_RANGE:
-	resolved_type = resolve_dynamic_range (type, addr);
-	break;
+    case TYPE_CODE_RANGE:
+      resolved_type = resolve_dynamic_range (type, addr);
+      break;
 
     case TYPE_CODE_UNION:
       resolved_type = resolve_dynamic_union (type, addr);
