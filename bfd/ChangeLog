@@ -1,3 +1,7 @@
+2014-11-24  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (plt_stub_pad): Correct.
+
 2014-11-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_check_relocs): Assert size of
