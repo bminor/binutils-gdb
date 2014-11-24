@@ -1,3 +1,7 @@
+2014-11-24  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (plt_stub_pad): Correct.
+
 2014-11-20  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (group_sections): Init stub14_group_size from

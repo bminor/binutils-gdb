@@ -10209,7 +10209,7 @@ plt_stub_pad (struct ppc_link_hash_table *htab,
   bfd_vma stub_off = stub_entry->stub_sec->size;
 
   if (((stub_off + stub_size - 1) & -stub_align) - (stub_off & -stub_align)
-      > (stub_size & -stub_align))
+      > ((stub_size - 1) & -stub_align))
     return stub_align - (stub_off & (stub_align - 1));
   return 0;
 }
