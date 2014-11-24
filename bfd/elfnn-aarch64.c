@@ -2936,6 +2936,29 @@ aarch64_erratum_sequence (uint32_t insn_1, uint32_t insn_2)
   return FALSE;
 }
 
+/* Used to order a list of mapping symbols by address.  */
+
+static int
+elf_aarch64_compare_mapping (const void *a, const void *b)
+{
+  const elf_aarch64_section_map *amap = (const elf_aarch64_section_map *) a;
+  const elf_aarch64_section_map *bmap = (const elf_aarch64_section_map *) b;
+
+  if (amap->vma > bmap->vma)
+    return 1;
+  else if (amap->vma < bmap->vma)
+    return -1;
+  else if (amap->type > bmap->type)
+    /* Ensure results do not depend on the host qsort for objects with
+       multiple mapping symbols at the same address by sorting on type
+       after vma.  */
+    return 1;
+  else if (amap->type < bmap->type)
+    return -1;
+  else
+    return 0;
+}
+
 static bfd_boolean
 erratum_835769_scan (bfd *input_bfd,
 		     struct bfd_link_info *info,
@@ -2973,6 +2996,10 @@ erratum_835769_scan (bfd *input_bfd,
 	return TRUE;
 
       sec_data = elf_aarch64_section_data (section);
+
+      qsort (sec_data->map, sec_data->mapcount,
+	     sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
+
       for (span = 0; span < sec_data->mapcount; span++)
 	{
 	  unsigned int span_start = sec_data->map[span].vma;
