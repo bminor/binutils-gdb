@@ -1,3 +1,7 @@
+2014-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-dis-evex.c (evex_table): Add vpermi2b, vpermt2b, vpermb,
