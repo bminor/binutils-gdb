@@ -1,3 +1,8 @@
+2014-11-24  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (set_cu_language): Recognize DW_LANG_C11,
+	DW_LANG_C_plus_plus_11, DW_LANG_C_plus_plus_14.
+
 2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.c (nios2_analyze_prologue): Replace restriction
