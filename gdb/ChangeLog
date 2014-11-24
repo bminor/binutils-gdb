@@ -1,5 +1,15 @@
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
+	* configure.ac (AC_CHECK_FUNCS): Remove canonicalize_file_name
+	and realpath.
+	* config.in: Re-generated.
+	* configure: Re-generated.
+	* utils.c (gdb_realpath): Remove code calling realpath,
+	canonicalize_file_name and pathconf.
+	[!_WIN32]: Call canonicalize_file_name.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
 	canonicalize-lgpl.
 	* aclocal.m4: Re-generated.

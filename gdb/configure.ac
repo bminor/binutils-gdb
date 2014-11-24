@@ -1304,7 +1304,7 @@ AC_C_BIGENDIAN
 
 AC_FUNC_MMAP
 AC_FUNC_VFORK
-AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
+AC_CHECK_FUNCS([getrusage getuid getgid \
 		pipe poll pread pread64 pwrite resize_term \
 		sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair \
