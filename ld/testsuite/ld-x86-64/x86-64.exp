@@ -374,6 +374,24 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \
 	] \
+	[list \
+	    "Build plt-main" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+	    "" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
+	[list \
+	    "Build plt-main with PIE" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "-fPIC" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -397,6 +415,53 @@ if { [isnative] && [which $CC] != 0 } {
 	    "-fPIC" \
 	] \
     ]
+
+    if { [istarget "x86_64-*-linux*"] \
+	 && ![istarget "x86_64-*-linux*-gnux32"]} {
+
+	run_cc_link_tests [list \
+	    [list \
+		"Build plt-main with -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt" \
+		"" \
+		{ plt-main5.c } \
+		{{objdump {-drw} plt-main-bnd.dd}} \
+		"plt-main-bnd" \
+	    ] \
+	    [list \
+		"Build plt-main with PIE and -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie" \
+		"-fPIC" \
+		{ plt-main5.c } \
+		{{objdump {-drw} plt-main-bnd.dd}} \
+		"plt-main-pie-bnd" \
+	    ] \
+	]
+
+	run_ld_link_exec_tests [] [list \
+	    [list \
+		"Run plt-main with -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-bnd" \
+		"plt-main.out" \
+	    ] \
+	    [list \
+		"Run plt-main with PIE and -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-pie-bnd" \
+		"plt-main.out" \
+		"-fPIC" \
+	    ] \
+	]
+    }
 }
 
 if { ![istarget "x86_64-*-linux*"]} {

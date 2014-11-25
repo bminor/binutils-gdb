@@ -62,9 +62,6 @@ static int no_toc_opt = 0;
 /* Whether to sort input toc and got sections.  */
 static int no_toc_sort = 0;
 
-/* Set if individual PLT call stubs should be aligned.  */
-static int plt_stub_align = 0;
-
 static asection *toc_section = 0;
 
 /* This is called before the input files are opened.  We create a new
@@ -377,7 +374,9 @@ ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
 						 stub_sec_name, flags);
   if (stub_sec == NULL
       || !bfd_set_section_alignment (stub_file->the_bfd, stub_sec,
-				     plt_stub_align > 5 ? plt_stub_align : 5))
+				     (params.plt_stub_align > 5
+				      ? params.plt_stub_align
+				      : 5)))
     goto err_ret;
 
   output_section = input_section->output_section;
@@ -800,14 +799,14 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 	  unsigned long val = strtoul (optarg, &end, 0);
 	  if (*end || val > 8)
 	    einfo (_("%P%F: invalid --plt-align `%s'\''\n"), optarg);
-	  plt_stub_align = val;
+	  params.plt_stub_align = val;
 	}
       else
-	plt_stub_align = 5;
+	params.plt_stub_align = 5;
       break;
 
     case OPTION_NO_PLT_ALIGN:
-      plt_stub_align = 0;
+      params.plt_stub_align = 0;
       break;
 
     case OPTION_STUBSYMS:

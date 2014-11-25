@@ -1793,36 +1793,23 @@ int
 read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 	     enum bfd_endian byte_order, gdb_byte **buffer, int *bytes_read)
 {
-  int found_nul;		/* Non-zero if we found the nul char.  */
   int errcode;			/* Errno returned from bad reads.  */
   unsigned int nfetch;		/* Chars to fetch / chars fetched.  */
-  unsigned int chunksize;	/* Size of each fetch, in chars.  */
   gdb_byte *bufptr;		/* Pointer to next available byte in
 				   buffer.  */
-  gdb_byte *limit;		/* First location past end of fetch buffer.  */
   struct cleanup *old_chain = NULL;	/* Top of the old cleanup chain.  */
-
-  /* Decide how large of chunks to try to read in one operation.  This
-     is also pretty simple.  If LEN >= zero, then we want fetchlimit chars,
-     so we might as well read them all in one operation.  If LEN is -1, we
-     are looking for a NUL terminator to end the fetching, so we might as
-     well read in blocks that are large enough to be efficient, but not so
-     large as to be slow if fetchlimit happens to be large.  So we choose the
-     minimum of 8 and fetchlimit.  We used to use 200 instead of 8 but
-     200 is way too big for remote debugging over a serial line.  */
-
-  chunksize = (len == -1 ? min (8, fetchlimit) : fetchlimit);
 
   /* Loop until we either have all the characters, or we encounter
      some error, such as bumping into the end of the address space.  */
 
-  found_nul = 0;
   *buffer = NULL;
 
   old_chain = make_cleanup (free_current_contents, buffer);
 
   if (len > 0)
     {
+      /* We want fetchlimit chars, so we might as well read them all in
+	 one operation.  */
       unsigned int fetchlen = min (len, fetchlimit);
 
       *buffer = (gdb_byte *) xmalloc (fetchlen * width);
@@ -1836,6 +1823,18 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
   else if (len == -1)
     {
       unsigned long bufsize = 0;
+      unsigned int chunksize;	/* Size of each fetch, in chars.  */
+      int found_nul;		/* Non-zero if we found the nul char.  */
+      gdb_byte *limit;		/* First location past end of fetch buffer.  */
+
+      found_nul = 0;
+      /* We are looking for a NUL terminator to end the fetching, so we
+	 might as well read in blocks that are large enough to be efficient,
+	 but not so large as to be slow if fetchlimit happens to be large.
+	 So we choose the minimum of 8 and fetchlimit.  We used to use 200
+	 instead of 8 but 200 is way too big for remote debugging over a
+	  serial line.  */
+      chunksize = min (8, fetchlimit);
 
       do
 	{

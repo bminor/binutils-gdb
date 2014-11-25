@@ -218,9 +218,7 @@ cp_is_anonymous (const char *namespace)
    names.  This makes sure that names get looked for in all namespaces
    that are in scope.  NAME is the natural name of the symbol that
    we're looking for, BLOCK is the block that we're searching within,
-   DOMAIN says what kind of symbols we're looking for, and if SYMTAB
-   is non-NULL, we should store the symtab where we found the symbol
-   in it.  */
+   DOMAIN says what kind of symbols we're looking for.  */
 
 struct symbol *
 cp_lookup_symbol_nonlocal (const char *name,

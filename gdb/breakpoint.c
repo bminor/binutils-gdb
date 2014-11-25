@@ -9293,6 +9293,20 @@ bp_loc_is_permanent (struct bp_location *loc)
 
   gdb_assert (loc != NULL);
 
+  /* bp_call_dummy breakpoint locations are usually memory locations
+     where GDB just wrote a breakpoint instruction, making it look
+     as if there is a permanent breakpoint at that location.  Considering
+     it permanent makes GDB rely on that breakpoint instruction to stop
+     the program, thus removing the need to insert its own breakpoint
+     there.  This is normally expected to work, except that some versions
+     of QEMU (Eg: QEMU 2.0.0 for SPARC) just report a fatal problem (Trap
+     0x02 while interrupts disabled, Error state) instead of reporting
+     a SIGTRAP.  QEMU should probably be fixed, but in the interest of
+     compatibility with versions that behave this way, we always consider
+     bp_call_dummy breakpoint locations as non-permanent.  */
+  if (loc->owner->type == bp_call_dummy)
+    return 0;
+
   addr = loc->address;
   bpoint = gdbarch_breakpoint_from_pc (loc->gdbarch, &addr, &len);
 

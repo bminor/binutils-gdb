@@ -1,3 +1,66 @@
+2014-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbtypes.c (resolve_dynamic_type_internal): Reindent the code.
+
+2014-11-24  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>
+	* gdb/gnu-nat.c (inf_validate_procinfo): Multiply the number of
+	elements pi_len by the size of the elements before calling
+	vm_deallocate.
+	(inf_validate_task_sc): Likewise, and properly deallocate the
+	noise array.
+
+2014-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.c (print_args): Renamed from print_arg_types.  Print arg
+	number and name if present.  All callers updated.
+	(dump_fn_fieldlists): Fix indentation of args.
+
+2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
+2014-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (bp_loc_is_permanent): Return 0 if LOC corresponds
+	to a bp_call_dummy breakpoint type.
+
+2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (tui_initialize_win): Specify SA_RESTART when
+	registering the signal handler.
+
+2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* event-top.h (call_stdin_event_handler_again_p): Declare.
+	* event-top.c (call_stdin_event_handler_again_p): Define.
+	(stdin_event_handler): Use it.
+	* tui/tui-io.c (tui_getc): Prepare to call the stdin event
+	handler again if there is pending input following a
+	start sequence.
+
+2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>
+	* linux-fork.c (checkpoint_command): Print index of new
+	checkpoint in response message.
+
+2014-11-23  Yao Qi  <yao@codesourcery.com>
+
+	* valprint.c (read_string): Move local variables 'found_nul',
+	'chunksize' and 'limit' to inner scope.  Update comments.
+
+2014-11-22  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_symbol_in_objfile_from_linkage_name): Improve
+	function comment.
+	(search_symbols): Fix comments and whitespace.
+
+2014-11-22  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): Fix comment.
+
 2014-11-21  Doug Evans  <dje@google.com>
 
 	* psymtab.c (psymtab_search_name): Fix whitespace.

@@ -1,3 +1,58 @@
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_got_plt_entry): New.
+	(elf_i386_pic_got_plt_entry): Likewise.
+	(elf_i386_link_hash_entry): Add plt_got.
+	(elf_i386_link_hash_table): Likewise.
+	(elf_i386_link_hash_newfunc): Initialize plt_got.offset to -1.
+	(elf_i386_get_local_sym_hash): Likewise.
+	(elf_i386_check_relocs): Create the GOT PLT if there are both
+	PLT and GOT references when the regular PLT is used.
+	(elf_i386_allocate_dynrelocs): Use the GOT PLT if there are
+	both PLT and GOT references unless pointer equality is needed.
+	(elf_i386_relocate_section): Also check the GOT PLT when
+	resolving R_386_PLT32.
+	(elf_i386_finish_dynamic_symbol): Use the GOT PLT if it is
+	available.
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add plt_got.
+	(elf_x86_64_link_hash_table): Likewise.
+	(elf_x86_64_link_hash_newfunc): Initialize plt_got.offset to -1.
+	(elf_x86_64_get_local_sym_hash): Likewise.
+	(elf_x86_64_check_relocs): Create the GOT PLT if there are both
+	PLT and GOT references when the regular PLT is used.
+	(elf_x86_64_allocate_dynrelocs): Use the GOT PLT if there are
+	both PLT and GOT references unless pointer equality is needed.
+	(elf_x86_64_relocate_section): Also check the GOT PLT when
+	resolving R_X86_64_PLT32.
+	(elf_x86_64_finish_dynamic_symbol): Use the GOT PLT if it is
+	available.
+
+2014-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2014-11-24  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* elfnn-aarch64.c (elf_aarch64_compare_mapping): New.
+	(erratum_835769_scan): Sort map list.
+
+2014-11-24  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (plt_stub_pad): Correct.
+
+2014-11-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Assert size of
+	elf_x86_64_bnd_plt2_entry and elf_x86_64_legacy_plt2_entry.
+	(elf_x86_64_allocate_dynrelocs): Don't assert size of
+	elf_x86_64_bnd_plt2_entry and elf_x86_64_legacy_plt2_entry.
+
+2014-11-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Check
+	branch displacement overflow in PLT entry.
+
 2014-11-21  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
