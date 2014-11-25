@@ -1,5 +1,11 @@
 2014-11-25  Cary Coutant  <ccoutant@google.com>
 
+	* binary.cc (Binary_to_elf::sized_convert): Add size to _start symbol.
+	(Binary_to_elf::write_symbol): Add st_size parameter.
+	* binary.h (Binary_to_elf::write_symbol): Add st_size parameter.
+
+2014-11-25  Cary Coutant  <ccoutant@google.com>
+
 	PR gold/17639
 	* object.cc (Sized_relobj_file): Initialize is_deferred_layout_.
 	(Sized_relobj_file::do_layout): Handle deferred sections properly
