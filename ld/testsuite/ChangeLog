@@ -1,3 +1,12 @@
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Add run-time relocation tests for plt-main.
+	* ld-i386/plt-main.rd: New file.
+	* ld-x86-64/plt-main-bnd.dd: Likewise.
+	* ld-x86-64/plt-main.rd: Likewise.
+	* ld-x86-64/x86-64.exp: Add run-time relocation tests for
+	plt-main.
+
 2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/plt-lib.c: New file.

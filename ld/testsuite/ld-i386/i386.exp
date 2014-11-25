@@ -309,6 +309,24 @@ if { [isnative]
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \
 	] \
+	[list \
+	    "Build plt-main" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+	    "" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
+	[list \
+	    "Build plt-main with PIE" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "-fPIC" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \

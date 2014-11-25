@@ -1,3 +1,33 @@
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_got_plt_entry): New.
+	(elf_i386_pic_got_plt_entry): Likewise.
+	(elf_i386_link_hash_entry): Add plt_got.
+	(elf_i386_link_hash_table): Likewise.
+	(elf_i386_link_hash_newfunc): Initialize plt_got.offset to -1.
+	(elf_i386_get_local_sym_hash): Likewise.
+	(elf_i386_check_relocs): Create the GOT PLT if there are both
+	PLT and GOT references when the regular PLT is used.
+	(elf_i386_allocate_dynrelocs): Use the GOT PLT if there are
+	both PLT and GOT references unless pointer equality is needed.
+	(elf_i386_relocate_section): Also check the GOT PLT when
+	resolving R_386_PLT32.
+	(elf_i386_finish_dynamic_symbol): Use the GOT PLT if it is
+	available.
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add plt_got.
+	(elf_x86_64_link_hash_table): Likewise.
+	(elf_x86_64_link_hash_newfunc): Initialize plt_got.offset to -1.
+	(elf_x86_64_get_local_sym_hash): Likewise.
+	(elf_x86_64_check_relocs): Create the GOT PLT if there are both
+	PLT and GOT references when the regular PLT is used.
+	(elf_x86_64_allocate_dynrelocs): Use the GOT PLT if there are
+	both PLT and GOT references unless pointer equality is needed.
+	(elf_x86_64_relocate_section): Also check the GOT PLT when
+	resolving R_X86_64_PLT32.
+	(elf_x86_64_finish_dynamic_symbol): Use the GOT PLT if it is
+	available.
+
 2014-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
