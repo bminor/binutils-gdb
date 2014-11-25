@@ -1,3 +1,7 @@
+2014-11-25  Max Filippov  <jcmvbkbc@gmail.com>
+	* gas/xtensa/trampoline.d: Add expected output for branches.
+	* gas/xtensa/trampoline.s: Add test case for branches.
+
 2014-11-21  Terry Guo  <terry.guo@arm.com>
 
 	* gas/arm/attr-arch-assumption.d: New file.
