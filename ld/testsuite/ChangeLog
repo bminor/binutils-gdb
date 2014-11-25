@@ -1,5 +1,16 @@
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-alpha/tlsbin.dd: Updated for secureplt.
+	* ld-alpha/tlsbin.rd: Likewise.
+	* ld-alpha/tlsbin.sd: Likewise.
+	* ld-alpha/tlsbinr.dd: Likewise.
+	* ld-alpha/tlsbinr.rd: Likewise.
+	* ld-alpha/tlspic.dd: Likewise.
+	* ld-alpha/tlspic.rd: Likewise.
+	* ld-alpha/tlspic.sd: Likewise.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/16496
 	* ld-cris/weakref3.d: Add symbol version string to versioned
 	symbol names in dynamic relocation.
