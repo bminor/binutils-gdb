@@ -43,6 +43,7 @@
 #define bfd_pef_find_nearest_line                   _bfd_nosymbols_find_nearest_line
 #define bfd_pef_find_line                           _bfd_nosymbols_find_line
 #define bfd_pef_find_inliner_info                   _bfd_nosymbols_find_inliner_info
+#define bfd_pef_get_symbol_version_string	    _bfd_nosymbols_get_symbol_version_string
 #define bfd_pef_bfd_make_debug_symbol               _bfd_nosymbols_bfd_make_debug_symbol
 #define bfd_pef_read_minisymbols                    _bfd_generic_read_minisymbols
 #define bfd_pef_minisymbol_to_symbol                _bfd_generic_minisymbol_to_symbol

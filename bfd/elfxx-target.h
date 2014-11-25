@@ -66,6 +66,10 @@
 #ifndef bfd_elfNN_get_symbol_info
 #define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
 #endif
+#ifndef bfd_elfNN_get_symbol_version_string
+#define bfd_elfNN_get_symbol_version_string \
+  _bfd_elf_get_symbol_version_string
+#endif
 #define bfd_elfNN_canonicalize_symtab	_bfd_elf_canonicalize_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
 #define bfd_elfNN_make_empty_symbol	_bfd_elf_make_empty_symbol

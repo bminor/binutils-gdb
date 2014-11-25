@@ -353,6 +353,8 @@ extern void coff_print_symbol
   (bfd *, void * filep, asymbol *, bfd_print_symbol_type);
 extern void coff_get_symbol_info
   (bfd *, asymbol *, symbol_info *ret);
+#define coff_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
 extern bfd_boolean _bfd_coff_is_local_label_name
   (bfd *, const char *);
 extern asymbol *coff_bfd_make_debug_symbol

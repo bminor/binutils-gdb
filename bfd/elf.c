@@ -1425,8 +1425,8 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 /* Get version string.  */
 
 const char *
-bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
-				   bfd_boolean *hidden)
+_bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
+				    bfd_boolean *hidden)
 {
   const char *version_string = NULL;
   if (elf_dynversym (abfd) != 0
@@ -1522,9 +1522,9 @@ bfd_elf_print_symbol (bfd *abfd,
 	bfd_fprintf_vma (abfd, file, val);
 
 	/* If we have version information, print it.  */
-	version_string = bfd_elf_get_symbol_version_string (abfd,
-							    symbol,
-							    &hidden);
+	version_string = _bfd_elf_get_symbol_version_string (abfd,
+							     symbol,
+							     &hidden);
 	if (version_string)
 	  {
 	    if (!hidden)

@@ -3204,6 +3204,9 @@ mmo_write_object_contents (bfd *abfd)
 #define mmo_bfd_is_target_special_symbol  \
   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 
+#define mmo_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
+
 /* Is this one really used or defined by anyone?  */
 #define mmo_get_lineno _bfd_nosymbols_get_lineno
 

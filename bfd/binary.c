@@ -190,6 +190,8 @@ binary_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 
 #define binary_make_empty_symbol  _bfd_generic_make_empty_symbol
 #define binary_print_symbol       _bfd_nosymbols_print_symbol
+#define binary_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
 
 /* Get information about a symbol.  */
 

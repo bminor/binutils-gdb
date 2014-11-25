@@ -811,6 +811,7 @@ versados_canonicalize_reloc (bfd *abfd,
 #define versados_find_nearest_line                    _bfd_nosymbols_find_nearest_line
 #define versados_find_line                            _bfd_nosymbols_find_line
 #define versados_find_inliner_info                    _bfd_nosymbols_find_inliner_info
+#define versados_get_symbol_version_string	      _bfd_nosymbols_get_symbol_version_string
 #define versados_make_empty_symbol                    _bfd_generic_make_empty_symbol
 #define versados_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
 #define versados_read_minisymbols                     _bfd_generic_read_minisymbols

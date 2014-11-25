@@ -1375,6 +1375,7 @@ b_out_bfd_get_relocated_section_contents (bfd *output_bfd,
 /* Build the transfer vectors for Big and Little-Endian B.OUT files.  */
 
 #define aout_32_find_line                      _bfd_nosymbols_find_line
+#define aout_32_get_symbol_version_string      _bfd_nosymbols_get_symbol_version_string
 #define aout_32_bfd_make_debug_symbol          _bfd_nosymbols_bfd_make_debug_symbol
 #define aout_32_close_and_cleanup              aout_32_bfd_free_cached_info
 #define b_out_bfd_link_hash_table_create       _bfd_generic_link_hash_table_create

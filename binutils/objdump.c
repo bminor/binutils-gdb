@@ -808,9 +808,7 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
 	name = alloc;
     }
 
-  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    version_string = bfd_elf_get_symbol_version_string (abfd, sym,
-							&hidden);
+  version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
 
   if (bfd_is_und_section (bfd_get_section (sym)))
     hidden = TRUE;

@@ -1,5 +1,11 @@
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* objdump.c (objdump_print_symname): Replace
+	bfd_elf_get_symbol_version_string with
+	bfd_get_symbol_version_string.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/16496
 	* objdump.c (objdump_print_symname): Call
 	bfd_elf_get_symbol_version_string to get ELF symbol version

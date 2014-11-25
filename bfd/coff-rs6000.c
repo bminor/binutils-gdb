@@ -4008,6 +4008,8 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 #define _bfd_xcoff_make_empty_symbol coff_make_empty_symbol
 #define _bfd_xcoff_print_symbol coff_print_symbol
 #define _bfd_xcoff_get_symbol_info coff_get_symbol_info
+#define _bfd_xcoff_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
 #define _bfd_xcoff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
 #define _bfd_xcoff_bfd_is_target_special_symbol \
   coff_bfd_is_target_special_symbol

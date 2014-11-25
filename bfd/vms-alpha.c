@@ -9191,6 +9191,9 @@ bfd_vms_get_data (bfd *abfd)
    ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define alpha_vms_print_symbol             vms_print_symbol
 #define alpha_vms_get_symbol_info          vms_get_symbol_info
+#define alpha_vms_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
+
 #define alpha_vms_read_minisymbols         _bfd_generic_read_minisymbols
 #define alpha_vms_minisymbol_to_symbol     _bfd_generic_minisymbol_to_symbol
 #define alpha_vms_get_lineno               _bfd_nosymbols_get_lineno

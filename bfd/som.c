@@ -6718,6 +6718,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 }
 
 #define som_find_line			        _bfd_nosymbols_find_line
+#define som_get_symbol_version_string		_bfd_nosymbols_get_symbol_version_string
 #define	som_close_and_cleanup		        som_bfd_free_cached_info
 #define som_read_ar_hdr			        _bfd_generic_read_ar_hdr
 #define som_write_ar_hdr		        _bfd_generic_write_ar_hdr
