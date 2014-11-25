@@ -2399,6 +2399,14 @@ class Stub_control
   output_section()
   { return output_section_; }
 
+  void
+  set_output_and_owner(Output_section* o,
+		       const Output_section::Input_section* i)
+  {
+    this->output_section_ = o;
+    this->owner_ = i;
+  }
+
  private:
   typedef enum
   {
@@ -2515,6 +2523,7 @@ Target_powerpc<size, big_endian>::group_sections(Layout* layout,
 		{
 		  stub_table->init(stub_control.owner(),
 				   stub_control.output_section());
+		  stub_control.set_output_and_owner(*o, &*i);
 		  stub_table = NULL;
 		}
 	      if (stub_table == NULL)
