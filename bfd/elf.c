@@ -1422,6 +1422,53 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
   return FALSE;
 }
 
+/* Get version string.  */
+
+const char *
+_bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
+				    bfd_boolean *hidden)
+{
+  const char *version_string = NULL;
+  if (elf_dynversym (abfd) != 0
+      && (elf_dynverdef (abfd) != 0 || elf_dynverref (abfd) != 0))
+    {
+      unsigned int vernum = ((elf_symbol_type *) symbol)->version;
+
+      *hidden = (vernum & VERSYM_HIDDEN) != 0;
+      vernum &= VERSYM_VERSION;
+
+      if (vernum == 0)
+	version_string = "";
+      else if (vernum == 1)
+	version_string = "Base";
+      else if (vernum <= elf_tdata (abfd)->cverdefs)
+	version_string =
+	  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+      else
+	{
+	  Elf_Internal_Verneed *t;
+
+	  version_string = "";
+	  for (t = elf_tdata (abfd)->verref;
+	       t != NULL;
+	       t = t->vn_nextref)
+	    {
+	      Elf_Internal_Vernaux *a;
+
+	      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		{
+		  if (a->vna_other == vernum)
+		    {
+		      version_string = a->vna_nodename;
+		      break;
+		    }
+		}
+	    }
+	}
+    }
+  return version_string;
+}
+
 /* Display ELF-specific fields of a symbol.  */
 
 void
@@ -1448,6 +1495,8 @@ bfd_elf_print_symbol (bfd *abfd,
 	const struct elf_backend_data *bed;
 	unsigned char st_other;
 	bfd_vma val;
+	const char *version_string;
+	bfd_boolean hidden;
 
 	section_name = symbol->section ? symbol->section->name : "(*none*)";
 
@@ -1473,45 +1522,12 @@ bfd_elf_print_symbol (bfd *abfd,
 	bfd_fprintf_vma (abfd, file, val);
 
 	/* If we have version information, print it.  */
-	if (elf_dynversym (abfd) != 0
-	    && (elf_dynverdef (abfd) != 0
-		|| elf_dynverref (abfd) != 0))
+	version_string = _bfd_elf_get_symbol_version_string (abfd,
+							     symbol,
+							     &hidden);
+	if (version_string)
 	  {
-	    unsigned int vernum;
-	    const char *version_string;
-
-	    vernum = ((elf_symbol_type *) symbol)->version & VERSYM_VERSION;
-
-	    if (vernum == 0)
-	      version_string = "";
-	    else if (vernum == 1)
-	      version_string = "Base";
-	    else if (vernum <= elf_tdata (abfd)->cverdefs)
-	      version_string =
-		elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
-	    else
-	      {
-		Elf_Internal_Verneed *t;
-
-		version_string = "";
-		for (t = elf_tdata (abfd)->verref;
-		     t != NULL;
-		     t = t->vn_nextref)
-		  {
-		    Elf_Internal_Vernaux *a;
-
-		    for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
-		      {
-			if (a->vna_other == vernum)
-			  {
-			    version_string = a->vna_nodename;
-			    break;
-			  }
-		      }
-		  }
-	      }
-
-	    if ((((elf_symbol_type *) symbol)->version & VERSYM_HIDDEN) == 0)
+	    if (!hidden)
 	      fprintf (file, "  %-11s", version_string);
 	    else
 	      {

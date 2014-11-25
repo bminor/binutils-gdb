@@ -447,6 +447,7 @@ aout_adobe_sizeof_headers (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 /* Build the transfer vector for Adobe A.Out files.  */
 
 #define aout_32_find_line			    _bfd_nosymbols_find_line
+#define aout_32_get_symbol_version_string	    _bfd_nosymbols_get_symbol_version_string
 #define aout_32_bfd_make_debug_symbol		    _bfd_nosymbols_bfd_make_debug_symbol
 #define aout_32_bfd_reloc_type_lookup		    _bfd_norelocs_bfd_reloc_type_lookup
 #define aout_32_bfd_reloc_name_lookup		    _bfd_norelocs_bfd_reloc_name_lookup

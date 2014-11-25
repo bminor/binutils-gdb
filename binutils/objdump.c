@@ -795,7 +795,8 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
 		       asymbol *sym)
 {
   char *alloc;
-  const char *name;
+  const char *name, *version_string = NULL;
+  bfd_boolean hidden = FALSE;
 
   alloc = NULL;
   name = bfd_asymbol_name (sym);
@@ -807,10 +808,24 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
 	name = alloc;
     }
 
+  version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
+
+  if (bfd_is_und_section (bfd_get_section (sym)))
+    hidden = TRUE;
+
   if (inf != NULL)
-    (*inf->fprintf_func) (inf->stream, "%s", name);
+    {
+      (*inf->fprintf_func) (inf->stream, "%s", name);
+      if (version_string && *version_string != '\0')
+	(*inf->fprintf_func) (inf->stream, hidden ? "@%s" : "@@%s",
+			      version_string);
+    }
   else
-    printf ("%s", name);
+    {
+      printf ("%s", name);
+      if (version_string && *version_string != '\0')
+	printf (hidden ? "@%s" : "@@%s", version_string);
+    }
 
   if (alloc != NULL)
     free (alloc);

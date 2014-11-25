@@ -3828,6 +3828,8 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define ieee_update_armap_timestamp bfd_true
 #define ieee_get_elt_at_index _bfd_generic_get_elt_at_index
 
+#define ieee_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
 #define ieee_bfd_is_target_special_symbol  \
   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define ieee_bfd_is_local_label_name bfd_generic_is_local_label_name

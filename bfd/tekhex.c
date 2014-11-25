@@ -957,6 +957,7 @@ tekhex_print_symbol (bfd *abfd,
 #define tekhex_find_nearest_line                    _bfd_nosymbols_find_nearest_line
 #define tekhex_find_line                            _bfd_nosymbols_find_line
 #define tekhex_find_inliner_info                    _bfd_nosymbols_find_inliner_info
+#define tekhex_get_symbol_version_string	    _bfd_nosymbols_get_symbol_version_string
 #define tekhex_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
 #define tekhex_read_minisymbols                     _bfd_generic_read_minisymbols
 #define tekhex_minisymbol_to_symbol                 _bfd_generic_minisymbol_to_symbol

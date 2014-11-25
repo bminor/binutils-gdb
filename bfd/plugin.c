@@ -85,6 +85,7 @@ dlerror (void)
 #define bfd_plugin_find_nearest_line                  _bfd_nosymbols_find_nearest_line
 #define bfd_plugin_find_line                          _bfd_nosymbols_find_line
 #define bfd_plugin_find_inliner_info                  _bfd_nosymbols_find_inliner_info
+#define bfd_plugin_get_symbol_version_string	      _bfd_nosymbols_get_symbol_version_string
 #define bfd_plugin_bfd_make_debug_symbol              _bfd_nosymbols_bfd_make_debug_symbol
 #define bfd_plugin_read_minisymbols                   _bfd_generic_read_minisymbols
 #define bfd_plugin_minisymbol_to_symbol               _bfd_generic_minisymbol_to_symbol

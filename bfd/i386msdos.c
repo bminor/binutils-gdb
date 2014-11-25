@@ -162,6 +162,8 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_canonicalize_symtab _bfd_nosymbols_canonicalize_symtab
 #define msdos_print_symbol _bfd_nosymbols_print_symbol
 #define msdos_get_symbol_info _bfd_nosymbols_get_symbol_info
+#define msdos_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
 #define msdos_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define msdos_find_line _bfd_nosymbols_find_line
 #define msdos_find_inliner_info _bfd_nosymbols_find_inliner_info

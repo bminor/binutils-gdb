@@ -1,5 +1,60 @@
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Use
+	NAME##_get_symbol_version_string.
+	(bfd_get_symbol_version_string): New.
+	* aout-adobe.c (aout_32_get_symbol_version_string): Define using
+	_bfd_nosymbols define.
+	* aout-target.h (MY_get_symbol_version_string): Likewise.
+	* aout-tic30.c (MY_get_symbol_version_string): Likewise.
+	* binary.c (binary_get_symbol_version_string): Likewise.
+	* bout.c (aout_32_get_symbol_version_string): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_get_symbol_version_string): Likewise.
+	* i386msdos.c (msdos_get_symbol_version_string): Likewise.
+	* i386os9k.c (aout_32_get_symbol_version_string): Likewise.
+	* ieee.c (ieee_get_symbol_version_string): Likewise.
+	* ihex.c (ihex_get_symbol_version_string): Likewise.
+	* libecoff.h (_bfd_ecoff_get_symbol_version_string): Likewise.
+	* mach-o-target.c (bfd_mach_o_get_symbol_version_string): Likewise.
+	* mmo.c (mmo_get_symbol_version_string): Likewise.
+	* nlm-target.h (nlm_get_symbol_version_string): Likewise.
+	* oasys.c (oasys_get_symbol_version_string): Likewise.
+	* pef.c (bfd_pef_get_symbol_version_string): Likewise.
+	* plugin.c (bfd_plugin_get_symbol_version_string): Likewise.
+	* ppcboot.c (ppcboot_get_symbol_version_string): Likewise.
+	* som.c (som_get_symbol_version_string): Likewise.
+	* srec.c (srec_get_symbol_version_string): Likewise.
+	* tekhex.c (tekhex_get_symbol_version_string): Likewise.
+	* versados.c (versados_get_symbol_version_string): Likewise.
+	* vms-alpha.c (alpha_vms_get_symbol_version_string): Likewise.
+	* xsym.c (bfd_sym_get_symbol_version_string): Likewise.
+
+	* coff64-rs6000.c (rs6000_xcoff64_vec): Use
+	coff_get_symbol_version_string.
+	(rs6000_xcoff64_aix_vec): Likewise.
+
+	* elf-bfd.h (bfd_elf_get_symbol_version_string): Renamed to ...
+	(_bfd_elf_get_symbol_version_string): This.
+	* elf.c: Likewise.
+	(bfd_elf_print_symbol): Updated.
+	* elfxx-target.h (bfd_elfNN_get_symbol_version_string): Define.
+
+	* libbfd-in.h (_bfd_nosymbols_get_symbol_version_string): Define.
+	* libcoff-in.h (coff_get_symbol_version_string): Likewise.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+	* libcoff.h: Likewise.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16496
+	* elf-bfd.h (bfd_elf_get_symbol_version_string): New.
+	* elf.c (bfd_elf_get_symbol_version_string): New.  Extracted
+	from bfd_elf_print_symbol.
+	(bfd_elf_print_symbol): Use it.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_got_plt_entry): New.
 	(elf_i386_pic_got_plt_entry): Likewise.
 	(elf_i386_link_hash_entry): Add plt_got.
