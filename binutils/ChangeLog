@@ -1,3 +1,20 @@
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16496
+	* objdump.c (objdump_print_symname): Call
+	bfd_elf_get_symbol_version_string to get ELF symbol version
+	string.  Append version string if needed.
+
+	* readelf.c (versioned_symbol_info): New enum.
+	(get_symbol_version_string): New.  Extracted from
+	process_symbol_table.
+	(dump_relocations): Add a new argument to indicate if dynamic
+	symbol table is used.  Use get_symbol_version_string to get
+	symbol version string for dynamic symbol.  Append version string
+	if needed.
+	(process_relocs): Updated dump_relocations call.
+	(process_symbol_table): Use get_symbol_version_string.
+
 2014-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

@@ -1,5 +1,13 @@
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/16496
+	* elf-bfd.h (bfd_elf_get_symbol_version_string): New.
+	* elf.c (bfd_elf_get_symbol_version_string): New.  Extracted
+	from bfd_elf_print_symbol.
+	(bfd_elf_print_symbol): Use it.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_got_plt_entry): New.
 	(elf_i386_pic_got_plt_entry): Likewise.
 	(elf_i386_link_hash_entry): Add plt_got.

@@ -1,5 +1,21 @@
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/16496
+	* ld-cris/weakref3.d: Add symbol version string to versioned
+	symbol names in dynamic relocation.
+	* ld-cris/weakref4.d: Likewise.
+	* ld-elfvers/vers24.rd: Likewise.
+
+	* ld-elf/pr16496a.c: New file.
+	* ld-elf/pr16496a.map: Likewise.
+	* ld-elf/pr16496b.c: Likewise.
+	* ld-elf/pr16496b.od: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add libpr16496a.so and
+	libpr16496b.so tests.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-i386/i386.exp: Add run-time relocation tests for plt-main.
 	* ld-i386/plt-main.rd: New file.
 	* ld-x86-64/plt-main-bnd.dd: Likewise.
