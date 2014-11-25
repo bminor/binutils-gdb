@@ -1,3 +1,12 @@
+2014-11-25  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17639
+	* object.cc (Sized_relobj_file): Initialize is_deferred_layout_.
+	(Sized_relobj_file::do_layout): Handle deferred sections properly
+	during GC pass 1. Don't add reloc sections to deferred list twice.
+	* object.h (Sized_relobj_file::is_deferred_layout): New function.
+	(Sized_relobj_file::is_deferred_layout_): New data member.
+
 2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/17619
