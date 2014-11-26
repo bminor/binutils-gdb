@@ -1,5 +1,11 @@
 2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* nios2-tdep.c (nios2_analyze_prologue): Replace restriction
+	that there can be only one stack adjustment in the prologue
+	with tests to detect specific disallowed stack adjustments.
+
+2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* nios2-tdep.c (nios2_in_epilogue_p): Handle multiple stack
 	adjustments.
 

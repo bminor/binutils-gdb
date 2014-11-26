@@ -842,6 +842,11 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	      cache->reg_saved[NIOS2_SP_REGNUM].addr = -4;
 	    }
 
+	  else if (rc == NIOS2_SP_REGNUM && ra == NIOS2_FP_REGNUM)
+	    /* This is setting SP from FP.  This only happens in the
+	       function epilogue.  */
+	    break;
+
 	  else if (rc != 0)
 	    {
 	      if (value[rb].reg == 0)
@@ -853,13 +858,21 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	      value[rc].offset = value[ra].offset + value[rb].offset;
 	    }
 
-	  prologue_end = pc;
+	  /* The add/move is only considered a prologue instruction
+	     if the destination is SP or FP.  */
+	  if (rc == NIOS2_SP_REGNUM || rc == NIOS2_FP_REGNUM)
+	    prologue_end = pc;
 	}
       
       else if (nios2_match_sub (insn, op, mach, &ra, &rb, &rc))
 	{
 	  /* SUB   rc, ra, rb */
-	  if (rc != 0)
+	  if (rc == NIOS2_SP_REGNUM && rb == NIOS2_SP_REGNUM
+	      && value[rc].reg != 0)
+	    /* If we are decrementing the SP by a non-constant amount,
+	       this is alloca, not part of the prologue.  */
+	    break;
+	  else if (rc != 0)
 	    {
 	      if (value[rb].reg == 0)
 		value[rc].reg = value[ra].reg;
@@ -873,12 +886,13 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	{
 	  /* ADDI    rb, ra, imm */
 
-	  /* The first stack adjustment is part of the prologue.
-	     Any subsequent stack adjustments are either down to
-	     alloca or the epilogue so stop analysing when we hit
-	     them.  */
+	  /* A positive stack adjustment has to be part of the epilogue.  */
 	  if (rb == NIOS2_SP_REGNUM
-	      && (value[rb].offset != 0 || value[ra].reg != NIOS2_SP_REGNUM))
+	      && (imm > 0 || value[ra].reg != NIOS2_SP_REGNUM))
+	    break;
+
+	  /* Likewise restoring SP from FP.  */
+	  else if (rb == NIOS2_SP_REGNUM && ra == NIOS2_FP_REGNUM)
 	    break;
 
 	  if (rb != 0)
@@ -887,7 +901,10 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	      value[rb].offset = value[ra].offset + imm;
 	    }
 
-	  prologue_end = pc;
+	  /* The add is only considered a prologue instruction
+	     if the destination is SP or FP.  */
+	  if (rb == NIOS2_SP_REGNUM || rb == NIOS2_FP_REGNUM)
+	    prologue_end = pc;
 	}
 
       else if (nios2_match_orhi (insn, op, mach, &ra, &rb, &uimm))
