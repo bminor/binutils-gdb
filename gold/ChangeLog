@@ -1,5 +1,37 @@
 2014-11-26  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (struct Stub_table_owner): New.
+	(Powerpc_relobj): Rename stub_table_ to stub_table_index_, an
+	unsigned int vector.  Update all references.
+	(powerpc_relobj::set_stub_table): Take an unsigned int param
+	rather than a Stub_table.  Update callers.
+	(Powerpc_relobj::clear_stub_table): New function.
+	(Target_powerpc): Add relax_failed_, relax_fail_count_ and
+	stub_group_size_ vars.
+	(Target_powerpc::new_stub_table): Delete.
+	(max_branch_delta): New function, extracted from..
+	(Target_powerpc::Relocate::relocate): ..here..
+	(Target_powerpc::Branch_info::make_stub): ..and here.  Return
+	status on whether stub created successfully.
+	(Stub_control::Stub_control): Add "no_size_errors" param.  Move
+	default sizing to..
+	(Target_powerpc::do_relax): ..here.  Init stub_group_size_ and
+	reduce on relax failure.
+	(Target_powerpc::group_sections): Add "no_size_errors" param.
+	Use stub_group_size_.  Set up group info in a temp vector,
+	before building Stub_table vector.  Account for input sections
+	possibly already converted to relaxed sections.
+	(Stub_table::init): Delete.  Merge into..
+	(Stub_table::Stub_table): ..here.
+	(Stub_table::can_reach_stub): New function.
+	(Stub_table::add_plt_call_entry): Add "from" parameter and
+	return true iff stub could be reached.
+	(Stub_table::add_long_branch_entry): Similarly.  Add "r_type"
+	param too.
+	(Stub_table::clear_stubs): Add "all" param.
+
+2014-11-26  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Stub_control::set_output_and_owner): New function.
 	(Target_powerpc::group_sections): Use it.
 
