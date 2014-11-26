@@ -1,3 +1,7 @@
+2014-11-26  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-op-out-param.S: Fix comment.
+
 2014-11-22  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/entry-values.c: Remove asms.
