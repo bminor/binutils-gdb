@@ -1,3 +1,8 @@
+2014-11-26  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Stub_control::set_output_and_owner): New function.
+	(Target_powerpc::group_sections): Use it.
+
 2014-11-25  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/17639
