@@ -1,3 +1,8 @@
+2014-11-26  Jing Yu  <jingyu@google.com>
+
+	* aarch64.cc (Relocate::tls_desc_gd_to_ie): Set ldr target
+	register to be x0 when to relax TLSDESC_LD64_LO12.
+
 2014-11-26  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (struct Stub_table_owner): New.
@@ -162,7 +167,7 @@
 	* aarch64.cc (AArch64_relocate_functions::maybe_apply_stub):
 	Add "typename" keyword.
 
-2014-09-22  Han Shen  <shenhan@google.com>
+2014-10-15  Han Shen  <shenhan@google.com>
             Jing Yu   <jingyu@google.com>
 
 	Patch for gold aarch64 backend to support relaxation.

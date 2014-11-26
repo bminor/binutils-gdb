@@ -6536,6 +6536,11 @@ Target_aarch64<size, big_endian>::Relocate::tls_desc_gd_to_ie(
 
     case elfcpp::R_AARCH64_TLSDESC_LD64_LO12:
       {
+       // Set ldr target register to be x0.
+       Insntype insn = elfcpp::Swap<32, big_endian>::readval(ip);
+       insn &= 0xffffffe0;
+       elfcpp::Swap<32, big_endian>::writeval(ip, insn);
+       // Do relocation.
 	const AArch64_reloc_property* reloc_property =
 	    aarch64_reloc_property_table->get_reloc_property(
 	      elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC);
