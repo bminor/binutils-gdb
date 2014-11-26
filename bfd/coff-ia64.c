@@ -47,7 +47,7 @@ static reloc_howto_type howto_table[] =
 #endif
 
 #define RTYPE2HOWTO(cache_ptr, dst) \
-	    (cache_ptr)->howto = howto_table + (dst)->r_type;
+  (cache_ptr)->howto = howto_table;
 
 #ifdef COFF_WITH_PE
 /* Return TRUE if this relocation should

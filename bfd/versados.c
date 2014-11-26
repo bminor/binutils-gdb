@@ -85,8 +85,8 @@ typedef struct versados_data_struct
 tdata_type;
 
 #define VDATA(abfd)       (abfd->tdata.versados_data)
-#define EDATA(abfd, n)    (abfd->tdata.versados_data->e[n])
-#define RDATA(abfd, n)    (abfd->tdata.versados_data->rest[n])
+#define EDATA(abfd, n)    (abfd->tdata.versados_data->e[(n) < 16 ? (n) : 0])
+#define RDATA(abfd, n)    (abfd->tdata.versados_data->rest[(n) < 240 ? (n) : 0])
 
 struct ext_otr
 {
@@ -181,14 +181,22 @@ versados_new_symbol (bfd *abfd,
   return n;
 }
 
-static int
+static bfd_boolean
 get_record (bfd *abfd, union ext_any *ptr)
 {
   if (bfd_bread (&ptr->size, (bfd_size_type) 1, abfd) != 1
       || (bfd_bread ((char *) ptr + 1, (bfd_size_type) ptr->size, abfd)
 	  != ptr->size))
-    return 0;
-  return 1;
+    return FALSE;
+
+  {
+    bfd_size_type amt = ptr->size + 1;
+
+    if (amt < sizeof (* ptr))
+      memset ((char *) ptr + amt, 0, sizeof (* ptr) - amt);
+  }
+
+  return TRUE;
 }
 
 static int
@@ -366,7 +374,7 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 
   struct esdid *esdid = &EDATA (abfd, otr->esdid - 1);
   unsigned char *contents = esdid->contents;
-  int need_contents = 0;
+  bfd_boolean need_contents = FALSE;
   unsigned int dst_idx = esdid->pc;
 
   for (shift = ((unsigned long) 1 << 31); shift && srcp < endp; shift >>= 1)
@@ -390,8 +398,8 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 	      int val = get_offset (offsetlen, srcp + esdids);
 
 	      if (pass == 1)
-		need_contents = 1;
-	      else
+		need_contents = TRUE;
+	      else if (contents)
 		for (j = 0; j < sizeinwords * 2; j++)
 		  {
 		    contents[dst_idx + (sizeinwords * 2) - j - 1] = val;
@@ -429,19 +437,21 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 	}
       else
 	{
-	  need_contents = 1;
-	  
-	  if (esdid->section && dst_idx < esdid->section->size)
+	  need_contents = TRUE;
+
+	  if (esdid->section && contents && dst_idx < esdid->section->size)
 	    if (pass == 2)
 	      {
 		/* Absolute code, comes in 16 bit lumps.  */
 		contents[dst_idx] = srcp[0];
 		contents[dst_idx + 1] = srcp[1];
 	      }
+
 	  dst_idx += 2;
 	  srcp += 2;
 	}
     }
+
   EDATA (abfd, otr->esdid - 1).pc = dst_idx;
 
   if (!contents && need_contents)
@@ -461,7 +471,7 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 static bfd_boolean
 versados_scan (bfd *abfd)
 {
-  int loop = 1;
+  bfd_boolean loop = TRUE;
   int i;
   int j;
   int nsecs = 0;
@@ -479,13 +489,13 @@ versados_scan (bfd *abfd)
       union ext_any any;
 
       if (!get_record (abfd, &any))
-	return TRUE;
+	return FALSE;
       switch (any.header.type)
 	{
 	case VHEADER:
 	  break;
 	case VEND:
-	  loop = 0;
+	  loop = FALSE;
 	  break;
 	case VESTDEF:
 	  process_esd (abfd, &any.esd, 1);
@@ -512,7 +522,6 @@ versados_scan (bfd *abfd)
 	{
 	  amt = (bfd_size_type) esdid->relocs * sizeof (arelent);
 	  esdid->section->relocation = bfd_alloc (abfd, amt);
-
 	  esdid->pc = 0;
 
 	  if (esdid->contents)
@@ -571,7 +580,7 @@ versados_scan (bfd *abfd)
 
   VDATA (abfd)->ref_idx = 0;
 
-  return 1;
+  return TRUE;
 }
 
 /* Check whether an existing file is a versados  file.  */
@@ -773,6 +782,7 @@ versados_canonicalize_reloc (bfd *abfd,
 
   versados_pass_2 (abfd);
   src = section->relocation;
+
   if (!EDATA (abfd, section->target_index).donerel)
     {
       EDATA (abfd, section->target_index).donerel = 1;
@@ -790,6 +800,9 @@ versados_canonicalize_reloc (bfd *abfd,
 
 	      src[count].sym_ptr_ptr = e->section->symbol_ptr_ptr;
 	    }
+	  /* PR 17512: file:3757-2936-0.004.  */
+	  else if ((unsigned) (esdid - ES_BASE) >= bfd_get_symcount (abfd))
+	    src[count].sym_ptr_ptr = bfd_und_section_ptr->symbol_ptr_ptr;
 	  else
 	    src[count].sym_ptr_ptr = symbols + esdid - ES_BASE;
 	}

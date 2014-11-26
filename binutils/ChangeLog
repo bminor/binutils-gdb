@@ -1,3 +1,16 @@
+2014-11-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (display_block): Do nothing if the block starts after
+	the end of the buffer.
+	(read_and_display_attr_value): Add range checks.
+	(struct Frame_Chunk): Make the ncols and ra fields unsigned.
+	(frame_need_space): Test for an ncols of zero.
+	(read_cie): Fail if the augmentation data extends off the end of
+	the buffer.
+	(display_debug_frames): Add checks for read_cie failing.  Add
+	range checks.
+
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (objdump_print_symname): Replace

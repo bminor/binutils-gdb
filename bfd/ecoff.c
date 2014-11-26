@@ -615,6 +615,9 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   external_fdr_size = backend->debug_swap.external_fdr_size;
   fdr_ptr = debug->fdr;
   fraw_src = (char *) debug->external_fdr;
+  /* PR 17512: file: 3372-1243-0.004.  */
+  if (fraw_src == NULL && internal_symhdr->ifdMax > 0)
+    return FALSE;
   fraw_end = fraw_src + internal_symhdr->ifdMax * external_fdr_size;
   for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
     (*backend->debug_swap.swap_fdr_in) (abfd, (void *) fraw_src, fdr_ptr);
@@ -891,6 +894,11 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
       EXTR internal_esym;
 
       (*swap_ext_in) (abfd, (void *) eraw_src, &internal_esym);
+
+      /* PR 17512: file: 3372-1000-0.004.  */
+      if (internal_esym.asym.iss >= ecoff_data (abfd)->debug_info.symbolic_header.issExtMax)
+	return FALSE;
+
       internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ssext
 				   + internal_esym.asym.iss);
       if (!ecoff_set_symbol_info (abfd, &internal_esym.asym,
