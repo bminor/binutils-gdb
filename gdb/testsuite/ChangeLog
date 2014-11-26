@@ -1,3 +1,9 @@
+2014-11-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-linetable.exp: Escape properly sorted(fset)
+	test expected output.  Add parentheses for the call to print.
+	Remove L suffix from integers.
+
 2014-11-26  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dw2-op-out-param.S: Fix comment.

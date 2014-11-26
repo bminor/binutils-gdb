@@ -60,8 +60,8 @@ gdb_test "python print lt.line(1)" "None" \
 # Test gdb.Linetable.sourcelines ()
 gdb_py_test_silent_cmd "python fset = lt.source_lines()" \
     "Get all source lines into a frozen set" 0
-gdb_test "python print sorted(fset)" \
-    "\[20L, 21L, 22L, 24L, 25L, 28L, 29L, 30L, 32L, 33L, 37L, 39L, 40L, 42L, 44L, 45L, 46L\].*" \
+gdb_test "python print (sorted(fset))" \
+    "\\\[20, 21, 22, 24, 25, 28, 29, 30, 32, 33, 37, 39, 40, 42, 44, 45, 46\\\].*" \
     "Test frozen set contains line numbers"
 
 # Test gdb.Linetable.has_line ()
