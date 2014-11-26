@@ -1,3 +1,21 @@
+2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (options): Add OPTION_DSPR3 and
+	OPTION_NO_DSPR3.
+	(md_longopts): Likewise.
+	(md_show_usage): Add help for -mdspr3 and -mno-dspr3.
+	(mips_ases): Define availability for DSPr3.
+	(mips_ase_groups): Add ASE_DSPR3 to the DSP group.
+	(mips_convert_ase_flags): Map ASE_DSPR3 to AFL_ASE_DSPR3.
+	* doc/as.texinfo: Document -mdspr3, -mno-dspr3.  Fix -mdspr2
+	formatting.
+	* doc/c-mips.texi: Document -mdspr3, -mno-dspr3, .set dspr3 and
+	.set nodspr3.  Fix -mdspr2 formatting.
+	* testsuite/gas/mips/mips32-dspr3.d: New file.
+	* testsuite/gas/mips/mips32-dspr3.s: Likewise.
+	* testsuite/gas/mips/mips.exp: Run mips32-dspr3 test.
+
 2016-05-11  Nick Clifton  <nickc@redhat.com>
 
 	PR target/20068

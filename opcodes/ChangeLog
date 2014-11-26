@@ -1,3 +1,10 @@
+2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-dis.c (mips_arch_choices): Add ASE_DSPR3 to mips32r6 and
+	mips64r6.
+	* mips-opc.c (D34): New macro.
+	(mips_builtin_opcodes): Define bposge32c for DSPr3.
+
 2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
 
 	* i386-dis.c (prefix_table): Add RDPID instruction.

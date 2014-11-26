@@ -1,3 +1,7 @@
+2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* readelf.c (print_mips_ases): Add DSPR3.
+
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* readelf.c (display_arm_attribute): Add output for Tag_DSP_extension.
