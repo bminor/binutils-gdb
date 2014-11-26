@@ -589,26 +589,42 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
 		     CORE_ADDR start_pc)
 {
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  /* Maximum number of possibly-epilogue instructions to check.
+     Note that this number should not be too large, else we can
+     potentially end up iterating through unmapped memory.  */
+  int ninsns, max_insns = 5;
   unsigned int insn;
   const struct nios2_opcode *op = NULL;
   unsigned int uimm;
   int imm;
   int ra, rb, rc;
   enum branch_condition cond;
+  CORE_ADDR pc;
 
   /* There has to be a previous instruction in the function.  */
-  if (current_pc > start_pc)
-    {
-      int ok = 0;
+  if (current_pc <= start_pc)
+    return 0;
 
-      /* Check whether the previous instruction was a stack adjustment.
-	 Possible instructions here include:
+  /* Find the previous instruction before current_pc.
+     For the moment we will assume that all instructions are the
+     same size here.  */
+  pc = current_pc - NIOS2_OPCODE_SIZE;
+
+  /* Beginning with the previous instruction we just located, check whether
+     we are in a sequence of at least one stack adjustment instruction.
+     Possible instructions here include:
 	 ADDI sp, sp, n
 	 ADD sp, sp, rn
 	 LDW sp, n(sp)  */
-      op = nios2_fetch_insn (gdbarch, current_pc - NIOS2_OPCODE_SIZE, &insn);
+  for (ninsns = 0; ninsns < max_insns; ninsns++)
+    {
+      int ok = 0;
+
+      /* Fetch the insn at pc.  */
+      op = nios2_fetch_insn (gdbarch, pc, &insn);
       if (op == NULL)
 	return 0;
+      pc += op->size;
 
       /* Was it a stack adjustment?  */
       if (nios2_match_addi (insn, op, mach, &ra, &rb, &imm))
@@ -618,18 +634,27 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
       else if (nios2_match_ldw (insn, op, mach, &ra, &rb, &imm))
 	ok = (rb == NIOS2_SP_REGNUM);
       if (!ok)
-	return 0;
-
-      /* Then check if it's followed by a return or a tail call.  */
-      op = nios2_fetch_insn (gdbarch, current_pc, &insn);
-      if (op == NULL)
-       return 0;
-      if (nios2_match_jmpr (insn, op, mach, &ra)
-         || nios2_match_jmpi (insn, op, mach, &uimm)
-         || (nios2_match_branch (insn, op, mach, &ra, &rb, &imm, &cond)
-             && cond == branch_none))
-       return 1;
+	break;
     }
+
+  /* No stack adjustments found.  */
+  if (ninsns == 0)
+    return 0;
+
+  /* We found more stack adjustments than we expect GCC to be generating.
+     Since it looks like a stack unwind might be in progress tell GDB to
+     treat it as such.  */
+  if (ninsns == max_insns)
+    return 1;
+
+  /* The next instruction following the stack adjustments must be a
+     return, jump, or unconditional branch.  */
+  if (nios2_match_jmpr (insn, op, mach, &ra)
+      || nios2_match_jmpi (insn, op, mach, &uimm)
+      || (nios2_match_branch (insn, op, mach, &ra, &rb, &imm, &cond)
+	  && cond == branch_none))
+    return 1;
+
   return 0;
 }
 

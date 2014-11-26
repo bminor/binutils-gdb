@@ -1,5 +1,10 @@
 2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* nios2-tdep.c (nios2_in_epilogue_p): Handle multiple stack
+	adjustments.
+
+2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* nios2-tdep.c (nios2_fetch_insn): Move up in file.  Disassemble
 	the instruction as well as reading it from memory.
 	(nios2_match_add): New.
