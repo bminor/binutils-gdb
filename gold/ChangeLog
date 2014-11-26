@@ -1,3 +1,10 @@
+2014-11-26  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (gdb_sections): Keep .debug_gdb_scripts and
+	.debug_str_offsets; strip .debug_gnu_pubnames and
+	.debug_gnu_pubtypes.
+	(lines_only_debug_sections): Strip all four new sections.
+
 2014-11-26  Jing Yu  <jingyu@google.com>
 
 	* aarch64.cc (Relocate::tls_desc_gd_to_ie): Set ldr target
