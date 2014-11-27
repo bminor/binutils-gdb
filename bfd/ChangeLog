@@ -1,3 +1,10 @@
+2014-11-30  Alan Modra  <amodra@gmail.com>
+
+	PR 16452, 16457
+	* elflink.c (_bfd_elf_link_find_version_dependencies): Exclude
+	symbols from libraries that won't be listed in DT_NEEDED.
+	(elf_link_output_extsym): Don't output verdefs for such symbols.
+
 2014-11-24  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* elfnn-aarch64.c (elf_aarch64_compare_mapping): New.
