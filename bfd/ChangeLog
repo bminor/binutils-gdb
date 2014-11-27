@@ -1,3 +1,8 @@
+2014-11-28  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_slurp_version_tables): Exit loops when vn_next/
+	vna_next/vd_next/vda_next is zero.  Correct counts.
+
 2014-11-27  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

@@ -7307,7 +7307,6 @@ error_return_verref:
 	  || bfd_bread (contents, hdr->sh_size, abfd) != hdr->sh_size)
 	goto error_return_verref;
 
-      elf_tdata (abfd)->cverrefs = hdr->sh_info;
       elf_tdata (abfd)->verref = (Elf_Internal_Verneed *)
 	bfd_zalloc2 (abfd, hdr->sh_info, sizeof (Elf_Internal_Verneed));
 
@@ -7363,10 +7362,17 @@ error_return_verref:
 	      if (ivernaux->vna_nodename == NULL)
 		goto error_return_bad_verref;
 
+	      if (ivernaux->vna_other > freeidx)
+		freeidx = ivernaux->vna_other;
+
+	      ivernaux->vna_nextptr = NULL;
+	      if (ivernaux->vna_next == 0)
+		{
+		  iverneed->vn_cnt = j + 1;
+		  break;
+		}
 	      if (j + 1 < iverneed->vn_cnt)
 		ivernaux->vna_nextptr = ivernaux + 1;
-	      else
-		ivernaux->vna_nextptr = NULL;
 
 	      if (ivernaux->vna_next
 		  > (size_t) (contents_end - (bfd_byte *) evernaux))
@@ -7374,15 +7380,13 @@ error_return_verref:
 
 	      evernaux = ((Elf_External_Vernaux *)
 			  ((bfd_byte *) evernaux + ivernaux->vna_next));
-
-	      if (ivernaux->vna_other > freeidx)
-		freeidx = ivernaux->vna_other;
 	    }
 
+	  iverneed->vn_nextref = NULL;
+	  if (iverneed->vn_next == 0)
+	    break;
 	  if (i + 1 < hdr->sh_info)
 	    iverneed->vn_nextref = iverneed + 1;
-	  else
-	    iverneed->vn_nextref = NULL;
 
 	  if (iverneed->vn_next
 	      > (size_t) (contents_end - (bfd_byte *) everneed))
@@ -7391,6 +7395,7 @@ error_return_verref:
 	  everneed = ((Elf_External_Verneed *)
 		      ((bfd_byte *) everneed + iverneed->vn_next));
 	}
+      elf_tdata (abfd)->cverrefs = i;
 
       free (contents);
       contents = NULL;
@@ -7448,6 +7453,9 @@ error_return_verref:
 	    goto error_return_bad_verdef;
 	  if ((iverdefmem.vd_ndx & ((unsigned) VERSYM_VERSION)) > maxidx)
 	    maxidx = iverdefmem.vd_ndx & ((unsigned) VERSYM_VERSION);
+
+	  if (iverdefmem.vd_next == 0)
+	    break;
 
 	  if (iverdefmem.vd_next
 	      > (size_t) (contents_end_def - (bfd_byte *) everdef))
@@ -7518,10 +7526,14 @@ error_return_verref:
 	      if (iverdaux->vda_nodename == NULL)
 		goto error_return_bad_verdef;
 
+	      iverdaux->vda_nextptr = NULL;
+	      if (iverdaux->vda_next == 0)
+		{
+		  iverdef->vd_cnt = j + 1;
+		  break;
+		}
 	      if (j + 1 < iverdef->vd_cnt)
 		iverdaux->vda_nextptr = iverdaux + 1;
-	      else
-		iverdaux->vda_nextptr = NULL;
 
 	      if (iverdaux->vda_next
 		  > (size_t) (contents_end_aux - (bfd_byte *) everdaux))
@@ -7534,10 +7546,11 @@ error_return_verref:
 	  if (iverdef->vd_cnt)
 	    iverdef->vd_nodename = iverdef->vd_auxptr->vda_nodename;
 
+	  iverdef->vd_nextdef = NULL;
+	  if (iverdef->vd_next == 0)
+	    break;
 	  if ((size_t) (iverdef - iverdefarr) + 1 < maxidx)
 	    iverdef->vd_nextdef = iverdef + 1;
-	  else
-	    iverdef->vd_nextdef = NULL;
 
 	  everdef = ((Elf_External_Verdef *)
 		     ((bfd_byte *) everdef + iverdef->vd_next));
