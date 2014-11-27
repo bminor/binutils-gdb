@@ -1254,7 +1254,9 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 
       extdyn = dynbuf;
       extdynend = extdyn + s->size;
-      for (; extdyn < extdynend; extdyn += extdynsize)
+      /* PR 17512: file: id:000006,sig:06,src:000000,op:flip4,pos:5664.
+         Fix range check.  */
+      for (; extdyn <= (extdynend - extdynsize); extdyn += extdynsize)
 	{
 	  Elf_Internal_Dyn dyn;
 	  const char *name = "";

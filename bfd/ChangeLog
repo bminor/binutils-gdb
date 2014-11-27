@@ -1,3 +1,12 @@
+2014-11-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ecoff.c (_bfd_ecoff_slurp_symbol_table): Warn about and correct
+	a discrepancy between the isymMax and ifdMax values in the
+	symbolic header.
+	* elf.c (_bfd_elf_print_private_bfd_data): Fix the range check
+	scanning the external dynamic entries.
+
 2014-11-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
