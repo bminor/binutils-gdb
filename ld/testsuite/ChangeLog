@@ -1,3 +1,13 @@
+2014-11-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-mips-elf/got-vers-1.rd: Add symbol version string to
+	versioned symbol names in dynamic relocation.
+	* ld-mips-elf/reloc-estimate-1.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+	* ld-mips-elf/tlslib-o32-ver.got: Likewise.
+
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-alpha/tlsbin.dd: Updated for secureplt.
