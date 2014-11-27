@@ -165,7 +165,7 @@
 #endif
 
 char * program_name = "readelf";
-static long archive_file_offset;
+static unsigned long archive_file_offset;
 static unsigned long archive_file_size;
 static bfd_size_type current_file_size;
 static unsigned long dynamic_addr;
@@ -313,36 +313,40 @@ static const char *get_symbol_version_string
     }						\
   while (0)
 
-/* Retrieve NMEMB structures, each SIZE bytes long from FILE starting at OFFSET.
+/* Retrieve NMEMB structures, each SIZE bytes long from FILE starting at OFFSET +
+   the offset of the current archive member, if we are examining an archive.
    Put the retrieved data into VAR, if it is not NULL.  Otherwise allocate a buffer
    using malloc and fill that.  In either case return the pointer to the start of
    the retrieved data or NULL if something went wrong.  If something does go wrong
-   emit an error message using REASON as part of the context.  */
+   and REASON is not NULL then emit an error message using REASON as part of the
+   context.  */
 
 static void *
-get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
+get_data (void * var, FILE * file, unsigned long offset, size_t size, size_t nmemb,
 	  const char * reason)
 {
   void * mvar;
+  size_t amt = size * nmemb;
 
   if (size == 0 || nmemb == 0)
     return NULL;
+
+  /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
+     attempting to allocate memory when the read is bound to fail.  */
+  if (amt > current_file_size
+      || offset + archive_file_offset + amt > current_file_size)
+    {
+      if (reason)
+	error (_("Reading 0x%lx bytes extends past end of file for %s\n"),
+	       (unsigned long) amt, reason);
+      return NULL;
+    }
 
   if (fseek (file, archive_file_offset + offset, SEEK_SET))
     {
       if (reason)
 	error (_("Unable to seek to 0x%lx for %s\n"),
 	       (unsigned long) archive_file_offset + offset, reason);
-      return NULL;
-    }
-
-  /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
-     attempting to allocate memory when the read is bound to fail.  */
-  if (offset + archive_file_offset + size * nmemb > current_file_size)
-    {
-      if (reason)
-	error (_("Reading 0x%lx bytes extends past end of file for %s\n"),
-	       (unsigned long) (size * nmemb), reason);
       return NULL;
     }
 
@@ -362,14 +366,14 @@ get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
 	  return NULL;
 	}
 
-      ((char *) mvar)[size * nmemb] = '\0';
+      ((char *) mvar)[amt] = '\0';
     }
 
   if (fread (mvar, size, nmemb, file) != nmemb)
     {
       if (reason)
 	error (_("Unable to read in 0x%lx bytes of %s\n"),
-	       (unsigned long)(size * nmemb), reason);
+	       (unsigned long) amt, reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -4756,10 +4760,18 @@ get_32bit_elf_symbols (FILE * file,
   Elf_Internal_Sym * psym;
   unsigned int j;
 
-  /* Run some sanity checks first.  */
-  if (section->sh_entsize == 0)
+  if (section->sh_size == 0)
     {
-      error (_("sh_entsize is zero\n"));
+      if (num_syms_return != NULL)
+	* num_syms_return = 0;
+      return NULL;
+    }
+
+  /* Run some sanity checks first.  */
+  if (section->sh_entsize == 0 || section->sh_entsize > section->sh_size)
+    {
+      error (_("Section %s has an invalid sh_entsize of 0x%lx\n"),
+	     printable_section_name (section), (unsigned long) section->sh_entsize);
       goto exit_point;
     }
 
@@ -4774,7 +4786,8 @@ get_32bit_elf_symbols (FILE * file,
 
   if (number * sizeof (Elf32_External_Sym) > section->sh_size + 1)
     {
-      error (_("Invalid sh_entsize\n"));
+      error (_("Size (0x%lx) of section %s is not a multiple of its sh_entsize (0x%lx)\n"),
+	     section->sh_size, printable_section_name (section), section->sh_entsize);
       goto exit_point;
     }
 
@@ -4794,6 +4807,15 @@ get_32bit_elf_symbols (FILE * file,
                                                    _("symbol table section indicies"));
       if (shndx == NULL)
 	goto exit_point;
+      /* PR17531: file: heap-buffer-overflow */
+      else if (symtab_shndx_hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
+	{
+	  error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
+		 printable_section_name (symtab_shndx_hdr),
+		 (unsigned long) symtab_shndx_hdr->sh_size,
+		 (unsigned long) section->sh_size);
+	  goto exit_point;
+	}
     }
 
   isyms = (Elf_Internal_Sym *) cmalloc (number, sizeof (Elf_Internal_Sym));
@@ -4844,10 +4866,18 @@ get_64bit_elf_symbols (FILE * file,
   Elf_Internal_Sym * psym;
   unsigned int j;
 
-  /* Run some sanity checks first.  */
-  if (section->sh_entsize == 0)
+  if (section->sh_size == 0)
     {
-      error (_("sh_entsize is zero\n"));
+      if (num_syms_return != NULL)
+	* num_syms_return = 0;
+      return NULL;
+    }
+
+  /* Run some sanity checks first.  */
+  if (section->sh_entsize == 0 || section->sh_entsize > section->sh_size)
+    {
+      error (_("Section %s has an invalid sh_entsize of 0x%lx\n"),
+	     printable_section_name (section), (unsigned long) section->sh_entsize);
       goto exit_point;
     }
 
@@ -4862,7 +4892,8 @@ get_64bit_elf_symbols (FILE * file,
 
   if (number * sizeof (Elf64_External_Sym) > section->sh_size + 1)
     {
-      error (_("Invalid sh_entsize\n"));
+      error (_("Size (0x%lx) of section %s is not a multiple of its sh_entsize (0x%lx)\n"),
+	     section->sh_size, printable_section_name (section), section->sh_entsize);
       goto exit_point;
     }
 
@@ -4881,6 +4912,14 @@ get_64bit_elf_symbols (FILE * file,
                                                    _("symbol table section indicies"));
       if (shndx == NULL)
 	goto exit_point;
+      else if (symtab_shndx_hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
+	{
+	  error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
+		 printable_section_name (symtab_shndx_hdr),
+		 (unsigned long) symtab_shndx_hdr->sh_size,
+		 (unsigned long) section->sh_size);
+	  goto exit_point;
+	}
     }
 
   isyms = (Elf_Internal_Sym *) cmalloc (number, sizeof (Elf_Internal_Sym));
@@ -5794,6 +5833,15 @@ process_section_groups (FILE * file)
 		}
 	      group_name = sym->st_name < strtab_size
 		? strtab + sym->st_name : _("<corrupt>");
+	    }
+
+	  /* PR 17531: file: loop.  */
+	  if (section->sh_entsize > section->sh_size)
+	    {
+	      error (_("Section %s has sh_entsize (0x%lx) which is larger than its size (0x%lx)\n"),
+		     printable_section_name (section),
+		     section->sh_entsize, section->sh_size);
+	      break;
 	    }
 
 	  start = (unsigned char *) get_data (NULL, file, section->sh_offset,
