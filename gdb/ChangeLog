@@ -1,5 +1,14 @@
 2014-12-12  Yao Qi  <yao@codesourcery.com>
 
+	PR tdep/14261
+	* arm-tdep.c (arm_skip_prologue): Remove unused local variable
+	'skip_pc'.  Remove code skipping prologue instructions, use
+	arm_analyze_prologue instead.
+	(arm_analyze_prologue): Stop the scanning for unrecognized
+	instruction when skipping prologue.
+
+2014-12-12  Yao Qi  <yao@codesourcery.com>
+
 	* arm-tdep.c (arm_instruction_restores_sp): New function.
 	(arm_analyze_prologue): Call arm_instruction_restores_sp.
 	(arm_in_function_epilogue_p): Move code to
