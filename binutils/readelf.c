@@ -4787,7 +4787,9 @@ get_32bit_elf_symbols (FILE * file,
   if (number * sizeof (Elf32_External_Sym) > section->sh_size + 1)
     {
       error (_("Size (0x%lx) of section %s is not a multiple of its sh_entsize (0x%lx)\n"),
-	     section->sh_size, printable_section_name (section), section->sh_entsize);
+	     (unsigned long) section->sh_size,
+	     printable_section_name (section),
+	     (unsigned long) section->sh_entsize);
       goto exit_point;
     }
 
@@ -4877,14 +4879,16 @@ get_64bit_elf_symbols (FILE * file,
   if (section->sh_entsize == 0 || section->sh_entsize > section->sh_size)
     {
       error (_("Section %s has an invalid sh_entsize of 0x%lx\n"),
-	     printable_section_name (section), (unsigned long) section->sh_entsize);
+	     printable_section_name (section),
+	     (unsigned long) section->sh_entsize);
       goto exit_point;
     }
 
   if (section->sh_size > current_file_size)
     {
       error (_("Section %s has an invalid sh_size of 0x%lx\n"),
-	     printable_section_name (section), (unsigned long) section->sh_size);
+	     printable_section_name (section),
+	     (unsigned long) section->sh_size);
       goto exit_point;
     }
 
@@ -4893,7 +4897,9 @@ get_64bit_elf_symbols (FILE * file,
   if (number * sizeof (Elf64_External_Sym) > section->sh_size + 1)
     {
       error (_("Size (0x%lx) of section %s is not a multiple of its sh_entsize (0x%lx)\n"),
-	     section->sh_size, printable_section_name (section), section->sh_entsize);
+	     (unsigned long) section->sh_size,
+	     printable_section_name (section),
+	     (unsigned long) section->sh_entsize);
       goto exit_point;
     }
 
@@ -5840,7 +5846,8 @@ process_section_groups (FILE * file)
 	    {
 	      error (_("Section %s has sh_entsize (0x%lx) which is larger than its size (0x%lx)\n"),
 		     printable_section_name (section),
-		     section->sh_entsize, section->sh_size);
+		     (unsigned long) section->sh_entsize,
+		     (unsigned long) section->sh_size);
 	      break;
 	    }
 

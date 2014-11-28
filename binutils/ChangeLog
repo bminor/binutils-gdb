@@ -1,3 +1,9 @@
+2014-11-28  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_32bit_elf_symbols): Cast bfd_size_type values to
+	unsigned long for %lx.
+	(get_64bit_elf_symbols, process_section_groups): Likewise.
+
 2014-11-27  Espen Grindhaug <espen@grindhaug.org>
 	    Nick Clifton  <nickc@redhat.com>
 
