@@ -82,4 +82,10 @@
 #define PTRACE_SETEVRREGS 21
 #endif
 
+#ifdef __powerpc64__
+/* Return whether the inferior is 64bit or not by checking certain bit
+   in MSR.  */
+int ppc64_64bit_inferior_p (long msr);
+#endif
+
 #endif

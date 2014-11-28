@@ -398,13 +398,11 @@ ppc_arch_setup (void)
   current_process ()->tdesc = tdesc;
   ppc_hwcap = 0;
 
-  /* Only if the high bit of the MSR is set, we actually have
-     a 64-bit inferior.  */
   regcache = new_register_cache (tdesc);
   fetch_inferior_registers (regcache, find_regno (tdesc, "msr"));
   collect_register_by_name (regcache, "msr", &msr);
   free_register_cache (regcache);
-  if (msr < 0)
+  if (ppc64_64bit_inferior_p (msr))
     {
       ppc_get_hwcap (&ppc_hwcap);
       if (ppc_hwcap & PPC_FEATURE_CELL)

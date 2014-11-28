@@ -1,5 +1,18 @@
 2015-01-14  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (ppc-linux.o): New rule.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Add ppc-linux.o.
+	* configure.ac: AC_CHECK_FUNCS(getauxval).
+	* config.in: Re-generated.
+	* configure: Re-generated.
+	* nat/ppc-linux.h [__powerpc64__] (ppc64_64bit_inferior_p):
+	Declare.
+	* nat/ppc-linux.c: New file.
+	* ppc-linux-nat.c (ppc_linux_target_wordsize) [__powerpc64__]:
+	Call ppc64_64bit_inferior_p.
+
+2015-01-14  Yao Qi  <yao@codesourcery.com>
+
 	* ppc-linux-nat.c (PT_ORIG_R3, PT_TRAP): Move to
 	nat/ppc-linux.h.
 	(PPC_FEATURE_CELL, PPC_FEATURE_BOOKE): Likewise.

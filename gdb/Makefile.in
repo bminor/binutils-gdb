@@ -2270,6 +2270,10 @@ mips-linux-watch.o: ${srcdir}/nat/mips-linux-watch.c
 	$(COMPILE) $(srcdir)/nat/mips-linux-watch.c
 	$(POSTCOMPILE)
 
+ppc-linux.o: ${srcdir}/nat/ppc-linux.c
+	$(COMPILE) $(srcdir)/nat/ppc-linux.c
+	$(POSTCOMPILE)
+
 #
 # gdb/tui/ dependencies
 #

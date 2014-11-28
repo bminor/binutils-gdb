@@ -1311,7 +1311,7 @@ AC_C_BIGENDIAN
 
 AC_FUNC_MMAP
 AC_FUNC_VFORK
-AC_CHECK_FUNCS([getrusage getuid getgid \
+AC_CHECK_FUNCS([getauxval getrusage getuid getgid \
 		pipe poll pread pread64 pwrite resize_term \
 		sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair \

@@ -2367,7 +2367,7 @@ ppc_linux_target_wordsize (void)
 
   errno = 0;
   msr = (long) ptrace (PTRACE_PEEKUSER, tid, PT_MSR * 8, 0);
-  if (errno == 0 && msr < 0)
+  if (errno == 0 && ppc64_64bit_inferior_p (msr))
     wordsize = 8;
 #endif
 
