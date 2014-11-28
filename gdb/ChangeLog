@@ -1,3 +1,9 @@
+2014-11-28  Pierre Muller  <muller@sourceware.org>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	* amd64-tdep.c (amd64_dwarf_regmap array): Add missing MMX
+	registers.
+
 2014-11-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/ia64/linux.mh (NATDEPFILES): Remove core-regset.o.
