@@ -1872,28 +1872,30 @@ extract_sprg (unsigned long insn,
    much, since the architecture manual does not define mftb as
    accepting any values other than 268 or 269.  */
 
-#define TB (268)
-
 static unsigned long
 insert_tbr (unsigned long insn,
 	    long value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	    const char **errmsg ATTRIBUTE_UNUSED)
+	    const char **errmsg)
 {
   if (value == 0)
-    value = TB;
+    value = 268;
+  if (value != 268 && value != 269)
+    *errmsg = _("invalid tbr number");
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
 }
 
 static long
 extract_tbr (unsigned long insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	     int *invalid ATTRIBUTE_UNUSED)
+	     int *invalid)
 {
   long ret;
 
   ret = ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
-  if (ret == TB)
+  if (ret != 268 && ret != 269)
+    *invalid = 1;
+  if (ret == 268)
     ret = 0;
   return ret;
 }
@@ -5051,7 +5053,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mftbl",	XSPR(31,371,268), XSPR_MASK, PPC,	NO371,		{RT}},
 {"mftbu",	XSPR(31,371,269), XSPR_MASK, PPC,	NO371,		{RT}},
-{"mftb",	X(31,371),	X_MASK,      PPC|PPCA2,	NO371|POWER7,	{RT, TBR}},
+{"mftb",	X(31,371),	X_MASK,      PPC|PPCA2,	NO371,		{RT, TBR}},
 
 {"lwaux",	X(31,373),	X_MASK,      PPC64|PPCVLE, PPCNONE,	{RT, RAL, RB}},
 
