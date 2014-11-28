@@ -1,3 +1,8 @@
+2014-10-14  Oleg Endo <olegendo@gcc.gnu.org>  (tiny patch)
+
+	* gencode.c (fabs, fneg): Implement as integer operation
+	instead of using the FP_UNARY macro.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
