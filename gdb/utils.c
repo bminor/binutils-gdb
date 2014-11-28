@@ -2868,20 +2868,38 @@ string_to_core_addr (const char *my_string)
 char *
 gdb_realpath (const char *filename)
 {
-  /* The MS Windows method.  If we don't have realpath, we assume we
-     don't have symlinks and just canonicalize to a Windows absolute
-     path.  GetFullPath converts ../ and ./ in relative paths to
-     absolute paths, filling in current drive if one is not given
-     or using the current directory of a specified drive (eg, "E:foo").
-     It also converts all forward slashes to back slashes.  */
-  /* The file system is case-insensitive but case-preserving.
-     So we do not lowercase the path.  Otherwise, we might not
-     be able to display the original casing in a given path.  */
+/* On most hosts, we rely on canonicalize_file_name to compute
+   the FILENAME's realpath.
+
+   But the situation is slightly more complex on Windows, due to some
+   versions of GCC which were reported to generate paths where
+   backlashes (the directory separator) were doubled.  For instance:
+      c:\\some\\double\\slashes\\dir
+   ... instead of ...
+      c:\some\double\slashes\dir
+   Those double-slashes were getting in the way when comparing paths,
+   for instance when trying to insert a breakpoint as follow:
+      (gdb) b c:/some/double/slashes/dir/foo.c:4
+      No source file named c:/some/double/slashes/dir/foo.c:4.
+      (gdb) b c:\some\double\slashes\dir\foo.c:4
+      No source file named c:\some\double\slashes\dir\foo.c:4.
+   To prevent this from happening, we need this function to always
+   strip those extra backslashes.  While canonicalize_file_name does
+   perform this simplification, it only works when the path is valid.
+   Since the simplification would be useful even if the path is not
+   valid (one can always set a breakpoint on a file, even if the file
+   does not exist locally), we rely instead on GetFullPathName to
+   perform the canonicalization.  */
+
 #if defined (_WIN32)
   {
     char buf[MAX_PATH];
     DWORD len = GetFullPathName (filename, MAX_PATH, buf, NULL);
 
+    /* The file system is case-insensitive but case-preserving.
+       So it is important we do not lowercase the path.  Otherwise,
+       we might not be able to display the original casing in a given
+       path.  */
     if (len > 0 && len < MAX_PATH)
       return xstrdup (buf);
   }

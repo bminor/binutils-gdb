@@ -1,3 +1,8 @@
+2014-11-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.c (gdb_realpath): Rework comment about handling on
+	Windows.
+
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
