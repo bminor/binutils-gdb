@@ -1,3 +1,9 @@
+2014-11-28  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2.h (NIOS2_INSN_ADDI, NIOS2_INSN_ANDI): Delete.
+	(NIOS2_INSN_ORI, NIOS2_INSN_XORI): Delete.
+	(NIOS2_INSN_OPTARG): Renumber.
+
 2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2.h (nios2_find_opcode_hash): Add mach parameter to

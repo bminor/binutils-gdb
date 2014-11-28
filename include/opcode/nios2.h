@@ -120,12 +120,7 @@ struct nios2_opcode
 #define NIOS2_INSN_CBRANCH	0x00000020
 #define NIOS2_INSN_CALL		0x00000040
 
-#define NIOS2_INSN_ADDI		0x00000080
-#define NIOS2_INSN_ANDI		0x00000100
-#define NIOS2_INSN_ORI		0x00000200
-#define NIOS2_INSN_XORI		0x00000400
-
-#define NIOS2_INSN_OPTARG	0x00000800
+#define NIOS2_INSN_OPTARG	0x00000080
 
 /* Register attributes.  */
 #define REG_NORMAL	(1<<0)	/* Normal registers.  */

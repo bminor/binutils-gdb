@@ -179,13 +179,13 @@ const struct nios2_opcode nios2_r1_opcodes[] =
   {"add", "d,s,t", "d,s,t,E", 3, 4, iw_r_type,
    MATCH_R1_ADD, MASK_R1_ADD, 0, no_overflow},
   {"addi", "t,s,i", "t,s,i,E", 3, 4, iw_i_type,
-   MATCH_R1_ADDI, MASK_R1_ADDI, NIOS2_INSN_ADDI, signed_immed16_overflow},
+   MATCH_R1_ADDI, MASK_R1_ADDI, 0, signed_immed16_overflow},
   {"and", "d,s,t", "d,s,t,E", 3, 4, iw_r_type,
    MATCH_R1_AND, MASK_R1_AND, 0, no_overflow},
   {"andhi", "t,s,u", "t,s,u,E", 3, 4, iw_i_type,
    MATCH_R1_ANDHI, MASK_R1_ANDHI, 0, unsigned_immed16_overflow},
   {"andi", "t,s,u", "t,s,u,E", 3, 4, iw_i_type,
-   MATCH_R1_ANDI, MASK_R1_ANDI, NIOS2_INSN_ANDI, unsigned_immed16_overflow},
+   MATCH_R1_ANDI, MASK_R1_ANDI, 0, unsigned_immed16_overflow},
   {"beq", "s,t,o", "s,t,o,E", 3, 4, iw_i_type,
    MATCH_R1_BEQ, MASK_R1_BEQ, NIOS2_INSN_CBRANCH, branch_target_overflow},
   {"bge", "s,t,o", "s,t,o,E", 3, 4, iw_i_type,
@@ -341,7 +341,7 @@ const struct nios2_opcode nios2_r1_opcodes[] =
   {"orhi", "t,s,u", "t,s,u,E", 3, 4, iw_i_type,
    MATCH_R1_ORHI, MASK_R1_ORHI, 0, unsigned_immed16_overflow},
   {"ori", "t,s,u", "t,s,u,E", 3, 4, iw_i_type,
-   MATCH_R1_ORI, MASK_R1_ORI, NIOS2_INSN_ORI, unsigned_immed16_overflow},
+   MATCH_R1_ORI, MASK_R1_ORI, 0, unsigned_immed16_overflow},
   {"rdctl", "d,c", "d,c,E", 2, 4, iw_r_type,
    MATCH_R1_RDCTL, MASK_R1_RDCTL, 0, no_overflow},
   {"rdprs", "t,s,i", "t,s,i,E", 3, 4, iw_i_type,
@@ -395,7 +395,7 @@ const struct nios2_opcode nios2_r1_opcodes[] =
   {"xorhi", "t,s,u", "t,s,u,E", 3, 4, iw_i_type,
    MATCH_R1_XORHI, MASK_R1_XORHI, 0, unsigned_immed16_overflow},
   {"xori", "t,s,u", "t,s,u,E", 3, 4, iw_i_type,
-   MATCH_R1_XORI, MASK_R1_XORI, NIOS2_INSN_XORI, unsigned_immed16_overflow}
+   MATCH_R1_XORI, MASK_R1_XORI, 0, unsigned_immed16_overflow}
 };
 
 #define NIOS2_NUM_OPCODES \

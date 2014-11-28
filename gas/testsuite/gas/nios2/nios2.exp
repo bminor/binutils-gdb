@@ -24,4 +24,5 @@ if { [istarget nios2-*-*] } {
     run_list_test "illegal" ""
     run_list_test "warn_nobreak" ""
     run_list_test "warn_noat" ""
+    run_list_test "movi" ""
 }
