@@ -1,3 +1,10 @@
+2014-12-12  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_instruction_restores_sp): New function.
+	(arm_analyze_prologue): Call arm_instruction_restores_sp.
+	(arm_in_function_epilogue_p): Move code to
+	arm_instruction_restores_sp.
+
 2014-12-11  Doug Evans  <xdje42@gmail.com>
 
 	* cp-namespace.c (cp_lookup_nested_symbol): Fix comments.

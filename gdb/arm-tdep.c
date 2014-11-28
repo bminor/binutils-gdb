@@ -1664,6 +1664,30 @@ arm_instruction_changes_pc (uint32_t this_instr)
       }
 }
 
+/* Return 1 if the ARM instruction INSN restores SP in epilogue, 0
+   otherwise.  */
+
+static int
+arm_instruction_restores_sp (unsigned int insn)
+{
+  if (bits (insn, 28, 31) != INST_NV)
+    {
+      if ((insn & 0x0df0f000) == 0x0080d000
+	  /* ADD SP (register or immediate).  */
+	  || (insn & 0x0df0f000) == 0x0040d000
+	  /* SUB SP (register or immediate).  */
+	  || (insn & 0x0ffffff0) == 0x01a0d000
+	  /* MOV SP.  */
+	  || (insn & 0x0fff0000) == 0x08bd0000
+	  /* POP (LDMIA).  */
+	  || (insn & 0x0fff0000) == 0x049d0000)
+	  /* POP of a single register.  */
+	return 1;
+    }
+
+  return 0;
+}
+
 /* Analyze an ARM mode prologue starting at PROLOGUE_START and
    continuing no further than PROLOGUE_END.  If CACHE is non-NULL,
    fill it in.  Return the first address not recognized as a prologue
@@ -1861,6 +1885,11 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
       else if (arm_instruction_changes_pc (insn))
 	/* Don't scan past anything that might change control flow.  */
 	break;
+      else if (arm_instruction_restores_sp (insn))
+	{
+	  /* Don't scan past the epilogue.  */
+	  break;
+	}
       else if ((insn & 0xfe500000) == 0xe8100000	/* ldm */
 	       && pv_is_register (regs[bits (insn, 16, 19)], ARM_SP_REGNUM))
 	/* Ignore block loads from the stack, potentially copying
@@ -3351,7 +3380,7 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn;
-  int found_return, found_stack_adjust;
+  int found_return;
   CORE_ADDR func_start, func_end;
 
   if (arm_pc_is_thumb (gdbarch, pc))
@@ -3391,28 +3420,8 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (pc < func_start + 4)
     return 0;
 
-  found_stack_adjust = 0;
   insn = read_memory_unsigned_integer (pc - 4, 4, byte_order_for_code);
-  if (bits (insn, 28, 31) != INST_NV)
-    {
-      if ((insn & 0x0df0f000) == 0x0080d000)
-	/* ADD SP (register or immediate).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0df0f000) == 0x0040d000)
-	/* SUB SP (register or immediate).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0ffffff0) == 0x01a0d000)
-	/* MOV SP.  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0fff0000) == 0x08bd0000)
-	/* POP (LDMIA).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0fff0000) == 0x049d0000)
-	/* POP of a single register.  */
-	found_stack_adjust = 1;
-    }
-
-  if (found_stack_adjust)
+  if (arm_instruction_restores_sp (insn))
     return 1;
 
   return 0;
