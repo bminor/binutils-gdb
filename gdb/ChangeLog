@@ -1,3 +1,9 @@
+2014-11-29  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_analyze_prologue): Move local variables
+	'framereg' and 'framesize' to inner block.  Move code to
+	inner block too.
+
 2014-11-28  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* eval.c: Include gdbthread.h.
