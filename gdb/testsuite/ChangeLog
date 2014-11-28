@@ -1,3 +1,14 @@
+2014-11-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.ada/py_range.exp: Add parentheses to python calls to print.
+	* gdb.dwarf2/symtab-producer.exp: Same.
+	* gdb.gdb/python-interrupts.exp: Same.
+	* gdb.gdb/python-selftest.exp: Same.
+	* gdb.python/py-linetable.exp: Same.
+	* gdb.python/py-type.exp: Same.
+	* gdb.python/py-value-cc.exp: Same.
+	* gdb.python/py-value.exp: Same.
+
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/break-probes.exp: Match library name prefixed with
