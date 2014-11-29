@@ -23,9 +23,7 @@ if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } then {
     return
 }
 
-set testfile "i386-bp_permanent"
-set srcfile i386-bp_permanent.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
