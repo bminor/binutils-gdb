@@ -35,14 +35,10 @@ standard_testfile
 
 # Make this available to gdb before the program starts, it is
 # automagically loaded by gdb.
-# Give the file a new name so we don't clobber the real one if
-# objfile == srcdir.
 # We also need to do this before compiling the program because the name
 # of the script file is encoded in the binary.
-# FIXME: Can we get gdb_remote_download to call standard_output_file for us?
 set remote_guile_file [gdb_remote_download host \
-			   ${srcdir}/${subdir}/${testfile}.scm \
-			   ${subdir}/t-${testfile}.scm]
+			   ${srcdir}/${subdir}/${testfile}.scm]
 
 if {[build_executable $testfile.exp $testfile $srcfile \
 	[list debug "additional_flags=-I${srcdir}/../../include -DSCRIPT_FILE=\"$remote_guile_file\""]] == -1} {

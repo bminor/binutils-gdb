@@ -28,14 +28,10 @@ if { [skip_guile_tests] } { continue }
 
 # Test error while loading .scm.
 
-# Give the files a new name so we don't clobber the real one if
-# objfile == srcdir.
 set remote_guile_file_1 [gdb_remote_download host \
-			     ${srcdir}/${subdir}/${testfile}-1.scm \
-			     ${subdir}/t-${testfile}-1.scm]
+			     ${srcdir}/${subdir}/${testfile}-1.scm]
 set remote_guile_file_2 [gdb_remote_download host \
-			     ${srcdir}/${subdir}/${testfile}-2.scm \
-			     ${subdir}/t-${testfile}-2.scm]
+			     ${srcdir}/${subdir}/${testfile}-2.scm]
 
 gdb_test "source $remote_guile_file_1" \
     "(ERROR: )?In procedure \[+\]: Wrong type: #f.*" \

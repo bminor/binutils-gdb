@@ -1,5 +1,12 @@
 2014-12-05  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.guile/scm-error.exp: Remove the third argument to
+	gdb_remote_download.
+	* gdb.guile/scm-frame-args.exp: Likewise.
+	* gdb.guile/scm-section-script.exp: Likewise.
+
+2014-12-05  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.arch/i386-bp_permanent.exp: Use standard_testfile.
 
 2014-12-04  Doug Evans  <dje@google.com>
