@@ -69,7 +69,8 @@ evaluate_subexp (struct type *expect_type, struct expression *exp,
   int cleanup_temps = 0;
 
   if (*pos == 0 && target_has_execution
-      && exp->language_defn->la_language == language_cplus)
+      && exp->language_defn->la_language == language_cplus
+      && !thread_stack_temporaries_enabled_p (inferior_ptid))
     {
       cleanups = enable_thread_stack_temporaries (inferior_ptid);
       cleanup_temps = 1;

@@ -1,3 +1,8 @@
+2014-11-29  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* eval.c (evaluate_subexp): Check that the thread stack	temporaries
+	are not already enabled before enabling them.
+
 2014-11-29  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (arm_analyze_prologue): Move local variables
