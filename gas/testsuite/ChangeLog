@@ -1,3 +1,8 @@
+2014-11-30  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/a2.d: Update for mftb change.
+	* gas/ppc/476.d: Likewise.
+
 2014-11-28  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gas/nios2/nios2.exp: Make "movi" a list test.
