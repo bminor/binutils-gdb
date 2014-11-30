@@ -1,5 +1,10 @@
 2015-01-09  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* Makefile.in (.y.c): Don't munge yacc's #line
+	directives.
+
+2015-01-09  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* utils.c (defaulted_query): Rewrite to use gdb_readline_wrapper
 	to prompt for input.
 	* tui/tui-hooks.c (tui_query_hook): Remove.
