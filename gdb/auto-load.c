@@ -317,6 +317,22 @@ Use 'set auto-load safe-path /' for disabling the auto-load safe-path security.\
   auto_load_safe_path_vec_update ();
 }
 
+/* "add-auto-load-scripts-directory" command for the auto_load_dir configuration
+   variable.  */
+
+static void
+add_auto_load_dir (char *args, int from_tty)
+{
+  char *s;
+
+  if (args == NULL || *args == 0)
+    error (_("Directory argument required."));
+
+  s = xstrprintf ("%s%c%s", auto_load_dir, DIRNAME_SEPARATOR, args);
+  xfree (auto_load_dir);
+  auto_load_dir = s;
+}
+
 /* Implementation for filename_is_in_pattern overwriting the caller's FILENAME
    and PATTERN.  */
 
@@ -1523,6 +1539,15 @@ This options has security implications for untrusted inferiors."),
 		   "to auto-load files.\n\
 See the commands 'set auto-load safe-path' and 'show auto-load safe-path' to\n\
 access the current full list setting."),
+		 &cmdlist);
+  set_cmd_completer (cmd, filename_completer);
+
+  cmd = add_cmd ("add-auto-load-scripts-directory", class_support,
+		 add_auto_load_dir,
+		 _("Add entries to the list of directories from which to load "
+		   "auto-loaded scripts.\n\
+See the commands 'set auto-load scripts-directory' and\n\
+'show auto-load scripts-directory' to access the current full list setting."),
 		 &cmdlist);
   set_cmd_completer (cmd, filename_completer);
 
