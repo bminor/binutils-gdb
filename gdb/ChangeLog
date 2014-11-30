@@ -1,3 +1,8 @@
+2014-11-30  Martin Galvan  <martin.galvan@tallertechnologies.com>  (tiny patch, obvious)
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	* frame.c (frame_id_eq): Fix the check for FID_STACK_INVALID.
+
 2014-11-29  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* eval.c (evaluate_subexp): Check that the thread stack	temporaries
