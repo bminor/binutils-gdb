@@ -22562,9 +22562,9 @@ scripts.
 @anchor{add-auto-load-safe-path}
 @kindex add-auto-load-safe-path
 @item add-auto-load-safe-path
-Add an entry (or list of entries) the list of directories trusted for automatic
-loading and execution of scripts.  Multiple entries may be delimited by the
-host platform path separator in use.
+Add an entry (or list of entries) to the list of directories trusted for
+automatic loading and execution of scripts.  Multiple entries may be delimited
+by the host platform path separator in use.
 @end table
 
 This variable defaults to what @code{--with-auto-load-dir} has been configured
