@@ -1272,6 +1272,9 @@ class General_options
 	      NULL);
   DEFINE_bool(execstack, options::DASH_Z, '\0', false,
 	      N_("Mark output as requiring executable stack"), NULL);
+  DEFINE_bool(global, options::DASH_Z, '\0', false,
+	      N_("Make symbols in DSO available for subsequently loaded "
+	         "objects"), NULL);
   DEFINE_bool(initfirst, options::DASH_Z, '\0', false,
 	      N_("Mark DSO to be initialized first at runtime"),
 	      NULL);

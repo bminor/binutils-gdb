@@ -1,3 +1,9 @@
+2014-12-01  Dimitry Ivanov <dimitry@google.com>
+
+	* layout.cc (Layout::finish_dynamic_section): When '-z global'
+	is specified set DF_1_GLOBAL in DT_FLAGS_1 flags.
+	* options.h (General_options): New -z option (global).
+
 2014-12-01  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/17578
