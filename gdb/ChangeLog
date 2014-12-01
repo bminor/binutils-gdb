@@ -1,3 +1,13 @@
+2014-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/i386/i386gnu.mh (NATDEPFILES): Remove core-regset.o.
+	* i386gnu-nat.c: Do not include <sys/procfs.h> or "gregset.h".
+	(CREG_OFFSET, creg_offset, CREG_ADDR): Remove.
+	(supply_gregset, supply_fpregset): Remove.
+	* i386gnu-tdep.c (i386gnu_gregset_reg_offset): New variable.
+	(i386gnu_init_abi): Set tdep->gregset_reg_offset, gregset_num_regs,
+	and sizeof_gregset.
+
 2014-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Add add-auto-load-scripts-directory.

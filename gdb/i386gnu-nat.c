@@ -34,11 +34,6 @@
 #include "inf-child.h"
 #include "i387-tdep.h"
 
-#ifdef HAVE_SYS_PROCFS_H
-# include <sys/procfs.h>
-# include "gregset.h"
-#endif
-
 /* Offset to the thread_state_t location where REG is stored.  */
 #define REG_OFFSET(reg) offsetof (struct i386_thread_state, reg)
 
@@ -52,21 +47,7 @@ static int reg_offset[] =
   REG_OFFSET (ds), REG_OFFSET (es), REG_OFFSET (fs), REG_OFFSET (gs)
 };
 
-/* Offset to the greg_t location where REG is stored.  */
-#define CREG_OFFSET(reg) (REG_##reg * 4)
-
-/* At CREG_OFFSET[N] is the offset to the greg_t location where
-   the GDB register N is stored.  */
-static int creg_offset[] =
-{
-  CREG_OFFSET (EAX), CREG_OFFSET (ECX), CREG_OFFSET (EDX), CREG_OFFSET (EBX),
-  CREG_OFFSET (UESP), CREG_OFFSET (EBP), CREG_OFFSET (ESI), CREG_OFFSET (EDI),
-  CREG_OFFSET (EIP), CREG_OFFSET (EFL), CREG_OFFSET (CS), CREG_OFFSET (SS),
-  CREG_OFFSET (DS), CREG_OFFSET (ES), CREG_OFFSET (FS), CREG_OFFSET (GS)
-};
-
 #define REG_ADDR(state, regnum) ((char *)(state) + reg_offset[regnum])
-#define CREG_ADDR(state, regnum) ((const char *)(state) + creg_offset[regnum])
 
 
 /* Get the whole floating-point state of THREAD and record the values
@@ -99,24 +80,6 @@ fetch_fpregs (struct regcache *regcache, struct proc *thread)
       i387_supply_fsave (regcache, -1, state.hw_state);
     }
 }
-
-#ifdef HAVE_SYS_PROCFS_H
-/* These two calls are used by the core-regset.c code for
-   reading ELF core files.  */
-void
-supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregs)
-{
-  int i;
-  for (i = 0; i < I386_NUM_GREGS; i++)
-    regcache_raw_supply (regcache, i, CREG_ADDR (gregs, i));
-}
-
-void
-supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregs)
-{
-  i387_supply_fsave (regcache, -1, fpregs);
-}
-#endif
 
 /* Fetch register REGNO, or all regs if REGNO is -1.  */
 static void
