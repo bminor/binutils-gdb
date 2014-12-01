@@ -15261,11 +15261,11 @@ process_archive (char * file_name, FILE * file, bfd_boolean is_thin_archive)
 	error (_("%s: unable to dump the index as none was found\n"), file_name);
       else
 	{
-	  unsigned int i, l;
+	  unsigned long i, l;
 	  unsigned long current_pos;
 
-	  printf (_("Index of archive %s: (%ld entries, 0x%lx bytes in the symbol table)\n"),
-		  file_name, (long) arch.index_num, arch.sym_size);
+	  printf (_("Index of archive %s: (%lu entries, 0x%lx bytes in the symbol table)\n"),
+		  file_name, (unsigned long) arch.index_num, arch.sym_size);
 	  current_pos = ftell (file);
 
 	  for (i = l = 0; i < arch.index_num; i++)
@@ -15296,8 +15296,9 @@ process_archive (char * file_name, FILE * file, bfd_boolean is_thin_archive)
 			 file_name);
 		  break;
 		}
-	      printf ("\t%s\n", arch.sym_table + l);
-	      l += strlen (arch.sym_table + l) + 1;
+	      /* PR 17531: file: 0b6630b2.  */
+	      printf ("\t%.*s\n", (int) (arch.sym_size - l), arch.sym_table + l);
+	      l += strnlen (arch.sym_table + l, arch.sym_size - l) + 1;
 	    }
 
 	  if (arch.uses_64bit_indicies)

@@ -77,7 +77,7 @@ struct archive_info
 };
 
 /* Return the path name for a proxy entry in a thin archive.  */
-extern char *adjust_relative_path (const char *, const char *, int);
+extern char *adjust_relative_path (const char *, const char *, unsigned long);
 
 /* Read the symbol table and long-name table from an archive.  */
 extern int setup_archive (struct archive_info *, const char *, FILE *,

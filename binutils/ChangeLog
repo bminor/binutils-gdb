@@ -1,3 +1,17 @@
+2014-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (process_cu_tu_index): Check for an out of range row
+	index.
+	* elfcomm.c (adjust_relative_path): Change name_len parameter to
+	an unsigned long.  Check for path length overflow.
+	(process_archive_index_and_symbols): Check for invalid header
+	size.
+	(setup_archive): Add checks for invalid archives.
+	(get_archive_member_name): Add range checks.
+	* elfcomm.h (adjust_relative_path): Update prototyoe.
+	* readelf.c (process_archive): Add range checks.
+
 2014-11-28  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_32bit_elf_symbols): Cast bfd_size_type values to
