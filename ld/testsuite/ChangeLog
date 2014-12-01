@@ -1,3 +1,16 @@
+2014-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16452
+	PR ld/16457
+	* ld-elf/pr16452.map: New file.
+	* ld-elf/pr16452.od: Likewise.
+	* ld-elf/pr16452a.c: Likewise.
+	* ld-elf/pr16452b.c: Likewise.
+	* ld-elf/pr16457.od: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add tests for PR ld/16452 and
+	PR ld/16457.
+
 2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/mpx.exp: Always run mpx3 and mpx4 tests in 64-bit.
