@@ -67,7 +67,7 @@ gdb_py_test_multiple "multi-line python command" \
 with_test_prefix "python interactive help" {
     set test "python; help(); end"
     gdb_test_multiple "python\nhelp()\nend" $test {
-	-re "online help utility.*help> $" {
+	-re ".*help utility.*help> $" {
 	    pass $test
 
 	    # The "quit" must be seen on the output.  A buggy GDB
