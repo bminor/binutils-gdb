@@ -2280,6 +2280,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->address = bfd_get_section_vma (abfd, sec);
   section->size = bfd_get_section_size (sec);
   section->start = NULL;
+  section->user_data = sec;
   ret = bfd_get_full_section_contents (abfd, sec, &section->start);
 
   if (! ret)
@@ -2345,6 +2346,22 @@ free_debug_section (enum dwarf_section_display_enum debug)
 
   if (section->start == NULL)
     return;
+
+  /* PR 17512: file: 0f67f69d.  */
+  if (section->user_data != NULL)
+    {
+      asection * sec = (asection *) section->user_data;
+
+      /* If we are freeing contents that are also pointed to by the BFD
+	 library's section structure then make sure to update those pointers
+	 too.  Otherwise, the next time we try to load data for this section
+	 we can end up using a stale pointer.  */
+      if (section->start == sec->contents)
+	{
+	  sec->contents = NULL;
+	  sec->flags &= ~ SEC_IN_MEMORY;
+	}
+    }
 
   free ((char *) section->start);
   section->start = NULL;

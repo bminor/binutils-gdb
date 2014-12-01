@@ -1,5 +1,22 @@
 2014-12-01  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* dwarf.h (struct dwarf_section): Add user_data field.
+	* dwarf.c (frame_need_space): Check for an over large register
+	number.
+	(display_debug_frames): Check the return value from
+	frame_need_space.  Check for a CFA expression that is so long the
+	start address wraps around.
+	(debug_displays): Initialise the user_data field.
+	* objdump.c (load_specific_debug_section): Save the BFD section
+	pointer in the user_data field of the dwarf_section structure.
+	(free_debug_section): Update BFD section data when freeing section
+	contents.
+	* readelf.c (load_specific_debug_section): Initialise the
+	user_data field.
+
+2014-12-01  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17531
 	* dwarf.c (process_cu_tu_index): Check for an out of range row
 	index.

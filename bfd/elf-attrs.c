@@ -430,9 +430,13 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 {
   bfd_byte *contents;
   bfd_byte *p;
+  bfd_byte *p_end;
   bfd_vma len;
   const char *std_sec;
 
+  /* PR 17512: file: 2844a11d.  */
+  if (hdr->sh_size == 0)
+    return;
   contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
   if (!contents)
     return;
@@ -443,11 +447,14 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
       return;
     }
   p = contents;
+  p_end = p + hdr->sh_size;
   std_sec = get_elf_backend_data (abfd)->obj_attrs_vendor;
+  
   if (*(p++) == 'A')
     {
       len = hdr->sh_size - 1;
-      while (len > 0)
+
+      while (len > 0 && p < p_end - 4)
 	{
 	  unsigned namelen;
 	  bfd_vma section_len;
@@ -477,7 +484,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	    }
 
 	  p += namelen;
-	  while (section_len > 0)
+	  while (section_len > 0 && p < p_end)
 	    {
 	      int tag;
 	      unsigned int n;
@@ -487,7 +494,10 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 
 	      tag = read_unsigned_leb128 (abfd, p, &n);
 	      p += n;
-	      subsection_len = bfd_get_32 (abfd, p);
+	      if (p < p_end - 4)
+		subsection_len = bfd_get_32 (abfd, p);
+	      else
+		subsection_len = 0;
 	      p += 4;
 	      if (subsection_len == 0)
 		break;
