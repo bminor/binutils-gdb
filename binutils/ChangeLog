@@ -1,3 +1,8 @@
+2014-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (process_cu_tu_index): Properly check for an out of
+	range row index.
+
 2014-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

@@ -6825,7 +6825,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	  if (row != 0)
 	    {
 	      /* PR 17531: file: a05f6ab3.  */
-	      if (row >= nused)
+	      if (row > nused)
 		{
 		  warn (_("Row index (%u) is larger than number of used entries (%u)\n"),
 			row, nused);
