@@ -11713,6 +11713,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
   snprintf (buf, sizeof (buf), _("%s section data"), section->name);
   section->address = sec->sh_addr;
+  section->user_data = NULL;
   section->start = (unsigned char *) get_data (NULL, (FILE *) file,
                                                sec->sh_offset, 1,
                                                sec->sh_size, buf);

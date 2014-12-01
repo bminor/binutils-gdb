@@ -297,13 +297,14 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       /* Allocate and clear an extra byte at the end, to prevent crashes
 	 in case the string table is not terminated.  */
       if (shstrtabsize + 1 <= 1
-	  || (shstrtab = (bfd_byte *) bfd_alloc (abfd, shstrtabsize + 1)) == NULL
-	  || bfd_seek (abfd, offset, SEEK_SET) != 0)
+	  || bfd_seek (abfd, offset, SEEK_SET) != 0
+	  || (shstrtab = (bfd_byte *) bfd_alloc (abfd, shstrtabsize + 1)) == NULL)
 	shstrtab = NULL;
       else if (bfd_bread (shstrtab, shstrtabsize, abfd) != shstrtabsize)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_file_truncated);
+	  bfd_release (abfd, shstrtab);
 	  shstrtab = NULL;
 	  /* Once we've failed to read it, make sure we don't keep
 	     trying.  Otherwise, we'll keep allocating space for
@@ -332,9 +333,19 @@ bfd_elf_string_from_elf_section (bfd *abfd,
 
   hdr = elf_elfsections (abfd)[shindex];
 
-  if (hdr->contents == NULL
-      && bfd_elf_get_str_section (abfd, shindex) == NULL)
-    return NULL;
+  if (hdr->contents == NULL)
+    {
+      if (hdr->sh_type != SHT_STRTAB && hdr->sh_type < SHT_LOOS)
+	{
+	  /* PR 17512: file: f057ec89.  */
+	  _bfd_error_handler (_("%B: attempt to load strings from a non-string section (number %d)"),
+			      abfd, shindex);
+	  return NULL;
+	}
+  
+      if (bfd_elf_get_str_section (abfd, shindex) == NULL)
+	return NULL;
+    }
 
   if (strindex >= hdr->sh_size)
     {
@@ -636,6 +647,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		     pointers.  */
 		  src = shdr->contents + shdr->sh_size;
 		  dest = (Elf_Internal_Group *) (shdr->contents + amt);
+
 		  while (1)
 		    {
 		      unsigned int idx;
@@ -1253,6 +1265,9 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
       swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
 
       extdyn = dynbuf;
+      /* PR 17512: file: 6f427532.  */
+      if (s->size < extdynsize)
+	goto error_return;
       extdynend = extdyn + s->size;
       /* PR 17512: file: id:000006,sig:06,src:000000,op:flip4,pos:5664.
          Fix range check.  */
@@ -1607,7 +1622,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
   if (++ nesting > 3)
     {
       /* PR17512: A corrupt ELF binary might contain a recursive group of
-	 sections, each the string indicies pointing to the next in the
+	 sections, with each the string indicies pointing to the next in the
 	 loop.  Detect this here, by refusing to load a section that we are
 	 already in the process of loading.  We only trigger this test if
 	 we have nested at least three sections deep as normal ELF binaries
@@ -1974,7 +1989,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	else
 	  p_hdr = &esdt->rel.hdr;
 
-	BFD_ASSERT (*p_hdr == NULL);
+	/* PR 17512: file: 0b4f81b7.  */
+	if (*p_hdr != NULL)
+	  goto fail;
 	amt = sizeof (*hdr2);
 	hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
 	if (hdr2 == NULL)
@@ -2031,15 +2048,18 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (hdr->contents != NULL)
 	{
 	  Elf_Internal_Group *idx = (Elf_Internal_Group *) hdr->contents;
-	  unsigned int n_elt = hdr->sh_size / GRP_ENTRY_SIZE;
+	  unsigned int n_elt = hdr->sh_size / sizeof (* idx);
 	  asection *s;
 
+	  if (n_elt == 0)
+	    goto fail;
 	  if (idx->flags & GRP_COMDAT)
 	    hdr->bfd_section->flags
 	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
 	  /* We try to keep the same section order as it comes in.  */
 	  idx += n_elt;
+
 	  while (--n_elt != 0)
 	    {
 	      --idx;

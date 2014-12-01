@@ -592,6 +592,10 @@ bfd_perform_relocation (bfd *abfd,
       return bfd_reloc_ok;
     }
 
+  /* PR 17512: file: 0f67f69d.  */
+  if (howto == NULL)
+    return bfd_reloc_undefined;
+
   /* If we are not producing relocatable output, return an error if
      the symbol is not defined.  An undefined weak symbol is
      considered to have a value of zero (SVR4 ABI, p. 4-27).  */

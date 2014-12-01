@@ -1038,12 +1038,19 @@ do_slurp_coff_armap (bfd *abfd)
     }
 
   /* OK, build the carsyms.  */
-  for (i = 0; i < nsymz; i++)
+  for (i = 0; i < nsymz && stringsize > 0; i++)
     {
+      bfd_size_type len;
+
       rawptr = raw_armap + i;
       carsyms->file_offset = swap ((bfd_byte *) rawptr);
       carsyms->name = stringbase;
-      stringbase += strlen (stringbase) + 1;
+      /* PR 17512: file: 4a1d50c1.  */
+      len = strnlen (stringbase, stringsize);
+      if (len < stringsize)
+	len ++;
+      stringbase += len;
+      stringsize -= len;
       carsyms++;
     }
   *stringbase = 0;

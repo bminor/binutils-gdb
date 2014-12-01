@@ -1,3 +1,30 @@
+2014-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive.c (do_slurp_coff_armap): Add range checks to prevent
+	running off the end of the string table.
+	* compress.c (bfd_get_full_section_contents): Return a NULL
+	pointer for zero sized sections.  Do not attempt to copy a buffer
+	onto itself.
+	* elf-attrs.c (_bfd_elf_parse_attributes): Check for an empty
+	header.  Add range checks to avoid running off the end of the
+	section.
+	* elf.c (bfd_elf_get_str_section): Seek before allocating so that
+	if the seek fails, no memory is allocated.
+	(bfd_elf_string_from_elf_section): Do not allocate a string from a
+	non string section.  It only leads to trouble later on.
+	(_bfd_elf_print_private_bfd_data): Check for there being too
+	little external dynamic data.
+	(bfd_section_from_shdr): Replace assertion with a failure mode.
+	(bfd_section_from_shdr): When walking a loaded group section use
+	the internal structure size, not the external size.  Check for the
+	group section being empty.
+	* elf32-i386.c (elf_i386_rtype_to_howto): Replace assertion with a
+	failure mode.
+	* elfcode.h (elf_slurp_reloc_table): Likewise.
+	* reloc.c (bfd_perform_relocation): Avoid seg-fault if the howto
+	parameter is NULL.
+
 2014-11-30  Alan Modra  <amodra@gmail.com>
 
 	PR 16452, 16457

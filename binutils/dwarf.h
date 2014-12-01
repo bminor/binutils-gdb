@@ -164,6 +164,8 @@ struct dwarf_section
   dwarf_vma address;
   dwarf_size_type size;
   enum dwarf_section_display_enum abbrev_sec;
+  /* A spare field for random use.  */
+  void *user_data;
 };
 
 /* A structure containing the name of a debug section

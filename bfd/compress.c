@@ -152,7 +152,8 @@ DESCRIPTION
 	return @var{*ptr} with memory malloc'd by this function.
 
 	Return @code{TRUE} if the full section contents is retrieved
-	successfully.
+	successfully.  If the section has no contents then this function
+	returns @code{TRUE} but @var{*ptr} is set to NULL.
 */
 
 bfd_boolean
@@ -172,7 +173,10 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
   else
     sz = sec->size;
   if (sz == 0)
-    return TRUE;
+    {
+      *ptr = NULL;
+      return TRUE;
+    }
 
   switch (sec->compress_status)
     {
@@ -183,6 +187,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	  if (p == NULL)
 	    return FALSE;
 	}
+
       if (!bfd_get_section_contents (abfd, sec, p, 0, sz))
 	{
 	  if (*ptr != p)
@@ -246,7 +251,9 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	    return FALSE;
 	  *ptr = p;
 	}
-      memcpy (p, sec->contents, sz);
+      /* PR 17512; file: 5bc29788.  */
+      if (p != sec->contents)
+	memcpy (p, sec->contents, sz);
       return TRUE;
 
     default:
