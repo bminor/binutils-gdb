@@ -255,6 +255,18 @@ set build_tests {
   {"Build libpr16496b.so"
    "-shared tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
    {dummy.c} {{objdump {-R} pr16496b.od}} "libpr16496b.so"}
+  {"Build libpr16452a.so"
+   "-shared -Wl,-soname,libpr16452a.so,--version-script=pr16452.map" "-fPIC"
+   {pr16452a.c} {} "libpr16452a.so"}
+  {"Build libpr16452b.so"
+   "-shared -Wl,-soname,libpr16452b.so,--no-as-needed tmpdir/libpr16452a.so" "-fPIC"
+   {dummy.c} {} "libpr16452b.so"}
+  {"Build pr16452"
+   "tmpdir/libpr16452b.so -Wl,-rpath=tmpdir" ""
+   {pr16452b.c} {{objdump {-p} pr16452.od}} "pr16452"}
+  {"Build pr16457"
+   "tmpdir/libpr16452b.so -Wl,-rpath=tmpdir" ""
+   {pr16452b.c} {{objdump {-p} pr16457.od}} "pr16457"}
 }
 
 run_cc_link_tests $build_tests
