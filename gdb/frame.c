@@ -614,7 +614,7 @@ frame_id_eq (struct frame_id l, struct frame_id r)
        outer_frame_id.  */
     eq = 1;
   else if (l.stack_status == FID_STACK_INVALID
-	   || l.stack_status == FID_STACK_INVALID)
+	   || r.stack_status == FID_STACK_INVALID)
     /* Like a NaN, if either ID is invalid, the result is false.
        Note that a frame ID is invalid iff it is the null frame ID.  */
     eq = 0;

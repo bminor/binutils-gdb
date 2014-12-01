@@ -1304,12 +1304,12 @@ AC_C_BIGENDIAN
 
 AC_FUNC_MMAP
 AC_FUNC_VFORK
-AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
-		pipe poll pread pread64 pwrite readlink resize_term \
+AC_CHECK_FUNCS([getrusage getuid getgid \
+		pipe poll pread pread64 pwrite resize_term \
 		sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
-		setrlimit getrlimit posix_madvise waitpid lstat \
+		setrlimit getrlimit posix_madvise waitpid \
 		ptrace64 sigaltstack])
 AM_LANGINFO_CODESET
 GDB_AC_COMMON

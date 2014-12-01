@@ -1591,7 +1591,6 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
 
   if (debugfile == NULL)
     {
-#ifdef HAVE_LSTAT
       /* For PR gdb/9538, try again with realpath (if different from the
 	 original).  */
 
@@ -1618,7 +1617,6 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
 		}
 	    }
 	}
-#endif  /* HAVE_LSTAT  */
     }
 
   do_cleanups (cleanups);

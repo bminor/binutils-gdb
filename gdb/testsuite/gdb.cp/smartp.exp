@@ -72,6 +72,5 @@ gdb_test "p b->foo()"         "= 66"
 gdb_test "p c->foo()"         "= 66"
 gdb_test "p c->inta"          "= 77"
 
-setup_kfail "gdb/11606" "*-*-*"
 gdb_test "p c2->inta"          "= 77"
 

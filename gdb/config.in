@@ -75,9 +75,6 @@
 /* Define to 1 if you have the `btowc' function. */
 #undef HAVE_BTOWC
 
-/* Define to 1 if you have the `canonicalize_file_name' function. */
-#undef HAVE_CANONICALIZE_FILE_NAME
-
 /* Define to 1 if you have the <cursesX.h> header file. */
 #undef HAVE_CURSESX_H
 
@@ -225,9 +222,6 @@
 /* Define to 1 if the compiler supports long double. */
 #undef HAVE_LONG_DOUBLE
 
-/* Define to 1 if you have the `lstat' function. */
-#undef HAVE_LSTAT
-
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T
 
@@ -329,12 +323,6 @@
 
 /* Define if Python interpreter is being linked in. */
 #undef HAVE_PYTHON
-
-/* Define to 1 if you have the `readlink' function. */
-#undef HAVE_READLINK
-
-/* Define to 1 if you have the `realpath' function. */
-#undef HAVE_REALPATH
 
 /* Define to 1 if you have the `resize_term' function. */
 #undef HAVE_RESIZE_TERM

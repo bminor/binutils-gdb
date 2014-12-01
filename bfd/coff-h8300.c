@@ -337,7 +337,7 @@ rtype2howto (arelent *internal, struct internal_reloc *dst)
       internal->howto = howto_table + 19;
       break;
     default:
-      abort ();
+      internal->howto = NULL;
       break;
     }
 }

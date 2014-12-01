@@ -24,6 +24,7 @@
 #include "expression.h"
 #include "target.h"
 #include "frame.h"
+#include "gdbthread.h"
 #include "language.h"		/* For CAST_IS_CONVERSION.  */
 #include "f-lang.h"		/* For array bound stuff.  */
 #include "cp-abi.h"
@@ -63,8 +64,29 @@ struct value *
 evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 int *pos, enum noside noside)
 {
-  return (*exp->language_defn->la_exp_desc->evaluate_exp) 
+  struct cleanup *cleanups;
+  struct value *retval;
+  int cleanup_temps = 0;
+
+  if (*pos == 0 && target_has_execution
+      && exp->language_defn->la_language == language_cplus
+      && !thread_stack_temporaries_enabled_p (inferior_ptid))
+    {
+      cleanups = enable_thread_stack_temporaries (inferior_ptid);
+      cleanup_temps = 1;
+    }
+
+  retval = (*exp->language_defn->la_exp_desc->evaluate_exp)
     (expect_type, exp, pos, noside);
+
+  if (cleanup_temps)
+    {
+      if (value_in_thread_stack_temporaries (retval, inferior_ptid))
+	retval = value_non_lval (retval);
+      do_cleanups (cleanups);
+    }
+
+  return retval;
 }
 
 /* Parse the string EXP as a C expression, evaluate it,

@@ -1832,7 +1832,9 @@ _bfd_elf_link_find_version_dependencies (struct elf_link_hash_entry *h,
   if (!h->def_dynamic
       || h->def_regular
       || h->dynindx == -1
-      || h->verinfo.verdef == NULL)
+      || h->verinfo.verdef == NULL
+      || (elf_dyn_lib_class (h->verinfo.verdef->vd_bfd)
+	  & (DYN_AS_NEEDED | DYN_DT_NEEDED | DYN_NO_NEEDED)))
     return TRUE;
 
   /* See if we already know about this version.  */
@@ -9050,7 +9052,9 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 
 	  if (!h->def_regular)
 	    {
-	      if (h->verinfo.verdef == NULL)
+	      if (h->verinfo.verdef == NULL
+		  || (elf_dyn_lib_class (h->verinfo.verdef->vd_bfd)
+		      & (DYN_AS_NEEDED | DYN_DT_NEEDED | DYN_NO_NEEDED)))
 		iversym.vs_vers = 0;
 	      else
 		iversym.vs_vers = h->verinfo.verdef->vd_exp_refno + 1;

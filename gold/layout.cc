@@ -524,6 +524,7 @@ static const char* gdb_sections[] =
   "addr",         // Fission extension
   // "aranges",   // not used by gdb as of 7.4
   "frame",
+  "gdb_scripts",
   "info",
   "types",
   "line",
@@ -532,8 +533,11 @@ static const char* gdb_sections[] =
   "macro",
   // "pubnames",  // not used by gdb as of 7.4
   // "pubtypes",  // not used by gdb as of 7.4
+  // "gnu_pubnames",  // Fission extension
+  // "gnu_pubtypes",  // Fission extension
   "ranges",
   "str",
+  "str_offsets",
 };
 
 // This is the minimum set of sections needed for line numbers.
@@ -544,6 +548,7 @@ static const char* lines_only_debug_sections[] =
   // "addr",      // Fission extension
   // "aranges",   // not used by gdb as of 7.4
   // "frame",
+  // "gdb_scripts",
   "info",
   // "types",
   "line",
@@ -552,8 +557,11 @@ static const char* lines_only_debug_sections[] =
   // "macro",
   // "pubnames",  // not used by gdb as of 7.4
   // "pubtypes",  // not used by gdb as of 7.4
+  // "gnu_pubnames",  // Fission extension
+  // "gnu_pubtypes",  // Fission extension
   // "ranges",
   "str",
+  "str_offsets",  // Fission extension
 };
 
 // These sections are the DWARF fast-lookup tables, and are not needed

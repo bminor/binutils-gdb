@@ -1,3 +1,37 @@
+2014-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16452
+	PR ld/16457
+	* ld-elf/pr16452.map: New file.
+	* ld-elf/pr16452.od: Likewise.
+	* ld-elf/pr16452a.c: Likewise.
+	* ld-elf/pr16452b.c: Likewise.
+	* ld-elf/pr16457.od: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add tests for PR ld/16452 and
+	PR ld/16457.
+
+2014-11-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-mips-elf/got-vers-1.rd: Add symbol version string to
+	versioned symbol names in dynamic relocation.
+	* ld-mips-elf/reloc-estimate-1.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+	* ld-mips-elf/tlslib-o32-ver.got: Likewise.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-alpha/tlsbin.dd: Updated for secureplt.
+	* ld-alpha/tlsbin.rd: Likewise.
+	* ld-alpha/tlsbin.sd: Likewise.
+	* ld-alpha/tlsbinr.dd: Likewise.
+	* ld-alpha/tlsbinr.rd: Likewise.
+	* ld-alpha/tlspic.dd: Likewise.
+	* ld-alpha/tlspic.rd: Likewise.
+	* ld-alpha/tlspic.sd: Likewise.
+
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/16496

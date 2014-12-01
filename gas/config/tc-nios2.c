@@ -2062,34 +2062,6 @@ const int nios2_num_ps_insn_info_structs = NIOS2_NUM_PSEUDO_INSNS;
 
 /** Assembler output support.  */
 
-static int
-can_evaluate_expr (nios2_insn_infoS *insn)
-{
-  /* Remove this check for null and the invalid insn "ori r9, 1234" seg faults. */
-  if (!insn->insn_reloc) 
-    /* ??? Ideally we should do something other than as_fatal here as we can
-       continue to assemble.
-       However this function (actually the output_* functions) should not 
-       have been called in the first place once an illegal instruction had 
-       been encountered.  */
-    as_fatal (_("Invalid instruction encountered, cannot recover. No assembly attempted."));
-
-  if (insn->insn_reloc->reloc_expression.X_op == O_constant)
-    return 1;
-
-  return 0;
-}
-
-static int
-get_expr_value (nios2_insn_infoS *insn)
-{
-  int value = 0;
-
-  if (insn->insn_reloc->reloc_expression.X_op == O_constant)
-    value = insn->insn_reloc->reloc_expression.X_add_number;
-  return value;
-}
-
 /* Output a normal instruction.  */
 static void
 output_insn (nios2_insn_infoS *insn)
@@ -2202,107 +2174,6 @@ output_call (nios2_insn_infoS *insn)
   md_number_to_chars (f + 8, MATCH_R1_CALLR | SET_IW_R_A (AT_REGNUM), 4);
   dwarf2_emit_insn (4);
 }
-
-/* Output an addi - will silently convert to
-   orhi if rA = r0 and (expr & 0xffff0000) == 0.  */
-static void
-output_addi (nios2_insn_infoS *insn)
-{
-  if (can_evaluate_expr (insn))
-    {
-      int expr_val = get_expr_value (insn);
-      unsigned int rega = GET_IW_I_A (insn->insn_code);
-      unsigned int regb = GET_IW_I_B (insn->insn_code);
-
-      if (rega == 0
-	  && (expr_val & 0xffff) == 0
-	  && expr_val != 0)
-	{
-	  /* We really want a movhi (orhi) here.  */
-	  insn->insn_code
-	    = MATCH_R1_ORHI | SET_IW_I_A (rega) | SET_IW_I_B (regb);
-	  insn->insn_reloc->reloc_expression.X_add_number
-	    = (expr_val >> 16) & 0xffff;
-	  insn->insn_reloc->reloc_type = BFD_RELOC_NIOS2_U16;
-	}
-    }
-
-  /* Output an instruction.  */
-  output_insn (insn);
-}
-
-static void
-output_andi (nios2_insn_infoS *insn)
-{
-  if (can_evaluate_expr (insn))
-    {
-      int expr_val = get_expr_value (insn);
-      if (expr_val != 0 && (expr_val & 0xffff) == 0)
-	{
-	  unsigned int rega = GET_IW_I_A (insn->insn_code);
-	  unsigned int regb = GET_IW_I_B (insn->insn_code);
-
-	  /* We really want an andhi here.  */
-	  insn->insn_code
-	    = MATCH_R1_ANDHI | SET_IW_I_A (rega) | SET_IW_I_B (regb);
-	  insn->insn_reloc->reloc_expression.X_add_number
-	    = (expr_val >> 16) & 0xffff;
-	  insn->insn_reloc->reloc_type = BFD_RELOC_NIOS2_U16;
-	}
-    }
-
-  /* Output an instruction.  */
-  output_insn (insn);
-}
-
-static void
-output_ori (nios2_insn_infoS *insn)
-{
-  if (can_evaluate_expr (insn))
-    {
-      int expr_val = get_expr_value (insn);
-      if (expr_val != 0 && (expr_val & 0xffff) == 0)
-	{
-	  unsigned int rega = GET_IW_I_A (insn->insn_code);
-	  unsigned int regb = GET_IW_I_B (insn->insn_code);
-
-	  /* We really want a movhi (orhi) here.  */
-	  insn->insn_code
-	    = MATCH_R1_ORHI | SET_IW_I_A (rega) | SET_IW_I_B (regb);
-	  insn->insn_reloc->reloc_expression.X_add_number
-	    = (expr_val >> 16) & 0xffff;
-	  insn->insn_reloc->reloc_type = BFD_RELOC_NIOS2_U16;
-	}
-    }
-
-  /* Output an instruction.  */
-  output_insn (insn);
-}
-
-static void
-output_xori (nios2_insn_infoS *insn)
-{
-  if (can_evaluate_expr (insn))
-    {
-      int expr_val = get_expr_value (insn);
-      if (expr_val != 0 && (expr_val & 0xffff) == 0)
-	{
-	  unsigned int rega = GET_IW_I_A (insn->insn_code);
-	  unsigned int regb = GET_IW_I_B (insn->insn_code);
-
-	  /* We really want an xorhi here.  */
-	  insn->insn_code
-	    = MATCH_R1_XORHI | SET_IW_I_A (rega) | SET_IW_I_B (regb);
-	  insn->insn_reloc->reloc_expression.X_add_number
-	    = (expr_val >> 16) & 0xffff;
-	  insn->insn_reloc->reloc_type = BFD_RELOC_NIOS2_U16;
-	}
-    }
-
-  /* Output an instruction.  */
-  output_insn (insn);
-}
-
 
 /* Output a movhi/addi pair for the movia pseudo-op.  */
 static void
@@ -2540,14 +2411,6 @@ md_assemble (char *op_str)
 		   || (insn->insn_reloc->reloc_type
 		       == BFD_RELOC_NIOS2_CALL26_NOAT)))
 	output_call (insn);
-      else if (insn->insn_nios2_opcode->pinfo & NIOS2_INSN_ANDI)
-	output_andi (insn);
-      else if (insn->insn_nios2_opcode->pinfo & NIOS2_INSN_ORI)
-	output_ori (insn);
-      else if (insn->insn_nios2_opcode->pinfo & NIOS2_INSN_XORI)
-	output_xori (insn);
-      else if (insn->insn_nios2_opcode->pinfo & NIOS2_INSN_ADDI)
-	output_addi (insn);
       else if (saved_pinfo == NIOS2_INSN_MACRO_MOVIA)
 	output_movia (insn);
       else

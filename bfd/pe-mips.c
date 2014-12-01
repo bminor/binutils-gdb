@@ -349,8 +349,11 @@ static reloc_howto_type howto_table[] =
 /* Customize coffcode.h.  */
 #define MIPS 1
 
-#define RTYPE2HOWTO(cache_ptr, dst) \
-	    (cache_ptr)->howto = howto_table + (dst)->r_type;
+#define RTYPE2HOWTO(cache_ptr, dst)				\
+  ((cache_ptr)->howto =						\
+   ((dst)->r_type < NUM_HOWTOS					\
+    ? howto_table + (dst)->r_type				\
+    : NULL))
 
 /* Compute the addend of a reloc.  If the reloc is to a common symbol,
    the object file contains the value of the common symbol.  By the

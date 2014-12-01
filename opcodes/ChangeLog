@@ -1,3 +1,19 @@
+2014-11-30  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Make mftb* generate mfspr for
+	power4 and later.
+
+2014-11-28  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-opc.c (nios2_r1_opcodes): Remove deleted attributes
+	from descriptors.
+
+2014-11-28  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes <mftb>): Don't deprecate for power7.
+	(TB): Delete.
+	(insert_tbr, extract_tbr): Validate tbr number.
+
 2014-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

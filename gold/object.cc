@@ -430,6 +430,7 @@ Sized_relobj_file<size, big_endian>::Sized_relobj_file(
     kept_comdat_sections_(),
     has_eh_frame_(false),
     discarded_eh_frame_shndx_(-1U),
+    is_deferred_layout_(false),
     deferred_layout_(),
     deferred_layout_relocs_(),
     compressed_sections_()
@@ -1430,6 +1431,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
     {
       parameters->options().plugins()->add_deferred_layout_object(this);
       this->deferred_layout_.reserve(num_sections_to_defer);
+      this->is_deferred_layout_ = true;
     }
 
   // Whether we've seen a .note.GNU-stack section.
@@ -1590,10 +1592,13 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	{
 	  if (is_pass_one)
 	    {
-	      out_sections[i] = reinterpret_cast<Output_section*>(1);
+	      if (this->is_deferred_layout())
+		out_sections[i] = reinterpret_cast<Output_section*>(2);
+	      else
+		out_sections[i] = reinterpret_cast<Output_section*>(1);
 	      out_section_offsets[i] = invalid_address;
 	    }
-	  else if (should_defer_layout)
+	  else if (this->is_deferred_layout())
 	    this->deferred_layout_.push_back(Deferred_layout(i, name,
 							     pshdrs,
 							     reloc_shndx[i],
@@ -1658,11 +1663,12 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	}
 
       // Defer layout here if input files are claimed by plugins.  When gc
-      // is turned on this function is called twice.  For the second call
-      // should_defer_layout should be false.
-      if (should_defer_layout && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC))
+      // is turned on this function is called twice; we only want to do this
+      // on the first pass.
+      if (!is_pass_two
+          && this->is_deferred_layout()
+          && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC))
 	{
-	  gold_assert(!is_pass_two);
 	  this->deferred_layout_.push_back(Deferred_layout(i, name,
 							   pshdrs,
 							   reloc_shndx[i],
@@ -1764,6 +1770,8 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
       Output_section* data_section = out_sections[data_shndx];
       if (data_section == reinterpret_cast<Output_section*>(2))
 	{
+	  if (is_pass_two)
+	    continue;
 	  // The layout for the data section was deferred, so we need
 	  // to defer the relocation section, too.
 	  const char* name = pnames + shdr.get_sh_name();

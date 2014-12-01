@@ -7655,6 +7655,15 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     abfd, input_section, * parent);
 		  goto error_return;
 
+		case bfd_reloc_notsupported:
+		  /* PR ld/17512
+		     This error can result when processing a corrupt binary.
+		     Do not abort.  Issue an error message instead.  */
+		  link_info->callbacks->einfo
+		    (_("%X%P: %B(%A): relocation \"%R\" is not supported\n"),
+		     abfd, input_section, * parent);
+		  goto error_return;
+
 		default:
 		  abort ();
 		  break;

@@ -22414,6 +22414,8 @@ These are @value{GDBN} control commands for the auto-loading:
 @tab Control for @value{GDBN} auto-loaded scripts location.
 @item @xref{show auto-load scripts-directory}.
 @tab Show @value{GDBN} auto-loaded scripts location.
+@item @xref{add-auto-load-scripts-directory}.
+@tab Add directory for auto-loaded scripts location list.
 @item @xref{set auto-load local-gdbinit}.
 @tab Control for init file in the current directory.
 @item @xref{show auto-load local-gdbinit}.
@@ -22562,9 +22564,9 @@ scripts.
 @anchor{add-auto-load-safe-path}
 @kindex add-auto-load-safe-path
 @item add-auto-load-safe-path
-Add an entry (or list of entries) the list of directories trusted for automatic
-loading and execution of scripts.  Multiple entries may be delimited by the
-host platform path separator in use.
+Add an entry (or list of entries) to the list of directories trusted for
+automatic loading and execution of scripts.  Multiple entries may be delimited
+by the host platform path separator in use.
 @end table
 
 This variable defaults to what @code{--with-auto-load-dir} has been configured
@@ -23713,6 +23715,12 @@ to the @env{PATH} environment variable.
 @kindex show auto-load scripts-directory
 @item show auto-load scripts-directory
 Show @value{GDBN} auto-loaded scripts location.
+
+@anchor{add-auto-load-scripts-directory}
+@kindex add-auto-load-scripts-directory
+@item add-auto-load-scripts-directory @r{[}@var{directories}@dots{}@r{]}
+Add an entry (or list of entries) to the list of auto-loaded scripts locations.
+Multiple entries may be delimited by the host platform path separator in use.
 @end table
 
 @value{GDBN} does not track which files it has already auto-loaded this way.

@@ -1,3 +1,45 @@
+2014-12-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/python.exp: Change expected reply to help().
+
+2014-12-01  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac: Remove AC_ARG_ENABLE for gdbtk.  Don't invoke
+	AC_CONFIG_SUBDIRS(gdb.gdbtk).
+	* configure: Re-generated.
+
+2014-11-28  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.cp/chained-calls.cc: New file.
+	* gdb.cp/chained-calls.exp: New file.
+	* gdb.cp/smartp.exp: Remove KFAIL for "p c2->inta".
+
+2014-11-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.ada/py_range.exp: Add parentheses to python calls to print.
+	* gdb.dwarf2/symtab-producer.exp: Same.
+	* gdb.gdb/python-interrupts.exp: Same.
+	* gdb.gdb/python-selftest.exp: Same.
+	* gdb.python/py-linetable.exp: Same.
+	* gdb.python/py-type.exp: Same.
+	* gdb.python/py-value-cc.exp: Same.
+	* gdb.python/py-value.exp: Same.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/break-probes.exp: Match library name prefixed with
+	sysroot.
+
+2014-11-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-linetable.exp: Escape properly sorted(fset)
+	test expected output.  Add parentheses for the call to print.
+	Remove L suffix from integers.
+
+2014-11-26  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-op-out-param.S: Fix comment.
+
 2014-11-22  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/entry-values.c: Remove asms.

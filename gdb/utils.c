@@ -2868,83 +2868,47 @@ string_to_core_addr (const char *my_string)
 char *
 gdb_realpath (const char *filename)
 {
-  /* Method 1: The system has a compile time upper bound on a filename
-     path.  Use that and realpath() to canonicalize the name.  This is
-     the most common case.  Note that, if there isn't a compile time
-     upper bound, you want to avoid realpath() at all costs.  */
-#if defined (HAVE_REALPATH) && defined (PATH_MAX)
-  {
-    char buf[PATH_MAX];
-    const char *rp = realpath (filename, buf);
+/* On most hosts, we rely on canonicalize_file_name to compute
+   the FILENAME's realpath.
 
-    if (rp == NULL)
-      rp = filename;
-    return xstrdup (rp);
-  }
-#endif /* HAVE_REALPATH */
+   But the situation is slightly more complex on Windows, due to some
+   versions of GCC which were reported to generate paths where
+   backlashes (the directory separator) were doubled.  For instance:
+      c:\\some\\double\\slashes\\dir
+   ... instead of ...
+      c:\some\double\slashes\dir
+   Those double-slashes were getting in the way when comparing paths,
+   for instance when trying to insert a breakpoint as follow:
+      (gdb) b c:/some/double/slashes/dir/foo.c:4
+      No source file named c:/some/double/slashes/dir/foo.c:4.
+      (gdb) b c:\some\double\slashes\dir\foo.c:4
+      No source file named c:\some\double\slashes\dir\foo.c:4.
+   To prevent this from happening, we need this function to always
+   strip those extra backslashes.  While canonicalize_file_name does
+   perform this simplification, it only works when the path is valid.
+   Since the simplification would be useful even if the path is not
+   valid (one can always set a breakpoint on a file, even if the file
+   does not exist locally), we rely instead on GetFullPathName to
+   perform the canonicalization.  */
 
-  /* Method 2: The host system (i.e., GNU) has the function
-     canonicalize_file_name() which malloc's a chunk of memory and
-     returns that, use that.  */
-#if defined(HAVE_CANONICALIZE_FILE_NAME)
-  {
-    char *rp = canonicalize_file_name (filename);
-
-    if (rp == NULL)
-      return xstrdup (filename);
-    else
-      return rp;
-  }
-#endif
-
-  /* FIXME: cagney/2002-11-13:
-
-     Method 2a: Use realpath() with a NULL buffer.  Some systems, due
-     to the problems described in method 3, have modified their
-     realpath() implementation so that it will allocate a buffer when
-     NULL is passed in.  Before this can be used, though, some sort of
-     configure time test would need to be added.  Otherwize the code
-     will likely core dump.  */
-
-  /* Method 3: Now we're getting desperate!  The system doesn't have a
-     compile time buffer size and no alternative function.  Query the
-     OS, using pathconf(), for the buffer limit.  Care is needed
-     though, some systems do not limit PATH_MAX (return -1 for
-     pathconf()) making it impossible to pass a correctly sized buffer
-     to realpath() (it could always overflow).  On those systems, we
-     skip this.  */
-#if defined (HAVE_REALPATH) && defined (_PC_PATH_MAX)
-  {
-    /* Find out the max path size.  */
-    long path_max = pathconf ("/", _PC_PATH_MAX);
-
-    if (path_max > 0)
-      {
-	/* PATH_MAX is bounded.  */
-	char *buf = alloca (path_max);
-	char *rp = realpath (filename, buf);
-
-	return xstrdup (rp ? rp : filename);
-      }
-  }
-#endif
-
-  /* The MS Windows method.  If we don't have realpath, we assume we
-     don't have symlinks and just canonicalize to a Windows absolute
-     path.  GetFullPath converts ../ and ./ in relative paths to
-     absolute paths, filling in current drive if one is not given
-     or using the current directory of a specified drive (eg, "E:foo").
-     It also converts all forward slashes to back slashes.  */
-  /* The file system is case-insensitive but case-preserving.
-     So we do not lowercase the path.  Otherwise, we might not
-     be able to display the original casing in a given path.  */
 #if defined (_WIN32)
   {
     char buf[MAX_PATH];
     DWORD len = GetFullPathName (filename, MAX_PATH, buf, NULL);
 
+    /* The file system is case-insensitive but case-preserving.
+       So it is important we do not lowercase the path.  Otherwise,
+       we might not be able to display the original casing in a given
+       path.  */
     if (len > 0 && len < MAX_PATH)
       return xstrdup (buf);
+  }
+#else
+  {
+    char *rp = canonicalize_file_name (filename);
+
+    if (rp != NULL)
+      return rp;
   }
 #endif
 

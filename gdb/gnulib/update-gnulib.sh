@@ -31,15 +31,19 @@
 # The list of gnulib modules we are importing in GDB.
 IMPORTED_GNULIB_MODULES="\
     alloca \
+    canonicalize-lgpl \
     dirent \
     dirfd \
     errno \
     fnmatch-gnu \
     frexpl \
     inttypes \
+    lstat \
     memchr \
     memmem \
     pathmax \
+    readlink \
+    rename \
     strstr \
     sys_stat \
     unistd \

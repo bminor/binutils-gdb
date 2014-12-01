@@ -95,7 +95,8 @@ class Binary_to_elf
   template<int size, bool big_endian>
   void
   write_symbol(const std::string&, const Stringpool_template<char>*,
-	       section_size_type, unsigned int, unsigned char**);
+	       section_size_type, typename elfcpp::Elf_types<32>::Elf_WXword,
+	       unsigned int, unsigned char**);
 
   // The ELF machine code of the file to create.
   elfcpp::EM elf_machine_;

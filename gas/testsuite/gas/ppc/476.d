@@ -308,7 +308,7 @@ Disassembly of section \.text:
  4a8:	(7e 60 00 a6|a6 00 60 7e) 	mfmsr   r19
  4ac:	(7c 78 00 26|26 00 78 7c) 	mfocrf  r3,128
  4b0:	(7c 60 22 a6|a6 22 60 7c) 	mfspr   r3,128
- 4b4:	(7c 6c 42 e6|e6 42 6c 7c) 	mftbl   r3
+ 4b4:	(7c 6c 42 a6|a6 42 6c 7c) 	mftb    r3
  4b8:	(7c 00 04 ac|ac 04 00 7c) 	msync
  4bc:	(7c 78 01 20|20 01 78 7c) 	mtocrf  128,r3
  4c0:	(7c 6f f1 20|20 f1 6f 7c) 	mtcr    r3

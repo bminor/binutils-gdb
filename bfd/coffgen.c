@@ -146,8 +146,9 @@ make_a_section_from_file (bfd *abfd,
   /* Compress/decompress DWARF debug sections with names: .debug_* and
      .zdebug_*, after the section flags is set.  */
   if ((flags & SEC_DEBUGGING)
+      && strlen (name) > 7
       && ((name[1] == 'd' && name[6] == '_')
-	  || (name[1] == 'z' && name[7] == '_')))
+	  || (strlen (name) > 8 && name[1] == 'z' && name[7] == '_')))
     {
       enum { nothing, compress, decompress } action = nothing;
       char *new_name = NULL;
@@ -365,6 +366,10 @@ coff_object_p (bfd *abfd)
 	  bfd_release (abfd, opthdr);
 	  return NULL;
 	}
+      /* PR 17512: file: 11056-1136-0.004.  */
+      if (internal_f.f_opthdr < aoutsz)
+	memset (((char *) opthdr) + internal_f.f_opthdr, 0, aoutsz - internal_f.f_opthdr);
+
       bfd_coff_swap_aouthdr_in (abfd, opthdr, (void *) &internal_a);
       bfd_release (abfd, opthdr);
     }

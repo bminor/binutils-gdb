@@ -1686,7 +1686,6 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
   pv_t regs[ARM_FPS_REGNUM];
   struct pv_area *stack;
   struct cleanup *back_to;
-  int framereg, framesize;
   CORE_ADDR unrecognized_pc = 0;
 
   /* Search the prologue looking for instructions that set up the
@@ -1887,23 +1886,25 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
   if (unrecognized_pc == 0)
     unrecognized_pc = current_pc;
 
-  /* The frame size is just the distance from the frame register
-     to the original stack pointer.  */
-  if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
-    {
-      /* Frame pointer is fp.  */
-      framereg = ARM_FP_REGNUM;
-      framesize = -regs[ARM_FP_REGNUM].k;
-    }
-  else
-    {
-      /* Try the stack pointer... this is a bit desperate.  */
-      framereg = ARM_SP_REGNUM;
-      framesize = -regs[ARM_SP_REGNUM].k;
-    }
-
   if (cache)
     {
+      int framereg, framesize;
+
+      /* The frame size is just the distance from the frame register
+	 to the original stack pointer.  */
+      if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
+	{
+	  /* Frame pointer is fp.  */
+	  framereg = ARM_FP_REGNUM;
+	  framesize = -regs[ARM_FP_REGNUM].k;
+	}
+      else
+	{
+	  /* Try the stack pointer... this is a bit desperate.  */
+	  framereg = ARM_SP_REGNUM;
+	  framesize = -regs[ARM_SP_REGNUM].k;
+	}
+
       cache->framereg = framereg;
       cache->framesize = framesize;
 

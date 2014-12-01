@@ -5310,7 +5310,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 static reloc_howto_type *
 coff_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 		     asection *sec ATTRIBUTE_UNUSED,
-		     struct internal_reloc *rel,
+		     struct internal_reloc *rel ATTRIBUTE_UNUSED,
 		     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED,
 		     struct internal_syment *sym ATTRIBUTE_UNUSED,
 		     bfd_vma *addendp ATTRIBUTE_UNUSED)

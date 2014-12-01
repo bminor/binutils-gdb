@@ -380,7 +380,7 @@ int_param_two_reg_pieces:
         .uleb128 0x0                    /*   + 0 */
 
 .LDI5:
-        .uleb128 0x8                    /* DW_TAG_structure_type */
+        .uleb128 0x8                    /* DW_TAG_member */
         .string "b"                     /* DW_AT_name */
         .long   .LDI2 - .Ldebug_info0   /* DW_AT_type */
         .byte   0x2                     /* DW_AT_data_member_location : length */

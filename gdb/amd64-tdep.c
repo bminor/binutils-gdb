@@ -199,7 +199,13 @@ static int amd64_dwarf_regmap[] =
   AMD64_ST0_REGNUM + 2, AMD64_ST0_REGNUM + 3,
   AMD64_ST0_REGNUM + 4, AMD64_ST0_REGNUM + 5,
   AMD64_ST0_REGNUM + 6, AMD64_ST0_REGNUM + 7,
-  
+
+  /* MMX Registers 0 - 7.
+     We have to handle those registers specifically, as their register
+     number within GDB depends on the target (or they may even not be
+     available at all).  */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+
   /* Control and Status Flags Register.  */
   AMD64_EFLAGS_REGNUM,
 

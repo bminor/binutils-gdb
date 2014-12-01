@@ -36,25 +36,6 @@ esac
 AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
 AC_PROG_MAKE_SET
 
-# Enable gdbtk.
-AC_ARG_ENABLE(gdbtk,
-[  --enable-gtk            enable gdbtk graphical user interface (GUI)],,
-  [if test -d $srcdir/../gdbtk && test -d $srcdir/gdb.gdbtk; then
-    enable_gdbtk=yes
-  else
-    enable_gdbtk=no
-  fi])
-# We unconditionally disable gdbtk tests on selected platforms.
-case $host_os in
-  go32* | windows*)
-    enable_gdbtk=no ;;
-esac
-
-# Add gdbtk tests when appropriate.
-if test $enable_gdbtk = yes; then
-   AC_CONFIG_SUBDIRS(gdb.gdbtk)
-fi
-
 # Enable shared libraries.
 AC_ARG_ENABLE(shared,
 [  --enable-shared         build shared libraries [deault=yes]],,

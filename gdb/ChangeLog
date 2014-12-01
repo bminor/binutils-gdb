@@ -1,3 +1,233 @@
+2014-12-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* objfiles.c (allocate_objfile): Remove duplicate comment.
+
+2014-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/i386/i386gnu.mh (NATDEPFILES): Remove core-regset.o.
+	* i386gnu-nat.c: Do not include <sys/procfs.h> or "gregset.h".
+	(CREG_OFFSET, creg_offset, CREG_ADDR): Remove.
+	(supply_gregset, supply_fpregset): Remove.
+	* i386gnu-tdep.c (i386gnu_gregset_reg_offset): New variable.
+	(i386gnu_init_abi): Set tdep->gregset_reg_offset, gregset_num_regs,
+	and sizeof_gregset.
+
+2014-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Add add-auto-load-scripts-directory.
+	* NEWS (Changes since GDB 7.8): Add add-auto-load-scripts-directory.
+	* auto-load.c (add_auto_load_dir): New function.
+	(_initialize_auto_load): Install it.
+
+2014-11-30  Martin Galvan  <martin.galvan@tallertechnologies.com>  (tiny patch, obvious)
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	* frame.c (frame_id_eq): Fix the check for FID_STACK_INVALID.
+
+2014-11-29  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* eval.c (evaluate_subexp): Check that the thread stack	temporaries
+	are not already enabled before enabling them.
+
+2014-11-29  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_analyze_prologue): Move local variables
+	'framereg' and 'framesize' to inner block.  Move code to
+	inner block too.
+
+2014-11-28  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* eval.c: Include gdbthread.h.
+	(evaluate_subexp): Enable thread stack temporaries before
+	evaluating a complete expression and clean them up after the
+	evaluation is complete.
+	* gdbthread.h: Include common/vec.h.
+	(value_ptr): New typedef.
+	(VEC (value_ptr)): New vector type.
+	(value_vec): New typedef.
+	(struct thread_info): Add new fields stack_temporaries_enabled
+	and stack_temporaries.
+	(enable_thread_stack_temporaries)
+	(thread_stack_temporaries_enabled_p, push_thread_stack_temporary)
+	(get_last_thread_stack_temporary)
+	(value_in_thread_stack_temporaries): Declare.
+	* gdbtypes.c (class_or_union_p): New function.
+	* gdbtypes.h (class_or_union_p): Declare.
+	* infcall.c (call_function_by_hand): Store return values of class
+	type as	temporaries on stack.
+	* thread.c (enable_thread_stack_temporaries): New function.
+	(thread_stack_temporaries_enabled_p, push_thread_stack_temporary)
+	(get_last_thread_stack_temporary): Likewise.
+	(value_in_thread_stack_temporaries): Likewise.
+	* value.c (value_force_lval): New function.
+	* value.h (value_force_lval): Declare.
+
+2014-11-28  Pierre Muller  <muller@sourceware.org>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	* amd64-tdep.c (amd64_dwarf_regmap array): Add missing MMX
+	registers.
+
+2014-11-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/ia64/linux.mh (NATDEPFILES): Remove core-regset.o.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux64.mh (NATDEPFILES): Likewise.
+	* m68klinux-nat.c (fetch_core_registers): Remove.
+	(linux_elf_core_fns): Remove.
+	(_initialize_m68k_linux_nat): Do not call deprecated_add_core_fns.
+
+2014-11-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.c (gdb_realpath): Rework comment about handling on
+	Windows.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	rename.
+	* gnulib/aclocal.m4: Re-generated.
+	* gnulib/config.in: Re-generated.
+	* gnulib/configure: Re-generated.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Re-generated.
+	* gnulib/import/m4/gnulib-cache.m4: Re-generated.
+	* gnulib/import/m4/gnulib-comp.m4: Re-generated.
+	* import/basename-lgpl.c: New file.
+	* import/dirname-lgpl.c: New file.
+	* import/dirname.h: New file.
+	* import/m4/dirname.m4: New file.
+	* import/m4/malloc.m4: New file.
+	* import/m4/rename.m4: New file.
+	* import/m4/rmdir.m4: New file.
+	* import/m4/stdio_h.m4: New file.
+	* import/malloc.c: New file.
+	* import/rename.c: New file.
+	* import/rmdir.c: New file.
+	* import/same-inode.h: New file.
+	* import/stdio.c: New file.
+	* import/stdio.in.h: New file.
+	* import/stripslash.c: New file.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Remove canonicalize_file_name
+	and realpath.
+	* config.in: Re-generated.
+	* configure: Re-generated.
+	* utils.c (gdb_realpath): Remove code calling realpath,
+	canonicalize_file_name and pathconf.
+	[!_WIN32]: Call canonicalize_file_name.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	canonicalize-lgpl.
+	* aclocal.m4: Re-generated.
+	* config.in: Re-generated.
+	* configure: Re-generated.
+	* import/Makefile.am: Re-generated.
+	* import/Makefile.in: Re-generated.
+	* import/m4/gnulib-cache.m4: Re-generated.
+	* import/m4/gnulib-comp.m4: Re-generated.
+	* import/canonicalize-lgpl.c: New file.
+	* import/extra/snippet/_Noreturn.h: New file.
+	* import/m4/canonicalize.m4: New file.
+	* import/m4/double-slash-root.m4: New file.
+	* import/m4/eealloc.m4: New file.
+	* import/m4/malloca.m4: New file.
+	* import/m4/nocrash.m4: New file.
+	* import/m4/stdlib_h.m4: New file.
+	* import/malloca.c: New file.
+	* import/malloca.h: New file.
+	* import/malloca.valgrind: New file.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Remove lstat.
+	* config.in, configure: Regenerate.
+	* symfile.c (find_separate_debug_file_by_debuglink): Remove
+	code checking HAVE_LSTAT is defined.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	lstat.
+	* gnulib/aclocal.m4: Re-generated.
+	* gnulib/config.in: Re-generated.
+	* gnulib/configure: Re-generated.
+	* gnulib/import/Makefile.am: Re-generated.
+	* gnulib/import/Makefile.in: Re-generated.
+	* gnulib/import/m4/gnulib-cache.m4: Re-generated.
+	* gnulib/import/m4/gnulib-comp.m4: Re-generated.
+	* gnulib/import/lstat.c: New file.
+	* gnulib/import/m4/lstat.m4: New file.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Remove readlink.
+	* config.in, configure: Re-generate.
+	* inf-child.c (inf_child_fileio_readlink): Don't check
+	HAVE_READLINK is defined.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add readlink.
+	* gnulib/aclocal.m4: Re-generated.
+	* gnulib/config.in: Likewise.
+	* gnulib/configure: Likewise.
+	* gnulib/import/Makefile.am: Likewise.
+	* gnulib/import/Makefile.in: Likewise.
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+	* gnulib/import/m4/gnulib-comp.m4: Likewise.
+	* gnulib/import/dosname.h: New file
+	* gnulib/import/m4/largefile.m4: New file.
+	* gnulib/import/m4/readlink.m4: New file.
+	* gnulib/import/m4/stat.m4: New file.
+	* gnulib/import/readlink.c: New file.
+	* gnulib/import/stat.c: New file.
+
+2014-11-26  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (set_cu_language): Recognize DW_LANG_C11,
+	DW_LANG_C_plus_plus_11, DW_LANG_C_plus_plus_14.
+
+2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_analyze_prologue): Replace restriction
+	that there can be only one stack adjustment in the prologue
+	with tests to detect specific disallowed stack adjustments.
+
+2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_in_epilogue_p): Handle multiple stack
+	adjustments.
+
+2014-11-25  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_fetch_insn): Move up in file.  Disassemble
+	the instruction as well as reading it from memory.
+	(nios2_match_add): New.
+	(nios2_match_sub): New.
+	(nios2_match_addi): New.
+	(nios2_match_orhi): New.
+	(nios2_match_stw): New.
+	(nios2_match_ldw): New.
+	(nios2_match_rdctl): New.
+	(enum branch_condition): New.
+	(nios2_match_branch): New.
+	(nios2_match_jmpi): New.
+	(nios2_match_calli): New.
+	(nios2_match_jmpr): New.
+	(nios2_match_callr): New.
+	(nios2_match_break): New.
+	(nios2_match_trap): New.
+	(nios2_in_epilogue_p): Rewrite to use new functions.
+	(nios2_analyze_prologue): Likewise.
+	(nios2_skip_prologue): Delete unused local limit_pc.
+	(nios2_breakpoint_from_pc): Make R1-specific encodings explicit.
+	(nios2_get_next_pc): Rewrite to use new functions.
+
 2014-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbtypes.c (resolve_dynamic_type_internal): Reindent the code.

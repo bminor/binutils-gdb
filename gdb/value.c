@@ -1724,6 +1724,18 @@ value_non_lval (struct value *arg)
    return arg;
 }
 
+/* Write contents of V at ADDR and set its lval type to be LVAL_MEMORY.  */
+
+void
+value_force_lval (struct value *v, CORE_ADDR addr)
+{
+  gdb_assert (VALUE_LVAL (v) == not_lval);
+
+  write_memory (addr, value_contents_raw (v), TYPE_LENGTH (value_type (v)));
+  v->lval = lval_memory;
+  v->location.address = addr;
+}
+
 void
 set_value_component_location (struct value *component,
 			      const struct value *whole)

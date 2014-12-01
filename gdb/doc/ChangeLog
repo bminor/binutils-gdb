@@ -1,3 +1,14 @@
+2014-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Add add-auto-load-scripts-directory.
+	* gdb.texinfo (Auto-loading): Add add-auto-load-scripts-directory link.
+	(objfile-gdbdotext file): Add add-auto-load-scripts-directory.
+
+2014-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Auto-loading safe path): Fix add-auto-load-safe-path
+	description typo.
+
 2014-10-30  Doug Evans  <dje@google.com>
 
 	* python.texi (Progspaces In Python): Document ability to add

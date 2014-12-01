@@ -81,7 +81,7 @@ rtype2howto (arelent *internal, struct internal_reloc *dst)
   switch (dst->r_type)
     {
     default:
-      abort ();
+      internal->howto = NULL;
       break;
     case R_IMM8:
       internal->howto = &r_imm8;
