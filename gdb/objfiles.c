@@ -314,10 +314,6 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
      that any data that is reference is saved in the per-objfile data
      region.  */
 
-  /* Update the per-objfile information that comes from the bfd, ensuring
-     that any data that is reference is saved in the per-objfile data
-     region.  */
-
   objfile->obfd = abfd;
   gdb_bfd_ref (abfd);
   if (abfd != NULL)

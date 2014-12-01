@@ -1,3 +1,7 @@
+2014-12-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* objfiles.c (allocate_objfile): Remove duplicate comment.
+
 2014-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/i386/i386gnu.mh (NATDEPFILES): Remove core-regset.o.
