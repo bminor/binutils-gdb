@@ -1,3 +1,9 @@
+2014-12-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* features/Makefile (s390-te-linux64-expedite): Replace
+	non-existant r14 and r15 by r14l and r15l, respectively.
+	* regformats/s390-te-linux64.dat: Regenerate.
+
 2014-12-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* objfiles.c (allocate_objfile): Remove duplicate comment.
