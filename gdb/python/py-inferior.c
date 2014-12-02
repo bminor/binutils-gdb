@@ -116,6 +116,72 @@ python_on_resume (ptid_t ptid)
   do_cleanups (cleanup);
 }
 
+/* Callback, registered as an observer, that notifies Python listeners
+   when an inferior function call is about to be made. */
+
+static void
+python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
+{
+  struct cleanup *cleanup;
+
+  cleanup = ensure_python_env (target_gdbarch (), current_language);
+
+  if (emit_inferior_call_event (INFERIOR_CALL_PRE, thread, address) < 0)
+    gdbpy_print_stack ();
+
+  do_cleanups (cleanup);
+}
+
+/* Callback, registered as an observer, that notifies Python listeners
+   when an inferior function call has completed. */
+
+static void
+python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
+{
+  struct cleanup *cleanup;
+
+  cleanup = ensure_python_env (target_gdbarch (), current_language);
+
+  if (emit_inferior_call_event (INFERIOR_CALL_POST, thread, address) < 0)
+    gdbpy_print_stack ();
+
+  do_cleanups (cleanup);
+}
+
+/* Callback, registered as an observer, that notifies Python listeners
+   when a part of memory has been modified by user action (eg via a
+   'set' command). */
+
+static void
+python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len, const bfd_byte *data)
+{
+  struct cleanup *cleanup;
+
+  cleanup = ensure_python_env (target_gdbarch (), current_language);
+
+  if (emit_memory_changed_event (addr, len) < 0)
+    gdbpy_print_stack ();
+
+  do_cleanups (cleanup);
+}
+
+/* Callback, registered as an observer, that notifies Python listeners
+   when a register has been modified by user action (eg via a 'set'
+   command). */
+
+static void
+python_on_register_change (struct frame_info *frame, int regnum)
+{
+  struct cleanup *cleanup;
+
+  cleanup = ensure_python_env (target_gdbarch (), current_language);
+
+  if (emit_register_changed_event (frame, regnum) < 0)
+    gdbpy_print_stack ();
+
+  do_cleanups (cleanup);
+}
+
 static void
 python_inferior_exit (struct inferior *inf)
 {
@@ -802,6 +868,10 @@ gdbpy_initialize_inferior (void)
   observer_attach_thread_exit (delete_thread_object);
   observer_attach_normal_stop (python_on_normal_stop);
   observer_attach_target_resumed (python_on_resume);
+  observer_attach_inferior_call_pre (python_on_inferior_call_pre);
+  observer_attach_inferior_call_post (python_on_inferior_call_post);
+  observer_attach_memory_changed (python_on_memory_change);
+  observer_attach_register_changed (python_on_register_change);
   observer_attach_inferior_exit (python_inferior_exit);
   observer_attach_new_objfile (python_new_objfile);
 

@@ -134,23 +134,10 @@ thpy_get_ptid (PyObject *self, void *closure)
   int pid;
   long tid, lwp;
   thread_object *thread_obj = (thread_object *) self;
-  PyObject *ret;
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  ret = PyTuple_New (3);
-  if (!ret)
-    return NULL;
-
-  pid = ptid_get_pid (thread_obj->thread->ptid);
-  lwp = ptid_get_lwp (thread_obj->thread->ptid);
-  tid = ptid_get_tid (thread_obj->thread->ptid);
-
-  PyTuple_SET_ITEM (ret, 0, PyInt_FromLong (pid));
-  PyTuple_SET_ITEM (ret, 1, PyInt_FromLong (lwp));
-  PyTuple_SET_ITEM (ret, 2, PyInt_FromLong (tid));
-
-  return ret;
+  return gdbpy_create_ptid_object (thread_obj->thread->ptid);
 }
 
 /* Implementation of InferiorThread.switch ().
@@ -234,6 +221,30 @@ thpy_is_valid (PyObject *self, PyObject *args)
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
+}
+
+/* Return a reference to a new Python object representing a ptid_t.
+   The object is a tuple containing (pid, lwp, tid). */
+PyObject *
+gdbpy_create_ptid_object (ptid_t ptid)
+{
+  int pid;
+  long tid, lwp;
+  PyObject *ret;
+
+  ret = PyTuple_New (3);
+  if (!ret)
+    return NULL;
+
+  pid = ptid_get_pid (ptid);
+  lwp = ptid_get_lwp (ptid);
+  tid = ptid_get_tid (ptid);
+
+  PyTuple_SET_ITEM (ret, 0, PyInt_FromLong (pid));
+  PyTuple_SET_ITEM (ret, 1, PyInt_FromLong (lwp));
+  PyTuple_SET_ITEM (ret, 2, PyInt_FromLong (tid));
+ 
+  return ret;
 }
 
 /* Implementation of gdb.selected_thread () -> gdb.InferiorThread.
