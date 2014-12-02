@@ -1,3 +1,7 @@
+2014-12-02  Denis Chertykov  <chertykov@gmail.com>
+
+	* MAINTAINERS: Fix my email address.
+
 2014-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (process_cu_tu_index): Properly check for an out of
