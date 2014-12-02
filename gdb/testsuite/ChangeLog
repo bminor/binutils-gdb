@@ -1,3 +1,9 @@
+2014-12-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/execl-update-breakpoints.exp: Specify the link address
+	with '-Ttext-segment' instead of '-Ttext'.  Fall back to '-Ttext'
+	if the linker doesn't understand this.
+
 2014-12-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/python.exp: Change expected reply to help().

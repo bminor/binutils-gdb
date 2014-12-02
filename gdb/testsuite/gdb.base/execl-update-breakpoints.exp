@@ -28,17 +28,31 @@ standard_testfile
 # The address of "main" in the first binary should end up being an
 # unmapped address in the second binary.
 
-set exec1 ${testfile}1
-set exec2 ${testfile}2
-set binfile1 ${binfile}1
-set binfile2 ${binfile}2
+set objfile ${binfile}.o
+set exec1 ${binfile}1
+set exec2 ${binfile}2
 
-if { [prepare_for_testing "failed to prepare" ${exec1} "${srcfile}" \
-	  [list debug ldflags=-Wl,-Ttext=0x1000000]] } {
+if { [gdb_compile [file join $srcdir $subdir $srcfile] $objfile \
+	  object [list debug]] != "" } {
+    untested "compile failed"
     return -1
 }
-if { [prepare_for_testing "failed to prepare" ${exec2} "${srcfile}" \
-	  [list debug ldflags=-Wl,-Ttext=0x2000000]] } {
+
+set opts1_ld [list debug ldflags=-Wl,-Ttext-segment=0x1000000]
+set opts1_gold [list debug ldflags=-Wl,-Ttext=0x1000000]
+set opts2_ld [list debug ldflags=-Wl,-Ttext-segment=0x2000000]
+set opts2_gold [list debug ldflags=-Wl,-Ttext=0x2000000]
+
+if { [gdb_compile $objfile $exec1 executable $opts1_ld] != "" } {
+    # Old gold linker versions don't support -Ttext-segment.  Fall
+    # back to -Ttext.
+    if { [gdb_compile $objfile $exec1 executable $opts1_gold] != ""
+	 || [gdb_compile $objfile $exec2 executable $opts2_gold] != ""} {
+	untested "link failed"
+	return -1
+    }
+} elseif { [gdb_compile $objfile $exec2 executable $opts2_ld] != "" } {
+    untested "link failed"
     return -1
 }
 
