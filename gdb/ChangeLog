@@ -1,3 +1,7 @@
+2014-12-02  Doug Evans  <dje@google.com>
+
+	* python/py-infthread.c: Whitespace fixes.
+
 2014-12-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* features/Makefile (s390-te-linux64-expedite): Replace

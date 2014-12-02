@@ -36,8 +36,6 @@ static PyTypeObject thread_object_type
       }								\
   } while (0)
 
-
-
 thread_object *
 create_thread_object (struct thread_info *tp)
 {
@@ -52,8 +50,6 @@ create_thread_object (struct thread_info *tp)
 
   return thread_obj;
 }
-
-
 
 static void
 thpy_dealloc (PyObject *self)
@@ -131,6 +127,7 @@ thpy_get_num (PyObject *self, void *closure)
 
 /* Getter for InferiorThread.ptid  -> (pid, lwp, tid).
    Returns a tuple with the thread's ptid components.  */
+
 static PyObject *
 thpy_get_ptid (PyObject *self, void *closure)
 {
@@ -158,6 +155,7 @@ thpy_get_ptid (PyObject *self, void *closure)
 
 /* Implementation of InferiorThread.switch ().
    Makes this the GDB selected thread.  */
+
 static PyObject *
 thpy_switch (PyObject *self, PyObject *args)
 {
@@ -177,6 +175,7 @@ thpy_switch (PyObject *self, PyObject *args)
 
 /* Implementation of InferiorThread.is_stopped () -> Boolean.
    Return whether the thread is stopped.  */
+
 static PyObject *
 thpy_is_stopped (PyObject *self, PyObject *args)
 {
@@ -192,6 +191,7 @@ thpy_is_stopped (PyObject *self, PyObject *args)
 
 /* Implementation of InferiorThread.is_running () -> Boolean.
    Return whether the thread is running.  */
+
 static PyObject *
 thpy_is_running (PyObject *self, PyObject *args)
 {
@@ -207,6 +207,7 @@ thpy_is_running (PyObject *self, PyObject *args)
 
 /* Implementation of InferiorThread.is_exited () -> Boolean.
    Return whether the thread is exited.  */
+
 static PyObject *
 thpy_is_exited (PyObject *self, PyObject *args)
 {
@@ -237,6 +238,7 @@ thpy_is_valid (PyObject *self, PyObject *args)
 
 /* Implementation of gdb.selected_thread () -> gdb.InferiorThread.
    Returns the selected thread object.  */
+
 PyObject *
 gdbpy_selected_thread (PyObject *self, PyObject *args)
 {
@@ -252,8 +254,6 @@ gdbpy_selected_thread (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
-
-
 int
 gdbpy_initialize_thread (void)
 {
@@ -263,8 +263,6 @@ gdbpy_initialize_thread (void)
   return gdb_pymodule_addobject (gdb_module, "InferiorThread",
 				 (PyObject *) &thread_object_type);
 }
-
-
 
 static PyGetSetDef thread_object_getset[] =
 {
