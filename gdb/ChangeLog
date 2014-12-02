@@ -1,3 +1,7 @@
+2014-12-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/cleanups.c (make_cleanup_dtor): Fix comment typo.
+
 2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
 
 	* NEWS: Mention new Python events.

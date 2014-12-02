@@ -119,7 +119,7 @@ make_cleanup (make_cleanup_ftype *function, void *arg)
   return make_my_cleanup (&cleanup_chain, function, arg);
 }
 
-/* Same as make_cleanup except also includes TDOR, a destructor to free ARG.
+/* Same as make_cleanup except also includes DTOR, a destructor to free ARG.
    DTOR is invoked when the cleanup is performed or when it is discarded.  */
 
 struct cleanup *
