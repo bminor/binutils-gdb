@@ -331,4 +331,42 @@ if { [isnative] && [which $CC] != 0 } {
 	 "-shared -melf32_x86_64 tmpdir/simple-x32.o" "" "--x32"
 	{dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} "x86-64-x32"}
     }
+
+    run_cc_link_tests [list \
+	[list \
+	    "Build copyreloc-lib.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { copyreloc-lib.c } \
+	    {} \
+	    "copyreloc-lib.so" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE without -fPIE (1)" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.c } \
+	    {{readelf {-Wr} copyreloc-main1.rd}} \
+	    "copyreloc-main" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE without -fPIE (2)" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.c } \
+	    {{readelf {-Wr} copyreloc-main2.rd}} \
+	    "copyreloc-main" \
+	] \
+    ]
+
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run copyreloc-main with PIE without -fPIE" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.c } \
+	    "copyreloc-main" \
+	    "copyreloc-main.out" \
+	] \
+    ]
 }

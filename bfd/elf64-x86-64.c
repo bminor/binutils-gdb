@@ -1053,12 +1053,28 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
     return FALSE;
 
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!info->shared)
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->sdynbss
-      || (!info->shared && !htab->srelbss))
+  if (!htab->sdynbss)
     abort ();
+
+  if (info->executable)
+    {
+      /* Always allow copy relocs for building executables.  */
+      asection *s;
+      s  = bfd_get_linker_section (dynobj, ".rela.bss");
+      if (s == NULL)
+	{
+	  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
+	  s = bfd_make_section_anyway_with_flags (dynobj,
+						  ".rela.bss",
+						  (bed->dynamic_sec_flags
+						   | SEC_READONLY));
+	  if (s == NULL
+	      || ! bfd_set_section_alignment (dynobj, s,
+					      bed->s->log_file_align))
+	    return FALSE;
+	}
+      htab->srelbss = s;
+    }
 
   if (!info->no_ld_generated_unwind_info
       && htab->plt_eh_frame == NULL
@@ -2343,7 +2359,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.	*/
-  if (info->shared)
+  if (!info->executable)
     return TRUE;
 
   /* If there are no references to this symbol that do not use the
@@ -2636,20 +2652,28 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefweak)
+      if (eh->dyn_relocs != NULL)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (h->root.type == bfd_link_hash_undefweak)
+	    {
+	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+		eh->dyn_relocs = NULL;
+
+	      /* Make sure undefined weak symbols are output as a dynamic
+		 symbol in PIEs.  */
+	      else if (h->dynindx == -1
+		       && ! h->forced_local
+		       && ! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+	  /* For PIE, discard space for relocs against symbols which
+	     turn out to need copy relocs.  */
+	  else if (info->executable
+		   && h->needs_copy
+		   && h->def_dynamic
+		   && !h->def_regular)
 	    eh->dyn_relocs = NULL;
-
-	  /* Make sure undefined weak symbols are output as a dynamic
-	     symbol in PIEs.  */
-	  else if (h->dynindx == -1
-		   && ! h->forced_local
-		   && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
 	}
-
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
@@ -3962,10 +3986,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     defined locally or for a branch.  */
 		  fail = !h->def_regular && !branch;
 		}
-	      else
+	      else if (!(info->executable && h->needs_copy))
 		{
-		  /* Symbol isn't referenced locally.  We only allow
-		     branch to symbol with non-default visibility. */
+		  /* Symbol doesn't need copy reloc and isn't referenced
+		     locally.  We only allow branch to symbol with
+		     non-default visibility. */
 		  fail = (!branch
 			  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT);
 		}
@@ -4019,7 +4044,13 @@ direct:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
+	   /* Don't copy a pc-relative relocation into the output file
+	      if the symbol needs copy reloc.  */
 	  if ((info->shared
+	       && !(info->executable
+		    && h != NULL
+		    && h->needs_copy
+		    && IS_X86_64_PCREL_TYPE (r_type))
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		   || h->root.type != bfd_link_hash_undefweak)
