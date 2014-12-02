@@ -361,6 +361,7 @@ SUBDIR_PYTHON_OBS = \
 	py-function.o \
 	py-gdb-readline.o \
 	py-inferior.o \
+	py-infevents.o \
 	py-infthread.o \
 	py-lazy-string.o \
 	py-linetable.o \
@@ -399,6 +400,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-function.c \
 	python/py-gdb-readline.c \
 	python/py-inferior.c \
+	python/py-infevents.c \
 	python/py-infthread.c \
 	python/py-lazy-string.c \
 	python/py-linetable.c \
@@ -2476,6 +2478,10 @@ py-gdb-readline.o: $(srcdir)/python/py-gdb-readline.c
 
 py-inferior.o: $(srcdir)/python/py-inferior.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-inferior.c
+	$(POSTCOMPILE)
+
+py-infevents.o: $(srcdir)/python/py-infevents.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-infevents.c
 	$(POSTCOMPILE)
 
 py-infthread.o: $(srcdir)/python/py-infthread.c

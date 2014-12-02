@@ -281,6 +281,22 @@ The trace state variable @var{tsv} is deleted.  If @var{tsv} is
 The trace state value @var{tsv} is modified.
 @end deftypefun
 
+@deftypefun void inferior_call_pre (ptid_t @var{thread}, CORE_ADDR @var{address})
+An inferior function at @var{address} is about to be called in thread
+@var{thread}.
+@end deftypefun
+
+@deftypefun void inferior_call_post (ptid_t @var{thread}, CORE_ADDR @var{address})
+The inferior function at @var{address} has just been called.  This observer
+is called even if the inferior exits during the call.  @var{thread} is the
+thread in which the function was called, which may be different from the
+current thread.
+@end deftypefun
+
+@deftypefun void register_changed (struct frame_info *@var{frame}, int @var{regnum})
+A register in the inferior has been modified by the @value{GDBN} user.
+@end deftypefun
+
 @deftypefun void test_notification (int @var{somearg})
 This observer is used for internal testing.  Do not use.  
 See testsuite/gdb.gdb/observer.exp.

@@ -62,6 +62,30 @@ def clear_objfiles_handler (event):
     print ("event type: clear_objfiles")
     print ("progspace: %s" % (event.progspace.filename))
 
+def inferior_call_handler (event):
+    if (isinstance (event, gdb.InferiorCallPreEvent)):
+        print ("event type: pre-call")
+    elif (isinstance (event, gdb.InferiorCallPostEvent)):
+        print ("event type: post-call")
+    else:
+        assert False
+    print ("ptid: %s" % (event.ptid,))
+    print ("address: 0x%x" % (event.address))
+
+def register_changed_handler (event):
+    assert (isinstance (event, gdb.RegisterChangedEvent))
+    print ("event type: register-changed")
+    assert (isinstance (event.frame, gdb.Frame))
+    print ("frame: %s" % (event.frame))
+    print ("num: %s" % (event.regnum))
+
+def memory_changed_handler (event):
+    assert (isinstance (event, gdb.MemoryChangedEvent))
+    print ("event type: memory-changed")
+    print ("address: %s" % (event.address))
+    print ("length: %s" % (event.length))
+
+
 class test_events (gdb.Command):
     """Test events."""
 
@@ -73,6 +97,9 @@ class test_events (gdb.Command):
         gdb.events.stop.connect (breakpoint_stop_handler)
         gdb.events.exited.connect (exit_handler)
         gdb.events.cont.connect (continue_handler)
+        gdb.events.inferior_call.connect (inferior_call_handler)
+        gdb.events.memory_changed.connect (memory_changed_handler)
+        gdb.events.register_changed.connect (register_changed_handler)
         print ("Event testers registered.")
 
 test_events ()

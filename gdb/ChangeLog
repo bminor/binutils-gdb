@@ -1,3 +1,38 @@
+2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
+
+	* NEWS: Mention new Python events.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-infevents.o.
+	(SUBDIR_PYTHON_SRCS): Add py-infevents.c.
+	(py-infevents.o): New rule.
+	* doc/observer.texi (inferior_call_pre, inferior_call_post)
+	(memory_changed, register_changed): New observers.
+	* infcall.c (call_function_by_hand): Notify observer before and
+	after inferior call.
+	* python/py-event.h (inferior_call_kind): New enum.
+	(emit_inferior_call_event): New prototype.
+	(emit_register_changed_event): New prototype.
+	(emit_memory_changed_event): New prototype.
+	* python/py-events.h (events_object): New registries
+	inferior_call, memory_changed and register_changed.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add the
+	inferior_call, memory_changed and register_changed registries.
+	* python/py-infevents.c: New.
+	* python/py-inferior.c (python_on_inferior_call_pre)
+	(python_on_inferior_call_post, python_on_register_change)
+	(python_on_memory_change): New functions.
+	(gdbpy_initialize_inferior): Attach python handler to new
+	observers.
+	* python/py-infthread.c(gdbpy_create_ptid_object): New.
+	(thpy_get_ptid) Use gdbpy_create_ptid_object.
+	* python/python-internal.h:
+	(gdbpy_create_ptid_object)
+	(gdbpy_initialize_inferior_call_pre_event)
+	(gdbpy_initialize_inferior_call_post_event)
+	(gdbpy_initialize_register_changed_event)
+	(gdbpy_initialize_memory_changed_event): New prototypes.
+	* python/python.c (_initialize_python): Initialize new events.
+	* valops.c (value_assign): Notify register_changed observer.
+
 2014-12-02  Doug Evans  <dje@google.com>
 
 	* python/py-infthread.c: Whitespace fixes.

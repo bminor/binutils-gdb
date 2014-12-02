@@ -105,6 +105,22 @@ typedef struct
 extern int emit_continue_event (ptid_t ptid);
 extern int emit_exited_event (const LONGEST *exit_code, struct inferior *inf);
 
+/* For inferior function call events, discriminate whether event is
+   before or after the call. */
+
+typedef enum
+{
+  /* Before the call */
+  INFERIOR_CALL_PRE,
+  /* after the call */
+  INFERIOR_CALL_POST,
+} inferior_call_kind;
+
+extern int emit_inferior_call_event (inferior_call_kind kind,
+				     ptid_t thread, CORE_ADDR addr);
+extern int emit_register_changed_event (struct frame_info *frame,
+				        int regnum);
+extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
 extern int evpy_emit_event (PyObject *event,
                             eventregistry_object *registry)
   CPYCHECKER_STEALS_REFERENCE_TO_ARG (1);

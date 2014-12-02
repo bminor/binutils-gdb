@@ -1169,6 +1169,7 @@ value_assign (struct value *toval, struct value *fromval)
 	      }
 	  }
 
+	observer_notify_register_changed (frame, value_reg);
 	if (deprecated_register_changed_hook)
 	  deprecated_register_changed_hook (-1);
 	break;
