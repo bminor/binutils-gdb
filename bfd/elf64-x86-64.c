@@ -1060,12 +1060,28 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
     return FALSE;
 
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!info->shared)
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->sdynbss
-      || (!info->shared && !htab->srelbss))
+  if (!htab->sdynbss)
     abort ();
+
+  if (info->executable)
+    {
+      /* Always allow copy relocs for building executables.  */
+      asection *s;
+      s  = bfd_get_linker_section (dynobj, ".rela.bss");
+      if (s == NULL)
+	{
+	  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
+	  s = bfd_make_section_anyway_with_flags (dynobj,
+						  ".rela.bss",
+						  (bed->dynamic_sec_flags
+						   | SEC_READONLY));
+	  if (s == NULL
+	      || ! bfd_set_section_alignment (dynobj, s,
+					      bed->s->log_file_align))
+	    return FALSE;
+	}
+      htab->srelbss = s;
+    }
 
   if (!info->no_ld_generated_unwind_info
       && htab->plt_eh_frame == NULL
@@ -1939,7 +1955,8 @@ do_size:
 	     storing information in the relocs_copied field of the hash
 	     table entry.  A similar situation occurs when creating
 	     shared libraries and symbol visibility changes render the
-	     symbol local.
+	     symbol local.  We allow copy relocs for non-GOT pc-relative
+	     relocation.
 
 	     If on the other hand, we are creating an executable, we
 	     may need to keep relocations for symbols satisfied by a
@@ -1949,6 +1966,7 @@ do_size:
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (! IS_X86_64_PCREL_TYPE (r_type)
 		   || (h != NULL
+		       && !h->non_got_ref
 		       && (! SYMBOLIC_BIND (info, h)
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
@@ -2369,7 +2387,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.	*/
-  if (info->shared)
+  if (!info->executable)
     return TRUE;
 
   /* If there are no references to this symbol that do not use the
@@ -2384,7 +2402,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  if (ELIMINATE_COPY_RELOCS)
+  if (ELIMINATE_COPY_RELOCS && !info->shared)
     {
       eh = (struct elf_x86_64_link_hash_entry *) h;
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -4035,10 +4053,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     defined locally or for a branch.  */
 		  fail = !h->def_regular && !branch;
 		}
-	      else
+	      else if (!h->needs_copy)
 		{
-		  /* Symbol isn't referenced locally.  We only allow
-		     branch to symbol with non-default visibility. */
+		  /* Symbol doesn't need copy reloc and isn't referenced
+		     locally.  We only allow branch to symbol with
+		     non-default visibility. */
 		  fail = (!branch
 			  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT);
 		}
@@ -4092,7 +4111,12 @@ direct:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
+	   /* Don't copy a pc-relative relocation into the output file
+	      if the symbol needs copy reloc.  */
 	  if ((info->shared
+	       && !(h != NULL
+		    && h->needs_copy
+		    && IS_X86_64_PCREL_TYPE (r_type))
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		   || h->root.type != bfd_link_hash_undefweak)
