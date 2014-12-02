@@ -1,3 +1,18 @@
+2015-02-11  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2014-12-02  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (OPD_NDX): Define.  Use throughout for sizing/indexing
+	_opd_sec_data array, halving required memory.
+	(sort_r_offset): New function.
+	(ppc64_elf_edit_opd): Sort incoming relocs.  Accept .opd
+	sections with a mix of 16 and 24 byte OPD entries.  Don't
+	attempt to honour --non-overlapping-opd for .opd sections with
+	unexpected relocs.  Simplify opd entry size calculations by
+	first finding the reloc for the next entry.  Make edit loop
+	handle one opd entry per iteration, with an inner loop
+	handling relocs per entry.
+
 2015-01-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Backport from mainline
