@@ -1,16 +1,6 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-* Python Scripting
-
-  New events which are triggered when GDB modifies the state of the 
-  inferior.
-
-  ** gdb.events.inferior_call_pre: Function call is about to be made.
-  ** gdb.events.inferior_call_post: Function call has just been made.
-  ** gdb.events.memory_changed: A memory location has been altered.
-  ** gdb.events.register_changed: A register has been altered.
-
 *** Changes since GDB 7.8
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.

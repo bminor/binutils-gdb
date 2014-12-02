@@ -1,9 +1,3 @@
-2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
-
-	* python.texi (Events In Python): Document new events
-	InferiorCallPreEvent, InferiorCallPostEvent, MemoryChangedEvent
-	and RegisterChangedEvent.
-
 2014-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Add add-auto-load-scripts-directory.

@@ -1,11 +1,3 @@
-2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
-
-	* gdb.python/py-events.py (inferior_call_handler): New.
-	(register_changed_handler, memory_changed_handler): New.
-	(test_events.invoke): Register new handlers.
-	* gdb.python/py-events.exp: Add tests for inferior call,
-	memory_changed and register_changed events.
-
 2014-12-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/execl-update-breakpoints.exp: Specify the link address
