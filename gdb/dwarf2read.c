@@ -2918,22 +2918,16 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
     {
       /* NAME is already canonical.  Drop any qualifiers as .gdb_index does
 	 not contain any.  */
-      const char *paren = NULL;
 
-      /* Need to handle "(anonymous namespace)".  */
-      if (*name != '(')
-	paren = strchr (name, '(');
-
-      if (paren)
+      if (strchr (name, '(') != NULL)
 	{
-	  char *dup;
+	  char *without_params = cp_remove_params (name);
 
-	  dup = xmalloc (paren - name + 1);
-	  memcpy (dup, name, paren - name);
-	  dup[paren - name] = 0;
-
-	  make_cleanup (xfree, dup);
-	  name = dup;
+	  if (without_params != NULL)
+	    {
+	      make_cleanup (xfree, without_params);
+	      name = without_params;
+	    }
 	}
     }
 

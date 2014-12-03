@@ -1,5 +1,11 @@
 2014-12-02  Doug Evans  <dje@google.com>
 
+	PR symtab/17591
+	* dwarf2read.c (find_slot_in_mapped_hash): Use cp_remove_params
+	to strip parameters.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (peek_die_abbrev): Improve error message text.
 
 2014-12-02  Doug Evans  <dje@google.com>
