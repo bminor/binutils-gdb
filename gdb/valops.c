@@ -1825,9 +1825,7 @@ do_search_struct_field (const char *name, struct value *arg1, int offset,
 	  }
 
 	if (t_field_name
-	    && (t_field_name[0] == '\0'
-		|| (TYPE_CODE (type) == TYPE_CODE_UNION
-		    && (strcmp_iw (t_field_name, "else") == 0))))
+	    && t_field_name[0] == '\0')
 	  {
 	    struct type *field_type = TYPE_FIELD_TYPE (type, i);
 
