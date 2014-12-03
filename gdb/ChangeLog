@@ -1,3 +1,8 @@
+2014-12-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/cleanups.c (make_cleanup_dtor): Use typedef for dtor
+	type.
+
 2014-12-02  Doug Evans  <dje@google.com>
 
 	* symtab.c (symbol_init_cplus_specific): Delete.

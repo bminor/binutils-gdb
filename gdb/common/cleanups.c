@@ -124,7 +124,7 @@ make_cleanup (make_cleanup_ftype *function, void *arg)
 
 struct cleanup *
 make_cleanup_dtor (make_cleanup_ftype *function, void *arg,
-		   void (*dtor) (void *))
+		   make_cleanup_dtor_ftype *dtor)
 {
   return make_my_cleanup2 (&cleanup_chain,
 			   function, arg, dtor);
