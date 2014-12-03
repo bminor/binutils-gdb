@@ -2360,6 +2360,7 @@ free_debug_section (enum dwarf_section_display_enum debug)
 	{
 	  sec->contents = NULL;
 	  sec->flags &= ~ SEC_IN_MEMORY;
+	  sec->compress_status = COMPRESS_SECTION_NONE;
 	}
     }
 
