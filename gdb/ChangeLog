@@ -1,5 +1,9 @@
 2014-12-02  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (peek_die_abbrev): Improve error message text.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
 	* valops.c (do_search_struct_field): Remove remnant of Chill support.
 	Ref: commit 4c2260aa5c261f7bfb26dcf3aa7c67876720b17e
 

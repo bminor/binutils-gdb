@@ -7130,8 +7130,10 @@ peek_die_abbrev (const gdb_byte *info_ptr, unsigned int *bytes_read,
   abbrev = abbrev_table_lookup_abbrev (cu->abbrev_table, abbrev_number);
   if (!abbrev)
     {
-      error (_("Dwarf Error: Could not find abbrev number %d [in module %s]"),
-	     abbrev_number, bfd_get_filename (abfd));
+      error (_("Dwarf Error: Could not find abbrev number %d in %s"
+	       " at offset 0x%x [in module %s]"),
+	     abbrev_number, cu->per_cu->is_debug_types ? "TU" : "CU",
+	     cu->header.offset.sect_off, bfd_get_filename (abfd));
     }
 
   return abbrev;
