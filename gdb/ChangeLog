@@ -1,3 +1,23 @@
+2014-12-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/sparc/sol2.mh (NATDEPFILES): Remove core-regset.o.
+	* sparc-sol2-tdep.c: Include "regset.h".
+	(sparc32_sol2_supply_core_gregset): New function.
+	(sparc32_sol2_collect_core_gregset): Likewise.
+	(sparc32_sol2_supply_core_fpregset): Likewise.
+	(sparc32_sol2_collect_core_fpregset): Likewise.
+	(sparc32_sol2_gregset, sparc32_sol2_fpregset): New variables.
+	(sparc32_sol2_init_abi): Set tdep->gregset/sizeof_gregset and
+	tdep->fpregset/sizeof_fpregset.
+	* sparc64-sol2-tdep.c: Include "regset.h".
+	(sparc64_sol2_supply_core_gregset): New function.
+	(sparc64_sol2_collect_core_gregset): Likewise.
+	(sparc64_sol2_supply_core_fpregset): Likewise.
+	(sparc64_sol2_collect_core_fpregset): Likewise.
+	(sparc64_sol2_gregset, sparc64_sol2_fpregset): New variables.
+	(sparc64_sol2_init_abi): Set tdep->gregset/sizeof_gregset and
+	tdep->fpregset/sizeof_fpregset.
+
 2014-12-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/cleanups.c (make_cleanup_dtor): Use typedef for dtor
