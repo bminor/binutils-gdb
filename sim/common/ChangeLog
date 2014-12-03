@@ -1,3 +1,11 @@
+2014-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* sim-io.c (sim_io_stat, sim_io_fstat): Adjust calls to "stat"
+	and "fstat" callbacks by calls to "to_stat" and "to_fstat" (resp)
+	callbacks following renaming in callback.h.
+	* syscall.c (cb_syscall): Likewise.  Adjust calls to "lstat"
+	callback by call to "to_lstat" callback
+
 2014-08-28  Gary Benson  <gbenson@redhat.com>
 
 	* sim-trace.h (debug_printf): New define.

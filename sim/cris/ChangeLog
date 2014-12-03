@@ -1,3 +1,8 @@
+2014-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* traps.c (cris_break_13_handler): Adjust call to "fstat" callback
+	by call to "to_fstat" following renaming in callback.h.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
