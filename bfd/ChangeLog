@@ -1,6 +1,14 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-04  Alan Modra  <amodra@gmail.com>
+	PR 17666
+	* elflink.c: Include bfd_stdint.h.
+	(cmp_ext32l_r_offset, cmp_ext32b_r_offset)
+	(cmp_ext64l_r_offset, cmp_ext64b_r_offset): New functions.
+	(elf_link_adjust_relocs): Sort relocs.  Free rel hashes after
+	sorting invalidates.
+
 	2014-12-02  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (OPD_NDX): Define.  Use throughout for sizing/indexing
 	_opd_sec_data array, halving required memory.

@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "bfd_stdint.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #define ARCH_SIZE 0
@@ -7957,6 +7958,138 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   return r;
 }
 
+/* qsort comparison functions sorting external relocs by r_offset.  */
+
+static int
+cmp_ext32l_r_offset (const void *p, const void *q)
+{
+  union aligned32
+  {
+    uint32_t v;
+    unsigned char c[4];
+  };
+  const union aligned32 *a
+    = (const union aligned32 *) ((const Elf32_External_Rel *) p)->r_offset;
+  const union aligned32 *b
+    = (const union aligned32 *) ((const Elf32_External_Rel *) q)->r_offset;
+
+  uint32_t aval = (  (uint32_t) a->c[0]
+		   | (uint32_t) a->c[1] << 8
+		   | (uint32_t) a->c[2] << 16
+		   | (uint32_t) a->c[3] << 24);
+  uint32_t bval = (  (uint32_t) b->c[0]
+		   | (uint32_t) b->c[1] << 8
+		   | (uint32_t) b->c[2] << 16
+		   | (uint32_t) b->c[3] << 24);
+  if (aval < bval)
+    return -1;
+  else if (aval > bval)
+    return 1;
+  return 0;
+}
+
+static int
+cmp_ext32b_r_offset (const void *p, const void *q)
+{
+  union aligned32
+  {
+    uint32_t v;
+    unsigned char c[4];
+  };
+  const union aligned32 *a
+    = (const union aligned32 *) ((const Elf32_External_Rel *) p)->r_offset;
+  const union aligned32 *b
+    = (const union aligned32 *) ((const Elf32_External_Rel *) q)->r_offset;
+
+  uint32_t aval = (  (uint32_t) a->c[0] << 24
+		   | (uint32_t) a->c[1] << 16
+		   | (uint32_t) a->c[2] << 8
+		   | (uint32_t) a->c[3]);
+  uint32_t bval = (  (uint32_t) b->c[0] << 24
+		   | (uint32_t) b->c[1] << 16
+		   | (uint32_t) b->c[2] << 8
+		   | (uint32_t) b->c[3]);
+  if (aval < bval)
+    return -1;
+  else if (aval > bval)
+    return 1;
+  return 0;
+}
+
+#ifdef BFD_HOST_64_BIT
+static int
+cmp_ext64l_r_offset (const void *p, const void *q)
+{
+  union aligned64
+  {
+    uint64_t v;
+    unsigned char c[8];
+  };
+  const union aligned64 *a
+    = (const union aligned64 *) ((const Elf64_External_Rel *) p)->r_offset;
+  const union aligned64 *b
+    = (const union aligned64 *) ((const Elf64_External_Rel *) q)->r_offset;
+
+  uint64_t aval = (  (uint64_t) a->c[0]
+		   | (uint64_t) a->c[1] << 8
+		   | (uint64_t) a->c[2] << 16
+		   | (uint64_t) a->c[3] << 24
+		   | (uint64_t) a->c[4] << 32
+		   | (uint64_t) a->c[5] << 40
+		   | (uint64_t) a->c[6] << 48
+		   | (uint64_t) a->c[7] << 56);
+  uint64_t bval = (  (uint64_t) b->c[0]
+		   | (uint64_t) b->c[1] << 8
+		   | (uint64_t) b->c[2] << 16
+		   | (uint64_t) b->c[3] << 24
+		   | (uint64_t) b->c[4] << 32
+		   | (uint64_t) b->c[5] << 40
+		   | (uint64_t) b->c[6] << 48
+		   | (uint64_t) b->c[7] << 56);
+  if (aval < bval)
+    return -1;
+  else if (aval > bval)
+    return 1;
+  return 0;
+}
+
+static int
+cmp_ext64b_r_offset (const void *p, const void *q)
+{
+  union aligned64
+  {
+    uint64_t v;
+    unsigned char c[8];
+  };
+  const union aligned64 *a
+    = (const union aligned64 *) ((const Elf64_External_Rel *) p)->r_offset;
+  const union aligned64 *b
+    = (const union aligned64 *) ((const Elf64_External_Rel *) q)->r_offset;
+
+  uint64_t aval = (  (uint64_t) a->c[0] << 56
+		   | (uint64_t) a->c[1] << 48
+		   | (uint64_t) a->c[2] << 40
+		   | (uint64_t) a->c[3] << 32
+		   | (uint64_t) a->c[4] << 24
+		   | (uint64_t) a->c[5] << 16
+		   | (uint64_t) a->c[6] << 8
+		   | (uint64_t) a->c[7]);
+  uint64_t bval = (  (uint64_t) b->c[0] << 56
+		   | (uint64_t) b->c[1] << 48
+		   | (uint64_t) b->c[2] << 40
+		   | (uint64_t) b->c[3] << 32
+		   | (uint64_t) b->c[4] << 24
+		   | (uint64_t) b->c[5] << 16
+		   | (uint64_t) b->c[6] << 8
+		   | (uint64_t) b->c[7]);
+  if (aval < bval)
+    return -1;
+  else if (aval > bval)
+    return 1;
+  return 0;
+}
+#endif
+
 /* When performing a relocatable link, the input relocations are
    preserved.  But, if they reference global symbols, the indices
    referenced must be updated.  Update all the relocations found in
@@ -7975,6 +8108,7 @@ elf_link_adjust_relocs (bfd *abfd,
   int r_sym_shift;
   unsigned int count = reldata->count;
   struct elf_link_hash_entry **rel_hash = reldata->hashes;
+  int (*compare) (const void *, const void *);
 
   if (reldata->hdr->sh_entsize == bed->s->sizeof_rel)
     {
@@ -8020,6 +8154,30 @@ elf_link_adjust_relocs (bfd *abfd,
 			   | (irela[j].r_info & r_type_mask));
       (*swap_out) (abfd, irela, erela);
     }
+
+  if (bed->s->arch_size == 32)
+    {
+      if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
+	compare = cmp_ext32l_r_offset;
+      else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
+	compare = cmp_ext32b_r_offset;
+      else
+	abort ();
+    }
+  else
+    {
+#ifdef BFD_HOST_64_BIT
+      if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
+	compare = cmp_ext64l_r_offset;
+      else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
+	compare = cmp_ext64b_r_offset;
+      else
+#endif
+	abort ();
+    }
+  qsort (reldata->hdr->contents, count, reldata->hdr->sh_entsize, compare);
+  free (reldata->hashes);
+  reldata->hashes = NULL;
 }
 
 struct elf_link_sort_rela

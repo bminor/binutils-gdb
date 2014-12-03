@@ -1,3 +1,12 @@
+2015-02-11  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2014-12-04  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/vxworks-relax.rd: Update for reloc sorting.
+	* ld-powerpc/vxworks-relax-2.rd: Likewise.
+	* ld-sh/sh64/reldl32.rd: Likewise.
+	* ld-sh/sh64/reldl64.rd: Likewise.
+
 2015-01-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Backport from mainline
