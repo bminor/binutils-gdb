@@ -1059,8 +1059,7 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
   if (info->executable)
     {
       /* Always allow copy relocs for building executables.  */
-      asection *s;
-      s  = bfd_get_linker_section (dynobj, ".rela.bss");
+      asection *s = bfd_get_linker_section (dynobj, ".rela.bss");
       if (s == NULL)
 	{
 	  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
