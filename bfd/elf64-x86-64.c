@@ -4059,7 +4059,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     defined locally or for a branch.  */
 		  fail = !h->def_regular && !branch;
 		}
-	      else if (!h->needs_copy)
+	      else if (!(info->executable && h->needs_copy))
 		{
 		  /* Symbol doesn't need copy reloc and isn't referenced
 		     locally.  We only allow branch to symbol with
@@ -4120,7 +4120,8 @@ direct:
 	   /* Don't copy a pc-relative relocation into the output file
 	      if the symbol needs copy reloc.  */
 	  if ((info->shared
-	       && !(h != NULL
+	       && !(info->executable
+		    && h != NULL
 		    && h->needs_copy
 		    && IS_X86_64_PCREL_TYPE (r_type))
 	       && (h == NULL
