@@ -1,5 +1,14 @@
 2014-12-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Revert the last
+	change.
+	(elf_x86_64_adjust_dynamic_symbol): Don't check !info->shared
+	with ELIMINATE_COPY_RELOCS.
+	(elf_x86_64_allocate_dynrelocs): For PIE, discard space for
+	relocs against symbols which turn out to need copy relocs.
+
+2014-12-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Always
 	allow copy relocs for building executables.
 	(elf_x86_64_check_relocs): Allow copy relocs for non-GOT

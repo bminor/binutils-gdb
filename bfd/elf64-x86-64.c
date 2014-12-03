@@ -1955,8 +1955,7 @@ do_size:
 	     storing information in the relocs_copied field of the hash
 	     table entry.  A similar situation occurs when creating
 	     shared libraries and symbol visibility changes render the
-	     symbol local.  We allow copy relocs for non-GOT pc-relative
-	     relocation.
+	     symbol local.
 
 	     If on the other hand, we are creating an executable, we
 	     may need to keep relocations for symbols satisfied by a
@@ -1966,7 +1965,6 @@ do_size:
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (! IS_X86_64_PCREL_TYPE (r_type)
 		   || (h != NULL
-		       && !h->non_got_ref
 		       && (! SYMBOLIC_BIND (info, h)
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
@@ -2402,7 +2400,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  if (ELIMINATE_COPY_RELOCS && !info->shared)
+  if (ELIMINATE_COPY_RELOCS)
     {
       eh = (struct elf_x86_64_link_hash_entry *) h;
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -2719,20 +2717,28 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefweak)
+      if (eh->dyn_relocs != NULL)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (h->root.type == bfd_link_hash_undefweak)
+	    {
+	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+		eh->dyn_relocs = NULL;
+
+	      /* Make sure undefined weak symbols are output as a dynamic
+		 symbol in PIEs.  */
+	      else if (h->dynindx == -1
+		       && ! h->forced_local
+		       && ! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+	  /* For PIE, discard space for relocs against symbols which
+	     turn out to need copy relocs.  */
+	  else if (info->executable
+		   && h->needs_copy
+		   && h->def_dynamic
+		   && !h->def_regular)
 	    eh->dyn_relocs = NULL;
-
-	  /* Make sure undefined weak symbols are output as a dynamic
-	     symbol in PIEs.  */
-	  else if (h->dynindx == -1
-		   && ! h->forced_local
-		   && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
 	}
-
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
