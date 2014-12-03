@@ -1,5 +1,10 @@
 2014-12-02  Doug Evans  <dje@google.com>
 
+	PR symtab/17602
+	* linespec.c (iterate_name_matcher): Fix arguments to symbol_name_cmp.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
 	PR symtab/17591
 	* dwarf2read.c (find_slot_in_mapped_hash): Use cp_remove_params
 	to strip parameters.

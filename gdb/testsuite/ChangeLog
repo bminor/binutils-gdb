@@ -1,3 +1,10 @@
+2014-12-02  Doug Evans  <dje@google.com>
+
+        PR symtab/17602
+	* gdb.cp/anon-ns.cc: Move guts of this file to ...
+	* gdb.cp/anon-ns-2.cc: ... here.  New file.
+	* gdb.cp/anon-ns.exp: Update.
+
 2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
 
 	* gdb.python/py-events.py (inferior_call_handler): New.
