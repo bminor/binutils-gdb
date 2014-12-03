@@ -2738,6 +2738,55 @@ A reference to the program space (@code{gdb.Progspace}) whose objfile list has
 been cleared.  @xref{Progspaces In Python}.
 @end defvar
 
+@item events.inferior_call_pre
+Emits @code{gdb.InferiorCallPreEvent} which indicates that a function in
+the inferior is about to be called.
+
+@defvar InferiorCallPreEvent.ptid
+The thread in which the call will be run.
+@end defvar
+
+@defvar InferiorCallPreEvent.address
+The location of the function to be called.
+@end defvar
+
+@item events.inferior_call_post
+Emits @code{gdb.InferiorCallPostEvent} which indicates that a function in
+the inferior has returned.
+
+@defvar InferiorCallPostEvent.ptid
+The thread in which the call was run.
+@end defvar
+
+@defvar InferiorCallPostEvent.address
+The location of the function that was called.
+@end defvar
+
+@item events.memory_changed
+Emits @code{gdb.MemoryChangedEvent} which indicates that the memory of the
+inferior has been modified by the @value{GDBN} user, for instance via a
+command like @w{@code{set *addr = value}}.  The event has the following
+attributes:
+
+@defvar MemoryChangedEvent.address
+The start address of the changed region.
+@end defvar
+
+@defvar MemoryChangedEvent.length
+Length in bytes of the changed region.
+@end defvar
+
+@item events.register_changed
+Emits @code{gdb.RegisterChangedEvent} which indicates that a register in the
+inferior has been modified by the @value{GDBN} user.
+
+@defvar RegisterChangedEvent.frame
+A gdb.Frame object representing the frame in which the register was modified.
+@end defvar
+@defvar RegisterChangedEvent.regnum
+Denotes which register was modified.
+@end defvar
+
 @end table
 
 @node Threads In Python

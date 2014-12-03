@@ -2918,22 +2918,16 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
     {
       /* NAME is already canonical.  Drop any qualifiers as .gdb_index does
 	 not contain any.  */
-      const char *paren = NULL;
 
-      /* Need to handle "(anonymous namespace)".  */
-      if (*name != '(')
-	paren = strchr (name, '(');
-
-      if (paren)
+      if (strchr (name, '(') != NULL)
 	{
-	  char *dup;
+	  char *without_params = cp_remove_params (name);
 
-	  dup = xmalloc (paren - name + 1);
-	  memcpy (dup, name, paren - name);
-	  dup[paren - name] = 0;
-
-	  make_cleanup (xfree, dup);
-	  name = dup;
+	  if (without_params != NULL)
+	    {
+	      make_cleanup (xfree, without_params);
+	      name = without_params;
+	    }
 	}
     }
 
@@ -7130,8 +7124,10 @@ peek_die_abbrev (const gdb_byte *info_ptr, unsigned int *bytes_read,
   abbrev = abbrev_table_lookup_abbrev (cu->abbrev_table, abbrev_number);
   if (!abbrev)
     {
-      error (_("Dwarf Error: Could not find abbrev number %d [in module %s]"),
-	     abbrev_number, bfd_get_filename (abfd));
+      error (_("Dwarf Error: Could not find abbrev number %d in %s"
+	       " at offset 0x%x [in module %s]"),
+	     abbrev_number, cu->per_cu->is_debug_types ? "TU" : "CU",
+	     cu->header.offset.sect_off, bfd_get_filename (abfd));
     }
 
   return abbrev;

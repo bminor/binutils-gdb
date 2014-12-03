@@ -1,3 +1,24 @@
+2014-12-02  Doug Evans  <dje@google.com>
+
+        PR symtab/17602
+	* gdb.cp/anon-ns.cc: Move guts of this file to ...
+	* gdb.cp/anon-ns-2.cc: ... here.  New file.
+	* gdb.cp/anon-ns.exp: Update.
+
+2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
+
+	* gdb.python/py-events.py (inferior_call_handler): New.
+	(register_changed_handler, memory_changed_handler): New.
+	(test_events.invoke): Register new handlers.
+	* gdb.python/py-events.exp: Add tests for inferior call,
+	memory_changed and register_changed events.
+
+2014-12-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/execl-update-breakpoints.exp: Specify the link address
+	with '-Ttext-segment' instead of '-Ttext'.  Fall back to '-Ttext'
+	if the linker doesn't understand this.
+
 2014-12-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/python.exp: Change expected reply to help().

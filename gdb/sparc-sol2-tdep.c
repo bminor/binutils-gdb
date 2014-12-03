@@ -25,6 +25,7 @@
 #include "objfiles.h"
 #include "osabi.h"
 #include "regcache.h"
+#include "regset.h"
 #include "target.h"
 #include "trad-frame.h"
 
@@ -50,6 +51,52 @@ const struct sparc_fpregmap sparc32_sol2_fpregmap =
   0 * 4,			/* %f0 */
   33 * 4,			/* %fsr */
 };
+
+static void
+sparc32_sol2_supply_core_gregset (const struct regset *regset,
+				  struct regcache *regcache,
+				  int regnum, const void *gregs, size_t len)
+{
+  sparc32_supply_gregset (&sparc32_sol2_gregmap, regcache, regnum, gregs);
+}
+
+static void
+sparc32_sol2_collect_core_gregset (const struct regset *regset,
+				   const struct regcache *regcache,
+				   int regnum, void *gregs, size_t len)
+{
+  sparc32_collect_gregset (&sparc32_sol2_gregmap, regcache, regnum, gregs);
+}
+
+static void
+sparc32_sol2_supply_core_fpregset (const struct regset *regset,
+				   struct regcache *regcache,
+				   int regnum, const void *fpregs, size_t len)
+{
+  sparc32_supply_fpregset (&sparc32_sol2_fpregmap, regcache, regnum, fpregs);
+}
+
+static void
+sparc32_sol2_collect_core_fpregset (const struct regset *regset,
+				    const struct regcache *regcache,
+				    int regnum, void *fpregs, size_t len)
+{
+  sparc32_collect_fpregset (&sparc32_sol2_fpregmap, regcache, regnum, fpregs);
+}
+
+static const struct regset sparc32_sol2_gregset =
+  {
+    NULL,
+    sparc32_sol2_supply_core_gregset,
+    sparc32_sol2_collect_core_gregset
+  };
+
+static const struct regset sparc32_sol2_fpregset =
+  {
+    NULL,
+    sparc32_sol2_supply_core_fpregset,
+    sparc32_sol2_collect_core_fpregset
+  };
 
 
 /* The Solaris signal trampolines reside in libc.  For normal signals,
@@ -210,6 +257,12 @@ void
 sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->gregset = &sparc32_sol2_gregset;
+  tdep->sizeof_gregset = 152;
+
+  tdep->fpregset = &sparc32_sol2_fpregset;
+  tdep->sizeof_fpregset = 400;
 
   /* The Sun compilers (Sun ONE Studio, Forte Developer, Sun WorkShop, SunPRO)
      compiler puts out 0 instead of the address in N_SO stabs.  Starting with

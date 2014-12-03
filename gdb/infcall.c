@@ -35,6 +35,7 @@
 #include "ada-lang.h"
 #include "gdbthread.h"
 #include "event-top.h"
+#include "observer.h"
 
 /* If we can't find a function's name from its address,
    we print this instead.  */
@@ -654,6 +655,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       target_values_type = values_type;
     }
 
+  observer_notify_inferior_call_pre (inferior_ptid, funaddr);
+
   /* Determine the location of the breakpoint (and possibly other
      stuff) that the called function will return to.  The SPARC, for a
      function returning a structure or union, needs to make space for
@@ -898,6 +901,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
     e = run_inferior_call (tp, real_pc);
   }
+
+  observer_notify_inferior_call_post (call_thread_ptid, funaddr);
 
   /* Rethrow an error if we got one trying to run the inferior.  */
 

@@ -88,9 +88,9 @@ struct host_callback_struct
   void (*flush_stdout) (host_callback *);
   int (*write_stderr) (host_callback *, const char *, int);
   void (*flush_stderr) (host_callback *);
-  int (*stat) (host_callback *, const char *, struct stat *);
-  int (*fstat) (host_callback *, int, struct stat *);
-  int (*lstat) (host_callback *, const char *, struct stat *);
+  int (*to_stat) (host_callback *, const char *, struct stat *);
+  int (*to_fstat) (host_callback *, int, struct stat *);
+  int (*to_lstat) (host_callback *, const char *, struct stat *);
   int (*ftruncate) (host_callback *, int, long);
   int (*truncate) (host_callback *, const char *, long);
   int (*pipe) (host_callback *, int *);

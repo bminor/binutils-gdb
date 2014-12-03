@@ -2,7 +2,7 @@
 # Generated from: s390-te-linux64.xml
 name:s390_te_linux64
 xmltarget:s390-te-linux64.xml
-expedite:r14,r15,pswa
+expedite:r14l,r15l,pswa
 32:pswm
 32:pswa
 32:r0h

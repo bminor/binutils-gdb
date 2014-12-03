@@ -1,3 +1,106 @@
+2014-12-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/sparc/sol2.mh (NATDEPFILES): Remove core-regset.o.
+	* sparc-sol2-tdep.c: Include "regset.h".
+	(sparc32_sol2_supply_core_gregset): New function.
+	(sparc32_sol2_collect_core_gregset): Likewise.
+	(sparc32_sol2_supply_core_fpregset): Likewise.
+	(sparc32_sol2_collect_core_fpregset): Likewise.
+	(sparc32_sol2_gregset, sparc32_sol2_fpregset): New variables.
+	(sparc32_sol2_init_abi): Set tdep->gregset/sizeof_gregset and
+	tdep->fpregset/sizeof_fpregset.
+	* sparc64-sol2-tdep.c: Include "regset.h".
+	(sparc64_sol2_supply_core_gregset): New function.
+	(sparc64_sol2_collect_core_gregset): Likewise.
+	(sparc64_sol2_supply_core_fpregset): Likewise.
+	(sparc64_sol2_collect_core_fpregset): Likewise.
+	(sparc64_sol2_gregset, sparc64_sol2_fpregset): New variables.
+	(sparc64_sol2_init_abi): Set tdep->gregset/sizeof_gregset and
+	tdep->fpregset/sizeof_fpregset.
+
+2014-12-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/cleanups.c (make_cleanup_dtor): Use typedef for dtor
+	type.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
+	* symtab.c (symbol_init_cplus_specific): Delete.
+	(symbol_set_demangled_name): Remove special c++ support.
+	(symbol_get_demangled_name, symbol_set_language): Ditto.
+	* symtab.h (struct cplus_specific): Delete.
+	(struct general_symbol_info) <language_specific>: Remove
+	cplus_specific.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
+	PR symtab/17602
+	* linespec.c (iterate_name_matcher): Fix arguments to symbol_name_cmp.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
+	PR symtab/17591
+	* dwarf2read.c (find_slot_in_mapped_hash): Use cp_remove_params
+	to strip parameters.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (peek_die_abbrev): Improve error message text.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
+	* valops.c (do_search_struct_field): Remove remnant of Chill support.
+	Ref: commit 4c2260aa5c261f7bfb26dcf3aa7c67876720b17e
+
+2014-12-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/cleanups.c (make_cleanup_dtor): Fix comment typo.
+
+2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
+
+	* NEWS: Mention new Python events.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-infevents.o.
+	(SUBDIR_PYTHON_SRCS): Add py-infevents.c.
+	(py-infevents.o): New rule.
+	* doc/observer.texi (inferior_call_pre, inferior_call_post)
+	(memory_changed, register_changed): New observers.
+	* infcall.c (call_function_by_hand): Notify observer before and
+	after inferior call.
+	* python/py-event.h (inferior_call_kind): New enum.
+	(emit_inferior_call_event): New prototype.
+	(emit_register_changed_event): New prototype.
+	(emit_memory_changed_event): New prototype.
+	* python/py-events.h (events_object): New registries
+	inferior_call, memory_changed and register_changed.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add the
+	inferior_call, memory_changed and register_changed registries.
+	* python/py-infevents.c: New.
+	* python/py-inferior.c (python_on_inferior_call_pre)
+	(python_on_inferior_call_post, python_on_register_change)
+	(python_on_memory_change): New functions.
+	(gdbpy_initialize_inferior): Attach python handler to new
+	observers.
+	* python/py-infthread.c(gdbpy_create_ptid_object): New.
+	(thpy_get_ptid) Use gdbpy_create_ptid_object.
+	* python/python-internal.h:
+	(gdbpy_create_ptid_object)
+	(gdbpy_initialize_inferior_call_pre_event)
+	(gdbpy_initialize_inferior_call_post_event)
+	(gdbpy_initialize_register_changed_event)
+	(gdbpy_initialize_memory_changed_event): New prototypes.
+	* python/python.c (_initialize_python): Initialize new events.
+	* valops.c (value_assign): Notify register_changed observer.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
+	* python/py-infthread.c: Whitespace fixes.
+
+2014-12-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* features/Makefile (s390-te-linux64-expedite): Replace
+	non-existant r14 and r15 by r14l and r15l, respectively.
+	* regformats/s390-te-linux64.dat: Regenerate.
+
 2014-12-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* objfiles.c (allocate_objfile): Remove duplicate comment.

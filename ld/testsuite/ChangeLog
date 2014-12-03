@@ -1,3 +1,22 @@
+2014-12-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/copyreloc-lib.c: New file.
+	* ld-x86-64/copyreloc-main.c: Likewise.
+	* ld-x86-64/copyreloc-main.out: Likewise.
+	* ld-x86-64/copyreloc-main1.rd: Likewise.
+	* ld-x86-64/copyreloc-main2.rd: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run copyreloc tests.
+
+2014-12-02  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* ld-mips-elf/mips-elf.exp: Add undefined weak overflow
+	tests for o32, n32 and n64.
+	* ld-mips-elf/undefweak-overflow.s: New test.
+	* ld-mips-elf/undefweak-overflow.d: New test.
+	* ld-mips-elf/undefweak-overflow-n32.d: New test.
+	* ld-mips-elf/undefweak-overflow-n64.d: New test.
+
 2014-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16452

@@ -5566,10 +5566,10 @@ Target_powerpc<size, big_endian>::Scan::local(
 	{
 	  Reloc_section* rela_dyn = target->rela_dyn_section(symtab, layout,
 							     is_ifunc);
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	  if ((size == 32 && r_type == elfcpp::R_POWERPC_ADDR32)
 	      || (size == 64 && r_type == elfcpp::R_PPC64_ADDR64))
 	    {
-	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	      unsigned int dynrel = (is_ifunc ? elfcpp::R_POWERPC_IRELATIVE
 				     : elfcpp::R_POWERPC_RELATIVE);
 	      rela_dyn->add_local_relative(object, r_sym, dynrel,
@@ -5577,13 +5577,27 @@ Target_powerpc<size, big_endian>::Scan::local(
 					   reloc.get_r_offset(),
 					   reloc.get_r_addend(), false);
 	    }
-	  else
+	  else if (lsym.get_st_type() != elfcpp::STT_SECTION)
 	    {
 	      check_non_pic(object, r_type);
-	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	      rela_dyn->add_local(object, r_sym, r_type, output_section,
 				  data_shndx, reloc.get_r_offset(),
 				  reloc.get_r_addend());
+	    }
+	  else
+	    {
+	      gold_assert(lsym.get_st_value() == 0);
+	      unsigned int shndx = lsym.get_st_shndx();
+	      bool is_ordinary;
+	      shndx = object->adjust_sym_shndx(r_sym, shndx,
+					       &is_ordinary);
+	      if (!is_ordinary)
+		object->error(_("section symbol %u has bad shndx %u"),
+			      r_sym, shndx);
+	      else
+		rela_dyn->add_local_section(object, shndx, r_type,
+					    output_section, data_shndx,
+					    reloc.get_r_offset());
 	    }
 	}
       break;

@@ -73,6 +73,18 @@ gdbpy_initialize_py_events (void)
   if (add_new_registry (&gdb_py_events.exited, "exited") < 0)
     return -1;
 
+  if (add_new_registry (&gdb_py_events.inferior_call,
+			"inferior_call") < 0)
+    return -1;
+
+  if (add_new_registry (&gdb_py_events.memory_changed,
+			"memory_changed") < 0)
+    return -1;
+
+  if (add_new_registry (&gdb_py_events.register_changed,
+			"register_changed") < 0)
+    return -1;
+
   if (add_new_registry (&gdb_py_events.new_objfile, "new_objfile") < 0)
     return -1;
 

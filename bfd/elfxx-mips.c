@@ -5928,7 +5928,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 to them before.  */
       if (was_local_p)
 	value += gp0;
-      overflowed_p = mips_elf_overflow_p (value, 16);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
     case R_MIPS16_GOT16:
@@ -5983,7 +5984,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 18);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 18);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -5996,7 +5998,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 23);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 23);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6009,7 +6012,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 28);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 28);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6022,7 +6026,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - ((p | 7) ^ 7);
-      overflowed_p = mips_elf_overflow_p (value, 21);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 21);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6035,14 +6040,16 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 21);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 21);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
 
     case R_MIPS_PCHI16:
       value = mips_elf_high (symbol + addend - p);
-      overflowed_p = mips_elf_overflow_p (value, 16);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 16);
       value &= howto->dst_mask;
       break;
 
@@ -6057,7 +6064,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 8);
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 8);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 8);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6066,7 +6074,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 11);
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 11);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 11);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6075,7 +6084,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 17);
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 17);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 17);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6084,7 +6094,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 25);
       value = symbol + addend - ((p | 3) ^ 3);
-      overflowed_p = mips_elf_overflow_p (value, 25);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 25);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;

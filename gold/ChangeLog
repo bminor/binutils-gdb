@@ -1,3 +1,23 @@
+2014-12-03  Alan Modra  <amodra@gmail.com>
+
+	PR 17566
+	* powerpc.cc (Target_powerpc::Scan::local): Use add_local_section
+	when adding dynamic relocations against section symbols.
+
+2014-12-01  Dimitry Ivanov <dimitry@google.com>
+
+	* layout.cc (Layout::finish_dynamic_section): When '-z global'
+	is specified set DF_1_GLOBAL in DT_FLAGS_1 flags.
+	* options.h (General_options): New -z option (global).
+
+2014-12-01  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17578
+	* layout.cc (Layout::layout_gnu_stack): Don't warn when -z execstack
+	is given.
+	(Layout::create_executable_stack_info): Warn when -z noexecstack is
+	given but some inputs require executable stack.
+
 2014-11-26  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (gdb_sections): Keep .debug_gdb_scripts and

@@ -3062,7 +3062,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    stat_ptr = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (1) : GET_W_REG (1);
 
 	    /* Callback stat and return.  */
-	    fstat_return = sim_callback->fstat (sim_callback, fd, &stat_rec);
+	    fstat_return = sim_callback->to_fstat (sim_callback, fd,
+						   &stat_rec);
 
 	    /* Have stat_ptr point to starting of stat_rec.  */
 	    temp_stat_ptr = (char *) (&stat_rec);
@@ -3136,7 +3137,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	    /* Callback stat and return.  */
 	    stat_return =
-	      sim_callback->stat (sim_callback, filename, &stat_rec);
+	      sim_callback->to_stat (sim_callback, filename, &stat_rec);
 
 	    /* Have stat_ptr point to starting of stat_rec.  */
 	    temp_stat_ptr = (char *) (&stat_rec);

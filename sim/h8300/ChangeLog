@@ -1,3 +1,9 @@
+2014-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* compile.c (sim_resume):  Adjust calls to "stat" and "fstat"
+	callbacks by calls to "to_stat" and "to_fstat" (resp) callbacks
+	following renaming in callback.h.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

@@ -2101,8 +2101,7 @@ Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags,
       if ((gnu_stack_flags & elfcpp::SHF_EXECINSTR) != 0)
 	{
 	  this->input_requires_executable_stack_ = true;
-	  if (parameters->options().warn_execstack()
-	      || parameters->options().is_stack_executable())
+	  if (parameters->options().warn_execstack())
 	    gold_warning(_("%s: requires executable stack"),
 			 obj->name().c_str());
 	}
@@ -2975,7 +2974,14 @@ Layout::create_executable_stack_info()
 {
   bool is_stack_executable;
   if (parameters->options().is_execstack_set())
-    is_stack_executable = parameters->options().is_stack_executable();
+    {
+      is_stack_executable = parameters->options().is_stack_executable();
+      if (!is_stack_executable
+          && this->input_requires_executable_stack_
+          && parameters->options().warn_execstack())
+	gold_warning(_("one or more inputs require executable stack, "
+	               "but -z noexecstack was given"));
+    }
   else if (!this->input_with_gnu_stack_note_)
     return;
   else
@@ -4877,6 +4883,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     odyn->add_constant(elfcpp::DT_FLAGS, flags);
 
   flags = 0;
+  if (parameters->options().global())
+    flags |= elfcpp::DF_1_GLOBAL;
   if (parameters->options().initfirst())
     flags |= elfcpp::DF_1_INITFIRST;
   if (parameters->options().interpose())
