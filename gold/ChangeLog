@@ -1,3 +1,9 @@
+2014-12-03  Alan Modra  <amodra@gmail.com>
+
+	PR 17566
+	* powerpc.cc (Target_powerpc::Scan::local): Use add_local_section
+	when adding dynamic relocations against section symbols.
+
 2014-11-26  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Stub_control::set_output_and_owner): New function.
