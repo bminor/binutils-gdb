@@ -1,5 +1,14 @@
 2014-12-02  Doug Evans  <dje@google.com>
 
+	* symtab.c (symbol_init_cplus_specific): Delete.
+	(symbol_set_demangled_name): Remove special c++ support.
+	(symbol_get_demangled_name, symbol_set_language): Ditto.
+	* symtab.h (struct cplus_specific): Delete.
+	(struct general_symbol_info) <language_specific>: Remove
+	cplus_specific.
+
+2014-12-02  Doug Evans  <dje@google.com>
+
 	PR symtab/17602
 	* linespec.c (iterate_name_matcher): Fix arguments to symbol_name_cmp.
 

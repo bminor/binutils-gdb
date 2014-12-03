@@ -80,13 +80,6 @@ struct common_block;
 
    --chastain 2003-08-21  */
 
-/* Struct for storing C++ specific information.  Allocated when needed.  */
-
-struct cplus_specific
-{
-  const char *demangled_name;
-};
-
 /* Define a structure for the information that is common to all symbol types,
    including minimal symbols, partial symbols, and full symbols.  In a
    multilanguage environment, some language specific information may need to
@@ -141,14 +134,12 @@ struct general_symbol_info
     struct obstack *obstack;
 
     /* This is used by languages which wish to store a demangled name.
-       currently used by Ada, Java, and Objective C.  */
+       currently used by Ada, C++, Java, and Objective C.  */
     struct mangled_lang
     {
       const char *demangled_name;
     }
     mangled_lang;
-
-    struct cplus_specific *cplus_specific;
   }
   language_specific;
 
