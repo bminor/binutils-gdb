@@ -1,3 +1,24 @@
+2014-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* tramp-frame.h (tramp_frame): Add `validate' member.
+	* tramp-frame.c (tramp_frame_start): Validate trampoline before
+	scanning.
+	* mips-linux-tdep.c (MICROMIPS_INST_LI_V0): New macro.
+	(MICROMIPS_INST_POOL32A, MICROMIPS_INST_SYSCALL): Likewise.
+	(mips_linux_o32_sigframe): Initialize `validate' member.
+	(mips_linux_o32_rt_sigframe): Likewise.
+	(mips_linux_n32_rt_sigframe): Likewise.
+	(mips_linux_n64_rt_sigframe): Likewise.
+	(micromips_linux_o32_sigframe): New variable.
+	(micromips_linux_o32_rt_sigframe): Likewise.
+	(micromips_linux_n32_rt_sigframe): Likewise.
+	(micromips_linux_n64_rt_sigframe): Likewise.
+	(mips_linux_o32_sigframe_init): Handle microMIPS trampolines.
+	(mips_linux_n32n64_sigframe_init): Likewise.
+	(mips_linux_sigframe_validate): New function.
+	(micromips_linux_sigframe_validate): Likewise.
+	(mips_linux_init_abi): Install microMIPS trampoline unwinders.
+
 2014-12-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/sparc/sol2.mh (NATDEPFILES): Remove core-regset.o.

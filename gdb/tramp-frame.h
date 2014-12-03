@@ -69,6 +69,13 @@ struct tramp_frame
 		struct frame_info *this_frame,
 		struct trad_frame_cache *this_cache,
 		CORE_ADDR func);
+  /* Return non-zero if the tramp-frame is valid for the PC requested.
+     Adjust the PC to point to the address to check the instruction
+     sequence against if required.  If this is NULL, then the tramp-frame
+     is valid for any PC.  */
+  int (*validate) (const struct tramp_frame *self,
+		   struct frame_info *this_frame,
+		   CORE_ADDR *pc);
 };
 
 void tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,

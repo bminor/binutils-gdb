@@ -827,6 +827,14 @@ static void mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 					     struct trad_frame_cache *this_cache,
 					     CORE_ADDR func);
 
+static int mips_linux_sigframe_validate (const struct tramp_frame *self,
+					 struct frame_info *this_frame,
+					 CORE_ADDR *pc);
+
+static int micromips_linux_sigframe_validate (const struct tramp_frame *self,
+					      struct frame_info *this_frame,
+					      CORE_ADDR *pc);
+
 #define MIPS_NR_LINUX 4000
 #define MIPS_NR_N64_LINUX 5000
 #define MIPS_NR_N32_LINUX 6000
@@ -842,6 +850,10 @@ static void mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 #define MIPS_INST_LI_V0_N32_RT_SIGRETURN 0x24020000 + MIPS_NR_N32_rt_sigreturn
 #define MIPS_INST_SYSCALL 0x0000000c
 
+#define MICROMIPS_INST_LI_V0 0x3040
+#define MICROMIPS_INST_POOL32A 0x0000
+#define MICROMIPS_INST_SYSCALL 0x8b7c
+
 static const struct tramp_frame mips_linux_o32_sigframe = {
   SIGTRAMP_FRAME,
   4,
@@ -850,7 +862,8 @@ static const struct tramp_frame mips_linux_o32_sigframe = {
     { MIPS_INST_SYSCALL, -1 },
     { TRAMP_SENTINEL_INSN, -1 }
   },
-  mips_linux_o32_sigframe_init
+  mips_linux_o32_sigframe_init,
+  mips_linux_sigframe_validate
 };
 
 static const struct tramp_frame mips_linux_o32_rt_sigframe = {
@@ -860,7 +873,8 @@ static const struct tramp_frame mips_linux_o32_rt_sigframe = {
     { MIPS_INST_LI_V0_RT_SIGRETURN, -1 },
     { MIPS_INST_SYSCALL, -1 },
     { TRAMP_SENTINEL_INSN, -1 } },
-  mips_linux_o32_sigframe_init
+  mips_linux_o32_sigframe_init,
+  mips_linux_sigframe_validate
 };
 
 static const struct tramp_frame mips_linux_n32_rt_sigframe = {
@@ -871,7 +885,8 @@ static const struct tramp_frame mips_linux_n32_rt_sigframe = {
     { MIPS_INST_SYSCALL, -1 },
     { TRAMP_SENTINEL_INSN, -1 }
   },
-  mips_linux_n32n64_sigframe_init
+  mips_linux_n32n64_sigframe_init,
+  mips_linux_sigframe_validate
 };
 
 static const struct tramp_frame mips_linux_n64_rt_sigframe = {
@@ -882,7 +897,64 @@ static const struct tramp_frame mips_linux_n64_rt_sigframe = {
     { MIPS_INST_SYSCALL, -1 },
     { TRAMP_SENTINEL_INSN, -1 }
   },
-  mips_linux_n32n64_sigframe_init
+  mips_linux_n32n64_sigframe_init,
+  mips_linux_sigframe_validate
+};
+
+static const struct tramp_frame micromips_linux_o32_sigframe = {
+  SIGTRAMP_FRAME,
+  2,
+  {
+    { MICROMIPS_INST_LI_V0, -1 },
+    { MIPS_NR_sigreturn, -1 },
+    { MICROMIPS_INST_POOL32A, -1 },
+    { MICROMIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips_linux_o32_sigframe_init,
+  micromips_linux_sigframe_validate
+};
+
+static const struct tramp_frame micromips_linux_o32_rt_sigframe = {
+  SIGTRAMP_FRAME,
+  2,
+  {
+    { MICROMIPS_INST_LI_V0, -1 },
+    { MIPS_NR_rt_sigreturn, -1 },
+    { MICROMIPS_INST_POOL32A, -1 },
+    { MICROMIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips_linux_o32_sigframe_init,
+  micromips_linux_sigframe_validate
+};
+
+static const struct tramp_frame micromips_linux_n32_rt_sigframe = {
+  SIGTRAMP_FRAME,
+  2,
+  {
+    { MICROMIPS_INST_LI_V0, -1 },
+    { MIPS_NR_N32_rt_sigreturn, -1 },
+    { MICROMIPS_INST_POOL32A, -1 },
+    { MICROMIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips_linux_n32n64_sigframe_init,
+  micromips_linux_sigframe_validate
+};
+
+static const struct tramp_frame micromips_linux_n64_rt_sigframe = {
+  SIGTRAMP_FRAME,
+  2,
+  {
+    { MICROMIPS_INST_LI_V0, -1 },
+    { MIPS_NR_N64_rt_sigreturn, -1 },
+    { MICROMIPS_INST_POOL32A, -1 },
+    { MICROMIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips_linux_n32n64_sigframe_init,
+  micromips_linux_sigframe_validate
 };
 
 /* *INDENT-OFF* */
@@ -1002,7 +1074,8 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
   const struct mips_regnum *regs = mips_regnum (gdbarch);
   CORE_ADDR regs_base;
 
-  if (self == &mips_linux_o32_sigframe)
+  if (self == &mips_linux_o32_sigframe
+      || self == &micromips_linux_o32_sigframe)
     sigcontext_base = frame_sp + SIGFRAME_SIGCONTEXT_OFFSET;
   else
     sigcontext_base = frame_sp + RTSIGFRAME_SIGCONTEXT_OFFSET;
@@ -1203,7 +1276,8 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
   CORE_ADDR sigcontext_base;
   const struct mips_regnum *regs = mips_regnum (gdbarch);
 
-  if (self == &mips_linux_n32_rt_sigframe)
+  if (self == &mips_linux_n32_rt_sigframe
+      || self == &micromips_linux_n32_rt_sigframe)
     sigcontext_base = frame_sp + N32_SIGFRAME_SIGCONTEXT_OFFSET;
   else
     sigcontext_base = frame_sp + N64_SIGFRAME_SIGCONTEXT_OFFSET;
@@ -1271,6 +1345,26 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 
   /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
   trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
+}
+
+/* Implement struct tramp_frame's "validate" method for standard MIPS code.  */
+
+static int
+mips_linux_sigframe_validate (const struct tramp_frame *self,
+			      struct frame_info *this_frame,
+			      CORE_ADDR *pc)
+{
+  return mips_pc_is_mips (*pc);
+}
+
+/* Implement struct tramp_frame's "validate" method for microMIPS code.  */
+
+static int
+micromips_linux_sigframe_validate (const struct tramp_frame *self,
+				   struct frame_info *this_frame,
+				   CORE_ADDR *pc)
+{
+  return mips_pc_is_micromips (get_frame_arch (this_frame), *pc);
 }
 
 /* Implement the "write_pc" gdbarch method.  */
@@ -1556,6 +1650,9 @@ mips_linux_init_abi (struct gdbarch_info info,
 					mips_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+	tramp_frame_prepend_unwinder (gdbarch, &micromips_linux_o32_sigframe);
+	tramp_frame_prepend_unwinder (gdbarch,
+				      &micromips_linux_o32_rt_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_rt_sigframe);
 	set_xml_syscall_file_name (gdbarch, "syscalls/mips-o32-linux.xml");
@@ -1571,6 +1668,8 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   except that the quiet/signalling NaN bit is reversed (GDB
 	   does not distinguish between quiet and signalling NaNs).  */
 	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+	tramp_frame_prepend_unwinder (gdbarch,
+				      &micromips_linux_n32_rt_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
 	set_xml_syscall_file_name (gdbarch, "syscalls/mips-n32-linux.xml");
 	break;
@@ -1585,6 +1684,8 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   except that the quiet/signalling NaN bit is reversed (GDB
 	   does not distinguish between quiet and signalling NaNs).  */
 	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+	tramp_frame_prepend_unwinder (gdbarch,
+				      &micromips_linux_n64_rt_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
 	set_xml_syscall_file_name (gdbarch, "syscalls/mips-n64-linux.xml");
 	break;
