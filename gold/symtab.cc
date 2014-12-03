@@ -547,7 +547,6 @@ Symbol::set_output_segment(Output_segment* os, Segment_offset_base base)
 void
 Symbol::set_undefined()
 {
-  gold_assert(this->is_predefined_);
   this->source_ = IS_UNDEFINED;
   this->is_predefined_ = false;
 }

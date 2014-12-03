@@ -1015,11 +1015,11 @@ class Target_powerpc : public Sized_target<size, big_endian>
     bool issued_non_pic_error_;
   };
 
-  Address
-  symval_for_branch(const Symbol_table* symtab, Address value,
+  bool
+  symval_for_branch(const Symbol_table* symtab,
 		    const Sized_symbol<size>* gsym,
 		    Powerpc_relobj<size, big_endian>* object,
-		    unsigned int *dest_shndx);
+		    Address *value, unsigned int *dest_shndx);
 
   // The class which implements relocation.
   class Relocate : protected Track_tls
@@ -2668,8 +2668,9 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
       if (size == 64 && target->abiversion() < 2)
 	{
 	  unsigned int dest_shndx;
-	  to = target->symval_for_branch(symtab, to, gsym,
-					 this->object_, &dest_shndx);
+	  if (!target->symval_for_branch(symtab, gsym, this->object_,
+					 &to, &dest_shndx))
+	    return;
 	}
       Address delta = to - from;
       if (delta + max_branch_offset >= 2 * max_branch_offset)
@@ -6462,7 +6463,11 @@ class Global_symbol_visitor_opd
     unsigned int shndx = sym->shndx(&is_ordinary);
     if (shndx == symobj->opd_shndx()
 	&& symobj->get_opd_discard(sym->value()))
-      sym->set_symtab_index(-1U);
+      {
+	sym->set_undefined();
+	sym->set_is_defined_in_discarded_section();
+	sym->set_symtab_index(-1U);
+      }
   }
 };
 
@@ -6640,12 +6645,12 @@ ok_lo_toc_insn(uint32_t insn)
 // Return the value to use for a branch relocation.
 
 template<int size, bool big_endian>
-typename Target_powerpc<size, big_endian>::Address
+bool
 Target_powerpc<size, big_endian>::symval_for_branch(
     const Symbol_table* symtab,
-    Address value,
     const Sized_symbol<size>* gsym,
     Powerpc_relobj<size, big_endian>* object,
+    Address *value,
     unsigned int *dest_shndx)
 {
   if (size == 32 || this->abiversion() >= 2)
@@ -6657,20 +6662,20 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   Powerpc_relobj<size, big_endian>* symobj = object;
   if (gsym != NULL
       && gsym->source() != Symbol::FROM_OBJECT)
-    return value;
+    return true;
   if (gsym != NULL)
     symobj = static_cast<Powerpc_relobj<size, big_endian>*>(gsym->object());
   unsigned int shndx = symobj->opd_shndx();
   if (shndx == 0)
-    return value;
+    return true;
   Address opd_addr = symobj->get_output_section_offset(shndx);
   if (opd_addr == invalid_address)
-    return value;
+    return true;
   opd_addr += symobj->output_section_address(shndx);
-  if (value >= opd_addr && value < opd_addr + symobj->section_size(shndx))
+  if (*value >= opd_addr && *value < opd_addr + symobj->section_size(shndx))
     {
       Address sec_off;
-      *dest_shndx = symobj->get_opd_ent(value - opd_addr, &sec_off);
+      *dest_shndx = symobj->get_opd_ent(*value - opd_addr, &sec_off);
       if (symtab->is_section_folded(symobj, *dest_shndx))
 	{
 	  Section_id folded
@@ -6679,11 +6684,13 @@ Target_powerpc<size, big_endian>::symval_for_branch(
 	  *dest_shndx = folded.second;
 	}
       Address sec_addr = symobj->get_output_section_offset(*dest_shndx);
-      gold_assert(sec_addr != invalid_address);
+      if (sec_addr == invalid_address)
+	return false;
+
       sec_addr += symobj->output_section(*dest_shndx)->address();
-      value = sec_addr + sec_off;
+      *value = sec_addr + sec_off;
     }
-  return value;
+  return true;
 }
 
 // Perform a relocation.
@@ -6843,10 +6850,9 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		  if (target->abiversion() < 2)
 		    {
 		      Address addend = rela.get_r_addend();
-		      Address opdent = psymval->value(object, addend);
-		      code = target->symval_for_branch(relinfo->symtab,
-						       opdent, gsym, object,
-						       &dest_shndx);
+		      code = psymval->value(object, addend);
+		      target->symval_for_branch(relinfo->symtab, gsym, object,
+						&code, &dest_shndx);
 		    }
 		  bool is_ordinary;
 		  if (dest_shndx == 0)
@@ -7104,7 +7110,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   else if (!has_stub_value)
     {
       Address addend = 0;
-      unsigned int dest_shndx;
       if (r_type != elfcpp::R_PPC_PLTREL24)
 	addend = rela.get_r_addend();
       value = psymval->value(object, addend);
@@ -7118,8 +7123,11 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		value += object->ppc64_local_entry_offset(r_sym);
 	    }
 	  else
-	    value = target->symval_for_branch(relinfo->symtab, value,
-					      gsym, object, &dest_shndx);
+	    {
+	      unsigned int dest_shndx;
+	      target->symval_for_branch(relinfo->symtab, gsym, object,
+					&value, &dest_shndx);
+	    }
 	}
       unsigned int max_branch_offset = 0;
       if (r_type == elfcpp::R_POWERPC_REL24
