@@ -1,3 +1,10 @@
+2014-12-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/copyreloc-main.c: Removed.
+	* ld-x86-64/copyreloc-main.S: New.
+	* ld-x86-64/x86-64.exp: Replace copyreloc-main.c with
+	copyreloc-main.S.
+
 2014-12-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/copyreloc-lib.c: New file.
