@@ -345,7 +345,7 @@ if { [isnative] && [which $CC] != 0 } {
 	    "Build copyreloc-main with PIE without -fPIE (1)" \
 	    "tmpdir/copyreloc-lib.so -pie" \
 	    "" \
-	    { copyreloc-main.c } \
+	    { copyreloc-main.S } \
 	    {{readelf {-Wr} copyreloc-main1.rd}} \
 	    "copyreloc-main" \
 	] \
@@ -353,7 +353,7 @@ if { [isnative] && [which $CC] != 0 } {
 	    "Build copyreloc-main with PIE without -fPIE (2)" \
 	    "tmpdir/copyreloc-lib.so -pie" \
 	    "" \
-	    { copyreloc-main.c } \
+	    { copyreloc-main.S } \
 	    {{readelf {-Wr} copyreloc-main2.rd}} \
 	    "copyreloc-main" \
 	] \
@@ -364,7 +364,7 @@ if { [isnative] && [which $CC] != 0 } {
 	    "Run copyreloc-main with PIE without -fPIE" \
 	    "tmpdir/copyreloc-lib.so -pie" \
 	    "" \
-	    { copyreloc-main.c } \
+	    { copyreloc-main.S } \
 	    "copyreloc-main" \
 	    "copyreloc-main.out" \
 	] \
