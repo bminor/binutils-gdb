@@ -4330,14 +4330,14 @@ gdb_caching_proc gdb_has_argv0 {
 # foo.debug --> foo's debug info
 # foo --> like foo, but with a new .gnu_debuglink section pointing to foo.debug.
 
-# Return the build-id hex string (usually 160 bits as 40 hex characters)
-# converted to the form: .build-id/ab/cdef1234...89.debug
-# Return "" if no build-id found.
-proc build_id_debug_filename_get { exec } {
-    set tmp [standard_output_file "${exec}-tmp"]
+# Fetch the build id from the file.
+# Returns "" if there is none.
+
+proc get_build_id { filename } {
+    set tmp [standard_output_file "${filename}-tmp"]
     set objcopy_program [gdb_find_objcopy]
 
-    set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $exec $tmp" output]
+    set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $filename $tmp" output]
     verbose "result is $result"
     verbose "output is $output"
     if {$result == 1} {
@@ -4355,6 +4355,17 @@ proc build_id_debug_filename_get { exec } {
     }
     # Convert it to hex.
     binary scan $data H* data
+    return $data
+}
+
+# Return the build-id hex string (usually 160 bits as 40 hex characters)
+# converted to the form: .build-id/ab/cdef1234...89.debug
+# Return "" if no build-id found.
+proc build_id_debug_filename_get { filename } {
+    set data [get_build_id $filename]
+    if { $data == "" } {
+	return ""
+    }
     regsub {^..} $data {\0/} data
     return ".build-id/${data}.debug"
 }

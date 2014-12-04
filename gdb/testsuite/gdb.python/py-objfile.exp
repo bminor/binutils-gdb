@@ -39,6 +39,16 @@ gdb_py_test_silent_cmd "python objfile = sym\[0\].symtab.objfile" \
 
 gdb_test "python print (objfile.filename)" ".*py-objfile.*" \
   "Get objfile file name"
+
+set binfile_build_id [get_build_id $binfile]
+if [string compare $binfile_build_id ""] {
+    verbose -log "binfile_build_id = $binfile_build_id"
+    gdb_test "python print (objfile.build_id)" "$binfile_build_id" \
+    "Get objfile build id"
+} else {
+    unsupported "build-id is not supported by the compiler"
+}
+
 gdb_test "python print (objfile.progspace)" "<gdb\.Progspace object at .*>" \
   "Get objfile program space"
 gdb_test "python print (objfile.is_valid())" "True" \

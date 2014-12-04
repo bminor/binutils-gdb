@@ -1,3 +1,7 @@
+2014-12-04  Doug Evans  <dje@google.com>
+
+	* python.texi (Objfiles In Python): Document Objfile.build_id.
+
 2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
 
 	* python.texi (Events In Python): Document new events

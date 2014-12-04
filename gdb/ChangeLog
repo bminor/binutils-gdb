@@ -1,3 +1,15 @@
+2014-12-04  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention gdb.Objfile.build_id.
+	* build-id.c (build_id_bfd_get): Make non-static.
+	* build-id.h (build_id_bfd_get): Add declaration.
+	* python/py-objfile.c: #include "build-id.h", "elf-bfd.h".
+	(OBJFPY_REQUIRE_VALID): New macro.
+	(objfpy_get_build_id): New function.
+	(objfile_getset): Add "build_id".
+	* utils.c (make_hex_string): New function.
+	* utils.h (make_hex_string): Add declaration.
+
 2014-12-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* block.c (block_lookup_symbol_primary): New function.

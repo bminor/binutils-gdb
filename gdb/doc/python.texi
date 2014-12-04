@@ -3495,6 +3495,17 @@ class.
 The file name of the objfile as a string.
 @end defvar
 
+@defvar Objfile.build_id
+The build ID of the objfile as a string.
+If the objfile does not have a build ID then the value is @code{None}.
+
+This is supported only on some operating systems, notably those which use
+the ELF format for binary files and the @sc{gnu} Binutils.  For more details
+about this feature, see the description of the @option{--build-id}
+command-line option in @ref{Options, , Command Line Options, ld.info,
+The GNU Linker}.
+@end defvar
+
 @defvar Objfile.progspace
 The containing program space of the objfile as a @code{gdb.Progspace}
 object.  @xref{Progspaces In Python}.

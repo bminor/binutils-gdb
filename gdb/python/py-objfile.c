@@ -22,6 +22,8 @@
 #include "charset.h"
 #include "objfiles.h"
 #include "language.h"
+#include "build-id.h"
+#include "elf-bfd.h"
 
 typedef struct
 {
@@ -51,9 +53,21 @@ static PyTypeObject objfile_object_type
 
 static const struct objfile_data *objfpy_objfile_data_key;
 
+/* Require that OBJF be a valid objfile.  */
+#define OBJFPY_REQUIRE_VALID(obj)				\
+  do {								\
+    if (!(obj)->objfile)					\
+      {								\
+	PyErr_SetString (PyExc_RuntimeError,			\
+			 _("Objfile no longer exists."));	\
+	return NULL;						\
+      }								\
+  } while (0)
+
 
 
 /* An Objfile method which returns the objfile's file name, or None.  */
+
 static PyObject *
 objfpy_get_filename (PyObject *self, void *closure)
 {
@@ -63,6 +77,38 @@ objfpy_get_filename (PyObject *self, void *closure)
     return PyString_Decode (objfile_name (obj->objfile),
 			    strlen (objfile_name (obj->objfile)),
 			    host_charset (), NULL);
+  Py_RETURN_NONE;
+}
+
+/* An Objfile method which returns the objfile's build id, or None.  */
+
+static PyObject *
+objfpy_get_build_id (PyObject *self, void *closure)
+{
+  objfile_object *obj = (objfile_object *) self;
+  struct objfile *objfile = obj->objfile;
+  const struct elf_build_id *build_id = NULL;
+  volatile struct gdb_exception except;
+
+  OBJFPY_REQUIRE_VALID (obj);
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      build_id = build_id_bfd_get (objfile->obfd);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (build_id != NULL)
+    {
+      char *hex_form = make_hex_string (build_id->data, build_id->size);
+      PyObject *result;
+
+      result = PyString_Decode (hex_form, strlen (hex_form),
+				host_charset (), NULL);
+      xfree (hex_form);
+      return result;
+    }
+
   Py_RETURN_NONE;
 }
 
@@ -364,6 +410,8 @@ static PyGetSetDef objfile_getset[] =
     "The __dict__ for this objfile.", &objfile_object_type },
   { "filename", objfpy_get_filename, NULL,
     "The objfile's filename, or None.", NULL },
+  { "build_id", objfpy_get_build_id, NULL,
+    "The objfile's build id, or None.", NULL },
   { "progspace", objfpy_get_progspace, NULL,
     "The objfile's progspace, or None.", NULL },
   { "pretty_printers", objfpy_get_printers, objfpy_set_printers,

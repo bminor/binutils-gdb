@@ -1,3 +1,9 @@
+2014-12-04  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (get_build_id): New function.
+	(build_id_debug_filename_get): Rewrite to use it.
+	* gdb.python/py-objfile.exp: Add test for objfile.build_id.
+
 2014-12-04  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.cp/expand-psymtabs-cxx.exp: Accept any address of
