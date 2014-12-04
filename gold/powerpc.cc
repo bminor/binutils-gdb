@@ -2657,7 +2657,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
     }
   else
     {
-      unsigned long max_branch_offset = max_branch_delta(this->r_type_);
+      Address max_branch_offset = max_branch_delta(this->r_type_);
       if (max_branch_offset == 0)
 	return true;
       Address from = this->object_->get_output_section_offset(this->shndx_);
@@ -2711,7 +2711,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	  if (size == 64)
 	    to += this->object_->ppc64_local_entry_offset(this->r_sym_);
 	}
-      to += this->addend_;
+      if (!(size == 32 && this->r_type_ == elfcpp::R_PPC_PLTREL24))
+	to += this->addend_;
       if (stub_table == NULL)
 	stub_table = this->object_->stub_table(this->shndx_);
       if (size == 64 && target->abiversion() < 2)
@@ -3627,7 +3628,7 @@ class Stub_table : public Output_relaxed_input_section
   bool
   can_reach_stub(Address from, unsigned int off, unsigned int r_type)
   {
-    unsigned long max_branch_offset = max_branch_delta(r_type);
+    Address max_branch_offset = max_branch_delta(r_type);
     if (max_branch_offset == 0)
       return true;
     gold_assert(from != invalid_address);
@@ -7197,7 +7198,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   else if (!has_stub_value)
     {
       Address addend = 0;
-      if (r_type != elfcpp::R_PPC_PLTREL24)
+      if (!(size == 32 && r_type == elfcpp::R_PPC_PLTREL24))
 	addend = rela.get_r_addend();
       value = psymval->value(object, addend);
       if (size == 64 && is_branch_reloc(r_type))
@@ -7216,7 +7217,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 					&value, &dest_shndx);
 	    }
 	}
-      unsigned long max_branch_offset = max_branch_delta(r_type);
+      Address max_branch_offset = max_branch_delta(r_type);
       if (max_branch_offset != 0
 	  && value - address + max_branch_offset >= 2 * max_branch_offset)
 	{
