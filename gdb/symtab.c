@@ -1585,6 +1585,8 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
 {
   struct compunit_symtab *cust;
 
+  gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
+
   ALL_OBJFILE_COMPUNITS (objfile, cust)
     {
       const struct blockvector *bv;
@@ -1593,7 +1595,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
 
       bv = COMPUNIT_BLOCKVECTOR (cust);
       block = BLOCKVECTOR_BLOCK (bv, block_index);
-      sym = block_lookup_symbol (block, name, domain);
+      sym = block_lookup_symbol_primary (block, name, domain);
       if (sym)
 	{
 	  block_found = block;

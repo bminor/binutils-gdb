@@ -746,3 +746,28 @@ block_lookup_symbol (const struct block *block, const char *name,
       return (sym_found);	/* Will be NULL if not found.  */
     }
 }
+
+/* See block.h.  */
+
+struct symbol *
+block_lookup_symbol_primary (const struct block *block, const char *name,
+			     const domain_enum domain)
+{
+  struct symbol *sym;
+  struct dict_iterator dict_iter;
+
+  /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
+  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL
+	      || BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL);
+
+  for (sym = dict_iter_name_first (block->dict, name, &dict_iter);
+       sym != NULL;
+       sym = dict_iter_name_next (name, &dict_iter))
+    {
+      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				 SYMBOL_DOMAIN (sym), domain))
+	return sym;
+    }
+
+  return NULL;
+}

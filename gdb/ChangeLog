@@ -1,3 +1,10 @@
+2014-12-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* block.c (block_lookup_symbol_primary): New function.
+	* block.h (block_lookup_symbol_primary): New declaration.
+	* symtab.c (lookup_symbol_in_objfile_symtabs): Assert BLOCK_INDEX.
+	Call block_lookup_symbol_primary.
+
 2014-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* tramp-frame.h (tramp_frame): Add `validate' member.

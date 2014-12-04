@@ -276,6 +276,14 @@ extern struct symbol *block_lookup_symbol (const struct block *block,
 					   const char *name,
 					   const domain_enum domain);
 
+/* Search BLOCK for symbol NAME in DOMAIN but only in primary symbol table of
+   BLOCK.  BLOCK must be STATIC_BLOCK or GLOBAL_BLOCK.  Function is useful if
+   one iterates all global/static blocks of an objfile.  */
+
+extern struct symbol *block_lookup_symbol_primary (const struct block *block,
+						   const char *name,
+						   const domain_enum domain);
+
 /* Macro to loop through all symbols in BLOCK, in no particular
    order.  ITER helps keep track of the iteration, and must be a
    struct block_iterator.  SYM points to the current symbol.  */
