@@ -1,5 +1,10 @@
 2014-12-04  Doug Evans  <dje@google.com>
 
+	* gdb.python/py-objfile.exp: Add tests for
+	objfile.add_separate_debug_file.
+
+2014-12-04  Doug Evans  <dje@google.com>
+
 	* lib/gdb.exp (get_build_id): New function.
 	(build_id_debug_filename_get): Rewrite to use it.
 	* gdb.python/py-objfile.exp: Add test for objfile.build_id.

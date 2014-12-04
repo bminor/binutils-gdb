@@ -23,6 +23,7 @@
      which is the gdb.Progspace object of the containing program space.
   ** gdb.Objfile objects have a new attribute "build_id",
      which is the build ID generated when the file was built.
+  ** gdb.Objfile objects have a new method "add_separate_debug_file".
   ** A new event "gdb.clear_objfiles" has been added, triggered when
      selecting a new file to debug.
   ** You can now add attributes to gdb.Objfile and gdb.Progspace objects.

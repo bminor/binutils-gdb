@@ -3562,6 +3562,17 @@ longer.  All other @code{gdb.Objfile} methods will throw an exception
 if it is invalid at the time the method is called.
 @end defun
 
+@defun Objfile.add_separate_debug_file (file)
+Add @var{file} to the list of files that @value{GDBN} will search for
+debug information for the objfile.
+This is useful when the debug info has been removed from the program
+and stored in a separate file.  @value{GDBN} has built-in support for
+finding separate debug info files (@pxref{Separate Debug Files}), but if
+the file doesn't live in one of the standard places that @value{GDBN}
+searches then this function can be used to add a debug info file
+from a different place.
+@end defun
+
 @node Frames In Python
 @subsubsection Accessing inferior stack frames from Python.
 

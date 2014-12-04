@@ -334,6 +334,33 @@ objfpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+/* Implementation of gdb.Objfile.add_separate_debug_file (self) -> Boolean.  */
+
+static PyObject *
+objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
+{
+  static char *keywords[] = { "file_name", NULL };
+  objfile_object *obj = (objfile_object *) self;
+  const char *file_name;
+  int symfile_flags = 0;
+  volatile struct gdb_exception except;
+
+  OBJFPY_REQUIRE_VALID (obj);
+
+  if (!PyArg_ParseTupleAndKeywords (args, kw, "s", keywords, &file_name))
+    return NULL;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      bfd *abfd = symfile_bfd_open (file_name);
+
+      symbol_file_add_separate (abfd, file_name, symfile_flags, obj->objfile);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  Py_RETURN_NONE;
+}
+
 
 
 /* Clear the OBJFILE pointer in an Objfile object and remove the
@@ -400,6 +427,11 @@ static PyMethodDef objfile_object_methods[] =
   { "is_valid", objfpy_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return true if this object file is valid, false if not." },
+
+  { "add_separate_debug_file", (PyCFunction) objfpy_add_separate_debug_file,
+    METH_VARARGS | METH_KEYWORDS,
+    "add_separate_debug_file (file_name).\n\
+Add FILE_NAME to the list of files containing debug info for the objfile." },
 
   { NULL }
 };

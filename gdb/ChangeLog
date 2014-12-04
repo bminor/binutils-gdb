@@ -1,5 +1,11 @@
 2014-12-04  Doug Evans  <dje@google.com>
 
+	* NEWS: Mention gdb.Objfile.add_separate_debug_file.
+	* python/py-objfile.c (objfpy_add_separate_debug_file): New function.
+	(objfile_getset): Add "add_separate_debug_file".
+
+2014-12-04  Doug Evans  <dje@google.com>
+
 	* NEWS: Mention gdb.Objfile.build_id.
 	* build-id.c (build_id_bfd_get): Make non-static.
 	* build-id.h (build_id_bfd_get): Add declaration.
