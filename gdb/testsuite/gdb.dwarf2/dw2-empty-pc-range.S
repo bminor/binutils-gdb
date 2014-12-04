@@ -15,7 +15,7 @@
 
 	.text
 pc_start:
-	.byte	0
+	.4byte	0
 pc_end:
 
 	.section	.debug_info
