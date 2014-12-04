@@ -1,5 +1,13 @@
 2014-12-04  Alan Modra  <amodra@gmail.com>
 
+	* Powerpc.cc (Target_powerpc::Branch_info::make_stub): Ignore
+	addend of PLTREL24 reloc when not generating a plt stub.  Make
+	max_branch_offset an "Address".
+	(Target_powerpc::Relocate::relocate): Make max_branch_offset
+	an "Address".
+
+2014-12-04  Alan Modra  <amodra@gmail.com>
+
 	PR 17670
 	* symtab.cc (Symbol::set_undefined): Remove assertion.
 	* powerpc.cc (Target_powerpc::symval_for_branch): Don't assert

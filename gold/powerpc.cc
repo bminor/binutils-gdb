@@ -2600,7 +2600,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
     }
   else
     {
-      unsigned long max_branch_offset;
+      Address max_branch_offset;
       if (this->r_type_ == elfcpp::R_POWERPC_REL14
 	  || this->r_type_ == elfcpp::R_POWERPC_REL14_BRTAKEN
 	  || this->r_type_ == elfcpp::R_POWERPC_REL14_BRNTAKEN)
@@ -2662,7 +2662,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	  if (size == 64)
 	    to += this->object_->ppc64_local_entry_offset(this->r_sym_);
 	}
-      to += this->addend_;
+      if (!(size == 32 && this->r_type_ == elfcpp::R_PPC_PLTREL24))
+	to += this->addend_;
       if (stub_table == NULL)
 	stub_table = this->object_->stub_table(this->shndx_);
       if (size == 64 && target->abiversion() < 2)
@@ -7110,7 +7111,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   else if (!has_stub_value)
     {
       Address addend = 0;
-      if (r_type != elfcpp::R_PPC_PLTREL24)
+      if (!(size == 32 && r_type == elfcpp::R_PPC_PLTREL24))
 	addend = rela.get_r_addend();
       value = psymval->value(object, addend);
       if (size == 64 && is_branch_reloc(r_type))
@@ -7129,7 +7130,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 					&value, &dest_shndx);
 	    }
 	}
-      unsigned int max_branch_offset = 0;
+      Address max_branch_offset = 0;
       if (r_type == elfcpp::R_POWERPC_REL24
 	  || r_type == elfcpp::R_PPC_PLTREL24
 	  || r_type == elfcpp::R_PPC_LOCAL24PC)
