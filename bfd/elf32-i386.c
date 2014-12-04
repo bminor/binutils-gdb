@@ -4975,46 +4975,87 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
-/* Return address in section PLT for the Ith GOTPLT relocation, for
-   relocation REL or (bfd_vma) -1 if it should not be included.  */
+/* Return an array of PLT entry symbol values.  */
 
-static bfd_vma
-elf_i386_plt_sym_val (bfd_vma i, const asection *plt, const arelent *rel)
+static bfd_vma *
+elf_i386_get_plt_sym_val (bfd *abfd, asymbol **dynsyms, asection *plt,
+			  asection *relplt)
 {
-  bfd *abfd;
-  const struct elf_i386_backend_data *bed;
+  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+  arelent *p;
+  long count, i;
+  bfd_vma *plt_sym_val;
   bfd_vma plt_offset;
+  bfd_byte *plt_contents;
+  const struct elf_i386_backend_data *bed
+    = get_elf_i386_backend_data (abfd);
+  Elf_Internal_Shdr *hdr;
 
-  /* Only match R_386_JUMP_SLOT and R_386_IRELATIVE.  */
-  if (rel->howto->type != R_386_JUMP_SLOT
-      && rel->howto->type != R_386_IRELATIVE)
-    return (bfd_vma) -1;
-
-  abfd = plt->owner;
-  bed = get_elf_i386_backend_data (abfd);
-  plt_offset = bed->plt->plt_entry_size;
-
-  if (elf_elfheader (abfd)->e_ident[EI_OSABI] != ELFOSABI_GNU)
-    return plt->vma + (i + 1) * plt_offset;
-
-  while (plt_offset < plt->size)
+  /* Get the .plt section contents.  */
+  plt_contents = (bfd_byte *) bfd_malloc (plt->size);
+  if (plt_contents == NULL)
+    return NULL;
+  if (!bfd_get_section_contents (abfd, (asection *) plt,
+				 plt_contents, 0, plt->size))
     {
-      bfd_vma reloc_offset;
-      bfd_byte reloc_offset_raw[4];
+bad_return:
+      free (plt_contents);
+      return NULL;
+    }
 
-      if (!bfd_get_section_contents (abfd, (asection *) plt,
-				     reloc_offset_raw,
-				     plt_offset + bed->plt->plt_reloc_offset,
-				     sizeof (reloc_offset_raw)))
-	return (bfd_vma) -1;
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
+    goto bad_return;
 
-      reloc_offset = H_GET_32 (abfd, reloc_offset_raw);
-      if (reloc_offset == i * sizeof (Elf32_External_Rel))
-	return plt->vma + plt_offset;
+  hdr = &elf_section_data (relplt)->this_hdr;
+  count = relplt->size / hdr->sh_entsize;
+
+  plt_sym_val = (bfd_vma *) bfd_malloc (sizeof (bfd_vma) * count);
+  if (plt_sym_val == NULL)
+    goto bad_return;
+
+  for (i = 0; i < count; i++, p++)
+    plt_sym_val[i] = -1;
+
+  plt_offset = bed->plt->plt_entry_size;
+  p = relplt->relocation;
+  for (i = 0; i < count; i++, p++)
+    {
+      long reloc_index;
+
+      if (p->howto->type != R_386_JUMP_SLOT
+	  && p->howto->type != R_386_IRELATIVE)
+	continue;
+
+      reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset
+				     + bed->plt->plt_reloc_offset));
+      reloc_index /= sizeof (Elf32_External_Rel);
+      if (reloc_index >= count)
+	abort ();
+      plt_sym_val[reloc_index] = plt->vma + plt_offset;
       plt_offset += bed->plt->plt_entry_size;
     }
 
-  abort ();
+  free (plt_contents);
+
+  return plt_sym_val;
+}
+
+/* Similar to _bfd_elf_get_synthetic_symtab.  */
+
+static long
+elf_i386_get_synthetic_symtab (bfd *abfd,
+			       long symcount,
+			       asymbol **syms,
+			       long dynsymcount,
+			       asymbol **dynsyms,
+			       asymbol **ret)
+{
+  asection *plt = bfd_get_section_by_name (abfd, ".plt");
+  return _bfd_elf_ifunc_get_synthetic_symtab (abfd, symcount, syms,
+					      dynsymcount, dynsyms, ret,
+					      plt,
+					      elf_i386_get_plt_sym_val);
 }
 
 /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
@@ -5076,6 +5117,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define bfd_elf32_bfd_link_hash_table_free    elf_i386_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
+#define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
 
 #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
 #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
@@ -5095,7 +5137,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define elf_backend_always_size_sections      elf_i386_always_size_sections
 #define elf_backend_omit_section_dynsym \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
-#define elf_backend_plt_sym_val		      elf_i386_plt_sym_val
 #define elf_backend_hash_symbol		      elf_i386_hash_symbol
 #define elf_backend_add_symbol_hook           elf_i386_add_symbol_hook
 

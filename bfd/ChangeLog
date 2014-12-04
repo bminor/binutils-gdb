@@ -1,3 +1,26 @@
+2014-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (bfd_elf32_get_synthetic_symtab): New.
+
+2014-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/17677
+	* elf-bfd.h (_bfd_elf_ifunc_get_synthetic_symtab): New prototype.
+	* elf-ifunc.c (_bfd_elf_ifunc_get_synthetic_symtab): New
+	function.
+	* elf32-i386.c (elf_i386_plt_sym_val): Removed.
+	(elf_backend_plt_sym_val): Likewise.
+	(elf_i386_get_plt_sym_val): New.
+	(elf_i386_get_synthetic_symtab): Likewise.
+	(bfd_elf32_get_synthetic_symtab): Likewise.
+	* elf64-x86-64.c (elf_x86_64_plt_sym_val): Removed.
+	(elf_x86_64_plt_sym_val_offset_plt_bnd): Likewise.
+	(elf_backend_plt_sym_val): Likewise.
+	(elf_x86_64_get_plt_sym_val): New.
+	(elf_x86_64_get_synthetic_symtab): Use
+	_bfd_elf_ifunc_get_synthetic_symtab.
+	(bfd_elf64_get_synthetic_symtab): Don't undefine for NaCl.
+
 2014-09-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/17407
