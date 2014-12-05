@@ -79,6 +79,11 @@ struct symbol *lookup_local_symbol (const char *name,
 				    const domain_enum domain,
 				    enum language language);
 
+static struct symbol *
+  lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
+				    int block_index, const char *name,
+				    const domain_enum domain);
+
 static
 struct symbol *lookup_symbol_via_quick_fns (struct objfile *objfile,
 					    int block_index,
@@ -1546,24 +1551,12 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
        objfile;
        objfile = objfile_separate_debug_iterate (main_objfile, objfile))
     {
-      struct compunit_symtab *cust;
       struct symbol *sym;
-
-      /* Go through symtabs.  */
-      ALL_OBJFILE_COMPUNITS (objfile, cust)
-	{
-	  const struct blockvector *bv;
-	  const struct block *block;
-
-	  bv = COMPUNIT_BLOCKVECTOR (cust);
-	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	  sym = block_lookup_symbol (block, name, domain);
-	  if (sym)
-	    {
-	      block_found = block;
-	      return fixup_symbol_section (sym, objfile);
-	    }
-	}
+      
+      sym = lookup_symbol_in_objfile_symtabs (objfile, GLOBAL_BLOCK, name,
+					      domain);
+      if (sym != NULL)
+	return sym;
 
       sym = lookup_symbol_via_quick_fns (objfile, GLOBAL_BLOCK, name, domain);
       if (sym)

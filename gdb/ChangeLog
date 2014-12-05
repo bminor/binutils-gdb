@@ -1,5 +1,10 @@
 2014-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symtab.c (lookup_symbol_in_objfile_symtabs): New declaration.
+	(lookup_global_symbol_from_objfile): Call it.
+
+2014-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Remove const from struct objfile *.
 	* solib-darwin.c, solib-spu.c, solib-svr4.c, solib.c, solist.h,
 	symtab.c, symtab.h: In these files.
