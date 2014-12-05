@@ -1,3 +1,9 @@
+2014-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove const from struct objfile *.
+	* solib-darwin.c, solib-spu.c, solib-svr4.c, solib.c, solist.h,
+	symtab.c, symtab.h: In these files.
+
 2014-12-05  Andreas From  <andreas.from@ericsson.com>
 
 	* MAINTAINERS (Write After Approval): Add "Andreas From"

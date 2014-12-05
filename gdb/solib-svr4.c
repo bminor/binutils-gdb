@@ -3195,7 +3195,7 @@ struct target_so_ops svr4_so_ops;
    the main executable.  */
 
 static struct symbol *
-elf_lookup_lib_symbol (const struct objfile *objfile,
+elf_lookup_lib_symbol (struct objfile *objfile,
 		       const char *name,
 		       const domain_enum domain)
 {

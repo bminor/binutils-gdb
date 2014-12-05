@@ -389,7 +389,7 @@ spu_bfd_open (char *pathname)
 
 /* Lookup global symbol in a SPE executable.  */
 static struct symbol *
-spu_lookup_lib_symbol (const struct objfile *objfile,
+spu_lookup_lib_symbol (struct objfile *objfile,
 		       const char *name,
 		       const domain_enum domain)
 {

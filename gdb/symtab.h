@@ -1475,7 +1475,7 @@ extern enum language main_language (void);
    if necessary.  */
 
 extern struct symbol *
-  lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
+  lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				     const char *name,
 				     const domain_enum domain);
 

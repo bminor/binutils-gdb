@@ -1404,7 +1404,7 @@ show_auto_solib_add (struct ui_file *file, int from_tty,
    the library-specific handler if it is installed for the current target.  */
 
 struct symbol *
-solib_global_lookup (const struct objfile *objfile,
+solib_global_lookup (struct objfile *objfile,
 		     const char *name,
 		     const domain_enum domain)
 {

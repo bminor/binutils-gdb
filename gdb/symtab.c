@@ -1536,11 +1536,11 @@ lookup_symbol_in_block (const char *name, const struct block *block,
 /* See symtab.h.  */
 
 struct symbol *
-lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
+lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				   const char *name,
 				   const domain_enum domain)
 {
-  const struct objfile *objfile;
+  struct objfile *objfile;
 
   for (objfile = main_objfile;
        objfile;
@@ -1561,12 +1561,11 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
 	  if (sym)
 	    {
 	      block_found = block;
-	      return fixup_symbol_section (sym, (struct objfile *)objfile);
+	      return fixup_symbol_section (sym, objfile);
 	    }
 	}
 
-      sym = lookup_symbol_via_quick_fns ((struct objfile *) objfile,
-					 GLOBAL_BLOCK, name, domain);
+      sym = lookup_symbol_via_quick_fns (objfile, GLOBAL_BLOCK, name, domain);
       if (sym)
 	return sym;
     }
