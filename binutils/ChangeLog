@@ -1,3 +1,8 @@
+2014-12-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* readelf.c (decode_AVR_machine_flags): New function.
+	(get_machine_flags): Add EM_AVR case.
+
 2014-12-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
