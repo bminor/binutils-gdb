@@ -982,12 +982,7 @@ iterate_name_matcher (const char *name, void *d)
 {
   const struct symbol_matcher_data *data = d;
 
-  /* The order of arguments we pass to symbol_name_cmp is important as
-     strcmp_iw, a typical value for symbol_name_cmp, only performs special
-     processing of '(' to remove overload info on the first argument and not
-     the second.  The first argument is what the user provided, the second
-     argument is what came from partial syms / .gdb_index.  */
-  if (data->symbol_name_cmp (data->lookup_name, name) == 0)
+  if (data->symbol_name_cmp (name, data->lookup_name) == 0)
     return 1; /* Expand this symbol's symbol table.  */
   return 0; /* Skip this symbol.  */
 }

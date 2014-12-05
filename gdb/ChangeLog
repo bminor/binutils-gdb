@@ -1,3 +1,9 @@
+2014-12-05  Doug Evans  <xdje42@gmail.com>
+
+	Revert:
+	PR symtab/17602
+	* linespec.c (iterate_name_matcher): Fix arguments to symbol_name_cmp.
+
 2014-12-04  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention gdb.Objfile.add_separate_debug_file.
