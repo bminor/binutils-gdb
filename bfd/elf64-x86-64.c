@@ -6102,6 +6102,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
   elf_x86_64_reloc_name_lookup
 #define bfd_elf32_mkobject \
   elf_x86_64_mkobject
+#define bfd_elf32_get_synthetic_symtab \
+  elf_x86_64_get_synthetic_symtab
 
 #undef elf_backend_object_p
 #define elf_backend_object_p \
