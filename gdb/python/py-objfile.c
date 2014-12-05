@@ -22,6 +22,8 @@
 #include "charset.h"
 #include "objfiles.h"
 #include "language.h"
+#include "build-id.h"
+#include "elf-bfd.h"
 
 typedef struct
 {
@@ -51,9 +53,21 @@ static PyTypeObject objfile_object_type
 
 static const struct objfile_data *objfpy_objfile_data_key;
 
+/* Require that OBJF be a valid objfile.  */
+#define OBJFPY_REQUIRE_VALID(obj)				\
+  do {								\
+    if (!(obj)->objfile)					\
+      {								\
+	PyErr_SetString (PyExc_RuntimeError,			\
+			 _("Objfile no longer exists."));	\
+	return NULL;						\
+      }								\
+  } while (0)
+
 
 
 /* An Objfile method which returns the objfile's file name, or None.  */
+
 static PyObject *
 objfpy_get_filename (PyObject *self, void *closure)
 {
@@ -63,6 +77,38 @@ objfpy_get_filename (PyObject *self, void *closure)
     return PyString_Decode (objfile_name (obj->objfile),
 			    strlen (objfile_name (obj->objfile)),
 			    host_charset (), NULL);
+  Py_RETURN_NONE;
+}
+
+/* An Objfile method which returns the objfile's build id, or None.  */
+
+static PyObject *
+objfpy_get_build_id (PyObject *self, void *closure)
+{
+  objfile_object *obj = (objfile_object *) self;
+  struct objfile *objfile = obj->objfile;
+  const struct elf_build_id *build_id = NULL;
+  volatile struct gdb_exception except;
+
+  OBJFPY_REQUIRE_VALID (obj);
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      build_id = build_id_bfd_get (objfile->obfd);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (build_id != NULL)
+    {
+      char *hex_form = make_hex_string (build_id->data, build_id->size);
+      PyObject *result;
+
+      result = PyString_Decode (hex_form, strlen (hex_form),
+				host_charset (), NULL);
+      xfree (hex_form);
+      return result;
+    }
+
   Py_RETURN_NONE;
 }
 
@@ -288,6 +334,33 @@ objfpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+/* Implementation of gdb.Objfile.add_separate_debug_file (self) -> Boolean.  */
+
+static PyObject *
+objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
+{
+  static char *keywords[] = { "file_name", NULL };
+  objfile_object *obj = (objfile_object *) self;
+  const char *file_name;
+  int symfile_flags = 0;
+  volatile struct gdb_exception except;
+
+  OBJFPY_REQUIRE_VALID (obj);
+
+  if (!PyArg_ParseTupleAndKeywords (args, kw, "s", keywords, &file_name))
+    return NULL;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      bfd *abfd = symfile_bfd_open (file_name);
+
+      symbol_file_add_separate (abfd, file_name, symfile_flags, obj->objfile);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  Py_RETURN_NONE;
+}
+
 
 
 /* Clear the OBJFILE pointer in an Objfile object and remove the
@@ -355,6 +428,11 @@ static PyMethodDef objfile_object_methods[] =
     "is_valid () -> Boolean.\n\
 Return true if this object file is valid, false if not." },
 
+  { "add_separate_debug_file", (PyCFunction) objfpy_add_separate_debug_file,
+    METH_VARARGS | METH_KEYWORDS,
+    "add_separate_debug_file (file_name).\n\
+Add FILE_NAME to the list of files containing debug info for the objfile." },
+
   { NULL }
 };
 
@@ -364,6 +442,8 @@ static PyGetSetDef objfile_getset[] =
     "The __dict__ for this objfile.", &objfile_object_type },
   { "filename", objfpy_get_filename, NULL,
     "The objfile's filename, or None.", NULL },
+  { "build_id", objfpy_get_build_id, NULL,
+    "The objfile's build id, or None.", NULL },
   { "progspace", objfpy_get_progspace, NULL,
     "The objfile's progspace, or None.", NULL },
   { "pretty_printers", objfpy_get_printers, objfpy_set_printers,

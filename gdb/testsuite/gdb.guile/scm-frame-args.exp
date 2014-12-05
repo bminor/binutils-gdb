@@ -28,11 +28,8 @@ if ![gdb_guile_runto_main] {
     return
 }
 
-# Give the file a new name so we don't clobber the real one if
-# objfile == srcdir.
 set remote_guile_file [gdb_remote_download host \
-			   ${srcdir}/${subdir}/${testfile}.scm \
-			   ${subdir}/t-${testfile}.scm]
+			   ${srcdir}/${subdir}/${testfile}.scm]
 
 gdb_scm_load_file "$remote_guile_file" "load script"
 

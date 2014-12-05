@@ -1,3 +1,46 @@
+2014-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/17677
+	* elf-bfd.h (_bfd_elf_ifunc_get_synthetic_symtab): New prototype.
+	* elf-ifunc.c (_bfd_elf_ifunc_get_synthetic_symtab): New
+	function.
+	* elf32-i386.c (elf_i386_plt_sym_val): Removed.
+	(elf_backend_plt_sym_val): Likewise.
+	(elf_i386_get_plt_sym_val): New.
+	(elf_i386_get_synthetic_symtab): Likewise.
+	(bfd_elf32_get_synthetic_symtab): Likewise.
+	* elf64-x86-64.c (elf_x86_64_plt_sym_val): Removed.
+	(elf_x86_64_plt_sym_val_offset_plt_bnd): Likewise.
+	(elf_backend_plt_sym_val): Likewise.
+	(elf_x86_64_get_plt_sym_val): New.
+	(elf_x86_64_get_synthetic_symtab): Use
+	_bfd_elf_ifunc_get_synthetic_symtab.
+	(bfd_elf64_get_synthetic_symtab): Don't undefine for NaCl.
+
+2014-12-04  Alan Modra  <amodra@gmail.com>
+
+	PR 17666
+	* elflink.c: Include bfd_stdint.h.
+	(cmp_ext32l_r_offset, cmp_ext32b_r_offset,
+	cmp_ext64l_r_offset, cmp_ext64b_r_offset): New functions.
+	(elf_link_adjust_relocs): Sort relocs.  Free rel hashes after
+	sorting invalidates.
+
+2014-12-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* compress.c (bfd_get_full_section_contents): Fail if there are no
+	section contents available when the compress_status is
+	COMPRESS_SECTION_DONE.
+	* libbfd.c (bfd_malloc): Refuse to allocate a negative size.
+	(bfd_malloc2): Use bfd_malloc.
+	(bfd_realloc): Refuse to reallocate a negative size.
+	(bfd_realloc2): Use bfd_realloc.
+	(bfd_realloc_or_free): Use bfd_realloc.
+	(bfd_zmalloc): Use bfd_malloc.
+	(bfd_zmalloc): Use bfd_malloc2.
+	* opncls.c (bfd_alloc): Refuse to allocate a negative size.
+
 2014-12-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Reformat.

@@ -39,6 +39,16 @@ gdb_py_test_silent_cmd "python objfile = sym\[0\].symtab.objfile" \
 
 gdb_test "python print (objfile.filename)" ".*py-objfile.*" \
   "Get objfile file name"
+
+set binfile_build_id [get_build_id $binfile]
+if [string compare $binfile_build_id ""] {
+    verbose -log "binfile_build_id = $binfile_build_id"
+    gdb_test "python print (objfile.build_id)" "$binfile_build_id" \
+    "Get objfile build id"
+} else {
+    unsupported "build-id is not supported by the compiler"
+}
+
 gdb_test "python print (objfile.progspace)" "<gdb\.Progspace object at .*>" \
   "Get objfile program space"
 gdb_test "python print (objfile.is_valid())" "True" \
@@ -51,3 +61,29 @@ gdb_py_test_silent_cmd "python objfile.random_attribute = 42" \
     "Set random attribute in objfile" 1
 gdb_test "python print (objfile.random_attribute)" "42" \
     "Verify set of random attribute in objfile"
+
+# Now build another copy of the testcase, this time without debug info.
+
+if { [prepare_for_testing ${testfile}.exp ${testfile}2 ${srcfile} {nodebug ldflags=-Wl,--strip-debug}] } {
+    return -1
+}
+
+if ![runto_main] {
+    fail "Can't run to main"
+    return 0
+}
+
+gdb_py_test_silent_cmd "python objfile = gdb.objfiles()\[0\]" \
+    "Get no-debug objfile file" 1
+
+gdb_test "p main" "= {<text variable, no debug info>} $hex <main>" \
+    "print main without debug info"
+
+gdb_py_test_silent_cmd "python objfile.add_separate_debug_file(\"${binfile}\")" \
+    "Add separate debug file file" 1
+
+gdb_py_test_silent_cmd "python sep_objfile = gdb.objfiles()\[0\]" \
+    "Get separate debug info objfile" 1
+
+gdb_test "p main" "= {int \\(\\)} $hex <main>" \
+    "print main with debug info"

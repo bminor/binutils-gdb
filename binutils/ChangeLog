@@ -1,5 +1,11 @@
 2014-12-03  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* objdump.c (free_debug_section): Reset the compress_status as
+	well.
+
+2014-12-03  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17531
 	* readelf.c (get_machine_flags): Replace call to abort with a
 	warning message and a return value.

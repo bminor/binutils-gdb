@@ -3495,6 +3495,17 @@ class.
 The file name of the objfile as a string.
 @end defvar
 
+@defvar Objfile.build_id
+The build ID of the objfile as a string.
+If the objfile does not have a build ID then the value is @code{None}.
+
+This is supported only on some operating systems, notably those which use
+the ELF format for binary files and the @sc{gnu} Binutils.  For more details
+about this feature, see the description of the @option{--build-id}
+command-line option in @ref{Options, , Command Line Options, ld.info,
+The GNU Linker}.
+@end defvar
+
 @defvar Objfile.progspace
 The containing program space of the objfile as a @code{gdb.Progspace}
 object.  @xref{Progspaces In Python}.
@@ -3549,6 +3560,17 @@ Returns @code{True} if the @code{gdb.Objfile} object is valid,
 if the object file it refers to is not loaded in @value{GDBN} any
 longer.  All other @code{gdb.Objfile} methods will throw an exception
 if it is invalid at the time the method is called.
+@end defun
+
+@defun Objfile.add_separate_debug_file (file)
+Add @var{file} to the list of files that @value{GDBN} will search for
+debug information for the objfile.
+This is useful when the debug info has been removed from the program
+and stored in a separate file.  @value{GDBN} has built-in support for
+finding separate debug info files (@pxref{Separate Debug Files}), but if
+the file doesn't live in one of the standard places that @value{GDBN}
+searches then this function can be used to add a debug info file
+from a different place.
 @end defun
 
 @node Frames In Python

@@ -520,6 +520,7 @@ two_file_pie_test: two_file_test_1_pie.o two_file_test_1b_pie.o \
 check_PROGRAMS += pie_copyrelocs_test
 pie_copyrelocs_test_SOURCES = pie_copyrelocs_test.cc
 pie_copyrelocs_test_DEPENDENCIES = gcctestdir/ld pie_copyrelocs_shared_test.so
+pie_copyrelocs_test_CXXFLAGS = -fno-exceptions -fno-asynchronous-unwind-tables
 pie_copyrelocs_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -pie
 pie_copyrelocs_test_LDADD = pie_copyrelocs_shared_test.so
 pie_copyrelocs_shared_test.o: pie_copyrelocs_shared_test.cc

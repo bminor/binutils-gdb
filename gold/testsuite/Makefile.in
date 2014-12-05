@@ -1419,11 +1419,10 @@ permission_test_LDADD = $(LDADD)
 permission_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am_pie_copyrelocs_test_OBJECTS =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test.$(OBJEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_pie_copyrelocs_test_OBJECTS = pie_copyrelocs_test-pie_copyrelocs_test.$(OBJEXT)
 pie_copyrelocs_test_OBJECTS = $(am_pie_copyrelocs_test_OBJECTS)
-pie_copyrelocs_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(pie_copyrelocs_test_LDFLAGS) $(LDFLAGS) -o $@
+pie_copyrelocs_test_LINK = $(CXXLD) $(pie_copyrelocs_test_CXXFLAGS) \
+	$(CXXFLAGS) $(pie_copyrelocs_test_LDFLAGS) $(LDFLAGS) -o $@
 plugin_test_1_SOURCES = plugin_test_1.c
 plugin_test_1_OBJECTS = plugin_test_1.$(OBJEXT)
 plugin_test_1_LDADD = $(LDADD)
@@ -2338,6 +2337,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable_test_LDADD = two_file_relocatable.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_SOURCES = pie_copyrelocs_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_DEPENDENCIES = gcctestdir/ld pie_copyrelocs_shared_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_CXXFLAGS = -fno-exceptions -fno-asynchronous-unwind-tables
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -pie
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_LDADD = pie_copyrelocs_shared_test.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic_test_SOURCES = \
@@ -3673,7 +3673,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/permission_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pie_copyrelocs_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_10.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_2.Po@am__quote@
@@ -3833,6 +3833,20 @@ ehdr_start_test_5-ehdr_start_def.obj: ehdr_start_def.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ehdr_start_def.cc' object='ehdr_start_test_5-ehdr_start_def.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ehdr_start_test_5_CXXFLAGS) $(CXXFLAGS) -c -o ehdr_start_test_5-ehdr_start_def.obj `if test -f 'ehdr_start_def.cc'; then $(CYGPATH_W) 'ehdr_start_def.cc'; else $(CYGPATH_W) '$(srcdir)/ehdr_start_def.cc'; fi`
+
+pie_copyrelocs_test-pie_copyrelocs_test.o: pie_copyrelocs_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pie_copyrelocs_test_CXXFLAGS) $(CXXFLAGS) -MT pie_copyrelocs_test-pie_copyrelocs_test.o -MD -MP -MF $(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Tpo -c -o pie_copyrelocs_test-pie_copyrelocs_test.o `test -f 'pie_copyrelocs_test.cc' || echo '$(srcdir)/'`pie_copyrelocs_test.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Tpo $(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pie_copyrelocs_test.cc' object='pie_copyrelocs_test-pie_copyrelocs_test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pie_copyrelocs_test_CXXFLAGS) $(CXXFLAGS) -c -o pie_copyrelocs_test-pie_copyrelocs_test.o `test -f 'pie_copyrelocs_test.cc' || echo '$(srcdir)/'`pie_copyrelocs_test.cc
+
+pie_copyrelocs_test-pie_copyrelocs_test.obj: pie_copyrelocs_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pie_copyrelocs_test_CXXFLAGS) $(CXXFLAGS) -MT pie_copyrelocs_test-pie_copyrelocs_test.obj -MD -MP -MF $(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Tpo -c -o pie_copyrelocs_test-pie_copyrelocs_test.obj `if test -f 'pie_copyrelocs_test.cc'; then $(CYGPATH_W) 'pie_copyrelocs_test.cc'; else $(CYGPATH_W) '$(srcdir)/pie_copyrelocs_test.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Tpo $(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pie_copyrelocs_test.cc' object='pie_copyrelocs_test-pie_copyrelocs_test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pie_copyrelocs_test_CXXFLAGS) $(CXXFLAGS) -c -o pie_copyrelocs_test-pie_copyrelocs_test.obj `if test -f 'pie_copyrelocs_test.cc'; then $(CYGPATH_W) 'pie_copyrelocs_test.cc'; else $(CYGPATH_W) '$(srcdir)/pie_copyrelocs_test.cc'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
