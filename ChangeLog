@@ -1,3 +1,7 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* config.sub: Update from upstream config repo.
+
 2014-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* libtool.m4: Updated from GCC trunk.
