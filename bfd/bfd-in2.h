@@ -2284,6 +2284,8 @@ enum bfd_architecture
 #define bfd_mach_aarch64_ilp32 32
   bfd_arch_nios2,
 #define bfd_mach_nios2 0
+  bfd_arch_visium,     /* Visium */
+#define bfd_mach_visium        1
   bfd_arch_last
   };
 
@@ -6067,6 +6069,15 @@ assembler and not (currently) written to any object files.  */
 
 /* Adapteva EPIPHANY - 8 bit immediate for 16 bit mov instruction.  */
   BFD_RELOC_EPIPHANY_IMM8,
+
+/* Visium Relocations.  */
+  BFD_RELOC_VISIUM_HI16,
+  BFD_RELOC_VISIUM_LO16,
+  BFD_RELOC_VISIUM_IM16,
+  BFD_RELOC_VISIUM_REL16,
+  BFD_RELOC_VISIUM_HI16_PCREL,
+  BFD_RELOC_VISIUM_LO16_PCREL,
+  BFD_RELOC_VISIUM_IM16_PCREL,
   BFD_RELOC_UNUSED };
 
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;

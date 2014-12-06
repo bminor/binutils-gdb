@@ -1,3 +1,8 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* common.h (EM_VISIUM): Define.
+	* visium.h: New file.
+
 2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86-64.h (R_X86_64_GOTPLT64): Mark it obsolete.

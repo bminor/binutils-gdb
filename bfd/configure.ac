@@ -998,6 +998,7 @@ do
     vax_aout_bsd_vec)		 tb="$tb vaxbsd.lo aout32.lo" ;;
     vax_aout_nbsd_vec)		 tb="$tb vaxnetbsd.lo aout32.lo" ;;
     vax_elf32_vec)		 tb="$tb elf32-vax.lo elf32.lo $elf" ;;
+    visium_elf32_vec)		 tb="$tb elf32-visium.lo elf32.lo $elf" ;;
     w65_coff_vec)		 tb="$tb coff-w65.lo reloc16.lo" ;;
     we32k_coff_vec)		 tb="$tb coff-we32k.lo" ;;
     x86_64_coff_vec)		 tb="$tb coff-x86_64.lo cofflink.lo"; target_size=64 ;;

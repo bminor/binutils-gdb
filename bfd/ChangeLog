@@ -1,3 +1,25 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* config.bfd: Add Visium support.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+	* Makefile.am (ALL_MACHINES): Add cpu-visium.lo.
+	(ALL_MACHINES_CFILES): Add cpu-visium.c.
+	(BFD32_BACKENDS): Add elf32-visium.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-visium.c.
+	* Makefile.in: Regenerate.
+	* archures.c (DESCRIPTION): Add Visium support.
+	(bfd_visium_arch): Declare.
+	(bfd_archures_list): Add bfd_visium_arch.
+	* reloc.c: Add Visium relocations.
+	* targets.c (visium_elf32_vec): Declare.
+	(_bfd_target_vector): Add visium_elf32_vec.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+	* cpu-visium.c: New file.
+	* elf32-visium.c: Likewise.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2014-12-05  Steve Ellcey  <sellcey@mips.com>
 
 	* ecoff.c (_bfd_ecoff_slurp_symbol_table): Add cast.
