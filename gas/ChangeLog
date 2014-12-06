@@ -1,3 +1,15 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* configure.tgt: Add Visium support.
+	* Makefile.am (TARGET_CPU_CFILES): Move config/tc-vax.c around
+	and add config/tc-visium.c.
+	(TARGET_CPU_HFILES): Move config/tc-vax.h around and add
+	config/tc-visium.h.
+	* Makefile.in: Regenerate.
+	* config/tc-visium.c: New file.
+	* config/tc-visium.h: Likewise.
+	* po/POTFILES.in: Regenerate.
+
 2014-11-28  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* config/tc-nios2.c (can_evaluate_expr, get_expr_value): Delete.
