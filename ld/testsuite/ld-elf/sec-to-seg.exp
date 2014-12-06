@@ -86,6 +86,7 @@ if {    [istarget avr-*-*]
      || [istarget moxie-*-*]
      || [istarget msp430-*-*]
      || [istarget mt-*-*]
+     || [istarget visium-*-*]
     } {
     set B_test_same_seg 0
 } else {
