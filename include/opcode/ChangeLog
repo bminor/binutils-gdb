@@ -1,3 +1,7 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* visium.h: New file.
+
 2014-11-28  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2.h (NIOS2_INSN_ADDI, NIOS2_INSN_ANDI): Delete.

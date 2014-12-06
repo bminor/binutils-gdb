@@ -1,3 +1,7 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* dis-asm.h (print_insn_visium): Declare.
+
 2014-11-24  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2.h: Add DW_LANG_C_plus_plus_11, DW_LANG_C11 and

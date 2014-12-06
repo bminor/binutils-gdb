@@ -207,6 +207,8 @@ tilepro-opc.c
 v850-dis.c
 v850-opc.c
 vax-dis.c
+visium-dis.c
+visium-opc.c
 w65-dis.c
 w65-opc.h
 xc16x-asm.c
