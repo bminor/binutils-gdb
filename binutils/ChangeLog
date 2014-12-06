@@ -1,3 +1,15 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* readelf.c: Include elf/visium.h.
+	(guess_is_rela): Deal with EM_VISIUM.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(get_machine_flags): Likewise.
+	(get_osabi_name): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_32bit_pcrel_reloc): Likewise.
+	(is_16bit_abs_reloc): Likewise.
+
 2014-12-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* readelf.c (decode_AVR_machine_flags): New function.
