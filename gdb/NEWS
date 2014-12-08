@@ -21,6 +21,7 @@
   ** New attribute 'producer' for gdb.Symtab objects.
   ** gdb.Objfile objects have a new attribute "progspace",
      which is the gdb.Progspace object of the containing program space.
+  ** gdb.Objfile objects have a new attribute "owner".
   ** gdb.Objfile objects have a new attribute "build_id",
      which is the build ID generated when the file was built.
   ** gdb.Objfile objects have a new method "add_separate_debug_file".

@@ -80,6 +80,25 @@ objfpy_get_filename (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* If SELF is a separate debug-info file, return the "backlink" field.
+   Otherwise return None.  */
+
+static PyObject *
+objfpy_get_owner (PyObject *self, void *closure)
+{
+  objfile_object *obj = (objfile_object *) self;
+  struct objfile *objfile = obj->objfile;
+  struct objfile *owner;
+
+  OBJFPY_REQUIRE_VALID (obj);
+
+  owner = objfile->separate_debug_objfile_backlink;
+
+  if (owner != NULL)
+    return objfile_to_objfile_object (owner);
+  Py_RETURN_NONE;
+}
+
 /* An Objfile method which returns the objfile's build id, or None.  */
 
 static PyObject *
@@ -442,6 +461,9 @@ static PyGetSetDef objfile_getset[] =
     "The __dict__ for this objfile.", &objfile_object_type },
   { "filename", objfpy_get_filename, NULL,
     "The objfile's filename, or None.", NULL },
+  { "owner", objfpy_get_owner, NULL,
+    "The objfile owner of separate debug info objfiles, or None.",
+    NULL },
   { "build_id", objfpy_get_build_id, NULL,
     "The objfile's build id, or None.", NULL },
   { "progspace", objfpy_get_progspace, NULL,

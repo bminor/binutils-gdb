@@ -3495,6 +3495,14 @@ class.
 The file name of the objfile as a string.
 @end defvar
 
+@defvar Objfile.owner
+For separate debug info objfiles this is the corresponding @code{gdb.Objfile}
+object that debug info is being provided for.
+Otherwise this is @code{None}.
+Separate debug info objfiles are added with the
+@code{gdb.Objfile.add_separate_debug_file} method, described below.
+@end defvar
+
 @defvar Objfile.build_id
 The build ID of the objfile as a string.
 If the objfile does not have a build ID then the value is @code{None}.

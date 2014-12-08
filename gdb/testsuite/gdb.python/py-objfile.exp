@@ -76,6 +76,9 @@ if ![runto_main] {
 gdb_py_test_silent_cmd "python objfile = gdb.objfiles()\[0\]" \
     "Get no-debug objfile file" 1
 
+gdb_test "python print (objfile.owner)" "None" \
+    "Test owner of real objfile."
+
 gdb_test "p main" "= {<text variable, no debug info>} $hex <main>" \
     "print main without debug info"
 
@@ -84,6 +87,9 @@ gdb_py_test_silent_cmd "python objfile.add_separate_debug_file(\"${binfile}\")" 
 
 gdb_py_test_silent_cmd "python sep_objfile = gdb.objfiles()\[0\]" \
     "Get separate debug info objfile" 1
+
+gdb_test "python print (sep_objfile.owner.filename)" "${testfile}2" \
+    "Test owner of separate debug file"
 
 gdb_test "p main" "= {int \\(\\)} $hex <main>" \
     "print main with debug info"

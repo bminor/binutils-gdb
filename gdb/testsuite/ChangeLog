@@ -1,3 +1,7 @@
+2014-12-08  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-objfile.exp: Add tests for objfile.owner.
+
 2014-12-05  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.guile/scm-error.exp: Remove the third argument to

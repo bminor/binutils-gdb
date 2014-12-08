@@ -1,3 +1,9 @@
+2014-12-08  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention gdb.Objfile.owner.
+	* python/py-objfile.c (objfpy_get_owner): New function.
+	(objfile_getset): Add "owner".
+
 2014-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symtab.c (lookup_symbol_in_objfile_symtabs): New declaration.
