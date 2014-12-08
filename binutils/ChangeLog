@@ -1,3 +1,18 @@
+2014-12-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (display_debug_frames): Check for a negative
+	augmentation data length.
+	(display_gdb_index): Check for invalid offsets.
+	* elfcomm.c (process_archive_index_and_symbols): Check for an
+	index number that overflows when multiplied by the ar index size.
+	* readelf.c (dump_ia64_unwind): Add range checks.
+	(slurp_ia64_unwind_table): Change to a boolean function.  Add
+	range checks.
+	(process_version_sections): Add range checks.
+	(get_symbol_version_string): Add check for missing section
+	headers.
+
 2014-12-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* configure.ac: Add od-elf32_avr to build.

@@ -6490,6 +6490,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
       bfd_vma offset;
       const unsigned char * dp;
       const unsigned char * head;
+      const unsigned char * end;
       const char * procname;
 
       find_symbol_for_address (aux->symtab, aux->nsyms, aux->strtab,
@@ -6512,6 +6513,18 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
       printf ("], info at +0x%lx\n",
 	      (unsigned long) (tp->info.offset - aux->seg_base));
 
+      /* PR 17531: file: 86232b32.  */
+      if (aux->info == NULL)
+	continue;
+
+      /* PR 17531: file: 0997b4d1.  */
+      if ((ABSADDR (tp->info) - aux->info_addr) >= aux->info_size)
+	{
+	  warn (_("Invalid offset %lx in table entry %ld\n"),
+		(long) tp->info.offset, (long) (tp - aux->table));
+	  continue;
+	}
+
       head = aux->info + (ABSADDR (tp->info) - aux->info_addr);
       stamp = byte_get ((unsigned char *) head, sizeof (stamp));
 
@@ -6529,12 +6542,16 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
 	}
 
       in_body = 0;
-      for (dp = head + 8; dp < head + 8 + eh_addr_size * UNW_LENGTH (stamp);)
+      end = head + 8 + eh_addr_size * UNW_LENGTH (stamp);
+      /* PR 17531: file: 16ceda89.  */
+      if (end > aux->info + aux->info_size)
+	end = aux->info + aux->info_size;
+      for (dp = head + 8; dp < end;)
 	dp = unw_decode (dp, in_body, & in_body);
     }
 }
 
-static int
+static bfd_boolean
 slurp_ia64_unwind_table (FILE * file,
 			 struct ia64_unw_aux_info * aux,
 			 Elf_Internal_Shdr * sec)
@@ -6550,13 +6567,15 @@ slurp_ia64_unwind_table (FILE * file,
   Elf_Internal_Sym * sym;
   const char * relname;
 
+  aux->table_len = 0;
+
   /* First, find the starting address of the segment that includes
      this section: */
 
   if (elf_header.e_phnum)
     {
       if (! get_program_headers (file))
-	  return 0;
+	  return FALSE;
 
       for (seg = program_headers;
 	   seg < program_headers + elf_header.e_phnum;
@@ -6579,12 +6598,14 @@ slurp_ia64_unwind_table (FILE * file,
   table = (unsigned char *) get_data (NULL, file, sec->sh_offset, 1, size,
                                       _("unwind table"));
   if (!table)
-    return 0;
+    return FALSE;
 
+  aux->table_len = size / (3 * eh_addr_size);
   aux->table = (struct ia64_unw_table_entry *)
-      xcmalloc (size / (3 * eh_addr_size), sizeof (aux->table[0]));
+    xcmalloc (aux->table_len, sizeof (aux->table[0]));
   tep = aux->table;
-  for (tp = table; tp < table + size; ++tep)
+
+  for (tp = table; tp <= table + size - (3 * eh_addr_size); ++tep)
     {
       tep->start.section = SHN_UNDEF;
       tep->end.section   = SHN_UNDEF;
@@ -6610,7 +6631,12 @@ slurp_ia64_unwind_table (FILE * file,
 
       if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
 			      & rela, & nrelas))
-	return 0;
+	{
+	  free (aux->table);
+	  aux->table = NULL;
+	  aux->table_len = 0;
+	  return FALSE;
+	}
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
@@ -6625,7 +6651,14 @@ slurp_ia64_unwind_table (FILE * file,
 
 	  i = rp->r_offset / (3 * eh_addr_size);
 
-	  switch (rp->r_offset/eh_addr_size % 3)
+	  /* PR 17531: file: 5bc8d9bf.  */
+	  if (i >= aux->table_len)
+	    {
+	      warn (_("Skipping reloc with overlarge offset: %lx\n"), i);
+	      continue;
+	    }
+
+	  switch (rp->r_offset / eh_addr_size % 3)
 	    {
 	    case 0:
 	      aux->table[i].start.section = sym->st_shndx;
@@ -6647,8 +6680,7 @@ slurp_ia64_unwind_table (FILE * file,
       free (rela);
     }
 
-  aux->table_len = size / (3 * eh_addr_size);
-  return 1;
+  return TRUE;
 }
 
 static void
@@ -6785,9 +6817,8 @@ ia64_process_unwind (FILE * file)
 		  (unsigned long) unwsec->sh_offset,
 		  (unsigned long) (unwsec->sh_size / (3 * eh_addr_size)));
 
-	  (void) slurp_ia64_unwind_table (file, & aux, unwsec);
-
-	  if (aux.table_len > 0)
+	  if (slurp_ia64_unwind_table (file, & aux, unwsec)
+	      && aux.table_len > 0)
 	    dump_ia64_unwind (& aux);
 
 	  if (aux.table)
@@ -9406,7 +9437,6 @@ process_version_sections (FILE * file)
 		/* Check for overflow.  */
 		if (ent.vn_aux > (size_t) (endbuf - vstart))
 		  break;
-
 		vstart += ent.vn_aux;
 
 		for (j = 0, isum = idx + ent.vn_aux; j < ent.vn_cnt; ++j)
@@ -9435,9 +9465,14 @@ process_version_sections (FILE * file)
 			    get_ver_flags (aux.vna_flags), aux.vna_other);
 
 		    /* Check for overflow.  */
-		    if (aux.vna_next > (size_t) (endbuf - vstart))
-		      break;
-
+		    if (aux.vna_next > (size_t) (endbuf - vstart)
+			|| (aux.vna_next == 0 && j < ent.vn_cnt - 1))
+		      {
+			warn (_("Invalid vna_next field of %lx\n"),
+			      aux.vna_next);
+			j = ent.vn_cnt;
+			break;
+		      }
 		    isum   += aux.vna_next;
 		    vstart += aux.vna_next;
 		  }
@@ -10114,7 +10149,8 @@ get_symbol_version_string (FILE *file, int is_dynsym,
 
       vers_data = byte_get (data, 2);
 
-      is_nobits = (psym->st_shndx < elf_header.e_shnum
+      is_nobits = (section_headers != NULL
+		   && psym->st_shndx < elf_header.e_shnum
 		   && section_headers[psym->st_shndx].sh_type
 		   == SHT_NOBITS);
 

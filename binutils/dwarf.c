@@ -5787,7 +5787,7 @@ display_debug_frames (struct dwarf_section *section,
 	      augmentation_data = start;
 	      start += augmentation_data_len;
 	      /* PR 17512: file: 722-8446-0.004.  */
-	      if (start >= end)
+	      if (start >= end || ((signed long) augmentation_data_len) < 0)
 		{
 		  warn (_("Corrupt augmentation data length: %lx\n"),
 			augmentation_data_len);
@@ -6486,9 +6486,42 @@ display_gdb_index (struct dwarf_section *section,
       return 0;
     }
 
+  /* PR 17531: file: 418d0a8a.  */
+  if (tu_list_offset < cu_list_offset)
+    {
+      warn (_("TU offset (%x) is less than CU offset (%x)\n"),
+	    tu_list_offset, cu_list_offset);
+      return 0;
+    }
+
   cu_list_elements = (tu_list_offset - cu_list_offset) / 8;
+
+  if (address_table_offset < tu_list_offset)
+    {
+      warn (_("Address table offset (%x) is less than TU offset (%x)\n"),
+	    address_table_offset, tu_list_offset);
+      return 0;
+    }
+
   tu_list_elements = (address_table_offset - tu_list_offset) / 8;
+
+  /* PR 17531: file: 18a47d3d.  */
+  if (symbol_table_offset < address_table_offset)
+    {
+      warn (_("Symbolt table offset (%xl) is less then Address table offset (%x)\n"),
+	    symbol_table_offset, address_table_offset);
+      return 0;
+    }
+
   address_table_size = symbol_table_offset - address_table_offset;
+
+  if (constant_pool_offset < symbol_table_offset)
+    {
+      warn (_("Constant pool offset (%x) is less than symbol table offset (%x)\n"),
+	    constant_pool_offset, symbol_table_offset);
+      return 0;
+    }
+
   symbol_table_slots = (constant_pool_offset - symbol_table_offset) / 8;
 
   cu_list = start + cu_list_offset;
@@ -6523,7 +6556,7 @@ display_gdb_index (struct dwarf_section *section,
     }
 
   printf (_("\nAddress table:\n"));
-  for (i = 0; i < address_table_size; i += 2 * 8 + 4)
+  for (i = 0; i <= address_table_size - (2 * 8 + 4); i += 2 * 8 + 4)
     {
       uint64_t low = byte_get_little_endian (address_table + i, 8);
       uint64_t high = byte_get_little_endian (address_table + i + 8, 8);
@@ -6546,8 +6579,37 @@ display_gdb_index (struct dwarf_section *section,
 	{
 	  unsigned int j;
 
-	  printf ("[%3u] %s:", i, constant_pool + name_offset);
-	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+	  /* PR 17531: file: 5b7b07ad.  */
+	  if (constant_pool + name_offset < constant_pool
+	      || constant_pool + name_offset >= section->start + section->size)
+	    {
+	      printf (_("[%3u] <corrupt offset: %x>"), i, name_offset);
+	      warn (_("Corrupt name offset of 0x%x found for symbol table slot %d\n"),
+		    name_offset, i);
+	    }
+	  else
+	    printf ("[%3u] %s:", i, constant_pool + name_offset);
+
+	  if (constant_pool + cu_vector_offset < constant_pool
+	      || constant_pool + cu_vector_offset >= section->start + section->size)
+	    {
+	      printf (_("<invalid CU vector offset: %x>\n"), cu_vector_offset);
+	      warn (_("Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"),
+		    cu_vector_offset, i);
+	      continue;
+	    }
+	  else
+	    num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+
+	  if (constant_pool + cu_vector_offset + 4 + num_cus * 4 >=
+	      section->start + section->size)
+	    {
+	      printf ("<invalid number of CUs: %d>\n", num_cus);
+	      warn (_("Invalid number of CUs (%d) for symbol table slot %d\n"),
+		    num_cus, i);
+	      continue;
+	    }
+
 	  if (num_cus > 1)
 	    printf ("\n");
 	  for (j = 0; j < num_cus; ++j)

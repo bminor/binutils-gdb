@@ -510,9 +510,11 @@ process_archive_index_and_symbols (struct archive_info *  arch,
       arch->index_num = byte_get_big_endian (integer_buffer, sizeof_ar_index);
       size -= sizeof_ar_index;
 
-      if (size < arch->index_num * sizeof_ar_index)
+      if (size < arch->index_num * sizeof_ar_index
+	  /* PR 17531: file: 585515d1.  */
+	  || size < arch->index_num)
 	{
-	  error (_("%s: the archive index is supposed to have %ld entries of %d bytes, but the size is only %ld\n"),
+	  error (_("%s: the archive index is supposed to have 0x%lx entries of %d bytes, but the size is only 0x%lx\n"),
 		 arch->file_name, (long) arch->index_num, sizeof_ar_index, size);
 	  return FALSE;
 	}
