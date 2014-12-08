@@ -411,6 +411,9 @@ changequote([,])dnl
 
 	# Add objdump private vectors.
 	case $targ in
+	avr-*-*)
+	  od_vectors="$od_vectors objdump_private_desc_elf32_avr"
+	  ;;
 	powerpc-*-aix*)
 	  od_vectors="$od_vectors objdump_private_desc_xcoff"
 	  ;;
@@ -431,6 +434,8 @@ for i in $od_vectors ; do
 	f="$f $i"
 	OBJDUMP_PRIVATE_VECTORS="$OBJDUMP_PRIVATE_VECTORS &$i,"
 	case $i in
+	objdump_private_desc_elf32_avr)
+	    od_files="$od_files od-elf32_avr" ;;
 	objdump_private_desc_xcoff)
 	    od_files="$od_files od-xcoff" ;;
 	objdump_private_desc_mach_o)

@@ -1,3 +1,10 @@
+2014-12-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* configure.ac: Add od-elf32_avr to build.
+	* configure: Regenerate.
+	* od-elf32_avr.c: New file.
+	* objdump.h: Declare objdump_private_desc_elf32_avr.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* readelf.c: Include elf/visium.h.
