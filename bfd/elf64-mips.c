@@ -4444,6 +4444,7 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_sign_extend_vma	TRUE
 
 #define elf_backend_write_section	_bfd_mips_elf_write_section
+#define elf_backend_sort_relocs_p	_bfd_mips_elf_sort_relocs_p
 
 /* We don't set bfd_elf64_bfd_is_local_label_name because the 32-bit
    MIPS-specific function only applies to IRIX5, which had no 64-bit

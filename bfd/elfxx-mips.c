@@ -11912,6 +11912,18 @@ mips_set_isa_flags (bfd *abfd)
 }
 
 
+/* Whether to sort relocs output by ld -r or ld --emit-relocs, by r_offset.
+   Don't do so for code sections.  We want to keep ordering of HI16/LO16
+   as is.  On the other hand, elf-eh-frame.c processing requires .eh_frame
+   relocs to be sorted.  */
+
+bfd_boolean
+_bfd_mips_elf_sort_relocs_p (asection *sec)
+{
+  return (sec->flags & SEC_CODE) == 0;
+}
+
+
 /* The final processing done just before writing out a MIPS ELF object
    file.  This gets the MIPS architecture right based on the machine
    number.  This is used by both the 32-bit and the 64-bit ABI.  */
