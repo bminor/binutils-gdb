@@ -1,3 +1,7 @@
+2014-12-09  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* windres.c (open_file_search): Free path buffer on failure.
+
 2014-12-08  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531
