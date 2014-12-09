@@ -1,3 +1,8 @@
+2014-12-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (sort_r_offset): Delete.
+	(ppc64_elf_edit_opd): Don't sort input relocs.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* config.bfd: Add Visium support.
