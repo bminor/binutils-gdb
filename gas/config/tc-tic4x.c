@@ -2417,6 +2417,7 @@ md_assemble (char *str)
   char *s;
   int i;
   int parsed = 0;
+  size_t len;
   tic4x_inst_t *inst;		/* Instruction template.  */
   tic4x_inst_t *first_inst;
 
@@ -2455,8 +2456,8 @@ md_assemble (char *str)
 	s++;
       if (*s)			/* Null terminate for hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
-      strcat (insn->name, "_");
-      strncat (insn->name, str, TIC4X_NAME_MAX - 1 - strlen (insn->name));
+      len = strlen (insn->name);
+      snprintf (insn->name + len, TIC4X_NAME_MAX - len, "_%s", str);
 
       insn->operands[insn->num_operands++].mode = M_PARALLEL;
 
@@ -2518,7 +2519,8 @@ md_assemble (char *str)
 	s++;
       if (*s)			/* Null terminate for hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
-      strncpy (insn->name, str, TIC4X_NAME_MAX - 3);
+      strncpy (insn->name, str, TIC4X_NAME_MAX - 1);
+      insn->name[TIC4X_NAME_MAX - 1] = '\0';
 
       if ((i = tic4x_operands_parse (s, insn->operands, 0)) < 0)
 	{

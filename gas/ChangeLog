@@ -1,3 +1,8 @@
+2014-12-09  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* config/tc-tic4x.c (md_assemble): Ensure insn->name is zero
+	terminated.  Simplify concatenation of parallel insn.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* configure.tgt: Add Visium support.
