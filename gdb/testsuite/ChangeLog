@@ -1,3 +1,8 @@
+2014-12-15  Jason Merrill  <jason@redhat.com>
+
+	* Makefile.in (check-gdb.%): Restore.
+	* README: Mention it.
+
 2014-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/str_uninit: New testcase.
