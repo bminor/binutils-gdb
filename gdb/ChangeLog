@@ -1,5 +1,9 @@
 2014-12-08  Doug Evans  <dje@google.com>
 
+	* python/py-objfile.c (objfpy_get_owner): Increment refcount of result.
+
+2014-12-08  Doug Evans  <dje@google.com>
+
 	* NEWS: Mention gdb.Objfile.owner.
 	* python/py-objfile.c (objfpy_get_owner): New function.
 	(objfile_getset): Add "owner".

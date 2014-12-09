@@ -93,9 +93,13 @@ objfpy_get_owner (PyObject *self, void *closure)
   OBJFPY_REQUIRE_VALID (obj);
 
   owner = objfile->separate_debug_objfile_backlink;
-
   if (owner != NULL)
-    return objfile_to_objfile_object (owner);
+    {
+      PyObject *result = objfile_to_objfile_object (owner);
+
+      Py_XINCREF (result);
+      return result;
+    }
   Py_RETURN_NONE;
 }
 
