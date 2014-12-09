@@ -1,3 +1,7 @@
+2014-12-09  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* od-elf32_avr.c (elf32_avr_dump_mem_usage): Fix device initialization.
+
 2014-12-09  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

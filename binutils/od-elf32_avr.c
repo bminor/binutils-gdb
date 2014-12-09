@@ -181,7 +181,7 @@ elf32_avr_dump_mem_usage (bfd *abfd)
   char *description = NULL;
   bfd_size_type note_section_size = 0;
 
-  deviceinfo device = {0};
+  deviceinfo device = { 0, 0, 0, 0, 0, 0, NULL };
   device.name = "Unknown";
 
   bfd_size_type data_usage = 0;
