@@ -1,3 +1,9 @@
+2014-12-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* objdump.c (display_any_bfd): Avoid infinite loop closing and
+	opening the same archive again and again.
+
 2014-12-09  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* windres.c (open_file_search): Free path buffer on failure.

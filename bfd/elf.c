@@ -9817,32 +9817,33 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 	  return TRUE;
 
 	case bfd_core:
-	  if (CONST_STRNEQ (in.namedata, "NetBSD-CORE"))
+	  {
+	    struct
 	    {
-	      if (! elfcore_grok_netbsd_note (abfd, &in))
-		return FALSE;
+	      const char * string;
+	      bfd_boolean (* func)(bfd *, Elf_Internal_Note *);
 	    }
-	  else if (CONST_STRNEQ (in.namedata, "OpenBSD"))
+	    grokers[] =
 	    {
-	      if (! elfcore_grok_openbsd_note (abfd, &in))
-		return FALSE;
-	    }
-	  else if (CONST_STRNEQ (in.namedata, "QNX"))
-	    {
-	      if (! elfcore_grok_nto_note (abfd, &in))
-		return FALSE;
-	    }
-	  else if (CONST_STRNEQ (in.namedata, "SPU/"))
-	    {
-	      if (! elfcore_grok_spu_note (abfd, &in))
-		return FALSE;
-	    }
-	  else
-	    {
-	      if (! elfcore_grok_note (abfd, &in))
-		return FALSE;
-	    }
-	  break;
+	      { "", elfcore_grok_note },
+	      { "NetBSD-CORE", elfcore_grok_netbsd_note },
+	      { "OpenBSD", elfcore_grok_openbsd_note },
+	      { "QNX", elfcore_grok_nto_note },
+	      { "SPU/", elfcore_grok_spu_note }
+	    };
+	    int i;
+
+	    for (i = ARRAY_SIZE (grokers); i--;)
+	      if (in.namesz >= sizeof grokers[i].string - 1
+		  && strncmp (in.namedata, grokers[i].string,
+			      sizeof (grokers[i].string) - 1) == 0)
+		{
+		  if (! grokers[i].func (abfd, & in))
+		    return FALSE;
+		  break;
+		}
+	    break;
+	  }
 
 	case bfd_object:
 	  if (in.namesz == sizeof "GNU" && strcmp (in.namedata, "GNU") == 0)
@@ -9876,9 +9877,13 @@ elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return FALSE;
 
-  buf = (char *) bfd_malloc (size);
+  buf = (char *) bfd_malloc (size + 1);
   if (buf == NULL)
     return FALSE;
+
+  /* PR 17512: file: ec08f814
+     0-termintate the buffer so that string searches will not overflow.  */
+  buf[size] = 0;
 
   if (bfd_bread (buf, size, abfd) != size
       || !elf_parse_notes (abfd, buf, size, offset))

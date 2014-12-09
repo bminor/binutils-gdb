@@ -839,3 +839,5 @@ extern void bfd_section_already_linked_table_traverse
 
 extern bfd_vma read_unsigned_leb128 (bfd *, bfd_byte *, unsigned int *);
 extern bfd_signed_vma read_signed_leb128 (bfd *, bfd_byte *, unsigned int *);
+extern bfd_vma safe_read_leb128 (bfd *, bfd_byte *, unsigned int *,
+				 bfd_boolean, const bfd_byte * const);

@@ -1,3 +1,16 @@
+2014-12-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive64.c (bfd_elf64_archive_slurp_armap): Add range checks.
+	* libbfd.c (safe_read_leb128): New function.
+	* libbfd-in.h (safe_read_leb128): Add prototype.
+	* libbfd.h: Regenerate.
+	* elf-attrs.c (_bfd_elf_parse_attributes): Use safe_read_leb128.
+	Check for an over-long subsection length.
+	* elf.c (elf_parse_notes): Check that the namedata is long enough
+	for the string comparison that is about to be performed.
+	(elf_read_notes): Zero-terminate the note buffer.
+
 2014-12-09  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (sort_r_offset): Delete.
