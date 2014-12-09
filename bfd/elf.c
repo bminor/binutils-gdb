@@ -7648,109 +7648,6 @@ _bfd_elf_set_arch_mach (bfd *abfd,
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
 
-/* Find the function to a particular section and offset,
-   for error reporting.  */
-
-static bfd_boolean
-elf_find_function (bfd *abfd,
-		   asymbol **symbols,
-		   asection *section,
-		   bfd_vma offset,
-		   const char **filename_ptr,
-		   const char **functionname_ptr)
-{
-  struct elf_find_function_cache
-  {
-    asection *last_section;
-    asymbol *func;
-    const char *filename;
-    bfd_size_type func_size;
-  } *cache;
-
-  if (symbols == NULL)
-    return FALSE;
-
-  cache = elf_tdata (abfd)->elf_find_function_cache;
-  if (cache == NULL)
-    {
-      cache = bfd_zalloc (abfd, sizeof (*cache));
-      elf_tdata (abfd)->elf_find_function_cache = cache;
-      if (cache == NULL)
-	return FALSE;
-    }
-  if (cache->last_section != section
-      || cache->func == NULL
-      || offset < cache->func->value
-      || offset >= cache->func->value + cache->func_size)
-    {
-      asymbol *file;
-      bfd_vma low_func;
-      asymbol **p;
-      /* ??? Given multiple file symbols, it is impossible to reliably
-	 choose the right file name for global symbols.  File symbols are
-	 local symbols, and thus all file symbols must sort before any
-	 global symbols.  The ELF spec may be interpreted to say that a
-	 file symbol must sort before other local symbols, but currently
-	 ld -r doesn't do this.  So, for ld -r output, it is possible to
-	 make a better choice of file name for local symbols by ignoring
-	 file symbols appearing after a given local symbol.  */
-      enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
-      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-      file = NULL;
-      low_func = 0;
-      state = nothing_seen;
-      cache->filename = NULL;
-      cache->func = NULL;
-      cache->func_size = 0;
-      cache->last_section = section;
-
-      for (p = symbols; *p != NULL; p++)
-	{
-	  asymbol *sym = *p;
-	  bfd_vma code_off;
-	  bfd_size_type size;
-
-	  if ((sym->flags & BSF_FILE) != 0)
-	    {
-	      file = sym;
-	      if (state == symbol_seen)
-		state = file_after_symbol_seen;
-	      continue;
-	    }
-
-	  size = bed->maybe_function_sym (sym, section, &code_off);
-	  if (size != 0
-	      && code_off <= offset
-	      && (code_off > low_func
-		  || (code_off == low_func
-		      && size > cache->func_size)))
-	    {
-	      cache->func = sym;
-	      cache->func_size = size;
-	      cache->filename = NULL;
-	      low_func = code_off;
-	      if (file != NULL
-		  && ((sym->flags & BSF_LOCAL) != 0
-		      || state != file_after_symbol_seen))
-		cache->filename = bfd_asymbol_name (file);
-	    }
-	  if (state == nothing_seen)
-	    state = symbol_seen;
-	}
-    }
-
-  if (cache->func == NULL)
-    return FALSE;
-
-  if (filename_ptr)
-    *filename_ptr = cache->filename;
-  if (functionname_ptr)
-    *functionname_ptr = bfd_asymbol_name (cache->func);
-
-  return TRUE;
-}
-
 /* Find the nearest line to a particular section and offset,
    for error reporting.  */
 
@@ -7770,24 +7667,15 @@ _bfd_elf_find_nearest_line (bfd *abfd,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, discriminator_ptr,
 				     dwarf_debug_sections, 0,
-				     &elf_tdata (abfd)->dwarf2_find_line_info))
+				     &elf_tdata (abfd)->dwarf2_find_line_info)
+      || _bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
+					filename_ptr, functionname_ptr,
+					line_ptr))
     {
       if (!*functionname_ptr)
-	elf_find_function (abfd, symbols, section, offset,
-			   *filename_ptr ? NULL : filename_ptr,
-			   functionname_ptr);
-
-      return TRUE;
-    }
-
-  if (_bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
-				     filename_ptr, functionname_ptr, line_ptr))
-    {
-      if (!*functionname_ptr)
-	elf_find_function (abfd, symbols, section, offset,
-			   *filename_ptr ? NULL : filename_ptr,
-			   functionname_ptr);
-
+	_bfd_elf_find_function (abfd, symbols, section, offset,
+				*filename_ptr ? NULL : filename_ptr,
+				functionname_ptr);
       return TRUE;
     }
 
@@ -7802,8 +7690,8 @@ _bfd_elf_find_nearest_line (bfd *abfd,
   if (symbols == NULL)
     return FALSE;
 
-  if (! elf_find_function (abfd, symbols, section, offset,
-			   filename_ptr, functionname_ptr))
+  if (! _bfd_elf_find_function (abfd, symbols, section, offset,
+				filename_ptr, functionname_ptr))
     return FALSE;
 
   *line_ptr = 0;
