@@ -1,6 +1,18 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-10  Alan Modra  <amodra@gmail.com>
+	PR 17666
+	* elf-bfd.h (struct elf_backend_data): Add sort_relocs_p.
+	* elfxx-target.h (elf_backend_sort_relocs_p): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (elf_link_adjust_relocs): Conditionally sort.
+	(bfd_elf_final_link): Control sorting of relocs.
+	* elfxx-mips.c (_bfd_mips_elf_sort_relocs_p): New function.
+	* elfxx-mips.h (_bfd_mips_elf_sort_relocs_p): Declare.
+	* elf32-mips.c (elf_backend_sort_relocs_p): Define.
+	* elf64-mips.c (elf_backend_sort_relocs_p): Define.
+
 	2014-12-09  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (sort_r_offset): Delete.
 	(ppc64_elf_edit_opd): Don't sort input relocs.
