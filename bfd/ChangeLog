@@ -2,6 +2,27 @@
 
 	Apply from master.
 	2014-12-10  Alan Modra  <amodra@gmail.com>
+	PR 17541
+	* dwarf2.c (struct comp_unit): Add "lang".
+	(non_mangled): New function.
+	(struct funcinfo): Add "is_linkage".  Reorder for better packing.
+	Make "name" a const char*.
+	(lookup_address_in_function_table): Delete functionname_ptr param.
+	(find_abstract_instance_name): Add is_linkage param.  Set if we
+	have DW_AT_linkage_name or non_mangled DW_AT_name.
+	(scan_unit_for_symbols): Similarly set func->is_linkage.
+	(parse_comp_unit): Stash DW_AT_language.
+	(comp_unit_find_nearest_line): Replace functionname_ptr param
+	with function_ptr param.
+	(_bfd_dwarf2_find_nearest_line): Adjust above calls.  Set
+	functionname_ptr from function->name.  Call _bfd_elf_find_function
+	to retrieve symbol for function if not linkage name.
+	(_bfd_elf_find_function): Add bfd_target_elf_flavour test, moved from..
+	* elf.c (elf_find_function): ..here.
+	(_bfd_elf_find_nearest_line): Adjust calls.
+	* elf-bfd.h (_bfd_elf_find_function): Declare.
+
+	2014-12-10  Alan Modra  <amodra@gmail.com>
 	PR 17666
 	* elf-bfd.h (struct elf_backend_data): Add sort_relocs_p.
 	* elfxx-target.h (elf_backend_sort_relocs_p): Define.
