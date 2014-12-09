@@ -1,6 +1,10 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-09  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (sort_r_offset): Delete.
+	(ppc64_elf_edit_opd): Don't sort input relocs.
+
 	2014-12-04  Alan Modra  <amodra@gmail.com>
 	PR 17666
 	* elflink.c: Include bfd_stdint.h.
