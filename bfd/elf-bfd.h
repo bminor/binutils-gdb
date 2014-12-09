@@ -1109,6 +1109,11 @@ struct elf_backend_data
   unsigned int (*elf_backend_count_relocs)
     (struct bfd_link_info *, asection *);
 
+  /* Say whether to sort relocs output by ld -r and ld --emit-relocs,
+     by r_offset.  If NULL, default to true.  */
+  bfd_boolean (*sort_relocs_p)
+    (asection *);
+
   /* This function, if defined, is called when an NT_PRSTATUS note is found
      in a core file.  */
   bfd_boolean (*elf_backend_grok_prstatus)
