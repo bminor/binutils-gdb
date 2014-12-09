@@ -1,3 +1,10 @@
+2015-01-15  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.base/noreturn-return.c: New file.
+	* gdb.base/noreturn-return.exp: New file.
+	* gdb.base/noreturn-finish.c: New file.
+	* gdb.base/noreturn-finish.exp: New file.
+
 2015-01-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/continue-pending-after-query.c: New file.

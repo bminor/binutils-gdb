@@ -14343,6 +14343,12 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   else
     TYPE_CALLING_CONVENTION (ftype) = DW_CC_normal;
 
+  /* Record whether the function returns normally to its caller or not
+     if the DWARF producer set that information.  */
+  attr = dwarf2_attr (die, DW_AT_noreturn, cu);
+  if (attr && (DW_UNSND (attr) != 0))
+    TYPE_NO_RETURN (ftype) = 1;
+
   /* We need to add the subroutine type to the die immediately so
      we don't infinitely recurse when dealing with parameters
      declared as the same subroutine type.  */

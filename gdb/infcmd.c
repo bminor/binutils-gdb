@@ -1872,7 +1872,14 @@ finish_command (char *arg, int from_tty)
       if (execution_direction == EXEC_REVERSE)
 	printf_filtered (_("Run back to call of "));
       else
-	printf_filtered (_("Run till exit from "));
+	{
+	  if (function != NULL && TYPE_NO_RETURN (function->type)
+	      && !query (_("warning: Function %s does not return normally.\n"
+			   "Try to finish anyway? "),
+			 SYMBOL_PRINT_NAME (function)))
+	    error (_("Not confirmed."));
+	  printf_filtered (_("Run till exit from "));
+	}
 
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION, 0);
     }

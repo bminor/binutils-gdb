@@ -1,3 +1,14 @@
+2015-01-15  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (read_subroutine_type): Set TYPE_NO_RETURN from
+	DW_AT_noreturn.
+	* gdbtypes.h (struct func_type): Add is_noreturn field flag. Make
+	calling_convention an 8 bit bit field.
+	(TYPE_NO_RETURN): New macro.
+	* infcmd.c (finish_command): Query if function does not return
+	normally.
+	* stack.c (return_command): Likewise.
+
 2015-01-23  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_is_async_p): New macro.
