@@ -64,21 +64,19 @@ BFD_H = bfd.h
 # debugger).
 BFD32_LIBS = \
 	archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo \
-	cache.lo coffgen.lo corefile.lo \
-	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
-	section.lo syms.lo targets.lo hash.lo linker.lo \
-	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
-	merge.lo dwarf2.lo simple.lo compress.lo verilog.lo
+	cache.lo coff-bfd.lo compress.lo corefile.lo format.lo hash.lo \
+	init.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
+	section.lo simple.lo stab-syms.lo stabs.lo syms.lo targets.lo \
+	binary.lo ihex.lo srec.lo tekhex.lo verilog.lo
 
 BFD64_LIBS = archive64.lo
 
 BFD32_LIBS_CFILES = \
 	archive.c archures.c bfd.c bfdio.c bfdwin.c \
-	cache.c coffgen.c corefile.c \
-	format.c init.c libbfd.c opncls.c reloc.c \
-	section.c syms.c targets.c hash.c linker.c \
-	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
-	merge.c dwarf2.c simple.c compress.c verilog.c
+	cache.c coff-bfd.c compress.c corefile.c format.c hash.c \
+	init.c libbfd.c linker.c merge.c opncls.c reloc.c \
+	section.c simple.c stab-syms.c stabs.c syms.c targets.c \
+	binary.c ihex.c srec.c tekhex.c verilog.c
 
 BFD64_LIBS_CFILES = archive64.c
 
@@ -295,8 +293,10 @@ BFD32_BACKENDS = \
 	coff-we32k.lo \
 	coff-z80.lo \
 	coff-z8k.lo \
+	coffgen.lo \
 	cofflink.lo \
 	dwarf1.lo \
+	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
 	elf-attrs.lo \
@@ -483,8 +483,10 @@ BFD32_BACKENDS_CFILES = \
 	coff-we32k.c \
 	coff-z80.c \
 	coff-z8k.c \
+	coffgen.c \
 	cofflink.c \
 	dwarf1.c \
+	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
 	elf-attrs.c \

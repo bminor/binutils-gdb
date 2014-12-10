@@ -633,22 +633,6 @@ coff_count_linenumbers (bfd *abfd)
   return total;
 }
 
-/* Takes a bfd and a symbol, returns a pointer to the coff specific
-   area of the symbol if there is one.  */
-
-coff_symbol_type *
-coff_symbol_from (bfd *ignore_abfd ATTRIBUTE_UNUSED,
-		  asymbol *symbol)
-{
-  if (!bfd_family_coff (bfd_asymbol_bfd (symbol)))
-    return (coff_symbol_type *) NULL;
-
-  if (bfd_asymbol_bfd (symbol)->tdata.coff_obj_data == (coff_data_type *) NULL)
-    return (coff_symbol_type *) NULL;
-
-  return (coff_symbol_type *) symbol;
-}
-
 static void
 fixup_symbol_value (bfd *abfd,
 		    coff_symbol_type *coff_symbol_ptr,
@@ -765,8 +749,9 @@ coff_renumber_symbols (bfd *bfd_ptr, int *first_undef)
 
   for (symbol_index = 0; symbol_index < symbol_count; symbol_index++)
     {
-      coff_symbol_type *coff_symbol_ptr = coff_symbol_from (bfd_ptr, symbol_ptr_ptr[symbol_index]);
+      coff_symbol_type *coff_symbol_ptr;
 
+      coff_symbol_ptr = coff_symbol_from (symbol_ptr_ptr[symbol_index]);
       symbol_ptr_ptr[symbol_index]->udata.i = symbol_index;
       if (coff_symbol_ptr && coff_symbol_ptr->native)
 	{
@@ -810,9 +795,9 @@ coff_mangle_symbols (bfd *bfd_ptr)
 
   for (symbol_index = 0; symbol_index < symbol_count; symbol_index++)
     {
-      coff_symbol_type *coff_symbol_ptr =
-      coff_symbol_from (bfd_ptr, symbol_ptr_ptr[symbol_index]);
+      coff_symbol_type *coff_symbol_ptr;
 
+      coff_symbol_ptr = coff_symbol_from (symbol_ptr_ptr[symbol_index]);
       if (coff_symbol_ptr && coff_symbol_ptr->native)
 	{
 	  int i;
@@ -1140,7 +1125,7 @@ coff_write_alien_symbol (bfd *abfd,
       /* Copy the any flags from the file header into the symbol.
          FIXME: Why?  */
       {
-	coff_symbol_type *c = coff_symbol_from (abfd, symbol);
+	coff_symbol_type *c = coff_symbol_from (symbol);
 	if (c != (coff_symbol_type *) NULL)
 	  native->u.syment.n_flags = bfd_asymbol_bfd (&c->symbol)->flags;
       }
@@ -1272,7 +1257,7 @@ coff_write_symbols (bfd *abfd)
   for (p = abfd->outsymbols, i = 0; i < limit; i++, p++)
     {
       asymbol *symbol = *p;
-      coff_symbol_type *c_symbol = coff_symbol_from (abfd, symbol);
+      coff_symbol_type *c_symbol = coff_symbol_from (symbol);
 
       if (c_symbol == (coff_symbol_type *) NULL
 	  || c_symbol->native == (combined_entry_type *) NULL)
@@ -1372,7 +1357,7 @@ coff_write_symbols (bfd *abfd)
 	{
 	  asymbol *q = *p;
 	  size_t name_length = strlen (q->name);
-	  coff_symbol_type *c_symbol = coff_symbol_from (abfd, q);
+	  coff_symbol_type *c_symbol = coff_symbol_from (q);
 	  size_t maxlen;
 
 	  /* Figure out whether the symbol name should go in the string
@@ -2045,79 +2030,6 @@ coff_get_symbol_info (bfd *abfd, asymbol *symbol, symbol_info *ret)
       (bfd_hostptr_t) obj_raw_syments (abfd);
 }
 
-/* Return the COFF syment for a symbol.  */
-
-bfd_boolean
-bfd_coff_get_syment (bfd *abfd,
-		     asymbol *symbol,
-		     struct internal_syment *psyment)
-{
-  coff_symbol_type *csym;
-
-  csym = coff_symbol_from (abfd, symbol);
-  if (csym == NULL || csym->native == NULL
-      || ! csym->native->is_sym)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
-    }
-
-  *psyment = csym->native->u.syment;
-
-  if (csym->native->fix_value)
-    psyment->n_value = psyment->n_value -
-      (bfd_hostptr_t) obj_raw_syments (abfd);
-
-  /* FIXME: We should handle fix_line here.  */
-
-  return TRUE;
-}
-
-/* Return the COFF auxent for a symbol.  */
-
-bfd_boolean
-bfd_coff_get_auxent (bfd *abfd,
-		     asymbol *symbol,
-		     int indx,
-		     union internal_auxent *pauxent)
-{
-  coff_symbol_type *csym;
-  combined_entry_type *ent;
-
-  csym = coff_symbol_from (abfd, symbol);
-
-  if (csym == NULL
-      || csym->native == NULL
-      || ! csym->native->is_sym
-      || indx >= csym->native->u.syment.n_numaux)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
-    }
-
-  ent = csym->native + indx + 1;
-
-  BFD_ASSERT (! ent->is_sym);
-  *pauxent = ent->u.auxent;
-
-  if (ent->fix_tag)
-    pauxent->x_sym.x_tagndx.l =
-      ((combined_entry_type *) pauxent->x_sym.x_tagndx.p
-       - obj_raw_syments (abfd));
-
-  if (ent->fix_end)
-    pauxent->x_sym.x_fcnary.x_fcn.x_endndx.l =
-      ((combined_entry_type *) pauxent->x_sym.x_fcnary.x_fcn.x_endndx.p
-       - obj_raw_syments (abfd));
-
-  if (ent->fix_scnlen)
-    pauxent->x_csect.x_scnlen.l =
-      ((combined_entry_type *) pauxent->x_csect.x_scnlen.p
-       - obj_raw_syments (abfd));
-
-  return TRUE;
-}
-
 /* Print out information about COFF symbol.  */
 
 void
@@ -2567,7 +2479,7 @@ bfd_coff_set_symbol_class (bfd *         abfd,
 {
   coff_symbol_type * csym;
 
-  csym = coff_symbol_from (abfd, symbol);
+  csym = coff_symbol_from (symbol);
   if (csym == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
@@ -2621,16 +2533,6 @@ bfd_coff_set_symbol_class (bfd *         abfd,
     csym->native->u.syment.n_sclass = symbol_class;
 
   return TRUE;
-}
-
-struct coff_comdat_info *
-bfd_coff_get_comdat_section (bfd *abfd, struct bfd_section *sec)
-{
-  if (bfd_get_flavour (abfd) == bfd_target_coff_flavour
-      && coff_section_data (abfd, sec) != NULL)
-    return coff_section_data (abfd, sec)->comdat;
-  else
-    return NULL;
 }
 
 bfd_boolean

@@ -1,3 +1,7 @@
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c: #include "coff-bfd.h".
+
 2014-12-09  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* od-elf32_avr.c (elf32_avr_dump_mem_usage): Fix device initialization.

@@ -35,6 +35,7 @@
 #include "ldmain.h"
 #include "ldfile.h"
 #include "elf-bfd.h"
+#include "coff-bfd.h"
 
 /*
  %% literal %

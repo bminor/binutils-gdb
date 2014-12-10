@@ -1,5 +1,38 @@
 2014-12-10  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (BFD32_LIBS, BFD32_LIBS_CFILES): Remove dwarf2
+	and coffgen.  Add coff-bfd.  Sort.
+	(BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Add coffgen and dwarf2.
+	* bfd-in.h (bfd_coff_get_syment, bfd_coff_get_auxent): Delete.
+	(struct coff_comdat_info, bfd_coff_get_comdat_section): Delete.
+	* coffgen.c (coff_symbol_from): Move to coff-bfd.h as macro,
+	without unused param.  Update uses.
+	(bfd_coff_get_comdat_section): Move to coff-bfd.h as macro.
+	(bfd_coff_get_syment, bfd_coff_get_auxent): Move to coff-bfd.c.
+	* libcoff-in.h: #include "coff-bfd.h".
+	(struct coff_section_tdata, coff_section_data): Move to coff-bfd.h.
+	(coff_symbol_from): Delete.
+	* coff-bfd.c: New file.
+	* coff-bfd.h: New file.
+	* coff-i386.c: Update coff_symbol_from occurrences.
+	* coff-i960.c: Likewise.
+	* coff-m68k.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-x86_64.c: Likewise.
+	* coffcode.h: Likewise.
+	* pe-mips.c: Likewise.
+	* configure.ac (elf): Add dwarf2.lo.
+	(coffgen, coff, ecoff, xcoff): Define.  Use when mapping bfd
+	target vectors to .o files.  Add dwarf2 for mach-o targets.
+	Fix the sh target FIXME.
+	* po/SRC-POTFILES.in: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
 	PR 17541
 	* dwarf2.c (struct comp_unit): Add "lang".
 	(non_mangled): New function.
