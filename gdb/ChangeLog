@@ -1,3 +1,9 @@
+2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR breakpoints/17012
+	* breakpoint.c (remove_breakpoints_pid): Skip removing breakpoint if
+	it is marked as persistent.
+
 2014-12-10  Doug Evans  <xdje42@gmail.com>
 
 	* cp-namespace.c (cp_lookup_symbol_nonlocal): Move definition,

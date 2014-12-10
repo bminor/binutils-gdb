@@ -1,5 +1,11 @@
 2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
 
+	PR breakpoints/17012
+	* gdb.base/dprintf-detach.c: New file.
+	* gdb.base/dprintf-detach.exp: New file.
+
+2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.trace/qtro.exp: Replace gdbserver detection code by...
 	* lib/gdb.exp (target_is_gdbserver): New procedure.
 

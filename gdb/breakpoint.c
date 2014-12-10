@@ -3220,10 +3220,7 @@ remove_breakpoints_pid (int pid)
     if (bl->pspace != inf->pspace)
       continue;
 
-    if (bl->owner->type == bp_dprintf)
-      continue;
-
-    if (bl->inserted)
+    if (bl->inserted && !bl->target_info.persist)
       {
 	val = remove_breakpoint (bl, mark_uninserted);
 	if (val != 0)
