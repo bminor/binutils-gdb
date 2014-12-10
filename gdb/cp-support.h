@@ -201,13 +201,6 @@ extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const struct block *block,
 						  const domain_enum domain);
 
-extern struct symbol *cp_lookup_symbol_imports (const char *scope,
-                                                const char *name,
-                                                const struct block *block,
-                                                const domain_enum domain,
-                                                const int declaration_only,
-                                                const int search_parents);
-
 extern struct symbol *cp_lookup_symbol_imports_or_template
      (const char *scope,
       const char *name,

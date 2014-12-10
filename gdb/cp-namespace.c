@@ -299,7 +299,7 @@ reset_directive_searched (void *data)
    namespaces X and Y will be considered.  If SEARCH_PARENTS is false
    only the import of Y is considered.  */
 
-struct symbol *
+static struct symbol *
 cp_lookup_symbol_imports (const char *scope,
                           const char *name,
                           const struct block *block,

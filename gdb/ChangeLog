@@ -1,3 +1,8 @@
+2014-12-10  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_symbol_imports): Make static.
+	* cp-support.c (cp_lookup_symbol_imports): Delete.
+
 2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/17627
