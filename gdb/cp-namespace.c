@@ -32,12 +32,6 @@
 #include "buildsym.h"
 #include "language.h"
 
-static struct symbol *lookup_namespace_scope (const char *name,
-					      const struct block *block,
-					      const domain_enum domain,
-					      const char *scope,
-					      int scope_len);
-
 static struct type *cp_lookup_transparent_type_loop (const char *name,
 						     const char *scope,
 						     int scope_len);
@@ -206,29 +200,6 @@ cp_is_anonymous (const char *namespace)
 {
   return (strstr (namespace, CP_ANONYMOUS_NAMESPACE_STR)
 	  != NULL);
-}
-
-/* The C++-specific version of name lookup for static and global
-   names.  This makes sure that names get looked for in all namespaces
-   that are in scope.  NAME is the natural name of the symbol that
-   we're looking for, BLOCK is the block that we're searching within,
-   DOMAIN says what kind of symbols we're looking for.  */
-
-struct symbol *
-cp_lookup_symbol_nonlocal (const char *name,
-			   const struct block *block,
-			   const domain_enum domain)
-{
-  struct symbol *sym;
-  const char *scope = block_scope (block);
-
-  sym = lookup_namespace_scope (name, block,
-				domain, scope, 0);
-  if (sym != NULL)
-    return sym;
-
-  return cp_lookup_symbol_namespace (scope, name,
-				     block, domain);
 }
 
 /* Look up NAME in BLOCK's static block and in global blocks.  If
@@ -697,6 +668,29 @@ lookup_namespace_scope (const char *name,
   namespace[scope_len] = '\0';
   return cp_lookup_symbol_in_namespace (namespace, name,
 					block, domain, 1);
+}
+
+/* The C++-specific version of name lookup for static and global
+   names.  This makes sure that names get looked for in all namespaces
+   that are in scope.  NAME is the natural name of the symbol that
+   we're looking for, BLOCK is the block that we're searching within,
+   DOMAIN says what kind of symbols we're looking for.  */
+
+struct symbol *
+cp_lookup_symbol_nonlocal (const char *name,
+			   const struct block *block,
+			   const domain_enum domain)
+{
+  struct symbol *sym;
+  const char *scope = block_scope (block);
+
+  sym = lookup_namespace_scope (name, block,
+				domain, scope, 0);
+  if (sym != NULL)
+    return sym;
+
+  return cp_lookup_symbol_namespace (scope, name,
+				     block, domain);
 }
 
 /* Search through the base classes of PARENT_TYPE for a base class

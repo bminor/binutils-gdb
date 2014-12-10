@@ -1,5 +1,10 @@
 2014-12-10  Doug Evans  <xdje42@gmail.com>
 
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): Move definition,
+	closer to its subroutines.
+
+2014-12-10  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c (lookup_symbol_file): Move next to only caller.
 
 2014-12-10  Doug Evans  <xdje42@gmail.com>
