@@ -1,3 +1,12 @@
+2014-12-10  Jing Yu  <jingyu@google.com>
+
+	* aarch64.cc (Target_aarch64): Add new variable stub_group_size_.
+	(AArch64_relocate_functions::maybe_apply_stub): Add new parameter.
+	Update error message.
+	(Target_aarch64::do_relax): Use absolute value of option
+	stub_group_size. Replace local variable with class member
+	stub_group_size_.
+
 2014-12-04  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Branch_info::make_stub): Ignore
