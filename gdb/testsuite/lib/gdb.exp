@@ -2537,6 +2537,31 @@ proc gdb_is_target_remote {} {
     return 0
 }
 
+# Return 1 if the current remote target is an instance of our GDBserver, 0
+# otherwise.  Return -1 if there was an error and we can't tell.
+
+gdb_caching_proc target_is_gdbserver {
+    global gdb_prompt
+
+    set is_gdbserver -1
+    set test "Probing for GDBserver"
+
+    gdb_test_multiple "monitor help" $test {
+	-re "The following monitor commands are supported.*Quit GDBserver.*$gdb_prompt $" {
+	    set is_gdbserver 1
+	}
+	-re "$gdb_prompt $" {
+	    set is_gdbserver 0
+	}
+    }
+
+    if { $is_gdbserver == -1 } {
+	verbose -log "Unable to tell whether we are using GDBserver or not."
+    }
+
+    return $is_gdbserver
+}
+
 set compiler_info		"unknown"
 set gcc_compiled		0
 set hp_cc_compiler		0
