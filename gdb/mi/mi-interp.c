@@ -386,6 +386,7 @@ mi_thread_exit (struct thread_info *t, int silent)
 {
   struct mi_interp *mi;
   struct inferior *inf;
+  struct cleanup *old_chain;
 
   if (silent)
     return;
@@ -393,11 +394,14 @@ mi_thread_exit (struct thread_info *t, int silent)
   inf = find_inferior_pid (ptid_get_pid (t->ptid));
 
   mi = top_level_interpreter_data ();
+  old_chain = make_cleanup_restore_target_terminal ();
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel, 
 		      "thread-exited,id=\"%d\",group-id=\"i%d\"",
 		      t->num, inf->num);
   gdb_flush (mi->event_channel);
+
+  do_cleanups (old_chain);
 }
 
 /* Emit notification on changing the state of record.  */

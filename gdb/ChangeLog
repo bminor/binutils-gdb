@@ -1,3 +1,11 @@
+2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/17627
+	* target.c (cleanup_restore_target_terminal): New function.
+	(make_cleanup_restore_target_terminal): New function.
+	* target.h (make_cleanup_restore_target_terminal): New declaration.
+	* mi/mi-interp.c (mi_thread_exit): Use the new cleanup.
+
 2014-12-08  Doug Evans  <dje@google.com>
 
 	* python/py-objfile.c (objfpy_get_owner): Increment refcount of result.

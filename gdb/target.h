@@ -1413,6 +1413,10 @@ extern void target_terminal_ours (void);
 
 extern int target_supports_terminal_ours (void);
 
+/* Make a cleanup that restores the state of the terminal to the current
+   state.  */
+extern struct cleanup *make_cleanup_restore_target_terminal (void);
+
 /* Print useful information about our terminal status, if such a thing
    exists.  */
 
