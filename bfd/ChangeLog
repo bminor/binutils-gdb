@@ -1,3 +1,9 @@
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2.c (read_address): Check bfd_target_elf_flavour before
+	calling get_elf_backend_data.
+	(_bfd_dwarf2_find_nearest_line): Fix parens.
+
 2014-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (bfd_elf32_get_synthetic_symtab): New.

@@ -745,7 +745,10 @@ read_alt_indirect_ref (struct comp_unit * unit,
 static bfd_uint64_t
 read_address (struct comp_unit *unit, bfd_byte *buf)
 {
-  int signed_vma = get_elf_backend_data (unit->abfd)->sign_extend_vma;
+  int signed_vma = 0;
+
+  if (bfd_get_flavour (unit->abfd) == bfd_target_elf_flavour)
+    signed_vma = get_elf_backend_data (unit->abfd)->sign_extend_vma;
 
   if (signed_vma)
     {
@@ -3849,7 +3852,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 						     functionname_ptr,
 						     linenumber_ptr,
 						     discriminator_ptr,
-						     stash)) > 0;
+						     stash) != 0);
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
 	      == stash->sec->size)
