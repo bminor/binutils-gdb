@@ -1,6 +1,15 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-11  Alan Modra  <amodra@gmail.com>
+	* configure.ac: Check for long long and sizes of long long and long.
+	* elfcomm.h (HOST_WIDEST_INT): Test HAVE_LONG_LONG in place of
+	__STDC_VERSION__ and __GNUC__.
+	* strings.c (print_strings): Likewise.
+	* dwarf.c (DWARF_VMA_FMT, DWARF_VMA_FMT_LONG): Likewise.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 	2014-11-24  Mark Wielaard  <mjw@redhat.com>
 	* dwarf.c (read_and_display_attr_value): Handle DW_LANG_C11,
 	DW_LANG_C_plus_plus_11 and DW_LANG_C_plus_plus_14.
