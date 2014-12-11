@@ -1,3 +1,8 @@
+2014-12-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (display_gdb_index): Add more range checks.
+
 2014-12-11  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Check for long long and sizes of long long and long.

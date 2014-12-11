@@ -6509,7 +6509,7 @@ display_gdb_index (struct dwarf_section *section,
   /* PR 17531: file: 18a47d3d.  */
   if (symbol_table_offset < address_table_offset)
     {
-      warn (_("Symbolt table offset (%xl) is less then Address table offset (%x)\n"),
+      warn (_("Symbol table offset (%xl) is less then Address table offset (%x)\n"),
 	    symbol_table_offset, address_table_offset);
       return 0;
     }
@@ -6531,6 +6531,12 @@ display_gdb_index (struct dwarf_section *section,
   symbol_table = start + symbol_table_offset;
   constant_pool = start + constant_pool_offset;
 
+  if (address_table + address_table_size * (2 + 8 + 4) > section->start + section->size)
+    {
+      warn (_("Address table extends beyond end of section. %x"), address_table_size);
+      return 0;
+    }
+  
   printf (_("\nCU table:\n"));
   for (i = 0; i < cu_list_elements; i += 2)
     {
@@ -6557,7 +6563,8 @@ display_gdb_index (struct dwarf_section *section,
     }
 
   printf (_("\nAddress table:\n"));
-  for (i = 0; i <= address_table_size - (2 * 8 + 4); i += 2 * 8 + 4)
+  for (i = 0; i < address_table_size && i <= address_table_size - (2 * 8 + 4);
+       i += 2 * 8 + 4)
     {
       uint64_t low = byte_get_little_endian (address_table + i, 8);
       uint64_t high = byte_get_little_endian (address_table + i + 8, 8);
@@ -6589,7 +6596,9 @@ display_gdb_index (struct dwarf_section *section,
 		    name_offset, i);
 	    }
 	  else
-	    printf ("[%3u] %s:", i, constant_pool + name_offset);
+	    printf ("[%3u] %.*s:", i,
+		    (int) (section->size - (constant_pool_offset + name_offset)),
+		    constant_pool + name_offset);
 
 	  if (constant_pool + cu_vector_offset < constant_pool
 	      || constant_pool + cu_vector_offset >= section->start + section->size)
@@ -6602,11 +6611,12 @@ display_gdb_index (struct dwarf_section *section,
 	  else
 	    num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
 
-	  if (constant_pool + cu_vector_offset + 4 + num_cus * 4 >=
+	  if (num_cus * 4 < num_cus
+	      || constant_pool + cu_vector_offset + 4 + num_cus * 4 >=
 	      section->start + section->size)
 	    {
 	      printf ("<invalid number of CUs: %d>\n", num_cus);
-	      warn (_("Invalid number of CUs (%d) for symbol table slot %d\n"),
+	      warn (_("Invalid number of CUs (0x%x) for symbol table slot %d\n"),
 		    num_cus, i);
 	      continue;
 	    }
