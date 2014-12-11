@@ -9706,30 +9706,35 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 
 	case bfd_core:
 	  {
+#define GROKER_ELEMENT(S,F) {S, sizeof (S) - 1, F}
 	    struct
 	    {
 	      const char * string;
+	      size_t len;
 	      bfd_boolean (* func)(bfd *, Elf_Internal_Note *);
 	    }
 	    grokers[] =
 	    {
-	      { "", elfcore_grok_note },
-	      { "NetBSD-CORE", elfcore_grok_netbsd_note },
-	      { "OpenBSD", elfcore_grok_openbsd_note },
-	      { "QNX", elfcore_grok_nto_note },
-	      { "SPU/", elfcore_grok_spu_note }
+	      GROKER_ELEMENT ("", elfcore_grok_note),
+	      GROKER_ELEMENT ("NetBSD-CORE", elfcore_grok_netbsd_note),
+	      GROKER_ELEMENT ( "OpenBSD", elfcore_grok_openbsd_note),
+	      GROKER_ELEMENT ("QNX", elfcore_grok_nto_note),
+	      GROKER_ELEMENT ("SPU/", elfcore_grok_spu_note)
 	    };
+#undef GROKER_ELEMENT
 	    int i;
 
 	    for (i = ARRAY_SIZE (grokers); i--;)
-	      if (in.namesz >= sizeof grokers[i].string - 1
-		  && strncmp (in.namedata, grokers[i].string,
-			      sizeof (grokers[i].string) - 1) == 0)
-		{
-		  if (! grokers[i].func (abfd, & in))
-		    return FALSE;
-		  break;
-		}
+	      {
+		if (in.namesz >= grokers[i].len
+		    && strncmp (in.namedata, grokers[i].string,
+				grokers[i].len) == 0)
+		  {
+		    if (! grokers[i].func (abfd, & in))
+		      return FALSE;
+		    break;
+		  }
+	      }
 	    break;
 	  }
 

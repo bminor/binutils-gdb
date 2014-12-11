@@ -1,3 +1,11 @@
+2014-12-11  Keith Seitz  <keiths@redhat.com>
+
+	* elf.c (elf_parse_notes): Define convenience macro
+	GROKER_ELEMENT to add elements to 'grokers' array.
+	Add 'len' element to 'grokers'.
+	Use grokers.len instead of sizeof in string
+	comparisons.
+
 2014-12-10  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (BFD32_LIBS, BFD32_LIBS_CFILES): Remove dwarf2
