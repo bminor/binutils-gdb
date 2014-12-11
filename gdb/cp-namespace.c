@@ -785,14 +785,14 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 
 /* Look up a symbol named NESTED_NAME that is nested inside the C++
    class or namespace given by PARENT_TYPE, from within the context
-   given by BLOCK.  Return NULL if there is no such nested type.  */
+   given by BLOCK.  Return NULL if there is no such nested symbol.  */
 
 struct symbol *
 cp_lookup_nested_symbol (struct type *parent_type,
 			 const char *nested_name,
 			 const struct block *block)
 {
-  /* type_name_no_tag_required provides better error reporting using the
+  /* type_name_no_tag_or_error provides better error reporting using the
      original type.  */
   struct type *saved_parent_type = parent_type;
 

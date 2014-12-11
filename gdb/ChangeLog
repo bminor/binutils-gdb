@@ -1,5 +1,9 @@
 2014-12-11  Doug Evans  <xdje42@gmail.com>
 
+	* cp-namespace.c (cp_lookup_nested_symbol): Fix comments.
+
+2014-12-11  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (lookup_symbol_in_objfile_symtabs): Delete forward decl.
 	(symbol *lookup_symbol_via_quick_fns): Ditto.
 	(lookup_symbol_in_objfile): Add forward decl.
