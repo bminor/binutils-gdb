@@ -1,3 +1,7 @@
+2014-12-11  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (domain_name) <MODULE_DOMAIN>: Add missing case.
+
 2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR breakpoints/17012
