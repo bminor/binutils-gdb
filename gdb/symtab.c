@@ -80,15 +80,8 @@ struct symbol *lookup_local_symbol (const char *name,
 				    enum language language);
 
 static struct symbol *
-  lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
-				    int block_index, const char *name,
-				    const domain_enum domain);
-
-static
-struct symbol *lookup_symbol_via_quick_fns (struct objfile *objfile,
-					    int block_index,
-					    const char *name,
-					    const domain_enum domain);
+  lookup_symbol_in_objfile (struct objfile *objfile, int block_index,
+			    const char *name, const domain_enum domain);
 
 extern initialize_file_ftype _initialize_symtab;
 
@@ -1552,15 +1545,10 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
        objfile;
        objfile = objfile_separate_debug_iterate (main_objfile, objfile))
     {
-      struct symbol *sym;
-      
-      sym = lookup_symbol_in_objfile_symtabs (objfile, GLOBAL_BLOCK, name,
-					      domain);
-      if (sym != NULL)
-	return sym;
+      struct symbol *sym = lookup_symbol_in_objfile (objfile, GLOBAL_BLOCK,
+						     name, domain);
 
-      sym = lookup_symbol_via_quick_fns (objfile, GLOBAL_BLOCK, name, domain);
-      if (sym)
+      if (sym != NULL)
 	return sym;
     }
 
