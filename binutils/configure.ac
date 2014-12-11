@@ -124,6 +124,9 @@ case "${host}" in
 esac
 AC_SUBST(DEMANGLER_NAME)
 
+AC_CHECK_SIZEOF([long])
+AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
+
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h limits.h locale.h sys/param.h wchar.h)
 AC_HEADER_SYS_WAIT
 ACX_HEADER_STRING

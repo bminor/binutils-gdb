@@ -29,7 +29,7 @@
 void error (const char *, ...) ATTRIBUTE_PRINTF_1;
 void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
 
-#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+#if defined HAVE_LONG_LONG && SIZEOF_LONG_LONG > SIZEOF_LONG
 /* We can't use any bfd types here since readelf may define BFD64 and
    objdump may not.  */
 #define HOST_WIDEST_INT	long long
