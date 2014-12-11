@@ -162,17 +162,17 @@ get_encoded_value (unsigned char **pdata,
   return val;
 }
 
-#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
-#ifndef __MINGW32__
-#define  DWARF_VMA_FMT       "ll"
-#define  DWARF_VMA_FMT_LONG  "%16.16llx"
+#if defined HAVE_LONG_LONG && SIZEOF_LONG_LONG > SIZEOF_LONG
+# ifndef __MINGW32__
+#  define DWARF_VMA_FMT		"ll"
+#  define DWARF_VMA_FMT_LONG	"%16.16llx"
+# else
+#  define DWARF_VMA_FMT		"I64"
+#  define DWARF_VMA_FMT_LONG	"%016I64x"
+# endif
 #else
-#define  DWARF_VMA_FMT       "I64"
-#define  DWARF_VMA_FMT_LONG  "%016I64x"
-#endif
-#else
-#define  DWARF_VMA_FMT       "l"
-#define  DWARF_VMA_FMT_LONG  "%16.16lx"
+# define DWARF_VMA_FMT		"l"
+# define DWARF_VMA_FMT_LONG	"%16.16lx"
 #endif
 
 /* Convert a dwarf vma value into a string.  Returns a pointer to a static
@@ -2757,7 +2757,8 @@ read_debug_line_header (struct dwarf_section * section,
   /* PR 17512: file:002-117414-0.004.  */ 
   if (* end_of_sequence > end)
     {
-      warn (_("Line length %lld extends beyond end of section\n"), linfo->li_length);
+      warn (_("Line length %s extends beyond end of section\n"),
+	    dwarf_vmatoa ("u", linfo->li_length));
       * end_of_sequence = end;
       return NULL;
     }

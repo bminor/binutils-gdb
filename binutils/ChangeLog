@@ -1,3 +1,14 @@
+2014-12-11  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Check for long long and sizes of long long and long.
+	* elfcomm.h (HOST_WIDEST_INT): Test HAVE_LONG_LONG in place of
+	__STDC_VERSION__ and __GNUC__.
+	* strings.c (print_strings): Likewise.
+	* dwarf.c (DWARF_VMA_FMT, DWARF_VMA_FMT_LONG): Likewise.
+	(read_debug_line_header): Use dwarf_vmatoa to print warning.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2014-12-10  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c: #include "coff-bfd.h".
