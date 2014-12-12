@@ -310,6 +310,20 @@ s390_store_system_call (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "system_call", buf);
 }
 
+static void
+s390_store_tdb (struct regcache *regcache, const void *buf)
+{
+  int tdb0 = find_regno (regcache->tdesc, "tdb0");
+  int tr0 = find_regno (regcache->tdesc, "tr0");
+  int i;
+
+  for (i = 0; i < 4; i++)
+    supply_register (regcache, tdb0 + i, (const char *) buf + 8 * i);
+
+  for (i = 0; i < 16; i++)
+    supply_register (regcache, tr0 + i, (const char *) buf + 8 * (16 + i));
+}
+
 static struct regset_info s390_regsets[] = {
   { 0, 0, 0, 0, GENERAL_REGS, s390_fill_gregset, NULL },
   /* Last break address is read-only; no fill function.  */
@@ -317,6 +331,9 @@ static struct regset_info s390_regsets[] = {
     NULL, s390_store_last_break },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_SYSTEM_CALL, 0,
     EXTENDED_REGS, s390_fill_system_call, s390_store_system_call },
+  /* TDB is read-only.  */
+  { PTRACE_GETREGSET, -1, NT_S390_TDB, 0, EXTENDED_REGS,
+    NULL, s390_store_tdb },
   { 0, 0, 0, -1, -1, NULL, NULL }
 };
 

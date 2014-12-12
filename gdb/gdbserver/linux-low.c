@@ -4256,6 +4256,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 		 this process mode.  */
 	      disable_regset (regsets_info, regset);
 	    }
+	  else if (errno == ENODATA)
+	    {
+	      /* ENODATA may be returned if the regset is currently
+		 not "active".  This can happen in normal operation,
+		 so suppress the warning in this case.  */
+	    }
 	  else
 	    {
 	      char s[256];
