@@ -379,12 +379,12 @@ mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
 
   if (ELF_ST_IS_MICROMIPS (st_other))
     {
-      MSYMBOL_TARGET_FLAG_2 (msym) = 1;
+      MSYMBOL_TARGET_FLAG_MICROMIPS (msym) = 1;
       SET_MSYMBOL_VALUE_ADDRESS (msym, MSYMBOL_VALUE_RAW_ADDRESS (msym) | 1);
     }
   else if (ELF_ST_IS_MIPS16 (st_other))
     {
-      MSYMBOL_TARGET_FLAG_1 (msym) = 1;
+      MSYMBOL_TARGET_FLAG_MIPS16 (msym) = 1;
       SET_MSYMBOL_VALUE_ADDRESS (msym, MSYMBOL_VALUE_RAW_ADDRESS (msym) | 1);
     }
 }
@@ -394,7 +394,8 @@ mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
 static int
 msymbol_is_mips (struct minimal_symbol *msym)
 {
-  return !(MSYMBOL_TARGET_FLAG_1 (msym) | MSYMBOL_TARGET_FLAG_2 (msym));
+  return !(MSYMBOL_TARGET_FLAG_MIPS16 (msym)
+	   | MSYMBOL_TARGET_FLAG_MICROMIPS (msym));
 }
 
 /* Return one iff MSYM refers to MIPS16 code.  */
@@ -402,7 +403,7 @@ msymbol_is_mips (struct minimal_symbol *msym)
 static int
 msymbol_is_mips16 (struct minimal_symbol *msym)
 {
-  return MSYMBOL_TARGET_FLAG_1 (msym);
+  return MSYMBOL_TARGET_FLAG_MIPS16 (msym);
 }
 
 /* Return one iff MSYM refers to microMIPS code.  */
@@ -410,7 +411,7 @@ msymbol_is_mips16 (struct minimal_symbol *msym)
 static int
 msymbol_is_micromips (struct minimal_symbol *msym)
 {
-  return MSYMBOL_TARGET_FLAG_2 (msym);
+  return MSYMBOL_TARGET_FLAG_MICROMIPS (msym);
 }
 
 /* Set the ISA bit in the main symbol too, complementing the corresponding

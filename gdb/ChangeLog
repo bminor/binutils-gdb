@@ -1,3 +1,12 @@
+2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.h (MSYMBOL_TARGET_FLAG_MIPS16): New macro.
+	(MSYMBOL_TARGET_FLAG_MICROMIPS): Likewise.
+	* mips-tdep.c (mips_elf_make_msymbol_special): Use the new
+	macros.
+	(msymbol_is_mips, msymbol_is_mips16, msymbol_is_micromips):
+	Likewise.
+
 2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* completer.c: Include "target.h", "reggroups.h", and

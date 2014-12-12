@@ -48,6 +48,10 @@ enum mips_isa
     ISA_MICROMIPS
   };
 
+/* Corresponding MSYMBOL_TARGET_FLAG aliases.  */
+#define MSYMBOL_TARGET_FLAG_MIPS16 MSYMBOL_TARGET_FLAG_1
+#define MSYMBOL_TARGET_FLAG_MICROMIPS MSYMBOL_TARGET_FLAG_2
+
 /* Return the MIPS ISA's register size.  Just a short cut to the BFD
    architecture's word size.  */
 extern int mips_isa_regsize (struct gdbarch *gdbarch);
