@@ -873,6 +873,8 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
       if (symvis - 1 < hvis - 1)
 	h->other = symvis | (h->other & ~ELF_ST_VISIBILITY (-1));
     }
+  else if (definition && ELF_ST_VISIBILITY (isym->st_other) != STV_DEFAULT)
+    h->protected_def = 1;
 }
 
 /* This function is called when we want to merge a new symbol with an
@@ -2637,7 +2639,8 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
    DYNBSS.  */
 
 bfd_boolean
-_bfd_elf_adjust_dynamic_copy (struct elf_link_hash_entry *h,
+_bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
+			      struct elf_link_hash_entry *h,
 			      asection *dynbss)
 {
   unsigned int power_of_two;
@@ -2675,6 +2678,14 @@ _bfd_elf_adjust_dynamic_copy (struct elf_link_hash_entry *h,
 
   /* Increment the size of DYNBSS to make room for the symbol.  */
   dynbss->size += h->size;
+
+  if (h->protected_def)
+    {
+      info->callbacks->einfo
+	(_("%P: copy reloc against protected `%T' is invalid\n"),
+	 h->root.root.string);
+      return FALSE;
+    }
 
   return TRUE;
 }

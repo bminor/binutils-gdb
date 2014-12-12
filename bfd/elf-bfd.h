@@ -196,6 +196,8 @@ struct elf_link_hash_entry
   unsigned int pointer_equality_needed : 1;
   /* Symbol is a unique global symbol.  */
   unsigned int unique_global : 1;
+  /* Symbol is defined with non-default visibility.  */
+  unsigned int protected_def : 1;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
   unsigned long dynstr_index;
@@ -2024,7 +2026,7 @@ extern bfd_boolean _bfd_elf_link_output_relocs
    struct elf_link_hash_entry **);
 
 extern bfd_boolean _bfd_elf_adjust_dynamic_copy
-  (struct elf_link_hash_entry *, asection *);
+  (struct bfd_link_info *, struct elf_link_hash_entry *, asection *);
 
 extern bfd_boolean _bfd_elf_dynamic_symbol_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);

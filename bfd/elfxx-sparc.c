@@ -2211,7 +2211,7 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   s = htab->sdynbss;
 
-  return _bfd_elf_adjust_dynamic_copy (h, s);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for

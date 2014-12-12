@@ -7121,7 +7121,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   s = htab->dynbss;
 
-  return _bfd_elf_adjust_dynamic_copy (h, s);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* If given a function descriptor symbol, hide both the function code
