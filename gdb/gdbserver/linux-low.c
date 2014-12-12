@@ -4255,8 +4255,6 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	      /* If we get EIO on a regset, do not try it again for
 		 this process mode.  */
 	      disable_regset (regsets_info, regset);
-	      free (buf);
-	      continue;
 	    }
 	  else
 	    {
@@ -4266,9 +4264,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	      perror (s);
 	    }
 	}
-      else if (regset->type == GENERAL_REGS)
-	saw_general_regs = 1;
-      regset->store_function (regcache, buf);
+      else
+	{
+	  if (regset->type == GENERAL_REGS)
+	    saw_general_regs = 1;
+	  regset->store_function (regcache, buf);
+	}
       free (buf);
     }
   if (saw_general_regs)

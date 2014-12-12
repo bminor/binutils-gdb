@@ -1,5 +1,12 @@
 2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* linux-low.c (regsets_fetch_inferior_registers): Do not invoke
+	the regset's store function when ptrace returned an error.
+	* regcache.c (get_thread_regcache): Invalidate register cache
+	before fetching inferior's registers.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* linux-low.c (regsets_fetch_inferior_registers): Rephrase
 	while-loop as for-loop.
 	(regsets_store_inferior_registers): Likewise.
