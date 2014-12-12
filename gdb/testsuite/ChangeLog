@@ -1,3 +1,8 @@
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/completion.exp: Add test for completion of "info
+	registers ".
+
 2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.base/func-ptrs.c: New file.

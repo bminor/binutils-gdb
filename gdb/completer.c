@@ -23,6 +23,9 @@
 #include "filenames.h"		/* For DOSish file names.  */
 #include "language.h"
 #include "gdb_signals.h"
+#include "target.h"
+#include "reggroups.h"
+#include "user-regs.h"
 
 #include "cli/cli-decode.h"
 
@@ -835,6 +838,45 @@ signal_completer (struct cmd_list_element *ignore,
 
   return return_val;
 }
+
+/* Complete on a register or reggroup.  */
+
+VEC (char_ptr) *
+reg_or_group_completer (struct cmd_list_element *ignore,
+			const char *text, const char *word)
+{
+  VEC (char_ptr) *result = NULL;
+  size_t len = strlen (word);
+  struct gdbarch *gdbarch;
+  struct reggroup *group;
+  const char *name;
+  int i;
+
+  if (!target_has_registers)
+    return result;
+
+  gdbarch = get_frame_arch (get_selected_frame (NULL));
+
+  for (i = 0;
+       (name = user_reg_map_regnum_to_name (gdbarch, i)) != NULL;
+       i++)
+    {
+      if (*name != '\0' && strncmp (word, name, len) == 0)
+	VEC_safe_push (char_ptr, result, xstrdup (name));
+    }
+
+  for (group = reggroup_next (gdbarch, NULL);
+       group != NULL;
+       group = reggroup_next (gdbarch, group))
+    {
+      name = reggroup_name (group);
+      if (strncmp (word, name, len) == 0)
+	VEC_safe_push (char_ptr, result, xstrdup (name));
+    }
+
+  return result;
+}
+
 
 /* Get the list of chars that are considered as word breaks
    for the current command.  */

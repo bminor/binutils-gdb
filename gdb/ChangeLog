@@ -1,5 +1,15 @@
 2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* completer.c: Include "target.h", "reggroups.h", and
+	"user-regs.h".
+	(reg_or_group_completer): New.
+	* completer.h (reg_or_group_completer): Declare.
+	* infcmd.c (_initialize_infcmd): Set reg_or_group_completer for
+	the "info registers" and "info all-registers" commands and the
+	dbx-mode "lr" command.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* user-regs.c: Include "arch-utils.h", "command.h", and
 	"cli/cli-cmds.h".
 	(maintenance_print_user_registers): New.
