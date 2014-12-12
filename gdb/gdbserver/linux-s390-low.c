@@ -290,12 +290,6 @@ s390_fill_gregset (struct regcache *regcache, void *buf)
 /* Fill and store functions for extended register sets.  */
 
 static void
-s390_fill_last_break (struct regcache *regcache, void *buf)
-{
-  /* Last break address is read-only.  */
-}
-
-static void
 s390_store_last_break (struct regcache *regcache, const void *buf)
 {
   const char *p;
@@ -318,9 +312,9 @@ s390_store_system_call (struct regcache *regcache, const void *buf)
 
 static struct regset_info s390_regsets[] = {
   { 0, 0, 0, 0, GENERAL_REGS, s390_fill_gregset, NULL },
-  /* Last break address is read-only; do not attempt PTRACE_SETREGSET.  */
-  { PTRACE_GETREGSET, PTRACE_GETREGSET, NT_S390_LAST_BREAK, 0,
-    EXTENDED_REGS, s390_fill_last_break, s390_store_last_break },
+  /* Last break address is read-only; no fill function.  */
+  { PTRACE_GETREGSET, -1, NT_S390_LAST_BREAK, 0, EXTENDED_REGS,
+    NULL, s390_store_last_break },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_SYSTEM_CALL, 0,
     EXTENDED_REGS, s390_fill_system_call, s390_store_system_call },
   { 0, 0, 0, -1, -1, NULL, NULL }
@@ -485,7 +479,7 @@ s390_arch_setup (void)
 #endif
 
   /* Update target_regsets according to available register sets.  */
-  for (regset = s390_regsets; regset->fill_function != NULL; regset++)
+  for (regset = s390_regsets; regset->size >= 0; regset++)
     if (regset->get_request == PTRACE_GETREGSET)
       switch (regset->nt_type)
 	{

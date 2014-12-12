@@ -4293,7 +4293,8 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
       void *buf, *data;
       int nt_type, res;
 
-      if (regset->size == 0 || regset_disabled (regsets_info, regset))
+      if (regset->size == 0 || regset_disabled (regsets_info, regset)
+	  || regset->fill_function == NULL)
 	continue;
 
       buf = xmalloc (regset->size);
