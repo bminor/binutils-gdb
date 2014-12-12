@@ -1,3 +1,10 @@
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* ui-file.h (ui_file_write_for_put): Declare.
+	* ui-file.c (ui_file_write_for_put): New function.
+	* mi/mi-out.c (do_write): Remove.
+	(mi_out_put): Use ui_file_write_for_put.
+
 2014-12-12  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention gdb.lookup_objfile.
