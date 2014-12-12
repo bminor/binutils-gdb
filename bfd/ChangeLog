@@ -1,6 +1,41 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-12  Alan Modra  <amodra@gmail.com>
+	PR 15228
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Add "info" param.
+	Error on copy relocs against protected symbols.
+	(elf_merge_st_other): Set h->protected_def.
+	* elf-bfd.h (struct elf_link_hash_entry): Add "protected_def".
+	(_bfd_elf_adjust_dynamic_copy): Update prototype.
+	* elf-m10300.c (_bfd_mn10300_elf_adjust_dynamic_symbol): Update
+	_bfd_elf_adjust_dynamic_copy call.
+	* elf32-arm.c (elf32_arm_adjust_dynamic_symbol): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-cris.c (elf_cris_adjust_dynamic_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Likewise.
+	* elf32-i370.c (i370_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Likewise.
+	* elf32-lm32.c (lm32_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
+	* elf32-metag.c (elf_metag_adjust_dynamic_symbol): Likewise.
+	* elf32-or1k.c (or1k_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_adjust_dynamic_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-vax.c (elf_vax_adjust_dynamic_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf64-sh64.c (sh64_elf64_adjust_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf_x86_64_adjust_dynamic_symbol): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_adjust_dynamic_symbol): Likewise.
+
 	2014-12-10  Alan Modra  <amodra@gmail.com>
 	PR 17541
 	* dwarf2.c (struct comp_unit): Add "lang".
