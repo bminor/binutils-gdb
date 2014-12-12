@@ -1,3 +1,9 @@
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-low.c (regsets_fetch_inferior_registers): Rephrase
+	while-loop as for-loop.
+	(regsets_store_inferior_registers): Likewise.
+
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
 	* configure.ac(AC_CHECK_FUNCS): Remove readlink.
