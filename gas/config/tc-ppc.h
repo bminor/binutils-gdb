@@ -267,11 +267,24 @@ extern int ppc_parse_name (const char *, struct expressionS *);
 #define md_cleanup() ppc_cleanup ()
 extern void ppc_cleanup (void);
 
+#if (defined TE_AIX5 || defined TE_AIX					\
+     || defined TE_FreeBSD || defined TE_NetBSD || defined TE_LYNX)
 /* ppc uses different register numbers between .eh_frame and .debug_frame.
    This macro translates the .eh_frame register numbers to .debug_frame
    register numbers.  */
-#define md_reg_eh_frame_to_debug_frame(regno) \
-  ((regno) == 70 ? 64 /* cr2 */ : (regno))
+#define md_reg_eh_frame_to_debug_frame(regno)				\
+  ((regno) == 70 ? 64	/* cr2 */					\
+   : (regno) == 65 ? 108 /* lr */					\
+   : (regno) == 66 ? 109 /* ctr */					\
+   : (regno) >= 68 && (regno) <= 75 ? (regno) + 86 - 68 /* crN */	\
+   : (regno) == 76 ? 101 /* xer */					\
+   : (regno) >= 77 && (regno) <= 108 ? (regno) + 1124 - 77 /* vrN */	\
+   : (regno) == 109 ? 356 /* vrsave */					\
+   : (regno) == 110 ? 67 /* vscr */					\
+   : (regno) == 111 ? 99 /* spe_acc */					\
+   : (regno) == 112 ? 612 /* spefscr */					\
+   : (regno))
+#endif
 
 #define TARGET_USE_CFIPOP 1
 
