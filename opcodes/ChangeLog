@@ -1,3 +1,7 @@
+2014-12-12  Anthony Green  <green@moxielogic.com>
+
+	* moxie-opc.c: Define zex instructions.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* configure.ac: Add Visium support.
