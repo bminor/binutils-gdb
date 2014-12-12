@@ -2824,6 +2824,7 @@ create_signatured_type_table_from_index (struct objfile *objfile,
 static void
 create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const gdb_byte *iter, *end;
   struct obstack temp_obstack;
   struct addrmap *mutable_map;
@@ -2865,8 +2866,9 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 	  continue;
 	}
 
-      addrmap_set_empty (mutable_map, lo + baseaddr, hi + baseaddr - 1,
-			 dw2_get_cutu (cu_index));
+      lo = gdbarch_adjust_dwarf2_addr (gdbarch, lo + baseaddr);
+      hi = gdbarch_adjust_dwarf2_addr (gdbarch, hi + baseaddr);
+      addrmap_set_empty (mutable_map, lo, hi - 1, dw2_get_cutu (cu_index));
     }
 
   objfile->psymtabs_addrmap = addrmap_create_fixed (mutable_map,
@@ -5849,6 +5851,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 {
   struct dwarf2_cu *cu = reader->cu;
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct attribute *attr;
   CORE_ADDR baseaddr;
@@ -5893,8 +5896,11 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
     /* Store the contiguous range if it is not empty; it can be empty for
        CUs with no code.  */
     addrmap_set_empty (objfile->psymtabs_addrmap,
-		       best_lowpc + baseaddr,
-		       best_highpc + baseaddr - 1, pst);
+		       gdbarch_adjust_dwarf2_addr (gdbarch,
+						   best_lowpc + baseaddr),
+		       gdbarch_adjust_dwarf2_addr (gdbarch,
+						   best_highpc + baseaddr) - 1,
+		       pst);
 
   /* Check if comp unit has_children.
      If so, read the rest of the partial symbols from this comp unit.
@@ -5925,8 +5931,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 	  best_highpc = highpc;
 	}
     }
-  pst->textlow = best_lowpc + baseaddr;
-  pst->texthigh = best_highpc + baseaddr;
+  pst->textlow = gdbarch_adjust_dwarf2_addr (gdbarch, best_lowpc + baseaddr);
+  pst->texthigh = gdbarch_adjust_dwarf2_addr (gdbarch, best_highpc + baseaddr);
 
   pst->n_global_syms = objfile->global_psymbols.next -
     (objfile->global_psymbols.list + pst->globals_offset);
@@ -6789,6 +6795,7 @@ static void
 add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR addr = 0;
   const char *actual_name = NULL;
   CORE_ADDR baseaddr;
@@ -6806,31 +6813,30 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   switch (pdi->tag)
     {
     case DW_TAG_subprogram:
+      addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
       if (pdi->is_external || cu->language == language_ada)
 	{
           /* brobecker/2007-12-26: Normally, only "external" DIEs are part
              of the global scope.  But in Ada, we want to be able to access
              nested procedures globally.  So all Ada subprograms are stored
              in the global scope.  */
-	  /* prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
-	     mst_text, objfile); */
+	  /* prim_record_minimal_symbol (actual_name, addr, mst_text,
+	     objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       &objfile->global_psymbols,
-			       0, pdi->lowpc + baseaddr,
-			       cu->language, objfile);
+			       0, addr, cu->language, objfile);
 	}
       else
 	{
-	  /* prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
-	     mst_file_text, objfile); */
+	  /* prim_record_minimal_symbol (actual_name, addr, mst_file_text,
+	     objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       &objfile->static_psymbols,
-			       0, pdi->lowpc + baseaddr,
-			       cu->language, objfile);
+			       0, addr, cu->language, objfile);
 	}
       break;
     case DW_TAG_constant:
@@ -7031,14 +7037,19 @@ add_partial_subprogram (struct partial_die_info *pdi,
             *highpc = pdi->highpc;
 	  if (set_addrmap)
 	    {
-	      CORE_ADDR baseaddr;
 	      struct objfile *objfile = cu->objfile;
+	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	      CORE_ADDR baseaddr;
+	      CORE_ADDR highpc;
+	      CORE_ADDR lowpc;
 
 	      baseaddr = ANOFFSET (objfile->section_offsets,
 				   SECT_OFF_TEXT (objfile));
-	      addrmap_set_empty (objfile->psymtabs_addrmap,
-				 pdi->lowpc + baseaddr,
-				 pdi->highpc - 1 + baseaddr,
+	      lowpc = gdbarch_adjust_dwarf2_addr (gdbarch,
+						  pdi->lowpc + baseaddr);
+	      highpc = gdbarch_adjust_dwarf2_addr (gdbarch,
+						   pdi->highpc + baseaddr);
+	      addrmap_set_empty (objfile->psymtabs_addrmap, lowpc, highpc - 1,
 				 cu->per_cu->v.psymtab);
 	    }
         }
@@ -7925,11 +7936,13 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 {
   struct dwarf2_cu *cu = per_cu->cu;
   struct objfile *objfile = per_cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR lowpc, highpc;
   struct compunit_symtab *cust;
   struct cleanup *back_to, *delayed_list_cleanup;
   CORE_ADDR baseaddr;
   struct block *static_block;
+  CORE_ADDR addr;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -7960,8 +7973,8 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
      it, by scanning the DIE's below the compilation unit.  */
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
-  static_block
-    = end_symtab_get_static_block (highpc + baseaddr, 0, 1);
+  addr = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
+  static_block = end_symtab_get_static_block (addr, 0, 1);
 
   /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
      Also, DW_AT_ranges may record ranges not belonging to any child DIEs
@@ -9006,6 +9019,7 @@ static void
 read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct cleanup *back_to = make_cleanup (null_cleanup, 0);
   CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
@@ -9024,8 +9038,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
      from finish_block.  */
   if (lowpc == ((CORE_ADDR) -1))
     lowpc = highpc;
-  lowpc += baseaddr;
-  highpc += baseaddr;
+  lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
 
   find_file_and_directory (die, cu, &name, &comp_dir);
 
@@ -11133,6 +11146,7 @@ static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct context_stack *new;
   CORE_ADDR lowpc;
   CORE_ADDR highpc;
@@ -11185,8 +11199,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  lowpc += baseaddr;
-  highpc += baseaddr;
+  lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
+  highpc = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
 
   /* If we have any template arguments, then we must allocate a
      different sort of symbol.  */
@@ -11273,6 +11287,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);
 
+  gdbarch_make_symbol_special (gdbarch, new->name, objfile);
+
   /* Attach template arguments to function.  */
   if (! VEC_empty (symbolp, template_args))
     {
@@ -11309,6 +11325,7 @@ static void
 read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct context_stack *new;
   CORE_ADDR lowpc, highpc;
   struct die_info *child_die;
@@ -11323,8 +11340,8 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
      describe ranges.  */
   if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, NULL))
     return;
-  lowpc += baseaddr;
-  highpc += baseaddr;
+  lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
+  highpc = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
 
   push_context (0, lowpc);
   if (die->child != NULL)
@@ -11386,6 +11403,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
   pc = attr_value_as_address (attr) + baseaddr;
+  pc = gdbarch_adjust_dwarf2_addr (gdbarch, pc);
 
   if (cu->call_site_htab == NULL)
     cu->call_site_htab = htab_create_alloc_ex (16, core_addr_hash, core_addr_eq,
@@ -11534,7 +11552,10 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		         "low pc, for referencing DIE 0x%x [in module %s]"),
 		       die->offset.sect_off, objfile_name (objfile));
 	  else
-	    SET_FIELD_PHYSADDR (call_site->target, lowpc + baseaddr);
+	    {
+	      lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
+	      SET_FIELD_PHYSADDR (call_site->target, lowpc);
+	    }
 	}
     }
   else
@@ -11662,6 +11683,7 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 		    struct partial_symtab *ranges_pst)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct comp_unit_head *cu_header = &cu->header;
   bfd *obfd = objfile->obfd;
   unsigned int addr_size = cu_header->addr_size;
@@ -11769,10 +11791,17 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 	}
 
       if (ranges_pst != NULL)
-	addrmap_set_empty (objfile->psymtabs_addrmap,
-			   range_beginning + baseaddr,
-			   range_end - 1 + baseaddr,
-			   ranges_pst);
+	{
+	  CORE_ADDR lowpc;
+	  CORE_ADDR highpc;
+
+	  lowpc = gdbarch_adjust_dwarf2_addr (gdbarch,
+					      range_beginning + baseaddr);
+	  highpc = gdbarch_adjust_dwarf2_addr (gdbarch,
+					       range_end + baseaddr);
+	  addrmap_set_empty (objfile->psymtabs_addrmap, lowpc, highpc - 1,
+			     ranges_pst);
+	}
 
       /* FIXME: This is recording everything as a low-high
 	 segment of consecutive addresses.  We should have a
@@ -11986,6 +12015,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
                             CORE_ADDR baseaddr, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct attribute *attr;
   struct attribute *attr_high;
 
@@ -12001,7 +12031,9 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 	  if (cu->header.version >= 4 && attr_form_is_constant (attr_high))
 	    high += low;
 
-          record_block_range (block, baseaddr + low, baseaddr + high - 1);
+	  low = gdbarch_adjust_dwarf2_addr (gdbarch, low + baseaddr);
+	  high = gdbarch_adjust_dwarf2_addr (gdbarch, high + baseaddr);
+	  record_block_range (block, low, high - 1);
         }
     }
 
@@ -12105,6 +12137,8 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 		  continue;
 		}
 
+	      start = gdbarch_adjust_dwarf2_addr (gdbarch, start);
+	      end = gdbarch_adjust_dwarf2_addr (gdbarch, end);
               record_block_range (block, start, end - 1);
             }
         }
@@ -15931,6 +15965,8 @@ read_attribute_value (const struct die_reader_specs *reader,
 		      const gdb_byte *info_ptr)
 {
   struct dwarf2_cu *cu = reader->cu;
+  struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   bfd *abfd = reader->abfd;
   struct comp_unit_head *cu_header = &cu->header;
   unsigned int bytes_read;
@@ -15953,6 +15989,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       break;
     case DW_FORM_addr:
       DW_ADDR (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
+      DW_ADDR (attr) = gdbarch_adjust_dwarf2_addr (gdbarch, DW_ADDR (attr));
       info_ptr += bytes_read;
       break;
     case DW_FORM_block2:
@@ -17284,8 +17321,12 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
   /* Read the statement sequences until there's nothing left.  */
   while (line_ptr < line_end)
     {
-      /* state machine registers  */
-      CORE_ADDR address = 0;
+      /* State machine registers.  Call `gdbarch_adjust_dwarf2_line'
+         on the initial 0 address as if there was a line entry for it
+         so that the backend has a chance to adjust it and also record
+         it in case it needs it.  This is currently used by MIPS code,
+         cf. `mips_adjust_dwarf2_line'.  */
+      CORE_ADDR address = gdbarch_adjust_dwarf2_line (gdbarch, 0, 0);
       unsigned int file = 1;
       unsigned int line = 1;
       int is_stmt = lh->default_is_stmt;
@@ -17328,12 +17369,14 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	    {
 	      /* Special opcode.  */
 	      unsigned char adj_opcode;
+	      CORE_ADDR addr_adj;
 	      int line_delta;
 
 	      adj_opcode = op_code - lh->opcode_base;
-	      address += (((op_index + (adj_opcode / lh->line_range))
+	      addr_adj = (((op_index + (adj_opcode / lh->line_range))
 			   / lh->maximum_ops_per_instruction)
 			  * lh->minimum_instruction_length);
+	      address += gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
 	      op_index = ((op_index + (adj_opcode / lh->line_range))
 			  % lh->maximum_ops_per_instruction);
 	      line_delta = lh->line_base + (adj_opcode % lh->line_range);
@@ -17410,6 +17453,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		  op_index = 0;
 		  line_ptr += bytes_read;
 		  address += baseaddr;
+		  address = gdbarch_adjust_dwarf2_line (gdbarch, address, 0);
 		  break;
 		case DW_LNE_define_file:
                   {
@@ -17487,10 +17531,12 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      {
 		CORE_ADDR adjust
 		  = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		CORE_ADDR addr_adj;
 
-		address += (((op_index + adjust)
+		addr_adj = (((op_index + adjust)
 			     / lh->maximum_ops_per_instruction)
 			    * lh->minimum_instruction_length);
+		address += gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
 		op_index = ((op_index + adjust)
 			    % lh->maximum_ops_per_instruction);
 		line_ptr += bytes_read;
@@ -17550,18 +17596,25 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	    case DW_LNS_const_add_pc:
 	      {
 		CORE_ADDR adjust = (255 - lh->opcode_base) / lh->line_range;
+		CORE_ADDR addr_adj;
 
-		address += (((op_index + adjust)
+		addr_adj = (((op_index + adjust)
 			     / lh->maximum_ops_per_instruction)
 			    * lh->minimum_instruction_length);
+		address += gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
 		op_index = ((op_index + adjust)
 			    % lh->maximum_ops_per_instruction);
 	      }
 	      break;
 	    case DW_LNS_fixed_advance_pc:
-	      address += read_2_bytes (abfd, line_ptr);
-	      op_index = 0;
-	      line_ptr += 2;
+	      {
+		CORE_ADDR addr_adj;
+
+		addr_adj = read_2_bytes (abfd, line_ptr);
+		address += gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
+		op_index = 0;
+		line_ptr += 2;
+	      }
 	      break;
 	    default:
 	      {
@@ -17813,6 +17866,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		 struct symbol *space)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symbol *sym = NULL;
   const char *name;
   struct attribute *attr = NULL;
@@ -17890,8 +17944,13 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_label:
 	  attr = dwarf2_attr (die, DW_AT_low_pc, cu);
 	  if (attr)
-	    SYMBOL_VALUE_ADDRESS (sym)
-	      = attr_value_as_address (attr) + baseaddr;
+	    {
+	      CORE_ADDR addr;
+
+	      addr = attr_value_as_address (attr);
+	      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + baseaddr);
+	      SYMBOL_VALUE_ADDRESS (sym) = addr;
+	    }
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
 	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;

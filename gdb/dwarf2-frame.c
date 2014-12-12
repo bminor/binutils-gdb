@@ -2066,6 +2066,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
     {
       /* This is a FDE.  */
       struct dwarf2_fde *fde;
+      CORE_ADDR addr;
 
       /* Check that an FDE was expected.  */
       if ((entry_type & EH_FDE_TYPE_ID) == 0)
@@ -2099,14 +2100,16 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
 
       gdb_assert (fde->cie != NULL);
 
-      fde->initial_location =
-	read_encoded_value (unit, fde->cie->encoding, fde->cie->ptr_size,
-			    buf, &bytes_read, 0);
+      addr = read_encoded_value (unit, fde->cie->encoding, fde->cie->ptr_size,
+				 buf, &bytes_read, 0);
+      fde->initial_location = gdbarch_adjust_dwarf2_addr (gdbarch, addr);
       buf += bytes_read;
 
       fde->address_range =
 	read_encoded_value (unit, fde->cie->encoding & 0x0f,
 			    fde->cie->ptr_size, buf, &bytes_read, 0);
+      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + fde->address_range);
+      fde->address_range = addr - fde->initial_location;
       buf += bytes_read;
 
       /* A 'z' augmentation in the CIE implies the presence of an

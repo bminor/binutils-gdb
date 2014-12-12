@@ -252,6 +252,9 @@ struct gdbarch
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
+  gdbarch_make_symbol_special_ftype *make_symbol_special;
+  gdbarch_adjust_dwarf2_addr_ftype *adjust_dwarf2_addr;
+  gdbarch_adjust_dwarf2_line_ftype *adjust_dwarf2_line;
   int cannot_step_breakpoint;
   int have_nonsteppable_watchpoint;
   gdbarch_address_class_type_flags_ftype *address_class_type_flags;
@@ -392,8 +395,10 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
   gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
-  gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
+  gdbarch->make_symbol_special = default_make_symbol_special;
+  gdbarch->adjust_dwarf2_addr = default_adjust_dwarf2_addr;
+  gdbarch->adjust_dwarf2_line = default_adjust_dwarf2_line;
   gdbarch->register_reggroup_p = default_register_reggroup_p;
   gdbarch->skip_permanent_breakpoint = default_skip_permanent_breakpoint;
   gdbarch->displaced_step_hw_singlestep = default_displaced_step_hw_singlestep;
@@ -565,8 +570,11 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
-  /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
+  /* Skip verify of elf_make_msymbol_special, has predicate.  */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
+  /* Skip verify of make_symbol_special, invalid_p == 0 */
+  /* Skip verify of adjust_dwarf2_addr, invalid_p == 0 */
+  /* Skip verify of adjust_dwarf2_line, invalid_p == 0 */
   /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
   /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
   /* Skip verify of address_class_type_flags, has predicate.  */
@@ -690,6 +698,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: adjust_breakpoint_address = <%s>\n",
                       host_address_to_string (gdbarch->adjust_breakpoint_address));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: adjust_dwarf2_addr = <%s>\n",
+                      host_address_to_string (gdbarch->adjust_dwarf2_addr));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: adjust_dwarf2_line = <%s>\n",
+                      host_address_to_string (gdbarch->adjust_dwarf2_line));
   fprintf_unfiltered (file,
                       "gdbarch_dump: auto_charset = <%s>\n",
                       host_address_to_string (gdbarch->auto_charset));
@@ -837,6 +851,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: ecoff_reg_to_regnum = <%s>\n",
                       host_address_to_string (gdbarch->ecoff_reg_to_regnum));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_elf_make_msymbol_special_p() = %d\n",
+                      gdbarch_elf_make_msymbol_special_p (gdbarch));
   fprintf_unfiltered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->elf_make_msymbol_special));
@@ -1017,6 +1034,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: make_corefile_notes = <%s>\n",
                       host_address_to_string (gdbarch->make_corefile_notes));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: make_symbol_special = <%s>\n",
+                      host_address_to_string (gdbarch->make_symbol_special));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_max_insn_length_p() = %d\n",
                       gdbarch_max_insn_length_p (gdbarch));
@@ -3065,6 +3085,13 @@ set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch,
   gdbarch->in_function_epilogue_p = in_function_epilogue_p;
 }
 
+int
+gdbarch_elf_make_msymbol_special_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->elf_make_msymbol_special != NULL;
+}
+
 void
 gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym)
 {
@@ -3097,6 +3124,57 @@ set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch,
                                        gdbarch_coff_make_msymbol_special_ftype coff_make_msymbol_special)
 {
   gdbarch->coff_make_msymbol_special = coff_make_msymbol_special;
+}
+
+void
+gdbarch_make_symbol_special (struct gdbarch *gdbarch, struct symbol *sym, struct objfile *objfile)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->make_symbol_special != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_make_symbol_special called\n");
+  gdbarch->make_symbol_special (sym, objfile);
+}
+
+void
+set_gdbarch_make_symbol_special (struct gdbarch *gdbarch,
+                                 gdbarch_make_symbol_special_ftype make_symbol_special)
+{
+  gdbarch->make_symbol_special = make_symbol_special;
+}
+
+CORE_ADDR
+gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->adjust_dwarf2_addr != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_adjust_dwarf2_addr called\n");
+  return gdbarch->adjust_dwarf2_addr (pc);
+}
+
+void
+set_gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch,
+                                gdbarch_adjust_dwarf2_addr_ftype adjust_dwarf2_addr)
+{
+  gdbarch->adjust_dwarf2_addr = adjust_dwarf2_addr;
+}
+
+CORE_ADDR
+gdbarch_adjust_dwarf2_line (struct gdbarch *gdbarch, CORE_ADDR addr, int rel)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->adjust_dwarf2_line != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_adjust_dwarf2_line called\n");
+  return gdbarch->adjust_dwarf2_line (addr, rel);
+}
+
+void
+set_gdbarch_adjust_dwarf2_line (struct gdbarch *gdbarch,
+                                gdbarch_adjust_dwarf2_line_ftype adjust_dwarf2_line)
+{
+  gdbarch->adjust_dwarf2_line = adjust_dwarf2_line;
 }
 
 int

@@ -4296,6 +4296,9 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       low += base_address;
       high += base_address;
 
+      low = gdbarch_adjust_dwarf2_addr (gdbarch, low);
+      high = gdbarch_adjust_dwarf2_addr (gdbarch, high);
+
       length = extract_unsigned_integer (loc_ptr, 2, byte_order);
       loc_ptr += 2;
 

@@ -68,14 +68,21 @@ extern gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr_ident
 
 extern int no_op_reg_to_regnum (struct gdbarch *gdbarch, int reg);
 
-/* Do nothing version of elf_make_msymbol_special.  */
-
-void default_elf_make_msymbol_special (asymbol *sym,
-				       struct minimal_symbol *msym);
-
 /* Do nothing version of coff_make_msymbol_special.  */
 
 void default_coff_make_msymbol_special (int val, struct minimal_symbol *msym);
+
+/* Do nothing default implementation of gdbarch_make_symbol_special.  */
+
+void default_make_symbol_special (struct symbol *sym, struct objfile *objfile);
+
+/* Do nothing default implementation of gdbarch_adjust_dwarf2_addr.  */
+
+CORE_ADDR default_adjust_dwarf2_addr (CORE_ADDR pc);
+
+/* Do nothing default implementation of gdbarch_adjust_dwarf2_line.  */
+
+CORE_ADDR default_adjust_dwarf2_line (CORE_ADDR addr, int rel);
 
 /* Version of cannot_fetch_register() / cannot_store_register() that
    always fails.  */

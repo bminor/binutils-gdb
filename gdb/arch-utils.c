@@ -31,6 +31,7 @@
 #include "target-descriptions.h"
 #include "objfiles.h"
 #include "language.h"
+#include "symtab.h"
 
 #include "version.h"
 
@@ -167,15 +168,33 @@ no_op_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 }
 
 void
-default_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+default_coff_make_msymbol_special (int val, struct minimal_symbol *msym)
 {
   return;
 }
 
+/* See arch-utils.h.  */
+
 void
-default_coff_make_msymbol_special (int val, struct minimal_symbol *msym)
+default_make_symbol_special (struct symbol *sym, struct objfile *objfile)
 {
   return;
+}
+
+/* See arch-utils.h.  */
+
+CORE_ADDR
+default_adjust_dwarf2_addr (CORE_ADDR pc)
+{
+  return pc;
+}
+
+/* See arch-utils.h.  */
+
+CORE_ADDR
+default_adjust_dwarf2_line (CORE_ADDR addr, int rel)
+{
+  return addr;
 }
 
 int

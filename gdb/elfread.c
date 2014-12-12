@@ -247,6 +247,8 @@ elf_symtab_read (struct objfile *objfile, int type,
   const char *filesymname = "";
   struct dbx_symfile_info *dbx = DBX_SYMFILE_INFO (objfile);
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
+  int elf_make_msymbol_special_p
+    = gdbarch_elf_make_msymbol_special_p (gdbarch);
 
   for (i = 0; i < number_of_symbols; i++)
     {
@@ -330,7 +332,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 	  if (msym != NULL)
 	    {
 	      msym->filename = filesymname;
-	      gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
+	      if (elf_make_msymbol_special_p)
+		gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
 	    }
 	  continue;
 	}
@@ -558,7 +561,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 		}
 
 	      msym->filename = filesymname;
-	      gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
+	      if (elf_make_msymbol_special_p)
+		gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
 	    }
 
 	  /* If we see a default versioned symbol, install it under
@@ -597,7 +601,9 @@ elf_symtab_read (struct objfile *objfile, int type,
 		      SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
 		      mtramp->created_by_gdb = 1;
 		      mtramp->filename = filesymname;
-		      gdbarch_elf_make_msymbol_special (gdbarch, sym, mtramp);
+		      if (elf_make_msymbol_special_p)
+			gdbarch_elf_make_msymbol_special (gdbarch,
+							  sym, mtramp);
 		    }
 		}
 	    }

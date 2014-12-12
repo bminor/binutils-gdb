@@ -1,3 +1,68 @@
+2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
+            Maciej W. Rozycki  <macro@mips.com>
+            Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbarch.sh (elf_make_msymbol_special): Change type to `F',
+	remove `predefault' and `invalid_p' initializers.
+	(make_symbol_special): New architecture method.
+	(adjust_dwarf2_addr, adjust_dwarf2_line): Likewise.
+	(objfile, symbol): New declarations.
+	* arch-utils.h (default_elf_make_msymbol_special): Remove
+	prototype.
+	(default_make_symbol_special): New prototype.
+	(default_adjust_dwarf2_addr): Likewise.
+	(default_adjust_dwarf2_line): Likewise.
+	* mips-tdep.h (mips_unmake_compact_addr): New prototype.
+	* arch-utils.c (default_elf_make_msymbol_special): Remove
+	function.
+	(default_make_symbol_special): New function.
+	(default_adjust_dwarf2_addr): Likewise.
+	(default_adjust_dwarf2_line): Likewise.
+	* dwarf2-frame.c (decode_frame_entry_1): Call
+	`gdbarch_adjust_dwarf2_addr'.
+	* dwarf2loc.c (dwarf2_find_location_expression): Likewise.
+	* dwarf2read.c (create_addrmap_from_index): Likewise.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(add_partial_symbol): Likewise.
+	(add_partial_subprogram): Likewise.
+	(process_full_comp_unit): Likewise.
+	(read_file_scope): Likewise.
+	(read_func_scope): Likewise.  Call `gdbarch_make_symbol_special'.
+	(read_lexical_block_scope): Call `gdbarch_adjust_dwarf2_addr'.
+	(read_call_site_scope): Likewise.
+	(dwarf2_ranges_read): Likewise.
+	(dwarf2_record_block_ranges): Likewise.
+	(read_attribute_value): Likewise.
+	(dwarf_decode_lines_1): Call `gdbarch_adjust_dwarf2_line'.
+	(new_symbol_full): Call `gdbarch_adjust_dwarf2_addr'.
+	* elfread.c (elf_symtab_read): Don't call
+	`gdbarch_elf_make_msymbol_special' if unset.
+	* mips-linux-tdep.c (micromips_linux_sigframe_validate): Strip
+	the ISA bit from the PC.
+	* mips-tdep.c (mips_unmake_compact_addr): New function.
+	(mips_elf_make_msymbol_special): Set the ISA bit in the symbol's
+	address appropriately.
+	(mips_make_symbol_special): New function.
+	(mips_pc_is_mips): Set the ISA bit before symbol lookup.
+	(mips_pc_is_mips16): Likewise.
+	(mips_pc_is_micromips): Likewise.
+	(mips_pc_isa): Likewise.
+	(mips_adjust_dwarf2_addr): New function.
+	(mips_adjust_dwarf2_line): Likewise.
+	(mips_read_pc, mips_unwind_pc): Keep the ISA bit.
+	(mips_addr_bits_remove): Likewise.
+	(mips_skip_trampoline_code): Likewise.
+	(mips_write_pc): Don't set the ISA bit.
+	(mips_eabi_push_dummy_call): Likewise.
+	(mips_o64_push_dummy_call): Likewise.
+	(mips_gdbarch_init): Install `mips_make_symbol_special',
+	`mips_adjust_dwarf2_addr' and `mips_adjust_dwarf2_line' gdbarch
+	handlers.
+	* solib.c (gdb_bfd_lookup_symbol_from_symtab): Get
+	target-specific symbol address adjustments.
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Regenerate.
+
 2014-12-12  Yao Qi  <yao@codesourcery.com>
 
 	PR tdep/14261

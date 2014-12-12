@@ -1,3 +1,8 @@
+2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/func-ptrs.c: New file.
+	* gdb.base/func-ptrs.exp: New file.
+
 2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR breakpoints/17012

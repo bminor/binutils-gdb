@@ -155,6 +155,9 @@ enum
 /* Single step based on where the current instruction will take us.  */
 extern int mips_software_single_step (struct frame_info *frame);
 
+/* Strip the ISA (compression) bit off from ADDR.  */
+extern CORE_ADDR mips_unmake_compact_addr (CORE_ADDR addr);
+
 /* Tell if the program counter value in MEMADDR is in a standard
    MIPS function.  */
 extern int mips_pc_is_mips (bfd_vma memaddr);
