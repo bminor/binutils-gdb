@@ -1,3 +1,12 @@
+2015-02-11  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2014-12-12  Alan Modra  <amodra@gmail.com>
+	* config/tc-ppc.h (md_reg_eh_frame_to_debug_frame): Match current
+	gcc behaviour.
+	* config/te-aix.h: New file.
+	* configure.tgt: Use em=aix for powerpc-aix.
+
 2015-01-28  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (parse_ifimm_zero): Accept #0x0 as a synonym for #0,
