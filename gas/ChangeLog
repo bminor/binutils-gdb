@@ -1,3 +1,10 @@
+2014-12-12  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.h (md_reg_eh_frame_to_debug_frame): Match current
+	gcc behaviour.
+	* config/te-aix.h: New file.
+	* configure.tgt: Use em=aix for powerpc-aix.
+
 2014-12-09  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* config/tc-tic4x.c (md_assemble): Ensure insn->name is zero
