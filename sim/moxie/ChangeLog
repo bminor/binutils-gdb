@@ -1,3 +1,7 @@
+2014-12-12  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (sim_resume): Add zex instructions.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

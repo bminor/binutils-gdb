@@ -604,8 +604,24 @@ sim_resume (sd, step, siggnal)
 		cpu.asregs.regs[a] = (int) bv;
 	      }
 	      break;
-	    case 0x12: /* bad */
-	    case 0x13: /* bad */
+	    case 0x12: /* zex.b */
+	      {
+		int a = (inst >> 4) & 0xf;
+		int b = inst & 0xf;
+		signed char bv = cpu.asregs.regs[b];
+		TRACE("zex.b");
+		cpu.asregs.regs[a] = (int) bv & 0xff;
+	      }
+	      break;
+	    case 0x13: /* zex.s */
+	      {
+		int a = (inst >> 4) & 0xf;
+		int b = inst & 0xf;
+		signed short bv = cpu.asregs.regs[b];
+		TRACE("zex.s");
+		cpu.asregs.regs[a] = (int) bv & 0xffff;
+	      }
+	      break;
 	    case 0x14: /* bad */
 	    case 0x15: /* bad */
 	    case 0x16: /* bad */
