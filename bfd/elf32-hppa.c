@@ -1915,7 +1915,7 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   sec = htab->sdynbss;
 
-  return _bfd_elf_adjust_dynamic_copy (eh, sec);
+  return _bfd_elf_adjust_dynamic_copy (info, eh, sec);
 }
 
 /* Allocate space in the .plt for entries that won't have relocations.
