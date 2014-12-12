@@ -1,3 +1,14 @@
+2014-12-12  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention gdb.lookup_objfile.
+	* python/python.c (GdbMethods): Add lookup_objfile.
+	* python/python-internal.h (gdbpy_lookup_objfile): Declare.
+	* python/py-objfile.c: #include "symtab.h".
+	(objfpy_build_id_ok, objfpy_build_id_matches): New functions.
+	(objfpy_lookup_objfile_by_name): New function.
+	(objfpy_lookup_objfile_by_build_id): New function.
+	(gdbpy_lookup_objfile): New function.
+
 2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.h (MSYMBOL_TARGET_FLAG_MIPS16): New macro.

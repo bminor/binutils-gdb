@@ -1,3 +1,8 @@
+2014-12-12  Doug Evans  <dje@google.com>
+
+	* lib/gdb-python.exp (get_python_valueof): New function.
+	* gdb.python/py-objfile.exp: Add tests for gdb.lookup_objfile.
+
 2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/completion.exp: Add test for completion of "info
