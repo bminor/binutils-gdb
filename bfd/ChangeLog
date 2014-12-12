@@ -3,6 +3,10 @@
 	Apply from master.
 	2014-12-12  Alan Modra  <amodra@gmail.com>
 	PR 15228
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Call bfd_set_error.
+
+	2014-12-12  Alan Modra  <amodra@gmail.com>
+	PR 15228
 	* elflink.c (_bfd_elf_adjust_dynamic_copy): Add "info" param.
 	Error on copy relocs against protected symbols.
 	(elf_merge_st_other): Set h->protected_def.
