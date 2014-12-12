@@ -45,6 +45,9 @@ add-auto-load-scripts-directory directory
   Add entries to the list of directories from which to load auto-loaded
   scripts.
 
+maint print user-registers
+  List all currently available "user" registers.
+
 * On resume, GDB now always passes the signal the program had stopped
   for to the thread the signal was sent to, even if the user changed
   threads before resuming.  Previously GDB would often (but not

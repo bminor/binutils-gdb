@@ -23,6 +23,9 @@
 #include "user-regs.h"
 #include "gdbtypes.h"
 #include "frame.h"
+#include "arch-utils.h"
+#include "command.h"
+#include "cli/cli-cmds.h"
 
 /* A table of user registers.
 
@@ -215,10 +218,31 @@ value_of_user_reg (int regnum, struct frame_info *frame)
   return reg->read (frame, reg->baton);
 }
 
+static void
+maintenance_print_user_registers (char *args, int from_tty)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  struct gdb_user_regs *regs;
+  struct user_reg *reg;
+  int regnum;
+
+  regs = gdbarch_data (gdbarch, user_regs_data);
+  regnum = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+
+  fprintf_unfiltered (gdb_stdout, " Nr  Name\n");
+  for (reg = regs->first; reg != NULL; reg = reg->next, ++regnum)
+    fprintf_unfiltered (gdb_stdout, "%3d  %s\n", regnum, reg->name);
+}
+
 extern initialize_file_ftype _initialize_user_regs; /* -Wmissing-prototypes */
 
 void
 _initialize_user_regs (void)
 {
   user_regs_data = gdbarch_data_register_post_init (user_regs_init);
+
+  add_cmd ("user-registers", class_maintenance,
+	   maintenance_print_user_registers,
+	   _("List the names of the current user registers.\n"),
+	   &maintenanceprintlist);
 }

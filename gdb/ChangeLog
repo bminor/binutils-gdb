@@ -1,3 +1,12 @@
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* user-regs.c: Include "arch-utils.h", "command.h", and
+	"cli/cli-cmds.h".
+	(maintenance_print_user_registers): New.
+	(_initialize_user_regs): Register new "maint print user-registers"
+	subcommand.
+	* NEWS: Mention new GDB command "maint print user-registers".
+
 2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
             Maciej W. Rozycki  <macro@mips.com>
             Pedro Alves  <pedro@codesourcery.com>

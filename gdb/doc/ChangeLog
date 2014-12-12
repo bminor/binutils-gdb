@@ -1,3 +1,7 @@
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo: Document "maint print user-registers".
+
 2014-12-08  Doug Evans  <dje@google.com>
 
 	* python.texi (Objfiles In Python): Document Objfile.owner.
