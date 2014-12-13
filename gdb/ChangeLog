@@ -1,5 +1,10 @@
 2014-12-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* utils.c (make_hex_string): Replace use of sprintf by use of
+	xsnprintf.
+
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* compile/compile-object-load.c (link_callbacks_multiple_definition)
 	(link_callbacks_warning, link_callbacks_einfo): Remove trailing
 	newline at end of warning message.

@@ -1124,7 +1124,7 @@ make_hex_string (const gdb_byte *data, size_t length)
 
   p = result;
   for (i = 0; i < length; ++i)
-    p += sprintf (p, "%02x", data[i]);
+    p += xsnprintf (p, 2, "%02x", data[i]);
   *p = '\0';
   return result;
 }
