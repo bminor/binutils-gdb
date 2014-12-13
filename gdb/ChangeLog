@@ -1,5 +1,10 @@
 2014-12-12  Doug Evans  <xdje42@gmail.com>
 
+	* cp-support.h (cp_is_in_anonymous): Renamed from cp_is_anonymous.
+	All callers updated.  Rename arg "namespace" to "symbol_name".
+
+2014-12-12  Doug Evans  <xdje42@gmail.com>
+
 	* psymtab.c (psym_map_symtabs_matching_filename): Renamed from
 	partial_map_symtabs_matching_filename.  All uses updated.
 	(psym_find_pc_sect_compunit_symtab): Renamed from

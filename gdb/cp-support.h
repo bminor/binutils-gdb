@@ -179,7 +179,7 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 
 /* Functions/variables from cp-namespace.c.  */
 
-extern int cp_is_anonymous (const char *namespace);
+extern int cp_is_in_anonymous (const char *symbol_name);
 
 extern void cp_add_using_directive (const char *dest,
                                     const char *src,

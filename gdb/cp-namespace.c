@@ -52,7 +52,7 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
       /* Start with a quick-and-dirty check for mention of "(anonymous
 	 namespace)".  */
 
-      if (!cp_is_anonymous (name))
+      if (!cp_is_in_anonymous (name))
 	return;
 
       previous_component = 0;
@@ -196,9 +196,9 @@ cp_add_using_directive (const char *dest,
    namespace; return nonzero if so.  */
 
 int
-cp_is_anonymous (const char *namespace)
+cp_is_in_anonymous (const char *symbol_name)
 {
-  return (strstr (namespace, CP_ANONYMOUS_NAMESPACE_STR)
+  return (strstr (symbol_name, CP_ANONYMOUS_NAMESPACE_STR)
 	  != NULL);
 }
 
@@ -331,7 +331,7 @@ cp_lookup_symbol_in_namespace (const char *namespace,
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
       return lookup_symbol_file (concatenated_name, block, domain,
-				 cp_is_anonymous (namespace), search);
+				 cp_is_in_anonymous (namespace), search);
     }
 }
 
