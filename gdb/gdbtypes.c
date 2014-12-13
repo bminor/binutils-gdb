@@ -1888,41 +1888,47 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
   if (!is_dynamic_type_internal (real_type, top_level))
     return type;
 
-  switch (TYPE_CODE (type))
+  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {
-    case TYPE_CODE_TYPEDEF:
       resolved_type = copy_type (type);
       TYPE_TARGET_TYPE (resolved_type)
 	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr,
 					 top_level);
-      break;
+    }
+  else 
+    {
+      /* Before trying to resolve TYPE, make sure it is not a stub.  */
+      type = real_type;
 
-    case TYPE_CODE_REF:
-      {
-	CORE_ADDR target_addr = read_memory_typed_address (addr, type);
+      switch (TYPE_CODE (type))
+	{
+	case TYPE_CODE_REF:
+	  {
+	    CORE_ADDR target_addr = read_memory_typed_address (addr, type);
 
-	resolved_type = copy_type (type);
-	TYPE_TARGET_TYPE (resolved_type)
-	  = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
-					   target_addr, top_level);
-	break;
-      }
+	    resolved_type = copy_type (type);
+	    TYPE_TARGET_TYPE (resolved_type)
+	      = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
+					       target_addr, top_level);
+	    break;
+	  }
 
-    case TYPE_CODE_ARRAY:
-      resolved_type = resolve_dynamic_array (type, addr);
-      break;
+	case TYPE_CODE_ARRAY:
+	  resolved_type = resolve_dynamic_array (type, addr);
+	  break;
 
-    case TYPE_CODE_RANGE:
-      resolved_type = resolve_dynamic_range (type, addr);
-      break;
+	case TYPE_CODE_RANGE:
+	  resolved_type = resolve_dynamic_range (type, addr);
+	  break;
 
-    case TYPE_CODE_UNION:
-      resolved_type = resolve_dynamic_union (type, addr);
-      break;
+	case TYPE_CODE_UNION:
+	  resolved_type = resolve_dynamic_union (type, addr);
+	  break;
 
-    case TYPE_CODE_STRUCT:
-      resolved_type = resolve_dynamic_struct (type, addr);
-      break;
+	case TYPE_CODE_STRUCT:
+	  resolved_type = resolve_dynamic_struct (type, addr);
+	  break;
+	}
     }
 
   /* Resolve data_location attribute.  */

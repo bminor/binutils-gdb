@@ -1,3 +1,9 @@
+2014-12-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/17642
+	* gdbtypes.c (resolve_dynamic_type_internal): Apply check_typedef to
+	TYPE if not TYPE_CODE_TYPEDEF.
+
 2014-12-12  Doug Evans  <xdje42@gmail.com>
 
 	* valops.c (value_maybe_namespace_elt): Remove unnecessary test of
