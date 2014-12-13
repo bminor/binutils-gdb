@@ -1,5 +1,11 @@
 2014-12-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR symtab/17642
+	* gdbtypes.c (resolve_dynamic_type_internal): Apply check_typedef to
+	TYPE if not TYPE_CODE_TYPEDEF.
+
+2014-12-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdbtypes.c (resolve_dynamic_type_internal): Reindent the code.
 
 2014-10-29  Joel Brobecker  <brobecker@adacore.com>
