@@ -1,3 +1,9 @@
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: If large-file support is disabled in GDBserver,
+	pass --disable-largefile to ACX_CONFIGURE_DIR call for "gnulib".
+	* configure: Regenerate.
+
 2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* linux-low.c (regsets_fetch_inferior_registers): Suppress the
