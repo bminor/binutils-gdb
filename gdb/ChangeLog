@@ -1,5 +1,10 @@
 2014-12-12  Doug Evans  <xdje42@gmail.com>
 
+	* valops.c (value_maybe_namespace_elt): Remove unnecessary test of
+	result != NULL.
+
+2014-12-12  Doug Evans  <xdje42@gmail.com>
+
 	* cp-support.h (cp_is_in_anonymous): Renamed from cp_is_anonymous.
 	All callers updated.  Rename arg "namespace" to "symbol_name".
 
