@@ -1,5 +1,11 @@
 2014-12-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* compile/compile-object-load.c (link_callbacks_multiple_definition)
+	(link_callbacks_warning, link_callbacks_einfo): Remove trailing
+	newline at end of warning message.
+
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* acx_configure_dir.m4 (ACX_CONFIGURE_DIR): Add support for
 	new "EXTRA-ARGS" parameter.
 	* configure.ac: If large-file support is disabled in GDB,

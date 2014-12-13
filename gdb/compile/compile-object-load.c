@@ -149,7 +149,7 @@ link_callbacks_multiple_definition (struct bfd_link_info *link_info,
 
   if (link_info->allow_multiple_definition)
     return TRUE;
-  warning (_("Compiled module \"%s\": multiple symbol definitions: %s\n"),
+  warning (_("Compiled module \"%s\": multiple symbol definitions: %s"),
 	   bfd_get_filename (abfd), h->root.string);
   return FALSE;
 }
@@ -161,7 +161,7 @@ link_callbacks_warning (struct bfd_link_info *link_info, const char *xwarning,
                         const char *symbol, bfd *abfd, asection *section,
 			bfd_vma address)
 {
-  warning (_("Compiled module \"%s\" section \"%s\": warning: %s\n"),
+  warning (_("Compiled module \"%s\" section \"%s\": warning: %s"),
 	   bfd_get_filename (abfd), bfd_get_section_name (abfd, section),
 	   xwarning);
   /* Maybe permit running as a module?  */
@@ -236,7 +236,7 @@ link_callbacks_einfo (const char *fmt, ...)
   va_end (ap);
   cleanups = make_cleanup (xfree, str);
 
-  warning (_("Compile module: warning: %s\n"), str);
+  warning (_("Compile module: warning: %s"), str);
 
   do_cleanups (cleanups);
 }
