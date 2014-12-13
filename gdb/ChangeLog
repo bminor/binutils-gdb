@@ -1,3 +1,40 @@
+2014-12-12  Doug Evans  <xdje42@gmail.com>
+
+	* psymtab.c (psym_map_symtabs_matching_filename): Renamed from
+	partial_map_symtabs_matching_filename.  All uses updated.
+	(psym_find_pc_sect_compunit_symtab): Renamed from
+	find_pc_sect_compunit_symtab_from_partial.  All uses updated.
+	Add function comment.
+	(psym_lookup_symbol): Renamed from lookup_symbol_aux_psymtabs.
+	All uses updated.  Add function comment.
+	(psym_relocate): Renamed from relocate_psymtabs.  All uses updated.
+	Add function comment.
+	(psym_find_last_source_symtab): Renamed from
+	find_last_source_symtab_from_partial.  All uses updated.
+	Add function comment.
+	(psym_forget_cached_source_info): Renamed from
+	forget_cached_source_info_partial.  All uses updated.
+	Add function comment.
+	(psym_print_stats): Renamed from print_psymtab_stats_for_objfile.
+	All uses updated.  Add function comment.
+	(psym_dump): Renamed from dump_psymtabs_for_objfile.  All uses
+	updated.  Add function comment.
+	(psym_expand_symtabs_for_function): Renamed from
+	read_symtabs_for_function.  All uses updated.  Update function comment.
+	(psym_expand_all_symtabs): Renamed from expand_partial_symbol_tables.
+	All uses updated.  Add function comment.
+	(psym_expand_symtabs_with_fullname): Renamed from
+	read_psymtabs_with_fullname.  All uses updated.  Add function comment.
+	(psym_map_symbol_filenames): Renamed from map_symbol_filenames_psymtab.
+	All uses updated.  Add function comment.
+	(psym_map_matching_symbols): Renamed from map_matching_symbols_psymtab.
+	All uses updated.
+	(psym_expand_symtabs_matching): Renamed from
+	expand_symtabs_matching_via_partial.  All uses updated.
+	Add function comment.
+	(psym_has_symbols): Renamed from objfile_has_psyms.  All uses updated.
+	Add function comment.
+
 2014-12-12  Phil Muldoon  <pmuldoon@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>

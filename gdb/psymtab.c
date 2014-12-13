@@ -124,7 +124,7 @@ require_partial_symbols (struct objfile *objfile, int verbose)
   ALL_OBJFILES (objfile)	 \
     ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)
 
-/* Helper function for partial_map_symtabs_matching_filename that
+/* Helper function for psym_map_symtabs_matching_filename that
    expands the symtabs and calls the iterator.  */
 
 static int
@@ -153,15 +153,16 @@ partial_map_expand_apply (struct objfile *objfile,
 				    objfile->compunit_symtabs, last_made);
 }
 
-/* Implementation of the map_symtabs_matching_filename method.  */
+/*  Psymtab version of map_symtabs_matching_filename.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
 
 static int
-partial_map_symtabs_matching_filename (struct objfile *objfile,
-				       const char *name,
-				       const char *real_path,
-				       int (*callback) (struct symtab *,
-							void *),
-				       void *data)
+psym_map_symtabs_matching_filename (struct objfile *objfile,
+				    const char *name,
+				    const char *real_path,
+				    int (*callback) (struct symtab *,
+						     void *),
+				    void *data)
 {
   struct partial_symtab *pst;
   const char *name_basename = lbasename (name);
@@ -370,12 +371,15 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
   return NULL;
 }
 
+/*  Psymtab version of find_pc_sect_compunit_symtab.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static struct compunit_symtab *
-find_pc_sect_compunit_symtab_from_partial (struct objfile *objfile,
-					   struct bound_minimal_symbol msymbol,
-					   CORE_ADDR pc,
-					   struct obj_section *section,
-					   int warn_if_readin)
+psym_find_pc_sect_compunit_symtab (struct objfile *objfile,
+				   struct bound_minimal_symbol msymbol,
+				   CORE_ADDR pc,
+				   struct obj_section *section,
+				   int warn_if_readin)
 {
   struct partial_symtab *ps = find_pc_sect_psymtab (objfile, pc, section,
 						    msymbol);
@@ -495,10 +499,13 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
   fixup_section (&psym->ginfo, addr, objfile);
 }
 
+/*  Psymtab version of lookup_symbol.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static struct compunit_symtab *
-lookup_symbol_aux_psymtabs (struct objfile *objfile,
-			    int block_index, const char *name,
-			    const domain_enum domain)
+psym_lookup_symbol (struct objfile *objfile,
+		    int block_index, const char *name,
+		    const domain_enum domain)
 {
   struct partial_symtab *ps;
   const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
@@ -785,10 +792,13 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
   return pst->compunit_symtab;
 }
 
+/*  Psymtab version of relocate.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-relocate_psymtabs (struct objfile *objfile,
-		   const struct section_offsets *new_offsets,
-		   const struct section_offsets *delta)
+psym_relocate (struct objfile *objfile,
+	       const struct section_offsets *new_offsets,
+	       const struct section_offsets *delta)
 {
   struct partial_symbol **psym;
   struct partial_symtab *p;
@@ -819,8 +829,11 @@ relocate_psymtabs (struct objfile *objfile,
     }
 }
 
+/*  Psymtab version of find_last_source_symtab.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static struct symtab *
-find_last_source_symtab_from_partial (struct objfile *ofp)
+psym_find_last_source_symtab (struct objfile *ofp)
 {
   struct partial_symtab *ps;
   struct partial_symtab *cs_pst = 0;
@@ -855,8 +868,11 @@ find_last_source_symtab_from_partial (struct objfile *ofp)
   return NULL;
 }
 
+/*  Psymtab version of forget_cached_source_info.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-forget_cached_source_info_partial (struct objfile *objfile)
+psym_forget_cached_source_info (struct objfile *objfile)
 {
   struct partial_symtab *pst;
 
@@ -1047,8 +1063,11 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
   fprintf_filtered (outfile, "\n");
 }
 
+/*  Psymtab version of print_stats.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-print_psymtab_stats_for_objfile (struct objfile *objfile)
+psym_print_stats (struct objfile *objfile)
 {
   int i;
   struct partial_symtab *ps;
@@ -1062,8 +1081,11 @@ print_psymtab_stats_for_objfile (struct objfile *objfile)
   printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"), i);
 }
 
+/*  Psymtab version of dump.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-dump_psymtabs_for_objfile (struct objfile *objfile)
+psym_dump (struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
@@ -1084,11 +1106,12 @@ dump_psymtabs_for_objfile (struct objfile *objfile)
     }
 }
 
-/* Look through the partial symtabs for all symbols which begin
-   by matching FUNC_NAME.  Make sure we read that symbol table in.  */
+/*  Psymtab version of expand_symtabs_for_function.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
 
 static void
-read_symtabs_for_function (struct objfile *objfile, const char *func_name)
+psym_expand_symtabs_for_function (struct objfile *objfile,
+				  const char *func_name)
 {
   struct partial_symtab *ps;
 
@@ -1105,8 +1128,11 @@ read_symtabs_for_function (struct objfile *objfile, const char *func_name)
   }
 }
 
+/*  Psymtab version of expand_all_symtabs.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-expand_partial_symbol_tables (struct objfile *objfile)
+psym_expand_all_symtabs (struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
@@ -1116,8 +1142,12 @@ expand_partial_symbol_tables (struct objfile *objfile)
     }
 }
 
+/*  Psymtab version of expand_symtabs_with_fullname.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-read_psymtabs_with_fullname (struct objfile *objfile, const char *fullname)
+psym_expand_symtabs_with_fullname (struct objfile *objfile,
+				   const char *fullname)
 {
   struct partial_symtab *p;
 
@@ -1136,10 +1166,13 @@ read_psymtabs_with_fullname (struct objfile *objfile, const char *fullname)
     }
 }
 
+/*  Psymtab version of map_symbol_filenames.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-map_symbol_filenames_psymtab (struct objfile *objfile,
-			      symbol_filename_ftype *fun, void *data,
-			      int need_fullname)
+psym_map_symbol_filenames (struct objfile *objfile,
+			   symbol_filename_ftype *fun, void *data,
+			   int need_fullname)
 {
   struct partial_symtab *ps;
 
@@ -1246,14 +1279,14 @@ map_block (const char *name, domain_enum namespace, struct objfile *objfile,
     the definition of quick_symbol_functions in symfile.h.  */
 
 static void
-map_matching_symbols_psymtab (struct objfile *objfile,
-			      const char *name, domain_enum namespace,
-			      int global,
-			      int (*callback) (struct block *,
-					       struct symbol *, void *),
-			      void *data,
-			      symbol_compare_ftype *match,
-			      symbol_compare_ftype *ordered_compare)
+psym_map_matching_symbols (struct objfile *objfile,
+			   const char *name, domain_enum namespace,
+			   int global,
+			   int (*callback) (struct block *,
+					    struct symbol *, void *),
+			   void *data,
+			   symbol_compare_ftype *match,
+			   symbol_compare_ftype *ordered_compare)
 {
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
   struct partial_symtab *ps;
@@ -1280,7 +1313,7 @@ map_matching_symbols_psymtab (struct objfile *objfile,
     }
 }	    
 
-/* A helper for expand_symtabs_matching_via_partial that handles
+/* A helper for psym_expand_symtabs_matching that handles
    searching included psymtabs.  This returns 1 if a symbol is found,
    and zero otherwise.  It also updates the 'searched_flag' on the
    various psymtabs that it searches.  */
@@ -1368,8 +1401,11 @@ recursively_search_psymtabs (struct partial_symtab *ps,
   return result == PST_SEARCHED_AND_FOUND;
 }
 
+/*  Psymtab version of expand_symtabs_matching.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static void
-expand_symtabs_matching_via_partial
+psym_expand_symtabs_matching
   (struct objfile *objfile,
    expand_symtabs_file_matcher_ftype *file_matcher,
    expand_symtabs_symbol_matcher_ftype *symbol_matcher,
@@ -1419,29 +1455,32 @@ expand_symtabs_matching_via_partial
     }
 }
 
+/*  Psymtab version of has_symbols.  See its definition in
+    the definition of quick_symbol_functions in symfile.h.  */
+
 static int
-objfile_has_psyms (struct objfile *objfile)
+psym_has_symbols (struct objfile *objfile)
 {
   return objfile->psymtabs != NULL;
 }
 
 const struct quick_symbol_functions psym_functions =
 {
-  objfile_has_psyms,
-  find_last_source_symtab_from_partial,
-  forget_cached_source_info_partial,
-  partial_map_symtabs_matching_filename,
-  lookup_symbol_aux_psymtabs,
-  print_psymtab_stats_for_objfile,
-  dump_psymtabs_for_objfile,
-  relocate_psymtabs,
-  read_symtabs_for_function,
-  expand_partial_symbol_tables,
-  read_psymtabs_with_fullname,
-  map_matching_symbols_psymtab,
-  expand_symtabs_matching_via_partial,
-  find_pc_sect_compunit_symtab_from_partial,
-  map_symbol_filenames_psymtab
+  psym_has_symbols,
+  psym_find_last_source_symtab,
+  psym_forget_cached_source_info,
+  psym_map_symtabs_matching_filename,
+  psym_lookup_symbol,
+  psym_print_stats,
+  psym_dump,
+  psym_relocate,
+  psym_expand_symtabs_for_function,
+  psym_expand_all_symtabs,
+  psym_expand_symtabs_with_fullname,
+  psym_map_matching_symbols,
+  psym_expand_symtabs_matching,
+  psym_find_pc_sect_compunit_symtab,
+  psym_map_symbol_filenames
 };
 
 
