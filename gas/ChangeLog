@@ -2,6 +2,7 @@
 
 	* config/tc-i386.c (flag_compress_debug): Default to compress
 	debug sections for Linux.
+	* NEWS: Mention it.
 
 2014-12-12  Alan Modra  <amodra@gmail.com>
 
