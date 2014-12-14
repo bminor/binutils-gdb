@@ -1,3 +1,8 @@
+2014-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* aarch64.cc (AArch64_relocate_functions::maybe_apply_stub):
+	Cast current_group_size to unsigned long when reporting error.
+
 2014-12-10  Jing Yu  <jingyu@google.com>
 
 	* aarch64.cc (Target_aarch64): Add new variable stub_group_size_.
