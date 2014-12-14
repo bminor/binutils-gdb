@@ -757,8 +757,15 @@ struct elf_x86_64_link_hash_entry
   (GOT_TLS_GD_P (type) || GOT_TLS_GDESC_P (type))
   unsigned char tls_type;
 
+  /* TRUE if a weak symbol with a real definition needs a copy reloc.
+     When there is a weak symbol with a real definition, the processor
+     independent code will have arranged for us to see the real
+     definition first.  We need to copy the needs_copy bit from the
+     real definition and check it when allowing copy reloc in PIE.  */
+  unsigned int needs_copy : 1;
+
   /* TRUE if symbol has at least one BND relocation.  */
-  bfd_boolean has_bnd_reloc;
+  unsigned int has_bnd_reloc : 1;
 
   /* Information about the GOT PLT entry. Filled when there are both
      GOT and PLT relocations against the same function.  */
@@ -897,7 +904,8 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh = (struct elf_x86_64_link_hash_entry *) entry;
       eh->dyn_relocs = NULL;
       eh->tls_type = GOT_UNKNOWN;
-      eh->has_bnd_reloc = FALSE;
+      eh->needs_copy = 0;
+      eh->has_bnd_reloc = 0;
       eh->plt_bnd.offset = (bfd_vma) -1;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
@@ -1665,7 +1673,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      && (get_elf_x86_64_backend_data (abfd)
 			  == &elf_x86_64_arch_bed))
 		{
-		  elf_x86_64_hash_entry (h)->has_bnd_reloc = TRUE;
+		  elf_x86_64_hash_entry (h)->has_bnd_reloc = 1;
 
 		  /* Create the second PLT for Intel MPX support.  */
 		  if (htab->plt_bnd == NULL)
@@ -2373,7 +2381,11 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
       h->root.u.def.section = h->u.weakdef->root.u.def.section;
       h->root.u.def.value = h->u.weakdef->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
-	h->non_got_ref = h->u.weakdef->non_got_ref;
+	{
+	  eh = (struct elf_x86_64_link_hash_entry *) h;
+	  h->non_got_ref = h->u.weakdef->non_got_ref;
+	  eh->needs_copy = h->u.weakdef->needs_copy;
+	}
       return TRUE;
     }
 
@@ -2733,7 +2745,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  /* For PIE, discard space for relocs against symbols which
 	     turn out to need copy relocs.  */
 	  else if (info->executable
-		   && h->needs_copy
+		   && (h->needs_copy || eh->needs_copy)
 		   && h->def_dynamic
 		   && !h->def_regular)
 	    eh->dyn_relocs = NULL;
@@ -4058,7 +4070,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     defined locally or for a branch.  */
 		  fail = !h->def_regular && !branch;
 		}
-	      else if (!(info->executable && h->needs_copy))
+	      else if (!(info->executable
+			 && (h->needs_copy || eh->needs_copy)))
 		{
 		  /* Symbol doesn't need copy reloc and isn't referenced
 		     locally.  We only allow branch to symbol with
@@ -4121,7 +4134,7 @@ direct:
 	  if ((info->shared
 	       && !(info->executable
 		    && h != NULL
-		    && h->needs_copy
+		    && (h->needs_copy || eh->needs_copy)
 		    && IS_X86_64_PCREL_TYPE (r_type))
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
