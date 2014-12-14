@@ -4205,7 +4205,7 @@ maybe_apply_stub(unsigned int r_type,
   if (status != This::STATUS_OKAY)
     gold_error(_("Stub is too far away, try a smaller value "
 		 "for '--stub-group-size'. The current value is 0x%lx."),
-	       current_group_size);
+	       static_cast<unsigned long>(current_group_size));
   return true;
 }
 
