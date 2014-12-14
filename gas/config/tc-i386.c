@@ -33,6 +33,11 @@
 #include "elf/x86-64.h"
 #include "opcodes/i386-init.h"
 
+#ifdef TE_LINUX
+/* Default to compress debug sections for Linux.  */
+int flag_compress_debug = 1;
+#endif
+
 #ifndef REGISTER_WARNINGS
 #define REGISTER_WARNINGS 1
 #endif
