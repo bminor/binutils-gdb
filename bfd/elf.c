@@ -7702,109 +7702,6 @@ _bfd_elf_set_arch_mach (bfd *abfd,
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
 
-/* Find the function to a particular section and offset,
-   for error reporting.  */
-
-static bfd_boolean
-elf_find_function (bfd *abfd,
-		   asymbol **symbols,
-		   asection *section,
-		   bfd_vma offset,
-		   const char **filename_ptr,
-		   const char **functionname_ptr)
-{
-  struct elf_find_function_cache
-  {
-    asection *last_section;
-    asymbol *func;
-    const char *filename;
-    bfd_size_type func_size;
-  } *cache;
-
-  if (symbols == NULL)
-    return FALSE;
-
-  cache = elf_tdata (abfd)->elf_find_function_cache;
-  if (cache == NULL)
-    {
-      cache = bfd_zalloc (abfd, sizeof (*cache));
-      elf_tdata (abfd)->elf_find_function_cache = cache;
-      if (cache == NULL)
-	return FALSE;
-    }
-  if (cache->last_section != section
-      || cache->func == NULL
-      || offset < cache->func->value
-      || offset >= cache->func->value + cache->func_size)
-    {
-      asymbol *file;
-      bfd_vma low_func;
-      asymbol **p;
-      /* ??? Given multiple file symbols, it is impossible to reliably
-	 choose the right file name for global symbols.  File symbols are
-	 local symbols, and thus all file symbols must sort before any
-	 global symbols.  The ELF spec may be interpreted to say that a
-	 file symbol must sort before other local symbols, but currently
-	 ld -r doesn't do this.  So, for ld -r output, it is possible to
-	 make a better choice of file name for local symbols by ignoring
-	 file symbols appearing after a given local symbol.  */
-      enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
-      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-      file = NULL;
-      low_func = 0;
-      state = nothing_seen;
-      cache->filename = NULL;
-      cache->func = NULL;
-      cache->func_size = 0;
-      cache->last_section = section;
-
-      for (p = symbols; *p != NULL; p++)
-	{
-	  asymbol *sym = *p;
-	  bfd_vma code_off;
-	  bfd_size_type size;
-
-	  if ((sym->flags & BSF_FILE) != 0)
-	    {
-	      file = sym;
-	      if (state == symbol_seen)
-		state = file_after_symbol_seen;
-	      continue;
-	    }
-
-	  size = bed->maybe_function_sym (sym, section, &code_off);
-	  if (size != 0
-	      && code_off <= offset
-	      && (code_off > low_func
-		  || (code_off == low_func
-		      && size > cache->func_size)))
-	    {
-	      cache->func = sym;
-	      cache->func_size = size;
-	      cache->filename = NULL;
-	      low_func = code_off;
-	      if (file != NULL
-		  && ((sym->flags & BSF_LOCAL) != 0
-		      || state != file_after_symbol_seen))
-		cache->filename = bfd_asymbol_name (file);
-	    }
-	  if (state == nothing_seen)
-	    state = symbol_seen;
-	}
-    }
-
-  if (cache->func == NULL)
-    return FALSE;
-
-  if (filename_ptr)
-    *filename_ptr = cache->filename;
-  if (functionname_ptr)
-    *functionname_ptr = bfd_asymbol_name (cache->func);
-
-  return TRUE;
-}
-
 /* Find the nearest line to a particular section and offset,
    for error reporting.  */
 
@@ -7824,24 +7721,15 @@ _bfd_elf_find_nearest_line (bfd *abfd,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, discriminator_ptr,
 				     dwarf_debug_sections, 0,
-				     &elf_tdata (abfd)->dwarf2_find_line_info))
+				     &elf_tdata (abfd)->dwarf2_find_line_info)
+      || _bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
+					filename_ptr, functionname_ptr,
+					line_ptr))
     {
       if (!*functionname_ptr)
-	elf_find_function (abfd, symbols, section, offset,
-			   *filename_ptr ? NULL : filename_ptr,
-			   functionname_ptr);
-
-      return TRUE;
-    }
-
-  if (_bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
-				     filename_ptr, functionname_ptr, line_ptr))
-    {
-      if (!*functionname_ptr)
-	elf_find_function (abfd, symbols, section, offset,
-			   *filename_ptr ? NULL : filename_ptr,
-			   functionname_ptr);
-
+	_bfd_elf_find_function (abfd, symbols, section, offset,
+				*filename_ptr ? NULL : filename_ptr,
+				functionname_ptr);
       return TRUE;
     }
 
@@ -7856,8 +7744,8 @@ _bfd_elf_find_nearest_line (bfd *abfd,
   if (symbols == NULL)
     return FALSE;
 
-  if (! elf_find_function (abfd, symbols, section, offset,
-			   filename_ptr, functionname_ptr))
+  if (! _bfd_elf_find_function (abfd, symbols, section, offset,
+				filename_ptr, functionname_ptr))
     return FALSE;
 
   *line_ptr = 0;
@@ -9817,32 +9705,38 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 	  return TRUE;
 
 	case bfd_core:
-	  if (CONST_STRNEQ (in.namedata, "NetBSD-CORE"))
+	  {
+#define GROKER_ELEMENT(S,F) {S, sizeof (S) - 1, F}
+	    struct
 	    {
-	      if (! elfcore_grok_netbsd_note (abfd, &in))
-		return FALSE;
+	      const char * string;
+	      size_t len;
+	      bfd_boolean (* func)(bfd *, Elf_Internal_Note *);
 	    }
-	  else if (CONST_STRNEQ (in.namedata, "OpenBSD"))
+	    grokers[] =
 	    {
-	      if (! elfcore_grok_openbsd_note (abfd, &in))
-		return FALSE;
-	    }
-	  else if (CONST_STRNEQ (in.namedata, "QNX"))
-	    {
-	      if (! elfcore_grok_nto_note (abfd, &in))
-		return FALSE;
-	    }
-	  else if (CONST_STRNEQ (in.namedata, "SPU/"))
-	    {
-	      if (! elfcore_grok_spu_note (abfd, &in))
-		return FALSE;
-	    }
-	  else
-	    {
-	      if (! elfcore_grok_note (abfd, &in))
-		return FALSE;
-	    }
-	  break;
+	      GROKER_ELEMENT ("", elfcore_grok_note),
+	      GROKER_ELEMENT ("NetBSD-CORE", elfcore_grok_netbsd_note),
+	      GROKER_ELEMENT ( "OpenBSD", elfcore_grok_openbsd_note),
+	      GROKER_ELEMENT ("QNX", elfcore_grok_nto_note),
+	      GROKER_ELEMENT ("SPU/", elfcore_grok_spu_note)
+	    };
+#undef GROKER_ELEMENT
+	    int i;
+
+	    for (i = ARRAY_SIZE (grokers); i--;)
+	      {
+		if (in.namesz >= grokers[i].len
+		    && strncmp (in.namedata, grokers[i].string,
+				grokers[i].len) == 0)
+		  {
+		    if (! grokers[i].func (abfd, & in))
+		      return FALSE;
+		    break;
+		  }
+	      }
+	    break;
+	  }
 
 	case bfd_object:
 	  if (in.namesz == sizeof "GNU" && strcmp (in.namedata, "GNU") == 0)
@@ -9876,9 +9770,13 @@ elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return FALSE;
 
-  buf = (char *) bfd_malloc (size);
+  buf = (char *) bfd_malloc (size + 1);
   if (buf == NULL)
     return FALSE;
+
+  /* PR 17512: file: ec08f814
+     0-termintate the buffer so that string searches will not overflow.  */
+  buf[size] = 0;
 
   if (bfd_bread (buf, size, abfd) != size
       || !elf_parse_notes (abfd, buf, size, offset))

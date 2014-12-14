@@ -3586,7 +3586,7 @@ value_maybe_namespace_elt (const struct type *curtype,
   else
     result = value_of_variable (sym, get_selected_block (0));
 
-  if (result && want_address)
+  if (want_address)
     result = value_addr (result);
 
   return result;

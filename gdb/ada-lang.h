@@ -162,6 +162,8 @@ struct ada_task_info
 
 extern void *grow_vect (void *, size_t *, size_t, int);
 
+extern void ada_ensure_varsize_limit (const struct type *type);
+
 extern int ada_get_field_index (const struct type *type,
                                 const char *field_name,
                                 int maybe_missing);

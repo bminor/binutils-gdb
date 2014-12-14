@@ -529,7 +529,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{-mcpu=54[123589]}|@b{-mcpu=54[56]lp}] [@b{-mfar-mode}|@b{-mf}]
  [@b{-merrors-to-file} @var{<filename>}|@b{-me} @var{<filename>}]
 @end ifset
-
 @ifset TIC6X
 
 @emph{Target TIC6X options:}
@@ -545,7 +544,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset TILEPRO
 @c TILEPro has no machine-dependent assembler options
 @end ifset
+@ifset VISIUM
 
+@emph{Target Visium options:}
+   [@b{-mtune=@var{arch}}]
+@end ifset
 @ifset XTENSA
 
 @emph{Target Xtensa options:}
@@ -555,7 +558,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--rename-section} @var{oldname}=@var{newname}]
  [@b{--[no-]trampolines}]
 @end ifset
-
 @ifset Z80
 
 @emph{Target Z80 options:}
@@ -567,8 +569,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
   [@b{ -forbid-undocumented-instructions}] [@b{-Fud}]
   [@b{ -forbid-unportable-instructions}] [@b{-Fup}]
 @end ifset
-
 @ifset Z8000
+
 @c Z8000 has no machine-dependent assembler options
 @end ifset
 
@@ -1633,6 +1635,25 @@ processor.
 @c man end
 @c man begin INCLUDE
 @include c-tilegx.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@ifset VISIUM
+
+@ifclear man
+@xref{Visium Options}, for the options available when @value{AS} is configured
+for a Visium processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following option is available when @value{AS} is configured for a Visium
+processor.
+@c man end
+@c man begin INCLUDE
+@include c-visium.texi
 @c ended inside the included file
 @end ifset
 
@@ -7268,6 +7289,12 @@ subject, see the hardware manufacturer's manual.
 @ifset V850
 * V850-Dependent::              V850 Dependent Features
 @end ifset
+@ifset VAX
+* Vax-Dependent::               VAX Dependent Features
+@end ifset
+@ifset VISIUM
+* Visium-Dependent::            Visium Dependent Features
+@end ifset
 @ifset XGATE
 * XGATE-Dependent::             XGATE Features
 @end ifset
@@ -7282,9 +7309,6 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset Z8000
 * Z8000-Dependent::             Z8000 Dependent Features
-@end ifset
-@ifset VAX
-* Vax-Dependent::               VAX Dependent Features
 @end ifset
 @end menu
 
@@ -7498,20 +7522,16 @@ family.
 @include c-tilepro.texi
 @end ifset
 
-@ifset Z80
-@include c-z80.texi
-@end ifset
-
-@ifset Z8000
-@include c-z8k.texi
+@ifset V850
+@include c-v850.texi
 @end ifset
 
 @ifset VAX
 @include c-vax.texi
 @end ifset
 
-@ifset V850
-@include c-v850.texi
+@ifset VISIUM
+@include c-visium.texi
 @end ifset
 
 @ifset XGATE
@@ -7524,6 +7544,14 @@ family.
 
 @ifset XTENSA
 @include c-xtensa.texi
+@end ifset
+
+@ifset Z80
+@include c-z80.texi
+@end ifset
+
+@ifset Z8000
+@include c-z8k.texi
 @end ifset
 
 @ifset GENERIC

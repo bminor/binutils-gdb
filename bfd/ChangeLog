@@ -1,3 +1,187 @@
+2014-12-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17689
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add needs_copy.
+	Change has_bnd_reloc to bit field.
+	(elf_x86_64_link_hash_newfunc): Initialize needs_copy and
+	has_bnd_reloc to 0.
+	(elf_x86_64_check_relocs): Set has_bnd_reloc to 1 instead
+	of TRUE.
+	(elf_x86_64_adjust_dynamic_symbol): Copy needs_copy from the
+	real definition to a weak symbol.
+	(elf_x86_64_allocate_dynrelocs): Also check needs_copy of a
+	weak symbol for PIE when discarding space for relocs against
+	symbols which turn out to need copy relocs.
+	(elf_x86_64_relocate_section): Also check needs_copy of a
+	weak symbol for PIE with copy reloc.
+
+2014-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR 15228
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Call bfd_set_error.
+
+2014-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR 15228
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Add "info" param.
+	Error on copy relocs against protected symbols.
+	(elf_merge_st_other): Set h->protected_def.
+	* elf-bfd.h (struct elf_link_hash_entry): Add "protected_def".
+	(_bfd_elf_adjust_dynamic_copy): Update prototype.
+	* elf-m10300.c (_bfd_mn10300_elf_adjust_dynamic_symbol): Update
+	_bfd_elf_adjust_dynamic_copy call.
+	* elf32-arm.c (elf32_arm_adjust_dynamic_symbol): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-cris.c (elf_cris_adjust_dynamic_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Likewise.
+	* elf32-i370.c (i370_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Likewise.
+	* elf32-lm32.c (lm32_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
+	* elf32-metag.c (elf_metag_adjust_dynamic_symbol): Likewise.
+	* elf32-or1k.c (or1k_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_adjust_dynamic_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-vax.c (elf_vax_adjust_dynamic_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf64-sh64.c (sh64_elf64_adjust_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf_x86_64_adjust_dynamic_symbol): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_adjust_dynamic_symbol): Likewise.
+
+2014-12-11  Keith Seitz  <keiths@redhat.com>
+
+	* elf.c (elf_parse_notes): Define convenience macro
+	GROKER_ELEMENT to add elements to 'grokers' array.
+	Add 'len' element to 'grokers'.
+	Use grokers.len instead of sizeof in string
+	comparisons.
+
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (BFD32_LIBS, BFD32_LIBS_CFILES): Remove dwarf2
+	and coffgen.  Add coff-bfd.  Sort.
+	(BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Add coffgen and dwarf2.
+	* bfd-in.h (bfd_coff_get_syment, bfd_coff_get_auxent): Delete.
+	(struct coff_comdat_info, bfd_coff_get_comdat_section): Delete.
+	* coffgen.c (coff_symbol_from): Move to coff-bfd.h as macro,
+	without unused param.  Update uses.
+	(bfd_coff_get_comdat_section): Move to coff-bfd.h as macro.
+	(bfd_coff_get_syment, bfd_coff_get_auxent): Move to coff-bfd.c.
+	* libcoff-in.h: #include "coff-bfd.h".
+	(struct coff_section_tdata, coff_section_data): Move to coff-bfd.h.
+	(coff_symbol_from): Delete.
+	* coff-bfd.c: New file.
+	* coff-bfd.h: New file.
+	* coff-i386.c: Update coff_symbol_from occurrences.
+	* coff-i960.c: Likewise.
+	* coff-m68k.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-x86_64.c: Likewise.
+	* coffcode.h: Likewise.
+	* pe-mips.c: Likewise.
+	* configure.ac (elf): Add dwarf2.lo.
+	(coffgen, coff, ecoff, xcoff): Define.  Use when mapping bfd
+	target vectors to .o files.  Add dwarf2 for mach-o targets.
+	Fix the sh target FIXME.
+	* po/SRC-POTFILES.in: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	PR 17541
+	* dwarf2.c (struct comp_unit): Add "lang".
+	(non_mangled): New function.
+	(struct funcinfo): Add "is_linkage".  Reorder for better packing.
+	Make "name" a const char*.
+	(lookup_address_in_function_table): Delete functionname_ptr param.
+	(find_abstract_instance_name): Add is_linkage param.  Set if we
+	have DW_AT_linkage_name or non_mangled DW_AT_name.
+	(scan_unit_for_symbols): Similarly set func->is_linkage.
+	(parse_comp_unit): Stash DW_AT_language.
+	(comp_unit_find_nearest_line): Replace functionname_ptr param
+	with function_ptr param.
+	(_bfd_dwarf2_find_nearest_line): Adjust above calls.  Set
+	functionname_ptr from function->name.  Call _bfd_elf_find_function
+	to retrieve symbol for function if not linkage name.
+	(_bfd_elf_find_function): Add bfd_target_elf_flavour test, moved from..
+	* elf.c (elf_find_function): ..here.
+	(_bfd_elf_find_nearest_line): Adjust calls.
+	* elf-bfd.h (_bfd_elf_find_function): Declare.
+
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2.c (read_address): Check bfd_target_elf_flavour before
+	calling get_elf_backend_data.
+	(_bfd_dwarf2_find_nearest_line): Fix parens.
+
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	PR 17666
+	* elf-bfd.h (struct elf_backend_data): Add sort_relocs_p.
+	* elfxx-target.h (elf_backend_sort_relocs_p): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (elf_link_adjust_relocs): Conditionally sort.
+	(bfd_elf_final_link): Control sorting of relocs.
+	* elfxx-mips.c (_bfd_mips_elf_sort_relocs_p): New function.
+	* elfxx-mips.h (_bfd_mips_elf_sort_relocs_p): Declare.
+	* elf32-mips.c (elf_backend_sort_relocs_p): Define.
+	* elf64-mips.c (elf_backend_sort_relocs_p): Define.
+
+2014-12-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive64.c (bfd_elf64_archive_slurp_armap): Add range checks.
+	* libbfd.c (safe_read_leb128): New function.
+	* libbfd-in.h (safe_read_leb128): Add prototype.
+	* libbfd.h: Regenerate.
+	* elf-attrs.c (_bfd_elf_parse_attributes): Use safe_read_leb128.
+	Check for an over-long subsection length.
+	* elf.c (elf_parse_notes): Check that the namedata is long enough
+	for the string comparison that is about to be performed.
+	(elf_read_notes): Zero-terminate the note buffer.
+
+2014-12-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (sort_r_offset): Delete.
+	(ppc64_elf_edit_opd): Don't sort input relocs.
+
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* config.bfd: Add Visium support.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+	* Makefile.am (ALL_MACHINES): Add cpu-visium.lo.
+	(ALL_MACHINES_CFILES): Add cpu-visium.c.
+	(BFD32_BACKENDS): Add elf32-visium.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-visium.c.
+	* Makefile.in: Regenerate.
+	* archures.c (DESCRIPTION): Add Visium support.
+	(bfd_visium_arch): Declare.
+	(bfd_archures_list): Add bfd_visium_arch.
+	* reloc.c: Add Visium relocations.
+	* targets.c (visium_elf32_vec): Declare.
+	(_bfd_target_vector): Add visium_elf32_vec.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+	* cpu-visium.c: New file.
+	* elf32-visium.c: Likewise.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2014-12-05  Steve Ellcey  <sellcey@mips.com>
+
+	* ecoff.c (_bfd_ecoff_slurp_symbol_table): Add cast.
+
 2014-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (bfd_elf32_get_synthetic_symtab): New.

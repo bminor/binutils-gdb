@@ -79,11 +79,9 @@ struct symbol *lookup_local_symbol (const char *name,
 				    const domain_enum domain,
 				    enum language language);
 
-static
-struct symbol *lookup_symbol_via_quick_fns (struct objfile *objfile,
-					    int block_index,
-					    const char *name,
-					    const domain_enum domain);
+static struct symbol *
+  lookup_symbol_in_objfile (struct objfile *objfile, int block_index,
+			    const char *name, const domain_enum domain);
 
 extern initialize_file_ftype _initialize_symtab;
 
@@ -152,6 +150,7 @@ domain_name (domain_enum e)
     case UNDEF_DOMAIN: return "UNDEF_DOMAIN";
     case VAR_DOMAIN: return "VAR_DOMAIN";
     case STRUCT_DOMAIN: return "STRUCT_DOMAIN";
+    case MODULE_DOMAIN: return "MODULE_DOMAIN";
     case LABEL_DOMAIN: return "LABEL_DOMAIN";
     case COMMON_BLOCK_DOMAIN: return "COMMON_BLOCK_DOMAIN";
     default: gdb_assert_not_reached ("bad domain_enum");
@@ -1536,38 +1535,20 @@ lookup_symbol_in_block (const char *name, const struct block *block,
 /* See symtab.h.  */
 
 struct symbol *
-lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
+lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				   const char *name,
 				   const domain_enum domain)
 {
-  const struct objfile *objfile;
+  struct objfile *objfile;
 
   for (objfile = main_objfile;
        objfile;
        objfile = objfile_separate_debug_iterate (main_objfile, objfile))
     {
-      struct compunit_symtab *cust;
-      struct symbol *sym;
+      struct symbol *sym = lookup_symbol_in_objfile (objfile, GLOBAL_BLOCK,
+						     name, domain);
 
-      /* Go through symtabs.  */
-      ALL_OBJFILE_COMPUNITS (objfile, cust)
-	{
-	  const struct blockvector *bv;
-	  const struct block *block;
-
-	  bv = COMPUNIT_BLOCKVECTOR (cust);
-	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	  sym = block_lookup_symbol (block, name, domain);
-	  if (sym)
-	    {
-	      block_found = block;
-	      return fixup_symbol_section (sym, (struct objfile *)objfile);
-	    }
-	}
-
-      sym = lookup_symbol_via_quick_fns ((struct objfile *) objfile,
-					 GLOBAL_BLOCK, name, domain);
-      if (sym)
+      if (sym != NULL)
 	return sym;
     }
 

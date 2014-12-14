@@ -124,6 +124,9 @@ case "${host}" in
 esac
 AC_SUBST(DEMANGLER_NAME)
 
+AC_CHECK_SIZEOF([long])
+AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
+
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h limits.h locale.h sys/param.h wchar.h)
 AC_HEADER_SYS_WAIT
 ACX_HEADER_STRING
@@ -411,6 +414,9 @@ changequote([,])dnl
 
 	# Add objdump private vectors.
 	case $targ in
+	avr-*-*)
+	  od_vectors="$od_vectors objdump_private_desc_elf32_avr"
+	  ;;
 	powerpc-*-aix*)
 	  od_vectors="$od_vectors objdump_private_desc_xcoff"
 	  ;;
@@ -431,6 +437,8 @@ for i in $od_vectors ; do
 	f="$f $i"
 	OBJDUMP_PRIVATE_VECTORS="$OBJDUMP_PRIVATE_VECTORS &$i,"
 	case $i in
+	objdump_private_desc_elf32_avr)
+	    od_files="$od_files od-elf32_avr" ;;
 	objdump_private_desc_xcoff)
 	    od_files="$od_files od-xcoff" ;;
 	objdump_private_desc_mach_o)

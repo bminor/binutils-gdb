@@ -803,7 +803,8 @@ namespace eval Dwarf {
 	variable _cu_offset_size
 
 	foreach line [split $body \n] {
-	    if {[lindex $line 0] == ""} {
+	    # Ignore blank lines, and allow embedded comments.
+	    if {[lindex $line 0] == "" || [regexp -- {^[ \t]*#} $line]} {
 		continue
 	    }
 	    set opcode [_map_name [lindex $line 0] _OP]
@@ -814,6 +815,7 @@ namespace eval Dwarf {
 		    _op .${_cu_addr_size}byte [lindex $line 1]
 		}
 
+		DW_OP_pick -
 		DW_OP_const1u -
 		DW_OP_const1s {
 		    _op .byte [lindex $line 1]
@@ -852,6 +854,11 @@ namespace eval Dwarf {
 		DW_OP_bit_piece {
 		    _op .uleb128 [lindex $line 1]
 		    _op .uleb128 [lindex $line 2]
+		}
+
+		DW_OP_skip -
+		DW_OP_bra {
+		    _op .2byte [lindex $line 1]
 		}
 
 		DW_OP_GNU_implicit_pointer {

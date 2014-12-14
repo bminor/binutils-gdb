@@ -74,6 +74,7 @@
 @set TILEPRO
 @set V850
 @set VAX
+@set VISIUM
 @set XGATE
 @set XSTORMY16
 @set XTENSA

@@ -1632,6 +1632,8 @@ extern struct type *make_cv_type (int, int, struct type *, struct type **);
 
 extern struct type *make_restrict_type (struct type *);
 
+extern struct type *make_unqualified_type (struct type *);
+
 extern void replace_type (struct type *, struct type *);
 
 extern int address_space_name_to_int (struct gdbarch *, char *);

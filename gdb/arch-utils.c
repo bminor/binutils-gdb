@@ -31,6 +31,7 @@
 #include "target-descriptions.h"
 #include "objfiles.h"
 #include "language.h"
+#include "symtab.h"
 
 #include "version.h"
 
@@ -167,15 +168,33 @@ no_op_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 }
 
 void
-default_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+default_coff_make_msymbol_special (int val, struct minimal_symbol *msym)
 {
   return;
 }
 
+/* See arch-utils.h.  */
+
 void
-default_coff_make_msymbol_special (int val, struct minimal_symbol *msym)
+default_make_symbol_special (struct symbol *sym, struct objfile *objfile)
 {
   return;
+}
+
+/* See arch-utils.h.  */
+
+CORE_ADDR
+default_adjust_dwarf2_addr (CORE_ADDR pc)
+{
+  return pc;
+}
+
+/* See arch-utils.h.  */
+
+CORE_ADDR
+default_adjust_dwarf2_line (CORE_ADDR addr, int rel)
+{
+  return addr;
 }
 
 int
@@ -837,6 +856,30 @@ default_skip_permanent_breakpoint (struct regcache *regcache)
   bp_insn = gdbarch_breakpoint_from_pc (gdbarch, &current_pc, &bp_len);
   current_pc += bp_len;
   regcache_write_pc (regcache, current_pc);
+}
+
+CORE_ADDR
+default_infcall_mmap (CORE_ADDR size, unsigned prot)
+{
+  error (_("This target does not support inferior memory allocation by mmap."));
+}
+
+/* -mcmodel=large is used so that no GOT (Global Offset Table) is needed to be
+   created in inferior memory by GDB (normally it is set by ld.so).  */
+
+char *
+default_gcc_target_options (struct gdbarch *gdbarch)
+{
+  return xstrprintf ("-m%d%s", gdbarch_ptr_bit (gdbarch),
+		     gdbarch_ptr_bit (gdbarch) == 64 ? " -mcmodel=large" : "");
+}
+
+/* gdbarch gnu_triplet_regexp method.  */
+
+const char *
+default_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  return gdbarch_bfd_arch_info (gdbarch)->arch_name;
 }
 
 /* -Wmissing-prototypes */

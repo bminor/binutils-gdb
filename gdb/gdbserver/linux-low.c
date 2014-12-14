@@ -4221,19 +4221,14 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
   int pid;
   struct iovec iov;
 
-  regset = regsets_info->regsets;
-
   pid = lwpid_of (current_thread);
-  while (regset->size >= 0)
+  for (regset = regsets_info->regsets; regset->size >= 0; regset++)
     {
       void *buf, *data;
       int nt_type, res;
 
       if (regset->size == 0 || regset_disabled (regsets_info, regset))
-	{
-	  regset ++;
-	  continue;
-	}
+	continue;
 
       buf = xmalloc (regset->size);
 
@@ -4260,8 +4255,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	      /* If we get EIO on a regset, do not try it again for
 		 this process mode.  */
 	      disable_regset (regsets_info, regset);
-	      free (buf);
-	      continue;
+	    }
+	  else if (errno == ENODATA)
+	    {
+	      /* ENODATA may be returned if the regset is currently
+		 not "active".  This can happen in normal operation,
+		 so suppress the warning in this case.  */
 	    }
 	  else
 	    {
@@ -4271,10 +4270,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	      perror (s);
 	    }
 	}
-      else if (regset->type == GENERAL_REGS)
-	saw_general_regs = 1;
-      regset->store_function (regcache, buf);
-      regset ++;
+      else
+	{
+	  if (regset->type == GENERAL_REGS)
+	    saw_general_regs = 1;
+	  regset->store_function (regcache, buf);
+	}
       free (buf);
     }
   if (saw_general_regs)
@@ -4292,19 +4293,15 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
   int pid;
   struct iovec iov;
 
-  regset = regsets_info->regsets;
-
   pid = lwpid_of (current_thread);
-  while (regset->size >= 0)
+  for (regset = regsets_info->regsets; regset->size >= 0; regset++)
     {
       void *buf, *data;
       int nt_type, res;
 
-      if (regset->size == 0 || regset_disabled (regsets_info, regset))
-	{
-	  regset ++;
-	  continue;
-	}
+      if (regset->size == 0 || regset_disabled (regsets_info, regset)
+	  || regset->fill_function == NULL)
+	continue;
 
       buf = xmalloc (regset->size);
 
@@ -4350,8 +4347,6 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	      /* If we get EIO on a regset, do not try it again for
 		 this process mode.  */
 	      disable_regset (regsets_info, regset);
-	      free (buf);
-	      continue;
 	    }
 	  else if (errno == ESRCH)
 	    {
@@ -4369,7 +4364,6 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	}
       else if (regset->type == GENERAL_REGS)
 	saw_general_regs = 1;
-      regset ++;
       free (buf);
     }
   if (saw_general_regs)

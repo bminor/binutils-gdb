@@ -7121,7 +7121,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   s = htab->dynbss;
 
-  return _bfd_elf_adjust_dynamic_copy (h, s);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* If given a function descriptor symbol, hide both the function code
@@ -7589,21 +7589,6 @@ dec_dynrel_count (bfd_vma r_info,
   return FALSE;
 }
 
-/* qsort comparison function sorting relocs by r_offset.  */
-
-static int
-sort_r_offset (const void *p, const void *q)
-{
-  const Elf_Internal_Rela *a = (const Elf_Internal_Rela *) p;
-  const Elf_Internal_Rela *b = (const Elf_Internal_Rela *) q;
-
-  if (a->r_offset < b->r_offset)
-    return -1;
-  else if (a->r_offset > b->r_offset)
-    return 1;
-  return 0;
-}
-
 /* Remove unused Official Procedure Descriptor entries.  Currently we
    only remove those associated with functions in discarded link-once
    sections, or weakly defined functions that have been overridden.  It
@@ -7657,7 +7642,6 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 					    info->keep_memory);
       if (relstart == NULL)
 	return FALSE;
-      qsort (relstart, sec->reloc_count, sizeof (*relstart), sort_r_offset);
 
       /* First run through the relocs to check they are sane, and to
 	 determine whether we need to edit this opd section.  */

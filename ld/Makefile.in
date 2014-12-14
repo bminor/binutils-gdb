@@ -572,6 +572,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32tilegx_be.c \
 	eelf32tilepro.c \
 	eelf32vax.c \
+	eelf32visium.c \
 	eelf32xc16x.c \
 	eelf32xc16xl.c \
 	eelf32xc16xs.c \
@@ -1190,6 +1191,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32tilegx_be.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32tilepro.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32vax.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32visium.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32xc16x.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32xc16xl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32xc16xs.Po@am__quote@
@@ -2671,6 +2673,9 @@ eelf32tilepro.c: $(srcdir)/emulparams/elf32tilepro.sh \
 
 eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+eelf32visium.c: $(srcdir)/emulparams/elf32visium.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/visium.sc ${GEN_DEPENDS}
 
 eelf32xc16x.c: $(srcdir)/emulparams/elf32xc16x.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/needrelax.em \

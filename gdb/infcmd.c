@@ -3235,18 +3235,24 @@ If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\
 interrupt all running threads in non-stop mode, use the -a option."));
 
-  add_info ("registers", nofp_registers_info, _("\
+  c = add_info ("registers", nofp_registers_info, _("\
 List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
   add_info_alias ("r", "registers", 1);
+  set_cmd_completer (c, reg_or_group_completer);
 
   if (xdb_commands)
-    add_com ("lr", class_info, nofp_registers_info, _("\
+    {
+      c = add_com ("lr", class_info, nofp_registers_info, _("\
 List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
-  add_info ("all-registers", all_registers_info, _("\
+      set_cmd_completer (c, reg_or_group_completer);
+    }
+
+  c = add_info ("all-registers", all_registers_info, _("\
 List of all registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
+  set_cmd_completer (c, reg_or_group_completer);
 
   add_info ("program", program_info,
 	    _("Execution status of the program."));

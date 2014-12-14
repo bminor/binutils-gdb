@@ -1,3 +1,8 @@
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* gas/elf/elf.exp: Skip ifunc-1 for Visium.
+	* gas/visium/: New directory.
+
 2014-11-30  Alan Modra  <amodra@gmail.com>
 
 	* gas/ppc/a2.d: Update for mftb change.

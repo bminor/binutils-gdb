@@ -3488,11 +3488,40 @@ Return a sequence of all the objfiles current known to @value{GDBN}.
 @xref{Objfiles In Python}.
 @end defun
 
+@findex gdb.lookup_objfile
+@defun gdb.lookup_objfile (name @r{[}, by_build_id{]})
+Look up @var{name}, a file name or build ID, in the list of objfiles
+for the current program space (@pxref{Progspaces In Python}).
+If the objfile is not found throw the Python @code{ValueError} exception.
+
+If @var{name} is a relative file name, then it will match any
+source file name with the same trailing components.  For example, if
+@var{name} is @samp{gcc/expr.c}, then it will match source file
+name of @file{/build/trunk/gcc/expr.c}, but not
+@file{/build/trunk/libcpp/expr.c} or @file{/build/trunk/gcc/x-expr.c}.
+
+If @var{by_build_id} is provided and is @code{True} then @var{name}
+is the build ID of the objfile.  Otherwise, @var{name} is a file name.
+This is supported only on some operating systems, notably those which use
+the ELF format for binary files and the @sc{gnu} Binutils.  For more details
+about this feature, see the description of the @option{--build-id}
+command-line option in @ref{Options, , Command Line Options, ld.info,
+The GNU Linker}.
+@end defun
+
 Each objfile is represented by an instance of the @code{gdb.Objfile}
 class.
 
 @defvar Objfile.filename
 The file name of the objfile as a string.
+@end defvar
+
+@defvar Objfile.owner
+For separate debug info objfiles this is the corresponding @code{gdb.Objfile}
+object that debug info is being provided for.
+Otherwise this is @code{None}.
+Separate debug info objfiles are added with the
+@code{gdb.Objfile.add_separate_debug_file} method, described below.
 @end defvar
 
 @defvar Objfile.build_id

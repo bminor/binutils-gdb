@@ -952,7 +952,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
      and ecoff_data (abfd)->debug_info.symbolic_header.ifdMax can mean that
      we have fewer symbols than we were expecting.  Allow for this by updating
      the symbol count and warning the user.  */
-  if (internal_ptr - internal < bfd_get_symcount (abfd))
+  if (internal_ptr - internal < (ptrdiff_t) bfd_get_symcount (abfd))
     {
       bfd_get_symcount (abfd) = internal_ptr - internal;
       (*_bfd_error_handler)

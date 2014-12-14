@@ -4835,6 +4835,12 @@ $as_echo "no" >&6; }
 fi
 
 
+gnulib_extra_configure_args=
+# If large-file support is disabled, make sure gnulib does the same.
+if test "$enable_largefile" = no; then
+gnulib_extra_configure_args="$gnulib_extra_configure_args --disable-largefile"
+fi
+
 # Configure gnulib.  We need to build gnulib under some other
 # directory not "gnulib", to avoid the problem of both GDB and
 # GDBserver wanting to build it in the same directory, when building
@@ -4842,6 +4848,7 @@ fi
 
   in_src="gnulib"
   in_build="build-gnulib"
+  in_extra_args="$gnulib_extra_configure_args"
 
   # Remove --cache-file, --srcdir, and --disable-option-checking arguments
   # so they do not pile up.
@@ -4925,6 +4932,11 @@ fi
   *) # Relative name.
     ac_sub_cache_file=$ac_top_build_prefix$cache_file ;;
   esac
+
+  if test -n "$in_extra_args"; then
+    # Add the extra args at the end.
+    ac_sub_configure_args="$ac_sub_configure_args $in_extra_args"
+  fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&5
 $as_echo "$as_me: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&6;}

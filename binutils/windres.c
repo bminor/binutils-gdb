@@ -204,6 +204,7 @@ open_file_search (const char *filename, const char *mode, const char *errmsg,
 	      *real_filename = n;
 	      return e;
 	    }
+	  free (n);
 
 	  if (errno != ENOENT)
 	    break;

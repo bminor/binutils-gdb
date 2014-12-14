@@ -222,6 +222,9 @@ struct comp_unit
   /* The abbrev hash table.  */
   struct abbrev_info **abbrevs;
 
+  /* DW_AT_language.  */
+  int lang;
+
   /* Note that an error was found by comp_unit_find_nearest_line.  */
   int error;
 
@@ -745,7 +748,10 @@ read_alt_indirect_ref (struct comp_unit * unit,
 static bfd_uint64_t
 read_address (struct comp_unit *unit, bfd_byte *buf)
 {
-  int signed_vma = get_elf_backend_data (unit->abfd)->sign_extend_vma;
+  int signed_vma = 0;
+
+  if (bfd_get_flavour (unit->abfd) == bfd_target_elf_flavour)
+    signed_vma = get_elf_backend_data (unit->abfd)->sign_extend_vma;
 
   if (signed_vma)
     {
@@ -1100,6 +1106,33 @@ read_attribute (struct attribute *attr,
   return info_ptr;
 }
 
+/* Return whether DW_AT_name will return the same as DW_AT_linkage_name
+   for a function.  */
+
+static bfd_boolean
+non_mangled (int lang)
+{
+  switch (lang)
+    {
+    default:
+      return FALSE;
+
+    case DW_LANG_C89:
+    case DW_LANG_C:
+    case DW_LANG_Ada83:
+    case DW_LANG_Cobol74:
+    case DW_LANG_Cobol85:
+    case DW_LANG_Fortran77:
+    case DW_LANG_Pascal83:
+    case DW_LANG_C99:
+    case DW_LANG_Ada95:
+    case DW_LANG_PLI:
+    case DW_LANG_UPC:
+    case DW_LANG_C11:
+      return TRUE;
+    }
+}
+
 /* Source line information table routines.  */
 
 #define FILE_ALLOC_CHUNK 5
@@ -1158,14 +1191,15 @@ struct funcinfo
   struct funcinfo *caller_func;
   /* Source location file name where caller_func inlines this func.  */
   char *caller_file;
-  /* Source location line number where caller_func inlines this func.  */
-  int caller_line;
   /* Source location file name.  */
   char *file;
+  /* Source location line number where caller_func inlines this func.  */
+  int caller_line;
   /* Source location line number.  */
   int line;
   int tag;
-  char *name;
+  bfd_boolean is_linkage;
+  const char *name;
   struct arange arange;
   /* Where the symbol is defined.  */
   asection *sec;
@@ -1989,7 +2023,7 @@ read_debug_ranges (struct comp_unit *unit)
 
 /* Function table functions.  */
 
-/* If ADDR is within UNIT's function tables, set FUNCTIONNAME_PTR, and return
+/* If ADDR is within UNIT's function tables, set FUNCTION_PTR, and return
    TRUE.  Note that we need to find the function that has the smallest range
    that contains ADDR, to handle inlined functions without depending upon
    them being ordered in TABLE by increasing range.  */
@@ -1997,8 +2031,7 @@ read_debug_ranges (struct comp_unit *unit)
 static bfd_boolean
 lookup_address_in_function_table (struct comp_unit *unit,
 				  bfd_vma addr,
-				  struct funcinfo **function_ptr,
-				  const char **functionname_ptr)
+				  struct funcinfo **function_ptr)
 {
   struct funcinfo* each_func;
   struct funcinfo* best_fit = NULL;
@@ -2027,14 +2060,10 @@ lookup_address_in_function_table (struct comp_unit *unit,
 
   if (best_fit)
     {
-      *functionname_ptr = best_fit->name;
       *function_ptr = best_fit;
       return TRUE;
     }
-  else
-    {
-      return FALSE;
-    }
+  return FALSE;
 }
 
 /* If SYM at ADDR is within function table of UNIT, set FILENAME_PTR
@@ -2125,7 +2154,8 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 
 static char *
 find_abstract_instance_name (struct comp_unit *unit,
-			     struct attribute *attr_ptr)
+			     struct attribute *attr_ptr,
+			     bfd_boolean *is_linkage)
 {
   bfd *abfd = unit->abfd;
   bfd_byte *info_ptr;
@@ -2176,7 +2206,7 @@ find_abstract_instance_name (struct comp_unit *unit,
 	  (*_bfd_error_handler)
 	    (_("Dwarf Error: Unable to read alt ref %u."), die_ref);
 	  bfd_set_error (bfd_error_bad_value);
-	  return name;
+	  return NULL;
 	}
       /* FIXME: Do we need to locate the correct CU, in a similar
 	 fashion to the code in the DW_FORM_ref_addr case above ?  */
@@ -2210,17 +2240,24 @@ find_abstract_instance_name (struct comp_unit *unit,
 		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
 		     over DW_AT_name.  */
 		  if (name == NULL && is_str_attr (attr.form))
-		    name = attr.u.str;
+		    {
+		      name = attr.u.str;
+		      if (non_mangled (unit->lang))
+			*is_linkage = TRUE;
+		    }
 		  break;
 		case DW_AT_specification:
-		  name = find_abstract_instance_name (unit, &attr);
+		  name = find_abstract_instance_name (unit, &attr, is_linkage);
 		  break;
 		case DW_AT_linkage_name:
 		case DW_AT_MIPS_linkage_name:
 		  /* PR 16949:  Corrupt debug info can place
 		     non-string forms into these attributes.  */
 		  if (is_str_attr (attr.form))
-		    name = attr.u.str;
+		    {
+		      name = attr.u.str;
+		      *is_linkage = TRUE;
+		    }
 		  break;
 		default:
 		  break;
@@ -2386,14 +2423,19 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_abstract_origin:
 		case DW_AT_specification:
-		  func->name = find_abstract_instance_name (unit, &attr);
+		  func->name = find_abstract_instance_name (unit, &attr,
+							    &func->is_linkage);
 		  break;
 
 		case DW_AT_name:
 		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
 		     over DW_AT_name.  */
 		  if (func->name == NULL && is_str_attr (attr.form))
-		    func->name = attr.u.str;
+		    {
+		      func->name = attr.u.str;
+		      if (non_mangled (unit->lang))
+			func->is_linkage = TRUE;
+		    }
 		  break;
 
 		case DW_AT_linkage_name:
@@ -2401,7 +2443,10 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  /* PR 16949:  Corrupt debug info can place
 		     non-string forms into these attributes.  */
 		  if (is_str_attr (attr.form))
-		    func->name = attr.u.str;
+		    {
+		      func->name = attr.u.str;
+		      func->is_linkage = TRUE;
+		    }
 		  break;
 
 		case DW_AT_low_pc:
@@ -2689,6 +2734,10 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	    break;
 	  }
 
+	case DW_AT_language:
+	  unit->lang = attr.u.val;
+	  break;
+
 	default:
 	  break;
 	}
@@ -2733,7 +2782,7 @@ comp_unit_contains_address (struct comp_unit *unit, bfd_vma addr)
 
 /* If UNIT contains ADDR, set the output parameters to the values for
    the line containing ADDR.  The output parameters, FILENAME_PTR,
-   FUNCTIONNAME_PTR, and LINENUMBER_PTR, are pointers to the objects
+   FUNCTION_PTR, and LINENUMBER_PTR, are pointers to the objects
    to be filled in.
 
    Returns the range of addresses covered by the entry that was used
@@ -2743,13 +2792,12 @@ static bfd_vma
 comp_unit_find_nearest_line (struct comp_unit *unit,
 			     bfd_vma addr,
 			     const char **filename_ptr,
-			     const char **functionname_ptr,
+			     struct funcinfo **function_ptr,
 			     unsigned int *linenumber_ptr,
 			     unsigned int *discriminator_ptr,
 			     struct dwarf2_debug *stash)
 {
   bfd_boolean func_p;
-  struct funcinfo *function;
 
   if (unit->error)
     return FALSE;
@@ -2778,11 +2826,10 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 	}
     }
 
-  function = NULL;
-  func_p = lookup_address_in_function_table (unit, addr,
-					     &function, functionname_ptr);
-  if (func_p && (function->tag == DW_TAG_inlined_subroutine))
-    stash->inliner_chain = function;
+  *function_ptr = NULL;
+  func_p = lookup_address_in_function_table (unit, addr, function_ptr);
+  if (func_p && (*function_ptr)->tag == DW_TAG_inlined_subroutine)
+    stash->inliner_chain = *function_ptr;
 
   return lookup_address_in_line_info_table (unit->line_table, addr,
 					    filename_ptr,
@@ -3628,6 +3675,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
   /* What address are we looking for?  */
   bfd_vma addr;
   struct comp_unit* each;
+  struct funcinfo *function = NULL;
   bfd_boolean found = FALSE;
   bfd_boolean do_line;
 
@@ -3710,7 +3758,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     {
       bfd_vma min_range = (bfd_vma) -1;
       const char * local_filename = NULL;
-      const char * local_functionname = NULL;
+      struct funcinfo *local_function = NULL;
       unsigned int local_linenumber = 0;
       unsigned int local_discriminator = 0;
 
@@ -3722,7 +3770,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 		    || comp_unit_contains_address (each, addr))
 		   && (range = comp_unit_find_nearest_line (each, addr,
 							    & local_filename,
-							    & local_functionname,
+							    & local_function,
 							    & local_linenumber,
 							    & local_discriminator,
 							    stash)) != 0);
@@ -3743,8 +3791,8 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 		{
 		  if (filename_ptr && local_filename)
 		    * filename_ptr = local_filename;
-		  if (functionname_ptr && local_functionname)
-		    * functionname_ptr = local_functionname;
+		  if (local_function)
+		    function = local_function;
 		  if (discriminator_ptr && local_discriminator)
 		    * discriminator_ptr = local_discriminator;
 		  if (local_linenumber)
@@ -3846,10 +3894,10 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 		      || comp_unit_contains_address (each, addr))
 		     && comp_unit_find_nearest_line (each, addr,
 						     filename_ptr,
-						     functionname_ptr,
+						     &function,
 						     linenumber_ptr,
 						     discriminator_ptr,
-						     stash)) > 0;
+						     stash) != 0);
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
 	      == stash->sec->size)
@@ -3865,6 +3913,19 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
 
  done:
+  if (function)
+    {
+      if (!function->is_linkage
+	  && _bfd_elf_find_function (abfd, symbols, section, offset,
+				     *filename_ptr ? NULL : filename_ptr,
+				     functionname_ptr))
+	{
+	  function->name = *functionname_ptr;
+	  function->is_linkage = TRUE;
+	}
+      else
+	*functionname_ptr = function->name;
+    }
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
     unset_sections (stash);
 
@@ -3981,4 +4042,110 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
     free (stash->adjusted_sections);
   if (stash->alt_bfd_ptr)
     bfd_close (stash->alt_bfd_ptr);
+}
+
+/* Find the function to a particular section and offset,
+   for error reporting.  */
+
+bfd_boolean
+_bfd_elf_find_function (bfd *abfd,
+			asymbol **symbols,
+			asection *section,
+			bfd_vma offset,
+			const char **filename_ptr,
+			const char **functionname_ptr)
+{
+  struct elf_find_function_cache
+  {
+    asection *last_section;
+    asymbol *func;
+    const char *filename;
+    bfd_size_type func_size;
+  } *cache;
+
+  if (symbols == NULL)
+    return FALSE;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return FALSE;
+
+  cache = elf_tdata (abfd)->elf_find_function_cache;
+  if (cache == NULL)
+    {
+      cache = bfd_zalloc (abfd, sizeof (*cache));
+      elf_tdata (abfd)->elf_find_function_cache = cache;
+      if (cache == NULL)
+	return FALSE;
+    }
+  if (cache->last_section != section
+      || cache->func == NULL
+      || offset < cache->func->value
+      || offset >= cache->func->value + cache->func_size)
+    {
+      asymbol *file;
+      bfd_vma low_func;
+      asymbol **p;
+      /* ??? Given multiple file symbols, it is impossible to reliably
+	 choose the right file name for global symbols.  File symbols are
+	 local symbols, and thus all file symbols must sort before any
+	 global symbols.  The ELF spec may be interpreted to say that a
+	 file symbol must sort before other local symbols, but currently
+	 ld -r doesn't do this.  So, for ld -r output, it is possible to
+	 make a better choice of file name for local symbols by ignoring
+	 file symbols appearing after a given local symbol.  */
+      enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+      file = NULL;
+      low_func = 0;
+      state = nothing_seen;
+      cache->filename = NULL;
+      cache->func = NULL;
+      cache->func_size = 0;
+      cache->last_section = section;
+
+      for (p = symbols; *p != NULL; p++)
+	{
+	  asymbol *sym = *p;
+	  bfd_vma code_off;
+	  bfd_size_type size;
+
+	  if ((sym->flags & BSF_FILE) != 0)
+	    {
+	      file = sym;
+	      if (state == symbol_seen)
+		state = file_after_symbol_seen;
+	      continue;
+	    }
+
+	  size = bed->maybe_function_sym (sym, section, &code_off);
+	  if (size != 0
+	      && code_off <= offset
+	      && (code_off > low_func
+		  || (code_off == low_func
+		      && size > cache->func_size)))
+	    {
+	      cache->func = sym;
+	      cache->func_size = size;
+	      cache->filename = NULL;
+	      low_func = code_off;
+	      if (file != NULL
+		  && ((sym->flags & BSF_LOCAL) != 0
+		      || state != file_after_symbol_seen))
+		cache->filename = bfd_asymbol_name (file);
+	    }
+	  if (state == nothing_seen)
+	    state = symbol_seen;
+	}
+    }
+
+  if (cache->func == NULL)
+    return FALSE;
+
+  if (filename_ptr)
+    *filename_ptr = cache->filename;
+  if (functionname_ptr)
+    *functionname_ptr = bfd_asymbol_name (cache->func);
+
+  return TRUE;
 }

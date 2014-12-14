@@ -570,7 +570,7 @@ darwin_relocate_section_addresses (struct so_list *so,
 }
 
 static struct symbol *
-darwin_lookup_lib_symbol (const struct objfile *objfile,
+darwin_lookup_lib_symbol (struct objfile *objfile,
 			  const char *name,
 			  const domain_enum domain)
 {

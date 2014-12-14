@@ -1,3 +1,27 @@
+2014-12-12  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.h (md_reg_eh_frame_to_debug_frame): Match current
+	gcc behaviour.
+	* config/te-aix.h: New file.
+	* configure.tgt: Use em=aix for powerpc-aix.
+
+2014-12-09  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* config/tc-tic4x.c (md_assemble): Ensure insn->name is zero
+	terminated.  Simplify concatenation of parallel insn.
+
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* configure.tgt: Add Visium support.
+	* Makefile.am (TARGET_CPU_CFILES): Move config/tc-vax.c around
+	and add config/tc-visium.c.
+	(TARGET_CPU_HFILES): Move config/tc-vax.h around and add
+	config/tc-visium.h.
+	* Makefile.in: Regenerate.
+	* config/tc-visium.c: New file.
+	* config/tc-visium.h: Likewise.
+	* po/POTFILES.in: Regenerate.
+
 2014-11-28  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* config/tc-nios2.c (can_evaluate_expr, get_expr_value): Delete.

@@ -844,6 +844,8 @@ extern void bfd_section_already_linked_table_traverse
 
 extern bfd_vma read_unsigned_leb128 (bfd *, bfd_byte *, unsigned int *);
 extern bfd_signed_vma read_signed_leb128 (bfd *, bfd_byte *, unsigned int *);
+extern bfd_vma safe_read_leb128 (bfd *, bfd_byte *, unsigned int *,
+				 bfd_boolean, const bfd_byte * const);
 /* Extracted from init.c.  */
 /* Extracted from libbfd.c.  */
 bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);
@@ -2955,6 +2957,13 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_EPIPHANY_SIMM11",
   "BFD_RELOC_EPIPHANY_IMM11",
   "BFD_RELOC_EPIPHANY_IMM8",
+  "BFD_RELOC_VISIUM_HI16",
+  "BFD_RELOC_VISIUM_LO16",
+  "BFD_RELOC_VISIUM_IM16",
+  "BFD_RELOC_VISIUM_REL16",
+  "BFD_RELOC_VISIUM_HI16_PCREL",
+  "BFD_RELOC_VISIUM_LO16_PCREL",
+  "BFD_RELOC_VISIUM_IM16_PCREL",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

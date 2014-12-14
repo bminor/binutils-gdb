@@ -1,3 +1,38 @@
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: If large-file support is disabled in GDBserver,
+	pass --disable-largefile to ACX_CONFIGURE_DIR call for "gnulib".
+	* configure: Regenerate.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-low.c (regsets_fetch_inferior_registers): Suppress the
+	warning upon ENODATA from ptrace.
+	* linux-s390-low.c (s390_store_tdb): New.
+	(s390_regsets): Add regset for NT_S390_TDB.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-low.c (regsets_store_inferior_registers): Skip regsets
+	without a fill_function.
+	* linux-s390-low.c (s390_fill_last_break): Remove.
+	(s390_regsets): Set fill_function to NULL for NT_S390_LAST_BREAK.
+	(s390_arch_setup): Use regset's size instead of fill_function for
+	loop end condition.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-low.c (regsets_fetch_inferior_registers): Do not invoke
+	the regset's store function when ptrace returned an error.
+	* regcache.c (get_thread_regcache): Invalidate register cache
+	before fetching inferior's registers.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-low.c (regsets_fetch_inferior_registers): Rephrase
+	while-loop as for-loop.
+	(regsets_store_inferior_registers): Likewise.
+
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
 	* configure.ac(AC_CHECK_FUNCS): Remove readlink.

@@ -24,6 +24,7 @@
    MA 02110-1301, USA.  */
 
 #include "bfdlink.h"
+#include "coff-bfd.h"
 
 /* Object file tdata; access macros.  */
 
@@ -191,36 +192,6 @@ struct xcoff_tdata
    macro is only ever applied to an asymbol.  */
 #define coffsymbol(asymbol) ((coff_symbol_type *)(&((asymbol)->the_bfd)))
 
-/* The used_by_bfd field of a section may be set to a pointer to this
-   structure.  */
-
-struct coff_section_tdata
-{
-  /* The relocs, swapped into COFF internal form.  This may be NULL.  */
-  struct internal_reloc *relocs;
-  /* If this is TRUE, the relocs entry may not be freed.  */
-  bfd_boolean keep_relocs;
-  /* The section contents.  This may be NULL.  */
-  bfd_byte *contents;
-  /* If this is TRUE, the contents entry may not be freed.  */
-  bfd_boolean keep_contents;
-  /* Information cached by coff_find_nearest_line.  */
-  bfd_vma offset;
-  unsigned int i;
-  const char *function;
-  /* Optional information about a COMDAT entry; NULL if not COMDAT. */
-  struct coff_comdat_info *comdat;
-  int line_base;
-  /* A pointer used for .stab linking optimizations.  */
-  void * stab_info;
-  /* Available for individual backends.  */
-  void * tdata;
-};
-
-/* An accessor macro for the coff_section_tdata structure.  */
-#define coff_section_data(abfd, sec) \
-  ((struct coff_section_tdata *) (sec)->used_by_bfd)
-
 /* Tdata for sections in XCOFF files.  This is used by the linker.  */
 
 struct xcoff_section_tdata
@@ -324,8 +295,6 @@ extern long coff_canonicalize_symtab
   (bfd *, asymbol **);
 extern int coff_count_linenumbers
   (bfd *);
-extern struct coff_symbol_struct *coff_symbol_from
-  (bfd *, asymbol *);
 extern bfd_boolean coff_renumber_symbols
   (bfd *, int *);
 extern void coff_mangle_symbols

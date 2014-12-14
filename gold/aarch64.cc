@@ -1653,7 +1653,7 @@ class Target_aarch64 : public Sized_target<size, big_endian>
       rela_irelative_(NULL), copy_relocs_(elfcpp::R_AARCH64_COPY),
       got_mod_index_offset_(-1U),
       tlsdesc_reloc_info_(), tls_base_symbol_defined_(false),
-      stub_tables_(), aarch64_input_section_map_()
+      stub_tables_(), stub_group_size_(0), aarch64_input_section_map_()
   { }
 
   // Scan the relocations to determine unreferenced sections for
@@ -2214,6 +2214,8 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   bool tls_base_symbol_defined_;
   // List of stub_tables
   Stub_table_list stub_tables_;
+  // Actual stub group size
+  section_size_type stub_group_size_;
   AArch64_input_section_map aarch64_input_section_map_;
 };  // End of Target_aarch64
 
@@ -4148,7 +4150,8 @@ class AArch64_relocate_functions
 		   Address,
 		   const Sized_symbol<size>*,
 		   const Symbol_value<size>*,
-		   const Sized_relobj_file<size, big_endian>*);
+		   const Sized_relobj_file<size, big_endian>*,
+		   section_size_type);
 
 };  // End of AArch64_relocate_functions
 
@@ -4168,7 +4171,8 @@ maybe_apply_stub(unsigned int r_type,
 		 Address address,
 		 const Sized_symbol<size>* gsym,
 		 const Symbol_value<size>* psymval,
-		 const Sized_relobj_file<size, big_endian>* object)
+		 const Sized_relobj_file<size, big_endian>* object,
+		 section_size_type current_group_size)
 {
   if (parameters->options().relocatable())
     return false;
@@ -4200,7 +4204,8 @@ maybe_apply_stub(unsigned int r_type,
       rela_general<32>(view, branch_offset, 0, arp);
   if (status != This::STATUS_OKAY)
     gold_error(_("Stub is too far away, try a smaller value "
-		 "for '--stub-group-size'. For example, 0x2000000."));
+		 "for '--stub-group-size'. The current value is 0x%lx."),
+	       current_group_size);
   return true;
 }
 
@@ -4293,16 +4298,17 @@ Target_aarch64<size, big_endian>::do_relax(
   gold_assert(!parameters->options().relocatable());
   if (pass == 1)
     {
-      section_size_type stub_group_size =
-	  parameters->options().stub_group_size();
-      if (stub_group_size == 1)
+      // We don't handle negative stub_group_size right now.
+      this->stub_group_size_ = abs(parameters->options().stub_group_size());
+      if (this->stub_group_size_ == 1)
 	{
 	  // Leave room for 4096 4-byte stub entries. If we exceed that, then we
 	  // will fail to link.  The user will have to relink with an explicit
 	  // group size option.
-	  stub_group_size = The_reloc_stub::MAX_BRANCH_OFFSET - 4096 * 4;
+	  this->stub_group_size_ = The_reloc_stub::MAX_BRANCH_OFFSET -
+				   4096 * 4;
 	}
-      group_sections(layout, stub_group_size, true, task);
+      group_sections(layout, this->stub_group_size_, true, task);
     }
   else
     {
@@ -5739,7 +5745,8 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
       // Fallthrough
     case elfcpp::R_AARCH64_JUMP26:
       if (Reloc::maybe_apply_stub(r_type, relinfo, rela, view, address,
-				  gsym, psymval, object))
+				  gsym, psymval, object,
+				  target->stub_group_size_))
 	break;
       // Fallthrough
     case elfcpp::R_AARCH64_TSTBR14:

@@ -1,3 +1,76 @@
+2014-12-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (display_gdb_index): Add more range checks.
+
+2014-12-11  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Check for long long and sizes of long long and long.
+	* elfcomm.h (HOST_WIDEST_INT): Test HAVE_LONG_LONG in place of
+	__STDC_VERSION__ and __GNUC__.
+	* strings.c (print_strings): Likewise.
+	* dwarf.c (DWARF_VMA_FMT, DWARF_VMA_FMT_LONG): Likewise.
+	(read_debug_line_header): Use dwarf_vmatoa to print warning.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c: #include "coff-bfd.h".
+
+2014-12-09  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* od-elf32_avr.c (elf32_avr_dump_mem_usage): Fix device initialization.
+
+2014-12-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* objdump.c (display_any_bfd): Avoid infinite loop closing and
+	opening the same archive again and again.
+
+2014-12-09  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* windres.c (open_file_search): Free path buffer on failure.
+
+2014-12-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (display_debug_frames): Check for a negative
+	augmentation data length.
+	(display_gdb_index): Check for invalid offsets.
+	* elfcomm.c (process_archive_index_and_symbols): Check for an
+	index number that overflows when multiplied by the ar index size.
+	* readelf.c (dump_ia64_unwind): Add range checks.
+	(slurp_ia64_unwind_table): Change to a boolean function.  Add
+	range checks.
+	(process_version_sections): Add range checks.
+	(get_symbol_version_string): Add check for missing section
+	headers.
+
+2014-12-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* configure.ac: Add od-elf32_avr to build.
+	* configure: Regenerate.
+	* od-elf32_avr.c: New file.
+	* objdump.h: Declare objdump_private_desc_elf32_avr.
+
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* readelf.c: Include elf/visium.h.
+	(guess_is_rela): Deal with EM_VISIUM.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(get_machine_flags): Likewise.
+	(get_osabi_name): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_32bit_pcrel_reloc): Likewise.
+	(is_16bit_abs_reloc): Likewise.
+
+2014-12-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* readelf.c (decode_AVR_machine_flags): New function.
+	(get_machine_flags): Add EM_AVR case.
+
 2014-12-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

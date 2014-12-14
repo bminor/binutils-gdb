@@ -51,6 +51,8 @@ struct target_ops;
 struct obstack;
 struct bp_target_info;
 struct target_desc;
+struct objfile;
+struct symbol;
 struct displaced_step_closure;
 struct core_regset_section;
 struct syscall;
@@ -688,6 +690,16 @@ typedef int (gdbarch_in_function_epilogue_p_ftype) (struct gdbarch *gdbarch, COR
 extern int gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p);
 
+/* Process an ELF symbol in the minimal symbol table in a backend-specific
+   way.  Normally this hook is supposed to do nothing, however if required,
+   then this hook can be used to apply tranformations to symbols that are
+   considered special in some way.  For example the MIPS backend uses it
+   to interpret `st_other' information to mark compressed code symbols so
+   that they can be treated in the appropriate manner in the processing of
+   the main symbol table and DWARF-2 records. */
+
+extern int gdbarch_elf_make_msymbol_special_p (struct gdbarch *gdbarch);
+
 typedef void (gdbarch_elf_make_msymbol_special_ftype) (asymbol *sym, struct minimal_symbol *msym);
 extern void gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym);
 extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special);
@@ -695,6 +707,45 @@ extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbar
 typedef void (gdbarch_coff_make_msymbol_special_ftype) (int val, struct minimal_symbol *msym);
 extern void gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, int val, struct minimal_symbol *msym);
 extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special);
+
+/* Process a symbol in the main symbol table in a backend-specific way.
+   Normally this hook is supposed to do nothing, however if required,
+   then this hook can be used to apply tranformations to symbols that
+   are considered special in some way.  This is currently used by the
+   MIPS backend to make sure compressed code symbols have the ISA bit
+   set.  This in turn is needed for symbol values seen in GDB to match
+   the values used at the runtime by the program itself, for function
+   and label references. */
+
+typedef void (gdbarch_make_symbol_special_ftype) (struct symbol *sym, struct objfile *objfile);
+extern void gdbarch_make_symbol_special (struct gdbarch *gdbarch, struct symbol *sym, struct objfile *objfile);
+extern void set_gdbarch_make_symbol_special (struct gdbarch *gdbarch, gdbarch_make_symbol_special_ftype *make_symbol_special);
+
+/* Adjust the address retrieved from a DWARF-2 record other than a line
+   entry in a backend-specific way.  Normally this hook is supposed to
+   return the address passed unchanged, however if that is incorrect for
+   any reason, then this hook can be used to fix the address up in the
+   required manner.  This is currently used by the MIPS backend to make
+   sure addresses in FDE, range records, etc. referring to compressed
+   code have the ISA bit set, matching line information and the symbol
+   table. */
+
+typedef CORE_ADDR (gdbarch_adjust_dwarf2_addr_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch, gdbarch_adjust_dwarf2_addr_ftype *adjust_dwarf2_addr);
+
+/* Adjust the address updated by a line entry in a backend-specific way.
+   Normally this hook is supposed to return the address passed unchanged,
+   however in the case of inconsistencies in these records, this hook can
+   be used to fix them up in the required manner.  This is currently used
+   by the MIPS backend to make sure all line addresses in compressed code
+   are presented with the ISA bit set, which is not always the case.  This
+   in turn ensures breakpoint addresses are correctly matched against the
+   stop PC. */
+
+typedef CORE_ADDR (gdbarch_adjust_dwarf2_line_ftype) (CORE_ADDR addr, int rel);
+extern CORE_ADDR gdbarch_adjust_dwarf2_line (struct gdbarch *gdbarch, CORE_ADDR addr, int rel);
+extern void set_gdbarch_adjust_dwarf2_line (struct gdbarch *gdbarch, gdbarch_adjust_dwarf2_line_ftype *adjust_dwarf2_line);
 
 extern int gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch);
 extern void set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch, int cannot_step_breakpoint);
@@ -1338,6 +1389,33 @@ extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_
 typedef int (gdbarch_vsyscall_range_ftype) (struct gdbarch *gdbarch, struct mem_range *range);
 extern int gdbarch_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);
 extern void set_gdbarch_vsyscall_range (struct gdbarch *gdbarch, gdbarch_vsyscall_range_ftype *vsyscall_range);
+
+/* Allocate SIZE bytes of PROT protected page aligned memory in inferior.
+   PROT has GDB_MMAP_PROT_* bitmask format.
+   Throw an error if it is not possible.  Returned address is always valid. */
+
+typedef CORE_ADDR (gdbarch_infcall_mmap_ftype) (CORE_ADDR size, unsigned prot);
+extern CORE_ADDR gdbarch_infcall_mmap (struct gdbarch *gdbarch, CORE_ADDR size, unsigned prot);
+extern void set_gdbarch_infcall_mmap (struct gdbarch *gdbarch, gdbarch_infcall_mmap_ftype *infcall_mmap);
+
+/* Return string (caller has to use xfree for it) with options for GCC
+   to produce code for this target, typically "-m64", "-m32" or "-m31".
+   These options are put before CU's DW_AT_producer compilation options so that
+   they can override it.  Method may also return NULL. */
+
+typedef char * (gdbarch_gcc_target_options_ftype) (struct gdbarch *gdbarch);
+extern char * gdbarch_gcc_target_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_gcc_target_options (struct gdbarch *gdbarch, gdbarch_gcc_target_options_ftype *gcc_target_options);
+
+/* Return a regular expression that matches names used by this
+   architecture in GNU configury triplets.  The result is statically
+   allocated and must not be freed.  The default implementation simply
+   returns the BFD architecture name, which is correct in nearly every
+   case. */
+
+typedef const char * (gdbarch_gnu_triplet_regexp_ftype) (struct gdbarch *gdbarch);
+extern const char * gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch);
+extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

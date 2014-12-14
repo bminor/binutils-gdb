@@ -41,46 +41,70 @@ static const char *gdb_osabi_available_names[GDB_OSABI_INVALID + 3] = {
 };
 static const char *set_osabi_string;
 
+/* Names associated with each osabi.  */
+
+struct osabi_names
+{
+  /* The "pretty" name.  */
+
+  const char *pretty;
+
+  /* The triplet regexp, or NULL if not known.  */
+
+  const char *regexp;
+};
+
 /* This table matches the indices assigned to enum gdb_osabi.  Keep
    them in sync.  */
-static const char * const gdb_osabi_names[] =
+static const struct osabi_names gdb_osabi_names[] =
 {
-  "none",
+  { "none", NULL },
 
-  "SVR4",
-  "GNU/Hurd",
-  "Solaris",
-  "GNU/Linux",
-  "FreeBSD a.out",
-  "FreeBSD ELF",
-  "NetBSD a.out",
-  "NetBSD ELF",
-  "OpenBSD ELF",
-  "Windows CE",
-  "DJGPP",
-  "Irix",
-  "HP/UX ELF",
-  "HP/UX SOM",
-  "QNX Neutrino",
-  "Cygwin",
-  "AIX",
-  "DICOS",
-  "Darwin",
-  "Symbian",
-  "OpenVMS",
-  "LynxOS178",
-  "Newlib",
+  { "SVR4", NULL },
+  { "GNU/Hurd", NULL },
+  { "Solaris", NULL },
+  { "GNU/Linux", "linux(-gnu)?" },
+  { "FreeBSD a.out", NULL },
+  { "FreeBSD ELF", NULL },
+  { "NetBSD a.out", NULL },
+  { "NetBSD ELF", NULL },
+  { "OpenBSD ELF", NULL },
+  { "Windows CE", NULL },
+  { "DJGPP", NULL },
+  { "Irix", NULL },
+  { "HP/UX ELF", NULL },
+  { "HP/UX SOM", NULL },
+  { "QNX Neutrino", NULL },
+  { "Cygwin", NULL },
+  { "AIX", NULL },
+  { "DICOS", NULL },
+  { "Darwin", NULL },
+  { "Symbian", NULL },
+  { "OpenVMS", NULL },
+  { "LynxOS178", NULL },
+  { "Newlib", NULL },
 
-  "<invalid>"
+  { "<invalid>", NULL }
 };
 
 const char *
 gdbarch_osabi_name (enum gdb_osabi osabi)
 {
   if (osabi >= GDB_OSABI_UNKNOWN && osabi < GDB_OSABI_INVALID)
-    return gdb_osabi_names[osabi];
+    return gdb_osabi_names[osabi].pretty;
 
-  return gdb_osabi_names[GDB_OSABI_INVALID];
+  return gdb_osabi_names[GDB_OSABI_INVALID].pretty;
+}
+
+/* See osabi.h.  */
+
+const char *
+osabi_triplet_regexp (enum gdb_osabi osabi)
+{
+  if (osabi >= GDB_OSABI_UNKNOWN && osabi < GDB_OSABI_INVALID)
+    return gdb_osabi_names[osabi].regexp;
+
+  return gdb_osabi_names[GDB_OSABI_INVALID].regexp;
 }
 
 /* Lookup the OS ABI corresponding to the specified target description
@@ -92,7 +116,7 @@ osabi_from_tdesc_string (const char *name)
   int i;
 
   for (i = 0; i < ARRAY_SIZE (gdb_osabi_names); i++)
-    if (strcmp (name, gdb_osabi_names[i]) == 0)
+    if (strcmp (name, gdb_osabi_names[i].pretty) == 0)
       {
 	/* See note above: the name table matches the indices assigned
 	   to enum gdb_osabi.  */
@@ -645,7 +669,7 @@ extern initialize_file_ftype _initialize_gdb_osabi; /* -Wmissing-prototype */
 void
 _initialize_gdb_osabi (void)
 {
-  if (strcmp (gdb_osabi_names[GDB_OSABI_INVALID], "<invalid>") != 0)
+  if (strcmp (gdb_osabi_names[GDB_OSABI_INVALID].pretty, "<invalid>") != 0)
     internal_error
       (__FILE__, __LINE__,
        _("_initialize_gdb_osabi: gdb_osabi_names[] is inconsistent"));

@@ -3174,7 +3174,7 @@ coff_compute_section_file_positions (bfd * abfd)
 	{
 	  coff_symbol_type *cf;
 
-	  cf = coff_symbol_from (abfd, *symp);
+	  cf = coff_symbol_from (*symp);
 	  if (cf != NULL
 	      && cf->native != NULL
 	      && cf->native->is_sym
@@ -3872,7 +3872,7 @@ coff_write_object_contents (bfd * abfd)
 	      /* See if this is the section symbol.  */
 	      if (strcmp ((*psym)->name, current->name) == 0)
 		{
-		  csym = coff_symbol_from (abfd, *psym);
+		  csym = coff_symbol_from (*psym);
 		  if (csym == NULL
 		      || csym->native == NULL
 		      || ! csym->native->is_sym
@@ -5185,7 +5185,7 @@ SUBSUBSECTION
       coffsym = (obj_symbols (abfd)				\
 		 + (cache_ptr->sym_ptr_ptr - symbols));		\
     else if (ptr)						\
-      coffsym = coff_symbol_from (abfd, ptr);			\
+      coffsym = coff_symbol_from (ptr);				\
     if (coffsym != NULL						\
 	&& coffsym->native->is_sym				\
 	&& coffsym->native->u.syment.n_scnum == 0)		\

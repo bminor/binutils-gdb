@@ -1,3 +1,20 @@
+2014-12-12  Anthony Green  <green@moxielogic.com>
+
+	* moxie-opc.c: Define zex instructions.
+
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* configure.ac: Add Visium support.
+	* configure: Regenerate.
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add visium-dis.c and
+	visium-opc.c.
+	* Makefile.in: Regenerate.
+	* disassemble.c (ARCH_visium): Define if ARCH_all.
+	(disassembler): Deal with bfd_arch_visium if ARCH_visium.
+	* visium-dis.c: New file.
+	* visium-opc.c: Likewise.
+	* po/POTFILES.in: Regenerate.
+
 2014-11-30  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes): Make mftb* generate mfspr for

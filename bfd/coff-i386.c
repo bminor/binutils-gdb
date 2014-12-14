@@ -379,7 +379,7 @@ static reloc_howto_type howto_table[] =
       coffsym = (obj_symbols (abfd)				\
 	         + (cache_ptr->sym_ptr_ptr - symbols));		\
     else if (ptr)						\
-      coffsym = coff_symbol_from (abfd, ptr);			\
+      coffsym = coff_symbol_from (ptr);				\
     if (coffsym != (coff_symbol_type *) NULL			\
 	&& coffsym->native->u.syment.n_scnum == 0)		\
       cache_ptr->addend = - coffsym->native->u.syment.n_value;	\

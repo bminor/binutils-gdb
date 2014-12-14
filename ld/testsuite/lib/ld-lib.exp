@@ -1652,6 +1652,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget rx-*-*]
 	 && ![istarget spu-*-*]
 	 && ![istarget v850*-*-*]
+	 && ![istarget visium-*-*]
 	 && ![istarget xstormy16-*-*]
 	 && ![istarget *-*-irix*]
 	 && ![istarget *-*-rtems] } {

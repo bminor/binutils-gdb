@@ -393,6 +393,7 @@ PyObject *objfile_to_objfile_object (struct objfile *)
 PyObject *objfpy_get_printers (PyObject *, void *);
 PyObject *objfpy_get_frame_filters (PyObject *, void *);
 PyObject *objfpy_get_xmethods (PyObject *, void *);
+PyObject *gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw);
 
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 

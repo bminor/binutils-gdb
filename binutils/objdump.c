@@ -51,6 +51,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "elf-bfd.h"
+#include "coff-bfd.h"
 #include "progress.h"
 #include "bucomm.h"
 #include "elfcomm.h"
@@ -3426,7 +3427,15 @@ display_any_bfd (bfd *file, int level)
 	  display_any_bfd (arfile, level + 1);
 
 	  if (last_arfile != NULL)
-	    bfd_close (last_arfile);
+	    {
+	      bfd_close (last_arfile);
+	      /* PR 17512: file: ac585d01.  */
+	      if (arfile == last_arfile)
+		{
+		  last_arfile = NULL;
+		  break;
+		}
+	    }
 	  last_arfile = arfile;
 	}
 

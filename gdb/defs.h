@@ -55,6 +55,24 @@
 
 #include "host-defs.h"
 
+/* Scope types enumerator.  List the types of scopes the compiler will
+   accept.  */
+
+enum compile_i_scope_types
+  {
+    COMPILE_I_INVALID_SCOPE,
+
+    /* A simple scope.  Wrap an expression into a simple scope that
+       takes no arguments, returns no value, and uses the generic
+       function name "_gdb_expr". */
+
+    COMPILE_I_SIMPLE_SCOPE,
+
+    /* Do not wrap the expression,
+       it has to provide function "_gdb_expr" on its own.  */
+    COMPILE_I_RAW_SCOPE,
+  };
+
 /* Just in case they're not defined in stdio.h.  */
 
 #ifndef SEEK_SET
@@ -364,6 +382,7 @@ enum command_control_type
     if_control,
     commands_control,
     python_control,
+    compile_control,
     guile_control,
     while_stepping_control,
     invalid_control
@@ -377,6 +396,15 @@ struct command_line
     struct command_line *next;
     char *line;
     enum command_control_type control_type;
+    union
+      {
+	struct
+	  {
+	    enum compile_i_scope_types scope;
+	  }
+	compile;
+      }
+    control_u;
     /* * The number of elements in body_list.  */
     int body_count;
     /* * For composite commands, the nested lists of commands.  For

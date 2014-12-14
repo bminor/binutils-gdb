@@ -1,3 +1,16 @@
+2014-12-10  Alan Modra  <amodra@gmail.com>
+
+	* ldmisc.c: #include "coff-bfd.h"
+
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* configure.tgt: Add Visium support.
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32visium.c.
+	(eelf32visium.c): New rule.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32visium.sh: New file.
+	* scripttempl/visium.sc: Likewise.
+
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/elf_i386.sh (TINY_READONLY_SECTION): New.

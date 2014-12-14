@@ -61,6 +61,13 @@ struct dummy_frame
 
   /* The caller's state prior to the call.  */
   struct infcall_suspend_state *caller_state;
+
+  /* If non-NULL, a destructor that is run when this dummy frame is
+     popped.  */
+  void (*dtor) (void *data);
+
+  /* Arbitrary data that is passed to DTOR.  */
+  void *dtor_data;
 };
 
 static struct dummy_frame *dummy_frame_stack = NULL;
@@ -127,6 +134,10 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
   struct dummy_frame *dummy = *dummy_ptr;
 
   gdb_assert (ptid_equal (dummy->id.ptid, inferior_ptid));
+
+  if (dummy->dtor != NULL)
+    dummy->dtor (dummy->dtor_data);
+
   restore_infcall_suspend_state (dummy->caller_state);
 
   iterate_over_breakpoints (pop_dummy_frame_bpt, dummy);
@@ -188,6 +199,36 @@ dummy_frame_discard (struct frame_id dummy_id, ptid_t ptid)
   dp = lookup_dummy_frame (&id);
   if (dp)
     remove_dummy_frame (dp);
+}
+
+/* See dummy-frame.h.  */
+
+void
+register_dummy_frame_dtor (struct frame_id dummy_id, ptid_t ptid,
+			   dummy_frame_dtor_ftype *dtor, void *dtor_data)
+{
+  struct dummy_frame_id id = { dummy_id, ptid };
+  struct dummy_frame **dp, *d;
+
+  dp = lookup_dummy_frame (&id);
+  gdb_assert (dp != NULL);
+  d = *dp;
+  gdb_assert (d->dtor == NULL);
+  d->dtor = dtor;
+  d->dtor_data = dtor_data;
+}
+
+/* See dummy-frame.h.  */
+
+int
+find_dummy_frame_dtor (dummy_frame_dtor_ftype *dtor, void *dtor_data)
+{
+  struct dummy_frame *d;
+
+  for (d = dummy_frame_stack; d != NULL; d = d->next)
+    if (d->dtor == dtor && d->dtor_data == dtor_data)
+      return 1;
+  return 0;
 }
 
 /* There may be stale dummy frames, perhaps left over from when an uncaught

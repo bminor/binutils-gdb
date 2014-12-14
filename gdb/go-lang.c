@@ -597,6 +597,8 @@ static const struct language_defn go_language_defn =
   NULL,
   iterate_over_symbols,
   &default_varobj_ops,
+  NULL,
+  NULL,
   LANG_MAGIC
 };
 

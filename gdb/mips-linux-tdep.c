@@ -1364,7 +1364,13 @@ micromips_linux_sigframe_validate (const struct tramp_frame *self,
 				   struct frame_info *this_frame,
 				   CORE_ADDR *pc)
 {
-  return mips_pc_is_micromips (get_frame_arch (this_frame), *pc);
+  if (mips_pc_is_micromips (get_frame_arch (this_frame), *pc))
+    {
+      *pc = mips_unmake_compact_addr (*pc);
+      return 1;
+    }
+  else
+    return 0;
 }
 
 /* Implement the "write_pc" gdbarch method.  */

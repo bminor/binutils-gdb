@@ -38,4 +38,15 @@ extern CORE_ADDR find_function_addr (struct value *function,
 extern struct value *call_function_by_hand (struct value *function, int nargs,
 					    struct value **args);
 
+/* Similar to call_function_by_hand and additional call
+   register_dummy_frame_dtor with DUMMY_DTOR and DUMMY_DTOR_DATA for the
+   created inferior call dummy frame.  */
+
+typedef void (call_function_by_hand_dummy_dtor_ftype) (void *data);
+extern struct value *
+  call_function_by_hand_dummy (struct value *function, int nargs,
+			       struct value **args,
+			     call_function_by_hand_dummy_dtor_ftype *dummy_dtor,
+			       void *dummy_dtor_data);
+
 #endif

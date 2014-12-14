@@ -48,6 +48,10 @@ enum mips_isa
     ISA_MICROMIPS
   };
 
+/* Corresponding MSYMBOL_TARGET_FLAG aliases.  */
+#define MSYMBOL_TARGET_FLAG_MIPS16 MSYMBOL_TARGET_FLAG_1
+#define MSYMBOL_TARGET_FLAG_MICROMIPS MSYMBOL_TARGET_FLAG_2
+
 /* Return the MIPS ISA's register size.  Just a short cut to the BFD
    architecture's word size.  */
 extern int mips_isa_regsize (struct gdbarch *gdbarch);
@@ -154,6 +158,9 @@ enum
 
 /* Single step based on where the current instruction will take us.  */
 extern int mips_software_single_step (struct frame_info *frame);
+
+/* Strip the ISA (compression) bit off from ADDR.  */
+extern CORE_ADDR mips_unmake_compact_addr (CORE_ADDR addr);
 
 /* Tell if the program counter value in MEMADDR is in a standard
    MIPS function.  */

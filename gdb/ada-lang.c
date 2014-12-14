@@ -232,8 +232,6 @@ static int ada_is_direct_array_type (struct type *);
 static void ada_language_arch_info (struct gdbarch *,
 				    struct language_arch_info *);
 
-static void check_size (const struct type *);
-
 static struct value *ada_index_struct_field (int, struct value *, int,
 					     struct type *);
 
@@ -678,7 +676,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 
       /* Make sure that the object size is not unreasonable before
          trying to allocate some memory for it.  */
-      check_size (type);
+      ada_ensure_varsize_limit (type);
 
       if (value_lazy (val)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
@@ -740,8 +738,8 @@ lim_warning (const char *format, ...)
    i.e. if it would be a bad idea to allocate a value of this type in
    GDB.  */
 
-static void
-check_size (const struct type *type)
+void
+ada_ensure_varsize_limit (const struct type *type)
 {
   if (TYPE_LENGTH (type) > varsize_limit)
     error (_("object size is larger than varsize-limit"));
@@ -2052,7 +2050,7 @@ ada_coerce_to_simple_array (struct value *arr)
 
       if (arrVal == NULL)
         error (_("Bounds unavailable for null array pointer."));
-      check_size (TYPE_TARGET_TYPE (value_type (arrVal)));
+      ada_ensure_varsize_limit (TYPE_TARGET_TYPE (value_type (arrVal)));
       return value_ind (arrVal);
     }
   else if (ada_is_constrained_packed_array_type (value_type (arr)))
@@ -7917,7 +7915,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 		 initialized, the type size may be completely bogus and
 		 GDB may fail to allocate a value for it.  So check the
 		 size first before creating the value.  */
-	      check_size (rtype);
+	      ada_ensure_varsize_limit (rtype);
 	      /* Using plain value_from_contents_and_address here
 		 causes problems because we will end up trying to
 		 resolve a type that is currently being
@@ -7965,7 +7963,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     large (due to an uninitialized variable in the inferior)
 	     that it would cause an overflow when adding it to the
 	     record size.  */
-	  check_size (field_type);
+	  ada_ensure_varsize_limit (field_type);
 
 	  TYPE_FIELD_TYPE (rtype, f) = field_type;
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
@@ -10907,7 +10905,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		    (ada_aligned_type
 		     (ada_check_typedef (TYPE_TARGET_TYPE (type))));
 		}
-	      check_size (type);
+	      ada_ensure_varsize_limit (type);
               return value_zero (type, lval_memory);
             }
           else if (TYPE_CODE (type) == TYPE_CODE_INT)
@@ -13630,6 +13628,8 @@ const struct language_defn ada_language_defn = {
   ada_get_symbol_name_cmp,	/* la_get_symbol_name_cmp */
   ada_iterate_over_symbols,
   &ada_varobj_ops,
+  NULL,
+  NULL,
   LANG_MAGIC
 };
 

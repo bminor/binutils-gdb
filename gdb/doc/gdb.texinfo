@@ -10256,6 +10256,7 @@ the selected stack frame.  The @var{regname} may be any register name valid on
 the machine you are using, with or without the initial @samp{$}.
 @end table
 
+@anchor{standard registers}
 @cindex stack pointer register
 @cindex program counter register
 @cindex process status register
@@ -16493,6 +16494,7 @@ address, or even return prematurely from a function.
 * Returning::                   Returning from a function
 * Calling::                     Calling your program's functions
 * Patching::                    Patching your program
+* Compiling and Injecting Code:: Compiling and injecting code in @value{GDBN}
 @end menu
 
 @node Assignment
@@ -16913,6 +16915,237 @@ write}, for your new setting to take effect.
 @kindex show write
 Display whether executable files and core files are opened for writing
 as well as reading.
+@end table
+
+@node Compiling and Injecting Code
+@section Compiling and injecting code in @value{GDBN}
+@cindex injecting code
+@cindex writing into executables
+@cindex compiling code
+
+@value{GDBN} supports on-demand compilation and code injection into
+programs running under @value{GDBN}.  GCC 5.0 or higher built with
+@file{libcc1.so} must be installed for this functionality to be enabled.
+This functionality is implemented with the following commands.
+
+@table @code
+@kindex compile code
+@item compile code @var{source-code}
+@itemx compile code -raw @var{--} @var{source-code}
+Compile @var{source-code} with the compiler language found as the current
+language in @value{GDBN} (@pxref{Languages}).  If compilation and
+injection is not supported with the current language specified in
+@value{GDBN}, or the compiler does not support this feature, an error
+message will be printed.  If @var{source-code} compiles and links
+successfully, @value{GDBN} will load the object-code emitted,
+and execute it within the context of the currently selected inferior.
+It is important to note that the compiled code is executed immediately.
+After execution, the compiled code is removed from @value{GDBN} and any
+new types or variables you have defined will be deleted.
+
+The command allows you to specify @var{source-code} in two ways.
+The simplest method is to provide a single line of code to the command.
+E.g.:
+
+@smallexample
+compile code printf ("hello world\n");
+@end smallexample
+
+If you specify options on the command line as well as source code, they
+may conflict.  The @samp{--} delimiter can be used to separate options
+from actual source code.  E.g.:
+
+@smallexample
+compile code -r -- printf ("hello world\n");
+@end smallexample
+
+Alternatively you can enter source code as multiple lines of text.  To
+enter this mode, invoke the @samp{compile code} command without any text
+following the command.  This will start the multiple-line editor and
+allow you to type as many lines of source code as required.  When you
+have completed typing, enter @samp{end} on its own line to exit the
+editor.
+
+@smallexample
+compile code
+>printf ("hello\n");
+>printf ("world\n");
+>end
+@end smallexample
+
+Specifying @samp{-raw}, prohibits @value{GDBN} from wrapping the
+provided @var{source-code} in a callable scope.  In this case, you must
+specify the entry point of the code by defining a function named
+@code{_gdb_expr_}.  The @samp{-raw} code cannot access variables of the
+inferior.  Using @samp{-raw} option may be needed for example when
+@var{source-code} requires @samp{#include} lines which may conflict with
+inferior symbols otherwise.
+
+@kindex compile file
+@item compile file @var{filename}
+@itemx compile file -raw @var{filename}
+Like @code{compile code}, but take the source code from @var{filename}.
+
+@smallexample
+compile file /home/user/example.c
+@end smallexample
+@end table
+
+@subsection Caveats when using the @code{compile} command
+
+There are a few caveats to keep in mind when using the @code{compile}
+command.  As the caveats are different per language, the table below
+highlights specific issues on a per language basis.
+
+@table @asis
+@item C code examples and caveats
+When the language in @value{GDBN} is set to @samp{C}, the compiler will
+attempt to compile the source code with a @samp{C} compiler.  The source
+code provided to the @code{compile} command will have much the same
+access to variables and types as it normally would if it were part of
+the program currently being debugged in @value{GDBN}.
+
+Below is a sample program that forms the basis of the examples that
+follow.  This program has been compiled and loaded into @value{GDBN},
+much like any other normal debugging session.
+
+@smallexample
+void function1 (void)
+@{
+   int i = 42;
+   printf ("function 1\n");
+@}
+
+void function2 (void)
+@{
+   int j = 12;
+   function1 ();
+@}
+
+int main(void)
+@{
+   int k = 6;
+   int *p;
+   function2 ();
+   return 0;
+@}
+@end smallexample
+
+For the purposes of the examples in this section, the program above has
+been compiled, loaded into @value{GDBN}, stopped at the function
+@code{main}, and @value{GDBN} is awaiting input from the user.
+
+To access variables and types for any program in @value{GDBN}, the
+program must be compiled and packaged with debug information.  The
+@code{compile} command is not an exception to this rule.  Without debug
+information, you can still use the @code{compile} command, but you will
+be very limited in what variables and types you can access.
+
+So with that in mind, the example above has been compiled with debug
+information enabled.  The @code{compile} command will have access to
+all variables and types (except those that may have been optimized
+out).  Currently, as @value{GDBN} has stopped the program in the
+@code{main} function, the @code{compile} command would have access to
+the variable @code{k}.  You could invoke the @code{compile} command
+and type some source code to set the value of @code{k}.  You can also
+read it, or do anything with that variable you would normally do in
+@code{C}.  Be aware that changes to inferior variables in the
+@code{compile} command are persistent.  In the following example:
+
+@smallexample
+compile code k = 3;
+@end smallexample
+
+@noindent
+the variable @code{k} is now 3.  It will retain that value until
+something else in the example program changes it, or another
+@code{compile} command changes it.
+
+Normal scope and access rules apply to source code compiled and
+injected by the @code{compile} command.  In the example, the variables
+@code{j} and @code{k} are not accessible yet, because the program is
+currently stopped in the @code{main} function, where these variables
+are not in scope.  Therefore, the following command
+
+@smallexample
+compile code j = 3;
+@end smallexample
+
+@noindent
+will result in a compilation error message.
+
+Once the program is continued, execution will bring these variables in
+scope, and they will become accessible; then the code you specify via
+the @code{compile} command will be able to access them.
+
+You can create variables and types with the @code{compile} command as
+part of your source code.  Variables and types that are created as part
+of the @code{compile} command are not visible to the rest of the program for
+the duration of its run.  This example is valid:
+
+@smallexample
+compile code int ff = 5; printf ("ff is %d\n", ff);
+@end smallexample
+
+However, if you were to type the following into @value{GDBN} after that
+command has completed:
+
+@smallexample
+compile code printf ("ff is %d\n'', ff);
+@end smallexample
+
+@noindent
+a compiler error would be raised as the variable @code{ff} no longer
+exists.  Object code generated and injected by the @code{compile}
+command is removed when its execution ends.  Caution is advised
+when assigning to program variables values of variables created by the
+code submitted to the @code{compile} command.  This example is valid:
+
+@smallexample
+compile code int ff = 5; k = ff;
+@end smallexample
+
+The value of the variable @code{ff} is assigned to @code{k}.  The variable
+@code{k} does not require the existence of @code{ff} to maintain the value
+it has been assigned.  However, pointers require particular care in
+assignment.  If the source code compiled with the @code{compile} command
+changed the address of a pointer in the example program, perhaps to a
+variable created in the @code{compile} command, that pointer would point
+to an invalid location when the command exits.  The following example
+would likely cause issues with your debugged program:
+
+@smallexample
+compile code int ff = 5; p = &ff;
+@end smallexample
+
+In this example, @code{p} would point to @code{ff} when the
+@code{compile} command is executing the source code provided to it.
+However, as variables in the (example) program persist with their
+assigned values, the variable @code{p} would point to an invalid
+location when the command exists.  A general rule should be followed
+in that you should either assign @code{NULL} to any assigned pointers,
+or restore a valid location to the pointer before the command exits.
+
+Similar caution must be exercised with any structs, unions, and typedefs
+defined in @code{compile} command.  Types defined in the @code{compile}
+command will no longer be available in the next @code{compile} command.
+Therefore, if you cast a variable to a type defined in the
+@code{compile} command, care must be taken to ensure that any future
+need to resolve the type can be achieved.
+
+@smallexample
+(gdb) compile code static struct a @{ int a; @} v = @{ 42 @}; argv = &v;
+(gdb) compile code printf ("%d\n", ((struct a *) argv)->a);
+gdb command line:1:36: error: dereferencing pointer to incomplete type ‘struct a’
+Compilation failed.
+(gdb) compile code struct a @{ int a; @}; printf ("%d\n", ((struct a *) argv)->a);
+42
+@end smallexample
+
+Variables that have been optimized away by the compiler are not
+accessible to the code submitted to the @code{compile} command.
+Access to those variables will generate a compiler error which @value{GDBN}
+will print to the console.
 @end table
 
 @node GDB Files
@@ -33434,6 +33667,17 @@ Print a dump of all known object files.
 If @var{regexp} is specified, only print object files whose names
 match @var{regexp}.  For each object file, this command prints its name,
 address in memory, and all of its psymtabs and symtabs.
+
+@kindex maint print user-registers
+@cindex user registers
+@item maint print user-registers
+List all currently available @dfn{user registers}.  User registers
+typically provide alternate names for actual hardware registers.  They
+include the four ``standard'' registers @code{$fp}, @code{$pc},
+@code{$sp}, and @code{$ps}.  @xref{standard registers}.  User
+registers can be used in expressions in the same way as the canonical
+register names, but only the latter are listed by the @code{info
+registers} and @code{maint print registers} commands.
 
 @kindex maint print section-scripts
 @cindex info for known .debug_gdb_scripts-loaded scripts

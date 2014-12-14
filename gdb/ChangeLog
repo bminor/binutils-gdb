@@ -1,3 +1,441 @@
+2014-12-13  Doug Evans  <xdje42@gmail.com>
+
+	* utils.c (make_hex_string): Fix off-by-one error.
+
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (ada_ensure_varsize_limit): Declare.
+	* ada-lang.c (check_size): Remove advance declaration.
+	(ada_ensure_varsize_limit): Renames check_size.
+	Replace calls to check_size by calls to ada_ensure_varsize_limit
+	throughout.
+	* ada-valprint.c (ada_val_print_ref): Add call to
+	ada_ensure_varsize_limit.  Add comment explaining why.
+
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.c (make_hex_string): Replace use of sprintf by use of
+	xsnprintf.
+
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* compile/compile-object-load.c (link_callbacks_multiple_definition)
+	(link_callbacks_warning, link_callbacks_einfo): Remove trailing
+	newline at end of warning message.
+
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* acx_configure_dir.m4 (ACX_CONFIGURE_DIR): Add support for
+	new "EXTRA-ARGS" parameter.
+	* configure.ac: If large-file support is disabled in GDB,
+	pass --disable-largefile to ACX_CONFIGURE_DIR call for "gnulib".
+	* configure: Regenerate.
+
+2014-12-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/17642
+	* gdbtypes.c (resolve_dynamic_type_internal): Apply check_typedef to
+	TYPE if not TYPE_CODE_TYPEDEF.
+
+2014-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	PR backtrace/16215:
+	* dwarf2-frame.c (dwarf2_frame_cfa): Remove the restriction
+	the frame unwinder must either be the dwarf2_frame_unwind
+	or the dwarf2_tailcall_frame_unwind.  Verify that this_frame's
+	stack_addr is valid before calling get_frame_base.  Throw
+	an error if not valid.
+
+2014-12-12  Doug Evans  <xdje42@gmail.com>
+
+	* valops.c (value_maybe_namespace_elt): Remove unnecessary test of
+	result != NULL.
+
+2014-12-12  Doug Evans  <xdje42@gmail.com>
+
+	* cp-support.h (cp_is_in_anonymous): Renamed from cp_is_anonymous.
+	All callers updated.  Rename arg "namespace" to "symbol_name".
+
+2014-12-12  Doug Evans  <xdje42@gmail.com>
+
+	* psymtab.c (psym_map_symtabs_matching_filename): Renamed from
+	partial_map_symtabs_matching_filename.  All uses updated.
+	(psym_find_pc_sect_compunit_symtab): Renamed from
+	find_pc_sect_compunit_symtab_from_partial.  All uses updated.
+	Add function comment.
+	(psym_lookup_symbol): Renamed from lookup_symbol_aux_psymtabs.
+	All uses updated.  Add function comment.
+	(psym_relocate): Renamed from relocate_psymtabs.  All uses updated.
+	Add function comment.
+	(psym_find_last_source_symtab): Renamed from
+	find_last_source_symtab_from_partial.  All uses updated.
+	Add function comment.
+	(psym_forget_cached_source_info): Renamed from
+	forget_cached_source_info_partial.  All uses updated.
+	Add function comment.
+	(psym_print_stats): Renamed from print_psymtab_stats_for_objfile.
+	All uses updated.  Add function comment.
+	(psym_dump): Renamed from dump_psymtabs_for_objfile.  All uses
+	updated.  Add function comment.
+	(psym_expand_symtabs_for_function): Renamed from
+	read_symtabs_for_function.  All uses updated.  Update function comment.
+	(psym_expand_all_symtabs): Renamed from expand_partial_symbol_tables.
+	All uses updated.  Add function comment.
+	(psym_expand_symtabs_with_fullname): Renamed from
+	read_psymtabs_with_fullname.  All uses updated.  Add function comment.
+	(psym_map_symbol_filenames): Renamed from map_symbol_filenames_psymtab.
+	All uses updated.  Add function comment.
+	(psym_map_matching_symbols): Renamed from map_matching_symbols_psymtab.
+	All uses updated.
+	(psym_expand_symtabs_matching): Renamed from
+	expand_symtabs_matching_via_partial.  All uses updated.
+	Add function comment.
+	(psym_has_symbols): Renamed from objfile_has_psyms.  All uses updated.
+	Add function comment.
+
+2014-12-12  Phil Muldoon  <pmuldoon@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Update.
+	* symtab.h (struct symbol_computed_ops) <generate_c_location>: New
+	field.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn) <la_get_compile_instance,
+	la_compute_program>: New fields.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Update.
+	* jv-lang.c (java_language_defn): Update.
+	* go-lang.c (go_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* dwarf2loc.h (dwarf2_compile_property_to_c): Declare.
+	* dwarf2loc.c (dwarf2_compile_property_to_c)
+	(locexpr_generate_c_location, loclist_generate_c_location): New
+	functions.
+	(dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Update.
+	* defs.h (enum compile_i_scope_types): New.
+	(enum command_control_type) <compile_control>: New constant.
+	(struct command_line) <control_u>: New field.
+	* d-lang.c (d_language_defn): Update.
+	* compile/compile.c: New file.
+	* compile/compile-c-support.c: New file.
+	* compile/compile-c-symbols.c: New file.
+	* compile/compile-c-types.c: New file.
+	* compile/compile.h: New file.
+	* compile/compile-internal.h: New file.
+	* compile/compile-loc2c.c: New file.
+	* compile/compile-object-load.c: New file.
+	* compile/compile-object-load.h: New file.
+	* compile/compile-object-run.c: New file.
+	* compile/compile-object-run.h: New file.
+	* cli/cli-script.c (multi_line_command_p, print_command_lines)
+	(execute_control_command, process_next_line)
+	(recurse_read_control_structure): Handle compile_control.
+	* c-lang.h (c_get_compile_context, c_compute_program): Declare.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* ada-lang.c (ada_language_defn): Update.
+	* Makefile.in (SUBDIR_GCC_COMPILE_OBS, SUBDIR_GCC_COMPILE_SRCS):
+	New variables.
+	(SFILES): Add SUBDIR_GCC_COMPILE_SRCS.
+	(HFILES_NO_SRCDIR): Add compile.h.
+	(COMMON_OBS): Add SUBDIR_GCC_COMPILE_OBS.
+	(INIT_FILES): Add SUBDIR_GCC_COMPILE_SRCS.
+	(compile.o, compile-c-types.o, compile-c-symbols.o)
+	(compile-object-load.o, compile-object-run.o, compile-loc2c.o)
+	(compile-c-support.o): New targets.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* s390-linux-tdep.c (s390_gcc_target_options): New function.
+	(s390_gdbarch_init): Add it to gdbarch.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-tdep.c: Include objfiles.h and infcall.h.
+	(GDB_MMAP_MAP_PRIVATE, GDB_MMAP_MAP_ANONYMOUS, linux_infcall_mmap): New
+	function.
+	(linux_init_abi): Add linux_infcall_mmap to gdbarch.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.h (dwarf2_reg_to_regnum_or_error): Declare.
+	* dwarf2loc.c (dwarf2_reg_to_regnum_or_error): Rename from
+	translate_register.  Now public.
+	(dwarf2_compile_expr_to_ax): Update.
+
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (dwarf_expr_frame_base_1): Remove declaration.
+	(dwarf_expr_frame_base): Update caller.
+	(dwarf_expr_frame_base_1): Rename to ...
+	(func_get_frame_base_dwarf_block): ... this and make it public.
+	(dwarf2_compile_expr_to_ax, locexpr_describe_location_piece): Update
+	callers.
+	* dwarf2loc.h (func_get_frame_base_dwarf_block): New declaration.
+
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax) <DW_OP_call_frame_cfa>:
+	Update.
+	* dwarf2-frame.c (dwarf2_fetch_cfa_info): New function, based on
+	dwarf2_compile_cfa_to_ax.
+	(dwarf2_compile_cfa_to_ax): Remove.
+	* dwarf2-frame.h (dwarf2_fetch_cfa_info): Declare.
+	(dwarf2_compile_cfa_to_ax): Remove.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* infcall.h (call_function_by_hand_dummy): Declare.
+	* infcall.c (call_function_by_hand): Use
+	call_function_by_hand_dummy.
+	(call_function_by_hand_dummy): Rename from call_function_by_hand.
+	Add arguments.  Register a destructor.
+
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* osabi.h (osabi_triplet_regexp): Declare.
+	* osabi.c (struct osabi_names): New.
+	(gdb_osabi_names): Change type to struct osabi_names.  Update
+	values.
+	(gdbarch_osabi_name): Update.
+	(osabi_triplet_regexp): New function.
+	(osabi_from_tdesc_string, _initialize_gdb_osabi): Update.
+	* i386-tdep.c (i386_gnu_triplet_regexp): New method.
+	(i386_elf_init_abi, i386_go32_init_abi, i386_gdbarch_init): Call
+	set_gdbarch_gnu_triplet_regexp.
+	* gdbarch.sh (gnu_triplet_regexp): New method.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* arch-utils.h (default_gnu_triplet_regexp): Declare.
+	* arch-utils.c (default_gnu_triplet_regexp): New function.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* arch-utils.c (default_infcall_mmap)
+	(default_gcc_target_options): New functions.
+	* arch-utils.h (GDB_MMAP_PROT_READ, GDB_MMAP_PROT_WRITE)
+	(GDB_MMAP_PROT_EXEC): Define.
+	(default_infcall_mmap, default_gcc_target_options): Declare.
+	* gdbarch.h: Rebuild.
+	* gdbarch.c: Rebuild.
+	* gdbarch.sh (infcall_mmap, gcc_target_options): New methods.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dummy-frame.c (struct dummy_frame) <dtor, dtor_data>: New
+	fields.
+	(pop_dummy_frame): Call the destructor if it exists.
+	(register_dummy_frame_dtor, find_dummy_frame_dtor): New
+	functions.
+	* dummy-frame.h (dummy_frame_dtor_ftype): New typedef.
+	(register_dummy_frame_dtor, find_dummy_frame_dtor): Declare.
+
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdbtypes.h (make_unqualified_type): Declare.
+	* gdbtypes.c (make_unqualified_type): New function.
+
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* ui-file.h (ui_file_write_for_put): Declare.
+	* ui-file.c (ui_file_write_for_put): New function.
+	* mi/mi-out.c (do_write): Remove.
+	(mi_out_put): Use ui_file_write_for_put.
+
+2014-12-12  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention gdb.lookup_objfile.
+	* python/python.c (GdbMethods): Add lookup_objfile.
+	* python/python-internal.h (gdbpy_lookup_objfile): Declare.
+	* python/py-objfile.c: #include "symtab.h".
+	(objfpy_build_id_ok, objfpy_build_id_matches): New functions.
+	(objfpy_lookup_objfile_by_name): New function.
+	(objfpy_lookup_objfile_by_build_id): New function.
+	(gdbpy_lookup_objfile): New function.
+
+2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.h (MSYMBOL_TARGET_FLAG_MIPS16): New macro.
+	(MSYMBOL_TARGET_FLAG_MICROMIPS): Likewise.
+	* mips-tdep.c (mips_elf_make_msymbol_special): Use the new
+	macros.
+	(msymbol_is_mips, msymbol_is_mips16, msymbol_is_micromips):
+	Likewise.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* completer.c: Include "target.h", "reggroups.h", and
+	"user-regs.h".
+	(reg_or_group_completer): New.
+	* completer.h (reg_or_group_completer): Declare.
+	* infcmd.c (_initialize_infcmd): Set reg_or_group_completer for
+	the "info registers" and "info all-registers" commands and the
+	dbx-mode "lr" command.
+
+2014-12-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* user-regs.c: Include "arch-utils.h", "command.h", and
+	"cli/cli-cmds.h".
+	(maintenance_print_user_registers): New.
+	(_initialize_user_regs): Register new "maint print user-registers"
+	subcommand.
+	* NEWS: Mention new GDB command "maint print user-registers".
+
+2014-12-12  Maciej W. Rozycki  <macro@codesourcery.com>
+            Maciej W. Rozycki  <macro@mips.com>
+            Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbarch.sh (elf_make_msymbol_special): Change type to `F',
+	remove `predefault' and `invalid_p' initializers.
+	(make_symbol_special): New architecture method.
+	(adjust_dwarf2_addr, adjust_dwarf2_line): Likewise.
+	(objfile, symbol): New declarations.
+	* arch-utils.h (default_elf_make_msymbol_special): Remove
+	prototype.
+	(default_make_symbol_special): New prototype.
+	(default_adjust_dwarf2_addr): Likewise.
+	(default_adjust_dwarf2_line): Likewise.
+	* mips-tdep.h (mips_unmake_compact_addr): New prototype.
+	* arch-utils.c (default_elf_make_msymbol_special): Remove
+	function.
+	(default_make_symbol_special): New function.
+	(default_adjust_dwarf2_addr): Likewise.
+	(default_adjust_dwarf2_line): Likewise.
+	* dwarf2-frame.c (decode_frame_entry_1): Call
+	`gdbarch_adjust_dwarf2_addr'.
+	* dwarf2loc.c (dwarf2_find_location_expression): Likewise.
+	* dwarf2read.c (create_addrmap_from_index): Likewise.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(add_partial_symbol): Likewise.
+	(add_partial_subprogram): Likewise.
+	(process_full_comp_unit): Likewise.
+	(read_file_scope): Likewise.
+	(read_func_scope): Likewise.  Call `gdbarch_make_symbol_special'.
+	(read_lexical_block_scope): Call `gdbarch_adjust_dwarf2_addr'.
+	(read_call_site_scope): Likewise.
+	(dwarf2_ranges_read): Likewise.
+	(dwarf2_record_block_ranges): Likewise.
+	(read_attribute_value): Likewise.
+	(dwarf_decode_lines_1): Call `gdbarch_adjust_dwarf2_line'.
+	(new_symbol_full): Call `gdbarch_adjust_dwarf2_addr'.
+	* elfread.c (elf_symtab_read): Don't call
+	`gdbarch_elf_make_msymbol_special' if unset.
+	* mips-linux-tdep.c (micromips_linux_sigframe_validate): Strip
+	the ISA bit from the PC.
+	* mips-tdep.c (mips_unmake_compact_addr): New function.
+	(mips_elf_make_msymbol_special): Set the ISA bit in the symbol's
+	address appropriately.
+	(mips_make_symbol_special): New function.
+	(mips_pc_is_mips): Set the ISA bit before symbol lookup.
+	(mips_pc_is_mips16): Likewise.
+	(mips_pc_is_micromips): Likewise.
+	(mips_pc_isa): Likewise.
+	(mips_adjust_dwarf2_addr): New function.
+	(mips_adjust_dwarf2_line): Likewise.
+	(mips_read_pc, mips_unwind_pc): Keep the ISA bit.
+	(mips_addr_bits_remove): Likewise.
+	(mips_skip_trampoline_code): Likewise.
+	(mips_write_pc): Don't set the ISA bit.
+	(mips_eabi_push_dummy_call): Likewise.
+	(mips_o64_push_dummy_call): Likewise.
+	(mips_gdbarch_init): Install `mips_make_symbol_special',
+	`mips_adjust_dwarf2_addr' and `mips_adjust_dwarf2_line' gdbarch
+	handlers.
+	* solib.c (gdb_bfd_lookup_symbol_from_symtab): Get
+	target-specific symbol address adjustments.
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Regenerate.
+
+2014-12-12  Yao Qi  <yao@codesourcery.com>
+
+	PR tdep/14261
+	* arm-tdep.c (arm_skip_prologue): Remove unused local variable
+	'skip_pc'.  Remove code skipping prologue instructions, use
+	arm_analyze_prologue instead.
+	(arm_analyze_prologue): Stop the scanning for unrecognized
+	instruction when skipping prologue.
+
+2014-12-12  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_instruction_restores_sp): New function.
+	(arm_analyze_prologue): Call arm_instruction_restores_sp.
+	(arm_in_function_epilogue_p): Move code to
+	arm_instruction_restores_sp.
+
+2014-12-11  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_nested_symbol): Fix comments.
+
+2014-12-11  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_symbol_in_objfile_symtabs): Delete forward decl.
+	(symbol *lookup_symbol_via_quick_fns): Ditto.
+	(lookup_symbol_in_objfile): Add forward decl.
+	(lookup_global_symbol_from_objfile): Simplify, call
+	lookup_symbol_in_objfile.
+
+2014-12-11  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (domain_name) <MODULE_DOMAIN>: Add missing case.
+
+2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR breakpoints/17012
+	* breakpoint.c (remove_breakpoints_pid): Skip removing breakpoint if
+	it is marked as persistent.
+
+2014-12-10  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): Move definition,
+	closer to its subroutines.
+
+2014-12-10  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (lookup_symbol_file): Move next to only caller.
+
+2014-12-10  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_symbol_imports): Make static.
+	* cp-support.c (cp_lookup_symbol_imports): Delete.
+
+2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/17627
+	* target.c (cleanup_restore_target_terminal): New function.
+	(make_cleanup_restore_target_terminal): New function.
+	* target.h (make_cleanup_restore_target_terminal): New declaration.
+	* mi/mi-interp.c (mi_thread_exit): Use the new cleanup.
+
+2014-12-08  Doug Evans  <dje@google.com>
+
+	* python/py-objfile.c (objfpy_get_owner): Increment refcount of result.
+
+2014-12-08  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention gdb.Objfile.owner.
+	* python/py-objfile.c (objfpy_get_owner): New function.
+	(objfile_getset): Add "owner".
+
+2014-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symtab.c (lookup_symbol_in_objfile_symtabs): New declaration.
+	(lookup_global_symbol_from_objfile): Call it.
+
+2014-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove const from struct objfile *.
+	* solib-darwin.c, solib-spu.c, solib-svr4.c, solib.c, solist.h,
+	symtab.c, symtab.h: In these files.
+
+2014-12-05  Andreas From  <andreas.from@ericsson.com>
+
+	* MAINTAINERS (Write After Approval): Add "Andreas From"
+
 2014-12-05  Doug Evans  <xdje42@gmail.com>
 
 	Revert:

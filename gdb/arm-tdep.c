@@ -1388,7 +1388,6 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long inst;
-  CORE_ADDR skip_pc;
   CORE_ADDR func_addr, limit_pc;
 
   /* See if we can determine the end of the prologue via the symbol table.
@@ -1462,65 +1461,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Check if this is Thumb code.  */
   if (arm_pc_is_thumb (gdbarch, pc))
     return thumb_analyze_prologue (gdbarch, pc, limit_pc, NULL);
-
-  for (skip_pc = pc; skip_pc < limit_pc; skip_pc += 4)
-    {
-      inst = read_memory_unsigned_integer (skip_pc, 4, byte_order_for_code);
-
-      /* "mov ip, sp" is no longer a required part of the prologue.  */
-      if (inst == 0xe1a0c00d)			/* mov ip, sp */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe28dc000)    /* add ip, sp #n */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe24dc000)    /* sub ip, sp #n */
-	continue;
-
-      /* Some prologues begin with "str lr, [sp, #-4]!".  */
-      if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
-	continue;
-
-      if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
-	continue;
-
-      if ((inst & 0xfffff800) == 0xe92dd800)	/* stmfd sp!,{fp,ip,lr,pc} */
-	continue;
-
-      /* Any insns after this point may float into the code, if it makes
-	 for better instruction scheduling, so we skip them only if we
-	 find them, but still consider the function to be frame-ful.  */
-
-      /* We may have either one sfmfd instruction here, or several stfe
-	 insns, depending on the version of floating point code we
-	 support.  */
-      if ((inst & 0xffbf0fff) == 0xec2d0200)	/* sfmfd fn, <cnt>, [sp]! */
-	continue;
-
-      if ((inst & 0xffff8fff) == 0xed6d0103)	/* stfe fn, [sp, #-12]! */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
-	continue;
-
-      if ((inst & 0xffffc000) == 0xe54b0000	/* strb r(0123),[r11,#-nn] */
-	  || (inst & 0xffffc0f0) == 0xe14b00b0	/* strh r(0123),[r11,#-nn] */
-	  || (inst & 0xffffc000) == 0xe50b0000)	/* str  r(0123),[r11,#-nn] */
-	continue;
-
-      if ((inst & 0xffffc000) == 0xe5cd0000	/* strb r(0123),[sp,#nn] */
-	  || (inst & 0xffffc0f0) == 0xe1cd00b0	/* strh r(0123),[sp,#nn] */
-	  || (inst & 0xffffc000) == 0xe58d0000)	/* str  r(0123),[sp,#nn] */
-	continue;
-
-      /* Un-recognized instruction; stop scanning.  */
-      break;
-    }
-
-  return skip_pc;		/* End of prologue.  */
+  else
+    return arm_analyze_prologue (gdbarch, pc, limit_pc, NULL);
 }
 
 /* *INDENT-OFF* */
@@ -1662,6 +1604,30 @@ arm_instruction_changes_pc (uint32_t this_instr)
       default:
 	internal_error (__FILE__, __LINE__, _("bad value in switch"));
       }
+}
+
+/* Return 1 if the ARM instruction INSN restores SP in epilogue, 0
+   otherwise.  */
+
+static int
+arm_instruction_restores_sp (unsigned int insn)
+{
+  if (bits (insn, 28, 31) != INST_NV)
+    {
+      if ((insn & 0x0df0f000) == 0x0080d000
+	  /* ADD SP (register or immediate).  */
+	  || (insn & 0x0df0f000) == 0x0040d000
+	  /* SUB SP (register or immediate).  */
+	  || (insn & 0x0ffffff0) == 0x01a0d000
+	  /* MOV SP.  */
+	  || (insn & 0x0fff0000) == 0x08bd0000
+	  /* POP (LDMIA).  */
+	  || (insn & 0x0fff0000) == 0x049d0000)
+	  /* POP of a single register.  */
+	return 1;
+    }
+
+  return 0;
 }
 
 /* Analyze an ARM mode prologue starting at PROLOGUE_START and
@@ -1861,6 +1827,11 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
       else if (arm_instruction_changes_pc (insn))
 	/* Don't scan past anything that might change control flow.  */
 	break;
+      else if (arm_instruction_restores_sp (insn))
+	{
+	  /* Don't scan past the epilogue.  */
+	  break;
+	}
       else if ((insn & 0xfe500000) == 0xe8100000	/* ldm */
 	       && pv_is_register (regs[bits (insn, 16, 19)], ARM_SP_REGNUM))
 	/* Ignore block loads from the stack, potentially copying
@@ -1876,10 +1847,17 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	continue;
       else
 	{
-	  /* The optimizer might shove anything into the prologue,
-	     so we just skip what we don't recognize.  */
+	  /* The optimizer might shove anything into the prologue, if
+	     we build up cache (cache != NULL) from scanning prologue,
+	     we just skip what we don't recognize and scan further to
+	     make cache as complete as possible.  However, if we skip
+	     prologue, we'll stop immediately on unrecognized
+	     instruction.  */
 	  unrecognized_pc = current_pc;
-	  continue;
+	  if (cache != NULL)
+	    continue;
+	  else
+	    break;
 	}
     }
 
@@ -3351,7 +3329,7 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn;
-  int found_return, found_stack_adjust;
+  int found_return;
   CORE_ADDR func_start, func_end;
 
   if (arm_pc_is_thumb (gdbarch, pc))
@@ -3391,28 +3369,8 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (pc < func_start + 4)
     return 0;
 
-  found_stack_adjust = 0;
   insn = read_memory_unsigned_integer (pc - 4, 4, byte_order_for_code);
-  if (bits (insn, 28, 31) != INST_NV)
-    {
-      if ((insn & 0x0df0f000) == 0x0080d000)
-	/* ADD SP (register or immediate).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0df0f000) == 0x0040d000)
-	/* SUB SP (register or immediate).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0ffffff0) == 0x01a0d000)
-	/* MOV SP.  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0fff0000) == 0x08bd0000)
-	/* POP (LDMIA).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0fff0000) == 0x049d0000)
-	/* POP of a single register.  */
-	found_stack_adjust = 1;
-    }
-
-  if (found_stack_adjust)
+  if (arm_instruction_restores_sp (insn))
     return 1;
 
   return 0;

@@ -873,6 +873,8 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
       if (symvis - 1 < hvis - 1)
 	h->other = symvis | (h->other & ~ELF_ST_VISIBILITY (-1));
     }
+  else if (definition && ELF_ST_VISIBILITY (isym->st_other) != STV_DEFAULT)
+    h->protected_def = 1;
 }
 
 /* This function is called when we want to merge a new symbol with an
@@ -2637,7 +2639,8 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
    DYNBSS.  */
 
 bfd_boolean
-_bfd_elf_adjust_dynamic_copy (struct elf_link_hash_entry *h,
+_bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
+			      struct elf_link_hash_entry *h,
 			      asection *dynbss)
 {
   unsigned int power_of_two;
@@ -2675,6 +2678,15 @@ _bfd_elf_adjust_dynamic_copy (struct elf_link_hash_entry *h,
 
   /* Increment the size of DYNBSS to make room for the symbol.  */
   dynbss->size += h->size;
+
+  if (h->protected_def)
+    {
+      info->callbacks->einfo
+	(_("%P: copy reloc against protected `%T' is invalid\n"),
+	 h->root.root.string);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   return TRUE;
 }
@@ -8097,7 +8109,8 @@ cmp_ext64b_r_offset (const void *p, const void *q)
 
 static void
 elf_link_adjust_relocs (bfd *abfd,
-			struct bfd_elf_section_reloc_data *reldata)
+			struct bfd_elf_section_reloc_data *reldata,
+			bfd_boolean sort)
 {
   unsigned int i;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -8108,7 +8121,6 @@ elf_link_adjust_relocs (bfd *abfd,
   int r_sym_shift;
   unsigned int count = reldata->count;
   struct elf_link_hash_entry **rel_hash = reldata->hashes;
-  int (*compare) (const void *, const void *);
 
   if (reldata->hdr->sh_entsize == bed->s->sizeof_rel)
     {
@@ -8155,29 +8167,34 @@ elf_link_adjust_relocs (bfd *abfd,
       (*swap_out) (abfd, irela, erela);
     }
 
-  if (bed->s->arch_size == 32)
+  if (sort)
     {
-      if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
-	compare = cmp_ext32l_r_offset;
-      else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
-	compare = cmp_ext32b_r_offset;
+      int (*compare) (const void *, const void *);
+
+      if (bed->s->arch_size == 32)
+	{
+	  if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
+	    compare = cmp_ext32l_r_offset;
+	  else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
+	    compare = cmp_ext32b_r_offset;
+	  else
+	    abort ();
+	}
       else
-	abort ();
-    }
-  else
-    {
+	{
 #ifdef BFD_HOST_64_BIT
-      if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
-	compare = cmp_ext64l_r_offset;
-      else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
-	compare = cmp_ext64b_r_offset;
-      else
+	  if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
+	    compare = cmp_ext64l_r_offset;
+	  else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
+	    compare = cmp_ext64b_r_offset;
+	  else
 #endif
-	abort ();
+	    abort ();
+	}
+      qsort (reldata->hdr->contents, count, reldata->hdr->sh_entsize, compare);
+      free (reldata->hashes);
+      reldata->hashes = NULL;
     }
-  qsort (reldata->hdr->contents, count, reldata->hdr->sh_entsize, compare);
-  free (reldata->hashes);
-  reldata->hashes = NULL;
 }
 
 struct elf_link_sort_rela
@@ -11325,13 +11342,15 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       struct bfd_elf_section_data *esdo = elf_section_data (o);
+      bfd_boolean sort;
       if ((o->flags & SEC_RELOC) == 0)
 	continue;
 
+      sort = bed->sort_relocs_p == NULL || (*bed->sort_relocs_p) (o);
       if (esdo->rel.hdr != NULL)
-	elf_link_adjust_relocs (abfd, &esdo->rel);
+	elf_link_adjust_relocs (abfd, &esdo->rel, sort);
       if (esdo->rela.hdr != NULL)
-	elf_link_adjust_relocs (abfd, &esdo->rela);
+	elf_link_adjust_relocs (abfd, &esdo->rela, sort);
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
 	 trying to swap the relocs out itself.  */

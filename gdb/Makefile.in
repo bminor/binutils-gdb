@@ -280,6 +280,24 @@ SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
 	-DTUI=1
 
+#
+# GCC Compile support sub-directory definitions
+#
+SUBDIR_GCC_COMPILE_OBS = \
+	compile.o compile-c-symbols.o compile-c-types.o \
+	compile-object-load.o compile-object-run.o \
+	compile-loc2c.o compile-c-support.o
+SUBDIR_GCC_COMPILE_SRCS = \
+	compile/compile.c \
+	compile/compile-c-symbols.c \
+	compile/compile-c-types.c \
+	compile/compile-object-load.c \
+	compile/compile-object-load.h \
+	compile/compile-object-run.c \
+	compile/compile-object-run.h \
+	compile/compile-loc2c.c \
+	compile/compile-c-support.c
+
 # Guile sub directory definitons for guile support.
 
 SUBDIR_GUILE_OBS = \
@@ -854,7 +872,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
-	common/errors.c common/common-debug.c common/common-exceptions.c
+	common/errors.c common/common-debug.c common/common-exceptions.c \
+	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -876,7 +895,7 @@ nto-tdep.h serial.h \
 c-lang.h d-lang.h go-lang.h frame.h event-loop.h block.h cli/cli-setshow.h \
 cli/cli-decode.h cli/cli-cmds.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h common/version.h \
-gnulib/import/string.in.h gnulib/import/str-two-way.h \
+compile/compile.h gnulib/import/string.in.h gnulib/import/str-two-way.h \
 gnulib/import/stdint.in.h remote.h remote-notif.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h dwarf2-frame-tailcall.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-linux-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
@@ -1041,7 +1060,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
-	common-exceptions.o
+	common-exceptions.o \
+	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
 
@@ -1284,7 +1304,7 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 # duplicates.  Files in the gdb/ directory can end up appearing in
 # COMMON_OBS (as a .o file) and CONFIG_SRCS (as a .c file).
 
-INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS)
+INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS) $(SUBDIR_GCC_COMPILE_SRCS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
@@ -1914,6 +1934,39 @@ cli-setshow.o: $(srcdir)/cli/cli-setshow.c
 
 cli-utils.o: $(srcdir)/cli/cli-utils.c
 	$(COMPILE) $(srcdir)/cli/cli-utils.c
+	$(POSTCOMPILE)
+
+# GCC Compile support dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+compile.o: $(srcdir)/compile/compile.c
+	$(COMPILE) $(srcdir)/compile/compile.c
+	$(POSTCOMPILE)
+
+compile-c-types.o: $(srcdir)/compile/compile-c-types.c
+	$(COMPILE) $(srcdir)/compile/compile-c-types.c
+	$(POSTCOMPILE)
+
+compile-c-symbols.o: $(srcdir)/compile/compile-c-symbols.c
+	$(COMPILE) $(srcdir)/compile/compile-c-symbols.c
+	$(POSTCOMPILE)
+
+compile-object-load.o: $(srcdir)/compile/compile-object-load.c
+	$(COMPILE) $(srcdir)/compile/compile-object-load.c
+	$(POSTCOMPILE)
+
+compile-object-run.o: $(srcdir)/compile/compile-object-run.c
+	$(COMPILE) $(srcdir)/compile/compile-object-run.c
+	$(POSTCOMPILE)
+
+compile-loc2c.o: $(srcdir)/compile/compile-loc2c.c
+	$(COMPILE) $(srcdir)/compile/compile-loc2c.c
+	$(POSTCOMPILE)
+
+compile-c-support.o: $(srcdir)/compile/compile-c-support.c
+	$(COMPILE) $(srcdir)/compile/compile-c-support.c
 	$(POSTCOMPILE)
 
 

@@ -865,6 +865,8 @@ const struct language_defn c_language_defn =
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &c_varobj_ops,
+  c_get_compile_context,
+  c_compute_program,
   LANG_MAGIC
 };
 
@@ -990,6 +992,8 @@ const struct language_defn cplus_language_defn =
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &cplus_varobj_ops,
+  NULL,
+  NULL,
   LANG_MAGIC
 };
 
@@ -1033,6 +1037,8 @@ const struct language_defn asm_language_defn =
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,
+  NULL,
+  NULL,
   LANG_MAGIC
 };
 
@@ -1081,6 +1087,8 @@ const struct language_defn minimal_language_defn =
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,
+  NULL,
+  NULL,
   LANG_MAGIC
 };
 

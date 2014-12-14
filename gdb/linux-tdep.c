@@ -33,6 +33,8 @@
 #include "arch-utils.h"
 #include "gdb_obstack.h"
 #include "observer.h"
+#include "objfiles.h"
+#include "infcall.h"
 
 #include <ctype.h>
 
@@ -1921,6 +1923,52 @@ linux_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
   return 1;
 }
 
+/* Symbols for linux_infcall_mmap's ARG_FLAGS; their Linux MAP_* system
+   definitions would be dependent on compilation host.  */
+#define GDB_MMAP_MAP_PRIVATE	0x02		/* Changes are private.  */
+#define GDB_MMAP_MAP_ANONYMOUS	0x20		/* Don't use a file.  */
+
+/* See gdbarch.sh 'infcall_mmap'.  */
+
+static CORE_ADDR
+linux_infcall_mmap (CORE_ADDR size, unsigned prot)
+{
+  struct objfile *objf;
+  /* Do there still exist any Linux systems without "mmap64"?
+     "mmap" uses 64-bit off_t on x86_64 and 32-bit off_t on i386 and x32.  */
+  struct value *mmap_val = find_function_in_inferior ("mmap64", &objf);
+  struct value *addr_val;
+  struct gdbarch *gdbarch = get_objfile_arch (objf);
+  CORE_ADDR retval;
+  enum
+    {
+      ARG_ADDR, ARG_LENGTH, ARG_PROT, ARG_FLAGS, ARG_FD, ARG_OFFSET, ARG_MAX
+    };
+  struct value *arg[ARG_MAX];
+
+  arg[ARG_ADDR] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr,
+				      0);
+  /* Assuming sizeof (unsigned long) == sizeof (size_t).  */
+  arg[ARG_LENGTH] = value_from_ulongest
+		    (builtin_type (gdbarch)->builtin_unsigned_long, size);
+  gdb_assert ((prot & ~(GDB_MMAP_PROT_READ | GDB_MMAP_PROT_WRITE
+			| GDB_MMAP_PROT_EXEC))
+	      == 0);
+  arg[ARG_PROT] = value_from_longest (builtin_type (gdbarch)->builtin_int, prot);
+  arg[ARG_FLAGS] = value_from_longest (builtin_type (gdbarch)->builtin_int,
+				       GDB_MMAP_MAP_PRIVATE
+				       | GDB_MMAP_MAP_ANONYMOUS);
+  arg[ARG_FD] = value_from_longest (builtin_type (gdbarch)->builtin_int, -1);
+  arg[ARG_OFFSET] = value_from_longest (builtin_type (gdbarch)->builtin_int64,
+					0);
+  addr_val = call_function_by_hand (mmap_val, ARG_MAX, arg);
+  retval = value_as_address (addr_val);
+  if (retval == (CORE_ADDR) -1)
+    error (_("Failed inferior mmap call for %s bytes, errno is changed."),
+	   pulongest (size));
+  return retval;
+}
+
 /* To be called from the various GDB_OSABI_LINUX handlers for the
    various GNU/Linux architectures and machine types.  */
 
@@ -1939,6 +1987,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_to_target (gdbarch,
 				    linux_gdb_signal_to_target);
   set_gdbarch_vsyscall_range (gdbarch, linux_vsyscall_range);
+  set_gdbarch_infcall_mmap (gdbarch, linux_infcall_mmap);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

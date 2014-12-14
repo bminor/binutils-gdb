@@ -21,12 +21,14 @@
   ** New attribute 'producer' for gdb.Symtab objects.
   ** gdb.Objfile objects have a new attribute "progspace",
      which is the gdb.Progspace object of the containing program space.
+  ** gdb.Objfile objects have a new attribute "owner".
   ** gdb.Objfile objects have a new attribute "build_id",
      which is the build ID generated when the file was built.
   ** gdb.Objfile objects have a new method "add_separate_debug_file".
   ** A new event "gdb.clear_objfiles" has been added, triggered when
      selecting a new file to debug.
   ** You can now add attributes to gdb.Objfile and gdb.Progspace objects.
+  ** New function gdb.lookup_objfile.
 
 * New Python-based convenience functions:
 
@@ -34,6 +36,16 @@
   ** $_caller_matches(regexp [, number_of_frames])
   ** $_any_caller_is(name [, number_of_frames])
   ** $_any_caller_matches(regexp [, number_of_frames])
+
+* GDB now supports the compilation and injection of source code into
+  the inferior.  GDB will use GCC 5.0 or higher built with libcc1.so
+  to compile the source code to object code, and if successful, inject
+  and execute that code within the current context of the inferior.
+  Currently the C language is supported.  The commands used to
+  interface with this new feature are:
+
+     compile code [-raw|-r] [--] [source code]
+     compile file [-raw|-r] filename
 
 * New commands
 
@@ -43,6 +55,18 @@ queue-signal signal-name-or-number
 add-auto-load-scripts-directory directory
   Add entries to the list of directories from which to load auto-loaded
   scripts.
+
+maint print user-registers
+  List all currently available "user" registers.
+
+compile code [-r|-raw] [--] [source code]
+  Compile, inject, and execute in the inferior the executable object
+  code produced by compiling the provided source code.
+
+compile file [-r|-raw] filename
+  Compile and inject into the inferior the executable object code
+  produced by compiling the source code stored in the filename
+  provided.
 
 * On resume, GDB now always passes the signal the program had stopped
   for to the thread the signal was sent to, even if the user changed

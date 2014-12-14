@@ -107,6 +107,7 @@ case ${cpu} in
   tilegx*be)		cpu_type=tilegx endian=big ;;
   tilegx*)		cpu_type=tilegx endian=little ;;
   v850*)		cpu_type=v850 ;;
+  visium)		cpu_type=visium endian=big ;;
   x86_64*)		cpu_type=i386 arch=x86_64;;
   xgate)		cpu_type=xgate ;;
   xtensa*)		cpu_type=xtensa arch=xtensa ;;
@@ -372,7 +373,7 @@ case ${generic_target} in
   ppc-*-winnt*)				fmt=coff em=pe ;;
   ppc-*-aix5.[01])			fmt=coff em=aix5 ;;
   ppc-*-aix[5-9].*)			fmt=coff em=aix5 ;;
-  ppc-*-aix*)				fmt=coff ;;
+  ppc-*-aix*)				fmt=coff em=aix ;;
   ppc-*-beos*)				fmt=coff ;;
   ppc-*-*n*bsd* | ppc-*-elf*)		fmt=elf ;;
   ppc-*-eabi* | ppc-*-sysv4*)		fmt=elf ;;
@@ -452,6 +453,8 @@ case ${generic_target} in
 
   vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
   vax-*-linux-*)			fmt=elf em=linux ;;
+
+  visium-*-elf)				fmt=elf ;;
 
   xstormy16-*-*)			fmt=elf ;;
   

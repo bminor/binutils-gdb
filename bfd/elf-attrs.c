@@ -492,7 +492,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	      bfd_vma subsection_len;
 	      bfd_byte *end;
 
-	      tag = read_unsigned_leb128 (abfd, p, &n);
+	      tag = safe_read_leb128 (abfd, p, &n, FALSE, p_end);
 	      p += n;
 	      if (p < p_end - 4)
 		subsection_len = bfd_get_32 (abfd, p);
@@ -506,6 +506,9 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	      section_len -= subsection_len;
 	      subsection_len -= n + 4;
 	      end = p + subsection_len;
+	      /* PR 17512: file: 0e8c0c90.  */
+	      if (end > p_end)
+		end = p_end;
 	      switch (tag)
 		{
 		case Tag_File:
@@ -513,25 +516,25 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 		    {
 		      int type;
 
-		      tag = read_unsigned_leb128 (abfd, p, &n);
+		      tag = safe_read_leb128 (abfd, p, &n, FALSE, end);
 		      p += n;
 		      type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
 		      switch (type & (ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL))
 			{
 			case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:
-			  val = read_unsigned_leb128 (abfd, p, &n);
+			  val = safe_read_leb128 (abfd, p, &n, FALSE, end);
 			  p += n;
 			  bfd_elf_add_obj_attr_int_string (abfd, vendor, tag,
-							   val, (char *)p);
+							   val, (char *) p);
 			  p += strlen ((char *)p) + 1;
 			  break;
 			case ATTR_TYPE_FLAG_STR_VAL:
 			  bfd_elf_add_obj_attr_string (abfd, vendor, tag,
-						       (char *)p);
+						       (char *) p);
 			  p += strlen ((char *)p) + 1;
 			  break;
 			case ATTR_TYPE_FLAG_INT_VAL:
-			  val = read_unsigned_leb128 (abfd, p, &n);
+			  val = safe_read_leb128 (abfd, p, &n, FALSE, end);
 			  p += n;
 			  bfd_elf_add_obj_attr_int (abfd, vendor, tag, val);
 			  break;

@@ -1003,6 +1003,45 @@ read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
   return result;
 }
 
+/* Read in a LEB128 encoded value from ABFD starting at DATA.
+   If SIGN is true, return a signed LEB128 value.
+   If LENGTH_RETURN is not NULL, return in it the number of bytes read.
+   No bytes will be read at address END or beyond.  */
+
+bfd_vma
+safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
+		  bfd_byte *data,
+		  unsigned int *length_return,
+		  bfd_boolean sign,
+		  const bfd_byte * const end)
+{
+  bfd_vma result = 0;
+  unsigned int num_read = 0;
+  unsigned int shift = 0;
+  unsigned char byte = 0;
+
+  while (data < end)
+    {
+      byte = bfd_get_8 (abfd, data);
+      data++;
+      num_read++;
+
+      result |= ((bfd_vma) (byte & 0x7f)) << shift;
+
+      shift += 7;
+      if ((byte & 0x80) == 0)
+	break;
+    }
+
+  if (length_return != NULL)
+    *length_return = num_read;
+
+  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
+    result |= (bfd_vma) -1 << shift;
+
+  return result;
+}
+
 /* Helper function for reading sleb128 encoded data.  */
 
 bfd_signed_vma

@@ -632,6 +632,21 @@ struct symbol_computed_ops
 
   void (*tracepoint_var_ref) (struct symbol *symbol, struct gdbarch *gdbarch,
 			      struct agent_expr *ax, struct axs_value *value);
+
+  /* Generate C code to compute the location of SYMBOL.  The C code is
+     emitted to STREAM.  GDBARCH is the current architecture and PC is
+     the PC at which SYMBOL's location should be evaluated.
+     REGISTERS_USED is a vector indexed by register number; the
+     generator function should set an element in this vector if the
+     corresponding register is needed by the location computation.
+     The generated C code must assign the location to a local
+     variable; this variable's name is RESULT_NAME.  */
+
+  void (*generate_c_location) (struct symbol *symbol, struct ui_file *stream,
+			       struct gdbarch *gdbarch,
+			       unsigned char *registers_used,
+			       CORE_ADDR pc, const char *result_name);
+
 };
 
 /* The methods needed to implement LOC_BLOCK for inferior functions.
@@ -1475,7 +1490,7 @@ extern enum language main_language (void);
    if necessary.  */
 
 extern struct symbol *
-  lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
+  lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				     const char *name,
 				     const domain_enum domain);
 

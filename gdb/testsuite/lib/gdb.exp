@@ -2518,6 +2518,23 @@ proc skip_libstdcxx_probe_tests {} {
     return $ok
 }
 
+# Return 1 if we should skip tests of the "compile" feature.
+# This must be invoked after the inferior has been started.
+
+proc skip_compile_feature_tests {} {
+    global gdb_prompt
+
+    set result 0
+    gdb_test_multiple "compile code -- ;" "check for working compile command" {
+	"Could not load libcc1.*\r\n$gdb_prompt $" {
+	    set result 1
+	}
+	-re "\r\n$gdb_prompt $" {
+	}
+    }
+    return $result
+}
+
 # Check whether we're testing with the remote or extended-remote
 # targets.
 
@@ -2535,6 +2552,31 @@ proc gdb_is_target_remote {} {
 	}
     }
     return 0
+}
+
+# Return 1 if the current remote target is an instance of our GDBserver, 0
+# otherwise.  Return -1 if there was an error and we can't tell.
+
+gdb_caching_proc target_is_gdbserver {
+    global gdb_prompt
+
+    set is_gdbserver -1
+    set test "Probing for GDBserver"
+
+    gdb_test_multiple "monitor help" $test {
+	-re "The following monitor commands are supported.*Quit GDBserver.*$gdb_prompt $" {
+	    set is_gdbserver 1
+	}
+	-re "$gdb_prompt $" {
+	    set is_gdbserver 0
+	}
+    }
+
+    if { $is_gdbserver == -1 } {
+	verbose -log "Unable to tell whether we are using GDBserver or not."
+    }
+
+    return $is_gdbserver
 }
 
 set compiler_info		"unknown"

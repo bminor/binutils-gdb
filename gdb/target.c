@@ -528,6 +528,40 @@ target_supports_terminal_ours (void)
   return 0;
 }
 
+/* Restore the terminal to its previous state (helper for
+   make_cleanup_restore_target_terminal). */
+
+static void
+cleanup_restore_target_terminal (void *arg)
+{
+  enum terminal_state *previous_state = arg;
+
+  switch (*previous_state)
+    {
+    case terminal_is_ours:
+      target_terminal_ours ();
+      break;
+    case terminal_is_ours_for_output:
+      target_terminal_ours_for_output ();
+      break;
+    case terminal_is_inferior:
+      target_terminal_inferior ();
+      break;
+    }
+}
+
+/* See target.h. */
+
+struct cleanup *
+make_cleanup_restore_target_terminal (void)
+{
+  enum terminal_state *ts = xmalloc (sizeof (*ts));
+
+  *ts = terminal_state;
+
+  return make_cleanup_dtor (cleanup_restore_target_terminal, ts, xfree);
+}
+
 static void
 tcomplain (void)
 {
