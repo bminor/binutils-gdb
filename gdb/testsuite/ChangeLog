@@ -1,3 +1,8 @@
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (default_gdb_start): After starting gdb, loop
+	as long as we get pagination notifications.
+
 2014-12-15  Jason Merrill  <jason@redhat.com>
 
 	* Makefile.in (check-gdb.%): Restore.
