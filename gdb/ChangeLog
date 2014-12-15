@@ -1,5 +1,9 @@
 2014-12-16  Yao Qi  <yao@codesourcery.com>
 
+	* NEWS: Move some entries to "Changes since GDB 7.8" section.
+
+2014-12-16  Yao Qi  <yao@codesourcery.com>
+
 	* linux-tdep.c (linux_infcall_mmap): Replace ARG_MAX with
 	ARG_LAST.
 
