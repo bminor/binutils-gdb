@@ -1,3 +1,8 @@
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/lib/gdb/prompt.py (_prompt_pwd): Use os.getcwd() instead of
+	os.getcwdu().
+
 2014-12-15  Catalin Udma  <catalin.udma@freescale.com>
 
 	PR gdb/15684

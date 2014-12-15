@@ -21,7 +21,7 @@ import os
 
 def _prompt_pwd(ignore):
     "The current working directory."
-    return os.getcwdu()
+    return os.getcwd()
 
 def _prompt_object_attr(func, what, attr, nattr):
     """Internal worker for fetching GDB attributes."""
