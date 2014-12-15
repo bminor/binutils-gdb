@@ -1662,7 +1662,7 @@ record_btrace_step_thread (struct thread_info *tp)
       if (replay == NULL)
 	return btrace_step_no_history ();
 
-      inf = find_inferior_pid (ptid_get_pid (tp->ptid));
+      inf = find_inferior_ptid (tp->ptid);
       aspace = inf->aspace;
 
       /* Determine the end of the instruction trace.  */
@@ -1699,7 +1699,7 @@ record_btrace_step_thread (struct thread_info *tp)
       if (replay == NULL)
 	replay = record_btrace_start_replaying (tp);
 
-      inf = find_inferior_pid (ptid_get_pid (tp->ptid));
+      inf = find_inferior_ptid (tp->ptid);
       aspace = inf->aspace;
 
       for (;;)

@@ -859,7 +859,7 @@ darwin_resume (ptid_t ptid, int step, enum gdb_signal signal)
     }
   else
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (ptid));
+      struct inferior *inf = find_inferior_ptid (ptid);
       long tid = ptid_get_tid (ptid);
 
       /* Stop the inferior (should be useless).  */

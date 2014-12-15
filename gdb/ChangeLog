@@ -1,5 +1,32 @@
 2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* inferior.c (find_inferior_ptid): New function.
+	* inferior.h (find_inferior_ptid): New declaration.
+	* ada-tasks.c (ada_get_task_number): Use find_inferior_ptid.
+	* corelow.c (core_pid_to_str): Same.
+	* darwin-nat.c (darwin_resume): Same.
+	* infrun.c (fetch_inferior_event): Same.
+	(get_inferior_stop_soon): Same.
+	(handle_inferior_event): Same.
+	(handle_signal_stop): Same.
+	* linux-nat.c (resume_lwp): Same.
+	(stop_wait_callback): Same.
+	* mi/mi-interp.c (mi_new_thread): Same.
+	(mi_thread_exit): Same.
+	* proc-service.c (ps_pglobal_lookup): Same.
+	* record-btrace.c (record_btrace_step_thread): Same.
+	* remote-sim.c (gdbsim_close_inferior): Same.
+	(gdbsim_resume): Same.
+	(gdbsim_stop): Same.
+	* sol2-tdep.c (sol2_core_pid_to_str): Same.
+	* target.c (memory_xfer_partial_1): Same.
+	(default_thread_address_space): Same.
+	* thread.c (thread_change_ptid): Same.
+	(switch_to_thread): Same.
+	(do_restore_current_thread_cleanup): Same.
+
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* defs.h (gdb_readline): Constify argument.
 	(gdb_readline_wrapper): Same.
 	(command_line_input): Same.

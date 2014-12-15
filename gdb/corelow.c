@@ -954,7 +954,7 @@ core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
   /* Otherwise, this isn't a "threaded" core -- use the PID field, but
      only if it isn't a fake PID.  */
-  inf = find_inferior_pid (ptid_get_pid (ptid));
+  inf = find_inferior_ptid (ptid);
   if (inf != NULL && !inf->fake_pid_p)
     return normal_pid_to_str (ptid);
 

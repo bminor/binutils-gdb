@@ -1435,7 +1435,7 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 {
   if (lp->stopped)
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      struct inferior *inf = find_inferior_ptid (lp->ptid);
 
       if (inf->vfork_child != NULL)
 	{
@@ -2388,7 +2388,7 @@ linux_nat_set_status_is_event (struct target_ops *t,
 static int
 stop_wait_callback (struct lwp_info *lp, void *data)
 {
-  struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+  struct inferior *inf = find_inferior_ptid (lp->ptid);
 
   /* If this is a vfork parent, bail out, it is not going to report
      any SIGSTOP until the vfork is done with.  */

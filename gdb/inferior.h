@@ -465,6 +465,9 @@ extern int valid_gdb_inferior_id (int num);
 /* Search function to lookup an inferior by target 'pid'.  */
 extern struct inferior *find_inferior_pid (int pid);
 
+/* Search function to lookup an inferior whose pid is equal to 'ptid.pid'. */
+extern struct inferior *find_inferior_ptid (ptid_t ptid);
+
 /* Search function to lookup an inferior by GDB 'num'.  */
 extern struct inferior *find_inferior_id (int num);
 

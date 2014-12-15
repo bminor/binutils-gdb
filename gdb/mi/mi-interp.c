@@ -371,7 +371,7 @@ static void
 mi_new_thread (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
-  struct inferior *inf = find_inferior_pid (ptid_get_pid (t->ptid));
+  struct inferior *inf = find_inferior_ptid (t->ptid);
 
   gdb_assert (inf);
 
@@ -391,7 +391,7 @@ mi_thread_exit (struct thread_info *t, int silent)
   if (silent)
     return;
 
-  inf = find_inferior_pid (ptid_get_pid (t->ptid));
+  inf = find_inferior_ptid (t->ptid);
 
   mi = top_level_interpreter_data ();
   old_chain = make_cleanup_restore_target_terminal ();
