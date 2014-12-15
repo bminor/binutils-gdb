@@ -1,5 +1,21 @@
 2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* defs.h (gdb_readline): Constify argument.
+	(gdb_readline_wrapper): Same.
+	(command_line_input): Same.
+	(deprecated_readline_hook): Same.
+	* top.c (deprecated_readline_hook): Same.
+	(gdb_readline): Same.
+	(gdb_readline_wrapper): Same.
+	(command_line_input): Constify argument. Pass prompt_arg to called
+	functions instead of local_prompt, overwriting prompt_arg if necessary.
+	* event-top.h (display_gdb_prompt): Constify argument.
+	* event-top.c (display_gdb_prompt): Same.
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Constify argument
+	if building with Python 3.4 and up.
+
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* python/lib/gdb/prompt.py (_prompt_pwd): Use os.getcwd() instead of
 	os.getcwdu().
 

@@ -27,7 +27,7 @@ struct cmd_list_element;
 /* Exported functions from event-top.c.
    FIXME: these should really go into top.h.  */
 
-extern void display_gdb_prompt (char *new_prompt);
+extern void display_gdb_prompt (const char *new_prompt);
 void gdb_setup_readline (void);
 void gdb_disable_readline (void);
 extern void async_init_signals (void);

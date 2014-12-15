@@ -288,7 +288,7 @@ gdb_rl_callback_handler_reinstall (void)
    3. On prompting for pagination.  */
 
 void
-display_gdb_prompt (char *new_prompt)
+display_gdb_prompt (const char *new_prompt)
 {
   char *actual_gdb_prompt = NULL;
   struct cleanup *old_chain;
