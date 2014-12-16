@@ -1,3 +1,8 @@
+2014-12-16  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add JALRC alias for
+	JIALC.  Remove the operand from NAL.
+
 2014-11-30  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes): Make mftb* generate mfspr for
