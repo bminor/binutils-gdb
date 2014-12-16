@@ -1350,7 +1350,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
       if (reloc.r_extern)
 	{
 	  /* PR 17512: file: 8396-1185-0.004.  */
-	  if (num >= bfd_get_symcount (abfd))
+	  if (bfd_get_symcount (abfd) > 0 && num > bfd_get_symcount (abfd))
 	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
 	  else
 	    /* An external symbol number.  */
@@ -1368,7 +1368,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
       else
         {
 	  /* PR 17512: file: 006-2964-0.004.  */
-	  if (num >= mdata->nsects)
+	  if (num > mdata->nsects)
 	    return -1;
 	  
 	  /* A section number.  */
@@ -1400,6 +1400,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 
   if (!(*bed->_bfd_mach_o_swap_reloc_in)(res, &reloc))
     return -1;
+
   return 0;
 }
 
@@ -1414,6 +1415,7 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
 
   /* Allocate and read relocs.  */
   native_size = count * BFD_MACH_O_RELENT_SIZE;
+
   native_relocs =
     (struct mach_o_reloc_info_external *) bfd_malloc (native_size);
   if (native_relocs == NULL)
