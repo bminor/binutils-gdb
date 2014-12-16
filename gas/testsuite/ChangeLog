@@ -1,3 +1,10 @@
+2014-12-16  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/r6.s: Test JALRC and NAL
+	* gas/mips/r6-n32.d: Add expected output for JALRC and NAL.
+	* gas/mips/r6-n64.d: Likewise.
+	* gas/mips/r6.d: Likewise.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* gas/elf/elf.exp: Skip ifunc-1 for Visium.

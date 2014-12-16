@@ -1,3 +1,8 @@
+2014-12-16  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add JALRC alias for
+	JIALC.  Remove the operand from NAL.
+
 2014-12-12  Anthony Green  <green@moxielogic.com>
 
 	* moxie-opc.c: Define zex instructions.
