@@ -1,3 +1,9 @@
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* linux-thread-db.c (thread_db_find_new_threads_silently)
+	(try_thread_db_load_1, try_thread_db_load, thread_db_load_search)
+	(find_new_threads_once): Print debug output on gdb_stdlog.
+
 2015-01-09  Chen Gang  <gang.chen.5i5j@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 
