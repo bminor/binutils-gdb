@@ -38,6 +38,7 @@
 #include "observer.h"
 #include "linux-nat.h"
 #include "nat/linux-procfs.h"
+#include "nat/linux-ptrace.h"
 #include "nat/linux-osdata.h"
 #include "auto-load.h"
 #include "cli/cli-utils.h"
@@ -76,6 +77,16 @@ static char *libthread_db_search_path;
 /* Set to non-zero if thread_db auto-loading is enabled
    by the "set auto-load libthread-db" command.  */
 static int auto_load_thread_db = 1;
+
+/* Returns true if we need to use thread_db thread create/death event
+   breakpoints to learn about threads.  */
+
+static int
+thread_db_use_events (void)
+{
+  /* Not necessary if the kernel supports clone events.  */
+  return !linux_supports_traceclone ();
+}
 
 /* "show" command for the auto_load_thread_db configuration variable.  */
 
@@ -836,7 +847,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
     push_target (&thread_db_ops);
 
   /* Enable event reporting, but not when debugging a core file.  */
-  if (target_has_execution)
+  if (target_has_execution && thread_db_use_events ())
     enable_thread_event_reporting ();
 
   return 1;
@@ -1264,6 +1275,17 @@ thread_db_inferior_created (struct target_ops *target, int from_tty)
   check_for_thread_db ();
 }
 
+/* Update the thread's state (what's displayed in "info threads"),
+   from libthread_db thread state information.  */
+
+static void
+update_thread_state (struct private_thread_info *private,
+		     const td_thrinfo_t *ti_p)
+{
+  private->dying = (ti_p->ti_state == TD_THR_UNKNOWN
+		    || ti_p->ti_state == TD_THR_ZOMBIE);
+}
+
 /* Attach to a new thread.  This function is called when we receive a
    TD_CREATE event or when we iterate over all threads and find one
    that wasn't already in our list.  Returns true on success.  */
@@ -1345,8 +1367,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   gdb_assert (ti_p->ti_tid != 0);
   private->th = *th_p;
   private->tid = ti_p->ti_tid;
-  if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
-    private->dying = 1;
+  update_thread_state (private, ti_p);
 
   /* Add the thread to GDB's thread list.  */
   if (tp == NULL)
@@ -1358,7 +1379,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
   /* Enable thread event reporting for this thread, except when
      debugging a core file.  */
-  if (target_has_execution)
+  if (target_has_execution && thread_db_use_events ())
     {
       err = info->td_thr_event_enable_p (th_p, 1);
       if (err != TD_OK)
@@ -1397,7 +1418,7 @@ thread_db_detach (struct target_ops *ops, const char *args, int from_tty)
 
   if (info)
     {
-      if (target_has_execution)
+      if (target_has_execution && thread_db_use_events ())
 	{
 	  disable_thread_event_reporting (info);
 
@@ -1633,7 +1654,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	 need this glibc bug workaround.  */
       info->need_stale_parent_threads_check = 0;
 
-      if (target_has_execution)
+      if (target_has_execution && thread_db_use_events ())
 	{
 	  err = info->td_thr_event_enable_p (th_p, 1);
 	  if (err != TD_OK)
@@ -1669,6 +1690,12 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	   (observed with glibc-2.3.6).  To prevent that, terminate
 	   iteration: thread_db_find_new_threads_2 will retry.  */
 	return 1;
+    }
+  else if (target_has_execution && !thread_db_use_events ())
+    {
+      /* Need to update this if not using the libthread_db events
+	 (particularly, the TD_DEATH event).  */
+      update_thread_state (tp->private, &ti);
     }
 
   return 0;

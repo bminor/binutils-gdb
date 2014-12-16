@@ -76,12 +76,13 @@ main (void)
   signal (SIGUSR1, handler_sigusr1);
   signal (SIGUSR2, handler_sigusr2);
 
-  pthread_barrier_init (&barrier, NULL, 3);
-
   for (i = 0; i < 2; i++)
-    pthread_create (&child_thread[i], NULL, thread_function, NULL);
-
-  pthread_barrier_wait (&barrier);
+    {
+      pthread_barrier_init (&barrier, NULL, 2);
+      pthread_create (&child_thread[i], NULL, thread_function, NULL);
+      pthread_barrier_wait (&barrier);
+      pthread_barrier_destroy (&barrier);
+    }
 
   all_threads_started ();
 

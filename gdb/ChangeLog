@@ -1,3 +1,20 @@
+2014-01-09  Pedro Alves  <palves@redhat.com>
+
+	Skip enabling event reporting if the kernel supports
+	PTRACE_EVENT_CLONE.
+	* linux-thread-db.c: Include "nat/linux-ptrace.h".
+	(thread_db_use_events): New function.
+	(try_thread_db_load_1): Check thread_db_use_events before enabling
+	event reporting.
+	(update_thread_state): New function.
+	(attach_thread): Use it.  Check thread_db_use_events before
+	enabling event reporting.
+	(thread_db_detach): Check thread_db_use_events before disabling
+	event reporting.
+	(find_new_threads_callback): Check thread_db_use_events before
+	enabling event reporting.  Update the thread's state if not using
+	libthread_db events.
+
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (lin_lwp_attach_lwp): Assert that the lwp id we're

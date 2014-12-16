@@ -1,3 +1,14 @@
+2014-01-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/fork-thread-pending.exp: Switch to the main thread
+	instead of to thread 2.
+	* gdb.threads/signal-command-multiple-signals-pending.c (main):
+	Add barrier around each pthread_create call instead of around all
+	calls.
+	* gdb.threads/signal-command-multiple-signals-pending.exp (test):
+	Set a break on thread_function and have the child threads hit it
+	one at at a time.
+
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (can_spawn_for_attach): New procedure.
