@@ -1,5 +1,12 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (lin_lwp_attach_lwp): Assert that the lwp id we're
+	about to wait for is > 0.
+	* linux-thread-db.c (find_new_threads_callback): Ignore thread if
+	the kernel thread ID is -1.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (attach_proc_task_lwp_callback): New function.
 	(linux_nat_attach): Use linux_proc_attach_tgid_threads.
 	(wait_lwp, linux_nat_filter_event): If not set yet, set the lwp's

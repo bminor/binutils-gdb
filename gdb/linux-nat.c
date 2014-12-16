@@ -1023,6 +1023,7 @@ lin_lwp_attach_lwp (ptid_t ptid)
 
 		  /* See if we've got a stop for this new child
 		     pending.  If so, we're already attached.  */
+		  gdb_assert (lwpid > 0);
 		  new_pid = my_waitpid (lwpid, &status, WNOHANG);
 		  if (new_pid == -1 && errno == ECHILD)
 		    new_pid = my_waitpid (lwpid, &status, __WCLONE | WNOHANG);

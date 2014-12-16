@@ -1,5 +1,10 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* thread-db.c (find_new_threads_callback): Ignore thread if the
+	kernel thread ID is -1.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (linux_attach_fail_reason_string): Move to
 	nat/linux-ptrace.c, and rename.
 	(linux_attach_lwp): Update comment.

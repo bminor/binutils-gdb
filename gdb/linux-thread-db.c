@@ -1610,6 +1610,17 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
     error (_("find_new_threads_callback: cannot get thread info: %s"),
 	   thread_db_err_str (err));
 
+  if (ti.ti_lid == -1)
+    {
+      /* A thread with kernel thread ID -1 is either a thread that
+	 exited and was joined, or a thread that is being created but
+	 hasn't started yet, and that is reusing the tcb/stack of a
+	 thread that previously exited and was joined.  (glibc marks
+	 terminated and joined threads with kernel thread ID -1.  See
+	 glibc PR17707.  */
+      return 0;
+    }
+
   if (ti.ti_tid == 0)
     {
       /* A thread ID of zero means that this is the main thread, but
