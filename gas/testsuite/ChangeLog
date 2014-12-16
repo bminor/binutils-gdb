@@ -1,5 +1,16 @@
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* gas/mips/r6-64.s: Remove .align directives from LDPC
+	instructions and add further tests for LDPC.
+	* gas/mips/r6-64-n32.d: remove the NOPs from LDPC expected
+	output and update for new tests.
+	* gas/mips/r6-64-n64.d: Likewise.
+	* gas/mips/ldpc-unalign.l: New file.
+	* gas/mips/ldpc-unalign.s: Likewise.
+	* gas/mips/mips.exp: Run ldpc-unalign test.
+
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* gas/mips/r6.s: Test JALRC and NAL
 	* gas/mips/r6-n32.d: Add expected output for JALRC and NAL.
 	* gas/mips/r6-n64.d: Likewise.

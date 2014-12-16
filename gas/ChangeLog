@@ -1,3 +1,10 @@
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (md_apply_fix): Apply alignment check
+	to the symbol and offset rather than *valP for
+	BFD_RELOC_MIPS_18_PCREL_S3.  Also update the error message
+	for BFD_RELOC_MIPS_19_PCREL_S2.
+
 2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
 
 	* config/tc-i386-intel.c (i386_operator): Remove last argument

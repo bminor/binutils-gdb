@@ -1446,6 +1446,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "r6-n64"	[mips_arch_list_matching mips64r6]
 	run_dump_test_arches "r6-64-n32"	[mips_arch_list_matching mips64r6]
 	run_dump_test_arches "r6-64-n64"	[mips_arch_list_matching mips64r6]
+	run_list_test_arches "ldpc-unalign" "-64" [mips_arch_list_matching mips64r6]
     }
     run_list_test_arches "r6-removed"	"-32" [mips_arch_list_matching mips32r6]
     run_list_test_arches "r6-64-removed"	[mips_arch_list_matching mips64r6]
