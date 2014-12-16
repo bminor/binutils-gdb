@@ -1,3 +1,9 @@
+2014-12-16  Catalin Udma  <catalin.udma@freescale.com>
+
+	PR server/17457
+	* gdb.arch/aarch64-fp.c: New file.
+	* gdb.arch/aarch64-fp.exp: New file.
+
 2014-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	Merge dg-extract-results.{sh,py} from GCC upstream (r210243,

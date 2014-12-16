@@ -1,3 +1,12 @@
+2014-12-16  Catalin Udma  <catalin.udma@freescale.com>
+
+	PR server/17457
+	* linux-aarch64-low.c (AARCH64_FPSR_REGNO): New define.
+	(AARCH64_FPCR_REGNO): Likewise.
+	(AARCH64_NUM_REGS): Update to include fpsr/fpcr registers.
+	(aarch64_fill_fpregset): Add missing fpsr/fpcr registers.
+	(aarch64_store_fpregset): Likewise.
+
 2014-12-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-low.c (lynx_resume): Use PTRACE_SINGLESTEP_ONE if N == 1.
