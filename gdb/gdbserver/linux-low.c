@@ -631,31 +631,8 @@ linux_create_inferior (char *program, char **allargs)
   return pid;
 }
 
-char *
-linux_attach_fail_reason_string (ptid_t ptid, int err)
-{
-  static char *reason_string;
-  struct buffer buffer;
-  char *warnings;
-  long lwpid = ptid_get_lwp (ptid);
-
-  xfree (reason_string);
-
-  buffer_init (&buffer);
-  linux_ptrace_attach_fail_reason (lwpid, &buffer);
-  buffer_grow_str0 (&buffer, "");
-  warnings = buffer_finish (&buffer);
-  if (warnings[0] != '\0')
-    reason_string = xstrprintf ("%s (%d), %s",
-				strerror (err), err, warnings);
-  else
-    reason_string = xstrprintf ("%s (%d)",
-				strerror (err), err);
-  xfree (warnings);
-  return reason_string;
-}
-
-/* Attach to an inferior process.  */
+/* Attach to an inferior process.  Returns 0 on success, ERRNO on
+   error.  */
 
 int
 linux_attach_lwp (ptid_t ptid)
@@ -739,6 +716,50 @@ linux_attach_lwp (ptid_t ptid)
   return 0;
 }
 
+/* Callback for linux_proc_attach_tgid_threads.  Attach to PTID if not
+   already attached.  Returns true if a new LWP is found, false
+   otherwise.  */
+
+static int
+attach_proc_task_lwp_callback (ptid_t ptid)
+{
+  /* Is this a new thread?  */
+  if (find_thread_ptid (ptid) == NULL)
+    {
+      int lwpid = ptid_get_lwp (ptid);
+      int err;
+
+      if (debug_threads)
+	debug_printf ("Found new lwp %d\n", lwpid);
+
+      err = linux_attach_lwp (ptid);
+
+      /* Be quiet if we simply raced with the thread exiting.  EPERM
+	 is returned if the thread's task still exists, and is marked
+	 as exited or zombie, as well as other conditions, so in that
+	 case, confirm the status in /proc/PID/status.  */
+      if (err == ESRCH
+	  || (err == EPERM && linux_proc_pid_is_gone (lwpid)))
+	{
+	  if (debug_threads)
+	    {
+	      debug_printf ("Cannot attach to lwp %d: "
+			    "thread is gone (%d: %s)\n",
+			    lwpid, err, strerror (err));
+	    }
+	}
+      else if (err != 0)
+	{
+	  warning (_("Cannot attach to lwp %d: %s"),
+		   lwpid,
+		   linux_ptrace_attach_fail_reason_string (ptid, err));
+	}
+
+      return 1;
+    }
+  return 0;
+}
+
 /* Attach to PID.  If PID is the tgid, attach to it and all
    of its threads.  */
 
@@ -753,7 +774,7 @@ linux_attach (unsigned long pid)
   err = linux_attach_lwp (ptid);
   if (err != 0)
     error ("Cannot attach to process %ld: %s",
-	   pid, linux_attach_fail_reason_string (ptid, err));
+	   pid, linux_ptrace_attach_fail_reason_string (ptid, err));
 
   linux_add_process (pid, 1);
 
@@ -767,75 +788,16 @@ linux_attach (unsigned long pid)
       thread->last_resume_kind = resume_stop;
     }
 
-  if (linux_proc_get_tgid (pid) == pid)
-    {
-      DIR *dir;
-      char pathname[128];
-
-      sprintf (pathname, "/proc/%ld/task", pid);
-
-      dir = opendir (pathname);
-
-      if (!dir)
-	{
-	  fprintf (stderr, "Could not open /proc/%ld/task.\n", pid);
-	  fflush (stderr);
-	}
-      else
-	{
-	  /* At this point we attached to the tgid.  Scan the task for
-	     existing threads.  */
-	  int new_threads_found;
-	  int iterations = 0;
-
-	  while (iterations < 2)
-	    {
-	      struct dirent *dp;
-
-	      new_threads_found = 0;
-	      /* Add all the other threads.  While we go through the
-		 threads, new threads may be spawned.  Cycle through
-		 the list of threads until we have done two iterations without
-		 finding new threads.  */
-	      while ((dp = readdir (dir)) != NULL)
-		{
-		  unsigned long lwp;
-		  ptid_t ptid;
-
-		  /* Fetch one lwp.  */
-		  lwp = strtoul (dp->d_name, NULL, 10);
-
-		  ptid = ptid_build (pid, lwp, 0);
-
-		  /* Is this a new thread?  */
-		  if (lwp != 0 && find_thread_ptid (ptid) == NULL)
-		    {
-		      int err;
-
-		      if (debug_threads)
-			debug_printf ("Found new lwp %ld\n", lwp);
-
-		      err = linux_attach_lwp (ptid);
-		      if (err != 0)
-			warning ("Cannot attach to lwp %ld: %s",
-				 lwp,
-				 linux_attach_fail_reason_string (ptid, err));
-
-		      new_threads_found++;
-		    }
-		}
-
-	      if (!new_threads_found)
-		iterations++;
-	      else
-		iterations = 0;
-
-	      rewinddir (dir);
-	    }
-	  closedir (dir);
-	}
-    }
-
+  /* We must attach to every LWP.  If /proc is mounted, use that to
+     find them now.  On the one hand, the inferior may be using raw
+     clone instead of using pthreads.  On the other hand, even if it
+     is using pthreads, GDB may not be connected yet (thread_db needs
+     to do symbol lookups, through qSymbol).  Also, thread_db walks
+     structures in the inferior's address space to find the list of
+     threads/LWPs, and those structures may well be corrupted.  Note
+     that once thread_db is loaded, we'll still use it to list threads
+     and associate pthread info with each LWP.  */
+  linux_proc_attach_tgid_threads (pid, attach_proc_task_lwp_callback);
   return 0;
 }
 

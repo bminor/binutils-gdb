@@ -33,6 +33,10 @@ struct lwp_info
      and overall process id.  */
   ptid_t ptid;
 
+  /* If this flag is set, we need to set the event request flags the
+     next time we see this LWP stop.  */
+  int must_set_ptrace_flags;
+
   /* Non-zero if this LWP is cloned.  In this context "cloned" means
      that the LWP is reporting to its parent using a signal other than
      SIGCHLD.  */

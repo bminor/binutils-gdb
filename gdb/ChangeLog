@@ -1,5 +1,45 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (attach_proc_task_lwp_callback): New function.
+	(linux_nat_attach): Use linux_proc_attach_tgid_threads.
+	(wait_lwp, linux_nat_filter_event): If not set yet, set the lwp's
+	ptrace option flags.
+	* linux-nat.h (struct lwp_info) <must_set_ptrace_flags>: New
+	field.
+	* nat/linux-procfs.c: Include <dirent.h>.
+	(linux_proc_get_int): New parameter "warn".  Handle it.
+	(linux_proc_get_tgid): Adjust.
+	(linux_proc_get_tracerpid): Rename to ...
+	(linux_proc_get_tracerpid_nowarn): ... this.
+	(linux_proc_pid_get_state): New function, factored out from
+	(linux_proc_pid_has_state): ... this.  Add new parameter "warn"
+	and handle it.
+	(linux_proc_pid_is_gone): New function.
+	(linux_proc_pid_is_stopped): Adjust.
+	(linux_proc_pid_is_zombie_maybe_warn)
+	(linux_proc_pid_is_zombie_nowarn): New functions.
+	(linux_proc_pid_is_zombie): Use
+	linux_proc_pid_is_zombie_maybe_warn.
+	(linux_proc_attach_tgid_threads): New function.
+	* nat/linux-procfs.h (linux_proc_get_tgid): Update comment.
+	(linux_proc_get_tracerpid): Rename to ...
+	(linux_proc_get_tracerpid_nowarn): ... this, and update comment.
+	(linux_proc_pid_is_gone): New declaration.
+	(linux_proc_pid_is_zombie): Update comment.
+	(linux_proc_pid_is_zombie_nowarn): New declaration.
+	(linux_proc_attach_lwp_func): New typedef.
+	(linux_proc_attach_tgid_threads): New declaration.
+	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason): Adjust to
+	use nowarn functions.
+	(linux_ptrace_attach_fail_reason_string): Move here from
+	gdbserver/linux-low.c and rename.
+	(ptrace_supports_feature): If the current ptrace options are not
+	known yet, check them now, instead of asserting.
+	* nat/linux-ptrace.h (linux_ptrace_attach_fail_reason_string):
+	Declare.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* linux-thread-db.c (thread_db_find_new_threads_silently)
 	(try_thread_db_load_1, try_thread_db_load, thread_db_load_search)
 	(find_new_threads_once): Print debug output on gdb_stdlog.

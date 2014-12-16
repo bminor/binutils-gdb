@@ -1137,6 +1137,73 @@ linux_nat_create_inferior (struct target_ops *ops,
 #endif /* HAVE_PERSONALITY */
 }
 
+/* Callback for linux_proc_attach_tgid_threads.  Attach to PTID if not
+   already attached.  Returns true if a new LWP is found, false
+   otherwise.  */
+
+static int
+attach_proc_task_lwp_callback (ptid_t ptid)
+{
+  struct lwp_info *lp;
+
+  /* Ignore LWPs we're already attached to.  */
+  lp = find_lwp_pid (ptid);
+  if (lp == NULL)
+    {
+      int lwpid = ptid_get_lwp (ptid);
+
+      if (ptrace (PTRACE_ATTACH, lwpid, 0, 0) < 0)
+	{
+	  int err = errno;
+
+	  /* Be quiet if we simply raced with the thread exiting.
+	     EPERM is returned if the thread's task still exists, and
+	     is marked as exited or zombie, as well as other
+	     conditions, so in that case, confirm the status in
+	     /proc/PID/status.  */
+	  if (err == ESRCH
+	      || (err == EPERM && linux_proc_pid_is_gone (lwpid)))
+	    {
+	      if (debug_linux_nat)
+		{
+		  fprintf_unfiltered (gdb_stdlog,
+				      "Cannot attach to lwp %d: "
+				      "thread is gone (%d: %s)\n",
+				      lwpid, err, safe_strerror (err));
+		}
+	    }
+	  else
+	    {
+	      warning (_("Cannot attach to lwp %d: %s\n"),
+		       lwpid,
+		       linux_ptrace_attach_fail_reason_string (ptid,
+							       err));
+	    }
+	}
+      else
+	{
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"PTRACE_ATTACH %s, 0, 0 (OK)\n",
+				target_pid_to_str (ptid));
+
+	  lp = add_lwp (ptid);
+	  lp->cloned = 1;
+
+	  /* The next time we wait for this LWP we'll see a SIGSTOP as
+	     PTRACE_ATTACH brings it to a halt.  */
+	  lp->signalled = 1;
+
+	  /* We need to wait for a stop before being able to make the
+	     next ptrace call on this LWP.  */
+	  lp->must_set_ptrace_flags = 1;
+	}
+
+      return 1;
+    }
+  return 0;
+}
+
 static void
 linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 {
@@ -1229,6 +1296,16 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 			(long) ptid_get_pid (lp->ptid), status_to_str (status));
 
   lp->status = status;
+
+  /* We must attach to every LWP.  If /proc is mounted, use that to
+     find them now.  The inferior may be using raw clone instead of
+     using pthreads.  But even if it is using pthreads, thread_db
+     walks structures in the inferior's address space to find the list
+     of threads/LWPs, and those structures may well be corrupted.
+     Note that once thread_db is loaded, we'll still use it to list
+     threads and associate pthread info with each LWP.  */
+  linux_proc_attach_tgid_threads (ptid_get_pid (lp->ptid),
+				  attach_proc_task_lwp_callback);
 
   if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
@@ -2159,6 +2236,14 @@ wait_lwp (struct lwp_info *lp)
   gdb_assert (WIFSTOPPED (status));
   lp->stopped = 1;
 
+  if (lp->must_set_ptrace_flags)
+    {
+      struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+
+      linux_enable_event_reporting (ptid_get_lwp (lp->ptid), inf->attach_flag);
+      lp->must_set_ptrace_flags = 0;
+    }
+
   /* Handle GNU/Linux's syscall SIGTRAPs.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SYSCALL_SIGTRAP)
     {
@@ -2782,6 +2867,14 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
   /* This LWP is stopped now.  (And if dead, this prevents it from
      ever being continued.)  */
   lp->stopped = 1;
+
+  if (WIFSTOPPED (status) && lp->must_set_ptrace_flags)
+    {
+      struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+
+      linux_enable_event_reporting (ptid_get_lwp (lp->ptid), inf->attach_flag);
+      lp->must_set_ptrace_flags = 0;
+    }
 
   /* Handle GNU/Linux's syscall SIGTRAPs.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SYSCALL_SIGTRAP)

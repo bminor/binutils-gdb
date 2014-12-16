@@ -339,7 +339,7 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
     {
       warning ("Could not attach to thread %ld (LWP %d): %s\n",
 	       ti_p->ti_tid, ti_p->ti_lid,
-	       linux_attach_fail_reason_string (ptid, err));
+	       linux_ptrace_attach_fail_reason_string (ptid, err));
       return 0;
     }
 
