@@ -145,14 +145,11 @@ set regs_output [capture_command_output "mt print registers" \
 append regs_output "\n"
 append regs_output [capture_command_output "mt print reggroups" \
 			".*Group.*Type\[^\n]*\n"]
+append regs_output "\n"
+append regs_output [capture_command_output "mt print user-registers" \
+		     ".*Name.*Nr\[^\n]*\n"]
 set all_regs {}
 foreach {- reg} [regexp -all -inline -line {^\s+(\w+)} $regs_output] {
-    lappend all_regs $reg
-}
-
-set regs_output [capture_command_output "mt print user-registers" \
-		     ".*Nr.*Name\[^\n]*\n"]
-foreach {- reg} [regexp -all -inline -line {^\s+\d+\s+(\w+)} $regs_output] {
     lappend all_regs $reg
 }
 

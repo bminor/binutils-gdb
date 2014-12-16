@@ -1,3 +1,8 @@
+2014-12-16  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* gdb.base/completion.exp: Adjust to format changes of "maint
+	print user-registers".
+
 2014-12-16  Catalin Udma  <catalin.udma@freescale.com>
 
 	PR server/17457

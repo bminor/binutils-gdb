@@ -1,3 +1,8 @@
+2014-12-16  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* user-regs.c (maintenance_print_user_registers): Swap "Nr" and
+	"Name" columns.  Assure that the output is always indented.
+
 2014-12-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* nat/linux-ptrace.h (PTRACE_O_EXITKILL): Define if not
