@@ -1457,9 +1457,7 @@ struct symbol_search
 
   /* Information describing what was found.
 
-     If symtab and symbol are NOT NULL, then information was found
-     for this match.  */
-  struct symtab *symtab;
+     If symbol is NOT NULL, then information was found for this match.  */
   struct symbol *symbol;
 
   /* If msymbol is non-null, then a match was made on something for

@@ -1,3 +1,10 @@
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct symbol_search) <symtab>: Delete.  All uses updated.
+	* symtab.c (compare_search_syms): Use SYMBOL_SYMTAB accessor.
+	(print_symbol_info): Delete arg symtab.  All callers updated.
+	(symtab_symbol_info): Use SYMBOL_SYMTAB accessor.
+
 2014-12-16  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
 	* user-regs.c (maintenance_print_user_registers): Swap "Nr" and

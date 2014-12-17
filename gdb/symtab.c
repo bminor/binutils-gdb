@@ -3406,7 +3406,8 @@ compare_search_syms (const void *sa, const void *sb)
   struct symbol_search *sym_b = *(struct symbol_search **) sb;
   int c;
 
-  c = FILENAME_CMP (sym_a->symtab->filename, sym_b->symtab->filename);
+  c = FILENAME_CMP (SYMBOL_SYMTAB (sym_a->symbol)->filename,
+		    SYMBOL_SYMTAB (sym_b->symbol)->filename);
   if (c != 0)
     return c;
 
@@ -3722,7 +3723,6 @@ search_symbols (const char *regexp, enum search_domain kind,
 		struct symbol_search *psr = (struct symbol_search *)
 		  xmalloc (sizeof (struct symbol_search));
 		psr->block = i;
-		psr->symtab = real_symtab;
 		psr->symbol = sym;
 		memset (&psr->msymbol, 0, sizeof (psr->msymbol));
 		psr->next = NULL;
@@ -3780,7 +3780,6 @@ search_symbols (const char *regexp, enum search_domain kind,
 			psr->block = i;
 			psr->msymbol.minsym = msymbol;
 			psr->msymbol.objfile = objfile;
-			psr->symtab = NULL;
 			psr->symbol = NULL;
 			psr->next = NULL;
 			if (tail == NULL)
@@ -3806,9 +3805,10 @@ search_symbols (const char *regexp, enum search_domain kind,
 
 static void
 print_symbol_info (enum search_domain kind,
-		   struct symtab *s, struct symbol *sym,
+		   struct symbol *sym,
 		   int block, const char *last)
 {
+  struct symtab *s = SYMBOL_SYMTAB (sym);
   const char *s_filename = symtab_to_filename_for_display (s);
 
   if (last == NULL || filename_cmp (last, s_filename) != 0)
@@ -3903,11 +3903,11 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
       else
 	{
 	  print_symbol_info (kind,
-			     p->symtab,
 			     p->symbol,
 			     p->block,
 			     last_filename);
-	  last_filename = symtab_to_filename_for_display (p->symtab);
+	  last_filename
+	    = symtab_to_filename_for_display (SYMBOL_SYMTAB (p->symbol));
 	}
     }
 
@@ -3993,7 +3993,8 @@ rbreak_command (char *regexp, int from_tty)
     {
       if (p->msymbol.minsym == NULL)
 	{
-	  const char *fullname = symtab_to_fullname (p->symtab);
+	  struct symtab *symtab = SYMBOL_SYMTAB (p->symbol);
+	  const char *fullname = symtab_to_fullname (symtab);
 
 	  int newlen = (strlen (fullname)
 			+ strlen (SYMBOL_LINKAGE_NAME (p->symbol))
@@ -4010,10 +4011,9 @@ rbreak_command (char *regexp, int from_tty)
 	  strcat (string, "'");
 	  break_command (string, from_tty);
 	  print_symbol_info (FUNCTIONS_DOMAIN,
-			     p->symtab,
 			     p->symbol,
 			     p->block,
-			     symtab_to_filename_for_display (p->symtab));
+			     symtab_to_filename_for_display (symtab));
 	}
       else
 	{
