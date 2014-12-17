@@ -222,7 +222,7 @@ extern struct compunit_symtab *end_symtab (CORE_ADDR end_addr, int section);
 extern struct compunit_symtab *end_expandable_symtab (CORE_ADDR end_addr,
 						      int section);
 
-extern void augment_type_symtab (struct compunit_symtab *cust);
+extern void augment_type_symtab (void);
 
 /* Defined in stabsread.c.  */
 
@@ -243,7 +243,8 @@ extern struct compunit_symtab *start_symtab (struct objfile *objfile,
 					     const char *comp_dir,
 					     CORE_ADDR start_addr);
 
-extern void restart_symtab (CORE_ADDR start_addr);
+extern void restart_symtab (struct compunit_symtab *cust,
+			    const char *name, CORE_ADDR start_addr);
 
 extern int hashname (const char *name);
 

@@ -1,5 +1,30 @@
 2014-12-16  Doug Evans  <xdje42@gmail.com>
 
+	* buildsym.c: Add comments describing how the buildsym machinery
+	is used by the various file formats.
+	(really_free_pendings): Enhance function comment.
+	See pending_macros to NULL.  Simplify resetting pending_addrmap.
+	Call free_buildsym_compunit.
+	(free_buildsym_compunit): Set current_subfile to NULL.
+	(prepare_for_building): New function.
+	(start_symtab): Call it.  Remove call to set_last_source_file.
+	(restart_symtab): New arg "cust".  All callers updated.
+	Simplify, call prepare_for_building.  Re-initialize buildsym_compunit.
+	(reset_symtab_globals): Enhance function comment.
+	Set local_symbols, file_symbols, global_symbols to NULL.
+	Set pending_macros to NULL.  Simplify resetting pending_addrmap.
+	Call free_buildysym_compunit.
+	(end_symtab_without_blockvector): Delete.  All callers updated.
+	(end_symtab_with_blockvector): Remove redundant call to
+	free_buildsym_compunit.
+	(augment_type_symtab): Remove arg "cust".  All callers updated.
+	(buildsym_init): Remove resetting of free_pendings, file_symbols,
+	global_symbols, pending_blocks, pending_macros.  Instead make
+	handling consistent with pending_addrmap: Assert value was reset
+	at end of previous symtab building.  Initialize context_stack here.
+
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c (cp_lookup_symbol_via_imports): Renamed from
 	cp_lookup_symbol_imports.  All callers updated.
 

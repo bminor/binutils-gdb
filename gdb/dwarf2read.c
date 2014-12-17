@@ -8093,7 +8093,7 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
     }
   else
     {
-      augment_type_symtab (sig_type->type_unit_group->compunit_symtab);
+      augment_type_symtab ();
       cust = sig_type->type_unit_group->compunit_symtab;
     }
 
@@ -9149,7 +9149,7 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
       else
 	{
 	  gdb_assert (tu_group->symtabs == NULL);
-	  restart_symtab (0);
+	  restart_symtab (tu_group->compunit_symtab, "", 0);
 	}
       /* Note: The compunit symtab will get allocated at the end.  */
       return;
@@ -9190,7 +9190,7 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
     }
   else
     {
-      restart_symtab (0);
+      restart_symtab (tu_group->compunit_symtab, "", 0);
 
       for (i = 0; i < lh->num_file_names; ++i)
 	{
