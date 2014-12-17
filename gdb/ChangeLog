@@ -1,3 +1,12 @@
+2014-12-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix MinGW compilation.
+	* compile/compile.c (get_compile_file_tempdir): Call error if
+	!HAVE_MKDTEMP.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac (AC_CHECK_FUNCS): Add mkdtemp.
+
 2014-12-17  Doug Evans  <xdje42@gmail.com>
 
 	* valops.c (value_maybe_namespace_elt): Remove redundant call to

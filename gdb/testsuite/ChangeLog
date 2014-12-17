@@ -1,3 +1,14 @@
+2014-12-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix MinGW compilation.
+	* gdb.compile/compile-ops.exp: Update untested message if
+	!skip_compile_feature_tests.
+	* gdb.compile/compile-setjmp.exp: Likewise.
+	* gdb.compile/compile-tls.exp: Likewise.
+	* gdb.compile/compile.exp: Likewise.
+	* lib/gdb.exp (skip_compile_feature_tests): Check also "Command not
+	supported on this host".
+
 2014-12-16  Doug Evans  <xdje42@gmail.com>
 
 	* boards/stabs.exp: New file.
