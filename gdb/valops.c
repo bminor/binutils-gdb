@@ -3570,15 +3570,6 @@ value_maybe_namespace_elt (const struct type *curtype,
 				    get_selected_block (0), VAR_DOMAIN);
 
   if (sym == NULL)
-    {
-      char *concatenated_name = alloca (strlen (namespace_name) + 2
-					+ strlen (name) + 1);
-
-      sprintf (concatenated_name, "%s::%s", namespace_name, name);
-      sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
-    }
-
-  if (sym == NULL)
     return NULL;
   else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
 	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))

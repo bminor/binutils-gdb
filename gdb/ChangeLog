@@ -1,5 +1,10 @@
 2014-12-17  Doug Evans  <xdje42@gmail.com>
 
+	* valops.c (value_maybe_namespace_elt): Remove redundant call to
+	lookup_static_symbol.
+
+2014-12-17  Doug Evans  <xdje42@gmail.com>
+
 	New parameter "debug symbol-lookup".
 	* NEWS: Mention it.
 	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Add debug
