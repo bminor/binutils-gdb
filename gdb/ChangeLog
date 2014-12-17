@@ -1,5 +1,10 @@
 2014-12-16  Doug Evans  <xdje42@gmail.com>
 
+	* cp-namespace.c (cp_lookup_symbol_via_imports): Renamed from
+	cp_lookup_symbol_imports.  All callers updated.
+
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c (cp_find_type_baseclass_by_name): Renamed from
 	find_type_baseclass_by_name.  All callers updated.
 

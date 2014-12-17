@@ -371,12 +371,12 @@ reset_directive_searched (void *data)
    only the import of Y is considered.  */
 
 static struct symbol *
-cp_lookup_symbol_imports (const char *scope,
-                          const char *name,
-                          const struct block *block,
-                          const domain_enum domain,
-                          const int declaration_only,
-                          const int search_parents)
+cp_lookup_symbol_via_imports (const char *scope,
+			      const char *name,
+			      const struct block *block,
+			      const domain_enum domain,
+			      const int declaration_only,
+			      const int search_parents)
 {
   struct using_direct *current;
   struct symbol *sym = NULL;
@@ -472,9 +472,9 @@ cp_lookup_symbol_imports (const char *scope,
 	      /* If this import statement creates no alias, pass
 		 current->inner as NAMESPACE to direct the search
 		 towards the imported namespace.  */
-	      sym = cp_lookup_symbol_imports (current->import_src,
-					      name, block,
-					      domain, 0, 0);
+	      sym = cp_lookup_symbol_via_imports (current->import_src,
+						  name, block,
+						  domain, 0, 0);
 	    }
 	  current->searched = 0;
 	  discard_cleanups (searched_cleanup);
@@ -505,7 +505,7 @@ search_symbol_list (const char *name, int num,
   return NULL;
 }
 
-/* Like cp_lookup_symbol_imports, but if BLOCK is a function, it
+/* Like cp_lookup_symbol_via_imports, but if BLOCK is a function, it
    searches through the template parameters of the function and the
    function's type.  */
 
@@ -578,7 +578,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	}
     }
 
-  return cp_lookup_symbol_imports (scope, name, block, domain, 1, 1);
+  return cp_lookup_symbol_via_imports (scope, name, block, domain, 1, 1);
 }
 
  /* Searches for NAME in the current namespace, and by applying
@@ -604,8 +604,8 @@ cp_lookup_symbol_namespace (const char *scope,
      blocks.  */
   while (block != NULL)
     {
-      sym = cp_lookup_symbol_imports (scope, name, block,
-				      domain, 0, 1);
+      sym = cp_lookup_symbol_via_imports (scope, name, block,
+					  domain, 0, 1);
 
       if (sym)
 	return sym;
