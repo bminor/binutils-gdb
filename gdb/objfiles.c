@@ -1503,6 +1503,14 @@ objfile_name (const struct objfile *objfile)
   return objfile->original_name;
 }
 
+/* See objfiles.h.  */
+
+const char *
+objfile_debug_name (const struct objfile *objfile)
+{
+  return lbasename (objfile->original_name);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_objfiles;
 

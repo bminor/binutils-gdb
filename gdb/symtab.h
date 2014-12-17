@@ -1505,6 +1505,8 @@ struct objfile *lookup_objfile_from_block (const struct block *block);
 
 extern unsigned int symtab_create_debug;
 
+extern unsigned int symbol_lookup_debug;
+
 extern int basenames_may_differ;
 
 int compare_filenames_for_search (const char *filename,

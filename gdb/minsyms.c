@@ -203,6 +203,14 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	     and the second over the demangled hash table.  */
         int pass;
 
+	if (symbol_lookup_debug)
+	  {
+	    fprintf_unfiltered (gdb_stdlog,
+				"lookup_minimal_symbol (%s, %s, %s)\n",
+				name, sfile != NULL ? sfile : "NULL",
+				objfile_debug_name (objfile));
+	  }
+
         for (pass = 1; pass <= 2 && found_symbol.minsym == NULL; pass++)
 	    {
             /* Select hash list according to pass.  */
@@ -282,13 +290,42 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 
   /* External symbols are best.  */
   if (found_symbol.minsym != NULL)
-    return found_symbol;
+    {
+      if (symbol_lookup_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "lookup_minimal_symbol (...) = %s"
+			      " (external)\n",
+			      host_address_to_string (found_symbol.minsym));
+	}
+      return found_symbol;
+    }
 
   /* File-local symbols are next best.  */
   if (found_file_symbol.minsym != NULL)
-    return found_file_symbol;
+    {
+      if (symbol_lookup_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "lookup_minimal_symbol (...) = %s"
+			      " (file-local)\n",
+			      host_address_to_string
+			        (found_file_symbol.minsym));
+	}
+      return found_file_symbol;
+    }
 
   /* Symbols for shared library trampolines are next best.  */
+  if (symbol_lookup_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "lookup_minimal_symbol (...) = %s%s\n",
+			  trampoline_symbol.minsym != NULL
+			  ? host_address_to_string (trampoline_symbol.minsym)
+			  : "NULL",
+			  trampoline_symbol.minsym != NULL
+			  ? " (trampoline)" : "");
+    }
   return trampoline_symbol;
 }
 

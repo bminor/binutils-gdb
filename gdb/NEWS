@@ -84,6 +84,12 @@ compile file [-r|-raw] filename
   even in non-stop mode.  The "auto" mode has been removed, and "off"
   is now the default mode.
 
+* New options
+
+set debug symbol-lookup
+show debug symbol-lookup
+  Control display of debugging info regarding symbol lookup.
+
 * MI changes
 
   ** The -list-thread-groups command outputs an exit-code field for

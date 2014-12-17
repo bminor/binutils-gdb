@@ -1,3 +1,26 @@
+2014-12-17  Doug Evans  <xdje42@gmail.com>
+
+	New parameter "debug symbol-lookup".
+	* NEWS: Mention it.
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Add debug
+	output.
+	(cp_lookup_symbol_namespace, cp_lookup_symbol_nonlocal): Ditto.
+	(cp_lookup_nested_symbol): Ditto.
+	* language.c (language_lookup_primitive_type_by_name): Add debug
+	output.
+	* minsyms.c (lookup_minimal_symbol): Add debug output.
+	* objfiles.c (objfile_debug_name): Moved here, and renamed ...
+	* symfile-debug.c (debug_objfile_name): ... from here.  All callers
+	updated.
+	* objfiles.h (objfile_debug_name): Declare.
+	* symtab.h (symbol_lookup_debug): Declare.
+	* symtab.c (symbol_lookup_debug): New global.
+	(lookup_language_this): Add debug output.
+	(lookup_symbol_aux, lookup_symbol_in_block): Ditto.
+	(lookup_symbol_in_objfile_symtabs, lookup_symbol_via_quick_fns): Ditto.
+	(lookup_symbol_in_static_block, lookup_symbol_in_objfile): Ditto.
+	(_initialize_symtab): Add new parameter "debug symbol-lookup".
+
 2014-12-16  Doug Evans  <xdje42@gmail.com>
 
 	* buildsym.c: Add comments describing how the buildsym machinery

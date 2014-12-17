@@ -23186,6 +23186,14 @@ Turns on or off debugging messages for FR-V shared-library code.
 @item show debug solib-frv
 Display the current state of FR-V shared-library code debugging
 messages.
+@item set debug symbol-lookup
+@cindex symbol lookup
+Turns on or off display of debugging messages related to symbol lookup.
+The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
+@item show debug symbol-lookup
+Show the current state of symbol lookup debugging messages.
 @item set debug symfile
 @cindex symbol file functions
 Turns on or off display of debugging messages related to symbol file functions.

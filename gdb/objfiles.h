@@ -701,6 +701,10 @@ void set_objfile_per_bfd (struct objfile *obj);
 
 const char *objfile_name (const struct objfile *objfile);
 
+/* Return the name to print for OBJFILE in debugging messages.  */
+
+extern const char *objfile_debug_name (const struct objfile *objfile);
+
 /* Set the objfile's notion of the "main" name and language.  */
 
 extern void set_objfile_main_name (struct objfile *objfile,
