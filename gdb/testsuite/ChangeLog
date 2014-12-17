@@ -1,3 +1,7 @@
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
+	* boards/stabs.exp: New file.
+
 2014-12-16  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
 	* gdb.base/completion.exp: Adjust to format changes of "maint
