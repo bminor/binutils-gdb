@@ -697,7 +697,7 @@ cp_lookup_symbol_nonlocal (const char *name,
    named NAME and return its type.  If not found, return NULL.  */
 
 struct type *
-find_type_baseclass_by_name (struct type *parent_type, const char *name)
+cp_find_type_baseclass_by_name (struct type *parent_type, const char *name)
 {
   int i;
 
@@ -713,7 +713,7 @@ find_type_baseclass_by_name (struct type *parent_type, const char *name)
       if (streq (base_name, name))
 	return type;
 
-      type = find_type_baseclass_by_name (type, name);
+      type = cp_find_type_baseclass_by_name (type, name);
       if (type != NULL)
 	return type;
     }
