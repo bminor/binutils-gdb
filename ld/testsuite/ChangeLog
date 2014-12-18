@@ -1,5 +1,23 @@
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* ld-mips-elf/attr-gnu-4-00.d: Relax check for ISA extension.
+	* ld-mips-elf/attr-gnu-4-01.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-02.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-03.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-08.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-10.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-11.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-18.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-20.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-22.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-28.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-30.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-33.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-38.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-44.d: Likewise.
+
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* ld-mips-elf/mips-elf.exp: Update undefweak-overflow tests.
 	* ld-mips-elf/undefweak-overflow-n32.d: Remove.
 	* ld-mips-elf/undefweak-overflow-n64.d: Likewise.
