@@ -2942,9 +2942,9 @@ classify_name (struct parser_state *par_state, const struct block *block,
     }
 
   yylval.tsym.type
-    = language_lookup_primitive_type_by_name (parse_language (par_state),
-					      parse_gdbarch (par_state),
-					      copy);
+    = language_lookup_primitive_type (parse_language (par_state),
+				      parse_gdbarch (par_state),
+				      copy);
   if (yylval.tsym.type != NULL)
     return TYPENAME;
 

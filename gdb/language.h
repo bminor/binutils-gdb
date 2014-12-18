@@ -435,9 +435,9 @@ struct type *language_bool_type (const struct language_defn *l,
 struct type *language_string_char_type (const struct language_defn *l,
 					struct gdbarch *gdbarch);
 
-struct type *language_lookup_primitive_type_by_name (const struct language_defn *l,
-						     struct gdbarch *gdbarch,
-						     const char *name);
+struct type *language_lookup_primitive_type (const struct language_defn *l,
+					     struct gdbarch *gdbarch,
+					     const char *name);
 
 
 /* These macros define the behaviour of the expression 

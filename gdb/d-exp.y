@@ -1577,8 +1577,8 @@ yylex (void)
     return DOLLAR_VARIABLE;
 
   yylval.tsym.type
-    = language_lookup_primitive_type_by_name (parse_language (pstate),
-					      parse_gdbarch (pstate), copy);
+    = language_lookup_primitive_type (parse_language (pstate),
+				      parse_gdbarch (pstate), copy);
   if (yylval.tsym.type != NULL)
     return TYPENAME;
 

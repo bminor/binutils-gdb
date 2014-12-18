@@ -988,9 +988,9 @@ language_bool_type (const struct language_defn *la,
 }
 
 struct type *
-language_lookup_primitive_type_by_name (const struct language_defn *la,
-					struct gdbarch *gdbarch,
-					const char *name)
+language_lookup_primitive_type (const struct language_defn *la,
+				struct gdbarch *gdbarch,
+				const char *name)
 {
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
@@ -999,8 +999,7 @@ language_lookup_primitive_type_by_name (const struct language_defn *la,
   if (symbol_lookup_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "language_lookup_primitive_type_by_name"
-			  " (%s, %s, %s)",
+			  "language_lookup_primitive_type (%s, %s, %s)",
 			  la->la_name, host_address_to_string (gdbarch), name);
     }
 

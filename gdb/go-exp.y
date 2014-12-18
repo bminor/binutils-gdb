@@ -1455,9 +1455,9 @@ classify_name (struct parser_state *par_state, const struct block *block)
   copy = copy_name (yylval.sval);
 
   /* Try primitive types first so they win over bad/weird debug info.  */
-  type = language_lookup_primitive_type_by_name (parse_language (par_state),
-						 parse_gdbarch (par_state),
-						 copy);
+  type = language_lookup_primitive_type (parse_language (par_state),
+					 parse_gdbarch (par_state),
+					 copy);
   if (type != NULL)
     {
       /* NOTE: We take advantage of the fact that yylval coming in was a
