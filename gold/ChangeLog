@@ -1,4 +1,31 @@
 2015-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+	    Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17729
+	* configure.ac (DEFAULT_TARGET_X86_64): Don't set for x32.
+	(DEFAULT_TARGET_X32): Set for x32.
+	* x86_64.cc (cmp_insn_32): New.
+	(lea_r10_insn_32): Likewise.
+	(lea_r11_insn_32): Likewise.
+	(cmp_insn_64): Likewise.
+	(lea_r10_insn_64): Likewise.
+	(lea_r11_insn_64): Likewise.
+	(Target_x86_64<size>::do_calls_non_split): Handle x32.
+	* testsuite/Makefile.am (check_SCRIPTS): Add split_x32.sh.
+	(check_DATA): Add split_x32 files.
+	(split_x32_[1234n].o): New targets.
+	(split_x32_[124]): New targets.
+	(split_x32_[1234r].stdout): New targets.
+	* testsuite/split_x32.sh: New file.
+	* testsuite/split_x32_1.s: Likewise.
+	* testsuite/split_x32_2.s: Likewise.
+	* testsuite/split_x32_3.s: Likewise.
+	* testsuite/split_x32_4.s: Likewise.
+	* testsuite/split_x32_n.s: Likewise.
+	* configure: Regenerated.
+	* testsuite/Makefile.in: Likewise.
+
+2015-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/17809
 	* x86_64.cc (Target_x86_64<size>::Relocate::tls_ie_to_le): Handle

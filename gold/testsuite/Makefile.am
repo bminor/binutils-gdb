@@ -2483,6 +2483,43 @@ MOSTLYCLEANFILES += split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 
 endif DEFAULT_TARGET_X86_64
 
+if DEFAULT_TARGET_X32
+
+check_SCRIPTS += split_x32.sh
+check_DATA += split_x32_1.stdout split_x32_2.stdout \
+	split_x32_3.stdout split_x32_4.stdout split_x32_r.stdout
+SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+split_x32_1.o: split_x32_1.s
+	$(TEST_AS) -o $@ $<
+split_x32_2.o: split_x32_2.s
+	$(TEST_AS) -o $@ $<
+split_x32_3.o: split_x32_3.s
+	$(TEST_AS) -o $@ $<
+split_x32_4.o: split_x32_4.s
+	$(TEST_AS) -o $@ $<
+split_x32_n.o: split_x32_n.s
+	$(TEST_AS) -o $@ $<
+split_x32_1: split_x32_1.o split_x32_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x32_1.o split_x32_n.o
+split_x32_1.stdout: split_x32_1
+	$(TEST_OBJDUMP) -d $< > $@
+split_x32_2: split_x32_2.o split_x32_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x32_2.o split_x32_n.o
+split_x32_2.stdout: split_x32_2
+	$(TEST_OBJDUMP) -d $< > $@
+split_x32_3.stdout: split_x32_3.o split_x32_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_x32_3 split_x32_3.o split_x32_n.o > $@ 2>&1 || exit 0
+split_x32_4: split_x32_4.o split_x32_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x32_4.o split_x32_n.o
+split_x32_4.stdout: split_x32_4
+	$(TEST_OBJDUMP) -d $< > $@
+split_x32_r.stdout: split_x32_1.o split_x32_n.o ../ld-new
+	../ld-new -r split_x32_1.o split_x32_n.o -o split_x32_r > $@ 2>&1 || exit 0
+MOSTLYCLEANFILES += split_x32_1 split_x32_2 split_x32_3 \
+	split_x32_4 split_x32_r
+
+endif DEFAULT_TARGET_X32
+
 if DEFAULT_TARGET_ARM
 
 check_SCRIPTS += arm_abs_global.sh
