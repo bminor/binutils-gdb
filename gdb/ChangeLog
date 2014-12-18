@@ -1,3 +1,9 @@
+2014-12-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* elfread.c (elf_symfile_init): Remove stale comment.
+	(elf_symfile_read): Same.
+	* symfile.h (struct sym_fns): Same.
+
 2014-12-18  Nigel Stephens  <nigel@mips.com>
 	    Maciej W. Rozycki  <macro@codesourcery.com>
 

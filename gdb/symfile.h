@@ -353,12 +353,12 @@ struct sym_fns
 
   void (*sym_finish) (struct objfile *);
 
+
   /* This function produces a file-dependent section_offsets
-     structure, allocated in the objfile's storage, and based on the
-     parameter.  The parameter is currently a CORE_ADDR (FIXME!) for
-     backward compatibility with the higher levels of GDB.  It should
-     probably be changed to a string, where NULL means the default,
-     and others are parsed in a file dependent way.  */
+     structure, allocated in the objfile's storage.
+
+     The section_addr_info structure contains the offset of loadable and
+     allocated sections, relative to the absolute offsets found in the BFD.  */
 
   void (*sym_offsets) (struct objfile *, const struct section_addr_info *);
 
