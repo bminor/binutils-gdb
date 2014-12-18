@@ -1,3 +1,12 @@
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/mips-elf.exp: Update undefweak-overflow tests.
+	* ld-mips-elf/undefweak-overflow-n32.d: Remove.
+	* ld-mips-elf/undefweak-overflow-n64.d: Likewise.
+	* ld-mips-elf/undefweak-overflow.s: Set mips64r6, noreorder and
+	add a label to mark the micromips region.
+	* ld-mips-elf/undefweak-overflow.d: Update expected output.
+
 2014-12-19  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* ld-mips-elf/mips-elf.exp: Add undefined weak overflow
