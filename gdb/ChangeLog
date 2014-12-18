@@ -1,5 +1,16 @@
 2014-12-18  Yao Qi  <yao@codesourcery.com>
 
+	* gdbarch.sh (print_float_info): Change its type from 'M' to 'm'.
+	* gdbarch.c: Re-generated.
+	* gdbarch.h: Likewise.
+	* infcmd.c (default_print_float_info): New function.
+	(print_float_info): Removed.  Move code to
+	default_print_float_info.
+	(float_info): Adjust to call gdbarch_print_float_info.
+	* inferior.h (default_print_float_info): Declare it.
+
+2014-12-18  Yao Qi  <yao@codesourcery.com>
+
 	* h8300-tdep.c (h8300_print_float_info): Remove.
 	(h8300_gdbarch_init): Remove the call to
 	set_gdbarch_print_float_info.
