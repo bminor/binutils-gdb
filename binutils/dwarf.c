@@ -1888,7 +1888,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  /* DWARF 5 values.  */
 	case DW_LANG_Go:		printf ("(Go)"); break;
 	case DW_LANG_C_plus_plus_11:	printf ("(C++11)"); break;
-	case DW_LANG_C11:		printf ("(ANSI C11)"); break;
+	case DW_LANG_C11:		printf ("(C11)"); break;
 	case DW_LANG_C_plus_plus_14:	printf ("(C++14)"); break;
 	  /* MIPS extension.  */
 	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;

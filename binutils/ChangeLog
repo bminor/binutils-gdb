@@ -1,6 +1,10 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-18  Mark Wielaard  <mjw@redhat.com>
+	* dwarf.c (read_and_display_attr_value): Change display name of
+	DW_LANG_C11 from (ANSI C11) to (C11).
+
 	2014-12-11  Alan Modra  <amodra@gmail.com>
 	* configure.ac: Check for long long and sizes of long long and long.
 	* elfcomm.h (HOST_WIDEST_INT): Test HAVE_LONG_LONG in place of
