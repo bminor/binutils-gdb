@@ -1,3 +1,7 @@
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/octeon3.d: Switch to use numeric register names.
+
 2014-12-16  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/attr-gnu-4-5.d: Ignore ASEs.
