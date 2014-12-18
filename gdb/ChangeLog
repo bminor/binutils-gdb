@@ -1,5 +1,9 @@
 2014-12-18  Doug Evans  <xdje42@gmail.com>
 
+	* infcmd.c (jump_command): Minor simplification.
+
+2014-12-18  Doug Evans  <xdje42@gmail.com>
+
 	* language.c (language_lookup_primitive_type): Renamed from
 	language_lookup_primitive_type_by_name.  All callers updated.
 
