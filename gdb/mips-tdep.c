@@ -73,6 +73,9 @@ static int micromips_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
 static int mips16_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
 					     CORE_ADDR addr, int mustbe32);
 
+static void mips_print_float_info (struct gdbarch *, struct ui_file *,
+				   struct frame_info *, const char *);
+
 /* A useful bit in the CP0 status register (MIPS_PS_REGNUM).  */
 /* This bit is set if we are emulating 32-bit FPRs on a 64-bit chip.  */
 #define ST0_FR (1 << 26)
@@ -6387,6 +6390,94 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
 			      &opts, 0, file);
 }
 
+/* Print IEEE exception condition bits in FLAGS.  */
+
+static void
+print_fpu_flags (struct ui_file *file, int flags)
+{
+  if (flags & (1 << 0))
+    fputs_filtered (" inexact", file);
+  if (flags & (1 << 1))
+    fputs_filtered (" uflow", file);
+  if (flags & (1 << 2))
+    fputs_filtered (" oflow", file);
+  if (flags & (1 << 3))
+    fputs_filtered (" div0", file);
+  if (flags & (1 << 4))
+    fputs_filtered (" inval", file);
+  if (flags & (1 << 5))
+    fputs_filtered (" unimp", file);
+  fputc_filtered ('\n', file);
+}
+
+/* Print interesting information about the floating point processor
+   (if present) or emulator.  */
+
+static void
+mips_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+		      struct frame_info *frame, const char *args)
+{
+  int fcsr = mips_regnum (gdbarch)->fp_control_status;
+  enum mips_fpu_type type = MIPS_FPU_TYPE (gdbarch);
+  ULONGEST fcs = 0;
+  int i;
+
+  if (fcsr == -1 || !read_frame_register_unsigned (frame, fcsr, &fcs))
+    type = MIPS_FPU_NONE;
+
+  fprintf_filtered (file, "fpu type: %s\n",
+		    type == MIPS_FPU_DOUBLE ? "double-precision"
+		    : type == MIPS_FPU_SINGLE ? "single-precision"
+		    : "none / unused");
+
+  if (type == MIPS_FPU_NONE)
+    return;
+
+  fprintf_filtered (file, "reg size: %d bits\n",
+		    register_size (gdbarch, mips_regnum (gdbarch)->fp0) * 8);
+
+  fputs_filtered ("cond    :", file);
+  if (fcs & (1 << 23))
+    fputs_filtered (" 0", file);
+  for (i = 1; i <= 7; i++)
+    if (fcs & (1 << (24 + i)))
+      fprintf_filtered (file, " %d", i);
+  fputc_filtered ('\n', file);
+
+  fputs_filtered ("cause   :", file);
+  print_fpu_flags (file, (fcs >> 12) & 0x3f);
+  fputs ("mask    :", stdout);
+  print_fpu_flags (file, (fcs >> 7) & 0x1f);
+  fputs ("flags   :", stdout);
+  print_fpu_flags (file, (fcs >> 2) & 0x1f);
+
+  fputs_filtered ("rounding: ", file);
+  switch (fcs & 3)
+    {
+    case 0: fputs_filtered ("nearest\n", file); break;
+    case 1: fputs_filtered ("zero\n", file); break;
+    case 2: fputs_filtered ("+inf\n", file); break;
+    case 3: fputs_filtered ("-inf\n", file); break;
+    }
+
+  fputs_filtered ("flush   :", file);
+  if (fcs & (1 << 21))
+    fputs_filtered (" nearest", file);
+  if (fcs & (1 << 22))
+    fputs_filtered (" override", file);
+  if (fcs & (1 << 24))
+    fputs_filtered (" zero", file);
+  if ((fcs & (0xb << 21)) == 0)
+    fputs_filtered (" no", file);
+  fputc_filtered ('\n', file);
+
+  fprintf_filtered (file, "nan2008 : %s\n", fcs & (1 << 18) ? "yes" : "no");
+  fprintf_filtered (file, "abs2008 : %s\n", fcs & (1 << 19) ? "yes" : "no");
+  fputc_filtered ('\n', file);
+
+  default_print_float_info (gdbarch, file, frame, args);
+}
+
 /* Replacement for generic do_registers_info.
    Print regs in pretty columns.  */
 
@@ -8736,6 +8827,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_push_dummy_code (gdbarch, mips_push_dummy_code);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
+
+  set_gdbarch_print_float_info (gdbarch, mips_print_float_info);
 
   set_gdbarch_convert_register_p (gdbarch, mips_convert_register_p);
   set_gdbarch_register_to_value (gdbarch, mips_register_to_value);

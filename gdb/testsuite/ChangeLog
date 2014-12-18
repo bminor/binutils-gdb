@@ -1,3 +1,9 @@
+2014-12-18  Nigel Stephens  <nigel@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/float.exp: Handle the new output from "info float" on
+	MIPS targets.
+
 2014-12-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix MinGW compilation.

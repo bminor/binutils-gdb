@@ -1,3 +1,11 @@
+2014-12-18  Nigel Stephens  <nigel@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (print_fpu_flags): New function.
+	(mips_print_float_info): Likewise.
+	(mips_gdbarch_init): Install mips_print_float_info as gdbarch
+	print_float_info routine.
+
 2014-12-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdbarch.sh (print_float_info): Change its type from 'M' to 'm'.
