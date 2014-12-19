@@ -83,6 +83,7 @@ static const struct osabi_names gdb_osabi_names[] =
   { "OpenVMS", NULL },
   { "LynxOS178", NULL },
   { "Newlib", NULL },
+  { "SDE", NULL },
 
   { "<invalid>", NULL }
 };

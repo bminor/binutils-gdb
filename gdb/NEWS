@@ -95,6 +95,10 @@ show debug symbol-lookup
   ** The -list-thread-groups command outputs an exit-code field for
      inferiors that have exited.
 
+* New targets
+
+MIPS SDE			mips*-sde*-elf*
+
 * Removed targets
 
 Support for these obsolete configurations has been removed.
