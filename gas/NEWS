@@ -1,5 +1,9 @@
 -*- text -*-
 
+Changes in 2.26:
+
+* --compress-debug-sections is turned on for Linux/x86 by default.
+
 Changes in 2.25:
 
 * Add support for the AVR Tiny microcontrollers.

@@ -277,11 +277,11 @@ extern void print_transfer_performance (struct ui_file *stream,
 
 typedef void initialize_file_ftype (void);
 
-extern char *gdb_readline (char *);
+extern char *gdb_readline (const char *);
 
-extern char *gdb_readline_wrapper (char *);
+extern char *gdb_readline_wrapper (const char *);
 
-extern char *command_line_input (char *, int, char *);
+extern char *command_line_input (const char *, int, char *);
 
 extern void print_prompt (void);
 
@@ -664,7 +664,7 @@ extern void (*deprecated_warning_hook) (const char *, va_list)
 extern void (*deprecated_interactive_hook) (void);
 extern void (*deprecated_readline_begin_hook) (char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
-extern char *(*deprecated_readline_hook) (char *);
+extern char *(*deprecated_readline_hook) (const char *);
 extern void (*deprecated_readline_end_hook) (void);
 extern void (*deprecated_register_changed_hook) (int regno);
 extern void (*deprecated_context_hook) (int);

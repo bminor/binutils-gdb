@@ -229,9 +229,9 @@ maintenance_print_user_registers (char *args, int from_tty)
   regs = gdbarch_data (gdbarch, user_regs_data);
   regnum = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
-  fprintf_unfiltered (gdb_stdout, " Nr  Name\n");
+  fprintf_unfiltered (gdb_stdout, " %-11s %3s\n", "Name", "Nr");
   for (reg = regs->first; reg != NULL; reg = reg->next, ++regnum)
-    fprintf_unfiltered (gdb_stdout, "%3d  %s\n", regnum, reg->name);
+    fprintf_unfiltered (gdb_stdout, " %-11s %3d\n", reg->name, regnum);
 }
 
 extern initialize_file_ftype _initialize_user_regs; /* -Wmissing-prototypes */

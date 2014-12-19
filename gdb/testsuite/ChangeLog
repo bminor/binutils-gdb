@@ -1,3 +1,82 @@
+2014-12-18  Nigel Stephens  <nigel@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/float.exp: Handle the new output from "info float" on
+	MIPS targets.
+
+2014-12-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix MinGW compilation.
+	* gdb.compile/compile-ops.exp: Update untested message if
+	!skip_compile_feature_tests.
+	* gdb.compile/compile-setjmp.exp: Likewise.
+	* gdb.compile/compile-tls.exp: Likewise.
+	* gdb.compile/compile.exp: Likewise.
+	* lib/gdb.exp (skip_compile_feature_tests): Check also "Command not
+	supported on this host".
+
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
+	* boards/stabs.exp: New file.
+
+2014-12-16  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* gdb.base/completion.exp: Adjust to format changes of "maint
+	print user-registers".
+
+2014-12-16  Catalin Udma  <catalin.udma@freescale.com>
+
+	PR server/17457
+	* gdb.arch/aarch64-fp.c: New file.
+	* gdb.arch/aarch64-fp.exp: New file.
+
+2014-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	Merge dg-extract-results.{sh,py} from GCC upstream (r210243,
+	r210637, r210913, r211666, r215400, r215817).
+
+	2014-05-08  Richard Sandiford  <rdsandiford@googlemail.com>
+		* dg-extract-results.py: New file.
+		* dg-extract-results.sh: Use it if the environment seems
+		suitable.
+
+	2014-05-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+		* dg-extract-results.py (parse_run): Handle warnings that
+		are printed before a test harness is run.
+
+	2014-05-25  Richard Sandiford  <rdsandiford@googlemail.com>
+
+		* dg-extract-results.py (Named): Remove __cmp__ method.
+		(output_variation): Use a key to sort variation.harnesses.
+
+	2014-06-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
+		* dg-extract-results.py: For Python 3, force sys.stdout to
+		handle surrogate escape sequences.
+		(safe_open): New function.
+		(output_segment, main): Use it.
+
+	2014-09-19  Segher Boessenkool  <segher@kernel.crashing.org>
+
+		* dg-extract-results.py (Prog.result_re): Include options
+		in test name.
+
+	2014-10-02  Segher Boessenkool  <segher@kernel.crashing.org>
+
+		* dg-extract-results.py (output_variation): Always sort if
+		do_sum.
+
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (default_gdb_start): After starting gdb, loop
+	as long as we get pagination notifications.
+
+2014-12-15  Jason Merrill  <jason@redhat.com>
+
+	* Makefile.in (check-gdb.%): Restore.
+	* README: Mention it.
+
 2014-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/str_uninit: New testcase.

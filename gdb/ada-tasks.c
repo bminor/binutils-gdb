@@ -292,7 +292,7 @@ int
 ada_get_task_number (ptid_t ptid)
 {
   int i;
-  struct inferior *inf = find_inferior_pid (ptid_get_pid (ptid));
+  struct inferior *inf = find_inferior_ptid (ptid);
   struct ada_tasks_inferior_data *data;
 
   gdb_assert (inf != NULL);
@@ -1449,4 +1449,3 @@ _initialize_tasks (void)
 Without argument, this command simply prints the current task ID"),
            &cmdlist);
 }
-

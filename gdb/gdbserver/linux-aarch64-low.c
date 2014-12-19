@@ -46,8 +46,10 @@ extern const struct target_desc *tdesc_aarch64;
 #define AARCH64_PC_REGNO   32
 #define AARCH64_CPSR_REGNO 33
 #define AARCH64_V0_REGNO   34
+#define AARCH64_FPSR_REGNO (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM)
+#define AARCH64_FPCR_REGNO (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM + 1)
 
-#define AARCH64_NUM_REGS (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM)
+#define AARCH64_NUM_REGS (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM + 2)
 
 static int
 aarch64_regmap [] =
@@ -255,6 +257,8 @@ aarch64_fill_fpregset (struct regcache *regcache, void *buf)
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
     collect_register (regcache, AARCH64_V0_REGNO + i, &regset->vregs[i]);
+  collect_register (regcache, AARCH64_FPSR_REGNO, &regset->fpsr);
+  collect_register (regcache, AARCH64_FPCR_REGNO, &regset->fpcr);
 }
 
 static void
@@ -265,6 +269,8 @@ aarch64_store_fpregset (struct regcache *regcache, const void *buf)
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
     supply_register (regcache, AARCH64_V0_REGNO + i, &regset->vregs[i]);
+  supply_register (regcache, AARCH64_FPSR_REGNO, &regset->fpsr);
+  supply_register (regcache, AARCH64_FPCR_REGNO, &regset->fpcr);
 }
 
 /* Enable miscellaneous debugging output.  The name is historical - it

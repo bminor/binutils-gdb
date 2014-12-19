@@ -21,7 +21,53 @@
    file-reading routines.
 
    Routines to support specific debugging information formats (stabs,
-   DWARF, etc) belong somewhere else.  */
+   DWARF, etc) belong somewhere else.
+
+   The basic way this module is used is as follows:
+
+   buildsym_init ();
+   cleanups = make_cleanup (really_free_pendings, NULL);
+   cust = start_symtab (...);
+   ... read debug info ...
+   cust = end_symtab (...);
+   do_cleanups (cleanups);
+
+   The compunit symtab pointer ("cust") is returned from both start_symtab
+   and end_symtab to simplify the debug info readers.
+
+   There are minor variations on this, e.g., dwarf2read.c splits end_symtab
+   into two calls: end_symtab_get_static_block, end_symtab_from_static_block,
+   but all debug info readers follow this basic flow.
+
+   Reading DWARF Type Units is another variation:
+
+   buildsym_init ();
+   cleanups = make_cleanup (really_free_pendings, NULL);
+   cust = start_symtab (...);
+   ... read debug info ...
+   cust = end_expandable_symtab (...);
+   do_cleanups (cleanups);
+
+   And then reading subsequent Type Units within the containing "Comp Unit"
+   will use a second flow:
+
+   buildsym_init ();
+   cleanups = make_cleanup (really_free_pendings, NULL);
+   cust = restart_symtab (...);
+   ... read debug info ...
+   cust = augment_type_symtab (...);
+   do_cleanups (cleanups);
+
+   dbxread.c and xcoffread.c use another variation:
+
+   buildsym_init ();
+   cleanups = make_cleanup (really_free_pendings, NULL);
+   cust = start_symtab (...);
+   ... read debug info ...
+   cust = end_symtab (...);
+   ... start_symtab + read + end_symtab repeated ...
+   do_cleanups (cleanups);
+*/
 
 #include "defs.h"
 #include "bfd.h"
@@ -146,6 +192,8 @@ static struct subfile_stack *subfile_stack;
    currently reading.  */
 static struct macro_table *pending_macros;
 
+static void free_buildsym_compunit (void);
+
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
 static void record_pending_block (struct objfile *objfile,
@@ -220,8 +268,12 @@ find_symbol_in_list (struct pending *list, char *name, int length)
   return (NULL);
 }
 
-/* At end of reading syms, or in case of quit, really free as many
-   `struct pending's as we can easily find.  */
+/* At end of reading syms, or in case of quit, ensure everything associated
+   with building symtabs is freed.  This is intended to be registered as a
+   cleanup before doing psymtab->symtab expansion.
+
+   N.B. This is *not* intended to be used when building psymtabs.  Some debug
+   info readers call this anyway, which is harmless if confusing.  */
 
 void
 really_free_pendings (void *dummy)
@@ -253,12 +305,13 @@ really_free_pendings (void *dummy)
 
   if (pending_macros)
     free_macro_table (pending_macros);
+  pending_macros = NULL;
 
   if (pending_addrmap)
-    {
-      obstack_free (&pending_addrmap_obstack, NULL);
-      pending_addrmap = NULL;
-    }
+    obstack_free (&pending_addrmap_obstack, NULL);
+  pending_addrmap = NULL;
+
+  free_buildsym_compunit ();
 }
 
 /* This function is called to discard any pending blocks.  */
@@ -744,6 +797,7 @@ free_buildsym_compunit (void)
   xfree (buildsym_compunit->comp_dir);
   xfree (buildsym_compunit);
   buildsym_compunit = NULL;
+  current_subfile = NULL;
 }
 
 /* For stabs readers, the first N_SO symbol is assumed to be the
@@ -943,6 +997,32 @@ get_macro_table (void)
   return pending_macros;
 }
 
+/* Init state to prepare for building a symtab.
+   Note: This can't be done in buildsym_init because dbxread.c and xcoffread.c
+   can call start_symtab+end_symtab multiple times after one call to
+   buildsym_init.  */
+
+static void
+prepare_for_building (const char *name, CORE_ADDR start_addr)
+{
+  set_last_source_file (name);
+  last_source_start_addr = start_addr;
+
+  local_symbols = NULL;
+  within_function = 0;
+  have_line_numbers = 0;
+
+  context_stack_depth = 0;
+
+  /* These should have been reset either by successful completion of building
+     a symtab, or by the really_free_pendings cleanup.  */
+  gdb_assert (file_symbols == NULL);
+  gdb_assert (global_symbols == NULL);
+  gdb_assert (pending_macros == NULL);
+  gdb_assert (pending_addrmap == NULL);
+  gdb_assert (current_subfile == NULL);
+}
+
 /* Start a new symtab for a new source file in OBJFILE.  Called, for example,
    when a stabs symbol of type N_SO is seen, or when a DWARF
    TAG_compile_unit DIE is seen.  It indicates the start of data for
@@ -956,11 +1036,11 @@ struct compunit_symtab *
 start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
 	      CORE_ADDR start_addr)
 {
-  restart_symtab (start_addr);
+  prepare_for_building (name, start_addr);
 
   buildsym_compunit = start_buildsym_compunit (objfile, comp_dir);
 
-  /* Allocate the primary symtab now.  The caller needs it to allocate
+  /* Allocate the compunit symtab now.  The caller needs it to allocate
      non-primary symtabs.  It is also needed by get_macro_table.  */
   buildsym_compunit->compunit_symtab = allocate_compunit_symtab (objfile,
 								 name);
@@ -976,43 +1056,27 @@ start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
      of the subfiles list.  */
   buildsym_compunit->main_subfile = current_subfile;
 
-  set_last_source_file (name);
-
   return buildsym_compunit->compunit_symtab;
 }
 
 /* Restart compilation for a symtab.
+   CUST is the result of end_expandable_symtab.
+   NAME, START_ADDR are the source file we are resuming with.
+
    This is used when a symtab is built from multiple sources.
-   The symtab is first built with start_symtab and then for each additional
-   piece call restart_symtab.  */
+   The symtab is first built with start_symtab/end_expandable_symtab
+   and then for each additional piece call restart_symtab/augment_*_symtab.
+   Note: At the moment there is only augment_type_symtab.  */
 
 void
-restart_symtab (CORE_ADDR start_addr)
+restart_symtab (struct compunit_symtab *cust,
+		const char *name, CORE_ADDR start_addr)
 {
-  set_last_source_file (NULL);
-  last_source_start_addr = start_addr;
-  file_symbols = NULL;
-  global_symbols = NULL;
-  within_function = 0;
-  have_line_numbers = 0;
+  prepare_for_building (name, start_addr);
 
-  /* Context stack is initially empty.  Allocate first one with room
-     for 10 levels; reuse it forever afterward.  */
-  if (context_stack == NULL)
-    {
-      context_stack_size = INITIAL_CONTEXT_STACK_SIZE;
-      context_stack = (struct context_stack *)
-	xmalloc (context_stack_size * sizeof (struct context_stack));
-    }
-  context_stack_depth = 0;
-
-  /* We shouldn't have any address map at this point.  */
-  gdb_assert (! pending_addrmap);
-
-  /* Reset the sub source files list.  The list should already be empty,
-     but free it anyway in case some code didn't finish cleaning up after
-     an error.  */
-  free_buildsym_compunit ();
+  buildsym_compunit = start_buildsym_compunit (COMPUNIT_OBJFILE (cust),
+					       COMPUNIT_DIRNAME (cust));
+  buildsym_compunit->compunit_symtab = cust;
 }
 
 /* Subroutine of end_symtab to simplify it.  Look for a subfile that
@@ -1101,19 +1165,30 @@ block_compar (const void *ap, const void *bp)
 	  - (BLOCK_START (b) < BLOCK_START (a)));
 }
 
-/* Reset globals used to build symtabs.  */
+/* Reset state after a successful building of a symtab.
+   This exists because dbxread.c and xcoffread.c can call
+   start_symtab+end_symtab multiple times after one call to buildsym_init,
+   and before the really_free_pendings cleanup is called.
+   We keep the free_pendings list around for dbx/xcoff sake.  */
 
 static void
 reset_symtab_globals (void)
 {
   set_last_source_file (NULL);
-  free_buildsym_compunit ();
+
+  local_symbols = NULL;
+  file_symbols = NULL;
+  global_symbols = NULL;
+
+  /* We don't free pending_macros here because if the symtab was successfully
+     built then ownership was transferred to the symtab.  */
   pending_macros = NULL;
+
   if (pending_addrmap)
-    {
-      obstack_free (&pending_addrmap_obstack, NULL);
-      pending_addrmap = NULL;
-    }
+    obstack_free (&pending_addrmap_obstack, NULL);
+  pending_addrmap = NULL;
+
+  free_buildsym_compunit ();
 }
 
 /* Implementation of the first part of end_symtab.  It allows modifying
@@ -1218,23 +1293,6 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 				    last_source_start_addr, end_addr,
 				    0, expandable);
     }
-}
-
-/* Subroutine of end_symtab_from_static_block to simplify it.
-   Handle the "no blockvector" case.
-   When this happens there is nothing to record, so just free up
-   any memory we allocated while reading debug info.  */
-
-static void
-end_symtab_without_blockvector (void)
-{
-  /* Free up all the subfiles.
-     We won't be adding a compunit to the objfile's list of compunits,
-     so there's nothing to unchain.  However, since each symtab
-     is added to the objfile's obstack we can't free that space.
-     We could do better, but this is believed to be a sufficiently rare
-     event.  */
-  free_buildsym_compunit ();
 }
 
 /* Subroutine of end_symtab_from_static_block to simplify it.
@@ -1349,7 +1407,7 @@ end_symtab_with_blockvector (struct block *static_block,
     gdb_assert (main_symtab == COMPUNIT_FILETABS (cu));
   }
 
-  /* Fill out the primary symtab.  */
+  /* Fill out the compunit symtab.  */
 
   if (buildsym_compunit->comp_dir != NULL)
     {
@@ -1406,7 +1464,6 @@ end_symtab_with_blockvector (struct block *static_block,
   }
 
   add_compunit_symtab_to_objfile (cu);
-  free_buildsym_compunit ();
 
   return cu;
 }
@@ -1428,7 +1485,15 @@ end_symtab_from_static_block (struct block *static_block,
 
   if (static_block == NULL)
     {
-      end_symtab_without_blockvector ();
+      /* Handle the "no blockvector" case.
+	 When this happens there is nothing to record, so there's nothing
+	 to do: memory will be freed up later.
+
+	 Note: We won't be adding a compunit to the objfile's list of
+	 compunits, so there's nothing to unchain.  However, since each symtab
+	 is added to the objfile's obstack we can't free that space.
+	 We could do better, but this is believed to be a sufficiently rare
+	 event.  */
       cu = NULL;
     }
   else
@@ -1506,8 +1571,9 @@ set_missing_symtab (struct pending *pending_list,
    This is the case for DWARF4 Type Units.  */
 
 void
-augment_type_symtab (struct compunit_symtab *cust)
+augment_type_symtab (void)
 {
+  struct compunit_symtab *cust = buildsym_compunit->compunit_symtab;
   const struct blockvector *blockvector = COMPUNIT_BLOCKVECTOR (cust);
 
   if (context_stack_depth > 0)
@@ -1674,17 +1740,29 @@ get_last_source_file (void)
 void
 buildsym_init (void)
 {
-  free_pendings = NULL;
-  file_symbols = NULL;
-  global_symbols = NULL;
-  pending_blocks = NULL;
-  pending_macros = NULL;
   using_directives = NULL;
   subfile_stack = NULL;
 
-  /* We shouldn't have any address map at this point.  */
-  gdb_assert (! pending_addrmap);
   pending_addrmap_interesting = 0;
+
+  /* Context stack is initially empty.  Allocate first one with room
+     for a few levels; reuse it forever afterward.  */
+  if (context_stack == NULL)
+    {
+      context_stack_size = INITIAL_CONTEXT_STACK_SIZE;
+      context_stack = (struct context_stack *)
+	xmalloc (context_stack_size * sizeof (struct context_stack));
+    }
+
+  /* Ensure the really_free_pendings cleanup was called after
+     the last time.  */
+  gdb_assert (free_pendings == NULL);
+  gdb_assert (pending_blocks == NULL);
+  gdb_assert (file_symbols == NULL);
+  gdb_assert (global_symbols == NULL);
+  gdb_assert (pending_macros == NULL);
+  gdb_assert (pending_addrmap == NULL);
+  gdb_assert (buildsym_compunit == NULL);
 }
 
 /* Initialize anything that needs initializing when a completely new

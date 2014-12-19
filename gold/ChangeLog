@@ -1,3 +1,12 @@
+2014-12-16  Cary Coutant  <ccoutant@google.com>
+
+	* mapfile.cc (Mapfile::print_input_section): Print uncompressed sizes.
+	(Mapfile::print_output_data): Use current_data_size() to avoid
+	assert for sections requiring postprocessing; if address is not valid,
+	print 0.
+	(Mapfile::print_output_section): Use current_data_size(); print note
+	that addresses and sizes are before compression.
+
 2014-12-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aarch64.cc (AArch64_relocate_functions::maybe_apply_stub):

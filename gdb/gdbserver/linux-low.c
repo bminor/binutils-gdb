@@ -1878,7 +1878,9 @@ linux_low_filter_event (ptid_t filter_ptid, int lwpid, int wstat)
 
   if (WIFSTOPPED (wstat) && child->must_set_ptrace_flags)
     {
-      linux_enable_event_reporting (lwpid);
+      struct process_info *proc = find_process_pid (pid_of (thread));
+
+      linux_enable_event_reporting (lwpid, proc->attached);
       child->must_set_ptrace_flags = 0;
     }
 

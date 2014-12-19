@@ -57,7 +57,7 @@ if ![runto_main] {
 }
 
 if {[skip_compile_feature_tests]} {
-    untested "could not find libcc1 shared library"
+    untested "compile command not supported (could not find libcc1 shared library?)"
     return -1
 }
 

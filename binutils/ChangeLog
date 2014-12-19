@@ -1,3 +1,8 @@
+2014-12-18  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Change display name of
+	DW_LANG_C11 from (ANSI C11) to (C11).
+
 2014-12-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

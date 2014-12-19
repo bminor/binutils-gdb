@@ -215,7 +215,7 @@ void (*deprecated_warning_hook) (const char *, va_list);
    window and it can close it.  */
 
 void (*deprecated_readline_begin_hook) (char *, ...);
-char *(*deprecated_readline_hook) (char *);
+char *(*deprecated_readline_hook) (const char *);
 void (*deprecated_readline_end_hook) (void);
 
 /* Called as appropriate to notify the interface that we have attached
@@ -620,7 +620,7 @@ prevent_dont_repeat (void)
 
    A NULL return means end of file.  */
 char *
-gdb_readline (char *prompt_arg)
+gdb_readline (const char *prompt_arg)
 {
   int c;
   char *result;
@@ -812,7 +812,7 @@ gdb_readline_wrapper_cleanup (void *arg)
 }
 
 char *
-gdb_readline_wrapper (char *prompt)
+gdb_readline_wrapper (const char *prompt)
 {
   struct cleanup *back_to;
   struct gdb_readline_wrapper_cleanup *cleanup;
@@ -912,14 +912,14 @@ gdb_rl_operate_and_get_next (int count, int key)
    simple input as the user has requested.  */
 
 char *
-command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
+command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
+  const char *prompt = prompt_arg;
   char *p;
   char *p1;
   char *rl;
-  char *local_prompt = prompt_arg;
   char *nline;
   char got_eof = 0;
 
@@ -929,15 +929,19 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 
   if (annotation_level > 1 && instream == stdin)
     {
-      local_prompt = alloca ((prompt_arg == NULL ? 0 : strlen (prompt_arg))
+      char *local_prompt;
+
+      local_prompt = alloca ((prompt == NULL ? 0 : strlen (prompt))
 			     + strlen (annotation_suffix) + 40);
-      if (prompt_arg == NULL)
+      if (prompt == NULL)
 	local_prompt[0] = '\0';
       else
-	strcpy (local_prompt, prompt_arg);
+	strcpy (local_prompt, prompt);
       strcat (local_prompt, "\n\032\032");
       strcat (local_prompt, annotation_suffix);
       strcat (local_prompt, "\n");
+
+      prompt = local_prompt;
     }
 
   if (linebuffer == 0)
@@ -979,15 +983,15 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
       /* Don't use fancy stuff if not talking to stdin.  */
       if (deprecated_readline_hook && input_from_terminal_p ())
 	{
-	  rl = (*deprecated_readline_hook) (local_prompt);
+	  rl = (*deprecated_readline_hook) (prompt);
 	}
       else if (command_editing_p && input_from_terminal_p ())
 	{
-	  rl = gdb_readline_wrapper (local_prompt);
+	  rl = gdb_readline_wrapper (prompt);
 	}
       else
 	{
-	  rl = gdb_readline (local_prompt);
+	  rl = gdb_readline (prompt);
 	}
 
       if (annotation_level > 1 && instream == stdin)
@@ -1021,7 +1025,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	break;
 
       p--;			/* Put on top of '\'.  */
-      local_prompt = (char *) 0;
+      prompt = NULL;
     }
 
 #ifdef STOP_SIGNAL
@@ -1064,7 +1068,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	  if (expanded < 0)
 	    {
 	      xfree (history_value);
-	      return command_line_input (prompt_arg, repeat,
+	      return command_line_input (prompt, repeat,
 					 annotation_suffix);
 	    }
 	  if (strlen (history_value) > linelength)

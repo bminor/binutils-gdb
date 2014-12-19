@@ -2942,9 +2942,9 @@ classify_name (struct parser_state *par_state, const struct block *block,
     }
 
   yylval.tsym.type
-    = language_lookup_primitive_type_by_name (parse_language (par_state),
-					      parse_gdbarch (par_state),
-					      copy);
+    = language_lookup_primitive_type (parse_language (par_state),
+				      parse_gdbarch (par_state),
+				      copy);
   if (yylval.tsym.type != NULL)
     return TYPENAME;
 
@@ -3019,7 +3019,7 @@ classify_inner_name (struct parser_state *par_state,
      relative to the `this' pointer.  */
   if (yylval.ssym.sym == NULL)
     {
-      struct type *base_type = find_type_baseclass_by_name (type, copy);
+      struct type *base_type = cp_find_type_baseclass_by_name (type, copy);
 
       if (base_type != NULL)
 	{
@@ -3038,7 +3038,7 @@ classify_inner_name (struct parser_state *par_state,
 	 named COPY when we really wanted a base class of the same name.
 	 Double-check this case by looking for a base class.  */
       {
-	struct type *base_type = find_type_baseclass_by_name (type, copy);
+	struct type *base_type = cp_find_type_baseclass_by_name (type, copy);
 
 	if (base_type != NULL)
 	  {

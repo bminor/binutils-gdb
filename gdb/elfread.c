@@ -1236,10 +1236,6 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
    We have been initialized by a call to elf_symfile_init, which
    currently does nothing.
 
-   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
-   in each section.  We simplify it down to a single offset for all
-   symbols.  FIXME.
-
    This function only does the minimum work necessary for letting the
    user "name" things symbolically; it does not read the entire symtab.
    Instead, it reads the external and static symbols and puts them in partial
@@ -1418,14 +1414,7 @@ elf_symfile_finish (struct objfile *objfile)
   dwarf2_free_objfile (objfile);
 }
 
-/* ELF specific initialization routine for reading symbols.
-
-   It is passed a pointer to a struct sym_fns which contains, among other
-   things, the BFD for the file whose symbols are being read, and a slot for
-   a pointer to "private data" which we can fill with goodies.
-
-   For now at least, we have nothing in particular to do, so this function is
-   just a stub.  */
+/* ELF specific initialization routine for reading symbols.  */
 
 static void
 elf_symfile_init (struct objfile *objfile)

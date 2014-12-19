@@ -367,6 +367,14 @@ find_inferior_pid (int pid)
   return NULL;
 }
 
+/* See inferior.h */
+
+struct inferior *
+find_inferior_ptid (ptid_t ptid)
+{
+  return find_inferior_pid (ptid_get_pid (ptid));
+}
+
 /* See inferior.h.  */
 
 struct inferior *

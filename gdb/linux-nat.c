@@ -321,25 +321,27 @@ pull_pid_from_list (struct simple_pid_list **listp, int pid, int *statusp)
 }
 
 /* Initialize ptrace warnings and check for supported ptrace
-   features given PID.  */
+   features given PID.
+
+   ATTACHED should be nonzero iff we attached to the inferior.  */
 
 static void
-linux_init_ptrace (pid_t pid)
+linux_init_ptrace (pid_t pid, int attached)
 {
-  linux_enable_event_reporting (pid);
+  linux_enable_event_reporting (pid, attached);
   linux_ptrace_init_warnings ();
 }
 
 static void
 linux_child_post_attach (struct target_ops *self, int pid)
 {
-  linux_init_ptrace (pid);
+  linux_init_ptrace (pid, 1);
 }
 
 static void
 linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
-  linux_init_ptrace (ptid_get_pid (ptid));
+  linux_init_ptrace (ptid_get_pid (ptid), 0);
 }
 
 /* Return the number of known LWPs in the tgid given by PID.  */
@@ -1435,7 +1437,7 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 {
   if (lp->stopped)
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      struct inferior *inf = find_inferior_ptid (lp->ptid);
 
       if (inf->vfork_child != NULL)
 	{
@@ -2388,7 +2390,7 @@ linux_nat_set_status_is_event (struct target_ops *t,
 static int
 stop_wait_callback (struct lwp_info *lp, void *data)
 {
-  struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+  struct inferior *inf = find_inferior_ptid (lp->ptid);
 
   /* If this is a vfork parent, bail out, it is not going to report
      any SIGSTOP until the vfork is done with.  */

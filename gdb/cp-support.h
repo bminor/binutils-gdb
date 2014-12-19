@@ -215,8 +215,8 @@ struct type *cp_lookup_transparent_type (const char *name);
 
 /* See description in cp-namespace.c.  */
 
-struct type *find_type_baseclass_by_name (struct type *parent_type,
-					  const char *name);
+struct type *cp_find_type_baseclass_by_name (struct type *parent_type,
+					     const char *name);
 
 /* Functions from cp-name-parser.y.  */
 

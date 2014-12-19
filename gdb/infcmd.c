@@ -1199,9 +1199,12 @@ jump_command (char *arg, int from_tty)
 
   if (sfn != NULL)
     {
+      struct obj_section *section;
+
       fixup_symbol_section (sfn, 0);
-      if (section_is_overlay (SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sfn), sfn)) &&
-	  !section_is_mapped (SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sfn), sfn)))
+      section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sfn), sfn);
+      if (section_is_overlay (section)
+	  && !section_is_mapped (section))
 	{
 	  if (!query (_("WARNING!!!  Destination is in "
 			"unmapped overlay!  Jump anyway? ")))
@@ -2864,43 +2867,41 @@ interrupt_command (char *args, int from_tty)
     }
 }
 
-static void
-print_float_info (struct ui_file *file,
-		  struct frame_info *frame, const char *args)
+/* See inferior.h.  */
+
+void
+default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+			  struct frame_info *frame, const char *args)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int regnum;
+  int printed_something = 0;
 
-  if (gdbarch_print_float_info_p (gdbarch))
-    gdbarch_print_float_info (gdbarch, file, frame, args);
-  else
+  for (regnum = 0;
+       regnum < gdbarch_num_regs (gdbarch)
+	 + gdbarch_num_pseudo_regs (gdbarch);
+       regnum++)
     {
-      int regnum;
-      int printed_something = 0;
-
-      for (regnum = 0;
-	   regnum < gdbarch_num_regs (gdbarch)
-		    + gdbarch_num_pseudo_regs (gdbarch);
-	   regnum++)
+      if (gdbarch_register_reggroup_p (gdbarch, regnum, float_reggroup))
 	{
-	  if (gdbarch_register_reggroup_p (gdbarch, regnum, float_reggroup))
-	    {
-	      printed_something = 1;
-	      gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);
-	    }
+	  printed_something = 1;
+	  gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);
 	}
-      if (!printed_something)
-	fprintf_filtered (file, "No floating-point info "
-			  "available for this processor.\n");
     }
+  if (!printed_something)
+    fprintf_filtered (file, "No floating-point info "
+		      "available for this processor.\n");
 }
 
 static void
 float_info (char *args, int from_tty)
 {
+  struct frame_info *frame;
+
   if (!target_has_registers)
     error (_("The program has no registers now."));
 
-  print_float_info (gdb_stdout, get_selected_frame (NULL), args);
+  frame = get_selected_frame (NULL);
+  gdbarch_print_float_info (get_frame_arch (frame), gdb_stdout, frame, args);
 }
 
 static void

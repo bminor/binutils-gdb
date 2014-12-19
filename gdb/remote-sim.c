@@ -774,7 +774,7 @@ gdbsim_close_inferior (struct inferior *inf, void *arg)
 	 Thus we need to verify the existence of an inferior using the
 	 pid in question before setting inferior_ptid via
 	 switch_to_thread() or mourning the inferior.  */
-      if (find_inferior_pid (ptid_get_pid (ptid)) != NULL)
+      if (find_inferior_ptid (ptid) != NULL)
 	{
 	  switch_to_thread (ptid);
 	  generic_mourn_inferior ();
@@ -881,7 +881,7 @@ gdbsim_resume (struct target_ops *ops,
      either have multiple inferiors to resume or an error condition.  */
 
   if (sim_data)
-    gdbsim_resume_inferior (find_inferior_pid (ptid_get_pid (ptid)), &rd);
+    gdbsim_resume_inferior (find_inferior_ptid (ptid), &rd);
   else if (ptid_equal (ptid, minus_one_ptid))
     iterate_over_inferiors (gdbsim_resume_inferior, &rd);
   else
@@ -928,7 +928,7 @@ gdbsim_stop (struct target_ops *self, ptid_t ptid)
     }
   else
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (ptid));
+      struct inferior *inf = find_inferior_ptid (ptid);
 
       if (inf == NULL)
 	error (_("Can't stop pid %d.  No inferior found."),

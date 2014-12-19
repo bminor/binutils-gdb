@@ -1310,7 +1310,7 @@ lookup_typename (const struct language_defn *language,
   if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     return SYMBOL_TYPE (sym);
 
-  type = language_lookup_primitive_type_by_name (language, gdbarch, name);
+  type = language_lookup_primitive_type (language, gdbarch, name);
   if (type)
     return type;
 

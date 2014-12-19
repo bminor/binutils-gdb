@@ -320,10 +320,11 @@ lynx_attach (unsigned long pid)
 static void
 lynx_resume (struct thread_resume *resume_info, size_t n)
 {
-  /* FIXME: Assume for now that n == 1.  */
   ptid_t ptid = resume_info[0].thread;
-  const int request = (resume_info[0].kind == resume_step
-                       ? PTRACE_SINGLESTEP : PTRACE_CONT);
+  const int request
+    = (resume_info[0].kind == resume_step
+       ? (n == 1 ? PTRACE_SINGLESTEP_ONE : PTRACE_SINGLESTEP)
+       : PTRACE_CONT);
   const int signal = resume_info[0].sig;
 
   /* If given a minus_one_ptid, then try using the current_process'

@@ -1,3 +1,21 @@
+2014-12-18  Richard Henderson  <rth@redhat.com>
+
+	* elf32-ppc.c (ELF_COMMONPAGESIZE): Set to 64k.
+	* elf64-ppc.c (ELF_COMMONPAGESIZE): Likewise.
+
+2014-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* format.c (bfd_check_format_matches): Check for a matching vector
+	before using match priorities.
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Fix off-by-one
+	errors with previous delta.
+
+2014-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17713
+	* elflink.c (_bfd_elf_gc_mark_rsec): Check corrupt input.
+
 2014-12-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17689

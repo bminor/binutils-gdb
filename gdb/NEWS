@@ -1,16 +1,6 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-* Python Scripting
-
-  New events which are triggered when GDB modifies the state of the 
-  inferior.
-
-  ** gdb.events.inferior_call_pre: Function call is about to be made.
-  ** gdb.events.inferior_call_post: Function call has just been made.
-  ** gdb.events.memory_changed: A memory location has been altered.
-  ** gdb.events.register_changed: A register has been altered.
-
 *** Changes since GDB 7.8
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.
@@ -29,6 +19,14 @@
      selecting a new file to debug.
   ** You can now add attributes to gdb.Objfile and gdb.Progspace objects.
   ** New function gdb.lookup_objfile.
+
+  New events which are triggered when GDB modifies the state of the 
+  inferior.
+
+  ** gdb.events.inferior_call_pre: Function call is about to be made.
+  ** gdb.events.inferior_call_post: Function call has just been made.
+  ** gdb.events.memory_changed: A memory location has been altered.
+  ** gdb.events.register_changed: A register has been altered.
 
 * New Python-based convenience functions:
 
@@ -85,6 +83,12 @@ compile file [-r|-raw] filename
   won't remove breakpoints from the target until all threads stop,
   even in non-stop mode.  The "auto" mode has been removed, and "off"
   is now the default mode.
+
+* New options
+
+set debug symbol-lookup
+show debug symbol-lookup
+  Control display of debugging info regarding symbol lookup.
 
 * MI changes
 

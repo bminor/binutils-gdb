@@ -1,3 +1,205 @@
+2014-12-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* elfread.c (elf_symfile_init): Remove stale comment.
+	(elf_symfile_read): Same.
+	* symfile.h (struct sym_fns): Same.
+
+2014-12-18  Nigel Stephens  <nigel@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (print_fpu_flags): New function.
+	(mips_print_float_info): Likewise.
+	(mips_gdbarch_init): Install mips_print_float_info as gdbarch
+	print_float_info routine.
+
+2014-12-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdbarch.sh (print_float_info): Change its type from 'M' to 'm'.
+	* gdbarch.c: Re-generated.
+	* gdbarch.h: Likewise.
+	* infcmd.c (default_print_float_info): New function.
+	(print_float_info): Removed.  Move code to
+	default_print_float_info.
+	(float_info): Adjust to call gdbarch_print_float_info.
+	* inferior.h (default_print_float_info): Declare it.
+
+2014-12-18  Yao Qi  <yao@codesourcery.com>
+
+	* h8300-tdep.c (h8300_print_float_info): Remove.
+	(h8300_gdbarch_init): Remove the call to
+	set_gdbarch_print_float_info.
+
+2014-12-18  Doug Evans  <xdje42@gmail.com>
+
+	* infcmd.c (jump_command): Minor simplification.
+
+2014-12-18  Doug Evans  <xdje42@gmail.com>
+
+	* language.c (language_lookup_primitive_type): Renamed from
+	language_lookup_primitive_type_by_name.  All callers updated.
+
+2014-12-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix MinGW compilation.
+	* compile/compile.c (get_compile_file_tempdir): Call error if
+	!HAVE_MKDTEMP.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac (AC_CHECK_FUNCS): Add mkdtemp.
+
+2014-12-17  Doug Evans  <xdje42@gmail.com>
+
+	* valops.c (value_maybe_namespace_elt): Remove redundant call to
+	lookup_static_symbol.
+
+2014-12-17  Doug Evans  <xdje42@gmail.com>
+
+	New parameter "debug symbol-lookup".
+	* NEWS: Mention it.
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Add debug
+	output.
+	(cp_lookup_symbol_namespace, cp_lookup_symbol_nonlocal): Ditto.
+	(cp_lookup_nested_symbol): Ditto.
+	* language.c (language_lookup_primitive_type_by_name): Add debug
+	output.
+	* minsyms.c (lookup_minimal_symbol): Add debug output.
+	* objfiles.c (objfile_debug_name): Moved here, and renamed ...
+	* symfile-debug.c (debug_objfile_name): ... from here.  All callers
+	updated.
+	* objfiles.h (objfile_debug_name): Declare.
+	* symtab.h (symbol_lookup_debug): Declare.
+	* symtab.c (symbol_lookup_debug): New global.
+	(lookup_language_this): Add debug output.
+	(lookup_symbol_aux, lookup_symbol_in_block): Ditto.
+	(lookup_symbol_in_objfile_symtabs, lookup_symbol_via_quick_fns): Ditto.
+	(lookup_symbol_in_static_block, lookup_symbol_in_objfile): Ditto.
+	(_initialize_symtab): Add new parameter "debug symbol-lookup".
+
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
+	* buildsym.c: Add comments describing how the buildsym machinery
+	is used by the various file formats.
+	(really_free_pendings): Enhance function comment.
+	See pending_macros to NULL.  Simplify resetting pending_addrmap.
+	Call free_buildsym_compunit.
+	(free_buildsym_compunit): Set current_subfile to NULL.
+	(prepare_for_building): New function.
+	(start_symtab): Call it.  Remove call to set_last_source_file.
+	(restart_symtab): New arg "cust".  All callers updated.
+	Simplify, call prepare_for_building.  Re-initialize buildsym_compunit.
+	(reset_symtab_globals): Enhance function comment.
+	Set local_symbols, file_symbols, global_symbols to NULL.
+	Set pending_macros to NULL.  Simplify resetting pending_addrmap.
+	Call free_buildysym_compunit.
+	(end_symtab_without_blockvector): Delete.  All callers updated.
+	(end_symtab_with_blockvector): Remove redundant call to
+	free_buildsym_compunit.
+	(augment_type_symtab): Remove arg "cust".  All callers updated.
+	(buildsym_init): Remove resetting of free_pendings, file_symbols,
+	global_symbols, pending_blocks, pending_macros.  Instead make
+	handling consistent with pending_addrmap: Assert value was reset
+	at end of previous symtab building.  Initialize context_stack here.
+
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_symbol_via_imports): Renamed from
+	cp_lookup_symbol_imports.  All callers updated.
+
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_find_type_baseclass_by_name): Renamed from
+	find_type_baseclass_by_name.  All callers updated.
+
+2014-12-16  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct symbol_search) <symtab>: Delete.  All uses updated.
+	* symtab.c (compare_search_syms): Use SYMBOL_SYMTAB accessor.
+	(print_symbol_info): Delete arg symtab.  All callers updated.
+	(symtab_symbol_info): Use SYMBOL_SYMTAB accessor.
+
+2014-12-16  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* user-regs.c (maintenance_print_user_registers): Swap "Nr" and
+	"Name" columns.  Assure that the output is always indented.
+
+2014-12-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-ptrace.h (PTRACE_O_EXITKILL): Define if not
+	already defined.
+	(linux_enable_event_reporting): Add parameter "attached".
+	* nat/linux-ptrace.c (linux_test_for_exitkill): New forward
+	declaration.  New function.
+	(linux_check_ptrace_features): Add linux_test_for_exitkill call.
+	(linux_enable_event_reporting): Add new parameter "attached".
+	Do not call ptrace with the PTRACE_O_EXITKILL if ATTACHED is
+	nonzero.
+	* linux-nat.c (linux_init_ptrace): Add parameter "attached".
+	Use it.  Update function description.
+	(linux_child_post_attach, linux_child_post_startup_inferior):
+	Update call to linux_enable_event_reporting.
+
+2014-12-16  Yao Qi  <yao@codesourcery.com>
+
+	* NEWS: Move some entries to "Changes since GDB 7.8" section.
+
+2014-12-16  Yao Qi  <yao@codesourcery.com>
+
+	* linux-tdep.c (linux_infcall_mmap): Replace ARG_MAX with
+	ARG_LAST.
+
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.c (find_inferior_ptid): New function.
+	* inferior.h (find_inferior_ptid): New declaration.
+	* ada-tasks.c (ada_get_task_number): Use find_inferior_ptid.
+	* corelow.c (core_pid_to_str): Same.
+	* darwin-nat.c (darwin_resume): Same.
+	* infrun.c (fetch_inferior_event): Same.
+	(get_inferior_stop_soon): Same.
+	(handle_inferior_event): Same.
+	(handle_signal_stop): Same.
+	* linux-nat.c (resume_lwp): Same.
+	(stop_wait_callback): Same.
+	* mi/mi-interp.c (mi_new_thread): Same.
+	(mi_thread_exit): Same.
+	* proc-service.c (ps_pglobal_lookup): Same.
+	* record-btrace.c (record_btrace_step_thread): Same.
+	* remote-sim.c (gdbsim_close_inferior): Same.
+	(gdbsim_resume): Same.
+	(gdbsim_stop): Same.
+	* sol2-tdep.c (sol2_core_pid_to_str): Same.
+	* target.c (memory_xfer_partial_1): Same.
+	(default_thread_address_space): Same.
+	* thread.c (thread_change_ptid): Same.
+	(switch_to_thread): Same.
+	(do_restore_current_thread_cleanup): Same.
+
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* defs.h (gdb_readline): Constify argument.
+	(gdb_readline_wrapper): Same.
+	(command_line_input): Same.
+	(deprecated_readline_hook): Same.
+	* top.c (deprecated_readline_hook): Same.
+	(gdb_readline): Same.
+	(gdb_readline_wrapper): Same.
+	(command_line_input): Constify argument. Pass prompt_arg to called
+	functions instead of local_prompt, overwriting prompt_arg if necessary.
+	* event-top.h (display_gdb_prompt): Constify argument.
+	* event-top.c (display_gdb_prompt): Same.
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Constify argument
+	if building with Python 3.4 and up.
+
+2014-12-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/lib/gdb/prompt.py (_prompt_pwd): Use os.getcwd() instead of
+	os.getcwdu().
+
+2014-12-15  Catalin Udma  <catalin.udma@freescale.com>
+
+	PR gdb/15684
+	* memattr.c (mem_info_command): Remove "unsigned long" casts.
+
 2014-12-13  Doug Evans  <xdje42@gmail.com>
 
 	* utils.c (make_hex_string): Fix off-by-one error.
@@ -401,7 +603,7 @@
 2014-12-10  Doug Evans  <xdje42@gmail.com>
 
 	* cp-namespace.c (cp_lookup_symbol_imports): Make static.
-	* cp-support.c (cp_lookup_symbol_imports): Delete.
+	* cp-support.h (cp_lookup_symbol_imports): Delete.
 
 2014-12-10  Simon Marchi  <simon.marchi@ericsson.com>
 

@@ -188,6 +188,10 @@ DO_RUNTEST = \
 @GMAKE_TRUE@endif
 @GMAKE_FALSE@expanded_tests_or_none = $(TESTS)
 
+# Shorthand for running all the tests in a single directory.
+@GMAKE_TRUE@check-gdb.%:
+@GMAKE_TRUE@	$(MAKE) check TESTS="gdb.$*/*.exp"
+
 check-single:
 	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none)
 

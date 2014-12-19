@@ -1086,9 +1086,9 @@ static struct type*
 find_primitive_type (struct parser_state *par_state, char *name)
 {
   struct type *type;
-  type = language_lookup_primitive_type_by_name (parse_language (par_state),
-						 parse_gdbarch (par_state),
-						 name);
+  type = language_lookup_primitive_type (parse_language (par_state),
+					 parse_gdbarch (par_state),
+					 name);
   if (type == NULL && strcmp ("system__address", name) == 0)
     type = type_system_address (par_state);
 
@@ -1525,9 +1525,9 @@ static struct type *
 type_system_address (struct parser_state *par_state)
 {
   struct type *type 
-    = language_lookup_primitive_type_by_name (parse_language (par_state),
-					      parse_gdbarch (par_state),
-					      "system__address");
+    = language_lookup_primitive_type (parse_language (par_state),
+				      parse_gdbarch (par_state),
+				      "system__address");
   return  type != NULL ? type : parse_type (par_state)->builtin_data_ptr;
 }
 

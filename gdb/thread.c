@@ -747,7 +747,7 @@ thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
   /* It can happen that what we knew as the target inferior id
      changes.  E.g, target remote may only discover the remote process
      pid after adding the inferior to GDB's list.  */
-  inf = find_inferior_pid (ptid_get_pid (old_ptid));
+  inf = find_inferior_ptid (old_ptid);
   inf->pid = ptid_get_pid (new_ptid);
 
   tp = find_thread_ptid (old_ptid);
@@ -1179,7 +1179,7 @@ switch_to_thread (ptid_t ptid)
     {
       struct inferior *inf;
 
-      inf = find_inferior_pid (ptid_get_pid (ptid));
+      inf = find_inferior_ptid (ptid);
       gdb_assert (inf != NULL);
       set_current_program_space (inf->pspace);
       set_current_inferior (inf);
@@ -1290,7 +1290,7 @@ do_restore_current_thread_cleanup (void *arg)
      then don't revert back to it, but instead simply drop back to no
      thread selected.  */
   if (tp
-      && find_inferior_pid (ptid_get_pid (tp->ptid)) != NULL)
+      && find_inferior_ptid (tp->ptid) != NULL)
     restore_current_thread (old->inferior_ptid);
   else
     {

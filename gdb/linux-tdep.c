@@ -1942,9 +1942,9 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
   CORE_ADDR retval;
   enum
     {
-      ARG_ADDR, ARG_LENGTH, ARG_PROT, ARG_FLAGS, ARG_FD, ARG_OFFSET, ARG_MAX
+      ARG_ADDR, ARG_LENGTH, ARG_PROT, ARG_FLAGS, ARG_FD, ARG_OFFSET, ARG_LAST
     };
-  struct value *arg[ARG_MAX];
+  struct value *arg[ARG_LAST];
 
   arg[ARG_ADDR] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr,
 				      0);
@@ -1961,7 +1961,7 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
   arg[ARG_FD] = value_from_longest (builtin_type (gdbarch)->builtin_int, -1);
   arg[ARG_OFFSET] = value_from_longest (builtin_type (gdbarch)->builtin_int64,
 					0);
-  addr_val = call_function_by_hand (mmap_val, ARG_MAX, arg);
+  addr_val = call_function_by_hand (mmap_val, ARG_LAST, arg);
   retval = value_as_address (addr_val);
   if (retval == (CORE_ADDR) -1)
     error (_("Failed inferior mmap call for %s bytes, errno is changed."),

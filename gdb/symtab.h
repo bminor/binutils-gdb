@@ -1457,9 +1457,7 @@ struct symbol_search
 
   /* Information describing what was found.
 
-     If symtab and symbol are NOT NULL, then information was found
-     for this match.  */
-  struct symtab *symtab;
+     If symbol is NOT NULL, then information was found for this match.  */
   struct symbol *symbol;
 
   /* If msymbol is non-null, then a match was made on something for
@@ -1506,6 +1504,8 @@ void fixup_section (struct general_symbol_info *ginfo,
 struct objfile *lookup_objfile_from_block (const struct block *block);
 
 extern unsigned int symtab_create_debug;
+
+extern unsigned int symbol_lookup_debug;
 
 extern int basenames_may_differ;
 

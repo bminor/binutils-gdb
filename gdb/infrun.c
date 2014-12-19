@@ -3262,7 +3262,7 @@ fetch_inferior_event (void *client_data)
 
   if (!ecs->wait_some_more)
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
+      struct inferior *inf = find_inferior_ptid (ecs->ptid);
 
       delete_just_stopped_threads_infrun_breakpoints ();
 
@@ -3581,7 +3581,7 @@ fill_in_stop_func (struct gdbarch *gdbarch,
 static enum stop_kind
 get_inferior_stop_soon (ptid_t ptid)
 {
-  struct inferior *inf = find_inferior_pid (ptid_get_pid (ptid));
+  struct inferior *inf = find_inferior_ptid (ptid);
 
   gdb_assert (inf != NULL);
   return inf->control.stop_soon;
@@ -3815,7 +3815,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
 
       inferior_ptid = ecs->ptid;
-      set_current_inferior (find_inferior_pid (ptid_get_pid (ecs->ptid)));
+      set_current_inferior (find_inferior_ptid (ecs->ptid));
       set_current_program_space (current_inferior ()->pspace);
       handle_vfork_child_exec_or_exit (0);
       target_terminal_ours ();	/* Must do this before mourn anyway.  */
@@ -3899,7 +3899,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	if (displaced && ptid_equal (displaced->step_ptid, ecs->ptid))
 	  {
 	    struct inferior *parent_inf
-	      = find_inferior_pid (ptid_get_pid (ecs->ptid));
+	      = find_inferior_ptid (ecs->ptid);
 	    struct regcache *child_regcache;
 	    CORE_ADDR parent_pc;
 
@@ -4495,7 +4495,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (random_signal)
     {
       /* Signal not for debugging purposes.  */
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
+      struct inferior *inf = find_inferior_ptid (ecs->ptid);
       enum gdb_signal stop_signal = ecs->event_thread->suspend.stop_signal;
 
       if (debug_infrun)
