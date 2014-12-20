@@ -1,3 +1,9 @@
+2014-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/14608
+	* testsuite/debug_msg.cc (SometimesInlineFunction): Changed
+	to "return i * i * 3;".
+
 2014-12-16  Cary Coutant  <ccoutant@google.com>
 
 	* mapfile.cc (Mapfile::print_input_section): Print uncompressed sizes.
