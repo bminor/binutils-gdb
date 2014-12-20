@@ -3448,6 +3448,9 @@ struct collect_minsyms
   /* The objfile we're examining.  */
   struct objfile *objfile;
 
+  /* Only search the given symtab, or NULL to search for all symbols.  */
+  struct symtab *symtab;
+
   /* The funfirstline setting from the initial call.  */
   int funfirstline;
 
@@ -3507,6 +3510,24 @@ add_minsym (struct minimal_symbol *minsym, void *d)
   mo.minsym = minsym;
   mo.objfile = info->objfile;
 
+  if (info->symtab != NULL)
+    {
+      CORE_ADDR pc;
+      struct symtab_and_line sal;
+      struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
+
+      sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (info->objfile, minsym),
+			       NULL, 0);
+      sal.section = MSYMBOL_OBJ_SECTION (info->objfile, minsym);
+      pc
+	= gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc, &current_target);
+      if (pc != sal.pc)
+	sal = find_pc_sect_line (pc, NULL, 0);
+
+      if (info->symtab != sal.symtab)
+	return;
+    }
+
   /* Exclude data symbols when looking for breakpoint locations.   */
   if (!info->list_mode)
     switch (minsym->type)
@@ -3533,40 +3554,59 @@ add_minsym (struct minimal_symbol *minsym, void *d)
   VEC_safe_push (bound_minimal_symbol_d, info->msyms, &mo);
 }
 
-/* Search minimal symbols in all objfiles for NAME.  If SEARCH_PSPACE
+/* Search for minimal symbols called NAME.  If SEARCH_PSPACE
    is not NULL, the search is restricted to just that program
-   space.  */
+   space.
+
+   If SYMTAB is NULL, search all objfiles, otherwise
+   restrict results to the given SYMTAB.  */
 
 static void
 search_minsyms_for_name (struct collect_info *info, const char *name,
-			 struct program_space *search_pspace)
+			 struct program_space *search_pspace,
+			 struct symtab *symtab)
 {
-  struct objfile *objfile;
-  struct program_space *pspace;
+  struct collect_minsyms local;
+  struct cleanup *cleanup;
 
-  ALL_PSPACES (pspace)
-  {
-    struct collect_minsyms local;
-    struct cleanup *cleanup;
+  memset (&local, 0, sizeof (local));
+  local.funfirstline = info->state->funfirstline;
+  local.list_mode = info->state->list_mode;
+  local.symtab = symtab;
 
-    if (search_pspace != NULL && search_pspace != pspace)
-      continue;
-    if (pspace->executing_startup)
-      continue;
+  cleanup = make_cleanup (VEC_cleanup (bound_minimal_symbol_d), &local.msyms);
 
-    set_current_program_space (pspace);
-
-    memset (&local, 0, sizeof (local));
-    local.funfirstline = info->state->funfirstline;
-    local.list_mode = info->state->list_mode;
-
-    cleanup = make_cleanup (VEC_cleanup (bound_minimal_symbol_d),
-			    &local.msyms);
-
-    ALL_OBJFILES (objfile)
+  if (symtab == NULL)
     {
-      local.objfile = objfile;
-      iterate_over_minimal_symbols (objfile, name, add_minsym, &local);
+      struct program_space *pspace;
+
+      ALL_PSPACES (pspace)
+      {
+	struct objfile *objfile;
+
+	if (search_pspace != NULL && search_pspace != pspace)
+	  continue;
+	if (pspace->executing_startup)
+	  continue;
+
+	set_current_program_space (pspace);
+
+	ALL_OBJFILES (objfile)
+	{
+	  local.objfile = objfile;
+	  iterate_over_minimal_symbols (objfile, name, add_minsym, &local);
+	}
+      }
+    }
+  else
+    {
+      if (search_pspace == NULL || SYMTAB_PSPACE (symtab) == search_pspace)
+	{
+	  set_current_program_space (SYMTAB_PSPACE (symtab));
+	  local.objfile = SYMTAB_OBJFILE(symtab);
+	  iterate_over_minimal_symbols (local.objfile, name, add_minsym,
+					&local);
+	}
     }
 
     if (!VEC_empty (bound_minimal_symbol_d, local.msyms))
@@ -3599,7 +3639,6 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
       }
 
     do_cleanups (cleanup);
-  }
 }
 
 /* A helper function to add all symbols matching NAME to INFO.  If
@@ -3621,16 +3660,26 @@ add_matching_symbols_to_info (const char *name,
 	  iterate_over_all_matching_symtabs (info->state, name, VAR_DOMAIN,
 					     collect_symbols, info,
 					     pspace, 1);
-	  search_minsyms_for_name (info, name, pspace);
+	  search_minsyms_for_name (info, name, pspace, NULL);
 	}
       else if (pspace == NULL || pspace == SYMTAB_PSPACE (elt))
 	{
+	  int prev_len = VEC_length (symbolp, info->result.symbols);
+
 	  /* Program spaces that are executing startup should have
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
 	  iterate_over_file_blocks (elt, name, VAR_DOMAIN,
 				    collect_symbols, info);
+
+	  /* If no new symbols were found in this iteration and this symtab
+	     is in assembler, we might actually be looking for a label for
+	     which we don't have debug info.  Check for a minimal symbol in
+	     this case.  */
+	  if (prev_len == VEC_length (symbolp, info->result.symbols)
+	      && elt->language == language_asm)
+	    search_minsyms_for_name (info, name, pspace, elt);
 	}
     }
 }

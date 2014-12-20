@@ -1,3 +1,14 @@
+2014-12-20  Keith Seitz  <keiths@redhat.com>
+	    Mihail-Marian Nistor  <mihail.nistor@freescale.com>
+
+	PR gdb/17394
+	* linespec.c (struct collect_minsyms): Add new member `symtab'.
+	(add_minsym): Handle cases where info.symtab is non-NULL.
+	(search_minsyms_for_name): Add new parameter `symtab'.
+	Handle limiting searches to a specific symtab.
+	(add_matching_symtabs_to_info): Search through minimal symbols
+	for language_asm files for which no new symbols are found.
+
 2014-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
 	    Nigel Stephens  <nigel@mips.com>
 	    Chris Dearman  <chris@mips.com>
