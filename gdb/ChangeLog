@@ -1,3 +1,17 @@
+2014-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
+	    Nigel Stephens  <nigel@mips.com>
+	    Chris Dearman  <chris@mips.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add mips-sde-tdep.o.
+	(ALLDEPFILES): Add mips-sde-tdep.c.
+	* mips-sde-tdep.c: New file containg SDE specific code.
+	* configure.tgt (mips*-sde*-elf*): Add mips-sde-dep.o to
+	gdb_target_obs.
+	* defs.h (gdb_osabi): Add GDB_OSABI_SDE.
+	* osabi.c (gdb_osabi_names): Add SDE.
+	* NEWS: Mention the change.
+
 2014-12-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* elfread.c (elf_symfile_init): Remove stale comment.

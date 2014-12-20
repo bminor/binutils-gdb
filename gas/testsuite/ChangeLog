@@ -1,3 +1,18 @@
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/r6-64.s: Remove .align directives from LDPC
+	instructions and add further tests for LDPC.
+	* gas/mips/r6-64-n32.d: remove the NOPs from LDPC expected
+	output and update for new tests.
+	* gas/mips/r6-64-n64.d: Likewise.
+	* gas/mips/ldpc-unalign.l: New file.
+	* gas/mips/ldpc-unalign.s: Likewise.
+	* gas/mips/mips.exp: Run ldpc-unalign test.
+
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/octeon3.d: Switch to use numeric register names.
+
 2014-12-16  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/attr-gnu-4-5.d: Ignore ASEs.
