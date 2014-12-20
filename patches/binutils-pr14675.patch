@@ -1,0 +1,197 @@
+From 4a5d5d94ca76cbf730d7f0379601e75f9469670e Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Sat, 20 Dec 2014 05:45:51 -0800
+Subject: [PATCH] Treat .eh_frame section before crtbegin as normal input
+
+Force the exception frame section from input files before the crtbegin
+file to be handled as an ordinary input section if we aren't creating
+the exception frame header.  If we don't do this, we won't correctly
+handle the special marker symbol in the exception frame section in the
+crtbegin file.
+
+	PR gold/14675
+	* ehframe.cc (Eh_frame::add_ehframe_input_section): Force the
+	exception frame section from input files before the crtbegin
+	file to be handled as an ordinary input section if we aren't
+	creating the exception frame header.
+	(Eh_frame::add_ehframe_input_section<32, false>): Updated.
+	(Eh_frame::add_ehframe_input_section<32, true>): Likewise.
+	(Eh_frame::add_ehframe_input_section<64, false>): Likewise.
+	(Eh_frame::add_ehframe_input_section<64, true>): Likewise.
+	* ehframe.h (Eh_frame::add_ehframe_input_section): Add a
+	bool parameter to indicate if the crtbegin file has been
+	processed.
+	* layout.cc (Layout::Layout): Initialize seen_crtbegin_.
+	(Layout::layout_eh_frame): Pass this->seen_crtbegin_ to
+	Eh_frame::add_ehframe_input_section.
+	(Layout::make_eh_frame_section): Set this->seen_crtbegin_ to
+	true when processing the crtbegin file.
+	* layout.h (Layout): Add a seen_crtbegin_ field.
+---
+ gold/ChangeLog  | 21 +++++++++++++++++++++
+ gold/ehframe.cc | 34 ++++++++++++++++++++++++----------
+ gold/ehframe.h  |  6 ++++--
+ gold/layout.cc  | 10 +++++++++-
+ gold/layout.h   |  3 +++
+ 5 files changed, 61 insertions(+), 13 deletions(-)
+
+diff --git a/gold/ehframe.cc b/gold/ehframe.cc
+index c711bac..dde90df 100644
+--- a/gold/ehframe.cc
++++ b/gold/ehframe.cc
+@@ -576,7 +576,8 @@ Eh_frame::add_ehframe_input_section(
+     section_size_type symbol_names_size,
+     unsigned int shndx,
+     unsigned int reloc_shndx,
+-    unsigned int reloc_type)
++    unsigned int reloc_type,
++    bool crtbegin_seen)
+ {
+   // Get the section contents.
+   section_size_type contents_len;
+@@ -595,15 +596,24 @@ Eh_frame::add_ehframe_input_section(
+     return false;
+ 
+   New_cies new_cies;
+-  if (!this->do_add_ehframe_input_section(object, symbols, symbols_size,
++  bool recognized_eh_frame_section
++    = this->do_add_ehframe_input_section(object, symbols, symbols_size,
+ 					  symbol_names, symbol_names_size,
+ 					  shndx, reloc_shndx,
+ 					  reloc_type, pcontents,
+-					  contents_len, &new_cies))
++					  contents_len, &new_cies);
++  if (!recognized_eh_frame_section && this->eh_frame_hdr_ != NULL)
++    this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
++
++  // If we don't unrecognize the exception frame section or we haven't
++  // seen the crtbegin file and we aren't creating the exception frame
++  // header, then return false to force it to be handled as an ordinary
++  // input section.  If we don't do this, we won't correctly handle the
++  // special marker symbol in the exception frame section in the crtbegin
++  // file.
++  if (!recognized_eh_frame_section
++      || (this->eh_frame_hdr_ == NULL && !crtbegin_seen))
+     {
+-      if (this->eh_frame_hdr_ != NULL)
+-	this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
+-
+       for (New_cies::iterator p = new_cies.begin();
+ 	   p != new_cies.end();
+ 	   ++p)
+@@ -1224,7 +1234,8 @@ Eh_frame::add_ehframe_input_section<32, false>(
+     section_size_type symbol_names_size,
+     unsigned int shndx,
+     unsigned int reloc_shndx,
+-    unsigned int reloc_type);
++    unsigned int reloc_type,
++    bool crtbegin_seen);
+ #endif
+ 
+ #ifdef HAVE_TARGET_32_BIG
+@@ -1238,7 +1249,8 @@ Eh_frame::add_ehframe_input_section<32, true>(
+     section_size_type symbol_names_size,
+     unsigned int shndx,
+     unsigned int reloc_shndx,
+-    unsigned int reloc_type);
++    unsigned int reloc_type,
++    bool crtbegin_seen);
+ #endif
+ 
+ #ifdef HAVE_TARGET_64_LITTLE
+@@ -1252,7 +1264,8 @@ Eh_frame::add_ehframe_input_section<64, false>(
+     section_size_type symbol_names_size,
+     unsigned int shndx,
+     unsigned int reloc_shndx,
+-    unsigned int reloc_type);
++    unsigned int reloc_type,
++    bool crtbegin_seen);
+ #endif
+ 
+ #ifdef HAVE_TARGET_64_BIG
+@@ -1266,7 +1279,8 @@ Eh_frame::add_ehframe_input_section<64, true>(
+     section_size_type symbol_names_size,
+     unsigned int shndx,
+     unsigned int reloc_shndx,
+-    unsigned int reloc_type);
++    unsigned int reloc_type,
++    bool crtbegin_seen);
+ #endif
+ 
+ } // End namespace gold.
+diff --git a/gold/ehframe.h b/gold/ehframe.h
+index 2ae12e0..b0effa0 100644
+--- a/gold/ehframe.h
++++ b/gold/ehframe.h
+@@ -371,7 +371,8 @@ class Eh_frame : public Output_section_data
+   // is the relocation section if any (0 for none, -1U for multiple).
+   // RELOC_TYPE is the type of the relocation section if any.  This
+   // returns whether the section was incorporated into the .eh_frame
+-  // data.
++  // data.  CRTBEGIN_SEEN is true if the crtbegin file has been
++  // processed.
+   template<int size, bool big_endian>
+   bool
+   add_ehframe_input_section(Sized_relobj_file<size, big_endian>* object,
+@@ -380,7 +381,8 @@ class Eh_frame : public Output_section_data
+ 			    const unsigned char* symbol_names,
+ 			    section_size_type symbol_names_size,
+ 			    unsigned int shndx, unsigned int reloc_shndx,
+-			    unsigned int reloc_type);
++			    unsigned int reloc_type,
++			    bool crtbegin_seen);
+ 
+   // Add a CIE and an FDE for a PLT section, to permit unwinding
+   // through a PLT.  The FDE data should start with 8 bytes of zero,
+diff --git a/gold/layout.cc b/gold/layout.cc
+index 0a71a2a..6649f9f 100644
+--- a/gold/layout.cc
++++ b/gold/layout.cc
+@@ -469,6 +469,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
+     unique_segment_for_sections_specified_(false),
+     incremental_inputs_(NULL),
+     record_output_section_data_from_script_(false),
++    seen_crtbegin_(false),
+     script_output_section_data_list_(),
+     segment_states_(NULL),
+     relaxation_debug_check_(NULL),
+@@ -1428,7 +1429,8 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
+ 							 symbol_names_size,
+ 							 shndx,
+ 							 reloc_shndx,
+-							 reloc_type))
++							 reloc_type,
++							 this->seen_crtbegin_))
+     {
+       os->update_flags_for_input_section(shdr.get_sh_flags());
+ 
+@@ -1485,6 +1487,12 @@ Layout::make_eh_frame_section(const Relobj* object)
+   if (os == NULL)
+     return NULL;
+ 
++  if (object != NULL && Layout::match_file_name(object, "crtbegin"))
++    {
++      gold_assert(!this->seen_crtbegin_);
++      this->seen_crtbegin_ = true;
++    }
++
+   if (this->eh_frame_section_ == NULL)
+     {
+       this->eh_frame_section_ = os;
+diff --git a/gold/layout.h b/gold/layout.h
+index 032f5f3..74e5ec1 100644
+--- a/gold/layout.h
++++ b/gold/layout.h
+@@ -1420,6 +1420,9 @@ class Layout
+   Incremental_inputs* incremental_inputs_;
+   // Whether we record output section data created in script
+   bool record_output_section_data_from_script_;
++  // Whether we have seen the crtbegin file when processing the exception
++  // frame sections.
++  bool seen_crtbegin_;
+   // List of output data that needs to be removed at relaxation clean up.
+   Output_section_data_list script_output_section_data_list_;
+   // Structure to save segment states before entering the relaxation loop.
+-- 
+1.9.3
+
