@@ -1,5 +1,16 @@
 2014-12-22  Doug Evans  <xdje42@gmail.com>
 
+	* cp-namespace.c (cp_lookup_nested_symbol_1): New function.
+	(cp_basic_lookup_symbol): Renamed from lookup_symbol_file.  Delete
+	arg "search".  All callers updated.
+	(cp_lookup_bare_symbol): New function.
+	(cp_search_static_and_baseclasses): New function.
+	(cp_lookup_symbol_in_namespace): Rewrite, move more logic here.
+	(find_symbol_in_baseclass): Simplify, call cp_lookup_nested_symbol_1.
+	(cp_lookup_nested_symbol): Ditto.
+
+2014-12-22  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c (cp_lookup_symbol_in_namespace): Simplify.
 
 2014-12-22  Doug Evans  <xdje42@gmail.com>
