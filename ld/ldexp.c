@@ -304,11 +304,11 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
     einfo (_("%P%F: bfd_hash_lookup failed creating symbol %s\n"), name);
 
   /* If the symbol was already defined, and not by a script, then it
-     must be defined by an object file.  */
+     must be defined by an object file or by the linker target code.  */
   if (!defentry->by_script
-      && h->type != bfd_link_hash_undefined
-      && h->type != bfd_link_hash_common
-      && h->type != bfd_link_hash_new)
+      && (h->type == bfd_link_hash_defined
+	  || h->type == bfd_link_hash_defweak
+	  || h->type == bfd_link_hash_common))
     defentry->by_object = 1;
 
   defentry->by_script = 1;
