@@ -95,7 +95,6 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
     }
 }
 
-
 /* Add a using directive to using_directives.  If the using directive
    in question has already been added, don't add it twice.
 
@@ -121,7 +120,7 @@ cp_add_using_directive (const char *dest,
 {
   struct using_direct *current;
   struct using_direct *new;
-  
+
   /* Has it already been added?  */
 
   for (current = using_directives; current != NULL; current = current->next)
@@ -227,7 +226,7 @@ lookup_symbol_file (const char *name,
 	 So we only search the current file's global block.  */
 
       const struct block *global_block = block_global_block (block);
-      
+
       if (global_block != NULL)
 	sym = lookup_symbol_in_block (name, global_block, domain);
     }
@@ -388,7 +387,7 @@ cp_lookup_symbol_via_imports (const char *scope,
   if (!declaration_only)
     sym = cp_lookup_symbol_in_namespace (scope, name,
 					 block, domain, 1);
-  
+
   if (sym != NULL)
     return sym;
 
@@ -532,7 +531,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
       /* Search the function's template parameters.  */
       if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (function))
 	{
-	  struct template_symbol *templ 
+	  struct template_symbol *templ
 	    = (struct template_symbol *) function;
 
 	  result = search_symbol_list (name,
@@ -613,10 +612,10 @@ cp_lookup_symbol_imports_or_template (const char *scope,
   return result;
 }
 
- /* Searches for NAME in the current namespace, and by applying
-    relevant import statements belonging to BLOCK and its parents.
-    SCOPE is the namespace scope of the context in which the search is
-    being evaluated.  */
+/* Searches for NAME in the current namespace, and by applying
+   relevant import statements belonging to BLOCK and its parents.
+   SCOPE is the namespace scope of the context in which the search is
+   being evaluated.  */
 
 struct symbol*
 cp_lookup_symbol_namespace (const char *scope,
@@ -819,6 +818,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
   sym = NULL;
   concatenated_name = NULL;
   cleanup = make_cleanup (free_current_contents, &concatenated_name);
+
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
       size_t len;
