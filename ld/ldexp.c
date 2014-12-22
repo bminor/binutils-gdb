@@ -1070,15 +1070,15 @@ exp_fold_tree_1 (etree_type *tree)
 	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
 					FALSE, FALSE, TRUE);
 	      if (h == NULL
-		  || (h->type != bfd_link_hash_new
-		      && h->type != bfd_link_hash_undefined
-		      && h->type != bfd_link_hash_common
-		      && !(h->type == bfd_link_hash_defined
+		  || !(h->type == bfd_link_hash_new
+		       || h->type == bfd_link_hash_undefined
+		       || (h->type == bfd_link_hash_defined
 			   && (h->u.def.section->flags
 			       & SEC_LINKER_CREATED) != 0)))
 		{
-		  /* Do nothing.  The symbol was never referenced, or was
-		     defined by some object.  */
+		  /* Do nothing.  The symbol was never referenced, or
+		     was defined in some object file.  Undefined weak
+		     symbols stay undefined.  */
 		  break;
 		}
 	    }
