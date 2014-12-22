@@ -2,6 +2,9 @@
 
 	Apply from master.
 	2014-12-23  Alan Modra  <amodra@gmail.com>
+	* ldexp.c (update_definedness): Correct logic setting by_object.
+
+	2014-12-23  Alan Modra  <amodra@gmail.com>
 	* ldexp.c (struct definedness_hash_entry, definedness_table)
 	(definedness_newfunc, symbol_defined, update_definedness): Move
 	and rename from..
