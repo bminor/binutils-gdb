@@ -1,3 +1,7 @@
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/endsym.s, *ld-elf/endsym.d: New test.
+
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* ld-mips-elf/attr-gnu-4-00.d: Relax check for ISA extension.
