@@ -429,13 +429,17 @@ reset_directive_searched (void *data)
 
    If SCOPE is "A::B" and SEARCH_PARENTS is true the imports of
    namespaces X and Y will be considered.  If SEARCH_PARENTS is false
-   only the import of Y is considered.  */
+   only the import of Y is considered.
+
+   SEARCH_SCOPE_FIRST is an internal implementation detail: Callers must
+   pass 0 for it.  Internally we pass 1 when recursing.  */
 
 static struct symbol *
 cp_lookup_symbol_via_imports (const char *scope,
 			      const char *name,
 			      const struct block *block,
 			      const domain_enum domain,
+			      const int search_scope_first,
 			      const int declaration_only,
 			      const int search_parents)
 {
@@ -445,8 +449,8 @@ cp_lookup_symbol_via_imports (const char *scope,
   int directive_match;
   struct cleanup *searched_cleanup;
 
-  /* First, try to find the symbol in the given namespace.  */
-  if (!declaration_only)
+  /* First, try to find the symbol in the given namespace if requested.  */
+  if (search_scope_first)
     sym = cp_lookup_symbol_in_namespace (scope, name,
 					 block, domain, 1);
 
@@ -535,7 +539,7 @@ cp_lookup_symbol_via_imports (const char *scope,
 		 towards the imported namespace.  */
 	      sym = cp_lookup_symbol_via_imports (current->import_src,
 						  name, block,
-						  domain, 0, 0);
+						  domain, 1, 0, 0);
 	    }
 	  current->searched = 0;
 	  discard_cleanups (searched_cleanup);
@@ -663,7 +667,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	}
     }
 
-  result = cp_lookup_symbol_via_imports (scope, name, block, domain, 1, 1);
+  result = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1, 1);
   if (symbol_lookup_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -714,7 +718,7 @@ cp_lookup_symbol_namespace (const char *scope,
   while (block != NULL)
     {
       sym = cp_lookup_symbol_via_imports (scope, name, block,
-					  domain, 0, 1);
+					  domain, 0, 0, 1);
 
       if (sym)
 	{

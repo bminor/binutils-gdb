@@ -1,5 +1,10 @@
 2014-12-22  Doug Evans  <xdje42@gmail.com>
 
+	* cp-namespace.c (cp_lookup_symbol_via_imports): New arg
+	"search_scope_first".  All callers updated.
+
+2014-12-22  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c (cp_lookup_nested_symbol_1): New function.
 	(cp_basic_lookup_symbol): Renamed from lookup_symbol_file.  Delete
 	arg "search".  All callers updated.
