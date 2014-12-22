@@ -1,5 +1,9 @@
 2014-12-22  Doug Evans  <xdje42@gmail.com>
 
+	* cp-namespace.c (cp_lookup_symbol_in_namespace): Simplify.
+
+2014-12-22  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c: Whitespace cleanup.
 
 2014-12-20  Keith Seitz  <keiths@redhat.com>

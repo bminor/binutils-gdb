@@ -317,21 +317,20 @@ cp_lookup_symbol_in_namespace (const char *namespace,
                                const struct block *block,
                                const domain_enum domain, int search)
 {
-  if (namespace[0] == '\0')
-    {
-      return lookup_symbol_file (name, block, domain, 0, search);
-    }
-  else
-    {
-      char *concatenated_name = alloca (strlen (namespace) + 2
-					+ strlen (name) + 1);
+  char *concatenated_name = NULL;
+  int is_anonymous = namespace[0] != '\0' && cp_is_in_anonymous (namespace);
 
+  if (namespace[0] != '\0')
+    {
+      concatenated_name = alloca (strlen (namespace) + 2
+				  + strlen (name) + 1);
       strcpy (concatenated_name, namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
-      return lookup_symbol_file (concatenated_name, block, domain,
-				 cp_is_in_anonymous (namespace), search);
+      name = concatenated_name;
     }
+
+  return lookup_symbol_file (name, block, domain, is_anonymous, search);
 }
 
 /* Used for cleanups to reset the "searched" flag incase
