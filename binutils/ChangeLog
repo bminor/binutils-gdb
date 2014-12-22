@@ -1,3 +1,7 @@
+2014-12-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (read_cie): Cast size to long to warn.
+
 2014-12-22  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531

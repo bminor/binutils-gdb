@@ -5539,7 +5539,7 @@ read_cie (unsigned char *start, unsigned char *end,
       if (q < qend)
 	{
 	  warn (_("Not enough augmentation data (%lx bytes still needed)\n"),
-		(augmentation_data + augmentation_data_len) - q);
+		(long) ((augmentation_data + augmentation_data_len) - q));
 	  augmentation_data_len = q - augmentation_data;
 	}
     }
