@@ -1352,6 +1352,8 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 	  /* PR 17512: file: 8396-1185-0.004.  */
 	  if (bfd_get_symcount (abfd) > 0 && num > bfd_get_symcount (abfd))
 	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
+	  else if (syms == NULL)
+	    sym = bfd_und_section_ptr->symbol_ptr_ptr;	    
 	  else
 	    /* An external symbol number.  */
 	    sym = syms + num;

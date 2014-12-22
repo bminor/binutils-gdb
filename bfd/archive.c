@@ -902,6 +902,9 @@ do_slurp_bsd_armap (bfd *abfd)
     return FALSE;
   parsed_size = mapdata->parsed_size;
   free (mapdata);
+  /* PR 17512: file: 883ff754.  */
+  if (parsed_size == 0)
+    return FALSE;
 
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, parsed_size);
   if (raw_armap == NULL)
@@ -917,7 +920,6 @@ do_slurp_bsd_armap (bfd *abfd)
     }
 
   ardata->symdef_count = H_GET_32 (abfd, raw_armap) / BSD_SYMDEF_SIZE;
-
   if (ardata->symdef_count * BSD_SYMDEF_SIZE >
       parsed_size - BSD_SYMDEF_COUNT_SIZE)
     {
@@ -1138,6 +1140,7 @@ bfd_slurp_armap (bfd *abfd)
 	return FALSE;
       if (bfd_seek (abfd, -(file_ptr) (sizeof (hdr) + 20), SEEK_CUR) != 0)
 	return FALSE;
+      extname[20] = 0;
       if (CONST_STRNEQ (extname, "__.SYMDEF SORTED")
 	  || CONST_STRNEQ (extname, "__.SYMDEF"))
 	return do_slurp_bsd_armap (abfd);
@@ -1971,7 +1974,9 @@ bfd_generic_stat_arch_elt (bfd *abfd, struct stat *buf)
     }
 
   hdr = arch_hdr (abfd);
-
+  /* PR 17512: file: 3d9e9fe9.  */
+  if (hdr == NULL)
+    return -1;
 #define foo(arelt, stelt, size)				\
   buf->stelt = strtol (hdr->arelt, &aloser, size);	\
   if (aloser == hdr->arelt)	      			\

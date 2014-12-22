@@ -297,7 +297,11 @@ m32c_info_to_howto_rela
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_M32C_max);
+  if (r_type >= (unsigned int) R_M32C_max)
+    {
+      _bfd_error_handler (_("%A: invalid M32C reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = & m32c_elf_howto_table [r_type];
 }
 
