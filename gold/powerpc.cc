@@ -7452,7 +7452,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
       Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 
-      overflow = Reloc::CHECK_SIGNED;
       if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
 	overflow = Reloc::CHECK_BITFIELD;
       else if (overflow == Reloc::CHECK_LOW_INSN
@@ -7463,6 +7462,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		  || (insn & (0x3f << 26)) == 25u << 26 /* oris */
 		  || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
 	overflow = Reloc::CHECK_UNSIGNED;
+      else
+	overflow = Reloc::CHECK_SIGNED;
     }
 
   typename Powerpc_relocate_functions<size, big_endian>::Status status
