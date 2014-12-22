@@ -1,3 +1,19 @@
+2015-02-11  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2014-12-23  Alan Modra  <amodra@gmail.com>
+	* ldexp.c (struct definedness_hash_entry, definedness_table)
+	(definedness_newfunc, symbol_defined, update_definedness): Move
+	and rename from..
+	* ldlang.h (struct lang_definedness_hash_entry): ..here,..
+	* ldlang.c (lang_definedness_table, lang_definedness_newfunc)
+	(lang_symbol_defined, lang_update_definedness): ..and here.
+	* ldexp.c (ldexp_init, ldexp_finish): New functions, extracted from..
+	* ldlang.c (lang_init, lang_finish): ..here.
+	* ldexp.h (ldexp_init, ldexp_finish): Declare.
+	* ldlang.h (lang_symbol_defined, lang_update_definedness): Delete.
+	* ldmain.c (main): Call ldexp_init and ldexp_finish.
+
 2014-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

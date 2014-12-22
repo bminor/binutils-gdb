@@ -64,7 +64,6 @@ static bfd_vma print_dot;
 static lang_input_statement_type *first_file;
 static const char *current_target;
 static lang_statement_list_type statement_list;
-static struct bfd_hash_table lang_definedness_table;
 static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
 static struct unique_sections *unique_section_list;
@@ -73,8 +72,6 @@ static struct asneeded_minfo *asneeded_list_head;
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
 static lang_input_statement_type *lookup_name (const char *);
-static struct bfd_hash_entry *lang_definedness_newfunc
- (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 static void insert_undefined (const char *);
 static bfd_boolean sort_def_symbol (struct bfd_link_hash_entry *, void *);
 static void print_statement (lang_statement_union_type *,
@@ -1241,14 +1238,6 @@ lang_init (void)
 
   abs_output_section->bfd_section = bfd_abs_section_ptr;
 
-  /* The value "13" is ad-hoc, somewhat related to the expected number of
-     assignments in a linker script.  */
-  if (!bfd_hash_table_init_n (&lang_definedness_table,
-			      lang_definedness_newfunc,
-			      sizeof (struct lang_definedness_hash_entry),
-			      13))
-    einfo (_("%P%F: can not create hash table: %E\n"));
-
   asneeded_list_head = NULL;
   asneeded_list_tail = &asneeded_list_head;
 }
@@ -1256,7 +1245,6 @@ lang_init (void)
 void
 lang_finish (void)
 {
-  bfd_hash_table_free (&lang_definedness_table);
   output_section_statement_table_free ();
 }
 
@@ -3363,65 +3351,6 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
   /* Exit if any of the files were missing.  */
   if (input_flags.missing_file)
     einfo ("%F");
-}
-
-/* New-function for the definedness hash table.  */
-
-static struct bfd_hash_entry *
-lang_definedness_newfunc (struct bfd_hash_entry *entry,
-			  struct bfd_hash_table *table ATTRIBUTE_UNUSED,
-			  const char *name ATTRIBUTE_UNUSED)
-{
-  struct lang_definedness_hash_entry *ret
-    = (struct lang_definedness_hash_entry *) entry;
-
-  if (ret == NULL)
-    ret = (struct lang_definedness_hash_entry *)
-      bfd_hash_allocate (table, sizeof (struct lang_definedness_hash_entry));
-
-  if (ret == NULL)
-    einfo (_("%P%F: bfd_hash_allocate failed creating symbol %s\n"), name);
-
-  ret->by_object = 0;
-  ret->by_script = 0;
-  ret->iteration = 0;
-  return &ret->root;
-}
-
-/* Called during processing of linker script script expressions.
-   For symbols assigned in a linker script, return a struct describing
-   where the symbol is defined relative to the current expression,
-   otherwise return NULL.  */
-
-struct lang_definedness_hash_entry *
-lang_symbol_defined (const char *name)
-{
-  return ((struct lang_definedness_hash_entry *)
-	  bfd_hash_lookup (&lang_definedness_table, name, FALSE, FALSE));
-}
-
-/* Update the definedness state of NAME.  */
-
-void
-lang_update_definedness (const char *name, struct bfd_link_hash_entry *h)
-{
-  struct lang_definedness_hash_entry *defentry
-    = (struct lang_definedness_hash_entry *)
-    bfd_hash_lookup (&lang_definedness_table, name, TRUE, FALSE);
-
-  if (defentry == NULL)
-    einfo (_("%P%F: bfd_hash_lookup failed creating symbol %s\n"), name);
-
-  /* If the symbol was already defined, and not by a script, then it
-     must be defined by an object file.  */
-  if (!defentry->by_script
-      && h->type != bfd_link_hash_undefined
-      && h->type != bfd_link_hash_common
-      && h->type != bfd_link_hash_new)
-    defentry->by_object = 1;
-
-  defentry->by_script = 1;
-  defentry->iteration = lang_statement_iteration;
 }
 
 /* Add the supplied name to the symbol table as an undefined reference.
