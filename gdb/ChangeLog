@@ -1,5 +1,11 @@
 2014-12-22  Doug Evans  <xdje42@gmail.com>
 
+	* cp-namespace.c (cp_lookup_symbol_via_all_imports): New function.
+	(cp_lookup_symbol_namespace): Call it.
+	(cp_lookup_symbol_nonlocal): Ditto.
+
+2014-12-22  Doug Evans  <xdje42@gmail.com>
+
 	* cp-namespace.c (cp_lookup_symbol_via_imports): New arg
 	"search_scope_first".  All callers updated.
 

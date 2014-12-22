@@ -678,12 +678,35 @@ cp_lookup_symbol_imports_or_template (const char *scope,
   return result;
 }
 
+/* Search for NAME by applying relevant import statements belonging to BLOCK
+   and its parents.  SCOPE is the namespace scope of the context in which the
+   search is being evaluated.  */
+
+static struct symbol *
+cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
+				  const struct block *block,
+				  const domain_enum domain)
+{
+  struct symbol *sym;
+
+  while (block != NULL)
+    {
+      sym = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 0, 1);
+      if (sym)
+	return sym;
+
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  return NULL;
+}
+
 /* Searches for NAME in the current namespace, and by applying
    relevant import statements belonging to BLOCK and its parents.
    SCOPE is the namespace scope of the context in which the search is
    being evaluated.  */
 
-struct symbol*
+struct symbol *
 cp_lookup_symbol_namespace (const char *scope,
                             const char *name,
                             const struct block *block,
@@ -700,46 +723,19 @@ cp_lookup_symbol_namespace (const char *scope,
     }
 
   /* First, try to find the symbol in the given namespace.  */
-  sym = cp_lookup_symbol_in_namespace (scope, name,
-				       block, domain, 1);
-  if (sym != NULL)
-    {
-      if (symbol_lookup_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "cp_lookup_symbol_namespace (...) = %s\n",
-			      host_address_to_string (sym));
-	}
-      return sym;
-    }
+  sym = cp_lookup_symbol_in_namespace (scope, name, block, domain, 1);
 
-  /* Search for name in namespaces imported to this and parent
-     blocks.  */
-  while (block != NULL)
-    {
-      sym = cp_lookup_symbol_via_imports (scope, name, block,
-					  domain, 0, 0, 1);
-
-      if (sym)
-	{
-	  if (symbol_lookup_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "cp_lookup_symbol_namespace (...) = %s\n",
-				  host_address_to_string (sym));
-	    }
-	  return sym;
-	}
-
-      block = BLOCK_SUPERBLOCK (block);
-    }
+  /* Search for name in namespaces imported to this and parent blocks.  */
+  if (sym == NULL)
+    sym = cp_lookup_symbol_via_all_imports (scope, name, block, domain);
 
   if (symbol_lookup_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_symbol_namespace (...) = NULL\n");
+			  "cp_lookup_symbol_namespace (...) = %s\n",
+			  sym != NULL ? host_address_to_string (sym) : "NULL");
     }
-  return NULL;
+  return sym;
 }
 
 /* Lookup NAME at namespace scope (or, in C terms, in static and
@@ -819,19 +815,14 @@ cp_lookup_symbol_nonlocal (const char *name,
 			  domain_name (domain));
     }
 
+  /* First, try to find the symbol in the given namespace, and all
+     containing namespaces.  */
   sym = lookup_namespace_scope (name, block, domain, scope, 0);
-  if (sym != NULL)
-    {
-      if (symbol_lookup_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "cp_lookup_symbol_nonlocal (...) = %s\n",
-			      host_address_to_string (sym));
-	}
-      return sym;
-    }
 
-  sym = cp_lookup_symbol_namespace (scope, name, block, domain);
+  /* Search for name in namespaces imported to this and parent blocks.  */
+  if (sym == NULL)
+    sym = cp_lookup_symbol_via_all_imports (scope, name, block, domain);
+
   if (symbol_lookup_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
