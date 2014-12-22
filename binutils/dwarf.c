@@ -1303,6 +1303,9 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_GNU_entry_value:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
+	  /* PR 17531: file: 0cc9cd00.  */
+	  if (uvalue > (dwarf_vma) (end - data))
+	    uvalue = end - data;
 	  printf ("DW_OP_GNU_entry_value: (");
 	  if (decode_location_expression (data, pointer_size, offset_size,
 					  dwarf_version, uvalue,
@@ -2803,6 +2806,12 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  end_of_sequence = end;
 	  standard_opcodes = NULL;
 	  linfo = saved_linfo;
+	  /* PR 17531: file: 0522b371.  */
+	  if (linfo.li_line_range == 0)
+	    {
+	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section"));
+	      return 0;
+	    }
 	  reset_state_machine (linfo.li_default_is_stmt);
 	}
       else
@@ -2831,7 +2840,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      warn (_("Line range of 0 is invalid, using 1 instead\n"));
 	      linfo.li_line_range = 1;
 	    }
-
+	  
 	  reset_state_machine (linfo.li_default_is_stmt);
 
 	  /* Display the contents of the Opcodes table.  */
@@ -3154,6 +3163,12 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	  end_of_sequence = end;
 	  standard_opcodes = NULL;
 	  linfo = saved_linfo;
+	  /* PR 17531: file: 0522b371.  */
+	  if (linfo.li_line_range == 0)
+	    {
+	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section"));
+	      return 0;
+	    }
 	  reset_state_machine (linfo.li_default_is_stmt);
         }
       else
@@ -3164,6 +3179,12 @@ display_debug_lines_decoded (struct dwarf_section *section,
 						& end_of_sequence)) == NULL)
 	      return 0;
 
+	  /* PR 17531: file: 0522b371.  */
+	  if (linfo.li_line_range == 0)
+	    {
+	      warn (_("Line range of 0 is invalid, using 1 instead\n"));
+	      linfo.li_line_range = 1;
+	    }
 	  reset_state_machine (linfo.li_default_is_stmt);
 
 	  /* Save a pointer to the contents of the Opcodes table.  */
@@ -3682,7 +3703,23 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, end);
 
-      start += names.pn_length + initial_length_size;
+      /* PR 17531: file: 7615b6b2.  */
+      if ((dwarf_signed_vma) names.pn_length < 0)
+	{
+	  warn (_("Negative length for public name: 0x%lx\n"), (long) names.pn_length);
+	  start = end;
+	}
+      else
+	start += names.pn_length + initial_length_size;
+
+      printf (_("  Length:                              %ld\n"),
+	      (long) names.pn_length);
+      printf (_("  Version:                             %d\n"),
+	      names.pn_version);
+      printf (_("  Offset into .debug_info section:     0x%lx\n"),
+	      (unsigned long) names.pn_offset);
+      printf (_("  Size of area in .debug_info section: %ld\n"),
+	      (long) names.pn_size);
 
       if (names.pn_version != 2 && names.pn_version != 3)
 	{
@@ -3696,15 +3733,6 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 
 	  continue;
 	}
-
-      printf (_("  Length:                              %ld\n"),
-	      (long) names.pn_length);
-      printf (_("  Version:                             %d\n"),
-	      names.pn_version);
-      printf (_("  Offset into .debug_info section:     0x%lx\n"),
-	      (unsigned long) names.pn_offset);
-      printf (_("  Size of area in .debug_info section: %ld\n"),
-	      (long) names.pn_size);
 
       if (is_gnu)
 	printf (_("\n    Offset  Kind          Name\n"));
@@ -5478,9 +5506,20 @@ read_cie (unsigned char *start, unsigned char *end,
 
   if (augmentation_data_len)
     {
-      unsigned char *p, *q;
+      unsigned char *p;
+      unsigned char *q;
+      unsigned char *qend;
+      
       p = (unsigned char *) fc->augmentation + 1;
       q = augmentation_data;
+      qend = q + augmentation_data_len;
+
+      /* PR 17531: file: 015adfaa.  */
+      if (qend < q)
+	{
+	  warn (_("Negative augmentation data length: 0x%lx"), augmentation_data_len);
+	  augmentation_data_len = 0;
+	}
 
       while (p < end && q < augmentation_data + augmentation_data_len)
 	{
@@ -5495,6 +5534,13 @@ read_cie (unsigned char *start, unsigned char *end,
 	  else
 	    break;
 	  p++;
+	}
+
+      if (q < qend)
+	{
+	  warn (_("Not enough augmentation data (%lx bytes still needed)\n"),
+		(augmentation_data + augmentation_data_len) - q);
+	  augmentation_data_len = q - augmentation_data;
 	}
     }
 
