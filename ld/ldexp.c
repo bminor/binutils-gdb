@@ -291,11 +291,13 @@ symbol_defined (const char *name)
 	  bfd_hash_lookup (&definedness_table, name, FALSE, FALSE));
 }
 
-/* Update the definedness state of NAME.  */
+/* Update the definedness state of NAME.  Return FALSE if script symbol
+   is multiply defining a strong symbol in an object.  */
 
-static void
+static bfd_boolean
 update_definedness (const char *name, struct bfd_link_hash_entry *h)
 {
+  bfd_boolean ret;
   struct definedness_hash_entry *defentry
     = (struct definedness_hash_entry *)
     bfd_hash_lookup (&definedness_table, name, TRUE, FALSE);
@@ -305,14 +307,22 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
 
   /* If the symbol was already defined, and not by a script, then it
      must be defined by an object file or by the linker target code.  */
+  ret = TRUE;
   if (!defentry->by_script
       && (h->type == bfd_link_hash_defined
 	  || h->type == bfd_link_hash_defweak
 	  || h->type == bfd_link_hash_common))
-    defentry->by_object = 1;
+    {
+      defentry->by_object = 1;
+      if (h->type == bfd_link_hash_defined
+	  && h->u.def.section->output_section != NULL
+	  && !h->linker_def)
+	ret = FALSE;
+    }
 
   defentry->by_script = 1;
   defentry->iteration = lang_statement_iteration;
+  return ret;
 }
 
 static void
@@ -1108,19 +1118,27 @@ exp_fold_tree_1 (etree_type *tree)
 			   tree->assign.dst);
 		}
 
-	      /* FIXME: Should we worry if the symbol is already
-		 defined?  */
-	      update_definedness (tree->assign.dst, h);
-	      h->type = bfd_link_hash_defined;
-	      h->u.def.value = expld.result.value;
 	      if (expld.result.section == NULL)
 		expld.result.section = expld.section;
+	      if (!update_definedness (tree->assign.dst, h) && 0)
+		{
+		  /* Symbol was already defined.  For now this error
+		     is disabled because it causes failures in the ld
+		     testsuite: ld-elf/var1, ld-scripts/defined5, and
+		     ld-scripts/pr14962.  Some of these no doubt
+		     reflect scripts used in the wild.  */
+		  (*link_info.callbacks->multiple_definition)
+		    (&link_info, h, link_info.output_bfd,
+		     expld.result.section, expld.result.value);
+		}
+	      h->type = bfd_link_hash_defined;
+	      h->u.def.value = expld.result.value;
 	      h->u.def.section = expld.result.section;
 	      if (tree->type.node_class == etree_provide)
 		tree->type.node_class = etree_provided;
 
 	      /* Copy the symbol type if this is a simple assignment of
-	         one symbol to another.  This could be more general
+		 one symbol to another.  This could be more general
 		 (e.g. a ?: operator with NAMEs in each branch).  */
 	      if (tree->assign.src->type.node_class == etree_name)
 		{
