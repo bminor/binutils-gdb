@@ -1,3 +1,7 @@
+2014-12-18  Xingxing Pan <xxingpan@marvell.com>
+
+	* gas/config/tc-arm.c (arm_cpus): Add core marvell-whitney.
+
 2014-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
