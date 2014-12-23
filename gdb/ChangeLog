@@ -1,5 +1,57 @@
 2014-12-23  Doug Evans  <xdje42@gmail.com>
 
+	* ada-lang.c (user_select_syms): Only fetch symtab if symbol is
+	objfile-owned.
+	(cache_symbol): Ignore symbols that are not objfile-owned.
+	* block.c (block_objfile): New function.
+	(block_gdbarch): New function.
+	* block.h (block_objfile): Declare.
+	(block_gdbarch): Declare.
+	* c-exp.y (classify_name): Remove call to
+	language_lookup_primitive_type.  No longer necessary.
+	* gdbtypes.c (lookup_typename): Call lookup_symbol_in_language.
+	Remove call to language_lookup_primitive_type.  No longer necessary.
+	* guile/scm-symbol.c (syscm_gdbarch_data_key): New static global.
+	(syscm_gdbarch_data): New struct.
+	(syscm_init_arch_symbols): New function.
+	(syscm_get_symbol_map): Renamed from syscm_objfile_symbol_map.
+	All callers updated.  Handle symbols owned by arches.
+	(gdbscm_symbol_symtab): Handle symbols owned by arches.
+	(gdbscm_initialize_symbols): Initialize syscm_gdbarch_data_key.
+	* language.c (language_lookup_primitive_type_1): New function.
+	(language_lookup_primitive_type): Call it.
+	(language_alloc_type_symbol): New function.
+	(language_init_primitive_type_symbols): New function.
+	(language_lookup_primitive_type_as_symbol): New function.
+	* language.h (struct language_arch_info) <primitive_type_symbols>:
+	New member.
+	(language_lookup_primitive_type): Add function comment.
+	(language_lookup_primitive_type_as_symbol): Declare.
+	* printcmd.c (address_info): Handle arch-owned symbols.
+	* python/py-symbol.c (sympy_get_symtab): Ditto.
+	(set_symbol): Ditto.
+	(sympy_dealloc): Ditto.
+	* symmisc.c (print_symbol): Ditto.
+	* symtab.c (fixup_symbol_section): Ditto.
+	(lookup_symbol_aux): Initialize block_found.
+	(basic_lookup_symbol_nonlocal): Try looking up the symbol as a
+	primitive type.
+	(initialize_objfile_symbol_1): New function.
+	(initialize_objfile_symbol): Call it.
+	(allocate_symbol): Call it.
+	(allocate_template_symbol): Call it.
+	(symbol_objfile): Assert symbol is objfile-owned.
+	(symbol_arch, symbol_symtab, symbol_set_symtab): Ditto.
+	* symtab.h (struct symbol) <owner>: Replaces member "symtab".
+	(struct symbol) <is_objfile_owned>: New member.
+	(SYMBOL_OBJFILE_OWNED): New macro.
+	* cp-namespace.c (cp_lookup_bare_symbol): New arg langdef.
+	All callers updated.  Try to find the symbol as a primitive type.
+	(lookup_namespace_scope): New arg langdef.  All callers updated.
+	Call cp_lookup_bare_symbol directly for simple bare symbols.
+
+2014-12-23  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.h (SYMBOL_DOMAIN_BITS): New macro.
 	(struct symbol) <domain>: Use it.
 

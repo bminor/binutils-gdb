@@ -242,12 +242,18 @@ cp_basic_lookup_symbol (const char *name, const struct block *block,
 }
 
 /* Search bare symbol NAME in DOMAIN in BLOCK.
-   NAME is guaranteed to not have any scope (no "::").
+   NAME is guaranteed to not have any scope (no "::") in its name, though
+   if for example NAME is a template spec then "::" may appear in the
+   argument list.
+   If LANGDEF is non-NULL then try to lookup NAME as a primitive type in
+   that language.  Normally we wouldn't need LANGDEF but fortran also uses
+   this code.
    If SEARCH is non-zero then see if we can determine "this" from BLOCK, and
    if so then also search for NAME in that class.  */
 
 static struct symbol *
-cp_lookup_bare_symbol (const char *name, const struct block *block,
+cp_lookup_bare_symbol (const struct language_defn *langdef,
+		       const char *name, const struct block *block,
 		       const domain_enum domain, int search)
 {
   struct symbol *sym;
@@ -261,6 +267,25 @@ cp_lookup_bare_symbol (const char *name, const struct block *block,
   sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym != NULL)
     return sym;
+
+  /* If we didn't find a definition for a builtin type in the static block,
+     search for it now.  This is actually the right thing to do and can be
+     a massive performance win.  E.g., when debugging a program with lots of
+     shared libraries we could search all of them only to find out the
+     builtin type isn't defined in any of them.  This is common for types
+     like "void".  */
+  if (langdef != NULL && domain == VAR_DOMAIN)
+    {
+      struct gdbarch *gdbarch;
+
+      if (block == NULL)
+	gdbarch = target_gdbarch ();
+      else
+	gdbarch = block_gdbarch (block);
+      sym = language_lookup_primitive_type_as_symbol (langdef, gdbarch, name);
+      if (sym != NULL)
+	return sym;
+    }
 
   sym = lookup_global_symbol (name, block, domain);
   if (sym != NULL)
@@ -378,7 +403,7 @@ cp_lookup_symbol_in_namespace (const char *namespace, const char *name,
 
   prefix_len = cp_entire_prefix_len (name);
   if (prefix_len == 0)
-    return cp_lookup_bare_symbol (name, block, domain, search);
+    return cp_lookup_bare_symbol (NULL, name, block, domain, search);
 
   /* This would be simpler if we just called cp_lookup_nested_symbol
      at this point.  But that would require first looking up the containing
@@ -753,7 +778,8 @@ cp_lookup_symbol_namespace (const char *scope,
    "x".  */
 
 static struct symbol *
-lookup_namespace_scope (const char *name,
+lookup_namespace_scope (const struct language_defn *langdef,
+			const char *name,
 			const struct block *block,
 			const domain_enum domain,
 			const char *scope,
@@ -775,14 +801,25 @@ lookup_namespace_scope (const char *name,
 	  new_scope_len += 2;
 	}
       new_scope_len += cp_find_first_component (scope + new_scope_len);
-      sym = lookup_namespace_scope (name, block, domain,
+      sym = lookup_namespace_scope (langdef, name, block, domain,
 				    scope, new_scope_len);
       if (sym != NULL)
 	return sym;
     }
 
   /* Okay, we didn't find a match in our children, so look for the
-     name in the current namespace.  */
+     name in the current namespace.
+
+     If we there is no scope and we know we have a bare symbol, then short
+     circuit everything and call cp_lookup_bare_symbol directly.
+     This isn't an optimization, rather it allows us to pass LANGDEF which
+     is needed for primitive type lookup.  The test doesn't have to be
+     perfect: if NAME is a bare symbol that our test doesn't catch (e.g., a
+     template symbol with "::" in the argument list) then
+     cp_lookup_symbol_in_namespace will catch it.  */
+
+  if (scope_len == 0 && strchr (name, ':') == NULL)
+    return cp_lookup_bare_symbol (langdef, name, block, domain, 1);
 
   namespace = alloca (scope_len + 1);
   strncpy (namespace, scope, scope_len);
@@ -817,7 +854,7 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
   /* First, try to find the symbol in the given namespace, and all
      containing namespaces.  */
-  sym = lookup_namespace_scope (name, block, domain, scope, 0);
+  sym = lookup_namespace_scope (langdef, name, block, domain, scope, 0);
 
   /* Search for name in namespaces imported to this and parent blocks.  */
   if (sym == NULL)

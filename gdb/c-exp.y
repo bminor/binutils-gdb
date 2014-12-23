@@ -2941,13 +2941,6 @@ classify_name (struct parser_state *par_state, const struct block *block,
       return TYPENAME;
     }
 
-  yylval.tsym.type
-    = language_lookup_primitive_type (parse_language (par_state),
-				      parse_gdbarch (par_state),
-				      copy);
-  if (yylval.tsym.type != NULL)
-    return TYPENAME;
-
   /* See if it's an ObjC classname.  */
   if (parse_language (par_state)->la_language == language_objc && !sym)
     {

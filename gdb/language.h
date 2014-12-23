@@ -111,6 +111,11 @@ struct language_arch_info
      expressions, regardless of whether the program being debugged
      actually defines such a type.  */
   struct type **primitive_type_vector;
+
+  /* Symbol wrappers around primitive_type_vector, so that the symbol lookup
+     machinery can return them.  */
+  struct symbol **primitive_type_symbols;
+
   /* Type of elements of strings.  */
   struct type *string_char_type;
 
@@ -436,9 +441,20 @@ struct type *language_bool_type (const struct language_defn *l,
 struct type *language_string_char_type (const struct language_defn *l,
 					struct gdbarch *gdbarch);
 
+/* Look up type NAME in language L, and return its definition for architecture
+   GDBARCH.  Returns NULL if not found.  */
+
 struct type *language_lookup_primitive_type (const struct language_defn *l,
 					     struct gdbarch *gdbarch,
 					     const char *name);
+
+/* Wrapper around language_lookup_primitive_type to return the
+   corresponding symbol.  */
+
+struct symbol *
+  language_lookup_primitive_type_as_symbol (const struct language_defn *l,
+					    struct gdbarch *gdbarch,
+					    const char *name);
 
 
 /* These macros define the behaviour of the expression 

@@ -466,8 +466,12 @@ print_symbol (void *args)
   struct symbol *symbol = ((struct print_symbol_args *) args)->symbol;
   int depth = ((struct print_symbol_args *) args)->depth;
   struct ui_file *outfile = ((struct print_symbol_args *) args)->outfile;
-  struct obj_section *section = SYMBOL_OBJ_SECTION (symbol_objfile (symbol),
-						    symbol);
+  struct obj_section *section;
+
+  if (SYMBOL_OBJFILE_OWNED (symbol))
+    section = SYMBOL_OBJ_SECTION (symbol_objfile (symbol), symbol);
+  else
+    section = NULL;
 
   print_spaces (depth, outfile);
   if (SYMBOL_DOMAIN (symbol) == LABEL_DOMAIN)

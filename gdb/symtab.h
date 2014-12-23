@@ -711,10 +711,19 @@ struct symbol
 
   struct type *type;
 
-  /* The symbol table containing this symbol.  This is the file
-     associated with LINE.  It can be NULL during symbols read-in but it is
-     never NULL during normal operation.  */
-  struct symtab *symtab;
+  /* The owner of this symbol.
+     Which one to use is defined by symbol.is_arch_owned.  */
+
+  union
+  {
+    /* The symbol table containing this symbol.  This is the file associated
+       with LINE.  It can be NULL during symbols read-in but it is never NULL
+       during normal operation.  */
+    struct symtab *symtab;
+
+    /* For types defined by the architecture.  */
+    struct gdbarch *arch;
+  } owner;
 
   /* Domain code.  */
 
@@ -725,6 +734,11 @@ struct symbol
      alongside any per-class ops vectors.  */
 
   unsigned int aclass_index : SYMBOL_ACLASS_BITS;
+
+  /* If non-zero then symbol is objfile-owned, use owner.symtab.
+     Otherwise symbol is arch-owned, use owner.arch.  */
+
+  unsigned int is_objfile_owned : 1;
 
   /* Whether this is an argument.  */
 
@@ -742,6 +756,7 @@ struct symbol
      SYMBOL_INLINED set) this is the line number of the function's call
      site.  Inlined function symbols are not definitions, and they are
      never found by symbol table lookup.
+     If this symbol is arch-owned, LINE shall be zero.
 
      FIXME: Should we really make the assumption that nobody will try
      to debug files longer than 64K lines?  What about machine
@@ -769,10 +784,14 @@ struct symbol
 
 extern const struct symbol_impl *symbol_impls;
 
+/* Note: There is no accessor macro for symbol.owner because it is
+   "private".  */
+
 #define SYMBOL_DOMAIN(symbol)	(symbol)->domain
 #define SYMBOL_IMPL(symbol)		(symbol_impls[(symbol)->aclass_index])
 #define SYMBOL_ACLASS_INDEX(symbol)	(symbol)->aclass_index
 #define SYMBOL_CLASS(symbol)		(SYMBOL_IMPL (symbol).aclass)
+#define SYMBOL_OBJFILE_OWNED(symbol)	((symbol)->is_objfile_owned)
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
 #define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \

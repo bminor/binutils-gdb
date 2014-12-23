@@ -1150,6 +1150,9 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   if (!sym)
     return NULL;
 
+  if (!SYMBOL_OBJFILE_OWNED (sym))
+    return sym;
+
   /* We either have an OBJFILE, or we can get at it from the sym's
      symtab.  Anything else is a bug.  */
   gdb_assert (objfile || symbol_symtab (sym));
@@ -1420,6 +1423,13 @@ lookup_symbol_aux (const char *name, const struct block *block,
 			  ? objfile_debug_name (objfile) : "NULL",
 			  domain_name (domain), language_str (language));
     }
+
+  /* Initialize block_found so that the language la_lookup_symbol_nonlocal
+     routines don't have to set it (to NULL) if a primitive type is found.
+     We do this early so that block_found is also NULL if no symbol is
+     found (though this is not part of the API, and callers cannot assume
+     this).  */
+  block_found = NULL;
 
   /* Make sure we do something sensible with is_a_field_of_this, since
      the callers that set this parameter to some non-null value will
@@ -1847,6 +1857,25 @@ basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
   sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym != NULL)
     return sym;
+
+  /* If we didn't find a definition for a builtin type in the static block,
+     search for it now.  This is actually the right thing to do and can be
+     a massive performance win.  E.g., when debugging a program with lots of
+     shared libraries we could search all of them only to find out the
+     builtin type isn't defined in any of them.  This is common for types
+     like "void".  */
+  if (domain == VAR_DOMAIN)
+    {
+      struct gdbarch *gdbarch;
+
+      if (block == NULL)
+	gdbarch = target_gdbarch ();
+      else
+	gdbarch = block_gdbarch (block);
+      sym = language_lookup_primitive_type_as_symbol (langdef, gdbarch, name);
+      if (sym != NULL)
+	return sym;
+    }
 
   return lookup_global_symbol (name, block, domain);
 }
@@ -5313,13 +5342,23 @@ initialize_ordinary_address_classes (void)
 
 
 
-/* Initialize the symbol SYM.  */
+/* Helper function to initialize the fields of an objfile-owned symbol.
+   It assumed that *SYM is already all zeroes.  */
+
+static void
+initialize_objfile_symbol_1 (struct symbol *sym)
+{
+  SYMBOL_OBJFILE_OWNED (sym) = 1;
+  SYMBOL_SECTION (sym) = -1;
+}
+
+/* Initialize the symbol SYM, and mark it as being owned by an objfile.  */
 
 void
 initialize_objfile_symbol (struct symbol *sym)
 {
   memset (sym, 0, sizeof (*sym));
-  SYMBOL_SECTION (sym) = -1;
+  initialize_objfile_symbol_1 (sym);
 }
 
 /* Allocate and initialize a new 'struct symbol' on OBJFILE's
@@ -5331,7 +5370,7 @@ allocate_symbol (struct objfile *objfile)
   struct symbol *result;
 
   result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
-  SYMBOL_SECTION (result) = -1;
+  initialize_objfile_symbol_1 (result);
 
   return result;
 }
@@ -5345,7 +5384,7 @@ allocate_template_symbol (struct objfile *objfile)
   struct template_symbol *result;
 
   result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct template_symbol);
-  SYMBOL_SECTION (&result->base) = -1;
+  initialize_objfile_symbol_1 (&result->base);
 
   return result;
 }
@@ -5355,7 +5394,8 @@ allocate_template_symbol (struct objfile *objfile)
 struct objfile *
 symbol_objfile (const struct symbol *symbol)
 {
-  return SYMTAB_OBJFILE (symbol->symtab);
+  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  return SYMTAB_OBJFILE (symbol->owner.symtab);
 }
 
 /* See symtab.h.  */
@@ -5363,7 +5403,9 @@ symbol_objfile (const struct symbol *symbol)
 struct gdbarch *
 symbol_arch (const struct symbol *symbol)
 {
-  return get_objfile_arch (symbol_objfile (symbol));
+  if (!SYMBOL_OBJFILE_OWNED (symbol))
+    return symbol->owner.arch;
+  return get_objfile_arch (SYMTAB_OBJFILE (symbol->owner.symtab));
 }
 
 /* See symtab.h.  */
@@ -5371,7 +5413,8 @@ symbol_arch (const struct symbol *symbol)
 struct symtab *
 symbol_symtab (const struct symbol *symbol)
 {
-  return symbol->symtab;
+  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  return symbol->owner.symtab;
 }
 
 /* See symtab.h.  */
@@ -5379,7 +5422,8 @@ symbol_symtab (const struct symbol *symbol)
 void
 symbol_set_symtab (struct symbol *symbol, struct symtab *symtab)
 {
-  symbol->symtab = symtab;
+  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  symbol->owner.symtab = symtab;
 }
 
 
