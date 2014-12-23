@@ -69,4 +69,7 @@ run_dump_test "defined4"
 if ![is_aout_format] {
     run_dump_test "defined5"
 }
+if [is_elf_format] {
+    run_dump_test "defined6"
+}
 set LDFLAGS "$saved_LDFLAGS"

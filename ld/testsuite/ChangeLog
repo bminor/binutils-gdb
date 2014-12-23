@@ -1,3 +1,10 @@
+2014-12-24  Alan Modra  <amodra@gmail.com>
+
+	* ld-scripts/defined6.s,
+	* ld-scripts/defined6.t,
+	* ld-scripts/defined6.d: New test.
+	* ld-scripts/defined.exp: Run it.
+
 2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld-avr/relax-elf-flags-01.d: New file.
