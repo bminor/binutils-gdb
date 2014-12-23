@@ -35,6 +35,7 @@ struct dwarf2_line_info {
   unsigned int isa;
   unsigned int flags;
   unsigned int discriminator;
+  unsigned int logical;
 };
 
 /* Implements the .file FILENO "FILENAME" directive.  FILENO can be 0
@@ -42,13 +43,29 @@ struct dwarf2_line_info {
    number must be >0.  */
 extern char *dwarf2_directive_file (int dummy);
 
+/* Experimental DWARF-5 extension:
+   Implements the .subprog SUBPNO ["SUBPROG" [FILENO LINENO]] directive.
+   FILENO is the file number, LINENO the line number and the
+   (optional) COLUMN the column of the source code that the following
+   instruction corresponds to.  FILENO can be 0 to indicate that the
+   filename specified by the textually most recent .file directive
+   should be used.  */
+extern void dwarf2_directive_subprog (int dummy);
+
 /* Implements the .loc FILENO LINENO [COLUMN] directive.  FILENO is
    the file number, LINENO the line number and the (optional) COLUMN
    the column of the source code that the following instruction
    corresponds to.  FILENO can be 0 to indicate that the filename
    specified by the textually most recent .file directive should be
    used.  */
-extern void dwarf2_directive_loc (int dummy);
+/* Experimental DWARF-5 extension:
+   If IS_LLOC is true, implements the .lloc LOGICAL [FILENO LINENO [COLUMN]]
+   directive. FILENO is the file number, LINENO the line number and the
+   (optional) COLUMN the column of the source code that the following
+   instruction corresponds to.  FILENO can be 0 to indicate that the
+   filename specified by the textually most recent .file directive
+   should be used.  */
+extern void dwarf2_directive_loc (int is_lloc);
 
 /* Implements the .loc_mark_labels {0,1} directive.  */
 extern void dwarf2_directive_loc_mark_labels (int dummy);

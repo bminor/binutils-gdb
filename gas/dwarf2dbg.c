@@ -45,6 +45,8 @@
 #include "dwarf2dbg.h"
 #include <filenames.h>
 
+#include "hash.h"
+
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
 /* We need to decide which character to use as a directory separator.
    Just because HAVE_DOS_BASED_FILE_SYSTEM is defined, it does not
@@ -101,6 +103,10 @@
 #ifndef DWARF2_LINE_VERSION
 #define DWARF2_LINE_VERSION 2
 #endif
+/* If we see .lloc directives, generate an experimental version 6.  */
+#ifndef DWARF2_LINE_EXPERIMENTAL_VERSION
+#define DWARF2_LINE_EXPERIMENTAL_VERSION 0xf006
+#endif
 
 #include "subsegs.h"
 
@@ -126,16 +132,19 @@
    "standard_opcode_lengths" table that is emitted below in
    out_debug_line().  */
 #define DWARF2_LINE_OPCODE_BASE		13
+#define DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE  16
+
+static int opcode_base;
 
 #ifndef DWARF2_LINE_BASE
   /* Minimum line offset in a special line info. opcode.  This value
      was chosen to give a reasonable range of values.  */
-# define DWARF2_LINE_BASE		-5
+# define DWARF2_LINE_BASE		-3
 #endif
 
 /* Range of line offsets in a special line info. opcode.  */
 #ifndef DWARF2_LINE_RANGE
-# define DWARF2_LINE_RANGE		14
+# define DWARF2_LINE_RANGE		10
 #endif
 
 #ifndef DWARF2_LINE_MIN_INSN_LENGTH
@@ -144,16 +153,20 @@
 # define DWARF2_LINE_MIN_INSN_LENGTH	1
 #endif
 
+#ifndef DWARF2_LINE_MAX_OPS_PER_INSN
+# define DWARF2_LINE_MAX_OPS_PER_INSN	1
+#endif
+
 /* Flag that indicates the initial value of the is_stmt_start flag.  */
 #define	DWARF2_LINE_DEFAULT_IS_STMT	1
 
 /* Given a special op, return the line skip amount.  */
 #define SPECIAL_LINE(op) \
-	(((op) - DWARF2_LINE_OPCODE_BASE)%DWARF2_LINE_RANGE + DWARF2_LINE_BASE)
+	(((op) - opcode_base) % DWARF2_LINE_RANGE + DWARF2_LINE_BASE)
 
 /* Given a special op, return the address skip amount (in units of
    DWARF2_LINE_MIN_INSN_LENGTH.  */
-#define SPECIAL_ADDR(op) (((op) - DWARF2_LINE_OPCODE_BASE)/DWARF2_LINE_RANGE)
+#define SPECIAL_ADDR(op) (((op) - opcode_base) / DWARF2_LINE_RANGE)
 
 /* The maximum address skip amount that can be encoded with a special op.  */
 #define MAX_SPECIAL_ADDR_DELTA		SPECIAL_ADDR(255)
@@ -203,6 +216,44 @@ static char **dirs;
 static unsigned int dirs_in_use;
 static unsigned int dirs_allocated;
 
+/* Experimental DWARF-5 Extension: Table of subprograms.  */
+struct subprog_entry {
+  const char *subpname;
+  unsigned int filenum;
+  unsigned int line;
+};
+
+static struct subprog_entry *subprogs;
+static unsigned int subprogs_in_use;
+static unsigned int subprogs_allocated;
+
+/* Experimental DWARF-5 Extension: Logicals table.  */
+struct logicals_entry {
+  segT seg;
+  symbolS *label;
+  /* A logical row doesn't use every field in this struct, but using it
+     here makes the code for writing the line number program simpler.  */
+  struct dwarf2_line_info loc;
+  unsigned int context;
+  unsigned int subprog;
+};
+
+static struct logicals_entry *logicals;
+static unsigned int logicals_in_use;
+static unsigned int logicals_allocated = 0;
+static unsigned int logicals_with_labels = 0;
+
+/* DWARF-5: .debug_line_str string table.  */
+struct string_table {
+  struct hash_control *hashtab;
+  const char **strings;
+  unsigned int strings_in_use;
+  unsigned int strings_allocated;
+  offsetT next_offset;
+};
+
+static struct string_table debug_line_str_table;
+
 /* TRUE when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  */
 bfd_boolean dwarf2_loc_directive_seen;
@@ -213,9 +264,9 @@ bfd_boolean dwarf2_loc_mark_labels;
 
 /* Current location as indicated by the most recent .loc directive.  */
 static struct dwarf2_line_info current = {
-  1, 1, 0, 0,
-  DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0,
-  0
+  1, 1, 0, 0,  /* filenum, line, column, isa */
+  DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0,  /* flags */
+  0, 0         /* discriminator, logical */
 };
 
 /* The size of an address on the target.  */
@@ -338,6 +389,15 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   else
     sym = symbol_temp_new (now_seg, ofs, frag_now);
   dwarf2_gen_line_info_1 (sym, loc);
+
+  /* Record the current symbol with all logical rows created since
+     the last emitted instruction.  */
+  while (logicals_with_labels < logicals_in_use)
+    {
+      logicals[logicals_with_labels].label = sym;
+      logicals[logicals_with_labels].seg = now_seg;
+      logicals_with_labels++;
+    }
 }
 
 /* Returns the current source information.  If .file directives have
@@ -357,6 +417,7 @@ dwarf2_where (struct dwarf2_line_info *line)
       line->flags = DWARF2_FLAG_IS_STMT;
       line->isa = current.isa;
       line->discriminator = current.discriminator;
+      line->logical = 0;
     }
   else
     *line = current;
@@ -560,6 +621,68 @@ get_filenum (const char *filename, unsigned int num)
   return i;
 }
 
+/* Make a new entry in the subprograms table.  */
+
+static void
+make_subprog_entry (unsigned int num, char *subpname, int filenum, int line)
+{
+  if (subprogs_allocated == 0)
+    {
+      subprogs_allocated = 4;
+      subprogs = (struct subprog_entry *)
+	  xcalloc (subprogs_allocated, sizeof (struct subprog_entry));
+    }
+  if (num > subprogs_allocated)
+    {
+      unsigned int old = subprogs_allocated;
+
+      subprogs_allocated *= 2;
+      if (num > subprogs_allocated)
+        subprogs_allocated = num;
+      subprogs = (struct subprog_entry *)
+	  xrealloc (subprogs,
+		    subprogs_allocated * sizeof (struct subprog_entry));
+      memset (subprogs + old, 0,
+	      (subprogs_allocated - old) * sizeof (struct subprog_entry));
+    }
+  if (subprogs_in_use < num)
+    subprogs_in_use = num;
+  subprogs[num - 1].subpname = xstrdup (subpname);
+  subprogs[num - 1].filenum = filenum;
+  subprogs[num - 1].line = line;
+}
+
+/* Make a new entry in the logicals table.  */
+
+static void
+make_logical (unsigned int logical, int context, int subprog)
+{
+  if (logicals_allocated == 0)
+    {
+      logicals_allocated = 4;
+      logicals = (struct logicals_entry *)
+	  xcalloc (logicals_allocated, sizeof (struct logicals_entry));
+    }
+  if (logical > logicals_allocated)
+    {
+      unsigned int old = logicals_allocated;
+
+      logicals_allocated *= 2;
+      if (logical > logicals_allocated)
+        logicals_allocated = logical;
+      logicals = (struct logicals_entry *)
+	  xrealloc (logicals,
+		    logicals_allocated * sizeof (struct logicals_entry));
+      memset (logicals + old, 0,
+	      (logicals_allocated - old) * sizeof (struct logicals_entry));
+    }
+  logicals[logical - 1].loc = current;
+  logicals[logical - 1].context = context;
+  logicals[logical - 1].subprog = subprog;
+  if (logical > logicals_in_use)
+    logicals_in_use = logical;
+}
+
 /* Handle two forms of .file directive:
    - Pass .file "source.c" to s_app_file
    - Handle .file 1 "source.c" by adding an entry to the DWARF-2 file table
@@ -608,34 +731,130 @@ dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
   return filename;
 }
 
+/* Experimental DWARF-5 extension:
+   Implements the .subprog SUBPNO ["SUBPROG" [FILENO LINENO]] directive.
+   FILENO is the file number, LINENO the line number and the
+   (optional) COLUMN the column of the source code that the following
+   instruction corresponds to.  FILENO can be 0 to indicate that the
+   filename specified by the textually most recent .file directive
+   should be used.  */
 void
-dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
+dwarf2_directive_subprog (int dummy ATTRIBUTE_UNUSED)
 {
-  offsetT filenum, line;
+  offsetT num, filenum, line;
+  char *subpname;
+  int subpname_len;
 
-  /* If we see two .loc directives in a row, force the first one to be
-     output now.  */
-  if (dwarf2_loc_directive_seen)
-    dwarf2_emit_insn (0);
+  num = get_absolute_expression ();
+  subpname = demand_copy_C_string (&subpname_len);
+  if (subpname == NULL)
+    return;
 
+  SKIP_WHITESPACE ();
   filenum = get_absolute_expression ();
   SKIP_WHITESPACE ();
   line = get_absolute_expression ();
+  demand_empty_rest_of_line ();
 
-  if (filenum < 1)
+  if (num < 1)
     {
-      as_bad (_("file number less than one"));
+      as_bad (_("subprogram number less than one"));
       return;
     }
-  if (filenum >= (int) files_in_use || files[filenum].filename == 0)
+
+  /* A .subprog directive implies compiler generated debug information is
+     being supplied.  Turn off gas generated debug info.  */
+  debug_type = DEBUG_NONE;
+
+  if (num < (int) subprogs_in_use && subprogs[num].subpname != NULL)
     {
-      as_bad (_("unassigned file number %ld"), (long) filenum);
+      as_bad (_("subprogram number %ld already allocated"), (long) num);
       return;
+    }
+
+  make_subprog_entry (num, subpname, filenum, line);
+}
+
+void
+dwarf2_directive_loc (int is_lloc)
+{
+  offsetT filenum, line;
+  offsetT logical = 0;
+  offsetT context = 0;
+  offsetT subprog = 0;
+  bfd_boolean is_new_logical = FALSE;
+  bfd_boolean is_actual = FALSE;
+  static bfd_boolean saw_loc = FALSE;
+  static bfd_boolean saw_lloc = FALSE;
+  static bfd_boolean saw_both = FALSE;
+
+  if ((is_lloc && saw_loc) || (!is_lloc && saw_lloc))
+    {
+      if (!saw_both)
+        as_bad (_(".loc and .lloc cannot both be used"));
+      saw_both = TRUE;
+      return;
+    }
+
+  if (is_lloc)
+    {
+      saw_lloc = TRUE;
+      logical = get_absolute_expression ();
+      SKIP_WHITESPACE ();
+
+      if (ISDIGIT (*input_line_pointer))
+	is_new_logical = TRUE;
+      else
+	is_actual = TRUE;
+
+      if (logical < 1)
+	{
+	  as_bad (_("logical row less than one"));
+	  return;
+	}
+      if (is_actual &&
+          ((unsigned int) logical > logicals_in_use
+           || logicals[logical - 1].loc.line == 0))
+	{
+	  as_bad (_("unassigned logical row %ld"), (long) logical);
+	  return;
+	}
+    }
+  else
+    saw_loc = TRUE;
+
+  /* If we see two .loc directives in a row, force the first one to be
+     output now.  */
+  if (!is_new_logical && dwarf2_loc_directive_seen)
+    dwarf2_emit_insn (0);
+
+  if (is_lloc && !is_new_logical)
+    {
+      filenum = logicals[logical - 1].loc.filenum;
+      line = logicals[logical - 1].loc.line;
+    }
+  else
+    {
+      filenum = get_absolute_expression ();
+      SKIP_WHITESPACE ();
+      line = get_absolute_expression ();
+
+      if (filenum < 1)
+	{
+	  as_bad (_("file number less than one"));
+	  return;
+	}
+      if (filenum >= (int) files_in_use || files[filenum].filename == 0)
+	{
+	  as_bad (_("unassigned file number %ld"), (long) filenum);
+	  return;
+	}
     }
 
   current.filenum = filenum;
   current.line = line;
   current.discriminator = 0;
+  current.logical = logical;
 
 #ifndef NO_LISTING
   if (listing)
@@ -678,17 +897,17 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  current.flags |= DWARF2_FLAG_BASIC_BLOCK;
 	  *input_line_pointer = c;
 	}
-      else if (strcmp (p, "prologue_end") == 0)
+      else if (!is_actual && strcmp (p, "prologue_end") == 0)
 	{
 	  current.flags |= DWARF2_FLAG_PROLOGUE_END;
 	  *input_line_pointer = c;
 	}
-      else if (strcmp (p, "epilogue_begin") == 0)
+      else if (!is_actual && strcmp (p, "epilogue_begin") == 0)
 	{
 	  current.flags |= DWARF2_FLAG_EPILOGUE_BEGIN;
 	  *input_line_pointer = c;
 	}
-      else if (strcmp (p, "is_stmt") == 0)
+      else if (!is_actual && strcmp (p, "is_stmt") == 0)
 	{
 	  *input_line_pointer = c;
 	  value = get_absolute_expression ();
@@ -714,7 +933,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	      return;
 	    }
 	}
-      else if (strcmp (p, "discriminator") == 0)
+      else if (!is_actual && strcmp (p, "discriminator") == 0)
 	{
 	  *input_line_pointer = c;
 	  value = get_absolute_expression ();
@@ -723,6 +942,30 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  else
 	    {
 	      as_bad (_("discriminator less than zero"));
+	      return;
+	    }
+	}
+      else if (!is_actual && strcmp (p, "context") == 0)
+	{
+	  *input_line_pointer = c;
+	  value = get_absolute_expression ();
+	  if (value >= 0)
+	    context = value;
+	  else
+	    {
+	      as_bad (_("context less than zero"));
+	      return;
+	    }
+	}
+      else if (!is_actual && strcmp (p, "subprog") == 0)
+	{
+	  *input_line_pointer = c;
+	  value = get_absolute_expression ();
+	  if (value >= 0)
+	    subprog = value;
+	  else
+	    {
+	      as_bad (_("subprog number less than zero"));
 	      return;
 	    }
 	}
@@ -739,6 +982,9 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
   dwarf2_loc_directive_seen = TRUE;
   debug_type = DEBUG_NONE;
+
+  if (is_new_logical)
+    make_logical (logical, context, subprog);
 }
 
 void
@@ -869,6 +1115,15 @@ out_set_addr (symbolS *sym)
   emit_expr (&exp, sizeof_address);
 }
 
+/* Set the address from a logicals table entry.  */
+
+static void
+out_set_addr_from_logical (int logical_delta)
+{
+  out_opcode (DW_LNS_set_address_from_logical);
+  out_leb128 (logical_delta);
+}
+
 static void scale_addr_delta (addressT *);
 
 static void
@@ -907,7 +1162,7 @@ size_inc_line_addr (int line_delta, addressT addr_delta)
      to emit the matrix entry.  */
   if (line_delta == INT_MAX)
     {
-      if (addr_delta == MAX_SPECIAL_ADDR_DELTA)
+      if (addr_delta == (unsigned int) MAX_SPECIAL_ADDR_DELTA)
 	len = 1;
       else
 	len = 1 + sizeof_leb128 (addr_delta, 0);
@@ -927,10 +1182,10 @@ size_inc_line_addr (int line_delta, addressT addr_delta)
     }
 
   /* Bias the opcode by the special opcode base.  */
-  tmp += DWARF2_LINE_OPCODE_BASE;
+  tmp += opcode_base;
 
   /* Avoid overflow when addr_delta is large.  */
-  if (addr_delta < 256 + MAX_SPECIAL_ADDR_DELTA)
+  if (addr_delta < (unsigned int) (256 + MAX_SPECIAL_ADDR_DELTA))
     {
       /* Try using a special opcode.  */
       opcode = tmp + addr_delta * DWARF2_LINE_RANGE;
@@ -971,7 +1226,7 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
      to emit the matrix entry.  */
   if (line_delta == INT_MAX)
     {
-      if (addr_delta == MAX_SPECIAL_ADDR_DELTA)
+      if (addr_delta == (unsigned int) MAX_SPECIAL_ADDR_DELTA)
 	*p++ = DW_LNS_const_add_pc;
       else
 	{
@@ -1009,10 +1264,10 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
     }
 
   /* Bias the opcode by the special opcode base.  */
-  tmp += DWARF2_LINE_OPCODE_BASE;
+  tmp += opcode_base;
 
   /* Avoid overflow when addr_delta is large.  */
-  if (addr_delta < 256 + MAX_SPECIAL_ADDR_DELTA)
+  if (addr_delta < (unsigned int) (256 + MAX_SPECIAL_ADDR_DELTA))
     {
       /* Try using a special opcode.  */
       opcode = tmp + addr_delta * DWARF2_LINE_RANGE;
@@ -1264,6 +1519,123 @@ dwarf2dbg_convert_frag (fragS *frag)
   frag->fr_offset = 0;
 }
 
+/* Generate .debug_line content for the logicals table rows.  */
+
+static void
+emit_logicals (void)
+{
+  unsigned logical;
+  unsigned filenum = 1;
+  unsigned line = 1;
+  unsigned column = 0;
+  unsigned discriminator;
+  unsigned flags = DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0;
+  unsigned context = 0;
+  unsigned subprog = 0;
+  segT last_seg = NULL;
+  fragS *last_frag = NULL, *frag;
+  addressT last_frag_ofs = 0, frag_ofs;
+  symbolS *last_lab = NULL, *lab;
+
+  for (logical = 1; logical <= logicals_in_use; ++logical)
+    {
+      int line_delta;
+      struct logicals_entry *e = &logicals[logical - 1];
+
+      discriminator = 0;
+
+      if (context != e->context || subprog != e->subprog)
+        {
+	  unsigned int caller = e->context;
+	  unsigned int npop = 0;
+
+	  // See if a sequence of DW_LNS_pop_context ops will get
+	  // to the state we want.
+	  while (caller > 0 && caller <= logicals_in_use) {
+	    ++npop;
+	    if (logicals[caller - 1].subprog == subprog)
+	      break;
+	    caller = logicals[caller - 1].context;
+	  }
+	  if (caller > 0 && caller <= logicals_in_use && npop < 5) {
+	    while (npop-- > 0)
+	      out_opcode (DW_LNS_pop_context);
+	    filenum = logicals[caller - 1].loc.filenum;
+	    line = logicals[caller - 1].loc.line;
+	    column = logicals[caller - 1].loc.column;
+	    discriminator = logicals[caller - 1].loc.discriminator;
+	    flags = logicals[caller - 1].loc.flags;
+	    context = logicals[caller - 1].context;
+	    subprog = logicals[caller - 1].subprog;
+	  } else {
+	    out_opcode (DW_LNS_inlined_call);
+	    out_uleb128 (context);
+	    out_uleb128 (subprog);
+	    context = e->context;
+	    subprog = e->subprog;
+	  }
+	}
+
+      if (filenum != e->loc.filenum)
+	{
+	  filenum = e->loc.filenum;
+	  out_opcode (DW_LNS_set_file);
+	  out_uleb128 (filenum);
+	}
+
+      if (column != e->loc.column)
+	{
+	  column = e->loc.column;
+	  out_opcode (DW_LNS_set_column);
+	  out_uleb128 (column);
+	}
+
+      if (e->loc.discriminator != discriminator)
+	{
+	  out_opcode (DW_LNS_extended_op);
+	  out_leb128 (1 + sizeof_leb128 (e->loc.discriminator, 0));
+	  out_opcode (DW_LNE_set_discriminator);
+	  out_uleb128 (e->loc.discriminator);
+	}
+
+      if ((e->loc.flags ^ flags) & DWARF2_FLAG_IS_STMT)
+	{
+	  flags = e->loc.flags;
+	  out_opcode (DW_LNS_negate_stmt);
+	}
+
+      if (e->loc.flags & DWARF2_FLAG_PROLOGUE_END)
+	out_opcode (DW_LNS_set_prologue_end);
+
+      if (e->loc.flags & DWARF2_FLAG_EPILOGUE_BEGIN)
+	out_opcode (DW_LNS_set_epilogue_begin);
+
+      if (logicals_in_use == 0)
+	line_delta = e->loc.line - line;
+      else
+	line_delta = e->loc.logical - line;
+      lab = e->label;
+      frag = symbol_get_frag (lab);
+      frag_ofs = S_GET_VALUE (lab);
+
+      if (last_frag == NULL || e->seg != last_seg)
+	{
+	  out_set_addr (lab);
+	  out_inc_line_addr (line_delta, 0);
+	}
+      else if (frag == last_frag && ! DWARF2_USE_FIXED_ADVANCE_PC)
+	out_inc_line_addr (line_delta, frag_ofs - last_frag_ofs);
+      else
+	relax_inc_line_addr (line_delta, lab, last_lab);
+
+      line = e->loc.line;
+      last_seg = e->seg;
+      last_lab = lab;
+      last_frag = frag;
+      last_frag_ofs = frag_ofs;
+    }
+}
+
 /* Generate .debug_line content for the chain of line number entries
    beginning at E, for segment SEG.  */
 
@@ -1318,27 +1690,30 @@ process_entries (segT seg, struct line_entry *e)
     {
       int line_delta;
 
-      if (filenum != e->loc.filenum)
-	{
-	  filenum = e->loc.filenum;
-	  out_opcode (DW_LNS_set_file);
-	  out_uleb128 (filenum);
-	}
+      if (logicals_in_use == 0)
+        {
+	  if (filenum != e->loc.filenum)
+	    {
+	      filenum = e->loc.filenum;
+	      out_opcode (DW_LNS_set_file);
+	      out_uleb128 (filenum);
+	    }
 
-      if (column != e->loc.column)
-	{
-	  column = e->loc.column;
-	  out_opcode (DW_LNS_set_column);
-	  out_uleb128 (column);
-	}
+	  if (column != e->loc.column)
+	    {
+	      column = e->loc.column;
+	      out_opcode (DW_LNS_set_column);
+	      out_uleb128 (column);
+	    }
 
-      if (e->loc.discriminator != 0)
-	{
-	  out_opcode (DW_LNS_extended_op);
-	  out_leb128 (1 + sizeof_leb128 (e->loc.discriminator, 0));
-	  out_opcode (DW_LNE_set_discriminator);
-	  out_uleb128 (e->loc.discriminator);
-	}
+	  if (e->loc.discriminator != 0)
+	    {
+	      out_opcode (DW_LNS_extended_op);
+	      out_leb128 (1 + sizeof_leb128 (e->loc.discriminator, 0));
+	      out_opcode (DW_LNE_set_discriminator);
+	      out_uleb128 (e->loc.discriminator);
+	    }
+        }
 
       if (isa != e->loc.isa)
 	{
@@ -1356,22 +1731,35 @@ process_entries (segT seg, struct line_entry *e)
       if (e->loc.flags & DWARF2_FLAG_BASIC_BLOCK)
 	out_opcode (DW_LNS_set_basic_block);
 
-      if (e->loc.flags & DWARF2_FLAG_PROLOGUE_END)
-	out_opcode (DW_LNS_set_prologue_end);
+      if (logicals_in_use == 0)
+        {
+	  if (e->loc.flags & DWARF2_FLAG_PROLOGUE_END)
+	    out_opcode (DW_LNS_set_prologue_end);
 
-      if (e->loc.flags & DWARF2_FLAG_EPILOGUE_BEGIN)
-	out_opcode (DW_LNS_set_epilogue_begin);
+	  if (e->loc.flags & DWARF2_FLAG_EPILOGUE_BEGIN)
+	    out_opcode (DW_LNS_set_epilogue_begin);
+        }
 
       /* Don't try to optimize away redundant entries; gdb wants two
 	 entries for a function where the code starts on the same line as
 	 the {, and there's no way to identify that case here.  Trust gcc
 	 to optimize appropriately.  */
-      line_delta = e->loc.line - line;
+      if (logicals_in_use == 0)
+	line_delta = e->loc.line - line;
+      else
+	line_delta = e->loc.logical - line;
       lab = e->label;
       frag = symbol_get_frag (lab);
       frag_ofs = S_GET_VALUE (lab);
 
-      if (last_frag == NULL)
+      if (logicals_in_use > 0
+	  && frag != last_frag
+	  && logicals[e->loc.logical - 1].label == lab)
+	{
+	  out_set_addr_from_logical (line_delta);
+	  out_opcode (DW_LNS_copy);
+	}
+      else if (last_frag == NULL)
 	{
 	  out_set_addr (lab);
 	  out_inc_line_addr (line_delta, 0);
@@ -1381,7 +1769,10 @@ process_entries (segT seg, struct line_entry *e)
       else
 	relax_inc_line_addr (line_delta, lab, last_lab);
 
-      line = e->loc.line;
+      if (logicals_in_use == 0)
+	line = e->loc.line;
+      else
+	line = e->loc.logical;
       last_lab = lab;
       last_frag = frag;
       last_frag_ofs = frag_ofs;
@@ -1456,6 +1847,158 @@ out_file_list (void)
   out_byte (0);
 }
 
+/* Add a string to the string table.  */
+
+static offsetT
+add_to_string_table (struct string_table *strtab, const char *str)
+{
+  const char *key;
+  offsetT val;
+
+  if (strtab->strings_allocated == 0)
+    {
+      strtab->strings_allocated = 4;
+      strtab->strings = (const char **)
+	  xcalloc (strtab->strings_allocated, sizeof(char *));
+      strtab->hashtab = hash_new ();
+    }
+
+  val = (offsetT) hash_find (strtab->hashtab, str);
+  if (val != 0)
+    return val;
+
+  if (strtab->strings_in_use >= strtab->strings_allocated)
+    {
+      unsigned int old = strtab->strings_allocated;
+
+      strtab->strings_allocated *= 2;
+      strtab->strings = (const char **)
+	  xrealloc (strtab->strings,
+		    strtab->strings_allocated * sizeof (char *));
+      memset (strtab->strings + old, 0,
+	      (strtab->strings_allocated - old) * sizeof (char *));
+    }
+
+  key = xstrdup (str);
+  val = strtab->next_offset;
+  hash_insert (strtab->hashtab, key, (void *) val);
+  strtab->strings[strtab->strings_in_use++] = key;
+  strtab->next_offset += strlen(key) + 1;
+  return val;
+}
+
+/* Output the string table STRTAB to the section STR_SEG.
+   In a debug string table, the first byte is always '\0',
+   and valid indexes begin at 1.  */
+
+static void
+out_string_table (segT str_seg, struct string_table *strtab)
+{
+  unsigned int i;
+  size_t size;
+  char *cp;
+
+  subseg_set (str_seg, 0);
+  out_byte (0);
+  for (i = 0; i < strtab->strings_in_use; i++)
+    {
+      size = strlen (strtab->strings[i]) + 1;
+      cp = frag_more (size);
+      memcpy (cp, strtab->strings[i], size);
+    }
+}
+
+static void
+out_dwarf5_file_list (segT str_seg, int sizeof_offset)
+{
+  const char *dir;
+  offsetT strp;
+  unsigned int i;
+  expressionS exp;
+
+  exp.X_op = O_symbol;
+  exp.X_add_symbol = section_symbol (str_seg);
+
+  out_byte (1);                    /* directory_entry_format_count */
+  out_uleb128 (DW_LNCT_path);      /* directory_entry_format[0].content_type */
+  out_uleb128 (DW_FORM_line_strp); /* directory_entry_format[0].form */
+  out_uleb128 (dirs_in_use - 1);   /* directories_count */
+
+  /* Emit directories list.  */
+  for (i = 1; i < dirs_in_use; ++i)
+    {
+      dir = remap_debug_filename (dirs[i]);
+      strp = add_to_string_table (&debug_line_str_table, dir);
+      exp.X_add_number = strp;
+      emit_expr (&exp, sizeof_offset);
+    }
+
+  out_byte (2);                          /* file_name_entry_format_count */
+  out_uleb128 (DW_LNCT_path);            /* file_name_entry_format[0].type */
+  out_uleb128 (DW_FORM_line_strp);       /* file_name_entry_format[0].form */
+  out_uleb128 (DW_LNCT_directory_index); /* file_name_entry_format[0].type */
+  out_uleb128 (DW_FORM_udata);           /* file_name_entry_format[0].form */
+  out_uleb128 (files_in_use - 1);        /* file_names_count */
+
+  /* Emit file_names list.  */
+  for (i = 1; i < files_in_use; ++i)
+    {
+      const char *fullfilename;
+
+      if (files[i].filename == NULL)
+	{
+	  as_bad (_("unassigned file number %ld"), (long) i);
+	  /* Prevent a crash later, particularly for file 1.  */
+	  files[i].filename = "";
+	}
+
+      fullfilename = DWARF2_FILE_NAME (files[i].filename,
+				       files[i].dir ? dirs [files [i].dir] : "");
+      strp = add_to_string_table (&debug_line_str_table, fullfilename);
+      exp.X_add_number = strp;
+      emit_expr (&exp, sizeof_offset);
+      out_uleb128 (files[i].dir);	/* directory number */
+    }
+}
+
+static void
+out_subprog_list (segT str_seg, int sizeof_offset)
+{
+  const char *name;
+  offsetT strp;
+  unsigned int i;
+  expressionS exp;
+
+  exp.X_op = O_symbol;
+  exp.X_add_symbol = section_symbol (str_seg);
+
+  out_byte (3);                          /* subprogram_entry_format_count */
+  out_uleb128 (DW_LNCT_subprogram_name); /* subprogram_entry_format[0].type */
+  out_uleb128 (DW_FORM_line_strp);       /* subprogram_entry_format[0].form */
+  out_uleb128 (DW_LNCT_decl_file);       /* subprogram_entry_format[1].type */
+  out_uleb128 (DW_FORM_udata);           /* subprogram_entry_format[1].form */
+  out_uleb128 (DW_LNCT_decl_line);       /* subprogram_entry_format[2].type */
+  out_uleb128 (DW_FORM_udata);           /* subprogram_entry_format[2].form */
+  out_uleb128 (subprogs_in_use);         /* subprograms_count */
+
+  /* Emit subprograms list.  */
+  for (i = 0; i < subprogs_in_use; ++i)
+    {
+      name = subprogs[i].subpname;
+      if (name == NULL)
+	{
+	  as_bad (_("unassigned subprogram number %ld"), (long) i);
+	  strp = 0;
+	}
+      else
+	strp = add_to_string_table (&debug_line_str_table, name);
+      exp.X_add_number = strp;
+      emit_expr (&exp, sizeof_offset);
+      out_uleb128 (subprogs[i].filenum);
+      out_uleb128 (subprogs[i].line);
+    }
+}
+
 /* Switch to SEC and output a header length field.  Return the size of
    offsets used in SEC.  The caller must set EXPR->X_add_symbol value
    to the end of the section.  */
@@ -1501,19 +2044,31 @@ out_header (asection *sec, expressionS *exp)
 /* Emit the collected .debug_line data.  */
 
 static void
-out_debug_line (segT line_seg)
+out_debug_line (segT line_seg, segT str_seg)
 {
   expressionS exp;
-  symbolS *prologue_start, *prologue_end;
+  symbolS *prologue_start, *prologue_end, *actuals_start;
   symbolS *line_end;
   struct line_seg *s;
   int sizeof_offset;
+  unsigned int version;
+
+  if (logicals_in_use == 0)
+    {
+      version = DWARF2_LINE_VERSION;
+      opcode_base = DWARF2_LINE_OPCODE_BASE;
+    }
+  else
+    {
+      version = DWARF2_LINE_EXPERIMENTAL_VERSION;
+      opcode_base = DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE;
+    }
 
   sizeof_offset = out_header (line_seg, &exp);
   line_end = exp.X_add_symbol;
 
   /* Version.  */
-  out_two (DWARF2_LINE_VERSION);
+  out_two (version);
 
   /* Length of the prologue following this length.  */
   prologue_start = symbol_temp_make ();
@@ -1525,12 +2080,22 @@ out_debug_line (segT line_seg)
   emit_expr (&exp, sizeof_offset);
   symbol_set_value_now (prologue_start);
 
+  /* Actuals table offset.  */
+  if (version == DWARF2_LINE_EXPERIMENTAL_VERSION)
+    {
+      actuals_start = symbol_temp_make ();
+      exp.X_add_symbol = actuals_start;
+      emit_expr (&exp, sizeof_offset);
+    }
+
   /* Parameters of the state machine.  */
   out_byte (DWARF2_LINE_MIN_INSN_LENGTH);
+  if (version >= 4)
+    out_byte (DWARF2_LINE_MAX_OPS_PER_INSN);
   out_byte (DWARF2_LINE_DEFAULT_IS_STMT);
   out_byte (DWARF2_LINE_BASE);
   out_byte (DWARF2_LINE_RANGE);
-  out_byte (DWARF2_LINE_OPCODE_BASE);
+  out_byte (opcode_base);
 
   /* Standard opcode lengths.  */
   out_byte (0);			/* DW_LNS_copy */
@@ -1545,10 +2110,28 @@ out_debug_line (segT line_seg)
   out_byte (0);			/* DW_LNS_set_prologue_end */
   out_byte (0);			/* DW_LNS_set_epilogue_begin */
   out_byte (1);			/* DW_LNS_set_isa */
+  if (opcode_base == DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE)
+    {
+      out_byte (2);		/* DW_LNS_inlined_call */
+      out_byte (0);		/* DW_LNS_pop_context */
+      out_byte (1);		/* DW_LNS_set_address_from_logical */
+    }
 
-  out_file_list ();
+  if (version >= 5)
+    out_dwarf5_file_list (str_seg, sizeof_offset);
+  else
+    out_file_list ();
+
+  if (version == DWARF2_LINE_EXPERIMENTAL_VERSION)
+    out_subprog_list (str_seg, sizeof_offset);
 
   symbol_set_value_now (prologue_end);
+
+  if (version == DWARF2_LINE_EXPERIMENTAL_VERSION)
+    {
+      emit_logicals ();
+      symbol_set_value_now (actuals_start);
+    }
 
   /* For each section, emit a statement program.  */
   for (s = all_segs; s; s = s->next)
@@ -1851,11 +2434,13 @@ dwarf2_finish (void)
   segT line_seg;
   struct line_seg *s;
   segT info_seg;
+  segT str_seg = NULL;
   int emit_other_sections = 0;
   int empty_debug_line = 0;
 
   info_seg = bfd_get_section_by_name (stdoutput, ".debug_info");
-  emit_other_sections = info_seg == NULL || !seg_not_empty_p (info_seg);
+  emit_other_sections = ((info_seg == NULL || !seg_not_empty_p (info_seg))
+			 && logicals_in_use == 0);
 
   line_seg = bfd_get_section_by_name (stdoutput, ".debug_line");
   empty_debug_line = line_seg == NULL || !seg_not_empty_p (line_seg);
@@ -1892,7 +2477,22 @@ dwarf2_finish (void)
 	}
     }
 
-  out_debug_line (line_seg);
+  if (logicals_in_use > 0)
+    {
+      str_seg = subseg_new (".debug_line_str", 0);
+      bfd_set_section_flags (stdoutput, str_seg,
+			     (SEC_READONLY | SEC_DEBUGGING
+			      | SEC_MERGE | SEC_STRINGS));
+      debug_line_str_table.strings = NULL;
+      debug_line_str_table.strings_in_use = 0;
+      debug_line_str_table.strings_allocated = 0;
+      debug_line_str_table.next_offset = 1;
+    }
+
+  out_debug_line (line_seg, str_seg);
+
+  if (str_seg != NULL)
+    out_string_table (str_seg, &debug_line_str_table);
 
   /* If this is assembler generated line info, and there is no
      debug_info already, we need .debug_info and .debug_abbrev
