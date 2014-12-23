@@ -1,3 +1,29 @@
+2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-avr/relax-elf-flags-01.d: New file.
+	* ld-avr/relax-elf-flags-02.d: New file.
+	* ld-avr/relax-elf-flags-03.d: New file.
+	* ld-avr/relax-elf-flags-04.d: New file.
+	* ld-avr/relax-elf-flags-05.d: New file.
+	* ld-avr/relax-elf-flags-06.d: New file.
+	* ld-avr/relax-elf-flags-07.d: New file.
+	* ld-avr/relax-elf-flags-08.d: New file.
+	* ld-avr/relax-elf-flags-a.s: New file.
+	* ld-avr/relax-elf-flags-b.s: New file.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/sdabase.s,
+	* ld-powerpc/sdabase.t,
+	* ld-powerpc/sdabase.d: New test.
+	* ld-powerpc/sdabase2.t,
+	* ld-powerpc/sdabase2.d: New test.
+	* ld-powerpc/powerpc.exp: Run them.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/endsym.s, *ld-elf/endsym.d: New test.
+
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* ld-mips-elf/attr-gnu-4-00.d: Relax check for ISA extension.

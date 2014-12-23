@@ -289,6 +289,8 @@ if { [istarget "powerpc*-eabi*"] } {
 }
 
 run_dump_test "plt1"
+run_dump_test "sdabase"
+run_dump_test "sdabase2"
 
 run_dump_test "attr-gnu-4-00"
 run_dump_test "attr-gnu-4-01"

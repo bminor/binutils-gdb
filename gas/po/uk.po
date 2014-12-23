@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: gas 2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2014-11-09 16:54+0200\n"
+"PO-Revision-Date: 2014-12-13 16:52+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -1014,7 +1014,7 @@ msgstr "мало бути вказано назву %s з наступним «,
 #: config/obj-macho.c:195
 #, c-format
 msgid "cannot overide zerofill section type for `%s,%s'"
-msgstr ""
+msgstr "неможливо перевизначити тип розділу zerofill для «%s,%s»"
 
 #: config/obj-macho.c:258
 #, c-format
@@ -3998,7 +3998,7 @@ msgstr "невирівняне призначення гілки"
 #: config/tc-arm.c:22152
 #, c-format
 msgid "blx to Thumb func '%s' from Thumb ISA state changed to bl"
-msgstr ""
+msgstr "blx до функції Thumb «%s» зі стану ISA Thumb змінено на bl"
 
 #: config/tc-arm.c:22202
 msgid "Thumb2 branch out of range"
@@ -4146,7 +4146,7 @@ msgstr "аргументи з рухомою крапкою зберігають
 
 #: config/tc-arm.c:23757
 msgid "re-entrant code"
-msgstr ""
+msgstr "повторновхідний код"
 
 #: config/tc-arm.c:23758
 msgid "code is ATPCS conformant"
@@ -5444,7 +5444,7 @@ msgstr "інструкція IU не може перебувати у лівом
 
 #: config/tc-d10v.c:1043 config/tc-d10v.c:1058
 msgid "Instruction in R container is squashed by flow control instruction in L container."
-msgstr ""
+msgstr "Інструкцію у контейнері R роздушено інструкцією з керування потоком у контейнері L."
 
 #: config/tc-d10v.c:1056 config/tc-d30v.c:1076
 msgid "MU instruction may not be in the right container"
@@ -5763,7 +5763,7 @@ msgstr "помилкове форматування списку регістр�
 #. Checks for behavioral restrictions on LD/ST instructions.
 #: config/tc-epiphany.c:505
 msgid "destination register modified by displacement-post-modified address"
-msgstr ""
+msgstr "регістр призначення змінено адресою зсуву після зміни"
 
 #: config/tc-epiphany.c:506
 msgid "ldrd/strd requires even:odd register pair"
@@ -6306,7 +6306,7 @@ msgstr "Некоректні операнди %s"
 #: config/tc-hppa.c:5755
 #, c-format
 msgid "Immediates %d and %d will give undefined behavior."
-msgstr ""
+msgstr "Значення пришвидшеного використання %d і %d призведуть до невизначеної поведінки."
 
 #: config/tc-hppa.c:5807 config/tc-hppa.c:7034 config/tc-hppa.c:7089
 msgid "Missing function name for .PROC (corrupted label chain)"
@@ -6975,11 +6975,11 @@ msgstr "непідтримувана трансляція"
 
 #: config/tc-i386.c:4966
 msgid "broadcast not on source memory operand"
-msgstr ""
+msgstr "трансляція поза операндом пам’яті призначення"
 
 #: config/tc-i386.c:4969
 msgid "broadcast is needed for operand of such type"
-msgstr ""
+msgstr "для операнда такого типу потрібна трансляція"
 
 #: config/tc-i386.c:4972
 msgid "unsupported masking"
@@ -8415,6 +8415,21 @@ msgid ""
 "\t\t\t  hint.b check (default -mhint.b=error)\n"
 "  -x | -xexplicit\t  turn on dependency violation checking\n"
 msgstr ""
+"Параметра IA-64:\n"
+"  --mconstant-gp\t  позначити файл результату як такий, що використовує модель сталого GP\n"
+"\t\t\t  (встановлює прапорець заголовка ELF EF_IA_64_CONS_GP)\n"
+"  --mauto-pic\t\t  позначити файл результату як такий, що використовує модель сталого GP\n"
+"\t\t\t  без дескрипторів функцій (встановлює прапорець заголовка ELF\n"
+"\t\t\t  EF_IA_64_NOFUNCDESC_CONS_GP)\n"
+"  -milp32|-milp64|-mlp64|-mp64\tвибрати модель даних (типово -mlp64)\n"
+"  -mle | -mbe\t\t  вибрати прямий чи зворотний порядок байтів (типово -mle)\n"
+"  -mtune=[itanium1|itanium2]\n"
+"\t\t\t  скоригувати для специфічного процесора (типово -mtune=itanium2)\n"
+"  -munwind-check=[warning|error]\n"
+"\t\t\t  розгорнути перевірку директив (типово -munwind-check=warning)\n"
+"  -mhint.b=[ok|warning|error]\n"
+"\t\t\t  перевірка hint.b (типово -mhint.b=error)\n"
+"  -x | -xexplicit\t  увімкнути перевірку порушення залежностей\n"
 
 #. Note for translators: "automagically" can be translated as "automatically" here.
 #: config/tc-ia64.c:7202
@@ -8427,6 +8442,13 @@ msgid ""
 "  -xdebugx\t\t  debug dependency violation checker and turn on\n"
 "\t\t\t  dependency violation checking\n"
 msgstr ""
+"  -xauto\t\t  автоматично вилучити порушення залежностей (типово)\n"
+"  -xnone\t\t  вимкнути перевірку порушення залежностей\n"
+"  -xdebug\t\t  діагностувати перевірку порушення залежностей\n"
+"  -xdebugn\t\t  діагностувати перевірку порушення залежностей, але\n"
+"\t\t\t  вимкнути перевірку порушення залежностей\n"
+"  -xdebugx\t\t  діагностувати перевірку порушення залежностей і\n"
+"\t\t\t  увімкнути перевірку порушення залежностей\n"
 
 #: config/tc-ia64.c:7217
 msgid "--gstabs is not supported for ia64"
@@ -8867,7 +8889,7 @@ msgstr "  -nIp                    синонім до -no-ignore-parallel-confli
 #: config/tc-m32r.c:419
 #, c-format
 msgid "  -warn-unmatched-high    warn when an (s)high reloc has no matching low reloc\n"
-msgstr ""
+msgstr "  -warn-unmatched-high    попереджати, якщо пересування (s)high не має відповідного пересування low\n"
 
 #: config/tc-m32r.c:421
 #, c-format
@@ -8986,6 +9008,24 @@ msgid ""
 "  --generate-example      generate an example of each instruction\n"
 "                          (used for testing)\n"
 msgstr ""
+"Параметри Motorola 68HC11/68HC12/68HCS12:\n"
+"  -m68hc11 | -m68hc12 |\n"
+"  -m68hcs12 | -mm9s12x |\n"
+"  -mm9s12xg               вказати процесор [типовий %s]\n"
+"  -mshort                 використовувати 16-бітовий ABI int (типово)\n"
+"  -mlong                  використовувати 32-бітовий ABI int\n"
+"  -mshort-double          використовувати 32-бітовий ABI double\n"
+"  -mlong-double           використовувати 64-бітовий ABI double (типово)\n"
+"  --force-long-branches   завжди перетворювати відносні гілки абсолютними\n"
+"  -S,--short-branches     не перетворювати відносні гілки на абсолютні,\n"
+"                          якщо відступ перебуває за межами діапазону\n"
+"  --strict-direct-mode    не перетворювати безпосередній режим на розширений,\n"
+"                          якщо у інструкції не передбачено безпосереднього режиму\n"
+"  --print-insn-syntax     виводити синтаксис інструкції у випадку помилки\n"
+"  --print-opcodes         виводити список інструкцій із синтаксисом\n"
+"  --xgate-ramoffset       відступати у адресах RAM на 0xc000\n"
+"  --generate-example      створити приклад кожної інструкції\n"
+"                          (використовується для тестування)\n"
 
 #: config/tc-m68hc11.c:466 config/tc-xgate.c:285
 #, c-format
@@ -9762,6 +9802,17 @@ msgid ""
 "--disp-size-default-16\tdisplacement with unknown size is 16 bits\n"
 "--disp-size-default-32\tdisplacement with unknown size is 32 bits (default)\n"
 msgstr ""
+"-l\t\t\tвикористовувати 1 слово для посилань на невизначені символи [типово 2]\n"
+"-pic, -k\t\tстворити незалежний від позиції код\n"
+"-S\t\t\tперетворювати jbsr на jsr\n"
+"--pcrel                 ніколи не перетворювати гілки відносно PC на абсолютні переходи\n"
+"--register-prefix-optional\n"
+"\t\t\tрозпізнавати назви регістрів без символу префікса\n"
+"--bitwise-or\t\tне вважати «|» символом коментування\n"
+"--base-size-default-16\tбазовий регістр без розміру є 16-бітовим\n"
+"--base-size-default-32\tбазовий регістр без розміру є 32-бітовим (типово)\n"
+"--disp-size-default-16\tпереміщення з невідомим розміром є 16-бітовим\n"
+"--disp-size-default-32\tпереміщення з невідомим розміром є 32-бітовими (типово)\n"
 
 #: config/tc-m68k.c:7761
 #, c-format
@@ -9965,6 +10016,12 @@ msgid ""
 "  -EB                     assemble for a big endian system (default)\n"
 "  -EL                     assemble for a little endian system\n"
 msgstr ""
+"Специфічні для MCORE параметри:\n"
+"  -{no-}jsri2bsr\t  {вимкнути}увімкнути перетворення jsri на bsr (тип: вимкнути)\n"
+"  -{no-}sifilter\t  {вимкнути}увімкнути поведінку фільтрування silicon (тип: вимкнути)\n"
+"  -cpu=[210|340]          вибрати тип процесора\n"
+"  -EB                     зібрати для систем зі зворотним порядком байтів (типово)\n"
+"  -EL                     зібрати для систем із прямим порядком байтів\n"
 
 #: config/tc-mcore.c:1703 config/tc-microblaze.c:1841
 msgid "failed sanity check: short_jump"
@@ -10032,6 +10089,19 @@ msgid ""
 "  if any enabling -m options are given, only those are enabled;\n"
 "  if only disabling -m options are given, only those are disabled.\n"
 msgstr ""
+"Специфічні для MeP параметри командного рядка:\n"
+"  -EB                     зібрати для системи зі зворотним порядком байтів\n"
+"  -EL                     зібрати для системи із прямим порядком байтів (типово)\n"
+"  -mconfig=<назва>        вказати конфігурацію мікросхем, якою слід скористатися\n"
+"  -maverage -mno-average -mmult -mno-mult -mdiv -mno-div\n"
+"  -mbitops -mno-bitops -mleadz -mno-leadz -mabsdiff -mno-absdiff\n"
+"  -mminmax -mno-minmax -mclip -mno-clip -msatur -mno-satur -mcop32\n"
+"                          увімкнути або вимкнути вказані коди операцій\n"
+"\n"
+"  Якщо вказано -mconfig, інші параметри -m внесуть зміни. Інакше,\n"
+"  якщо не вказано параметри -m, буде увімкнено усі основні коди операцій;\n"
+"  якщо вказано будь-які параметри -m вмикання, буде увімкнено лише ці коди;\n"
+"  якщо вказано лише параметри -m вимикання, лише вказані коди буде вимкнено.\n"
 
 #: config/tc-mep.c:410
 msgid "$hi and $lo are disabled when MUL and DIV are off"
@@ -10620,11 +10690,11 @@ msgstr "гілка, відносна щодо PC, до мітки %s, яка н�
 
 #: config/tc-microblaze.c:2257
 msgid "Variable is accessed using small data read only anchor, but it is not in the small data read only section"
-msgstr ""
+msgstr "Доступ до змінної здійснюється за допомогою прив’язки малих даних лише для читання, але вона не перебуває у розділі малих даних лише для читання"
 
 #: config/tc-microblaze.c:2280
 msgid "Variable is accessed using small data read write anchor, but it is not in the small data read write section"
-msgstr ""
+msgstr "Доступ до змінної здійснюється за допомогою прив’язки малих даних читання-запису, але вона не перебуває у розділі малих даних читання-запису"
 
 #: config/tc-microblaze.c:2289
 msgid "Incorrect fr_opcode value in frag.  Internal error....."
@@ -11436,6 +11506,13 @@ msgid ""
 "--[no-]relax-branch\t[dis]allow out-of-range branches to be relaxed\n"
 "-mnan=ENCODING\t\tselect an IEEE 754 NaN encoding convention, either of:\n"
 msgstr ""
+"-mhard-float\t\tдозволити інструкції дій з рухомою крапкою\n"
+"-msoft-float\t\tзаборонити інструкції дій з рухомою крапкою\n"
+"-msingle-float\t\tдозволити лише 32-бітові інструкції дій з рухомою крапкою\n"
+"-mdouble-float\t\tдозволити 32-бітові і 64-бітові інструкції дій з рухомою крапкою\n"
+"--[no-]construct-floats\t[заборонити]дозволити побудову значень з рухомою крапкою\n"
+"--[no-]relax-branch\t[заборонити]дозволити оптимізацію гілок поза діапазоном\n"
+"-mnan=КОДУВАННЯ\t\tвибрати угоду з кодування NaN IEEE 754 з таких варіантів:\n"
 
 #: config/tc-mips.c:18187
 #, c-format
@@ -11450,6 +11527,16 @@ msgid ""
 "                        position dependent (non shared) code\n"
 "-mabi=ABI\t\tcreate ABI conformant object file for:\n"
 msgstr ""
+"-KPIC, -call_shared\tстворити незалежний від позицій код SVR4\n"
+"-call_nonpic\t\tстворити код без PIC, який може працювати із DSO\n"
+"-mvxworks-pic\t\tстворити незалежний від позицій код VxWorks\n"
+"-non_shared\t\tне створювати код, який може працювати з DSO\n"
+"-xgot\t\t\tприпустити 32-бітовий GOT\n"
+"-mpdr, -mno-pdr\t\tувімкнути або вимкнути створення розділів .pdr\n"
+"-mshared, -mno-shared   вимкнути або увімкнути оптимізацію .cpload для\n"
+"                        залежного від позиції (непридатного до спільного\n"
+"                        використання) коду\n"
+"-mabi=ABI\t\tстворити сумісний з ABI об’єктний файл для:\n"
 
 #: config/tc-mips.c:18208
 #, c-format
@@ -11497,6 +11584,8 @@ msgid ""
 "  -no-predefined-syms     Do not provide mmixal built-in constants.\n"
 "                          Implies -fixed-special-register-names.\n"
 msgstr ""
+"  -no-predefined-syms     не надавати вбудовані сталі mmixal.\n"
+"                          Додає -fixed-special-register-names.\n"
 
 #: config/tc-mmix.c:713
 #, c-format
@@ -11515,7 +11604,7 @@ msgstr "  -no-merge-gregs         Не об’єднувати визначен�
 #: config/tc-mmix.c:718
 #, c-format
 msgid "  -linker-allocated-gregs If there's no suitable GREG definition for the                          operands of an instruction, let the linker resolve.\n"
-msgstr ""
+msgstr "  -linker-allocated-gregs якщо немає відповідного визначення GREG для                          операндів інструкції, дозволити вирішувати компонувальнику.\n"
 
 #: config/tc-mmix.c:721
 #, c-format
@@ -11525,6 +11614,10 @@ msgid ""
 "                          The linker will catch any errors.  Implies\n"
 "                          -linker-allocated-gregs."
 msgstr ""
+"  -x                      не виводити попередження, якщо щодо операнда GETA, гілки,\n"
+"                          PUSHJ або JUMP є невідомою належність його до діапазону.\n"
+"                          Компонувальник визначить усі помилки. Використовується з\n"
+"                          -linker-allocated-gregs."
 
 #: config/tc-mmix.c:847
 #, c-format
@@ -11617,7 +11710,7 @@ msgstr "немає придатного визначення GREG для опе�
 
 #: config/tc-mmix.c:2867
 msgid "operands were not reducible at assembly-time"
-msgstr ""
+msgstr "операнди не можна спрощувати під час збирання"
 
 #: config/tc-mmix.c:2894
 #, c-format
@@ -11635,7 +11728,7 @@ msgstr "мітки [0-9]H не можуть бути єдиними даними
 
 #: config/tc-mmix.c:2953
 msgid "[0-9]H labels do not mix with dot-pseudos"
-msgstr ""
+msgstr "мітки [0-9]H не змішуються з крапка-псевдонімами"
 
 #: config/tc-mmix.c:3041
 msgid "invalid characters in input"
@@ -11684,7 +11777,7 @@ msgstr "некоректний вираз LOC"
 
 #: config/tc-mmix.c:3992 config/tc-mmix.c:4019
 msgid "LOC expression stepping backwards is not supported"
-msgstr ""
+msgstr "підтримки виразів LOC із відходом назад не передбачено"
 
 #. We will only get here in rare cases involving #NO_APP,
 #. where the unterminated string is not recognized by the
@@ -11711,7 +11804,7 @@ msgstr "запис даних з вирівнюванням, що перевищ
 #. macro.  FIXME: Do it cleaner.
 #: config/tc-mmix.h:105
 msgid "`&' serial number operator is not supported"
-msgstr ""
+msgstr "підтримки оператора серійного номера & не передбачено"
 
 #: config/tc-mn10200.c:303
 #, c-format
@@ -11935,7 +12028,7 @@ msgstr "потрібна «)»"
 #: config/tc-msp430.c:1775
 #, c-format
 msgid "unknown operator %s. Did you mean X(Rn) or #[hl][hl][oi](CONST) ?"
-msgstr ""
+msgstr "невідомий оператор %s. Мали на увазі X(Rn) або #[hl][hl][oi](CONST) ?"
 
 #: config/tc-msp430.c:1782
 msgid "r2 should not be used in indexed addressing mode"
@@ -11986,7 +12079,7 @@ msgstr "у %s виявлено сталий регістр призначенн�
 #: config/tc-msp430.c:2117 config/tc-msp430.c:2147
 #, c-format
 msgid "constant generator source register found in %s"
-msgstr ""
+msgstr "у %s виявлено сталий регістр джерела для створення"
 
 #: config/tc-msp430.c:2229
 msgid "no size modifier after period, .w assumed"
@@ -12031,7 +12124,7 @@ msgstr "після %s вставлено інструкцію NOP"
 #: config/tc-msp430.c:2377 config/tc-msp430.c:2477 config/tc-msp430.c:3091
 #: config/tc-msp430.c:3255
 msgid "repeat instruction used with non-register mode instruction"
-msgstr ""
+msgstr "інструкцію repeat використано разом із інструкцією не регістрового режиму"
 
 #: config/tc-msp430.c:2466 config/tc-msp430.c:2800 config/tc-msp430.c:2840
 #: config/tc-msp430.c:3225
@@ -12119,7 +12212,7 @@ msgstr "Помилкове переміщення %d"
 
 #: config/tc-msp430.c:3381
 msgid "instruction requires label sans '$'"
-msgstr ""
+msgstr "інструкція потребує мітки без «$»"
 
 #: config/tc-msp430.c:3385
 msgid "instruction requires label or value in range -511:512"
@@ -12185,32 +12278,32 @@ msgstr "  -nosched                  вимкнути обмеження план
 #: config/tc-mt.c:224
 #, c-format
 msgid "instruction %s may not follow another memory access instruction."
-msgstr ""
+msgstr "інструкція %s може не слідувати іншій інструкції доступу до пам’яті."
 
 #: config/tc-mt.c:230
 #, c-format
 msgid "instruction %s may not follow another I/O instruction."
-msgstr ""
+msgstr "інструкція %s може не слідувати іншій інструкції введення-виведення."
 
 #: config/tc-mt.c:236
 #, c-format
 msgid "%s may not occupy the delay slot of another branch insn."
-msgstr ""
+msgstr "%s не може займати слот затримки іншої інструкції гілки."
 
 #: config/tc-mt.c:261
 #, c-format
 msgid "operand references R%ld of previous instruction."
-msgstr ""
+msgstr "операнд посилається на R%ld попередньої інструкції."
 
 #: config/tc-mt.c:267
 #, c-format
 msgid "operand references R%ld of instruction before previous."
-msgstr ""
+msgstr "операнд посилається на R%ld інструкції до попередньої."
 
 #: config/tc-mt.c:281 config/tc-mt.c:286
 #, c-format
 msgid "conditional branch or jal insn's operand references R%ld of previous arithmetic or logic insn."
-msgstr ""
+msgstr "умовна гілка або операнд інструкції jal посилається на R%ld попередньої арифметичної або логічної інструкції."
 
 #: config/tc-mt.c:349
 msgid "md_estimate_size_before_relax\n"
@@ -12222,12 +12315,17 @@ msgid ""
 "\t\t\t  <arch name> could be\n"
 "\t\t\t  v3, v3j, v3m, v3f, v3s, v2, v2j, v2f, v2s"
 msgstr ""
+"<назва>\t  Зібрати для архітектури <назва>\n"
+"\t\t\t  Значенням <назва> може бути\n"
+"\t\t\t  v3, v3j, v3m, v3f, v3s, v2, v2j, v2f, v2s"
 
 #: config/tc-nds32.c:1933
 msgid ""
 "<baseline>\t  Assemble for baseline <baseline>\n"
 "\t\t\t  <baseline> could be v2, v3, v3m"
 msgstr ""
+"<базовий рядок>\t  зібрати для базового рядка <базовий рядок>\n"
+"\t\t\t  значенням <базовий рядок> може бути v2, v3, v3m"
 
 #: config/tc-nds32.c:1936
 msgid ""
@@ -12238,12 +12336,20 @@ msgid ""
 "\t\t\t  2:    32 SP / 16 DP registers\n"
 "\t\t\t  3:    32 SP / 32 DP registers"
 msgstr ""
+"<freg>\t  Вказати конфігурацію FPU\n"
+"\t\t\t  <freg>\n"
+"\t\t\t  0:     8 SP /  4 DP регістрів\n"
+"\t\t\t  1:    16 SP /  8 DP регістрів\n"
+"\t\t\t  2:    32 SP / 16 DP регістрів\n"
+"\t\t\t  3:    32 SP / 32 DP регістрів"
 
 #: config/tc-nds32.c:1942
 msgid ""
 "<abi>\t          Specify a abi version\n"
 "\t\t\t  <abi> could be v1, v2, v2fp, v2fpp"
 msgstr ""
+"<abi>\t          вказати версію ABI\n"
+"\t\t\t  <abi> може мати значення v1, v2, v2fp, v2fpp"
 
 #: config/tc-nds32.c:1973
 msgid "Multiply instructions support"
@@ -12291,7 +12397,7 @@ msgstr "Розширення FPU DP"
 
 #: config/tc-nds32.c:1984
 msgid "FPU fused-multiply-add instructions"
-msgstr ""
+msgstr "Інструкції fused-multiply-add FPU"
 
 #: config/tc-nds32.c:2021
 #, c-format
@@ -12321,6 +12427,12 @@ msgid ""
 "  -mb2bb-relax\t\t  Back-to-back branch optimization\n"
 "  -mno-all-relax\t  Suppress all relaxation for this file\n"
 msgstr ""
+"  -EL, -mel або -little   створити код із прямим порядком байтів\n"
+"  -EB, -meb або -big      створити код із зворотним порядком байтів\n"
+"  -mpic\t\t\t  створити PIC\n"
+"  -mno-fp-as-gp-relax\t  придушити коригування fp-як-gp для цього файла\n"
+"  -mb2bb-relax\t\t  оптимізація гілок назад-на-назад\n"
+"  -mno-all-relax\t  придушити усі коригування для цього файла\n"
 
 #: config/tc-nds32.c:2036
 #, c-format
@@ -12340,7 +12452,7 @@ msgstr "  -mall-ext\t\t  увімкнути усі розширення та п�
 #: config/tc-nds32.c:2329
 #, c-format
 msgid "need PIC qualifier with symbol. '%s'"
-msgstr ""
+msgstr "потребує специфікатора PIC із символом. «%s»"
 
 #: config/tc-nds32.c:2363
 #, c-format
@@ -12372,7 +12484,7 @@ msgstr "невідома назва архітектури «%s»\n"
 #: config/tc-nds32.c:3021
 #, c-format
 msgid "unknown baseline `%s'\n"
-msgstr ""
+msgstr "невідоме значення baseline, %s\n"
 
 #. Logic here rejects the input FPU configuration.
 #: config/tc-nds32.c:3044
@@ -12458,7 +12570,7 @@ msgstr "використання інструкції %s потребує вми
 #: config/tc-nds32.c:4651
 #, c-format
 msgid "Not support instrcution %s in the baseline."
-msgstr ""
+msgstr "Немає підтримки %s-інструкцій у baseline."
 
 #: config/tc-nds32.c:4703
 #, c-format
@@ -12483,7 +12595,7 @@ msgstr "Операнд поза припустимим діапазоном, %s.
 #: config/tc-nds32.c:4715
 #, c-format
 msgid "Prohibited register used for reduced-register, %s."
-msgstr ""
+msgstr "Для скороченого регістра використано заборонений регістр, %s."
 
 #: config/tc-nds32.c:4718
 #, c-format
@@ -12511,7 +12623,7 @@ msgstr "у режимі самотестування мало бути вико�
 #: config/tc-nios2.c:479
 #, c-format
 msgid "assembly 0x%08x, expected %s"
-msgstr ""
+msgstr "зібрати 0x%08x, мало бути %s"
 
 #: config/tc-nios2.c:853
 msgid "branch offset out of range\n"
@@ -12519,11 +12631,11 @@ msgstr "відступ гілки поза припустимими межами
 
 #: config/tc-nios2.c:854
 msgid "branch relaxation failed\n"
-msgstr ""
+msgstr "не вдалося скоригувати гілку\n"
 
 #: config/tc-nios2.c:937
 msgid "expecting conditional branch for relaxation\n"
-msgstr ""
+msgstr "для оптимізації потрібна умовна гілка\n"
 
 #: config/tc-nios2.c:1045
 msgid "error checking for overflow - broken assembler"
@@ -12532,32 +12644,32 @@ msgstr "помилка під час спроби перевірити на пе
 #: config/tc-nios2.c:1061
 #, c-format
 msgid "immediate value 0x%x truncated to 0x%x"
-msgstr ""
+msgstr "значення негайного використання 0x%x обрізано до 0x%x"
 
 #: config/tc-nios2.c:1087
 #, c-format
 msgid "call target address 0x%08x out of range 0x%08x to 0x%08x"
-msgstr ""
+msgstr "виклик адреси призначення 0x%08x поза діапазоном від 0x%08x до 0x%08x"
 
 #: config/tc-nios2.c:1092
 #, c-format
 msgid "branch offset %d out of range %d to %d"
-msgstr ""
+msgstr "зсув гілки %d лежить поза межами діапазону від %d до %d"
 
 #: config/tc-nios2.c:1097
 #, c-format
 msgid "%s offset %d out of range %d to %d"
-msgstr ""
+msgstr "зсув %s %d лежить поза межами діапазону від %d до %d"
 
 #: config/tc-nios2.c:1102
 #, c-format
 msgid "immediate value %d out of range %d to %d"
-msgstr ""
+msgstr "значення пришвидшеного використання %d лежить поза межами діапазону від %d до %d"
 
 #: config/tc-nios2.c:1107 config/tc-nios2.c:1112
 #, c-format
 msgid "immediate value %u out of range %u to %u"
-msgstr ""
+msgstr "значення пришвидшеного використання %u лежить поза межами діапазону від %u до %u"
 
 #: config/tc-nios2.c:1117
 #, c-format
@@ -12566,7 +12678,7 @@ msgstr "код операції нетипової інструкції, %u, п�
 
 #: config/tc-nios2.c:1122
 msgid "overflow in immediate argument"
-msgstr ""
+msgstr "переповнення у аргументі пришвидшеного використання"
 
 #: config/tc-nios2.c:1181
 msgid "cannot create 64-bit relocation"
@@ -12595,7 +12707,7 @@ msgstr "невідомий базовий регістр, %s"
 
 #: config/tc-nios2.c:1699
 msgid "ipending control register (ctl4) is read-only\n"
-msgstr ""
+msgstr "регістр керування ipending (ctl4) придатний лише до читання\n"
 
 #: config/tc-nios2.c:1923
 msgid "expecting control register"
@@ -12614,18 +12726,24 @@ msgid ""
 "Register at (r1) can sometimes be corrupted by assembler optimizations.\n"
 "Use .set noat to turn off those optimizations (and this warning)."
 msgstr ""
+"Іноді, вміст регістра at (r1) може бути пошкоджено внаслідок оптимізації збирання.\n"
+"Скористайтеся командою .set noat, щоб вимкнути такі оптимізації (і це попередження)."
 
 #: config/tc-nios2.c:1969
 msgid ""
 "The debugger will corrupt bt (r25).\n"
 "If you don't need to debug this code use .set nobreak to turn off this warning."
 msgstr ""
+"Засобом зневадження буде пошкоджено дані зворотного трасування (r25).\n"
+"Якщо ви не маєте наміру виконувати діагностичну перевірку цього коду, скористайтеся .set nobreak, щоб вимкнути це попередження."
 
 #: config/tc-nios2.c:1977
 msgid ""
 "The debugger will corrupt sstatus/ba (r30).\n"
 "If you don't need to debug this code use .set nobreak to turn off this warning."
 msgstr ""
+"Засобом зневадження буде пошкоджено дані sstatus/ba (r30).\n"
+"Якщо ви не маєте наміру виконувати діагностичну перевірку цього коду, скористайтеся .set nobreak, щоб вимкнути це попередження."
 
 #: config/tc-nios2.c:1997 config/tc-nios2.c:2006
 #, c-format
@@ -12658,7 +12776,7 @@ msgstr "нерозпізнана псевдоінструкція %s"
 #. been encountered.
 #: config/tc-nios2.c:2289
 msgid "Invalid instruction encountered, cannot recover. No assembly attempted."
-msgstr ""
+msgstr "Виявлено некоректну інструкцію, відновлення неможливе. Спроб збирання не виконувалося."
 
 #: config/tc-nios2.c:2770
 #, c-format
@@ -12705,23 +12823,23 @@ msgstr "Некоректна синтаксична конструкція у р
 
 #: config/tc-ns32k.c:544
 msgid "Invalid syntax in Memory Relative addressing mode"
-msgstr ""
+msgstr "Некоректна синтаксична конструкція у відносному щодо пам’яті режимі адресування"
 
 #: config/tc-ns32k.c:611
 msgid "Invalid scaled-indexed mode, use (b,w,d,q)"
-msgstr ""
+msgstr "Некоректний масштабовано-індексований режим, має бути (b,w,d,q)"
 
 #: config/tc-ns32k.c:616
 msgid "Syntax in scaled-indexed mode, use [Rn:m] where n=[0..7] m={b,w,d,q}"
-msgstr ""
+msgstr "Синтаксис у масштабовано-індексованому режимі, має бути вказано як [Rn:m], де n=[0..7] m={b,w,d,q}"
 
 #: config/tc-ns32k.c:621
 msgid "Scaled-indexed addressing mode combined with scaled-index"
-msgstr ""
+msgstr "Масштабовано-індексований режим адресування поєднано з масштабованим індексом"
 
 #: config/tc-ns32k.c:632
 msgid "Invalid or illegal addressing mode combined with scaled-index"
-msgstr ""
+msgstr "Некоректний або неприйнятний режим адресування поєднано із масштабованим індексом"
 
 #: config/tc-ns32k.c:755
 msgid "Premature end of suffix -- Defaulting to d"
@@ -12729,31 +12847,31 @@ msgstr "Передчасне завершення суфікса, викорис
 
 #: config/tc-ns32k.c:768
 msgid "Bad suffix after ':' use {b|w|d} Defaulting to d"
-msgstr ""
+msgstr "Помилковий суфікс після «:», скористайтеся {b|w|d}. Типовим суфіксом є d"
 
 #: config/tc-ns32k.c:813
 msgid "Very short instr to option, ie you can't do it on a NULLstr"
-msgstr ""
+msgstr "Дуже коротка інструкція до параметра, тобто ви не можете виконувати її над NULLstr"
 
 #: config/tc-ns32k.c:863
 msgid "No such entry in list. (cpu/mmu register)"
-msgstr ""
+msgstr "У списку немає такого запису. (регістр cpu/mmu)"
 
 #: config/tc-ns32k.c:920
 msgid "Internal consistency error.  check ns32k-opcode.h"
-msgstr ""
+msgstr "Внутрішня помилка узгодженості. Ознайомтеся із ns32k-opcode.h"
 
 #: config/tc-ns32k.c:944
 msgid "Address of immediate operand"
-msgstr ""
+msgstr "Адреса операнда безпосереднього використання"
 
 #: config/tc-ns32k.c:945
 msgid "Invalid immediate write operand."
-msgstr ""
+msgstr "Некоректний операнд безпосереднього запису."
 
 #: config/tc-ns32k.c:1075
 msgid "Bad opcode-table-option, check in file ns32k-opcode.h"
-msgstr ""
+msgstr "Помилкове opcode-table-option, ознайомтеся із вмістом файла ns32k-opcode.h"
 
 #: config/tc-ns32k.c:1108
 msgid "No such opcode"
@@ -12770,7 +12888,7 @@ msgstr "Інструкції передано забагато операнді�
 #. Check error in default.
 #: config/tc-ns32k.c:1222
 msgid "Wrong numbers of operands in default, check ns32k-opcodes.h"
-msgstr ""
+msgstr "Помилкова типова кількість операндів, ознайомтеся із вмістом ns32k-opcodes.h"
 
 #: config/tc-ns32k.c:1225
 msgid "Wrong number of operands"
@@ -12779,27 +12897,27 @@ msgstr "Помилкова кількість операндів"
 #: config/tc-ns32k.c:1298
 #, c-format
 msgid "Can not do %d byte pc-relative relocation for storage type %d"
-msgstr ""
+msgstr "Виконання пересування на %d байтів відносно PC неможливе для типу зберігання %d"
 
 #: config/tc-ns32k.c:1301
 #, c-format
 msgid "Can not do %d byte relocation for storage type %d"
-msgstr ""
+msgstr "Виконання пересування на %d байтів неможливе для типу зберігання %d"
 
 #: config/tc-ns32k.c:1393
 #, c-format
 msgid "value of %ld out of byte displacement range."
-msgstr ""
+msgstr "значення %ld перебуває поза межами діапазону переміщень байтів."
 
 #: config/tc-ns32k.c:1403
 #, c-format
 msgid "value of %ld out of word displacement range."
-msgstr ""
+msgstr "значення %ld перебуває поза межами діапазону переміщень слів."
 
 #: config/tc-ns32k.c:1418
 #, c-format
 msgid "value of %ld out of double word displacement range."
-msgstr ""
+msgstr "значення %ld перебуває поза межами діапазону переміщень подвійних слів."
 
 #: config/tc-ns32k.c:1439
 #, c-format
@@ -12817,15 +12935,15 @@ msgstr "Бітове пола поза межами припустимого д�
 
 #: config/tc-ns32k.c:1688
 msgid "iif convert internal pcrel/binary"
-msgstr ""
+msgstr "iif перетворює внутрішній pcrel/бінарний"
 
 #: config/tc-ns32k.c:1705
 msgid "Bignum too big for long"
-msgstr ""
+msgstr "Bignum є надто великим для long"
 
 #: config/tc-ns32k.c:1782
 msgid "iif convert internal pcrel/pointer"
-msgstr ""
+msgstr "iif перетворює внутрішній pcrel/вказівник"
 
 #: config/tc-ns32k.c:1787
 msgid "Internal logic error in iif.iifP[n].type"
@@ -12834,7 +12952,7 @@ msgstr "Внутрішня логічна помилка у iif.iifP[n].type"
 #. We cant relax this case.
 #: config/tc-ns32k.c:1823
 msgid "Can't relax difference"
-msgstr ""
+msgstr "Не вдалося оптимізувати різницю"
 
 #: config/tc-ns32k.c:1864
 msgid "Displacement too large for :d"
@@ -12874,7 +12992,7 @@ msgstr ""
 #: config/tc-ns32k.c:2249
 #, c-format
 msgid "Cannot find relocation type for symbol %s, code %d"
-msgstr ""
+msgstr "Не вдалося знайти тип пересування для символу %s, код %d"
 
 #: config/tc-or32.c:361
 #, c-format
@@ -12924,15 +13042,15 @@ msgstr "Помилка у виразі"
 
 #: config/tc-pdp11.c:492
 msgid "Low order bits truncated in immediate float operand"
-msgstr ""
+msgstr "У операнді пришвидшеного використання із рухомою крапкою обрізано біти нижнього порядку"
 
 #: config/tc-pdp11.c:611
 msgid "Float AC not legal as integer operand"
-msgstr ""
+msgstr "AC з рухомою крапкою не можна використовувати як цілий операнд"
 
 #: config/tc-pdp11.c:631
 msgid "General register not legal as float operand"
-msgstr ""
+msgstr "Загальний регістр не можна використовувати як операнд з рухомою крапкою (float)"
 
 #: config/tc-pdp11.c:664
 msgid "No instruction found"
@@ -12998,7 +13116,7 @@ msgstr "суперечливі виразу пересування"
 
 #: config/tc-pj.c:157
 msgid "can't have relocation for ipush"
-msgstr ""
+msgstr "не може бути пересування для ipush"
 
 #: config/tc-pj.c:289
 msgid "expected expression"
@@ -13030,11 +13148,11 @@ msgstr "оцінювання розміру\n"
 
 #: config/tc-ppc.c:1100 config/tc-ppc.c:1157 config/tc-ppc.c:1195
 msgid "the use of -mvle requires big endian."
-msgstr ""
+msgstr "використання -mvle потребує зворотного порядку байтів."
 
 #: config/tc-ppc.c:1138 config/tc-ppc.c:1159
 msgid "the use of -mvle requires -a32."
-msgstr ""
+msgstr "використання -mvle потребує -a32."
 
 #: config/tc-ppc.c:1140
 #, c-format
@@ -13066,6 +13184,23 @@ msgid ""
 "                        generate code for PowerPC 7400/7410/7450/7455\n"
 "-m750cl                 generate code for PowerPC 750cl\n"
 msgstr ""
+"Параметри для PowerPC:\n"
+"-a32                    створити ELF32/XCOFF32\n"
+"-a64                    створити ELF64/XCOFF64\n"
+"-u                      ігнорується\n"
+"-mpwrx, -mpwr2          створити код для POWER/2 (RIOS2)\n"
+"-mpwr                   створити код для POWER (RIOS1)\n"
+"-m601                   створити код для PowerPC 601\n"
+"-mppc, -mppc32, -m603, -m604\n"
+"                        створити код для PowerPC 603/604\n"
+"-m403                   створити код для PowerPC 403\n"
+"-m405                   створити код для PowerPC 405\n"
+"-m440                   створити код для PowerPC 440\n"
+"-m464                   створити код для PowerPC 464\n"
+"-m476                   створити код для PowerPC 476\n"
+"-m7400, -m7410, -m7450, -m7455\n"
+"                        створити код для PowerPC 7400/7410/7450/7455\n"
+"-m750cl                 створити код для PowerPC 750cl\n"
 
 #: config/tc-ppc.c:1281
 #, c-format
@@ -13084,6 +13219,19 @@ msgid ""
 "-mcom                   generate code Power/PowerPC common instructions\n"
 "-many                   generate code for any architecture (PWR/PWRX/PPC)\n"
 msgstr ""
+"-mppc64, -m620          створити код для PowerPC 620/625/630\n"
+"-mppc64bridge           створити код для PowerPC 64, зокрема для інструкцій містків\n"
+"-mbooke                 створити код для 32-бітового PowerPC BookE\n"
+"-ma2                    створити код для архітектури A2\n"
+"-mpower4, -mpwr4        створити код для архітектури Power4\n"
+"-mpower5, -mpwr5, -mpwr5x\n"
+"                        створити код для архітектури Power5\n"
+"-mpower6, -mpwr6        створити код для архітектури Power6\n"
+"-mpower7, -mpwr7        створити код для архітектури Power7\n"
+"-mpower8, -mpwr8        створити код для архітектури Power8\n"
+"-mcell                  створити код для архітектури Cell Broadband Engine\n"
+"-mcom                   створити код із загальних інструкцій Power/PowerPC\n"
+"-many                   створити код для будь-якої архітектури (PWR/PWRX/PPC)\n"
 
 #: config/tc-ppc.c:1295
 #, c-format
@@ -13103,6 +13251,20 @@ msgid ""
 "-mregnames              Allow symbolic names for registers\n"
 "-mno-regnames           Do not allow symbolic names for registers\n"
 msgstr ""
+"-maltivec               створити код для AltiVec\n"
+"-mvsx                   створити код для інструкцій Vector-Scalar (VSX)\n"
+"-mhtm                   створити код для Hardware Transactional Memory\n"
+"-me300                  створити код для сімейства PowerPC e300\n"
+"-me500, -me500x2        створити код для комплексу ядер Motorola e500\n"
+"-me500mc,               створити код для комплексу ядер Freescale e500mc\n"
+"-me500mc64,             створити код для комплексу ядер Freescale e500mc64\n"
+"-me5500,                створити код для комплексу ядер Freescale e5500\n"
+"-me6500,                створити код для комплексу ядер Freescale e6500\n"
+"-mspe                   створити код для інструкцій Motorola SPE\n"
+"-mvle                   створити код для інструкцій Freescale VLE\n"
+"-mtitan                 створити код для комплексу ядер AppliedMicro Titan\n"
+"-mregnames              дозволити символічні назви для регістрів\n"
+"-mno-regnames           не дозволяти символічні назви для регістрів\n"
 
 #: config/tc-ppc.c:1311
 #, c-format
@@ -13120,11 +13282,23 @@ msgid ""
 "-V                      print assembler version number\n"
 "-Qy, -Qn                ignored\n"
 msgstr ""
+"-mrelocatable           підтримка для параметра -mrelocatble GCC\n"
+"-mrelocatable-lib       підтримка для параметра -mrelocatble-lib GCC\n"
+"-memb                   встановити біт PPC_EMB у прапорцях ELF\n"
+"-mlittle, -mlittle-endian, -le\n"
+"                        створити код для архітектури із прямим порядком байтів\n"
+"-mbig, -mbig-endian, -be\n"
+"                        створити код для архітектури із зворотним порядком байтів\n"
+"-msolaris               створити код для Solaris\n"
+"-mno-solaris            не створювати код для Solaris\n"
+"-K PIC                  встановити EF_PPC_RELOCATABLE_LIB у прапорцях ELF\n"
+"-V                      вивести номер версії асемблера\n"
+"-Qy, -Qn                ігнорується\n"
 
 #: config/tc-ppc.c:1325
 #, c-format
 msgid "-nops=count             when aligning, more than COUNT nops uses a branch\n"
-msgstr ""
+msgstr "-nops=кількість         під час вирівнювання код із вказаної кількості nop використовує гілку\n"
 
 #: config/tc-ppc.c:1351
 #, c-format
@@ -13138,12 +13312,12 @@ msgstr "не вибрано ні коди операцій Power, ні коди 
 #: config/tc-ppc.c:1439
 #, c-format
 msgid "mask trims opcode bits for %s"
-msgstr ""
+msgstr "маскувати обрізання бітів кодів операцій для %s"
 
 #: config/tc-ppc.c:1448
 #, c-format
 msgid "operand index error for %s"
-msgstr ""
+msgstr "помилка індексування операнда для %s"
 
 #: config/tc-ppc.c:1464
 #, c-format
@@ -13163,7 +13337,7 @@ msgstr "powerpc_operands[%d] дублює powerpc_operands[%d]"
 #: config/tc-ppc.c:1552 config/tc-ppc.c:1604
 #, c-format
 msgid "major opcode is not sorted for %s"
-msgstr ""
+msgstr "основний код операції не впорядковано для %s"
 
 #: config/tc-ppc.c:1568 config/tc-ppc.c:1621
 #, c-format
@@ -13177,7 +13351,7 @@ msgstr "дублювання макросу %s"
 
 #: config/tc-ppc.c:2015
 msgid "symbol+offset not supported for got tls"
-msgstr ""
+msgstr "підтримки символ+відступ не передбачено для got tls"
 
 #: config/tc-ppc.c:2148 config/tc-ppc.c:5256
 msgid "expected comma after symbol-name: rest of line ignored."
@@ -13200,7 +13374,7 @@ msgstr "загальне вирівнювання не є степенем 2"
 #: config/tc-ppc.c:2249
 #, c-format
 msgid "expected comma after name `%s' in .localentry directive"
-msgstr ""
+msgstr "у директиві .localentry мало бути використано кому після назви «%s»"
 
 #: config/tc-ppc.c:2259
 msgid "missing expression in .localentry directive"
@@ -13209,20 +13383,20 @@ msgstr "пропущено вираз у директиві .localentry"
 #: config/tc-ppc.c:2273
 #, c-format
 msgid ".localentry expression for `%s' is not a valid power of 2"
-msgstr ""
+msgstr "вираз .localentry для «%s» не є коректним степенем 2"
 
 #: config/tc-ppc.c:2287
 #, c-format
 msgid ".localentry expression for `%s' does not evaluate to a constant"
-msgstr ""
+msgstr "вираз .localentry для «%s» не дорівнює сталій величині"
 
 #: config/tc-ppc.c:2302
 msgid "missing expression in .abiversion directive"
-msgstr ""
+msgstr "у директиві .abiversion не вистачає виразу"
 
 #: config/tc-ppc.c:2311
 msgid ".abiversion expression does not evaluate to a constant"
-msgstr ""
+msgstr "обчислення виразу .abiversion не призводить до сталої"
 
 #: config/tc-ppc.c:2364
 msgid "relocation cannot be done when using -mrelocatable"
@@ -13363,7 +13537,7 @@ msgstr ".es без попереднього .bs"
 
 #: config/tc-ppc.c:4793
 msgid "non-constant byte count"
-msgstr ""
+msgstr "нестала кількість байтів"
 
 #: config/tc-ppc.c:4867
 msgid ".tc not in .toc section"
@@ -13388,7 +13562,7 @@ msgstr "некоректний тип комп’ютера, «%s»"
 
 #: config/tc-ppc.c:5025
 msgid "no previous section to return to, ignored."
-msgstr ""
+msgstr "немає попереднього розділу для повернення, проігноровано."
 
 #: config/tc-ppc.c:5301
 #, c-format
@@ -13411,7 +13585,7 @@ msgstr "нерозпізнаний суфікс символу"
 
 #: config/tc-ppc.c:5797
 msgid "two .function pseudo-ops with no intervening .ef"
-msgstr ""
+msgstr "дві псевдооперації .function без проміжної .ef"
 
 #: config/tc-ppc.c:5810
 msgid ".ef with no preceding .function"
@@ -13439,7 +13613,7 @@ msgstr "Помилка gas, значення пересування %d\n"
 #: config/tc-ppc.c:7052
 #, c-format
 msgid "cannot emit PC relative %s relocation against %s"
-msgstr ""
+msgstr "не вдалося видати пересування %s відносно PC щодо %s"
 
 #: config/tc-ppc.c:7059
 msgid "unable to resolve expression"
@@ -13453,12 +13627,12 @@ msgstr "Значення %d не відповідає беззнаковому %
 #: config/tc-rl78.c:232 config/tc-rx.c:869
 #, c-format
 msgid "Value %d doesn't fit in signed %d-bit field"
-msgstr ""
+msgstr "Значення %d не відповідає %d-бітовому полю зі знаком"
 
 #: config/tc-rl78.c:364
 #, c-format
 msgid "%%%s() must be outermost term in expression"
-msgstr ""
+msgstr "%%%s() має бути розташовано на зовнішньому рівні виразу"
 
 #: config/tc-rl78.c:591 config/tc-rx.c:2192
 #, c-format
@@ -13468,16 +13642,16 @@ msgstr "непідтримуваний розмір сталої, %d\n"
 #: config/tc-rl78.c:604
 #, c-format
 msgid "%%hi16/%%lo16 only applies to .short or .hword"
-msgstr ""
+msgstr "%%hi16/%%lo16 можна застосовувати лише до .short або .hword"
 
 #: config/tc-rl78.c:609
 #, c-format
 msgid "%%hi8 only applies to .byte"
-msgstr ""
+msgstr "%%hi8 можна застосовувати лише до .byte"
 
 #: config/tc-rl78.c:619 config/tc-rx.c:2199
 msgid "difference of two symbols only supported with .long, .short, or .byte"
-msgstr ""
+msgstr "підтримку різниці між двома символами передбачено лише з .long, .short або .byte"
 
 #: config/tc-rl78.c:855 config/tc-rx.c:2389
 #, c-format
@@ -13487,7 +13661,7 @@ msgstr "Невідоме пересування у md_apply_fix: %s"
 #: config/tc-rx.c:173
 #, c-format
 msgid "unrecognised RX CPU type %s"
-msgstr ""
+msgstr "нерозпізнаний тип процесора RX, %s"
 
 #: config/tc-rx.c:184
 #, c-format
@@ -13561,7 +13735,7 @@ msgstr "не вдалося знайти включений файл: %s"
 #: config/tc-rx.c:429
 #, c-format
 msgid "unrecognised alignment value in .SECTION directive: %s"
-msgstr ""
+msgstr "нерозпізнане значення вирівнювання у директиві .SECTION: %s"
 
 #: config/tc-rx.c:446
 #, c-format
@@ -13587,7 +13761,7 @@ msgstr "Псевдооператор .MACRO не реалізовано"
 
 #: config/tc-rx.c:1073
 msgid "The .BTEQU pseudo-op is not implemented."
-msgstr ""
+msgstr "Псевдооперацію .BTEQU не реалізовано."
 
 #: config/tc-rx.c:2057
 msgid "invalid immediate size"
@@ -13595,17 +13769,17 @@ msgstr "некоректний розмір константи"
 
 #: config/tc-rx.c:2076
 msgid "invalid immediate field position"
-msgstr ""
+msgstr "некоректне розташування поля значення пришвидшеного використання"
 
 #: config/tc-rx.c:2125
 #, c-format
 msgid "bad frag at %p : fix %ld addr %ld %ld \n"
-msgstr ""
+msgstr "помилковий фрагмент за адресою %p: виправте адресу %ld %ld %ld \n"
 
 #: config/tc-rx.c:2243
 #, c-format
 msgid "jump not 3..10 bytes away (is %d)"
-msgstr ""
+msgstr "перехід не на 3..10 байтів (на %d)"
 
 #: config/tc-s390.c:338 config/tc-sparc.c:297
 msgid "Invalid default architecture, broken assembler."
@@ -13626,6 +13800,12 @@ msgid ""
 "        -m31              Set file format to 31 bit format\n"
 "        -m64              Set file format to 64 bit format\n"
 msgstr ""
+"        Параметри для S390:\n"
+"        -mregnames        дозволити символічні назви регістрів\n"
+"        -mwarn-areg-zero  попереджати щодо нульових базових регістрів або регістрів індексу\n"
+"        -mno-regnames     не дозволяти символічних назв регістрів\n"
+"        -m31              встановити 31-бітовий формат файлів\n"
+"        -m64              встановити 64-бітовий формат файлів\n"
 
 #: config/tc-s390.c:481
 #, c-format
@@ -13638,7 +13818,7 @@ msgstr ""
 
 #: config/tc-s390.c:546
 msgid "The 64 bit file format is used without esame instructions."
-msgstr ""
+msgstr "Використано 64-бітовий формат файлів без інструкцій esame."
 
 #: config/tc-s390.c:562
 #, c-format
@@ -13653,7 +13833,7 @@ msgstr "операнд поза припустимим діапазоном (%s 
 #: config/tc-s390.c:790
 #, c-format
 msgid "identifier+constant@%s means identifier@%s+constant"
-msgstr ""
+msgstr "ідентифікатор+стала@%s означає ідентифікатор@%s+стала"
 
 #: config/tc-s390.c:871
 msgid "Can't handle O_big in s390_exp_compare"
@@ -13661,7 +13841,7 @@ msgstr "Обробка O_big у s390_exp_compare неможлива"
 
 #: config/tc-s390.c:952
 msgid "Invalid suffix for literal pool entry"
-msgstr ""
+msgstr "Некоректний суфікс для запису буфера літералів"
 
 #: config/tc-s390.c:1009
 msgid "Big number is too big"
@@ -13673,19 +13853,19 @@ msgstr "пересування незастосовне"
 
 #: config/tc-s390.c:1273
 msgid "index register specified but zero"
-msgstr ""
+msgstr "вказано регістр індексу, але нульовий"
 
 #: config/tc-s390.c:1277
 msgid "base register specified but zero"
-msgstr ""
+msgstr "вказано базовий регістр, але нульовий"
 
 #: config/tc-s390.c:1281
 msgid "odd numbered general purpose register specified as register pair"
-msgstr ""
+msgstr "як пару регістрів вказано регістр загального призначення з непарним номером"
 
 #: config/tc-s390.c:1289
 msgid "invalid floating point register pair.  Valid fp register pair operands are 0, 1, 4, 5, 8, 9, 12 or 13."
-msgstr ""
+msgstr "некоректна пара регістрів даних із рухомою крапкою. Коректними операндами пари регістрів із рухомою крапкою є 0, 1, 4, 5, 8, 9, 12 або 13."
 
 #: config/tc-s390.c:1378
 msgid "invalid operand suffix"
@@ -13731,16 +13911,16 @@ msgstr "пропущено кому після сталої у insn\n"
 
 #: config/tc-s390.c:1923
 msgid ".machinemode stack overflow"
-msgstr ""
+msgstr "переповнення стека .machinemode"
 
 #: config/tc-s390.c:1930
 msgid ".machinemode stack underflow"
-msgstr ""
+msgstr "спустошення стека .machinemode"
 
 #: config/tc-s390.c:2145
 #, c-format
 msgid "cannot emit relocation %s against subsy symbol %s"
-msgstr ""
+msgstr "не можна створювати пересування %s щодо символу subsy %s"
 
 #: config/tc-s390.c:2249
 msgid "unsupported relocation type"
@@ -13749,7 +13929,7 @@ msgstr "непідтримуваний тип пересування"
 #: config/tc-s390.c:2304
 #, c-format
 msgid "cannot emit PC relative %s relocation%s%s"
-msgstr ""
+msgstr "не вдалося видати пересування %s відносно PC%s%s"
 
 #: config/tc-s390.c:2443
 #, c-format
@@ -13775,15 +13955,15 @@ msgstr "У цій архітектурі не передбачено підтр�
 
 #: config/tc-score.c:469
 msgid "S+core register expected"
-msgstr ""
+msgstr "мало бути вказано регістр S+core"
 
 #: config/tc-score.c:470
 msgid "S+core special-register expected"
-msgstr ""
+msgstr "мало бути вказано спеціальний регістр S+core"
 
 #: config/tc-score.c:471
 msgid "S+core co-processor register expected"
-msgstr ""
+msgstr "мало бути вказано регістр співпроцесора S+core"
 
 #: config/tc-score.c:1074 config/tc-score.c:2068
 msgid "Using temp register(r1)"
@@ -13836,17 +14016,17 @@ msgstr "не вистачає ]"
 #: config/tc-score.c:2347
 #, c-format
 msgid "Fix data dependency: %s %s -- %s %s  (insert %d nop!/%d)"
-msgstr ""
+msgstr "Виправте залежність даних: %s %s -- %s %s  (вставте %d nop!/%d)"
 
 #: config/tc-score.c:2366
 #, c-format
 msgid "Fix data dependency: %s %s -- %s %s  (insert 1 pflush/%d)"
-msgstr ""
+msgstr "Виправте залежність даних: %s %s -- %s %s  (вставте 1 pflush/%d)"
 
 #: config/tc-score.c:2382 config/tc-score.c:2389
 #, c-format
 msgid "data dependency: %s %s -- %s %s  (%d/%d bubble)"
-msgstr ""
+msgstr "залежність даних: %s %s -- %s %s  (бульбашка %d/%d)"
 
 #: config/tc-score.c:2838
 msgid "address offset must be half word alignment"
@@ -13905,7 +14085,7 @@ msgstr "не вистачає +"
 #: config/tc-score.c:3903
 #, c-format
 msgid "%s register same as write-back base"
-msgstr ""
+msgstr "регістр %s збігається з основою зворотного запису"
 
 #: config/tc-score.c:3905
 msgid "destination"
@@ -13929,7 +14109,7 @@ msgstr "значення не належить до діапазону [-0xfffff
 
 #: config/tc-score.c:4345
 msgid "li rd label isn't correct instruction form"
-msgstr ""
+msgstr "мітка rd li не є коректною формою інструкцій"
 
 #: config/tc-score.c:4515 config/tc-score.c:4670 config/tc-score.c:5197
 #: config/tc-score.c:5225
@@ -13966,7 +14146,7 @@ msgstr "некоректна стала: 10-бітовий вираз не у д
 
 #: config/tc-score.c:5365
 msgid "pce instruction error (16 bit || 16 bit)'"
-msgstr ""
+msgstr "помилка інструкції pce (16-бітова || 16-бітова)"
 
 #: config/tc-score.c:5383 config/tc-score.c:5407 config/tc-score.c:5434
 #: config/tc-score.c:5463 config/tc-score.c:5512
@@ -14057,7 +14237,7 @@ msgstr "        -FIXDD\t\tзібрати коду для фіксованої з
 #: config/tc-score.c:7812
 #, c-format
 msgid "        -NWARN\t\tassemble code for no warning message for fix data dependency\n"
-msgstr ""
+msgstr "        -NWARN\t\tзібрати код так, щоб уникнути попередження щодо виправлення залежності даних\n"
 
 #: config/tc-score.c:7814
 #, c-format
@@ -14107,7 +14287,7 @@ msgstr "        -O0\t\tпід час збирання не виконувати 
 #: config/tc-score.c:7832
 #, c-format
 msgid "        -G gpnum\tassemble code for setting gpsize and default is 8 byte\n"
-msgstr ""
+msgstr "        -G gpnum\tзібрати код для встановлення gpsize і типовим є 8 байтів\n"
 
 #: config/tc-score.c:7834
 #, c-format
@@ -14124,7 +14304,7 @@ msgstr "виявлено директиву .little, коли потрібен �
 
 #: config/tc-sh.c:1423
 msgid "illegal double indirection"
-msgstr ""
+msgstr "некоректне подвійне переспрямовування"
 
 #: config/tc-sh.c:1432
 msgid "illegal register after @-"
@@ -14227,7 +14407,7 @@ msgstr "некоректний регістр dsp movy"
 
 #: config/tc-sh.c:2734
 msgid "dsp immediate shift value not constant"
-msgstr ""
+msgstr "значення зсуву пришвидшеного використання dsp не є сталим"
 
 #: config/tc-sh.c:2748 config/tc-sh.c:2774
 msgid "multiple parallel processing specifications"
@@ -14243,7 +14423,7 @@ msgstr "insn не можна поєднувати з pmuls"
 
 #: config/tc-sh.c:2821
 msgid "bad combined pmuls output operand"
-msgstr ""
+msgstr "помилковий комбінований операнд виведення pmuls"
 
 #: config/tc-sh.c:2831
 msgid "destination register is same for parallel insns"
@@ -14251,7 +14431,7 @@ msgstr "регістр призначення збігається з регіс
 
 #: config/tc-sh.c:2840
 msgid "condition not followed by conditionalizable insn"
-msgstr ""
+msgstr "за умовою не слідує придатна для умовної обробки інструкція"
 
 #: config/tc-sh.c:2850
 msgid "unrecognized characters at end of parallel processing insn"
@@ -14328,6 +14508,18 @@ msgid ""
 "    | dsp               same as '-dsp'\n"
 "    | fp"
 msgstr ""
+"Параметри для SH:\n"
+"--little\t\tстворити код із прямим порядком байтів\n"
+"--big\t\t\tстворити код із зворотним порядком байтів\n"
+"--relax\t\t\tзамінювати інструкції jump для довгих переміщень\n"
+"--renesas\t\tвимкнути оптимізацію із символом розділу для\n"
+"\t\t\tсумісності із асемблером Renesas.\n"
+"--small\t\t\tвирівняти розділи на межу 4 байтів, а не 16\n"
+"--dsp\t\t\tувімкнути інструкції sh-dsp і вимкнути ISA із рухомою крапкою.\n"
+"--allow-reg-prefix\tдозволити «$» як префікс назв регістрів.\n"
+"--isa=[any\t\tвикористовувати найвідповіднішу isa\n"
+"    | dsp               те саме, що і «-dsp»\n"
+"    | fp"
 
 #: config/tc-sh.c:3355
 #, c-format
@@ -14355,6 +14547,15 @@ msgid ""
 "--expand-pt32\t\twith -abi=64, expand PT, PTA and PTB instructions\n"
 "\t\t\tto 32 bits only\n"
 msgstr ""
+"--abi=[32|64]\t\tвстановити розмір розширених операндів SHmedia та тип\n"
+"\t\t\tоб’єктних файлів\n"
+"--shcompact-const-crange  видавати дескриптори код-діапазон для сталих у\n"
+"\t\t\tрозділах коду SHcompact\n"
+"--no-mix\t\tзаборонити код SHmedia у тому самому розділі, що і\n"
+"\t\t\tсталі і код SHcompact\n"
+"--no-expand\t\tне розгортати інструкції MOVI, PT, PTA або PTB\n"
+"--expand-pt32\t\tз -abi=64, розгорнути інструкції PT, PTA і PTB\n"
+"\t\t\tлише до 32 бітів\n"
 
 #: config/tc-sh.c:3372
 #, c-format
@@ -14594,7 +14795,7 @@ msgstr "-expand-pt32 є некоректним, якщо вказано -no-expa
 
 #: config/tc-sh64.c:3198
 msgid "SHmedia code not allowed in same section as constants and SHcompact code"
-msgstr ""
+msgstr "Код SHmedia не можна використовувати у тому самому розділі як сталі та код SHcompact"
 
 #: config/tc-sh64.c:3216
 msgid "No segment info for current section"
@@ -14638,6 +14839,13 @@ msgid ""
 "-relax\t\t\trelax jumps and branches (default)\n"
 "-no-relax\t\tavoid changing any jumps and branches\n"
 msgstr ""
+"\n"
+"\t\t\tвказати варіант архітектури SPARC\n"
+"-bump\t\t\tпопереджати, коли асемблер перемикає архітектури\n"
+"-sparc\t\t\tігнорується\n"
+"--enforce-aligned-data\tпримусово використовувати .long тощо для належного вирівнювання\n"
+"-relax\t\t\tоптимізувати переходи і гілки (типово)\n"
+"-no-relax\t\tуникнути зміни усіх переходів та гілок\n"
 
 #: config/tc-sparc.c:696
 #, c-format
@@ -14687,6 +14895,15 @@ msgid ""
 "-Qy, -Qn\t\tignored\n"
 "-s\t\t\tignored\n"
 msgstr ""
+"-KPIC\t\t\tстворити PIC\n"
+"-V\t\t\tвивести номер версії асемблера\n"
+"-undeclared-regs\tігнорувати використання загальних регістрів програм без\n"
+"\t\t\tвідповідної директиви .register (типова поведінка)\n"
+"-no-undeclared-regs\tприпусово видавати помилку щодо використання загальних\n"
+"\t\t\tрегістрів програм без відповідної директиви .register\n"
+"-q\t\t\tігнорується\n"
+"-Qy, -Qn\t\tігнорується\n"
+"-s\t\t\tігнорується\n"
 
 #: config/tc-sparc.c:723
 #, c-format
@@ -14696,6 +14913,10 @@ msgid ""
 "--little-endian-data\tgenerate code for a machine having big endian\n"
 "                        instructions and little endian data.\n"
 msgstr ""
+"-EL\t\t\tстворити код для архітектури із прямим порядком байтів\n"
+"-EB\t\t\tстворити код для архітектури із зворотним порядком байтів\n"
+"--little-endian-data\tстворити код для архітектури із зворотним порядком\n"
+"                        інструкцій і прямим порядком байтів.\n"
 
 #: config/tc-sparc.c:862
 #, c-format
@@ -14789,7 +15010,7 @@ msgstr ": нерозпізнаний v9a або v9b допоміжний рег�
 
 #: config/tc-sparc.c:1737
 msgid ": rd on write only ancillary state register"
-msgstr ""
+msgstr ": rd на запис лише до регістра допоміжного стану"
 
 #. %sys_tick and %sys_tick_cmpr are v9bnotv9a
 #: config/tc-sparc.c:1745
@@ -16031,7 +16252,7 @@ msgstr "«%s» не можна використовувати двічі. Ост
 
 #: config/tc-tic54x.c:4980
 msgid "Instructions using long offset modifiers or absolute addresses are not repeatable. Resulting behavior is undefined."
-msgstr ""
+msgstr "Інструкції з використанням модифікаторів довгих зсувів чи абсолютних адрес не можна повторювати. Остаточна поведінка є невизначеною."
 
 #: config/tc-tic54x.c:5132
 #, c-format
@@ -16145,7 +16366,7 @@ msgstr "неочікувана директива .handlerdata"
 
 #: config/tc-tic6x.c:418
 msgid "personality routine required before .handlerdata directive"
-msgstr ""
+msgstr "перед директивою .handlerdata має бути використано підпрограму персоналізації"
 
 #: config/tc-tic6x.c:534
 msgid "expected symbol"
@@ -16193,7 +16414,7 @@ msgstr "помилковий предикат «%s»"
 
 #: config/tc-tic6x.c:907
 msgid "predication on A0 not supported on this architecture"
-msgstr ""
+msgstr "предикації на A0 на цій архітектурі не передбачено"
 
 #: config/tc-tic6x.c:940
 msgid "label after '||'"
@@ -16225,7 +16446,7 @@ msgstr "підтримки регістра з номером %u на цій а�
 #: config/tc-tic6x.c:1619
 #, c-format
 msgid "register pair for operand %u of '%.*s' not a valid even/odd pair"
-msgstr ""
+msgstr "пара регістрів для операнда %u «%.*s» не є коректною парою парний-непарний"
 
 #: config/tc-tic6x.c:1675
 #, c-format
@@ -16307,7 +16528,7 @@ msgstr "операнд %u «%.*s» поза межами доступного д
 #: config/tc-tic6x.c:2614 config/tc-tic6x.c:2839
 #, c-format
 msgid "offset in operand %u of '%.*s' not divisible by %u"
-msgstr ""
+msgstr "відступ у операції %u «%.*s» не є кратним до %u"
 
 #: config/tc-tic6x.c:2831 config/tc-tic6x.c:2864
 #, c-format
@@ -16322,7 +16543,7 @@ msgstr "функціональний модуль вже замасковано 
 #: config/tc-tic6x.c:2970 config/tc-tic6x.c:3729
 #, c-format
 msgid "'%.*s' instruction not in a software pipelined loop"
-msgstr ""
+msgstr "інструкція «%.*s» перебуває поза межами програмного каналізованого циклу"
 
 #: config/tc-tic6x.c:3069
 #, c-format
@@ -16426,7 +16647,7 @@ msgstr "функціональний модуль вже використано 
 
 #: config/tc-tic6x.c:3718
 msgid "nested software pipelined loop"
-msgstr ""
+msgstr "вкладений програмний каналізований цикл"
 
 #: config/tc-tic6x.c:3737
 msgid "'||^' without previous SPMASK"
@@ -16450,11 +16671,11 @@ msgstr "значення є надто великими для однобайт�
 
 #: config/tc-tic6x.c:3953
 msgid "immediate offset not 2-byte-aligned"
-msgstr ""
+msgstr "відступ пришвидшеного використання не вирівняно на межу 2 байтів"
 
 #: config/tc-tic6x.c:3981
 msgid "immediate offset not 4-byte-aligned"
-msgstr ""
+msgstr "відступ пришвидшеного використання не вирівняно на межу 4 байтів"
 
 #: config/tc-tic6x.c:3995
 msgid "addend used with $DSBT_INDEX"
@@ -16486,11 +16707,11 @@ msgstr "не вистачає .endp перед .cfi_startproc"
 
 #: config/tc-tic6x.c:4918
 msgid "stack pointer offset too large for personality routine"
-msgstr ""
+msgstr "відступ вказівника стека є надто великим для підпрограми персоналізації"
 
 #: config/tc-tic6x.c:4925
 msgid "stack frame layout does not match personality routine"
-msgstr ""
+msgstr "компонування фреймів стека не відповідає підпрограмі персоналізації"
 
 #: config/tc-tic6x.c:5059
 msgid "too many unwinding instructions"
@@ -16689,7 +16910,7 @@ msgstr "мало бути вказано сталий виразу або спи
 
 #: config/tc-v850.c:1423
 msgid "high bits set in register list expression"
-msgstr ""
+msgstr "у виразі списку регістрів встановлено верхні біти"
 
 #: config/tc-v850.c:1461 config/tc-v850.c:1518
 msgid "illegal register included in list"
@@ -16720,7 +16941,7 @@ msgstr "  -mwarn-signed-overflow    попереджати про перепов
 #: config/tc-v850.c:1548
 #, c-format
 msgid "  -mwarn-unsigned-overflow  Warn if unsigned immediate values overflow\n"
-msgstr ""
+msgstr "  -mwarn-unsigned-overflow  попереджати про переповнення значень пришвидшеного використання без знаку\n"
 
 #: config/tc-v850.c:1549
 #, c-format
@@ -16780,7 +17001,7 @@ msgstr "  -mextension               увімкнути підтримку код
 #: config/tc-v850.c:1560
 #, c-format
 msgid "  -mno-bcond17\t\t  disable b<cond> disp17 instruction\n"
-msgstr ""
+msgstr "  -mno-bcond17\t\t  вимкнути інструкцію disp17 b<cond>\n"
 
 #: config/tc-v850.c:1561
 #, c-format
@@ -16847,7 +17068,7 @@ msgstr "операнд поза припустимими межами (%d не �
 
 #: config/tc-v850.c:2341
 msgid "st/ld offset 23 instruction was disabled ."
-msgstr ""
+msgstr "відступ st/ld інструкції 23 було вимкнено."
 
 #: config/tc-v850.c:2350
 msgid "Target processor does not support this instruction."
@@ -16903,11 +17124,11 @@ msgstr "тут не можна використовувати умову sa"
 
 #: config/tc-v850.c:2815
 msgid "invalid cache oparation name"
-msgstr ""
+msgstr "некоректна назва обробки кешу"
 
 #: config/tc-v850.c:2820
 msgid "invalid pref oparation name"
-msgstr ""
+msgstr "некоректна назва дії з пріоритетизації"
 
 #: config/tc-v850.c:2825
 msgid "invalid vector register name"
@@ -16939,7 +17160,7 @@ msgstr "тут не можна використовувати значення 0
 
 #: config/tc-v850.c:2927
 msgid "immediate operand is not match"
-msgstr ""
+msgstr "операнд пришвидшеного використання є невідповідним"
 
 #: config/tc-v850.c:2940
 msgid "displacement is too large"
@@ -17015,7 +17236,7 @@ msgstr "S^# потрібен вираз"
 
 #: config/tc-vax.c:1602
 msgid "S^# may only read-access"
-msgstr ""
+msgstr "S^# може лише доступ до читання"
 
 #: config/tc-vax.c:1625
 msgid "invalid operand of -()"
@@ -17047,7 +17268,7 @@ msgstr "# конфліктує з довжиною"
 
 #: config/tc-vax.c:1698
 msgid "# bars register"
-msgstr ""
+msgstr "# регістр стовпчиків"
 
 #: config/tc-vax.c:1718
 msgid "writing or modifying # is unpredictable"
@@ -17133,6 +17354,13 @@ msgid ""
 "\t\t\t0 = upper, 2 = lower, 3 = preserve case\n"
 "-v\"VERSION\"\t\tcode being assembled was produced by compiler \"VERSION\"\n"
 msgstr ""
+"Параметри для VMS:\n"
+"-+\t\t\tхешувати назви кодувань, довші за 31 символ\n"
+"-1\t\t\tобробка «const», сумісна із gcc 1.x\n"
+"-H\t\t\tпоказувати новий символ після обрізання хешу\n"
+"-h NUM\t\t\tне хешувати назви з літер різного регістру і коригувати регістр до:\n"
+"\t\t\t0 = верхнього, 2 = нижнього, 3 = не змінювати регістр\n"
+"-v\"ВЕРСІЯ\"\t\tкод збирається компілятором \"ВЕРСІЯ\"\n"
 
 #: config/tc-vax.c:2461
 #, c-format
@@ -17150,26 +17378,26 @@ msgstr "Не вдалося пересунути вираз"
 
 #: config/tc-vax.c:2626
 msgid "Bignum not permitted in short literal. Immediate mode assumed."
-msgstr ""
+msgstr "Bignum не можна використовувати у короткому літералі. Припускаємо режим пришвидшеного використання."
 
 #: config/tc-vax.c:2635
 msgid "Can't do flonum short literal: immediate mode used."
-msgstr ""
+msgstr "Не вдалося створити короткий літерал flonum: використано режим пришвидшеного використання."
 
 #: config/tc-vax.c:2682
 #, c-format
 msgid "A bignum/flonum may not be a displacement: 0x%lx used"
-msgstr ""
+msgstr "bignum/flonum не може бути переміщенням: використано 0x%lx"
 
 #: config/tc-vax.c:2994
 #, c-format
 msgid "Short literal overflow(%ld.), immediate mode assumed."
-msgstr ""
+msgstr "Переповнення короткого літерала (%ld.). Припускаємо режим пришвидшеного використання."
 
 #: config/tc-vax.c:3003
 #, c-format
 msgid "Forced short literal to immediate mode. now_seg=%s to_seg=%s"
-msgstr ""
+msgstr "Примусово переводимо короткий літерал у режим пришвидшеного використання. now_seg=%s to_seg=%s"
 
 #: config/tc-vax.c:3068
 msgid "Length specification ignored. Address mode 9F used"
@@ -17215,6 +17443,15 @@ msgid ""
 "  --print-opcodes         print the list of instructions with syntax\n"
 "  --generate-example      generate an example of each instruction"
 msgstr ""
+"Параметри для співпроцесора XGATE Freescale:\n"
+"  -mshort                 використовувати ABI 16-бітових цілих (типовий)\n"
+"  -mlong                  використовувати ABI 32-бітових цілих\n"
+"  -mshort-double          використовувати ABI 32-бітових double\n"
+"  -mlong-double           використовувати ABI 64-бітових double (типовий)\n"
+"  --mxgate                вказати варіант процесора [типовим є %s]\n"
+"  --print-insn-syntax     вивести синтаксис інструкції, якщо трапиться помилка\n"
+"  --print-opcodes         вивести список інструкцій із синтаксисом\n"
+"  --generate-example      створити приклад для кожної із інструкцій"
 
 #: config/tc-xgate.c:496
 msgid "opcode missing or not found on input line"
@@ -17231,7 +17468,7 @@ msgstr "встановлюємо відповідність операндів �
 
 #: config/tc-xgate.c:552
 msgid ": processing macro, real opcode handle not found in hash"
-msgstr ""
+msgstr ": обробляємо макрос, у хеші не знайдено обробника справжнього коду операції"
 
 #: config/tc-xgate.c:683
 #, c-format
@@ -17274,7 +17511,7 @@ msgstr ": розмір операнда (%d) є надто великим для
 
 #: config/tc-xgate.c:1299
 msgid "you must use a hi/lo directive or 16-bit macro to load a 16-bit value."
-msgstr ""
+msgstr "вам слід використовувати директиву hi/lo або 16-бітовий макрос для завантаження 16-бітового значення."
 
 #: config/tc-xgate.c:1312
 msgid ":unknown relocation constraint size"
@@ -17420,11 +17657,11 @@ msgstr "після назви символу мало бути використ�
 
 #: config/tc-xtensa.c:1532
 msgid "fall through frequency must be greater than 0"
-msgstr ""
+msgstr "частота провалювання має перевищувати 0"
 
 #: config/tc-xtensa.c:1540
 msgid "branch target frequency must be greater than 0"
-msgstr ""
+msgstr "частота призначення гілки має перевищувати 0"
 
 #: config/tc-xtensa.c:1588
 #, c-format
@@ -17594,7 +17831,7 @@ msgstr "мітки не можна використовувати всереди
 
 #: config/tc-xtensa.c:5233
 msgid "invalid last instruction for a zero-overhead loop"
-msgstr ""
+msgstr "некоректна остання інструкція для циклу із нульовим верхом"
 
 #: config/tc-xtensa.c:5300
 msgid "extra opening brace"
@@ -17634,7 +17871,7 @@ msgstr "для одного кортежу вказано декілька фо�
 
 #: config/tc-xtensa.c:5549
 msgid "entry instruction with stack decrement < 16"
-msgstr ""
+msgstr "інструкція входу із зменшенням стека < 16"
 
 #: config/tc-xtensa.c:5602
 msgid "unaligned entry instruction"
@@ -17670,7 +17907,7 @@ msgstr "Внутрішня помилка. Не вдалося створити 
 
 #: config/tc-xtensa.c:6226
 msgid "The option \"--no-allow-flix\" prohibits multi-slot flix."
-msgstr ""
+msgstr "Параметр «--no-allow-flix» забороняє багатослотові flix."
 
 #: config/tc-xtensa.c:6235
 msgid "couldn't find a valid instruction format"
@@ -17713,7 +17950,7 @@ msgstr "коди операцій «%s» (слот %d) та «%s» (слот %d)
 #: config/tc-xtensa.c:6460
 #, c-format
 msgid "opcodes '%s' (slot %d) and '%s' (slot %d) both have volatile port accesses"
-msgstr ""
+msgstr "коди операцій «%s» (слот %d) та «%s» (слот %d) обидва виконують доступ до змінного порту"
 
 #: config/tc-xtensa.c:6476
 msgid "multiple branches or jumps in the same bundle"
@@ -17758,7 +17995,7 @@ msgstr "некоректний порожній цикл"
 
 #: config/tc-xtensa.c:8112
 msgid "loop target does not follow loop instruction in section"
-msgstr ""
+msgstr "призначення циклу не відповідає інструкції циклу у розділі"
 
 #: config/tc-xtensa.c:8713
 msgid "bad relaxation state"
@@ -17771,7 +18008,7 @@ msgstr "fr_var (%ld) < довжини (%d)"
 
 #: config/tc-xtensa.c:9406
 msgid "invalid relaxation fragment result"
-msgstr ""
+msgstr "некоректний результат оптимізації фрагмента"
 
 #: config/tc-xtensa.c:9485
 msgid "unable to widen instruction"
@@ -17792,7 +18029,7 @@ msgstr "кількість ключів літералів != 1"
 #: config/tc-xtensa.c:9759 config/tc-xtensa.c:9765
 #, c-format
 msgid "unresolved loop target symbol: %s"
-msgstr ""
+msgstr "невизначений символ призначення циклу: %s"
 
 #: config/tc-xtensa.c:9871
 #, c-format
@@ -17810,7 +18047,7 @@ msgstr "не усі коригування пересунуто з %s"
 
 #: config/tc-xtensa.c:10288
 msgid "literal pool location required for text-section-literals; specify with .literal_position"
-msgstr ""
+msgstr "для літералів текстових розділів потрібне розташування буфера літералів; вказати його можна за допомогою .literal_position"
 
 #: config/tc-xtensa.c:11130
 msgid "too many operands in instruction"
@@ -18091,17 +18328,17 @@ msgstr "некоректний параметр налаштування «%s» 
 #: config/xtensa-relax.c:1681
 #, c-format
 msgid "opcode '%s': no bound opname '%s' for precondition in '%s'"
-msgstr ""
+msgstr "код операції «%s»: немає прив’язаної назви операції «%s» для попередньої умови у «%s»"
 
 #: config/xtensa-relax.c:1691
 #, c-format
 msgid "opcode '%s': no bound opname '%s' for precondition in %s"
-msgstr ""
+msgstr "код операції «%s»: немає прив’язаної назви операції «%s» для попередньої умови у %s"
 
 #: config/xtensa-relax.c:1698
 #, c-format
 msgid "opcode '%s': precondition only contains constants in '%s'"
-msgstr ""
+msgstr "код операції «%s»: у «%s» передумова містить лише сталі"
 
 #: config/xtensa-relax.c:1745
 msgid "expected one operand for generated literal"
@@ -18174,7 +18411,7 @@ msgstr "bfd_set_section_flags: %s"
 #: dw2gencfi.c:457
 #, c-format
 msgid "register save offset not a multiple of %u"
-msgstr ""
+msgstr "відступ збереження регістра не є кратним до %u"
 
 #: dw2gencfi.c:540
 msgid "CFI state restore without previous remember"
@@ -18434,7 +18671,7 @@ msgstr ".stab%c: ігноруємо ненульове інше поле"
 #: ecoff.c:3489
 #, c-format
 msgid "line number (%d) for .stab%c directive cannot fit in index field (20 bits)"
-msgstr ""
+msgstr "номер рядка (%d) для директиви .stab%c не вкладається у поле індексу (20 бітів)"
 
 #: ecoff.c:3525
 #, c-format
@@ -18451,7 +18688,7 @@ msgstr "не вистачає .end або .bend наприкінці файла"
 
 #: ecoff.c:5179
 msgid "GP prologue size exceeds field size, using 0 instead"
-msgstr ""
+msgstr "розмір вступу GP перевищує розмір поля, використовуємо замість нього 0"
 
 #: expr.c:87 read.c:3731
 msgid "bignum invalid"
@@ -18472,7 +18709,7 @@ msgstr "помилкова стала з рухомою крапкою: неві
 
 #: expr.c:395
 msgid "a bignum with underscores may not have more than 8 hex digits in any word"
-msgstr ""
+msgstr "bignum із підкреслюваннями не може містити більше 8 шістнадцяткових цифр у будь-якому слові"
 
 #: expr.c:418
 msgid "a bignum with underscores must have exactly 4 words"

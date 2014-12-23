@@ -1559,7 +1559,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   if (name[0] == '.')
     ++name;
 
-  initialize_symbol (sym);
+  initialize_objfile_symbol (sym);
 
   /* default assumptions */
   SYMBOL_VALUE_ADDRESS (sym) = cs->c_value + off;

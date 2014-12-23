@@ -1810,7 +1810,7 @@ operator_check_standard (struct expression *exp, int pos,
 
 	/* Check objfile where the variable itself is placed.
 	   SYMBOL_OBJ_SECTION (symbol) may be NULL.  */
-	if ((*objfile_func) (SYMBOL_OBJFILE (symbol), data))
+	if ((*objfile_func) (symbol_objfile (symbol), data))
 	  return 1;
 
 	/* Check objfile where is placed the code touching the variable.  */

@@ -1,3 +1,43 @@
+2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* emultempl/avrelf.em: Add include of elf/avr.h.
+	(avr_finish): New function.
+	(LDEMUL_FINISH): Added.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (update_definedness): Return false if script symbol is
+	redefining a strong symbol in an object.
+	(exp_fold_tree_1 <etree_assign>): Set up for reporting a multiple
+	definition error, but for now leave disabled.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_fold_tree_1 <etree_provide>): Test linker_def.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_fold_tree_1 <etree_provide>): Leave bfd_link_hash_common
+	symbols alone.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (update_definedness): Correct logic setting by_object.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (struct definedness_hash_entry, definedness_table)
+	(definedness_newfunc, symbol_defined, update_definedness): Move
+	and rename from..
+	* ldlang.h (struct lang_definedness_hash_entry): ..here,..
+	* ldlang.c (lang_definedness_table, lang_definedness_newfunc)
+	(lang_symbol_defined, lang_update_definedness): ..and here.
+	* ldexp.c (ldexp_init, ldexp_finish): New functions, extracted from..
+	* ldlang.c (lang_init, lang_finish): ..here.
+	* ldexp.h (ldexp_init, ldexp_finish): Declare.
+	* ldlang.h (lang_symbol_defined, lang_update_definedness): Delete.
+	* ldmain.c (main): Call ldexp_init and ldexp_finish.
+
 2014-12-10  Alan Modra  <amodra@gmail.com>
 
 	* ldmisc.c: #include "coff-bfd.h"

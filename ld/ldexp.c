@@ -48,6 +48,19 @@ segment_type *segments;
 
 struct ldexp_control expld;
 
+/* This structure records symbols for which we need to keep track of
+   definedness for use in the DEFINED () test.  */
+
+struct definedness_hash_entry
+{
+  struct bfd_hash_entry root;
+  unsigned int by_object : 1;
+  unsigned int by_script : 1;
+  unsigned int iteration : 1;
+};
+
+static struct bfd_hash_table definedness_table;
+
 /* Print the string representation of the given token.  Surround it
    with spaces if INFIX_P is TRUE.  */
 
@@ -242,6 +255,74 @@ new_rel_from_abs (bfd_vma value)
   expld.result.value = value - s->vma;
   expld.result.str = NULL;
   expld.result.section = s;
+}
+
+/* New-function for the definedness hash table.  */
+
+static struct bfd_hash_entry *
+definedness_newfunc (struct bfd_hash_entry *entry,
+		     struct bfd_hash_table *table ATTRIBUTE_UNUSED,
+		     const char *name ATTRIBUTE_UNUSED)
+{
+  struct definedness_hash_entry *ret = (struct definedness_hash_entry *) entry;
+
+  if (ret == NULL)
+    ret = (struct definedness_hash_entry *)
+      bfd_hash_allocate (table, sizeof (struct definedness_hash_entry));
+
+  if (ret == NULL)
+    einfo (_("%P%F: bfd_hash_allocate failed creating symbol %s\n"), name);
+
+  ret->by_object = 0;
+  ret->by_script = 0;
+  ret->iteration = 0;
+  return &ret->root;
+}
+
+/* Called during processing of linker script script expressions.
+   For symbols assigned in a linker script, return a struct describing
+   where the symbol is defined relative to the current expression,
+   otherwise return NULL.  */
+
+static struct definedness_hash_entry *
+symbol_defined (const char *name)
+{
+  return ((struct definedness_hash_entry *)
+	  bfd_hash_lookup (&definedness_table, name, FALSE, FALSE));
+}
+
+/* Update the definedness state of NAME.  Return FALSE if script symbol
+   is multiply defining a strong symbol in an object.  */
+
+static bfd_boolean
+update_definedness (const char *name, struct bfd_link_hash_entry *h)
+{
+  bfd_boolean ret;
+  struct definedness_hash_entry *defentry
+    = (struct definedness_hash_entry *)
+    bfd_hash_lookup (&definedness_table, name, TRUE, FALSE);
+
+  if (defentry == NULL)
+    einfo (_("%P%F: bfd_hash_lookup failed creating symbol %s\n"), name);
+
+  /* If the symbol was already defined, and not by a script, then it
+     must be defined by an object file or by the linker target code.  */
+  ret = TRUE;
+  if (!defentry->by_script
+      && (h->type == bfd_link_hash_defined
+	  || h->type == bfd_link_hash_defweak
+	  || h->type == bfd_link_hash_common))
+    {
+      defentry->by_object = 1;
+      if (h->type == bfd_link_hash_defined
+	  && h->u.def.section->output_section != NULL
+	  && !h->linker_def)
+	ret = FALSE;
+    }
+
+  defentry->by_script = 1;
+  defentry->iteration = lang_statement_iteration;
+  return ret;
 }
 
 static void
@@ -578,7 +659,7 @@ fold_name (etree_type *tree)
       if (expld.phase != lang_first_phase_enum)
 	{
 	  struct bfd_link_hash_entry *h;
-	  struct lang_definedness_hash_entry *def;
+	  struct definedness_hash_entry *def;
 
 	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					    &link_info,
@@ -588,7 +669,7 @@ fold_name (etree_type *tree)
 		      && (h->type == bfd_link_hash_defined
 			  || h->type == bfd_link_hash_defweak
 			  || h->type == bfd_link_hash_common)
-		      && ((def = lang_symbol_defined (tree->name.name)) == NULL
+		      && ((def = symbol_defined (tree->name.name)) == NULL
 			  || def->by_object
 			  || def->iteration == (lang_statement_iteration & 1)));
 	}
@@ -601,7 +682,7 @@ fold_name (etree_type *tree)
 	  /* Self-assignment is only allowed for absolute symbols
 	     defined in a linker script.  */
 	  struct bfd_link_hash_entry *h;
-	  struct lang_definedness_hash_entry *def;
+	  struct definedness_hash_entry *def;
 
 	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					    &link_info,
@@ -611,7 +692,7 @@ fold_name (etree_type *tree)
 		&& (h->type == bfd_link_hash_defined
 		    || h->type == bfd_link_hash_defweak)
 		&& h->u.def.section == bfd_abs_section_ptr
-		&& (def = lang_symbol_defined (tree->name.name)) != NULL
+		&& (def = symbol_defined (tree->name.name)) != NULL
 		&& def->iteration == (lang_statement_iteration & 1)))
 	    expld.assign_name = NULL;
 	}
@@ -817,11 +898,11 @@ static bfd_boolean
 is_sym_value (const etree_type *tree, bfd_vma val)
 {
   struct bfd_link_hash_entry *h;
-  struct lang_definedness_hash_entry *def;
+  struct definedness_hash_entry *def;
 
   return (tree->type.node_class == etree_name
 	  && tree->type.node_code == NAME
-	  && (def = lang_symbol_defined (tree->name.name)) != NULL
+	  && (def = symbol_defined (tree->name.name)) != NULL
 	  && def->by_script
 	  && def->iteration == (lang_statement_iteration & 1)
 	  && (h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
@@ -999,15 +1080,13 @@ exp_fold_tree_1 (etree_type *tree)
 	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
 					FALSE, FALSE, TRUE);
 	      if (h == NULL
-		  || (h->type != bfd_link_hash_new
-		      && h->type != bfd_link_hash_undefined
-		      && h->type != bfd_link_hash_common
-		      && !(h->type == bfd_link_hash_defined
-			   && (h->u.def.section->flags
-			       & SEC_LINKER_CREATED) != 0)))
+		  || !(h->type == bfd_link_hash_new
+		       || h->type == bfd_link_hash_undefined
+		       || h->linker_def))
 		{
-		  /* Do nothing.  The symbol was never referenced, or was
-		     defined by some object.  */
+		  /* Do nothing.  The symbol was never referenced, or
+		     was defined in some object file.  Undefined weak
+		     symbols stay undefined.  */
 		  break;
 		}
 	    }
@@ -1039,19 +1118,27 @@ exp_fold_tree_1 (etree_type *tree)
 			   tree->assign.dst);
 		}
 
-	      /* FIXME: Should we worry if the symbol is already
-		 defined?  */
-	      lang_update_definedness (tree->assign.dst, h);
-	      h->type = bfd_link_hash_defined;
-	      h->u.def.value = expld.result.value;
 	      if (expld.result.section == NULL)
 		expld.result.section = expld.section;
+	      if (!update_definedness (tree->assign.dst, h) && 0)
+		{
+		  /* Symbol was already defined.  For now this error
+		     is disabled because it causes failures in the ld
+		     testsuite: ld-elf/var1, ld-scripts/defined5, and
+		     ld-scripts/pr14962.  Some of these no doubt
+		     reflect scripts used in the wild.  */
+		  (*link_info.callbacks->multiple_definition)
+		    (&link_info, h, link_info.output_bfd,
+		     expld.result.section, expld.result.value);
+		}
+	      h->type = bfd_link_hash_defined;
+	      h->u.def.value = expld.result.value;
 	      h->u.def.section = expld.result.section;
 	      if (tree->type.node_class == etree_provide)
 		tree->type.node_class = etree_provided;
 
 	      /* Copy the symbol type if this is a simple assignment of
-	         one symbol to another.  This could be more general
+		 one symbol to another.  This could be more general
 		 (e.g. a ?: operator with NAMEs in each branch).  */
 	      if (tree->assign.src->type.node_class == etree_name)
 		{
@@ -1469,4 +1556,22 @@ align_n (bfd_vma value, bfd_vma align)
 
   value = (value + align - 1) / align;
   return value * align;
+}
+
+void
+ldexp_init (void)
+{
+  /* The value "13" is ad-hoc, somewhat related to the expected number of
+     assignments in a linker script.  */
+  if (!bfd_hash_table_init_n (&definedness_table,
+			      definedness_newfunc,
+			      sizeof (struct definedness_hash_entry),
+			      13))
+    einfo (_("%P%F: can not create hash table: %E\n"));
+}
+
+void
+ldexp_finish (void)
+{
+  bfd_hash_table_free (&definedness_table);
 }

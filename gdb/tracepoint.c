@@ -2739,7 +2739,7 @@ scope_info (char *args, int from_tty)
 	  if (symname == NULL || *symname == '\0')
 	    continue;		/* Probably botched, certainly useless.  */
 
-	  gdbarch = get_objfile_arch (SYMBOL_OBJFILE (sym));
+	  gdbarch = symbol_arch (sym);
 
 	  printf_filtered ("Symbol %s is ", symname);
 

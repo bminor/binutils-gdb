@@ -1,3 +1,8 @@
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (struct bfd_link_hash_entry): Comment non_ir_ref.  Add
+	linker_def.
+
 2014-12-12  Phil Muldoon  <pmuldoon@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>

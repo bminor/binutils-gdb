@@ -1,3 +1,19 @@
+2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-avr.c: Add include for elf/avr.h.
+	(avr_elf_final_processing): New function.
+	* config/tc-avr.h (elf_tc_final_processing): Define.
+	(avr_elf_final_processing): Declare
+
+2014-12-18  Xingxing Pan <xxingpan@marvell.com>
+
+	* gas/config/tc-arm.c (arm_cpus): Add core marvell-whitney.
+
+2014-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/uk.po: Updated Ukrainian translation.
+
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (md_apply_fix): Apply alignment check

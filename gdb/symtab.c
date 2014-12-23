@@ -1150,12 +1150,15 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   if (!sym)
     return NULL;
 
+  if (!SYMBOL_OBJFILE_OWNED (sym))
+    return sym;
+
   /* We either have an OBJFILE, or we can get at it from the sym's
      symtab.  Anything else is a bug.  */
-  gdb_assert (objfile || SYMBOL_SYMTAB (sym));
+  gdb_assert (objfile || symbol_symtab (sym));
 
   if (objfile == NULL)
-    objfile = SYMBOL_OBJFILE (sym);
+    objfile = symbol_objfile (sym);
 
   if (SYMBOL_OBJ_SECTION (objfile, sym))
     return sym;
@@ -1421,6 +1424,13 @@ lookup_symbol_aux (const char *name, const struct block *block,
 			  domain_name (domain), language_str (language));
     }
 
+  /* Initialize block_found so that the language la_lookup_symbol_nonlocal
+     routines don't have to set it (to NULL) if a primitive type is found.
+     We do this early so that block_found is also NULL if no symbol is
+     found (though this is not part of the API, and callers cannot assume
+     this).  */
+  block_found = NULL;
+
   /* Make sure we do something sensible with is_a_field_of_this, since
      the callers that set this parameter to some non-null value will
      certainly use it later.  If we don't set it, the contents of
@@ -1485,7 +1495,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
   /* Now do whatever is appropriate for LANGUAGE to look
      up static and global variables.  */
 
-  sym = langdef->la_lookup_symbol_nonlocal (name, block, domain);
+  sym = langdef->la_lookup_symbol_nonlocal (langdef, name, block, domain);
   if (sym != NULL)
     {
       if (symbol_lookup_debug)
@@ -1805,7 +1815,8 @@ lookup_symbol_via_quick_fns (struct objfile *objfile, int block_index,
 /* See symtab.h.  */
 
 struct symbol *
-basic_lookup_symbol_nonlocal (const char *name,
+basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
+			      const char *name,
 			      const struct block *block,
 			      const domain_enum domain)
 {
@@ -1846,6 +1857,25 @@ basic_lookup_symbol_nonlocal (const char *name,
   sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym != NULL)
     return sym;
+
+  /* If we didn't find a definition for a builtin type in the static block,
+     search for it now.  This is actually the right thing to do and can be
+     a massive performance win.  E.g., when debugging a program with lots of
+     shared libraries we could search all of them only to find out the
+     builtin type isn't defined in any of them.  This is common for types
+     like "void".  */
+  if (domain == VAR_DOMAIN)
+    {
+      struct gdbarch *gdbarch;
+
+      if (block == NULL)
+	gdbarch = target_gdbarch ();
+      else
+	gdbarch = block_gdbarch (block);
+      sym = language_lookup_primitive_type_as_symbol (langdef, gdbarch, name);
+      if (sym != NULL)
+	return sym;
+    }
 
   return lookup_global_symbol (name, block, domain);
 }
@@ -2862,10 +2892,11 @@ struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
 {
   struct symtab_and_line sal;
+  struct obj_section *section;
 
   fixup_symbol_section (sym, NULL);
-  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
-			   SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym), 0);
+  section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
+  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
 
   /* We always should have a line for the function start address.
      If we don't, something is odd.  Create a plain SAL refering
@@ -2876,7 +2907,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       init_sal (&sal);
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      sal.section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
+      sal.section = section;
     }
 
   if (funfirstline)
@@ -2956,10 +2987,10 @@ skip_prologue_sal (struct symtab_and_line *sal)
     {
       fixup_symbol_section (sym, NULL);
 
+      objfile = symbol_objfile (sym);
       pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
+      section = SYMBOL_OBJ_SECTION (objfile, sym);
       name = SYMBOL_LINKAGE_NAME (sym);
-      objfile = SYMBOL_OBJFILE (sym);
     }
   else
     {
@@ -2991,7 +3022,8 @@ skip_prologue_sal (struct symtab_and_line *sal)
   /* Be conservative - allow direct PC (without skipping prologue) only if we
      have proven the CU (Compilation Unit) supports it.  sal->SYMTAB does not
      have to be set by the caller so we use SYM instead.  */
-  if (sym && COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (SYMBOL_SYMTAB (sym))))
+  if (sym != NULL
+      && COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (symbol_symtab (sym))))
     force_skip = 0;
 
   saved_pc = pc;
@@ -3056,7 +3088,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
      is aligned.  */
   if (!force_skip && sym && start_sal.symtab == NULL)
     {
-      pc = skip_prologue_using_lineinfo (pc, SYMBOL_SYMTAB (sym));
+      pc = skip_prologue_using_lineinfo (pc, symbol_symtab (sym));
       /* Recalculate the line number.  */
       start_sal = find_pc_sect_line (pc, section, 0);
     }
@@ -3096,7 +3128,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       && SYMBOL_LINE (BLOCK_FUNCTION (function_block)) != 0)
     {
       sal->line = SYMBOL_LINE (BLOCK_FUNCTION (function_block));
-      sal->symtab = SYMBOL_SYMTAB (BLOCK_FUNCTION (function_block));
+      sal->symtab = symbol_symtab (BLOCK_FUNCTION (function_block));
     }
 }
 
@@ -3578,8 +3610,8 @@ compare_search_syms (const void *sa, const void *sb)
   struct symbol_search *sym_b = *(struct symbol_search **) sb;
   int c;
 
-  c = FILENAME_CMP (SYMBOL_SYMTAB (sym_a->symbol)->filename,
-		    SYMBOL_SYMTAB (sym_b->symbol)->filename);
+  c = FILENAME_CMP (symbol_symtab (sym_a->symbol)->filename,
+		    symbol_symtab (sym_b->symbol)->filename);
   if (c != 0)
     return c;
 
@@ -3861,7 +3893,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 	b = BLOCKVECTOR_BLOCK (bv, i);
 	ALL_BLOCK_SYMBOLS (b, iter, sym)
 	  {
-	    struct symtab *real_symtab = SYMBOL_SYMTAB (sym);
+	    struct symtab *real_symtab = symbol_symtab (sym);
 
 	    QUIT;
 
@@ -3980,7 +4012,7 @@ print_symbol_info (enum search_domain kind,
 		   struct symbol *sym,
 		   int block, const char *last)
 {
-  struct symtab *s = SYMBOL_SYMTAB (sym);
+  struct symtab *s = symbol_symtab (sym);
   const char *s_filename = symtab_to_filename_for_display (s);
 
   if (last == NULL || filename_cmp (last, s_filename) != 0)
@@ -4079,7 +4111,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 			     p->block,
 			     last_filename);
 	  last_filename
-	    = symtab_to_filename_for_display (SYMBOL_SYMTAB (p->symbol));
+	    = symtab_to_filename_for_display (symbol_symtab (p->symbol));
 	}
     }
 
@@ -4165,7 +4197,7 @@ rbreak_command (char *regexp, int from_tty)
     {
       if (p->msymbol.minsym == NULL)
 	{
-	  struct symtab *symtab = SYMBOL_SYMTAB (p->symbol);
+	  struct symtab *symtab = symbol_symtab (p->symbol);
 	  const char *fullname = symtab_to_fullname (symtab);
 
 	  int newlen = (strlen (fullname)
@@ -5310,13 +5342,23 @@ initialize_ordinary_address_classes (void)
 
 
 
-/* Initialize the symbol SYM.  */
+/* Helper function to initialize the fields of an objfile-owned symbol.
+   It assumed that *SYM is already all zeroes.  */
+
+static void
+initialize_objfile_symbol_1 (struct symbol *sym)
+{
+  SYMBOL_OBJFILE_OWNED (sym) = 1;
+  SYMBOL_SECTION (sym) = -1;
+}
+
+/* Initialize the symbol SYM, and mark it as being owned by an objfile.  */
 
 void
-initialize_symbol (struct symbol *sym)
+initialize_objfile_symbol (struct symbol *sym)
 {
   memset (sym, 0, sizeof (*sym));
-  SYMBOL_SECTION (sym) = -1;
+  initialize_objfile_symbol_1 (sym);
 }
 
 /* Allocate and initialize a new 'struct symbol' on OBJFILE's
@@ -5328,7 +5370,7 @@ allocate_symbol (struct objfile *objfile)
   struct symbol *result;
 
   result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
-  SYMBOL_SECTION (result) = -1;
+  initialize_objfile_symbol_1 (result);
 
   return result;
 }
@@ -5342,9 +5384,46 @@ allocate_template_symbol (struct objfile *objfile)
   struct template_symbol *result;
 
   result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct template_symbol);
-  SYMBOL_SECTION (&result->base) = -1;
+  initialize_objfile_symbol_1 (&result->base);
 
   return result;
+}
+
+/* See symtab.h.  */
+
+struct objfile *
+symbol_objfile (const struct symbol *symbol)
+{
+  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  return SYMTAB_OBJFILE (symbol->owner.symtab);
+}
+
+/* See symtab.h.  */
+
+struct gdbarch *
+symbol_arch (const struct symbol *symbol)
+{
+  if (!SYMBOL_OBJFILE_OWNED (symbol))
+    return symbol->owner.arch;
+  return get_objfile_arch (SYMTAB_OBJFILE (symbol->owner.symtab));
+}
+
+/* See symtab.h.  */
+
+struct symtab *
+symbol_symtab (const struct symbol *symbol)
+{
+  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  return symbol->owner.symtab;
+}
+
+/* See symtab.h.  */
+
+void
+symbol_set_symtab (struct symbol *symbol, struct symtab *symtab)
+{
+  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  symbol->owner.symtab = symtab;
 }
 
 

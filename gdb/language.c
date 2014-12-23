@@ -987,6 +987,24 @@ language_bool_type (const struct language_defn *la,
   return ld->arch_info[la->la_language].bool_type_default;
 }
 
+/* Helper function for primitive type lookup.  */
+
+static struct type **
+language_lookup_primitive_type_1 (const struct language_arch_info *lai,
+				  const char *name)
+{
+  struct type **p;
+
+  for (p = lai->primitive_type_vector; (*p) != NULL; p++)
+    {
+      if (strcmp (TYPE_NAME (*p), name) == 0)
+	return p;
+    }
+  return NULL;
+}
+
+/* See language.h.  */
+
 struct type *
 language_lookup_primitive_type (const struct language_defn *la,
 				struct gdbarch *gdbarch,
@@ -994,33 +1012,113 @@ language_lookup_primitive_type (const struct language_defn *la,
 {
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
-  struct type *const *p;
+  struct type **typep;
+
+  typep = language_lookup_primitive_type_1 (&ld->arch_info[la->la_language],
+					    name);
+  if (typep == NULL)
+    return NULL;
+  return *typep;
+}
+
+/* Helper function for type lookup as a symbol.
+   Create the symbol corresponding to type TYPE in language LANG.  */
+
+static struct symbol *
+language_alloc_type_symbol (enum language lang, struct type *type)
+{
+  struct symbol *symbol;
+  struct gdbarch *gdbarch;
+
+  gdb_assert (!TYPE_OBJFILE_OWNED (type));
+
+  gdbarch = TYPE_OWNER (type).gdbarch;
+  symbol = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct symbol);
+
+  symbol->ginfo.name = TYPE_NAME (type);
+  symbol->ginfo.language = lang;
+  symbol->owner.arch = gdbarch;
+  SYMBOL_OBJFILE_OWNED (symbol) = 0;
+  SYMBOL_TYPE (symbol) = type;
+  SYMBOL_DOMAIN (symbol) = VAR_DOMAIN;
+  SYMBOL_ACLASS_INDEX (symbol) = LOC_TYPEDEF;
+
+  return symbol;
+}
+
+/* Initialize the primitive type symbols of language LD.
+   The primitive type vector must have already been initialized.  */
+
+static void
+language_init_primitive_type_symbols (struct language_arch_info *lai,
+				      const struct language_defn *la,
+				      struct gdbarch *gdbarch)
+{
+  int n;
+  struct compunit_symtab *cust;
+  struct symtab *symtab;
+  struct block *static_block, *global_block;
+
+  gdb_assert (lai->primitive_type_vector != NULL);
+
+  for (n = 0; lai->primitive_type_vector[n] != NULL; ++n)
+    continue;
+
+  lai->primitive_type_symbols
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, n + 1, struct symbol *);
+
+  for (n = 0; lai->primitive_type_vector[n] != NULL; ++n)
+    {
+      lai->primitive_type_symbols[n]
+	= language_alloc_type_symbol (la->la_language,
+				      lai->primitive_type_vector[n]);
+    }
+
+  /* Note: The result of symbol lookup is normally a symbol *and* the block
+     it was found in (returned in global block_found).  Builtin types don't
+     live in blocks.  We *could* give them one, but there is no current need
+     so to keep things simple symbol lookup is extended to allow for
+     BLOCK_FOUND to be NULL.  */
+}
+
+/* See language.h.  */
+
+struct symbol *
+language_lookup_primitive_type_as_symbol (const struct language_defn *la,
+					  struct gdbarch *gdbarch,
+					  const char *name)
+{
+  struct language_gdbarch *ld = gdbarch_data (gdbarch,
+					      language_gdbarch_data);
+  struct language_arch_info *lai = &ld->arch_info[la->la_language];
+  struct type **typep;
+  struct symbol *sym;
 
   if (symbol_lookup_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "language_lookup_primitive_type (%s, %s, %s)",
+			  "language_lookup_primitive_type_as_symbol"
+			  " (%s, %s, %s)",
 			  la->la_name, host_address_to_string (gdbarch), name);
     }
 
-  for (p = ld->arch_info[la->la_language].primitive_type_vector;
-       (*p) != NULL;
-       p++)
+  typep = language_lookup_primitive_type_1 (lai, name);
+  if (typep == NULL)
     {
-      if (strcmp (TYPE_NAME (*p), name) == 0)
-	{
-	  if (symbol_lookup_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, " = %s\n",
-				  host_address_to_string (*p));
-	    }
-	  return (*p);
-	}
+      if (symbol_lookup_debug)
+	fprintf_unfiltered (gdb_stdlog, " = NULL\n");
+      return NULL;
     }
 
+  /* The set of symbols is lazily initialized.  */
+  if (lai->primitive_type_symbols == NULL)
+    language_init_primitive_type_symbols (lai, la, gdbarch);
+
+  sym = lai->primitive_type_symbols[typep - lai->primitive_type_vector];
+
   if (symbol_lookup_debug)
-    fprintf_unfiltered (gdb_stdlog, " = NULL\n");
-  return (NULL);
+    fprintf_unfiltered (gdb_stdlog, " = %s\n", host_address_to_string (sym));
+  return sym;
 }
 
 /* Initialize the language routines.  */

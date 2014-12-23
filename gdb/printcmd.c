@@ -1251,8 +1251,11 @@ address_info (char *exp, int from_tty)
 			   current_language->la_language, DMGL_ANSI);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
-  section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
-  gdbarch = get_objfile_arch (SYMBOL_OBJFILE (sym));
+  if (SYMBOL_OBJFILE_OWNED (sym))
+    section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
+  else
+    section = NULL;
+  gdbarch = symbol_arch (sym);
 
   if (SYMBOL_COMPUTED_OPS (sym) != NULL)
     {

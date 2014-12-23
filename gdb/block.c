@@ -25,6 +25,7 @@
 #include "cp-support.h"
 #include "addrmap.h"
 #include "gdbtypes.h"
+#include "objfiles.h"
 
 /* This is used by struct block to store namespace-related info for
    C++ files, namely using declarations and the current namespace in
@@ -38,6 +39,31 @@ struct block_namespace_info
 
 static void block_initialize_namespace (struct block *block,
 					struct obstack *obstack);
+
+/* See block.h.  */
+
+struct objfile *
+block_objfile (const struct block *block)
+{
+  const struct global_block *global_block;
+
+  if (BLOCK_FUNCTION (block) != NULL)
+    return symbol_objfile (BLOCK_FUNCTION (block));
+
+  global_block = (struct global_block *) block_global_block (block);
+  return COMPUNIT_OBJFILE (global_block->compunit_symtab);
+}
+
+/* See block.  */
+
+struct gdbarch *
+block_gdbarch (const struct block *block)
+{
+  if (BLOCK_FUNCTION (block) != NULL)
+    return symbol_arch (BLOCK_FUNCTION (block));
+
+  return get_objfile_arch (block_objfile (block));
+}
 
 /* Return Nonzero if block a is lexically nested within block b,
    or if a and b have the same pc range.

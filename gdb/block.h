@@ -136,6 +136,14 @@ struct blockvector
 #define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
 #define BLOCKVECTOR_MAP(blocklist) ((blocklist)->map)
 
+/* Return the objfile of BLOCK, which must be non-NULL.  */
+
+extern struct objfile *block_objfile (const struct block *block);
+
+/* Return the architecture of BLOCK, which must be non-NULL.  */
+
+extern struct gdbarch *block_gdbarch (const struct block *block);
+
 extern struct symbol *block_linkage_function (const struct block *);
 
 extern struct symbol *block_containing_function (const struct block *);
