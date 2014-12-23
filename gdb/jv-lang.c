@@ -174,8 +174,7 @@ get_java_class_symtab (struct gdbarch *gdbarch)
 static void
 add_class_symtab_symbol (struct symbol *sym)
 {
-  struct compunit_symtab *cust
-    = get_java_class_symtab (get_objfile_arch (SYMBOL_OBJFILE (sym)));
+  struct compunit_symtab *cust = get_java_class_symtab (symbol_arch (sym));
   const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
 
   dict_add_symbol (BLOCK_DICT (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)), sym);

@@ -455,7 +455,7 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	{
 	  CORE_ADDR addr
 	    = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
-					SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (var),
+					SYMBOL_OBJ_SECTION (symbol_objfile (var),
 							    var));
 
 	  store_typed_address (value_contents_raw (v), type, addr);
@@ -481,7 +481,7 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_STATIC:
       if (overlay_debugging)
 	addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
-					 SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (var),
+					 SYMBOL_OBJ_SECTION (symbol_objfile (var),
 							     var));
       else
 	addr = SYMBOL_VALUE_ADDRESS (var);
@@ -523,8 +523,8 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_BLOCK:
       if (overlay_debugging)
 	addr = symbol_overlayed_address
-	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)), SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (var),
-								       var));
+	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)),
+	   SYMBOL_OBJ_SECTION (symbol_objfile (var), var));
       else
 	addr = BLOCK_START (SYMBOL_BLOCK_VALUE (var));
       break;
@@ -573,9 +573,9 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	lookup_data.name = SYMBOL_LINKAGE_NAME (var);
 
 	gdbarch_iterate_over_objfiles_in_search_order
-	  (get_objfile_arch (SYMBOL_OBJFILE (var)),
+	  (symbol_arch (var),
 	   minsym_lookup_iterator_cb, &lookup_data,
-	   SYMBOL_OBJFILE (var));
+	   symbol_objfile (var));
 	msym = lookup_data.result.minsym;
 
 	if (msym == NULL)

@@ -1,3 +1,24 @@
+2014-12-23  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (SYMBOL_SYMTAB): Delete
+	(SYMBOL_OBJFILE): Delete.
+	(symbol_symtab, symbol_set_symtab): Declare.
+	(symbol_objfile, symbol_arch): Declare.
+	* symtab.c (symbol_symtab): Replaces SYMBOL_SYMTAB.  All uses updated.
+	All references to symbol->symtab redirected through here.
+	(symbol_set_symtab): New function.  All assignments to SYMBOL_SYMTAB
+	redirected through here.
+	(symbol_arch): New function.
+	(symbol_objfile): New function.  Replaces SYMBOL_OBJFILE.
+	All uses updated.
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Call
+	symbol_arch.
+	* findvar.c (default_read_var_value): Call symbol_arch.
+	* guile/scm-frame.c (gdbscm_frame_block): Call symbol_objfile.
+	* jv-lang.c (add_class_symtab_symbol): Call symbol_arch.
+	* printcmd.c (address_info): Call symbol_arch.
+	* tracepoint.c (scope_info): Call symbol_arch.
+
 2014-12-22  Doug Evans  <xdje42@gmail.com>
 
 	* cp-namespace.c (cp_lookup_symbol_via_all_imports): New function.

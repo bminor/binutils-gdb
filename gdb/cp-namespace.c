@@ -624,8 +624,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	  char *name_copy = xstrdup (SYMBOL_NATURAL_NAME (function));
 	  struct cleanup *cleanups = make_cleanup (xfree, name_copy);
 	  const struct language_defn *lang = language_def (language_cplus);
-	  struct gdbarch *arch
-	    = get_objfile_arch (SYMBOL_OBJFILE (function));
+	  struct gdbarch *arch = symbol_arch (function);
 	  const struct block *parent = BLOCK_SUPERBLOCK (block);
 
 	  while (1)

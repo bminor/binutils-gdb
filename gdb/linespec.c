@@ -2011,7 +2011,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
       for (i = 0; VEC_iterate (symbolp, ls->labels.label_symbols, i, sym); ++i)
 	{
-	  struct program_space *pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
+	  struct program_space *pspace = SYMTAB_PSPACE (symbol_symtab (sym));
 
 	  if (symbol_to_sal (&sal, state->funfirstline, sym)
 	      && maybe_add_address (state->addr_set, pspace, sal.pc))
@@ -2038,7 +2038,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
 	  for (i = 0; VEC_iterate (symbolp, ls->function_symbols, i, sym); ++i)
 	    {
-	      pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
+	      pspace = SYMTAB_PSPACE (symbol_symtab (sym));
 	      set_current_program_space (pspace);
 	      if (symbol_to_sal (&sal, state->funfirstline, sym)
 		  && maybe_add_address (state->addr_set, pspace, sal.pc))
@@ -2776,8 +2776,8 @@ compare_symbols (const void *a, const void *b)
   struct symbol * const *sb = b;
   uintptr_t uia, uib;
 
-  uia = (uintptr_t) SYMTAB_PSPACE (SYMBOL_SYMTAB (*sa));
-  uib = (uintptr_t) SYMTAB_PSPACE (SYMBOL_SYMTAB (*sb));
+  uia = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (*sa));
+  uib = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (*sb));
 
   if (uia < uib)
     return -1;
@@ -2921,8 +2921,8 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 
       /* Program spaces that are executing startup should have
 	 been filtered out earlier.  */
-      gdb_assert (!SYMTAB_PSPACE (SYMBOL_SYMTAB (sym))->executing_startup);
-      pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
+      pspace = SYMTAB_PSPACE (symbol_symtab (sym));
+      gdb_assert (!pspace->executing_startup);
       set_current_program_space (pspace);
       t = check_typedef (SYMBOL_TYPE (sym));
       find_methods (t, method_name, &result_names, &superclass_vec);
@@ -2931,7 +2931,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	 sure not to miss the last batch.  */
       if (ix == VEC_length (symbolp, sym_classes) - 1
 	  || (pspace
-	      != SYMTAB_PSPACE (SYMBOL_SYMTAB (VEC_index (symbolp, sym_classes,
+	      != SYMTAB_PSPACE (symbol_symtab (VEC_index (symbolp, sym_classes,
 							  ix + 1)))))
 	{
 	  /* If we did not find a direct implementation anywhere in
@@ -3247,7 +3247,7 @@ find_label_symbols (struct linespec_state *self,
       for (ix = 0;
 	   VEC_iterate (symbolp, function_symbols, ix, fn_sym); ++ix)
 	{
-	  set_current_program_space (SYMTAB_PSPACE (SYMBOL_SYMTAB (fn_sym)));
+	  set_current_program_space (SYMTAB_PSPACE (symbol_symtab (fn_sym)));
 	  block = SYMBOL_BLOCK_VALUE (fn_sym);
 	  sym = lookup_symbol (name, block, LABEL_DOMAIN, 0);
 
@@ -3703,10 +3703,10 @@ symbol_to_sal (struct symtab_and_line *result,
       if (SYMBOL_CLASS (sym) == LOC_LABEL && SYMBOL_VALUE_ADDRESS (sym) != 0)
 	{
 	  init_sal (result);
-	  result->symtab = SYMBOL_SYMTAB (sym);
+	  result->symtab = symbol_symtab (sym);
 	  result->line = SYMBOL_LINE (sym);
 	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
-	  result->pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
+	  result->pspace = SYMTAB_PSPACE (result->symtab);
 	  result->explicit_pc = 1;
 	  return 1;
 	}
@@ -3718,9 +3718,9 @@ symbol_to_sal (struct symtab_and_line *result,
 	{
 	  /* We know its line number.  */
 	  init_sal (result);
-	  result->symtab = SYMBOL_SYMTAB (sym);
+	  result->symtab = symbol_symtab (sym);
 	  result->line = SYMBOL_LINE (sym);
-	  result->pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
+	  result->pspace = SYMTAB_PSPACE (result->symtab);
 	  return 1;
 	}
     }

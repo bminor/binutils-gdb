@@ -1451,15 +1451,15 @@ end_symtab_with_blockvector (struct block *static_block,
 	/* Inlined functions may have symbols not in the global or
 	   static symbol lists.  */
 	if (BLOCK_FUNCTION (block) != NULL)
-	  if (SYMBOL_SYMTAB (BLOCK_FUNCTION (block)) == NULL)
-	    SYMBOL_SYMTAB (BLOCK_FUNCTION (block)) = symtab;
+	  if (symbol_symtab (BLOCK_FUNCTION (block)) == NULL)
+	    symbol_set_symtab (BLOCK_FUNCTION (block), symtab);
 
 	/* Note that we only want to fix up symbols from the local
 	   blocks, not blocks coming from included symtabs.  That is why
 	   we use ALL_DICT_SYMBOLS here and not ALL_BLOCK_SYMBOLS.  */
 	ALL_DICT_SYMBOLS (BLOCK_DICT (block), iter, sym)
-	  if (SYMBOL_SYMTAB (sym) == NULL)
-	    SYMBOL_SYMTAB (sym) = symtab;
+	  if (symbol_symtab (sym) == NULL)
+	    symbol_set_symtab (sym, symtab);
       }
   }
 
@@ -1560,8 +1560,8 @@ set_missing_symtab (struct pending *pending_list,
     {
       for (i = 0; i < pending->nsyms; ++i)
 	{
-	  if (SYMBOL_SYMTAB (pending->symbol[i]) == NULL)
-	    SYMBOL_SYMTAB (pending->symbol[i]) = COMPUNIT_FILETABS (cu);
+	  if (symbol_symtab (pending->symbol[i]) == NULL)
+	    symbol_set_symtab (pending->symbol[i], COMPUNIT_FILETABS (cu));
 	}
     }
 }

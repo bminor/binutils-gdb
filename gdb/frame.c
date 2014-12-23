@@ -2346,7 +2346,7 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
       init_sal (sal);
       if (SYMBOL_LINE (sym) != 0)
 	{
-	  sal->symtab = SYMBOL_SYMTAB (sym);
+	  sal->symtab = symbol_symtab (sym);
 	  sal->line = SYMBOL_LINE (sym);
 	}
       else

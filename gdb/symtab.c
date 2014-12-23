@@ -1152,10 +1152,10 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 
   /* We either have an OBJFILE, or we can get at it from the sym's
      symtab.  Anything else is a bug.  */
-  gdb_assert (objfile || SYMBOL_SYMTAB (sym));
+  gdb_assert (objfile || symbol_symtab (sym));
 
   if (objfile == NULL)
-    objfile = SYMBOL_OBJFILE (sym);
+    objfile = symbol_objfile (sym);
 
   if (SYMBOL_OBJ_SECTION (objfile, sym))
     return sym;
@@ -2862,10 +2862,11 @@ struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
 {
   struct symtab_and_line sal;
+  struct obj_section *section;
 
   fixup_symbol_section (sym, NULL);
-  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
-			   SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym), 0);
+  section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
+  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
 
   /* We always should have a line for the function start address.
      If we don't, something is odd.  Create a plain SAL refering
@@ -2876,7 +2877,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       init_sal (&sal);
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      sal.section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
+      sal.section = section;
     }
 
   if (funfirstline)
@@ -2956,10 +2957,10 @@ skip_prologue_sal (struct symtab_and_line *sal)
     {
       fixup_symbol_section (sym, NULL);
 
+      objfile = symbol_objfile (sym);
       pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
+      section = SYMBOL_OBJ_SECTION (objfile, sym);
       name = SYMBOL_LINKAGE_NAME (sym);
-      objfile = SYMBOL_OBJFILE (sym);
     }
   else
     {
@@ -2991,7 +2992,8 @@ skip_prologue_sal (struct symtab_and_line *sal)
   /* Be conservative - allow direct PC (without skipping prologue) only if we
      have proven the CU (Compilation Unit) supports it.  sal->SYMTAB does not
      have to be set by the caller so we use SYM instead.  */
-  if (sym && COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (SYMBOL_SYMTAB (sym))))
+  if (sym != NULL
+      && COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (symbol_symtab (sym))))
     force_skip = 0;
 
   saved_pc = pc;
@@ -3056,7 +3058,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
      is aligned.  */
   if (!force_skip && sym && start_sal.symtab == NULL)
     {
-      pc = skip_prologue_using_lineinfo (pc, SYMBOL_SYMTAB (sym));
+      pc = skip_prologue_using_lineinfo (pc, symbol_symtab (sym));
       /* Recalculate the line number.  */
       start_sal = find_pc_sect_line (pc, section, 0);
     }
@@ -3096,7 +3098,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       && SYMBOL_LINE (BLOCK_FUNCTION (function_block)) != 0)
     {
       sal->line = SYMBOL_LINE (BLOCK_FUNCTION (function_block));
-      sal->symtab = SYMBOL_SYMTAB (BLOCK_FUNCTION (function_block));
+      sal->symtab = symbol_symtab (BLOCK_FUNCTION (function_block));
     }
 }
 
@@ -3578,8 +3580,8 @@ compare_search_syms (const void *sa, const void *sb)
   struct symbol_search *sym_b = *(struct symbol_search **) sb;
   int c;
 
-  c = FILENAME_CMP (SYMBOL_SYMTAB (sym_a->symbol)->filename,
-		    SYMBOL_SYMTAB (sym_b->symbol)->filename);
+  c = FILENAME_CMP (symbol_symtab (sym_a->symbol)->filename,
+		    symbol_symtab (sym_b->symbol)->filename);
   if (c != 0)
     return c;
 
@@ -3861,7 +3863,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 	b = BLOCKVECTOR_BLOCK (bv, i);
 	ALL_BLOCK_SYMBOLS (b, iter, sym)
 	  {
-	    struct symtab *real_symtab = SYMBOL_SYMTAB (sym);
+	    struct symtab *real_symtab = symbol_symtab (sym);
 
 	    QUIT;
 
@@ -3980,7 +3982,7 @@ print_symbol_info (enum search_domain kind,
 		   struct symbol *sym,
 		   int block, const char *last)
 {
-  struct symtab *s = SYMBOL_SYMTAB (sym);
+  struct symtab *s = symbol_symtab (sym);
   const char *s_filename = symtab_to_filename_for_display (s);
 
   if (last == NULL || filename_cmp (last, s_filename) != 0)
@@ -4079,7 +4081,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 			     p->block,
 			     last_filename);
 	  last_filename
-	    = symtab_to_filename_for_display (SYMBOL_SYMTAB (p->symbol));
+	    = symtab_to_filename_for_display (symbol_symtab (p->symbol));
 	}
     }
 
@@ -4165,7 +4167,7 @@ rbreak_command (char *regexp, int from_tty)
     {
       if (p->msymbol.minsym == NULL)
 	{
-	  struct symtab *symtab = SYMBOL_SYMTAB (p->symbol);
+	  struct symtab *symtab = symbol_symtab (p->symbol);
 	  const char *fullname = symtab_to_fullname (symtab);
 
 	  int newlen = (strlen (fullname)
@@ -5345,6 +5347,38 @@ allocate_template_symbol (struct objfile *objfile)
   SYMBOL_SECTION (&result->base) = -1;
 
   return result;
+}
+
+/* See symtab.h.  */
+
+struct objfile *
+symbol_objfile (const struct symbol *symbol)
+{
+  return SYMTAB_OBJFILE (symbol->symtab);
+}
+
+/* See symtab.h.  */
+
+struct gdbarch *
+symbol_arch (const struct symbol *symbol)
+{
+  return get_objfile_arch (symbol_objfile (symbol));
+}
+
+/* See symtab.h.  */
+
+struct symtab *
+symbol_symtab (const struct symbol *symbol)
+{
+  return symbol->symtab;
+}
+
+/* See symtab.h.  */
+
+void
+symbol_set_symtab (struct symbol *symbol, struct symtab *symtab)
+{
+  symbol->symtab = symtab;
 }
 
 

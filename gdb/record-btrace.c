@@ -556,7 +556,7 @@ btrace_call_history_src_line (struct ui_out *uiout,
     return;
 
   ui_out_field_string (uiout, "file",
-		       symtab_to_filename_for_display (sym->symtab));
+		       symtab_to_filename_for_display (symbol_symtab (sym)));
 
   begin = bfun->lbegin;
   end = bfun->lend;

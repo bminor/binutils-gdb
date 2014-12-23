@@ -87,7 +87,7 @@ sympy_get_symtab (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return symtab_to_symtab_object (SYMBOL_SYMTAB (symbol));
+  return symtab_to_symtab_object (symbol_symtab (symbol));
 }
 
 static PyObject *
@@ -290,15 +290,14 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
 {
   obj->symbol = symbol;
   obj->prev = NULL;
-  if (SYMBOL_SYMTAB (symbol))
+  if (symbol_symtab (symbol) != NULL)
     {
-      obj->next = objfile_data (SYMBOL_OBJFILE (symbol),
-				sympy_objfile_data_key);
+      struct objfile *objfile = symbol_objfile (symbol);
 
+      obj->next = objfile_data (objfile, sympy_objfile_data_key);
       if (obj->next)
 	obj->next->prev = obj;
-      set_objfile_data (SYMBOL_OBJFILE (symbol),
-			sympy_objfile_data_key, obj);
+      set_objfile_data (objfile, sympy_objfile_data_key, obj);
     }
   else
     obj->next = NULL;
@@ -334,9 +333,10 @@ sympy_dealloc (PyObject *obj)
 
   if (sym_obj->prev)
     sym_obj->prev->next = sym_obj->next;
-  else if (sym_obj->symbol && SYMBOL_SYMTAB (sym_obj->symbol))
+  else if (sym_obj->symbol != NULL
+	   && symbol_symtab (sym_obj->symbol) != NULL)
     {
-      set_objfile_data (SYMBOL_OBJFILE (sym_obj->symbol),
+      set_objfile_data (symbol_objfile (sym_obj->symbol),
 			sympy_objfile_data_key, sym_obj->next);
     }
   if (sym_obj->next)

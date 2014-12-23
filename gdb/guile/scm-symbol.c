@@ -81,7 +81,7 @@ syscm_eq_symbol_smob (const void *ap, const void *bp)
 static htab_t
 syscm_objfile_symbol_map (struct symbol *symbol)
 {
-  struct objfile *objfile = SYMBOL_OBJFILE (symbol);
+  struct objfile *objfile = symbol_objfile (symbol);
   htab_t htab = objfile_data (objfile, syscm_objfile_data_key);
 
   if (htab == NULL)
@@ -329,7 +329,7 @@ gdbscm_symbol_symtab (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return stscm_scm_from_symtab (SYMBOL_SYMTAB (symbol));
+  return stscm_scm_from_symtab (symbol_symtab (symbol));
 }
 
 /* (symbol-name <gdb:symbol>) -> string */

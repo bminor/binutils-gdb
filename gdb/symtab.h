@@ -775,12 +775,10 @@ extern const struct symbol_impl *symbol_impls;
   (symbol)->is_cplus_template_function
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
-#define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
 #define SYMBOL_COMPUTED_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_computed)
 #define SYMBOL_BLOCK_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_block)
 #define SYMBOL_REGISTER_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_register)
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
-#define SYMBOL_OBJFILE(symbol)		SYMTAB_OBJFILE (SYMBOL_SYMTAB (symbol))
 
 extern int register_symbol_computed_impl (enum address_class,
 					  const struct symbol_computed_ops *);
@@ -790,6 +788,28 @@ extern int register_symbol_block_impl (enum address_class aclass,
 
 extern int register_symbol_register_impl (enum address_class,
 					  const struct symbol_register_ops *);
+
+/* Return the OBJFILE of SYMBOL.
+   It is an error to call this if symbol.is_objfile_owned is false, which
+   only happens for architecture-provided types.  */
+
+extern struct objfile *symbol_objfile (const struct symbol *symbol);
+
+/* Return the ARCH of SYMBOL.  */
+
+extern struct gdbarch *symbol_arch (const struct symbol *symbol);
+
+/* Return the SYMTAB of SYMBOL.
+   It is an error to call this if symbol.is_objfile_owned is false, which
+   only happens for architecture-provided types.  */
+
+extern struct symtab *symbol_symtab (const struct symbol *symbol);
+
+/* Set the symtab of SYMBOL to SYMTAB.
+   It is an error to call this if symbol.is_objfile_owned is false, which
+   only happens for architecture-provided types.  */
+
+extern void symbol_set_symtab (struct symbol *symbol, struct symtab *symtab);
 
 /* An instance of this type is used to represent a C++ template
    function.  It includes a "struct symbol" as a kind of base class;

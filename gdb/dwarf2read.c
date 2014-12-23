@@ -7746,8 +7746,9 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 		  if (strcmp (package_name, this_package_name) != 0)
 		    complaint (&symfile_complaints,
 			       _("Symtab %s has objects from two different Go packages: %s and %s"),
-			       (SYMBOL_SYMTAB (sym)
-			  ? symtab_to_filename_for_display (SYMBOL_SYMTAB (sym))
+			       (symbol_symtab (sym) != NULL
+				? symtab_to_filename_for_display
+				    (symbol_symtab (sym))
 				: objfile_name (cu->objfile)),
 			       this_package_name, package_name);
 		  xfree (this_package_name);
@@ -17935,7 +17936,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      struct file_entry *fe;
 
 	      fe = &cu->line_header->file_names[file_index - 1];
-	      SYMBOL_SYMTAB (sym) = fe->symtab;
+	      symbol_set_symtab (sym, fe->symtab);
 	    }
 	}
 

@@ -3716,7 +3716,7 @@ See set/show multiple-symbol."));
             (SYMBOL_CLASS (syms[i].sym) == LOC_CONST
              && SYMBOL_TYPE (syms[i].sym) != NULL
              && TYPE_CODE (SYMBOL_TYPE (syms[i].sym)) == TYPE_CODE_ENUM);
-          struct symtab *symtab = SYMBOL_SYMTAB (syms[i].sym);
+          struct symtab *symtab = symbol_symtab (syms[i].sym);
 
           if (SYMBOL_LINE (syms[i].sym) != 0 && symtab != NULL)
             printf_unfiltered (_("[%d] %s at %s:%d\n"),
@@ -4471,9 +4471,9 @@ cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
      the symbol is local or not, we check the block where we found it
      against the global and static blocks of its associated symtab.  */
   if (sym
-      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (sym->symtab),
+      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symbol_symtab (sym)),
 			    GLOBAL_BLOCK) != block
-      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (sym->symtab),
+      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symbol_symtab (sym)),
 			    STATIC_BLOCK) != block)
     return;
 
