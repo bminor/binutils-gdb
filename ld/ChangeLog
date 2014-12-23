@@ -1,3 +1,7 @@
+2014-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2014-11-24  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo: Correct --plt-align documentation.
