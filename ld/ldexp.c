@@ -1072,9 +1072,7 @@ exp_fold_tree_1 (etree_type *tree)
 	      if (h == NULL
 		  || !(h->type == bfd_link_hash_new
 		       || h->type == bfd_link_hash_undefined
-		       || (h->type == bfd_link_hash_defined
-			   && (h->u.def.section->flags
-			       & SEC_LINKER_CREATED) != 0)))
+		       || h->linker_def))
 		{
 		  /* Do nothing.  The symbol was never referenced, or
 		     was defined in some object file.  Undefined weak
