@@ -1,5 +1,9 @@
 2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* doc/c-avr.texi: Document -mlink-relax and -mno-link-relax.
+
+2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-avr.c (struct avr_opt_s): Change link_relax to
 	no_link_relax, extend comment.
 	(enum options): Add new OPTION_NO_LINK_RELAX.
