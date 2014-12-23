@@ -1,5 +1,10 @@
 2014-12-23  Tristan Gingold  <gingold@adacore.com>
 
+	* version.m4: Bump version to 2.25.0
+	* configure: Regenerate.
+
+2014-12-23  Tristan Gingold  <gingold@adacore.com>
+
 	* version.m4: Bump version to 2.25
 	* configure: Regenerate.
 

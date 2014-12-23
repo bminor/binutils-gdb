@@ -2,6 +2,10 @@
 
 	* configure: Regenerate.
 
+2014-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2014-11-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.
