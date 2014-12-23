@@ -1,3 +1,9 @@
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_define_linkage_sym): Set linker_def.
+	* linker.c (_bfd_generic_link_add_one_symbol): Clear linker_def
+	for CDEF, DEF, DEFW, COM.
+
 2014-12-22  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
