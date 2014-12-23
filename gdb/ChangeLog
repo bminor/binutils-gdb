@@ -1,5 +1,10 @@
 2014-12-23  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.h (SYMBOL_DOMAIN_BITS): New macro.
+	(struct symbol) <domain>: Use it.
+
+2014-12-23  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (initialize_objfile_symbol): Renamed from initialize_symbol.
 	All callers updated.
 

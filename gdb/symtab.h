@@ -461,6 +461,10 @@ typedef enum domain_enum_tag
   COMMON_BLOCK_DOMAIN
 } domain_enum;
 
+/* The number of bits in a symbol used to represent the domain.  */
+
+#define SYMBOL_DOMAIN_BITS 4
+
 extern const char *domain_name (domain_enum);
 
 /* Searching domains, used for `search_symbols'.  Element numbers are
@@ -714,7 +718,7 @@ struct symbol
 
   /* Domain code.  */
 
-  ENUM_BITFIELD(domain_enum_tag) domain : 6;
+  ENUM_BITFIELD(domain_enum_tag) domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class.  This holds an index into the 'symbol_impls'
      table.  The actual enum address_class value is stored there,
