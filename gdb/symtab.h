@@ -1571,7 +1571,7 @@ struct cleanup *demangle_for_lookup (const char *name, enum language lang,
 
 struct symbol *allocate_symbol (struct objfile *);
 
-void initialize_symbol (struct symbol *);
+void initialize_objfile_symbol (struct symbol *);
 
 struct template_symbol *allocate_template_symbol (struct objfile *);
 

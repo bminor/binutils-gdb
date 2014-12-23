@@ -5316,7 +5316,7 @@ initialize_ordinary_address_classes (void)
 /* Initialize the symbol SYM.  */
 
 void
-initialize_symbol (struct symbol *sym)
+initialize_objfile_symbol (struct symbol *sym)
 {
   memset (sym, 0, sizeof (*sym));
   SYMBOL_SECTION (sym) = -1;
