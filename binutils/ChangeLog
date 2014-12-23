@@ -1,3 +1,22 @@
+2014-12-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (read_cie): Cast size to long to warn.
+
+2014-12-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (decode_location_expression): Check for an out of range
+	value for a DW_OP_GNU_entry_value expression.
+	(display_debug_lines_raw): Check for a partial
+	.debug_line. section being encountered without a prior, full
+	.debug.line section.
+	(display_debug_lines_decoded): Likewise.  Also check for
+	li_line_range being zero.
+	(display_debug_pubnames_worker): Check for an invalid pn_length
+	field.
+	(read_cie): Add range checks.
+	* elfcomm.c (setup_archive): Check for a negative longnames_size.
+
 2014-12-18  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Change display name of

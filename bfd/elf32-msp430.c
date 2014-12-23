@@ -617,12 +617,20 @@ msp430_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
 
   if (uses_msp430x_relocs (abfd))
     {
-      BFD_ASSERT (r_type < (unsigned int) R_MSP430x_max);
+      if (r_type >= (unsigned int) R_MSP430x_max)
+	{
+	  _bfd_error_handler (_("%A: invalid MSP430X reloc number: %d"), abfd, r_type);
+	  r_type = 0;
+	}
       cache_ptr->howto = elf_msp430x_howto_table + r_type;
       return;
     }
 
-  BFD_ASSERT (r_type < (unsigned int) R_MSP430_max);
+  if (r_type >= (unsigned int) R_MSP430_max)
+    {
+      _bfd_error_handler (_("%A: invalid MSP430 reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = &elf_msp430_howto_table[r_type];
 }
 

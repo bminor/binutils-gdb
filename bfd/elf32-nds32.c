@@ -2965,7 +2965,11 @@ nds32_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   enum elf_nds32_reloc_type r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) <= R_NDS32_GNU_VTENTRY);
+  if (r_type > R_NDS32_GNU_VTENTRY)
+    {
+      _bfd_error_handler (_("%A: invalid NDS32 reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = bfd_elf32_bfd_reloc_type_table_lookup (r_type);
 }
 

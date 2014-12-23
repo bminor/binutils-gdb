@@ -1,3 +1,57 @@
+2014-12-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive.c (do_slurp_bsd_armap): Return if the parsed_size is
+	zero.
+	(bfd_slurp_armap): Zero terminate the name.
+	(bfd_generic_stat_arch_elt): If there is no header, fail.
+	* elf32-arc.c (arc_info_to_howto_rel): Replace BFD_ASSERT with
+	error message.
+	* elf32-avr.c (avr_info_to_howto_rela): Likewise.
+	* elf32-cr16c.c (elf_cr16c_info_to_howto_rel): Likewise.
+	* elf32-cris.c (cris_info_to_howto_rela): Likewise.
+	* elf32-d10v.c (d10v_info_to_howto_rel): Likewise.
+	* elf32-d30v.c (d30v_info_to_howto_rel): Likewise.
+	* elf32-dlx.c (dlx_rtype_to_howto): Likewise.
+	* elf32-epiphany.c (epiphany_info_to_howto_rela): Likewise.
+	* elf32-fr30.c (fr30_info_to_howto_rela): Likewise.
+	* elf32-frv.c (frv_info_to_howto_rela): Likewise.
+	* elf32-i960.c (elf32_i960_info_to_howto_rel): Likewise.
+	* elf32-ip2k.c (ip2k_info_to_howto_rela): Likewise.
+	* elf32-iq2000.c (iq2000_info_to_howto_rela): Likewise.
+	* elf32-lm32.c (lm32_info_to_howto_rela): Likewise.
+	* elf32-m32c.c (m32c_info_to_howto_rela): Likewise.
+	* elf32-m32r.c (m32r_info_to_howto_rel): Likewise.
+	* elf32-m68hc11.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-m68hc12.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-mep.c (mep_info_to_howto_rela): Likewise.
+	* elf32-metag.c (metag_info_to_howto_rela): Likewise.
+	* elf32-moxie.c (moxie_info_to_howto_rela): Likewise.
+	* elf32-msp430.c (msp430_info_to_howto_rela): Likewise.
+	* elf32-mt.c (mt_info_to_howto_rela): Likewise.
+	* elf32-nds32.c (nds32_info_to_howto_rel): Likewise.
+	* elf32-or1k.c (or1k_info_to_howto_rela): Likewise.
+	* elf32-rl78.c (rl78_info_to_howto_rela): Likewise.
+	* elf32-rx.c (rx_info_to_howto_rela): Likewise.
+	* elf32-v850.c (v850_elf_info_to_howto_rel): Likewise.
+	* elf32-visium.c (visium_info_to_howto_rela): Likewise.
+	* elf32-xgate.c (xgate_info_to_howto_rel): Likewise.
+	* elf32-xtensa.c (elf_xtensa_info_to_howto_rela): Likewise.
+	* elf64-mmix.c (mmix_info_to_howto_rela): Likewise.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_lookup): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_bfd_reloc_from_type): Likewise.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Add range
+	checking of reloc symbol index.
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): If no symbols have
+	been provided then set the reloc's symbol to undefined.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Add range
+	checking of the reloc to be applied.
+	* versados.c (process_otr): Add more range checks.
+	(versados_canonicalize_reloc): If the section is unknown, set the
+	symbol to undefined.
+	* vms-alpha.c (_bfd_vms_slurp_eisd): Add range checks.
+	(alpha_vms_object_p): Likewise.
+
 2014-12-18  Richard Henderson  <rth@redhat.com>
 
 	* elf32-ppc.c (ELF_COMMONPAGESIZE): Set to 64k.

@@ -373,10 +373,17 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
   | (otr->map[3] << 0);
 
   struct esdid *esdid = &EDATA (abfd, otr->esdid - 1);
-  unsigned char *contents = esdid->contents;
+  unsigned char *contents;
   bfd_boolean need_contents = FALSE;
-  unsigned int dst_idx = esdid->pc;
+  unsigned int dst_idx;
 
+  /* PR 17512: file: ac7da425.  */
+  if (otr->esdid == 0)
+    return;
+  
+  contents = esdid->contents;
+  dst_idx = esdid->pc;
+  
   for (shift = ((unsigned long) 1 << 31); shift && srcp < endp; shift >>= 1)
     {
       if (bits & shift)
@@ -399,7 +406,7 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 
 	      if (pass == 1)
 		need_contents = TRUE;
-	      else if (contents)
+	      else if (contents && dst_idx < esdid->section->size - sizeinwords * 2)
 		for (j = 0; j < sizeinwords * 2; j++)
 		  {
 		    contents[dst_idx + (sizeinwords * 2) - j - 1] = val;
@@ -421,10 +428,13 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 			}
 		      else
 			{
-			  arelent *n =
-			  EDATA (abfd, otr->esdid - 1).section->relocation + rn;
-			  n->address = dst_idx;
+			  arelent *n;
 
+			  /* PR 17512: file: 54f733e0.  */
+			  if (EDATA (abfd, otr->esdid - 1).section == NULL)
+			    continue;
+			  n = EDATA (abfd, otr->esdid - 1).section->relocation + rn;
+			  n->address = dst_idx;
 			  n->sym_ptr_ptr = (asymbol **) (size_t) id;
 			  n->addend = 0;
 			  n->howto = versados_howto_table + ((j & 1) * 2) + (sizeinwords - 1);
@@ -798,7 +808,11 @@ versados_canonicalize_reloc (bfd *abfd,
 	      /* Section relative thing.  */
 	      struct esdid *e = &EDATA (abfd, esdid - 1);
 
-	      src[count].sym_ptr_ptr = e->section->symbol_ptr_ptr;
+	      /* PR 17512: file:cd92277c.  */
+	      if (e->section)
+		src[count].sym_ptr_ptr = e->section->symbol_ptr_ptr;
+	      else
+		src[count].sym_ptr_ptr = bfd_und_section_ptr->symbol_ptr_ptr;
 	    }
 	  /* PR 17512: file:3757-2936-0.004.  */
 	  else if ((unsigned) (esdid - ES_BASE) >= bfd_get_symcount (abfd))

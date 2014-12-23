@@ -1431,6 +1431,14 @@ elfNN_aarch64_bfd_reloc_from_type (unsigned int r_type)
   if (r_type == R_AARCH64_NONE || r_type == R_AARCH64_NULL)
     return BFD_RELOC_AARCH64_NONE;
 
+  /* PR 17512: file: b371e70a.  */
+  if (r_type >= R_AARCH64_end)
+    {
+      _bfd_error_handler (_("Invalid AArch64 reloc number: %d"), r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return BFD_RELOC_AARCH64_NONE;
+    }
+
   return BFD_RELOC_AARCH64_RELOC_START + offsets[r_type];
 }
 

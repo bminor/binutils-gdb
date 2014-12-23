@@ -588,7 +588,11 @@ lm32_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_LM32_max);
+  if (r_type >= (unsigned int) R_LM32_max)
+    {
+      _bfd_error_handler (_("%A: invalid LM32 reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = &lm32_elf_howto_table[r_type];
 }
 

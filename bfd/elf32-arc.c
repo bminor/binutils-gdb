@@ -172,7 +172,11 @@ arc_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_ARC_max);
+  if (r_type >= (unsigned int) R_ARC_max)
+    {
+      _bfd_error_handler (_("%A: invalid ARC reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = &elf_arc_howto_table[r_type];
 }
 

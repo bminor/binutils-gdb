@@ -655,6 +655,14 @@ setup_archive (struct archive_info *arch, const char *file_name,
 		 file_name, arch->longnames_size);
 	  return 1;
 	}
+      /* PR 17531: file: 639d6a26.  */
+      if ((signed long) arch->longnames_size < 0)
+	{
+	  error (_("%s: long name table is too big, (size = 0x%lx)\n"),
+		 file_name, arch->longnames_size);
+	  return 1;
+	}
+
       arch->next_arhdr_offset += sizeof arch->arhdr + arch->longnames_size;
 
       /* Plus one to allow for a string terminator.  */
@@ -676,6 +684,8 @@ setup_archive (struct archive_info *arch, const char *file_name,
 
       if ((arch->longnames_size & 1) != 0)
 	getc (file);
+
+      arch->longnames[arch->longnames_size] = 0;
     }
 
   return 0;

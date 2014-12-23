@@ -302,7 +302,7 @@ elf_x86_64_reloc_type_lookup (bfd *abfd,
 	return elf_x86_64_rtype_to_howto (abfd,
 					  x86_64_reloc_map[i].elf_reloc_val);
     }
-  return 0;
+  return NULL;
 }
 
 static reloc_howto_type *
