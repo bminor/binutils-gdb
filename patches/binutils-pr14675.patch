@@ -1,4 +1,4 @@
-From cade3c669933278d78d5a8900458324aadd68b14 Mon Sep 17 00:00:00 2001
+From c694de32e282069ac0965ebb650cea7de4bf6a30 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sat, 20 Dec 2014 05:45:51 -0800
 Subject: [PATCH] Treat .eh_frame section before crtbeginT as normal input
@@ -32,7 +32,7 @@ crtbeginT file.
 	* layout.h (Layout::Layout): Add has_crtbeginT.
 	(Layout::match_file_name (const char*, const char*)): New.
 	(Layout): Add an optimize_ehframe_ member.
-	* main.cc (main): Update layout.
+	* main.cc (main): Pass command_line.has_crtbeginT() to layout.
 	* options.cc: Include "layout.h".
 	(Input_arguments::add_file): Set this->has_crtbeginT_ to true
 	if there is a crtbeginT file.
@@ -40,7 +40,7 @@ crtbeginT file.
 	has_crtbeginT_ to false.
 	(Input_arguments::has_crtbeginT): New function.
 	(Input_arguments::has_crtbeginT_): New bool member.
-	(Command_line::crtbeginT): New function.
+	(Command_line::has_crtbeginT): New function.
 ---
  gold/ChangeLog  | 35 +++++++++++++++++++++++++++++++++++
  gold/ehframe.cc | 31 +++++++++++++++++++++----------
@@ -283,7 +283,7 @@ index 032f5f3..31724a2 100644
    Output_section_data_list script_output_section_data_list_;
    // Structure to save segment states before entering the relaxation loop.
 diff --git a/gold/main.cc b/gold/main.cc
-index bb86613..bbeff65 100644
+index bb86613..452815e 100644
 --- a/gold/main.cc
 +++ b/gold/main.cc
 @@ -227,7 +227,8 @@ main(int argc, char** argv)
@@ -292,7 +292,7 @@ index bb86613..bbeff65 100644
    Layout layout(command_line.number_of_input_files(),
 -		&command_line.script_options());
 +		&command_line.script_options(),
-+		command_line.crtbeginT());
++		command_line.has_crtbeginT());
  
    if (layout.incremental_inputs() != NULL)
      layout.incremental_inputs()->report_command_line(argc, argv);
@@ -319,7 +319,7 @@ index 731061d..cf7af2d 100644
  }
  
 diff --git a/gold/options.h b/gold/options.h
-index 6d827f1..7e881df 100644
+index 6d827f1..9a8ee27 100644
 --- a/gold/options.h
 +++ b/gold/options.h
 @@ -1970,7 +1970,8 @@ class Input_arguments
@@ -357,7 +357,7 @@ index 6d827f1..7e881df 100644
  
 +  // Whether there is a crtbeginT file.
 +  bool
-+  crtbeginT() const
++  has_crtbeginT() const
 +  { return this->inputs_.has_crtbeginT(); }
 +
   private:
