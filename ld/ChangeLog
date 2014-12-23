@@ -2,6 +2,9 @@
 
 	Apply from master.
 	2014-12-23  Alan Modra  <amodra@gmail.com>
+	* ldexp.c (exp_fold_tree_1 <etree_provide>): Test linker_def.
+
+	2014-12-23  Alan Modra  <amodra@gmail.com>
 	* ldexp.c (exp_fold_tree_1 <etree_provide>): Leave bfd_link_hash_common
 	symbols alone.
 

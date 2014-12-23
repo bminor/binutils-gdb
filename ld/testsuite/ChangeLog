@@ -2,6 +2,14 @@
 
 	Apply from master.
 	2014-12-23  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/sdabase.s,
+	* ld-powerpc/sdabase.t,
+	* ld-powerpc/sdabase.d: New test.
+	* ld-powerpc/sdabase2.t,
+	* ld-powerpc/sdabase2.d: New test.
+	* ld-powerpc/powerpc.exp: Run them.
+
+	2014-12-23  Alan Modra  <amodra@gmail.com>
 	* ld-elf/endsym.s, *ld-elf/endsym.d: New test.
 
 	2014-12-04  Alan Modra  <amodra@gmail.com>

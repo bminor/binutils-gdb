@@ -1,6 +1,10 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-23  Alan Modra  <amodra@gmail.com>
+	* bfdlink.h (struct bfd_link_hash_entry): Comment non_ir_ref.  Add
+	linker_def.
+
 	2014-11-24  Mark Wielaard  <mjw@redhat.com>
 	* dwarf2.h: Add DW_LANG_C_plus_plus_11, DW_LANG_C11 and
 	DW_LANG_C_plus_plus_14.
