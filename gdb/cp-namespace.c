@@ -798,7 +798,8 @@ lookup_namespace_scope (const char *name,
    DOMAIN says what kind of symbols we're looking for.  */
 
 struct symbol *
-cp_lookup_symbol_nonlocal (const char *name,
+cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
+			   const char *name,
 			   const struct block *block,
 			   const domain_enum domain)
 {

@@ -192,9 +192,11 @@ extern void cp_add_using_directive (const char *dest,
 extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol,
 					      struct objfile *objfile);
 
-extern struct symbol *cp_lookup_symbol_nonlocal (const char *name,
-						 const struct block *block,
-						 const domain_enum domain);
+extern struct symbol *cp_lookup_symbol_nonlocal
+     (const struct language_defn *langdef,
+      const char *name,
+      const struct block *block,
+      const domain_enum domain);
 
 extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const char *name,

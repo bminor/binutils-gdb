@@ -1485,7 +1485,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
   /* Now do whatever is appropriate for LANGUAGE to look
      up static and global variables.  */
 
-  sym = langdef->la_lookup_symbol_nonlocal (name, block, domain);
+  sym = langdef->la_lookup_symbol_nonlocal (langdef, name, block, domain);
   if (sym != NULL)
     {
       if (symbol_lookup_debug)
@@ -1805,7 +1805,8 @@ lookup_symbol_via_quick_fns (struct objfile *objfile, int block_index,
 /* See symtab.h.  */
 
 struct symbol *
-basic_lookup_symbol_nonlocal (const char *name,
+basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
+			      const char *name,
 			      const struct block *block,
 			      const domain_enum domain)
 {

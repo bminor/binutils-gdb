@@ -1,5 +1,10 @@
 2014-12-23  Doug Evans  <xdje42@gmail.com>
 
+	* language.h (struct language_defn) <la_lookup_symbol_nonlocal>:
+	New arg language_defn.  All uses updated.
+
+2014-12-23  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.h (SYMBOL_SYMTAB): Delete
 	(SYMBOL_OBJFILE): Delete.
 	(symbol_symtab, symbol_set_symtab): Declare.

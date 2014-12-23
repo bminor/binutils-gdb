@@ -1186,9 +1186,11 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
    that can't think of anything better to do.
    This implements the C lookup rules.  */
 
-extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
-						    const struct block *,
-						    const domain_enum);
+extern struct symbol *
+  basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
+				const char *,
+				const struct block *,
+				const domain_enum);
 
 /* Some helper functions for languages that need to write their own
    lookup_symbol_nonlocal functions.  */

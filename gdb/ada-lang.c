@@ -5585,7 +5585,8 @@ ada_lookup_symbol (const char *name, const struct block *block0,
 }
 
 static struct symbol *
-ada_lookup_symbol_nonlocal (const char *name,
+ada_lookup_symbol_nonlocal (const struct language_defn *langdef,
+			    const char *name,
                             const struct block *block,
                             const domain_enum domain)
 {
