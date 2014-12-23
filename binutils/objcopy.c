@@ -632,7 +632,7 @@ strip_usage (FILE *stream, int exit_status)
   -U --disable-deterministic-archives\n\
                                    Disable -D behavior (default)\n"));
   fprintf (stream, _("\
-  -R --remove-section=<name>       Remove section <name> from the output\n\
+  -R --remove-section=<name>       Also remove section <name> from the output\n\
   -s --strip-all                   Remove all symbol and relocation information\n\
   -g -S -d --strip-debug           Remove all debugging symbols & sections\n\
      --strip-dwo                   Remove all DWO sections\n\

@@ -1,3 +1,8 @@
+2014-12-23  Andrew Stubbs  <ams@codesourcery.com>
+
+	* objcopy.c (strip_usage): Reword --remove-section description.
+	* doc/binutils.texi (strip): Likewise.
+
 2014-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (objdump): Reformat to avoid overlong lines.
