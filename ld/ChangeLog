@@ -1,6 +1,11 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-24  Alan Modra  <amodra@gmail.com>
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Exclude
+	shared libraries in loop looking for .eh_frame sections.
+	Similarly for build-id loop.
+
 	2014-12-23  Alan Modra  <amodra@gmail.com>
 	* ldexp.c (exp_fold_tree_1 <etree_provide>): Test linker_def.
 
