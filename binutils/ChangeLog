@@ -1,3 +1,8 @@
+2014-12-24  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_cie): Revert check for unused augmentation data -
+	it was bogus.
+
 2014-12-23  Andrew Stubbs  <ams@codesourcery.com>
 
 	* objcopy.c (strip_usage): Reword --remove-section description.
