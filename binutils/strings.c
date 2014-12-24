@@ -21,7 +21,10 @@
    Options:
    --all
    -a
-   -		Do not scan only the initialized data section of object files.
+   -		Scan each file in its entirety.
+
+   --data
+   -d		Scan only the initialized data section(s) of object files.
 
    --print-file-name
    -f		Print the name of the file before each string.
@@ -114,6 +117,7 @@ static int encoding_bytes;
 static struct option long_options[] =
 {
   {"all", no_argument, NULL, 'a'},
+  {"data", no_argument, NULL, 'd'},
   {"print-file-name", no_argument, NULL, 'f'},
   {"bytes", required_argument, NULL, 'n'},
   {"radix", required_argument, NULL, 't'},
@@ -136,7 +140,7 @@ typedef struct
 
 static void strings_a_section (bfd *, asection *, void *);
 static bfd_boolean strings_object_file (const char *);
-static bfd_boolean strings_file (char *file);
+static bfd_boolean strings_file (char *);
 static void print_strings (const char *, FILE *, file_ptr, int, int, char *);
 static void usage (FILE *, int);
 static long get_char (FILE *, file_ptr *, int *, char **);
@@ -167,17 +171,24 @@ main (int argc, char **argv)
   include_all_whitespace = FALSE;
   print_addresses = FALSE;
   print_filenames = FALSE;
-  datasection_only = TRUE;
+  if (DEFAULT_STRINGS_ALL)
+    datasection_only = FALSE;
+  else
+    datasection_only = TRUE;
   target = NULL;
   encoding = 's';
 
-  while ((optc = getopt_long (argc, argv, "afhHn:wot:e:T:Vv0123456789",
+  while ((optc = getopt_long (argc, argv, "adfhHn:wot:e:T:Vv0123456789",
 			      long_options, (int *) 0)) != EOF)
     {
       switch (optc)
 	{
 	case 'a':
 	  datasection_only = FALSE;
+	  break;
+
+	case 'd':
+	  datasection_only = TRUE;
 	  break;
 
 	case 'f':
@@ -567,14 +578,14 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	switch (address_radix)
 	  {
 	  case 8:
-#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+#ifdef HAVE_LONG_LONG
 	    if (sizeof (start) > sizeof (long))
 	      {
-#ifndef __MSVCRT__
+# ifndef __MSVCRT__
 	        printf ("%7llo ", (unsigned long long) start);
-#else
+# else
 	        printf ("%7I64o ", (unsigned long long) start);
-#endif
+# endif
 	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
@@ -586,14 +597,14 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    break;
 
 	  case 10:
-#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+#ifdef HAVE_LONG_LONG
 	    if (sizeof (start) > sizeof (long))
 	      {
-#ifndef __MSVCRT__
+# ifndef __MSVCRT__
 	        printf ("%7lld ", (unsigned long long) start);
-#else
+# else
 	        printf ("%7I64d ", (unsigned long long) start);
-#endif
+# endif
 	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
@@ -605,14 +616,14 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    break;
 
 	  case 16:
-#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+#ifdef HAVE_LONG_LONG
 	    if (sizeof (start) > sizeof (long))
 	      {
-#ifndef __MSVCRT__
+# ifndef __MSVCRT__
 	        printf ("%7llx ", (unsigned long long) start);
-#else
+# else
 	        printf ("%7I64x ", (unsigned long long) start);
-#endif
+# endif
 	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
@@ -648,8 +659,18 @@ usage (FILE *stream, int status)
 {
   fprintf (stream, _("Usage: %s [option(s)] [file(s)]\n"), program_name);
   fprintf (stream, _(" Display printable strings in [file(s)] (stdin by default)\n"));
-  fprintf (stream, _(" The options are:\n\
+  fprintf (stream, _(" The options are:\n"));
+
+  if (DEFAULT_STRINGS_ALL)
+    fprintf (stream, _("\
+  -a - --all                Scan the entire file, not just the data section [default]\n\
+  -d --data                 Only scan the data sections in the file\n"));
+  else
+    fprintf (stream, _("\
   -a - --all                Scan the entire file, not just the data section\n\
+  -d --data                 Only scan the data sections in the file [default]\n"));
+
+  fprintf (stream, _("\
   -f --print-file-name      Print the name of the file before each string\n\
   -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n\
   -<number>                   least [number] characters (default 4).\n\

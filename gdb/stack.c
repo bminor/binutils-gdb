@@ -36,7 +36,6 @@
 #include "block.h"
 #include "stack.h"
 #include "dictionary.h"
-#include "exceptions.h"
 #include "reggroups.h"
 #include "regcache.h"
 #include "solib.h"
@@ -1777,7 +1776,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
 
 	  QUIT;
 	  pc = get_frame_address_in_block (fi);
-	  find_pc_sect_symtab_via_partial (pc, find_pc_mapped_section (pc));
+	  expand_symtab_containing_pc (pc, find_pc_mapped_section (pc));
 	}
     }
 
@@ -2570,7 +2569,6 @@ get_frame_language (void)
     {
       volatile struct gdb_exception ex;
       CORE_ADDR pc = 0;
-      struct symtab *s;
 
       /* We determine the current frame language by looking up its
          associated symtab.  To retrieve this symtab, we use the frame
@@ -2592,9 +2590,10 @@ get_frame_language (void)
 	}
       else
 	{
-	  s = find_pc_symtab (pc);
-	  if (s != NULL)
-	    return s->language;
+	  struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
+
+	  if (cust != NULL)
+	    return compunit_language (cust);
 	}
     }
 

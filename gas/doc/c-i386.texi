@@ -151,16 +151,28 @@ accept various extension mnemonics.  For example,
 @code{smap},
 @code{mpx},
 @code{sha},
+@code{prefetchwt1},
+@code{clflushopt},
+@code{se1},
+@code{clwb},
+@code{pcommit},
 @code{avx512f},
 @code{avx512cd},
 @code{avx512er},
 @code{avx512pf},
+@code{avx512vl},
+@code{avx512bw},
+@code{avx512dq},
+@code{avx512ifma},
+@code{avx512vbmi},
 @code{noavx},
 @code{vmx},
 @code{vmfunc},
 @code{smx},
 @code{xsave},
 @code{xsaveopt},
+@code{xsavec},
+@code{xsaves},
 @code{aes},
 @code{pclmul},
 @code{fsgsbase},
@@ -188,9 +200,6 @@ accept various extension mnemonics.  For example,
 @code{svme},
 @code{abm} and
 @code{padlock}.
-@code{avx512dq},
-@code{avx512bw},
-@code{avx512vl},
 Note that rather than extending a basic instruction set, the extension
 mnemonics starting with @code{no} revoke the respective functionality.
 
@@ -1094,20 +1103,15 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.rdrnd} @tab @samp{.f16c} @tab @samp{.avx2} @tab @samp{.bmi2}
 @item @samp{.lzcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc} @tab @samp{.hle}
 @item @samp{.rtm} @tab @samp{.adx} @tab @samp{.rdseed} @tab @samp{.prfchw}
-@item @samp{.smap} @tab @samp{.mpx}
-@item @samp{.smap} @tab @samp{.sha}
-@item @samp{.smap} @tab @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves}
-@item @samp{.smap} @tab @samp{.prefetchwt1}
-@item @samp{.smap} @tab @samp{.avx512vl} @tab @samp{.avx512bw} @tab @samp{.avx512dq}
+@item @samp{.smap} @tab @samp{.mpx} @tab @samp{.sha} @tab @samp{.prefetchwt1}
+@item @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves} @tab @samp{.se1}
+@item @samp{.avx512f} @tab @samp{.avx512cd} @tab @samp{.avx512er} @tab @samp{.avx512pf}
+@item @samp{.avx512vl} @tab @samp{.avx512bw} @tab @samp{.avx512dq} @tab @samp{.avx512ifma}
+@item @samp{.avx512vbmi} @tab @samp{.clwb} @tab @samp{.pcommit}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock}
-@item @samp{.smap} @tab @samp{.avx512f} @tab @samp{.avx512cd} @tab @samp{.avx512er}
-@item @samp{.avx512pf} @tab @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a}
-@item @samp{.sse5} @tab @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
-@item @samp{.abm} @tab @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop}
-@item @samp{.cx16} @tab @samp{.padlock}
 @end multitable
 
 Apart from the warning, there are only two other effects on

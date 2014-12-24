@@ -479,7 +479,7 @@ v:int:call_dummy_location::::AT_ENTRY_POINT::0
 M:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr, struct regcache *regcache:sp, funaddr, args, nargs, value_type, real_pc, bp_addr, regcache
 
 m:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all::default_print_registers_info::0
-M:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
+m:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args::default_print_float_info::0
 M:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
 # MAP a GDB RAW register number onto a simulator register number.  See
 # also include/...-sim.h.
@@ -635,8 +635,42 @@ m:int:in_solib_return_trampoline:CORE_ADDR pc, const char *name:pc, name::generi
 # which don't suffer from that problem could just let this functionality
 # untouched.
 m:int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue_p::0
-f:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym::default_elf_make_msymbol_special::0
+# Process an ELF symbol in the minimal symbol table in a backend-specific
+# way.  Normally this hook is supposed to do nothing, however if required,
+# then this hook can be used to apply tranformations to symbols that are
+# considered special in some way.  For example the MIPS backend uses it
+# to interpret \`st_other' information to mark compressed code symbols so
+# that they can be treated in the appropriate manner in the processing of
+# the main symbol table and DWARF-2 records.
+F:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym
 f:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym::default_coff_make_msymbol_special::0
+# Process a symbol in the main symbol table in a backend-specific way.
+# Normally this hook is supposed to do nothing, however if required,
+# then this hook can be used to apply tranformations to symbols that
+# are considered special in some way.  This is currently used by the
+# MIPS backend to make sure compressed code symbols have the ISA bit
+# set.  This in turn is needed for symbol values seen in GDB to match
+# the values used at the runtime by the program itself, for function
+# and label references.
+f:void:make_symbol_special:struct symbol *sym, struct objfile *objfile:sym, objfile::default_make_symbol_special::0
+# Adjust the address retrieved from a DWARF-2 record other than a line
+# entry in a backend-specific way.  Normally this hook is supposed to
+# return the address passed unchanged, however if that is incorrect for
+# any reason, then this hook can be used to fix the address up in the
+# required manner.  This is currently used by the MIPS backend to make
+# sure addresses in FDE, range records, etc. referring to compressed
+# code have the ISA bit set, matching line information and the symbol
+# table.
+f:CORE_ADDR:adjust_dwarf2_addr:CORE_ADDR pc:pc::default_adjust_dwarf2_addr::0
+# Adjust the address updated by a line entry in a backend-specific way.
+# Normally this hook is supposed to return the address passed unchanged,
+# however in the case of inconsistencies in these records, this hook can
+# be used to fix them up in the required manner.  This is currently used
+# by the MIPS backend to make sure all line addresses in compressed code
+# are presented with the ISA bit set, which is not always the case.  This
+# in turn ensures breakpoint addresses are correctly matched against the
+# stop PC.
+f:CORE_ADDR:adjust_dwarf2_line:CORE_ADDR addr, int rel:addr, rel::default_adjust_dwarf2_line::0
 v:int:cannot_step_breakpoint:::0:0::0
 v:int:have_nonsteppable_watchpoint:::0:0::0
 F:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
@@ -651,12 +685,13 @@ m:int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup
 # Fetch the pointer to the ith function argument.
 F:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
 
-# Return the appropriate register set for a core file section with
-# name SECT_NAME and size SECT_SIZE.
-M:const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
-
-# Supported register notes in a core file.
-v:struct core_regset_section *:core_regset_sections:const char *name, int len::::::host_address_to_string (gdbarch->core_regset_sections)
+# Iterate over all supported register notes in a core file.  For each
+# supported register note section, the iterator must call CB and pass
+# CB_DATA unchanged.  If REGCACHE is not NULL, the iterator can limit
+# the supported register note sections based on the current register
+# values.  Otherwise it should enumerate all supported register note
+# sections.
+M:void:iterate_over_regset_sections:iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache:cb, cb_data, regcache
 
 # Create core file notes
 M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
@@ -698,7 +733,7 @@ v:int:vtable_function_descriptors:::0:0::0
 v:int:vbit_in_delta:::0:0::0
 
 # Advance PC to next instruction in order to skip a permanent breakpoint.
-F:void:skip_permanent_breakpoint:struct regcache *regcache:regcache
+f:void:skip_permanent_breakpoint:struct regcache *regcache:regcache:default_skip_permanent_breakpoint:default_skip_permanent_breakpoint::0
 
 # The maximum length of an instruction on this architecture in bytes.
 V:ULONGEST:max_insn_length:::0:0
@@ -843,6 +878,12 @@ M:void:record_special_symbol:struct objfile *objfile, asymbol *sym:objfile, sym
 
 # Get architecture-specific system calls information from registers.
 M:LONGEST:get_syscall_number:ptid_t ptid:ptid
+
+# The filename of the XML syscall for this architecture.
+v:const char *:xml_syscall_file:::0:0::0:pstring (gdbarch->xml_syscall_file)
+
+# Information about system calls from this architecture
+v:struct syscalls_info *:syscalls_info:::0:0::0:host_address_to_string (gdbarch->syscalls_info)
 
 # SystemTap related fields and functions.
 
@@ -1029,6 +1070,30 @@ m:int:insn_is_jump:CORE_ADDR addr:addr::default_insn_is_jump::0
 # Return -1 if there is insufficient buffer for a whole entry.
 # Return 1 if an entry was read into *TYPEP and *VALP.
 M:int:auxv_parse:gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp:readptr, endptr, typep, valp
+
+# Find the address range of the current inferior's vsyscall/vDSO, and
+# write it to *RANGE.  If the vsyscall's length can't be determined, a
+# range with zero length is returned.  Returns true if the vsyscall is
+# found, false otherwise.
+m:int:vsyscall_range:struct mem_range *range:range::default_vsyscall_range::0
+
+# Allocate SIZE bytes of PROT protected page aligned memory in inferior.
+# PROT has GDB_MMAP_PROT_* bitmask format.
+# Throw an error if it is not possible.  Returned address is always valid.
+f:CORE_ADDR:infcall_mmap:CORE_ADDR size, unsigned prot:size, prot::default_infcall_mmap::0
+
+# Return string (caller has to use xfree for it) with options for GCC
+# to produce code for this target, typically "-m64", "-m32" or "-m31".
+# These options are put before CU's DW_AT_producer compilation options so that
+# they can override it.  Method may also return NULL.
+m:char *:gcc_target_options:void:::default_gcc_target_options::0
+
+# Return a regular expression that matches names used by this
+# architecture in GNU configury triplets.  The result is statically
+# allocated and must not be freed.  The default implementation simply
+# returns the BFD architecture name, which is correct in nearly every
+# case.
+m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
 EOF
 }
 
@@ -1140,6 +1205,8 @@ struct target_ops;
 struct obstack;
 struct bp_target_info;
 struct target_desc;
+struct objfile;
+struct symbol;
 struct displaced_step_closure;
 struct core_regset_section;
 struct syscall;
@@ -1148,6 +1215,8 @@ struct axs_value;
 struct stap_parse_info;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
+struct mem_range;
+struct syscalls_info;
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -1169,6 +1238,10 @@ extern struct gdbarch *target_gdbarch (void);
 
 typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
   (struct objfile *objfile, void *cb_data);
+
+typedef void (iterate_over_regset_sections_cb)
+  (const char *sect_name, int size, const struct regset *regset,
+   const char *human_name, void *cb_data);
 EOF
 
 # function typedef's

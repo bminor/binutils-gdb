@@ -23,7 +23,6 @@
 #include "defs.h"
 #include "block.h"
 #include "frame.h"
-#include "exceptions.h"
 #include "inferior.h"
 #include "objfiles.h"
 #include "symfile.h"
@@ -609,11 +608,8 @@ gdbscm_frame_block (SCM self)
 
   if (block != NULL)
     {
-      struct symtab *st;
-      SCM block_scm;
-
-      st = SYMBOL_SYMTAB (BLOCK_FUNCTION (fn_block));
-      return bkscm_scm_from_block (block, st->objfile);
+      return bkscm_scm_from_block
+	(block, symbol_objfile (BLOCK_FUNCTION (fn_block)));
     }
 
   return SCM_BOOL_F;

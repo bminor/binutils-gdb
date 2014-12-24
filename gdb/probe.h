@@ -96,14 +96,14 @@ struct probe_ops
 
     /* Set the semaphore associated with the PROBE.  This function only makes
        sense if the probe has a concept of semaphore associated to a
-       probe.  */
+       probe, otherwise it can be set to NULL.  */
 
     void (*set_semaphore) (struct probe *probe, struct objfile *objfile,
 			   struct gdbarch *gdbarch);
 
     /* Clear the semaphore associated with the PROBE.  This function only
        makes sense if the probe has a concept of semaphore associated to
-       a probe.  */
+       a probe, otherwise it can be set to NULL.  */
 
     void (*clear_semaphore) (struct probe *probe, struct objfile *objfile,
 			     struct gdbarch *gdbarch);

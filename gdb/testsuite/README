@@ -160,7 +160,9 @@ list of tests to run.
 If using GNU make then the contents are wildcard-expanded using
 GNU make's $(wildcard) function.  Test paths must be fully specified,
 relative to the "testsuite" subdirectory.  This allows one to run all
-tests in a subdirectory by passing "gdb.subdir/*.exp".
+tests in a subdirectory by passing "gdb.subdir/*.exp", or more simply
+by using the check-gdb.subdir target in the Makefile.
+
 If for some strange reason one wanted to run all tests that begin with
 the letter "d" that is also possible: TESTS="*/d*.exp".
 

@@ -2211,7 +2211,7 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   s = htab->sdynbss;
 
-  return _bfd_elf_adjust_dynamic_copy (h, s);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
@@ -4908,9 +4908,16 @@ _bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   in_attr = &in_attrs[Tag_GNU_Sparc_HWCAPS];
   out_attr = &out_attrs[Tag_GNU_Sparc_HWCAPS];
-
+  
   out_attr->i |= in_attr->i;
   out_attr->type = 1;
+
+  in_attr = &in_attrs[Tag_GNU_Sparc_HWCAPS2];
+  out_attr = &out_attrs[Tag_GNU_Sparc_HWCAPS2];
+  
+  out_attr->i |= in_attr->i;
+  out_attr->type = 1;
+
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   _bfd_elf_merge_object_attributes (ibfd, obfd);

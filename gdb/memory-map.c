@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "memory-map.h"
-#include "exceptions.h"
 
 #if !defined(HAVE_LIBEXPAT)
 

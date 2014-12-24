@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "block.h"
-#include "exceptions.h"
 #include "frame.h"
 #include "symtab.h"
 #include "objfiles.h"
@@ -51,6 +50,13 @@ static SCM domain_keyword;
 static SCM frame_keyword;
 
 static const struct objfile_data *syscm_objfile_data_key;
+static struct gdbarch_data *syscm_gdbarch_data_key;
+
+struct syscm_gdbarch_data
+{
+  /* Hash table to implement eqable gdbarch symbols.  */
+  htab_t htab;
+};
 
 /* Administrivia for symbol smobs.  */
 
@@ -76,20 +82,44 @@ syscm_eq_symbol_smob (const void *ap, const void *bp)
 	  && a->symbol != NULL);
 }
 
+static void *
+syscm_init_arch_symbols (struct gdbarch *gdbarch)
+{
+  struct syscm_gdbarch_data *data
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct syscm_gdbarch_data);
+
+  data->htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
+						   syscm_eq_symbol_smob);
+  return data;
+}
+
 /* Return the struct symbol pointer -> SCM mapping table.
    It is created if necessary.  */
 
 static htab_t
-syscm_objfile_symbol_map (struct symbol *symbol)
+syscm_get_symbol_map (struct symbol *symbol)
 {
-  struct objfile *objfile = SYMBOL_SYMTAB (symbol)->objfile;
-  htab_t htab = objfile_data (objfile, syscm_objfile_data_key);
+  htab_t htab;
 
-  if (htab == NULL)
+  if (SYMBOL_OBJFILE_OWNED (symbol))
     {
-      htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
-						 syscm_eq_symbol_smob);
-      set_objfile_data (objfile, syscm_objfile_data_key, htab);
+      struct objfile *objfile = symbol_objfile (symbol);
+
+      htab = objfile_data (objfile, syscm_objfile_data_key);
+      if (htab == NULL)
+	{
+	  htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
+						     syscm_eq_symbol_smob);
+	  set_objfile_data (objfile, syscm_objfile_data_key, htab);
+	}
+    }
+  else
+    {
+      struct gdbarch *gdbarch = symbol_arch (symbol);
+      struct syscm_gdbarch_data *data = gdbarch_data (gdbarch,
+						      syscm_gdbarch_data_key);
+
+      htab = data->htab;
     }
 
   return htab;
@@ -104,7 +134,7 @@ syscm_free_symbol_smob (SCM self)
 
   if (s_smob->symbol != NULL)
     {
-      htab_t htab = syscm_objfile_symbol_map (s_smob->symbol);
+      htab_t htab = syscm_get_symbol_map (s_smob->symbol);
 
       gdbscm_clear_eqable_gsmob_ptr_slot (htab, &s_smob->base);
     }
@@ -182,7 +212,7 @@ syscm_scm_from_symbol (struct symbol *symbol)
 
   /* If we've already created a gsmob for this symbol, return it.
      This makes symbols eq?-able.  */
-  htab = syscm_objfile_symbol_map (symbol);
+  htab = syscm_get_symbol_map (symbol);
   s_smob_for_lookup.symbol = symbol;
   slot = gdbscm_find_eqable_gsmob_ptr_slot (htab, &s_smob_for_lookup.base);
   if (*slot != NULL)
@@ -320,8 +350,9 @@ gdbscm_symbol_type (SCM self)
   return tyscm_scm_from_type (SYMBOL_TYPE (symbol));
 }
 
-/* (symbol-symtab <gdb:symbol>) -> <gdb:symtab>
-   Return the symbol table of SELF.  */
+/* (symbol-symtab <gdb:symbol>) -> <gdb:symtab> | #f
+   Return the symbol table of SELF.
+   If SELF does not have a symtab (it is arch-owned) return #f.  */
 
 static SCM
 gdbscm_symbol_symtab (SCM self)
@@ -330,7 +361,9 @@ gdbscm_symbol_symtab (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return stscm_scm_from_symtab (SYMBOL_SYMTAB (symbol));
+  if (!SYMBOL_OBJFILE_OWNED (symbol))
+    return SCM_BOOL_F;
+  return stscm_scm_from_symtab (symbol_symtab (symbol));
 }
 
 /* (symbol-name <gdb:symbol>) -> string */
@@ -608,7 +641,7 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      symbol = lookup_symbol_global (name, NULL, domain);
+      symbol = lookup_global_symbol (name, NULL, domain);
     }
   do_cleanups (cleanups);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
@@ -762,4 +795,8 @@ gdbscm_initialize_symbols (void)
      invalidate symbols when an object file is about to be deleted.  */
   syscm_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, syscm_del_objfile_symbols);
+
+  /* Arch-specific symbol data.  */
+  syscm_gdbarch_data_key
+    = gdbarch_data_register_post_init (syscm_init_arch_symbols);
 }

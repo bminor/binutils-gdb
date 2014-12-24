@@ -273,16 +273,15 @@ mcore_coff_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 }
 #undef HOW2MAP
 
+#define NUM_HOWTOS NUM_ELEM (mcore_coff_howto_table)
+
 static reloc_howto_type *
 mcore_coff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 			      const char *r_name)
 {
   unsigned int i;
 
-  for (i = 0;
-       i < (sizeof (mcore_coff_howto_table)
-	    / sizeof (mcore_coff_howto_table[0]));
-       i++)
+  for (i = 0; i < NUM_HOWTOS; i++)
     if (mcore_coff_howto_table[i].name != NULL
 	&& strcasecmp (mcore_coff_howto_table[i].name, r_name) == 0)
       return &mcore_coff_howto_table[i];
@@ -290,8 +289,11 @@ mcore_coff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-#define RTYPE2HOWTO(cache_ptr, dst) \
-  (cache_ptr)->howto = mcore_coff_howto_table + (dst)->r_type;
+#define RTYPE2HOWTO(cache_ptr, dst)				\
+  ((cache_ptr)->howto =						\
+   ((dst)->r_type < NUM_HOWTOS					\
+    ? mcore_coff_howto_table + (dst)->r_type			\
+    : NULL))
 
 static reloc_howto_type *
 coff_mcore_rtype_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
@@ -303,7 +305,7 @@ coff_mcore_rtype_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
 {
   reloc_howto_type * howto;
 
-  if (rel->r_type >= NUM_ELEM (mcore_coff_howto_table))
+  if (rel->r_type >= NUM_HOWTOS)
     return NULL;
 
   howto = mcore_coff_howto_table + rel->r_type;

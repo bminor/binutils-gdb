@@ -22,8 +22,6 @@
 #ifndef INTERPS_H
 #define INTERPS_H
 
-#include "exceptions.h"
-
 struct ui_out;
 struct interp;
 

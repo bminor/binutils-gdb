@@ -557,6 +557,8 @@ parse_exp_not_indexed (const char *s, expressionS *op)
     case O_illegal:
       error (_("bad expression syntax"));
       break;
+    default:
+      break;
     }
   return input_line_pointer;
 }
@@ -604,6 +606,8 @@ parse_exp (const char *s, expressionS *op)
 	  op->X_op = O_md1;
 	}
 	break;
+    default:
+      break;
     }
   return res;
 }

@@ -15,7 +15,8 @@
 
 	.text
 	.globl main
-main:	.byte 0
+main:
+	.4byte	0
 .Lmain_end:
 	.section	.debug_info
 debug_start:

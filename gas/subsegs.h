@@ -90,6 +90,9 @@ typedef struct segment_info_struct {
      this section.  sym->bsym and bfd_section->symbol should be the same.  */
   symbolS *sym;
 
+  /* Used by dwarf2dbg.c for this section's line table entries.  */
+  void *dwarf2_line_seg;
+
   union {
     /* Current size of section holding stabs strings.  */
     unsigned long stab_string_size;

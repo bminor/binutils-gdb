@@ -72,7 +72,6 @@ _initialize_sparc64fbsd_nat (void)
   t = sparc_target ();
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
   t->to_find_memory_regions = fbsd_find_memory_regions;
-  t->to_make_corefile_notes = fbsd_make_corefile_notes;
   add_target (t);
 
   sparc_gregmap = &sparc64fbsd_gregmap;

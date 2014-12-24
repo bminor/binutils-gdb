@@ -1516,11 +1516,16 @@ Output_data_plt_x86_64_standard<size>::do_fill_plt_entry(
     unsigned int plt_offset,
     unsigned int plt_index)
 {
+  // Check PC-relative offset overflow in PLT entry.
+  uint64_t plt_got_pcrel_offset = (got_address + got_offset
+				   - (plt_address + plt_offset + 6));
+  if (Bits<32>::has_overflow(plt_got_pcrel_offset))
+    gold_error(_("PC-relative offset overflow in PLT entry %d"),
+	       plt_index + 1);
+
   memcpy(pov, plt_entry, plt_entry_size);
   elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
-					      (got_address + got_offset
-					       - (plt_address + plt_offset
-						  + 6)));
+					      plt_got_pcrel_offset);
 
   elfcpp::Swap_unaligned<32, false>::writeval(pov + 7, plt_index);
   elfcpp::Swap<32, false>::writeval(pov + 12,
@@ -2923,11 +2928,6 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 		  }
 	      }
 	  }
-	// For GOTPLT64, we also need a PLT entry (but only if the
-	// symbol is not fully resolved).
-	if (r_type == elfcpp::R_X86_64_GOTPLT64
-	    && !gsym->final_value_is_known())
-	  target->make_plt_entry(symtab, layout, gsym);
       }
       break;
 
@@ -3454,9 +3454,9 @@ Target_x86_64<size>::Relocate::relocate(
       break;
 
     case elfcpp::R_X86_64_GOT64:
-      // The ABI doc says "Like GOT64, but indicates a PLT entry is needed."
-      // Since we always add a PLT entry, this is equivalent.
     case elfcpp::R_X86_64_GOTPLT64:
+      // R_X86_64_GOTPLT64 is obsolete and treated the the same as
+      // GOT64.
       gold_assert(have_got_offset);
       Relocate_functions<size, false>::rela64(view, got_offset, addend);
       break;
@@ -4470,22 +4470,46 @@ Target_x86_64<size>::do_calls_non_split(Relobj* object, unsigned int shndx,
   // The function starts with a comparison of the stack pointer and a
   // field in the TCB.  This is followed by a jump.
 
-  // cmp %fs:NN,%rsp
-  if (this->match_view(view, view_size, fnoffset, "\x64\x48\x3b\x24\x25", 5)
-      && fnsize > 9)
+  const char *cmp_insn, *lea_r10_insn, *lea_r11_insn;
+  size_t cmp_insn_len, nop_insn_len;
+
+  if (size == 32)
+    {
+      // For X32
+      // cmp %fs:NN,%esp
+      cmp_insn = "\x64\x3b\x24\x25";
+      cmp_insn_len = 4;
+      // lea NN(%rsp),%r10d
+      // lea NN(%rsp),%r11d
+      lea_r10_insn = "\x44\x8d\x94\x24";
+      lea_r11_insn = "\x44\x8d\x9c\x24";
+      nop_insn_len = 7;
+    }
+  else
+    {
+      // cmp %fs:NN,%rsp
+      cmp_insn = "\x64\x48\x3b\x24\x25";
+      cmp_insn_len = 5;
+      // lea NN(%rsp),%r10
+      // lea NN(%rsp),%r11
+      lea_r10_insn = "\x4c\x8d\x94\x24";
+      lea_r11_insn = "\x4c\x8d\x9c\x24";
+      nop_insn_len = 8;
+    }
+
+  if (this->match_view(view, view_size, fnoffset, cmp_insn, cmp_insn_len)
+      && fnsize > (nop_insn_len + 1))
     {
       // We will call __morestack if the carry flag is set after this
       // comparison.  We turn the comparison into an stc instruction
       // and some nops.
       view[fnoffset] = '\xf9';
-      this->set_view_to_nop(view, view_size, fnoffset + 1, 8);
+      this->set_view_to_nop(view, view_size, fnoffset + 1, nop_insn_len);
     }
-  // lea NN(%rsp),%r10
-  // lea NN(%rsp),%r11
   else if ((this->match_view(view, view_size, fnoffset,
-			     "\x4c\x8d\x94\x24", 4)
+			     lea_r10_insn, 4)
 	    || this->match_view(view, view_size, fnoffset,
-				"\x4c\x8d\x9c\x24", 4))
+				lea_r11_insn, 4))
 	   && fnsize > 8)
     {
       // This is loading an offset from the stack pointer for a

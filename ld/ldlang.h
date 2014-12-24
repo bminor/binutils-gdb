@@ -470,17 +470,6 @@ struct unique_sections
   const char *name;
 };
 
-/* This structure records symbols for which we need to keep track of
-   definedness for use in the DEFINED () test.  */
-
-struct lang_definedness_hash_entry
-{
-  struct bfd_hash_entry root;
-  unsigned int by_object : 1;
-  unsigned int by_script : 1;
-  unsigned int iteration : 1;
-};
-
 /* Used by place_orphan to keep track of orphan sections and statements.  */
 
 struct orphan_save
@@ -525,7 +514,7 @@ extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
 extern void lang_init
   (bfd_boolean);
 extern void lang_finish
-  (bfd_boolean);
+  (void);
 extern lang_memory_region_type * lang_memory_region_lookup
   (const char * const, bfd_boolean);
 extern void lang_memory_region_alias
@@ -683,10 +672,6 @@ extern void lang_add_unique
   (const char *);
 extern const char *lang_get_output_target
   (void);
-extern struct lang_definedness_hash_entry *lang_symbol_defined (const char *);
-extern void lang_update_definedness
-  (const char *, struct bfd_link_hash_entry *);
-
 extern void add_excluded_libs (const char *);
 extern bfd_boolean load_symbols
   (lang_input_statement_type *, lang_statement_list_type *);

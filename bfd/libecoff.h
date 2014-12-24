@@ -285,12 +285,15 @@ extern void _bfd_ecoff_print_symbol
   (bfd *, void *, asymbol *, bfd_print_symbol_type);
 extern void _bfd_ecoff_get_symbol_info
   (bfd *, asymbol *, symbol_info *);
+#define _bfd_ecoff_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
 extern bfd_boolean _bfd_ecoff_bfd_is_local_label_name
   (bfd *, const char *);
 #define _bfd_ecoff_get_lineno _bfd_nosymbols_get_lineno
 extern bfd_boolean _bfd_ecoff_find_nearest_line
-  (bfd *, asection *, asymbol **, bfd_vma, const char **, const char **,
-   unsigned int *);
+  (bfd *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *);
+#define _bfd_ecoff_find_line _bfd_nosymbols_find_line
 #define _bfd_ecoff_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define _bfd_ecoff_read_minisymbols _bfd_generic_read_minisymbols
 #define _bfd_ecoff_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol

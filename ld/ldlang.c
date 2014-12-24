@@ -68,7 +68,6 @@ static bfd_vma print_dot;
 static lang_input_statement_type *first_file;
 static const char *current_target;
 static lang_statement_list_type statement_list;
-static struct bfd_hash_table lang_definedness_table;
 static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
 static struct unique_sections *unique_section_list;
@@ -80,8 +79,6 @@ static cmdline_list_type cmdline_temp_object_only_list;
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
 static lang_input_statement_type *lookup_name (const char *);
-static struct bfd_hash_entry *lang_definedness_newfunc
- (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 static void insert_undefined (const char *);
 static bfd_boolean sort_def_symbol (struct bfd_link_hash_entry *, void *);
 static void print_statement (lang_statement_union_type *,
@@ -1129,6 +1126,26 @@ lang_add_input_file (const char *name,
 		     lang_input_file_enum_type file_type,
 		     const char *target)
 {
+  if (name != NULL && *name == '=')
+    {
+      lang_input_statement_type *ret;
+      char *sysrooted_name
+	= concat (ld_sysroot, name + 1, (const char *) NULL);
+
+      /* We've now forcibly prepended the sysroot, making the input
+	 file independent of the context.  Therefore, temporarily
+	 force a non-sysrooted context for this statement, so it won't
+	 get the sysroot prepended again when opened.  (N.B. if it's a
+	 script, any child nodes with input files starting with "/"
+	 will be handled as "sysrooted" as they'll be found to be
+	 within the sysroot subdirectory.)  */
+      unsigned int outer_sysrooted = input_flags.sysrooted;
+      input_flags.sysrooted = 0;
+      ret = new_afile (sysrooted_name, file_type, target, TRUE);
+      input_flags.sysrooted = outer_sysrooted;
+      return ret;
+    }
+
   return new_afile (name, file_type, target, TRUE);
 }
 
@@ -1235,24 +1252,13 @@ lang_init (bfd_boolean object_only)
 
   abs_output_section->bfd_section = bfd_abs_section_ptr;
 
-  /* The value "13" is ad-hoc, somewhat related to the expected number of
-     assignments in a linker script.  */
-  if (!object_only
-      && !bfd_hash_table_init_n (&lang_definedness_table,
-				 lang_definedness_newfunc,
-				 sizeof (struct lang_definedness_hash_entry),
-				 13))
-    einfo (_("%P%F: can not create hash table: %E\n"));
-
   asneeded_list_head = NULL;
   asneeded_list_tail = &asneeded_list_head;
 }
 
 void
-lang_finish (bfd_boolean object_only)
+lang_finish (void)
 {
-  if (!object_only)
-    bfd_hash_table_free (&lang_definedness_table);
   output_section_statement_table_free ();
 }
 
@@ -2427,8 +2433,7 @@ lang_add_section (lang_statement_list_type *ptr,
 
   section->output_section = output->bfd_section;
 
-  if (!link_info.relocatable
-      && !map_head_is_link_order)
+  if (!map_head_is_link_order)
     {
       asection *s = output->bfd_section->map_tail.s;
       output->bfd_section->map_tail.s = section;
@@ -3366,65 +3371,6 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
   /* Exit if any of the files were missing.  */
   if (input_flags.missing_file)
     einfo ("%F");
-}
-
-/* New-function for the definedness hash table.  */
-
-static struct bfd_hash_entry *
-lang_definedness_newfunc (struct bfd_hash_entry *entry,
-			  struct bfd_hash_table *table ATTRIBUTE_UNUSED,
-			  const char *name ATTRIBUTE_UNUSED)
-{
-  struct lang_definedness_hash_entry *ret
-    = (struct lang_definedness_hash_entry *) entry;
-
-  if (ret == NULL)
-    ret = (struct lang_definedness_hash_entry *)
-      bfd_hash_allocate (table, sizeof (struct lang_definedness_hash_entry));
-
-  if (ret == NULL)
-    einfo (_("%P%F: bfd_hash_allocate failed creating symbol %s\n"), name);
-
-  ret->by_object = 0;
-  ret->by_script = 0;
-  ret->iteration = 0;
-  return &ret->root;
-}
-
-/* Called during processing of linker script script expressions.
-   For symbols assigned in a linker script, return a struct describing
-   where the symbol is defined relative to the current expression,
-   otherwise return NULL.  */
-
-struct lang_definedness_hash_entry *
-lang_symbol_defined (const char *name)
-{
-  return ((struct lang_definedness_hash_entry *)
-	  bfd_hash_lookup (&lang_definedness_table, name, FALSE, FALSE));
-}
-
-/* Update the definedness state of NAME.  */
-
-void
-lang_update_definedness (const char *name, struct bfd_link_hash_entry *h)
-{
-  struct lang_definedness_hash_entry *defentry
-    = (struct lang_definedness_hash_entry *)
-    bfd_hash_lookup (&lang_definedness_table, name, TRUE, FALSE);
-
-  if (defentry == NULL)
-    einfo (_("%P%F: bfd_hash_lookup failed creating symbol %s\n"), name);
-
-  /* If the symbol was already defined, and not by a script, then it
-     must be defined by an object file.  */
-  if (!defentry->by_script
-      && h->type != bfd_link_hash_undefined
-      && h->type != bfd_link_hash_common
-      && h->type != bfd_link_hash_new)
-    defentry->by_object = 1;
-
-  defentry->by_script = 1;
-  defentry->iteration = lang_statement_iteration;
 }
 
 /* Add the supplied name to the symbol table as an undefined reference.
@@ -8917,6 +8863,7 @@ cmdline_emit_object_only_section (void)
   link_info.input_bfds_tail = &link_info.input_bfds;
 
   lang_init (TRUE);
+  ldexp_init (TRUE);
 
   ld_parse_linker_script ();
 
@@ -8989,7 +8936,8 @@ cmdline_emit_object_only_section (void)
 
   ldwrite ();
 
-  lang_finish (TRUE);
+  ldexp_finish (TRUE);
+  lang_finish ();
 
   if (! bfd_close (link_info.output_bfd))
     einfo (_("%P%F:%s: final close failed on object-only output: %E\n"),

@@ -63,6 +63,12 @@ FUNC (compdir_absolute_ldir_absolute_file_relative_different)	\
 FUNC (compdir_absolute_ldir_absolute_file_absolute_same)	\
 FUNC (compdir_absolute_ldir_absolute_file_absolute_different)
 
+#ifdef __mips__
+#define START_INSNS asm (".insn\n");
+#else
+#define START_INSNS
+#endif
+
 /* Notes: (1) The '*_start' label below is needed because 'name' may
    point to a function descriptor instead of to the actual code.  (2)
    The '.balign' should specify the highest possible function
@@ -72,6 +78,7 @@ FUNC (compdir_absolute_ldir_absolute_file_absolute_different)
 #define FUNC(name)					\
   asm (".balign 8");					\
   asm (#name "_start: .globl " #name "_start\n");	\
+  START_INSNS						\
   static void						\
   name (void)						\
   {							\

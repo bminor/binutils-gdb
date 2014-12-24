@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "btrace.h"
 #include "gdbthread.h"
-#include "exceptions.h"
 #include "inferior.h"
 #include "target.h"
 #include "record.h"
@@ -80,7 +79,7 @@ ftrace_print_filename (const struct btrace_function *bfun)
   sym = bfun->sym;
 
   if (sym != NULL)
-    filename = symtab_to_filename_for_display (sym->symtab);
+    filename = symtab_to_filename_for_display (symbol_symtab (sym));
   else
     filename = "<unknown>";
 
@@ -152,8 +151,8 @@ ftrace_function_switched (const struct btrace_function *bfun,
 	return 1;
 
       /* Check the location of those functions, as well.  */
-      bfname = symtab_to_fullname (sym->symtab);
-      fname = symtab_to_fullname (fun->symtab);
+      bfname = symtab_to_fullname (symbol_symtab (sym));
+      fname = symtab_to_fullname (symbol_symtab (fun));
       if (filename_cmp (fname, bfname) != 0)
 	return 1;
     }
@@ -184,7 +183,7 @@ ftrace_skip_file (const struct btrace_function *bfun, const char *fullname)
   if (sym == NULL)
     return 1;
 
-  bfile = symtab_to_fullname (sym->symtab);
+  bfile = symtab_to_fullname (symbol_symtab (sym));
 
   return (filename_cmp (bfile, fullname) != 0);
 }

@@ -15,10 +15,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <sys/types.h>
+#include <unistd.h>
+
+int server_pid;
+
 int
 main (void)
 {
-  int i = 0;
+  int i;
+
+  server_pid = getppid ();
+  i = 0;
 
   return i;
 }

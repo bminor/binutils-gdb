@@ -40,7 +40,6 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "exceptions.h"
 #include <signal.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -2103,7 +2102,7 @@ static int
 monitor_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr = bp_tgt->placed_address;
+  CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
   int i;
   int bplen;
 

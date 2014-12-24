@@ -836,7 +836,8 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	if (symsec == NULL)
 	  abort ();
 
-	if (bfd_is_abs_section (symsec))
+	if (bfd_is_abs_section (symsec)
+	    || symsec == reg_section)
 	  {
 	    /* The fixup_segment routine normally will not use this
 	       symbol in a relocation.  */
@@ -1693,63 +1694,98 @@ set_symtab (void)
 #endif
 
 static void
-subsegs_finish (void)
+subsegs_finish_section (asection *s)
 {
   struct frchain *frchainP;
+  segment_info_type *seginfo = seg_info (s);
+  if (!seginfo)
+    return;
+
+  for (frchainP = seginfo->frchainP;
+       frchainP != NULL;
+       frchainP = frchainP->frch_next)
+    {
+      int alignment = 0;
+
+      subseg_set (s, frchainP->frch_subseg);
+
+      /* This now gets called even if we had errors.  In that case,
+	 any alignment is meaningless, and, moreover, will look weird
+	 if we are generating a listing.  */
+      if (!had_errors ())
+	{
+	  alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
+	  if ((bfd_get_section_flags (now_seg->owner, now_seg) & SEC_MERGE)
+	      && now_seg->entsize)
+	    {
+	      unsigned int entsize = now_seg->entsize;
+	      int entalign = 0;
+
+	      while ((entsize & 1) == 0)
+		{
+		  ++entalign;
+		  entsize >>= 1;
+		}
+
+	      if (entalign > alignment)
+		alignment = entalign;
+	    }
+	}
+
+      if (subseg_text_p (now_seg))
+	frag_align_code (alignment, 0);
+      else
+	frag_align (alignment, 0, 0);
+
+      /* frag_align will have left a new frag.
+	 Use this last frag for an empty ".fill".
+
+	 For this segment ...
+	 Create a last frag. Do not leave a "being filled in frag".  */
+      frag_wane (frag_now);
+      frag_now->fr_fix = 0;
+      know (frag_now->fr_next == NULL);
+    }
+}
+
+static void
+subsegs_finish (void)
+{
   asection *s;
 
   for (s = stdoutput->sections; s; s = s->next)
+    subsegs_finish_section (s);
+}
+
+#ifdef OBJ_ELF
+static void
+create_obj_attrs_section (void)
+{
+  segT s;
+  char *p;
+  offsetT size;
+  const char *name;
+
+  size = bfd_elf_obj_attr_size (stdoutput);
+  if (size)
     {
-      segment_info_type *seginfo = seg_info (s);
-      if (!seginfo)
-	continue;
+      name = get_elf_backend_data (stdoutput)->obj_attrs_section;
+      if (!name)
+	name = ".gnu.attributes";
+      s = subseg_new (name, 0);
+      elf_section_type (s)
+	= get_elf_backend_data (stdoutput)->obj_attrs_section_type;
+      bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
+      frag_now_fix ();
+      p = frag_more (size);
+      bfd_elf_set_obj_attr_contents (stdoutput, (bfd_byte *)p, size);
 
-      for (frchainP = seginfo->frchainP;
-	   frchainP != NULL;
-	   frchainP = frchainP->frch_next)
-	{
-	  int alignment = 0;
-
-	  subseg_set (s, frchainP->frch_subseg);
-
-	  /* This now gets called even if we had errors.  In that case,
-	     any alignment is meaningless, and, moreover, will look weird
-	     if we are generating a listing.  */
-	  if (!had_errors ())
-	    {
-	      alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
-	      if ((bfd_get_section_flags (now_seg->owner, now_seg) & SEC_MERGE)
-		  && now_seg->entsize)
-		{
-		  unsigned int entsize = now_seg->entsize;
-		  int entalign = 0;
-
-		  while ((entsize & 1) == 0)
-		    {
-		      ++entalign;
-		      entsize >>= 1;
-		    }
-		  if (entalign > alignment)
-		    alignment = entalign;
-		}
-	    }
-
-	  if (subseg_text_p (now_seg))
-	    frag_align_code (alignment, 0);
-	  else
-	    frag_align (alignment, 0, 0);
-
-	  /* frag_align will have left a new frag.
-	     Use this last frag for an empty ".fill".
-
-	     For this segment ...
-	     Create a last frag. Do not leave a "being filled in frag".  */
-	  frag_wane (frag_now);
-	  frag_now->fr_fix = 0;
-	  know (frag_now->fr_next == NULL);
-	}
+      subsegs_finish_section (s);
+      relax_segment (seg_info (s)->frchainP->frch_root, s, 0);
+      size_seg (stdoutput, s, NULL);
     }
 }
+#endif
 
 /* Write the object file.  */
 
@@ -1841,6 +1877,11 @@ write_object_file (void)
 
 #ifdef md_post_relax_hook
   md_post_relax_hook;
+#endif
+
+#ifdef OBJ_ELF
+  if (IS_ELF)
+    create_obj_attrs_section ();
 #endif
 
 #ifndef WORKING_DOT_WORD
@@ -2263,13 +2304,13 @@ relax_frag (segT segment, fragS *fragP, long stretch)
 /* Relax_align. Advance location counter to next address that has 'alignment'
    lowest order bits all 0s, return size of adjustment made.  */
 static relax_addressT
-relax_align (register relax_addressT address,	/* Address now.  */
-	     register int alignment	/* Alignment (binary).  */)
+relax_align (relax_addressT address,	/* Address now.  */
+	     int alignment	/* Alignment (binary).  */)
 {
   relax_addressT mask;
   relax_addressT new_address;
 
-  mask = ~((~0) << alignment);
+  mask = ~((relax_addressT) ~0 << alignment);
   new_address = (address + mask) & (~mask);
 #ifdef LINKER_RELAXING_SHRINKS_ONLY
   if (linkrelax)

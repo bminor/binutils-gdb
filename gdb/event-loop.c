@@ -32,7 +32,6 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
-#include "exceptions.h"
 #include "gdb_select.h"
 #include "observer.h"
 

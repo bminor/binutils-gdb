@@ -1116,7 +1116,7 @@ md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 		 segT sec ATTRIBUTE_UNUSED,
-		 register fragS *fragP ATTRIBUTE_UNUSED)
+		 fragS *fragP ATTRIBUTE_UNUSED)
 {
   debug ("In md_convert_frag()\n");
 }

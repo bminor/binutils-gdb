@@ -281,10 +281,6 @@ print_program_space (struct ui_out *uiout, int requested)
   int count = 0;
   struct cleanup *old_chain;
 
-  /* Might as well prune away unneeded ones, so the user doesn't even
-     seem them.  */
-  prune_program_spaces ();
-
   /* Compute number of pspaces we will print.  */
   ALL_PSPACES (pspace)
     {
@@ -463,8 +459,7 @@ save_current_space_and_thread (void)
   return old_chain;
 }
 
-/* Switches full context to program space PSPACE.  Switches to the
-   first thread found bound to PSPACE.  */
+/* See progspace.h  */
 
 void
 switch_to_program_space_and_thread (struct program_space *pspace)
@@ -472,7 +467,7 @@ switch_to_program_space_and_thread (struct program_space *pspace)
   struct inferior *inf;
 
   inf = find_inferior_for_program_space (pspace);
-  if (inf != NULL)
+  if (inf != NULL && inf->pid != 0)
     {
       struct thread_info *tp;
 

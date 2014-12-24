@@ -1395,11 +1395,11 @@ static struct hash_control *op_hash;
 static void
 m68k_ip (char *instring)
 {
-  register char *p;
-  register struct m68k_op *opP;
-  register const struct m68k_incant *opcode;
-  register const char *s;
-  register int tmpreg = 0, baseo = 0, outro = 0, nextword;
+  char *p;
+  struct m68k_op *opP;
+  const struct m68k_incant *opcode;
+  const char *s;
+  int tmpreg = 0, baseo = 0, outro = 0, nextword;
   char *pdot, *pdotmove;
   enum m68k_size siz1, siz2;
   char c;
@@ -3955,9 +3955,9 @@ install_gen_operand (int mode, int val)
 static char *
 crack_operand (char *str, struct m68k_op *opP)
 {
-  register int parens;
-  register int c;
-  register char *beg_str;
+  int parens;
+  int c;
+  char *beg_str;
   int inquote = 0;
 
   if (!str)
@@ -5033,12 +5033,12 @@ md_convert_frag_1 (fragS *fragP)
   fixS *fixP = NULL;
 
   /* Address in object code of the displacement.  */
-  register int object_address = fragP->fr_fix + fragP->fr_address;
+  int object_address = fragP->fr_fix + fragP->fr_address;
 
   /* Address in gas core of the place to store the displacement.  */
   /* This convinces the native rs6000 compiler to generate the code we
      want.  */
-  register char *buffer_address = fragP->fr_literal;
+  char *buffer_address = fragP->fr_literal;
   buffer_address += fragP->fr_fix;
   /* End ibm compiler workaround.  */
 
@@ -5663,8 +5663,8 @@ s_bss (int ignore ATTRIBUTE_UNUSED)
 static void
 s_even (int ignore ATTRIBUTE_UNUSED)
 {
-  register int temp;
-  register long temp_fill;
+  int temp;
+  long temp_fill;
 
   temp = 1;			/* JF should be 2? */
   temp_fill = get_absolute_expression ();

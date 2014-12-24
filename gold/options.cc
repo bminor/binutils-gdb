@@ -38,6 +38,7 @@
 #include "script.h"
 #include "target-select.h"
 #include "options.h"
+#include "layout.h"
 #include "plugin.h"
 
 namespace gold
@@ -1346,6 +1347,9 @@ Input_arguments::add_file(Input_file_argument& file)
       return this->input_argument_list_.back().lib()->add_file(file);
     }
   this->input_argument_list_.push_back(Input_argument(file));
+  if (!this->has_crtbeginT_
+      && Layout::match_file_name(file.name(), "crtbeginT"))
+    this->has_crtbeginT_ = true;
   return this->input_argument_list_.back();
 }
 

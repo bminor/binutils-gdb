@@ -691,7 +691,33 @@ tui_getc (FILE *fp)
     TUI_CMD_WIN->detail.command_info.curch = 0;
   if (ch == KEY_BACKSPACE)
     return '\b';
-  
+
+  if (async_command_editing_p && key_is_start_sequence (ch))
+    {
+      int ch_pending;
+
+      nodelay (w, TRUE);
+      ch_pending = wgetch (w);
+      nodelay (w, FALSE);
+
+      /* If we have pending input following a start sequence, call the stdin
+	 event handler again because ncurses may have already read and stored
+	 the input into its internal buffer, meaning that we won't get an stdin
+	 event for it.  If we don't compensate for this missed stdin event, key
+	 sequences as Alt_F (^[f) will not behave promptly.
+
+	 (We only compensates for the missed 2nd byte of a key sequence because
+	 2-byte sequences are by far the most commonly used. ncurses may have
+	 buffered a larger, 3+-byte key sequence though it remains to be seen
+	 whether it is useful to compensate for all the bytes of such
+	 sequences.)  */
+      if (ch_pending != ERR)
+	{
+	  ungetch (ch_pending);
+	  call_stdin_event_handler_again_p = 1;
+	}
+    }
+
   return ch;
 }
 

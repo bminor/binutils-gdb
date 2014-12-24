@@ -495,6 +495,9 @@ mips_arch_create octeonp 64	octeon { oddspreg } \
 mips_arch_create octeon2 64	octeonp { oddspreg } \
 			{ -march=octeon2 -mtune=octeon2 } { -mmips:octeon2 } \
 			{ }
+mips_arch_create octeon3 64	octeon2 { oddspreg } \
+			{ -march=octeon3 -mtune=octeon3 } { -mmips:octeon3 } \
+			{ }
 mips_arch_create xlr 	64	mips64	{ oddspreg } \
 			{ -march=xlr -mtune=xlr } { -mmips:xlr }
 mips_arch_create r5900 	64	mips3	{ gpr_ilocks singlefloat nollsc } \
@@ -867,10 +870,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "elf_arch_mips32r2"
     run_dump_test "elf_arch_mips32r3"
     run_dump_test "elf_arch_mips32r5"
+    run_dump_test "elf_arch_mips32r6"
     run_dump_test "elf_arch_mips64"
     run_dump_test "elf_arch_mips64r2"
     run_dump_test "elf_arch_mips64r3"
     run_dump_test "elf_arch_mips64r5"
+    run_dump_test "elf_arch_mips64r6"
 
     # Verify that ASE markings are handled properly.
     run_dump_test "elf_ase_mips16"
@@ -1100,6 +1105,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test_arches "octeon-ill"	[mips_arch_list_matching octeon]
     run_dump_test_arches "octeon-pref"	[mips_arch_list_matching octeon]
     run_dump_test_arches "octeon2"	[mips_arch_list_matching octeon2]
+    run_dump_test_arches "octeon3"	[mips_arch_list_matching octeon3]
 
     run_dump_test "smartmips"
     run_dump_test_arches "mips32-dsp"	[mips_arch_list_matching mips32r2 \
@@ -1134,6 +1140,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "align3"
     run_dump_test "odd-float"
     run_dump_test "ehword"
+    run_dump_test "insn-opts"
 
     run_list_test_arches "mips-macro-ill-sfp" "-32 -msingle-float" \
 					[mips_arch_list_matching mips2]
@@ -1443,6 +1450,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "r6-n64"	[mips_arch_list_matching mips64r6]
 	run_dump_test_arches "r6-64-n32"	[mips_arch_list_matching mips64r6]
 	run_dump_test_arches "r6-64-n64"	[mips_arch_list_matching mips64r6]
+	run_list_test_arches "ldpc-unalign" "-64" [mips_arch_list_matching mips64r6]
     }
     run_list_test_arches "r6-removed"	"-32" [mips_arch_list_matching mips32r6]
     run_list_test_arches "r6-64-removed"	[mips_arch_list_matching mips64r6]

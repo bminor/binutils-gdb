@@ -369,23 +369,16 @@ static const struct regset m68k_linux_fpregset =
     regcache_supply_regset, regcache_collect_regset
   };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-m68k_linux_regset_from_core_section (struct gdbarch *gdbarch,
-				     const char *sect_name,
-				     size_t sect_size)
+static void
+m68k_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					 iterate_over_regset_sections_cb *cb,
+					 void *cb_data,
+					 const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size >= M68K_LINUX_GREGS_SIZE)
-    return &m68k_linux_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0
-      && sect_size >= M68K_LINUX_FPREGS_SIZE)
-    return &m68k_linux_fpregset;
-
-  return NULL;
+  cb (".reg", M68K_LINUX_GREGS_SIZE, &m68k_linux_gregset, NULL, cb_data);
+  cb (".reg2", M68K_LINUX_FPREGS_SIZE, &m68k_linux_fpregset, NULL, cb_data);
 }
 
 static void
@@ -423,8 +416,8 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Core file support. */
-  set_gdbarch_regset_from_core_section
-    (gdbarch, m68k_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, m68k_linux_iterate_over_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

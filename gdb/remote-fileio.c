@@ -25,7 +25,6 @@
 #include "gdb/fileio.h"
 #include "gdb_wait.h"
 #include <sys/stat.h>
-#include "exceptions.h"
 #include "remote-fileio.h"
 #include "event-loop.h"
 #include "target.h"

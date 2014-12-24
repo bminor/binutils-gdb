@@ -33,7 +33,6 @@
 #include <signal.h>
 #include "regcache.h"
 #include "gdbcore.h"
-#include "exceptions.h"
 #include "target-descriptions.h"
 #include "gdbthread.h"
 #include "solib.h"
@@ -433,6 +432,43 @@ target_load (const char *arg, int from_tty)
   (*current_target.to_load) (&current_target, arg, from_tty);
 }
 
+/* Possible terminal states.  */
+
+enum terminal_state
+  {
+    /* The inferior's terminal settings are in effect.  */
+    terminal_is_inferior = 0,
+
+    /* Some of our terminal settings are in effect, enough to get
+       proper output.  */
+    terminal_is_ours_for_output = 1,
+
+    /* Our terminal settings are in effect, for output and input.  */
+    terminal_is_ours = 2
+  };
+
+static enum terminal_state terminal_state;
+
+/* See target.h.  */
+
+void
+target_terminal_init (void)
+{
+  (*current_target.to_terminal_init) (&current_target);
+
+  terminal_state = terminal_is_ours;
+}
+
+/* See target.h.  */
+
+int
+target_terminal_is_inferior (void)
+{
+  return (terminal_state == terminal_is_inferior);
+}
+
+/* See target.h.  */
+
 void
 target_terminal_inferior (void)
 {
@@ -443,9 +479,36 @@ target_terminal_inferior (void)
   if (target_can_async_p () && !sync_execution)
     return;
 
+  if (terminal_state == terminal_is_inferior)
+    return;
+
   /* If GDB is resuming the inferior in the foreground, install
      inferior's terminal modes.  */
   (*current_target.to_terminal_inferior) (&current_target);
+  terminal_state = terminal_is_inferior;
+}
+
+/* See target.h.  */
+
+void
+target_terminal_ours (void)
+{
+  if (terminal_state == terminal_is_ours)
+    return;
+
+  (*current_target.to_terminal_ours) (&current_target);
+  terminal_state = terminal_is_ours;
+}
+
+/* See target.h.  */
+
+void
+target_terminal_ours_for_output (void)
+{
+  if (terminal_state != terminal_is_inferior)
+    return;
+  (*current_target.to_terminal_ours_for_output) (&current_target);
+  terminal_state = terminal_is_ours_for_output;
 }
 
 /* See target.h.  */
@@ -463,6 +526,40 @@ target_supports_terminal_ours (void)
     }
 
   return 0;
+}
+
+/* Restore the terminal to its previous state (helper for
+   make_cleanup_restore_target_terminal). */
+
+static void
+cleanup_restore_target_terminal (void *arg)
+{
+  enum terminal_state *previous_state = arg;
+
+  switch (*previous_state)
+    {
+    case terminal_is_ours:
+      target_terminal_ours ();
+      break;
+    case terminal_is_ours_for_output:
+      target_terminal_ours_for_output ();
+      break;
+    case terminal_is_inferior:
+      target_terminal_inferior ();
+      break;
+    }
+}
+
+/* See target.h. */
+
+struct cleanup *
+make_cleanup_restore_target_terminal (void)
+{
+  enum terminal_state *ts = xmalloc (sizeof (*ts));
+
+  *ts = terminal_state;
+
+  return make_cleanup_dtor (cleanup_restore_target_terminal, ts, xfree);
 }
 
 static void
@@ -909,6 +1006,59 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
   return NULL;
 }
 
+
+/* Helper for the memory xfer routines.  Checks the attributes of the
+   memory region of MEMADDR against the read or write being attempted.
+   If the access is permitted returns true, otherwise returns false.
+   REGION_P is an optional output parameter.  If not-NULL, it is
+   filled with a pointer to the memory region of MEMADDR.  REG_LEN
+   returns LEN trimmed to the end of the region.  This is how much the
+   caller can continue requesting, if the access is permitted.  A
+   single xfer request must not straddle memory region boundaries.  */
+
+static int
+memory_xfer_check_region (gdb_byte *readbuf, const gdb_byte *writebuf,
+			  ULONGEST memaddr, ULONGEST len, ULONGEST *reg_len,
+			  struct mem_region **region_p)
+{
+  struct mem_region *region;
+
+  region = lookup_mem_region (memaddr);
+
+  if (region_p != NULL)
+    *region_p = region;
+
+  switch (region->attrib.mode)
+    {
+    case MEM_RO:
+      if (writebuf != NULL)
+	return 0;
+      break;
+
+    case MEM_WO:
+      if (readbuf != NULL)
+	return 0;
+      break;
+
+    case MEM_FLASH:
+      /* We only support writing to flash during "load" for now.  */
+      if (writebuf != NULL)
+	error (_("Writing to flash memory forbidden in this context"));
+      break;
+
+    case MEM_NONE:
+      return 0;
+    }
+
+  /* region->hi == 0 means there's no upper bound.  */
+  if (memaddr + len < region->hi || region->hi == 0)
+    *reg_len = len;
+  else
+    *reg_len = region->hi - memaddr;
+
+  return 1;
+}
+
 /* Read memory from more than one valid target.  A core file, for
    instance, could have some of memory but delegate other bits to
    the target below it.  So, we must manually try all targets.  */
@@ -970,7 +1120,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 		       ULONGEST len, ULONGEST *xfered_len)
 {
   enum target_xfer_status res;
-  int reg_len;
+  ULONGEST reg_len;
   struct mem_region *region;
   struct inferior *inf;
 
@@ -1017,37 +1167,13 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     }
 
   /* Try GDB's internal data cache.  */
-  region = lookup_mem_region (memaddr);
-  /* region->hi == 0 means there's no upper bound.  */
-  if (memaddr + len < region->hi || region->hi == 0)
-    reg_len = len;
-  else
-    reg_len = region->hi - memaddr;
 
-  switch (region->attrib.mode)
-    {
-    case MEM_RO:
-      if (writebuf != NULL)
-	return TARGET_XFER_E_IO;
-      break;
-
-    case MEM_WO:
-      if (readbuf != NULL)
-	return TARGET_XFER_E_IO;
-      break;
-
-    case MEM_FLASH:
-      /* We only support writing to flash during "load" for now.  */
-      if (writebuf != NULL)
-	error (_("Writing to flash memory forbidden in this context"));
-      break;
-
-    case MEM_NONE:
-      return TARGET_XFER_E_IO;
-    }
+  if (!memory_xfer_check_region (readbuf, writebuf, memaddr, len, &reg_len,
+				 &region))
+    return TARGET_XFER_E_IO;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
-    inf = find_inferior_pid (ptid_get_pid (inferior_ptid));
+    inf = find_inferior_ptid (inferior_ptid);
   else
     inf = NULL;
 
@@ -1184,6 +1310,16 @@ target_xfer_partial (struct target_ops *ops,
 				  writebuf, offset, len, xfered_len);
   else if (object == TARGET_OBJECT_RAW_MEMORY)
     {
+      /* Skip/avoid accessing the target if the memory region
+	 attributes block the access.  Check this here instead of in
+	 raw_memory_xfer_partial as otherwise we'd end up checking
+	 this twice in the case of the memory_xfer_partial path is
+	 taken; once before checking the dcache, and another in the
+	 tail call to raw_memory_xfer_partial.  */
+      if (!memory_xfer_check_region (readbuf, writebuf, offset, len, &len,
+				     NULL))
+	return TARGET_XFER_E_IO;
+
       /* Request the normal memory object from other layers.  */
       retval = raw_memory_xfer_partial (ops, readbuf, writebuf, offset, len,
 					xfered_len);
@@ -2513,7 +2649,7 @@ default_thread_address_space (struct target_ops *self, ptid_t ptid)
   struct inferior *inf;
 
   /* Fall-back to the "main" address space of the inferior.  */
-  inf = find_inferior_pid (ptid_get_pid (ptid));
+  inf = find_inferior_ptid (ptid);
 
   if (inf == NULL || inf->aspace == NULL)
     internal_error (__FILE__, __LINE__,
@@ -3010,9 +3146,9 @@ target_thread_alive (ptid_t ptid)
 }
 
 void
-target_find_new_threads (void)
+target_update_thread_list (void)
 {
-  current_target.to_find_new_threads (&current_target);
+  current_target.to_update_thread_list (&current_target);
 }
 
 void

@@ -20,11 +20,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-/* Under OSF 2.0 & 3.0 and HPUX 10, the second arg of pthread_create
+/* Under HPUX 10, the second arg of pthread_create
    is prototyped to be just a "pthread_attr_t", while under Solaris it
    is a "pthread_attr_t *".  Arg! */
 
-#if defined (__osf__) || defined (__hpux__)
+#if defined (__hpux__)
 #define PTHREAD_CREATE_ARG2(arg) arg
 #define PTHREAD_CREATE_NULL_ARG2 null_attr
 static pthread_attr_t null_attr;

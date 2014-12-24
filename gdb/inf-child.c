@@ -412,7 +412,7 @@ inf_child_fileio_readlink (struct target_ops *self,
 {
   /* We support readlink only on systems that also provide a compile-time
      maximum path length (PATH_MAX), at least for now.  */
-#if defined (HAVE_READLINK) && defined (PATH_MAX)
+#if defined (PATH_MAX)
   char buf[PATH_MAX];
   int len;
   char *ret;

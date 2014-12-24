@@ -1349,8 +1349,14 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 
       if (reloc.r_extern)
 	{
-	  /* An external symbol number.  */
-	  sym = syms + num;
+	  /* PR 17512: file: 8396-1185-0.004.  */
+	  if (bfd_get_symcount (abfd) > 0 && num > bfd_get_symcount (abfd))
+	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
+	  else if (syms == NULL)
+	    sym = bfd_und_section_ptr->symbol_ptr_ptr;	    
+	  else
+	    /* An external symbol number.  */
+	    sym = syms + num;
 	}
       else if (num == 0x00ffffff || num == 0)
 	{
@@ -1363,9 +1369,11 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 	}
       else
         {
+	  /* PR 17512: file: 006-2964-0.004.  */
+	  if (num > mdata->nsects)
+	    return -1;
+	  
 	  /* A section number.  */
-          BFD_ASSERT (num <= mdata->nsects);
-
           sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
           /* For a symbol defined in section S, the addend (stored in the
              binary) contains the address of the section.  To comply with
@@ -1394,6 +1402,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 
   if (!(*bed->_bfd_mach_o_swap_reloc_in)(res, &reloc))
     return -1;
+
   return 0;
 }
 
@@ -1408,6 +1417,7 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
 
   /* Allocate and read relocs.  */
   native_size = count * BFD_MACH_O_RELENT_SIZE;
+
   native_relocs =
     (struct mach_o_reloc_info_external *) bfd_malloc (native_size);
   if (native_relocs == NULL)
@@ -2334,16 +2344,19 @@ bfd_mach_o_mangle_sections (bfd *abfd, bfd_mach_o_data_struct *mdata)
       && (mdata->nsects == 0 || mdata->sections != NULL))
     return TRUE;
 
+  /* We need to check that this can be done...  */
+  if (nsect > 255)
+    {
+      (*_bfd_error_handler) (_("mach-o: there are too many sections (%u)"
+			       " maximum is 255,\n"), nsect);
+      return FALSE;
+    }
+
   mdata->nsects = nsect;
   mdata->sections = bfd_alloc (abfd,
 			       mdata->nsects * sizeof (bfd_mach_o_section *));
   if (mdata->sections == NULL)
     return FALSE;
-
-  /* We need to check that this can be done...  */
-  if (nsect > 255)
-    (*_bfd_error_handler) (_("mach-o: there are too many sections (%d)"
-			     " maximum is 255,\n"), nsect);
 
   /* Create Mach-O sections.
      Section type, attribute and align should have been set when the
@@ -3644,6 +3657,9 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
       if (bfd_seek (abfd, sym->stroff, SEEK_SET) != 0
           || bfd_bread (sym->strtab, sym->strsize, abfd) != sym->strsize)
         {
+	  /* PR 17512: file: 10888-1609-0.004.  */
+	  bfd_release (abfd, sym->strtab);
+	  sym->strtab = NULL;
           bfd_set_error (bfd_error_file_truncated);
           return FALSE;
         }
@@ -3660,10 +3676,8 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
   unsigned long i;
 
   if (sym == NULL || sym->symbols)
-    {
-      /* Return now if there are no symbols or if already loaded.  */
-      return TRUE;
-    }
+    /* Return now if there are no symbols or if already loaded.  */
+    return TRUE;
 
   sym->symbols = bfd_alloc (abfd, sym->nsyms * sizeof (bfd_mach_o_asymbol));
 
@@ -3674,12 +3688,20 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
     }
 
   if (!bfd_mach_o_read_symtab_strtab (abfd))
-    return FALSE;
+    {
+      bfd_release (abfd, sym->symbols);
+      sym->symbols = NULL;
+      return FALSE;
+    }
 
   for (i = 0; i < sym->nsyms; i++)
     {
       if (!bfd_mach_o_read_symtab_symbol (abfd, sym, &sym->symbols[i], i))
-	return FALSE;
+	{
+	  bfd_release (abfd, sym->symbols);
+	  sym->symbols = NULL;
+	  return FALSE;
+	}
     }
 
   return TRUE;
@@ -5631,12 +5653,13 @@ bfd_mach_o_follow_dsym (bfd *abfd)
 
 bfd_boolean
 bfd_mach_o_find_nearest_line (bfd *abfd,
-			      asection *section,
 			      asymbol **symbols,
+			      asection *section,
 			      bfd_vma offset,
 			      const char **filename_ptr,
 			      const char **functionname_ptr,
-			      unsigned int *line_ptr)
+			      unsigned int *line_ptr,
+			      unsigned int *discriminator_ptr)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   if (mdata == NULL)
@@ -5668,13 +5691,11 @@ bfd_mach_o_find_nearest_line (bfd *abfd,
     default:
       return FALSE;
     }
-  if (_bfd_dwarf2_find_nearest_line (abfd, dwarf_debug_sections,
-				     section, symbols, offset,
-				     filename_ptr, functionname_ptr,
-				     line_ptr, NULL, 0,
-				     &mdata->dwarf2_find_line_info))
-    return TRUE;
-  return FALSE;
+  return _bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
+					filename_ptr, functionname_ptr,
+					line_ptr, discriminator_ptr,
+					dwarf_debug_sections, 0,
+					&mdata->dwarf2_find_line_info);
 }
 
 bfd_boolean

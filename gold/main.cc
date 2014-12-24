@@ -227,7 +227,8 @@ main(int argc, char** argv)
 
   // The layout object.
   Layout layout(command_line.number_of_input_files(),
-		&command_line.script_options());
+		&command_line.script_options(),
+		command_line.has_crtbeginT());
 
   if (layout.incremental_inputs() != NULL)
     layout.incremental_inputs()->report_command_line(argc, argv);

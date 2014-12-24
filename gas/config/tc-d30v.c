@@ -1242,12 +1242,10 @@ find_format (struct d30v_opcode *opcode,
 
 		      /* Calculate the current address by running through the
 			 previous frags and adding our current offset.  */
-		      value = 0;
+		      value = frag_now_fix_octets ();
 		      for (f = frchain_now->frch_root; f; f = f->fr_next)
 			value += f->fr_fix + f->fr_offset;
-		      value = (S_GET_VALUE (myops[j].X_add_symbol) - value
-			       - (obstack_next_free (&frchain_now->frch_obstack)
-				  - frag_now->fr_literal));
+		      value = S_GET_VALUE (myops[j].X_add_symbol) - value;
 		      if (check_range (value, bits, flags))
 			match = 0;
 		    }

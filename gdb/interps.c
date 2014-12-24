@@ -37,7 +37,6 @@
 #include "interps.h"
 #include "completer.h"
 #include "top.h"		/* For command_loop.  */
-#include "exceptions.h"
 #include "continuations.h"
 
 /* True if the current interpreter in is async mode.  See interps.h

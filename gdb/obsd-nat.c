@@ -50,10 +50,12 @@ obsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 static void
-obsd_find_new_threads (struct target_ops *ops)
+obsd_update_thread_list (struct target_ops *ops)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   struct ptrace_thread_state pts;
+
+  prune_threads ();
 
   if (ptrace (PT_GET_THREAD_FIRST, pid, (caddr_t)&pts, sizeof pts) == -1)
     perror_with_name (("ptrace"));
@@ -168,7 +170,7 @@ obsd_add_target (struct target_ops *t)
 {
   /* Override some methods to support threads.  */
   t->to_pid_to_str = obsd_pid_to_str;
-  t->to_find_new_threads = obsd_find_new_threads;
+  t->to_update_thread_list = obsd_update_thread_list;
   t->to_wait = obsd_wait;
   add_target (t);
 }

@@ -685,8 +685,7 @@ static char *strorig;
    *CCP.  Otherwise don't change *CCP, and return 0.  */
 
 static enum m68k_register
-m68k_reg_parse (ccp)
-     register char **ccp;
+m68k_reg_parse (char **ccp)
 {
   char *start = *ccp;
   char c;
@@ -748,7 +747,7 @@ m68k_reg_parse (ccp)
 /* The lexer.  */
 
 static int
-yylex ()
+yylex (void)
 {
   enum m68k_register reg;
   char *s;
@@ -1091,9 +1090,7 @@ yylex ()
    from outside this file.  */
 
 int
-m68k_ip_op (s, oparg)
-     char *s;
-     struct m68k_op *oparg;
+m68k_ip_op (char *s, struct m68k_op *oparg)
 {
   memset (oparg, 0, sizeof *oparg);
   oparg->error = NULL;
@@ -1111,8 +1108,7 @@ m68k_ip_op (s, oparg)
 /* The error handler.  */
 
 static void
-yyerror (s)
-     const char *s;
+yyerror (const char *s)
 {
   op->error = s;
 }

@@ -18,6 +18,9 @@
 /* Should ar and ranlib use -D behavior by default? */
 #undef DEFAULT_AR_DETERMINISTIC
 
+/* Should strings use -a behavior by default? */
+#undef DEFAULT_STRINGS_ALL
+
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS
@@ -104,6 +107,9 @@
 
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
+
+/* Define to 1 if the system has the type `long long'. */
+#undef HAVE_LONG_LONG
 
 /* Define if mbstate_t exists in wchar.h. */
 #undef HAVE_MBSTATE_T
@@ -204,6 +210,12 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* The size of `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be

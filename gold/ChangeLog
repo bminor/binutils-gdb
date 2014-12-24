@@ -1,3 +1,333 @@
+2014-12-22  Cary Coutant  <ccoutant@google.com>
+
+	* powerpc.cc (Target_powerpc::relocate): Fix overflow check.
+
+2014-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/14608
+	* testsuite/debug_msg.cc (SometimesInlineFunction): Changed
+	to "return i * i * 3;".
+
+2014-12-16  Cary Coutant  <ccoutant@google.com>
+
+	* mapfile.cc (Mapfile::print_input_section): Print uncompressed sizes.
+	(Mapfile::print_output_data): Use current_data_size() to avoid
+	assert for sections requiring postprocessing; if address is not valid,
+	print 0.
+	(Mapfile::print_output_section): Use current_data_size(); print note
+	that addresses and sizes are before compression.
+
+2014-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* aarch64.cc (AArch64_relocate_functions::maybe_apply_stub):
+	Cast current_group_size to unsigned long when reporting error.
+
+2014-12-10  Jing Yu  <jingyu@google.com>
+
+	* aarch64.cc (Target_aarch64): Add new variable stub_group_size_.
+	(AArch64_relocate_functions::maybe_apply_stub): Add new parameter.
+	Update error message.
+	(Target_aarch64::do_relax): Use absolute value of option
+	stub_group_size. Replace local variable with class member
+	stub_group_size_.
+
+2014-12-04  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Branch_info::make_stub): Ignore
+	addend of PLTREL24 reloc when not generating a plt stub.  Make
+	max_branch_offset an "Address".
+	(Stub_table::can_reach_stub): Make max_branch_offset an "Address".
+	(Target_powerpc::Relocate::relocate): Likewise.
+
+2014-12-04  Alan Modra  <amodra@gmail.com>
+
+	PR 17670
+	* symtab.cc (Symbol::set_undefined): Remove assertion.
+	* powerpc.cc (Target_powerpc::symval_for_branch): Don't assert
+	on symbols defined in discarded sections, instead return false.
+	Rearrange params, update all callers.
+	(Target_powerpc::Branch_info::make_stub): Don't make stubs for
+	branches to syms in discarded sections.
+	(Global_symbol_visitor_opd::operator()): Set discarded opd syms
+	undefined and flag as discarded.
+	(Target_powerpc::Relocate::relocate): Localize variable.
+
+2014-12-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/17675
+	* testsuite/Makefile.am (pie_copyrelocs_test_CXXFLAGS): New.
+	* testsuite/Makefile.in: Regenerated.
+
+2014-12-03  Alan Modra  <amodra@gmail.com>
+
+	PR 17566
+	* powerpc.cc (Target_powerpc::Scan::local): Use add_local_section
+	when adding dynamic relocations against section symbols.
+
+2014-12-01  Dimitry Ivanov <dimitry@google.com>
+
+	* layout.cc (Layout::finish_dynamic_section): When '-z global'
+	is specified set DF_1_GLOBAL in DT_FLAGS_1 flags.
+	* options.h (General_options): New -z option (global).
+
+2014-12-01  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17578
+	* layout.cc (Layout::layout_gnu_stack): Don't warn when -z execstack
+	is given.
+	(Layout::create_executable_stack_info): Warn when -z noexecstack is
+	given but some inputs require executable stack.
+
+2014-11-26  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (gdb_sections): Keep .debug_gdb_scripts and
+	.debug_str_offsets; strip .debug_gnu_pubnames and
+	.debug_gnu_pubtypes.
+	(lines_only_debug_sections): Strip all four new sections.
+
+2014-11-26  Jing Yu  <jingyu@google.com>
+
+	* aarch64.cc (Relocate::tls_desc_gd_to_ie): Set ldr target
+	register to be x0 when to relax TLSDESC_LD64_LO12.
+
+2014-11-26  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (struct Stub_table_owner): New.
+	(Powerpc_relobj): Rename stub_table_ to stub_table_index_, an
+	unsigned int vector.  Update all references.
+	(powerpc_relobj::set_stub_table): Take an unsigned int param
+	rather than a Stub_table.  Update callers.
+	(Powerpc_relobj::clear_stub_table): New function.
+	(Target_powerpc): Add relax_failed_, relax_fail_count_ and
+	stub_group_size_ vars.
+	(Target_powerpc::new_stub_table): Delete.
+	(max_branch_delta): New function, extracted from..
+	(Target_powerpc::Relocate::relocate): ..here..
+	(Target_powerpc::Branch_info::make_stub): ..and here.  Return
+	status on whether stub created successfully.
+	(Stub_control::Stub_control): Add "no_size_errors" param.  Move
+	default sizing to..
+	(Target_powerpc::do_relax): ..here.  Init stub_group_size_ and
+	reduce on relax failure.
+	(Target_powerpc::group_sections): Add "no_size_errors" param.
+	Use stub_group_size_.  Set up group info in a temp vector,
+	before building Stub_table vector.  Account for input sections
+	possibly already converted to relaxed sections.
+	(Stub_table::init): Delete.  Merge into..
+	(Stub_table::Stub_table): ..here.
+	(Stub_table::can_reach_stub): New function.
+	(Stub_table::add_plt_call_entry): Add "from" parameter and
+	return true iff stub could be reached.
+	(Stub_table::add_long_branch_entry): Similarly.  Add "r_type"
+	param too.
+	(Stub_table::clear_stubs): Add "all" param.
+
+2014-11-26  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Stub_control::set_output_and_owner): New function.
+	(Target_powerpc::group_sections): Use it.
+
+2014-11-25  Cary Coutant  <ccoutant@google.com>
+
+	* binary.cc (Binary_to_elf::sized_convert): Add size to _start symbol.
+	(Binary_to_elf::write_symbol): Add st_size parameter.
+	* binary.h (Binary_to_elf::write_symbol): Add st_size parameter.
+
+2014-11-25  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17639
+	* object.cc (Sized_relobj_file): Initialize is_deferred_layout_.
+	(Sized_relobj_file::do_layout): Handle deferred sections properly
+	during GC pass 1. Don't add reloc sections to deferred list twice.
+	* object.h (Sized_relobj_file::is_deferred_layout): New function.
+	(Sized_relobj_file::is_deferred_layout_): New data member.
+
+2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/17619
+	* x86_64.cc (Output_data_plt_x86_64_standard<size>::do_fill_plt_entry):
+	Check PC-relative offset overflow in PLT entry.
+
+2014-11-21  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Correct test
+	for undefined weaks.
+
+2014-11-20  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Stub_control::Stub_control): Init stub14_group_size_
+	from --stub-group-size parameter divided by 1024.
+	(Powerpc_relocate_functions::rela, rela_ua): Add fieldsize
+	template parameter.  Update all uses.
+	(Target_powerpc::Relocate::relocate): Rename has_plt_value to
+	has_stub_value.  Set for long branches.  Don't report overflow for
+	branch to undefined weak symbols.  Print info message on
+	overflowing branch to stub.
+
+2014-11-20  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::do_relax): Add __go_go to thread_starters.
+
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (Target_x86_64<size>::Scan::global): Don't make PLT
+	entry for R_X86_64_GOTPLT64.
+	(Target_x86_64<size>::Relocate::relocate): Update comments for
+	R_X86_64_GOTPLT64.
+
+2014-11-06  Evgeniy Dushistov  <dushistov@mail.ru>
+
+	* plugin.cc: use lock to searialize calls of Plugin_manager::claim_file
+	* plugin.h: add lock definition
+
+2014-10-29  Han Shen  <shenhan@google.com>
+	    Jing Yu   <jingyu@google.com>
+
+	* aarch64-reloc.def: Add LD_PREL_LO12, ADR_PREL_LO21,
+	TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC, TLSLD_MOVW_DTPREL_G1,
+	TLSLD_MOVW_DTPREL_G0_NC. Change property of TLS relocations to
+	Symbol::TLS_REF.
+	* aarch64.cc (Target_aarch64::do_can_check_for_function_pointers): New
+	method.
+	(Target_aarch64::reloc_needs_plt_for_ifunc): New method.
+	(Target_aarch64::tls_ld_to_le): New method.
+	(Target_aarch64::aarch64_info): Enable can_icf_inline_merge_sections
+	for 64bit targets.
+	(Output_data_plt_aarch64::irelative_rel_): New data member.
+	(Output_data_plt_aarch64::add_entry): Add irelative entries to plt.
+	(Output_data_plt_aarch64::add_local_ifunc_entry): New method.
+	(Output_data_plt_aarch64::add_relocation): New method.
+	(Output_data_plt_aarch64::do_write): Add gold_assert on got_irelative
+	offset. Add got_irelative size to got size.
+	(AArch64_relocate_functions): Typedef AArch64_valtype. Replace long
+	type string with the new typename.
+	(AArch64_relocate_functions::update_adr): Replace parameter x with
+	immed.
+	(AArch64_relocate_functions::update_movnz): Correct wrong val mask.
+	(AArch64_relocate_functions::reloc_common): New method.
+	(AArch64_relocate_funcsions::rela_general): Extract common part out
+	into reloc_common method.
+	(AArch64_relocate_functions::rela_general): Likewise.
+	(AArch64_relocate_functions::pcrela_general): Likewise.
+	(AArch64_relocate_functions::adr): New method.
+	(AArch64_relocate_functions::adrp): Calculate immed before calling
+	update_adr.
+	(AArch64_relocate_functions::adrp): Likewise.
+	(AArch64_relocate_functions::movnz): Cast x to SignedW type when
+	comparing x to 0. Calculate immed from ~x when x < 0.
+	(Target_aarch64::optimize_tls_reloc): Add new cases for
+	TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC, TLSLD_MOVW_DTPREL_G1,
+	TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::possible_function_pointer_reloc): Implement this
+	method.
+	(Target_aarch64::Scan::local_reloc_may_be_function_pointer): Update
+	comment.
+	(Target_aarch64::Scan::local): Add codes to handle STT_GNU_IFUNC
+	symbol. Add cases for TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC,
+	TLSLD_MOVW_DTPREL_G1, TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::Scan::global): Add codes to handle STT_GNU_IFUNC
+	symbol. Add cases for TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC,
+	TLSLD_MOVW_DTPREL_G1, TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::make_plt_entry): Call add_entry with two more
+	parameters.
+	(Target_aarch64::make_local_ifunc_plt_entry): New method.
+	(Target_aarch64::Relocate::relocate): Add cases for LD_PREL_LO19,
+	ADR_PREL_LO21, TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC,
+	TLSLD_MOVW_DTPREL_G1, TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::Relocate::relocate_tls): Add cases for
+	TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC, TLSLD_MOVW_DTPREL_G1,
+	TLSLD_MOVW_DTPREL_G0_NC.
+	* testsuite/icf_safe_so_test.cc: Correct test comment.
+	* testsuite/icf_safe_test.sh: Add AArch64 arch.
+
+2014-10-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (do_relax): Add gcc-4.9 libgomp functions to
+	thread_starter.
+
+2014-10-18  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* configure.tgt (targ_extra_obj) [aarch64*-*]: Define.
+
+2014-10-17  Cary Coutant  <ccoutant@google.com>
+
+	* aarch64.cc (AArch64_relocate_functions::maybe_apply_stub):
+	Add "typename" keyword.
+
+2014-10-15  Han Shen  <shenhan@google.com>
+            Jing Yu   <jingyu@google.com>
+
+	Patch for gold aarch64 backend to support relaxation.
+	* aarch64-reloc.def: Change format.
+	* aarch64.cc (class Reloc_stub): New class.
+	(class Stub_table): New class.
+	(class AArch64_relobj): New class.
+	(class AArch64_input_section): New class.
+	(class AArch64_output_section): New class.
+	(Target_aarch64::new_stub_table): New method.
+	(Target_aarch64::new_aarch64_input_section): New method.
+	(Target_aarch64::find_aarch64_input_section): New method.
+	(Target_aarch64::scan_section_for_stubs): New method.
+	(Target_aarch64::scan_reloc_section_for_stubs): New method.
+	(Target_aarch64::relocate_stub): New method.
+	(Target_aarch64::current_target): New method.
+	(Target_aarch64::do_make_elf_object): New method.
+	(Target_aarch64::do_may_relax): New method.
+	(Target_aarch64::do_relax): New method.
+	(Target_aarch64::group_sections): New method.
+	(Target_aarch64::scan_reloc_for_stub): New method.
+	(Target_aarch64::do_make_output_section): New method.
+	(Target_aarch64::stub_tables_): New data member.
+	(Target_aarch64::aarch64_input_section_map_): New data member.
+	(AArch64_relocate_functions::maybe_apply_stub): New method.
+
+2014-09-30  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17432
+	* resolve.cc (Symbol_table::resolve): Fix local shadowing error.
+
+2014-09-30  Kito Cheng  <kito@0xlab.org>
+
+	PR gold/13597
+	* layout.cc (Layout::create_dynamic_symtab): Build gnu-style
+	hash table before sysv-style hash table.
+
+2014-09-29  Sriraman Tallam  <tmsriram@google.com>
+
+	* options.h (--pic-executable): Add negative to alias to -no-pie.
+
+2014-09-26  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/16773
+	* object.cc (Sized_relobj_file): Compute value of section symbols
+	for TLS sections the same as TLS symbols.
+
+2014-09-25  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17432
+	* resolve.cc (Symbol_table::resolve): Override common placeholder
+	symbols, but adjust sizes.
+	* symtab.cc (Symbol_table::add_from_object): Don't add placeholder
+	symbols to common lists.
+
+2014-09-24  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
+2014-09-23  Taiju Tsuiki  <tzik@google.com>
+            Cary Coutant  <ccoutant@google.com>
+
+	PR gold/14860
+	* gold.cc (queue_final_tasks): Add Write_sections_task as a blocker
+	on input_sections_blocker.
+	* layout.cc (Write_sections_task::locks): Unblock
+	input_sections_blocker_.
+	* layout.h (Write_sections_task::Write_sections_task): Add
+	input_sections_blocker.
+	* testsuite/Makefile.am (exception_x86_64_bnd_test): Add gcctestdir/ld
+	to DEPENDENCIES.
+	* testsuite/Makefile.in: Regenerate.
+
 2014-09-18  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* testsuite/Makefile.am (plugin_test_10): New test.
@@ -72,7 +402,7 @@
 	(AArch64_relocate_functions::movnz): New method.
 	(Target_aarch64::Scan::local): Correct format. Move r_sym, got to
 	before the switch. Add new cases to switch.
-	Check ie_to_le relaxation on tlsie relocations. Add code handling 
+	Check ie_to_le relaxation on tlsie relocations. Add code handling
 	tlsgd tlsdesc cases.
 	(Target_aarch64::Scan::global): Move arp to front. Do copy_reloc when
 	needed. Add new cases to switch. Insert dynamic RELATIVE relocation

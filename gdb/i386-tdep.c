@@ -44,7 +44,6 @@
 #include "dis-asm.h"
 #include "disasm.h"
 #include "remote.h"
-#include "exceptions.h"
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 #include "x86-xstate.h"
@@ -1818,14 +1817,15 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
     {
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
-      struct symtab *s = find_pc_symtab (func_addr);
+      struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
       /* Clang always emits a line note before the prologue and another
 	 one after.  We trust clang to emit usable line notes.  */
       if (post_prologue_pc
-	  && (s != NULL
-	      && s->producer != NULL
-	      && strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
+	  && (cust != NULL
+	      && COMPUNIT_PRODUCER (cust) != NULL
+	      && strncmp (COMPUNIT_PRODUCER (cust), "clang ",
+			  sizeof ("clang ") - 1) == 0))
         return max (start_pc, post_prologue_pc);
     }
  
@@ -2184,10 +2184,10 @@ static int
 i386_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
-  struct symtab *symtab;
+  struct compunit_symtab *cust;
 
-  symtab = find_pc_symtab (pc);
-  if (symtab && symtab->epilogue_unwind_valid)
+  cust = find_pc_compunit_symtab (pc);
+  if (cust != NULL && COMPUNIT_EPILOGUE_UNWIND_VALID (cust))
     return 0;
 
   if (target_read_memory (pc, &insn, 1))
@@ -3806,26 +3806,6 @@ i386_collect_fpregset (const struct regset *regset,
   i387_collect_fsave (regcache, regnum, fpregs);
 }
 
-/* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
-
-static void
-i386_supply_xstateregset (const struct regset *regset,
-			  struct regcache *regcache, int regnum,
-			  const void *xstateregs, size_t len)
-{
-  i387_supply_xsave (regcache, regnum, xstateregs);
-}
-
-/* Similar to i386_collect_fpregset , but use XSAVE extended state.  */
-
-static void
-i386_collect_xstateregset (const struct regset *regset,
-			   const struct regcache *regcache,
-			   int regnum, void *xstateregs, size_t len)
-{
-  i387_collect_xsave (regcache, regnum, xstateregs, 1);
-}
-
 /* Register set definitions.  */
 
 const struct regset i386_gregset =
@@ -3833,37 +3813,24 @@ const struct regset i386_gregset =
     NULL, i386_supply_gregset, i386_collect_gregset
   };
 
-static const struct regset i386_fpregset =
+const struct regset i386_fpregset =
   {
     NULL, i386_supply_fpregset, i386_collect_fpregset
   };
 
-static const struct regset i386_xstateregset =
-  {
-    NULL, i386_supply_xstateregset, i386_collect_xstateregset
-  };
+/* Default iterator over core file register note sections.  */
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
-
-const struct regset *
-i386_regset_from_core_section (struct gdbarch *gdbarch,
-			       const char *sect_name, size_t sect_size)
+void
+i386_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				   iterate_over_regset_sections_cb *cb,
+				   void *cb_data,
+				   const struct regcache *regcache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
-      return &i386_gregset;
-
-  if ((strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
-      || (strcmp (sect_name, ".reg-xfp") == 0
-	  && sect_size == I387_SIZEOF_FXSAVE))
-    return &i386_fpregset;
-
-  if (strcmp (sect_name, ".reg-xstate") == 0)
-    return &i386_xstateregset;
-
-  return NULL;
+  cb (".reg", tdep->sizeof_gregset, &i386_gregset, NULL, cb_data);
+  if (tdep->sizeof_fpregset)
+    cb (".reg2", tdep->sizeof_fpregset, tdep->fpregset, NULL, cb_data);
 }
 
 
@@ -4339,6 +4306,17 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 
 
 
+/* gdbarch gnu_triplet_regexp method.  Both arches are acceptable as GDB always
+   also supplies -m64 or -m32 by gdbarch_gcc_target_options.  */
+
+static const char *
+i386_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  return "(x86_64|i.86)";
+}
+
+
+
 /* Generic ELF.  */
 
 void
@@ -4365,6 +4343,8 @@ i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      i386_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
 					i386_stap_parse_special_token);
+
+  set_gdbarch_gnu_triplet_regexp (gdbarch, i386_gnu_triplet_regexp);
 }
 
 /* System V Release 4 (SVR4).  */
@@ -4412,6 +4392,8 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 
   set_gdbarch_has_dos_based_file_system (gdbarch, 1);
+
+  set_gdbarch_gnu_triplet_regexp (gdbarch, i386_gnu_triplet_regexp);
 }
 
 
@@ -4556,18 +4538,6 @@ i386_fetch_pointer_argument (struct frame_info *frame, int argi,
   CORE_ADDR sp = get_frame_register_unsigned (frame, I386_ESP_REGNUM);
   return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4, byte_order);
 }
-
-static void
-i386_skip_permanent_breakpoint (struct regcache *regcache)
-{
-  CORE_ADDR current_pc = regcache_read_pc (regcache);
-
- /* On i386, breakpoint is exactly 1 byte long, so we just
-    adjust the PC in the regcache.  */
-  current_pc += 1;
-  regcache_write_pc (regcache, current_pc);
-}
-
 
 #define PREFIX_REPZ	0x01
 #define PREFIX_REPNZ	0x02
@@ -8291,6 +8261,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Floating-point registers.  */
   tdep->sizeof_fpregset = I387_SIZEOF_FSAVE;
+  tdep->fpregset = &i386_fpregset;
 
   /* The default settings include the FPU registers, the MMX registers
      and the SSE registers.  This can be overridden for a specific ABI
@@ -8446,6 +8417,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      gap for the upper AVX, MPX and AVX512 registers.  */
   set_gdbarch_num_regs (gdbarch, I386_AVX512_NUM_REGS);
 
+  set_gdbarch_gnu_triplet_regexp (gdbarch, i386_gnu_triplet_regexp);
+
   /* Get the x86 target description from INFO.  */
   tdesc = info.target_desc;
   if (! tdesc_has_registers (tdesc))
@@ -8595,12 +8568,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* If we have a register mapping, enable the generic core file
      support, unless it has already been enabled.  */
   if (tdep->gregset_reg_offset
-      && !gdbarch_regset_from_core_section_p (gdbarch))
-    set_gdbarch_regset_from_core_section (gdbarch,
-					  i386_regset_from_core_section);
-
-  set_gdbarch_skip_permanent_breakpoint (gdbarch,
-					 i386_skip_permanent_breakpoint);
+      && !gdbarch_iterate_over_regset_sections_p (gdbarch))
+    set_gdbarch_iterate_over_regset_sections
+      (gdbarch, i386_iterate_over_regset_sections);
 
   set_gdbarch_fast_tracepoint_valid_at (gdbarch,
 					i386_fast_tracepoint_valid_at);

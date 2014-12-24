@@ -302,6 +302,7 @@ main (int argc, char **argv)
   config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
   config.commonpagesize = bfd_emul_get_commonpagesize (default_target);
   lang_init (FALSE);
+  ldexp_init (FALSE);
   ldemul_before_parse ();
   lang_has_input_file = FALSE;
   parse_args (argc, argv);
@@ -418,7 +419,8 @@ main (int argc, char **argv)
     fprintf (stderr, "lookup = %p val %lx\n", h, h ? h->u.def.value : 1);
   }
 #endif
-  lang_finish (FALSE);
+  ldexp_finish (FALSE);
+  lang_finish ();
 
   /* Even if we're producing relocatable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we

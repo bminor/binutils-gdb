@@ -316,9 +316,10 @@ decode_mips_operand (const char *p)
 #define N5	(INSN_5400 | INSN_5500)
 #define N54	INSN_5400
 #define N55	INSN_5500
-#define IOCT	(INSN_OCTEON | INSN_OCTEONP | INSN_OCTEON2)
-#define IOCTP	(INSN_OCTEONP | INSN_OCTEON2)
-#define IOCT2	INSN_OCTEON2
+#define IOCT	(INSN_OCTEON | INSN_OCTEONP | INSN_OCTEON2 | INSN_OCTEON3)
+#define IOCTP	(INSN_OCTEONP | INSN_OCTEON2 | INSN_OCTEON3)
+#define IOCT2	(INSN_OCTEON2 | INSN_OCTEON3)
+#define IOCT3	INSN_OCTEON3
 #define XLR     INSN_XLR
 #define IVIRT	ASE_VIRT
 #define IVIRT64	ASE_VIRT64
@@ -429,7 +430,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"move",		"d,s",		0x00000025, 0xfc1f07ff,	WR_1|RD_2,		INSN2_ALIAS,	I1,		0,	0 },/* or */
 {"b",			"p",		0x10000000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1,		0,	0 },/* beq 0,0 */
 {"b",			"p",		0x04010000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1,		0,	0 },/* bgez 0 */
-{"nal",			"p",		0x04100000, 0xffff0000,	WR_31|CBD,		INSN2_ALIAS,	I1,		0,	0 },/* bltzal 0 */
+{"nal",			"",		0x04100000, 0xffffffff,	WR_31|CBD,		INSN2_ALIAS,	I1,		0,	0 },/* bltzal 0 */
 {"bal",			"p",		0x04110000, 0xffff0000,	WR_31|UBD,		INSN2_ALIAS,	I1,		0,	0 },/* bgezal 0*/
 {"bc",			"+'",		0xc8000000, 0xfc000000,	NODS,			0,		I37,		0,	0 },
 {"balc",		"+'",		0xe8000000, 0xfc000000,	WR_31|NODS,		0,		I37,		0,	0 },
@@ -1496,11 +1497,17 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mtlhx",		"s",		0x00000053, 0xfc1fffff,	RD_1|MOD_HILO,		0,		0,		SMT,	0 },
 {"mtcr",		"t,s",		0x70000019, 0xfc00ffff, RD_1|RD_2,		0,		XLR,		0,	0 },
 {"mtm0",		"s",		0x70000008, 0xfc1fffff, RD_1,			0,		IOCT,		0,	0 },
+{"mtm0",    		"s,t",		0x70000008, 0xfc00ffff, RD_1|RD_2,		0,		IOCT3,		0,	0 },
 {"mtm1",		"s",		0x7000000c, 0xfc1fffff, RD_1,			0,		IOCT,		0,	0 },
+{"mtm1",    		"s,t",		0x7000000c, 0xfc00ffff, RD_1|RD_2,		0,		IOCT3,		0,	0 },
 {"mtm2",		"s",		0x7000000d, 0xfc1fffff, RD_1,			0,		IOCT,		0,	0 },
+{"mtm2",    		"s,t",		0x7000000d, 0xfc00ffff, RD_1|RD_2,		0,		IOCT3,		0,	0 },
 {"mtp0",		"s",		0x70000009, 0xfc1fffff, RD_1,			0,		IOCT,		0,	0 },
+{"mtp0",    		"s,t",		0x70000009, 0xfc00ffff, RD_1|RD_2,		0,		IOCT3,		0,	0 },
 {"mtp1",		"s",		0x7000000a, 0xfc1fffff, RD_1,			0,		IOCT,		0,	0 },
+{"mtp1",    		"s,t",		0x7000000a, 0xfc00ffff, RD_1|RD_2,		0,		IOCT3,		0,	0 },
 {"mtp2",		"s",		0x7000000b, 0xfc1fffff, RD_1,			0,		IOCT,		0,	0 },
+{"mtp2",    		"s,t",		0x7000000b, 0xfc00ffff, RD_1|RD_2,		0,		IOCT3,		0,	0 },
 {"mtsa",		"s",		0x00000029, 0xfc1fffff,	RD_1,			0,		EE,		0,	0 },
 {"mtsab",		"s,j",		0x04180000, 0xfc1f0000,	RD_1,			0,		EE,		0,	0 },
 {"mtsah",		"s,j",		0x04190000, 0xfc1f0000,	RD_1,			0,		EE,		0,	0 },
@@ -3247,6 +3254,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"jic",			"t,j",		0xd8000000, 0xffe00000,	RD_1|NODS,		0,		I37,		0,	0 },
 
 {"bnezc",		"-s,+\"",	0xf8000000, 0xfc000000,	RD_1|NODS,		FS,		I37,		0,	0 },
+{"jalrc",		"t",		0xf8000000, 0xffe0ffff, RD_1|NODS,		0,		I37,		0,	0 },
 {"jialc",		"t,j",		0xf8000000, 0xffe00000,	RD_1|NODS,		0,		I37,		0,	0 },
 
 {"cmp.af.s",		"D,S,T",	0x46800000, 0xffe0003f,	WR_1|RD_2|RD_3|FP_S,	0,		I37,		0,	0 },

@@ -47,9 +47,8 @@ struct macro_table
      #inclusion tree; everything else is #included from here.  */
   struct macro_source_file *main_source;
 
-  /* Compilation directory for all files of this macro table.  It is allocated
-     on objfile's obstack.  */
-  const char *comp_dir;
+  /* Backlink to containing compilation unit, or NULL if there isn't one.  */
+  struct compunit_symtab *compunit_symtab;
 
   /* True if macros in this table can be redefined without issuing an
      error.  */
@@ -1049,7 +1048,7 @@ macro_for_each_in_scope (struct macro_source_file *file, int line,
 
 struct macro_table *
 new_macro_table (struct obstack *obstack, struct bcache *b,
-		 const char *comp_dir)
+		 struct compunit_symtab *cust)
 {
   struct macro_table *t;
 
@@ -1063,7 +1062,7 @@ new_macro_table (struct obstack *obstack, struct bcache *b,
   t->obstack = obstack;
   t->bcache = b;
   t->main_source = NULL;
-  t->comp_dir = comp_dir;
+  t->compunit_symtab = cust;
   t->redef_ok = 0;
   t->definitions = (splay_tree_new_with_allocator
                     (macro_tree_compare,
@@ -1092,8 +1091,13 @@ free_macro_table (struct macro_table *table)
 char *
 macro_source_fullname (struct macro_source_file *file)
 {
-  if (file->table->comp_dir == NULL || IS_ABSOLUTE_PATH (file->filename))
+  const char *comp_dir = NULL;
+
+  if (file->table->compunit_symtab != NULL)
+    comp_dir = COMPUNIT_DIRNAME (file->table->compunit_symtab);
+
+  if (comp_dir == NULL || IS_ABSOLUTE_PATH (file->filename))
     return xstrdup (file->filename);
 
-  return concat (file->table->comp_dir, SLASH_STRING, file->filename, NULL);
+  return concat (comp_dir, SLASH_STRING, file->filename, NULL);
 }

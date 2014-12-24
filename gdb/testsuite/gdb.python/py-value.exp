@@ -20,6 +20,8 @@ load_lib gdb-python.exp
 
 standard_testfile
 
+set has_argv0 [gdb_has_argv0]
+
 # Build inferior to language specification.
 # LANG is one of "c" or "c++".
 proc build_inferior {exefile lang} {
@@ -221,8 +223,12 @@ proc test_value_in_inferior {} {
   gdb_py_test_silent_cmd "python arg0 = argv.dereference ()" "dereference value" 1
 
   # Check that the dereferenced value is sane
-  if { ! [target_info exists noargs] } {
-    gdb_test "python print (arg0)" "0x.*$testfile\"" "verify dereferenced value"
+  global has_argv0
+  set test "verify dereferenced value"
+  if { $has_argv0 } {
+    gdb_test "python print (arg0)" "0x.*$testfile\"" $test
+  } else {
+    unsupported $test
   }
 
   # Smoke-test is_optimized_out attribute
@@ -288,7 +294,7 @@ proc test_value_in_inferior {} {
   # Test fetching a string longer than its declared (in C) size.
   # PR 16286
   gdb_py_test_silent_cmd "python xstr = gdb.parse_and_eval('xstr')" "get xstr" 1
-  gdb_test "python print xstr\['text'\].string (length = xstr\['length'\])" "x{100}" \
+  gdb_test "python print(xstr\['text'\].string (length = xstr\['length'\]))" "x{100}" \
     "read string beyond declared size"
 }
 

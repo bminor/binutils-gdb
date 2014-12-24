@@ -21,7 +21,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "cleanups.h"
 #include "exceptions.h"
 
 extern void initialize_utils (void);
@@ -369,5 +368,10 @@ extern void warn_cant_dump_core (const char *reason);
    first.  */
 
 extern void dump_core (void);
+
+/* Return the hex string form of LENGTH bytes of DATA.
+   Space for the result is malloc'd, caller must free.  */
+
+extern char *make_hex_string (const gdb_byte *data, size_t length);
 
 #endif /* UTILS_H */

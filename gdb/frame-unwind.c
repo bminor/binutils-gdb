@@ -24,7 +24,6 @@
 #include "inline-frame.h"
 #include "value.h"
 #include "regcache.h"
-#include "exceptions.h"
 #include "gdb_obstack.h"
 #include "target.h"
 

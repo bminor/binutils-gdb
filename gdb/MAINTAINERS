@@ -156,6 +156,7 @@ Andrew Cagney			cagney@gnu.org
 Doug Evans			dje@google.com
 Daniel Jacobowitz		drow@false.org
 Mark Kettenis           	kettenis@gnu.org
+Yao Qi				yao@codesourcery.com
 Stan Shebs			stan@codesourcery.com
 Tom Tromey			tromey@redhat.com
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
@@ -516,6 +517,7 @@ Doug Evans					dje@google.com
 Adam Fedor					fedor@gnu.org
 Brian Ford					ford@vss.fsi.com
 Orjan Friberg					orjanf@axis.com
+Andreas From					andreas.from@ericsson.com
 Nathan Froyd					froydnj@codesourcery.com
 Gary Funck					gary@intrepid.com
 Mircea Gherzan					mircea.gherzan@intel.com
@@ -595,6 +597,7 @@ David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Karen Osmond					karen.osmond@gmail.com
 Pawandeep Oza					oza.pawandeep@gmail.com
+Patrick Palka					patrick@parcs.ath.cx
 Denis Pilat					denis.pilat@st.com
 Andrew Pinski					apinski@cavium.com
 Kevin Pouget					kevin.pouget@st.com

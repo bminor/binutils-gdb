@@ -1256,14 +1256,6 @@ h8300_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
   return breakpoint;
 }
 
-static void
-h8300_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-			struct frame_info *frame, const char *args)
-{
-  fprintf_filtered (file, "\
-No floating-point info available for this processor.\n");
-}
-
 static struct gdbarch *
 h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1375,7 +1367,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_type (gdbarch, h8300_register_type);
   set_gdbarch_print_registers_info (gdbarch, h8300_print_registers_info);
-  set_gdbarch_print_float_info (gdbarch, h8300_print_float_info);
 
   /*
    * Frame Info

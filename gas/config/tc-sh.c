@@ -811,7 +811,7 @@ sh_cons_fix_new (fragS *frag, int off, int size, expressionS *exp,
 /* Clobbers input_line_pointer, checks end-of-line.  */
 /* NBYTES 1=.byte, 2=.word, 4=.long */
 static void
-sh_elf_cons (register int nbytes)
+sh_elf_cons (int nbytes)
 {
   expressionS exp;
 

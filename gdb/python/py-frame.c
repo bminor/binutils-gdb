@@ -21,7 +21,6 @@
 #include "charset.h"
 #include "block.h"
 #include "frame.h"
-#include "exceptions.h"
 #include "symtab.h"
 #include "stack.h"
 #include "value.h"
@@ -301,10 +300,8 @@ frapy_block (PyObject *self, PyObject *args)
 
   if (block)
     {
-      struct symtab *symt;
-
-      symt = SYMBOL_SYMTAB (BLOCK_FUNCTION (fn_block));
-      return block_to_block_object (block, symt->objfile);
+      return block_to_block_object
+	(block, symbol_objfile (BLOCK_FUNCTION (fn_block)));
     }
 
   Py_RETURN_NONE;

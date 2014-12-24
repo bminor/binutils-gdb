@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "value.h"
-#include "exceptions.h"
 #include "breakpoint.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
@@ -152,7 +151,6 @@ bpscm_enable_state_to_string (enum enable_state enable_state)
     case bp_disabled: return "disabled";
     case bp_enabled: return "enabled";
     case bp_call_disabled: return "call_disabled";
-    case bp_permanent: return "permanent";
     default: return "unknown";
     }
 }

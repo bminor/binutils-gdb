@@ -115,7 +115,11 @@ proc test_follow_fork { who detach cmd } {
 	# Set up the output we expect to see after we run.
 	set expected_re ""
 	if {$who == "child"} {
-	    set expected_re "Attaching after.* fork to.*set breakpoint here.*"
+	    set expected_re "Attaching after.* fork to.*"
+	    if {$detach == "on"} {
+		append expected_re "Detaching after fork from .*"
+	    }
+	    append expected_re "set breakpoint here.*"
 	} elseif {$who == "parent" && $detach == "on"} {
 	    set expected_re "Detaching after fork from .*set breakpoint here.*"
 	} else {
@@ -218,9 +222,9 @@ proc catch_fork_child_follow {} {
 	"Temporary breakpoint.*, line $bp_after_fork.*" \
 	"set follow-fork child, tbreak"
 
-    gdb_test "continue" \
-	"Attaching after.* fork to.* at .*$bp_after_fork.*" \
-	"set follow-fork child, hit tbreak"
+    set expected_re "Attaching after.* fork to.*Detaching after fork from"
+    append expected_re ".* at .*$bp_after_fork.*"
+    gdb_test "continue" $expected_re "set follow-fork child, hit tbreak"
 
     # The parent has been detached; allow time for any output it might
     # generate to arrive, so that output doesn't get confused with

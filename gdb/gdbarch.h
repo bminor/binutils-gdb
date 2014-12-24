@@ -51,6 +51,8 @@ struct target_ops;
 struct obstack;
 struct bp_target_info;
 struct target_desc;
+struct objfile;
+struct symbol;
 struct displaced_step_closure;
 struct core_regset_section;
 struct syscall;
@@ -59,6 +61,8 @@ struct axs_value;
 struct stap_parse_info;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
+struct mem_range;
+struct syscalls_info;
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -80,6 +84,10 @@ extern struct gdbarch *target_gdbarch (void);
 
 typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
   (struct objfile *objfile, void *cb_data);
+
+typedef void (iterate_over_regset_sections_cb)
+  (const char *sect_name, int size, const struct regset *regset,
+   const char *human_name, void *cb_data);
 
 
 /* The following are pre-initialized by GDBARCH.  */
@@ -368,8 +376,6 @@ extern void set_gdbarch_push_dummy_code (struct gdbarch *gdbarch, gdbarch_push_d
 typedef void (gdbarch_print_registers_info_ftype) (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all);
 extern void gdbarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all);
 extern void set_gdbarch_print_registers_info (struct gdbarch *gdbarch, gdbarch_print_registers_info_ftype *print_registers_info);
-
-extern int gdbarch_print_float_info_p (struct gdbarch *gdbarch);
 
 typedef void (gdbarch_print_float_info_ftype) (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, const char *args);
 extern void gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, const char *args);
@@ -682,6 +688,16 @@ typedef int (gdbarch_in_function_epilogue_p_ftype) (struct gdbarch *gdbarch, COR
 extern int gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p);
 
+/* Process an ELF symbol in the minimal symbol table in a backend-specific
+   way.  Normally this hook is supposed to do nothing, however if required,
+   then this hook can be used to apply tranformations to symbols that are
+   considered special in some way.  For example the MIPS backend uses it
+   to interpret `st_other' information to mark compressed code symbols so
+   that they can be treated in the appropriate manner in the processing of
+   the main symbol table and DWARF-2 records. */
+
+extern int gdbarch_elf_make_msymbol_special_p (struct gdbarch *gdbarch);
+
 typedef void (gdbarch_elf_make_msymbol_special_ftype) (asymbol *sym, struct minimal_symbol *msym);
 extern void gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym);
 extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special);
@@ -689,6 +705,45 @@ extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbar
 typedef void (gdbarch_coff_make_msymbol_special_ftype) (int val, struct minimal_symbol *msym);
 extern void gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, int val, struct minimal_symbol *msym);
 extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special);
+
+/* Process a symbol in the main symbol table in a backend-specific way.
+   Normally this hook is supposed to do nothing, however if required,
+   then this hook can be used to apply tranformations to symbols that
+   are considered special in some way.  This is currently used by the
+   MIPS backend to make sure compressed code symbols have the ISA bit
+   set.  This in turn is needed for symbol values seen in GDB to match
+   the values used at the runtime by the program itself, for function
+   and label references. */
+
+typedef void (gdbarch_make_symbol_special_ftype) (struct symbol *sym, struct objfile *objfile);
+extern void gdbarch_make_symbol_special (struct gdbarch *gdbarch, struct symbol *sym, struct objfile *objfile);
+extern void set_gdbarch_make_symbol_special (struct gdbarch *gdbarch, gdbarch_make_symbol_special_ftype *make_symbol_special);
+
+/* Adjust the address retrieved from a DWARF-2 record other than a line
+   entry in a backend-specific way.  Normally this hook is supposed to
+   return the address passed unchanged, however if that is incorrect for
+   any reason, then this hook can be used to fix the address up in the
+   required manner.  This is currently used by the MIPS backend to make
+   sure addresses in FDE, range records, etc. referring to compressed
+   code have the ISA bit set, matching line information and the symbol
+   table. */
+
+typedef CORE_ADDR (gdbarch_adjust_dwarf2_addr_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch, gdbarch_adjust_dwarf2_addr_ftype *adjust_dwarf2_addr);
+
+/* Adjust the address updated by a line entry in a backend-specific way.
+   Normally this hook is supposed to return the address passed unchanged,
+   however in the case of inconsistencies in these records, this hook can
+   be used to fix them up in the required manner.  This is currently used
+   by the MIPS backend to make sure all line addresses in compressed code
+   are presented with the ISA bit set, which is not always the case.  This
+   in turn ensures breakpoint addresses are correctly matched against the
+   stop PC. */
+
+typedef CORE_ADDR (gdbarch_adjust_dwarf2_line_ftype) (CORE_ADDR addr, int rel);
+extern CORE_ADDR gdbarch_adjust_dwarf2_line (struct gdbarch *gdbarch, CORE_ADDR addr, int rel);
+extern void set_gdbarch_adjust_dwarf2_line (struct gdbarch *gdbarch, gdbarch_adjust_dwarf2_line_ftype *adjust_dwarf2_line);
 
 extern int gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch);
 extern void set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch, int cannot_step_breakpoint);
@@ -732,19 +787,18 @@ typedef CORE_ADDR (gdbarch_fetch_pointer_argument_ftype) (struct frame_info *fra
 extern CORE_ADDR gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, struct frame_info *frame, int argi, struct type *type);
 extern void set_gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument);
 
-/* Return the appropriate register set for a core file section with
-   name SECT_NAME and size SECT_SIZE. */
+/* Iterate over all supported register notes in a core file.  For each
+   supported register note section, the iterator must call CB and pass
+   CB_DATA unchanged.  If REGCACHE is not NULL, the iterator can limit
+   the supported register note sections based on the current register
+   values.  Otherwise it should enumerate all supported register note
+   sections. */
 
-extern int gdbarch_regset_from_core_section_p (struct gdbarch *gdbarch);
+extern int gdbarch_iterate_over_regset_sections_p (struct gdbarch *gdbarch);
 
-typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
-extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
-extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
-
-/* Supported register notes in a core file. */
-
-extern struct core_regset_section * gdbarch_core_regset_sections (struct gdbarch *gdbarch);
-extern void set_gdbarch_core_regset_sections (struct gdbarch *gdbarch, struct core_regset_section * core_regset_sections);
+typedef void (gdbarch_iterate_over_regset_sections_ftype) (struct gdbarch *gdbarch, iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache);
+extern void gdbarch_iterate_over_regset_sections (struct gdbarch *gdbarch, iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache);
+extern void set_gdbarch_iterate_over_regset_sections (struct gdbarch *gdbarch, gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections);
 
 /* Create core file notes */
 
@@ -824,8 +878,6 @@ extern int gdbarch_vbit_in_delta (struct gdbarch *gdbarch);
 extern void set_gdbarch_vbit_in_delta (struct gdbarch *gdbarch, int vbit_in_delta);
 
 /* Advance PC to next instruction in order to skip a permanent breakpoint. */
-
-extern int gdbarch_skip_permanent_breakpoint_p (struct gdbarch *gdbarch);
 
 typedef void (gdbarch_skip_permanent_breakpoint_ftype) (struct regcache *regcache);
 extern void gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, struct regcache *regcache);
@@ -1053,6 +1105,16 @@ extern int gdbarch_get_syscall_number_p (struct gdbarch *gdbarch);
 typedef LONGEST (gdbarch_get_syscall_number_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
 extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
+
+/* The filename of the XML syscall for this architecture. */
+
+extern const char * gdbarch_xml_syscall_file (struct gdbarch *gdbarch);
+extern void set_gdbarch_xml_syscall_file (struct gdbarch *gdbarch, const char * xml_syscall_file);
+
+/* Information about system calls from this architecture */
+
+extern struct syscalls_info * gdbarch_syscalls_info (struct gdbarch *gdbarch);
+extern void set_gdbarch_syscalls_info (struct gdbarch *gdbarch, struct syscalls_info * syscalls_info);
 
 /* SystemTap related fields and functions.
    A NULL-terminated array of prefixes used to mark an integer constant
@@ -1316,6 +1378,42 @@ extern int gdbarch_auxv_parse_p (struct gdbarch *gdbarch);
 typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_ftype *auxv_parse);
+
+/* Find the address range of the current inferior's vsyscall/vDSO, and
+   write it to *RANGE.  If the vsyscall's length can't be determined, a
+   range with zero length is returned.  Returns true if the vsyscall is
+   found, false otherwise. */
+
+typedef int (gdbarch_vsyscall_range_ftype) (struct gdbarch *gdbarch, struct mem_range *range);
+extern int gdbarch_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);
+extern void set_gdbarch_vsyscall_range (struct gdbarch *gdbarch, gdbarch_vsyscall_range_ftype *vsyscall_range);
+
+/* Allocate SIZE bytes of PROT protected page aligned memory in inferior.
+   PROT has GDB_MMAP_PROT_* bitmask format.
+   Throw an error if it is not possible.  Returned address is always valid. */
+
+typedef CORE_ADDR (gdbarch_infcall_mmap_ftype) (CORE_ADDR size, unsigned prot);
+extern CORE_ADDR gdbarch_infcall_mmap (struct gdbarch *gdbarch, CORE_ADDR size, unsigned prot);
+extern void set_gdbarch_infcall_mmap (struct gdbarch *gdbarch, gdbarch_infcall_mmap_ftype *infcall_mmap);
+
+/* Return string (caller has to use xfree for it) with options for GCC
+   to produce code for this target, typically "-m64", "-m32" or "-m31".
+   These options are put before CU's DW_AT_producer compilation options so that
+   they can override it.  Method may also return NULL. */
+
+typedef char * (gdbarch_gcc_target_options_ftype) (struct gdbarch *gdbarch);
+extern char * gdbarch_gcc_target_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_gcc_target_options (struct gdbarch *gdbarch, gdbarch_gcc_target_options_ftype *gcc_target_options);
+
+/* Return a regular expression that matches names used by this
+   architecture in GNU configury triplets.  The result is statically
+   allocated and must not be freed.  The default implementation simply
+   returns the BFD architecture name, which is correct in nearly every
+   case. */
+
+typedef const char * (gdbarch_gnu_triplet_regexp_ftype) (struct gdbarch *gdbarch);
+extern const char * gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch);
+extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

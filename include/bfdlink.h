@@ -91,7 +91,13 @@ struct bfd_link_hash_entry
   /* Type of this entry.  */
   ENUM_BITFIELD (bfd_link_hash_type) type : 8;
 
+  /* Symbol is referenced in a normal object file, as distict from a LTO
+     IR object file.  */
   unsigned int non_ir_ref : 1;
+
+  /* Symbol is a built-in define.  These will be overridden by PROVIDE
+     in a linker script.  */
+  unsigned int linker_def : 1;
 
   /* Set if it is a secondary symbol.  */
   unsigned int secondary : 1;
@@ -431,6 +437,9 @@ struct bfd_link_info
 
   /* TRUE if the linker script contained an explicit PHDRS command.  */
   unsigned int user_phdrs: 1;
+
+  /* TRUE if BND prefix in PLT entries is always generated.  */
+  unsigned int bndplt: 1;
 
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in

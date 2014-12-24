@@ -53,14 +53,19 @@ static reloc_howto_type howto_table[] =
   HOWTO(R_PCRLONG,	       0,  2, 	32, TRUE,  0, complain_overflow_signed, 0, "DISP32",   TRUE, 0xffffffff,0xffffffff, FALSE),
 };
 
+#define NUM_HOWTOS (sizeof (howto_table) / sizeof (howto_table[0]))
+
 /* Turn a howto into a reloc  nunmber */
 
 #define SELECT_RELOC(x,howto) { x.r_type = howto->type; }
 #define BADMAG(x) WE32KBADMAG(x)
 #define WE32K	1
 
-#define RTYPE2HOWTO(cache_ptr, dst) \
-	    (cache_ptr)->howto = howto_table + (dst)->r_type;
+#define RTYPE2HOWTO(cache_ptr, dst)				\
+  ((cache_ptr)->howto =						\
+   ((dst)->r_type < NUM_HOWTOS					\
+    ? howto_table + (dst)->r_type				\
+    : NULL))
 
 #ifndef bfd_pe_print_pdata
 #define bfd_pe_print_pdata	NULL

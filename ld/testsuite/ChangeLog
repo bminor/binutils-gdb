@@ -1,3 +1,374 @@
+2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld/testsuite/ld-avr/relax-elf-flags-02.d: Add -mno-link-relax
+	option.
+	* ld/testsuite/ld-avr/relax-elf-flags-03.d: Likewise.
+	* ld/testsuite/ld-avr/relax-elf-flags-04.d: Likewise.
+	* ld/testsuite/ld-avr/relax-elf-flags-05.d: Likewise.
+	* ld/testsuite/ld-avr/relax-elf-flags-06.d: Likewise.
+
+2014-12-24  Alan Modra  <amodra@gmail.com>
+
+	* ld-scripts/defined6.s,
+	* ld-scripts/defined6.t,
+	* ld-scripts/defined6.d: New test.
+	* ld-scripts/defined.exp: Run it.
+
+2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-avr/relax-elf-flags-01.d: New file.
+	* ld-avr/relax-elf-flags-02.d: New file.
+	* ld-avr/relax-elf-flags-03.d: New file.
+	* ld-avr/relax-elf-flags-04.d: New file.
+	* ld-avr/relax-elf-flags-05.d: New file.
+	* ld-avr/relax-elf-flags-06.d: New file.
+	* ld-avr/relax-elf-flags-07.d: New file.
+	* ld-avr/relax-elf-flags-08.d: New file.
+	* ld-avr/relax-elf-flags-a.s: New file.
+	* ld-avr/relax-elf-flags-b.s: New file.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/sdabase.s,
+	* ld-powerpc/sdabase.t,
+	* ld-powerpc/sdabase.d: New test.
+	* ld-powerpc/sdabase2.t,
+	* ld-powerpc/sdabase2.d: New test.
+	* ld-powerpc/powerpc.exp: Run them.
+
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/endsym.s, *ld-elf/endsym.d: New test.
+
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/attr-gnu-4-00.d: Relax check for ISA extension.
+	* ld-mips-elf/attr-gnu-4-01.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-02.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-03.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-08.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-10.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-11.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-18.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-20.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-22.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-28.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-30.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-33.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-38.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-44.d: Likewise.
+
+2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/mips-elf.exp: Update undefweak-overflow tests.
+	* ld-mips-elf/undefweak-overflow-n32.d: Remove.
+	* ld-mips-elf/undefweak-overflow-n64.d: Likewise.
+	* ld-mips-elf/undefweak-overflow.s: Set mips64r6, noreorder and
+	add a label to mark the micromips region.
+	* ld-mips-elf/undefweak-overflow.d: Update expected output.
+
+2014-12-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17689
+	* ld-x86-64/pr17689.out: New file.
+	* ld-x86-64/pr17689.rd: Likewise.
+	* ld-x86-64/pr17689a.c: Likewise.
+	* ld-x86-64/pr17689b.S: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run PR ld/17689 tests.
+
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* lib/ld-lib.exp (check_shared_lib_support): Return 0 for Visium.
+	* ld-visium/: New directory.
+
+2014-12-04  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/vxworks-relax.rd: Update for reloc sorting.
+	* ld-powerpc/vxworks-relax-2.rd: Likewise.
+	* ld-sh/sh64/reldl32.rd: Likewise.
+	* ld-sh/sh64/reldl64.rd: Likewise.
+
+2014-12-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/copyreloc-main.c: Removed.
+	* ld-x86-64/copyreloc-main.S: New.
+	* ld-x86-64/x86-64.exp: Replace copyreloc-main.c with
+	copyreloc-main.S.
+
+2014-12-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/copyreloc-lib.c: New file.
+	* ld-x86-64/copyreloc-main.c: Likewise.
+	* ld-x86-64/copyreloc-main.out: Likewise.
+	* ld-x86-64/copyreloc-main1.rd: Likewise.
+	* ld-x86-64/copyreloc-main2.rd: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run copyreloc tests.
+
+2014-12-02  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* ld-mips-elf/mips-elf.exp: Add undefined weak overflow
+	tests for o32, n32 and n64.
+	* ld-mips-elf/undefweak-overflow.s: New test.
+	* ld-mips-elf/undefweak-overflow.d: New test.
+	* ld-mips-elf/undefweak-overflow-n32.d: New test.
+	* ld-mips-elf/undefweak-overflow-n64.d: New test.
+
+2014-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16452
+	PR ld/16457
+	* ld-elf/pr16452.map: New file.
+	* ld-elf/pr16452.od: Likewise.
+	* ld-elf/pr16452a.c: Likewise.
+	* ld-elf/pr16452b.c: Likewise.
+	* ld-elf/pr16457.od: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add tests for PR ld/16452 and
+	PR ld/16457.
+
+2014-11-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-mips-elf/got-vers-1.rd: Add symbol version string to
+	versioned symbol names in dynamic relocation.
+	* ld-mips-elf/reloc-estimate-1.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+	* ld-mips-elf/tlslib-o32-ver.got: Likewise.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-alpha/tlsbin.dd: Updated for secureplt.
+	* ld-alpha/tlsbin.rd: Likewise.
+	* ld-alpha/tlsbin.sd: Likewise.
+	* ld-alpha/tlsbinr.dd: Likewise.
+	* ld-alpha/tlsbinr.rd: Likewise.
+	* ld-alpha/tlspic.dd: Likewise.
+	* ld-alpha/tlspic.rd: Likewise.
+	* ld-alpha/tlspic.sd: Likewise.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16496
+	* ld-cris/weakref3.d: Add symbol version string to versioned
+	symbol names in dynamic relocation.
+	* ld-cris/weakref4.d: Likewise.
+	* ld-elfvers/vers24.rd: Likewise.
+
+	* ld-elf/pr16496a.c: New file.
+	* ld-elf/pr16496a.map: Likewise.
+	* ld-elf/pr16496b.c: Likewise.
+	* ld-elf/pr16496b.od: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add libpr16496a.so and
+	libpr16496b.so tests.
+
+2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Add run-time relocation tests for plt-main.
+	* ld-i386/plt-main.rd: New file.
+	* ld-x86-64/plt-main-bnd.dd: Likewise.
+	* ld-x86-64/plt-main.rd: Likewise.
+	* ld-x86-64/x86-64.exp: Add run-time relocation tests for
+	plt-main.
+
+2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/plt-lib.c: New file.
+	* ld-i386/plt-main.out: Likewise.
+	* ld-i386/plt-main1.c: Likewise.
+	* ld-i386/plt-main1.rd: Likewise.
+	* ld-i386/plt-main2.c: Likewise.
+	* ld-i386/plt-main2.rd: Likewise.
+	* ld-i386/plt-main3.c: Likewise.
+	* ld-i386/plt-main3.rd: Likewise.
+	* ld-i386/plt-main4.c: Likewise.
+	* ld-i386/plt-main4.rd: Likewise.
+	* ld-i386/plt-main5.c: Likewise.
+
+	* ld-i386/i386.exp: Run plt-main tests.
+
+2014-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/x86-64.exp: Run plt-main test with -pie.
+
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/tls-longplt-lib.s: Require ARMv6T2.
+	* ld-arm/tls-longplt.s: Likewise.
+	* ld-arm/tls-longplt-lib.d: Updated.
+	* ld-arm/tls-longplt.d: Likewise.
+
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-vfp-4-sp.s: New test source file.
+	* ld-arm/attr-merge-vfp-5-sp.s: Likewise.
+	* ld-arm/attr-merge-vfp-5.s: Likewise.
+	* ld-arm/attr-merge-vfp-8.d: New test.
+	* ld-arm/attr-merge-vfp-8r.d: Likewise.
+	* ld-arm/attr-merge-vfp-9.d: Likewise.
+	* ld-arm/attr-merge-vfp-9r.d: Likewise.
+	* ld-arm/attr-merge-vfp-10.d: Likewise.
+	* ld-arm/attr-merge-vfp-10r.d: Likewise.
+	* ld-arm/attr-merge-vfp-11.d: Likewise.
+	* ld-arm/attr-merge-vfp-11r.d: Likewise.
+	* ld-arm/attr-merge-vfp-12.d: Likewise.
+	* ld-arm/attr-merge-vfp-12r.d: Likewise.
+	* ld-arm/attr-merge-vfp-13.d: Likewise.
+	* ld-arm/attr-merge-vfp-13r.d: Likewise.
+	* ld-arm/attr-merge-vfp-14.d: Likewise.
+	* ld-arm/attr-merge-vfp-14r.d: Likewise.
+	* ld-arm/arm-elf.exp: Run the new tests.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/pr17618.d: Don't run on x32.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/plt-main1.rd: Updated for x32.
+	* ld-x86-64/plt-main2.rd: Likewise.
+	* ld-x86-64/plt-main3.rd: Likewise.
+	* ld-x86-64/plt-main4.rd: Likewise.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/plt-lib.c: New file.
+	* ld-x86-64/plt-main.out: Likewise.
+	* ld-x86-64/plt-main1.c: Likewise.
+	* ld-x86-64/plt-main1.rd: Likewise.
+	* ld-x86-64/plt-main2.c: Likewise.
+	* ld-x86-64/plt-main2.rd: Likewise.
+	* ld-x86-64/plt-main3.c: Likewise.
+	* ld-x86-64/plt-main3.rd: Likewise.
+	* ld-x86-64/plt-main4.c: Likewise.
+	* ld-x86-64/plt-main4.rd: Likewise.
+	* ld-x86-64/plt-main5.c: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run plt-main tests.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-main.c (get_bar): New function.
+	(main): Use it.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc.exp: Run ifunc-main.
+	* ld-ifunc/ifunc-lib.c: New file.
+	* ld-ifunc/ifunc-main.c: Likewise.
+	* ld-ifunc/ifunc-main.out: Likewise.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/ld-lib.exp (check_ifunc_available): New.
+	* ld-ifunc/ifunc.exp: Run IFUNC run-time tests only if IFUNC
+	is supported.
+
+2014-11-20  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-nosection-1.d: New file.
+	* ld-arm/attr-merge-nosection-1a.s: Likewise.
+	* ld-arm/attr-merge-nosection-1b.s: Likewise.
+	* ld-arm/arm-elf.exp: Include the new test.
+
+2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17618
+	* ld-x86-64/x86-64.exp: Run pr17618 for Linux target.
+
+	* ld-x86-64/pr17618.d: New file.
+	* ld-x86-64/pr17618.s: Likewise.
+
+2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/mpx.exp: Always run mpx3 and mpx4 tests in 64-bit.
+
+2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
+
+	* ld-x86-64/bnd-ifunc-1.d: Add bndplt option.
+	* ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* ld-x86-64/bnd-plt-1.d: Likewise.  Update dissassembly sections.
+	* ld-x86-64/mpx.exp: Handle mpx3 and mpx4 tests.
+	* ld-x86-64/mpx1a.rd: Remove _BND from relocation name.
+	* ld-x86-64/mpx1c.rd: Likewise.
+	* ld-x86-64/mpx2a.rd: Likewise.
+	* ld-x86-64/mpx2c.rd: Likewise.
+	* ld-x86-64/mpx3.dd: New file.
+	* ld-x86-64/mpx3a.s: Likewise.
+	* ld-x86-64/mpx3b.s: Likewise.
+	* ld-x86-64/mpx4.dd: Likewise.
+	* ld-x86-64/mpx4a.s: Likewise.
+	* ld-x86-64/mpx4b.s: Likewise.
+
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17598
+	* ld-x86-64/x86-64.exp: Run gotplt1.
+
+	* ld-x86-64/gotplt1.d: New file.
+	* ld-x86-64/gotplt1.s: Likewise.
+
+2014-11-11  Jiong Wang <jiong.wang@arm.com>
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Append board_cflags if gcc
+	driver used as link tool.
+	(run_cc_link_exec_tests): Likewise.
+
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17482
+	* ld-x86-64/tlsie4.dd: Updated.
+
+2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/abiflags-strip10-ph.d: New file.
+	* ld-mips-elf/mips-eld.exp: Run the new test.
+
+2014-10-30  Will Newton  <will.newton@linaro.org>
+
+	* ld-unique/unique.exp: Use a wider glob for matching ARM
+	targets.
+	* ld-unique/unique.s: Use % instead of @ in .type directive.
+	* ld-unique/unique_shared.s: Likewise.
+
+2014-10-24  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (aarch64elftests): Drive erratum
+	835769 tests.
+	* ld-aarch64/erratum835769.d: New.
+	* ld-aarch64/erratum835769.s: New.
+
+2014-10-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-scripts/sysroot-prefix.exp: Log $ld_sysroot.  Handle sysroot
+	== "/" as a separate sysroot-configuration with separable
+	test-types.
+	(sysroot_prefix_tests): Include all existing sysroot tests in
+	sysroot == "/" tests except exclude those where a --sysroot option
+	is not specified.
+	* lib/ld-lib.exp (check_sysroot_available): Rewrite to use
+	--print-sysroot instead of relying on error code from using
+	--sysroot=...  Also, set $ld_sysroot.
+
+2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-scripts/sysroot-prefix.exp, ld-scripts/sysroot-prefix-x.s,
+	ld-scripts/sysroot-prefix-y.s: New files.
+	* lib/ld-lib.exp (check_sysroot_available): New proc.
+
+2014-10-04  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/eh1.s: Don't create FDEs with zero address ranges.
+	* ld-elf/eh3.s: Likewise.
+	* ld-elf/eh1.d, * ld-elf/eh2.d, * ld-elf/eh3.d: Adjust.
+	* ld-mips-elf/eh-frame1-n32.d: Warning match update.
+	* ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* ld-mips-elf/eh-frame2-n64.d: Likewise.
+
 2014-09-22  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/lto.exp: Use both --print-file-name and --print-prog-name
@@ -534,7 +905,7 @@
 
 2014-06-09  Ryan Mansfield  <rmansfield@qnx.com>
 
-        * config/default.exp (GASP): Remove.
+	* config/default.exp (GASP): Remove.
 
 2014-06-03  Alan Modra  <amodra@gmail.com>
 

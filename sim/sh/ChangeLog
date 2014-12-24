@@ -1,3 +1,8 @@
+2014-10-14  Oleg Endo <olegendo@gcc.gnu.org>  (tiny patch)
+
+	* gencode.c (fabs, fneg): Implement as integer operation
+	instead of using the FP_UNARY macro.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
@@ -1054,7 +1059,7 @@ Thu Sep 14 19:32:59 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gencode.c:  Back up PC by 2 for breakpoints.
 	* interp.c:  Move fp regs beyond pc/pr/etc to avoid confusing GDB,
-	which expect pc to immediatly follow regs[].
+	which expect pc to immediately follow regs[].
 
 Fri Sep  8 14:18:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 

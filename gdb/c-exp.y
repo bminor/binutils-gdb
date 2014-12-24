@@ -1353,12 +1353,12 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 					      expression_context_block); }
 	|	CLASS COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_CLASS, "", 0);
+			  mark_completion_tag (TYPE_CODE_STRUCT, "", 0);
 			  $$ = NULL;
 			}
 	|	CLASS name COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_CLASS, $2.ptr,
+			  mark_completion_tag (TYPE_CODE_STRUCT, $2.ptr,
 					       $2.length);
 			  $$ = NULL;
 			}
@@ -2928,7 +2928,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  symtab = lookup_symtab (copy);
 	  if (symtab)
 	    {
-	      yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab),
+	      yylval.bval = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
 					       STATIC_BLOCK);
 	      return FILENAME;
 	    }
@@ -2940,13 +2940,6 @@ classify_name (struct parser_state *par_state, const struct block *block,
       yylval.tsym.type = SYMBOL_TYPE (sym);
       return TYPENAME;
     }
-
-  yylval.tsym.type
-    = language_lookup_primitive_type_by_name (parse_language (par_state),
-					      parse_gdbarch (par_state),
-					      copy);
-  if (yylval.tsym.type != NULL)
-    return TYPENAME;
 
   /* See if it's an ObjC classname.  */
   if (parse_language (par_state)->la_language == language_objc && !sym)
@@ -3019,7 +3012,7 @@ classify_inner_name (struct parser_state *par_state,
      relative to the `this' pointer.  */
   if (yylval.ssym.sym == NULL)
     {
-      struct type *base_type = find_type_baseclass_by_name (type, copy);
+      struct type *base_type = cp_find_type_baseclass_by_name (type, copy);
 
       if (base_type != NULL)
 	{
@@ -3038,7 +3031,7 @@ classify_inner_name (struct parser_state *par_state,
 	 named COPY when we really wanted a base class of the same name.
 	 Double-check this case by looking for a base class.  */
       {
-	struct type *base_type = find_type_baseclass_by_name (type, copy);
+	struct type *base_type = cp_find_type_baseclass_by_name (type, copy);
 
 	if (base_type != NULL)
 	  {

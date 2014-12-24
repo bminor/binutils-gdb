@@ -1132,7 +1132,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 
 	  if (allow_20bit_values)
 	    {
-	      if (op->exp.X_add_number > 0xfffff || op->exp.X_add_number < - (0x7ffff))
+	      if (op->exp.X_add_number > 0xfffff || op->exp.X_add_number < -524288)
 		{
 		  as_bad (_("value 0x%x out of extended range."), x);
 		  return 1;

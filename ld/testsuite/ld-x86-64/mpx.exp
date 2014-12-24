@@ -74,6 +74,21 @@ set run_tests {
      {dummy.s} "mpx2static" "mpx2.out"}
 }
 
+run_ld_link_tests {
+    {"Build libcall.so"
+     "-m elf_x86_64 -shared -z bndplt" "" "--64"
+     {mpx3b.s} {} "libcall.so"}
+    {"Build mpx3"
+     "-m elf_x86_64 -z bndplt tmpdir/libcall.so" "" "--64"
+     {mpx3a.s} {{objdump -dw mpx3.dd}} "mpx3"}
+    {"Build libcall1.so"
+     "-m elf_x86_64 -shared -z bndplt" "" "--64"
+     {mpx4b.s} {} "libcall1.so"}
+    {"Build mpx4"
+     "-m elf_x86_64 -z bndplt tmpdir/libcall1.so" "" "--64"
+     {mpx4a.s} {{objdump -dw mpx4.dd}} "mpx4"}
+}
+
 run_ld_link_exec_tests [] $run_tests
 
 run_dump_test "bnd-branch-1"

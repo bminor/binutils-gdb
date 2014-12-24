@@ -236,6 +236,8 @@ static const arm_feature_set fpu_neon_ext_fma = ARM_FEATURE (0, FPU_NEON_EXT_FMA
 static const arm_feature_set fpu_vfp_ext_fma = ARM_FEATURE (0, FPU_VFP_EXT_FMA);
 static const arm_feature_set fpu_vfp_ext_armv8 =
   ARM_FEATURE (0, FPU_VFP_EXT_ARMV8);
+static const arm_feature_set fpu_vfp_ext_armv8xd =
+  ARM_FEATURE (0, FPU_VFP_EXT_ARMV8xD);
 static const arm_feature_set fpu_neon_ext_armv8 =
   ARM_FEATURE (0, FPU_NEON_EXT_ARMV8);
 static const arm_feature_set fpu_crypto_ext_armv8 =
@@ -7251,7 +7253,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 /* Functions for operand encoding.  ARM, then Thumb.  */
 
-#define rotate_left(v, n) (v << n | v >> (32 - n))
+#define rotate_left(v, n) (v << (n & 31) | v >> ((32 - n) & 31))
 
 /* If VAL can be encoded in the immediate field of an ARM instruction,
    return the encoded form.  Otherwise, return FAIL.  */
@@ -15032,6 +15034,13 @@ do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
   int sz, op;
   int rm;
 
+  /* Targets like FPv5-SP-D16 don't support FP v8 instructions with
+     D register operands.  */
+  if (flavour == neon_cvt_flavour_s32_f64
+      || flavour == neon_cvt_flavour_u32_f64)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
+
   set_it_insn_type (OUTSIDE_IT_INSN);
 
   switch (flavour)
@@ -15296,11 +15305,21 @@ do_neon_cvttb_1 (bfd_boolean t)
     }
   else if (neon_check_type (2, rs, N_F16, N_F64 | N_VFP).type != NT_invtype)
     {
+      /* The VCVTB and VCVTT instructions with D-register operands
+         don't work for SP only targets.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		  _(BAD_FPU));
+
       inst.error = NULL;
       do_neon_cvttb_2 (t, /*to=*/TRUE, /*is_double=*/TRUE);
     }
   else if (neon_check_type (2, rs, N_F64 | N_VFP, N_F16).type != NT_invtype)
     {
+      /* The VCVTB and VCVTT instructions with D-register operands
+         don't work for SP only targets.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		  _(BAD_FPU));
+
       inst.error = NULL;
       do_neon_cvttb_2 (t, /*to=*/FALSE, /*is_double=*/TRUE);
     }
@@ -16427,6 +16446,12 @@ do_neon_ldx_stx (void)
 static void
 do_vfp_nsyn_fpv8 (enum neon_shape rs)
 {
+  /* Targets like FPv5-SP-D16 don't support FP v8 instructions with
+     D register operands.  */
+  if (neon_shape_class[rs] == SC_DOUBLE)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
+
   NEON_ENCODE (FPV8, inst);
 
   if (rs == NS_FFF)
@@ -16471,6 +16496,12 @@ do_vrint_1 (enum neon_cvt_mode mode)
 
   if (rs == NS_NULL)
     return;
+
+  /* Targets like FPv5-SP-D16 don't support FP v8 instructions with
+     D register operands.  */
+  if (neon_shape_class[rs] == SC_DOUBLE)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
 
   et = neon_check_type (2, rs, N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
   if (et.type != NT_invtype)
@@ -17672,9 +17703,9 @@ md_assemble (char *str)
       /* Many Thumb-2 instructions also have Thumb-1 variants, so explicitly
 	 set those bits when Thumb-2 32-bit instructions are seen.  ie.
 	 anything other than bl/blx and v6-M instructions.
-	 This is overly pessimistic for relaxable instructions.  */
-      if (((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
-	   || inst.relax)
+	 The impact of relaxable instructions will be considered later after we
+	 finish all relaxation.  */
+      if ((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
 	  && !(ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_msr)
 	       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier)))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
@@ -18953,9 +18984,9 @@ static const struct asm_opcode insns[] =
 
   /* FP for ARMv8.  */
 #undef  ARM_VARIANT
-#define ARM_VARIANT   & fpu_vfp_ext_armv8
+#define ARM_VARIANT   & fpu_vfp_ext_armv8xd
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT & fpu_vfp_ext_armv8
+#define THUMB_VARIANT & fpu_vfp_ext_armv8xd
 
   nUF(vseleq, _vseleq, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vselvs, _vselvs, 3, (RVSD, RVSD, RVSD),		vsel),
@@ -20508,6 +20539,11 @@ md_convert_frag (bfd *abfd, segT asec ATTRIBUTE_UNUSED, fragS *fragp)
   fixp->fx_file = fragp->fr_file;
   fixp->fx_line = fragp->fr_line;
   fragp->fr_fix += fragp->fr_var;
+
+  /* Set whether we use thumb-2 ISA based on final relaxation results.  */
+  if (thumb_mode && fragp->fr_var == 4 && no_cpu_selected ()
+      && !ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_t2))
+    ARM_MERGE_FEATURE_SETS (arm_arch_used, thumb_arch_used, arm_ext_v6t2);
 }
 
 /* Return the size of a relaxable immediate operand instruction.
@@ -24406,6 +24442,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-r7",	ARM_ARCH_V7R_IDIV,
 						 FPU_ARCH_VFP_V3D16,
 								  "Cortex-R7"),
+  ARM_CPU_OPT ("cortex-m7",	ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M7"),
   ARM_CPU_OPT ("cortex-m4",	ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M4"),
   ARM_CPU_OPT ("cortex-m3",	ARM_ARCH_V7M,	 FPU_NONE,	  "Cortex-M3"),
   ARM_CPU_OPT ("cortex-m1",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M1"),
@@ -24423,6 +24460,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   /* Marvell processors.  */
   ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP | ARM_EXT_SEC, 0),
 						FPU_ARCH_VFP_V3D16, NULL),
+  ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP
+					       | ARM_EXT_SEC, 0),
+					       FPU_ARCH_NEON_VFP_V4, NULL),
 
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }
 };
@@ -24574,6 +24614,8 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"vfpv4",		FPU_ARCH_VFP_V4},
   {"vfpv4-d16",		FPU_ARCH_VFP_V4D16},
   {"fpv4-sp-d16",	FPU_ARCH_VFP_V4_SP_D16},
+  {"fpv5-d16",		FPU_ARCH_VFP_V5D16},
+  {"fpv5-sp-d16",	FPU_ARCH_VFP_V5_SP_D16},
   {"neon-vfpv4",	FPU_ARCH_NEON_VFP_V4},
   {"fp-armv8",		FPU_ARCH_VFP_ARMV8},
   {"neon-fp-armv8",	FPU_ARCH_NEON_VFP_ARMV8},
@@ -25091,7 +25133,7 @@ aeabi_set_attribute_string (int tag, const char *value)
 }
 
 /* Set the public EABI object attributes.  */
-static void
+void
 aeabi_set_public_attributes (void)
 {
   int arch;
@@ -25199,8 +25241,10 @@ aeabi_set_public_attributes (void)
 	ARM_CPU_HAS_FEATURE (flags, arm_arch_t2) ? 2 : 1);
 
   /* Tag_VFP_arch.  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_armv8))
-    aeabi_set_attribute_int (Tag_VFP_arch, 7);
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_armv8xd))
+    aeabi_set_attribute_int (Tag_VFP_arch,
+			     ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32)
+			     ? 7 : 8);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_fma))
     aeabi_set_attribute_int (Tag_VFP_arch,
 			     ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32)

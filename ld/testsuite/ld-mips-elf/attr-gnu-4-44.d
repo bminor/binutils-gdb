@@ -14,7 +14,7 @@ GPR size: .*
 CPR1 size: .*
 CPR2 size: 0
 FP ABI: Hard float \(MIPS32r2 64-bit FPU 12 callee-saved\)
-ISA Extension: None
+ISA Extension: .*
 ASEs:
 	None
 FLAGS 1: 0000000.

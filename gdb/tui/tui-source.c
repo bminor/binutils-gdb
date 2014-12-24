@@ -111,7 +111,7 @@ tui_set_source_content (struct symtab *s,
 		  stream = fdopen (desc, FOPEN_RT);
 		  clearerr (stream);
 		  cur_line = 0;
-		  src->gdbarch = get_objfile_arch (s->objfile);
+		  src->gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
 		  src->start_line_or_addr.loa = LOA_LINE;
 		  cur_line_no = src->start_line_or_addr.u.line_no = line_no;
 		  if (offset > 0)
@@ -357,7 +357,7 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
+	s = find_pc_line_symtab (get_frame_pc (get_selected_frame (NULL)));
       else
 	s = cursal.symtab;
 

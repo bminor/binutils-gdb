@@ -98,6 +98,12 @@ extern int ui_file_isatty (struct ui_file *);
 extern void ui_file_write (struct ui_file *file, const char *buf,
 			   long length_buf);
 
+/* A wrapper for ui_file_write that is suitable for use by
+   ui_file_put.  */
+
+extern void ui_file_write_for_put (void *data, const char *buffer,
+				   long length_buffer);
+
 extern void ui_file_write_async_safe (struct ui_file *file, const char *buf,
 				      long length_buf);
 

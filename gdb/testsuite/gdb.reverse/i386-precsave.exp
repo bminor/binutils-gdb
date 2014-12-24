@@ -55,7 +55,7 @@ global hex
 global decimal
 
 gdb_test "break $end_of_main" \
-    "Breakpoint $decimal at .*/$srcfile, line $end_of_main\." \
+    "Breakpoint $decimal at .*$srcfile, line $end_of_main\." \
     "BP at end of main"
 
 gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
@@ -68,7 +68,7 @@ gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
 gdb_test "record restore $precsave" \
-    "Program terminated with signal .*" \
+    "Restored records from core file .*" \
     "reload precord save file"
 
 gdb_test "step" "inc .eax.*" "step to inc eax 1st time"

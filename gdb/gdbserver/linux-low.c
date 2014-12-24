@@ -1878,7 +1878,9 @@ linux_low_filter_event (ptid_t filter_ptid, int lwpid, int wstat)
 
   if (WIFSTOPPED (wstat) && child->must_set_ptrace_flags)
     {
-      linux_enable_event_reporting (lwpid);
+      struct process_info *proc = find_process_pid (pid_of (thread));
+
+      linux_enable_event_reporting (lwpid, proc->attached);
       child->must_set_ptrace_flags = 0;
     }
 
@@ -2517,34 +2519,6 @@ retry:
   trace_event = 0;
   in_step_range = 0;
   ourstatus->kind = TARGET_WAITKIND_IGNORE;
-
-  /* If we were only supposed to resume one thread, only wait for
-     that thread - if it's still alive.  If it died, however - which
-     can happen if we're coming from the thread death case below -
-     then we need to make sure we restart the other threads.  We could
-     pick a thread at random or restart all; restarting all is less
-     arbitrary.  */
-  if (!non_stop
-      && !ptid_equal (cont_thread, null_ptid)
-      && !ptid_equal (cont_thread, minus_one_ptid))
-    {
-      struct thread_info *thread;
-
-      thread = (struct thread_info *) find_inferior_id (&all_threads,
-							cont_thread);
-
-      /* No stepping, no signal - unless one is pending already, of course.  */
-      if (thread == NULL)
-	{
-	  struct thread_resume resume_info;
-	  resume_info.thread = minus_one_ptid;
-	  resume_info.kind = resume_continue;
-	  resume_info.sig = 0;
-	  linux_resume (&resume_info, 1);
-	}
-      else
-	ptid = cont_thread;
-    }
 
   if (ptid_equal (step_over_bkpt, null_ptid))
     pid = linux_wait_for_event (ptid, &w, options);
@@ -4249,19 +4223,14 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
   int pid;
   struct iovec iov;
 
-  regset = regsets_info->regsets;
-
   pid = lwpid_of (current_thread);
-  while (regset->size >= 0)
+  for (regset = regsets_info->regsets; regset->size >= 0; regset++)
     {
       void *buf, *data;
       int nt_type, res;
 
       if (regset->size == 0 || regset_disabled (regsets_info, regset))
-	{
-	  regset ++;
-	  continue;
-	}
+	continue;
 
       buf = xmalloc (regset->size);
 
@@ -4288,8 +4257,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	      /* If we get EIO on a regset, do not try it again for
 		 this process mode.  */
 	      disable_regset (regsets_info, regset);
-	      free (buf);
-	      continue;
+	    }
+	  else if (errno == ENODATA)
+	    {
+	      /* ENODATA may be returned if the regset is currently
+		 not "active".  This can happen in normal operation,
+		 so suppress the warning in this case.  */
 	    }
 	  else
 	    {
@@ -4299,10 +4272,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	      perror (s);
 	    }
 	}
-      else if (regset->type == GENERAL_REGS)
-	saw_general_regs = 1;
-      regset->store_function (regcache, buf);
-      regset ++;
+      else
+	{
+	  if (regset->type == GENERAL_REGS)
+	    saw_general_regs = 1;
+	  regset->store_function (regcache, buf);
+	}
       free (buf);
     }
   if (saw_general_regs)
@@ -4320,19 +4295,15 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
   int pid;
   struct iovec iov;
 
-  regset = regsets_info->regsets;
-
   pid = lwpid_of (current_thread);
-  while (regset->size >= 0)
+  for (regset = regsets_info->regsets; regset->size >= 0; regset++)
     {
       void *buf, *data;
       int nt_type, res;
 
-      if (regset->size == 0 || regset_disabled (regsets_info, regset))
-	{
-	  regset ++;
-	  continue;
-	}
+      if (regset->size == 0 || regset_disabled (regsets_info, regset)
+	  || regset->fill_function == NULL)
+	continue;
 
       buf = xmalloc (regset->size);
 
@@ -4378,8 +4349,6 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	      /* If we get EIO on a regset, do not try it again for
 		 this process mode.  */
 	      disable_regset (regsets_info, regset);
-	      free (buf);
-	      continue;
 	    }
 	  else if (errno == ESRCH)
 	    {
@@ -4397,7 +4366,6 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	}
       else if (regset->type == GENERAL_REGS)
 	saw_general_regs = 1;
-      regset ++;
       free (buf);
     }
   if (saw_general_regs)
@@ -4848,16 +4816,9 @@ linux_request_interrupt (void)
 {
   extern unsigned long signal_pid;
 
-  if (!ptid_equal (cont_thread, null_ptid)
-      && !ptid_equal (cont_thread, minus_one_ptid))
-    {
-      int lwpid;
-
-      lwpid = lwpid_of (current_thread);
-      kill_lwp (lwpid, SIGINT);
-    }
-  else
-    kill_lwp (signal_pid, SIGINT);
+  /* Send a SIGINT to the process group.  This acts just like the user
+     typed a ^C on the controlling terminal.  */
+  kill (-signal_pid, SIGINT);
 }
 
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET

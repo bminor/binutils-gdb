@@ -215,20 +215,16 @@ const struct regset aarch64_linux_fpregset =
 
 /* Implement the "regset_from_core_section" gdbarch method.  */
 
-static const struct regset *
-aarch64_linux_regset_from_core_section (struct gdbarch *gdbarch,
-					const char *sect_name,
-					size_t sect_size)
+static void
+aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					    iterate_over_regset_sections_cb *cb,
+					    void *cb_data,
+					    const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size == AARCH64_LINUX_SIZEOF_GREGSET)
-    return &aarch64_linux_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0
-      && sect_size == AARCH64_LINUX_SIZEOF_FPREGSET)
-    return &aarch64_linux_fpregset;
-
-  return NULL;
+  cb (".reg", AARCH64_LINUX_SIZEOF_GREGSET, &aarch64_linux_gregset,
+      NULL, cb_data);
+  cb (".reg2", AARCH64_LINUX_SIZEOF_FPREGSET, &aarch64_linux_fpregset,
+      NULL, cb_data);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
@@ -376,8 +372,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable longjmp.  */
   tdep->jb_pc = 11;
 
-  set_gdbarch_regset_from_core_section (gdbarch,
-					aarch64_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, aarch64_linux_iterate_over_regset_sections);
 
   /* SystemTap related.  */
   set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);

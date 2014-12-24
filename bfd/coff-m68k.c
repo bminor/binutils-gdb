@@ -143,6 +143,7 @@ m68k_rtype2howto (arelent *internal, int relocentry)
     case R_PCRWORD:	internal->howto = m68kcoff_howto_table + 4; break;
     case R_PCRLONG:	internal->howto = m68kcoff_howto_table + 5; break;
     case R_RELLONG_NEG:	internal->howto = m68kcoff_howto_table + 6; break;
+    default:            internal->howto = NULL; break;
     }
 }
 
@@ -359,7 +360,7 @@ m68kcoff_common_addend_special_fn (bfd *abfd,
       coffsym = (obj_symbols (abfd)				\
 	         + (cache_ptr->sym_ptr_ptr - symbols));		\
     else if (ptr)						\
-      coffsym = coff_symbol_from (abfd, ptr);			\
+      coffsym = coff_symbol_from (ptr);				\
     if (coffsym != (coff_symbol_type *) NULL			\
 	&& coffsym->native->u.syment.n_scnum == 0)		\
       cache_ptr->addend = - coffsym->native->u.syment.n_value;	\

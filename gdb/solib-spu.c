@@ -33,7 +33,6 @@
 #include "observer.h"
 #include "breakpoint.h"
 #include "gdbthread.h"
-#include "exceptions.h"
 #include "gdb_bfd.h"
 
 #include "spu-tdep.h"
@@ -390,7 +389,7 @@ spu_bfd_open (char *pathname)
 
 /* Lookup global symbol in a SPE executable.  */
 static struct symbol *
-spu_lookup_lib_symbol (const struct objfile *objfile,
+spu_lookup_lib_symbol (struct objfile *objfile,
 		       const char *name,
 		       const domain_enum domain)
 {

@@ -126,6 +126,18 @@ include/elf/
 
 ld/
 
+2014-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (cmdline_emit_object_only_section): Call ldexp_init
+	and ldexp_finish.  Don't pass FALSE to lang_finish.
+	* ldlang.h (lang_finish): Remove the bfd_boolean argument.
+	* ldexp.c (ldexp_init): Take a bfd_boolean argument to supprt
+	object-only output.
+	(ldexp_finish): Likewise.
+	* ldexp.h (ldexp_init): Take a bfd_boolean argument.
+	(ldexp_finish): Likewise.
+	* ldmain.c (main): Pass FALSE to ldexp_init.
+
 2014-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (cmdline_add_object_only_section): Save BFD filename

@@ -364,9 +364,9 @@ struct vms_section_data_struct
   ((struct vms_section_data_struct *)sec->used_by_bfd)
 
 /* To be called from the debugger.  */
-struct vms_private_data_struct *bfd_vms_get_data (bfd *abfd);
+struct vms_private_data_struct *bfd_vms_get_data (bfd *);
 
-static int vms_get_remaining_object_record (bfd *abfd, int read_so_far);
+static int vms_get_remaining_object_record (bfd *, unsigned int);
 static bfd_boolean _bfd_vms_slurp_object_records (bfd * abfd);
 static void alpha_vms_add_fixup_lp (struct bfd_link_info *, bfd *, bfd *);
 static void alpha_vms_add_fixup_ca (struct bfd_link_info *, bfd *, bfd *);
@@ -374,8 +374,8 @@ static void alpha_vms_add_fixup_qr (struct bfd_link_info *, bfd *, bfd *,
                                     bfd_vma);
 static void alpha_vms_add_fixup_lr (struct bfd_link_info *, unsigned int,
                                     bfd_vma);
-static void alpha_vms_add_lw_reloc (struct bfd_link_info *info);
-static void alpha_vms_add_qw_reloc (struct bfd_link_info *info);
+static void alpha_vms_add_lw_reloc (struct bfd_link_info *);
+static void alpha_vms_add_qw_reloc (struct bfd_link_info *);
 
 struct vector_type
 {
@@ -521,9 +521,11 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
       asection *section;
       flagword bfd_flags;
 
+      /* PR 17512: file: 3d9e9fe9.  */
+      if (offset >= PRIV (recrd.rec_size))
+	return FALSE;
       eisd = (struct vms_eisd *)(PRIV (recrd.rec) + offset);
       rec_size = bfd_getl32 (eisd->eisdsize);
-
       if (rec_size == 0)
         break;
 
@@ -788,7 +790,7 @@ _bfd_vms_get_object_record (bfd *abfd)
    Return the size of the record or 0 on failure.  */
 
 static int
-vms_get_remaining_object_record (bfd *abfd, int read_so_far)
+vms_get_remaining_object_record (bfd *abfd, unsigned int read_so_far)
 {
   unsigned int to_read;
 
@@ -824,7 +826,10 @@ vms_get_remaining_object_record (bfd *abfd, int read_so_far)
         return 0;
       PRIV (recrd.buf_size) = to_read;
     }
-
+  /* PR 17512: file: 025-1974-0.004.  */
+  else if (to_read <= read_so_far)
+    return 0;
+  
   /* Read the remaining record.  */
   to_read -= read_so_far;
 
@@ -2524,6 +2529,9 @@ alpha_vms_object_p (bfd *abfd)
       /* Reset the record pointer.  */
       PRIV (recrd.rec) = buf;
 
+      /* PR 17512: file: 7d7c57c2.  */
+      if (PRIV (recrd.rec_size) < sizeof (struct vms_eihd))
+	goto error_ret;
       vms_debug2 ((2, "file type is image\n"));
 
       if (_bfd_vms_slurp_eihd (abfd, &eisd_offset, &eihs_offset) != TRUE)
@@ -4575,10 +4583,14 @@ module_find_nearest_line (bfd *abfd, struct module *module, bfd_vma addr,
    location.  */
 
 static bfd_boolean
-_bfd_vms_find_nearest_dst_line (bfd *abfd, asection *section,
-				asymbol **symbols ATTRIBUTE_UNUSED,
-				bfd_vma offset, const char **file,
-				const char **func, unsigned int *line)
+_bfd_vms_find_nearest_line (bfd *abfd,
+			    asymbol **symbols ATTRIBUTE_UNUSED,
+			    asection *section,
+			    bfd_vma offset,
+			    const char **file,
+			    const char **func,
+			    unsigned int *line,
+			    unsigned int *discriminator)
 {
   struct module *module;
 
@@ -4588,6 +4600,8 @@ _bfd_vms_find_nearest_dst_line (bfd *abfd, asection *section,
   *file = NULL;
   *func = NULL;
   *line = 0;
+  if (discriminator)
+    *discriminator = 0;
 
   /* We can't do anything if there is no DST (debug symbol table).  */
   if (PRIV (dst_section) == NULL)
@@ -4607,26 +4621,6 @@ _bfd_vms_find_nearest_dst_line (bfd *abfd, asection *section,
 
   return FALSE;
 }
-
-/* Likewise but with a discriminator.  */
-
-static bfd_boolean
-_bfd_vms_find_nearest_line_discriminator (bfd *abfd,
-					  asection *section,
-					  asymbol **symbols,
-					  bfd_vma offset,
-					  const char **filename_ptr,
-					  const char **functionname_ptr,
-					  unsigned int *line_ptr,
-					  unsigned int *discriminator)
-{
-  *discriminator = 0;
-
-  return _bfd_vms_find_nearest_dst_line (abfd, section, symbols, offset,
-					 filename_ptr, functionname_ptr,
-					 line_ptr);
-}
-
 
 /* Canonicalizations.  */
 /* Set name, value, section and flags of SYM from E.  */
@@ -9202,14 +9196,16 @@ bfd_vms_get_data (bfd *abfd)
    ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define alpha_vms_print_symbol             vms_print_symbol
 #define alpha_vms_get_symbol_info          vms_get_symbol_info
+#define alpha_vms_get_symbol_version_string \
+  _bfd_nosymbols_get_symbol_version_string
+
 #define alpha_vms_read_minisymbols         _bfd_generic_read_minisymbols
 #define alpha_vms_minisymbol_to_symbol     _bfd_generic_minisymbol_to_symbol
 #define alpha_vms_get_lineno               _bfd_nosymbols_get_lineno
 #define alpha_vms_find_inliner_info        _bfd_nosymbols_find_inliner_info
 #define alpha_vms_bfd_make_debug_symbol    _bfd_nosymbols_bfd_make_debug_symbol
-#define alpha_vms_find_nearest_line        _bfd_vms_find_nearest_dst_line
-#define _bfd_generic_find_nearest_line_discriminator \
-  _bfd_vms_find_nearest_line_discriminator
+#define alpha_vms_find_nearest_line        _bfd_vms_find_nearest_line
+#define alpha_vms_find_line                _bfd_nosymbols_find_line
 #define alpha_vms_bfd_is_local_label_name  vms_bfd_is_local_label_name
 
 /* Generic table.  */

@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "value.h"
-#include "exceptions.h"
 #include "python-internal.h"
 #include "charset.h"
 #include "gdbtypes.h"
@@ -233,7 +232,7 @@ convert_field (struct type *type, int field)
     goto failarg;
   Py_DECREF (arg);
 
-  if (TYPE_CODE (type) == TYPE_CODE_CLASS)
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     arg = field < TYPE_N_BASECLASSES (type) ? Py_True : Py_False;
   else
     arg = Py_False;

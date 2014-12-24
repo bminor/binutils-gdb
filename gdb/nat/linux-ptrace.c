@@ -307,6 +307,7 @@ linux_child_function (gdb_byte *child_stack)
 
 static void linux_test_for_tracesysgood (int child_pid);
 static void linux_test_for_tracefork (int child_pid);
+static void linux_test_for_exitkill (int child_pid);
 
 /* Determine ptrace features available on this target.  */
 
@@ -337,6 +338,8 @@ linux_check_ptrace_features (void)
   linux_test_for_tracesysgood (child_pid);
 
   linux_test_for_tracefork (child_pid);
+
+  linux_test_for_exitkill (child_pid);
 
   /* Clean things up and kill any pending children.  */
   do
@@ -449,19 +452,44 @@ linux_test_for_tracefork (int child_pid)
 	     "(%d, status 0x%x)"), ret, status);
 }
 
-/* Enable reporting of all currently supported ptrace events.  */
+/* Determine if PTRACE_O_EXITKILL can be used.  */
+
+static void
+linux_test_for_exitkill (int child_pid)
+{
+  int ret;
+
+  ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
+		(PTRACE_TYPE_ARG4) PTRACE_O_EXITKILL);
+
+  if (ret == 0)
+    current_ptrace_options |= PTRACE_O_EXITKILL;
+}
+
+/* Enable reporting of all currently supported ptrace events.
+   ATTACHED should be nonzero if we have attached to the inferior.  */
 
 void
-linux_enable_event_reporting (pid_t pid)
+linux_enable_event_reporting (pid_t pid, int attached)
 {
+  int ptrace_options;
+
   /* Check if we have initialized the ptrace features for this
      target.  If not, do it now.  */
   if (current_ptrace_options == -1)
     linux_check_ptrace_features ();
 
+  ptrace_options = current_ptrace_options;
+  if (attached)
+    {
+      /* When attached to our inferior, we do not want the inferior
+	 to die with us if we terminate unexpectedly.  */
+      ptrace_options &= ~PTRACE_O_EXITKILL;
+    }
+
   /* Set the options.  */
   ptrace (PTRACE_SETOPTIONS, pid, (PTRACE_TYPE_ARG3) 0,
-	  (PTRACE_TYPE_ARG4) (uintptr_t) current_ptrace_options);
+	  (PTRACE_TYPE_ARG4) (uintptr_t) ptrace_options);
 }
 
 /* Disable reporting of all currently supported ptrace events.  */

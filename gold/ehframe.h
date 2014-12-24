@@ -371,7 +371,8 @@ class Eh_frame : public Output_section_data
   // is the relocation section if any (0 for none, -1U for multiple).
   // RELOC_TYPE is the type of the relocation section if any.  This
   // returns whether the section was incorporated into the .eh_frame
-  // data.
+  // data.  OPTIMIZE_EHFRAME is true if the exception frame section
+  // can be optimized.
   template<int size, bool big_endian>
   bool
   add_ehframe_input_section(Sized_relobj_file<size, big_endian>* object,
@@ -380,7 +381,8 @@ class Eh_frame : public Output_section_data
 			    const unsigned char* symbol_names,
 			    section_size_type symbol_names_size,
 			    unsigned int shndx, unsigned int reloc_shndx,
-			    unsigned int reloc_type);
+			    unsigned int reloc_type,
+			    bool optimize_ehframe);
 
   // Add a CIE and an FDE for a PLT section, to permit unwinding
   // through a PLT.  The FDE data should start with 8 bytes of zero,

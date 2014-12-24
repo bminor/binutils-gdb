@@ -49,7 +49,6 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "memrange.h"
-#include "exceptions.h"
 #include "cli/cli-utils.h"
 #include "probe.h"
 #include "ctf.h"
@@ -1859,7 +1858,8 @@ start_tracing (char *notes)
       t->number_on_target = b->number;
 
       for (loc = b->loc; loc; loc = loc->next)
-	if (loc->probe.probe != NULL)
+	if (loc->probe.probe != NULL
+	    && loc->probe.probe->pops->set_semaphore != NULL)
 	  loc->probe.probe->pops->set_semaphore (loc->probe.probe,
 						 loc->probe.objfile,
 						 loc->gdbarch);
@@ -1958,7 +1958,8 @@ stop_tracing (char *note)
 	     but we don't really care if this semaphore goes out of sync.
 	     That's why we are decrementing it here, but not taking care
 	     in other places.  */
-	  if (loc->probe.probe != NULL)
+	  if (loc->probe.probe != NULL
+	      && loc->probe.probe->pops->clear_semaphore != NULL)
 	    loc->probe.probe->pops->clear_semaphore (loc->probe.probe,
 						     loc->probe.objfile,
 						     loc->gdbarch);
@@ -2738,7 +2739,7 @@ scope_info (char *args, int from_tty)
 	  if (symname == NULL || *symname == '\0')
 	    continue;		/* Probably botched, certainly useless.  */
 
-	  gdbarch = get_objfile_arch (SYMBOL_SYMTAB (sym)->objfile);
+	  gdbarch = symbol_arch (sym);
 
 	  printf_filtered ("Symbol %s is ", symname);
 

@@ -34,11 +34,7 @@ struct parser_state;
    system and that might consider (confusing) debugging information.
    Each name (a basic regular expression string) is followed by a
    comma.  FIXME: Should be part of a configuration file.  */
-#if defined(__alpha__) && defined(__osf__)
-#define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
-   "^[agis]-.*\\.ad[bs]$", \
-   "/usr/shlib/libpthread\\.so",
-#elif defined (__linux__)
+#if defined (__linux__)
 #define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
    "^[agis]-.*\\.ad[bs]$", \
    "/lib.*/libpthread\\.so[.0-9]*$", "/lib.*/libpthread\\.a$", \
@@ -165,6 +161,8 @@ struct ada_task_info
    if ((s) < (m)) (v) = grow_vect (v, &(s), m, sizeof *(v));
 
 extern void *grow_vect (void *, size_t *, size_t, int);
+
+extern void ada_ensure_varsize_limit (const struct type *type);
 
 extern int ada_get_field_index (const struct type *type,
                                 const char *field_name,

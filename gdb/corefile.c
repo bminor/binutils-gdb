@@ -30,7 +30,6 @@
 #include "dis-asm.h"
 #include <sys/stat.h>
 #include "completer.h"
-#include "exceptions.h"
 #include "observer.h"
 #include "cli/cli-utils.h"
 

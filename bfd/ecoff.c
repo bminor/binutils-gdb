@@ -615,6 +615,9 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   external_fdr_size = backend->debug_swap.external_fdr_size;
   fdr_ptr = debug->fdr;
   fraw_src = (char *) debug->external_fdr;
+  /* PR 17512: file: 3372-1243-0.004.  */
+  if (fraw_src == NULL && internal_symhdr->ifdMax > 0)
+    return FALSE;
   fraw_end = fraw_src + internal_symhdr->ifdMax * external_fdr_size;
   for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
     (*backend->debug_swap.swap_fdr_in) (abfd, (void *) fraw_src, fdr_ptr);
@@ -891,12 +894,18 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
       EXTR internal_esym;
 
       (*swap_ext_in) (abfd, (void *) eraw_src, &internal_esym);
+
+      /* PR 17512: file: 3372-1000-0.004.  */
+      if (internal_esym.asym.iss >= ecoff_data (abfd)->debug_info.symbolic_header.issExtMax)
+	return FALSE;
+
       internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ssext
 				   + internal_esym.asym.iss);
       if (!ecoff_set_symbol_info (abfd, &internal_esym.asym,
 				  &internal_ptr->symbol, 1,
 				  internal_esym.weakext))
 	return FALSE;
+      
       /* The alpha uses a negative ifd field for section symbols.  */
       if (internal_esym.ifd >= 0)
 	internal_ptr->fdr = (ecoff_data (abfd)->debug_info.fdr
@@ -936,6 +945,20 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
 	  internal_ptr->local = TRUE;
 	  internal_ptr->native = (void *) lraw_src;
 	}
+    }
+
+  /* PR 17512: file: 3372-3080-0.004.
+     A discrepancy between ecoff_data (abfd)->debug_info.symbolic_header.isymMax
+     and ecoff_data (abfd)->debug_info.symbolic_header.ifdMax can mean that
+     we have fewer symbols than we were expecting.  Allow for this by updating
+     the symbol count and warning the user.  */
+  if (internal_ptr - internal < (ptrdiff_t) bfd_get_symcount (abfd))
+    {
+      bfd_get_symcount (abfd) = internal_ptr - internal;
+      (*_bfd_error_handler)
+	(_("%B: warning: isymMax (%ld) is greater than ifdMax (%d)\n"),
+	 abfd, ecoff_data (abfd)->debug_info.symbolic_header.isymMax,
+	 ecoff_data (abfd)->debug_info.symbolic_header.ifdMax);
     }
 
   ecoff_data (abfd)->canonical_symbols = internal;
@@ -1704,12 +1727,13 @@ _bfd_ecoff_canonicalize_reloc (bfd *abfd,
 
 bfd_boolean
 _bfd_ecoff_find_nearest_line (bfd *abfd,
+			      asymbol **symbols ATTRIBUTE_UNUSED,
 			      asection *section,
-			      asymbol **ignore_symbols ATTRIBUTE_UNUSED,
 			      bfd_vma offset,
 			      const char **filename_ptr,
 			      const char **functionname_ptr,
-			      unsigned int *retline_ptr)
+			      unsigned int *retline_ptr,
+			      unsigned int *discriminator_ptr)
 {
   const struct ecoff_debug_swap * const debug_swap
     = &ecoff_backend (abfd)->debug_swap;
@@ -1730,8 +1754,10 @@ _bfd_ecoff_find_nearest_line (bfd *abfd,
       if (ecoff_data (abfd)->find_line_info == NULL)
 	return FALSE;
     }
-  line_info = ecoff_data (abfd)->find_line_info;
 
+  if (discriminator_ptr)
+    *discriminator_ptr = 0;
+  line_info = ecoff_data (abfd)->find_line_info;
   return _bfd_ecoff_locate_line (abfd, section, offset, debug_info,
 				 debug_swap, line_info, filename_ptr,
 				 functionname_ptr, retline_ptr);

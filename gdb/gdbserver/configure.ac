@@ -39,8 +39,6 @@ AC_ARG_PROGRAM
 
 AC_HEADER_STDC
 
-AC_FUNC_ALLOCA
-
 # Set the 'development' global.
 . $srcdir/../../bfd/development.sh
 
@@ -71,21 +69,28 @@ esac
 AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
 AC_PROG_MAKE_SET
 
+gnulib_extra_configure_args=
+# If large-file support is disabled, make sure gnulib does the same.
+if test "$enable_largefile" = no; then
+gnulib_extra_configure_args="$gnulib_extra_configure_args --disable-largefile"
+fi
+
 # Configure gnulib.  We can't use AC_CONFIG_SUBDIRS as that'd expect
 # to find the the source subdir to be configured directly under
 # gdbserver/.  We need to build gnulib under some other directory not
 # "gnulib", to avoid the problem of both GDB and GDBserver wanting to
 # build it in the same directory, when building in the source dir.
-ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"])
+ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"],
+                  ["$gnulib_extra_configure_args"])
 
 ACX_CONFIGURE_DIR(["../../libiberty"], ["build-libiberty-gdbserver"])
 
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h linux/elf.h dnl
-		 fcntl.h signal.h sys/file.h malloc.h dnl
+		 fcntl.h signal.h sys/file.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h)
-AC_CHECK_FUNCS(pread pwrite pread64 readlink)
+AC_CHECK_FUNCS(pread pwrite pread64)
 
 GDB_AC_COMMON
 

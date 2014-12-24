@@ -461,7 +461,11 @@ cris_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   enum elf_cris_reloc_type r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_CRIS_max);
+  if (r_type >= R_CRIS_max)
+    {
+      _bfd_error_handler (_("%A: invalid CRIS reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = & cris_elf_howto_table [r_type];
 }
 
@@ -3054,7 +3058,7 @@ elf_cris_adjust_dynamic_symbol (struct bfd_link_info *info,
       h->needs_copy = 1;
     }
 
-  return _bfd_elf_adjust_dynamic_copy (h, s);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* Adjust our "subclass" elements for an indirect symbol.  */

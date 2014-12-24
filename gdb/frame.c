@@ -36,7 +36,6 @@
 #include "gdbcmd.h"
 #include "observer.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "gdbthread.h"
 #include "block.h"
 #include "inline-frame.h"
@@ -615,7 +614,7 @@ frame_id_eq (struct frame_id l, struct frame_id r)
        outer_frame_id.  */
     eq = 1;
   else if (l.stack_status == FID_STACK_INVALID
-	   || l.stack_status == FID_STACK_INVALID)
+	   || r.stack_status == FID_STACK_INVALID)
     /* Like a NaN, if either ID is invalid, the result is false.
        Note that a frame ID is invalid iff it is the null frame ID.  */
     eq = 0;
@@ -1601,13 +1600,13 @@ select_frame (struct frame_info *fi)
 	 block.  */
       if (get_frame_address_in_block_if_available (fi, &pc))
 	{
-	  struct symtab *s = find_pc_symtab (pc);
+	  struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
 
-	  if (s
-	      && s->language != current_language->la_language
-	      && s->language != language_unknown
+	  if (cust != NULL
+	      && compunit_language (cust) != current_language->la_language
+	      && compunit_language (cust) != language_unknown
 	      && language_mode == language_mode_auto)
-	    set_language (s->language);
+	    set_language (compunit_language (cust));
 	}
     }
 }
@@ -2347,7 +2346,7 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
       init_sal (sal);
       if (SYMBOL_LINE (sym) != 0)
 	{
-	  sal->symtab = SYMBOL_SYMTAB (sym);
+	  sal->symtab = symbol_symtab (sym);
 	  sal->line = SYMBOL_LINE (sym);
 	}
       else

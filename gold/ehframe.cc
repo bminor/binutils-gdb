@@ -576,7 +576,8 @@ Eh_frame::add_ehframe_input_section(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type)
+    unsigned int reloc_type,
+    bool optimize_ehframe)
 {
   // Get the section contents.
   section_size_type contents_len;
@@ -595,15 +596,21 @@ Eh_frame::add_ehframe_input_section(
     return false;
 
   New_cies new_cies;
-  if (!this->do_add_ehframe_input_section(object, symbols, symbols_size,
+  bool recognized_eh_frame_section
+    = this->do_add_ehframe_input_section(object, symbols, symbols_size,
 					  symbol_names, symbol_names_size,
 					  shndx, reloc_shndx,
 					  reloc_type, pcontents,
-					  contents_len, &new_cies))
-    {
-      if (this->eh_frame_hdr_ != NULL)
-	this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
+					  contents_len, &new_cies);
+  if (!recognized_eh_frame_section && this->eh_frame_hdr_ != NULL)
+    this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
 
+  // If we don't unrecognize the exception frame section or it can't
+  // be optimized, then return false to force it to be handled as an
+  // ordinary input section.
+  if (!recognized_eh_frame_section
+      || (this->eh_frame_hdr_ == NULL && !optimize_ehframe))
+    {
       for (New_cies::iterator p = new_cies.begin();
 	   p != new_cies.end();
 	   ++p)
@@ -1224,7 +1231,8 @@ Eh_frame::add_ehframe_input_section<32, false>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type);
+    unsigned int reloc_type,
+    bool optimize_ehframe);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1238,7 +1246,8 @@ Eh_frame::add_ehframe_input_section<32, true>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type);
+    unsigned int reloc_type,
+    bool optimize_ehframe);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1252,7 +1261,8 @@ Eh_frame::add_ehframe_input_section<64, false>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type);
+    unsigned int reloc_type,
+    bool optimize_ehframe);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1266,7 +1276,8 @@ Eh_frame::add_ehframe_input_section<64, true>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type);
+    unsigned int reloc_type,
+    bool optimize_ehframe);
 #endif
 
 } // End namespace gold.

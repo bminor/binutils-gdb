@@ -25,7 +25,6 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "target.h"
@@ -1405,11 +1404,11 @@ show_auto_solib_add (struct ui_file *file, int from_tty,
    the library-specific handler if it is installed for the current target.  */
 
 struct symbol *
-solib_global_lookup (const struct objfile *objfile,
+solib_global_lookup (struct objfile *objfile,
 		     const char *name,
 		     const domain_enum domain)
 {
-  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (get_objfile_arch (objfile));
 
   if (ops->lookup_lib_global_symbol != NULL)
     return ops->lookup_lib_global_symbol (objfile, name, domain);
@@ -1444,8 +1443,28 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 
 	  if (match_sym (sym, data))
 	    {
+	      struct gdbarch *gdbarch = target_gdbarch ();
+	      symaddr = sym->value;
+
+	      /* Some ELF targets fiddle with addresses of symbols they
+	         consider special.  They use minimal symbols to do that
+	         and this is needed for correct breakpoint placement,
+	         but we do not have full data here to build a complete
+	         minimal symbol, so just set the address and let the
+	         targets cope with that.  */
+	      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+		  && gdbarch_elf_make_msymbol_special_p (gdbarch))
+		{
+		  struct minimal_symbol msym;
+
+		  memset (&msym, 0, sizeof (msym));
+		  SET_MSYMBOL_VALUE_ADDRESS (&msym, symaddr);
+		  gdbarch_elf_make_msymbol_special (gdbarch, sym, &msym);
+		  symaddr = MSYMBOL_VALUE_RAW_ADDRESS (&msym);
+		}
+
 	      /* BFD symbols are section relative.  */
-	      symaddr = sym->value + sym->section->vma;
+	      symaddr += sym->section->vma;
 	      break;
 	    }
 	}

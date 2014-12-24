@@ -53,15 +53,6 @@
 #include "record-full.h"
 #include "linux-record.h"
 
-/* Supported register note sections.  */
-static struct core_regset_section amd64_linux_regset_sections[] =
-{
-  { ".reg", 27 * 8, "general-purpose" },
-  { ".reg2", 512, "floating-point" },
-  { ".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state" },
-  { NULL, 0 }
-};
-
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register cache layout.  */
 
@@ -1609,6 +1600,49 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
     }
 }
 
+/* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64_linux_supply_xstateregset (const struct regset *regset,
+				 struct regcache *regcache, int regnum,
+				 const void *xstateregs, size_t len)
+{
+  amd64_supply_xsave (regcache, regnum, xstateregs);
+}
+
+/* Similar to amd64_collect_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64_linux_collect_xstateregset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *xstateregs, size_t len)
+{
+  amd64_collect_xsave (regcache, regnum, xstateregs, 1);
+}
+
+static const struct regset amd64_linux_xstateregset =
+  {
+    NULL,
+    amd64_linux_supply_xstateregset,
+    amd64_linux_collect_xstateregset
+  };
+
+/* Iterate over core file register note sections.  */
+
+static void
+amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					  iterate_over_regset_sections_cb *cb,
+					  void *cb_data,
+					  const struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  cb (".reg", 27 * 8, &i386_gregset, NULL, cb_data);
+  cb (".reg2", 512, &amd64_fpregset, NULL, cb_data);
+  cb (".reg-xstate",  regcache ? X86_XSTATE_MAX_SIZE : 0,
+      &amd64_linux_xstateregset, "XSAVE extended state", cb_data);
+}
+
 static void
 amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1629,7 +1663,7 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->register_reggroup_p = amd64_linux_register_reggroup_p;
 
   /* Functions for 'catch syscall'.  */
-  set_xml_syscall_file_name (XML_SYSCALL_FILENAME_AMD64);
+  set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_AMD64);
   set_gdbarch_get_syscall_number (gdbarch,
                                   amd64_linux_get_syscall_number);
 
@@ -1643,8 +1677,9 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
-  /* Install supported register note sections.  */
-  set_gdbarch_core_regset_sections (gdbarch, amd64_linux_regset_sections);
+  /* Iterate over core file register note sections.  */
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, amd64_linux_iterate_over_regset_sections);
 
   set_gdbarch_core_read_description (gdbarch,
 				     amd64_linux_core_read_description);

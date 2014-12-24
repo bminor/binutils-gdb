@@ -443,19 +443,16 @@ static const struct regset frv_linux_fpregset =
   regcache_supply_regset, regcache_collect_regset
 };
 
-static const struct regset *
-frv_linux_regset_from_core_section (struct gdbarch *gdbarch,
-				    const char *sect_name, size_t sect_size)
+static void
+frv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 
-      && sect_size >= sizeof (frv_elf_gregset_t))
-    return &frv_linux_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0 
-      && sect_size >= sizeof (frv_elf_fpregset_t))
-    return &frv_linux_fpregset;
-
-  return NULL;
+  cb (".reg", sizeof (frv_elf_gregset_t), &frv_linux_gregset,
+      NULL, cb_data);
+  cb (".reg2", sizeof (frv_elf_fpregset_t), &frv_linux_fpregset,
+      NULL, cb_data);
 }
 
 
@@ -467,8 +464,8 @@ frv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Set the sigtramp frame sniffer.  */
   frame_unwind_append_unwinder (gdbarch, &frv_linux_sigtramp_frame_unwind); 
 
-  set_gdbarch_regset_from_core_section (gdbarch,
-                                        frv_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, frv_linux_iterate_over_regset_sections);
 }
 
 static enum gdb_osabi

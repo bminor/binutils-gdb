@@ -35,7 +35,6 @@
 #include "objfiles.h"
 #include "valprint.h"
 #include "cli/cli-decode.h"
-#include "exceptions.h"
 #include "extension.h"
 #include <ctype.h>
 #include "tracepoint.h"
@@ -1723,6 +1722,18 @@ value_non_lval (struct value *arg)
       return val;
     }
    return arg;
+}
+
+/* Write contents of V at ADDR and set its lval type to be LVAL_MEMORY.  */
+
+void
+value_force_lval (struct value *v, CORE_ADDR addr)
+{
+  gdb_assert (VALUE_LVAL (v) == not_lval);
+
+  write_memory (addr, value_contents_raw (v), TYPE_LENGTH (value_type (v)));
+  v->lval = lval_memory;
+  v->location.address = addr;
 }
 
 void

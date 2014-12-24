@@ -680,9 +680,11 @@ unsigned int bfd_mach_o_get_section_attribute_from_name (const char *);
 
 void bfd_mach_o_convert_section_name_to_bfd (bfd *, const char *, const char *,
 					     const char **, flagword *);
-bfd_boolean bfd_mach_o_find_nearest_line (bfd *, asection *, asymbol **,
-                                          bfd_vma, const char **,
-                                          const char **, unsigned int *);
+bfd_boolean bfd_mach_o_find_nearest_line (bfd *, asymbol **,
+					  asection *, bfd_vma,
+					  const char **, const char **,
+					  unsigned int *, unsigned int *);
+#define bfd_mach_o_find_line _bfd_nosymbols_find_line
 bfd_boolean bfd_mach_o_close_and_cleanup (bfd *);
 bfd_boolean bfd_mach_o_free_cached_info (bfd *);
 

@@ -1,3 +1,10 @@
+2014-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* callback.h (struct host_callback_struct) <to_stat>: Renamed
+	from "stat".
+	<to_fstat>: Renamed from "fstat".
+	<to_lstat>: Renamed from "lstat".
+
 2014-03-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.h (sim_do_command): Add const to cmd.

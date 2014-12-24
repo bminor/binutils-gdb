@@ -28,7 +28,6 @@
 #include "gdbcmd.h"
 #include "filenames.h"
 #include "value.h"
-#include "exceptions.h"
 #include "ax.h"
 #include "ax-gdb.h"
 #include "complaints.h"
@@ -1051,9 +1050,9 @@ stap_parse_argument (const char **arg, struct type *atype,
   struct cleanup *back_to;
 
   /* We need to initialize the expression buffer, in order to begin
-     our parsing efforts.  The language here does not matter, since we
-     are using our own parser.  */
-  initialize_expout (&p.pstate, 10, current_language, gdbarch);
+     our parsing efforts.  We use language_c here because we may need
+     to do pointer arithmetics.  */
+  initialize_expout (&p.pstate, 10, language_def (language_c), gdbarch);
   back_to = make_cleanup (free_current_contents, &p.pstate.expout);
 
   p.saved_arg = *arg;

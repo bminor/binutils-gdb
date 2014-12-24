@@ -263,3 +263,91 @@ run_dump_test "pr12627"
 run_dump_test "pr13302"
 run_dump_test "pr14215"
 run_dump_test "pr17057"
+
+# Must be Linux native with the C compiler
+if { [isnative]
+     && [istarget "i?86-*-linux*"]
+     && [which $CC] != 0 } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build plt-lib.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { plt-lib.c } \
+	    {} \
+	    "libplt-lib.so" \
+	] \
+	[list \
+	    "Build libplt-main1.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main1.c } \
+	    {{readelf {-Wr} plt-main1.rd}} \
+	    "libplt-main1.a" \
+	] \
+	[list \
+	    "Build libplt-main2.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main2.c } \
+	    {{readelf {-Wr} plt-main2.rd}} \
+	    "libplt-main2.a" \
+	] \
+	[list \
+	    "Build libplt-main3.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main3.c } \
+	    {{readelf {-Wr} plt-main3.rd}} \
+	    "libplt-main3.a" \
+	] \
+	[list \
+	    "Build libplt-main4.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main4.c } \
+	    {{readelf {-Wr} plt-main4.rd}} \
+	    "libplt-main4.a" \
+	] \
+	[list \
+	    "Build plt-main" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+	    "" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
+	[list \
+	    "Build plt-main with PIE" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "-fPIC" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
+    ]
+
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run plt-main" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+	    "" \
+	    { plt-main5.c } \
+	    "plt-main" \
+	    "plt-main.out" \
+	] \
+	[list \
+	    "Run plt-main with PIE" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "" \
+	    { plt-main5.c } \
+	    "plt-main-pie" \
+	    "plt-main.out" \
+	    "-fPIC" \
+	] \
+    ]
+}

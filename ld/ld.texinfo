@@ -706,7 +706,8 @@ how @command{ld} searches for a linker script unless @option{-T}
 option is specified.
 
 If @var{searchdir} begins with @code{=}, then the @code{=} will be replaced
-by the @dfn{sysroot prefix}, a path specified when the linker is configured.
+by the @dfn{sysroot prefix}, controlled by the @samp{--sysroot} option, or
+specified when the linker is configured.
 
 @ifset UsesEnvVars
 The default set of paths searched (without being specified with
@@ -1135,6 +1136,9 @@ Set the emulation common page size to @var{value}.
 Specify a stack size for in an ELF @code{PT_GNU_STACK} segment.
 Specifying zero will override any default non-zero sized
 @code{PT_GNU_STACK} segment creation.
+
+@item bndplt
+Always generate BND prefix in PLT entries. Supported for Linux/x86_64.
 
 @end table
 
@@ -3146,7 +3150,9 @@ with the @samp{/} character, and the script being processed was
 located inside the @dfn{sysroot prefix}, the filename will be looked
 for in the @dfn{sysroot prefix}.  Otherwise, the linker will try to
 open the file in the current directory.  If it is not found, the
-linker will search through the archive library search path.  See the
+linker will search through the archive library search path.
+The @dfn{sysroot prefix} can also be forced by specifying @code{=}
+as the first character in the filename path.  See also the
 description of @samp{-L} in @ref{Options,,Command Line Options}.
 
 If you use @samp{INPUT (-l@var{file})}, @command{ld} will transform the
@@ -6571,6 +6577,13 @@ The @samp{--fix-cortex-a8} switch enables a link-time workaround for an erratum 
 
 The erratum only affects Thumb-2 code.  Please contact ARM for further details.
 
+@cindex Cortex-A53 erratum 835769 workaround
+@kindex --fix-cortex-a53-835769
+@kindex --no-fix-cortex-a53-835769
+The @samp{--fix-cortex-a53-835769} switch enables a link-time workaround for erratum 835769 present on certain early revisions of Cortex-A53 processors.  The workaround is disabled by default.  It can be enabled by specifying @samp{--fix-cortex-a53-835769}, or disabled unconditionally by specifying @samp{--no-fix-cortex-a53-835769}.
+
+Please contact ARM for further details.
+
 @kindex --merge-exidx-entries
 @kindex --no-merge-exidx-entries
 @cindex Merging exidx entries
@@ -7043,9 +7056,10 @@ off this feature.
 @item --plt-align
 @itemx --no-plt-align
 Use these options to control whether individual PLT call stubs are
-aligned to a 32-byte boundary, or to the specified power of two
-boundary when using @code{--plt-align=}.  By default PLT call stubs
-are packed tightly.
+padded so that they don't cross a 32-byte boundary, or to the
+specified power of two boundary when using @code{--plt-align=}.  Note
+that this isn't alignment in the usual sense.  By default PLT call
+stubs are packed tightly.
 
 @cindex PowerPC64 PLT call stub static chain
 @kindex --plt-static-chain

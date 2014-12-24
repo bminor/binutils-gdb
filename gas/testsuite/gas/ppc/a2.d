@@ -360,8 +360,8 @@ Disassembly of section \.text:
  530:	(7c 70 10 26|26 10 70 7c) 	mfocrf  r3,1
  534:	(7c 78 00 26|26 00 78 7c) 	mfocrf  r3,128
  538:	(7d 4a 3a a6|a6 3a 4a 7d) 	mfspr   r10,234
- 53c:	(7d 4c 42 e6|e6 42 4c 7d) 	mftbl   r10
- 540:	(7d 4d 42 e6|e6 42 4d 7d) 	mftbu   r10
+ 53c:	(7d 4c 42 a6|a6 42 4c 7d) 	mftb    r10
+ 540:	(7d 4d 42 a6|a6 42 4d 7d) 	mftbu   r10
  544:	(7c 00 51 dc|dc 51 00 7c) 	msgclr  r10
  548:	(7c 00 51 9c|9c 51 00 7c) 	msgsnd  r10
  54c:	(7c 60 01 20|20 01 60 7c) 	mtcrf   0,r3

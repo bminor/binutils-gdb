@@ -22,10 +22,10 @@
 
 // The goal of this program is to verify if identical code folding
 // in safe mode correctly folds functions in a shared object. The
-// foo_* functions below should not be folded.  For x86-64,
-// foo_glob and bar_glob should be folded as their function pointers
-// are addresses of PLT entries in shared objects.  For 32-bit X86,
-// the hidden protected and internal symbols can be folded.
+// foo_* functions below should not be folded on X86_64.
+// For 32-bit X86, the hidden protected and internal symbols can be folded.
+// foo_glob and bar_glob should not be folded, because function pointer
+// of foo_glob is taken.
 
 int  __attribute__ ((visibility ("protected")))
 foo_prot()

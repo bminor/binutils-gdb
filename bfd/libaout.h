@@ -551,8 +551,8 @@ extern void NAME (aout, get_symbol_info)
   (bfd *, asymbol *, symbol_info *);
 
 extern bfd_boolean NAME (aout, find_nearest_line)
-  (bfd *, asection *, asymbol **, bfd_vma, const char **,
-   const char **, unsigned int *);
+  (bfd *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *);
 
 extern long NAME (aout, read_minisymbols)
   (bfd *, bfd_boolean, void * *, unsigned int *);

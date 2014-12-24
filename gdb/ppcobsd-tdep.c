@@ -80,17 +80,15 @@ const struct regset ppcobsd_fpregset =
   ppc_supply_fpregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-ppcobsd_regset_from_core_section (struct gdbarch *gdbarch,
-				  const char *sect_name, size_t sect_size)
+static void
+ppcobsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				      iterate_over_regset_sections_cb *cb,
+				      void *cb_data,
+				      const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= 412)
-    return &ppcobsd_gregset;
-
-  return NULL;
+  cb (".reg", 412, &ppcobsd_gregset, NULL, cb_data);
 }
 
 
@@ -257,8 +255,8 @@ ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
-  set_gdbarch_regset_from_core_section
-    (gdbarch, ppcobsd_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, ppcobsd_iterate_over_regset_sections);
 
   frame_unwind_append_unwinder (gdbarch, &ppcobsd_sigtramp_frame_unwind);
 }

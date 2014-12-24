@@ -114,7 +114,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
 {
   struct bound_minimal_symbol ms;
   struct cleanup *old_chain = save_current_program_space ();
-  struct inferior *inf = find_inferior_pid (ptid_get_pid (ph->ptid));
+  struct inferior *inf = find_inferior_ptid (ph->ptid);
   ps_err_e result;
 
   set_current_program_space (inf->pspace);

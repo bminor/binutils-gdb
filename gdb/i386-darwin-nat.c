@@ -73,6 +73,11 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 				 (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
+
+	  /* Some kernels don't sanitize the values.  */
+	  gp_regs.uts.ts64.__fs &= 0xffff;
+	  gp_regs.uts.ts64.__gs &= 0xffff;
+
 	  amd64_supply_native_gregset (regcache, &gp_regs.uts, -1);
           fetched++;
         }
@@ -182,6 +187,10 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
           gdb_assert (gp_regs.tsh.count == x86_THREAD_STATE64_COUNT);
 
 	  amd64_collect_native_gregset (regcache, &gp_regs.uts, regno);
+
+	  /* Some kernels don't sanitize the values.  */
+	  gp_regs.uts.ts64.__fs &= 0xffff;
+	  gp_regs.uts.ts64.__gs &= 0xffff;
 
           ret = thread_set_state (current_thread, x86_THREAD_STATE,
                                   (thread_state_t) &gp_regs,

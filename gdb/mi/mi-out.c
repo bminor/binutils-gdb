@@ -376,18 +376,12 @@ mi_out_rewind (struct ui_out *uiout)
 
 /* Dump the buffer onto the specified stream.  */
 
-static void
-do_write (void *data, const char *buffer, long length_buffer)
-{
-  ui_file_write (data, buffer, length_buffer);
-}
-
 void
 mi_out_put (struct ui_out *uiout, struct ui_file *stream)
 {
   mi_out_data *data = ui_out_data (uiout);
 
-  ui_file_put (data->buffer, do_write, stream);
+  ui_file_put (data->buffer, ui_file_write_for_put, stream);
   ui_file_rewind (data->buffer);
 }
 

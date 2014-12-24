@@ -1,3 +1,7 @@
+2014-11-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* igen/ld-cache.h, igen/table.h: Change immediatly to immediately.
+
 2014-03-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

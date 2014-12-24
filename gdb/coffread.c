@@ -382,9 +382,9 @@ coff_alloc_type (int index)
    it indicates the start of data for one original source file.  */
 
 static void
-coff_start_symtab (const char *name)
+coff_start_symtab (struct objfile *objfile, const char *name)
 {
-  start_symtab (
+  start_symtab (objfile,
   /* We fill in the filename later.  start_symtab puts this pointer
      into last_source_file and we put it in subfiles->name, which
      end_symtab frees; that's why it must be malloc'd.  */
@@ -421,8 +421,7 @@ coff_end_symtab (struct objfile *objfile)
 {
   last_source_start_addr = current_source_start_addr;
 
-  end_symtab (current_source_end_addr, objfile,
-	      SECT_OFF_TEXT (objfile));
+  end_symtab (current_source_end_addr, SECT_OFF_TEXT (objfile));
 
   /* Reinitialize for beginning of new file.  */
   set_last_source_file (NULL);
@@ -782,7 +781,6 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   struct coff_symbol fcn_cs_saved;
   static struct internal_syment fcn_sym_saved;
   static union internal_auxent fcn_aux_saved;
-  struct symtab *s;
   /* A .file is open.  */
   int in_source_file = 0;
   int next_file_symnum = -1;
@@ -832,7 +830,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
     xmalloc (type_vector_length * sizeof (struct type *));
   memset (type_vector, 0, type_vector_length * sizeof (struct type *));
 
-  coff_start_symtab ("");
+  coff_start_symtab (objfile, "");
 
   symnum = 0;
   while (symnum < nsyms)
@@ -846,7 +844,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  if (get_last_source_file ())
 	    coff_end_symtab (objfile);
 
-	  coff_start_symtab ("_globals_");
+	  coff_start_symtab (objfile, "_globals_");
 	  /* coff_start_symtab will set the language of this symtab to
 	     language_unknown, since such a ``file name'' is not
 	     recognized.  Override that with the minimal language to
@@ -910,7 +908,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  if (get_last_source_file ())
 	    {
 	      coff_end_symtab (objfile);
-	      coff_start_symtab (filestring);
+	      coff_start_symtab (objfile, filestring);
 	    }
 	  in_source_file = 1;
 	  break;
@@ -1136,9 +1134,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
 			    + ANOFFSET (objfile->section_offsets,
-					SECT_OFF_TEXT (objfile)),
-			    objfile
-		);
+					SECT_OFF_TEXT (objfile)));
 	      within_function = 0;
 	    }
 	  break;
@@ -1178,7 +1174,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 					    SECT_OFF_TEXT (objfile));
 		  /* Make a block for the local symbols within.  */
 		  finish_block (0, &local_symbols, new->old_blocks,
-				new->start_addr, tmpaddr, objfile);
+				new->start_addr, tmpaddr);
 		}
 	      /* Now pop locals of block just finished.  */
 	      local_symbols = new->locals;
@@ -1203,8 +1199,13 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
   /* Patch up any opaque types (references to types that are not defined
      in the file where they are referenced, e.g. "struct foo *bar").  */
-  ALL_OBJFILE_SYMTABS (objfile, s)
-    patch_opaque_types (s);
+  {
+    struct compunit_symtab *cu;
+    struct symtab *s;
+
+    ALL_OBJFILE_FILETABS (objfile, cu, s)
+      patch_opaque_types (s);
+  }
 
   coffread_objfile = NULL;
 }
@@ -1547,7 +1548,7 @@ patch_opaque_types (struct symtab *s)
   struct symbol *real_sym;
 
   /* Go through the per-file symbols only.  */
-  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+  b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
   ALL_BLOCK_SYMBOLS (b, iter, real_sym)
     {
       /* Find completed typedefs to use to fix opaque ones.

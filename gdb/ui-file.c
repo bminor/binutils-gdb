@@ -223,6 +223,12 @@ ui_file_write (struct ui_file *file,
 }
 
 void
+ui_file_write_for_put (void *data, const char *buffer, long length_buffer)
+{
+  ui_file_write (data, buffer, length_buffer);
+}
+
+void
 ui_file_write_async_safe (struct ui_file *file,
 			  const char *buf,
 			  long length_buf)

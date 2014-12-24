@@ -26,7 +26,6 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "target.h"
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "completer.h"
@@ -1742,7 +1741,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
      current thread until we report an event out of windows_wait.  */
   inferior_ptid = pid_to_ptid (pid);
 
-  child_terminal_init_with_pgrp (pid);
+  target_terminal_init ();
   target_terminal_inferior ();
 
   windows_initialization_done = 0;

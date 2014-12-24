@@ -1,3 +1,79 @@
+2014-12-23  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (struct bfd_link_hash_entry): Comment non_ir_ref.  Add
+	linker_def.
+
+2014-12-12  Phil Muldoon  <pmuldoon@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gcc-c-fe.def: New file.
+	* gcc-c-interface.h: New file.
+	* gcc-interface.h: New file.
+
+2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* dis-asm.h (print_insn_visium): Declare.
+
+2014-11-24  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2.h: Add DW_LANG_C_plus_plus_11, DW_LANG_C11 and
+	DW_LANG_C_plus_plus_14.
+
+2014-11-21  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
+
+	* dwarf2.def (DW_AT_APPLE_optimized, DW_AT_APPLE_flags)
+	(DW_AT_APPLE_isa, DW_AT_APPLE_block)
+	(DW_AT_APPLE_major_runtime_vers, DW_AT_APPLE_runtime_class)
+	(DW_AT_APPLE_omit_frame_ptr, DW_AT_APPLE_property_name)
+	(DW_AT_APPLE_property_getter, DW_AT_APPLE_property_setter)
+	(DW_AT_APPLE_property_attribute, DW_AT_APPLE_objc_complete_type)
+	(DW_AT_APPLE_property): New macros.
+
+2014-11-21  Mark Wielaard  <mjw@redhat.com>
+
+	PR debug/63239
+	* dwarf2.def (DW_AT_GNU_deleted): New attribute.
+
+2014-11-21  Terry Guo  <terry.guo@arm.com>
+
+	* opcode/arm.h (FPU_VFP_EXT_ARMV8xD): New macro.
+	(FPU_VFP_V5D16): Likewise.
+	(FPU_VFP_V5_SP_D16): Likewise.
+	(FPU_ARCH_VFP_V5D16): Likewise.
+	(FPU_ARCH_VFP_V5_SP_D16): Likewise.
+
+2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
+
+	* bfdlink.h (struct bfd_link_info): Add bndplt.
+
+2014-10-30  Andrew Pinski  <apinski@cavium.com>
+
+	* elf/mips.h (AFL_EXT_OCTEON3): Define.
+	INSN_OCTEON3, CPU_OCTEON3): Define.
+
+2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elf/mips.h (AFL_ASE_MASK): Define.
+
+2014-09-26  Max Ostapenko  <m.ostapenko@partner.samsung.com>
+
+	* libiberty.h (PEX_STDOUT_APPEND): New flag.
+	(PEX_STDERR_APPEND): Likewise.
+
+2014-09-23  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* demangle.h (DMGL_DLANG): New macro.
+	(DMGL_STYLE_MASK): Add DMGL_DLANG.
+	(demangling_styles): Add dlang_demangling.
+	(DLANG_DEMANGLING_STYLE_STRING): New macro.
+	(DLANG_DEMANGLING): New macro.
+	(dlang_demangle): New prototype.
+
+2014-09-15  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* longlong.h: Add __udiv_w_sdiv prototype.
+
 2014-08-12  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_callbacks <notice>): Remove "string"

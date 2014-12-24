@@ -5928,7 +5928,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 to them before.  */
       if (was_local_p)
 	value += gp0;
-      overflowed_p = mips_elf_overflow_p (value, 16);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
     case R_MIPS16_GOT16:
@@ -5983,7 +5984,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 18);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 18);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -5996,7 +5998,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 23);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 23);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6009,7 +6012,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 28);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 28);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6022,7 +6026,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - ((p | 7) ^ 7);
-      overflowed_p = mips_elf_overflow_p (value, 21);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 21);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6035,14 +6040,16 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 21);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 21);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
 
     case R_MIPS_PCHI16:
       value = mips_elf_high (symbol + addend - p);
-      overflowed_p = mips_elf_overflow_p (value, 16);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 16);
       value &= howto->dst_mask;
       break;
 
@@ -6057,7 +6064,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 8);
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 8);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 8);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6066,7 +6074,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 11);
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 11);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 11);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6075,7 +6084,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 17);
       value = symbol + addend - p;
-      overflowed_p = mips_elf_overflow_p (value, 17);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 17);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6084,7 +6094,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 25);
       value = symbol + addend - ((p | 3) ^ 3);
-      overflowed_p = mips_elf_overflow_p (value, 25);
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 25);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -6588,6 +6599,9 @@ _bfd_elf_mips_mach (flagword flags)
     case E_MIPS_MACH_LS3A:
       return bfd_mach_mips_loongson_3a;
 
+    case E_MIPS_MACH_OCTEON3:
+      return bfd_mach_mips_octeon3;
+
     case E_MIPS_MACH_OCTEON2:
       return bfd_mach_mips_octeon2;
 
@@ -6983,20 +6997,11 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
       if (strcmp (name, ".sdata") == 0
 	  || strcmp (name, ".lit8") == 0
 	  || strcmp (name, ".lit4") == 0)
-	{
-	  hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
-	  hdr->sh_type = SHT_PROGBITS;
-	}
+	hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
       else if (strcmp (name, ".srdata") == 0)
-	{
-	  hdr->sh_flags |= SHF_ALLOC | SHF_MIPS_GPREL;
-	  hdr->sh_type = SHT_PROGBITS;
-	}
+	hdr->sh_flags |= SHF_ALLOC | SHF_MIPS_GPREL;
       else if (strcmp (name, ".compact_rel") == 0)
-	{
-	  hdr->sh_flags = 0;
-	  hdr->sh_type = SHT_PROGBITS;
-	}
+	hdr->sh_flags = 0;
       else if (strcmp (name, ".rtproc") == 0)
 	{
 	  if (hdr->sh_addralign != 0 && hdr->sh_entsize == 0)
@@ -9210,7 +9215,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      dynamic will now refer to the local copy instead.  */
   hmips->possibly_dynamic_relocs = 0;
 
-  return _bfd_elf_adjust_dynamic_copy (h, htab->sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, htab->sdynbss);
 }
 
 /* This function is called after all the input files have been read,
@@ -11454,9 +11459,11 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      name = ".dynsym";
 	      elemsize = MIPS_ELF_SYM_SIZE (output_bfd);
 	      s = bfd_get_section_by_name (output_bfd, name);
-	      BFD_ASSERT (s != NULL);
 
-	      dyn.d_un.d_val = s->size / elemsize;
+	      if (s != NULL)
+		dyn.d_un.d_val = s->size / elemsize;
+	      else
+		dyn.d_un.d_val = 0;
 	      break;
 
 	    case DT_MIPS_HIPAGENO:
@@ -11859,6 +11866,10 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_64R2 | E_MIPS_MACH_OCTEON;
       break;
 
+    case bfd_mach_mips_octeon3:
+      val = E_MIPS_ARCH_64R2 | E_MIPS_MACH_OCTEON3;
+      break;
+
     case bfd_mach_mips_xlr:
       val = E_MIPS_ARCH_64 | E_MIPS_MACH_XLR;
       break;
@@ -11898,6 +11909,18 @@ mips_set_isa_flags (bfd *abfd)
   elf_elfheader (abfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
   elf_elfheader (abfd)->e_flags |= val;
 
+}
+
+
+/* Whether to sort relocs output by ld -r or ld --emit-relocs, by r_offset.
+   Don't do so for code sections.  We want to keep ordering of HI16/LO16
+   as is.  On the other hand, elf-eh-frame.c processing requires .eh_frame
+   relocs to be sorted.  */
+
+bfd_boolean
+_bfd_mips_elf_sort_relocs_p (asection *sec)
+{
+  return (sec->flags & SEC_CODE) == 0;
 }
 
 
@@ -12591,24 +12614,26 @@ struct mips_elf_find_line
 };
 
 bfd_boolean
-_bfd_mips_elf_find_nearest_line (bfd *abfd, asection *section,
-				 asymbol **symbols, bfd_vma offset,
+_bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
+				 asection *section, bfd_vma offset,
 				 const char **filename_ptr,
 				 const char **functionname_ptr,
-				 unsigned int *line_ptr)
+				 unsigned int *line_ptr,
+				 unsigned int *discriminator_ptr)
 {
   asection *msec;
 
-  if (_bfd_dwarf1_find_nearest_line (abfd, section, symbols, offset,
+  if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr))
+				     line_ptr, discriminator_ptr,
+				     dwarf_debug_sections,
+				     ABI_64_P (abfd) ? 8 : 0,
+				     &elf_tdata (abfd)->dwarf2_find_line_info))
     return TRUE;
 
-  if (_bfd_dwarf2_find_nearest_line (abfd, dwarf_debug_sections,
-                                     section, symbols, offset,
+  if (_bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr, NULL, ABI_64_P (abfd) ? 8 : 0,
-				     &elf_tdata (abfd)->dwarf2_find_line_info))
+				     line_ptr))
     return TRUE;
 
   msec = bfd_get_section_by_name (abfd, ".mdebug");
@@ -12687,9 +12712,9 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asection *section,
 
   /* Fall back on the generic ELF find_nearest_line routine.  */
 
-  return _bfd_elf_find_nearest_line (abfd, section, symbols, offset,
+  return _bfd_elf_find_nearest_line (abfd, symbols, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr);
+				     line_ptr, discriminator_ptr);
 }
 
 bfd_boolean
@@ -13903,6 +13928,8 @@ bfd_mips_isa_ext (bfd *abfd)
       return AFL_EXT_OCTEON;
     case bfd_mach_mips_octeonp:
       return AFL_EXT_OCTEONP;
+    case bfd_mach_mips_octeon3:
+      return AFL_EXT_OCTEON3;
     case bfd_mach_mips_octeon2:
       return AFL_EXT_OCTEON2;
     case bfd_mach_mips_xlr:
@@ -13948,6 +13975,10 @@ update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
       if (abiflags->isa_rev < 2)
 	abiflags->isa_rev = 2;
       break;
+    case E_MIPS_ARCH_32R6:
+      abiflags->isa_level = 32;
+      abiflags->isa_rev = 6;
+      break;
     case E_MIPS_ARCH_64:
       abiflags->isa_level = 64;
       abiflags->isa_rev = 1;
@@ -13957,6 +13988,10 @@ update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
       abiflags->isa_level = 64;
       if (abiflags->isa_rev < 2)
 	abiflags->isa_rev = 2;
+      break;
+    case E_MIPS_ARCH_64R6:
+      abiflags->isa_level = 64;
+      abiflags->isa_rev = 6;
       break;
     default:
       (*_bfd_error_handler)
@@ -14728,6 +14763,7 @@ struct mips_mach_extension
 static const struct mips_mach_extension mips_mach_extensions[] =
 {
   /* MIPS64r2 extensions.  */
+  { bfd_mach_mips_octeon3, bfd_mach_mips_octeon2 },
   { bfd_mach_mips_octeon2, bfd_mach_mips_octeonp },
   { bfd_mach_mips_octeonp, bfd_mach_mips_octeon },
   { bfd_mach_mips_octeon, bfd_mach_mipsisa64r2 },
@@ -15505,6 +15541,8 @@ print_mips_ases (FILE *file, unsigned int mask)
     fputs ("\n\tXPA ASE", file);
   if (mask == 0)
     fprintf (file, "\n\t%s", _("None"));
+  else if ((mask & ~AFL_ASE_MASK) != 0)
+    fprintf (stdout, "\n\t%s (%x)", _("Unknown"), mask & ~AFL_ASE_MASK);
 }
 
 static void
@@ -15517,6 +15555,9 @@ print_mips_isa_ext (FILE *file, unsigned int isa_ext)
       break;
     case AFL_EXT_XLR:
       fputs ("RMI XLR", file);
+      break;
+    case AFL_EXT_OCTEON3:
+      fputs ("Cavium Networks Octeon3", file);
       break;
     case AFL_EXT_OCTEON2:
       fputs ("Cavium Networks Octeon2", file);
@@ -15570,7 +15611,7 @@ print_mips_isa_ext (FILE *file, unsigned int isa_ext)
       fputs ("ST Microelectronics Loongson 2F", file);
       break;
     default:
-      fputs (_("Unknown"), file);
+      fprintf (file, "%s (%d)", _("Unknown"), isa_ext);
       break;
     }
 }

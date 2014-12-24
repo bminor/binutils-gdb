@@ -79,7 +79,7 @@ input_file_buffer_size (void)
 char *
 input_file_push (void)
 {
-  register struct saved_file *saved;
+  struct saved_file *saved;
 
   saved = (struct saved_file *) xmalloc (sizeof *saved);
 
@@ -98,7 +98,7 @@ input_file_push (void)
 void
 input_file_pop (char *arg)
 {
-  register struct saved_file *saved = (struct saved_file *) arg;
+  struct saved_file *saved = (struct saved_file *) arg;
 
   input_file_end ();		/* Close out old file.  */
 

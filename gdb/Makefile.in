@@ -280,6 +280,24 @@ SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
 	-DTUI=1
 
+#
+# GCC Compile support sub-directory definitions
+#
+SUBDIR_GCC_COMPILE_OBS = \
+	compile.o compile-c-symbols.o compile-c-types.o \
+	compile-object-load.o compile-object-run.o \
+	compile-loc2c.o compile-c-support.o
+SUBDIR_GCC_COMPILE_SRCS = \
+	compile/compile.c \
+	compile/compile-c-symbols.c \
+	compile/compile-c-types.c \
+	compile/compile-object-load.c \
+	compile/compile-object-load.h \
+	compile/compile-object-run.c \
+	compile/compile-object-run.h \
+	compile/compile-loc2c.c \
+	compile/compile-c-support.c
+
 # Guile sub directory definitons for guile support.
 
 SUBDIR_GUILE_OBS = \
@@ -361,6 +379,7 @@ SUBDIR_PYTHON_OBS = \
 	py-function.o \
 	py-gdb-readline.o \
 	py-inferior.o \
+	py-infevents.o \
 	py-infthread.o \
 	py-lazy-string.o \
 	py-linetable.o \
@@ -399,6 +418,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-function.c \
 	python/py-gdb-readline.c \
 	python/py-inferior.c \
+	python/py-infevents.c \
 	python/py-infthread.c \
 	python/py-lazy-string.c \
 	python/py-linetable.c \
@@ -607,7 +627,7 @@ TARGET_OBS = @TARGET_OBS@
 ALL_64_TARGET_OBS = \
 	aarch64-tdep.o aarch64-linux-tdep.o aarch64-newlib-tdep.o \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
-	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
+	alphanbsd-tdep.o alphaobsd-tdep.o alpha-tdep.o \
 	amd64fbsd-tdep.o amd64-darwin-tdep.o amd64-dicos-tdep.o \
 	amd64-linux-tdep.o amd64nbsd-tdep.o \
 	amd64obsd-tdep.o amd64-sol2-tdep.o amd64-tdep.o amd64-windows-tdep.o \
@@ -625,6 +645,7 @@ ALL_TARGET_OBS = \
 	bfin-linux-tdep.o bfin-tdep.o \
 	cris-linux-tdep.o cris-tdep.o \
 	dicos-tdep.o \
+	fbsd-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
 	h8300-tdep.o \
 	hppabsd-tdep.o hppanbsd-tdep.o hppaobsd-tdep.o \
@@ -643,7 +664,7 @@ ALL_TARGET_OBS = \
 	m88k-tdep.o \
 	mep-tdep.o \
 	microblaze-tdep.o microblaze-linux-tdep.o \
-	mips-irix-tdep.o mips-linux-tdep.o \
+	mips-linux-tdep.o mips-sde-tdep.o \
 	mipsnbsd-tdep.o mips-tdep.o \
 	mn10300-linux-tdep.o mn10300-tdep.o \
 	moxie-tdep.o \
@@ -672,7 +693,7 @@ ALL_TARGET_OBS = \
 	bsd-uthread.o \
 	nbsd-tdep.o obsd-tdep.o \
 	sol2-tdep.o \
-	solib-frv.o solib-irix.o solib-svr4.o \
+	solib-frv.o solib-svr4.o \
 	solib-som.o solib-pa64.o solib-darwin.o solib-dsbt.o \
 	dbug-rom.o dink32-rom.o ppcbug-rom.o m32r-rom.o dsrec.o monitor.o \
 	remote-m32r-sdi.o remote-mips.o \
@@ -797,7 +818,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	charset.c common/cleanups.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c continuations.c corefile.c corelow.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
-	d-exp.y d-lang.c d-support.c d-valprint.c \
+	d-exp.y d-lang.c d-valprint.c \
 	cp-name-parser.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
@@ -851,7 +872,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
-	common/errors.c common/common-debug.c common/common-exceptions.c
+	common/errors.c common/common-debug.c common/common-exceptions.c \
+	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -873,7 +895,7 @@ nto-tdep.h serial.h \
 c-lang.h d-lang.h go-lang.h frame.h event-loop.h block.h cli/cli-setshow.h \
 cli/cli-decode.h cli/cli-cmds.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h common/version.h \
-gnulib/import/string.in.h gnulib/import/str-two-way.h \
+compile/compile.h gnulib/import/string.in.h gnulib/import/str-two-way.h \
 gnulib/import/stdint.in.h remote.h remote-notif.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h dwarf2-frame-tailcall.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-linux-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
@@ -902,14 +924,14 @@ interps.h auxv.h gdbcmd.h tramp-frame.h mipsnbsd-tdep.h	\
 amd64-linux-tdep.h linespec.h i387-tdep.h mn10300-tdep.h \
 sparc64-tdep.h monitor.h ppcobsd-tdep.h srec.h solib-pa64.h \
 coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
-m68k-tdep.h spu-tdep.h jv-lang.h environ.h solib-irix.h amd64-tdep.h \
+m68k-tdep.h spu-tdep.h jv-lang.h environ.h amd64-tdep.h \
 doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
 rs6000-tdep.h rs6000-aix-tdep.h \
 common/gdb_locale.h arch-utils.h trad-frame.h gnu-nat.h \
 language.h nbsd-tdep.h solib-svr4.h \
 macroexp.h ui-file.h regcache.h tracepoint.h tracefile.h i386-tdep.h \
 inf-child.h p-lang.h event-top.h gdbtypes.h user-regs.h \
-regformats/regdef.h config/alpha/nm-osf3.h  config/i386/nm-i386gnu.h \
+regformats/regdef.h config/i386/nm-i386gnu.h \
 config/i386/nm-fbsd.h \
 config/nm-nto.h config/sparc/nm-sol2.h config/nm-linux.h \
 top.h bsd-kvm.h gdb-stabs.h reggroups.h \
@@ -939,7 +961,7 @@ common/print-utils.h common/rsp-low.h nat/x86-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
-common/common-regcache.h
+common/common-regcache.h fbsd-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1026,7 +1048,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	inline-frame.o \
 	gnu-v2-abi.o gnu-v3-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
-	d-support.o \
 	reggroups.o \
 	trad-frame.o \
 	tramp-frame.o \
@@ -1039,7 +1060,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
-	common-exceptions.o
+	common-exceptions.o \
+	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
 
@@ -1282,7 +1304,7 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 # duplicates.  Files in the gdb/ directory can end up appearing in
 # COMMON_OBS (as a .o file) and CONFIG_SRCS (as a .c file).
 
-INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS)
+INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS) $(SUBDIR_GCC_COMPILE_SRCS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
@@ -1601,9 +1623,9 @@ ALLDEPFILES = \
 	aarch64-tdep.c aarch64-linux-tdep.c aarch64-newlib-tdep.c \
 	aarch64-linux-nat.c \
 	aix-thread.c \
-	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
+	alphabsd-nat.c alpha-linux-nat.c \
 	alpha-tdep.c alpha-mdebug-tdep.c \
-	alpha-linux-tdep.c alpha-osf1-tdep.c \
+	alpha-linux-tdep.c \
 	alphabsd-tdep.c alphafbsd-tdep.c alphanbsd-tdep.c alphaobsd-tdep.c \
 	amd64-nat.c amd64-tdep.c \
 	amd64bsd-nat.c amd64fbsd-nat.c amd64fbsd-tdep.c \
@@ -1622,6 +1644,7 @@ ALLDEPFILES = \
 	dcache.c dicos-tdep.c darwin-nat.c \
 	exec.c \
 	fbsd-nat.c \
+	fbsd-tdep.c \
 	fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
@@ -1659,14 +1682,13 @@ ALLDEPFILES = \
 	microblaze-tdep.c microblaze-linux-tdep.c \
 	mingw-hdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
-	mips-irix-tdep.c \
+	mips-sde-tdep.c \
 	mips-tdep.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
 	msp430-tdep.c \
 	nios2-tdep.c nios2-linux-tdep.c \
 	nbsd-nat.c nbsd-tdep.c obsd-nat.c obsd-tdep.c \
-	solib-osf.c \
 	somread.c solib-som.c \
 	posix-hdep.c \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c ppc64-tdep.c \
@@ -1687,7 +1709,7 @@ ALLDEPFILES = \
 	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	sol2-tdep.c \
-	solib-irix.c solib-svr4.c \
+	solib-svr4.c \
 	sparc-linux-nat.c sparc-linux-tdep.c \
 	sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-sol2-tdep.c \
 	sparc-nat.c sparc-tdep.c sparc64-linux-nat.c sparc64-linux-tdep.c \
@@ -1699,7 +1721,7 @@ ALLDEPFILES = \
 	spu-linux-nat.c spu-tdep.c spu-multiarch.c solib-spu.c \
 	tilegx-linux-nat.c tilegx-tdep.c tilegx-linux-tdep.c \
 	v850-tdep.c \
-	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
+	vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	windows-nat.c windows-tdep.c \
 	xcoffread.c \
 	xstormy16-tdep.c \
@@ -1913,6 +1935,39 @@ cli-setshow.o: $(srcdir)/cli/cli-setshow.c
 
 cli-utils.o: $(srcdir)/cli/cli-utils.c
 	$(COMPILE) $(srcdir)/cli/cli-utils.c
+	$(POSTCOMPILE)
+
+# GCC Compile support dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+compile.o: $(srcdir)/compile/compile.c
+	$(COMPILE) $(srcdir)/compile/compile.c
+	$(POSTCOMPILE)
+
+compile-c-types.o: $(srcdir)/compile/compile-c-types.c
+	$(COMPILE) $(srcdir)/compile/compile-c-types.c
+	$(POSTCOMPILE)
+
+compile-c-symbols.o: $(srcdir)/compile/compile-c-symbols.c
+	$(COMPILE) $(srcdir)/compile/compile-c-symbols.c
+	$(POSTCOMPILE)
+
+compile-object-load.o: $(srcdir)/compile/compile-object-load.c
+	$(COMPILE) $(srcdir)/compile/compile-object-load.c
+	$(POSTCOMPILE)
+
+compile-object-run.o: $(srcdir)/compile/compile-object-run.c
+	$(COMPILE) $(srcdir)/compile/compile-object-run.c
+	$(POSTCOMPILE)
+
+compile-loc2c.o: $(srcdir)/compile/compile-loc2c.c
+	$(COMPILE) $(srcdir)/compile/compile-loc2c.c
+	$(POSTCOMPILE)
+
+compile-c-support.o: $(srcdir)/compile/compile-c-support.c
+	$(COMPILE) $(srcdir)/compile/compile-c-support.c
 	$(POSTCOMPILE)
 
 
@@ -2477,6 +2532,10 @@ py-gdb-readline.o: $(srcdir)/python/py-gdb-readline.c
 
 py-inferior.o: $(srcdir)/python/py-inferior.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-inferior.c
+	$(POSTCOMPILE)
+
+py-infevents.o: $(srcdir)/python/py-infevents.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-infevents.c
 	$(POSTCOMPILE)
 
 py-infthread.o: $(srcdir)/python/py-infthread.c

@@ -21,7 +21,6 @@
 #include "objfiles.h"
 #include "symtab.h"
 #include "language.h"
-#include "exceptions.h"
 #include "arch-utils.h"
 #include "python.h"
 #include "ui-out.h"

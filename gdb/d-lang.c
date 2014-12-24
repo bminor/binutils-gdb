@@ -23,8 +23,8 @@
 #include "varobj.h"
 #include "d-lang.h"
 #include "c-lang.h"
-#include "parser-defs.h"
-#include "gdb_obstack.h"
+#include "demangle.h"
+#include "cp-support.h"
 
 /* The name of the symbol to use to get the name of the main subprogram.  */
 static const char D_MAIN[] = "D main";
@@ -52,37 +52,7 @@ d_main_name (void)
 char *
 d_demangle (const char *symbol, int options)
 {
-  struct obstack tempbuf;
-  char *result;
-
-  if ((symbol == NULL) || (*symbol == '\0'))
-    return NULL;
-  else if (strcmp (symbol, "_Dmain") == 0)
-    return xstrdup ("D main");
-
-  obstack_init (&tempbuf);
-
-  if (strncmp (symbol, "_D", 2) == 0)
-    symbol += 2;
-  else
-    {
-      obstack_free (&tempbuf, NULL);
-      return NULL;
-    }
-
-  if (d_parse_symbol (&tempbuf, symbol) != NULL)
-    {
-      obstack_grow_str0 (&tempbuf, "");
-      result = xstrdup (obstack_finish (&tempbuf));
-      obstack_free (&tempbuf, NULL);
-    }
-  else
-    {
-      obstack_free (&tempbuf, NULL);
-      return NULL;
-    }
-
-  return result;
+  return gdb_demangle (symbol, options | DMGL_DLANG);
 }
 
 /* Table mapping opcodes into strings for printing operators
@@ -261,6 +231,8 @@ static const struct language_defn d_language_defn =
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,
+  NULL,
+  NULL,
   LANG_MAGIC
 };
 

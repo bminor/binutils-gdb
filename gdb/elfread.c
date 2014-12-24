@@ -247,6 +247,8 @@ elf_symtab_read (struct objfile *objfile, int type,
   const char *filesymname = "";
   struct dbx_symfile_info *dbx = DBX_SYMFILE_INFO (objfile);
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
+  int elf_make_msymbol_special_p
+    = gdbarch_elf_make_msymbol_special_p (gdbarch);
 
   for (i = 0; i < number_of_symbols; i++)
     {
@@ -328,7 +330,11 @@ elf_symtab_read (struct objfile *objfile, int type,
 	    (sym->name, strlen (sym->name), copy_names,
 	     symaddr, mst_solib_trampoline, sect, objfile);
 	  if (msym != NULL)
-	    msym->filename = filesymname;
+	    {
+	      msym->filename = filesymname;
+	      if (elf_make_msymbol_special_p)
+		gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
+	    }
 	  continue;
 	}
 
@@ -555,7 +561,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 		}
 
 	      msym->filename = filesymname;
-	      gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
+	      if (elf_make_msymbol_special_p)
+		gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
 	    }
 
 	  /* If we see a default versioned symbol, install it under
@@ -594,7 +601,9 @@ elf_symtab_read (struct objfile *objfile, int type,
 		      SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
 		      mtramp->created_by_gdb = 1;
 		      mtramp->filename = filesymname;
-		      gdbarch_elf_make_msymbol_special (gdbarch, sym, mtramp);
+		      if (elf_make_msymbol_special_p)
+			gdbarch_elf_make_msymbol_special (gdbarch,
+							  sym, mtramp);
 		    }
 		}
 	    }
@@ -1227,10 +1236,6 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
    We have been initialized by a call to elf_symfile_init, which
    currently does nothing.
 
-   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
-   in each section.  We simplify it down to a single offset for all
-   symbols.  FIXME.
-
    This function only does the minimum work necessary for letting the
    user "name" things symbolically; it does not read the entire symtab.
    Instead, it reads the external and static symbols and puts them in partial
@@ -1409,14 +1414,7 @@ elf_symfile_finish (struct objfile *objfile)
   dwarf2_free_objfile (objfile);
 }
 
-/* ELF specific initialization routine for reading symbols.
-
-   It is passed a pointer to a struct sym_fns which contains, among other
-   things, the BFD for the file whose symbols are being read, and a slot for
-   a pointer to "private data" which we can fill with goodies.
-
-   For now at least, we have nothing in particular to do, so this function is
-   just a stub.  */
+/* ELF specific initialization routine for reading symbols.  */
 
 static void
 elf_symfile_init (struct objfile *objfile)

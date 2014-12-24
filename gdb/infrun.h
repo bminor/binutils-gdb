@@ -115,12 +115,14 @@ extern void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
 						  struct symtab_and_line ,
 						  struct frame_id);
 
-extern void follow_inferior_reset_breakpoints (void);
-
 /* Returns true if we're trying to step past the instruction at
    ADDRESS in ASPACE.  */
 extern int stepping_past_instruction_at (struct address_space *aspace,
 					 CORE_ADDR address);
+
+/* Returns true if we're trying to step past an instruction that
+   triggers a non-steppable watchpoint.  */
+extern int stepping_past_nonsteppable_watchpoint (void);
 
 extern void set_step_info (struct frame_info *frame,
 			   struct symtab_and_line sal);

@@ -66,7 +66,7 @@ OdrBase* CreateOdrDerived2();  // in odr_violation2.cc
 extern "C" int OverriddenCFunction(int i);  // in odr_violation*.cc
 
 inline int SometimesInlineFunction(int i) {  // strong in odr_violation2.cc.
-  return i;
+  return i * i * 3;
 }
 
 

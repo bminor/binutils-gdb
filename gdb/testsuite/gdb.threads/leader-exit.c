@@ -29,7 +29,8 @@ start (void *arg)
   i = pthread_join (main_thread, NULL);
   assert (i == 0);
 
-  return arg;	/* break-here */
+  sleep (10);  /* break-here */
+  return arg;
 }
 
 int

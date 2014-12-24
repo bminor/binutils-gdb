@@ -632,7 +632,7 @@ strip_usage (FILE *stream, int exit_status)
   -U --disable-deterministic-archives\n\
                                    Disable -D behavior (default)\n"));
   fprintf (stream, _("\
-  -R --remove-section=<name>       Remove section <name> from the output\n\
+  -R --remove-section=<name>       Also remove section <name> from the output\n\
   -s --strip-all                   Remove all symbol and relocation information\n\
   -g -S -d --strip-debug           Remove all debugging symbols & sections\n\
      --strip-dwo                   Remove all DWO sections\n\
@@ -2271,6 +2271,16 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       bfd_boolean del = TRUE;
       bfd_boolean ok_object;
 
+      /* PR binutils/17533: Do not allow directory traversal
+	 outside of the current directory tree by archive members.  */
+      if (! is_valid_archive_path (bfd_get_filename (this_element)))
+	{
+	  non_fatal (_("illegal pathname found in archive member: %s"),
+		     bfd_get_filename (this_element));
+	  status = 1;
+	  goto cleanup_and_exit;
+	}
+
       /* Create an output file for this member.  */
       output_name = concat (dir, "/",
 			    bfd_get_filename (this_element), (char *) 0);
@@ -2280,8 +2290,12 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	{
 	  output_name = make_tempdir (output_name);
 	  if (output_name == NULL)
-	    fatal (_("cannot create tempdir for archive copying (error: %s)"),
-		   strerror (errno));
+	    {
+	      non_fatal (_("cannot create tempdir for archive copying (error: %s)"),
+			 strerror (errno));
+	      status = 1;
+	      goto cleanup_and_exit;
+	    }
 
 	  l = (struct name_list *) xmalloc (sizeof (struct name_list));
 	  l->name = output_name;
@@ -2323,7 +2337,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	{
 	  bfd_nonfatal_message (output_name, NULL, NULL, NULL);
 	  status = 1;
-	  return;
+	  goto cleanup_and_exit;
 	}
 
       if (ok_object)
@@ -2384,7 +2398,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     {
       status = 1;
       bfd_nonfatal_message (filename, NULL, NULL, NULL);
-      return;
     }
 
   filename = bfd_get_filename (ibfd);
@@ -2392,9 +2405,9 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     {
       status = 1;
       bfd_nonfatal_message (filename, NULL, NULL, NULL);
-      return;
     }
 
+ cleanup_and_exit:
   /* Delete all the files that we opened.  */
   for (l = list; l != NULL; l = l->next)
     {
@@ -3217,7 +3230,7 @@ strip_main (int argc, char *argv[])
   int i;
   char *output_file = NULL;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXHhVvw",
+  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXHhVvwDU",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -3508,7 +3521,7 @@ copy_main (int argc, char *argv[])
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
 
-  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:w",
+  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:wDU",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)

@@ -2728,6 +2728,65 @@ A reference to the object file (@code{gdb.Objfile}) which has been loaded.
 @xref{Objfiles In Python}, for details of the @code{gdb.Objfile} object.
 @end defvar
 
+@item events.clear_objfiles
+Emits @code{gdb.ClearObjFilesEvent} which indicates that the list of object
+files for a program space has been reset.
+@code{gdb.ClearObjFilesEvent} has one attribute:
+
+@defvar ClearObjFilesEvent.progspace
+A reference to the program space (@code{gdb.Progspace}) whose objfile list has
+been cleared.  @xref{Progspaces In Python}.
+@end defvar
+
+@item events.inferior_call_pre
+Emits @code{gdb.InferiorCallPreEvent} which indicates that a function in
+the inferior is about to be called.
+
+@defvar InferiorCallPreEvent.ptid
+The thread in which the call will be run.
+@end defvar
+
+@defvar InferiorCallPreEvent.address
+The location of the function to be called.
+@end defvar
+
+@item events.inferior_call_post
+Emits @code{gdb.InferiorCallPostEvent} which indicates that a function in
+the inferior has returned.
+
+@defvar InferiorCallPostEvent.ptid
+The thread in which the call was run.
+@end defvar
+
+@defvar InferiorCallPostEvent.address
+The location of the function that was called.
+@end defvar
+
+@item events.memory_changed
+Emits @code{gdb.MemoryChangedEvent} which indicates that the memory of the
+inferior has been modified by the @value{GDBN} user, for instance via a
+command like @w{@code{set *addr = value}}.  The event has the following
+attributes:
+
+@defvar MemoryChangedEvent.address
+The start address of the changed region.
+@end defvar
+
+@defvar MemoryChangedEvent.length
+Length in bytes of the changed region.
+@end defvar
+
+@item events.register_changed
+Emits @code{gdb.RegisterChangedEvent} which indicates that a register in the
+inferior has been modified by the @value{GDBN} user.
+
+@defvar RegisterChangedEvent.frame
+A gdb.Frame object representing the frame in which the register was modified.
+@end defvar
+@defvar RegisterChangedEvent.regnum
+Denotes which register was modified.
+@end defvar
+
 @end table
 
 @node Threads In Python
@@ -3356,6 +3415,50 @@ The @code{frame_filters} attribute is a dictionary of frame filter
 objects.  @xref{Frame Filter API}, for more information.
 @end defvar
 
+One may add arbitrary attributes to @code{gdb.Progspace} objects
+in the usual Python way.
+This is useful if, for example, one needs to do some extra record keeping
+associated with the program space.
+
+In this contrived example, we want to perform some processing when
+an objfile with a certain symbol is loaded, but we only want to do
+this once because it is expensive.  To achieve this we record the results
+with the program space because we can't predict when the desired objfile
+will be loaded.
+
+@smallexample
+(gdb) python
+def clear_objfiles_handler(event):
+    event.progspace.expensive_computation = None
+def expensive(symbol):
+    """A mock routine to perform an "expensive" computation on symbol."""
+    print "Computing the answer to the ultimate question ..."
+    return 42
+def new_objfile_handler(event):
+    objfile = event.new_objfile
+    progspace = objfile.progspace
+    if not hasattr(progspace, 'expensive_computation') or \
+            progspace.expensive_computation is None:
+        # We use 'main' for the symbol to keep the example simple.
+        # Note: There's no current way to constrain the lookup
+        # to one objfile.
+        symbol = gdb.lookup_global_symbol('main')
+        if symbol is not None:
+            progspace.expensive_computation = expensive(symbol)
+gdb.events.clear_objfiles.connect(clear_objfiles_handler)
+gdb.events.new_objfile.connect(new_objfile_handler)
+end
+(gdb) file /tmp/hello
+Reading symbols from /tmp/hello...done.
+Computing the answer to the ultimate question ...
+(gdb) python print gdb.current_progspace().expensive_computation
+42
+(gdb) run
+Starting program: /tmp/hello
+Hello.
+[Inferior 1 (process 4242) exited normally]
+@end smallexample
+
 @node Objfiles In Python
 @subsubsection Objfiles In Python
 
@@ -3385,11 +3488,56 @@ Return a sequence of all the objfiles current known to @value{GDBN}.
 @xref{Objfiles In Python}.
 @end defun
 
+@findex gdb.lookup_objfile
+@defun gdb.lookup_objfile (name @r{[}, by_build_id{]})
+Look up @var{name}, a file name or build ID, in the list of objfiles
+for the current program space (@pxref{Progspaces In Python}).
+If the objfile is not found throw the Python @code{ValueError} exception.
+
+If @var{name} is a relative file name, then it will match any
+source file name with the same trailing components.  For example, if
+@var{name} is @samp{gcc/expr.c}, then it will match source file
+name of @file{/build/trunk/gcc/expr.c}, but not
+@file{/build/trunk/libcpp/expr.c} or @file{/build/trunk/gcc/x-expr.c}.
+
+If @var{by_build_id} is provided and is @code{True} then @var{name}
+is the build ID of the objfile.  Otherwise, @var{name} is a file name.
+This is supported only on some operating systems, notably those which use
+the ELF format for binary files and the @sc{gnu} Binutils.  For more details
+about this feature, see the description of the @option{--build-id}
+command-line option in @ref{Options, , Command Line Options, ld.info,
+The GNU Linker}.
+@end defun
+
 Each objfile is represented by an instance of the @code{gdb.Objfile}
 class.
 
 @defvar Objfile.filename
 The file name of the objfile as a string.
+@end defvar
+
+@defvar Objfile.owner
+For separate debug info objfiles this is the corresponding @code{gdb.Objfile}
+object that debug info is being provided for.
+Otherwise this is @code{None}.
+Separate debug info objfiles are added with the
+@code{gdb.Objfile.add_separate_debug_file} method, described below.
+@end defvar
+
+@defvar Objfile.build_id
+The build ID of the objfile as a string.
+If the objfile does not have a build ID then the value is @code{None}.
+
+This is supported only on some operating systems, notably those which use
+the ELF format for binary files and the @sc{gnu} Binutils.  For more details
+about this feature, see the description of the @option{--build-id}
+command-line option in @ref{Options, , Command Line Options, ld.info,
+The GNU Linker}.
+@end defvar
+
+@defvar Objfile.progspace
+The containing program space of the objfile as a @code{gdb.Progspace}
+object.  @xref{Progspaces In Python}.
 @end defvar
 
 @defvar Objfile.pretty_printers
@@ -3411,6 +3559,28 @@ The @code{frame_filters} attribute is a dictionary of frame filter
 objects.  @xref{Frame Filter API}, for more information.
 @end defvar
 
+One may add arbitrary attributes to @code{gdb.Objfile} objects
+in the usual Python way.
+This is useful if, for example, one needs to do some extra record keeping
+associated with the objfile.
+
+In this contrived example we record the time when @value{GDBN}
+loaded the objfile.
+
+@smallexample
+(gdb) python
+import datetime
+def new_objfile_handler(event):
+    # Set the time_loaded attribute of the new objfile.
+    event.new_objfile.time_loaded = datetime.datetime.today()
+gdb.events.new_objfile.connect(new_objfile_handler)
+end
+(gdb) file ./hello
+Reading symbols from ./hello...done.
+(gdb) python print gdb.objfiles()[0].time_loaded
+2014-10-09 11:41:36.770345
+@end smallexample
+
 A @code{gdb.Objfile} object has the following methods:
 
 @defun Objfile.is_valid ()
@@ -3419,6 +3589,17 @@ Returns @code{True} if the @code{gdb.Objfile} object is valid,
 if the object file it refers to is not loaded in @value{GDBN} any
 longer.  All other @code{gdb.Objfile} methods will throw an exception
 if it is invalid at the time the method is called.
+@end defun
+
+@defun Objfile.add_separate_debug_file (file)
+Add @var{file} to the list of files that @value{GDBN} will search for
+debug information for the objfile.
+This is useful when the debug info has been removed from the program
+and stored in a separate file.  @value{GDBN} has built-in support for
+finding separate debug info files (@pxref{Separate Debug Files}), but if
+the file doesn't live in one of the standard places that @value{GDBN}
+searches then this function can be used to add a debug info file
+from a different place.
 @end defun
 
 @node Frames In Python
@@ -4250,7 +4431,7 @@ watchpoint scope, the watchpoint remains valid even if execution of the
 inferior leaves the scope of that watchpoint.
 @end defun
 
-@defun Breakpoint.delete
+@defun Breakpoint.delete ()
 Permanently deletes the @value{GDBN} breakpoint.  This also
 invalidates the Python @code{Breakpoint} object.  Any further access
 to this object's attributes or methods will raise an error.
@@ -4258,7 +4439,8 @@ to this object's attributes or methods will raise an error.
 
 @defvar Breakpoint.enabled
 This attribute is @code{True} if the breakpoint is enabled, and
-@code{False} otherwise.  This attribute is writable.
+@code{False} otherwise.  This attribute is writable.  You can use it to enable
+or disable the breakpoint.
 @end defvar
 
 @defvar Breakpoint.silent

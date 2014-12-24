@@ -624,7 +624,7 @@ check_for_thread_db (void)
       if (ptid_get_pid (ptid) != -1)
 	inferior_ptid = ptid;
 
-      target_find_new_threads ();
+      target_update_thread_list ();
       break;
 
     default:
@@ -1056,11 +1056,11 @@ solaris_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 
-/* Worker bee for find_new_threads.  Callback function that gets
+/* Worker bee for update_thread_list.  Callback function that gets
    called once per user-level thread (i.e. not for LWP's).  */
 
 static int
-sol_find_new_threads_callback (const td_thrhandle_t *th, void *ignored)
+sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
 {
   td_err_e retval;
   td_thrinfo_t ti;
@@ -1078,15 +1078,18 @@ sol_find_new_threads_callback (const td_thrhandle_t *th, void *ignored)
 }
 
 static void
-sol_find_new_threads (struct target_ops *ops)
+sol_update_thread_list (struct target_ops *ops)
 {
   struct target_ops *beneath = find_target_beneath (ops);
 
-  /* First Find any new LWP's.  */
-  beneath->to_find_new_threads (beneath);
+  /* Delete dead threads.  */
+  prune_threads ();
+
+  /* Find any new LWP's.  */
+  beneath->to_update_thread_list (beneath);
 
   /* Then find any new user-level threads.  */
-  p_td_ta_thr_iter (main_ta, sol_find_new_threads_callback, (void *) 0,
+  p_td_ta_thr_iter (main_ta, sol_update_thread_list_callback, (void *) 0,
 		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
 }
@@ -1200,7 +1203,7 @@ sol_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
     {
       /* The list of threads is probably not up to date.  Find any
          thread that is missing from the list, and try again.  */
-      sol_find_new_threads (&current_target);
+      sol_update_thread_list (&current_target);
       thread_info = iterate_over_threads (thread_db_find_thread_from_tid,
                                           &thread);
     }
@@ -1225,7 +1228,7 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_mourn_inferior = sol_thread_mourn_inferior;
   sol_thread_ops.to_thread_alive = sol_thread_alive;
   sol_thread_ops.to_pid_to_str = solaris_pid_to_str;
-  sol_thread_ops.to_find_new_threads = sol_find_new_threads;
+  sol_thread_ops.to_update_thread_list = sol_update_thread_list;
   sol_thread_ops.to_stratum = thread_stratum;
   sol_thread_ops.to_get_ada_task_ptid = sol_get_ada_task_ptid;
   sol_thread_ops.to_magic = OPS_MAGIC;

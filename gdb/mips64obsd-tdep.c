@@ -64,17 +64,15 @@ static const struct regset mips64obsd_gregset =
   mips64obsd_supply_gregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-mips64obsd_regset_from_core_section (struct gdbarch *gdbarch,
-				     const char *sect_name, size_t sect_size)
+static void
+mips64obsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					 iterate_over_regset_sections_cb *cb,
+					 void *cb_data,
+					 const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= MIPS64OBSD_NUM_REGS * 8)
-    return &mips64obsd_gregset;
-
-  return NULL;
+  cb (".reg", MIPS64OBSD_NUM_REGS * 8, &mips64obsd_gregset, NULL, cb_data);
 }
 
 
@@ -145,8 +143,8 @@ mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* OpenBSD/mips64 only supports the n64 ABI, but the braindamaged
      way GDB works, forces us to pretend we can handle them all.  */
 
-  set_gdbarch_regset_from_core_section
-    (gdbarch, mips64obsd_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, mips64obsd_iterate_over_regset_sections);
 
   tramp_frame_prepend_unwinder (gdbarch, &mips64obsd_sigframe);
 

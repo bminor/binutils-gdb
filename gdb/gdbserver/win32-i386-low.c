@@ -40,29 +40,36 @@ extern const struct target_desc *tdesc_i386;
 
 static struct x86_debug_reg_state debug_reg_state;
 
-static int debug_registers_changed = 0;
-static int debug_registers_used = 0;
+static int
+update_debug_registers_callback (struct inferior_list_entry *entry,
+				 void *pid_p)
+{
+  struct thread_info *thr = (struct thread_info *) entry;
+  win32_thread_info *th = inferior_target_data (thr);
+  int pid = *(int *) pid_p;
+
+  /* Only update the threads of this process.  */
+  if (pid_of (thr) == pid)
+    {
+      /* The actual update is done later just before resuming the lwp,
+	 we just mark that the registers need updating.  */
+      th->debug_registers_changed = 1;
+    }
+
+  return 0;
+}
 
 /* Update the inferior's debug register REGNUM from STATE.  */
 
 static void
 x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
+  /* Only update the threads of this process.  */
+  int pid = pid_of (current_thread);
+
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
-  /* debug_reg_state.dr_mirror is already set.
-     Just notify i386_set_thread_context, i386_thread_added
-     that the registers need to be updated.  */
-  debug_registers_changed = 1;
-  debug_registers_used = 1;
-}
-
-static CORE_ADDR
-x86_dr_low_get_addr (int regnum)
-{
-  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
-
-  return debug_reg_state.dr_mirror[regnum];
+  find_inferior (&all_threads, update_debug_registers_callback, &pid);
 }
 
 /* Update the inferior's DR7 debug control register from STATE.  */
@@ -70,17 +77,53 @@ x86_dr_low_get_addr (int regnum)
 static void
 x86_dr_low_set_control (unsigned long control)
 {
-  /* debug_reg_state.dr_control_mirror is already set.
-     Just notify i386_set_thread_context, i386_thread_added
-     that the registers need to be updated.  */
-  debug_registers_changed = 1;
-  debug_registers_used = 1;
+  /* Only update the threads of this process.  */
+  int pid = pid_of (current_thread);
+
+  find_inferior (&all_threads, update_debug_registers_callback, &pid);
+}
+
+/* Return the current value of a DR register of the current thread's
+   context.  */
+
+static DWORD64
+win32_get_current_dr (int dr)
+{
+  win32_thread_info *th = inferior_target_data (current_thread);
+
+  win32_require_context (th);
+
+#define RET_DR(DR)				\
+  case DR:					\
+    return th->context.Dr ## DR
+
+  switch (dr)
+    {
+      RET_DR (0);
+      RET_DR (1);
+      RET_DR (2);
+      RET_DR (3);
+      RET_DR (6);
+      RET_DR (7);
+    }
+
+#undef RET_DR
+
+  gdb_assert_not_reached ("unhandled dr");
+}
+
+static CORE_ADDR
+x86_dr_low_get_addr (int regnum)
+{
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
+
+  return win32_get_current_dr (regnum - DR_FIRSTADDR);
 }
 
 static unsigned long
 x86_dr_low_get_control (void)
 {
-  return debug_reg_state.dr_control_mirror;
+  return win32_get_current_dr (7);
 }
 
 /* Get the value of the DR6 debug status register from the inferior
@@ -89,9 +132,7 @@ x86_dr_low_get_control (void)
 static unsigned long
 x86_dr_low_get_status (void)
 {
-  /* We don't need to do anything here, the last call to thread_rec for
-     current_event.dwThreadId id has already set it.  */
-  return debug_reg_state.dr_status_mirror;
+  return win32_get_current_dr (6);
 }
 
 /* Low-level function vector.  */
@@ -181,12 +222,10 @@ static void
 i386_initial_stuff (void)
 {
   x86_low_init_dregs (&debug_reg_state);
-  debug_registers_changed = 0;
-  debug_registers_used = 0;
 }
 
 static void
-i386_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
+i386_get_thread_context (win32_thread_info *th)
 {
   /* Requesting the CONTEXT_EXTENDED_REGISTERS register set fails if
      the system doesn't support extended registers.  */
@@ -210,28 +249,17 @@ i386_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
 
       error ("GetThreadContext failure %ld\n", (long) e);
     }
-
-  debug_registers_changed = 0;
-
-  if (th->tid == current_event->dwThreadId)
-    {
-      /* Copy dr values from the current thread.  */
-      struct x86_debug_reg_state *dr = &debug_reg_state;
-      dr->dr_mirror[0] = th->context.Dr0;
-      dr->dr_mirror[1] = th->context.Dr1;
-      dr->dr_mirror[2] = th->context.Dr2;
-      dr->dr_mirror[3] = th->context.Dr3;
-      dr->dr_status_mirror = th->context.Dr6;
-      dr->dr_control_mirror = th->context.Dr7;
-    }
 }
 
 static void
-i386_set_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
+i386_prepare_to_resume (win32_thread_info *th)
 {
-  if (debug_registers_changed)
+  if (th->debug_registers_changed)
     {
       struct x86_debug_reg_state *dr = &debug_reg_state;
+
+      win32_require_context (th);
+
       th->context.Dr0 = dr->dr_mirror[0];
       th->context.Dr1 = dr->dr_mirror[1];
       th->context.Dr2 = dr->dr_mirror[2];
@@ -239,32 +267,15 @@ i386_set_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
       /* th->context.Dr6 = dr->dr_status_mirror;
 	 FIXME: should we set dr6 also ?? */
       th->context.Dr7 = dr->dr_control_mirror;
-    }
 
-  SetThreadContext (th->h, &th->context);
+      th->debug_registers_changed = 0;
+    }
 }
 
 static void
 i386_thread_added (win32_thread_info *th)
 {
-  /* Set the debug registers for the new thread if they are used.  */
-  if (debug_registers_used)
-    {
-      struct x86_debug_reg_state *dr = &debug_reg_state;
-      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-      GetThreadContext (th->h, &th->context);
-
-      th->context.Dr0 = dr->dr_mirror[0];
-      th->context.Dr1 = dr->dr_mirror[1];
-      th->context.Dr2 = dr->dr_mirror[2];
-      th->context.Dr3 = dr->dr_mirror[3];
-      /* th->context.Dr6 = dr->dr_status_mirror;
-	 FIXME: should we set dr6 also ?? */
-      th->context.Dr7 = dr->dr_control_mirror;
-
-      SetThreadContext (th->h, &th->context);
-      th->context.ContextFlags = 0;
-    }
+  th->debug_registers_changed = 1;
 }
 
 static void
@@ -450,7 +461,7 @@ struct win32_target_ops the_low_target = {
   sizeof (mappings) / sizeof (mappings[0]),
   i386_initial_stuff,
   i386_get_thread_context,
-  i386_set_thread_context,
+  i386_prepare_to_resume,
   i386_thread_added,
   i386_fetch_inferior_register,
   i386_store_inferior_register,

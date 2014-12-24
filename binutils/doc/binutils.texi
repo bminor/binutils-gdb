@@ -234,7 +234,8 @@ a normal archive.  Instead the elements of the first archive are added
 individually to the second archive.
 
 The paths to the elements of the archive are stored relative to the
-archive itself.
+archive itself.  For security reasons absolute paths and paths with a
+@code{/../} component are not allowed.
 
 @cindex compatibility, @command{ar}
 @cindex @command{ar} compatibility
@@ -1857,7 +1858,10 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
         [@option{-W[lLiaprmfFsoRt]}|
-         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]]
+         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames]
+                 [=aranges,=macro,=frames,=frames-interp,=str,=loc]
+                 [=Ranges,=pubtypes,=trace_info,=trace_abbrev]
+                 [=trace_aranges,=gdb_index]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
         [@option{-T}|@option{--dynamic-syms}]
@@ -2094,19 +2098,35 @@ compilers.
 For the x86, some of the options duplicate functions of the @option{-m}
 switch, but allow finer grained control.  Multiple selections from the
 following may be specified as a comma separated string.
-@option{x86-64}, @option{i386} and @option{i8086} select disassembly for
-the given architecture.  @option{intel} and @option{att} select between
-intel syntax mode and AT&T syntax mode.
-@option{intel-mnemonic} and @option{att-mnemonic} select between
-intel mnemonic mode and AT&T mnemonic mode. @option{intel-mnemonic}
-implies @option{intel} and @option{att-mnemonic} implies @option{att}.
-@option{addr64}, @option{addr32},
-@option{addr16}, @option{data32} and @option{data16} specify the default
-address size and operand size.  These four options will be overridden if
-@option{x86-64}, @option{i386} or @option{i8086} appear later in the
-option string.  Lastly, @option{suffix}, when in AT&T mode,
-instructs the disassembler to print a mnemonic suffix even when the
-suffix could be inferred by the operands.
+@table @code
+@item x86-64
+@itemx i386
+@itemx i8086
+Select disassembly for the given architecture.
+
+@item intel
+@itemx att
+Select between intel syntax mode and AT&T syntax mode.
+
+@item intel-mnemonic
+@itemx att-mnemonic
+Select between intel mnemonic mode and AT&T mnemonic mode.
+Note: @code{intel-mnemonic} implies @code{intel} and
+@code{att-mnemonic} implies @code{att}.
+
+@item addr64
+@itemx addr32
+@itemx addr16
+@itemx data32
+@itemx data16
+Specify the default address size and operand size.  These four options
+will be overridden if @code{x86-64}, @code{i386} or @code{i8086}
+appear later in the option string.
+
+@item suffix
+When in AT&T mode, instructs the disassembler to print a mnemonic
+suffix even when the suffix could be inferred by the operands.
+@end table
 
 For PowerPC, @option{booke} controls the disassembly of BookE
 instructions.  @option{32} and @option{64} select PowerPC and
@@ -2190,10 +2210,24 @@ Print information that is specific to the object file format.  The
 argument @var{options} is a comma separated list that depends on the
 format (the lists of options is displayed with the help).
 
-For XCOFF, the available options are: @option{header}, @option{aout},
-@option{sections}, @option{syms}, @option{relocs}, @option{lineno},
-@option{loader}, @option{except}, @option{typchk}, @option{traceback},
-@option{toc} and @option{ldinfo}.
+For XCOFF, the available options are:
+@table @code
+@item header
+@item aout
+@item sections
+@item syms
+@item relocs
+@item lineno,
+@item loader
+@item except
+@item typchk
+@item traceback
+@item toc
+@item ldinfo
+@end table
+
+Not all object formats support this option.  In particular the ELF
+format does not use it.
 
 @item -r
 @itemx --reloc
@@ -2250,7 +2284,10 @@ Display @var{width} bytes on a single line when disassembling
 instructions.
 
 @item -W[lLiaprmfFsoRt]
-@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]
+@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames]
+@itemx --dwarf[=aranges,=macro,=frames,=frames-interp,=str,=loc]
+@itemx --dwarf[=Ranges,=pubtypes,=trace_info,=trace_abbrev]
+@itemx --dwarf[=trace_aranges,=gdb_index]
 @cindex DWARF
 @cindex debug symbols
 Displays the contents of the debug sections in the file, if any are
@@ -2672,15 +2709,24 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
 
 @c man begin DESCRIPTION strings
 
-For each @var{file} given, @sc{gnu} @command{strings} prints the printable
-character sequences that are at least 4 characters long (or the number
-given with the options below) and are followed by an unprintable
-character.  By default, it only prints the strings from the initialized
-and loaded sections of object files; for other types of files, it prints
-the strings from the whole file.
+For each @var{file} given, @sc{gnu} @command{strings} prints the
+printable character sequences that are at least 4 characters long (or
+the number given with the options below) and are followed by an
+unprintable character.
 
-@command{strings} is mainly useful for determining the contents of non-text
-files.
+Depending upon how the strings program was configured it will default
+to either displaying all the printable sequences that it can find in
+each file, or only those sequences that are in loadable, initialized
+data sections.  If the file type in unrecognizable, or if strings is
+reading from stdin then it will always display all of the printable
+sequences that it can find.
+
+For backwards compatibility any file that occurs after a command line
+option of just @option{-} will also be scanned in full, regardless of
+the presence of any @option{-d} option. 
+
+@command{strings} is mainly useful for determining the contents of
+non-text files.
 
 @c man end
 
@@ -2690,8 +2736,25 @@ files.
 @item -a
 @itemx --all
 @itemx -
-Do not scan only the initialized and loaded sections of object files;
-scan the whole files.
+Scan the whole file, regardless of what sections it contains or
+whether those sections are loaded or initialized.  Normally this is
+the default behaviour, but strings can be configured so that the
+@option{-d} is the default instead.
+
+The @option{-} option is position dependent and forces strings to
+perform full scans of any file that is mentioned after the @option{-}
+on the command line, even if the @option{-d} option has been
+specified.
+
+@item -d
+@itemx --data
+Only print strings from initialized, loaded data sections in the
+file.  This may reduce the amount of garbage in the output, but it
+also exposes the strings program to any security flaws that may be
+present in the BFD library used to scan and load sections.  Strings
+can be configured so that this option is the default behaviour.  In
+such cases the @option{-a} option can be used to avoid using the BFD
+library and instead just print all of the strings found in the file.
 
 @item -f
 @itemx --print-file-name
@@ -2828,7 +2891,8 @@ Replace @var{objfile} with a file in the output format @var{bfdname}.
 
 @item -R @var{sectionname}
 @itemx --remove-section=@var{sectionname}
-Remove any section named @var{sectionname} from the output file.  This
+Remove any section named @var{sectionname} from the output file, in
+addition to whatever sections would otherwise be removed.  This
 option may be given more than once.  Note that using this option
 inappropriately may make the output file unusable.  The wildcard
 character @samp{*} may be given at the end of @var{sectionname}.  If

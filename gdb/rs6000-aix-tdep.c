@@ -33,7 +33,6 @@
 #include "rs6000-tdep.h"
 #include "ppc-tdep.h"
 #include "rs6000-aix-tdep.h"
-#include "exceptions.h"
 #include "xcoffread.h"
 #include "solib.h"
 #include "solib-aix.h"
@@ -147,25 +146,18 @@ static const struct regset rs6000_aix64_regset =
   rs6000_aix_collect_regset,
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-rs6000_aix_regset_from_core_section (struct gdbarch *gdbarch,
-				     const char *sect_name, size_t sect_size)
+static void
+rs6000_aix_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					 iterate_over_regset_sections_cb *cb,
+					 void *cb_data,
+					 const struct regcache *regcache)
 {
   if (gdbarch_tdep (gdbarch)->wordsize == 4)
-    {
-      if (strcmp (sect_name, ".reg") == 0 && sect_size >= 592)
-        return &rs6000_aix32_regset;
-    }
+    cb (".reg", 592, &rs6000_aix32_regset, NULL, cb_data);
   else
-    {
-      if (strcmp (sect_name, ".reg") == 0 && sect_size >= 576)
-        return &rs6000_aix64_regset;
-    }
-
-  return NULL;
+    cb (".reg", 576, &rs6000_aix64_regset, NULL, cb_data);
 }
 
 
@@ -1065,8 +1057,8 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, rs6000_convert_from_func_ptr_addr);
 
   /* Core file support.  */
-  set_gdbarch_regset_from_core_section
-    (gdbarch, rs6000_aix_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, rs6000_aix_iterate_over_regset_sections);
   set_gdbarch_core_xfer_shared_libraries_aix
     (gdbarch, rs6000_aix_core_xfer_shared_libraries_aix);
 

@@ -55,6 +55,18 @@ fi], [default_ar_deterministic=0])
 AC_DEFINE_UNQUOTED(DEFAULT_AR_DETERMINISTIC, $default_ar_deterministic,
 		   [Should ar and ranlib use -D behavior by default?])
 
+AC_ARG_ENABLE(default-strings-all,
+[AS_HELP_STRING([--disable-default-strings-all],
+		[strings defaults to --data behavior])], [
+if test "${enableval}" = no; then
+  default_strings_all=0
+else
+  default_strings_all=1
+fi], [default_strings_all=1])
+
+AC_DEFINE_UNQUOTED(DEFAULT_STRINGS_ALL, $default_strings_all,
+		   [Should strings use -a behavior by default?])
+
 AM_BINUTILS_WARNINGS
 
 AC_CONFIG_HEADERS(config.h:config.in)
@@ -111,6 +123,9 @@ case "${host}" in
     DEMANGLER_NAME=cxxfilt
 esac
 AC_SUBST(DEMANGLER_NAME)
+
+AC_CHECK_SIZEOF([long])
+AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h limits.h locale.h sys/param.h wchar.h)
 AC_HEADER_SYS_WAIT
@@ -399,6 +414,9 @@ changequote([,])dnl
 
 	# Add objdump private vectors.
 	case $targ in
+	avr-*-*)
+	  od_vectors="$od_vectors objdump_private_desc_elf32_avr"
+	  ;;
 	powerpc-*-aix*)
 	  od_vectors="$od_vectors objdump_private_desc_xcoff"
 	  ;;
@@ -419,6 +437,8 @@ for i in $od_vectors ; do
 	f="$f $i"
 	OBJDUMP_PRIVATE_VECTORS="$OBJDUMP_PRIVATE_VECTORS &$i,"
 	case $i in
+	objdump_private_desc_elf32_avr)
+	    od_files="$od_files od-elf32_avr" ;;
 	objdump_private_desc_xcoff)
 	    od_files="$od_files od-xcoff" ;;
 	objdump_private_desc_mach_o)

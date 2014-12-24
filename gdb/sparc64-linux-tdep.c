@@ -336,7 +336,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_write_pc (gdbarch, sparc64_linux_write_pc);
 
   /* Functions for 'catch syscall'.  */
-  set_xml_syscall_file_name (XML_SYSCALL_FILENAME_SPARC64);
+  set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_SPARC64);
   set_gdbarch_get_syscall_number (gdbarch,
                                   sparc64_linux_get_syscall_number);
 }

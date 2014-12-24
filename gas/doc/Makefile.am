@@ -91,8 +91,9 @@ CPU_DOCS = \
         c-tic6x.texi \
 	c-tilegx.texi \
 	c-tilepro.texi \
-	c-vax.texi \
 	c-v850.texi \
+	c-vax.texi \
+	c-visium.texi \
 	c-xgate.texi \
 	c-xstormy16.texi \
 	c-xtensa.texi \

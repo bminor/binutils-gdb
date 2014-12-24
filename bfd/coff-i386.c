@@ -340,16 +340,18 @@ static reloc_howto_type howto_table[] =
 	 PCRELOFFSET)		/* pcrel_offset */
 };
 
+#define NUM_HOWTOS (sizeof (howto_table) / sizeof (howto_table[0]))
+
 /* Turn a howto into a reloc  nunmber */
 
 #define SELECT_RELOC(x,howto) { x.r_type = howto->type; }
 #define BADMAG(x) I386BADMAG(x)
 #define I386 1			/* Customize coffcode.h */
 
-#define RTYPE2HOWTO(cache_ptr, dst)					\
-  ((cache_ptr)->howto =							\
-   ((dst)->r_type < sizeof (howto_table) / sizeof (howto_table[0])	\
-    ? howto_table + (dst)->r_type					\
+#define RTYPE2HOWTO(cache_ptr, dst)				\
+  ((cache_ptr)->howto =						\
+   ((dst)->r_type < NUM_HOWTOS					\
+    ? howto_table + (dst)->r_type				\
     : NULL))
 
 /* For 386 COFF a STYP_NOLOAD | STYP_BSS section is part of a shared
@@ -377,7 +379,7 @@ static reloc_howto_type howto_table[] =
       coffsym = (obj_symbols (abfd)				\
 	         + (cache_ptr->sym_ptr_ptr - symbols));		\
     else if (ptr)						\
-      coffsym = coff_symbol_from (abfd, ptr);			\
+      coffsym = coff_symbol_from (ptr);				\
     if (coffsym != (coff_symbol_type *) NULL			\
 	&& coffsym->native->u.syment.n_scnum == 0)		\
       cache_ptr->addend = - coffsym->native->u.syment.n_value;	\
@@ -386,7 +388,8 @@ static reloc_howto_type howto_table[] =
       cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
     else							\
       cache_ptr->addend = 0;					\
-    if (ptr && howto_table[reloc.r_type].pc_relative)		\
+    if (ptr && reloc.r_type < NUM_HOWTOS			\
+	&& howto_table[reloc.r_type].pc_relative)		\
       cache_ptr->addend += asect->vma;				\
   }
 
@@ -438,7 +441,7 @@ coff_i386_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 {
   reloc_howto_type *howto;
 
-  if (rel->r_type >= sizeof (howto_table) / sizeof (howto_table[0]))
+  if (rel->r_type >= NUM_HOWTOS)
     {
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -574,7 +577,7 @@ coff_i386_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = 0; i < sizeof (howto_table) / sizeof (howto_table[0]); i++)
+  for (i = 0; i < NUM_HOWTOS; i++)
     if (howto_table[i].name != NULL
 	&& strcasecmp (howto_table[i].name, r_name) == 0)
       return &howto_table[i];
@@ -604,9 +607,6 @@ coff_i386_is_local_label_name (bfd *abfd, const char *name)
 #endif /* TARGET_UNDERSCORE */
 
 #include "coffcode.h"
-
-#define _bfd_generic_find_nearest_line_discriminator \
-	coff_find_nearest_line_discriminator
 
 const bfd_target
 #ifdef TARGET_SYM

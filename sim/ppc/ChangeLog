@@ -1,3 +1,8 @@
+2014-11-23  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* ChangeLog, ChangeLog.00, hw_com.c, ld-cache.h, ppc-instructions:
+	Change immediatly to immediately.
+
 2014-08-27  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* basics.h, device.c, device.h, hw_htab.c, hw_memory.c:
@@ -3983,7 +3988,7 @@ Wed Jan 17 19:46:07 1996  Andrew Cagney  <cagney@highland.com.au>
         device tree load from file code.
 
 	* psim.c (psim_create): Dump device tree if enabled. If nump
-        selected, exit psim immediatly.
+        selected, exit psim immediately.
 
 Wed Jan 17 19:36:52 1996  Andrew Cagney  <cagney@highland.com.au>
 

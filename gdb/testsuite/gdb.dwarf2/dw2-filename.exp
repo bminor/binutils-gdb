@@ -28,8 +28,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {nodebug
     return -1
 }
 
-set remote_dwarf_srcfile [gdb_remote_download host \
-			      ${srcdir}/${subdir}/${dwarf_srcfile}]
+gdb_remote_download host ${srcdir}/${subdir}/${dwarf_srcfile}
 
 clean_restart ${testfile}
 
@@ -42,5 +41,3 @@ gdb_test "interpreter-exec mi -file-list-exec-source-files" \
 
 # And `info sources' should return the fullname incl. the directories.
 gdb_test "info sources" {[/\\]file1\.txt}
-
-remote_file host delete ${remote_dwarf_srcfile}

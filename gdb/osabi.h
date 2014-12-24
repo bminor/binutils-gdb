@@ -49,6 +49,10 @@ void gdbarch_init_osabi (struct gdbarch_info, struct gdbarch *);
 /* Return the name of the specified OS ABI.  */
 const char *gdbarch_osabi_name (enum gdb_osabi);
 
+/* Return a regular expression that matches the OS part of a GNU
+   configury triplet for the given OSABI.  */
+const char *osabi_triplet_regexp (enum gdb_osabi osabi);
+
 /* Helper routine for ELF file sniffers.  This looks at ABI tag note
    sections to determine the OS ABI from the note.  It should be called
    via bfd_map_over_sections.  */

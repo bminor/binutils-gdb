@@ -54,7 +54,6 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include "xml-support.h"
-#include "terminal.h"
 #include <sys/vfs.h>
 #include "solib.h"
 #include "nat/linux-osdata.h"
@@ -62,7 +61,6 @@
 #include "symfile.h"
 #include "agent.h"
 #include "tracepoint.h"
-#include "exceptions.h"
 #include "buffer.h"
 #include "target-descriptions.h"
 #include "filestuff.h"
@@ -323,25 +321,27 @@ pull_pid_from_list (struct simple_pid_list **listp, int pid, int *statusp)
 }
 
 /* Initialize ptrace warnings and check for supported ptrace
-   features given PID.  */
+   features given PID.
+
+   ATTACHED should be nonzero iff we attached to the inferior.  */
 
 static void
-linux_init_ptrace (pid_t pid)
+linux_init_ptrace (pid_t pid, int attached)
 {
-  linux_enable_event_reporting (pid);
+  linux_enable_event_reporting (pid, attached);
   linux_ptrace_init_warnings ();
 }
 
 static void
 linux_child_post_attach (struct target_ops *self, int pid)
 {
-  linux_init_ptrace (pid);
+  linux_init_ptrace (pid, 1);
 }
 
 static void
 linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
-  linux_init_ptrace (ptid_get_pid (ptid));
+  linux_init_ptrace (ptid_get_pid (ptid), 0);
 }
 
 /* Return the number of known LWPs in the tgid given by PID.  */
@@ -369,79 +369,41 @@ delete_lwp_cleanup (void *lp_voidp)
   delete_lwp (lp->ptid);
 }
 
+/* Target hook for follow_fork.  On entry inferior_ptid must be the
+   ptid of the followed inferior.  At return, inferior_ptid will be
+   unchanged.  */
+
 static int
 linux_child_follow_fork (struct target_ops *ops, int follow_child,
 			 int detach_fork)
 {
-  int has_vforked;
-  int parent_pid, child_pid;
-
-  has_vforked = (inferior_thread ()->pending_follow.kind
-		 == TARGET_WAITKIND_VFORKED);
-  parent_pid = ptid_get_lwp (inferior_ptid);
-  if (parent_pid == 0)
-    parent_pid = ptid_get_pid (inferior_ptid);
-  child_pid
-    = ptid_get_pid (inferior_thread ()->pending_follow.value.related_pid);
-
-  if (has_vforked
-      && !non_stop /* Non-stop always resumes both branches.  */
-      && (!target_is_async_p () || sync_execution)
-      && !(follow_child || detach_fork || sched_multi))
-    {
-      /* The parent stays blocked inside the vfork syscall until the
-	 child execs or exits.  If we don't let the child run, then
-	 the parent stays blocked.  If we're telling the parent to run
-	 in the foreground, the user will not be able to ctrl-c to get
-	 back the terminal, effectively hanging the debug session.  */
-      fprintf_filtered (gdb_stderr, _("\
-Can not resume the parent process over vfork in the foreground while\n\
-holding the child stopped.  Try \"set detach-on-fork\" or \
-\"set schedule-multiple\".\n"));
-      /* FIXME output string > 80 columns.  */
-      return 1;
-    }
-
-  if (! follow_child)
+  if (!follow_child)
     {
       struct lwp_info *child_lp = NULL;
+      int status = W_STOPCODE (0);
+      struct cleanup *old_chain;
+      int has_vforked;
+      int parent_pid, child_pid;
+
+      has_vforked = (inferior_thread ()->pending_follow.kind
+		     == TARGET_WAITKIND_VFORKED);
+      parent_pid = ptid_get_lwp (inferior_ptid);
+      if (parent_pid == 0)
+	parent_pid = ptid_get_pid (inferior_ptid);
+      child_pid
+	= ptid_get_pid (inferior_thread ()->pending_follow.value.related_pid);
+
 
       /* We're already attached to the parent, by default.  */
+      old_chain = save_inferior_ptid ();
+      inferior_ptid = ptid_build (child_pid, child_pid, 0);
+      child_lp = add_lwp (inferior_ptid);
+      child_lp->stopped = 1;
+      child_lp->last_resume_kind = resume_stop;
 
       /* Detach new forked process?  */
       if (detach_fork)
 	{
-	  struct cleanup *old_chain;
-	  int status = W_STOPCODE (0);
-
-	  /* Before detaching from the child, remove all breakpoints
-	     from it.  If we forked, then this has already been taken
-	     care of by infrun.c.  If we vforked however, any
-	     breakpoint inserted in the parent is visible in the
-	     child, even those added while stopped in a vfork
-	     catchpoint.  This will remove the breakpoints from the
-	     parent also, but they'll be reinserted below.  */
-	  if (has_vforked)
-	    {
-	      /* keep breakpoints list in sync.  */
-	      remove_breakpoints_pid (ptid_get_pid (inferior_ptid));
-	    }
-
-	  if (info_verbose || debug_linux_nat)
-	    {
-	      target_terminal_ours ();
-	      fprintf_filtered (gdb_stdlog,
-				"Detaching after fork from "
-				"child process %d.\n",
-				child_pid);
-	    }
-
-	  old_chain = save_inferior_ptid ();
-	  inferior_ptid = ptid_build (child_pid, child_pid, 0);
-
-	  child_lp = add_lwp (inferior_ptid);
-	  child_lp->stopped = 1;
-	  child_lp->last_resume_kind = resume_stop;
 	  make_cleanup (delete_lwp_cleanup, child_lp);
 
 	  if (linux_nat_prepare_to_resume != NULL)
@@ -476,86 +438,20 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      ptrace (PTRACE_DETACH, child_pid, 0, signo);
 	    }
 
+	  /* Resets value of inferior_ptid to parent ptid.  */
 	  do_cleanups (old_chain);
 	}
       else
 	{
-	  struct inferior *parent_inf, *child_inf;
-	  struct cleanup *old_chain;
-
-	  /* Add process to GDB's tables.  */
-	  child_inf = add_inferior (child_pid);
-
-	  parent_inf = current_inferior ();
-	  child_inf->attach_flag = parent_inf->attach_flag;
-	  copy_terminal_info (child_inf, parent_inf);
-	  child_inf->gdbarch = parent_inf->gdbarch;
-	  copy_inferior_target_desc_info (child_inf, parent_inf);
-
-	  old_chain = save_inferior_ptid ();
-	  save_current_program_space ();
-
-	  inferior_ptid = ptid_build (child_pid, child_pid, 0);
-	  add_thread (inferior_ptid);
-	  child_lp = add_lwp (inferior_ptid);
-	  child_lp->stopped = 1;
-	  child_lp->last_resume_kind = resume_stop;
-	  child_inf->symfile_flags = SYMFILE_NO_READ;
-
-	  /* If this is a vfork child, then the address-space is
-	     shared with the parent.  */
-	  if (has_vforked)
-	    {
-	      child_inf->pspace = parent_inf->pspace;
-	      child_inf->aspace = parent_inf->aspace;
-
-	      /* The parent will be frozen until the child is done
-		 with the shared region.  Keep track of the
-		 parent.  */
-	      child_inf->vfork_parent = parent_inf;
-	      child_inf->pending_detach = 0;
-	      parent_inf->vfork_child = child_inf;
-	      parent_inf->pending_detach = 0;
-	    }
-	  else
-	    {
-	      child_inf->aspace = new_address_space ();
-	      child_inf->pspace = add_program_space (child_inf->aspace);
-	      child_inf->removable = 1;
-	      set_current_program_space (child_inf->pspace);
-	      clone_program_space (child_inf->pspace, parent_inf->pspace);
-
-	      /* Let the shared library layer (solib-svr4) learn about
-		 this new process, relocate the cloned exec, pull in
-		 shared libraries, and install the solib event
-		 breakpoint.  If a "cloned-VM" event was propagated
-		 better throughout the core, this wouldn't be
-		 required.  */
-	      solib_create_inferior_hook (0);
-	    }
-
 	  /* Let the thread_db layer learn about this new process.  */
 	  check_for_thread_db ();
-
-	  do_cleanups (old_chain);
 	}
+
+      do_cleanups (old_chain);
 
       if (has_vforked)
 	{
 	  struct lwp_info *parent_lp;
-	  struct inferior *parent_inf;
-
-	  parent_inf = current_inferior ();
-
-	  /* If we detached from the child, then we have to be careful
-	     to not insert breakpoints in the parent until the child
-	     is done with the shared memory region.  However, if we're
-	     staying attached to the child, then we can and should
-	     insert breakpoints, so that we can debug it.  A
-	     subsequent child exec or exit is enough to know when does
-	     the child stops using the parent's address space.  */
-	  parent_inf->waiting_for_vfork_done = detach_fork;
-	  parent_inf->pspace->breakpoints_not_allowed = detach_fork;
 
 	  parent_lp = find_lwp_pid (pid_to_ptid (parent_pid));
 	  gdb_assert (linux_supports_tracefork () >= 0);
@@ -628,97 +524,11 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
     }
   else
     {
-      struct inferior *parent_inf, *child_inf;
       struct lwp_info *child_lp;
-      struct program_space *parent_pspace;
 
-      if (info_verbose || debug_linux_nat)
-	{
-	  target_terminal_ours ();
-	  if (has_vforked)
-	    fprintf_filtered (gdb_stdlog,
-			      _("Attaching after process %d "
-				"vfork to child process %d.\n"),
-			      parent_pid, child_pid);
-	  else
-	    fprintf_filtered (gdb_stdlog,
-			      _("Attaching after process %d "
-				"fork to child process %d.\n"),
-			      parent_pid, child_pid);
-	}
-
-      /* Add the new inferior first, so that the target_detach below
-	 doesn't unpush the target.  */
-
-      child_inf = add_inferior (child_pid);
-
-      parent_inf = current_inferior ();
-      child_inf->attach_flag = parent_inf->attach_flag;
-      copy_terminal_info (child_inf, parent_inf);
-      child_inf->gdbarch = parent_inf->gdbarch;
-      copy_inferior_target_desc_info (child_inf, parent_inf);
-
-      parent_pspace = parent_inf->pspace;
-
-      /* If we're vforking, we want to hold on to the parent until the
-	 child exits or execs.  At child exec or exit time we can
-	 remove the old breakpoints from the parent and detach or
-	 resume debugging it.  Otherwise, detach the parent now; we'll
-	 want to reuse it's program/address spaces, but we can't set
-	 them to the child before removing breakpoints from the
-	 parent, otherwise, the breakpoints module could decide to
-	 remove breakpoints from the wrong process (since they'd be
-	 assigned to the same address space).  */
-
-      if (has_vforked)
-	{
-	  gdb_assert (child_inf->vfork_parent == NULL);
-	  gdb_assert (parent_inf->vfork_child == NULL);
-	  child_inf->vfork_parent = parent_inf;
-	  child_inf->pending_detach = 0;
-	  parent_inf->vfork_child = child_inf;
-	  parent_inf->pending_detach = detach_fork;
-	  parent_inf->waiting_for_vfork_done = 0;
-	}
-      else if (detach_fork)
-	target_detach (NULL, 0);
-
-      /* Note that the detach above makes PARENT_INF dangling.  */
-
-      /* Add the child thread to the appropriate lists, and switch to
-	 this new thread, before cloning the program space, and
-	 informing the solib layer about this new process.  */
-
-      inferior_ptid = ptid_build (child_pid, child_pid, 0);
-      add_thread (inferior_ptid);
       child_lp = add_lwp (inferior_ptid);
       child_lp->stopped = 1;
       child_lp->last_resume_kind = resume_stop;
-
-      /* If this is a vfork child, then the address-space is shared
-	 with the parent.  If we detached from the parent, then we can
-	 reuse the parent's program/address spaces.  */
-      if (has_vforked || detach_fork)
-	{
-	  child_inf->pspace = parent_pspace;
-	  child_inf->aspace = child_inf->pspace->aspace;
-	}
-      else
-	{
-	  child_inf->aspace = new_address_space ();
-	  child_inf->pspace = add_program_space (child_inf->aspace);
-	  child_inf->removable = 1;
-	  child_inf->symfile_flags = SYMFILE_NO_READ;
-	  set_current_program_space (child_inf->pspace);
-	  clone_program_space (child_inf->pspace, parent_pspace);
-
-	  /* Let the shared library layer (solib-svr4) learn about
-	     this new process, relocate the cloned exec, pull in
-	     shared libraries, and install the solib event breakpoint.
-	     If a "cloned-VM" event was propagated better throughout
-	     the core, this wouldn't be required.  */
-	  solib_create_inferior_hook (0);
-	}
 
       /* Let the thread_db layer learn about this new process.  */
       check_for_thread_db ();
@@ -1627,7 +1437,7 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 {
   if (lp->stopped)
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      struct inferior *inf = find_inferior_ptid (lp->ptid);
 
       if (inf->vfork_child != NULL)
 	{
@@ -2580,7 +2390,7 @@ linux_nat_set_status_is_event (struct target_ops *t,
 static int
 stop_wait_callback (struct lwp_info *lp, void *data)
 {
-  struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+  struct inferior *inf = find_inferior_ptid (lp->ptid);
 
   /* If this is a vfork parent, bail out, it is not going to report
      any SIGSTOP until the vfork is done with.  */
@@ -3203,7 +3013,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 		  ptid_t ptid, struct target_waitstatus *ourstatus,
 		  int target_options)
 {
-  static sigset_t prev_mask;
+  sigset_t prev_mask;
   enum resume_kind last_resume_kind;
   struct lwp_info *lp;
   int status;
@@ -4070,62 +3880,6 @@ linux_child_pid_to_exec_file (struct target_ops *self, int pid)
   return buf;
 }
 
-/* Records the thread's register state for the corefile note
-   section.  */
-
-static char *
-linux_nat_collect_thread_registers (const struct regcache *regcache,
-				    ptid_t ptid, bfd *obfd,
-				    char *note_data, int *note_size,
-				    enum gdb_signal stop_signal)
-{
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  const struct regset *regset;
-  int core_regset_p;
-  gdb_gregset_t gregs;
-  gdb_fpregset_t fpregs;
-
-  core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
-
-  if (core_regset_p
-      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
-						     sizeof (gregs)))
-	 != NULL && regset->collect_regset != NULL)
-    regset->collect_regset (regset, regcache, -1, &gregs, sizeof (gregs));
-  else
-    fill_gregset (regcache, &gregs, -1);
-
-  note_data = (char *) elfcore_write_prstatus
-			 (obfd, note_data, note_size, ptid_get_lwp (ptid),
-			  gdb_signal_to_host (stop_signal), &gregs);
-
-  if (core_regset_p
-      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
-						     sizeof (fpregs)))
-	  != NULL && regset->collect_regset != NULL)
-    regset->collect_regset (regset, regcache, -1, &fpregs, sizeof (fpregs));
-  else
-    fill_fpregset (regcache, &fpregs, -1);
-
-  note_data = (char *) elfcore_write_prfpreg (obfd, note_data, note_size,
-					      &fpregs, sizeof (fpregs));
-
-  return note_data;
-}
-
-/* Fills the "to_make_corefile_note" target vector.  Builds the note
-   section for a corefile, and returns it in a malloc buffer.  */
-
-static char *
-linux_nat_make_corefile_notes (struct target_ops *self,
-			       bfd *obfd, int *note_size)
-{
-  /* FIXME: uweigand/2011-10-06: Once all GNU/Linux architectures have been
-     converted to gdbarch_core_regset_sections, this function can go away.  */
-  return linux_make_corefile_notes (target_gdbarch (), obfd, note_size,
-				    linux_nat_collect_thread_registers);
-}
-
 /* Implement the to_xfer_partial interface for memory reads using the /proc
    filesystem.  Because we can use a single read() call for /proc, this
    can be much more efficient than banging away at PTRACE_PEEKTEXT,
@@ -4522,7 +4276,6 @@ linux_target_install_ops (struct target_ops *t)
   t->to_post_startup_inferior = linux_child_post_startup_inferior;
   t->to_post_attach = linux_child_post_attach;
   t->to_follow_fork = linux_child_follow_fork;
-  t->to_make_corefile_notes = linux_nat_make_corefile_notes;
 
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;

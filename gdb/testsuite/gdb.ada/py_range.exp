@@ -30,11 +30,11 @@ if { [skip_python_tests] } { continue }
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
-gdb_test "python print int(gdb.parse_and_eval('sr'))" \
+gdb_test "python print(int(gdb.parse_and_eval('sr')))" \
          "48"
 
-gdb_test "python print int(gdb.parse_and_eval('si'))" \
+gdb_test "python print(int(gdb.parse_and_eval('si')))" \
          "740804"
 
-gdb_test "python print int(gdb.parse_and_eval('ir'))" \
+gdb_test "python print(int(gdb.parse_and_eval('ir')))" \
          "974"

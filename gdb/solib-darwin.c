@@ -38,7 +38,6 @@
 #include "elf-bfd.h"
 #include "exec.h"
 #include "auxv.h"
-#include "exceptions.h"
 #include "mach-o.h"
 #include "mach-o/external.h"
 
@@ -571,7 +570,7 @@ darwin_relocate_section_addresses (struct so_list *so,
 }
 
 static struct symbol *
-darwin_lookup_lib_symbol (const struct objfile *objfile,
+darwin_lookup_lib_symbol (struct objfile *objfile,
 			  const char *name,
 			  const domain_enum domain)
 {

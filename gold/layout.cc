@@ -418,7 +418,8 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 
 // Layout methods.
 
-Layout::Layout(int number_of_input_files, Script_options* script_options)
+Layout::Layout(int number_of_input_files, Script_options* script_options,
+	       bool has_crtbeginT)
   : number_of_input_files_(number_of_input_files),
     script_options_(script_options),
     namepool_(),
@@ -469,6 +470,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     unique_segment_for_sections_specified_(false),
     incremental_inputs_(NULL),
     record_output_section_data_from_script_(false),
+    optimize_ehframe_(!has_crtbeginT),
     script_output_section_data_list_(),
     segment_states_(NULL),
     relaxation_debug_check_(NULL),
@@ -524,6 +526,7 @@ static const char* gdb_sections[] =
   "addr",         // Fission extension
   // "aranges",   // not used by gdb as of 7.4
   "frame",
+  "gdb_scripts",
   "info",
   "types",
   "line",
@@ -532,8 +535,11 @@ static const char* gdb_sections[] =
   "macro",
   // "pubnames",  // not used by gdb as of 7.4
   // "pubtypes",  // not used by gdb as of 7.4
+  // "gnu_pubnames",  // Fission extension
+  // "gnu_pubtypes",  // Fission extension
   "ranges",
   "str",
+  "str_offsets",
 };
 
 // This is the minimum set of sections needed for line numbers.
@@ -544,6 +550,7 @@ static const char* lines_only_debug_sections[] =
   // "addr",      // Fission extension
   // "aranges",   // not used by gdb as of 7.4
   // "frame",
+  // "gdb_scripts",
   "info",
   // "types",
   "line",
@@ -552,8 +559,11 @@ static const char* lines_only_debug_sections[] =
   // "macro",
   // "pubnames",  // not used by gdb as of 7.4
   // "pubtypes",  // not used by gdb as of 7.4
+  // "gnu_pubnames",  // Fission extension
+  // "gnu_pubtypes",  // Fission extension
   // "ranges",
   "str",
+  "str_offsets",  // Fission extension
 };
 
 // These sections are the DWARF fast-lookup tables, and are not needed
@@ -1420,7 +1430,8 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 							 symbol_names_size,
 							 shndx,
 							 reloc_shndx,
-							 reloc_type))
+							 reloc_type,
+							 this->optimize_ehframe_))
     {
       os->update_flags_for_input_section(shdr.get_sh_flags());
 
@@ -1476,6 +1487,14 @@ Layout::make_eh_frame_section(const Relobj* object)
 						   ORDER_EHFRAME, false);
   if (os == NULL)
     return NULL;
+
+  // optimize_ehframe_ is false only if there is a crtbeginT file on
+  // command line.  We can't optimize the exception frame section
+  // until we have seen the crtbeginT file.
+  if (!this->optimize_ehframe_
+      && object != NULL
+      && Layout::match_file_name(object, "crtbeginT"))
+    this->optimize_ehframe_ = true;
 
   if (this->eh_frame_section_ == NULL)
     {
@@ -2093,8 +2112,7 @@ Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags,
       if ((gnu_stack_flags & elfcpp::SHF_EXECINSTR) != 0)
 	{
 	  this->input_requires_executable_stack_ = true;
-	  if (parameters->options().warn_execstack()
-	      || parameters->options().is_stack_executable())
+	  if (parameters->options().warn_execstack())
 	    gold_warning(_("%s: requires executable stack"),
 			 obj->name().c_str());
 	}
@@ -2967,7 +2985,14 @@ Layout::create_executable_stack_info()
 {
   bool is_stack_executable;
   if (parameters->options().is_execstack_set())
-    is_stack_executable = parameters->options().is_stack_executable();
+    {
+      is_stack_executable = parameters->options().is_stack_executable();
+      if (!is_stack_executable
+          && this->input_requires_executable_stack_
+          && parameters->options().warn_execstack())
+	gold_warning(_("one or more inputs require executable stack, "
+	               "but -z noexecstack was given"));
+    }
   else if (!this->input_with_gnu_stack_note_)
     return;
   else
@@ -4308,38 +4333,9 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	}
     }
 
-  // Create the hash tables.
-
-  if (strcmp(parameters->options().hash_style(), "sysv") == 0
-      || strcmp(parameters->options().hash_style(), "both") == 0)
-    {
-      unsigned char* phash;
-      unsigned int hashlen;
-      Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
-				    &phash, &hashlen);
-
-      Output_section* hashsec =
-	this->choose_output_section(NULL, ".hash", elfcpp::SHT_HASH,
-				    elfcpp::SHF_ALLOC, false,
-				    ORDER_DYNAMIC_LINKER, false);
-
-      Output_section_data* hashdata = new Output_data_const_buffer(phash,
-								   hashlen,
-								   align,
-								   "** hash");
-      if (hashsec != NULL && hashdata != NULL)
-	hashsec->add_output_section_data(hashdata);
-
-      if (hashsec != NULL)
-	{
-	  if (dynsym != NULL)
-	    hashsec->set_link_section(dynsym);
-	  hashsec->set_entsize(4);
-	}
-
-      if (odyn != NULL)
-	odyn->add_section_address(elfcpp::DT_HASH, hashsec);
-    }
+  // Create the hash tables.  The Gnu-style hash table must be
+  // built first, because it changes the order of the symbols
+  // in the dynamic symbol table.
 
   if (strcmp(parameters->options().hash_style(), "gnu") == 0
       || strcmp(parameters->options().hash_style(), "both") == 0)
@@ -4375,6 +4371,37 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	  if (odyn != NULL)
 	    odyn->add_section_address(elfcpp::DT_GNU_HASH, hashsec);
 	}
+    }
+
+  if (strcmp(parameters->options().hash_style(), "sysv") == 0
+      || strcmp(parameters->options().hash_style(), "both") == 0)
+    {
+      unsigned char* phash;
+      unsigned int hashlen;
+      Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
+				    &phash, &hashlen);
+
+      Output_section* hashsec =
+	this->choose_output_section(NULL, ".hash", elfcpp::SHT_HASH,
+				    elfcpp::SHF_ALLOC, false,
+				    ORDER_DYNAMIC_LINKER, false);
+
+      Output_section_data* hashdata = new Output_data_const_buffer(phash,
+								   hashlen,
+								   align,
+								   "** hash");
+      if (hashsec != NULL && hashdata != NULL)
+	hashsec->add_output_section_data(hashdata);
+
+      if (hashsec != NULL)
+	{
+	  if (dynsym != NULL)
+	    hashsec->set_link_section(dynsym);
+	  hashsec->set_entsize(4);
+	}
+
+      if (odyn != NULL)
+	odyn->add_section_address(elfcpp::DT_HASH, hashsec);
     }
 }
 
@@ -4867,6 +4894,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     odyn->add_constant(elfcpp::DT_FLAGS, flags);
 
   flags = 0;
+  if (parameters->options().global())
+    flags |= elfcpp::DF_1_GLOBAL;
   if (parameters->options().initfirst())
     flags |= elfcpp::DF_1_INITFIRST;
   if (parameters->options().interpose())
@@ -5074,19 +5103,18 @@ Layout::output_section_name(const Relobj* relobj, const char* name,
   return name;
 }
 
-// Return true if RELOBJ is an input file whose base name matches
-// FILE_NAME.  The base name must have an extension of ".o", and must
-// be exactly FILE_NAME.o or FILE_NAME, one character, ".o".  This is
+// Return true if FILE is an input file whose base name matches
+// MATCH.  The base name must have an extension of ".o", and must
+// be exactly MATCH.o or MATCH, one character, ".o".  This is
 // to match crtbegin.o as well as crtbeginS.o without getting confused
 // by other possibilities.  Overall matching the file name this way is
 // a dreadful hack, but the GNU linker does it in order to better
 // support gcc, and we need to be compatible.
 
 bool
-Layout::match_file_name(const Relobj* relobj, const char* match)
+Layout::match_file_name(const char* file, const char* match)
 {
-  const std::string& file_name(relobj->name());
-  const char* base_name = lbasename(file_name.c_str());
+  const char* base_name = lbasename(file);
   size_t match_len = strlen(match);
   if (strncmp(base_name, match, match_len) != 0)
     return false;
@@ -5094,6 +5122,17 @@ Layout::match_file_name(const Relobj* relobj, const char* match)
   if (base_len != match_len + 2 && base_len != match_len + 3)
     return false;
   return memcmp(base_name + base_len - 2, ".o", 2) == 0;
+}
+
+// Return true if FILE is an input file whose base name matches
+// MATCH.  The base name must have an extension of ".o", and must
+// be exactly MATCH.o or MATCH, one character, ".o".
+
+bool
+Layout::match_file_name(const Relobj* relobj, const char* match)
+{
+  const std::string& file_name(relobj->name());
+  return Layout::match_file_name(file_name.c_str(), match);
 }
 
 // Check if a comdat group or .gnu.linkonce section with the given
@@ -5532,6 +5571,8 @@ void
 Write_sections_task::locks(Task_locker* tl)
 {
   tl->add(this, this->output_sections_blocker_);
+  if (this->input_sections_blocker_ != NULL)
+    tl->add(this, this->input_sections_blocker_);
   tl->add(this, this->final_blocker_);
 }
 

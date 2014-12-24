@@ -137,6 +137,7 @@ enum option_values
 #endif /* ENABLE_PLUGINS */
   OPTION_DEFAULT_SCRIPT,
   OPTION_PRINT_OUTPUT_FORMAT,
+  OPTION_PRINT_SYSROOT,
   OPTION_IGNORE_UNRESOLVED_SYMBOL,
   OPTION_PUSH_STATE,
   OPTION_POP_STATE,
@@ -162,6 +163,7 @@ extern int yylex (void);
 extern void lex_push_file (FILE *, const char *, unsigned int);
 extern void lex_redirect (const char *, const char *, unsigned int);
 extern void ldlex_script (void);
+extern void ldlex_inputlist (void);
 extern void ldlex_mri_script (void);
 extern void ldlex_version_script (void);
 extern void ldlex_version_file (void);

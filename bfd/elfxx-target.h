@@ -49,6 +49,9 @@
 #ifndef bfd_elfNN_find_nearest_line
 #define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
 #endif
+#ifndef bfd_elfNN_find_line
+#define bfd_elfNN_find_line		_bfd_elf_find_line
+#endif
 #ifndef bfd_elfNN_find_inliner_info
 #define bfd_elfNN_find_inliner_info	_bfd_elf_find_inliner_info
 #endif
@@ -62,6 +65,10 @@
 #endif
 #ifndef bfd_elfNN_get_symbol_info
 #define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
+#endif
+#ifndef bfd_elfNN_get_symbol_version_string
+#define bfd_elfNN_get_symbol_version_string \
+  _bfd_elf_get_symbol_version_string
 #endif
 #define bfd_elfNN_canonicalize_symtab	_bfd_elf_canonicalize_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
@@ -528,6 +535,9 @@
 #ifndef elf_backend_count_relocs
 #define elf_backend_count_relocs		NULL
 #endif
+#ifndef elf_backend_sort_relocs_p
+#define elf_backend_sort_relocs_p		NULL
+#endif
 #ifndef elf_backend_grok_prstatus
 #define elf_backend_grok_prstatus		NULL
 #endif
@@ -730,6 +740,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_ignore_undef_symbol,
   elf_backend_emit_relocs,
   elf_backend_count_relocs,
+  elf_backend_sort_relocs_p,
   elf_backend_grok_prstatus,
   elf_backend_grok_psinfo,
   elf_backend_write_core_note,

@@ -1645,22 +1645,18 @@ sparc_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-sparc_regset_from_core_section (struct gdbarch *gdbarch,
-				const char *sect_name, size_t sect_size)
+static void
+sparc_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				    iterate_over_regset_sections_cb *cb,
+				    void *cb_data,
+				    const struct regcache *regcache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= tdep->sizeof_gregset)
-    return tdep->gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= tdep->sizeof_fpregset)
-    return tdep->fpregset;
-
-  return NULL;
+  cb (".reg", tdep->sizeof_gregset, tdep->gregset, NULL, cb_data);
+  cb (".reg2", tdep->sizeof_fpregset, tdep->fpregset, NULL, cb_data);
 }
 
 
@@ -1740,8 +1736,8 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* If we have register sets, enable the generic core file support.  */
   if (tdep->gregset)
-    set_gdbarch_regset_from_core_section (gdbarch,
-					  sparc_regset_from_core_section);
+    set_gdbarch_iterate_over_regset_sections
+      (gdbarch, sparc_iterate_over_regset_sections);
 
   register_sparc_ravenscar_ops (gdbarch);
 

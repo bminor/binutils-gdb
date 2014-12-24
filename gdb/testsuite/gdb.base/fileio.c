@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <time.h>
 /* TESTS :
  * - open(const char *pathname, int flags, mode_t mode);
 1) Attempt to create file that already exists - EEXIST
@@ -169,6 +170,7 @@ test_write ()
       ret = write (fd, STRING, strlen (STRING));
       printf ("write 3: ret = %d, errno = %d %s\n", ret, errno,
 	      strerrno (errno));
+      close (fd);
     }
   else
     printf ("write 3: ret = %d, errno = %d\n", ret, errno);

@@ -68,7 +68,14 @@ if { [istarget "aarch64*-*-*"] } then {
 	}
     }
 } elseif [istarget "mips*-*-*"] then {
-    gdb_test "info float" "f0:.*flt:.*dbl:.*" "info float"
+    gdb_test_multiple "info float" "info float" {
+	-re "fpu type: none / unused\r\n$gdb_prompt $" {
+	      pass "info float (without FPU)"
+	  }
+	-re "fpu type:.*cause.*mask.*flags.*round.*flush.*f0:.*flt:.*dbl:.*$gdb_prompt $" {
+	      pass "info float (with FPU)"
+	  }
+    }
 } elseif [istarget "powerpc*-*-*"] then {
     gdb_test_multiple "info float" "info_float" {
         -re "f0.*f1.*f31.*fpscr.*$gdb_prompt $" {

@@ -29,7 +29,6 @@
 #include "arch-utils.h"
 #include "linespec.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "breakpoint.h" /* for get_sal_arch () */
 #include "source.h"
 #include "filenames.h"

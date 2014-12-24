@@ -25,7 +25,7 @@
 /* Opaque declarations.  */
 
 struct symbol;
-struct symtab;
+struct compunit_symtab;
 struct block_namespace_info;
 struct using_direct;
 struct obstack;
@@ -100,7 +100,7 @@ struct block
 };
 
 /* The global block is singled out so that we can provide a back-link
-   to the primary symtab.  */
+   to the compunit symtab.  */
 
 struct global_block
 {
@@ -108,10 +108,9 @@ struct global_block
 
   struct block block;
 
-  /* This holds a pointer to the primary symtab holding this
-     block.  */
+  /* This holds a pointer to the compunit symtab holding this block.  */
 
-  struct symtab *symtab;
+  struct compunit_symtab *compunit_symtab;
 };
 
 #define BLOCK_START(bl)		(bl)->startaddr
@@ -137,6 +136,14 @@ struct blockvector
 #define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
 #define BLOCKVECTOR_MAP(blocklist) ((blocklist)->map)
 
+/* Return the objfile of BLOCK, which must be non-NULL.  */
+
+extern struct objfile *block_objfile (const struct block *block);
+
+/* Return the architecture of BLOCK, which must be non-NULL.  */
+
+extern struct gdbarch *block_gdbarch (const struct block *block);
+
 extern struct symbol *block_linkage_function (const struct block *);
 
 extern struct symbol *block_containing_function (const struct block *);
@@ -148,10 +155,9 @@ extern int contained_in (const struct block *, const struct block *);
 extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
 					       const struct block **);
 
-extern const struct blockvector *blockvector_for_pc_sect (CORE_ADDR, 
-							  struct obj_section *,
-							  const struct block **,
-							  struct symtab *);
+extern const struct blockvector *
+  blockvector_for_pc_sect (CORE_ADDR, struct obj_section *,
+			   const struct block **, struct compunit_symtab *);
 
 extern int blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc);
 
@@ -181,7 +187,8 @@ extern struct block *allocate_block (struct obstack *obstack);
 
 extern struct block *allocate_global_block (struct obstack *obstack);
 
-extern void set_block_symtab (struct block *, struct symtab *);
+extern void set_block_compunit_symtab (struct block *,
+				       struct compunit_symtab *);
 
 /* A block iterator.  This structure should be treated as though it
    were opaque; it is only defined here because we want to support
@@ -190,11 +197,11 @@ extern void set_block_symtab (struct block *, struct symtab *);
 struct block_iterator
 {
   /* If we're iterating over a single block, this holds the block.
-     Otherwise, it holds the canonical symtab.  */
+     Otherwise, it holds the canonical compunit.  */
 
   union
   {
-    struct symtab *symtab;
+    struct compunit_symtab *compunit_symtab;
     const struct block *block;
   } d;
 
@@ -271,13 +278,36 @@ extern struct symbol *block_iter_match_next (const char *name,
 					     symbol_compare_ftype *compare,
 					     struct block_iterator *iterator);
 
-/* Macro to loop through all symbols in a block BL, in no particular
-   order.  ITER helps keep track of the iteration, and should be a
+/* Search BLOCK for symbol NAME in DOMAIN.  */
+
+extern struct symbol *block_lookup_symbol (const struct block *block,
+					   const char *name,
+					   const domain_enum domain);
+
+/* Search BLOCK for symbol NAME in DOMAIN but only in primary symbol table of
+   BLOCK.  BLOCK must be STATIC_BLOCK or GLOBAL_BLOCK.  Function is useful if
+   one iterates all global/static blocks of an objfile.  */
+
+extern struct symbol *block_lookup_symbol_primary (const struct block *block,
+						   const char *name,
+						   const domain_enum domain);
+
+/* Macro to loop through all symbols in BLOCK, in no particular
+   order.  ITER helps keep track of the iteration, and must be a
    struct block_iterator.  SYM points to the current symbol.  */
 
 #define ALL_BLOCK_SYMBOLS(block, iter, sym)		\
   for ((sym) = block_iterator_first ((block), &(iter));	\
        (sym);						\
        (sym) = block_iterator_next (&(iter)))
+
+/* Macro to loop through all symbols with name NAME in BLOCK,
+   in no particular order.  ITER helps keep track of the iteration, and
+   must be a struct block_iterator.  SYM points to the current symbol.  */
+
+#define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
+  for ((sym) = block_iter_name_first ((block), (name), &(iter));	\
+       (sym) != NULL;							\
+       (sym) = block_iter_name_next ((name), &(iter)))
 
 #endif /* BLOCK_H */

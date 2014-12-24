@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "python-internal.h"
-#include "exceptions.h"
 #include "top.h"
 #include "cli/cli-utils.h"
 /* Readline function suitable for PyOS_ReadlineFunctionPointer, which
@@ -30,7 +29,11 @@
 
 static char *
 gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 4
+			const char *prompt)
+#else
 			char *prompt)
+#endif
 {
   int n;
   char *p = NULL, *q;

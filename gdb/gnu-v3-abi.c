@@ -26,7 +26,6 @@
 #include "objfiles.h"
 #include "valprint.h"
 #include "c-lang.h"
-#include "exceptions.h"
 #include "typeprint.h"
 
 static struct cp_abi_ops gnu_v3_abi_ops;
@@ -289,7 +288,7 @@ gnuv3_rtti_type (struct value *value,
   char *atsign;
 
   /* We only have RTTI for class objects.  */
-  if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
+  if (TYPE_CODE (values_type) != TYPE_CODE_STRUCT)
     return NULL;
 
   /* Java doesn't have RTTI following the C++ ABI.  */
@@ -407,7 +406,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
   struct gdbarch *gdbarch;
 
   /* Some simple sanity checks.  */
-  if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
+  if (TYPE_CODE (values_type) != TYPE_CODE_STRUCT)
     error (_("Only classes can have virtual functions."));
 
   /* Determine architecture.  */
@@ -1102,7 +1101,7 @@ gnuv3_get_typeid (struct value *value)
 
   /* We check for lval_memory because in the "typeid (type-id)" case,
      the type is passed via a not_lval value object.  */
-  if (TYPE_CODE (type) == TYPE_CODE_CLASS
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && value_lval_const (value) == lval_memory
       && gnuv3_dynamic_class (type))
     {
@@ -1278,9 +1277,13 @@ gnuv3_pass_by_reference (struct type *type)
 
   /* We're only interested in things that can have methods.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_CLASS
       && TYPE_CODE (type) != TYPE_CODE_UNION)
     return 0;
+
+  /* A dynamic class has a non-trivial copy constructor.
+     See c++98 section 12.8 Copying class objects [class.copy].  */
+  if (gnuv3_dynamic_class (type))
+    return 1;
 
   for (fieldnum = 0; fieldnum < TYPE_NFN_FIELDS (type); fieldnum++)
     for (fieldelem = 0; fieldelem < TYPE_FN_FIELDLIST_LENGTH (type, fieldnum);
@@ -1313,11 +1316,19 @@ gnuv3_pass_by_reference (struct type *type)
 
 	/* If this method takes two arguments, and the second argument is
 	   a reference to this class, then it is a copy constructor.  */
-	if (TYPE_NFIELDS (fieldtype) == 2
-	    && TYPE_CODE (TYPE_FIELD_TYPE (fieldtype, 1)) == TYPE_CODE_REF
-	    && check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (fieldtype,
-								 1))) == type)
-	  return 1;
+	if (TYPE_NFIELDS (fieldtype) == 2)
+	  {
+	    struct type *arg_type = TYPE_FIELD_TYPE (fieldtype, 1);
+
+	    if (TYPE_CODE (arg_type) == TYPE_CODE_REF)
+	      {
+		struct type *arg_target_type;
+
+	        arg_target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+		if (class_types_same_p (arg_target_type, type))
+		  return 1;
+	      }
+	  }
       }
 
   /* Even if all the constructors and destructors were artificial, one

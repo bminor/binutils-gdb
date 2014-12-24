@@ -83,6 +83,8 @@ static const struct regcache_map_entry tilegx_linux_regmap[] =
     { 0 }
   };
 
+#define TILEGX_LINUX_SIZEOF_GREGSET (64 * 8)
+
 /* TILE-Gx Linux kernel register set.  */
 
 static const struct regset tilegx_linux_regset =
@@ -91,15 +93,15 @@ static const struct regset tilegx_linux_regset =
   regcache_supply_regset, regcache_collect_regset
 };
 
-static const struct regset *
-tilegx_regset_from_core_section (struct gdbarch *gdbarch,
-				 const char *sect_name,
-				 size_t sect_size)
-{
-  if (strcmp (sect_name, ".reg") == 0)
-    return &tilegx_linux_regset;
 
-  return NULL;
+static void
+tilegx_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				     iterate_over_regset_sections_cb *cb,
+				     void *cb_data,
+				     const struct regcache *regcache)
+{
+  cb (".reg", TILEGX_LINUX_SIZEOF_GREGSET, &tilegx_linux_regset,
+      NULL, cb_data);
 }
 
 /* OS specific initialization of gdbarch.  */
@@ -113,8 +115,8 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch, &tilegx_linux_rt_sigframe);
 
-  set_gdbarch_regset_from_core_section (gdbarch,
-					tilegx_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, tilegx_iterate_over_regset_sections);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   if (arch_size == 32)

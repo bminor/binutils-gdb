@@ -325,6 +325,4 @@ gdb_expect 60 {
 
 do_tests
 
-remote_file host delete ${binfile}
-
 return 0

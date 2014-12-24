@@ -250,6 +250,8 @@ TARGET_LIBOPCODES_CFILES = \
 	v850-dis.c \
 	v850-opc.c \
 	vax-dis.c \
+	visium-dis.c \
+	visium-opc.c \
 	w65-dis.c \
 	xc16x-asm.c \
 	xc16x-desc.c \

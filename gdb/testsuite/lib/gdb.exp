@@ -1451,7 +1451,7 @@ proc default_gdb_spawn { } {
 # Default gdb_start procedure.
 
 proc default_gdb_start { } {
-    global gdb_prompt
+    global gdb_prompt pagination_prompt
     global gdb_spawn_id
 
     if [info exists gdb_spawn_id] {
@@ -1466,20 +1466,29 @@ proc default_gdb_start { } {
     # When running over NFS, particularly if running many simultaneous
     # tests on different hosts all using the same server, things can
     # get really slow.  Give gdb at least 3 minutes to start up.
-    gdb_expect 360 {
-	-re "\[\r\n\]$gdb_prompt $" {
-	    verbose "GDB initialized."
-	}
-	-re "$gdb_prompt $"	{
-	    perror "GDB never initialized."
-	    unset gdb_spawn_id
-	    return -1
-	}
-	timeout	{
-	    perror "(timeout) GDB never initialized after 10 seconds."
-	    remote_close host
-	    unset gdb_spawn_id
-	    return -1
+    set loop_again 1
+    while { $loop_again } {
+	set loop_again 0
+	gdb_expect 360 {
+	    -re "$pagination_prompt" {
+		verbose "Hit pagination during startup. Pressing enter to continue."
+		send_gdb "\n"
+		set loop_again 1
+	    }
+	    -re "\[\r\n\]$gdb_prompt $" {
+		verbose "GDB initialized."
+	    }
+	    -re "$gdb_prompt $"	{
+		perror "GDB never initialized."
+		unset gdb_spawn_id
+		return -1
+	    }
+	    timeout	{
+		perror "(timeout) GDB never initialized after 10 seconds."
+		remote_close host
+		unset gdb_spawn_id
+		return -1
+	    }
 	}
     }
 
@@ -2518,6 +2527,26 @@ proc skip_libstdcxx_probe_tests {} {
     return $ok
 }
 
+# Return 1 if we should skip tests of the "compile" feature.
+# This must be invoked after the inferior has been started.
+
+proc skip_compile_feature_tests {} {
+    global gdb_prompt
+
+    set result 0
+    gdb_test_multiple "compile code -- ;" "check for working compile command" {
+	"Could not load libcc1.*\r\n$gdb_prompt $" {
+	    set result 1
+	}
+	-re "Command not supported on this host\\..*\r\n$gdb_prompt $" {
+	    set result 1
+	}
+	-re "\r\n$gdb_prompt $" {
+	}
+    }
+    return $result
+}
+
 # Check whether we're testing with the remote or extended-remote
 # targets.
 
@@ -2535,6 +2564,31 @@ proc gdb_is_target_remote {} {
 	}
     }
     return 0
+}
+
+# Return 1 if the current remote target is an instance of our GDBserver, 0
+# otherwise.  Return -1 if there was an error and we can't tell.
+
+gdb_caching_proc target_is_gdbserver {
+    global gdb_prompt
+
+    set is_gdbserver -1
+    set test "Probing for GDBserver"
+
+    gdb_test_multiple "monitor help" $test {
+	-re "The following monitor commands are supported.*Quit GDBserver.*$gdb_prompt $" {
+	    set is_gdbserver 1
+	}
+	-re "$gdb_prompt $" {
+	    set is_gdbserver 0
+	}
+    }
+
+    if { $is_gdbserver == -1 } {
+	verbose -log "Unable to tell whether we are using GDBserver or not."
+    }
+
+    return $is_gdbserver
 }
 
 set compiler_info		"unknown"
@@ -2563,8 +2617,8 @@ set hp_aCC_compiler		0
 #   if the build machine is the same as the host machine, which is
 #   usually true of the targets which are not gcc.  But this code does
 #   not figure which compiler to call, and it always ends up using the C
-#   compiler.  Not good for setting hp_aCC_compiler.  Targets
-#   hppa*-*-hpux* and mips*-*-irix* used to do this.
+#   compiler.  Not good for setting hp_aCC_compiler.  Target
+#   hppa*-*-hpux* used to do this.
 #
 # [ gdb_compile -E $ifile > $binfile.ci ]
 # source $binfile.ci
@@ -2975,10 +3029,6 @@ proc gdb_compile_shlib {sources dest options} {
                 "hppa*-hp-hpux*" {
                     lappend obj_options "additional_flags=+z"
                 }
-                "mips-sgi-irix*" {
-                    # Disable SGI compiler's implicit -Dsgi
-                    lappend obj_options "additional_flags=-Usgi"
-                } 
                 default {
                     # don't know what the compiler is...
                 }
@@ -4206,9 +4256,11 @@ gdb_caching_proc gdb_skip_xml_test {
     global gdb_prompt
     global srcdir
 
+    set xml_file [gdb_remote_download host "${srcdir}/gdb.xml/trivial.xml"]
+
     gdb_start
     set xml_missing 0
-    gdb_test_multiple "set tdesc filename ${srcdir}/gdb.xml/trivial.xml" "" {
+    gdb_test_multiple "set tdesc filename $xml_file" "" {
 	-re ".*XML support was disabled at compile time.*$gdb_prompt $" {
 	    set xml_missing 1
 	}
@@ -4216,6 +4268,104 @@ gdb_caching_proc gdb_skip_xml_test {
     }
     gdb_exit
     return $xml_missing
+}
+
+# Return true if argv[0] is available.
+
+gdb_caching_proc gdb_has_argv0 {
+    set result 0
+
+    # Set up, compile, and execute a test program to check whether
+    # argv[0] is available.
+    set src [standard_temp_file has_argv0[pid].c]
+    set exe [standard_temp_file has_argv0[pid].x]
+
+    gdb_produce_source $src {
+	int main (int argc, char **argv) {
+	    return 0;
+	}
+    }
+
+    gdb_compile $src $exe executable {debug}
+
+    # Helper proc.
+    proc gdb_has_argv0_1 { exe } {
+	global srcdir subdir
+	global gdb_prompt hex
+
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load "$exe"
+
+	# Set breakpoint on main.
+	gdb_test_multiple "break main" "break main" {
+	    -re "Breakpoint.*${gdb_prompt} $" {
+	    }
+	    -re "${gdb_prompt} $" {
+		return 0
+	    }
+	}
+
+	# Run to main.
+	gdb_run_cmd
+	gdb_test_multiple "" "run to main" {
+	    -re "Breakpoint.*${gdb_prompt} $" {
+	    }
+	    -re "${gdb_prompt} $" {
+		return 0
+	    }
+	}
+
+	# Check whether argc is 1.
+	gdb_test_multiple "p argc" "p argc" {
+	    -re " = 1\r\n${gdb_prompt} $" {
+
+		gdb_test_multiple "p argv\[0\]" "p argv\[0\]" {
+		    -re " = $hex \".*[file tail $exe]\"\r\n${gdb_prompt} $" {
+			return 1
+		    }
+		    -re "${gdb_prompt} $" {
+			return 0
+		    }
+		}
+	    }
+	    -re "${gdb_prompt} $" {
+		return 0
+	    }
+	}
+	return 0
+    }
+
+    set result [gdb_has_argv0_1 $exe]
+
+    gdb_exit
+    file delete $src
+    file delete $exe
+
+    if { !$result
+      && ([istarget *-*-linux*]
+	  || [istarget *-*-freebsd*] || [istarget *-*-kfreebsd*]
+	  || [istarget *-*-netbsd*] || [istarget *-*-knetbsd*]
+	  || [istarget *-*-openbsd*]
+	  || [istarget *-*-darwin*]
+	  || [istarget *-*-solaris*]
+	  || [istarget *-*-aix*]
+	  || [istarget *-*-gnu*]
+	  || [istarget *-*-cygwin*] || [istarget *-*-mingw32*]
+	  || [istarget *-*-*djgpp*] || [istarget *-*-go32*]
+	  || [istarget *-wince-pe] || [istarget *-*-mingw32ce*]
+	  || [istarget *-*-symbianelf*]
+	  || [istarget *-*-osf*]
+	  || [istarget *-*-hpux*]
+	  || [istarget *-*-dicos*]
+	  || [istarget *-*-nto*]
+	  || [istarget *-*-*vms*]
+	  || [istarget *-*-lynx*178]) } {
+	fail "argv\[0\] should be available on this target"
+    }
+
+    return $result
 }
 
 # Note: the procedure gdb_gnu_strip_debug will produce an executable called
@@ -4234,14 +4384,14 @@ gdb_caching_proc gdb_skip_xml_test {
 # foo.debug --> foo's debug info
 # foo --> like foo, but with a new .gnu_debuglink section pointing to foo.debug.
 
-# Return the build-id hex string (usually 160 bits as 40 hex characters)
-# converted to the form: .build-id/ab/cdef1234...89.debug
-# Return "" if no build-id found.
-proc build_id_debug_filename_get { exec } {
-    set tmp [standard_output_file "${exec}-tmp"]
+# Fetch the build id from the file.
+# Returns "" if there is none.
+
+proc get_build_id { filename } {
+    set tmp [standard_output_file "${filename}-tmp"]
     set objcopy_program [gdb_find_objcopy]
 
-    set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $exec $tmp" output]
+    set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $filename $tmp" output]
     verbose "result is $result"
     verbose "output is $output"
     if {$result == 1} {
@@ -4259,6 +4409,17 @@ proc build_id_debug_filename_get { exec } {
     }
     # Convert it to hex.
     binary scan $data H* data
+    return $data
+}
+
+# Return the build-id hex string (usually 160 bits as 40 hex characters)
+# converted to the form: .build-id/ab/cdef1234...89.debug
+# Return "" if no build-id found.
+proc build_id_debug_filename_get { filename } {
+    set data [get_build_id $filename]
+    if { $data == "" } {
+	return ""
+    }
     regsub {^..} $data {\0/} data
     return ".build-id/${data}.debug"
 }

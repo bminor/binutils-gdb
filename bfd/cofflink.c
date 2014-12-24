@@ -2003,7 +2003,10 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 			  if (strings == NULL)
 			    return FALSE;
 			}
-		      filename = strings + auxp->x_file.x_n.x_offset;
+		      if ((bfd_size_type) auxp->x_file.x_n.x_offset >= obj_coff_strings_len (input_bfd))
+			filename = _("<corrupt>");
+		      else
+			filename = strings + auxp->x_file.x_n.x_offset;
 		      indx = _bfd_stringtab_add (flaginfo->strtab, filename,
 						 hash, copy);
 		      if (indx == (bfd_size_type) -1)

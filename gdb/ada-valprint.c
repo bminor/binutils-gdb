@@ -30,7 +30,6 @@
 #include "ada-lang.h"
 #include "c-lang.h"
 #include "infcall.h"
-#include "exceptions.h"
 #include "objfiles.h"
 
 static int print_field_values (struct type *, const gdb_byte *,
@@ -1055,6 +1054,12 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
 					 deref_val_int));
   if (ada_is_tagged_type (value_type (deref_val), 1))
     deref_val = ada_tag_value_at_base_address (deref_val);
+
+  /* Make sure that the object does not have an unreasonable size
+     before trying to print it.  This can happen for instance with
+     references to dynamic objects whose contents is uninitialized
+     (Eg: an array whose bounds are not set yet).  */
+  ada_ensure_varsize_limit (value_type (deref_val));
 
   val_print (value_type (deref_val),
 	     value_contents_for_printing (deref_val),

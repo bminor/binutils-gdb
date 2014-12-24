@@ -24,7 +24,6 @@
 #include "target.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "exceptions.h"
 #include "top.h"
 #include "gdbthread.h"
 #include "mi-cmds.h"
@@ -658,6 +657,9 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 
       ui_out_field_fmt (uiout, "id", "i%d", inferior->num);
       ui_out_field_string (uiout, "type", "process");
+      if (inferior->has_exit_code)
+	ui_out_field_string (uiout, "exit-code",
+			     int_string (inferior->exit_code, 8, 0, 0, 1));
       if (inferior->pid != 0)
 	ui_out_field_int (uiout, "pid", inferior->pid);
 

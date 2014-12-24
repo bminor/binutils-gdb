@@ -134,7 +134,8 @@ class Plugin_manager
       in_claim_file_handler_(false),
       options_(options), workqueue_(NULL), task_(NULL), input_objects_(NULL),
       symtab_(NULL), layout_(NULL), dirpath_(NULL), mapfile_(NULL),
-      this_blocker_(NULL), extra_search_path_()
+      this_blocker_(NULL), extra_search_path_(), lock_(NULL),
+      initialize_lock_(&lock_)
   { this->current_ = plugins_.end(); }
 
   ~Plugin_manager();
@@ -376,6 +377,8 @@ class Plugin_manager
   // An extra directory to seach for the libraries passed by
   // add_input_library.
   std::string extra_search_path_;
+  Lock* lock_;
+  Initialize_lock initialize_lock_;
 };
 
 

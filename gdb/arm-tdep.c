@@ -1204,7 +1204,9 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
 	{
 	  *destreg = bits (insn1, 8, 10);
 	  *offset = 2;
-	  address = bits (insn1, 0, 7);
+	  address = (pc & 0xfffffffc) + 4 + (bits (insn1, 0, 7) << 2);
+	  address = read_memory_unsigned_integer (address, 4,
+						  byte_order_for_code);
 	}
       else if ((insn1 & 0xfbf0) == 0xf240) /* movw Rd, #const */
 	{
@@ -1233,9 +1235,12 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
       unsigned int insn
 	= read_memory_unsigned_integer (pc, 4, byte_order_for_code);
 
-      if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, #immed */
+      if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, [PC, #immed] */
 	{
-	  address = bits (insn, 0, 11);
+	  address = bits (insn, 0, 11) + pc + 8;
+	  address = read_memory_unsigned_integer (address, 4,
+						  byte_order_for_code);
+
 	  *destreg = bits (insn, 12, 15);
 	  *offset = 4;
 	}
@@ -1306,11 +1311,10 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
     return pc;
 
   stack_chk_guard = lookup_minimal_symbol_by_pc (addr);
-  /* If name of symbol doesn't start with '__stack_chk_guard', this
-     instruction sequence is not for stack protector.  If symbol is
-     removed, we conservatively think this sequence is for stack protector.  */
-  if (stack_chk_guard.minsym
-      && strncmp (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
+  /* ADDR must correspond to a symbol whose name is __stack_chk_guard.
+     Otherwise, this sequence cannot be for stack protector.  */
+  if (stack_chk_guard.minsym == NULL
+      || strncmp (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
 		  "__stack_chk_guard",
 		  strlen ("__stack_chk_guard")) != 0)
    return pc;
@@ -1384,7 +1388,6 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long inst;
-  CORE_ADDR skip_pc;
   CORE_ADDR func_addr, limit_pc;
 
   /* See if we can determine the end of the prologue via the symbol table.
@@ -1394,7 +1397,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
-      struct symtab *s = find_pc_symtab (func_addr);
+      struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
       if (post_prologue_pc)
 	post_prologue_pc
@@ -1408,10 +1411,12 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	 will have producer information for most binaries; if it is
 	 missing (e.g. for -gstabs), assuming the GNU tools.  */
       if (post_prologue_pc
-	  && (s == NULL
-	      || s->producer == NULL
-	      || strncmp (s->producer, "GNU ", sizeof ("GNU ") - 1) == 0 
-	      || strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
+	  && (cust == NULL
+	      || COMPUNIT_PRODUCER (cust) == NULL
+	      || strncmp (COMPUNIT_PRODUCER (cust), "GNU ",
+			  sizeof ("GNU ") - 1) == 0
+	      || strncmp (COMPUNIT_PRODUCER (cust), "clang ",
+			  sizeof ("clang ") - 1) == 0))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)
@@ -1456,65 +1461,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Check if this is Thumb code.  */
   if (arm_pc_is_thumb (gdbarch, pc))
     return thumb_analyze_prologue (gdbarch, pc, limit_pc, NULL);
-
-  for (skip_pc = pc; skip_pc < limit_pc; skip_pc += 4)
-    {
-      inst = read_memory_unsigned_integer (skip_pc, 4, byte_order_for_code);
-
-      /* "mov ip, sp" is no longer a required part of the prologue.  */
-      if (inst == 0xe1a0c00d)			/* mov ip, sp */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe28dc000)    /* add ip, sp #n */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe24dc000)    /* sub ip, sp #n */
-	continue;
-
-      /* Some prologues begin with "str lr, [sp, #-4]!".  */
-      if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
-	continue;
-
-      if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
-	continue;
-
-      if ((inst & 0xfffff800) == 0xe92dd800)	/* stmfd sp!,{fp,ip,lr,pc} */
-	continue;
-
-      /* Any insns after this point may float into the code, if it makes
-	 for better instruction scheduling, so we skip them only if we
-	 find them, but still consider the function to be frame-ful.  */
-
-      /* We may have either one sfmfd instruction here, or several stfe
-	 insns, depending on the version of floating point code we
-	 support.  */
-      if ((inst & 0xffbf0fff) == 0xec2d0200)	/* sfmfd fn, <cnt>, [sp]! */
-	continue;
-
-      if ((inst & 0xffff8fff) == 0xed6d0103)	/* stfe fn, [sp, #-12]! */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
-	continue;
-
-      if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
-	continue;
-
-      if ((inst & 0xffffc000) == 0xe54b0000	/* strb r(0123),[r11,#-nn] */
-	  || (inst & 0xffffc0f0) == 0xe14b00b0	/* strh r(0123),[r11,#-nn] */
-	  || (inst & 0xffffc000) == 0xe50b0000)	/* str  r(0123),[r11,#-nn] */
-	continue;
-
-      if ((inst & 0xffffc000) == 0xe5cd0000	/* strb r(0123),[sp,#nn] */
-	  || (inst & 0xffffc0f0) == 0xe1cd00b0	/* strh r(0123),[sp,#nn] */
-	  || (inst & 0xffffc000) == 0xe58d0000)	/* str  r(0123),[sp,#nn] */
-	continue;
-
-      /* Un-recognized instruction; stop scanning.  */
-      break;
-    }
-
-  return skip_pc;		/* End of prologue.  */
+  else
+    return arm_analyze_prologue (gdbarch, pc, limit_pc, NULL);
 }
 
 /* *INDENT-OFF* */
@@ -1658,6 +1606,30 @@ arm_instruction_changes_pc (uint32_t this_instr)
       }
 }
 
+/* Return 1 if the ARM instruction INSN restores SP in epilogue, 0
+   otherwise.  */
+
+static int
+arm_instruction_restores_sp (unsigned int insn)
+{
+  if (bits (insn, 28, 31) != INST_NV)
+    {
+      if ((insn & 0x0df0f000) == 0x0080d000
+	  /* ADD SP (register or immediate).  */
+	  || (insn & 0x0df0f000) == 0x0040d000
+	  /* SUB SP (register or immediate).  */
+	  || (insn & 0x0ffffff0) == 0x01a0d000
+	  /* MOV SP.  */
+	  || (insn & 0x0fff0000) == 0x08bd0000
+	  /* POP (LDMIA).  */
+	  || (insn & 0x0fff0000) == 0x049d0000)
+	  /* POP of a single register.  */
+	return 1;
+    }
+
+  return 0;
+}
+
 /* Analyze an ARM mode prologue starting at PROLOGUE_START and
    continuing no further than PROLOGUE_END.  If CACHE is non-NULL,
    fill it in.  Return the first address not recognized as a prologue
@@ -1680,7 +1652,6 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
   pv_t regs[ARM_FPS_REGNUM];
   struct pv_area *stack;
   struct cleanup *back_to;
-  int framereg, framesize;
   CORE_ADDR unrecognized_pc = 0;
 
   /* Search the prologue looking for instructions that set up the
@@ -1856,6 +1827,11 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
       else if (arm_instruction_changes_pc (insn))
 	/* Don't scan past anything that might change control flow.  */
 	break;
+      else if (arm_instruction_restores_sp (insn))
+	{
+	  /* Don't scan past the epilogue.  */
+	  break;
+	}
       else if ((insn & 0xfe500000) == 0xe8100000	/* ldm */
 	       && pv_is_register (regs[bits (insn, 16, 19)], ARM_SP_REGNUM))
 	/* Ignore block loads from the stack, potentially copying
@@ -1871,33 +1847,42 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	continue;
       else
 	{
-	  /* The optimizer might shove anything into the prologue,
-	     so we just skip what we don't recognize.  */
+	  /* The optimizer might shove anything into the prologue, if
+	     we build up cache (cache != NULL) from scanning prologue,
+	     we just skip what we don't recognize and scan further to
+	     make cache as complete as possible.  However, if we skip
+	     prologue, we'll stop immediately on unrecognized
+	     instruction.  */
 	  unrecognized_pc = current_pc;
-	  continue;
+	  if (cache != NULL)
+	    continue;
+	  else
+	    break;
 	}
     }
 
   if (unrecognized_pc == 0)
     unrecognized_pc = current_pc;
 
-  /* The frame size is just the distance from the frame register
-     to the original stack pointer.  */
-  if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
-    {
-      /* Frame pointer is fp.  */
-      framereg = ARM_FP_REGNUM;
-      framesize = -regs[ARM_FP_REGNUM].k;
-    }
-  else
-    {
-      /* Try the stack pointer... this is a bit desperate.  */
-      framereg = ARM_SP_REGNUM;
-      framesize = -regs[ARM_SP_REGNUM].k;
-    }
-
   if (cache)
     {
+      int framereg, framesize;
+
+      /* The frame size is just the distance from the frame register
+	 to the original stack pointer.  */
+      if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
+	{
+	  /* Frame pointer is fp.  */
+	  framereg = ARM_FP_REGNUM;
+	  framesize = -regs[ARM_FP_REGNUM].k;
+	}
+      else
+	{
+	  /* Try the stack pointer... this is a bit desperate.  */
+	  framereg = ARM_SP_REGNUM;
+	  framesize = -regs[ARM_SP_REGNUM].k;
+	}
+
       cache->framereg = framereg;
       cache->framesize = framesize;
 
@@ -3273,7 +3258,7 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	found_return = 1;
       else if (thumb_instruction_restores_sp (insn))
 	{
-	  if ((insn & 0xfe00) == 0xbd00)  /* pop <registers, PC> */
+	  if ((insn & 0xff00) == 0xbd00)  /* pop <registers, PC> */
 	    found_return = 1;
 	}
       else if (thumb_insn_size (insn) == 4)  /* 32-bit Thumb-2 instruction */
@@ -3344,7 +3329,7 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn;
-  int found_return, found_stack_adjust;
+  int found_return;
   CORE_ADDR func_start, func_end;
 
   if (arm_pc_is_thumb (gdbarch, pc))
@@ -3384,28 +3369,8 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (pc < func_start + 4)
     return 0;
 
-  found_stack_adjust = 0;
   insn = read_memory_unsigned_integer (pc - 4, 4, byte_order_for_code);
-  if (bits (insn, 28, 31) != INST_NV)
-    {
-      if ((insn & 0x0df0f000) == 0x0080d000)
-	/* ADD SP (register or immediate).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0df0f000) == 0x0040d000)
-	/* SUB SP (register or immediate).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0ffffff0) == 0x01a0d000)
-	/* MOV SP.  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0fff0000) == 0x08bd0000)
-	/* POP (LDMIA).  */
-	found_stack_adjust = 1;
-      else if ((insn & 0x0fff0000) == 0x049d0000)
-	/* POP of a single register.  */
-	found_stack_adjust = 1;
-    }
-
-  if (found_stack_adjust)
+  if (arm_instruction_restores_sp (insn))
     return 1;
 
   return 0;
@@ -10676,6 +10641,8 @@ vfp - VFP co-processor."),
 #define THUMB2_INSN_SIZE_BYTES 4
 
 
+/* Position of the bit within a 32-bit ARM instruction
+   that defines whether the instruction is a load or store.  */
 #define INSN_S_L_BIT_NUM 20
 
 #define REG_ALLOC(REGS, LENGTH, RECORD_BUF) \
@@ -11473,110 +11440,90 @@ arm_record_data_proc_imm (insn_decode_record *arm_insn_r)
   return 0;
 }
 
-/* Handling opcode 010 insns.  */
+/* Handle ARM mode instructions with opcode 010.  */
 
 static int
 arm_record_ld_st_imm_offset (insn_decode_record *arm_insn_r)
 {
   struct regcache *reg_cache = arm_insn_r->regcache;
 
-  uint32_t reg_src1 = 0 , reg_dest = 0;
-  uint32_t offset_12 = 0, tgt_mem_addr = 0;
+  uint32_t reg_base , reg_dest;
+  uint32_t offset_12, tgt_mem_addr;
   uint32_t record_buf[8], record_buf_mem[8];
+  unsigned char wback;
+  ULONGEST u_regval;
 
-  ULONGEST u_regval = 0;
+  /* Calculate wback.  */
+  wback = (bit (arm_insn_r->arm_insn, 24) == 0)
+	  || (bit (arm_insn_r->arm_insn, 21) == 1);
 
-  arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);
-  arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);
+  arm_insn_r->reg_rec_count = 0;
+  reg_base = bits (arm_insn_r->arm_insn, 16, 19);
 
   if (bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
     {
+      /* LDR (immediate), LDR (literal), LDRB (immediate), LDRB (literal), LDRBT
+	 and LDRT.  */
+
       reg_dest = bits (arm_insn_r->arm_insn, 12, 15);
-      /* LDR insn has a capability to do branching, if
-         MOV LR, PC is precedded by LDR insn having Rn as R15
-         in that case, it emulates branch and link insn, and hence we
-         need to save CSPR and PC as well.  */
-      if (ARM_PC_REGNUM != reg_dest)
-        {
-          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
-          arm_insn_r->reg_rec_count = 1;
-        }
-      else
-        {
-          record_buf[0] = reg_dest;
-          record_buf[1] = ARM_PS_REGNUM;
-          arm_insn_r->reg_rec_count = 2;
-        }
+      record_buf[arm_insn_r->reg_rec_count++] = reg_dest;
+
+      /* The LDR instruction is capable of doing branching.  If MOV LR, PC
+	 preceeds a LDR instruction having R15 as reg_base, it
+	 emulates a branch and link instruction, and hence we need to save
+	 CPSR and PC as well.  */
+      if (ARM_PC_REGNUM == reg_dest)
+	record_buf[arm_insn_r->reg_rec_count++] = ARM_PS_REGNUM;
+
+      /* If wback is true, also save the base register, which is going to be
+	 written to.  */
+      if (wback)
+	record_buf[arm_insn_r->reg_rec_count++] = reg_base;
     }
   else
     {
-      /* Store, immediate offset, immediate pre-indexed,
-         immediate post-indexed.  */
-      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      /* STR (immediate), STRB (immediate), STRBT and STRT.  */
+
       offset_12 = bits (arm_insn_r->arm_insn, 0, 11);
-      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval);
-      /* U == 1 */
+      regcache_raw_read_unsigned (reg_cache, reg_base, &u_regval);
+
+      /* Handle bit U.  */
       if (bit (arm_insn_r->arm_insn, 23))
-        {
-          tgt_mem_addr = u_regval + offset_12;
-        }
+	{
+	  /* U == 1: Add the offset. */
+	  tgt_mem_addr = (uint32_t) u_regval + offset_12;
+	}
       else
-        {
-          tgt_mem_addr = u_regval - offset_12;
-        }
+	{
+	  /* U == 0: subtract the offset. */
+	  tgt_mem_addr = (uint32_t) u_regval - offset_12;
+	}
 
-      switch (arm_insn_r->opcode)
-        {
-          /* STR.  */
-          case 8:
-          case 12:
-          /* STR.  */
-          case 9:
-          case 13:
-          /* STRT.  */    
-          case 1:
-          case 5:
-          /* STR.  */    
-          case 4:
-          case 0:
-            record_buf_mem[0] = 4;
-          break;
+      /* Bit 22 tells us whether the store instruction writes 1 byte or 4
+	 bytes.  */
+      if (bit (arm_insn_r->arm_insn, 22))
+	{
+	  /* STRB and STRBT: 1 byte.  */
+	  record_buf_mem[0] = 1;
+	}
+      else
+	{
+	  /* STR and STRT: 4 bytes.  */
+	  record_buf_mem[0] = 4;
+	}
 
-          /* STRB.  */
-          case 10:
-          case 14:
-          /* STRB.  */    
-          case 11:
-          case 15:
-          /* STRBT.  */    
-          case 3:
-          case 7:
-          /* STRB.  */    
-          case 2:
-          case 6:
-            record_buf_mem[0] = 1;
-          break;
+      /* Handle bit P.  */
+      if (bit (arm_insn_r->arm_insn, 24))
+	record_buf_mem[1] = tgt_mem_addr;
+      else
+	record_buf_mem[1] = (uint32_t) u_regval;
 
-          default:
-            gdb_assert_not_reached ("no decoding pattern found");
-          break;
-        }
-      record_buf_mem[1] = tgt_mem_addr;
       arm_insn_r->mem_rec_count = 1;
 
-      if (9 == arm_insn_r->opcode || 11 == arm_insn_r->opcode
-          || 13 == arm_insn_r->opcode || 15 == arm_insn_r->opcode
-          || 0 == arm_insn_r->opcode || 2 == arm_insn_r->opcode
-          || 4 == arm_insn_r->opcode || 6 == arm_insn_r->opcode
-          || 1 == arm_insn_r->opcode || 3 == arm_insn_r->opcode
-          || 5 == arm_insn_r->opcode || 7 == arm_insn_r->opcode
-         )
-        {
-          /* We are handling pre-indexed mode; post-indexed mode;
-             where Rn is going to be changed.  */
-          record_buf[0] = reg_src1;
-          arm_insn_r->reg_rec_count = 1;
-        }
+      /* If wback is true, also save the base register, which is going to be
+	 written to.  */
+      if (wback)
+	record_buf[arm_insn_r->reg_rec_count++] = reg_base;
     }
 
   REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
@@ -11847,134 +11794,99 @@ arm_record_ld_st_reg_offset (insn_decode_record *arm_insn_r)
   return 0;
 }
 
-/* Handling opcode 100 insns.  */
+/* Handle ARM mode instructions with opcode 100.  */
 
 static int
 arm_record_ld_st_multiple (insn_decode_record *arm_insn_r)
 {
   struct regcache *reg_cache = arm_insn_r->regcache;
-
-  uint32_t register_list[16] = {0}, register_count = 0, register_bits = 0;
-  uint32_t reg_src1 = 0, addr_mode = 0, no_of_regs = 0;
-  uint32_t start_address = 0, index = 0;
+  uint32_t register_count = 0, register_bits;
+  uint32_t reg_base, addr_mode;
   uint32_t record_buf[24], record_buf_mem[48];
+  uint32_t wback;
+  ULONGEST u_regval;
 
-  ULONGEST u_regval[2] = {0};
+  /* Fetch the list of registers.  */
+  register_bits = bits (arm_insn_r->arm_insn, 0, 15);
+  arm_insn_r->reg_rec_count = 0;
 
-  /* This mode is exclusively for load and store multiple.  */
-  /* Handle incremenrt after/before and decrment after.before mode;
-     Rn is changing depending on W bit, but as of now we store Rn too
-     without optimization.  */
+  /* Fetch the base register that contains the address we are loading data
+     to.  */
+  reg_base = bits (arm_insn_r->arm_insn, 16, 19);
+
+  /* Calculate wback.  */
+  wback = (bit (arm_insn_r->arm_insn, 21) == 1);
 
   if (bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
     {
-      /* LDM  (1,2,3) where LDM  (3) changes CPSR too.  */
+      /* LDM/LDMIA/LDMFD, LDMDA/LDMFA, LDMDB and LDMIB.  */
 
-      if (bit (arm_insn_r->arm_insn, 20) && !bit (arm_insn_r->arm_insn, 22))
-        {
-          register_bits = bits (arm_insn_r->arm_insn, 0, 15);
-          no_of_regs = 15;
-        }
-      else
-        {
-          register_bits = bits (arm_insn_r->arm_insn, 0, 14);
-          no_of_regs = 14;
-        }
-      /* Get Rn.  */
-      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      /* Find out which registers are going to be loaded from memory.  */
       while (register_bits)
-      {
-        if (register_bits & 0x00000001)
-          record_buf[index++] = register_count;
-        register_bits = register_bits >> 1;
-        register_count++;
-      }
+	{
+	  if (register_bits & 0x00000001)
+	    record_buf[arm_insn_r->reg_rec_count++] = register_count;
+	  register_bits = register_bits >> 1;
+	  register_count++;
+	}
 
-        /* Extra space for Base Register and CPSR; wihtout optimization.  */
-        record_buf[index++] = reg_src1;
-        record_buf[index++] = ARM_PS_REGNUM;
-        arm_insn_r->reg_rec_count = index;
+  
+      /* If wback is true, also save the base register, which is going to be
+	 written to.  */
+      if (wback)
+	record_buf[arm_insn_r->reg_rec_count++] = reg_base;
+
+      /* Save the CPSR register.  */
+      record_buf[arm_insn_r->reg_rec_count++] = ARM_PS_REGNUM;
     }
   else
     {
-      /* It handles both STM(1) and STM(2).  */
-      addr_mode = bits (arm_insn_r->arm_insn, 23, 24);    
+      /* STM (STMIA, STMEA), STMDA (STMED), STMDB (STMFD) and STMIB (STMFA).  */
 
-      register_bits = bits (arm_insn_r->arm_insn, 0, 15);
-      /* Get Rn.  */
-      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
-      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+      addr_mode = bits (arm_insn_r->arm_insn, 23, 24); 
+
+      regcache_raw_read_unsigned (reg_cache, reg_base, &u_regval);
+
+      /* Find out how many registers are going to be stored to memory.  */
       while (register_bits)
-        {
-          if (register_bits & 0x00000001)
-            register_count++;
-          register_bits = register_bits >> 1;
-        }
+	{
+	  if (register_bits & 0x00000001)
+	    register_count++;
+	  register_bits = register_bits >> 1;
+	}
 
       switch (addr_mode)
-        {
-          /* Decrement after.  */
-          case 0:                          
-            start_address = (u_regval[0]) - (register_count * 4) + 4;
-            arm_insn_r->mem_rec_count = register_count;
-            while (register_count)
-              {
-                record_buf_mem[(register_count * 2) - 1] = start_address;
-                record_buf_mem[(register_count * 2) - 2] = 4;
-                start_address = start_address + 4;
-                register_count--;
-              }
-          break;    
+	{
+	  /* STMDA (STMED): Decrement after.  */
+	  case 0:
+	  record_buf_mem[1] = (uint32_t) u_regval
+			      - register_count * INT_REGISTER_SIZE + 4;
+	  break;
+	  /* STM (STMIA, STMEA): Increment after.  */
+	  case 1:
+	  record_buf_mem[1] = (uint32_t) u_regval;
+	  break;
+	  /* STMDB (STMFD): Decrement before.  */
+	  case 2:
+	  record_buf_mem[1] = (uint32_t) u_regval
+			      - register_count * INT_REGISTER_SIZE;
+	  break;
+	  /* STMIB (STMFA): Increment before.  */
+	  case 3:
+	  record_buf_mem[1] = (uint32_t) u_regval + INT_REGISTER_SIZE;
+	  break;
+	  default:
+	    gdb_assert_not_reached ("no decoding pattern found");
+	  break;
+	}
 
-          /* Increment after.  */
-          case 1:
-            start_address = u_regval[0];
-            arm_insn_r->mem_rec_count = register_count;
-            while (register_count)
-              {
-                record_buf_mem[(register_count * 2) - 1] = start_address;
-                record_buf_mem[(register_count * 2) - 2] = 4;
-                start_address = start_address + 4;
-                register_count--;
-              }
-          break;    
+      record_buf_mem[0] = register_count * INT_REGISTER_SIZE;
+      arm_insn_r->mem_rec_count = 1;
 
-          /* Decrement before.  */
-          case 2:
-
-            start_address = (u_regval[0]) - (register_count * 4);
-            arm_insn_r->mem_rec_count = register_count;
-            while (register_count)
-              {
-                record_buf_mem[(register_count * 2) - 1] = start_address;
-                record_buf_mem[(register_count * 2) - 2] = 4;
-                start_address = start_address + 4;
-                register_count--;
-              }
-          break;    
-
-          /* Increment before.  */
-          case 3:
-            start_address = u_regval[0] + 4;
-            arm_insn_r->mem_rec_count = register_count;
-            while (register_count)
-              {
-                record_buf_mem[(register_count * 2) - 1] = start_address;
-                record_buf_mem[(register_count * 2) - 2] = 4;
-                start_address = start_address + 4;
-                register_count--;
-              }
-          break;    
-
-          default:
-            gdb_assert_not_reached ("no decoding pattern found");
-          break;    
-        }
-
-      /* Base register also changes; based on condition and W bit.  */
-      /* We save it anyway without optimization.  */
-      record_buf[0] = reg_src1;
-      arm_insn_r->reg_rec_count = 1;
+      /* If wback is true, also save the base register, which is going to be
+	 written to.  */
+      if (wback)
+	record_buf[arm_insn_r->reg_rec_count++] = reg_base;
     }
 
   REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
@@ -13860,7 +13772,7 @@ extract_arm_insn (insn_decode_record *insn_record, uint32_t insn_size)
     return 1;
   insn_record->arm_insn = (uint32_t) extract_unsigned_integer (&buf[0],
                            insn_size, 
-                           gdbarch_byte_order (insn_record->gdbarch));
+			   gdbarch_byte_order_for_code (insn_record->gdbarch));
   return 0;
 }
 

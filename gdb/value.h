@@ -1038,6 +1038,8 @@ extern struct value *value_copy (struct value *);
 
 extern struct value *value_non_lval (struct value *);
 
+extern void value_force_lval (struct value *, CORE_ADDR);
+
 extern void preserve_one_value (struct value *, struct objfile *, htab_t);
 
 /* From valops.c */

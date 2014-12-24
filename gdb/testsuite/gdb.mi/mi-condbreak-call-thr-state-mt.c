@@ -19,6 +19,8 @@
 
 #include <stdlib.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <unistd.h>
 
 extern int test (void);
 

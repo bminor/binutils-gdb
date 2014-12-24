@@ -804,7 +804,8 @@ inf_validate_procinfo (struct inf *inf)
       inf->nomsg = !!(pi->state & PI_NOMSG);
       if (inf->nomsg)
 	inf->traced = !!(pi->state & PI_TRACED);
-      vm_deallocate (mach_task_self (), (vm_address_t) pi, pi_len);
+      vm_deallocate (mach_task_self (), (vm_address_t) pi,
+		     pi_len * sizeof (*(procinfo_t) 0));
       if (noise_len > 0)
 	vm_deallocate (mach_task_self (), (vm_address_t) noise, noise_len);
     }
@@ -844,9 +845,10 @@ inf_validate_task_sc (struct inf *inf)
 
   suspend_count = pi->taskinfo.suspend_count;
 
-  vm_deallocate (mach_task_self (), (vm_address_t) pi, pi_len);
+  vm_deallocate (mach_task_self (), (vm_address_t) pi,
+		 pi_len * sizeof (*(procinfo_t) 0));
   if (noise_len > 0)
-    vm_deallocate (mach_task_self (), (vm_address_t) pi, pi_len);
+    vm_deallocate (mach_task_self (), (vm_address_t) noise, noise_len);
 
   if (inf->task->cur_sc < suspend_count)
     {

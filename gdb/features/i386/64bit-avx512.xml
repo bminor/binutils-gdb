@@ -77,11 +77,11 @@
   <reg name="zmm7h" bitsize="256" type="v2ui128"/>
   <reg name="zmm8h" bitsize="256" type="v2ui128"/>
   <reg name="zmm9h" bitsize="256" type="v2ui128"/>
-  <reg name="zmm10h" bitsize="256" type="v2ui128/>
-  <reg name="zmm11h" bitsize="256" type="v2ui128/>
-  <reg name="zmm12h" bitsize="256" type="v2ui128/>
-  <reg name="zmm13h" bitsize="256" type="v2ui128/>
-  <reg name="zmm14h" bitsize="256" type="v2ui128/>
+  <reg name="zmm10h" bitsize="256" type="v2ui128"/>
+  <reg name="zmm11h" bitsize="256" type="v2ui128"/>
+  <reg name="zmm12h" bitsize="256" type="v2ui128"/>
+  <reg name="zmm13h" bitsize="256" type="v2ui128"/>
+  <reg name="zmm14h" bitsize="256" type="v2ui128"/>
   <reg name="zmm15h" bitsize="256" type="v2ui128"/>
   <reg name="zmm16h" bitsize="256" type="v2ui128"/>
   <reg name="zmm17h" bitsize="256" type="v2ui128"/>

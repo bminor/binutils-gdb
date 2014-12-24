@@ -356,5 +356,3 @@ mi_list_varobj_children fake.private {
 
 mi_gdb_test "-var-set-visualizer fake.private gdb.default_visualizer" \
     "\\^done" "Install visualizer on a cplus_fake_child"
-
-remote_file host delete ${remote_python_file}

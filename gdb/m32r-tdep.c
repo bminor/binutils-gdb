@@ -79,7 +79,7 @@ static int
 m32r_memory_insert_breakpoint (struct gdbarch *gdbarch,
 			       struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr = bp_tgt->placed_address;
+  CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
   int val;
   gdb_byte buf[4];
   gdb_byte contents_cache[4];

@@ -1599,6 +1599,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	      h->type = bfd_link_hash_defined;
 	    h->u.def.section = section;
 	    h->u.def.value = value;
+	    h->linker_def = 0;
 
 	    /* Mark if this is a secondary symbol.  */
 	    h->secondary = secondary;
@@ -1701,6 +1702,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	    }
 	  else
 	    h->u.c.p->section = section;
+	  h->linker_def = 0;
 	  break;
 
 	case REF:
@@ -2176,7 +2178,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 		  /* fall through */
 		case bfd_link_hash_defined:
 		  sym->flags |= BSF_GLOBAL;
-		  sym->flags &=~ BSF_CONSTRUCTOR;
+		  sym->flags &=~ (BSF_WEAK | BSF_CONSTRUCTOR);
 		  sym->value = h->root.u.def.value;
 		  sym->section = h->root.u.def.section;
 		  break;

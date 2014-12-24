@@ -26,7 +26,6 @@
 #include "infrun.h"
 #include "bfd.h"
 #include "symfile.h"
-#include "exceptions.h"
 #include "target.h"
 /*#include "terminal.h" */
 #include "gdbcmd.h"
@@ -168,8 +167,6 @@ static void packet_command (char *, int);
 static int stub_unpack_int (char *buff, int fieldlength);
 
 static ptid_t remote_current_thread (ptid_t oldptid);
-
-static void remote_find_new_threads (void);
 
 static int putpkt_binary (const char *buf, int cnt);
 
@@ -1845,11 +1842,11 @@ set_general_process (void)
 }
 
 
-/*  Return nonzero if the thread PTID is still alive on the remote
-    system.  */
+/* Return nonzero if this is the main thread that we made up ourselves
+   to model non-threaded targets as single-threaded.  */
 
 static int
-remote_thread_alive (struct target_ops *ops, ptid_t ptid)
+remote_thread_always_alive (struct target_ops *ops, ptid_t ptid)
 {
   struct remote_state *rs = get_remote_state ();
   char *p, *endp;
@@ -1862,6 +1859,23 @@ remote_thread_alive (struct target_ops *ops, ptid_t ptid)
     /* The main thread is always alive.  This can happen after a
        vAttach, if the remote side doesn't support
        multi-threading.  */
+    return 1;
+
+  return 0;
+}
+
+/* Return nonzero if the thread PTID is still alive on the remote
+   system.  */
+
+static int
+remote_thread_alive (struct target_ops *ops, ptid_t ptid)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p, *endp;
+
+  /* Check if this is a thread that we made up ourselves to model
+     non-threaded targets as single-threaded.  */
+  if (remote_thread_always_alive (ops, ptid))
     return 1;
 
   p = rs->buf;
@@ -2428,6 +2442,9 @@ parse_threadlist_response (char *pkt, int result_limit,
   return resultcount;
 }
 
+/* Fetch the next batch of threads from the remote.  Returns -1 if the
+   qL packet is not supported, 0 on error and 1 on success.  */
+
 static int
 remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
 		       int *done, int *result_count, threadref *threadlist)
@@ -2443,13 +2460,15 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
   pack_threadlist_request (rs->buf, startflag, result_limit, nextthread);
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
-
   if (*rs->buf == '\0')
-    return 0;
-  else
-    *result_count =
-      parse_threadlist_response (rs->buf + 2, result_limit,
-				 &rs->echo_nextthread, threadlist, done);
+    {
+      /* Packet not supported.  */
+      return -1;
+    }
+
+  *result_count =
+    parse_threadlist_response (rs->buf + 2, result_limit,
+			       &rs->echo_nextthread, threadlist, done);
 
   if (!threadmatch (&rs->echo_nextthread, nextthread))
     {
@@ -2482,15 +2501,11 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
   return result;
 }
 
-/* This is the interface between remote and threads, remotes upper
-   interface.  */
-
-/* remote_find_new_threads retrieves the thread list and for each
-   thread in the list, looks up the thread in GDB's internal list,
-   adding the thread if it does not already exist.  This involves
-   getting partial thread lists from the remote target so, polling the
-   quit_flag is required.  */
-
+/* Fetch the list of remote threads, with the qL packet, and call
+   STEPFUNCTION for each thread found.  Stops iterating and returns 1
+   if STEPFUNCTION returns true.  Stops iterating and returns 0 if the
+   STEPFUNCTION returns false.  If the packet is not supported,
+   returns -1.  */
 
 static int
 remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
@@ -2511,13 +2526,12 @@ remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
 	  warning (_("Remote fetch threadlist -infinite loop-."));
 	  break;
 	}
-      if (!remote_get_threadlist (startflag, &rs->nextthread,
-				  MAXTHREADLISTRESULTS,
-				  &done, &result_count, rs->resultthreadlist))
-	{
-	  result = 0;
-	  break;
-	}
+      result = remote_get_threadlist (startflag, &rs->nextthread,
+				      MAXTHREADLISTRESULTS,
+				      &done, &result_count,
+				      rs->resultthreadlist);
+      if (result <= 0)
+	break;
       /* Clear for later iterations.  */
       startflag = 0;
       /* Setup to resume next batch of thread references, set nextthread.  */
@@ -2526,20 +2540,70 @@ remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
 			&rs->resultthreadlist[result_count - 1]);
       i = 0;
       while (result_count--)
-	if (!(result = (*stepfunction) (&rs->resultthreadlist[i++], context)))
-	  break;
+	{
+	  if (!(*stepfunction) (&rs->resultthreadlist[i++], context))
+	    {
+	      result = 0;
+	      break;
+	    }
+	}
     }
   return result;
 }
 
-static int
-remote_newthread_step (threadref *ref, void *context)
-{
-  int pid = ptid_get_pid (inferior_ptid);
-  ptid_t ptid = ptid_build (pid, threadref_to_int (ref), 0);
+/* A thread found on the remote target.  */
 
-  if (!in_thread_list (ptid))
-    add_thread (ptid);
+typedef struct thread_item
+{
+  /* The thread's PTID.  */
+  ptid_t ptid;
+
+  /* The thread's extra info.  May be NULL.  */
+  char *extra;
+
+  /* The core the thread was running on.  -1 if not known.  */
+  int core;
+} thread_item_t;
+DEF_VEC_O(thread_item_t);
+
+/* Context passed around to the various methods listing remote
+   threads.  As new threads are found, they're added to the ITEMS
+   vector.  */
+
+struct threads_listing_context
+{
+  /* The threads found on the remote target.  */
+  VEC (thread_item_t) *items;
+};
+
+/* Discard the contents of the constructed thread listing context.  */
+
+static void
+clear_threads_listing_context (void *p)
+{
+  struct threads_listing_context *context = p;
+  int i;
+  struct thread_item *item;
+
+  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
+    xfree (item->extra);
+
+  VEC_free (thread_item_t, context->items);
+}
+
+static int
+remote_newthread_step (threadref *ref, void *data)
+{
+  struct threads_listing_context *context = data;
+  struct thread_item item;
+  int pid = ptid_get_pid (inferior_ptid);
+
+  item.ptid = ptid_build (pid, threadref_to_int (ref), 0);
+  item.core = -1;
+  item.extra = NULL;
+
+  VEC_safe_push (thread_item_t, context->items, &item);
+
   return 1;			/* continue iterator */
 }
 
@@ -2558,38 +2622,27 @@ remote_current_thread (ptid_t oldpid)
     return oldpid;
 }
 
-/* Find new threads for info threads command.
- * Original version, using John Metzler's thread protocol.
- */
+/* List remote threads using the deprecated qL packet.  */
 
-static void
-remote_find_new_threads (void)
+static int
+remote_get_threads_with_ql (struct target_ops *ops,
+			    struct threads_listing_context *context)
 {
-  remote_threadlist_iterator (remote_newthread_step, 0,
-			      CRAZY_MAX_THREADS);
+  if (remote_threadlist_iterator (remote_newthread_step, context,
+				  CRAZY_MAX_THREADS) >= 0)
+    return 1;
+
+  return 0;
 }
 
 #if defined(HAVE_LIBEXPAT)
-
-typedef struct thread_item
-{
-  ptid_t ptid;
-  char *extra;
-  int core;
-} thread_item_t;
-DEF_VEC_O(thread_item_t);
-
-struct threads_parsing_context
-{
-  VEC (thread_item_t) *items;
-};
 
 static void
 start_thread (struct gdb_xml_parser *parser,
 	      const struct gdb_xml_element *element,
 	      void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct threads_parsing_context *data = user_data;
+  struct threads_listing_context *data = user_data;
 
   struct thread_item item;
   char *id;
@@ -2614,7 +2667,7 @@ end_thread (struct gdb_xml_parser *parser,
 	    const struct gdb_xml_element *element,
 	    void *user_data, const char *body_text)
 {
-  struct threads_parsing_context *data = user_data;
+  struct threads_listing_context *data = user_data;
 
   if (body_text && *body_text)
     VEC_last (thread_item_t, data->items)->extra = xstrdup (body_text);
@@ -2643,141 +2696,173 @@ const struct gdb_xml_element threads_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-/* Discard the contents of the constructed thread info context.  */
-
-static void
-clear_threads_parsing_context (void *p)
-{
-  struct threads_parsing_context *context = p;
-  int i;
-  struct thread_item *item;
-
-  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
-    xfree (item->extra);
-
-  VEC_free (thread_item_t, context->items);
-}
-
 #endif
 
-/*
- * Find all threads for info threads command.
- * Uses new thread protocol contributed by Cisco.
- * Falls back and attempts to use the older method (above)
- * if the target doesn't respond to the new method.
- */
+/* List remote threads using qXfer:threads:read.  */
 
-static void
-remote_threads_info (struct target_ops *ops)
+static int
+remote_get_threads_with_qxfer (struct target_ops *ops,
+			       struct threads_listing_context *context)
 {
-  struct remote_state *rs = get_remote_state ();
-  char *bufp;
-  ptid_t new_thread;
-
-  if (rs->remote_desc == 0)		/* paranoia */
-    error (_("Command can only be used when connected to the remote target."));
-
 #if defined(HAVE_LIBEXPAT)
   if (packet_support (PACKET_qXfer_threads) == PACKET_ENABLE)
     {
-      char *xml = target_read_stralloc (&current_target,
-					 TARGET_OBJECT_THREADS, NULL);
-
+      char *xml = target_read_stralloc (ops, TARGET_OBJECT_THREADS, NULL);
       struct cleanup *back_to = make_cleanup (xfree, xml);
 
-      if (xml && *xml)
+      if (xml != NULL && *xml != '\0')
 	{
-	  struct threads_parsing_context context;
-
-	  context.items = NULL;
-	  make_cleanup (clear_threads_parsing_context, &context);
-
-	  if (gdb_xml_parse_quick (_("threads"), "threads.dtd",
-				   threads_elements, xml, &context) == 0)
-	    {
-	      int i;
-	      struct thread_item *item;
-
-	      for (i = 0;
-		   VEC_iterate (thread_item_t, context.items, i, item);
-		   ++i)
-		{
-		  if (!ptid_equal (item->ptid, null_ptid))
-		    {
-		      struct private_thread_info *info;
-		      /* In non-stop mode, we assume new found threads
-			 are running until proven otherwise with a
-			 stop reply.  In all-stop, we can only get
-			 here if all threads are stopped.  */
-		      int running = non_stop ? 1 : 0;
-
-		      remote_notice_new_inferior (item->ptid, running);
-
-		      info = demand_private_info (item->ptid);
-		      info->core = item->core;
-		      info->extra = item->extra;
-		      item->extra = NULL;
-		    }
-		}
-	    }
+	  gdb_xml_parse_quick (_("threads"), "threads.dtd",
+			       threads_elements, xml, context);
 	}
 
       do_cleanups (back_to);
-      return;
+      return 1;
     }
 #endif
 
+  return 0;
+}
+
+/* List remote threads using qfThreadInfo/qsThreadInfo.  */
+
+static int
+remote_get_threads_with_qthreadinfo (struct target_ops *ops,
+				     struct threads_listing_context *context)
+{
+  struct remote_state *rs = get_remote_state ();
+
   if (rs->use_threadinfo_query)
     {
+      char *bufp;
+
       putpkt ("qfThreadInfo");
       getpkt (&rs->buf, &rs->buf_size, 0);
       bufp = rs->buf;
       if (bufp[0] != '\0')		/* q packet recognized */
 	{
-	  struct cleanup *old_chain;
-	  char *saved_reply;
-
-	  /* remote_notice_new_inferior (in the loop below) may make
-	     new RSP calls, which clobber rs->buf.  Work with a
-	     copy.  */
-	  bufp = saved_reply = xstrdup (rs->buf);
-	  old_chain = make_cleanup (free_current_contents, &saved_reply);
-
 	  while (*bufp++ == 'm')	/* reply contains one or more TID */
 	    {
 	      do
 		{
-		  new_thread = read_ptid (bufp, &bufp);
-		  if (!ptid_equal (new_thread, null_ptid))
-		    {
-		      /* In non-stop mode, we assume new found threads
-			 are running until proven otherwise with a
-			 stop reply.  In all-stop, we can only get
-			 here if all threads are stopped.  */
-		      int running = non_stop ? 1 : 0;
+		  struct thread_item item;
 
-		      remote_notice_new_inferior (new_thread, running);
-		    }
+		  item.ptid = read_ptid (bufp, &bufp);
+		  item.core = -1;
+		  item.extra = NULL;
+
+		  VEC_safe_push (thread_item_t, context->items, &item);
 		}
 	      while (*bufp++ == ',');	/* comma-separated list */
-	      free_current_contents (&saved_reply);
 	      putpkt ("qsThreadInfo");
 	      getpkt (&rs->buf, &rs->buf_size, 0);
-	      bufp = saved_reply = xstrdup (rs->buf);
+	      bufp = rs->buf;
 	    }
-	  do_cleanups (old_chain);
-	  return;	/* done */
+	  return 1;
+	}
+      else
+	{
+	  /* Packet not recognized.  */
+	  rs->use_threadinfo_query = 0;
 	}
     }
 
-  /* Only qfThreadInfo is supported in non-stop mode.  */
-  if (non_stop)
-    return;
+  return 0;
+}
 
-  /* Else fall back to old method based on jmetzler protocol.  */
-  rs->use_threadinfo_query = 0;
-  remote_find_new_threads ();
-  return;
+/* Implement the to_update_thread_list function for the remote
+   targets.  */
+
+static void
+remote_update_thread_list (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct threads_listing_context context;
+  struct cleanup *old_chain;
+  int got_list = 0;
+
+  context.items = NULL;
+  old_chain = make_cleanup (clear_threads_listing_context, &context);
+
+  /* We have a few different mechanisms to fetch the thread list.  Try
+     them all, starting with the most preferred one first, falling
+     back to older methods.  */
+  if (remote_get_threads_with_qxfer (ops, &context)
+      || remote_get_threads_with_qthreadinfo (ops, &context)
+      || remote_get_threads_with_ql (ops, &context))
+    {
+      int i;
+      struct thread_item *item;
+      struct thread_info *tp, *tmp;
+
+      got_list = 1;
+
+      if (VEC_empty (thread_item_t, context.items)
+	  && remote_thread_always_alive (ops, inferior_ptid))
+	{
+	  /* Some targets don't really support threads, but still
+	     reply an (empty) thread list in response to the thread
+	     listing packets, instead of replying "packet not
+	     supported".  Exit early so we don't delete the main
+	     thread.  */
+	  do_cleanups (old_chain);
+	  return;
+	}
+
+      /* CONTEXT now holds the current thread list on the remote
+	 target end.  Delete GDB-side threads no longer found on the
+	 target.  */
+      ALL_NON_EXITED_THREADS_SAFE (tp, tmp)
+        {
+	  for (i = 0;
+	       VEC_iterate (thread_item_t, context.items, i, item);
+	       ++i)
+	    {
+	      if (ptid_equal (item->ptid, tp->ptid))
+		break;
+	    }
+
+	  if (i == VEC_length (thread_item_t, context.items))
+	    {
+	      /* Not found.  */
+	      delete_thread (tp->ptid);
+	    }
+        }
+
+      /* And now add threads we don't know about yet to our list.  */
+      for (i = 0;
+	   VEC_iterate (thread_item_t, context.items, i, item);
+	   ++i)
+	{
+	  if (!ptid_equal (item->ptid, null_ptid))
+	    {
+	      struct private_thread_info *info;
+	      /* In non-stop mode, we assume new found threads are
+		 running until proven otherwise with a stop reply.  In
+		 all-stop, we can only get here if all threads are
+		 stopped.  */
+	      int running = non_stop ? 1 : 0;
+
+	      remote_notice_new_inferior (item->ptid, running);
+
+	      info = demand_private_info (item->ptid);
+	      info->core = item->core;
+	      info->extra = item->extra;
+	      item->extra = NULL;
+	    }
+	}
+    }
+
+  if (!got_list)
+    {
+      /* If no thread listing method is supported, then query whether
+	 each known thread is alive, one by one, with the T packet.
+	 If the target doesn't support threads at all, then this is a
+	 no-op.  See remote_thread_alive.  */
+      prune_threads ();
+    }
+
+  do_cleanups (old_chain);
 }
 
 /*
@@ -3401,7 +3486,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	 controlling.  We default to adding them in the running state.
 	 The '?' query below will then tell us about which threads are
 	 stopped.  */
-      remote_threads_info (target);
+      remote_update_thread_list (target);
     }
   else if (packet_support (PACKET_QNonStop) == PACKET_ENABLE)
     {
@@ -3453,7 +3538,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	}
 
       /* Fetch thread list.  */
-      target_find_new_threads ();
+      target_update_thread_list ();
 
       /* Let the stub know that we want it to return the thread.  */
       set_continue_thread (minus_one_ptid);
@@ -4423,7 +4508,7 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
       struct thread_info *thread;
 
       /* Get list of threads.  */
-      remote_threads_info (target);
+      remote_update_thread_list (target);
 
       thread = first_thread_of_process (pid);
       if (thread)
@@ -8076,7 +8161,7 @@ remote_insert_breakpoint (struct target_ops *ops,
 
   if (packet_support (PACKET_Z0) != PACKET_DISABLE)
     {
-      CORE_ADDR addr = bp_tgt->placed_address;
+      CORE_ADDR addr = bp_tgt->reqstd_address;
       struct remote_state *rs;
       char *p, *endbuf;
       int bpsize;
@@ -8348,16 +8433,16 @@ static int
 remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr;
+  CORE_ADDR addr = bp_tgt->reqstd_address;
   struct remote_state *rs;
   char *p, *endbuf;
   char *message;
+  int bpsize;
 
   /* The length field should be set to the size of a breakpoint
      instruction, even though we aren't inserting one ourselves.  */
 
-  gdbarch_remote_breakpoint_from_pc
-    (gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
+  gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
   if (packet_support (PACKET_Z1) == PACKET_DISABLE)
     return -1;
@@ -8375,9 +8460,9 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   *(p++) = '1';
   *(p++) = ',';
 
-  addr = remote_address_masked (bp_tgt->placed_address);
+  addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  xsnprintf (p, endbuf - p, ",%x", bp_tgt->placed_size);
+  xsnprintf (p, endbuf - p, ",%x", bpsize);
 
   if (remote_supports_cond_breakpoints (self))
     remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
@@ -8401,6 +8486,8 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
     case PACKET_UNKNOWN:
       return -1;
     case PACKET_OK:
+      bp_tgt->placed_address = addr;
+      bp_tgt->placed_size = bpsize;
       return 0;
     }
   internal_error (__FILE__, __LINE__,
@@ -11431,7 +11518,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_pass_signals = remote_pass_signals;
   remote_ops.to_program_signals = remote_program_signals;
   remote_ops.to_thread_alive = remote_thread_alive;
-  remote_ops.to_find_new_threads = remote_threads_info;
+  remote_ops.to_update_thread_list = remote_update_thread_list;
   remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_ops.to_get_ada_task_ptid = remote_get_ada_task_ptid;

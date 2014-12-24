@@ -738,7 +738,11 @@ or1k_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_OR1K_max);
+  if (r_type >= (unsigned int) R_OR1K_max)
+    {
+      _bfd_error_handler (_("%A: invalid OR1K reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = & or1k_elf_howto_table[r_type];
 }
 
@@ -2187,7 +2191,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       h->needs_copy = 1;
     }
 
-  return _bfd_elf_adjust_dynamic_copy (h, s);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for

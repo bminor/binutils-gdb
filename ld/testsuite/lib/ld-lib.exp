@@ -1410,6 +1410,13 @@ proc run_cc_link_tests { ldtests } {
     global CXXFLAGS
     global ar
     global exec_output
+    global board_cflags
+
+    if [board_info [target_info name] exists cflags] {
+        set board_cflags " [board_info [target_info name] cflags]"
+    } else {
+	set board_cflags ""
+    }
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -1466,7 +1473,7 @@ proc run_cc_link_tests { ldtests } {
 		set failed 1
 	    }
 	} else {
-	    if { ![ld_simple_link $cc_cmd $binfile "-L$srcdir/$subdir $ldflags $objfiles"] } {
+	    if { ![ld_simple_link $cc_cmd $binfile "$board_cflags -L$srcdir/$subdir $ldflags $objfiles"] } {
 		set failed 1
 	    }
 
@@ -1645,6 +1652,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget rx-*-*]
 	 && ![istarget spu-*-*]
 	 && ![istarget v850*-*-*]
+	 && ![istarget visium-*-*]
 	 && ![istarget xstormy16-*-*]
 	 && ![istarget *-*-irix*]
 	 && ![istarget *-*-rtems] } {
@@ -1667,6 +1675,22 @@ proc check_plugin_api_available { } {
 	}
     }
     return $plugin_api_available_saved
+}
+
+# Sets ld_sysroot to the current sysroot (empty if not supported) and
+# returns true if the target ld supports sysroot.
+proc check_sysroot_available { } {
+    global ld_sysroot_available_saved ld ld_sysroot
+    if {![info exists ld_sysroot_available_saved]} {
+	# Check if ld supports --sysroot *other* than empty.
+	set ld_sysroot [string trimright [lindex [remote_exec host $ld "--print-sysroot"] 1]]
+	if { $ld_sysroot == "" } {
+	    set ld_sysroot_available_saved 0
+	} else {
+	    set ld_sysroot_available_saved 1
+	}
+    }
+    return $ld_sysroot_available_saved
 }
 
 # Returns true if the target compiler supports LTO
@@ -1795,6 +1819,53 @@ proc check_as_cfi { } {
     #remote_file host delete $as_file
     set check_as_cfi_result $success
     return $success
+}
+
+# Returns true if IFUNC works.
+
+proc check_ifunc_available { } {
+    global ifunc_available_saved
+    global CC
+
+    if {![info exists ifunc_available_saved]} {
+        if { [which $CC] == 0 } {
+	    set ifunc_available_saved 0
+	    return 0
+	}
+	# Check if gcc supports -flto -fuse-linker-plugin
+	set flags ""
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+
+	set basename "tmpdir/ifunc[pid]"
+	set src ${basename}.c
+	set output ${basename}.out
+	set f [open $src "w"]
+	puts $f "extern int library_func2 (void);"
+	puts $f "int main (void)"
+	puts $f "{"
+	puts $f "  if (library_func2 () != 2) __builtin_abort ();"
+	puts $f "  return 0; "
+	puts $f "}"
+	puts $f "static int library_func1 (void) {return 2; }"
+	puts $f "void *foo (void) __asm__ (\"library_func2\");"
+	puts $f "void *foo (void) { return library_func1; }"
+	puts $f "__asm__(\".type library_func2, %gnu_indirect_function\");"
+	close $f
+	remote_download host $src
+	set ifunc_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
+	if { $ifunc_available_saved == 1 } {
+	  set ifunc_available_saved [run_host_cmd_yesno "$output" ""]
+	}
+	remote_file host delete $src
+	remote_file host delete $output
+	file delete $src
+    }
+    return $ifunc_available_saved
 }
 
 # Provide virtual target "cfi" for targets supporting CFI.

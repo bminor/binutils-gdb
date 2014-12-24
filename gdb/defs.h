@@ -55,6 +55,24 @@
 
 #include "host-defs.h"
 
+/* Scope types enumerator.  List the types of scopes the compiler will
+   accept.  */
+
+enum compile_i_scope_types
+  {
+    COMPILE_I_INVALID_SCOPE,
+
+    /* A simple scope.  Wrap an expression into a simple scope that
+       takes no arguments, returns no value, and uses the generic
+       function name "_gdb_expr". */
+
+    COMPILE_I_SIMPLE_SCOPE,
+
+    /* Do not wrap the expression,
+       it has to provide function "_gdb_expr" on its own.  */
+    COMPILE_I_RAW_SCOPE,
+  };
+
 /* Just in case they're not defined in stdio.h.  */
 
 #ifndef SEEK_SET
@@ -259,11 +277,11 @@ extern void print_transfer_performance (struct ui_file *stream,
 
 typedef void initialize_file_ftype (void);
 
-extern char *gdb_readline (char *);
+extern char *gdb_readline (const char *);
 
-extern char *gdb_readline_wrapper (char *);
+extern char *gdb_readline_wrapper (const char *);
 
-extern char *command_line_input (char *, int, char *);
+extern char *command_line_input (const char *, int, char *);
 
 extern void print_prompt (void);
 
@@ -364,6 +382,7 @@ enum command_control_type
     if_control,
     commands_control,
     python_control,
+    compile_control,
     guile_control,
     while_stepping_control,
     invalid_control
@@ -377,6 +396,15 @@ struct command_line
     struct command_line *next;
     char *line;
     enum command_control_type control_type;
+    union
+      {
+	struct
+	  {
+	    enum compile_i_scope_types scope;
+	  }
+	compile;
+      }
+    control_u;
     /* * The number of elements in body_list.  */
     int body_count;
     /* * For composite commands, the nested lists of commands.  For
@@ -514,7 +542,6 @@ enum gdb_osabi
   GDB_OSABI_SVR4,
   GDB_OSABI_HURD,
   GDB_OSABI_SOLARIS,
-  GDB_OSABI_OSF1,
   GDB_OSABI_LINUX,
   GDB_OSABI_FREEBSD_AOUT,
   GDB_OSABI_FREEBSD_ELF,
@@ -535,6 +562,7 @@ enum gdb_osabi
   GDB_OSABI_OPENVMS,
   GDB_OSABI_LYNXOS178,
   GDB_OSABI_NEWLIB,
+  GDB_OSABI_SDE,
 
   GDB_OSABI_INVALID		/* keep this last */
 };
@@ -548,27 +576,6 @@ enum gdb_osabi
 #ifndef atof
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 #endif
-
-/* Various possibilities for alloca.  */
-#ifndef alloca
-#ifdef __GNUC__
-#define alloca __builtin_alloca
-#else /* Not GNU C */
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#else
-#ifdef _AIX
-#pragma alloca
-#else
-
-/* We need to be careful not to declare this in a way which conflicts with
-   bison.  Bison never declares it as char *, but under various circumstances
-   (like __hpux) we need to use void *.  */
-extern void *alloca ();
-#endif /* Not _AIX */
-#endif /* Not HAVE_ALLOCA_H */
-#endif /* Not GNU C */
-#endif /* alloca not defined */
 
 /* Dynamic target-system-dependent parameters for GDB.  */
 #include "gdbarch.h"
@@ -658,7 +665,7 @@ extern void (*deprecated_warning_hook) (const char *, va_list)
 extern void (*deprecated_interactive_hook) (void);
 extern void (*deprecated_readline_begin_hook) (char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
-extern char *(*deprecated_readline_hook) (char *);
+extern char *(*deprecated_readline_hook) (const char *);
 extern void (*deprecated_readline_end_hook) (void);
 extern void (*deprecated_register_changed_hook) (int regno);
 extern void (*deprecated_context_hook) (int);

@@ -34,7 +34,6 @@
 #include "gdbcmd.h"
 #include "cp-abi.h"
 #include "hashtab.h"
-#include "exceptions.h"
 #include "cp-support.h"
 #include "bcache.h"
 #include "dwarf2loc.h"
@@ -704,6 +703,19 @@ make_restrict_type (struct type *type)
 			      NULL);
 }
 
+/* Make a type without const, volatile, or restrict.  */
+
+struct type *
+make_unqualified_type (struct type *type)
+{
+  return make_qualified_type (type,
+			      (TYPE_INSTANCE_FLAGS (type)
+			       & ~(TYPE_INSTANCE_FLAG_CONST
+				   | TYPE_INSTANCE_FLAG_VOLATILE
+				   | TYPE_INSTANCE_FLAG_RESTRICT)),
+			      NULL);
+}
+
 /* Replace the contents of ntype with the type *type.  This changes the
    contents, rather than the pointer for TYPE_MAIN_TYPE (ntype); thus
    the changes are propogated to all types in the TYPE_CHAIN.
@@ -821,6 +833,13 @@ create_range_type (struct type *result_type, struct type *index_type,
 
   if (low_bound->kind == PROP_CONST && low_bound->data.const_val >= 0)
     TYPE_UNSIGNED (result_type) = 1;
+
+  /* Ada allows the declaration of range types whose upper bound is
+     less than the lower bound, so checking the lower bound is not
+     enough.  Make sure we do not mark a range type whose upper bound
+     is negative as unsigned.  */
+  if (high_bound->kind == PROP_CONST && high_bound->data.const_val < 0)
+    TYPE_UNSIGNED (result_type) = 0;
 
   return result_type;
 }
@@ -1287,13 +1306,10 @@ lookup_typename (const struct language_defn *language,
   struct symbol *sym;
   struct type *type;
 
-  sym = lookup_symbol (name, block, VAR_DOMAIN, 0);
+  sym = lookup_symbol_in_language (name, block, VAR_DOMAIN,
+				   language->la_language, NULL);
   if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     return SYMBOL_TYPE (sym);
-
-  type = language_lookup_primitive_type_by_name (language, gdbarch, name);
-  if (type)
-    return type;
 
   if (noerr)
     return NULL;
@@ -1869,41 +1885,47 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
   if (!is_dynamic_type_internal (real_type, top_level))
     return type;
 
-  switch (TYPE_CODE (type))
+  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {
-      case TYPE_CODE_TYPEDEF:
-	resolved_type = copy_type (type);
-	TYPE_TARGET_TYPE (resolved_type)
-	  = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr,
-					   top_level);
-	break;
+      resolved_type = copy_type (type);
+      TYPE_TARGET_TYPE (resolved_type)
+	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr,
+					 top_level);
+    }
+  else 
+    {
+      /* Before trying to resolve TYPE, make sure it is not a stub.  */
+      type = real_type;
 
-      case TYPE_CODE_REF:
+      switch (TYPE_CODE (type))
 	{
-	  CORE_ADDR target_addr = read_memory_typed_address (addr, type);
+	case TYPE_CODE_REF:
+	  {
+	    CORE_ADDR target_addr = read_memory_typed_address (addr, type);
 
-	  resolved_type = copy_type (type);
-	  TYPE_TARGET_TYPE (resolved_type)
-	    = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
-					     target_addr, top_level);
+	    resolved_type = copy_type (type);
+	    TYPE_TARGET_TYPE (resolved_type)
+	      = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
+					       target_addr, top_level);
+	    break;
+	  }
+
+	case TYPE_CODE_ARRAY:
+	  resolved_type = resolve_dynamic_array (type, addr);
+	  break;
+
+	case TYPE_CODE_RANGE:
+	  resolved_type = resolve_dynamic_range (type, addr);
+	  break;
+
+	case TYPE_CODE_UNION:
+	  resolved_type = resolve_dynamic_union (type, addr);
+	  break;
+
+	case TYPE_CODE_STRUCT:
+	  resolved_type = resolve_dynamic_struct (type, addr);
 	  break;
 	}
-
-      case TYPE_CODE_ARRAY:
-	resolved_type = resolve_dynamic_array (type, addr);
-	break;
-
-      case TYPE_CODE_RANGE:
-	resolved_type = resolve_dynamic_range (type, addr);
-	break;
-
-    case TYPE_CODE_UNION:
-      resolved_type = resolve_dynamic_union (type, addr);
-      break;
-
-    case TYPE_CODE_STRUCT:
-      resolved_type = resolve_dynamic_struct (type, addr);
-      break;
     }
 
   /* Resolve data_location attribute.  */
@@ -2500,6 +2522,15 @@ is_scalar_type_recursive (struct type *t)
     }
 
   return 0;
+}
+
+/* Return true is T is a class or a union.  False otherwise.  */
+
+int
+class_or_union_p (const struct type *t)
+{
+  return (TYPE_CODE (t) == TYPE_CODE_STRUCT
+          || TYPE_CODE (t) == TYPE_CODE_UNION);
 }
 
 /* A helper function which returns true if types A and B represent the
@@ -3415,7 +3446,6 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 	}
       break;
     case TYPE_CODE_STRUCT:
-      /* currently same as TYPE_CODE_CLASS.  */
       switch (TYPE_CODE (arg))
 	{
 	case TYPE_CODE_STRUCT:
@@ -3504,14 +3534,18 @@ print_bit_vector (B_TYPE *bits, int nbits)
    situation.  */
 
 static void
-print_arg_types (struct field *args, int nargs, int spaces)
+print_args (struct field *args, int nargs, int spaces)
 {
   if (args != NULL)
     {
       int i;
 
       for (i = 0; i < nargs; i++)
-	recursive_dump_type (args[i].type, spaces + 2);
+	{
+	  printfi_filtered (spaces, "[%d] name '%s'\n", i,
+			    args[i].name != NULL ? args[i].name : "<NULL>");
+	  recursive_dump_type (args[i].type, spaces + 2);
+	}
     }
 }
 
@@ -3569,11 +3603,9 @@ dump_fn_fieldlists (struct type *type, int spaces)
 	  gdb_print_host_address (TYPE_FN_FIELD_ARGS (f, overload_idx), 
 				  gdb_stdout);
 	  printf_filtered ("\n");
-
-	  print_arg_types (TYPE_FN_FIELD_ARGS (f, overload_idx),
-			   TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, 
-							     overload_idx)),
-			   spaces);
+	  print_args (TYPE_FN_FIELD_ARGS (f, overload_idx),
+		      TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, overload_idx)),
+		      spaces + 8 + 2);
 	  printfi_filtered (spaces + 8, "fcontext ");
 	  gdb_print_host_address (TYPE_FN_FIELD_FCONTEXT (f, overload_idx),
 				  gdb_stdout);

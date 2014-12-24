@@ -344,6 +344,8 @@ static int m32r_pt_regs_offset[] = {
 #define SPU_OFFSET (4 * 23)
 #define SPI_OFFSET (4 * 26)
 
+#define M32R_LINUX_GREGS_SIZE (4 * 28)
+
 static void
 m32r_linux_supply_gregset (const struct regset *regset,
 			   struct regcache *regcache, int regnum,
@@ -433,14 +435,13 @@ static const struct regset m32r_linux_gregset = {
   m32r_linux_supply_gregset, m32r_linux_collect_gregset
 };
 
-static const struct regset *
-m32r_linux_regset_from_core_section (struct gdbarch *core_arch,
-				     const char *sect_name, size_t sect_size)
+static void
+m32r_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					 iterate_over_regset_sections_cb *cb,
+					 void *cb_data,
+					 const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (core_arch);
-  if (strcmp (sect_name, ".reg") == 0)
-    return &m32r_linux_gregset;
-  return NULL;
+  cb (".reg", M32R_LINUX_GREGS_SIZE, &m32r_linux_gregset, NULL, cb_data);
 }
 
 static void
@@ -462,8 +463,8 @@ m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
   /* Core file support.  */
-  set_gdbarch_regset_from_core_section
-    (gdbarch, m32r_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, m32r_linux_iterate_over_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

@@ -227,6 +227,7 @@ run_dump_test "pr12570a"
 run_dump_test "pr12570b"
 run_dump_test "pr14215"
 run_dump_test "pr14207"
+run_dump_test "gotplt1"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
@@ -331,4 +332,197 @@ if { [isnative] && [which $CC] != 0 } {
 	 "-shared -melf32_x86_64 tmpdir/simple-x32.o" "" "--x32"
 	{dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} "x86-64-x32"}
     }
+
+    run_cc_link_tests [list \
+	[list \
+	    "Build plt-lib.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { plt-lib.c } \
+	    {} \
+	    "libplt-lib.so" \
+	] \
+	[list \
+	    "Build libplt-main1.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main1.c } \
+	    {{readelf {-Wr} plt-main1.rd}} \
+	    "libplt-main1.a" \
+	] \
+	[list \
+	    "Build libplt-main2.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main2.c } \
+	    {{readelf {-Wr} plt-main2.rd}} \
+	    "libplt-main2.a" \
+	] \
+	[list \
+	    "Build libplt-main3.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main3.c } \
+	    {{readelf {-Wr} plt-main3.rd}} \
+	    "libplt-main3.a" \
+	] \
+	[list \
+	    "Build libplt-main4.a" \
+	    "" \
+	    "-fPIC" \
+	    { plt-main4.c } \
+	    {{readelf {-Wr} plt-main4.rd}} \
+	    "libplt-main4.a" \
+	] \
+	[list \
+	    "Build plt-main" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+	    "" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
+	[list \
+	    "Build plt-main with PIE" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "-fPIC" \
+	    { plt-main5.c } \
+	    {{readelf {-Wr} plt-main.rd}} \
+	    "plt-main" \
+	] \
+	[list \
+	    "Build copyreloc-lib.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { copyreloc-lib.c } \
+	    {} \
+	    "copyreloc-lib.so" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE without -fPIE (1)" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.S } \
+	    {{readelf {-Wr} copyreloc-main1.rd}} \
+	    "copyreloc-main" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE without -fPIE (2)" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.S } \
+	    {{readelf {-Wr} copyreloc-main2.rd}} \
+	    "copyreloc-main" \
+	] \
+	[list \
+	    "Build pr17689.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr17689a.c } \
+	    {} \
+	    "pr17689.so" \
+	] \
+	[list \
+	    "Build pr17689 with PIE without -fPIE" \
+	    "tmpdir/pr17689.so -pie" \
+	    "" \
+	    { pr17689b.S } \
+	    {{readelf {-Wr} pr17689.rd}} \
+	    "pr17689" \
+	] \
+    ]
+
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run plt-main" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+	    "" \
+	    { plt-main5.c } \
+	    "plt-main" \
+	    "plt-main.out" \
+	] \
+	[list \
+	    "Run plt-main with PIE" \
+	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "" \
+	    { plt-main5.c } \
+	    "plt-main-pie" \
+	    "plt-main.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run copyreloc-main with PIE without -fPIE" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.S } \
+	    "copyreloc-main" \
+	    "copyreloc-main.out" \
+	] \
+	[list \
+	    "Run pr17689 with PIE without -fPIE" \
+	    "tmpdir/pr17689.so -pie" \
+	    "" \
+	    { pr17689b.S } \
+	    "pr17689" \
+	    "pr17689.out" \
+	] \
+    ]
+
+    if { [istarget "x86_64-*-linux*"] \
+	 && ![istarget "x86_64-*-linux*-gnux32"]} {
+
+	run_cc_link_tests [list \
+	    [list \
+		"Build plt-main with -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt" \
+		"" \
+		{ plt-main5.c } \
+		{{objdump {-drw} plt-main-bnd.dd}} \
+		"plt-main-bnd" \
+	    ] \
+	    [list \
+		"Build plt-main with PIE and -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie" \
+		"-fPIC" \
+		{ plt-main5.c } \
+		{{objdump {-drw} plt-main-bnd.dd}} \
+		"plt-main-pie-bnd" \
+	    ] \
+	]
+
+	run_ld_link_exec_tests [] [list \
+	    [list \
+		"Run plt-main with -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-bnd" \
+		"plt-main.out" \
+	    ] \
+	    [list \
+		"Run plt-main with PIE and -z bndplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-pie-bnd" \
+		"plt-main.out" \
+		"-fPIC" \
+	    ] \
+	]
+    }
 }
+
+if { ![istarget "x86_64-*-linux*"]} {
+    return
+}
+
+# Linux only tests
+run_dump_test "pr17618"

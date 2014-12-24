@@ -28,11 +28,13 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}
     return -1
 }
 
-# The test proper.  NON_STOP indicates whether we're testing in
-# non-stop, or all-stop mode.  ALWAYS_INSERTED indicates whether
-# testing in "breakpoint always-inserted" mode.
+# The test proper.  UPDATE_THREAD_LIST indicates whether we should do
+# an "info threads" to sync the thread list after the first stop.
+# ALWAYS_INSERTED indicates whether testing in "breakpoint
+# always-inserted" mode.  NON_STOP indicates whether we're testing in
+# non-stop, or all-stop mode.
 
-proc test { always_inserted non_stop } {
+proc test { update_thread_list always_inserted non_stop } {
     global srcfile binfile
     global gdb_prompt
     global decimal
@@ -70,9 +72,15 @@ proc test { always_inserted non_stop } {
 	gdb_test "thread 1" "Switching to .*" "switch back to main thread"
     }
 
-    gdb_test "info threads" \
-	"\\\(running\\\).*\\\(running\\\).* main .*" \
-	"only main stopped"
+    # Test with and without pulling the thread list explicitly with
+    # "info threads".  GDB should be able to figure out itself whether
+    # the target is running and thus breakpoints should be inserted,
+    # without the user explicitly fetching the thread list.
+    if {$update_thread_list} {
+	gdb_test "info threads" \
+	    "\\\(running\\\).*\\\(running\\\).* main .*" \
+	    "only main stopped"
+    }
 
     # Don't use gdb_test as it's racy in this case -- gdb_test matches
     # the prompt with an end anchor.  Sometimes expect will manage to
@@ -141,11 +149,14 @@ proc test { always_inserted non_stop } {
     }
 }
 
-foreach always_inserted { "off" "on" } {
-    foreach non_stop { "off" "on" } {
-	set stop_mode [expr ($non_stop=="off")?"all-stop":"non-stop"]
-	with_test_prefix "always-inserted $always_inserted: $stop_mode" {
-	    test $always_inserted $non_stop
+foreach update_thread_list { true false } {
+    foreach always_inserted { "off" "on" } {
+	foreach non_stop { "off" "on" } {
+	    set stop_mode [expr ($non_stop=="off")?"all-stop":"non-stop"]
+	    set update_list_mode [expr ($update_thread_list)?"w/ithr":"wo/ithr"]
+	    with_test_prefix "$update_list_mode: always-inserted $always_inserted: $stop_mode" {
+		test $update_thread_list $always_inserted $non_stop
+	    }
 	}
     }
 }

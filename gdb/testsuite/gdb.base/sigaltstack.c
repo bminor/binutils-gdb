@@ -72,6 +72,7 @@ catcher (int signal)
 }
 
 
+int
 main ()
 {
   /* Set up the altstack.  */
@@ -90,4 +91,5 @@ main ()
   }
   level = MAIN;
   catcher (0);
+  return 0;
 }

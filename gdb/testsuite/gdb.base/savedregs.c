@@ -61,9 +61,11 @@ thrower (void)
 
 }
 
+int
 main ()
 {
   signal (SIGILL, catcher);
   signal (SIGSEGV, catcher);
   thrower ();
+  return 0;
 }

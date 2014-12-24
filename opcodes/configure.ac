@@ -343,6 +343,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_v850ea_arch)	ta="$ta v850-opc.lo v850-dis.lo" ;;
 	bfd_v850_rh850_arch)	ta="$ta v850-opc.lo v850-dis.lo" ;;
 	bfd_vax_arch)		ta="$ta vax-dis.lo" ;;
+	bfd_visium_arch)	ta="$ta visium-dis.lo visium-opc.lo" ;;
 	bfd_w65_arch)		ta="$ta w65-dis.lo" ;;
 	bfd_we32k_arch)		;;
 	bfd_xc16x_arch)		ta="$ta xc16x-asm.lo xc16x-desc.lo xc16x-dis.lo xc16x-ibld.lo xc16x-opc.lo" using_cgen=yes ;;

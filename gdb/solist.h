@@ -137,7 +137,7 @@ struct target_so_ops
         unsigned o_flags, char **temp_pathname);
 
     /* Hook for looking up global symbols in a library-specific way.  */
-    struct symbol * (*lookup_lib_global_symbol) (const struct objfile *objfile,
+    struct symbol * (*lookup_lib_global_symbol) (struct objfile *objfile,
 						 const char *name,
 						 const domain_enum domain);
 
@@ -189,7 +189,7 @@ extern bfd *solib_bfd_open (char *in_pathname);
 extern struct target_so_ops *current_target_so_ops;
 
 /* Handler for library-specific global symbol lookup in solib.c.  */
-struct symbol *solib_global_lookup (const struct objfile *objfile,
+struct symbol *solib_global_lookup (struct objfile *objfile,
 				    const char *name,
 				    const domain_enum domain);
 

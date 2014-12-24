@@ -58,8 +58,7 @@ START_RELOC_NUMBERS (elf_x86_64_reloc_type)
      						 offset to GOT entry */
      RELOC_NUMBER (R_X86_64_GOTPC64,  29)     /* 64 bit signed pc relative
      						 offset to GOT */
-     RELOC_NUMBER (R_X86_64_GOTPLT64, 30)     /* like GOT64, but indicates
-     						 that PLT entry is needed */
+     RELOC_NUMBER (R_X86_64_GOTPLT64, 30)     /* Obsolete. The same as GOT64. */
      RELOC_NUMBER (R_X86_64_PLTOFF64, 31)     /* 64 bit GOT relative offset
      						 to PLT entry */
      RELOC_NUMBER (R_X86_64_SIZE32,   32)     /* 32-bit symbol size */

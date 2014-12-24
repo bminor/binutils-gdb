@@ -30,13 +30,13 @@ Dwarf::assemble $asm_file {
     declare_labels int_label
 
     extern func_start func_end ptr
+    global srcdir subdir srcfile
 
     cu {} {
 	compile_unit {
 	    {name file1.txt}
 	    {language @DW_LANG_C}
-	    {low_pc func_start addr}
-	    {high_pc func_end addr}
+	    {MACRO_AT_range { func ${srcdir}/${subdir}/${srcfile} }}
 	} {
 	    int_label: base_type {
 		{name int}
@@ -46,9 +46,7 @@ Dwarf::assemble $asm_file {
 
 	    subprogram {
 		{external 1 flag}
-		{name func}
-		{low_pc func_start addr}
-		{high_pc func_end addr}
+		{MACRO_AT_func { func ${srcdir}/${subdir}/${srcfile} }}
 	    } {
 		formal_parameter {
 		    {name param}

@@ -6,7 +6,6 @@ MH_CFLAGS= -I$(srcdir)/config/djgpp
 NATDEPFILES= go32-nat.o x86-nat.o x86-dregs.o
 
 HOST_IPC=
-CC= gcc
 XM_CLIBS= -ldbg
 
 

@@ -31,6 +31,6 @@ main (void)
     break_me (); /* Try a condition-specific breakpoint.  */
 
   break_me (); /* Finally, try a breakpoint with commands.  */
-  return 0;
+  return 0; /* Return line. */
 }
 
