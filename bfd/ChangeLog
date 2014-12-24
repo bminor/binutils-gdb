@@ -1,3 +1,8 @@
+2014-12-24  Alan Modra  <amodra@gmail.com>
+
+	* linker.c (_bfd_generic_link_output_symbols): Remove BSF_WEAK
+	flag from bfd_link_hash_defined symbols.
+
 2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* elf32-avr.c (bfd_elf_avr_final_write_processing): Don't set
