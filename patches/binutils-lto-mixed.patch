@@ -86,10 +86,10 @@ for Linux kernel build with LTO.
 
 diff --git a/ChangeLog.lto-mixed b/ChangeLog.lto-mixed
 new file mode 100644
-index 0000000..3294d96
+index 0000000..3dd69fe
 --- /dev/null
 +++ b/ChangeLog.lto-mixed
-@@ -0,0 +1,329 @@
+@@ -0,0 +1,335 @@
 +bfd/
 +
 +2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
@@ -217,6 +217,12 @@ index 0000000..3294d96
 +	* common.h (SHT_GNU_OBJECT_ONLY): New.
 +
 +ld/
++
++2014-12-24  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* emultempl/avrelf.em (avr_finish): Replace finish_default with
++	gld${EMULATION_NAME}_finish.
++	* emultempl/ppc32elf.em (ppc_finish): Likewise.
 +
 +2014-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -1004,7 +1010,7 @@ index b27539a..b3e0c3d 100644
  .#define bfd_com_section_ptr (&_bfd_std_section[0])
  .{* Pointer to the undefined section.  *}
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
-index 07794cb..8177609 100644
+index cac4089..5a83c52 100644
 --- a/binutils/objcopy.c
 +++ b/binutils/objcopy.c
 @@ -1009,30 +1009,6 @@ is_specified_symbol (const char *name, htab_t htab)
@@ -1186,8 +1192,21 @@ index 1dde019..4388fdb 100644
  # Call the extra arm-elf function
 -LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 +LDEMUL_FINISH=arm_finish
+diff --git a/ld/emultempl/avrelf.em b/ld/emultempl/avrelf.em
+index f4e2654..048ad43 100644
+--- a/ld/emultempl/avrelf.em
++++ b/ld/emultempl/avrelf.em
+@@ -209,7 +209,7 @@ avr_finish (void)
+   else
+     elf_elfheader (abfd)->e_flags &= ~EF_AVR_LINKRELAX_PREPARED;
+ 
+-  finish_default ();
++  gld${EMULATION_NAME}_finish ();
+ }
+ EOF
+ 
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 137446f..4d6093a 100644
+index 36dee8e..f4968ec 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
 @@ -65,6 +65,7 @@ static void gld${EMULATION_NAME}_before_allocation (void);
@@ -1198,7 +1217,7 @@ index 137446f..4d6093a 100644
  EOF
  
  if [ "x${USE_LIBPATH}" = xyes ] ; then
-@@ -1729,6 +1730,8 @@ output_rel_find (asection *sec, int isdyn)
+@@ -1732,6 +1733,8 @@ output_rel_find (asection *sec, int isdyn)
    return last;
  }
  
@@ -1207,7 +1226,7 @@ index 137446f..4d6093a 100644
  /* Place an orphan section.  We use this to put random SHF_ALLOC
     sections in the right segment.  */
  
-@@ -1737,7 +1740,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1740,7 +1743,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  				   const char *secname,
  				   int constraint)
  {
@@ -1216,7 +1235,7 @@ index 137446f..4d6093a 100644
      {
        { ".text",
  	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE,
-@@ -1767,6 +1770,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1770,6 +1773,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  	SEC_HAS_CONTENTS,
  	0, 0, 0, 0 },
      };
@@ -1224,7 +1243,7 @@ index 137446f..4d6093a 100644
    enum orphan_save_index
      {
        orphan_text = 0,
-@@ -1779,7 +1783,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1782,7 +1786,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
        orphan_sdata,
        orphan_nonalloc
      };
@@ -1232,7 +1251,7 @@ index 137446f..4d6093a 100644
    struct orphan_save *place;
    lang_output_section_statement_type *after;
    lang_output_section_statement_type *os;
-@@ -1856,15 +1859,22 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1859,15 +1862,22 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  
    if (!orphan_init_done)
      {
@@ -1256,7 +1275,7 @@ index 137446f..4d6093a 100644
        orphan_init_done = 1;
      }
  
-@@ -1936,6 +1946,27 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1939,6 +1949,27 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  EOF
  fi
  
@@ -1284,7 +1303,7 @@ index 137446f..4d6093a 100644
  if test x"$LDEMUL_AFTER_ALLOCATION" != xgld"$EMULATION_NAME"_after_allocation; then
  fragment <<EOF
  
-@@ -2504,7 +2535,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+@@ -2507,7 +2538,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
    ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
    "${EMULATION_NAME}",
    "${OUTPUT_FORMAT}",
@@ -1293,6 +1312,19 @@ index 137446f..4d6093a 100644
    ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
    ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
    ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
+diff --git a/ld/emultempl/ppc32elf.em b/ld/emultempl/ppc32elf.em
+index 0e2af12..5287b6f 100644
+--- a/ld/emultempl/ppc32elf.em
++++ b/ld/emultempl/ppc32elf.em
+@@ -212,7 +212,7 @@ ppc_finish (void)
+ {
+   if (params.ppc476_workaround)
+     lang_for_each_statement (no_zero_padding);
+-  finish_default ();
++  gld${EMULATION_NAME}_finish ();
+ }
+ 
+ EOF
 diff --git a/ld/emultempl/ppc64elf.em b/ld/emultempl/ppc64elf.em
 index 9646903..f67b08b 100644
 --- a/ld/emultempl/ppc64elf.em
