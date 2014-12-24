@@ -1,3 +1,7 @@
+2014-12-24  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (sim_resume): Add mul.x and umul.x instructions.
+
 2014-12-12  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_resume): Add zex instructions.
