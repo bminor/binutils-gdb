@@ -1,3 +1,21 @@
+2014-12-24  Pierre Muller  <muller@sourceware.org>
+
+	Add support for pdata output for pe coff objects.
+	* pe-x86_64.c (pex64_bfd_print_pdata): Add external
+	declaration.
+	(bfd_pe_print_data): Set macro to pex64_bfd_print_data.
+	* pei-x86_64.c (pex64_bfd_print_pdata): Changed to
+	global function. Now handles multiple .pdata sections.
+	(pex_bfd_print_pdata_section): New static helper function,
+	using most of old pex_bfd_print_pdata function code, but adding
+	support for coff pe objects, which might have some fields
+	starting at zero offset.
+	(pex64_print_all_pdata_sections) : New static helper function,
+	used in call to bfd_map_over_sections inside new
+	pex66_bfd_print_pdata function.
+	(bfd_boolean pdata_count): New static variable, used to return
+	bfd_boolean value for pex64_bfd_print_pdata function.
+
 2014-12-24  Alan Modra  <amodra@gmail.com>
 
 	* linker.c (_bfd_generic_link_output_symbols): Remove BSF_WEAK
