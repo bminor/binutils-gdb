@@ -126,6 +126,12 @@ include/elf/
 
 ld/
 
+2014-12-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/avrelf.em (avr_finish): Replace finish_default with
+	gld${EMULATION_NAME}_finish.
+	* emultempl/ppc32elf.em (ppc_finish): Likewise.
+
 2014-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (cmdline_emit_object_only_section): Call ldexp_init

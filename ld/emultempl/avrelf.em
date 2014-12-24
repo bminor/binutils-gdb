@@ -209,7 +209,7 @@ avr_finish (void)
   else
     elf_elfheader (abfd)->e_flags &= ~EF_AVR_LINKRELAX_PREPARED;
 
-  finish_default ();
+  gld${EMULATION_NAME}_finish ();
 }
 EOF
 
