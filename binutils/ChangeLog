@@ -1,3 +1,9 @@
+2014-12-24  Alexander Cherepanov  <cherepan@mccme.ru>
+
+	PR binutils/17671
+	* objcopy.c (copy_main, strip_main): Add D and U to the list of
+	accepted short versions of long options.
+
 2014-12-24  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (read_cie): Revert check for unused augmentation data -
