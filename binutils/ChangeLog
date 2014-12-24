@@ -1,3 +1,19 @@
+2014-12-24  Alexander Cherepanov  <cherepan@mccme.ru>
+
+	PR binutils/17671
+	* objcopy.c (copy_main, strip_main): Add D and U to the list of
+	accepted short versions of long options.
+
+2014-12-24  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_cie): Revert check for unused augmentation data -
+	it was bogus.
+
+2014-12-23  Andrew Stubbs  <ams@codesourcery.com>
+
+	* objcopy.c (strip_usage): Reword --remove-section description.
+	* doc/binutils.texi (strip): Likewise.
+
 2014-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (objdump): Reformat to avoid overlong lines.

@@ -55,9 +55,10 @@ if { ![istarget cris-*-*] && ![istarget crisv32-*-*]
 # The MN10300 port supports link time relaxation which in turn allows
 # for link time resolution of the differneces of two symbols which are
 # undefined at assembly time.  Hence this test will not pass for the
-# MN10300.  The same thing is true for the RX port as well.
+# MN10300.  The same thing is true for the RX and AVR port as well.
 if { ![istarget hppa*-*-*]
      && ![istarget alpha*-*-*vms*]
+     && ![istarget avr-*-*]
      && ![istarget rx-*-*]
      && ![istarget mn10300-*-*]
      && ![istarget msp430*-*-*]

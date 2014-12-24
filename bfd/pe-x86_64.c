@@ -58,6 +58,12 @@
 { COFF_SECTION_NAME_PARTIAL_MATCH (".gnu.linkonce.wi."), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }
 
+/* The function pex64_bfd_print_pdata is implemented in pei-x86_64.c
+   source, but has be extended to also handle pe objects.  */
+extern bfd_boolean pex64_bfd_print_pdata (bfd *, void *);
+
+#define bfd_pe_print_pdata   pex64_bfd_print_pdata
+
 #include "coff-x86_64.c"
 
 /* Entry for big object files.  */

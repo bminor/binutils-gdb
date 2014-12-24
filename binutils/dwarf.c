@@ -5535,13 +5535,8 @@ read_cie (unsigned char *start, unsigned char *end,
 	    break;
 	  p++;
 	}
-
-      if (q < qend)
-	{
-	  warn (_("Not enough augmentation data (%lx bytes still needed)\n"),
-		(long) ((augmentation_data + augmentation_data_len) - q));
-	  augmentation_data_len = q - augmentation_data;
-	}
+      /* Note - it is OK if this loop terminates with q < qend.
+	 Padding may have been inserted to align the end of the CIE.  */
     }
 
   *p_cie = fc;

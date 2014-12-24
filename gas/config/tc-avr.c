@@ -345,8 +345,8 @@ struct avr_opt_s
   int all_opcodes;  /* -mall-opcodes: accept all known AVR opcodes.  */
   int no_skip_bug;  /* -mno-skip-bug: no warnings for skipping 2-word insns.  */
   int no_wrap;      /* -mno-wrap: reject rjmp/rcall with 8K wrap-around.  */
-  int link_relax;   /* -mlink-relax: generate relocations for linker
-                       relaxation.  */
+  int no_link_relax;   /* -mno-link-relax / -mlink-relax: generate (or not)
+                          relocations for linker relaxation.  */
 };
 
 static struct avr_opt_s avr_opt = { 0, 0, 0, 0 };
@@ -411,7 +411,8 @@ enum options
   OPTION_NO_SKIP_BUG,
   OPTION_NO_WRAP,
   OPTION_ISA_RMW,
-  OPTION_LINK_RELAX
+  OPTION_LINK_RELAX,
+  OPTION_NO_LINK_RELAX
 };
 
 struct option md_longopts[] =
@@ -422,6 +423,7 @@ struct option md_longopts[] =
   { "mno-wrap",     no_argument, NULL, OPTION_NO_WRAP     },
   { "mrmw",         no_argument, NULL, OPTION_ISA_RMW     },
   { "mlink-relax",  no_argument, NULL, OPTION_LINK_RELAX  },
+  { "mno-link-relax",  no_argument, NULL, OPTION_NO_LINK_RELAX  },
   { NULL, no_argument, NULL, 0 }
 };
 
@@ -528,8 +530,9 @@ md_show_usage (FILE *stream)
 	"  -mno-wrap        reject rjmp/rcall instructions with 8K wrap-around\n"
 	"                   (default for avr3, avr5)\n"
 	"  -mrmw            accept Read-Modify-Write instructions\n"
-    "  -mlink-relax     generate relocations for linker relaxation\n"
-    ));
+	"  -mlink-relax     generate relocations for linker relaxation (default)\n"
+	"  -mno-link-relax  don't generate relocations for linker relaxation.\n"
+        ));
   show_mcu_list (stream);
 }
 
@@ -600,7 +603,10 @@ md_parse_option (int c, char *arg)
       specified_mcu.isa |= AVR_ISA_RMW;
       return 1;
     case OPTION_LINK_RELAX:
-      avr_opt.link_relax = 1;
+      avr_opt.no_link_relax = 0;
+      return 1;
+    case OPTION_NO_LINK_RELAX:
+      avr_opt.no_link_relax = 1;
       return 1;
     }
 
@@ -652,7 +658,7 @@ md_begin (void)
     }
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
-  linkrelax = avr_opt.link_relax;
+  linkrelax = !avr_opt.no_link_relax;
 }
 
 /* Resolve STR as a constant expression and return the result.
@@ -1239,7 +1245,9 @@ md_pcrel_from_section (fixS *fixp, segT sec)
 static bfd_boolean
 relaxable_section (asection *sec)
 {
-  return (sec->flags & SEC_DEBUGGING) == 0;
+  return ((sec->flags & SEC_DEBUGGING) == 0
+          && (sec->flags & SEC_CODE) != 0
+          && (sec->flags & SEC_ALLOC) != 0);
 }
 
 /* Does whatever the xtensa port does.  */

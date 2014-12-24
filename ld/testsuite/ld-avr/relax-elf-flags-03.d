@@ -2,7 +2,7 @@
 #as: -mmcu=avrxmega2
 #ld: -r -mavrxmega2
 #source: relax-elf-flags-a.s -mlink-relax
-#source: relax-elf-flags-b.s
+#source: relax-elf-flags-b.s -mno-link-relax
 #readelf: -h
 #target: avr-*-*
 

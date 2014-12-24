@@ -2891,7 +2891,8 @@ Replace @var{objfile} with a file in the output format @var{bfdname}.
 
 @item -R @var{sectionname}
 @itemx --remove-section=@var{sectionname}
-Remove any section named @var{sectionname} from the output file.  This
+Remove any section named @var{sectionname} from the output file, in
+addition to whatever sections would otherwise be removed.  This
 option may be given more than once.  Note that using this option
 inappropriately may make the output file unusable.  The wildcard
 character @samp{*} may be given at the end of @var{sectionname}.  If
