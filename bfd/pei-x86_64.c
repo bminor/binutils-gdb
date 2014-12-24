@@ -509,7 +509,8 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
       {
 	fprintf (file,
 		 _("Warning: %s section size (%ld) is smaller than virtual size (%ld)\n"),
-		 pdata_section->name, datasize, stop);
+		 pdata_section->name, (unsigned long) datasize,
+		 (unsigned long) stop);
 	/* Be sure not to read passed datasize.  */
 	stop = datasize / onaline;
       }

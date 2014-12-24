@@ -1,3 +1,8 @@
+2014-12-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* pei-x86_64.c (pex64_bfd_print_pdata_section): Add cast to
+	unsigned long.
+
 2014-12-24  Pierre Muller  <muller@sourceware.org>
 
 	Add support for pdata output for pe coff objects.
