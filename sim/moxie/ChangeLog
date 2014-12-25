@@ -1,3 +1,8 @@
+2014-12-25  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (sim_resume): Whitespace changes to align with GDB
+	coding standard.
+
 2014-12-24  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_resume): Add mul.x and umul.x instructions.
