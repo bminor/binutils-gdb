@@ -10056,7 +10056,7 @@ Target_arm<big_endian>::do_adjust_elf_header(
     if (type == elfcpp::ET_EXEC || type == elfcpp::ET_DYN)
       {
 	Object_attribute* attr = this->get_aeabi_object_attribute(elfcpp::Tag_ABI_VFP_args);
-	if (attr->int_value() == AEABI_VFP_args_vfp)
+	if (attr->int_value() == elfcpp::AEABI_VFP_args_vfp)
 	  flags |= elfcpp::EF_ARM_ABI_FLOAT_HARD;
 	else
 	  flags |= elfcpp::EF_ARM_ABI_FLOAT_SOFT;
@@ -10494,17 +10494,17 @@ Target_arm<big_endian>::merge_object_attributes(
     {
       // Ignore mismatches if the object doesn't use floating point.  */
       if (out_attr[elfcpp::Tag_ABI_FP_number_model].int_value()
-	  == AEABI_FP_number_model_none
+	  == elfcpp::AEABI_FP_number_model_none
 	  || (in_attr[elfcpp::Tag_ABI_FP_number_model].int_value()
-	      != AEABI_FP_number_model_none
+	      != elfcpp::AEABI_FP_number_model_none
 	      && out_attr[elfcpp::Tag_ABI_VFP_args].int_value()
-		 == AEABI_VFP_args_compatible))
+		 == elfcpp::AEABI_VFP_args_compatible))
 	out_attr[elfcpp::Tag_ABI_VFP_args].set_int_value(
 	    in_attr[elfcpp::Tag_ABI_VFP_args].int_value());
       else if (in_attr[elfcpp::Tag_ABI_FP_number_model].int_value()
-	       != AEABI_FP_number_model_none
+	       != elfcpp::AEABI_FP_number_model_none
 	       && in_attr[elfcpp::Tag_ABI_VFP_args].int_value()
-		  != AEABI_VFP_args_compatible
+		  != elfcpp::AEABI_VFP_args_compatible
 	       && parameters->options().warn_mismatch())
 	gold_error(_("%s uses VFP register arguments, output does not"),
 		   name);
