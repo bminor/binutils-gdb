@@ -12213,7 +12213,7 @@ static const char * arm_attr_tag_ABI_enum_size[] =
 static const char * arm_attr_tag_ABI_HardFP_use[] =
   {"As Tag_FP_arch", "SP only", "DP only", "SP and DP"};
 static const char * arm_attr_tag_ABI_VFP_args[] =
-  {"AAPCS", "VFP registers", "custom"};
+  {"AAPCS", "VFP registers", "custom", "compatible"};
 static const char * arm_attr_tag_ABI_WMMX_args[] =
   {"AAPCS", "WMMX registers", "custom"};
 static const char * arm_attr_tag_ABI_optimization_goals[] =

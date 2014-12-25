@@ -1,3 +1,11 @@
+2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.cc (Target_arm::do_adjust_elf_header): Set e_flags in ELF header
+	as hard float only when Tag_ABI_VFP_args is 1, using new enum value
+	AEABI_VFP_args_vfp to check that.
+	(Target_arm::merge_object_attributes): Handle new Tag_ABI_VFP_args
+	value and replace hardcoded values by enum values.
+
 2014-12-22  Cary Coutant  <ccoutant@google.com>
 
 	* powerpc.cc (Target_powerpc::relocate): Fix overflow check.

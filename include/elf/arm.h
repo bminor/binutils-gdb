@@ -319,6 +319,23 @@ enum
   Tag_VFP_HP_extension = Tag_FP_HP_extension
 };
 
+/* Values for Tag_ABI_FP_number_model.  */
+enum
+{
+  AEABI_FP_number_model_none = 0,
+  AEABI_FP_number_model_ieee754_number = 1,
+  AEABI_FP_number_model_rtabi = 2,
+  AEABI_FP_number_model_ieee754_all = 3
+};
+
+/* Values for Tag_ABI_VFP_args.  */
+enum
+{
+  AEABI_VFP_args_base = 0,
+  AEABI_VFP_args_vfp = 1,
+  AEABI_VFP_args_toolchain = 2,
+  AEABI_VFP_args_compatible = 3
+};
 #endif
 
 /* The name of the note section used to identify arm variants.  */

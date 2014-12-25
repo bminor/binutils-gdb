@@ -1,3 +1,7 @@
+2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_ABI_VFP_args): Add "compatible".
+
 2014-12-24  Alexander Cherepanov  <cherepan@mccme.ru>
 
 	PR binutils/17671
