@@ -1,3 +1,8 @@
+2014-12-25  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	PR gas/17753
+	* config/tc-mep.c (md_begin): Specify types of vararg literals.
+
 2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* doc/c-avr.texi: Document -mlink-relax and -mno-link-relax.
