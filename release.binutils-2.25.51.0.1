@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.24.51.0.4 for Linux, which is
-based on binutils 2014 0923 master branch on sourceware.org plus
+This is the beta release of binutils 2.25.51.0.1 for Linux, which is
+based on binutils 2014 1224 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -120,12 +120,59 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.24.51.0.4 to
+Please report any bugs related to binutils 2.25.51.0.1 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.24.51.0.4:
+
+1. Update from binutils 2014 1224.
+2. Update Intel instruction extension support to October, 2014,
+including AVX512VBMI, AVX512IFMA, PCOMMIT and CLWB.
+3. --compress-debug-sections is turned on for Linux/x86 assembler by
+default.
+4. Deprecate R_X86_64_PC32_BND and R_X86_64_PLT32_BND support.  Add
+-z bndplt linker option to enable MPX PLT.
+5. Support copy relocations in x86-64 PIE.
+6. Don't output symbol version definitions for non-DT_NEEDED libs.
+PR ld/16452, ld/16457.
+7. Optimize out i386/x86-64 JUMP_SLOT relocation.
+8. Check PC-relative offset overflow in x86-64 PLT entry.  PR ld/17618.
+9. Check branch displacement overflow in x86-64 PLT entry.
+10. Fix many memory access issues.  PRs ld/17453, binutils/17510,
+binutils/17512, binutils/17531, binutils/17533, binutils/17597,
+PR binutuls/17605, PR ld/17713.
+11. Disallow copy relocations against protected symbols.  PR ld/15228.
+12. Fix an x86 assembler crash on invalid input.  PR gas/17493.
+12. Fix an addr2line bug.  PR binutils/17541.
+14. Sort relocs output by ld -r.  PR ld/17666.
+15. Speed up x86 PLT dump.  PR binutils/17677.
+16. Update x86 assembler to add REX prefix to encode R_X86_64_GOTTPOFF
+for x32.  PR ld/17482.
+17. Run eh_frame optimisation for relocatable link.  PR ld/17467.
+18. Discard zero address range eh_frame FDEs.  PR ld/17447.
+19. Add support for more than one plugin in lib/bfd-plugins.  PR ld/17422.
+20. Add -D/-U options to objcopy/strip.  PR binutils/17671.
+21. Don't check shared libraries for .eh_frame sections nor --build-id.
+PR ld/17742.
+22. Fix exception frame section with static link for gold.  PR gold/14675.
+23. Handle stack split for x32 in gold.  PR gold/17729.
+24. Initial visium support.
+25. Improve gold support.
+26. Improve COFF support.
+27. Improve aarch64 support.
+28. Improve arm support.
+29. Improve avr support.
+30. Improve mips support.
+31. Improve moxie support.
+32. Improve msp430 support.
+33. Improve nios2 support.
+34. Improve ppc/ppc64 support.
+35. Improve sparc support.
+36. Improve spu support.
 
 Changes from binutils 2.24.51.0.3:
 
@@ -955,7 +1002,7 @@ already been defined.  PR 12001.
 16. Improve ppc support.
 17. Improve tic6x support.
 
-It is available as hjl/linux/release/2.24.51.0.4 tag at
+It is available as hjl/linux/release/2.25.51.0.1 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -964,4 +1011,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-10/10/2014
+12/24/2014
