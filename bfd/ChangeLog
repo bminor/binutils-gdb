@@ -1,3 +1,11 @@
+2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Handle new
+	Tag_ABI_VFP_args value and replace hardcoded values by enum values.
+	(elf32_arm_post_process_headers): Set e_flags in ELF header as hard
+	float only when Tag_ABI_VFP_args is 1, using new enum value
+	AEABI_VFP_args_vfp to check that.
+
 2014-12-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* pei-x86_64.c (pex64_bfd_print_pdata_section): Add cast to

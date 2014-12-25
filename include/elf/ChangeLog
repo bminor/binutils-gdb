@@ -1,3 +1,7 @@
+2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h: New AEABI_FP_number_model_* and AEABI_VFP_args_* enum values.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* common.h (EM_VISIUM): Define.

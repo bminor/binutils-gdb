@@ -11753,10 +11753,14 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   /* This needs to happen before Tag_ABI_FP_number_model is merged.  */
   if (in_attr[Tag_ABI_VFP_args].i != out_attr[Tag_ABI_VFP_args].i)
     {
-      /* Ignore mismatches if the object doesn't use floating point.  */
-      if (out_attr[Tag_ABI_FP_number_model].i == 0)
+      /* Ignore mismatches if the object doesn't use floating point or is
+	 floating point ABI independent.  */
+      if (out_attr[Tag_ABI_FP_number_model].i == AEABI_FP_number_model_none
+	  || (in_attr[Tag_ABI_FP_number_model].i != AEABI_FP_number_model_none
+	      && out_attr[Tag_ABI_VFP_args].i == AEABI_VFP_args_compatible))
 	out_attr[Tag_ABI_VFP_args].i = in_attr[Tag_ABI_VFP_args].i;
-      else if (in_attr[Tag_ABI_FP_number_model].i != 0)
+      else if (in_attr[Tag_ABI_FP_number_model].i != AEABI_FP_number_model_none
+	       && in_attr[Tag_ABI_VFP_args].i != AEABI_VFP_args_compatible)
 	{
 	  _bfd_error_handler
 	    (_("error: %B uses VFP register arguments, %B does not"),
@@ -14719,7 +14723,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
       && ((i_ehdrp->e_type == ET_DYN) || (i_ehdrp->e_type == ET_EXEC)))
     {
       int abi = bfd_elf_get_obj_attr_int (abfd, OBJ_ATTR_PROC, Tag_ABI_VFP_args);
-      if (abi)
+      if (abi == AEABI_VFP_args_vfp)
 	i_ehdrp->e_flags |= EF_ARM_ABI_FLOAT_HARD;
       else
 	i_ehdrp->e_flags |= EF_ARM_ABI_FLOAT_SOFT;

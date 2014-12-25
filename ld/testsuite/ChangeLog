@@ -1,3 +1,16 @@
+2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld-arm/attr-merge-2a.s: Add Tag_ABI_VFP_args.
+	* ld-arm/attr-merge-2b.s: Likewise.
+	* ld-arm/attr-merge-2.attr: Likewise.
+	* ld-arm/attr-merge-4a.s: Add Tag_ABI_FP_number_model and
+	Tag_ABI_VFP_args.
+	* ld-arm/attr-merge-4b.s: Likewise.
+	* ld-arm/attr-merge-4.attr: Likewise.
+	* ld-arm/attr-merge-6a.s: Likewise.
+	* ld-arm/attr-merge-6b.s: Likewise.
+	* ld-arm/attr-merge-6.attr: Add Tag_ABI_FP_number_model.
+
 2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld/testsuite/ld-avr/relax-elf-flags-02.d: Add -mno-link-relax
