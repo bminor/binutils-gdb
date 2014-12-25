@@ -86,7 +86,7 @@ for Linux kernel build with LTO.
 
 diff --git a/ChangeLog.lto-mixed b/ChangeLog.lto-mixed
 new file mode 100644
-index 0000000..3dd69fe
+index 0000000..0b22c16
 --- /dev/null
 +++ b/ChangeLog.lto-mixed
 @@ -0,0 +1,335 @@
@@ -96,16 +96,6 @@ index 0000000..3dd69fe
 +
 +	* format.c (bfd_check_format_matches): Don't check the plugin
 +	target twice.
-+
-+2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
-+	object-only output.
-+	(cmdline_emit_object_only_section): Pass TRUE to lang_finish.
-+
-+	* ldlang.h (lang_finish): Updated.
-+
-+	* ldmain.c (main): Pass FALSE to lang_finish.
 +
 +2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -240,6 +230,16 @@ index 0000000..3dd69fe
 +
 +	* ldlang.c (cmdline_add_object_only_section): Save BFD filename
 +	to be used after bfd_close ().
++
++2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
++	object-only output.
++	(cmdline_emit_object_only_section): Pass TRUE to lang_finish.
++
++	* ldlang.h (lang_finish): Updated.
++
++	* ldmain.c (main): Pass FALSE to lang_finish.
 +
 +2012-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 +
