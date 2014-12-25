@@ -366,6 +366,7 @@ sim_resume (sd, step, siggnal)
 		    int a = (inst >> 8) & 0xf;
 		    unsigned av = cpu.asregs.regs[a];
 		    unsigned v = (inst & 0xff);
+
 		    TRACE("inc");
 		    cpu.asregs.regs[a] = av + v;
 		  }
@@ -375,6 +376,7 @@ sim_resume (sd, step, siggnal)
 		    int a = (inst >> 8) & 0xf;
 		    unsigned av = cpu.asregs.regs[a];
 		    unsigned v = (inst & 0xff);
+
 		    TRACE("dec");
 		    cpu.asregs.regs[a] = av - v;
 		  }
@@ -383,6 +385,7 @@ sim_resume (sd, step, siggnal)
 		  {
 		    int a = (inst >> 8) & 0xf;
 		    unsigned v = (inst & 0xff);
+
 		    TRACE("gsr");
 		    cpu.asregs.regs[a] = cpu.asregs.sregs[v];
 		  }
@@ -391,6 +394,7 @@ sim_resume (sd, step, siggnal)
 		  {
 		    int a = (inst >> 8) & 0xf;
 		    unsigned v = (inst & 0xff);
+
 		    TRACE("ssr");
 		    cpu.asregs.sregs[v] = cpu.asregs.regs[a];
 		  }
@@ -416,6 +420,7 @@ sim_resume (sd, step, siggnal)
 	    case 0x01: /* ldi.l (immediate) */
 	      {
 		int reg = (inst >> 4) & 0xf;
+
 		TRACE("ldi.l");
 		unsigned int val = EXTRACT_WORD(pc+2);
 		cpu.asregs.regs[reg] = val;
@@ -426,6 +431,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int dest  = (inst >> 4) & 0xf;
 		int src = (inst ) & 0xf;
+
 		TRACE("mov");
 		cpu.asregs.regs[dest] = cpu.asregs.regs[src];
 	      }
@@ -434,6 +440,7 @@ sim_resume (sd, step, siggnal)
  	      {
  		unsigned int fn = EXTRACT_WORD(pc+2);
  		unsigned int sp = cpu.asregs.regs[1];
+
 		TRACE("jsra");
  		/* Save a slot for the static chain.  */
 		sp -= 4;
@@ -479,6 +486,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
+
 		TRACE("add.l");
 		cpu.asregs.regs[a] = av + bv;
 	      }
@@ -488,6 +496,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		int sp = cpu.asregs.regs[a] - 4;
+
 		TRACE("push");
 		wlat (scpu, opc, sp, cpu.asregs.regs[b]);
 		cpu.asregs.regs[a] = sp;
@@ -498,6 +507,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		int sp = cpu.asregs.regs[a];
+
 		TRACE("pop");
 		cpu.asregs.regs[b] = rlat (scpu, opc, sp);
 		cpu.asregs.regs[a] = sp + 4;
@@ -507,6 +517,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
+
 		TRACE("lda.l");
 		cpu.asregs.regs[reg] = rlat (scpu, opc, addr);
 		pc += 4;
@@ -516,6 +527,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
+
 		TRACE("sta.l");
 		wlat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
@@ -526,6 +538,7 @@ sim_resume (sd, step, siggnal)
 		int src  = inst & 0xf;
 		int dest = (inst >> 4) & 0xf;
 		int xv;
+
 		TRACE("ld.l");
 		xv = cpu.asregs.regs[src];
 		cpu.asregs.regs[dest] = rlat (scpu, opc, xv);
@@ -535,6 +548,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
+
 		TRACE("st.l");
 		wlat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
@@ -544,6 +558,7 @@ sim_resume (sd, step, siggnal)
 		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
+
 		TRACE("ldo.l");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rlat (scpu, opc, addr);
@@ -555,6 +570,7 @@ sim_resume (sd, step, siggnal)
 		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
+
 		TRACE("sto.l");
 		addr += cpu.asregs.regs[a];
 		wlat (scpu, opc, addr, cpu.asregs.regs[b]);
@@ -570,7 +586,6 @@ sim_resume (sd, step, siggnal)
 		int vb = cpu.asregs.regs[b]; 
 
 		TRACE("cmp");
-
 		if (va == vb)
 		  cc = CC_EQ;
 		else
@@ -591,6 +606,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		signed char bv = cpu.asregs.regs[b];
+
 		TRACE("sex.b");
 		cpu.asregs.regs[a] = (int) bv;
 	      }
@@ -600,6 +616,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		signed short bv = cpu.asregs.regs[b];
+
 		TRACE("sex.s");
 		cpu.asregs.regs[a] = (int) bv;
 	      }
@@ -609,6 +626,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		signed char bv = cpu.asregs.regs[b];
+
 		TRACE("zex.b");
 		cpu.asregs.regs[a] = (int) bv & 0xff;
 	      }
@@ -618,6 +636,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		signed short bv = cpu.asregs.regs[b];
+
 		TRACE("zex.s");
 		cpu.asregs.regs[a] = (int) bv & 0xffff;
 	      }
@@ -628,9 +647,10 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
-		TRACE("mul.x");
 		signed long long r = 
 		  (signed long long) av * (signed long long) bv;
+
+		TRACE("mul.x");
 		cpu.asregs.regs[a] = r >> 32;
 	      }
 	      break;
@@ -640,9 +660,10 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
-		TRACE("umul.x");
 		unsigned long long r = 
 		  (unsigned long long) av * (unsigned long long) bv;
+
+		TRACE("umul.x");
 		cpu.asregs.regs[a] = r >> 32;
 	      }
 	      break;
@@ -682,6 +703,7 @@ sim_resume (sd, step, siggnal)
 	    case 0x1a: /* jmpa */
 	      {
 		unsigned int tgt = EXTRACT_WORD(pc+2);
+
 		TRACE("jmpa");
 		pc = tgt - 2;
 	      }
@@ -689,8 +711,8 @@ sim_resume (sd, step, siggnal)
 	    case 0x1b: /* ldi.b (immediate) */
 	      {
 		int reg = (inst >> 4) & 0xf;
-
 		unsigned int val = EXTRACT_WORD(pc+2);
+
 		TRACE("ldi.b");
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
@@ -701,6 +723,7 @@ sim_resume (sd, step, siggnal)
 		int src  = inst & 0xf;
 		int dest = (inst >> 4) & 0xf;
 		int xv;
+
 		TRACE("ld.b");
 		xv = cpu.asregs.regs[src];
 		cpu.asregs.regs[dest] = rbat (scpu, opc, xv);
@@ -710,6 +733,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
+
 		TRACE("lda.b");
 		cpu.asregs.regs[reg] = rbat (scpu, opc, addr);
 		pc += 4;
@@ -719,6 +743,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
+
 		TRACE("st.b");
 		wbat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
@@ -727,6 +752,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
+
 		TRACE("sta.b");
 		wbat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
@@ -737,6 +763,7 @@ sim_resume (sd, step, siggnal)
 		int reg = (inst >> 4) & 0xf;
 
 		unsigned int val = EXTRACT_WORD(pc+2);
+
 		TRACE("ldi.s");
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
@@ -747,6 +774,7 @@ sim_resume (sd, step, siggnal)
 		int src  = inst & 0xf;
 		int dest = (inst >> 4) & 0xf;
 		int xv;
+
 		TRACE("ld.s");
 		xv = cpu.asregs.regs[src];
 		cpu.asregs.regs[dest] = rsat (scpu, opc, xv);
@@ -756,6 +784,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
+
 		TRACE("lda.s");
 		cpu.asregs.regs[reg] = rsat (scpu, opc, addr);
 		pc += 4;
@@ -765,6 +794,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
+
 		TRACE("st.s");
 		wsat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
@@ -773,6 +803,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
+
 		TRACE("sta.s");
 		wsat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
@@ -781,6 +812,7 @@ sim_resume (sd, step, siggnal)
 	    case 0x25: /* jmp */
 	      {
 		int reg = (inst >> 4) & 0xf;
+
 		TRACE("jmp");
 		pc = cpu.asregs.regs[reg] - 2;
 	      }
@@ -790,6 +822,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		int av, bv;
+
 		TRACE("and");
 		av = cpu.asregs.regs[a];
 		bv = cpu.asregs.regs[b];
@@ -802,6 +835,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
+
 		TRACE("lshr");
 		cpu.asregs.regs[a] = (unsigned) ((unsigned) av >> bv);
 	      }
@@ -812,6 +846,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
+
 		TRACE("ashl");
 		cpu.asregs.regs[a] = av << bv;
 	      }
@@ -822,6 +857,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
+
 		TRACE("sub.l");
 		cpu.asregs.regs[a] = av - bv;
 	      }
@@ -831,6 +867,7 @@ sim_resume (sd, step, siggnal)
 		int a  = (inst >> 4) & 0xf;
 		int b  = inst & 0xf;
 		int bv = cpu.asregs.regs[b];
+
 		TRACE("neg");
 		cpu.asregs.regs[a] = - bv;
 	      }
@@ -840,6 +877,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		int av, bv;
+
 		TRACE("or");
 		av = cpu.asregs.regs[a];
 		bv = cpu.asregs.regs[b];
@@ -851,6 +889,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		int bv = cpu.asregs.regs[b];
+
 		TRACE("not");
 		cpu.asregs.regs[a] = 0xffffffff ^ bv;
 	      }
@@ -861,6 +900,7 @@ sim_resume (sd, step, siggnal)
 		int b  = inst & 0xf;
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
+
 		TRACE("ashr");
 		cpu.asregs.regs[a] = av >> bv;
 	      }
@@ -870,6 +910,7 @@ sim_resume (sd, step, siggnal)
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		int av, bv;
+
 		TRACE("xor");
 		av = cpu.asregs.regs[a];
 		bv = cpu.asregs.regs[b];
@@ -882,6 +923,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
+
 		TRACE("mul.l");
 		cpu.asregs.regs[a] = av * bv;
 	      }
@@ -889,6 +931,7 @@ sim_resume (sd, step, siggnal)
 	    case 0x30: /* swi */
 	      {
 		unsigned int inum = EXTRACT_WORD(pc+2);
+
 		TRACE("swi");
 		/* Set the special registers appropriately.  */
 		cpu.asregs.sregs[2] = 3; /* MOXIE_EX_SWI */
@@ -969,6 +1012,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
+
 		TRACE("div.l");
 		cpu.asregs.regs[a] = av / bv;
 	      }
@@ -979,6 +1023,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		unsigned int av = cpu.asregs.regs[a];
 		unsigned int bv = cpu.asregs.regs[b];
+
 		TRACE("udiv.l");
 		cpu.asregs.regs[a] = (av / bv);
 	      }
@@ -989,6 +1034,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
+
 		TRACE("mod.l");
 		cpu.asregs.regs[a] = av % bv;
 	      }
@@ -999,6 +1045,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		unsigned int av = cpu.asregs.regs[a];
 		unsigned int bv = cpu.asregs.regs[b];
+
 		TRACE("umod.l");
 		cpu.asregs.regs[a] = (av % bv);
 	      }
@@ -1013,6 +1060,7 @@ sim_resume (sd, step, siggnal)
 		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
+
 		TRACE("ldo.b");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rbat (scpu, opc, addr);
@@ -1024,6 +1072,7 @@ sim_resume (sd, step, siggnal)
 		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
+
 		TRACE("sto.b");
 		addr += cpu.asregs.regs[a];
 		wbat (scpu, opc, addr, cpu.asregs.regs[b]);
@@ -1035,6 +1084,7 @@ sim_resume (sd, step, siggnal)
 		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
+
 		TRACE("ldo.s");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rsat (scpu, opc, addr);
@@ -1046,6 +1096,7 @@ sim_resume (sd, step, siggnal)
 		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
+
 		TRACE("sto.s");
 		addr += cpu.asregs.regs[a];
 		wsat (scpu, opc, addr, cpu.asregs.regs[b]);
