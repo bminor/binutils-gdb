@@ -1,3 +1,9 @@
+2014-12-26  Alan Modra  <amodra@gmail.com>
+
+	PR 17755
+	* elf64-sh64.c (sh_elf64_copy_private_data_internal): Delete code
+	copying SHF_SH5_ISA32.
+
 2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Handle new
