@@ -959,6 +959,12 @@ if [is_elf_format] {
          && !([istarget "arm*-*-*"] && ![istarget "arm-*-*eabi*"])} {
 	run_dump_test "strip-10"
     }
+    set extra_strip11 ""
+    if { [istarget "sh64*-*"] } {
+	# pr17755 testcase
+	set extra_strip11 { { "as" "--isa=SHmedia --abi=64" } }
+    }
+    run_dump_test "strip-11" $extra_strip11
 
     if { [istarget "i*86-*"] || [istarget "x86_64-*-*"] } {
 	# Check to make sure we don't strip a symbol named in relocations.

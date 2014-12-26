@@ -1,6 +1,11 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2014-12-26  Alan Modra  <amodra@gmail.com>
+	PR 17755
+	* elf64-sh64.c (sh_elf64_copy_private_data_internal): Delete code
+	copying SHF_SH5_ISA32.
+
 	2014-12-23  Alan Modra  <amodra@gmail.com>
 	* elflink.c (_bfd_elf_define_linkage_sym): Set linker_def.
 	* linker.c (_bfd_generic_link_add_one_symbol): Clear linker_def

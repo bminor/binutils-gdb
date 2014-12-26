@@ -1,3 +1,10 @@
+2015-02-11  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2014-12-26  Alan Modra  <amodra@gmail.com>
+	* binutils-all/strip-11.d: New test.
+	* binutils-all/objcopy.exp: Run it.
+
 2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* binutils-all/objcopy.exp: Add mips*-img-elf* target triple.
