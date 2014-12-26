@@ -1,3 +1,8 @@
+2014-12-26  Alan Modra  <amodra@gmail.com>
+
+	* ld-sh/sh64/crangerel1.rd: Update.
+	* ld-sh/sh64/crangerel2.rd: Update.
+
 2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* ld-arm/attr-merge-2a.s: Add Tag_ABI_VFP_args.
