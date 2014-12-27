@@ -1,3 +1,11 @@
+2014-12-27  Anthony Green  <green@moxielogic.com>
+
+	* moxie-tdep.c (moxie_software_single_step): ldo/sto instructions
+	are 32 bits, not 48.  Update comments for various instructions.
+	(moxie_process_record): Update for new shorter ldo/sto
+	instructions.  Add support for sex, zex, umul.x and mul.x
+	instructions.  Update comments for various instructions.
+
 2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Explicitely handle value 3 of
