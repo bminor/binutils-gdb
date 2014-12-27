@@ -1,3 +1,9 @@
+2014-12-27  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (EXTRACT_OFFSET): Define.
+	(sim_resume): ldo/sto instructions now use 16 bit offset instead
+	of 32.  Also swap mul.x/umul.x opcodes (reversed by mistake).
+
 2014-12-25  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_resume): Whitespace changes to align with GDB
