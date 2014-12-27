@@ -404,7 +404,7 @@ md_assemble (char *str)
 	iword += (a << 4);
       }
       break;
-    case MOXIE_F1_ABi4:
+    case MOXIE_F1_ABi2:
       iword = opcode->opcode << 8;
       while (ISSPACE (*op_end))
 	op_end++;
@@ -426,13 +426,13 @@ md_assemble (char *str)
 	op_end++;
 
 	op_end = parse_exp_save_ilp (op_end, &arg);
-	offset = frag_more (4);
+	offset = frag_more (2);
 	fix_new_exp (frag_now,
 		     (offset - frag_now->fr_literal),
-		     4,
+		     2,
 		     &arg,
 		     0,
-		     BFD_RELOC_32);
+		     BFD_RELOC_16);
 
 	if (*op_end != '(')
 	  {
@@ -458,7 +458,7 @@ md_assemble (char *str)
 	iword += (a << 4) + b;
       }
       break;
-    case MOXIE_F1_AiB4:
+    case MOXIE_F1_AiB2:
       iword = opcode->opcode << 8;
       while (ISSPACE (*op_end))
 	op_end++;
@@ -468,13 +468,13 @@ md_assemble (char *str)
 	int a, b;
 
 	op_end = parse_exp_save_ilp (op_end, &arg);
-	offset = frag_more (4);
+	offset = frag_more (2);
 	fix_new_exp (frag_now,
 		     (offset - frag_now->fr_literal),
-		     4,
+		     2,
 		     &arg,
 		     0,
-		     BFD_RELOC_32);
+		     BFD_RELOC_16);
 
 	if (*op_end != '(')
 	  {
