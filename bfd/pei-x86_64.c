@@ -601,11 +601,12 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
      section name, replacing .pdata by .xdata prefix.  */
   if (strcmp (pdata_section->name, ".pdata") != 0)
     {
-      char *xdata_name = alloca (strlen (pdata_section->name + 1));
+      size_t len = strlen (pdata_section->name);
+      char *xdata_name = alloca (len + 1);
 
-      xdata_name = strcpy (xdata_name, pdata_section->name);
+      xdata_name = memcpy (xdata_name, pdata_section->name, len + 1);
       /* Transform .pdata prefix into .xdata prefix.  */
-      if (strlen (xdata_name) > 1)
+      if (len > 1)
 	xdata_name [1] = 'x';
       xdata_section = pex64_get_section_by_rva (abfd, xdata_base,
 						xdata_name);

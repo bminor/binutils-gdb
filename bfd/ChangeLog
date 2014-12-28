@@ -1,3 +1,9 @@
+2014-12-28  Alan Modra  <amodra@gmail.com>
+
+	PR 17766
+	* pei-x86_64.c (pex64_bfd_print_pdata_section): Correct string
+	length.  Use memcpy rather than strcpy.
+
 2014-12-26  Alan Modra  <amodra@gmail.com>
 
 	PR 17755
