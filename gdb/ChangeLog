@@ -8,7 +8,7 @@
 
 2014-12-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
-	* arm-tdep.c (arm_gdbarch_init): Explicitely handle value 3 of
+	* arm-tdep.c (arm_gdbarch_init): Explicitly handle value 3 of
 	Tag_ABI_VFP_args. Also replace hardcoded values by enum values in the
 	switch handling the different values of Tag_ABI_VFP_args.
 
