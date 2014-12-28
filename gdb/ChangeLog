@@ -1,3 +1,11 @@
+2015-01-08  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2loc.c (indirect_pieced_value): Don't call
+	gdb_sign_extend.  Call extract_signed_integer instead.
+	* utils.c (gdb_sign_extend): Remove.
+	* utils.h (gdb_sign_extend): Remove declaration.
+
 2015-01-07  Pierre Muller  <muller@sourceware.org>
 
 	PR symtab/17811

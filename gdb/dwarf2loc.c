@@ -2012,6 +2012,7 @@ indirect_pieced_value (struct value *value)
   int i, bit_offset, bit_length;
   struct dwarf_expr_piece *piece = NULL;
   LONGEST byte_offset;
+  enum bfd_endian byte_order;
 
   type = check_typedef (value_type (value));
   if (TYPE_CODE (type) != TYPE_CODE_PTR)
@@ -2056,11 +2057,16 @@ indirect_pieced_value (struct value *value)
   /* This is an offset requested by GDB, such as value subscripts.
      However, due to how synthetic pointers are implemented, this is
      always presented to us as a pointer type.  This means we have to
-     sign-extend it manually as appropriate.  */
-  byte_offset = value_as_address (value);
-  if (TYPE_LENGTH (value_type (value)) < sizeof (LONGEST))
-    byte_offset = gdb_sign_extend (byte_offset,
-				   8 * TYPE_LENGTH (value_type (value)));
+     sign-extend it manually as appropriate.  Use raw
+     extract_signed_integer directly rather than value_as_address and
+     sign extend afterwards on architectures that would need it
+     (mostly everywhere except MIPS, which has signed addresses) as
+     the later would go through gdbarch_pointer_to_address and thus
+     return a CORE_ADDR with high bits set on architectures that
+     encode address spaces and other things in CORE_ADDR.  */
+  byte_order = gdbarch_byte_order (get_frame_arch (frame));
+  byte_offset = extract_signed_integer (value_contents (value),
+					TYPE_LENGTH (type), byte_order);
   byte_offset += piece->v.ptr.offset;
 
   gdb_assert (piece);
