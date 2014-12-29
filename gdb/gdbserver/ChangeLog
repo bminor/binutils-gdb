@@ -1,5 +1,60 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (step_over_bkpt): Move higher up in the file.
+	(handle_extended_wait): Don't store the stop_pc here.
+	(get_stop_pc): Adjust comments and rename to ...
+	(check_stopped_by_breakpoint): ... this.  Record whether the LWP
+	stopped for a software breakpoint or hardware breakpoint.
+	(thread_still_has_status_pending_p): New function.
+	(status_pending_p_callback): Use
+	thread_still_has_status_pending_p.  If the event is no longer
+	interesting, resume the LWP.
+	(handle_tracepoints): Add assert.
+	(maybe_move_out_of_jump_pad): Remove cancel_breakpoints call.
+	(wstatus_maybe_breakpoint): New function.
+	(cancel_breakpoint): Delete function.
+	(check_stopped_by_watchpoint): New function, factored out from
+	linux_low_filter_event.
+	(lp_status_maybe_breakpoint): Delete function.
+	(linux_low_filter_event): Remove filter_ptid argument.
+	Leave thread group exits pending here.	Store the LWP's stop PC.
+	Always leave events pending.
+	(linux_wait_for_event_filtered): Pull all events out of the
+	kernel, and leave them all pending.
+	(count_events_callback, select_event_lwp_callback): Consider all
+	events.
+	(cancel_breakpoints_callback, linux_cancel_breakpoints): Delete.
+	(select_event_lwp): Only give preference to the stepping LWP in
+	all-stop mode.	Adjust comments.
+	(ignore_event): New function.
+	(linux_wait_1): Delete 'retry' label.  Use ignore_event.  Remove
+	references to cancel_breakpoints.  Adjust to renames.  Also give
+	equal priority to all LWPs that have had events in non-stop mode.
+	If reporting a software breakpoint event, unadjust the LWP's PC.
+	(linux_wait): If linux_wait_1 returned an ignored event, retry.
+	(stuck_in_jump_pad_callback, move_out_of_jump_pad_callback):
+	Adjust.
+	(linux_resume_one_lwp): Store the LWP's PC.  Adjust.
+	(resume_status_pending_p): Use thread_still_has_status_pending_p.
+	(linux_stopped_by_watchpoint): Adjust.
+	(linux_target_ops): Remove reference to linux_cancel_breakpoints.
+	* linux-low.h (enum lwp_stop_reason): New.
+	(struct lwp_info) <stop_pc>: Adjust comment.
+	<stopped_by_watchpoint>: Delete field.
+	<stop_reason>: New field.
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Adjust.
+	* mem-break.c (software_breakpoint_inserted_here)
+	(hardware_breakpoint_inserted_here): New function.
+	* mem-break.h (software_breakpoint_inserted_here)
+	(hardware_breakpoint_inserted_here): Declare.
+	* target.h (struct target_ops) <cancel_breakpoints>: Remove field.
+	(cancel_breakpoints): Delete.
+	* tracepoint.c (clear_installed_tracepoints, stop_tracing)
+	(upload_fast_traceframes): Remove references to
+	cancel_breakpoints.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* thread-db.c (find_new_threads_callback): Ignore thread if the
 	kernel thread ID is -1.
 

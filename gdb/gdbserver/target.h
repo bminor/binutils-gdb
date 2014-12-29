@@ -304,9 +304,6 @@ struct target_ops
      the pause call.  */
   void (*unpause_all) (int unfreeze);
 
-  /* Cancel all pending breakpoints hits in all threads.  */
-  void (*cancel_breakpoints) (void);
-
   /* Stabilize all threads.  That is, force them out of jump pads.  */
   void (*stabilize_threads) (void);
 
@@ -451,13 +448,6 @@ int kill_inferior (int);
     {						\
       if (the_target->unpause_all)		\
 	(*the_target->unpause_all) (unfreeze);	\
-    } while (0)
-
-#define cancel_breakpoints()			\
-  do						\
-    {						\
-      if (the_target->cancel_breakpoints)     	\
-	(*the_target->cancel_breakpoints) ();  	\
     } while (0)
 
 #define stabilize_threads()			\

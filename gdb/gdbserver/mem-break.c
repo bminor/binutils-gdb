@@ -1610,6 +1610,40 @@ breakpoint_inserted_here (CORE_ADDR addr)
   return 0;
 }
 
+/* See mem-break.h.  */
+
+int
+software_breakpoint_inserted_here (CORE_ADDR addr)
+{
+  struct process_info *proc = current_process ();
+  struct raw_breakpoint *bp;
+
+  for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
+    if (bp->raw_type == raw_bkpt_type_sw
+	&& bp->pc == addr
+	&& bp->inserted)
+      return 1;
+
+  return 0;
+}
+
+/* See mem-break.h.  */
+
+int
+hardware_breakpoint_inserted_here (CORE_ADDR addr)
+{
+  struct process_info *proc = current_process ();
+  struct raw_breakpoint *bp;
+
+  for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
+    if (bp->raw_type == raw_bkpt_type_hw
+	&& bp->pc == addr
+	&& bp->inserted)
+      return 1;
+
+  return 0;
+}
+
 static int
 validate_inserted_breakpoint (struct raw_breakpoint *bp)
 {
