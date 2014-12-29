@@ -1,3 +1,12 @@
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bp_location_inserted_here_p): New function,
+	factored out from ...
+	(breakpoint_inserted_here_p): ... here.  Use
+	ALL_BP_LOCATIONS_AT_ADDR.
+	(software_breakpoint_inserted_here_p): Use
+	bp_location_inserted_here_p and ALL_BP_LOCATIONS_AT_ADDR.
+
 2014-01-09  Pedro Alves  <palves@redhat.com>
 
 	Skip enabling event reporting if the kernel supports
