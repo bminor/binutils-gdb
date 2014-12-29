@@ -2085,6 +2085,10 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
       ourstatus->value.execd_pathname
 	= xstrdup (linux_child_pid_to_exec_file (NULL, pid));
 
+      /* The thread that execed must have been resumed, but, when a
+	 thread execs, it changes its tid to the tgid, and the old
+	 tgid thread might have not been resumed.  */
+      lp->resumed = 1;
       return 0;
     }
 

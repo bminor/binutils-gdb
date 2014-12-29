@@ -1,5 +1,10 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (linux_handle_extended_wait) <PTRACE_EVENT_EXEC>:
+	Set the LWP's 'resumed' flag.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (linux_resume_one_lwp): New function.
 	(resume_lwp): Use lwp_status_pending_p and linux_resume_one_lwp.
 	(linux_nat_resume): Use lwp_status_pending_p and
