@@ -1,3 +1,7 @@
+2014-12-29  Anthony Green  <green@moxielogic.com>
+
+	* configure.tgt: Add support for moxiebox target.
+
 2014-12-27  Anthony Green  <green@moxielogic.com>
 
 	* moxie-tdep.c (moxie_software_single_step): ldo/sto instructions
