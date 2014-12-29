@@ -1,5 +1,19 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/ia64-sigill.c (threads_started_barrier): New global.
+	(thread_func): Wait on barrier.
+	(main): Wait for all threads to start before stopping GDB.
+	* gdb.threads/siginfo-threads.c (threads_started_barrier): New
+	global.
+	(thread1_func, thread2_func): Wait on barrier.
+	(main): Wait for all threads to start before stopping GDB.
+	* gdb.threads/watchthreads-reorder.c (threads_started_barrier):
+	New global.
+	(thread1_func, thread2_func): Wait on barrier.
+	(main): Wait for all threads to start before stopping GDB.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/attach-many-short-lived-threads.c: New file.
 	* gdb.threads/attach-many-short-lived-threads.exp: New file.
 
