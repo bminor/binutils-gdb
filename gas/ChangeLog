@@ -1,3 +1,8 @@
+2014-12-27  Anthony Green  <green@moxielogic.com
+
+	* config/tc-moxie.c (md_assemble): ldo/sto instructions now use a
+	16 bit offset instead of 32.
+
 2014-12-25  Yaakov Selkowitz  <yselkowi@redhat.com>
 
 	PR gas/17753

@@ -9968,25 +9968,25 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 							OBJ_ATTR_PROC,
 							Tag_ABI_VFP_args))
 			{
-			case (int) AEABI_VFP_args_base:
+			case AEABI_VFP_args_base:
 			  /* "The user intended FP parameter/result
 			     passing to conform to AAPCS, base
 			     variant".  */
 			  fp_model = ARM_FLOAT_SOFT_VFP;
 			  break;
-			case (int) AEABI_VFP_args_vfp:
+			case AEABI_VFP_args_vfp:
 			  /* "The user intended FP parameter/result
 			     passing to conform to AAPCS, VFP
 			     variant".  */
 			  fp_model = ARM_FLOAT_VFP;
 			  break;
-			case (int) AEABI_VFP_args_toolchain:
+			case AEABI_VFP_args_toolchain:
 			  /* "The user intended FP parameter/result
 			     passing to conform to tool chain-specific
 			     conventions" - we don't know any such
 			     conventions, so leave it as "auto".  */
 			  break;
-			case (int) AEABI_VFP_args_compatible:
+			case AEABI_VFP_args_compatible:
 			  /* "Code is compatible with both the base
 			     and VFP variants; the user did not permit
 			     non-variadic functions to pass FP

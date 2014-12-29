@@ -1,3 +1,8 @@
+2014-12-26  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/strip-11.d: New test.
+	* binutils-all/objcopy.exp: Run it.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* binutils-all/objcopy.exp: Skip strip-10 for Visium.

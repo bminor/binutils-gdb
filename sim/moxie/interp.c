@@ -50,6 +50,12 @@ FILE *tracefile;
    + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+2) << 8) \
    + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+3)))
 
+#define EXTRACT_OFFSET(addr)						\
+  (unsigned int)							\
+  (((signed short)							\
+    ((sim_core_read_aligned_1 (scpu, cia, read_map, addr) << 8)		\
+     + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+1))) << 16) >> 16)
+
 unsigned long
 moxie_extract_unsigned_integer (addr, len)
      unsigned char * addr;
@@ -555,26 +561,26 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0x0c: /* ldo.l */
 	      {
-		unsigned int addr = EXTRACT_WORD(pc+2);
+		unsigned int addr = EXTRACT_OFFSET(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
 		TRACE("ldo.l");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rlat (scpu, opc, addr);
-		pc += 4;
+		pc += 2;
 	      }
 	      break;
 	    case 0x0d: /* sto.l */
 	      {
-		unsigned int addr = EXTRACT_WORD(pc+2);
+		unsigned int addr = EXTRACT_OFFSET(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
 		TRACE("sto.l");
 		addr += cpu.asregs.regs[a];
 		wlat (scpu, opc, addr, cpu.asregs.regs[b]);
-		pc += 4;
+		pc += 2;
 	      }
 	      break;
 	    case 0x0e: /* cmp */
@@ -641,20 +647,7 @@ sim_resume (sd, step, siggnal)
 		cpu.asregs.regs[a] = (int) bv & 0xffff;
 	      }
 	      break;
-	    case 0x14: /* mul.x */
-	      {
-		int a = (inst >> 4) & 0xf;
-		int b = inst & 0xf;
-		unsigned av = cpu.asregs.regs[a];
-		unsigned bv = cpu.asregs.regs[b];
-		signed long long r = 
-		  (signed long long) av * (signed long long) bv;
-
-		TRACE("mul.x");
-		cpu.asregs.regs[a] = r >> 32;
-	      }
-	      break;
-	    case 0x15: /* umul.x */
+	    case 0x14: /* umul.x */
 	      {
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
@@ -664,6 +657,19 @@ sim_resume (sd, step, siggnal)
 		  (unsigned long long) av * (unsigned long long) bv;
 
 		TRACE("umul.x");
+		cpu.asregs.regs[a] = r >> 32;
+	      }
+	      break;
+	    case 0x15: /* mul.x */
+	      {
+		int a = (inst >> 4) & 0xf;
+		int b = inst & 0xf;
+		unsigned av = cpu.asregs.regs[a];
+		unsigned bv = cpu.asregs.regs[b];
+		signed long long r = 
+		  (signed long long) av * (signed long long) bv;
+
+		TRACE("mul.x");
 		cpu.asregs.regs[a] = r >> 32;
 	      }
 	      break;
@@ -1057,50 +1063,50 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0x36: /* ldo.b */
 	      {
-		unsigned int addr = EXTRACT_WORD(pc+2);
+		unsigned int addr = EXTRACT_OFFSET(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
 		TRACE("ldo.b");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rbat (scpu, opc, addr);
-		pc += 4;
+		pc += 2;
 	      }
 	      break;
 	    case 0x37: /* sto.b */
 	      {
-		unsigned int addr = EXTRACT_WORD(pc+2);
+		unsigned int addr = EXTRACT_OFFSET(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
 		TRACE("sto.b");
 		addr += cpu.asregs.regs[a];
 		wbat (scpu, opc, addr, cpu.asregs.regs[b]);
-		pc += 4;
+		pc += 2;
 	      }
 	      break;
 	    case 0x38: /* ldo.s */
 	      {
-		unsigned int addr = EXTRACT_WORD(pc+2);
+		unsigned int addr = EXTRACT_OFFSET(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
 		TRACE("ldo.s");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rsat (scpu, opc, addr);
-		pc += 4;
+		pc += 2;
 	      }
 	      break;
 	    case 0x39: /* sto.s */
 	      {
-		unsigned int addr = EXTRACT_WORD(pc+2);
+		unsigned int addr = EXTRACT_OFFSET(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
 		TRACE("sto.s");
 		addr += cpu.asregs.regs[a];
 		wsat (scpu, opc, addr, cpu.asregs.regs[b]);
-		pc += 4;
+		pc += 2;
 	      }
 	      break;
 	    default:

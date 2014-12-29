@@ -1,3 +1,8 @@
+2014-12-27  Anthony Green  <green@moxielogic.com>
+
+	* moxie.h (MOXIE_F1_AiB2, MOXIE_F1_ABi2): Renamed from
+	MOXIE_F1_AiB4 and MOXIE_F1_ABi2.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* visium.h: New file.
