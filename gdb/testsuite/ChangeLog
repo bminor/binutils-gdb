@@ -1,5 +1,10 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/non-stop-fair-events.c: New file.
+	* gdb.threads/non-stop-fair-events.exp: New file.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/annota1.exp (thread_test): Use srcfile and binfile from
 	the global scope.  Set a breakpoint after all threads are started
 	rather than stepping over two source lines.  Expect the prompt.
