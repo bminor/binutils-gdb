@@ -1,3 +1,8 @@
+2014-12-29  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/entry-values.exp: Update comments.  Rename variable
+	bar_call_foo to returned_from_foo.
+
 2014-12-20  Mihail-Marian Nistor  <mihail.nistor@freescale.com>
 
 	PR gdb/17394
