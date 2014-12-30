@@ -1,3 +1,8 @@
+2014-12-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Document removal of "dll-symbols", "add-shared-symbol-files"
+	and "assf" commands.
+
 2014-12-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (safe_symbol_file_add_stub)
