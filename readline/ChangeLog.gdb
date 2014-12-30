@@ -1,3 +1,10 @@
+2014-05-16  Eli Zaretskii  <eliz@gnu.org>
+
+	Reapply local patch following readline 6.3 import.
+	* complete.c (stat_char) [_WIN32]: Don't use 'access' and X_OK on
+	Windows, they don't work.  Instead, look at the file-name
+	extension to determine whether the file is executable.
+
 2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
 
 	Import readline 6.3 and upstream patches 1-8.
