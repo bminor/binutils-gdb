@@ -1,3 +1,12 @@
+2014-12-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (safe_symbol_file_add_stub)
+	(safe_symbol_file_add_cleanup, safe_symbol_file_add)
+	(dll_symbol_command): Delete.
+	(_initialize_windows_nat): Delete local variable "c".
+	Remove "dll-symbols", "add-shared-symbol-files" and assf"
+	commands.
+
 2014-12-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Remove casts in Tag_ABI_VFP_args switch
