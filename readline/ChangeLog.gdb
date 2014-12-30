@@ -1,3 +1,9 @@
+2014-12-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* complete.c (stat_char) [_WIN32]: Don't use 'access' and X_OK on
+	Windows, they don't work.  Instead, look at the file-name
+	extension to determine whether the file is executable.
+
 2014-09-22  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>
