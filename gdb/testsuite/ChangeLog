@@ -1,3 +1,7 @@
+2015-01-08  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/entry-values.exp: Set call_insn for MIPS target.
+
 2015-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix testcase compilation.
