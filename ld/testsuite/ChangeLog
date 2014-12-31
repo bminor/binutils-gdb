@@ -1,3 +1,11 @@
+2014-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17773
+	* ld-elf/binutils.exp (binutils_test): Add an optional
+	readelf_options.  Replace -l with $readelf_options.  Add a
+	gap test.
+	* ld/testsuite/ld-elf/gap.s: New file.
+
 2014-12-26  Alan Modra  <amodra@gmail.com>
 
 	* ld-sh/sh64/crangerel1.rd: Update.

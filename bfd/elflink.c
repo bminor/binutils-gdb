@@ -10614,7 +10614,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   unsigned int i;
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Shdr *symtab_shndx_hdr;
-  Elf_Internal_Shdr *symstrtab_hdr;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_outext_info eoinfo;
   bfd_boolean merged;
@@ -11315,25 +11314,28 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
 
-  /* Finish up and write out the symbol string table (.strtab)
-     section.  */
-  symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
-  /* sh_name was set in prep_headers.  */
-  symstrtab_hdr->sh_type = SHT_STRTAB;
-  symstrtab_hdr->sh_flags = 0;
-  symstrtab_hdr->sh_addr = 0;
-  symstrtab_hdr->sh_size = _bfd_stringtab_size (flinfo.symstrtab);
-  symstrtab_hdr->sh_entsize = 0;
-  symstrtab_hdr->sh_link = 0;
-  symstrtab_hdr->sh_info = 0;
-  /* sh_offset is set just below.  */
-  symstrtab_hdr->sh_addralign = 1;
-
-  off = _bfd_elf_assign_file_position_for_section (symstrtab_hdr, off, TRUE);
-  elf_next_file_pos (abfd) = off;
-
   if (bfd_get_symcount (abfd) > 0)
     {
+      /* Finish up and write out the symbol string table (.strtab)
+	 section.  */
+      Elf_Internal_Shdr *symstrtab_hdr;
+
+      symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
+      /* sh_name was set in prep_headers.  */
+      symstrtab_hdr->sh_type = SHT_STRTAB;
+      symstrtab_hdr->sh_flags = 0;
+      symstrtab_hdr->sh_addr = 0;
+      symstrtab_hdr->sh_size = _bfd_stringtab_size (flinfo.symstrtab);
+      symstrtab_hdr->sh_entsize = 0;
+      symstrtab_hdr->sh_link = 0;
+      symstrtab_hdr->sh_info = 0;
+      /* sh_offset is set just below.  */
+      symstrtab_hdr->sh_addralign = 1;
+
+      off = _bfd_elf_assign_file_position_for_section (symstrtab_hdr,
+						       off, TRUE);
+      elf_next_file_pos (abfd) = off;
+
       if (bfd_seek (abfd, symstrtab_hdr->sh_offset, SEEK_SET) != 0
 	  || ! _bfd_stringtab_emit (abfd, flinfo.symstrtab))
 	return FALSE;

@@ -1,3 +1,9 @@
+2014-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17773
+	* elflink.c (bfd_elf_final_link): Assign the file position for
+	the symbol string table only there are symbols to be emitted.
+
 2014-12-28  Alan Modra  <amodra@gmail.com>
 
 	PR 17766
