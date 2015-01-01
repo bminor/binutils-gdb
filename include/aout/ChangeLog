@@ -1,3 +1,7 @@
+2015-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
 	Update copyright years.
@@ -252,7 +256,7 @@ Mon Aug 23  Sean Fagan  (sef@cygnus.com)
 	directory.
 
 
-Copyright (C) 1991-2014 Free Software Foundation, Inc.
+Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
