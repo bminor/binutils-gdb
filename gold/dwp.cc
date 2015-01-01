@@ -2352,7 +2352,7 @@ print_version()
 {
   // This output is intended to follow the GNU standards.
   printf("GNU dwp %s\n", BFD_VERSION_STRING);
-  printf(_("Copyright (C) 2014-2015 Free Software Foundation, Inc.\n"));
+  printf(_("Copyright (C) 2015 Free Software Foundation, Inc.\n"));
   printf(_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or (at your option) any later version.\n\
