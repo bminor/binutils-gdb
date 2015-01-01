@@ -1,6 +1,6 @@
 /* Remote debugging interface for boot monitors, for GDB.
 
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
    Resurrected from the ashes by Stu Grossman.

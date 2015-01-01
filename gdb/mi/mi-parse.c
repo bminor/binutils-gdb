@@ -1,6 +1,6 @@
 /* MI Command Set - MI parser.
 
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 

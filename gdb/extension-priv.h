@@ -1,7 +1,7 @@
 /* Private implementation details of interface between gdb and its
    extension languages.
 
-   Copyright (C) 2014 Free Software Foundation, Inc.
+   Copyright (C) 2014-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
