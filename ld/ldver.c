@@ -38,7 +38,7 @@ ldversion (int noisy)
 
   if (noisy & 2)
     {
-      printf (_("Copyright (C) 2014-2015 Free Software Foundation, Inc.\n"));
+      printf (_("Copyright (C) 2015 Free Software Foundation, Inc.\n"));
       printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or (at your option) a later version.\n\
