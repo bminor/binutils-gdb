@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright (C) 1988-2014 Free Software Foundation, Inc.
+@c Copyright (C) 1988-2015 Free Software Foundation, Inc.
 @c
 @c %**start of header
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
@@ -50,7 +50,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1988-2014 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2015 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -120,7 +120,7 @@ This is the @value{EDITION} Edition, for @value{GDBN}
 @end ifset
 Version @value{GDBVN}.
 
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2015 Free Software Foundation, Inc.
 
 This edition of the GDB manual is dedicated to the memory of Fred
 Fish.  Fred was a long-standing contributor to GDB and to Free
@@ -17390,22 +17390,6 @@ evaluation yields the address of the file's shared object file header.
 For this command to work, you must have used @code{symbol-file} or
 @code{exec-file} commands in advance.
 
-@kindex add-shared-symbol-files
-@kindex assf
-@item add-shared-symbol-files @var{library-file}
-@itemx assf @var{library-file}
-This command is deprecated and will be removed in future versions
-of @value{GDBN}.  Use the @code{sharedlibrary} command instead.
-
-The @code{add-shared-symbol-files} command can currently be used only
-in the Cygwin build of @value{GDBN} on MS-Windows OS, where it is an
-alias for the @code{dll-symbols} command (@pxref{Cygwin Native}).
-@value{GDBN} automatically looks for shared libraries, however if
-@value{GDBN} does not find yours, you can invoke
-@code{add-shared-symbol-files}.  It takes one argument: the shared
-library's file name.  @code{assf} is a shorthand alias for
-@code{add-shared-symbol-files}.
-
 @kindex section
 @item section @var{section} @var{addr}
 The @code{section} command changes the base address of the named
@@ -20377,14 +20361,6 @@ selector for 32-bit programs and @code{$gs} for 64-bit programs).
 @kindex info dll
 @item info dll
 This is a Cygwin-specific alias of @code{info shared}.
-
-@kindex dll-symbols
-@item dll-symbols
-This command is deprecated and will be removed in future versions
-of @value{GDBN}.  Use the @code{sharedlibrary} command instead.
-
-This command loads symbols from a dll similarly to
-add-sym command but without the need to specify a base address.
 
 @kindex set cygwin-exceptions
 @cindex debugging the Cygwin DLL

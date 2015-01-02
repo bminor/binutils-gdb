@@ -1,5 +1,5 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "tdesc.h"
 #include "dll.h"
 #include "rsp-low.h"
+#include <ctype.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -741,10 +742,18 @@ input_interrupt (int unused)
 
       cc = read_prim (&c, 1);
 
-      if (cc != 1 || c != '\003' || current_thread == NULL)
+      if (cc == 0)
 	{
-	  fprintf (stderr, "input_interrupt, count = %d c = %d ('%c')\n",
-		   cc, c, c);
+	  fprintf (stderr, "client connection closed\n");
+	  return;
+	}
+      else if (cc != 1 || c != '\003' || current_thread == NULL)
+	{
+	  fprintf (stderr, "input_interrupt, count = %d c = %d ", cc, c);
+	  if (isprint (c))
+	    fprintf (stderr, "('%c')\n", c);
+	  else
+	    fprintf (stderr, "('\\x%02x')\n", c & 0xff);
 	  return;
 	}
 

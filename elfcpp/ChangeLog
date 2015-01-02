@@ -1,3 +1,7 @@
+2015-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
 2014-12-25  Alan Modra  <amodra@gmail.com>
 
 	* arm.h: Add enums for Tag_ABI_FP_number_model and Tag_ABI_VFP_args.
@@ -385,7 +389,7 @@
 
 	* Added source code to GNU binutils.
 
-Copyright (C) 2008-2014 Free Software Foundation, Inc.
+Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

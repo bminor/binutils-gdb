@@ -109,6 +109,10 @@ SGI Irix-6.x				mips-*-irix6*
 VAX running (4.2 - 4.3 Reno) BSD 	vax-*-bsd*
 VAX running Ultrix 			vax-*-ultrix*
 
+* The "dll-symbols" command, and its two aliases ("add-shared-symbol-files"
+  and "assf"), have been removed.  Use the "sharedlibrary" command, or
+  its alias "share", instead.
+
 *** Changes in GDB 7.8
 
 * New command line options

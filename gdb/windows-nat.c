@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling windows child processes, for GDB.
 
-   Copyright (C) 1995-2014 Free Software Foundation, Inc.
+   Copyright (C) 1995-2015 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -551,61 +551,6 @@ struct lm_info
 
 static struct so_list solib_start, *solib_end;
 
-/* Call symbol_file_add with stderr redirected.  We don't care if there
-   are errors.  */
-static int
-safe_symbol_file_add_stub (void *argv)
-{
-#define p ((struct safe_symbol_file_add_args *) argv)
-  const int add_flags = ((p->from_tty ? SYMFILE_VERBOSE : 0)
-                         | (p->mainline ? SYMFILE_MAINLINE : 0));
-  p->ret = symbol_file_add (p->name, add_flags, p->addrs, p->flags);
-  return !!p->ret;
-#undef p
-}
-
-/* Restore gdb's stderr after calling symbol_file_add.  */
-static void
-safe_symbol_file_add_cleanup (void *p)
-{
-#define sp ((struct safe_symbol_file_add_args *)p)
-  gdb_flush (gdb_stderr);
-  gdb_flush (gdb_stdout);
-  ui_file_delete (gdb_stderr);
-  ui_file_delete (gdb_stdout);
-  gdb_stderr = sp->err;
-  gdb_stdout = sp->out;
-#undef sp
-}
-
-/* symbol_file_add wrapper that prevents errors from being displayed.  */
-static struct objfile *
-safe_symbol_file_add (char *name, int from_tty,
-		      struct section_addr_info *addrs,
-		      int mainline, int flags)
-{
-  struct safe_symbol_file_add_args p;
-  struct cleanup *cleanup;
-
-  cleanup = make_cleanup (safe_symbol_file_add_cleanup, &p);
-
-  p.err = gdb_stderr;
-  p.out = gdb_stdout;
-  gdb_flush (gdb_stderr);
-  gdb_flush (gdb_stdout);
-  gdb_stderr = ui_file_new ();
-  gdb_stdout = ui_file_new ();
-  p.name = name;
-  p.from_tty = from_tty;
-  p.addrs = addrs;
-  p.mainline = mainline;
-  p.flags = flags;
-  catch_errors (safe_symbol_file_add_stub, &p, "", RETURN_MASK_ERROR);
-
-  do_cleanups (cleanup);
-  return p.ret;
-}
-
 static struct so_list *
 windows_make_so (const char *name, LPVOID load_addr)
 {
@@ -852,28 +797,6 @@ windows_clear_solib (void)
 {
   solib_start.next = NULL;
   solib_end = &solib_start;
-}
-
-/* Load DLL symbol info.  */
-static void
-dll_symbol_command (char *args, int from_tty)
-{
-  int n;
-  dont_repeat ();
-
-  if (args == NULL)
-    error (_("dll-symbols requires a file name"));
-
-  n = strlen (args);
-  if (n > 4 && strcasecmp (args + n - 4, ".dll") != 0)
-    {
-      char *newargs = (char *) alloca (n + 4 + 1);
-      strcpy (newargs, args);
-      strcat (newargs, ".dll");
-      args = newargs;
-    }
-
-  safe_symbol_file_add (args, from_tty, NULL, 0, OBJF_SHARED | OBJF_USERLOADED);
 }
 
 /* Handle DEBUG_STRING output from child process.
@@ -2587,7 +2510,6 @@ extern initialize_file_ftype _initialize_windows_nat;
 void
 _initialize_windows_nat (void)
 {
-  struct cmd_list_element *c;
   struct target_ops *t;
 
   t = windows_target ();
@@ -2609,21 +2531,6 @@ _initialize_windows_nat (void)
 #ifdef __CYGWIN__
   cygwin_internal (CW_SET_DOS_FILE_WARNING, 0);
 #endif
-
-  c = add_com ("dll-symbols", class_files, dll_symbol_command,
-	       _("Load dll library symbols from FILE."));
-  set_cmd_completer (c, filename_completer);
-  deprecate_cmd (c, "sharedlibrary");
-
-  c = add_com ("add-shared-symbol-files", class_files, dll_symbol_command,
-	       _("Load dll library symbols from FILE."));
-  set_cmd_completer (c, filename_completer);
-  deprecate_cmd (c, "sharedlibrary");
-
-  c = add_com ("assf", class_files, dll_symbol_command,
-	       _("Load dll library symbols from FILE."));
-  set_cmd_completer (c, filename_completer);
-  deprecate_cmd (c, "sharedlibrary");
 
 #ifdef __CYGWIN__
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\

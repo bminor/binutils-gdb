@@ -1,3 +1,12 @@
+2015-01-02  Alan Modra  <amodra@gmail.com>
+
+	* version.cc (print_version): Just print current year.
+	* dwp.cc (print_version): Likewise.
+
+2015-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
 2014-12-25  Alan Modra  <amodra@gmail.com>
 
 	* arm.cc (Target_arm::do_adjust_elf_header): Provide namespace on
@@ -16454,7 +16463,7 @@
 
 	* Added source code to GNU binutils.
 
-Copyright (C) 2008-2014 Free Software Foundation, Inc.
+Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

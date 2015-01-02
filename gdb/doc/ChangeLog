@@ -1,3 +1,10 @@
+2014-12-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Files): Remove documentation of the
+	"add-shared-symbol-files" and "assf" commands.
+	(Cygwin Native): Remove documentation of the "dll-symbols"
+	command.
+
 2014-12-17  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.texinfo (Debugging Output): Document "debug symbol-lookup".

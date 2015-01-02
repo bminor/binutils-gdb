@@ -1,3 +1,15 @@
+2015-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbreplay.c (gdbreplay_version): Update copyright year to 2015.
+	* server.c (gdbserver_version): Likewise.
+
+2014-12-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* remote-utils.c: Include ctype.h.
+	(input_interrupt): Explicitly handle the case when the char
+	received is the NUL byte.  Improve the printing of non-ASCII
+	characters.
+
 2014-12-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* linux-low.c (linux_low_filter_event): Update call to
