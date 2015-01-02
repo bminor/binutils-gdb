@@ -712,7 +712,7 @@ struct symbol
   struct type *type;
 
   /* The owner of this symbol.
-     Which one to use is defined by symbol.is_arch_owned.  */
+     Which one to use is defined by symbol.is_objfile_owned.  */
 
   union
   {

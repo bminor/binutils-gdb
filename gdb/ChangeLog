@@ -1,3 +1,7 @@
+2015-01-02  Doug Evans  <dje@google.com>
+
+	* symtab.h (struct symbol): Fix typo in comment.
+
 2015-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Update year range in copyright notice of all files.
