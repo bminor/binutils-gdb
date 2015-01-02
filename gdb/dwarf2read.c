@@ -9152,7 +9152,6 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 	  gdb_assert (tu_group->symtabs == NULL);
 	  restart_symtab (tu_group->compunit_symtab, "", 0);
 	}
-      /* Note: The compunit symtab will get allocated at the end.  */
       return;
     }
 
