@@ -1,3 +1,7 @@
+2015-01-02  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw4-sig-types.exp: Also pass -fdebug-types-section to gcc.
+
 2014-12-29  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/entry-values.exp: Update comments.  Rename variable
