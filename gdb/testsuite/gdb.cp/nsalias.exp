@@ -90,8 +90,8 @@ Dwarf::assemble $asm_file {
 
 			im_foo_label: DW_TAG_subprogram {
 			    {name foo}
-			    {external 1}
-			    {declaration 1}
+			    {external 1 flag_present}
+			    {declaration 1 flag_present}
 			}
 		    }
 
@@ -108,8 +108,8 @@ Dwarf::assemble $asm_file {
 
 		    i_foo_label: subprogram {
 			{name foo}
-			{external 1}
-			{declaration 1}
+			{external 1 flag_present}
+			{declaration 1 flag_present}
 		    }
 		}
 
@@ -126,8 +126,8 @@ Dwarf::assemble $asm_file {
 
 		o_foo_label: subprogram {
 		    {name foo}
-		    {external 1}
-		    {declaration 1}
+		    {external 1 flag_present}
+		    {declaration 1 flag_present}
 		}
 	    }
 

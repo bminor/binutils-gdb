@@ -1,3 +1,7 @@
+2015-01-02  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.cp/nsalias.exp: Fix output of external/declaration flags.
+
 2015-01-02  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dw4-sig-types.exp: Also pass -fdebug-types-section to gcc.
