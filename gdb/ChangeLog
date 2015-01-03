@@ -1,3 +1,8 @@
+2015-01-03  Doug Evans  <xdje42@gmail.com>
+
+	* c-exp.y: Whitespace cleanup.
+	(classify_inner_name): Remove extra ;.
+
 2015-01-02  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips32_scan_prologue): Keep the extracted stack
