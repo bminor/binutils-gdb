@@ -1,3 +1,8 @@
+2015-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-avr.c (md_apply_fix): Update the contents of VALP for
+	diff fixups.
+
 2015-01-09  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
 
 	* config/tc-arm.c (arm_cpus): Add support for APM X-Gene 1 and
