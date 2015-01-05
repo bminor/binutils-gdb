@@ -38,6 +38,7 @@ static unsigned int last_pointer_size = 0;
 static int warned_about_missing_comp_units = FALSE;
 
 static unsigned int num_debug_info_entries = 0;
+static unsigned int alloc_num_debug_info_entries = 0;
 static debug_info *debug_information = NULL;
 /* Special value for num_debug_info_entries to indicate
    that the .debug_info section could not be loaded/parsed.  */
@@ -2280,8 +2281,10 @@ process_debug_info (struct dwarf_section *section,
 	{
 	  error (_("Not enough memory for a debug info array of %u entries\n"),
 		 num_units);
+	  alloc_num_debug_info_entries = num_debug_info_entries = 0;
 	  return 0;
 	}
+      alloc_num_debug_info_entries = num_units;
     }
 
   if (!do_loc)
@@ -2596,10 +2599,11 @@ process_debug_info (struct dwarf_section *section,
 		/* Show the offset from where the tag was extracted.  */
 		printf ("    <%lx>", (unsigned long)(tags - section_begin));
 
-	      arg = debug_information;
-	      if (debug_information)
-		arg += unit;
-
+	      if (debug_information && unit < alloc_num_debug_info_entries)
+		arg = debug_information + unit;
+	      else
+		arg = NULL;
+	      
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
 					    tags,
@@ -2624,7 +2628,12 @@ process_debug_info (struct dwarf_section *section,
   if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0
       && ! do_types)
-    num_debug_info_entries = num_units;
+    {
+      if (num_units > alloc_num_debug_info_entries)	
+	num_debug_info_entries = alloc_num_debug_info_entries;
+      else
+	num_debug_info_entries = num_units;
+    }
 
   if (!do_loc)
     printf ("\n");
@@ -2661,9 +2670,10 @@ load_debug_info (void * file)
   if (load_debug_section (info, file)
       && process_debug_info (&debug_displays [info].section, file, abbrev, 1, 0))
     return num_debug_info_entries;
-  else if (load_debug_section (info_dwo, file)
-           && process_debug_info (&debug_displays [info_dwo].section, file,
-                                  abbrev_dwo, 1, 0))
+
+  if (load_debug_section (info_dwo, file)
+      && process_debug_info (&debug_displays [info_dwo].section, file,
+			     abbrev_dwo, 1, 0))
     return num_debug_info_entries;
 
   num_debug_info_entries = DEBUG_INFO_UNAVAILABLE;
@@ -4271,23 +4281,35 @@ display_debug_abbrev (struct dwarf_section *section,
 static void
 display_loc_list (struct dwarf_section *section,
                   unsigned char **start_ptr,
-                  int debug_info_entry,
+                  unsigned int debug_info_entry,
                   unsigned long offset,
                   unsigned long base_address,
                   int has_frame_base)
 {
   unsigned char *start = *start_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset = debug_information [debug_info_entry].cu_offset;
-  unsigned int pointer_size = debug_information [debug_info_entry].pointer_size;
-  unsigned int offset_size = debug_information [debug_info_entry].offset_size;
-  int dwarf_version = debug_information [debug_info_entry].dwarf_version;
+  unsigned long cu_offset;
+  unsigned int pointer_size;
+  unsigned int offset_size;
+  int dwarf_version;
 
   dwarf_vma begin;
   dwarf_vma end;
   unsigned short length;
   int need_frame_base;
 
+  if (debug_info_entry >= num_debug_info_entries)
+    {
+      warn (_("No debug information available for loc lists of entry: %u\n"),
+	    debug_info_entry);
+      return;
+    }
+  
+  cu_offset = debug_information [debug_info_entry].cu_offset;
+  pointer_size = debug_information [debug_info_entry].pointer_size;
+  offset_size = debug_information [debug_info_entry].offset_size;
+  dwarf_version = debug_information [debug_info_entry].dwarf_version;
+  
   if (pointer_size < 2 || pointer_size > 8)
     {
       warn (_("Invalid pointer size (%d) in debug info for entry %d\n"),
@@ -4391,21 +4413,33 @@ print_addr_index (unsigned int idx, unsigned int len)
 static void
 display_loc_list_dwo (struct dwarf_section *section,
                       unsigned char **start_ptr,
-                      int debug_info_entry,
+                      unsigned int debug_info_entry,
                       unsigned long offset,
                       int has_frame_base)
 {
   unsigned char *start = *start_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset = debug_information [debug_info_entry].cu_offset;
-  unsigned int pointer_size = debug_information [debug_info_entry].pointer_size;
-  unsigned int offset_size = debug_information [debug_info_entry].offset_size;
-  int dwarf_version = debug_information [debug_info_entry].dwarf_version;
+  unsigned long cu_offset;
+  unsigned int pointer_size;
+  unsigned int offset_size;
+  int dwarf_version;
   int entry_type;
   unsigned short length;
   int need_frame_base;
   unsigned int idx;
   unsigned int bytes_read;
+
+  if (debug_info_entry >= num_debug_info_entries)
+    {
+      warn (_("No debug information for loc lists of entry: %u\n"),
+	    debug_info_entry);
+      return;
+    }
+
+  cu_offset = debug_information [debug_info_entry].cu_offset;
+  pointer_size = debug_information [debug_info_entry].pointer_size;
+  offset_size = debug_information [debug_info_entry].offset_size;
+  dwarf_version = debug_information [debug_info_entry].dwarf_version;
 
   if (pointer_size < 2 || pointer_size > 8)
     {
@@ -4902,10 +4936,8 @@ display_debug_addr (struct dwarf_section *section,
 
   count = 0;
   for (i = 0; i < num_debug_info_entries; i++)
-    {
-      if (debug_information [i].addr_base != DEBUG_INFO_UNAVAILABLE)
-        debug_addr_info [count++] = &debug_information [i];
-    }
+    if (debug_information [i].addr_base != DEBUG_INFO_UNAVAILABLE)
+      debug_addr_info [count++] = debug_information + i;
 
   /* Add a sentinel to make iteration convenient.  */
   debug_addr_info [count] = (debug_info *) xmalloc (sizeof (debug_info));
@@ -6963,7 +6995,12 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		  else
 		    {
 		      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
-		      this_set [row - 1].section_offsets [dw_sect] = val;
+
+		      /* PR 17531: file: 10796eb3.  */
+		      if (dw_sect >= DW_SECT_MAX)
+			warn (_("Overlarge Dwarf section index detected: %u\n"), dw_sect);
+		      else
+			this_set [row - 1].section_offsets [dw_sect] = val;
 		    }
 		}
 
@@ -7016,6 +7053,9 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		  else
 		    {
 		      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
+		      if (dw_sect >= DW_SECT_MAX)
+			warn (_("Overlarge Dwarf section index detected: %u\n"), dw_sect);
+		      else
 		      this_set [row - 1].section_sizes [dw_sect] = val;
 		    }
 		}
@@ -7100,34 +7140,40 @@ display_debug_not_supported (struct dwarf_section *section,
   return 1;
 }
 
+/* Like malloc, but takes two parameters.
+   Note: does *not* initialise the allocated memory to zero.  */
 void *
 cmalloc (size_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
     return NULL;
-  else
-    return malloc (nmemb * size);
+
+  return xmalloc (nmemb * size);
 }
 
+/* Like xmalloc, but takes two parameters.
+   Note: does *not* initialise the allocated memory to zero.  */
 void *
 xcmalloc (size_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
     return NULL;
-  else
-    return xmalloc (nmemb * size);
+
+  return xmalloc (nmemb * size);
 }
 
+/* Like xrealloc, but takes three parameters.
+   Note: does *not* initialise any new memory to zero.  */
 void *
 xcrealloc (void *ptr, size_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
     return NULL;
-  else
-    return xrealloc (ptr, nmemb * size);
+
+  return xrealloc (ptr, nmemb * size);
 }
 
 void
@@ -7155,10 +7201,9 @@ free_debug_memory (void)
 		free (debug_information [i].range_lists);
 	    }
 	}
-
       free (debug_information);
       debug_information = NULL;
-      num_debug_info_entries = 0;
+      alloc_num_debug_info_entries = num_debug_info_entries = 0;
     }
 }
 

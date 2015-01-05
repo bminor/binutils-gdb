@@ -32,7 +32,7 @@
    with include files (<malloc.h> and <stdlib.h> for example) just became
    too messy, particularly when such includes can be inserted at random
    times by the parser generator.  */
-   
+
 %{
 
 #include "defs.h"
@@ -231,7 +231,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
    E.g. "c" when input_radix==16.  Depending on the parse, it will be
    turned into a name or into a number.  */
 
-%token <ssym> NAME_OR_INT 
+%token <ssym> NAME_OR_INT
 
 %token OPERATOR
 %token STRUCT CLASS UNION ENUM SIZEOF UNSIGNED COLONCOLON
@@ -275,7 +275,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 %left '*' '/' '%'
 %right UNARY INCREMENT DECREMENT
 %right ARROW ARROW_STAR '.' DOT_STAR '[' OBJC_LBRAC '('
-%token <ssym> BLOCKNAME 
+%token <ssym> BLOCKNAME
 %token <bval> FILENAME
 %type <bval> block
 %left COLONCOLON
@@ -542,7 +542,7 @@ msgarg	:	name ':' exp
 			{ add_msglist(0, 0);   }
 	;
 
-exp	:	exp '(' 
+exp	:	exp '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
 			{ start_arglist (); }
@@ -715,7 +715,7 @@ exp	:	exp OROR exp
 exp	:	exp '?' exp ':' exp	%prec '?'
 			{ write_exp_elt_opcode (pstate, TERNOP_COND); }
 	;
-			  
+
 exp	:	exp '=' exp
 			{ write_exp_elt_opcode (pstate, BINOP_ASSIGN); }
 	;
@@ -903,7 +903,7 @@ exp     :	NSSTRING	/* ObjC NextStep NSString constant
 	;
 
 /* C++.  */
-exp     :       TRUEKEYWORD    
+exp     :       TRUEKEYWORD
                         { write_exp_elt_opcode (pstate, OP_LONG);
                           write_exp_elt_type (pstate,
 					  parse_type (pstate)->builtin_bool);
@@ -911,7 +911,7 @@ exp     :       TRUEKEYWORD
                           write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
-exp     :       FALSEKEYWORD   
+exp     :       FALSEKEYWORD
                         { write_exp_elt_opcode (pstate, OP_LONG);
                           write_exp_elt_type (pstate,
 					  parse_type (pstate)->builtin_bool);
@@ -1065,7 +1065,7 @@ variable:	name_not_typename
 			      if (symbol_read_needs_frame (sym))
 				{
 				  if (innermost_block == 0
-				      || contained_in (block_found, 
+				      || contained_in (block_found,
 						       innermost_block))
 				    innermost_block = block_found;
 				}
@@ -1123,10 +1123,10 @@ cv_with_space_id : const_or_volatile space_identifier const_or_volatile
 	;
 
 const_or_volatile_or_space_identifier_noopt: cv_with_space_id
-	| const_or_volatile_noopt 
+	| const_or_volatile_noopt
 	;
 
-const_or_volatile_or_space_identifier: 
+const_or_volatile_or_space_identifier:
 		const_or_volatile_or_space_identifier_noopt
 	|
 	;
@@ -1135,7 +1135,7 @@ ptr_operator:
 		ptr_operator '*'
 			{ insert_type (tp_pointer); }
 		const_or_volatile_or_space_identifier
-	|	'*' 
+	|	'*'
 			{ insert_type (tp_pointer); }
 		const_or_volatile_or_space_identifier
 	|	'&'
@@ -1155,7 +1155,7 @@ ptr_operator_ts: ptr_operator
 
 abs_decl:	ptr_operator_ts direct_abs_decl
 			{ $$ = append_type_stack ($2, $1); }
-	|	ptr_operator_ts 
+	|	ptr_operator_ts
 	|	direct_abs_decl
 	;
 
@@ -1314,7 +1314,7 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
 							 parse_gdbarch (pstate),
 							 "short"); }
-	|	SHORT UNSIGNED 
+	|	SHORT UNSIGNED
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
 							 parse_gdbarch (pstate),
 							 "short"); }
@@ -1408,14 +1408,14 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 						       "int"); }
                 /* It appears that this rule for templates is never
                    reduced; template recognition happens by lookahead
-                   in the token processing code in yylex. */         
+                   in the token processing code in yylex. */
 	|	TEMPLATE name '<' type '>'
 			{ $$ = lookup_template_type(copy_name($2), $4,
 						    expression_context_block);
 			}
-	| const_or_volatile_or_space_identifier_noopt typebase 
+	| const_or_volatile_or_space_identifier_noopt typebase
 			{ $$ = follow_types ($2); }
-	| typebase const_or_volatile_or_space_identifier_noopt 
+	| typebase const_or_volatile_or_space_identifier_noopt
 			{ $$ = follow_types ($1); }
 	;
 
@@ -1491,9 +1491,9 @@ const_and_volatile: 	CONST_KEYWORD VOLATILE_KEYWORD
 	| 		VOLATILE_KEYWORD CONST_KEYWORD
 	;
 
-const_or_volatile_noopt:  	const_and_volatile 
+const_or_volatile_noopt:  	const_and_volatile
 			{ insert_type (tp_const);
-			  insert_type (tp_volatile); 
+			  insert_type (tp_volatile);
 			}
 	| 		CONST_KEYWORD
 			{ insert_type (tp_const); }
@@ -1678,7 +1678,8 @@ write_destructor_name (struct parser_state *par_state, struct stoken token)
 }
 
 /* Returns a stoken of the operator name given by OP (which does not
-   include the string "operator").  */ 
+   include the string "operator").  */
+
 static struct stoken
 operator_stoken (const char *op)
 {
@@ -1957,7 +1958,7 @@ parse_number (struct parser_state *par_state,
   else
     {
       int shift;
-      if (sizeof (ULONGEST) * HOST_CHAR_BIT 
+      if (sizeof (ULONGEST) * HOST_CHAR_BIT
 	  < gdbarch_long_long_bit (parse_gdbarch (par_state)))
 	/* A long long does not fit in a LONGEST.  */
 	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
@@ -1973,11 +1974,11 @@ parse_number (struct parser_state *par_state,
    /* If the high bit of the worked out type is set then this number
       has to be unsigned. */
 
-   if (unsigned_p || (n & high_bit)) 
+   if (unsigned_p || (n & high_bit))
      {
        putithere->typed_val_int.type = unsigned_type;
      }
-   else 
+   else
      {
        putithere->typed_val_int.type = signed_type;
      }
@@ -2159,6 +2160,7 @@ c_parse_escape (const char **ptr, struct obstack *output)
    stored in VALUE.  This returns a token value, either STRING or
    CHAR, depending on what was parsed.  *HOST_CHARS is set to the
    number of host characters in the literal.  */
+
 static int
 parse_string_or_char (const char *tokptr, const char **outptr,
 		      struct typed_stoken *value, int *host_chars)
@@ -2408,15 +2410,13 @@ scan_macro_expansion (char *expansion)
   lexptr = copy;
 }
 
-
 static int
 scanning_macro_expansion (void)
 {
   return macro_original_text != 0;
 }
 
-
-static void 
+static void
 finished_macro_expansion (void)
 {
   /* There'd better be something to pop back to.  */
@@ -2426,7 +2426,6 @@ finished_macro_expansion (void)
   lexptr = macro_original_text;
   macro_original_text = 0;
 }
-
 
 static void
 scan_macro_cleanup (void *dummy)
@@ -2754,7 +2753,6 @@ lex_one_token (struct parser_state *par_state, int *is_quoted_name)
 		 that we look ahead only when the '<' adjoins non-whitespace
 		 characters; for comparison expressions, e.g. "a < b > c",
 		 there must be spaces before the '<', etc. */
-               
 	      const char *p = find_template_name_end (tokstart + namelen);
 
 	      if (p)
@@ -2870,6 +2868,7 @@ static struct obstack name_obstack;
    in which lookups start; this can be NULL to mean the global scope.
    IS_QUOTED_NAME is non-zero if the name token was originally quoted
    in single quotes.  */
+
 static int
 classify_name (struct parser_state *par_state, const struct block *block,
 	       int is_quoted_name)
@@ -2884,7 +2883,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
      we can refer to it unconditionally below.  */
   memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-  sym = lookup_symbol (copy, block, VAR_DOMAIN, 
+  sym = lookup_symbol (copy, block, VAR_DOMAIN,
 		       parse_language (par_state)->la_name_of_this
 		       ? &is_a_field_of_this : NULL);
 
@@ -3042,7 +3041,7 @@ classify_inner_name (struct parser_state *par_state,
       return ERROR;
 
     case LOC_TYPEDEF:
-      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym);;
+      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym);
       return TYPENAME;
 
     default:
@@ -3057,11 +3056,12 @@ classify_inner_name (struct parser_state *par_state,
    problem in our parsing approach, where the parser could not
    distinguish between qualified names and qualified types at the
    right point.
-   
+
    This approach is still not ideal, because it mishandles template
    types.  See the comment in lex_one_token for an example.  However,
    this is still an improvement over the earlier approach, and will
    suffice until we move to better parsing technology.  */
+
 static int
 yylex (void)
 {
@@ -3174,7 +3174,7 @@ yylex (void)
 	  current.token = classification;
 
 	  last_was_coloncolon = 0;
-	  
+
 	  if (classification == NAME)
 	    break;
 

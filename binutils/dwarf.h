@@ -248,10 +248,10 @@ extern void dwarf_select_sections_by_names (const char *);
 extern void dwarf_select_sections_by_letters (const char *);
 extern void dwarf_select_sections_all (void);
 
-unsigned int * find_cu_tu_set (void *, unsigned int);
+extern unsigned int * find_cu_tu_set (void *, unsigned int);
 
-void * cmalloc (size_t, size_t);
-void * xcmalloc (size_t, size_t);
-void * xcrealloc (void *, size_t, size_t);
+extern void * cmalloc (size_t, size_t);
+extern void * xcmalloc (size_t, size_t);
+extern void * xcrealloc (void *, size_t, size_t);
 
 extern dwarf_vma read_leb128 (unsigned char *, unsigned int *, bfd_boolean, const unsigned char * const);
