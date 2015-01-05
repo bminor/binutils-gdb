@@ -1,3 +1,9 @@
+2015-01-05  Daniel Klauer  <daniel.c.klauer@web.de>
+
+	PR binutils/17489
+	* doc/binutils.texi (dlltool): Correct description of --kill-at
+	option.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	* version.c (print_version): Just print current year.

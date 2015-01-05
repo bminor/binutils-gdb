@@ -4092,10 +4092,14 @@ party DLLs that were built with MS-Windows tools.
 
 @item -k
 @itemx --kill-at
-Specifies that when @command{dlltool} is creating the exports file it
-should not append the string @samp{@@ <number>}.  These numbers are
-called ordinal numbers and they represent another way of accessing the
-function in a DLL, other than by name.
+Specifies that @samp{@@<number>} suffixes should be omitted from the names
+of stdcall functions that will be imported from the DLL.  This is
+useful when creating an import library for a DLL which exports stdcall
+functions but without the usual @samp{@@<number>} symbol name suffix.
+
+This does not change the naming of symbols provided by the import library
+to programs linked against it, but only the entries in the import table
+(ie the .idata section).
 
 @item -A
 @itemx --add-stdcall-alias
