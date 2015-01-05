@@ -1,0 +1,6 @@
+2015-01-05  Will Newton  <will.newton@linaro.org>
+
+	Linaro binutils 2.25-2015.01 releaseed.
+
+	* version.h: Update VERSION.
+
