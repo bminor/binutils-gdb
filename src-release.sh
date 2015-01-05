@@ -56,8 +56,8 @@ ETC_SUPPORT="Makefile.in configure configure.in standards.texi \
 getver()
 {
     tool=$1
-    if grep 'AC_INIT.*BFD_VERSION' $tool/configure.ac >/dev/null 2>&1; then
-	bfd/configure --version | sed -n -e '1s,.* ,,p'
+    if grep 'AM_INIT_AUTOMAKE.*BFD_VERSION' $tool/configure.in >/dev/null 2>&1; then
+	bfdver=$(bfd/configure --version | sed -n -e '1s,.* ,,p'); linarover=$(sed < bfd/version.h -n 's/.*Linaro \([^ ]*\) ".*/-\1/p'); echo -n $bfdver; echo $linarover;
     elif test -f $tool/common/create-version.sh; then
 	$tool/common/create-version.sh $tool 'dummy-host' 'dummy-target' VER.tmp
 	cat VER.tmp | grep 'version\[\]' | sed 's/.*"\([^"]*\)".*/\1/' | sed 's/-cvs$//'
@@ -271,7 +271,7 @@ BINUTILS_SUPPORT_DIRS="bfd gas include libiberty opcodes ld elfcpp gold gprof in
 binutils_release()
 {
     compressors=$1
-    package=binutils
+    package=binutils-linaro
     tool=binutils
     tar_compress $package $tool "$BINUTILS_SUPPORT_DIRS" "$compressors"
 }
