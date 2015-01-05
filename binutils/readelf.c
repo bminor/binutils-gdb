@@ -6643,9 +6643,16 @@ slurp_ia64_unwind_table (FILE * file,
 	  relname = elf_ia64_reloc_type (get_reloc_type (rp->r_info));
 	  sym = aux->symtab + get_reloc_symindex (rp->r_info);
 
+	  /* PR 17531: file: 9fa67536.  */
+	  if (relname == NULL)
+	    {
+	      warn (_("Skipping unknown relocation type: %u\n"), get_reloc_type (rp->r_info));
+	      continue;
+	    }
+ 
 	  if (! const_strneq (relname, "R_IA64_SEGREL"))
 	    {
-	      warn (_("Skipping unexpected relocation type %s\n"), relname);
+	      warn (_("Skipping unexpected relocation type: %s\n"), relname);
 	      continue;
 	    }
 
@@ -8261,12 +8268,16 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
       {
 	char timebuf[20];
 	struct tm * tmp;
-
 	time_t atime = entry->d_un.d_val;
+
 	tmp = gmtime (&atime);
-	snprintf (timebuf, sizeof (timebuf), "%04u-%02u-%02uT%02u:%02u:%02u",
-		  tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
-		  tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+	/* PR 17531: file: 6accc532.  */
+	if (tmp == NULL)
+	  snprintf (timebuf, sizeof (timebuf), _("<corrupt>"));
+	else
+	  snprintf (timebuf, sizeof (timebuf), "%04u-%02u-%02uT%02u:%02u:%02u",
+		    tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+		    tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 	printf (_("Time Stamp: %s"), timebuf);
       }
       break;
@@ -13378,10 +13389,12 @@ process_msp430x_specific (FILE * file)
 
 /* DATA points to the contents of a MIPS GOT that starts at VMA PLTGOT.
    Print the Address, Access and Initial fields of an entry at VMA ADDR
-   and return the VMA of the next entry.  */
+   and return the VMA of the next entry, or -1 if there was a problem.
+   Does not read from DATA_END or beyond.  */
 
 static bfd_vma
-print_mips_got_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr)
+print_mips_got_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr,
+		      unsigned char * data_end)
 {
   printf ("  ");
   print_vma (addr, LONG_HEX);
@@ -13396,9 +13409,19 @@ print_mips_got_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr)
   else
     {
       bfd_vma entry;
+      unsigned char * from = data + addr - pltgot;
 
-      entry = byte_get (data + addr - pltgot, is_32bit_elf ? 4 : 8);
-      print_vma (entry, LONG_HEX);
+      if (from + (is_32bit_elf ? 4 : 8) > data_end)
+	{
+	  warn (_("MIPS GOT entry extends beyond the end of available data\n"));
+	  printf ("%*s", is_32bit_elf ? 8 : 16, _("<corrupt>"));
+	  return (bfd_vma) -1;
+	}
+      else
+	{
+	  entry = byte_get (data + addr - pltgot, is_32bit_elf ? 4 : 8);
+	  print_vma (entry, LONG_HEX);
+	}
     }
   return addr + (is_32bit_elf ? 4 : 8);
 }
@@ -13785,7 +13808,7 @@ process_mips_specific (FILE * file)
 	  offset = cnt = 0;
 	  option = iopt;
 
-	  while (offset < sect->sh_size)
+	  while (offset <= sect->sh_size - sizeof (* eopt))
 	    {
 	      Elf_External_Options * eoption;
 
@@ -13796,8 +13819,16 @@ process_mips_specific (FILE * file)
 	      option->section = BYTE_GET (eoption->section);
 	      option->info = BYTE_GET (eoption->info);
 
+	      /* PR 17531: file: ffa0fa3b.  */
+	      if (option->size < sizeof (* eopt)
+		  || offset + option->size > sect->sh_size)
+		{
+		  warn (_("Invalid size (%u) for MIPS option\n"), option->size);
+		  option->size = sizeof (* eopt);
+		  break;
+		}
 	      offset += option->size;
-
+		
 	      ++option;
 	      ++cnt;
 	    }
@@ -13806,6 +13837,7 @@ process_mips_specific (FILE * file)
 		  printable_section_name (sect), cnt);
 
 	  option = iopt;
+	  offset = 0;
 
 	  while (cnt-- > 0)
 	    {
@@ -13942,13 +13974,18 @@ process_mips_specific (FILE * file)
 
 	      len = sizeof (* eopt);
 	      while (len < option->size)
-		if (((char *) option)[len] >= ' '
-		    && ((char *) option)[len] < 0x7f)
-		  printf ("%c", ((char *) option)[len++]);
-		else
-		  printf ("\\%03o", ((char *) option)[len++]);
+		{
+		  char datum = * ((char *) eopt + offset + len);
 
+		  if (ISPRINT (datum))
+		    printf ("%c", datum);
+		  else
+		    printf ("\\%03o", datum);
+		  len ++;
+		}
 	      fputs ("\n", stdout);
+
+	      offset += option->size;
 	      ++option;
 	    }
 
@@ -14038,6 +14075,7 @@ process_mips_specific (FILE * file)
       bfd_vma ent, local_end, global_end;
       size_t i, offset;
       unsigned char * data;
+      unsigned char * data_end;
       int addr_size;
 
       ent = pltgot;
@@ -14048,18 +14086,25 @@ process_mips_specific (FILE * file)
       if (symtabno < gotsym)
 	{
 	  error (_("The GOT symbol offset (%lu) is greater than the symbol table size (%lu)\n"),
-		 (long) gotsym, (long) symtabno);
+		 (unsigned long) gotsym, (unsigned long) symtabno);
 	  return 0;
 	}
- 
+
       global_end = local_end + (symtabno - gotsym) * addr_size;
-      assert (global_end >= local_end);
+      /* PR 17531: file: 54c91a34.  */
+      if (global_end < local_end)
+	{
+	  error (_("Too many GOT symbols: %lu\n"), (unsigned long) symtabno);
+	  return 0;
+	}
+      
       offset = offset_from_vma (file, pltgot, global_end - pltgot);
       data = (unsigned char *) get_data (NULL, file, offset,
                                          global_end - pltgot, 1,
 					 _("Global Offset Table data"));
       if (data == NULL)
 	return 0;
+      data_end = data + (global_end - pltgot);
 
       printf (_("\nPrimary GOT:\n"));
       printf (_(" Canonical gp value: "));
@@ -14070,14 +14115,18 @@ process_mips_specific (FILE * file)
       printf (_("  %*s %10s %*s Purpose\n"),
 	      addr_size * 2, _("Address"), _("Access"),
 	      addr_size * 2, _("Initial"));
-      ent = print_mips_got_entry (data, pltgot, ent);
+      ent = print_mips_got_entry (data, pltgot, ent, data_end);
       printf (_(" Lazy resolver\n"));
+      if (ent == (bfd_vma) -1)
+	goto got_print_fail;
       if (data
 	  && (byte_get (data + ent - pltgot, addr_size)
 	      >> (addr_size * 8 - 1)) != 0)
 	{
-	  ent = print_mips_got_entry (data, pltgot, ent);
+	  ent = print_mips_got_entry (data, pltgot, ent, data_end);
 	  printf (_(" Module pointer (GNU extension)\n"));
+	  if (ent == (bfd_vma) -1)
+	    goto got_print_fail;
 	}
       printf ("\n");
 
@@ -14089,8 +14138,10 @@ process_mips_specific (FILE * file)
 		  addr_size * 2, _("Initial"));
 	  while (ent < local_end)
 	    {
-	      ent = print_mips_got_entry (data, pltgot, ent);
+	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
 	      printf ("\n");
+	      if (ent == (bfd_vma) -1)
+		goto got_print_fail;
 	    }
 	  printf ("\n");
 	}
@@ -14113,7 +14164,7 @@ process_mips_specific (FILE * file)
 
 	  for (i = gotsym; i < symtabno; i++)
 	    {
-	      ent = print_mips_got_entry (data, pltgot, ent);
+	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
 	      printf (" ");
 
 	      if (dynamic_symbols == NULL)
@@ -14137,10 +14188,13 @@ process_mips_specific (FILE * file)
 			(unsigned long) i);
 
 	      printf ("\n");
+	      if (ent == (bfd_vma) -1)
+		break;
 	    }
 	  printf ("\n");
 	}
 
+    got_print_fail:
       if (data)
 	free (data);
     }
