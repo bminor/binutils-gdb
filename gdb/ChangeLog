@@ -1,3 +1,9 @@
+2015-01-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (is_dynamic_type_internal) <TYPE_CODE_RANGE>: Return
+	nonzero if the type's subtype is dynamic.
+	(resolve_dynamic_range): Also resolve the range's subtype.
+
 2015-01-29  Joel Brobecker  <brobecker@adacore.com>  (tiny patch)
 
 	* symfile.c (unmap_overlay_command): Initialize sec to NULL.

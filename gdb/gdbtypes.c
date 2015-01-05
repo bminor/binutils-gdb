@@ -1650,7 +1650,15 @@ is_dynamic_type_internal (struct type *type, int top_level)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
-      return !has_static_range (TYPE_RANGE_DATA (type));
+      {
+	/* A range type is obviously dynamic if it has at least one
+	   dynamic bound.  But also consider the range type to be
+	   dynamic when its subtype is dynamic, even if the bounds
+	   of the range type are static.  It allows us to assume that
+	   the subtype of a static range type is also static.  */
+	return (!has_static_range (TYPE_RANGE_DATA (type))
+		|| is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0));
+      }
 
     case TYPE_CODE_ARRAY:
       {
@@ -1698,7 +1706,7 @@ static struct type *
 resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
 {
   CORE_ADDR value;
-  struct type *static_range_type;
+  struct type *static_range_type, *static_target_type;
   const struct dynamic_prop *prop;
   const struct dwarf2_locexpr_baton *baton;
   struct dynamic_prop low_bound, high_bound;
@@ -1733,8 +1741,11 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
       high_bound.data.const_val = 0;
     }
 
+  static_target_type
+    = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (dyn_range_type),
+				     addr, 0);
   static_range_type = create_range_type (copy_type (dyn_range_type),
-					 TYPE_TARGET_TYPE (dyn_range_type),
+					 static_target_type,
 					 &low_bound, &high_bound);
   TYPE_RANGE_DATA (static_range_type)->flag_bound_evaluated = 1;
   return static_range_type;
