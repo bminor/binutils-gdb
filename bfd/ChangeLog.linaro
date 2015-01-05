@@ -1,10 +1,16 @@
 2015-01-05  Will Newton  <will.newton@linaro.org>
 
+	Linaro binutils 2.25-2015.01-1 released.
+
+	* version.h: Update VERSION.
+
+2015-01-05  Will Newton  <will.newton@linaro.org>
+
 	* version.h: Bump VERSION.
 
 2015-01-05  Will Newton  <will.newton@linaro.org>
 
-	Linaro binutils 2.25-2015.01 releaseed.
+	Linaro binutils 2.25-2015.01 released.
 
 	* version.h: Update VERSION.
 
