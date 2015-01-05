@@ -2461,7 +2461,8 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
 int
 dwarf2_evaluate_property (const struct dynamic_prop *prop,
-			  CORE_ADDR address, CORE_ADDR *value)
+			  struct property_addr_info *addr_stack,
+			  CORE_ADDR *value)
 {
   if (prop == NULL)
     return 0;
@@ -2472,7 +2473,8 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
       {
 	const struct dwarf2_property_baton *baton = prop->data.baton;
 
-	if (dwarf2_locexpr_baton_eval (&baton->locexpr, address, value))
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, addr_stack->addr,
+				       value))
 	  {
 	    if (baton->referenced_type)
 	      {
@@ -2511,6 +2513,23 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
     case PROP_CONST:
       *value = prop->data.const_val;
       return 1;
+
+    case PROP_ADDR_OFFSET:
+      {
+	struct dwarf2_property_baton *baton = prop->data.baton;
+	struct property_addr_info *pinfo;
+	struct value *val;
+
+	for (pinfo = addr_stack; pinfo != NULL; pinfo = pinfo->next)
+	  if (pinfo->type == baton->referenced_type)
+	    break;
+	if (pinfo == NULL)
+	  error ("cannot find reference address for offset property");
+	val = value_at (baton->offset_info.type,
+			pinfo->addr + baton->offset_info.offset);
+	*value = value_as_address (val);
+	return 1;
+      }
     }
 
   return 0;

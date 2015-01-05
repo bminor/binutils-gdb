@@ -1695,15 +1695,16 @@ is_dynamic_type (struct type *type)
   return is_dynamic_type_internal (type, 1);
 }
 
-static struct type *resolve_dynamic_type_internal (struct type *type,
-						   CORE_ADDR addr,
-						   int top_level);
+static struct type *resolve_dynamic_type_internal
+  (struct type *type, struct property_addr_info *addr_stack, int top_level);
 
-/* Given a dynamic range type (dyn_range_type) and address,
-   return a static version of that type.  */
+/* Given a dynamic range type (dyn_range_type) and a stack of
+   struct property_addr_info elements, return a static version
+   of that type.  */
 
 static struct type *
-resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
+resolve_dynamic_range (struct type *dyn_range_type,
+		       struct property_addr_info *addr_stack)
 {
   CORE_ADDR value;
   struct type *static_range_type, *static_target_type;
@@ -1714,7 +1715,7 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->low;
-  if (dwarf2_evaluate_property (prop, addr, &value))
+  if (dwarf2_evaluate_property (prop, addr_stack, &value))
     {
       low_bound.kind = PROP_CONST;
       low_bound.data.const_val = value;
@@ -1726,7 +1727,7 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
     }
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
-  if (dwarf2_evaluate_property (prop, addr, &value))
+  if (dwarf2_evaluate_property (prop, addr_stack, &value))
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;
@@ -1743,7 +1744,7 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
 
   static_target_type
     = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (dyn_range_type),
-				     addr, 0);
+				     addr_stack, 0);
   static_range_type = create_range_type (copy_type (dyn_range_type),
 					 static_target_type,
 					 &low_bound, &high_bound);
@@ -1752,11 +1753,12 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
 }
 
 /* Resolves dynamic bound values of an array type TYPE to static ones.
-   ADDRESS might be needed to resolve the subrange bounds, it is the location
-   of the associated array.  */
+   ADDR_STACK is a stack of struct property_addr_info to be used
+   if needed during the dynamic resolution.  */
 
 static struct type *
-resolve_dynamic_array (struct type *type, CORE_ADDR addr)
+resolve_dynamic_array (struct type *type,
+		       struct property_addr_info *addr_stack)
 {
   CORE_ADDR value;
   struct type *elt_type;
@@ -1767,12 +1769,12 @@ resolve_dynamic_array (struct type *type, CORE_ADDR addr)
 
   elt_type = type;
   range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
-  range_type = resolve_dynamic_range (range_type, addr);
+  range_type = resolve_dynamic_range (range_type, addr_stack);
 
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
   if (ary_dim != NULL && TYPE_CODE (ary_dim) == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type), addr);
+    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type), addr_stack);
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
@@ -1782,10 +1784,12 @@ resolve_dynamic_array (struct type *type, CORE_ADDR addr)
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
-   bounds.  */
+   bounds.  ADDR_STACK is a stack of struct property_addr_info
+   to be used if needed during the dynamic resolution.  */
 
 static struct type *
-resolve_dynamic_union (struct type *type, CORE_ADDR addr)
+resolve_dynamic_union (struct type *type,
+		       struct property_addr_info *addr_stack)
 {
   struct type *resolved_type;
   int i;
@@ -1808,7 +1812,7 @@ resolve_dynamic_union (struct type *type, CORE_ADDR addr)
 	continue;
 
       t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
-					 addr, 0);
+					 addr_stack, 0);
       TYPE_FIELD_TYPE (resolved_type, i) = t;
       if (TYPE_LENGTH (t) > max_len)
 	max_len = TYPE_LENGTH (t);
@@ -1819,10 +1823,12 @@ resolve_dynamic_union (struct type *type, CORE_ADDR addr)
 }
 
 /* Resolve dynamic bounds of members of the struct TYPE to static
-   bounds.  */
+   bounds.  ADDR_STACK is a stack of struct property_addr_info to
+   be used if needed during the dynamic resolution.  */
 
 static struct type *
-resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
+resolve_dynamic_struct (struct type *type,
+			struct property_addr_info *addr_stack)
 {
   struct type *resolved_type;
   int i;
@@ -1841,13 +1847,10 @@ resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
   for (i = 0; i < TYPE_NFIELDS (resolved_type); ++i)
     {
       unsigned new_bit_length;
+      struct property_addr_info pinfo;
 
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
-
-      TYPE_FIELD_TYPE (resolved_type, i)
-	= resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
-					 addr, 0);
 
       /* As we know this field is not a static field, the field's
 	 field_loc_kind should be FIELD_LOC_KIND_BITPOS.  Verify
@@ -1856,9 +1859,20 @@ resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
 	 that verification indicates a bug in our code, the error
 	 is not severe enough to suggest to the user he stops
 	 his debugging session because of it.  */
-      if (TYPE_FIELD_LOC_KIND (resolved_type, i) != FIELD_LOC_KIND_BITPOS)
+      if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_BITPOS)
 	error (_("Cannot determine struct field location"
 		 " (invalid location kind)"));
+
+      pinfo.type = check_typedef (TYPE_FIELD_TYPE (type, i));
+      pinfo.addr = addr_stack->addr;
+      pinfo.next = addr_stack;
+
+      TYPE_FIELD_TYPE (resolved_type, i)
+	= resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
+					 &pinfo, 0);
+      gdb_assert (TYPE_FIELD_LOC_KIND (resolved_type, i)
+		  == FIELD_LOC_KIND_BITPOS);
+
       new_bit_length = TYPE_FIELD_BITPOS (resolved_type, i);
       if (TYPE_FIELD_BITSIZE (resolved_type, i) != 0)
 	new_bit_length += TYPE_FIELD_BITSIZE (resolved_type, i);
@@ -1885,7 +1899,8 @@ resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
 /* Worker for resolved_dynamic_type.  */
 
 static struct type *
-resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
+resolve_dynamic_type_internal (struct type *type,
+			       struct property_addr_info *addr_stack,
 			       int top_level)
 {
   struct type *real_type = check_typedef (type);
@@ -1900,7 +1915,7 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
     {
       resolved_type = copy_type (type);
       TYPE_TARGET_TYPE (resolved_type)
-	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr,
+	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr_stack,
 					 top_level);
     }
   else 
@@ -1912,36 +1927,40 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
 	{
 	case TYPE_CODE_REF:
 	  {
-	    CORE_ADDR target_addr = read_memory_typed_address (addr, type);
+	    struct property_addr_info pinfo;
+
+	    pinfo.type = check_typedef (TYPE_TARGET_TYPE (type));
+	    pinfo.addr = read_memory_typed_address (addr_stack->addr, type);
+	    pinfo.next = addr_stack;
 
 	    resolved_type = copy_type (type);
 	    TYPE_TARGET_TYPE (resolved_type)
 	      = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
-					       target_addr, top_level);
+					       &pinfo, top_level);
 	    break;
 	  }
 
 	case TYPE_CODE_ARRAY:
-	  resolved_type = resolve_dynamic_array (type, addr);
+	  resolved_type = resolve_dynamic_array (type, addr_stack);
 	  break;
 
 	case TYPE_CODE_RANGE:
-	  resolved_type = resolve_dynamic_range (type, addr);
+	  resolved_type = resolve_dynamic_range (type, addr_stack);
 	  break;
 
 	case TYPE_CODE_UNION:
-	  resolved_type = resolve_dynamic_union (type, addr);
+	  resolved_type = resolve_dynamic_union (type, addr_stack);
 	  break;
 
 	case TYPE_CODE_STRUCT:
-	  resolved_type = resolve_dynamic_struct (type, addr);
+	  resolved_type = resolve_dynamic_struct (type, addr_stack);
 	  break;
 	}
     }
 
   /* Resolve data_location attribute.  */
   prop = TYPE_DATA_LOCATION (resolved_type);
-  if (dwarf2_evaluate_property (prop, addr, &value))
+  if (dwarf2_evaluate_property (prop, addr_stack, &value))
     {
       TYPE_DATA_LOCATION_ADDR (resolved_type) = value;
       TYPE_DATA_LOCATION_KIND (resolved_type) = PROP_CONST;
@@ -1957,7 +1976,9 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
 struct type *
 resolve_dynamic_type (struct type *type, CORE_ADDR addr)
 {
-  return resolve_dynamic_type_internal (type, addr, 1);
+  struct property_addr_info pinfo = {check_typedef (type), addr, NULL};
+
+  return resolve_dynamic_type_internal (type, &pinfo, 1);
 }
 
 /* Find the real type of TYPE.  This function returns the real type,

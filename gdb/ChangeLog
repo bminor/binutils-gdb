@@ -1,5 +1,32 @@
 2015-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.h (struct dynamic_prop): New PROP_ADDR_OFFSET enum
+	kind.
+	* gdbtypes.c (resolve_dynamic_type_internal): Replace "addr"
+	parameter by "addr_stack" parameter.
+	(resolve_dynamic_range): Replace "addr" parameter by
+	"stack_addr" parameter.  Update function documentation.
+	Update code accordingly.
+	(resolve_dynamic_array, resolve_dynamic_union)
+	(resolve_dynamic_struct, resolve_dynamic_type_internal): Likewise.
+	(resolve_dynamic_type): Update code, following the changes made
+	to resolve_dynamic_type_internal's interface.
+	* dwarf2loc.h (struct property_addr_info): New.
+	(dwarf2_evaluate_property): Replace "address" parameter
+	by "addr_stack" parameter.  Adjust function documentation.
+	(struct dwarf2_offset_baton): New.
+	(struct dwarf2_property_baton): Update documentation of
+	field "referenced_type" to be more general. New field
+	"offset_info" in union data field.
+	* dwarf2loc.c (dwarf2_evaluate_property): Replace "address"
+	parameter by "addr_stack" parameter.  Adjust code accordingly.
+	Add support for PROP_ADDR_OFFSET properties.
+	* dwarf2read.c (attr_to_dynamic_prop): Add support for
+	DW_AT_data_member_location attributes as well.  Use case
+	statements instead of if/else condition.
+
+2015-01-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-varobj.c (ada_varobj_get_array_number_of_children):
 	Return zero if PARENT_VALUE is NULL and parent_type's
 	range type is dynamic.

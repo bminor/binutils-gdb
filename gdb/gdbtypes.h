@@ -405,6 +405,7 @@ struct dynamic_prop
   {
     PROP_UNDEFINED, /* Not defined.  */
     PROP_CONST,     /* Constant.  */
+    PROP_ADDR_OFFSET, /* Address offset.  */
     PROP_LOCEXPR,   /* Location expression.  */
     PROP_LOCLIST    /* Location list.  */
   } kind;
