@@ -1,3 +1,11 @@
+2015-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17773
+	* ld-elf/binutils.exp (binutils_test): Add an optional
+	readelf_options.  Replace -l with $readelf_options.  Add a
+	gap test.
+	* ld/testsuite/ld-elf/gap.s: New file.
+
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* ld-mips-elf/attr-gnu-4-00.d: Relax check for ISA extension.
