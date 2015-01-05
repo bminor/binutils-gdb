@@ -5194,8 +5194,9 @@ bad_return:
     {
       long reloc_index;
 
-      if (p->howto->type != R_386_JUMP_SLOT
-	  && p->howto->type != R_386_IRELATIVE)
+      if (p->howto == NULL /* PR 17512: file: bc9d6cf5.  */
+	  || (p->howto->type != R_386_JUMP_SLOT
+	      && p->howto->type != R_386_IRELATIVE))
 	continue;
 
       reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset

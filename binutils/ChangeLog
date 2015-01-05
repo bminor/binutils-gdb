@@ -1,5 +1,18 @@
 2015-01-05  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* nm.c (print_symbol): Add 'is_synthetic' parameter.  Use it to
+	help initialize the info.elfinfo field.
+	(print_size_symbols): Add 'synth_count' parameter.  Use it to set
+	the is_synthetic parameter when calling print_symbol.
+	(print_symbols): Likewise.
+	(display_rel_file): Pass synth_count to printing function.
+	(display_archive): Break loop if the last archive displayed
+	matches the current archive.
+	* size.c (display_archive): Likewise.
+
+2015-01-05  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17531
 	* dwarf.c (alloc_num_debug_info_entries): New variable.
 	(process_debug_info): Set it.  Use it to avoid displaying

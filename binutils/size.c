@@ -365,7 +365,14 @@ display_archive (bfd *file)
       display_bfd (arfile);
 
       if (last_arfile != NULL)
-	bfd_close (last_arfile);
+	{
+	  bfd_close (last_arfile);
+
+	  /* PR 17512: file: a244edbc.  */
+	  if (last_arfile == arfile)
+	    return;
+	}
+
       last_arfile = arfile;
     }
 

@@ -1,3 +1,15 @@
+2015-01-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive.c (do_slurp_bsd_armap): Make sure that the parsed sized
+	is at least big enough for the header to be read.
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Skip unknown relocs.
+	* mach-o.c (bfd_mach_o_get_synthetic_symtab): Add range checks.
+	(bfd_mach_o_read_command): Prevetn duplicate error messages about
+	unrecognized commands.
+	* syms.c (_bfd_stab_section_find_nearest_line): Add range checks
+	when indexing into the string table.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
