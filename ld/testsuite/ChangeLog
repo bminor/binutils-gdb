@@ -1,6 +1,12 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* ld-scripts/overlay-size.d: Add 'map' option.
+	* ld-scripts/overlay-size.exp: Remove manual check of mapfile.
+	* lib/ld-lib.exp (run_dump_test): Add support for new 'map'
+	option, checking linker mapfile output.
+
 	2015-01-19  Alan Modra  <amodra@gmail.com>
 	* ld-gc/pr14265.d,
 	* ld-cris/tls-gc-68.d,
