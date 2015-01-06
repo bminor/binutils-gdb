@@ -3675,7 +3675,7 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
     }
   else
     {
-      sym->strtab = bfd_alloc (abfd, sym->strsize);
+      sym->strtab = bfd_alloc (abfd, sym->strsize + 1);
       if (sym->strtab == NULL)
         return FALSE;
 
@@ -3688,6 +3688,8 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
           bfd_set_error (bfd_error_file_truncated);
           return FALSE;
         }
+      /* Zero terminate the string table.  */
+      sym->strtab[sym->strsize] = 0;
     }
 
   return TRUE;
