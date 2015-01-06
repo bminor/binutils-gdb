@@ -1037,9 +1037,9 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	report_bugs_to="\"$(REPORT_BUGS_TO)\"" ;\
 	. $(srcdir)/development.sh ;\
 	if test "$$development" = true ; then \
-	  if test -e $(srcdir)/../.git; then \
-	    here=`pwd`; \
-	    cd $(srcdir); \
+	  here=`pwd`; \
+	  cd $(srcdir)/..; \
+	  if test -e .git; then \
 	    bfd_version_date=`git log -1 --pretty=%ci | awk '{ print $$1 }' | sed -e "s/-//g"` ;\
 	    bfd_remote_git_repo=`git remote -v | grep fetch | awk '{ print $$2 }'` ;\
 	    case $$bfd_remote_git_repo in \
@@ -1049,11 +1049,13 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	    bfd_git_commit=`git log -1 --pretty=%H` ;\
 	    bfd_git_branch=`git name-rev --name-only $$bfd_git_commit` ;\
 	    bfd_version_string="\"$(VERSION).$${bfd_version_date}\\\n commit $$bfd_git_commit\\\n   from $$bfd_remote_git_repo on $$bfd_git_branch\"" ;\
-	    cd $$here; \
 	  else \
-	    bfd_version_date=`sed -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
+	    ChangeLog=`find . -name ChangeLog`; \
+	    bfd_version_date=`for cl in $$ChangeLog; do head -1 $$cl; done \
+	      | awk '{ print $$1 }' | sed -e "s/-//g" | sort -n | tail -1`; \
 	    bfd_version_string="\"$(VERSION).$${bfd_version_date}\"" ;\
 	  fi ;\
+	  cd $$here; \
 	  bfd_soversion="$(VERSION).$${bfd_version_date}" ;\
 	fi ;\
 	sed -e "s,@bfd_version@,$$bfd_version," \
