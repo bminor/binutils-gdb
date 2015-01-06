@@ -1,3 +1,9 @@
+2015-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/17809
+	* x86_64.cc (Target_x86_64<size>::Relocate::tls_ie_to_le): Handle
+	x32.
+
 2014-12-04  Alan Modra  <amodra@gmail.com>
 
 	* Powerpc.cc (Target_powerpc::Branch_info::make_stub): Ignore
