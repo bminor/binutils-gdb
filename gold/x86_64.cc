@@ -4100,6 +4100,8 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       // movq
       if (op1 == 0x4c)
 	view[-3] = 0x49;
+      else if (size == 32 && op1 == 0x44)
+	view[-3] = 0x41;
       view[-2] = 0xc7;
       view[-1] = 0xc0 | reg;
     }
@@ -4108,6 +4110,8 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       // Special handling for %rsp.
       if (op1 == 0x4c)
 	view[-3] = 0x49;
+      else if (size == 32 && op1 == 0x44)
+	view[-3] = 0x41;
       view[-2] = 0x81;
       view[-1] = 0xc0 | reg;
     }
@@ -4116,6 +4120,8 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       // addq
       if (op1 == 0x4c)
 	view[-3] = 0x4d;
+      else if (size == 32 && op1 == 0x44)
+	view[-3] = 0x45;
       view[-2] = 0x8d;
       view[-1] = 0x80 | reg | (reg << 3);
     }
