@@ -5559,6 +5559,9 @@ bad_return:
     {
       long reloc_index;
 
+      if (p->howto == NULL)
+	goto bad_return;
+
       if (p->howto->type != R_X86_64_JUMP_SLOT
 	  && p->howto->type != R_X86_64_IRELATIVE)
 	continue;
