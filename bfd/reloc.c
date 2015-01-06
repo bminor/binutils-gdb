@@ -437,6 +437,7 @@ bfd_get_reloc_size (reloc_howto_type *howto)
     case 3: return 0;
     case 4: return 8;
     case 8: return 16;
+    case -1: return 2;
     case -2: return 4;
     default: abort ();
     }
@@ -618,7 +619,11 @@ bfd_perform_relocation (bfd *abfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section)
+      /* PR 17512: file: c146ab8b.
+	 PR 17512: file: 46dff27f.
+	 Include the size of the reloc in the test for out of range addresses.  */
+      - bfd_get_reloc_size (howto))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -7623,10 +7628,6 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	      (*parent)->howto = &none_howto;
 	      r = bfd_reloc_ok;
 	    }
-	  /* PR 17512: file: c146ab8b.  */
-	  else if ((*parent)->address * bfd_octets_per_byte (abfd)
-		   >= bfd_get_section_size (input_section))
-	    r = bfd_reloc_outofrange;
 	  else
 	    r = bfd_perform_relocation (input_bfd,
 					*parent,

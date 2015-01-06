@@ -1,6 +1,12 @@
 2015-01-06  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
+	* reloc.c (bfd_get_reloc_size): Handle a reloc size of -1.
+	(bfd_perform_relocation): Include the size of the reloc in the
+	test for an out of range relocation.
+	(bfd_generic_get_relocated_section_contents): Remove reloc range
+	test.
+
 	* coff-i860.c (CALC_ADDEND): Always set an addend value.
 	* tekhex.c (getvalue): Add an end pointer parameter.  Use it to
 	avoid reading off the end of the buffer.
