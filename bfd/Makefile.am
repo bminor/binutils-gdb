@@ -1037,8 +1037,23 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	report_bugs_to="\"$(REPORT_BUGS_TO)\"" ;\
 	. $(srcdir)/development.sh ;\
 	if test "$$development" = true ; then \
-	  bfd_version_date=`sed -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
-	  bfd_version_string="\"$(VERSION).$${bfd_version_date}\"" ;\
+	  if test -e $(srcdir)/../.git; then \
+	    here=`pwd`; \
+	    cd $(srcdir); \
+	    bfd_version_date=`git log -1 --pretty=%ci | awk '{ print $$1 }' | sed -e "s/-//g"` ;\
+	    bfd_remote_git_repo=`git remote -v | grep fetch | awk '{ print $$2 }'` ;\
+	    case $$bfd_remote_git_repo in \
+	    *sourceware.org/git/binutils-gdb.git) \
+	      bfd_remote_git_repo="git://sourceware.org/git/binutils.git";; \
+	    esac; \
+	    bfd_git_branch=`git status | grep "On branch" | sed -e "s/.*On branch //"` ;\
+	    bfd_git_commit=`git log -1 --pretty=%H` ;\
+	    bfd_version_string="\"$(VERSION).$${bfd_version_date}\\\n from $$bfd_remote_git_repo commit $$bfd_git_commit on $$bfd_git_branch\"" ;\
+	    cd $$here; \
+	  else \
+	    bfd_version_date=`sed -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
+	    bfd_version_string="\"$(VERSION).$${bfd_version_date}\"" ;\
+	  fi ;\
 	  bfd_soversion="$(VERSION).$${bfd_version_date}" ;\
 	fi ;\
 	sed -e "s,@bfd_version@,$$bfd_version," \
