@@ -2108,8 +2108,8 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	    *sourceware.org/git/binutils-gdb.git) \
 	      bfd_remote_git_repo="git://sourceware.org/git/binutils.git";; \
 	    esac; \
-	    bfd_git_branch=`git status | grep "On branch" | sed -e "s/.*On branch //"` ;\
 	    bfd_git_commit=`git log -1 --pretty=%H` ;\
+	    bfd_git_branch=`git name-rev --name-only $$bfd_git_commit` ;\
 	    bfd_version_string="\"$(VERSION).$${bfd_version_date}\\\n from $$bfd_remote_git_repo commit $$bfd_git_commit on $$bfd_git_branch\"" ;\
 	    cd $$here; \
 	  else \
