@@ -1,3 +1,13 @@
+2015-01-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coff-i860.c (CALC_ADDEND): Always set an addend value.
+	* tekhex.c (getvalue): Add an end pointer parameter.  Use it to
+	avoid reading off the end of the buffer.
+	(getsym): Likewise.
+	(first_phase): Likewise.
+	(pass_over): Pass an end pointer to the invoked function.
+
 2015-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/17512

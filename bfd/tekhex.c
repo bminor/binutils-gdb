@@ -267,7 +267,7 @@ typedef struct tekhex_data_struct
 #define enda(x) (x->vma + x->size)
 
 static bfd_boolean
-getvalue (char **srcp, bfd_vma *valuep)
+getvalue (char **srcp, bfd_vma *valuep, char * endp)
 {
   char *src = *srcp;
   bfd_vma value = 0;
@@ -279,7 +279,7 @@ getvalue (char **srcp, bfd_vma *valuep)
   len = hex_value (*src++);
   if (len == 0)
     len = 16;
-  while (len--)
+  while (len-- && src < endp)
     {
       if (!ISHEX (*src))
 	return FALSE;
@@ -288,11 +288,11 @@ getvalue (char **srcp, bfd_vma *valuep)
 
   *srcp = src;
   *valuep = value;
-  return TRUE;
+  return len == 0;
 }
 
 static bfd_boolean
-getsym (char *dstp, char **srcp, unsigned int *lenp)
+getsym (char *dstp, char **srcp, unsigned int *lenp, char * endp)
 {
   char *src = *srcp;
   unsigned int i;
@@ -304,7 +304,7 @@ getsym (char *dstp, char **srcp, unsigned int *lenp)
   len = hex_value (*src++);
   if (len == 0)
     len = 16;
-  for (i = 0; i < len; i++)
+  for (i = 0; i < len && src < endp; i++)
     dstp[i] = src[i];
   dstp[i] = 0;
   *srcp = src + i;
@@ -354,7 +354,7 @@ insert_byte (bfd *abfd, int value, bfd_vma addr)
   how big the data is.  */
 
 static bfd_boolean
-first_phase (bfd *abfd, int type, char *src)
+first_phase (bfd *abfd, int type, char *src, char * src_end)
 {
   asection *section, *alt_section;
   unsigned int len;
@@ -368,21 +368,21 @@ first_phase (bfd *abfd, int type, char *src)
       {
 	bfd_vma addr;
 
-	if (!getvalue (&src, &addr))
+	if (!getvalue (&src, &addr, src_end))
 	  return FALSE;
 
-	while (*src)
+	while (*src && src < src_end - 1)
 	  {
 	    insert_byte (abfd, HEX (src), addr);
 	    src += 2;
 	    addr++;
 	  }
+	return TRUE;
       }
 
-      return TRUE;
     case '3':
       /* Symbol record, read the segment.  */
-      if (!getsym (sym, &src, &len))
+      if (!getsym (sym, &src, &len, src_end))
 	return FALSE;
       section = bfd_get_section_by_name (abfd, sym);
       if (section == NULL)
@@ -403,9 +403,9 @@ first_phase (bfd *abfd, int type, char *src)
 	    {
 	    case '1':		/* Section range.  */
 	      src++;
-	      if (!getvalue (&src, &section->vma))
+	      if (!getvalue (&src, &section->vma, src_end))
 		return FALSE;
-	      if (!getvalue (&src, &val))
+	      if (!getvalue (&src, &val, src_end))
 		return FALSE;
 	      section->size = val - section->vma;
 	      section->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
@@ -432,7 +432,7 @@ first_phase (bfd *abfd, int type, char *src)
 		abfd->flags |= HAS_SYMS;
 		new_symbol->prev = abfd->tdata.tekhex_data->symbols;
 		abfd->tdata.tekhex_data->symbols = new_symbol;
-		if (!getsym (sym, &src, &len))
+		if (!getsym (sym, &src, &len, src_end))
 		  return FALSE;
 		new_symbol->symbol.name = (const char *)
                     bfd_alloc (abfd, (bfd_size_type) len + 1);
@@ -480,7 +480,7 @@ first_phase (bfd *abfd, int type, char *src)
 			new_symbol->symbol.section = alt_section;
 		      }
 		  }
-		if (!getvalue (&src, &val))
+		if (!getvalue (&src, &val, src_end))
 		  return FALSE;
 		new_symbol->symbol.value = val - section->vma;
 		break;
@@ -498,7 +498,7 @@ first_phase (bfd *abfd, int type, char *src)
    record.  */
 
 static bfd_boolean
-pass_over (bfd *abfd, bfd_boolean (*func) (bfd *, int, char *))
+pass_over (bfd *abfd, bfd_boolean (*func) (bfd *, int, char *, char *))
 {
   unsigned int chars_on_line;
   bfd_boolean is_eof = FALSE;
@@ -539,8 +539,7 @@ pass_over (bfd *abfd, bfd_boolean (*func) (bfd *, int, char *))
 
       /* Put a null at the end.  */
       src[chars_on_line] = 0;
-
-      if (!func (abfd, type, src))
+      if (!func (abfd, type, src, src + chars_on_line))
 	return FALSE;
     }
 

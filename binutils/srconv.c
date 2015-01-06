@@ -1883,10 +1883,12 @@ main (int ac, char **av)
     printf ("ids %d %d\n", base1, base2);
 
   tree = coff_grok (abfd);
+  if (tree)
+    {
+      if (!noprescan)
+	prescan (tree);
 
-  if (!noprescan)
-    prescan (tree);
-
-  wr_module (tree);
+      wr_module (tree);
+    }
   return 0;
 }
