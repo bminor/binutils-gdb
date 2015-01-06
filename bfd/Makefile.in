@@ -2110,7 +2110,7 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	    esac; \
 	    bfd_git_commit=`git log -1 --pretty=%H` ;\
 	    bfd_git_branch=`git name-rev --name-only $$bfd_git_commit` ;\
-	    bfd_version_string="\"$(VERSION).$${bfd_version_date}\\\n from $$bfd_remote_git_repo commit $$bfd_git_commit on $$bfd_git_branch\"" ;\
+	    bfd_version_string="\"$(VERSION).$${bfd_version_date}\\\n commit $$bfd_git_commit\\\n   from $$bfd_remote_git_repo on $$bfd_git_branch\"" ;\
 	    cd $$here; \
 	  else \
 	    bfd_version_date=`sed -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
