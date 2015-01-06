@@ -1,3 +1,8 @@
+2015-01-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-type.exp: Add a couple test about empty
+	array creation, and negative-length array creation.
+
 2015-01-02  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.cp/nsalias.exp: Fix output of external/declaration flags.
