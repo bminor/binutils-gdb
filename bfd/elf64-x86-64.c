@@ -5559,6 +5559,10 @@ bad_return:
     {
       long reloc_index;
 
+      /* Skip unknown relocation.  */
+      if (p->howto == NULL)
+	continue;
+
       if (p->howto->type != R_X86_64_JUMP_SLOT
 	  && p->howto->type != R_X86_64_IRELATIVE)
 	continue;

@@ -528,7 +528,7 @@ typy_array_1 (PyObject *self, PyObject *args, int is_vector)
       n1 = 0;
     }
 
-  if (n2 < n1)
+  if (n2 < n1 - 1) /* Note: An empty array has n2 == n1 - 1.  */
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("Array length must not be negative"));

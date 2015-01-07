@@ -713,7 +713,7 @@ tyscm_array_1 (SCM self, SCM n1_scm, SCM n2_scm, int is_vector,
       n1 = 0;
     }
 
-  if (n2 < n1)
+  if (n2 < n1 - 1) /* Note: An empty array has n2 == n1 - 1.  */
     {
       gdbscm_out_of_range_error (func_name, SCM_ARG3,
 				 scm_cons (scm_from_long (n1),

@@ -1,3 +1,9 @@
+2015-01-06  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17754
+	* internal.h (internal_auxent): Increase size of x_fname field to
+	20 to allow for PE format's longer file names.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

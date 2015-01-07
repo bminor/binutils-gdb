@@ -588,7 +588,11 @@ union internal_auxent
 
   union
   {
-    char x_fname[FILNMLEN];
+    /* PR 17754: We use to FILNMLEN for the size of the x_fname
+       array, but that cause problems as PE targets use a larger
+       value.  We cannot use their definition of EFILNMLEN as this
+       header can be used without including any PE headers.  */
+    char x_fname[20];
     struct
     {
       long x_zeroes;

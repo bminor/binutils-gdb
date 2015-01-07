@@ -1890,6 +1890,10 @@ gdb_init (char *argv0)
 
   initialize_stdin_serial ();
 
+  /* Take a snapshot of our tty state before readline/ncurses have had a chance
+     to alter it.  */
+  set_initial_gdb_ttystate ();
+
   async_init_signals ();
 
   /* We need a default language for parsing expressions, so simple

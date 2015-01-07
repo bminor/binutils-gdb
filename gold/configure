@@ -688,6 +688,8 @@ DEFAULT_TARGET_MIPS_FALSE
 DEFAULT_TARGET_MIPS_TRUE
 DEFAULT_TARGET_TILEGX_FALSE
 DEFAULT_TARGET_TILEGX_TRUE
+DEFAULT_TARGET_X32_FALSE
+DEFAULT_TARGET_X32_TRUE
 DEFAULT_TARGET_X86_64_FALSE
 DEFAULT_TARGET_X86_64_TRUE
 DEFAULT_TARGET_SPARC_FALSE
@@ -3475,12 +3477,32 @@ else
   DEFAULT_TARGET_SPARC_FALSE=
 fi
 
-	 if test "$targ_obj" = "x86_64"; then
+	target_x86_64=no
+	target_x32=no
+	if test "$targ_obj" = "x86_64"; then
+	  case "$target" in
+	  x86_64*-linux-gnux32)
+	    target_x32=yes
+	    ;;
+	  *)
+	    target_x86_64=yes
+	    ;;
+	  esac
+	fi
+	 if test "$target_x86_64" = "yes"; then
   DEFAULT_TARGET_X86_64_TRUE=
   DEFAULT_TARGET_X86_64_FALSE='#'
 else
   DEFAULT_TARGET_X86_64_TRUE='#'
   DEFAULT_TARGET_X86_64_FALSE=
+fi
+
+	 if test "$target_x32" = "yes"; then
+  DEFAULT_TARGET_X32_TRUE=
+  DEFAULT_TARGET_X32_FALSE='#'
+else
+  DEFAULT_TARGET_X32_TRUE='#'
+  DEFAULT_TARGET_X32_FALSE=
 fi
 
 	 if test "$targ_obj" = "tilegx"; then
@@ -7809,6 +7831,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEFAULT_TARGET_X86_64_TRUE}" && test -z "${DEFAULT_TARGET_X86_64_FALSE}"; then
   as_fn_error "conditional \"DEFAULT_TARGET_X86_64\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_X32_TRUE}" && test -z "${DEFAULT_TARGET_X32_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_X32\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEFAULT_TARGET_TILEGX_TRUE}" && test -z "${DEFAULT_TARGET_TILEGX_FALSE}"; then

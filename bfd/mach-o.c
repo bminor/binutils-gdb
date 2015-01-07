@@ -790,18 +790,19 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
   bfd_mach_o_dysymtab_command *dysymtab = mdata->dysymtab;
   bfd_mach_o_symtab_command *symtab = mdata->symtab;
   asymbol *s;
+  char * s_start;
+  char * s_end;
   unsigned long count, i, j, n;
   size_t size;
   char *names;
   char *nul_name;
+  const char stub [] = "$stub";
 
   *ret = NULL;
 
   /* Stop now if no symbols or no indirect symbols.  */
-  if (dysymtab == NULL || symtab == NULL || symtab->symbols == NULL)
-    return 0;
-
-  if (dysymtab->nindirectsyms == 0)
+  if (dysymtab == NULL || dysymtab->nindirectsyms == 0
+      || symtab == NULL || symtab->symbols == NULL)
     return 0;
 
   /* We need to allocate a bfd symbol for every indirect symbol and to
@@ -811,19 +812,23 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
 
   for (j = 0; j < count; j++)
     {
+      const char * strng;
       unsigned int isym = dysymtab->indirect_syms[j];
 
       /* Some indirect symbols are anonymous.  */
-      if (isym < symtab->nsyms && symtab->symbols[isym].symbol.name)
-        size += strlen (symtab->symbols[isym].symbol.name) + sizeof ("$stub");
+      if (isym < symtab->nsyms && (strng = symtab->symbols[isym].symbol.name))
+	/* PR 17512: file: f5b8eeba.  */
+	size += strnlen (strng, symtab->strsize - (strng - symtab->strtab)) + sizeof (stub);
     }
 
-  s = *ret = (asymbol *) bfd_malloc (size);
+  s_start = bfd_malloc (size);
+  s = *ret = (asymbol *) s_start;
   if (s == NULL)
     return -1;
   names = (char *) (s + count);
   nul_name = names;
   *names++ = 0;
+  s_end = s_start + size;
 
   n = 0;
   for (i = 0; i < mdata->nsects; i++)
@@ -843,9 +848,18 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
           last = first + bfd_mach_o_section_get_nbr_indirect (abfd, sec);
           addr = sec->addr;
           entry_size = bfd_mach_o_section_get_entry_size (abfd, sec);
+
+	  /* PR 17512: file: 08e15eec.  */
+	  if (first >= count || last >= count || first > last)
+	    goto fail;
+
           for (j = first; j < last; j++)
             {
               unsigned int isym = dysymtab->indirect_syms[j];
+
+	      /* PR 17512: file: 04d64d9b.  */
+	      if (((char *) s) + sizeof (* s) > s_end)
+		goto fail;
 
               s->flags = BSF_GLOBAL | BSF_SYNTHETIC;
               s->section = sec->bfdsection;
@@ -860,10 +874,16 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
 
                   s->name = names;
                   len = strlen (sym);
+		  /* PR 17512: file: 47dfd4d2.  */
+		  if (names + len >= s_end)
+		    goto fail;
                   memcpy (names, sym, len);
                   names += len;
-                  memcpy (names, "$stub", sizeof ("$stub"));
-                  names += sizeof ("$stub");
+		  /* PR 17512: file: 18f340a4.  */
+		  if (names + sizeof (stub) >= s_end)
+		    goto fail;
+                  memcpy (names, stub, sizeof (stub));
+                  names += sizeof (stub);
                 }
               else
                 s->name = nul_name;
@@ -879,6 +899,11 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
     }
 
   return n;
+
+ fail:
+  free (s_start);
+  * ret = NULL;
+  return -1;
 }
 
 void
@@ -3650,7 +3675,7 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
     }
   else
     {
-      sym->strtab = bfd_alloc (abfd, sym->strsize);
+      sym->strtab = bfd_alloc (abfd, sym->strsize + 1);
       if (sym->strtab == NULL)
         return FALSE;
 
@@ -3663,6 +3688,8 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
           bfd_set_error (bfd_error_file_truncated);
           return FALSE;
         }
+      /* Zero terminate the string table.  */
+      sym->strtab[sym->strsize] = 0;
     }
 
   return TRUE;
@@ -4660,9 +4687,21 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
 	return FALSE;
       break;
     default:
-      (*_bfd_error_handler)(_("%B: unknown load command 0x%lx"),
-         abfd, (unsigned long) command->type);
-      break;
+      {
+	static bfd_boolean unknown_set = FALSE;
+	static unsigned long unknown_command = 0;
+
+	/* Prevent reams of error messages when parsing corrupt binaries.  */
+	if (!unknown_set)
+	  unknown_set = TRUE;
+	else if (command->type == unknown_command)
+	  break;
+	unknown_command = command->type;
+
+	(*_bfd_error_handler)(_("%B: unknown load command 0x%lx"),
+			      abfd, (unsigned long) command->type);
+	break;
+      }
     }
 
   return TRUE;

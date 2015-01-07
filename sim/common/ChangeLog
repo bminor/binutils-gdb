@@ -1,3 +1,7 @@
+2015-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* aclocal.m4, configure: Regenerate using automake 1.11.1.
+
 2014-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* sim-io.c (sim_io_stat, sim_io_fstat): Adjust calls to "stat"

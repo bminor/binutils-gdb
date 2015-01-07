@@ -903,7 +903,8 @@ do_slurp_bsd_armap (bfd *abfd)
   parsed_size = mapdata->parsed_size;
   free (mapdata);
   /* PR 17512: file: 883ff754.  */
-  if (parsed_size == 0)
+  /* PR 17512: file: 0458885f.  */
+  if (parsed_size < 4)
     return FALSE;
 
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, parsed_size);

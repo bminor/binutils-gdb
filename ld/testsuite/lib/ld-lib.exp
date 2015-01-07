@@ -509,6 +509,7 @@ proc ld_simple_link_defsyms {} {
 #       run_dump_test will guess which program to run by seeing which of
 #       the flags options below is present.
 #
+#   readelf: FLAGS
 #   objdump: FLAGS
 #   nm: FLAGS
 #   objcopy: FLAGS
@@ -545,9 +546,9 @@ proc ld_simple_link_defsyms {} {
 #
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
-#	to pass.  The PROG, objdump, nm and objcopy options have no
-#	meaning and need not supplied if this is present.  Multiple "error"
-#	directives append to the expected linker error message.
+#	to pass.  The PROG, readelf, objdump, nm and objcopy options have
+#	no meaning and need not be supplied if this is present.  Multiple
+#	"error" directives append to the expected linker error message.
 #
 #   warning: REGEX
 #	Expect a linker warning matching REGEX.  It is an error to issue

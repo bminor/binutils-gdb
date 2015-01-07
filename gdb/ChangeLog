@@ -1,3 +1,32 @@
+2015-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* inflow.c (set_initial_gdb_ttystate): Add empty line after
+	comment documenting function.
+
+2015-01-07  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* terminal.h (set_initial_gdb_ttystate): Declare.
+	* inflow.c (initial_gdb_ttystate): New static variable.
+	(set_initial_gdb_ttystate): New setter.
+	(child_terminal_init_with_pgrp): Copy initial_gdb_ttystate
+	instead of our current terminal state.
+	* top.c (gdb_init): Call set_initial_gdb_ttystate.
+
+2015-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* guile/scm-type.c (tyscm_array_1): Add comment.
+	* python/py-type.c (typy_array_1): Add comment.
+
+2015-01-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* guile/scm-type.c (tyscm_array_1): Do not raise out-of-range
+	error if N2 is equal to N1 - 1.
+
+2015-01-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/py-type.c (typy_array_1): Do not raise negative-length
+	exception if N2 is equal to N1 - 1.
+
 2015-01-03  Doug Evans  <xdje42@gmail.com>
 
 	* c-exp.y: Whitespace cleanup.

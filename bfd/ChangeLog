@@ -1,3 +1,47 @@
+2015-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/17512
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Skip unknown relocation.
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Likewise.
+
+2015-01-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* mach-o.c (bfd_mach_o_read_symtab_strtab): Zero terminate the
+	string table.
+
+	* reloc.c (bfd_get_reloc_size): Handle a reloc size of -1.
+	(bfd_perform_relocation): Include the size of the reloc in the
+	test for an out of range relocation.
+	(bfd_generic_get_relocated_section_contents): Remove reloc range
+	test.
+
+	* coff-i860.c (CALC_ADDEND): Always set an addend value.
+	* tekhex.c (getvalue): Add an end pointer parameter.  Use it to
+	avoid reading off the end of the buffer.
+	(getsym): Likewise.
+	(first_phase): Likewise.
+	(pass_over): Pass an end pointer to the invoked function.
+
+2015-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/17512
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Return NULL on corrupt
+	input.
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Likewise.
+
+2015-01-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive.c (do_slurp_bsd_armap): Make sure that the parsed sized
+	is at least big enough for the header to be read.
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Skip unknown relocs.
+	* mach-o.c (bfd_mach_o_get_synthetic_symtab): Add range checks.
+	(bfd_mach_o_read_command): Prevetn duplicate error messages about
+	unrecognized commands.
+	* syms.c (_bfd_stab_section_find_nearest_line): Add range checks
+	when indexing into the string table.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
