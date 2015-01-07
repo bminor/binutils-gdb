@@ -3406,9 +3406,16 @@ display_any_bfd (bfd *file, int level)
     {
       bfd *arfile = NULL;
       bfd *last_arfile = NULL;
-
+      
       if (level == 0)
         printf (_("In archive %s:\n"), bfd_get_filename (file));
+      else if (level > 100)
+	{
+	  /* Prevent corrupted files from spinning us into an
+	     infinite loop.  100 is an arbitrary heuristic.  */
+	  non_fatal (_("Archive nesting is too deep"));
+	  return;
+	}
       else
         printf (_("In nested archive %s:\n"), bfd_get_filename (file));
 
