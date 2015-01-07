@@ -225,9 +225,10 @@ enum dwarf_line_number_ops
     DW_LNS_set_isa = 12,
     /* Experimental DWARF 5 extensions.
        See http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables.  */
-    DW_LNS_inlined_call = 13,
-    DW_LNS_pop_context = 14,
-    DW_LNS_set_address_from_logical = 15
+    DW_LNS_set_address_from_logical = 13, /* Actuals table only.  */
+    DW_LNS_set_context = 13,              /* Logicals table only.  */
+    DW_LNS_set_subprogram = 14,           /* Logicals table only.  */
+    DW_LNS_pop_context = 15               /* Logicals table only.  */
   };
 
 /* Line number extended opcodes.  */
