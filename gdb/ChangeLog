@@ -1,3 +1,7 @@
+2015-01-07  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* inflow.c (initial_gdb_ttystate): Tweak comment.
+
 2015-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* inflow.c (set_initial_gdb_ttystate): Add empty line after

@@ -79,8 +79,8 @@ struct terminal_info
    unimportant.  */
 static struct terminal_info our_terminal_info;
 
-/* The initial tty state given to each new inferior.  It is a snapshot of our
-   own tty state taken during initialization of GDB.  */
+/* Snapshot of our own tty state taken during initialization of GDB.
+   This is used as the initial tty state given to each new inferior.  */
 static serial_ttystate initial_gdb_ttystate;
 
 static struct terminal_info *get_inflow_inferior_data (struct inferior *);
