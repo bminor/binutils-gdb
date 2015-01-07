@@ -1,3 +1,10 @@
+2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldlang.c (print_assignment): Only evaluate the expression for a
+	PROVIDE'd assignment when the destination is being defined.
+	Display a special message for PROVIDE'd symbols that are not being
+	provided.
+
 2015-01-20  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/elf64ppc.sh (BSS_PLT): Don't define.
