@@ -40,5 +40,7 @@ run_dump_test provide-1
 run_dump_test provide-2
 setup_xfail *-*-*
 run_dump_test provide-3
+run_dump_test provide-4
+run_dump_test provide-5
 
 set LDFLAGS "$saved_LDFLAGS"
