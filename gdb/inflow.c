@@ -161,6 +161,7 @@ show_interactive_mode (struct ui_file *file, int from_tty,
 }
 
 /* Set the initial tty state that is to be inherited by new inferiors.  */
+
 void
 set_initial_gdb_ttystate (void)
 {

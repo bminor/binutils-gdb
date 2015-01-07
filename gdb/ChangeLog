@@ -1,3 +1,8 @@
+2015-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* inflow.c (set_initial_gdb_ttystate): Add empty line after
+	comment documenting function.
+
 2015-01-07  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* terminal.h (set_initial_gdb_ttystate): Declare.
