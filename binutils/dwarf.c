@@ -381,6 +381,9 @@ typedef struct State_Machine_Registers
   unsigned int file;
   unsigned int line;
   unsigned int column;
+  unsigned int discriminator;
+  unsigned int context;
+  unsigned int subprogram;
   int is_stmt;
   int basic_block;
   unsigned char op_index;
@@ -400,10 +403,44 @@ reset_state_machine (int is_stmt)
   state_machine_regs.file = 1;
   state_machine_regs.line = 1;
   state_machine_regs.column = 0;
+  state_machine_regs.discriminator = 0;
+  state_machine_regs.context = 0;
+  state_machine_regs.subprogram = 0;
   state_machine_regs.is_stmt = is_stmt;
   state_machine_regs.basic_block = 0;
   state_machine_regs.end_sequence = 0;
   state_machine_regs.last_file_entry = 0;
+}
+
+/* Build a logicals table for reference when reading the actuals table.  */
+
+static SMR *logicals_table = NULL;
+static unsigned int logicals_allocated = 0;
+static unsigned int logicals_count = 0;
+
+static void
+free_logicals (void)
+{
+  free (logicals_table);
+  logicals_allocated = 0;
+  logicals_count = 0;
+}
+
+static void
+append_logical (void)
+{
+  if (logicals_allocated == 0)
+    {
+      logicals_allocated = 4;
+      logicals_table = (SMR *) xmalloc (logicals_allocated * sizeof (SMR));
+    }
+  if (logicals_count >= logicals_allocated)
+    {
+      logicals_allocated *= 2;
+      logicals_table = (SMR *)
+	  xrealloc (logicals_table, logicals_allocated * sizeof (SMR));
+    }
+  logicals_table[logicals_count++] = state_machine_regs;
 }
 
 /* Handled an extend line op.
@@ -412,7 +449,8 @@ reset_state_machine (int is_stmt)
 static int
 process_extended_line_op (unsigned char * data,
 			  int is_stmt,
-			  unsigned char * end)
+			  unsigned char * end,
+			  int is_logical)
 {
   unsigned char op_code;
   unsigned int bytes_read;
@@ -439,6 +477,8 @@ process_extended_line_op (unsigned char * data,
     {
     case DW_LNE_end_sequence:
       printf (_("End of Sequence\n\n"));
+      if (is_logical)
+	append_logical ();
       reset_state_machine (is_stmt);
       break;
 
@@ -590,6 +630,24 @@ fetch_indirect_string (dwarf_vma offset)
   if (offset > section->size)
     {
       warn (_("DW_FORM_strp offset too big: %s\n"),
+	    dwarf_vmatoa ("x", offset));
+      return (const unsigned char *) _("<offset is too big>");
+    }
+
+  return (const unsigned char *) section->start + offset;
+}
+
+static const unsigned char *
+fetch_indirect_line_string (dwarf_vma offset)
+{
+  struct dwarf_section *section = &debug_displays [line_str].section;
+
+  if (section->start == NULL)
+    return (const unsigned char *) _("<no .debug_line_str section>");
+
+  if (offset > section->size)
+    {
+      warn (_("DW_FORM_line_strp offset too big: %s\n"),
 	    dwarf_vmatoa ("x", offset));
       return (const unsigned char *) _("<offset is too big>");
     }
@@ -2670,6 +2728,10 @@ load_debug_info (void * file)
   return 0;
 }
 
+/* Experimental DWARF 5 extensions.
+   See http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables.  */
+#define DWARF2_LINE_EXPERIMENTAL_VERSION 0xf006
+
 /* Read a DWARF .debug_line section header starting at DATA.
    Upon success returns an updated DATA pointer and the LINFO
    structure and the END_OF_SEQUENCE pointer will be filled in.
@@ -2680,7 +2742,9 @@ read_debug_line_header (struct dwarf_section * section,
 			unsigned char * data,
 			unsigned char * end,
 			DWARF2_Internal_LineInfo * linfo,
-			unsigned char ** end_of_sequence)
+			unsigned char ** end_of_sequence,
+			unsigned int * pinitial_length_size,
+			unsigned int * poffset_size)
 {
   unsigned char *hdrptr;
   unsigned int offset_size;
@@ -2705,6 +2769,8 @@ read_debug_line_header (struct dwarf_section * section,
       offset_size = 4;
       initial_length_size = 4;
     }
+  *pinitial_length_size = initial_length_size;
+  *poffset_size = offset_size;
 
   if (linfo->li_length + initial_length_size > section->size)
     {
@@ -2727,15 +2793,25 @@ read_debug_line_header (struct dwarf_section * section,
   /* Get and check the version number.  */
   SAFE_BYTE_GET_AND_INC (linfo->li_version, hdrptr, 2, end);
 
+  /* Version 0xf006 is for experimental two-level line tables.  */
   if (linfo->li_version != 2
       && linfo->li_version != 3
-      && linfo->li_version != 4)
+      && linfo->li_version != 4
+      && linfo->li_version != 5
+      && linfo->li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
     {
-      warn (_("Only DWARF version 2, 3 and 4 line info is currently supported.\n"));
+      warn (_("Only DWARF versions 2-5 line info are currently supported.\n"));
       return NULL;
     }
 
   SAFE_BYTE_GET_AND_INC (linfo->li_prologue_length, hdrptr, offset_size, end);
+
+  if (linfo->li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
+    linfo->li_actuals_table_offset = 0;
+  else
+    SAFE_BYTE_GET_AND_INC (linfo->li_actuals_table_offset, hdrptr,
+			   offset_size, end);
+
   SAFE_BYTE_GET_AND_INC (linfo->li_min_insn_length, hdrptr, 1, end);
 
   if (linfo->li_version >= 4)
@@ -2769,12 +2845,468 @@ read_debug_line_header (struct dwarf_section * section,
   return hdrptr;
 }
 
+static void
+display_directory_table_v4 (unsigned char *start, unsigned char *end,
+			    unsigned char **pdata)
+{
+  unsigned char *data = *pdata;
+  unsigned int last_dir_entry = 0;
+
+  if (*data == 0)
+    printf (_("\n The Directory Table is empty.\n"));
+  else
+    {
+      printf (_("\n The Directory Table (offset 0x%lx):\n"),
+	      (long)(data - start));
+
+      while (data < end && *data != 0)
+	{
+	  printf ("  %d\t%.*s\n", ++last_dir_entry, (int) (end - data), data);
+
+	  data += strnlen ((char *) data, end - data) + 1;
+	}
+    }
+
+  /* Skip the NUL at the end of the table.  */
+  *pdata = data + 1;
+}
+
+static void
+display_file_name_table_v4 (unsigned char *start, unsigned char *end,
+			    unsigned char **pdata)
+{
+  unsigned char *data = *pdata;
+
+  if (*data == 0)
+    printf (_("\n The File Name Table is empty.\n"));
+  else
+    {
+      printf (_("\n The File Name Table (offset 0x%lx):\n"),
+	      (long)(data - start));
+      printf (_("  Entry\tDir\tTime\tSize\tName\n"));
+
+      while (data < end && *data != 0)
+	{
+	  unsigned char *name;
+	  unsigned int bytes_read;
+
+	  printf ("  %d\t", ++state_machine_regs.last_file_entry);
+	  name = data;
+	  data += strnlen ((char *) data, end - data) + 1;
+
+	  printf ("%s\t",
+		  dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
+	  data += bytes_read;
+	  printf ("%s\t",
+		  dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
+	  data += bytes_read;
+	  printf ("%s\t",
+		  dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
+	  data += bytes_read;
+	  printf ("%.*s\n", (int)(end - name), name);
+
+	  if (data == end)
+	    {
+	      warn (_("Corrupt file name table entry\n"));
+	      break;
+	    }
+	}
+    }
+
+  /* Skip the NUL at the end of the table.  */
+  *pdata = data + 1;
+}
+
+static int
+display_dir_file_table_v5 (unsigned char *start, unsigned char *end,
+			   unsigned char **pdata, char *table_name,
+			   unsigned int offset_size)
+{
+  unsigned char *data = *pdata;
+  unsigned int bytes_read;
+  unsigned int format_count;
+  unsigned int *content_types;
+  unsigned int *content_forms;
+  unsigned int entry_count;
+  unsigned int i, j;
+  const unsigned char *name;
+  dwarf_vma offset;
+  unsigned int val;
+
+  format_count = read_uleb128 (data, & bytes_read, end);
+  data += bytes_read;
+  content_types = (unsigned int *) xmalloc (format_count *
+					    sizeof (unsigned int));
+  content_forms = (unsigned int *) xmalloc (format_count *
+					    sizeof (unsigned int));
+  for (j = 0; j < format_count; j++)
+    {
+      content_types[j] = read_uleb128 (data, & bytes_read, end);
+      data += bytes_read;
+      content_forms[j] = read_uleb128 (data, & bytes_read, end);
+      data += bytes_read;
+    }
+
+  entry_count = read_uleb128 (data, & bytes_read, end);
+  data += bytes_read;
+
+  if (entry_count == 0)
+    printf (_("\n The %s Table is empty.\n"), table_name);
+  else
+    {
+      printf (_("\n The %s Table (offset 0x%lx):\n"),
+	      table_name, (long)(data - start));
+
+      printf (_("  Entry"));
+      for (j = 0; j < format_count; j++)
+	{
+	  printf ("\t");
+	  switch (content_types[j])
+	    {
+	    case DW_LNCT_path:
+	      printf (_("Path"));
+	      break;
+	    case DW_LNCT_subprogram_name:
+	      printf (_("Name"));
+	      break;
+	    case DW_LNCT_directory_index:
+	      printf (_("Dir"));
+	      break;
+	    case DW_LNCT_decl_file:
+	      printf (_("File"));
+	      break;
+	    case DW_LNCT_decl_line:
+	      printf (_("Line"));
+	      break;
+	    }
+	}
+      printf ("\n");
+    }
+
+  for (i = 0; i < entry_count; i++)
+    {
+      printf ("  %d", i + 1);
+      for (j = 0; j < format_count; j++)
+	{
+	  if (data >= end)
+	    break;
+	  switch (content_forms[j])
+	    {
+	    case DW_FORM_string:
+	      printf ("\t%.*s", (int) (end - data), data);
+	      data += strnlen ((char *) data, end - data) + 1;
+	      break;
+	    case DW_FORM_line_strp:
+	      SAFE_BYTE_GET_AND_INC (offset, data, offset_size, end);
+	      name = fetch_indirect_line_string (offset);
+	      printf ("\t%s", name);
+	      break;
+	    case DW_FORM_udata:
+	      val = read_uleb128 (data, & bytes_read, end);
+	      data += bytes_read;
+	      printf ("\t%d", val);
+	      break;
+	    default:
+	      printf ("\t%s", _("(unrecognized FORM code)"));
+	      data = end;
+	      break;
+	    }
+	}
+      printf ("\n");
+
+      /* PR 17512: file: 002-132094-0.004.  */
+      if (data >= end - 1)
+	break;
+    }
+
+  free (content_types);
+  free (content_forms);
+
+  *pdata = data;
+  return entry_count;
+}
+
+static void
+display_line_program (unsigned char *start, unsigned char *end,
+		      unsigned char **pdata, char *table_name,
+		      DWARF2_Internal_LineInfo *linfo,
+		      unsigned char *standard_opcodes,
+		      int is_logical)
+{
+  unsigned char *data = *pdata;
+
+  if (data >= end)
+    {
+      printf (_(" No %s.\n"), table_name);
+      return;
+    }
+
+  printf ("%s:\n", table_name);
+
+  while (data < end)
+    {
+      unsigned char op_code;
+      dwarf_signed_vma adv;
+      dwarf_vma uladv;
+      unsigned int bytes_read;
+      unsigned int logical;
+      int i;
+
+      printf ("  [0x%08lx]", (long)(data - start));
+
+      op_code = *data++;
+
+      if (op_code >= linfo->li_opcode_base)
+	{
+	  op_code -= linfo->li_opcode_base;
+	  uladv = (op_code / linfo->li_line_range);
+	  if (linfo->li_max_ops_per_insn == 1)
+	    {
+	      uladv *= linfo->li_min_insn_length;
+	      state_machine_regs.address += uladv;
+	      printf (_("  Special opcode %d: "
+			"advance Address by %s to 0x%s"),
+		      op_code, dwarf_vmatoa ("u", uladv),
+		      dwarf_vmatoa ("x", state_machine_regs.address));
+	    }
+	  else
+	    {
+	      state_machine_regs.address
+		+= ((state_machine_regs.op_index + uladv)
+		    / linfo->li_max_ops_per_insn)
+		* linfo->li_min_insn_length;
+	      state_machine_regs.op_index
+		= (state_machine_regs.op_index + uladv)
+		% linfo->li_max_ops_per_insn;
+	      printf (_("  Special opcode %d: "
+			"advance Address by %s to 0x%s[%d]"),
+		      op_code, dwarf_vmatoa ("u", uladv),
+		      dwarf_vmatoa ("x", state_machine_regs.address),
+		      state_machine_regs.op_index);
+	    }
+	  adv = (op_code % linfo->li_line_range) + linfo->li_line_base;
+	  state_machine_regs.line += adv;
+	  printf (_(" and Line by %s to %d\n"),
+		  dwarf_vmatoa ("d", adv), state_machine_regs.line);
+	  if (is_logical)
+	    append_logical ();
+	}
+      else
+	{
+	  switch (op_code)
+	     {
+	     case DW_LNS_extended_op:
+	       data += process_extended_line_op (data, linfo->li_default_is_stmt,
+						 end, is_logical);
+	       break;
+
+	     case DW_LNS_copy:
+	       printf (_("  Copy\n"));
+	       if (is_logical)
+		 append_logical ();
+	       break;
+
+	     case DW_LNS_advance_pc:
+	       uladv = read_uleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       if (linfo->li_max_ops_per_insn == 1)
+		 {
+		   uladv *= linfo->li_min_insn_length;
+		   state_machine_regs.address += uladv;
+		   printf (_("  Advance PC by %s to 0x%s\n"),
+			   dwarf_vmatoa ("u", uladv),
+			   dwarf_vmatoa ("x", state_machine_regs.address));
+		 }
+	       else
+		 {
+		   state_machine_regs.address
+		     += ((state_machine_regs.op_index + uladv)
+			 / linfo->li_max_ops_per_insn)
+		     * linfo->li_min_insn_length;
+		   state_machine_regs.op_index
+		     = (state_machine_regs.op_index + uladv)
+		     % linfo->li_max_ops_per_insn;
+		   printf (_("  Advance PC by %s to 0x%s[%d]\n"),
+			   dwarf_vmatoa ("u", uladv),
+			   dwarf_vmatoa ("x", state_machine_regs.address),
+			   state_machine_regs.op_index);
+		 }
+	       break;
+
+	     case DW_LNS_advance_line:
+	       adv = read_sleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       state_machine_regs.line += adv;
+	       printf (_("  Advance Line by %s to %d\n"),
+		       dwarf_vmatoa ("d", adv),
+		       state_machine_regs.line);
+	       break;
+
+	     case DW_LNS_set_file:
+	       adv = read_uleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       printf (_("  Set File Name to entry %s in the File Name Table\n"),
+		       dwarf_vmatoa ("d", adv));
+	       state_machine_regs.file = adv;
+	       break;
+
+	     case DW_LNS_set_column:
+	       uladv = read_uleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       printf (_("  Set column to %s\n"),
+		       dwarf_vmatoa ("u", uladv));
+	       state_machine_regs.column = uladv;
+	       break;
+
+	     case DW_LNS_negate_stmt:
+	       adv = state_machine_regs.is_stmt;
+	       adv = ! adv;
+	       printf (_("  Set is_stmt to %s\n"), dwarf_vmatoa ("d", adv));
+	       state_machine_regs.is_stmt = adv;
+	       break;
+
+	     case DW_LNS_set_basic_block:
+	       printf (_("  Set basic block\n"));
+	       state_machine_regs.basic_block = 1;
+	       break;
+
+	     case DW_LNS_const_add_pc:
+	       uladv = ((255 - linfo->li_opcode_base) / linfo->li_line_range);
+	       if (linfo->li_max_ops_per_insn)
+		 {
+		   uladv *= linfo->li_min_insn_length;
+		   state_machine_regs.address += uladv;
+		   printf (_("  Advance PC by constant %s to 0x%s\n"),
+			   dwarf_vmatoa ("u", uladv),
+			   dwarf_vmatoa ("x", state_machine_regs.address));
+		 }
+	       else
+		 {
+		   state_machine_regs.address
+		     += ((state_machine_regs.op_index + uladv)
+			 / linfo->li_max_ops_per_insn)
+		     * linfo->li_min_insn_length;
+		   state_machine_regs.op_index
+		     = (state_machine_regs.op_index + uladv)
+		     % linfo->li_max_ops_per_insn;
+		   printf (_("  Advance PC by constant %s to 0x%s[%d]\n"),
+			   dwarf_vmatoa ("u", uladv),
+			   dwarf_vmatoa ("x", state_machine_regs.address),
+			   state_machine_regs.op_index);
+		 }
+	       break;
+
+	     case DW_LNS_fixed_advance_pc:
+	       SAFE_BYTE_GET_AND_INC (uladv, data, 2, end);
+	       state_machine_regs.address += uladv;
+	       state_machine_regs.op_index = 0;
+	       printf (_("  Advance PC by fixed size amount %s to 0x%s\n"),
+		       dwarf_vmatoa ("u", uladv),
+		       dwarf_vmatoa ("x", state_machine_regs.address));
+	       break;
+
+	     case DW_LNS_set_prologue_end:
+	       printf (_("  Set prologue_end to true\n"));
+	       break;
+
+	     case DW_LNS_set_epilogue_begin:
+	       printf (_("  Set epilogue_begin to true\n"));
+	       break;
+
+	     case DW_LNS_set_isa:
+	       uladv = read_uleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       printf (_("  Set ISA to %s\n"), dwarf_vmatoa ("u", uladv));
+	       break;
+
+	     case DW_LNS_set_context:
+	     /* This opcode is aliased with:  */
+	     /* case DW_LNS_set_address_from_logical:  */
+	       if (is_logical)
+		 {
+		   /* DW_LNS_set_context */
+		   state_machine_regs.context = read_uleb128 (data, & bytes_read, end);
+		   data += bytes_read;
+		   state_machine_regs.subprogram = read_uleb128 (data, & bytes_read, end);
+		   data += bytes_read;
+		   printf (_("  Set context to %d\n"), state_machine_regs.context);
+		 }
+	       else
+		 {
+		   /* DW_LNS_set_address_from_logical */
+		   adv = read_uleb128 (data, & bytes_read, end);
+		   data += bytes_read;
+		   state_machine_regs.line += adv;
+		   logical = state_machine_regs.line;
+		   if (logical - 1 < logicals_count)
+		     {
+		       state_machine_regs.address = logicals_table[logical - 1].address;
+		       state_machine_regs.op_index = logicals_table[logical - 1].op_index;
+		     }
+		   else
+		     warn (_("Logical row number outside range of logicals table\n"));
+		   printf (_("  Advance Line by %s to %d and set address from logical to 0x%s[%d]\n"),
+			   dwarf_vmatoa ("d", adv),
+			   logical,
+			   dwarf_vmatoa ("x", state_machine_regs.address),
+			   state_machine_regs.op_index);
+		 }
+	       break;
+
+	     case DW_LNS_set_subprogram:
+	       state_machine_regs.subprogram = read_uleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       printf (_("  Set subprogram to %d\n"), state_machine_regs.subprogram);
+	       break;
+
+	     case DW_LNS_pop_context:
+	       uladv = read_uleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       logical = state_machine_regs.context;
+	       printf (_("  Pop context to logical %d\n"), logical);
+	       if (logical - 1 < logicals_count)
+	         {
+		   state_machine_regs.file = logicals_table[logical - 1].file;
+		   state_machine_regs.line = logicals_table[logical - 1].line;
+		   state_machine_regs.column = logicals_table[logical - 1].column;
+		   state_machine_regs.discriminator = logicals_table[logical - 1].discriminator;
+		   state_machine_regs.is_stmt = logicals_table[logical - 1].is_stmt;
+		   state_machine_regs.context = logicals_table[logical - 1].context;
+		   state_machine_regs.subprogram = logicals_table[logical - 1].subprogram;
+	         }
+	       else
+	         warn (_("Context register outside range of logicals table\n"));
+	       break;
+
+	     default:
+	       printf (_("  Unknown opcode %d with operands: "), op_code);
+
+	       if (standard_opcodes != NULL)
+		 for (i = standard_opcodes[op_code - 1]; i > 0 ; --i)
+		   {
+		     printf ("0x%s%s", dwarf_vmatoa ("x", read_uleb128 (data,
+									&bytes_read, end)),
+			     i == 1 ? "" : ", ");
+		     data += bytes_read;
+		   }
+	       putchar ('\n');
+	       break;
+	     }
+	 }
+    }
+
+  putchar ('\n');
+  *pdata = data;
+}
+
 static int
 display_debug_lines_raw (struct dwarf_section *section,
 			 unsigned char *data,
                          unsigned char *end)
 {
   unsigned char *start = section->start;
+  unsigned int initial_length_size;
+  unsigned int offset_size;
 
   printf (_("Raw dump of debug contents of section %s:\n\n"),
           section->name);
@@ -2783,10 +3315,13 @@ display_debug_lines_raw (struct dwarf_section *section,
     {
       static DWARF2_Internal_LineInfo saved_linfo;
       DWARF2_Internal_LineInfo linfo;
+      unsigned char *end_of_header_length;
       unsigned char *standard_opcodes;
+      unsigned char *start_of_line_program;
+      unsigned char *end_of_logicals;
       unsigned char *end_of_sequence;
-      unsigned int last_dir_entry = 0;
       int i;
+      unsigned char *hdrptr = NULL;
 
       if (const_strneq (section->name, ".debug_line.")
 	  /* Note: the following does not apply to .debug_line.dwo sections.
@@ -2809,23 +3344,25 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  /* PR 17531: file: 0522b371.  */
 	  if (linfo.li_line_range == 0)
 	    {
-	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section"));
+	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section\n"));
 	      return 0;
 	    }
 	  reset_state_machine (linfo.li_default_is_stmt);
 	}
       else
 	{
-	  unsigned char * hdrptr;
-
 	  if ((hdrptr = read_debug_line_header (section, data, end, & linfo,
-						& end_of_sequence)) == NULL)
+						& end_of_sequence,
+						& initial_length_size,
+						& offset_size)) == NULL)
 	    return 0;
 
 	  printf (_("  Offset:                      0x%lx\n"), (long)(data - start));
 	  printf (_("  Length:                      %ld\n"), (long) linfo.li_length);
 	  printf (_("  DWARF Version:               %d\n"), linfo.li_version);
 	  printf (_("  Prologue Length:             %d\n"), linfo.li_prologue_length);
+	  if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION)
+	    printf (_("  Actuals Table Offset:        0x%x\n"), linfo.li_actuals_table_offset);
 	  printf (_("  Minimum Instruction Length:  %d\n"), linfo.li_min_insn_length);
 	  if (linfo.li_version >= 4)
 	    printf (_("  Maximum Ops per Instruction: %d\n"), linfo.li_max_ops_per_insn);
@@ -2833,6 +3370,14 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Line Base:                   %d\n"), linfo.li_line_base);
 	  printf (_("  Line Range:                  %d\n"), linfo.li_line_range);
 	  printf (_("  Opcode Base:                 %d\n"), linfo.li_opcode_base);
+
+	  end_of_header_length = data + initial_length_size + 2 + offset_size;
+	  start_of_line_program = end_of_header_length + linfo.li_prologue_length;
+	  if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION
+	      && linfo.li_actuals_table_offset > 0)
+	    end_of_logicals = end_of_header_length + linfo.li_actuals_table_offset;
+	  else
+	    end_of_logicals = end;
 
 	  /* PR 17512: file: 1665-6428-0.004.  */
 	  if (linfo.li_line_range == 0)
@@ -2858,265 +3403,77 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  for (i = 1; i < linfo.li_opcode_base; i++)
 	    printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i - 1]);
 
-	  /* Display the contents of the Directory table.  */
 	  data = standard_opcodes + linfo.li_opcode_base - 1;
 
-	  if (*data == 0)
-	    printf (_("\n The Directory Table is empty.\n"));
+	  /* Display the contents of the Directory table.  */
+	  if (linfo.li_version >= 5)
+	    display_dir_file_table_v5 (start, end, &data, _("Directory"),
+				       offset_size);
 	  else
-	    {
-	      printf (_("\n The Directory Table (offset 0x%lx):\n"),
-		      (long)(data - start));
+	    display_directory_table_v4 (start, end, &data);
 
-	      while (data < end && *data != 0)
-		{
-		  printf ("  %d\t%.*s\n", ++last_dir_entry, (int) (end - data), data);
-
-		  data += strnlen ((char *) data, end - data) + 1;
-		}
-
-	      /* PR 17512: file: 002-132094-0.004.  */
-	      if (data >= end - 1)
-		break;
-	    }
-
-	  /* Skip the NUL at the end of the table.  */
-	  data++;
+	  /* PR 17512: file: 002-132094-0.004.  */
+	  if (data >= end - 1)
+	    break;
 
 	  /* Display the contents of the File Name table.  */
-	  if (*data == 0)
-	    printf (_("\n The File Name Table is empty.\n"));
-	  else
+	  if (linfo.li_version >= 5)
 	    {
-	      printf (_("\n The File Name Table (offset 0x%lx):\n"),
-		      (long)(data - start));
-	      printf (_("  Entry\tDir\tTime\tSize\tName\n"));
+	      unsigned int count;
 
-	      while (data < end && *data != 0)
-		{
-		  unsigned char *name;
-		  unsigned int bytes_read;
-
-		  printf ("  %d\t", ++state_machine_regs.last_file_entry);
-		  name = data;
-		  data += strnlen ((char *) data, end - data) + 1;
-
-		  printf ("%s\t",
-			  dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
-		  data += bytes_read;
-		  printf ("%s\t",
-			  dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
-		  data += bytes_read;
-		  printf ("%s\t",
-			  dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
-		  data += bytes_read;
-		  printf ("%.*s\n", (int)(end - name), name);
-
-		  if (data == end)
-		    {
-		      warn (_("Corrupt file name table entry\n"));
-		      break;
-		    }
-		}
+	      count = display_dir_file_table_v5 (start, end, &data,
+						 _("File Name"), offset_size);
+	      state_machine_regs.last_file_entry = count - 1;
 	    }
+	  else
+	    display_file_name_table_v4 (start, end, &data);
 
-	  /* Skip the NUL at the end of the table.  */
-	  data++;
+	  /* Display the contents of the Subprogram table.  */
+	  if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION)
+	    display_dir_file_table_v5 (start, end, &data, _("Subprogram"),
+				       offset_size);
+
 	  putchar ('\n');
 	  saved_linfo = linfo;
 	}
 
-      /* Now display the statements.  */
-      if (data >= end_of_sequence)
-	printf (_(" No Line Number Statements.\n"));
-      else
-	{
-	  printf (_(" Line Number Statements:\n"));
+      if (data > start_of_line_program)
+	warn (_("Line table header is longer than header_length indicates\n"));
+      else if (data < start_of_line_program)
+	warn (_("Line table header is shorter than header_length indicates\n"));
+      data = start_of_line_program;
 
-	  while (data < end_of_sequence)
+      if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION
+          && hdrptr != NULL
+          && linfo.li_actuals_table_offset > 0)
+        {
+          if (end_of_logicals > end)
 	    {
-	      unsigned char op_code;
-	      dwarf_signed_vma adv;
-	      dwarf_vma uladv;
-	      unsigned int bytes_read;
-
-	      printf ("  [0x%08lx]", (long)(data - start));
-
-	      op_code = *data++;
-
-	      if (op_code >= linfo.li_opcode_base)
-		{
-		  op_code -= linfo.li_opcode_base;
-		  uladv = (op_code / linfo.li_line_range);
-		  if (linfo.li_max_ops_per_insn == 1)
-		    {
-		      uladv *= linfo.li_min_insn_length;
-		      state_machine_regs.address += uladv;
-		      printf (_("  Special opcode %d: "
-				"advance Address by %s to 0x%s"),
-			      op_code, dwarf_vmatoa ("u", uladv),
-			      dwarf_vmatoa ("x", state_machine_regs.address));
-		    }
-		  else
-		    {
-		      state_machine_regs.address
-			+= ((state_machine_regs.op_index + uladv)
-			    / linfo.li_max_ops_per_insn)
-			* linfo.li_min_insn_length;
-		      state_machine_regs.op_index
-			= (state_machine_regs.op_index + uladv)
-			% linfo.li_max_ops_per_insn;
-		      printf (_("  Special opcode %d: "
-				"advance Address by %s to 0x%s[%d]"),
-			      op_code, dwarf_vmatoa ("u", uladv),
-			      dwarf_vmatoa ("x", state_machine_regs.address),
-			      state_machine_regs.op_index);
-		    }
-		  adv = (op_code % linfo.li_line_range) + linfo.li_line_base;
-		  state_machine_regs.line += adv;
-		  printf (_(" and Line by %s to %d\n"),
-			  dwarf_vmatoa ("d", adv), state_machine_regs.line);
-		}
-	      else switch (op_code)
-		     {
-		     case DW_LNS_extended_op:
-		       data += process_extended_line_op (data, linfo.li_default_is_stmt, end);
-		       break;
-
-		     case DW_LNS_copy:
-		       printf (_("  Copy\n"));
-		       break;
-
-		     case DW_LNS_advance_pc:
-		       uladv = read_uleb128 (data, & bytes_read, end);
-		       data += bytes_read;
-		       if (linfo.li_max_ops_per_insn == 1)
-			 {
-			   uladv *= linfo.li_min_insn_length;
-			   state_machine_regs.address += uladv;
-			   printf (_("  Advance PC by %s to 0x%s\n"),
-				   dwarf_vmatoa ("u", uladv),
-				   dwarf_vmatoa ("x", state_machine_regs.address));
-			 }
-		       else
-			 {
-			   state_machine_regs.address
-			     += ((state_machine_regs.op_index + uladv)
-				 / linfo.li_max_ops_per_insn)
-			     * linfo.li_min_insn_length;
-			   state_machine_regs.op_index
-			     = (state_machine_regs.op_index + uladv)
-			     % linfo.li_max_ops_per_insn;
-			   printf (_("  Advance PC by %s to 0x%s[%d]\n"),
-				   dwarf_vmatoa ("u", uladv),
-				   dwarf_vmatoa ("x", state_machine_regs.address),
-				   state_machine_regs.op_index);
-			 }
-		       break;
-
-		     case DW_LNS_advance_line:
-		       adv = read_sleb128 (data, & bytes_read, end);
-		       data += bytes_read;
-		       state_machine_regs.line += adv;
-		       printf (_("  Advance Line by %s to %d\n"),
-			       dwarf_vmatoa ("d", adv),
-			       state_machine_regs.line);
-		       break;
-
-		     case DW_LNS_set_file:
-		       adv = read_uleb128 (data, & bytes_read, end);
-		       data += bytes_read;
-		       printf (_("  Set File Name to entry %s in the File Name Table\n"),
-			       dwarf_vmatoa ("d", adv));
-		       state_machine_regs.file = adv;
-		       break;
-
-		     case DW_LNS_set_column:
-		       uladv = read_uleb128 (data, & bytes_read, end);
-		       data += bytes_read;
-		       printf (_("  Set column to %s\n"),
-			       dwarf_vmatoa ("u", uladv));
-		       state_machine_regs.column = uladv;
-		       break;
-
-		     case DW_LNS_negate_stmt:
-		       adv = state_machine_regs.is_stmt;
-		       adv = ! adv;
-		       printf (_("  Set is_stmt to %s\n"), dwarf_vmatoa ("d", adv));
-		       state_machine_regs.is_stmt = adv;
-		       break;
-
-		     case DW_LNS_set_basic_block:
-		       printf (_("  Set basic block\n"));
-		       state_machine_regs.basic_block = 1;
-		       break;
-
-		     case DW_LNS_const_add_pc:
-		       uladv = ((255 - linfo.li_opcode_base) / linfo.li_line_range);
-		       if (linfo.li_max_ops_per_insn)
-			 {
-			   uladv *= linfo.li_min_insn_length;
-			   state_machine_regs.address += uladv;
-			   printf (_("  Advance PC by constant %s to 0x%s\n"),
-				   dwarf_vmatoa ("u", uladv),
-				   dwarf_vmatoa ("x", state_machine_regs.address));
-			 }
-		       else
-			 {
-			   state_machine_regs.address
-			     += ((state_machine_regs.op_index + uladv)
-				 / linfo.li_max_ops_per_insn)
-			     * linfo.li_min_insn_length;
-			   state_machine_regs.op_index
-			     = (state_machine_regs.op_index + uladv)
-			     % linfo.li_max_ops_per_insn;
-			   printf (_("  Advance PC by constant %s to 0x%s[%d]\n"),
-				   dwarf_vmatoa ("u", uladv),
-				   dwarf_vmatoa ("x", state_machine_regs.address),
-				   state_machine_regs.op_index);
-			 }
-		       break;
-
-		     case DW_LNS_fixed_advance_pc:
-		       SAFE_BYTE_GET_AND_INC (uladv, data, 2, end);
-		       state_machine_regs.address += uladv;
-		       state_machine_regs.op_index = 0;
-		       printf (_("  Advance PC by fixed size amount %s to 0x%s\n"),
-			       dwarf_vmatoa ("u", uladv),
-			       dwarf_vmatoa ("x", state_machine_regs.address));
-		       break;
-
-		     case DW_LNS_set_prologue_end:
-		       printf (_("  Set prologue_end to true\n"));
-		       break;
-
-		     case DW_LNS_set_epilogue_begin:
-		       printf (_("  Set epilogue_begin to true\n"));
-		       break;
-
-		     case DW_LNS_set_isa:
-		       uladv = read_uleb128 (data, & bytes_read, end);
-		       data += bytes_read;
-		       printf (_("  Set ISA to %s\n"), dwarf_vmatoa ("u", uladv));
-		       break;
-
-		     default:
-		       printf (_("  Unknown opcode %d with operands: "), op_code);
-
-		       if (standard_opcodes != NULL)
-			 for (i = standard_opcodes[op_code - 1]; i > 0 ; --i)
-			   {
-			     printf ("0x%s%s", dwarf_vmatoa ("x", read_uleb128 (data,
-										&bytes_read, end)),
-				     i == 1 ? "" : ", ");
-			     data += bytes_read;
-			   }
-		       putchar ('\n');
-		       break;
-		     }
+	      warn (_("Actuals table offset %s extends beyond end of section\n"),
+		    dwarf_vmatoa ("u", linfo.li_actuals_table_offset));
+	      end_of_logicals = end;
 	    }
-	  putchar ('\n');
-	}
+          display_line_program (start, end_of_logicals, &data,
+				_("Logicals Statements"),
+				&linfo, standard_opcodes, 1);
+          if (data > end_of_logicals)
+	    warn (_("Logicals table is longer than actuals_table_offset indicates\n"));
+          else if (data < end_of_logicals)
+	    warn (_("Line table header is shorter than actuals_table_offset indicates\n"));
+          data = end_of_logicals;
+	  reset_state_machine (linfo.li_default_is_stmt);
+          display_line_program (start, end_of_sequence, &data,
+				_("Actuals Statements"),
+				&linfo, standard_opcodes, 0);
+          free_logicals ();
+        }
+      else
+        {
+          display_line_program (start, end_of_sequence, &data,
+				_("Line Number Statements"),
+				&linfo, standard_opcodes, 0);
+        }
+
     }
 
   return 1;
@@ -3138,6 +3495,8 @@ display_debug_lines_decoded (struct dwarf_section *section,
 			     unsigned char *end)
 {
   static DWARF2_Internal_LineInfo saved_linfo;
+  unsigned int initial_length_size;
+  unsigned int offset_size;
 
   printf (_("Decoded dump of debug contents of section %s:\n\n"),
           section->name);
@@ -3166,7 +3525,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	  /* PR 17531: file: 0522b371.  */
 	  if (linfo.li_line_range == 0)
 	    {
-	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section"));
+	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section\n"));
 	      return 0;
 	    }
 	  reset_state_machine (linfo.li_default_is_stmt);
@@ -3176,7 +3535,9 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	  unsigned char *hdrptr;
 
 	  if ((hdrptr = read_debug_line_header (section, data, end, & linfo,
-						& end_of_sequence)) == NULL)
+						& end_of_sequence,
+						& initial_length_size,
+						& offset_size)) == NULL)
 	      return 0;
 
 	  /* PR 17531: file: 0522b371.  */
@@ -3600,7 +3961,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 }
 
 static int
-display_debug_lines (struct dwarf_section *section, void *file ATTRIBUTE_UNUSED)
+display_debug_lines (struct dwarf_section *section, void *file)
 {
   unsigned char *data = section->start;
   unsigned char *end = data + section->size;
@@ -3609,6 +3970,8 @@ display_debug_lines (struct dwarf_section *section, void *file ATTRIBUTE_UNUSED)
 
   if (do_debug_lines == 0)
     do_debug_lines |= FLAG_DEBUG_LINES_RAW;
+
+  load_debug_section (line_str, file);
 
   if (do_debug_lines & FLAG_DEBUG_LINES_RAW)
     retValRaw = display_debug_lines_raw (section, data, end);
@@ -7352,6 +7715,8 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_macro",	    ".zdebug_macro",	NULL, NULL, 0, 0, 0, NULL },
     display_debug_macro,    &do_debug_macinfo,	1 },
   { { ".debug_str",	    ".zdebug_str",	NULL, NULL, 0, 0, 0, NULL },
+    display_debug_str,	    &do_debug_str,	0 },
+  { { ".debug_line_str",    ".zdebug_line_str",	NULL, NULL, 0, 0, 0, NULL },
     display_debug_str,	    &do_debug_str,	0 },
   { { ".debug_loc",	    ".zdebug_loc",	NULL, NULL, 0, 0, 0, NULL },
     display_debug_loc,	    &do_debug_loc,	1 },
