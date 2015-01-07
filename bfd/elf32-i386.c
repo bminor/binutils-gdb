@@ -5194,9 +5194,9 @@ bad_return:
     {
       long reloc_index;
 
-      /* PR 17512: file: bc9d6cf5.  */
+      /* Skip unknown relocation.  PR 17512: file: bc9d6cf5.  */
       if (p->howto == NULL)
-	goto bad_return;
+	continue;
 
       if (p->howto->type != R_386_JUMP_SLOT
 	  && p->howto->type != R_386_IRELATIVE)
