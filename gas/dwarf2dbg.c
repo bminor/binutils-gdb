@@ -1551,29 +1551,37 @@ emit_logicals (void)
 
 	  // See if a sequence of DW_LNS_pop_context ops will get
 	  // to the state we want.
-	  while (caller > 0 && caller <= logicals_in_use) {
-	    ++npop;
-	    if (logicals[caller - 1].subprog == subprog)
-	      break;
-	    caller = logicals[caller - 1].context;
-	  }
-	  if (caller > 0 && caller <= logicals_in_use && npop < 5) {
-	    while (npop-- > 0)
-	      out_opcode (DW_LNS_pop_context);
-	    filenum = logicals[caller - 1].loc.filenum;
-	    line = logicals[caller - 1].loc.line;
-	    column = logicals[caller - 1].loc.column;
-	    discriminator = logicals[caller - 1].loc.discriminator;
-	    flags = logicals[caller - 1].loc.flags;
-	    context = logicals[caller - 1].context;
-	    subprog = logicals[caller - 1].subprog;
-	  } else {
-	    out_opcode (DW_LNS_inlined_call);
-	    out_uleb128 (context);
-	    out_uleb128 (subprog);
-	    context = e->context;
-	    subprog = e->subprog;
-	  }
+	  while (caller > 0 && caller <= logicals_in_use)
+	    {
+	      ++npop;
+	      if (logicals[caller - 1].subprog == subprog)
+		break;
+	      caller = logicals[caller - 1].context;
+	    }
+	  if (caller > 0 && caller <= logicals_in_use && npop < 5)
+	    {
+	      while (npop-- > 0)
+		out_opcode (DW_LNS_pop_context);
+	      filenum = logicals[caller - 1].loc.filenum;
+	      line = logicals[caller - 1].loc.line;
+	      column = logicals[caller - 1].loc.column;
+	      discriminator = logicals[caller - 1].loc.discriminator;
+	      flags = logicals[caller - 1].loc.flags;
+	      context = logicals[caller - 1].context;
+	      subprog = logicals[caller - 1].subprog;
+	    }
+	  if (context != e->context)
+	    {
+	      context = e->context;
+	      out_opcode (DW_LNS_set_context);
+	      out_uleb128 (context);
+	    }
+	  if (subprog != e->subprog)
+	    {
+	      subprog = e->subprog;
+	      out_opcode (DW_LNS_set_subprogram);
+	      out_uleb128 (subprog);
+	    }
 	}
 
       if (filenum != e->loc.filenum)
@@ -1610,10 +1618,7 @@ emit_logicals (void)
       if (e->loc.flags & DWARF2_FLAG_EPILOGUE_BEGIN)
 	out_opcode (DW_LNS_set_epilogue_begin);
 
-      if (logicals_in_use == 0)
-	line_delta = e->loc.line - line;
-      else
-	line_delta = e->loc.logical - line;
+      line_delta = e->loc.line - line;
       lab = e->label;
       frag = symbol_get_frag (lab);
       frag_ofs = S_GET_VALUE (lab);
@@ -1722,17 +1727,17 @@ process_entries (segT seg, struct line_entry *e)
 	  out_uleb128 (isa);
 	}
 
-      if ((e->loc.flags ^ flags) & DWARF2_FLAG_IS_STMT)
-	{
-	  flags = e->loc.flags;
-	  out_opcode (DW_LNS_negate_stmt);
-	}
-
       if (e->loc.flags & DWARF2_FLAG_BASIC_BLOCK)
 	out_opcode (DW_LNS_set_basic_block);
 
       if (logicals_in_use == 0)
         {
+	  if ((e->loc.flags ^ flags) & DWARF2_FLAG_IS_STMT)
+	    {
+	      flags = e->loc.flags;
+	      out_opcode (DW_LNS_negate_stmt);
+	    }
+
 	  if (e->loc.flags & DWARF2_FLAG_PROLOGUE_END)
 	    out_opcode (DW_LNS_set_prologue_end);
 
@@ -1915,6 +1920,8 @@ out_dwarf5_file_list (segT str_seg, int sizeof_offset)
   offsetT strp;
   unsigned int i;
   expressionS exp;
+  unsigned int dir_count = dirs_in_use > 0 ? dirs_in_use - 1 : 0;
+  unsigned int file_count = files_in_use > 0 ? files_in_use - 1 : 0;
 
   exp.X_op = O_symbol;
   exp.X_add_symbol = section_symbol (str_seg);
@@ -1922,7 +1929,7 @@ out_dwarf5_file_list (segT str_seg, int sizeof_offset)
   out_byte (1);                    /* directory_entry_format_count */
   out_uleb128 (DW_LNCT_path);      /* directory_entry_format[0].content_type */
   out_uleb128 (DW_FORM_line_strp); /* directory_entry_format[0].form */
-  out_uleb128 (dirs_in_use - 1);   /* directories_count */
+  out_uleb128 (dir_count);         /* directories_count */
 
   /* Emit directories list.  */
   for (i = 1; i < dirs_in_use; ++i)
@@ -1938,7 +1945,7 @@ out_dwarf5_file_list (segT str_seg, int sizeof_offset)
   out_uleb128 (DW_FORM_line_strp);       /* file_name_entry_format[0].form */
   out_uleb128 (DW_LNCT_directory_index); /* file_name_entry_format[0].type */
   out_uleb128 (DW_FORM_udata);           /* file_name_entry_format[0].form */
-  out_uleb128 (files_in_use - 1);        /* file_names_count */
+  out_uleb128 (file_count);              /* file_names_count */
 
   /* Emit file_names list.  */
   for (i = 1; i < files_in_use; ++i)
@@ -2112,9 +2119,9 @@ out_debug_line (segT line_seg, segT str_seg)
   out_byte (1);			/* DW_LNS_set_isa */
   if (opcode_base == DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE)
     {
-      out_byte (2);		/* DW_LNS_inlined_call */
+      out_byte (1);		/* DW_LNS_set_context/DW_LNS_set_address_from_logical */
+      out_byte (1);		/* DW_LNS_set_subprogram */
       out_byte (0);		/* DW_LNS_pop_context */
-      out_byte (1);		/* DW_LNS_set_address_from_logical */
     }
 
   if (version >= 5)
