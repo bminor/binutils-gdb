@@ -1,3 +1,9 @@
+2015-01-07  Jan Beulich <jbeulich@suse.com>
+
+	* config/tc-arm.c (struct arm_option_extension_value_table):
+	Split field "value" into fields "merge_value" and "clear_value".
+	(arm_extensions): Adjust initializer accordingly.
+
 2015-06-17  Nicolas Pitre <nico@linaro.org>
 
 	* as.c (show_usage): Document --sectname-subst.

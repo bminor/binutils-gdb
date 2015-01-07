@@ -24493,40 +24493,51 @@ struct arm_option_extension_value_table
 {
   char *name;
   size_t name_len;
-  const arm_feature_set value;
+  const arm_feature_set merge_value;
+  const arm_feature_set clear_value;
   const arm_feature_set allowed_archs;
 };
 
 /* The following table must be in alphabetical order with a NULL last entry.
    */
-#define ARM_EXT_OPT(N, V, AA) { N, sizeof (N) - 1, V, AA }
+#define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, AA }
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
-  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE (ARM_EXT_V8, 0)),
+  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE (0, CRC_EXT_ARMV8),
+			 ARM_FEATURE (ARM_EXT_V8, 0)),
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+			 ARM_FEATURE (0, FPU_CRYPTO_ARMV8),
 				   ARM_FEATURE (ARM_EXT_V8, 0)),
-  ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8,
+  ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE (0, FPU_VFP_ARMV8),
 				   ARM_FEATURE (ARM_EXT_V8, 0)),
   ARM_EXT_OPT ("idiv",	ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
+			ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
 				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
-  ARM_EXT_OPT ("iwmmxt",ARM_FEATURE (0, ARM_CEXT_IWMMXT),	ARM_ANY),
-  ARM_EXT_OPT ("iwmmxt2",
-			ARM_FEATURE (0, ARM_CEXT_IWMMXT2),	ARM_ANY),
-  ARM_EXT_OPT ("maverick",
-			ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY),
+  ARM_EXT_OPT ("iwmmxt",ARM_FEATURE (0, ARM_CEXT_IWMMXT),
+			ARM_FEATURE (0, ARM_CEXT_IWMMXT), ARM_ANY),
+  ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE (0, ARM_CEXT_IWMMXT2),
+			ARM_FEATURE (0, ARM_CEXT_IWMMXT2), ARM_ANY),
+  ARM_EXT_OPT ("maverick", ARM_FEATURE (0, ARM_CEXT_MAVERICK),
+			ARM_FEATURE (0, ARM_CEXT_MAVERICK), ARM_ANY),
   ARM_EXT_OPT ("mp",	ARM_FEATURE (ARM_EXT_MP, 0),
+			ARM_FEATURE (ARM_EXT_MP, 0),
 				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
   ARM_EXT_OPT ("simd",   FPU_ARCH_NEON_VFP_ARMV8,
+			ARM_FEATURE(0, FPU_NEON_ARMV8),
 				   ARM_FEATURE (ARM_EXT_V8, 0)),
   ARM_EXT_OPT ("os",	ARM_FEATURE (ARM_EXT_OS, 0),
+			ARM_FEATURE (ARM_EXT_OS, 0),
 				   ARM_FEATURE (ARM_EXT_V6M, 0)),
   ARM_EXT_OPT ("sec",	ARM_FEATURE (ARM_EXT_SEC, 0),
+			ARM_FEATURE (ARM_EXT_SEC, 0),
 				   ARM_FEATURE (ARM_EXT_V6K | ARM_EXT_V7A, 0)),
   ARM_EXT_OPT ("virt",	ARM_FEATURE (ARM_EXT_VIRT | ARM_EXT_ADIV
 				     | ARM_EXT_DIV, 0),
+			ARM_FEATURE (ARM_EXT_VIRT, 0),
 				   ARM_FEATURE (ARM_EXT_V7A, 0)),
-  ARM_EXT_OPT ("xscale",ARM_FEATURE (0, ARM_CEXT_XSCALE),	ARM_ANY),
-  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+  ARM_EXT_OPT ("xscale",ARM_FEATURE (0, ARM_CEXT_XSCALE),
+			ARM_FEATURE (0, ARM_CEXT_XSCALE), ARM_ANY),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 #undef ARM_EXT_OPT
 
@@ -24701,9 +24712,9 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
 
 	    /* Add or remove the extension.  */
 	    if (adding_value)
-	      ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->value);
+	      ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->merge_value);
 	    else
-	      ARM_CLEAR_FEATURE (*ext_set, *ext_set, opt->value);
+	      ARM_CLEAR_FEATURE (*ext_set, *ext_set, opt->clear_value);
 
 	    break;
 	  }
@@ -25436,9 +25447,10 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 	  }
 
 	if (adding_value)
-	  ARM_MERGE_FEATURE_SETS (selected_cpu, selected_cpu, opt->value);
+	  ARM_MERGE_FEATURE_SETS (selected_cpu, selected_cpu,
+				  opt->merge_value);
 	else
-	  ARM_CLEAR_FEATURE (selected_cpu, selected_cpu, opt->value);
+	  ARM_CLEAR_FEATURE (selected_cpu, selected_cpu, opt->clear_value);
 
 	mcpu_cpu_opt = &selected_cpu;
 	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
