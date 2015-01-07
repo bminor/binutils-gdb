@@ -1,3 +1,8 @@
+2015-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* guile/scm-type.c (tyscm_array_1): Add comment.
+	* python/py-type.c (typy_array_1): Add comment.
+
 2015-01-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* guile/scm-type.c (tyscm_array_1): Do not raise out-of-range
