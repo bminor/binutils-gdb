@@ -1,4 +1,4 @@
-From c694de32e282069ac0965ebb650cea7de4bf6a30 Mon Sep 17 00:00:00 2001
+From 081ff0b8a64fa33a2fbd8b900f31228138400438 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sat, 20 Dec 2014 05:45:51 -0800
 Subject: [PATCH] Treat .eh_frame section before crtbeginT as normal input
@@ -35,25 +35,26 @@ crtbeginT file.
 	* main.cc (main): Pass command_line.has_crtbeginT() to layout.
 	* options.cc: Include "layout.h".
 	(Input_arguments::add_file): Set this->has_crtbeginT_ to true
-	if there is a crtbeginT file.
+	if there is a crtbeginT file and the last one is a crti file.
 	* options.h (Input_arguments::Input_arguments): Initialize
-	has_crtbeginT_ to false.
+	has_crtbeginT_ and last_is_crti_ to false.
 	(Input_arguments::has_crtbeginT): New function.
 	(Input_arguments::has_crtbeginT_): New bool member.
+	(Input_arguments::last_is_crti_): Likewise.
 	(Command_line::has_crtbeginT): New function.
 ---
- gold/ChangeLog  | 35 +++++++++++++++++++++++++++++++++++
+ gold/ChangeLog  | 36 ++++++++++++++++++++++++++++++++++++
  gold/ehframe.cc | 31 +++++++++++++++++++++----------
  gold/ehframe.h  |  6 ++++--
  gold/layout.cc  | 37 +++++++++++++++++++++++++++++--------
  gold/layout.h   | 10 +++++++++-
  gold/main.cc    |  3 ++-
- gold/options.cc |  4 ++++
- gold/options.h  | 15 ++++++++++++++-
- 8 files changed, 118 insertions(+), 23 deletions(-)
+ gold/options.cc | 14 ++++++++++++++
+ gold/options.h  | 17 ++++++++++++++++-
+ 8 files changed, 131 insertions(+), 23 deletions(-)
 
 diff --git a/gold/ehframe.cc b/gold/ehframe.cc
-index c711bac..ce3741b 100644
+index faea1a8..2fee0ff 100644
 --- a/gold/ehframe.cc
 +++ b/gold/ehframe.cc
 @@ -576,7 +576,8 @@ Eh_frame::add_ehframe_input_section(
@@ -134,7 +135,7 @@ index c711bac..ce3741b 100644
  
  } // End namespace gold.
 diff --git a/gold/ehframe.h b/gold/ehframe.h
-index 2ae12e0..93f7268 100644
+index aa2bd31..73e0fd4 100644
 --- a/gold/ehframe.h
 +++ b/gold/ehframe.h
 @@ -371,7 +371,8 @@ class Eh_frame : public Output_section_data
@@ -158,7 +159,7 @@ index 2ae12e0..93f7268 100644
    // Add a CIE and an FDE for a PLT section, to permit unwinding
    // through a PLT.  The FDE data should start with 8 bytes of zero,
 diff --git a/gold/layout.cc b/gold/layout.cc
-index 0a71a2a..a723d03 100644
+index acc03b2..1ef4d18 100644
 --- a/gold/layout.cc
 +++ b/gold/layout.cc
 @@ -418,7 +418,8 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
@@ -248,7 +249,7 @@ index 0a71a2a..a723d03 100644
  // NAME is selected for the link.  If there is already a section,
  // *KEPT_SECTION is set to point to the existing section and the
 diff --git a/gold/layout.h b/gold/layout.h
-index 032f5f3..31724a2 100644
+index aec0c53..bf4a44a 100644
 --- a/gold/layout.h
 +++ b/gold/layout.h
 @@ -488,7 +488,7 @@ enum Output_section_order
@@ -283,7 +284,7 @@ index 032f5f3..31724a2 100644
    Output_section_data_list script_output_section_data_list_;
    // Structure to save segment states before entering the relaxation loop.
 diff --git a/gold/main.cc b/gold/main.cc
-index bb86613..452815e 100644
+index c5e50d6..a3aea4b 100644
 --- a/gold/main.cc
 +++ b/gold/main.cc
 @@ -227,7 +227,8 @@ main(int argc, char** argv)
@@ -297,7 +298,7 @@ index bb86613..452815e 100644
    if (layout.incremental_inputs() != NULL)
      layout.incremental_inputs()->report_command_line(argc, argv);
 diff --git a/gold/options.cc b/gold/options.cc
-index 731061d..cf7af2d 100644
+index 7eb8f27..12c1aaa 100644
 --- a/gold/options.cc
 +++ b/gold/options.cc
 @@ -38,6 +38,7 @@
@@ -308,18 +309,28 @@ index 731061d..cf7af2d 100644
  #include "plugin.h"
  
  namespace gold
-@@ -1346,6 +1347,9 @@ Input_arguments::add_file(Input_file_argument& file)
+@@ -1346,6 +1347,19 @@ Input_arguments::add_file(Input_file_argument& file)
        return this->input_argument_list_.back().lib()->add_file(file);
      }
    this->input_argument_list_.push_back(Input_argument(file));
-+  if (!this->has_crtbeginT_
-+      && Layout::match_file_name(file.name(), "crtbeginT"))
-+    this->has_crtbeginT_ = true;
++  if (!this->has_crtbeginT_)
++    {
++      // Set has_crtbeginT_ to true only if the last one is a crti file.
++      if (Layout::match_file_name(file.name(), "crti"))
++	this->last_is_crti_ = true;
++      else
++	{
++	  if (this->last_is_crti_
++	      && Layout::match_file_name(file.name(), "crtbeginT"))
++	    this->has_crtbeginT_ = true;
++	  this->last_is_crti_ = false;
++	}
++    }
    return this->input_argument_list_.back();
  }
  
 diff --git a/gold/options.h b/gold/options.h
-index 6d827f1..9a8ee27 100644
+index 956a7f4..83bdd20 100644
 --- a/gold/options.h
 +++ b/gold/options.h
 @@ -1970,7 +1970,8 @@ class Input_arguments
@@ -328,11 +339,11 @@ index 6d827f1..9a8ee27 100644
    Input_arguments()
 -    : input_argument_list_(), in_group_(false), in_lib_(false), file_count_(0)
 +    : input_argument_list_(), in_group_(false), in_lib_(false),
-+      file_count_(0), has_crtbeginT_(false)
++      file_count_(0), has_crtbeginT_(false), last_is_crti_(false)
    { }
  
    // Add a file.
-@@ -2030,11 +2031,18 @@ class Input_arguments
+@@ -2030,11 +2031,20 @@ class Input_arguments
    number_of_input_files() const
    { return this->file_count_; }
  
@@ -348,10 +359,12 @@ index 6d827f1..9a8ee27 100644
    unsigned int file_count_;
 +  // Whether there is a crtbeginT file.
 +  bool has_crtbeginT_;
++  // Whether the last one is a crti file.
++  bool last_is_crti_;
  };
  
  
-@@ -2103,6 +2111,11 @@ class Command_line
+@@ -2103,6 +2113,11 @@ class Command_line
    end() const
    { return this->inputs_.end(); }
  
