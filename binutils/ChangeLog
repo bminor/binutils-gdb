@@ -1,6 +1,9 @@
 2015-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
+	* dlltool.c (scan_obj_file): Break loop if the last archive
+	displayed matches the current archive.
+
 	* objdump.c (display_any_bfd): Add a depth limit to nested archive
 	display in order to avoid infinite loops.
 	* srconv.c: Replace calls to abort with calls to fatal with an
