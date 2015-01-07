@@ -2,6 +2,17 @@
 
 	Apply from master.
 	2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* ld-scripts/provide-4.d: New file.
+	* ld-scripts/provide-4-map.d: New file.
+	* ld-scripts/provide-4.t: New file.
+	* ld-scripts/provide-5.d: New file.
+	* ld-scripts/provide-5.s: New file.
+	* ld-scripts/provide-5-map.d: New file.
+	* ld-scripts/provide-5.t: New file.
+	* ld-scripts/provide.exp: Run the provide-4.d and provide-5.d
+	tests.
+
+	2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 	* ld-scripts/overlay-size.d: Add 'map' option.
 	* ld-scripts/overlay-size.exp: Remove manual check of mapfile.
 	* lib/ld-lib.exp (run_dump_test): Add support for new 'map'
