@@ -4293,6 +4293,29 @@ software_breakpoint_inserted_here_p (struct address_space *aspace,
   return 0;
 }
 
+/* See breakpoint.h.  */
+
+int
+hardware_breakpoint_inserted_here_p (struct address_space *aspace,
+				     CORE_ADDR pc)
+{
+  struct bp_location **blp, **blp_tmp = NULL;
+  struct bp_location *bl;
+
+  ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
+    {
+      struct bp_location *bl = *blp;
+
+      if (bl->loc_type != bp_loc_hardware_breakpoint)
+	continue;
+
+      if (bp_location_inserted_here_p (bl, aspace, pc))
+	return 1;
+    }
+
+  return 0;
+}
+
 int
 hardware_watchpoint_inserted_in_range (struct address_space *aspace,
 				       CORE_ADDR addr, ULONGEST len)

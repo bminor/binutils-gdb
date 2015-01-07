@@ -1,5 +1,45 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (hardware_breakpoint_inserted_here_p): New
+	function.
+	* breakpoint.h (hardware_breakpoint_inserted_here_p): New
+	declaration.
+	* linux-nat.c (linux_nat_status_is_event): Move higher up in file.
+	(linux_resume_one_lwp): Store the thread's PC.  Adjust to clear
+	stop_reason.
+	(check_stopped_by_watchpoint): New function.
+	(save_sigtrap): Reimplement.
+	(linux_nat_stopped_by_watchpoint): Adjust.
+	(linux_nat_lp_status_is_event): Delete.
+	(stop_wait_callback): Only call save_sigtrap after storing the
+	pending status.
+	(status_callback): If the thread had been stopped for a breakpoint
+	that has since been removed, discard the event and resume the LWP.
+	(count_events_callback, select_event_lwp_callback): Use
+	lwp_status_pending_p instead of linux_nat_lp_status_is_event.
+	(cancel_breakpoint): Rename to ...
+	(check_stopped_by_breakpoint): ... this.  Record whether the LWP
+	stopped for a software breakpoint or hardware breakpoint.
+	(select_event_lwp): Only give preference to the stepping LWP in
+	all-stop mode.  Adjust comments.
+	(stop_and_resume_callback): Remove references to new_pending_p.
+	(linux_nat_filter_event): Likewise.  Leave exit events of the
+	leader thread pending here.  Handle signal short circuiting here.
+	Only call save_sigtrap after storing the pending waitstatus.
+	(linux_nat_wait_1): Remove 'retry' label.  Remove references to
+	new_pending.  Don't handle leaving events the caller is not
+	interested in pending here, nor handle signal short-circuiting
+	here.  Also give equal priority to all LWPs that have had events
+	in non-stop mode.  If reporting a software breakpoint event,
+	unadjust the LWP's PC.
+	* linux-nat.h (enum lwp_stop_reason): New.
+	(struct lwp_info) <stop_pc>: New field.
+	(struct lwp_info) <stopped_by_watchpoint>: Delete field.
+	(struct lwp_info) <stop_reason>: New field.
+	* x86-linux-nat.c (x86_linux_prepare_to_resume): Adjust.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (linux_handle_extended_wait) <PTRACE_EVENT_EXEC>:
 	Set the LWP's 'resumed' flag.
 
