@@ -1,5 +1,22 @@
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (linux_resume_one_lwp): New function.
+	(resume_lwp): Use lwp_status_pending_p and linux_resume_one_lwp.
+	(linux_nat_resume): Use lwp_status_pending_p and
+	linux_resume_one_lwp.
+	(linux_handle_syscall_trap): Use linux_resume_one_lwp.
+	(linux_handle_extended_wait): Use linux_resume_one_lwp.
+	(status_callback, running_callback): Use lwp_status_pending_p.
+	(lwp_status_pending_p): New function.
+	(stop_and_resume_callback): Use lwp_status_pending_p.
+	(linux_nat_filter_event): Use linux_resume_one_lwp.
+	(linux_nat_wait_1): Always use status_callback to look for an LWP
+	with a pending status.  Use linux_resume_one_lwp.
+	(resume_stopped_resumed_lwps): Use lwp_status_pending_p and
+	linux_resume_one_lwp.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (bp_location_inserted_here_p): New function,
 	factored out from ...
 	(breakpoint_inserted_here_p): ... here.  Use
