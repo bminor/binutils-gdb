@@ -1,3 +1,24 @@
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-avr.c: Add elf32-avr.h include.
+	(struct avr_property_record_link): New structure.
+	(avr_output_property_section_header): New function.
+	(avr_record_size): New function.
+	(avr_output_property_record): New function.
+	(avr_create_property_section): New function.
+	(avr_handle_align): New function.
+	(exclude_section_from_property_tables): New function.
+	(create_record_for_frag): New function.
+	(append_records_for_section): New function.
+	(avr_create_and_fill_property_section): New function.
+	(avr_post_relax_hook): New function.
+	* config/tc-avr.h (md_post_relax_hook): Define.
+	(avr_post_relax_hook): Declare.
+	(HANDLE_ALIGN): Define.
+	(avr_handle_align): Declare.
+	(strut avr_frag_data): New structure.
+	(TC_FRAG_TYPE): Define.
+
 2015-02-25  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* doc/c-arm.texi (-mcpu=): Add cortex-a53, cortex-a57 and

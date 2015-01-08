@@ -36,3 +36,55 @@ elf32_avr_size_stubs (bfd *, struct bfd_link_info *, bfd_boolean);
 
 extern bfd_boolean
 elf32_avr_build_stubs (struct bfd_link_info *);
+
+/* The name of the section into which the property records are stored.  */
+#define AVR_PROPERTY_RECORD_SECTION_NAME ".avr.prop"
+
+/* The current version number for the format of the property records.  */
+#define AVR_PROPERTY_RECORDS_VERSION 1
+
+/* The size of the header that is written to the property record section
+   before the property records are written out.  */
+#define AVR_PROPERTY_SECTION_HEADER_SIZE 4
+
+/* This holds a single property record in memory, the structure of this
+   data when written out to the ELF section is more compressed.  */
+
+struct avr_property_record
+{
+  /* The section and offset for this record.  */
+  asection *section;
+  bfd_vma offset;
+
+  /* The type of this record.  */
+  enum {
+    RECORD_ORG = 0,
+    RECORD_ORG_AND_FILL = 1,
+    RECORD_ALIGN = 2,
+    RECORD_ALIGN_AND_FILL = 3
+  } type;
+
+  /* Type specific data.  */
+  union
+  {
+    /* RECORD_ORG and RECORD_ORG_AND_FILL.  */
+    struct
+    {
+      unsigned long fill;
+    } org;
+
+    /* RECORD_ALIGN and RECORD_ALIGN_AND_FILL.  */
+    struct
+    {
+      unsigned long bytes;
+      unsigned long fill;
+
+      /* This field is used during linker relaxation to track the number of
+         bytes that have been opened up before this alignment directive.
+         When we have enough bytes available it is possible to move the
+         re-align this directive backwards while still maintaining the
+         alignment requirement.  */
+      unsigned long preceding_deleted;
+    } align;
+  } data;
+};

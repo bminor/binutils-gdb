@@ -1,3 +1,10 @@
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-avr.h (AVR_PROPERTY_RECORD_SECTION_NAME): Define.
+	(AVR_PROPERTY_RECORDS_VERSION): Define.
+	(AVR_PROPERTY_SECTION_HEADER_SIZE): Define.
+	(struct avr_property_record): New structure.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-v850.c (v850_set_note): New function.  Creates a Renesas
