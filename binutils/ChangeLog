@@ -1,3 +1,11 @@
+2015-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* nlmconv.c (i386_mangle_relocs): Skip relocs without an
+	associated symbol.
+	(powerpc_mangle_relocs): Skip unrecognised relocs.  Check address
+	range before applying a reloc.
+
 2015-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
