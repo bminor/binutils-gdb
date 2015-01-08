@@ -1,5 +1,11 @@
 2015-01-08  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-msp430.c (msp430_elf_relax_section): Add relaxation of
+	16-bit absolute BR instructions to 10-bit pc-relative JMP
+	instructions.
+
+2015-01-08  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17512
 	* coffcode.h (coff_slurp_symbol_table): Return false if we failed
 	to load the line table.
