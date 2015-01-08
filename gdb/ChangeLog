@@ -1,3 +1,16 @@
+2015-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* ppc-linux-nat.c (PT_ORIG_R3, PT_TRAP): Move to
+	nat/ppc-linux.h.
+	(PPC_FEATURE_CELL, PPC_FEATURE_BOOKE): Likewise.
+	(PPC_FEATURE_HAS_DFP): Likewise.
+	(PTRACE_GETVRREGS, PTRACE_SETVRREGS): Likewise.
+	(PTRACE_GETVSXREGS, PTRACE_SETVSXREGS): Likewise.
+	(PTRACE_GETEVRREGS, PTRACE_SETEVRREGS): Likewise.
+	Include "nat/ppc-linux.h".
+	* nat/ppc-linux.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/ppc-linux.h.
+
 2015-01-14  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17525
