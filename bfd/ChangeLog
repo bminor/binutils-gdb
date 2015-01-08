@@ -1,5 +1,24 @@
 2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* elf32-avr.c (struct elf_avr_section_data): New structure.
+	(struct avr_relax_info): New structure.
+	(elf_avr_new_section_hook): New function.
+	(struct elf_avr_section_data): Add relax_info.
+	(get_avr_relax_info): New function.
+	(init_avr_relax_info): New function.
+	(elf32_avr_relax_delete_bytes): Find next property record before
+	deleting bytes.  When deleting don't move bytes beyond the next
+	property record.
+	(avr_elf32_assign_records_to_section): New function.
+	(avr_property_record_compare): New function.
+	(avr_load_all_property_sections): New function.
+	(elf32_avr_relax_section): Load property data.  After relaxing the
+	section, move any .align directives that have enough deleted bytes
+	before them.
+	(bfd_elf32_new_section_hook): Define.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* elf32-avr.h (struct avr_property_header): New strucure.
 	(avr_elf32_load_property_records): Declare.
 	(avr_elf32_property_record_name): Declare.

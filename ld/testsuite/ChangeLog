@@ -1,3 +1,14 @@
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-avr/avr-prop-1.d: New file.
+	* ld-avr/avr-prop-1.s: New file.
+	* ld-avr/avr-prop-2.d: New file.
+	* ld-avr/avr-prop-2.s: New file.
+	* ld-avr/avr-prop-3.d: New file.
+	* ld-avr/avr-prop-3.s: New file.
+	* ld-avr/avr-prop-4.d: New file.
+	* ld-avr/avr-prop-4.s: New file.
+
 2015-02-25  Oleg Endo  <olegendo@gcc.gnu.org>
 
 	* ld-sh/arch/arch_expected.txt: Regenerate.
