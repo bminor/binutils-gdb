@@ -1,5 +1,22 @@
 2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* elf32-avr.h (struct avr_property_header): New strucure.
+	(avr_elf32_load_property_records): Declare.
+	(avr_elf32_property_record_name): Declare.
+	* elf32-avr.c: Add bfd_stdint.h include.
+	(retrieve_local_syms): New function.
+	(get_elf_r_symndx_section): New function.
+	(get_elf_r_symndx_offset): New function.
+	(internal_reloc_compare): New function.
+	(struct avr_find_section_data): New structure.
+	(avr_is_section_for_address): New function.
+	(avr_find_section_for_address): New function.
+	(avr_elf32_load_records_from_section): New function.
+	(avr_elf32_load_property_records): New function.
+	(avr_elf32_property_record_name): New function.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* elf32-avr.h (AVR_PROPERTY_RECORD_SECTION_NAME): Define.
 	(AVR_PROPERTY_RECORDS_VERSION): Define.
 	(AVR_PROPERTY_SECTION_HEADER_SIZE): Define.

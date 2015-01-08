@@ -1,3 +1,8 @@
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gas/avr/avr-prop-1.d: New file.
+	* gas/avr/avr-prop-1.s: New file.
+
 2015-02-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 	    Oleg Endo  <olegendo@gcc.gnu.org>
 

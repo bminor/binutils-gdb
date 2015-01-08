@@ -1,3 +1,12 @@
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* od-elf32_avr.c: Add elf32-avr.h include.
+	(OPT_AVRPROP): Define.
+	(options[]): Add 'avr-prop' entry.
+	(elf32_avr_help): Add avr-prop help text.
+	(elf32_avr_dump_avr_prop): New function.
+	(elf32_avr_dump): Add check for avr-prop.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Remove deprecated V850 machine

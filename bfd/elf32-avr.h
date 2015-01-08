@@ -88,3 +88,35 @@ struct avr_property_record
     } align;
   } data;
 };
+
+struct avr_property_record_list
+{
+  /* The version number tells us the structure of the property record data
+     within the section.  See AVR_PROPERTY_RECORDS_VERSION.  */
+  bfd_byte version;
+
+  /* The flags field is currently unused.  This should be set to 0.  */
+  bfd_byte flags;
+
+  /* The number of property records.  This is stored as a 2-byte value in
+     the section contents.  */
+  unsigned long record_count;
+
+  /* The section from which the property records were loaded.  This is the
+     actual section containing the records, not the section(s) to which the
+     records apply.  */
+  asection *section;
+
+  /* The actual property records.  */
+  struct avr_property_record *records;
+};
+
+/* Load the property records from ABFD, return NULL if there are non
+   found, otherwise return pointer to dynamically allocated memory.  The
+   memory for the header and all of the records are allocated in a single
+   block, as such only the header needs to be freed.  */
+
+extern struct avr_property_record_list *avr_elf32_load_property_records (bfd *abfd);
+
+/* Return a string that is the name of the property record pointed to by REC.  */
+extern const char *avr_elf32_property_record_name (struct avr_property_record *rec);
