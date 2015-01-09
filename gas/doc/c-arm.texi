@@ -129,6 +129,10 @@ recognized:
 @code{cortex-m1},
 @code{cortex-m0},
 @code{cortex-m0plus},
+@code{marvell-pj4},
+@code{marvell-whitney},
+@code{xgene1},
+@code{xgene2},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
 @code{i80200} (Intel XScale processor)
 @code{iwmmxt} (Intel(r) XScale processor with Wireless MMX(tm) technology coprocessor)
@@ -156,13 +160,16 @@ been added, again in ascending alphabetical order.  For example,
 
 
 The following extensions are currently supported:
+@code{crc}
 @code{crypto} (Cryptography Extensions for v8-A architecture, implies @code{fp+simd}),
 @code{fp} (Floating Point Extensions for v8-A architecture),
 @code{idiv} (Integer Divide Extensions for v7-A and v7-R architectures),
 @code{iwmmxt},
 @code{iwmmxt2},
+@code{xscale},
 @code{maverick},
-@code{mp} (Multiprocessing Extensions for v7-A and v7-R architectures),
+@code{mp} (Multiprocessing Extensions for v7-A and v7-R
+architectures),
 @code{os} (Operating System for v6M architecture),
 @code{sec} (Security Extensions for v6K and v7-A architectures),
 @code{simd} (Advanced SIMD Extensions for v8-A architecture, implies @code{fp}),
@@ -207,6 +214,7 @@ names are recognized:
 @code{armv7e-m},
 @code{armv8-a},
 @code{iwmmxt}
+@code{iwmmxt2}
 and
 @code{xscale}.
 If both @code{-mcpu} and
