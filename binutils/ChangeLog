@@ -1,3 +1,31 @@
+2015-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ojcopy.c (copy_object): Free the symbol table if no symbols
+	could be loaded.
+	(copy_file): Use bfd_close_all_done to close files that could not
+	be copied.
+
+	* sysdump.c (getINT): Fail if reading off the end of the buffer.
+	Replace call to abort with a call to fatal.
+	(getCHARS): Prevetn reading off the end of the buffer.
+
+	* nlmconv.c (i386_mangle_relocs): Skip relocs without an
+	associated symbol.
+	(powerpc_mangle_relocs): Skip unrecognised relocs.  Check address
+	range before applying a reloc.
+
+2015-01-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dlltool.c (scan_obj_file): Break loop if the last archive
+	displayed matches the current archive.
+
+	* objdump.c (display_any_bfd): Add a depth limit to nested archive
+	display in order to avoid infinite loops.
+	* srconv.c: Replace calls to abort with calls to fatal with an
+	error message.
+
 2015-01-06  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

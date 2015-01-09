@@ -2,6 +2,12 @@
 
 	Update year range in copyright notice of all files.
 
+2014-12-24  Uros Bizjak  <ubizjak@gmail.com>
+	    Ben Elliston  <bje@au.ibm.com>
+	    Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+
+	* libiberty.h (xasprintf): Declare.
+
 2014-12-23  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_hash_entry): Comment non_ir_ref.  Add
@@ -14,6 +20,12 @@
 	* gcc-c-fe.def: New file.
 	* gcc-c-interface.h: New file.
 	* gcc-interface.h: New file.
+
+2014-12-11  Uros Bizjak  <ubizjak@gmail.com>
+            Ben Elliston  <bje@au.ibm.com>
+            Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+
+	* libiberty.h (xvasprintf): Declare.
 
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 

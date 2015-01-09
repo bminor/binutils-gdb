@@ -1,3 +1,23 @@
+2015-01-09  Anthony Green  <green@moxielogic.com>
+
+	* elf32-moxie.c (ELF_MACHINE_ALT1): Define.
+
+2015-01-08  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-msp430.c (msp430_elf_relax_section): Add relaxation of
+	16-bit absolute BR instructions to 10-bit pc-relative JMP
+	instructions.
+
+2015-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_symbol_table): Return false if we failed
+	to load the line table.
+	* elf.c (_bfd_elf_map_sections_to_segments): Enforce a minimum
+	maxpagesize of 1.
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Fail if
+	the Data Directory Size is too large.
+
 2015-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/17512

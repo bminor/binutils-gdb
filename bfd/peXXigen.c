@@ -2930,6 +2930,16 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
           struct external_IMAGE_DEBUG_DIRECTORY *dd =
 	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
 
+	  /* PR 17512: file: 0f15796a.  */
+	  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size + (addr - section->vma)
+	      > bfd_get_section_size (section))
+	    {
+	      _bfd_error_handler (_("%A: Data Directory size (%lx) exceeds space left in section (%lx)"),
+				  obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
+				  bfd_get_section_size (section) - (addr - section->vma));
+	      return FALSE;
+	    }
+
           for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
 		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
             {

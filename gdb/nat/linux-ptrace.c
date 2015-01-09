@@ -43,16 +43,42 @@ linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer)
 {
   pid_t tracerpid;
 
-  tracerpid = linux_proc_get_tracerpid (pid);
+  tracerpid = linux_proc_get_tracerpid_nowarn (pid);
   if (tracerpid > 0)
     buffer_xml_printf (buffer, _("process %d is already traced "
 				 "by process %d"),
 		       (int) pid, (int) tracerpid);
 
-  if (linux_proc_pid_is_zombie (pid))
+  if (linux_proc_pid_is_zombie_nowarn (pid))
     buffer_xml_printf (buffer, _("process %d is a zombie "
 				 "- the process has already terminated"),
 		       (int) pid);
+}
+
+/* See linux-ptrace.h.  */
+
+char *
+linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err)
+{
+  static char *reason_string;
+  struct buffer buffer;
+  char *warnings;
+  long lwpid = ptid_get_lwp (ptid);
+
+  xfree (reason_string);
+
+  buffer_init (&buffer);
+  linux_ptrace_attach_fail_reason (lwpid, &buffer);
+  buffer_grow_str0 (&buffer, "");
+  warnings = buffer_finish (&buffer);
+  if (warnings[0] != '\0')
+    reason_string = xstrprintf ("%s (%d), %s",
+				strerror (err), err, warnings);
+  else
+    reason_string = xstrprintf ("%s (%d)",
+				strerror (err), err);
+  xfree (warnings);
+  return reason_string;
 }
 
 #if defined __i386__ || defined __x86_64__
@@ -508,7 +534,8 @@ linux_disable_event_reporting (pid_t pid)
 static int
 ptrace_supports_feature (int ptrace_options)
 {
-  gdb_assert (current_ptrace_options >= 0);
+  if (current_ptrace_options == -1)
+    linux_check_ptrace_features ();
 
   return ((current_ptrace_options & ptrace_options) == ptrace_options);
 }

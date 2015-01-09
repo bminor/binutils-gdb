@@ -2443,7 +2443,6 @@ clear_installed_tracepoints (void)
   struct tracepoint *prev_stpoint;
 
   pause_all (1);
-  cancel_breakpoints ();
 
   prev_stpoint = NULL;
 
@@ -3433,9 +3432,6 @@ stop_tracing (void)
      We can't now, since we may be getting here due to the inferior
      agent calling us.  */
   pause_all (1);
-  /* Since we're removing breakpoints, cancel breakpoint hits,
-     possibly related to the breakpoints we're about to delete.  */
-  cancel_breakpoints ();
 
   /* Stop logging. Tracepoints can still be hit, but they will not be
      recorded.  */
@@ -6538,7 +6534,6 @@ upload_fast_traceframes (void)
   trace_debug ("Done uploading traceframes [%d]\n", curr_tbctrl_idx);
 
   pause_all (1);
-  cancel_breakpoints ();
 
   delete_breakpoint (about_to_request_buffer_space_bkpt);
   about_to_request_buffer_space_bkpt = NULL;

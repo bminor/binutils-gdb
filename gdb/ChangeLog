@@ -1,3 +1,167 @@
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (hardware_breakpoint_inserted_here_p): New
+	function.
+	* breakpoint.h (hardware_breakpoint_inserted_here_p): New
+	declaration.
+	* linux-nat.c (linux_nat_status_is_event): Move higher up in file.
+	(linux_resume_one_lwp): Store the thread's PC.  Adjust to clear
+	stop_reason.
+	(check_stopped_by_watchpoint): New function.
+	(save_sigtrap): Reimplement.
+	(linux_nat_stopped_by_watchpoint): Adjust.
+	(linux_nat_lp_status_is_event): Delete.
+	(stop_wait_callback): Only call save_sigtrap after storing the
+	pending status.
+	(status_callback): If the thread had been stopped for a breakpoint
+	that has since been removed, discard the event and resume the LWP.
+	(count_events_callback, select_event_lwp_callback): Use
+	lwp_status_pending_p instead of linux_nat_lp_status_is_event.
+	(cancel_breakpoint): Rename to ...
+	(check_stopped_by_breakpoint): ... this.  Record whether the LWP
+	stopped for a software breakpoint or hardware breakpoint.
+	(select_event_lwp): Only give preference to the stepping LWP in
+	all-stop mode.  Adjust comments.
+	(stop_and_resume_callback): Remove references to new_pending_p.
+	(linux_nat_filter_event): Likewise.  Leave exit events of the
+	leader thread pending here.  Handle signal short circuiting here.
+	Only call save_sigtrap after storing the pending waitstatus.
+	(linux_nat_wait_1): Remove 'retry' label.  Remove references to
+	new_pending.  Don't handle leaving events the caller is not
+	interested in pending here, nor handle signal short-circuiting
+	here.  Also give equal priority to all LWPs that have had events
+	in non-stop mode.  If reporting a software breakpoint event,
+	unadjust the LWP's PC.
+	* linux-nat.h (enum lwp_stop_reason): New.
+	(struct lwp_info) <stop_pc>: New field.
+	(struct lwp_info) <stopped_by_watchpoint>: Delete field.
+	(struct lwp_info) <stop_reason>: New field.
+	* x86-linux-nat.c (x86_linux_prepare_to_resume): Adjust.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_handle_extended_wait) <PTRACE_EVENT_EXEC>:
+	Set the LWP's 'resumed' flag.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_resume_one_lwp): New function.
+	(resume_lwp): Use lwp_status_pending_p and linux_resume_one_lwp.
+	(linux_nat_resume): Use lwp_status_pending_p and
+	linux_resume_one_lwp.
+	(linux_handle_syscall_trap): Use linux_resume_one_lwp.
+	(linux_handle_extended_wait): Use linux_resume_one_lwp.
+	(status_callback, running_callback): Use lwp_status_pending_p.
+	(lwp_status_pending_p): New function.
+	(stop_and_resume_callback): Use lwp_status_pending_p.
+	(linux_nat_filter_event): Use linux_resume_one_lwp.
+	(linux_nat_wait_1): Always use status_callback to look for an LWP
+	with a pending status.  Use linux_resume_one_lwp.
+	(resume_stopped_resumed_lwps): Use lwp_status_pending_p and
+	linux_resume_one_lwp.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bp_location_inserted_here_p): New function,
+	factored out from ...
+	(breakpoint_inserted_here_p): ... here.  Use
+	ALL_BP_LOCATIONS_AT_ADDR.
+	(software_breakpoint_inserted_here_p): Use
+	bp_location_inserted_here_p and ALL_BP_LOCATIONS_AT_ADDR.
+
+2014-01-09  Pedro Alves  <palves@redhat.com>
+
+	Skip enabling event reporting if the kernel supports
+	PTRACE_EVENT_CLONE.
+	* linux-thread-db.c: Include "nat/linux-ptrace.h".
+	(thread_db_use_events): New function.
+	(try_thread_db_load_1): Check thread_db_use_events before enabling
+	event reporting.
+	(update_thread_state): New function.
+	(attach_thread): Use it.  Check thread_db_use_events before
+	enabling event reporting.
+	(thread_db_detach): Check thread_db_use_events before disabling
+	event reporting.
+	(find_new_threads_callback): Check thread_db_use_events before
+	enabling event reporting.  Update the thread's state if not using
+	libthread_db events.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (lin_lwp_attach_lwp): Assert that the lwp id we're
+	about to wait for is > 0.
+	* linux-thread-db.c (find_new_threads_callback): Ignore thread if
+	the kernel thread ID is -1.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (attach_proc_task_lwp_callback): New function.
+	(linux_nat_attach): Use linux_proc_attach_tgid_threads.
+	(wait_lwp, linux_nat_filter_event): If not set yet, set the lwp's
+	ptrace option flags.
+	* linux-nat.h (struct lwp_info) <must_set_ptrace_flags>: New
+	field.
+	* nat/linux-procfs.c: Include <dirent.h>.
+	(linux_proc_get_int): New parameter "warn".  Handle it.
+	(linux_proc_get_tgid): Adjust.
+	(linux_proc_get_tracerpid): Rename to ...
+	(linux_proc_get_tracerpid_nowarn): ... this.
+	(linux_proc_pid_get_state): New function, factored out from
+	(linux_proc_pid_has_state): ... this.  Add new parameter "warn"
+	and handle it.
+	(linux_proc_pid_is_gone): New function.
+	(linux_proc_pid_is_stopped): Adjust.
+	(linux_proc_pid_is_zombie_maybe_warn)
+	(linux_proc_pid_is_zombie_nowarn): New functions.
+	(linux_proc_pid_is_zombie): Use
+	linux_proc_pid_is_zombie_maybe_warn.
+	(linux_proc_attach_tgid_threads): New function.
+	* nat/linux-procfs.h (linux_proc_get_tgid): Update comment.
+	(linux_proc_get_tracerpid): Rename to ...
+	(linux_proc_get_tracerpid_nowarn): ... this, and update comment.
+	(linux_proc_pid_is_gone): New declaration.
+	(linux_proc_pid_is_zombie): Update comment.
+	(linux_proc_pid_is_zombie_nowarn): New declaration.
+	(linux_proc_attach_lwp_func): New typedef.
+	(linux_proc_attach_tgid_threads): New declaration.
+	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason): Adjust to
+	use nowarn functions.
+	(linux_ptrace_attach_fail_reason_string): Move here from
+	gdbserver/linux-low.c and rename.
+	(ptrace_supports_feature): If the current ptrace options are not
+	known yet, check them now, instead of asserting.
+	* nat/linux-ptrace.h (linux_ptrace_attach_fail_reason_string):
+	Declare.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* linux-thread-db.c (thread_db_find_new_threads_silently)
+	(try_thread_db_load_1, try_thread_db_load, thread_db_load_search)
+	(find_new_threads_once): Print debug output on gdb_stdlog.
+
+2015-01-09  Chen Gang  <gang.chen.5i5j@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* compile/compile.c: Include "gdb_wait.h".
+	(do_rmdir): Check return value, and free 'zap'.
+
+2015-01-08  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2loc.c (indirect_pieced_value): Don't call
+	gdb_sign_extend.  Call extract_signed_integer instead.
+	* utils.c (gdb_sign_extend): Remove.
+	* utils.h (gdb_sign_extend): Remove declaration.
+
+2015-01-07  Pierre Muller  <muller@sourceware.org>
+
+	PR symtab/17811
+	* stabsread.c (define_symbol): Set language for C++ special symbols.
+
+2015-01-07  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* inflow.c (initial_gdb_ttystate): Tweak comment.
+
 2015-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* inflow.c (set_initial_gdb_ttystate): Add empty line after

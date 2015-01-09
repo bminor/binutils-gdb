@@ -371,6 +371,7 @@ moxie_elf_check_relocs (bfd *abfd,
 
 #define ELF_ARCH		bfd_arch_moxie
 #define ELF_MACHINE_CODE	EM_MOXIE
+#define ELF_MACHINE_ALT1        EM_MOXIE_OLD
 #define ELF_MAXPAGESIZE		0x1
 
 #define TARGET_BIG_SYM          moxie_elf32_be_vec

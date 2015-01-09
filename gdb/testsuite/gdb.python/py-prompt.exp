@@ -18,11 +18,6 @@
 
 standard_testfile
 
-# We need to use TCL's exec to get the pid.
-if [is_remote target] then {
-    return 0
-}
-
 load_lib gdb-python.exp
 load_lib prompt.exp
 
@@ -79,6 +74,10 @@ gdb_test "python print ('%d %d' % (x, len(p)))" "1 2" \
 gdb_test "python print (\"'\" + str(p\[0\]) + \"'\")" "'$gdb_prompt_fail '" \
 	 "prompt_hook argument is default prompt. 2"
 gdb_exit
+
+if {![can_spawn_for_attach]} {
+    return 0
+}
 
 set testpid [spawn_wait_for_attach $binfile]
 

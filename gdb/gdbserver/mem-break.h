@@ -90,6 +90,16 @@ int breakpoint_here (CORE_ADDR addr);
 
 int breakpoint_inserted_here (CORE_ADDR addr);
 
+/* Returns TRUE if there's any inserted software breakpoint at
+   ADDR.  */
+
+int software_breakpoint_inserted_here (CORE_ADDR addr);
+
+/* Returns TRUE if there's any inserted hardware (code) breakpoint at
+   ADDR.  */
+
+int hardware_breakpoint_inserted_here (CORE_ADDR addr);
+
 /* Clear all breakpoint conditions and commands associated with a
    breakpoint.  */
 

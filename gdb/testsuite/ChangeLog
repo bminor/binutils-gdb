@@ -1,3 +1,74 @@
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/non-stop-fair-events.c: New file.
+	* gdb.threads/non-stop-fair-events.exp: New file.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/annota1.exp (thread_test): Use srcfile and binfile from
+	the global scope.  Set a breakpoint after all threads are started
+	rather than stepping over two source lines.  Expect the prompt.
+	* gdb.base/watch_thread_num.c (threads_started_barrier): New
+	global.
+	(NUM): Now 15.
+	(main): Use threads_started_barrier to wait for all threads to
+	start.  Main thread no longer calls thread_function.  Exit after
+	180 seconds.
+	(loop): New function.
+	(thread_function): Wait on threads_started_barrier barrier.  Call
+	'loop' at each iteration.
+	* gdb.base/watch_thread_num.exp: Continue to breakpoint after all
+	threads have started, instead of hardcoding number of "next"
+	steps.  Use an access watchpoint instead of a write watchpoint.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/ia64-sigill.c (threads_started_barrier): New global.
+	(thread_func): Wait on barrier.
+	(main): Wait for all threads to start before stopping GDB.
+	* gdb.threads/siginfo-threads.c (threads_started_barrier): New
+	global.
+	(thread1_func, thread2_func): Wait on barrier.
+	(main): Wait for all threads to start before stopping GDB.
+	* gdb.threads/watchthreads-reorder.c (threads_started_barrier):
+	New global.
+	(thread1_func, thread2_func): Wait on barrier.
+	(main): Wait for all threads to start before stopping GDB.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-many-short-lived-threads.c: New file.
+	* gdb.threads/attach-many-short-lived-threads.exp: New file.
+
+2014-01-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/fork-thread-pending.exp: Switch to the main thread
+	instead of to thread 2.
+	* gdb.threads/signal-command-multiple-signals-pending.c (main):
+	Add barrier around each pthread_create call instead of around all
+	calls.
+	* gdb.threads/signal-command-multiple-signals-pending.exp (test):
+	Set a break on thread_function and have the child threads hit it
+	one at at a time.
+
+2015-01-09  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (can_spawn_for_attach): New procedure.
+	(spawn_wait_for_attach): Error out if can_spawn_for_attach returns
+	false.
+	* gdb.base/attach.exp: Use can_spawn_for_attach instead of
+	checking whether the target board is remote.
+	* gdb.multi/multi-attach.exp: Likewise.
+	* gdb.python/py-sync-interp.exp: Likewise.
+	* gdb.server/ext-attach.exp: Likewise.
+	* gdb.python/py-prompt.exp: Use can_spawn_for_attach before the
+	tests that need to attach, instead of checking whether the target
+	board is remote at the top of the file.
+
+2015-01-08  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/entry-values.exp: Set call_insn for MIPS target.
+
 2015-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix testcase compilation.

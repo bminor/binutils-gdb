@@ -27,7 +27,11 @@
 
 void *thread_function (void *arg); /* Pointer to function executed by each thread */
 
-#define NUM 5
+static pthread_barrier_t threads_started_barrier;
+
+#define NUM 15
+
+static int num_threads = NUM;
 
 static unsigned int shared_var = 1;
 
@@ -37,6 +41,8 @@ int main () {
     void *thread_result;
     long i;
 
+    pthread_barrier_init (&threads_started_barrier, NULL, NUM + 1);
+
     for (i = 0; i < NUM; i++)
       {
         res = pthread_create (&threads[i],
@@ -45,18 +51,29 @@ int main () {
 			     (void *) i);
       }
 
-    thread_result = thread_function ((void *) i);
+    pthread_barrier_wait (&threads_started_barrier);
+
+    sleep (180); /* all threads started */
 
     exit (EXIT_SUCCESS);
 }
 
+void
+loop (void)
+{
+}
+
 void *thread_function (void *arg) {
     int my_number = (long) arg;
+
+    pthread_barrier_wait (&threads_started_barrier);
+
     /* Don't run forever.  Run just short of it :)  */
     while (shared_var > 0)
       {
         shared_var++;
 	usleep (1); /* Loop increment.  */
+	loop ();
       }
 
     pthread_exit (NULL);

@@ -1699,6 +1699,9 @@ scan_obj_file (const char *filename)
 	    scan_open_obj_file (arfile);
 	  next = bfd_openr_next_archived_file (f, arfile);
 	  bfd_close (arfile);
+	  /* PR 17512: file: 58715298.  */
+	  if (next == arfile)
+	    break;
 	  arfile = next;
 	}
 

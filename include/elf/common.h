@@ -302,6 +302,7 @@
 #define EM_INTEL208	208	/* Reserved by Intel */
 #define EM_INTEL209	209	/* Reserved by Intel */
 #define EM_VISIUM	221	/* Controls and Data Services VISIUMcore processor */
+#define EM_MOXIE        223     /* Moxie processor family */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -394,7 +395,8 @@
 
 #define EM_CYGNUS_MEP		0xF00D  /* Toshiba MeP */
 
-#define EM_MOXIE                0xFEED  /* Moxie */
+/* Old, unofficial value for Moxie.  */
+#define EM_MOXIE_OLD            0xFEED
 
 /* Old Sunplus S+core7 backend magic number. Written in the absence of an ABI.  */
 #define EM_SCORE_OLD            95

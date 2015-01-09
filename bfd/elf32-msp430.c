@@ -1768,7 +1768,6 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
   bfd_byte *          contents = NULL;
   Elf_Internal_Sym *  isymbuf = NULL;
 
-
   /* Assume nothing changes.  */
   *again = FALSE;
 
@@ -1966,10 +1965,6 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
       *again = TRUE;
     }
 
-  if (! uses_msp430x_relocs (abfd))
-    /* Now perform the relocations that shrink the code size.
-       We only do this for non msp430x as gas only generates the RL
-       reloc for the msp430.  */
     for (irel = internal_relocs; irel < irelend; irel++)
       {
 	bfd_vma symval;
@@ -2048,7 +2043,8 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	/* Try to turn a 16bit pc-relative branch into a 10bit pc-relative
 	   branch.  */
 	/* Paranoia? paranoia...  */      
-	if (ELF32_R_TYPE (irel->r_info) == (int) R_MSP430_RL_PCREL)
+	if (! uses_msp430x_relocs (abfd)
+	    && ELF32_R_TYPE (irel->r_info) == (int) R_MSP430_RL_PCREL)
 	  {
 	    bfd_vma value = symval;
 
@@ -2152,6 +2148,62 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		/* Handle unconditional jumps.  */
 		if (rx->cdx == 0)
 		  irel->r_offset -= 2;
+
+		/* That will change things, so, we should relax again.
+		   Note that this is not required, and it may be slow.  */
+		*again = TRUE;
+	      }
+	  }
+
+	/* Try to turn a 16-bit absolute branch into a 10-bit pc-relative
+	   branch.  */
+	if (uses_msp430x_relocs (abfd)
+	    && ELF32_R_TYPE (irel->r_info) == R_MSP430X_ABS16)
+	  {
+	    bfd_vma value = symval;
+
+	    value -= irel->r_offset;
+	    value += irel->r_addend;
+	   
+	    /* See if the value will fit in 10 bits, note the high value is
+	       1016 as the target will be two bytes closer if we are
+	       able to relax.  */
+	    if ((long) value < 1016 && (long) value > -1016)
+	      {
+		int code2;
+
+		/* Get the opcode.  */
+		code2 = bfd_get_16 (abfd, contents + irel->r_offset - 2);
+		if (code2 != 0x4030)
+		  continue;
+		/* FIXME: check r4 and r3 ? */
+		/* FIXME: Handle 0x4010 as well ?  */
+
+		/* Note that we've changed the relocs, section contents, etc.  */
+		elf_section_data (sec)->relocs = internal_relocs;
+		elf_section_data (sec)->this_hdr.contents = contents;
+		symtab_hdr->contents = (unsigned char *) isymbuf;
+
+		/* Fix the relocation's type.  */
+		if (uses_msp430x_relocs (abfd))
+		  {
+		    irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						 R_MSP430X_10_PCREL);
+		  }
+		else
+		  {
+		    irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						 R_MSP430_10_PCREL);
+		  }
+
+		/* Fix the opcode right way.  */
+		bfd_put_16 (abfd, 0x3c00, contents + irel->r_offset - 2);
+		irel->r_offset -= 2;
+
+		/* Delete bytes.  */
+		if (!msp430_elf_relax_delete_bytes (abfd, sec,
+						    irel->r_offset + 2, 2))
+		  goto error_return;
 
 		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */

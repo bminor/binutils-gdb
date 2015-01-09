@@ -1130,6 +1130,11 @@ extern int regular_breakpoint_inserted_here_p (struct address_space *,
 extern int software_breakpoint_inserted_here_p (struct address_space *, 
 						CORE_ADDR);
 
+/* Return non-zero iff there is a hardware breakpoint inserted at
+   PC.  */
+extern int hardware_breakpoint_inserted_here_p (struct address_space *,
+						CORE_ADDR);
+
 /* Check whether any location of BP is inserted at PC.  */
 
 extern int breakpoint_has_location_inserted_here (struct breakpoint *bp,

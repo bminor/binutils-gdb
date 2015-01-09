@@ -4226,29 +4226,45 @@ moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
   return 0;
 }
 
+/* Returns non-zero iff BL is inserted at PC, in address space
+   ASPACE.  */
+
+static int
+bp_location_inserted_here_p (struct bp_location *bl,
+			     struct address_space *aspace, CORE_ADDR pc)
+{
+  if (bl->inserted
+      && breakpoint_address_match (bl->pspace->aspace, bl->address,
+				   aspace, pc))
+    {
+      if (overlay_debugging
+	  && section_is_overlay (bl->section)
+	  && !section_is_mapped (bl->section))
+	return 0;		/* unmapped overlay -- can't be a match */
+      else
+	return 1;
+    }
+  return 0;
+}
+
 /* Returns non-zero iff there's a breakpoint inserted at PC.  */
 
 int
 breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
-  struct bp_location *bl, **blp_tmp;
+  struct bp_location **blp, **blp_tmp = NULL;
+  struct bp_location *bl;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
     {
+      struct bp_location *bl = *blp;
+
       if (bl->loc_type != bp_loc_software_breakpoint
 	  && bl->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
-      if (bl->inserted
-	  && breakpoint_location_address_match (bl, aspace, pc))
-	{
-	  if (overlay_debugging 
-	      && section_is_overlay (bl->section)
-	      && !section_is_mapped (bl->section))
-	    continue;		/* unmapped overlay -- can't be a match */
-	  else
-	    return 1;
-	}
+      if (bp_location_inserted_here_p (bl, aspace, pc))
+	return 1;
     }
   return 0;
 }
@@ -4260,24 +4276,41 @@ int
 software_breakpoint_inserted_here_p (struct address_space *aspace,
 				     CORE_ADDR pc)
 {
-  struct bp_location *bl, **blp_tmp;
+  struct bp_location **blp, **blp_tmp = NULL;
+  struct bp_location *bl;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
     {
+      struct bp_location *bl = *blp;
+
       if (bl->loc_type != bp_loc_software_breakpoint)
 	continue;
 
-      if (bl->inserted
-	  && breakpoint_address_match (bl->pspace->aspace, bl->address,
-				       aspace, pc))
-	{
-	  if (overlay_debugging 
-	      && section_is_overlay (bl->section)
-	      && !section_is_mapped (bl->section))
-	    continue;		/* unmapped overlay -- can't be a match */
-	  else
-	    return 1;
-	}
+      if (bp_location_inserted_here_p (bl, aspace, pc))
+	return 1;
+    }
+
+  return 0;
+}
+
+/* See breakpoint.h.  */
+
+int
+hardware_breakpoint_inserted_here_p (struct address_space *aspace,
+				     CORE_ADDR pc)
+{
+  struct bp_location **blp, **blp_tmp = NULL;
+  struct bp_location *bl;
+
+  ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
+    {
+      struct bp_location *bl = *blp;
+
+      if (bl->loc_type != bp_loc_hardware_breakpoint)
+	continue;
+
+      if (bp_location_inserted_here_p (bl, aspace, pc))
+	return 1;
     }
 
   return 0;

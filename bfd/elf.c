@@ -4011,6 +4011,11 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       last_size = 0;
       phdr_index = 0;
       maxpagesize = bed->maxpagesize;
+      /* PR 17512: file: c8455299.
+	 Avoid divide-by-zero errors later on.
+	 FIXME: Should we abort if the maxpagesize is zero ?  */
+      if (maxpagesize == 0)
+	maxpagesize = 1;
       writable = FALSE;
       dynsec = bfd_get_section_by_name (abfd, ".dynamic");
       if (dynsec != NULL

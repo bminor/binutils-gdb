@@ -339,7 +339,7 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
     {
       warning ("Could not attach to thread %ld (LWP %d): %s\n",
 	       ti_p->ti_tid, ti_p->ti_lid,
-	       linux_attach_fail_reason_string (ptid, err));
+	       linux_ptrace_attach_fail_reason_string (ptid, err));
       return 0;
     }
 
@@ -395,6 +395,17 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   err = thread_db->td_thr_get_info_p (th_p, &ti);
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
+
+  if (ti.ti_lid == -1)
+    {
+      /* A thread with kernel thread ID -1 is either a thread that
+	 exited and was joined, or a thread that is being created but
+	 hasn't started yet, and that is reusing the tcb/stack of a
+	 thread that previously exited and was joined.  (glibc marks
+	 terminated and joined threads with kernel thread ID -1.  See
+	 glibc PR17707.  */
+      return 0;
+    }
 
   /* Check for zombies.  */
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
