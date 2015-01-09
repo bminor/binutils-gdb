@@ -1,3 +1,10 @@
+2015-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* tekhex.c (getvalue): Fix thinko in test for correct extraction
+	of value.
+	(getsym): Return false if there was not enough data to extract the
+	symbol.
+
 2015-01-09  Anthony Green  <green@moxielogic.com>
 
 	* elf32-moxie.c (ELF_MACHINE_ALT1): Define.

@@ -288,7 +288,7 @@ getvalue (char **srcp, bfd_vma *valuep, char * endp)
 
   *srcp = src;
   *valuep = value;
-  return len == 0;
+  return len == -1U;
 }
 
 static bfd_boolean
@@ -309,7 +309,7 @@ getsym (char *dstp, char **srcp, unsigned int *lenp, char * endp)
   dstp[i] = 0;
   *srcp = src + i;
   *lenp = len;
-  return TRUE;
+  return i == len;
 }
 
 static struct data_struct *
