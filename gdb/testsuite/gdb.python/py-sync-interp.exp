@@ -20,8 +20,7 @@
 
 standard_testfile
 
-# We need to use TCL's exec to get the pid.
-if [is_remote target] then {
+if {![can_spawn_for_attach]} {
     return 0
 }
 

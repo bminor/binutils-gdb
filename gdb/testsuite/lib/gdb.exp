@@ -3413,11 +3413,38 @@ proc gdb_exit { } {
     catch default_gdb_exit
 }
 
+# Return true if we can spawn a program on the target and attach to
+# it.
+
+proc can_spawn_for_attach { } {
+    # We use TCL's exec to get the inferior's pid.
+    if [is_remote target] then {
+	return 0
+    }
+
+    # The "attach" command doesn't make sense when the target is
+    # stub-like, where GDB finds the program already started on
+    # initial connection.
+    if {[target_info exists use_gdb_stub]} {
+	return 0
+    }
+
+    # Assume yes.
+    return 1
+}
+
 # Start a set of programs running and then wait for a bit, to be sure
 # that they can be attached to.  Return a list of the processes' PIDs.
+# It's a test error to call this when [can_spawn_for_attach] is false.
 
 proc spawn_wait_for_attach { executable_list } {
     set pid_list {}
+
+    if ![can_spawn_for_attach] {
+	# The caller should have checked can_spawn_for_attach itself
+	# before getting here.
+	error "can't spawn for attach with this target/board"
+    }
 
     foreach {executable} $executable_list {
 	lappend pid_list [eval exec $executable &]

@@ -31,8 +31,7 @@ if [skip_shlib_tests] {
     return 0
 }
 
-# Are we on a target board?  It is required for attaching to a process.
-if [is_remote target] {
+if {![can_spawn_for_attach]} {
     return 0
 }
 
