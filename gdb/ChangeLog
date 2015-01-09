@@ -1,3 +1,9 @@
+2015-01-09  Chen Gang  <gang.chen.5i5j@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* compile/compile.c: Include "gdb_wait.h".
+	(do_rmdir): Check return value, and free 'zap'.
+
 2015-01-08  Pedro Alves  <palves@redhat.com>
 	    Yao Qi  <yao@codesourcery.com>
 
