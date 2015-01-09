@@ -1,3 +1,12 @@
+2015-01-09  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* utils.c (defaulted_query): Rewrite to use gdb_readline_wrapper
+	to prompt for input.
+	* tui/tui-hooks.c (tui_query_hook): Remove.
+	(tui_install_hooks): Don't set deprecated_query_hook.
+	* tui/tui-io.c (tui_redisplay_readline): Fix off-by-one error in
+	height calculation.  Always update the command window's cur_line.
+
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (hardware_breakpoint_inserted_here_p): New

@@ -1198,12 +1198,11 @@ compile_rx_or_error (regex_t *pattern, const char *rx, const char *message)
 static int ATTRIBUTE_PRINTF (1, 0)
 defaulted_query (const char *ctlstr, const char defchar, va_list args)
 {
-  int answer;
   int ans2;
   int retval;
   int def_value;
   char def_answer, not_def_answer;
-  char *y_string, *n_string, *question;
+  char *y_string, *n_string, *question, *prompt;
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
   struct timeval prompt_started, prompt_ended, prompt_delta;
@@ -1263,62 +1262,31 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   /* Format the question outside of the loop, to avoid reusing args.  */
   question = xstrvprintf (ctlstr, args);
+  prompt = xstrprintf (_("%s%s(%s or %s) %s"),
+		      annotation_level > 1 ? "\n\032\032pre-query\n" : "",
+		      question, y_string, n_string,
+		      annotation_level > 1 ? "\n\032\032query\n" : "");
+  xfree (question);
 
   /* Used for calculating time spend waiting for user.  */
   gettimeofday (&prompt_started, NULL);
 
   while (1)
     {
-      wrap_here ("");		/* Flush any buffered output.  */
+      char *response, answer;
+
       gdb_flush (gdb_stdout);
+      response = gdb_readline_wrapper (prompt);
 
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032pre-query\n"));
-
-      fputs_filtered (question, gdb_stdout);
-      printf_filtered (_("(%s or %s) "), y_string, n_string);
-
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032query\n"));
-
-      wrap_here ("");
-      gdb_flush (gdb_stdout);
-
-      answer = fgetc (stdin);
-
-      /* We expect fgetc to block until a character is read.  But
-         this may not be the case if the terminal was opened with
-         the NONBLOCK flag.  In that case, if there is nothing to
-         read on stdin, fgetc returns EOF, but also sets the error
-         condition flag on stdin and errno to EAGAIN.  With a true
-         EOF, stdin's error condition flag is not set.
-
-         A situation where this behavior was observed is a pseudo
-         terminal on AIX.  */
-      while (answer == EOF && ferror (stdin) && errno == EAGAIN)
-        {
-          /* Not a real EOF.  Wait a little while and try again until
-             we read something.  */
-          clearerr (stdin);
-          gdb_usleep (10000);
-          answer = fgetc (stdin);
-        }
-
-      clearerr (stdin);		/* in case of C-d */
-      if (answer == EOF)	/* C-d */
+      if (response == NULL)	/* C-d  */
 	{
 	  printf_filtered ("EOF [assumed %c]\n", def_answer);
 	  retval = def_value;
 	  break;
 	}
-      /* Eat rest of input line, to EOF or newline.  */
-      if (answer != '\n')
-	do
-	  {
-	    ans2 = fgetc (stdin);
-	    clearerr (stdin);
-	  }
-	while (ans2 != EOF && ans2 != '\n' && ans2 != '\r');
+
+      answer = response[0];
+      xfree (response);
 
       if (answer >= 'a')
 	answer -= 040;
@@ -1333,8 +1301,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
          specify the required input or have it default by entering
          nothing.  */
       if (answer == def_answer
-	  || (defchar != '\0' &&
-	      (answer == '\n' || answer == '\r' || answer == EOF)))
+	  || (defchar != '\0' && answer == '\0'))
 	{
 	  retval = def_value;
 	  break;
@@ -1350,7 +1317,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   timeval_add (&prompt_for_continue_wait_time,
                &prompt_for_continue_wait_time, &prompt_delta);
 
-  xfree (question);
+  xfree (prompt);
   if (annotation_level > 1)
     printf_filtered (("\n\032\032post-query\n"));
   return retval;
