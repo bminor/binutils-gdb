@@ -37,6 +37,7 @@
 #include "filestuff.h"
 #include "target.h"
 #include "osabi.h"
+#include "gdb_wait.h"
 
 
 
@@ -169,10 +170,14 @@ do_rmdir (void *arg)
 {
   const char *dir = arg;
   char *zap;
-  
+  int wstat;
+
   gdb_assert (strncmp (dir, TMP_PREFIX, strlen (TMP_PREFIX)) == 0);
   zap = concat ("rm -rf ", dir, (char *) NULL);
-  system (zap);
+  wstat = system (zap);
+  if (wstat == -1 || !WIFEXITED (wstat) || WEXITSTATUS (wstat) != 0)
+    warning (_("Could not remove temporary directory %s"), dir);
+  XDELETEVEC (zap);
 }
 
 /* Return the name of the temporary directory to use for .o files, and
