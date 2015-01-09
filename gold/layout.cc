@@ -3524,7 +3524,9 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	      // put them on different pages in memory. We will revisit this
 	      // decision once we know the size of the segment.
 
-	      addr = align_address(addr, (*p)->maximum_alignment());
+	      uint64_t max_align = (*p)->maximum_alignment();
+	      if (max_align > abi_pagesize)
+		addr = align_address(addr, max_align);
 	      aligned_addr = addr;
 
 	      if (load_seg == *p)

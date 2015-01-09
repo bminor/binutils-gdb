@@ -1,3 +1,8 @@
+2015-01-09  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::set_segment_offsets): Don't align start of segment
+	unless alignment is larger than page size.
+
 2015-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 	    Cary Coutant  <ccoutant@google.com>
 
