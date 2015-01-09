@@ -1,3 +1,7 @@
+2015-01-09  Anthony Green  <green@moxielogic.com>
+
+	* elf32-moxie.c (ELF_MACHINE_ALT1): Define.
+
 2015-01-08  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-msp430.c (msp430_elf_relax_section): Add relaxation of
