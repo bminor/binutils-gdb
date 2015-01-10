@@ -1,6 +1,9 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-12  Alan Modra  <amodra@gmail.com>
+	* read.c (s_altmacro, s_reloc): Make definition static.
+
 	2014-12-12  Alan Modra  <amodra@gmail.com>
 	* config/tc-ppc.h (md_reg_eh_frame_to_debug_frame): Match current
 	gcc behaviour.

@@ -1,6 +1,11 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-12  Alan Modra  <amodra@gmail.com>
+	* prdbg.c (print_debugging_info): Don't use void* for function
+	pointer param.
+	* budbg.h (print_debugging_info): Update prototype.
+
 	2014-12-18  Mark Wielaard  <mjw@redhat.com>
 	* dwarf.c (read_and_display_attr_value): Change display name of
 	DW_LANG_C11 from (ANSI C11) to (C11).
