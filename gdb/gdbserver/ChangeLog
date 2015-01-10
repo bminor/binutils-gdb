@@ -1,3 +1,9 @@
+2015-01-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* i387-fp.c (i387_cache_to_xsave): In look over
+	num_avx512_zmmh_high_registers, replace use of struct i387_xsave
+	zmmh_low_space field by use of zmmh_high_space.
+
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (step_over_bkpt): Move higher up in the file.
