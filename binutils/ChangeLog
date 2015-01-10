@@ -1,3 +1,9 @@
+2015-01-12  Alan Modra  <amodra@gmail.com>
+
+	* prdbg.c (print_debugging_info): Don't use void* for function
+	pointer param.
+	* budbg.h (print_debugging_info): Update prototype.
+
 2015-01-08  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

@@ -1,3 +1,7 @@
+2015-01-12  Alan Modra  <amodra@gmail.com>
+
+	* read.c (s_altmacro, s_reloc): Make definition static.
+
 2015-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-avr.c (md_apply_fix): Update the contents of VALP for

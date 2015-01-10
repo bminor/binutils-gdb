@@ -1579,7 +1579,7 @@ s_align_ptwo (int arg)
 
 /* Switch in and out of alternate macro mode.  */
 
-void
+static void
 s_altmacro (int on)
 {
   demand_empty_rest_of_line ();
@@ -3984,7 +3984,7 @@ s_rva (int size)
 
 /* .reloc offset, reloc_name, symbol+addend.  */
 
-void
+static void
 s_reloc (int ignore ATTRIBUTE_UNUSED)
 {
   char *stop = NULL;
