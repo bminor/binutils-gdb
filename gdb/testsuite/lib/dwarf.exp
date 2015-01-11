@@ -225,7 +225,9 @@ proc function_range { func src } {
 #   reference.  The rest of VALUE is taken to be the name of a label,
 #   and DW_FORM_ref4 is used.  See 'new_label' and 'define_label'.
 # * Otherwise, VALUE is taken to be a string and DW_FORM_string is
-#   used.
+#   used.  In order to prevent bugs where a numeric value is given but
+#   no form is specified, it is an error if the value looks like a number
+#   (using Tcl's "string is integer") and no form is provided.
 # More form-guessing functionality may be added.
 #
 # CHILDREN is just Tcl code that can be used to define child DIEs.  It
@@ -614,6 +616,10 @@ namespace eval Dwarf {
 		if {[llength $attr] > 2} {
 		    set attr_form [lindex $attr 2]
 		} else {
+		    # If the value looks like an integer, a form is required.
+		    if [string is integer $attr_value] {
+			error "Integer value requires a form"
+		    }
 		    set attr_form [_guess_form $attr_value attr_value]
 		}
 		set attr_form [_map_name $attr_form _FORM]

@@ -1,5 +1,16 @@
 2015-01-11  Doug Evans  <xdje42@gmail.com>
 
+	* lib/dwarf.exp (Dwarf): Flag an error if a numeric attribute value
+	is given without an explicit form.
+	* gdb.dwarf2/arr-subrange.exp: Specify forms for all numeric
+	attributes.
+	* gdb.dwarf/corrupt.exp: Ditto.
+	* gdb.dwarf2/enum-type.exp: Ditto.
+	* gdb.trace/entry-values.exp: Ditto.
+	* gdb.trace/unavailable-dwarf-piece.exp: Ditto.
+
+2015-01-11  Doug Evans  <xdje42@gmail.com>
+
 	PR gdb/15830
 	* gdb.base/maint.exp: Remove references to "maint demangle".
 	* gdb.cp/demangle.exp: Update.  "maint demangle" -> "demangle".

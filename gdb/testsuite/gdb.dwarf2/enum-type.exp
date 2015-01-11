@@ -50,7 +50,7 @@ Dwarf::assemble $asm_file {
 	    } {
 		DW_TAG_enumerator {
 		    {DW_AT_name ONE}
-		    {DW_AT_const_value 1}
+		    {DW_AT_const_value 1 DW_FORM_sdata}
 		}
 	    }
 
