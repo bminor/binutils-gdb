@@ -1,5 +1,10 @@
 2015-01-11  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (eq_symbol_entry): Use SYMBOL_SEARCH_NAME and
+	symbol_matches_domain for symbol comparisons.
+
+2015-01-11  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (symbol_cache_mark_found): Improve function comment.
 	Rename parameter objfile to objfile_context.
 	(symbol_cache_mark_not_found): Improve function comment.

@@ -1200,26 +1200,52 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
     }
   else
     {
-      slot_name = SYMBOL_LINKAGE_NAME (slot->value.found);
+      slot_name = SYMBOL_SEARCH_NAME (slot->value.found);
       slot_domain = SYMBOL_DOMAIN (slot->value.found);
     }
 
   /* NULL names match.  */
   if (slot_name == NULL && name == NULL)
-    ;
+    {
+      /* But there's no point in calling symbol_matches_domain in the
+	 SYMBOL_SLOT_FOUND case.  */
+      if (slot_domain != domain)
+	return 0;
+    }
   else if (slot_name != NULL && name != NULL)
     {
-      if (strcmp (slot_name, name) != 0)
-	return 0;
+      /* It's important that we use the same comparison that was done the
+	 first time through.  If the slot records a found symbol, then this
+	 means using strcmp_iw on SYMBOL_SEARCH_NAME.  See dictionary.c.
+	 It also means using symbol_matches_domain for found symbols.
+	 See block.c.
+
+	 If the slot records a not-found symbol, then require a precise match.
+	 We could still be lax with whitespace like strcmp_iw though.  */
+
+      if (slot->state == SYMBOL_SLOT_NOT_FOUND)
+	{
+	  if (strcmp (slot_name, name) != 0)
+	    return 0;
+	  if (slot_domain != domain)
+	    return 0;
+	}
+      else
+	{
+	  struct symbol *sym = slot->value.found;
+
+	  if (strcmp_iw (slot_name, name) != 0)
+	    return 0;
+	  if (!symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				      slot_domain, domain))
+	    return 0;
+	}
     }
   else
     {
       /* Only one name is NULL.  */
       return 0;
     }
-
-  if (slot_domain != domain)
-    return 0;
 
   return 1;
 }
