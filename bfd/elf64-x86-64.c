@@ -2677,13 +2677,23 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 		       && ! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
 	    }
-	  /* For PIE, discard space for relocs against symbols which
-	     turn out to need copy relocs.  */
+	  /* For PIE, discard space for pc-relative relocs against
+	     symbols which turn out to need copy relocs.  */
 	  else if (info->executable
 		   && (h->needs_copy || eh->needs_copy)
 		   && h->def_dynamic
 		   && !h->def_regular)
-	    eh->dyn_relocs = NULL;
+	    {
+	      struct elf_dyn_relocs **pp;
+
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+		{
+		  if (p->pc_count != 0)
+		    *pp = p->next;
+		  else
+		    pp = &p->next;
+		}
+	    }
 	}
     }
   else if (ELIMINATE_COPY_RELOCS)

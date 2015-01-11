@@ -373,6 +373,14 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{readelf {-Wr} pr17689.rd}} \
 	    "pr17689" \
 	] \
+	[list \
+	    "Build pr17827 with PIE without -fPIE" \
+	    "tmpdir/pr17689.so -pie" \
+	    "" \
+	    { pr17689b.S } \
+	    {{readelf {-Wr} pr17827.rd}} \
+	    "pr17827" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \

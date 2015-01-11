@@ -1,3 +1,13 @@
+2015-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17827
+	* ld-x86-64/pr17689.out: Updated.
+	* ld-x86-64/pr17689b.S: Likewise.
+
+	* ld-x86-64/pr17827.rd: New file.
+
+	* ld-x86-64/x86-64.exp: Run PR ld/17827 test.
+
 2015-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17773
