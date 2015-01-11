@@ -1,3 +1,8 @@
+2015-01-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_follow_fork): Adjust now that
+	inferior_thread is a function.
+
 2015-01-11  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.c (eq_symbol_entry): Use SYMBOL_SEARCH_NAME and
