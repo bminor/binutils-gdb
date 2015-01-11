@@ -2,7 +2,7 @@
 
 	* symtab.c (symbol_cache_mark_found): Improve function comment.
 	Rename parameter objfile to objfile_context.
-	(symbol_cache_mark_not_found): Ditto.
+	(symbol_cache_mark_not_found): Improve function comment.
 
 2015-01-10  Doug Evans  <xdje42@gmail.com>
 
