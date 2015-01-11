@@ -454,7 +454,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_avx512_zmmh_high_registers; i++)
 	{
 	  collect_register (regcache, i + zmm16h_regnum, raw);
-	  p = ((char *) &fp->zmmh_low_space[0]) + 32 + i * 64;
+	  p = ((char *) &fp->zmmh_high_space[0]) + 32 + i * 64;
 	  if (memcmp (raw, p, 32) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM;

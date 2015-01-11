@@ -1858,7 +1858,6 @@ po/$(PACKAGE).pot: force
 	     -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
 	     -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
 	     -e '/^#line.*y.tab.c/d' \
-	     -e "s/^\(#line.*\)`basename $<`/\1`echo $<|sed 's/\//\\\\\//g'`/" \
 	  < $@.tmp > $@
 	rm -f $@.tmp
 .l.c:

@@ -234,20 +234,23 @@ tui_redisplay_readline (void)
     {
       waddch (w, prompt[in]);
       getyx (w, line, col);
-      if (col < prev_col)
+      if (col <= prev_col)
         height++;
       prev_col = col;
     }
-  for (in = 0; in < rl_end; in++)
+  for (in = 0; in <= rl_end; in++)
     {
       unsigned char c;
       
-      c = (unsigned char) rl_line_buffer[in];
       if (in == rl_point)
 	{
           getyx (w, c_line, c_pos);
 	}
 
+      if (in == rl_end)
+        break;
+
+      c = (unsigned char) rl_line_buffer[in];
       if (CTRL_CHAR (c) || c == RUBOUT)
 	{
           waddch (w, '^');

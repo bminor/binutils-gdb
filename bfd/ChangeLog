@@ -1,3 +1,17 @@
+2015-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17827
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): For PIE,
+	only discard space for pc-relative relocs symbols which turn
+	out to need copy relocs.
+
+2015-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* tekhex.c (getvalue): Fix thinko in test for correct extraction
+	of value.
+	(getsym): Return false if there was not enough data to extract the
+	symbol.
+
 2015-01-09  Anthony Green  <green@moxielogic.com>
 
 	* elf32-moxie.c (ELF_MACHINE_ALT1): Define.

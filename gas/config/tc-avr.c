@@ -1344,6 +1344,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 
       value = S_GET_VALUE (fixP->fx_addsy) +
           fixP->fx_offset - S_GET_VALUE (fixP->fx_subsy);
+      *valP = value;
 
       fixP->fx_subsy = NULL;
   }

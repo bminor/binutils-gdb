@@ -24463,6 +24463,11 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP
 					       | ARM_EXT_SEC, 0),
 					       FPU_ARCH_NEON_VFP_V4, NULL),
+  /* APM X-Gene family.  */
+  ARM_CPU_OPT ("xgene1",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+	                                                          "APM X-Gene 1"),
+  ARM_CPU_OPT ("xgene2",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+	                                                          "APM X-Gene 2"),
 
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }
 };

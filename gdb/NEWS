@@ -57,6 +57,15 @@ add-auto-load-scripts-directory directory
 maint print user-registers
   List all currently available "user" registers.
 
+maint print symbol-cache
+  Print the contents of the symbol cache.
+
+maint print symbol-cache-statistics
+  Print statistics of symbol cache usage.
+
+maint flush-symbol-cache
+  Flush the contents of the symbol cache.
+
 compile code [-r|-raw] [--] [source code]
   Compile, inject, and execute in the inferior the executable object
   code produced by compiling the provided source code.
@@ -89,6 +98,10 @@ compile file [-r|-raw] filename
 set debug symbol-lookup
 show debug symbol-lookup
   Control display of debugging info regarding symbol lookup.
+
+maint set symbol-cache-size
+maint show symbol-cache-size
+  Control the size of the symbol cache.
 
 * MI changes
 
