@@ -1,3 +1,10 @@
+2015-01-10  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Symbols): Document new commands
+	"maint print symbol-cache", "maint print symbol-cache-statistics",
+	"maint flush-symbol-cache".  Document new option
+	"maint set symbol-cache-size".
+
 2014-12-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Files): Remove documentation of the
