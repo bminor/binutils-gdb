@@ -1426,12 +1426,16 @@ symbol_cache_clear_slot (struct symbol_cache_slot *slot)
   slot->state = SYMBOL_SLOT_UNUSED;
 }
 
-/* Mark SYMBOL as found in SLOT.  */
+/* Mark SYMBOL as found in SLOT.
+   OBJFILE_CONTEXT is the current objfile when the lookup was done, or NULL
+   if it's not needed to distinguish lookups (STATIC_BLOCK).  It is *not*
+   necessarily the objfile the symbol was found in.  */
 
 static void
 symbol_cache_mark_found (struct block_symbol_cache *bsc,
 			 struct symbol_cache_slot *slot,
-			 struct objfile *objfile, struct symbol *symbol)
+			 struct objfile *objfile_context,
+			 struct symbol *symbol)
 {
   if (bsc == NULL)
     return;
@@ -1441,11 +1445,13 @@ symbol_cache_mark_found (struct block_symbol_cache *bsc,
       symbol_cache_clear_slot (slot);
     }
   slot->state = SYMBOL_SLOT_FOUND;
-  slot->objfile_context = objfile;
+  slot->objfile_context = objfile_context;
   slot->value.found = symbol;
 }
 
-/* Mark symbol NAME, DOMAIN as not found in SLOT.  */
+/* Mark symbol NAME, DOMAIN as not found in SLOT.
+   OBJFILE_CONTEXT is the current objfile when the lookup was done, or NULL
+   if it's not needed to distinguish lookups (STATIC_BLOCK).  */
 
 static void
 symbol_cache_mark_not_found (struct block_symbol_cache *bsc,
