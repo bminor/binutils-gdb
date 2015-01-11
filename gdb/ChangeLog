@@ -1,3 +1,14 @@
+2015-01-11  Doug Evans  <xdje42@gmail.com>
+
+	PR gdb/15830
+	* NEWS: The "maint demangle" command is renamed as "demangle".
+	* demangle.c: #include cli/cli-utils.h, language.h.
+	(demangle_command): New function.
+	(_initialize_demangle): Add new command "demangle".
+	* maint.c (maintenance_demangle): Stub out.
+	(_initialize_maint_cmds): Update help text for "maint demangle",
+	and mark as deprecated.
+
 2015-01-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c (inf_ptrace_follow_fork): Adjust now that

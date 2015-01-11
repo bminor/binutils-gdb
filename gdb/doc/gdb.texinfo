@@ -14215,6 +14215,11 @@ method tables of the object computed by @var{expression}.  This shows
 one entry per virtual table; there may be multiple virtual tables when
 multiple inheritance is in use.
 
+@cindex C@t{++} demangling
+@item demangle @var{name}
+Demangle @var{name}.
+@xref{Symbols}, for a more complete description of the @code{demangle} command.
+
 @cindex C@t{++} symbol display
 @item set print demangle
 @itemx show print demangle
@@ -16069,6 +16074,19 @@ _start + 5 in section .text of /tmp/a.out
 (@value{GDBP}) info symbol 0x2aaaac2811cf
 __read_nocancel + 6 in section .text of /usr/lib64/libc.so.6
 @end smallexample
+
+@kindex demangle
+@cindex demangle
+@item demangle @r{[}-l @var{language}@r{]} @r{[}@var{--}@r{]} @var{name}
+Demangle @var{name}.
+If @var{language} is provided it is the name of the language to demangle
+@var{name} in.  Otherwise @var{name} is demangled in the current language.
+
+The @samp{--} option specifies the end of options,
+and is useful when @var{name} begins with a dash.
+
+The parameter @code{demangle-style} specifies how to interpret the kind
+of mangling used. @xref{Print Settings}.
 
 @kindex whatis
 @item whatis[/@var{flags}] [@var{arg}]
@@ -33500,10 +33518,6 @@ Print the first C@t{++} class/namespace component of @var{name}.
 @kindex maint cplus namespace
 @item maint cplus namespace
 Print the list of possible C@t{++} namespaces.
-
-@kindex maint demangle
-@item maint demangle @var{name}
-Demangle a C@t{++} or Objective-C mangled @var{name}.
 
 @kindex maint deprecate
 @kindex maint undeprecate

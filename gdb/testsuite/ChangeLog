@@ -1,3 +1,11 @@
+2015-01-11  Doug Evans  <xdje42@gmail.com>
+
+	PR gdb/15830
+	* gdb.base/maint.exp: Remove references to "maint demangle".
+	* gdb.cp/demangle.exp: Update.  "maint demangle" -> "demangle".
+	Add tests for explicitly specifying language to demangle.
+	* gdb.dlang/demangle.exp: Ditto.
+
 2015-01-09  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/non-stop-fair-events.c: New file.

@@ -47,6 +47,12 @@
 
 * New commands
 
+demangle [-l language] [--] name
+  Demangle "name" in the specified language, or the current language
+  if elided.  This command is renamed from the "maint demangle" command.
+  The latter is kept as a no-op to avoid "maint demangle" being interpreted
+  as "maint demangler-warning".
+
 queue-signal signal-name-or-number
   Queue a signal to be delivered to the thread when it is resumed.
 
