@@ -2276,7 +2276,7 @@ process_debug_info (struct dwarf_section *section,
 
       /* Then allocate an array to hold the information.  */
       debug_information = (debug_info *) cmalloc (num_units,
-                                                  sizeof (* debug_information));
+						  sizeof (* debug_information));
       if (debug_information == NULL)
 	{
 	  error (_("Not enough memory for a debug info array of %u entries\n"),
@@ -2824,7 +2824,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  /* PR 17531: file: 0522b371.  */
 	  if (linfo.li_line_range == 0)
 	    {
-	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section"));
+	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section\n"));
 	      return 0;
 	    }
 	  reset_state_machine (linfo.li_default_is_stmt);
@@ -3181,7 +3181,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	  /* PR 17531: file: 0522b371.  */
 	  if (linfo.li_line_range == 0)
 	    {
-	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section"));
+	      warn (_("Partial .debug_line. section encountered without a prior full .debug_line section\n"));
 	      return 0;
 	    }
 	  reset_state_machine (linfo.li_default_is_stmt);
@@ -4936,19 +4936,30 @@ display_debug_addr (struct dwarf_section *section,
 
   printf (_("Contents of the %s section:\n\n"), section->name);
 
-  debug_addr_info = (debug_info **) xmalloc ((num_debug_info_entries + 1)
-                                             * sizeof (debug_info *));
+  /* PR  17531: file: cf38d01b.
+     We use xcalloc because a corrupt file may not have initialised all of the
+     fields in the debug_info structure, which means that the sort below might
+     try to move uninitialised data.  */
+  debug_addr_info = (debug_info **) xcalloc ((num_debug_info_entries + 1),
+                                             sizeof (debug_info *));
 
   count = 0;
   for (i = 0; i < num_debug_info_entries; i++)
     if (debug_information [i].addr_base != DEBUG_INFO_UNAVAILABLE)
-      debug_addr_info [count++] = debug_information + i;
+      {
+	/* PR 17531: file: cf38d01b.  */
+	if (debug_information[i].addr_base >= section->size)
+	  warn (_("Corrupt address base (%lx) found in debug section %u\n"),
+		(unsigned long) debug_information[i].addr_base, i);
+	else
+	  debug_addr_info [count++] = debug_information + i;
+      }
 
   /* Add a sentinel to make iteration convenient.  */
   debug_addr_info [count] = (debug_info *) xmalloc (sizeof (debug_info));
   debug_addr_info [count]->addr_base = section->size;
-
   qsort (debug_addr_info, count, sizeof (debug_info *), comp_addr_base);
+
   for (i = 0; i < count; i++)
     {
       unsigned int idx;
@@ -5536,7 +5547,7 @@ read_cie (unsigned char *start, unsigned char *end,
       /* PR 17512: file: 11042-2589-0.004.  */
       if (start > end)
 	{
-	  warn (_("Augmentation data too long: 0x%lx"), augmentation_data_len);
+	  warn (_("Augmentation data too long: 0x%lx\n"), augmentation_data_len);
 	  return end;
 	}
     }
@@ -6279,7 +6290,7 @@ display_debug_frames (struct dwarf_section *section,
 	          fc->cfa_exp = rs->cfa_exp;
 		  if (frame_need_space (fc, rs->ncols - 1) < 0)
 		    {
-		      warn (_("Invalid column number in saved frame state"));
+		      warn (_("Invalid column number in saved frame state\n"));
 		      fc->ncols = 0;
 		      break;
 		    }
@@ -6611,7 +6622,7 @@ display_gdb_index (struct dwarf_section *section,
 
   if (address_table + address_table_size * (2 + 8 + 4) > section->start + section->size)
     {
-      warn (_("Address table extends beyond end of section. %x"), address_table_size);
+      warn (_("Address table extends beyond end of section.\n"));
       return 0;
     }
   
@@ -7145,7 +7156,8 @@ display_debug_not_supported (struct dwarf_section *section,
   return 1;
 }
 
-/* Like malloc, but takes two parameters.
+/* Like malloc, but takes two parameters like calloc.
+   Verifies that the first parameter is not too large.
    Note: does *not* initialise the allocated memory to zero.  */
 void *
 cmalloc (size_t nmemb, size_t size)
@@ -7157,18 +7169,8 @@ cmalloc (size_t nmemb, size_t size)
   return xmalloc (nmemb * size);
 }
 
-/* Like xcalloc, but verifies that the first paramer is not too large.  */
-void *
-xcalloc2 (size_t nmemb, size_t size)
-{
-  /* Check for overflow.  */
-  if (nmemb >= ~(size_t) 0 / size)
-    return NULL;
-
-  return xcalloc (nmemb, size);
-}
-
-/* Like xmalloc, but takes two parameters.
+/* Like xmalloc, but takes two parameters like calloc.
+   Verifies that the first parameter is not too large.
    Note: does *not* initialise the allocated memory to zero.  */
 void *
 xcmalloc (size_t nmemb, size_t size)
@@ -7181,6 +7183,7 @@ xcmalloc (size_t nmemb, size_t size)
 }
 
 /* Like xrealloc, but takes three parameters.
+   Verifies that the second parameter is not too large.
    Note: does *not* initialise any new memory to zero.  */
 void *
 xcrealloc (void *ptr, size_t nmemb, size_t size)
@@ -7190,6 +7193,17 @@ xcrealloc (void *ptr, size_t nmemb, size_t size)
     return NULL;
 
   return xrealloc (ptr, nmemb * size);
+}
+
+/* Like xcalloc, but verifies that the first parameter is not too large.  */
+void *
+xcalloc2 (size_t nmemb, size_t size)
+{
+  /* Check for overflow.  */
+  if (nmemb >= ~(size_t) 0 / size)
+    return NULL;
+
+  return xcalloc (nmemb, size);
 }
 
 void
