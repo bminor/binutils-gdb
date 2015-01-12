@@ -1,3 +1,19 @@
+2015-02-11  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2015-01-12  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+		    Alan Modra  <amodra@gmail.com>
+	PR 17817
+	* Makefile.am (aoutx.stamp): cp -p $srcdir/aoutx.texi to keep
+	timestamps so that makeinfo need not be installed.
+	(archive.stamp, archures.stamp, bfdt.stamp, cache.stamp,
+	coffcode.stamp, core.stamp, elf.stamp, elfcode.stamp, mmo.stamp,
+	format.stamp, libbfd.stamp, bfdio.stamp, bfdwin.stamp,
+	opncls.stamp, reloc.stamp, section.stamp, syms.stamp, targets.stamp,
+	init.stamp, hash.stamp, linker.stamp): Similarly.
+	(bfdver.texi): Use test rather than [ ] in commands.
+	* Makefile.in: Regenerate.
+
 2014-08-05  Doug Evans  <dje@google.com>
 
 	* chew.c (skip_past_newline_1): New function.
