@@ -2466,6 +2466,11 @@ process_debug_info (struct dwarf_section *section,
 	warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"),
 	      (unsigned long) compunit.cu_abbrev_offset,
 	      (unsigned long) abbrev_size);
+      /* PR 17531: file:4bcd9ce9.  */ 
+      else if (abbrev_base >= abbrev_size)
+	warn (_("Debug info is corrupted, abbrev base (%lx) is larger than abbrev section size (%lx)\n"),
+	      (unsigned long) abbrev_base,
+	      (unsigned long) abbrev_size);
       else
 	process_abbrev_section
 	  (((unsigned char *) debug_displays [abbrev_sec].section.start
@@ -6832,7 +6837,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   /* PR 17512: file: 002-376-0.004.  */
   if (section->size < 24)
     {
-      warn (_("Section %s is too small to contain a CU/TU header"),
+      warn (_("Section %s is too small to contain a CU/TU header\n"),
 	    section->name);
       return 0;
     }
@@ -6942,13 +6947,13 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	  if (is_tu_index)
 	    {
 	      tu_count = nused;
-	      tu_sets = xcmalloc (nused, sizeof (struct cu_tu_set));
+	      tu_sets = xcalloc2 (nused, sizeof (struct cu_tu_set));
 	      this_set = tu_sets;
 	    }
 	  else
 	    {
 	      cu_count = nused;
-	      cu_sets = xcmalloc (nused, sizeof (struct cu_tu_set));
+	      cu_sets = xcalloc2 (nused, sizeof (struct cu_tu_set));
 	      this_set = cu_sets;
 	    }
 	}
@@ -7150,6 +7155,17 @@ cmalloc (size_t nmemb, size_t size)
     return NULL;
 
   return xmalloc (nmemb * size);
+}
+
+/* Like xcalloc, but verifies that the first paramer is not too large.  */
+void *
+xcalloc2 (size_t nmemb, size_t size)
+{
+  /* Check for overflow.  */
+  if (nmemb >= ~(size_t) 0 / size)
+    return NULL;
+
+  return xcalloc (nmemb, size);
 }
 
 /* Like xmalloc, but takes two parameters.
