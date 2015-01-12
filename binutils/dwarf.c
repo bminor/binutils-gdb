@@ -2467,10 +2467,11 @@ process_debug_info (struct dwarf_section *section,
 	      (unsigned long) compunit.cu_abbrev_offset,
 	      (unsigned long) abbrev_size);
       /* PR 17531: file:4bcd9ce9.  */ 
-      else if (abbrev_base >= abbrev_size)
-	warn (_("Debug info is corrupted, abbrev base (%lx) is larger than abbrev section size (%lx)\n"),
-	      (unsigned long) abbrev_base,
-	      (unsigned long) abbrev_size);
+      else if ((abbrev_base + abbrev_size)
+	       > debug_displays [abbrev_sec].section.size)
+	warn (_("Debug info is corrupted, abbrev size (%lx) is larger than abbrev section size (%lx)\n"),
+	      (unsigned long) abbrev_base + abbrev_size,
+	      (unsigned long) debug_displays [abbrev_sec].section.size);
       else
 	process_abbrev_section
 	  (((unsigned char *) debug_displays [abbrev_sec].section.start
