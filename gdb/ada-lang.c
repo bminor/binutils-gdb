@@ -5598,7 +5598,38 @@ ada_lookup_symbol_nonlocal (const struct language_defn *langdef,
                             const struct block *block,
                             const domain_enum domain)
 {
-  return ada_lookup_symbol (name, block_static_block (block), domain, NULL);
+  struct symbol *sym;
+
+  sym = ada_lookup_symbol (name, block_static_block (block), domain, NULL);
+  if (sym != NULL)
+    return sym;
+
+  /* If we haven't found a match at this point, try the primitive
+     types.  In other languages, this search is performed before
+     searching for global symbols in order to short-circuit that
+     global-symbol search if it happens that the name corresponds
+     to a primitive type.  But we cannot do the same in Ada, because
+     it is perfectly legitimate for a program to declare a type which
+     has the same name as a standard type.  If looking up a type in
+     that situation, we have traditionally ignored the primitive type
+     in favor of user-defined types.  This is why, unlike most other
+     languages, we search the primitive types this late and only after
+     having searched the global symbols without success.  */
+
+  if (domain == VAR_DOMAIN)
+    {
+      struct gdbarch *gdbarch;
+
+      if (block == NULL)
+	gdbarch = target_gdbarch ();
+      else
+	gdbarch = block_gdbarch (block);
+      sym = language_lookup_primitive_type_as_symbol (langdef, gdbarch, name);
+      if (sym != NULL)
+	return sym;
+    }
+
+  return NULL;
 }
 
 
