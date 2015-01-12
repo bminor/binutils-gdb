@@ -11971,6 +11971,47 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
   return ret;
 }
 
+/* Scan and mark sections in a special or debug section group.  */
+
+static void
+_bfd_elf_gc_mark_debug_special_section_group (asection *grp)
+{
+  /* Point to first section of section group.  */
+  asection *ssec;
+  /* Used to iterate the section group.  */
+  asection *msec;
+
+  bfd_boolean is_special_grp = TRUE;
+  bfd_boolean is_debug_grp = TRUE;
+
+  /* First scan to see if group contains any section other than debug
+     and special section.  */
+  ssec = msec = elf_next_in_group (grp);
+  do
+    {
+      if ((msec->flags & SEC_DEBUGGING) == 0)
+	is_debug_grp = FALSE;
+
+      if ((msec->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) != 0)
+	is_special_grp = FALSE;
+
+      msec = elf_next_in_group (msec);
+    }
+  while (msec != ssec);
+
+  /* If this is a pure debug section group or pure special section group,
+     keep all sections in this group.  */
+  if (is_debug_grp || is_special_grp)
+    {
+      do
+	{
+	  msec->gc_mark = 1;
+	  msec = elf_next_in_group (msec);
+	}
+      while (msec != ssec);
+    }
+}
+
 /* Keep debug and special sections.  */
 
 bfd_boolean
@@ -12011,13 +12052,17 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	continue;
 
       /* Keep debug and special sections like .comment when they are
-	 not part of a group, or when we have single-member groups.  */
+	 not part of a group.  Also keep section groups that contain
+	 just debug sections or special sections.  */
       for (isec = ibfd->sections; isec != NULL; isec = isec->next)
-	if ((elf_next_in_group (isec) == NULL
-	     || elf_next_in_group (isec) == isec)
-	    && ((isec->flags & SEC_DEBUGGING) != 0
-		|| (isec->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0))
-	  isec->gc_mark = 1;
+	{
+	  if ((isec->flags & SEC_GROUP) != 0)
+	    _bfd_elf_gc_mark_debug_special_section_group (isec);
+	  else if (((isec->flags & SEC_DEBUGGING) != 0
+		    || (isec->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0)
+		   && elf_next_in_group (isec) == NULL)
+	    isec->gc_mark = 1;
+	}
 
       if (! debug_frag_seen)
 	continue;
