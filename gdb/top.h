@@ -79,6 +79,8 @@ extern int history_expansion_p;
 extern int server_command;
 extern char *lim_at_start;
 
+extern void gdb_add_history (const char *);
+
 extern void show_commands (char *args, int from_tty);
 
 extern void set_history (char *, int);

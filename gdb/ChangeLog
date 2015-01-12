@@ -1,3 +1,14 @@
+2015-01-12  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.h (gdb_add_history): Declare.
+	* top.c (command_count): New variable.
+	(gdb_add_history): New function.
+	(gdb_safe_append_history): New static function.
+	(quit_force): Call it.
+	(command_line_input): Use gdb_add_history instead of
+	add_history.
+	* event-top.c (command_line_handler): Likewise.
+
 2015-01-12  James Clarke  <jrtc27@jrtc27.com>  (tiny patch)
 
 	PR gdb/17046
