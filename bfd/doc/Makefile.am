@@ -97,18 +97,21 @@ protos: libbfd.h libcoff.h bfd.h
 aoutx.texi: aoutx.stamp ; @true
 aoutx.stamp: $(srcdir)/../aoutx.h $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >aoutx.tmp
+	test -e aoutx.texi || test ! -f $(srcdir)/aoutx.texi || cp -p $(srcdir)/aoutx.texi .
 	$(SHELL) $(srcdir)/../../move-if-change aoutx.tmp aoutx.texi
 	touch $@
 
 archive.texi: archive.stamp ; @true
 archive.stamp: $(srcdir)/../archive.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >archive.tmp
+	test -e archive.texi || test ! -f $(srcdir)/archive.texi || cp -p $(srcdir)/archive.texi .
 	$(SHELL) $(srcdir)/../../move-if-change archive.tmp archive.texi
 	touch $@
 
 archures.texi: archures.stamp ; @true
 archures.stamp: $(srcdir)/../archures.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >archures.tmp
+	test -e archures.texi || test ! -f $(srcdir)/archures.texi || cp -p $(srcdir)/archures.texi .
 	$(SHELL) $(srcdir)/../../move-if-change archures.tmp archures.texi
 	touch $@
 
@@ -117,114 +120,133 @@ archures.stamp: $(srcdir)/../archures.c $(srcdir)/doc.str $(MKDOC)
 bfdt.texi: bfdt.stamp ; @true
 bfdt.stamp: $(srcdir)/../bfd.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >bfd.tmp
+	test -e bfdt.texi || test ! -f $(srcdir)/bfdt.texi || cp -p $(srcdir)/bfdt.texi .
 	$(SHELL) $(srcdir)/../../move-if-change bfd.tmp bfdt.texi
 	touch $@
 
 cache.texi: cache.stamp ; @true
 cache.stamp: $(srcdir)/../cache.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >cache.tmp
+	test -e cache.texi || test ! -f $(srcdir)/cache.texi || cp -p $(srcdir)/cache.texi .
 	$(SHELL) $(srcdir)/../../move-if-change cache.tmp cache.texi
 	touch $@
 
 coffcode.texi: coffcode.stamp ; @true
 coffcode.stamp: $(srcdir)/../coffcode.h $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >coffcode.tmp
+	test -e coffcode.texi || test ! -f $(srcdir)/coffcode.texi || cp -p $(srcdir)/coffcode.texi .
 	$(SHELL) $(srcdir)/../../move-if-change coffcode.tmp coffcode.texi
 	touch $@
 
 core.texi: core.stamp ; @true
 core.stamp: $(srcdir)/../corefile.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >core.tmp
+	test -e core.texi || test ! -f $(srcdir)/core.texi || cp -p $(srcdir)/core.texi .
 	$(SHELL) $(srcdir)/../../move-if-change core.tmp core.texi
 	touch $@
 
 elf.texi: elf.stamp ; @true
 elf.stamp: $(srcdir)/../elf.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >elf.tmp
+	test -e elf.texi || test ! -f $(srcdir)/elf.texi || cp -p $(srcdir)/elf.texi .
 	$(SHELL) $(srcdir)/../../move-if-change elf.tmp elf.texi
 	touch $@
 
 elfcode.texi: elfcode.stamp ; @true
 elfcode.stamp: $(srcdir)/../elfcode.h $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >elfcode.tmp
+	test -e elfcode.texi || test ! -f $(srcdir)/elfcode.texi || cp -p $(srcdir)/elfcode.texi .
 	$(SHELL) $(srcdir)/../../move-if-change elfcode.tmp elfcode.texi
 	touch $@
 
 mmo.texi: mmo.stamp ; @true
 mmo.stamp: $(srcdir)/../mmo.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >mmo.tmp
+	test -e mmo.texi || test ! -f $(srcdir)/mmo.texi || cp -p $(srcdir)/mmo.texi .
 	$(SHELL) $(srcdir)/../../move-if-change mmo.tmp mmo.texi
 	touch $@
 
 format.texi: format.stamp ; @true
 format.stamp: $(srcdir)/../format.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >format.tmp
+	test -e format.texi || test ! -f $(srcdir)/format.texi || cp -p $(srcdir)/format.texi .
 	$(SHELL) $(srcdir)/../../move-if-change format.tmp format.texi
 	touch $@
 
 libbfd.texi: libbfd.stamp ; @true
 libbfd.stamp: $(srcdir)/../libbfd.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >libbfd.tmp
+	test -e libbfd.texi || test ! -f $(srcdir)/libbfd.texi || cp -p $(srcdir)/libbfd.texi .
 	$(SHELL) $(srcdir)/../../move-if-change libbfd.tmp libbfd.texi
 	touch $@
 
 bfdio.texi: bfdio.stamp ; @true
 bfdio.stamp: $(srcdir)/../bfdio.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >bfdio.tmp
+	test -e bfdio.texi || test ! -f $(srcdir)/bfdio.texi || cp -p $(srcdir)/bfdio.texi .
 	$(SHELL) $(srcdir)/../../move-if-change bfdio.tmp bfdio.texi
 	touch $@
 
 bfdwin.texi: bfdwin.stamp ; @true
 bfdwin.stamp: $(srcdir)/../bfdwin.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >bfdwin.tmp
+	test -e bfdwin.texi || test ! -f $(srcdir)/bfdwin.texi || cp -p $(srcdir)/bfdwin.texi .
 	$(SHELL) $(srcdir)/../../move-if-change bfdwin.tmp bfdwin.texi
 	touch $@
 
 opncls.texi: opncls.stamp ; @true
 opncls.stamp: $(srcdir)/../opncls.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >opncls.tmp
+	test -e opncls.texi || test ! -f $(srcdir)/opncls.texi || cp -p $(srcdir)/opncls.texi .
 	$(SHELL) $(srcdir)/../../move-if-change opncls.tmp opncls.texi
 	touch $@
 
 reloc.texi: reloc.stamp ; @true
 reloc.stamp: $(srcdir)/../reloc.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >reloc.tmp
+	test -e reloc.texi || test ! -f $(srcdir)/reloc.texi || cp -p $(srcdir)/reloc.texi .
 	$(SHELL) $(srcdir)/../../move-if-change reloc.tmp reloc.texi
 	touch $@
 
 section.texi: section.stamp ; @true
 section.stamp: $(srcdir)/../section.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >section.tmp
+	test -e section.texi || test ! -f $(srcdir)/section.texi || cp -p $(srcdir)/section.texi .
 	$(SHELL) $(srcdir)/../../move-if-change section.tmp section.texi
 	touch $@
 
 syms.texi: syms.stamp ; @true
 syms.stamp: $(srcdir)/../syms.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >syms.tmp
+	test -e syms.texi || test ! -f $(srcdir)/syms.texi || cp -p $(srcdir)/syms.texi .
 	$(SHELL) $(srcdir)/../../move-if-change syms.tmp syms.texi
 	touch $@
 
 targets.texi: targets.stamp ; @true
 targets.stamp: $(srcdir)/../targets.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >targets.tmp
+	test -e targets.texi || test ! -f $(srcdir)/targets.texi || cp -p $(srcdir)/targets.texi .
 	$(SHELL) $(srcdir)/../../move-if-change targets.tmp targets.texi
 	touch $@
 
 init.texi: init.stamp ; @true
 init.stamp: $(srcdir)/../init.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >init.tmp
+	test -e init.texi || test ! -f $(srcdir)/init.texi || cp -p $(srcdir)/init.texi .
 	$(SHELL) $(srcdir)/../../move-if-change init.tmp init.texi
 	touch $@
 
 hash.texi: hash.stamp ; @true
 hash.stamp: $(srcdir)/../hash.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >hash.tmp
+	test -e hash.texi || test ! -f $(srcdir)/hash.texi || cp -p $(srcdir)/hash.texi .
 	$(SHELL) $(srcdir)/../../move-if-change hash.tmp hash.texi
 	touch $@
 
 linker.texi: linker.stamp ; @true
 linker.stamp: $(srcdir)/../linker.c $(srcdir)/doc.str $(MKDOC)
 	./$(MKDOC) -f $(srcdir)/doc.str < $< >linker.tmp
+	test -e linker.texi || test ! -f $(srcdir)/linker.texi || cp -p $(srcdir)/linker.texi .
 	$(SHELL) $(srcdir)/../../move-if-change linker.tmp linker.texi
 	touch $@
 
@@ -316,11 +338,11 @@ bfd.h: $(BFD_H_DEP)
 bfdver.texi: $(srcdir)/Makefile.in
 	@echo "creating $@"; \
 	echo "@set VERSION $(VERSION)" > bfdver.texi; \
-	if [ -n "$(PKGVERSION)" ]; then \
+	if test -n "$(PKGVERSION)"; then \
 	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> bfdver.texi; \
 	fi; \
 	echo "@set UPDATED `date '+%B %Y'`" >> bfdver.texi; \
-	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
+	if test -n "$(REPORT_BUGS_TEXI)"; then \
 	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> bfdver.texi; \
 	fi
 
