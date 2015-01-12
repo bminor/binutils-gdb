@@ -1600,7 +1600,7 @@ s_altmacro (int on)
    If a symbol name could not be read, the routine issues an error
    messages, skips to the end of the line and returns NULL.  */
 
-static char *
+char *
 read_symbol_name (void)
 {
   char * name;

@@ -51,6 +51,10 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
 	set ASFLAGS "$old_ASFLAGS"
     }
 
+    if { [is_elf_format] } then {
+	run_dump_test "cfi-label"
+    }
+
     if { [is_pecoff_format] } then {
 	run_dump_test "reloc-pe-i386"
     }

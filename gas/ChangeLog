@@ -1,5 +1,18 @@
 2015-01-12  Jan Beulich  <jbeulich@suse.com>
 
+	* gas/dw2gencfi.c (cfi_add_label, dot_cfi_label): New.
+	(cfi_pseudo_table): Add "cfi_label".
+	(output_cfi_insn): Handle CFI_label.
+	(select_cie_for_fde): Als terminate CIE when encountering
+	CFI_label.
+	* dw2gencfi.h (cfi_add_label): Declare.
+	(struct cfi_insn_data): New member "sym_name".
+	(CFI_label): New.
+	* read.c (read_symbol_name): Drop "static".
+	* read.h (read_symbol_name): Declare.
+
+2015-01-12  Jan Beulich  <jbeulich@suse.com>
+
 	* gas/config/tc-arm.c (do_neon_shl_imm): Check immediate range.
 	(do_neon_qshl_imm): Likewise.
 
