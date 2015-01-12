@@ -41,7 +41,7 @@
 
 #include <sys/ptrace.h>
 #include <sys/signal.h>
-#include <machine/setjmp.h>
+#include <setjmp.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>

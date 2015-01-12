@@ -14215,6 +14215,11 @@ method tables of the object computed by @var{expression}.  This shows
 one entry per virtual table; there may be multiple virtual tables when
 multiple inheritance is in use.
 
+@cindex C@t{++} demangling
+@item demangle @var{name}
+Demangle @var{name}.
+@xref{Symbols}, for a more complete description of the @code{demangle} command.
+
 @cindex C@t{++} symbol display
 @item set print demangle
 @itemx show print demangle
@@ -16070,6 +16075,19 @@ _start + 5 in section .text of /tmp/a.out
 __read_nocancel + 6 in section .text of /usr/lib64/libc.so.6
 @end smallexample
 
+@kindex demangle
+@cindex demangle
+@item demangle @r{[}-l @var{language}@r{]} @r{[}@var{--}@r{]} @var{name}
+Demangle @var{name}.
+If @var{language} is provided it is the name of the language to demangle
+@var{name} in.  Otherwise @var{name} is demangled in the current language.
+
+The @samp{--} option specifies the end of options,
+and is useful when @var{name} begins with a dash.
+
+The parameter @code{demangle-style} specifies how to interpret the kind
+of mangling used. @xref{Print Settings}.
+
 @kindex whatis
 @item whatis[/@var{flags}] [@var{arg}]
 Print the data type of @var{arg}, which can be either an expression
@@ -16471,39 +16489,8 @@ line 1574.
 @}
 (@value{GDBP})
 @end smallexample
-
-@kindex maint set symbol-cache-size
-@cindex symbol cache size
-@item maint set symbol-cache-size @var{size}
-Set the size of the symbol cache to @var{size}.
-The default size is intended to be good enough for debugging
-most applications.  This option exists to allow for experimenting
-with different sizes.
-
-@kindex maint show symbol-cache-size
-@item maint show symbol-cache-size
-Show the size of the symbol cache.
-
-@kindex maint print symbol-cache
-@cindex symbol cache, printing its contents
-@item maint print symbol-cache
-Print the contents of the symbol cache.
-This is useful when debugging symbol cache issues.
-
-@kindex maint print symbol-cache-statistics
-@cindex symbol cache, printing usage statistics
-@item maint print symbol-cache-statistics
-Print symbol cache usage statistics.
-This helps determine how well the cache is being utilized.
-
-@kindex maint flush-symbol-cache
-@cindex symbol cache, flushing
-@item maint flush-symbol-cache
-Flush the contents of the symbol cache, all entries are removed.
-This command is useful when debugging the symbol cache.
-It is also useful when collecting performance data.
-
 @end table
+
 
 @node Altering
 @chapter Altering Execution
@@ -33500,10 +33487,6 @@ Print the first C@t{++} class/namespace component of @var{name}.
 @kindex maint cplus namespace
 @item maint cplus namespace
 Print the list of possible C@t{++} namespaces.
-
-@kindex maint demangle
-@item maint demangle @var{name}
-Demangle a C@t{++} or Objective-C mangled @var{name}.
 
 @kindex maint deprecate
 @kindex maint undeprecate

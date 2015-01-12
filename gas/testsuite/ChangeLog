@@ -1,3 +1,14 @@
+2015-01-12  Jan Beulich  <jbeulich@suse.com>
+
+	gas/cfi/cfi-label.d, gas/cfi/cfi-label.s: New.
+	gas/cfi/cfi.exp: Run new tests.
+
+2015-01-12  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/arm/neon-addressing-bad.s: Add test for invalid VSHL,
+	VQSHL, and VQSHLU immediates.
+	* gas/arm/neon-addressing-bad.l: Update accordingly. 
+
 2015-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gas/avr/large-debug-line-table.d: New file.

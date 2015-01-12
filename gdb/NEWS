@@ -47,6 +47,12 @@
 
 * New commands
 
+demangle [-l language] [--] name
+  Demangle "name" in the specified language, or the current language
+  if elided.  This command is renamed from the "maint demangle" command.
+  The latter is kept as a no-op to avoid "maint demangle" being interpreted
+  as "maint demangler-warning".
+
 queue-signal signal-name-or-number
   Queue a signal to be delivered to the thread when it is resumed.
 
@@ -56,15 +62,6 @@ add-auto-load-scripts-directory directory
 
 maint print user-registers
   List all currently available "user" registers.
-
-maint print symbol-cache
-  Print the contents of the symbol cache.
-
-maint print symbol-cache-statistics
-  Print statistics of symbol cache usage.
-
-maint flush-symbol-cache
-  Flush the contents of the symbol cache.
 
 compile code [-r|-raw] [--] [source code]
   Compile, inject, and execute in the inferior the executable object
@@ -98,10 +95,6 @@ compile file [-r|-raw] filename
 set debug symbol-lookup
 show debug symbol-lookup
   Control display of debugging info regarding symbol lookup.
-
-maint set symbol-cache-size
-maint show symbol-cache-size
-  Control the size of the symbol cache.
 
 * MI changes
 

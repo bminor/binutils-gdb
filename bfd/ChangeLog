@@ -1,3 +1,9 @@
+2015-01-12  Terry Guo  <terry.guo@arm.com>
+
+	* elflink.c (_bfd_elf_gc_mark_debug_special_section_group): New
+	function.
+	(_bfd_elf_gc_mark_extra_sections): Use it.
+
 2015-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17827

@@ -45,7 +45,8 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child,
 {
   if (!follow_child)
     {
-      pid_t child_pid = inferior_thread->pending_follow.value.related_pid;
+      struct thread_info *tp = inferior_thread ();
+      pid_t child_pid = ptid_get_pid (tp->pending_follow.value.related_pid);
 
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */

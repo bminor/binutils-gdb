@@ -1579,7 +1579,7 @@ s_align_ptwo (int arg)
 
 /* Switch in and out of alternate macro mode.  */
 
-void
+static void
 s_altmacro (int on)
 {
   demand_empty_rest_of_line ();
@@ -1600,7 +1600,7 @@ s_altmacro (int on)
    If a symbol name could not be read, the routine issues an error
    messages, skips to the end of the line and returns NULL.  */
 
-static char *
+char *
 read_symbol_name (void)
 {
   char * name;
@@ -3984,7 +3984,7 @@ s_rva (int size)
 
 /* .reloc offset, reloc_name, symbol+addend.  */
 
-void
+static void
 s_reloc (int ignore ATTRIBUTE_UNUSED)
 {
   char *stop = NULL;

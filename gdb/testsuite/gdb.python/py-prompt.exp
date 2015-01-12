@@ -76,6 +76,7 @@ gdb_test "python print (\"'\" + str(p\[0\]) + \"'\")" "'$gdb_prompt_fail '" \
 gdb_exit
 
 if {![can_spawn_for_attach]} {
+    set GDBFLAGS $saved_gdbflags
     return 0
 }
 

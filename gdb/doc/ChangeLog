@@ -1,9 +1,9 @@
-2015-01-10  Doug Evans  <xdje42@gmail.com>
+2015-01-11  Doug Evans  <xdje42@gmail.com>
 
-	* gdb.texinfo (Symbols): Document new commands
-	"maint print symbol-cache", "maint print symbol-cache-statistics",
-	"maint flush-symbol-cache".  Document new option
-	"maint set symbol-cache-size".
+	PR gdb/15830
+	* gdb.texinfo (Debugging C Plus Plus): Mention "demangle".
+	(Symbols): Ditto.
+	(Maintenance Commands): Delete docs for "maint demangle".
 
 2014-12-31  Joel Brobecker  <brobecker@adacore.com>
 

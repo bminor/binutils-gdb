@@ -14102,8 +14102,12 @@ do_neon_shl_imm (void)
     {
       enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
       struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_KEY | N_I_ALL);
+      int imm = inst.operands[2].imm;
+
+      constraint (imm < 0 || (unsigned)imm >= et.size,
+		  _("immediate out of range for shift"));
       NEON_ENCODE (IMMED, inst);
-      neon_imm_shift (FALSE, 0, neon_quad (rs), et, inst.operands[2].imm);
+      neon_imm_shift (FALSE, 0, neon_quad (rs), et, imm);
     }
   else
     {
@@ -14134,10 +14138,12 @@ do_neon_qshl_imm (void)
     {
       enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
       struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_SU_ALL | N_KEY);
+      int imm = inst.operands[2].imm;
 
+      constraint (imm < 0 || (unsigned)imm >= et.size,
+		  _("immediate out of range for shift"));
       NEON_ENCODE (IMMED, inst);
-      neon_imm_shift (TRUE, et.type == NT_unsigned, neon_quad (rs), et,
-		      inst.operands[2].imm);
+      neon_imm_shift (TRUE, et.type == NT_unsigned, neon_quad (rs), et, imm);
     }
   else
     {

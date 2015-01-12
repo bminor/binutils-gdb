@@ -251,6 +251,7 @@ extern void dwarf_select_sections_all (void);
 extern unsigned int * find_cu_tu_set (void *, unsigned int);
 
 extern void * cmalloc (size_t, size_t);
+extern void * xcalloc2 (size_t, size_t);
 extern void * xcmalloc (size_t, size_t);
 extern void * xcrealloc (void *, size_t, size_t);
 
