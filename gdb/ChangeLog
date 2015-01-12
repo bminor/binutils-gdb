@@ -1,5 +1,9 @@
 2015-01-11  Doug Evans  <xdje42@gmail.com>
 
+	* dwarf2read.c (compute_delayed_physnames): Use TYPE_FN_FIELD_PHYSNAME.
+
+2015-01-11  Doug Evans  <xdje42@gmail.com>
+
 	PR gdb/15830
 	* NEWS: The "maint demangle" command is renamed as "demangle".
 	* demangle.c: #include cli/cli-utils.h, language.h.

@@ -7704,7 +7704,8 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
       struct fn_fieldlist *fn_flp
 	= &TYPE_FN_FIELDLIST (mi->type, mi->fnfield_index);
       physname = dwarf2_physname (mi->name, mi->die, cu);
-      fn_flp->fn_fields[mi->index].physname = physname ? physname : "";
+      TYPE_FN_FIELD_PHYSNAME (fn_flp->fn_fields, mi->index)
+	= physname ? physname : "";
     }
 }
 
