@@ -1,3 +1,8 @@
+2015-01-12  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/config/tc-arm.c (do_neon_shl_imm): Check immediate range.
+	(do_neon_qshl_imm): Likewise.
+
 2015-01-12  Alan Modra  <amodra@gmail.com>
 
 	* read.c (s_altmacro, s_reloc): Make definition static.
