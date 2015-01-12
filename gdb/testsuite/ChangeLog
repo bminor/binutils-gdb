@@ -1,3 +1,8 @@
+2015-01-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-prompt.exp: When the board can't spawn for attach,
+	restore GDBFLAGS before returning.
+
 2015-01-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-frame.exp (test Frame.read_register(rip)): Use
