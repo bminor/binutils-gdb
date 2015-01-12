@@ -1,3 +1,9 @@
+2015-01-12  James Clarke  <jrtc27@jrtc27.com>  (tiny patch)
+
+	PR gdb/17046
+	* darwin-nat.c: Replace <machine/setjmp.h> #include by
+	<setjmp.h> #include.
+
 2015-01-11  Doug Evans  <xdje42@gmail.com>
 
 	* dwarf2read.c (compute_delayed_physnames): Use TYPE_FN_FIELD_PHYSNAME.
