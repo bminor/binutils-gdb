@@ -131,6 +131,7 @@ run_dump_test "gc-plt-relocs"
 run_dump_test "gc-relocs-257-dyn"
 run_dump_test "gc-relocs-257"
 run_dump_test "pr17415"
+run_dump_test "tprel_g2_overflow"
 
 # ifunc tests
 run_dump_test "ifunc-1"

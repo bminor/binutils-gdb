@@ -1,5 +1,10 @@
 2015-01-13  Jiong Wang  <jiong.wang@arm.com>
 
+	* elfnn-aarch64.c: (elfNN_aarch64_howto_table): Enable overflow check
+	for TLSLE_MOVW_TPREL_G2.
+
+2015-01-13  Jiong Wang  <jiong.wang@arm.com>
+
 	PR ld/17415
 	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Mark
 	R_AARCH64_TLSLE_ADD_TPREL_HI12 as complain_overflow_unsigned.

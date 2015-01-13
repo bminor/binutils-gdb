@@ -1,5 +1,11 @@
 2015-01-13  Jiong Wang  <jiong.wang@arm.com>
 
+	* ld-aarch64/tprel_g2_overflow.s: New testcase.
+	* ld-aarch64/tprel_g2_overflow.d: New expectation file.
+	* ld-aarch64/aarch64-elf.exp: Run new testcase.
+
+2015-01-13  Jiong Wang  <jiong.wang@arm.com>
+
 	PR ld/17415
 	* ld-aarch64/pr17415.s: Source file for new test.
 	* ld-aarch64/pr17415.d: Expect file for new test.
