@@ -1,5 +1,9 @@
 2015-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* Makefile.in (clean mostlyclean): Do not delete *.py.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.python/py-lookup-type.exp: New file.
 
 2015-01-12  Pedro Alves  <palves@redhat.com>

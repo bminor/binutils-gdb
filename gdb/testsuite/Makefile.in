@@ -242,7 +242,7 @@ force:;
 
 clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x *.grt bigcore.corefile .gdb_history
-	-rm -f core.* *.tf *.cl *.py tracecommandsscript copy1.txt zzz-gdbscript
+	-rm -f core.* *.tf *.cl tracecommandsscript copy1.txt zzz-gdbscript
 	-rm -f *.dwo *.dwp
 	-rm -rf outputs temp cache
 	-rm -f read1.so expect-read1
