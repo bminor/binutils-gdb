@@ -1,3 +1,8 @@
+2015-01-13  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (parse_ifimm_zero): Accept #0x0 as a synonym for
+	#0, restoring previous behaviour.
+
 2015-01-12  Jan Beulich  <jbeulich@suse.com>
 
 	* gas/dw2gencfi.c (cfi_add_label, dot_cfi_label): New.
