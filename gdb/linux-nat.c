@@ -1181,7 +1181,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	    }
 	  else
 	    {
-	      warning (_("Cannot attach to lwp %d: %s\n"),
+	      warning (_("Cannot attach to lwp %d: %s"),
 		       lwpid,
 		       linux_ptrace_attach_fail_reason_string (ptid,
 							       err));

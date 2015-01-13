@@ -1,5 +1,10 @@
 2015-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* linux-nat.c (attach_proc_task_lwp_callback): Remove trailing
+	new-line in argument of call to "warning".
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_lookup_symbol_nonlocal): If name not found
 	in static block, then try searching for primitive types.
 
