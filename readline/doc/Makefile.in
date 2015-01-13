@@ -16,6 +16,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
+
 topdir = @top_srcdir@
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -24,6 +26,7 @@ prefix = @prefix@
 
 datarootdir = @datarootdir@
 
+docdir = @docdir@
 infodir = @infodir@
 
 mandir = @mandir@

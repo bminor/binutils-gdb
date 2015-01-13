@@ -1,3 +1,9 @@
+2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
+
+	Import readline 6.3 and upstream patches 1-8.
+	* configure: Regenerate.
+	* examples/rlfe/configure: Regenerate.
+
 2014-12-30  Eli Zaretskii  <eliz@gnu.org>
 
 	* complete.c (stat_char) [_WIN32]: Don't use 'access' and X_OK on

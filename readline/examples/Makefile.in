@@ -68,11 +68,19 @@ TERMCAP_LIB = @TERMCAP_LIB@
 	$(CC) $(CCFLAGS) -c $<
 
 SOURCES = excallback.c fileman.c histexamp.c manexamp.c rl-fgets.c rl.c \
-		rlcat.c rlevent.c rlptytest.c rltest.c rlversion.c
+		rlcat.c rlevent.c rlptytest.c rltest.c rlversion.c \
+		rl-callbacktest.c hist_erasedups.c hist_purgecmd.c 
 
 EXECUTABLES = fileman$(EXEEXT) rltest$(EXEEXT) rl$(EXEEXT) rlcat$(EXEEXT) \
-		rlevent$(EXEEXT) rlversion$(EXEEXT) histexamp$(EXEEXT)
-OBJECTS = fileman.o rltest.o rl.o rlevent.o rlcat.o rlversion.o histexamp.o
+		rlevent$(EXEEXT) rlversion$(EXEEXT) histexamp$(EXEEXT) \
+		rl-callbacktest$(EXEEXT) \
+		hist_erasedups$(EXEEXT) hist_purgecmd$(EXEEXT)
+
+OBJECTS = fileman.o rltest.o rl.o rlevent.o rlcat.o rlversion.o histexamp.o \
+	  rl-callbacktest.o hist_erasedups.o hist_purgecmd.o
+
+OTHEREXE = rlptytest$(EXEEXT)
+OTHEROBJ = rlptytest.o
 
 all: $(EXECUTABLES)
 everything: all
@@ -110,6 +118,9 @@ fileman$(EXEEXT): fileman.o $(READLINE_LIB)
 rltest$(EXEEXT): rltest.o $(READLINE_LIB)
 	$(PURIFY) $(CC) $(LDFLAGS) -o $@ rltest.o $(READLINE_LIB) $(TERMCAP_LIB)
 
+rl-callbacktest$(EXEEXT): rl-callbacktest.o $(READLINE_LIB)
+	$(PURIFY) $(CC) $(LDFLAGS) -o $@ rl-callbacktest.o $(READLINE_LIB) $(TERMCAP_LIB)
+
 rlptytest$(EXEEXT): rlptytest.o $(READLINE_LIB)
 	$(PURIFY) $(CC) $(LDFLAGS) -o $@ rlptytest.o $(READLINE_LIB) $(TERMCAP_LIB)
 
@@ -119,9 +130,15 @@ rlversion$(EXEEXT): rlversion.o $(READLINE_LIB)
 histexamp$(EXEEXT): histexamp.o $(HISTORY_LIB)
 	$(PURIFY) $(CC) $(LDFLAGS) -o $@ histexamp.o -lhistory $(TERMCAP_LIB)
 
+hist_erasedups$(EXEEXT): hist_erasedups.o $(HISTORY_LIB)
+	$(PURIFY) $(CC) $(LDFLAGS) -o $@ hist_erasedups.o -lhistory $(TERMCAP_LIB)
+
+hist_purgecmd$(EXEEXT): hist_purgecmd.o $(HISTORY_LIB)
+	$(PURIFY) $(CC) $(LDFLAGS) -o $@ hist_purgecmd.o -lhistory $(TERMCAP_LIB)
+
 clean mostlyclean:
-	$(RM) $(OBJECTS)
-	$(RM) $(EXECUTABLES) *.exe
+	$(RM) $(OBJECTS) $(OTHEROBJ)
+	$(RM) $(EXECUTABLES) $(OTHEREXE) *.exe
 
 distclean maintainer-clean: clean
 	$(RM) Makefile
@@ -131,13 +148,19 @@ rltest.o: rltest.c
 rl.o: rl.c
 rlversion.o: rlversion.c
 histexamp.o: histexamp.c
+hist_erasedups.o: hist_erasedups.c
+hist_purgecmd.o: hist_purgecmd.c
 rlcat.o: rlcat.c
 rlptytest.o: rlptytest.c
+rl-callbacktest.o: rl-callbacktest.c
 
 fileman.o: $(top_srcdir)/readline.h
 rltest.o: $(top_srcdir)/readline.h
 rl.o: $(top_srcdir)/readline.h
 rlversion.o: $(top_srcdir)/readline.h
 histexamp.o: $(top_srcdir)/history.h
+hist_erasedups.o: $(top_srcdir)/history.h
+hist_purgecmd.o: $(top_srcdir)/history.h
 rlcat.o: $(top_srcdir)/readline.h $(top_srcdir)/history.h
 rlptytest.o: $(top_srcdir)/readline.h $(top_srcdir)/history.h
+rl-callbacktest.o: $(top_srcdir)/readline.h $(top_srcdir)/history.h

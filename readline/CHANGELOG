@@ -1093,3 +1093,132 @@ xfree.c
 				   -----
 {examples,shlib}/Makefile.in
 	- Cygwin-based changes from Eric Blake <eblake@redhat.com>
+
+				 3/26/2011
+				 ---------
+Makefile.in
+	- don't ignore failures when building, installing, or cleaning in
+	  the shlib subdirectory.  Sample patch from Mike Frysinger
+	  <vapier@gentoo.org>
+
+shlib/Makefile.in
+	- split the install and uninstall targets into install-supported and
+	  install-unsupported targets that depend on the value of
+	  SHLIB_STATUS
+
+				    4/2
+				    ---
+{,shlib}/Makefile.in
+	- add dependency for callback.o/callback.so on xmalloc.h.  From
+	  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+{,doc,examples,shlib}/Makefile.in
+	- fix typo: htm target should be html.  From Jan Kratochvil
+	  <jan.kratochvil@redhat.com>
+	- remove `.' from VPATH.  From Jan Kratochvil
+	   <jan.kratochvil@redhat.com>
+
+examples/rlfe/configure.in
+	- quote AC_PROGRAM_SOURCE.  From Jan Kratochvil
+	   <jan.kratochvil@redhat.com>
+
+				   5/17
+				   ----
+config.h.in
+	- WCWIDTH_BROKEN: new define, picked up from bash, defined on systems
+	  where wcwidth returns 1 for Unicode combining characters
+
+				   11/28
+				   -----
+support/shlib-install
+	- make sure solaris2 systems make the installed shared library
+	  executable.  ldd warns about it otherwise.  Bug and fix from
+	  Tim Mooney <tim.mooney@ndsu.edu>
+
+examples/hist_erasedups.c
+	- new example program, shows how to erase duplicates from the history
+	  list
+
+examples/hist_purgecmd.c
+	- new example program, shows how to remove all entries matching a
+	  string or pattern from the history list
+
+				 1/12/2012
+				 ---------
+colors.[ch],parse-colors.[ch]}
+	- new files, part of color infrastructure support
+
+Makefile.in,shlib/Makefile.in
+	- arrange to have colors.o and parse-colors.o added to library
+	  (static and shared versions)
+
+{configure,config.h}.in
+	- check for stdbool.h, define HAVE_STDBOOL_H if found
+
+rldefs.h
+	- COLOR_SUPPORT: if defined, compile in colors.c and parse-colors.c
+	  for color support
+
+				   1/18
+				   ----
+
+{configure,config.h}.in
+        - new check: check for AUDIT_USER_TTY defined in <linux/audit.h>,
+          define HAVE_DECL_AUDIT_USER_TTY if both are found
+
+				    8/7
+				    ---
+configure.in
+	- AC_CANONICAL_BUILD: call to set the build_xxx variables
+	- use $build_os instead of $host_os to decide when DJGPP should run
+	  `pwd.exe' to figure out the build directory.  Report and fix from
+	  Yao Qi <yao@codesourcery.com>
+
+				   8/29
+				   ----
+configure.ac
+	- new name for configure.in
+
+MANIFEST,Makefile.in
+	- configure.in -> configure.ac
+
+				 1/5/2013
+				 --------
+configure.ac
+	- move version number up to 6.3
+
+				   1/31
+				   ----
+configure.ac
+	- use AC_CHECK_TOOL instead of AC_CHECK_PROG to check for ar, since it
+	  will find $host-prefixed versions of utilities.  Report and fix from
+	  Mike Frysinger <vapier@gentoo.org>
+
+				    3/4
+				    ---
+Makefile.in
+        - PACKAGE_TARNAME, docdir: new variables substituted by autoconf
+        - OTHER_DOCS,OTHER_INSTALLED_DOCS: new variables with auxiliary
+	  documentation files to be installed into $(docdir)
+        - install: add new rule to install $(OTHER_DOCS)
+        - uninstall: add new rule to uninstall $(docdir)/$(OTHER_INSTALLED_DOCS)
+
+				   4/29
+				   ----
+Makefile.in
+	- installdirs: make sure to create $(DESTDIR)$(docdir).  Report from
+	  <hiroo.hayashi@computer.org>
+
+				 1/27/2014
+				 ---------
+Makefile.in
+	- install-examples: should not depend on `shared', since the examples
+	  themselves are not built using shared libraries.  Report from
+	  <hiroo.hayashi@computer.org>
+
+support/shobj-conf
+	- [from bash] darwin: changed the install_name embedded into the
+	  shared library to contain only the major version number, not the
+	  minor one. The idea is that the minor versions should all be API/ABI
+	  compatible, and it is better to link automatically with the latest
+	  one.  Idea from Max Horn <max@quendi.de>

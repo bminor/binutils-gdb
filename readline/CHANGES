@@ -1,3 +1,142 @@
+This document details the changes between this version, readline-6.3, and the
+previous version, readline-6.2.
+
+1.  Changes to Readline
+
+a.  Fixed a bug that did not allow the `dd', `cc', or `yy' vi editing mode
+    commands to work on the entire line.
+
+b.  Fixed a bug that caused redisplay problems with prompts longer than 128
+    characters and history searches.
+
+c.  Fixed a bug that caused readline to try and run code to modify its idea
+    of the screen size in a signal handler context upon receiving a SIGWINCH.
+
+d.  Fixed a bug that caused the `meta' key to be enabled beyond the duration
+    of an individual call top readline().
+    
+e.  Added a workaround for a wcwidth bug in Mac OS X that caused readline's
+    redisplay to mishandle zero-width combining characters.
+
+f.  Fixed a bug that caused readline to `forget' part of a key sequence when
+    a multiple-key sequence caused it to break out of an incremental search.
+
+g.  Fixed bugs that caused readline to execute code in a signal handler
+    context if interrupted while reading from the file system during completion.
+
+h.  Fixed a bug that caused readline to `forget' part of a key sequence when
+    reading an unbound multi-character key sequence.
+
+i.  Fixed a bug that caused Readline's signal handlers to be installed beyond
+    the bounds of a single call to readline().
+
+j.  Fixed a bug that caused the `.' command to not redo the most recent `R'
+    command in vi mode.
+
+k.  Fixed a bug that caused ignoring case in completion matches to result in
+    readline using the wrong match.
+
+l.  Paren matching now works in vi insert mode.
+
+m.  Fix menu-completion to make show-all-if-ambiguous and menu-complete-display-prefix
+    work together.
+
+n.  Fixed a bug that didn't allow the `cc', `dd', or `yy' commands to be redone
+    in vi editing mode.
+
+o.  Fixed a bug that caused the filename comparison code to not compare
+    multibyte characters correctly when using case-sensitive or case-mapping
+    comparisons.
+
+p.  Fixed the input reading loop to call the input hook function only when there
+    is no terminal input available.
+
+q.  Fixed a bug that caused binding a macro to a multi-character key sequence
+    where the sequence and macro value share a common prefix to not perform
+    the macro replacement.
+
+r.  Fixed several redisplay errors with multibyte characters and prompts
+    containing invisible characters when using horizontal scrolling.
+
+s.  Fixed a bug that caused redisplay errors when trying to overwrite
+    existing characters using multibyte characters.
+
+t.  Fixed a bug in vi mode that caused the arrow keys to set the saved last
+    vi-mode command to the wrong value.
+
+u.  Fixed a bug that caused double-quoted strings to be scanned incorrectly
+    when being used as the value of a readline variable assignment.
+
+v.  Fixed a bug with vi mode that prevented `.' from repeating a command
+    entered on a previous line (command).
+
+w.  Fixed a bug that could cause completion to core dump if it was interrupted
+    by a signal.
+
+x. Fixed a bug that could cause readline to crash and seg fault attempting to
+   expand an empty history entry.
+
+y. Fixed a bug that caused display problems with multi-line prompts containing
+   invisible characters on multiple lines.
+   
+z. Fixed a bug that caused effects made by undoing changes to a history line to
+   be discarded.
+
+2.  New Features in Readline
+
+a.  Readline is now more responsive to SIGHUP and other fatal signals when
+    reading input from the terminal or performing word completion but no
+    longer attempts to run any not-allowable functions from a signal handler
+    context.
+
+b.  There are new bindable commands to search the history for the string of
+    characters between the beginning of the line and the point
+    (history-substring-search-forward, history-substring-search-backward)
+
+c.  Readline allows quoted strings as the values of variables when setting
+    them with `set'.  As a side effect, trailing spaces and tabs are ignored
+    when setting a string variable's value.
+
+d.  The history library creates a backup of the history file when writing it
+    and restores the backup on a write error.
+
+e.  New application-settable variable: rl_filename_stat_hook: a function called
+    with a filename before using it in a call to stat(2).  Bash uses it to
+    expand shell variables so things like $HOME/Downloads have a slash
+    appended.
+
+f.  New bindable function `print-last-kbd-macro', prints the most-recently-
+    defined keyboard macro in a reusable format.
+
+g.  New user-settable variable `colored-stats', enables use of colored text
+    to denote file types when displaying possible completions (colored analog
+    of visible-stats).
+
+h.  New user-settable variable `keyseq-timout', acts as an inter-character
+    timeout when reading input or incremental search strings.
+
+i.  New application-callable function: rl_clear_history. Clears the history list
+    and frees all readline-associated private data.
+
+j.  New user-settable variable, show-mode-in-prompt, adds a characters to the
+    beginning of the prompt indicating the current editing mode.
+
+k.  New application-settable variable: rl_input_available_hook; function to be
+    called when readline needs to check whether there is data available on its
+    input source.  The default hook checks rl_instream.
+
+l.  Readline calls an application-set event hook (rl_signal_event_hook) after
+    it gets a signal while reading input (read returns -1/EINTR but readline    
+    does not handle the signal immediately) to allow the application to handle
+    or otherwise note it.  Not currently called for SIGHUP or SIGTERM.
+    
+m.  If the user-settable variable `history-size' is set to a value less than
+    0, the history list size is unlimited.
+
+n.  When creating shared libraries on Mac OS X, the pathname written into the
+    library (install_name) no longer includes the minor version number.
+
+-------------------------------------------------------------------------------
 This document details the changes between this version, readline-6.2,
 and the previous version, readline-6.1.
 

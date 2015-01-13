@@ -5,7 +5,7 @@ dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2009 Free Software Foundation, Inc.
+# Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -20,23 +20,19 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Readline 6.2, version 2.67])
+AC_REVISION([for Readline 6.3, version 2.73])
 
-m4_include([../config/override.m4])
-
-AC_INIT(readline, 6.2, bug-readline@gnu.org)
+AC_INIT(readline, 6.3, bug-readline@gnu.org)
 
 dnl make sure we are using a recent autoconf version
 AC_PREREQ(2.50)
 
 AC_CONFIG_SRCDIR(readline.h)
-dnl GDB LOCAL
-dnl AC_CONFIG_AUX_DIR(./support)
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
+AC_CONFIG_AUX_DIR(./support)
 AC_CONFIG_HEADERS(config.h)
 
 dnl update the value of RL_READLINE_VERSION in readline.h when this changes
-LIBVERSION=6.2
+LIBVERSION=6.3
 
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
@@ -62,10 +58,10 @@ fi
 dnl option parsing for optional features
 opt_multibyte=yes
 opt_static_libs=yes
-opt_shared_libs=no
+opt_shared_libs=yes
 
 AC_ARG_ENABLE(multibyte, AC_HELP_STRING([--enable-multibyte], [enable multibyte characters if OS supports them]), opt_multibyte=$enableval)
-dnl AC_ARG_ENABLE(shared, AC_HELP_STRING([--enable-shared], [build shared libraries [[default=YES]]]), opt_shared_libs=$enableval)
+AC_ARG_ENABLE(shared, AC_HELP_STRING([--enable-shared], [build shared libraries [[default=YES]]]), opt_shared_libs=$enableval)
 AC_ARG_ENABLE(static, AC_HELP_STRING([--enable-static], [build static libraries [[default=YES]]]), opt_static_libs=$enableval)
 
 if test $opt_multibyte = no; then
@@ -119,7 +115,7 @@ test -n "$GCC" && test -n "$auto_cflags" && CFLAGS="$CFLAGS -O"
 
 AC_PROG_GCC_TRADITIONAL
 AC_PROG_INSTALL
-AC_CHECK_PROG(AR, ar, , ar)
+AC_CHECK_TOOL(AR, ar)
 dnl Set default for ARFLAGS, since autoconf does not have a macro for it.
 dnl This allows people to set it when running configure or make
 test -n "$ARFLAGS" || ARFLAGS="cr"
@@ -151,7 +147,8 @@ AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
 
 AC_FUNC_STRCOLL
 
-AC_CHECK_HEADERS(fcntl.h unistd.h stdlib.h varargs.h stdarg.h string.h strings.h \
+AC_CHECK_HEADERS(fcntl.h unistd.h stdlib.h varargs.h stdarg.h stdbool.h \
+		string.h strings.h \
 		limits.h locale.h pwd.h memory.h termcap.h termios.h termio.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h)
 
@@ -185,6 +182,8 @@ BASH_CHECK_SPEED_T
 BASH_STRUCT_WINSIZE
 BASH_STRUCT_DIRENT_D_INO
 BASH_STRUCT_DIRENT_D_FILENO
+
+AC_CHECK_DECLS([AUDIT_USER_TTY],,, [[#include <linux/audit.h>]])
 
 dnl yuck
 case "$host_os" in
