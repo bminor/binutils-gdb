@@ -1,3 +1,9 @@
+2015-01-13  Thomas Preud'homme <thomas.preudhomme@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Added relocs-257-symbolic-func test.
+	* ld-aarch64/relocs-257-symbolic-func.d: New file.
+	* ld-aarch64/relocs-257-symbolic-func.s: Likewise.
+
 2015-07-25  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/symbolic-func.s,
