@@ -1,5 +1,10 @@
 2015-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.9 branch created (92fc2e6978d9a7c8324c7e851dbee59e22ec7a37):
+	* version.in: Bump version to 7.9.50.DATE-cvs.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* nat/linux-procfs.c (linux_proc_attach_tgid_threads):
 	Remove trailing new-line in argument of call to warning.
 
