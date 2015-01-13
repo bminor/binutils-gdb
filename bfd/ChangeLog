@@ -1,3 +1,7 @@
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* development.sh (development): Set to false.
+
 2015-01-12  Terry Guo  <terry.guo@arm.com>
 
 	* elflink.c (_bfd_elf_gc_mark_debug_special_section_group): New
