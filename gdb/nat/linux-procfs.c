@@ -212,7 +212,7 @@ linux_proc_attach_tgid_threads (pid_t pid,
   dir = opendir (pathname);
   if (dir == NULL)
     {
-      warning (_("Could not open /proc/%ld/task.\n"), (long) pid);
+      warning (_("Could not open /proc/%ld/task."), (long) pid);
       return;
     }
 
