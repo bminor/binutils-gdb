@@ -1,3 +1,29 @@
+2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR corefiles/17808:
+	* gdbarch.sh (iterate_over_regset_sections_cb): Document this
+	function type, particularly its SIZE parameter.
+	* gdbarch.h: Regenerate.
+	* amd64-tdep.c (amd64_supply_fpregset): In gdb_assert, compare
+	actual against required size using ">=" instead of "==".
+	(amd64_collect_fpregset): Likewise.
+	* i386-tdep.c (i386_supply_gregset): Likewise.
+	(i386_collect_gregset): Likewise.
+	(i386_supply_fpregset): Likewise.
+	(i386_collect_fpregset): Likewise.
+	* mips-linux-tdep.c (mips_supply_gregset_wrapper): Likewise.
+	(mips_fill_gregset_wrapper): Likewise.
+	(mips_supply_fpregset_wrapper): Likewise.
+	(mips_fill_fpregset_wrapper): Likewise.
+	(mips64_supply_gregset_wrapper): Likewise.
+	(mips64_fill_gregset_wrapper): Likewise.
+	(mips64_supply_fpregset_wrapper): Likewise.
+	(mips64_fill_fpregset_wrapper): Likewise.
+	* mn10300-linux-tdep.c (am33_supply_gregset_method): Likewise.
+	(am33_supply_fpregset_method): Likewise.
+	(am33_collect_gregset_method): Likewise.
+	(am33_collect_fpregset_method): Likewise.
+
 2015-02-04  Doug Evans  <dje@google.com>
 	    Pedro Alves  <palves@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
