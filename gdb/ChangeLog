@@ -1,3 +1,9 @@
+2015-01-14  Pedro Alves  <palves@redhat.com>
+
+	PR cli/17828
+	* infrun.c (reinstall_readline_callback_handler_cleanup): Don't
+	reinstall if the interpreter is sync.
+
 2014-12-31  Joel Brobecker  <brobecker@adacore.com>
 
 	PR backtrace/16215:

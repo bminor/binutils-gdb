@@ -2861,6 +2861,16 @@ wait_for_inferior (void)
 static void
 reinstall_readline_callback_handler_cleanup (void *arg)
 {
+  if (!interpreter_async)
+    {
+      /* We're not going back to the top level event loop yet.  Don't
+	 install the readline callback, as it'd prep the terminal,
+	 readline-style (raw, noecho) (e.g., --batch).  We'll install
+	 it the next time the prompt is displayed, when we're ready
+	 for input.  */
+      return;
+    }
+
   if (async_command_editing_p && !sync_execution)
     gdb_rl_callback_handler_reinstall ();
 }
