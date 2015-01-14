@@ -299,6 +299,8 @@ run_dump_test "movw-shared-1"
 run_dump_test "movw-shared-2"
 run_dump_test "movw-shared-3"
 run_dump_test "movw-shared-4"
+run_dump_test "rel32-reject"
+run_dump_test "rel32-reject-pie"
 
 # Exclude non-ARM-EABI targets.
 

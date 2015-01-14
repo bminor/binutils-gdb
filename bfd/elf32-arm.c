@@ -8416,6 +8416,21 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  Elf_Internal_Rela outrel;
 	  bfd_boolean skip, relocate;
 
+	  if ((r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI)
+	      && !h->def_regular)
+	    {
+	      char *v = _("shared object");
+
+	      if (info->executable)
+		v = _("PIE executable");
+
+	      (*_bfd_error_handler)
+		(_("%B: relocation %s against external or undefined symbol `%s'"
+		   " can not be used when making a %s; recompile with -fPIC"), input_bfd,
+		 elf32_arm_howto_table_1[r_type].name, h->root.root.string, v);
+	      return bfd_reloc_notsupported;
+	    }
+
 	  *unresolved_reloc_p = FALSE;
 
 	  if (sreloc == NULL && globals->root.dynamic_sections_created)
