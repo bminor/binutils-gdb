@@ -69,7 +69,7 @@
 #include "skip.h"
 #include "ax-gdb.h"
 #include "dummy-frame.h"
-
+#include "interps.h"
 #include "format.h"
 
 /* readline include files */
@@ -4593,7 +4593,7 @@ bpstat_do_actions_1 (bpstat *bsp)
 
       if (breakpoint_proceeded)
 	{
-	  if (target_can_async_p ())
+	  if (interpreter_async && target_can_async_p ())
 	    /* If we are in async mode, then the target might be still
 	       running, not stopped at any breakpoint, so nothing for
 	       us to do here -- just return to the event loop.  */
