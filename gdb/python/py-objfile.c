@@ -438,12 +438,18 @@ objfpy_lookup_objfile_by_name (const char *name)
 
   ALL_OBJFILES (objfile)
     {
+      const char *filename;
+
       if ((objfile->flags & OBJF_NOT_FILENAME) != 0)
 	continue;
       /* Don't return separate debug files.  */
       if (objfile->separate_debug_objfile_backlink != NULL)
 	continue;
-      if (compare_filenames_for_search (objfile_name (objfile), name))
+
+      filename = objfile_filename (objfile);
+      if (filename != NULL && compare_filenames_for_search (filename, name))
+	return objfile;
+      if (compare_filenames_for_search (objfile->original_name, name))
 	return objfile;
     }
 

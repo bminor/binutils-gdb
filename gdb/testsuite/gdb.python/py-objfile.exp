@@ -115,3 +115,14 @@ if { [get_python_valueof "sep_objfile.build_id" "None"] != "None" } {
     gdb_test "python print (gdb.lookup_objfile (sep_objfile.build_id, by_build_id=True))" \
 	"Objfile not found\\.\r\n${python_error_text}"
 }
+
+# An objfile that was a symlink to a differently named file is still
+# findable with its original name.
+set symlink_binary [standard_output_file "symlink-binary"]
+remote_exec host "rm -f ${symlink_binary}"
+remote_exec host "ln -sf ${testfile} ${symlink_binary}"
+if [remote_file host exists "${symlink_binary}"] {
+    clean_restart "${symlink_binary}"
+    gdb_test "python print (gdb.lookup_objfile (\"${symlink_binary}\").filename)" \
+	"${testfile}" "gdb.lookup_objfile of symlinked binary"
+}
