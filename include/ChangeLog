@@ -1,3 +1,7 @@
+2015-01-14  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* libiberty.h: Merge from GCC.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
@@ -68,9 +72,17 @@
 	* elf/mips.h (AFL_EXT_OCTEON3): Define.
 	INSN_OCTEON3, CPU_OCTEON3): Define.
 
+2014-10-28  Yury Gribov  <y.gribov@samsung.com>
+
+	* libiberty.h (strtol, strtoul, strtoll, strtoull): New prototypes.
+
 2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elf/mips.h (AFL_ASE_MASK): Define.
+
+2014-10-15  David Malcolm  <dmalcolm@redhat.com>
+
+	* libiberty.h (choose_tmpdir): New prototype.
 
 2014-09-26  Max Ostapenko  <m.ostapenko@partner.samsung.com>
 
