@@ -690,8 +690,7 @@ i386_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg", 68, &i386_gregset, NULL, cb_data);
 
   if (tdep->xcr0 & X86_XSTATE_AVX)
-    /* Use max size for writing, accept any size when reading.  */
-    cb (".reg-xstate", regcache ? X86_XSTATE_MAX_SIZE : 0,
+    cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0),
 	&i386_linux_xstateregset, "XSAVE extended state", cb_data);
   else if (tdep->xcr0 & X86_XSTATE_SSE)
     cb (".reg-xfp", 512, &i386_fpregset, "extended floating-point",

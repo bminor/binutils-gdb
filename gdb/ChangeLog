@@ -1,5 +1,14 @@
 2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* amd64-linux-tdep.c (amd64_linux_iterate_over_regset_sections):
+	For ".reg-xstate", explicitly specify the requested section size
+	via X86_XSTATE_SIZE instead of just 0 on input and
+	X86_XSTATE_MAX_SIZE on output.
+	* i386-linux-tdep.c (i386_linux_iterate_over_regset_sections):
+	Likewise.
+
+2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	PR corefiles/17808:
 	* gdbarch.sh (iterate_over_regset_sections_cb): Document this
 	function type, particularly its SIZE parameter.
