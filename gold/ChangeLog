@@ -1,3 +1,14 @@
+2015-01-14  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* mips.cc (reloc_high): Add r_sym.
+	(Mips_relocate_functions::relhi16): Add r_sym parameter. Pass r_sym to
+	reloc_high constructor.
+	(Mips_relocate_functions::relgot16_local): Likewise.
+	(Mips_relocate_functions::rello16): Add r_sym parameter. Use r_sym and
+	r_type to decide whether LO16 matches HI16.
+	(Target_mips::Relocate::relocate): Pass r_sym to calls to relhi16,
+	rello16 and relgot16_local.
+
 2015-01-09  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::set_segment_offsets): Don't align start of segment
