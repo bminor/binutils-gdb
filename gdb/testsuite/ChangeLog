@@ -1,4 +1,12 @@
 2015-01-14  Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/17525
+	* gdb.base/bp-cmds-execution-x-script.c: New file.
+	* gdb.base/bp-cmds-execution-x-script.exp: New file.
+	* gdb.base/bp-cmds-execution-x-script.gdb: New file.
+
+2015-01-14  Pedro Alves  <palves@redhat.com>
 
 	PR cli/17828
 	* gdb.base/batch-preserve-term-settings.c: New file.

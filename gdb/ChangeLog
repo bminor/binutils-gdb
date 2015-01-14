@@ -1,5 +1,12 @@
 2015-01-14  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17525
+	* breakpoint.c: Include "interps.h".
+	(bpstat_do_actions_1): Also check whether the interpreter is
+	async.
+
+2015-01-14  Pedro Alves  <palves@redhat.com>
+
 	PR cli/17828
 	* infrun.c (reinstall_readline_callback_handler_cleanup): Don't
 	reinstall if the interpreter is sync.
