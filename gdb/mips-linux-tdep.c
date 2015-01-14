@@ -163,7 +163,7 @@ mips_supply_gregset_wrapper (const struct regset *regset,
 			     struct regcache *regcache,
 			     int regnum, const void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips_elf_gregset_t));
+  gdb_assert (len >= sizeof (mips_elf_gregset_t));
 
   mips_supply_gregset (regcache, (const mips_elf_gregset_t *)gregs);
 }
@@ -231,7 +231,7 @@ mips_fill_gregset_wrapper (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips_elf_gregset_t));
+  gdb_assert (len >= sizeof (mips_elf_gregset_t));
 
   mips_fill_gregset (regcache, (mips_elf_gregset_t *)gregs, regnum);
 }
@@ -268,7 +268,7 @@ mips_supply_fpregset_wrapper (const struct regset *regset,
 			      struct regcache *regcache,
 			      int regnum, const void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips_elf_fpregset_t));
+  gdb_assert (len >= sizeof (mips_elf_fpregset_t));
 
   mips_supply_fpregset (regcache, (const mips_elf_fpregset_t *)gregs);
 }
@@ -311,7 +311,7 @@ mips_fill_fpregset_wrapper (const struct regset *regset,
 			    const struct regcache *regcache,
 			    int regnum, void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips_elf_fpregset_t));
+  gdb_assert (len >= sizeof (mips_elf_fpregset_t));
 
   mips_fill_fpregset (regcache, (mips_elf_fpregset_t *)gregs, regnum);
 }
@@ -413,7 +413,7 @@ mips64_supply_gregset_wrapper (const struct regset *regset,
 			       struct regcache *regcache,
 			       int regnum, const void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips64_elf_gregset_t));
+  gdb_assert (len >= sizeof (mips64_elf_gregset_t));
 
   mips64_supply_gregset (regcache, (const mips64_elf_gregset_t *)gregs);
 }
@@ -484,7 +484,7 @@ mips64_fill_gregset_wrapper (const struct regset *regset,
 			     const struct regcache *regcache,
 			     int regnum, void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips64_elf_gregset_t));
+  gdb_assert (len >= sizeof (mips64_elf_gregset_t));
 
   mips64_fill_gregset (regcache, (mips64_elf_gregset_t *)gregs, regnum);
 }
@@ -533,7 +533,7 @@ mips64_supply_fpregset_wrapper (const struct regset *regset,
 				struct regcache *regcache,
 				int regnum, const void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips64_elf_fpregset_t));
+  gdb_assert (len >= sizeof (mips64_elf_fpregset_t));
 
   mips64_supply_fpregset (regcache, (const mips64_elf_fpregset_t *)gregs);
 }
@@ -611,7 +611,7 @@ mips64_fill_fpregset_wrapper (const struct regset *regset,
 			      const struct regcache *regcache,
 			      int regnum, void *gregs, size_t len)
 {
-  gdb_assert (len == sizeof (mips64_elf_fpregset_t));
+  gdb_assert (len >= sizeof (mips64_elf_fpregset_t));
 
   mips64_fill_fpregset (regcache, (mips64_elf_fpregset_t *)gregs, regnum);
 }

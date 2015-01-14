@@ -90,7 +90,7 @@ am33_supply_gregset_method (const struct regset *regset,
   const mn10300_elf_greg_t *regp = (const mn10300_elf_greg_t *) gregs;
   int i;
 
-  gdb_assert (len == sizeof (mn10300_elf_gregset_t));
+  gdb_assert (len >= sizeof (mn10300_elf_gregset_t));
 
   switch (regnum) {
   case E_D0_REGNUM:
@@ -245,7 +245,7 @@ am33_supply_fpregset_method (const struct regset *regset,
 {
   const mn10300_elf_fpregset_t *fpregset = fpregs;
 
-  gdb_assert (len == sizeof (mn10300_elf_fpregset_t));
+  gdb_assert (len >= sizeof (mn10300_elf_fpregset_t));
 
   if (regnum == -1)
     {
@@ -278,7 +278,7 @@ am33_collect_gregset_method (const struct regset *regset,
   mn10300_elf_gregset_t *regp = gregs;
   int i;
 
-  gdb_assert (len == sizeof (mn10300_elf_gregset_t));
+  gdb_assert (len >= sizeof (mn10300_elf_gregset_t));
 
   switch (regnum) {
   case E_D0_REGNUM:
@@ -425,7 +425,7 @@ am33_collect_fpregset_method (const struct regset *regset,
 {
   mn10300_elf_fpregset_t *fpregset = fpregs;
 
-  gdb_assert (len == sizeof (mn10300_elf_fpregset_t));
+  gdb_assert (len >= sizeof (mn10300_elf_fpregset_t));
 
   if (regnum == -1)
     {
