@@ -1,3 +1,7 @@
+2015-01-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_var_array: New testcase.
+
 2015-01-27  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-objfile.exp: Add tests for objfile.username.

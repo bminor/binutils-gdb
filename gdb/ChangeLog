@@ -1,5 +1,11 @@
 2015-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-varobj.c (ada_varobj_get_array_number_of_children):
+	Return zero if PARENT_VALUE is NULL and parent_type's
+	range type is dynamic.
+
+2015-01-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.c (is_dynamic_type_internal) <TYPE_CODE_RANGE>: Return
 	nonzero if the type's subtype is dynamic.
 	(resolve_dynamic_range): Also resolve the range's subtype.
