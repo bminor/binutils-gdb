@@ -1,5 +1,20 @@
 2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* regset.h (struct regset): Add flags field.
+	(REGSET_VARIABLE_SIZE): New value for a regset's flags field.
+	* corelow.c (get_core_register_section): Add warning if the size
+	exceeds the requested size and the regset does not have the
+	REGSET_VARIABLE_SIZE flag set.
+	* alphanbsd-tdep.c (alphanbsd_gregset): Add REGSET_VARIABLE_SIZE
+	flag.
+	* armbsd-tdep.c (armbsd_gregset): Likewise.
+	* hppa-hpux-tdep.c (hppa_hpux_regset): Likewise.
+	* hppaobsd-tdep.c (hppaobsd_gregset): Likewise.
+	* m68kbsd-tdep.c (m68kbsd_gregset): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_gregset): Likewise.
+
+2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* amd64-linux-tdep.c (amd64_linux_iterate_over_regset_sections):
 	For ".reg-xstate", explicitly specify the requested section size
 	via X86_XSTATE_SIZE instead of just 0 on input and

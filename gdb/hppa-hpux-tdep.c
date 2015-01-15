@@ -1367,7 +1367,9 @@ hppa_hpux_supply_save_state (const struct regset *regset,
 static const struct regset hppa_hpux_regset =
 {
   NULL,
-  hppa_hpux_supply_save_state
+  hppa_hpux_supply_save_state,
+  NULL,
+  REGSET_VARIABLE_SIZE
 };
 
 static void
