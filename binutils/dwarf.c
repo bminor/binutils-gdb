@@ -441,6 +441,16 @@ append_logical (void)
 	  xrealloc (logicals_table, logicals_allocated * sizeof (SMR));
     }
   logicals_table[logicals_count++] = state_machine_regs;
+  printf (_("\t\tLogical %d: 0x%s[%d] file %d line %d discrim %d context %d subprog %d is_stmt %d\n"),
+	  logicals_count,
+	  dwarf_vmatoa ("x", state_machine_regs.address),
+	  state_machine_regs.op_index,
+	  state_machine_regs.file,
+	  state_machine_regs.line,
+	  state_machine_regs.discriminator,
+	  state_machine_regs.context,
+	  state_machine_regs.subprogram,
+	  state_machine_regs.is_stmt);
 }
 
 /* Handled an extend line op.
@@ -3227,8 +3237,6 @@ display_line_program (unsigned char *start, unsigned char *end,
 		   /* DW_LNS_set_context */
 		   state_machine_regs.context = read_uleb128 (data, & bytes_read, end);
 		   data += bytes_read;
-		   state_machine_regs.subprogram = read_uleb128 (data, & bytes_read, end);
-		   data += bytes_read;
 		   printf (_("  Set context to %d\n"), state_machine_regs.context);
 		 }
 	       else
@@ -3260,8 +3268,6 @@ display_line_program (unsigned char *start, unsigned char *end,
 	       break;
 
 	     case DW_LNS_pop_context:
-	       uladv = read_uleb128 (data, & bytes_read, end);
-	       data += bytes_read;
 	       logical = state_machine_regs.context;
 	       printf (_("  Pop context to logical %d\n"), logical);
 	       if (logical - 1 < logicals_count)
