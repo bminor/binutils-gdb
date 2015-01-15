@@ -29,7 +29,6 @@
 
 #include <sys/types.h>
 #include <limits.h>
-#include <stdint.h>
 
 /* The libdecnumber library, on which GDB depends, includes a header file
    called gstdint.h instead of relying directly on stdint.h.  GDB, on the

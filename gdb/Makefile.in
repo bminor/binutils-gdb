@@ -961,7 +961,7 @@ common/print-utils.h common/rsp-low.h nat/x86-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
-common/common-regcache.h fbsd-tdep.h
+common/common-regcache.h fbsd-tdep.h nat/linux-personality.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -2280,6 +2280,10 @@ mips-linux-watch.o: ${srcdir}/nat/mips-linux-watch.c
 
 ppc-linux.o: ${srcdir}/nat/ppc-linux.c
 	$(COMPILE) $(srcdir)/nat/ppc-linux.c
+	$(POSTCOMPILE)
+
+linux-personality.o: ${srcdir}/nat/linux-personality.c
+	$(COMPILE) $(srcdir)/nat/linux-personality.c
 	$(POSTCOMPILE)
 
 #

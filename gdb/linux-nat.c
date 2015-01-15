@@ -32,6 +32,7 @@
 #include "linux-nat.h"
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"
+#include "nat/linux-personality.h"
 #include "linux-fork.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
@@ -69,13 +70,6 @@
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
 #endif
-
-#ifdef HAVE_PERSONALITY
-# include <sys/personality.h>
-# if !HAVE_DECL_ADDR_NO_RANDOMIZE
-#  define ADDR_NO_RANDOMIZE 0x0040000
-# endif
-#endif /* HAVE_PERSONALITY */
 
 /* This comment documents high-level logic of this file.
 
@@ -1103,45 +1097,18 @@ linux_nat_create_inferior (struct target_ops *ops,
 			   char *exec_file, char *allargs, char **env,
 			   int from_tty)
 {
-#ifdef HAVE_PERSONALITY
-  int personality_orig = 0, personality_set = 0;
-#endif /* HAVE_PERSONALITY */
+  struct cleanup *restore_personality
+    = maybe_disable_address_space_randomization (disable_randomization);
 
   /* The fork_child mechanism is synchronous and calls target_wait, so
      we have to mask the async mode.  */
-
-#ifdef HAVE_PERSONALITY
-  if (disable_randomization)
-    {
-      errno = 0;
-      personality_orig = personality (0xffffffff);
-      if (errno == 0 && !(personality_orig & ADDR_NO_RANDOMIZE))
-	{
-	  personality_set = 1;
-	  personality (personality_orig | ADDR_NO_RANDOMIZE);
-	}
-      if (errno != 0 || (personality_set
-			 && !(personality (0xffffffff) & ADDR_NO_RANDOMIZE)))
-	warning (_("Error disabling address space randomization: %s"),
-		 safe_strerror (errno));
-    }
-#endif /* HAVE_PERSONALITY */
 
   /* Make sure we report all signals during startup.  */
   linux_nat_pass_signals (ops, 0, NULL);
 
   linux_ops->to_create_inferior (ops, exec_file, allargs, env, from_tty);
 
-#ifdef HAVE_PERSONALITY
-  if (personality_set)
-    {
-      errno = 0;
-      personality (personality_orig);
-      if (errno != 0)
-	warning (_("Error restoring address space randomization: %s"),
-		 safe_strerror (errno));
-    }
-#endif /* HAVE_PERSONALITY */
+  do_cleanups (restore_personality);
 }
 
 /* Callback for linux_proc_attach_tgid_threads.  Attach to PTID if not
