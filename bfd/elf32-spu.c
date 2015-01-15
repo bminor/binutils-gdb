@@ -151,7 +151,14 @@ spu_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   enum elf_spu_reloc_type r_type;
 
   r_type = (enum elf_spu_reloc_type) ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < R_SPU_max);
+  /* PR 17512: file: 90c2a92e.  */
+  if (r_type >= R_SPU_max)
+    {
+      (*_bfd_error_handler) (_("%A: unrecognised SPU reloc number: %d"),
+			     abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      r_type = R_SPU_NONE;
+    }
   cache_ptr->howto = &elf_howto_table[(int) r_type];
 }
 

@@ -623,7 +623,10 @@ bfd_perform_relocation (bfd *abfd,
       /* PR 17512: file: c146ab8b.
 	 PR 17512: file: 46dff27f.
 	 Include the size of the reloc in the test for out of range addresses.  */
-      - bfd_get_reloc_size (howto))
+      - bfd_get_reloc_size (howto)
+      /* PR 17512: file: 38e53ebf
+	 Add make sure that there is enough room for the relocation to be applied.  */
+      || bfd_get_reloc_size (howto) > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -7691,7 +7694,11 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		  goto error_return;
 
 		default:
-		  abort ();
+		  /* PR 17512; file: 90c2a92e.
+		     Report unexpected results, without aborting.  */
+		  link_info->callbacks->einfo
+		    (_("%X%P: %B(%A): relocation \"%R\" returns an unrecognized value %x\n"),
+		     abfd, input_section, * parent, r);
 		  break;
 		}
 

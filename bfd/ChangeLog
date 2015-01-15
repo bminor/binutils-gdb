@@ -1,5 +1,31 @@
 2015-01-15  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* elf-m10300.c (mn10300_info_to_howto): Replace assertion with an
+	error message.  Never return an invalid howto pointer.
+	* elf32-cr16.c (cr16_info_to_howto): Likewise.
+	* elf32-crx.c (elf_crx_info_to_howto): Likewise.
+	* elf32-i370.c (i370_elf_info_to_howto): Likewise.
+	* elf32-mcore.c (mcore_elf_info_to_howto): Likewise.
+	* elf32-microblaze.c (microblaze_elf_info_to_howto): Likewise.
+	* elf32-mips.c (mips_elf32_rtype_to_howto): Likewise.
+	* elf32-pj.c (pj_elf_info_to_howto): Likewise.
+	* elf32-ppc.c (ppc_elf_info_to_howto): Likewise.
+	* elf32-spu.c (spu_elf_info_to_howto): Likewise.
+	* elf32-v850.c (v850_elf_info_to_howto_rela): Likewise.
+	* elf32-vax.c (rtype_to_howto): Likewise.
+	* elf64-alpha.c (elf64_alpha_info_to_howto): Likewise.
+	* elf64-mips.c (mips_elf64_rtype_to_howto): Likewise.
+	* elfn32-mips.c (sh_elf_info_to_howto): Likewise.
+	* elf32-sh.c (sh_elf_info_to_howto): Likewise.
+	(sh_elf_reloc): Check that the reloc is in range.
+	* reloc.c (bfd_perform_relocation): Check that the section is big
+	enough for the entire reloc.
+	(bfd_generic_get_relocated_section_contents): Report unexpected
+	return values from perform_reloc.
+
+2015-01-15  Nick Clifton  <nickc@redhat.com>
+
 	* elf32-msp430.c (msp430_elf_relax_section): Skip unhandled
 	relocs.  Include PC-relative adjustment for R_MSP430X_ABS16
 	relaxation.
