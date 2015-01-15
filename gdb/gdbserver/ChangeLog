@@ -1,3 +1,11 @@
+2015-01-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (posix-strerror.o): New rule.
+	(mingw-strerror.o): Likewise.
+	* configure: Regenerated.
+	* configure.ac: Source file ../common/common.host.  Initialize new
+	variable srv_host_obs.  Add srv_host_obs to GDBSERVER_DEPFILES.
+
 2015-01-14  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (SFILES): Add nat/ppc-linux.c.

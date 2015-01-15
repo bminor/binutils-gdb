@@ -1,4 +1,4 @@
-/* Host support routines for MinGW, for GDB, the GNU debugger.
+/* Safe version of strerror for POSIX systems for GDB, the GNU debugger.
 
    Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
@@ -17,29 +17,22 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
-#include "event-loop.h"
+#include "common-defs.h"
 
-#include "gdb_select.h"
+/* Implementation of safe_strerror as defined in common-utils.h.  */
 
-/* Wrapper for select.  Nothing special needed on POSIX platforms.  */
-
-int
-gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
-	    struct timeval *timeout)
+char *
+safe_strerror (int errnum)
 {
-  return select (n, readfds, writefds, exceptfds, timeout);
-}
+  char *msg;
 
-/* Wrapper for the body of signal handlers.  Nothing special needed on
-   POSIX platforms.  */
+  msg = strerror (errnum);
+  if (msg == NULL)
+    {
+      static char buf[32];
 
-void
-gdb_call_async_signal_handler (struct async_signal_handler *handler,
-			       int immediate_p)
-{
-  if (immediate_p)
-    call_async_signal_handler (handler);
-  else
-    mark_async_signal_handler (handler);
+      xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
+      msg = buf;
+    }
+  return (msg);
 }

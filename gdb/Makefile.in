@@ -1680,7 +1680,7 @@ ALLDEPFILES = \
 	m68klinux-nat.c m68klinux-tdep.c \
 	m88k-tdep.c m88kbsd-nat.c \
 	microblaze-tdep.c microblaze-linux-tdep.c \
-	mingw-hdep.c \
+	mingw-hdep.c common/mingw-strerror.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-sde-tdep.c \
 	mips-tdep.c \
@@ -1690,7 +1690,7 @@ ALLDEPFILES = \
 	nios2-tdep.c nios2-linux-tdep.c \
 	nbsd-nat.c nbsd-tdep.c obsd-nat.c obsd-tdep.c \
 	somread.c solib-som.c \
-	posix-hdep.c \
+	posix-hdep.c common/posix-strerror.c \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c ppc64-tdep.c \
 	ppcfbsd-nat.c ppcfbsd-tdep.c \
 	ppcnbsd-nat.c ppcnbsd-tdep.c \
@@ -2225,6 +2225,14 @@ cleanups.o: ${srcdir}/common/cleanups.c
 
 common-exceptions.o: ${srcdir}/common/common-exceptions.c
 	$(COMPILE) $(srcdir)/common/common-exceptions.c
+	$(POSTCOMPILE)
+
+posix-strerror.o: ${srcdir}/common/posix-strerror.c
+	$(COMPILE) $(srcdir)/common/posix-strerror.c
+	$(POSTCOMPILE)
+
+mingw-strerror.o: ${srcdir}/common/mingw-strerror.c
+	$(COMPILE) $(srcdir)/common/mingw-strerror.c
 	$(POSTCOMPILE)
 
 #

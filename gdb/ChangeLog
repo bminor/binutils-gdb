@@ -1,3 +1,27 @@
+2015-01-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Including common/mingw-strerror.c and
+	common/posix-strerror.c.
+	(posix-strerror.o): New rule.
+	(mingw-strerror.o): Likewise.
+	* common/common-utils.h (safe_strerror): Move prototype to here,
+	from utils.h.
+	* common/common.host: New file.
+	* common/mingw-strerror.c: Likewise.
+	* common/posix-strerror.c: Likewise.
+	* configure: Regenerated.
+	* configure.ac: Source common/common.host.  Add variable
+	common_host_obs to gdb_host_obs.
+	* contrib/ari/gdb_ari.sh: Mention gdb/common/mingw-strerror.c and
+	gdb/common/posix-strerror.c when warning about the use of
+	strerror.
+	* mingw-hdep.c (safe_strerror): Remove definition; move it to
+	common/mingw-strerror.c.
+	* posix-hdep.c (safe_strerror): Remove definition; move it to
+	common/posix-hdep.c.
+	* utils.h (safe_strerror): Remove prototype; move to
+	common/common-utils.h.
+
 2015-01-15  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.8.2 released.

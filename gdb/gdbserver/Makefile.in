@@ -518,6 +518,12 @@ rsp-low.o: ../common/rsp-low.c
 common-utils.o: ../common/common-utils.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+posix-strerror.o: ../common/posix-strerror.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+mingw-strerror.o: ../common/mingw-strerror.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 vec.o: ../common/vec.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
