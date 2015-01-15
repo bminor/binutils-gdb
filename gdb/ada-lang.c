@@ -2928,8 +2928,19 @@ ada_array_bound_from_type (struct type *arr_type, int n, int which)
   else
     type = arr_type;
 
-  index_type_desc = ada_find_parallel_type (type, "___XA");
-  ada_fixup_array_indexes_type (index_type_desc);
+  if (TYPE_FIXED_INSTANCE (type))
+    {
+      /* The array has already been fixed, so we do not need to
+	 check the parallel ___XA type again.  That encoding has
+	 already been applied, so ignore it now.  */
+      index_type_desc = NULL;
+    }
+  else
+    {
+      index_type_desc = ada_find_parallel_type (type, "___XA");
+      ada_fixup_array_indexes_type (index_type_desc);
+    }
+
   if (index_type_desc != NULL)
     index_type = to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, n - 1),
 				      NULL);
