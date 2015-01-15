@@ -1,3 +1,9 @@
+2015-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17847
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Don't complain
+	about -fPIC if the symbol is undefined when building executable.
+
 2015-01-15  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
