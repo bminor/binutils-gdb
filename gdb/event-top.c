@@ -667,7 +667,7 @@ command_line_handler (char *rl)
 
   /* Add line to history if appropriate.  */
   if (*linebuffer && input_from_terminal_p ())
-    add_history (linebuffer);
+    gdb_add_history (linebuffer);
 
   /* Note: lines consisting solely of comments are added to the command
      history.  This is useful when you type a command, and then

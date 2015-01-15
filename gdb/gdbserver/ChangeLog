@@ -1,3 +1,24 @@
+2015-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (SFILES): Add nat/ppc-linux.c.
+	(ppc-linux.o): New rule.
+	* configure.srv (powerpc*-*-linux*): Add ppc-linux.o.
+	* configure.ac: AC_CHECK_FUNCS(getauxval).
+	* config.in: Re-generated.
+	* configure: Re-generated.
+	* linux-ppc-low.c (ppc_arch_setup) [__powerpc64__]: Call
+	ppc64_64bit_inferior_p
+
+2015-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* linux-ppc-low.c: Include "nat/ppc-linux.h".
+	 (PPC_FEATURE_HAS_VSX): Move to nat/ppc-linux.h.
+	(PPC_FEATURE_HAS_ALTIVEC,  PPC_FEATURE_HAS_SPE): Likewise.
+	(PT_ORIG_R3, PT_TRAP): Likewise.
+	(PTRACE_GETVSXREGS, PTRACE_SETVSXREGS): Likewise.
+	(PTRACE_GETVRREGS, PTRACE_SETVRREGS): Likewise.
+	(PTRACE_GETEVRREGS, PTRACE_SETEVRREGS): Likewise.
+
 2015-01-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* i387-fp.c (i387_cache_to_xsave): In look over

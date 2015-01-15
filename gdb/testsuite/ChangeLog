@@ -1,3 +1,34 @@
+2015-01-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/var_arr_attrs: New testcase.
+
+2015-01-14  Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/17525
+	* gdb.base/bp-cmds-execution-x-script.c: New file.
+	* gdb.base/bp-cmds-execution-x-script.exp: New file.
+	* gdb.base/bp-cmds-execution-x-script.gdb: New file.
+
+2015-01-14  Pedro Alves  <palves@redhat.com>
+
+	PR cli/17828
+	* gdb.base/batch-preserve-term-settings.c: New file.
+	* gdb.base/batch-preserve-term-settings.exp: New file.
+
+2015-01-13  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-objfile.exp: Test gdb.lookup_objfile on symlinked
+	binary.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (clean mostlyclean): Do not delete *.py.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-lookup-type.exp: New file.
+
 2015-01-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-prompt.exp: When the board can't spawn for attach,

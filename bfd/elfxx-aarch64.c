@@ -450,7 +450,9 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
       value = (value + addend) & (bfd_vma) 0xffff0000;
       break;
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
-      value = (value + addend) & (bfd_vma) 0xfff000;
+      /* Mask off low 12bits, keep all other high bits, so that the later
+	 generic code could check whehter there is overflow.  */
+      value = (value + addend) & ~(bfd_vma) 0xfff;
       break;
 
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:

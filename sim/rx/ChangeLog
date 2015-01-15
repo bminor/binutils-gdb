@@ -1,3 +1,9 @@
+2015-12-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb-if.c (open): Rename to...
+	(rx_sim_is_open): This. Replace all uses of "open" by uses of
+	"rx_sim_is_open" throughout.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

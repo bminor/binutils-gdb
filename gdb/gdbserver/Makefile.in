@@ -155,7 +155,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/linux-m32r-low.c \
 	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
 	$(srcdir)/linux-nios2-low.c \
-	$(srcdir)/linux-ppc-low.c \
+	$(srcdir)/linux-ppc-low.c $(srcdir)/nat/ppc-linux.c \
 	$(srcdir)/linux-s390-low.c \
 	$(srcdir)/linux-sh-low.c $(srcdir)/linux-sparc-low.c \
 	$(srcdir)/linux-x86-low.c \
@@ -579,6 +579,9 @@ linux-waitpid.o: ../nat/linux-waitpid.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 mips-linux-watch.o: ../nat/mips-linux-watch.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+ppc-linux.o: ../nat/ppc-linux.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

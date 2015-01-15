@@ -968,7 +968,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_MOVW_TPREL_G2),	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1038,7 +1038,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_ADD_TPREL_HI12),	/* name */
 	 FALSE,			/* partial_inplace */
@@ -4337,7 +4337,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    memset (&outrel, 0, sizeof outrel);
 	  else if (h != NULL
 		   && h->dynindx != -1
-		   && (!info->shared || !info->symbolic || !h->def_regular))
+		   && (!info->shared || !SYMBOLIC_BIND (info, h) || !h->def_regular))
 	    outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
 	  else
 	    {

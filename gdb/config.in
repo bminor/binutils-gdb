@@ -138,6 +138,9 @@
 /* Define if <sys/procfs.h> has fpregset_t. */
 #undef HAVE_FPREGSET_T
 
+/* Define to 1 if you have the `getauxval' function. */
+#undef HAVE_GETAUXVAL
+
 /* Define to 1 if you have the `getgid' function. */
 #undef HAVE_GETGID
 

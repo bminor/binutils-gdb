@@ -130,6 +130,8 @@ run_dump_test "gc-tls-relocs"
 run_dump_test "gc-plt-relocs"
 run_dump_test "gc-relocs-257-dyn"
 run_dump_test "gc-relocs-257"
+run_dump_test "pr17415"
+run_dump_test "tprel_g2_overflow"
 
 # ifunc tests
 run_dump_test "ifunc-1"
@@ -175,6 +177,7 @@ run_dump_test "ifunc-21"
 run_dump_test "ifunc-22"
 
 run_dump_test "relasz"
+run_dump_test "relocs-257-symbolic-func"
 
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}

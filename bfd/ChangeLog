@@ -1,3 +1,42 @@
+2015-01-15  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_link_omit_section_dynsym): Return true for
+	any output section matching a linker created dynobj section.
+
+2015-01-15  Alan Modra  <amodra@gmail.com>
+
+	PR 17842
+	* elflink.c (elf_link_output_sym): Assert elf_onesymtab set.
+	(bfd_elf_final_link): Always create a symbol table when emit_relocs.
+	Don't assign symtab file position unless symbols will be output.
+	Merge blocks with condition in common.  Don't call
+	elf_backend_output_arch_local_syms or elf_backend_output_arch_syms
+	unless other symbols are output.  Move assignment of symtab_shndx
+	file position.  Localize variable.
+
+2015-01-14  Jiong Wang  <jiong.wang@arm.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Reject R_ARM_32/_NOI when
+	trying to defer them to runtime.
+
+2015-01-13  Thomas Preud'homme <thomas.preudhomme@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Use SYMBOLIC_BIND
+	to check if a symbol should be bound symbolically.
+
+2015-01-13  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c: (elfNN_aarch64_howto_table): Enable overflow check
+	for TLSLE_MOVW_TPREL_G2.
+
+2015-01-13  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/17415
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Mark
+	R_AARCH64_TLSLE_ADD_TPREL_HI12 as complain_overflow_unsigned.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Correct the
+	bit mask.
+
 2015-01-12  Terry Guo  <terry.guo@arm.com>
 
 	* elflink.c (_bfd_elf_gc_mark_debug_special_section_group): New

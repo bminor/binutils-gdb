@@ -955,7 +955,7 @@ common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h common/host-defs.h utils.h common/queue.h \
 nat/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h nat/linux-btrace.h \
-ctf.h nat/x86-cpuid.h nat/x86-gcc-cpuid.h target/resume.h \
+nat/ppc-linux.h ctf.h nat/x86-cpuid.h nat/x86-gcc-cpuid.h target/resume.h \
 target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h \
 common/print-utils.h common/rsp-low.h nat/x86-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
@@ -2268,6 +2268,10 @@ linux-waitpid.o: ${srcdir}/nat/linux-waitpid.c
 
 mips-linux-watch.o: ${srcdir}/nat/mips-linux-watch.c
 	$(COMPILE) $(srcdir)/nat/mips-linux-watch.c
+	$(POSTCOMPILE)
+
+ppc-linux.o: ${srcdir}/nat/ppc-linux.c
+	$(COMPILE) $(srcdir)/nat/ppc-linux.c
 	$(POSTCOMPILE)
 
 #

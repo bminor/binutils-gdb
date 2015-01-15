@@ -1492,7 +1492,7 @@ default_iterate_over_objfiles_in_search_order
     }
 }
 
-/* Return canonical name for OBJFILE.  */
+/* See objfiles.h.  */
 
 const char *
 objfile_name (const struct objfile *objfile)
@@ -1501,6 +1501,17 @@ objfile_name (const struct objfile *objfile)
     return bfd_get_filename (objfile->obfd);
 
   return objfile->original_name;
+}
+
+/* See objfiles.h.  */
+
+const char *
+objfile_filename (const struct objfile *objfile)
+{
+  if (objfile->obfd != NULL)
+    return bfd_get_filename (objfile->obfd);
+
+  return NULL;
 }
 
 /* See objfiles.h.  */

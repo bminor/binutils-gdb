@@ -1,3 +1,96 @@
+2015-01-15  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.8.2 released.
+
+2015-01-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_array_bound_from_type): Ignore array's parallel
+	___XA type if the array has already been fixed.
+
+2015-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (ppc-linux.o): New rule.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Add ppc-linux.o.
+	* configure.ac: AC_CHECK_FUNCS(getauxval).
+	* config.in: Re-generated.
+	* configure: Re-generated.
+	* nat/ppc-linux.h [__powerpc64__] (ppc64_64bit_inferior_p):
+	Declare.
+	* nat/ppc-linux.c: New file.
+	* ppc-linux-nat.c (ppc_linux_target_wordsize) [__powerpc64__]:
+	Call ppc64_64bit_inferior_p.
+
+2015-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* ppc-linux-nat.c (PT_ORIG_R3, PT_TRAP): Move to
+	nat/ppc-linux.h.
+	(PPC_FEATURE_CELL, PPC_FEATURE_BOOKE): Likewise.
+	(PPC_FEATURE_HAS_DFP): Likewise.
+	(PTRACE_GETVRREGS, PTRACE_SETVRREGS): Likewise.
+	(PTRACE_GETVSXREGS, PTRACE_SETVSXREGS): Likewise.
+	(PTRACE_GETEVRREGS, PTRACE_SETEVRREGS): Likewise.
+	Include "nat/ppc-linux.h".
+	* nat/ppc-linux.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/ppc-linux.h.
+
+2015-01-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17525
+	* breakpoint.c: Include "interps.h".
+	(bpstat_do_actions_1): Also check whether the interpreter is
+	async.
+
+2015-01-14  Pedro Alves  <palves@redhat.com>
+
+	PR cli/17828
+	* infrun.c (reinstall_readline_callback_handler_cleanup): Don't
+	reinstall if the interpreter is sync.
+
+2015-01-13  Doug Evans  <dje@google.com>
+
+	* objfiles.c (objfile_filename): New function.
+	* objfiles.h (objfile_filename): Declare it.
+	(objfile_name): Add function comment.
+	* python/py-objfile.c (objfpy_lookup_objfile_by_name): Try both the
+	bfd file name (which may be realpath'd), and the original name.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.9 branch created (92fc2e6978d9a7c8324c7e851dbee59e22ec7a37):
+	* version.in: Bump version to 7.9.50.DATE-cvs.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-procfs.c (linux_proc_attach_tgid_threads):
+	Remove trailing new-line in argument of call to warning.
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* linux-nat.c (attach_proc_task_lwp_callback): Remove trailing
+	new-line in argument of call to "warning".
+
+2015-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_lookup_symbol_nonlocal): If name not found
+	in static block, then try searching for primitive types.
+
+2015-01-12  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.h (gdb_add_history): Declare.
+	* top.c (command_count): New variable.
+	(gdb_add_history): New function.
+	(gdb_safe_append_history): New static function.
+	(quit_force): Call it.
+	(command_line_input): Use gdb_add_history instead of
+	add_history.
+	* event-top.c (command_line_handler): Likewise.
+
 2015-01-12  James Clarke  <jrtc27@jrtc27.com>  (tiny patch)
 
 	PR gdb/17046

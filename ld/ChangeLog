@@ -1,3 +1,19 @@
+2015-01-14  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-arm/elf32-reject.s: New testcase.
+	* ld-arm/elf32-reject.d: Likewise.
+	* ld-arm/elf32-reject-pie.s: Likewise.
+	* ld-arm/elf32-reject-pie.d: Likewise.
+	* ld-arm/arm-elf.exp: Run new testcases.
+	* ld-arm/ifunc-7.s: Delete f2/f4 test items.
+	* ld-arm/ifunc-7.rd: Likewise.
+	* ld-arm/ifunc-7.gd: Likewise.
+	* ld-arm/ifunc-7.dd: Likewise.
+	* ld-arm/ifunc-8.s: Likewise.
+	* ld-arm/ifunc-8.rd: Likewise.
+	* ld-arm/ifunc-8.gd: Likewise.
+	* ld-arm/ifunc-8.dd: Likewise.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	* ldver.c (ldversion): Just print current year.

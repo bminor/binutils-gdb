@@ -60,6 +60,9 @@
 /* Define to 1 if you have the `fdwalk' function. */
 #undef HAVE_FDWALK
 
+/* Define to 1 if you have the `getauxval' function. */
+#undef HAVE_GETAUXVAL
+
 /* Define to 1 if you have the `getrlimit' function. */
 #undef HAVE_GETRLIMIT
 

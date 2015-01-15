@@ -1,3 +1,22 @@
+2015-01-13  Thomas Preud'homme <thomas.preudhomme@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Added relocs-257-symbolic-func test.
+	* ld-aarch64/relocs-257-symbolic-func.d: New file.
+	* ld-aarch64/relocs-257-symbolic-func.s: Likewise.
+
+2015-01-13  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/tprel_g2_overflow.s: New testcase.
+	* ld-aarch64/tprel_g2_overflow.d: New expectation file.
+	* ld-aarch64/aarch64-elf.exp: Run new testcase.
+
+2015-01-13  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/17415
+	* ld-aarch64/pr17415.s: Source file for new test.
+	* ld-aarch64/pr17415.d: Expect file for new test.
+	* ld-aarch64/aarch64-elf.exp: Run the new test.
+
 2015-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17827
