@@ -8568,6 +8568,8 @@ elf_link_output_sym (struct elf_final_link_info *flinfo,
      struct elf_link_hash_entry *);
   const struct elf_backend_data *bed;
 
+  BFD_ASSERT (elf_onesymtab (flinfo->output_bfd));
+
   bed = get_elf_backend_data (flinfo->output_bfd);
   output_symbol_hook = bed->elf_backend_link_output_symbol_hook;
   if (output_symbol_hook != NULL)
@@ -10609,7 +10611,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   bfd_size_type max_internal_reloc_count;
   bfd_size_type max_sym_count;
   bfd_size_type max_sym_shndx_count;
-  file_ptr off;
   Elf_Internal_Sym elfsym;
   unsigned int i;
   Elf_Internal_Shdr *symtab_hdr;
@@ -10844,7 +10845,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Figure out the file positions for everything but the symbol table
      and the relocs.  We set symcount to force assign_section_numbers
      to create a symbol table.  */
-  bfd_get_symcount (abfd) = info->strip == strip_all ? 0 : 1;
+  bfd_get_symcount (abfd) = info->strip != strip_all || emit_relocs;
   BFD_ASSERT (! abfd->output_has_begun);
   if (! _bfd_elf_compute_section_file_positions (abfd, info))
     goto error_return;
@@ -10885,13 +10886,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* sh_offset is set just below.  */
   symtab_hdr->sh_addralign = (bfd_vma) 1 << bed->s->log_file_align;
 
-  off = elf_next_file_pos (abfd);
-  off = _bfd_elf_assign_file_position_for_section (symtab_hdr, off, TRUE);
-
-  /* Note that at this point elf_next_file_pos (abfd) is
-     incorrect.  We do not yet know the size of the .symtab section.
-     We correct next_file_pos below, after we do know the size.  */
-
   /* Allocate a buffer to hold swapped out symbols.  This is to avoid
      continuously seeking to the right position in the file.  */
   if (! info->keep_memory || max_sym_count < 20)
@@ -10914,11 +10908,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	goto error_return;
     }
 
-  /* Start writing out the symbol table.  The first symbol is always a
-     dummy symbol.  */
-  if (info->strip != strip_all
-      || emit_relocs)
+  if (info->strip != strip_all || emit_relocs)
     {
+      file_ptr off = elf_next_file_pos (abfd);
+
+      _bfd_elf_assign_file_position_for_section (symtab_hdr, off, TRUE);
+
+      /* Note that at this point elf_next_file_pos (abfd) is
+	 incorrect.  We do not yet know the size of the .symtab section.
+	 We correct next_file_pos below, after we do know the size.  */
+
+      /* Start writing out the symbol table.  The first symbol is always a
+	 dummy symbol.  */
       elfsym.st_value = 0;
       elfsym.st_size = 0;
       elfsym.st_info = 0;
@@ -10928,16 +10929,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       if (elf_link_output_sym (&flinfo, NULL, &elfsym, bfd_und_section_ptr,
 			       NULL) != 1)
 	goto error_return;
-    }
 
-  /* Output a symbol for each section.  We output these even if we are
-     discarding local symbols, since they are used for relocs.  These
-     symbols have no names.  We store the index of each one in the
-     index field of the section, so that we can find it again when
-     outputting relocs.  */
-  if (info->strip != strip_all
-      || emit_relocs)
-    {
+      /* Output a symbol for each section.  We output these even if we are
+	 discarding local symbols, since they are used for relocs.  These
+	 symbols have no names.  We store the index of each one in the
+	 index field of the section, so that we can find it again when
+	 outputting relocs.  */
+
       elfsym.st_size = 0;
       elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
       elfsym.st_other = 0;
@@ -11168,7 +11166,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* If backend needs to output some local symbols not present in the hash
      table, do it now.  */
-  if (bed->elf_backend_output_arch_local_syms)
+  if (bed->elf_backend_output_arch_local_syms
+      && (info->strip != strip_all || emit_relocs))
     {
       typedef int (*out_sym_func)
 	(void *, const char *, Elf_Internal_Sym *, asection *,
@@ -11278,7 +11277,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* If backend needs to output some symbols not present in the hash
      table, do it now.  */
-  if (bed->elf_backend_output_arch_syms)
+  if (bed->elf_backend_output_arch_syms
+      && (info->strip != strip_all || emit_relocs))
     {
       typedef int (*out_sym_func)
 	(void *, const char *, Elf_Internal_Sym *, asection *,
@@ -11294,31 +11294,29 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Now we know the size of the symtab section.  */
-  off += symtab_hdr->sh_size;
-
-  symtab_shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-  if (symtab_shndx_hdr->sh_name != 0)
-    {
-      symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
-      symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
-      symtab_shndx_hdr->sh_addralign = sizeof (Elf_External_Sym_Shndx);
-      amt = bfd_get_symcount (abfd) * sizeof (Elf_External_Sym_Shndx);
-      symtab_shndx_hdr->sh_size = amt;
-
-      off = _bfd_elf_assign_file_position_for_section (symtab_shndx_hdr,
-						       off, TRUE);
-
-      if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
-	  || (bfd_bwrite (flinfo.symshndxbuf, amt, abfd) != amt))
-	return FALSE;
-    }
-
-
   if (bfd_get_symcount (abfd) > 0)
     {
       /* Finish up and write out the symbol string table (.strtab)
 	 section.  */
       Elf_Internal_Shdr *symstrtab_hdr;
+      file_ptr off = symtab_hdr->sh_offset + symtab_hdr->sh_size;
+
+      symtab_shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+      if (symtab_shndx_hdr->sh_name != 0)
+	{
+	  symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
+	  symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
+	  symtab_shndx_hdr->sh_addralign = sizeof (Elf_External_Sym_Shndx);
+	  amt = bfd_get_symcount (abfd) * sizeof (Elf_External_Sym_Shndx);
+	  symtab_shndx_hdr->sh_size = amt;
+
+	  off = _bfd_elf_assign_file_position_for_section (symtab_shndx_hdr,
+							   off, TRUE);
+
+	  if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
+	      || (bfd_bwrite (flinfo.symshndxbuf, amt, abfd) != amt))
+	    return FALSE;
+	}
 
       symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
       /* sh_name was set in prep_headers.  */
@@ -11600,6 +11598,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      /* The contents of the .dynstr section are actually in a
 		 stringtab.  */
+	      file_ptr off;
+
 	      off = elf_section_data (o->output_section)->this_hdr.sh_offset;
 	      if (bfd_seek (abfd, off, SEEK_SET) != 0
 		  || ! _bfd_elf_strtab_emit (abfd,
