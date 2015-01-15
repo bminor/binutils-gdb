@@ -1,5 +1,9 @@
 2015-01-15  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.8.2 released.
+
+2015-01-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_array_bound_from_type): Ignore array's parallel
 	___XA type if the array has already been fixed.
 
