@@ -2,6 +2,10 @@
 
 	Apply from master.
 	2015-01-15  Alan Modra  <amodra@gmail.com>
+	* elflink.c (_bfd_elf_link_omit_section_dynsym): Return true for
+	any output section matching a linker created dynobj section.
+
+	2015-01-15  Alan Modra  <amodra@gmail.com>
 	PR 17842
 	* elflink.c (elf_link_output_sym): Assert elf_onesymtab set.
 	(bfd_elf_final_link): Always create a symbol table when emit_relocs.
