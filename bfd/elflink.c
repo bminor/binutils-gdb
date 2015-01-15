@@ -762,6 +762,7 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 				   asection *p)
 {
   struct elf_link_hash_table *htab;
+  asection *ip;
 
   switch (elf_section_data (p)->this_hdr.sh_type)
     {
@@ -777,18 +778,9 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (htab->text_index_section != NULL)
 	return p != htab->text_index_section && p != htab->data_index_section;
 
-      if (strcmp (p->name, ".got") == 0
-	  || strcmp (p->name, ".got.plt") == 0
-	  || strcmp (p->name, ".plt") == 0)
-	{
-	  asection *ip;
-
-	  if (htab->dynobj != NULL
+      return (htab->dynobj != NULL
 	      && (ip = bfd_get_linker_section (htab->dynobj, p->name)) != NULL
-	      && ip->output_section == p)
-	    return TRUE;
-	}
-      return FALSE;
+	      && ip->output_section == p);
 
       /* There shouldn't be section relative relocations
 	 against any other section.  */
