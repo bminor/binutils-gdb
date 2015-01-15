@@ -1,6 +1,16 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-15  Alan Modra  <amodra@gmail.com>
+	PR 17842
+	* elflink.c (elf_link_output_sym): Assert elf_onesymtab set.
+	(bfd_elf_final_link): Always create a symbol table when emit_relocs.
+	Don't assign symtab file position unless symbols will be output.
+	Merge blocks with condition in common.  Don't call
+	elf_backend_output_arch_local_syms or elf_backend_output_arch_syms
+	unless other symbols are output.  Move assignment of symtab_shndx
+	file position.  Localize variable.
+
 	2014-12-26  Alan Modra  <amodra@gmail.com>
 	PR 17755
 	* elf64-sh64.c (sh_elf64_copy_private_data_internal): Delete code
