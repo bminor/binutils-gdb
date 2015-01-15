@@ -1,3 +1,14 @@
+2015-01-15  Alan Modra  <amodra@gmail.com>
+
+	PR 17842
+	* elflink.c (elf_link_output_sym): Assert elf_onesymtab set.
+	(bfd_elf_final_link): Always create a symbol table when emit_relocs.
+	Don't assign symtab file position unless symbols will be output.
+	Merge blocks with condition in common.  Don't call
+	elf_backend_output_arch_local_syms or elf_backend_output_arch_syms
+	unless other symbols are output.  Move assignment of symtab_shndx
+	file position.  Localize variable.
+
 2015-01-14  Jiong Wang  <jiong.wang@arm.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Reject R_ARM_32/_NOI when
