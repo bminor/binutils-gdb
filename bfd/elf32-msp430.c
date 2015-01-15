@@ -1921,7 +1921,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	default:
 	  /* Not a conditional branch instruction.  */
 	  /* fprintf (stderr, "unrecog: %x\n", opcode); */
-	  goto error_return;
+	  continue;
 	}
 
       /* Note that we've changed the relocs, section contents, etc.  */
@@ -2162,6 +2162,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	  {
 	    bfd_vma value = symval;
 
+	    value -= (sec->output_section->vma + sec->output_offset);
 	    value -= irel->r_offset;
 	    value += irel->r_addend;
 	   

@@ -1,3 +1,9 @@
+2015-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-msp430.c (msp430_elf_relax_section): Skip unhandled
+	relocs.  Include PC-relative adjustment for R_MSP430X_ABS16
+	relaxation.
+
 2015-01-15  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_link_omit_section_dynsym): Return true for
