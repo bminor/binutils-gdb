@@ -1546,7 +1546,7 @@ emit_logicals (void)
 
       if (context != e->context || subprog != e->subprog)
         {
-	  unsigned int caller = e->context;
+	  unsigned int caller = context;
 	  unsigned int npop = 0;
 
 	  // See if a sequence of DW_LNS_pop_context ops will get
@@ -1554,7 +1554,7 @@ emit_logicals (void)
 	  while (caller > 0 && caller <= logicals_in_use)
 	    {
 	      ++npop;
-	      if (logicals[caller - 1].subprog == subprog)
+	      if (logicals[caller - 1].subprog == e->subprog)
 		break;
 	      caller = logicals[caller - 1].context;
 	    }
@@ -1757,17 +1757,18 @@ process_entries (segT seg, struct line_entry *e)
       frag = symbol_get_frag (lab);
       frag_ofs = S_GET_VALUE (lab);
 
-      if (logicals_in_use > 0
-	  && frag != last_frag
-	  && logicals[e->loc.logical - 1].label == lab)
+      if (last_frag == NULL)
 	{
-	  out_set_addr_from_logical (line_delta);
-	  out_opcode (DW_LNS_copy);
-	}
-      else if (last_frag == NULL)
-	{
-	  out_set_addr (lab);
-	  out_inc_line_addr (line_delta, 0);
+	  if (logicals_in_use > 0 && logicals[e->loc.logical - 1].label == lab)
+	    {
+	      out_set_addr_from_logical (line_delta);
+	      out_opcode (DW_LNS_copy);
+	    }
+	  else
+	    {
+	      out_set_addr (lab);
+	      out_inc_line_addr (line_delta, 0);
+	    }
 	}
       else if (frag == last_frag && ! DWARF2_USE_FIXED_ADVANCE_PC)
 	out_inc_line_addr (line_delta, frag_ofs - last_frag_ofs);
