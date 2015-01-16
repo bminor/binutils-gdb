@@ -1,3 +1,21 @@
+2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-dis.c (s390_extract_operand): Support vector register
+	operands.
+	(s390_print_insn_with_opcode): Support new operands types and add
+	new handling of optional operands.
+	* s390-mkopc.c (s390_opcode_mode_val, s390_opcode_cpu_val): Remove
+	and include opcode/s390.h instead.
+	(struct op_struct): New field `flags'.
+	(insertOpcode, insertExpandedMnemonic): New parameter `flags'.
+	(dumpTable): Dump flags.
+	(main): Parse flags from the s390-opc.txt file.  Add z13 as cpu
+	string.
+	* s390-opc.c: Add new operands types, instruction formats, and
+	instruction masks.
+	(s390_opformats): Add new formats for .insn.
+	* s390-opc.txt: Add new instructions.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

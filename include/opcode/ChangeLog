@@ -1,3 +1,7 @@
+2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390.h (s390_opcode_cpu_val): Add S390_OPCODE_Z13.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

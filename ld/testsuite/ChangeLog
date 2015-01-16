@@ -1,3 +1,8 @@
+2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* ld-s390/tlsbin.dd: The nopr register operand is optional and not
+	printed if 0 anymore.
+
 2015-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17847
