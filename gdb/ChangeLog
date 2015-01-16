@@ -2,6 +2,9 @@
 
 	* tui/tui-win.c (tui_scroll_left_command, tui_scroll_right_command):
 	Doc fix.
+	(tui_set_tab_width_command): Delete and recreate the source and
+	the disassembly windows, to show the effect of the changed tab
+	size immediately.
 
 	* tui/tui-data.h (LINE_PREFIX): Make shorter
 	(MAX_PID_WIDTH): Enlarge from 14 to 19, to leave enough space for
