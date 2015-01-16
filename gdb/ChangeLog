@@ -1,3 +1,9 @@
+2015-01-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-data.h (LINE_PREFIX): Make shorter
+	(MAX_PID_WIDTH): Enlarge from 14 to 19, to leave enough space for
+	"Thread NNNNN.XXXX" thread ID notation on Windows.
+
 2015-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix gcc-5 compilation.
