@@ -1,7 +1,25 @@
+2015-01-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* nat/linux-personality.c: Replace "#ifndef
+	HAVE_DECL_ADDR_NO_RANDOMIZE" by "#if
+	!HAVE_DECL_ADDR_NO_RANDOMIZE", fixing a regression in RHEL-5
+	systems.
+
 2015-01-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-win.c (tui_rehighlight_all, tui_set_var_cmd): New
+	functions.
+	(_initialize_tui_win) <border-kind, border-mode>:
+	<active-border-mode>: Use tui_set_var_cmd as the "set" function.
+	(tui_set_tab_width_command): Fix the commentary.
+
+	* tui/tui-win.h: Add prototype for tui_rehighlight_all.
 
 	* tui/tui-win.c (tui_scroll_left_command, tui_scroll_right_command):
 	Doc fix.
+	(tui_set_tab_width_command): Delete and recreate the source and
+	the disassembly windows, to show the effect of the changed tab
+	size immediately.
 
 	* tui/tui-data.h (LINE_PREFIX): Make shorter
 	(MAX_PID_WIDTH): Enlarge from 14 to 19, to leave enough space for

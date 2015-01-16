@@ -344,6 +344,15 @@ tui_get_cmd_list (void)
   return &tuilist;
 }
 
+/* The set_func hook of "set tui ..." commands that affect the window
+   borders on the TUI display.  */
+void
+tui_set_var_cmd (char *null_args, int from_tty, struct cmd_list_element *c)
+{
+  if (tui_update_variables () && tui_active)
+    tui_rehighlight_all ();
+}
+
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
 
@@ -420,7 +429,7 @@ This variable controls the border of TUI windows:\n\
 space           use a white space\n\
 ascii           use ascii characters + - | for the border\n\
 acs             use the Alternate Character Set"),
-			NULL,
+			tui_set_var_cmd,
 			show_tui_border_kind,
 			&tui_setlist, &tui_showlist);
 
@@ -436,7 +445,7 @@ half            use half bright\n\
 half-standout   use half bright and standout mode\n\
 bold            use extra bright or bold\n\
 bold-standout   use extra bright or bold with standout mode"),
-			NULL,
+			tui_set_var_cmd,
 			show_tui_border_mode,
 			&tui_setlist, &tui_showlist);
 
@@ -452,7 +461,7 @@ half            use half bright\n\
 half-standout   use half bright and standout mode\n\
 bold            use extra bright or bold\n\
 bold-standout   use extra bright or bold with standout mode"),
-			NULL,
+			tui_set_var_cmd,
 			show_tui_active_border_mode,
 			&tui_setlist, &tui_showlist);
 }
@@ -646,6 +655,14 @@ tui_refresh_all_win (void)
   tui_show_locator_content ();
 }
 
+void
+tui_rehighlight_all (void)
+{
+  enum tui_win_type type;
+
+  for (type = SRC_WIN; type < MAX_MAJOR_WINDOWS; type++)
+    tui_check_and_display_highlight_if_needed (tui_win_list[type]);
+}
 
 /* Resize all the windows based on the terminal size.  This function
    gets called from within the readline sinwinch handler.  */
@@ -990,7 +1007,7 @@ tui_refresh_all_command (char *arg, int from_tty)
 }
 
 
-/* Set the height of the specified window.  */
+/* Set the tab width of the specified window.  */
 static void
 tui_set_tab_width_command (char *arg, int from_tty)
 {
@@ -1002,7 +1019,27 @@ tui_set_tab_width_command (char *arg, int from_tty)
 
       ts = atoi (arg);
       if (ts > 0)
-	tui_set_default_tab_len (ts);
+	{
+	  tui_set_default_tab_len (ts);
+	  /* We don't really change the height of any windows, but
+	     calling these 2 functions causes a complete regeneration
+	     and redisplay of the window's contents, which will take
+	     the new tab width into account.  */
+	  if (tui_win_list[SRC_WIN]
+	      && tui_win_list[SRC_WIN]->generic.is_visible)
+	    {
+	      make_invisible_and_set_new_height (TUI_SRC_WIN,
+						 TUI_SRC_WIN->generic.height);
+	      make_visible_with_new_height (TUI_SRC_WIN);
+	    }
+	  if (tui_win_list[DISASSEM_WIN]
+	      && tui_win_list[DISASSEM_WIN]->generic.is_visible)
+	    {
+	      make_invisible_and_set_new_height (TUI_DISASM_WIN,
+						 TUI_DISASM_WIN->generic.height);
+	      make_visible_with_new_height (TUI_DISASM_WIN);
+	    }
+	}
       else
 	warning (_("Tab widths greater than 0 must be specified."));
     }
