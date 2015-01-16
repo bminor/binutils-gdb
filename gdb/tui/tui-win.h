@@ -35,6 +35,7 @@ extern void tui_scroll (enum tui_scroll_direction,
 extern void tui_set_win_focus_to (struct tui_win_info *);
 extern void tui_resize_all (void);
 extern void tui_refresh_all_win (void);
+extern void tui_rehighlight_all (void);
 
 extern chtype tui_border_ulcorner;
 extern chtype tui_border_urcorner;
