@@ -1002,7 +1002,27 @@ tui_set_tab_width_command (char *arg, int from_tty)
 
       ts = atoi (arg);
       if (ts > 0)
-	tui_set_default_tab_len (ts);
+	{
+	  tui_set_default_tab_len (ts);
+	  /* We don't really change the height of any windows, but
+	     calling these 2 functions causes a complete regeneration
+	     and redisplay of the window's contents, which will take
+	     the new tab width into account.  */
+	  if (tui_win_list[SRC_WIN]
+	      && tui_win_list[SRC_WIN]->generic.is_visible)
+	    {
+	      make_invisible_and_set_new_height (TUI_SRC_WIN,
+						 TUI_SRC_WIN->generic.height);
+	      make_visible_with_new_height (TUI_SRC_WIN);
+	    }
+	  if (tui_win_list[DISASSEM_WIN]
+	      && tui_win_list[DISASSEM_WIN]->generic.is_visible)
+	    {
+	      make_invisible_and_set_new_height (TUI_DISASM_WIN,
+						 TUI_DISASM_WIN->generic.height);
+	      make_visible_with_new_height (TUI_DISASM_WIN);
+	    }
+	}
       else
 	warning (_("Tab widths greater than 0 must be specified."));
     }
