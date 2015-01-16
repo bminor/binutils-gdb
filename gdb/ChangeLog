@@ -1,3 +1,10 @@
+2015-01-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* nat/linux-personality.c: Replace "#ifndef
+	HAVE_DECL_ADDR_NO_RANDOMIZE" by "#if
+	!HAVE_DECL_ADDR_NO_RANDOMIZE", fixing a regression in RHEL-5
+	systems.
+
 2015-01-16  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-win.c (tui_rehighlight_all, tui_set_var_cmd): New

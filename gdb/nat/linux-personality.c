@@ -22,7 +22,7 @@
 
 #ifdef HAVE_PERSONALITY
 # include <sys/personality.h>
-# ifndef HAVE_DECL_ADDR_NO_RANDOMIZE
+# if !HAVE_DECL_ADDR_NO_RANDOMIZE
 #  define ADDR_NO_RANDOMIZE 0x0040000
 # endif /* ! HAVE_DECL_ADDR_NO_RANDOMIZE */
 #endif /* HAVE_PERSONALITY */
