@@ -1007,7 +1007,7 @@ tui_refresh_all_command (char *arg, int from_tty)
 }
 
 
-/* Set the height of the specified window.  */
+/* Set the tab width of the specified window.  */
 static void
 tui_set_tab_width_command (char *arg, int from_tty)
 {
