@@ -24609,11 +24609,15 @@ Update the source window and the current execution point.
 @kindex winheight
 Change the height of the window @var{name} by @var{count}
 lines.  Positive counts increase the height, while negative counts
-decrease it.
+decrease it.  The @var{name} parameter can be one of @code{src} (the
+source window), @code{cmd} (the command window), @code{asm} (the
+disassembly window), or @code{regs} (the register display window).
 
 @item tabset @var{nchars}
 @kindex tabset
-Set the width of tab stops to be @var{nchars} characters.
+Set the width of tab stops to be @var{nchars} characters.  This
+setting affects the display of TAB characters in the source and
+assembly windows.
 @end table
 
 @node TUI Configuration
