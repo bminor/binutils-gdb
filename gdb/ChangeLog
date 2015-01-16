@@ -1,5 +1,13 @@
 2015-01-16  Eli Zaretskii  <eliz@gnu.org>
 
+	* tui/tui-win.c (tui_rehighlight_all, tui_set_var_cmd): New
+	functions.
+	(_initialize_tui_win) <border-kind, border-mode>:
+	<active-border-mode>: Use tui_set_var_cmd as the "set" function.
+	* tui/tui-win.h: Add prototype for tui_rehighlight_all.
+
+2015-01-16  Eli Zaretskii  <eliz@gnu.org>
+
 	* tui/tui-win.c (tui_scroll_left_command, tui_scroll_right_command):
 	Doc fix.
 	(tui_set_tab_width_command): Delete and recreate the source and
