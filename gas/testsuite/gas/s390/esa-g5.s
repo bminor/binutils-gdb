@@ -151,6 +151,7 @@ foo:
 	ed	4095(256,%r5),4095(%r10)
 	edmk	4095(256,%r5),4095(%r10)
 	efpc	%r6,%r9
+	efpc	%r6
 	epar	%r6
 	ereg	%r6,%r9
 	esar	%r6
@@ -366,6 +367,7 @@ foo:
 	sebr	%f6,%f9
 	ser	%f6,%f9
 	sfpc	%r6,%r9
+	sfpc	%r6
 	sh	%r6,4095(%r5,%r10)
 	sie	4095(%r5)
 	siga	4095(%r5)

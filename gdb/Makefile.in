@@ -961,7 +961,7 @@ common/print-utils.h common/rsp-low.h nat/x86-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
-common/common-regcache.h fbsd-tdep.h
+common/common-regcache.h fbsd-tdep.h nat/linux-personality.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1680,7 +1680,7 @@ ALLDEPFILES = \
 	m68klinux-nat.c m68klinux-tdep.c \
 	m88k-tdep.c m88kbsd-nat.c \
 	microblaze-tdep.c microblaze-linux-tdep.c \
-	mingw-hdep.c \
+	mingw-hdep.c common/mingw-strerror.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-sde-tdep.c \
 	mips-tdep.c \
@@ -1690,7 +1690,7 @@ ALLDEPFILES = \
 	nios2-tdep.c nios2-linux-tdep.c \
 	nbsd-nat.c nbsd-tdep.c obsd-nat.c obsd-tdep.c \
 	somread.c solib-som.c \
-	posix-hdep.c \
+	posix-hdep.c common/posix-strerror.c \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c ppc64-tdep.c \
 	ppcfbsd-nat.c ppcfbsd-tdep.c \
 	ppcnbsd-nat.c ppcnbsd-tdep.c \
@@ -2227,6 +2227,14 @@ common-exceptions.o: ${srcdir}/common/common-exceptions.c
 	$(COMPILE) $(srcdir)/common/common-exceptions.c
 	$(POSTCOMPILE)
 
+posix-strerror.o: ${srcdir}/common/posix-strerror.c
+	$(COMPILE) $(srcdir)/common/posix-strerror.c
+	$(POSTCOMPILE)
+
+mingw-strerror.o: ${srcdir}/common/mingw-strerror.c
+	$(COMPILE) $(srcdir)/common/mingw-strerror.c
+	$(POSTCOMPILE)
+
 #
 # gdb/target/ dependencies
 #
@@ -2272,6 +2280,10 @@ mips-linux-watch.o: ${srcdir}/nat/mips-linux-watch.c
 
 ppc-linux.o: ${srcdir}/nat/ppc-linux.c
 	$(COMPILE) $(srcdir)/nat/ppc-linux.c
+	$(POSTCOMPILE)
+
+linux-personality.o: ${srcdir}/nat/linux-personality.c
+	$(COMPILE) $(srcdir)/nat/linux-personality.c
 	$(POSTCOMPILE)
 
 #

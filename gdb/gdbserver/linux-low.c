@@ -27,6 +27,7 @@
 #include <sys/ptrace.h>
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"
+#include "nat/linux-personality.h"
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -597,29 +598,11 @@ add_lwp (ptid_t ptid)
 static int
 linux_create_inferior (char *program, char **allargs)
 {
-#ifdef HAVE_PERSONALITY
-  int personality_orig = 0, personality_set = 0;
-#endif
   struct lwp_info *new_lwp;
   int pid;
   ptid_t ptid;
-
-#ifdef HAVE_PERSONALITY
-  if (disable_randomization)
-    {
-      errno = 0;
-      personality_orig = personality (0xffffffff);
-      if (errno == 0 && !(personality_orig & ADDR_NO_RANDOMIZE))
-	{
-	  personality_set = 1;
-	  personality (personality_orig | ADDR_NO_RANDOMIZE);
-	}
-      if (errno != 0 || (personality_set
-			 && !(personality (0xffffffff) & ADDR_NO_RANDOMIZE)))
-	warning ("Error disabling address space randomization: %s",
-		 strerror (errno));
-    }
-#endif
+  struct cleanup *restore_personality
+    = maybe_disable_address_space_randomization (disable_randomization);
 
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)
   pid = vfork ();
@@ -665,16 +648,7 @@ linux_create_inferior (char *program, char **allargs)
       _exit (0177);
     }
 
-#ifdef HAVE_PERSONALITY
-  if (personality_set)
-    {
-      errno = 0;
-      personality (personality_orig);
-      if (errno != 0)
-	warning ("Error restoring address space randomization: %s",
-		 strerror (errno));
-    }
-#endif
+  do_cleanups (restore_personality);
 
   linux_add_process (pid, 0);
 

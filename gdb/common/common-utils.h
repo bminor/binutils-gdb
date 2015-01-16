@@ -62,4 +62,10 @@ int xsnprintf (char *str, size_t size, const char *format, ...)
 
 char *savestring (const char *ptr, size_t len);
 
+/* The strerror() function can return NULL for errno values that are
+   out of range.  Provide a "safe" version that always returns a
+   printable string.  */
+
+extern char *safe_strerror (int);
+
 #endif

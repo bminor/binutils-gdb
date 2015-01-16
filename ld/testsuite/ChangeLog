@@ -1,3 +1,15 @@
+2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* ld-s390/tlsbin.dd: The nopr register operand is optional and not
+	printed if 0 anymore.
+
+2015-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17847
+	* ld-x86-64/pie1.d: New file.
+	* ld-x86-64/pie1.s: Likwise.
+	* ld-x86-64/x86-64.exp: Run pie1.
+
 2015-01-13  Thomas Preud'homme <thomas.preudhomme@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp: Added relocs-257-symbolic-func test.

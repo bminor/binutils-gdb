@@ -167,6 +167,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/vec.c $(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
 	$(srcdir)/nat/linux-osdata.c $(srcdir)/common/ptid.c \
+	$(srcdir)/nat/linux-personality.c \
 	$(srcdir)/common/buffer.c $(srcdir)/nat/linux-btrace.c \
 	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
 	$(srcdir)/nat/mips-linux-watch.c $(srcdir)/common/print-utils.c \
@@ -518,6 +519,12 @@ rsp-low.o: ../common/rsp-low.c
 common-utils.o: ../common/common-utils.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+posix-strerror.o: ../common/posix-strerror.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+mingw-strerror.o: ../common/mingw-strerror.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 vec.o: ../common/vec.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
@@ -582,6 +589,9 @@ mips-linux-watch.o: ../nat/mips-linux-watch.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 ppc-linux.o: ../nat/ppc-linux.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+linux-personality.o: ../nat/linux-personality.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

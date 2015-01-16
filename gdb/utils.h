@@ -42,9 +42,6 @@ ULONGEST strtoulst (const char *num, const char **trailer, int base);
 int compare_positive_ints (const void *ap, const void *bp);
 int compare_strings (const void *ap, const void *bp);
 
-/* This is defined in *-hdep.c, e.g., posix-hdep.c.  */
-extern char *safe_strerror (int);
-
 /* A wrapper for bfd_errmsg to produce a more helpful error message
    in the case of bfd_error_file_ambiguously recognized.
    MATCHING, if non-NULL, is the corresponding argument to

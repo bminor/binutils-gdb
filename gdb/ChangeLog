@@ -1,3 +1,76 @@
+2015-01-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-win.c (tui_scroll_left_command, tui_scroll_right_command):
+	Doc fix.
+
+	* tui/tui-data.h (LINE_PREFIX): Make shorter
+	(MAX_PID_WIDTH): Enlarge from 14 to 19, to leave enough space for
+	"Thread NNNNN.XXXX" thread ID notation on Windows.
+
+2015-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix gcc-5 compilation.
+	* hppa-tdep.c (inst_saves_gr): Fix parentheses typo.
+
+2015-01-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/linux-personality.h.
+	(linux-personality.o): New rule.
+	* common/common-defs.h: Include <stdint.h>.
+	* config/aarch64/linux.mh (NATDEPFILES): Include
+	linux-personality.o.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Likewise.
+	* config/arm/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m32r/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/pa/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/spu-linux.mh (NATDEPFILES): Likewise.
+	* config/s390/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux64.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+	* config/tilegx/linux.mh (NATDEPFILES): Likewise.
+	* config/xtensa/linux.mh (NATDEPFILES): Likewise.
+	* defs.h: Remove #include <stdint.h> (moved to
+	common/common-defs.h).
+	* linux-nat.c: Include nat/linux-personality.h.  Remove #include
+	<sys/personality.h>; do not define ADDR_NO_RANDOMIZE (moved to
+	nat/linux-personality.c).
+	(linux_nat_create_inferior): Remove code to disable address space
+	randomization (moved to nat/linux-personality.c).  Create cleanup
+	to disable address space randomization.
+	* nat/linux-personality.c: New file.
+	* nat/linux-personality.h: Likewise.
+
+2015-01-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Including common/mingw-strerror.c and
+	common/posix-strerror.c.
+	(posix-strerror.o): New rule.
+	(mingw-strerror.o): Likewise.
+	* common/common-utils.h (safe_strerror): Move prototype to here,
+	from utils.h.
+	* common/common.host: New file.
+	* common/mingw-strerror.c: Likewise.
+	* common/posix-strerror.c: Likewise.
+	* configure: Regenerated.
+	* configure.ac: Source common/common.host.  Add variable
+	common_host_obs to gdb_host_obs.
+	* contrib/ari/gdb_ari.sh: Mention gdb/common/mingw-strerror.c and
+	gdb/common/posix-strerror.c when warning about the use of
+	strerror.
+	* mingw-hdep.c (safe_strerror): Remove definition; move it to
+	common/mingw-strerror.c.
+	* posix-hdep.c (safe_strerror): Remove definition; move it to
+	common/posix-hdep.c.
+	* utils.h (safe_strerror): Remove prototype; move to
+	common/common-utils.h.
+
 2015-01-15  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.8.2 released.

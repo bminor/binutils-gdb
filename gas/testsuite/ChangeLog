@@ -1,3 +1,19 @@
+2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* gas/s390/esa-g5.d: Add a variant without the optional operand.
+	* gas/s390/esa-g5.s: Likewise.
+	* gas/s390/esa-z9-109.d: Likewise.
+	* gas/s390/esa-z9-109.s: Likewise.
+	* gas/s390/zarch-z9-109.d: Likewise.
+	* gas/s390/zarch-z9-109.s: Likewise.
+	* gas/s390/zarch-z10.d: For variants with a zero optional argument
+	it is not dumped by objdump anymore.
+	* gas/s390/zarch-zEC12.d: Likewise.
+
+	* gas/s390/zarch-z13.d: New file.
+	* gas/s390/zarch-z13.s: New file.
+	* gas/s390/s390.exp: Run the test for the z13 files.
+
 2015-01-13  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/arm/ual-vcmp.s: Add vcmp, vcmpe with #0x0 operand.

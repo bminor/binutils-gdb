@@ -1,3 +1,20 @@
+2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c (struct pd_reg): Remove.
+	(pre_defined_registers): Remove.
+	(REG_NAME_CNT): Remove.
+	(reg_name_search): Calculate the register number instead of doing
+	a lookup.
+	(register_name, tc_s390_regname_to_dw2regnum): Adopt to the new
+	reg_name_search signature.
+	(s390_parse_cpu): Support the new arch string z13.
+	(s390_insert_operand): Support for vector registers with the extra
+	field for the fifth bit of each vector register operand.
+	(md_gather_operand): Adjust to the new handling of optional
+	parameters.
+
+	* doc/as.texinfo: Document the z13 cpu string.
+
 2015-01-13  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (parse_ifimm_zero): Accept #0x0 as a synonym for

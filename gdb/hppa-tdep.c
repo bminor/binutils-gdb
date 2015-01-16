@@ -1403,7 +1403,7 @@ inst_saves_gr (unsigned long inst)
   if ((inst >> 26) == 0x19 || (inst >> 26) == 0x18
       || ((inst >> 26) == 0x3
 	  && (((inst >> 6) & 0xf) == 0x8
-	      || (inst >> 6) & 0xf) == 0x9))
+	      || ((inst >> 6) & 0xf) == 0x9)))
     return hppa_extract_5R_store (inst);
 
   return 0;

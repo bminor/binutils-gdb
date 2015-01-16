@@ -1,3 +1,10 @@
+2015-01-15  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/attach-pie-noexec.exp: Use can_spawn_for_attach
+	instead of checking whether the target board is remote and
+	use spawn_wait_for_attach instead of exec/sleep.
+	* gdb.base/attach-twice.exp: Likewise.
+
 2015-01-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/var_arr_attrs: New testcase.

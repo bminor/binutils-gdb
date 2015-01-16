@@ -4063,10 +4063,14 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
 	case R_X86_64_PC32_BND:
+	  /* Don't complain about -fPIC if the symbol is undefined when
+	     building executable.  */
 	  if (info->shared
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && (input_section->flags & SEC_READONLY) != 0
-	      && h != NULL)
+	      && h != NULL
+	      && !(info->executable
+		   && h->root.type == bfd_link_hash_undefined))
 	    {
 	      bfd_boolean fail = FALSE;
 	      bfd_boolean branch
@@ -4140,11 +4144,14 @@ direct:
 	    break;
 
 	   /* Don't copy a pc-relative relocation into the output file
-	      if the symbol needs copy reloc.  */
+	      if the symbol needs copy reloc or the symbol is undefined
+	      when building executable.  */
 	  if ((info->shared
 	       && !(info->executable
 		    && h != NULL
-		    && (h->needs_copy || eh->needs_copy)
+		    && (h->needs_copy
+			|| eh->needs_copy
+			|| h->root.type == bfd_link_hash_undefined)
 		    && IS_X86_64_PCREL_TYPE (r_type))
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
