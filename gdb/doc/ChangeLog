@@ -1,3 +1,9 @@
+2015-01-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* doc/gdb.texinfo (TUI Commands): Document the possible
+	values of NAME argument to 'winheight' command.  Explain the
+	effect of 'tabset' setting better.
+
 2015-01-11  Doug Evans  <xdje42@gmail.com>
 
 	PR gdb/15830

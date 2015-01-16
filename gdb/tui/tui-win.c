@@ -401,10 +401,10 @@ Usage: + [win] [n]\n"));
 Scroll window backward.\n\
 Usage: - [win] [n]\n"));
   add_com ("<", class_tui, tui_scroll_left_command, _("\
-Scroll window forward.\n\
+Scroll window text to the left.\n\
 Usage: < [win] [n]\n"));
   add_com (">", class_tui, tui_scroll_right_command, _("\
-Scroll window backward.\n\
+Scroll window text to the right.\n\
 Usage: > [win] [n]\n"));
   if (xdb_commands)
     add_com ("w", class_xdb, tui_xdb_set_win_height_command, _("\
