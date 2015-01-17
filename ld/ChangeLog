@@ -1,6 +1,10 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-19  Alan Modra  <amodra@gmail.com>
+	PR 17165
+	* ldlang.c (lang_process): Run lang_common before lang_gc_sections.
+
 	2014-12-24  Alan Modra  <amodra@gmail.com>
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Exclude
 	shared libraries in loop looking for .eh_frame sections.

@@ -241,7 +241,8 @@ struct elf_link_hash_entry
   _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
 /* Common symbols that are turned into definitions don't have the
-   DEF_REGULAR flag set, so they might appear to be undefined.  */
+   DEF_REGULAR flag set, so they might appear to be undefined.
+   Symbols defined in linker scripts also don't have DEF_REGULAR set.  */
 #define ELF_COMMON_DEF_P(H) \
   (!(H)->def_regular							\
    && !(H)->def_dynamic							\

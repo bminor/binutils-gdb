@@ -6701,11 +6701,11 @@ lang_process (void)
   lang_do_assignments (lang_mark_phase_enum);
   expld.phase = lang_first_phase_enum;
 
-  /* Remove unreferenced sections if asked to.  */
-  lang_gc_sections ();
-
   /* Size up the common data.  */
   lang_common ();
+
+  /* Remove unreferenced sections if asked to.  */
+  lang_gc_sections ();
 
   /* Update wild statements.  */
   update_wild_statements (statement_list.head);
