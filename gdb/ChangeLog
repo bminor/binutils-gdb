@@ -1,4 +1,22 @@
 2015-01-17  Wei-cheng Wang  <cole945@gmail.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.tgt (powerpc*-*-linux): Add linux-record.o to
+	gdb_target_obs.
+	(ppc_linux_record_tdep, ppc64_linux_record_tdep): New for linux syscall
+	record.
+	(ppc_canonicalize_syscall, ppc_linux_syscall_record,
+	ppc_linux_record_signal, ppc_init_linux_record_tdep): New functions.
+	(ppc_linux_init_abi): Set process_record, process_record_signal.
+	* ppc-tdep.h (struct gdbarch_tdep): Add ppc_syscall_record and
+	ppc_linux_record_tdep to gdbarch_tdep.
+	(ppc_process_record): New declaration.
+	* rs6000-tdep.c (ppc_record_vsr, ppc_process_record_op4,
+	ppc_process_record_op19, ppc_process_record_op31,
+	ppc_process_record_op59, ppc_process_record_op60,
+	ppc_process_record_op63, ppc_process_record): New functions.
+
+2015-01-17  Wei-cheng Wang  <cole945@gmail.com>
 
 	* rs6000-tdep.c (rs6000_in_function_epilogue_p): Rename to
 	rs6000_in_function_epilogue_frame_p and add an argument
