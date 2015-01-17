@@ -1,3 +1,14 @@
+2015-01-17  Wei-cheng Wang  <cole945@gmail.com>
+
+	* rs6000-tdep.c (rs6000_in_function_epilogue_p): Rename to
+	rs6000_in_function_epilogue_frame_p and add an argument
+	for frame_info.
+	(rs6000_epilogue_frame_cache, rs6000_epilogue_frame_this_id,
+	rs6000_epilogue_frame_prev_register, rs6000_epilogue_frame_sniffer):
+	New functions.
+	(rs6000_epilogue_frame_unwind): New.
+	(rs6000_gdbarch_init): Append epilogue unwinder.
+
 2015-01-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* nat/linux-personality.c: Replace "#ifndef
