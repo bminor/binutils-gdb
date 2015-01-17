@@ -12068,7 +12068,7 @@ elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
   if (!h->mark
       && (((h->root.type == bfd_link_hash_defined
 	    || h->root.type == bfd_link_hash_defweak)
-	   && !(h->def_regular
+	   && !((h->def_regular || ELF_COMMON_DEF_P (h))
 		&& h->root.u.def.section->gc_mark))
 	  || h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak))
@@ -12291,7 +12291,7 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && (h->ref_dynamic
-	  || (h->def_regular
+	  || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
 	      && (!info->executable

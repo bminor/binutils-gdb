@@ -1,6 +1,13 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-19  Alan Modra  <amodra@gmail.com>
+	PR 17165
+	* elf-bfd.h (ELF_COMMON_DEF_P): Note that this might be true for
+	linker script assignments too.
+	* elflink.c (elf_gc_sweep_symbol): Don't drop ELF_COMMON_DEF syms.
+	(bfd_elf_gc_mark_dynamic_ref_symbol): Similarly.
+
 	2015-01-15  Alan Modra  <amodra@gmail.com>
 	* elflink.c (_bfd_elf_link_omit_section_dynsym): Return true for
 	any output section matching a linker created dynobj section.

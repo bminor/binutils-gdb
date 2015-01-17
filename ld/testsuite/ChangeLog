@@ -1,6 +1,18 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-19  Alan Modra  <amodra@gmail.com>
+	* ld-gc/pr14265.d,
+	* ld-cris/tls-gc-68.d,
+	* ld-cris/tls-gc-69.d,
+	* ld-cris/tls-gc-70.d,
+	* ld-cris/tls-gc-71.d,
+	* ld-cris/tls-gc-75.d,
+	* ld-cris/tls-gc-76.d,
+	* ld-cris/tls-gc-79.d,
+	* ld-mmix/bpo-10.d,
+	* ld-mmix/bpo-11.d: Update.
+
 	2014-12-23  Alan Modra  <amodra@gmail.com>
 	* ld-powerpc/sdabase.s,
 	* ld-powerpc/sdabase.t,
