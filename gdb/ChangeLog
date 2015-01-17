@@ -1,3 +1,16 @@
+2015-01-26  Wei-cheng Wang  <cole945@gmail.com>
+
+	Backport from mainline:
+
+	* rs6000-tdep.c (rs6000_in_function_epilogue_p): Rename to
+	rs6000_in_function_epilogue_frame_p and add an argument
+	for frame_info.
+	(rs6000_epilogue_frame_cache, rs6000_epilogue_frame_this_id,
+	rs6000_epilogue_frame_prev_register, rs6000_epilogue_frame_sniffer):
+	New functions.
+	(rs6000_epilogue_frame_unwind): New.
+	(rs6000_gdbarch_init): Append epilogue unwinder.
+
 2015-01-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix 100x slowdown regression on DWZ files.

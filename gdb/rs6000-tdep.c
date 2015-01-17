@@ -872,14 +872,14 @@ insn_changes_sp_or_jumps (unsigned long insn)
            limit for the size of an epilogue.  */
 
 static int
-rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+rs6000_in_function_epilogue_frame_p (struct frame_info *curfrm,
+				     struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte insn_buf[PPC_INSN_SIZE];
   CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
   unsigned long insn;
-  struct frame_info *curfrm;
 
   /* Find the search limits based on function boundaries and hard limit.  */
 
@@ -891,8 +891,6 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   epilogue_end = pc + PPC_MAX_EPILOGUE_INSTRUCTIONS * PPC_INSN_SIZE;
   if (epilogue_end > func_end) epilogue_end = func_end;
-
-  curfrm = get_current_frame ();
 
   /* Scan forward until next 'blr'.  */
 
@@ -932,6 +930,15 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
 
   return 0;
+}
+
+/* Implementation of gdbarch_in_function_epilogue_p.  */
+
+static int
+rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  return rs6000_in_function_epilogue_frame_p (get_current_frame (),
+					      gdbarch, pc);
 }
 
 /* Get the ith function argument for the current function.  */
@@ -3339,6 +3346,89 @@ static const struct frame_unwind rs6000_frame_unwind =
   NULL,
   default_frame_sniffer
 };
+
+static struct rs6000_frame_cache *
+rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
+{
+  volatile struct gdb_exception ex;
+  struct rs6000_frame_cache *cache;
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR sp;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct rs6000_frame_cache);
+  (*this_cache) = cache;
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      /* At this point the stack looks as if we just entered the
+	 function, and the return address is stored in LR.  */
+      CORE_ADDR sp, lr;
+
+      sp = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
+      lr = get_frame_register_unsigned (this_frame, tdep->ppc_lr_regnum);
+
+      cache->base = sp;
+      cache->initial_sp = sp;
+
+      trad_frame_set_value (cache->saved_regs,
+			    gdbarch_pc_regnum (gdbarch), lr);
+    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
+
+  return cache;
+}
+
+static void
+rs6000_epilogue_frame_this_id (struct frame_info *this_frame,
+			       void **this_cache, struct frame_id *this_id)
+{
+  CORE_ADDR pc;
+  struct rs6000_frame_cache *info =
+    rs6000_epilogue_frame_cache (this_frame, this_cache);
+
+  pc = get_frame_func (this_frame);
+  if (info->base == 0)
+    (*this_id) = frame_id_build_unavailable_stack (pc);
+  else
+    (*this_id) = frame_id_build (info->base, pc);
+}
+
+static struct value *
+rs6000_epilogue_frame_prev_register (struct frame_info *this_frame,
+				     void **this_cache, int regnum)
+{
+  struct rs6000_frame_cache *info =
+    rs6000_epilogue_frame_cache (this_frame, this_cache);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
+}
+
+static int
+rs6000_epilogue_frame_sniffer (const struct frame_unwind *self,
+			       struct frame_info *this_frame,
+			       void **this_prologue_cache)
+{
+  if (frame_relative_level (this_frame) == 0)
+    return rs6000_in_function_epilogue_frame_p (this_frame,
+						get_frame_arch (this_frame),
+						get_frame_pc (this_frame));
+  else
+    return 0;
+}
+
+static const struct frame_unwind rs6000_epilogue_frame_unwind =
+{
+  NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
+  rs6000_epilogue_frame_this_id, rs6000_epilogue_frame_prev_register,
+  NULL,
+  rs6000_epilogue_frame_sniffer
+};
 
 
 static CORE_ADDR
@@ -4154,6 +4244,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case GDB_OSABI_NETBSD_ELF:
     case GDB_OSABI_UNKNOWN:
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
+      frame_unwind_append_unwinder (gdbarch, &rs6000_epilogue_frame_unwind);
       frame_unwind_append_unwinder (gdbarch, &rs6000_frame_unwind);
       set_gdbarch_dummy_id (gdbarch, rs6000_dummy_id);
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
@@ -4162,6 +4253,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
+      frame_unwind_append_unwinder (gdbarch, &rs6000_epilogue_frame_unwind);
       frame_unwind_append_unwinder (gdbarch, &rs6000_frame_unwind);
       set_gdbarch_dummy_id (gdbarch, rs6000_dummy_id);
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
