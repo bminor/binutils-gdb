@@ -49,6 +49,8 @@
 #include "spu-tdep.h"
 #include "xml-syscall.h"
 #include "linux-tdep.h"
+#include "linux-record.h"
+#include "record-full.h"
 
 #include "stap-probe.h"
 #include "ax.h"
@@ -764,6 +766,167 @@ ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
   return ret;
 }
 
+/* PPC process record-replay */
+
+static struct linux_record_tdep ppc_linux_record_tdep;
+static struct linux_record_tdep ppc64_linux_record_tdep;
+
+static enum gdb_syscall
+ppc_canonicalize_syscall (int syscall)
+{
+  /* See arch/powerpc/include/uapi/asm/unistd.h */
+
+  if (syscall <= 165)
+    return syscall;
+  else if (syscall >= 167 && syscall <= 190)	/* Skip query_module 166 */
+    return syscall + 1;
+  else if (syscall >= 192 && syscall <= 197)	/* mmap2 */
+    return syscall;
+  else if (syscall == 208)			/* tkill */
+    return gdb_sys_tkill;
+  else if (syscall >= 207 && syscall <= 220)	/* gettid */
+    return syscall + 224 - 207;
+  else if (syscall >= 234 && syscall <= 239)	/* exit_group */
+    return syscall + 252 - 234;
+  else if (syscall >= 240 && syscall <=248)	/* timer_create */
+    return syscall += 259 - 240;
+  else if (syscall >= 250 && syscall <=251)	/* tgkill */
+    return syscall + 270 - 250;
+  else if (syscall == 336)
+    return gdb_sys_recv;
+  else if (syscall == 337)
+    return gdb_sys_recvfrom;
+  else if (syscall == 342)
+    return gdb_sys_recvmsg;
+  return -1;
+}
+
+static int
+ppc_linux_syscall_record (struct regcache *regcache)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ULONGEST scnum;
+  enum gdb_syscall syscall_gdb;
+  int ret;
+  int i;
+
+  regcache_raw_read_unsigned (regcache, tdep->ppc_gp0_regnum, &scnum);
+  syscall_gdb = ppc_canonicalize_syscall (scnum);
+
+  if (syscall_gdb < 0)
+    {
+      printf_unfiltered (_("Process record and replay target doesn't "
+			   "support syscall number %d\n"), (int) scnum);
+      return 0;
+    }
+
+  if (syscall_gdb == gdb_sys_sigreturn
+      || syscall_gdb == gdb_sys_rt_sigreturn)
+   {
+     int i, j;
+     int regsets[] = { tdep->ppc_gp0_regnum,
+		       tdep->ppc_fp0_regnum,
+		       tdep->ppc_vr0_regnum,
+		       tdep->ppc_vsr0_upper_regnum };
+
+     for (j = 0; j < 4; j++)
+       {
+	 if (regsets[j] == -1)
+	   continue;
+	 for (i = 0; i < 32; i++)
+	   {
+	     if (record_full_arch_list_add_reg (regcache, regsets[j] + i))
+	       return -1;
+	   }
+       }
+
+     if (record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum))
+       return -1;
+     if (record_full_arch_list_add_reg (regcache, tdep->ppc_ctr_regnum))
+       return -1;
+     if (record_full_arch_list_add_reg (regcache, tdep->ppc_lr_regnum))
+       return -1;
+     if (record_full_arch_list_add_reg (regcache, tdep->ppc_xer_regnum))
+       return -1;
+
+     return 0;
+   }
+
+  if (tdep->wordsize == 8)
+    ret = record_linux_system_call (syscall_gdb, regcache,
+				    &ppc64_linux_record_tdep);
+  else
+    ret = record_linux_system_call (syscall_gdb, regcache,
+				    &ppc_linux_record_tdep);
+
+  if (ret != 0)
+    return ret;
+
+  /* Record registers clobbered during syscall.  */
+  for (i = 3; i <= 12; i++)
+    {
+      if (record_full_arch_list_add_reg (regcache, tdep->ppc_gp0_regnum + i))
+	return -1;
+    }
+  if (record_full_arch_list_add_reg (regcache, tdep->ppc_gp0_regnum + 0))
+    return -1;
+  if (record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum))
+    return -1;
+  if (record_full_arch_list_add_reg (regcache, tdep->ppc_ctr_regnum))
+    return -1;
+  if (record_full_arch_list_add_reg (regcache, tdep->ppc_lr_regnum))
+    return -1;
+
+  return 0;
+}
+
+static int
+ppc_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
+			 enum gdb_signal signal)
+{
+  /* See handle_rt_signal64 in arch/powerpc/kernel/signal_64.c
+	 handle_rt_signal32 in arch/powerpc/kernel/signal_32.c
+	 arch/powerpc/include/asm/ptrace.h
+     for details.  */
+  const int SIGNAL_FRAMESIZE = 128;
+  const int sizeof_rt_sigframe = 1440 * 2 + 8 * 2 + 4 * 6 + 8 + 8 + 128 + 512;
+  ULONGEST sp;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int i;
+
+  for (i = 3; i <= 12; i++)
+    {
+      if (record_full_arch_list_add_reg (regcache, tdep->ppc_gp0_regnum + i))
+	return -1;
+    }
+
+  if (record_full_arch_list_add_reg (regcache, tdep->ppc_lr_regnum))
+    return -1;
+  if (record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum))
+    return -1;
+  if (record_full_arch_list_add_reg (regcache, tdep->ppc_ctr_regnum))
+    return -1;
+  if (record_full_arch_list_add_reg (regcache, gdbarch_pc_regnum (gdbarch)))
+    return -1;
+  if (record_full_arch_list_add_reg (regcache, gdbarch_sp_regnum (gdbarch)))
+    return -1;
+
+  /* Record the change in the stack.
+     frame-size = sizeof (struct rt_sigframe) + SIGNAL_FRAMESIZE  */
+  regcache_raw_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch), &sp);
+  sp -= SIGNAL_FRAMESIZE;
+  sp -= sizeof_rt_sigframe;
+
+  if (record_full_arch_list_add_mem (sp, SIGNAL_FRAMESIZE + sizeof_rt_sigframe))
+    return -1;
+
+  if (record_full_arch_list_add_end ())
+    return -1;
+
+  return 0;
+}
+
 static void
 ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
@@ -1234,6 +1397,234 @@ static const struct frame_unwind ppu2spu_unwind = {
   ppu2spu_prev_arch,
 };
 
+/* Initialize linux_record_tdep if not initialized yet.  */
+
+static void
+ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
+			    int wordsize)
+{
+  /* Simply return if it had been initialized.  */
+  if (record_tdep->size_pointer != 0)
+    return;
+
+  /* These values are the size of the type that will be used in a system
+     call.  They are obtained from Linux Kernel source.  */
+
+  if (wordsize == 8)
+    {
+      record_tdep->size_pointer = 8;
+      record_tdep->size__old_kernel_stat = 32;
+      record_tdep->size_tms = 32;
+      record_tdep->size_loff_t = 8;
+      record_tdep->size_flock = 32;
+      record_tdep->size_oldold_utsname = 45;
+      record_tdep->size_ustat = 32;
+      record_tdep->size_old_sigaction = 152;
+      record_tdep->size_old_sigset_t = 128;
+      record_tdep->size_rlimit = 16;
+      record_tdep->size_rusage = 144;
+      record_tdep->size_timeval = 16;
+      record_tdep->size_timezone = 8;
+      record_tdep->size_old_gid_t = 4;
+      record_tdep->size_old_uid_t = 4;
+      record_tdep->size_fd_set = 128;
+      record_tdep->size_dirent = 280;
+      record_tdep->size_dirent64 = 280;
+      record_tdep->size_statfs = 120;
+      record_tdep->size_statfs64 = 120;
+      record_tdep->size_sockaddr = 16;
+      record_tdep->size_int = 4;
+      record_tdep->size_long = 8;
+      record_tdep->size_ulong = 8;
+      record_tdep->size_msghdr = 56;
+      record_tdep->size_itimerval = 32;
+      record_tdep->size_stat = 144;
+      record_tdep->size_old_utsname = 325;
+      record_tdep->size_sysinfo = 112;
+      record_tdep->size_msqid_ds = 120;
+      record_tdep->size_shmid_ds = 112;
+      record_tdep->size_new_utsname = 390;
+      record_tdep->size_timex = 208;
+      record_tdep->size_mem_dqinfo = 24;
+      record_tdep->size_if_dqblk = 72;
+      record_tdep->size_fs_quota_stat = 80;
+      record_tdep->size_timespec = 16;
+      record_tdep->size_pollfd = 8;
+      record_tdep->size_NFS_FHSIZE = 32;
+      record_tdep->size_knfsd_fh = 132;
+      record_tdep->size_TASK_COMM_LEN = 32;
+      record_tdep->size_sigaction = 152;
+      record_tdep->size_sigset_t = 128;
+      record_tdep->size_siginfo_t = 128;
+      record_tdep->size_cap_user_data_t = 8;
+      record_tdep->size_stack_t = 24;
+      record_tdep->size_off_t = 8;
+      record_tdep->size_stat64 = 104;
+      record_tdep->size_gid_t = 4;
+      record_tdep->size_uid_t = 4;
+      record_tdep->size_PAGE_SIZE = 0x10000;	/* 64KB */
+      record_tdep->size_flock64 = 32;
+      record_tdep->size_io_event = 32;
+      record_tdep->size_iocb = 64;
+      record_tdep->size_epoll_event = 16;
+      record_tdep->size_itimerspec = 32;
+      record_tdep->size_mq_attr = 64;
+      record_tdep->size_siginfo = 128;
+      record_tdep->size_termios = 44;
+      record_tdep->size_pid_t = 4;
+      record_tdep->size_winsize = 8;
+      record_tdep->size_serial_struct = 72;
+      record_tdep->size_serial_icounter_struct = 80;
+      record_tdep->size_size_t = 8;
+      record_tdep->size_iovec = 16;
+    }
+  else if (wordsize == 4)
+    {
+      record_tdep->size_pointer = 4;
+      record_tdep->size__old_kernel_stat = 32;
+      record_tdep->size_tms = 16;
+      record_tdep->size_loff_t = 8;
+      record_tdep->size_flock = 16;
+      record_tdep->size_oldold_utsname = 45;
+      record_tdep->size_ustat = 20;
+      record_tdep->size_old_sigaction = 152;
+      record_tdep->size_old_sigset_t = 128;
+      record_tdep->size_rlimit = 8;
+      record_tdep->size_rusage = 72;
+      record_tdep->size_timeval = 8;
+      record_tdep->size_timezone = 8;
+      record_tdep->size_old_gid_t = 4;
+      record_tdep->size_old_uid_t = 4;
+      record_tdep->size_fd_set = 128;
+      record_tdep->size_dirent = 268;
+      record_tdep->size_dirent64 = 280;
+      record_tdep->size_statfs = 64;
+      record_tdep->size_statfs64 = 88;
+      record_tdep->size_sockaddr = 16;
+      record_tdep->size_int = 4;
+      record_tdep->size_long = 4;
+      record_tdep->size_ulong = 4;
+      record_tdep->size_msghdr = 28;
+      record_tdep->size_itimerval = 16;
+      record_tdep->size_stat = 88;
+      record_tdep->size_old_utsname = 325;
+      record_tdep->size_sysinfo = 64;
+      record_tdep->size_msqid_ds = 68;
+      record_tdep->size_shmid_ds = 60;
+      record_tdep->size_new_utsname = 390;
+      record_tdep->size_timex = 128;
+      record_tdep->size_mem_dqinfo = 24;
+      record_tdep->size_if_dqblk = 72;
+      record_tdep->size_fs_quota_stat = 80;
+      record_tdep->size_timespec = 8;
+      record_tdep->size_pollfd = 8;
+      record_tdep->size_NFS_FHSIZE = 32;
+      record_tdep->size_knfsd_fh = 132;
+      record_tdep->size_TASK_COMM_LEN = 32;
+      record_tdep->size_sigaction = 140;
+      record_tdep->size_sigset_t = 128;
+      record_tdep->size_siginfo_t = 128;
+      record_tdep->size_cap_user_data_t = 4;
+      record_tdep->size_stack_t = 12;
+      record_tdep->size_off_t = 4;
+      record_tdep->size_stat64 = 104;
+      record_tdep->size_gid_t = 4;
+      record_tdep->size_uid_t = 4;
+      record_tdep->size_PAGE_SIZE = 0x10000;	/* 64KB */
+      record_tdep->size_flock64 = 32;
+      record_tdep->size_io_event = 32;
+      record_tdep->size_iocb = 64;
+      record_tdep->size_epoll_event = 16;
+      record_tdep->size_itimerspec = 16;
+      record_tdep->size_mq_attr = 32;
+      record_tdep->size_siginfo = 128;
+      record_tdep->size_termios = 44;
+      record_tdep->size_pid_t = 4;
+      record_tdep->size_winsize = 8;
+      record_tdep->size_serial_struct = 60;
+      record_tdep->size_serial_icounter_struct = 80;
+      record_tdep->size_size_t = 4;
+      record_tdep->size_iovec = 8;
+    }
+  else
+    internal_error (__FILE__, __LINE__, _("unexpected wordsize"));
+
+  /* These values are the second argument of system call "sys_fcntl"
+     and "sys_fcntl64".  They are obtained from Linux Kernel source.  */
+  record_tdep->fcntl_F_GETLK = 5;
+  record_tdep->fcntl_F_GETLK64 = 12;
+  record_tdep->fcntl_F_SETLK64 = 13;
+  record_tdep->fcntl_F_SETLKW64 = 14;
+
+  record_tdep->arg1 = PPC_R0_REGNUM + 3;
+  record_tdep->arg2 = PPC_R0_REGNUM + 4;
+  record_tdep->arg3 = PPC_R0_REGNUM + 5;
+  record_tdep->arg4 = PPC_R0_REGNUM + 6;
+  record_tdep->arg5 = PPC_R0_REGNUM + 7;
+  record_tdep->arg6 = PPC_R0_REGNUM + 8;
+
+  /* These values are the second argument of system call "sys_ioctl".
+     They are obtained from Linux Kernel source.
+     See arch/powerpc/include/uapi/asm/ioctls.h.  */
+  record_tdep->ioctl_TCGETS = 0x403c7413;
+  record_tdep->ioctl_TCSETS = 0x803c7414;
+  record_tdep->ioctl_TCSETSW = 0x803c7415;
+  record_tdep->ioctl_TCSETSF = 0x803c7416;
+  record_tdep->ioctl_TCGETA = 0x40147417;
+  record_tdep->ioctl_TCSETA = 0x80147418;
+  record_tdep->ioctl_TCSETAW = 0x80147419;
+  record_tdep->ioctl_TCSETAF = 0x8014741c;
+  record_tdep->ioctl_TCSBRK = 0x2000741d;
+  record_tdep->ioctl_TCXONC = 0x2000741e;
+  record_tdep->ioctl_TCFLSH = 0x2000741f;
+  record_tdep->ioctl_TIOCEXCL = 0x540c;
+  record_tdep->ioctl_TIOCNXCL = 0x540d;
+  record_tdep->ioctl_TIOCSCTTY = 0x540e;
+  record_tdep->ioctl_TIOCGPGRP = 0x40047477;
+  record_tdep->ioctl_TIOCSPGRP = 0x80047476;
+  record_tdep->ioctl_TIOCOUTQ = 0x40047473;
+  record_tdep->ioctl_TIOCSTI = 0x5412;
+  record_tdep->ioctl_TIOCGWINSZ = 0x40087468;
+  record_tdep->ioctl_TIOCSWINSZ = 0x80087467;
+  record_tdep->ioctl_TIOCMGET = 0x5415;
+  record_tdep->ioctl_TIOCMBIS = 0x5416;
+  record_tdep->ioctl_TIOCMBIC = 0x5417;
+  record_tdep->ioctl_TIOCMSET = 0x5418;
+  record_tdep->ioctl_TIOCGSOFTCAR = 0x5419;
+  record_tdep->ioctl_TIOCSSOFTCAR = 0x541a;
+  record_tdep->ioctl_FIONREAD = 0x4004667f;
+  record_tdep->ioctl_TIOCINQ = 0x4004667f;
+  record_tdep->ioctl_TIOCLINUX = 0x541c;
+  record_tdep->ioctl_TIOCCONS = 0x541d;
+  record_tdep->ioctl_TIOCGSERIAL = 0x541e;
+  record_tdep->ioctl_TIOCSSERIAL = 0x541f;
+  record_tdep->ioctl_TIOCPKT = 0x5420;
+  record_tdep->ioctl_FIONBIO = 0x8004667e;
+  record_tdep->ioctl_TIOCNOTTY = 0x5422;
+  record_tdep->ioctl_TIOCSETD = 0x5423;
+  record_tdep->ioctl_TIOCGETD = 0x5424;
+  record_tdep->ioctl_TCSBRKP = 0x5425;
+  record_tdep->ioctl_TIOCSBRK = 0x5427;
+  record_tdep->ioctl_TIOCCBRK = 0x5428;
+  record_tdep->ioctl_TIOCGSID = 0x5429;
+  record_tdep->ioctl_TIOCGPTN = 0x40045430;
+  record_tdep->ioctl_TIOCSPTLCK = 0x80045431;
+  record_tdep->ioctl_FIONCLEX = 0x20006602;
+  record_tdep->ioctl_FIOCLEX = 0x20006601;
+  record_tdep->ioctl_FIOASYNC = 0x8004667d;
+  record_tdep->ioctl_TIOCSERCONFIG = 0x5453;
+  record_tdep->ioctl_TIOCSERGWILD = 0x5454;
+  record_tdep->ioctl_TIOCSERSWILD = 0x5455;
+  record_tdep->ioctl_TIOCGLCKTRMIOS = 0x5456;
+  record_tdep->ioctl_TIOCSLCKTRMIOS = 0x5457;
+  record_tdep->ioctl_TIOCSERGSTRUCT = 0x5458;
+  record_tdep->ioctl_TIOCSERGETLSR = 0x5459;
+  record_tdep->ioctl_TIOCSERGETMULTI = 0x545a;
+  record_tdep->ioctl_TIOCSERSETMULTI = 0x545b;
+  record_tdep->ioctl_TIOCMIWAIT = 0x545c;
+  record_tdep->ioctl_TIOCGICOUNT = 0x545d;
+  record_tdep->ioctl_FIOQSIZE = 0x40086680;
+}
 
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
@@ -1414,6 +1805,14 @@ ppc_linux_init_abi (struct gdbarch_info info,
     }
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
+
+  /* Support reverse debugging.  */
+  set_gdbarch_process_record (gdbarch, ppc_process_record);
+  set_gdbarch_process_record_signal (gdbarch, ppc_linux_record_signal);
+  tdep->ppc_syscall_record = ppc_linux_syscall_record;
+
+  ppc_init_linux_record_tdep (&ppc_linux_record_tdep, 4);
+  ppc_init_linux_record_tdep (&ppc64_linux_record_tdep, 8);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
