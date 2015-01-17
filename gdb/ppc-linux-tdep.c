@@ -51,6 +51,7 @@
 #include "linux-tdep.h"
 #include "linux-record.h"
 #include "record-full.h"
+#include "infrun.h"
 
 #include "stap-probe.h"
 #include "ax.h"
@@ -314,31 +315,50 @@ ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR target = 0;
+  int scan_limit, i;
 
-  if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub, insnbuf))
+  scan_limit = 1;
+  /* When reverse-debugging, scan backward to check whether we are
+     in the middle of trampoline code.  */
+  if (execution_direction == EXEC_REVERSE)
+    scan_limit = 4;	/* At more 4 instructions.  */
+
+  for (i = 0; i < scan_limit; i++)
     {
-      /* Insn pattern is
-		lis   r11, xxxx
-		lwz   r11, xxxx(r11)
-	 Branch target is in r11.  */
+      if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub, insnbuf))
+	{
+	  /* Insn pattern is
+	     lis   r11, xxxx
+	     lwz   r11, xxxx(r11)
+	     Branch target is in r11.  */
 
-      target = (ppc_insn_d_field (insnbuf[0]) << 16)
-	| ppc_insn_d_field (insnbuf[1]);
-      target = read_memory_unsigned_integer (target, 4, byte_order);
+	  target = (ppc_insn_d_field (insnbuf[0]) << 16)
+		   | ppc_insn_d_field (insnbuf[1]);
+	  target = read_memory_unsigned_integer (target, 4, byte_order);
+	}
+      else if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so,
+					insnbuf))
+	{
+	  /* Insn pattern is
+	     lwz   r11, xxxx(r30)
+	     Branch target is in r11.  */
+
+	  target = get_frame_register_unsigned (frame,
+						tdep->ppc_gp0_regnum + 30)
+		   + ppc_insn_d_field (insnbuf[0]);
+	  target = read_memory_unsigned_integer (target, 4, byte_order);
+	}
+      else
+	{
+	  /* Scan backward one more instructions if doesn't match.  */
+	  pc -= 4;
+	  continue;
+	}
+
+      return target;
     }
 
-  if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so, insnbuf))
-    {
-      /* Insn pattern is
-		lwz   r11, xxxx(r30)
-	 Branch target is in r11.  */
-
-      target = get_frame_register_unsigned (frame, tdep->ppc_gp0_regnum + 30)
-	       + ppc_insn_d_field (insnbuf[0]);
-      target = read_memory_unsigned_integer (target, 4, byte_order);
-    }
-
-  return target;
+  return 0;
 }
 
 /* Wrappers to handle Linux-only registers.  */

@@ -1,4 +1,12 @@
 2015-01-26  Wei-cheng Wang  <cole945@gmail.com>
+
+	Backport from mainline:
+
+	* ppc-linux-tdep.c (ppc_skip_trampoline_code):
+	Scan PLT stub backward for reverse debugging.
+	* ppc64-tdep.c (ppc64_skip_trampoline_code): Likewise.
+
+2015-01-26  Wei-cheng Wang  <cole945@gmail.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
 	Backport from mainline:
