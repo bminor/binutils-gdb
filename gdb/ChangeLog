@@ -2,6 +2,17 @@
 
 	Backport from mainline:
 
+	* rs6000-tdep.c (ppc_process_record_op4, ppc_process_record_op19,
+	ppc_process_record_op31, ppc_process_record_op59,
+	ppc_process_record_op60, ppc_process_record_op63,
+	ppc_process_record): Fix -Wformat warning.
+	* rs6000-tdep.c (rs6000_epilogue_frame_cache, ppc_process_record_op60):
+	Remove unused variables.
+
+2015-01-26  Wei-cheng Wang  <cole945@gmail.com>
+
+	Backport from mainline:
+
 	* ppc-linux-tdep.c (ppc_skip_trampoline_code):
 	Scan PLT stub backward for reverse debugging.
 	* ppc64-tdep.c (ppc64_skip_trampoline_code): Likewise.
