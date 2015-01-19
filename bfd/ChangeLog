@@ -1,6 +1,6 @@
 2015-01-19  Alan Modra  <amodra@gmail.com>
 
-	PR 17165
+	PR ld/17615
 	* elf-bfd.h (ELF_COMMON_DEF_P): Note that this might be true for
 	linker script assignments too.
 	* elflink.c (elf_gc_sweep_symbol): Don't drop ELF_COMMON_DEF syms.
