@@ -19,6 +19,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+
+#include "defs.h"
+
+#if !defined HAVE_CURSES_H && !defined HAVE_NCURSES_H && !defined HAVE_NCURSES_NCURSES_H
+
 #include <stdlib.h>
 
 /* -Wmissing-prototypes */
@@ -71,3 +76,5 @@ tgoto (const char *cap, int col, int row)
 {
   return NULL;
 }
+
+#endif	/* !HAVE_CURSES_H && !HAVE_NCURSES_H && !HAVE_NCURSES_NCURSES_H */

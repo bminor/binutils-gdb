@@ -1,3 +1,13 @@
+2015-01-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.ac [*mingw32*]: Only add windows-termcap.o to
+	CONFIG_OBS if not building with a curses library.
+	* configure: Regenerate.
+
+	* windows-termcap.c: Include defs.h.  Make the whole body empty if
+	either one of HAVE_CURSES_H or HAVE_NCURSES_H or
+	HAVE_NCURSES_NCURSES_H is defined.
+
 2015-01-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Move divide operator
