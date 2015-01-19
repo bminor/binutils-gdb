@@ -1,3 +1,8 @@
+2015-01-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Move divide operator
+	from end of line to start of next line.
+
 2015-01-17  Wei-cheng Wang  <cole945@gmail.com>
 
 	* ppc-linux-tdep.c (ppc_skip_trampoline_code):
