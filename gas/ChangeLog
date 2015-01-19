@@ -1,3 +1,8 @@
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	* read.c (s_reloc): Match BFD_RELOC_NONE, BFD_RELOC{8,16,32,64}.
+	* write.c (get_frag_for_reloc): Allow match just past end of frag.
+
 2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* config/tc-s390.c (struct pd_reg): Remove.
