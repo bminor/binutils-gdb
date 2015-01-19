@@ -1,3 +1,13 @@
+2015-01-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.ac [*mingw32*]: Only add windows-termcap.o to
+	CONFIG_OBS if not building with a curses library.
+	* configure: Regenerate.
+
+	* windows-termcap.c: Include defs.h.  Make the whole body empty if
+	either one of HAVE_CURSES_H or HAVE_NCURSES_H or
+	HAVE_NCURSES_NCURSES_H is defined.
+
 2015-01-16  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-win.c (tui_rehighlight_all, tui_set_var_cmd): New

@@ -607,9 +607,10 @@ case $host_os in
     ac_cv_search_tgetent="none required"
     ;;
   *mingw32*)
-    ac_cv_search_tgetent="none required"
-    CONFIG_OBS="$CONFIG_OBS windows-termcap.o"
-    ;;
+    if test x"$prefer_curses" != xyes; then
+      ac_cv_search_tgetent="none required"
+      CONFIG_OBS="$CONFIG_OBS windows-termcap.o"
+    fi ;;
 esac
 
 # These are the libraries checked by Readline.
