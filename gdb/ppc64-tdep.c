@@ -449,7 +449,10 @@ ppc64_standard_linkage4_target (struct frame_info *frame,
 
 
 /* Given that we've begun executing a call trampoline at PC, return
-   the entry point of the function the trampoline will go to.  */
+   the entry point of the function the trampoline will go to.
+
+   When the execution direction is EXEC_REVERSE, scan backward to
+   check whether we are in the middle of a PLT stub.  */
 
 CORE_ADDR
 ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)

@@ -3349,6 +3349,9 @@ static const struct frame_unwind rs6000_frame_unwind =
   default_frame_sniffer
 };
 
+/* Allocate and initialize a frame cache for an epilogue frame.
+   SP is restored and prev-PC is stored in LR.  */
+
 static struct rs6000_frame_cache *
 rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
@@ -3385,6 +3388,9 @@ rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   return cache;
 }
 
+/* Implementation of frame_unwind.this_id, as defined in frame_unwind.h.
+   Return the frame ID of an epilogue frame.  */
+
 static void
 rs6000_epilogue_frame_this_id (struct frame_info *this_frame,
 			       void **this_cache, struct frame_id *this_id)
@@ -3400,6 +3406,9 @@ rs6000_epilogue_frame_this_id (struct frame_info *this_frame,
     (*this_id) = frame_id_build (info->base, pc);
 }
 
+/* Implementation of frame_unwind.prev_register, as defined in frame_unwind.h.
+   Return the register value of REGNUM in previous frame.  */
+
 static struct value *
 rs6000_epilogue_frame_prev_register (struct frame_info *this_frame,
 				     void **this_cache, int regnum)
@@ -3408,6 +3417,9 @@ rs6000_epilogue_frame_prev_register (struct frame_info *this_frame,
     rs6000_epilogue_frame_cache (this_frame, this_cache);
   return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
+
+/* Implementation of frame_unwind.sniffer, as defined in frame_unwind.h.
+   Check whether this an epilogue frame.  */
 
 static int
 rs6000_epilogue_frame_sniffer (const struct frame_unwind *self,
@@ -3421,6 +3433,9 @@ rs6000_epilogue_frame_sniffer (const struct frame_unwind *self,
   else
     return 0;
 }
+
+/* Frame unwinder for epilogue frame.  This is required for reverse step-over
+   a function without debug information.  */
 
 static const struct frame_unwind rs6000_epilogue_frame_unwind =
 {
@@ -3668,7 +3683,9 @@ bfd_uses_spe_extensions (bfd *abfd)
 #define PPC_XT(insn)	((PPC_TX (insn) << 5) | PPC_T (insn))
 #define PPC_XER_NB(xer)	(xer & 0x7f)
 
-/* Record Vector-Scalar Registers.  */
+/* Record Vector-Scalar Registers.
+   For VSR less than 32, it's represented by an FPR and an VSR-upper register.
+   Otherwise, it's just a VR register.  Record them accordingly.  */
 
 static int
 ppc_record_vsr (struct regcache *regcache, struct gdbarch_tdep *tdep, int vsr)
@@ -3693,11 +3710,12 @@ ppc_record_vsr (struct regcache *regcache, struct gdbarch_tdep *tdep, int vsr)
   return 0;
 }
 
-/* Parse instructions of primary opcode-4.  */
+/* Parse and record instructions primary opcode-4 at ADDR.
+   Return 0 if successful.  */
 
 static int
 ppc_process_record_op4 (struct gdbarch *gdbarch, struct regcache *regcache,
-			   CORE_ADDR addr, uint32_t insn)
+			CORE_ADDR addr, uint32_t insn)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int ext = PPC_FIELD (insn, 21, 11);
@@ -3961,7 +3979,8 @@ ppc_process_record_op4 (struct gdbarch *gdbarch, struct regcache *regcache,
   return -1;
 }
 
-/* Parse instructions of primary opcode-19.  */
+/* Parse and record instructions of primary opcode-19 at ADDR.
+   Return 0 if successful.  */
 
 static int
 ppc_process_record_op19 (struct gdbarch *gdbarch, struct regcache *regcache,
@@ -4004,7 +4023,8 @@ ppc_process_record_op19 (struct gdbarch *gdbarch, struct regcache *regcache,
   return -1;
 }
 
-/* Parse instructions of primary opcode-31.  */
+/* Parse and record instructions of primary opcode-31 at ADDR.
+   Return 0 if successful.  */
 
 static int
 ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
@@ -4482,7 +4502,8 @@ UNKNOWN_OP:
   return -1;
 }
 
-/* Parse instructions of primary opcode-59.  */
+/* Parse and record instructions of primary opcode-59 at ADDR.
+   Return 0 if successful.  */
 
 static int
 ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
@@ -4574,7 +4595,8 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
   return -1;
 }
 
-/* Parse instructions of primary opcode-60.  */
+/* Parse and record instructions of primary opcode-60 at ADDR.
+   Return 0 if successful.  */
 
 static int
 ppc_process_record_op60 (struct gdbarch *gdbarch, struct regcache *regcache,
@@ -4856,7 +4878,8 @@ ppc_process_record_op60 (struct gdbarch *gdbarch, struct regcache *regcache,
   return -1;
 }
 
-/* Parse instructions of primary opcode-63.  */
+/* Parse and record instructions of primary opcode-63 at ADDR.
+   Return 0 if successful.  */
 
 static int
 ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
