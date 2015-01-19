@@ -49,7 +49,7 @@ void rx_dump_symtab (bfd *, void *, void *);
 
 static reloc_howto_type rx_elf_howto_table [] =
 {
-  RXREL (NONE,         0,  0, 0, dont,     FALSE),
+  RXREL (NONE,         3,  0, 0, dont,     FALSE),
   RXREL (DIR32,        2, 32, 0, signed,   FALSE),
   RXREL (DIR24S,       2, 24, 0, signed,   FALSE),
   RXREL (DIR16,        1, 16, 0, dont,     FALSE),

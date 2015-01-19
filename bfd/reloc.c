@@ -579,7 +579,7 @@ bfd_perform_relocation (bfd *abfd,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
-  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  bfd_size_type octets;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -618,15 +618,12 @@ bfd_perform_relocation (bfd *abfd,
 	return cont;
     }
 
-  /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section)
-      /* PR 17512: file: c146ab8b.
-	 PR 17512: file: 46dff27f.
-	 Include the size of the reloc in the test for out of range addresses.  */
-      - bfd_get_reloc_size (howto)
-      /* PR 17512: file: 38e53ebf
-	 Add make sure that there is enough room for the relocation to be applied.  */
-      || bfd_get_reloc_size (howto) > bfd_get_section_limit (abfd, input_section))
+  /* Is the address of the relocation really within the section?
+     Include the size of the reloc in the test for out of range addresses.
+     PR 17512: file: c146ab8b, 46dff27f, 38e53ebf.  */
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  if (octets + bfd_get_reloc_size (howto)
+      > bfd_get_section_limit_octets (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -976,7 +973,7 @@ bfd_install_relocation (bfd *abfd,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
-  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  bfd_size_type octets;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -1009,7 +1006,9 @@ bfd_install_relocation (bfd *abfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  if (octets + bfd_get_reloc_size (howto)
+      > bfd_get_section_limit_octets (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1344,9 +1343,11 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
 			  bfd_vma addend)
 {
   bfd_vma relocation;
+  bfd_size_type octets = address * bfd_octets_per_byte (input_bfd);
 
   /* Sanity check the address.  */
-  if (address > bfd_get_section_limit (input_bfd, input_section))
+  if (octets + bfd_get_reloc_size (howto)
+      > bfd_get_section_limit_octets (input_bfd, input_section))
     return bfd_reloc_outofrange;
 
   /* This function assumes that we are dealing with a basic relocation
@@ -1401,8 +1402,9 @@ _bfd_relocate_contents (reloc_howto_type *howto,
   switch (size)
     {
     default:
-    case 0:
       abort ();
+    case 0:
+      return bfd_reloc_ok;
     case 1:
       x = bfd_get_8 (input_bfd, location);
       break;
@@ -1569,8 +1571,9 @@ _bfd_clear_contents (reloc_howto_type *howto,
   switch (size)
     {
     default:
-    case 0:
       abort ();
+    case 0:
+      return;
     case 1:
       x = bfd_get_8 (input_bfd, location);
       break;

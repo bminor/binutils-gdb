@@ -3152,7 +3152,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 
       size = bfd_get_reloc_size (howto);
       buf = bfd_zmalloc (size);
-      if (buf == NULL)
+      if (buf == NULL && size != 0)
 	return FALSE;
       r = MY_relocate_contents (howto, flaginfo->output_bfd,
 				pr->addend, buf);

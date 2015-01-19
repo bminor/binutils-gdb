@@ -58,8 +58,8 @@ static reloc_howto_type elf_arc_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_ARC_NONE,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
-	 32,			/* Bitsize.  */
+	 3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Bitsize.  */
 	 FALSE,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
 	 complain_overflow_bitfield, /* Complain_on_overflow.  */
