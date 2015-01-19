@@ -246,7 +246,7 @@ rl78_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   if (code == BFD_RELOC_RL78_32_OP)
     return rl78_elf_howto_table + R_RL78_DIR32;
 
-  for (i = ARRAY_SIZE (rl78_reloc_map); --i;)
+  for (i = ARRAY_SIZE (rl78_reloc_map); i--;)
     if (rl78_reloc_map [i].bfd_reloc_val == code)
       return rl78_elf_howto_table + rl78_reloc_map[i].rl78_reloc_val;
 

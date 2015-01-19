@@ -764,6 +764,7 @@ struct elf_reloc_map
 };
 
 static const struct elf_reloc_map nios2_reloc_map[] = {
+  {BFD_RELOC_NONE, R_NIOS2_NONE},
   {BFD_RELOC_NIOS2_S16, R_NIOS2_S16},
   {BFD_RELOC_NIOS2_U16, R_NIOS2_U16},
   {BFD_RELOC_16_PCREL, R_NIOS2_PCREL16},

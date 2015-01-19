@@ -264,7 +264,7 @@ m32c_reloc_type_lookup
 {
   unsigned int i;
 
-  for (i = ARRAY_SIZE (m32c_reloc_map); --i;)
+  for (i = ARRAY_SIZE (m32c_reloc_map); i--;)
     if (m32c_reloc_map [i].bfd_reloc_val == code)
       return & m32c_elf_howto_table [m32c_reloc_map[i].m32c_reloc_val];
 

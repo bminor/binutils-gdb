@@ -334,7 +334,7 @@ xstormy16_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = ARRAY_SIZE (xstormy16_reloc_map); --i;)
+  for (i = ARRAY_SIZE (xstormy16_reloc_map); i--;)
     {
       const reloc_map * entry;
 

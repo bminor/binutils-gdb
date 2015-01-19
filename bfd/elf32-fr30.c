@@ -343,7 +343,7 @@ fr30_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned int i;
 
   for (i = sizeof (fr30_reloc_map) / sizeof (fr30_reloc_map[0]);
-       --i;)
+       i--;)
     if (fr30_reloc_map [i].bfd_reloc_val == code)
       return & fr30_elf_howto_table [fr30_reloc_map[i].fr30_reloc_val];
 

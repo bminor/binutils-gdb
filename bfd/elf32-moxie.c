@@ -99,7 +99,7 @@ moxie_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned int i;
 
   for (i = sizeof (moxie_reloc_map) / sizeof (moxie_reloc_map[0]);
-       --i;)
+       i--;)
     if (moxie_reloc_map [i].bfd_reloc_val == code)
       return & moxie_elf_howto_table [moxie_reloc_map[i].moxie_reloc_val];
 

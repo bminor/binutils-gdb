@@ -1065,13 +1065,13 @@ bfin_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 			    bfd_reloc_code_real_type code)
 {
   unsigned int i;
-  unsigned int r_type = BFIN_RELOC_MIN;
+  unsigned int r_type = (unsigned int) -1;
 
-  for (i = sizeof (bfin_reloc_map) / sizeof (bfin_reloc_map[0]); --i;)
+  for (i = sizeof (bfin_reloc_map) / sizeof (bfin_reloc_map[0]); i--;)
     if (bfin_reloc_map[i].bfd_reloc_val == code)
       r_type = bfin_reloc_map[i].bfin_reloc_val;
 
-  if (r_type <= BFIN_RELOC_MAX && r_type > BFIN_RELOC_MIN)
+  if (r_type <= BFIN_RELOC_MAX)
     return &bfin_howto_table [r_type];
 
   else if (r_type >= BFIN_GNUEXT_RELOC_MIN && r_type <= BFIN_GNUEXT_RELOC_MAX)

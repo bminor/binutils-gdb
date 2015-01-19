@@ -1,5 +1,22 @@
 2015-01-19  Alan Modra  <amodra@gmail.com>
 
+	* elf32-bfin.c (bfin_bfd_reloc_type_lookup): Correct loop iteration
+	to allow return of first howto.
+	* elf32-fr30.c (fr30_reloc_type_lookup): Likewise.
+	* elf32-m32c.c (m32c_reloc_type_lookup): Likewise.
+	* elf32-moxie.c (moxie_reloc_type_lookup): Likewise.
+	* elf32-or1k.c (or1k_reloc_type_lookup): Likewise.
+	* elf32-rl78.c (rl78_reloc_type_lookup): Likewise.
+	* elf32-rx.c (rx_reloc_type_lookup): Likewise.
+	* elf32-tilepro.c (tilepro_reloc_type_lookup): Likewise.
+	* elf32-xstormy16.c (xstormy16_reloc_type_lookup): Likewise.
+	* elfxx-tilegx.c (tilegx_reloc_type_lookup): Likewise.
+	* elf32-nios2.c (nios2_reloc_map): Add mapping for R_NIOS2_NONE.
+	* elf32-spu.c (spu_elf_bfd_to_reloc_type): Allow return of R_SPU_NONE.
+	(spu_elf_reloc_type_lookup): Adjust to suit.
+
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h (bfd_get_section_limit_octets): New define, extracted from..
 	(bfd_get_section_limit): ..here.
 	* reloc.c (bfd_perform_relocation): Correct bfd_reloc_outofrange check.

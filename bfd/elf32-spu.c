@@ -105,6 +105,8 @@ spu_elf_bfd_to_reloc_type (bfd_reloc_code_real_type code)
   switch (code)
     {
     default:
+      return (enum elf_spu_reloc_type) -1;
+    case BFD_RELOC_NONE:
       return R_SPU_NONE;
     case BFD_RELOC_SPU_IMM10W:
       return R_SPU_ADDR10;
@@ -168,7 +170,7 @@ spu_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   enum elf_spu_reloc_type r_type = spu_elf_bfd_to_reloc_type (code);
 
-  if (r_type == R_SPU_NONE)
+  if (r_type == (enum elf_spu_reloc_type) -1)
     return NULL;
 
   return elf_howto_table + r_type;

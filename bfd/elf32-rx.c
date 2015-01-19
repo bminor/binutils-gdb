@@ -277,7 +277,7 @@ rx_reloc_type_lookup (bfd *                    abfd ATTRIBUTE_UNUSED,
   if (code == BFD_RELOC_RX_32_OP)
     return rx_elf_howto_table + R_RX_DIR32;
 
-  for (i = ARRAY_SIZE (rx_reloc_map); --i;)
+  for (i = ARRAY_SIZE (rx_reloc_map); i--;)
     if (rx_reloc_map [i].bfd_reloc_val == code)
       return rx_elf_howto_table + rx_reloc_map[i].rx_reloc_val;
 
