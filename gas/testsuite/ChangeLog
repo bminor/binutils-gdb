@@ -1,3 +1,9 @@
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/none.s,
+	* gas/all/none.d: New test.
+	* gas/all/gas.exp: Run it.
+
 2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* gas/s390/esa-g5.d: Add a variant without the optional operand.

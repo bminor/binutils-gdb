@@ -439,7 +439,8 @@ powerpc*-*-linux*)
 			ppc64-tdep.o solib-svr4.o solib-spu.o \
 			spu-multiarch.o \
 			glibc-tdep.o symfile-mem.o linux-tdep.o \
-			ravenscar-thread.o ppc-ravenscar-thread.o"
+			ravenscar-thread.o ppc-ravenscar-thread.o \
+			linux-record.o "
 	gdb_sim=../sim/ppc/libsim.a
 	build_gdbserver=yes
 	;;

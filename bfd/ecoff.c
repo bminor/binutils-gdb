@@ -3999,7 +3999,7 @@ ecoff_reloc_link_order (bfd *output_bfd,
 
       size = bfd_get_reloc_size (rel.howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
-      if (buf == NULL)
+      if (buf == NULL && size != 0)
 	return FALSE;
       rstat = _bfd_relocate_contents (rel.howto, output_bfd,
 				      (bfd_vma) addend, buf);

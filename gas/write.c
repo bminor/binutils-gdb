@@ -1184,6 +1184,11 @@ get_frag_for_reloc (fragS *last_frag,
 	&& r->u.b.r.address < f->fr_address + f->fr_fix)
       return f;
 
+  for (f = seginfo->frchainP->frch_root; f != NULL; f = f->fr_next)
+    if (f->fr_address <= r->u.b.r.address
+	&& r->u.b.r.address <= f->fr_address + f->fr_fix)
+      return f;
+
   as_bad_where (r->file, r->line,
 		_("reloc not within (fixed part of) section"));
   return NULL;

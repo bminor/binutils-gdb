@@ -3993,6 +3993,14 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
   char *r_name;
   int c;
   struct reloc_list *reloc;
+  struct _bfd_rel { char *name; bfd_reloc_code_real_type code; };
+  static struct _bfd_rel bfd_relocs[] = {
+    { "NONE", BFD_RELOC_NONE },
+    { "8", BFD_RELOC_8 },
+    { "16", BFD_RELOC_16 },
+    { "32", BFD_RELOC_32 },
+    { "64", BFD_RELOC_64 }
+  };
 
   reloc = (struct reloc_list *) xmalloc (sizeof (*reloc));
 
@@ -4035,7 +4043,20 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   r_name = input_line_pointer;
   c = get_symbol_end ();
-  reloc->u.a.howto = bfd_reloc_name_lookup (stdoutput, r_name);
+  if (strncasecmp (r_name, "BFD_RELOC_", 10) == 0)
+    {
+      unsigned int i;
+
+      for (reloc->u.a.howto = NULL, i = 0; i < ARRAY_SIZE (bfd_relocs); i++)
+	if (strcasecmp (r_name + 10, bfd_relocs[i].name) == 0)
+	  {
+	    reloc->u.a.howto = bfd_reloc_type_lookup (stdoutput,
+						      bfd_relocs[i].code);
+	    break;
+	  }
+    }
+  else
+    reloc->u.a.howto = bfd_reloc_name_lookup (stdoutput, r_name);
   *input_line_pointer = c;
   if (reloc->u.a.howto == NULL)
     {

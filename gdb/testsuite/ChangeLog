@@ -1,3 +1,9 @@
+2015-01-17  Wei-cheng Wang  <cole945@gmail.com>
+
+	* lib/gdb.exp (supports_process_record): Return true for
+	powerpc*-*-linux*.
+	(supports_reverse): Likewise.
+
 2015-01-15  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.base/attach-pie-noexec.exp: Use can_spawn_for_attach

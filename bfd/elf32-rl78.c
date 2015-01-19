@@ -37,7 +37,7 @@
 
 static reloc_howto_type rl78_elf_howto_table [] =
 {
-  RL78REL (NONE,         0,  0, 0, dont,     FALSE),
+  RL78REL (NONE,         3,  0, 0, dont,     FALSE),
   RL78REL (DIR32,        2, 32, 0, signed,   FALSE),
   RL78REL (DIR24S,       2, 24, 0, signed,   FALSE),
   RL78REL (DIR16,        1, 16, 0, dont,     FALSE),
@@ -246,7 +246,7 @@ rl78_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   if (code == BFD_RELOC_RL78_32_OP)
     return rl78_elf_howto_table + R_RL78_DIR32;
 
-  for (i = ARRAY_SIZE (rl78_reloc_map); --i;)
+  for (i = ARRAY_SIZE (rl78_reloc_map); i--;)
     if (rl78_reloc_map [i].bfd_reloc_val == code)
       return rl78_elf_howto_table + rl78_reloc_map[i].rl78_reloc_val;
 

@@ -1,3 +1,8 @@
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17615
+	* ldlang.c (lang_process): Run lang_common before lang_gc_sections.
+
 2015-01-14  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-arm/elf32-reject.s: New testcase.

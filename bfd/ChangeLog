@@ -1,3 +1,134 @@
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17615
+	* elf-bfd.h (ELF_COMMON_DEF_P): Note that this might be true for
+	linker script assignments too.
+	* elflink.c (elf_gc_sweep_symbol): Don't drop ELF_COMMON_DEF syms.
+	(bfd_elf_gc_mark_dynamic_ref_symbol): Similarly.
+
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	* elf32-bfin.c (bfin_bfd_reloc_type_lookup): Correct loop iteration
+	to allow return of first howto.
+	* elf32-fr30.c (fr30_reloc_type_lookup): Likewise.
+	* elf32-m32c.c (m32c_reloc_type_lookup): Likewise.
+	* elf32-moxie.c (moxie_reloc_type_lookup): Likewise.
+	* elf32-or1k.c (or1k_reloc_type_lookup): Likewise.
+	* elf32-rl78.c (rl78_reloc_type_lookup): Likewise.
+	* elf32-rx.c (rx_reloc_type_lookup): Likewise.
+	* elf32-tilepro.c (tilepro_reloc_type_lookup): Likewise.
+	* elf32-xstormy16.c (xstormy16_reloc_type_lookup): Likewise.
+	* elfxx-tilegx.c (tilegx_reloc_type_lookup): Likewise.
+	* elf32-nios2.c (nios2_reloc_map): Add mapping for R_NIOS2_NONE.
+	* elf32-spu.c (spu_elf_bfd_to_reloc_type): Allow return of R_SPU_NONE.
+	(spu_elf_reloc_type_lookup): Adjust to suit.
+
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	* bfd-in.h (bfd_get_section_limit_octets): New define, extracted from..
+	(bfd_get_section_limit): ..here.
+	* reloc.c (bfd_perform_relocation): Correct bfd_reloc_outofrange check.
+	(bfd_install_relocation, _bfd_final_link_relocate): Add same check here.
+	* elf32-sh.c (sh_elf_reloc): Correct bfd_reloc_outofrange check.
+	* elf32-ppc.c (ppc_elf_addr16_ha_reloc): Remove duplicated
+	bfd_reloc_outofrange check.
+	* bfd-in2.h: Regenerate.
+
+	* cpu-ns32k.c (_bfd_do_ns32k_reloc_contents): Return bfd_reloc_ok
+	on zero size relocs.
+	* ecoff.c (ecoff_reloc_link_order): Likewise.
+	* elf32-nds32.c (nds32_relocate_contents): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+
+	* reloc.c (_bfd_relocate_contents): Don't bomb on zero size relocs.
+	(_bfd_clear_contents): Likewise.
+	* elfxx-mips.c (mips_elf_obtain_contents): Likewise.
+	(mips_elf_perform_relocation): Likewise.
+
+	* aoutx.h (aout_link_reloc_link_order): Allow for NULL return
+	from malloc on zero size alloc.
+	* cofflink.c (_bfd_coff_reloc_link_order): Likewise.
+	* elflink.c (elf_reloc_link_order): Likewise.
+	* linker.c (_bfd_generic_reloc_link_order): Likewise.
+	* pdp11.c (aout_link_reloc_link_order): Likewise.
+	* xcofflink.c (xcoff_reloc_link_order): Likewise.
+
+	* aoutx.h (howto_table_ext): Ensure NONE relocs have size 3,
+	bitsize 0, and complain_overflow_dont.
+	* coff-sparc.c (coff_sparc_howto_table): Likewise.
+	* elf-hppa.h (elf_hppa_howto_table): Likewise.
+	* elf-m10200.c (elf_mn10200_howto_table): Likewise.
+	* elf-m10300.c (elf_mn10300_howto_table): Likewise.
+	* elf32-arc.c (elf_arc_howto_table): Likewise.
+	* elf32-arm.c (elf32_arm_howto_table_1): Likewise.
+	* elf32-avr.c (elf_avr_howto_table): Likewise.
+	* elf32-bfin.c (bfin_howto_table): Likewise.
+	* elf32-cr16.c (cr16_elf_howto_table): Likewise.
+	* elf32-cris.c (cris_elf_howto_table): Likewise.
+	* elf32-crx.c (crx_elf_howto_table): Likewise.
+	* elf32-d10v.c (elf_d10v_howto_table): Likewise.
+	* elf32-d30v.c (elf_d30v_howto_table): Likewise.
+	* elf32-dlx.c (dlx_elf_howto_table): Likewise.
+	* elf32-epiphany.c (epiphany_elf_howto_table): Likewise.
+	* elf32-fr30.c (fr30_elf_howto_table): Likewise.
+	* elf32-frv.c (elf32_frv_howto_table): Likewise.
+	* elf32-h8300.c (h8_elf_howto_table): Likewise.
+	* elf32-i370.c (i370_elf_howto_raw): Likewise.
+	* elf32-i386.c (elf_howto_table): Likewise.
+	* elf32-i860.c (elf32_i860_howto_table): Likewise.
+	* elf32-i960.c (elf32_i960_relocate): Likewise.
+	* elf32-ip2k.c (ip2k_elf_howto_table): Likewise.
+	* elf32-iq2000.c (iq2000_elf_howto_table): Likewise.
+	* elf32-lm32.c (lm32_elf_howto_table): Likewise.
+	* elf32-m32c.c (m32c_elf_howto_table): Likewise.
+	* elf32-m32r.c (m32r_elf_howto_table): Likewise.
+	* elf32-m68hc11.c (elf_m68hc11_howto_table): Likewise.
+	* elf32-m68hc12.c (elf_m68hc11_howto_table): Likewise.
+	* elf32-m68k.c (howto_table): Likewise.
+	* elf32-mcore.c (mcore_elf_howto_raw): Likewise.
+	* elf32-mep.c (mep_elf_howto_table): Likewise.
+	* elf32-metag.c (elf_metag_howto_table): Likewise.
+	* elf32-microblaze.c (microblaze_elf_howto_raw): Likewise.
+	* elf32-mips.c (elf_mips_howto_table_rel): Likewise.
+	* elf32-moxie.c (moxie_elf_howto_table): Likewise.
+	* elf32-msp430.c (elf_msp430_howto_table): Likewise.
+	* elf32-mt.c (mt_elf_howto_table): Likewise.
+	* elf32-nds32.c (nds32_elf_howto_table): Likewise.
+	* elf32-nios2.c (elf_nios2_howto_table_rel): Likewise.
+	* elf32-or1k.c (or1k_elf_howto_table): Likewise.
+	* elf32-pj.c (pj_elf_howto_table): Likewise.
+	* elf32-ppc.c (ppc_elf_howto_raw): Likewise.
+	* elf32-rl78.c (rl78_elf_howto_table): Likewise.
+	* elf32-rx.c (rx_elf_howto_table): Likewise.
+	* elf32-s390.c (elf_howto_table): Likewise.
+	* elf32-score.c (elf32_score_howto_table): Likewise.
+	* elf32-score7.c (elf32_score_howto_table): Likewise.
+	* elf32-sh-relocs.h (R_SH_NONE): Likewise.
+	* elf32-spu.c (elf_howto_table): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_howto_table): Likewise.
+	* elf32-tilepro.c (tilepro_elf_howto_table): Likewise.
+	* elf32-v850.c (v850_elf_howto_table): Likewise.
+	* elf32-vax.c (howto_table): Likewise.
+	* elf32-visium.c (visium_elf_howto_table): Likewise.
+	* elf32-xc16x.c (xc16x_elf_howto_table): Likewise.
+	* elf32-xgate.c (elf_xgate_howto_table): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_howto_table): Likewise.
+	* elf32-xtensa.c (elf_howto_table): Likewise.
+	* elf64-alpha.c (elf64_alpha_howto_table): Likewise.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Likewise.
+	* elf64-mmix.c (elf_mmix_howto_table): Likewise.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Likewise.
+	* elf64-s390.c (elf_howto_table): Likewise.
+	* elf64-sh64.c (sh_elf64_howto_table): Likewise.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Likewise.
+	* elfn32-mips.c (elf_mips_howto_table_rel): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Likewise.
+	(elfNN_aarch64_howto_none): Likewise.
+	* elfxx-ia64.c (ia64_howto_table): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_howto_table): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_howto_table): Likewise.
+	* nlm32-sparc.c (nlm32_sparc_howto_table): Likewise.
+
 2015-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17847

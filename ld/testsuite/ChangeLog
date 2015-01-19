@@ -1,3 +1,22 @@
+2015-01-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17615
+	* ld-elf/pr17615.d: New file.
+	* ld-elf/pr17615.s: Likewise.
+
+2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	* ld-gc/pr14265.d,
+	* ld-cris/tls-gc-68.d,
+	* ld-cris/tls-gc-69.d,
+	* ld-cris/tls-gc-70.d,
+	* ld-cris/tls-gc-71.d,
+	* ld-cris/tls-gc-75.d,
+	* ld-cris/tls-gc-76.d,
+	* ld-cris/tls-gc-79.d,
+	* ld-mmix/bpo-10.d,
+	* ld-mmix/bpo-11.d: Update.
+
 2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* ld-s390/tlsbin.dd: The nopr register operand is optional and not
