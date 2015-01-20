@@ -1,5 +1,9 @@
 2015-01-21  Wei-cheng Wang  <cole945@gmail.com>
 
+	* MAINTAINERS (Write After Approval): Add "Wei-cheng Wang".
+
+2015-01-21  Wei-cheng Wang  <cole945@gmail.com>
+
 	* ppc-linux-tdep.c (ppc_skip_trampoline_code,
 	ppc_canonicalize_syscall, ppc_linux_syscall_record,
 	ppc_linux_record_signal, ppc_init_linux_record_tdep): Add comments.
