@@ -20,6 +20,7 @@
 #		(e.g., .PARISC.global)
 #	OTHER_RELRO_SECTIONS - other than .data.rel.ro ...
 #		(e.g. PPC32 .fixup, .got[12])
+#	OTHER_RELRO_SECTIONS_2 - as above, but after .dynamic in text segment
 #	OTHER_BSS_SECTIONS - other than .bss .sbss ...
 #	ATTRS_SECTIONS - at the end
 #	OTHER_SECTIONS - at the end
@@ -572,6 +573,7 @@ cat <<EOF
   ${RELOCATING+${DATARELRO}}
   ${OTHER_RELRO_SECTIONS}
   ${TEXT_DYNAMIC-${DYNAMIC}}
+  ${OTHER_RELRO_SECTIONS_2}
   ${DATA_GOT+${RELRO_NOW+${GOT}}}
   ${DATA_GOT+${RELRO_NOW+${GOTPLT}}}
   ${DATA_GOT+${RELRO_NOW-${SEPARATE_GOTPLT+${GOT}}}}

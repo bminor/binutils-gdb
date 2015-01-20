@@ -37,5 +37,6 @@ OTHER_GOT_RELOC_SECTIONS="
   .rela.branch_lt	${RELOCATING-0} : { *(.rela.branch_lt) }"
 OTHER_READWRITE_SECTIONS="
   .toc1		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.toc1) }
-  .opd		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { KEEP (*(.opd)) }
   .branch_lt	${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.branch_lt) }"
+OTHER_RELRO_SECTIONS_2="
+  .opd		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { KEEP (*(.opd)) }"
