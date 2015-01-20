@@ -1,3 +1,7 @@
+2015-01-20  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add "Chen Gang".
+
 2015-01-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* configure.ac [*mingw32*]: Only add windows-termcap.o to
