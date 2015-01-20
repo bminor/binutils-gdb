@@ -5307,5 +5307,6 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define TARGET_BIG_NAME			"elf32-bignios2"
 
 #define elf_backend_got_header_size	12
+#define elf_backend_default_execstack	0
 
 #include "elf32-target.h"
