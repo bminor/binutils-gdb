@@ -1,3 +1,9 @@
+2015-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason_string)
+	(linux_ptrace_test_ret_to_nx): Use safe_strerror instead of
+	strerror.
+
 2015-01-20  Wei-cheng Wang  <cole945@gmail.com>
 
 	* rs6000-tdep.c (ppc_process_record_op4, ppc_process_record_op19,
