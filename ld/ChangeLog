@@ -1,5 +1,16 @@
 2015-01-20  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/elf64ppc.sh (BSS_PLT): Don't define.
+	(OTHER_READWRITE_SECTIONS): Move .branch_lt to..
+	(OTHER_RELRO_SECTIONS_2): ..here.
+	(DATA_GOT, SEPARATE_GOTPLT, DATA_SDATA, DATA_PLT,
+	PLT_BEFORE_GOT): Define.
+	* scripttempl/elf.sc: Handle DATA_SDATA and DATA_GOT/DATA_PLT/
+	PLT_BEFORE_GOT combination.
+	(DATA_GOT, SDATA_GOT): Don't define if either is already defined.
+
+2015-01-20  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/elf64ppc.sh (OTHER_READWRITE_SECTIONS): Move .opd to..
 	(OTHER_RELRO_SECTIONS_2): ..here, new define.
 	* scripttempl/elf.sc: Add OTHER_RELRO_SECTIONS_2.

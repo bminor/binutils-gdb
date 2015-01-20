@@ -1,5 +1,18 @@
 2015-01-20  Alan Modra  <amodra@gmail.com>
 
+	* ld-powerpc/ambiguousv1.d,
+	* ld-powerpc/ambiguousv1b.d,
+	* ld-powerpc/ambiguousv2.d,
+	* ld-powerpc/ambiguousv2b.d,
+	* ld-powerpc/elfv2exe.d,
+	* ld-powerpc/elfv2so.d,
+	* ld-powerpc/tlsexe.r,
+	* ld-powerpc/tlsexetoc.r,
+	* ld-powerpc/tlsso.r,
+	* ld-powerpc/tlstocso.r: Update.
+
+2015-01-20  Alan Modra  <amodra@gmail.com>
+
 	PR ld/17615
 	* ld-elf/pr17615.d: Match .sbss too.
 
