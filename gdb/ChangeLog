@@ -1,4 +1,4 @@
-2015-01-18  Wei-cheng Wang  <cole945@gmail.com>
+2015-01-20  Wei-cheng Wang  <cole945@gmail.com>
 
 	* rs6000-tdep.c (ppc_process_record_op4, ppc_process_record_op19,
 	ppc_process_record_op31, ppc_process_record_op59,
