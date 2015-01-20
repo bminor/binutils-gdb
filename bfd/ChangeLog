@@ -1,6 +1,11 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-20  Alan Modra  <amodra@gmail.com>
+	PR ld/17615
+	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref): Don't drop
+	ELF_COMMON_DEF syms.
+
 	2015-01-19  Alan Modra  <amodra@gmail.com>
 	PR 17165
 	* elf-bfd.h (ELF_COMMON_DEF_P): Note that this might be true for
