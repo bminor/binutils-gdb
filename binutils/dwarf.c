@@ -3344,7 +3344,9 @@ display_debug_lines_raw (struct dwarf_section *section,
 	     Since the section is a fragment it does not have the details
 	     needed to fill out a LineInfo structure, so instead we use the
 	     details from the last full debug_line section that we processed.  */
+	  start_of_line_program = data;
 	  end_of_sequence = end;
+	  end_of_logicals = end;
 	  standard_opcodes = NULL;
 	  linfo = saved_linfo;
 	  /* PR 17531: file: 0522b371.  */
