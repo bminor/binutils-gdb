@@ -1638,10 +1638,16 @@ Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
 
   header_.total_length = initial_length;
 
+  const unsigned char* end_of_initial_length = lineptr;
   gold_assert(lineptr + header_.total_length <= buffer_end_);
 
   header_.version = elfcpp::Swap_unaligned<16, big_endian>::readval(lineptr);
   lineptr += 2;
+
+  // We can only read versions 2 and 3 of the DWARF line number table.
+  // For other versions, just skip the entire line number table.
+  if (header_.version < 2 || header_.version > 3)
+    return end_of_initial_length + initial_length;
 
   if (header_.offset_size == 4)
     header_.prologue_length = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
@@ -2027,8 +2033,11 @@ Sized_dwarf_line_info<size, big_endian>::read_line_mappings(unsigned int shndx)
     {
       const unsigned char* lineptr = this->buffer_;
       lineptr = this->read_header_prolog(lineptr);
-      lineptr = this->read_header_tables(lineptr);
-      lineptr = this->read_lines(lineptr, shndx);
+      if (header_.version >= 2 && header_.version <= 3)
+	{
+	  lineptr = this->read_header_tables(lineptr);
+	  lineptr = this->read_lines(lineptr, shndx);
+	}
       this->buffer_ = lineptr;
     }
 
