@@ -1,3 +1,10 @@
+2015-01-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-lookup-type.exp (test_lookup_type): Change
+	the second test to print the name attribute of value
+	returned by the call to gdb.lookup_type, and adjust
+	the expected output accordingly.
+
 2015-01-25  Mark Wielaard  <mjw@redhat.com>
 
 	* gdb.arch/i386-bp_permanent.c (standard): New declaration.
