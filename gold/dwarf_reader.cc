@@ -26,6 +26,7 @@
 #include <utility>
 #include <vector>
 
+#include "debug.h"
 #include "elfcpp_swap.h"
 #include "dwarf.h"
 #include "object.h"
@@ -1526,6 +1527,7 @@ struct LineStateMachine
   bool is_stmt;          // stmt means statement.
   bool basic_block;
   bool end_sequence;
+  unsigned int context;
 };
 
 static void
@@ -1539,6 +1541,7 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
   lsm->is_stmt = default_is_stmt;
   lsm->basic_block = false;
   lsm->end_sequence = false;
+  lsm->context = 0;
 }
 
 template<int size, bool big_endian>
@@ -1546,27 +1549,40 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(
     Object* object,
     unsigned int read_shndx)
   : data_valid_(false), buffer_(NULL), buffer_start_(NULL),
+    str_buffer_(NULL), str_buffer_start_(NULL),
     reloc_mapper_(NULL), symtab_buffer_(NULL), directories_(), files_(),
-    current_header_index_(-1)
+    current_header_index_(-1), reloc_map_(), line_number_map_()
 {
-  unsigned int debug_shndx;
+  unsigned int debug_line_shndx = 0;
+  unsigned int debug_line_str_shndx = 0;
 
-  for (debug_shndx = 1; debug_shndx < object->shnum(); ++debug_shndx)
+  for (unsigned int i = 1; i < object->shnum(); ++i)
     {
+      section_size_type buffer_size;
+      bool is_new = false;
+
       // FIXME: do this more efficiently: section_name() isn't super-fast
-      std::string name = object->section_name(debug_shndx);
+      std::string name = object->section_name(i);
       if (name == ".debug_line" || name == ".zdebug_line")
 	{
-	  section_size_type buffer_size;
-	  bool is_new = false;
-	  this->buffer_ = object->decompressed_section_contents(debug_shndx,
-								&buffer_size,
-								&is_new);
+	  this->buffer_ =
+	      object->decompressed_section_contents(i, &buffer_size, &is_new);
 	  if (is_new)
 	    this->buffer_start_ = this->buffer_;
 	  this->buffer_end_ = this->buffer_ + buffer_size;
-	  break;
+	  debug_line_shndx = i;
 	}
+      else if (name == ".debug_line_str" || name == ".zdebug_line_str")
+	{
+	  this->str_buffer_ =
+	      object->decompressed_section_contents(i, &buffer_size, &is_new);
+	  if (is_new)
+	    this->str_buffer_start_ = this->str_buffer_;
+	  this->str_buffer_end_ = this->str_buffer_ + buffer_size;
+	  debug_line_str_shndx = i;
+	}
+      if (debug_line_shndx > 0 && debug_line_str_shndx > 0)
+        break;
     }
   if (this->buffer_ == NULL)
     return;
@@ -1579,7 +1595,7 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(
       unsigned int reloc_sh_type = object->section_type(i);
       if ((reloc_sh_type == elfcpp::SHT_REL
 	   || reloc_sh_type == elfcpp::SHT_RELA)
-	  && object->section_info(i) == debug_shndx)
+	  && object->section_info(i) == debug_line_shndx)
 	{
 	  reloc_shndx = i;
 	  this->track_relocs_type_ = reloc_sh_type;
@@ -1612,6 +1628,8 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(
   // Now that we have successfully read all the data, parse the debug
   // info.
   this->data_valid_ = true;
+  gold_debug(DEBUG_LOCATION, "read_line_mappings: %s shndx %u",
+	     object->name().c_str(), read_shndx);
   this->read_line_mappings(read_shndx);
 }
 
@@ -1638,10 +1656,17 @@ Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
 
   header_.total_length = initial_length;
 
-  gold_assert(lineptr + header_.total_length <= buffer_end_);
+  this->end_of_unit_ = lineptr + initial_length;
+  gold_assert(this->end_of_unit_ <= buffer_end_);
 
   header_.version = elfcpp::Swap_unaligned<16, big_endian>::readval(lineptr);
   lineptr += 2;
+
+  // We can only read versions 2 and 3 of the DWARF line number table.
+  // For other versions, just skip the entire line number table.
+  if ((header_.version < 2 || header_.version > 4)
+      && header_.version != DWARF5_EXPERIMENTAL_LINE_TABLE)
+    return this->end_of_unit_;
 
   if (header_.offset_size == 4)
     header_.prologue_length = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
@@ -1649,8 +1674,20 @@ Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
     header_.prologue_length = elfcpp::Swap_unaligned<64, big_endian>::readval(lineptr);
   lineptr += header_.offset_size;
 
+  this->end_of_header_length_ = lineptr;
+
+  // If this is a two-level line table, we'll adjust these below.
+  this->logicals_start_ = lineptr + header_.prologue_length;
+  this->actuals_start_ = NULL;
+
   header_.min_insn_length = *lineptr;
   lineptr += 1;
+
+  if (header_.version >= 4)
+    {
+      header_.max_ops_per_insn = *lineptr;
+      lineptr += 1;
+    }
 
   header_.default_is_stmt = *lineptr;
   lineptr += 1;
@@ -1670,6 +1707,32 @@ Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
     {
       header_.std_opcode_lengths[i] = *lineptr;
       lineptr += 1;
+    }
+
+  if (header_.version == DWARF5_EXPERIMENTAL_LINE_TABLE)
+    {
+      // Skip over fake empty directory and filename tables,
+      // and fake extended opcode that hides the rest of the
+      // section from old consumers.
+      lineptr += 7;
+
+      // Offsets to logicals and actuals tables.
+      off_t logicals_offset;
+      off_t actuals_offset;
+      if (header_.offset_size == 4)
+	logicals_offset = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
+      else
+	logicals_offset = elfcpp::Swap_unaligned<64, big_endian>::readval(lineptr);
+      lineptr += header_.offset_size;
+      if (header_.offset_size == 4)
+	actuals_offset = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
+      else
+	actuals_offset = elfcpp::Swap_unaligned<64, big_endian>::readval(lineptr);
+      lineptr += header_.offset_size;
+
+      this->logicals_start_ = this->end_of_header_length_ + logicals_offset;
+      if (actuals_offset > 0)
+	this->actuals_start_ = this->end_of_header_length_ + actuals_offset;
     }
 
   return lineptr;
@@ -1745,12 +1808,180 @@ Sized_dwarf_line_info<size, big_endian>::read_header_tables(
   return lineptr;
 }
 
+template<int size, bool big_endian>
+const unsigned char*
+Sized_dwarf_line_info<size, big_endian>::read_header_tables_v5(
+    const unsigned char* lineptr)
+{
+  size_t len;
+
+  ++this->current_header_index_;
+
+  // Create a new directories_ entry and a new files_ entry for our new
+  // header.  We initialize each with a single empty element, because
+  // dwarf indexes directory and filenames starting at 1.
+  gold_assert(static_cast<int>(this->directories_.size())
+	      == this->current_header_index_);
+  gold_assert(static_cast<int>(this->files_.size())
+	      == this->current_header_index_);
+
+  // Read the directory list.
+  uint64_t format_count = read_unsigned_LEB_128(lineptr, &len);
+  lineptr += len;
+
+  unsigned int *types = new unsigned int[format_count];
+  unsigned int *forms = new unsigned int[format_count];
+
+  for (unsigned int i = 0; i < format_count; i++)
+    {
+      types[i] = read_unsigned_LEB_128(lineptr, &len);
+      lineptr += len;
+      forms[i] = read_unsigned_LEB_128(lineptr, &len);
+      lineptr += len;
+    }
+
+  uint64_t entry_count = read_unsigned_LEB_128(lineptr, &len);
+  lineptr += len;
+  this->directories_.push_back(std::vector<std::string>(1));
+  std::vector<std::string>& dir_list = this->directories_.back();
+
+  for (unsigned int j = 0; j < entry_count; j++)
+    {
+      std::string dirname;
+
+      for (unsigned int i = 0; i < format_count; i++)
+	{
+	  if (types[i] == elfcpp::DW_LNCT_path)
+	    {
+	      if (forms[i] == elfcpp::DW_FORM_string)
+		{
+		  dirname = reinterpret_cast<const char*>(lineptr);
+		  lineptr += dirname.size() + 1;
+		}
+	      else if (forms[i] == elfcpp::DW_FORM_line_strp)
+		{
+		  uint64_t offset;
+		  if (header_.offset_size == 4)
+		    offset = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
+		  else
+		    offset = elfcpp::Swap_unaligned<64, big_endian>::readval(lineptr);
+		  typename Reloc_map::const_iterator it
+		      = this->reloc_map_.find(lineptr - this->buffer_);
+		  if (it != reloc_map_.end())
+		    {
+		      if (this->track_relocs_type_ == elfcpp::SHT_RELA)
+			offset = 0;
+		      offset += it->second.second;
+		    }
+		  lineptr += header_.offset_size;
+		  dirname = reinterpret_cast<const char*>(this->str_buffer_
+							  + offset);
+		}
+	      else
+		return lineptr;
+	    }
+	  else
+	    return lineptr;
+	}
+      dir_list.push_back(dirname);
+    }
+
+  delete[] types;
+  delete[] forms;
+
+  // Read the filenames list.
+  format_count = read_unsigned_LEB_128(lineptr, &len);
+  lineptr += len;
+
+  types = new unsigned int[format_count];
+  forms = new unsigned int[format_count];
+
+  for (unsigned int i = 0; i < format_count; i++)
+    {
+      types[i] = read_unsigned_LEB_128(lineptr, &len);
+      lineptr += len;
+      forms[i] = read_unsigned_LEB_128(lineptr, &len);
+      lineptr += len;
+    }
+
+  entry_count = read_unsigned_LEB_128(lineptr, &len);
+  lineptr += len;
+  this->files_.push_back(
+      std::vector<std::pair<int, std::string> >(1));
+  std::vector<std::pair<int, std::string> >& file_list = this->files_.back();
+
+  for (unsigned int j = 0; j < entry_count; j++)
+    {
+      const char* path = NULL;
+      int dirindex = 0;
+
+      for (unsigned int i = 0; i < format_count; i++)
+	{
+	  if (types[i] == elfcpp::DW_LNCT_path)
+	    {
+	      if (forms[i] == elfcpp::DW_FORM_string)
+		{
+		  path = reinterpret_cast<const char*>(lineptr);
+		  lineptr += strlen(path) + 1;
+		}
+	      else if (forms[i] == elfcpp::DW_FORM_line_strp)
+		{
+		  uint64_t offset;
+		  if (header_.offset_size == 4)
+		    offset = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
+		  else
+		    offset = elfcpp::Swap_unaligned<64, big_endian>::readval(lineptr);
+		  typename Reloc_map::const_iterator it
+		      = this->reloc_map_.find(lineptr - this->buffer_);
+		  if (it != reloc_map_.end())
+		    {
+		      if (this->track_relocs_type_ == elfcpp::SHT_RELA)
+			offset = 0;
+		      offset += it->second.second;
+		    }
+		  lineptr += header_.offset_size;
+		  path = reinterpret_cast<const char*>(this->str_buffer_
+						       + offset);
+		}
+	      else
+		return lineptr;
+	    }
+	  else if (types[i] == elfcpp::DW_LNCT_directory_index)
+	    {
+	      if (forms[i] == elfcpp::DW_FORM_udata)
+		{
+		  dirindex = read_unsigned_LEB_128(lineptr, &len);
+		  lineptr += len;
+		}
+	      else
+		return lineptr;
+	    }
+	  else
+	    return lineptr;
+	}
+      gold_debug(DEBUG_LOCATION, "File %3d: %s",
+		 static_cast<int>(file_list.size()), path);
+      file_list.push_back(std::make_pair<int, std::string>(dirindex, path));
+    }
+
+  delete[] types;
+  delete[] forms;
+
+  // Ignore the subprograms table; we don't need it for now.
+  // Because it's the last thing in the header, we don't need
+  // to figure out how long it is to skip over it.
+
+  return lineptr;
+}
+
 // Process a single opcode in the .debug.line structure.
 
 template<int size, bool big_endian>
 bool
 Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
-    const unsigned char* start, struct LineStateMachine* lsm, size_t* len)
+    const unsigned char* start, struct LineStateMachine* lsm, size_t* len,
+    std::vector<LineStateMachine>* logicals,
+    bool is_logicals_table, bool is_actuals_table)
 {
   size_t oplen = 0;
   size_t templen;
@@ -1794,7 +2025,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
 
     case elfcpp::DW_LNS_advance_line:
       {
-        const uint64_t advance_line = read_signed_LEB_128(start, &templen);
+        const int64_t advance_line = read_signed_LEB_128(start, &templen);
         oplen += templen;
         lsm->line_num += advance_line;
       }
@@ -1840,6 +2071,61 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
                                         / header_.line_range));
         lsm->address += advance_address;
       }
+      break;
+
+    case elfcpp::DW_LNS_set_subprogram:
+    // aliased with elfcpp::DW_LNS_set_address_from_logical
+      if (is_actuals_table)
+	{
+	  // elfcpp::DW_LNS_set_address_from_logical
+	  const int64_t advance_line = read_signed_LEB_128(start, &templen);
+	  oplen += templen;
+	  lsm->line_num += advance_line;
+	  if (lsm->line_num >= 1
+	      && lsm->line_num <= static_cast<int64_t>(logicals->size()))
+	    {
+	      const LineStateMachine& logical = (*logicals)[lsm->line_num - 1];
+	      lsm->address = logical.address;
+	      lsm->shndx = logical.shndx;
+	    }
+	}
+      else if (is_logicals_table)
+	{
+	  // elfcpp::DW_LNS_set_subprogram
+	  // Ignore the subprogram number for now.
+	  read_unsigned_LEB_128(start, &templen);
+	  oplen += templen;
+	  lsm->context = 0;
+	}
+      break;
+
+    case elfcpp::DW_LNS_inlined_call:
+      if (is_logicals_table)
+	{
+	  const int64_t advance_line = read_signed_LEB_128(start, &templen);
+	  oplen += templen;
+	  start += templen;
+	  // Ignore the subprogram number for now.
+	  read_unsigned_LEB_128(start, &templen);
+	  oplen += templen;
+	  lsm->context = logicals->size() + advance_line;
+	}
+      break;
+
+    case elfcpp::DW_LNS_pop_context:
+      if (is_logicals_table)
+	{
+	  const unsigned int context = lsm->context;
+	  if (context >= 1 && context <= logicals->size())
+	    {
+	      const LineStateMachine& logical = (*logicals)[context - 1];
+	      lsm->file_num = logical.file_num;
+	      lsm->line_num = logical.line_num;
+	      lsm->column_num = logical.column_num;
+	      lsm->is_stmt = logical.is_stmt;
+	      lsm->context = logical.context;
+	    }
+	}
       break;
 
     case elfcpp::DW_LNS_extended_op:
@@ -1939,54 +2225,92 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
 
 template<int size, bool big_endian>
 unsigned const char*
-Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr,
-                                                    unsigned int shndx)
+Sized_dwarf_line_info<size, big_endian>::read_lines(
+    unsigned const char* lineptr,
+    unsigned const char* endptr,
+    std::vector<LineStateMachine>* logicals,
+    bool is_logicals_table,
+    bool is_actuals_table,
+    unsigned int shndx)
 {
   struct LineStateMachine lsm;
 
-  // LENGTHSTART is the place the length field is based on.  It is the
-  // point in the header after the initial length field.
-  const unsigned char* lengthstart = buffer_;
-
-  // In 64 bit dwarf, the initial length is 12 bytes, because of the
-  // 0xffffffff at the start.
-  if (header_.offset_size == 8)
-    lengthstart += 12;
-  else
-    lengthstart += 4;
-
-  while (lineptr < lengthstart + header_.total_length)
+  while (lineptr < endptr)
     {
       ResetLineStateMachine(&lsm, header_.default_is_stmt);
       while (!lsm.end_sequence)
         {
           size_t oplength;
-          bool add_line = this->process_one_opcode(lineptr, &lsm, &oplength);
-          if (add_line
-              && (shndx == -1U || lsm.shndx == -1U || shndx == lsm.shndx))
-            {
-              Offset_to_lineno_entry entry
-                  = { static_cast<off_t>(lsm.address),
-		      this->current_header_index_,
-		      static_cast<unsigned int>(lsm.file_num),
-		      true, lsm.line_num };
-	      std::vector<Offset_to_lineno_entry>&
-		map(this->line_number_map_[lsm.shndx]);
-	      // If we see two consecutive entries with the same
-	      // offset and a real line number, then mark the first
-	      // one as non-canonical.
-	      if (!map.empty()
-		  && (map.back().offset == static_cast<off_t>(lsm.address))
-		  && lsm.line_num != -1
-		  && map.back().line_num != -1)
-		map.back().last_line_for_offset = false;
-	      map.push_back(entry);
-            }
+          if (lineptr >= endptr)
+            break;
+
+          bool add_line = this->process_one_opcode(lineptr, &lsm, &oplength,
+						   logicals,
+						   is_logicals_table,
+						   is_actuals_table);
           lineptr += oplength;
+
+          if (add_line)
+            {
+              if (is_logicals_table)
+		{
+		  logicals->push_back(lsm);
+		  gold_debug(DEBUG_LOCATION, "Logical %d [%3u:%08x]: "
+			     "file %d line %d context %u",
+			     static_cast<int>(logicals->size()),
+			     lsm.shndx, static_cast<int>(lsm.address),
+			     lsm.file_num, lsm.line_num, lsm.context);
+		}
+	      else if (shndx == -1U || lsm.shndx == -1U || shndx == lsm.shndx)
+		{
+		  Offset_to_lineno_entry entry;
+
+		  if (is_actuals_table && lsm.line_num != -1)
+		    {
+		      if (lsm.line_num < 1
+			  || lsm.line_num > static_cast<int64_t>(logicals->size()))
+		        continue;
+		      const LineStateMachine& logical =
+			  (*logicals)[lsm.line_num - 1];
+		      gold_debug(DEBUG_LOCATION, "Actual [%3u:%08x]: "
+				 "logical %u file %d line %d context %u",
+				 lsm.shndx, static_cast<int>(lsm.address),
+				 lsm.line_num, logical.file_num,
+				 logical.line_num, lsm.context);
+		      entry.offset = static_cast<off_t>(lsm.address);
+		      entry.header_num = this->current_header_index_;
+		      entry.file_num =
+			  static_cast<unsigned int>(logical.file_num);
+		      entry.last_line_for_offset = true;
+		      entry.line_num = logical.line_num;
+		    }
+		  else
+		    {
+		      entry.offset = static_cast<off_t>(lsm.address);
+		      entry.header_num = this->current_header_index_;
+		      entry.file_num = static_cast<unsigned int>(lsm.file_num);
+		      entry.last_line_for_offset = true;
+		      entry.line_num = lsm.line_num;
+		    }
+
+		  std::vector<Offset_to_lineno_entry>&
+		    map(this->line_number_map_[lsm.shndx]);
+		  // If we see two consecutive entries with the same
+		  // offset and a real line number, then mark the first
+		  // one as non-canonical.
+		  if (!map.empty()
+		      && (map.back().offset == static_cast<off_t>(lsm.address))
+		      && lsm.line_num != -1
+		      && map.back().line_num != -1)
+		    map.back().last_line_for_offset = false;
+		  map.push_back(entry);
+		}
+            }
+
         }
     }
 
-  return lengthstart + header_.total_length;
+  return endptr;
 }
 
 // Read the relocations into a Reloc_map.
@@ -2026,10 +2350,48 @@ Sized_dwarf_line_info<size, big_endian>::read_line_mappings(unsigned int shndx)
   while (this->buffer_ < this->buffer_end_)
     {
       const unsigned char* lineptr = this->buffer_;
+      std::vector<LineStateMachine> logicals;
+
       lineptr = this->read_header_prolog(lineptr);
-      lineptr = this->read_header_tables(lineptr);
-      lineptr = this->read_lines(lineptr, shndx);
-      this->buffer_ = lineptr;
+      if (header_.version >= 2 && header_.version <= 4)
+	{
+	  lineptr = this->read_header_tables(lineptr);
+	  lineptr = this->read_lines(this->logicals_start_,
+				     this->end_of_unit_,
+				     NULL,
+				     false,
+				     false,
+				     shndx);
+	}
+      else if (header_.version == DWARF5_EXPERIMENTAL_LINE_TABLE)
+	{
+	  lineptr = this->read_header_tables_v5(lineptr);
+	  if (this->actuals_start_ != NULL)
+	    {
+	      lineptr = this->read_lines(this->logicals_start_,
+					 this->actuals_start_,
+					 &logicals,
+					 true,
+					 false,
+					 shndx);
+	      lineptr = this->read_lines(this->actuals_start_,
+					 this->end_of_unit_,
+					 &logicals,
+					 false,
+					 true,
+					 shndx);
+	    }
+	  else
+	    {
+	      lineptr = this->read_lines(this->logicals_start_,
+					 this->end_of_unit_,
+					 NULL,
+					 false,
+					 false,
+					 shndx);
+	    }
+	}
+      this->buffer_ = this->end_of_unit_;
     }
 
   // Sort the lines numbers, so addr2line can use binary search.
@@ -2185,6 +2547,9 @@ Sized_dwarf_line_info<size, big_endian>::do_addr2line(
     off_t offset,
     std::vector<std::string>* other_lines)
 {
+  gold_debug(DEBUG_LOCATION, "do_addr2line: shndx %u offset %08x",
+	     shndx, static_cast<int>(offset));
+
   if (this->data_valid_ == false)
     return "";
 

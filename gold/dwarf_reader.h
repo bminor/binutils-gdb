@@ -1001,9 +1001,13 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   {
     if (this->buffer_start_ != NULL)
       delete[] this->buffer_start_;
+    if (this->str_buffer_start_ != NULL)
+      delete[] this->str_buffer_start_;
   }
 
  private:
+  const static int DWARF5_EXPERIMENTAL_LINE_TABLE = 0xf006;
+
   std::string
   do_addr2line(unsigned int shndx, off_t offset,
                std::vector<std::string>* other_lines);
@@ -1031,11 +1035,17 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   const unsigned char*
   read_header_tables(const unsigned char* lineptr);
 
+  const unsigned char*
+  read_header_tables_v5(const unsigned char* lineptr);
+
   // Reads the DWARF2/3 line information.  If shndx is non-negative,
   // discard all line information that doesn't pertain to the given
   // section.
   const unsigned char*
-  read_lines(const unsigned char* lineptr, unsigned int shndx);
+  read_lines(const unsigned char* lineptr, const unsigned char* endptr,
+	     std::vector<LineStateMachine>* logicals,
+	     bool is_logicals_table, bool is_actuals_table,
+	     unsigned int shndx);
 
   // Process a single line info opcode at START using the state
   // machine at LSM.  Return true if we should define a line using the
@@ -1043,7 +1053,9 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   // opcode in LEN.
   bool
   process_one_opcode(const unsigned char* start,
-                     struct LineStateMachine* lsm, size_t* len);
+                     struct LineStateMachine* lsm, size_t* len,
+                     std::vector<LineStateMachine>* logicals,
+		     bool is_logicals_table, bool is_actuals_table);
 
   // Some parts of processing differ depending on whether the input
   // was a .o file or not.
@@ -1064,6 +1076,7 @@ class Sized_dwarf_line_info : public Dwarf_line_info
     int version;
     off_t prologue_length;
     int min_insn_length; // insn stands for instructin
+    int max_ops_per_insn;
     bool default_is_stmt; // stmt stands for statement
     signed char line_base;
     int line_range;
@@ -1080,6 +1093,26 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   // deallocated in the dtor, this contains a pointer to the start
   // of the buffer.
   const unsigned char* buffer_start_;
+
+  // buffer is the buffer for our line info, starting at exactly where
+  // the line info to read is.
+  const unsigned char* str_buffer_;
+  const unsigned char* str_buffer_end_;
+  // If the buffer was allocated temporarily, and therefore must be
+  // deallocated in the dtor, this contains a pointer to the start
+  // of the buffer.
+  const unsigned char* str_buffer_start_;
+
+  // Pointer to the end of the header_length field (aka prologue_length).
+  // The offsets to the line number programs are relative to this point.
+  const unsigned char* end_of_header_length_;
+
+  // Pointers to the start of the line number programs.
+  const unsigned char* logicals_start_;
+  const unsigned char* actuals_start_;
+
+  // Pointer to the end of the current compilation unit.
+  const unsigned char* end_of_unit_;
 
   // This has relocations that point into buffer.
   Sized_elf_reloc_mapper<size, big_endian>* reloc_mapper_;
