@@ -1,3 +1,37 @@
+2015-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_set_arch_mach_hook): Check return value from
+	bfd_malloc.
+	(coff_slurp_line_table): Return FALSE if the line number
+	information was corrupt.
+	(coff_slurp_symbol_table): Return FALSE if the symbol information
+	was corrupt.
+	* mach-o.c (bfd_mach_o_bfd_copy_private_header_data): Always
+	initialise the fields of the dyld_info structure.
+	(bfd_mach_o_build_exec_seg_command): Replace assertion with an
+	error message and a return value.
+	(bfd_mach_o_layout_commands): Change the function to boolean.
+	Return FALSE if the function fails.
+	(bfd_mach_o_build_commands): Fail if bfd_mach_o_layout_commands
+	fails.
+	(bfd_mach_o_read_command): Fail if an unrecognised command is
+	encountered.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Set bfd_error if the
+	read fails.
+	(slurp_symtab): Check the return from bfd_malloc.
+	(_bfd_XX_bfd_copy_private_bfd_data_common): Fail if the copy
+	encountered an error.
+	(_bfd_XXi_final_link_postscript): Fail if a section could not be
+	copied.
+	* peicode.h (pe_bfd_object_p): Fail if the header could not be
+	swapped in.
+	* tekhex.c (first_phase): Fail if the section is too big.
+	* versados.c (struct esdid): Add content_size field.
+	(process_otr): Use and check the new field.
+	(versados_get_section_contents): Check that the section exists and
+	that the requested data is available.
+
 2015-01-20  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* elf32-nios2.c (elf_backend_default_execstack): Define as 0.

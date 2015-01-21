@@ -690,6 +690,20 @@ bfd_mach_o_bfd_copy_private_header_data (bfd *ibfd, bfd *obfd)
 		ody->export_size = idy->export_size;
 		ody->export_content = idy->export_content;
 	      }
+	    /* PR 17512L: file: 730e492d.  */
+	    else
+	      {
+		ody->rebase_size = 
+		  ody->bind_size = 
+		  ody->weak_bind_size = 
+		  ody->lazy_bind_size = 
+		  ody->export_size = 0;
+		ody->rebase_content = 
+		  ody->bind_content = 
+		  ody->weak_bind_content = 
+		  ody->lazy_bind_content = 
+		  ody->export_content = NULL;
+	      }
 	  }
 	  break;
 
@@ -2764,7 +2778,14 @@ bfd_mach_o_build_exec_seg_command (bfd *abfd, bfd_mach_o_segment_command *seg)
 
       bfd_mach_o_append_section_to_segment (seg, s);
 
-      BFD_ASSERT (s->addr >= vma);
+      if (s->addr < vma)
+	{
+	  (*_bfd_error_handler)
+	    (_("section address (%lx) below start of segment (%lx)"),
+	       (unsigned long) s->addr, (unsigned long) vma);
+	  return FALSE;
+	}
+
       vma = s->addr + s->size;
     }
 
@@ -2839,7 +2860,7 @@ bfd_mach_o_build_exec_seg_command (bfd *abfd, bfd_mach_o_segment_command *seg)
 /* Layout the commands: set commands size and offset, set ncmds and sizeofcmds
    fields in header.  */
 
-static void
+static bfd_boolean
 bfd_mach_o_layout_commands (bfd_mach_o_data_struct *mdata)
 {
   unsigned wide = mach_o_wide_p (&mdata->header);
@@ -2847,6 +2868,7 @@ bfd_mach_o_layout_commands (bfd_mach_o_data_struct *mdata)
   ufile_ptr offset;
   bfd_mach_o_load_command *cmd;
   unsigned int align;
+  bfd_boolean ret = TRUE;
 
   hdrlen = wide ? BFD_MACH_O_HEADER_64_SIZE : BFD_MACH_O_HEADER_SIZE;
   align = wide ? 8 - 1 : 4 - 1;
@@ -2902,6 +2924,7 @@ bfd_mach_o_layout_commands (bfd_mach_o_data_struct *mdata)
 	  (*_bfd_error_handler)
 	    (_("unable to layout unknown load command 0x%lx"),
 	     (unsigned long) cmd->type);
+	  ret = FALSE;
 	  break;
 	}
 
@@ -2910,6 +2933,8 @@ bfd_mach_o_layout_commands (bfd_mach_o_data_struct *mdata)
     }
   mdata->header.sizeofcmds = offset - hdrlen;
   mdata->filelen = offset;
+
+  return ret;
 }
 
 /* Subroutine of bfd_mach_o_build_commands: set type, name and nsects of a
@@ -3044,8 +3069,7 @@ bfd_mach_o_build_commands (bfd *abfd)
   if (nbr_commands == 0)
     {
       /* Layout commands (well none...) and set headers command fields.  */
-      bfd_mach_o_layout_commands (mdata);
-      return TRUE;
+      return bfd_mach_o_layout_commands (mdata);
     }
 
   /* Create commands for segments (and symtabs), prepend them.  */
@@ -3128,7 +3152,8 @@ bfd_mach_o_build_commands (bfd *abfd)
     }
 
   /* Layout commands.  */
-  bfd_mach_o_layout_commands (mdata);
+  if (! bfd_mach_o_layout_commands (mdata))
+    return FALSE;
 
   /* So, now we have sized the commands and the filelen set to that.
      Now we can build the segment command and set the section file offsets.  */
@@ -4687,21 +4712,10 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
 	return FALSE;
       break;
     default:
-      {
-	static bfd_boolean unknown_set = FALSE;
-	static unsigned long unknown_command = 0;
-
-	/* Prevent reams of error messages when parsing corrupt binaries.  */
-	if (!unknown_set)
-	  unknown_set = TRUE;
-	else if (command->type == unknown_command)
-	  break;
-	unknown_command = command->type;
-
-	(*_bfd_error_handler)(_("%B: unknown load command 0x%lx"),
-			      abfd, (unsigned long) command->type);
-	break;
-      }
+      command->len = 0;
+      (*_bfd_error_handler)(_("%B: unknown load command 0x%lx"),
+			    abfd, (unsigned long) command->type);
+      return FALSE;
     }
 
   return TRUE;

@@ -686,6 +686,7 @@ main (int ac, char **av)
 
   program_name = av[0];
   xmalloc_set_program_name (program_name);
+  bfd_set_error_program_name (program_name);
 
   expandargv (&ac, &av);
 

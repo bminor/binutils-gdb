@@ -1,3 +1,24 @@
+2015-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* addr2line.c (main): Call bfd_set_error_program_name.
+	* ar.c (main): Likewise.
+	* coffdump.c (main): Likewise.
+	* cxxfilt.c (main): Likewise.
+	* dlltool.c (main): Likewise.
+	* nlmconv.c (main): Likewise.
+	* nm.c (main): Likewise.
+	* objdump.c (main): Likewise.
+	* size.c (main): Likewise.
+	* srconv.c (main): Likewise.
+	* strings.c (main): Likewise.
+	* sysdump.c (main): Likewise.
+	* windmc.c (main): Likewise.
+	* windres.c (main): Likewise.
+	* objcopy.c (main): Likewise.
+	(copy_relocations_in_section): Check for relocs without associated
+	symbol pointers.
+
 2015-01-21  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* MAINTAINERS: Add self to ARM maintainers list.
