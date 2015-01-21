@@ -1,3 +1,9 @@
+2015-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffgrok.c (do_type): Check that computed ref exists.
+	(doit): Add range checks when computing section for scope.
+
 2015-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (process_debug_info): Properly check abbrev size.

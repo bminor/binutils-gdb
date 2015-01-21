@@ -476,7 +476,11 @@ do_type (unsigned int i)
 	  /* Referring to a enum defined elsewhere.  */
 	  res->type = coff_enumref_type;
 	  res->u.aenumref.ref = tindex[idx];
-	  res->size = res->u.aenumref.ref->type->size;
+	  /* PR 17512: file: b85b67e8.  */
+	  if (res->u.aenumref.ref)
+	    res->size = res->u.aenumref.ref->type->size;
+	  else
+	    res->size = 0;
 	}
       else
 	{
@@ -740,7 +744,11 @@ doit (void)
 		/* PR 17512: file: 0ef7fbaf.  */
 		if (last_function_type)
 		  last_function_type->u.function.code = top_scope;
-		top_scope->sec = ofile->sections + sym->n_scnum;
+		/* PR 17512: file: 22908266.  */
+		if (sym->n_scnum < ofile->nsections && sym->n_scnum >= 0)
+		  top_scope->sec = ofile->sections + sym->n_scnum;
+		else
+		  top_scope->sec = NULL;
 		top_scope->offset = sym->n_value;
 	      }
 	    else
@@ -750,7 +758,6 @@ doit (void)
 		  fatal (_("Function start encountered without a top level scope."));
 		top_scope->size = sym->n_value - top_scope->offset + 1;
 		pop_scope ();
-
 	      }
 	    i += sym->n_numaux + 1;
 	  }
@@ -764,7 +771,11 @@ doit (void)
 	      {
 		/* Block start.  */
 		push_scope (1);
-		top_scope->sec = ofile->sections + sym->n_scnum;
+		/* PR 17512: file: af7e8e83.  */
+		if (sym->n_scnum < ofile->nsections && sym->n_scnum >= 0)
+		  top_scope->sec = ofile->sections + sym->n_scnum;
+		else
+		  top_scope->sec = NULL;
 		top_scope->offset = sym->n_value;
 	      }
 	    else
