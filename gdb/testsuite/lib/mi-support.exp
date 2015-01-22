@@ -191,7 +191,7 @@ proc default_mi_gdb_start { args } {
 	    return -1
 	}
     }
-    set gdb_spawn_id -1
+    set gdb_spawn_id $res
 
     # FIXME: mi output does not go through pagers, so these can be removed.
     # force the height to "unlimited", so no pagers get used
