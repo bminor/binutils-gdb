@@ -7184,7 +7184,7 @@ case $host_os in
     ac_cv_search_tgetent="none required"
     ;;
   *mingw32*)
-    if test x"$prefer_curses" != xyes; then
+    if test x"$curses_found" != xyes; then
       ac_cv_search_tgetent="none required"
       CONFIG_OBS="$CONFIG_OBS windows-termcap.o"
     fi ;;
