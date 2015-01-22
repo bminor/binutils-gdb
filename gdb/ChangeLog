@@ -1,3 +1,7 @@
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile.c (_initialize_compile): Use -fPIE for compile_args.
+
 2015-01-22  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove ada-varobj.h.

@@ -1,3 +1,7 @@
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile.exp (pointer to jit function): New test.
+
 2015-01-17  Wei-cheng Wang  <cole945@gmail.com>
 
 	* lib/gdb.exp (supports_process_record): Return true for
