@@ -425,6 +425,12 @@ tui_enable (void)
 	error (_("Cannot enable the TUI when output is not a terminal"));
 
       s = newterm (NULL, stdout, stdin);
+#ifdef __MINGW32__
+      /* The MinGW port of ncurses requires $TERM to be unset in order
+	 to activate the Windows console driver.  */
+      if (s == NULL)
+	s = newterm ("unknown", stdout, stdin);
+#endif
       if (s == NULL)
 	{
 	  error (_("Cannot enable the TUI: error opening terminal [TERM=%s]"),
@@ -432,7 +438,9 @@ tui_enable (void)
 	}
       w = stdscr;
 
-      /* Check required terminal capabilities.  */
+      /* Check required terminal capabilities.  The MinGW port of
+	 ncurses does have them, but doesn't expose them through "cup".  */
+#ifndef __MINGW32__
       cap = tigetstr ("cup");
       if (cap == NULL || cap == (char *) -1 || *cap == '\0')
 	{
@@ -442,6 +450,7 @@ tui_enable (void)
 		   "terminal doesn't support cursor addressing [TERM=%s]"),
 		 gdb_getenv_term ());
 	}
+#endif
 
       cbreak ();
       noecho ();
