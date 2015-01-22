@@ -1,3 +1,12 @@
+2015-01-22  Thomas Preud'homme <thomas.preudhomme@arm.com>
+
+	Backport from mainline
+	2015-01-13  Thomas Preud'homme <thomas.preudhomme@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Added relocs-257-symbolic-func test.
+	* ld-aarch64/relocs-257-symbolic-func.d: New file.
+	* ld-aarch64/relocs-257-symbolic-func.s: Likewise.
+
 2014-10-24  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp (aarch64elftests): Drive erratum
