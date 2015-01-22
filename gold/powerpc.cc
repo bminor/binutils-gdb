@@ -5584,8 +5584,8 @@ Target_powerpc<size, big_endian>::Scan::local(
 
 	if (!parameters->options().output_is_position_independent())
 	  {
-	    if ((size == 32 && is_ifunc)
-		|| (size == 64 && target->abiversion() >= 2))
+	    if (is_ifunc
+		&& (size == 32 || target->abiversion() >= 2))
 	      got->add_local_plt(object, r_sym, GOT_TYPE_STANDARD);
 	    else
 	      got->add_local(object, r_sym, GOT_TYPE_STANDARD);
@@ -6032,8 +6032,8 @@ Target_powerpc<size, big_endian>::Scan::global(
 	got = target->got_section(symtab, layout);
 	if (gsym->final_value_is_known())
 	  {
-	    if ((size == 32 && is_ifunc)
-		|| (size == 64 && target->abiversion() >= 2))
+	    if (is_ifunc
+		&& (size == 32 || target->abiversion() >= 2))
 	      got->add_global_plt(gsym, GOT_TYPE_STANDARD);
 	    else
 	      got->add_global(gsym, GOT_TYPE_STANDARD);
