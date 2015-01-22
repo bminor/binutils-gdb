@@ -1,3 +1,9 @@
+2015-01-22  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_apply_reloc_24): New.
+	(m32c_elf_howto_table): Use it for R_M32C_24.
+	(m32c_elf_relocate_section): Handle R_M32C_24 specially.
+
 2015-01-22  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
