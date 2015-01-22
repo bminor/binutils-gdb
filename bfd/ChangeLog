@@ -1,3 +1,11 @@
+2015-01-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Backport from mainline
+	2015-01-13  Thomas Preud'homme <thomas.preudhomme@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Use SYMBOLIC_BIND
+	to check if a symbol should be bound symbolically.
+
 2015-01-20  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	Backport from master
