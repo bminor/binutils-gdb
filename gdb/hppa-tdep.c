@@ -1376,37 +1376,106 @@ is_branch (unsigned long inst)
 }
 
 /* Return the register number for a GR which is saved by INST or
-   zero it INST does not save a GR.  */
+   zero if INST does not save a GR.
+
+   Referenced from:
+
+     parisc 1.1:
+     https://parisc.wiki.kernel.org/images-parisc/6/68/Pa11_acd.pdf
+
+     parisc 2.0:
+     https://parisc.wiki.kernel.org/images-parisc/7/73/Parisc2.0.pdf
+
+     According to Table 6-5 of Chapter 6 (Memory Reference Instructions)
+     on page 106 in parisc 2.0, all instructions for storing values from
+     the general registers are:
+
+       Store:          stb, sth, stw, std (according to Chapter 7, they
+                       are only in both "inst >> 26" and "inst >> 6".
+       Store Absolute: stwa, stda (according to Chapter 7, they are only
+                       in "inst >> 6".
+       Store Bytes:    stby, stdby (according to Chapter 7, they are
+                       only in "inst >> 6").
+
+   For (inst >> 26), according to Chapter 7:
+
+     The effective memory reference address is formed by the addition
+     of an immediate displacement to a base value.
+
+    - stb: 0x18, store a byte from a general register.
+
+    - sth: 0x19, store a halfword from a general register.
+
+    - stw: 0x1a, store a word from a general register.
+
+    - stwm: 0x1b, store a word from a general register and perform base
+      register modification (2.0 will still treate it as stw).
+
+    - std: 0x1c, store a doubleword from a general register (2.0 only).
+
+    - stw: 0x1f, store a word from a general register (2.0 only).
+
+   For (inst >> 6) when ((inst >> 26) == 0x03), according to Chapter 7:
+
+     The effective memory reference address is formed by the addition
+     of an index value to a base value specified in the instruction.
+
+    - stb: 0x08, store a byte from a general register (1.1 calls stbs).
+
+    - sth: 0x09, store a halfword from a general register (1.1 calls
+      sths).
+
+    - stw: 0x0a, store a word from a general register (1.1 calls stws).
+
+    - std: 0x0b: store a doubleword from a general register (2.0 only)
+
+     Implement fast byte moves (stores) to unaligned word or doubleword
+     destination.
+
+    - stby: 0x0c, for unaligned word (1.1 calls stbys).
+
+    - stdby: 0x0d for unaligned doubleword (2.0 only).
+
+     Store a word or doubleword using an absolute memory address formed
+     using short or long displacement or indexed
+
+    - stwa: 0x0e, store a word from a general register to an absolute
+      address (1.0 calls stwas).
+
+    - stda: 0x0f, store a doubleword from a general register to an
+      absolute address (2.0 only).  */
 
 static int
 inst_saves_gr (unsigned long inst)
 {
-  /* Does it look like a stw?  */
-  if ((inst >> 26) == 0x1a || (inst >> 26) == 0x1b
-      || (inst >> 26) == 0x1f
-      || ((inst >> 26) == 0x1f
-	  && ((inst >> 6) == 0xa)))
-    return hppa_extract_5R_store (inst);
-
-  /* Does it look like a std?  */
-  if ((inst >> 26) == 0x1c
-      || ((inst >> 26) == 0x03
-	  && ((inst >> 6) & 0xf) == 0xb))
-    return hppa_extract_5R_store (inst);
-
-  /* Does it look like a stwm?  GCC & HPC may use this in prologues.  */
-  if ((inst >> 26) == 0x1b)
-    return hppa_extract_5R_store (inst);
-
-  /* Does it look like sth or stb?  HPC versions 9.0 and later use these
-     too.  */
-  if ((inst >> 26) == 0x19 || (inst >> 26) == 0x18
-      || ((inst >> 26) == 0x3
-	  && (((inst >> 6) & 0xf) == 0x8
-	      || ((inst >> 6) & 0xf) == 0x9)))
-    return hppa_extract_5R_store (inst);
-
-  return 0;
+  switch ((inst >> 26) & 0x0f)
+    {
+      case 0x03:
+	switch ((inst >> 6) & 0x0f)
+	  {
+	    case 0x08:
+	    case 0x09:
+	    case 0x0a:
+	    case 0x0b:
+	    case 0x0c:
+	    case 0x0d:
+	    case 0x0e:
+	    case 0x0f:
+	      return hppa_extract_5R_store (inst);
+	    default:
+	      return 0;
+	  }
+      case 0x18:
+      case 0x19:
+      case 0x1a:
+      case 0x1b:
+      case 0x1c:
+      /* no 0x1d or 0x1e -- according to parisc 2.0 document */
+      case 0x1f:
+	return hppa_extract_5R_store (inst);
+      default:
+	return 0;
+    }
 }
 
 /* Return the register number for a FR which is saved by INST or

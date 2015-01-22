@@ -1,3 +1,8 @@
+2015-01-22  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* hppa-tdep.c (inst_saves_gr): Fix logical working flow issues
+	and check additional store instructions.
+
 2015-01-21  Wei-cheng Wang  <cole945@gmail.com>
 
 	* MAINTAINERS (Write After Approval): Add "Wei-cheng Wang".
