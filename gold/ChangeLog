@@ -1,6 +1,11 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-01-22  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::Scan::local <got relocs>): Correct
+	condition for need of ifunc plt entry.
+	(Target_powerpc::Scan::global <got relocs>): Likewise.
+
 	2014-12-22  Cary Coutant  <ccoutant@google.com>
 	* powerpc.cc (Target_powerpc::relocate): Fix overflow check.
 
