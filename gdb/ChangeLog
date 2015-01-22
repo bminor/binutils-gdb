@@ -1,3 +1,11 @@
+2015-01-22  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac [*mingw32*]: Check $curses_found instead of
+	$prefer_curses.
+	* configure: Regenerate.
+	* windows-termcap.c: Remove HAVE_CURSES_H, HAVE_NCURSES_H and
+	HAVE_NCURSES_NCURSES_H checks.
+
 2015-01-22  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb/tui/tui.c (tui_enable) [__MINGW32__]: If the call to 'newterm'
