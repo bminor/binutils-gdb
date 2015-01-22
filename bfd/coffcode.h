@@ -1009,6 +1009,13 @@ handle_COMDAT (bfd * abfd,
 
 		seen_state = 1;
 
+		/* PR 17512: file: e2cfe54f.  */
+		if (esym + bfd_coff_symesz (abfd) >= esymend)
+		  {
+		    _bfd_error_handler (_("%B: warning: No symbol for section '%s' found"),
+					abfd, symname);
+		    break;
+		  }
 		/* This is the section symbol.  */
 		bfd_coff_swap_aux_in (abfd, (esym + bfd_coff_symesz (abfd)),
 				      isym.n_type, isym.n_sclass,

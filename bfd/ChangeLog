@@ -1,3 +1,10 @@
+2015-01-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (handle_COMDAT): When searching for the section
+	symbol, make sure that there is space left in the symbol table.
+	* vms-alpha.c (_bfd_vms_slurp_ehdr): Add range checks.
+
 2015-01-21  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
