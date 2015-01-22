@@ -523,8 +523,14 @@ process_extended_line_op (unsigned char * data,
       break;
 
     case DW_LNE_set_discriminator:
-      printf (_("set Discriminator to %s\n"),
-	      dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
+      {
+	unsigned int discrim;
+
+	discrim = read_uleb128 (data, & bytes_read, end);
+	data += bytes_read;
+	printf (_("set Discriminator to %u\n"), discrim);
+	state_machine_regs.discriminator = discrim;
+      }
       break;
 
     /* HP extensions.  */
