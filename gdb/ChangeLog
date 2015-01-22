@@ -1,3 +1,9 @@
+2015-01-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove ada-varobj.h.
+	(ALLDEPFILES): Remove irix5-nat.c.  These two are part of the
+	reason that "make TAGS" is broken.
+
 2015-01-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* configure.ac [*mingw32*]: Only add windows-termcap.o to
