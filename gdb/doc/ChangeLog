@@ -1,3 +1,7 @@
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Threads): Describe -ascending for thread apply all.
+
 2015-01-16  Eli Zaretskii  <eliz@gnu.org>
 
 	* doc/gdb.texinfo (TUI Commands): Document the possible

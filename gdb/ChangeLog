@@ -1,5 +1,14 @@
 2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* NEWS (Changes since GDB 7.9): Add 'thread apply all' option
+	'-ascending'.
+	* thread.c (tp_array_compar_ascending, tp_array_compar): New.
+	(thread_apply_all_command): Parse CMD for tp_array_compar_ascending.
+	Sort tp_array using tp_array_compar.
+	(_initialize_thread): Extend thread_apply_all_command help.
+
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* corelow.c (core_open): Call also thread_command.
 	* gdbthread.h (thread_command): New prototype moved from ...
 	* thread.c (thread_command): ... here.
