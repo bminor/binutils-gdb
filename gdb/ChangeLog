@@ -1,3 +1,10 @@
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* corelow.c (core_open): Call also thread_command.
+	* gdbthread.h (thread_command): New prototype moved from ...
+	* thread.c (thread_command): ... here.
+	(thread_command): Make it global.
+
 2015-01-22  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac [*mingw32*]: Check $curses_found instead of

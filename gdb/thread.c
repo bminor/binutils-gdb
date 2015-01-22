@@ -62,7 +62,6 @@ static int highest_thread_num;
    spawned new threads we haven't heard of yet.  */
 static int threads_executing;
 
-static void thread_command (char *tidstr, int from_tty);
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
@@ -1506,7 +1505,7 @@ thread_apply_command (char *tidlist, int from_tty)
 /* Switch to the specified thread.  Will dispatch off to thread_apply_command
    if prefix of arg is `apply'.  */
 
-static void
+void
 thread_command (char *tidstr, int from_tty)
 {
   if (!tidstr)
