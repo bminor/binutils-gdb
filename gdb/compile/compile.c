@@ -645,12 +645,13 @@ String quoting is parsed like in shell, for example:\n\
 
   /* Override flags possibly coming from DW_AT_producer.  */
   compile_args = xstrdup ("-O0 -gdwarf-4"
-  /* We use -fPIC Otherwise GDB would need to reserve space large enough for
+  /* We use -fPIE Otherwise GDB would need to reserve space large enough for
      any object file in the inferior in advance to get the final address when
      to link the object file to and additionally the default system linker
      script would need to be modified so that one can specify there the
-     absolute target address.  */
-			 " -fPIC"
+     absolute target address.
+     -fPIC is not used at is would require from GDB to generate .got.  */
+			 " -fPIE"
   /* We don't want warnings.  */
 			 " -w"
   /* Override CU's possible -fstack-protector-strong.  */

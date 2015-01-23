@@ -259,6 +259,11 @@ gdb_test_no_output "end" "compile code -r multiline 4"
 gdb_test "print 'compile.c'::globalshadow" " = 77000" \
     "check globalshadow with -r"
 
+# Test GOT vs. resolving jit function pointers.
+
+gdb_test_no_output "compile -raw -- int func(){return 21;} _gdb_expr(){int (*funcp)()=func; if (funcp()!=21) abort();}" \
+    "pointer to jit function"
+
 #
 # Test the case where the registers structure would not normally have
 # any fields.
