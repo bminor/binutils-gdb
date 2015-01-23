@@ -478,7 +478,24 @@ ftrace_update_function (struct btrace_function *bfun, CORE_ADDR pc)
       switch (last->iclass)
 	{
 	case BTRACE_INSN_RETURN:
-	  return ftrace_new_return (bfun, mfun, fun);
+	  {
+	    const char *fname;
+
+	    /* On some systems, _dl_runtime_resolve returns to the resolved
+	       function instead of jumping to it.  From our perspective,
+	       however, this is a tailcall.
+	       If we treated it as return, we wouldn't be able to find the
+	       resolved function in our stack back trace.  Hence, we would
+	       lose the current stack back trace and start anew with an empty
+	       back trace.  When the resolved function returns, we would then
+	       create a stack back trace with the same function names but
+	       different frame id's.  This will confuse stepping.  */
+	    fname = ftrace_print_function_name (bfun);
+	    if (strcmp (fname, "_dl_runtime_resolve") == 0)
+	      return ftrace_new_tailcall (bfun, mfun, fun);
+
+	    return ftrace_new_return (bfun, mfun, fun);
+	  }
 
 	case BTRACE_INSN_CALL:
 	  /* Ignore calls to the next instruction.  They are used for PIC.  */

@@ -1,5 +1,10 @@
 2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (ftrace_update_function): Treat return as tailcall for
+	"_dl_runtime_resolve".
+
+2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.h (btrace_function) <lbegin, lend>: Remove.
 	* btrace.c (ftrace_debug): Do not print the line range.
 	(ftrace_skip_file, ftrace_update_lines): Remove.
