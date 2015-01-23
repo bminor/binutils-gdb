@@ -1,3 +1,13 @@
+2015-01-23  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_is_async_p): New macro.
+	(linux_nat_is_async_p):
+	(linux_nat_terminal_inferior): Check whether the target can async
+	instead of whether it is already async.
+	(linux_nat_terminal_ours): Don't check whether the target is
+	async.
+	(linux_async_pipe): Use linux_is_async_p.
+
 2015-01-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* compile/compile.c (_initialize_compile): Use -fPIE for compile_args.

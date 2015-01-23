@@ -225,6 +225,9 @@ struct simple_pid_list *stopped_pids;
    event loop.  */
 static int linux_nat_event_pipe[2] = { -1, -1 };
 
+/* True if we're currently in async mode.  */
+#define linux_is_async_p() (linux_nat_event_pipe[0] != -1)
+
 /* Flush the event pipe.  */
 
 static void
@@ -4335,10 +4338,7 @@ linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
 static int
 linux_nat_is_async_p (struct target_ops *ops)
 {
-  /* NOTE: palves 2008-03-21: We're only async when the user requests
-     it explicitly with the "set target-async" command.
-     Someday, linux will always be async.  */
-  return target_async_permitted;
+  return linux_is_async_p ();
 }
 
 /* target_can_async_p implementation.  */
@@ -4388,7 +4388,11 @@ static int async_terminal_is_ours = 1;
 static void
 linux_nat_terminal_inferior (struct target_ops *self)
 {
-  if (!target_is_async_p ())
+  /* Like target_terminal_inferior, use target_can_async_p, not
+     target_is_async_p, since at this point the target is not async
+     yet.  If it can async, then we know it will become async prior to
+     resume.  */
+  if (!target_can_async_p ())
     {
       /* Async mode is disabled.  */
       child_terminal_inferior (self);
@@ -4418,13 +4422,6 @@ linux_nat_terminal_inferior (struct target_ops *self)
 static void
 linux_nat_terminal_ours (struct target_ops *self)
 {
-  if (!target_is_async_p ())
-    {
-      /* Async mode is disabled.  */
-      child_terminal_ours (self);
-      return;
-    }
-
   /* GDB should never give the terminal to the inferior if the
      inferior is running in the background (run&, continue&, etc.),
      but claiming it sure should.  */
@@ -4477,7 +4474,7 @@ handle_target_event (int error, gdb_client_data client_data)
 static int
 linux_async_pipe (int enable)
 {
-  int previous = (linux_nat_event_pipe[0] != -1);
+  int previous = linux_is_async_p ();
 
   if (previous != enable)
     {
