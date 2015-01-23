@@ -1,3 +1,8 @@
+2015-01-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-var-list-children-invalid-grandchild.c: New file.
+	* gdb.mi/mi-var-list-children-invalid-grandchild.exp: New file.
+
 2015-01-15  Mark Wielaard  <mjw@redhat.com>
 
 	* gdb.base/noreturn-return.c: New file.

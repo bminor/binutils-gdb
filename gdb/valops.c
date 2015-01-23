@@ -3592,7 +3592,7 @@ struct type *
 value_rtti_indirect_type (struct value *v, int *full, 
 			  int *top, int *using_enc)
 {
-  struct value *target;
+  struct value *target = NULL;
   struct type *type, *real_type, *target_type;
 
   type = value_type (v);
@@ -3600,7 +3600,25 @@ value_rtti_indirect_type (struct value *v, int *full,
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     target = coerce_ref (v);
   else if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    target = value_ind (v);
+    {
+      volatile struct gdb_exception except;
+
+      TRY_CATCH (except, RETURN_MASK_ERROR)
+        {
+	  target = value_ind (v);
+        }
+      if (except.reason < 0)
+	{
+	  if (except.error == MEMORY_ERROR)
+	    {
+	      /* value_ind threw a memory error. The pointer is NULL or
+	         contains an uninitialized value: we can't determine any
+	         type.  */
+	      return NULL;
+	    }
+	  throw_exception (except);
+	}
+    }
   else
     return NULL;
 

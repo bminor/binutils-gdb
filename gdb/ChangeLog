@@ -1,3 +1,9 @@
+2015-01-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/17416
+	* valops.c (value_rtti_indirect_type): Catch exception thrown by
+	value_ind.
+
 2015-01-15  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2read.c (read_subroutine_type): Set TYPE_NO_RETURN from
