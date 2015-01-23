@@ -2083,6 +2083,13 @@ out_debug_line (segT line_seg, segT str_seg)
   /* Version.  */
   out_two (version);
 
+  /* Version 5 adds address_size and segment_size. */
+  if (version >= 5)
+    {
+      out_byte (sizeof_address);
+      out_byte (0);
+    }
+
   /* Length of the prologue following this length.  */
   prologue_start = symbol_temp_make ();
   prologue_end = symbol_temp_make ();
