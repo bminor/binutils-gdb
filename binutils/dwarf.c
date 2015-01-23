@@ -441,7 +441,7 @@ append_logical (void)
 	  xrealloc (logicals_table, logicals_allocated * sizeof (SMR));
     }
   logicals_table[logicals_count++] = state_machine_regs;
-  printf (_("\t\tLogical %d: 0x%s[%d] file %d line %d discrim %d context %d subprog %d is_stmt %d\n"),
+  printf (_("\t\tLogical %u: 0x%s[%u] file %u line %u discrim %u context %u subprog %u is_stmt %d\n"),
 	  logicals_count,
 	  dwarf_vmatoa ("x", state_machine_regs.address),
 	  state_machine_regs.op_index,
@@ -3235,15 +3235,17 @@ display_line_program (unsigned char *start, unsigned char *end,
 	       printf (_("  Set ISA to %s\n"), dwarf_vmatoa ("u", uladv));
 	       break;
 
-	     case DW_LNS_set_context:
+	     case DW_LNS_set_subprogram:
 	     /* This opcode is aliased with:  */
 	     /* case DW_LNS_set_address_from_logical:  */
 	       if (is_logical)
 		 {
-		   /* DW_LNS_set_context */
-		   state_machine_regs.context = read_uleb128 (data, & bytes_read, end);
+		   /* DW_LNS_set_subprogram */
+		   state_machine_regs.context = 0;
+		   state_machine_regs.subprogram = read_uleb128 (data, & bytes_read, end);
 		   data += bytes_read;
-		   printf (_("  Set context to %d\n"), state_machine_regs.context);
+		   printf (_("  Set subprogram to %u and reset context to 0\n"),
+			   state_machine_regs.subprogram);
 		 }
 	       else
 		 {
@@ -3259,7 +3261,7 @@ display_line_program (unsigned char *start, unsigned char *end,
 		     }
 		   else
 		     warn (_("Logical row number outside range of logicals table\n"));
-		   printf (_("  Advance Line by %s to %d and set address from logical to 0x%s[%d]\n"),
+		   printf (_("  Advance Line by %s to %u and set address from logical to 0x%s[%u]\n"),
 			   dwarf_vmatoa ("d", adv),
 			   logical,
 			   dwarf_vmatoa ("x", state_machine_regs.address),
@@ -3267,15 +3269,20 @@ display_line_program (unsigned char *start, unsigned char *end,
 		 }
 	       break;
 
-	     case DW_LNS_set_subprogram:
+	     case DW_LNS_inlined_call:
+	       adv = read_sleb128 (data, & bytes_read, end);
+	       data += bytes_read;
+	       state_machine_regs.context = logicals_count + adv;
 	       state_machine_regs.subprogram = read_uleb128 (data, & bytes_read, end);
 	       data += bytes_read;
-	       printf (_("  Set subprogram to %d\n"), state_machine_regs.subprogram);
+	       printf (_("  Set context to %u and subprogram to %u\n"),
+		       state_machine_regs.context,
+		       state_machine_regs.subprogram);
 	       break;
 
 	     case DW_LNS_pop_context:
 	       logical = state_machine_regs.context;
-	       printf (_("  Pop context to logical %d\n"), logical);
+	       printf (_("  Pop context to logical %u\n"), logical);
 	       if (logical - 1 < logicals_count)
 	         {
 		   state_machine_regs.file = logicals_table[logical - 1].file;
