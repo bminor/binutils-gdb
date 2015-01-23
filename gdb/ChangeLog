@@ -1,3 +1,96 @@
+2015-01-23  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_is_async_p): New macro.
+	(linux_nat_is_async_p):
+	(linux_nat_terminal_inferior): Check whether the target can async
+	instead of whether it is already async.
+	(linux_nat_terminal_ours): Don't check whether the target is
+	async.
+	(linux_async_pipe): Use linux_is_async_p.
+
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes since GDB 7.9): Add 'thread apply all' option
+	'-ascending'.
+	* thread.c (tp_array_compar_ascending, tp_array_compar): New.
+	(thread_apply_all_command): Parse CMD for tp_array_compar_ascending.
+	Sort tp_array using tp_array_compar.
+	(_initialize_thread): Extend thread_apply_all_command help.
+
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* corelow.c (core_open): Call also thread_command.
+	* gdbthread.h (thread_command): New prototype moved from ...
+	* thread.c (thread_command): ... here.
+	(thread_command): Make it global.
+
+2015-01-22  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac [*mingw32*]: Check $curses_found instead of
+	$prefer_curses.
+	* configure: Regenerate.
+	* windows-termcap.c: Remove HAVE_CURSES_H, HAVE_NCURSES_H and
+	HAVE_NCURSES_NCURSES_H checks.
+
+2015-01-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui.c (tui_enable) [__MINGW32__]: If the call to 'newterm'
+	fails with the 1st arg NULL, try again with "unknown".  Don't test
+	the "cup" capability: it isn't supported by the Windows port of
+	ncurses, but the Windows console driver is still capable of
+	supporting TUI.
+
+2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile.c (_initialize_compile): Use -fPIE for compile_args.
+
+2015-01-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove ada-varobj.h.
+	(ALLDEPFILES): Remove irix5-nat.c.  These two are part of the
+	reason that "make TAGS" is broken.
+
+2015-01-22  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* hppa-tdep.c (inst_saves_gr): Fix logical working flow issues
+	and check additional store instructions.
+
+2015-01-21  Wei-cheng Wang  <cole945@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add "Wei-cheng Wang".
+
+2015-01-21  Wei-cheng Wang  <cole945@gmail.com>
+
+	* ppc-linux-tdep.c (ppc_skip_trampoline_code,
+	ppc_canonicalize_syscall, ppc_linux_syscall_record,
+	ppc_linux_record_signal, ppc_init_linux_record_tdep): Add comments.
+	* ppc64-tdep.c (ppc64_skip_trampoline_code): Likewise.
+	* rs6000-tdep.c (rs6000_epilogue_frame_cache,
+	rs6000_epilogue_frame_this_id, rs6000_epilogue_frame_prev_register,
+	rs6000_epilogue_frame_sniffer, ppc_record_vsr, ppc_process_record_op4,
+	ppc_process_record_op19, ppc_process_record_op31,
+	ppc_process_record_op59, ppc_process_record_op60,
+	ppc_process_record_op63): Likewise.
+
+2015-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason_string)
+	(linux_ptrace_test_ret_to_nx): Use safe_strerror instead of
+	strerror.
+
+2015-01-20  Wei-cheng Wang  <cole945@gmail.com>
+
+	* rs6000-tdep.c (ppc_process_record_op4, ppc_process_record_op19,
+	ppc_process_record_op31, ppc_process_record_op59,
+	ppc_process_record_op60, ppc_process_record_op63,
+	ppc_process_record): Fix -Wformat warning.
+	* rs6000-tdep.c (rs6000_epilogue_frame_cache, ppc_process_record_op60):
+	Remove unused variables.
+
+2015-01-20  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add "Chen Gang".
+
 2015-01-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* configure.ac [*mingw32*]: Only add windows-termcap.o to

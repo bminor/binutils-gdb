@@ -305,7 +305,12 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
   return 0;
 }
 
-/* Follow PLT stub to actual routine.  */
+/* Follow PLT stub to actual routine.
+
+   When the execution direction is EXEC_REVERSE, scan backward to
+   check whether we are in the middle of a PLT stub.  Currently,
+   we only look-behind at most 4 instructions (the max length of PLT
+   stub sequence.  */
 
 static CORE_ADDR
 ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
@@ -791,11 +796,16 @@ ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
 static struct linux_record_tdep ppc_linux_record_tdep;
 static struct linux_record_tdep ppc64_linux_record_tdep;
 
+/* ppc_canonicalize_syscall maps from the native PowerPC Linux set of
+   syscall ids into a canonical set of syscall ids used by process
+   record.  (See arch/powerpc/include/uapi/asm/unistd.h in kernel tree.)
+   Return -1 if this system call is not supported by process record.
+   Otherwise, return the syscall number for preocess reocrd of given
+   SYSCALL.  */
+
 static enum gdb_syscall
 ppc_canonicalize_syscall (int syscall)
 {
-  /* See arch/powerpc/include/uapi/asm/unistd.h */
-
   if (syscall <= 165)
     return syscall;
   else if (syscall >= 167 && syscall <= 190)	/* Skip query_module 166 */
@@ -820,6 +830,9 @@ ppc_canonicalize_syscall (int syscall)
     return gdb_sys_recvmsg;
   return -1;
 }
+
+/* Record registers which might be clobbered during system call.
+   Return 0 if successful.  */
 
 static int
 ppc_linux_syscall_record (struct regcache *regcache)
@@ -900,6 +913,9 @@ ppc_linux_syscall_record (struct regcache *regcache)
 
   return 0;
 }
+
+/* Record registers which might be clobbered during signal handling.
+   Return 0 if successful.  */
 
 static int
 ppc_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
@@ -1417,7 +1433,9 @@ static const struct frame_unwind ppu2spu_unwind = {
   ppu2spu_prev_arch,
 };
 
-/* Initialize linux_record_tdep if not initialized yet.  */
+/* Initialize linux_record_tdep if not initialized yet.
+   WORDSIZE is 4 or 8 for 32- or 64-bit PowerPC Linux respectively.
+   Sizes of data structures are initialized accordingly.  */
 
 static void
 ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,

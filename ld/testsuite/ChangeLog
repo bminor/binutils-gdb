@@ -1,3 +1,45 @@
+2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-scripts/provide-4-map.d: Update expected output.
+	* ld-scripts/provide-5-map.d: Likewise.
+
+2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-scripts/provide-4.d: New file.
+	* ld-scripts/provide-4-map.d: New file.
+	* ld-scripts/provide-4.t: New file.
+	* ld-scripts/provide-5.d: New file.
+	* ld-scripts/provide-5.s: New file.
+	* ld-scripts/provide-5-map.d: New file.
+	* ld-scripts/provide-5.t: New file.
+	* ld-scripts/provide.exp: Run the provide-4.d and provide-5.d
+	tests.
+
+2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-scripts/overlay-size.d: Add 'map' option.
+	* ld-scripts/overlay-size.exp: Remove manual check of mapfile.
+	* lib/ld-lib.exp (run_dump_test): Add support for new 'map'
+	option, checking linker mapfile output.
+
+2015-01-20  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/ambiguousv1.d,
+	* ld-powerpc/ambiguousv1b.d,
+	* ld-powerpc/ambiguousv2.d,
+	* ld-powerpc/ambiguousv2b.d,
+	* ld-powerpc/elfv2exe.d,
+	* ld-powerpc/elfv2so.d,
+	* ld-powerpc/tlsexe.r,
+	* ld-powerpc/tlsexetoc.r,
+	* ld-powerpc/tlsso.r,
+	* ld-powerpc/tlstocso.r: Update.
+
+2015-01-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17615
+	* ld-elf/pr17615.d: Match .sbss too.
+
 2015-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17615

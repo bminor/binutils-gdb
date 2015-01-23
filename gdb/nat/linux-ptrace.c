@@ -73,10 +73,10 @@ linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err)
   warnings = buffer_finish (&buffer);
   if (warnings[0] != '\0')
     reason_string = xstrprintf ("%s (%d), %s",
-				strerror (err), err, warnings);
+				safe_strerror (err), err, warnings);
   else
     reason_string = xstrprintf ("%s (%d)",
-				strerror (err), err);
+				safe_strerror (err), err);
   xfree (warnings);
   return reason_string;
 }
@@ -111,7 +111,7 @@ linux_ptrace_test_ret_to_nx (void)
   if (return_address == MAP_FAILED)
     {
       warning (_("linux_ptrace_test_ret_to_nx: Cannot mmap: %s"),
-	       strerror (errno));
+	       safe_strerror (errno));
       return;
     }
 
@@ -123,7 +123,7 @@ linux_ptrace_test_ret_to_nx (void)
     {
     case -1:
       warning (_("linux_ptrace_test_ret_to_nx: Cannot fork: %s"),
-	       strerror (errno));
+	       safe_strerror (errno));
       return;
 
     case 0:
@@ -131,7 +131,7 @@ linux_ptrace_test_ret_to_nx (void)
 		  (PTRACE_TYPE_ARG4) NULL);
       if (l != 0)
 	warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_TRACEME: %s"),
-		 strerror (errno));
+		 safe_strerror (errno));
       else
 	{
 #if defined __i386__
@@ -161,7 +161,7 @@ linux_ptrace_test_ret_to_nx (void)
   if (got_pid != child)
     {
       warning (_("linux_ptrace_test_ret_to_nx: waitpid returned %ld: %s"),
-	       (long) got_pid, strerror (errno));
+	       (long) got_pid, safe_strerror (errno));
       return;
     }
 
@@ -205,7 +205,7 @@ linux_ptrace_test_ret_to_nx (void)
   if (errno != 0)
     {
       warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_PEEKUSER: %s"),
-	       strerror (errno));
+	       safe_strerror (errno));
       return;
     }
   pc = (void *) (uintptr_t) l;
@@ -220,7 +220,7 @@ linux_ptrace_test_ret_to_nx (void)
     {
       warning (_("linux_ptrace_test_ret_to_nx: "
 		 "PTRACE_KILL waitpid returned %ld: %s"),
-	       (long) got_pid, strerror (errno));
+	       (long) got_pid, safe_strerror (errno));
       return;
     }
   if (!WIFSIGNALED (kill_status))

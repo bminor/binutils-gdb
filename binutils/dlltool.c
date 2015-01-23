@@ -4044,6 +4044,7 @@ main (int ac, char **av)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
+  bfd_set_error_program_name (program_name);
   expandargv (&ac, &av);
 
   while ((c = getopt_long (ac, av,

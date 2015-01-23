@@ -1,3 +1,9 @@
+2015-01-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Scan::local <got relocs>): Correct
+	condition for need of ifunc plt entry.
+	(Target_powerpc::Scan::global <got relocs>): Likewise.
+
 2015-01-14  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* mips.cc (reloc_high): Add r_sym.

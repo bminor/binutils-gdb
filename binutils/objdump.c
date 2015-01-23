@@ -3495,6 +3495,7 @@ main (int argc, char **argv)
 
   program_name = *argv;
   xmalloc_set_program_name (program_name);
+  bfd_set_error_program_name (program_name);
 
   START_PROGRESS (program_name, 0);
 

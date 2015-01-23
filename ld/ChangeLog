@@ -1,3 +1,37 @@
+2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldlang.c (print_assignment): Only evaluate the expression for a
+	PROVIDE'd assignment when the destination is being defined.
+	Display a special message for PROVIDE'd symbols that are not being
+	provided.
+
+2015-01-20  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf64ppc.sh (OTHER_SDATA_SECTIONS): Use in place of..
+	(OTHER_BSS_SYMBOLS): ..this.
+	(OTHER_PLT_RELOC_SECTIONS): Don't define.
+	(OTHER_GOT_RELOC_SECTIONS): Add rela.toc1 and rela.tocbss.
+	(OTHER_READWRITE_SECTIONS): Don't define.  Move .toc1 to..
+	(OTHER_RELRO_SECTIONS_2): ..here.
+	* scripttempl/elf.sc: Move SBSS too when DATA_SDATA.
+
+2015-01-20  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf64ppc.sh (BSS_PLT): Don't define.
+	(OTHER_READWRITE_SECTIONS): Move .branch_lt to..
+	(OTHER_RELRO_SECTIONS_2): ..here.
+	(DATA_GOT, SEPARATE_GOTPLT, DATA_SDATA, DATA_PLT,
+	PLT_BEFORE_GOT): Define.
+	* scripttempl/elf.sc: Handle DATA_SDATA and DATA_GOT/DATA_PLT/
+	PLT_BEFORE_GOT combination.
+	(DATA_GOT, SDATA_GOT): Don't define if either is already defined.
+
+2015-01-20  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf64ppc.sh (OTHER_READWRITE_SECTIONS): Move .opd to..
+	(OTHER_RELRO_SECTIONS_2): ..here, new define.
+	* scripttempl/elf.sc: Add OTHER_RELRO_SECTIONS_2.
+
 2015-01-19  Alan Modra  <amodra@gmail.com>
 
 	PR ld/17615

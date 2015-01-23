@@ -526,6 +526,8 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
 	(*_bfd_error_handler)
 	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
 	   abfd, a->NumberOfRvaAndSizes);
+	bfd_set_error (bfd_error_bad_value);
+
 	/* Paranoia: If the number is corrupt, then assume that the
 	   actual entries themselves might be corrupt as well.  */
 	a->NumberOfRvaAndSizes = 0;
@@ -2007,7 +2009,11 @@ slurp_symtab (bfd *abfd, sym_cache *psc)
   if (storage < 0)
     return NULL;
   if (storage)
-    sy = (asymbol **) bfd_malloc (storage);
+    {
+      sy = (asymbol **) bfd_malloc (storage);
+      if (sy == NULL)
+	return NULL;
+    }
 
   psc->symcount = bfd_canonicalize_symtab (abfd, sy);
   if (psc->symcount < 0)
@@ -2963,8 +2969,16 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
             }
 
           if (!bfd_set_section_contents (obfd, section, data, 0, section->size))
-            _bfd_error_handler (_("Failed to update file offsets in debug directory"));
+	    {
+	      _bfd_error_handler (_("Failed to update file offsets in debug directory"));
+	      return FALSE;
+	    }
         }
+      else if (section)
+	{
+	  _bfd_error_handler (_("%A: Failed to read debug data section"), obfd);
+	  return FALSE;
+	}
     }
 
   return TRUE;
@@ -4475,6 +4489,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	      }
 	    free (tmp_data);
 	  }
+	else
+	  result = FALSE;
       }
   }
 #endif

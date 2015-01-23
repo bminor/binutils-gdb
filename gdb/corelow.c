@@ -456,6 +456,19 @@ core_open (const char *arg, int from_tty)
   /* Now, set up the frame cache, and print the top of stack.  */
   reinit_frame_cache ();
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+
+  /* Current thread should be NUM 1 but the user does not know that.
+     If a program is single threaded gdb in general does not mention
+     anything about threads.  That is why the test is >= 2.  */
+  if (thread_count () >= 2)
+    {
+      TRY_CATCH (except, RETURN_MASK_ERROR)
+	{
+	  thread_command (NULL, from_tty);
+	}
+      if (except.reason < 0)
+	exception_print (gdb_stderr, except);
+    }
 }
 
 static void

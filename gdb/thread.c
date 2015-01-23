@@ -62,7 +62,6 @@ static int highest_thread_num;
    spawned new threads we haven't heard of yet.  */
 static int threads_executing;
 
-static void thread_command (char *tidstr, int from_tty);
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
@@ -1382,6 +1381,24 @@ make_cleanup_restore_current_thread (void)
 			    restore_current_thread_cleanup_dtor);
 }
 
+/* If non-zero tp_array_compar should sort in ascending order, otherwise in
+   descending order.  */
+
+static int tp_array_compar_ascending;
+
+/* Sort an array for struct thread_info pointers by their NUM, order is
+   determined by TP_ARRAY_COMPAR_ASCENDING.  */
+
+static int
+tp_array_compar (const void *ap_voidp, const void *bp_voidp)
+{
+  const struct thread_info *const *ap = ap_voidp;
+  const struct thread_info *const *bp = bp_voidp;
+
+  return ((((*ap)->num > (*bp)->num) - ((*ap)->num < (*bp)->num))
+	  * (tp_array_compar_ascending ? +1 : -1));
+}
+
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
    seperated list of numbers, or ranges, or the keyword `all'.  Ranges consist
    of two numbers seperated by a hyphen.  Examples:
@@ -1397,6 +1414,14 @@ thread_apply_all_command (char *cmd, int from_tty)
   char *saved_cmd;
   int tc;
   struct thread_array_cleanup ta_cleanup;
+
+  tp_array_compar_ascending = 0;
+  if (cmd != NULL
+      && check_for_argument (&cmd, "-ascending", strlen ("-ascending")))
+    {
+      cmd = skip_spaces (cmd);
+      tp_array_compar_ascending = 1;
+    }
 
   if (cmd == NULL || *cmd == '\000')
     error (_("Please specify a command following the thread ID list"));
@@ -1430,6 +1455,8 @@ thread_apply_all_command (char *cmd, int from_tty)
           tp->refcount++;
           i++;
         }
+
+      qsort (tp_array, i, sizeof (*tp_array), tp_array_compar);
 
       make_cleanup (set_thread_refcount, &ta_cleanup);
 
@@ -1506,7 +1533,7 @@ thread_apply_command (char *tidlist, int from_tty)
 /* Switch to the specified thread.  Will dispatch off to thread_apply_command
    if prefix of arg is `apply'.  */
 
-static void
+void
 thread_command (char *tidstr, int from_tty)
 {
   if (!tidstr)
@@ -1739,7 +1766,14 @@ The new thread ID must be currently known."),
 		  &thread_apply_list, "thread apply ", 1, &thread_cmd_list);
 
   add_cmd ("all", class_run, thread_apply_all_command,
-	   _("Apply a command to all threads."), &thread_apply_list);
+	   _("\
+Apply a command to all threads.\n\
+\n\
+Usage: thread apply all [-ascending] <command>\n\
+-ascending: Call <command> for all threads in ascending order.\n\
+            The default is descending order.\
+"),
+	   &thread_apply_list);
 
   add_cmd ("name", class_run, thread_name_command,
 	   _("Set the current thread's name.\n\

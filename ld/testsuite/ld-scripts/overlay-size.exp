@@ -23,12 +23,3 @@ if ![is_elf_format] {
 }
 
 run_dump_test overlay-size
-
-set testname "overlay size (map check)"
-
-if [regexp_diff "tmpdir/overlay-size.map" \
-	        "$srcdir/$subdir/overlay-size-map.d"] {
-    fail $testname
-} else {
-    pass $testname
-}

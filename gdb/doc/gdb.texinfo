@@ -2959,14 +2959,17 @@ information on convenience variables.
 
 @kindex thread apply
 @cindex apply command to several threads
-@item thread apply [@var{threadno} | all] @var{command}
+@item thread apply [@var{threadno} | all [-ascending]] @var{command}
 The @code{thread apply} command allows you to apply the named
 @var{command} to one or more threads.  Specify the numbers of the
 threads that you want affected with the command argument
 @var{threadno}.  It can be a single thread number, one of the numbers
 shown in the first field of the @samp{info threads} display; or it
-could be a range of thread numbers, as in @code{2-4}.  To apply a
-command to all threads, type @kbd{thread apply all @var{command}}.
+could be a range of thread numbers, as in @code{2-4}.  To apply
+a command to all threads in descending order, type @kbd{thread apply all
+@var{command}}.  To apply a command to all threads in ascending order,
+type @kbd{thread apply all -ascending @var{command}}.
+
 
 @kindex thread name
 @cindex name a thread

@@ -2960,9 +2960,13 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
 	  temp_relpp = (arelent **) xmalloc (relsize);
 	  for (i = 0; i < relcount; i++)
-	    if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
-				     keep_specific_htab))
-	      temp_relpp [temp_relcount++] = relpp [i];
+	    {
+	      /* PR 17512: file: 9e907e0c.  */
+	      if (relpp[i]->sym_ptr_ptr)
+		if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
+					 keep_specific_htab))
+		  temp_relpp [temp_relcount++] = relpp [i];
+	    }
 	  relcount = temp_relcount;
 	  free (relpp);
 	  relpp = temp_relpp;
@@ -4410,6 +4414,9 @@ main (int argc, char *argv[])
     }
 
   create_symbol_htabs ();
+
+  if (argv != NULL)
+    bfd_set_error_program_name (argv[0]);
 
   if (is_strip)
     strip_main (argc, argv);

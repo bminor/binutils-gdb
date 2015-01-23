@@ -1444,7 +1444,8 @@ proc default_gdb_spawn { } {
 	perror "Spawning $GDB failed."
 	return 1
     }
-    set gdb_spawn_id -1
+
+    set gdb_spawn_id $res
     return 0
 }
 
@@ -1514,6 +1515,24 @@ proc default_gdb_start { } {
 	}
     }
     return 0
+}
+
+# Utility procedure to give user control of the gdb prompt in a script. It is
+# meant to be used for debugging test cases, and should not be left in the
+# test cases code.
+
+proc gdb_interact { } {
+    global gdb_spawn_id
+    set spawn_id $gdb_spawn_id
+
+    send_user "+------------------------------------------+\n"
+    send_user "| Script interrupted, you can now interact |\n"
+    send_user "| with by gdb. Type >>> to continue.       |\n"
+    send_user "+------------------------------------------+\n"
+
+    interact {
+	">>>" return
+    }
 }
 
 # Examine the output of compilation to determine whether compilation
