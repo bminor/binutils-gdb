@@ -1540,6 +1540,7 @@ emit_logicals (void)
   for (logical = 1; logical <= logicals_in_use; ++logical)
     {
       int line_delta;
+      int context_delta;
       struct logicals_entry *e = &logicals[logical - 1];
 
       discriminator = 0;
@@ -1558,7 +1559,7 @@ emit_logicals (void)
 		break;
 	      caller = logicals[caller - 1].context;
 	    }
-	  if (caller > 0 && caller <= logicals_in_use && npop < 5)
+	  if (caller > 0 && caller <= logicals_in_use && npop < 10)
 	    {
 	      while (npop-- > 0)
 		out_opcode (DW_LNS_pop_context);
@@ -1570,16 +1571,20 @@ emit_logicals (void)
 	      context = logicals[caller - 1].context;
 	      subprog = logicals[caller - 1].subprog;
 	    }
-	  if (context != e->context)
+	  if (context != e->context && e->context == 0)
 	    {
-	      context = e->context;
-	      out_opcode (DW_LNS_set_context);
-	      out_uleb128 (context);
-	    }
-	  if (subprog != e->subprog)
-	    {
+	      context = 0;
 	      subprog = e->subprog;
 	      out_opcode (DW_LNS_set_subprogram);
+	      out_uleb128 (subprog);
+	    }
+	  else if (context != e->context || subprog != e->subprog)
+	    {
+	      context_delta = e->context - (logical - 1);
+	      context = e->context;
+	      subprog = e->subprog;
+	      out_opcode (DW_LNS_inlined_call);
+	      out_leb128 (context_delta);
 	      out_uleb128 (subprog);
 	    }
 	}
@@ -2120,8 +2125,8 @@ out_debug_line (segT line_seg, segT str_seg)
   out_byte (1);			/* DW_LNS_set_isa */
   if (opcode_base == DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE)
     {
-      out_byte (1);		/* DW_LNS_set_context/DW_LNS_set_address_from_logical */
-      out_byte (1);		/* DW_LNS_set_subprogram */
+      out_byte (1);		/* DW_LNS_set_subprogram/DW_LNS_set_address_from_logical */
+      out_byte (2);		/* DW_LNS_inlined_call */
       out_byte (0);		/* DW_LNS_pop_context */
     }
 
