@@ -226,8 +226,8 @@ enum dwarf_line_number_ops
     /* Experimental DWARF 5 extensions.
        See http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables.  */
     DW_LNS_set_address_from_logical = 13, /* Actuals table only.  */
-    DW_LNS_set_context = 13,              /* Logicals table only.  */
-    DW_LNS_set_subprogram = 14,           /* Logicals table only.  */
+    DW_LNS_set_subprogram = 13,           /* Logicals table only.  */
+    DW_LNS_inlined_call = 14,             /* Logicals table only.  */
     DW_LNS_pop_context = 15               /* Logicals table only.  */
   };
 
