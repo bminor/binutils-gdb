@@ -8,7 +8,7 @@
 
 2015-01-22  Eli Zaretskii  <eliz@gnu.org>
 
-	* gdb/tui/tui.c (tui_enable) [__MINGW32__]: If the call to 'newterm'
+	* tui/tui.c (tui_enable) [__MINGW32__]: If the call to 'newterm'
 	fails with the 1st arg NULL, try again with "unknown".  Don't test
 	the "cup" capability: it isn't supported by the Windows port of
 	ncurses, but the Windows console driver is still capable of
