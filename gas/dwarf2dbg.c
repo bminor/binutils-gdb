@@ -2503,6 +2503,7 @@ dwarf2_finish (void)
       bfd_set_section_flags (stdoutput, str_seg,
 			     (SEC_READONLY | SEC_DEBUGGING
 			      | SEC_MERGE | SEC_STRINGS));
+      str_seg->entsize = 1;
       debug_line_str_table.strings = NULL;
       debug_line_str_table.strings_in_use = 0;
       debug_line_str_table.strings_allocated = 0;
