@@ -1237,7 +1237,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_SPECIFIC_FIELD(thistype) \
   TYPE_MAIN_TYPE(thistype)->type_specific_field
-#define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific
 /* We need this tap-dance with the TYPE_RAW_SPECIFIC because of the case
    where we're trying to print an Ada array using the C language.
    In that case, there is no "cplus_stuff", but the C language assumes

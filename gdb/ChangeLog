@@ -1,3 +1,7 @@
+2015-01-24  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.h (TYPE_TYPE_SPECIFIC): Delete.
+
 2015-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix 100x slowdown regression on DWZ files.
