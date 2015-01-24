@@ -2464,7 +2464,7 @@ return_command (char *retval_exp, int from_tty)
       else
 	{
 	  if (TYPE_NO_RETURN (thisfun->type))
-	    warning ("Function does not return normally to caller.");
+	    warning (_("Function does not return normally to caller."));
 	  confirmed = query (_("%sMake %s return now? "), query_prefix,
 			     SYMBOL_PRINT_NAME (thisfun));
 	}

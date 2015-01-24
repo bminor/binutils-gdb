@@ -1,3 +1,7 @@
+2015-01-24  Mark Wielaard  <mjw@redhat.com>
+
+	* stack.c (return_command): Markup warning message with _.
+
 2015-01-24  Doug Evans  <xdje42@gmail.com>
 
 	* gdbtypes.h (TYPE_TYPE_SPECIFIC): Delete.
