@@ -12266,7 +12266,7 @@ static void
 check_producer (struct dwarf2_cu *cu)
 {
   const char *cs;
-  int major, minor, release;
+  int major, minor;
 
   if (cu->producer == NULL)
     {
@@ -12279,22 +12279,10 @@ check_producer (struct dwarf2_cu *cu)
 	 combination.  gcc-4.5.x -gdwarf-4 binaries have DW_AT_accessibility
 	 interpreted incorrectly by GDB now - GCC PR debug/48229.  */
     }
-  else if (strncmp (cu->producer, "GNU ", strlen ("GNU ")) == 0)
+  else if ((major = producer_is_gcc (cu->producer, &minor)) > 0)
     {
-      /* Skip any identifier after "GNU " - such as "C++" or "Java".  */
-
-      cs = &cu->producer[strlen ("GNU ")];
-      while (*cs && !isdigit (*cs))
-	cs++;
-      if (sscanf (cs, "%d.%d.%d", &major, &minor, &release) != 3)
-	{
-	  /* Not recognized as GCC.  */
-	}
-      else
-	{
-	  cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
-	  cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
-	}
+      cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
+      cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
     }
   else if (strncmp (cu->producer, "Intel(R) C", strlen ("Intel(R) C")) == 0)
     cu->producer_is_icc = 1;

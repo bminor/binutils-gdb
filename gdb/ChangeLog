@@ -1,3 +1,10 @@
+2015-01-25  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (checkproducer): Call producer_is_gcc.
+	* utils.c (producer_is_gcc_ge_4): Likewise.
+	(producer_is_gcc): New function.
+	* utils.h (producer_is_gcc): New declaration.
+
 2015-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.h (struct dynamic_prop): New PROP_ADDR_OFFSET enum
