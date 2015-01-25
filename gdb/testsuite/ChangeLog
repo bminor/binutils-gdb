@@ -1,3 +1,26 @@
+2015-01-25  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.arch/i386-bp_permanent.c (standard): New declaration.
+	* gdb.base/disp-step-fork.c: Include unistd.h.
+	* gdb.base/siginfo-obj.c: Include stdio.h.
+	* gdb.base/siginfo-thread.c: Likewise.
+	* gdb.mi/non-stop.c: Include unistd.h.
+	* gdb.mi/nsthrexec.c: Include stdio.h.
+	* gdb.mi/pthreads.c: Include unistd.h.
+	* gdb.modula2/unbounded1.c (main): Declare returns int.
+	* gdb.reverse/consecutive-reverse.c: Likewise.
+	* gdb.threads/create-fail.c: Include unistd.h.
+	* gdb.threads/killed.c: Likewise.
+	* gdb.threads/linux-dp.c: Likewise.
+	* gdb.threads/non-ldr-exc-1.c: Include stdio.h and string.h.
+	* gdb.threads/non-ldr-exc-2.c: Likewise.
+	* gdb.threads/non-ldr-exc-3.c: Likewise.
+	* gdb.threads/non-ldr-exc-4.c: Likewise.
+	* gdb.threads/pthreads.c: Include unistd.h.
+	(main): Declare returns int.
+	* gdb.threads/tls-main.c (foo): New declaration.
+	* gdb.threads/watchpoint-fork-mt.c: Define _GNU_SOURCE.
+
 2015-01-23  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.mi/mi-var-list-children-invalid-grandchild.c: New file.
