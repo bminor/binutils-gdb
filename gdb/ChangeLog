@@ -1,3 +1,19 @@
+2015-01-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix 100x slowdown regression on DWZ files.
+	* dwarf2read.c (struct dwarf2_per_objfile): Add line_header_hash.
+	(struct line_header): Add offset and offset_in_dwz.
+	(dwarf_decode_lines): Add parameter decode_mapping to the declaration.
+	(free_line_header_voidp): New declaration.
+	(line_header_hash, line_header_hash_voidp, line_header_eq_voidp): New
+	functions.
+	(dwarf2_build_include_psymtabs): Update dwarf_decode_lines caller.
+	(handle_DW_AT_stmt_list): Use line_header_hash.
+	(free_line_header_voidp): New function.
+	(dwarf_decode_line_header): Initialize offset and offset_in_dwz.
+	(dwarf_decode_lines): New parameter decode_mapping, use it.
+	(dwarf2_free_objfile): Free line_header_hash.
+
 2015-01-23  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_is_async_p): New macro.
