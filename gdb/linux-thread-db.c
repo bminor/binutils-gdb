@@ -1639,6 +1639,10 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	 thread that previously exited and was joined.  (glibc marks
 	 terminated and joined threads with kernel thread ID -1.  See
 	 glibc PR17707.  */
+      if (libthread_db_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "thread_db: skipping exited and "
+			    "joined thread (0x%lx)\n", ti.ti_tid);
       return 0;
     }
 

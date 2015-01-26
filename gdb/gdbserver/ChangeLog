@@ -1,3 +1,7 @@
+2015-02-06  Pedro Alves  <palves@redhat.com>
+
+	* thread-db.c (find_new_threads_callback): Add debug output.
+
 2015-02-04  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (handle_extended_wait): Don't resume LWPs here.
