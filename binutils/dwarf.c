@@ -3117,6 +3117,7 @@ display_line_program (unsigned char *start, unsigned char *end,
 		  dwarf_vmatoa ("d", adv), state_machine_regs.line);
 	  if (is_logical)
 	    append_logical ();
+	  state_machine_regs.discriminator = 0;
 	}
       else
 	{
@@ -3131,6 +3132,7 @@ display_line_program (unsigned char *start, unsigned char *end,
 	       printf (_("  Copy\n"));
 	       if (is_logical)
 		 append_logical ();
+	       state_machine_regs.discriminator = 0;
 	       break;
 
 	     case DW_LNS_advance_pc:
