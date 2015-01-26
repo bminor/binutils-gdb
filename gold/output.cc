@@ -4311,8 +4311,8 @@ Output_segment::set_section_addresses(const Target* target,
 	      else
 		{
 		  // FIXME: This could be faster.
-		  (*p)->set_address_and_file_offset(addr + relro_size,
-						    off + relro_size);
+		  (*p)->set_address_and_file_offset(relro_size,
+						    relro_size);
 		  relro_size += (*p)->data_size();
 		  (*p)->reset_address_and_file_offset();
 		}
@@ -4332,11 +4332,12 @@ Output_segment::set_section_addresses(const Target* target,
 
       // Align to offset N such that (N + RELRO_SIZE) % PAGE_ALIGN == 0.
       uint64_t desired_align = page_align - (aligned_size % page_align);
-      if (desired_align < *poff % page_align)
-	*poff += page_align - *poff % page_align;
-      *poff += desired_align - *poff % page_align;
-      addr += *poff - orig_off;
-      orig_off = *poff;
+      if (desired_align < off % page_align)
+	off += page_align;
+      off += desired_align - off % page_align;
+      addr += off - orig_off;
+      orig_off = off;
+      *poff = off;
     }
 
   if (!reset && this->are_addresses_set_)

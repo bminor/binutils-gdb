@@ -1,3 +1,8 @@
+2015-01-25  Cary Coutant  <ccoutant@google.com>
+
+	* output.cc (Output_segment::set_section_addresses): Fix calculation
+	of size of relro segment.
+
 2015-01-22  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Scan::local <got relocs>): Correct
