@@ -1,3 +1,8 @@
+2015-02-10  Antoine Tremblay <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/no-attach-trace.c: New file.
+	* gdb.trace/no-attach-trace.exp: New file.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* gdb.dwarf2/atomic.c: New file.

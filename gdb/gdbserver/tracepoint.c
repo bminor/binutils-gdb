@@ -2377,6 +2377,13 @@ cmd_qtinit (char *packet)
 {
   struct trace_state_variable *tsv, *prev, *next;
 
+  /* Can't do this command without a pid attached.  */
+  if (current_thread == NULL)
+    {
+      write_enn (packet);
+      return;
+    }
+
   /* Make sure we don't try to read from a trace frame.  */
   current_traceframe = -1;
 

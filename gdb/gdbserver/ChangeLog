@@ -1,3 +1,8 @@
+2015-02-10  Antoine Tremblay <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/15956
+	* tracepoint.c (cmd_qtinit): Add check for current_thread.
+
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* linux-low.c (linux_low_btrace_conf): Print size.
