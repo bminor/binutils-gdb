@@ -3263,7 +3263,7 @@ display_line_program (unsigned char *start, unsigned char *end,
 	       else
 		 {
 		   /* DW_LNS_set_address_from_logical */
-		   adv = read_uleb128 (data, & bytes_read, end);
+		   adv = read_sleb128 (data, & bytes_read, end);
 		   data += bytes_read;
 		   state_machine_regs.line += adv;
 		   logical = state_machine_regs.line;
