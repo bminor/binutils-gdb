@@ -1,3 +1,8 @@
+2015-02-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-sigtrap.c: New file.
+	* gdb.threads/signal-sigtrap.exp: New file.
+
 2015-02-10  Antoine Tremblay <antoine.tremblay@ericsson.com>
 
 	* gdb.trace/no-attach-trace.c: New file.
