@@ -1,3 +1,7 @@
+2015-01-26  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_pick_relax): Fix again setting.
+
 2015-01-22  DJ Delorie  <dj@redhat.com>
 
 	* elf32-m32c.c (m32c_apply_reloc_24): New.

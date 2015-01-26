@@ -11815,7 +11815,8 @@ nds32_elf_pick_relax (bfd_boolean init, asection *sec, bfd_boolean *again,
 		      struct elf_nds32_link_hash_table *table,
 		      struct bfd_link_info *link_info)
 {
-  static asection *final_sec;
+  static asection *final_sec, *first_sec = NULL;
+  static bfd_boolean normal_again = FALSE;
   static bfd_boolean set = FALSE;
   static bfd_boolean first = TRUE;
   int round_table[] = {
@@ -11827,6 +11828,13 @@ nds32_elf_pick_relax (bfd_boolean init, asection *sec, bfd_boolean *again,
   static int pass = 0;
   static int relax_round;
 
+  /* The new round.  */
+  if (init && first_sec == sec)
+    {
+      set = TRUE;
+      normal_again = FALSE;
+    }
+
   if (first)
     {
       /* Run an empty run to get the final section.  */
@@ -11835,27 +11843,29 @@ nds32_elf_pick_relax (bfd_boolean init, asection *sec, bfd_boolean *again,
       /* It has to enter relax again because we can
 	 not make sure what the final turn is.  */
       *again = TRUE;
+
       first = FALSE;
+      first_sec = sec;
     }
 
-  if (!set && *again)
+  if (!set)
     {
-      /* It is reentered when again is FALSE.  */
+      /* Not reenter yet.  */
       final_sec = sec;
       return relax_round;
     }
 
-  /* The second round begins.  */
-  set = TRUE;
-
   relax_round = round_table[pass];
+
+  if (!init && relax_round == NDS32_RELAX_NORMAL_ROUND && *again)
+    normal_again = TRUE;
 
   if (!init && final_sec == sec)
     {
       switch (relax_round)
 	{
 	case NDS32_RELAX_NORMAL_ROUND:
-	  if (!*again)
+	  if (!normal_again)
 	    {
 	      /* Normal relaxation done.  */
 	      if (table->target_optimize & NDS32_RELAX_JUMP_IFC_ON)
@@ -12032,7 +12042,10 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
   if (ELF32_R_TYPE (irel->r_info) == R_NDS32_RELAX_ENTRY)
     {
       if (irel->r_addend & R_NDS32_RELAX_ENTRY_DISABLE_RELAX_FLAG)
-	return TRUE;
+	{
+	  nds32_elf_pick_relax (FALSE, sec, again, table, link_info);
+	  return TRUE;
+	}
 
       if (irel->r_addend & R_NDS32_RELAX_ENTRY_OPTIMIZE_FLAG)
 	optimize = 1;
