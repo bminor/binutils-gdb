@@ -1,3 +1,9 @@
+2015-01-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dlltool.c (identify_search_archive): If the last archive was the
+	same as the current archive, terminate the loop.
+
 2015-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* nlmconv.c (powerpc_mangle_relocs): Fix build errors introduced

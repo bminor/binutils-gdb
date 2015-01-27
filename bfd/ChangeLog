@@ -1,3 +1,9 @@
+2015-01-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* pdp11.c (aout_get_external_symbols): Return false if there are
+	no symbols.
+
 2015-01-26  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elf32-nds32.c (nds32_elf_pick_relax): Fix again setting.
