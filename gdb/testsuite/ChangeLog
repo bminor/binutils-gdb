@@ -1,3 +1,9 @@
+2015-01-27  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-objfile.exp: Add tests for objfile.username.
+	Add test for objfile.filename, objfile.username after objfile
+	has been unloaded.
+
 2015-01-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.python/py-lookup-type.exp (test_lookup_type): Change

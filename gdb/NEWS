@@ -3,6 +3,12 @@
 
 *** Changes since GDB 7.9
 
+* Python Scripting
+
+  ** gdb.Objfile objects have a new attribute "username",
+     which is the name of the objfile as specified by the user,
+     without, for example, resolving symlinks.
+
 * New options
 
 * The command 'thread apply all' can now support new option '-ascending'

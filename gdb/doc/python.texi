@@ -3519,6 +3519,13 @@ The value is @code{None} if the objfile is no longer valid.
 See the @code{gdb.Objfile.is_valid} method, described below.
 @end defvar
 
+@defvar Objfile.username
+The file name of the objfile as specified by the user as a string.
+
+The value is @code{None} if the objfile is no longer valid.
+See the @code{gdb.Objfile.is_valid} method, described below.
+@end defvar
+
 @defvar Objfile.owner
 For separate debug info objfiles this is the corresponding @code{gdb.Objfile}
 object that debug info is being provided for.
