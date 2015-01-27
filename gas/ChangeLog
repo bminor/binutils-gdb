@@ -1,5 +1,10 @@
 2015-01-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
+	* config/tc-nds32.c (do_pseudo_la_internal): Limit the second argument
+	of instruction la to a symbol.
+
+2015-01-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
 	* config/tc-nds32.c (nds32_parse_name): Ignore when the input is
 	section name.
 

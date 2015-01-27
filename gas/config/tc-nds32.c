@@ -2311,9 +2311,18 @@ do_pseudo_bral (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_la_internal (const char *arg_reg, const char *arg_label,
+do_pseudo_la_internal (const char *arg_reg, char *arg_label,
 		       const char *line)
 {
+  expressionS exp;
+
+  parse_expression (arg_label, &exp);
+  if (exp.X_op != O_symbol)
+    {
+      as_bad (_("la must use with symbol. '%s'"), line);
+      return;
+    }
+
   relaxing = TRUE;
   /* rt, label */
   if (!nds32_pic && !strstr(arg_label, "@"))
