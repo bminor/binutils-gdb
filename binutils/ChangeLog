@@ -7,6 +7,14 @@
 	* addr2line.c (slurp_symtab): If the symcount is zero, free the
 	symbol table pointer.
 
+	* rcparse.y: Add checks to avoid integer divide by zero.
+	* rescoff.c (read_coff_rsrc): Add check on the size of the
+	resource section.
+	(read_coff_res_dir): Add check on the nesting level.
+	Check for resource names overrunning the buffer.
+	* resrc.c (write_rc_messagetable): Update formatting.
+	Add check of 'elen' being zero.
+
 2015-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* nlmconv.c (powerpc_mangle_relocs): Fix build errors introduced
