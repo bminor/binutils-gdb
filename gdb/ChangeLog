@@ -1,3 +1,7 @@
+2015-01-29  Joel Brobecker  <brobecker@adacore.com>  (tiny patch)
+
+	* symfile.c (unmap_overlay_command): Initialize sec to NULL.
+
 2015-01-27  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention gdb.Objfile.username.

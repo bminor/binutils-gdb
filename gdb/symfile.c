@@ -3439,7 +3439,7 @@ static void
 unmap_overlay_command (char *args, int from_tty)
 {
   struct objfile *objfile;
-  struct obj_section *sec;
+  struct obj_section *sec = NULL;
 
   if (!overlay_debugging)
     error (_("Overlay debugging not enabled.  "
