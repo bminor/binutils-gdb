@@ -4,6 +4,9 @@
 	* dlltool.c (identify_search_archive): If the last archive was the
 	same as the current archive, terminate the loop.
 
+	* addr2line.c (slurp_symtab): If the symcount is zero, free the
+	symbol table pointer.
+
 2015-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* nlmconv.c (powerpc_mangle_relocs): Fix build errors introduced

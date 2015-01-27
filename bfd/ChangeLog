@@ -4,6 +4,14 @@
 	* pdp11.c (aout_get_external_symbols): Return false if there are
 	no symbols.
 
+	* dwarf2.c (concat_filename): Check for an empty directory table.
+	(scan_unit_for_symbols): Check for reading off the end of the
+	unit.
+	(parse_comp_unit): Check for a DW_AT_comp_dir attribute with a
+	non-string form.
+	* elf64-ppc.c (opd_entry_value): Fail if there are no relocs
+	available.
+
 2015-01-26  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elf32-nds32.c (nds32_elf_pick_relax): Fix again setting.

@@ -5978,6 +5978,9 @@ opd_entry_value (asection *opd_sec,
   relocs = ppc64_elf_tdata (opd_bfd)->opd.relocs;
   if (relocs == NULL)
     relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
+  /* PR 17512: file: df8e1fd6.  */
+  if (relocs == NULL)
+    return (bfd_vma) -1;
 
   /* Go find the opd reloc at the sym address.  */
   lo = relocs;
