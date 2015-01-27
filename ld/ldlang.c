@@ -6295,7 +6295,6 @@ lang_final (void)
 
   new_stmt = new_stat (lang_output_statement, stat_ptr);
   new_stmt->name = output_filename;
-
 }
 
 /* Reset the current counters in the regions.  */

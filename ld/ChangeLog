@@ -1,3 +1,11 @@
+2015-01-28  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf64ppc.sh (INITIAL_READWRITE_SECTIONS): Define.
+	* emultempl/ppc64elf.em (params): Init new field.
+	(ppc_after_open): New function.
+	(LDEMUL_AFTER_OPEN): Define.
+	* ldlang.c (lang_final): Whitespace fix.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* Makefile.am: Add FT32 files.

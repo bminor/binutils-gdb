@@ -1,3 +1,9 @@
+2015-01-28  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tocvar.d, * ld-powerpc/tocvar.s: New test.
+	* ld-powerpc/tocnovar.d, * ld-powerpc/tocnovar.s: New test.
+	* ld-powerpc/powerpc.exp: Run tocvar and tocnovar.
+
 2015-01-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* ld-scripts/memory.t: Define new symbol tred.

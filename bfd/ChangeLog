@@ -1,3 +1,9 @@
+2015-01-28  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.h (struct ppc64_elf_params): Add "object_in_toc".
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Assume that global symbols
+	in .toc indicate xlc compiled code that might require a rw .toc.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* Makefile.am: Add FT32 files.
