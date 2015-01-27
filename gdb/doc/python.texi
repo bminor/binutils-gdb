@@ -3513,7 +3513,10 @@ Each objfile is represented by an instance of the @code{gdb.Objfile}
 class.
 
 @defvar Objfile.filename
-The file name of the objfile as a string.
+The file name of the objfile as a string, with symbolic links resolved.
+
+The value is @code{None} if the objfile is no longer valid.
+See the @code{gdb.Objfile.is_valid} method, described below.
 @end defvar
 
 @defvar Objfile.owner
