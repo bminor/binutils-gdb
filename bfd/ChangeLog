@@ -1,5 +1,9 @@
 2015-02-03  Will Newton  <will.newton@linaro.org>
 
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol):
+	Set st_value to zero for undefined symbols if the reference
+	is weak or pointer_equality_needed is FALSE.
+
 	* elf32-arm.c (elf32_arm_finish_dynamic_symbol): Improve
 	  comment discussing why we clear st_value for some symbols.
 
