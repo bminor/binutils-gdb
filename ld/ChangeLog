@@ -1,5 +1,11 @@
 2015-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* plugin.h (plugin_get_ir_dummy_bfd): Removed.  Move comments to
+	...
+	* plugin.c (plugin_get_ir_dummy_bfd): Here.  Make it static.
+
+2015-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/17878
 	* plugin.c (tv_header_tags(): Add LDPT_GET_VIEW.
 	(get_view): New function.
