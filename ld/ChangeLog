@@ -1,3 +1,17 @@
+2015-01-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR 4643
+	* ldexp.c (fold_name): Fold LENGTH only after
+	lang_first_phase_enum.
+	* ldgram.y (memory_spec): Don't evaluate ORIGIN and LENGTH
+	rightaway.
+	* ldlang.h (struct memory_region_struct): Add origin_exp and
+	length_exp fields.
+	* ldlang.c (lang_do_memory_regions): New.
+	(lang_memory_region_lookup): Initialize origin_exp and
+	length_exp fields.
+	(lang_process): Call lang_do_memory_regions.
+
 2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ldlang.c (print_assignment): Only evaluate the expression for a

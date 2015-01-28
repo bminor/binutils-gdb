@@ -1,3 +1,10 @@
+2015-01-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-scripts/memory.t: Define new symbol tred.
+	* ld-scripts/memory_sym.t: New.
+	* ld-scripts/script.exp: Perform MEMORY with symbols test, and
+	conditionally check values of linker symbols.
+
 2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld-scripts/provide-4-map.d: Update expected output.
