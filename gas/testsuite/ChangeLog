@@ -1,3 +1,9 @@
+2015-01-28  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/arm/ual-vcmp.s: Add vcmp, vcmpe with #0x0 operand.
+	* gas/ual/vcmp.d: Update expected output.
+	* gas/ual/vcmp-zero-bad.l: Likewise
+
 2014-12-19  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/r6-64.s: Remove .align directives from LDPC

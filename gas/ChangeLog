@@ -1,3 +1,8 @@
+2015-01-28  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (parse_ifimm_zero): Accept #0x0 as a synonym for #0,
+	restoring previous behaviour.
+
 2014-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
