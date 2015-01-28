@@ -2983,7 +2983,12 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
       {
-	const bool is_final = gsym->final_value_is_known();
+	// For the Initial-Exec model, we can treat undef symbols as final
+	// when building an executable.
+	const bool is_final = (gsym->final_value_is_known() ||
+			       (r_type == elfcpp::R_X86_64_GOTTPOFF &&
+			        gsym->is_undefined() &&
+				parameters->options().output_is_executable()));
 	const tls::Tls_optimization optimized_type
 	    = Target_x86_64<size>::optimize_tls_reloc(is_final, r_type);
 	switch (r_type)
@@ -3779,7 +3784,15 @@ Target_x86_64<size>::Relocate::relocate_tls(
       break;
 
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
-      if (optimized_type == tls::TLSOPT_TO_LE)
+      if (gsym != NULL && gsym->is_undefined())
+	{
+	  Target_x86_64<size>::Relocate::tls_ie_to_le(relinfo, relnum,
+						      NULL, rela,
+						      r_type, value, view,
+						      view_size);
+	  break;
+	}
+      else if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  if (tls_segment == NULL)
 	    {
@@ -4126,7 +4139,8 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       view[-1] = 0x80 | reg | (reg << 3);
     }
 
-  value -= tls_segment->memsz();
+  if (tls_segment != NULL)
+    value -= tls_segment->memsz();
   Relocate_functions<size, false>::rela32(view, value, 0);
 }
 
