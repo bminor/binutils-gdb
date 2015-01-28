@@ -4979,6 +4979,16 @@ parse_ifimm_zero (char **in)
     return FALSE;
 
   ++*in;
+
+  /* Accept #0x0 as a synonym for #0.  */
+  if (strncmp (*in, "0x", 2) == 0)
+    {
+      int val;
+      if (parse_immediate (in, &val, 0, 0, TRUE) == FAIL)
+	return FALSE;
+      return TRUE;
+    }
+
   error_code = atof_generic (in, ".", EXP_CHARS,
                              &generic_floating_point_number);
 
