@@ -424,6 +424,7 @@ free_logicals (void)
   free (logicals_table);
   logicals_allocated = 0;
   logicals_count = 0;
+  logicals_table = NULL;
 }
 
 static void
@@ -643,7 +644,7 @@ fetch_indirect_string (dwarf_vma offset)
   if (section->start == NULL)
     return (const unsigned char *) _("<no .debug_str section>");
 
-  if (offset > section->size)
+  if (offset >= section->size)
     {
       warn (_("DW_FORM_strp offset too big: %s\n"),
 	    dwarf_vmatoa ("x", offset));
@@ -661,7 +662,7 @@ fetch_indirect_line_string (dwarf_vma offset)
   if (section->start == NULL)
     return (const unsigned char *) _("<no .debug_line_str section>");
 
-  if (offset > section->size)
+  if (offset >= section->size)
     {
       warn (_("DW_FORM_line_strp offset too big: %s\n"),
 	    dwarf_vmatoa ("x", offset));
@@ -688,7 +689,7 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
 
   if (this_set != NULL)
     index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
-  if (index_offset > index_section->size)
+  if (index_offset + offset_size > index_section->size)
     {
       warn (_("DW_FORM_GNU_str_index offset too big: %s\n"),
 	    dwarf_vmatoa ("x", index_offset));
@@ -701,7 +702,7 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
 
   str_offset = byte_get (index_section->start + index_offset, offset_size);
   str_offset -= str_section->address;
-  if (str_offset > str_section->size)
+  if (str_offset >= str_section->size)
     {
       warn (_("DW_FORM_GNU_str_index indirect offset too big: %s\n"),
 	    dwarf_vmatoa ("x", str_offset));
@@ -3031,7 +3032,7 @@ display_dir_file_table_v5 (unsigned char *start, unsigned char *end,
 	    case DW_FORM_udata:
 	      val = read_uleb128 (data, & bytes_read, end);
 	      data += bytes_read;
-	      printf ("\t%d", val);
+	      printf ("\t%u", val);
 	      break;
 	    default:
 	      printf ("\t%s", _("(unrecognized FORM code)"));
