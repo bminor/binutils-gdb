@@ -1,3 +1,8 @@
+2015-01-28  Jan Beulich  <jbeulich@suse.com>
+
+	* ld-elf/pr16322.s (p1): Rename to px1.
+	(f1): Rename to fx1.
+
 2015-01-28  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tocvar.d, * ld-powerpc/tocvar.s: New test.
