@@ -872,6 +872,7 @@ extern const bfd_target tilegx_elf64_le_vec;
 extern const bfd_target tilepro_elf32_vec;
 extern const bfd_target v800_elf32_vec;
 extern const bfd_target v850_elf32_vec;
+extern const bfd_target ft32_elf32_vec;
 extern const bfd_target vax_aout_1knbsd_vec;
 extern const bfd_target vax_aout_bsd_vec;
 extern const bfd_target vax_aout_nbsd_vec;
@@ -1377,6 +1378,8 @@ static const bfd_target * const _bfd_target_vector[] =
 	&tilegx_elf64_le_vec,
 #endif
 	&tilepro_elf32_vec,
+
+	&ft32_elf32_vec,
 
 	&v800_elf32_vec,
 	&v850_elf32_vec,

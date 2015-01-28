@@ -1,3 +1,11 @@
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.am: Add FT32 files.
+	* configure.tgt: Handle FT32 target.
+	* emulparams/elf32ft32.sh: New file.
+	* scripttempl/ft32.sc: New file.
+	* Makefile.in: Regenerate.
+
 2015-01-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR 4643
