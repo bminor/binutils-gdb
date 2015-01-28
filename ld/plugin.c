@@ -114,6 +114,7 @@ static const enum ld_plugin_tag tv_header_tags[] =
   LDPT_REGISTER_CLEANUP_HOOK,
   LDPT_ADD_SYMBOLS,
   LDPT_GET_INPUT_FILE,
+  LDPT_GET_VIEW,
   LDPT_RELEASE_INPUT_FILE,
   LDPT_GET_SYMBOLS,
   LDPT_GET_SYMBOLS_V2,
@@ -443,6 +444,15 @@ get_input_file (const void *handle ATTRIBUTE_UNUSED,
   return LDPS_ERR;
 }
 
+/* Get view of the input file.  */
+static enum ld_plugin_status
+get_view (const void *handle ATTRIBUTE_UNUSED,
+	  const void **viewp ATTRIBUTE_UNUSED)
+{
+  ASSERT (called_plugin);
+  return LDPS_ERR;
+}
+
 /* Release the input file.  */
 static enum ld_plugin_status
 release_input_file (const void *handle ATTRIBUTE_UNUSED)
@@ -730,6 +740,9 @@ set_tv_header (struct ld_plugin_tv *tv)
 	  break;
 	case LDPT_GET_INPUT_FILE:
 	  TVU(get_input_file) = get_input_file;
+	  break;
+	case LDPT_GET_VIEW:
+	  TVU(get_view) = get_view;
 	  break;
 	case LDPT_RELEASE_INPUT_FILE:
 	  TVU(release_input_file) = release_input_file;
