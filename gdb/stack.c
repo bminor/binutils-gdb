@@ -2462,8 +2462,12 @@ return_command (char *retval_exp, int from_tty)
 	confirmed = query (_("%sMake selected stack frame return now? "),
 			   query_prefix);
       else
-	confirmed = query (_("%sMake %s return now? "), query_prefix,
-			   SYMBOL_PRINT_NAME (thisfun));
+	{
+	  if (TYPE_NO_RETURN (thisfun->type))
+	    warning (_("Function does not return normally to caller."));
+	  confirmed = query (_("%sMake %s return now? "), query_prefix,
+			     SYMBOL_PRINT_NAME (thisfun));
+	}
       if (!confirmed)
 	error (_("Not confirmed"));
     }

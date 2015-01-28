@@ -1,3 +1,11 @@
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* dis-asm.h (print_insn_ft32): Declare.
+
+2015-01-15  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2.def (DW_AT_noreturn): New DWARF5 attribute.
+
 2015-01-14  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* libiberty.h: Merge from GCC.

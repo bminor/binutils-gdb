@@ -1628,6 +1628,10 @@ case "${targ}" in
     targ_defvec=tilepro_elf32_vec
     ;;
 
+  ft32*-*-*)
+    targ_defvec=ft32_elf32_vec
+    ;;
+
   v850*-*-*)
     targ_defvec=v850_elf32_vec
     targ_selvecs="v800_elf32_vec"

@@ -106,6 +106,7 @@
 #include "elf/epiphany.h"
 #include "elf/fr30.h"
 #include "elf/frv.h"
+#include "elf/ft32.h"
 #include "elf/h8.h"
 #include "elf/hppa.h"
 #include "elf/i386.h"
@@ -709,6 +710,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_D30V:
     case EM_CYGNUS_D30V:
     case EM_FR30:
+    case EM_FT32:
     case EM_CYGNUS_FR30:
     case EM_CYGNUS_FRV:
     case EM_H8S:
@@ -1232,6 +1234,10 @@ dump_relocations (FILE * file,
 
 	case EM_CYGNUS_FRV:
 	  rtype = elf_frv_reloc_type (type);
+	  break;
+
+	case EM_FT32:
+	  rtype = elf_ft32_reloc_type (type);
 	  break;
 
 	case EM_MCORE:
@@ -2072,6 +2078,7 @@ get_machine_name (unsigned e_machine)
     case EM_PPC:		return "PowerPC";
     case EM_PPC64:		return "PowerPC64";
     case EM_FR20:		return "Fujitsu FR20";
+    case EM_FT32:		return "FTDI FT32";
     case EM_RH32:		return "TRW RH32";
     case EM_MCORE:		return "MCORE";
     case EM_ARM:		return "ARM";
@@ -11033,6 +11040,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_CYGNUS_FR30:
     case EM_FR30:
       return reloc_type == 3; /* R_FR30_32.  */
+    case EM_FT32:
+      return reloc_type == 1; /* R_FT32_32.  */
     case EM_H8S:
     case EM_H8_300:
     case EM_H8_300H:
@@ -11400,6 +11409,7 @@ is_none_reloc (unsigned int reloc_type)
     case EM_L1OM:    /* R_X86_64_NONE.  */
     case EM_K1OM:    /* R_X86_64_NONE.  */
     case EM_MN10300: /* R_MN10300_NONE.  */
+    case EM_FT32:    /* R_FT32_NONE.  */
     case EM_MOXIE:   /* R_MOXIE_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
     case EM_TI_C6000:/* R_C6000_NONE.  */

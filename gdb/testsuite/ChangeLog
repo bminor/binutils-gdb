@@ -1,3 +1,51 @@
+2015-01-27  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-objfile.exp: Add tests for objfile.username.
+	Add test for objfile.filename, objfile.username after objfile
+	has been unloaded.
+
+2015-01-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-lookup-type.exp (test_lookup_type): Change
+	the second test to print the name attribute of value
+	returned by the call to gdb.lookup_type, and adjust
+	the expected output accordingly.
+
+2015-01-25  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.arch/i386-bp_permanent.c (standard): New declaration.
+	* gdb.base/disp-step-fork.c: Include unistd.h.
+	* gdb.base/siginfo-obj.c: Include stdio.h.
+	* gdb.base/siginfo-thread.c: Likewise.
+	* gdb.mi/non-stop.c: Include unistd.h.
+	* gdb.mi/nsthrexec.c: Include stdio.h.
+	* gdb.mi/pthreads.c: Include unistd.h.
+	* gdb.modula2/unbounded1.c (main): Declare returns int.
+	* gdb.reverse/consecutive-reverse.c: Likewise.
+	* gdb.threads/create-fail.c: Include unistd.h.
+	* gdb.threads/killed.c: Likewise.
+	* gdb.threads/linux-dp.c: Likewise.
+	* gdb.threads/non-ldr-exc-1.c: Include stdio.h and string.h.
+	* gdb.threads/non-ldr-exc-2.c: Likewise.
+	* gdb.threads/non-ldr-exc-3.c: Likewise.
+	* gdb.threads/non-ldr-exc-4.c: Likewise.
+	* gdb.threads/pthreads.c: Include unistd.h.
+	(main): Declare returns int.
+	* gdb.threads/tls-main.c (foo): New declaration.
+	* gdb.threads/watchpoint-fork-mt.c: Define _GNU_SOURCE.
+
+2015-01-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-var-list-children-invalid-grandchild.c: New file.
+	* gdb.mi/mi-var-list-children-invalid-grandchild.exp: New file.
+
+2015-01-15  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.base/noreturn-return.c: New file.
+	* gdb.base/noreturn-return.exp: New file.
+	* gdb.base/noreturn-finish.c: New file.
+	* gdb.base/noreturn-finish.exp: New file.
+
 2015-01-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/continue-pending-after-query.c: New file.

@@ -3589,7 +3589,15 @@ identify_search_archive (bfd * abfd,
         }
 
       if (last_arfile != NULL)
-	bfd_close (last_arfile);
+	{
+	  bfd_close (last_arfile);
+	  /* PR 17512: file: 8b2168d4.  */
+	  if (last_arfile == arfile)
+	    {
+	      last_arfile = NULL;
+	      break;
+	    }
+	}
 
       last_arfile = arfile;
     }

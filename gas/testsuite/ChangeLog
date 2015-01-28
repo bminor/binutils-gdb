@@ -1,3 +1,9 @@
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* gas/ft32/ft32.exp: New file.
+	* gas/ft32/insn.d: New file.
+	* gas/ft32/insn.s: New file.
+
 2015-01-19  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/none.s,

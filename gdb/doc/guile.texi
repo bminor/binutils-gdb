@@ -2246,7 +2246,8 @@ if it is invalid at the time the procedure is called.
 @end deffn
 
 @deffn {Scheme Procedure} objfile-filename objfile
-Return the file name of @var{objfile} as a string.
+Return the file name of @var{objfile} as a string,
+with symbolic links resolved.
 @end deffn
 
 @deffn {Scheme Procedure} objfile-pretty-printers objfile

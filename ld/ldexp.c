@@ -828,15 +828,18 @@ fold_name (etree_type *tree)
 
     case LENGTH:
       {
-        lang_memory_region_type *mem;
+      if (expld.phase != lang_first_phase_enum)
+        {
+          lang_memory_region_type *mem;
 
-        mem = lang_memory_region_lookup (tree->name.name, FALSE);
-        if (mem != NULL)
-          new_number (mem->length);
-        else
-          einfo (_("%F%S: undefined MEMORY region `%s'"
-		   " referenced in expression\n"),
-		 tree, tree->name.name);
+          mem = lang_memory_region_lookup (tree->name.name, FALSE);
+          if (mem != NULL)
+            new_number (mem->length);
+          else
+            einfo (_("%F%S: undefined MEMORY region `%s'"
+             " referenced in expression\n"),
+           tree, tree->name.name);
+        }
       }
       break;
 

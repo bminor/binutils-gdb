@@ -1937,7 +1937,8 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
 
 	      if (rel->address > contents_size - 4)
 		{
-		  non_fatal (_("Out of range relocation: %lx"), rel->address);
+		  non_fatal (_("Out of range relocation: %lx"),
+			     (long) rel->address);
 		  break;
 		}
 	      
@@ -1992,7 +1993,8 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
 	    case 1:
 	      if (rel->address > contents_size - 2)
 		{
-		  non_fatal (_("Out of range relocation: %lx"), rel->address);
+		  non_fatal (_("Out of range relocation: %lx"),
+			     (long) rel->address);
 		  break;
 		}
 		       
@@ -2014,7 +2016,8 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
 	      /* PR 17512: file: 0455a112.  */
 	      if (rel->address > contents_size - 4)
 		{
-		  non_fatal (_("Out of range relocation: %lx"), rel->address);
+		  non_fatal (_("Out of range relocation: %lx"),
+			     (long) rel->address);
 		  break;
 		}
 		       

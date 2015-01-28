@@ -2311,9 +2311,18 @@ do_pseudo_bral (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_la_internal (const char *arg_reg, const char *arg_label,
+do_pseudo_la_internal (const char *arg_reg, char *arg_label,
 		       const char *line)
 {
+  expressionS exp;
+
+  parse_expression (arg_label, &exp);
+  if (exp.X_op != O_symbol)
+    {
+      as_bad (_("la must use with symbol. '%s'"), line);
+      return;
+    }
+
   relaxing = TRUE;
   /* rt, label */
   if (!nds32_pic && !strstr(arg_label, "@"))
@@ -6541,12 +6550,19 @@ nds32_parse_name (char const *name, expressionS *exprP,
 		  enum expr_mode mode ATTRIBUTE_UNUSED,
 		  char *nextcharP ATTRIBUTE_UNUSED)
 {
+  segT segment;
+
   exprP->X_op_symbol = NULL;
   exprP->X_md = BFD_RELOC_UNUSED;
 
   exprP->X_add_symbol = symbol_find_or_make (name);
   exprP->X_op = O_symbol;
   exprP->X_add_number = 0;
+
+  /* Check the specail name if a symbol.  */
+  segment = S_GET_SEGMENT (exprP->X_add_symbol);
+  if (segment != undefined_section)
+    return 0;
 
   if (strcmp (name, GOT_NAME) == 0 && *nextcharP != '@')
     {

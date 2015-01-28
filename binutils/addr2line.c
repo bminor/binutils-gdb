@@ -140,6 +140,14 @@ slurp_symtab (bfd *abfd)
       syms = xmalloc (storage);
       symcount = bfd_canonicalize_dynamic_symtab (abfd, syms);
     }
+
+  /* PR 17512: file: 2a1d3b5b.
+     Do not pretend that we have some symbols when we don't.  */
+  if (symcount <= 0)
+    {
+      free (syms);
+      syms = NULL;
+    }
 }
 
 /* These global variables are used to pass information between

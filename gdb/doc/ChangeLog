@@ -1,3 +1,12 @@
+2015-01-27  Doug Evans  <dje@google.com>
+
+	* python.texi (Objfiles In Python): Document Objfile.username.
+
+2015-01-27  Doug Evans  <dje@google.com>
+
+	* python.texi (Objfiles In Python) <Objfile.filename>: Improve docs.
+	* guile.texi (Objfiles In Guile) <objfile-filename>: Improve docs.
+
 2015-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Threads): Describe -ascending for thread apply all.

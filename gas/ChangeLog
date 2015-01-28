@@ -1,3 +1,22 @@
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.am: Add FT32 files.
+	* config/tc-ft32.c: New file.
+	* config/tc-ft32.h: New file.
+	* configure.tgt: Add FT32 support.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2015-01-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-nds32.c (do_pseudo_la_internal): Limit the second argument
+	of instruction la to a symbol.
+
+2015-01-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-nds32.c (nds32_parse_name): Ignore when the input is
+	section name.
+
 2015-01-19  Alan Modra  <amodra@gmail.com>
 
 	* read.c (s_reloc): Match BFD_RELOC_NONE, BFD_RELOC{8,16,32,64}.

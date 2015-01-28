@@ -1189,6 +1189,9 @@ aout_get_external_symbols (bfd *abfd)
 
       count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
 
+      /* PR 17512: file: 011f5a08.  */
+      if (count == 0)
+	return FALSE;
 #ifdef USE_MMAP
       if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd),
 				 exec_hdr (abfd)->a_syms,

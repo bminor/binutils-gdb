@@ -1019,9 +1019,16 @@ struct func_type
   {
     /* * The calling convention for targets supporting multiple ABIs.
        Right now this is only fetched from the Dwarf-2
-       DW_AT_calling_convention attribute.  */
+       DW_AT_calling_convention attribute.  The value is one of the
+       DW_CC enum dwarf_calling_convention constants.  */
 
-    unsigned calling_convention;
+    unsigned calling_convention : 8;
+
+    /* * Whether this function normally returns to its caller.  It is
+       set from the DW_AT_noreturn attribute if set on the
+       DW_TAG_subprogram.  */
+
+    unsigned int is_noreturn : 1;
 
     /* * Only those DW_TAG_GNU_call_site's in this function that have
        DW_AT_GNU_tail_call set are linked in this list.  Function
@@ -1230,7 +1237,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_SPECIFIC_FIELD(thistype) \
   TYPE_MAIN_TYPE(thistype)->type_specific_field
-#define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific
 /* We need this tap-dance with the TYPE_RAW_SPECIFIC because of the case
    where we're trying to print an Ada array using the C language.
    In that case, there is no "cplus_stuff", but the C language assumes
@@ -1245,6 +1251,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_GNAT_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.gnat_stuff
 #define TYPE_DESCRIPTIVE_TYPE(thistype) TYPE_GNAT_SPECIFIC(thistype)->descriptive_type
 #define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->calling_convention
+#define TYPE_NO_RETURN(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->is_noreturn
 #define TYPE_TAIL_CALL_LIST(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->tail_call_list
 #define TYPE_BASECLASS(thistype,index) TYPE_FIELD_TYPE(thistype, index)
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses

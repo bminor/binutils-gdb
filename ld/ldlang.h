@@ -55,8 +55,10 @@ typedef struct memory_region_struct
 {
   lang_memory_region_name name_list;
   struct memory_region_struct *next;
+  union etree_union *origin_exp;
   bfd_vma origin;
   bfd_size_type length;
+  union etree_union *length_exp;
   bfd_vma current;
   union lang_statement_union *last_os;
   flagword flags;

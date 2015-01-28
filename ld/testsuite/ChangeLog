@@ -1,3 +1,21 @@
+2015-01-28  Jan Beulich  <jbeulich@suse.com>
+
+	* ld-elf/pr16322.s (p1): Rename to px1.
+	(f1): Rename to fx1.
+
+2015-01-28  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tocvar.d, * ld-powerpc/tocvar.s: New test.
+	* ld-powerpc/tocnovar.d, * ld-powerpc/tocnovar.s: New test.
+	* ld-powerpc/powerpc.exp: Run tocvar and tocnovar.
+
+2015-01-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-scripts/memory.t: Define new symbol tred.
+	* ld-scripts/memory_sym.t: New.
+	* ld-scripts/script.exp: Perform MEMORY with symbols test, and
+	conditionally check values of linker symbols.
+
 2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld-scripts/provide-4-map.d: Update expected output.

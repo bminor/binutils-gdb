@@ -4836,6 +4836,14 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 	  isym->st_shndx = SHN_UNDEF;
 	}
     }
+  else if (*sec != NULL
+	   && strcmp ((*sec)->name, ".toc") == 0
+	   && ELF_ST_TYPE (isym->st_info) == STT_OBJECT)
+    {
+      struct ppc_link_hash_table *htab = ppc_hash_table (info);
+      if (htab != NULL)
+	htab->params->object_in_toc = 1;
+    }
 
   if ((STO_PPC64_LOCAL_MASK & isym->st_other) != 0)
     {
@@ -5978,6 +5986,9 @@ opd_entry_value (asection *opd_sec,
   relocs = ppc64_elf_tdata (opd_bfd)->opd.relocs;
   if (relocs == NULL)
     relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
+  /* PR 17512: file: df8e1fd6.  */
+  if (relocs == NULL)
+    return (bfd_vma) -1;
 
   /* Go find the opd reloc at the sym address.  */
   lo = relocs;

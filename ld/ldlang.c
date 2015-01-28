@@ -85,6 +85,7 @@ static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
 static void lang_finalize_version_expr_head
   (struct bfd_elf_version_expr_head *);
+static void lang_do_memory_regions (void);
 
 /* Exported variables.  */
 const char *output_target;
@@ -1305,7 +1306,9 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
   new_region->name_list.name = xstrdup (name);
   new_region->name_list.next = NULL;
   new_region->next = NULL;
+  new_region->origin_exp = NULL;
   new_region->origin = 0;
+  new_region->length_exp = NULL;
   new_region->length = ~(bfd_size_type) 0;
   new_region->current = 0;
   new_region->last_os = NULL;
@@ -6292,7 +6295,6 @@ lang_final (void)
 
   new_stmt = new_stat (lang_output_statement, stat_ptr);
   new_stmt->name = output_filename;
-
 }
 
 /* Reset the current counters in the regions.  */
@@ -6707,6 +6709,8 @@ lang_process (void)
   /* PR 13683: We must rerun the assignments prior to running garbage
      collection in order to make sure that all symbol aliases are resolved.  */
   lang_do_assignments (lang_mark_phase_enum);
+
+  lang_do_memory_regions();
   expld.phase = lang_first_phase_enum;
 
   /* Size up the common data.  */
@@ -7968,6 +7972,37 @@ lang_do_version_exports_section (void)
   lreg = lang_new_vers_pattern (NULL, "*", NULL, FALSE);
   lang_register_vers_node (command_line.version_exports_section,
 			   lang_new_vers_node (greg, lreg), NULL);
+}
+
+/* Evaluate LENGTH and ORIGIN parts of MEMORY spec */
+
+static void
+lang_do_memory_regions (void)
+{
+  lang_memory_region_type *r = lang_memory_region_list;
+
+  for (; r != NULL; r = r->next)
+    {
+      if (r->origin_exp)
+      {
+        exp_fold_tree_no_dot (r->origin_exp);
+        if (expld.result.valid_p)
+          {
+            r->origin = expld.result.value;
+            r->current = r->origin;
+          }
+        else
+          einfo (_("%F%P: invalid origin for memory region %s\n"), r->name_list.name);
+      }
+      if (r->length_exp)
+      {
+        exp_fold_tree_no_dot (r->length_exp);
+        if (expld.result.valid_p)
+          r->length = expld.result.value;
+        else
+          einfo (_("%F%P: invalid length for memory region %s\n"), r->name_list.name);
+      }
+    }
 }
 
 void

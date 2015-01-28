@@ -81,6 +81,25 @@ objfpy_get_filename (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* An Objfile method which returns the objfile's file name, as specified
+   by the user, or None.  */
+
+static PyObject *
+objfpy_get_username (PyObject *self, void *closure)
+{
+  objfile_object *obj = (objfile_object *) self;
+
+  if (obj->objfile)
+    {
+      const char *username = obj->objfile->original_name;
+
+      return PyString_Decode (username, strlen (username),
+			      host_charset (), NULL);
+    }
+
+  Py_RETURN_NONE;
+}
+
 /* If SELF is a separate debug-info file, return the "backlink" field.
    Otherwise return None.  */
 
@@ -613,6 +632,8 @@ static PyGetSetDef objfile_getset[] =
     "The __dict__ for this objfile.", &objfile_object_type },
   { "filename", objfpy_get_filename, NULL,
     "The objfile's filename, or None.", NULL },
+  { "username", objfpy_get_username, NULL,
+    "The name of the objfile as provided by the user, or None.", NULL },
   { "owner", objfpy_get_owner, NULL,
     "The objfile owner of separate debug info objfiles, or None.",
     NULL },

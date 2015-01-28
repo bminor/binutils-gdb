@@ -2932,53 +2932,63 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
   if (length < BIN_MESSAGETABLE_SIZE)
     has_error = 1;
   else
-    do {
-      rc_uint_type m, i;
-      mt = (const struct bin_messagetable *) data;
-      m = windres_get_32 (&wrtarget, mt->cblocks, length);
-      if (length < (BIN_MESSAGETABLE_SIZE + m * BIN_MESSAGETABLE_BLOCK_SIZE))
-	{
-	  has_error = 1;
-	  break;
-	}
-      for (i = 0; i < m; i++)
-	{
-	  rc_uint_type low, high, offset;
-	  const struct bin_messagetable_item *mti;
+    do
+      {
+	rc_uint_type m, i;
 
-	  low = windres_get_32 (&wrtarget, mt->items[i].lowid, 4);
-	  high = windres_get_32 (&wrtarget, mt->items[i].highid, 4);
-	  offset = windres_get_32 (&wrtarget, mt->items[i].offset, 4);
-	  while (low <= high)
-	    {
-	      rc_uint_type elen, flags;
-	      if ((offset + BIN_MESSAGETABLE_ITEM_SIZE) > length)
-		{
-		  has_error = 1;
-	  break;
-		}
-	      mti = (const struct bin_messagetable_item *) &data[offset];
-	      elen = windres_get_16 (&wrtarget, mti->length, 2);
-	      flags = windres_get_16 (&wrtarget, mti->flags, 2);
-	      if ((offset + elen) > length)
-		{
-		  has_error = 1;
-		  break;
-		}
-	      wr_printcomment (e, "MessageId = 0x%x", low);
-	      wr_printcomment (e, "");
-	      if ((flags & MESSAGE_RESOURCE_UNICODE) == MESSAGE_RESOURCE_UNICODE)
-		unicode_print (e, (const unichar *) mti->data,
-			       (elen - BIN_MESSAGETABLE_ITEM_SIZE) / 2);
-	      else
-		ascii_print (e, (const char *) mti->data,
-			     (elen - BIN_MESSAGETABLE_ITEM_SIZE));
-	      wr_printcomment (e,"");
-	      ++low;
-	      offset += elen;
-	    }
-	}
-    } while (0);
+	mt = (const struct bin_messagetable *) data;
+	m = windres_get_32 (&wrtarget, mt->cblocks, length);
+
+	if (length < (BIN_MESSAGETABLE_SIZE + m * BIN_MESSAGETABLE_BLOCK_SIZE))
+	  {
+	    has_error = 1;
+	    break;
+	  }
+	for (i = 0; i < m; i++)
+	  {
+	    rc_uint_type low, high, offset;
+	    const struct bin_messagetable_item *mti;
+
+	    low = windres_get_32 (&wrtarget, mt->items[i].lowid, 4);
+	    high = windres_get_32 (&wrtarget, mt->items[i].highid, 4);
+	    offset = windres_get_32 (&wrtarget, mt->items[i].offset, 4);
+	    while (low <= high)
+	      {
+		rc_uint_type elen, flags;
+		if ((offset + BIN_MESSAGETABLE_ITEM_SIZE) > length)
+		  {
+		    has_error = 1;
+		    break;
+		  }
+		mti = (const struct bin_messagetable_item *) &data[offset];
+		elen = windres_get_16 (&wrtarget, mti->length, 2);
+		flags = windres_get_16 (&wrtarget, mti->flags, 2);
+		if ((offset + elen) > length)
+		  {
+		    has_error = 1;
+		    break;
+		  }
+		wr_printcomment (e, "MessageId = 0x%x", low);
+		wr_printcomment (e, "");
+
+		/* PR 17512: file: 5c3232dc.  */
+		if (elen)
+		  {
+		    if ((flags & MESSAGE_RESOURCE_UNICODE) == MESSAGE_RESOURCE_UNICODE)
+		      unicode_print (e, (const unichar *) mti->data,
+				     (elen - BIN_MESSAGETABLE_ITEM_SIZE) / 2);
+		    else
+		      ascii_print (e, (const char *) mti->data,
+				   (elen - BIN_MESSAGETABLE_ITEM_SIZE));
+		  }
+		wr_printcomment (e,"");
+		++low;
+		offset += elen;
+	      }
+	  }
+      }
+    while (0);
+
   if (has_error)
     wr_printcomment (e, "Illegal data");
   wr_print_flush (e);

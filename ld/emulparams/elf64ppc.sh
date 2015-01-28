@@ -38,6 +38,8 @@ OTHER_RELRO_SECTIONS_2="
   .opd		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { KEEP (*(.opd)) }
   .toc1		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.toc1) }
   .branch_lt	${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.branch_lt) }"
+INITIAL_READWRITE_SECTIONS="
+  .toc		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.toc) }"
 # Put .got before .data
 DATA_GOT=" "
 # Always make .got read-only after relocation

@@ -1387,7 +1387,9 @@ concat_filename (struct line_info_table *table, unsigned int file)
       char *name;
       size_t len;
 
-      if (table->files[file - 1].dir)
+      if (table->files[file - 1].dir
+	  /* PR 17512: file: 7f3d2e4b.  */
+	  && table->dirs != NULL)
 	subdir_name = table->dirs[table->files[file - 1].dir - 1];
 
       if (!subdir_name || !IS_ABSOLUTE_PATH (subdir_name))
@@ -2340,6 +2342,10 @@ scan_unit_for_symbols (struct comp_unit *unit)
       bfd_vma high_pc = 0;
       bfd_boolean high_pc_relative = FALSE;
 
+      /* PR 17512: file: 9f405d9d.  */
+      if (info_ptr >= unit->stash->info_ptr_end)
+	goto fail;
+      
       abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
 
@@ -2721,6 +2727,15 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	case DW_AT_comp_dir:
 	  {
 	    char *comp_dir = attr.u.str;
+
+	    /* PR 17512: file: 1fe726be.  */
+	    if (! is_str_attr (attr.form))
+	      {
+		(*_bfd_error_handler)
+		  (_("Dwarf Error: DW_AT_comp_dir attribute encountered with a non-string form."));
+		comp_dir = NULL;
+	      }
+
 	    if (comp_dir)
 	      {
 		/* Irix 6.2 native cc prepends <machine>.: to the compilation

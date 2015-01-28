@@ -1,3 +1,33 @@
+2015-01-28  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf64ppc.sh (INITIAL_READWRITE_SECTIONS): Define.
+	* emultempl/ppc64elf.em (params): Init new field.
+	(ppc_after_open): New function.
+	(LDEMUL_AFTER_OPEN): Define.
+	* ldlang.c (lang_final): Whitespace fix.
+
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.am: Add FT32 files.
+	* configure.tgt: Handle FT32 target.
+	* emulparams/elf32ft32.sh: New file.
+	* scripttempl/ft32.sc: New file.
+	* Makefile.in: Regenerate.
+
+2015-01-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR 4643
+	* ldexp.c (fold_name): Fold LENGTH only after
+	lang_first_phase_enum.
+	* ldgram.y (memory_spec): Don't evaluate ORIGIN and LENGTH
+	rightaway.
+	* ldlang.h (struct memory_region_struct): Add origin_exp and
+	length_exp fields.
+	* ldlang.c (lang_do_memory_regions): New.
+	(lang_memory_region_lookup): Initialize origin_exp and
+	length_exp fields.
+	(lang_process): Call lang_do_memory_regions.
+
 2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ldlang.c (print_assignment): Only evaluate the expression for a

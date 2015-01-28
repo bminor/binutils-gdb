@@ -37,6 +37,7 @@
 #define ARCH_epiphany
 #define ARCH_fr30
 #define ARCH_frv
+#define ARCH_ft32
 #define ARCH_h8300
 #define ARCH_h8500
 #define ARCH_hppa
@@ -443,6 +444,11 @@ disassembler (abfd)
 #ifdef ARCH_tic80
     case bfd_arch_tic80:
       disassemble = print_insn_tic80;
+      break;
+#endif
+#ifdef ARCH_ft32
+    case bfd_arch_ft32:
+      disassemble = print_insn_ft32;
       break;
 #endif
 #ifdef ARCH_v850

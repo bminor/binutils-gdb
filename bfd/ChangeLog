@@ -1,3 +1,47 @@
+2015-01-28  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.h (struct ppc64_elf_params): Add "object_in_toc".
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Assume that global symbols
+	in .toc indicate xlc compiled code that might require a rw .toc.
+
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.am: Add FT32 files.
+	* archures.c (enum bfd_architecture): Add bfd_arch_ft32.
+	(bfd_mach_ft32): Define.
+	(bfd_ft32_arch): Declare.
+	(bfd_archures_list): Add bfd_ft32_arch.
+	* config.bfd: Handle FT32.
+	* configure.ac: Likewise.
+	* cpu-ft32.c: New file.
+	* elf32-ft32.c: New file.
+	* reloc.c (BFD_RELOC_FT32_10, BFD_RELOC_FT32_20, BFD_RELOC_FT32_17,
+	BFD_RELOC_FT32_18): Define.
+	* targets.c (_bfd_target_vector): Add ft32_elf32_vec.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2015-01-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* pdp11.c (aout_get_external_symbols): Return false if there are
+	no symbols.
+
+	* dwarf2.c (concat_filename): Check for an empty directory table.
+	(scan_unit_for_symbols): Check for reading off the end of the
+	unit.
+	(parse_comp_unit): Check for a DW_AT_comp_dir attribute with a
+	non-string form.
+	* elf64-ppc.c (opd_entry_value): Fail if there are no relocs
+	available.
+
+2015-01-26  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_pick_relax): Fix again setting.
+
 2015-01-22  DJ Delorie  <dj@redhat.com>
 
 	* elf32-m32c.c (m32c_apply_reloc_24): New.

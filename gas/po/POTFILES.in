@@ -66,6 +66,8 @@ config/tc-fr30.c
 config/tc-fr30.h
 config/tc-frv.c
 config/tc-frv.h
+config/tc-ft32.c
+config/tc-ft32.h
 config/tc-h8300.c
 config/tc-h8300.h
 config/tc-hppa.c

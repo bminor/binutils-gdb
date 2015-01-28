@@ -767,6 +767,9 @@ case "${target}" in
   rs6000-*-aix*)
     noconfigdirs="$noconfigdirs ${libgcj}"
     ;;
+  ft32-*-*)
+    noconfigdirs="$noconfigdirs ${libgcj}"
+    ;;
   *-*-lynxos*)
     noconfigdirs="$noconfigdirs ${libgcj}"
     ;; 
@@ -991,6 +994,9 @@ case "${target}" in
     ;;
   fr30-*-elf*)
     noconfigdirs="$noconfigdirs gdb"
+    ;;
+  ft32-*-*)
+    noconfigdirs="$noconfigdirs target-rda gprof"
     ;;
   moxie-*-*)
     noconfigdirs="$noconfigdirs"

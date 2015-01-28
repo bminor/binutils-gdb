@@ -1,3 +1,18 @@
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.am: Add FT32 files.
+	* configure.ac: Handle FT32.
+	* disassemble.c (disassembler): Call print_insn_ft32.
+	* ft32-dis.c: New file.
+	* ft32-opc.c: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2015-01-28 Kuan-Lin Chen <kuanlinchentw@gmail.com>
+
+	* nds32-asm.c (keyword_sr): Add new system registers.
+
 2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-dis.c (s390_extract_operand): Support vector register
