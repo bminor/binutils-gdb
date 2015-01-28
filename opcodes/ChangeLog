@@ -1,3 +1,7 @@
+2015-01-28 Kuan-Lin Chen <kuanlinchentw@gmail.com>
+
+	* nds32-asm.c (keyword_sr): Add new system registers.
+
 2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-dis.c (s390_extract_operand): Support vector register
