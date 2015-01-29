@@ -14121,7 +14121,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      {
 			outrel.r_addend += relocation;
 			if (tls_type & (TLS_GD | TLS_DTPREL | TLS_TPREL))
-			  outrel.r_addend -= htab->elf.tls_sec->vma;
+			  {
+			    if (htab->elf.tls_sec == NULL)
+			      outrel.r_addend = 0;
+			    else
+			      outrel.r_addend -= htab->elf.tls_sec->vma;
+			  }
 		      }
 		    loc = relgot->contents;
 		    loc += (relgot->reloc_count++
@@ -14138,9 +14143,14 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      relocation = 1;
 		    else if (tls_type != 0)
 		      {
-			relocation -= htab->elf.tls_sec->vma + DTP_OFFSET;
-			if (tls_type == (TLS_TLS | TLS_TPREL))
-			  relocation += DTP_OFFSET - TP_OFFSET;
+			if (htab->elf.tls_sec == NULL)
+			  relocation = 0;
+			else
+			  {
+			    relocation -= htab->elf.tls_sec->vma + DTP_OFFSET;
+			    if (tls_type == (TLS_TLS | TLS_TPREL))
+			      relocation += DTP_OFFSET - TP_OFFSET;
+			  }
 
 			if (tls_type == (TLS_TLS | TLS_GD))
 			  {
@@ -14273,7 +14283,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		bfd_put_32 (output_bfd, insn, p);
 	      break;
 	    }
-	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  if (info->shared)
 	    /* The TPREL16 relocs shouldn't really be used in shared
 	       libs as they will result in DT_TEXTREL being set, but
@@ -14293,7 +14304,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL16_HIGHERA:
 	case R_PPC64_DTPREL16_HIGHEST:
 	case R_PPC64_DTPREL16_HIGHESTA:
-	  addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
 	  break;
 
 	case R_PPC64_ADDR64_LOCAL:
@@ -14308,11 +14320,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  goto dodyn;
 
 	case R_PPC64_TPREL64:
-	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  goto dodyn;
 
 	case R_PPC64_DTPREL64:
-	  addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
 	  /* Fall thru */
 
 	  /* Relocations that may need to be propagated if this is a
