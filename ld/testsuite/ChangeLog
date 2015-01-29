@@ -1,6 +1,11 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-29  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/tlsld.d, * ld-powerpc/tlsld.s: New test.
+	* ld-powerpc/tlsld32.d, * ld-powerpc/tlsld32.s: New test.
+	* ld-powerpc/powerpc.exp: Run them.
+
 	2015-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 	* ld-scripts/provide-4-map.d: Update expected output.
 	* ld-scripts/provide-5-map.d: Likewise.
