@@ -3258,41 +3258,43 @@ make_bpstat_clear_actions_cleanup (void)
 int
 producer_is_gcc_ge_4 (const char *producer)
 {
-  const char *cs;
   int major, minor;
-
-  if (producer == NULL)
-    {
-      /* For unknown compilers expect their behavior is not compliant.  For GCC
-	 this case can also happen for -gdwarf-4 type units supported since
-	 gcc-4.5.  */
-
-      return -1;
-    }
-
-  /* Skip any identifier after "GNU " - such as "C++" or "Java".  */
-
-  if (strncmp (producer, "GNU ", strlen ("GNU ")) != 0)
-    {
-      /* For non-GCC compilers expect their behavior is not compliant.  */
-
-      return -1;
-    }
-  cs = &producer[strlen ("GNU ")];
-  while (*cs && !isdigit (*cs))
-    cs++;
-  if (sscanf (cs, "%d.%d", &major, &minor) != 2)
-    {
-      /* Not recognized as GCC.  */
-
-      return -1;
-    }
-
+  major = producer_is_gcc (producer, &minor);
   if (major < 4)
     return -1;
   if (major > 4)
     return INT_MAX;
   return minor;
+}
+
+/* Returns the major version number if the given PRODUCER string is GCC and
+   sets the MINOR version.  Returns -1 if the given PRODUCER is NULL or it
+   isn't GCC.  */
+int
+producer_is_gcc (const char *producer, int *minor)
+{
+  const char *cs;
+  int major;
+
+  if (producer != NULL && strncmp (producer, "GNU ", strlen ("GNU ")) == 0)
+    {
+      /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
+	 A full producer string might look like:
+	 "GNU C 4.7.2"
+	 "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."
+	 "GNU C++14 5.0.0 20150123 (experimental)"
+      */
+      cs = &producer[strlen ("GNU ")];
+      while (*cs && !isspace (*cs))
+        cs++;
+      if (*cs && isspace (*cs))
+        cs++;
+      if (sscanf (cs, "%d.%d", &major, minor) == 2)
+	return major;
+    }
+
+  /* Not recognized as GCC.  */
+  return -1;
 }
 
 /* Helper for make_cleanup_free_char_ptr_vec.  */

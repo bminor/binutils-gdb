@@ -240,6 +240,18 @@ ada_varobj_get_array_number_of_children (struct value *parent_value,
 {
   LONGEST lo, hi;
 
+  if (parent_value == NULL
+      && is_dynamic_type (TYPE_INDEX_TYPE (parent_type)))
+    {
+      /* This happens when listing the children of an object
+	 which does not exist in memory (Eg: when requesting
+	 the children of a null pointer, which is allowed by
+	 varobj).  The array index type being dynamic, we cannot
+	 determine how many elements this array has.  Just assume
+	 it has none.  */
+      return 0;
+    }
+
   if (!get_array_bounds (parent_type, &lo, &hi))
     {
       /* Could not get the array bounds.  Pretend this is an empty array.  */

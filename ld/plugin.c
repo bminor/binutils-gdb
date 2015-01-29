@@ -114,6 +114,7 @@ static const enum ld_plugin_tag tv_header_tags[] =
   LDPT_REGISTER_CLEANUP_HOOK,
   LDPT_ADD_SYMBOLS,
   LDPT_GET_INPUT_FILE,
+  LDPT_GET_VIEW,
   LDPT_RELEASE_INPUT_FILE,
   LDPT_GET_SYMBOLS,
   LDPT_GET_SYMBOLS_V2,
@@ -240,8 +241,12 @@ plugin_opt_plugin_arg (const char *arg)
   return 0;
 }
 
-/* Create a dummy BFD.  */
-bfd *
+/* Generate a dummy BFD to represent an IR file, for any callers of
+   plugin_call_claim_file to use as the handle in the ld_plugin_input_file
+   struct that they build to pass in.  The BFD is initially writable, so
+   that symbols can be added to it; it must be made readable after the
+   add_symbols hook has been called so that it can be read when linking.  */
+static bfd *
 plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 {
   bfd *abfd;
@@ -438,6 +443,15 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 static enum ld_plugin_status
 get_input_file (const void *handle ATTRIBUTE_UNUSED,
                 struct ld_plugin_input_file *file ATTRIBUTE_UNUSED)
+{
+  ASSERT (called_plugin);
+  return LDPS_ERR;
+}
+
+/* Get view of the input file.  */
+static enum ld_plugin_status
+get_view (const void *handle ATTRIBUTE_UNUSED,
+	  const void **viewp ATTRIBUTE_UNUSED)
 {
   ASSERT (called_plugin);
   return LDPS_ERR;
@@ -731,6 +745,9 @@ set_tv_header (struct ld_plugin_tv *tv)
 	case LDPT_GET_INPUT_FILE:
 	  TVU(get_input_file) = get_input_file;
 	  break;
+	case LDPT_GET_VIEW:
+	  TVU(get_view) = get_view;
+	  break;
 	case LDPT_RELEASE_INPUT_FILE:
 	  TVU(release_input_file) = release_input_file;
 	  break;
@@ -772,14 +789,6 @@ set_tv_plugin_args (plugin_t *plugin, struct ld_plugin_tv *tv)
     }
   tv->tv_tag = LDPT_NULL;
   tv->tv_u.tv_val = 0;
-}
-
-/* Return true if any plugins are active this run.  Only valid
-   after options have been processed.  */
-bfd_boolean
-plugin_active_plugins_p (void)
-{
-  return plugins_list != NULL;
 }
 
 /* Load up and initialise all plugins after argument parsing.  */

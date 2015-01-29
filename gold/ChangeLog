@@ -1,3 +1,15 @@
+2015-01-29  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Correct GOT_TLSLD
+	and GOT_TLSGD to LE optimization.
+
+2015-01-28  Cary Coutant  <ccoutant@google.com>
+
+	* x86_64.cc (Target_x86_64::Scan::global): Allow IE-to-LE optimization
+	for undef TLS symbols.
+	(Target_x86_64::Relocate::relocate_tls): Likewise.
+	(Target_x86_64::Relocate::tls_ie_to_le): Likewise.
+
 2015-01-25  Cary Coutant  <ccoutant@google.com>
 
 	* output.cc (Output_segment::set_section_addresses): Fix calculation

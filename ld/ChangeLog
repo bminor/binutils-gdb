@@ -1,3 +1,29 @@
+2015-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldfile.c (ldfile_try_open_bfd): Replace plugin_active_plugins_p()
+	with link_info.lto_plugin_active.
+	* ldlang.c (lang_process): Likewise.
+	* ldmain.c (add_archive_element): Likewise.
+	* plugin.c (plugin_active_plugins_p): Removed.
+	* plugin.h (plugin_active_plugins_p): Likewise.
+
+2015-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.h (plugin_get_ir_dummy_bfd): Removed.  Move comments to
+	...
+	* plugin.c (plugin_get_ir_dummy_bfd): Here.  Make it static.
+
+2015-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
+	* plugin.c (tv_header_tags(): Add LDPT_GET_VIEW.
+	(get_view): New function.
+	(set_tv_header): Handle LDPT_GET_VIEW.
+	* testplug.c (tag_names): Add LDPT_GET_VIEW.
+	(tv_get_view): New.
+	(dump_tv_tag): Handle LDPT_GET_VIEW.
+	(parse_tv_tag): Likewise.
+
 2015-01-28  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/elf64ppc.sh (INITIAL_READWRITE_SECTIONS): Define.

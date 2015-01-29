@@ -39,10 +39,6 @@ extern void plugin_opt_plugin (const char *plugin);
    error if none.  */
 extern int plugin_opt_plugin_arg (const char *arg);
 
-/* Return true if any plugins are active this run.  Only valid
-   after options have been processed.  */
-extern bfd_boolean plugin_active_plugins_p (void);
-
 /* Load up and initialise all plugins after argument parsing.  */
 extern void plugin_load_plugins (void);
 
@@ -58,12 +54,5 @@ extern int plugin_call_all_symbols_read (void);
 
 /* Call 'cleanup' hook for all plugins at exit.  */
 extern void plugin_call_cleanup (void);
-
-/* Generate a dummy BFD to represent an IR file, for any callers of
-   plugin_call_claim_file to use as the handle in the ld_plugin_input_file
-   struct that they build to pass in.  The BFD is initially writable, so
-   that symbols can be added to it; it must be made readable after the
-   add_symbols hook has been called so that it can be read when linking.  */
-extern bfd *plugin_get_ir_dummy_bfd (const char *name, bfd *template);
 
 #endif /* !def GLD_PLUGIN_H */

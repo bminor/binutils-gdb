@@ -12266,7 +12266,7 @@ static void
 check_producer (struct dwarf2_cu *cu)
 {
   const char *cs;
-  int major, minor, release;
+  int major, minor;
 
   if (cu->producer == NULL)
     {
@@ -12279,22 +12279,10 @@ check_producer (struct dwarf2_cu *cu)
 	 combination.  gcc-4.5.x -gdwarf-4 binaries have DW_AT_accessibility
 	 interpreted incorrectly by GDB now - GCC PR debug/48229.  */
     }
-  else if (strncmp (cu->producer, "GNU ", strlen ("GNU ")) == 0)
+  else if ((major = producer_is_gcc (cu->producer, &minor)) > 0)
     {
-      /* Skip any identifier after "GNU " - such as "C++" or "Java".  */
-
-      cs = &cu->producer[strlen ("GNU ")];
-      while (*cs && !isdigit (*cs))
-	cs++;
-      if (sscanf (cs, "%d.%d.%d", &major, &minor, &release) != 3)
-	{
-	  /* Not recognized as GCC.  */
-	}
-      else
-	{
-	  cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
-	  cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
-	}
+      cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
+      cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
     }
   else if (strncmp (cu->producer, "Intel(R) C", strlen ("Intel(R) C")) == 0)
     cu->producer_is_icc = 1;
@@ -14733,33 +14721,58 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       target_die = follow_die_ref (die, attr, &target_cu);
       target_attr = dwarf2_attr (target_die, DW_AT_location, target_cu);
       if (target_attr == NULL)
+	target_attr = dwarf2_attr (target_die, DW_AT_data_member_location,
+				   target_cu);
+      if (target_attr == NULL)
 	return 0;
 
-      if (attr_form_is_section_offset (target_attr))
+      switch (target_attr->name)
 	{
-	  baton = obstack_alloc (obstack, sizeof (*baton));
-	  baton->referenced_type = die_type (target_die, target_cu);
-	  fill_in_loclist_baton (cu, &baton->loclist, target_attr);
-	  prop->data.baton = baton;
-	  prop->kind = PROP_LOCLIST;
-	  gdb_assert (prop->data.baton != NULL);
-	}
-      else if (attr_form_is_block (target_attr))
-	{
-	  baton = obstack_alloc (obstack, sizeof (*baton));
-	  baton->referenced_type = die_type (target_die, target_cu);
-	  baton->locexpr.per_cu = cu->per_cu;
-	  baton->locexpr.size = DW_BLOCK (target_attr)->size;
-	  baton->locexpr.data = DW_BLOCK (target_attr)->data;
-	  prop->data.baton = baton;
-	  prop->kind = PROP_LOCEXPR;
-	  gdb_assert (prop->data.baton != NULL);
-	}
-      else
-	{
-	  dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
-						 "dynamic property");
-	  return 0;
+	  case DW_AT_location:
+	    if (attr_form_is_section_offset (target_attr))
+	      {
+		baton = obstack_alloc (obstack, sizeof (*baton));
+		baton->referenced_type = die_type (target_die, target_cu);
+		fill_in_loclist_baton (cu, &baton->loclist, target_attr);
+		prop->data.baton = baton;
+		prop->kind = PROP_LOCLIST;
+		gdb_assert (prop->data.baton != NULL);
+	      }
+	    else if (attr_form_is_block (target_attr))
+	      {
+		baton = obstack_alloc (obstack, sizeof (*baton));
+		baton->referenced_type = die_type (target_die, target_cu);
+		baton->locexpr.per_cu = cu->per_cu;
+		baton->locexpr.size = DW_BLOCK (target_attr)->size;
+		baton->locexpr.data = DW_BLOCK (target_attr)->data;
+		prop->data.baton = baton;
+		prop->kind = PROP_LOCEXPR;
+		gdb_assert (prop->data.baton != NULL);
+	      }
+	    else
+	      {
+		dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
+						       "dynamic property");
+		return 0;
+	      }
+	    break;
+	  case DW_AT_data_member_location:
+	    {
+	      LONGEST offset;
+
+	      if (!handle_data_member_location (target_die, target_cu,
+						&offset))
+		return 0;
+
+	      baton = obstack_alloc (obstack, sizeof (*baton));
+	      baton->referenced_type = get_die_type (target_die->parent,
+						     target_cu);
+	      baton->offset_info.offset = offset;
+	      baton->offset_info.type = die_type (target_die, target_cu);
+	      prop->data.baton = baton;
+	      prop->kind = PROP_ADDR_OFFSET;
+	      break;
+	    }
 	}
     }
   else if (attr_form_is_constant (attr))

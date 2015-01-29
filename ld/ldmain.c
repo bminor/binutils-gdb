@@ -790,7 +790,7 @@ add_archive_element (struct bfd_link_info *info,
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
 #ifdef ENABLE_PLUGINS
-  if (plugin_active_plugins_p () && !no_more_claiming)
+  if (link_info.lto_plugin_active && !no_more_claiming)
     {
       /* We must offer this archive member to the plugins to claim.  */
       const char *filename = (bfd_my_archive (abfd) != NULL

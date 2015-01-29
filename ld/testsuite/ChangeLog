@@ -1,3 +1,24 @@
+2015-01-29  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tlsld.d, * ld-powerpc/tlsld.s: New test.
+	* ld-powerpc/tlsld32.d, * ld-powerpc/tlsld32.s: New test.
+	* ld-powerpc/powerpc.exp: Run them.  Move tocvar and tocnovar.
+
+2015-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
+	* ld-plugin/plugin-1.d: Add LDPT_GET_VIEW.
+	* ld-plugin/plugin-10.d: Likewise.
+	* ld-plugin/plugin-11.d: Likewise.
+	* ld-plugin/plugin-2.d: Likewise.
+	* ld-plugin/plugin-3.d: Likewise.
+	* ld-plugin/plugin-4.d: Likewise.
+	* ld-plugin/plugin-5.d: Likewise.
+	* ld-plugin/plugin-6.d: Likewise.
+	* ld-plugin/plugin-7.d: Likewise.
+	* ld-plugin/plugin-8.d: Likewise.
+	* ld-plugin/plugin-9.d: Likewise.
+
 2015-01-28  Jan Beulich  <jbeulich@suse.com>
 
 	* ld-elf/pr16322.s (p1): Rename to px1.

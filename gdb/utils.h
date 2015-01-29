@@ -302,6 +302,7 @@ extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
 #endif
 
 extern int producer_is_gcc_ge_4 (const char *producer);
+extern int producer_is_gcc (const char *producer, int *minor);
 
 extern int myread (int, char *, int);
 
