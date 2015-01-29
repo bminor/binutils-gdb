@@ -132,20 +132,26 @@
    "standard_opcode_lengths" table that is emitted below in
    out_debug_line().  */
 #define DWARF2_LINE_OPCODE_BASE		13
-#define DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE  16
+#define DWARF5_EXPERIMENTAL_LINE_OPCODE_BASE  16
 
 static int opcode_base;
+static int line_base;
+static unsigned int line_range;
 
 #ifndef DWARF2_LINE_BASE
   /* Minimum line offset in a special line info. opcode.  This value
      was chosen to give a reasonable range of values.  */
-# define DWARF2_LINE_BASE		-3
+# define DWARF2_LINE_BASE		-5
 #endif
 
 /* Range of line offsets in a special line info. opcode.  */
 #ifndef DWARF2_LINE_RANGE
-# define DWARF2_LINE_RANGE		10
+# define DWARF2_LINE_RANGE		14
 #endif
+
+/* For two-level line tables, these values work a bit better.  */
+#define DWARF5_EXPERIMENTAL_LINE_BASE		-3
+#define DWARF5_EXPERIMENTAL_LINE_RANGE		10
 
 #ifndef DWARF2_LINE_MIN_INSN_LENGTH
   /* Define the architecture-dependent minimum instruction length (in
@@ -162,11 +168,11 @@ static int opcode_base;
 
 /* Given a special op, return the line skip amount.  */
 #define SPECIAL_LINE(op) \
-	(((op) - opcode_base) % DWARF2_LINE_RANGE + DWARF2_LINE_BASE)
+	(((op) - opcode_base) % line_range + line_base)
 
 /* Given a special op, return the address skip amount (in units of
    DWARF2_LINE_MIN_INSN_LENGTH.  */
-#define SPECIAL_ADDR(op) (((op) - opcode_base) / DWARF2_LINE_RANGE)
+#define SPECIAL_ADDR(op) (((op) - opcode_base) / line_range)
 
 /* The maximum address skip amount that can be encoded with a special op.  */
 #define MAX_SPECIAL_ADDR_DELTA		SPECIAL_ADDR(255)
@@ -1170,15 +1176,15 @@ size_inc_line_addr (int line_delta, addressT addr_delta)
     }
 
   /* Bias the line delta by the base.  */
-  tmp = line_delta - DWARF2_LINE_BASE;
+  tmp = line_delta - line_base;
 
   /* If the line increment is out of range of a special opcode, we
      must encode it with DW_LNS_advance_line.  */
-  if (tmp >= DWARF2_LINE_RANGE)
+  if (tmp >= line_range)
     {
       len = 1 + sizeof_leb128 (line_delta, 1);
       line_delta = 0;
-      tmp = 0 - DWARF2_LINE_BASE;
+      tmp = 0 - line_base;
     }
 
   /* Bias the opcode by the special opcode base.  */
@@ -1188,12 +1194,12 @@ size_inc_line_addr (int line_delta, addressT addr_delta)
   if (addr_delta < (unsigned int) (256 + MAX_SPECIAL_ADDR_DELTA))
     {
       /* Try using a special opcode.  */
-      opcode = tmp + addr_delta * DWARF2_LINE_RANGE;
+      opcode = tmp + addr_delta * line_range;
       if (opcode <= 255)
 	return len + 1;
 
       /* Try using DW_LNS_const_add_pc followed by special op.  */
-      opcode = tmp + (addr_delta - MAX_SPECIAL_ADDR_DELTA) * DWARF2_LINE_RANGE;
+      opcode = tmp + (addr_delta - MAX_SPECIAL_ADDR_DELTA) * line_range;
       if (opcode <= 255)
 	return len + 2;
     }
@@ -1241,17 +1247,17 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
     }
 
   /* Bias the line delta by the base.  */
-  tmp = line_delta - DWARF2_LINE_BASE;
+  tmp = line_delta - line_base;
 
   /* If the line increment is out of range of a special opcode, we
      must encode it with DW_LNS_advance_line.  */
-  if (tmp >= DWARF2_LINE_RANGE)
+  if (tmp >= line_range)
     {
       *p++ = DW_LNS_advance_line;
       p += output_leb128 (p, line_delta, 1);
 
       line_delta = 0;
-      tmp = 0 - DWARF2_LINE_BASE;
+      tmp = 0 - line_base;
       need_copy = 1;
     }
 
@@ -1270,7 +1276,7 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
   if (addr_delta < (unsigned int) (256 + MAX_SPECIAL_ADDR_DELTA))
     {
       /* Try using a special opcode.  */
-      opcode = tmp + addr_delta * DWARF2_LINE_RANGE;
+      opcode = tmp + addr_delta * line_range;
       if (opcode <= 255)
 	{
 	  *p++ = opcode;
@@ -1278,7 +1284,7 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
 	}
 
       /* Try using DW_LNS_const_add_pc followed by special op.  */
-      opcode = tmp + (addr_delta - MAX_SPECIAL_ADDR_DELTA) * DWARF2_LINE_RANGE;
+      opcode = tmp + (addr_delta - MAX_SPECIAL_ADDR_DELTA) * line_range;
       if (opcode <= 255)
 	{
 	  *p++ = DW_LNS_const_add_pc;
@@ -2060,7 +2066,7 @@ static void
 out_debug_line (segT line_seg, segT str_seg)
 {
   expressionS exp;
-  symbolS *prologue_start, *prologue_end, *actuals_start;
+  symbolS *prologue_start, *prologue_end, *logicals_start, *actuals_start;
   symbolS *line_end;
   struct line_seg *s;
   int sizeof_offset;
@@ -2070,11 +2076,15 @@ out_debug_line (segT line_seg, segT str_seg)
     {
       version = DWARF2_LINE_VERSION;
       opcode_base = DWARF2_LINE_OPCODE_BASE;
+      line_base = DWARF2_LINE_BASE;
+      line_range = DWARF2_LINE_RANGE;
     }
   else
     {
       version = DWARF2_LINE_EXPERIMENTAL_VERSION;
-      opcode_base = DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE;
+      opcode_base = DWARF5_EXPERIMENTAL_LINE_OPCODE_BASE;
+      line_base = DWARF5_EXPERIMENTAL_LINE_BASE;
+      line_range = DWARF5_EXPERIMENTAL_LINE_RANGE;
     }
 
   sizeof_offset = out_header (line_seg, &exp);
@@ -2082,13 +2092,6 @@ out_debug_line (segT line_seg, segT str_seg)
 
   /* Version.  */
   out_two (version);
-
-  /* Version 5 adds address_size and segment_size. */
-  if (version >= 5)
-    {
-      out_byte (sizeof_address);
-      out_byte (0);
-    }
 
   /* Length of the prologue following this length.  */
   prologue_start = symbol_temp_make ();
@@ -2100,21 +2103,13 @@ out_debug_line (segT line_seg, segT str_seg)
   emit_expr (&exp, sizeof_offset);
   symbol_set_value_now (prologue_start);
 
-  /* Actuals table offset.  */
-  if (version == DWARF2_LINE_EXPERIMENTAL_VERSION)
-    {
-      actuals_start = symbol_temp_make ();
-      exp.X_add_symbol = actuals_start;
-      emit_expr (&exp, sizeof_offset);
-    }
-
   /* Parameters of the state machine.  */
   out_byte (DWARF2_LINE_MIN_INSN_LENGTH);
   if (version >= 4)
     out_byte (DWARF2_LINE_MAX_OPS_PER_INSN);
   out_byte (DWARF2_LINE_DEFAULT_IS_STMT);
-  out_byte (DWARF2_LINE_BASE);
-  out_byte (DWARF2_LINE_RANGE);
+  out_byte (line_base);
+  out_byte (line_range);
   out_byte (opcode_base);
 
   /* Standard opcode lengths.  */
@@ -2130,27 +2125,62 @@ out_debug_line (segT line_seg, segT str_seg)
   out_byte (0);			/* DW_LNS_set_prologue_end */
   out_byte (0);			/* DW_LNS_set_epilogue_begin */
   out_byte (1);			/* DW_LNS_set_isa */
-  if (opcode_base == DWARF2_EXPERIMENTAL_LINE_OPCODE_BASE)
+  if (opcode_base == DWARF5_EXPERIMENTAL_LINE_OPCODE_BASE)
     {
       out_byte (1);		/* DW_LNS_set_subprogram/DW_LNS_set_address_from_logical */
       out_byte (2);		/* DW_LNS_inlined_call */
       out_byte (0);		/* DW_LNS_pop_context */
     }
 
-  if (version >= 5)
-    out_dwarf5_file_list (str_seg, sizeof_offset);
-  else
-    out_file_list ();
-
-  if (version == DWARF2_LINE_EXPERIMENTAL_VERSION)
-    out_subprog_list (str_seg, sizeof_offset);
-
-  symbol_set_value_now (prologue_end);
-
   if (version == DWARF2_LINE_EXPERIMENTAL_VERSION)
     {
+      /* Fake empty version 4 directory and filename lists, to fool
+         old consumers who don't check the version number.  */
+      out_byte (0);
+      out_byte (0);
+
+      symbol_set_value_now (prologue_end);
+
+      /* Now wrap the remainder of the section inside a fake
+         extended opcode, so old consumers will see just the single
+         extended opcode, and will not try to read anything else.
+         For simplicity, we simply output a very large number for
+         the size of the extended op. */
+      out_opcode (DW_LNS_extended_op);
+      out_byte (255);  /* 3-byte LEB128 for 0x1fffff.  */
+      out_byte (255);
+      out_byte (127);
+      out_byte (127);  /* Fake extended opcode.  */
+
+      /* Logicals table offset.  */
+      logicals_start = symbol_temp_make ();
+      exp.X_add_symbol = logicals_start;
+      emit_expr (&exp, sizeof_offset);
+
+      /* Actuals table offset.  */
+      actuals_start = symbol_temp_make ();
+      exp.X_add_symbol = actuals_start;
+      emit_expr (&exp, sizeof_offset);
+
+      /* Directory and filename lists. */
+      out_dwarf5_file_list (str_seg, sizeof_offset);
+
+      /* Subprogram list. */
+      out_subprog_list (str_seg, sizeof_offset);
+
+      symbol_set_value_now (logicals_start);
       emit_logicals ();
       symbol_set_value_now (actuals_start);
+    }
+  else if (version >= 5)
+    {
+      out_dwarf5_file_list (str_seg, sizeof_offset);
+      symbol_set_value_now (prologue_end);
+    }
+  else
+    {
+      out_file_list ();
+      symbol_set_value_now (prologue_end);
     }
 
   /* For each section, emit a statement program.  */
