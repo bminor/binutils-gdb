@@ -43,7 +43,6 @@ typedef struct
   unsigned char  li_address_size;
   unsigned char  li_segment_size;
   unsigned int   li_prologue_length;
-  unsigned int   li_actuals_table_offset;
   unsigned char  li_min_insn_length;
   unsigned char  li_max_ops_per_insn;
   unsigned char  li_default_is_stmt;

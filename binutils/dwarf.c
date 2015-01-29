@@ -2826,19 +2826,13 @@ read_debug_line_header (struct dwarf_section * section,
       linfo->li_address_size = 0;
       linfo->li_segment_size = 0;
     }
-  else
+  else if (linfo->li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
     {
       SAFE_BYTE_GET_AND_INC (linfo->li_address_size, hdrptr, 1, end);
       SAFE_BYTE_GET_AND_INC (linfo->li_segment_size, hdrptr, 1, end);
     }
 
   SAFE_BYTE_GET_AND_INC (linfo->li_prologue_length, hdrptr, offset_size, end);
-
-  if (linfo->li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
-    linfo->li_actuals_table_offset = 0;
-  else
-    SAFE_BYTE_GET_AND_INC (linfo->li_actuals_table_offset, hdrptr,
-			   offset_size, end);
 
   SAFE_BYTE_GET_AND_INC (linfo->li_min_insn_length, hdrptr, 1, end);
 
@@ -3069,7 +3063,7 @@ display_line_program (unsigned char *start, unsigned char *end,
       return;
     }
 
-  printf ("%s:\n", table_name);
+  printf (" %s:\n", table_name);
 
   while (data < end)
     {
@@ -3348,6 +3342,8 @@ display_debug_lines_raw (struct dwarf_section *section,
     {
       static DWARF2_Internal_LineInfo saved_linfo;
       DWARF2_Internal_LineInfo linfo;
+      unsigned int logicals_table_offset = 0;
+      unsigned int actuals_table_offset = 0;
       unsigned char *end_of_header_length;
       unsigned char *standard_opcodes;
       unsigned char *start_of_line_program;
@@ -3395,14 +3391,13 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Offset:                      0x%lx\n"), (long)(data - start));
 	  printf (_("  Length:                      %ld\n"), (long) linfo.li_length);
 	  printf (_("  DWARF Version:               %d\n"), linfo.li_version);
-	  if (linfo.li_version >= 5)
+	  if (linfo.li_version >= 5 &&
+	      linfo.li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
 	    {
 	      printf (_("  Address Size:                %u\n"), linfo.li_address_size);
 	      printf (_("  Segment Size:                %u\n"), linfo.li_segment_size);
 	    }
 	  printf (_("  Prologue Length:             %d\n"), linfo.li_prologue_length);
-	  if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION)
-	    printf (_("  Actuals Table Offset:        0x%x\n"), linfo.li_actuals_table_offset);
 	  printf (_("  Minimum Instruction Length:  %d\n"), linfo.li_min_insn_length);
 	  if (linfo.li_version >= 4)
 	    printf (_("  Maximum Ops per Instruction: %d\n"), linfo.li_max_ops_per_insn);
@@ -3412,14 +3407,11 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Opcode Base:                 %d\n"), linfo.li_opcode_base);
 
 	  end_of_header_length = data + initial_length_size + 2 + offset_size;
-	  if (linfo.li_version >= 5)
+	  if (linfo.li_version >= 5 &&
+	      linfo.li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
 	    end_of_header_length += 2;
 	  start_of_line_program = end_of_header_length + linfo.li_prologue_length;
-	  if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION
-	      && linfo.li_actuals_table_offset > 0)
-	    end_of_logicals = end_of_header_length + linfo.li_actuals_table_offset;
-	  else
-	    end_of_logicals = end;
+	  end_of_logicals = end;
 
 	  /* PR 17512: file: 1665-6428-0.004.  */
 	  if (linfo.li_line_range == 0)
@@ -3446,6 +3438,29 @@ display_debug_lines_raw (struct dwarf_section *section,
 	    printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i - 1]);
 
 	  data = standard_opcodes + linfo.li_opcode_base - 1;
+
+	  if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION)
+	    {
+	      /* Skip the fake directory and filename table.  */
+	      data += 2;
+
+	      /* Skip the fake extended opcode that wraps the rest
+		 of the section.  */
+	      data += 5;
+
+	      /* Read the logicals table offset and actuals table offset.  */
+	      SAFE_BYTE_GET_AND_INC (logicals_table_offset, data, offset_size, end);
+	      SAFE_BYTE_GET_AND_INC (actuals_table_offset, data, offset_size, end);
+
+	      start_of_line_program = end_of_header_length + logicals_table_offset;
+
+	      if (actuals_table_offset > 0)
+		end_of_logicals = end_of_header_length + actuals_table_offset;
+
+	      putchar ('\n');
+	      printf (_("  Logicals Table Offset:       0x%x\n"), logicals_table_offset);
+	      printf (_("  Actuals Table Offset:        0x%x\n"), actuals_table_offset);
+	    }
 
 	  /* Display the contents of the Directory table.  */
 	  if (linfo.li_version >= 5)
@@ -3487,12 +3502,12 @@ display_debug_lines_raw (struct dwarf_section *section,
 
       if (linfo.li_version == DWARF2_LINE_EXPERIMENTAL_VERSION
           && hdrptr != NULL
-          && linfo.li_actuals_table_offset > 0)
+          && actuals_table_offset > 0)
         {
           if (end_of_logicals > end)
 	    {
 	      warn (_("Actuals table offset %s extends beyond end of section\n"),
-		    dwarf_vmatoa ("u", linfo.li_actuals_table_offset));
+		    dwarf_vmatoa ("u", actuals_table_offset));
 	      end_of_logicals = end;
 	    }
           display_line_program (start, end_of_logicals, &data,
