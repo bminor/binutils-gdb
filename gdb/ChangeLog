@@ -37,8 +37,9 @@
 	nonzero if the type's subtype is dynamic.
 	(resolve_dynamic_range): Also resolve the range's subtype.
 
-2015-01-29  Joel Brobecker  <brobecker@adacore.com>  (tiny patch)
+2015-01-29  Alexander Klimov  <alserkli@inbox.ru>  (tiny patch)
 
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
 	* symfile.c (unmap_overlay_command): Initialize sec to NULL.
 
 2015-01-27  Doug Evans  <dje@google.com>
