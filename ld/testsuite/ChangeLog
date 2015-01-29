@@ -1,3 +1,9 @@
+2015-01-29  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tlsld.d, * ld-powerpc/tlsld.s: New test.
+	* ld-powerpc/tlsld32.d, * ld-powerpc/tlsld32.s: New test.
+	* ld-powerpc/powerpc.exp: Run them.  Move tocvar and tocnovar.
+
 2015-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17878
