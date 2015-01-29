@@ -1,6 +1,10 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-01-29  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Correct GOT_TLSLD
+	and GOT_TLSGD to LE optimization.
+
 	2015-01-22  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (Target_powerpc::Scan::local <got relocs>): Correct
 	condition for need of ifunc plt entry.
