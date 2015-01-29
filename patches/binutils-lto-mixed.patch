@@ -764,10 +764,10 @@ index 1320ee1..538feb5 100644
 +  return name;
 +}
 diff --git a/bfd/plugin.c b/bfd/plugin.c
-index 94ed95b..bfab7ca 100644
+index 94ed95b..1a2aa22 100644
 --- a/bfd/plugin.c
 +++ b/bfd/plugin.c
-@@ -130,6 +130,139 @@ register_claim_file (ld_plugin_claim_file_handler handler)
+@@ -130,6 +130,146 @@ register_claim_file (ld_plugin_claim_file_handler handler)
    return LDPS_OK;
  }
  
@@ -795,11 +795,18 @@ index 94ed95b..bfab7ca 100644
 +  if (abfd->sections == NULL && abfd->my_archive == NULL)
 +    {
 +      nbfd = bfd_openr (abfd->filename, NULL);
-+      if (nbfd == NULL || !bfd_check_format (nbfd, bfd_object))
++      if (nbfd == NULL)
 +	{
 +	  (*_bfd_error_handler)
 +	    (_("%s: failed to open to extract object only section: %s"),
 +	     abfd->filename, bfd_errmsg (bfd_get_error ()));
++	  goto error_return;
++	}
++      else if (!bfd_check_format (nbfd, bfd_object))
++	{
++	  /* There is no object only section if it isn't a bfd_object
++	     file.  */
++error_return:
 +	  bfd_close (nbfd);
 +	  return;
 +	}
@@ -907,7 +914,7 @@ index 94ed95b..bfab7ca 100644
  static enum ld_plugin_status
  add_symbols (void * handle,
  	     int nsyms,
-@@ -142,10 +275,13 @@ add_symbols (void * handle,
+@@ -142,10 +282,13 @@ add_symbols (void * handle,
    plugin_data->nsyms = nsyms;
    plugin_data->syms = syms;
  
@@ -923,7 +930,7 @@ index 94ed95b..bfab7ca 100644
    return LDPS_OK;
  }
  
-@@ -391,7 +527,8 @@ static long
+@@ -391,7 +534,8 @@ static long
  bfd_plugin_get_symtab_upper_bound (bfd *abfd)
  {
    struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
@@ -933,7 +940,7 @@ index 94ed95b..bfab7ca 100644
  
    BFD_ASSERT (nsyms >= 0);
  
-@@ -425,12 +562,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -425,12 +569,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
    struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
    long nsyms = plugin_data->nsyms;
    const struct ld_plugin_symbol *syms = plugin_data->syms;
@@ -947,7 +954,7 @@ index 94ed95b..bfab7ca 100644
  
    for (i = 0; i < nsyms; i++)
      {
-@@ -443,10 +575,11 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -443,10 +582,11 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
        s->name = syms[i].name;
        s->value = 0;
        s->flags = convert_flags (&syms[i]);
@@ -960,7 +967,7 @@ index 94ed95b..bfab7ca 100644
  	  break;
  	case LDPK_UNDEF:
  	case LDPK_WEAKUNDEF:
-@@ -454,15 +587,18 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -454,15 +594,18 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
  	  break;
  	case LDPK_DEF:
  	case LDPK_WEAKDEF:
@@ -1430,7 +1437,7 @@ index 10fcf3d..4eec185 100644
  
  #endif
 diff --git a/ld/ldfile.c b/ld/ldfile.c
-index f33bc9d..aa312a1 100644
+index c9c9541..a9414f1 100644
 --- a/ld/ldfile.c
 +++ b/ld/ldfile.c
 @@ -317,7 +317,9 @@ success:
@@ -1444,7 +1451,7 @@ index f33bc9d..aa312a1 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index 3a4257c..f97bec4 100644
+index 5c4581f..a9b2888 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -2596,7 +2603,7 @@ index be7f653..725175d 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index a6207c6..df9a48b 100644
+index 86f02a6..9c57b45 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -220,6 +220,9 @@ main (int argc, char **argv)
@@ -2769,7 +2776,7 @@ index e23f1e7..40c796a 100644
  	case 'q':
  	  link_info.emitrelocations = TRUE;
 diff --git a/ld/plugin.c b/ld/plugin.c
-index f6f85ba..cfd8672 100644
+index cfbca0b..4f24785 100644
 --- a/ld/plugin.c
 +++ b/ld/plugin.c
 @@ -39,6 +39,9 @@
@@ -2782,7 +2789,7 @@ index f6f85ba..cfd8672 100644
  /* The suffix to append to the name of the real (claimed) object file
     when generating a dummy BFD to hold the IR symbols sent from the
     plugin.  For cosmetic use only; appears in maps, crefs etc.  */
-@@ -882,6 +885,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
+@@ -891,6 +894,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
    close (file->fd);
    if (claimed)
      {
@@ -2792,7 +2799,7 @@ index f6f85ba..cfd8672 100644
        /* Discard the real file's BFD and substitute the dummy one.  */
  
        /* BFD archive handling caches elements so we can't call
-@@ -935,14 +941,17 @@ plugin_call_cleanup (void)
+@@ -944,14 +950,17 @@ plugin_call_cleanup (void)
      {
        if (curplug->cleanup_handler && !curplug->cleanup_done)
  	{
@@ -2819,7 +2826,7 @@ index f6f85ba..cfd8672 100644
  	}
        curplug = curplug->next;
 diff --git a/ld/plugin.h b/ld/plugin.h
-index 82cf162..de81129 100644
+index 15532cd..887a3ef 100644
 --- a/ld/plugin.h
 +++ b/ld/plugin.h
 @@ -24,6 +24,9 @@
