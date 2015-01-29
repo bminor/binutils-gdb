@@ -2270,7 +2270,8 @@ retry_dot:
   pinsn->opcode = opc;
   if (opc == NULL)
     {
-      pdesc->result = NASM_ERR_SYNTAX;
+      if (pdesc->result == NASM_OK)
+	pdesc->result = NASM_ERR_SYNTAX;
       goto out;
     }
 
