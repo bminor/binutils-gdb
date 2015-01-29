@@ -3092,8 +3092,6 @@ static const uint32_t addi_11_11	= 0x396b0000;
 static const uint32_t addi_12_12	= 0x398c0000;
 static const uint32_t addis_0_2		= 0x3c020000;
 static const uint32_t addis_0_13	= 0x3c0d0000;
-static const uint32_t addis_3_2		= 0x3c620000;
-static const uint32_t addis_3_13	= 0x3c6d0000;
 static const uint32_t addis_11_2	= 0x3d620000;
 static const uint32_t addis_11_11	= 0x3d6b0000;
 static const uint32_t addis_11_30	= 0x3d7e0000;
@@ -6921,9 +6919,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_LO)
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
-	      Insn insn = addis_3_13;
+	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      insn &= (1 << 26) - (1 << 21); // extract rt
 	      if (size == 32)
-		insn = addis_3_2;
+		insn |= addis_0_2;
+	      else
+		insn |= addis_0_13;
 	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	      r_type = elfcpp::R_POWERPC_TPREL16_HA;
 	      value = psymval->value(object, rela.get_r_addend());
@@ -6956,9 +6957,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_LO)
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
-	      Insn insn = addis_3_13;
+	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      insn &= (1 << 26) - (1 << 21); // extract rt
 	      if (size == 32)
-		insn = addis_3_2;
+		insn |= addis_0_2;
+	      else
+		insn |= addis_0_13;
 	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	      r_type = elfcpp::R_POWERPC_TPREL16_HA;
 	      value = dtp_offset;
