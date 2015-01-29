@@ -17117,6 +17117,8 @@ get_debug_line_section (struct dwarf2_cu *cu)
 /* Read the statement program header starting at OFFSET in
    .debug_line, or .debug_line.dwo.  Return a pointer
    to a struct line_header, allocated using xmalloc.
+   Returns NULL if there is a problem reading the header, e.g., if it
+   has a version we don't understand.
 
    NOTE: the strings in the include directory and file name tables of
    the returned object point into the dwarf line section buffer,
@@ -17181,6 +17183,14 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   lh->statement_program_end = line_ptr + lh->total_length;
   lh->version = read_2_bytes (abfd, line_ptr);
   line_ptr += 2;
+  if (lh->version > 4)
+    {
+      /* This is a version we don't understand.  The format could have
+	 changed in ways we don't handle properly so just punt.  */
+      complaint (&symfile_complaints,
+		 _("unsupported version in .debug_line section"));
+      return NULL;
+    }
   lh->header_length = read_offset_1 (abfd, line_ptr, offset_size);
   line_ptr += offset_size;
   lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
