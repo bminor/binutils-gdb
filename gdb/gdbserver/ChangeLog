@@ -1,3 +1,8 @@
+2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* linux-low.c (linux_low_enable_btrace): Do not overwrite non-zero
+	ptr_bits.
+
 2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* Makefile.in (s390-vx-linux64.c, s390-tevx-linux64.c)

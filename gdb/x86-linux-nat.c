@@ -450,9 +450,11 @@ x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid,
 	   target_pid_to_str (ptid), safe_strerror (errno));
 
   /* Fill in the size of a pointer in bits.  */
-  gdbarch = target_thread_architecture (ptid);
-  tinfo->ptr_bits = gdbarch_ptr_bit (gdbarch);
-
+  if (tinfo->ptr_bits == 0)
+    {
+      gdbarch = target_thread_architecture (ptid);
+      tinfo->ptr_bits = gdbarch_ptr_bit (gdbarch);
+    }
   return tinfo;
 }
 

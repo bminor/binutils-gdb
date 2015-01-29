@@ -5956,7 +5956,7 @@ linux_low_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 
   tinfo = linux_enable_btrace (ptid, conf);
 
-  if (tinfo != NULL)
+  if (tinfo != NULL && tinfo->ptr_bits == 0)
     {
       struct thread_info *thread = find_thread_ptid (ptid);
       struct regcache *regcache = get_thread_regcache (thread, 0);

@@ -1,5 +1,13 @@
 2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* nat/linux-btrace.c: Include sys/utsname.h.
+	(linux_determine_kernel_ptr_bits): New.
+	(linux_enable_bts): Call linux_determine_kernel_ptr_bits.
+	* x86-linux-nat.c (x86_linux_enable_btrace): Do not overwrite non-zero
+	ptr_bits.
+
+2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (ftrace_update_function): Treat return as tailcall for
 	"_dl_runtime_resolve".
 
