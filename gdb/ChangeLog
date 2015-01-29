@@ -1,3 +1,8 @@
+2015-01-29  Doug Evans  <dje@google.com>
+
+	PR symtab/17890
+	* dwarf2read.c (dwarf_decode_line_header): Punt if version > 4.
+
 2015-01-25  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2read.c (checkproducer): Call producer_is_gcc.
