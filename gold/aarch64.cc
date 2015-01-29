@@ -3082,7 +3082,7 @@ class Output_data_plt_aarch64 : public Output_section_data
   // The number of PLT entries.
   unsigned int count_;
 
-  // Number of PLT entries with R_X86_64_IRELATIVE relocs.  These
+  // Number of PLT entries with R_AARCH64_IRELATIVE relocs.  These
   // follow the regular PLT entries.
   unsigned int irelative_count_;
 

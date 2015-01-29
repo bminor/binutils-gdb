@@ -192,11 +192,12 @@ enum
   R_ARM_PRIVATE_14 = 126,
   R_ARM_PRIVATE_15 = 127,
   R_ARM_ME_TOO = 128,		// Obsolete
-  R_ARM_THM_TLS_DESCSEQ16 = 129,// Static	Thumb16	
+  R_ARM_THM_TLS_DESCSEQ16 = 129,// Static	Thumb16
   R_ARM_THM_TLS_DESCSEQ32 = 130,// Static	Thumb32
   // 131 - 139			Unallocated
   // 140 - 159			Dynamic		Reserved for future allocation
-  // 160 - 255			Unallocated
+  R_ARM_IRELATIVE = 160,	// Dynamic
+  // 161 - 255			Unallocated
 };
 
 // e_flags values used for ARM.  We only support flags defined in AAELF.

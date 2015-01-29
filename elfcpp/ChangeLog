@@ -1,3 +1,7 @@
+2015-01-22  Han Shen  <shenhan@google.com>
+
+	* arm.h (R_ARM_IRELATIVE): New dynamic relocation.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
