@@ -9042,12 +9042,6 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 		    asection *tls_sec = elf_hash_table (flinfo->info)->tls_sec;
 		    if (tls_sec != NULL)
 		      sym.st_value -= tls_sec->vma;
-		    else
-		      {
-			/* The TLS section may have been garbage collected.  */
-			BFD_ASSERT (flinfo->info->gc_sections
-				    && !input_sec->gc_mark);
-		      }
 		  }
 	      }
 	  }
