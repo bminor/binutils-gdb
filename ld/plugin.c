@@ -791,14 +791,6 @@ set_tv_plugin_args (plugin_t *plugin, struct ld_plugin_tv *tv)
   tv->tv_u.tv_val = 0;
 }
 
-/* Return true if any plugins are active this run.  Only valid
-   after options have been processed.  */
-bfd_boolean
-plugin_active_plugins_p (void)
-{
-  return plugins_list != NULL;
-}
-
 /* Load up and initialise all plugins after argument parsing.  */
 void
 plugin_load_plugins (void)

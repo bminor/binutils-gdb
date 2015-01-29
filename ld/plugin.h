@@ -39,10 +39,6 @@ extern void plugin_opt_plugin (const char *plugin);
    error if none.  */
 extern int plugin_opt_plugin_arg (const char *arg);
 
-/* Return true if any plugins are active this run.  Only valid
-   after options have been processed.  */
-extern bfd_boolean plugin_active_plugins_p (void);
-
 /* Load up and initialise all plugins after argument parsing.  */
 extern void plugin_load_plugins (void);
 
