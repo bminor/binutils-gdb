@@ -1,6 +1,12 @@
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-01-29  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_relocate_section): Correct GOT_TLSLD
+	optimization.  Tidy mask for GOT_TLSGD optimization.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.  Correct
+	location of nop zapping high insn too.
+
 	2015-01-20  Alan Modra  <amodra@gmail.com>
 	PR ld/17615
 	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref): Don't drop

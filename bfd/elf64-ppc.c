@@ -13406,12 +13406,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 					      htab->tls_get_addr,
 					      htab->tls_get_addr_fd))
 		offset = rel[1].r_offset;
+	      /* We read the low GOT_TLS (or TOC16) insn because we
+		 need to keep the destination reg.  It may be
+		 something other than the usual r3, and moved to r3
+		 before the call by intervening code.  */
+	      insn1 = bfd_get_32 (output_bfd,
+				  contents + rel->r_offset - d_offset);
 	      if ((tls_mask & tls_gd) != 0)
 		{
 		  /* IE */
-		  insn1 = bfd_get_32 (output_bfd,
-				      contents + rel->r_offset - d_offset);
-		  insn1 &= (1 << 26) - (1 << 2);
+		  insn1 &= (0x1f << 21) | (0x1f << 16);
 		  insn1 |= 58 << 26;	/* ld */
 		  insn2 = 0x7c636a14;	/* add 3,3,13 */
 		  if (offset != (bfd_vma) -1)
@@ -13426,7 +13430,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  /* LE */
-		  insn1 = 0x3c6d0000;	/* addis 3,13,0 */
+		  insn1 &= 0x1f << 21;
+		  insn1 |= 0x3c0d0000;	/* addis r,13,0 */
 		  insn2 = 0x38630000;	/* addi 3,3,0 */
 		  if (tls_gd == 0)
 		    {

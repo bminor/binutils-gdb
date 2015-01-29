@@ -7754,8 +7754,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  + R_PPC_GOT_TPREL16);
 	      else
 		{
-		  bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
 		  rel->r_offset -= d_offset;
+		  bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
 		  r_type = R_PPC_NONE;
 		}
 	      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
@@ -7788,12 +7788,16 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  && branch_reloc_hash_match (input_bfd, rel + 1,
 					      htab->tls_get_addr))
 		offset = rel[1].r_offset;
+	      /* We read the low GOT_TLS insn because we need to keep
+		 the destination reg.  It may be something other than
+		 the usual r3, and moved to r3 before the call by
+		 intervening code.  */
+	      insn1 = bfd_get_32 (output_bfd,
+				  contents + rel->r_offset - d_offset);
 	      if ((tls_mask & tls_gd) != 0)
 		{
 		  /* IE */
-		  insn1 = bfd_get_32 (output_bfd,
-				      contents + rel->r_offset - d_offset);
-		  insn1 &= (1 << 26) - 1;
+		  insn1 &= (0x1f << 21) | (0x1f << 16);
 		  insn1 |= 32 << 26;	/* lwz */
 		  if (offset != (bfd_vma) -1)
 		    {
@@ -7808,7 +7812,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  /* LE */
-		  insn1 = 0x3c620000;	/* addis 3,2,0 */
+		  insn1 &= 0x1f << 21;
+		  insn1 |= 0x3c020000;	/* addis r,2,0 */
 		  if (tls_gd == 0)
 		    {
 		      /* Was an LD reloc.  */
