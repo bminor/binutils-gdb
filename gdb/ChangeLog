@@ -1,5 +1,58 @@
 2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* ada-varobj.c (ada_number_of_children): Constify struct varobj *
+	parameter.
+	(ada_name_of_variable): Same.
+	(ada_path_expr_of_child): Same.
+	(ada_value_of_variable): Same.
+	(ada_value_is_changeable_p): Same.
+	(ada_value_has_mutated): Same.
+	* c-varobj.c (varobj_is_anonymous_child): Same.
+	(c_is_path_expr_parent): Same.
+	(c_number_of_children): Same.
+	(c_name_of_variable): Same.
+	(c_path_expr_of_child): Same.
+	(get_type): Same.
+	(c_value_of_variable): Same.
+	(cplus_number_of_children): Same.
+	(cplus_name_of_variable): Same.
+	(cplus_path_expr_of_child): Same.
+	(cplus_value_of_variable): Same.
+	* jv-varobj.c (java_number_of_children): Same.
+	(java_name_of_variable): Same.
+	(java_path_expr_of_child): Same.
+	(java_value_of_variable): Same.
+	* varobj.c (number_of_children): Same.
+	(name_of_variable): Same.
+	(is_root_p): Same.
+	(varobj_ensure_python_env): Same.
+	(varobj_get_objname): Same.
+	(varobj_get_expression): Same.
+	(varobj_get_display_format): Same.
+	(varobj_get_display_hint): Same.
+	(varobj_has_more): Same.
+	(varobj_get_thread_id): Same.
+	(varobj_get_frozen): Same.
+	(dynamic_varobj_has_child_method): Same.
+	(varobj_get_gdb_type): Same.
+	(is_path_expr_parent): Same.
+	(varobj_default_is_path_expr_parent): Same.
+	(varobj_get_language): Same.
+	(varobj_get_attributes): Same.
+	(varobj_is_dynamic_p): Same.
+	(varobj_get_child_range): Same.
+	(varobj_value_has_mutated): Same.
+	(varobj_get_value_type): Same.
+	(number_of_children): Same.
+	(name_of_variable): Same.
+	(check_scope): Same.
+	(varobj_editable_p): Same.
+	(varobj_value_is_changeable_p): Same.
+	(varobj_floating_p): Same.
+	(varobj_default_value_is_changeable_p): Same.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* varobj.c (varobj_get_path_expr): Set var->path_expr.
 	* c-varobj.c (c_path_expr_of_child): Set local var instead of
 	child->path_expr.

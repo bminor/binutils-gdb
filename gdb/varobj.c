@@ -193,9 +193,9 @@ static int install_new_value (struct varobj *var, struct value *value,
 
 /* Language-specific routines.  */
 
-static int number_of_children (struct varobj *);
+static int number_of_children (const struct varobj *);
 
-static char *name_of_variable (struct varobj *);
+static char *name_of_variable (const struct varobj *);
 
 static char *name_of_child (struct varobj *, int);
 
@@ -206,7 +206,7 @@ static struct value *value_of_child (struct varobj *parent, int index);
 static char *my_value_of_variable (struct varobj *var,
 				   enum varobj_display_formats format);
 
-static int is_root_p (struct varobj *var);
+static int is_root_p (const struct varobj *var);
 
 static struct varobj *varobj_add_child (struct varobj *var,
 					struct varobj_item *item);
@@ -230,7 +230,7 @@ static struct vlist **varobj_table;
 
 /* API Implementation */
 static int
-is_root_p (struct varobj *var)
+is_root_p (const struct varobj *var)
 {
   return (var->root->rootvar == var);
 }
@@ -239,7 +239,7 @@ is_root_p (struct varobj *var)
 /* Helper function to install a Python environment suitable for
    use during operations on VAR.  */
 struct cleanup *
-varobj_ensure_python_env (struct varobj *var)
+varobj_ensure_python_env (const struct varobj *var)
 {
   return ensure_python_env (var->root->exp->gdbarch,
 			    var->root->exp->language_defn);
@@ -487,7 +487,7 @@ varobj_get_handle (char *objname)
 /* Given the handle, return the name of the object.  */
 
 char *
-varobj_get_objname (struct varobj *var)
+varobj_get_objname (const struct varobj *var)
 {
   return var->obj_name;
 }
@@ -496,7 +496,7 @@ varobj_get_objname (struct varobj *var)
    result must be freed by the caller.  */
 
 char *
-varobj_get_expression (struct varobj *var)
+varobj_get_expression (const struct varobj *var)
 {
   return name_of_variable (var);
 }
@@ -600,13 +600,13 @@ varobj_set_display_format (struct varobj *var,
 }
 
 enum varobj_display_formats
-varobj_get_display_format (struct varobj *var)
+varobj_get_display_format (const struct varobj *var)
 {
   return var->format;
 }
 
 char *
-varobj_get_display_hint (struct varobj *var)
+varobj_get_display_hint (const struct varobj *var)
 {
   char *result = NULL;
 
@@ -630,7 +630,7 @@ varobj_get_display_hint (struct varobj *var)
 /* Return true if the varobj has items after TO, false otherwise.  */
 
 int
-varobj_has_more (struct varobj *var, int to)
+varobj_has_more (const struct varobj *var, int to)
 {
   if (VEC_length (varobj_p, var->children) > to)
     return 1;
@@ -643,7 +643,7 @@ varobj_has_more (struct varobj *var, int to)
    inside that thread, returns GDB id of the thread -- which
    is always positive.  Otherwise, returns -1.  */
 int
-varobj_get_thread_id (struct varobj *var)
+varobj_get_thread_id (const struct varobj *var)
 {
   if (var->root->valid_block && var->root->thread_id > 0)
     return var->root->thread_id;
@@ -665,7 +665,7 @@ varobj_set_frozen (struct varobj *var, int frozen)
 }
 
 int
-varobj_get_frozen (struct varobj *var)
+varobj_get_frozen (const struct varobj *var)
 {
   return var->frozen;
 }
@@ -741,7 +741,7 @@ install_dynamic_child (struct varobj *var,
 #if HAVE_PYTHON
 
 static int
-dynamic_varobj_has_child_method (struct varobj *var)
+dynamic_varobj_has_child_method (const struct varobj *var)
 {
   struct cleanup *back_to;
   PyObject *printer = var->dynamic->pretty_printer;
@@ -991,7 +991,7 @@ varobj_get_type (struct varobj *var)
 /* Obtain the type of an object variable.  */
 
 struct type *
-varobj_get_gdb_type (struct varobj *var)
+varobj_get_gdb_type (const struct varobj *var)
 {
   return var->type;
 }
@@ -1000,7 +1000,7 @@ varobj_get_gdb_type (struct varobj *var)
    a valid path expression?  */
 
 static int
-is_path_expr_parent (struct varobj *var)
+is_path_expr_parent (const struct varobj *var)
 {
   gdb_assert (var->root->lang_ops->is_path_expr_parent != NULL);
   return var->root->lang_ops->is_path_expr_parent (var);
@@ -1011,7 +1011,7 @@ is_path_expr_parent (struct varobj *var)
    parent.  */
 
 int
-varobj_default_is_path_expr_parent (struct varobj *var)
+varobj_default_is_path_expr_parent (const struct varobj *var)
 {
   return 1;
 }
@@ -1048,13 +1048,13 @@ varobj_get_path_expr (struct varobj *var)
 }
 
 const struct language_defn *
-varobj_get_language (struct varobj *var)
+varobj_get_language (const struct varobj *var)
 {
   return var->root->exp->language_defn;
 }
 
 int
-varobj_get_attributes (struct varobj *var)
+varobj_get_attributes (const struct varobj *var)
 {
   int attributes = 0;
 
@@ -1068,7 +1068,7 @@ varobj_get_attributes (struct varobj *var)
 /* Return true if VAR is a dynamic varobj.  */
 
 int
-varobj_is_dynamic_p (struct varobj *var)
+varobj_is_dynamic_p (const struct varobj *var)
 {
   return var->dynamic->pretty_printer != NULL;
 }
@@ -1517,7 +1517,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
    selected sub-range of VAR.  If no range was selected using
    -var-set-update-range, then both will be -1.  */
 void
-varobj_get_child_range (struct varobj *var, int *from, int *to)
+varobj_get_child_range (const struct varobj *var, int *from, int *to)
 {
   *from = var->from;
   *to = var->to;
@@ -1579,7 +1579,7 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
    NEW_VALUE may be NULL, if the varobj is now out of scope.  */
 
 static int
-varobj_value_has_mutated (struct varobj *var, struct value *new_value,
+varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
 			  struct type *new_type)
 {
   /* If we haven't previously computed the number of children in var,
@@ -2209,7 +2209,7 @@ make_cleanup_free_variable (struct varobj *var)
 
    For example, top-level references are always stripped.  */
 struct type *
-varobj_get_value_type (struct varobj *var)
+varobj_get_value_type (const struct varobj *var)
 {
   struct type *type;
 
@@ -2278,7 +2278,7 @@ cppop (struct cpstack **pstack)
    is the number of children that the user will see in the variable
    display.  */
 static int
-number_of_children (struct varobj *var)
+number_of_children (const struct varobj *var)
 {
   return (*var->root->lang_ops->number_of_children) (var);
 }
@@ -2286,7 +2286,7 @@ number_of_children (struct varobj *var)
 /* What is the expression for the root varobj VAR? Returns a malloc'd
    string.  */
 static char *
-name_of_variable (struct varobj *var)
+name_of_variable (const struct varobj *var)
 {
   return (*var->root->lang_ops->name_of_variable) (var);
 }
@@ -2303,7 +2303,7 @@ name_of_child (struct varobj *var, int index)
    to it and return 1.  Otherwise, return 0.  */
 
 static int
-check_scope (struct varobj *var)
+check_scope (const struct varobj *var)
 {
   struct frame_info *fi;
   int scope;
@@ -2514,7 +2514,7 @@ varobj_formatted_print_options (struct value_print_options *opts,
 char *
 varobj_value_get_print_value (struct value *value,
 			      enum varobj_display_formats format,
-			      struct varobj *var)
+			      const struct varobj *var)
 {
   struct ui_file *stb;
   struct cleanup *old_chain;
@@ -2645,7 +2645,7 @@ varobj_value_get_print_value (struct value *value,
 }
 
 int
-varobj_editable_p (struct varobj *var)
+varobj_editable_p (const struct varobj *var)
 {
   struct type *type;
 
@@ -2673,7 +2673,7 @@ varobj_editable_p (struct varobj *var)
 /* Call VAR's value_is_changeable_p language-specific callback.  */
 
 int
-varobj_value_is_changeable_p (struct varobj *var)
+varobj_value_is_changeable_p (const struct varobj *var)
 {
   return var->root->lang_ops->value_is_changeable_p (var);
 }
@@ -2682,7 +2682,7 @@ varobj_value_is_changeable_p (struct varobj *var)
    selected frame, and not bound to thread/frame.  Such variable objects
    are created using '@' as frame specifier to -var-create.  */
 int
-varobj_floating_p (struct varobj *var)
+varobj_floating_p (const struct varobj *var)
 {
   return var->root->floating;
 }
@@ -2691,7 +2691,7 @@ varobj_floating_p (struct varobj *var)
    languages.  */
 
 int
-varobj_default_value_is_changeable_p (struct varobj *var)
+varobj_default_value_is_changeable_p (const struct varobj *var)
 {
   int r;
   struct type *type;

@@ -35,7 +35,7 @@ static void cplus_class_num_children (struct type *type, int children[3]);
    thing to do is to compare the child's name with ANONYMOUS_*_NAME.  */
 
 int
-varobj_is_anonymous_child (struct varobj *child)
+varobj_is_anonymous_child (const struct varobj *child)
 {
   return (strcmp (child->name, ANONYMOUS_STRUCT_NAME) == 0
 	  || strcmp (child->name, ANONYMOUS_UNION_NAME) == 0);
@@ -130,7 +130,7 @@ adjust_value_for_child_access (struct value **value,
    a valid path expression?  */
 
 static int
-c_is_path_expr_parent (struct varobj *var)
+c_is_path_expr_parent (const struct varobj *var)
 {
   struct type *type;
 
@@ -179,7 +179,7 @@ c_is_path_expr_parent (struct varobj *var)
 /* C */
 
 static int
-c_number_of_children (struct varobj *var)
+c_number_of_children (const struct varobj *var)
 {
   struct type *type = varobj_get_value_type (var);
   int children = 0;
@@ -230,7 +230,7 @@ c_number_of_children (struct varobj *var)
 }
 
 static char *
-c_name_of_variable (struct varobj *parent)
+c_name_of_variable (const struct varobj *parent)
 {
   return xstrdup (parent->name);
 }
@@ -431,7 +431,7 @@ c_name_of_child (struct varobj *parent, int index)
 }
 
 static char *
-c_path_expr_of_child (struct varobj *child)
+c_path_expr_of_child (const struct varobj *child)
 {
   char *path_expr;
 
@@ -462,7 +462,7 @@ c_type_of_child (struct varobj *parent, int index)
    to return the real type of the variable.  */
 
 static struct type *
-get_type (struct varobj *var)
+get_type (const struct varobj *var)
 {
   struct type *type;
 
@@ -474,7 +474,8 @@ get_type (struct varobj *var)
 }
 
 static char *
-c_value_of_variable (struct varobj *var, enum varobj_display_formats format)
+c_value_of_variable (const struct varobj *var,
+		     enum varobj_display_formats format)
 {
   /* BOGUS: if val_print sees a struct/class, or a reference to one,
      it will print out its children instead of "{...}".  So we need to
@@ -558,7 +559,7 @@ enum vsections
 /* C++ */
 
 static int
-cplus_number_of_children (struct varobj *var)
+cplus_number_of_children (const struct varobj *var)
 {
   struct value *value = NULL;
   struct type *type;
@@ -671,7 +672,7 @@ cplus_class_num_children (struct type *type, int children[3])
 }
 
 static char *
-cplus_name_of_variable (struct varobj *parent)
+cplus_name_of_variable (const struct varobj *parent)
 {
   return c_name_of_variable (parent);
 }
@@ -906,7 +907,7 @@ cplus_name_of_child (struct varobj *parent, int index)
 }
 
 static char *
-cplus_path_expr_of_child (struct varobj *child)
+cplus_path_expr_of_child (const struct varobj *child)
 {
   char *path_expr;
 
@@ -934,7 +935,7 @@ cplus_type_of_child (struct varobj *parent, int index)
 }
 
 static char *
-cplus_value_of_variable (struct varobj *var, 
+cplus_value_of_variable (const struct varobj *var,
 			 enum varobj_display_formats format)
 {
 
