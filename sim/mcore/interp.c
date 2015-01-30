@@ -2143,6 +2143,7 @@ sim_do_command (sd, cmd)
 	  if ((simargv[1] == NULL) || (simargv[2] == NULL))
 	    {
 	      fprintf (stderr, "Error: missing argument to watch cmd.\n");
+	      freeargv (simargv);
 	      return;
 	    }
 	  
@@ -2187,6 +2188,8 @@ sim_do_command (sd, cmd)
 	  fprintf (stderr,"Error: \"%s\" is not a valid M.CORE simulator command.\n",
 		   cmd);
 	}
+
+      freeargv (simargv);
     }
   else
     {
