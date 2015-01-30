@@ -1019,6 +1019,7 @@ sim_do_command (SIM_DESC sd, const char *cmd)
 	  if ((simargv[1] == NULL) || (simargv[2] == NULL))
 	    {
 	      fprintf (stderr, "Error: missing argument to watch cmd.\n");
+	      freeargv (simargv);
 	      return;
 	    }
 
@@ -1062,6 +1063,8 @@ sim_do_command (SIM_DESC sd, const char *cmd)
 	  fprintf (stderr,"Error: \"%s\" is not a valid M.CORE simulator command.\n",
 		   cmd);
 	}
+
+      freeargv (simargv);
     }
   else
     {

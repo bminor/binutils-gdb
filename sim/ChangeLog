@@ -1,5 +1,10 @@
 2015-02-02  Chen Gang <gang.chen.5i5j@gmail.com>
 
+	* microblaze/interp.c (sim_do_command): Call freeargv() before
+	return.
+
+2015-02-02  Chen Gang <gang.chen.5i5j@gmail.com>
+
 	* mcore/interp.c (sim_do_command): Call freeargv() before return.
 
 2015-02-02  Chen Gang <gang.chen.5i5j@gmail.com>
