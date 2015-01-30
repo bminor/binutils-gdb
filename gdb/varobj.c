@@ -972,7 +972,8 @@ varobj_add_child (struct varobj *var, struct varobj_item *item)
 }
 
 /* Obtain the type of an object Variable as a string similar to the one gdb
-   prints on the console.  */
+   prints on the console.  The caller is responsible for freeing the string.
+   */
 
 char *
 varobj_get_type (struct varobj *var)
@@ -1289,11 +1290,16 @@ update_type_if_necessary (struct varobj *var, struct value *new_value)
 	{
 	  struct type *new_type;
 	  char *curr_type_str, *new_type_str;
+	  int type_name_changed;
 
 	  new_type = value_actual_type (new_value, 0, 0);
 	  new_type_str = type_to_string (new_type);
 	  curr_type_str = varobj_get_type (var);
-	  if (strcmp (curr_type_str, new_type_str) != 0)
+	  type_name_changed = strcmp (curr_type_str, new_type_str) != 0;
+	  xfree (curr_type_str);
+	  xfree (new_type_str);
+
+	  if (type_name_changed)
 	    {
 	      var->type = new_type;
 

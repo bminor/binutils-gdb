@@ -447,14 +447,18 @@ mi_cmd_var_info_type (char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
+  char *type_name;
 
   if (argc != 1)
     error (_("-var-info-type: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified.  */
   var = varobj_get_handle (argv[0]);
+  type_name = varobj_get_type (var);
 
-  ui_out_field_string (uiout, "type", varobj_get_type (var));
+  ui_out_field_string (uiout, "type", type_name);
+
+  xfree (type_name);
 }
 
 void
@@ -765,7 +769,12 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	}
 
       if (r->type_changed)
-	ui_out_field_string (uiout, "new_type", varobj_get_type (r->varobj));
+	{
+	  char *type_name = varobj_get_type (r->varobj);
+
+	  ui_out_field_string (uiout, "new_type", type_name);
+	  xfree (type_name);
+	}
 
       if (r->type_changed || r->children_changed)
 	ui_out_field_int (uiout, "new_num_children", 

@@ -1,3 +1,13 @@
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_info_type): Free result of
+	varobj_get_type.
+	(varobj_update_one): Same.
+	* varobj.c (update_type_if_necessary): Free curr_type_str and
+	new_type_str.
+	(varobj_get_type): Specify in comment that the result needs to be
+	freed by the caller.
+
 2015-01-29  Doug Evans  <dje@google.com>
 
 	PR symtab/17890
