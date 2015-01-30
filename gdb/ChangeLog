@@ -1,5 +1,13 @@
 2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* mi-cmd-var.c (print_varobj): Free varobj_get_expression
+	result.
+	(mi_cmd_var_info_expression): Same.
+	* varobj.c (varobj_get_expression): Mention in the comment that
+	the result must by freed by the caller.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* mi/mi-cmd-var.c (mi_cmd_var_info_type): Free result of
 	varobj_get_type.
 	(varobj_update_one): Same.

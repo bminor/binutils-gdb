@@ -492,7 +492,8 @@ varobj_get_objname (struct varobj *var)
   return var->obj_name;
 }
 
-/* Given the handle, return the expression represented by the object.  */
+/* Given the handle, return the expression represented by the object.  The
+   result must be freed by the caller.  */
 
 char *
 varobj_get_expression (struct varobj *var)
