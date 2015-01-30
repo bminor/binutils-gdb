@@ -2682,21 +2682,27 @@ ada_value_assign (struct value *toval, struct value *fromval)
 }
 
 
-/* Given that COMPONENT is a memory lvalue that is part of the lvalue 
- * CONTAINER, assign the contents of VAL to COMPONENTS's place in 
- * CONTAINER.  Modifies the VALUE_CONTENTS of CONTAINER only, not 
- * COMPONENT, and not the inferior's memory.  The current contents 
- * of COMPONENT are ignored.  */
+/* Given that COMPONENT is a memory lvalue that is part of the lvalue
+   CONTAINER, assign the contents of VAL to COMPONENTS's place in
+   CONTAINER.  Modifies the VALUE_CONTENTS of CONTAINER only, not
+   COMPONENT, and not the inferior's memory.  The current contents
+   of COMPONENT are ignored.
+
+   Although not part of the initial design, this function also works
+   when CONTAINER and COMPONENT are not_lval's: it works as if CONTAINER
+   had a null address, and COMPONENT had an address which is equal to
+   its offset inside CONTAINER.  */
+
 static void
 value_assign_to_component (struct value *container, struct value *component,
 			   struct value *val)
 {
   LONGEST offset_in_container =
     (LONGEST)  (value_address (component) - value_address (container));
-  int bit_offset_in_container = 
+  int bit_offset_in_container =
     value_bitpos (component) - value_bitpos (container);
   int bits;
-  
+
   val = value_cast (value_type (component), val);
 
   if (value_bitsize (component) == 0)
@@ -2705,17 +2711,17 @@ value_assign_to_component (struct value *container, struct value *component,
     bits = value_bitsize (component);
 
   if (gdbarch_bits_big_endian (get_type_arch (value_type (container))))
-    move_bits (value_contents_writeable (container) + offset_in_container, 
+    move_bits (value_contents_writeable (container) + offset_in_container,
 	       value_bitpos (container) + bit_offset_in_container,
 	       value_contents (val),
 	       TYPE_LENGTH (value_type (component)) * TARGET_CHAR_BIT - bits,
 	       bits, 1);
   else
-    move_bits (value_contents_writeable (container) + offset_in_container, 
+    move_bits (value_contents_writeable (container) + offset_in_container,
 	       value_bitpos (container) + bit_offset_in_container,
 	       value_contents (val), 0, bits, 0);
-}	       
-			
+}
+
 /* The value of the element of array ARR at the ARITY indices given in IND.
    ARR may be either a simple array, GNAT array descriptor, or pointer
    thereto.  */

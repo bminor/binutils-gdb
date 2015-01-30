@@ -1,5 +1,10 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (value_assign_to_component): Reformat and improve
+	documentation. Remove all trailing spaces.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* inline-frame.c (inline_frame_sniffer, skip_inline_frames):
 	Stop counting inlined frames as soon as an out-of-line function
 	is found.
