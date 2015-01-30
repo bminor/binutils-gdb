@@ -1,5 +1,9 @@
 2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* varobj.c (create_child): Modify comment.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ada-varobj.c (ada_number_of_children): Constify struct varobj *
 	parameter.
 	(ada_name_of_variable): Same.

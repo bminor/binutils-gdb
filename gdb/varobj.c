@@ -2043,7 +2043,10 @@ uninstall_variable (struct varobj *var)
 
 }
 
-/* Create and install a child of the parent of the given name.  */
+/* Create and install a child of the parent of the given name.
+
+   The created VAROBJ takes ownership of the allocated NAME.  */
+
 static struct varobj *
 create_child (struct varobj *parent, int index, char *name)
 {
