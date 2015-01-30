@@ -1,5 +1,10 @@
 2015-05-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_convert_actual): Add handling of formals
+	passed inside an aligner type.
+
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (NOT_FSF_LIST): Remove sim/erc32 entries.
 
 2015-05-08  Siva Chandra Reddy  <sivachandra@google.com>
