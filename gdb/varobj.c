@@ -1034,16 +1034,17 @@ varobj_get_path_expr_parent (struct varobj *var)
 char *
 varobj_get_path_expr (struct varobj *var)
 {
-  if (var->path_expr != NULL)
-    return var->path_expr;
-  else 
+  if (var->path_expr == NULL)
     {
       /* For root varobjs, we initialize path_expr
 	 when creating varobj, so here it should be
 	 child varobj.  */
       gdb_assert (!is_root_p (var));
-      return (*var->root->lang_ops->path_expr_of_child) (var);
+
+      var->path_expr = (*var->root->lang_ops->path_expr_of_child) (var);
     }
+
+  return var->path_expr;
 }
 
 const struct language_defn *

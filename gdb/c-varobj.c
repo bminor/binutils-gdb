@@ -433,9 +433,11 @@ c_name_of_child (struct varobj *parent, int index)
 static char *
 c_path_expr_of_child (struct varobj *child)
 {
+  char *path_expr;
+
   c_describe_child (child->parent, child->index, NULL, NULL, NULL, 
-		    &child->path_expr);
-  return child->path_expr;
+		    &path_expr);
+  return path_expr;
 }
 
 static struct value *
@@ -906,9 +908,11 @@ cplus_name_of_child (struct varobj *parent, int index)
 static char *
 cplus_path_expr_of_child (struct varobj *child)
 {
+  char *path_expr;
+
   cplus_describe_child (child->parent, child->index, NULL, NULL, NULL, 
-			&child->path_expr);
-  return child->path_expr;
+			&path_expr);
+  return path_expr;
 }
 
 static struct value *

@@ -1,5 +1,12 @@
 2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* varobj.c (varobj_get_path_expr): Set var->path_expr.
+	* c-varobj.c (c_path_expr_of_child): Set local var instead of
+	child->path_expr.
+	(cplus_path_expr_of_child): Same.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* mi-cmd-var.c (print_varobj): Free varobj_get_expression
 	result.
 	(mi_cmd_var_info_expression): Same.
