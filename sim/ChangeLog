@@ -1,3 +1,8 @@
+2015-02-02  Chen Gang <gang.chen.5i5j@gmail.com>
+
+	* common/sim-options.c (sim_args_command): Call freeargv() when
+	failure occurs.
+
 2014-07-01  Chen Gang <gang.chen.5i5j@gmail.com>
 
 	* sim/microblaze/interp.c: Use long int format instead of int
