@@ -831,7 +831,7 @@ dwarf2_directive_loc (int is_lloc)
 
   /* If we see two .loc directives in a row, force the first one to be
      output now.  */
-  if (!is_new_logical && dwarf2_loc_directive_seen)
+  if (dwarf2_loc_directive_seen)
     dwarf2_emit_insn (0);
 
   if (is_lloc && !is_new_logical)
