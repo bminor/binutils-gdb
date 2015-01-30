@@ -1,5 +1,9 @@
 2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* varobj.c (varobj_delete): Fix comment.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* varobj.c (create_child): Modify comment.
 
 2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>

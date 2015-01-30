@@ -502,9 +502,10 @@ varobj_get_expression (const struct varobj *var)
 }
 
 /* Deletes a varobj and all its children if only_children == 0,
-   otherwise deletes only the children; returns a malloc'ed list of
-   all the (malloc'ed) names of the variables that have been deleted
-   (NULL terminated).  */
+   otherwise deletes only the children. If DELLIST is non-NULL, it is
+   assigned a malloc'ed list of all the (malloc'ed) names of the variables
+   that have been deleted (NULL terminated).  Returns the number of deleted
+   variables.  */
 
 int
 varobj_delete (struct varobj *var, char ***dellist, int only_children)
