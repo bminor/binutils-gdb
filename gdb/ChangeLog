@@ -1,3 +1,9 @@
+2015-01-31  Joel Brobecker  <brobecker@adacore.com>
+
+	PR symtab/17855
+	* symfile.c (clear_symtab_users): Move call to breakpoint_re_set
+	to end.
+
 2015-01-31  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-io.c (tui_expand_tabs): New function.

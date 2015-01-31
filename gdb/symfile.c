@@ -3028,8 +3028,6 @@ clear_symtab_users (int add_flags)
   clear_current_source_symtab_and_line ();
 
   clear_displays ();
-  if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
-    breakpoint_re_set ();
   clear_last_displayed_sal ();
   clear_pc_function_cache ();
   observer_notify_new_objfile (NULL);
@@ -3043,6 +3041,10 @@ clear_symtab_users (int add_flags)
   /* Varobj may refer to old symbols, perform a cleanup.  */
   varobj_invalidate ();
 
+  /* Now that the various caches have been cleared, we can re_set
+     our breakpoints without risking it using stale data.  */
+  if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
+    breakpoint_re_set ();
 }
 
 static void
