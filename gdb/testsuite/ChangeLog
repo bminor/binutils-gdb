@@ -1,5 +1,9 @@
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.ada/dyn_arrayidx.exp: Add additional_flags=-gnat12.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.guile/scm-section-script.c: Add duplicate inlined section script
 	entries.  Duplicate file section script entries.
 	* gdb.guile/scm-section-script.exp: Add tests for duplicate entries,
