@@ -178,7 +178,20 @@ tui_puts (const char *string)
       else if (tui_skip_line != 1)
         {
           tui_skip_line = -1;
-          waddch (w, c);
+	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
+	  if (c == '\t')
+	    {
+	      int line, col;
+
+	      getyx (w, line, col);
+	      do
+		{
+		  waddch (w, ' ');
+		  col++;
+		} while ((col % 8) != 0);
+	    }
+	  else
+	    waddch (w, c);
         }
       else if (c == '\n')
         tui_skip_line = -1;
@@ -255,6 +268,16 @@ tui_redisplay_readline (void)
 	{
           waddch (w, '^');
           waddch (w, CTRL_CHAR (c) ? UNCTRL (c) : '?');
+	}
+      else if (c == '\t')
+	{
+	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
+	  getyx (w, line, col);
+	  do
+	    {
+	      waddch (w, ' ');
+	      col++;
+	    } while ((col % 8) != 0);
 	}
       else
 	{
@@ -724,6 +747,59 @@ tui_getc (FILE *fp)
   return ch;
 }
 
+/* Utility function to expand TABs in a STRING into spaces.  STRING
+   will be displayed starting at column COL, and is assumed to include
+   no newlines.  The returned expanded string is malloc'ed.  */
+
+char *
+tui_expand_tabs (const char *string, int col)
+{
+  int n_adjust;
+  const char *s;
+  char *ret, *q;
+
+  /* 1. How many additional characters do we need?  */
+  for (n_adjust = 0, s = string; s; )
+    {
+      s = strpbrk (s, "\t");
+      if (s)
+	{
+	  col += (s - string) + n_adjust;
+	  /* Adjustment for the next tab stop, minus one for the TAB
+	     we replace with spaces.  */
+	  n_adjust += 8 - (col % 8) - 1;
+	  s++;
+	}
+    }
+
+  /* Allocate the copy.  */
+  ret = q = xmalloc (strlen (string) + n_adjust + 1);
+
+  /* 2. Copy the original string while replacing TABs with spaces.  */
+  for (s = string; s; )
+    {
+      char *s1 = strpbrk (s, "\t");
+      if (s1)
+	{
+	  if (s1 > s)
+	    {
+	      strncpy (q, s, s1 - s);
+	      q += s1 - s;
+	      col += s1 - s;
+	    }
+	  do {
+	    *q++ = ' ';
+	    col++;
+	  } while ((col % 8) != 0);
+	  s1++;
+	}
+      else
+	strcpy (q, s);
+      s = s1;
+    }
+
+  return ret;
+}
 
 /* Cleanup when a resize has occured.
    Returns the character that must be processed.  */

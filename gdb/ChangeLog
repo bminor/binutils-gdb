@@ -1,3 +1,13 @@
+2015-01-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-io.c (tui_expand_tabs): New function.
+	(tui_puts, tui_redisplay_readline): Expand TABs into the
+	appropriate number of spaces.
+	* tui/tui-regs.c: Include tui-io.h.
+	(tui_register_format): Call tui_expand_tabs to expand TABs into
+	the appropriate number of spaces.
+	* tui/tui-io.h: Add prototype for tui_expand_tabs.
+
 2015-01-30  Doug Evans  <dje@google.com>
 
 	* NEWS: "info source" command now display producer string if present.

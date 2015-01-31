@@ -41,6 +41,9 @@ extern int tui_getc (FILE *);
    changed the edited text.  */
 extern void tui_redisplay_readline (void);
 
+/* Expand TABs into spaces.  */
+extern char *tui_expand_tabs (const char *, int);
+
 extern struct ui_out *tui_out;
 extern struct ui_out *tui_old_uiout;
 
