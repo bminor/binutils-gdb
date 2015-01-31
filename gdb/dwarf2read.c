@@ -3825,6 +3825,7 @@ dw2_expand_symtabs_matching
   (struct objfile *objfile,
    expand_symtabs_file_matcher_ftype *file_matcher,
    expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+   expand_symtabs_exp_notify_ftype *expansion_notify,
    enum search_domain kind,
    void *data)
 {
@@ -3996,7 +3997,20 @@ dw2_expand_symtabs_matching
 
 	  per_cu = dw2_get_cutu (cu_index);
 	  if (file_matcher == NULL || per_cu->v.quick->mark)
-	    dw2_instantiate_symtab (per_cu);
+	    {
+	      int symtab_was_null =
+		(per_cu->v.quick->compunit_symtab == NULL);
+
+	      dw2_instantiate_symtab (per_cu);
+
+	      if (expansion_notify != NULL
+		  && symtab_was_null
+		  && per_cu->v.quick->compunit_symtab != NULL)
+		{
+		  expansion_notify (per_cu->v.quick->compunit_symtab,
+				    data);
+		}
+	    }
 	}
     }
 }

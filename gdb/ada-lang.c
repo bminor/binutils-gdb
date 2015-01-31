@@ -6247,8 +6247,8 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     data.word = word;
     data.wild_match = wild_match_p;
     data.encoded = encoded_p;
-    expand_symtabs_matching (NULL, ada_complete_symbol_matcher, ALL_DOMAIN,
-			     &data);
+    expand_symtabs_matching (NULL, ada_complete_symbol_matcher, NULL,
+			     ALL_DOMAIN, &data);
   }
 
   /* At this point scan through the misc symbol vectors and add each
@@ -12992,7 +12992,7 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
   struct objfile *objfile;
   struct compunit_symtab *s;
 
-  expand_symtabs_matching (NULL, ada_exc_search_name_matches,
+  expand_symtabs_matching (NULL, ada_exc_search_name_matches, NULL,
 			   VARIABLES_DOMAIN, preg);
 
   ALL_COMPUNITS (objfile, s)

@@ -3941,6 +3941,7 @@ symfile_free_objfile (struct objfile *objfile)
 void
 expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
 			 expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+			 expand_symtabs_exp_notify_ftype *expansion_notify,
 			 enum search_domain kind,
 			 void *data)
 {
@@ -3950,7 +3951,8 @@ expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
   {
     if (objfile->sf)
       objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
-						symbol_matcher, kind,
+						symbol_matcher,
+						expansion_notify, kind,
 						data);
   }
 }

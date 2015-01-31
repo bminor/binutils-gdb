@@ -4521,7 +4521,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			    ? NULL
 			    : search_symbols_file_matches),
 			   search_symbols_name_matches,
-			   kind, &datum);
+			   NULL, kind, &datum);
 
   /* Here, we search through the minimal symbol tables for functions
      and variables that match, and force their symbols to be read.
@@ -5309,8 +5309,8 @@ default_make_symbol_completion_list_break_on (const char *text,
   /* Look through the partial symtabs for all symbols which begin
      by matching SYM_TEXT.  Expand all CUs that you find to the list.
      The real names will get added by COMPLETION_LIST_ADD_SYMBOL below.  */
-  expand_symtabs_matching (NULL, symbol_completion_matcher, ALL_DOMAIN,
-			   &datum);
+  expand_symtabs_matching (NULL, symbol_completion_matcher, NULL,
+			   ALL_DOMAIN, &datum);
 
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore

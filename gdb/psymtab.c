@@ -1409,6 +1409,7 @@ psym_expand_symtabs_matching
   (struct objfile *objfile,
    expand_symtabs_file_matcher_ftype *file_matcher,
    expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+   expand_symtabs_exp_notify_ftype *expansion_notify,
    enum search_domain kind,
    void *data)
 {
@@ -1451,7 +1452,13 @@ psym_expand_symtabs_matching
 	}
 
       if (recursively_search_psymtabs (ps, objfile, kind, symbol_matcher, data))
-	psymtab_to_symtab (objfile, ps);
+	{
+	  struct compunit_symtab *symtab =
+	    psymtab_to_symtab (objfile, ps);
+
+	  if (expansion_notify != NULL)
+	    expansion_notify (symtab, data);
+	}
     }
 }
 

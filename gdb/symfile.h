@@ -137,6 +137,12 @@ typedef int (expand_symtabs_file_matcher_ftype) (const char *filename,
 typedef int (expand_symtabs_symbol_matcher_ftype) (const char *name,
 						   void *data);
 
+/* Callback for quick_symbol_functions->expand_symtabs_matching
+   to be called after a symtab has been expanded.  */
+
+typedef void (expand_symtabs_exp_notify_ftype) \
+  (struct compunit_symtab *symtab, void *data);
+
 /* The "quick" symbol functions exist so that symbol readers can
    avoiding an initial read of all the symbols.  For example, symbol
    readers might choose to use the "partial symbol table" utilities,
@@ -282,6 +288,7 @@ struct quick_symbol_functions
     (struct objfile *objfile,
      expand_symtabs_file_matcher_ftype *file_matcher,
      expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+     expand_symtabs_exp_notify_ftype *expansion_notify,
      enum search_domain kind,
      void *data);
 
@@ -569,6 +576,7 @@ extern struct cleanup *increment_reading_symtab (void);
 
 void expand_symtabs_matching (expand_symtabs_file_matcher_ftype *,
 			      expand_symtabs_symbol_matcher_ftype *,
+			      expand_symtabs_exp_notify_ftype *,
 			      enum search_domain kind, void *data);
 
 void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
