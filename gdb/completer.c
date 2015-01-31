@@ -1538,13 +1538,8 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 /* Utility for displaying completion list matches, used by both CLI and TUI.
 
    MATCHES is the list of strings, in argv format, LEN is the number of
-   strings in MATCHES, and MAX is the length of the longest string in MATCHES.
-
-   This function handles the LIST_MAYBE_TRUNCATED marker that we add to the
-   completion list.
-
-   Note: While LIST_MAYBE_TRUNCATED contributes to MAX, it's not long enough
-   that we worry about it.  */
+   strings in MATCHES, and MAX is the length of the longest string in
+   MATCHES.  */
 
 void
 gdb_display_match_list (char **matches, int len, int max,
