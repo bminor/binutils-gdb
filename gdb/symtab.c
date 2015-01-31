@@ -5169,15 +5169,19 @@ completion_list_add_fields (struct symbol *sym, const char *sym_text,
     }
 }
 
-/* Type of the user_data argument passed to add_macro_name or
-   symbol_completion_matcher.  The contents are simply whatever is
-   needed by completion_list_add_name.  */
+/* Type of the user_data argument passed to add_macro_name,
+   symbol_completion_matcher and symtab_expansion_callback.  */
+
 struct add_name_data
 {
+  /* Arguments required by completion_list_add_name.  */
   const char *sym_text;
   int sym_text_len;
   const char *text;
   const char *word;
+
+  /* Extra argument required for add_symtab_completions.  */
+  enum type_code code;
 };
 
 /* A callback used with macro_for_each and macro_for_each_in_scope.
@@ -5203,6 +5207,50 @@ symbol_completion_matcher (const char *name, void *user_data)
   struct add_name_data *datum = (struct add_name_data *) user_data;
 
   return compare_symbol_name (name, datum->sym_text, datum->sym_text_len);
+}
+
+/* Add matching symbols from SYMTAB to the current completion list.  */
+
+static void
+add_symtab_completions (struct compunit_symtab *cust,
+			const char *sym_text, int sym_text_len,
+			const char *text, const char *word,
+			enum type_code code)
+{
+  struct symbol *sym;
+  const struct block *b;
+  struct block_iterator iter;
+  int i;
+
+  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+    {
+      QUIT;
+      b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), i);
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
+	{
+	  if (code == TYPE_CODE_UNDEF
+	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+		  && TYPE_CODE (SYMBOL_TYPE (sym)) == code))
+	    COMPLETION_LIST_ADD_SYMBOL (sym,
+					sym_text, sym_text_len,
+					text, word);
+	}
+    }
+}
+
+/* Callback to add completions to the current list when symbol tables
+   are expanded during completion list generation.  */
+
+static void
+symtab_expansion_callback (struct compunit_symtab *symtab,
+			   void *user_data)
+{
+  struct add_name_data *datum = (struct add_name_data *) user_data;
+
+  add_symtab_completions (symtab,
+			  datum->sym_text, datum->sym_text_len,
+			  datum->text, datum->word,
+			  datum->code);
 }
 
 VEC (char_ptr) *
@@ -5305,17 +5353,12 @@ default_make_symbol_completion_list_break_on (const char *text,
   datum.sym_text_len = sym_text_len;
   datum.text = text;
   datum.word = word;
-
-  /* Look through the partial symtabs for all symbols which begin
-     by matching SYM_TEXT.  Expand all CUs that you find to the list.
-     The real names will get added by COMPLETION_LIST_ADD_SYMBOL below.  */
-  expand_symtabs_matching (NULL, symbol_completion_matcher, NULL,
-			   ALL_DOMAIN, &datum);
+  datum.code = code;
 
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore
      anything that isn't a text symbol (everything else will be
-     handled by the psymtab code above).  */
+     handled by the psymtab code below).  */
 
   if (code == TYPE_CODE_UNDEF)
     {
@@ -5329,6 +5372,19 @@ default_make_symbol_completion_list_break_on (const char *text,
 				       word);
 	}
     }
+
+  /* Add completions for all currently loaded symbol tables.  */
+  ALL_COMPUNITS (objfile, cust)
+    add_symtab_completions (cust, sym_text, sym_text_len, text, word,
+			    code);
+
+  /* Look through the partial symtabs for all symbols which begin
+     by matching SYM_TEXT.  Expand all CUs that you find to the list.
+     symtab_expansion_callback is called for each expanded symtab,
+     causing those symtab's completions to be added to the list too.  */
+  expand_symtabs_matching (NULL, symbol_completion_matcher,
+			   symtab_expansion_callback, ALL_DOMAIN,
+			   &datum);
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars).  Also catch fields of types defined in
@@ -5378,35 +5434,6 @@ default_make_symbol_completion_list_break_on (const char *text,
 	ALL_BLOCK_SYMBOLS (surrounding_global_block, iter, sym)
 	  completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
     }
-
-  /* Go through the symtabs and check the externs and statics for
-     symbols which match.  */
-
-  ALL_COMPUNITS (objfile, cust)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), GLOBAL_BLOCK);
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
-      {
-	if (code == TYPE_CODE_UNDEF
-	    || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		&& TYPE_CODE (SYMBOL_TYPE (sym)) == code))
-	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-      }
-  }
-
-  ALL_COMPUNITS (objfile, cust)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
-      {
-	if (code == TYPE_CODE_UNDEF
-	    || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		&& TYPE_CODE (SYMBOL_TYPE (sym)) == code))
-	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-      }
-  }
 
   /* Skip macros if we are completing a struct tag -- arguable but
      usually what is expected.  */

@@ -1,5 +1,19 @@
 2015-01-31  Gary Benson  <gbenson@redhat.com>
 
+	* symtab.c (struct add_name_data) <code>: New field.
+	Updated comments.
+	(add_symtab_completions): New function.
+	(symtab_expansion_callback): Likewise.
+	(default_make_symbol_completion_list_break_on): Set datum.code.
+	Move minimal symbol scan before calling expand_symtabs_matching.
+	Scan known primary symtabs for externs and statics before calling
+	expand_symtabs_matching.  Pass symtab_expansion_callback as
+	expansion_notify argument to expand_symtabs_matching.  Do not scan
+	primary symtabs for externs and statics after calling
+	expand_symtabs_matching.
+
+2015-01-31  Gary Benson  <gbenson@redhat.com>
+
 	* symfile.h (expand_symtabs_exp_notify_ftype): New typedef.
 	(struct quick_symbol_functions) <expand_symtabs_matching>:
 	New argument expansion_notify.  All uses updated.
