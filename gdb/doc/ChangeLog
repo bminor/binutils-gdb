@@ -1,3 +1,9 @@
+2015-01-31  Gary Benson <gbenson@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Command Completion): Document new
+	"set/show max-completions" option.
+
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.texinfo (Symbols): Document new commands

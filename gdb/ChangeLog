@@ -1,3 +1,46 @@
+2015-01-31  Gary Benson <gbenson@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	PR cli/9007
+	PR cli/11920
+	PR cli/15548
+	* cli/cli-cmds.c (complete_command): Notify user if max-completions
+	reached.
+	* common/common-exceptions.h (enum errors)
+	<MAX_COMPLETIONS_REACHED_ERROR>: New value.
+	* completer.h (get_max_completions_reached_message): New declaration.
+	(max_completions): Likewise.
+	(completion_tracker_t): New typedef.
+	(new_completion_tracker): New declaration.
+	(make_cleanup_free_completion_tracker): Likewise.
+	(maybe_add_completion_enum): New enum.
+	(maybe_add_completion): New declaration.
+	(throw_max_completions_reached_error): Likewise.
+	* completer.c (max_completions): New global variable.
+	(new_completion_tracker): New function.
+	(free_completion_tracker): Likewise.
+	(make_cleanup_free_completion_tracker): Likewise.
+	(maybe_add_completions): Likewise.
+	(throw_max_completions_reached_error): Likewise.
+	(complete_line): Remove duplicates and limit result to max_completions
+	entries.
+	(get_max_completions_reached_message): New function.
+	(gdb_display_match_list): Handle max_completions.
+	(_initialize_completer): New declaration and function.
+	* symtab.c: Include completer.h.
+	(completion_tracker): New static variable.
+	(completion_list_add_name): Call maybe_add_completion.
+	(default_make_symbol_completion_list_break_on_1): Renamed from
+	default_make_symbol_completion_list_break_on.  Maintain
+	completion_tracker across calls to completion_list_add_name.
+	(default_make_symbol_completion_list_break_on): New function.
+	* top.c (init_main): Set rl_completion_display_matches_hook.
+	* tui/tui-io.c: Include completer.h.
+	(tui_old_rl_display_matches_hook): New static global.
+	(tui_rl_display_match_list): Notify user if max-completions reached.
+	(tui_setup_io): Save/restore rl_completion_display_matches_hook.
+	* NEWS (New Options): Mention set/show max-completions.
+
 2015-01-31  Gary Benson  <gbenson@redhat.com>
 
 	* symtab.c (struct add_name_data) <code>: New field.
