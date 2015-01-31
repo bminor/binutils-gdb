@@ -20,6 +20,52 @@
 #include "gdb_vecs.h"
 #include "command.h"
 
+/* Types of functions in struct match_list_displayer.  */
+
+struct match_list_displayer;
+
+typedef void mld_crlf_ftype (const struct match_list_displayer *);
+typedef void mld_putch_ftype (const struct match_list_displayer *, int);
+typedef void mld_puts_ftype (const struct match_list_displayer *,
+			     const char *);
+typedef void mld_flush_ftype (const struct match_list_displayer *);
+typedef void mld_erase_entire_line_ftype (const struct match_list_displayer *);
+typedef void mld_beep_ftype (const struct match_list_displayer *);
+typedef int mld_read_key_ftype (const struct match_list_displayer *);
+
+/* Interface between CLI/TUI and gdb_match_list_displayer.  */
+
+struct match_list_displayer
+{
+  /* The screen dimensions to work with when displaying matches.  */
+  int height, width;
+
+  /* Print cr,lf.  */
+  mld_crlf_ftype *crlf;
+
+  /* Not "putc" to avoid issues where it is a stdio macro.  Sigh.  */
+  mld_putch_ftype *putch;
+
+  /* Print a string.  */
+  mld_puts_ftype *puts;
+
+  /* Flush all accumulated output.  */
+  mld_flush_ftype *flush;
+
+  /* Erase the currently line on the terminal (but don't discard any text the
+     user has entered, readline may shortly re-print it).  */
+  mld_erase_entire_line_ftype *erase_entire_line;
+
+  /* Ring the bell.  */
+  mld_beep_ftype *beep;
+
+  /* Read one key.  */
+  mld_read_key_ftype *read_key;
+};
+
+extern void gdb_display_match_list (char **matches, int len, int max,
+				    const struct match_list_displayer *);
+
 extern VEC (char_ptr) *complete_line (const char *text,
 				      const char *line_buffer,
 				      int point);

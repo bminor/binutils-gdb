@@ -1828,6 +1828,7 @@ init_main (void)
   rl_completion_entry_function = readline_line_completion_function;
   rl_completer_word_break_characters = default_word_break_characters ();
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
+  rl_completion_display_matches_hook = cli_display_match_list;
   rl_readline_name = "gdb";
   rl_terminal_name = getenv ("TERM");
 

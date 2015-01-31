@@ -1,5 +1,34 @@
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
+	* cli-out.c: #include completer.h, readline/readline.h.
+	(cli_mld_crlf, cli_mld_putch, cli_mld_puts): New functions.
+	(cli_mld_flush, cld_mld_erase_entire_line): Ditto.
+	(cli_mld_beep, cli_mld_read_key, cli_display_match_list): Ditto.
+	* cli-out.h (cli_display_match_list): Declare.
+	* completer.c (MB_INVALIDCH, MB_NULLWCH): New macros.
+	(ELLIPSIS_LEN): Ditto.
+	(gdb_get_y_or_n, gdb_display_match_list_pager): New functions.
+	(gdb_path_isdir, gdb_printable_part, gdb_fnwidth): Ditto.
+	(gdb_fnprint, gdb_print_filename): Ditto.
+	(gdb_complete_get_screenwidth, gdb_display_match_list_1): Ditto.
+	(gdb_display_match_list): Ditto.
+	* completer.h (mld_crlf_ftype, mld_putch_ftype): New typedefs.
+	(mld_puts_ftype, mld_flush_ftype, mld_erase_entire_line_ftype): Ditto.
+	(mld_beep_ftype, mld_read_key_ftype): Ditto.
+	(match_list_displayer): New struct.
+	(gdb_display_match_list): Declare.
+	* top.c (init_main): Set rl_completion_display_matches_hook.
+	* tui/tui-io.c: #include completer.h.
+	(printable_part, PUTX, print_filename, get_y_or_n): Delete.
+	(tui_mld_crlf, tui_mld_putch, tui_mld_puts): New functions.
+	(tui_mld_flush, tui_mld_erase_entire_line, tui_mld_beep): Ditto.
+	(tui_mld_getc, tui_mld_read_key): Ditto.
+	(tui_rl_display_match_list): Rewrite.
+	(tui_handle_resize_during_io): New arg for_completion.  All callers
+	updated.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
 	Add symbol lookup cache.
 	* NEWS: Document new options and commands.
 	* symtab.c (symbol_cache_key): New static global.
