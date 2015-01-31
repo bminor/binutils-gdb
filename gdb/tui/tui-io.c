@@ -132,6 +132,7 @@ static rl_getc_func_t *tui_old_rl_getc_function;
 static rl_voidfunc_t *tui_old_rl_redisplay_function;
 static rl_vintfunc_t *tui_old_rl_prep_terminal;
 static rl_voidfunc_t *tui_old_rl_deprep_terminal;
+static rl_compdisp_func_t *tui_old_rl_display_matches_hook;
 static int tui_old_rl_echoing_p;
 
 /* Readline output stream.
@@ -468,6 +469,7 @@ tui_setup_io (int mode)
       tui_old_rl_deprep_terminal = rl_deprep_term_function;
       tui_old_rl_prep_terminal = rl_prep_term_function;
       tui_old_rl_getc_function = rl_getc_function;
+      tui_old_rl_display_matches_hook = rl_completion_display_matches_hook;
       tui_old_rl_outstream = rl_outstream;
       tui_old_rl_echoing_p = _rl_echoing_p;
       rl_redisplay_function = tui_redisplay_readline;
@@ -511,8 +513,8 @@ tui_setup_io (int mode)
       rl_deprep_term_function = tui_old_rl_deprep_terminal;
       rl_prep_term_function = tui_old_rl_prep_terminal;
       rl_getc_function = tui_old_rl_getc_function;
+      rl_completion_display_matches_hook = tui_old_rl_display_matches_hook;
       rl_outstream = tui_old_rl_outstream;
-      rl_completion_display_matches_hook = 0;
       _rl_echoing_p = tui_old_rl_echoing_p;
       rl_already_prompted = 0;
 

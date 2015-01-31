@@ -236,7 +236,8 @@ help_command (char *command, int from_tty)
   help_cmd (command, gdb_stdout);
 }
 
-/* The "complete" command is used by Emacs to implement completion.  */
+/* Note: The "complete" command is used by Emacs to implement completion.
+   [Is that why this function writes output with *_unfiltered?]  */
 
 static void
 complete_command (char *arg, int from_tty)
@@ -246,6 +247,18 @@ complete_command (char *arg, int from_tty)
   VEC (char_ptr) *completions;
 
   dont_repeat ();
+
+  if (max_completions == 0)
+    {
+      /* Only print this for non-mi frontends.  An MI frontend may not
+	 be able to handle this.  */
+      if (!ui_out_is_mi_like_p (current_uiout))
+	{
+	  printf_unfiltered (_("max-completions is zero,"
+			       " completion is disabled.\n"));
+	}
+      return;
+    }
 
   if (arg == NULL)
     arg = "";
@@ -293,6 +306,15 @@ complete_command (char *arg, int from_tty)
 
       xfree (prev);
       VEC_free (char_ptr, completions);
+
+      if (size == max_completions)
+	{
+	  /* ARG_PREFIX and POINT are included in the output so that emacs
+	     will include the message in the output.  */
+	  printf_unfiltered (_("%s%s %s\n"),
+			     arg_prefix, point,
+			     get_max_completions_reached_message ());
+	}
     }
 }
 

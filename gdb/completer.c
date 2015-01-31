@@ -781,9 +781,93 @@ complete_line_internal (const char *text,
 
   return list;
 }
-/* Generate completions all at once.  Returns a vector of strings.
-   Each element is allocated with xmalloc.  It can also return NULL if
-   there are no completions.
+
+/* See completer.h.  */
+
+int max_completions = 200;
+
+/* See completer.h.  */
+
+completion_tracker_t
+new_completion_tracker (void)
+{
+  if (max_completions <= 0)
+    return NULL;
+
+  return htab_create_alloc (max_completions,
+			    htab_hash_string, (htab_eq) streq,
+			    NULL, xcalloc, xfree);
+}
+
+/* Cleanup routine to free a completion tracker and reset the pointer
+   to NULL.  */
+
+static void
+free_completion_tracker (void *p)
+{
+  completion_tracker_t *tracker_ptr = p;
+
+  htab_delete (*tracker_ptr);
+  *tracker_ptr = NULL;
+}
+
+/* See completer.h.  */
+
+struct cleanup *
+make_cleanup_free_completion_tracker (completion_tracker_t *tracker_ptr)
+{
+  if (*tracker_ptr == NULL)
+    return make_cleanup (null_cleanup, NULL);
+
+  return make_cleanup (free_completion_tracker, tracker_ptr);
+}
+
+/* See completer.h.  */
+
+enum maybe_add_completion_enum
+maybe_add_completion (completion_tracker_t tracker, char *name)
+{
+  void **slot;
+
+  if (max_completions < 0)
+    return MAYBE_ADD_COMPLETION_OK;
+  if (max_completions == 0)
+    return MAYBE_ADD_COMPLETION_MAX_REACHED;
+
+  gdb_assert (tracker != NULL);
+
+  if (htab_elements (tracker) >= max_completions)
+    return MAYBE_ADD_COMPLETION_MAX_REACHED;
+
+  slot = htab_find_slot (tracker, name, INSERT);
+
+  if (*slot != HTAB_EMPTY_ENTRY)
+    return MAYBE_ADD_COMPLETION_DUPLICATE;
+
+  *slot = name;
+
+  return (htab_elements (tracker) < max_completions
+	  ? MAYBE_ADD_COMPLETION_OK
+	  : MAYBE_ADD_COMPLETION_OK_MAX_REACHED);
+}
+
+void
+throw_max_completions_reached_error (void)
+{
+  throw_error (MAX_COMPLETIONS_REACHED_ERROR, _("Max completions reached."));
+}
+
+/* Generate completions all at once.  Returns a vector of unique strings
+   allocated with xmalloc.  Returns NULL if there are no completions
+   or if max_completions is 0.  If max_completions is non-negative, this will
+   return at most max_completions + 1 strings.
+
+   If max_completions strings are collected, an extra string is added which
+   is a text message to inform the user that the list may be truncated.
+   This extra string serves two purposes:
+   1) Inform the user.
+   2) Prevent readline from being able to find a common prefix to advance
+      point to, since it's working with an incomplete list.
 
    TEXT is the caller's idea of the "word" we are looking at.
 
@@ -796,8 +880,58 @@ complete_line_internal (const char *text,
 VEC (char_ptr) *
 complete_line (const char *text, const char *line_buffer, int point)
 {
-  return complete_line_internal (text, line_buffer, 
-				 point, handle_completions);
+  VEC (char_ptr) *list;
+  VEC (char_ptr) *result = NULL;
+  struct cleanup *cleanups;
+  completion_tracker_t tracker;
+  char *candidate;
+  int ix, max_reached;
+
+  if (max_completions == 0)
+    return NULL;
+  list = complete_line_internal (text, line_buffer, point,
+				 handle_completions);
+  if (max_completions < 0)
+    return list;
+
+  tracker = new_completion_tracker ();
+  cleanups = make_cleanup_free_completion_tracker (&tracker);
+  make_cleanup_free_char_ptr_vec (list);
+
+  /* Do a final test for too many completions.  Individual completers may
+     do some of this, but are not required to.  Duplicates are also removed
+     here.  Otherwise the user is left scratching his/her head: readline and
+     complete_command will remove duplicates, and if removal of duplicates
+     there brings the total under max_completions the user may think gdb quit
+     searching too early.  */
+
+  for (ix = 0, max_reached = 0;
+       !max_reached && VEC_iterate (char_ptr, list, ix, candidate);
+       ++ix)
+    {
+      enum maybe_add_completion_enum add_status;
+
+      add_status = maybe_add_completion (tracker, candidate);
+
+      switch (add_status)
+	{
+	  case MAYBE_ADD_COMPLETION_OK:
+	    VEC_safe_push (char_ptr, result, xstrdup (candidate));
+	    break;
+	  case MAYBE_ADD_COMPLETION_OK_MAX_REACHED:
+	    VEC_safe_push (char_ptr, result, xstrdup (candidate));
+	    max_reached = 1;
+	    break;
+      	  case MAYBE_ADD_COMPLETION_MAX_REACHED:
+	    gdb_assert_not_reached ("more than max completions reached");
+	  case MAYBE_ADD_COMPLETION_DUPLICATE:
+	    break;
+	}
+    }
+
+  do_cleanups (cleanups);
+
+  return result;
 }
 
 /* Complete on command names.  Used by "help".  */
@@ -1019,6 +1153,15 @@ const char *
 skip_quoted (const char *str)
 {
   return skip_quoted_chars (str, NULL, NULL);
+}
+
+/* Return a message indicating that the maximum number of completions
+   has been reached and that there may be more.  */
+
+const char *
+get_max_completions_reached_message (void)
+{
+  return _("*** List may be truncated, max-completions reached. ***");
 }
 
 /* GDB replacement for rl_display_match_list.
@@ -1413,9 +1556,10 @@ gdb_complete_get_screenwidth (const struct match_list_displayer *displayer)
 }
 
 /* GDB version of readline/complete.c:rl_display_match_list.
-   See gdb_display_match_list for a description of MATCHES, LEN, MAX.  */
+   See gdb_display_match_list for a description of MATCHES, LEN, MAX.
+   Returns non-zero if all matches are displayed.  */
 
-static void
+static int
 gdb_display_match_list_1 (char **matches, int len, int max,
 			  const struct match_list_displayer *displayer)
 {
@@ -1501,7 +1645,7 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 	    {
 	      lines = gdb_display_match_list_pager (lines, displayer);
 	      if (lines < 0)
-		return;
+		return 0;
 	    }
 	}
     }
@@ -1523,7 +1667,7 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 		    {
 		      lines = gdb_display_match_list_pager (lines, displayer);
 		      if (lines < 0)
-			return;
+			return 0;
 		    }
 		}
 	      else
@@ -1533,6 +1677,8 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 	}
       displayer->crlf (displayer);
     }
+
+  return 1;
 }
 
 /* Utility for displaying completion list matches, used by both CLI and TUI.
@@ -1545,6 +1691,13 @@ void
 gdb_display_match_list (char **matches, int len, int max,
 			const struct match_list_displayer *displayer)
 {
+  /* Readline will never call this if complete_line returned NULL.  */
+  gdb_assert (max_completions != 0);
+
+  /* complete_line will never return more than this.  */
+  if (max_completions > 0)
+    gdb_assert (len <= max_completions);
+
   if (rl_completion_query_items > 0 && len >= rl_completion_query_items)
     {
       char msg[100];
@@ -1567,5 +1720,33 @@ gdb_display_match_list (char **matches, int len, int max,
 	}
     }
 
-  gdb_display_match_list_1 (matches, len, max, displayer);
+  if (gdb_display_match_list_1 (matches, len, max, displayer))
+    {
+      /* Note: MAX_COMPLETIONS may be -1 or zero, but LEN is always > 0.  */
+      if (len == max_completions)
+	{
+	  /* The maximum number of completions has been reached.  Warn the user
+	     that there may be more.  */
+	  const char *message = get_max_completions_reached_message ();
+
+	  displayer->puts (displayer, message);
+	  displayer->crlf (displayer);
+	}
+    }
+}
+
+extern initialize_file_ftype _initialize_completer; /* -Wmissing-prototypes */
+
+void
+_initialize_completer (void)
+{
+  add_setshow_zuinteger_unlimited_cmd ("max-completions", no_class,
+				       &max_completions, _("\
+Set maximum number of completion candidates."), _("\
+Show maximum number of completion candidates."), _("\
+Use this to limit the number of candidates considered\n\
+during completion.  Specifying \"unlimited\" or -1\n\
+disables limiting.  Note that setting either no limit or\n\
+a very large limit can make completion slow."),
+				       NULL, NULL, &setlist, &showlist);
 }

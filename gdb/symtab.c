@@ -60,6 +60,7 @@
 #include "macroscope.h"
 
 #include "parser-defs.h"
+#include "completer.h"
 
 /* Forward declarations for local functions.  */
 
@@ -5001,6 +5002,15 @@ static VEC (char_ptr) *return_val;
       completion_list_add_name \
 	(MSYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
 
+/* Tracker for how many unique completions have been generated.  Used
+   to terminate completion list generation early if the list has grown
+   to a size so large as to be useless.  This helps avoid GDB seeming
+   to lock up in the event the user requests to complete on something
+   vague that necessitates the time consuming expansion of many symbol
+   tables.  */
+
+static completion_tracker_t completion_tracker;
+
 /*  Test to see if the symbol specified by SYMNAME (which is already
    demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN
    characters.  If so, add it to the current completion list.  */
@@ -5019,6 +5029,7 @@ completion_list_add_name (const char *symname,
 
   {
     char *new;
+    enum maybe_add_completion_enum add_status;
 
     if (word == sym_text)
       {
@@ -5040,7 +5051,22 @@ completion_list_add_name (const char *symname,
 	strcat (new, symname);
       }
 
-    VEC_safe_push (char_ptr, return_val, new);
+    add_status = maybe_add_completion (completion_tracker, new);
+
+    switch (add_status)
+      {
+      case MAYBE_ADD_COMPLETION_OK:
+	VEC_safe_push (char_ptr, return_val, new);
+	break;
+      case MAYBE_ADD_COMPLETION_OK_MAX_REACHED:
+	VEC_safe_push (char_ptr, return_val, new);
+	throw_max_completions_reached_error ();
+      case MAYBE_ADD_COMPLETION_MAX_REACHED:
+	throw_max_completions_reached_error ();
+      case MAYBE_ADD_COMPLETION_DUPLICATE:
+	xfree (new);
+	break;
+      }
   }
 }
 
@@ -5253,11 +5279,11 @@ symtab_expansion_callback (struct compunit_symtab *symtab,
 			  datum->code);
 }
 
-VEC (char_ptr) *
-default_make_symbol_completion_list_break_on (const char *text,
-					      const char *word,
-					      const char *break_on,
-					      enum type_code code)
+static void
+default_make_symbol_completion_list_break_on_1 (const char *text,
+						const char *word,
+						const char *break_on,
+						enum type_code code)
 {
   /* Problem: All of the symbols have to be copied because readline
      frees them.  I'm not going to worry about this; hopefully there
@@ -5275,7 +5301,7 @@ default_make_symbol_completion_list_break_on (const char *text,
   /* Length of sym_text.  */
   int sym_text_len;
   struct add_name_data datum;
-  struct cleanup *back_to;
+  struct cleanup *cleanups;
 
   /* Now look for the symbol we are supposed to complete on.  */
   {
@@ -5310,7 +5336,7 @@ default_make_symbol_completion_list_break_on (const char *text,
       /* A double-quoted string is never a symbol, nor does it make sense
          to complete it any other way.  */
       {
-	return NULL;
+	return;
       }
     else
       {
@@ -5346,8 +5372,8 @@ default_make_symbol_completion_list_break_on (const char *text,
     }
   gdb_assert (sym_text[sym_text_len] == '\0' || sym_text[sym_text_len] == '(');
 
-  return_val = NULL;
-  back_to = make_cleanup (do_free_completion_list, &return_val);
+  completion_tracker = new_completion_tracker ();
+  cleanups = make_cleanup_free_completion_tracker (&completion_tracker);
 
   datum.sym_text = sym_text;
   datum.sym_text_len = sym_text_len;
@@ -5461,8 +5487,34 @@ default_make_symbol_completion_list_break_on (const char *text,
       macro_for_each (macro_user_macros, add_macro_name, &datum);
     }
 
+  do_cleanups (cleanups);
+}
+
+VEC (char_ptr) *
+default_make_symbol_completion_list_break_on (const char *text,
+					      const char *word,
+					      const char *break_on,
+					      enum type_code code)
+{
+  struct cleanup *back_to;
+  volatile struct gdb_exception except;
+
+  return_val = NULL;
+  back_to = make_cleanup (do_free_completion_list, &return_val);
+
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      default_make_symbol_completion_list_break_on_1 (text, word,
+						      break_on, code);
+    }
+  if (except.reason < 0)
+    {
+      if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
+	throw_exception (except);
+    }
+
   discard_cleanups (back_to);
-  return (return_val);
+  return return_val;
 }
 
 VEC (char_ptr) *

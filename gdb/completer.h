@@ -66,6 +66,8 @@ struct match_list_displayer
 extern void gdb_display_match_list (char **matches, int len, int max,
 				    const struct match_list_displayer *);
 
+extern const char *get_max_completions_reached_message (void);
+
 extern VEC (char_ptr) *complete_line (const char *text,
 				      const char *line_buffer,
 				      int point);
@@ -111,5 +113,69 @@ extern const char *skip_quoted_chars (const char *, const char *,
 				      const char *);
 
 extern const char *skip_quoted (const char *);
+
+/* Maximum number of candidates to consider before the completer
+   bails by throwing MAX_COMPLETIONS_REACHED_ERROR.  Negative values
+   disable limiting.  */
+
+extern int max_completions;
+
+/* Object to track how many unique completions have been generated.
+   Used to limit the size of generated completion lists.  */
+
+typedef htab_t completion_tracker_t;
+
+/* Create a new completion tracker.
+   The result is a hash table to track added completions, or NULL
+   if max_completions <= 0.  If max_completions < 0, tracking is disabled.
+   If max_completions == 0, the max is indeed zero.  */
+
+extern completion_tracker_t new_completion_tracker (void);
+
+/* Make a cleanup to free a completion tracker, and reset its pointer
+   to NULL.  */
+
+extern struct cleanup *make_cleanup_free_completion_tracker
+		      (completion_tracker_t *tracker_ptr);
+
+/* Return values for maybe_add_completion.  */
+
+enum maybe_add_completion_enum
+{
+  /* NAME has been recorded and max_completions has not been reached,
+     or completion tracking is disabled (max_completions < 0).  */
+  MAYBE_ADD_COMPLETION_OK,
+
+  /* NAME has been recorded and max_completions has been reached
+     (thus the caller can stop searching).  */
+  MAYBE_ADD_COMPLETION_OK_MAX_REACHED,
+
+  /* max-completions entries has been reached.
+     Whether NAME is a duplicate or not is not determined.  */
+  MAYBE_ADD_COMPLETION_MAX_REACHED,
+
+  /* NAME has already been recorded.
+     Note that this is never returned if completion tracking is disabled
+     (max_completions < 0).  */
+  MAYBE_ADD_COMPLETION_DUPLICATE
+};
+
+/* Add the completion NAME to the list of generated completions if
+   it is not there already.
+   If max_completions is negative, nothing is done, not even watching
+   for duplicates, and MAYBE_ADD_COMPLETION_OK is always returned.
+
+   If MAYBE_ADD_COMPLETION_MAX_REACHED is returned, callers are required to
+   record at least one more completion.  The final list will be pruned to
+   max_completions, but recording at least one more than max_completions is
+   the signal to the completion machinery that too many completions were
+   found.  */
+
+extern enum maybe_add_completion_enum
+  maybe_add_completion (completion_tracker_t tracker, char *name);
+
+/* Wrapper to throw MAX_COMPLETIONS_REACHED_ERROR.  */ 
+
+extern void throw_max_completions_reached_error (void);
 
 #endif /* defined (COMPLETER_H) */

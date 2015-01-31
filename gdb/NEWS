@@ -26,6 +26,13 @@ maint flush-symbol-cache
 
 * New options
 
+set max-completions
+show max-completions
+  Set the maximum number of candidates to be considered during
+  completion.  The default value is 200.  This limit allows GDB
+  to avoid generating large completion lists, the computation of
+  which can cause the debugger to become temporarily unresponsive.
+
 maint set symbol-cache-size
 maint show symbol-cache-size
   Control the size of the symbol cache.
