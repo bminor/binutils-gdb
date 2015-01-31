@@ -1,3 +1,14 @@
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-section-script.c: Add duplicate inlined section script
+	entries.  Duplicate file section script entries.
+	* gdb.guile/scm-section-script.exp: Add tests for duplicate entries,
+	inlined entries.  Add test for safe-path rejection.
+	* gdb.python/py-section-script.c: Add duplicate inlined section script
+	entries.  Duplicate file section script entries.
+	* gdb.python/py-section-script.exp: Add tests for duplicate entries,
+	inlined entries.  Add test for safe-path rejection.
+
 2015-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/disc_arr_bound: New testcase.

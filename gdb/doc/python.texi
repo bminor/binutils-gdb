@@ -4754,8 +4754,9 @@ Show whether auto-loading of Python scripts is enabled or disabled.
 Print the list of all Python scripts that @value{GDBN} auto-loaded.
 
 Also printed is the list of Python scripts that were mentioned in
-the @code{.debug_gdb_scripts} section and were not found
-(@pxref{dotdebug_gdb_scripts section}).
+the @code{.debug_gdb_scripts} section and were either not found
+(@pxref{dotdebug_gdb_scripts section}) or were not auto-loaded due to
+@code{auto-load safe-path} rejection (@pxref{Auto-loading}).
 This is useful because their names are not printed when @value{GDBN}
 tries to load them and fails.  There may be many of them, and printing
 an error message for each one is problematic.
@@ -4773,7 +4774,7 @@ No     my-foo-pretty-printers.py
 @end smallexample
 @end table
 
-When reading an auto-loaded file, @value{GDBN} sets the
+When reading an auto-loaded file or script, @value{GDBN} sets the
 @dfn{current objfile}.  This is available via the @code{gdb.current_objfile}
 function (@pxref{Objfiles In Python}).  This can be useful for
 registering objfile-specific pretty-printers and frame-filters.

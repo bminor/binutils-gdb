@@ -18,6 +18,11 @@
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.
 
+* Python/Guile scripting
+
+  ** GDB now supports auto-loading of Python/Guile scripts contained in the
+     special section named `.debug_gdb_scripts'.
+
 *** Changes in GDB 7.9
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.

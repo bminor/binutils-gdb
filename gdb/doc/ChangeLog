@@ -1,3 +1,9 @@
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (dotdebug_gdb_scripts section): Update docs to
+	distinguish script files vs inlined scripts.
+	* python.texi (Python Auto-loading): Ditto.
+
 2015-01-30  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Symbols) <info source>: Output now contains producer

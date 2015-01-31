@@ -131,6 +131,7 @@ PyObject *gdbpy_gdb_memory_error;
 
 static script_sourcer_func gdbpy_source_script;
 static objfile_script_sourcer_func gdbpy_source_objfile_script;
+static objfile_script_executor_func gdbpy_execute_objfile_script;
 static void gdbpy_finish_initialization
   (const struct extension_language_defn *);
 static int gdbpy_initialized (const struct extension_language_defn *);
@@ -155,6 +156,7 @@ static const struct extension_language_script_ops python_extension_script_ops =
 {
   gdbpy_source_script,
   gdbpy_source_objfile_script,
+  gdbpy_execute_objfile_script,
   gdbpy_auto_load_enabled
 };
 
@@ -1262,7 +1264,8 @@ gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 
 /* The "current" objfile.  This is set when gdb detects that a new
    objfile has been loaded.  It is only set for the duration of a call to
-   gdbpy_source_objfile_script; it is NULL at other times.  */
+   gdbpy_source_objfile_script and gdbpy_execute_objfile_script; it is NULL
+   at other times.  */
 static struct objfile *gdbpy_current_objfile;
 
 /* Set the current objfile to OBJFILE and then read FILE named FILENAME
@@ -1285,6 +1288,31 @@ gdbpy_source_objfile_script (const struct extension_language_defn *extlang,
   gdbpy_current_objfile = objfile;
 
   python_run_simple_file (file, filename);
+
+  do_cleanups (cleanups);
+  gdbpy_current_objfile = NULL;
+}
+
+/* Set the current objfile to OBJFILE and then execute SCRIPT
+   as Python code.  This does not throw any errors.  If an exception
+   occurs python will print the traceback and clear the error indicator.
+   This is the extension_language_script_ops.objfile_script_executor
+   "method".  */
+
+static void
+gdbpy_execute_objfile_script (const struct extension_language_defn *extlang,
+			      struct objfile *objfile, const char *name,
+			      const char *script)
+{
+  struct cleanup *cleanups;
+
+  if (!gdb_python_initialized)
+    return;
+
+  cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
+  gdbpy_current_objfile = objfile;
+
+  PyRun_SimpleString (script);
 
   do_cleanups (cleanups);
   gdbpy_current_objfile = NULL;

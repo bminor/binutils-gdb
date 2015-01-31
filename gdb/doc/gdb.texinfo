@@ -23977,17 +23977,29 @@ is evaluated more than once.
 For systems using file formats like ELF and COFF,
 when @value{GDBN} loads a new object file
 it will look for a special section named @code{.debug_gdb_scripts}.
-If this section exists, its contents is a list of NUL-terminated names
-of scripts to load.  Each entry begins with a non-NULL prefix byte that
-specifies the kind of entry, typically the extension language.
+If this section exists, its contents is a list of null-terminated entries
+specifying scripts to load.  Each entry begins with a non-null prefix byte that
+specifies the kind of entry, typically the extension language and whether the
+script is in a file or inlined in @code{.debug_gdb_scripts}.
 
-@value{GDBN} will look for each specified script file first in the
-current directory and then along the source search path
+The following entries are supported:
+
+@table @code
+@item SECTION_SCRIPT_ID_PYTHON_FILE = 1
+@item SECTION_SCRIPT_ID_SCHEME_FILE = 3
+@item SECTION_SCRIPT_ID_PYTHON_TEXT = 4
+@item SECTION_SCRIPT_ID_SCHEME_TEXT = 6
+@end table
+
+@subsubsection Script File Entries
+
+If the entry specifies a file, @value{GDBN} will look for the file first
+in the current directory and then along the source search path
 (@pxref{Source Path, ,Specifying Source Directories}),
 except that @file{$cdir} is not searched, since the compilation
 directory is not relevant to scripts.
 
-Entries can be placed in section @code{.debug_gdb_scripts} with,
+File entries can be placed in section @code{.debug_gdb_scripts} with,
 for example, this GCC macro for Python scripts.
 
 @example
@@ -24018,6 +24030,45 @@ If the macro invocation is put in a header, any application or library
 using this header will get a reference to the specified script,
 and with the use of @code{"MS"} attributes on the section, the linker
 will remove duplicates.
+
+@subsubsection Script Text Entries
+
+Script text entries allow to put the executable script in the entry
+itself instead of loading it from a file.
+The first line of the entry, everything after the prefix byte and up to
+the first newline (@code{0xa}) character, is the script name, and must not
+contain any kind of space character, e.g., spaces or tabs.
+The rest of the entry, up to the trailing null byte, is the script to
+execute in the specified language.  The name needs to be unique among
+all script names, as @value{GDBN} executes each script only once based
+on its name.
+
+Here is an example from file @file{py-section-script.c} in the @value{GDBN}
+testsuite.
+
+@example
+#include "symcat.h"
+#include "gdb/section-scripts.h"
+asm(
+".pushsection \".debug_gdb_scripts\", \"MS\",@@progbits,1\n"
+".byte " XSTRING (SECTION_SCRIPT_ID_PYTHON_TEXT) "\n"
+".ascii \"gdb.inlined-script\\n\"\n"
+".ascii \"class test_cmd (gdb.Command):\\n\"\n"
+".ascii \"  def __init__ (self):\\n\"\n"
+".ascii \"    super (test_cmd, self).__init__ ("
+    "\\\"test-cmd\\\", gdb.COMMAND_OBSCURE)\\n\"\n"
+".ascii \"  def invoke (self, arg, from_tty):\\n\"\n"
+".ascii \"    print (\\\"test-cmd output, arg = %s\\\" % arg)\\n\"\n"
+".ascii \"test_cmd ()\\n\"\n"
+".byte 0\n"
+".popsection\n"
+);
+@end example
+
+Loading of inlined scripts requires a properly configured
+@code{auto-load safe-path} (@pxref{Auto-loading safe path}).
+The path to specify in @code{auto-load safe-path} is the path of the file
+containing the @code{.debug_gdb_scripts} section.
 
 @node Which flavor to choose?
 @subsection Which flavor to choose?

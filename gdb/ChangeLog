@@ -1,3 +1,36 @@
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* NEWS: Mention inlined scripts in .debug_gdb_scripts section.
+	* auto-load.c: #include ctype.h.
+	(struct auto_load_pspace_info): Replace member loaded_scripts with
+	new members loaded_script_files, loaded_script_texts.
+	(auto_load_pspace_data_cleanup): Update.
+	(init_loaded_scripts_info): Update.
+	(get_auto_load_pspace_data_for_loading): Update.
+	(maybe_add_script_file): Renamed from maybe_add_script.  All callers
+	updated.
+	(maybe_add_script_text): New function.
+	(clear_section_scripts): Update.
+	(source_script_file, execute_script_contents): New functions.
+	(source_section_scripts): Add support for
+	SECTION_SCRIPT_ID_PYTHON_TEXT, SECTION_SCRIPT_ID_GUILE_TEXT.
+	(print_scripts): New function.
+	(auto_load_info_scripts): Also print inlined scripts.
+	(maybe_print_unsupported_script_warning): Renamed from
+	unsupported_script_warning_print.  All callers updated.
+	(maybe_print_script_not_found_warning): Renamed from
+	script_not_found_warning_print.  All callers updated.
+	* extension-priv.h (struct extension_language_script_ops): New member
+	objfile_script_executor.
+	* extension.c (ext_lang_objfile_script_executor): New function.
+	* extension.h (objfile_script_executor_func): New typedef.
+	(ext_lang_objfile_script_executor): Declare.
+	* guile/guile-internal.h (gdbscm_execute_objfile_script): Declare.
+	* guile/guile.c (guile_extension_script_ops): Update.
+	* guile/scm-objfile.c (gdbscm_execute_objfile_script): New function.
+	* python/python.c (python_extension_script_ops): Update.
+	(gdbpy_execute_objfile_script): New function.
+
 2015-01-31  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-io.c (tui_expand_tabs): New function.

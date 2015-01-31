@@ -283,7 +283,8 @@ gdbscm_set_objfile_pretty_printers_x (SCM self, SCM printers)
 
 /* The "current" objfile.  This is set when gdb detects that a new
    objfile has been loaded.  It is only set for the duration of a call to
-   gdbscm_source_objfile_script; it is NULL at other times.  */
+   gdbscm_source_objfile_script and gdbscm_execute_objfile_script; it is NULL
+   at other times.  */
 static struct objfile *ofscm_current_objfile;
 
 /* Set the current objfile to OBJFILE and then read FILE named FILENAME
@@ -302,6 +303,31 @@ gdbscm_source_objfile_script (const struct extension_language_defn *extlang,
   ofscm_current_objfile = objfile;
 
   msg = gdbscm_safe_source_script (filename);
+  if (msg != NULL)
+    {
+      fprintf_filtered (gdb_stderr, "%s", msg);
+      xfree (msg);
+    }
+
+  ofscm_current_objfile = NULL;
+}
+
+/* Set the current objfile to OBJFILE and then read FILE named FILENAME
+   as Guile code.  This does not throw any errors.  If an exception
+   occurs Guile will print the backtrace.
+   This is the extension_language_script_ops.objfile_script_sourcer
+   "method".  */
+
+void
+gdbscm_execute_objfile_script (const struct extension_language_defn *extlang,
+			       struct objfile *objfile, const char *name,
+			       const char *script)
+{
+  char *msg;
+
+  ofscm_current_objfile = objfile;
+
+  msg = gdbscm_safe_eval_string (script, 0 /* display_result */);
   if (msg != NULL)
     {
       fprintf_filtered (gdb_stderr, "%s", msg);
