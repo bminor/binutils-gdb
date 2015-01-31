@@ -16300,6 +16300,9 @@ its length, in lines,
 @item
 which programming language it is written in,
 @item
+if the debug information provides it, the program that compiled the file
+(which may include, e.g., the compiler version and command line arguments),
+@item
 whether the executable includes debugging information for that file, and
 if so, what format the information is in (e.g., STABS, Dwarf 2, etc.), and
 @item

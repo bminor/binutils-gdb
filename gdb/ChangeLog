@@ -1,3 +1,8 @@
+2015-01-30  Doug Evans  <dje@google.com>
+
+	* NEWS: "info source" command now display producer string if present.
+	* source.c (source_info): Print producer string if present.
+
 2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* varobj.c (varobj_delete): Fix comment.

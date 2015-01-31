@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.9
 
+* The "info source" command now displays the producer string if it was
+  present in the debug info.  This typically includes the compiler version
+  and may include things like its command line arguments.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",

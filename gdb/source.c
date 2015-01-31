@@ -654,12 +654,15 @@ static void
 source_info (char *ignore, int from_tty)
 {
   struct symtab *s = current_source_symtab;
+  struct compunit_symtab *cust;
 
   if (!s)
     {
       printf_filtered (_("No current source file.\n"));
       return;
     }
+
+  cust = SYMTAB_COMPUNIT (s);
   printf_filtered (_("Current source file is %s\n"), s->filename);
   if (SYMTAB_DIRNAME (s) != NULL)
     printf_filtered (_("Compilation directory is %s\n"), SYMTAB_DIRNAME (s));
@@ -670,10 +673,13 @@ source_info (char *ignore, int from_tty)
 		     s->nlines == 1 ? "" : "s");
 
   printf_filtered (_("Source language is %s.\n"), language_str (s->language));
+  printf_filtered (_("Producer is %s.\n"),
+		   COMPUNIT_PRODUCER (cust) != NULL
+		   ? COMPUNIT_PRODUCER (cust) : _("unknown"));
   printf_filtered (_("Compiled with %s debugging format.\n"),
-		   COMPUNIT_DEBUGFORMAT (SYMTAB_COMPUNIT (s)));
+		   COMPUNIT_DEBUGFORMAT (cust));
   printf_filtered (_("%s preprocessor macro info.\n"),
-		   COMPUNIT_MACRO_TABLE (SYMTAB_COMPUNIT (s)) != NULL
+		   COMPUNIT_MACRO_TABLE (cust) != NULL
 		   ? "Includes" : "Does not include");
 }
 

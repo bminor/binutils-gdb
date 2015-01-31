@@ -1,3 +1,8 @@
+2015-01-30  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Symbols) <info source>: Output now contains producer
+	string if present.
+
 2015-01-27  Doug Evans  <dje@google.com>
 
 	* python.texi (Objfiles In Python): Document Objfile.username.
