@@ -13,7 +13,22 @@
      which is the name of the objfile as specified by the user,
      without, for example, resolving symlinks.
 
+* New commands
+
+maint print symbol-cache
+  Print the contents of the symbol cache.
+
+maint print symbol-cache-statistics
+  Print statistics of symbol cache usage.
+
+maint flush-symbol-cache
+  Flush the contents of the symbol cache.
+
 * New options
+
+maint set symbol-cache-size
+maint show symbol-cache-size
+  Control the size of the symbol cache.
 
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.

@@ -1,3 +1,34 @@
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	Add symbol lookup cache.
+	* NEWS: Document new options and commands.
+	* symtab.c (symbol_cache_key): New static global.
+	(DEFAULT_SYMBOL_CACHE_SIZE, MAX_SYMBOL_CACHE_SIZE): New macros.
+	(SYMBOL_LOOKUP_FAILED): New macro.
+	(symbol_cache_slot_state): New enum.
+	(block_symbol_cache): New struct.
+	(symbol_cache): New struct.
+	(new_symbol_cache_size, symbol_cache_size): New static globals.
+	(hash_symbol_entry, eq_symbol_entry): New functions.
+	(symbol_cache_byte_size, resize_symbol_cache): New functions.
+	(make_symbol_cache, free_symbol_cache): New functions.
+	(get_symbol_cache, symbol_cache_cleanup): New function.
+	(set_symbol_cache_size, set_symbol_cache_size_handler): New functions.
+	(symbol_cache_lookup, symbol_cache_clear_slot): New function.
+	(symbol_cache_mark_found, symbol_cache_mark_not_found): New functions.
+	(symbol_cache_flush, symbol_cache_dump): New functions.
+	(maintenance_print_symbol_cache): New function.
+	(maintenance_flush_symbol_cache): New function.
+	(symbol_cache_stats): New function.
+	(maintenance_print_symbol_cache_statistics): New function.
+	(symtab_new_objfile_observer): New function.
+	(symtab_free_objfile_observer): New function.
+	(lookup_static_symbol, lookup_global_symbol): Use symbol cache.
+	(_initialize_symtab): Init symbol_cache_key.  New parameter
+	maint symbol-cache-size.  New maint commands print symbol-cache,
+	print symbol-cache-statistics, flush-symbol-cache.
+	Install new_objfile, free_objfile observers.
+
 2015-01-31  Joel Brobecker  <brobecker@adacore.com>
 
 	PR symtab/17855

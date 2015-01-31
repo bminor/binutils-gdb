@@ -1,5 +1,12 @@
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.texinfo (Symbols): Document new commands
+	"maint print symbol-cache", "maint print symbol-cache-statistics",
+	"maint flush-symbol-cache".  Document new option
+	"maint set symbol-cache-size".
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.texinfo (dotdebug_gdb_scripts section): Update docs to
 	distinguish script files vs inlined scripts.
 	* python.texi (Python Auto-loading): Ditto.

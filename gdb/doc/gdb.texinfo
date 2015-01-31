@@ -16495,8 +16495,39 @@ line 1574.
 @}
 (@value{GDBP})
 @end smallexample
-@end table
 
+@kindex maint set symbol-cache-size
+@cindex symbol cache size
+@item maint set symbol-cache-size @var{size}
+Set the size of the symbol cache to @var{size}.
+The default size is intended to be good enough for debugging
+most applications.  This option exists to allow for experimenting
+with different sizes.
+
+@kindex maint show symbol-cache-size
+@item maint show symbol-cache-size
+Show the size of the symbol cache.
+
+@kindex maint print symbol-cache
+@cindex symbol cache, printing its contents
+@item maint print symbol-cache
+Print the contents of the symbol cache.
+This is useful when debugging symbol cache issues.
+
+@kindex maint print symbol-cache-statistics
+@cindex symbol cache, printing usage statistics
+@item maint print symbol-cache-statistics
+Print symbol cache usage statistics.
+This helps determine how well the cache is being utilized.
+
+@kindex maint flush-symbol-cache
+@cindex symbol cache, flushing
+@item maint flush-symbol-cache
+Flush the contents of the symbol cache, all entries are removed.
+This command is useful when debugging the symbol cache.
+It is also useful when collecting performance data.
+
+@end table
 
 @node Altering
 @chapter Altering Execution
