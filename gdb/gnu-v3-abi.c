@@ -202,6 +202,12 @@ gnuv3_dynamic_class (struct type *type)
 {
   int fieldnum, fieldelem;
 
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+
+  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+    return 0;
+
   if (TYPE_CPLUS_DYNAMIC (type))
     return TYPE_CPLUS_DYNAMIC (type) == 1;
 
@@ -246,9 +252,12 @@ gnuv3_get_vtable (struct gdbarch *gdbarch,
   struct value *vtable_pointer;
   CORE_ADDR vtable_address;
 
+  CHECK_TYPEDEF (container_type);
+  gdb_assert (TYPE_CODE (container_type) == TYPE_CODE_STRUCT);
+
   /* If this type does not have a virtual table, don't read the first
      field.  */
-  if (!gnuv3_dynamic_class (check_typedef (container_type)))
+  if (!gnuv3_dynamic_class (container_type))
     return NULL;
 
   /* We do not consult the debug information to find the virtual table.
@@ -301,7 +310,7 @@ gnuv3_rtti_type (struct value *value,
   if (using_enc_p)
     *using_enc_p = 0;
 
-  vtable = gnuv3_get_vtable (gdbarch, value_type (value),
+  vtable = gnuv3_get_vtable (gdbarch, values_type,
 			     value_as_address (value_addr (value)));
   if (vtable == NULL)
     return NULL;
@@ -821,6 +830,8 @@ compute_vtable_size (htab_t offset_hash,
   void **slot;
   struct value_and_voffset search_vo, *current_vo;
 
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+
   /* If the object is not dynamic, then we are done; as it cannot have
      dynamic base types either.  */
   if (!gnuv3_dynamic_class (type))
@@ -949,8 +960,11 @@ gnuv3_print_vtable (struct value *value)
     }
 
   gdbarch = get_type_arch (type);
-  vtable = gnuv3_get_vtable (gdbarch, type,
-			     value_as_address (value_addr (value)));
+
+  vtable = NULL;
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+    vtable = gnuv3_get_vtable (gdbarch, type,
+			       value_as_address (value_addr (value)));
 
   if (!vtable)
     {
