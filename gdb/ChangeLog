@@ -1,3 +1,7 @@
+2015-02-01  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS: Remove myself.
+
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
 	* dwarf2read.c (process_structure_scope): Update setting of
