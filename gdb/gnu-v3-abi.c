@@ -584,8 +584,8 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 			struct type *type,
 			struct ui_file *stream)
 {
-  struct type *domain = TYPE_SELF_TYPE (type);
-  struct gdbarch *gdbarch = get_type_arch (domain);
+  struct type *self_type = TYPE_SELF_TYPE (type);
+  struct gdbarch *gdbarch = get_type_arch (self_type);
   CORE_ADDR ptr_value;
   LONGEST adjustment;
   int vbit;
@@ -611,7 +611,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 	 to an index, as used in TYPE_FN_FIELD_VOFFSET.  */
       voffset = ptr_value / TYPE_LENGTH (vtable_ptrdiff_type (gdbarch));
 
-      physname = gnuv3_find_method_in (domain, voffset, adjustment);
+      physname = gnuv3_find_method_in (self_type, voffset, adjustment);
 
       /* If we found a method, print that.  We don't bother to disambiguate
 	 possible paths to the method based on the adjustment.  */
@@ -709,17 +709,17 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   struct gdbarch *gdbarch;
   const gdb_byte *contents = value_contents (method_ptr);
   CORE_ADDR ptr_value;
-  struct type *domain_type, *final_type, *method_type;
+  struct type *self_type, *final_type, *method_type;
   LONGEST adjustment;
   int vbit;
 
-  domain_type = TYPE_SELF_TYPE (check_typedef (value_type (method_ptr)));
-  final_type = lookup_pointer_type (domain_type);
+  self_type = TYPE_SELF_TYPE (check_typedef (value_type (method_ptr)));
+  final_type = lookup_pointer_type (self_type);
 
   method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
 
   /* Extract the pointer to member.  */
-  gdbarch = get_type_arch (domain_type);
+  gdbarch = get_type_arch (self_type);
   vbit = gnuv3_decode_method_ptr (gdbarch, contents, &ptr_value, &adjustment);
 
   /* First convert THIS to match the containing type of the pointer to

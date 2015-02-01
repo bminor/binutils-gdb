@@ -188,8 +188,12 @@ m2_range (struct type *type, struct ui_file *stream, int show,
 	  int level, const struct type_print_options *flags)
 {
   if (TYPE_HIGH_BOUND (type) == TYPE_LOW_BOUND (type))
-    m2_print_type (TYPE_SELF_TYPE (type), "", stream, show, level,
-		   flags);
+    {
+      /* FIXME: TYPE_TARGET_TYPE used to be TYPE_DOMAIN_TYPE but that was
+	 wrong.  Not sure if TYPE_TARGET_TYPE is correct though.  */
+      m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level,
+		     flags);
+    }
   else
     {
       struct type *target = TYPE_TARGET_TYPE (type);

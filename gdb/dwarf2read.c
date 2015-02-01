@@ -12997,7 +12997,7 @@ is_vtable_name (const char *name, struct dwarf2_cu *cu)
 static void
 quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
 {
-  struct type *pfn_type, *domain_type, *new_type;
+  struct type *pfn_type, *self_type, *new_type;
 
   /* Check for a structure with no name and two children.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
@@ -13024,9 +13024,9 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
       || TYPE_CODE (TYPE_FIELD_TYPE (pfn_type, 0)) != TYPE_CODE_PTR)
     return;
 
-  domain_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
+  self_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
   new_type = alloc_type (objfile);
-  smash_to_method_type (new_type, domain_type, TYPE_TARGET_TYPE (pfn_type),
+  smash_to_method_type (new_type, self_type, TYPE_TARGET_TYPE (pfn_type),
 			TYPE_FIELDS (pfn_type), TYPE_NFIELDS (pfn_type),
 			TYPE_VARARGS (pfn_type));
   smash_to_methodptr_type (type, new_type);
@@ -22032,6 +22032,9 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   if (need_gnat_info (cu)
       && TYPE_CODE (type) != TYPE_CODE_FUNC
       && TYPE_CODE (type) != TYPE_CODE_FLT
+      && TYPE_CODE (type) != TYPE_CODE_METHODPTR
+      && TYPE_CODE (type) != TYPE_CODE_MEMBERPTR
+      && TYPE_CODE (type) != TYPE_CODE_METHOD
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
 

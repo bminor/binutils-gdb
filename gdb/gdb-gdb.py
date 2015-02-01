@@ -209,6 +209,8 @@ class StructMainTypePrettyPrinter:
             img = ("calling_convention = %d"
                    % type_specific['func_stuff']['calling_convention'])
             # tail_call_list is not printed.
+        elif type_specific_kind == "TYPE_SPECIFIC_SELF_TYPE":
+            img = "self_type = %s" % type_specific['self_type']
         else:
             img = ("type_specific = ??? (unknown type_secific_kind: %s)"
                    % type_specific_kind)

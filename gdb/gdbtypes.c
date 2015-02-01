@@ -1188,7 +1188,58 @@ init_vector_type (struct type *elt_type, int n)
   return array_type;
 }
 
-/* Smash TYPE to be a type of pointers to members of DOMAIN with type
+/* Internal routine called by TYPE_SELF_TYPE to return the type that TYPE
+   belongs to.  In c++ this is the class of "this", but TYPE_THIS_TYPE is too
+   confusing.  "self" is a common enough replacement for "this".
+   TYPE must be one of TYPE_CODE_METHODPTR, TYPE_CODE_MEMBERPTR, or
+   TYPE_CODE_METHOD.  */
+
+struct type *
+internal_type_self_type (struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_METHODPTR:
+    case TYPE_CODE_MEMBERPTR:
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_SELF_TYPE);
+      return TYPE_MAIN_TYPE (type)->type_specific.self_type;
+    case TYPE_CODE_METHOD:
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
+      return TYPE_MAIN_TYPE (type)->type_specific.func_stuff->self_type;
+    default:
+      gdb_assert_not_reached ("bad type");
+    }
+}
+
+/* Set the type of the class that TYPE belongs to.
+   In c++ this is the class of "this".
+   TYPE must be one of TYPE_CODE_METHODPTR, TYPE_CODE_MEMBERPTR, or
+   TYPE_CODE_METHOD.  */
+
+void
+set_type_self_type (struct type *type, struct type *self_type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_METHODPTR:
+    case TYPE_CODE_MEMBERPTR:
+      if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE)
+	TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_SELF_TYPE;
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_SELF_TYPE);
+      TYPE_MAIN_TYPE (type)->type_specific.self_type = self_type;
+      break;
+    case TYPE_CODE_METHOD:
+      if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE)
+	INIT_FUNC_SPECIFIC (type);
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
+      TYPE_MAIN_TYPE (type)->type_specific.func_stuff->self_type = self_type;
+      break;
+    default:
+      gdb_assert_not_reached ("bad type");
+    }
+}
+
+/* Smash TYPE to be a type of pointers to members of SELF_TYPE with type
    TO_TYPE.  A member pointer is a wierd thing -- it amounts to a
    typed offset into a struct, e.g. "an int at offset 8".  A MEMBER
    TYPE doesn't include the offset (that's the value of the MEMBER
@@ -1200,17 +1251,17 @@ init_vector_type (struct type *elt_type, int n)
    allocated.  */
 
 void
-smash_to_memberptr_type (struct type *type, struct type *domain,
+smash_to_memberptr_type (struct type *type, struct type *self_type,
 			 struct type *to_type)
 {
   smash_type (type);
+  TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
   TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_SELF_TYPE (type) = domain;
+  set_type_self_type (type, self_type);
   /* Assume that a data member pointer is the same size as a normal
      pointer.  */
   TYPE_LENGTH (type)
     = gdbarch_ptr_bit (get_type_arch (to_type)) / TARGET_CHAR_BIT;
-  TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
 }
 
 /* Smash TYPE to be a type of pointer to methods type TO_TYPE.
@@ -1223,13 +1274,13 @@ void
 smash_to_methodptr_type (struct type *type, struct type *to_type)
 {
   smash_type (type);
-  TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_SELF_TYPE (type) = TYPE_SELF_TYPE (to_type);
-  TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
   TYPE_CODE (type) = TYPE_CODE_METHODPTR;
+  TYPE_TARGET_TYPE (type) = to_type;
+  set_type_self_type (type, TYPE_SELF_TYPE (to_type));
+  TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
 }
 
-/* Smash TYPE to be a type of method of DOMAIN with type TO_TYPE.
+/* Smash TYPE to be a type of method of SELF_TYPE with type TO_TYPE.
    METHOD just means `function that gets an extra "this" argument'.
 
    When "smashing" the type, we preserve the objfile that the old type
@@ -1237,19 +1288,19 @@ smash_to_methodptr_type (struct type *type, struct type *to_type)
    allocated.  */
 
 void
-smash_to_method_type (struct type *type, struct type *domain,
+smash_to_method_type (struct type *type, struct type *self_type,
 		      struct type *to_type, struct field *args,
 		      int nargs, int varargs)
 {
   smash_type (type);
+  TYPE_CODE (type) = TYPE_CODE_METHOD;
   TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_SELF_TYPE (type) = domain;
+  set_type_self_type (type, self_type);
   TYPE_FIELDS (type) = args;
   TYPE_NFIELDS (type) = nargs;
   if (varargs)
     TYPE_VARARGS (type) = 1;
   TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
-  TYPE_CODE (type) = TYPE_CODE_METHOD;
 }
 
 /* Return a typename for a struct/union/enum type without "struct ",
@@ -2311,13 +2362,12 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 
   /* Now update the old "stub" type into a real type.  */
   mtype = TYPE_FN_FIELD_TYPE (f, signature_id);
-  TYPE_SELF_TYPE (mtype) = type;
-  TYPE_FIELDS (mtype) = argtypes;
-  TYPE_NFIELDS (mtype) = argcount;
+  /* MTYPE may currently be a function (TYPE_CODE_FUNC).
+     We want a method (TYPE_CODE_METHOD).  */
+  smash_to_method_type (mtype, type, TYPE_TARGET_TYPE (mtype),
+			argtypes, argcount, p[-2] == '.');
   TYPE_STUB (mtype) = 0;
   TYPE_FN_FIELD_STUB (f, signature_id) = 0;
-  if (p[-2] == '.')
-    TYPE_VARARGS (mtype) = 1;
 
   xfree (demangled_name);
 }
@@ -4051,6 +4101,12 @@ recursive_dump_type (struct type *type, int spaces)
                           TYPE_CALLING_CONVENTION (type));
 	/* tail_call_list is not printed.  */
 	break;
+
+      case TYPE_SPECIFIC_SELF_TYPE:
+	printfi_filtered (spaces, "self_type ");
+	gdb_print_host_address (TYPE_SELF_TYPE (type), gdb_stdout);
+	puts_filtered ("\n");
+	break;
     }
 
   if (spaces == 0)
@@ -4242,6 +4298,11 @@ copy_type_recursive (struct objfile *objfile,
       break;
     case TYPE_SPECIFIC_GNAT_STUFF:
       INIT_GNAT_SPECIFIC (new_type);
+      break;
+    case TYPE_SPECIFIC_SELF_TYPE:
+      set_type_self_type (new_type,
+			  copy_type_recursive (objfile, TYPE_SELF_TYPE (type),
+					       copied_types));
       break;
     default:
       gdb_assert_not_reached ("bad type_specific_kind");

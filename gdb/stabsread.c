@@ -2376,14 +2376,21 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      p++;
 	    }
 
-	  /* If this is just a stub, then we don't have the real name here.  */
+	  /* These are methods, not functions.  */
+	  if (TYPE_CODE (new_sublist->fn_field.type) == TYPE_CODE_FUNC)
+	    TYPE_CODE (new_sublist->fn_field.type) = TYPE_CODE_METHOD;
+	  else
+	    gdb_assert (TYPE_CODE (new_sublist->fn_field.type)
+			== TYPE_CODE_METHOD);
 
+	  /* If this is just a stub, then we don't have the real name here.  */
 	  if (TYPE_STUB (new_sublist->fn_field.type))
 	    {
 	      if (!TYPE_SELF_TYPE (new_sublist->fn_field.type))
-		TYPE_SELF_TYPE (new_sublist->fn_field.type) = type;
+		set_type_self_type (new_sublist->fn_field.type, type);
 	      new_sublist->fn_field.is_stub = 1;
 	    }
+
 	  new_sublist->fn_field.physname = savestring (*pp, p - *pp);
 	  *pp = p + 1;
 

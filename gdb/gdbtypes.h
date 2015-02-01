@@ -439,7 +439,7 @@ enum field_loc_kind
 /* * A discriminant to determine which field in the
    main_type.type_specific union is being used, if any.
 
-   For types such as TYPE_CODE_FLT or TYPE_CODE_FUNC, the use of this
+   For types such as TYPE_CODE_FLT, the use of this
    discriminant is really redundant, as we know from the type code
    which field is going to be used.  As such, it would be possible to
    reduce the size of this enum in order to save a bit or two for
@@ -453,7 +453,9 @@ enum type_specific_kind
   TYPE_SPECIFIC_CPLUS_STUFF,
   TYPE_SPECIFIC_GNAT_STUFF,
   TYPE_SPECIFIC_FLOATFORMAT,
-  TYPE_SPECIFIC_FUNC
+  /* Note: This is used by TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
+  TYPE_SPECIFIC_FUNC,
+  TYPE_SPECIFIC_SELF_TYPE
 };
 
 /* * Main structure representing a type in GDB.
@@ -678,13 +680,6 @@ struct main_type
      VPTR_BASETYPE is the base class which defined the virtual
      function table pointer.
 
-     For types that are pointer to member types (TYPE_CODE_METHODPTR,
-     TYPE_CODE_MEMBERPTR), VPTR_BASETYPE is the type that this pointer
-     is a member of.
-
-     For method types (TYPE_CODE_METHOD), VPTR_BASETYPE is the aggregate
-     type that contains the method.
-
      Unused otherwise.  */
 
   struct type *vptr_basetype;
@@ -712,9 +707,15 @@ struct main_type
 
     const struct floatformat **floatformat;
 
-    /* * For TYPE_CODE_FUNC types,  */
+    /* * For TYPE_CODE_FUNC and TYPE_CODE_METHOD types.  */
 
     struct func_type *func_stuff;
+
+    /* * For types that are pointer to member types (TYPE_CODE_METHODPTR,
+       TYPE_CODE_MEMBERPTR), SELF_TYPE is the type that this pointer
+       is a member of.  */
+
+    struct type *self_type;
   } type_specific;
 
   /* * Contains a location description value for the current type. Evaluating
@@ -904,7 +905,7 @@ struct cplus_struct_type
 	       
 	       (This comment used to say "The return value of the
 	       method", but that's wrong.  The function type is
-	       expected here, i.e. something with TYPE_CODE_FUNC, and
+	       expected here, i.e. something with TYPE_CODE_METHOD, and
 	       *not* the return-value type).  */
 
 	    struct type *type;
@@ -1014,7 +1015,7 @@ struct gnat_aux_type
     struct type* descriptive_type;
   };
 
-/* * For TYPE_CODE_FUNC types.  */
+/* * For TYPE_CODE_FUNC and TYPE_CODE_METHOD types.  */
 
 struct func_type
   {
@@ -1039,6 +1040,11 @@ struct func_type
        DW_TAG_GNU_call_site's exist in such function. */
 
     struct call_site *tail_call_list;
+
+    /* * For method types (TYPE_CODE_METHOD), the aggregate type that
+       contains the method.  */
+
+    struct type *self_type;
   };
 
 /* struct call_site_parameter can be referenced in callees by several ways.  */
@@ -1232,8 +1238,12 @@ extern void allocate_gnat_aux_type (struct type *);
 
 /* C++ */
 
+#define TYPE_SELF_TYPE(thistype) internal_type_self_type (thistype)
+/* Do not call this, use TYPE_SELF_TYPE.  */
+extern struct type *internal_type_self_type (struct type *);
+extern void set_type_self_type (struct type *, struct type *);
+
 #define TYPE_VPTR_BASETYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
-#define TYPE_SELF_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
 #define TYPE_VPTR_FIELDNO(thistype) TYPE_MAIN_TYPE(thistype)->vptr_fieldno
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_SPECIFIC_FIELD(thistype) \
@@ -1655,7 +1665,7 @@ extern struct type *lookup_memberptr_type (struct type *, struct type *);
 
 extern struct type *lookup_methodptr_type (struct type *);
 
-extern void smash_to_method_type (struct type *type, struct type *domain,
+extern void smash_to_method_type (struct type *type, struct type *self_type,
 				  struct type *to_type, struct field *args,
 				  int nargs, int varargs);
 

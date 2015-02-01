@@ -1,5 +1,41 @@
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
+	* cp-valprint.c (cp_find_class_member): Rename parameter domain_p
+	to self_p.
+	(cp_print_class_member): Rename local domain to self_type.
+	* dwarf2read.c (quirk_gcc_member_function_pointer): Rename local
+	domain_type to self_type.
+	(set_die_type) <need_gnat_info>: Handle
+	TYPE_CODE_METHODPTR, TYPE_CODE_MEMBERPTR, TYPE_CODE_METHOD.
+	* gdb-gdb.py (StructMainTypePrettyPrinter): Handle
+	TYPE_SPECIFIC_SELF_TYPE.
+	* gdbtypes.c (internal_type_self_type): New function.
+	(set_type_self_type): New function.
+	(smash_to_memberptr_type): Rename parameter domain to self_type.
+	Update setting of TYPE_SELF_TYPE.
+	(smash_to_methodptr_type): Update setting of TYPE_SELF_TYPE.
+	(smash_to_method_type): Rename parameter domain to self_type.
+	Update setting of TYPE_SELF_TYPE.
+	(check_stub_method): Call smash_to_method_type.
+	(recursive_dump_type): Handle TYPE_SPECIFIC_SELF_TYPE.
+	(copy_type_recursive): Ditto.
+	* gdbtypes.h (enum type_specific_kind): New value
+	TYPE_SPECIFIC_SELF_TYPE.
+	(struct main_type) <type_specific>: New member self_type.
+	(struct cplus_struct_type) <fn_field.type>: Update comment.
+	(TYPE_SELF_TYPE): Rewrite.
+	(internal_type_self_type, set_type_self_type): Declare.
+	* gnu-v3-abi.c (gnuv3_print_method_ptr): Rename local domain to
+	self_type.
+	(gnuv3_method_ptr_to_value): Rename local domain_type to self_type.
+	* m2-typeprint.c (m2_range): Replace TYPE_SELF_TYPE with
+	TYPE_TARGET_TYPE.
+	* stabsread.c (read_member_functions): Mark methods with
+	TYPE_CODE_METHOD, not TYPE_CODE_FUNC.  Update setting of
+	TYPE_SELF_TYPE.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
 	* gdbtypes.h (TYPE_SELF_TYPE): Renamed from TYPE_DOMAIN_TYPE.
 	All uses updated.
 
