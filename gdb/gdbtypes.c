@@ -4217,18 +4217,35 @@ copy_type_recursive (struct objfile *objfile,
       copy_type_recursive (objfile,
 			   TYPE_VPTR_BASETYPE (type),
 			   copied_types);
+
   /* Maybe copy the type_specific bits.
 
      NOTE drow/2005-12-09: We do not copy the C++-specific bits like
      base classes and methods.  There's no fundamental reason why we
      can't, but at the moment it is not needed.  */
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    TYPE_FLOATFORMAT (new_type) = TYPE_FLOATFORMAT (type);
-  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	   || TYPE_CODE (type) == TYPE_CODE_UNION
-	   || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
-    INIT_CPLUS_SPECIFIC (new_type);
+  switch (TYPE_SPECIFIC_FIELD (type))
+    {
+    case TYPE_SPECIFIC_NONE:
+      break;
+    case TYPE_SPECIFIC_FUNC:
+      INIT_FUNC_SPECIFIC (new_type);
+      TYPE_CALLING_CONVENTION (new_type) = TYPE_CALLING_CONVENTION (type);
+      TYPE_NO_RETURN (new_type) = TYPE_NO_RETURN (type);
+      TYPE_TAIL_CALL_LIST (new_type) = NULL;
+      break;
+    case TYPE_SPECIFIC_FLOATFORMAT:
+      TYPE_FLOATFORMAT (new_type) = TYPE_FLOATFORMAT (type);
+      break;
+    case TYPE_SPECIFIC_CPLUS_STUFF:
+      INIT_CPLUS_SPECIFIC (new_type);
+      break;
+    case TYPE_SPECIFIC_GNAT_STUFF:
+      INIT_GNAT_SPECIFIC (new_type);
+      break;
+    default:
+      gdb_assert_not_reached ("bad type_specific_kind");
+    }
 
   return new_type;
 }
