@@ -507,19 +507,6 @@ struct main_type
 
   short nfields;
 
-  /* * Field number of the virtual function table pointer in
-     VPTR_BASETYPE.  If -1, we were unable to find the virtual
-     function table pointer in initial symbol reading, and
-     get_vptr_fieldno should be called to find it if possible.
-     get_vptr_fieldno will update this field if possible.  Otherwise
-     the value is left at -1.
-
-     Unused if this type does not have virtual functions.
-
-     This field appears at this location because it packs nicely here.  */
-
-  short vptr_fieldno;
-
   /* * Name of this type, or NULL if none.
 
      This is used for printing only, except by poorly designed C++
@@ -676,14 +663,6 @@ struct main_type
 
   } flds_bnds;
 
-  /* * For types with virtual functions (TYPE_CODE_STRUCT),
-     VPTR_BASETYPE is the base class which defined the virtual
-     function table pointer.
-
-     Unused otherwise.  */
-
-  struct type *vptr_basetype;
-
   /* * Slot to point to additional language-specific fields of this
      type.  */
 
@@ -806,6 +785,22 @@ struct cplus_struct_type
 
     short n_baseclasses;
 
+    /* * Field number of the virtual function table pointer in VPTR_BASETYPE.
+       All access to this field must be through TYPE_VPTR_FIELDNO as one
+       thing it does is check whether the field has been initialized.
+       Initially TYPE_RAW_CPLUS_SPECIFIC has the value of cplus_struct_default,
+       which for portability reasons doesn't initialize this field.
+       TYPE_VPTR_FIELDNO returns -1 for this case.
+
+       If -1, we were unable to find the virtual function table pointer in
+       initial symbol reading, and get_vptr_fieldno should be called to find
+       it if possible.  get_vptr_fieldno will update this field if possible.
+       Otherwise the value is left at -1.
+
+       Unused if this type does not have virtual functions.  */
+
+    short vptr_fieldno;
+
     /* * Number of methods with unique names.  All overloaded methods
        with the same name count only once.  */
 
@@ -826,6 +821,10 @@ struct cplus_struct_type
     /* * Non-zero if this type came from a Java CU.  */
 
     unsigned int is_java : 1;
+
+    /* * The base class which defined the virtual function table pointer.  */
+
+    struct type *vptr_basetype;
 
     /* * For derived classes, the number of base classes is given by
        n_baseclasses and virtual_field_bits is a bit vector containing
@@ -1243,8 +1242,13 @@ extern void allocate_gnat_aux_type (struct type *);
 extern struct type *internal_type_self_type (struct type *);
 extern void set_type_self_type (struct type *, struct type *);
 
-#define TYPE_VPTR_BASETYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
-#define TYPE_VPTR_FIELDNO(thistype) TYPE_MAIN_TYPE(thistype)->vptr_fieldno
+extern int internal_type_vptr_fieldno (struct type *);
+extern void set_type_vptr_fieldno (struct type *, int);
+extern struct type *internal_type_vptr_basetype (struct type *);
+extern void set_type_vptr_basetype (struct type *, struct type *);
+#define TYPE_VPTR_FIELDNO(thistype) internal_type_vptr_fieldno (thistype)
+#define TYPE_VPTR_BASETYPE(thistype) internal_type_vptr_basetype (thistype)
+
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_SPECIFIC_FIELD(thistype) \
   TYPE_MAIN_TYPE(thistype)->type_specific_field

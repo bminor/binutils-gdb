@@ -13255,7 +13255,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      struct type *t = die_containing_type (die, cu);
 
-	      TYPE_VPTR_BASETYPE (type) = t;
+	      set_type_vptr_basetype (type, t);
 	      if (type == t)
 		{
 		  int i;
@@ -13269,7 +13269,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
                       if (is_vtable_name (fieldname, cu))
 			{
-			  TYPE_VPTR_FIELDNO (type) = i;
+			  set_type_vptr_fieldno (type, i);
 			  break;
 			}
 		    }
@@ -13284,7 +13284,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		}
 	      else
 		{
-		  TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
+		  set_type_vptr_fieldno (type, TYPE_VPTR_FIELDNO (t));
 		}
 	    }
 	  else if (cu->producer
@@ -13303,8 +13303,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		{
 		  if (strcmp (TYPE_FIELD_NAME (type, i), "__vfp") == 0)
 		    {
-		      TYPE_VPTR_FIELDNO (type) = i;
-		      TYPE_VPTR_BASETYPE (type) = type;
+		      set_type_vptr_fieldno (type, i);
+		      set_type_vptr_basetype (type, type);
 		      break;
 		    }
 		}

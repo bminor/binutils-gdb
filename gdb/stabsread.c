@@ -3267,7 +3267,7 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 	      return 0;
 	    }
 
-	  TYPE_VPTR_BASETYPE (type) = t;
+	  set_type_vptr_basetype (type, t);
 	  if (type == t)	/* Our own class provides vtbl ptr.  */
 	    {
 	      for (i = TYPE_NFIELDS (t) - 1;
@@ -3279,7 +3279,7 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 		  if (!strncmp (name, vptr_name, sizeof (vptr_name) - 2)
 		      && is_cplus_marker (name[sizeof (vptr_name) - 2]))
 		    {
-		      TYPE_VPTR_FIELDNO (type) = i;
+		      set_type_vptr_fieldno (type, i);
 		      goto gotit;
 		    }
 		}
@@ -3292,7 +3292,7 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 	    }
 	  else
 	    {
-	      TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
+	      set_type_vptr_fieldno (type, TYPE_VPTR_FIELDNO (t));
 	    }
 
 	gotit:

@@ -226,7 +226,6 @@ class StructMainTypePrettyPrinter:
         fields.append("flags = [%s]" % self.flags_to_string())
         fields.append("owner = %s" % self.owner_to_string())
         fields.append("target_type = %s" % self.val['target_type'])
-        fields.append("vptr_basetype = %s" % self.val['vptr_basetype'])
         if self.val['nfields'] > 0:
             for fieldno in range(self.val['nfields']):
                 fields.append(self.struct_field_img(fieldno))

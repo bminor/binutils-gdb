@@ -180,7 +180,6 @@ alloc_type (struct objfile *objfile)
   /* Initialize the fields that might not be zero.  */
 
   TYPE_CODE (type) = TYPE_CODE_UNDEF;
-  TYPE_VPTR_FIELDNO (type) = -1;
   TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
 
   return type;
@@ -208,7 +207,6 @@ alloc_type_arch (struct gdbarch *gdbarch)
   /* Initialize the fields that might not be zero.  */
 
   TYPE_CODE (type) = TYPE_CODE_UNDEF;
-  TYPE_VPTR_FIELDNO (type) = -1;
   TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
 
   return type;
@@ -1054,7 +1052,6 @@ create_array_type_with_stride (struct type *result_type,
   TYPE_FIELDS (result_type) =
     (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
   TYPE_INDEX_TYPE (result_type) = range_type;
-  TYPE_VPTR_FIELDNO (result_type) = -1;
   if (bit_stride > 0)
     TYPE_FIELD_BITSIZE (result_type, 0) = bit_stride;
 
@@ -1614,6 +1611,59 @@ get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
   *max = ((ULONGEST) 1 << (n - 1)) - 1;
 }
 
+/* Internal routine called by TYPE_VPTR_FIELDNO to return the value of
+   cplus_stuff.vptr_fieldno.
+
+   cplus_stuff is initialized to cplus_struct_default which does not
+   set vptr_fieldno to -1 for portability reasons (IWBN to use C99
+   designated initializers).  We cope with that here.  */
+
+int
+internal_type_vptr_fieldno (struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  if (!HAVE_CPLUS_STRUCT (type))
+    return -1;
+  return TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_fieldno;
+}
+
+/* Set the value of cplus_stuff.vptr_fieldno.  */
+
+void
+set_type_vptr_fieldno (struct type *type, int fieldno)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  if (!HAVE_CPLUS_STRUCT (type))
+    ALLOCATE_CPLUS_STRUCT_TYPE (type);
+  TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_fieldno = fieldno;
+}
+
+/* Internal routine called by TYPE_VPTR_BASETYPE to return the value of
+   cplus_stuff.vptr_basetype.  */
+
+struct type *
+internal_type_vptr_basetype (struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_CPLUS_STUFF);
+  return TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_basetype;
+}
+
+/* Set the value of cplus_stuff.vptr_basetype.  */
+
+void
+set_type_vptr_basetype (struct type *type, struct type *basetype)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  if (!HAVE_CPLUS_STRUCT (type))
+    ALLOCATE_CPLUS_STRUCT_TYPE (type);
+  TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_basetype = basetype;
+}
+
 /* Lookup the vptr basetype/fieldno values for TYPE.
    If found store vptr_basetype in *BASETYPEP if non-NULL, and return
    vptr_fieldno.  Also, if found and basetype is from the same objfile,
@@ -1650,8 +1700,8 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
 		 it, it may have a different lifetime.  PR 2384 */
 	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (basetype))
 		{
-		  TYPE_VPTR_FIELDNO (type) = fieldno;
-		  TYPE_VPTR_BASETYPE (type) = basetype;
+		  set_type_vptr_fieldno (type, fieldno);
+		  set_type_vptr_basetype (type, basetype);
 		}
 	      if (basetypep)
 		*basetypep = basetype;
@@ -2433,6 +2483,7 @@ allocate_cplus_struct_type (struct type *type)
   TYPE_RAW_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
     TYPE_ALLOC (type, sizeof (struct cplus_struct_type));
   *(TYPE_RAW_CPLUS_SPECIFIC (type)) = cplus_struct_default;
+  set_type_vptr_fieldno (type, -1);
 }
 
 const struct gnat_aux_type gnat_aux_default =
@@ -3712,6 +3763,13 @@ dump_fn_fieldlists (struct type *type, int spaces)
 static void
 print_cplus_stuff (struct type *type, int spaces)
 {
+  printfi_filtered (spaces, "vptr_fieldno %d\n", TYPE_VPTR_FIELDNO (type));
+  printfi_filtered (spaces, "vptr_basetype ");
+  gdb_print_host_address (TYPE_VPTR_BASETYPE (type), gdb_stdout);
+  puts_filtered ("\n");
+  if (TYPE_VPTR_BASETYPE (type) != NULL)
+    recursive_dump_type (TYPE_VPTR_BASETYPE (type), spaces + 2);
+
   printfi_filtered (spaces, "n_baseclasses %d\n",
 		    TYPE_N_BASECLASSES (type));
   printfi_filtered (spaces, "nfn_fields %d\n",
@@ -4044,15 +4102,6 @@ recursive_dump_type (struct type *type, int spaces)
 			TYPE_HIGH_BOUND_UNDEFINED (type) 
 			? " (undefined)" : "");
     }
-  printfi_filtered (spaces, "vptr_basetype ");
-  gdb_print_host_address (TYPE_VPTR_BASETYPE (type), gdb_stdout);
-  puts_filtered ("\n");
-  if (TYPE_VPTR_BASETYPE (type) != NULL)
-    {
-      recursive_dump_type (TYPE_VPTR_BASETYPE (type), spaces + 2);
-    }
-  printfi_filtered (spaces, "vptr_fieldno %d\n", 
-		    TYPE_VPTR_FIELDNO (type));
 
   switch (TYPE_SPECIFIC_FIELD (type))
     {
@@ -4267,11 +4316,6 @@ copy_type_recursive (struct objfile *objfile,
     TYPE_TARGET_TYPE (new_type) = 
       copy_type_recursive (objfile, 
 			   TYPE_TARGET_TYPE (type),
-			   copied_types);
-  if (TYPE_VPTR_BASETYPE (type))
-    TYPE_VPTR_BASETYPE (new_type) = 
-      copy_type_recursive (objfile,
-			   TYPE_VPTR_BASETYPE (type),
 			   copied_types);
 
   /* Maybe copy the type_specific bits.

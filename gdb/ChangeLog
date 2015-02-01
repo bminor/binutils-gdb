@@ -1,5 +1,28 @@
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
+	* dwarf2read.c (process_structure_scope): Update setting of
+	TYPE_VPTR_BASETYPE, TYPE_VPTR_FIELDNO.
+	* gdbtypes.c (internal_type_vptr_fieldno): New function.
+	(set_type_vptr_fieldno): New function.
+	(internal_type_vptr_basetype): New function.
+	(set_type_vptr_basetype): New function.
+	(get_vptr_fieldno): Update setting of TYPE_VPTR_FIELDNO,
+	TYPE_VPTR_BASETYPE.
+	(allocate_cplus_struct_type): Initialize vptr_fieldno.
+	(recursive_dump_type): Printing of vptr_fieldno, vptr_basetype ...
+	(print_cplus_stuff): ... moved here.
+	(copy_type_recursive): Don't copy TYPE_VPTR_BASETYPE.
+	* gdbtypes.h (struct main_type): Members vptr_fieldno, vptr_basetype
+	moved to ...
+	(struct cplus_struct_type): ... here.  All uses updated.
+	(TYPE_VPTR_FIELDNO, TYPE_VPTR_BASETYPE): Rewrite.
+	(internal_type_vptr_fieldno, set_type_vptr_fieldno): Declare.
+	(internal_type_vptr_basetype, set_type_vptr_basetype): Declare.
+	* stabsread.c (read_tilde_fields): Update setting of
+	TYPE_VPTR_FIELDNO, TYPE_VPTR_BASETYPE.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
 	* cp-valprint.c (cp_find_class_member): Rename parameter domain_p
 	to self_p.
 	(cp_print_class_member): Rename local domain to self_type.
