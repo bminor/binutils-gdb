@@ -2380,8 +2380,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 
 	  if (TYPE_STUB (new_sublist->fn_field.type))
 	    {
-	      if (!TYPE_DOMAIN_TYPE (new_sublist->fn_field.type))
-		TYPE_DOMAIN_TYPE (new_sublist->fn_field.type) = type;
+	      if (!TYPE_SELF_TYPE (new_sublist->fn_field.type))
+		TYPE_SELF_TYPE (new_sublist->fn_field.type) = type;
 	      new_sublist->fn_field.is_stub = 1;
 	    }
 	  new_sublist->fn_field.physname = savestring (*pp, p - *pp);

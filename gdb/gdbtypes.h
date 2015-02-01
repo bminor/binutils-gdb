@@ -1233,7 +1233,7 @@ extern void allocate_gnat_aux_type (struct type *);
 /* C++ */
 
 #define TYPE_VPTR_BASETYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
-#define TYPE_DOMAIN_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
+#define TYPE_SELF_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
 #define TYPE_VPTR_FIELDNO(thistype) TYPE_MAIN_TYPE(thistype)->vptr_fieldno
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_SPECIFIC_FIELD(thistype) \

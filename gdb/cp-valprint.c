@@ -764,7 +764,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
   /* VAL is a byte offset into the structure type DOMAIN.
      Find the name of the field for that offset and
      print it.  */
-  struct type *domain = TYPE_DOMAIN_TYPE (type);
+  struct type *domain = TYPE_SELF_TYPE (type);
   LONGEST val;
   int fieldno;
 

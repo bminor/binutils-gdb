@@ -2544,7 +2544,7 @@ find_overload_match (struct value **args, int nargs,
 	 value_find_oload_method_list above.  */
       if (fns_ptr)
 	{
-	  gdb_assert (TYPE_DOMAIN_TYPE (fns_ptr[0].type) != NULL);
+	  gdb_assert (TYPE_SELF_TYPE (fns_ptr[0].type) != NULL);
 
 	  src_method_oload_champ = find_oload_champ (args, nargs,
 						     num_fns, fns_ptr, NULL,
@@ -3360,7 +3360,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		  type = check_typedef (value_type (ptr));
 		  gdb_assert (type != NULL
 			      && TYPE_CODE (type) == TYPE_CODE_MEMBERPTR);
-		  tmp = lookup_pointer_type (TYPE_DOMAIN_TYPE (type));
+		  tmp = lookup_pointer_type (TYPE_SELF_TYPE (type));
 		  v = value_cast_pointers (tmp, v, 1);
 		  mem_offset = value_as_long (ptr);
 		  tmp = lookup_pointer_type (TYPE_TARGET_TYPE (type));

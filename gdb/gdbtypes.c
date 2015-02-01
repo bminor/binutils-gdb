@@ -805,7 +805,7 @@ allocate_stub_method (struct type *type)
   TYPE_LENGTH (mtype) = 1;
   TYPE_STUB (mtype) = 1;
   TYPE_TARGET_TYPE (mtype) = type;
-  /*  _DOMAIN_TYPE (mtype) = unknown yet */
+  /* TYPE_SELF_TYPE (mtype) = unknown yet */
   return mtype;
 }
 
@@ -1205,7 +1205,7 @@ smash_to_memberptr_type (struct type *type, struct type *domain,
 {
   smash_type (type);
   TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_DOMAIN_TYPE (type) = domain;
+  TYPE_SELF_TYPE (type) = domain;
   /* Assume that a data member pointer is the same size as a normal
      pointer.  */
   TYPE_LENGTH (type)
@@ -1224,7 +1224,7 @@ smash_to_methodptr_type (struct type *type, struct type *to_type)
 {
   smash_type (type);
   TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_DOMAIN_TYPE (type) = TYPE_DOMAIN_TYPE (to_type);
+  TYPE_SELF_TYPE (type) = TYPE_SELF_TYPE (to_type);
   TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
   TYPE_CODE (type) = TYPE_CODE_METHODPTR;
 }
@@ -1243,7 +1243,7 @@ smash_to_method_type (struct type *type, struct type *domain,
 {
   smash_type (type);
   TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_DOMAIN_TYPE (type) = domain;
+  TYPE_SELF_TYPE (type) = domain;
   TYPE_FIELDS (type) = args;
   TYPE_NFIELDS (type) = nargs;
   if (varargs)
@@ -2311,7 +2311,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 
   /* Now update the old "stub" type into a real type.  */
   mtype = TYPE_FN_FIELD_TYPE (f, signature_id);
-  TYPE_DOMAIN_TYPE (mtype) = type;
+  TYPE_SELF_TYPE (mtype) = type;
   TYPE_FIELDS (mtype) = argtypes;
   TYPE_NFIELDS (mtype) = argcount;
   TYPE_STUB (mtype) = 0;

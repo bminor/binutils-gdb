@@ -584,7 +584,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 			struct type *type,
 			struct ui_file *stream)
 {
-  struct type *domain = TYPE_DOMAIN_TYPE (type);
+  struct type *domain = TYPE_SELF_TYPE (type);
   struct gdbarch *gdbarch = get_type_arch (domain);
   CORE_ADDR ptr_value;
   LONGEST adjustment;
@@ -713,7 +713,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   LONGEST adjustment;
   int vbit;
 
-  domain_type = TYPE_DOMAIN_TYPE (check_typedef (value_type (method_ptr)));
+  domain_type = TYPE_SELF_TYPE (check_typedef (value_type (method_ptr)));
   final_type = lookup_pointer_type (domain_type);
 
   method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
