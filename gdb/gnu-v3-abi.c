@@ -202,6 +202,12 @@ gnuv3_dynamic_class (struct type *type)
 {
   int fieldnum, fieldelem;
 
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+
+  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+    return 0;
+
   if (TYPE_CPLUS_DYNAMIC (type))
     return TYPE_CPLUS_DYNAMIC (type) == 1;
 
@@ -246,9 +252,12 @@ gnuv3_get_vtable (struct gdbarch *gdbarch,
   struct value *vtable_pointer;
   CORE_ADDR vtable_address;
 
+  CHECK_TYPEDEF (container_type);
+  gdb_assert (TYPE_CODE (container_type) == TYPE_CODE_STRUCT);
+
   /* If this type does not have a virtual table, don't read the first
      field.  */
-  if (!gnuv3_dynamic_class (check_typedef (container_type)))
+  if (!gnuv3_dynamic_class (container_type))
     return NULL;
 
   /* We do not consult the debug information to find the virtual table.
@@ -301,7 +310,7 @@ gnuv3_rtti_type (struct value *value,
   if (using_enc_p)
     *using_enc_p = 0;
 
-  vtable = gnuv3_get_vtable (gdbarch, value_type (value),
+  vtable = gnuv3_get_vtable (gdbarch, values_type,
 			     value_as_address (value_addr (value)));
   if (vtable == NULL)
     return NULL;
@@ -575,8 +584,8 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 			struct type *type,
 			struct ui_file *stream)
 {
-  struct type *domain = TYPE_DOMAIN_TYPE (type);
-  struct gdbarch *gdbarch = get_type_arch (domain);
+  struct type *self_type = TYPE_SELF_TYPE (type);
+  struct gdbarch *gdbarch = get_type_arch (self_type);
   CORE_ADDR ptr_value;
   LONGEST adjustment;
   int vbit;
@@ -602,7 +611,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 	 to an index, as used in TYPE_FN_FIELD_VOFFSET.  */
       voffset = ptr_value / TYPE_LENGTH (vtable_ptrdiff_type (gdbarch));
 
-      physname = gnuv3_find_method_in (domain, voffset, adjustment);
+      physname = gnuv3_find_method_in (self_type, voffset, adjustment);
 
       /* If we found a method, print that.  We don't bother to disambiguate
 	 possible paths to the method based on the adjustment.  */
@@ -700,17 +709,17 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   struct gdbarch *gdbarch;
   const gdb_byte *contents = value_contents (method_ptr);
   CORE_ADDR ptr_value;
-  struct type *domain_type, *final_type, *method_type;
+  struct type *self_type, *final_type, *method_type;
   LONGEST adjustment;
   int vbit;
 
-  domain_type = TYPE_DOMAIN_TYPE (check_typedef (value_type (method_ptr)));
-  final_type = lookup_pointer_type (domain_type);
+  self_type = TYPE_SELF_TYPE (check_typedef (value_type (method_ptr)));
+  final_type = lookup_pointer_type (self_type);
 
   method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
 
   /* Extract the pointer to member.  */
-  gdbarch = get_type_arch (domain_type);
+  gdbarch = get_type_arch (self_type);
   vbit = gnuv3_decode_method_ptr (gdbarch, contents, &ptr_value, &adjustment);
 
   /* First convert THIS to match the containing type of the pointer to
@@ -820,6 +829,8 @@ compute_vtable_size (htab_t offset_hash,
   struct type *type = check_typedef (value_type (value));
   void **slot;
   struct value_and_voffset search_vo, *current_vo;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
 
   /* If the object is not dynamic, then we are done; as it cannot have
      dynamic base types either.  */
@@ -949,8 +960,11 @@ gnuv3_print_vtable (struct value *value)
     }
 
   gdbarch = get_type_arch (type);
-  vtable = gnuv3_get_vtable (gdbarch, type,
-			     value_as_address (value_addr (value)));
+
+  vtable = NULL;
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+    vtable = gnuv3_get_vtable (gdbarch, type,
+			       value_as_address (value_addr (value)));
 
   if (!vtable)
     {

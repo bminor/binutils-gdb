@@ -1714,6 +1714,17 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 				    address, true, true, false, false));
   }
 
+  void
+  add_local_relative(Sized_relobj<size, big_endian>* relobj,
+		     unsigned int local_sym_index, unsigned int type,
+		     Output_data* od, unsigned int shndx, Address address,
+		     bool use_plt_offset)
+  {
+    this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
+				    address, true, true, false,
+				    use_plt_offset));
+  }
+
   // Add a local relocation which does not use a symbol for the relocation,
   // but which gets its addend from a symbol.
 

@@ -315,11 +315,11 @@ c_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_MEMBERPTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
 				   stream, show, 0, 0, flags);
-      name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
+      name = type_name_no_tag (TYPE_SELF_TYPE (type));
       if (name)
 	print_name_maybe_canonical (name, flags, stream);
       else
-	c_type_print_base (TYPE_DOMAIN_TYPE (type),
+	c_type_print_base (TYPE_SELF_TYPE (type),
 			   stream, -1, passed_a_ptr, flags);
       fprintf_filtered (stream, "::*");
       break;
@@ -328,11 +328,11 @@ c_type_print_varspec_prefix (struct type *type,
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
 				   stream, show, 0, 0, flags);
       fprintf_filtered (stream, "(");
-      name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
+      name = type_name_no_tag (TYPE_SELF_TYPE (type));
       if (name)
 	print_name_maybe_canonical (name, flags, stream);
       else
-	c_type_print_base (TYPE_DOMAIN_TYPE (type),
+	c_type_print_base (TYPE_SELF_TYPE (type),
 			   stream, -1, passed_a_ptr, flags);
       fprintf_filtered (stream, "::*");
       break;

@@ -128,6 +128,7 @@ static const struct extension_language_script_ops guile_extension_script_ops =
 {
   gdbscm_source_script,
   gdbscm_source_objfile_script,
+  gdbscm_execute_objfile_script,
   gdbscm_auto_load_enabled
 };
 

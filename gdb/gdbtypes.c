@@ -180,7 +180,6 @@ alloc_type (struct objfile *objfile)
   /* Initialize the fields that might not be zero.  */
 
   TYPE_CODE (type) = TYPE_CODE_UNDEF;
-  TYPE_VPTR_FIELDNO (type) = -1;
   TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
 
   return type;
@@ -208,7 +207,6 @@ alloc_type_arch (struct gdbarch *gdbarch)
   /* Initialize the fields that might not be zero.  */
 
   TYPE_CODE (type) = TYPE_CODE_UNDEF;
-  TYPE_VPTR_FIELDNO (type) = -1;
   TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
 
   return type;
@@ -805,7 +803,7 @@ allocate_stub_method (struct type *type)
   TYPE_LENGTH (mtype) = 1;
   TYPE_STUB (mtype) = 1;
   TYPE_TARGET_TYPE (mtype) = type;
-  /*  _DOMAIN_TYPE (mtype) = unknown yet */
+  /* TYPE_SELF_TYPE (mtype) = unknown yet */
   return mtype;
 }
 
@@ -1054,7 +1052,6 @@ create_array_type_with_stride (struct type *result_type,
   TYPE_FIELDS (result_type) =
     (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
   TYPE_INDEX_TYPE (result_type) = range_type;
-  TYPE_VPTR_FIELDNO (result_type) = -1;
   if (bit_stride > 0)
     TYPE_FIELD_BITSIZE (result_type, 0) = bit_stride;
 
@@ -1188,7 +1185,58 @@ init_vector_type (struct type *elt_type, int n)
   return array_type;
 }
 
-/* Smash TYPE to be a type of pointers to members of DOMAIN with type
+/* Internal routine called by TYPE_SELF_TYPE to return the type that TYPE
+   belongs to.  In c++ this is the class of "this", but TYPE_THIS_TYPE is too
+   confusing.  "self" is a common enough replacement for "this".
+   TYPE must be one of TYPE_CODE_METHODPTR, TYPE_CODE_MEMBERPTR, or
+   TYPE_CODE_METHOD.  */
+
+struct type *
+internal_type_self_type (struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_METHODPTR:
+    case TYPE_CODE_MEMBERPTR:
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_SELF_TYPE);
+      return TYPE_MAIN_TYPE (type)->type_specific.self_type;
+    case TYPE_CODE_METHOD:
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
+      return TYPE_MAIN_TYPE (type)->type_specific.func_stuff->self_type;
+    default:
+      gdb_assert_not_reached ("bad type");
+    }
+}
+
+/* Set the type of the class that TYPE belongs to.
+   In c++ this is the class of "this".
+   TYPE must be one of TYPE_CODE_METHODPTR, TYPE_CODE_MEMBERPTR, or
+   TYPE_CODE_METHOD.  */
+
+void
+set_type_self_type (struct type *type, struct type *self_type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_METHODPTR:
+    case TYPE_CODE_MEMBERPTR:
+      if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE)
+	TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_SELF_TYPE;
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_SELF_TYPE);
+      TYPE_MAIN_TYPE (type)->type_specific.self_type = self_type;
+      break;
+    case TYPE_CODE_METHOD:
+      if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE)
+	INIT_FUNC_SPECIFIC (type);
+      gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
+      TYPE_MAIN_TYPE (type)->type_specific.func_stuff->self_type = self_type;
+      break;
+    default:
+      gdb_assert_not_reached ("bad type");
+    }
+}
+
+/* Smash TYPE to be a type of pointers to members of SELF_TYPE with type
    TO_TYPE.  A member pointer is a wierd thing -- it amounts to a
    typed offset into a struct, e.g. "an int at offset 8".  A MEMBER
    TYPE doesn't include the offset (that's the value of the MEMBER
@@ -1200,17 +1248,17 @@ init_vector_type (struct type *elt_type, int n)
    allocated.  */
 
 void
-smash_to_memberptr_type (struct type *type, struct type *domain,
+smash_to_memberptr_type (struct type *type, struct type *self_type,
 			 struct type *to_type)
 {
   smash_type (type);
+  TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
   TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_DOMAIN_TYPE (type) = domain;
+  set_type_self_type (type, self_type);
   /* Assume that a data member pointer is the same size as a normal
      pointer.  */
   TYPE_LENGTH (type)
     = gdbarch_ptr_bit (get_type_arch (to_type)) / TARGET_CHAR_BIT;
-  TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
 }
 
 /* Smash TYPE to be a type of pointer to methods type TO_TYPE.
@@ -1223,13 +1271,13 @@ void
 smash_to_methodptr_type (struct type *type, struct type *to_type)
 {
   smash_type (type);
-  TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_DOMAIN_TYPE (type) = TYPE_DOMAIN_TYPE (to_type);
-  TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
   TYPE_CODE (type) = TYPE_CODE_METHODPTR;
+  TYPE_TARGET_TYPE (type) = to_type;
+  set_type_self_type (type, TYPE_SELF_TYPE (to_type));
+  TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
 }
 
-/* Smash TYPE to be a type of method of DOMAIN with type TO_TYPE.
+/* Smash TYPE to be a type of method of SELF_TYPE with type TO_TYPE.
    METHOD just means `function that gets an extra "this" argument'.
 
    When "smashing" the type, we preserve the objfile that the old type
@@ -1237,19 +1285,19 @@ smash_to_methodptr_type (struct type *type, struct type *to_type)
    allocated.  */
 
 void
-smash_to_method_type (struct type *type, struct type *domain,
+smash_to_method_type (struct type *type, struct type *self_type,
 		      struct type *to_type, struct field *args,
 		      int nargs, int varargs)
 {
   smash_type (type);
+  TYPE_CODE (type) = TYPE_CODE_METHOD;
   TYPE_TARGET_TYPE (type) = to_type;
-  TYPE_DOMAIN_TYPE (type) = domain;
+  set_type_self_type (type, self_type);
   TYPE_FIELDS (type) = args;
   TYPE_NFIELDS (type) = nargs;
   if (varargs)
     TYPE_VARARGS (type) = 1;
   TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
-  TYPE_CODE (type) = TYPE_CODE_METHOD;
 }
 
 /* Return a typename for a struct/union/enum type without "struct ",
@@ -1563,6 +1611,59 @@ get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
   *max = ((ULONGEST) 1 << (n - 1)) - 1;
 }
 
+/* Internal routine called by TYPE_VPTR_FIELDNO to return the value of
+   cplus_stuff.vptr_fieldno.
+
+   cplus_stuff is initialized to cplus_struct_default which does not
+   set vptr_fieldno to -1 for portability reasons (IWBN to use C99
+   designated initializers).  We cope with that here.  */
+
+int
+internal_type_vptr_fieldno (struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  if (!HAVE_CPLUS_STRUCT (type))
+    return -1;
+  return TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_fieldno;
+}
+
+/* Set the value of cplus_stuff.vptr_fieldno.  */
+
+void
+set_type_vptr_fieldno (struct type *type, int fieldno)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  if (!HAVE_CPLUS_STRUCT (type))
+    ALLOCATE_CPLUS_STRUCT_TYPE (type);
+  TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_fieldno = fieldno;
+}
+
+/* Internal routine called by TYPE_VPTR_BASETYPE to return the value of
+   cplus_stuff.vptr_basetype.  */
+
+struct type *
+internal_type_vptr_basetype (struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_CPLUS_STUFF);
+  return TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_basetype;
+}
+
+/* Set the value of cplus_stuff.vptr_basetype.  */
+
+void
+set_type_vptr_basetype (struct type *type, struct type *basetype)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  if (!HAVE_CPLUS_STRUCT (type))
+    ALLOCATE_CPLUS_STRUCT_TYPE (type);
+  TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_basetype = basetype;
+}
+
 /* Lookup the vptr basetype/fieldno values for TYPE.
    If found store vptr_basetype in *BASETYPEP if non-NULL, and return
    vptr_fieldno.  Also, if found and basetype is from the same objfile,
@@ -1599,8 +1700,8 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
 		 it, it may have a different lifetime.  PR 2384 */
 	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (basetype))
 		{
-		  TYPE_VPTR_FIELDNO (type) = fieldno;
-		  TYPE_VPTR_BASETYPE (type) = basetype;
+		  set_type_vptr_fieldno (type, fieldno);
+		  set_type_vptr_basetype (type, basetype);
 		}
 	      if (basetypep)
 		*basetypep = basetype;
@@ -2311,13 +2412,12 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 
   /* Now update the old "stub" type into a real type.  */
   mtype = TYPE_FN_FIELD_TYPE (f, signature_id);
-  TYPE_DOMAIN_TYPE (mtype) = type;
-  TYPE_FIELDS (mtype) = argtypes;
-  TYPE_NFIELDS (mtype) = argcount;
+  /* MTYPE may currently be a function (TYPE_CODE_FUNC).
+     We want a method (TYPE_CODE_METHOD).  */
+  smash_to_method_type (mtype, type, TYPE_TARGET_TYPE (mtype),
+			argtypes, argcount, p[-2] == '.');
   TYPE_STUB (mtype) = 0;
   TYPE_FN_FIELD_STUB (f, signature_id) = 0;
-  if (p[-2] == '.')
-    TYPE_VARARGS (mtype) = 1;
 
   xfree (demangled_name);
 }
@@ -2383,6 +2483,7 @@ allocate_cplus_struct_type (struct type *type)
   TYPE_RAW_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
     TYPE_ALLOC (type, sizeof (struct cplus_struct_type));
   *(TYPE_RAW_CPLUS_SPECIFIC (type)) = cplus_struct_default;
+  set_type_vptr_fieldno (type, -1);
 }
 
 const struct gnat_aux_type gnat_aux_default =
@@ -3662,6 +3763,13 @@ dump_fn_fieldlists (struct type *type, int spaces)
 static void
 print_cplus_stuff (struct type *type, int spaces)
 {
+  printfi_filtered (spaces, "vptr_fieldno %d\n", TYPE_VPTR_FIELDNO (type));
+  printfi_filtered (spaces, "vptr_basetype ");
+  gdb_print_host_address (TYPE_VPTR_BASETYPE (type), gdb_stdout);
+  puts_filtered ("\n");
+  if (TYPE_VPTR_BASETYPE (type) != NULL)
+    recursive_dump_type (TYPE_VPTR_BASETYPE (type), spaces + 2);
+
   printfi_filtered (spaces, "n_baseclasses %d\n",
 		    TYPE_N_BASECLASSES (type));
   printfi_filtered (spaces, "nfn_fields %d\n",
@@ -3994,15 +4102,6 @@ recursive_dump_type (struct type *type, int spaces)
 			TYPE_HIGH_BOUND_UNDEFINED (type) 
 			? " (undefined)" : "");
     }
-  printfi_filtered (spaces, "vptr_basetype ");
-  gdb_print_host_address (TYPE_VPTR_BASETYPE (type), gdb_stdout);
-  puts_filtered ("\n");
-  if (TYPE_VPTR_BASETYPE (type) != NULL)
-    {
-      recursive_dump_type (TYPE_VPTR_BASETYPE (type), spaces + 2);
-    }
-  printfi_filtered (spaces, "vptr_fieldno %d\n", 
-		    TYPE_VPTR_FIELDNO (type));
 
   switch (TYPE_SPECIFIC_FIELD (type))
     {
@@ -4050,6 +4149,12 @@ recursive_dump_type (struct type *type, int spaces)
 	printfi_filtered (spaces, "calling_convention %d\n",
                           TYPE_CALLING_CONVENTION (type));
 	/* tail_call_list is not printed.  */
+	break;
+
+      case TYPE_SPECIFIC_SELF_TYPE:
+	printfi_filtered (spaces, "self_type ");
+	gdb_print_host_address (TYPE_SELF_TYPE (type), gdb_stdout);
+	puts_filtered ("\n");
 	break;
     }
 
@@ -4212,23 +4317,40 @@ copy_type_recursive (struct objfile *objfile,
       copy_type_recursive (objfile, 
 			   TYPE_TARGET_TYPE (type),
 			   copied_types);
-  if (TYPE_VPTR_BASETYPE (type))
-    TYPE_VPTR_BASETYPE (new_type) = 
-      copy_type_recursive (objfile,
-			   TYPE_VPTR_BASETYPE (type),
-			   copied_types);
+
   /* Maybe copy the type_specific bits.
 
      NOTE drow/2005-12-09: We do not copy the C++-specific bits like
      base classes and methods.  There's no fundamental reason why we
      can't, but at the moment it is not needed.  */
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    TYPE_FLOATFORMAT (new_type) = TYPE_FLOATFORMAT (type);
-  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	   || TYPE_CODE (type) == TYPE_CODE_UNION
-	   || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
-    INIT_CPLUS_SPECIFIC (new_type);
+  switch (TYPE_SPECIFIC_FIELD (type))
+    {
+    case TYPE_SPECIFIC_NONE:
+      break;
+    case TYPE_SPECIFIC_FUNC:
+      INIT_FUNC_SPECIFIC (new_type);
+      TYPE_CALLING_CONVENTION (new_type) = TYPE_CALLING_CONVENTION (type);
+      TYPE_NO_RETURN (new_type) = TYPE_NO_RETURN (type);
+      TYPE_TAIL_CALL_LIST (new_type) = NULL;
+      break;
+    case TYPE_SPECIFIC_FLOATFORMAT:
+      TYPE_FLOATFORMAT (new_type) = TYPE_FLOATFORMAT (type);
+      break;
+    case TYPE_SPECIFIC_CPLUS_STUFF:
+      INIT_CPLUS_SPECIFIC (new_type);
+      break;
+    case TYPE_SPECIFIC_GNAT_STUFF:
+      INIT_GNAT_SPECIFIC (new_type);
+      break;
+    case TYPE_SPECIFIC_SELF_TYPE:
+      set_type_self_type (new_type,
+			  copy_type_recursive (objfile, TYPE_SELF_TYPE (type),
+					       copied_types));
+      break;
+    default:
+      gdb_assert_not_reached ("bad type_specific_kind");
+    }
 
   return new_type;
 }

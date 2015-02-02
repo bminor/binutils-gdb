@@ -549,6 +549,7 @@ extern struct value *vlscm_convert_value_from_scheme
 /* stript_lang methods */
 
 extern objfile_script_sourcer_func gdbscm_source_objfile_script;
+extern objfile_script_executor_func gdbscm_execute_objfile_script;
 
 extern int gdbscm_auto_load_enabled (const struct extension_language_defn *);
 

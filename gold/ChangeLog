@@ -1,3 +1,51 @@
+2015-01-22  Han Shen  <shenhan@google.com>
+
+	* arm.cc (Target_arm::Target_arm): Add initialization for new members.
+	(Target_arm::do_plt_address_for_global): New method.
+	(Target_arm::do_plt_address_for_local): New method.
+	(Target_arm::rel_irelative_section): New method.
+	(Target_arm::make_data_plt): Add more parameters for plt ctor.
+	(Target_arm::do_make_data_plt): Add more parameters for plt ctor.
+	(Target_arm::Scan::symbol_needs_plt_entry): Add ifunc support.
+	(Target_arm::Scan::reloc_needs_plt_for_ifunc): Add ifunc support.
+	(Target_arm::Scan::check_non_pic): Add ifunc support.
+	(Target_arm::Scan::local): Add ifunc support.
+	(Target_arm::Scan::global): Add ifunc support.
+	(Target_arm::make_plt_section): New method.
+	(Target_arm::make_plt_entry): Change to call to make_plt_section.
+	(Target_arm::make_local_ifunc_plt_entry): New method.
+	(Target_arm::got_irelative_): New member.
+	(Target_arm::rel_irelative_): New member.
+	(Target_arm::got_section): Add creation for got_irelative_.
+	(Target_arm::rel_dyn_section): Add creation for rel_irelative_.
+	(Target_arm::Relocate::relocate): Properly set local ifunc address.
+	(Target_arm::do_dynsym_value): Properly set global ifunc address.
+	(Target_arm::scan_reloc_for_stub): Properly set global ifunc address.
+	(Output_data_plt_arm::IRelative_data): New type.
+	(Output_data_plt_arm::Output_data_plt_arm): Add more parameters.
+	(Output_data_plt_arm::add_entry): Add more parameters.
+	(Output_data_plt_arm::add_relocation): New method.
+	(Output_data_plt_arm::add_local_ifunc_entry): New method.
+	(Output_data_plt_arm::rel_irelative): New method.
+	(Output_data_plt_arm::entry_count): Modified.
+	(Output_data_plt_arm::address_for_global): New method.
+	(Output_data_plt_arm::address_for_local): New method.
+	(Output_data_plt_arm::set_final_data_size): Add irelative_count_.
+	(Output_data_plt_arm::insert_irelative_data): New method.
+	(Output_data_plt_arm::irelative_rel_): New member.
+	(Output_data_plt_arm::got_): New member.
+	(Output_data_plt_arm::got_irelative_): New member.
+	(Output_data_plt_arm::irelative_count_): New member.
+	(Output_data_plt_arm::IRelative_data_vec): New typedef.
+	(Output_data_plt_arm::irelative_data_vec_): New member.
+	(Output_data_plt_arm::do_write): Write out irelative entries.
+	(Output_data_plt_arm_standard::Output_data_plt_arm_standard): Add
+	more parameters to ctor.
+	(Output_data_plt_arm_nacl::Output_data_plt_arm_nacl): Add
+	more parameters to ctor.
+	* output.h (Output_data_reloc::add_local_relative): New method.
+	* aarch64.cc (Output_data_plt_aarch64): Fixed typo in comment.
+
 2015-01-29  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Correct GOT_TLSLD

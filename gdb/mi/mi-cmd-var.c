@@ -55,7 +55,12 @@ print_varobj (struct varobj *var, enum print_values print_values,
 
   ui_out_field_string (uiout, "name", varobj_get_objname (var));
   if (print_expression)
-    ui_out_field_string (uiout, "exp", varobj_get_expression (var));
+    {
+      char *exp = varobj_get_expression (var);
+
+      ui_out_field_string (uiout, "exp", exp);
+      xfree (exp);
+    }
   ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
   
   if (mi_print_value_p (var, print_values))
@@ -447,14 +452,18 @@ mi_cmd_var_info_type (char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
+  char *type_name;
 
   if (argc != 1)
     error (_("-var-info-type: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified.  */
   var = varobj_get_handle (argv[0]);
+  type_name = varobj_get_type (var);
 
-  ui_out_field_string (uiout, "type", varobj_get_type (var));
+  ui_out_field_string (uiout, "type", type_name);
+
+  xfree (type_name);
 }
 
 void
@@ -481,6 +490,7 @@ mi_cmd_var_info_expression (char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   const struct language_defn *lang;
   struct varobj *var;
+  char *exp;
 
   if (argc != 1)
     error (_("-var-info-expression: Usage: NAME."));
@@ -491,7 +501,10 @@ mi_cmd_var_info_expression (char *command, char **argv, int argc)
   lang = varobj_get_language (var);
 
   ui_out_field_string (uiout, "lang", lang->la_natural_name);
-  ui_out_field_string (uiout, "exp", varobj_get_expression (var));
+
+  exp = varobj_get_expression (var);
+  ui_out_field_string (uiout, "exp", exp);
+  xfree (exp);
 }
 
 void
@@ -765,7 +778,12 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	}
 
       if (r->type_changed)
-	ui_out_field_string (uiout, "new_type", varobj_get_type (r->varobj));
+	{
+	  char *type_name = varobj_get_type (r->varobj);
+
+	  ui_out_field_string (uiout, "new_type", type_name);
+	  xfree (type_name);
+	}
 
       if (r->type_changed || r->children_changed)
 	ui_out_field_int (uiout, "new_num_children", 

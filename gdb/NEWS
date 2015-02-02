@@ -3,16 +3,47 @@
 
 *** Changes since GDB 7.9
 
+* The "info source" command now displays the producer string if it was
+  present in the debug info.  This typically includes the compiler version
+  and may include things like its command line arguments.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",
      which is the name of the objfile as specified by the user,
      without, for example, resolving symlinks.
 
+* New commands
+
+maint print symbol-cache
+  Print the contents of the symbol cache.
+
+maint print symbol-cache-statistics
+  Print statistics of symbol cache usage.
+
+maint flush-symbol-cache
+  Flush the contents of the symbol cache.
+
 * New options
+
+set max-completions
+show max-completions
+  Set the maximum number of candidates to be considered during
+  completion.  The default value is 200.  This limit allows GDB
+  to avoid generating large completion lists, the computation of
+  which can cause the debugger to become temporarily unresponsive.
+
+maint set symbol-cache-size
+maint show symbol-cache-size
+  Control the size of the symbol cache.
 
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.
+
+* Python/Guile scripting
+
+  ** GDB now supports auto-loading of Python/Guile scripts contained in the
+     special section named `.debug_gdb_scripts'.
 
 *** Changes in GDB 7.9
 

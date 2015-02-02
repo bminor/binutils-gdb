@@ -1,3 +1,378 @@
+2015-02-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_property): Add i18n marker.
+
+2015-02-02  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/17856:
+	* ada-lang.c (ada_lookup_symbol_list_worker): Do not re-cache
+	results found in the cache.
+
+2015-02-02  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/17854:
+	* ada-lang.c (ada_get_symbol_cache): Set pspace_data->sym_cache
+	when allocating a new one.
+
+2015-02-01  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS: Remove myself.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* dwarf2read.c (process_structure_scope): Update setting of
+	TYPE_VPTR_BASETYPE, TYPE_VPTR_FIELDNO.
+	* gdbtypes.c (internal_type_vptr_fieldno): New function.
+	(set_type_vptr_fieldno): New function.
+	(internal_type_vptr_basetype): New function.
+	(set_type_vptr_basetype): New function.
+	(get_vptr_fieldno): Update setting of TYPE_VPTR_FIELDNO,
+	TYPE_VPTR_BASETYPE.
+	(allocate_cplus_struct_type): Initialize vptr_fieldno.
+	(recursive_dump_type): Printing of vptr_fieldno, vptr_basetype ...
+	(print_cplus_stuff): ... moved here.
+	(copy_type_recursive): Don't copy TYPE_VPTR_BASETYPE.
+	* gdbtypes.h (struct main_type): Members vptr_fieldno, vptr_basetype
+	moved to ...
+	(struct cplus_struct_type): ... here.  All uses updated.
+	(TYPE_VPTR_FIELDNO, TYPE_VPTR_BASETYPE): Rewrite.
+	(internal_type_vptr_fieldno, set_type_vptr_fieldno): Declare.
+	(internal_type_vptr_basetype, set_type_vptr_basetype): Declare.
+	* stabsread.c (read_tilde_fields): Update setting of
+	TYPE_VPTR_FIELDNO, TYPE_VPTR_BASETYPE.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* cp-valprint.c (cp_find_class_member): Rename parameter domain_p
+	to self_p.
+	(cp_print_class_member): Rename local domain to self_type.
+	* dwarf2read.c (quirk_gcc_member_function_pointer): Rename local
+	domain_type to self_type.
+	(set_die_type) <need_gnat_info>: Handle
+	TYPE_CODE_METHODPTR, TYPE_CODE_MEMBERPTR, TYPE_CODE_METHOD.
+	* gdb-gdb.py (StructMainTypePrettyPrinter): Handle
+	TYPE_SPECIFIC_SELF_TYPE.
+	* gdbtypes.c (internal_type_self_type): New function.
+	(set_type_self_type): New function.
+	(smash_to_memberptr_type): Rename parameter domain to self_type.
+	Update setting of TYPE_SELF_TYPE.
+	(smash_to_methodptr_type): Update setting of TYPE_SELF_TYPE.
+	(smash_to_method_type): Rename parameter domain to self_type.
+	Update setting of TYPE_SELF_TYPE.
+	(check_stub_method): Call smash_to_method_type.
+	(recursive_dump_type): Handle TYPE_SPECIFIC_SELF_TYPE.
+	(copy_type_recursive): Ditto.
+	* gdbtypes.h (enum type_specific_kind): New value
+	TYPE_SPECIFIC_SELF_TYPE.
+	(struct main_type) <type_specific>: New member self_type.
+	(struct cplus_struct_type) <fn_field.type>: Update comment.
+	(TYPE_SELF_TYPE): Rewrite.
+	(internal_type_self_type, set_type_self_type): Declare.
+	* gnu-v3-abi.c (gnuv3_print_method_ptr): Rename local domain to
+	self_type.
+	(gnuv3_method_ptr_to_value): Rename local domain_type to self_type.
+	* m2-typeprint.c (m2_range): Replace TYPE_SELF_TYPE with
+	TYPE_TARGET_TYPE.
+	* stabsread.c (read_member_functions): Mark methods with
+	TYPE_CODE_METHOD, not TYPE_CODE_FUNC.  Update setting of
+	TYPE_SELF_TYPE.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.h (TYPE_SELF_TYPE): Renamed from TYPE_DOMAIN_TYPE.
+	All uses updated.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* gnu-v3-abi.c (gnuv3_dynamic_class): Assert only passed structs
+	or unions.  Return zero if union.
+	(gnuv3_get_vtable): Call check_typedef.  Assert only passed structs.
+	(gnuv3_rtti_type): Pass already-check_typedef'd value to
+	gnuv3_get_vtable.
+	(compute_vtable_size): Assert only passed structs.
+	(gnuv3_print_vtable): Don't call gnuv3_get_vtable for non-structs.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.c (copy_type_recursive): Handle all TYPE_SPECIFIC_FIELD
+	kinds.
+
+2015-01-31  Gary Benson <gbenson@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	PR cli/9007
+	PR cli/11920
+	PR cli/15548
+	* cli/cli-cmds.c (complete_command): Notify user if max-completions
+	reached.
+	* common/common-exceptions.h (enum errors)
+	<MAX_COMPLETIONS_REACHED_ERROR>: New value.
+	* completer.h (get_max_completions_reached_message): New declaration.
+	(max_completions): Likewise.
+	(completion_tracker_t): New typedef.
+	(new_completion_tracker): New declaration.
+	(make_cleanup_free_completion_tracker): Likewise.
+	(maybe_add_completion_enum): New enum.
+	(maybe_add_completion): New declaration.
+	(throw_max_completions_reached_error): Likewise.
+	* completer.c (max_completions): New global variable.
+	(new_completion_tracker): New function.
+	(free_completion_tracker): Likewise.
+	(make_cleanup_free_completion_tracker): Likewise.
+	(maybe_add_completions): Likewise.
+	(throw_max_completions_reached_error): Likewise.
+	(complete_line): Remove duplicates and limit result to max_completions
+	entries.
+	(get_max_completions_reached_message): New function.
+	(gdb_display_match_list): Handle max_completions.
+	(_initialize_completer): New declaration and function.
+	* symtab.c: Include completer.h.
+	(completion_tracker): New static variable.
+	(completion_list_add_name): Call maybe_add_completion.
+	(default_make_symbol_completion_list_break_on_1): Renamed from
+	default_make_symbol_completion_list_break_on.  Maintain
+	completion_tracker across calls to completion_list_add_name.
+	(default_make_symbol_completion_list_break_on): New function.
+	* top.c (init_main): Set rl_completion_display_matches_hook.
+	* tui/tui-io.c: Include completer.h.
+	(tui_old_rl_display_matches_hook): New static global.
+	(tui_rl_display_match_list): Notify user if max-completions reached.
+	(tui_setup_io): Save/restore rl_completion_display_matches_hook.
+	* NEWS (New Options): Mention set/show max-completions.
+
+2015-01-31  Gary Benson  <gbenson@redhat.com>
+
+	* symtab.c (struct add_name_data) <code>: New field.
+	Updated comments.
+	(add_symtab_completions): New function.
+	(symtab_expansion_callback): Likewise.
+	(default_make_symbol_completion_list_break_on): Set datum.code.
+	Move minimal symbol scan before calling expand_symtabs_matching.
+	Scan known primary symtabs for externs and statics before calling
+	expand_symtabs_matching.  Pass symtab_expansion_callback as
+	expansion_notify argument to expand_symtabs_matching.  Do not scan
+	primary symtabs for externs and statics after calling
+	expand_symtabs_matching.
+
+2015-01-31  Gary Benson  <gbenson@redhat.com>
+
+	* symfile.h (expand_symtabs_exp_notify_ftype): New typedef.
+	(struct quick_symbol_functions) <expand_symtabs_matching>:
+	New argument expansion_notify.  All uses updated.
+	(expand_symtabs_matching): New argument expansion_notify.
+	All uses updated.
+	* symfile-debug.c (debug_qf_expand_symtabs_matching):
+	Also print expansion notify.
+	* symtab.c (expand_symtabs_matching_via_partial): Call
+	expansion_notify whenever a partial symbol table is expanded.
+	* dwarf2read.c (dw2_expand_symtabs_matching): Call
+	expansion_notify whenever a symbol table is instantiated.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* cli-out.c: #include completer.h, readline/readline.h.
+	(cli_mld_crlf, cli_mld_putch, cli_mld_puts): New functions.
+	(cli_mld_flush, cld_mld_erase_entire_line): Ditto.
+	(cli_mld_beep, cli_mld_read_key, cli_display_match_list): Ditto.
+	* cli-out.h (cli_display_match_list): Declare.
+	* completer.c (MB_INVALIDCH, MB_NULLWCH): New macros.
+	(ELLIPSIS_LEN): Ditto.
+	(gdb_get_y_or_n, gdb_display_match_list_pager): New functions.
+	(gdb_path_isdir, gdb_printable_part, gdb_fnwidth): Ditto.
+	(gdb_fnprint, gdb_print_filename): Ditto.
+	(gdb_complete_get_screenwidth, gdb_display_match_list_1): Ditto.
+	(gdb_display_match_list): Ditto.
+	* completer.h (mld_crlf_ftype, mld_putch_ftype): New typedefs.
+	(mld_puts_ftype, mld_flush_ftype, mld_erase_entire_line_ftype): Ditto.
+	(mld_beep_ftype, mld_read_key_ftype): Ditto.
+	(match_list_displayer): New struct.
+	(gdb_display_match_list): Declare.
+	* top.c (init_main): Set rl_completion_display_matches_hook.
+	* tui/tui-io.c: #include completer.h.
+	(printable_part, PUTX, print_filename, get_y_or_n): Delete.
+	(tui_mld_crlf, tui_mld_putch, tui_mld_puts): New functions.
+	(tui_mld_flush, tui_mld_erase_entire_line, tui_mld_beep): Ditto.
+	(tui_mld_getc, tui_mld_read_key): Ditto.
+	(tui_rl_display_match_list): Rewrite.
+	(tui_handle_resize_during_io): New arg for_completion.  All callers
+	updated.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	Add symbol lookup cache.
+	* NEWS: Document new options and commands.
+	* symtab.c (symbol_cache_key): New static global.
+	(DEFAULT_SYMBOL_CACHE_SIZE, MAX_SYMBOL_CACHE_SIZE): New macros.
+	(SYMBOL_LOOKUP_FAILED): New macro.
+	(symbol_cache_slot_state): New enum.
+	(block_symbol_cache): New struct.
+	(symbol_cache): New struct.
+	(new_symbol_cache_size, symbol_cache_size): New static globals.
+	(hash_symbol_entry, eq_symbol_entry): New functions.
+	(symbol_cache_byte_size, resize_symbol_cache): New functions.
+	(make_symbol_cache, free_symbol_cache): New functions.
+	(get_symbol_cache, symbol_cache_cleanup): New function.
+	(set_symbol_cache_size, set_symbol_cache_size_handler): New functions.
+	(symbol_cache_lookup, symbol_cache_clear_slot): New function.
+	(symbol_cache_mark_found, symbol_cache_mark_not_found): New functions.
+	(symbol_cache_flush, symbol_cache_dump): New functions.
+	(maintenance_print_symbol_cache): New function.
+	(maintenance_flush_symbol_cache): New function.
+	(symbol_cache_stats): New function.
+	(maintenance_print_symbol_cache_statistics): New function.
+	(symtab_new_objfile_observer): New function.
+	(symtab_free_objfile_observer): New function.
+	(lookup_static_symbol, lookup_global_symbol): Use symbol cache.
+	(_initialize_symtab): Init symbol_cache_key.  New parameter
+	maint symbol-cache-size.  New maint commands print symbol-cache,
+	print symbol-cache-statistics, flush-symbol-cache.
+	Install new_objfile, free_objfile observers.
+
+2015-01-31  Joel Brobecker  <brobecker@adacore.com>
+
+	PR symtab/17855
+	* symfile.c (clear_symtab_users): Move call to breakpoint_re_set
+	to end.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* NEWS: Mention inlined scripts in .debug_gdb_scripts section.
+	* auto-load.c: #include ctype.h.
+	(struct auto_load_pspace_info): Replace member loaded_scripts with
+	new members loaded_script_files, loaded_script_texts.
+	(auto_load_pspace_data_cleanup): Update.
+	(init_loaded_scripts_info): Update.
+	(get_auto_load_pspace_data_for_loading): Update.
+	(maybe_add_script_file): Renamed from maybe_add_script.  All callers
+	updated.
+	(maybe_add_script_text): New function.
+	(clear_section_scripts): Update.
+	(source_script_file, execute_script_contents): New functions.
+	(source_section_scripts): Add support for
+	SECTION_SCRIPT_ID_PYTHON_TEXT, SECTION_SCRIPT_ID_GUILE_TEXT.
+	(print_scripts): New function.
+	(auto_load_info_scripts): Also print inlined scripts.
+	(maybe_print_unsupported_script_warning): Renamed from
+	unsupported_script_warning_print.  All callers updated.
+	(maybe_print_script_not_found_warning): Renamed from
+	script_not_found_warning_print.  All callers updated.
+	* extension-priv.h (struct extension_language_script_ops): New member
+	objfile_script_executor.
+	* extension.c (ext_lang_objfile_script_executor): New function.
+	* extension.h (objfile_script_executor_func): New typedef.
+	(ext_lang_objfile_script_executor): Declare.
+	* guile/guile-internal.h (gdbscm_execute_objfile_script): Declare.
+	* guile/guile.c (guile_extension_script_ops): Update.
+	* guile/scm-objfile.c (gdbscm_execute_objfile_script): New function.
+	* python/python.c (python_extension_script_ops): Update.
+	(gdbpy_execute_objfile_script): New function.
+
+2015-01-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-io.c (tui_expand_tabs): New function.
+	(tui_puts, tui_redisplay_readline): Expand TABs into the
+	appropriate number of spaces.
+	* tui/tui-regs.c: Include tui-io.h.
+	(tui_register_format): Call tui_expand_tabs to expand TABs into
+	the appropriate number of spaces.
+	* tui/tui-io.h: Add prototype for tui_expand_tabs.
+
+2015-01-30  Doug Evans  <dje@google.com>
+
+	* NEWS: "info source" command now display producer string if present.
+	* source.c (source_info): Print producer string if present.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* varobj.c (varobj_delete): Fix comment.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* varobj.c (create_child): Modify comment.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-varobj.c (ada_number_of_children): Constify struct varobj *
+	parameter.
+	(ada_name_of_variable): Same.
+	(ada_path_expr_of_child): Same.
+	(ada_value_of_variable): Same.
+	(ada_value_is_changeable_p): Same.
+	(ada_value_has_mutated): Same.
+	* c-varobj.c (varobj_is_anonymous_child): Same.
+	(c_is_path_expr_parent): Same.
+	(c_number_of_children): Same.
+	(c_name_of_variable): Same.
+	(c_path_expr_of_child): Same.
+	(get_type): Same.
+	(c_value_of_variable): Same.
+	(cplus_number_of_children): Same.
+	(cplus_name_of_variable): Same.
+	(cplus_path_expr_of_child): Same.
+	(cplus_value_of_variable): Same.
+	* jv-varobj.c (java_number_of_children): Same.
+	(java_name_of_variable): Same.
+	(java_path_expr_of_child): Same.
+	(java_value_of_variable): Same.
+	* varobj.c (number_of_children): Same.
+	(name_of_variable): Same.
+	(is_root_p): Same.
+	(varobj_ensure_python_env): Same.
+	(varobj_get_objname): Same.
+	(varobj_get_expression): Same.
+	(varobj_get_display_format): Same.
+	(varobj_get_display_hint): Same.
+	(varobj_has_more): Same.
+	(varobj_get_thread_id): Same.
+	(varobj_get_frozen): Same.
+	(dynamic_varobj_has_child_method): Same.
+	(varobj_get_gdb_type): Same.
+	(is_path_expr_parent): Same.
+	(varobj_default_is_path_expr_parent): Same.
+	(varobj_get_language): Same.
+	(varobj_get_attributes): Same.
+	(varobj_is_dynamic_p): Same.
+	(varobj_get_child_range): Same.
+	(varobj_value_has_mutated): Same.
+	(varobj_get_value_type): Same.
+	(number_of_children): Same.
+	(name_of_variable): Same.
+	(check_scope): Same.
+	(varobj_editable_p): Same.
+	(varobj_value_is_changeable_p): Same.
+	(varobj_floating_p): Same.
+	(varobj_default_value_is_changeable_p): Same.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* varobj.c (varobj_get_path_expr): Set var->path_expr.
+	* c-varobj.c (c_path_expr_of_child): Set local var instead of
+	child->path_expr.
+	(cplus_path_expr_of_child): Same.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi-cmd-var.c (print_varobj): Free varobj_get_expression
+	result.
+	(mi_cmd_var_info_expression): Same.
+	* varobj.c (varobj_get_expression): Mention in the comment that
+	the result must by freed by the caller.
+
+2015-01-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_info_type): Free result of
+	varobj_get_type.
+	(varobj_update_one): Same.
+	* varobj.c (update_type_if_necessary): Free curr_type_str and
+	new_type_str.
+	(varobj_get_type): Specify in comment that the result needs to be
+	freed by the caller.
+
+2015-01-29  Doug Evans  <dje@google.com>
+
+	PR symtab/17890
+	* dwarf2read.c (dwarf_decode_line_header): Punt if version > 4.
+
 2015-01-25  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2read.c (checkproducer): Call producer_is_gcc.

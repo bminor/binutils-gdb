@@ -239,7 +239,7 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
       if (passed_a_ptr)
 	{
 	  fprintf_filtered (stream, " ");
-	  pascal_type_print_base (TYPE_DOMAIN_TYPE (type),
+	  pascal_type_print_base (TYPE_SELF_TYPE (type),
 				  stream, 0, passed_a_ptr, flags);
 	  fprintf_filtered (stream, "::");
 	}

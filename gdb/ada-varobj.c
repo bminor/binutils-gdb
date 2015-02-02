@@ -906,13 +906,13 @@ ada_varobj_get_value_of_variable (struct value *value,
 /* Ada specific callbacks for VAROBJs.  */
 
 static int
-ada_number_of_children (struct varobj *var)
+ada_number_of_children (const struct varobj *var)
 {
   return ada_varobj_get_number_of_children (var->value, var->type);
 }
 
 static char *
-ada_name_of_variable (struct varobj *parent)
+ada_name_of_variable (const struct varobj *parent)
 {
   return c_varobj_ops.name_of_variable (parent);
 }
@@ -925,7 +925,7 @@ ada_name_of_child (struct varobj *parent, int index)
 }
 
 static char*
-ada_path_expr_of_child (struct varobj *child)
+ada_path_expr_of_child (const struct varobj *child)
 {
   struct varobj *parent = child->parent;
   const char *parent_path_expr = varobj_get_path_expr (parent);
@@ -952,7 +952,8 @@ ada_type_of_child (struct varobj *parent, int index)
 }
 
 static char *
-ada_value_of_variable (struct varobj *var, enum varobj_display_formats format)
+ada_value_of_variable (const struct varobj *var,
+		       enum varobj_display_formats format)
 {
   struct value_print_options opts;
 
@@ -964,7 +965,7 @@ ada_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 /* Implement the "value_is_changeable_p" routine for Ada.  */
 
 static int
-ada_value_is_changeable_p (struct varobj *var)
+ada_value_is_changeable_p (const struct varobj *var)
 {
   struct type *type = var->value ? value_type (var->value) : var->type;
 
@@ -990,7 +991,7 @@ ada_value_is_changeable_p (struct varobj *var)
 /* Implement the "value_has_mutated" routine for Ada.  */
 
 static int
-ada_value_has_mutated (struct varobj *var, struct value *new_val,
+ada_value_has_mutated (const struct varobj *var, struct value *new_val,
 		       struct type *new_type)
 {
   int i;

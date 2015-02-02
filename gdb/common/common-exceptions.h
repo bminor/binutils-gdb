@@ -99,6 +99,12 @@ enum errors {
   /* Requested feature, method, mechanism, etc. is not supported.  */
   NOT_SUPPORTED_ERROR,
 
+  /* The number of candidates generated during line completion has
+     reached the user's specified limit.  This isn't an error, this exception
+     is used to halt searching for more completions, but for consistency
+     "_ERROR" is appended to the name.  */
+  MAX_COMPLETIONS_REACHED_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };

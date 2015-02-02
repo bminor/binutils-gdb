@@ -21,13 +21,13 @@
 /* Java */
 
 static int
-java_number_of_children (struct varobj *var)
+java_number_of_children (const struct varobj *var)
 {
   return cplus_varobj_ops.number_of_children (var);
 }
 
 static char *
-java_name_of_variable (struct varobj *parent)
+java_name_of_variable (const struct varobj *parent)
 {
   char *p, *name;
 
@@ -66,7 +66,7 @@ java_name_of_child (struct varobj *parent, int index)
 }
 
 static char *
-java_path_expr_of_child (struct varobj *child)
+java_path_expr_of_child (const struct varobj *child)
 {
   return NULL;
 }
@@ -84,7 +84,8 @@ java_type_of_child (struct varobj *parent, int index)
 }
 
 static char *
-java_value_of_variable (struct varobj *var, enum varobj_display_formats format)
+java_value_of_variable (const struct varobj *var,
+			enum varobj_display_formats format)
 {
   return cplus_varobj_ops.value_of_variable (var, format);
 }

@@ -1028,7 +1028,7 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
       if (objfile->sf)
 	objfile->sf->qf->expand_symtabs_matching (objfile, NULL,
 						  iterate_name_matcher,
-						  ALL_DOMAIN,
+						  NULL, ALL_DOMAIN,
 						  &matcher_data);
 
       ALL_OBJFILE_COMPUNITS (objfile, cu)

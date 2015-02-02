@@ -1600,6 +1600,38 @@ means @kbd{@key{META} ?}.  You can type this either by holding down a
 key designated as the @key{META} shift on your keyboard (if there is
 one) while typing @kbd{?}, or as @key{ESC} followed by @kbd{?}.
 
+If the number of possible completions is large, @value{GDBN} will
+print as much of the list as it has collected, as well as a message
+indicating that the list may be truncated.
+
+@smallexample
+(@value{GDBP}) b m@key{TAB}@key{TAB}
+main
+<... the rest of the possible completions ...>
+*** List may be truncated, max-completions reached. ***
+(@value{GDBP}) b m
+@end smallexample
+
+@noindent
+This behavior can be controlled with the following commands:
+
+@table @code
+@kindex set max-completions
+@item set max-completions @var{limit}
+@itemx set max-completions unlimited
+Set the maximum number of completion candidates.  @value{GDBN} will
+stop looking for more completions once it collects this many candidates.
+This is useful when completing on things like function names as collecting
+all the possible candidates can be time consuming.
+The default value is 200.  A value of zero disables tab-completion.
+Note that setting either no limit or a very large limit can make
+completion slow.
+@kindex show max-completions
+@item show max-completions
+Show the maximum number of candidates that @value{GDBN} will collect and show
+during completion.
+@end table
+
 @cindex quotes in commands
 @cindex completion of quoted strings
 Sometimes the string you need, while logically a ``word'', may contain
@@ -16300,6 +16332,9 @@ its length, in lines,
 @item
 which programming language it is written in,
 @item
+if the debug information provides it, the program that compiled the file
+(which may include, e.g., the compiler version and command line arguments),
+@item
 whether the executable includes debugging information for that file, and
 if so, what format the information is in (e.g., STABS, Dwarf 2, etc.), and
 @item
@@ -16492,8 +16527,39 @@ line 1574.
 @}
 (@value{GDBP})
 @end smallexample
-@end table
 
+@kindex maint set symbol-cache-size
+@cindex symbol cache size
+@item maint set symbol-cache-size @var{size}
+Set the size of the symbol cache to @var{size}.
+The default size is intended to be good enough for debugging
+most applications.  This option exists to allow for experimenting
+with different sizes.
+
+@kindex maint show symbol-cache-size
+@item maint show symbol-cache-size
+Show the size of the symbol cache.
+
+@kindex maint print symbol-cache
+@cindex symbol cache, printing its contents
+@item maint print symbol-cache
+Print the contents of the symbol cache.
+This is useful when debugging symbol cache issues.
+
+@kindex maint print symbol-cache-statistics
+@cindex symbol cache, printing usage statistics
+@item maint print symbol-cache-statistics
+Print symbol cache usage statistics.
+This helps determine how well the cache is being utilized.
+
+@kindex maint flush-symbol-cache
+@cindex symbol cache, flushing
+@item maint flush-symbol-cache
+Flush the contents of the symbol cache, all entries are removed.
+This command is useful when debugging the symbol cache.
+It is also useful when collecting performance data.
+
+@end table
 
 @node Altering
 @chapter Altering Execution
@@ -23974,17 +24040,29 @@ is evaluated more than once.
 For systems using file formats like ELF and COFF,
 when @value{GDBN} loads a new object file
 it will look for a special section named @code{.debug_gdb_scripts}.
-If this section exists, its contents is a list of NUL-terminated names
-of scripts to load.  Each entry begins with a non-NULL prefix byte that
-specifies the kind of entry, typically the extension language.
+If this section exists, its contents is a list of null-terminated entries
+specifying scripts to load.  Each entry begins with a non-null prefix byte that
+specifies the kind of entry, typically the extension language and whether the
+script is in a file or inlined in @code{.debug_gdb_scripts}.
 
-@value{GDBN} will look for each specified script file first in the
-current directory and then along the source search path
+The following entries are supported:
+
+@table @code
+@item SECTION_SCRIPT_ID_PYTHON_FILE = 1
+@item SECTION_SCRIPT_ID_SCHEME_FILE = 3
+@item SECTION_SCRIPT_ID_PYTHON_TEXT = 4
+@item SECTION_SCRIPT_ID_SCHEME_TEXT = 6
+@end table
+
+@subsubsection Script File Entries
+
+If the entry specifies a file, @value{GDBN} will look for the file first
+in the current directory and then along the source search path
 (@pxref{Source Path, ,Specifying Source Directories}),
 except that @file{$cdir} is not searched, since the compilation
 directory is not relevant to scripts.
 
-Entries can be placed in section @code{.debug_gdb_scripts} with,
+File entries can be placed in section @code{.debug_gdb_scripts} with,
 for example, this GCC macro for Python scripts.
 
 @example
@@ -24015,6 +24093,45 @@ If the macro invocation is put in a header, any application or library
 using this header will get a reference to the specified script,
 and with the use of @code{"MS"} attributes on the section, the linker
 will remove duplicates.
+
+@subsubsection Script Text Entries
+
+Script text entries allow to put the executable script in the entry
+itself instead of loading it from a file.
+The first line of the entry, everything after the prefix byte and up to
+the first newline (@code{0xa}) character, is the script name, and must not
+contain any kind of space character, e.g., spaces or tabs.
+The rest of the entry, up to the trailing null byte, is the script to
+execute in the specified language.  The name needs to be unique among
+all script names, as @value{GDBN} executes each script only once based
+on its name.
+
+Here is an example from file @file{py-section-script.c} in the @value{GDBN}
+testsuite.
+
+@example
+#include "symcat.h"
+#include "gdb/section-scripts.h"
+asm(
+".pushsection \".debug_gdb_scripts\", \"MS\",@@progbits,1\n"
+".byte " XSTRING (SECTION_SCRIPT_ID_PYTHON_TEXT) "\n"
+".ascii \"gdb.inlined-script\\n\"\n"
+".ascii \"class test_cmd (gdb.Command):\\n\"\n"
+".ascii \"  def __init__ (self):\\n\"\n"
+".ascii \"    super (test_cmd, self).__init__ ("
+    "\\\"test-cmd\\\", gdb.COMMAND_OBSCURE)\\n\"\n"
+".ascii \"  def invoke (self, arg, from_tty):\\n\"\n"
+".ascii \"    print (\\\"test-cmd output, arg = %s\\\" % arg)\\n\"\n"
+".ascii \"test_cmd ()\\n\"\n"
+".byte 0\n"
+".popsection\n"
+);
+@end example
+
+Loading of inlined scripts requires a properly configured
+@code{auto-load safe-path} (@pxref{Auto-loading safe path}).
+The path to specify in @code{auto-load safe-path} is the path of the file
+containing the @code{.debug_gdb_scripts} section.
 
 @node Which flavor to choose?
 @subsection Which flavor to choose?

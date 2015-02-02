@@ -664,7 +664,6 @@ make_params (int num_types, struct type **param_types)
   TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
   TYPE_LENGTH (type) = 1;
   TYPE_CODE (type) = TYPE_CODE_METHOD;
-  TYPE_VPTR_FIELDNO (type) = -1;
   TYPE_CHAIN (type) = type;
   if (num_types > 0)
     {
@@ -1390,7 +1389,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else if (TYPE_CODE (type) == TYPE_CODE_MEMBERPTR)
 	    {
 	      struct type *type_ptr
-		= lookup_pointer_type (TYPE_DOMAIN_TYPE (type));
+		= lookup_pointer_type (TYPE_SELF_TYPE (type));
 	      struct type *target_type_ptr
 		= lookup_pointer_type (TYPE_TARGET_TYPE (type));
 
@@ -1934,7 +1933,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	case TYPE_CODE_MEMBERPTR:
 	  /* Now, convert these values to an address.  */
-	  arg1 = value_cast_pointers (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
+	  arg1 = value_cast_pointers (lookup_pointer_type (TYPE_SELF_TYPE (type)),
 				      arg1, 1);
 
 	  mem_offset = value_as_long (arg2);

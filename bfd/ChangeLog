@@ -1,3 +1,8 @@
+2015-02-02  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.c (nds32_get_section_contents): Add one more argument.
+	(nds32_elf_relocate_section): Do not relocate R_NDS32_LONGJUMP7.
+
 2015-01-29  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Correct GOT_TLSLD

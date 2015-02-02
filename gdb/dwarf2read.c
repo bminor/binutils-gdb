@@ -3825,6 +3825,7 @@ dw2_expand_symtabs_matching
   (struct objfile *objfile,
    expand_symtabs_file_matcher_ftype *file_matcher,
    expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+   expand_symtabs_exp_notify_ftype *expansion_notify,
    enum search_domain kind,
    void *data)
 {
@@ -3996,7 +3997,20 @@ dw2_expand_symtabs_matching
 
 	  per_cu = dw2_get_cutu (cu_index);
 	  if (file_matcher == NULL || per_cu->v.quick->mark)
-	    dw2_instantiate_symtab (per_cu);
+	    {
+	      int symtab_was_null =
+		(per_cu->v.quick->compunit_symtab == NULL);
+
+	      dw2_instantiate_symtab (per_cu);
+
+	      if (expansion_notify != NULL
+		  && symtab_was_null
+		  && per_cu->v.quick->compunit_symtab != NULL)
+		{
+		  expansion_notify (per_cu->v.quick->compunit_symtab,
+				    data);
+		}
+	    }
 	}
     }
 }
@@ -12983,7 +12997,7 @@ is_vtable_name (const char *name, struct dwarf2_cu *cu)
 static void
 quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
 {
-  struct type *pfn_type, *domain_type, *new_type;
+  struct type *pfn_type, *self_type, *new_type;
 
   /* Check for a structure with no name and two children.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
@@ -13010,9 +13024,9 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
       || TYPE_CODE (TYPE_FIELD_TYPE (pfn_type, 0)) != TYPE_CODE_PTR)
     return;
 
-  domain_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
+  self_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
   new_type = alloc_type (objfile);
-  smash_to_method_type (new_type, domain_type, TYPE_TARGET_TYPE (pfn_type),
+  smash_to_method_type (new_type, self_type, TYPE_TARGET_TYPE (pfn_type),
 			TYPE_FIELDS (pfn_type), TYPE_NFIELDS (pfn_type),
 			TYPE_VARARGS (pfn_type));
   smash_to_methodptr_type (type, new_type);
@@ -13241,7 +13255,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      struct type *t = die_containing_type (die, cu);
 
-	      TYPE_VPTR_BASETYPE (type) = t;
+	      set_type_vptr_basetype (type, t);
 	      if (type == t)
 		{
 		  int i;
@@ -13255,7 +13269,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
                       if (is_vtable_name (fieldname, cu))
 			{
-			  TYPE_VPTR_FIELDNO (type) = i;
+			  set_type_vptr_fieldno (type, i);
 			  break;
 			}
 		    }
@@ -13270,7 +13284,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		}
 	      else
 		{
-		  TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
+		  set_type_vptr_fieldno (type, TYPE_VPTR_FIELDNO (t));
 		}
 	    }
 	  else if (cu->producer
@@ -13289,8 +13303,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		{
 		  if (strcmp (TYPE_FIELD_NAME (type, i), "__vfp") == 0)
 		    {
-		      TYPE_VPTR_FIELDNO (type) = i;
-		      TYPE_VPTR_BASETYPE (type) = type;
+		      set_type_vptr_fieldno (type, i);
+		      set_type_vptr_basetype (type, type);
 		      break;
 		    }
 		}
@@ -17136,6 +17150,8 @@ get_debug_line_section (struct dwarf2_cu *cu)
 /* Read the statement program header starting at OFFSET in
    .debug_line, or .debug_line.dwo.  Return a pointer
    to a struct line_header, allocated using xmalloc.
+   Returns NULL if there is a problem reading the header, e.g., if it
+   has a version we don't understand.
 
    NOTE: the strings in the include directory and file name tables of
    the returned object point into the dwarf line section buffer,
@@ -17200,6 +17216,14 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   lh->statement_program_end = line_ptr + lh->total_length;
   lh->version = read_2_bytes (abfd, line_ptr);
   line_ptr += 2;
+  if (lh->version > 4)
+    {
+      /* This is a version we don't understand.  The format could have
+	 changed in ways we don't handle properly so just punt.  */
+      complaint (&symfile_complaints,
+		 _("unsupported version in .debug_line section"));
+      return NULL;
+    }
   lh->header_length = read_offset_1 (abfd, line_ptr, offset_size);
   line_ptr += offset_size;
   lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
@@ -22008,6 +22032,9 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   if (need_gnat_info (cu)
       && TYPE_CODE (type) != TYPE_CODE_FUNC
       && TYPE_CODE (type) != TYPE_CODE_FLT
+      && TYPE_CODE (type) != TYPE_CODE_METHODPTR
+      && TYPE_CODE (type) != TYPE_CODE_MEMBERPTR
+      && TYPE_CODE (type) != TYPE_CODE_METHOD
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
 

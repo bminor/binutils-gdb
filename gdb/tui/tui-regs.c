@@ -36,6 +36,7 @@
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
 #include "tui/tui-regs.h"
+#include "tui/tui-io.h"
 #include "reggroups.h"
 #include "valprint.h"
 
@@ -693,7 +694,9 @@ tui_register_format (struct frame_info *frame, int regnum)
   if (s && s[1] == 0)
     *s = 0;
 
-  ret = xstrdup (p);
+  /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
+  ret = tui_expand_tabs (p, 0);
+
   do_cleanups (cleanups);
 
   return ret;

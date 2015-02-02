@@ -115,7 +115,6 @@ affiliation, and they act on behalf of the GNU project.
        Pedro Alves (Red Hat)
        Joel Brobecker (AdaCore)
        Doug Evans (Google)
-       Tom Tromey (Red Hat)
        Eli Zaretskii
 
 		  Global Maintainers
@@ -158,7 +157,6 @@ Daniel Jacobowitz		drow@false.org
 Mark Kettenis           	kettenis@gnu.org
 Yao Qi				yao@codesourcery.com
 Stan Shebs			stan@codesourcery.com
-Tom Tromey			tromey@redhat.com
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
 Elena Zannoni			elena.zannoni@oracle.com
 Eli Zaretskii			eliz@gnu.org
@@ -651,7 +649,6 @@ Jason Thorpe					thorpej@netbsd.org
 Caroline Tice					ctice@apple.com
 Kai Tietz					ktietz@redhat.com
 Andreas Tobler					andreast@fgznet.ch
-Tom Tromey					tromey@redhat.com
 David Ung					davidu@mips.com
 D Venkatasubramanian				dvenkat@noida.hcltech.com
 Corinna Vinschen				vinschen@redhat.com
