@@ -1,5 +1,11 @@
 2015-02-02  Joel Brobecker  <brobecker@adacore.com>
 
+	PR gdb/17856:
+	* ada-lang.c (ada_lookup_symbol_list_worker): Do not re-cache
+	results found in the cache.
+
+2015-02-02  Joel Brobecker  <brobecker@adacore.com>
+
 	PR gdb/17854:
 	* ada-lang.c (ada_get_symbol_cache): Set pspace_data->sym_cache
 	when allocating a new one.
