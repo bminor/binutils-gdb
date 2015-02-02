@@ -2524,7 +2524,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  if (pinfo->type == baton->referenced_type)
 	    break;
 	if (pinfo == NULL)
-	  error ("cannot find reference address for offset property");
+	  error (_("cannot find reference address for offset property"));
 	val = value_at (baton->offset_info.type,
 			pinfo->addr + baton->offset_info.offset);
 	*value = value_as_address (val);
