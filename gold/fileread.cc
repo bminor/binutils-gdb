@@ -293,6 +293,7 @@ void
 File_read::lock(const Task* task)
 {
   gold_assert(this->released_);
+  gold_debug(DEBUG_FILES, "Locking file \"%s\"", this->name_.c_str());
   this->token_.add_writer(task);
   this->released_ = false;
 }
@@ -302,6 +303,7 @@ File_read::lock(const Task* task)
 void
 File_read::unlock(const Task* task)
 {
+  gold_debug(DEBUG_FILES, "Unlocking file \"%s\"", this->name_.c_str());
   this->release();
   this->token_.remove_writer(task);
 }
