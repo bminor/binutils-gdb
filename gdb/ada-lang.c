@@ -4404,15 +4404,14 @@ static struct ada_symbol_cache *
 ada_get_symbol_cache (struct program_space *pspace)
 {
   struct ada_pspace_data *pspace_data = get_ada_pspace_data (pspace);
-  struct ada_symbol_cache *sym_cache = pspace_data->sym_cache;
 
-  if (sym_cache == NULL)
+  if (pspace_data->sym_cache == NULL)
     {
-      sym_cache = XCNEW (struct ada_symbol_cache);
-      ada_init_symbol_cache (sym_cache);
+      pspace_data->sym_cache = XCNEW (struct ada_symbol_cache);
+      ada_init_symbol_cache (pspace_data->sym_cache);
     }
 
-  return sym_cache;
+  return pspace_data->sym_cache;
 }
 
 /* Clear all entries from the symbol cache.  */
