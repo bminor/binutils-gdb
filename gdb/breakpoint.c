@@ -14880,7 +14880,7 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
   int match;
   struct get_number_or_range_state state;
 
-  if (args == 0)
+  if (args == 0 || *args == '\0')
     error_no_arg (_("one or more breakpoint numbers"));
 
   init_number_or_range (&state, args);
@@ -15217,7 +15217,12 @@ do_map_enable_count_breakpoint (struct breakpoint *bpt, void *countptr)
 static void
 enable_count_command (char *args, int from_tty)
 {
-  int count = get_number (&args);
+  int count;
+
+  if (args == NULL)
+    error_no_arg (_("hit count"));
+
+  count = get_number (&args);
 
   map_breakpoint_numbers (args, do_map_enable_count_breakpoint, &count);
 }

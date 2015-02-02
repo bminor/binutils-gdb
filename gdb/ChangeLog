@@ -1,3 +1,9 @@
+2015-02-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/15678
+	* breakpoint.c (map_breakpoint_numbers): Check for empty args string.
+	(enable_count_command): Check args for NULL value.
+
 2015-02-05  Doug Evans  <xdje42@gmail.com>
 
 	* guile/scm-frame.c: Fix spelling errors in a comment.

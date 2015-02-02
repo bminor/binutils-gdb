@@ -1,3 +1,8 @@
+2015-02-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/15678
+	* gdb.base/ena-dis-br.exp: Test "enable count" for bad user input.
+
 2015-02-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/attach-many-short-lived-threads.c (SECONDS): New
