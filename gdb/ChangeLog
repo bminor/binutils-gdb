@@ -1,3 +1,8 @@
+2015-02-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* varobj.h (lang_varobj_ops): Mention which return values need
+	to be freed.
+
 2015-02-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_property): Add i18n marker.

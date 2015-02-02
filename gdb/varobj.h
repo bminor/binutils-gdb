@@ -169,14 +169,17 @@ struct lang_varobj_ops
   /* The number of children of PARENT.  */
   int (*number_of_children) (const struct varobj *parent);
 
-  /* The name (expression) of a root varobj.  */
+  /* The name (expression) of a root varobj.  The returned value must be freed
+     by the caller.  */
   char *(*name_of_variable) (const struct varobj *parent);
 
-  /* The name of the INDEX'th child of PARENT.  */
+  /* The name of the INDEX'th child of PARENT.  The returned value must be
+     freed by the caller.  */
   char *(*name_of_child) (struct varobj *parent, int index);
 
   /* Returns the rooted expression of CHILD, which is a variable
-     obtain that has some parent.  */
+     obtain that has some parent.  The returned value must be freed by the
+     caller.  */
   char *(*path_expr_of_child) (const struct varobj *child);
 
   /* The ``struct value *'' of the INDEX'th child of PARENT.  */
@@ -185,7 +188,8 @@ struct lang_varobj_ops
   /* The type of the INDEX'th child of PARENT.  */
   struct type *(*type_of_child) (struct varobj *parent, int index);
 
-  /* The current value of VAR.  */
+  /* The current value of VAR.  The returned value must be freed by the
+     caller.  */
   char *(*value_of_variable) (const struct varobj *var,
 			      enum varobj_display_formats format);
 
