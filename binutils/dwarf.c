@@ -2444,10 +2444,18 @@ process_debug_info (struct dwarf_section *section,
 	  	  " extends beyond end of section (length = %s)\n"),
 		dwarf_vmatoa ("x", cu_offset),
 		dwarf_vmatoa ("x", compunit.cu_length));
+	  num_units = unit;
 	  break;
 	}
       tags = hdrptr;
       start += compunit.cu_length + initial_length_size;
+
+      if (start > end)
+	{
+	  warn (_("Debug info is corrupt.  CU at %s extends beyond end of section"),
+		dwarf_vmatoa ("x", cu_offset));
+	  start = end;
+	}
 
       if (compunit.cu_version != 2
 	  && compunit.cu_version != 3
@@ -3720,7 +3728,9 @@ display_debug_pubnames_worker (struct dwarf_section *section,
       SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, end);
 
       /* PR 17531: file: 7615b6b2.  */
-      if ((dwarf_signed_vma) names.pn_length < 0)
+      if ((dwarf_signed_vma) names.pn_length < 0
+	  /* PR 17531: file: a5dbeaa7. */
+	  || start + names.pn_length + initial_length_size < start)
 	{
 	  warn (_("Negative length for public name: 0x%lx\n"), (long) names.pn_length);
 	  start = end;
@@ -6691,19 +6701,19 @@ display_gdb_index (struct dwarf_section *section,
 		    constant_pool + name_offset);
 
 	  if (constant_pool + cu_vector_offset < constant_pool
-	      || constant_pool + cu_vector_offset >= section->start + section->size)
+	      || constant_pool + cu_vector_offset >= section->start + section->size - 3)
 	    {
 	      printf (_("<invalid CU vector offset: %x>\n"), cu_vector_offset);
 	      warn (_("Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"),
 		    cu_vector_offset, i);
 	      continue;
 	    }
-	  else
-	    num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+
+	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
 
 	  if (num_cus * 4 < num_cus
-	      || constant_pool + cu_vector_offset + 4 + num_cus * 4 >=
-	      section->start + section->size)
+	      || constant_pool + cu_vector_offset + 4 + num_cus * 4
+	      >= section->start + section->size)
 	    {
 	      printf ("<invalid number of CUs: %d>\n", num_cus);
 	      warn (_("Invalid number of CUs (0x%x) for symbol table slot %d\n"),
@@ -6863,6 +6873,14 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   phash = phdr + 16;
   pindex = phash + nslots * 8;
   ppool = pindex + nslots * 4;
+
+  /* PR 17531: file: 45d69832.  */
+  if (pindex < phash || ppool < phdr)
+    {
+      warn (_("Section %s is too small for %d slots\n"),
+	    section->name, nslots);
+      return 0;
+    }
 
   if (do_display)
     {

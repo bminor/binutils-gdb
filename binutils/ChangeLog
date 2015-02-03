@@ -1,5 +1,18 @@
 2015-02-03  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17531
+	* dwarf.c (process_debug_info): Add range check.
+	(display_debug_pubnames_worker): Likewise.
+	(display_gdb_index): Fix range check.
+	(process_cu_tu_index): Add range check.
+	* readelf.c (get_data): Change parameter types from size_t to
+	bfd_size_type.  Add checks for loss of accuracy when casting from
+	bfd_size_type to size_t.
+	(get_dynamic_data): Likewise.
+	(process_section_groups): Limit number of error messages.
+
+2015-02-03  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17512
 	* objdump.c (display_any_bfd): Fail if archives nest too deeply.
 
