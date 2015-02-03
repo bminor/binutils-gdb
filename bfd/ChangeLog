@@ -1,3 +1,8 @@
+2015-02-03  Will Newton  <will.newton@linaro.org>
+
+	* elf32-arm.c (elf32_arm_finish_dynamic_symbol): Improve
+	  comment discussing why we clear st_value for some symbols.
+
 2015-02-02  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elf32-nds32.c (nds32_get_section_contents): Add one more argument.
