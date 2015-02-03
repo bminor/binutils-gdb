@@ -503,7 +503,7 @@ visium_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
     default:
       if (r_type >= (unsigned int) R_VISIUM_max)
 	{
-	  _bfd_error_handler (_("%A: invalid Visium reloc number: %d"), abfd, r_type);
+	  _bfd_error_handler (_("%B: invalid Visium reloc number: %d"), abfd, r_type);
 	  r_type = 0;
 	}
       cache_ptr->howto = &visium_elf_howto_table[r_type];

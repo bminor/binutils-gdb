@@ -1,3 +1,67 @@
+2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ecoff.c: Use bfd_alloc2 to allocate space for structure arrays.
+	(_bfd_ecoff_slurp_symbol_table): Check for a negative symbol
+	index or an out of range fdr index.
+	* elf-m10300.c (mn10300_info_to_howto): Fix typo in error message.
+	* elf32-arc.c (arc_info_to_howto_rel): Likewise.
+	* elf32-avr.c (avr_info_to_howto_rela): Likewise.
+	* elf32-cr16.c (elf_cr16_info_to_howto): Likewise.
+	* elf32-cr16c.c (elf_cr16c_info_to_howto_rel): Likewise.
+	* elf32-cris.c (cris_info_to_howto_rela): Likewise.
+	* elf32-crx.c (elf_crx_info_to_howto): Likewise.
+	* elf32-d10v.c (d10v_info_to_howto_rel): Likewise.
+	* elf32-d30v.c (d30v_info_to_howto_rel): Likewise.
+	* elf32-epiphany.c (epiphany_info_to_howto_rela): Likewise.
+	* elf32-fr30.c (fr30_info_to_howto_rela): Likewise.
+	* elf32-frv.c (frv_info_to_howto_rela): Likewise.
+	* elf32-i370.c (i370_elf_info_to_howto): Likewise.
+	* elf32-i960.c (elf32_i960_info_to_howto_rel): Likewise.
+	* elf32-ip2k.c (ip2k_info_to_howto_rela): Likewise.
+	* elf32-iq2000.c (iq2000_info_to_howto_rela): Likewise.
+	* elf32-lm32.c (lm32_info_to_howto_rela): Likewise.
+	* elf32-m32c.c (m32c_info_to_howto_rela): Likewise.
+	* elf32-m32r.c (m32r_info_to_howto_rel): Likewise.
+	* elf32-m68hc11.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-m68hc12.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-mcore.c (mcore_elf_info_to_howto): Likewise.
+	* elf32-mep.c (mep_info_to_howto_rela): Likewise.
+	* elf32-metag.c (metag_info_to_howto_rela): Likewise.
+	* elf32-microblaze.c (microblaze_elf_info_to_howto): Likewise.
+	* elf32-moxie.c (moxie_info_to_howto_rela): Likewise.
+	* elf32-msp430.c (msp430_info_to_howto_rela): Likewise.
+	* elf32-mt.c (mt_info_to_howto_rela): Likewise.
+	* elf32-nds32.c (nds32_info_to_howto_rel): Likewise.
+	* elf32-or1k.c (or1k_info_to_howto_rela): Likewise.
+	* elf32-pj.c (pj_elf_info_to_howto): Likewise.
+	* elf32-ppc.c (ppc_elf_info_to_howto): Likewise.
+	* elf32-rl78.c (rl78_info_to_howto_rela): Likewise.
+	* elf32-rx.c (rx_info_to_howto_rela): Likewise.
+	* elf32-sh.c (sh_elf_info_to_howto): Likewise.
+	* elf32-spu.c (spu_elf_info_to_howto): Likewise.
+	* elf32-v850.c (v850_elf_perform_relocation): Likewise.
+	* elf32-vax.c (rtype_to_howto): Likewise.
+	* elf32-visium.c (visium_info_to_howto_rela): Likewise.
+	* elf32-xgate.c (xgate_info_to_howto_rel): Likewise.
+	* elf32-xtensa.c (elf_xtensa_info_to_howto_rela): Likewise.
+	* elf64-alpha.c (elf64_alpha_info_to_howto): Likewise.
+	* elf64-mmix.c (mmix_info_to_howto_rela): Likewise.
+	* mach-o.c: Use bfd_alloc2 to allocate space for structure arrays.
+	(bfd_mach_o_canonicalize_one_reloc): Fix check on out
+	of range symbol indicies.
+	(bfd_mach_o_canonicalize_relocs): Check for out of range alloc.
+	(bfd_mach_o_canonicalize_dynamic_reloc): Likewise.
+	(bfd_mach_o_build_dysymtab): Likewise.
+	(bfd_mach_o_write_symtab_content): Set the string table size to
+	zero upon error.
+	(bfd_mach_o_read_symtab_symbols): Reset the nsyms value if the
+	read fails.
+	* peXXigen.c (pe_print_edata):  Check for numeric overflow in edt
+	fields.
+	* tekhex.c (first_phase): Check for src pointer reaching end of
+	buffer.
+
 2015-02-03  Will Newton  <will.newton@linaro.org>
 
 	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol):

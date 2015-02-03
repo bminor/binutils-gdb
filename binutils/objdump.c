@@ -3413,7 +3413,7 @@ display_any_bfd (bfd *file, int level)
 	{
 	  /* Prevent corrupted files from spinning us into an
 	     infinite loop.  100 is an arbitrary heuristic.  */
-	  non_fatal (_("Archive nesting is too deep"));
+	  fatal (_("Archive nesting is too deep"));
 	  return;
 	}
       else

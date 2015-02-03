@@ -136,7 +136,7 @@ elf32_i960_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   /* PR 17521: file: 9609b8d6.  */
   if (type >= R_960_max)
     {
-      _bfd_error_handler (_("%A; invalid i960 reloc number: %d"), abfd, type);
+      _bfd_error_handler (_("%B: invalid i960 reloc number: %d"), abfd, type);
       type = 0;
     }
 
