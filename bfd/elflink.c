@@ -2423,6 +2423,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
     }
   else
     {
+      /* If a plugin symbol is referenced from a non-IR file, mark
+         the symbol as undefined, except for symbol for linker
+	 created section.  */
+      if (h->root.non_ir_ref
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && (h->root.u.def.section->flags & SEC_LINKER_CREATED) == 0
+	  && h->root.u.def.section->owner != NULL
+	  && (h->root.u.def.section->owner->flags & BFD_PLUGIN) != 0)
+	{
+	  h->root.type = bfd_link_hash_undefined;
+	  h->root.u.undef.abfd = h->root.u.def.section->owner;
+	}
+
       /* Unfortunately, NON_ELF is only correct if the symbol
 	 was first seen in a non-ELF file.  Fortunately, if the symbol
 	 was first seen in an ELF file, we're probably OK unless the

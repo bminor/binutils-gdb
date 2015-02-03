@@ -88,6 +88,9 @@ set lto_link_tests [list \
   [list "LTO 6" \
    "-O2 -flto -fuse-linker-plugin" "" \
    {lto-6.c} {} "lto-6.exe" "c"] \
+  [list "Compile PR ld/12365" \
+   "" "-flto -O2 $lto_fat" \
+   {pr12365a.c pr12365b.c pr12365c.c} {} ""] \
   [list "Compile 9" \
    "" "-O2 -finline -flto" \
    {lto-9.cc} {} "" "c++"] \
@@ -380,6 +383,13 @@ if {![string match "" $catch_output]} {
 
 if { [at_least_gcc_version 4 7] } {
     # Check expected LTO linker errors.
+    set testname "PR ld/12365"
+    set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
+    if { [ regexp "undefined reference to `my_bcopy'" $exec_output ] } {
+	pass $testname
+    } {
+	fail $testname
+    }
     set testname "PR ld/12942 (3)"
     set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
     if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {

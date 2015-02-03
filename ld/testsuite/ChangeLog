@@ -1,5 +1,16 @@
 2015-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/12365
+	* ld-plugin/pr12365a.c: New file.
+	* ld-plugin/pr12365b.c: Likewise.
+	* ld-plugin/pr12365c.c: Likewise.
+
+	* ld-plugin/lto.exp (lto_link_tests): Prepare for the PR ld/12365
+	test.
+	Run the PR ld/12365 test.
+
+2015-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/14918
 	* ld-plugin/lto.exp (lto_link_elf_tests): Add PR ld/14918 test.
 
