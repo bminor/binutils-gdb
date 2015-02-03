@@ -35,5 +35,7 @@ main (void)
   int answer;
 
   answer = foo ();
-  return ++answer;
+  answer += 1;
+
+  return answer;
 }

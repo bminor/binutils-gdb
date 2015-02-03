@@ -1,5 +1,30 @@
 2015-03-25  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/next.exp: Merged into step.exp.
+	* gdb.btrace/finish.exp: Merged into step.exp.
+	* gdb.btrace/nexti.exp: Merged into stepi.exp.
+	* gdb.btrace/step.exp: Use record_goto.c as test file.  Avoid using
+	"record goto" and checking the exact replay position.
+	* gdb.btrace/stepi.exp: Choose test file based on target.  Do not
+	check for "Recording format" in "info record" output.
+	* gdb.btrace/record_goto.exp: Choose test file based on target.
+	* gdb.btrace/x86-record_goto.S: Renamed into ...
+	* gdb.btrace/x86_64-record_goto.S: ... this.
+	* gdb.btrace/i686-record_goto.S: New.
+	* gdb.btrace/x86-tailcall.S: Renamed into ...
+	* gdb.btrace/x86_64-tailcall.S: ... this.
+	* gdb.btrace/i686-tailcall.S: New.
+	* gdb.btrace/x86-tailcall.c: Renamed into ...
+	* gdb.btrace/tailcall.c: ... this.  Split "return ++answer" into two
+	separate statements.  Update test.
+	* gdb.btrace/delta.exp: Use record_goto.c as test file.
+	* gdb.btrace/gcore.exp: Use record_goto.c as test file.
+	* gdb.btrace/nohist.exp: Use record_goto.c as test file.
+	* gdb.btrace/tailcall.exp: Choose test file based on target.
+	* gdb.btrace/Makefile.in: Remove next, finish, and nexti.
+
+2015-03-25  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/exception.exp: Increase BTS buffer size.
 
 2015-03-24  Pedro Alves  <palves@redhat.com>
