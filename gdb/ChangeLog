@@ -1,3 +1,12 @@
+2015-02-03  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_child_follow_fork, linux_nat_wait_1): Use
+	target_is_async_p instead of target_can_async.
+	(linux_nat_wait): Use target_is_async_p instead of
+	target_can_async.  Don't enable async here.
+	* remote.c (interrupt_query, remote_wait, putpkt_binary): Use
+	target_is_async_p instead of target_can_async.
+
 2015-02-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* varobj.h (lang_varobj_ops): Mention which return values need
