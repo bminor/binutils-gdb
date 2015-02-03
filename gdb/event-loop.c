@@ -1050,6 +1050,14 @@ mark_async_event_handler (async_event_handler *async_handler_ptr)
   async_handler_ptr->ready = 1;
 }
 
+/* See event-loop.h.  */
+
+void
+clear_async_event_handler (async_event_handler *async_handler_ptr)
+{
+  async_handler_ptr->ready = 0;
+}
+
 struct async_event_handler_data
 {
   async_event_handler_func* proc;

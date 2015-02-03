@@ -910,6 +910,22 @@ record_full_close (struct target_ops *self)
     delete_async_event_handler (&record_full_async_inferior_event_token);
 }
 
+/* "to_async" target method.  */
+
+static void
+record_full_async (struct target_ops *ops,
+		   void (*callback) (enum inferior_event_type event_type,
+				     void *context),
+		   void *context)
+{
+  if (callback != NULL)
+    mark_async_event_handler (record_full_async_inferior_event_token);
+  else
+    clear_async_event_handler (record_full_async_inferior_event_token);
+
+  ops->beneath->to_async (ops->beneath, callback, context);
+}
+
 static int record_full_resume_step = 0;
 
 /* True if we've been resumed, and so each record_full_wait call should
@@ -989,12 +1005,7 @@ record_full_resume (struct target_ops *ops, ptid_t ptid, int step,
   /* We are about to start executing the inferior (or simulate it),
      let's register it with the event loop.  */
   if (target_can_async_p ())
-    {
-      target_async (inferior_event_handler, 0);
-      /* Notify the event loop there's an event to wait for.  We do
-	 most of the work in record_full_wait.  */
-      mark_async_event_handler (record_full_async_inferior_event_token);
-    }
+    target_async (inferior_event_handler, 0);
 }
 
 static int record_full_get_sig = 0;
@@ -1902,6 +1913,7 @@ init_record_full_ops (void)
     "Log program while executing and replay execution from log.";
   record_full_ops.to_open = record_full_open;
   record_full_ops.to_close = record_full_close;
+  record_full_ops.to_async = record_full_async;
   record_full_ops.to_resume = record_full_resume;
   record_full_ops.to_wait = record_full_wait;
   record_full_ops.to_disconnect = record_disconnect;
@@ -1943,12 +1955,7 @@ record_full_core_resume (struct target_ops *ops, ptid_t ptid, int step,
   /* We are about to start executing the inferior (or simulate it),
      let's register it with the event loop.  */
   if (target_can_async_p ())
-    {
-      target_async (inferior_event_handler, 0);
-
-      /* Notify the event loop there's an event to wait for.  */
-      mark_async_event_handler (record_full_async_inferior_event_token);
-    }
+    target_async (inferior_event_handler, 0);
 }
 
 /* "to_kill" method for prec over corefile.  */
@@ -2141,6 +2148,7 @@ init_record_full_core_ops (void)
     "Log program while executing and replay execution from log.";
   record_full_core_ops.to_open = record_full_open;
   record_full_core_ops.to_close = record_full_close;
+  record_full_core_ops.to_async = record_full_async;
   record_full_core_ops.to_resume = record_full_core_resume;
   record_full_core_ops.to_wait = record_full_wait;
   record_full_core_ops.to_kill = record_full_core_kill;

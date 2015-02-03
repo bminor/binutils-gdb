@@ -1,5 +1,19 @@
 2015-02-03  Pedro Alves  <palves@redhat.com>
 
+	* event-loop.c (clear_async_event_handler): New function.
+	* event-loop.h (clear_async_event_handler): New declaration.
+	* record-btrace.c (record_btrace_async): New function.
+	(init_record_btrace_ops): Install record_btrace_async.
+	* record-full.c (record_full_async): New function.
+	(record_full_resume): Don't mark the async event source here.
+	(init_record_full_ops): Install record_full_async.
+	(record_full_core_resume): Don't mark the async event source here.
+	(init_record_full_core_ops): Install record_full_async.
+	* remote.c (remote_async): Mark and clear the async stop reply
+	queue event-loop token as appropriate.
+
+2015-02-03  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (linux_child_follow_fork, linux_nat_wait_1): Use
 	target_is_async_p instead of target_can_async.
 	(linux_nat_wait): Use target_is_async_p instead of
