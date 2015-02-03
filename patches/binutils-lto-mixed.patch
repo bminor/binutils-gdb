@@ -86,35 +86,16 @@ for Linux kernel build with LTO.
 
 diff --git a/ChangeLog.lto-mixed b/ChangeLog.lto-mixed
 new file mode 100644
-index 0000000..0b22c16
+index 0000000..be66879
 --- /dev/null
 +++ b/ChangeLog.lto-mixed
-@@ -0,0 +1,335 @@
+@@ -0,0 +1,297 @@
 +bfd/
 +
 +2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 +
 +	* format.c (bfd_check_format_matches): Don't check the plugin
 +	target twice.
-+
-+2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14747
-+	* elflink.c (_bfd_elf_fix_symbol_flags): Check symbol for linker
-+	created section instead.
-+
-+2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14747
-+	* elflink.c (_bfd_elf_fix_symbol_flags): Never mark
-+	_GLOBAL_OFFSET_TABLE_, _PROCEDURE_LINKAGE_TABLE_ nor _DYNAMIC
-+	undefined.
-+
-+2012-06-28  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14272
-+	* elflink.c (_bfd_elf_fix_symbol_flags): Mark the plugin symbol
-+	undefined if it is referenced from a non-IR file.
 +
 +2012-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -378,25 +359,6 @@ index 0000000..0b22c16
 +
 +	* ld-plugin/lto.exp: Add test for nm on mixed LTO/non-LTO object.
 +
-+2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14918
-+	* ld-plugin/lto.exp (lto_link_elf_tests): Add PR ld/14918 test.
-+
-+	* ld-plugin/pr14918.c: New file.
-+	* ld-plugin/pr14918.d: Likewise.
-+
-+2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/12365
-+	* ld-plugin/pr12365a.c: New file.
-+	* ld-plugin/pr12365b.c: Likewise.
-+	* ld-plugin/pr12365c.c: Likewise.
-+
-+	* ld-plugin/lto.exp (lto_link_tests): Prepare for the PR ld/12365
-+	test.
-+	Run the PR ld/12365 test.
-+
 +2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 +
 +	PR ld/12430
@@ -581,31 +543,6 @@ index 0aa5f8e..79992c1 100644
    { STRING_COMMA_LEN (".gnu.version"),     0, SHT_GNU_versym,  0 },
    { STRING_COMMA_LEN (".gnu.version_d"),   0, SHT_GNU_verdef,  0 },
    { STRING_COMMA_LEN (".gnu.version_r"),   0, SHT_GNU_verneed, 0 },
-diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 26af870..604cfb6 100644
---- a/bfd/elflink.c
-+++ b/bfd/elflink.c
-@@ -2423,6 +2423,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
-     }
-   else
-     {
-+      /* If a plugin symbol is referenced from a non-IR file, mark
-+         the symbol as undefined, except for symbol for linker
-+	 created section.  */
-+      if (h->root.non_ir_ref
-+	  && (h->root.type == bfd_link_hash_defined
-+	      || h->root.type == bfd_link_hash_defweak)
-+	  && (h->root.u.def.section->flags & SEC_LINKER_CREATED) == 0
-+	  && h->root.u.def.section->owner != NULL
-+	  && (h->root.u.def.section->owner->flags & BFD_PLUGIN) != 0)
-+	{
-+	  h->root.type = bfd_link_hash_undefined;
-+	  h->root.u.undef.abfd = h->root.u.def.section->owner;
-+	}
-+
-       /* Unfortunately, NON_ELF is only correct if the symbol
- 	 was first seen in a non-ELF file.  Fortunately, if the symbol
- 	 was first seen in an ELF file, we're probably OK unless the
 diff --git a/bfd/format.c b/bfd/format.c
 index dd6dc8a..55ab44c 100644
 --- a/bfd/format.c
@@ -1333,10 +1270,10 @@ index 719e57f..8e3a5a4 100644
  
  EOF
 diff --git a/ld/emultempl/ppc64elf.em b/ld/emultempl/ppc64elf.em
-index 5a784fd..2c3adaf 100644
+index fd9a3ce..dc069a5 100644
 --- a/ld/emultempl/ppc64elf.em
 +++ b/ld/emultempl/ppc64elf.em
-@@ -553,7 +553,7 @@ gld${EMULATION_NAME}_after_allocation (void)
+@@ -559,7 +559,7 @@ gld${EMULATION_NAME}_after_allocation (void)
  /* Final emulation specific call.  */
  
  static void
@@ -1345,7 +1282,7 @@ index 5a784fd..2c3adaf 100644
  {
    char *msg = NULL;
    char *line, *endline;
-@@ -585,7 +585,7 @@ gld${EMULATION_NAME}_finish (void)
+@@ -591,7 +591,7 @@ gld${EMULATION_NAME}_finish (void)
      free (msg);
  
    ppc64_elf_restore_symbols (&link_info);
@@ -1354,7 +1291,7 @@ index 5a784fd..2c3adaf 100644
  }
  
  
-@@ -910,4 +910,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
+@@ -916,4 +916,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
  LDEMUL_AFTER_OPEN=ppc_after_open
  LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
  LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
@@ -3087,7 +3024,7 @@ index 0000000..d4c5852
 +.* .gnu_object_only.*
 +#pass
 diff --git a/ld/testsuite/ld-plugin/lto.exp b/ld/testsuite/ld-plugin/lto.exp
-index d8e7a1e..1d1c459 100644
+index 400e683..1d1c459 100644
 --- a/ld/testsuite/ld-plugin/lto.exp
 +++ b/ld/testsuite/ld-plugin/lto.exp
 @@ -79,6 +79,15 @@ set lto_link_tests [list \
@@ -3106,13 +3043,7 @@ index d8e7a1e..1d1c459 100644
    [list "Compile 5a" \
     "" "-flto $lto_fat" \
     {lto-5a.c} {} ""] \
-@@ -88,9 +97,18 @@ set lto_link_tests [list \
-   [list "LTO 6" \
-    "-O2 -flto -fuse-linker-plugin" "" \
-    {lto-6.c} {} "lto-6.exe" "c"] \
-+  [list "Compile PR ld/12365" \
-+   "" "-flto -O2 $lto_fat" \
-+   {pr12365a.c pr12365b.c pr12365c.c} {} ""] \
+@@ -94,6 +103,12 @@ set lto_link_tests [list \
    [list "Compile 9" \
     "" "-O2 -finline -flto" \
     {lto-9.cc} {} "" "c++"] \
@@ -3125,17 +3056,7 @@ index d8e7a1e..1d1c459 100644
    [list "Compile 11a" \
     "" "-O -flto" \
     {lto-11a.c} {} ""] \
-@@ -247,6 +265,9 @@ set lto_link_elf_tests [list \
-   [list "PR ld/16746 (2)" \
-    "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto" \
-    {dummy.c} {} "pr16746b.exe"] \
-+  [list "PR ld/14918" \
-+   "-flto" "-flto" \
-+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
- ]
- 
- # Check final symbols in executables.
-@@ -282,9 +303,21 @@ set lto_run_tests [list \
+@@ -288,9 +303,21 @@ set lto_run_tests [list \
    [list "LTO 3c" \
     "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" "" \
     {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"] \
@@ -3157,7 +3078,7 @@ index d8e7a1e..1d1c459 100644
    [list "LTO 11" \
     "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" "" \
     {dummy.c} "lto-11.exe" "lto-11.out" "" "c"] \
-@@ -366,6 +399,15 @@ if { [is_elf_format] && [check_lto_shared_available] } {
+@@ -372,6 +399,15 @@ if { [is_elf_format] && [check_lto_shared_available] } {
      }
  }
  
@@ -3173,21 +3094,7 @@ index d8e7a1e..1d1c459 100644
  set testname "Build liblto-11.a"
  remote_file host delete "tmpdir/liblto-11.a"
  set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
-@@ -377,6 +419,13 @@ if {![string match "" $catch_output]} {
- 
- if { [at_least_gcc_version 4 7] } {
-     # Check expected LTO linker errors.
-+    set testname "PR ld/12365"
-+    set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
-+    if { [ regexp "undefined reference to `my_bcopy'" $exec_output ] } {
-+	pass $testname
-+    } {
-+	fail $testname
-+    }
-     set testname "PR ld/12942 (3)"
-     set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
-     if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
-@@ -389,8 +438,30 @@ if { [at_least_gcc_version 4 7] } {
+@@ -402,8 +438,30 @@ if { [at_least_gcc_version 4 7] } {
  # Run "ld -r" to generate inputs for complex LTO tests.
  run_dump_test "lto-3r"
  remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
@@ -3218,193 +3125,3 @@ index d8e7a1e..1d1c459 100644
  
  run_cc_link_tests $lto_link_symbol_tests
  
-diff --git a/ld/testsuite/ld-plugin/pr12365a.c b/ld/testsuite/ld-plugin/pr12365a.c
-new file mode 100644
-index 0000000..a9bb6c6
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr12365a.c
-@@ -0,0 +1,25 @@
-+extern void abort(void);
-+extern void main_test (void);
-+extern void abort (void);
-+int inside_main;
-+
-+int
-+main ()
-+{
-+  inside_main = 1;
-+  main_test ();
-+  inside_main = 0;
-+  return 0;
-+}
-+
-+/* When optimizing, all the constant cases should have been
-+   constant folded, so no calls to link_error should remain.
-+   In any case, link_error should not be called.  */
-+
-+#ifndef __OPTIMIZE__
-+void
-+link_error (void)
-+{
-+  abort ();
-+}
-+#endif
-diff --git a/ld/testsuite/ld-plugin/pr12365b.c b/ld/testsuite/ld-plugin/pr12365b.c
-new file mode 100644
-index 0000000..a5a80e0
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr12365b.c
-@@ -0,0 +1,47 @@
-+#define ASMNAME(cname)  ASMNAME2 (__USER_LABEL_PREFIX__, cname)
-+#define ASMNAME2(prefix, cname) STRING (prefix) cname
-+#define STRING(x)    #x
-+
-+typedef __SIZE_TYPE__ size_t;
-+extern void abort (void);
-+extern void *memcpy (void *, const void *, size_t)
-+  __asm (ASMNAME ("my_memcpy"));
-+extern void bcopy (const void *, void *, size_t)
-+  __asm (ASMNAME ("my_bcopy"));
-+extern void *memset (void *, int, size_t)
-+  __asm (ASMNAME ("my_memset"));
-+extern void bzero (void *, size_t)
-+  __asm (ASMNAME ("my_bzero"));
-+extern int memcmp (const void *, const void *, size_t);
-+
-+struct A { char c[32]; } a = { "foobar" };
-+char x[64] = "foobar", y[64];
-+int i = 39, j = 6, k = 4;
-+
-+extern int inside_main;
-+
-+void
-+main_test (void)
-+{
-+  struct A b = a;
-+  struct A c = { { 'x' } };
-+
-+  inside_main = 1;
-+
-+  if (memcmp (b.c, x, 32) || c.c[0] != 'x' || memcmp (c.c + 1, x + 32, 31))
-+    abort ();
-+  if (__builtin_memcpy (y, x, i) != y || memcmp (x, y, 64))
-+    abort ();
-+  if (memcpy (y + 6, x, j) != y + 6
-+      || memcmp (x, y, 6) || memcmp (x, y + 6, 58))
-+    abort ();
-+  if (__builtin_memset (y + 2, 'X', k) != y + 2
-+      || memcmp (y, "foXXXXfoobar", 13))
-+    abort ();
-+  bcopy (y + 1, y + 2, 6);
-+  if (memcmp (y, "fooXXXXfobar", 13))
-+    abort ();
-+  __builtin_bzero (y + 4, 2);
-+  if (memcmp (y, "fooX\0\0Xfobar", 13))
-+    abort ();
-+}
-diff --git a/ld/testsuite/ld-plugin/pr12365c.c b/ld/testsuite/ld-plugin/pr12365c.c
-new file mode 100644
-index 0000000..2edd0ff
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr12365c.c
-@@ -0,0 +1,79 @@
-+extern void abort (void);
-+extern int inside_main;
-+typedef __SIZE_TYPE__ size_t;
-+
-+#define TEST_ABORT if (inside_main) abort()
-+
-+void *
-+my_memcpy (void *d, const void *s, size_t n)
-+{
-+  char *dst = (char *) d;
-+  const char *src = (const char *) s;
-+  while (n--)
-+    *dst++ = *src++;
-+  return (char *) d;
-+}
-+
-+void
-+my_bcopy (const void *s, void *d, size_t n)
-+{
-+  char *dst = (char *) d;
-+  const char *src = (const char *) s;
-+  if (src >= dst)
-+    while (n--)
-+      *dst++ = *src++;
-+  else
-+    {
-+      dst += n;
-+      src += n;
-+      while (n--)
-+        *--dst = *--src;
-+    }
-+}
-+
-+void *
-+my_memset (void *d, int c, size_t n)
-+{
-+  char *dst = (char *) d;
-+  while (n--)
-+    *dst++ = c;
-+  return (char *) d;
-+}
-+
-+void
-+my_bzero (void *d, size_t n)
-+{
-+  char *dst = (char *) d;
-+  while (n--)
-+    *dst++ = '\0';
-+}
-+
-+void *
-+memcpy (void *d, const void *s, size_t n)
-+{
-+  void *result = my_memcpy (d, s, n);
-+  TEST_ABORT;
-+  return result;
-+}
-+
-+void
-+bcopy (const void *s, void *d, size_t n)
-+{
-+  my_bcopy (s, d, n);
-+  TEST_ABORT;
-+}
-+
-+void *
-+memset (void *d, int c, size_t n)
-+{
-+  void *result = my_memset (d, c, n);
-+  TEST_ABORT;
-+  return result;
-+}
-+
-+void
-+bzero (void *d, size_t n)
-+{
-+  my_bzero (d, n);
-+  TEST_ABORT;
-+}
-diff --git a/ld/testsuite/ld-plugin/pr14918.c b/ld/testsuite/ld-plugin/pr14918.c
-new file mode 100644
-index 0000000..a9bce4a
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr14918.c
-@@ -0,0 +1,5 @@
-+int
-+main ()
-+{
-+  return 0;
-+}
-diff --git a/ld/testsuite/ld-plugin/pr14918.d b/ld/testsuite/ld-plugin/pr14918.d
-new file mode 100644
-index 0000000..0b14948
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr14918.d
-@@ -0,0 +1,4 @@
-+#failif
-+#...
-+ 0x0+1 \(NEEDED\) +Shared library: \[libgcc_s.so.[0-9]+\]
-+#...
