@@ -1,5 +1,31 @@
 2015-02-03  Pedro Alves  <palves@redhat.com>
 
+	* event-loop.c: Don't declare nor define a queue type for
+	gdb_event_p.
+	(event_queue): Delete.
+	(create_event, create_file_event, gdb_event_xfree)
+	(initialize_event_loop, process_event): Delete.
+	(gdb_do_one_event): Return as soon as one event is handled.
+	(handle_file_event): Change prototype.  Used the passed in
+	file_handler pointer and ready_mask instead of looping over all
+	file handlers.
+	(gdb_wait_for_event): Update the poll/select timeouts before
+	blocking.  Run event handlers directly instead of queueing events.
+	Return as soon as one event is handled.
+	(struct async_event_handler_data): Delete.
+	(invoke_async_event_handler): Delete.
+	(check_async_event_handlers): Change return type to int.  Run
+	event handlers directly instead of queueing events.  Return as
+	soon as one event is handled.
+	(handle_timer_event): Delete.
+	(update_wait_timeout): New function, factored out from
+	poll_timers.
+	(poll_timers): Reimplement.
+	* event-loop.h (initialize_event_loop): Delete declaration.
+	* top.c (gdb_init): Don't call initialize_event_loop.
+
+2015-02-03  Pedro Alves  <palves@redhat.com>
+
 	* event-loop.c (clear_async_event_handler): New function.
 	* event-loop.h (clear_async_event_handler): New declaration.
 	* record-btrace.c (record_btrace_async): New function.
