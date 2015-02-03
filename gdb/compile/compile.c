@@ -324,6 +324,27 @@ get_selected_pc_producer_options (void)
   return cs;
 }
 
+/* Filter out unwanted options from *ARGCP and ARGV.  */
+
+static void
+filter_args (int *argcp, char **argv)
+{
+  char **destv;
+
+  for (destv = argv; *argv != NULL; argv++)
+    {
+      /* -fpreprocessed may get in commonly from ccache.  */
+      if (strcmp (*argv, "-fpreprocessed") == 0)
+	{
+	  xfree (*argv);
+	  (*argcp)--;
+	  continue;
+	}
+      *destv++ = *argv;
+    }
+  *destv = NULL;
+}
+
 /* Produce final vector of GCC compilation options.  First element is target
    size ("-m64", "-m32" etc.), optionally followed by DW_AT_producer options
    and then compile-args string GDB variable.  */
@@ -346,6 +367,7 @@ get_args (const struct compile_instance *compiler, struct gdbarch *gdbarch,
       char **argv_producer;
 
       build_argc_argv (cs_producer_options, &argc_producer, &argv_producer);
+      filter_args (&argc_producer, argv_producer);
       append_args (argcp, argvp, argc_producer, argv_producer);
       freeargv (argv_producer);
     }
