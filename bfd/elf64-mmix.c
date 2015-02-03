@@ -1261,7 +1261,7 @@ mmix_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF64_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_MMIX_max)
     {
-      _bfd_error_handler (_("%A: invalid MMIX reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid MMIX reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_mmix_howto_table[r_type];

@@ -62,6 +62,8 @@ static int no_toc_opt = 0;
 /* Whether to sort input toc and got sections.  */
 static int no_toc_sort = 0;
 
+/* Input .toc sections will be placed in this output section.  */
+static const char *toc_section_name = ".got";
 static asection *toc_section = 0;
 
 /* This is called before the input files are opened.  We create a new
@@ -124,6 +126,10 @@ ppc_after_open (void)
 		  else
 		    i = &(*i)->next;
 	      }
+	  /* Instead, .toc input sections will be mapped to the
+	     read/write .toc output section.  If user scripts don't
+	     provide one then we'll lose toc sorting and multi-toc.  */
+	  toc_section_name = ".toc";
 	}
     }
   gld${EMULATION_NAME}_after_open ();
@@ -301,7 +307,7 @@ ppc_before_allocation (void)
 	{
 	  lang_output_section_statement_type *toc_os;
 
-	  toc_os = lang_output_section_find (".got");
+	  toc_os = lang_output_section_find (toc_section_name);
 	  if (toc_os != NULL)
 	    sort_toc_sections (&toc_os->children, NULL, NULL);
 	}
@@ -504,7 +510,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 	  if (!params.no_multi_toc)
 	    {
 	      toc_section = bfd_get_section_by_name (link_info.output_bfd,
-						     ".got");
+						     toc_section_name);
 	      if (toc_section != NULL)
 		lang_for_each_statement (build_toc_list);
 	    }

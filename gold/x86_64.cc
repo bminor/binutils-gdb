@@ -3784,7 +3784,9 @@ Target_x86_64<size>::Relocate::relocate_tls(
       break;
 
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
-      if (gsym != NULL && gsym->is_undefined())
+      if (gsym != NULL
+	  && gsym->is_undefined()
+	  && parameters->options().output_is_executable())
 	{
 	  Target_x86_64<size>::Relocate::tls_ie_to_le(relinfo, relnum,
 						      NULL, rela,

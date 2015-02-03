@@ -5079,7 +5079,7 @@ interrupt_query (void)
 {
   target_terminal_ours ();
 
-  if (target_can_async_p ())
+  if (target_is_async_p ())
     {
       signal (SIGINT, handle_sigint);
       quit ();
@@ -6036,7 +6036,7 @@ remote_wait (struct target_ops *ops,
   else
     event_ptid = remote_wait_as (ptid, status, options);
 
-  if (target_can_async_p ())
+  if (target_is_async_p ())
     {
       /* If there are are events left in the queue tell the event loop
 	 to return here.  */
@@ -7226,7 +7226,7 @@ putpkt_binary (const char *buf, int cnt)
      case it's not possible to issue a command while the target is
      running.  This is not a problem in non-stop mode, because in that
      case, the stub is always ready to process serial input.  */
-  if (!non_stop && target_can_async_p () && rs->waiting_for_stop_reply)
+  if (!non_stop && target_is_async_p () && rs->waiting_for_stop_reply)
     {
       error (_("Cannot execute this command while the target is running.\n"
 	       "Use the \"interrupt\" command to stop the target\n"
@@ -11691,9 +11691,17 @@ remote_async (struct target_ops *ops,
       serial_async (rs->remote_desc, remote_async_serial_handler, rs);
       rs->async_client_callback = callback;
       rs->async_client_context = context;
+
+      /* If there are pending events in the stop reply queue tell the
+	 event loop to process them.  */
+      if (!QUEUE_is_empty (stop_reply_p, stop_reply_queue))
+	mark_async_event_handler (remote_async_inferior_event_token);
     }
   else
-    serial_async (rs->remote_desc, NULL, NULL);
+    {
+      serial_async (rs->remote_desc, NULL, NULL);
+      clear_async_event_handler (remote_async_inferior_event_token);
+    }
 }
 
 static void

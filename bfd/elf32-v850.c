@@ -494,7 +494,7 @@ v850_elf_perform_relocation (bfd *abfd,
     {
     default:
 #ifdef DEBUG
-      fprintf (stderr, "reloc number %d not recognised\n", r_type);
+      fprintf (stderr, "%B: reloc number %d not recognised\n", abfd, r_type);
 #endif
       return bfd_reloc_notsupported;
 
@@ -1898,7 +1898,7 @@ v850_elf_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_V850_max)
     {
-      _bfd_error_handler (_("%A: invalid V850 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid V850 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
@@ -1916,7 +1916,7 @@ v850_elf_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_V850_max)
     {
-      _bfd_error_handler (_("%A: invalid V850 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid V850 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
@@ -2147,7 +2147,7 @@ v850_elf_final_link_relocate (reloc_howto_type *howto,
 
     default:
 #ifdef DEBUG
-      fprintf (stderr, "reloc number %d not recognised\n", r_type);
+      fprintf (stderr, "%B: reloc number %d not recognised\n", input_bfd, r_type);
 #endif
       return bfd_reloc_notsupported;
     }

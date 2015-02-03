@@ -1,3 +1,10 @@
+2015-02-02  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (toc_section_name): New var.
+	(ppc_after_open): Set it.
+	(ppc_before_allocation): Use it.
+	(gld${EMULATION_NAME}_after_allocation): Here too.
+
 2015-01-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldfile.c (ldfile_try_open_bfd): Replace plugin_active_plugins_p()

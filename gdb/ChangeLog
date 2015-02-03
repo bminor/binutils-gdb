@@ -1,3 +1,63 @@
+2015-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Filter out inferior gcc option -fpreprocessed.
+	* compile/compile.c (filter_args): New function.
+	(get_args): Use it.
+
+2015-02-03  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c: Don't declare nor define a queue type for
+	gdb_event_p.
+	(event_queue): Delete.
+	(create_event, create_file_event, gdb_event_xfree)
+	(initialize_event_loop, process_event): Delete.
+	(gdb_do_one_event): Return as soon as one event is handled.
+	(handle_file_event): Change prototype.  Used the passed in
+	file_handler pointer and ready_mask instead of looping over all
+	file handlers.
+	(gdb_wait_for_event): Update the poll/select timeouts before
+	blocking.  Run event handlers directly instead of queueing events.
+	Return as soon as one event is handled.
+	(struct async_event_handler_data): Delete.
+	(invoke_async_event_handler): Delete.
+	(check_async_event_handlers): Change return type to int.  Run
+	event handlers directly instead of queueing events.  Return as
+	soon as one event is handled.
+	(handle_timer_event): Delete.
+	(update_wait_timeout): New function, factored out from
+	poll_timers.
+	(poll_timers): Reimplement.
+	* event-loop.h (initialize_event_loop): Delete declaration.
+	* top.c (gdb_init): Don't call initialize_event_loop.
+
+2015-02-03  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c (clear_async_event_handler): New function.
+	* event-loop.h (clear_async_event_handler): New declaration.
+	* record-btrace.c (record_btrace_async): New function.
+	(init_record_btrace_ops): Install record_btrace_async.
+	* record-full.c (record_full_async): New function.
+	(record_full_resume): Don't mark the async event source here.
+	(init_record_full_ops): Install record_full_async.
+	(record_full_core_resume): Don't mark the async event source here.
+	(init_record_full_core_ops): Install record_full_async.
+	* remote.c (remote_async): Mark and clear the async stop reply
+	queue event-loop token as appropriate.
+
+2015-02-03  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_child_follow_fork, linux_nat_wait_1): Use
+	target_is_async_p instead of target_can_async.
+	(linux_nat_wait): Use target_is_async_p instead of
+	target_can_async.  Don't enable async here.
+	* remote.c (interrupt_query, remote_wait, putpkt_binary): Use
+	target_is_async_p instead of target_can_async.
+
+2015-02-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* varobj.h (lang_varobj_ops): Mention which return values need
+	to be freed.
+
 2015-02-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_property): Add i18n marker.

@@ -402,7 +402,7 @@ mep_info_to_howto_rela
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_MEP_max)
     {
-      _bfd_error_handler (_("%A: invalid MEP reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid MEP reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & mep_elf_howto_table [r_type];

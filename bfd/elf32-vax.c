@@ -280,15 +280,14 @@ static reloc_howto_type howto_table[] = {
 };
 
 static void
-rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
-		Elf_Internal_Rela *dst)
+rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_VAX_max)
     {
-      (*_bfd_error_handler) (_("%A: unrecognised VAX reloc number: %d"),
+      (*_bfd_error_handler) (_("%B: unrecognised VAX reloc number: %d"),
 			     abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_VAX_NONE;

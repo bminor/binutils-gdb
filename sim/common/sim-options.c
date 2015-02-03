@@ -993,7 +993,10 @@ sim_args_command (SIM_DESC sd, const char *cmd)
       sim_cpu *cpu;
 
       if (argv [0] == NULL)
-	return SIM_RC_OK; /* FIXME - perhaps help would be better */
+	{
+	  freeargv (argv);
+	  return SIM_RC_OK; /* FIXME - perhaps help would be better */
+	}
 
       /* First check for a cpu selector.  */
       {

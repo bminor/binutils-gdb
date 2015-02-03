@@ -7436,11 +7436,18 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
       if (!h->def_regular)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
-	     the .plt section.  Leave the value alone.  This is a clue
-	     for the dynamic linker, to make function pointer
-	     comparisons work between an application and shared
-	     library.  */
+	     the .plt section.  */
 	  sym->st_shndx = SHN_UNDEF;
+	  /* If the symbol is weak we need to clear the value.
+	     Otherwise, the PLT entry would provide a definition for
+	     the symbol even if the symbol wasn't defined anywhere,
+	     and so the symbol would never be NULL.  Leave the value if
+	     there were any relocations where pointer equality matters
+	     (this is a clue for the dynamic linker, to make function
+	     pointer comparisons work between an application and shared
+	     library).  */
+	  if (!h->ref_regular_nonweak || !h->pointer_equality_needed)
+	    sym->st_value = 0;
 	}
     }
 

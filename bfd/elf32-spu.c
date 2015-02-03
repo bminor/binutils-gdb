@@ -156,7 +156,7 @@ spu_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   /* PR 17512: file: 90c2a92e.  */
   if (r_type >= R_SPU_max)
     {
-      (*_bfd_error_handler) (_("%A: unrecognised SPU reloc number: %d"),
+      (*_bfd_error_handler) (_("%B: unrecognised SPU reloc number: %d"),
 			     abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_SPU_NONE;

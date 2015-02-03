@@ -1757,6 +1757,8 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   /* PR 17512: Handle corrupt PE binaries.  */
   if (edt.eat_addr + (edt.num_functions * 4) - adj >= datasize
+      /* PR 17512: file: 092b1829 */
+      || (edt.num_functions * 4) < edt.num_functions
       /* PR 17512 file: 140-165018-0.004.  */
       || data + edt.eat_addr - adj < data)
     fprintf (file, _("\tInvalid Export Address Table rva (0x%lx) or entry count (0x%lx)\n"),
@@ -1801,6 +1803,8 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   /* PR 17512: Handle corrupt PE binaries.  */
   if (edt.npt_addr + (edt.num_names * 4) - adj >= datasize
+      /* PR 17512: file: bb68816e.  */
+      || edt.num_names * 4 < edt.num_names
       || (data + edt.npt_addr - adj) < data)
     fprintf (file, _("\tInvalid Name Pointer Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.npt_addr,

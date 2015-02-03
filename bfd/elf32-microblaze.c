@@ -652,7 +652,7 @@ microblaze_elf_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_MICROBLAZE_max)
     {
-      (*_bfd_error_handler) (_("%A: unrecognised MicroBlaze reloc number: %d"),
+      (*_bfd_error_handler) (_("%B: unrecognised MicroBlaze reloc number: %d"),
 			     abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_MICROBLAZE_NONE;

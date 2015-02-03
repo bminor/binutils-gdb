@@ -321,7 +321,7 @@ pj_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (r >= R_PJ_max)
     {
-      (*_bfd_error_handler) (_("%A: unrecognised PicoJava reloc number: %d"),
+      (*_bfd_error_handler) (_("%B: unrecognised PicoJava reloc number: %d"),
 			     abfd, r);
       bfd_set_error (bfd_error_bad_value);
       r = R_PJ_NONE;

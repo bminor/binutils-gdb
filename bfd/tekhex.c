@@ -397,7 +397,7 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 	    return FALSE;
 	}
       alt_section = NULL;
-      while (*src)
+      while (src < src_end && *src)
 	{
 	  switch (*src)
 	    {

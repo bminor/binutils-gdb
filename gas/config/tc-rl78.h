@@ -82,3 +82,6 @@ extern void rl78_handle_align (fragS *);
 
 #define elf_tc_final_processing	rl78_elf_final_processing
 extern void rl78_elf_final_processing (void);
+
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES)	\
+  ((EXP)->X_md = 0, expression (EXP), TC_PARSE_CONS_RETURN_NONE)

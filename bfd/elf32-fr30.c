@@ -377,7 +377,7 @@ fr30_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_FR30_max)
     {
-      _bfd_error_handler (_("%A: invalid FR30 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid FR30 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & fr30_elf_howto_table [r_type];

@@ -2028,7 +2028,7 @@ ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_PPC_max)
     {
-      (*_bfd_error_handler) (_("%A: unrecognised PPC reloc number: %d"),
+      (*_bfd_error_handler) (_("%B: unrecognised PPC reloc number: %d"),
 			     abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_PPC_NONE;

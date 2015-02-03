@@ -1,3 +1,8 @@
+2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* objdump.c (display_any_bfd): Fail if archives nest too deeply.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* readelf.c: Add FT32 support.

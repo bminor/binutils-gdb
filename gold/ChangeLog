@@ -1,3 +1,8 @@
+2015-02-02  Cary Coutant  <ccoutant@google.com>
+
+	* x86_64.cc (Target_x86_64::Relocate::relocate_tls): Check for
+	executable output file.
+
 2015-01-22  Han Shen  <shenhan@google.com>
 
 	* arm.cc (Target_arm::Target_arm): Add initialization for new members.
