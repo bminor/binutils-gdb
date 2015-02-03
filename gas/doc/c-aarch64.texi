@@ -232,6 +232,24 @@ The AArch64 architecture uses @sc{ieee} floating-point numbers.
 @table @code
 
 @c AAAAAAAAAAAAAAAAAAAAAAAAA
+
+@cindex @code{.arch} directive, AArch64
+@item .arch @var{name}
+Select the target architecture.  Valid values for @var{name} are the same as
+for the @option{-march} commandline option.
+
+Specifying @code{.arch} clears any previously selected architecture
+extensions.
+
+@cindex @code{.arch_extension} directive, AArch64
+@item .arch_extension @var{name}
+Add or remove an architecture extension to the target architecture.  Valid
+values for @var{name} are the same as those accepted as architectural
+extensions by the @option{-mcpu} commandline option.
+
+@code{.arch_extension} may be used multiple times to add or remove extensions
+incrementally to the architecture being compiled for.
+
 @c BBBBBBBBBBBBBBBBBBBBBBBBBB
 
 @cindex @code{.bss} directive, AArch64
