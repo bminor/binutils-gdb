@@ -1,3 +1,11 @@
+2015-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14918
+	* ld-plugin/lto.exp (lto_link_elf_tests): Add PR ld/14918 test.
+
+	* ld-plugin/pr14918.c: New file.
+	* ld-plugin/pr14918.d: Likewise.
+
 2015-01-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lib/ld-lib.exp (ar_simple_create): Move -rc before $aropts.

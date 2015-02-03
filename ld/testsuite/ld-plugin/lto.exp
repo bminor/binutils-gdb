@@ -247,6 +247,9 @@ set lto_link_elf_tests [list \
   [list "PR ld/16746 (2)" \
    "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto" \
    {dummy.c} {} "pr16746b.exe"] \
+  [list "PR ld/14918" \
+   "-flto" "-flto" \
+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
 ]
 
 # Check final symbols in executables.
