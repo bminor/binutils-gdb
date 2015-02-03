@@ -1,3 +1,9 @@
+2015-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Filter out inferior gcc option -fpreprocessed.
+	* compile/compile.c (filter_args): New function.
+	(get_args): Use it.
+
 2015-02-03  Pedro Alves  <palves@redhat.com>
 
 	* event-loop.c: Don't declare nor define a queue type for
