@@ -1389,7 +1389,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
       if (reloc.r_extern)
 	{
 	  /* PR 17512: file: 8396-1185-0.004.  */
-	  if (num >= bfd_mach_o_count_symbols (abfd))
+	  if (num >= (unsigned) bfd_mach_o_count_symbols (abfd))
 	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
 	  else if (syms == NULL)
 	    sym = bfd_und_section_ptr->symbol_ptr_ptr;	    
