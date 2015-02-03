@@ -1,3 +1,7 @@
+2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.h (TC_PARSE_CONS_EXPRESSION): Define.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* Makefile.am: Add FT32 files.
