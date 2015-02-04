@@ -1,3 +1,15 @@
+2015-02-04  Doug Evans  <dje@google.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	PR tui/17810
+	* tui/tui-command.c (tui_refresh_cmd_win): New function.
+	* tui/tui-command.c (tui_refresh_cmd_win): Declare.
+	* tui/tui-file.c: #include tui/tui-command.h.
+	(tui_file_fputs): Refresh command window if stream is not gdb_stdout.
+	(tui_file_flush): Refresh command window if stream is gdb_stdout.
+	* tui/tui-io.c (tui_puts): Remove calls to wrefresh, fflush.
+
 2015-02-04  Pedro Alves  <palves@redhat.com>
 
 	Fix build breakage.
