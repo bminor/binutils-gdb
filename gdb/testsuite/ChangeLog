@@ -1,3 +1,11 @@
+2015-02-04  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/info-os.c (shmid, semid, msqid): Make variables static
+	and initialize them.
+	(ipc_cleanup): New function.
+	(main): Don't declare shmid, semid, and msqid.  Add a call to
+	atexit so that we call ipc_cleanup on exit.
+
 2015-02-04  Pedro Alves  <palves@redhat.com>
 
 	* boards/native-extended-gdbserver.exp: Remove any target variant
