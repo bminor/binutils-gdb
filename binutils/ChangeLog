@@ -1,3 +1,15 @@
+2015-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (read_and_display_attr_value): Test for a block length
+	being so long that it wraps around to before the start of the block.
+	(process_debug_info): Test for section_begin wrapping around to
+	before the start of the section.
+	(display_gdb_index): Test for num_cus being so large that the end
+	address wraps around to before the start of the section.
+	(process_cu_tu_index): Test for j being so large that the section
+	index pool wraps around to before the start of the section.
+
 2015-02-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531
