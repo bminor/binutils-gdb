@@ -282,6 +282,10 @@ class Plugin_manager
   input_objects() const
   { return this->input_objects_; }
 
+  Symbol_table*
+  symtab()
+  { return this->symtab_; }
+
   Layout*
   layout()
   { return this->layout_; }
@@ -396,7 +400,8 @@ class Pluginobj : public Object
 
   // Fill in the symbol resolution status for the given plugin symbols.
   ld_plugin_status
-  get_symbol_resolution_info(int nsyms,
+  get_symbol_resolution_info(Symbol_table* symtab,
+			     int nsyms,
 			     ld_plugin_symbol* syms,
 			     int version) const;
 
