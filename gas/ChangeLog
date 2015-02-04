@@ -1,3 +1,8 @@
+2015-02-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add support for Cortex-A72.
+	* doc/c-aarch64.texi (-mcpu=): Add "cortex-a72".
+
 2015-02-04  Nick Clifton  <nickc@redhat.com>
 
 	* config/rl78-parse.y (addsubw): Fix encoding of [HL] variant of
