@@ -20,7 +20,7 @@
 #include "ui-file.h"
 #include "tui/tui-file.h"
 #include "tui/tui-io.h"
-
+#include "tui/tui-command.h"
 #include "tui.h"
 
 /* A ``struct ui_file'' that is compatible with all the legacy
@@ -179,6 +179,10 @@ tui_file_fputs (const char *linebuffer, struct ui_file *file)
   else
     {
       tui_puts (linebuffer);
+      /* gdb_stdout is buffered, and the caller must gdb_flush it at
+	 appropriate times.  Other streams are not so buffered.  */
+      if (file != gdb_stdout)
+	tui_refresh_cmd_win ();
     }
 }
 
@@ -239,6 +243,10 @@ tui_file_flush (struct ui_file *file)
     case astring:
       break;
     case afile:
+      /* gdb_stdout is buffered.  Other files are always flushed on
+	 every write.  */
+      if (file == gdb_stdout)
+	tui_refresh_cmd_win ();
       fflush (stream->ts_filestream);
       break;
     }

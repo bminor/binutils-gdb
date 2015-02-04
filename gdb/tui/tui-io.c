@@ -158,7 +158,10 @@ tui_putc (char c)
   tui_puts (buf);
 }
 
-/* Print the string in the curses command window.  */
+/* Print the string in the curses command window.
+   The output is buffered.  It is up to the caller to refresh the screen
+   if necessary.  */
+
 void
 tui_puts (const char *string)
 {
@@ -200,10 +203,6 @@ tui_puts (const char *string)
          TUI_CMD_WIN->detail.command_info.curch);
   TUI_CMD_WIN->detail.command_info.start_line
     = TUI_CMD_WIN->detail.command_info.cur_line;
-
-  /* We could defer the following.  */
-  wrefresh (w);
-  fflush (stdout);
 }
 
 /* Readline callback.
@@ -342,6 +341,7 @@ tui_readline_output (int error, gdb_client_data data)
     {
       buf[size] = 0;
       tui_puts (buf);
+      tui_refresh_cmd_win ();
     }
 }
 #endif
@@ -393,6 +393,7 @@ print_filename (const char *to_print, const char *full_pathname)
     {
       PUTX (*s);
     }
+  tui_refresh_cmd_win ();
   return printed_len;
 }
 
@@ -448,9 +449,11 @@ tui_rl_display_match_list (char **matches, int len, int max)
       xsnprintf (msg, sizeof (msg),
 		 "\nDisplay all %d possibilities? (y or n)", len);
       tui_puts (msg);
+      tui_refresh_cmd_win ();
       if (get_y_or_n () == 0)
 	{
 	  tui_puts ("\n");
+	  tui_refresh_cmd_win ();
 	  return;
 	}
     }
@@ -522,6 +525,7 @@ tui_rl_display_match_list (char **matches, int len, int max)
 	}
       tui_putc ('\n');
     }
+  tui_refresh_cmd_win ();
 }
 
 /* Setup the IO for curses or non-curses mode.
