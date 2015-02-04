@@ -27,7 +27,9 @@ load_board_description "gdbserver-base"
 # matches localhost.  Force it to be NOT remote.
 global board
 global board_info
-set board_info($board,isremote) 0
+# Remove any target variant specifications from the name.
+set baseboard [lindex [split $board "/"] 0]
+set board_info($baseboard,isremote) 0
 
 set_board_info sockethost "localhost:"
 
