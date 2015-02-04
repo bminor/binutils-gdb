@@ -1,3 +1,8 @@
+2015-02-04  Pedro Alves  <palves@redhat.com>
+
+	Fix build breakage.
+	* event-loop.c (gdb_do_one_event): Add default switch case.
+
 2015-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Filter out inferior gcc option -fpreprocessed.

@@ -287,6 +287,10 @@ gdb_do_one_event (void)
 	  /* Are there any asynchronous event handlers ready?  */
 	  res = check_async_event_handlers ();
 	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  "unexpected event_source_head %d",
+			  event_source_head);
 	}
 
       event_source_head++;
