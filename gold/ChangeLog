@@ -1,3 +1,8 @@
+2015-02-04  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* merge.cc (do_add_input_section): Combine loop epilogue into main loop
+	body.
+
 2015-02-04  Peter Collingbourne  <pcc@google.com>
 
 	* plugin.cc (Pluginobj::get_symbol_resolution_info): Resolve
