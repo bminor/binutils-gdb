@@ -1,3 +1,8 @@
+2015-02-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/rl78-parse.y (addsubw): Fix encoding of [HL] variant of
+	these instructions.
+
 2015-02-03  Renlin Li  <renlin.li@arm.com>
 
 	* doc/c-aarch64.texi (.arch): Document the directive.
