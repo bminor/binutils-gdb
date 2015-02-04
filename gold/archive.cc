@@ -930,6 +930,32 @@ Archive::count_members()
   return ret;
 }
 
+// RAII class to ensure we unlock the object if it's a member of a
+// thin archive. We can't use Task_lock_obj in Archive::include_member
+// because the object file is already locked when it's opened by
+// get_elf_object_for_member.
+
+class Thin_archive_object_unlocker
+{
+ public:
+  Thin_archive_object_unlocker(const Task *task, Object* obj)
+    : task_(task), obj_(obj)
+  { }
+
+  ~Thin_archive_object_unlocker()
+  {
+    if (this->obj_->offset() == 0)
+      this->obj_->unlock(this->task_);
+  }
+
+ private:
+  Thin_archive_object_unlocker(const Thin_archive_object_unlocker&);
+  Thin_archive_object_unlocker& operator=(const Thin_archive_object_unlocker&);
+
+  const Task* task_;
+  Object* obj_;
+};
+
 // Include an archive member in the link.  OFF is the file offset of
 // the member header.  WHY is the reason we are including this member.
 // Return true if we added the member or if we had an error, return
@@ -978,6 +1004,10 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       return unconfigured ? false : true;
     }
 
+  // If the object is an external member of a thin archive,
+  // unlock it when we're done here.
+  Thin_archive_object_unlocker unlocker(this->task_, obj);
+
   if (mapfile != NULL)
     mapfile->report_include_archive_member(obj->name(), sym, why);
 
@@ -991,31 +1021,21 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   if (!input_objects->add_object(obj))
     {
-      // If this is an external member of a thin archive, unlock the
-      // file.
-      if (obj->offset() == 0)
-	obj->unlock(this->task_);
       delete obj;
-    }
-  else
-    {
-      {
-	if (layout->incremental_inputs() != NULL)
-	  layout->incremental_inputs()->report_object(obj, 0, this, NULL);
-	Read_symbols_data sd;
-	obj->read_symbols(&sd);
-	obj->layout(symtab, layout, &sd);
-	obj->add_symbols(symtab, &sd, layout);
-      }
-
-      // If this is an external member of a thin archive, unlock the file
-      // for the next task.
-      if (obj->offset() == 0)
-        obj->unlock(this->task_);
-
-      this->included_member_ = true;
+      return true;
     }
 
+  if (layout->incremental_inputs() != NULL)
+    layout->incremental_inputs()->report_object(obj, 0, this, NULL);
+
+  {
+    Read_symbols_data sd;
+    obj->read_symbols(&sd);
+    obj->layout(symtab, layout, &sd);
+    obj->add_symbols(symtab, &sd, layout);
+  }
+
+  this->included_member_ = true;
   return true;
 }
 

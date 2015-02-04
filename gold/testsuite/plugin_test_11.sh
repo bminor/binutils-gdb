@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# plugin_test_1.sh -- a test case for the plugin API.
+# plugin_test_11.sh -- a test case for the plugin API.
 
 # Copyright (C) 2008-2015 Free Software Foundation, Inc.
 # Written by Cary Coutant <ccoutant@google.com>.
@@ -39,21 +39,21 @@ check()
     fi
 }
 
-check plugin_test_1.err "API version:"
-check plugin_test_1.err "gold version:"
-check plugin_test_1.err "option: _Z4f13iv"
-check plugin_test_1.err "two_file_test_main.o: claim file hook called"
-check plugin_test_1.err "two_file_test_1.o.syms: claim file hook called"
-check plugin_test_1.err "two_file_test_1b.o.syms: claim file hook called"
-check plugin_test_1.err "two_file_test_2.o.syms: claim file hook called"
-check plugin_test_1.err "two_file_test_1.o.syms: _Z4f13iv: PREVAILING_DEF_IRONLY"
-check plugin_test_1.err "two_file_test_1.o.syms: _Z2t2v: PREVAILING_DEF_REG"
-check plugin_test_1.err "two_file_test_1.o.syms: v2: RESOLVED_IR"
-check plugin_test_1.err "two_file_test_1.o.syms: t17data: RESOLVED_IR"
-check plugin_test_1.err "two_file_test_2.o.syms: _Z4f13iv: PREEMPTED_IR"
-check plugin_test_1.err "two_file_test_1.o: adding new input file"
-check plugin_test_1.err "two_file_test_1b.o: adding new input file"
-check plugin_test_1.err "two_file_test_2.o: adding new input file"
-check plugin_test_1.err "cleanup hook called"
+check plugin_test_11.err "API version:"
+check plugin_test_11.err "gold version:"
+check plugin_test_11.err "option: _Z4f13iv"
+check plugin_test_11.err "two_file_test_main.o: claim file hook called"
+check plugin_test_11.err "two_file_test_1.o: claim file hook called"
+check plugin_test_11.err "two_file_test_1b.o: claim file hook called"
+check plugin_test_11.err "two_file_test_2.o: claim file hook called"
+check plugin_test_11.err "two_file_test_1.o: _Z4f13iv: PREVAILING_DEF_IRONLY"
+check plugin_test_11.err "two_file_test_1.o: _Z2t2v: PREVAILING_DEF_REG"
+check plugin_test_11.err "two_file_test_1.o: v2: RESOLVED_IR"
+check plugin_test_11.err "two_file_test_1.o: t17data: RESOLVED_IR"
+check plugin_test_11.err "two_file_test_2.o: _Z4f13iv: PREEMPTED_IR"
+check plugin_test_11.err "two_file_test_1.o: adding new input file"
+check plugin_test_11.err "two_file_test_1b.o: adding new input file"
+check plugin_test_11.err "two_file_test_2.o: adding new input file"
+check plugin_test_11.err "cleanup hook called"
 
 exit 0
