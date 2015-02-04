@@ -1,3 +1,9 @@
+2015-02-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/python-internal.h (Py_hash_t): Define it for Python <3.2.
+	* python/py-value.c (valpy_fetch_lazy): Use it.  Remove cast to the
+	return type.
+
 2015-02-04  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (handle_extended_wait): Don't resume LWPs here.
