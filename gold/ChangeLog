@@ -1,3 +1,41 @@
+2015-02-03  Cary Coutant  <ccoutant@google.com>
+	    Peter Collingbourne  <pcc@google.com>
+
+	PR gold/15660
+	* archive.cc (Thin_archive_object_unlocker): New class.
+	(Archive::include_member): Unlock external members of thin archives.
+	* testsuite/Makefile.am (plugin_test_1): Rename .syms files.
+	(plugin_test_2): Likewise.
+	(plugin_test_3): Likewise.
+	(plugin_test_4): Likewise.
+	(plugin_test_5): Likewise.
+	(plugin_test_6): Likewise.
+	(plugin_test_7): Likewise.
+	(plugin_test_8): Likewise.
+	(plugin_test_9): Likewise.
+	(plugin_test_10): Likewise.
+	(plugin_test_11): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test.c (claim_file_hook): Check for parallel .syms
+	file to decide whether to claim file.
+	(all_symbols_read_hook): Likewise.
+	* testsuite/plugin_test_1.sh: Adjust expected output.
+	* testsuite/plugin_test_2.sh: Likewise.
+	* testsuite/plugin_test_3.sh: Likewise.
+	* testsuite/plugin_test_6.sh: Likewise.
+	* testsuite/plugin_test_tls.sh: Likewise.
+	* testsuite/plugin_test_11.sh: New testcase.
+
+2015-02-03  Cary Coutant  <ccoutant@google.com>
+
+	* descriptors.cc (Descriptors::open): Set artificially-low limit for
+	file descriptors when debugging enabled. Add debug output.
+	(Descriptors::release): Add debug output.
+	(Descriptors::close_some_descriptor): Likewise.
+	(Descriptors::close_all): Likewise.
+	* fileread.cc (File_read::lock): Likewise.
+	(File_read::unlock): Likewise.
+
 2015-02-02  Cary Coutant  <ccoutant@google.com>
 
 	* x86_64.cc (Target_x86_64::Relocate::relocate_tls): Check for
@@ -35,6 +73,7 @@
 	(Output_data_plt_arm::entry_count): Modified.
 	(Output_data_plt_arm::address_for_global): New method.
 	(Output_data_plt_arm::address_for_local): New method.
+gold/
 	(Output_data_plt_arm::set_final_data_size): Add irelative_count_.
 	(Output_data_plt_arm::insert_irelative_data): New method.
 	(Output_data_plt_arm::irelative_rel_): New member.
