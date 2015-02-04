@@ -1,3 +1,12 @@
+2015-02-04  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (handle_extended_wait): Don't resume LWPs here.
+	(wait_lwp): Don't call wait_lwp if linux_handle_extended_wait
+	returns true.
+	(resume_stopped_resumed_lwps): Don't check whether the thread is
+	marked as executing.
+	(linux_nat_wait_1): Use resume_stopped_resumed_lwps.
+
 2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* regset.h (struct regset): Add flags field.
