@@ -1,3 +1,8 @@
+2015-02-05  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-msp430.c (md_assemble): Correct size passed to
+	extract_cmd.  Remove index check.
+
 2015-02-04  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add support for Cortex-A72.

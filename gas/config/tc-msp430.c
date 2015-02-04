@@ -3174,9 +3174,9 @@ md_assemble (char * str)
   unsigned int i = 0;
 
   str = skip_space (str);	/* Skip leading spaces.  */
-  str = extract_cmd (str, cmd, sizeof (cmd));
+  str = extract_cmd (str, cmd, sizeof (cmd) - 1);
 
-  while (cmd[i] && i < sizeof (cmd))
+  while (cmd[i])
     {
       char a = TOLOWER (cmd[i]);
       cmd[i] = a;
