@@ -1,3 +1,10 @@
+2015-02-04  Peter Collingbourne  <pcc@google.com>
+
+	* plugin.cc (Pluginobj::get_symbol_resolution_info): Resolve
+	forwarding symbols when computing symbol resolution info for plugins.
+	* plugin.h (Plugin_manager::symtab): New method.
+	(Pluginobj::get_symbol_resolution_info): Add symtab parameter.
+
 2015-02-03  Cary Coutant  <ccoutant@google.com>
 	    Peter Collingbourne  <pcc@google.com>
 
