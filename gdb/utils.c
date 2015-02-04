@@ -3259,7 +3259,9 @@ int
 producer_is_gcc_ge_4 (const char *producer)
 {
   int major, minor;
-  major = producer_is_gcc (producer, &minor);
+
+  if (! producer_is_gcc (producer, &major, &minor))
+    return -1;
   if (major < 4)
     return -1;
   if (major > 4)
@@ -3267,17 +3269,24 @@ producer_is_gcc_ge_4 (const char *producer)
   return minor;
 }
 
-/* Returns the major version number if the given PRODUCER string is GCC and
-   sets the MINOR version.  Returns -1 if the given PRODUCER is NULL or it
-   isn't GCC.  */
-int
-producer_is_gcc (const char *producer, int *minor)
+/* Returns true if the given PRODUCER string is GCC and sets the MAJOR
+   and MINOR versions when not NULL.  Returns false if the given PRODUCER
+   is NULL or it isn't GCC.  */
+
+bool
+producer_is_gcc (const char *producer, int *major, int *minor)
 {
   const char *cs;
-  int major;
 
   if (producer != NULL && strncmp (producer, "GNU ", strlen ("GNU ")) == 0)
     {
+      int maj, min;
+
+      if (major == NULL)
+	major = &maj;
+      if (minor == NULL)
+	minor = &min;
+
       /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
 	 A full producer string might look like:
 	 "GNU C 4.7.2"
@@ -3289,7 +3298,7 @@ producer_is_gcc (const char *producer, int *minor)
         cs++;
       if (*cs && isspace (*cs))
         cs++;
-      if (sscanf (cs, "%d.%d", &major, minor) == 2)
+      if (sscanf (cs, "%d.%d", major, minor) == 2)
 	return major;
     }
 
