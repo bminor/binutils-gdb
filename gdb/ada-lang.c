@@ -13844,7 +13844,8 @@ ada_get_symbol_name_cmp (const char *lookup_name)
 /* Implement the "la_read_var_value" language_defn method for Ada.  */
 
 static struct value *
-ada_read_var_value (struct symbol *var, struct frame_info *frame)
+ada_read_var_value (struct symbol *var, const struct block *var_block,
+		    struct frame_info *frame)
 {
   const struct block *frame_block = NULL;
   struct symbol *renaming_sym = NULL;
@@ -13860,7 +13861,7 @@ ada_read_var_value (struct symbol *var, struct frame_info *frame)
 
   /* This is a typical case where we expect the default_read_var_value
      function to work.  */
-  return default_read_var_value (var, frame);
+  return default_read_var_value (var, var_block, frame);
 }
 
 const struct language_defn ada_language_defn = {

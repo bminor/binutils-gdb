@@ -20,6 +20,7 @@
 #if !defined (OBJFILES_H)
 #define OBJFILES_H
 
+#include "hashtab.h"
 #include "gdb_obstack.h"	/* For obstack internals.  */
 #include "symfile.h"		/* For struct psymbol_allocation_list.  */
 #include "progspace.h"
@@ -428,6 +429,19 @@ struct objfile
      properly.  */
 
   struct symbol *template_symbols;
+
+  /* Associate a static link (struct dynamic_prop *) to all blocks (struct
+     block *) that have one.
+
+     In the context of nested functions (available in Pascal, Ada and GNU C,
+     for instance), a static link (as in DWARF's DW_AT_static_link attribute)
+     for a function is a way to get the frame corresponding to the enclosing
+     function.
+
+     Very few blocks have a static link, so it's more memory efficient to
+     store these here rather than in struct block.  Static links must be
+     allocated on the objfile's obstack.  */
+  htab_t static_links;
 };
 
 /* Defines for the objfile flag word.  */
@@ -734,5 +748,13 @@ extern const char *objfile_debug_name (const struct objfile *objfile);
 
 extern void set_objfile_main_name (struct objfile *objfile,
 				   const char *name, enum language lang);
+
+extern void objfile_register_static_link
+  (struct objfile *objfile,
+   const struct block *block,
+   const struct dynamic_prop *static_link);
+
+extern const struct dynamic_prop *objfile_lookup_static_link
+  (struct objfile *objfile, const struct block *block);
 
 #endif /* !defined (OBJFILES_H) */

@@ -265,7 +265,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
                   /* Ignore Python errors at this stage.  */
                   self_bpfinish->return_type = type_to_type_object (ret_type);
                   PyErr_Clear ();
-                  func_value = read_var_value (function, frame);
+                  func_value = read_var_value (function, NULL, frame);
                   self_bpfinish->function_value =
                       value_to_value_object (func_value);
                   PyErr_Clear ();

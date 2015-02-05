@@ -428,6 +428,21 @@ set_block_compunit_symtab (struct block *block, struct compunit_symtab *cu)
   gb->compunit_symtab = cu;
 }
 
+/* See block.h.  */
+
+struct dynamic_prop *
+block_static_link (const struct block *block)
+{
+  struct objfile *objfile = block_objfile (block);
+
+  /* Only objfile-owned blocks that materialize top function scopes can have
+     static links.  */
+  if (objfile == NULL || BLOCK_FUNCTION (block) == NULL)
+    return NULL;
+
+  return (struct dynamic_prop *) objfile_lookup_static_link (objfile, block);
+}
+
 /* Return the compunit of the global block.  */
 
 static struct compunit_symtab *

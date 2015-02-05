@@ -1389,7 +1389,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		}
 
 	      finish_block (newobj->name, &local_symbols, newobj->old_blocks,
-			    newobj->start_addr,
+			    NULL, newobj->start_addr,
 			    (fcn_cs_saved.c_value
 			     + fcn_aux_saved.x_sym.x_misc.x_fsize
 			     + ANOFFSET (objfile->section_offsets,
@@ -1480,7 +1480,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	      if (local_symbols && context_stack_depth > 0)
 		{
 		  /* Make a block for the local symbols within.  */
-		  finish_block (newobj->name, &local_symbols, newobj->old_blocks,
+		  finish_block (newobj->name, &local_symbols,
+				newobj->old_blocks, NULL,
 				newobj->start_addr,
 				(cs->c_value
 				 + ANOFFSET (objfile->section_offsets,

@@ -39,6 +39,8 @@ struct compunit_symtab;
 struct block;
 struct pending_block;
 
+struct dynamic_prop;
+
 #ifndef EXTERN
 #define	EXTERN extern
 #endif
@@ -145,6 +147,11 @@ struct context_stack
 
     struct symbol *name;
 
+    /* Expression that computes the frame base of the lexically enclosing
+       function, if any.  NULL otherwise.  */
+
+    struct dynamic_prop *static_link;
+
     /* PC where this context starts */
 
     CORE_ADDR start_addr;
@@ -196,9 +203,11 @@ extern struct symbol *find_symbol_in_list (struct pending *list,
 					   char *name, int length);
 
 extern struct block *finish_block (struct symbol *symbol,
-                                   struct pending **listhead,
-                                   struct pending_block *old_blocks,
-                                   CORE_ADDR start, CORE_ADDR end);
+				   struct pending **listhead,
+				   struct pending_block *old_blocks,
+				   const struct dynamic_prop *static_link,
+				   CORE_ADDR start,
+				   CORE_ADDR end);
 
 extern void record_block_range (struct block *,
                                 CORE_ADDR start, CORE_ADDR end_inclusive);

@@ -1743,6 +1743,10 @@ static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 
 static void read_signatured_type (struct signatured_type *);
 
+static int attr_to_dynamic_prop (const struct attribute *attr,
+				 struct die_info *die, struct dwarf2_cu *cu,
+				 struct dynamic_prop *prop);
+
 /* memory allocation interface */
 
 static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
@@ -11392,6 +11396,16 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     dwarf2_symbol_mark_computed (attr, newobj->name, cu, 1);
 
+  /* If there is a location for the static link, record it.  */
+  newobj->static_link = NULL;
+  attr = dwarf2_attr (die, DW_AT_static_link, cu);
+  if (attr)
+    {
+      newobj->static_link = obstack_alloc (&objfile->objfile_obstack,
+					sizeof (*newobj->static_link));
+      attr_to_dynamic_prop (attr, die, cu, newobj->static_link);
+    }
+
   cu->list_in_scope = &local_symbols;
 
   if (die->child != NULL)
@@ -11443,7 +11457,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   newobj = pop_context ();
   /* Make a block for the local symbols within.  */
   block = finish_block (newobj->name, &local_symbols, newobj->old_blocks,
-                        lowpc, highpc);
+			newobj->static_link, lowpc, highpc);
 
   /* For C++, set the block's scope.  */
   if ((cu->language == language_cplus
@@ -11528,7 +11542,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (local_symbols != NULL || local_using_directives != NULL)
     {
       struct block *block
-        = finish_block (0, &local_symbols, newobj->old_blocks,
+        = finish_block (0, &local_symbols, newobj->old_blocks, NULL,
 			newobj->start_addr, highpc);
 
       /* Note that recording ranges after traversing children, as we

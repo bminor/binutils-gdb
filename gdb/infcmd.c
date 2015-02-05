@@ -1662,7 +1662,7 @@ finish_command_continuation (void *arg, int err)
 	    {
 	      struct value *func;
 
-	      func = read_var_value (a->function, get_current_frame ());
+	      func = read_var_value (a->function, NULL, get_current_frame ());
 	      TRY
 		{
 		  /* print_return_value can throw an exception in some

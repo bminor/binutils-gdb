@@ -1,3 +1,112 @@
+2015-08-25  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_read_var_value): Add a var_block argument
+	and pass it to default_read_var_value.
+	* block.c (block_static_link): New accessor.
+	* block.h (block_static_link): Declare it.
+	* buildsym.c (finish_block_internal): Add a static_link
+	argument.  If there is a static link, associate it to the new
+	block.
+	(finish_block): Add a static link argument and pass it to
+	finish_block_internal.
+	(end_symtab_get_static_block): Update calls to finish_block and
+	to finish_block_internal.
+	(end_symtab_with_blockvector): Update call to
+	finish_block_internal.
+	* buildsym.h: Forward-declare struct dynamic_prop.
+	(struct context_stack): Add a static_link field.
+	(finish_block): Add a static link argument.
+	* c-exp.y: Remove an obsolete comment (evaluation of variables
+	already start from the selected frame, and now they climb *up*
+	the call stack) and propagate the block information to the
+	produced expression.
+	* d-exp.y: Likewise.
+	* f-exp.y: Likewise.
+	* go-exp.y: Likewise.
+	* jv-exp.y: Likewise.
+	* m2-exp.y: Likewise.
+	* p-exp.y: Likewise.
+	* coffread.c (coff_symtab_read): Update calls to finish_block.
+	* dbxread.c (process_one_symbol): Likewise.
+	* xcoffread.c (read_xcoff_symtab): Likewise.
+	* compile/compile-c-symbols.c (convert_one_symbol): Promote the
+	"sym" parameter to struct block_symbol, update its uses and pass
+	its block to calls to read_var_value.
+	(convert_symbol_sym): Update the calls to convert_one_symbol.
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Update
+	call to read_var_value.
+	* dwarf2loc.c (block_op_get_frame_base): New.
+	(dwarf2_block_frame_base_locexpr_funcs): Implement the
+	get_frame_base method.
+	(dwarf2_block_frame_base_loclist_funcs): Likewise.
+	(dwarf2locexpr_baton_eval): Add a frame argument and use it
+	instead of the selected frame in order to evaluate the
+	expression.
+	(dwarf2_evaluate_property): Add a frame argument.  Update call
+	to dwarf2_locexpr_baton_eval to provide a frame in available and
+	to handle the absence of address stack.
+	* dwarf2loc.h (dwarf2_evaluate_property): Add a frame argument.
+	* dwarf2read.c (attr_to_dynamic_prop): Add a forward
+	declaration.
+	(read_func_scope): Record any available static link description.
+	Update call to finish_block.
+	(read_lexical_block_scope): Update call to finish_block.
+	* findvar.c (follow_static_link): New.
+	(get_hosting_frame): New.
+	(default_read_var_value): Add a var_block argument.  Use
+	get_hosting_frame to handle non-local references.
+	(read_var_value): Add a var_block argument and pass it to the
+	LA_READ_VAR_VALUE method.
+	* gdbtypes.c (resolve_dynamic_range): Update calls to
+	dwarf2_evaluate_property.
+	(resolve_dynamic_type_internal): Likewise.
+	* guile/scm-frame.c (gdbscm_frame_read_var): Update call to
+	read_var_value, passing it the block coming from symbol lookup.
+	* guile/scm-symbol.c (gdbscm_symbol_value): Update call to
+	read_var_value (TODO).
+	* infcmd.c (finish_command_continuation): Update call to
+	read_var_value, passing it the block coming from symbol lookup.
+	* infrun.c (insert_exception_resume_breakpoint): Likewise.
+	* language.h (struct language_defn): Add a var_block argument to
+	the LA_READ_VAR_VALUE method.
+	* objfiles.c (struct static_link_htab_entry): New.
+	(static_link_htab_entry_hash): New.
+	(static_link_htab_entry_eq): New.
+	(objfile_register_static_link): New.
+	(objfile_lookup_static_link): New.
+	(free_objfile): Free the STATIC_LINKS hashed map if needed.
+	* objfiles.h: Include hashtab.h.
+	(struct objfile): Add a static_links field.
+	(objfile_register_static_link): New.
+	(objfile_lookup_static_link): New.
+	* printcmd.c (print_variable_and_value): Update call to
+	read_var_value.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	* python/py-frame.c (frapy_read_var): Update call to
+	read_var_value, passing it the block coming from symbol lookup.
+	* python/py-framefilter.c (extract_sym): Add a sym_block
+	parameter and set the pointed value to NULL (TODO).
+	(enumerate_args): Update call to extract_sym.
+	(enumerate_locals): Update calls to extract_sym and to
+	read_var_value.
+	* python/py-symbol.c (sympy_value): Update call to
+	read_var_value (TODO).
+	* stack.c (read_frame_local): Update call to read_var_value.
+	(read_frame_arg): Likewise.
+	(return_command): Likewise.
+	* symtab.h (struct symbol_block_ops): Add a get_frame_base
+	method.
+	(struct symbol): Add a block field.
+	(SYMBOL_BLOCK): New accessor.
+	* valops.c (value_of_variable): Remove frame/block handling and
+	pass the block argument to read_var_value, which does this job
+	now.
+	(value_struct_elt_for_reference): Update calls to
+	read_var_value.
+	(value_of_this): Pass the block found to read_var_value.
+	* value.h (read_var_value): Add a var_block argument.
+	(default_read_var_value): Likewise.
+
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_new_thread): Move it to ...

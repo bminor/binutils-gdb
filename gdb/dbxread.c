@@ -2756,7 +2756,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
 	  /* Make a block for the local symbols within.  */
 	  block = finish_block (newobj->name, &local_symbols,
-				newobj->old_blocks,
+				newobj->old_blocks, NULL,
 				newobj->start_addr, newobj->start_addr + valu);
 
 	  /* For C++, set the block's scope.  */
@@ -2857,7 +2857,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  newobj->start_addr = valu;
 		}
 	      /* Make a block for the local symbols within.  */
-	      finish_block (0, &local_symbols, newobj->old_blocks,
+	      finish_block (0, &local_symbols, newobj->old_blocks, NULL,
 			    newobj->start_addr, valu);
 	    }
 	}
@@ -3155,8 +3155,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  newobj = pop_context ();
 		  /* Make a block for the local symbols within.  */
 		  block = finish_block (newobj->name, &local_symbols,
-					newobj->old_blocks, newobj->start_addr,
-					valu);
+					newobj->old_blocks, NULL,
+					newobj->start_addr, valu);
 
 		  /* For C++, set the block's scope.  */
 		  if (SYMBOL_LANGUAGE (newobj->name) == language_cplus)

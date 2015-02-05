@@ -318,7 +318,7 @@ read_frame_local (struct symbol *sym, struct frame_info *frame,
 
   TRY
     {
-      argp->val = read_var_value (sym, frame);
+      argp->val = read_var_value (sym, NULL, frame);
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
@@ -344,7 +344,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
     {
       TRY
 	{
-	  val = read_var_value (sym, frame);
+	  val = read_var_value (sym, NULL, frame);
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -471,7 +471,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 
 	  TRY
 	    {
-	      val = read_var_value (sym, frame);
+	      val = read_var_value (sym, NULL, frame);
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -2424,7 +2424,7 @@ return_command (char *retval_exp, int from_tty)
 	value_fetch_lazy (return_value);
 
       if (thisfun != NULL)
-	function = read_var_value (thisfun, thisframe);
+	function = read_var_value (thisfun, NULL, thisframe);
 
       rv_conv = RETURN_VALUE_REGISTER_CONVENTION;
       if (TYPE_CODE (return_type) == TYPE_CODE_VOID)

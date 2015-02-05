@@ -1284,9 +1284,7 @@ push_variable (struct parser_state *par_state, struct stoken name)
 	}
 
       write_exp_elt_opcode (par_state, OP_VAR_VALUE);
-      /* We want to use the selected frame, not another more inner frame
-	 which happens to be in the same block.  */
-      write_exp_elt_block (par_state, NULL);
+      write_exp_elt_block (par_state, sym.block);
       write_exp_elt_sym (par_state, sym.symbol);
       write_exp_elt_opcode (par_state, OP_VAR_VALUE);
       return 1;

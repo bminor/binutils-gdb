@@ -686,6 +686,25 @@ struct symbol_block_ops
      uninitialized in such case.  */
   void (*find_frame_base_location) (struct symbol *framefunc, CORE_ADDR pc,
 				    const gdb_byte **start, size_t *length);
+
+  /* Return the frame base address.  FRAME is the frame for which we want to
+     compute the base address while FRAMEFUNC is the symbol for the
+     corresponding function.  Return 0 on failure (FRAMEFUNC may not hold the
+     information we need).
+
+     This method is designed to work with static links (nested functions
+     handling).  Static links are function properties whose evaluation returns
+     the frame base address for the enclosing frame.  However, there are
+     multiple definitions for "frame base": the content of the frame base
+     register, the CFA as defined by DWARF unwinding information, ...
+
+     So this specific method is supposed to compute the frame base address such
+     as for nested fuctions, the static link computes the same address.  For
+     instance, considering DWARF debugging information, the static link is
+     computed with DW_AT_static_link and this method must be used to compute
+     the corresponding DW_AT_frame_base attribute.  */
+  CORE_ADDR (*get_frame_base) (struct symbol *framefunc,
+			       struct frame_info *frame);
 };
 
 /* Functions used with LOC_REGISTER and LOC_REGPARM_ADDR.  */

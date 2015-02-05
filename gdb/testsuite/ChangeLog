@@ -1,3 +1,12 @@
+2015-08-25  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.base/nested-subp1.exp: New file.
+	* gdb.base/nested-subp1.c: New file.
+	* gdb.base/nested-subp2.exp: New file.
+	* gdb.base/nested-subp2.c: New file.
+	* gdb.base/nested-subp3.exp: New file.
+	* gdb.base/nested-subp3.c: New file.
+
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.server/connect-without-multi-process.c: New file.
