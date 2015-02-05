@@ -2310,6 +2310,7 @@ struct reloc_table_entry
 {
   const char *name;
   int pc_rel;
+  bfd_reloc_code_real_type adr_type;
   bfd_reloc_code_real_type adrp_type;
   bfd_reloc_code_real_type movw_type;
   bfd_reloc_code_real_type add_type;
@@ -2319,6 +2320,7 @@ struct reloc_table_entry
 static struct reloc_table_entry reloc_table[] = {
   /* Low 12 bits of absolute address: ADD/i and LDR/STR */
   {"lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_ADD_LO12,
@@ -2326,6 +2328,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Higher 21 bits of pc-relative page offset: ADRP */
   {"pg_hi21", 1,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_ADR_HI21_PCREL,
    0,
    0,
@@ -2333,6 +2336,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Higher 21 bits of pc-relative page offset: ADRP, no check */
   {"pg_hi21_nc", 1,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL,
    0,
    0,
@@ -2340,6 +2344,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 0-15 of unsigned address/value: MOVZ */
   {"abs_g0", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G0,
    0,
@@ -2347,6 +2352,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 0-15 of signed address/value: MOVN/Z */
   {"abs_g0_s", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G0_S,
    0,
@@ -2354,6 +2360,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Less significant bits 0-15 of address/value: MOVK, no check */
   {"abs_g0_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G0_NC,
    0,
@@ -2361,6 +2368,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 16-31 of unsigned address/value: MOVZ */
   {"abs_g1", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G1,
    0,
@@ -2368,6 +2376,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 16-31 of signed address/value: MOVN/Z */
   {"abs_g1_s", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G1_S,
    0,
@@ -2375,6 +2384,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Less significant bits 16-31 of address/value: MOVK, no check */
   {"abs_g1_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G1_NC,
    0,
@@ -2382,6 +2392,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 32-47 of unsigned address/value: MOVZ */
   {"abs_g2", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G2,
    0,
@@ -2389,6 +2400,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 32-47 of signed address/value: MOVN/Z */
   {"abs_g2_s", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G2_S,
    0,
@@ -2396,6 +2408,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Less significant bits 32-47 of address/value: MOVK, no check */
   {"abs_g2_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G2_NC,
    0,
@@ -2403,6 +2416,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 48-63 of signed/unsigned address/value: MOVZ */
   {"abs_g3", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G3,
    0,
@@ -2410,6 +2424,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get to the page containing GOT entry for a symbol.  */
   {"got", 1,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_ADR_GOT_PAGE,
    0,
    0,
@@ -2417,6 +2432,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* 12 bit offset into the page containing GOT entry for that symbol.  */
   {"got_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    0,
@@ -2424,6 +2440,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsgd", 0,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21,
    0,
    0,
@@ -2431,6 +2448,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* 12 bit offset into the page containing GOT TLS entry for a symbol */
   {"tlsgd_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC,
@@ -2438,6 +2456,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsdesc", 0,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21,
    0,
    0,
@@ -2445,6 +2464,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* 12 bit offset into the page containing GOT TLS entry for a symbol */
   {"tlsdesc_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
@@ -2452,6 +2472,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"gottprel", 0,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21,
    0,
    0,
@@ -2459,6 +2480,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* 12 bit offset into the page containing GOT TLS entry for a symbol */
   {"gottprel_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    0,
@@ -2466,6 +2488,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get tp offset for a symbol.  */
   {"tprel", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12,
@@ -2473,6 +2496,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get tp offset for a symbol.  */
   {"tprel_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12,
@@ -2480,6 +2504,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get tp offset for a symbol.  */
   {"tprel_hi12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12,
@@ -2487,6 +2512,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get tp offset for a symbol.  */
   {"tprel_lo12_nc", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC,
@@ -2494,6 +2520,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 32-47 of address/value: MOVZ.  */
   {"tprel_g2", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2,
    0,
@@ -2501,6 +2528,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 16-31 of address/value: MOVZ.  */
   {"tprel_g1", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1,
    0,
@@ -2508,6 +2536,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 16-31 of address/value: MOVZ, no check.  */
   {"tprel_g1_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC,
    0,
@@ -2515,6 +2544,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 0-15 of address/value: MOVZ.  */
   {"tprel_g0", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0,
    0,
@@ -2522,6 +2552,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Most significant bits 0-15 of address/value: MOVZ, no check.  */
   {"tprel_g0_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC,
    0,
@@ -2931,6 +2962,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
       skip_past_char (&p, '#');
       if (reloc && skip_past_char (&p, ':'))
 	{
+	  bfd_reloc_code_real_type ty;
 	  struct reloc_table_entry *entry;
 
 	  /* Try to parse a relocation modifier.  Anything else is
@@ -2942,7 +2974,19 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	      return FALSE;
 	    }
 
-	  if (entry->ldst_type == 0)
+	  switch (operand->type)
+	    {
+	    case AARCH64_OPND_ADDR_PCREL21:
+	      /* adr */
+	      ty = entry->adr_type;
+	      break;
+
+	    default:
+	      ty = entry->ldst_type;
+	      break;
+	    }
+
+	  if (ty == 0)
 	    {
 	      set_syntax_error
 		(_("this relocation modifier is not allowed on this "
@@ -2958,8 +3002,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	    }
 
 	  /* #:<reloc_op>:<expr>  */
-	  /* Record the load/store relocation type.  */
-	  inst.reloc.type = entry->ldst_type;
+	  /* Record the relocation type.  */
+	  inst.reloc.type = ty;
 	  inst.reloc.pc_rel = entry->pc_rel;
 	}
       else
