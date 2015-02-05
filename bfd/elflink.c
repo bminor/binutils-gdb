@@ -2281,8 +2281,8 @@ _bfd_elf_link_size_reloc_section (bfd *abfd,
     {
       struct elf_link_hash_entry **p;
 
-      p = (struct elf_link_hash_entry **)
-          bfd_zmalloc (reldata->count * sizeof (struct elf_link_hash_entry *));
+      p = ((struct elf_link_hash_entry **)
+	   bfd_zmalloc (reldata->count * sizeof (*p)));
       if (p == NULL)
 	return FALSE;
 
@@ -4384,8 +4384,8 @@ error_free_dyn:
 		    {
 		      amt = ((isymend - isym + 1)
 			     * sizeof (struct elf_link_hash_entry *));
-		      nondeflt_vers =
-                          (struct elf_link_hash_entry **) bfd_malloc (amt);
+		      nondeflt_vers
+			= (struct elf_link_hash_entry **) bfd_malloc (amt);
 		      if (!nondeflt_vers)
 			goto error_free_vers;
 		    }
@@ -4451,7 +4451,7 @@ error_free_dyn:
 		}
 
 	      elf_dyn_lib_class (abfd) = (enum dynamic_lib_link_class)
-                  (elf_dyn_lib_class (abfd) & ~DYN_AS_NEEDED);
+		(elf_dyn_lib_class (abfd) & ~DYN_AS_NEEDED);
 
 	      add_needed = TRUE;
 	      ret = elf_add_dt_needed_tag (abfd, info, soname, add_needed);
@@ -4860,8 +4860,7 @@ error_free_dyn:
       /* Add this bfd to the loaded list.  */
       struct elf_link_loaded_list *n;
 
-      n = (struct elf_link_loaded_list *)
-          bfd_alloc (abfd, sizeof (struct elf_link_loaded_list));
+      n = (struct elf_link_loaded_list *) bfd_alloc (abfd, sizeof (*n));
       if (n == NULL)
 	goto error_return;
       n->abfd = abfd;
@@ -5422,7 +5421,7 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	    {
 	      best_chlen = max;
 	      best_size = i;
-              no_improvement_count = 0;
+	      no_improvement_count = 0;
 	    }
 	  /* PR 11843: Avoid futile long searches for the best bucket size
 	     when there are a large number of symbols.  */
@@ -6716,7 +6715,7 @@ _bfd_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
   if (entry == NULL)
     {
       entry = (struct bfd_hash_entry *)
-          bfd_hash_allocate (table, sizeof (struct elf_link_hash_entry));
+	bfd_hash_allocate (table, sizeof (struct elf_link_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -7267,10 +7266,10 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
       if (count1 == 0 || count2 == 0 || count1 != count2)
 	goto done;
 
-      symtable1 = (struct elf_symbol *)
-          bfd_malloc (count1 * sizeof (struct elf_symbol));
-      symtable2 = (struct elf_symbol *)
-          bfd_malloc (count2 * sizeof (struct elf_symbol));
+      symtable1
+	= (struct elf_symbol *) bfd_malloc (count1 * sizeof (*symtable1));
+      symtable2
+	= (struct elf_symbol *) bfd_malloc (count2 * sizeof (*symtable2));
       if (symtable1 == NULL || symtable2 == NULL)
 	goto done;
 
@@ -8599,7 +8598,7 @@ elf_link_output_sym (struct elf_final_link_info *flinfo,
 
 	  amt = flinfo->shndxbuf_size * sizeof (Elf_External_Sym_Shndx);
 	  destshndx = (Elf_External_Sym_Shndx *) bfd_realloc (destshndx,
-                                                              amt * 2);
+							      amt * 2);
 	  if (destshndx == NULL)
 	    return 0;
 	  flinfo->symshndxbuf = destshndx;
@@ -8945,7 +8944,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	    || h->root.type == bfd_link_hash_defweak)
 	   && ((flinfo->info->strip_discarded
 		&& discarded_section (h->root.u.def.section))
-	       || (h->root.u.def.section->owner != NULL
+	       || ((h->root.u.def.section->flags & SEC_LINKER_CREATED) == 0
+		   && h->root.u.def.section->owner != NULL
 		   && (h->root.u.def.section->owner->flags & BFD_PLUGIN) != 0)))
     strip = TRUE;
   else if ((h->root.type == bfd_link_hash_undefined
@@ -9794,8 +9794,10 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		  s_type = h->type;
 
 		  /* If a plugin symbol is referenced from a non-IR file,
-		     mark the symbol as undefined, except for symbol for
-		     linker created section.  */
+		     mark the symbol as undefined.  Note that the
+		     linker may attach linker created dynamic sections
+		     to the plugin bfd.  Symbols defined in linker
+		     created sections are not plugin symbols.  */
 		  if (h->root.non_ir_ref
 		      && (h->root.type == bfd_link_hash_defined
 			  || h->root.type == bfd_link_hash_defweak)
@@ -12519,8 +12521,8 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
  win:
   if (!child->vtable)
     {
-      child->vtable = (struct elf_link_virtual_table_entry *)
-          bfd_zalloc (abfd, sizeof (*child->vtable));
+      child->vtable = ((struct elf_link_virtual_table_entry *)
+		       bfd_zalloc (abfd, sizeof (*child->vtable)));
       if (!child->vtable)
 	return FALSE;
     }
@@ -12552,8 +12554,8 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (!h->vtable)
     {
-      h->vtable = (struct elf_link_virtual_table_entry *)
-          bfd_zalloc (abfd, sizeof (*h->vtable));
+      h->vtable = ((struct elf_link_virtual_table_entry *)
+		   bfd_zalloc (abfd, sizeof (*h->vtable)));
       if (!h->vtable)
 	return FALSE;
     }
@@ -13211,11 +13213,11 @@ _bfd_elf_get_dynamic_reloc_section (bfd *       abfd,
    string table associated with ABFD.  */
 
 asection *
-_bfd_elf_make_dynamic_reloc_section (asection *         sec,
-				     bfd *		dynobj,
-				     unsigned int	alignment,
-				     bfd *              abfd,
-				     bfd_boolean        is_rela)
+_bfd_elf_make_dynamic_reloc_section (asection *sec,
+				     bfd *dynobj,
+				     unsigned int alignment,
+				     bfd *abfd,
+				     bfd_boolean is_rela)
 {
   asection * reloc_sec = elf_section_data (sec)->sreloc;
 

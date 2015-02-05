@@ -1,3 +1,10 @@
+2015-02-09  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c: Whitespace, formatting fixes.
+	(elf_link_input_bfd): Clarify comment.
+	(elf_link_output_extsym): Exclude symbols in linker created
+	sections when testing for plugin symbols.
+
 2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17935
