@@ -1,3 +1,17 @@
+2015-02-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
+	* plugin.c: Include <errno.h>.
+	(errno): New.  Declare if needed.
+	(plugin_input_file_t): New.
+	(get_input_file): Implemented.
+	(get_view): Likewise.
+	(release_input_file): Likewise.
+	(add_symbols): Updated.
+	(get_symbols): Likewise.
+	(plugin_maybe_claim): Allocate a plugin_input_file_t.  Close fd
+	only for a bfd_object input.
+
 2015-02-02  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (toc_section_name): New var.
