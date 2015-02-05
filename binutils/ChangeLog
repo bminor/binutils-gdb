@@ -1,3 +1,8 @@
+2015-02-05  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17926
+	* dwarf.c (dwarf_select_sections_by_letters): Don't refer to optarg.
+
 2015-02-04  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531

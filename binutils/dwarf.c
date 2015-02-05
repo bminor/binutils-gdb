@@ -7414,7 +7414,7 @@ dwarf_select_sections_by_letters (const char *letters)
 	break;
 
       default:
-	warn (_("Unrecognized debug option '%s'\n"), optarg);
+	warn (_("Unrecognized debug option '%s'\n"), letters);
 	break;
       }
 }
