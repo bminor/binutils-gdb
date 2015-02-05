@@ -1,3 +1,33 @@
+2015-02-05  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17926
+	* dwarf.c (dwarf_select_sections_by_letters): Don't refer to optarg.
+
+2015-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (read_and_display_attr_value): Test for a block length
+	being so long that it wraps around to before the start of the block.
+	(process_debug_info): Test for section_begin wrapping around to
+	before the start of the section.
+	(display_gdb_index): Test for num_cus being so large that the end
+	address wraps around to before the start of the section.
+	(process_cu_tu_index): Test for j being so large that the section
+	index pool wraps around to before the start of the section.
+
+2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (process_debug_info): Add range check.
+	(display_debug_pubnames_worker): Likewise.
+	(display_gdb_index): Fix range check.
+	(process_cu_tu_index): Add range check.
+	* readelf.c (get_data): Change parameter types from size_t to
+	bfd_size_type.  Add checks for loss of accuracy when casting from
+	bfd_size_type to size_t.
+	(get_dynamic_data): Likewise.
+	(process_section_groups): Limit number of error messages.
+
 2015-02-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

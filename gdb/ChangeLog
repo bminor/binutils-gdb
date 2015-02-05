@@ -1,3 +1,85 @@
+2015-02-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/python-internal.h (Py_hash_t): Define it for Python <3.2.
+	* python/py-value.c (valpy_fetch_lazy): Use it.  Remove cast to the
+	return type.
+
+2015-02-04  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (handle_extended_wait): Don't resume LWPs here.
+	(wait_lwp): Don't call wait_lwp if linux_handle_extended_wait
+	returns true.
+	(resume_stopped_resumed_lwps): Don't check whether the thread is
+	marked as executing.
+	(linux_nat_wait_1): Use resume_stopped_resumed_lwps.
+
+2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* regset.h (struct regset): Add flags field.
+	(REGSET_VARIABLE_SIZE): New value for a regset's flags field.
+	* corelow.c (get_core_register_section): Add warning if the size
+	exceeds the requested size and the regset does not have the
+	REGSET_VARIABLE_SIZE flag set.
+	* alphanbsd-tdep.c (alphanbsd_gregset): Add REGSET_VARIABLE_SIZE
+	flag.
+	* armbsd-tdep.c (armbsd_gregset): Likewise.
+	* hppa-hpux-tdep.c (hppa_hpux_regset): Likewise.
+	* hppaobsd-tdep.c (hppaobsd_gregset): Likewise.
+	* m68kbsd-tdep.c (m68kbsd_gregset): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_gregset): Likewise.
+
+2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* amd64-linux-tdep.c (amd64_linux_iterate_over_regset_sections):
+	For ".reg-xstate", explicitly specify the requested section size
+	via X86_XSTATE_SIZE instead of just 0 on input and
+	X86_XSTATE_MAX_SIZE on output.
+	* i386-linux-tdep.c (i386_linux_iterate_over_regset_sections):
+	Likewise.
+
+2015-02-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR corefiles/17808:
+	* gdbarch.sh (iterate_over_regset_sections_cb): Document this
+	function type, particularly its SIZE parameter.
+	* gdbarch.h: Regenerate.
+	* amd64-tdep.c (amd64_supply_fpregset): In gdb_assert, compare
+	actual against required size using ">=" instead of "==".
+	(amd64_collect_fpregset): Likewise.
+	* i386-tdep.c (i386_supply_gregset): Likewise.
+	(i386_collect_gregset): Likewise.
+	(i386_supply_fpregset): Likewise.
+	(i386_collect_fpregset): Likewise.
+	* mips-linux-tdep.c (mips_supply_gregset_wrapper): Likewise.
+	(mips_fill_gregset_wrapper): Likewise.
+	(mips_supply_fpregset_wrapper): Likewise.
+	(mips_fill_fpregset_wrapper): Likewise.
+	(mips64_supply_gregset_wrapper): Likewise.
+	(mips64_fill_gregset_wrapper): Likewise.
+	(mips64_supply_fpregset_wrapper): Likewise.
+	(mips64_fill_fpregset_wrapper): Likewise.
+	* mn10300-linux-tdep.c (am33_supply_gregset_method): Likewise.
+	(am33_supply_fpregset_method): Likewise.
+	(am33_collect_gregset_method): Likewise.
+	(am33_collect_fpregset_method): Likewise.
+
+2015-02-04  Doug Evans  <dje@google.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	PR tui/17810
+	* tui/tui-command.c (tui_refresh_cmd_win): New function.
+	* tui/tui-command.c (tui_refresh_cmd_win): Declare.
+	* tui/tui-file.c: #include tui/tui-command.h.
+	(tui_file_fputs): Refresh command window if stream is not gdb_stdout.
+	(tui_file_flush): Refresh command window if stream is gdb_stdout.
+	* tui/tui-io.c (tui_puts): Remove calls to wrefresh, fflush.
+
+2015-02-04  Pedro Alves  <palves@redhat.com>
+
+	Fix build breakage.
+	* event-loop.c (gdb_do_one_event): Add default switch case.
+
 2015-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Filter out inferior gcc option -fpreprocessed.

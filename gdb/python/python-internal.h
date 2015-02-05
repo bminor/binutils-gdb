@@ -169,6 +169,10 @@ typedef unsigned long gdb_py_ulongest;
 
 #endif /* HAVE_LONG_LONG */
 
+#if PY_VERSION_HEX < 0x03020000
+typedef long Py_hash_t;
+#endif
+
 /* Python 2.6 did not wrap Py_DECREF in 'do {...} while (0)', leading
    to 'suggest explicit braces to avoid ambiguous ‘else’' gcc errors.
    Wrap it ourselves, so that callers don't need to care.  */

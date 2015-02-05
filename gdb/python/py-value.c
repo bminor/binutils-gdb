@@ -895,10 +895,10 @@ valpy_fetch_lazy (PyObject *self, PyObject *args)
 
 /* Calculate and return the address of the PyObject as the value of
    the builtin __hash__ call.  */
-static long
+static Py_hash_t
 valpy_hash (PyObject *self)
 {
-  return (long) (intptr_t) self;
+  return (intptr_t) self;
 }
 
 enum valpy_opcode

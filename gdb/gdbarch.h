@@ -85,6 +85,12 @@ extern struct gdbarch *target_gdbarch (void);
 typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
   (struct objfile *objfile, void *cb_data);
 
+/* Callback type for regset section iterators.  The callback usually
+   invokes the REGSET's supply or collect method, to which it must
+   pass a buffer with at least the given SIZE.  SECT_NAME is a BFD
+   section name, and HUMAN_NAME is used for diagnostic messages.
+   CB_DATA should have been passed unchanged through the iterator.  */
+
 typedef void (iterate_over_regset_sections_cb)
   (const char *sect_name, int size, const struct regset *regset,
    const char *human_name, void *cb_data);

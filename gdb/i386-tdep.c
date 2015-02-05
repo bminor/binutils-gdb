@@ -3727,7 +3727,7 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
   const gdb_byte *regs = gregs;
   int i;
 
-  gdb_assert (len == tdep->sizeof_gregset);
+  gdb_assert (len >= tdep->sizeof_gregset);
 
   for (i = 0; i < tdep->gregset_num_regs; i++)
     {
@@ -3752,7 +3752,7 @@ i386_collect_gregset (const struct regset *regset,
   gdb_byte *regs = gregs;
   int i;
 
-  gdb_assert (len == tdep->sizeof_gregset);
+  gdb_assert (len >= tdep->sizeof_gregset);
 
   for (i = 0; i < tdep->gregset_num_regs; i++)
     {
@@ -3779,7 +3779,7 @@ i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
       return;
     }
 
-  gdb_assert (len == tdep->sizeof_fpregset);
+  gdb_assert (len >= tdep->sizeof_fpregset);
   i387_supply_fsave (regcache, regnum, fpregs);
 }
 
@@ -3802,7 +3802,7 @@ i386_collect_fpregset (const struct regset *regset,
       return;
     }
 
-  gdb_assert (len == tdep->sizeof_fpregset);
+  gdb_assert (len >= tdep->sizeof_fpregset);
   i387_collect_fsave (regcache, regnum, fpregs);
 }
 

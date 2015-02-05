@@ -1,3 +1,9 @@
+2015-02-04  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (handle_extended_wait): Don't resume LWPs here.
+	(resume_stopped_resumed_lwps): New function.
+	(linux_wait_for_event_filtered): Use it.
+
 2015-01-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (SFILES): Add linux-personality.c.

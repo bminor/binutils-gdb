@@ -1564,8 +1564,8 @@ check_PROGRAMS += plugin_test_1
 check_SCRIPTS += plugin_test_1.sh
 check_DATA += plugin_test_1.err
 MOSTLYCLEANFILES += plugin_test_1.err
-plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_1.err
+plugin_test_1: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms 2>plugin_test_1.err
 plugin_test_1.err: plugin_test_1
 	@touch plugin_test_1.err
 
@@ -1573,8 +1573,8 @@ check_PROGRAMS += plugin_test_2
 check_SCRIPTS += plugin_test_2.sh
 check_DATA += plugin_test_2.err
 MOSTLYCLEANFILES += plugin_test_2.err
-plugin_test_2: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so 2>plugin_test_2.err
+plugin_test_2: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_shared_2.so 2>plugin_test_2.err
 plugin_test_2.err: plugin_test_2
 	@touch plugin_test_2.err
 
@@ -1582,8 +1582,8 @@ check_PROGRAMS += plugin_test_3
 check_SCRIPTS += plugin_test_3.sh
 check_DATA += plugin_test_3.err
 MOSTLYCLEANFILES += plugin_test_3.err
-plugin_test_3: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--export-dynamic -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_3.err
+plugin_test_3: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--export-dynamic -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms 2>plugin_test_3.err
 plugin_test_3.err: plugin_test_3
 	@touch plugin_test_3.err
 
@@ -1596,35 +1596,35 @@ plugin_test_4: two_file_test_main.o plugin_test_4.a gcctestdir/ld plugin_test.so
 plugin_test_4.err: plugin_test_4
 	@touch plugin_test_4.err
 
-plugin_test_4.a: two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms
+plugin_test_4.a: two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms
 	$(TEST_AR) cr $@ $^
 
 check_PROGRAMS += plugin_test_5
-plugin_test_5: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms
+plugin_test_5: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms unused.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms unused.o.syms
 
 check_PROGRAMS += plugin_test_6
 check_SCRIPTS += plugin_test_6.sh
 check_DATA += plugin_test_6.err
 MOSTLYCLEANFILES += plugin_test_6.err
-plugin_test_6: plugin_common_test_1.syms plugin_common_test_2.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.syms 2>plugin_test_6.err
+plugin_test_6: plugin_common_test_1.o.syms plugin_common_test_2.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.o.syms plugin_common_test_2.o.syms 2>plugin_test_6.err
 plugin_test_6.err: plugin_test_6
 	@touch plugin_test_6.err
 
 check_PROGRAMS += plugin_test_7
 check_SCRIPTS += plugin_test_7.sh
-check_DATA += plugin_test_7.err plugin_test_7.syms
+check_DATA += plugin_test_7.err plugin_test_7.o.syms
 MOSTLYCLEANFILES += plugin_test_7.err
-plugin_test_7: plugin_test_7_1.o plugin_test_7_1.syms plugin_test_7_2.o gcctestdir/ld plugin_test.so
-	$(LINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--gc-sections,--print-gc-sections plugin_test_7_1.syms plugin_test_7_2.o 2>plugin_test_7.err
-plugin_test_7.syms: plugin_test_7
+plugin_test_7: plugin_test_7_1.o plugin_test_7_1.o.syms plugin_test_7_2.o gcctestdir/ld plugin_test.so
+	$(LINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--gc-sections,--print-gc-sections plugin_test_7_1.o.syms plugin_test_7_2.o 2>plugin_test_7.err
+plugin_test_7.o.syms: plugin_test_7
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 plugin_test_7_1.o: plugin_test_7_1.c
 	$(COMPILE) -DLTO -O0 -c -ffunction-sections -fdata-sections -o $@ $<
 plugin_test_7_1_orig.o: plugin_test_7_1.c
 	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
-plugin_test_7_1.syms: plugin_test_7_1_orig.o
+plugin_test_7_1.o.syms: plugin_test_7_1_orig.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 plugin_test_7_2.o: plugin_test_7_2.c
 	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
@@ -1632,8 +1632,8 @@ plugin_test_7.err: plugin_test_7
 
 # Test plugins with -r.
 check_PROGRAMS += plugin_test_8
-plugin_test_8.o: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o ../ld-new plugin_test.so
-	../ld-new -r -o $@ --no-demangle --plugin "./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o
+plugin_test_8.o: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o ../ld-new plugin_test.so
+	../ld-new -r -o $@ --no-demangle --plugin "./plugin_test.so" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o
 plugin_test_8: plugin_test_8.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle plugin_test_8.o
 
@@ -1641,17 +1641,17 @@ plugin_test_8: plugin_test_8.o gcctestdir/ld
 # produce an unresolved symbol error.
 check_DATA += plugin_test_9.err
 MOSTLYCLEANFILES += plugin_test_9.err
-plugin_test_9.err: two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
-	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms 2>$@; then \
+plugin_test_9.err: two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms gcctestdir/ld plugin_test.so
+	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms 2>$@; then \
 	  echo 1>&2 "Link of plugin_test_9 should have failed"; \
 	  rm -f $@; \
 	  exit 1; \
 	fi
 # Make a .syms file that claims to define the symbol _Z4t16av.
-two_file_test_1c.syms: two_file_test_1.syms two_file_test_1c.o
-	cp two_file_test_1.syms $@.tmp
-	grep "_Z4t16av" two_file_test_1b.syms >> $@.tmp
+two_file_test_1c.o.syms: two_file_test_1.o.syms two_file_test_1c.o
+	cp two_file_test_1.o.syms $@.tmp
+	grep "_Z4t16av" two_file_test_1b.o.syms >> $@.tmp
 	mv -f $@.tmp $@
 # Make a copy of two_file_test_1.o, which does not define the symbol _Z4t16av.
 MOSTLYCLEANFILES += two_file_test_1c.o
@@ -1662,32 +1662,43 @@ check_PROGRAMS += plugin_test_10
 check_SCRIPTS += plugin_test_10.sh
 check_DATA += plugin_test_10.sections
 MOSTLYCLEANFILES += plugin_test_10.sections
-plugin_test_10: plugin_common_test_1.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.o
+plugin_test_10: plugin_common_test_1.o.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.o.syms plugin_common_test_2.o
 plugin_test_10.sections: plugin_test_10
 	$(TEST_READELF) -SW $< >$@ 2>/dev/null
 
-
+check_PROGRAMS += plugin_test_11
+check_SCRIPTS += plugin_test_11.sh
+check_DATA += plugin_test_11.err
+MOSTLYCLEANFILES += plugin_test_11.err
+PLUGIN_TEST_11_SYMS = two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms
+plugin_test_11: two_file_test_main.o plugin_test_thin.a gcctestdir/ld plugin_test.so $(PLUGIN_TEST_11_SYMS)
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o plugin_test_thin.a 2>plugin_test_11.err
+plugin_test_11.err: plugin_test_11
+	@touch plugin_test_11.err
+plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
 
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
 
-two_file_test_main.syms: two_file_test_main.o
+two_file_test_main.o.syms: two_file_test_main.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-two_file_test_1.syms: two_file_test_1.o
+two_file_test_1.o.syms: two_file_test_1.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-two_file_test_1b.syms: two_file_test_1b.o
+two_file_test_1b.o.syms: two_file_test_1b.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-two_file_test_2.syms: two_file_test_2.o
+two_file_test_2.o.syms: two_file_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-plugin_common_test_1.syms: plugin_common_test_1.o
+plugin_common_test_1.o.syms: plugin_common_test_1.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-plugin_common_test_2.syms: plugin_common_test_2.o
+plugin_common_test_2.o.syms: plugin_common_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
-empty.syms:
+empty.o.syms:
 	@echo "" >$@
 	@echo "Symbol table" >>$@
 
@@ -1697,18 +1708,18 @@ check_PROGRAMS += plugin_test_tls
 check_SCRIPTS += plugin_test_tls.sh
 check_DATA += plugin_test_tls.err
 MOSTLYCLEANFILES += plugin_test_tls.err
-plugin_test_tls: two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms 2>plugin_test_tls.err
+plugin_test_tls: two_file_test_tls.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2_tls.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2_tls.o.syms 2>plugin_test_tls.err
 plugin_test_tls.err: plugin_test_tls
 	@touch plugin_test_tls.err
 
-two_file_test_2_tls.syms: two_file_test_2_tls.o
+two_file_test_2_tls.o.syms: two_file_test_2_tls.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
 endif TLS
 
 MOSTLYCLEANFILES += unused.c
-unused.syms: unused.o
+unused.o.syms: unused.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 	@echo "     1: 00000000     4 FUNC    GLOBAL DEFAULT    1 UNUSED" >>$@
 unused.o: unused.c

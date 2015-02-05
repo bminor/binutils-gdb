@@ -159,7 +159,10 @@ tui_putc (char c)
   tui_puts (buf);
 }
 
-/* Print the string in the curses command window.  */
+/* Print the string in the curses command window.
+   The output is buffered.  It is up to the caller to refresh the screen
+   if necessary.  */
+
 void
 tui_puts (const char *string)
 {
@@ -201,10 +204,6 @@ tui_puts (const char *string)
          TUI_CMD_WIN->detail.command_info.curch);
   TUI_CMD_WIN->detail.command_info.start_line
     = TUI_CMD_WIN->detail.command_info.cur_line;
-
-  /* We could defer the following.  */
-  wrefresh (w);
-  fflush (stdout);
 }
 
 /* Readline callback.

@@ -32,6 +32,10 @@
 #include "plugin.h"
 #include "plugin-api.h"
 #include "elf-bfd.h"
+#include <errno.h>
+#if !(defined(errno) || defined(_MSC_VER) && defined(_INC_ERRNO))
+extern int errno;
+#endif
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 #include <windows.h>
 #endif
@@ -71,6 +75,17 @@ typedef struct plugin
   /* TRUE if the cleanup handlers have been called.  */
   bfd_boolean cleanup_done;
 } plugin_t;
+
+/* The internal version of struct ld_plugin_input_file with a BFD
+   pointer.  */
+typedef struct plugin_input_file
+{
+  bfd *abfd;
+  char *name;
+  int fd;
+  off_t offset;
+  off_t filesize;
+} plugin_input_file_t;
 
 /* The master list of all plugins.  */
 static plugin_t *plugins_list = NULL;
@@ -418,7 +433,8 @@ static enum ld_plugin_status
 add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 {
   asymbol **symptrs;
-  bfd *abfd = handle;
+  plugin_input_file_t *input = handle;
+  bfd *abfd = input->abfd;
   int n;
 
   ASSERT (called_plugin);
@@ -441,28 +457,66 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 /* Get the input file information with an open (possibly re-opened)
    file descriptor.  */
 static enum ld_plugin_status
-get_input_file (const void *handle ATTRIBUTE_UNUSED,
-                struct ld_plugin_input_file *file ATTRIBUTE_UNUSED)
+get_input_file (const void *handle, struct ld_plugin_input_file *file)
 {
+  const plugin_input_file_t *input = handle;
+
   ASSERT (called_plugin);
-  return LDPS_ERR;
+
+  file->name = input->name;
+  file->offset = input->offset;
+  file->filesize = input->filesize;
+  file->handle = (void *) handle;
+
+  return LDPS_OK;
 }
 
 /* Get view of the input file.  */
 static enum ld_plugin_status
-get_view (const void *handle ATTRIBUTE_UNUSED,
-	  const void **viewp ATTRIBUTE_UNUSED)
+get_view (const void *handle, const void **viewp)
 {
+  const plugin_input_file_t *input = handle;
+  char *buffer;
+  size_t size;
+
   ASSERT (called_plugin);
-  return LDPS_ERR;
+
+  if (lseek (input->fd, input->offset, SEEK_SET) < 0)
+    return LDPS_ERR;
+
+  size = input->filesize;
+  buffer = bfd_alloc (input->abfd, size);
+  if (buffer == NULL)
+    return LDPS_ERR;
+  *viewp = buffer;
+
+  do
+    {
+      ssize_t got = read (input->fd, buffer, size);
+      if (got == 0)
+	break;
+      else if (got > 0)
+	{
+	  buffer += got;
+	  size -= got;
+	}
+      else if (errno != EINTR)
+	return LDPS_ERR;
+    }
+  while (size > 0);
+
+  return LDPS_OK;
 }
 
 /* Release the input file.  */
 static enum ld_plugin_status
-release_input_file (const void *handle ATTRIBUTE_UNUSED)
+release_input_file (const void *handle)
 {
+  const plugin_input_file_t *input = handle;
   ASSERT (called_plugin);
-  return LDPS_ERR;
+  if (input->fd != -1)
+    close (input->fd);
+  return LDPS_OK;
 }
 
 /* Return TRUE if a defined symbol might be reachable from outside the
@@ -515,7 +569,8 @@ static enum ld_plugin_status
 get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	     int def_ironly_exp)
 {
-  const bfd *abfd = handle;
+  const plugin_input_file_t *input = handle;
+  const bfd *abfd = (const bfd *) input->abfd;
   int n;
 
   ASSERT (called_plugin);
@@ -879,16 +934,50 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
 		    lang_input_statement_type *entry)
 {
   int claimed = 0;
+  plugin_input_file_t *input;
+  size_t namelength;
 
   /* We create a dummy BFD, initially empty, to house whatever symbols
      the plugin may want to add.  */
-  file->handle = plugin_get_ir_dummy_bfd (entry->the_bfd->filename,
-					  entry->the_bfd);
+  bfd *abfd = plugin_get_ir_dummy_bfd (entry->the_bfd->filename,
+				       entry->the_bfd);
+
+  input = bfd_alloc (abfd, sizeof (*input));
+  if (input == NULL)
+    einfo (_("%P%F: plugin failed to allocate memory for input: %s\n"),
+	   bfd_get_error ());
+
+  input->abfd = abfd;
+  input->fd = file->fd;
+  input->offset  = file->offset;
+  input->filesize = file->filesize;
+  namelength = strlen (entry->the_bfd->filename) + 1;
+  input->name = bfd_alloc (abfd, namelength);
+  if (input->name == NULL)
+    einfo (_("%P%F: plugin failed to allocate memory for input filename: %s\n"),
+	   bfd_get_error ());
+  memcpy (input->name, entry->the_bfd->filename, namelength);
+
+  file->handle = input;
+
   if (plugin_call_claim_file (file, &claimed))
     einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
-  /* fd belongs to us, not the plugin; but we don't need it.  */
-  close (file->fd);
+
+  if (bfd_check_format (entry->the_bfd, bfd_object))
+    {
+      /* FIXME: fd belongs to us, not the plugin.  IR for GCC plugin,
+	 which doesn't need fd after plugin_call_claim_file, is
+	 stored in bfd_object file.  Since GCC plugin before GCC 5
+	 doesn't call release_input_file, we close it here.  IR for
+	 LLVM plugin, which needs fd after plugin_call_claim_file and
+	 calls release_input_file after it is done, is stored in
+	 non-bfd_object file.  This scheme doesn't work when a plugin
+	 needs fd and its IR is stored in bfd_object file.  */
+      close (file->fd);
+      input->fd = -1;
+    }
+
   if (claimed)
     {
       /* Discard the real file's BFD and substitute the dummy one.  */
@@ -897,7 +986,7 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
 	 bfd_close for archives.  */
       if (entry->the_bfd->my_archive == NULL)
 	bfd_close (entry->the_bfd);
-      entry->the_bfd = file->handle;
+      entry->the_bfd = abfd;
       entry->flags.claimed = TRUE;
       bfd_make_readable (entry->the_bfd);
     }
@@ -905,7 +994,7 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
     {
       /* If plugin didn't claim the file, we don't need the dummy bfd.
 	 Can't avoid speculatively creating it, alas.  */
-      bfd_close_all_done (file->handle);
+      bfd_close_all_done (abfd);
       entry->flags.claimed = FALSE;
     }
 }

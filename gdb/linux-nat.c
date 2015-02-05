@@ -691,6 +691,7 @@ linux_nat_pass_signals (struct target_ops *self,
 static int stop_wait_callback (struct lwp_info *lp, void *data);
 static int linux_thread_alive (ptid_t ptid);
 static char *linux_child_pid_to_exec_file (struct target_ops *self, int pid);
+static int resume_stopped_resumed_lwps (struct lwp_info *lp, void *data);
 
 
 
@@ -2033,28 +2034,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	      new_lp->status = status;
 	    }
 
-	  /* Note the need to use the low target ops to resume, to
-	     handle resuming with PT_SYSCALL if we have syscall
-	     catchpoints.  */
-	  if (!stopping)
-	    {
-	      new_lp->resumed = 1;
-
-	      if (status == 0)
-		{
-		  gdb_assert (new_lp->last_resume_kind == resume_continue);
-		  if (debug_linux_nat)
-		    fprintf_unfiltered (gdb_stdlog,
-					"LHEW: resuming new LWP %ld\n",
-					ptid_get_lwp (new_lp->ptid));
-		  linux_resume_one_lwp (new_lp, 0, GDB_SIGNAL_0);
-		}
-	    }
-
-	  if (debug_linux_nat)
-	    fprintf_unfiltered (gdb_stdlog,
-				"LHEW: resuming parent LWP %d\n", pid);
-	  linux_resume_one_lwp (lp, 0, GDB_SIGNAL_0);
+	  new_lp->resumed = !stopping;
 	  return 1;
 	}
 
@@ -2096,9 +2076,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LHEW: Got PTRACE_EVENT_VFORK_DONE "
-			    "from LWP %ld: resuming\n",
+			    "from LWP %ld: ignoring\n",
 			    ptid_get_lwp (lp->ptid));
-      ptrace (PTRACE_CONT, ptid_get_lwp (lp->ptid), 0, 0);
       return 1;
     }
 
@@ -2245,8 +2224,8 @@ wait_lwp (struct lwp_info *lp)
 	fprintf_unfiltered (gdb_stdlog,
 			    "WL: Handling extended status 0x%06x\n",
 			    status);
-      if (linux_handle_extended_wait (lp, status, 1))
-	return wait_lwp (lp);
+      linux_handle_extended_wait (lp, status, 1);
+      return 0;
     }
 
   return status;
@@ -3274,8 +3253,13 @@ linux_nat_wait_1 (struct target_ops *ops,
 	  continue;
 	}
 
-      /* Now that we've pulled all events out of the kernel, check if
-	 there's any LWP with a status to report to the core.  */
+      /* Now that we've pulled all events out of the kernel, resume
+	 LWPs that don't have an interesting event to report.  */
+      iterate_over_lwps (minus_one_ptid,
+			 resume_stopped_resumed_lwps, &minus_one_ptid);
+
+      /* ... and find an LWP with a status to report to the core, if
+	 any.  */
       lp = iterate_over_lwps (ptid, status_callback, NULL);
       if (lp != NULL)
 	break;
@@ -3435,8 +3419,6 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
       struct regcache *regcache = get_thread_regcache (lp->ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
       CORE_ADDR pc = regcache_read_pc (regcache);
-
-      gdb_assert (is_executing (lp->ptid));
 
       /* Don't bother if there's a breakpoint at PC that we'd hit
 	 immediately, and we're not waiting for this LWP.  */

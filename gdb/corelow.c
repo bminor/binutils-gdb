@@ -536,6 +536,11 @@ get_core_register_section (struct regcache *regcache,
       warning (_("Section `%s' in core file too small."), section_name);
       return;
     }
+  if (size != min_size && !(regset->flags & REGSET_VARIABLE_SIZE))
+    {
+      warning (_("Unexpected size of section `%s' in core file."),
+	       section_name);
+    }
 
   contents = alloca (size);
   if (! bfd_get_section_contents (core_bfd, section, contents,

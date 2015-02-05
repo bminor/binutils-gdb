@@ -1666,8 +1666,12 @@ read_and_display_attr_value (unsigned long attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
+      /* FIXME: Testing "(block_start + uvalue) < block_start" miscompiles with
+	 gcc 4.8.3 running on an x86_64 host in 32-bit mode.  So we pre-compute
+	 block_start + uvalue here.  */
+      data = block_start + uvalue;
       /* PR 17512: file: 008-103549-0.001:0.1.  */
-      if (block_start + uvalue > end)
+      if (block_start + uvalue > end || data < block_start)
 	{
 	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
 	  uvalue = end - block_start;
@@ -1687,7 +1691,8 @@ read_and_display_attr_value (unsigned long attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
-      if (block_start + uvalue > end)
+      data = block_start + uvalue;
+      if (block_start + uvalue > end || data < block_start)
 	{
 	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
 	  uvalue = end - block_start;
@@ -1707,7 +1712,8 @@ read_and_display_attr_value (unsigned long attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
-      if (block_start + uvalue > end)
+      data = block_start + uvalue;
+      if (block_start + uvalue > end || data < block_start)
 	{
 	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
 	  uvalue = end - block_start;
@@ -1728,7 +1734,10 @@ read_and_display_attr_value (unsigned long attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
-      if (block_start + uvalue > end)
+      data = block_start + uvalue;
+      if (block_start + uvalue > end
+	  /* PR 17531: file: 5b5f0592.  */ 
+	  || data < block_start)
 	{
 	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
 	  uvalue = end - block_start;
@@ -2125,7 +2134,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  uvalue += cu_offset;
 
 	if (uvalue >= section->size)
-	  warn (_("Offset %s used as value for DW_AT_import attribute of DIE at offset %lx is too big.\n"),
+	  warn (_("Offset %s used as value for DW_AT_import attribute of DIE at offset 0x%lx is too big.\n"),
 		dwarf_vmatoa ("x", uvalue),
 		(unsigned long) (orig_data - section->start));
 	else
@@ -2259,8 +2268,8 @@ process_debug_info (struct dwarf_section *section,
 
 	  /* Negative values are illegal, they may even cause infinite
 	     looping.  This can happen if we can't accurately apply
-	     relocations to an object file.  */
-	  if ((signed long) length <= 0)
+	     relocations to an object file, or if the file is corrupt.  */
+	  if ((signed long) length <= 0 || section_begin < start)
 	    {
 	      warn (_("Corrupt unit length (0x%s) found in section %s\n"),
 		    dwarf_vmatoa ("x", length), section->name);
@@ -2444,10 +2453,18 @@ process_debug_info (struct dwarf_section *section,
 	  	  " extends beyond end of section (length = %s)\n"),
 		dwarf_vmatoa ("x", cu_offset),
 		dwarf_vmatoa ("x", compunit.cu_length));
+	  num_units = unit;
 	  break;
 	}
       tags = hdrptr;
       start += compunit.cu_length + initial_length_size;
+
+      if (start > end)
+	{
+	  warn (_("Debug info is corrupt.  CU at %s extends beyond end of section"),
+		dwarf_vmatoa ("x", cu_offset));
+	  start = end;
+	}
 
       if (compunit.cu_version != 2
 	  && compunit.cu_version != 3
@@ -2571,7 +2588,7 @@ process_debug_info (struct dwarf_section *section,
 		  printf ("\n");
 		  fflush (stdout);
 		}
-	      warn (_("DIE at offset %lx refers to abbreviation number %lu which does not exist\n"),
+	      warn (_("DIE at offset 0x%lx refers to abbreviation number %lu which does not exist\n"),
 		    die_offset, abbrev_number);
 	      return 0;
 	    }
@@ -2609,7 +2626,7 @@ process_debug_info (struct dwarf_section *section,
 		arg = debug_information + unit;
 	      else
 		arg = NULL;
-	      
+
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
 					    tags,
@@ -3720,7 +3737,9 @@ display_debug_pubnames_worker (struct dwarf_section *section,
       SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, end);
 
       /* PR 17531: file: 7615b6b2.  */
-      if ((dwarf_signed_vma) names.pn_length < 0)
+      if ((dwarf_signed_vma) names.pn_length < 0
+	  /* PR 17531: file: a5dbeaa7. */
+	  || start + names.pn_length + initial_length_size < start)
 	{
 	  warn (_("Negative length for public name: 0x%lx\n"), (long) names.pn_length);
 	  start = end;
@@ -6691,19 +6710,20 @@ display_gdb_index (struct dwarf_section *section,
 		    constant_pool + name_offset);
 
 	  if (constant_pool + cu_vector_offset < constant_pool
-	      || constant_pool + cu_vector_offset >= section->start + section->size)
+	      || constant_pool + cu_vector_offset >= section->start + section->size - 3)
 	    {
 	      printf (_("<invalid CU vector offset: %x>\n"), cu_vector_offset);
 	      warn (_("Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"),
 		    cu_vector_offset, i);
 	      continue;
 	    }
-	  else
-	    num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+
+	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
 
 	  if (num_cus * 4 < num_cus
-	      || constant_pool + cu_vector_offset + 4 + num_cus * 4 >=
-	      section->start + section->size)
+	      || constant_pool + cu_vector_offset + 4 + num_cus * 4
+	      >= section->start + section->size
+	      || (constant_pool + cu_vector_offset + 4 + num_cus * 4) < constant_pool)
 	    {
 	      printf ("<invalid number of CUs: %d>\n", num_cus);
 	      warn (_("Invalid number of CUs (0x%x) for symbol table slot %d\n"),
@@ -6713,6 +6733,7 @@ display_gdb_index (struct dwarf_section *section,
 
 	  if (num_cus > 1)
 	    printf ("\n");
+
 	  for (j = 0; j < num_cus; ++j)
 	    {
 	      int is_static;
@@ -6864,6 +6885,14 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   pindex = phash + nslots * 8;
   ppool = pindex + nslots * 4;
 
+  /* PR 17531: file: 45d69832.  */
+  if (pindex < phash || ppool < phdr)
+    {
+      warn (_("Section %s is too small for %d slots\n"),
+	    section->name, nslots);
+      return 0;
+    }
+
   if (do_display)
     {
       printf (_("Contents of the %s section:\n\n"), section->name);
@@ -6895,6 +6924,13 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	    {
 	      SAFE_BYTE_GET (j, pindex, 4, limit);
 	      shndx_list = ppool + j * 4;
+	      /* PR 17531: file: 705e010d.  */
+	      if (shndx_list < ppool)
+		{
+		  warn (_("Section index pool located before start of section\n"));
+		  return 0;
+		}
+
 	      if (do_display)
 		printf (_("  [%3d] Signature:  0x%s  Sections: "),
 			i, dwarf_vmatoa64 (signature_high, signature_low,
@@ -7378,7 +7414,7 @@ dwarf_select_sections_by_letters (const char *letters)
 	break;
 
       default:
-	warn (_("Unrecognized debug option '%s'\n"), optarg);
+	warn (_("Unrecognized debug option '%s'\n"), letters);
 	break;
       }
 }

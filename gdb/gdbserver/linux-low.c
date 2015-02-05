@@ -427,30 +427,12 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
       /* Normally we will get the pending SIGSTOP.  But in some cases
 	 we might get another signal delivered to the group first.
 	 If we do get another signal, be sure not to lose it.  */
-      if (WSTOPSIG (status) == SIGSTOP)
-	{
-	  if (stopping_threads == NOT_STOPPING_THREADS)
-	    linux_resume_one_lwp (new_lwp, 0, 0, NULL);
-	}
-      else
+      if (WSTOPSIG (status) != SIGSTOP)
 	{
 	  new_lwp->stop_expected = 1;
-
-	  if (stopping_threads != NOT_STOPPING_THREADS)
-	    {
-	      new_lwp->status_pending_p = 1;
-	      new_lwp->status_pending = status;
-	    }
-	  else
-	    /* Pass the signal on.  This is what GDB does - except
-	       shouldn't we really report it instead?  */
-	    linux_resume_one_lwp (new_lwp, 0, WSTOPSIG (status), NULL);
+	  new_lwp->status_pending_p = 1;
+	  new_lwp->status_pending = status;
 	}
-
-      /* Always resume the current thread.  If we are stopping
-	 threads, it will have a pending SIGSTOP; we may as well
-	 collect it now.  */
-      linux_resume_one_lwp (event_child, event_child->stepping, 0, NULL);
     }
 }
 
@@ -1955,6 +1937,32 @@ linux_low_filter_event (int lwpid, int wstat)
   return child;
 }
 
+/* Resume LWPs that are currently stopped without any pending status
+   to report, but are resumed from the core's perspective.  */
+
+static void
+resume_stopped_resumed_lwps (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct lwp_info *lp = get_thread_lwp (thread);
+
+  if (lp->stopped
+      && !lp->status_pending_p
+      && thread->last_resume_kind != resume_stop
+      && thread->last_status.kind == TARGET_WAITKIND_IGNORE)
+    {
+      int step = thread->last_resume_kind == resume_step;
+
+      if (debug_threads)
+	debug_printf ("RSRL: resuming stopped-resumed LWP %s at %s: step=%d\n",
+		      target_pid_to_str (ptid_of (thread)),
+		      paddress (lp->stop_pc),
+		      step);
+
+      linux_resume_one_lwp (lp, step, GDB_SIGNAL_0, NULL);
+    }
+}
+
 /* Wait for an event from child(ren) WAIT_PTID, and return any that
    match FILTER_PTID (leaving others pending).  The PTIDs can be:
    minus_one_ptid, to specify any child; a pid PTID, specifying all
@@ -2088,8 +2096,13 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	  continue;
 	}
 
-      /* Now that we've pulled all events out of the kernel, check if
-	 there's any LWP with a status to report to the core.  */
+      /* Now that we've pulled all events out of the kernel, resume
+	 LWPs that don't have an interesting event to report.  */
+      if (stopping_threads == NOT_STOPPING_THREADS)
+	for_each_inferior (&all_threads, resume_stopped_resumed_lwps);
+
+      /* ... and find an LWP with a status to report to the core, if
+	 any.  */
       event_thread = (struct thread_info *)
 	find_inferior (&all_threads, status_pending_p_callback, &filter_ptid);
       if (event_thread != NULL)

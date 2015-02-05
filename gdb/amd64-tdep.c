@@ -2854,7 +2854,7 @@ amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  gdb_assert (len == tdep->sizeof_fpregset);
+  gdb_assert (len >= tdep->sizeof_fpregset);
   amd64_supply_fxsave (regcache, regnum, fpregs);
 }
 
@@ -2871,7 +2871,7 @@ amd64_collect_fpregset (const struct regset *regset,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  gdb_assert (len == tdep->sizeof_fpregset);
+  gdb_assert (len >= tdep->sizeof_fpregset);
   amd64_collect_fxsave (regcache, regnum, fpregs);
 }
 

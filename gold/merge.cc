@@ -564,9 +564,9 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 				 & (this->addralign() - 1));
   bool has_misaligned_strings = false;
 
-  while (p < pend0)
+  while (p < pend)
     {
-      size_t len = string_length(p);
+      size_t len = p < pend0 ? string_length(p) : pend - p;
 
       // Within merge input section each string must be aligned.
       if (len != 0
@@ -579,17 +579,6 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
       merged_strings.push_back(Merged_string(i, key));
       p += len + 1;
-      i += (len + 1) * sizeof(Char_type);
-    }
-  if (p < pend)
-    {
-      size_t len = pend - p;
-
-      Stringpool::Key key;
-      this->stringpool_.add_with_length(p, len, true, &key);
-
-      merged_strings.push_back(Merged_string(i, key));
-
       i += (len + 1) * sizeof(Char_type);
     }
 

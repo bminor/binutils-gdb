@@ -351,7 +351,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_6 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_8 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_34 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.sh \
@@ -359,7 +360,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_6.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.sh
 
 # Test that symbols known in the IR file but not in the replacement file
 # produce an unresolved symbol error.
@@ -370,9 +372,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_6.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.o.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err
 # Make a copy of two_file_test_1.o, which does not define the symbol _Z4t16av.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_36 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
@@ -384,7 +387,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	two_file_test_1c.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_37 = plugin_test_tls
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_38 = plugin_test_tls.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_39 = plugin_test_tls.err
@@ -886,7 +890,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_8$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__EXEEXT_24 = plugin_test_tls$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_25 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT) \
@@ -1442,6 +1447,12 @@ plugin_test_10_LDADD = $(LDADD)
 plugin_test_10_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+plugin_test_11_SOURCES = plugin_test_11.c
+plugin_test_11_OBJECTS = plugin_test_11.$(OBJEXT)
+plugin_test_11_LDADD = $(LDADD)
+plugin_test_11_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 plugin_test_2_SOURCES = plugin_test_2.c
 plugin_test_2_OBJECTS = plugin_test_2.$(OBJEXT)
 plugin_test_2_LDADD = $(LDADD)
@@ -1905,10 +1916,10 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	local_labels_test.c many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
 	permission_test.c $(pie_copyrelocs_test_SOURCES) \
-	plugin_test_1.c plugin_test_10.c plugin_test_2.c \
-	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
-	plugin_test_6.c plugin_test_7.c plugin_test_8.c \
-	plugin_test_tls.c $(protected_1_SOURCES) \
+	plugin_test_1.c plugin_test_10.c plugin_test_11.c \
+	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
+	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
+	plugin_test_8.c plugin_test_tls.c $(protected_1_SOURCES) \
 	$(protected_2_SOURCES) $(relro_now_test_SOURCES) \
 	$(relro_script_test_SOURCES) $(relro_strip_test_SOURCES) \
 	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
@@ -2645,6 +2656,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_DEPENDENCIES = gcctestdir/ld libthinall.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_LDFLAGS = -Bgcctestdir/ -L.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_LDADD = -lthinall
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@PLUGIN_TEST_11_SYMS = two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_SOURCES = exclude_libs_test.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_DEPENDENCIES = gcctestdir/ld libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a alt/libexclude_libs_test_3.a
@@ -3301,6 +3313,15 @@ pie_copyrelocs_test$(EXEEXT): $(pie_copyrelocs_test_OBJECTS) $(pie_copyrelocs_te
 @PLUGINS_FALSE@plugin_test_10$(EXEEXT): $(plugin_test_10_OBJECTS) $(plugin_test_10_DEPENDENCIES) 
 @PLUGINS_FALSE@	@rm -f plugin_test_10$(EXEEXT)
 @PLUGINS_FALSE@	$(LINK) $(plugin_test_10_OBJECTS) $(plugin_test_10_LDADD) $(LIBS)
+@GCC_FALSE@plugin_test_11$(EXEEXT): $(plugin_test_11_OBJECTS) $(plugin_test_11_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f plugin_test_11$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(plugin_test_11_OBJECTS) $(plugin_test_11_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@plugin_test_11$(EXEEXT): $(plugin_test_11_OBJECTS) $(plugin_test_11_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f plugin_test_11$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(plugin_test_11_OBJECTS) $(plugin_test_11_LDADD) $(LIBS)
+@PLUGINS_FALSE@plugin_test_11$(EXEEXT): $(plugin_test_11_OBJECTS) $(plugin_test_11_DEPENDENCIES) 
+@PLUGINS_FALSE@	@rm -f plugin_test_11$(EXEEXT)
+@PLUGINS_FALSE@	$(LINK) $(plugin_test_11_OBJECTS) $(plugin_test_11_LDADD) $(LIBS)
 @GCC_FALSE@plugin_test_2$(EXEEXT): $(plugin_test_2_OBJECTS) $(plugin_test_2_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f plugin_test_2$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(plugin_test_2_OBJECTS) $(plugin_test_2_LDADD) $(LIBS)
@@ -3685,6 +3706,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_10.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_4.Po@am__quote@
@@ -4151,6 +4173,8 @@ plugin_test_7.sh.log: plugin_test_7.sh
 	@p='plugin_test_7.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_10.sh.log: plugin_test_10.sh
 	@p='plugin_test_10.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_11.sh.log: plugin_test_11.sh
+	@p='plugin_test_11.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_tls.sh.log: plugin_test_tls.sh
 	@p='plugin_test_tls.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_final_layout.sh.log: plugin_final_layout.sh
@@ -4435,6 +4459,8 @@ plugin_test_8.log: plugin_test_8$(EXEEXT)
 	@p='plugin_test_8$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_10.log: plugin_test_10$(EXEEXT)
 	@p='plugin_test_10$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_11.log: plugin_test_11$(EXEEXT)
+	@p='plugin_test_11$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_tls.log: plugin_test_tls$(EXEEXT)
 	@p='plugin_test_tls$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 exclude_libs_test.log: exclude_libs_test$(EXEEXT)
@@ -5316,16 +5342,16 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@alt/thin_archive_test_4.o: thin_archive_test_4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_1.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms 2>plugin_test_1.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1.err: plugin_test_1
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_1.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_2: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so 2>plugin_test_2.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_2: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_shared_2.so 2>plugin_test_2.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_2.err: plugin_test_2
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_2.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_3: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--export-dynamic -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_3.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_3: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--export-dynamic -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms 2>plugin_test_3.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_3.err: plugin_test_3
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_3.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_4: two_file_test_main.o plugin_test_4.a gcctestdir/ld plugin_test.so
@@ -5333,79 +5359,86 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_4.err: plugin_test_4
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_4.err
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_4.a: two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_4.a: two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_AR) cr $@ $^
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_5: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_6: plugin_common_test_1.syms plugin_common_test_2.syms gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.syms 2>plugin_test_6.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_5: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms unused.o.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms unused.o.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_6: plugin_common_test_1.o.syms plugin_common_test_2.o.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.o.syms plugin_common_test_2.o.syms 2>plugin_test_6.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_6.err: plugin_test_6
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_6.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7: plugin_test_7_1.o plugin_test_7_1.syms plugin_test_7_2.o gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--gc-sections,--print-gc-sections plugin_test_7_1.syms plugin_test_7_2.o 2>plugin_test_7.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7.syms: plugin_test_7
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7: plugin_test_7_1.o plugin_test_7_1.o.syms plugin_test_7_2.o gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--gc-sections,--print-gc-sections plugin_test_7_1.o.syms plugin_test_7_2.o 2>plugin_test_7.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7.o.syms: plugin_test_7
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7_1.o: plugin_test_7_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -DLTO -O0 -c -ffunction-sections -fdata-sections -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7_1_orig.o: plugin_test_7_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7_1.syms: plugin_test_7_1_orig.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7_1.o.syms: plugin_test_7_1_orig.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7_2.o: plugin_test_7_2.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_7.err: plugin_test_7
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_8.o: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o ../ld-new plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	../ld-new -r -o $@ --no-demangle --plugin "./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_8.o: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o ../ld-new plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	../ld-new -r -o $@ --no-demangle --plugin "./plugin_test.so" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_8: plugin_test_8.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle plugin_test_8.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_9.err: two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms "2>$@"
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms 2>$@; then \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_9.err: two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms 2>$@; then \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	  echo 1>&2 "Link of plugin_test_9 should have failed"; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	fi
 # Make a .syms file that claims to define the symbol _Z4t16av.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1c.syms: two_file_test_1.syms two_file_test_1c.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	cp two_file_test_1.syms $@.tmp
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	grep "_Z4t16av" two_file_test_1b.syms >> $@.tmp
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1c.o.syms: two_file_test_1.o.syms two_file_test_1c.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	cp two_file_test_1.o.syms $@.tmp
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	grep "_Z4t16av" two_file_test_1b.o.syms >> $@.tmp
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	mv -f $@.tmp $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1c.o: two_file_test_1.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	cp two_file_test_1.o $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_10: plugin_common_test_1.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_10: plugin_common_test_1.o.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.o.syms plugin_common_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_10.sections: plugin_test_10
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -SW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_11: two_file_test_main.o plugin_test_thin.a gcctestdir/ld plugin_test.so $(PLUGIN_TEST_11_SYMS)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o plugin_test_thin.a 2>plugin_test_11.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_11.err: plugin_test_11
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_11.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_AR) crT $@ $^
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.so: plugin_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.o: plugin_test.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -fpic -o $@ $<
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_main.syms: two_file_test_main.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_main.o.syms: two_file_test_main.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1.syms: two_file_test_1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1.o.syms: two_file_test_1.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1b.syms: two_file_test_1b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1b.o.syms: two_file_test_1b.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_2.syms: two_file_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_2.o.syms: two_file_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_common_test_1.syms: plugin_common_test_1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_common_test_1.o.syms: plugin_common_test_1.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_common_test_2.syms: plugin_common_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_common_test_2.o.syms: plugin_common_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@empty.syms:
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@empty.o.syms:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "" >$@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "Symbol table" >>$@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@plugin_test_tls: two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms 2>plugin_test_tls.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@plugin_test_tls: two_file_test_tls.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2_tls.o.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2_tls.o.syms 2>plugin_test_tls.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@plugin_test_tls.err: plugin_test_tls
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@	@touch plugin_test_tls.err
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@two_file_test_2_tls.syms: two_file_test_2_tls.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@two_file_test_2_tls.o.syms: two_file_test_2_tls.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@unused.syms: unused.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@unused.o.syms: unused.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "     1: 00000000     4 FUNC    GLOBAL DEFAULT    1 UNUSED" >>$@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@unused.o: unused.c

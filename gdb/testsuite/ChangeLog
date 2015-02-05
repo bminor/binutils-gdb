@@ -1,3 +1,17 @@
+2015-02-04  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/info-os.c (shmid, semid, msqid): Make variables static
+	and initialize them.
+	(ipc_cleanup): New function.
+	(main): Don't declare shmid, semid, and msqid.  Add a call to
+	atexit so that we call ipc_cleanup on exit.
+
+2015-02-04  Pedro Alves  <palves@redhat.com>
+
+	* boards/native-extended-gdbserver.exp: Remove any target variant
+	specifications from the board name before clearing the isremote
+	flag from board_info.
+
 2015-01-31  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.base/maint.exp <maint print type argc>: Update expected output.

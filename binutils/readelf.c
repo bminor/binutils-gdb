@@ -324,14 +324,36 @@ static const char *get_symbol_version_string
    context.  */
 
 static void *
-get_data (void * var, FILE * file, unsigned long offset, size_t size, size_t nmemb,
-	  const char * reason)
+get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
+	  bfd_size_type nmemb, const char * reason)
 {
   void * mvar;
-  size_t amt = size * nmemb;
+  bfd_size_type amt = size * nmemb;
 
   if (size == 0 || nmemb == 0)
     return NULL;
+
+  /* If the size_t type is smaller than the bfd_size_type, eg because
+     you are building a 32-bit tool on a 64-bit host, then make sure
+     that when the sizes are cast to (size_t) no information is lost.  */
+  if (sizeof (size_t) < sizeof (bfd_size_type)
+      && (   (bfd_size_type) ((size_t) size) != size
+	  || (bfd_size_type) ((size_t) nmemb) != nmemb))
+    {
+      if (reason)
+	error (_("Size truncation prevents reading 0x%llx elements of size 0x%llx for %s\n"),
+	       (unsigned long long) nmemb, (unsigned long long) size, reason);
+      return NULL;
+    }
+
+  /* Check for size overflow.  */
+  if (amt < nmemb)
+    {
+      if (reason)
+	error (_("Size overflow prevents reading 0x%llx elements of size 0x%llx for %s\n"),
+	       (unsigned long long) nmemb, (unsigned long long) size, reason);
+      return NULL;
+    }
 
   /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
      attempting to allocate memory when the read is bound to fail.  */
@@ -339,8 +361,8 @@ get_data (void * var, FILE * file, unsigned long offset, size_t size, size_t nme
       || offset + archive_file_offset + amt > current_file_size)
     {
       if (reason)
-	error (_("Reading 0x%lx bytes extends past end of file for %s\n"),
-	       (unsigned long) amt, reason);
+	error (_("Reading 0x%llx bytes extends past end of file for %s\n"),
+	       (unsigned long long) amt, reason);
       return NULL;
     }
 
@@ -356,26 +378,26 @@ get_data (void * var, FILE * file, unsigned long offset, size_t size, size_t nme
   if (mvar == NULL)
     {
       /* Check for overflow.  */
-      if (nmemb < (~(size_t) 0 - 1) / size)
+      if (nmemb < (~(bfd_size_type) 0 - 1) / size)
 	/* + 1 so that we can '\0' terminate invalid string table sections.  */
-	mvar = malloc (size * nmemb + 1);
+	mvar = malloc ((size_t) amt + 1);
 
       if (mvar == NULL)
 	{
 	  if (reason)
-	    error (_("Out of memory allocating 0x%lx bytes for %s\n"),
-		   (unsigned long)(size * nmemb), reason);
+	    error (_("Out of memory allocating 0x%llx bytes for %s\n"),
+		   (unsigned long long) amt, reason);
 	  return NULL;
 	}
 
       ((char *) mvar)[amt] = '\0';
     }
 
-  if (fread (mvar, size, nmemb, file) != nmemb)
+  if (fread (mvar, (size_t) size, (size_t) nmemb, file) != nmemb)
     {
       if (reason)
-	error (_("Unable to read in 0x%lx bytes of %s\n"),
-	       (unsigned long) amt, reason);
+	error (_("Unable to read in 0x%llx bytes of %s\n"),
+	       (unsigned long long) amt, reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -5994,8 +6016,15 @@ process_section_groups (FILE * file)
 
 	      if (entry >= elf_header.e_shnum)
 		{
-		  error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
-			 entry, i, elf_header.e_shnum - 1);
+		  static unsigned num_group_errors = 0;
+
+		  if (num_group_errors ++ < 10)
+		    {
+		      error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
+			     entry, i, elf_header.e_shnum - 1);
+		      if (num_group_errors == 10)
+			warn (_("Futher error messages about overlarge group section indicies suppressed\n"));
+		    }
 		  continue;
 		}
 
@@ -6003,9 +6032,16 @@ process_section_groups (FILE * file)
 		{
 		  if (entry)
 		    {
-		      error (_("section [%5u] in group section [%5u] already in group section [%5u]\n"),
-			     entry, i,
-			     section_headers_groups [entry]->group_index);
+		      static unsigned num_errs = 0;
+
+		      if (num_errs ++ < 10)
+			{
+			  error (_("section [%5u] in group section [%5u] already in group section [%5u]\n"),
+				 entry, i,
+				 section_headers_groups [entry]->group_index);
+			  if (num_errs == 10)
+			    warn (_("Further error messages about already contained group sections suppressed\n"));
+			}
 		      continue;
 		    }
 		  else
@@ -10051,41 +10087,52 @@ get_symbol_index_type (unsigned int type)
 }
 
 static bfd_vma *
-get_dynamic_data (FILE * file, size_t number, unsigned int ent_size)
+get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
 {
   unsigned char * e_data;
   bfd_vma * i_data;
 
+  /* If the size_t type is smaller than the bfd_size_type, eg because
+     you are building a 32-bit tool on a 64-bit host, then make sure
+     that when (number) is cast to (size_t) no information is lost.  */
+  if (sizeof (size_t) < sizeof (bfd_size_type)
+      && (bfd_size_type) ((size_t) number) != number)
+    {
+      error (_("Size truncation prevents reading %llu elements of size %u\n"),
+	     (unsigned long long) number, ent_size);
+      return NULL;
+    }
+  
   /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
      attempting to allocate memory when the read is bound to fail.  */
   if (ent_size * number > current_file_size)
     {
-      error (_("Invalid number of dynamic entries: %lu\n"),
-	     (unsigned long) number);
+      error (_("Invalid number of dynamic entries: %llu\n"),
+	     (unsigned long long) number);
       return NULL;
     }
 
-  e_data = (unsigned char *) cmalloc (number, ent_size);
+  e_data = (unsigned char *) cmalloc ((size_t) number, ent_size);
   if (e_data == NULL)
     {
-      error (_("Out of memory reading %lu dynamic entries\n"),
-	     (unsigned long) number);
+      error (_("Out of memory reading %llu dynamic entries\n"),
+	     (unsigned long long) number);
       return NULL;
     }
 
-  if (fread (e_data, ent_size, number, file) != number)
+  if (fread (e_data, ent_size, (size_t) number, file) != number)
     {
-      error (_("Unable to read in %lu bytes of dynamic data\n"),
-	     (unsigned long) (number * ent_size));
+      error (_("Unable to read in %llu bytes of dynamic data\n"),
+	     (unsigned long long) (number * ent_size));
       free (e_data);
       return NULL;
     }
 
-  i_data = (bfd_vma *) cmalloc (number, sizeof (*i_data));
+  i_data = (bfd_vma *) cmalloc ((size_t) number, sizeof (*i_data));
   if (i_data == NULL)
     {
-      error (_("Out of memory allocating space for %lu dynamic entries\n"),
-	     (unsigned long) number);
+      error (_("Out of memory allocating space for %llu dynamic entries\n"),
+	     (unsigned long long) number);
       free (e_data);
       return NULL;
     }
@@ -10683,7 +10730,7 @@ process_symbol_table (FILE * file)
       printf (_(" Length  Number     %% of total  Coverage\n"));
       for (hn = 0; hn < nbuckets; ++hn)
 	{
-	  for (si = buckets[hn]; si > 0 && si < nchains; si = chains[si])
+	  for (si = buckets[hn]; si > 0 && si < nchains && si < nbuckets; si = chains[si])
 	    {
 	      ++nsyms;
 	      if (maxlength < ++lengths[hn])
