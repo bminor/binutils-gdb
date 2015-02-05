@@ -123,3 +123,4 @@
 	str	x1, [x1], #8
 	stp	x0, x1, [x0, #16]!
 	ldp	x0, x1, [x1], #16
+	adr	x2, :got:s1
