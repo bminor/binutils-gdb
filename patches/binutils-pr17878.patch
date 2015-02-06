@@ -1,4 +1,4 @@
-From 56be256ac6ca58dfb04c67bad10208425575ee19 Mon Sep 17 00:00:00 2001
+From da4f3c6f563c13033e697a9af343accff6df38d6 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 26 Jan 2015 16:42:27 -0800
 Subject: [PATCH 1/8] PR ld/17878: Add bfd_maybe_object_p
@@ -65,6 +65,8 @@ ld/testsuite/
 	* ld-plugin/plugin-21.d: Likewise.
 	* ld-plugin/plugin-22.d: Likewise.
 	* ld-plugin/plugin-23.d: Likewise.
+	* ld-plugin/plugin-24.d: Likewise.
+	* ld-plugin/plugin-25.d: Likewise.
 	* ld-plugin/plugin.exp (plugin2_name): New.
 	(plugin3_name): Likewise.
 	(plugin2_path): Likewise.
@@ -87,22 +89,24 @@ ld/testsuite/
  ld/Makefile.in                     |  49 ++-
  ld/ldfile.c                        |   6 +-
  ld/plugin.c                        |  14 +-
- ld/testplug2.c                     | 691 +++++++++++++++++++++++++++++++++++++
+ ld/testplug2.c                     | 693 +++++++++++++++++++++++++++++++++++++
  ld/testplug3.c                     | 674 ++++++++++++++++++++++++++++++++++++
  ld/testsuite/ld-plugin/func.c      |   3 +
  ld/testsuite/ld-plugin/plugin-13.d |  22 ++
  ld/testsuite/ld-plugin/plugin-14.d |  33 ++
- ld/testsuite/ld-plugin/plugin-15.d |  33 ++
- ld/testsuite/ld-plugin/plugin-16.d |  37 ++
+ ld/testsuite/ld-plugin/plugin-15.d |  34 ++
+ ld/testsuite/ld-plugin/plugin-16.d |  38 ++
  ld/testsuite/ld-plugin/plugin-17.d |  37 ++
  ld/testsuite/ld-plugin/plugin-18.d |  38 ++
  ld/testsuite/ld-plugin/plugin-19.d |  42 +++
- ld/testsuite/ld-plugin/plugin-20.d |   6 +
- ld/testsuite/ld-plugin/plugin-21.d |   6 +
- ld/testsuite/ld-plugin/plugin-22.d |   6 +
- ld/testsuite/ld-plugin/plugin-23.d |   6 +
+ ld/testsuite/ld-plugin/plugin-20.d |   7 +
+ ld/testsuite/ld-plugin/plugin-21.d |   7 +
+ ld/testsuite/ld-plugin/plugin-22.d |   7 +
+ ld/testsuite/ld-plugin/plugin-23.d |   7 +
+ ld/testsuite/ld-plugin/plugin-24.d |   5 +
+ ld/testsuite/ld-plugin/plugin-25.d |   5 +
  ld/testsuite/ld-plugin/plugin.exp  | 128 +++++++
- 24 files changed, 1882 insertions(+), 17 deletions(-)
+ 26 files changed, 1900 insertions(+), 17 deletions(-)
  create mode 100644 ld/testplug2.c
  create mode 100644 ld/testplug3.c
  create mode 100644 ld/testsuite/ld-plugin/plugin-13.d
@@ -116,6 +120,8 @@ ld/testsuite/
  create mode 100644 ld/testsuite/ld-plugin/plugin-21.d
  create mode 100644 ld/testsuite/ld-plugin/plugin-22.d
  create mode 100644 ld/testsuite/ld-plugin/plugin-23.d
+ create mode 100644 ld/testsuite/ld-plugin/plugin-24.d
+ create mode 100644 ld/testsuite/ld-plugin/plugin-25.d
 
 diff --git a/bfd/archive.c b/bfd/archive.c
 index cc4c52f..15d1e89 100644
@@ -178,7 +184,7 @@ index 91dbf80..df34f03 100644
     (bfd *abfd, bfd_format format, char ***matching);
  
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 604cfb6..0a022ad 100644
+index e8c4ad4..e05e2ac 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
 @@ -2989,6 +2989,7 @@ is_global_symbol_definition (bfd *abfd,
@@ -418,10 +424,10 @@ index c9c9541..94e07fd 100644
        int fd = open (attempt, O_RDONLY | O_BINARY);
        if (fd >= 0)
 diff --git a/ld/plugin.c b/ld/plugin.c
-index 28236f2..c5f1443 100644
+index 7ee45a2..cbc4c2d 100644
 --- a/ld/plugin.c
 +++ b/ld/plugin.c
-@@ -272,10 +272,15 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
+@@ -292,10 +292,15 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
    if (abfd != NULL)
      {
        abfd->flags |= BFD_LINKER_CREATED | BFD_PLUGIN;
@@ -441,7 +447,7 @@ index 28236f2..c5f1443 100644
  	{
  	  flagword flags;
  
-@@ -286,6 +291,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
+@@ -306,6 +311,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
  	    return abfd;
  	}
      }
@@ -451,10 +457,10 @@ index 28236f2..c5f1443 100644
  }
 diff --git a/ld/testplug2.c b/ld/testplug2.c
 new file mode 100644
-index 0000000..34d686c
+index 0000000..5e17b68
 --- /dev/null
 +++ b/ld/testplug2.c
-@@ -0,0 +1,691 @@
+@@ -0,0 +1,693 @@
 +/* Test plugin for the GNU linker.  Check non-object IR file as well as
 +   get_input_file, get_view and release_input_file interfaces.
 +   Copyright (C) 2015 Free Software Foundation, Inc.
@@ -1088,10 +1094,12 @@ index 0000000..34d686c
 +	  || SIZE_OF_FUNC_C < sizeof EXPECTED_VIEW_LENGTH
 +	  || memcmp (view, EXPECTED_VIEW, EXPECTED_VIEW_LENGTH) != 0)
 +	{
-+	  ((char *) view)[EXPECTED_VIEW_LENGTH] = '\0';
++	  char result[EXPECTED_VIEW_LENGTH + 1];
++	  memcpy (result, view, sizeof (result));
++	  result[EXPECTED_VIEW_LENGTH] = '\0';
 +	  TV_MESSAGE (LDPL_INFO, "Incorrect view:");
 +	  TV_MESSAGE (LDPL_INFO, "  Expect: " EXPECTED_VIEW);
-+	  TV_MESSAGE (LDPL_INFO, "  Result: %s", view);
++	  TV_MESSAGE (LDPL_INFO, "  Result: %s", result);
 +	}
 +      rv = tv_get_symbols_v2 (claimfile->file.handle, claimfile->n_syms_used,
 +			      claimfile->symbols);
@@ -1906,10 +1914,10 @@ index 0000000..96e1703
 +#...
 diff --git a/ld/testsuite/ld-plugin/plugin-15.d b/ld/testsuite/ld-plugin/plugin-15.d
 new file mode 100644
-index 0000000..caa486b
+index 0000000..ec7e52c
 --- /dev/null
 +++ b/ld/testsuite/ld-plugin/plugin-15.d
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,34 @@
 +Hello from testplugin.
 +.*: LDPT_MESSAGE func@0x.*
 +.*: LDPT_API_VERSION value        0x1 \(1\)
@@ -1940,15 +1948,16 @@ index 0000000..caa486b
 +hook called: claim_file tmpdir/text.o \[@0/.* not claimed
 +#...
 +hook called: all symbols read.
-+`_?func' referenced in section `\.text.*' of tmpdir/main.o: defined in discarded section .*
++tmpdir/main.o: In function `main':
++.*main.c.*: undefined reference to `func'
 +hook called: cleanup.
 +#...
 diff --git a/ld/testsuite/ld-plugin/plugin-16.d b/ld/testsuite/ld-plugin/plugin-16.d
 new file mode 100644
-index 0000000..6ce96c2
+index 0000000..479785e
 --- /dev/null
 +++ b/ld/testsuite/ld-plugin/plugin-16.d
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,38 @@
 +Hello from testplugin.
 +.*: LDPT_MESSAGE func@0x.*
 +.*: LDPT_API_VERSION value        0x1 \(1\)
@@ -1983,7 +1992,8 @@ index 0000000..6ce96c2
 +hook called: all symbols read.
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF
 +Sym: '_?func2' Resolution: LDPR_PREVAILING_DEF_IRONLY
-+`_?func' referenced in section `\.text.*' of tmpdir/main.o: defined in discarded section .*
++tmpdir/main.o: In function `main':
++.*main.c.*: undefined reference to `func'
 +hook called: cleanup.
 +#...
 diff --git a/ld/testsuite/ld-plugin/plugin-17.d b/ld/testsuite/ld-plugin/plugin-17.d
@@ -2123,54 +2133,80 @@ index 0000000..e838028
 +#...
 diff --git a/ld/testsuite/ld-plugin/plugin-20.d b/ld/testsuite/ld-plugin/plugin-20.d
 new file mode 100644
-index 0000000..b019df2
+index 0000000..dbee504
 --- /dev/null
 +++ b/ld/testsuite/ld-plugin/plugin-20.d
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,7 @@
 +hook called: all symbols read.
 +Input: func.c \(tmpdir/libfunc.a\)
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
-+`_?func' referenced in section `\.text.*' of tmpdir/main.o: defined in discarded section .*
++tmpdir/main.o: In function `main':
++.*main.c.*: undefined reference to `func'
 +hook called: cleanup.
 diff --git a/ld/testsuite/ld-plugin/plugin-21.d b/ld/testsuite/ld-plugin/plugin-21.d
 new file mode 100644
-index 0000000..abfd27f
+index 0000000..ebfa6c5
 --- /dev/null
 +++ b/ld/testsuite/ld-plugin/plugin-21.d
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,7 @@
 +hook called: all symbols read.
 +Input: .*/ld/testsuite/ld-plugin/func.c \(.*/ld/testsuite/ld-plugin/func.c\)
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
-+`_?func' referenced in section `\.text.*' of tmpdir/main.o: defined in discarded section .*
++tmpdir/main.o: In function `main':
++.*main.c.*: undefined reference to `func'
 +hook called: cleanup.
 diff --git a/ld/testsuite/ld-plugin/plugin-22.d b/ld/testsuite/ld-plugin/plugin-22.d
 new file mode 100644
-index 0000000..dcd4f24
+index 0000000..07a47ac
 --- /dev/null
 +++ b/ld/testsuite/ld-plugin/plugin-22.d
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,7 @@
 +Claimed: tmpdir/libfunc.a \[@.*
 +hook called: all symbols read.
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
-+`_?func' referenced in section `\.text.*' of tmpdir/main.o: defined in discarded section .*
++tmpdir/main.o: In function `main':
++.*main.c.*: undefined reference to `func'
 +hook called: cleanup.
 diff --git a/ld/testsuite/ld-plugin/plugin-23.d b/ld/testsuite/ld-plugin/plugin-23.d
 new file mode 100644
-index 0000000..35b48bd
+index 0000000..45e4052
 --- /dev/null
 +++ b/ld/testsuite/ld-plugin/plugin-23.d
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,7 @@
 +Claimed: .*/ld/testsuite/ld-plugin/func.c \[@0.*
 +hook called: all symbols read.
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
-+`_?func' referenced in section `\.text.*' of tmpdir/main.o: defined in discarded section .*
++tmpdir/main.o: In function `main':
++.*main.c.*: undefined reference to `func'
++hook called: cleanup.
+diff --git a/ld/testsuite/ld-plugin/plugin-24.d b/ld/testsuite/ld-plugin/plugin-24.d
+new file mode 100644
+index 0000000..1f21a4d
+--- /dev/null
++++ b/ld/testsuite/ld-plugin/plugin-24.d
+@@ -0,0 +1,5 @@
++hook called: all symbols read.
++Input: .*/ld/testsuite/ld-plugin/func.c \(.*/ld/testsuite/ld-plugin/func.c\)
++Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
++Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
++hook called: cleanup.
+diff --git a/ld/testsuite/ld-plugin/plugin-25.d b/ld/testsuite/ld-plugin/plugin-25.d
+new file mode 100644
+index 0000000..6e7638f
+--- /dev/null
++++ b/ld/testsuite/ld-plugin/plugin-25.d
+@@ -0,0 +1,5 @@
++Claimed: .*/ld/testsuite/ld-plugin/func.c \[@0.*
++hook called: all symbols read.
++Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
++Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
 +hook called: cleanup.
 diff --git a/ld/testsuite/ld-plugin/plugin.exp b/ld/testsuite/ld-plugin/plugin.exp
-index 23a8cfb..1d7e7f3 100644
+index 23a8cfb..0efd7ee 100644
 --- a/ld/testsuite/ld-plugin/plugin.exp
 +++ b/ld/testsuite/ld-plugin/plugin.exp
 @@ -41,6 +41,14 @@ set plugin_name [file_contents "$base_dir/libldtestplug.la"]
@@ -2296,34 +2332,34 @@ index 23a8cfb..1d7e7f3 100644
  }
 +
 +set plugin_src_tests [list \
-+    [list "plugin with source lib" \
++    [list "plugin 2 with source lib" \
 +	               "-plugin $plugin2_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
 +     tmpdir/main.o -Ltmpdir -ltext -lfunc $libs" "" "" "" {{ld plugin-20.d}} "main.x" ] \
-+    [list "load plugin with source" \
++    [list "load plugin 2 with source" \
 +	               "-plugin $plugin2_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
 +			-plugin-opt claim:$srcdir/$subdir/func.c \
 +    $testsrcfiles $libs" "" "" "" {{ld plugin-21.d}} "main.x" ] \
-+    [list "load plugin with source and -r" \
++    [list "load plugin 2 with source and -r" \
 +	               "-r -plugin $plugin2_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
 +			-plugin-opt claim:$srcdir/$subdir/func.c \
-+    $testsrcfiles $libs" "" "" "" {{ld plugin-21.d}} "main.x" ] \
-+    [list "plugin with source lib" \
++    $testsrcfiles $libs" "" "" "" {{ld plugin-24.d}} "main.x" ] \
++    [list "plugin 3 with source lib" \
 +	               "-plugin $plugin3_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
 +     tmpdir/main.o -Ltmpdir -ltext -lfunc $libs" "" "" "" {{ld plugin-22.d}} "main.x" ] \
-+    [list "load plugin with source" \
++    [list "load plugin 3 with source" \
 +	               "-plugin $plugin3_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
 +			-plugin-opt claim:$srcdir/$subdir/func.c \
 +    $testsrcfiles $libs" "" "" "" {{ld plugin-23.d}} "main.x" ] \
-+    [list "load plugin with source and -r" \
++    [list "load plugin 3 with source and -r" \
 +	               "-r -plugin $plugin3_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
 +			-plugin-opt claim:$srcdir/$subdir/func.c \
-+    $testsrcfiles $libs" "" "" "" {{ld plugin-23.d}} "main.x" ] \
++    $testsrcfiles $libs" "" "" "" {{ld plugin-25.d}} "main.x" ] \
 +]
 +
 +# Check if nm --plugin works.
@@ -2349,5 +2385,5 @@ index 23a8cfb..1d7e7f3 100644
 +    }
 +}
 -- 
-2.1.0
+1.9.3
 
