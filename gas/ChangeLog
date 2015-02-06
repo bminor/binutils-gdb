@@ -1,3 +1,10 @@
+2015-02-06  Jan Beulich  <jbeulich@suse.com>
+
+	* dw2gencfi.c (select_cie_for_fde): Also bail on CFI_label.
+	(cfi_change_reg_numbers): Also do nothing for CFI_label.
+	(cfi_pseudo_table): Also handle .cfi_label when not supporting
+	CFI directives.
+
 2015-02-05  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-msp430.c (md_assemble): Correct size passed to

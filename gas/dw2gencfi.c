@@ -1759,6 +1759,7 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
 
 	    case CFI_escape:
 	    case CFI_val_encoded_addr:
+	    case CFI_label:
 	      /* Don't bother matching these for now.  */
 	      goto fail;
 
@@ -1775,7 +1776,8 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
 	      || j->insn == DW_CFA_advance_loc
 	      || j->insn == DW_CFA_remember_state
 	      || j->insn == CFI_escape
-	      || j->insn == CFI_val_encoded_addr))
+	      || j->insn == CFI_val_encoded_addr
+	      || j->insn == CFI_label))
 	{
 	  *pfirst = j;
 	  return cie;
@@ -1827,6 +1829,7 @@ cfi_change_reg_numbers (struct cfi_insn_data *insn, segT ccseg)
 	case DW_CFA_restore_state:
 	case DW_CFA_GNU_window_save:
 	case CFI_escape:
+	case CFI_label:
 	  break;
 
 	case DW_CFA_def_cfa:
@@ -2072,6 +2075,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_personality", dot_cfi_dummy, 0 },
     { "cfi_lsda", dot_cfi_dummy, 0 },
     { "cfi_val_encoded_addr", dot_cfi_dummy, 0 },
+    { "cfi_label", dot_cfi_dummy, 0 },
     { NULL, NULL, 0 }
   };
 
