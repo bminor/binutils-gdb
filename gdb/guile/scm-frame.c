@@ -300,13 +300,14 @@ frscm_get_frame_arg_unsafe (SCM self, int arg_pos, const char *func_name)
    Thus code working with frames has to handle both Scheme errors (e.g., the
    object is not a frame) and GDB errors (e.g., the frame lookup failed).
 
-   To help keep things clear we split gdbscm_scm_to_frame into two:
+   To help keep things clear we split what would be gdbscm_scm_to_frame
+   into two:
 
-   gdbscm_get_frame_smob_arg_unsafe
+   frscm_get_frame_smob_arg_unsafe
      - throws a Scheme error if object is not a frame,
        or if the inferior is gone or is no longer current
 
-   gdbscm_frame_smob_to_frame
+   frscm_frame_smob_to_frame
      - may throw a gdb error if the conversion fails
      - it's not clear when it will and won't throw a GDB error,
        but for robustness' sake we assume that whenever we call out to GDB
