@@ -434,6 +434,10 @@ extern void add_compunit_symtab_to_objfile (struct compunit_symtab *cu);
 
 extern void add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *);
 
+extern void clear_symtab_users (int add_flags);
+
+extern enum language deduce_language_from_filename (const char *);
+
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to
    symbol_file_add, etc.  */
 

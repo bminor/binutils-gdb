@@ -1,3 +1,9 @@
+2015-02-06  Doug Evans  <dje@google.com>
+
+	* symtab.h (clear_symtab_users, deduce_language_from_filename): Move
+	* symfile.h (clear_symtab_users, deduce_language_from_filename): ...
+	to here.
+
 2015-02-06  Pedro Alves  <palves@redhat.com>
 
 	* linux-thread-db.c (find_new_threads_callback): Add debug output.
