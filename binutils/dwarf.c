@@ -3391,8 +3391,8 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Offset:                      0x%lx\n"), (long)(data - start));
 	  printf (_("  Length:                      %ld\n"), (long) linfo.li_length);
 	  printf (_("  DWARF Version:               %d\n"), linfo.li_version);
-	  if (linfo.li_version >= 5 &&
-	      linfo.li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
+	  if (linfo.li_version >= 5
+	      && linfo.li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
 	    {
 	      printf (_("  Address Size:                %u\n"), linfo.li_address_size);
 	      printf (_("  Segment Size:                %u\n"), linfo.li_segment_size);
@@ -3407,8 +3407,8 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Opcode Base:                 %d\n"), linfo.li_opcode_base);
 
 	  end_of_header_length = data + initial_length_size + 2 + offset_size;
-	  if (linfo.li_version >= 5 &&
-	      linfo.li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
+	  if (linfo.li_version >= 5
+	      && linfo.li_version != DWARF2_LINE_EXPERIMENTAL_VERSION)
 	    end_of_header_length += 2;
 	  start_of_line_program = end_of_header_length + linfo.li_prologue_length;
 	  end_of_logicals = end;
