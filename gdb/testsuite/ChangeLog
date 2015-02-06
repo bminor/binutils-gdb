@@ -1,3 +1,16 @@
+2015-02-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/gdb-sigterm.c (main): Use the TIMEOUT define to
+	determine how many seconds to pass to 'alarm'.
+	* gdb.base/gdb-sigterm.exp (top level): Build program with
+	-DTIMEOUT=$timeout.
+	(do_test): Return success/failure indication.  Add more verbose
+	logging.  Don't fail if 200 single steps are seen.  Instead, fail
+	when the test times out.
+	(passes): New global.
+	(top level): Break the testing loop if testing fails on any
+	iteration.  Use gdb_assert.
+
 2015-02-04  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.base/info-os.c (shmid, semid, msqid): Make variables static
