@@ -8,6 +8,8 @@
 	* dwarf.c (xcmalloc): Fail if the arguments are too big.
 	(xcrealloc): Likewise.
 	(xcalloc2): Likewise.
+	* readelf.c (process_mips_specific): Fail if an option has an
+	invalid size.
 
 2015-02-05  Alan Modra  <amodra@gmail.com>
 

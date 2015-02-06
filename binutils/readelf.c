@@ -13880,9 +13880,8 @@ process_mips_specific (FILE * file)
 	      if (option->size < sizeof (* eopt)
 		  || offset + option->size > sect->sh_size)
 		{
-		  warn (_("Invalid size (%u) for MIPS option\n"), option->size);
-		  option->size = sizeof (* eopt);
-		  break;
+		  error (_("Invalid size (%u) for MIPS option\n"), option->size);
+		  return 0;
 		}
 	      offset += option->size;
 		
