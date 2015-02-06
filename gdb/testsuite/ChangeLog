@@ -1,3 +1,34 @@
+2015-02-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/15678
+	* gdb.base/ena-dis-br.exp: Test "enable count" for bad user input.
+
+2015-02-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-many-short-lived-threads.c (SECONDS): New
+	macro.
+	(seconds_left, again): New globals.
+	(main): Wait seconds_left in a 1-second sleep loop instead of
+	sleeping 180 seconds.  If 'again' is set, reset the seconds
+	counter.
+	* gdb.threads/attach-many-short-lived-threads.exp (test): Set
+	'again' in the inferior before detaching.  Print the seconds left.
+	(options): New global.
+	(top level): Build program with	-DTIMEOUT=$timeout.
+
+2015-02-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/gdb-sigterm.c (main): Use the TIMEOUT define to
+	determine how many seconds to pass to 'alarm'.
+	* gdb.base/gdb-sigterm.exp (top level): Build program with
+	-DTIMEOUT=$timeout.
+	(do_test): Return success/failure indication.  Add more verbose
+	logging.  Don't fail if 200 single steps are seen.  Instead, fail
+	when the test times out.
+	(passes): New global.
+	(top level): Break the testing loop if testing fails on any
+	iteration.  Use gdb_assert.
+
 2015-02-04  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.base/info-os.c (shmid, semid, msqid): Make variables static

@@ -2302,6 +2302,7 @@ rsrc_print_resource_entries (FILE *         file,
 			     bfd_vma        rva_bias)
 {
   unsigned long entry, addr, size;
+  bfd_byte * leaf;
 
   if (data + 8 >= regions->section_end)
     return regions->section_end + 1;
@@ -2382,18 +2383,21 @@ rsrc_print_resource_entries (FILE *         file,
 					    regions, rva_bias);
     }
 
-  if (regions->section_start + entry + 16 >= regions->section_end)
+  leaf = regions->section_start + entry;
+
+  if (leaf + 16 >= regions->section_end
+      /* PR 17512: file: 055dff7e.  */
+      || leaf < regions->section_start)
     return regions->section_end + 1;
 
   fprintf (file, _("%03x %*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
-	   (int) (entry),
-	   indent, " ",
-	   addr = (long) bfd_get_32 (abfd, regions->section_start + entry),
-	   size = (long) bfd_get_32 (abfd, regions->section_start + entry + 4),
-	   (int) bfd_get_32 (abfd, regions->section_start + entry + 8));
+	   (int) (entry), indent, " ",
+	   addr = (long) bfd_get_32 (abfd, leaf),
+	   size = (long) bfd_get_32 (abfd, leaf + 4),
+	   (int) bfd_get_32 (abfd, leaf + 8));
 
   /* Check that the reserved entry is 0.  */
-  if (bfd_get_32 (abfd, regions->section_start + entry + 12) != 0
+  if (bfd_get_32 (abfd, leaf + 12) != 0
       /* And that the data address/size is valid too.  */
       || (regions->section_start + (addr - rva_bias) + size > regions->section_end))
     return regions->section_end + 1;
@@ -3264,9 +3268,14 @@ rsrc_parse_entry (bfd *            abfd,
   if (entry->value.leaf == NULL)
     return dataend;
 
-  addr = bfd_get_32 (abfd, datastart + val);
-  size = entry->value.leaf->size = bfd_get_32 (abfd, datastart + val + 4);
-  entry->value.leaf->codepage = bfd_get_32 (abfd, datastart + val + 8);
+  data = datastart + val;
+  if (data < datastart || data >= dataend)
+    return dataend;
+
+  addr = bfd_get_32 (abfd, data);
+  size = entry->value.leaf->size = bfd_get_32 (abfd, data + 4);
+  entry->value.leaf->codepage = bfd_get_32 (abfd, data + 8);
+  /* FIXME: We assume that the reserved field (data + 12) is OK.  */
 
   entry->value.leaf->data = bfd_malloc (size);
   if (entry->value.leaf->data == NULL)

@@ -1,3 +1,11 @@
+2015-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12365
+	PR ld/14272
+	* ld-plugin/lto.exp: Run the PR ld/12365 test only for x86 targets.
+	* ld-plugin/plugin-7.d: Updated.
+	* ld-plugin/plugin-8.d: Likewise.
+
 2015-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	*  ld-plugin/lto.exp: Pass -flto-partition=none to the PR

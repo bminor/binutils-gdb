@@ -32,6 +32,7 @@ hook called: claim_file tmpdir/text.o \[@0/.* not claimed
 hook called: all symbols read.
 Sym: '_?func' Resolution: LDPR_PREVAILING_DEF
 Sym: '_?func2' Resolution: LDPR_PREVAILING_DEF_IRONLY
-`_?func' referenced in section `\.text.*' of tmpdir/main.o: defined in discarded section .*
+tmpdir/main.o: In function `main':
+.*main.c.*: undefined reference to `func'
 hook called: cleanup.
 #...
