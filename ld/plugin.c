@@ -512,10 +512,13 @@ get_view (const void *handle, const void **viewp)
 static enum ld_plugin_status
 release_input_file (const void *handle)
 {
-  const plugin_input_file_t *input = handle;
+  plugin_input_file_t *input = (plugin_input_file_t *) handle;
   ASSERT (called_plugin);
   if (input->fd != -1)
-    close (input->fd);
+    {
+      close (input->fd);
+      input->fd = -1;
+    }
   return LDPS_OK;
 }
 
@@ -964,7 +967,7 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
     einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
-  if (bfd_check_format (entry->the_bfd, bfd_object))
+  if (input->fd != -1 && bfd_check_format (entry->the_bfd, bfd_object))
     {
       /* FIXME: fd belongs to us, not the plugin.  IR for GCC plugin,
 	 which doesn't need fd after plugin_call_claim_file, is

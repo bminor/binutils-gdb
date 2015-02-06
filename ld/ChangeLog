@@ -1,5 +1,10 @@
 2015-02-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* plugin.c (release_input_file): Set fd to -1 after closing it.
+	(plugin_maybe_claim): Close fd only if fd != -1.
+
+2015-02-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/17878
 	* plugin.c: Include <errno.h>.
 	(errno): New.  Declare if needed.
