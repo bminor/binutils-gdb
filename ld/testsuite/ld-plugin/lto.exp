@@ -383,12 +383,23 @@ if {![string match "" $catch_output]} {
 
 if { [at_least_gcc_version 4 7] } {
     # Check expected LTO linker errors.
-    set testname "PR ld/12365"
-    set exec_output [run_host_cmd "$CC" "-O2 -flto -flto-partition=none -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
-    if { [ regexp "undefined reference to `my_bcopy'" $exec_output ] } {
-	pass $testname
-    } {
-	fail $testname
+    # Since the asm symbol name hack in pr12365b.c doesn't work on all
+    # targets, run PR ld/12365 tests only for known targets.
+    if { ([istarget "i?86-*-elf*"]
+	   || (([istarget "i?86-*-linux*"] || [istarget "i?86-*-gnu*"])
+		&& ![istarget "*-*-*aout*"]
+		&& ![istarget "*-*-*oldld*"])
+	   || [istarget "i?86-*-nacl*"]
+	   || [istarget "x86_64-*-nacl*"]
+	   || [istarget "x86_64-*-linux*"]
+	   || [istarget "amd64-*-linux*"]) } {
+	set testname "PR ld/12365"
+	set exec_output [run_host_cmd "$CC" "-O2 -flto -flto-partition=none -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
+	if { [ regexp "undefined reference to `my_bcopy'" $exec_output ] } {
+	    pass $testname
+	} {
+	    fail $testname
+	}
     }
     set testname "PR ld/12942 (3)"
     set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
