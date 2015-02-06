@@ -2454,6 +2454,12 @@ EOF
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
   fprintf (file, _("\
+  -z text                     Treat DT_TEXTREL in shared object as error\n"));
+  fprintf (file, _("\
+  -z notext                   Don't treat DT_TEXTREL in shared object as error\n"));
+  fprintf (file, _("\
+  -z textoff                  Don't treat DT_TEXTREL in shared object as error\n"));
+  fprintf (file, _("\
   -z norelro                  Don't create RELRO program header\n"));
   fprintf (file, _("\
   -z now                      Mark object non-lazy runtime binding\n"));

@@ -1,5 +1,11 @@
 2015-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld.texinfo: Document -z text, -z notext and -z textoff.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_list_options): Add
+	-z text, -z notext and -z textoff.
+
+2015-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.ac: Add AC_FUNC_MMAP.
 	* config.in: Regenerated.
 	* configure: Likewise.
