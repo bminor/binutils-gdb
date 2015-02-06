@@ -32,6 +32,18 @@
 #include "plugin.h"
 #include "plugin-api.h"
 #include "elf-bfd.h"
+#if HAVE_MMAP
+# include <sys/mman.h>
+# ifndef MAP_FAILED
+#  define MAP_FAILED ((void *) -1)
+# endif
+# ifndef PROT_READ
+#  define PROT_READ 0
+# endif
+# ifndef MAP_PRIVATE
+#  define MAP_PRIVATE 0
+# endif
+#endif
 #include <errno.h>
 #if !(defined(errno) || defined(_MSC_VER) && defined(_INC_ERRNO))
 extern int errno;
@@ -76,11 +88,19 @@ typedef struct plugin
   bfd_boolean cleanup_done;
 } plugin_t;
 
+typedef struct view_buffer
+{
+  char *addr;
+  size_t filesize;
+  off_t offset;
+} view_buffer_t;
+
 /* The internal version of struct ld_plugin_input_file with a BFD
    pointer.  */
 typedef struct plugin_input_file
 {
   bfd *abfd;
+  view_buffer_t view_buffer;
   char *name;
   int fd;
   off_t offset;
@@ -475,35 +495,63 @@ get_input_file (const void *handle, struct ld_plugin_input_file *file)
 static enum ld_plugin_status
 get_view (const void *handle, const void **viewp)
 {
-  const plugin_input_file_t *input = handle;
+  plugin_input_file_t *input = (plugin_input_file_t *) handle;
   char *buffer;
-  size_t size;
+  size_t size = input->filesize;
 
   ASSERT (called_plugin);
 
-  if (lseek (input->fd, input->offset, SEEK_SET) < 0)
-    return LDPS_ERR;
+  /* FIXME: einfo should support %lld.  */
+  if ((off_t) size != input->filesize)
+    einfo (_("%P%F: unsupported input file size: %s (%ld bytes)\n"),
+	   input->name, (long) input->filesize);
 
-  size = input->filesize;
-  buffer = bfd_alloc (input->abfd, size);
-  if (buffer == NULL)
-    return LDPS_ERR;
-  *viewp = buffer;
-
-  do
+  /* Check the cached view buffer.  */
+  if (input->view_buffer.addr != NULL
+      && input->view_buffer.filesize == size
+      && input->view_buffer.offset == input->offset)
     {
-      ssize_t got = read (input->fd, buffer, size);
-      if (got == 0)
-	break;
-      else if (got > 0)
-	{
-	  buffer += got;
-	  size -= got;
-	}
-      else if (errno != EINTR)
-	return LDPS_ERR;
+      *viewp = input->view_buffer.addr;
+      return LDPS_OK;
     }
-  while (size > 0);
+
+  input->view_buffer.filesize = size;
+  input->view_buffer.offset = input->offset;
+
+#if HAVE_MMAP
+  buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd,
+		 input->offset);
+  if (buffer == MAP_FAILED)
+#endif
+    {
+      char *p;
+
+      if (lseek (input->fd, input->offset, SEEK_SET) < 0)
+	return LDPS_ERR;
+
+      buffer = bfd_alloc (input->abfd, size);
+      if (buffer == NULL)
+	return LDPS_ERR;
+
+      p = buffer;
+      do
+	{
+	  ssize_t got = read (input->fd, p, size);
+	  if (got == 0)
+	    break;
+	  else if (got > 0)
+	    {
+	      p += got;
+	      size -= got;
+	    }
+	  else if (errno != EINTR)
+	    return LDPS_ERR;
+	}
+      while (size > 0);
+    }
+
+  input->view_buffer.addr = buffer;
+  *viewp = buffer;
 
   return LDPS_OK;
 }
@@ -951,6 +999,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
 	   bfd_get_error ());
 
   input->abfd = abfd;
+  input->view_buffer.addr = NULL;
+  input->view_buffer.filesize = 0;
+  input->view_buffer.offset = 0;
   input->fd = file->fd;
   input->offset  = file->offset;
   input->filesize = file->filesize;

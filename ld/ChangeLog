@@ -1,3 +1,17 @@
+2015-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Add AC_FUNC_MMAP.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* plugin.c: Include <sys/mman.h>.
+	(MAP_FAILED): New.  Defined if not defined.
+	(PROT_READ): Likewise.
+	(MAP_PRIVATE): Likewise.
+	(view_buffer_t): New.
+	(plugin_input_file_t): Add view_buffer.
+	(get_view): Try mmap and cache the view buffer.
+	(plugin_maybe_claim): Initialize view_buffer.
+
 2015-02-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* plugin.c (release_input_file): Set fd to -1 after closing it.

@@ -195,6 +195,9 @@ AC_CHECK_FUNCS(glob mkstemp realpath sbrk setlocale waitpid)
 AC_CHECK_FUNCS(open lseek close)
 AC_HEADER_DIRENT
 
+dnl AC_CHECK_HEADERS(sys/mman.h)
+AC_FUNC_MMAP
+
 AC_SEARCH_LIBS([dlopen], [dl])
 AM_CONDITIONAL([ENABLE_PLUGINS], [test x$plugins = xyes])
 
