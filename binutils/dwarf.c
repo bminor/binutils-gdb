@@ -5949,6 +5949,7 @@ display_debug_frames (struct dwarf_section *section,
 	    {
 	      unsigned int reg, op, opa;
 	      unsigned long temp;
+	      unsigned char * new_start;
 
 	      op = *start++;
 	      opa = op & 0x3f;
@@ -6019,26 +6020,28 @@ display_debug_frames (struct dwarf_section *section,
 		  break;
 		case DW_CFA_def_cfa_expression:
 		  temp = LEB ();
-		  if (start + temp < start)
+		  new_start = start + temp;
+		  if (new_start < start)
 		    {
 		      warn (_("Corrupt CFA_def expression value: %lu\n"), temp);
 		      start = block_end;
 		    }
 		  else
-		    start += temp;
+		    start = new_start;
 		  break;
 		case DW_CFA_expression:
 		case DW_CFA_val_expression:
 		  reg = LEB ();
 		  temp = LEB ();
-		  if (start + temp < start)
+		  new_start = start + temp;
+		  if (new_start < start)
 		    {
 		      /* PR 17512: file:306-192417-0.005.  */ 
 		      warn (_("Corrupt CFA expression value: %lu\n"), temp);
 		      start = block_end;
 		    }
 		  else
-		    start += temp;
+		    start = new_start;
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
