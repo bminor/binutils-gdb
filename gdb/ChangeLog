@@ -1,5 +1,9 @@
 2015-02-06  Doug Evans  <dje@google.com>
 
+	* remote-m32r-sdi.c: Include symfile.h.
+
+2015-02-06  Doug Evans  <dje@google.com>
+
 	* symtab.h (clear_symtab_users, deduce_language_from_filename): Move
 	* symfile.h (clear_symtab_users, deduce_language_from_filename): ...
 	to here.
