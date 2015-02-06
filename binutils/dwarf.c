@@ -7217,7 +7217,12 @@ xcmalloc (size_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
-    return NULL;
+    {
+      fprintf (stderr,
+	       _("Attempt to allocate an array with an excessive number of elements: 0x%lx\n"),
+	       (long) nmemb);
+      xexit (1);
+    }
 
   return xmalloc (nmemb * size);
 }
@@ -7230,7 +7235,12 @@ xcrealloc (void *ptr, size_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
-    return NULL;
+    {
+      fprintf (stderr,
+	       _("Attempt to re-allocate an array with an excessive number of elements: 0x%lx\n"),
+	       (long) nmemb);
+      xexit (1);
+    }
 
   return xrealloc (ptr, nmemb * size);
 }
@@ -7241,7 +7251,12 @@ xcalloc2 (size_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
-    return NULL;
+    {
+      fprintf (stderr,
+	       _("Attempt to allocate a zero'ed array with an excessive number of elements: 0x%lx\n"),
+	       (long) nmemb);
+      xexit (1);
+    }
 
   return xcalloc (nmemb, size);
 }
