@@ -1,3 +1,12 @@
+2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17935
+	* elf32-i386.c (elf_i386_readonly_dynrelocs): Also issue a
+	warning for relocation in readonly section for -z text.
+	(elf_i386_size_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf_x86_64_readonly_dynrelocs): Likewise.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+
 2015-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12365

@@ -2600,8 +2600,9 @@ elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  info->flags |= DF_TEXTREL;
 
-	  if (info->warn_shared_textrel && info->shared)
-	    info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' in readonly section `%A'.\n"),
+	  if ((info->warn_shared_textrel && info->shared)
+	      || info->error_textrel)
+	    info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' in readonly section `%A'\n"),
 				    p->sec->owner, h->root.root.string,
 				    p->sec);
 
@@ -2842,8 +2843,9 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 		      && (info->flags & DF_TEXTREL) == 0)
 		    {
 		      info->flags |= DF_TEXTREL;
-		      if (info->warn_shared_textrel && info->shared)
-			info->callbacks->einfo (_("%P: %B: warning: relocation in readonly section `%A'.\n"),
+		      if ((info->warn_shared_textrel && info->shared)
+			  || info->error_textrel)
+			info->callbacks->einfo (_("%P: %B: warning: relocation in readonly section `%A'\n"),
 						p->sec->owner, p->sec);
 		    }
 		}
