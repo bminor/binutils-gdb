@@ -1,3 +1,16 @@
+2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c: Include "libbfd.h".
+	(plugin_strdup): New.
+	(plugin_maybe_claim): Remove the argument of pointer to struct
+	ld_plugin_input_file.  Open and handle input entry.
+	* plugin.h (plugin_maybe_claim): Updated.
+	* ldfile.c (ldfile_try_open_bfd): Call plugin_maybe_claim directly
+	without passing a pointer to struct ld_plugin_input_file.
+	* ldmain.c: Don't include "libbfd.h".
+	(add_archive_element): Call plugin_maybe_claim directly without
+	passing a pointer to struct ld_plugin_input_file.
+
 2015-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Document -z text, -z notext and -z textoff.

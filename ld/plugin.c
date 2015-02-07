@@ -21,6 +21,7 @@
 #include "sysdep.h"
 #include "libiberty.h"
 #include "bfd.h"
+#include "libbfd.h"
 #include "bfdlink.h"
 #include "bfdver.h"
 #include "ld.h"
@@ -980,41 +981,83 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
   return plugin_error_p () ? -1 : 0;
 }
 
+/* Duplicates a character string with memory attached to ABFD.  */
+
+static char *
+plugin_strdup (bfd *abfd, const char *str)
+{
+  size_t strlength;
+  char *copy;
+  strlength = strlen (str) + 1;
+  copy = bfd_alloc (abfd, strlength);
+  if (copy == NULL)
+    einfo (_("%P%F: plugin_strdup failed to allocate memory: %s\n"),
+	   bfd_get_error ());
+  memcpy (copy, str, strlength);
+  return copy;
+}
+
 void
-plugin_maybe_claim (struct ld_plugin_input_file *file,
-		    lang_input_statement_type *entry)
+plugin_maybe_claim (lang_input_statement_type *entry)
 {
   int claimed = 0;
   plugin_input_file_t *input;
-  size_t namelength;
+  off_t offset, filesize;
+  struct ld_plugin_input_file file;
+  bfd *abfd;
+  bfd *ibfd = entry->the_bfd;
+  bfd_boolean inarchive = bfd_my_archive (ibfd) != NULL;
+  const char *name
+    = inarchive ? bfd_my_archive (ibfd)->filename : ibfd->filename;
+  int fd = open (name, O_RDONLY | O_BINARY);
+
+  if (fd < 0)
+    return;
 
   /* We create a dummy BFD, initially empty, to house whatever symbols
      the plugin may want to add.  */
-  bfd *abfd = plugin_get_ir_dummy_bfd (entry->the_bfd->filename,
-				       entry->the_bfd);
+  abfd = plugin_get_ir_dummy_bfd (ibfd->filename, ibfd);
 
   input = bfd_alloc (abfd, sizeof (*input));
   if (input == NULL)
     einfo (_("%P%F: plugin failed to allocate memory for input: %s\n"),
 	   bfd_get_error ());
 
+  if (inarchive)
+    {
+      /* Offset and filesize must refer to the individual archive
+	 member, not the whole file, and must exclude the header.
+	 Fortunately for us, that is how the data is stored in the
+	 origin field of the bfd and in the arelt_data.  */
+      offset = ibfd->origin;
+      filesize = arelt_size (ibfd);
+    }
+  else
+    {
+      offset = 0;
+      filesize = lseek (fd, 0, SEEK_END);
+
+      /* We must copy filename attached to ibfd if it is not an archive
+	 member since it may be freed by bfd_close below.  */
+      name = plugin_strdup (abfd, name);
+    }
+
+  file.name = name;
+  file.offset = offset;
+  file.filesize = filesize;
+  file.fd = fd;
+  file.handle = input;
+
   input->abfd = abfd;
   input->view_buffer.addr = NULL;
   input->view_buffer.filesize = 0;
   input->view_buffer.offset = 0;
-  input->fd = file->fd;
-  input->offset  = file->offset;
-  input->filesize = file->filesize;
-  namelength = strlen (entry->the_bfd->filename) + 1;
-  input->name = bfd_alloc (abfd, namelength);
-  if (input->name == NULL)
-    einfo (_("%P%F: plugin failed to allocate memory for input filename: %s\n"),
-	   bfd_get_error ());
-  memcpy (input->name, entry->the_bfd->filename, namelength);
+  input->fd = fd;
+  input->offset = offset;
+  input->filesize = filesize;
+  input->name = plugin_strdup (abfd, ibfd->filename);
 
-  file->handle = input;
-
-  if (plugin_call_claim_file (file, &claimed))
+  if (plugin_call_claim_file (&file, &claimed))
     einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
@@ -1028,7 +1071,7 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
 	 calls release_input_file after it is done, is stored in
 	 non-bfd_object file.  This scheme doesn't work when a plugin
 	 needs fd and its IR is stored in bfd_object file.  */
-      close (file->fd);
+      close (fd);
       input->fd = -1;
     }
 
@@ -1038,11 +1081,11 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
 
       /* BFD archive handling caches elements so we can't call
 	 bfd_close for archives.  */
-      if (entry->the_bfd->my_archive == NULL)
-	bfd_close (entry->the_bfd);
+      if (!inarchive)
+	bfd_close (ibfd);
+      bfd_make_readable (abfd);
       entry->the_bfd = abfd;
       entry->flags.claimed = TRUE;
-      bfd_make_readable (entry->the_bfd);
     }
   else
     {

@@ -304,19 +304,7 @@ success:
   if (bfd_check_format (entry->the_bfd, bfd_object)
       && link_info.lto_plugin_active
       && !no_more_claiming)
-    {
-      int fd = open (attempt, O_RDONLY | O_BINARY);
-      if (fd >= 0)
-	{
-	  struct ld_plugin_input_file file;
-
-	  file.name = attempt;
-	  file.offset = 0;
-	  file.filesize = lseek (fd, 0, SEEK_END);
-	  file.fd = fd;
-	  plugin_maybe_claim (&file, entry);
-	}
-    }
+    plugin_maybe_claim (entry);
 #endif /* ENABLE_PLUGINS */
 
   /* It opened OK, the format checked out, and the plugins have had
