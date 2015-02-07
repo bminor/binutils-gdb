@@ -1061,7 +1061,7 @@ plugin_maybe_claim (lang_input_statement_type *entry)
     einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
-  if (input->fd != -1 && bfd_check_format (entry->the_bfd, bfd_object))
+  if (input->fd != -1 && bfd_check_format (ibfd, bfd_object))
     {
       /* FIXME: fd belongs to us, not the plugin.  IR for GCC plugin,
 	 which doesn't need fd after plugin_call_claim_file, is

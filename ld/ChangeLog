@@ -1,5 +1,10 @@
 2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* plugin.c (plugin_maybe_claim): Replace entry->the_bfd with
+	ibfd.
+
+2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* plugin.c: Include "libbfd.h".
 	(plugin_strdup): New.
 	(plugin_maybe_claim): Remove the argument of pointer to struct
