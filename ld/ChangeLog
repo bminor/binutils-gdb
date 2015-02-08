@@ -1,5 +1,10 @@
 2015-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldfile.c (ldfile_try_open_bfd): Don't call bfd_check_format
+	if plugin isn't active or there is no thing more to claim.
+
+2015-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* plugin.c (plugin_maybe_claim): Check format against bfd_object
 	directly.
 

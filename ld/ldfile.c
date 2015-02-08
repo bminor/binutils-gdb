@@ -301,9 +301,9 @@ success:
      bfd_object that it sets the bfd's arch and mach, which
      will be needed when and if we want to bfd_create a new
      one using this one as a template.  */
-  if (bfd_check_format (entry->the_bfd, bfd_object)
-      && link_info.lto_plugin_active
-      && !no_more_claiming)
+  if (link_info.lto_plugin_active
+      && !no_more_claiming
+      && bfd_check_format (entry->the_bfd, bfd_object))
     plugin_maybe_claim (entry);
 #endif /* ENABLE_PLUGINS */
 
