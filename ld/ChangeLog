@@ -1,3 +1,8 @@
+2015-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (plugin_maybe_claim): Check format against bfd_object
+	directly.
+
 2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* plugin.c (plugin_maybe_claim): Replace entry->the_bfd with
