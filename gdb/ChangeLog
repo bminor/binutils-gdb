@@ -1,3 +1,10 @@
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* cp-valprint.c (vtbl_ptr_name): Use EXPORTED_CONST.
+	* guile/guile.c (extension_language_guile): Use EXPORTED_CONST.
+	* features/feature_to_c.sh: Tag the generated xml_builtin array
+	with extern const in C++ mode.
+
 2015-02-27  Tom Tromey  <tromey@redhat.com>
 
 	* minidebug.c (struct lzma_stream): Rename to ...

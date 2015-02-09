@@ -77,7 +77,7 @@ extern const struct extension_language_ops guile_extension_ops;
 
 /* The main struct describing GDB's interface to the Guile
    extension language.  */
-const struct extension_language_defn extension_language_guile =
+EXPORTED_CONST struct extension_language_defn extension_language_guile =
 {
   EXT_LANG_GUILE,
   "guile",
