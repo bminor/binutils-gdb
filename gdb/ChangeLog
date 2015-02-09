@@ -1,5 +1,11 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* common/agent.h (IPA_SYM_EXPORTED_NAME): New.
+	(IPA_SYM): Use it.
+	* common/common-defs.h (EXTERN_C_PUSH, EXTERN_C_POP): New macros.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* cli-out.c (_rl_erase_entire_line): Move declaration out of
 	cli_mld_erase_entire_line, and make it extern "C".
 	* common/common-defs.h (EXTERN_C): New.

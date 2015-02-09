@@ -99,7 +99,7 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
     }
 }
 
-ULONGEST __attribute__ ((visibility("default"), used))
+IP_AGENT_EXPORT_FUNC ULONGEST
 gdb_agent_get_raw_reg (unsigned char *raw_regs, int regnum)
 {
   /* This should maybe be allowed to return an error code, or perhaps

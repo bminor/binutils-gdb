@@ -1,3 +1,54 @@
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* linux-amd64-ipa.c (gdb_agent_get_raw_reg): Use
+	IP_AGENT_EXPORT_FUNC.
+	* linux-i386-ipa.c (gdb_agent_get_raw_reg): Use
+	IP_AGENT_EXPORT_FUNC.
+	* tracepoint.c (ATTR_USED, ATTR_NOINLINE, ATTR_CONSTRUCTOR)
+	(IP_AGENT_EXPORT): Delete.
+	(gdb_tp_heap_buffer, gdb_jump_pad_buffer, gdb_jump_pad_buffer_end)
+	(gdb_trampoline_buffer, gdb_trampoline_buffer_end)
+	(gdb_trampoline_buffer_error, collecting, gdb_collect)
+	(stop_tracing, flush_trace_buffer, about_to_request_buffer_space)
+	(trace_buffer_is_full, stopping_tracepoint, expr_eval_result)
+	(error_tracepoint, tracepoints, tracing, trace_buffer_ctrl)
+	(trace_buffer_ctrl_curr, trace_buffer_lo, trace_buffer_hi)
+	(traceframe_read_count, traceframe_write_count)
+	(traceframes_created, trace_state_variables, get_raw_reg)
+	(get_trace_state_variable_value, set_trace_state_variable_value)
+	(ust_loaded, helper_thread_id, cmd_buf): Use
+	IPA_SYM_EXPORTED_NAME.
+	(stop_tracing, flush_trace_buffer): Use IP_AGENT_EXPORT_FUNC.
+	(tracepoints) Use IP_AGENT_EXPORT_VAR.
+	(stopping_tracepoint, trace_buffer_is_full, expr_eval_result): Use
+	IP_AGENT_EXPORT_VAR and wrap in EXTERN_C_PUSH/EXTERN_C_POP.
+	(last_tracepoint): Move into !IN_PROCESS_AGENT block.
+	(error_tracepoint): Use IP_AGENT_EXPORT_VAR and wrap in
+	EXTERN_C_PUSH/EXTERN_C_POP.
+	(trace_state_variables): Use IP_AGENT_EXPORT_VAR.
+	(trace_buffer_lo, trace_buffer_hi): Use IP_AGENT_EXPORT_VAR and
+	wrap in EXTERN_C_PUSH/EXTERN_C_POP.
+	(trace_buffer_ctrl, trace_buffer_ctrl_curr)
+	(traceframe_write_count, traceframe_read_count)
+	(traceframes_created, tracing): Use IP_AGENT_EXPORT_VAR.
+	(about_to_request_buffer_space, get_trace_state_variable_value)
+	(set_trace_state_variable_value): Use IP_AGENT_EXPORT_FUNC.
+	(collecting): Use IP_AGENT_EXPORT_VAR and wrap in
+	EXTERN_C_PUSH/EXTERN_C_POP.
+	(gdb_collect): Use IP_AGENT_EXPORT_FUNC.
+	(ust_loaded, cmd_buf): Use IP_AGENT_EXPORT_VAR.
+	(helper_thread_id, gdb_agent_capability): Use IP_AGENT_EXPORT_VAR
+	and wrap in EXTERN_C_PUSH/EXTERN_C_POP.
+	(gdb_tp_heap_buffer, gdb_jump_pad_buffer, gdb_jump_pad_buffer_end)
+	(gdb_trampoline_buffer, gdb_trampoline_buffer_end)
+	(gdb_trampoline_buffer_error): Use IP_AGENT_EXPORT_VAR.
+	* tracepoint.h (ATTR_USED, ATTR_NOINLINE, EXPORTED_SYMBOL):
+	Define.
+	(IP_AGENT_EXPORT_FUNC, IP_AGENT_EXPORT_VAR)
+	(IP_AGENT_EXPORT_VAR_DECL): Define.
+	(tracing): Declare.
+	(gdb_agent_get_raw_reg): Declare.
+
 2015-02-27  Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
