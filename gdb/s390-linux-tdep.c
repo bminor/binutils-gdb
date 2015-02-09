@@ -70,12 +70,18 @@
 #define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
 #define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
 
+enum s390_abi_kind
+{
+  ABI_LINUX_S390,
+  ABI_LINUX_ZSERIES
+};
+
 /* The tdep structure.  */
 
 struct gdbarch_tdep
 {
   /* ABI version.  */
-  enum { ABI_LINUX_S390, ABI_LINUX_ZSERIES } abi;
+  enum s390_abi_kind abi;
 
   /* Pseudo register numbers.  */
   int gpr_full_regnum;

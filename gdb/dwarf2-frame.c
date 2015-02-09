@@ -165,29 +165,34 @@ static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 				     CORE_ADDR func_base);
 
 
+enum cfa_how_kind
+{
+  CFA_UNSET,
+  CFA_REG_OFFSET,
+  CFA_EXP
+};
+
+struct dwarf2_frame_state_reg_info
+{
+  struct dwarf2_frame_state_reg *reg;
+  int num_regs;
+
+  LONGEST cfa_offset;
+  ULONGEST cfa_reg;
+  enum cfa_how_kind cfa_how;
+  const gdb_byte *cfa_exp;
+
+  /* Used to implement DW_CFA_remember_state.  */
+  struct dwarf2_frame_state_reg_info *prev;
+};
+
 /* Structure describing a frame state.  */
 
 struct dwarf2_frame_state
 {
   /* Each register save state can be described in terms of a CFA slot,
      another register, or a location expression.  */
-  struct dwarf2_frame_state_reg_info
-  {
-    struct dwarf2_frame_state_reg *reg;
-    int num_regs;
-
-    LONGEST cfa_offset;
-    ULONGEST cfa_reg;
-    enum {
-      CFA_UNSET,
-      CFA_REG_OFFSET,
-      CFA_EXP
-    } cfa_how;
-    const gdb_byte *cfa_exp;
-
-    /* Used to implement DW_CFA_remember_state.  */
-    struct dwarf2_frame_state_reg_info *prev;
-  } regs;
+  struct dwarf2_frame_state_reg_info regs;
 
   /* The PC described by the current frame state.  */
   CORE_ADDR pc;

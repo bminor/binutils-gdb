@@ -72,6 +72,15 @@ struct psymbol_allocation_list
   int size;
 };
 
+struct other_sections
+{
+  CORE_ADDR addr;
+  char *name;
+
+  /* SECTINDEX must be valid for associated BFD or set to -1.  */
+  int sectindex;
+};
+
 /* Define an array of addresses to accommodate non-contiguous dynamic
    loading of modules.  This is for use when entering commands, so we
    can keep track of the section names until we read the file and can
@@ -85,14 +94,7 @@ struct section_addr_info
      available.  */
   size_t num_sections;
   /* Sections whose names are file format dependent.  */
-  struct other_sections
-  {
-    CORE_ADDR addr;
-    char *name;
-
-    /* SECTINDEX must be valid for associated BFD or set to -1.  */
-    int sectindex;
-  } other[1];
+  struct other_sections other[1];
 };
 
 

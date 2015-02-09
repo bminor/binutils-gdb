@@ -199,6 +199,15 @@ struct mapped_index
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
 DEF_VEC_P (dwarf2_per_cu_ptr);
 
+struct tu_stats
+{
+  int nr_uniq_abbrev_tables;
+  int nr_symtabs;
+  int nr_symtab_sharers;
+  int nr_stmt_less_type_units;
+  int nr_all_type_units_reallocs;
+};
+
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
 
@@ -250,14 +259,7 @@ struct dwarf2_per_objfile
 
   /* Type unit statistics, to see how well the scaling improvements
      are doing.  */
-  struct tu_stats
-  {
-    int nr_uniq_abbrev_tables;
-    int nr_symtabs;
-    int nr_symtab_sharers;
-    int nr_stmt_less_type_units;
-    int nr_all_type_units_reallocs;
-  } tu_stats;
+  struct tu_stats tu_stats;
 
   /* A chain of compilation units that are currently read in, so that
      they can be freed later.  */
@@ -1022,6 +1024,16 @@ typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
 				      int has_children,
 				      void *data);
 
+struct file_entry
+{
+  const char *name;
+  unsigned int dir_index;
+  unsigned int mod_time;
+  unsigned int length;
+  int included_p; /* Non-zero if referenced by the Line Number Program.  */
+  struct symtab *symtab; /* The associated symbol table, if any.  */
+};
+
 /* The line number information for a compilation unit (found in the
    .debug_line section) begins with a "statement program header",
    which contains the following information.  */
@@ -1060,15 +1072,7 @@ struct line_header
      with xmalloc; instead, they are pointers into debug_line_buffer.
      Don't try to free them directly.  */
   unsigned int num_file_names, file_names_size;
-  struct file_entry
-  {
-    const char *name;
-    unsigned int dir_index;
-    unsigned int mod_time;
-    unsigned int length;
-    int included_p; /* Non-zero if referenced by the Line Number Program.  */
-    struct symtab *symtab; /* The associated symbol table, if any.  */
-  } *file_names;
+  struct file_entry *file_names;
 
   /* The start and end of the statement program following this
      header.  These point into dwarf2_per_objfile->line_buffer.  */
@@ -1285,20 +1289,40 @@ struct dwarf_block
    and friends.  */
 static int bits_per_byte = 8;
 
+struct nextfield
+{
+  struct nextfield *next;
+  int accessibility;
+  int virtuality;
+  struct field field;
+};
+
+struct nextfnfield
+{
+  struct nextfnfield *next;
+  struct fn_field fnfield;
+};
+
+struct fnfieldlist
+{
+  const char *name;
+  int length;
+  struct nextfnfield *head;
+};
+
+struct typedef_field_list
+{
+  struct typedef_field field;
+  struct typedef_field_list *next;
+};
+
 /* The routines that read and process dies for a C struct or C++ class
    pass lists of data member fields and lists of member function fields
    in an instance of a field_info structure, as defined below.  */
 struct field_info
   {
     /* List of data member and baseclasses fields.  */
-    struct nextfield
-      {
-	struct nextfield *next;
-	int accessibility;
-	int virtuality;
-	struct field field;
-      }
-     *fields, *baseclasses;
+    struct nextfield *fields, *baseclasses;
 
     /* Number of fields (including baseclasses).  */
     int nfields;
@@ -1311,35 +1335,19 @@ struct field_info
 
     /* Member function fields array, entries are allocated in the order they
        are encountered in the object file.  */
-    struct nextfnfield
-      {
-	struct nextfnfield *next;
-	struct fn_field fnfield;
-      }
-     *fnfields;
+    struct nextfnfield *fnfields;
 
     /* Member function fieldlist array, contains name of possibly overloaded
        member function, number of overloaded member functions and a pointer
        to the head of the member function field chain.  */
-    struct fnfieldlist
-      {
-	const char *name;
-	int length;
-	struct nextfnfield *head;
-      }
-     *fnfieldlists;
+    struct fnfieldlist *fnfieldlists;
 
     /* Number of entries in the fnfieldlists array.  */
     int nfnfields;
 
     /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
        a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
-    struct typedef_field_list
-      {
-	struct typedef_field field;
-	struct typedef_field_list *next;
-      }
-    *typedef_field_list;
+    struct typedef_field_list *typedef_field_list;
     unsigned typedef_field_list_count;
   };
 

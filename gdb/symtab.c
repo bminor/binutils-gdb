@@ -133,6 +133,39 @@ enum symbol_cache_slot_state
   SYMBOL_SLOT_FOUND
 };
 
+struct symbol_cache_slot
+{
+  enum symbol_cache_slot_state state;
+
+  /* The objfile that was current when the symbol was looked up.
+     This is only needed for global blocks, but for simplicity's sake
+     we allocate the space for both.  If data shows the extra space used
+     for static blocks is a problem, we can split things up then.
+
+     Global blocks need cache lookup to include the objfile context because
+     we need to account for gdbarch_iterate_over_objfiles_in_search_order
+     which can traverse objfiles in, effectively, any order, depending on
+     the current objfile, thus affecting which symbol is found.  Normally,
+     only the current objfile is searched first, and then the rest are
+     searched in recorded order; but putting cache lookup inside
+     gdbarch_iterate_over_objfiles_in_search_order would be awkward.
+     Instead we just make the current objfile part of the context of
+     cache lookup.  This means we can record the same symbol multiple times,
+     each with a different "current objfile" that was in effect when the
+     lookup was saved in the cache, but cache space is pretty cheap.  */
+  const struct objfile *objfile_context;
+
+  union
+  {
+    struct symbol *found;
+    struct
+    {
+      char *name;
+      domain_enum domain;
+    } not_found;
+  } value;
+};
+
 /* Symbols don't specify global vs static block.
    So keep them in separate caches.  */
 
@@ -148,38 +181,7 @@ struct block_symbol_cache
      on which to decide.  */
   unsigned int size;
 
-  struct symbol_cache_slot
-  {
-    enum symbol_cache_slot_state state;
-
-    /* The objfile that was current when the symbol was looked up.
-       This is only needed for global blocks, but for simplicity's sake
-       we allocate the space for both.  If data shows the extra space used
-       for static blocks is a problem, we can split things up then.
-
-       Global blocks need cache lookup to include the objfile context because
-       we need to account for gdbarch_iterate_over_objfiles_in_search_order
-       which can traverse objfiles in, effectively, any order, depending on
-       the current objfile, thus affecting which symbol is found.  Normally,
-       only the current objfile is searched first, and then the rest are
-       searched in recorded order; but putting cache lookup inside
-       gdbarch_iterate_over_objfiles_in_search_order would be awkward.
-       Instead we just make the current objfile part of the context of
-       cache lookup.  This means we can record the same symbol multiple times,
-       each with a different "current objfile" that was in effect when the
-       lookup was saved in the cache, but cache space is pretty cheap.  */
-    const struct objfile *objfile_context;
-
-    union
-    {
-      struct symbol *found;
-      struct
-      {
-	char *name;
-	domain_enum domain;
-      } not_found;
-    } value;
-  } symbols[1];
+  struct symbol_cache_slot symbols[1];
 };
 
 /* The symbol cache.

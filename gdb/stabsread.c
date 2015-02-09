@@ -53,6 +53,24 @@
 
 extern void _initialize_stabsread (void);
 
+struct nextfield
+{
+  struct nextfield *next;
+
+  /* This is the raw visibility from the stab.  It is not checked
+     for being one of the visibilities we recognize, so code which
+     examines this field better be able to deal.  */
+  int visibility;
+
+  struct field field;
+};
+
+struct next_fnfieldlist
+{
+  struct next_fnfieldlist *next;
+  struct fn_fieldlist fn_fieldlist;
+};
+
 /* The routines that read and process a complete stabs for a C struct or 
    C++ class pass lists of data member fields and lists of member function
    fields in an instance of a field_info structure, as defined below.
@@ -61,24 +79,8 @@ extern void _initialize_stabsread (void);
 
 struct field_info
   {
-    struct nextfield
-      {
-	struct nextfield *next;
-
-	/* This is the raw visibility from the stab.  It is not checked
-	   for being one of the visibilities we recognize, so code which
-	   examines this field better be able to deal.  */
-	int visibility;
-
-	struct field field;
-      }
-     *list;
-    struct next_fnfieldlist
-      {
-	struct next_fnfieldlist *next;
-	struct fn_fieldlist fn_fieldlist;
-      }
-     *fnlist;
+    struct nextfield *list;
+    struct next_fnfieldlist *fnlist;
   };
 
 static void

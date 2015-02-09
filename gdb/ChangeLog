@@ -1,6 +1,48 @@
 2015-02-27  Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* dwarf2-frame.c (enum cfa_how_kind, struct
+	dwarf2_frame_state_reg_info): Move out of struct
+	dwarf2_frame_state.
+	* dwarf2read.c (struct tu_stats): Move out of struct
+	dwarf2_per_objfile.
+	(struct file_entry): Move out of struct line_header.
+	(struct nextfield, struct nextfnfield, struct fnfieldlist, struct
+	typedef_field_list): Move out of struct field_info.
+	* gdbtypes.h (enum dynamic_prop_kind, union dynamic_prop_data):
+	Move out of struct dynamic_prop.
+	(union type_owner, union field_location, struct field, struct
+	range_bounds, union type_specific): Move out of struct main_type.
+	(struct fn_fieldlist, struct fn_field, struct typedef_field)
+	(VOFFSET_STATIC): Move out of struct cplus_struct_type.
+	(struct call_site_target, union call_site_parameter_u, struct
+	call_site_parameter): Move out of struct call_site.
+	* m32c-tdep.c (enum m32c_prologue_kind): Move out of struct
+	m32c_prologue.
+	(enum srcdest_kind): Move out of struct srcdest.
+	* main.c (enum cmdarg_kind): Move out of struct cmdarg.
+	* prologue-value.h (enum prologue_value_kind): Move out of struct
+	prologue_value.
+	* s390-linux-tdep.c (enum s390_abi_kind): Move out of struct
+	gdbarch_tdep.
+	* stabsread.c (struct nextfield, struct next_fnfieldlist): Move
+	out of struct field_info.
+	* symfile.h (struct other_sections): Move out of struct
+	section_addr_info.
+	* symtab.c (struct symbol_cache_slot): Move out struct
+	block_symbol_cache.
+	* target-descriptions.c (enum tdesc_type_kind): Move out of
+	typedef struct tdesc_type.
+	* tui/tui-data.h (enum tui_line_or_address_kind): Move out of
+	struct tui_line_or_address.
+	* value.c (enum internalvar_kind, union internalvar_data): Move
+	out of struct internalvar.
+	* xtensa-tdep.h (struct ctype_cache): Move out of struct
+	gdbarch_tdep.
+
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	Rename symbols whose names are reserved C++ keywords throughout.
 
 2015-02-27  Pedro Alves  <palves@redhat.com>
