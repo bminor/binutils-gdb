@@ -1,3 +1,9 @@
+2015-02-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add libweak_undef_2.a,
+	plugin_test_thin.a and defsym_test.
+	* testsuite/Makefile.in: Regenerate.
+
 2015-02-04  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* merge.cc (do_add_input_section): Combine loop epilogue into main loop

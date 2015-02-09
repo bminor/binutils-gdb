@@ -3085,26 +3085,28 @@ debug_can_use_agent (struct target_ops *self)
 }
 
 static int
-delegate_supports_btrace (struct target_ops *self)
+delegate_supports_btrace (struct target_ops *self, enum btrace_format arg1)
 {
   self = self->beneath;
-  return self->to_supports_btrace (self);
+  return self->to_supports_btrace (self, arg1);
 }
 
 static int
-tdefault_supports_btrace (struct target_ops *self)
+tdefault_supports_btrace (struct target_ops *self, enum btrace_format arg1)
 {
   return 0;
 }
 
 static int
-debug_supports_btrace (struct target_ops *self)
+debug_supports_btrace (struct target_ops *self, enum btrace_format arg1)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_supports_btrace (...)\n", debug_target.to_shortname);
-  result = debug_target.to_supports_btrace (&debug_target);
+  result = debug_target.to_supports_btrace (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_supports_btrace (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_enum_btrace_format (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -3112,28 +3114,30 @@ debug_supports_btrace (struct target_ops *self)
 }
 
 static struct btrace_target_info *
-delegate_enable_btrace (struct target_ops *self, ptid_t arg1)
+delegate_enable_btrace (struct target_ops *self, ptid_t arg1, const struct btrace_config *arg2)
 {
   self = self->beneath;
-  return self->to_enable_btrace (self, arg1);
+  return self->to_enable_btrace (self, arg1, arg2);
 }
 
 static struct btrace_target_info *
-tdefault_enable_btrace (struct target_ops *self, ptid_t arg1)
+tdefault_enable_btrace (struct target_ops *self, ptid_t arg1, const struct btrace_config *arg2)
 {
   tcomplain ();
 }
 
 static struct btrace_target_info *
-debug_enable_btrace (struct target_ops *self, ptid_t arg1)
+debug_enable_btrace (struct target_ops *self, ptid_t arg1, const struct btrace_config *arg2)
 {
   struct btrace_target_info * result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_enable_btrace (...)\n", debug_target.to_shortname);
-  result = debug_target.to_enable_btrace (&debug_target, arg1);
+  result = debug_target.to_enable_btrace (&debug_target, arg1, arg2);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_enable_btrace (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_const_struct_btrace_config_p (arg2);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_struct_btrace_target_info_p (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -3191,20 +3195,20 @@ debug_teardown_btrace (struct target_ops *self, struct btrace_target_info *arg1)
 }
 
 static enum btrace_error
-delegate_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
+delegate_read_btrace (struct target_ops *self, struct btrace_data *arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   self = self->beneath;
   return self->to_read_btrace (self, arg1, arg2, arg3);
 }
 
 static enum btrace_error
-tdefault_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
+tdefault_read_btrace (struct target_ops *self, struct btrace_data *arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   tcomplain ();
 }
 
 static enum btrace_error
-debug_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
+debug_read_btrace (struct target_ops *self, struct btrace_data *arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   enum btrace_error result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_read_btrace (...)\n", debug_target.to_shortname);
@@ -3212,13 +3216,42 @@ debug_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct 
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_read_btrace (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_VEC__btrace_block_s__pp (arg1);
+  target_debug_print_struct_btrace_data_p (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_btrace_target_info_p (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_enum_btrace_read_type (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_enum_btrace_error (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static const struct btrace_config *
+delegate_btrace_conf (struct target_ops *self, const struct btrace_target_info *arg1)
+{
+  self = self->beneath;
+  return self->to_btrace_conf (self, arg1);
+}
+
+static const struct btrace_config *
+tdefault_btrace_conf (struct target_ops *self, const struct btrace_target_info *arg1)
+{
+  return NULL;
+}
+
+static const struct btrace_config *
+debug_btrace_conf (struct target_ops *self, const struct btrace_target_info *arg1)
+{
+  const struct btrace_config * result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_btrace_conf (...)\n", debug_target.to_shortname);
+  result = debug_target.to_btrace_conf (&debug_target, arg1);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_btrace_conf (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_const_struct_btrace_target_info_p (arg1);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_const_struct_btrace_config_p (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }
@@ -3970,6 +4003,8 @@ install_delegators (struct target_ops *ops)
     ops->to_teardown_btrace = delegate_teardown_btrace;
   if (ops->to_read_btrace == NULL)
     ops->to_read_btrace = delegate_read_btrace;
+  if (ops->to_btrace_conf == NULL)
+    ops->to_btrace_conf = delegate_btrace_conf;
   if (ops->to_stop_recording == NULL)
     ops->to_stop_recording = delegate_stop_recording;
   if (ops->to_info_record == NULL)
@@ -4133,6 +4168,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_disable_btrace = tdefault_disable_btrace;
   ops->to_teardown_btrace = tdefault_teardown_btrace;
   ops->to_read_btrace = tdefault_read_btrace;
+  ops->to_btrace_conf = tdefault_btrace_conf;
   ops->to_stop_recording = tdefault_stop_recording;
   ops->to_info_record = tdefault_info_record;
   ops->to_save_record = tdefault_save_record;
@@ -4276,6 +4312,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_disable_btrace = debug_disable_btrace;
   ops->to_teardown_btrace = debug_teardown_btrace;
   ops->to_read_btrace = debug_read_btrace;
+  ops->to_btrace_conf = debug_btrace_conf;
   ops->to_stop_recording = debug_stop_recording;
   ops->to_info_record = debug_info_record;
   ops->to_save_record = debug_save_record;

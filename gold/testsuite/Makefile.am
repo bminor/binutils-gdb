@@ -733,6 +733,7 @@ weak_undef_test_2_SOURCES = weak_undef_test_2.cc
 weak_undef_test_2_DEPENDENCIES = gcctestdir/ld libweak_undef_2.a
 weak_undef_test_2_LDFLAGS = -Bgcctestdir/ -u weak_undef_2
 weak_undef_test_2_LDADD = -L . -lweak_undef_2
+MOSTLYCLEANFILES += libweak_undef_2.a
 libweak_undef_2.a: weak_undef_file3.o weak_undef_file4.o
 	$(TEST_AR) rc $@ $^
 weak_undef_file3.o: weak_undef_file3.cc
@@ -1670,7 +1671,7 @@ plugin_test_10.sections: plugin_test_10
 check_PROGRAMS += plugin_test_11
 check_SCRIPTS += plugin_test_11.sh
 check_DATA += plugin_test_11.err
-MOSTLYCLEANFILES += plugin_test_11.err
+MOSTLYCLEANFILES += plugin_test_11.err plugin_test_thin.a
 PLUGIN_TEST_11_SYMS = two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms
 plugin_test_11: two_file_test_main.o plugin_test_thin.a gcctestdir/ld plugin_test.so $(PLUGIN_TEST_11_SYMS)
 	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o plugin_test_thin.a 2>plugin_test_11.err
@@ -2279,7 +2280,7 @@ ehdr_start_test_5_LDADD =
 # Test that the --defsym option copies the symbol type and visibility.
 check_SCRIPTS += defsym_test.sh
 check_DATA += defsym_test.syms
-MOSTLYCLEANFILES += defsym_test.syms
+MOSTLYCLEANFILES += defsym_test defsym_test.syms
 defsym_test.syms: defsym_test
 	$(TEST_READELF) -sW $< > $@
 defsym_test: defsym_test.o gcctestdir/ld

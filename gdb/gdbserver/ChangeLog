@@ -1,3 +1,46 @@
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* linux-low.c (linux_low_btrace_conf): Print size.
+	* server.c (handle_btrace_conf_general_set): New.
+	(hanle_general_set): Call handle_btrace_conf_general_set.
+	(handle_query): Report Qbtrace-conf:bts:size as supported.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* linux-low.c (linux_low_enable_btrace): Update parameters.
+	(linux_low_btrace_conf): New.
+	(linux_target_ops)<to_btrace_conf>: Initialize.
+	* server.c (current_btrace_conf): New.
+	(handle_btrace_enable): Rename to ...
+	(handle_btrace_enable_bts): ... this.  Pass &current_btrace_conf
+	to target_enable_btrace.  Update comment.  Update users.
+	(handle_qxfer_btrace_conf): New.
+	(qxfer_packets): Add btrace-conf entry.
+	(handle_query): Report qXfer:btrace-conf:read as supported packet.
+	* target.h (target_ops)<enable_btrace>: Update parameters and comment.
+	(target_ops)<read_btrace_conf>: New.
+	(target_enable_btrace): Update parameters.
+	(target_read_btrace_conf): New.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* server.c (handle_btrace_general_set): Remove call to
+	target_supports_btrace.
+	(supported_btrace_packets): New.
+	(handle_query): Call supported_btrace_packets.
+	* target.h: include btrace-common.h.
+	(btrace_target_info): Removed.
+	(supports_btrace, target_supports_btrace): Update parameters.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* Makefile.in (SFILES): Add common/btrace-common.c.
+	(OBS): Add common/btrace-common.o.
+	(btrace-common.o): Add build rules.
+	* linux-low: Include btrace-common.h.
+	(linux_low_read_btrace): Use struct btrace_data.  Call
+	btrace_data_init and btrace_data_fini.
+
 2015-02-06  Pedro Alves  <palves@redhat.com>
 
 	* thread-db.c (find_new_threads_callback): Add debug output.

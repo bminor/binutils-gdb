@@ -24,6 +24,10 @@ maint print symbol-cache-statistics
 maint flush-symbol-cache
   Flush the contents of the symbol cache.
 
+record btrace bts
+record bts
+  Start branch trace recording using Branch Trace Store (BTS) format.
+
 * New options
 
 set max-completions
@@ -37,6 +41,12 @@ maint set symbol-cache-size
 maint show symbol-cache-size
   Control the size of the symbol cache.
 
+set|show record btrace bts buffer-size
+  Set and show the size of the ring buffer used for branch tracing in
+  BTS format.
+  The obtained size may differ from the requested size.  Use "info
+  record" to see the obtained buffer size.
+
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.
 
@@ -44,6 +54,19 @@ maint show symbol-cache-size
 
   ** GDB now supports auto-loading of Python/Guile scripts contained in the
      special section named `.debug_gdb_scripts'.
+
+* New remote packets
+
+qXfer:btrace-conf:read
+  Return the branch trace configuration for the current thread.
+
+Qbtrace-conf:bts:size
+  Set the requested ring buffer size for branch tracing in BTS format.
+
+* The info record command now shows the recording format and the
+  branch tracing configuration for the current thread when using
+  the btrace record target.
+  For the BTS format, it shows the ring buffer size.
 
 *** Changes in GDB 7.9
 

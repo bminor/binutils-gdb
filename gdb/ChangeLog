@@ -1,3 +1,228 @@
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_find_call): Skip gaps.
+	(ftrace_new_function): Initialize level.
+	(ftrace_new_call, ftrace_new_tailcall, ftrace_new_return)
+	(ftrace_new_switch): Update
+	level computation.
+	(ftrace_new_gap): New.
+	(ftrace_update_function): Create new function after gap.
+	(btrace_compute_ftrace_bts): Create gap on error.
+	(btrace_stitch_bts): Update parameters.  Clear trace if it
+	becomes empty.
+	(btrace_stitch_trace): Update parameters.  Update callers.
+	(btrace_clear): Reset the number of gaps.
+	(btrace_insn_get): Return NULL if the iterator points to a gap.
+	(btrace_insn_number): Return zero if the iterator points to a gap.
+	(btrace_insn_end): Allow gaps at the end.
+	(btrace_insn_next, btrace_insn_prev, btrace_insn_cmp): Handle gaps.
+	(btrace_find_insn_by_number): Assert that the found iterator does
+	not point to a gap.
+	(btrace_call_next, btrace_call_prev): Assert that the last function
+	is not a gap.
+	* btrace.h (btrace_bts_error): New.
+	(btrace_function): Update comment.
+	(btrace_function) <insn, insn_offset, number>: Update comment.
+	(btrace_function) <errcode>: New.
+	(btrace_thread_info) <ngaps>: New.
+	(btrace_thread_info) <replay>: Update comment.
+	(btrace_insn_get): Update comment.
+	* record-btrace.c (btrace_ui_out_decode_error): New.
+	(record_btrace_info): Print number of gaps.
+	(btrace_insn_history, btrace_call_history): Call
+	btrace_ui_out_decode_error for gaps.
+	(record_btrace_step_thread, record_btrace_start_replaying): Skip gaps.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* common/btrace-common.h (btrace_cpu_vendor, btrace_cpu): New.
+	* nat/linux-btrace.c: (btrace_this_cpu): New.
+	(cpu_supports_bts): Call btrace_this_cpu.
+	(intel_supports_bts): Add cpu parameter.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.h (btrace_insn_class): New.
+	(btrace_insn) <size, iclass>: New.
+	* btrace.c (ftrace_find_call): Update parameters.  Update users.
+	Use instruction classification.
+	(ftrace_new_return): Update parameters.  Update users.
+	(ftrace_update_function): Update parameters.  Update users.  Use
+	instruction classification.
+	(ftrace_update_insns): Update parameters.  Update users.
+	(ftrace_classify_insn): New.
+	(btrace_compute_ftrace_bts): Fill in new btrace_insn fields.  Add
+	TRY_CATCH around call to gdb_insn_length.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_compute_ftrace_bts, btrace_compute_ftrace):
+	Update parameters.  Update users.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (parse_xml_btrace_conf_bts): Add size.
+	(btrace_conf_bts_attributes): New.
+	(btrace_conf_children): Add attributes.
+	* common/btrace-common.h (btrace_config_bts): New.
+	(btrace_config)<bts>: New.
+	(btrace_config): Update comment.
+	* nat/linux-btrace.c (linux_enable_btrace, linux_enable_bts):
+	Use config.
+	* features/btrace-conf.dtd: Increment version.  Add size
+	attribute to bts element.
+	* record-btrace.c (set_record_btrace_bts_cmdlist,
+	show_record_btrace_bts_cmdlist): New.
+	(record_btrace_adjust_size, record_btrace_print_bts_conf,
+	record_btrace_print_conf, cmd_set_record_btrace_bts,
+	cmd_show_record_btrace_bts): New.
+	(record_btrace_info): Call record_btrace_print_conf.
+	(_initialize_record_btrace): Add commands.
+	* remote.c: Add PACKET_Qbtrace_conf_bts_size enum.
+	(remote_protocol_features): Add Qbtrace-conf:bts:size packet.
+	(btrace_sync_conf): Synchronize bts size.
+	(_initialize_remote): Add Qbtrace-conf:bts:size packet.
+	* NEWS: Announce new commands and new packets.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* Makefile.in (XMLFILES): Add btrace-conf.dtd.
+	* x86-linux-nat.c (x86_linux_enable_btrace): Update parameters.
+	(x86_linux_btrace_conf): New.
+	(x86_linux_create_target): Initialize to_btrace_conf.
+	* nat/linux-btrace.c (linux_enable_btrace): Update parameters.
+	Check format.  Split into this and ...
+	(linux_enable_bts): ... this.
+	(linux_btrace_conf): New.
+	(perf_event_skip_record): Renamed into ...
+	(perf_event_skip_bts_record): ... this.  Updated users.
+	(linux_disable_btrace): Split into this and ...
+	(linux_disable_bts): ... this.
+	(linux_read_btrace): Check format.
+	* nat/linux-btrace.h (linux_enable_btrace): Update parameters.
+	(linux_btrace_conf): New.
+	(btrace_target_info)<ptid>: Moved.
+	(btrace_target_info)<conf>: New.
+	(btrace_target_info): Split into this and ...
+	(btrace_tinfo_bts): ... this.  Updated users.
+	* btrace.c (btrace_enable): Update parameters.
+	(btrace_conf, parse_xml_btrace_conf_bts, parse_xml_btrace_conf)
+	(btrace_conf_children, btrace_conf_attributes)
+	(btrace_conf_elements): New.
+	* btrace.h (btrace_enable): Update parameters.
+	(btrace_conf, parse_xml_btrace_conf): New.
+	* common/btrace-common.h (btrace_config): New.
+	* feature/btrace-conf.dtd: New.
+	* record-btrace.c (record_btrace_conf): New.
+	(record_btrace_cmdlist): New.
+	(record_btrace_enable_warn, record_btrace_open): Pass
+	&record_btrace_conf.
+	(record_btrace_info): Print recording format.
+	(cmd_record_btrace_bts_start): New.
+	(cmd_record_btrace_start): Call cmd_record_btrace_bts_start.
+	(_initialize_record_btrace): Add "record btrace bts" subcommand.
+	Add "record bts" alias command.
+	* remote.c (remote_state)<btrace_config>: New.
+	(remote_btrace_reset, PACKET_qXfer_btrace_conf): New.
+	(remote_protocol_features): Add qXfer:btrace-conf:read.
+	(remote_open_1): Call remote_btrace_reset.
+	(remote_xfer_partial): Handle TARGET_OBJECT_BTRACE_CONF.
+	(btrace_target_info)<conf>: New.
+	(btrace_sync_conf, btrace_read_config): New.
+	(remote_enable_btrace): Update parameters.  Call btrace_sync_conf and
+	btrace_read_conf.
+	(remote_btrace_conf): New.
+	(init_remote_ops): Initialize to_btrace_conf.
+	(_initialize_remote): Add qXfer:btrace-conf packet.
+	* target.c (target_enable_btrace): Update parameters.
+	(target_btrace_conf): New.
+	* target.h (target_enable_btrace): Update parameters.
+	(target_btrace_conf): New.
+	(target_object)<TARGET_OBJECT_BTRACE_CONF>: New.
+	(target_ops)<to_enable_btrace>: Update parameters and comment.
+	(target_ops)<to_btrace_conf>: New.
+	* target-delegates: Regenerate.
+	* target-debug.h (target_debug_print_const_struct_btrace_config_p)
+	(target_debug_print_const_struct_btrace_target_info_p): New.
+	* NEWS: Announce new command and new packet.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.h (perf_event_buffer): New.
+	(btrace_target_info) <buffer, size, data_head>: Replace with ...
+	<bts>: ... this.
+	* nat/linux-btrace.c (perf_event_header, perf_event_mmap_size)
+	(perf_event_buffer_size, perf_event_buffer_begin)
+	(perf_event_buffer_end, linux_btrace_has_changed): Removed.
+	Updated users.
+	(perf_event_new_data): New.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_enable): Pass BTRACE_FORMAT_BTS.
+	* record-btrace.c (record_btrace_open): Remove call to
+	target_supports_btrace.
+	* remote.c (remote_supports_btrace): Update parameters.
+	* target.c (target_supports_btrace): Update parameters.
+	* target.h (to_supports_btrace, target_supports_btrace): Update
+	parameters.
+	* target-delegates.c: Regenerate.
+	* target-debug.h (target_debug_print_enum_btrace_format): New.
+	* nat/linux-btrace.c
+	(kernel_supports_btrace): Rename into ...
+	(kernel_supports_bts): ... this.  Update users.  Update warning text.
+	(intel_supports_btrace): Rename into ...
+	(intel_supports_bts): ... this.  Update users.
+	(cpu_supports_btrace): Rename into ...
+	(cpu_supports_bts): ... this.  Update users.
+	(linux_supports_btrace): Update parameters.  Split into this and ...
+	(linux_supports_bts): ... this.
+	* nat/linux-btrace.h (linux_supports_btrace): Update parameters.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* Makefile.in (SFILES): Add common/btrace-common.c.
+	(COMMON_OBS): Add common/btrace-common.o.
+	(btrace-common.o): Add build rules.
+	* btrace.c (parse_xml_btrace): Update parameters.
+	(parse_xml_btrace_block): Set format field.
+	(btrace_add_pc, btrace_fetch): Use struct btrace_data.
+	(do_btrace_data_cleanup, make_cleanup_btrace_data): New.
+	(btrace_compute_ftrace): Split into this and...
+	(btrace_compute_ftrace_bts): ...this.
+	(btrace_stitch_trace): Split into this and...
+	(btrace_stitch_bts): ...this.
+	* btrace.h (parse_xml_btrace): Update parameters.
+	(make_cleanup_btrace_data): New.
+	* common/btrace-common.c: New.
+	* common/btrace-common.h: Include common-defs.h.
+	(btrace_block_s): Update comment.
+	(btrace_format): New.
+	(btrace_format_string): New.
+	(btrace_data_bts): New.
+	(btrace_data): New.
+	(btrace_data_init, btrace_data_fini, btrace_data_empty): New.
+	* remote.c (remote_read_btrace): Update parameters.
+	* target.c (target_read_btrace): Update parameters.
+	* target.h (target_read_btrace): Update parameters.
+	(target_ops)<to_read_btrace>: Update parameters.
+	* x86-linux-nat.c (x86_linux_read_btrace): Update parameters.
+	* target-delegates.c: Regenerate.
+	* target-debug (target_debug_print_struct_btrace_data_p): New.
+	* nat/linux-btrace.c (linux_read_btrace): Split into this and...
+	(linux_read_bts): ...this.
+	* nat/linux-btrace.h (linux_read_btrace): Update parameters.
+
+2015-02-06  Doug Evans  <dje@google.com>
+
+	* remote-m32r-sdi.c: Include symfile.h.
+
+2015-02-06  Doug Evans  <dje@google.com>
+
+	* symtab.h (clear_symtab_users, deduce_language_from_filename): Move
+	* symfile.h (clear_symtab_users, deduce_language_from_filename): ...
+	to here.
+
 2015-02-06  Pedro Alves  <palves@redhat.com>
 
 	* linux-thread-db.c (find_new_threads_callback): Add debug output.

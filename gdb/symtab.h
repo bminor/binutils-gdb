@@ -1416,7 +1416,7 @@ extern int find_line_pc_range (struct symtab_and_line, CORE_ADDR *,
 
 extern void resolve_sal_pc (struct symtab_and_line *);
 
-/* Symbol-reading stuff in symfile.c and solib.c.  */
+/* solib.c */
 
 extern void clear_solib (void);
 
@@ -1473,12 +1473,6 @@ extern struct symtab_and_line find_function_start_sal (struct symbol *sym,
 						       int);
 
 extern void skip_prologue_sal (struct symtab_and_line *);
-
-/* symfile.c */
-
-extern void clear_symtab_users (int add_flags);
-
-extern enum language deduce_language_from_filename (const char *);
 
 /* symtab.c */
 

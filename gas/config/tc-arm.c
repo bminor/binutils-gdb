@@ -7258,7 +7258,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 #define warn_deprecated_sp(reg)			\
   do						\
     if (warn_on_deprecated && reg == REG_SP)	\
-       as_warn (_("use of r13 is deprecated"));	\
+       as_tsktsk (_("use of r13 is deprecated"));	\
   while (0)
 
 /* Functions for operand encoding.  ARM, then Thumb.  */
@@ -7490,7 +7490,7 @@ encode_arm_addr_mode_2 (int i, bfd_boolean is_t)
 	  if (warn_on_deprecated
 	      && !is_load
 	      && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7))
-	    as_warn (_("use of PC in this instruction is deprecated"));
+	    as_tsktsk (_("use of PC in this instruction is deprecated"));
 	}
 
       if (inst.reloc.type == BFD_RELOC_UNUSED)
@@ -7989,7 +7989,7 @@ check_obsolete (const arm_feature_set *feature, const char *msg)
 {
   if (ARM_CPU_IS_ANY (cpu_variant))
     {
-      as_warn ("%s", msg);
+      as_tsktsk ("%s", msg);
       return TRUE;
     }
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
@@ -8017,7 +8017,7 @@ do_rd_rm_rn (void)
 			   _("swp{b} use is obsoleted for ARMv8 and later"))
 	  && warn_on_deprecated
 	  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6))
-	as_warn (_("swp{b} use is deprecated for ARMv6 and ARMv7"));
+	as_tsktsk (_("swp{b} use is deprecated for ARMv6 and ARMv7"));
     }
 
   inst.instruction |= inst.operands[0].reg << 12;
@@ -8394,7 +8394,7 @@ do_co_reg (void)
 	    if (! ARM_CPU_IS_ANY (cpu_variant)
 		&& warn_on_deprecated
 		&& ARM_CPU_HAS_FEATURE (cpu_variant, r->deprecated))
-	      as_warn ("%s", r->dep_msg);
+	      as_tsktsk ("%s", r->dep_msg);
 	  }
       }
 
@@ -9117,7 +9117,7 @@ do_setend (void)
 {
   if (warn_on_deprecated
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
-      as_warn (_("setend use is deprecated for ARMv8"));
+      as_tsktsk (_("setend use is deprecated for ARMv8"));
 
   if (inst.operands[0].imm)
     inst.instruction |= 0x200;
@@ -11560,7 +11560,7 @@ do_t_mov_cmp (void)
 		  if ((Rn == REG_SP || Rn == REG_PC)
 		      && (Rm == REG_SP || Rm == REG_PC))
 		    {
-		      as_warn (_("Use of r%u as a source register is "
+		      as_tsktsk (_("Use of r%u as a source register is "
 				 "deprecated when r%u is the destination "
 				 "register."), Rm, Rn);
 		    }
@@ -12384,7 +12384,7 @@ do_t_setend (void)
 {
   if (warn_on_deprecated
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
-      as_warn (_("setend use is deprecated for ARMv8"));
+      as_tsktsk (_("setend use is deprecated for ARMv8"));
 
   set_it_insn_type (OUTSIDE_IT_INSN);
   if (inst.operands[0].imm)
@@ -16104,7 +16104,7 @@ do_neon_ldr_str (void)
       if (thumb_mode)
 	inst.error = _("Use of PC here is UNPREDICTABLE");
       else if (warn_on_deprecated)
-	as_warn (_("Use of PC here is deprecated"));
+	as_tsktsk (_("Use of PC here is deprecated"));
     }
 
   if (inst.operands[0].issingle)
@@ -17131,7 +17131,7 @@ opcode_lookup (char **str)
 	}
 
       if (warn_on_deprecated && unified_syntax)
-	as_warn (_("conditional infixes are deprecated in unified syntax"));
+	as_tsktsk (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
       cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
       gas_assert (cond);
@@ -17217,7 +17217,7 @@ opcode_lookup (char **str)
       if (warn_on_deprecated && unified_syntax
 	  && (opcode->tag == OT_cinfix3
 	      || opcode->tag == OT_cinfix3_deprecated))
-	as_warn (_("conditional infixes are deprecated in unified syntax"));
+	as_tsktsk (_("conditional infixes are deprecated in unified syntax"));
 
       inst.cond = cond->value;
       return opcode;
@@ -17547,7 +17547,7 @@ it_fsm_post_encode (void)
     {
       if (inst.instruction >= 0x10000)
 	{
-	  as_warn (_("IT blocks containing 32-bit Thumb instructions are "
+	  as_tsktsk (_("IT blocks containing 32-bit Thumb instructions are "
 		     "deprecated in ARMv8"));
 	  now_it.warn_deprecated = TRUE;
 	}
@@ -17559,7 +17559,7 @@ it_fsm_post_encode (void)
 	    {
 	      if ((inst.instruction & p->mask) == p->pattern)
 		{
-		  as_warn (_("IT blocks containing 16-bit Thumb instructions "
+		  as_tsktsk (_("IT blocks containing 16-bit Thumb instructions "
 			     "of the following class are deprecated in ARMv8: "
 			     "%s"), p->description);
 		  now_it.warn_deprecated = TRUE;
@@ -17572,7 +17572,7 @@ it_fsm_post_encode (void)
 
       if (now_it.block_length > 1)
 	{
-	  as_warn (_("IT blocks containing more than one conditional "
+	  as_tsktsk (_("IT blocks containing more than one conditional "
 		     "instruction are deprecated in ARMv8"));
 	  now_it.warn_deprecated = TRUE;
 	}
@@ -17636,7 +17636,7 @@ md_assemble (char *str)
     }
 
   if (warn_on_deprecated && opcode->tag == OT_cinfix3_deprecated)
-    as_warn (_("s suffix on comparison instruction is deprecated"));
+    as_tsktsk (_("s suffix on comparison instruction is deprecated"));
 
   /* The value which unconditional instructions should have in place of the
      condition field.  */

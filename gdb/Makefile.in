@@ -601,7 +601,7 @@ XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd \
 	$(srcdir)/features/library-list-aix.dtd \
 	$(srcdir)/features/library-list-svr4.dtd $(srcdir)/features/osdata.dtd \
 	$(srcdir)/features/threads.dtd $(srcdir)/features/traceframe-info.dtd \
-	$(srcdir)/features/btrace.dtd
+	$(srcdir)/features/btrace.dtd $(srcdir)/features/btrace-conf.dtd
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
 # interface to the serial port.  Hopefully if get ported to OS/2, VMS,
@@ -873,6 +873,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
+	common/btrace-common.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -1060,7 +1061,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
-	common-exceptions.o \
+	common-exceptions.o btrace-common.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -2232,6 +2233,10 @@ posix-strerror.o: ${srcdir}/common/posix-strerror.c
 
 mingw-strerror.o: ${srcdir}/common/mingw-strerror.c
 	$(COMPILE) $(srcdir)/common/mingw-strerror.c
+	$(POSTCOMPILE)
+
+btrace-common.o: ${srcdir}/common/btrace-common.c
+	$(COMPILE) $(srcdir)/common/btrace-common.c
 	$(POSTCOMPILE)
 
 #

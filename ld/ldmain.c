@@ -41,7 +41,6 @@
 #ifdef ENABLE_PLUGINS
 #include "plugin.h"
 #include "plugin-api.h"
-#include "libbfd.h"
 #endif /* ENABLE_PLUGINS */
 
 /* Somewhere above, sys/stat.h got included.  */
@@ -793,27 +792,11 @@ add_archive_element (struct bfd_link_info *info,
   if (link_info.lto_plugin_active && !no_more_claiming)
     {
       /* We must offer this archive member to the plugins to claim.  */
-      const char *filename = (bfd_my_archive (abfd) != NULL
-			      ? bfd_my_archive (abfd)->filename : abfd->filename);
-      int fd = open (filename, O_RDONLY | O_BINARY);
-      if (fd >= 0)
+      plugin_maybe_claim (input);
+      if (input->flags.claimed)
 	{
-	  struct ld_plugin_input_file file;
-
-	  /* Offset and filesize must refer to the individual archive
-	     member, not the whole file, and must exclude the header.
-	     Fortunately for us, that is how the data is stored in the
-	     origin field of the bfd and in the arelt_data.  */
-	  file.name = filename;
-	  file.offset = abfd->origin;
-	  file.filesize = arelt_size (abfd);
-	  file.fd = fd;
-	  plugin_maybe_claim (&file, input);
-	  if (input->flags.claimed)
-	    {
-	      input->flags.claim_archive = TRUE;
-	      *subsbfd = input->the_bfd;
-	    }
+	  input->flags.claim_archive = TRUE;
+	  *subsbfd = input->the_bfd;
 	}
     }
 #endif /* ENABLE_PLUGINS */

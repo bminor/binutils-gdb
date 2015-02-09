@@ -263,6 +263,8 @@ run_dump_test "pr12627"
 run_dump_test "pr13302"
 run_dump_test "pr14215"
 run_dump_test "pr17057"
+run_dump_test "pr17935-1"
+run_dump_test "pr17935-2"
 
 # Must be Linux native with the C compiler
 if { [isnative]

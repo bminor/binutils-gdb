@@ -3389,10 +3389,18 @@ target_ranged_break_num_registers (void)
 
 /* See target.h.  */
 
-struct btrace_target_info *
-target_enable_btrace (ptid_t ptid)
+int
+target_supports_btrace (enum btrace_format format)
 {
-  return current_target.to_enable_btrace (&current_target, ptid);
+  return current_target.to_supports_btrace (&current_target, format);
+}
+
+/* See target.h.  */
+
+struct btrace_target_info *
+target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
+{
+  return current_target.to_enable_btrace (&current_target, ptid, conf);
 }
 
 /* See target.h.  */
@@ -3414,11 +3422,19 @@ target_teardown_btrace (struct btrace_target_info *btinfo)
 /* See target.h.  */
 
 enum btrace_error
-target_read_btrace (VEC (btrace_block_s) **btrace,
+target_read_btrace (struct btrace_data *btrace,
 		    struct btrace_target_info *btinfo,
 		    enum btrace_read_type type)
 {
   return current_target.to_read_btrace (&current_target, btrace, btinfo, type);
+}
+
+/* See target.h.  */
+
+const struct btrace_config *
+target_btrace_conf (const struct btrace_target_info *btinfo)
+{
+  return current_target.to_btrace_conf (&current_target, btinfo);
 }
 
 /* See target.h.  */

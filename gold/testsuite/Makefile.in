@@ -155,7 +155,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libweak_undef_2.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_pic_test
@@ -388,7 +389,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	two_file_test_1c.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_thin.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_37 = plugin_test_tls
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_38 = plugin_test_tls.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_39 = plugin_test_tls.err
@@ -583,7 +585,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_71 = ehdr_start_test_4.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	defsym_test.syms
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_72 = ehdr_start_test_4 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	defsym_test.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	defsym_test defsym_test.syms
 @GCC_FALSE@ehdr_start_test_5_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@ehdr_start_test_5_DEPENDENCIES =
 

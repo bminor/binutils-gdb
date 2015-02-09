@@ -1,3 +1,18 @@
+2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17935
+	* ld-i386/i386.exp: Run pr17935-1 and pr17935-2.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+	* ld-i386/pr17935-1.d: New file.
+	* ld-i386/pr17935-1.s: Likewise.
+	* ld-i386/pr17935-2.d: Likewise.
+	* ld-i386/pr17935-2.s: Likewise.
+	* ld-x86-64/pr17935-1.d: Likewise.
+	* ld-x86-64/pr17935-1.s: Likewise.
+	* ld-x86-64/pr17935-2.d: Likewise.
+	* ld-x86-64/pr17935-2.s: Likewise.
+
 2015-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12365

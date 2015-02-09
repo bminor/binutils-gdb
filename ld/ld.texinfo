@@ -1106,6 +1106,15 @@ Marks the object can not be dumped by @code{dldump}.
 @item noexecstack
 Marks the object as not requiring executable stack.
 
+@item text
+Treat DT_TEXTREL in shared object as error.
+
+@item notext
+Don't treat DT_TEXTREL in shared object as error.
+
+@item textoff
+Don't treat DT_TEXTREL in shared object as error.
+
 @item norelro
 Don't create an ELF @code{PT_GNU_RELRO} segment header in the object.
 

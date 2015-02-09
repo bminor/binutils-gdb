@@ -6372,9 +6372,13 @@ For architecture environments that support process record and replay,
 @kindex record
 @kindex record full
 @kindex record btrace
+@kindex record btrace bts
+@kindex record bts
 @kindex rec
 @kindex rec full
 @kindex rec btrace
+@kindex rec btrace bts
+@kindex rec bts
 @item record @var{method}
 This command starts the process record and replay target.  The
 recording method can be specified as parameter.  Without a parameter
@@ -6387,13 +6391,25 @@ Full record/replay recording using @value{GDBN}'s software record and
 replay implementation.  This method allows replaying and reverse
 execution.
 
-@item btrace
+@item btrace @var{format}
 Hardware-supported instruction recording.  This method does not record
 data.  Further, the data is collected in a ring buffer so old data will
 be overwritten when the buffer is full.  It allows limited replay and
 reverse execution.
 
-This recording method may not be available on all processors.
+The recording format can be specified as parameter.  Without a parameter
+the command chooses the recording format.  The following recording
+formats are available:
+
+@table @code
+@item bts
+@cindex branch trace store
+Use the @dfn{Branch Trace Store} (@acronym{BTS}) recording format.  In
+this format, the processor stores a from/to record for each executed
+branch in the btrace ring buffer.
+@end table
+
+Not all recording formats may be available on all processors.
 @end table
 
 The process record and replay target can only debug a process that is
@@ -6545,6 +6561,30 @@ position.
 @item show record btrace replay-memory-access
 Show the current setting of @code{replay-memory-access}.
 
+@kindex set record btrace bts
+@item set record btrace bts buffer-size @var{size}
+@itemx set record btrace bts buffer-size unlimited
+Set the requested ring buffer size for branch tracing in @acronym{BTS}
+format.  Default is 64KB.
+
+If @var{size} is a positive number, then @value{GDBN} will try to
+allocate a buffer of at least @var{size} bytes for each new thread
+that uses the btrace recording method and the @acronym{BTS} format.
+The actually obtained buffer size may differ from the requested
+@var{size}.  Use the @code{info record} command to see the actual
+buffer size for each thread that uses the btrace recording method and
+the @acronym{BTS} format.
+
+If @var{limit} is @code{unlimited} or zero, @value{GDBN} will try to
+allocate a buffer of 4MB.
+
+Bigger buffers mean longer traces.  On the other hand, @value{GDBN} will
+also need longer to process the branch trace data before it can be used.
+
+@item show record btrace bts buffer-size @var{size}
+Show the current setting of the requested ring buffer size for branch
+tracing in @acronym{BTS} format.
+
 @kindex info record
 @item info record
 Show various statistics about the recording depending on the recording
@@ -6571,9 +6611,25 @@ Maximum number of instructions that may be contained in the execution log.
 @end itemize
 
 @item btrace
-For the @code{btrace} recording method, it shows the number of
-instructions that have been recorded and the number of blocks of
-sequential control-flow that is formed by the recorded instructions.
+For the @code{btrace} recording method, it shows:
+
+@itemize @bullet
+@item
+Recording format.
+@item
+Number of instructions that have been recorded.
+@item
+Number of blocks of sequential control-flow formed by the recorded
+instructions.
+@item
+Whether in record mode or replay mode.
+@end itemize
+
+For the @code{bts} recording format, it also shows:
+@itemize @bullet
+@item
+Size of the perf ring buffer.
+@end itemize
 @end table
 
 @kindex record delete
@@ -33066,7 +33122,8 @@ MS-Windows shared libraries (@pxref{Shared Libraries})
 @item
 Traceframe info (@pxref{Traceframe Info Format})
 @item
-Branch trace (@pxref{Branch Trace Format})
+Branch trace (@pxref{Branch Trace Format},
+@pxref{Branch Trace Configuration Format})
 @end itemize
 
 @item zlib
@@ -34051,6 +34108,7 @@ Show the current setting of the target wait timeout.
 * Thread List Format::
 * Traceframe Info Format::
 * Branch Trace Format::
+* Branch Trace Configuration Format::
 @end menu
 
 @node Overview
@@ -35723,6 +35781,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:btrace-conf:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:features:read}
 @tab No
 @tab @samp{-}
@@ -35799,6 +35862,11 @@ These are the currently defined stub features and their properties:
 @tab Yes
 
 @item @samp{Qbtrace:bts}
+@tab Yes
+@tab @samp{-}
+@tab Yes
+
+@item @samp{Qbtrace-conf:bts:size}
 @tab Yes
 @tab @samp{-}
 @tab Yes
@@ -35906,6 +35974,10 @@ The remote stub understands the @samp{qXfer:auxv:read} packet
 @item qXfer:btrace:read
 The remote stub understands the @samp{qXfer:btrace:read}
 packet (@pxref{qXfer btrace read}).
+
+@item qXfer:btrace-conf:read
+The remote stub understands the @samp{qXfer:btrace-conf:read}
+packet (@pxref{qXfer btrace-conf read}).
 
 @item qXfer:features:read
 The remote stub understands the @samp{qXfer:features:read} packet
@@ -36056,6 +36128,9 @@ The remote stub understands the @samp{Qbtrace:off} packet.
 @item Qbtrace:bts
 The remote stub understands the @samp{Qbtrace:bts} packet.
 
+@item Qbtrace-conf:bts:size
+The remote stub understands the @samp{Qbtrace-conf:bts:size} packet.
+
 @end table
 
 @item qSymbol::
@@ -36197,6 +36272,15 @@ used to stitch traces together.
 
 If the trace buffer overflowed, returns an error indicating the overflow.
 @end table
+
+This packet is not probed by default; the remote stub must request it
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:btrace-conf:read::@var{offset},@var{length}
+@anchor{qXfer btrace-conf read}
+
+Return a description of the current branch trace configuration.
+@xref{Branch Trace Configuration Format}.
 
 This packet is not probed by default; the remote stub must request it
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
@@ -36482,6 +36566,18 @@ Reply:
 @table @samp
 @item OK
 Branch tracing has been disabled.
+@item E.errtext
+A badly formed request or an error was encountered.
+@end table
+
+@item Qbtrace-conf:bts:size=@var{value}
+Set the requested ring buffer size for new threads that use the
+btrace recording method in bts format.
+
+Reply:
+@table @samp
+@item OK
+The ring buffer size has been set.
 @item E.errtext
 A badly formed request or an error was encountered.
 @end table
@@ -39003,6 +39099,39 @@ The formal DTD for the branch trace format is given below:
 <!ELEMENT block        EMPTY>
 <!ATTLIST block        begin  CDATA   #REQUIRED
                        end    CDATA   #REQUIRED>
+@end smallexample
+
+@node Branch Trace Configuration Format
+@section Branch Trace Configuration Format
+@cindex branch trace configuration format
+
+For each inferior thread, @value{GDBN} can obtain the branch trace
+configuration using the @samp{qXfer:btrace-conf:read}
+(@pxref{qXfer btrace-conf read}) packet.
+
+The configuration describes the branch trace format and configuration
+settings for that format.  The following information is described:
+
+@table @code
+@item bts
+This thread uses the @dfn{Branch Trace Store} (@acronym{BTS}) format.
+@table @code
+@item size
+The size of the @acronym{BTS} ring buffer in bytes.
+@end table
+@end table
+
+@value{GDBN} must be linked with the Expat library to support XML
+branch trace configuration discovery.  @xref{Expat}.
+
+The formal DTD for the branch trace configuration format is given below:
+
+@smallexample
+<!ELEMENT btrace-conf	(bts?)>
+<!ATTLIST btrace-conf	version	CDATA	#FIXED "1.0">
+
+<!ELEMENT bts	EMPTY>
+<!ATTLIST bts	size	CDATA	#IMPLIED>
 @end smallexample
 
 @include agentexpr.texi

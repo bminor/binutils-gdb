@@ -8221,7 +8221,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  {
 			    outrel.r_addend += relocation;
 			    if (tls_ty & (TLS_GD | TLS_DTPREL | TLS_TPREL))
-			      outrel.r_addend -= htab->elf.tls_sec->vma;
+			      {
+				if (htab->elf.tls_sec == NULL)
+				  outrel.r_addend = 0;
+				else
+				  outrel.r_addend -= htab->elf.tls_sec->vma;
+			      }
 			  }
 			loc = rsec->contents;
 			loc += (rsec->reloc_count++
@@ -8239,9 +8244,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  value = 1;
 			else if (tls_ty != 0)
 			  {
-			    value -= htab->elf.tls_sec->vma + DTP_OFFSET;
-			    if (tls_ty == (TLS_TLS | TLS_TPREL))
-			      value += DTP_OFFSET - TP_OFFSET;
+			    if (htab->elf.tls_sec == NULL)
+			      value = 0;
+			    else
+			      {
+				value -= htab->elf.tls_sec->vma + DTP_OFFSET;
+				if (tls_ty == (TLS_TLS | TLS_TPREL))
+				  value += DTP_OFFSET - TP_OFFSET;
+			      }
 
 			    if (tls_ty == (TLS_TLS | TLS_GD))
 			      {
@@ -8327,7 +8337,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_DTPREL16_LO:
 	case R_PPC_DTPREL16_HI:
 	case R_PPC_DTPREL16_HA:
-	  addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
 	  break;
 
 	  /* Relocations that may need to be propagated if this is a shared
@@ -8351,18 +8362,21 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		bfd_put_32 (output_bfd, insn, p);
 	      break;
 	    }
-	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  /* The TPREL16 relocs shouldn't really be used in shared
 	     libs as they will result in DT_TEXTREL being set, but
 	     support them anyway.  */
 	  goto dodyn;
 
 	case R_PPC_TPREL32:
-	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  goto dodyn;
 
 	case R_PPC_DTPREL32:
-	  addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
+	  if (htab->elf.tls_sec != NULL)
+	    addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
 	  goto dodyn;
 
 	case R_PPC_DTPMOD32:

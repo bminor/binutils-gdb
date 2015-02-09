@@ -311,6 +311,8 @@ run_dump_test "mov1a"
 run_dump_test "mov1b"
 run_dump_test "mov1c"
 run_dump_test "mov1d"
+run_dump_test "pr17935-1"
+run_dump_test "pr17935-2"
 
 # Must be native with the C compiler
 if { [isnative] && [which $CC] != 0 } {
