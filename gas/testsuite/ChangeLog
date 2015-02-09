@@ -1,3 +1,17 @@
+2015-02-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* gas/arm/armv1.l: Remove 'Warning: ' from expected messages
+	for deprecations.
+	* gas/arm/armv8-a-bad.l: Likewise.
+	* gas/arm/armv8-a-it-bad.l: Likewise.
+	* gas/arm/depr-swp.l: Likewise.
+	* gas/arm/ldsgeb.l: Likewise.
+	* gas/arm/ldsgeh.l: Likewise.
+	* gas/arm/thumb2_bad_reg.l: Likewise.
+	* gas/arm/thumb32.l: Likewise.
+	* gas/arm/udf.l: Likewise.
+	* gas/arm/vstr-arm-bad.l: Likewise.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* gas/ft32/ft32.exp: New file.

@@ -1,3 +1,18 @@
+2015-02-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (warn_deprecated_sp): Use as_tsktsk instead
+	of as_warn for deprecation messages.
+	(encode_arm_addr_mode_2): Likewise.
+	(check_obsolete): Likewise.
+	(do_rd_rm_rn): Likewise.
+	(do_co_reg): Likewise.
+	(do_setend): Likewise.
+	(do_t_mov_cmp): Likewise.
+	(do_neon_ldr_str): Likewise.
+	(opcode_lookup): Likewise.
+	(if_fsm_post_encode): Likewise.
+	(md_assemble): Likewise.
+
 2015-02-06  Jan Beulich  <jbeulich@suse.com>
 
 	* dw2gencfi.c (select_cie_for_fde): Also bail on CFI_label.
