@@ -1,5 +1,16 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.h (exception_none): Declare.
+	* common/common-exceptions.c (exception_none): Moved from
+	exceptions.c.
+	(exceptions_state_mc_init): Use exception_none.
+	* exceptions.c (exception_none): Move to
+	common/common-exceptions.c.
+	* exceptions.h (exception_none): Move to
+	common/common-exceptions.h.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* main.c (catch_command_errors, catch_command_errors_const):
 	Remove 'mask' argument.  Adjust.
 	(captured_main): Adjust callers.

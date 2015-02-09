@@ -188,4 +188,7 @@ extern void throw_error (enum errors error, const char *fmt, ...)
 extern void throw_quit (const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
+/* A pre-defined non-exception.  */
+extern const struct gdb_exception exception_none;
+
 #endif /* COMMON_EXCEPTIONS_H */

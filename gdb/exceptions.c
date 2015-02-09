@@ -27,8 +27,6 @@
 #include "serial.h"
 #include "gdbthread.h"
 
-const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
-
 void
 prepare_to_throw_exception (void)
 {
