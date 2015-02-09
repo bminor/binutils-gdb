@@ -1,5 +1,16 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb_proc_service.h: Wrap with EXTERN_C_PUSH/EXTERN_C_POP.
+	[!HAVE_PROC_SERVICE_H] (struct ps_prochandle): Forward declare.
+	[!HAVE_PROC_SERVICE_H] (ps_pdread, ps_pdwrite, ps_ptread)
+	ps_ptwrite, ps_lgetregs, ps_lsetregs, ps_lgetfpregs)
+	(ps_lsetfpregs, ps_getpid)
+	(ps_get_thread_area, ps_pglobal_lookup, ps_pstop, ps_pcontinue)
+	(ps_lstop, ps_lcontinue, ps_lgetxregsize, ps_lgetxregs)
+	(ps_lsetxregs, ps_plog): Declare.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* linux-amd64-ipa.c (gdb_agent_get_raw_reg): Use
 	IP_AGENT_EXPORT_FUNC.
 	* linux-i386-ipa.c (gdb_agent_get_raw_reg): Use
