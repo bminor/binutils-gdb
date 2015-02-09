@@ -50,4 +50,10 @@
 #include "cleanups.h"
 #include "common-exceptions.h"
 
+#ifdef __cplusplus
+# define EXTERN_C extern "C"
+#else
+# define EXTERN_C extern
+#endif
+
 #endif /* COMMON_DEFS_H */

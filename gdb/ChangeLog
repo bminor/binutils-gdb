@@ -1,5 +1,24 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* cli-out.c (_rl_erase_entire_line): Move declaration out of
+	cli_mld_erase_entire_line, and make it extern "C".
+	* common/common-defs.h (EXTERN_C): New.
+	* completer.c (_rl_completion_prefix_display_length)
+	(_rl_print_completions_horizontally, QSFUNC): Move declarations
+	out of gdb_display_match_list_1.
+	(_rl_qsort_string_compare): Move declaration out of
+	gdb_display_match_list_1, and make it extern "C".
+	* defs.h (re_comp): Use EXTERN_C.
+	* maint.c (_mcleanup): Move declaration out of mcleanup_wrapper,
+	and make it extern "C".
+	(monstartup): Move declaration out of maintenance_set_profile_cmd,
+	and make it extern "C".
+	(main): Move declaration out of maintenance_set_profile_cmd.
+	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason_string): Use
+	EXTERN_C.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* python/python.c (GdbMethods): Rename to ...
 	(python_GdbMethods): ... this and make extern.
 	(GdbModuleDef): Rename to ...

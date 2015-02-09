@@ -452,13 +452,13 @@ cli_mld_flush (const struct match_list_displayer *displayer)
   fflush (rl_outstream);
 }
 
+EXTERN_C void _rl_erase_entire_line (void);
+
 /* CLI version of displayer.erase_entire_line.  */
 
 static void
 cli_mld_erase_entire_line (const struct match_list_displayer *displayer)
 {
-  extern void _rl_erase_entire_line (void);
-
   _rl_erase_entire_line ();
 }
 
