@@ -1,3 +1,9 @@
+2015-02-09  Ed Maste  <emaste@freebsd.org>
+
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Avoid incrementing
+	uninitialized and unused variable.
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Likewise.
+
 2015-02-09  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Don't segfault on NULL

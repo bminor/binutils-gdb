@@ -5187,7 +5187,7 @@ bad_return:
   if (plt_sym_val == NULL)
     goto bad_return;
 
-  for (i = 0; i < count; i++, p++)
+  for (i = 0; i < count; i++)
     plt_sym_val[i] = -1;
 
   plt_offset = bed->plt->plt_entry_size;
