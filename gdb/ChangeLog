@@ -1,3 +1,8 @@
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* record-btrace.c (set_record_btrace_cmdlist)
+	(show_record_btrace_cmdlist): Remove redefinitions.
+
 2015-02-27  Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
