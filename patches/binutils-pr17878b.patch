@@ -1,36 +1,10 @@
-From da4f3c6f563c13033e697a9af343accff6df38d6 Mon Sep 17 00:00:00 2001
+From ff574ce49154d752a159fe53f11d688a5121294a Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
-Date: Mon, 26 Jan 2015 16:42:27 -0800
-Subject: [PATCH 1/8] PR ld/17878: Add bfd_maybe_object_p
-To: binutils@sourceware.org
+Date: Mon, 9 Feb 2015 03:30:03 -0800
+Subject: [PATCH 2/2] Add tests for non-object IR file
 
-This patch adds bfd_maybe_object_p which is similar to
-
-bfd_check_format (abfd, bfd_object)
-
-The difference is bfd_maybe_object_p takes an argument to indicate if a
-compiler plug-in library is applied.  When a compiler plug-in library is
-active, it also returns TRUE if the file is not an archive or a coredump
-file.  This patch checks bfd_maybe_object_p instead of bfd_check_format
-when calling plugin_maybe_claim or dealing with archive member.  It adds
-tests for non-object IR file, including inside archive.
-
-bfd/
-
-	PR ld/17878
-	* archive.c (bfd_generic_archive_p): Replace bfd_check_format
-	with bfd_maybe_object_p.
-	(_bfd_write_archive_contents): Likewise.
-	(_bfd_compute_and_write_armap): Likewise.
-	* elflink.c (elf_link_is_defined_archive_symbol): Add a pointer
-	argument to struct bfd_link_info.  Replace bfd_check_format with
-	bfd_maybe_object_p.
-	(elf_link_add_archive_symbols): Update call to
-	elf_link_is_defined_archive_symbol.  Replace bfd_check_format
-	with bfd_maybe_object_p.
-	* format.c (bfd_maybe_object_p): New.
-	* targets.c (plugin_active_p): Likewise.
-	* bfd-in2.h: Regenerated.
+This patch adds linker, nm and ar tests for non-object IR file, including
+archive with non-object IR member.
 
 ld/
 
@@ -44,10 +18,6 @@ ld/
 	(libldtestplug3_la_CFLAGS): Likewise.
 	(libldtestplug3_la_LDFLAGS): Likewise.
 	* Makefile.in: Regenerated.
-	* ldfile.c (ldfile_try_open_bfd): Replace bfd_check_format with
-	bfd_maybe_object_p.
-	* plugin.c (plugin_get_ir_dummy_bfd): Update BFD info only if
-	input template is a bfd_object file.
 	* testplug2.c: New file.
 	* testplug3.c: Likewise.
 
@@ -55,7 +25,8 @@ ld/testsuite/
 
 	PR ld/17878
 	* ld-plugin/func.c: Add some comments.
-	* ld-plugin/plugin-14.d: New file.
+	* ld-plugin/plugin-13.d: New file.
+	* ld-plugin/plugin-14.d: Likewise.
 	* ld-plugin/plugin-15.d: Likewise.
 	* ld-plugin/plugin-16.d: Likewise.
 	* ld-plugin/plugin-17.d: Likewise.
@@ -67,6 +38,7 @@ ld/testsuite/
 	* ld-plugin/plugin-23.d: Likewise.
 	* ld-plugin/plugin-24.d: Likewise.
 	* ld-plugin/plugin-25.d: Likewise.
+	* ld-plugin/plugin-26.d: Likewise.
 	* ld-plugin/plugin.exp (plugin2_name): New.
 	(plugin3_name): Likewise.
 	(plugin2_path): Likewise.
@@ -78,21 +50,15 @@ ld/testsuite/
 	(plugin_extra_elf_tests): Likewise.
 	(plugin_src_tests): New tests for non-object IR file.
 	Run nm --plugin test.
+	Run ar --plugin test.
 	Run plugin_src_tests.
 ---
- bfd/archive.c                      |   6 +-
- bfd/bfd-in2.h                      |  11 +
- bfd/elflink.c                      |  10 +-
- bfd/format.c                       |  25 ++
- bfd/targets.c                      |   8 +
  ld/Makefile.am                     |   8 +-
  ld/Makefile.in                     |  49 ++-
- ld/ldfile.c                        |   6 +-
- ld/plugin.c                        |  14 +-
  ld/testplug2.c                     | 693 +++++++++++++++++++++++++++++++++++++
  ld/testplug3.c                     | 674 ++++++++++++++++++++++++++++++++++++
  ld/testsuite/ld-plugin/func.c      |   3 +
- ld/testsuite/ld-plugin/plugin-13.d |  22 ++
+ ld/testsuite/ld-plugin/plugin-13.d |  27 ++
  ld/testsuite/ld-plugin/plugin-14.d |  33 ++
  ld/testsuite/ld-plugin/plugin-15.d |  34 ++
  ld/testsuite/ld-plugin/plugin-16.d |  38 ++
@@ -105,8 +71,9 @@ ld/testsuite/
  ld/testsuite/ld-plugin/plugin-23.d |   7 +
  ld/testsuite/ld-plugin/plugin-24.d |   5 +
  ld/testsuite/ld-plugin/plugin-25.d |   5 +
- ld/testsuite/ld-plugin/plugin.exp  | 128 +++++++
- 26 files changed, 1900 insertions(+), 17 deletions(-)
+ ld/testsuite/ld-plugin/plugin-26.d |  24 ++
+ ld/testsuite/ld-plugin/plugin.exp  | 138 ++++++++
+ 20 files changed, 1873 insertions(+), 3 deletions(-)
  create mode 100644 ld/testplug2.c
  create mode 100644 ld/testplug3.c
  create mode 100644 ld/testsuite/ld-plugin/plugin-13.d
@@ -122,170 +89,8 @@ ld/testsuite/
  create mode 100644 ld/testsuite/ld-plugin/plugin-23.d
  create mode 100644 ld/testsuite/ld-plugin/plugin-24.d
  create mode 100644 ld/testsuite/ld-plugin/plugin-25.d
+ create mode 100644 ld/testsuite/ld-plugin/plugin-26.d
 
-diff --git a/bfd/archive.c b/bfd/archive.c
-index cc4c52f..15d1e89 100644
---- a/bfd/archive.c
-+++ b/bfd/archive.c
-@@ -856,7 +856,7 @@ bfd_generic_archive_p (bfd *abfd)
-       if (first != NULL)
- 	{
- 	  first->target_defaulted = FALSE;
--	  if (bfd_check_format (first, bfd_object)
-+	  if (bfd_maybe_object_p (first, plugin_active_p (first))
- 	      && first->xvec != abfd->xvec)
- 	    bfd_set_error (bfd_error_wrong_object_format);
- 	  /* And we ought to close `first' here too.  */
-@@ -2163,7 +2163,7 @@ _bfd_write_archive_contents (bfd *arch)
- 
-       if (makemap && ! hasobjects)
- 	{			/* Don't bother if we won't make a map!  */
--	  if ((bfd_check_format (current, bfd_object)))
-+	  if (bfd_maybe_object_p (current, plugin_active_p (current)))
- 	    hasobjects = TRUE;
- 	}
-     }
-@@ -2318,7 +2318,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
-        current != NULL;
-        current = current->archive_next, elt_no++)
-     {
--      if (bfd_check_format (current, bfd_object)
-+      if (bfd_maybe_object_p (current, plugin_active_p (current))
- 	  && (bfd_get_file_flags (current) & HAS_SYMS) != 0)
- 	{
- 	  long storage;
-diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 91dbf80..df34f03 100644
---- a/bfd/bfd-in2.h
-+++ b/bfd/bfd-in2.h
-@@ -7199,6 +7199,14 @@ typedef struct bfd_target
- 
- } bfd_target;
- 
-+/* TRUE if plugin is applied on ABFD.  */
-+#if BFD_SUPPORTS_PLUGINS
-+extern const bfd_target plugin_vec;
-+# define plugin_active_p(abfd) ((abfd)->xvec == &plugin_vec)
-+#else
-+# define plugin_active_p(abfd) FALSE
-+#endif
-+
- bfd_boolean bfd_set_default_target (const char *name);
- 
- const bfd_target *bfd_find_target (const char *target_name, bfd *abfd);
-@@ -7217,6 +7225,9 @@ const bfd_target *bfd_search_for_target
- /* Extracted from format.c.  */
- bfd_boolean bfd_check_format (bfd *abfd, bfd_format format);
- 
-+bfd_boolean bfd_maybe_object_p
-+   (bfd *abfd, bfd_boolean plugin_active_p);
-+
- bfd_boolean bfd_check_format_matches
-    (bfd *abfd, bfd_format format, char ***matching);
- 
-diff --git a/bfd/elflink.c b/bfd/elflink.c
-index e8c4ad4..e05e2ac 100644
---- a/bfd/elflink.c
-+++ b/bfd/elflink.c
-@@ -2989,6 +2989,7 @@ is_global_symbol_definition (bfd *abfd,
- 
- static bfd_boolean
- elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef,
-+				    struct bfd_link_info *info,
- 				    bfd_boolean ignore_secondary)
- {
-   Elf_Internal_Shdr * hdr;
-@@ -3004,7 +3005,7 @@ elf_link_is_defined_archive_symbol (bfd
-   if (abfd == NULL)
-     return FALSE;
- 
--  if (! bfd_check_format (abfd, bfd_object))
-+  if (! bfd_maybe_object_p (abfd, info->lto_plugin_active))
-     return FALSE;
- 
-   /* Select the appropriate symbol table.  */
-@@ -5124,7 +5125,7 @@ elf_link_add_archive_symbols (bfd *abfd,
- 		 table and check that to see what kind of symbol definition
- 		 this is.  */
- 	      if (! elf_link_is_defined_archive_symbol (abfd, symdef,
--							FALSE))
-+							info, FALSE))
- 		continue;
- 	    }
- 	  /* Keep searching if a definition is secondary.  */
-@@ -5141,7 +5142,7 @@ elf_link_add_archive_symbols (bfd *abfd,
- 	    {
- 	      /* Ignore another secondary definition.  */
- 	      if (! elf_link_is_defined_archive_symbol (abfd, symdef,
--							TRUE))
-+							info, TRUE))
- 		continue;
- 	    }
- 
-@@ -5150,7 +5151,7 @@ elf_link_add_archive_symbols (bfd *abfd,
- 	  if (element == NULL)
- 	    goto error_return;
- 
--	  if (! bfd_check_format (element, bfd_object))
-+	  if (! bfd_maybe_object_p (element, info->lto_plugin_active))
- 	    goto error_return;
- 
- 	  undefs_tail = info->hash->undefs_tail;
-diff --git a/bfd/format.c b/bfd/format.c
-index dd6dc8a..0cf2764 100644
---- a/bfd/format.c
-+++ b/bfd/format.c
-@@ -94,6 +94,31 @@ bfd_check_format (bfd *abfd, bfd_format format)
-   return bfd_check_format_matches (abfd, format, NULL);
- }
- 
-+/*
-+FUNCTION
-+	bfd_maybe_object_p
-+
-+SYNOPSIS
-+	bfd_boolean bfd_maybe_object_p
-+	  (bfd *abfd, bfd_boolean plugin_active_p);
-+
-+DESCRIPTION
-+	The function returns <<TRUE>> if the file attached to the BFD
-+	@var{abfd} may be an object file.  Compiler plug-in library is
-+	applied to @var{abfd} if @var{plugin_active_p} is <<TRUE>>.
-+*/
-+
-+bfd_boolean
-+bfd_maybe_object_p (bfd *abfd, bfd_boolean plugin_active_p)
-+{
-+  /* LTO IR object file may look like a bfd_object file or a file which
-+     is not bfd_core nor bfd_archive.  */
-+  return (bfd_check_format (abfd, bfd_object)
-+	  || (plugin_active_p
-+	      && !bfd_check_format (abfd, bfd_core)
-+	      && !bfd_check_format (abfd, bfd_archive)));
-+}
-+
- struct bfd_preserve
- {
-   void *marker;
-diff --git a/bfd/targets.c b/bfd/targets.c
-index 0c7fed5..2c76a4c 100644
---- a/bfd/targets.c
-+++ b/bfd/targets.c
-@@ -558,6 +558,14 @@ to find an alternative output format that is suitable.
- .
- .} bfd_target;
- .
-+.{* TRUE if plugin is applied on ABFD.  *}
-+.#if BFD_SUPPORTS_PLUGINS
-+.extern const bfd_target plugin_vec;
-+.# define plugin_active_p(abfd) ((abfd)->xvec == &plugin_vec)
-+.#else
-+.# define plugin_active_p(abfd) FALSE
-+.#endif
-+.
- */
- 
- /* All known xvecs (even those that don't compile on all systems).
 diff --git a/ld/Makefile.am b/ld/Makefile.am
 index 18bcf8b..75a481b 100644
 --- a/ld/Makefile.am
@@ -406,55 +211,6 @@ index a3011c9..6c54fda 100644
  .l.c:
  	$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
  
-diff --git a/ld/ldfile.c b/ld/ldfile.c
-index c9c9541..94e07fd 100644
---- a/ld/ldfile.c
-+++ b/ld/ldfile.c
-@@ -301,9 +301,9 @@ success:
-      bfd_object that it sets the bfd's arch and mach, which
-      will be needed when and if we want to bfd_create a new
-      one using this one as a template.  */
--  if (bfd_check_format (entry->the_bfd, bfd_object)
--      && link_info.lto_plugin_active
--      && !no_more_claiming)
-+  if (link_info.lto_plugin_active
-+      && !no_more_claiming
-+      && bfd_maybe_object_p (entry->the_bfd, link_info.lto_plugin_active))
-     {
-       int fd = open (attempt, O_RDONLY | O_BINARY);
-       if (fd >= 0)
-diff --git a/ld/plugin.c b/ld/plugin.c
-index 7ee45a2..cbc4c2d 100644
---- a/ld/plugin.c
-+++ b/ld/plugin.c
-@@ -292,10 +292,15 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
-   if (abfd != NULL)
-     {
-       abfd->flags |= BFD_LINKER_CREATED | BFD_PLUGIN;
--      bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
--      bfd_set_gp_size (abfd, bfd_get_gp_size (srctemplate));
--      if (bfd_make_writable (abfd)
--	  && bfd_copy_private_bfd_data (srctemplate, abfd))
-+      if (!bfd_make_writable (abfd))
-+	goto report_error;
-+      if (bfd_check_format (srctemplate, bfd_object))
-+	{
-+	  bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
-+	  bfd_set_gp_size (abfd, bfd_get_gp_size (srctemplate));
-+	  if (!bfd_copy_private_bfd_data (srctemplate, abfd))
-+	    goto report_error;
-+	}
- 	{
- 	  flagword flags;
- 
-@@ -306,6 +311,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
- 	    return abfd;
- 	}
-     }
-+report_error:
-   einfo (_("could not create dummy IR bfd: %F%E\n"));
-   return NULL;
- }
 diff --git a/ld/testplug2.c b/ld/testplug2.c
 new file mode 100644
 index 0000000..5e17b68
@@ -1847,10 +1603,10 @@ index 8c668db..7b0c043 100644
  
 diff --git a/ld/testsuite/ld-plugin/plugin-13.d b/ld/testsuite/ld-plugin/plugin-13.d
 new file mode 100644
-index 0000000..d7a73fb
+index 0000000..ebfdc11
 --- /dev/null
 +++ b/ld/testsuite/ld-plugin/plugin-13.d
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,27 @@
 +Hello from testplugin.
 +.*: LDPT_MESSAGE func@0x.*
 +.*: LDPT_API_VERSION value        0x1 \(1\)
@@ -1872,6 +1628,11 @@ index 0000000..d7a73fb
 +.*: LDPT_OPTION 'registerclaimfile'
 +.*: LDPT_OPTION 'claim:.*/ld/testsuite/ld-plugin/func.c'
 +.*: LDPT_NULL value        0x0 \(0\)
++hook called: claim_file tmpdir/main.o \[@0/.* not claimed
++hook called: claim_file .*/ld/testsuite/ld-plugin/func.c \[@0/.* CLAIMED
++hook called: claim_file tmpdir/text.o \[@0/.* not claimed
++#...
++.*main.c.*: undefined reference to `func'
 +#...
 diff --git a/ld/testsuite/ld-plugin/plugin-14.d b/ld/testsuite/ld-plugin/plugin-14.d
 new file mode 100644
@@ -2205,8 +1966,38 @@ index 0000000..6e7638f
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
 +Sym: '_?func' Resolution: LDPR_PREVAILING_DEF.*
 +hook called: cleanup.
+diff --git a/ld/testsuite/ld-plugin/plugin-26.d b/ld/testsuite/ld-plugin/plugin-26.d
+new file mode 100644
+index 0000000..c631e38
+--- /dev/null
++++ b/ld/testsuite/ld-plugin/plugin-26.d
+@@ -0,0 +1,24 @@
++Hello from testplugin.
++.*: LDPT_MESSAGE func@0x.*
++.*: LDPT_API_VERSION value        0x1 \(1\)
++.*: LDPT_GNU_LD_VERSION value       0x.*
++.*: LDPT_LINKER_OUTPUT value        0x1 \(1\)
++.*: LDPT_OUTPUT_NAME 'tmpdir/main.x'
++.*: LDPT_REGISTER_CLAIM_FILE_HOOK func@0x.*
++.*: LDPT_REGISTER_ALL_SYMBOLS_READ_HOOK func@0x.*
++.*: LDPT_REGISTER_CLEANUP_HOOK func@0x.*
++.*: LDPT_ADD_SYMBOLS func@0x.*
++.*: LDPT_GET_INPUT_FILE func@0x.*
++.*: LDPT_GET_VIEW func@0x.*
++.*: LDPT_RELEASE_INPUT_FILE func@0x.*
++.*: LDPT_GET_SYMBOLS func@0x.*
++.*: LDPT_GET_SYMBOLS_V2 func@0x.*
++.*: LDPT_ADD_INPUT_FILE func@0x.*
++.*: LDPT_ADD_INPUT_LIBRARY func@0x.*
++.*: LDPT_SET_EXTRA_LIBRARY_PATH func@0x.*
++.*: LDPT_OPTION 'registerclaimfile'
++.*: LDPT_NULL value        0x0 \(0\)
++hook called: claim_file tmpdir/main.o \[@0/.* not claimed
++hook called: claim_file .*/ld/testsuite/ld-plugin/func.c \[@0/.* not claimed
++.*/ld/testsuite/ld-plugin/func.c: file format not recognized; treating as linker script
++.*/ld/testsuite/ld-plugin/func.c:5: syntax error
 diff --git a/ld/testsuite/ld-plugin/plugin.exp b/ld/testsuite/ld-plugin/plugin.exp
-index 23a8cfb..0efd7ee 100644
+index 23a8cfb..b832534 100644
 --- a/ld/testsuite/ld-plugin/plugin.exp
 +++ b/ld/testsuite/ld-plugin/plugin.exp
 @@ -41,6 +41,14 @@ set plugin_name [file_contents "$base_dir/libldtestplug.la"]
@@ -2245,7 +2036,7 @@ index 23a8cfb..0efd7ee 100644
  # Rather than having libs we just define dummy values for anything
  # we may need to link a target exe; we aren't going to run it anyway.
  set libs "[ld_simple_link_defsyms] --defsym ${_}printf=${_}main --defsym ${_}puts=${_}main"
-@@ -125,6 +139,33 @@ set plugin_tests [list \
+@@ -125,6 +139,35 @@ set plugin_tests [list \
  			-plugin-opt dumpresolutions \
  			-plugin-opt add:tmpdir/func.o \
      $testobjfiles $libs" "" "" "" {{ld plugin-9.d}} "main.x" ] \
@@ -2276,10 +2067,12 @@ index 23a8cfb..0efd7ee 100644
 +			-plugin-opt dumpresolutions \
 +			-plugin-opt add:tmpdir/func.o \
 +    $testsrcfiles $libs" "" "" "" {{ld plugin-17.d}} "main.x" ] \
++    [list "load plugin with source not claimed" "-plugin $plugin_path $regclm \
++    $testsrcfiles $libs" "" "" "" {{ld plugin-26.d}} "main.x" ] \
  ]
  
  set plugin_lib_tests [list \
-@@ -145,6 +186,25 @@ set plugin_lib_tests [list \
+@@ -145,6 +188,25 @@ set plugin_lib_tests [list \
  			-plugin-opt sym:${_}text::0:0:0 \
  			-plugin-opt add:tmpdir/text.o \
      $testobjfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-11.d}} "main.x" ] \
@@ -2305,7 +2098,7 @@ index 23a8cfb..0efd7ee 100644
  ]
  
  set plugin_extra_elf_tests [list \
-@@ -161,6 +221,20 @@ set plugin_extra_elf_tests [list \
+@@ -161,6 +223,20 @@ set plugin_extra_elf_tests [list \
  			-plugin-opt add:tmpdir/func3h.o \
      $testobjfiles $libs --verbose=2" "" "" "" {{ld plugin-12.d} \
  				{readelf -s plugin-vis-1.d}} "main.x" ] \
@@ -2326,7 +2119,7 @@ index 23a8cfb..0efd7ee 100644
  ]
  
  if { !$can_compile || $failed_compile } {
-@@ -191,3 +265,57 @@ if ![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] {
+@@ -191,3 +267,65 @@ if ![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] {
  } else {
      run_ld_link_tests $plugin_lib_tests
  }
@@ -2339,12 +2132,10 @@ index 23a8cfb..0efd7ee 100644
 +    [list "load plugin 2 with source" \
 +	               "-plugin $plugin2_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
-+			-plugin-opt claim:$srcdir/$subdir/func.c \
 +    $testsrcfiles $libs" "" "" "" {{ld plugin-21.d}} "main.x" ] \
 +    [list "load plugin 2 with source and -r" \
 +	               "-r -plugin $plugin2_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
-+			-plugin-opt claim:$srcdir/$subdir/func.c \
 +    $testsrcfiles $libs" "" "" "" {{ld plugin-24.d}} "main.x" ] \
 +    [list "plugin 3 with source lib" \
 +	               "-plugin $plugin3_path $regclm $regas $regcln \
@@ -2353,12 +2144,10 @@ index 23a8cfb..0efd7ee 100644
 +    [list "load plugin 3 with source" \
 +	               "-plugin $plugin3_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
-+			-plugin-opt claim:$srcdir/$subdir/func.c \
 +    $testsrcfiles $libs" "" "" "" {{ld plugin-23.d}} "main.x" ] \
 +    [list "load plugin 3 with source and -r" \
 +	               "-r -plugin $plugin3_path $regclm $regas $regcln \
 +			-plugin-opt dumpresolutions \
-+			-plugin-opt claim:$srcdir/$subdir/func.c \
 +    $testsrcfiles $libs" "" "" "" {{ld plugin-25.d}} "main.x" ] \
 +]
 +
@@ -2376,14 +2165,26 @@ index 23a8cfb..0efd7ee 100644
 +}
 +
 +# Check if ar --plugin works.
++file delete tmpdir/libfunc.a
 +if [ar_simple_create $ar "--plugin $plugin2_path" "tmpdir/libfunc.a" \
-+			 "$srcdir/$subdir/func.c"] {
-+    run_ld_link_tests $plugin_src_tests
++			 "tmpdir/main.o $srcdir/$subdir/func.c"] {
++    set testname "ar --plugin"
++    set nm_plugin "$NM -s --plugin $plugin2_path tmpdir/libfunc.a"
++    catch "exec $nm_plugin" plugin_nm_output
++    send_log "$nm_plugin\n"
++    send_log "$plugin_nm_output\n"
++    if { [regexp "func in func.c" "$plugin_nm_output"] &&
++         [regexp "_func in func.c" "$plugin_nm_output"] } {
++	pass $testname
++	run_ld_link_tests $plugin_src_tests
++    } else {
++	fail $testname
++    }
 +} else {
 +    foreach testitem $plugin_src_tests {
 +	unresolved [lindex $testitem 0]
 +    }
 +}
 -- 
-1.9.3
+2.1.0
 
