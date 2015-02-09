@@ -103,10 +103,10 @@ const struct extension_language_defn extension_language_python =
 
 int gdb_python_initialized;
 
-static PyMethodDef GdbMethods[];
+extern PyMethodDef python_GdbMethods[];
 
 #ifdef IS_PY3K
-static struct PyModuleDef GdbModuleDef;
+extern struct PyModuleDef python_GdbModuleDef;
 #endif
 
 PyObject *gdb_module;
@@ -1712,11 +1712,11 @@ message == an error message without a stack will be printed."),
   PyEval_InitThreads ();
 
 #ifdef IS_PY3K
-  gdb_module = PyModule_Create (&GdbModuleDef);
+  gdb_module = PyModule_Create (&python_GdbModuleDef);
   /* Add _gdb module to the list of known built-in modules.  */
   _PyImport_FixupBuiltin (gdb_module, "_gdb");
 #else
-  gdb_module = Py_InitModule ("_gdb", GdbMethods);
+  gdb_module = Py_InitModule ("_gdb", python_GdbMethods);
 #endif
   if (gdb_module == NULL)
     goto fail;
@@ -1932,7 +1932,7 @@ gdbpy_initialized (const struct extension_language_defn *extlang)
 
 #ifdef HAVE_PYTHON
 
-static PyMethodDef GdbMethods[] =
+PyMethodDef python_GdbMethods[] =
 {
   { "history", gdbpy_history, METH_VARARGS,
     "Get a value from history" },
@@ -2044,7 +2044,7 @@ Return a tuple containing all inferiors." },
 };
 
 #ifdef IS_PY3K
-static struct PyModuleDef GdbModuleDef =
+struct PyModuleDef python_GdbModuleDef =
 {
   PyModuleDef_HEAD_INIT,
   "_gdb",
