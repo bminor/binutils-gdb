@@ -1,3 +1,16 @@
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
+	* c-typeprint.c (cp_type_print_method_args): Handle '_Atomic'.
+	(c_type_print_modifier): Likewise.
+	* dwarf2read.c (read_tag_atomic_type): New function.
+	(read_type_die_1): Handle DW_TAG_atomic_type.
+	* gdbtypes.c (make_atomic_type): New function.
+	(recursive_dump_type): Handle TYPE_ATOMIC.
+	* gdbtypes.h (enum type_flag_values): Renumber.
+	(enum type_instance_flag_value): Add TYPE_INSTANCE_FLAG_ATOMIC.
+	(TYPE_ATOMIC): New macro.
+	(make_atomic_type): Declare.
+
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (ftrace_find_call): Skip gaps.

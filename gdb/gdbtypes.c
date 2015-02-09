@@ -714,6 +714,17 @@ make_unqualified_type (struct type *type)
 			      NULL);
 }
 
+/* Make a '_Atomic'-qualified version of TYPE.  */
+
+struct type *
+make_atomic_type (struct type *type)
+{
+  return make_qualified_type (type,
+			      (TYPE_INSTANCE_FLAGS (type)
+			       | TYPE_INSTANCE_FLAG_ATOMIC),
+			      NULL);
+}
+
 /* Replace the contents of ntype with the type *type.  This changes the
    contents, rather than the pointer for TYPE_MAIN_TYPE (ntype); thus
    the changes are propogated to all types in the TYPE_CHAIN.
@@ -4011,6 +4022,10 @@ recursive_dump_type (struct type *type, int spaces)
   if (TYPE_RESTRICT (type))
     {
       puts_filtered (" TYPE_FLAG_RESTRICT");
+    }
+  if (TYPE_ATOMIC (type))
+    {
+      puts_filtered (" TYPE_FLAG_ATOMIC");
     }
   puts_filtered ("\n");
 

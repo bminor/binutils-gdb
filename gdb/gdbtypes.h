@@ -193,18 +193,18 @@ enum type_code
 
 enum type_flag_value
 {
-  TYPE_FLAG_UNSIGNED = (1 << 8),
-  TYPE_FLAG_NOSIGN = (1 << 9),
-  TYPE_FLAG_STUB = (1 << 10),
-  TYPE_FLAG_TARGET_STUB = (1 << 11),
-  TYPE_FLAG_STATIC = (1 << 12),
-  TYPE_FLAG_PROTOTYPED = (1 << 13),
-  TYPE_FLAG_INCOMPLETE = (1 << 14),
-  TYPE_FLAG_VARARGS = (1 << 15),
-  TYPE_FLAG_VECTOR = (1 << 16),
-  TYPE_FLAG_FIXED_INSTANCE = (1 << 17),
-  TYPE_FLAG_STUB_SUPPORTED = (1 << 18),
-  TYPE_FLAG_GNU_IFUNC = (1 << 19),
+  TYPE_FLAG_UNSIGNED = (1 << 9),
+  TYPE_FLAG_NOSIGN = (1 << 10),
+  TYPE_FLAG_STUB = (1 << 11),
+  TYPE_FLAG_TARGET_STUB = (1 << 12),
+  TYPE_FLAG_STATIC = (1 << 13),
+  TYPE_FLAG_PROTOTYPED = (1 << 14),
+  TYPE_FLAG_INCOMPLETE = (1 << 15),
+  TYPE_FLAG_VARARGS = (1 << 16),
+  TYPE_FLAG_VECTOR = (1 << 17),
+  TYPE_FLAG_FIXED_INSTANCE = (1 << 18),
+  TYPE_FLAG_STUB_SUPPORTED = (1 << 19),
+  TYPE_FLAG_GNU_IFUNC = (1 << 20),
 
   /* * Used for error-checking.  */
   TYPE_FLAG_MIN = TYPE_FLAG_UNSIGNED
@@ -223,7 +223,8 @@ enum type_instance_flag_value
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 = (1 << 4),
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2 = (1 << 5),
   TYPE_INSTANCE_FLAG_NOTTEXT = (1 << 6),
-  TYPE_INSTANCE_FLAG_RESTRICT = (1 << 7)
+  TYPE_INSTANCE_FLAG_RESTRICT = (1 << 7),
+  TYPE_INSTANCE_FLAG_ATOMIC = (1 << 8)
 };
 
 /* * Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
@@ -354,6 +355,12 @@ enum type_instance_flag_value
 
 #define TYPE_RESTRICT(t) \
   (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT)
+
+/* * Atomic type.  If this is set, the corresponding type has an
+   _Atomic modifier.  */
+
+#define TYPE_ATOMIC(t) \
+  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC)
 
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -1655,6 +1662,8 @@ extern struct type *make_cv_type (int, int, struct type *, struct type **);
 extern struct type *make_restrict_type (struct type *);
 
 extern struct type *make_unqualified_type (struct type *);
+
+extern struct type *make_atomic_type (struct type *);
 
 extern void replace_type (struct type *, struct type *);
 
