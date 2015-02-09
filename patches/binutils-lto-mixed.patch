@@ -86,11 +86,17 @@ for Linux kernel build with LTO.
 
 diff --git a/ChangeLog.lto-mixed b/ChangeLog.lto-mixed
 new file mode 100644
-index 0000000..be66879
+index 0000000..5088e37
 --- /dev/null
 +++ b/ChangeLog.lto-mixed
-@@ -0,0 +1,297 @@
+@@ -0,0 +1,303 @@
 +bfd/
++
++2015-02-08  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* format.c: Include "plugin.h"
++	(bfd_check_format_matches): Don't check the plugin target twice
++	if the plugin target is explicitly specified.
 +
 +2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -388,7 +394,7 @@ index 0000000..be66879
 +	(lto_run_tests): Add "LTO 4[acd]" tests.
 +	Build liblto-4.a.  Run "lto-4r-[abcd]" tests.
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 91dbf80..8c92319 100644
+index 678eaed..6df7519 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
 @@ -1060,6 +1060,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
@@ -411,8 +417,8 @@ index 91dbf80..8c92319 100644
  /* Pointer to the common section.  */
  #define bfd_com_section_ptr (&_bfd_std_section[0])
  /* Pointer to the undefined section.  */
-@@ -6272,6 +6278,14 @@ enum bfd_direction
-     both_direction = 3
+@@ -6279,6 +6285,14 @@ enum bfd_plugin_format
+     bfd_plugin_no = 2
    };
  
 +enum bfd_lto_object_type
@@ -426,17 +432,17 @@ index 91dbf80..8c92319 100644
  struct bfd
  {
    /* The filename the application opened the BFD with.  */
-@@ -6428,6 +6442,9 @@ struct bfd
-   /* Set if this is the linker output BFD.  */
-   unsigned int is_linker_output : 1;
+@@ -6438,6 +6452,9 @@ struct bfd
+   /* If this is an input for a compiler plug-in library.  */
+   ENUM_BITFIELD (bfd_plugin_format) plugin_format : 2;
  
 +  /* LTO object type.  */
-+  unsigned int lto_type : 2;
++  ENUM_BITFIELD (bfd_lto_object_type) lto_type : 2;
 +
-   /* Currently my_archive is tested before adding origin to
-      anything. I believe that this can become always an add of
-      origin, with origin set to 0 for non archive files.  */
-@@ -6449,6 +6466,9 @@ struct bfd
+   /* Set to dummy BFD created when claimed by a compiler plug-in
+      library.  */
+   bfd *plugin_dummy_bfd;
+@@ -6463,6 +6480,9 @@ struct bfd
    /* The last section on the section list.  */
    struct bfd_section *section_last;
  
@@ -446,7 +452,7 @@ index 91dbf80..8c92319 100644
    /* The number of sections.  */
    unsigned int section_count;
  
-@@ -6750,6 +6770,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
+@@ -6764,6 +6784,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
  
  char *bfd_demangle (bfd *, const char *, int);
  
@@ -456,11 +462,11 @@ index 91dbf80..8c92319 100644
  symindex bfd_get_next_mapent
     (bfd *abfd, symindex previous, carsym **sym);
 diff --git a/bfd/bfd.c b/bfd/bfd.c
-index 29a7c5d..3e2cee4 100644
+index 69c6bde..ed8d28f 100644
 --- a/bfd/bfd.c
 +++ b/bfd/bfd.c
-@@ -44,6 +44,14 @@ CODE_FRAGMENT
- .    both_direction = 3
+@@ -51,6 +51,14 @@ CODE_FRAGMENT
+ .    bfd_plugin_no = 2
  .  };
  .
 +.enum bfd_lto_object_type
@@ -474,17 +480,17 @@ index 29a7c5d..3e2cee4 100644
  .struct bfd
  .{
  .  {* The filename the application opened the BFD with.  *}
-@@ -200,6 +208,9 @@ CODE_FRAGMENT
- .  {* Set if this is the linker output BFD.  *}
- .  unsigned int is_linker_output : 1;
+@@ -210,6 +218,9 @@ CODE_FRAGMENT
+ .  {* If this is an input for a compiler plug-in library.  *}
+ .  ENUM_BITFIELD (bfd_plugin_format) plugin_format : 2;
  .
 +.  {* LTO object type.  *}
-+.  unsigned int lto_type : 2;
++.  ENUM_BITFIELD (bfd_lto_object_type) lto_type : 2;
 +.
- .  {* Currently my_archive is tested before adding origin to
- .     anything. I believe that this can become always an add of
- .     origin, with origin set to 0 for non archive files.  *}
-@@ -221,6 +232,9 @@ CODE_FRAGMENT
+ .  {* Set to dummy BFD created when claimed by a compiler plug-in
+ .     library.  *}
+ .  bfd *plugin_dummy_bfd;
+@@ -235,6 +246,9 @@ CODE_FRAGMENT
  .  {* The last section on the section list.  *}
  .  struct bfd_section *section_last;
  .
@@ -494,7 +500,7 @@ index 29a7c5d..3e2cee4 100644
  .  {* The number of sections.  *}
  .  unsigned int section_count;
  .
-@@ -1923,3 +1937,36 @@ bfd_demangle (bfd *abfd, const char *name, int options)
+@@ -1937,3 +1951,36 @@ bfd_demangle (bfd *abfd, const char *name, int options)
  
    return res;
  }
@@ -544,10 +550,20 @@ index 0aa5f8e..79992c1 100644
    { STRING_COMMA_LEN (".gnu.version_d"),   0, SHT_GNU_verdef,  0 },
    { STRING_COMMA_LEN (".gnu.version_r"),   0, SHT_GNU_verneed, 0 },
 diff --git a/bfd/format.c b/bfd/format.c
-index dd6dc8a..55ab44c 100644
+index dd6dc8a..11c3d9a 100644
 --- a/bfd/format.c
 +++ b/bfd/format.c
-@@ -179,6 +179,33 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
+@@ -46,6 +46,9 @@ SUBSECTION
+ #include "sysdep.h"
+ #include "bfd.h"
+ #include "libbfd.h"
++#if BFD_SUPPORTS_PLUGINS
++#include "plugin.h"
++#endif
+ 
+ /* IMPORT from targets.c.  */
+ extern const size_t _bfd_target_vector_entries;
+@@ -179,6 +182,33 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
    preserve->marker = NULL;
  }
  
@@ -581,16 +597,6 @@ index dd6dc8a..55ab44c 100644
  /*
  FUNCTION
  	bfd_check_format_matches
-@@ -203,6 +230,9 @@ bfd_boolean
- bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
- {
-   extern const bfd_target binary_vec;
-+#if BFD_SUPPORTS_PLUGINS
-+  extern const bfd_target plugin_vec;
-+#endif
-   const bfd_target * const *target;
-   const bfd_target **matching_vector = NULL;
-   const bfd_target *save_targ, *right_targ, *ar_right_targ, *match_targ;
 @@ -221,7 +251,10 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
      }
  
@@ -608,9 +614,9 @@ index dd6dc8a..55ab44c 100644
  	continue;
  
 +#if BFD_SUPPORTS_PLUGINS
-+      /* Since the plugin target is explicitly specified when a BFD file
-+	 is opened,  don't check it twice.  */
-+      if (*target == &plugin_vec)
++      /* If the plugin target is explicitly specified when a BFD file
++	 is opened, don't check it twice.  */
++      if (bfd_plugin_specified_p () && bfd_plugin_target_p (*target))
 +	continue;
 +#endif
 +
@@ -701,7 +707,7 @@ index 1320ee1..538feb5 100644
 +  return name;
 +}
 diff --git a/bfd/plugin.c b/bfd/plugin.c
-index 94ed95b..1a2aa22 100644
+index b41e092..4d77af1 100644
 --- a/bfd/plugin.c
 +++ b/bfd/plugin.c
 @@ -130,6 +130,146 @@ register_claim_file (ld_plugin_claim_file_handler handler)
@@ -867,7 +873,7 @@ index 94ed95b..1a2aa22 100644
    return LDPS_OK;
  }
  
-@@ -391,7 +534,8 @@ static long
+@@ -440,7 +583,8 @@ static long
  bfd_plugin_get_symtab_upper_bound (bfd *abfd)
  {
    struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
@@ -877,7 +883,7 @@ index 94ed95b..1a2aa22 100644
  
    BFD_ASSERT (nsyms >= 0);
  
-@@ -425,12 +569,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -474,12 +618,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
    struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
    long nsyms = plugin_data->nsyms;
    const struct ld_plugin_symbol *syms = plugin_data->syms;
@@ -891,7 +897,7 @@ index 94ed95b..1a2aa22 100644
  
    for (i = 0; i < nsyms; i++)
      {
-@@ -443,10 +582,11 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -492,10 +631,11 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
        s->name = syms[i].name;
        s->value = 0;
        s->flags = convert_flags (&syms[i]);
@@ -904,7 +910,7 @@ index 94ed95b..1a2aa22 100644
  	  break;
  	case LDPK_UNDEF:
  	case LDPK_WEAKUNDEF:
-@@ -454,15 +594,18 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -503,15 +643,18 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
  	  break;
  	case LDPK_DEF:
  	case LDPK_WEAKDEF:
@@ -927,10 +933,10 @@ index 94ed95b..1a2aa22 100644
  }
  
 diff --git a/bfd/plugin.h b/bfd/plugin.h
-index af98c59..97c2a1d 100644
+index 1a66e6e..5dbcba4 100644
 --- a/bfd/plugin.h
 +++ b/bfd/plugin.h
-@@ -30,6 +30,8 @@ typedef struct plugin_data_struct
+@@ -33,6 +33,8 @@ typedef struct plugin_data_struct
  {
    int nsyms;
    const struct ld_plugin_symbol *syms;
@@ -1007,10 +1013,10 @@ index 8320793..8579f73 100644
        if (gsym != NULL)
  	{
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index e08d74e..6e051fb 100644
+index 00bcb1d..5fb12fc 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -3763,6 +3763,7 @@ get_section_type_name (unsigned int sh_type)
+@@ -3785,6 +3785,7 @@ get_section_type_name (unsigned int sh_type)
      case 0x7ffffffd:		return "AUXILIARY";
      case 0x7fffffff:		return "FILTER";
      case SHT_GNU_LIBLIST:	return "GNU_LIBLIST";
@@ -1150,7 +1156,7 @@ index f7a3acb..10ab41e 100644
  EOF
  
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 34a729e..ef44ab6 100644
+index 618e20a..d7645c5 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
 @@ -65,6 +65,7 @@ static void gld${EMULATION_NAME}_before_allocation (void);
@@ -1247,7 +1253,7 @@ index 34a729e..ef44ab6 100644
  if test x"$LDEMUL_AFTER_ALLOCATION" != xgld"$EMULATION_NAME"_after_allocation; then
  fragment <<EOF
  
-@@ -2507,7 +2538,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+@@ -2513,7 +2544,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
    ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
    "${EMULATION_NAME}",
    "${OUTPUT_FORMAT}",
@@ -1374,13 +1380,13 @@ index 10fcf3d..4eec185 100644
  
  #endif
 diff --git a/ld/ldfile.c b/ld/ldfile.c
-index c9c9541..a9414f1 100644
+index e19f55e..7aaf3b9 100644
 --- a/ld/ldfile.c
 +++ b/ld/ldfile.c
-@@ -317,7 +317,9 @@ success:
- 	  plugin_maybe_claim (&file, entry);
- 	}
-     }
+@@ -305,7 +305,9 @@ success:
+       && !no_more_claiming
+       && bfd_check_format (entry->the_bfd, bfd_object))
+     plugin_maybe_claim (entry);
 +  else
  #endif /* ENABLE_PLUGINS */
 +    cmdline_check_object_only_section (entry->the_bfd, FALSE);
@@ -2540,10 +2546,10 @@ index be7f653..725175d 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 86f02a6..9c57b45 100644
+index 4b41288..1d91dae 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
-@@ -220,6 +220,9 @@ main (int argc, char **argv)
+@@ -219,6 +219,9 @@ main (int argc, char **argv)
  
    xatexit (ld_cleanup);
  
@@ -2553,7 +2559,7 @@ index 86f02a6..9c57b45 100644
    /* Set up the sysroot directory.  */
    ld_sysroot = get_sysroot (argc, argv);
    if (*ld_sysroot)
-@@ -296,8 +299,8 @@ main (int argc, char **argv)
+@@ -295,8 +298,8 @@ main (int argc, char **argv)
    default_target = ldemul_choose_target (argc, argv);
    config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
    config.commonpagesize = bfd_emul_get_commonpagesize (default_target);
@@ -2564,7 +2570,7 @@ index 86f02a6..9c57b45 100644
    ldemul_before_parse ();
    lang_has_input_file = FALSE;
    parse_args (argc, argv);
-@@ -312,34 +315,7 @@ main (int argc, char **argv)
+@@ -311,34 +314,7 @@ main (int argc, char **argv)
  
    ldemul_set_symbols ();
  
@@ -2600,7 +2606,7 @@ index 86f02a6..9c57b45 100644
  
    if (verbose)
      {
-@@ -441,7 +417,7 @@ main (int argc, char **argv)
+@@ -440,7 +416,7 @@ main (int argc, char **argv)
      fprintf (stderr, "lookup = %p val %lx\n", h, h ? h->u.def.value : 1);
    }
  #endif
@@ -2609,7 +2615,7 @@ index 86f02a6..9c57b45 100644
    lang_finish ();
  
    /* Even if we're producing relocatable output, some non-fatal errors should
-@@ -461,6 +437,8 @@ main (int argc, char **argv)
+@@ -460,6 +436,8 @@ main (int argc, char **argv)
        if (! bfd_close (link_info.output_bfd))
  	einfo (_("%F%B: final close failed: %E\n"), link_info.output_bfd);
  
@@ -2618,7 +2624,7 @@ index 86f02a6..9c57b45 100644
        /* If the --force-exe-suffix is enabled, and we're making an
  	 executable file and it doesn't end in .exe, copy it to one
  	 which does.  */
-@@ -507,6 +485,9 @@ main (int argc, char **argv)
+@@ -506,6 +484,9 @@ main (int argc, char **argv)
  	}
      }
  
@@ -2628,8 +2634,8 @@ index 86f02a6..9c57b45 100644
    END_PROGRESS (program_name);
  
    if (config.stats)
-@@ -816,7 +797,9 @@ add_archive_element (struct bfd_link_info *info,
- 	    }
+@@ -799,7 +780,9 @@ add_archive_element (struct bfd_link_info *info,
+ 	  *subsbfd = input->the_bfd;
  	}
      }
 +  else
@@ -2638,7 +2644,7 @@ index 86f02a6..9c57b45 100644
  
    ldlang_add_file (input);
  
-@@ -1495,3 +1478,38 @@ notice (struct bfd_link_info *info,
+@@ -1478,3 +1461,38 @@ notice (struct bfd_link_info *info,
  
    return TRUE;
  }
@@ -2713,10 +2719,10 @@ index e23f1e7..40c796a 100644
  	case 'q':
  	  link_info.emitrelocations = TRUE;
 diff --git a/ld/plugin.c b/ld/plugin.c
-index cfbca0b..4f24785 100644
+index a4d38f3..9f79483 100644
 --- a/ld/plugin.c
 +++ b/ld/plugin.c
-@@ -39,6 +39,9 @@
+@@ -57,6 +57,9 @@ extern int errno;
  /* Report plugin symbols.  */
  bfd_boolean report_plugin_symbols;
  
@@ -2726,17 +2732,17 @@ index cfbca0b..4f24785 100644
  /* The suffix to append to the name of the real (claimed) object file
     when generating a dummy BFD to hold the IR symbols sent from the
     plugin.  For cosmetic use only; appears in maps, crefs etc.  */
-@@ -891,6 +894,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
-   close (file->fd);
-   if (claimed)
+@@ -1122,6 +1125,9 @@ plugin_maybe_claim (lang_input_statement_type *entry)
      {
+       bfd *abfd = entry->the_bfd->plugin_dummy_bfd;
+ 
 +      /* Check object only section.  */
 +      cmdline_check_object_only_section (entry->the_bfd, TRUE);
 +
        /* Discard the real file's BFD and substitute the dummy one.  */
  
        /* BFD archive handling caches elements so we can't call
-@@ -944,14 +950,17 @@ plugin_call_cleanup (void)
+@@ -1167,14 +1173,17 @@ plugin_call_cleanup (void)
      {
        if (curplug->cleanup_handler && !curplug->cleanup_done)
  	{
@@ -2763,7 +2769,7 @@ index cfbca0b..4f24785 100644
  	}
        curplug = curplug->next;
 diff --git a/ld/plugin.h b/ld/plugin.h
-index 15532cd..887a3ef 100644
+index 59c0df7..bf92dd9 100644
 --- a/ld/plugin.h
 +++ b/ld/plugin.h
 @@ -24,6 +24,9 @@
@@ -3024,7 +3030,7 @@ index 0000000..d4c5852
 +.* .gnu_object_only.*
 +#pass
 diff --git a/ld/testsuite/ld-plugin/lto.exp b/ld/testsuite/ld-plugin/lto.exp
-index 400e683..1d1c459 100644
+index 6d9500b..8052131 100644
 --- a/ld/testsuite/ld-plugin/lto.exp
 +++ b/ld/testsuite/ld-plugin/lto.exp
 @@ -79,6 +79,15 @@ set lto_link_tests [list \
@@ -3094,7 +3100,7 @@ index 400e683..1d1c459 100644
  set testname "Build liblto-11.a"
  remote_file host delete "tmpdir/liblto-11.a"
  set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
-@@ -402,8 +438,30 @@ if { [at_least_gcc_version 4 7] } {
+@@ -413,8 +449,30 @@ if { [at_least_gcc_version 4 7] } {
  # Run "ld -r" to generate inputs for complex LTO tests.
  run_dump_test "lto-3r"
  remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
