@@ -1,3 +1,9 @@
+2015-02-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR remote/17946
+	* gdb/remote.c (remote_parse_stop_reply): Fix wrong comparison
+	of pointer against char.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* c-typeprint.c (cp_type_print_method_args): Handle '_Atomic'.
