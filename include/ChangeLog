@@ -1,5 +1,9 @@
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
+	* dwarf2.h: Add DW_LANG_Fortran03 and DW_LANG_Fortran08.
+
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
 	* dwarf2.def: Add DW_TAG_atomic_type.
 
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>

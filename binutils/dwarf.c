@@ -1951,6 +1951,8 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_LANG_C_plus_plus_11:	printf ("(C++11)"); break;
 	case DW_LANG_C11:		printf ("(C11)"); break;
 	case DW_LANG_C_plus_plus_14:	printf ("(C++14)"); break;
+	case DW_LANG_Fortran03:		printf ("(Fortran 03)"); break;
+	case DW_LANG_Fortran08:		printf ("(Fortran 08)"); break;
 	  /* MIPS extension.  */
 	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;
 	  /* UPC extension.  */
