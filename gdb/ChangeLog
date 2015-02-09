@@ -1,3 +1,8 @@
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (set_cu_language): Recognize DW_LANG_Fortran03 and
+	DW_LANG_Fortran08 as language_fortran.
+
 2015-02-09  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR remote/17946
