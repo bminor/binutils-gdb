@@ -1,5 +1,12 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/python-interrupts.exp (test_python_interrupts): Adjust
+	call to catch_command_errors.
+	* gdb.gdb/python-selftest.exp (selftest_python): Adjust call to
+	catch_command_errors.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.gdb/complaints.exp (test_initial_complaints): Also accept
 	"true" for boolean result.
 	* gdb.gdb/selftest.exp (test_with_self): Also accept full

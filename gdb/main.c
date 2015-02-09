@@ -362,11 +362,11 @@ typedef void (catch_command_errors_ftype) (char *, int);
 
 static int
 catch_command_errors (catch_command_errors_ftype *command,
-		      char *arg, int from_tty, return_mask mask)
+		      char *arg, int from_tty)
 {
   volatile struct gdb_exception e;
 
-  TRY_CATCH (e, mask)
+  TRY_CATCH (e, RETURN_MASK_ALL)
     {
       int was_sync = sync_execution;
 
@@ -385,11 +385,11 @@ typedef void (catch_command_errors_const_ftype) (const char *, int);
 
 static int
 catch_command_errors_const (catch_command_errors_const_ftype *command,
-			    const char *arg, int from_tty, return_mask mask)
+			    const char *arg, int from_tty)
 {
   volatile struct gdb_exception e;
 
-  TRY_CATCH (e, mask)
+  TRY_CATCH (e, RETURN_MASK_ALL)
     {
       int was_sync = sync_execution;
 
@@ -992,8 +992,7 @@ captured_main (void *data)
      processed; it sets global parameters, which are independent of
      what file you are debugging or what directory you are in.  */
   if (system_gdbinit && !inhibit_gdbinit)
-    catch_command_errors_const (source_script, system_gdbinit,
-				0, RETURN_MASK_ALL);
+    catch_command_errors_const (source_script, system_gdbinit, 0);
 
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
      *before* all the command line arguments are processed; it sets
@@ -1001,8 +1000,7 @@ captured_main (void *data)
      debugging or what directory you are in.  */
 
   if (home_gdbinit && !inhibit_gdbinit && !inhibit_home_gdbinit)
-    catch_command_errors_const (source_script,
-				home_gdbinit, 0, RETURN_MASK_ALL);
+    catch_command_errors_const (source_script, home_gdbinit, 0);
 
   /* Process '-ix' and '-iex' options early.  */
   for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
@@ -1010,22 +1008,22 @@ captured_main (void *data)
     {
       case CMDARG_INIT_FILE:
         catch_command_errors_const (source_script, cmdarg_p->string,
-				    !batch_flag, RETURN_MASK_ALL);
+				    !batch_flag);
 	break;
       case CMDARG_INIT_COMMAND:
         catch_command_errors (execute_command, cmdarg_p->string,
-			      !batch_flag, RETURN_MASK_ALL);
+			      !batch_flag);
 	break;
     }
 
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)
     {
-      catch_command_errors (cd_command, cdarg, 0, RETURN_MASK_ALL);
+      catch_command_errors (cd_command, cdarg, 0);
     }
 
   for (i = 0; i < ndir; i++)
-    catch_command_errors (directory_switch, dirarg[i], 0, RETURN_MASK_ALL);
+    catch_command_errors (directory_switch, dirarg[i], 0);
   xfree (dirarg);
 
   /* Skip auto-loading section-specified scripts until we've sourced
@@ -1042,18 +1040,18 @@ captured_main (void *data)
          open it, better only print one error message.
          catch_command_errors returns non-zero on success!  */
       if (catch_command_errors_const (exec_file_attach, execarg,
-				      !batch_flag, RETURN_MASK_ALL))
+				      !batch_flag))
 	catch_command_errors_const (symbol_file_add_main, symarg,
-				    !batch_flag, RETURN_MASK_ALL);
+				    !batch_flag);
     }
   else
     {
       if (execarg != NULL)
 	catch_command_errors_const (exec_file_attach, execarg,
-				    !batch_flag, RETURN_MASK_ALL);
+				    !batch_flag);
       if (symarg != NULL)
 	catch_command_errors_const (symbol_file_add_main, symarg,
-				    !batch_flag, RETURN_MASK_ALL);
+				    !batch_flag);
     }
 
   if (corearg && pidarg)
@@ -1061,11 +1059,9 @@ captured_main (void *data)
 	     "a core file at the same time."));
 
   if (corearg != NULL)
-    catch_command_errors (core_file_command, corearg,
-			  !batch_flag, RETURN_MASK_ALL);
+    catch_command_errors (core_file_command, corearg, !batch_flag);
   else if (pidarg != NULL)
-    catch_command_errors (attach_command, pidarg,
-			  !batch_flag, RETURN_MASK_ALL);
+    catch_command_errors (attach_command, pidarg, !batch_flag);
   else if (pid_or_core_arg)
     {
       /* The user specified 'gdb program pid' or gdb program core'.
@@ -1075,13 +1071,13 @@ captured_main (void *data)
       if (isdigit (pid_or_core_arg[0]))
 	{
 	  if (catch_command_errors (attach_command, pid_or_core_arg,
-				    !batch_flag, RETURN_MASK_ALL) == 0)
+				    !batch_flag) == 0)
 	    catch_command_errors (core_file_command, pid_or_core_arg,
-				  !batch_flag, RETURN_MASK_ALL);
+				  !batch_flag);
 	}
       else /* Can't be a pid, better be a corefile.  */
 	catch_command_errors (core_file_command, pid_or_core_arg,
-			      !batch_flag, RETURN_MASK_ALL);
+			      !batch_flag);
     }
 
   if (ttyarg != NULL)
@@ -1104,8 +1100,7 @@ captured_main (void *data)
 	{
 	  auto_load_local_gdbinit_loaded = 1;
 
-	  catch_command_errors_const (source_script, local_gdbinit, 0,
-				      RETURN_MASK_ALL);
+	  catch_command_errors_const (source_script, local_gdbinit, 0);
 	}
     }
 
@@ -1123,11 +1118,11 @@ captured_main (void *data)
     {
       case CMDARG_FILE:
         catch_command_errors_const (source_script, cmdarg_p->string,
-				    !batch_flag, RETURN_MASK_ALL);
+				    !batch_flag);
 	break;
       case CMDARG_COMMAND:
         catch_command_errors (execute_command, cmdarg_p->string,
-			      !batch_flag, RETURN_MASK_ALL);
+			      !batch_flag);
 	break;
     }
 

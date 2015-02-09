@@ -1,5 +1,11 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* main.c (catch_command_errors, catch_command_errors_const):
+	Remove 'mask' argument.  Adjust.
+	(captured_main): Adjust callers.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* python/python-internal.h: Include "extension-priv.h".
 
 2015-02-27  Pedro Alves  <palves@redhat.com>
