@@ -1,3 +1,7 @@
+2015-02-11  Pedro Alves  <palves@redhat.com>
+
+	* xcoffread.c (within_function): Delete.
+
 2015-02-11  Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves <palves@redhat.com>
 
