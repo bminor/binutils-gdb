@@ -2304,6 +2304,13 @@ process_debug_info (struct dwarf_section *section,
 	  alloc_num_debug_info_entries = num_debug_info_entries = 0;
 	  return 0;
 	}
+      /* PR 17531: file: 92ca3797.
+	 We cannot rely upon the debug_information array being initialised
+	 before it is used.  A corrupt file could easily contain references
+	 to a unit for which information has not been made available.  So
+	 we ensure that the array is zeroed here.  */
+      memset (debug_information, 0, num_units * sizeof * debug_information);
+	 
       alloc_num_debug_info_entries = num_units;
     }
 
@@ -6913,7 +6920,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   ppool = pindex + nslots * 4;
 
   /* PR 17531: file: 45d69832.  */
-  if (pindex < phash || ppool < phdr)
+  if (pindex < phash || ppool < phdr || (pindex == phash && nslots != 0))
     {
       warn (_("Section %s is too small for %d slots\n"),
 	    section->name, nslots);
@@ -6930,7 +6937,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       printf (_("  Number of slots:         %d\n\n"), nslots);
     }
 
-  if (ppool > limit)
+  if (ppool > limit || ppool < phdr)
     {
       warn (_("Section %s too small for %d hash table entries\n"),
 	    section->name, nslots);
