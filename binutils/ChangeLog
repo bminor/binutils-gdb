@@ -1,3 +1,22 @@
+2015-02-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (eh_addr_size): Use an unsigned type.
+	(size_of_encoded_value): Return an unsigned type.
+	(read_leb128): Break if the shift becomes too big.
+	(process_extended_line_op): Do not read the address if the length
+	is too long.
+	(read_cie): Warn and fail if the pointer size or segment size are
+	too big.
+	* dwarf.h (DWARF2_External_LineInfo): Delete unused and incorrect
+	structure definition.
+	(DWARF2_External_PubNames): Likewise.
+	(DWARF2_External_CompUnit): Likewise.
+	(DWARF2_External_ARange): Likewise.
+	(DWARF2_Internal_LineInfo): Use dwarf_vma type for
+	li_prologue_length.
+	(eh_addr_size): Update prototype.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Handle DW_LANG_Fortran03

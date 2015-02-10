@@ -44,7 +44,7 @@ static debug_info *debug_information = NULL;
    that the .debug_info section could not be loaded/parsed.  */
 #define DEBUG_INFO_UNAVAILABLE  (unsigned int) -1
 
-int eh_addr_size;
+unsigned int eh_addr_size;
 
 int do_debug_info;
 int do_debug_abbrevs;
@@ -105,7 +105,7 @@ static void load_cu_tu_indexes (void *file);
 #define FLAG_DEBUG_LINES_RAW	 1
 #define FLAG_DEBUG_LINES_DECODED 2
 
-static int
+static unsigned int
 size_of_encoded_value (int encoding)
 {
   switch (encoding & 0x7)
@@ -281,6 +281,11 @@ read_leb128 (unsigned char *data,
       shift += 7;
       if ((byte & 0x80) == 0)
 	break;
+
+      /* PR 17512: file: 0ca183b8.
+	 FIXME: Should we signal this error somehow ?  */
+      if (shift >= sizeof (result))
+	break;
     }
 
   if (length_return != NULL)
@@ -446,9 +451,13 @@ process_extended_line_op (unsigned char * data,
     case DW_LNE_set_address:
       /* PR 17512: file: 002-100480-0.004.  */
       if (len - bytes_read - 1 > 8)
-	warn (_("Length (%d) of DW_LNE_set_address op is too long\n"),
-	      len - bytes_read - 1);
-      SAFE_BYTE_GET (adr, data, len - bytes_read - 1, end);
+	{
+	  warn (_("Length (%d) of DW_LNE_set_address op is too long\n"),
+		len - bytes_read - 1);
+	  adr = 0;
+	}
+      else
+	SAFE_BYTE_GET (adr, data, len - bytes_read - 1, end);
       printf (_("set Address to 0x%s\n"), dwarf_vmatoa ("x", adr));
       state_machine_regs.address = adr;
       state_machine_regs.op_index = 0;
@@ -2860,7 +2869,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Offset:                      0x%lx\n"), (long)(data - start));
 	  printf (_("  Length:                      %ld\n"), (long) linfo.li_length);
 	  printf (_("  DWARF Version:               %d\n"), linfo.li_version);
-	  printf (_("  Prologue Length:             %d\n"), linfo.li_prologue_length);
+	  printf (_("  Prologue Length:             %d\n"), (int) linfo.li_prologue_length);
 	  printf (_("  Minimum Instruction Length:  %d\n"), linfo.li_min_insn_length);
 	  if (linfo.li_version >= 4)
 	    printf (_("  Maximum Ops per Instruction: %d\n"), linfo.li_max_ops_per_insn);
@@ -2875,7 +2884,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      warn (_("Line range of 0 is invalid, using 1 instead\n"));
 	      linfo.li_line_range = 1;
 	    }
-	  
+
 	  reset_state_machine (linfo.li_default_is_stmt);
 
 	  /* Display the contents of the Opcodes table.  */
@@ -5542,7 +5551,20 @@ read_cie (unsigned char *start, unsigned char *end,
   if (version >= 4)
     {
       GET (fc->ptr_size, 1);
+      if (fc->ptr_size < 1 || fc->ptr_size > 8)
+	{
+	  warn (_("Invalid pointer size (%d) in CIE data\n"), fc->ptr_size);
+	  return end;
+	}
+
       GET (fc->segment_size, 1);
+      /* PR 17512: file: e99d2804.  */
+      if (fc->segment_size > 8 || fc->segment_size + fc->ptr_size > 8)
+	{
+	  warn (_("Invalid segment size (%d) in CIE data\n"), fc->segment_size);
+	  return end;
+	}
+
       eh_addr_size = fc->ptr_size;
     }
   else
@@ -5634,7 +5656,7 @@ display_debug_frames (struct dwarf_section *section,
   unsigned int length_return;
   unsigned int max_regs = 0;
   const char *bad_reg = _("bad register: ");
-  int saved_eh_addr_size = eh_addr_size;
+  unsigned int saved_eh_addr_size = eh_addr_size;
 
   printf (_("Contents of the %s section:\n"), section->name);
 

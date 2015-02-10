@@ -373,7 +373,7 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
   | (otr->map[2] << 8)
   | (otr->map[3] << 0);
 
-  struct esdid *esdid = &EDATA (abfd, otr->esdid - 1);
+  struct esdid *esdid;
   unsigned char *contents;
   bfd_boolean need_contents = FALSE;
   unsigned int dst_idx;
@@ -382,6 +382,7 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
   if (otr->esdid == 0)
     return;
   
+  esdid = &EDATA (abfd, otr->esdid - 1);
   contents = esdid->contents;
   dst_idx = esdid->pc;
   

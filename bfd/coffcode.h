@@ -1169,7 +1169,7 @@ styp_to_sec_flags (bfd *abfd,
 		   flagword *flags_ptr)
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
-  long styp_flags = internal_s->s_flags;
+  unsigned long styp_flags = internal_s->s_flags;
   flagword sec_flags;
   bfd_boolean result = TRUE;
   bfd_boolean is_dbg = FALSE;
@@ -1192,7 +1192,7 @@ styp_to_sec_flags (bfd *abfd,
   /* Process each flag bit in styp_flags in turn.  */
   while (styp_flags)
     {
-      long flag = styp_flags & - styp_flags;
+      unsigned long flag = styp_flags & - styp_flags;
       char * unhandled = NULL;
 
       styp_flags &= ~ flag;

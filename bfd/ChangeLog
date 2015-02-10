@@ -1,3 +1,15 @@
+2015-02-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (styp_to_sec_flags): Use an unsigned long type to
+	hold the flag bits.
+	* peXXigen.c (pe_print_reloc): Use unsigned types to hold the
+	size and number of relocs.
+	(pe_print_debugdata): Use a 32-bit aligned buffer to store the
+	codeview record.
+	* versados.c (process_otr): Check the esdid value before using it
+	to access the EDATA.
+
 2015-02-09  Ed Maste  <emaste@freebsd.org>
 
 	* elf32-i386.c (elf_i386_get_plt_sym_val): Avoid incrementing
