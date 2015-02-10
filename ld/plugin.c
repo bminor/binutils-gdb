@@ -499,6 +499,9 @@ get_view (const void *handle, const void **viewp)
   plugin_input_file_t *input = (plugin_input_file_t *) handle;
   char *buffer;
   size_t size = input->filesize;
+#if HAVE_GETPAGESIZE
+  off_t offset, bias;
+#endif
 
   ASSERT (called_plugin);
 
@@ -520,9 +523,15 @@ get_view (const void *handle, const void **viewp)
   input->view_buffer.offset = input->offset;
 
 #if HAVE_MMAP
-  buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd,
-		 input->offset);
-  if (buffer == MAP_FAILED)
+# if HAVE_GETPAGESIZE
+  bias = input->offset % getpagesize ();;
+  offset = input->offset - bias;
+  size += bias;
+# endif
+  buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd, offset);
+  if (buffer != MAP_FAILED)
+    buffer += bias;
+  else
 #endif
     {
       char *p;

@@ -1,3 +1,7 @@
+2015-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (get_view): Align offset passed to mmap.
+
 2015-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldfile.c (ldfile_try_open_bfd): Don't call bfd_check_format
