@@ -22,6 +22,14 @@
 	since correct initialisation cannot be relied upon.
 	(process_cu_tu_index): Improve range checks.
 
+	PR binutils/17531
+	* dwarf.c (display_debug_pubnames_worker): Use dwarf_vma type for
+	offset.
+	* readelf.c (dump_relocations): Handle printing offsets which are
+	MIN_INT.
+	(process_corefile_note_segment): Add range check of the namesz
+	field.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Handle DW_LANG_Fortran03

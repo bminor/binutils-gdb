@@ -3725,7 +3725,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
   while (start < end)
     {
       unsigned char *data;
-      unsigned long offset;
+      dwarf_vma offset;
       unsigned int offset_size, initial_length_size;
 
       data = start;
@@ -3824,11 +3824,11 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 		  kind_name = get_gdb_index_symbol_kind_name (kind);
 		  is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (kind_data);
 		  printf ("    %-6lx  %s,%-10s  %.*s\n",
-			  offset, is_static ? _("s") : _("g"),
+			  (unsigned long) offset, is_static ? _("s") : _("g"),
 			  kind_name, (int) maxprint, data);
 		}
 	      else
-		printf ("    %-6lx\t%.*s\n", offset, (int) maxprint, data);
+		printf ("    %-6lx\t%.*s\n", (unsigned long) offset, (int) maxprint, data);
 
 	      data += strnlen ((char *) data, maxprint) + 1;
 	      if (data >= end)
