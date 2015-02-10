@@ -1,3 +1,11 @@
+2015-02-10  Luis Machado  <lgustavo@codesourcery.com>
+
+	* arm-tdep.c (arm_prologue_unwind_stop_reason): New function.
+	(arm_prologue_this_id): Move PC and SP limit checks to
+	arm_prologue_unwind_stop_reason.
+	(arm_prologue_unwind) <stop_reason> : Set to
+	arm_prologue_unwind_stop_reason.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2read.c (set_cu_language): Recognize DW_LANG_Fortran03 and

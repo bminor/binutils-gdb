@@ -2021,6 +2021,31 @@ arm_make_prologue_cache (struct frame_info *this_frame)
   return cache;
 }
 
+/* Implementation of the stop_reason hook for arm_prologue frames.  */
+
+static enum unwind_stop_reason
+arm_prologue_unwind_stop_reason (struct frame_info *this_frame,
+				 void **this_cache)
+{
+  struct arm_prologue_cache *cache;
+  CORE_ADDR pc;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_prologue_cache (this_frame);
+  cache = *this_cache;
+
+  /* This is meant to halt the backtrace at "_start".  */
+  pc = get_frame_pc (this_frame);
+  if (pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
+    return UNWIND_OUTERMOST;
+
+  /* If we've hit a wall, stop.  */
+  if (cache->prev_sp == 0)
+    return UNWIND_OUTERMOST;
+
+  return UNWIND_NO_REASON;
+}
+
 /* Our frame ID for a normal frame is the current function's starting PC
    and the caller's SP when we were called.  */
 
@@ -2037,18 +2062,10 @@ arm_prologue_this_id (struct frame_info *this_frame,
     *this_cache = arm_make_prologue_cache (this_frame);
   cache = *this_cache;
 
-  /* This is meant to halt the backtrace at "_start".  */
-  pc = get_frame_pc (this_frame);
-  if (pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
-    return;
-
-  /* If we've hit a wall, stop.  */
-  if (cache->prev_sp == 0)
-    return;
-
   /* Use function start address as part of the frame ID.  If we cannot
      identify the start address (due to missing symbol information),
      fall back to just using the current PC.  */
+  pc = get_frame_pc (this_frame);
   func = get_frame_func (this_frame);
   if (!func)
     func = pc;
@@ -2117,7 +2134,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 
 struct frame_unwind arm_prologue_unwind = {
   NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
+  arm_prologue_unwind_stop_reason,
   arm_prologue_this_id,
   arm_prologue_prev_register,
   NULL,
