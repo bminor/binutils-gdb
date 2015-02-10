@@ -1,3 +1,10 @@
+2015-02-10  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* microblaze-opcm.h (or, and, xor): Rename to microblaze_or,
+	microblaze_and, microblaze_xor.
+	* microblaze-opc.h (opcodes): Adjust.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* Makefile.am: Add FT32 files.
