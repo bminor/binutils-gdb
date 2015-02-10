@@ -1,3 +1,7 @@
+2015-02-11  Mark Wielaard  <mjw@redhat.com>
+
+	* utils.c (producer_is_gcc): Return true or false.
+
 2015-02-04  Mark Wielaard  <mjw@redhat.com>
 
 	* utils.h (producer_is_gcc): Change return type to bool. Add major

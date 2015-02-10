@@ -3299,11 +3299,11 @@ producer_is_gcc (const char *producer, int *major, int *minor)
       if (*cs && isspace (*cs))
         cs++;
       if (sscanf (cs, "%d.%d", major, minor) == 2)
-	return major;
+	return true;
     }
 
   /* Not recognized as GCC.  */
-  return -1;
+  return false;
 }
 
 /* Helper for make_cleanup_free_char_ptr_vec.  */
