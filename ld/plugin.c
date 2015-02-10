@@ -529,9 +529,13 @@ get_view (const void *handle, const void **viewp)
   size += bias;
 # endif
   buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd, offset);
+# if HAVE_GETPAGESIZE
   if (buffer != MAP_FAILED)
     buffer += bias;
   else
+# else
+  if (buffer == MAP_FAILED)
+# endif
 #endif
     {
       char *p;
