@@ -47,7 +47,7 @@ java_name_of_variable (const struct varobj *parent)
 }
 
 static char *
-java_name_of_child (struct varobj *parent, int index)
+java_name_of_child (const struct varobj *parent, int index)
 {
   char *name, *p;
 
@@ -72,13 +72,13 @@ java_path_expr_of_child (const struct varobj *child)
 }
 
 static struct value *
-java_value_of_child (struct varobj *parent, int index)
+java_value_of_child (const struct varobj *parent, int index)
 {
   return cplus_varobj_ops.value_of_child (parent, index);
 }
 
 static struct type *
-java_type_of_child (struct varobj *parent, int index)
+java_type_of_child (const struct varobj *parent, int index)
 {
   return cplus_varobj_ops.type_of_child (parent, index);
 }

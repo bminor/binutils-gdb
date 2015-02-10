@@ -918,7 +918,7 @@ ada_name_of_variable (const struct varobj *parent)
 }
 
 static char *
-ada_name_of_child (struct varobj *parent, int index)
+ada_name_of_child (const struct varobj *parent, int index)
 {
   return ada_varobj_get_name_of_child (parent->value, parent->type,
 				       parent->name, index);
@@ -927,7 +927,7 @@ ada_name_of_child (struct varobj *parent, int index)
 static char*
 ada_path_expr_of_child (const struct varobj *child)
 {
-  struct varobj *parent = child->parent;
+  const struct varobj *parent = child->parent;
   const char *parent_path_expr = varobj_get_path_expr (parent);
 
   return ada_varobj_get_path_expr_of_child (parent->value,
@@ -938,14 +938,14 @@ ada_path_expr_of_child (const struct varobj *child)
 }
 
 static struct value *
-ada_value_of_child (struct varobj *parent, int index)
+ada_value_of_child (const struct varobj *parent, int index)
 {
   return ada_varobj_get_value_of_child (parent->value, parent->type,
 					parent->name, index);
 }
 
 static struct type *
-ada_type_of_child (struct varobj *parent, int index)
+ada_type_of_child (const struct varobj *parent, int index)
 {
   return ada_varobj_get_type_of_child (parent->value, parent->type,
 				       index);

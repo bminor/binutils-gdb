@@ -146,7 +146,7 @@ c_is_path_expr_parent (const struct varobj *var)
       && TYPE_NAME (type) == NULL
       && TYPE_TAG_NAME (type) == NULL)
     {
-      struct varobj *parent = var->parent;
+      const struct varobj *parent = var->parent;
 
       while (parent != NULL && CPLUS_FAKE_CHILD (parent))
 	parent = parent->parent;
@@ -282,7 +282,7 @@ value_struct_element_index (struct value *value, int type_index)
    to NULL.  */
 
 static void 
-c_describe_child (struct varobj *parent, int index,
+c_describe_child (const struct varobj *parent, int index,
 		  char **cname, struct value **cvalue, struct type **ctype,
 		  char **cfull_expression)
 {
@@ -422,7 +422,7 @@ c_describe_child (struct varobj *parent, int index,
 }
 
 static char *
-c_name_of_child (struct varobj *parent, int index)
+c_name_of_child (const struct varobj *parent, int index)
 {
   char *name;
 
@@ -441,7 +441,7 @@ c_path_expr_of_child (const struct varobj *child)
 }
 
 static struct value *
-c_value_of_child (struct varobj *parent, int index)
+c_value_of_child (const struct varobj *parent, int index)
 {
   struct value *value = NULL;
 
@@ -450,7 +450,7 @@ c_value_of_child (struct varobj *parent, int index)
 }
 
 static struct type *
-c_type_of_child (struct varobj *parent, int index)
+c_type_of_child (const struct varobj *parent, int index)
 {
   struct type *type = NULL;
 
@@ -614,7 +614,7 @@ cplus_number_of_children (const struct varobj *var)
       /* It is necessary to access a real type (via RTTI).  */
       if (opts.objectprint)
         {
-	  struct varobj *parent = var->parent;
+	  const struct varobj *parent = var->parent;
 
 	  value = parent->value;
 	  lookup_actual_type = (TYPE_CODE (parent->type) == TYPE_CODE_REF
@@ -697,7 +697,7 @@ match_accessibility (struct type *type, int index, enum accessibility acc)
 }
 
 static void
-cplus_describe_child (struct varobj *parent, int index,
+cplus_describe_child (const struct varobj *parent, int index,
 		      char **cname, struct value **cvalue, struct type **ctype,
 		      char **cfull_expression)
 {
@@ -706,7 +706,7 @@ cplus_describe_child (struct varobj *parent, int index,
   int was_ptr;
   int lookup_actual_type = 0;
   char *parent_expression = NULL;
-  struct varobj *var;
+  const struct varobj *var;
   struct value_print_options opts;
 
   if (cname)
@@ -898,7 +898,7 @@ cplus_describe_child (struct varobj *parent, int index,
 }
 
 static char *
-cplus_name_of_child (struct varobj *parent, int index)
+cplus_name_of_child (const struct varobj *parent, int index)
 {
   char *name = NULL;
 
@@ -917,7 +917,7 @@ cplus_path_expr_of_child (const struct varobj *child)
 }
 
 static struct value *
-cplus_value_of_child (struct varobj *parent, int index)
+cplus_value_of_child (const struct varobj *parent, int index)
 {
   struct value *value = NULL;
 
@@ -926,7 +926,7 @@ cplus_value_of_child (struct varobj *parent, int index)
 }
 
 static struct type *
-cplus_type_of_child (struct varobj *parent, int index)
+cplus_type_of_child (const struct varobj *parent, int index)
 {
   struct type *type = NULL;
 

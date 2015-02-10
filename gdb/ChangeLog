@@ -1,3 +1,35 @@
+2015-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-varobj.c (ada_name_of_child): Constify parent.
+	(ada_path_expr_of_child): Same.
+	(ada_value_of_child): Same.
+	(ada_type_of_child): Same.
+	* c-varobj.c (c_is_path_expr_parent): Same.
+	(c_describe_child): Same.
+	(c_name_of_child): Same.
+	(c_value_of_child): Same.
+	(c_type_of_child): Same.
+	(cplus_number_of_children): Same.
+	(cplus_describe_child): Constify var.
+	(cplus_name_of_child): Constify parent.
+	(cplus_value_of_child): Same.
+	(cplus_type_of_child): Same.
+	* jv-varobj.c (java_name_of_child): Same.
+	(java_value_of_child): Same.
+	(java_type_of_child): Same.
+	* varobj.c (value_of_child): Same.
+	(varobj_default_is_path_expr_parent): Constify var, parent and return
+	value.
+	(varobj_get_path_expr): Constify var, modify path_expr through
+	mutable_var.
+	(install_new_value): Constify parent.
+	(value_of_child): Constify parent.
+	* varobj.h (struct varobj): Constify parent.
+	(struct lang_varobj_ops): Constify name_of_child, value_of_child and
+	type_of_child.
+	(varobj_get_path_expr): Constify var.
+	(varobj_get_path_expr_parent): Constify var and return value.
+
 2015-02-10  Luis Machado  <lgustavo@codesourcery.com>
 
 	* arm-tdep.c (arm_prologue_unwind_stop_reason): New function.
