@@ -1,3 +1,8 @@
+2015-02-10  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (displaced_step_fixup): Switch to the event thread
+	before calling gdbarch_displaced_step_fixup.
+
 2015-02-10  Antoine Tremblay <antoine.tremblay@ericsson.com>
 
 	* MAINTAINERS (Write After Approval): Add Antoine Tremblay.

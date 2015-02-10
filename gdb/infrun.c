@@ -1784,6 +1784,10 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
   /* Did the instruction complete successfully?  */
   if (signal == GDB_SIGNAL_TRAP)
     {
+      /* Fixup may need to read memory/registers.  Switch to the
+	 thread that we're fixing up.  */
+      switch_to_thread (event_ptid);
+
       /* Fix up the resulting state.  */
       gdbarch_displaced_step_fixup (displaced->step_gdbarch,
                                     displaced->step_closure,
