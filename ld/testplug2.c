@@ -318,7 +318,22 @@ set_register_hook (const char *whichhook, bfd_boolean yesno)
 static enum ld_plugin_status
 parse_option (const char *opt)
 {
-  if (!strncmp ("fail", opt, 4))
+  if (!strncmp ("fatal", opt, 5))
+    {
+      TV_MESSAGE (LDPL_FATAL, "Fatal error");
+      fflush (NULL);
+    }
+  else if (!strncmp ("error", opt, 5))
+    {
+      TV_MESSAGE (LDPL_ERROR, "Error");
+      fflush (NULL);
+    }
+  else if (!strncmp ("warning", opt, 7))
+    {
+      TV_MESSAGE (LDPL_WARNING, "Warning");
+      fflush (NULL);
+    }
+  else if (!strncmp ("fail", opt, 4))
     return set_ret_val (opt + 4, LDPS_ERR);
   else if (!strncmp ("pass", opt, 4))
     return set_ret_val (opt + 4, LDPS_OK);

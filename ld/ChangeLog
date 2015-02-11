@@ -1,5 +1,11 @@
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* plugin.c (message): Output "warning:" for LDPL_WARNING. Output
+	"error:" for LDPL_FATAL and LDPL_ERROR.
+	* testplug2.c (parse_option): Handle fatal, error and warning.
+
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testplug2.c (dump_tv_tag): Removed.
 	(onall_symbols_read): Return LDPS_ERR if the file descriptor isn't
 	closed.

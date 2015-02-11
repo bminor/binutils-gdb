@@ -168,6 +168,12 @@ set plugin_tests [list \
     $testsrcfiles $libs" "" "" "" {{ld plugin-17.d}} "main.x" ] \
     [list "load plugin with source not claimed" "-plugin $plugin_path $regclm \
     $testsrcfiles $libs" "" "" "" {{ld plugin-26.d}} "main.x" ] \
+    [list "plugin fatal error" "-plugin $plugin2_path -plugin-opt fatal \
+    $testobjfiles $libs" "" "" "" {{ld plugin-27.d}} "main.x" ] \
+    [list "plugin error" "-plugin $plugin2_path -plugin-opt error \
+    $testobjfiles $libs" "" "" "" {{ld plugin-28.d}} "main.x" ] \
+    [list "plugin warning" "-plugin $plugin2_path -plugin-opt warning \
+    $testobjfiles $libs" "" "" "" {{ld plugin-29.d}} "main.x" ] \
 ]
 
 set plugin_lib_tests [list \
