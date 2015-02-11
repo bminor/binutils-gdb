@@ -3487,7 +3487,6 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 
 	 The SIGTRAP can be due to a completed hardware single-step only if 
 	  - we didn't insert software single-step breakpoints
-	  - the thread to be examined is still the current thread
 	  - this thread is currently being stepped
 
 	 If any of these events did not occur, we must have stopped due
@@ -3499,7 +3498,6 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 	 we also need to back up to the breakpoint address.  */
 
       if (thread_has_single_step_breakpoints_set (ecs->event_thread)
-	  || !ptid_equal (ecs->ptid, inferior_ptid)
 	  || !currently_stepping (ecs->event_thread)
 	  || (ecs->event_thread->stepped_breakpoint
 	      && ecs->event_thread->prev_pc == breakpoint_pc))

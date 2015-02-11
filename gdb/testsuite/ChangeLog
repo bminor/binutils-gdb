@@ -1,3 +1,8 @@
+2015-02-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/step-bg-decr-pc-switch-thread.c: New file.
+	* gdb.threads/step-bg-decr-pc-switch-thread.exp: New file.
+
 2015-02-10  Doug Evans  <xdje42@gmail.com>
 
 	* lib/gdb.exp (gdb_load): Always return a result.
