@@ -1,3 +1,8 @@
+2015-02-11  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.c (internal_type_self_type): If TYPE_SPECIFIC_FIELD hasn't
+	been initialized yet, return NULL.
+
 2015-02-11  Doug Evans  <dje@google.com>
 
 	* symfile.h (new_symfile_objfile): Delete.

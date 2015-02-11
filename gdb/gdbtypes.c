@@ -1209,9 +1209,13 @@ internal_type_self_type (struct type *type)
     {
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
+      if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE)
+	return NULL;
       gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_SELF_TYPE);
       return TYPE_MAIN_TYPE (type)->type_specific.self_type;
     case TYPE_CODE_METHOD:
+      if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE)
+	return NULL;
       gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
       return TYPE_MAIN_TYPE (type)->type_specific.func_stuff->self_type;
     default:
