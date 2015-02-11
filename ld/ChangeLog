@@ -1,3 +1,19 @@
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
+	* plugin.c: Include ../bfd/plugin.h.
+	(plugin_get_ir_dummy_bfd): Call bfd_create with
+	link_info.output_bfd instead of srctemplate.  Copy BFD info
+	from srctemplate only if it doesn't use BFD plugin target
+	vector.
+	(plugin_load_plugins): Call register_ld_plugin_object_p with
+	(plugin_object_p)
+	(plugin_maybe_claim): Renamed to ...
+	(plugin_object_p): This.  Return dummy BFD target vector if
+	input is calimed by plugin library, otherwise return NULL.
+	Update plugin_format and plugin_dummy_bfd.
+	(plugin_maybe_claim): New.  Use plugin_object_p.
+
 2015-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* plugin.c (plugin_maybe_claim): Initialize use_mmap.

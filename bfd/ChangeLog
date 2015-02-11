@@ -1,3 +1,24 @@
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
+	* bfd.c (bfd_plugin_format): New.
+	(bfd): Add plugin_format and plugin_dummy_bfd.
+	* plugin.c (try_load_plugin): Take a pointer to bfd_boolean
+	argument to return TRUE if any plugin is found.  Set plugin_format.
+	(has_plugin): New.
+	(bfd_plugin_target_p): New.
+	(bfd_plugin_specified_p): Likewise.
+	(bfd_plugin_target_p): Likewise.
+	(register_ld_plugin_object_p): Likewise.
+	(bfd_plugin_set_plugin): Set has_plugin.
+	(load_plugin): Cache try_load_plugin result.
+	(bfd_plugin_object_p): Try ld_plugin_object_p first.  Check
+	plugin_format.
+	* plugin.h (bfd_plugin_target_p): New.
+	(bfd_plugin_specified_p): Likewise.
+	(register_ld_plugin_object_p): Likewise.
+	* bfd-in2.h: Regenerated.
+
 2015-02-11  Pedro Alves  <palves@redhat.com>
 
 	* libbfd-in.h [__cplusplus]: Open extern "C" scope.
