@@ -104,6 +104,7 @@ typedef struct plugin_input_file
   view_buffer_t view_buffer;
   char *name;
   int fd;
+  bfd_boolean use_mmap;
   off_t offset;
   off_t filesize;
 } plugin_input_file_t;
@@ -136,6 +137,11 @@ static struct bfd_link_callbacks plugin_callbacks;
 /* Set at all symbols read time, to avoid recursively offering the plugin
    its own newly-added input files and libs to claim.  */
 bfd_boolean no_more_claiming = FALSE;
+
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+/* Page size used by mmap.  */
+static off_t plugin_pagesize;
+#endif
 
 /* List of tags to set in the constant leading part of the tv array. */
 static const enum ld_plugin_tag tv_header_tags[] =
@@ -499,8 +505,9 @@ get_view (const void *handle, const void **viewp)
   plugin_input_file_t *input = (plugin_input_file_t *) handle;
   char *buffer;
   size_t size = input->filesize;
-#if HAVE_GETPAGESIZE
-  off_t offset, bias;
+  off_t offset = input->offset;
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+  off_t bias;
 #endif
 
   ASSERT (called_plugin);
@@ -513,34 +520,37 @@ get_view (const void *handle, const void **viewp)
   /* Check the cached view buffer.  */
   if (input->view_buffer.addr != NULL
       && input->view_buffer.filesize == size
-      && input->view_buffer.offset == input->offset)
+      && input->view_buffer.offset == offset)
     {
       *viewp = input->view_buffer.addr;
       return LDPS_OK;
     }
 
   input->view_buffer.filesize = size;
-  input->view_buffer.offset = input->offset;
+  input->view_buffer.offset = offset;
 
 #if HAVE_MMAP
 # if HAVE_GETPAGESIZE
-  bias = input->offset % getpagesize ();;
-  offset = input->offset - bias;
+  bias = offset % plugin_pagesize;
+  offset -= bias;
   size += bias;
 # endif
   buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd, offset);
-# if HAVE_GETPAGESIZE
   if (buffer != MAP_FAILED)
-    buffer += bias;
-  else
-# else
-  if (buffer == MAP_FAILED)
+    {
+      input->use_mmap = TRUE;
+# if HAVE_GETPAGESIZE
+      buffer += bias;
 # endif
+    }
+  else
 #endif
     {
       char *p;
 
-      if (lseek (input->fd, input->offset, SEEK_SET) < 0)
+      input->use_mmap = FALSE;
+
+      if (lseek (input->fd, offset, SEEK_SET) < 0)
 	return LDPS_ERR;
 
       buffer = bfd_alloc (input->abfd, size);
@@ -968,6 +978,10 @@ plugin_load_plugins (void)
   link_info.notice_all = TRUE;
   link_info.lto_plugin_active = TRUE;
   link_info.callbacks = &plugin_callbacks;
+
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+  plugin_pagesize = getpagesize ();;
+#endif
 }
 
 /* Call 'claim file' hook for all plugins.  */
@@ -1102,6 +1116,21 @@ plugin_maybe_claim (lang_input_statement_type *entry)
     }
   else
     {
+#if HAVE_MMAP
+      if (input->use_mmap)
+	{
+	  /* If plugin didn't claim the file, unmap the buffer.  */
+	  char *addr = input->view_buffer.addr;
+	  off_t size = input->view_buffer.filesize;
+# if HAVE_GETPAGESIZE
+	  off_t bias = input->view_buffer.offset % plugin_pagesize;
+	  size += bias;
+	  addr -= bias;
+# endif
+	  munmap (addr, size);
+	}
+#endif
+
       /* If plugin didn't claim the file, we don't need the dummy bfd.
 	 Can't avoid speculatively creating it, alas.  */
       bfd_close_all_done (abfd);
