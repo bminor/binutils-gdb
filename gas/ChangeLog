@@ -1,5 +1,9 @@
 2015-02-11  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-aarch64.c (aarch64_cpus): Fix code formatting.
+
+2015-02-11  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* config/tc-arm.c: Add support for Cortex-A72.
 
 2015-02-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
