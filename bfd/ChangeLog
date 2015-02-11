@@ -1,3 +1,14 @@
+2015-02-11  Pedro Alves  <palves@redhat.com>
+
+	* libbfd-in.h [__cplusplus]: Open extern "C" scope.
+	* libcoff-in.h [__cplusplus]: Open extern "C" scope.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+	* elf-bfd.h [__cplusplus]: Wrap in extern "C".
+	* mach-o.h [__cplusplus]: Wrap in extern "C".
+	* som.h [__cplusplus]: Wrap in extern "C".
+
 2015-02-10  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

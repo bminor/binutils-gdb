@@ -26,6 +26,10 @@
 #include "bfdlink.h"
 #include "coff-bfd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Object file tdata; access macros.  */
 
 #define coff_data(bfd)		      ((bfd)->tdata.coff_obj_data)
@@ -951,3 +955,6 @@ typedef struct
    PE object file.  */
 #define bfd_pei_p(abfd) \
   (CONST_STRNEQ ((abfd)->xvec->name, "pei-"))
+#ifdef __cplusplus
+}
+#endif

@@ -24,6 +24,10 @@
 
 #include "hashtab.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  Take care never
    to wrap around if the address is within boundary-1 of the end of the
