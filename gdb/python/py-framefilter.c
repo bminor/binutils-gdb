@@ -1052,7 +1052,6 @@ py_print_frame (PyObject *filter, int flags,
       goto error;
     }
 
-
   /* stack-list-variables.  */
   if (print_locals && print_args && ! print_frame_info)
     {
@@ -1077,15 +1076,15 @@ py_print_frame (PyObject *filter, int flags,
 	 and are printed with indention.  */
       if (indent > 0)
 	{
-	TRY_CATCH (except, RETURN_MASK_ALL)
-	  {
-	    ui_out_spaces (out, indent*4);
-	  }
-	if (except.reason < 0)
-	  {
-	    gdbpy_convert_exception (except);
-	    goto error;
-	  }
+	  TRY_CATCH (except, RETURN_MASK_ALL)
+	    {
+	      ui_out_spaces (out, indent*4);
+	    }
+	  if (except.reason < 0)
+	    {
+	      gdbpy_convert_exception (except);
+	      goto error;
+	    }
 	}
 
       /* The address is required for frame annotations, and also for
@@ -1175,7 +1174,7 @@ py_print_frame (PyObject *filter, int flags,
 
 	      if (gdbpy_is_string (py_func))
 		{
-		  char *function_to_free = NULL;
+		  char *function_to_free;
 
 		  function = function_to_free =
 		    python_string_to_host_string (py_func);
@@ -1207,7 +1206,6 @@ py_print_frame (PyObject *filter, int flags,
 		  Py_DECREF (py_func);
 		  goto error;
 		}
-
 
 	      TRY_CATCH (except, RETURN_MASK_ALL)
 		{
@@ -1254,8 +1252,8 @@ py_print_frame (PyObject *filter, int flags,
 
       if (PyObject_HasAttrString (filter, "filename"))
 	{
-	  PyObject *py_fn = PyObject_CallMethod (filter, "filename",
-						 NULL);
+	  PyObject *py_fn = PyObject_CallMethod (filter, "filename", NULL);
+
 	  if (py_fn != NULL)
 	    {
 	      if (py_fn != Py_None)
@@ -1344,7 +1342,7 @@ py_print_frame (PyObject *filter, int flags,
     }
 
   /* Finally recursively print elided frames, if any.  */
-  elided  = get_py_iter_from_func (filter, "elided");
+  elided = get_py_iter_from_func (filter, "elided");
   if (elided == NULL)
     goto error;
 
