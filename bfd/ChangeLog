@@ -1,3 +1,53 @@
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
+	* bfd.c (bfd_plugin_format): New.
+	(bfd): Add plugin_format and plugin_dummy_bfd.
+	* plugin.c (try_load_plugin): Take a pointer to bfd_boolean
+	argument to return TRUE if any plugin is found.  Set plugin_format.
+	(has_plugin): New.
+	(bfd_plugin_target_p): New.
+	(bfd_plugin_specified_p): Likewise.
+	(bfd_plugin_target_p): Likewise.
+	(register_ld_plugin_object_p): Likewise.
+	(bfd_plugin_set_plugin): Set has_plugin.
+	(load_plugin): Cache try_load_plugin result.
+	(bfd_plugin_object_p): Try ld_plugin_object_p first.  Check
+	plugin_format.
+	* plugin.h (bfd_plugin_target_p): New.
+	(bfd_plugin_specified_p): Likewise.
+	(register_ld_plugin_object_p): Likewise.
+	* bfd-in2.h: Regenerated.
+
+2015-02-11  Pedro Alves  <palves@redhat.com>
+
+	* libbfd-in.h [__cplusplus]: Open extern "C" scope.
+	* libcoff-in.h [__cplusplus]: Open extern "C" scope.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+	* elf-bfd.h [__cplusplus]: Wrap in extern "C".
+	* mach-o.h [__cplusplus]: Wrap in extern "C".
+	* som.h [__cplusplus]: Wrap in extern "C".
+
+2015-02-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (styp_to_sec_flags): Use an unsigned long type to
+	hold the flag bits.
+	* peXXigen.c (pe_print_reloc): Use unsigned types to hold the
+	size and number of relocs.
+	(pe_print_debugdata): Use a 32-bit aligned buffer to store the
+	codeview record.
+	* versados.c (process_otr): Check the esdid value before using it
+	to access the EDATA.
+
+2015-02-09  Ed Maste  <emaste@freebsd.org>
+
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Avoid incrementing
+	uninitialized and unused variable.
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Likewise.
+
 2015-02-09  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Don't segfault on NULL

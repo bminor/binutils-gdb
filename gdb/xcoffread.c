@@ -119,11 +119,6 @@ static CORE_ADDR first_object_file_end;
 
 #define	INITIAL_STABVECTOR_LENGTH	40
 
-/* Nonzero if within a function (so symbols should be local,
-   if nothing says specifically).  */
-
-int within_function;
-
 /* Size of a COFF symbol.  I think it is always 18, so I'm not sure
    there is any reason not to just use a #define, but might as well
    ask BFD for the size and store it here, I guess.  */

@@ -1611,7 +1611,10 @@ dump_relocations (FILE * file,
 		{
 		  bfd_signed_vma off = rels[i].r_addend;
 
-		  if (off < 0)
+		  /* PR 17531: file: 2e63226f.  */
+		  if (off == ((bfd_signed_vma) 1) << ((sizeof (bfd_signed_vma) * 8) - 1))
+		    printf (" + %" BFD_VMA_FMT "x", off);
+		  else if (off < 0)
 		    printf (" - %" BFD_VMA_FMT "x", - off);
 		  else
 		    printf (" + %" BFD_VMA_FMT "x", off);
@@ -1623,7 +1626,10 @@ dump_relocations (FILE * file,
 	  bfd_signed_vma off = rels[i].r_addend;
 
 	  printf ("%*c", is_32bit_elf ? 12 : 20, ' ');
-	  if (off < 0)
+	  /* PR 17531: file: 2e63226f.  */
+	  if (off == ((bfd_signed_vma) 1) << ((sizeof (bfd_signed_vma) * 8) - 1))
+	    printf ("%" BFD_VMA_FMT "x", off);
+	  else if (off < 0)
 	    printf ("-%" BFD_VMA_FMT "x", - off);
 	  else
 	    printf ("%" BFD_VMA_FMT "x", off);
@@ -15065,6 +15071,13 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 	  inote.namedata = external->name;
 	  inote.descsz   = BYTE_GET (external->descsz);
 	  inote.descdata = inote.namedata + align_power (inote.namesz, 2);
+	  /* PR 17531: file: 3443835e.  */
+	  if (inote.descdata < (char *) pnotes)
+	    {
+	      warn (_("Corrupt note: name size is too big: %lx\n"), inote.namesz);
+	      inote.descdata = inote.namedata;
+	      inote.namesz   = 0;
+	    }
 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 	  next = inote.descdata + align_power (inote.descsz, 2);
 	}

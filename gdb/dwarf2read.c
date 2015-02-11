@@ -12293,7 +12293,7 @@ check_producer (struct dwarf2_cu *cu)
 	 combination.  gcc-4.5.x -gdwarf-4 binaries have DW_AT_accessibility
 	 interpreted incorrectly by GDB now - GCC PR debug/48229.  */
     }
-  else if ((major = producer_is_gcc (cu->producer, &minor)) > 0)
+  else if (producer_is_gcc (cu->producer, &major, &minor))
     {
       cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
       cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
@@ -14341,6 +14341,24 @@ read_tag_restrict_type (struct die_info *die, struct dwarf2_cu *cu)
     return cv_type;
 
   cv_type = make_restrict_type (base_type);
+  return set_die_type (die, cv_type, cu);
+}
+
+/* Handle DW_TAG_atomic_type.  */
+
+static struct type *
+read_tag_atomic_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *base_type, *cv_type;
+
+  base_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  cv_type = get_die_type (die, cu);
+  if (cv_type)
+    return cv_type;
+
+  cv_type = make_atomic_type (base_type);
   return set_die_type (die, cv_type, cu);
 }
 
@@ -16907,6 +16925,8 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_Fortran77:
     case DW_LANG_Fortran90:
     case DW_LANG_Fortran95:
+    case DW_LANG_Fortran03:
+    case DW_LANG_Fortran08:
       cu->language = language_fortran;
       break;
     case DW_LANG_Go:
@@ -18868,6 +18888,9 @@ read_type_die_1 (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_module:
       this_type = read_module_type (die, cu);
+      break;
+    case DW_TAG_atomic_type:
+      this_type = read_tag_atomic_type (die, cu);
       break;
     default:
       complaint (&symfile_complaints,

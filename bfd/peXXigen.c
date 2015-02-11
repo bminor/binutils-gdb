@@ -1151,7 +1151,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
   /* Ensure null termination of filename.  */
   buffer[256] = '\0';
 
-  cvinfo->CVSignature = H_GET_32(abfd, buffer);
+  cvinfo->CVSignature = H_GET_32 (abfd, buffer);
   cvinfo->Age = 0;
 
   if ((cvinfo->CVSignature == CVINFO_PDB70_CVSIGNATURE)
@@ -2216,7 +2216,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
     {
       int j;
       bfd_vma virtual_address;
-      long number, size;
+      unsigned long number, size;
       bfd_byte *chunk_end;
 
       /* The .reloc section is a sequence of blocks, with a header consisting
@@ -2231,7 +2231,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 
       fprintf (file,
 	       _("\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"),
-	       (unsigned long) virtual_address, size, (unsigned long) size, number);
+	       (unsigned long) virtual_address, size, size, number);
 
       chunk_end = p + size;
       if (chunk_end > end)
@@ -2674,7 +2674,11 @@ pe_print_debugdata (bfd * abfd, void * vfile)
       if (idd.Type == PE_IMAGE_DEBUG_TYPE_CODEVIEW)
         {
           char signature[CV_INFO_SIGNATURE_LENGTH * 2 + 1];
-          char buffer[256 + 1];
+	  /* PR 17512: file: 065-29434-0.001:0.1
+	     We need to use a 32-bit aligned buffer
+	     to safely read in a codeview record.  */
+          char buffer[256 + 1] ATTRIBUTE_ALIGNED_ALIGNOF (CODEVIEW_INFO);
+
           CODEVIEW_INFO *cvinfo = (CODEVIEW_INFO *) buffer;
 
           /* The debug entry doesn't have to have to be in a section,

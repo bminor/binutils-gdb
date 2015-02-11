@@ -44,7 +44,7 @@ static debug_info *debug_information = NULL;
    that the .debug_info section could not be loaded/parsed.  */
 #define DEBUG_INFO_UNAVAILABLE  (unsigned int) -1
 
-int eh_addr_size;
+unsigned int eh_addr_size;
 
 int do_debug_info;
 int do_debug_abbrevs;
@@ -105,7 +105,7 @@ static void load_cu_tu_indexes (void *file);
 #define FLAG_DEBUG_LINES_RAW	 1
 #define FLAG_DEBUG_LINES_DECODED 2
 
-static int
+static unsigned int
 size_of_encoded_value (int encoding)
 {
   switch (encoding & 0x7)
@@ -281,6 +281,11 @@ read_leb128 (unsigned char *data,
       shift += 7;
       if ((byte & 0x80) == 0)
 	break;
+
+      /* PR 17512: file: 0ca183b8.
+	 FIXME: Should we signal this error somehow ?  */
+      if (shift >= sizeof (result))
+	break;
     }
 
   if (length_return != NULL)
@@ -446,9 +451,13 @@ process_extended_line_op (unsigned char * data,
     case DW_LNE_set_address:
       /* PR 17512: file: 002-100480-0.004.  */
       if (len - bytes_read - 1 > 8)
-	warn (_("Length (%d) of DW_LNE_set_address op is too long\n"),
-	      len - bytes_read - 1);
-      SAFE_BYTE_GET (adr, data, len - bytes_read - 1, end);
+	{
+	  warn (_("Length (%d) of DW_LNE_set_address op is too long\n"),
+		len - bytes_read - 1);
+	  adr = 0;
+	}
+      else
+	SAFE_BYTE_GET (adr, data, len - bytes_read - 1, end);
       printf (_("set Address to 0x%s\n"), dwarf_vmatoa ("x", adr));
       state_machine_regs.address = adr;
       state_machine_regs.op_index = 0;
@@ -1951,6 +1960,8 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_LANG_C_plus_plus_11:	printf ("(C++11)"); break;
 	case DW_LANG_C11:		printf ("(C11)"); break;
 	case DW_LANG_C_plus_plus_14:	printf ("(C++14)"); break;
+	case DW_LANG_Fortran03:		printf ("(Fortran 03)"); break;
+	case DW_LANG_Fortran08:		printf ("(Fortran 08)"); break;
 	  /* MIPS extension.  */
 	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;
 	  /* UPC extension.  */
@@ -2293,6 +2304,13 @@ process_debug_info (struct dwarf_section *section,
 	  alloc_num_debug_info_entries = num_debug_info_entries = 0;
 	  return 0;
 	}
+      /* PR 17531: file: 92ca3797.
+	 We cannot rely upon the debug_information array being initialised
+	 before it is used.  A corrupt file could easily contain references
+	 to a unit for which information has not been made available.  So
+	 we ensure that the array is zeroed here.  */
+      memset (debug_information, 0, num_units * sizeof * debug_information);
+	 
       alloc_num_debug_info_entries = num_units;
     }
 
@@ -2858,7 +2876,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("  Offset:                      0x%lx\n"), (long)(data - start));
 	  printf (_("  Length:                      %ld\n"), (long) linfo.li_length);
 	  printf (_("  DWARF Version:               %d\n"), linfo.li_version);
-	  printf (_("  Prologue Length:             %d\n"), linfo.li_prologue_length);
+	  printf (_("  Prologue Length:             %d\n"), (int) linfo.li_prologue_length);
 	  printf (_("  Minimum Instruction Length:  %d\n"), linfo.li_min_insn_length);
 	  if (linfo.li_version >= 4)
 	    printf (_("  Maximum Ops per Instruction: %d\n"), linfo.li_max_ops_per_insn);
@@ -2873,7 +2891,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      warn (_("Line range of 0 is invalid, using 1 instead\n"));
 	      linfo.li_line_range = 1;
 	    }
-	  
+
 	  reset_state_machine (linfo.li_default_is_stmt);
 
 	  /* Display the contents of the Opcodes table.  */
@@ -3707,7 +3725,8 @@ display_debug_pubnames_worker (struct dwarf_section *section,
   while (start < end)
     {
       unsigned char *data;
-      unsigned long offset;
+      unsigned char *adr;
+      dwarf_vma offset;
       unsigned int offset_size, initial_length_size;
 
       data = start;
@@ -3736,17 +3755,18 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, end);
 
+      adr = start + names.pn_length + initial_length_size;
       /* PR 17531: file: 7615b6b2.  */
       if ((dwarf_signed_vma) names.pn_length < 0
 	  /* PR 17531: file: a5dbeaa7. */
-	  || start + names.pn_length + initial_length_size < start)
+	  || adr < start)
 	{
 	  warn (_("Negative length for public name: 0x%lx\n"), (long) names.pn_length);
 	  start = end;
 	}
       else
-	start += names.pn_length + initial_length_size;
-
+	start = adr;
+      
       printf (_("  Length:                              %ld\n"),
 	      (long) names.pn_length);
       printf (_("  Version:                             %d\n"),
@@ -3806,11 +3826,11 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 		  kind_name = get_gdb_index_symbol_kind_name (kind);
 		  is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (kind_data);
 		  printf ("    %-6lx  %s,%-10s  %.*s\n",
-			  offset, is_static ? _("s") : _("g"),
+			  (unsigned long) offset, is_static ? _("s") : _("g"),
 			  kind_name, (int) maxprint, data);
 		}
 	      else
-		printf ("    %-6lx\t%.*s\n", offset, (int) maxprint, data);
+		printf ("    %-6lx\t%.*s\n", (unsigned long) offset, (int) maxprint, data);
 
 	      data += strnlen ((char *) data, maxprint) + 1;
 	      if (data >= end)
@@ -5540,7 +5560,20 @@ read_cie (unsigned char *start, unsigned char *end,
   if (version >= 4)
     {
       GET (fc->ptr_size, 1);
+      if (fc->ptr_size < 1 || fc->ptr_size > 8)
+	{
+	  warn (_("Invalid pointer size (%d) in CIE data\n"), fc->ptr_size);
+	  return end;
+	}
+
       GET (fc->segment_size, 1);
+      /* PR 17512: file: e99d2804.  */
+      if (fc->segment_size > 8 || fc->segment_size + fc->ptr_size > 8)
+	{
+	  warn (_("Invalid segment size (%d) in CIE data\n"), fc->segment_size);
+	  return end;
+	}
+
       eh_addr_size = fc->ptr_size;
     }
   else
@@ -5632,7 +5665,7 @@ display_debug_frames (struct dwarf_section *section,
   unsigned int length_return;
   unsigned int max_regs = 0;
   const char *bad_reg = _("bad register: ");
-  int saved_eh_addr_size = eh_addr_size;
+  unsigned int saved_eh_addr_size = eh_addr_size;
 
   printf (_("Contents of the %s section:\n"), section->name);
 
@@ -6080,6 +6113,7 @@ display_debug_frames (struct dwarf_section *section,
 
       while (start < block_end)
 	{
+	  unsigned char * tmp;
 	  unsigned op, opa;
 	  unsigned long ul, reg, roffs;
 	  long l;
@@ -6381,7 +6415,8 @@ display_debug_frames (struct dwarf_section *section,
 		reg_prefix = bad_reg;
 	      /* PR 17512: file: 069-133014-0.006.  */
 	      /* PR 17512: file: 98c02eb4.  */
-	      if (start >= block_end || start + ul > block_end || start + ul < start)
+	      tmp = start + ul;
+	      if (start >= block_end || tmp > block_end || tmp < start)
 		{
 		  printf (_("  DW_CFA_expression: <corrupt len %lu>\n"), ul);
 		  break;
@@ -6396,7 +6431,7 @@ display_debug_frames (struct dwarf_section *section,
 		}
 	      if (*reg_prefix == '\0')
 		fc->col_type[reg] = DW_CFA_expression;
-	      start += ul;
+	      start = tmp;
 	      break;
 
 	    case DW_CFA_val_expression:
@@ -6404,7 +6439,8 @@ display_debug_frames (struct dwarf_section *section,
 	      ul = LEB ();
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
-	      if (start >= block_end || start + ul > block_end || start + ul < start)
+	      tmp = start + ul;
+	      if (start >= block_end || tmp > block_end || tmp < start)
 		{
 		  printf ("  DW_CFA_val_expression: <corrupt len %lu>\n", ul);
 		  break;
@@ -6419,7 +6455,7 @@ display_debug_frames (struct dwarf_section *section,
 		}
 	      if (*reg_prefix == '\0')
 		fc->col_type[reg] = DW_CFA_val_expression;
-	      start += ul;
+	      start = tmp;
 	      break;
 
 	    case DW_CFA_offset_extended_sf:
@@ -6698,10 +6734,11 @@ display_gdb_index (struct dwarf_section *section,
 	  || cu_vector_offset != 0)
 	{
 	  unsigned int j;
+	  unsigned char * adr;
 
+	  adr = constant_pool + name_offset;
 	  /* PR 17531: file: 5b7b07ad.  */
-	  if (constant_pool + name_offset < constant_pool
-	      || constant_pool + name_offset >= section->start + section->size)
+	  if (adr < constant_pool || adr >= section->start + section->size)
 	    {
 	      printf (_("[%3u] <corrupt offset: %x>"), i, name_offset);
 	      warn (_("Corrupt name offset of 0x%x found for symbol table slot %d\n"),
@@ -6712,8 +6749,8 @@ display_gdb_index (struct dwarf_section *section,
 		    (int) (section->size - (constant_pool_offset + name_offset)),
 		    constant_pool + name_offset);
 
-	  if (constant_pool + cu_vector_offset < constant_pool
-	      || constant_pool + cu_vector_offset >= section->start + section->size - 3)
+	  adr = constant_pool + cu_vector_offset;
+	  if (adr < constant_pool || adr >= section->start + section->size - 3)
 	    {
 	      printf (_("<invalid CU vector offset: %x>\n"), cu_vector_offset);
 	      warn (_("Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"),
@@ -6721,12 +6758,12 @@ display_gdb_index (struct dwarf_section *section,
 	      continue;
 	    }
 
-	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+	  num_cus = byte_get_little_endian (adr, 4);
 
+	  adr = constant_pool + cu_vector_offset + 4 + num_cus * 4;
 	  if (num_cus * 4 < num_cus
-	      || constant_pool + cu_vector_offset + 4 + num_cus * 4
-	      >= section->start + section->size
-	      || (constant_pool + cu_vector_offset + 4 + num_cus * 4) < constant_pool)
+	      || adr >= section->start + section->size
+	      || adr < constant_pool)
 	    {
 	      printf ("<invalid number of CUs: %d>\n", num_cus);
 	      warn (_("Invalid number of CUs (0x%x) for symbol table slot %d\n"),
@@ -6889,7 +6926,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   ppool = pindex + nslots * 4;
 
   /* PR 17531: file: 45d69832.  */
-  if (pindex < phash || ppool < phdr)
+  if (pindex < phash || ppool < phdr || (pindex == phash && nslots != 0))
     {
       warn (_("Section %s is too small for %d slots\n"),
 	    section->name, nslots);
@@ -6906,7 +6943,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       printf (_("  Number of slots:         %d\n\n"), nslots);
     }
 
-  if (ppool > limit)
+  if (ppool > limit || ppool < phdr)
     {
       warn (_("Section %s too small for %d hash table entries\n"),
 	    section->name, nslots);
@@ -6979,6 +7016,14 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       unsigned char *prow;
 
       is_tu_index = strcmp (section->name, ".debug_tu_index") == 0;
+
+      /* PR 17531: file: 0dd159bf.
+         Check for wraparound with an overlarge ncols value.  */
+      if ((unsigned int) ((poffsets - ppool) / 4) != ncols)
+	{
+	  warn (_("Overlarge number of columns: %x\n"), ncols);
+	  return 0;
+	}
 
       if (pend > limit)
 	{

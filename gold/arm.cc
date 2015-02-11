@@ -7938,6 +7938,13 @@ Target_arm<big_endian>::make_plt_section(
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_EXECINSTR),
 				      this->plt_, ORDER_PLT, false);
+      symtab->define_in_output_data("$a", NULL,
+				    Symbol_table::PREDEFINED,
+				    this->plt_,
+				    0, 0, elfcpp::STT_NOTYPE,
+				    elfcpp::STB_LOCAL,
+				    elfcpp::STV_DEFAULT, 0,
+				    false, false);
     }
 }
 

@@ -2053,10 +2053,16 @@ bootstrap: ld3$(EXEEXT)
 # Build a dummy plugin using libtool.
 #
 if ENABLE_PLUGINS
-noinst_LTLIBRARIES = libldtestplug.la
+noinst_LTLIBRARIES = libldtestplug.la libldtestplug2.la libldtestplug3.la
 libldtestplug_la_SOURCES = testplug.c
 libldtestplug_la_CFLAGS= -g -O2
 libldtestplug_la_LDFLAGS = -no-undefined -rpath /nowhere
+libldtestplug2_la_SOURCES = testplug2.c
+libldtestplug2_la_CFLAGS= -g -O2
+libldtestplug2_la_LDFLAGS = -no-undefined -rpath /nowhere
+libldtestplug3_la_SOURCES = testplug3.c
+libldtestplug3_la_CFLAGS= -g -O2
+libldtestplug3_la_LDFLAGS = -no-undefined -rpath /nowhere
 endif
 
 # DOCUMENTATION TARGETS

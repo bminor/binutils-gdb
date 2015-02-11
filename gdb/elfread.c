@@ -49,8 +49,8 @@
 extern void _initialize_elfread (void);
 
 /* Forward declarations.  */
-static const struct sym_fns elf_sym_fns_gdb_index;
-static const struct sym_fns elf_sym_fns_lazy_psyms;
+extern const struct sym_fns elf_sym_fns_gdb_index;
+extern const struct sym_fns elf_sym_fns_lazy_psyms;
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
@@ -1566,7 +1566,7 @@ static const struct sym_fns elf_sym_fns =
 /* The same as elf_sym_fns, but not registered and lazily reads
    psymbols.  */
 
-static const struct sym_fns elf_sym_fns_lazy_psyms =
+const struct sym_fns elf_sym_fns_lazy_psyms =
 {
   elf_new_init,			/* init anything gbl to entire symtab */
   elf_symfile_init,		/* read initial info, setup for sym_read() */
@@ -1583,7 +1583,7 @@ static const struct sym_fns elf_sym_fns_lazy_psyms =
 
 /* The same as elf_sym_fns, but not registered and uses the
    DWARF-specific GNU index rather than psymtab.  */
-static const struct sym_fns elf_sym_fns_gdb_index =
+const struct sym_fns elf_sym_fns_gdb_index =
 {
   elf_new_init,			/* init anything gbl to entire symab */
   elf_symfile_init,		/* read initial info, setup for sym_red() */

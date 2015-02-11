@@ -57,8 +57,8 @@ static const char *gdbpy_should_print_stack = python_excp_message;
 
 #ifdef HAVE_PYTHON
 /* Forward decls, these are defined later.  */
-static const struct extension_language_script_ops python_extension_script_ops;
-static const struct extension_language_ops python_extension_ops;
+extern const struct extension_language_script_ops python_extension_script_ops;
+extern const struct extension_language_ops python_extension_ops;
 #endif
 
 /* The main struct describing GDB's interface to the Python
@@ -152,7 +152,7 @@ static enum ext_lang_rc gdbpy_before_prompt_hook
 
 /* The interface between gdb proper and loading of python scripts.  */
 
-static const struct extension_language_script_ops python_extension_script_ops =
+const struct extension_language_script_ops python_extension_script_ops =
 {
   gdbpy_source_script,
   gdbpy_source_objfile_script,
@@ -162,7 +162,7 @@ static const struct extension_language_script_ops python_extension_script_ops =
 
 /* The interface between gdb proper and python extensions.  */
 
-static const struct extension_language_ops python_extension_ops =
+const struct extension_language_ops python_extension_ops =
 {
   gdbpy_finish_initialization,
   gdbpy_initialized,

@@ -1,3 +1,9 @@
+2015-02-11  Will Newton  <will.newton@linaro.org>
+
+	PR gold/13321
+	* arm.cc (Target_arm::make_plt_section): Create an ARM
+	state mapping symbol at the start of the PLT.
+
 2015-02-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/Makefile.am (two_file_shared_2_pic_1_test_DEPENDENCIES):

@@ -1,3 +1,7 @@
+2015-02-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c: Add support for Cortex-A72.
+
 2015-02-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (warn_deprecated_sp): Use as_tsktsk instead

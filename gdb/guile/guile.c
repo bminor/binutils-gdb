@@ -71,8 +71,8 @@ const char *gdbscm_print_excp = gdbscm_print_excp_message;
 
 #ifdef HAVE_GUILE
 /* Forward decls, these are defined later.  */
-static const struct extension_language_script_ops guile_extension_script_ops;
-static const struct extension_language_ops guile_extension_ops;
+extern const struct extension_language_script_ops guile_extension_script_ops;
+extern const struct extension_language_ops guile_extension_ops;
 #endif
 
 /* The main struct describing GDB's interface to the Guile
@@ -124,7 +124,7 @@ static const char boot_scm_filename[] = "boot.scm";
 
 /* The interface between gdb proper and loading of python scripts.  */
 
-static const struct extension_language_script_ops guile_extension_script_ops =
+const struct extension_language_script_ops guile_extension_script_ops =
 {
   gdbscm_source_script,
   gdbscm_source_objfile_script,
@@ -134,7 +134,7 @@ static const struct extension_language_script_ops guile_extension_script_ops =
 
 /* The interface between gdb proper and guile scripting.  */
 
-static const struct extension_language_ops guile_extension_ops =
+const struct extension_language_ops guile_extension_ops =
 {
   gdbscm_finish_initialization,
   gdbscm_initialized,

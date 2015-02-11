@@ -27,6 +27,10 @@
 #include "elf/internal.h"
 #include "bfdlink.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The number of entries in a section is its size divided by the size
    of a single entry.  This is normally only applicable to reloc and
    symbol table sections.
@@ -2540,4 +2544,7 @@ extern asection _bfd_elf_large_com_section;
     (!(H)->unique_global \
      && ((INFO)->symbolic || ((INFO)->dynamic && !(H)->dynamic)))
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* _LIBELF_H_ */

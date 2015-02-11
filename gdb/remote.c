@@ -5682,7 +5682,7 @@ Packet: '%s'\n"),
 	  {
 	    p++;
 
-	    if (p == '\0')
+	    if (*p == '\0')
 	      ;
 	    else if (strncmp (p,
 			      "process:", sizeof ("process:") - 1) == 0)

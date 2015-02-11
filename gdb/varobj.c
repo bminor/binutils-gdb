@@ -201,7 +201,7 @@ static char *name_of_child (struct varobj *, int);
 
 static struct value *value_of_root (struct varobj **var_handle, int *);
 
-static struct value *value_of_child (struct varobj *parent, int index);
+static struct value *value_of_child (const struct varobj *parent, int index);
 
 static char *my_value_of_variable (struct varobj *var,
 				   enum varobj_display_formats format);
@@ -1019,10 +1019,10 @@ varobj_default_is_path_expr_parent (const struct varobj *var)
 
 /* Return the path expression parent for VAR.  */
 
-struct varobj *
-varobj_get_path_expr_parent (struct varobj *var)
+const struct varobj *
+varobj_get_path_expr_parent (const struct varobj *var)
 {
-  struct varobj *parent = var;
+  const struct varobj *parent = var;
 
   while (!is_root_p (parent) && !is_path_expr_parent (parent))
     parent = parent->parent;
@@ -1033,16 +1033,17 @@ varobj_get_path_expr_parent (struct varobj *var)
 /* Return a pointer to the full rooted expression of varobj VAR.
    If it has not been computed yet, compute it.  */
 char *
-varobj_get_path_expr (struct varobj *var)
+varobj_get_path_expr (const struct varobj *var)
 {
   if (var->path_expr == NULL)
     {
       /* For root varobjs, we initialize path_expr
 	 when creating varobj, so here it should be
 	 child varobj.  */
+      struct varobj *mutable_var = (struct varobj *) var;
       gdb_assert (!is_root_p (var));
 
-      var->path_expr = (*var->root->lang_ops->path_expr_of_child) (var);
+      mutable_var->path_expr = (*var->root->lang_ops->path_expr_of_child) (var);
     }
 
   return var->path_expr;
@@ -1378,7 +1379,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      will be lazy, which means we've lost that old value.  */
   if (need_to_fetch && value && value_lazy (value))
     {
-      struct varobj *parent = var->parent;
+      const struct varobj *parent = var->parent;
       int frozen = var->frozen;
 
       for (; !frozen && parent; parent = parent->parent)
@@ -2483,7 +2484,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 
 /* What is the ``struct value *'' for the INDEX'th child of PARENT?  */
 static struct value *
-value_of_child (struct varobj *parent, int index)
+value_of_child (const struct varobj *parent, int index)
 {
   struct value *value;
 

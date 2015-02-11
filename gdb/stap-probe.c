@@ -47,7 +47,7 @@
 
 /* Forward declaration. */
 
-static const struct probe_ops stap_probe_ops;
+extern const struct probe_ops stap_probe_ops;
 
 /* Should we display debug information for the probe's argument expression
    parsing?  */
@@ -1742,7 +1742,7 @@ stap_gen_info_probes_table_values (struct probe *probe_generic,
 
 /* SystemTap probe_ops.  */
 
-static const struct probe_ops stap_probe_ops =
+const struct probe_ops stap_probe_ops =
 {
   stap_probe_is_linespec,
   stap_get_probes,

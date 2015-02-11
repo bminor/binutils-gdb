@@ -627,9 +627,16 @@ tui_getc (FILE *fp)
         }
       else
         {
-          wmove (w, TUI_CMD_WIN->detail.command_info.cur_line,
-                 TUI_CMD_WIN->detail.command_info.curch);
-          waddch (w, ch);
+	  /* Move cursor to the end of the command line before emitting the
+	     newline.  We need to do so because when ncurses outputs a newline
+	     it truncates any text that appears past the end of the cursor.  */
+	  int px = TUI_CMD_WIN->detail.command_info.curch;
+	  int py = TUI_CMD_WIN->detail.command_info.cur_line;
+	  px += rl_end - rl_point;
+	  py += px / TUI_CMD_WIN->generic.width;
+	  px %= TUI_CMD_WIN->generic.width;
+	  wmove (w, py, px);
+	  waddch (w, ch);
         }
     }
   
@@ -736,6 +743,7 @@ tui_handle_resize_during_io (int original_ch, int for_completion)
     {
       tui_resize_all ();
       tui_refresh_all_win ();
+      tui_update_gdb_sizes ();
       tui_set_win_resized_to (FALSE);
       if (!for_completion)
 	{

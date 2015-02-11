@@ -960,6 +960,9 @@ libbfd.h: $(LIBBFD_H_DEP)
 		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \
 	done
+	echo "#ifdef __cplusplus" >> $@
+	echo "}" >> $@
+	echo "#endif" >> $@
 
 libcoff.h: $(LIBCOFF_H_DEP)
 	echo "$(LIBCOFF_H_DEP)" | sed -f $(srcdir)/header.sed > $@
@@ -972,6 +975,9 @@ libcoff.h: $(LIBCOFF_H_DEP)
 		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \
 	done
+	echo "#ifdef __cplusplus" >> $@
+	echo "}" >> $@
+	echo "#endif" >> $@
 
 bfd.h: $(BFD_H_DEP)
 	echo "$(BFD_H_DEP)" | sed -f $(srcdir)/header.sed > $@

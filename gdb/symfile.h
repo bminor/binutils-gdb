@@ -458,8 +458,6 @@ enum symfile_add_flags
     SYMFILE_NO_READ = 1 << 4
   };
 
-extern void new_symfile_objfile (struct objfile *, int);
-
 extern struct objfile *symbol_file_add (const char *, int,
 					struct section_addr_info *, int);
 

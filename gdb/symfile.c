@@ -1099,8 +1099,8 @@ syms_from_objfile (struct objfile *objfile,
    symbols for a new objfile, or mapping in the symbols from a reusable
    objfile.  ADD_FLAGS is a bitmask of enum symfile_add_flags.  */
 
-void
-new_symfile_objfile (struct objfile *objfile, int add_flags)
+static void
+finish_new_objfile (struct objfile *objfile, int add_flags)
 {
   /* If this is the main symbol file we have to clean up all users of the
      old main symbol file.  Otherwise it is sufficient to fixup all the
@@ -1234,7 +1234,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
       return objfile;	/* No symbols.  */
     }
 
-  new_symfile_objfile (objfile, add_flags);
+  finish_new_objfile (objfile, add_flags);
 
   observer_notify_new_objfile (objfile);
 

@@ -30,6 +30,7 @@
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "../bfd/plugin.h"
 #include "plugin.h"
 #include "plugin-api.h"
 #include "elf-bfd.h"
@@ -104,6 +105,7 @@ typedef struct plugin_input_file
   view_buffer_t view_buffer;
   char *name;
   int fd;
+  bfd_boolean use_mmap;
   off_t offset;
   off_t filesize;
 } plugin_input_file_t;
@@ -137,6 +139,11 @@ static struct bfd_link_callbacks plugin_callbacks;
    its own newly-added input files and libs to claim.  */
 bfd_boolean no_more_claiming = FALSE;
 
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+/* Page size used by mmap.  */
+static off_t plugin_pagesize;
+#endif
+
 /* List of tags to set in the constant leading part of the tv array. */
 static const enum ld_plugin_tag tv_header_tags[] =
 {
@@ -167,6 +174,8 @@ static bfd_boolean plugin_notice (struct bfd_link_info *,
 				  struct bfd_link_hash_entry *,
 				  struct bfd_link_hash_entry *,
 				  bfd *, asection *, bfd_vma, flagword);
+
+static const bfd_target * plugin_object_p (bfd *);
 
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 
@@ -289,14 +298,19 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 
   bfd_use_reserved_id = 1;
   abfd = bfd_create (concat (name, IRONLY_SUFFIX, (const char *) NULL),
-		     srctemplate);
+		     link_info.output_bfd);
   if (abfd != NULL)
     {
       abfd->flags |= BFD_LINKER_CREATED | BFD_PLUGIN;
-      bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
-      bfd_set_gp_size (abfd, bfd_get_gp_size (srctemplate));
-      if (bfd_make_writable (abfd)
-	  && bfd_copy_private_bfd_data (srctemplate, abfd))
+      if (!bfd_make_writable (abfd))
+	goto report_error;
+      if (! bfd_plugin_target_p (srctemplate->xvec))
+	{
+	  bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
+	  bfd_set_gp_size (abfd, bfd_get_gp_size (srctemplate));
+	  if (!bfd_copy_private_bfd_data (srctemplate, abfd))
+	    goto report_error;
+	}
 	{
 	  flagword flags;
 
@@ -307,6 +321,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 	    return abfd;
 	}
     }
+report_error:
   einfo (_("could not create dummy IR bfd: %F%E\n"));
   return NULL;
 }
@@ -499,6 +514,10 @@ get_view (const void *handle, const void **viewp)
   plugin_input_file_t *input = (plugin_input_file_t *) handle;
   char *buffer;
   size_t size = input->filesize;
+  off_t offset = input->offset;
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+  off_t bias;
+#endif
 
   ASSERT (called_plugin);
 
@@ -510,24 +529,37 @@ get_view (const void *handle, const void **viewp)
   /* Check the cached view buffer.  */
   if (input->view_buffer.addr != NULL
       && input->view_buffer.filesize == size
-      && input->view_buffer.offset == input->offset)
+      && input->view_buffer.offset == offset)
     {
       *viewp = input->view_buffer.addr;
       return LDPS_OK;
     }
 
   input->view_buffer.filesize = size;
-  input->view_buffer.offset = input->offset;
+  input->view_buffer.offset = offset;
 
 #if HAVE_MMAP
-  buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd,
-		 input->offset);
-  if (buffer == MAP_FAILED)
+# if HAVE_GETPAGESIZE
+  bias = offset % plugin_pagesize;
+  offset -= bias;
+  size += bias;
+# endif
+  buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd, offset);
+  if (buffer != MAP_FAILED)
+    {
+      input->use_mmap = TRUE;
+# if HAVE_GETPAGESIZE
+      buffer += bias;
+# endif
+    }
+  else
 #endif
     {
       char *p;
 
-      if (lseek (input->fd, input->offset, SEEK_SET) < 0)
+      input->use_mmap = FALSE;
+
+      if (lseek (input->fd, offset, SEEK_SET) < 0)
 	return LDPS_ERR;
 
       buffer = bfd_alloc (input->abfd, size);
@@ -955,6 +987,12 @@ plugin_load_plugins (void)
   link_info.notice_all = TRUE;
   link_info.lto_plugin_active = TRUE;
   link_info.callbacks = &plugin_callbacks;
+
+  register_ld_plugin_object_p (plugin_object_p);
+
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+  plugin_pagesize = getpagesize ();;
+#endif
 }
 
 /* Call 'claim file' hook for all plugins.  */
@@ -997,22 +1035,36 @@ plugin_strdup (bfd *abfd, const char *str)
   return copy;
 }
 
-void
-plugin_maybe_claim (lang_input_statement_type *entry)
+static const bfd_target *
+plugin_object_p (bfd *ibfd)
 {
-  int claimed = 0;
+  int claimed;
   plugin_input_file_t *input;
   off_t offset, filesize;
   struct ld_plugin_input_file file;
   bfd *abfd;
-  bfd *ibfd = entry->the_bfd;
-  bfd_boolean inarchive = bfd_my_archive (ibfd) != NULL;
-  const char *name
-    = inarchive ? bfd_my_archive (ibfd)->filename : ibfd->filename;
-  int fd = open (name, O_RDONLY | O_BINARY);
+  bfd_boolean inarchive;
+  const char *name;
+  int fd;
+
+  /* Don't try the dummy object file.  */
+  if ((ibfd->flags & BFD_PLUGIN) != 0)
+    return NULL;
+
+  if (ibfd->plugin_format != bfd_plugin_uknown)
+    {
+      if (ibfd->plugin_format == bfd_plugin_yes)
+	return ibfd->plugin_dummy_bfd->xvec;
+      else
+	return NULL;
+    }
+
+  inarchive = bfd_my_archive (ibfd) != NULL;
+  name = inarchive ? bfd_my_archive (ibfd)->filename : ibfd->filename;
+  fd = open (name, O_RDONLY | O_BINARY);
 
   if (fd < 0)
-    return;
+    return NULL;
 
   /* We create a dummy BFD, initially empty, to house whatever symbols
      the plugin may want to add.  */
@@ -1053,46 +1105,78 @@ plugin_maybe_claim (lang_input_statement_type *entry)
   input->view_buffer.filesize = 0;
   input->view_buffer.offset = 0;
   input->fd = fd;
+  input->use_mmap = FALSE;
   input->offset = offset;
   input->filesize = filesize;
   input->name = plugin_strdup (abfd, ibfd->filename);
+
+  claimed = 0;
 
   if (plugin_call_claim_file (&file, &claimed))
     einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
-  if (input->fd != -1 && ibfd->format == bfd_object)
+  if (input->fd != -1 && ! bfd_plugin_target_p (ibfd->xvec))
     {
-      /* FIXME: fd belongs to us, not the plugin.  IR for GCC plugin,
-	 which doesn't need fd after plugin_call_claim_file, is
-	 stored in bfd_object file.  Since GCC plugin before GCC 5
-	 doesn't call release_input_file, we close it here.  IR for
-	 LLVM plugin, which needs fd after plugin_call_claim_file and
-	 calls release_input_file after it is done, is stored in
-	 non-bfd_object file.  This scheme doesn't work when a plugin
-	 needs fd and its IR is stored in bfd_object file.  */
+      /* FIXME: fd belongs to us, not the plugin.  GCC plugin, which
+	 doesn't need fd after plugin_call_claim_file, doesn't use
+	 BFD plugin target vector.  Since GCC plugin doesn't call
+	 release_input_file, we close it here.  LLVM plugin, which
+	 needs fd after plugin_call_claim_file and calls
+	 release_input_file after it is done, uses BFD plugin target
+	 vector.  This scheme doesn't work when a plugin needs fd and
+	 doesn't use BFD plugin target vector neither.  */
       close (fd);
       input->fd = -1;
     }
 
   if (claimed)
     {
+      ibfd->plugin_format = bfd_plugin_yes;
+      ibfd->plugin_dummy_bfd = abfd;
+      bfd_make_readable (abfd);
+      return abfd->xvec;
+    }
+  else
+    {
+#if HAVE_MMAP
+      if (input->use_mmap)
+	{
+	  /* If plugin didn't claim the file, unmap the buffer.  */
+	  char *addr = input->view_buffer.addr;
+	  off_t size = input->view_buffer.filesize;
+# if HAVE_GETPAGESIZE
+	  off_t bias = input->view_buffer.offset % plugin_pagesize;
+	  size += bias;
+	  addr -= bias;
+# endif
+	  munmap (addr, size);
+	}
+#endif
+
+      /* If plugin didn't claim the file, we don't need the dummy bfd.
+	 Can't avoid speculatively creating it, alas.  */
+      ibfd->plugin_format = bfd_plugin_no;
+      bfd_close_all_done (abfd);
+      return NULL;
+    }
+}
+
+void
+plugin_maybe_claim (lang_input_statement_type *entry)
+{
+  if (plugin_object_p (entry->the_bfd))
+    {
+      bfd *abfd = entry->the_bfd->plugin_dummy_bfd;
+
       /* Discard the real file's BFD and substitute the dummy one.  */
 
       /* BFD archive handling caches elements so we can't call
 	 bfd_close for archives.  */
-      if (!inarchive)
-	bfd_close (ibfd);
-      bfd_make_readable (abfd);
+      if (entry->the_bfd->my_archive == NULL)
+	bfd_close (entry->the_bfd);
       entry->the_bfd = abfd;
-      entry->flags.claimed = TRUE;
-    }
-  else
-    {
-      /* If plugin didn't claim the file, we don't need the dummy bfd.
-	 Can't avoid speculatively creating it, alas.  */
-      bfd_close_all_done (abfd);
-      entry->flags.claimed = FALSE;
+      entry->flags.claimed = 1;
     }
 }
 

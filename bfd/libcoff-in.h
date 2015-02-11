@@ -22,6 +22,10 @@
 #include "bfdlink.h"
 #include "coff-bfd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Object file tdata; access macros.  */
 
 #define coff_data(bfd)		      ((bfd)->tdata.coff_obj_data)

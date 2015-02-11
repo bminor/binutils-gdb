@@ -1,3 +1,160 @@
+2015-02-11  Pedro Alves  <palves@redhat.com>
+
+	* xcoffread.c (within_function): Delete.
+
+2015-02-11  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* breakpoint.c (base_breakpoint_ops): Delete.
+	* dwarf2loc.c (dwarf_expr_ctx_funcs): Make extern.
+	* elfread.c (elf_sym_fns_gdb_index, elf_sym_fns_lazy_psyms): Make extern.
+	* guile/guile.c (guile_extension_script_ops, guile_extension_ops): Make extern.
+	* ppcnbsd-tdep.c (ppcnbsd2_sigtramp): Make extern.
+	* python/py-arch.c (arch_object_type): Make extern.
+	* python/py-block.c (block_syms_iterator_object_type): Make extern.
+	* python/py-bpevent.c (breakpoint_event_object_type): Make extern.
+	* python/py-cmd.c (cmdpy_object_type): Make extern.
+	* python/py-continueevent.c (continue_event_object_type)
+	* python/py-event.h (GDBPY_NEW_EVENT_TYPE): Remove 'qual'
+	parameter.  Update all callers.
+	* python/py-evtregistry.c (eventregistry_object_type): Make extern.
+	* python/py-exitedevent.c (exited_event_object_type): Make extern.
+	* python/py-finishbreakpoint.c (finish_breakpoint_object_type): Make extern.
+	* python/py-function.c (fnpy_object_type): Make extern.
+	* python/py-inferior.c (inferior_object_type, membuf_object_type): Make extern.
+	* python/py-infevents.c (call_pre_event_object_type)
+	(inferior_call_post_event_object_type).
+	(memory_changed_event_object_type): Make extern.
+	* python/py-infthread.c (thread_object_type): Make extern.
+	* python/py-lazy-string.c (lazy_string_object_type): Make extern.
+	* python/py-linetable.c (linetable_entry_object_type)
+	(linetable_object_type, ltpy_iterator_object_type): Make extern.
+	* python/py-newobjfileevent.c (new_objfile_event_object_type)
+	(clear_objfiles_event_object_type): Make extern.
+	* python/py-objfile.c (objfile_object_type): Make extern.
+	* python/py-param.c (parmpy_object_type): Make extern.
+	* python/py-progspace.c (pspace_object_type): Make extern.
+	* python/py-signalevent.c (signal_event_object_type): Make extern.
+	* python/py-symtab.c (symtab_object_type, sal_object_type): Make extern.
+	* python/py-type.c (type_object_type, field_object_type)
+	(type_iterator_object_type): Make extern.
+	* python/python.c (python_extension_script_ops)
+	(python_extension_ops): Make extern.
+	* stap-probe.c (stap_probe_ops): Make extern.
+
+2015-02-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (adjust_pc_after_break): Don't adjust the PC just
+	because the event thread is not the current thread.
+
+2015-02-11  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.c (internal_type_self_type): If TYPE_SPECIFIC_FIELD hasn't
+	been initialized yet, return NULL.
+
+2015-02-11  Doug Evans  <dje@google.com>
+
+	* symfile.h (new_symfile_objfile): Delete.
+	* symfile.c (finish_new_objfile): Renamed from new_symfile_objfile.
+	All callers updated.
+
+2015-02-11  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_handle_resize_during_io): Call
+	tui_update_gdb_sizes() after resizing the screen.
+	* tui/tui.c (tui_enable): Resize the terminal before
+	calling tui_update_gdb_sizes().
+
+2015-02-11  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_getc): Move cursor to the end of the command
+	line before printing a newline.
+
+2015-02-11  Mark Wielaard  <mjw@redhat.com>
+
+	* utils.c (producer_is_gcc): Return true or false.
+
+2015-02-10  Mark Wielaard  <mjw@redhat.com>
+
+	* utils.h (producer_is_gcc): Change return type to bool. Add major
+	argument.
+	* utils.c (producer_is_gcc): Likewise.
+	(producer_is_gcc_ge_4): Adjust producer_is_gcc call.
+	* dwarf2read.c (check_producer): Likewise.
+
+2015-02-10  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (displaced_step_fixup): Switch to the event thread
+	before calling gdbarch_displaced_step_fixup.
+
+2015-02-10  Antoine Tremblay <antoine.tremblay@ericsson.com>
+
+	* MAINTAINERS (Write After Approval): Add Antoine Tremblay.
+
+2015-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-varobj.c (ada_name_of_child): Constify parent.
+	(ada_path_expr_of_child): Same.
+	(ada_value_of_child): Same.
+	(ada_type_of_child): Same.
+	* c-varobj.c (c_is_path_expr_parent): Same.
+	(c_describe_child): Same.
+	(c_name_of_child): Same.
+	(c_value_of_child): Same.
+	(c_type_of_child): Same.
+	(cplus_number_of_children): Same.
+	(cplus_describe_child): Constify var.
+	(cplus_name_of_child): Constify parent.
+	(cplus_value_of_child): Same.
+	(cplus_type_of_child): Same.
+	* jv-varobj.c (java_name_of_child): Same.
+	(java_value_of_child): Same.
+	(java_type_of_child): Same.
+	* varobj.c (value_of_child): Same.
+	(varobj_default_is_path_expr_parent): Constify var, parent and return
+	value.
+	(varobj_get_path_expr): Constify var, modify path_expr through
+	mutable_var.
+	(install_new_value): Constify parent.
+	(value_of_child): Constify parent.
+	* varobj.h (struct varobj): Constify parent.
+	(struct lang_varobj_ops): Constify name_of_child, value_of_child and
+	type_of_child.
+	(varobj_get_path_expr): Constify var.
+	(varobj_get_path_expr_parent): Constify var and return value.
+
+2015-02-10  Luis Machado  <lgustavo@codesourcery.com>
+
+	* arm-tdep.c (arm_prologue_unwind_stop_reason): New function.
+	(arm_prologue_this_id): Move PC and SP limit checks to
+	arm_prologue_unwind_stop_reason.
+	(arm_prologue_unwind) <stop_reason> : Set to
+	arm_prologue_unwind_stop_reason.
+
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (set_cu_language): Recognize DW_LANG_Fortran03 and
+	DW_LANG_Fortran08 as language_fortran.
+
+2015-02-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR remote/17946
+	* gdb/remote.c (remote_parse_stop_reply): Fix wrong comparison
+	of pointer against char.
+
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
+	* c-typeprint.c (cp_type_print_method_args): Handle '_Atomic'.
+	(c_type_print_modifier): Likewise.
+	* dwarf2read.c (read_tag_atomic_type): New function.
+	(read_type_die_1): Handle DW_TAG_atomic_type.
+	* gdbtypes.c (make_atomic_type): New function.
+	(recursive_dump_type): Handle TYPE_ATOMIC.
+	* gdbtypes.h (enum type_flag_values): Renumber.
+	(enum type_instance_flag_value): Add TYPE_INSTANCE_FLAG_ATOMIC.
+	(TYPE_ATOMIC): New macro.
+	(make_atomic_type): Declare.
+
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (ftrace_find_call): Skip gaps.

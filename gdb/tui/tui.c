@@ -492,6 +492,13 @@ tui_enable (void)
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);
+
+  /* Resize and refresh the screen.  */
+  if (tui_win_resized ())
+    {
+      tui_resize_all ();
+      tui_set_win_resized_to (FALSE);
+    }
   tui_refresh_all_win ();
 
   /* Update gdb's knowledge of its terminal.  */

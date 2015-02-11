@@ -120,7 +120,7 @@ struct varobj
   int num_children;
 
   /* If this object is a child, this points to its immediate parent.  */
-  struct varobj *parent;
+  const struct varobj *parent;
 
   /* Children of this object.  */
   VEC (varobj_p) *children;
@@ -175,7 +175,7 @@ struct lang_varobj_ops
 
   /* The name of the INDEX'th child of PARENT.  The returned value must be
      freed by the caller.  */
-  char *(*name_of_child) (struct varobj *parent, int index);
+  char *(*name_of_child) (const struct varobj *parent, int index);
 
   /* Returns the rooted expression of CHILD, which is a variable
      obtain that has some parent.  The returned value must be freed by the
@@ -183,10 +183,10 @@ struct lang_varobj_ops
   char *(*path_expr_of_child) (const struct varobj *child);
 
   /* The ``struct value *'' of the INDEX'th child of PARENT.  */
-  struct value *(*value_of_child) (struct varobj *parent, int index);
+  struct value *(*value_of_child) (const struct varobj *parent, int index);
 
   /* The type of the INDEX'th child of PARENT.  */
-  struct type *(*type_of_child) (struct varobj *parent, int index);
+  struct type *(*type_of_child) (const struct varobj *parent, int index);
 
   /* The current value of VAR.  The returned value must be freed by the
      caller.  */
@@ -285,7 +285,7 @@ extern char *varobj_get_type (struct varobj *var);
 
 extern struct type *varobj_get_gdb_type (const struct varobj *var);
 
-extern char *varobj_get_path_expr (struct varobj *var);
+extern char *varobj_get_path_expr (const struct varobj *var);
 
 extern const struct language_defn *
   varobj_get_language (const struct varobj *var);
@@ -329,7 +329,8 @@ extern struct type *varobj_get_value_type (const struct varobj *var);
 
 extern int varobj_is_anonymous_child (const struct varobj *child);
 
-extern struct varobj *varobj_get_path_expr_parent (struct varobj *var);
+extern const struct varobj *
+  varobj_get_path_expr_parent (const struct varobj *var);
 
 extern char *varobj_value_get_print_value (struct value *value,
 					   enum varobj_display_formats format,

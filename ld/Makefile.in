@@ -101,6 +101,24 @@ libldtestplug_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libldtestplug_la_CFLAGS) \
 	$(CFLAGS) $(libldtestplug_la_LDFLAGS) $(LDFLAGS) -o $@
 @ENABLE_PLUGINS_TRUE@am_libldtestplug_la_rpath =
+libldtestplug2_la_LIBADD =
+@ENABLE_PLUGINS_TRUE@am_libldtestplug2_la_OBJECTS =  \
+@ENABLE_PLUGINS_TRUE@	libldtestplug2_la-testplug2.lo
+libldtestplug2_la_OBJECTS = $(am_libldtestplug2_la_OBJECTS)
+libldtestplug2_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libldtestplug2_la_CFLAGS) $(CFLAGS) \
+	$(libldtestplug2_la_LDFLAGS) $(LDFLAGS) -o $@
+@ENABLE_PLUGINS_TRUE@am_libldtestplug2_la_rpath =
+libldtestplug3_la_LIBADD =
+@ENABLE_PLUGINS_TRUE@am_libldtestplug3_la_OBJECTS =  \
+@ENABLE_PLUGINS_TRUE@	libldtestplug3_la-testplug3.lo
+libldtestplug3_la_OBJECTS = $(am_libldtestplug3_la_OBJECTS)
+libldtestplug3_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libldtestplug3_la_CFLAGS) $(CFLAGS) \
+	$(libldtestplug3_la_LDFLAGS) $(LDFLAGS) -o $@
+@ENABLE_PLUGINS_TRUE@am_libldtestplug3_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
 	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -135,7 +153,8 @@ YLWRAP = $(top_srcdir)/../ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(YACC) $(YFLAGS) $(AM_YFLAGS)
-SOURCES = $(libldtestplug_la_SOURCES) $(ld_new_SOURCES) \
+SOURCES = $(libldtestplug_la_SOURCES) $(libldtestplug2_la_SOURCES) \
+	$(libldtestplug3_la_SOURCES) $(ld_new_SOURCES) \
 	$(EXTRA_ld_new_SOURCES)
 INFO_DEPS = ld.info
 am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
@@ -889,10 +908,16 @@ ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $
 #
 # Build a dummy plugin using libtool.
 #
-@ENABLE_PLUGINS_TRUE@noinst_LTLIBRARIES = libldtestplug.la
+@ENABLE_PLUGINS_TRUE@noinst_LTLIBRARIES = libldtestplug.la libldtestplug2.la libldtestplug3.la
 @ENABLE_PLUGINS_TRUE@libldtestplug_la_SOURCES = testplug.c
 @ENABLE_PLUGINS_TRUE@libldtestplug_la_CFLAGS = -g -O2
 @ENABLE_PLUGINS_TRUE@libldtestplug_la_LDFLAGS = -no-undefined -rpath /nowhere
+@ENABLE_PLUGINS_TRUE@libldtestplug2_la_SOURCES = testplug2.c
+@ENABLE_PLUGINS_TRUE@libldtestplug2_la_CFLAGS = -g -O2
+@ENABLE_PLUGINS_TRUE@libldtestplug2_la_LDFLAGS = -no-undefined -rpath /nowhere
+@ENABLE_PLUGINS_TRUE@libldtestplug3_la_SOURCES = testplug3.c
+@ENABLE_PLUGINS_TRUE@libldtestplug3_la_CFLAGS = -g -O2
+@ENABLE_PLUGINS_TRUE@libldtestplug3_la_LDFLAGS = -no-undefined -rpath /nowhere
 MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.
@@ -980,6 +1005,10 @@ clean-noinstLTLIBRARIES:
 	done
 libldtestplug.la: $(libldtestplug_la_OBJECTS) $(libldtestplug_la_DEPENDENCIES) 
 	$(libldtestplug_la_LINK) $(am_libldtestplug_la_rpath) $(libldtestplug_la_OBJECTS) $(libldtestplug_la_LIBADD) $(LIBS)
+libldtestplug2.la: $(libldtestplug2_la_OBJECTS) $(libldtestplug2_la_DEPENDENCIES) 
+	$(libldtestplug2_la_LINK) $(am_libldtestplug2_la_rpath) $(libldtestplug2_la_OBJECTS) $(libldtestplug2_la_LIBADD) $(LIBS)
+libldtestplug3.la: $(libldtestplug3_la_OBJECTS) $(libldtestplug3_la_DEPENDENCIES) 
+	$(libldtestplug3_la_LINK) $(am_libldtestplug3_la_rpath) $(libldtestplug3_la_OBJECTS) $(libldtestplug3_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -1397,6 +1426,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldwrite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lexsup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug2_la-testplug2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug3_la-testplug3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug_la-testplug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mri.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-dll.Po@am__quote@
@@ -1430,6 +1461,20 @@ libldtestplug_la-testplug.lo: testplug.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='testplug.c' object='libldtestplug_la-testplug.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug_la_CFLAGS) $(CFLAGS) -c -o libldtestplug_la-testplug.lo `test -f 'testplug.c' || echo '$(srcdir)/'`testplug.c
+
+libldtestplug2_la-testplug2.lo: testplug2.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug2_la_CFLAGS) $(CFLAGS) -MT libldtestplug2_la-testplug2.lo -MD -MP -MF $(DEPDIR)/libldtestplug2_la-testplug2.Tpo -c -o libldtestplug2_la-testplug2.lo `test -f 'testplug2.c' || echo '$(srcdir)/'`testplug2.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libldtestplug2_la-testplug2.Tpo $(DEPDIR)/libldtestplug2_la-testplug2.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='testplug2.c' object='libldtestplug2_la-testplug2.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug2_la_CFLAGS) $(CFLAGS) -c -o libldtestplug2_la-testplug2.lo `test -f 'testplug2.c' || echo '$(srcdir)/'`testplug2.c
+
+libldtestplug3_la-testplug3.lo: testplug3.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug3_la_CFLAGS) $(CFLAGS) -MT libldtestplug3_la-testplug3.lo -MD -MP -MF $(DEPDIR)/libldtestplug3_la-testplug3.Tpo -c -o libldtestplug3_la-testplug3.lo `test -f 'testplug3.c' || echo '$(srcdir)/'`testplug3.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libldtestplug3_la-testplug3.Tpo $(DEPDIR)/libldtestplug3_la-testplug3.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='testplug3.c' object='libldtestplug3_la-testplug3.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug3_la_CFLAGS) $(CFLAGS) -c -o libldtestplug3_la-testplug3.lo `test -f 'testplug3.c' || echo '$(srcdir)/'`testplug3.c
 
 .l.c:
 	$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)

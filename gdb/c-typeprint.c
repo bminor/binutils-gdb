@@ -270,6 +270,9 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 
       if (TYPE_RESTRICT (domain))
 	fprintf_filtered (stream, " restrict");
+
+      if (TYPE_ATOMIC (domain))
+	fprintf_filtered (stream, " _Atomic");
     }
 }
 
@@ -428,6 +431,14 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
       if (did_print_modifier || need_pre_space)
 	fprintf_filtered (stream, " ");
       fprintf_filtered (stream, "restrict");
+      did_print_modifier = 1;
+    }
+
+  if (TYPE_ATOMIC (type))
+    {
+      if (did_print_modifier || need_pre_space)
+	fprintf_filtered (stream, " ");
+      fprintf_filtered (stream, "_Atomic");
       did_print_modifier = 1;
     }
 

@@ -49,7 +49,7 @@ typedef struct
   PyObject *xmethods;
 } objfile_object;
 
-static PyTypeObject objfile_object_type
+extern PyTypeObject objfile_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("objfile_object");
 
 static const struct objfile_data *objfpy_objfile_data_key;
@@ -652,7 +652,7 @@ static PyGetSetDef objfile_getset[] =
   { NULL }
 };
 
-static PyTypeObject objfile_object_type =
+PyTypeObject objfile_object_type =
 {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Objfile",		  /*tp_name*/
