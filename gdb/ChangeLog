@@ -1,5 +1,10 @@
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* python/py-framefilter.c (py_print_frame): Substitute goto error.
+	Remove the error label.
+
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* python/py-framefilter.c (py_print_frame): Put conditional code paths
 	with goto first, indent the former else codepath left.  Put variable
 	'elided' to a new inner block.
