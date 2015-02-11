@@ -1,5 +1,13 @@
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testplug2.c (dump_tv_tag): Removed.
+	(onall_symbols_read): Return LDPS_ERR if the file descriptor isn't
+	closed.
+	* testplug3.c (dump_tv_tag): Removed.
+	(onclaim_file): Fix typo.
+
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/17878
 	* Makefile.am (noinst_LTLIBRARIES): Add libldtestplug2.la and
 	libldtestplug3.la.
