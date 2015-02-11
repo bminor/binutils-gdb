@@ -1,3 +1,7 @@
+2015-02-10  Doug Evans  <xdje42@gmail.com>
+
+	* lib/gdb.exp (gdb_load): Always return a result.
+
 2015-02-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/signal-sigtrap.c: New file.
