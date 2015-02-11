@@ -3725,6 +3725,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
   while (start < end)
     {
       unsigned char *data;
+      unsigned char *adr;
       dwarf_vma offset;
       unsigned int offset_size, initial_length_size;
 
@@ -3754,17 +3755,18 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, end);
 
+      adr = start + names.pn_length + initial_length_size;
       /* PR 17531: file: 7615b6b2.  */
       if ((dwarf_signed_vma) names.pn_length < 0
 	  /* PR 17531: file: a5dbeaa7. */
-	  || start + names.pn_length + initial_length_size < start)
+	  || adr < start)
 	{
 	  warn (_("Negative length for public name: 0x%lx\n"), (long) names.pn_length);
 	  start = end;
 	}
       else
-	start += names.pn_length + initial_length_size;
-
+	start = adr;
+      
       printf (_("  Length:                              %ld\n"),
 	      (long) names.pn_length);
       printf (_("  Version:                             %d\n"),
@@ -6111,6 +6113,7 @@ display_debug_frames (struct dwarf_section *section,
 
       while (start < block_end)
 	{
+	  unsigned char * tmp;
 	  unsigned op, opa;
 	  unsigned long ul, reg, roffs;
 	  long l;
@@ -6412,7 +6415,8 @@ display_debug_frames (struct dwarf_section *section,
 		reg_prefix = bad_reg;
 	      /* PR 17512: file: 069-133014-0.006.  */
 	      /* PR 17512: file: 98c02eb4.  */
-	      if (start >= block_end || start + ul > block_end || start + ul < start)
+	      tmp = start + ul;
+	      if (start >= block_end || tmp > block_end || tmp < start)
 		{
 		  printf (_("  DW_CFA_expression: <corrupt len %lu>\n"), ul);
 		  break;
@@ -6427,7 +6431,7 @@ display_debug_frames (struct dwarf_section *section,
 		}
 	      if (*reg_prefix == '\0')
 		fc->col_type[reg] = DW_CFA_expression;
-	      start += ul;
+	      start = tmp;
 	      break;
 
 	    case DW_CFA_val_expression:
@@ -6435,7 +6439,8 @@ display_debug_frames (struct dwarf_section *section,
 	      ul = LEB ();
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
-	      if (start >= block_end || start + ul > block_end || start + ul < start)
+	      tmp = start + ul;
+	      if (start >= block_end || tmp > block_end || tmp < start)
 		{
 		  printf ("  DW_CFA_val_expression: <corrupt len %lu>\n", ul);
 		  break;
@@ -6450,7 +6455,7 @@ display_debug_frames (struct dwarf_section *section,
 		}
 	      if (*reg_prefix == '\0')
 		fc->col_type[reg] = DW_CFA_val_expression;
-	      start += ul;
+	      start = tmp;
 	      break;
 
 	    case DW_CFA_offset_extended_sf:
@@ -6729,10 +6734,11 @@ display_gdb_index (struct dwarf_section *section,
 	  || cu_vector_offset != 0)
 	{
 	  unsigned int j;
+	  unsigned char * adr;
 
+	  adr = constant_pool + name_offset;
 	  /* PR 17531: file: 5b7b07ad.  */
-	  if (constant_pool + name_offset < constant_pool
-	      || constant_pool + name_offset >= section->start + section->size)
+	  if (adr < constant_pool || adr >= section->start + section->size)
 	    {
 	      printf (_("[%3u] <corrupt offset: %x>"), i, name_offset);
 	      warn (_("Corrupt name offset of 0x%x found for symbol table slot %d\n"),
@@ -6743,8 +6749,8 @@ display_gdb_index (struct dwarf_section *section,
 		    (int) (section->size - (constant_pool_offset + name_offset)),
 		    constant_pool + name_offset);
 
-	  if (constant_pool + cu_vector_offset < constant_pool
-	      || constant_pool + cu_vector_offset >= section->start + section->size - 3)
+	  adr = constant_pool + cu_vector_offset;
+	  if (adr < constant_pool || adr >= section->start + section->size - 3)
 	    {
 	      printf (_("<invalid CU vector offset: %x>\n"), cu_vector_offset);
 	      warn (_("Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"),
@@ -6752,12 +6758,12 @@ display_gdb_index (struct dwarf_section *section,
 	      continue;
 	    }
 
-	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+	  num_cus = byte_get_little_endian (adr, 4);
 
+	  adr = constant_pool + cu_vector_offset + 4 + num_cus * 4;
 	  if (num_cus * 4 < num_cus
-	      || constant_pool + cu_vector_offset + 4 + num_cus * 4
-	      >= section->start + section->size
-	      || (constant_pool + cu_vector_offset + 4 + num_cus * 4) < constant_pool)
+	      || adr >= section->start + section->size
+	      || adr < constant_pool)
 	    {
 	      printf ("<invalid number of CUs: %d>\n", num_cus);
 	      warn (_("Invalid number of CUs (0x%x) for symbol table slot %d\n"),
@@ -7010,6 +7016,14 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       unsigned char *prow;
 
       is_tu_index = strcmp (section->name, ".debug_tu_index") == 0;
+
+      /* PR 17531: file: 0dd159bf.
+         Check for wraparound with an overlarge ncols value.  */
+      if ((unsigned int) ((poffsets - ppool) / 4) != ncols)
+	{
+	  warn (_("Overlarge number of columns: %x\n"), ncols);
+	  return 0;
+	}
 
       if (pend > limit)
 	{

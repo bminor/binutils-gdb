@@ -1,3 +1,12 @@
+2015-02-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* dwarf.c (display_debug_pubnames_worker): Work around compiler
+	bug checking address ranges.
+	(display_debug_frames): Likewise.
+	(display_gdb_index): Likewise.
+	(process_cu_tu_index): Add range check on the ncols value.
+
 2015-02-10  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
