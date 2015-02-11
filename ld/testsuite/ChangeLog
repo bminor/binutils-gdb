@@ -1,3 +1,35 @@
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
+	* ld-plugin/func.c: Add some comments.
+	* ld-plugin/plugin-13.d: New file.
+	* ld-plugin/plugin-14.d: Likewise.
+	* ld-plugin/plugin-15.d: Likewise.
+	* ld-plugin/plugin-16.d: Likewise.
+	* ld-plugin/plugin-17.d: Likewise.
+	* ld-plugin/plugin-18.d: Likewise.
+	* ld-plugin/plugin-19.d: Likewise.
+	* ld-plugin/plugin-20.d: Likewise.
+	* ld-plugin/plugin-21.d: Likewise.
+	* ld-plugin/plugin-22.d: Likewise.
+	* ld-plugin/plugin-23.d: Likewise.
+	* ld-plugin/plugin-24.d: Likewise.
+	* ld-plugin/plugin-25.d: Likewise.
+	* ld-plugin/plugin-26.d: Likewise.
+	* ld-plugin/plugin.exp (plugin2_name): New.
+	(plugin3_name): Likewise.
+	(plugin2_path): Likewise.
+	(plugin3_path): Likewise.
+	(testsrcfiles): Likewise.
+	(testsrcfiles_notext): Likewise.
+	(plugin_tests): Add tests for non-object IR file.
+	(plugin_lib_tests): Likewise.
+	(plugin_extra_elf_tests): Likewise.
+	(plugin_src_tests): New tests for non-object IR file.
+	Run nm --plugin test.
+	Run ar --plugin test.
+	Run plugin_src_tests.
+
 2015-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17935

@@ -1,6 +1,21 @@
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17878
+	* Makefile.am (noinst_LTLIBRARIES): Add libldtestplug2.la and
+	libldtestplug3.la.
+	(libldtestplug2_la_SOURCES): New.
+	(libldtestplug2_la_CFLAGS): Likewise.
+	(libldtestplug2_la_LDFLAGS): Likewise.
+	(libldtestplug3_la_SOURCES): New.
+	(libldtestplug3_la_CFLAGS): Likewise.
+	(libldtestplug3_la_LDFLAGS): Likewise.
+	* Makefile.in: Regenerated.
+	* testplug2.c: New file.
+	* testplug3.c: Likewise.
+
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17878
 	* plugin.c: Include ../bfd/plugin.h.
 	(plugin_get_ir_dummy_bfd): Call bfd_create with
 	link_info.output_bfd instead of srctemplate.  Copy BFD info
