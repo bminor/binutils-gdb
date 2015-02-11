@@ -1,5 +1,10 @@
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* python/py-framefilter.c (py_print_single_arg, enumerate_locals)
+	(py_print_frame): Use RETURN_MASK_ERROR.
+
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* python/py-framefilter.c (py_print_frame): Mention RETURN_QUIT in
 	function comment.  Wrap all function that can throw in cleanups.
 	(gdbpy_apply_frame_filter): Wrap all function that can throw in

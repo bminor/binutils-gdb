@@ -376,7 +376,7 @@ py_print_single_arg (struct ui_out *out,
   else
     val = fv;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
@@ -761,7 +761,7 @@ enumerate_locals (PyObject *iter,
       /* If the object did not provide a value, read it.  */
       if (val == NULL)
 	{
-	  TRY_CATCH (except, RETURN_MASK_ALL)
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      val = read_var_value (sym, frame);
 	    }
@@ -781,7 +781,7 @@ enumerate_locals (PyObject *iter,
 	  if (print_args_field || args_type != NO_VALUES)
 	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
 	}
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  if (! ui_out_is_mi_like_p (out))
 	    {
@@ -838,7 +838,7 @@ enumerate_locals (PyObject *iter,
 
       do_cleanups (locals_cleanups);
 
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  ui_out_text (out, "\n");
 	}
@@ -1042,7 +1042,7 @@ py_print_frame (PyObject *filter, int flags,
   if (frame == NULL)
     return EXT_LANG_BT_ERROR;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       gdbarch = get_frame_arch (frame);
     }
@@ -1074,7 +1074,7 @@ py_print_frame (PyObject *filter, int flags,
 	 and are printed with indention.  */
       if (indent > 0)
 	{
-	  TRY_CATCH (except, RETURN_MASK_ALL)
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      ui_out_spaces (out, indent*4);
 	    }
@@ -1117,7 +1117,7 @@ py_print_frame (PyObject *filter, int flags,
 
       slot = (struct frame_info **) htab_find_slot (levels_printed,
 						    frame, INSERT);
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  level = frame_relative_level (frame);
 
@@ -1151,7 +1151,7 @@ py_print_frame (PyObject *filter, int flags,
 	 print nothing.  */
       if (opts.addressprint && has_addr)
 	{
-	  TRY_CATCH (except, RETURN_MASK_ALL)
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      annotate_frame_address ();
 	      ui_out_field_core_addr (out, "addr", gdbarch, address);
@@ -1218,7 +1218,7 @@ py_print_frame (PyObject *filter, int flags,
 	      return EXT_LANG_BT_ERROR;
 	    }
 
-	  TRY_CATCH (except, RETURN_MASK_ALL)
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      annotate_frame_function_name ();
 	      if (function == NULL)
@@ -1251,7 +1251,7 @@ py_print_frame (PyObject *filter, int flags,
   /* File name/source/line number information.  */
   if (print_frame_info)
     {
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  annotate_frame_source_begin ();
 	}
@@ -1285,7 +1285,7 @@ py_print_frame (PyObject *filter, int flags,
 		}
 
 	      make_cleanup (xfree, filename);
-	      TRY_CATCH (except, RETURN_MASK_ALL)
+	      TRY_CATCH (except, RETURN_MASK_ERROR)
 		{
 		  ui_out_wrap_hint (out, "   ");
 		  ui_out_text (out, " at ");
@@ -1319,7 +1319,7 @@ py_print_frame (PyObject *filter, int flags,
 	  if (py_line != Py_None)
 	    {
 	      line = PyLong_AsLong (py_line);
-	      TRY_CATCH (except, RETURN_MASK_ALL)
+	      TRY_CATCH (except, RETURN_MASK_ERROR)
 		{
 		  ui_out_text (out, ":");
 		  annotate_frame_source_line ();
@@ -1340,7 +1340,7 @@ py_print_frame (PyObject *filter, int flags,
      elided frames, so if MI output detected do not send newline.  */
   if (! ui_out_is_mi_like_p (out))
     {
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  annotate_frame_end ();
 	  ui_out_text (out, "\n");
