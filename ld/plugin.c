@@ -1080,6 +1080,7 @@ plugin_maybe_claim (lang_input_statement_type *entry)
   input->view_buffer.filesize = 0;
   input->view_buffer.offset = 0;
   input->fd = fd;
+  input->use_mmap = FALSE;
   input->offset = offset;
   input->filesize = filesize;
   input->name = plugin_strdup (abfd, ibfd->filename);

@@ -1,5 +1,9 @@
 2015-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* plugin.c (plugin_maybe_claim): Initialize use_mmap.
+
+2015-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* plugin.c (plugin_input_file_t): Add use_mmap.
 	(plugin_pagesize): New.
 	(get_view): Use plugin_pagesize.  Set use_mmap if mmap is used.
