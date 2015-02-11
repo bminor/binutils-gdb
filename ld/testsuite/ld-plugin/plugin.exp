@@ -41,6 +41,14 @@ set plugin_name [file_contents "$base_dir/libldtestplug.la"]
 set plugin_name [regsub "'.*" [regsub ".*dlname='" "$plugin_name" ""] ""]
 verbose "plugin name is '$plugin_name'"
 
+set plugin2_name [file_contents "$base_dir/libldtestplug2.la"]
+set plugin2_name [regsub "'.*" [regsub ".*dlname='" "$plugin2_name" ""] ""]
+verbose "plugin2 name is '$plugin2_name'"
+
+set plugin3_name [file_contents "$base_dir/libldtestplug3.la"]
+set plugin3_name [regsub "'.*" [regsub ".*dlname='" "$plugin3_name" ""] ""]
+verbose "plugin3 name is '$plugin3_name'"
+
 # Use libtool to find full path to plugin rather than worrying
 # about run paths or anything like that.
 catch "exec $base_dir/libtool --config" lt_config
@@ -50,7 +58,11 @@ regexp -line "^objdir=.*$" "$lt_config" lt_objdir
 verbose "lt_objdir line is '$lt_objdir'" 3
 set lt_objdir [regsub "objdir=" "$lt_objdir" ""]
 set plugin_path "$base_dir/$lt_objdir/$plugin_name"
+set plugin2_path "$base_dir/$lt_objdir/$plugin2_name"
+set plugin3_path "$base_dir/$lt_objdir/$plugin3_name"
 verbose "Full plugin path $plugin_path" 2
+verbose "Full plugin2 path $plugin2_path" 2
+verbose "Full plugin3 path $plugin3_path" 2
 
 set regclm "-plugin-opt registerclaimfile"
 set regas "-plugin-opt registerallsymbolsread"
@@ -88,6 +100,8 @@ if { $can_compile && !$failed_compile } {
 
 set testobjfiles "tmpdir/main.o tmpdir/func.o tmpdir/text.o"
 set testobjfiles_notext "tmpdir/main.o tmpdir/func.o"
+set testsrcfiles "tmpdir/main.o $srcdir/$subdir/func.c tmpdir/text.o"
+set testsrcfiles_notext "tmpdir/main.o $srcdir/$subdir/func.c"
 # Rather than having libs we just define dummy values for anything
 # we may need to link a target exe; we aren't going to run it anyway.
 set libs "[ld_simple_link_defsyms] --defsym ${_}printf=${_}main --defsym ${_}puts=${_}main"
@@ -125,6 +139,35 @@ set plugin_tests [list \
 			-plugin-opt dumpresolutions \
 			-plugin-opt add:tmpdir/func.o \
     $testobjfiles $libs" "" "" "" {{ld plugin-9.d}} "main.x" ] \
+    [list "load plugin with source" "-plugin $plugin_path $regclm \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-13.d}} "main.x" ] \
+    [list "plugin claimfile lost symbol with source" \
+		       "-plugin $plugin_path $regclm $regas $regcln \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-14.d}} "main.x" ] \
+    [list "plugin claimfile replace symbol with source" \
+		       "-plugin $plugin_path $regclm $regas $regcln \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+			-plugin-opt sym:${_}func::0:0:0 \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-15.d}} "main.x" ] \
+    [list "plugin claimfile resolve symbol with source" \
+		       "-plugin $plugin_path $regclm $regas $regcln \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+			-plugin-opt sym:${_}func::0:0:0 \
+			-plugin-opt sym:${_}func2::0:0:0 \
+			-plugin-opt dumpresolutions \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-16.d}} "main.x" ] \
+    [list "plugin claimfile replace file with source" \
+		       "-plugin $plugin_path $regclm $regas $regcln \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+			-plugin-opt sym:${_}func::0:0:0 \
+			-plugin-opt sym:${_}func2::0:0:0 \
+			-plugin-opt dumpresolutions \
+			-plugin-opt add:tmpdir/func.o \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-17.d}} "main.x" ] \
+    [list "load plugin with source not claimed" "-plugin $plugin_path $regclm \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-26.d}} "main.x" ] \
 ]
 
 set plugin_lib_tests [list \
@@ -145,6 +188,25 @@ set plugin_lib_tests [list \
 			-plugin-opt sym:${_}text::0:0:0 \
 			-plugin-opt add:tmpdir/text.o \
     $testobjfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-11.d}} "main.x" ] \
+    [list "plugin ignore lib with source" \
+	               "-plugin $plugin_path $regclm $regas $regcln \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+			-plugin-opt sym:${_}func::0:0:0 \
+			-plugin-opt sym:${_}func2::0:0:0 \
+			-plugin-opt dumpresolutions \
+			-plugin-opt add:tmpdir/func.o \
+    $testsrcfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-18.d}} "main.x" ] \
+    [list "plugin claimfile replace lib with source" \
+		       "-plugin $plugin_path $regclm $regas $regcln \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+			-plugin-opt sym:${_}func::0:0:0 \
+			-plugin-opt sym:${_}func2::0:0:0 \
+			-plugin-opt dumpresolutions \
+			-plugin-opt add:tmpdir/func.o \
+			-plugin-opt claim:tmpdir/libtext.a \
+			-plugin-opt sym:${_}text::0:0:0 \
+			-plugin-opt add:tmpdir/text.o \
+    $testsrcfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-19.d}} "main.x" ] \
 ]
 
 set plugin_extra_elf_tests [list \
@@ -160,6 +222,20 @@ set plugin_extra_elf_tests [list \
 			-plugin-opt add:tmpdir/func2i.o \
 			-plugin-opt add:tmpdir/func3h.o \
     $testobjfiles $libs --verbose=2" "" "" "" {{ld plugin-12.d} \
+				{readelf -s plugin-vis-1.d}} "main.x" ] \
+    [list "plugin set symbol visibility with source" \
+		       "-plugin $plugin_path $regclm $regas $regcln \
+			-plugin-opt claim:$srcdir/$subdir/func.c \
+			-plugin-opt sym:${_}func::0:0:0 \
+			-plugin-opt sym:${_}func1::0:1:0 \
+			-plugin-opt sym:${_}func2::0:2:0 \
+			-plugin-opt sym:${_}func3::0:3:0 \
+			-plugin-opt dumpresolutions \
+			-plugin-opt add:tmpdir/func.o \
+			-plugin-opt add:tmpdir/func1p.o \
+			-plugin-opt add:tmpdir/func2i.o \
+			-plugin-opt add:tmpdir/func3h.o \
+    $testsrcfiles $libs --verbose=2" "" "" "" {{ld plugin-12.d} \
 				{readelf -s plugin-vis-1.d}} "main.x" ] \
 ]
 
@@ -190,4 +266,66 @@ if ![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] {
     }
 } else {
     run_ld_link_tests $plugin_lib_tests
+}
+
+set plugin_src_tests [list \
+    [list "plugin 2 with source lib" \
+	               "-plugin $plugin2_path $regclm $regas $regcln \
+			-plugin-opt dumpresolutions \
+     tmpdir/main.o -Ltmpdir -ltext -lfunc $libs" "" "" "" {{ld plugin-20.d}} "main.x" ] \
+    [list "load plugin 2 with source" \
+	               "-plugin $plugin2_path $regclm $regas $regcln \
+			-plugin-opt dumpresolutions \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-21.d}} "main.x" ] \
+    [list "load plugin 2 with source and -r" \
+	               "-r -plugin $plugin2_path $regclm $regas $regcln \
+			-plugin-opt dumpresolutions \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-24.d}} "main.x" ] \
+    [list "plugin 3 with source lib" \
+	               "-plugin $plugin3_path $regclm $regas $regcln \
+			-plugin-opt dumpresolutions \
+     tmpdir/main.o -Ltmpdir -ltext -lfunc $libs" "" "" "" {{ld plugin-22.d}} "main.x" ] \
+    [list "load plugin 3 with source" \
+	               "-plugin $plugin3_path $regclm $regas $regcln \
+			-plugin-opt dumpresolutions \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-23.d}} "main.x" ] \
+    [list "load plugin 3 with source and -r" \
+	               "-r -plugin $plugin3_path $regclm $regas $regcln \
+			-plugin-opt dumpresolutions \
+    $testsrcfiles $libs" "" "" "" {{ld plugin-25.d}} "main.x" ] \
+]
+
+# Check if nm --plugin works.
+set testname "nm --plugin"
+set nm_plugin "$NM --plugin $plugin2_path $srcdir/$subdir/func.c"
+catch "exec $nm_plugin" plugin_nm_output
+send_log "$nm_plugin\n"
+send_log "$plugin_nm_output\n"
+if { [regexp "0+ T func" "$plugin_nm_output"] &&
+     [regexp "0+ T _func" "$plugin_nm_output"] } {
+    pass $testname
+} else {
+    fail $testname
+}
+
+# Check if ar --plugin works.
+file delete tmpdir/libfunc.a
+if [ar_simple_create $ar "--plugin $plugin2_path" "tmpdir/libfunc.a" \
+			 "tmpdir/main.o $srcdir/$subdir/func.c"] {
+    set testname "ar --plugin"
+    set nm_plugin "$NM -s --plugin $plugin2_path tmpdir/libfunc.a"
+    catch "exec $nm_plugin" plugin_nm_output
+    send_log "$nm_plugin\n"
+    send_log "$plugin_nm_output\n"
+    if { [regexp "func in func.c" "$plugin_nm_output"] &&
+         [regexp "_func in func.c" "$plugin_nm_output"] } {
+	pass $testname
+	run_ld_link_tests $plugin_src_tests
+    } else {
+	fail $testname
+    }
+} else {
+    foreach testitem $plugin_src_tests {
+	unresolved [lindex $testitem 0]
+    }
 }
