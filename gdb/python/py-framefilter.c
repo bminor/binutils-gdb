@@ -1016,7 +1016,7 @@ py_print_frame (PyObject *filter, int flags,
   struct frame_info *frame = NULL;
   struct cleanup *cleanup_stack = make_cleanup (null_cleanup, NULL);
   struct value_print_options opts;
-  PyObject *py_inf_frame, *elided;
+  PyObject *py_inf_frame;
   int print_level, print_frame_info, print_args, print_locals;
   volatile struct gdb_exception except;
 
@@ -1058,11 +1058,8 @@ py_print_frame (PyObject *filter, int flags,
       if (py_mi_print_variables (filter, out, &opts,
 				 args_type, frame) == EXT_LANG_BT_ERROR)
 	goto error;
-      else
-	{
-	  do_cleanups (cleanup_stack);
-	  return EXT_LANG_BT_COMPLETED;
-	}
+      do_cleanups (cleanup_stack);
+      return EXT_LANG_BT_COMPLETED;
     }
 
   /* -stack-list-locals does not require a
@@ -1092,17 +1089,16 @@ py_print_frame (PyObject *filter, int flags,
       if (PyObject_HasAttrString (filter, "address"))
 	{
 	  PyObject *paddr = PyObject_CallMethod (filter, "address", NULL);
-	  if (paddr != NULL)
-	    {
-	      if (paddr != Py_None)
-		{
-		  address = PyLong_AsLong (paddr);
-		  has_addr = 1;
-		}
-	      Py_DECREF (paddr);
-	    }
-	  else
+
+	  if (paddr == NULL)
 	    goto error;
+
+	  if (paddr != Py_None)
+	    {
+	      address = PyLong_AsLong (paddr);
+	      has_addr = 1;
+	    }
+	  Py_DECREF (paddr);
 	}
     }
 
@@ -1167,64 +1163,61 @@ py_print_frame (PyObject *filter, int flags,
       if (PyObject_HasAttrString (filter, "function"))
 	{
 	  PyObject *py_func = PyObject_CallMethod (filter, "function", NULL);
+	  const char *function = NULL;
 
-	  if (py_func != NULL)
-	    {
-	      const char *function = NULL;
-
-	      if (gdbpy_is_string (py_func))
-		{
-		  char *function_to_free;
-
-		  function = function_to_free =
-		    python_string_to_host_string (py_func);
-
-		  if (function == NULL)
-		    {
-		      Py_DECREF (py_func);
-		      goto error;
-		    }
-		  make_cleanup (xfree, function_to_free);
-		}
-	      else if (PyLong_Check (py_func))
-		{
-		  CORE_ADDR addr = PyLong_AsUnsignedLongLong (py_func);
-		  struct bound_minimal_symbol msymbol;
-
-		  if (PyErr_Occurred ())
-		    goto error;
-
-		  msymbol = lookup_minimal_symbol_by_pc (addr);
-		  if (msymbol.minsym != NULL)
-		    function = MSYMBOL_PRINT_NAME (msymbol.minsym);
-		}
-	      else if (py_func != Py_None)
-		{
-		  PyErr_SetString (PyExc_RuntimeError,
-				   _("FrameDecorator.function: expecting a " \
-				     "String, integer or None."));
-		  Py_DECREF (py_func);
-		  goto error;
-		}
-
-	      TRY_CATCH (except, RETURN_MASK_ALL)
-		{
-		  annotate_frame_function_name ();
-		  if (function == NULL)
-		    ui_out_field_skip (out, "func");
-		  else
-		    ui_out_field_string (out, "func", function);
-		}
-	      if (except.reason < 0)
-		{
-		  Py_DECREF (py_func);
-		  gdbpy_convert_exception (except);
-		  goto error;
-		}
-	      Py_DECREF (py_func);
-	    }
-	  else
+	  if (py_func == NULL)
 	    goto error;
+
+	  if (gdbpy_is_string (py_func))
+	    {
+	      char *function_to_free;
+
+	      function = function_to_free =
+		python_string_to_host_string (py_func);
+
+	      if (function == NULL)
+		{
+		  Py_DECREF (py_func);
+		  goto error;
+		}
+	      make_cleanup (xfree, function_to_free);
+	    }
+	  else if (PyLong_Check (py_func))
+	    {
+	      CORE_ADDR addr = PyLong_AsUnsignedLongLong (py_func);
+	      struct bound_minimal_symbol msymbol;
+
+	      if (PyErr_Occurred ())
+		goto error;
+
+	      msymbol = lookup_minimal_symbol_by_pc (addr);
+	      if (msymbol.minsym != NULL)
+		function = MSYMBOL_PRINT_NAME (msymbol.minsym);
+	    }
+	  else if (py_func != Py_None)
+	    {
+	      PyErr_SetString (PyExc_RuntimeError,
+			       _("FrameDecorator.function: expecting a " \
+				 "String, integer or None."));
+	      Py_DECREF (py_func);
+	      goto error;
+	    }
+
+	  TRY_CATCH (except, RETURN_MASK_ALL)
+	    {
+	      annotate_frame_function_name ();
+	      if (function == NULL)
+		ui_out_field_skip (out, "func");
+	      else
+		ui_out_field_string (out, "func", function);
+	    }
+	  if (except.reason < 0)
+	    {
+	      Py_DECREF (py_func);
+	      gdbpy_convert_exception (except);
+	      goto error;
+	    }
+	  Py_DECREF (py_func);
 	}
     }
 
@@ -1254,38 +1247,36 @@ py_print_frame (PyObject *filter, int flags,
 	{
 	  PyObject *py_fn = PyObject_CallMethod (filter, "filename", NULL);
 
-	  if (py_fn != NULL)
-	    {
-	      if (py_fn != Py_None)
-		{
-		  char *filename = python_string_to_host_string (py_fn);
-
-		  if (filename == NULL)
-		    {
-		      Py_DECREF (py_fn);
-		      goto error;
-		    }
-
-		  make_cleanup (xfree, filename);
-		  TRY_CATCH (except, RETURN_MASK_ALL)
-		    {
-		      ui_out_wrap_hint (out, "   ");
-		      ui_out_text (out, " at ");
-		      annotate_frame_source_file ();
-		      ui_out_field_string (out, "file", filename);
-		      annotate_frame_source_file_end ();
-		    }
-		  if (except.reason < 0)
-		    {
-		      Py_DECREF (py_fn);
-		      gdbpy_convert_exception (except);
-		      goto error;
-		    }
-		}
-	      Py_DECREF (py_fn);
-	    }
-	  else
+	  if (py_fn == NULL)
 	    goto error;
+
+	  if (py_fn != Py_None)
+	    {
+	      char *filename = python_string_to_host_string (py_fn);
+
+	      if (filename == NULL)
+		{
+		  Py_DECREF (py_fn);
+		  goto error;
+		}
+
+	      make_cleanup (xfree, filename);
+	      TRY_CATCH (except, RETURN_MASK_ALL)
+		{
+		  ui_out_wrap_hint (out, "   ");
+		  ui_out_text (out, " at ");
+		  annotate_frame_source_file ();
+		  ui_out_field_string (out, "file", filename);
+		  annotate_frame_source_file_end ();
+		}
+	      if (except.reason < 0)
+		{
+		  Py_DECREF (py_fn);
+		  gdbpy_convert_exception (except);
+		  goto error;
+		}
+	    }
+	  Py_DECREF (py_fn);
 	}
 
       if (PyObject_HasAttrString (filter, "line"))
@@ -1293,28 +1284,26 @@ py_print_frame (PyObject *filter, int flags,
 	  PyObject *py_line = PyObject_CallMethod (filter, "line", NULL);
 	  int line;
 
-	  if (py_line != NULL)
-	    {
-	      if (py_line != Py_None)
-		{
-		  line = PyLong_AsLong (py_line);
-		  TRY_CATCH (except, RETURN_MASK_ALL)
-		    {
-		      ui_out_text (out, ":");
-		      annotate_frame_source_line ();
-		      ui_out_field_int (out, "line", line);
-		    }
-		  if (except.reason < 0)
-		    {
-		      Py_DECREF (py_line);
-		      gdbpy_convert_exception (except);
-		      goto error;
-		    }
-		}
-	      Py_DECREF (py_line);
-	    }
-	  else
+	  if (py_line == NULL)
 	    goto error;
+
+	  if (py_line != Py_None)
+	    {
+	      line = PyLong_AsLong (py_line);
+	      TRY_CATCH (except, RETURN_MASK_ALL)
+		{
+		  ui_out_text (out, ":");
+		  annotate_frame_source_line ();
+		  ui_out_field_int (out, "line", line);
+		}
+	      if (except.reason < 0)
+		{
+		  Py_DECREF (py_line);
+		  gdbpy_convert_exception (except);
+		  goto error;
+		}
+	    }
+	  Py_DECREF (py_line);
 	}
     }
 
@@ -1341,38 +1330,42 @@ py_print_frame (PyObject *filter, int flags,
 	goto error;
     }
 
-  /* Finally recursively print elided frames, if any.  */
-  elided = get_py_iter_from_func (filter, "elided");
-  if (elided == NULL)
-    goto error;
+  {
+    PyObject *elided;
 
-  make_cleanup_py_decref (elided);
-  if (elided != Py_None)
-    {
-      PyObject *item;
+    /* Finally recursively print elided frames, if any.  */
+    elided = get_py_iter_from_func (filter, "elided");
+    if (elided == NULL)
+      goto error;
 
-      make_cleanup_ui_out_list_begin_end (out, "children");
+    make_cleanup_py_decref (elided);
+    if (elided != Py_None)
+      {
+	PyObject *item;
 
-      if (! ui_out_is_mi_like_p (out))
-	indent++;
+	make_cleanup_ui_out_list_begin_end (out, "children");
 
-      while ((item = PyIter_Next (elided)))
-	{
-	  enum ext_lang_bt_status success = py_print_frame (item, flags,
-							    args_type, out,
-							    indent,
-							    levels_printed);
+	if (! ui_out_is_mi_like_p (out))
+	  indent++;
 
-	  if (success == EXT_LANG_BT_ERROR)
-	    {
-	      Py_DECREF (item);
-	      goto error;
-	    }
+	while ((item = PyIter_Next (elided)))
+	  {
+	    enum ext_lang_bt_status success = py_print_frame (item, flags,
+							      args_type, out,
+							      indent,
+							      levels_printed);
 
-	  Py_DECREF (item);
-	}
-      if (item == NULL && PyErr_Occurred ())
-	goto error;
+	    if (success == EXT_LANG_BT_ERROR)
+	      {
+		Py_DECREF (item);
+		goto error;
+	      }
+
+	    Py_DECREF (item);
+	  }
+	if (item == NULL && PyErr_Occurred ())
+	  goto error;
+      }
     }
 
 
