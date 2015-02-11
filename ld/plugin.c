@@ -88,6 +88,8 @@ typedef struct plugin
   ld_plugin_cleanup_handler cleanup_handler;
   /* TRUE if the cleanup handlers have been called.  */
   bfd_boolean cleanup_done;
+  /* TRUE if output should be disabled.  */
+  bfd_boolean disable_output;
 } plugin_t;
 
 typedef struct view_buffer
@@ -283,6 +285,11 @@ plugin_opt_plugin_arg (const char *arg)
   *last_plugin_args_tail_chain_ptr = newarg;
   last_plugin_args_tail_chain_ptr = &newarg->next;
   last_plugin->n_args++;
+
+  /* LLVM plugin uses --plugin-opt=disable-output to disable output.  */
+  if (strcmp (arg, "disable-output") == 0)
+    last_plugin->disable_output = TRUE;
+
   return 0;
 }
 
@@ -934,6 +941,24 @@ set_tv_plugin_args (plugin_t *plugin, struct ld_plugin_tv *tv)
   tv->tv_u.tv_val = 0;
 }
 
+#if HAVE_ATEXIT
+static void
+plugin_cleanup (void)
+{
+  plugin_t *curplug = plugins_list;
+  while (curplug)
+    {
+      if (curplug->all_symbols_read_handler
+	  && curplug->disable_output)
+	{
+	  unlink_if_ordinary (output_filename);
+	  break;
+	}
+      curplug = curplug->next;
+    }
+}
+#endif
+
 /* Load up and initialise all plugins after argument parsing.  */
 void
 plugin_load_plugins (void)
@@ -993,6 +1018,12 @@ plugin_load_plugins (void)
   link_info.callbacks = &plugin_callbacks;
 
   register_ld_plugin_object_p (plugin_object_p);
+
+#if HAVE_ATEXIT
+  /* Since all_symbols_read_hook() in LLVM plugin calls exit() to
+     disable output, we must register plugin_cleanup() with atexit().  */
+  atexit (plugin_cleanup);
+#endif
 
 #if HAVE_MMAP && HAVE_GETPAGESIZE
   plugin_pagesize = getpagesize ();;
