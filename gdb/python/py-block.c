@@ -78,7 +78,7 @@ typedef struct {
       }									\
   } while (0)
 
-static PyTypeObject block_syms_iterator_object_type
+extern PyTypeObject block_syms_iterator_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("block_syms_iterator_object");
 static const struct objfile_data *blpy_objfile_data_key;
 
@@ -515,7 +515,7 @@ Return true if this block iterator is valid, false if not." },
   {NULL}  /* Sentinel */
 };
 
-static PyTypeObject block_syms_iterator_object_type = {
+PyTypeObject block_syms_iterator_object_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.BlockIterator",		  /*tp_name*/
   sizeof (block_syms_iterator_object),	      /*tp_basicsize*/

@@ -1,3 +1,43 @@
+2015-02-11  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* breakpoint.c (base_breakpoint_ops): Delete.
+	* dwarf2loc.c (dwarf_expr_ctx_funcs): Make extern.
+	* elfread.c (elf_sym_fns_gdb_index, elf_sym_fns_lazy_psyms): Make extern.
+	* guile/guile.c (guile_extension_script_ops, guile_extension_ops): Make extern.
+	* ppcnbsd-tdep.c (ppcnbsd2_sigtramp): Make extern.
+	* python/py-arch.c (arch_object_type): Make extern.
+	* python/py-block.c (block_syms_iterator_object_type): Make extern.
+	* python/py-bpevent.c (breakpoint_event_object_type): Make extern.
+	* python/py-cmd.c (cmdpy_object_type): Make extern.
+	* python/py-continueevent.c (continue_event_object_type)
+	* python/py-event.h (GDBPY_NEW_EVENT_TYPE): Remove 'qual'
+	parameter.  Update all callers.
+	* python/py-evtregistry.c (eventregistry_object_type): Make extern.
+	* python/py-exitedevent.c (exited_event_object_type): Make extern.
+	* python/py-finishbreakpoint.c (finish_breakpoint_object_type): Make extern.
+	* python/py-function.c (fnpy_object_type): Make extern.
+	* python/py-inferior.c (inferior_object_type, membuf_object_type): Make extern.
+	* python/py-infevents.c (call_pre_event_object_type)
+	(inferior_call_post_event_object_type).
+	(memory_changed_event_object_type): Make extern.
+	* python/py-infthread.c (thread_object_type): Make extern.
+	* python/py-lazy-string.c (lazy_string_object_type): Make extern.
+	* python/py-linetable.c (linetable_entry_object_type)
+	(linetable_object_type, ltpy_iterator_object_type): Make extern.
+	* python/py-newobjfileevent.c (new_objfile_event_object_type)
+	(clear_objfiles_event_object_type): Make extern.
+	* python/py-objfile.c (objfile_object_type): Make extern.
+	* python/py-param.c (parmpy_object_type): Make extern.
+	* python/py-progspace.c (pspace_object_type): Make extern.
+	* python/py-signalevent.c (signal_event_object_type): Make extern.
+	* python/py-symtab.c (symtab_object_type, sal_object_type): Make extern.
+	* python/py-type.c (type_object_type, field_object_type)
+	(type_iterator_object_type): Make extern.
+	* python/python.c (python_extension_script_ops)
+	(python_extension_ops): Make extern.
+	* stap-probe.c (stap_probe_ops): Make extern.
+
 2015-02-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (adjust_pc_after_break): Don't adjust the PC just

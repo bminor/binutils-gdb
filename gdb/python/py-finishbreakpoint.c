@@ -52,7 +52,7 @@ struct finish_breakpoint_object
   PyObject *return_value;
 };
 
-static PyTypeObject finish_breakpoint_object_type
+extern PyTypeObject finish_breakpoint_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("finish_breakpoint_object");
 
 /* Python function to get the 'return_value' attribute of
@@ -429,7 +429,7 @@ None otherwise.", NULL },
     { NULL }  /* Sentinel.  */
 };
 
-static PyTypeObject finish_breakpoint_object_type =
+PyTypeObject finish_breakpoint_object_type =
 {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.FinishBreakpoint",         /*tp_name*/

@@ -41,7 +41,7 @@
 
 extern int dwarf2_always_disassemble;
 
-static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
+extern const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
 
 static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
 						    struct frame_info *frame,
@@ -2151,7 +2151,7 @@ static const struct lval_funcs pieced_value_funcs = {
 
 /* Virtual method table for dwarf2_evaluate_loc_desc_full below.  */
 
-static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
+const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
 {
   dwarf_expr_read_addr_from_reg,
   dwarf_expr_get_reg_value,
