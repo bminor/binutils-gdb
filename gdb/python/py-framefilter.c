@@ -1033,14 +1033,20 @@ py_print_frame (PyObject *filter, int flags,
   read them if they returned filter object requires us to do so.  */
   py_inf_frame = PyObject_CallMethod (filter, "inferior_frame", NULL);
   if (py_inf_frame == NULL)
-    goto error;
+    {
+      do_cleanups (cleanup_stack);
+      return EXT_LANG_BT_ERROR;
+    }
 
   frame = frame_object_to_frame_info (py_inf_frame);;
 
   Py_DECREF (py_inf_frame);
 
   if (frame == NULL)
-    goto error;
+    {
+      do_cleanups (cleanup_stack);
+      return EXT_LANG_BT_ERROR;
+    }
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
@@ -1049,7 +1055,8 @@ py_print_frame (PyObject *filter, int flags,
   if (except.reason < 0)
     {
       gdbpy_convert_exception (except);
-      goto error;
+      do_cleanups (cleanup_stack);
+      return EXT_LANG_BT_ERROR;
     }
 
   /* stack-list-variables.  */
@@ -1057,7 +1064,10 @@ py_print_frame (PyObject *filter, int flags,
     {
       if (py_mi_print_variables (filter, out, &opts,
 				 args_type, frame) == EXT_LANG_BT_ERROR)
-	goto error;
+	{
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
+	}
       do_cleanups (cleanup_stack);
       return EXT_LANG_BT_COMPLETED;
     }
@@ -1080,7 +1090,8 @@ py_print_frame (PyObject *filter, int flags,
 	  if (except.reason < 0)
 	    {
 	      gdbpy_convert_exception (except);
-	      goto error;
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
 	}
 
@@ -1091,7 +1102,10 @@ py_print_frame (PyObject *filter, int flags,
 	  PyObject *paddr = PyObject_CallMethod (filter, "address", NULL);
 
 	  if (paddr == NULL)
-	    goto error;
+	    {
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
+	    }
 
 	  if (paddr != Py_None)
 	    {
@@ -1135,7 +1149,8 @@ py_print_frame (PyObject *filter, int flags,
       if (except.reason < 0)
 	{
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
 	}
     }
 
@@ -1155,7 +1170,8 @@ py_print_frame (PyObject *filter, int flags,
 	  if (except.reason < 0)
 	    {
 	      gdbpy_convert_exception (except);
-	      goto error;
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
 	}
 
@@ -1166,7 +1182,10 @@ py_print_frame (PyObject *filter, int flags,
 	  const char *function = NULL;
 
 	  if (py_func == NULL)
-	    goto error;
+	    {
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
+	    }
 
 	  if (gdbpy_is_string (py_func))
 	    {
@@ -1178,7 +1197,8 @@ py_print_frame (PyObject *filter, int flags,
 	      if (function == NULL)
 		{
 		  Py_DECREF (py_func);
-		  goto error;
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
 		}
 	      make_cleanup (xfree, function_to_free);
 	    }
@@ -1188,7 +1208,10 @@ py_print_frame (PyObject *filter, int flags,
 	      struct bound_minimal_symbol msymbol;
 
 	      if (PyErr_Occurred ())
-		goto error;
+		{
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
 
 	      msymbol = lookup_minimal_symbol_by_pc (addr);
 	      if (msymbol.minsym != NULL)
@@ -1200,7 +1223,8 @@ py_print_frame (PyObject *filter, int flags,
 			       _("FrameDecorator.function: expecting a " \
 				 "String, integer or None."));
 	      Py_DECREF (py_func);
-	      goto error;
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
 
 	  TRY_CATCH (except, RETURN_MASK_ALL)
@@ -1215,7 +1239,8 @@ py_print_frame (PyObject *filter, int flags,
 	    {
 	      Py_DECREF (py_func);
 	      gdbpy_convert_exception (except);
-	      goto error;
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
 	  Py_DECREF (py_func);
 	}
@@ -1227,7 +1252,10 @@ py_print_frame (PyObject *filter, int flags,
   if (print_args)
     {
       if (py_print_args (filter, out, args_type, frame) == EXT_LANG_BT_ERROR)
-	goto error;
+	{
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
+	}
     }
 
   /* File name/source/line number information.  */
@@ -1240,7 +1268,8 @@ py_print_frame (PyObject *filter, int flags,
       if (except.reason < 0)
 	{
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
 	}
 
       if (PyObject_HasAttrString (filter, "filename"))
@@ -1248,7 +1277,10 @@ py_print_frame (PyObject *filter, int flags,
 	  PyObject *py_fn = PyObject_CallMethod (filter, "filename", NULL);
 
 	  if (py_fn == NULL)
-	    goto error;
+	    {
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
+	    }
 
 	  if (py_fn != Py_None)
 	    {
@@ -1257,7 +1289,8 @@ py_print_frame (PyObject *filter, int flags,
 	      if (filename == NULL)
 		{
 		  Py_DECREF (py_fn);
-		  goto error;
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
 		}
 
 	      make_cleanup (xfree, filename);
@@ -1273,7 +1306,8 @@ py_print_frame (PyObject *filter, int flags,
 		{
 		  Py_DECREF (py_fn);
 		  gdbpy_convert_exception (except);
-		  goto error;
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
 		}
 	    }
 	  Py_DECREF (py_fn);
@@ -1285,7 +1319,10 @@ py_print_frame (PyObject *filter, int flags,
 	  int line;
 
 	  if (py_line == NULL)
-	    goto error;
+	    {
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
+	    }
 
 	  if (py_line != Py_None)
 	    {
@@ -1300,7 +1337,8 @@ py_print_frame (PyObject *filter, int flags,
 		{
 		  Py_DECREF (py_line);
 		  gdbpy_convert_exception (except);
-		  goto error;
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
 		}
 	    }
 	  Py_DECREF (py_line);
@@ -1319,7 +1357,8 @@ py_print_frame (PyObject *filter, int flags,
       if (except.reason < 0)
 	{
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
 	}
     }
 
@@ -1327,7 +1366,10 @@ py_print_frame (PyObject *filter, int flags,
     {
       if (py_print_locals (filter, out, args_type, indent,
 			   frame) == EXT_LANG_BT_ERROR)
-	goto error;
+	{
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
+	}
     }
 
   {
@@ -1336,7 +1378,10 @@ py_print_frame (PyObject *filter, int flags,
     /* Finally recursively print elided frames, if any.  */
     elided = get_py_iter_from_func (filter, "elided");
     if (elided == NULL)
-      goto error;
+      {
+	do_cleanups (cleanup_stack);
+	return EXT_LANG_BT_ERROR;
+      }
 
     make_cleanup_py_decref (elided);
     if (elided != Py_None)
@@ -1358,23 +1403,23 @@ py_print_frame (PyObject *filter, int flags,
 	    if (success == EXT_LANG_BT_ERROR)
 	      {
 		Py_DECREF (item);
-		goto error;
+		do_cleanups (cleanup_stack);
+		return EXT_LANG_BT_ERROR;
 	      }
 
 	    Py_DECREF (item);
 	  }
 	if (item == NULL && PyErr_Occurred ())
-	  goto error;
+	  {
+	    do_cleanups (cleanup_stack);
+	    return EXT_LANG_BT_ERROR;
+	  }
       }
     }
 
 
   do_cleanups (cleanup_stack);
   return EXT_LANG_BT_COMPLETED;
-
- error:
-  do_cleanups (cleanup_stack);
-  return EXT_LANG_BT_ERROR;
 }
 
 /* Helper function to initiate frame filter invocation at starting
