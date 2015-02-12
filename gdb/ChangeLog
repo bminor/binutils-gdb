@@ -1,3 +1,7 @@
+2015-02-12  Doug Evans  <dje@google.com>
+
+	* completer.c (complete_line): Remove incorrect comment.
+
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* python/py-framefilter.c (py_print_single_arg, enumerate_locals)
