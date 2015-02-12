@@ -1,5 +1,13 @@
 2015-02-11  Nick Clifton  <nickc@redhat.com>
 
+	* rl78-decode.opc: Add 'a' attribute to instructions that support
+	[HL+0] addressing.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78): Display the offset in [HL+0]
+	addresses.
+
+2015-02-11  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17531
 	* dwarf.c (display_debug_pubnames_worker): Work around compiler
 	bug checking address ranges.
