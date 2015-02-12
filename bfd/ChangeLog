@@ -1,3 +1,9 @@
+2015-02-13  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
+	* elf64-ppc.c (opd_entry_value): Tighten offset check.  Remove
+	now redundant assert.
+
 2015-02-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
