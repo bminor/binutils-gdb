@@ -107,5 +107,6 @@ extern int linux_supports_tracesysgood (void);
 extern void linux_ptrace_set_additional_flags (int);
 extern int linux_ptrace_get_extended_event (int wstat);
 extern int linux_is_extended_waitstatus (int wstat);
+extern int linux_wstatus_maybe_breakpoint (int wstat);
 
 #endif /* COMMON_LINUX_PTRACE_H */

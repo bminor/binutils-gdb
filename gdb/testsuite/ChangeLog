@@ -1,3 +1,9 @@
+2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16812
+	* gdb.base/catch-gdb-caused-signals.c: New file.
+	* gdb.base/catch-gdb-caused-signals.exp: New file.
+
 2015-02-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* configure: Regenerated.

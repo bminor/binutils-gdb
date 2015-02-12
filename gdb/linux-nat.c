@@ -3070,9 +3070,11 @@ linux_nat_filter_event (int lwpid, int status)
 	}
 
       /* When using hardware single-step, we need to report every signal.
-	 Otherwise, signals in pass_mask may be short-circuited.  */
+	 Otherwise, signals in pass_mask may be short-circuited
+	 except signals that might be caused by a breakpoint.  */
       if (!lp->step
-	  && WSTOPSIG (status) && sigismember (&pass_mask, WSTOPSIG (status)))
+	  && WSTOPSIG (status) && sigismember (&pass_mask, WSTOPSIG (status))
+	  && !linux_wstatus_maybe_breakpoint (status))
 	{
 	  linux_resume_one_lwp (lp, lp->step, signo);
 	  if (debug_linux_nat)

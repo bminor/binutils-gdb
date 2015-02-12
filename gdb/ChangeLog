@@ -1,3 +1,10 @@
+2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16812
+	* linux-nat.c (linux_nat_filter_event): Report SIGTRAP,SIGILL,SIGSEGV.
+	* nat/linux-ptrace.c (linux_wstatus_maybe_breakpoint): Add.
+	* nat/linux-ptrace.h: Add linux_wstatus_maybe_breakpoint.
+
 2015-02-19  David Taylor  <dtaylor@emc.com>
 
 	* common/ax.def (setv): Fix consumed entry in setv DEFOP.
