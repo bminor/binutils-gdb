@@ -26,6 +26,10 @@
 #ifndef RL78_OPCODES_H_INCLUDED
 #define RL78_OPCODES_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* For the purposes of these structures, the RL78 registers are as
    follows, despite most of these being memory-mapped and
    bank-switched:  */
@@ -163,5 +167,9 @@ typedef struct
 } RL78_Opcode_Decoded;
 
 int rl78_decode_opcode (unsigned long, RL78_Opcode_Decoded *, int (*)(void *), void *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

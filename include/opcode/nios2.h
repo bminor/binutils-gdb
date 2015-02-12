@@ -25,6 +25,10 @@
 
 #include "bfd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /****************************************************************************
  * This file contains structures, bit masks and shift counts used
  * by the GNU toolchain to define the Nios II instruction set and
@@ -152,5 +156,9 @@ extern int nios2_num_regs;
 /* Return the opcode descriptor for a single instruction.  */
 extern const struct nios2_opcode *
 nios2_find_opcode_hash (unsigned long, unsigned long);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _NIOS2_H */
