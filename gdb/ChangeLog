@@ -1,5 +1,9 @@
 2015-02-12  Doug Evans  <dje@google.com>
 
+	* completer.c (completion_list_add_name): Fix memory leak.
+
+2015-02-12  Doug Evans  <dje@google.com>
+
 	* completer.c (complete_line): Remove incorrect comment.
 
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
