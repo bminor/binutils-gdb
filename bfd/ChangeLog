@@ -1,3 +1,24 @@
+2015-02-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (read_1_byte, read_1_signed_byte, read_2_bytes)
+	(read_4_bytes, read_8_bytes, read_n_bytes, read_string)
+	(read_indirect_string, read_alt_indirect_string)
+	(read_alt_indirect_ref, read_address, read_abbrevs)
+	(read_attribute_value, read_attribute, decode_line_info)
+	(find_abstract_instance_name, read_rangelist)
+	(scan_unit_for_symbols, parse_comp_unit)
+	(_bfd_dwarf2_find_nearest_line): Harden DWARF reading code.  Pass
+	end pointers to reading functions and check for offsets taking
+	pointers out of range.  Replace calls to read_*_leb128 with calls
+	to safe_read_leb128.
+
+	(* elf64-ppc.c (opd_entry_value): Add a check for an overlarge
+	offset.
+	* syms.c (_bfd_stab_section_find_nearest_line): Add checks for
+	computed file_name address being before the start of the string
+	table.
+
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17878

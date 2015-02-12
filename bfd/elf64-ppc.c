@@ -5951,6 +5951,10 @@ opd_entry_value (asection *opd_sec,
 	  ppc64_elf_tdata (opd_bfd)->opd.contents = contents;
 	}
 
+      /* PR 17512: file: 64b9dfbb.  */
+      if (offset > bfd_section_size (opd_bfd, opd_sec))
+	return (bfd_vma) -1;
+
       val = bfd_get_64 (opd_bfd, contents + offset);
       if (code_sec != NULL)
 	{
