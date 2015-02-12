@@ -284,7 +284,7 @@ print_insn_rl78 (bfd_vma addr, disassemble_info * dis)
 		    PR (PS, "[%s", register_names[oper->reg]);
 		    if (oper->reg2 != RL78_Reg_None)
 		      PR (PS, "+%s", register_names[oper->reg2]);
-		    if (oper->addend)
+		    if (oper->addend || do_addr)
 		      PR (PS, "+%d", oper->addend);
 		    PC (']');
 		    break;

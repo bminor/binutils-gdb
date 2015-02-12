@@ -1,3 +1,7 @@
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-framefilter.exp (pagination quit - *): New tests.
+
 2015-02-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/step-bg-decr-pc-switch-thread.c: New file.

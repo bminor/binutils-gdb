@@ -1,3 +1,30 @@
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/py-framefilter.c (py_print_single_arg, enumerate_locals)
+	(py_print_frame): Use RETURN_MASK_ERROR.
+
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/py-framefilter.c (py_print_frame): Mention RETURN_QUIT in
+	function comment.  Wrap all function that can throw in cleanups.
+	(gdbpy_apply_frame_filter): Wrap all function that can throw in
+	cleanups.
+
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/py-framefilter.c (py_print_frame): Substitute goto error.
+	Remove the error label.
+
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/py-framefilter.c (py_print_frame): Put conditional code paths
+	with goto first, indent the former else codepath left.  Put variable
+	'elided' to a new inner block.
+
+2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/py-framefilter.c (py_print_frame): Whitespacing fixes.
+
 2015-02-11  Pedro Alves  <palves@redhat.com>
 
 	* xcoffread.c (within_function): Delete.

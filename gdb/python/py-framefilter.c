@@ -376,7 +376,7 @@ py_print_single_arg (struct ui_out *out,
   else
     val = fv;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
@@ -761,7 +761,7 @@ enumerate_locals (PyObject *iter,
       /* If the object did not provide a value, read it.  */
       if (val == NULL)
 	{
-	  TRY_CATCH (except, RETURN_MASK_ALL)
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      val = read_var_value (sym, frame);
 	    }
@@ -781,7 +781,7 @@ enumerate_locals (PyObject *iter,
 	  if (print_args_field || args_type != NO_VALUES)
 	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
 	}
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  if (! ui_out_is_mi_like_p (out))
 	    {
@@ -838,7 +838,7 @@ enumerate_locals (PyObject *iter,
 
       do_cleanups (locals_cleanups);
 
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  ui_out_text (out, "\n");
 	}
@@ -1003,7 +1003,7 @@ py_print_args (PyObject *filter,
     If a frame level has been printed, do not print it again (in the
     case of elided frames).  Returns EXT_LANG_BT_ERROR on error, with any
     GDB exceptions converted to a Python exception, or EXT_LANG_BT_COMPLETED
-    on success.  */
+    on success.  It can also throw an exception RETURN_QUIT.  */
 
 static enum ext_lang_bt_status
 py_print_frame (PyObject *filter, int flags,
@@ -1014,9 +1014,9 @@ py_print_frame (PyObject *filter, int flags,
   CORE_ADDR address = 0;
   struct gdbarch *gdbarch = NULL;
   struct frame_info *frame = NULL;
-  struct cleanup *cleanup_stack = make_cleanup (null_cleanup, NULL);
+  struct cleanup *cleanup_stack;
   struct value_print_options opts;
-  PyObject *py_inf_frame, *elided;
+  PyObject *py_inf_frame;
   int print_level, print_frame_info, print_args, print_locals;
   volatile struct gdb_exception except;
 
@@ -1033,38 +1033,35 @@ py_print_frame (PyObject *filter, int flags,
   read them if they returned filter object requires us to do so.  */
   py_inf_frame = PyObject_CallMethod (filter, "inferior_frame", NULL);
   if (py_inf_frame == NULL)
-    goto error;
+    return EXT_LANG_BT_ERROR;
 
   frame = frame_object_to_frame_info (py_inf_frame);;
 
   Py_DECREF (py_inf_frame);
 
   if (frame == NULL)
-    goto error;
+    return EXT_LANG_BT_ERROR;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       gdbarch = get_frame_arch (frame);
     }
   if (except.reason < 0)
     {
       gdbpy_convert_exception (except);
-      goto error;
+      return EXT_LANG_BT_ERROR;
     }
-
 
   /* stack-list-variables.  */
   if (print_locals && print_args && ! print_frame_info)
     {
       if (py_mi_print_variables (filter, out, &opts,
 				 args_type, frame) == EXT_LANG_BT_ERROR)
-	goto error;
-      else
-	{
-	  do_cleanups (cleanup_stack);
-	  return EXT_LANG_BT_COMPLETED;
-	}
+	return EXT_LANG_BT_ERROR;
+      return EXT_LANG_BT_COMPLETED;
     }
+
+  cleanup_stack = make_cleanup (null_cleanup, NULL);
 
   /* -stack-list-locals does not require a
      wrapping frame attribute.  */
@@ -1077,15 +1074,16 @@ py_print_frame (PyObject *filter, int flags,
 	 and are printed with indention.  */
       if (indent > 0)
 	{
-	TRY_CATCH (except, RETURN_MASK_ALL)
-	  {
-	    ui_out_spaces (out, indent*4);
-	  }
-	if (except.reason < 0)
-	  {
-	    gdbpy_convert_exception (except);
-	    goto error;
-	  }
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      ui_out_spaces (out, indent*4);
+	    }
+	  if (except.reason < 0)
+	    {
+	      gdbpy_convert_exception (except);
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
+	    }
 	}
 
       /* The address is required for frame annotations, and also for
@@ -1093,17 +1091,19 @@ py_print_frame (PyObject *filter, int flags,
       if (PyObject_HasAttrString (filter, "address"))
 	{
 	  PyObject *paddr = PyObject_CallMethod (filter, "address", NULL);
-	  if (paddr != NULL)
+
+	  if (paddr == NULL)
 	    {
-	      if (paddr != Py_None)
-		{
-		  address = PyLong_AsLong (paddr);
-		  has_addr = 1;
-		}
-	      Py_DECREF (paddr);
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
-	  else
-	    goto error;
+
+	  if (paddr != Py_None)
+	    {
+	      address = PyLong_AsLong (paddr);
+	      has_addr = 1;
+	    }
+	  Py_DECREF (paddr);
 	}
     }
 
@@ -1117,7 +1117,7 @@ py_print_frame (PyObject *filter, int flags,
 
       slot = (struct frame_info **) htab_find_slot (levels_printed,
 						    frame, INSERT);
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  level = frame_relative_level (frame);
 
@@ -1140,7 +1140,8 @@ py_print_frame (PyObject *filter, int flags,
       if (except.reason < 0)
 	{
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
 	}
     }
 
@@ -1150,7 +1151,7 @@ py_print_frame (PyObject *filter, int flags,
 	 print nothing.  */
       if (opts.addressprint && has_addr)
 	{
-	  TRY_CATCH (except, RETURN_MASK_ALL)
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      annotate_frame_address ();
 	      ui_out_field_core_addr (out, "addr", gdbarch, address);
@@ -1160,7 +1161,8 @@ py_print_frame (PyObject *filter, int flags,
 	  if (except.reason < 0)
 	    {
 	      gdbpy_convert_exception (except);
-	      goto error;
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
 	}
 
@@ -1168,65 +1170,69 @@ py_print_frame (PyObject *filter, int flags,
       if (PyObject_HasAttrString (filter, "function"))
 	{
 	  PyObject *py_func = PyObject_CallMethod (filter, "function", NULL);
+	  struct cleanup *py_func_cleanup;
+	  const char *function = NULL;
 
-	  if (py_func != NULL)
+	  if (py_func == NULL)
 	    {
-	      const char *function = NULL;
-
-	      if (gdbpy_is_string (py_func))
-		{
-		  char *function_to_free = NULL;
-
-		  function = function_to_free =
-		    python_string_to_host_string (py_func);
-
-		  if (function == NULL)
-		    {
-		      Py_DECREF (py_func);
-		      goto error;
-		    }
-		  make_cleanup (xfree, function_to_free);
-		}
-	      else if (PyLong_Check (py_func))
-		{
-		  CORE_ADDR addr = PyLong_AsUnsignedLongLong (py_func);
-		  struct bound_minimal_symbol msymbol;
-
-		  if (PyErr_Occurred ())
-		    goto error;
-
-		  msymbol = lookup_minimal_symbol_by_pc (addr);
-		  if (msymbol.minsym != NULL)
-		    function = MSYMBOL_PRINT_NAME (msymbol.minsym);
-		}
-	      else if (py_func != Py_None)
-		{
-		  PyErr_SetString (PyExc_RuntimeError,
-				   _("FrameDecorator.function: expecting a " \
-				     "String, integer or None."));
-		  Py_DECREF (py_func);
-		  goto error;
-		}
-
-
-	      TRY_CATCH (except, RETURN_MASK_ALL)
-		{
-		  annotate_frame_function_name ();
-		  if (function == NULL)
-		    ui_out_field_skip (out, "func");
-		  else
-		    ui_out_field_string (out, "func", function);
-		}
-	      if (except.reason < 0)
-		{
-		  Py_DECREF (py_func);
-		  gdbpy_convert_exception (except);
-		  goto error;
-		}
-	      Py_DECREF (py_func);
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
-	  else
-	    goto error;
+	  py_func_cleanup = make_cleanup_py_decref (py_func);
+
+	  if (gdbpy_is_string (py_func))
+	    {
+	      char *function_to_free;
+
+	      function = function_to_free =
+		python_string_to_host_string (py_func);
+
+	      if (function == NULL)
+		{
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+	      make_cleanup (xfree, function_to_free);
+	    }
+	  else if (PyLong_Check (py_func))
+	    {
+	      CORE_ADDR addr = PyLong_AsUnsignedLongLong (py_func);
+	      struct bound_minimal_symbol msymbol;
+
+	      if (PyErr_Occurred ())
+		{
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+
+	      msymbol = lookup_minimal_symbol_by_pc (addr);
+	      if (msymbol.minsym != NULL)
+		function = MSYMBOL_PRINT_NAME (msymbol.minsym);
+	    }
+	  else if (py_func != Py_None)
+	    {
+	      PyErr_SetString (PyExc_RuntimeError,
+			       _("FrameDecorator.function: expecting a " \
+				 "String, integer or None."));
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
+	    }
+
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      annotate_frame_function_name ();
+	      if (function == NULL)
+		ui_out_field_skip (out, "func");
+	      else
+		ui_out_field_string (out, "func", function);
+	    }
+	  if (except.reason < 0)
+	    {
+	      gdbpy_convert_exception (except);
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
+	    }
+	  do_cleanups (py_func_cleanup);
 	}
     }
 
@@ -1236,87 +1242,97 @@ py_print_frame (PyObject *filter, int flags,
   if (print_args)
     {
       if (py_print_args (filter, out, args_type, frame) == EXT_LANG_BT_ERROR)
-	goto error;
+	{
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
+	}
     }
 
   /* File name/source/line number information.  */
   if (print_frame_info)
     {
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  annotate_frame_source_begin ();
 	}
       if (except.reason < 0)
 	{
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
 	}
 
       if (PyObject_HasAttrString (filter, "filename"))
 	{
-	  PyObject *py_fn = PyObject_CallMethod (filter, "filename",
-						 NULL);
-	  if (py_fn != NULL)
+	  PyObject *py_fn = PyObject_CallMethod (filter, "filename", NULL);
+	  struct cleanup *py_fn_cleanup;
+
+	  if (py_fn == NULL)
 	    {
-	      if (py_fn != Py_None)
-		{
-		  char *filename = python_string_to_host_string (py_fn);
-
-		  if (filename == NULL)
-		    {
-		      Py_DECREF (py_fn);
-		      goto error;
-		    }
-
-		  make_cleanup (xfree, filename);
-		  TRY_CATCH (except, RETURN_MASK_ALL)
-		    {
-		      ui_out_wrap_hint (out, "   ");
-		      ui_out_text (out, " at ");
-		      annotate_frame_source_file ();
-		      ui_out_field_string (out, "file", filename);
-		      annotate_frame_source_file_end ();
-		    }
-		  if (except.reason < 0)
-		    {
-		      Py_DECREF (py_fn);
-		      gdbpy_convert_exception (except);
-		      goto error;
-		    }
-		}
-	      Py_DECREF (py_fn);
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
-	  else
-	    goto error;
+	  py_fn_cleanup = make_cleanup_py_decref (py_fn);
+
+	  if (py_fn != Py_None)
+	    {
+	      char *filename = python_string_to_host_string (py_fn);
+
+	      if (filename == NULL)
+		{
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+
+	      make_cleanup (xfree, filename);
+	      TRY_CATCH (except, RETURN_MASK_ERROR)
+		{
+		  ui_out_wrap_hint (out, "   ");
+		  ui_out_text (out, " at ");
+		  annotate_frame_source_file ();
+		  ui_out_field_string (out, "file", filename);
+		  annotate_frame_source_file_end ();
+		}
+	      if (except.reason < 0)
+		{
+		  gdbpy_convert_exception (except);
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+	    }
+	  do_cleanups (py_fn_cleanup);
 	}
 
       if (PyObject_HasAttrString (filter, "line"))
 	{
 	  PyObject *py_line = PyObject_CallMethod (filter, "line", NULL);
+	  struct cleanup *py_line_cleanup;
 	  int line;
 
-	  if (py_line != NULL)
+	  if (py_line == NULL)
 	    {
-	      if (py_line != Py_None)
-		{
-		  line = PyLong_AsLong (py_line);
-		  TRY_CATCH (except, RETURN_MASK_ALL)
-		    {
-		      ui_out_text (out, ":");
-		      annotate_frame_source_line ();
-		      ui_out_field_int (out, "line", line);
-		    }
-		  if (except.reason < 0)
-		    {
-		      Py_DECREF (py_line);
-		      gdbpy_convert_exception (except);
-		      goto error;
-		    }
-		}
-	      Py_DECREF (py_line);
+	      do_cleanups (cleanup_stack);
+	      return EXT_LANG_BT_ERROR;
 	    }
-	  else
-	    goto error;
+	  py_line_cleanup = make_cleanup_py_decref (py_line);
+
+	  if (py_line != Py_None)
+	    {
+	      line = PyLong_AsLong (py_line);
+	      TRY_CATCH (except, RETURN_MASK_ERROR)
+		{
+		  ui_out_text (out, ":");
+		  annotate_frame_source_line ();
+		  ui_out_field_int (out, "line", line);
+		}
+	      if (except.reason < 0)
+		{
+		  gdbpy_convert_exception (except);
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+	    }
+	  do_cleanups (py_line_cleanup);
 	}
     }
 
@@ -1324,7 +1340,7 @@ py_print_frame (PyObject *filter, int flags,
      elided frames, so if MI output detected do not send newline.  */
   if (! ui_out_is_mi_like_p (out))
     {
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
 	  annotate_frame_end ();
 	  ui_out_text (out, "\n");
@@ -1332,7 +1348,8 @@ py_print_frame (PyObject *filter, int flags,
       if (except.reason < 0)
 	{
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
 	}
     }
 
@@ -1340,50 +1357,62 @@ py_print_frame (PyObject *filter, int flags,
     {
       if (py_print_locals (filter, out, args_type, indent,
 			   frame) == EXT_LANG_BT_ERROR)
-	goto error;
-    }
-
-  /* Finally recursively print elided frames, if any.  */
-  elided  = get_py_iter_from_func (filter, "elided");
-  if (elided == NULL)
-    goto error;
-
-  make_cleanup_py_decref (elided);
-  if (elided != Py_None)
-    {
-      PyObject *item;
-
-      make_cleanup_ui_out_list_begin_end (out, "children");
-
-      if (! ui_out_is_mi_like_p (out))
-	indent++;
-
-      while ((item = PyIter_Next (elided)))
 	{
-	  enum ext_lang_bt_status success = py_print_frame (item, flags,
-							    args_type, out,
-							    indent,
-							    levels_printed);
-
-	  if (success == EXT_LANG_BT_ERROR)
-	    {
-	      Py_DECREF (item);
-	      goto error;
-	    }
-
-	  Py_DECREF (item);
+	  do_cleanups (cleanup_stack);
+	  return EXT_LANG_BT_ERROR;
 	}
-      if (item == NULL && PyErr_Occurred ())
-	goto error;
     }
 
+  {
+    PyObject *elided;
+    struct cleanup *elided_cleanup;
+
+    /* Finally recursively print elided frames, if any.  */
+    elided = get_py_iter_from_func (filter, "elided");
+    if (elided == NULL)
+      {
+	do_cleanups (cleanup_stack);
+	return EXT_LANG_BT_ERROR;
+      }
+    elided_cleanup = make_cleanup_py_decref (elided);
+
+    if (elided != Py_None)
+      {
+	PyObject *item;
+
+	make_cleanup_ui_out_list_begin_end (out, "children");
+
+	if (! ui_out_is_mi_like_p (out))
+	  indent++;
+
+	while ((item = PyIter_Next (elided)))
+	  {
+	    struct cleanup *item_cleanup = make_cleanup_py_decref (item);
+
+	    enum ext_lang_bt_status success = py_print_frame (item, flags,
+							      args_type, out,
+							      indent,
+							      levels_printed);
+
+	    do_cleanups (item_cleanup);
+
+	    if (success == EXT_LANG_BT_ERROR)
+	      {
+		do_cleanups (cleanup_stack);
+		return EXT_LANG_BT_ERROR;
+	      }
+	  }
+	if (item == NULL && PyErr_Occurred ())
+	  {
+	    do_cleanups (cleanup_stack);
+	    return EXT_LANG_BT_ERROR;
+	  }
+      }
+    do_cleanups (elided_cleanup);
+  }
 
   do_cleanups (cleanup_stack);
   return EXT_LANG_BT_COMPLETED;
-
- error:
-  do_cleanups (cleanup_stack);
-  return EXT_LANG_BT_ERROR;
 }
 
 /* Helper function to initiate frame filter invocation at starting
@@ -1533,15 +1562,17 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 
   while ((item = PyIter_Next (iterable)))
     {
+      struct cleanup *item_cleanup = make_cleanup_py_decref (item);
+
       success = py_print_frame (item, flags, args_type, out, 0,
 				levels_printed);
+
+      do_cleanups (item_cleanup);
 
       /* Do not exit on error printing a single frame.  Print the
 	 error and continue with other frames.  */
       if (success == EXT_LANG_BT_ERROR)
 	gdbpy_print_stack ();
-
-      Py_DECREF (item);
     }
 
   if (item == NULL && PyErr_Occurred ())

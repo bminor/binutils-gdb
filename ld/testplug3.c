@@ -343,54 +343,6 @@ parse_option (const char *opt)
   return LDPS_OK;
 }
 
-/* Output contents of transfer vector array entry in human-readable form.  */
-static void
-dump_tv_tag (size_t n, struct ld_plugin_tv *tv)
-{
-  size_t tag;
-  char unknownbuf[40];
-  const char *name;
-
-  for (tag = 0; tag < ARRAY_SIZE (tag_names); tag++)
-    if (tag_names[tag].tag == tv->tv_tag)
-      break;
-  sprintf (unknownbuf, "unknown tag #%d", tv->tv_tag);
-  name = (tag < ARRAY_SIZE (tag_names)) ? tag_names[tag].name : unknownbuf;
-  switch (tv->tv_tag)
-    {
-      case LDPT_OPTION:
-      case LDPT_OUTPUT_NAME:
-	TV_MESSAGE (LDPL_INFO, "tv[%d]: %s '%s'", n, name,
-		    tv->tv_u.tv_string);
-        break;
-      case LDPT_REGISTER_CLAIM_FILE_HOOK:
-      case LDPT_REGISTER_ALL_SYMBOLS_READ_HOOK:
-      case LDPT_REGISTER_CLEANUP_HOOK:
-      case LDPT_ADD_SYMBOLS:
-      case LDPT_GET_SYMBOLS:
-      case LDPT_GET_SYMBOLS_V2:
-      case LDPT_ADD_INPUT_FILE:
-      case LDPT_MESSAGE:
-      case LDPT_GET_INPUT_FILE:
-      case LDPT_GET_VIEW:
-      case LDPT_RELEASE_INPUT_FILE:
-      case LDPT_ADD_INPUT_LIBRARY:
-      case LDPT_SET_EXTRA_LIBRARY_PATH:
-	TV_MESSAGE (LDPL_INFO, "tv[%d]: %s func@0x%p", n, name,
-		    (void *)(tv->tv_u.tv_message));
-        break;
-      case LDPT_NULL:
-      case LDPT_API_VERSION:
-      case LDPT_GOLD_VERSION:
-      case LDPT_LINKER_OUTPUT:
-      case LDPT_GNU_LD_VERSION:
-      default:
-	TV_MESSAGE (LDPL_INFO, "tv[%d]: %s value %W (%d)", n, name,
-		    (bfd_vma)tv->tv_u.tv_val, tv->tv_u.tv_val);
-	break;
-    }
-}
-
 /* Handle/record information received in a transfer vector entry.  */
 static enum ld_plugin_status
 parse_tv_tag (struct ld_plugin_tv *tv)
@@ -595,7 +547,7 @@ onclaim_file (const struct ld_plugin_input_file *file, int *claimed)
 	}
       if (read (fd, buffer, sizeof (buffer)) >= 0)
 	{
-	  claim_file_ret == LDPS_ERR;
+	  claim_file_ret = LDPS_ERR;
 	  TV_MESSAGE (LDPL_FATAL, "Unreleased file descriptor on: %s", name);
 	}
       free (name);

@@ -1,3 +1,15 @@
+2015-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Replace elf_i386 with elf_i386_nacl for nacl.
+
+2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-plugin/plugin-27.d: New.
+	* ld-plugin/plugin-28.d: Likewise.
+	* ld-plugin/plugin-29.d: Likewise.
+	* plugin.exp (plugin_tests): Add tests for LDPL_FATAL, LDPL_ERROR
+	and LDPL_WARNING.
+
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17878
