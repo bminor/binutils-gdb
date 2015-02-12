@@ -1,3 +1,7 @@
+2015-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Replace elf_i386 with elf_i386_nacl for nacl.
+
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-plugin/plugin-27.d: New.

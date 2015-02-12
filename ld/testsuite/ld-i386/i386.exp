@@ -200,7 +200,7 @@ if [istarget "*-*-nacl*"] {
     regsub -all elf_i386 $i386tests elf_i386_nacl i386tests
 
     # Same, applied to all the run_dump_test cases.
-    set options_regsub(ld) {-melf_i386 -melf_i386_nacl}
+    set options_regsub(ld) {elf_i386 elf_i386_nacl}
 
     # The section/segment layout differs too much for the vanilla
     # readelf output files to match.  So massage the cases so that
