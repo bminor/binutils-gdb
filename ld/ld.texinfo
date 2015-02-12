@@ -1372,10 +1372,9 @@ limited form of arithmetic is supported for the @var{expression} in this
 context: you may give a hexadecimal constant or the name of an existing
 symbol, or use @code{+} and @code{-} to add or subtract hexadecimal
 constants or symbols.  If you need more elaborate expressions, consider
-using the linker command language from a script (@pxref{Assignments,,
-Assignment: Symbol Definitions}).  @emph{Note:} there should be no white
-space between @var{symbol}, the equals sign (``@key{=}''), and
-@var{expression}.
+using the linker command language from a script (@pxref{Assignments}).
+@emph{Note:} there should be no white space between @var{symbol}, the
+equals sign (``@key{=}''), and @var{expression}.
 
 @cindex demangling, from command line
 @kindex --demangle[=@var{style}]

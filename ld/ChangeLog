@@ -1,3 +1,7 @@
+2015-02-13  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Options <--defsym>): Correct cross reference.
+
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lexsup.c (ld_options): Add --[no-]map-whole-files for gold
