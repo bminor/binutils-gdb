@@ -1,3 +1,7 @@
+2015-02-12  Mark Wielaard  <mjw@redhat.com>
+
+	* contrib/ari/gdb_ari.sh: Remove checks for "true" and "false".
+
 2015-02-13  Doug Evans  <dje@google.com>
 
 	* cp-namespace.c (cp_basic_lookup_symbol): Rename parameter
