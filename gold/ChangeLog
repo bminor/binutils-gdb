@@ -1,3 +1,15 @@
+2015-02-12  Jing Yu  <jingyu@google.com>
+
+	* aarch64-reloc.def (TLSLE_MOVW_TPREL_G2, TLSLE_MOVW_TPREL_G1,
+	TLSLE_MOVW_TPREL_G1_NC, TLSLE_MOVW_TPREL_G0, TLSLE_MOVW_TPREL_G0_NC,):
+	New relocation.
+	* aarch64.cc (Target_aarch64::Scan::local): Add cases for new
+	TLSLE_MOVW_* relocations.
+	(Target_aarch64::Scan::global): Likewise.
+	(Target_aarch64::Relocate::relocate): Likewise.
+	(Target_aarch64::Relocate::relocate_tls): Add cases and handlings
+	for new TLSLE_MOVW_* relocations.
+
 2015-02-11  Will Newton  <will.newton@linaro.org>
 
 	PR gold/13321
