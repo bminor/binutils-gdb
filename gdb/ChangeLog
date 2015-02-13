@@ -1,5 +1,10 @@
 2015-05-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* infrun.c (handle_inferior_event_1): Renames handle_inferior_event.
+	(handle_inferior_event): New function.
+
+2015-05-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (to_fixed_array_type): Rename local variable
 	typename into type_name.
 
