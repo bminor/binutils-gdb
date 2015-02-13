@@ -1,3 +1,14 @@
+2015-02-13  Doug Evans  <dje@google.com>
+
+	* cp-namespace.c (cp_basic_lookup_symbol): Rename parameter
+	anonymous_namespace to is_in_anonymous for consistency with the rest
+	of the file.
+	(cp_lookup_bare_symbol): Fix typo in comment.
+	(cp_search_static_and_baseclasses): Ditto.
+	(search_symbol_list): Use vertical space in comment better.
+	(reset_directive_searched): Ditto. Fix typo.
+	(cp_lookup_nested_symbol_1): Clarify contents of NESTED_NAME parameter.
+
 2015-02-13  Yao Qi  <yao.qi@arm.com>
 
 	* MAINTAINERS: Update my email address.
