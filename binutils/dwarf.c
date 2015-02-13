@@ -284,7 +284,7 @@ read_leb128 (unsigned char *data,
 
       /* PR 17512: file: 0ca183b8.
 	 FIXME: Should we signal this error somehow ?  */
-      if (shift >= sizeof (result))
+      if (shift >= sizeof (result) * 8)
 	break;
     }
 
