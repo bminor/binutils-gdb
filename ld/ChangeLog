@@ -1,3 +1,7 @@
+2015-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for LLVM plugin.
+
 2015-02-13  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (Options <--defsym>): Correct cross reference.
