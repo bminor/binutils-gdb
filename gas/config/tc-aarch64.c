@@ -55,9 +55,6 @@ static const aarch64_feature_set *march_cpu_opt = NULL;
 /* Constants for known architecture features.  */
 static const aarch64_feature_set cpu_default = CPU_DEFAULT;
 
-static const aarch64_feature_set aarch64_arch_any = AARCH64_ANY;
-static const aarch64_feature_set aarch64_arch_none = AARCH64_ARCH_NONE;
-
 #ifdef OBJ_ELF
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_"	*/
 static symbolS *GOT_symbol;
