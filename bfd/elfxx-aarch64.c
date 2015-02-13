@@ -243,6 +243,7 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
 
     case BFD_RELOC_AARCH64_LD_LO19_PCREL:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
       if (old_addend & ((1 << howto->rightshift) - 1))
 	return bfd_reloc_overflow;
       contents = reencode_ld_lit_ofs_19 (contents, addend);
@@ -376,6 +377,7 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_NONE:
       break;
 
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
     case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
     case BFD_RELOC_AARCH64_BRANCH19:
     case BFD_RELOC_AARCH64_LD_LO19_PCREL:

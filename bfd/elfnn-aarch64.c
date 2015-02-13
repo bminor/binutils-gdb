@@ -951,7 +951,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   HOWTO (AARCH64_R (TLSIE_LD_GOTTPREL_PREL19),	/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 21,			/* bitsize */
+	 19,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
@@ -3747,6 +3747,9 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC:
       return is_local ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC : r_type;
 
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+      return r_type;
+
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
       /* Instructions with these relocations will become NOPs.  */
@@ -3784,6 +3787,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
       return GOT_TLS_IE;
 
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
@@ -4489,6 +4493,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
       if (globals->root.sgot == NULL)
 	return bfd_reloc_notsupported;
 
@@ -4590,6 +4595,9 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	   */
 	  return bfd_reloc_continue;
 	}
+
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+      return bfd_reloc_continue;
 
     case BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC:
       if (is_local)
@@ -4954,6 +4962,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC:
+	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
 	  if (! symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    {
 	      bfd_boolean need_relocs = FALSE;
@@ -5390,6 +5399,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -5858,6 +5868,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:

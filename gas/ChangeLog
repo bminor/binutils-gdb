@@ -1,3 +1,10 @@
+2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (reloc_table_entry): Generate
+	BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19.
+	(md_apply_fix, aarch64_force_relocation): Handle
+	BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19.
+
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* config/tc-aarch64.c (reloc_table_entry): Add ld_literal_type.
