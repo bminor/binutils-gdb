@@ -668,12 +668,10 @@ do_define (unsigned int i, struct coff_scope *b)
 
 	  if (!is->init)
 	    {
-	      long high = s->where->offset + s->type->size; 
-
 	      is->low = s->where->offset;
-	      is->high = high;
+	      is->high = s->where->offset + s->type->size; 
 	      /* PR 17512: file: 37e7a80d.  */
-	      if (is->high != high)
+	      if (is->high < s->where->offset)
 		fatal (_("Out of range type size: %u"), s->type->size);
 	      is->init = 1;
 	      is->parent = s->where->section;
