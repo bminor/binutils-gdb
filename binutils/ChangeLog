@@ -8,6 +8,12 @@
 	available before parsing.
 	(prescan): Likewise.
 
+	PR binutils/17531
+	* dwarf.c (display_debug_aranges): Add check for an excessive
+	ar_length value.
+	(process_cu_tu_index): Check for a row * columns sum being too
+	large.
+
 2015-02-13  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c: Formatting, whitespace.

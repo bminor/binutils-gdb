@@ -4923,7 +4923,13 @@ display_debug_aranges (struct dwarf_section *section,
       if (excess)
 	addr_ranges += (2 * address_size) - excess;
 
-      start += arange.ar_length + initial_length_size;
+      hdrptr = start + arange.ar_length + initial_length_size;
+      if (hdrptr < start || hdrptr > end)
+	{
+	  error (_("Excessive header length: %lx\n"), (long) arange.ar_length);
+	  break;
+	}
+      start = hdrptr;
 
       while (addr_ranges + 2 * address_size <= start)
 	{
@@ -7084,7 +7090,14 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		memcpy (&this_set[row - 1].signature, ph, sizeof (uint64_t));
 
 	      prow = poffsets + (row - 1) * ncols * 4;
-
+	      /* PR 17531: file: b8ce60a8.  */
+	      if (prow < poffsets || prow > limit)
+		{
+		  warn (_("Row index (%u) * num columns (%u) > space remaining in section\n"),
+			row, ncols);
+		  return 0;
+		}
+ 
 	      if (do_display)
 		printf (_("  [%3d] 0x%s"),
 			i, dwarf_vmatoa64 (signature_high, signature_low,
