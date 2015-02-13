@@ -1,3 +1,19 @@
+2015-02-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (update_sections): New list.
+	(command_line_switch): Add OPTION_UPDATE_SECTION.
+	(copy_options): Add update-section.
+	(copy_usage): Document new option.
+	(is_update_section): New function.
+	(is_strip_section_1): Add check for attempt to update and remove
+	the same section.
+	(copy_object): Update size and content of requested sections.
+	(skip_section): Don't copy for updated sections.
+	(copy_main): Handle --update-section.
+	* doc/binutils.texi (objcopy): Add description of --update-section
+	option.
+	* NEWS: Mention --update-section option.
+
 2015-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

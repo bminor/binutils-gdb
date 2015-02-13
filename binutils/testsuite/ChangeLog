@@ -1,3 +1,11 @@
+2015-02-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* binutils-all/update-1.s: New file.
+	* binutils-all/update-2.s: New file.
+	* binutils-all/update-3.s: New file.
+	* binutils-all/update-4.s: New file.
+	* binutils-all/update-section.exp: New file.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/objcopy.exp: Skip the strip-10 test for the V850.

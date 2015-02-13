@@ -1091,6 +1091,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--set-section-flags} @var{sectionpattern}=@var{flags}]
         [@option{--add-section} @var{sectionname}=@var{filename}]
         [@option{--dump-section} @var{sectionname}=@var{filename}]
+        [@option{--update-section} @var{sectionname}=@var{filename}]
         [@option{--rename-section} @var{oldname}=@var{newname}[,@var{flags}]]
         [@option{--long-section-names} @{enable,disable,keep@}]
         [@option{--change-leading-char}] [@option{--remove-leading-char}]
@@ -1488,6 +1489,21 @@ This option is similar to the @option{--only-section} option except
 that it does not create a formatted file, it just dumps the contents
 as raw binary data, without applying any relocations.  The option can
 be specified more than once.
+
+@item --update-section @var{sectionname}=@var{filename}
+Replace the existing contents of a section named @var{sectionname}
+with the contents of file @var{filename}.  The size of the section
+will be adjusted to the size of the file.  The section flags for
+@var{sectionname} will be unchanged.  For ELF format files the section
+to segment mapping will also remain unchanged, something which is not
+possible using @option{--remove-section} followed by
+@option{--add-section}.  The option can be specified more than once.
+
+Note - it is possible to use @option{--rename-section} and
+@option{--update-section} to both update and rename a section from one
+command line.  In this case, pass the original section name to
+@option{--update-section}, and the original and new section names to
+@option{--rename-section}.
 
 @item --rename-section @var{oldname}=@var{newname}[,@var{flags}]
 Rename a section from @var{oldname} to @var{newname}, optionally

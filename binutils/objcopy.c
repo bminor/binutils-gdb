@@ -186,6 +186,9 @@ struct section_add
 /* List of sections to add to the output BFD.  */
 static struct section_add *add_sections;
 
+/* List of sections to update in the output BFD.  */
+static struct section_add *update_sections;
+
 /* List of sections to dump from the output BFD.  */
 static struct section_add *dump_sections;
 
@@ -262,6 +265,7 @@ static enum long_section_name_handling long_section_names = KEEP;
 enum command_line_switch
   {
     OPTION_ADD_SECTION=150,
+    OPTION_UPDATE_SECTION,
     OPTION_DUMP_SECTION,
     OPTION_CHANGE_ADDRESSES,
     OPTION_CHANGE_LEADING_CHAR,
@@ -361,6 +365,7 @@ static struct option copy_options[] =
 {
   {"add-gnu-debuglink", required_argument, 0, OPTION_ADD_GNU_DEBUGLINK},
   {"add-section", required_argument, 0, OPTION_ADD_SECTION},
+  {"update-section", required_argument, 0, OPTION_UPDATE_SECTION},
   {"adjust-start", required_argument, 0, OPTION_CHANGE_START},
   {"adjust-vma", required_argument, 0, OPTION_CHANGE_ADDRESSES},
   {"adjust-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_ADDRESS},
@@ -553,6 +558,9 @@ copy_usage (FILE *stream, int exit_status)
      --set-section-flags <name>=<flags>\n\
                                    Set section <name>'s properties to <flags>\n\
      --add-section <name>=<file>   Add section <name> found in <file> to output\n\
+     --update-section <name>=<file>\n\
+                                   Update contents of section <name> with\n\
+                                   contents found in <file>\n\
      --dump-section <name>=<file>  Dump the contents of section <name> into <file>\n\
      --rename-section <old>=<new>[,<flags>] Rename section <old> to <new>\n\
      --long-section-names {enable|disable|keep}\n\
@@ -1044,6 +1052,27 @@ is_dwo_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
   return strncmp (name + len - 4, ".dwo", 4) == 0;
 }
 
+/* Return TRUE if section SEC is in the update list.  */
+
+static bfd_boolean
+is_update_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+{
+  if (update_sections != NULL)
+    {
+      struct section_add *pupdate;
+
+      for (pupdate = update_sections;
+           pupdate != NULL;
+           pupdate = pupdate->next)
+	{
+          if (strcmp (sec->name, pupdate->name) == 0)
+            return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
 /* See if a non-group section is being removed.  */
 
 static bfd_boolean
@@ -1062,6 +1091,9 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       if (p && q)
 	fatal (_("error: section %s matches both remove and copy options"),
 	       bfd_get_section_name (abfd, sec));
+      if (p && is_update_section (abfd, sec))
+        fatal (_("error: section %s matches both update and remove options"),
+               bfd_get_section_name (abfd, sec));
 
       if (p != NULL)
 	return TRUE;
@@ -1865,6 +1897,29 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
+  if (update_sections != NULL)
+    {
+      struct section_add *pupdate;
+
+      for (pupdate = update_sections;
+	   pupdate != NULL;
+	   pupdate = pupdate->next)
+	{
+	  asection *osec;
+
+	  pupdate->section = bfd_get_section_by_name (ibfd, pupdate->name);
+	  if (pupdate->section == NULL)
+	    fatal (_("error: %s not found, can't be updated"), pupdate->name);
+
+	  osec = pupdate->section->output_section;
+	  if (! bfd_set_section_size (obfd, osec, pupdate->size))
+	    {
+	      bfd_nonfatal_message (NULL, obfd, osec, NULL);
+	      return FALSE;
+	    }
+	}
+    }
+
   if (dump_sections != NULL)
     {
       struct section_add * pdump;
@@ -2145,6 +2200,26 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 					  0, padd->size))
 	    {
 	      bfd_nonfatal_message (NULL, obfd, padd->section, NULL);
+	      return FALSE;
+	    }
+	}
+    }
+
+  if (update_sections != NULL)
+    {
+      struct section_add *pupdate;
+
+      for (pupdate = update_sections;
+           pupdate != NULL;
+           pupdate = pupdate->next)
+	{
+	  asection *osec;
+
+	  osec = pupdate->section->output_section;
+	  if (! bfd_set_section_contents (obfd, osec, pupdate->contents,
+	                                  0, pupdate->size))
+	    {
+	      bfd_nonfatal_message (NULL, obfd, osec, NULL);
 	      return FALSE;
 	    }
 	}
@@ -2879,6 +2954,9 @@ skip_section (bfd *ibfd, sec_ptr isection)
     return TRUE;
 
   if (is_strip_section (ibfd, isection))
+    return TRUE;
+
+  if (is_update_section (ibfd, isection))
     return TRUE;
 
   flags = bfd_get_section_flags (ibfd, isection);
@@ -3793,6 +3871,12 @@ copy_main (int argc, char *argv[])
           add_sections = init_section_add (optarg, add_sections,
                                            "--add-section");
           section_add_load_file (add_sections);
+	  break;
+
+	case OPTION_UPDATE_SECTION:
+	  update_sections = init_section_add (optarg, update_sections,
+                                              "--update-section");
+	  section_add_load_file (update_sections);
 	  break;
 
 	case OPTION_DUMP_SECTION:
