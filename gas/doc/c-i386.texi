@@ -1051,27 +1051,6 @@ opcode bytes @samp{6a 04} (i.e., without the operand size prefix), which
 is correct since the processor default operand size is assumed to be 16
 bits in a 16-bit code section.
 
-@node i386-Bugs
-@section AT&T Syntax bugs
-
-The UnixWare assembler, and probably other AT&T derived ix86 Unix
-assemblers, generate floating point instructions with reversed source
-and destination registers in certain cases.  Unfortunately, gcc and
-possibly many other programs use this reversed syntax, so we're stuck
-with it.
-
-For example
-
-@smallexample
-        fsub %st,%st(3)
-@end smallexample
-@noindent
-results in @samp{%st(3)} being updated to @samp{%st - %st(3)} rather
-than the expected @samp{%st(3) - %st}.  This happens with all the
-non-commutative arithmetic floating point operations with two register
-operands where the source register is @samp{%st} and the destination
-register is @samp{%st(i)}.
-
 @node i386-Arch
 @section Specifying CPU Architecture
 
@@ -1142,6 +1121,27 @@ For example
 @smallexample
  .arch i8086,nojumps
 @end smallexample
+
+@node i386-Bugs
+@section AT&T Syntax bugs
+
+The UnixWare assembler, and probably other AT&T derived ix86 Unix
+assemblers, generate floating point instructions with reversed source
+and destination registers in certain cases.  Unfortunately, gcc and
+possibly many other programs use this reversed syntax, so we're stuck
+with it.
+
+For example
+
+@smallexample
+        fsub %st,%st(3)
+@end smallexample
+@noindent
+results in @samp{%st(3)} being updated to @samp{%st - %st(3)} rather
+than the expected @samp{%st(3) - %st}.  This happens with all the
+non-commutative arithmetic floating point operations with two register
+operands where the source register is @samp{%st} and the destination
+register is @samp{%st(i)}.
 
 @node i386-Notes
 @section Notes

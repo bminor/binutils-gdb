@@ -1,3 +1,8 @@
+2015-02-19  Alan Modra  <amodra@gmail.com>
+
+	* doc/as.texinfo (Local Symbol Names): Don't use ':' in pxref.
+	* doc/c-i386.texi: Reorder i386-Bugs after i386-Arch.
+
 2015-02-11  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Fix code formatting.
