@@ -1,3 +1,11 @@
+2015-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17973
+	* testplug2.c (allsymbolsread_silent): New.
+	(set_register_hook): Handle allsymbolsreadsilent.
+	(onall_symbols_read): Skip a message if allsymbolsread_silent is
+	TRUE.
+
 2015-02-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/17973

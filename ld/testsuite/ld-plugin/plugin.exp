@@ -66,6 +66,7 @@ verbose "Full plugin3 path $plugin3_path" 2
 
 set regclm "-plugin-opt registerclaimfile"
 set regas "-plugin-opt registerallsymbolsread"
+set regassilent "-plugin-opt registerallsymbolsreadsilent"
 set regcln "-plugin-opt registercleanup"
 
 if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] || [istarget m9s12x*-*-*] } {
@@ -85,7 +86,9 @@ set plugin_nm_output ""
 if { $can_compile && \
 	(![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c tmpdir/main.o] \
 	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/func.c tmpdir/func.o] \
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/text.c tmpdir/text.o]) } {
+	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/text.c tmpdir/text.o] \
+	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/dummy.s tmpdir/dummy.o] \
+	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/pr17973.s tmpdir/pr17973.o]) } {
     # Defer fail until we have list of tests set.
     set failed_compile 1
 }
@@ -174,6 +177,9 @@ set plugin_tests [list \
     $testobjfiles $libs" "" "" "" {{ld plugin-28.d}} "main.x" ] \
     [list "plugin warning" "-plugin $plugin2_path -plugin-opt warning \
     $testobjfiles $libs" "" "" "" {{ld plugin-29.d}} "main.x" ] \
+    [list "PR ld/17973" "-plugin $plugin2_path -shared $regassilent \
+			-plugin-opt add:tmpdir/pr17973.o \
+    tmpdir/dummy.o" "" "" "" {{readelf -sW pr17973.d}} "main.x" ] \
 ]
 
 set plugin_lib_tests [list \
