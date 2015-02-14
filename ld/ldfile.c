@@ -142,6 +142,11 @@ ldfile_try_open_bfd (const char *attempt,
   /* Linker needs to decompress sections.  */
   entry->the_bfd->flags |= BFD_DECOMPRESS;
 
+#ifdef ENABLE_PLUGINS
+  if (entry->flags.lto_output)
+    entry->the_bfd->lto_output = 1;
+#endif
+
   /* If we are searching for this file, see if the architecture is
      compatible with the output file.  If it isn't, keep searching.
      If we can't open the file as an object file, stop the search

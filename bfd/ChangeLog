@@ -1,3 +1,23 @@
+2015-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17973
+	* bfd.c (struct bfd): Add lto_output.
+	* linker.c (_bfd_handle_already_linked): Explicitly test for
+	objects added by the lto plugin.
+	* opncls.c (_bfd_new_bfd_contained_in): Copy lto_output and
+	no_export flags from archive.
+	* archive.c (open_nested_file): New function, setting lto_output
+	and no_export, extracted from..
+	(find_nested_archive): ..here.  Flip params.  Rename from
+	_bfd_find_nested_archive.
+	(_bfd_get_elt_at_filepos): Correct var typo.  Use open_nested_file.
+	(_bfd_look_for_bfd_in_cache): Copy no_export.
+	* elflink.c (elf_link_add_object_symbols): Remove now unnecessary
+	my_archive->no_export test.
+	(elf_link_input_bfd): Drop existing lto_output STT_FILE syms.
+	Don't use the file name when adding lto_output STT_FILE sym.
+	* bfd-in2.h: Regenerate.
+
 2015-02-13  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/17512

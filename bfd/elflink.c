@@ -4085,8 +4085,7 @@ error_free_dyn:
 	     requested we not re-export it, then mark it as hidden.  */
 	  if (definition
 	      && !dynamic
-	      && (abfd->no_export
-		  || (abfd->my_archive && abfd->my_archive->no_export))
+	      && abfd->no_export
 	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
 	    isym->st_other = (STV_HIDDEN
 			      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
@@ -9520,6 +9519,10 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 
       if (ELF_ST_TYPE (isym->st_info) == STT_FILE)
 	{
+	  if (input_bfd->lto_output)
+	    /* -flto puts a temp file name here.  This means builds
+	       are not reproducible.  Discard the symbol.  */
+	    continue;
 	  have_file_sym = TRUE;
 	  flinfo->filesym_count += 1;
 	}
@@ -9536,8 +9539,10 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  memset (&osym, 0, sizeof (osym));
 	  osym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
 	  osym.st_shndx = SHN_ABS;
-	  if (!elf_link_output_sym (flinfo, input_bfd->filename, &osym,
-				    bfd_abs_section_ptr, NULL))
+	  if (!elf_link_output_sym (flinfo,
+				    (input_bfd->lto_output ? NULL
+				     : input_bfd->filename),
+				    &osym, bfd_abs_section_ptr, NULL))
 	    return FALSE;
 	}
 
