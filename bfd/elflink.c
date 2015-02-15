@@ -8827,9 +8827,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	       && h->root.u.def.section->output_section != NULL))
 	return TRUE;
 
-      if (!eoinfo->file_sym_done
-	  && (eoinfo->second_pass ? eoinfo->flinfo->filesym_count == 1
-				  : eoinfo->flinfo->filesym_count > 1))
+      if (!eoinfo->file_sym_done && eoinfo->flinfo->filesym_count)
 	{
 	  /* Output a FILE symbol so that following locals are not associated
 	     with the wrong input file.  */
@@ -9006,10 +9004,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	    if (eoinfo->localsyms && flinfo->filesym_count == 1)
 	      {
 		bfd_boolean second_pass_sym
-		  = (input_sec->owner == flinfo->output_bfd
-		     || input_sec->owner == NULL
-		     || (input_sec->flags & SEC_LINKER_CREATED) != 0
-		     || (input_sec->owner->flags & BFD_LINKER_CREATED) != 0);
+		  = h->forced_local && !h->root.linker_def;
 
 		eoinfo->need_second_pass |= second_pass_sym;
 		if (eoinfo->second_pass != second_pass_sym)
