@@ -1,3 +1,8 @@
+2015-02-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2.c (read_rangelist): Correct buffer overflow check
+	Whitespace throughout file.
+
 2015-02-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/17973

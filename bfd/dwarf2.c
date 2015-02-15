@@ -669,7 +669,7 @@ read_indirect_string (struct comp_unit * unit,
       * bytes_read_ptr = 0;
       return NULL;
     }
-  
+
   if (unit->offset_size == 4)
     offset = read_4_bytes (unit->abfd, buf, buf_end);
   else
@@ -709,7 +709,7 @@ read_alt_indirect_string (struct comp_unit * unit,
       * bytes_read_ptr = 0;
       return NULL;
     }
-  
+
   if (unit->offset_size == 4)
     offset = read_4_bytes (unit->abfd, buf, buf_end);
   else
@@ -737,7 +737,7 @@ read_alt_indirect_string (struct comp_unit * unit,
 	}
       stash->alt_bfd_ptr = debug_bfd;
     }
-  
+
   if (! read_section (unit->stash->alt_bfd_ptr,
 		      stash->debug_sections + debug_str_alt,
 		      NULL, /* FIXME: Do we need to load alternate symbols ?  */
@@ -785,7 +785,7 @@ read_alt_indirect_ref (struct comp_unit * unit,
 	}
       stash->alt_bfd_ptr = debug_bfd;
     }
-  
+
   if (! read_section (unit->stash->alt_bfd_ptr,
 		      stash->debug_sections + debug_info_alt,
 		      NULL, /* FIXME: Do we need to load alternate symbols ?  */
@@ -1722,9 +1722,9 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
-    
+
   line_end = line_ptr + lh.total_length;
-  
+
   lh.version = read_2_bytes (abfd, line_ptr, line_end);
   if (lh.version < 2 || lh.version > 4)
     {
@@ -1786,7 +1786,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
-  
+
   amt = lh.opcode_base * sizeof (unsigned char);
   lh.standard_opcode_lengths = (unsigned char *) bfd_alloc (abfd, amt);
 
@@ -2414,14 +2414,14 @@ read_rangelist (struct comp_unit *unit, struct arange *arange,
   if (ranges_ptr < unit->stash->dwarf_ranges_buffer)
     return FALSE;
   ranges_end = unit->stash->dwarf_ranges_buffer + unit->stash->dwarf_ranges_size;
-  
+
   for (;;)
     {
       bfd_vma low_pc;
       bfd_vma high_pc;
 
       /* PR 17512: file: 62cada7d.  */
-      if (ranges_ptr + 2 * unit->addr_size >= ranges_end)
+      if (ranges_ptr + 2 * unit->addr_size > ranges_end)
 	return FALSE;
 
       low_pc = read_address (unit, ranges_ptr, ranges_end);
@@ -2481,7 +2481,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
       /* PR 17512: file: 9f405d9d.  */
       if (info_ptr >= info_ptr_end)
 	goto fail;
-      
+
       abbrev_number = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
       info_ptr += bytes_read;
 
@@ -4028,9 +4028,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	      found = FALSE;
 	      break;
 	    }
-	  else	    
+	  else
 	    stash->info_ptr = new_ptr;
-	  
+
 	  if (stash->all_comp_units)
 	    stash->all_comp_units->prev_unit = each;
 	  else
