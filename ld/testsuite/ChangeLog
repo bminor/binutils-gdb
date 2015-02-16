@@ -1,7 +1,7 @@
 2015-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17975
-	* ld-i386/tlsbin-nacl.rd: Likewise.
+	* ld-i386/tlsbin-nacl.rd: Updated.
 	* ld-i386/tlsbin.rd: Likewise.
 	* ld-i386/tlsbindesc-nacl.rd: Likewise.
 	* ld-i386/tlsbindesc.rd: Likewise.
