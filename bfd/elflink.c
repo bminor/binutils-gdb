@@ -77,9 +77,9 @@ _bfd_elf_define_linkage_sym (bfd *abfd,
     }
 
   bh = &h->root;
+  bed = get_elf_backend_data (abfd);
   if (!_bfd_generic_link_add_one_symbol (info, abfd, name, BSF_GLOBAL,
-					 sec, 0, NULL, FALSE,
-					 get_elf_backend_data (abfd)->collect,
+					 sec, 0, NULL, FALSE, bed->collect,
 					 &bh))
     return NULL;
   h = (struct elf_link_hash_entry *) bh;
@@ -90,7 +90,6 @@ _bfd_elf_define_linkage_sym (bfd *abfd,
   if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
     h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
 
-  bed = get_elf_backend_data (abfd);
   (*bed->elf_backend_hide_symbol) (info, h, TRUE);
   return h;
 }

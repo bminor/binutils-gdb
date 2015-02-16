@@ -1,5 +1,9 @@
 2015-02-19  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (_bfd_elf_define_linkage_sym): Set 'bed' earlier.
+
+2015-02-19  Alan Modra  <amodra@gmail.com>
+
 	PR ld/4317
 	* elflink.c (elf_link_input_bfd): Drop undefined local syms.
 	(elf_link_output_extsym): Drop local and global undefined syms.
