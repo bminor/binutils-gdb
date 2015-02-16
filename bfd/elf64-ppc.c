@@ -10950,6 +10950,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  h->ref_regular_nonweak = 1;
 	  h->forced_local = 1;
 	  h->non_elf = 0;
+	  h->root.linker_def = 1;
 	}
     }
 
@@ -12653,6 +12654,7 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 		h->ref_regular_nonweak = 1;
 		h->forced_local = 1;
 		h->non_elf = 0;
+		h->root.linker_def = 1;
 	      }
 	  }
 
@@ -12726,6 +12728,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	      h->ref_regular_nonweak = 1;
 	      h->forced_local = 1;
 	      h->non_elf = 0;
+	      h->root.linker_def = 1;
 	    }
 	}
       plt0 = (htab->elf.splt->output_section->vma

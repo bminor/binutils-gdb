@@ -1,3 +1,19 @@
+2015-02-17  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17975
+	* elflink.c (struct elf_outext_info): Remove need_second_pass
+	and second_pass.
+	(elf_link_output_extsym): Delete code handling second forced
+	local pass.  Move code emitting NULL STT_FILE symbol later, so
+	that it can be omitted if forced local is stripped.  Don't
+	emit the NULL STT_FILE if no file symbols have been output.
+	(bfd_elf_final_link): Remove second forced local pass.
+	* elf32-ppc.c (add_stub_sym): Set linker_def on linker syms.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	* elf64-ppc.c (ppc_build_one_stub): Likewise.
+	(build_global_entry_stubs): Likewise.
+	(ppc64_elf_build_stubs): Likewise.
+
 2015-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17975

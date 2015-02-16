@@ -96,13 +96,12 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sl7
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sl8
 .* FILE +LOCAL +DEFAULT +ABS 
-.* [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _DYNAMIC
-.* [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _PROCEDURE_LINKAGE_TABLE_
-.* [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 sH1
+.* [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _DYNAMIC
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sh3
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 sH2
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 sH7
+.* [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _PROCEDURE_LINKAGE_TABLE_
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sh7
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sh8
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 sH4
@@ -113,6 +112,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 sH6
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 sH8
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sh1
+.* [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sh2
 .* [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +9 sh6
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg8

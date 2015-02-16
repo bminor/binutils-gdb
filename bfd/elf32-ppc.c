@@ -5685,6 +5685,7 @@ add_stub_sym (struct plt_entry *ent,
       sh->ref_regular_nonweak = 1;
       sh->forced_local = 1;
       sh->non_elf = 0;
+      sh->root.linker_def = 1;
     }
   return TRUE;
 }
@@ -6366,6 +6367,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	      sh->ref_regular_nonweak = 1;
 	      sh->forced_local = 1;
 	      sh->non_elf = 0;
+	      sh->root.linker_def = 1;
 	    }
 	  sh = elf_link_hash_lookup (&htab->elf, "__glink_PLTresolve",
 				     TRUE, FALSE, FALSE);
@@ -6381,6 +6383,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	      sh->ref_regular_nonweak = 1;
 	      sh->forced_local = 1;
 	      sh->non_elf = 0;
+	      sh->root.linker_def = 1;
 	    }
 	}
     }

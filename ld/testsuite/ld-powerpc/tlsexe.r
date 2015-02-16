@@ -98,9 +98,9 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +8 le5
 .* FILE +LOCAL +DEFAULT +ABS 
 .* OBJECT +LOCAL +DEFAULT +10 _DYNAMIC
-.* (FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt)
-.* NOTYPE +LOCAL +DEFAULT +7 __glink_PLTresolve
-.* NOTYPE +LOCAL +DEFAULT +7 .*\.plt_call\.__tls_get_addr(|_opt)
+.* (NOTYPE +LOCAL +DEFAULT +7 __glink_PLTresolve|(FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt))
+.* (NOTYPE +LOCAL +DEFAULT +7 .*\.plt_call\.__tls_get_addr(|_opt)|NOTYPE +LOCAL +DEFAULT +7 __glink_PLTresolve)
+.* ((FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt)|NOTYPE +LOCAL +DEFAULT +7 .*\.plt_call\.__tls_get_addr(|_opt))
 .* GLOBAL +DEFAULT +UND gd
 .* GLOBAL +DEFAULT +9 le0
 .* GLOBAL +DEFAULT +9 ld0

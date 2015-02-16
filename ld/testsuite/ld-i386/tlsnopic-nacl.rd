@@ -104,10 +104,10 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+10 +0 +TLS +LOCAL +DEFAULT +6 bl5
 .* FILE +LOCAL +DEFAULT +ABS 
  +[0-9]+: [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +7 _DYNAMIC
- +[0-9]+: 0*1001031c +0 +OBJECT +LOCAL +DEFAULT +9 _GLOBAL_OFFSET_TABLE_
  +[0-9]+: 0+1c +0 +TLS +LOCAL +DEFAULT +6 sh3
  +[0-9]+: 0+20 +0 +TLS +LOCAL +DEFAULT +6 sh4
  +[0-9]+: 0+14 +0 +TLS +LOCAL +DEFAULT +6 sh1
+ +[0-9]+: 0*1001031c +0 +OBJECT +LOCAL +DEFAULT +9 _GLOBAL_OFFSET_TABLE_
  +[0-9]+: 0+18 +0 +TLS +LOCAL +DEFAULT +6 sh2
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg3
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg4

@@ -1,3 +1,20 @@
+2015-02-17  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17975
+	* ld-aarch64/gc-tls-relocs.d, * ld-alpha/tlspic.rd,
+	* ld-cris/libdso-2.d, * ld-i386/tlsdesc-nacl.rd, * ld-i386/tlsdesc.rd,
+	* ld-i386/tlsnopic-nacl.rd, * ld-i386/tlsnopic.rd,
+	* ld-i386/tlspic-nacl.rd, * ld-i386/tlspic.rd, * ld-ia64/tlspic.rd,
+	* ld-powerpc/tlsexe.r, * ld-powerpc/tlsexetoc.r,
+	* ld-powerpc/tlsso.r, * ld-powerpc/tlstocso.r,
+	* ld-s390/tlspic.rd, * ld-s390/tlspic_64.rd,
+	* ld-sparc/tlssunnopic32.rd, * ld-sparc/tlssunnopic64.rd,
+	* ld-sparc/tlssunpic32.rd, * ld-sparc/tlssunpic64.rd,
+	* ld-tic6x/shlib-1.rd, * ld-tic6x/shlib-1b.rd, * ld-tic6x/shlib-1r.rd,
+	* ld-tic6x/shlib-1rb.rd, * ld-tic6x/shlib-noindex.rd,
+	* ld-x86-64/tlsdesc-nacl.rd, * ld-x86-64/tlsdesc.rd,
+	* ld-x86-64/tlspic-nacl.rd, * ld-x86-64/tlspic.rd: Update.
+
 2015-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17975
