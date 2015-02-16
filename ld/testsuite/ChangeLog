@@ -1,3 +1,25 @@
+2015-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17975
+	* ld-i386/tlsbin-nacl.rd: Likewise.
+	* ld-i386/tlsbin.rd: Likewise.
+	* ld-i386/tlsbindesc-nacl.rd: Likewise.
+	* ld-i386/tlsbindesc.rd: Likewise.
+	* ld-i386/tlsdesc-nacl.rd: Likewise.
+	* ld-i386/tlsdesc.rd: Likewise.
+	* ld-i386/tlsnopic-nacl.rd: Likewise.
+	* ld-i386/tlsnopic.rd: Likewise.
+	* ld-i386/tlspic-nacl.rd: Likewise.
+	* ld-i386/tlspic.rd: Likewise.
+	* ld-x86-64/tlsbin-nacl.rd: Likewise.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-x86-64/tlsbindesc-nacl.rd: Likewise.
+	* ld-x86-64/tlsbindesc.rd: Likewise.
+	* ld-x86-64/tlsdesc-nacl.rd: Likewise.
+	* ld-x86-64/tlsdesc.rd: Likewise.
+	* ld-x86-64/tlspic-nacl.rd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+
 2015-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17973

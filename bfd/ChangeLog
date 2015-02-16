@@ -1,3 +1,10 @@
+2015-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17975
+	* elflink.c (elf_link_output_extsym): Only check filesym_count
+	when outputting a NULL FILE symbol.  Set second_pass_sym to
+	h->forced_local && !h->root.linker_def.
+
 2015-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_always_size_sections): Set root.linker_def
