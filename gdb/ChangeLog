@@ -1,3 +1,11 @@
+2015-02-17  Max Ostapenko  <m.ostapenko@partner.samsung.com>
+
+	PR gdb/17984
+	* aarch64-linux-nat.c: Don't include features/aarch64.c anymore.
+	(aarch64_linux_read_description): Remove initialize_tdesc_aarch64
+	call.
+	* aarch64-tdep.h (tdesc_aarch64): Declare.
+
 2015-02-12  Mark Wielaard  <mjw@redhat.com>
 
 	* contrib/ari/gdb_ari.sh: Remove checks for "true" and "false".

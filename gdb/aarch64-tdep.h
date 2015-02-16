@@ -90,4 +90,6 @@ struct gdbarch_tdep
   struct type *vnb_type;
 };
 
+extern struct target_desc *tdesc_aarch64;
+
 #endif /* aarch64-tdep.h */
