@@ -136,8 +136,6 @@ static int tui_readline_pipe[2];
    This may be the main gdb prompt or a secondary prompt.  */
 static char *tui_rl_saved_prompt;
 
-static int tui_handle_resize_during_io (int, int);
-
 static void
 tui_putc (char c)
 {
@@ -397,8 +395,6 @@ tui_mld_getc (FILE *fp)
   WINDOW *w = TUI_CMD_WIN->generic.handle;
   int c = wgetch (w);
 
-  c = tui_handle_resize_during_io (c, 1);
-
   return c;
 }
 
@@ -593,7 +589,6 @@ tui_getc (FILE *fp)
 #endif
 
   ch = wgetch (w);
-  ch = tui_handle_resize_during_io (ch, 0);
 
   /* The \n must be echoed because it will not be printed by
      readline.  */
@@ -718,26 +713,4 @@ tui_expand_tabs (const char *string, int col)
     }
 
   return ret;
-}
-
-/* Cleanup when a resize has occured.
-   Returns the character that must be processed.  */
-
-static int
-tui_handle_resize_during_io (int original_ch, int for_completion)
-{
-  if (tui_win_resized ())
-    {
-      tui_resize_all ();
-      tui_refresh_all_win ();
-      tui_update_gdb_sizes ();
-      tui_set_win_resized_to (FALSE);
-      if (!for_completion)
-	{
-	  dont_repeat ();
-	  return '\n';
-	}
-    }
-
-  return original_ch;
 }
