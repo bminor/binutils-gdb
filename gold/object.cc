@@ -2589,7 +2589,7 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
     dyn_oview = of->get_output_view(this->local_dynsym_offset_,
 				    dyn_output_size);
 
-  const Output_sections out_sections(this->output_sections());
+  const Output_sections& out_sections(this->output_sections());
 
   gold_assert(this->local_values_.size() == loccount);
 

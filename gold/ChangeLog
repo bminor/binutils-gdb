@@ -1,5 +1,9 @@
 2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
+	* object.cc (write_local_symbols): avoid std::vector copy.
+
+2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
 	* merge.cc (get_output_offset): Use upper_bound instead of lower_bound.
 
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
