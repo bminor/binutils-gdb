@@ -526,7 +526,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 
 	      /* If we're in async mode, need to tell the event loop
 		 there's something here to process.  */
-	      if (target_can_async_p ())
+	      if (target_is_async_p ())
 		async_file_mark ();
 	    }
 	}
@@ -3255,7 +3255,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 			    target_pid_to_str (lp->ptid));
     }
 
-  if (!target_can_async_p ())
+  if (!target_is_async_p ())
     {
       /* Causes SIGINT to be passed on to the attached process.  */
       set_sigint_trap ();
@@ -3326,7 +3326,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 
 	  ourstatus->kind = TARGET_WAITKIND_NO_RESUMED;
 
-	  if (!target_can_async_p ())
+	  if (!target_is_async_p ())
 	    clear_sigint_trap ();
 
 	  restore_child_signals_mask (&prev_mask);
@@ -3354,7 +3354,7 @@ linux_nat_wait_1 (struct target_ops *ops,
       sigsuspend (&suspend_mask);
     }
 
-  if (!target_can_async_p ())
+  if (!target_is_async_p ())
     clear_sigint_trap ();
 
   gdb_assert (lp);
@@ -3512,7 +3512,7 @@ linux_nat_wait (struct target_ops *ops,
     }
 
   /* Flush the async file first.  */
-  if (target_can_async_p ())
+  if (target_is_async_p ())
     async_file_flush ();
 
   /* Resume LWPs that are currently stopped without any pending status
@@ -3530,15 +3530,11 @@ linux_nat_wait (struct target_ops *ops,
   /* If we requested any event, and something came out, assume there
      may be more.  If we requested a specific lwp or process, also
      assume there may be more.  */
-  if (target_can_async_p ()
+  if (target_is_async_p ()
       && ((ourstatus->kind != TARGET_WAITKIND_IGNORE
 	   && ourstatus->kind != TARGET_WAITKIND_NO_RESUMED)
 	  || !ptid_equal (ptid, minus_one_ptid)))
     async_file_mark ();
-
-  /* Get ready for the next event.  */
-  if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
 
   return event_ptid;
 }
