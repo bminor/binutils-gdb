@@ -5011,6 +5011,35 @@ given, all object files are considered.
 List the available static probes, from all types.
 @end table
 
+@cindex enabling and disabling probes
+Some probe points can be enabled and/or disabled.  The effect of
+enabling or disabling a probe depends on the type of probe being
+handled.  @code{SystemTap} probes cannot be disabled.
+
+You can enable (or disable) one or more probes using the following
+commands, with optional arguments:
+
+@table @code
+@kindex enable probes
+@item enable probes @r{[}@var{provider} @r{[}@var{name} @r{[}@var{objfile}@r{]}@r{]}@r{]}
+If given, @var{provider} is a regular expression used to match against
+provider names when selecting which probes to enable.  If omitted,
+all probes from all providers are enabled.
+
+If given, @var{name} is a regular expression to match against probe
+names when selecting which probes to enable.  If omitted, probe names
+are not considered when deciding whether to enable them.
+
+If given, @var{objfile} is a regular expression used to select which
+object files (executable or shared libraries) to examine.  If not
+given, all object files are considered.
+
+@kindex disable probes
+@item disable probes @r{[}@var{provider} @r{[}@var{name} @r{[}@var{objfile}@r{]}@r{]}@r{]}
+See the @code{enable probes} command above for a description of the
+optional arguments accepted by this command.
+@end table
+
 @vindex $_probe_arg@r{, convenience variable}
 A probe may specify up to twelve arguments.  These are available at the
 point at which the probe is defined---that is, when the current PC is

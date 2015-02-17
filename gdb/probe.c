@@ -527,6 +527,24 @@ exists_probe_with_pops (VEC (bound_probe_s) *probes,
   return 0;
 }
 
+/* Helper function that parses a probe linespec of the form [PROVIDER
+   [PROBE [OBJNAME]]] from the provided string STR.  */
+
+static void
+parse_probe_linespec (const char *str, char **provider,
+		      char **probe_name, char **objname)
+{
+  *probe_name = *objname = NULL;
+
+  *provider = extract_arg_const (&str);
+  if (*provider != NULL)
+    {
+      *probe_name = extract_arg_const (&str);
+      if (*probe_name != NULL)
+	*objname = extract_arg_const (&str);
+    }
+}
+
 /* See comment in probe.h.  */
 
 void
@@ -546,22 +564,10 @@ info_probes_for_ops (const char *arg, int from_tty,
   struct bound_probe *probe;
   struct gdbarch *gdbarch = get_current_arch ();
 
-  /* Do we have a `provider:probe:objfile' style of linespec?  */
-  provider = extract_arg_const (&arg);
-  if (provider)
-    {
-      make_cleanup (xfree, provider);
-
-      probe_name = extract_arg_const (&arg);
-      if (probe_name)
-	{
-	  make_cleanup (xfree, probe_name);
-
-	  objname = extract_arg_const (&arg);
-	  if (objname)
-	    make_cleanup (xfree, objname);
-	}
-    }
+  parse_probe_linespec (arg, &provider, &probe_name, &objname);
+  make_cleanup (xfree, provider);
+  make_cleanup (xfree, probe_name);
+  make_cleanup (xfree, objname);
 
   probes = collect_probes (objname, provider, probe_name, pops);
   make_cleanup (VEC_cleanup (probe_p), &probes);
@@ -687,6 +693,98 @@ static void
 info_probes_command (char *arg, int from_tty)
 {
   info_probes_for_ops (arg, from_tty, NULL);
+}
+
+/* Implementation of the `enable probes' command.  */
+
+static void
+enable_probes_command (char *arg, int from_tty)
+{
+  char *provider, *probe_name = NULL, *objname = NULL;
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  VEC (bound_probe_s) *probes;
+  struct bound_probe *probe;
+  int i;
+
+  parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
+  make_cleanup (xfree, provider);
+  make_cleanup (xfree, probe_name);
+  make_cleanup (xfree, objname);
+
+  probes = collect_probes (objname, provider, probe_name, NULL);
+  if (VEC_empty (bound_probe_s, probes))
+    {
+      ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+      do_cleanups (cleanup);
+      return;
+    }
+
+  /* Enable the selected probes, provided their backends support the
+     notion of enabling a probe.  */
+  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
+    {
+      const struct probe_ops *pops = probe->probe->pops;
+
+      if (pops->enable_probe != NULL)
+	{
+	  pops->enable_probe (probe->probe);
+	  ui_out_message (current_uiout, 0,
+			  _("Probe %s:%s enabled.\n"),
+			  probe->probe->provider, probe->probe->name);
+	}
+      else
+	ui_out_message (current_uiout, 0,
+			_("Probe %s:%s cannot be enabled.\n"),
+			probe->probe->provider, probe->probe->name);
+    }
+
+  do_cleanups (cleanup);
+}
+
+/* Implementation of the `disable probes' command.  */
+
+static void
+disable_probes_command (char *arg, int from_tty)
+{
+  char *provider, *probe_name = NULL, *objname = NULL;
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  VEC (bound_probe_s) *probes;
+  struct bound_probe *probe;
+  int i;
+
+  parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
+  make_cleanup (xfree, provider);
+  make_cleanup (xfree, probe_name);
+  make_cleanup (xfree, objname);
+
+  probes = collect_probes (objname, provider, probe_name, NULL /* pops */);
+  if (VEC_empty (bound_probe_s, probes))
+    {
+      ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+      do_cleanups (cleanup);
+      return;
+    }
+
+  /* Disable the selected probes, provided their backends support the
+     notion of enabling a probe.  */
+  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
+    {
+      const struct probe_ops *pops = probe->probe->pops;
+
+      if (pops->disable_probe != NULL)
+	{
+	  pops->disable_probe (probe->probe);
+	  ui_out_message (current_uiout, 0,
+			  _("Probe %s:%s disabled.\n"),
+			  probe->probe->provider, probe->probe->name);
+	}
+      else
+	ui_out_message (current_uiout, 0,
+			_("Probe %s:%s cannot be disabled.\n"),
+			probe->probe->provider, probe->probe->name);
+    }
+
+  do_cleanups (cleanup);
 }
 
 /* See comments in probe.h.  */
@@ -950,4 +1048,27 @@ _initialize_probe (void)
 	   _("\
 Show information about all type of probes."),
 	   info_probes_cmdlist_get ());
+
+  add_cmd ("probes", class_breakpoint, enable_probes_command, _("\
+Enable probes.\n\
+Usage: enable probes [PROVIDER [NAME [OBJECT]]]\n\
+Each argument is a regular expression, used to select probes.\n\
+PROVIDER matches probe provider names.\n\
+NAME matches the probe names.\n\
+OBJECT matches the executable or shared library name.\n\
+If you do not specify any argument then the command will enable\n\
+all defined probes."),
+	   &enablelist);
+
+  add_cmd ("probes", class_breakpoint, disable_probes_command, _("\
+Disable probes.\n\
+Usage: disable probes [PROVIDER [NAME [OBJECT]]]\n\
+Each argument is a regular expression, used to select probes.\n\
+PROVIDER matches probe provider names.\n\
+NAME matches the probe names.\n\
+OBJECT matches the executable or shared library name.\n\
+If you do not specify any argument then the command will disable\n\
+all defined probes."),
+	   &disablelist);
+
 }

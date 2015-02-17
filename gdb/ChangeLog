@@ -1,5 +1,18 @@
 2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* stap-probe.c (stap_probe_ops): Add NULLs in the static
+	stap_probe_ops for `enable_probe' and `disable_probe'.
+	* probe.c (enable_probes_command): New function.
+	(disable_probes_command): Likewise.
+	(_initialize_probe): Define the cli commands `enable probe' and
+	`disable probe'.
+	(parse_probe_linespec): New function.
+	(info_probes_for_ops): Use parse_probe_linespec.
+	* probe.h (probe_ops): New hooks `enable_probe' and
+	`disable_probe'.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* probe.c (compute_probe_arg): Moved from stap-probe.c
 	(compile_probe_arg): Likewise.
 	(probe_funcs): Likewise.

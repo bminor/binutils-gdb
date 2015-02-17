@@ -1684,6 +1684,8 @@ const struct probe_ops stap_probe_ops =
   stap_type_name,
   stap_gen_info_probes_table_header,
   stap_gen_info_probes_table_values,
+  NULL,  /* enable_probe  */
+  NULL   /* disable_probe  */
 };
 
 /* Implementation of the `info probes stap' command.  */
