@@ -1,5 +1,9 @@
 2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
+	* gc.h (Garbage_collection::add_reference): Don't use find.
+
+2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
 	* object.cc (write_local_symbols): avoid std::vector copy.
 
 2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
