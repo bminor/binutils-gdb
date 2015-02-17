@@ -68,6 +68,9 @@ Qbtrace-conf:bts:size
   the btrace record target.
   For the BTS format, it shows the ring buffer size.
 
+* GDB now has support for DTrace USDT (Userland Static Defined
+  Tracing) probes.  The supported targets are x86_64-*-linux-gnu.
+
 *** Changes in GDB 7.9
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.
