@@ -125,6 +125,7 @@ static bfd_boolean register_claimfile_hook = TRUE;
 static bfd_boolean register_allsymbolsread_hook = FALSE;
 static bfd_boolean register_cleanup_hook = FALSE;
 static bfd_boolean dumpresolutions = FALSE;
+static bfd_boolean allsymbolsread_silent = FALSE;
 
 /* The master list of all claimable/claimed files.  */
 static claim_file_t *claimfiles_list = NULL;
@@ -307,6 +308,11 @@ set_register_hook (const char *whichhook, bfd_boolean yesno)
     register_claimfile_hook = yesno;
   else if (!strcmp ("allsymbolsread", whichhook))
     register_allsymbolsread_hook = yesno;
+  else if (!strcmp ("allsymbolsreadsilent", whichhook))
+    {
+      register_allsymbolsread_hook = yesno;
+      allsymbolsread_silent = TRUE;
+    }
   else if (!strcmp ("cleanup", whichhook))
     register_cleanup_hook = yesno;
   else
@@ -573,7 +579,8 @@ onall_symbols_read (void)
   char buffer[30];
   int fd;
   char *filename;
-  TV_MESSAGE (LDPL_INFO, "hook called: all symbols read.");
+  if (! allsymbolsread_silent)
+    TV_MESSAGE (LDPL_INFO, "hook called: all symbols read.");
   for ( ; claimfile; claimfile = claimfile->next)
     {
       enum ld_plugin_status rv;

@@ -1,3 +1,32 @@
+2015-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (read_leb128): Fix test for shift becoming too large.
+
+	* coffgrok.c (do_define): Add check for type size overflow.
+	* srconv.c (walk_tree_sfile): Check that enough sections are
+	available before parsing.
+	(prescan): Likewise.
+
+	PR binutils/17531
+	* dwarf.c (display_debug_aranges): Add check for an excessive
+	ar_length value.
+	(process_cu_tu_index): Check for a row * columns sum being too
+	large.
+
+2015-02-13  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c: Formatting, whitespace.
+	(process_debug_info): Style fix.
+
+2015-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* rl78-decode.opc: Add 'a' attribute to instructions that support
+	[HL+0] addressing.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78): Display the offset in [HL+0]
+	addresses.
+
 2015-02-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531

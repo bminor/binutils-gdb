@@ -5951,6 +5951,10 @@ opd_entry_value (asection *opd_sec,
 	  ppc64_elf_tdata (opd_bfd)->opd.contents = contents;
 	}
 
+      /* PR 17512: file: 64b9dfbb.  */
+      if (offset + 7 >= opd_sec->size || offset + 7 < offset)
+	return (bfd_vma) -1;
+
       val = bfd_get_64 (opd_bfd, contents + offset);
       if (code_sec != NULL)
 	{
@@ -5992,7 +5996,6 @@ opd_entry_value (asection *opd_sec,
 
   /* Go find the opd reloc at the sym address.  */
   lo = relocs;
-  BFD_ASSERT (lo != NULL);
   hi = lo + opd_sec->reloc_count - 1; /* ignore last reloc */
   val = (bfd_vma) -1;
   while (lo < hi)

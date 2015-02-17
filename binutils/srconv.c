@@ -1204,6 +1204,8 @@ walk_tree_sfile (struct coff_section *section, struct coff_sfile *sfile)
 static void
 wr_program_structure (struct coff_ofile *p, struct coff_sfile *sfile)
 {
+  if (p->nsections < 4)
+    return;
   walk_tree_sfile (p->sections + 4, sfile);
 }
 
@@ -1705,6 +1707,9 @@ prescan (struct coff_ofile *otree)
   struct coff_symbol *s;
   struct coff_section *common_section;
 
+  if (otree->nsections < 3)
+    return;
+
   /* Find the common section - always section 3.  */
   common_section = otree->sections + 3;
 
@@ -1715,7 +1720,6 @@ prescan (struct coff_ofile *otree)
       if (s->visible->type == coff_vis_common)
 	{
 	  struct coff_where *w = s->where;
-
 	  /*      s->visible->type = coff_vis_ext_def; leave it as common */
 	  common_section->size = align (common_section->size);
 	  w->offset = common_section->size + common_section->address;

@@ -6438,6 +6438,9 @@ struct bfd
   /* If this is an input for a compiler plug-in library.  */
   ENUM_BITFIELD (bfd_plugin_format) plugin_format : 2;
 
+  /* Set if this is a plugin output file.  */
+  unsigned int lto_output : 1;
+
   /* Set to dummy BFD created when claimed by a compiler plug-in
      library.  */
   bfd *plugin_dummy_bfd;

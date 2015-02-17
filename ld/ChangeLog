@@ -1,3 +1,28 @@
+2015-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17973
+	* testplug2.c (allsymbolsread_silent): New.
+	(set_register_hook): Handle allsymbolsreadsilent.
+	(onall_symbols_read): Skip a message if allsymbolsread_silent is
+	TRUE.
+
+2015-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17973
+	* ldlang.h (struct lang_input_statement_flags): Add lto_output.
+	* ldlang.c (lang_process): Don't set loading_lto_outputs.
+	* ldfile.c (ldfile_try_open_bfd): Transfer entry flags.lto_output
+	to bfd.
+	* plugin.c (add_input_file, add_input_library): Set flags.lto_output.
+
+2015-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for LLVM plugin.
+
+2015-02-13  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Options <--defsym>): Correct cross reference.
+
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lexsup.c (ld_options): Add --[no-]map-whole-files for gold

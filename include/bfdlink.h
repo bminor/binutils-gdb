@@ -301,9 +301,6 @@ struct bfd_link_info
   /* TRUE if the LTO plugin is active.  */
   unsigned int lto_plugin_active: 1;
 
-  /* TRUE if we are loading LTO outputs.  */
-  unsigned int loading_lto_outputs: 1;
-
   /* TRUE if global symbols in discarded sections should be stripped.  */
   unsigned int strip_discarded: 1;
 

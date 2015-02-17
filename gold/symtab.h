@@ -604,10 +604,8 @@ class Symbol
     if (parameters->options().in_dynamic_list(this->name()))
       return true;
 
-    // If the user used -Bsymbolic or provided a --dynamic-list script,
-    // then nothing (else) is preemptible.
-    if (parameters->options().Bsymbolic()
-        || parameters->options().have_dynamic_list())
+    // If the user used -Bsymbolic, then nothing (else) is preemptible.
+    if (parameters->options().Bsymbolic())
       return false;
 
     // If the user used -Bsymbolic-functions, then functions are not

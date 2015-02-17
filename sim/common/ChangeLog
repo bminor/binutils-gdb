@@ -1,3 +1,7 @@
+2015-02-13  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	*  gentmap.c: Include "string.h".
+
 2015-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* aclocal.m4, configure: Regenerate using automake 1.11.1.

@@ -1,3 +1,8 @@
+2015-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17973
+	* bfdlink.h (struct bfd_link_info): Delete loading_lto_outputs.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2.h: Add DW_LANG_Fortran03 and DW_LANG_Fortran08.

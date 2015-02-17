@@ -283,6 +283,9 @@ struct lang_input_statement_flags
 
   /* Set if the file was claimed from an archive.  */
   unsigned int claim_archive : 1;
+
+  /* Set if added by the lto plugin add_input_file callback.  */
+  unsigned int lto_output : 1;
 #endif /* ENABLE_PLUGINS */
 
   /* Head of list of pushed flags.  */

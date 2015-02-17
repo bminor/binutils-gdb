@@ -5062,6 +5062,7 @@ completion_list_add_name (const char *symname,
 	VEC_safe_push (char_ptr, return_val, new);
 	throw_max_completions_reached_error ();
       case MAYBE_ADD_COMPLETION_MAX_REACHED:
+	xfree (new);
 	throw_max_completions_reached_error ();
       case MAYBE_ADD_COMPLETION_DUPLICATE:
 	xfree (new);

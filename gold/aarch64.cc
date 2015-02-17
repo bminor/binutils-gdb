@@ -4860,6 +4860,11 @@ Target_aarch64<size, big_endian>::Scan::local(
       }
       break;
 
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -5248,6 +5253,11 @@ Target_aarch64<size, big_endian>::Scan::global(
       }
       break;
 
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:  // Local executable
@@ -5776,6 +5786,11 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6049,6 +6064,11 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
       // We shall never reach here.
       break;
 
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6061,11 +6081,21 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 	    AArch64_address aligned_tcb_size =
 		align_address(target->tcb_size(),
 			      tls_segment->maximum_alignment());
-	    return aarch64_reloc_funcs::template
-		rela_general<32>(view,
-				 value + aligned_tcb_size,
-				 addend,
-				 reloc_property);
+	    value += aligned_tcb_size;
+	    switch (r_type)
+	      {
+	      case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+	      case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+	      case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+		return aarch64_reloc_funcs::movnz(view, value + addend,
+						  reloc_property);
+	      default:
+		return aarch64_reloc_funcs::template
+		  rela_general<32>(view,
+				   value,
+				   addend,
+				   reloc_property);
+	      }
 	  }
 	else
 	  gold_error(_("%s: unsupported reloc %u "

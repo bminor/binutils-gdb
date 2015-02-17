@@ -860,14 +860,7 @@ throw_max_completions_reached_error (void)
 /* Generate completions all at once.  Returns a vector of unique strings
    allocated with xmalloc.  Returns NULL if there are no completions
    or if max_completions is 0.  If max_completions is non-negative, this will
-   return at most max_completions + 1 strings.
-
-   If max_completions strings are collected, an extra string is added which
-   is a text message to inform the user that the list may be truncated.
-   This extra string serves two purposes:
-   1) Inform the user.
-   2) Prevent readline from being able to find a common prefix to advance
-      point to, since it's working with an incomplete list.
+   return at most max_completions strings.
 
    TEXT is the caller's idea of the "word" we are looking at.
 

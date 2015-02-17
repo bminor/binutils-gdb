@@ -209,12 +209,12 @@ cp_is_in_anonymous (const char *symbol_name)
 }
 
 /* Look up NAME in DOMAIN in BLOCK's static block and in global blocks.
-   If ANONYMOUS_NAMESPACE is nonzero, the symbol in question is located
+   If IS_IN_ANONYMOUS is nonzero, the symbol in question is located
    within an anonymous namespace.  */
 
 static struct symbol *
 cp_basic_lookup_symbol (const char *name, const struct block *block,
-			const domain_enum domain, int anonymous_namespace)
+			const domain_enum domain, int is_in_anonymous)
 {
   struct symbol *sym;
 
@@ -222,7 +222,7 @@ cp_basic_lookup_symbol (const char *name, const struct block *block,
   if (sym != NULL)
     return sym;
 
-  if (anonymous_namespace)
+  if (is_in_anonymous)
     {
       /* Symbols defined in anonymous namespaces have external linkage
 	 but should be treated as local to a single file nonetheless.
@@ -307,7 +307,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
       if (TYPE_NAME (type) == NULL)
 	return NULL;
 
-      /* Look for a symbol named NESTED in this class.  */
+      /* Look for symbol NAME in this class.  */
       sym = cp_lookup_nested_symbol (type, name, block);
     }
 
@@ -317,7 +317,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 /* Search NAME in DOMAIN in all static blocks, and then in all baseclasses.
    BLOCK specifies the context in which to perform the search.
    NAME is guaranteed to have scope (contain "::") and PREFIX_LEN specifies
-   then length the entire scope of NAME (up to, but not including, the last
+   the length of the entire scope of NAME (up to, but not including, the last
    "::".
 
    Note: At least in the case of Fortran, which also uses this code, there
@@ -421,8 +421,7 @@ cp_lookup_symbol_in_namespace (const char *namespace, const char *name,
   return sym;
 }
 
-/* Used for cleanups to reset the "searched" flag incase
-   of an error.  */
+/* Used for cleanups to reset the "searched" flag in case of an error.  */
 
 static void
 reset_directive_searched (void *data)
@@ -577,8 +576,7 @@ cp_lookup_symbol_via_imports (const char *scope,
   return NULL;
 }
 
-/* Helper function that searches an array of symbols for one named
-   NAME.  */
+/* Helper function that searches an array of symbols for one named NAME.  */
 
 static struct symbol *
 search_symbol_list (const char *name, int num,
@@ -938,6 +936,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 
 /* Helper function to look up NESTED_NAME in CONTAINER_TYPE within the
    context of BLOCK.
+   NESTED_NAME may have scope ("::").
    CONTAINER_TYPE needn't have been "check_typedef'd" yet.
    CONCATENATED_NAME is the fully scoped spelling of NESTED_NAME, it is
    passed as an argument so that callers can control how space for it is

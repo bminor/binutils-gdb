@@ -1191,7 +1191,12 @@ aout_get_external_symbols (bfd *abfd)
 
       /* PR 17512: file: 011f5a08.  */
       if (count == 0)
-	return FALSE;
+	{
+	  obj_aout_external_syms (abfd) = NULL;
+	  obj_aout_external_sym_count (abfd) = count;
+	  return TRUE;
+	}
+
 #ifdef USE_MMAP
       if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd),
 				 exec_hdr (abfd)->a_syms,

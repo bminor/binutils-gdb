@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for LLVM plugin.
+
 Changes in 2.25:
 
 * PE binaries now once again contain real timestamps by default.  To disable

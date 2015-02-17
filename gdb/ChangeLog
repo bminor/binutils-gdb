@@ -1,3 +1,43 @@
+2015-02-17  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui.c (tui_enable): Resize windows before anything
+	might show a window.
+
+2015-02-17  Max Ostapenko  <m.ostapenko@partner.samsung.com>
+
+	PR gdb/17984
+	* aarch64-linux-nat.c: Don't include features/aarch64.c anymore.
+	(aarch64_linux_read_description): Remove initialize_tdesc_aarch64
+	call.
+	* aarch64-tdep.h (tdesc_aarch64): Declare.
+
+2015-02-12  Mark Wielaard  <mjw@redhat.com>
+
+	* contrib/ari/gdb_ari.sh: Remove checks for "true" and "false".
+
+2015-02-13  Doug Evans  <dje@google.com>
+
+	* cp-namespace.c (cp_basic_lookup_symbol): Rename parameter
+	anonymous_namespace to is_in_anonymous for consistency with the rest
+	of the file.
+	(cp_lookup_bare_symbol): Fix typo in comment.
+	(cp_search_static_and_baseclasses): Ditto.
+	(search_symbol_list): Use vertical space in comment better.
+	(reset_directive_searched): Ditto. Fix typo.
+	(cp_lookup_nested_symbol_1): Clarify contents of NESTED_NAME parameter.
+
+2015-02-13  Yao Qi  <yao.qi@arm.com>
+
+	* MAINTAINERS: Update my email address.
+
+2015-02-12  Doug Evans  <dje@google.com>
+
+	* completer.c (completion_list_add_name): Fix memory leak.
+
+2015-02-12  Doug Evans  <dje@google.com>
+
+	* completer.c (complete_line): Remove incorrect comment.
+
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* python/py-framefilter.c (py_print_single_arg, enumerate_locals)

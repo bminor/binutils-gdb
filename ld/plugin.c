@@ -772,10 +772,14 @@ get_symbols_v2 (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 static enum ld_plugin_status
 add_input_file (const char *pathname)
 {
+  lang_input_statement_type *is;
+
   ASSERT (called_plugin);
-  if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_file_enum,
-			    NULL))
+  is = lang_add_input_file (xstrdup (pathname), lang_input_file_is_file_enum,
+			    NULL);
+  if (!is)
     return LDPS_ERR;
+  is->flags.lto_output = 1;
   return LDPS_OK;
 }
 
@@ -783,10 +787,14 @@ add_input_file (const char *pathname)
 static enum ld_plugin_status
 add_input_library (const char *pathname)
 {
+  lang_input_statement_type *is;
+
   ASSERT (called_plugin);
-  if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_l_enum,
-			    NULL))
+  is = lang_add_input_file (xstrdup (pathname), lang_input_file_is_l_enum,
+			    NULL);
+  if (!is)
     return LDPS_ERR;
+  is->flags.lto_output = 1;
   return LDPS_OK;
 }
 

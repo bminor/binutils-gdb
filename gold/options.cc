@@ -1200,13 +1200,6 @@ General_options::finalize()
   // in the path, as appropriate.
   this->add_sysroot();
 
-  // --dynamic-list overrides -Bsymbolic and -Bsymbolic-functions.
-  if (this->have_dynamic_list())
-    {
-      this->set_Bsymbolic(false);
-      this->set_Bsymbolic_functions(false);
-    }
-
   // Now that we've normalized the options, check for contradictory ones.
   if (this->shared() && this->is_static())
     gold_fatal(_("-shared and -static are incompatible"));

@@ -1,3 +1,68 @@
+2015-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17975
+	* elflink.c (elf_link_output_extsym): Only check filesym_count
+	when outputting a NULL FILE symbol.  Set second_pass_sym to
+	h->forced_local && !h->root.linker_def.
+
+2015-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_always_size_sections): Set root.linker_def
+	on _TLS_MODULE_BASE_.
+	* elf64-x86-64.c (elf_x86_64_always_size_sections): Likewise.
+
+2015-02-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2.c (read_rangelist): Correct buffer overflow check
+	Whitespace throughout file.
+
+2015-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17973
+	* bfd.c (struct bfd): Add lto_output.
+	* linker.c (_bfd_handle_already_linked): Explicitly test for
+	objects added by the lto plugin.
+	* opncls.c (_bfd_new_bfd_contained_in): Copy lto_output and
+	no_export flags from archive.
+	* archive.c (open_nested_file): New function, setting lto_output
+	and no_export, extracted from..
+	(find_nested_archive): ..here.  Flip params.  Rename from
+	_bfd_find_nested_archive.
+	(_bfd_get_elt_at_filepos): Correct var typo.  Use open_nested_file.
+	(_bfd_look_for_bfd_in_cache): Copy no_export.
+	* elflink.c (elf_link_add_object_symbols): Remove now unnecessary
+	my_archive->no_export test.
+	(elf_link_input_bfd): Drop existing lto_output STT_FILE syms.
+	Don't use the file name when adding lto_output STT_FILE sym.
+	* bfd-in2.h: Regenerate.
+
+2015-02-13  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
+	* elf64-ppc.c (opd_entry_value): Tighten offset check.  Remove
+	now redundant assert.
+
+2015-02-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (read_1_byte, read_1_signed_byte, read_2_bytes)
+	(read_4_bytes, read_8_bytes, read_n_bytes, read_string)
+	(read_indirect_string, read_alt_indirect_string)
+	(read_alt_indirect_ref, read_address, read_abbrevs)
+	(read_attribute_value, read_attribute, decode_line_info)
+	(find_abstract_instance_name, read_rangelist)
+	(scan_unit_for_symbols, parse_comp_unit)
+	(_bfd_dwarf2_find_nearest_line): Harden DWARF reading code.  Pass
+	end pointers to reading functions and check for offsets taking
+	pointers out of range.  Replace calls to read_*_leb128 with calls
+	to safe_read_leb128.
+
+	(* elf64-ppc.c (opd_entry_value): Add a check for an overlarge
+	offset.
+	* syms.c (_bfd_stab_section_find_nearest_line): Add checks for
+	computed file_name address being before the start of the string
+	table.
+
 2015-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17878

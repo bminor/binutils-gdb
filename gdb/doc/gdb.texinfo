@@ -36812,7 +36812,7 @@ the ones in effect during the trace run; even a small discrepancy
 could cause @samp{tdump} not to work, or a particular trace frame not
 be found.
 
-@item QTDV:@var{n}:@var{value}
+@item QTDV:@var{n}:@var{value}:@var{builtin}:@var{name}
 @cindex define trace state variable, remote request
 @cindex @samp{QTDV} packet
 Create a new trace state variable, number @var{n}, with an initial
@@ -36820,7 +36820,12 @@ value of @var{value}, which is a 64-bit signed integer.  Both @var{n}
 and @var{value} are encoded as hexadecimal values. @value{GDBN} has
 the option of not using this packet for initial values of zero; the
 target should simply create the trace state variables as they are
-mentioned in expressions.
+mentioned in expressions.  The value @var{builtin} should be 1 (one)
+if the trace state variable is builtin and 0 (zero) if it is not builtin.
+@value{GDBN} only sets @var{builtin} to 1 if a previous @samp{qTfV} or
+@samp{qTsV} packet had it set.  The contents of @var{name} is the
+hex-encoded name (without the leading @samp{$}) of the trace state
+variable.
 
 @item QTFrame:@var{n}
 @cindex @samp{QTFrame} packet

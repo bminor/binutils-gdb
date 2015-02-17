@@ -1,3 +1,8 @@
+2015-02-12  David Taylor  <dtaylor@emc.com>
+
+	* gdb.texinfo (Tracepoint Packets): Document the builtin and name
+	fields of the QTDV packet.
+
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Branch Trace Configuration Format): Add size.

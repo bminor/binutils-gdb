@@ -37,8 +37,6 @@
 
 #include "gregset.h"
 
-#include "features/aarch64.c"
-
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
 
@@ -830,7 +828,6 @@ aarch64_linux_child_post_startup_inferior (struct target_ops *self,
 static const struct target_desc *
 aarch64_linux_read_description (struct target_ops *ops)
 {
-  initialize_tdesc_aarch64 ();
   return tdesc_aarch64;
 }
 

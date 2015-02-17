@@ -1,3 +1,9 @@
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf.h (enum DW_LANG): Add DW_LANG_C_plus_plus_11,
+	DW_LANG_C11, DW_LANG_C_plus_plus_14, DW_LANG_Fortran03 and
+	DW_LANG_Fortran08 from ../include/dwarf2.h.
+
 2015-01-22  Han Shen  <shenhan@google.com>
 
 	* arm.h (R_ARM_IRELATIVE): New dynamic relocation.
