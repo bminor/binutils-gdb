@@ -1,3 +1,8 @@
+2015-02-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_getc): Don't call key_is_command_char.
+	(key_is_command_char): Delete.
+
 2015-02-17  Pedro Alves  <palves@redhat.com>
 
 	* tui/tui.c (tui_enable): Resize windows before anything

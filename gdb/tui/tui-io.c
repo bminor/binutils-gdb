@@ -63,17 +63,6 @@ key_is_backspace (int ch)
   return (ch == 8);
 }
 
-int
-key_is_command_char (int ch)
-{
-  return ((ch == KEY_NPAGE) || (ch == KEY_PPAGE)
-	  || (ch == KEY_LEFT) || (ch == KEY_RIGHT)
-	  || (ch == KEY_UP) || (ch == KEY_DOWN)
-	  || (ch == KEY_SF) || (ch == KEY_SR)
-	  || (ch == (int)'\f') 
-	  || key_is_start_sequence (ch));
-}
-
 /* Use definition from readline 4.3.  */
 #undef CTRL_CHAR
 #define CTRL_CHAR(c) \
@@ -640,10 +629,8 @@ tui_getc (FILE *fp)
         }
     }
   
-  if (key_is_command_char (ch))
-    {				/* Handle prev/next/up/down here.  */
-      ch = tui_dispatch_ctrl_char (ch);
-    }
+  /* Handle prev/next/up/down here.  */
+  ch = tui_dispatch_ctrl_char (ch);
   
   if (ch == '\n' || ch == '\r' || ch == '\f')
     TUI_CMD_WIN->detail.command_info.curch = 0;
