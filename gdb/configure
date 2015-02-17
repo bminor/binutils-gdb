@@ -13068,7 +13068,7 @@ $as_echo "$gdb_cv_var_elf" >&6; }
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS
 if test $gdb_cv_var_elf = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o"
+  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o"
 
 $as_echo "#define HAVE_ELF 1" >>confdefs.h
 

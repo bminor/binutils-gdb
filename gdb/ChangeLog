@@ -1,3 +1,50 @@
+2015-01-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* breakpoint.c (BREAK_ARGS_HELP): Help string updated to mention
+	the -probe-dtrace new vpossible value for PROBE_MODIFIER.
+	* configure.ac (CONFIG_OBS): dtrace-probe.o added if BFD can
+	handle ELF files.
+	* Makefile.in (SFILES): dtrace-probe.c added.
+	* configure: Regenerate.
+	* dtrace-probe.c: New file.
+	(SHT_SUNW_dof): New constant.
+	(dtrace_probe_type): New enum.
+	(dtrace_probe_arg): New struct.
+	(dtrace_probe_arg_s): New typedef.
+	(struct dtrace_probe_enabler): New struct.
+	(dtrace_probe_enabler_s): New typedef.
+	(dtrace_probe): New struct.
+	(dtrace_probe_is_linespec): New function.
+	(dtrace_dof_sect_type): New enum.
+	(dtrace_dof_dofh_ident): Likewise.
+	(dtrace_dof_encoding): Likewise.
+	(DTRACE_DOF_ENCODE_LSB): Likewise.
+	(DTRACE_DOF_ENCODE_MSB): Likewise.
+	(dtrace_dof_hdr): New struct.
+	(dtrace_dof_sect): Likewise.
+	(dtrace_dof_provider): Likewise.
+	(dtrace_dof_probe): Likewise.
+	(DOF_UINT): New macro.
+	(DTRACE_DOF_PTR): Likewise.
+	(DTRACE_DOF_SECT): Likewise.
+	(dtrace_process_dof_probe): New function.
+	(dtrace_process_dof): Likewise.
+	(dtrace_build_arg_exprs): Likewise.
+	(dtrace_get_arg): Likewise.
+	(dtrace_get_probes): Likewise.
+	(dtrace_get_probe_argument_count): Likewise.
+	(dtrace_can_evaluate_probe_arguments): Likewise.
+	(dtrace_evaluate_probe_argument): Likewise.
+	(dtrace_compile_to_ax): Likewise.
+	(dtrace_probe_destroy): Likewise.
+	(dtrace_gen_info_probes_table_header): Likewise.
+	(dtrace_gen_info_probes_table_values): Likewise.
+	(dtrace_probe_is_enabled): Likewise.
+	(dtrace_probe_ops): New variable.
+	(info_probes_dtrace_command): New function.
+	(_initialize_dtrace_probe): Likewise.
+	(dtrace_type_name): Likewise.
+
 2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gdbarch.sh (dtrace_parse_probe_argument): New.
