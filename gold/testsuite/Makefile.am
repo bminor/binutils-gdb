@@ -1518,7 +1518,7 @@ dynamic_list_lib1.o: dynamic_list_lib1.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
 dynamic_list_lib2.so: gcctestdir/ld dynamic_list_lib2.o $(srcdir)/dynamic_list_2.t
-	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--dynamic-list,$(srcdir)/dynamic_list_2.t dynamic_list_lib2.o
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-Bsymbolic-functions -Wl,--dynamic-list,$(srcdir)/dynamic_list_2.t dynamic_list_lib2.o
 dynamic_list_lib2.o: dynamic_list_lib2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 

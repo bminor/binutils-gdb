@@ -1,5 +1,19 @@
 2015-02-16  Cary Coutant  <ccoutant@google.com>
 
+	PR gold/13577
+	PR gold/16992
+	* layout.cc (Layout::finish_dynamic_section): Don't set DT_SYMBOLIC or
+	DF_SYMBOLIC if --dynamic-list option is used.
+	* options.cc (General_options::finalize): --dynamic-list is not
+	mutually exclusive with -Bsymbolic.
+	* symtab.h (Symbol::is_preemptible): Don't exclude dynamic symbols not
+	listed in --dynamic-list.
+	* testsuite/Makefile.am (dynamic_list_lib2.so): Add
+	-Bsymbolic-functions.
+	* testsuite/Makefile.in: Regenerate.
+
+2015-02-16  Cary Coutant  <ccoutant@google.com>
+
 	PR gold/17971
 	* incremental.cc: Remove redundant include of "output.h".
 

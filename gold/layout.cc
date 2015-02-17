@@ -4873,7 +4873,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags |= elfcpp::DF_STATIC_TLS;
   if (parameters->options().origin())
     flags |= elfcpp::DF_ORIGIN;
-  if (parameters->options().Bsymbolic())
+  if (parameters->options().Bsymbolic()
+      && !parameters->options().have_dynamic_list())
     {
       flags |= elfcpp::DF_SYMBOLIC;
       // Add DT_SYMBOLIC for compatibility with older loaders.
