@@ -1,3 +1,19 @@
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* amd64-linux-tdep.c: Include "parser-defs.h" and "user-regs.h".
+	(amd64_dtrace_parse_probe_argument): New function.
+	(amd64_dtrace_probe_is_enabled): Likewise.
+	(amd64_dtrace_enable_probe): Likewise.
+	(amd64_dtrace_disable_probe): Likewise.
+	(amd64_linux_init_abi): Register the
+	`gdbarch_dtrace_probe_argument', `gdbarch_dtrace_enable_probe',
+	`gdbarch_dtrace_disable_probe' and
+	`gdbarch_dtrace_probe_is_enabled' hooks.
+	(amd64_dtrace_disabled_probe_sequence_1): New constant.
+	(amd64_dtrace_disabled_probe_sequence_2): Likewise.
+	(amd64_dtrace_enable_probe_sequence): Likewise.
+	(amd64_dtrace_disable_probe_sequence): Likewise.
+
 2015-01-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* breakpoint.c (BREAK_ARGS_HELP): Help string updated to mention
