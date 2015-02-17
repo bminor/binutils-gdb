@@ -266,6 +266,22 @@ record_btrace_close (struct target_ops *self)
     btrace_teardown (tp);
 }
 
+/* The to_async method of target record-btrace.  */
+
+static void
+record_btrace_async (struct target_ops *ops,
+		     void (*callback) (enum inferior_event_type event_type,
+				       void *context),
+		     void *context)
+{
+  if (callback != NULL)
+    mark_async_event_handler (record_btrace_async_inferior_event_handler);
+  else
+    clear_async_event_handler (record_btrace_async_inferior_event_handler);
+
+  ops->beneath->to_async (ops->beneath, callback, context);
+}
+
 /* The to_info_record method of target record-btrace.  */
 
 static void
@@ -1940,6 +1956,7 @@ init_record_btrace_ops (void)
   ops->to_doc = "Collect control-flow trace and provide the execution history.";
   ops->to_open = record_btrace_open;
   ops->to_close = record_btrace_close;
+  ops->to_async = record_btrace_async;
   ops->to_detach = record_detach;
   ops->to_disconnect = record_disconnect;
   ops->to_mourn_inferior = record_mourn_inferior;

@@ -11691,9 +11691,17 @@ remote_async (struct target_ops *ops,
       serial_async (rs->remote_desc, remote_async_serial_handler, rs);
       rs->async_client_callback = callback;
       rs->async_client_context = context;
+
+      /* If there are pending events in the stop reply queue tell the
+	 event loop to process them.  */
+      if (!QUEUE_is_empty (stop_reply_p, stop_reply_queue))
+	mark_async_event_handler (remote_async_inferior_event_token);
     }
   else
-    serial_async (rs->remote_desc, NULL, NULL);
+    {
+      serial_async (rs->remote_desc, NULL, NULL);
+      clear_async_event_handler (remote_async_inferior_event_token);
+    }
 }
 
 static void
