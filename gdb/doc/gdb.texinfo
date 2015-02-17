@@ -4967,34 +4967,50 @@ that can no longer be recreated.
 @subsection Static Probe Points
 
 @cindex static probe point, SystemTap
+@cindex static probe point, DTrace
 @value{GDBN} supports @dfn{SDT} probes in the code.  @acronym{SDT} stands
 for Statically Defined Tracing, and the probes are designed to have a tiny
-runtime code and data footprint, and no dynamic relocations.  They are
-usable from assembly, C and C@t{++} languages.  See
-@uref{http://sourceware.org/systemtap/wiki/UserSpaceProbeImplementation}
-for a good reference on how the @acronym{SDT} probes are implemented.
+runtime code and data footprint, and no dynamic relocations.
 
-Currently, @code{SystemTap} (@uref{http://sourceware.org/systemtap/})
-@acronym{SDT} probes are supported on ELF-compatible systems.  See
+Currently, the following types of probes are supported on
+ELF-compatible systems:
+
+@itemize @bullet
+
+@item @code{SystemTap} (@uref{http://sourceware.org/systemtap/})
+@acronym{SDT} probes@footnote{See
 @uref{http://sourceware.org/systemtap/wiki/AddingUserSpaceProbingToApps}
-for more information on how to add @code{SystemTap} @acronym{SDT} probes
-in your applications.
+for more information on how to add @code{SystemTap} @acronym{SDT}
+probes in your applications.}.  @code{SystemTap} probes are usable
+from assembly, C and C@t{++} languages@footnote{See
+@uref{http://sourceware.org/systemtap/wiki/UserSpaceProbeImplementation}
+for a good reference on how the @acronym{SDT} probes are implemented.}.  
+
+@item @code{DTrace} (@uref{http://oss.oracle.com/projects/DTrace})
+@acronym{USDT} probes.  @code{DTrace} probes are usable from C and
+C@t{++} languages.
+@end itemize
 
 @cindex semaphores on static probe points
-Some probes have an associated semaphore variable; for instance, this
-happens automatically if you defined your probe using a DTrace-style
-@file{.d} file.  If your probe has a semaphore, @value{GDBN} will
-automatically enable it when you specify a breakpoint using the
-@samp{-probe-stap} notation.  But, if you put a breakpoint at a probe's
-location by some other method (e.g., @code{break file:line}), then
-@value{GDBN} will not automatically set the semaphore.
+Some @code{SystemTap} probes have an associated semaphore variable;
+for instance, this happens automatically if you defined your probe
+using a DTrace-style @file{.d} file.  If your probe has a semaphore,
+@value{GDBN} will automatically enable it when you specify a
+breakpoint using the @samp{-probe-stap} notation.  But, if you put a
+breakpoint at a probe's location by some other method (e.g.,
+@code{break file:line}), then @value{GDBN} will not automatically set
+the semaphore.  @code{DTrace} probes do not support semaphores.
 
 You can examine the available static static probes using @code{info
 probes}, with optional arguments:
 
 @table @code
 @kindex info probes
-@item info probes stap @r{[}@var{provider} @r{[}@var{name} @r{[}@var{objfile}@r{]}@r{]}@r{]}
+@item info probes @r{[}@var{type}@r{]} @r{[}@var{provider} @r{[}@var{name} @r{[}@var{objfile}@r{]}@r{]}@r{]}
+If given, @var{type} is either @code{stap} for listing
+@code{SystemTap} probes or @code{dtrace} for listing @code{DTrace}
+probes.  If omitted all probes are listed regardless of their types.
+
 If given, @var{provider} is a regular expression used to match against provider
 names when selecting which probes to list.  If omitted, probes by all
 probes from all providers are listed.
@@ -5014,7 +5030,8 @@ List the available static probes, from all types.
 @cindex enabling and disabling probes
 Some probe points can be enabled and/or disabled.  The effect of
 enabling or disabling a probe depends on the type of probe being
-handled.  @code{SystemTap} probes cannot be disabled.
+handled.  Some @code{DTrace} probes can be enabled or
+disabled, but @code{SystemTap} probes cannot be disabled.
 
 You can enable (or disable) one or more probes using the following
 commands, with optional arguments:
@@ -5045,8 +5062,11 @@ A probe may specify up to twelve arguments.  These are available at the
 point at which the probe is defined---that is, when the current PC is
 at the probe's location.  The arguments are available using the
 convenience variables (@pxref{Convenience Vars})
-@code{$_probe_arg0}@dots{}@code{$_probe_arg11}.  Each probe argument is
-an integer of the appropriate size; types are not preserved.  The
+@code{$_probe_arg0}@dots{}@code{$_probe_arg11}.  In @code{SystemTap}
+probes each probe argument is an integer of the appropriate size;
+types are not preserved.  In @code{DTrace} probes types are preserved
+provided that they are recognized as such by @value{GDBN}; otherwise
+the value of the probe argument will be a long integer.  The
 convenience variable @code{$_probe_argc} holds the number of arguments
 at the current probe point.
 
