@@ -1,3 +1,7 @@
+2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* merge.cc (get_output_offset): Use upper_bound instead of lower_bound.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* gdb-index.cc (Gdb_index_info_reader::visit_top_die): Recognize

@@ -162,15 +162,12 @@ Object_merge_map::get_output_offset(const Merge_map* merge_map,
   Input_merge_entry entry;
   entry.input_offset = input_offset;
   std::vector<Input_merge_entry>::const_iterator p =
-    std::lower_bound(map->entries.begin(), map->entries.end(),
+    std::upper_bound(map->entries.begin(), map->entries.end(),
 		     entry, Input_merge_compare());
-  if (p == map->entries.end() || p->input_offset > input_offset)
-    {
-      if (p == map->entries.begin())
-	return false;
-      --p;
-      gold_assert(p->input_offset <= input_offset);
-    }
+  if (p == map->entries.begin())
+    return false;
+  --p;
+  gold_assert(p->input_offset <= input_offset);
 
   if (input_offset - p->input_offset
       >= static_cast<section_offset_type>(p->length))
