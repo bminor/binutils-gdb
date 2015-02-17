@@ -1,5 +1,16 @@
 2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* lib/dtrace.exp: New file.
+	* gdb.base/dtrace-probe.exp: Likewise.
+	* gdb.base/dtrace-probe.d: Likewise.
+	* gdb.base/dtrace-probe.c: Likewise.
+	* lib/pdtrace.in: Likewise.
+	* configure.ac: Output variables with the transformed names of
+	the strip, readelf, as and nm tools.  AC_SUBST lib/pdtrace.in.
+	* configure: Regenerated.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* gdb.base/stap-probe.exp (stap_test): Remove "SystemTap" from
 	expected message when trying to access $_probe_* convenience
 	variables while not on a probe.

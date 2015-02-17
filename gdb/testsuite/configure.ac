@@ -96,6 +96,32 @@ if test "${build}" = "${host}" -a "${host}" = "${target}"; then
 fi
 AC_SUBST(EXTRA_RULES)
 
+# Transform the name of some programs and generate the lib/pdtrace
+# test tool.
+AC_ARG_PROGRAM
+transform=`echo "$program_transform_name" | sed -e 's/[\\$][\\$]/\\$/g'`
+STRIP_TRANSFORM_NAME=`echo strip | sed -e "$transform"`
+if test "x$STRIP_TRANSFORM_NAME" = x; then
+  STRIP_TRANSFORM_NAME=strip
+fi
+AC_SUBST(STRIP_TRANSFORM_NAME)
+READELF_TRANSFORM_NAME=`echo readelf | sed -e "$transform"`
+if test "x$READELF_TRANSFORM_NAME" = x; then
+  READELF_TRANSFORM_NAME=readelf
+fi
+AC_SUBST(READELF_TRANSFORM_NAME)
+GAS_TRANSFORM_NAME=`echo as | sed -e "$transform"`
+if test "x$GAS_TRANSFORM_NAME" = x; then
+  GAS_TRANSFORM_NAME=as
+fi
+AC_SUBST(GAS_TRANSFORM_NAME)
+NM_TRANSFORM_NAME=`echo nm | sed -e "$transform"`
+if test "x$NM_TRANSFORM_NAME" = x; then
+  NM_TRANSFORM_NAME=nm
+fi
+AC_SUBST(NM_TRANSFORM_NAME)
+AC_CONFIG_FILES([lib/pdtrace], [chmod +x lib/pdtrace])
+
 AC_OUTPUT([Makefile \
   gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.btrace/Makefile \
