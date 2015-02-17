@@ -77,7 +77,6 @@ typedef void (timer_handler_func) (gdb_client_data);
 
 /* Exported functions from event-loop.c */
 
-extern void initialize_event_loop (void);
 extern void start_event_loop (void);
 extern int gdb_do_one_event (void);
 extern void delete_file_handler (int fd);
