@@ -59,6 +59,7 @@ struct syscall;
 struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
+struct parser_state;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
 struct mem_range;
@@ -1246,6 +1247,41 @@ extern int gdbarch_stap_parse_special_token_p (struct gdbarch *gdbarch);
 typedef int (gdbarch_stap_parse_special_token_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p);
 extern int gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p);
 extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbarch_stap_parse_special_token_ftype *stap_parse_special_token);
+
+/* DTrace related functions.
+   The expression to compute the NARTGth+1 argument to a DTrace USDT probe.
+   NARG must be >= 0. */
+
+extern int gdbarch_dtrace_parse_probe_argument_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_dtrace_parse_probe_argument_ftype) (struct gdbarch *gdbarch, struct parser_state *pstate, int narg);
+extern void gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, struct parser_state *pstate, int narg);
+extern void set_gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, gdbarch_dtrace_parse_probe_argument_ftype *dtrace_parse_probe_argument);
+
+/* True if the given ADDR does not contain the instruction sequence
+   corresponding to a disabled DTrace is-enabled probe. */
+
+extern int gdbarch_dtrace_probe_is_enabled_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_dtrace_probe_is_enabled_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_dtrace_probe_is_enabled (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_dtrace_probe_is_enabled (struct gdbarch *gdbarch, gdbarch_dtrace_probe_is_enabled_ftype *dtrace_probe_is_enabled);
+
+/* Enable a DTrace is-enabled probe at ADDR. */
+
+extern int gdbarch_dtrace_enable_probe_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_dtrace_enable_probe_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void gdbarch_dtrace_enable_probe (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_dtrace_enable_probe (struct gdbarch *gdbarch, gdbarch_dtrace_enable_probe_ftype *dtrace_enable_probe);
+
+/* Disable a DTrace is-enabled probe at ADDR. */
+
+extern int gdbarch_dtrace_disable_probe_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_dtrace_disable_probe_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void gdbarch_dtrace_disable_probe (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_dtrace_disable_probe (struct gdbarch *gdbarch, gdbarch_dtrace_disable_probe_ftype *dtrace_disable_probe);
 
 /* True if the list of shared libraries is one and only for all
    processes, as opposed to a list of shared libraries per inferior.

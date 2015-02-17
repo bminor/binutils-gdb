@@ -1,5 +1,14 @@
 2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* gdbarch.sh (dtrace_parse_probe_argument): New.
+	(dtrace_probe_is_enabled): Likewise.
+	(dtrace_enable_probe): Likewise.
+	(dtrace_disable_probe): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* stap-probe.c (stap_probe_ops): Add NULLs in the static
 	stap_probe_ops for `enable_probe' and `disable_probe'.
 	* probe.c (enable_probes_command): New function.
