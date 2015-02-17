@@ -410,6 +410,31 @@ gen_ui_out_table_header_info (VEC (bound_probe_s) *probes,
   do_cleanups (c);
 }
 
+/* Helper function to print not-applicable strings for all the extra
+   columns defined in a probe_ops.  */
+
+static void
+print_ui_out_not_applicables (const struct probe_ops *pops)
+{
+  struct cleanup *c;
+  VEC (info_probe_column_s) *headings = NULL;
+  info_probe_column_s *column;
+  int ix;
+
+  if (pops->gen_info_probes_table_header == NULL)
+    return;
+
+  c = make_cleanup (VEC_cleanup (info_probe_column_s), &headings);
+  pops->gen_info_probes_table_header (&headings);
+
+  for (ix = 0;
+       VEC_iterate (info_probe_column_s, headings, ix, column);
+       ++ix)
+    ui_out_field_string (current_uiout, column->field_name, _("n/a"));
+
+  do_cleanups (c);
+}
+
 /* Helper function to print extra information about a probe and an objfile
    represented by PROBE.  */
 
@@ -482,6 +507,23 @@ get_number_extra_fields (const struct probe_ops *pops)
   return n;
 }
 
+/* Helper function that returns 1 if there is a probe in PROBES
+   featuring the given POPS.  It returns 0 otherwise.  */
+
+static int
+exists_probe_with_pops (VEC (bound_probe_s) *probes,
+			const struct probe_ops *pops)
+{
+  struct bound_probe *probe;
+  int ix;
+
+  for (ix = 0; VEC_iterate (bound_probe_s, probes, ix, probe); ++ix)
+    if (probe->probe->pops == pops)
+      return 1;
+
+  return 0;
+}
+
 /* See comment in probe.h.  */
 
 void
@@ -497,6 +539,7 @@ info_probes_for_ops (const char *arg, int from_tty,
   size_t size_name = strlen ("Name");
   size_t size_objname = strlen ("Object");
   size_t size_provider = strlen ("Provider");
+  size_t size_type = strlen ("Type");
   struct bound_probe *probe;
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -517,6 +560,9 @@ info_probes_for_ops (const char *arg, int from_tty,
 	}
     }
 
+  probes = collect_probes (objname, provider, probe_name, pops);
+  make_cleanup (VEC_cleanup (probe_p), &probes);
+
   if (pops == NULL)
     {
       const struct probe_ops *po;
@@ -529,18 +575,18 @@ info_probes_for_ops (const char *arg, int from_tty,
 
 	 To do that, we iterate over all probe_ops, querying each one about
 	 its extra fields, and incrementing `ui_out_extra_fields' to reflect
-	 that number.  */
+	 that number.  But note that we ignore the probe_ops for which no probes
+	 are defined with the given search criteria.  */
 
       for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
-	ui_out_extra_fields += get_number_extra_fields (po);
+	if (exists_probe_with_pops (probes, po))
+	  ui_out_extra_fields += get_number_extra_fields (po);
     }
   else
     ui_out_extra_fields = get_number_extra_fields (pops);
 
-  probes = collect_probes (objname, provider, probe_name, pops);
-  make_cleanup (VEC_cleanup (probe_p), &probes);
   make_cleanup_ui_out_table_begin_end (current_uiout,
-				       4 + ui_out_extra_fields,
+				       5 + ui_out_extra_fields,
 				       VEC_length (bound_probe_s, probes),
 				       "StaticProbes");
 
@@ -552,15 +598,19 @@ info_probes_for_ops (const char *arg, int from_tty,
   /* What's the size of an address in our architecture?  */
   size_addr = gdbarch_addr_bit (gdbarch) == 64 ? 18 : 10;
 
-  /* Determining the maximum size of each field (`provider', `name' and
-     `objname').  */
+  /* Determining the maximum size of each field (`type', `provider',
+     `name' and `objname').  */
   for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
     {
+      const char *probe_type = probe->probe->pops->type_name (probe->probe);
+
+      size_type = max (strlen (probe_type), size_type);
       size_name = max (strlen (probe->probe->name), size_name);
       size_provider = max (strlen (probe->probe->provider), size_provider);
       size_objname = max (strlen (objfile_name (probe->objfile)), size_objname);
     }
 
+  ui_out_table_header (current_uiout, size_type, ui_left, "type", _("Type"));
   ui_out_table_header (current_uiout, size_provider, ui_left, "provider",
 		       _("Provider"));
   ui_out_table_header (current_uiout, size_name, ui_left, "name", _("Name"));
@@ -571,10 +621,12 @@ info_probes_for_ops (const char *arg, int from_tty,
       const struct probe_ops *po;
       int ix;
 
-      /* We have to generate the table header for each new probe type that we
-	 will print.  */
+      /* We have to generate the table header for each new probe type
+	 that we will print.  Note that this excludes probe types not
+	 having any defined probe with the search criteria.  */
       for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
-	gen_ui_out_table_header_info (probes, po);
+	if (exists_probe_with_pops (probes, po))
+	  gen_ui_out_table_header_info (probes, po);
     }
   else
     gen_ui_out_table_header_info (probes, pops);
@@ -586,9 +638,11 @@ info_probes_for_ops (const char *arg, int from_tty,
   for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
     {
       struct cleanup *inner;
+      const char *probe_type = probe->probe->pops->type_name (probe->probe);
 
       inner = make_cleanup_ui_out_tuple_begin_end (current_uiout, "probe");
 
+      ui_out_field_string (current_uiout, "type",probe_type);
       ui_out_field_string (current_uiout, "provider", probe->probe->provider);
       ui_out_field_string (current_uiout, "name", probe->probe->name);
       ui_out_field_core_addr (current_uiout, "addr",
@@ -604,6 +658,8 @@ info_probes_for_ops (const char *arg, int from_tty,
 	       ++ix)
 	    if (probe->probe->pops == po)
 	      print_ui_out_info (probe->probe);
+	    else if (exists_probe_with_pops (probes, po))
+	      print_ui_out_not_applicables (po);
 	}
       else
 	print_ui_out_info (probe->probe);

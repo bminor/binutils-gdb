@@ -1703,6 +1703,15 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
     }
 }
 
+/* Implementation of the type_name method.  */
+
+static const char *
+stap_type_name (struct probe *probe)
+{
+  gdb_assert (probe->pops == &stap_probe_ops);
+  return "stap";
+}
+
 static int
 stap_probe_is_linespec (const char **linespecp)
 {
@@ -1754,6 +1763,7 @@ const struct probe_ops stap_probe_ops =
   stap_set_semaphore,
   stap_clear_semaphore,
   stap_probe_destroy,
+  stap_type_name,
   stap_gen_info_probes_table_header,
   stap_gen_info_probes_table_values,
 };

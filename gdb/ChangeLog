@@ -1,3 +1,17 @@
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* probe.c (print_ui_out_not_applicables): New function.
+	(exists_probe_with_pops): Likewise.
+	(info_probes_for_ops): Do not include column headers for probe
+	types for which no probe has been actually found on any object.
+	Also invoke `print_ui_out_not_applicables' in order to match the
+	column rows with the header when probes of several types are
+	listed.
+	Print the "Type" column.
+	* probe.h (probe_ops): Added a new probe operation `type_name'.
+	* stap-probe.c (stap_probe_ops): Add `stap_type_name'.
+	(stap_type_name): New function.
+
 2015-02-17  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-io.c (tui_getc): Don't call key_is_command_char.

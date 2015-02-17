@@ -113,6 +113,12 @@ struct probe_ops
 
     void (*destroy) (struct probe *probe);
 
+    /* Return a pointer to a name identifying the probe type.  This is
+       the string that will be displayed in the "Type" column of the
+       `info probes' command.  */
+
+    const char *(*type_name) (struct probe *probe);
+
     /* Function responsible for providing the extra fields that will be
        printed in the `info probes' command.  It should fill HEADS
        with whatever extra fields it needs.  If the backend doesn't need
