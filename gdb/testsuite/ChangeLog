@@ -1,3 +1,9 @@
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.base/stap-probe.exp (stap_test): Remove "SystemTap" from
+	expected message when trying to access $_probe_* convenience
+	variables while not on a probe.
+
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-framefilter.exp (pagination quit - *): New tests.
