@@ -1,3 +1,8 @@
+2015-02-17  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui.c (tui_enable): Resize windows before anything
+	might show a window.
+
 2015-02-17  Max Ostapenko  <m.ostapenko@partner.samsung.com>
 
 	PR gdb/17984

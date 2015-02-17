@@ -487,18 +487,22 @@ tui_enable (void)
   tui_setup_io (1);
 
   tui_active = 1;
-  if (deprecated_safe_get_selected_frame ())
-     tui_show_frame_info (deprecated_safe_get_selected_frame ());
 
-  /* Restore TUI keymap.  */
-  tui_set_key_mode (tui_current_key_mode);
-
-  /* Resize and refresh the screen.  */
+  /* Resize windows before anything might display/refresh a
+     window.  */
   if (tui_win_resized ())
     {
       tui_resize_all ();
       tui_set_win_resized_to (FALSE);
     }
+
+  if (deprecated_safe_get_selected_frame ())
+    tui_show_frame_info (deprecated_safe_get_selected_frame ());
+
+  /* Restore TUI keymap.  */
+  tui_set_key_mode (tui_current_key_mode);
+
+  /* Refresh the screen.  */
   tui_refresh_all_win ();
 
   /* Update gdb's knowledge of its terminal.  */
