@@ -1,5 +1,11 @@
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* config/tc-aarch64.c (reloc_table_entry): Add ld_literal_type.
+	(reloc_table): Likewise.
+	(parse_address_main): Use ld_literal_type.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* config/tc-aarch64.c (reloc_table_entry): Add adr_type.
 	(reloc_table): Likewise.
 	(parse_address_main): Use adr_type.
