@@ -1,5 +1,17 @@
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Fix
+	TLSDESC_LD_PREL19 field width and masks.
+	(aarch64_tls_transition_without_check)
+	(aarch64_reloc_got_type, elfNN_aarch64_final_link_relocate)
+	(elfNN_aarch64_tls_relax, elfNN_aarch64_relocate_section)
+	(elfNN_aarch64_gc_sweep_hook, elfNN_aarch64_check_relocs): Handle
+	BFD_RELOC_AARCH64_TLSDESC_LD_PREL19.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend)
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* elfnn-aarch64.c (IS_AARCH64_TLSDESC_RELOC) BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21 move.
 	(aarch64_tls_transition_without_check)
 	(aarch64_reloc_got_type, elfNN_aarch64_final_link_relocate)
