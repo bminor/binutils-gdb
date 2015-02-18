@@ -1,5 +1,9 @@
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c: (TLSDESC_CALL): Fix HOWTO bit field width.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* elfnn-aarch64.c (TLSLE_MOVW_TPREL_G2)
 	(TLSLE_MOVW_TPREL_G1, TLSLE_MOVW_TPREL_G1_NC)
 	(TLSLE_MOVW_TPREL_G0, TLSLE_MOVW_TPREL_G0_NC): Fix bit field
