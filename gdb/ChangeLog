@@ -1,3 +1,18 @@
+2015-02-18  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_handle_resize_during_io): Remove this
+	function.
+	(tui_putc): Don't call tui_handle_resize_during_io.
+	(tui_getc): Likewise.
+	(tui_mld_getc): Likewise.
+	* tui/tui-win.c: Include event-loop.h and tui/tui-io.h.
+	(tui_sigwinch_token): New static variable.
+	(tui_initialize_win): Adjust documentation.  Set
+	tui_sigwinch_token.
+	(tui_async_resize_screen): New asynchronous callback.
+	(tui_sigwinch_handler): Adjust documentation.  Asynchronously
+	invoke tui_async_resize_screen.
+
 2015-02-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* configure: Regenerated.
