@@ -537,6 +537,11 @@ AM_ZLIB
 # On HP/UX we may need libxpdl for dlgetmodinfo (used by solib-pa64.c).
 AC_SEARCH_LIBS(dlgetmodinfo, [dl xpdl])
 
+# On FreeBSD we may need libutil for kinfo_getvmmap (used by fbsd-nat.c).
+AC_SEARCH_LIBS(kinfo_getvmmap, util,
+  [AC_DEFINE(HAVE_KINFO_GETVMMAP, 1,
+            [Define to 1 if your system has the kinfo_getvmmap function. ])])
+
 AM_ICONV
 
 # GDB may fork/exec the iconv program to get the list of supported character

@@ -1,5 +1,15 @@
 2015-03-13  John Baldwin  <jhb@FreeBSD.org>
 
+	* configure.ac: AC_SEARCH_LIBS(kinfo_getvmmap, util).
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* fbsd-nat.c [!HAVE_KINFO_GETVMMAP] (fbsd_read_mapping): Don't
+        define.
+	(fbsd_find_memory_regions): Use kinfo_getvmmap to
+	enumerate memory regions if present.
+
+2015-03-13  John Baldwin  <jhb@FreeBSD.org>
+
 	* amd64fbsd-tdep.c (amd64fbsd_sigtramp_p): Style fixes.
 	* i386fbsd-tdep.c: Fix style in various gdb_static_assert
 	expressions.

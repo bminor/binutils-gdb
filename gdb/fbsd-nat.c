@@ -26,6 +26,10 @@
 #include <sys/types.h>
 #include <sys/procfs.h>
 #include <sys/sysctl.h>
+#ifdef HAVE_KINFO_GETVMMAP
+#include <sys/user.h>
+#include <libutil.h>
+#endif
 
 #include "elf-bfd.h"
 #include "fbsd-nat.h"
@@ -62,6 +66,64 @@ fbsd_pid_to_exec_file (struct target_ops *self, int pid)
   return NULL;
 }
 
+#ifdef HAVE_KINFO_GETVMMAP
+/* Iterate over all the memory regions in the current inferior,
+   calling FUNC for each memory region.  OBFD is passed as the last
+   argument to FUNC.  */
+
+int
+fbsd_find_memory_regions (struct target_ops *self,
+			  find_memory_region_ftype func, void *obfd)
+{
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  struct kinfo_vmentry *vmentl, *kve;
+  uint64_t size;
+  struct cleanup *cleanup;
+  int i, nitems;
+
+  vmentl = kinfo_getvmmap (pid, &nitems);
+  if (vmentl == NULL)
+    perror_with_name (_("Couldn't fetch VM map entries."));
+  cleanup = make_cleanup (free, vmentl);
+
+  for (i = 0; i < nitems; i++)
+    {
+      kve = &vmentl[i];
+
+      /* Skip unreadable segments and those where MAP_NOCORE has been set.  */
+      if (!(kve->kve_protection & KVME_PROT_READ)
+	  || kve->kve_flags & KVME_FLAG_NOCOREDUMP)
+	continue;
+
+      /* Skip segments with an invalid type.  */
+      if (kve->kve_type != KVME_TYPE_DEFAULT
+	  && kve->kve_type != KVME_TYPE_VNODE
+	  && kve->kve_type != KVME_TYPE_SWAP
+	  && kve->kve_type != KVME_TYPE_PHYS)
+	continue;
+
+      size = kve->kve_end - kve->kve_start;
+      if (info_verbose)
+	{
+	  fprintf_filtered (gdb_stdout, 
+			    "Save segment, %ld bytes at %s (%c%c%c)\n",
+			    (long) size,
+			    paddress (target_gdbarch (), kve->kve_start),
+			    kve->kve_protection & KVME_PROT_READ ? 'r' : '-',
+			    kve->kve_protection & KVME_PROT_WRITE ? 'w' : '-',
+			    kve->kve_protection & KVME_PROT_EXEC ? 'x' : '-');
+	}
+
+      /* Invoke the callback function to create the corefile segment.
+	 Pass MODIFIED as true, we do not know the real modification state.  */
+      func (kve->kve_start, size, kve->kve_protection & KVME_PROT_READ,
+	    kve->kve_protection & KVME_PROT_WRITE,
+	    kve->kve_protection & KVME_PROT_EXEC, 1, obfd);
+    }
+  do_cleanups (cleanup);
+  return 0;
+}
+#else
 static int
 fbsd_read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
 		   char *protection)
@@ -137,3 +199,4 @@ fbsd_find_memory_regions (struct target_ops *self,
   do_cleanups (cleanup);
   return 0;
 }
+#endif
