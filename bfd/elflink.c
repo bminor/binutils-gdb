@@ -8902,8 +8902,9 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      a regular file, or that we have been told to strip.  However, if
      h->indx is set to -2, the symbol is used by a reloc and we must
      output it.  */
+  strip = FALSE;
   if (h->indx == -2)
-    strip = FALSE;
+    ;
   else if ((h->def_dynamic
 	    || h->ref_dynamic
 	    || h->root.type == bfd_link_hash_new)
@@ -8929,12 +8930,11 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	   && h->root.u.undef.abfd != NULL
 	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
     strip = TRUE;
-  else
-    strip = FALSE;
 
   /* If we're stripping it, and it's not a dynamic symbol, there's
-     nothing else to do unless it is a forced local symbol or a
-     STT_GNU_IFUNC symbol.  */
+     nothing else to do.   However, if it is a forced local symbol or
+     an ifunc symbol we need to give the backend finish_dynamic_symbol
+     function a chance to make it dynamic.  */
   if (strip
       && h->dynindx == -1
       && h->type != STT_GNU_IFUNC
@@ -9205,9 +9205,18 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	}
     }
 
-  /* If we're stripping it, then it was just a dynamic symbol, and
-     there's nothing else to do.  */
-  if (strip || (input_sec->flags & SEC_EXCLUDE) != 0)
+  /* If the symbol is undefined, and we didn't output it to .dynsym,
+     strip it from .symtab too.  Obviously we can't do this for
+     relocatable output or when needed for --emit-relocs.  */
+  else if (input_sec == bfd_und_section_ptr
+	   && h->indx != -2
+	   && !flinfo->info->relocatable)
+    return TRUE;
+  /* Also strip others that we couldn't earlier due to dynamic symbol
+     processing.  */
+  if (strip)
+    return TRUE;
+  if ((input_sec->flags & SEC_EXCLUDE) != 0)
     return TRUE;
 
   /* Output a FILE symbol so that following locals are not associated
@@ -9455,8 +9464,9 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 
       *ppsection = isec;
 
-      /* Don't output the first, undefined, symbol.  */
-      if (ppsection == flinfo->sections)
+      /* Don't output the first, undefined, symbol.  In fact, don't
+	 output any undefined local symbol.  */
+      if (isec == bfd_und_section_ptr)
 	continue;
 
       if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)

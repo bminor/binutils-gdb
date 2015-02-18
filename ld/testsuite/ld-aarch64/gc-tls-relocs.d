@@ -17,7 +17,6 @@ SYMBOL TABLE:
 0+9000 l    d  \.got	0+ \.got
 0+0000 l    df \*ABS\*	0+ .*
 0+0000 l    df \*ABS\*	0+ 
-0+0000 l       \*UND\*	0+ __tls_get_addr
 0+9000 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
 0+8000 g       \.text	0+ _start
 

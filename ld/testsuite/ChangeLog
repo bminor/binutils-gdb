@@ -1,3 +1,14 @@
+2015-02-19  Alan Modra  <amodra@gmail.com>
+
+	PR ld/4317
+	* ld-aarch64/gc-tls-relocs.d, * ld-cris/locref2.d,
+	* ld-elf/ehdr_start-weak.d, * ld-elf/group1.d,
+	* ld-i386/compressed1.d, * ld-ia64/error1.d, * ld-ia64/error2.d,
+	* ld-ia64/error3.d, * ld-mips-elf/pic-and-nonpic-1.nd,
+	* ld-mmix/undef-3.d, * ld-powerpc/tlsexe.r, * ld-powerpc/tlsexetoc.r,
+	* ld-powerpc/tlsso.r, * ld-powerpc/tlstocso.r,
+	* ld-x86-64/compressed1.d, * ld-x86-64/pie1.d: Update.
+
 2015-02-17  Alan Modra  <amodra@gmail.com>
 
 	PR ld/17975
