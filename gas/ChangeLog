@@ -1,6 +1,13 @@
 2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* config/tc-aarch64.c (reloc_table_entry): Generate
+	BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21.
+	(md_apply_fix, aarch64_force_relocation): Handle
+	BFD_RELOC_AARCH64_TLSGD_ADR_PREL21.
+
+2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (reloc_table_entry): Generate
 	BFD_RELOC_AARCH64_TLSGD_ADR_PREL21.
 	(md_apply_fix, aarch64_force_relocation): Handle
 	BFD_RELOC_AARCH64_TLSGD_ADR_PREL21.

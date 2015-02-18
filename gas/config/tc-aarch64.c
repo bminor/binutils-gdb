@@ -2474,7 +2474,7 @@ static struct reloc_table_entry reloc_table[] = {
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsdesc", 0,
-   0,				/* adr_type */
+   BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21, /* adr_type */
    BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21,
    0,
    0,
@@ -6708,6 +6708,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
@@ -6909,6 +6910,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_LDST8_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
