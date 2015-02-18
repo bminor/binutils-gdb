@@ -895,7 +895,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   HOWTO64 (AARCH64_R (TLSIE_MOVW_GOTTPREL_G0_NC),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */

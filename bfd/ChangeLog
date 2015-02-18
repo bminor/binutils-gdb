@@ -1,3 +1,8 @@
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c: (TLSIE_MOVW_GOTTPREL_G0_NC): Fix HOWTO bit
+	field width.
+
 2015-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
