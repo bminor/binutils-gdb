@@ -124,3 +124,4 @@
 	stp	x0, x1, [x0, #16]!
 	ldp	x0, x1, [x1], #16
 	adr	x2, :got:s1
+	ldr	x0, [x0, :got:s1]

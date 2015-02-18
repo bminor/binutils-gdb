@@ -1,5 +1,10 @@
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* gas/aarch64/diagnostic.s: Add LDR test.
+	* gas/aarch64/diagnostic.l: Likewise.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* gas/aarch64/diagnostic.s: Add ADR test.
 	* gas/aarch64/diagnostic.l: Likewise.
 
