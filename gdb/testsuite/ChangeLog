@@ -1,3 +1,9 @@
+2015-02-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure: Regenerated.
+	* configure.ac: Use GDB_AC_TRANSFORM.
+	* aclocal.m4: sinclude ../transform.m4.
+
 2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* lib/dtrace.exp: New file.

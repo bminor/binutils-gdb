@@ -1,3 +1,12 @@
+2015-02-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure: Regenerated.
+	* configure.ac: Use GDB_AC_TRANSFORM.
+	* Makefile.in (aclocal_m4_deps): Added transform.m4.
+	* acinclude.m4: sinclude transform.m4.
+	* transform.m4: New file.
+	(GDB_AC_TRANSFORM): New macro.
+
 2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* NEWS: Announce the support for DTrace SDT probes.
