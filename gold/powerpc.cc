@@ -6464,6 +6464,7 @@ class Global_symbol_visitor_opd
 	&& symobj->get_opd_discard(sym->value()))
       {
 	sym->set_undefined();
+	sym->set_visibility(elfcpp::STV_DEFAULT);
 	sym->set_is_defined_in_discarded_section();
 	sym->set_symtab_index(-1U);
       }
