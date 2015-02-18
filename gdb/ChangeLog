@@ -1,3 +1,9 @@
+2015-02-27  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (CONTEXT_DEBUGGER): Remove.
+	(CONTEXT_DEBUGGER_DR): Add CONTEXT_SEGMENTS.  Incorporate flags
+	from CONTEXT_DEBUGGER.
+
 2015-02-26  Doug Evans  <dje@google.com>
 
 	* gdbtypes.c (internal_type_vptr_fieldno): Add missing call to
