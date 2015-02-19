@@ -1,5 +1,10 @@
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
+	* target.h (forward_target_decr_pc_after_break): Delete
+	declaration.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
 	PR threads/18006
 	* linux-thread-db.c (thread_get_info_callback): Return early if
 	the thread's lwp id is -1.
