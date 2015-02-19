@@ -81,13 +81,4 @@ void sim_set_trace (void);
 
 void sim_set_profile_size (int n);
 
-
-/* Kill the running program.
-   THIS PROCEDURE IS DEPRECATED.
-   GDB and NRUN do not use this interface.
-   This procedure will be replaced as part of the introduction of
-   multi-cpu simulators. */
-
-void sim_kill (SIM_DESC sd);
-
 #endif

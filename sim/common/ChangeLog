@@ -1,3 +1,7 @@
+2015-02-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* run-sim.h (sim_kill): Delete unused prototype.
+
 2015-02-13  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* gentmap.c: Include "string.h".

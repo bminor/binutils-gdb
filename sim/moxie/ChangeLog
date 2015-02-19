@@ -1,3 +1,7 @@
+2015-02-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_kill): Delete unused func.
+
 2014-12-27  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (EXTRACT_OFFSET): Define.

@@ -1,3 +1,7 @@
+2015-02-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_kill): Delete unused func.
+
 2015-02-11  Chen Gang <gang.chen.5i5j@gmail.com>
 
 	* interp.c: Include "unistd.h".

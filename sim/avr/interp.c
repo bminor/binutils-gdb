@@ -1825,12 +1825,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 }
 
 void
-sim_kill (SIM_DESC sd)
-{
-  /* nothing to do */
-}
-
-void
 sim_do_command (SIM_DESC sd, const char *cmd)
 {
   /* Nothing there yet; it's all an error.  */
