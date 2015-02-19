@@ -17,9 +17,13 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+# Use the deprecated run frontend until we migrate to nrun.o
+SIM_RUN_OBJS = run.o
+
 SIM_OBJS = interp.o table.o simops.o endian.o sim-load.o
 SIM_EXTRA_CLEAN = clean-extra
-SIM_EXTRA_CFLAGS = -DNEED_UI_LOOP_HOOK -DSIM_HAVE_ENVIRONMENT
+SIM_EXTRA_CFLAGS = -DNEED_UI_LOOP_HOOK -DSIM_HAVE_ENVIRONMENT \
+	-DSIM_USE_DEPRECATED_RUN_FRONTEND
 
 INCLUDE = cr16_sim.h $(srcroot)/include/gdb/callback.h targ-vals.h endian.c \
 	$(srcroot)/include/gdb/sim-cr16.h

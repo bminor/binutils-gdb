@@ -50,6 +50,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "run-sim.h"
 #include "version.h"
 
+#ifdef SIM_USE_DEPRECATED_RUN_FRONTEND
+# warning "This sim is using the deprecated run.c; please migrate to nrun.c."
+#else
+# error "Please do not create new sim ports using run.c; use nrun.c instead." \
+        "New submissions using run.c will not be accepted."
+#endif
+
 static void usage (int help);
 static void print_version (void);
 extern int optind;

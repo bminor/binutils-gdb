@@ -47,7 +47,6 @@ SIM_EXTRA_DEPS = \
 
 SIM_EXTRA_CFLAGS = @sim_extra_cflags@
 
-SIM_RUN_OBJS = nrun.o
 SIM_EXTRA_CLEAN = m32r-clean
 
 # This selects the m32r newlib/libgloss syscall definitions.

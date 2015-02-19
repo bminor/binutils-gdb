@@ -1,3 +1,7 @@
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

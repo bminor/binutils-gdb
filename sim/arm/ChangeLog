@@ -1,5 +1,11 @@
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_EXTRA_CFLAGS): Add
+	-DSIM_USE_DEPRECATED_RUN_FRONTEND.
+	(SIM_RUN_OBJS): Set to run.o.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (AC_CHECK_HEADERS): Delete unistd.h.
 	* aclocal.m4, configure: Regenerate.
 

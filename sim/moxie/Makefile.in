@@ -19,6 +19,10 @@
 
 dtbdir = @datadir@/gdb/dtb
 
+# Use the deprecated run frontend until we migrate to nrun.o
+SIM_RUN_OBJS = run.o
+SIM_EXTRA_CFLAGS = -DSIM_USE_DEPRECATED_RUN_FRONTEND
+
 SIM_OBJS = interp.o sim-load.o sim-io.o sim-config.o sim-utils.o	\
 sim-options.o sim-module.o sim-core.o sim-endian.o sim-trace.o 	\
 sim-engine.o sim-fpu.o sim-bits.o sim-profile.o sim-events.o \

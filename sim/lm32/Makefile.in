@@ -25,9 +25,6 @@ SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h
 # List of flags to always pass to $(CC).
 #SIM_EXTRA_CFLAGS =
 
-# List of main object files for `run'.
-SIM_RUN_OBJS = nrun.o
-
 SIM_EXTRA_CLEAN = lm32-clean
 
 # This selects the lm32 newlib/libgloss syscall definitions.

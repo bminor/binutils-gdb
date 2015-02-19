@@ -17,6 +17,10 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+# Use the deprecated run frontend until we migrate to nrun.o
+SIM_RUN_OBJS = run.o
+SIM_EXTRA_CFLAGS = -DSIM_USE_DEPRECATED_RUN_FRONTEND
+
 SIM_OBJS = interp.o sim-load.o
 SIM_EXTRA_LIBS = -lm
 SIM_EXTRA_CLEAN = mcore-clean

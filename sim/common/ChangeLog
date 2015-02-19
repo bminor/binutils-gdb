@@ -1,5 +1,11 @@
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_RUN_OBJS): Change to nrun.o.
+	* run.c [SIM_USE_DEPRECATED_RUN_FRONTEND]: Issue a warning.
+	[!SIM_USE_DEPRECATED_RUN_FRONTEND]: Throw an error.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-assert.h [!SIM_ASSERT, WITH_ASSERT]: Include sim-io.h.
 	[!ASSERT, WITH_ASSERT]: Likewise.
 	* sim-endian.c: Delete sim-io.h include.

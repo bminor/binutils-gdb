@@ -1,3 +1,7 @@
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+
 2014-08-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.ac: Default simulator hardware to off again.  Remove

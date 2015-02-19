@@ -17,9 +17,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-# List of main object files for `run'.
-SIM_RUN_OBJS = nrun.o
-
 SIM_OBJS = compile.o \
 	   $(SIM_NEW_COMMON_OBJS) \
 	   sim-cpu.o \

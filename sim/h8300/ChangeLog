@@ -1,5 +1,9 @@
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (AC_CHECK_HEADERS): Delete stdlib.h & time.h.
 	* aclocal.m4, configure: Regenerate.
 

@@ -43,7 +43,6 @@ SIM_EXTRA_DEPS = \
 
 SIM_EXTRA_CFLAGS = @sim_trapdump@
 
-SIM_RUN_OBJS = nrun.o
 SIM_EXTRA_CLEAN = frv-clean
 
 # This selects the frv newlib/libgloss syscall definitions.
