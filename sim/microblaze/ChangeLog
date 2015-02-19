@@ -1,3 +1,7 @@
+2015-02-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* microblaze.isa: Add "microblaze_" prefix to "or", "and", and "xor".
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
