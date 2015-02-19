@@ -1,3 +1,14 @@
+2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16466
+	* gdb.mi/Makefile.in: Add mi-pendshr2.sl to cleanup.
+	* gdb.mi/mi-pending.c (thread_func): New function.
+	(int main): Add threading support required.
+	* gdb.mi/mi-pending.exp: Add tests for this issue.
+	* gdb.mi/mi-pendshr.c (pendfunc1): Remove stdio dependency.
+	(pendfunc2): Remove stdio dependency.
+	* gdb.mi/mi-pendshr2.c: New file.
+
 2015-03-23  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.linespec/keywords.c: New file.

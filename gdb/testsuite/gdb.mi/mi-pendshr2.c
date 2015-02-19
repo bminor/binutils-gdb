@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2007-2015 Free Software Foundation, Inc.
+   Copyright 2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,19 +16,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 void
-pendfunc1 (int x)
+pendfunc3 (void)
 {
-  int y = x + 4;
-}
-
-void
-pendfunc2 (int x)
-{
-}
-
-void
-pendfunc (int x)
-{
-  pendfunc1 (x);
-  pendfunc2 (x);
 }

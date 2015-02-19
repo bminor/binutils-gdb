@@ -9784,6 +9784,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      make_cleanup (xfree, cond_string);
 	    }
 	  b->cond_string = cond_string;
+	  b->thread = thread;
 	}
       b->extra_string = NULL;
       b->ignore_count = ignore_count;

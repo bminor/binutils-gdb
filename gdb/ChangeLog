@@ -1,3 +1,8 @@
+2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16466
+	* breakpoint.c (create_breakpoint): Set thread on breakpoint struct.
+
 2015-03-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* ser-mingw.c (ser_windows_setparity): Fix indentation.
