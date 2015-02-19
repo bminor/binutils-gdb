@@ -1,5 +1,16 @@
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* ld-aarch64/aarch64-elf.exp (tls-tiny-desc, tls-tiny-desc-ie)
+	(tls-tiny-desc-le): Add.
+	* ld-aarch64/tls-tiny-desc.d: New.
+	* ld-aarch64/tls-tiny-desc.s: New.
+	* ld-aarch64/tls-tiny-desc-ie.d: New.
+	* ld-aarch64/tls-tiny-desc-ie.s: New.
+	* ld-aarch64/tls-tiny-desc-le.d: New.
+	* ld-aarch64/tls-tiny-desc-le.s: New.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* ld-aarch64/aarch64-elf.exp (tls-tiny-gd, tls-tiny-gd-ie)
 	(tls-tiny-gd-le): Add.
 	* ld-aarch64/tls-tiny-gd.d: New.
