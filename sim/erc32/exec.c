@@ -2011,7 +2011,7 @@ init_regs(sregs)
     sregs->npc = 4;
     sregs->trap = 0;
     sregs->psr &= 0x00f03fdf;
-    sregs->psr |= 0x080;	/* Set supervisor bit */
+    sregs->psr |= 0x11000080;	/* Set supervisor bit */
     sregs->breakpoint = 0;
     sregs->annul = 0;
     sregs->fpstate = FP_EXE_MODE;
