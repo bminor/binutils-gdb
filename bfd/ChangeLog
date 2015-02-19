@@ -1,3 +1,8 @@
+2015-02-19  Branko Drevensek  <branko.drevensek@gmail.com>
+
+	PR 17995
+	* verilog.c (verilog_write_record): Correct buffer size.
+
 2015-02-19  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_define_linkage_sym): Set 'bed' earlier.
