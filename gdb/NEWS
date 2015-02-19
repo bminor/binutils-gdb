@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.8
+*** Changes in GDB 7.9
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.
 
