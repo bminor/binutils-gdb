@@ -1,5 +1,9 @@
 2015-02-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 7.9.
+
+2015-02-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set GDB version number to str 7.9.
 
 2015-02-19  Joel Brobecker  <brobecker@adacore.com>
