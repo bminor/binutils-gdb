@@ -1288,9 +1288,8 @@ status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
   ptid_t ptid = * (ptid_t *) arg;
 
   /* Check if we're only interested in events from a specific process
-     or its lwps.  */
-  if (!ptid_equal (minus_one_ptid, ptid)
-      && ptid_get_pid (ptid) != ptid_get_pid (thread->entry.id))
+     or a specific LWP.  */
+  if (!ptid_match (ptid_of (thread), ptid))
     return 0;
 
   if (lp->status_pending_p

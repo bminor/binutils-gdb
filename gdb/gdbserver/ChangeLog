@@ -1,3 +1,7 @@
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (status_pending_p_callback): Use ptid_match.
+
 2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	PR breakpoints/16812
