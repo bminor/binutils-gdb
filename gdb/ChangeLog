@@ -1,3 +1,8 @@
+2015-02-19  Steve Ellcey  <sellcey@imgtec.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Initialize arg.expr.
+	(dtrace_get_probes) Change type of variable 'dof'.
+
 2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	PR breakpoints/16812

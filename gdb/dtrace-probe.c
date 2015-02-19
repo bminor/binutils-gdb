@@ -415,6 +415,9 @@ dtrace_process_dof_probe (struct objfile *objfile,
 	  struct dtrace_probe_arg arg;
 	  struct expression *expr;
 
+	  /* Set arg.expr to ensure all fields in expr are initialized and
+	     the compiler will not warn when arg is used.  */
+	  arg.expr = NULL;
 	  arg.type_str = xstrdup (p);
 
 	  /* Use strtab_size as a sentinel.  */
@@ -617,17 +620,18 @@ dtrace_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
     {
       if (elf_section_data (sect)->this_hdr.sh_type == SHT_SUNW_dof)
 	{
-	  struct dtrace_dof_hdr *dof;
+	  bfd_byte *dof;
 
 	  /* Read the contents of the DOF section and then process it to
 	     extract the information of any probe defined into it.  */
-	  if (!bfd_malloc_and_get_section (abfd, sect, (bfd_byte **) &dof))
+	  if (!bfd_malloc_and_get_section (abfd, sect, &dof))
 	    complaint (&symfile_complaints,
 		       _("could not obtain the contents of"
 			 "section '%s' in objfile `%s'."),
 		       sect->name, abfd->filename);
       
-	  dtrace_process_dof (sect, objfile, probesp, dof);
+	  dtrace_process_dof (sect, objfile, probesp,
+			      (struct dtrace_dof_hdr *) dof);
 	  xfree (dof);
 	}
     }
