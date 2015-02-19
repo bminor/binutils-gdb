@@ -1,5 +1,10 @@
 2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
 
+	* float.c (get_accex, clear_accex, set_fsr): Use functions from fenv.h
+	instead of custom assembly.
+
+2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
+
 	* erc32.c (mec_read): Allow simulator memory size to be read
 	by application.
 	(boot_init): initialize memory and timers if start address is
