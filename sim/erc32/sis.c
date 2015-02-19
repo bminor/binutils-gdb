@@ -171,6 +171,7 @@ main(argc, argv)
     char           *cmdq[HIST_LEN];
     int             cmdi = 0;
     int             i;
+    int             lfile = 0;
 
     cfile = 0;
     for (i = 0; i < 64; i++)
@@ -219,7 +220,7 @@ main(argc, argv)
 		exit(1);
 	    }
 	} else {
-	    last_load_addr = bfd_load(argv[stat]);
+	    lfile = stat;
 	}
 	stat++;
     }
@@ -241,6 +242,8 @@ main(argc, argv)
     reset_all();
     init_bpt(&sregs);
     init_sim();
+    if (lfile)
+        last_load_addr = bfd_load(argv[lfile]);
 #ifdef STAT
     reset_stat(&sregs);
 #endif
