@@ -1,3 +1,7 @@
+2015-02-19  Pedro Alves  <palves@redhat.com>
+
+	* floatformat.h [__cplusplus]: Wrap in extern "C".
+
 2015-02-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/17973
