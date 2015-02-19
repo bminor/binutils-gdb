@@ -1,5 +1,9 @@
 2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
 
+	* Makefile.in: Remove unused defines
+
+2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
+
 	* float.c (get_accex, clear_accex, set_fsr): Use functions from fenv.h
 	instead of custom assembly.
 
