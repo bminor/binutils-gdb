@@ -1,3 +1,9 @@
+2015-02-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Delete sysdep.h and netinet/in.h includes.
+	Include stdlib.h and string.h and unistd.h.
+	* sysdep.h: Delete.
+
 2015-02-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_kill): Delete unused func.
