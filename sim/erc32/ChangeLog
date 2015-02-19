@@ -1,3 +1,8 @@
+2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
+
+	* func.c (print_insn_sparc_sis): Add helper function for disassembly.
+	(disp_ctrl): Use helper function.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

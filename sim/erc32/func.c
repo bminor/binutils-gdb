@@ -759,6 +759,17 @@ disp_regs(sregs,cwp)
     }
 }
 
+static void print_insn_sparc_sis(uint32 addr, struct disassemble_info *info)
+{
+    unsigned char           i[4];
+
+    sis_memory_read(addr, i, 4);
+    dinfo.buffer_vma = addr;
+    dinfo.buffer_length = 4;
+    dinfo.buffer = i;
+    print_insn_sparc(addr, info);
+}
+
 static void
 disp_ctrl(sregs)
     struct pstate  *sregs;
@@ -770,10 +781,10 @@ disp_ctrl(sregs)
 	   sregs->psr, sregs->wim, sregs->tbr, sregs->y);
     sis_memory_read(sregs->pc, i, 4);
     printf("\n  pc: %08X = %02X%02X%02X%02X    ", sregs->pc,i[0],i[1],i[2],i[3]);
-    print_insn_sparc(sregs->pc, &dinfo);
+    print_insn_sparc_sis(sregs->pc, &dinfo);
     sis_memory_read(sregs->npc, i, 4);
     printf("\n npc: %08X = %02X%02X%02X%02X    ",sregs->npc,i[0],i[1],i[2],i[3]);
-    print_insn_sparc(sregs->npc, &dinfo);
+    print_insn_sparc_sis(sregs->npc, &dinfo);
     if (sregs->err_mode)
 	printf("\n IU in error mode");
     printf("\n\n");
@@ -821,7 +832,7 @@ dis_mem(addr, len, info)
     for (i = addr & -3; i < ((addr & -3) + (len << 2)); i += 4) {
 	sis_memory_read(i, data, 4);
 	printf(" %08x  %02x%02x%02x%02x  ", i, data[0],data[1],data[2],data[3]);
-	print_insn_sparc(i, info);
+	print_insn_sparc_sis(i, info);
         if (i >= 0xfffffffc) break;
 	printf("\n");
     }
