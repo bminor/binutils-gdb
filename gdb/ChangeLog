@@ -1,3 +1,7 @@
+2015-02-19  David Taylor  <dtaylor@emc.com>
+
+	* common/ax.def (setv): Fix consumed entry in setv DEFOP.
+
 2015-02-18  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-io.c (tui_handle_resize_during_io): Remove this

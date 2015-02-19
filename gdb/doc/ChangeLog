@@ -1,3 +1,7 @@
+2015-02-19  David Taylor  <dtaylor@emc.com>
+
+	* agentexpr.texi (Bytecode Descriptions): Fix summary line for setv.
+
 2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gdb.texinfo (Static Probe Points): Add cindex `static probe
