@@ -1,5 +1,13 @@
 2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
 
+	* func.c (reset_stat, show_stat): Switch to double in time keeping.
+	(get_time): New function to get system time.
+	* interf.c (run_sim): Use get_time() for system time.
+	* sis.c (run_sim): Likewise.
+	* sis.h: Likewise.
+
+2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
+
 	* Makefile.in: Remove unused defines
 
 2015-02-21  Jiri Gaisler  <jiri@gaisler.se>

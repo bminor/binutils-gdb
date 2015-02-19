@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #endif
 #include <stdio.h>
-#include <time.h>
 #include <sys/fcntl.h>
 #include "sis.h"
 #include <dis-asm.h>
@@ -86,7 +85,7 @@ run_sim(sregs, icount, dis)
 {
     int             irq, mexc, deb, asi;
 
-    sregs->starttime = time(NULL);
+    sregs->starttime = get_time();
     init_stdio();
     if (sregs->err_mode) icount = 0;
     deb = dis || sregs->histlen || sregs->bptnum;
@@ -146,7 +145,7 @@ run_sim(sregs, icount, dis)
 	    if (sregs->tlimit <= ebase.simtime) sregs->tlimit = -1;
 	}
     }
-    sregs->tottime += time(NULL) - sregs->starttime;
+    sregs->tottime += get_time() - sregs->starttime;
     restore_stdio();
     if (sregs->err_mode)
 	return (ERROR);

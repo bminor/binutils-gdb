@@ -24,7 +24,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <sys/fcntl.h>
 #include "sis.h"
 #include "libiberty.h"
@@ -76,7 +75,7 @@ run_sim(sregs, icount, dis)
 	(*sim_callback->printf_filtered) (sim_callback, "resuming at %x\n",
 					  sregs->pc);
    init_stdio();
-   sregs->starttime = time(NULL);
+   sregs->starttime = get_time();
    irq = 0;
    if ((sregs->pc != 0) && (ebase.simtime == 0))
 	boot_init();
@@ -143,7 +142,7 @@ run_sim(sregs, icount, dis)
 	}
     }
     sim_halt();
-    sregs->tottime += time(NULL) - sregs->starttime;
+    sregs->tottime += get_time() - sregs->starttime;
     restore_stdio();
     clearerr(stdin);
     if (sregs->err_mode)
