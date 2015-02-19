@@ -30,7 +30,7 @@ SIM_EXTRA_CLEAN = clean-sis
 # UARTS run at about 115200 baud (simulator time). Add -DFAST_UART to
 # CFLAGS if faster (infinite) UART speed is desired. Might affect the
 # behaviour of UART interrupt routines ...
-SIM_EXTRA_CFLAGS = -DFAST_UART
+SIM_EXTRA_CFLAGS = -DFAST_UART -I$(srcroot)
 
 ## COMMON_POST_CONFIG_FRAG
 

@@ -1,3 +1,8 @@
+2015-02-22  Jiri Gaisler  <jiri@gaisler.se>
+
+	* Makefile.in: Add include path to readline.h.
+	sis.c: Remove locally define readline types.
+
 2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
 
 	* func.c (reset_stat, show_stat): Switch to double in time keeping.

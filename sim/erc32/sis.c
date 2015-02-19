@@ -35,17 +35,8 @@
 
 /* Structures and functions from readline library */
 
-typedef struct {
-  char *line;
-  char *data;
-} HIST_ENTRY;
-
-extern char *	readline (char *prompt);
-extern void	using_history (void);
-extern void	add_history (char *string);
-extern HIST_ENTRY *remove_history (int which);
-
-
+#include "readline/readline.h"
+#include "readline/history.h"
 
 /* Command history buffer length - MUST be binary */
 #define HIST_LEN	64
