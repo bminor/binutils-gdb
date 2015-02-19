@@ -1,5 +1,9 @@
 2015-02-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to str 7.9.
+
+2015-02-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Rewrite "Changes since GDB 7.8" into "Changes in GDB 7.9".
 
 2015-02-17  Pedro Alves  <palves@redhat.com>
