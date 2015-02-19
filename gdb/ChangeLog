@@ -1,3 +1,7 @@
+2015-02-20  David Taylor  <dtaylor@emc.com>
+
+	* common/ax.def (setv): Fix consumed entry in setv DEFOP.
+
 2015-02-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	PR corefiles/17808:
