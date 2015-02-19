@@ -468,6 +468,8 @@ exec_cmd(sregs, cmd)
 	    }
 	    sregs->pc = len & ~3;
 	    sregs->npc = sregs->pc + 4;
+	    if ((sregs->pc != 0) && (ebase.simtime == 0))
+	        boot_init();
 	    printf("resuming at 0x%08x\n",sregs->pc);
 	    if ((cmd2 = strtok(NULL, " \t\n\r")) != NULL) {
 		stat = run_sim(sregs, VAL(cmd2), 0);

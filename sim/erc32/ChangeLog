@@ -1,5 +1,14 @@
 2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
 
+	* erc32.c (mec_read): Allow simulator memory size to be read
+	by application.
+	(boot_init): initialize memory and timers if start address is
+	not 0.
+	* func.c (exe_cmd): Call boot_init if start address not 0.
+	* interf.c (run_sim): Likewise.
+
+2015-02-21  Jiri Gaisler  <jiri@gaisler.se>
+
 	* exec.c (init_regs): erc32 has vendor ID 1 and version ID 1 in %psr.
 
 2015-02-21  Jiri Gaisler  <jiri@gaisler.se>

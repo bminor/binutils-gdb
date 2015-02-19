@@ -78,6 +78,8 @@ run_sim(sregs, icount, dis)
    init_stdio();
    sregs->starttime = time(NULL);
    irq = 0;
+   if ((sregs->pc != 0) && (ebase.simtime == 0))
+	boot_init();
    while (!sregs->err_mode & (icount > 0)) {
 
 	sregs->fhold = 0;
