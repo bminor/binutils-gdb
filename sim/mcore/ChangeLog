@@ -2,6 +2,10 @@
 
 	* interp.c: Include "unistd.h".
 
+2015-02-02  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* interp.c (sim_do_command): Call freeargv() before return.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

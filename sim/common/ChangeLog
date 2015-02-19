@@ -1,6 +1,11 @@
 2015-02-13  Chen Gang  <gang.chen.5i5j@gmail.com>
 
-	*  gentmap.c: Include "string.h".
+	* gentmap.c: Include "string.h".
+
+2015-02-02  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* sim-options.c (sim_args_command): Call freeargv() when failure
+	occurs.
 
 2015-01-07  Joel Brobecker  <brobecker@adacore.com>
 

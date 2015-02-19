@@ -2,6 +2,14 @@
 
 	* microblaze.isa: Add "microblaze_" prefix to "or", "and", and "xor".
 
+2015-02-02  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* interp.c (sim_do_command): Call freeargv() before return.
+
+2014-07-01  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* interp.c: Use long int format instead of int format.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
