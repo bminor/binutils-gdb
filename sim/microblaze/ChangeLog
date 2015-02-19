@@ -1,3 +1,8 @@
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_HEADERS): Delete.
+	* aclocal.m4, configure: Regenerate.
+
 2015-03-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (microblaze_extract_unsigned_integer): Change %ld to %zu.

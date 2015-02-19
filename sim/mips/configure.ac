@@ -444,7 +444,6 @@ AC_PATH_X
 mips_extra_libs=""
 AC_SUBST(mips_extra_libs)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_FUNCS(aint anint sqrt)
 

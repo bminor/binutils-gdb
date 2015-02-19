@@ -1,3 +1,9 @@
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_HEADERS): Delete unistd.h & stdlib.h &
+	string.h & strings.h & time.h.
+	* aclocal.m4, configure: Regenerate.
+
 2015-02-27  Nick Clifton  <nickc@redhat.com>
 
 	* sim-main.h (reg64_t): New type.

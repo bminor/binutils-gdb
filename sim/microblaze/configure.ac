@@ -5,6 +5,4 @@ sinclude(../common/acinclude.m4)
 
 SIM_AC_COMMON
 
-AC_CHECK_HEADERS(unistd.h)
-
 SIM_AC_OUTPUT
