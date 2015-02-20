@@ -3546,6 +3546,79 @@ convert_efi_target (char *efi)
     }
 }
 
+/* Allocate and return a pointer to a struct section_add, initializing the
+   structure using OPTARG, a string in the format "sectionname=filename".
+   The returned structure will have its next pointer set to NEXT.  The
+   OPTION field is the name of the command line option currently being
+   parsed, and is only used if an error needs to be reported.  */
+
+static struct section_add *
+init_section_add (const char *optarg,
+                  struct section_add *next,
+                  const char *option)
+{
+  struct section_add *pa;
+  const char *s;
+
+  s = strchr (optarg, '=');
+  if (s == NULL)
+    fatal (_("bad format for %s"), option);
+
+  pa = (struct section_add *) xmalloc (sizeof (struct section_add));
+  pa->name = xstrndup (optarg, s - optarg);
+  pa->filename = s + 1;
+  pa->next = next;
+  pa->contents = NULL;
+  pa->size = 0;
+
+  return pa;
+}
+
+/* Load the file specified in PA, allocating memory to hold the file
+   contents, and store a pointer to the allocated memory in the contents
+   field of PA.  The size field of PA is also updated.  All errors call
+   FATAL.  */
+
+static void
+section_add_load_file (struct section_add *pa)
+{
+  size_t off, alloc;
+  FILE *f;
+
+  /* We don't use get_file_size so that we can do
+     --add-section .note.GNU_stack=/dev/null
+     get_file_size doesn't work on /dev/null.  */
+
+  f = fopen (pa->filename, FOPEN_RB);
+  if (f == NULL)
+    fatal (_("cannot open: %s: %s"),
+           pa->filename, strerror (errno));
+
+  off = 0;
+  alloc = 4096;
+  pa->contents = (bfd_byte *) xmalloc (alloc);
+  while (!feof (f))
+    {
+      off_t got;
+
+      if (off == alloc)
+        {
+          alloc <<= 1;
+          pa->contents = (bfd_byte *) xrealloc (pa->contents, alloc);
+        }
+
+      got = fread (pa->contents + off, 1, alloc - off, f);
+      if (ferror (f))
+        fatal (_("%s: fread failed"), pa->filename);
+
+      off += got;
+    }
+
+  pa->size = off;
+
+  fclose (f);
+}
+
 static int
 copy_main (int argc, char *argv[])
 {
@@ -3717,76 +3790,14 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_ADD_SECTION:
-	  {
-	    const char *s;
-	    size_t off, alloc;
-	    struct section_add *pa;
-	    FILE *f;
-
-	    s = strchr (optarg, '=');
-
-	    if (s == NULL)
-	      fatal (_("bad format for %s"), "--add-section");
-
-	    pa = (struct section_add *) xmalloc (sizeof (struct section_add));
-	    pa->name = xstrndup (optarg, s - optarg);
-	    pa->filename = s + 1;
-
-	    /* We don't use get_file_size so that we can do
-	         --add-section .note.GNU_stack=/dev/null
-	       get_file_size doesn't work on /dev/null.  */
-
-	    f = fopen (pa->filename, FOPEN_RB);
-	    if (f == NULL)
-	      fatal (_("cannot open: %s: %s"),
-		     pa->filename, strerror (errno));
-
-	    off = 0;
-	    alloc = 4096;
-	    pa->contents = (bfd_byte *) xmalloc (alloc);
-	    while (!feof (f))
-	      {
-		off_t got;
-
-		if (off == alloc)
-		  {
-		    alloc <<= 1;
-		    pa->contents = (bfd_byte *) xrealloc (pa->contents, alloc);
-		  }
-
-		got = fread (pa->contents + off, 1, alloc - off, f);
-		if (ferror (f))
-		  fatal (_("%s: fread failed"), pa->filename);
-
-		off += got;
-	      }
-
-	    pa->size = off;
-
-	    fclose (f);
-
-	    pa->next = add_sections;
-	    add_sections = pa;
-	  }
+          add_sections = init_section_add (optarg, add_sections,
+                                           "--add-section");
+          section_add_load_file (add_sections);
 	  break;
 
 	case OPTION_DUMP_SECTION:
-	  {
-	    const char *s;
-	    struct section_add *pa;
-
-	    s = strchr (optarg, '=');
-
-	    if (s == NULL)
-	      fatal (_("bad format for %s"), "--dump-section");
-
-	    pa = (struct section_add *) xmalloc (sizeof * pa);
-	    pa->name = xstrndup (optarg, s - optarg);
-	    pa->filename = s + 1;
-	    pa->next = dump_sections;
-	    pa->contents = NULL;
-	    dump_sections = pa;
-	  }
+          dump_sections = init_section_add (optarg, dump_sections,
+                                            "--dump-section");
 	  break;
 	  
 	case OPTION_CHANGE_START:
