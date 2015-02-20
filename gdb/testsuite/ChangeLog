@@ -1,5 +1,10 @@
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/solib-corrupted.exp: Expect "stap" as first column of
+	info probes.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/multi-create-ns-info-thr.exp: New file.
 
 2015-02-20  Pedro Alves  <palves@redhat.com>
