@@ -1,5 +1,13 @@
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (lin_lwp_attach_lwp): No longer special case the
+	main LWP.  Handle the case of waitpid returning 0 if we're already
+	attached to the LWP.  Don't set the LWP's last_resume_kind to
+	resume_stop if we already knew about the LWP.
+	(linux_nat_filter_event): Add debug logs.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
 	* target.h (forward_target_decr_pc_after_break): Delete
 	declaration.
 

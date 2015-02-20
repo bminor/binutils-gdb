@@ -994,13 +994,12 @@ lin_lwp_attach_lwp (ptid_t ptid)
   lp = find_lwp_pid (ptid);
   lwpid = ptid_get_lwp (ptid);
 
-  /* We assume that we're already attached to any LWP that has an id
-     equal to the overall process id, and to any LWP that is already
+  /* We assume that we're already attached to any LWP that is already
      in our list of LWPs.  If we're not seeing exit events from threads
      and we've had PID wraparound since we last tried to stop all threads,
      this assumption might be wrong; fortunately, this is very unlikely
      to happen.  */
-  if (lwpid != ptid_get_pid (ptid) && lp == NULL)
+  if (lp == NULL)
     {
       int status, cloned = 0, signalled = 0;
 
@@ -1018,23 +1017,50 @@ lin_lwp_attach_lwp (ptid_t ptid)
 		  /* We've already seen this thread stop, but we
 		     haven't seen the PTRACE_EVENT_CLONE extended
 		     event yet.  */
-		  return 0;
+		  if (debug_linux_nat)
+		    fprintf_unfiltered (gdb_stdlog,
+					"LLAL: attach failed, but already seen "
+					"this thread %s stop\n",
+					target_pid_to_str (ptid));
+		  return 1;
 		}
 	      else
 		{
 		  int new_pid;
 		  int status;
 
-		  /* See if we've got a stop for this new child
-		     pending.  If so, we're already attached.  */
+		  if (debug_linux_nat)
+		    fprintf_unfiltered (gdb_stdlog,
+					"LLAL: attach failed, and haven't seen "
+					"this thread %s stop yet\n",
+					target_pid_to_str (ptid));
+
+		  /* We may or may not be attached to the LWP already.
+		     Try waitpid on it.  If that errors, we're not
+		     attached to the LWP yet.  Otherwise, we're
+		     already attached.  */
 		  gdb_assert (lwpid > 0);
 		  new_pid = my_waitpid (lwpid, &status, WNOHANG);
 		  if (new_pid == -1 && errno == ECHILD)
 		    new_pid = my_waitpid (lwpid, &status, __WCLONE | WNOHANG);
 		  if (new_pid != -1)
 		    {
-		      if (WIFSTOPPED (status))
-			add_to_pid_list (&stopped_pids, lwpid, status);
+		      if (new_pid == 0)
+			{
+			  /* The child hasn't stopped for its initial
+			     SIGSTOP stop yet.  */
+			  if (debug_linux_nat)
+			    fprintf_unfiltered (gdb_stdlog,
+						"LLAL: child hasn't "
+						"stopped yet\n");
+			}
+		      else if (WIFSTOPPED (status))
+			{
+			  if (debug_linux_nat)
+			    fprintf_unfiltered (gdb_stdlog,
+						"LLAL: adding to stopped_pids\n");
+			  add_to_pid_list (&stopped_pids, lwpid, status);
+			}
 		      return 1;
 		    }
 		}
@@ -1061,6 +1087,7 @@ lin_lwp_attach_lwp (ptid_t ptid)
 
       lp = add_lwp (ptid);
       lp->stopped = 1;
+      lp->last_resume_kind = resume_stop;
       lp->cloned = cloned;
       lp->signalled = signalled;
       if (WSTOPSIG (status) != SIGSTOP)
@@ -1079,20 +1106,7 @@ lin_lwp_attach_lwp (ptid_t ptid)
 			      status_to_str (status));
 	}
     }
-  else
-    {
-      /* We assume that the LWP representing the original process is
-         already stopped.  Mark it as stopped in the data structure
-         that the GNU/linux ptrace layer uses to keep track of
-         threads.  Note that this won't have already been done since
-         the main thread will have, we assume, been stopped by an
-         attach from a different layer.  */
-      if (lp == NULL)
-	lp = add_lwp (ptid);
-      lp->stopped = 1;
-    }
 
-  lp->last_resume_kind = resume_stop;
   return 0;
 }
 
@@ -2855,6 +2869,10 @@ linux_nat_filter_event (int lwpid, int status)
 
   if (WIFSTOPPED (status) && !lp)
     {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LHEW: saving LWP %ld status %s in stopped_pids list\n",
+			    (long) lwpid, status_to_str (status));
       add_to_pid_list (&stopped_pids, lwpid, status);
       return NULL;
     }
