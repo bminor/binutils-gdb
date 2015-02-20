@@ -264,6 +264,7 @@ async_file_mark (void)
 static int kill_lwp (int lwpid, int signo);
 
 static int stop_callback (struct lwp_info *lp, void *data);
+static int resume_stopped_resumed_lwps (struct lwp_info *lp, void *data);
 
 static void block_child_signals (sigset_t *prev_mask);
 static void restore_child_signals_mask (sigset_t *prev_mask);
@@ -2003,34 +2004,24 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		status = 0;
 	    }
 
-	  if (non_stop)
+	  /* If the thread_db layer is active, let it record the user
+	     level thread id and status, and add the thread to GDB's
+	     list.  */
+	  if (!thread_db_notice_clone (lp->ptid, new_lp->ptid))
 	    {
-	      /* Add the new thread to GDB's lists as soon as possible
-		 so that:
+	      /* The process is not using thread_db.  Add the LWP to
+		 GDB's list.  */
+	      target_post_attach (ptid_get_lwp (new_lp->ptid));
+	      add_thread (new_lp->ptid);
+	    }
 
-		 1) the frontend doesn't have to wait for a stop to
-		 display them, and,
-
-		 2) we tag it with the correct running state.  */
-
-	      /* If the thread_db layer is active, let it know about
-		 this new thread, and add it to GDB's list.  */
-	      if (!thread_db_attach_lwp (new_lp->ptid))
-		{
-		  /* We're not using thread_db.  Add it to GDB's
-		     list.  */
-		  target_post_attach (ptid_get_lwp (new_lp->ptid));
-		  add_thread (new_lp->ptid);
-		}
-
-	      if (!stopping)
-		{
-		  set_running (new_lp->ptid, 1);
-		  set_executing (new_lp->ptid, 1);
-		  /* thread_db_attach_lwp -> lin_lwp_attach_lwp forced
-		     resume_stop.  */
-		  new_lp->last_resume_kind = resume_continue;
-		}
+	  if (!stopping)
+	    {
+	      set_running (new_lp->ptid, 1);
+	      set_executing (new_lp->ptid, 1);
+	      /* thread_db_attach_lwp -> lin_lwp_attach_lwp forced
+		 resume_stop.  */
+	      new_lp->last_resume_kind = resume_continue;
 	    }
 
 	  if (status != 0)
@@ -2283,6 +2274,28 @@ void
 linux_stop_lwp (struct lwp_info *lwp)
 {
   stop_callback (lwp, NULL);
+}
+
+/* See linux-nat.h  */
+
+void
+linux_stop_and_wait_all_lwps (void)
+{
+  /* Stop all LWP's ...  */
+  iterate_over_lwps (minus_one_ptid, stop_callback, NULL);
+
+  /* ... and wait until all of them have reported back that
+     they're no longer running.  */
+  iterate_over_lwps (minus_one_ptid, stop_wait_callback, NULL);
+}
+
+/* See linux-nat.h  */
+
+void
+linux_unstop_all_lwps (void)
+{
+  iterate_over_lwps (minus_one_ptid,
+		     resume_stopped_resumed_lwps, &minus_one_ptid);
 }
 
 /* Return non-zero if LWP PID has a pending SIGINT.  */

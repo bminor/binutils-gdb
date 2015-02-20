@@ -1,5 +1,9 @@
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/multi-create-ns-info-thr.exp: New file.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.trace/no-attach-trace.exp: Don't run to main.  Do
 	clean_restart before gdb_target_supports_trace.
 

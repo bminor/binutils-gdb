@@ -20,6 +20,7 @@
 #include "linux-procfs.h"
 #include "filestuff.h"
 #include <dirent.h>
+#include <sys/stat.h>
 
 /* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
    found.  */
@@ -250,4 +251,16 @@ linux_proc_attach_tgid_threads (pid_t pid,
     }
 
   closedir (dir);
+}
+
+/* See linux-procfs.h.  */
+
+int
+linux_proc_task_list_dir_exists (pid_t pid)
+{
+  char pathname[128];
+  struct stat buf;
+
+  xsnprintf (pathname, sizeof (pathname), "/proc/%ld/task", (long) pid);
+  return (stat (pathname, &buf) == 0);
 }

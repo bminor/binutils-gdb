@@ -1,5 +1,38 @@
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (linux_handle_extended_wait): Call
+	thread_db_notice_clone whenever a new clone LWP is detected.
+	(linux_stop_and_wait_all_lwps, linux_unstop_all_lwps): New
+	functions.
+	* linux-nat.h (thread_db_attach_lwp): Delete declaration.
+	(thread_db_notice_clone, linux_stop_and_wait_all_lwps)
+	(linux_unstop_all_lwps): Declare.
+	* linux-thread-db.c (struct thread_get_info_inout): Delete.
+	(thread_get_info_callback): Delete.
+	(thread_from_lwp): Use td_thr_get_info and record_thread.
+	(thread_db_attach_lwp): Delete.
+	(thread_db_notice_clone): New function.
+	(try_thread_db_load_1): If /proc is mounted and shows the
+	process'es task list, walk over all LWPs and call thread_from_lwp
+	instead of relying on td_ta_thr_iter.
+	(attach_thread): Don't call check_thread_signals here.  Split the
+	tail part of the function (which adds the thread to the core GDB
+	thread list) to ...
+	(record_thread): ... this function.  Call check_thread_signals
+	here.
+	(thread_db_wait): Don't call thread_db_find_new_threads_1.  Always
+	call thread_from_lwp.
+	(thread_db_update_thread_list): Rename to ...
+	(thread_db_update_thread_list_org): ... this.
+	(thread_db_update_thread_list): New function.
+	(thread_db_find_thread_from_tid): Delete.
+	(thread_db_get_ada_task_ptid): Simplify.
+	* nat/linux-procfs.c: Include <sys/stat.h>.
+	(linux_proc_task_list_dir_exists): New function.
+	* nat/linux-procfs.h (linux_proc_task_list_dir_exists): Declare.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (lin_lwp_attach_lwp): No longer special case the
 	main LWP.  Handle the case of waitpid returning 0 if we're already
 	attached to the LWP.  Don't set the LWP's last_resume_kind to
