@@ -1,3 +1,9 @@
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18006
+	* gdb.threads/clone-thread_db.c: New file.
+	* gdb.threads/clone-thread_db.exp: New file.
+
 2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	PR breakpoints/16812

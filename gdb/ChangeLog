@@ -1,3 +1,9 @@
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18006
+	* linux-thread-db.c (thread_get_info_callback): Return early if
+	the thread's lwp id is -1.
+
 2015-02-20  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.9 released.

@@ -431,6 +431,14 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *argp)
     error (_("thread_get_info_callback: cannot get thread info: %s"),
 	   thread_db_err_str (err));
 
+  if (ti.ti_lid == -1)
+    {
+      /* We'll get this if a threaded program has a thread call clone
+	 with CLONE_VM.  `clone' sets the pthread LID of the new LWP
+	 to -1, which ends up clearing the parent thread's LID.  */
+      return 0;
+    }
+
   /* Fill the cache.  */
   thread_ptid = ptid_build (info->pid, ti.ti_lid, 0);
   inout->thread_info = find_thread_ptid (thread_ptid);
