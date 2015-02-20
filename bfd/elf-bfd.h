@@ -2285,6 +2285,10 @@ extern char *elfcore_write_s390_system_call
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_s390_tdb
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_vxrs_low
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_vxrs_high
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_arm_vfp
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_aarch_tls

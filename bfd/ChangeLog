@@ -1,3 +1,14 @@
+2015-02-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf-bfd.h (elfcore_write_s390_vxrs_low): Add prototype.
+	(elfcore_write_s390_vxrs_high): Likewise.
+	* elf.c (elfcore_grok_s390_vxrs_low): New function.
+	(elfcore_grok_s390_vxrs_high): New function.
+	(elfcore_grok_note): Call them.
+	(elfcore_write_s390_vxrs_low): New function.
+	(elfcore_write_s390_vxrs_high): New function.
+	(elfcore_write_register_note): Call them.
+
 2015-02-19  Branko Drevensek  <branko.drevensek@gmail.com>
 
 	PR 17995
