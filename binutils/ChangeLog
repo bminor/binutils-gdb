@@ -1,3 +1,8 @@
+2015-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* readelf.c (process_program_headers): Add newline to warning
+	message.
+
 2015-02-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* readelf.c (get_note_type): Add NT_S390_VXRS_LOW and

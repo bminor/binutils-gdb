@@ -4490,7 +4490,7 @@ process_program_headers (FILE * file)
       /* PR binutils/12467.  */
       if (elf_header.e_phoff != 0)
 	warn (_("possibly corrupt ELF header - it has a non-zero program"
-		" header offset, but no program headers"));
+		" header offset, but no program headers\n"));
       else if (do_segments)
 	printf (_("\nThere are no program headers in this file.\n"));
       return 0;
