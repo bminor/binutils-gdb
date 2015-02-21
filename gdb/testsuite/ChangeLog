@@ -1,3 +1,9 @@
+2015-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR corefiles/17808
+	* gdb.arch/i386-biarch-core.core.bz2: New file.
+	* gdb.arch/i386-biarch-core.exp: New file.
+
 2015-02-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/multi-create-ns-info-thr.exp: Return early if
