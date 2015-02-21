@@ -39,6 +39,7 @@
 #include "disasm.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
+#include "x86-xstate.h"
 
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
@@ -3116,6 +3117,25 @@ amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_long_bit (gdbarch, 32);
   set_gdbarch_ptr_bit (gdbarch, 32);
+}
+
+/* Return the target description for a specified XSAVE feature mask.  */
+
+const struct target_desc *
+amd64_target_description (uint64_t xcr0)
+{
+  switch (xcr0 & X86_XSTATE_ALL_MASK)
+    {
+    case X86_XSTATE_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX512_MASK:
+      return tdesc_amd64_avx512;
+    case X86_XSTATE_MPX_MASK:
+      return tdesc_amd64_mpx;
+    case X86_XSTATE_AVX_MASK:
+      return tdesc_amd64_avx;
+    default:
+      return tdesc_amd64;
+    }
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

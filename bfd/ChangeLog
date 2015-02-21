@@ -1,3 +1,9 @@
+2015-04-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_note): Recognize NT_X86_XSTATE on
+	FreeBSD.
+	(elfcore_write_xstatereg): Use correct note name on FreeBSD.
+
 2015-04-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18250

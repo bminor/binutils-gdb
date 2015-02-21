@@ -1,6 +1,6 @@
-/* Native-dependent code for AMD64 BSD's.
+/* Target-dependent code for FreeBSD x86.
 
-   Copyright (C) 2011-2015 Free Software Foundation, Inc.
+   Copyright (C) 2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,22 +17,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AMD64BSD_NAT_H
-#define AMD64BSD_NAT_H
+#ifndef I386FBSD_TDEP_H
+#define I386FBSD_TDEP_H
 
-/* Low level amd64 XSAVE info.  */
-extern size_t amd64bsd_xsave_len;
+/* Get XSAVE extended state xcr0 from core dump.  */
+extern uint64_t i386fbsd_core_read_xcr0 (bfd *abfd);
 
-/* Low level amd64 debug register functions.  */
+/* The format of the XSAVE extended area is determined by hardware.
+   Cores store the XSAVE extended area in a NT_X86_XSTATE note that
+   matches the layout on Linux.  */
+#define I386_FBSD_XSAVE_XCR0_OFFSET 464
 
-extern void amd64bsd_dr_set_control (unsigned long control);
-
-extern void amd64bsd_dr_set_addr (int regnum, CORE_ADDR addr);
-
-extern CORE_ADDR amd64bsd_dr_get_addr (int regnum);
-
-extern unsigned long amd64bsd_dr_get_status (void);
-
-extern unsigned long amd64bsd_dr_get_control (void);
-
-#endif /* amd64bsd-nat.h */
+#endif /* i386fbsd-tdep.h */

@@ -1,3 +1,46 @@
+2015-04-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-tdep.c (amd64_target_description): New function.
+	* amd64-tdep.h: Export amd64_target_description and tdesc_amd64.
+	* amd64bsd-nat.c [PT_GETXSTATE_INFO]: New variable amd64bsd_xsave_len.
+	(amd64bsd_fetch_inferior_registers) [PT_GETXSTATE_INFO]: Handle
+	x86 extended save area.
+	(amd64bsd_store_inferior_registers) [PT_GETXSTATE_INFO]: Likewise.
+	* amd64bsd-nat.h: Export amd64bsd_xsave_len.
+	* amd64fbsd-nat.c (amd64fbsd_read_description): New function.
+	(_initialize_amd64fbsd_nat): Set "to_read_description" to
+	"amd64fbsd_read_description".
+	* amd64fbsd-tdep.c (amd64fbsd_core_read_description): New function.
+	(amd64fbsd_supply_xstateregset): New function.
+	(amd64fbsd_collect_xstateregset): New function.
+	Add "amd64fbsd_xstateregset".
+	(amd64fbsd_iterate_over_regset_sections): New function.
+	(amd64fbsd_init_abi): Set "xsave_xcr0_offset" to
+	"I386_FBSD_XSAVE_XCR0_OFFSET".
+	Add "iterate_over_regset_sections" gdbarch method.
+	Add "core_read_description" gdbarch method.
+	* i386-tdep.c (i386_target_description): New function.
+	* i386-tdep.h: Export i386_target_description and tdesc_i386.
+	* i386bsd-nat.c [PT_GETXSTATE_INFO]: New variable i386bsd_xsave_len.
+	(i386bsd_fetch_inferior_registers) [PT_GETXSTATE_INFO]: Handle
+	x86 extended save area.
+	(i386bsd_store_inferior_registers) [PT_GETXSTATE_INFO]: Likewise.
+	* i386bsd-nat.h: Export i386bsd_xsave_len.
+	* i386fbsd-nat.c (i386fbsd_read_description): New function.
+	(_initialize_i386fbsd_nat): Set "to_read_description" to
+	"i386fbsd_read_description".
+	* i386fbsd-tdep.c (i386fbsd_core_read_xcr0): New function.
+	(i386fbsd_core_read_description): New function.
+	(i386fbsd_supply_xstateregset): New function.
+	(i386fbsd_collect_xstateregset): New function.
+	Add "i386fbsd_xstateregset".
+	(i386fbsd_iterate_over_regset_sections): New function.
+	(i386fbsd4_init_abi): Set "xsave_xcr0_offset" to
+	"I386_FBSD_XSAVE_XCR0_OFFSET".
+	Add "iterate_over_regset_sections" gdbarch method.
+	Add "core_read_description" gdbarch method.
+	* i386fbsd-tdep.h: New file.
+
 2015-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (Changes since GDB 7.9): Add removed -xdb.

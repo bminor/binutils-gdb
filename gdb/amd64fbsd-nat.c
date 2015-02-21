@@ -151,6 +151,50 @@ amd64fbsd_mourn_inferior (struct target_ops *ops)
   super_mourn_inferior (ops);
 }
 
+/* Implement the to_read_description method.  */
+
+static const struct target_desc *
+amd64fbsd_read_description (struct target_ops *ops)
+{
+#ifdef PT_GETXSTATE_INFO
+  static int xsave_probed;
+  static uint64_t xcr0;
+#endif
+  struct reg regs;
+  int is64;
+
+  if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+    perror_with_name (_("Couldn't get registers"));
+  is64 = (regs.r_cs == GSEL (GUCODE_SEL, SEL_UPL));
+#ifdef PT_GETXSTATE_INFO
+  if (!xsave_probed)
+    {
+      struct ptrace_xstate_info info;
+
+      if (ptrace (PT_GETXSTATE_INFO, ptid_get_pid (inferior_ptid),
+		  (PTRACE_TYPE_ARG3) &info, sizeof (info)) == 0)
+	{
+	  amd64bsd_xsave_len = info.xsave_len;
+	  xcr0 = info.xsave_mask;
+	}
+      xsave_probed = 1;
+    }
+
+  if (amd64bsd_xsave_len != 0)
+    {
+      if (is64)
+	return amd64_target_description (xcr0);
+      else
+	return i386_target_description (xcr0);
+    }
+#endif
+  if (is64)
+    return tdesc_amd64;
+  else
+    return tdesc_i386;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64fbsd_nat (void);
 
@@ -181,6 +225,7 @@ _initialize_amd64fbsd_nat (void)
 
   super_mourn_inferior = t->to_mourn_inferior;
   t->to_mourn_inferior = amd64fbsd_mourn_inferior;
+  t->to_read_description = amd64fbsd_read_description;
 
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
   t->to_find_memory_regions = fbsd_find_memory_regions;
