@@ -1,3 +1,8 @@
+2015-02-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/multi-create-ns-info-thr.exp: Return early if
+	runto_main fails.
+
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/solib-corrupted.exp: Expect "stap" as first column of

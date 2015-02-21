@@ -25,7 +25,9 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}
 gdb_test_no_output "set pagination off"
 gdb_test_no_output "set non-stop on"
 
-runto_main
+if ![runto_main] {
+    return -1
+}
 
 # Create a breakpoint that does "info threads" when hit, which will be
 # just while other threads are being created or exiting.
