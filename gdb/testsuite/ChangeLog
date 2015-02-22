@@ -1,3 +1,11 @@
+2015-02-22  Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/17855
+	* gdb.ada/exec_changed.exp: Add second test where symbol lookup cache
+	is read after symbols have been re-read.
+	* gdb.ada/exec_changed/first.adb (First): New procedure Break_Me.
+	* gdb.ada/exec_changed/second.adb (Second): Ditto.
+
 2015-02-21  Doug Evans  <dje@google.com>
 
 	* gdb.cp/anon-ns.exp: Add test for ptype '(anonymous namespace)'.
