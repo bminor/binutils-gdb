@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
-#include "sysdep.h"
+#include <string.h>
 #include <sys/times.h>
 #include <sys/param.h>
-#include <netinet/in.h>	/* for byte ordering macros */
+#include <unistd.h>
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "libiberty.h"
@@ -1448,14 +1448,6 @@ sim_create_inferior (sd, prog_bfd, argv, env)
   load_dtb (sd, DTB);
 
   return SIM_RC_OK;
-}
-
-void
-sim_kill (sd)
-     SIM_DESC sd;
-{
-  if (tracefile)
-    fclose(tracefile);
 }
 
 void

@@ -985,6 +985,21 @@ M:int:stap_is_single_operand:const char *s:s
 # parser), and should advance the buffer pointer (p->arg).
 M:int:stap_parse_special_token:struct stap_parse_info *p:p
 
+# DTrace related functions.
+
+# The expression to compute the NARTGth+1 argument to a DTrace USDT probe.
+# NARG must be >= 0.
+M:void:dtrace_parse_probe_argument:struct parser_state *pstate, int narg:pstate, narg
+
+# True if the given ADDR does not contain the instruction sequence
+# corresponding to a disabled DTrace is-enabled probe.
+M:int:dtrace_probe_is_enabled:CORE_ADDR addr:addr
+
+# Enable a DTrace is-enabled probe at ADDR.
+M:void:dtrace_enable_probe:CORE_ADDR addr:addr
+
+# Disable a DTrace is-enabled probe at ADDR.
+M:void:dtrace_disable_probe:CORE_ADDR addr:addr
 
 # True if the list of shared libraries is one and only for all
 # processes, as opposed to a list of shared libraries per inferior.
@@ -1213,6 +1228,7 @@ struct syscall;
 struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
+struct parser_state;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
 struct mem_range;

@@ -29,6 +29,7 @@ static int thread_db_use_events;
 #include "gdb_proc_service.h"
 #include "nat/gdb_thread_db.h"
 #include "gdb_vecs.h"
+#include "nat/linux-procfs.h"
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
 #include <dlfcn.h>
@@ -859,7 +860,22 @@ thread_db_init (int use_events)
 	  thread_db_mourn (proc);
 	  return 0;
 	}
-      thread_db_find_new_threads ();
+
+      /* It's best to avoid td_ta_thr_iter if possible.  That walks
+	 data structures in the inferior's address space that may be
+	 corrupted, or, if the target is running, the list may change
+	 while we walk it.  In the latter case, it's possible that a
+	 thread exits just at the exact time that causes GDBserver to
+	 get stuck in an infinite loop.  If the kernel supports clone
+	 events, and /proc/PID/task/ exits, then we already know about
+	 all threads in the process.  When we need info out of
+	 thread_db on a given thread (e.g., for TLS), we'll use
+	 find_one_thread then.  That uses thread_db entry points that
+	 do not walk libpthread's thread list, so should be safe, as
+	 well as more efficient.  */
+      if (use_events
+	  || !linux_proc_task_list_dir_exists (pid_of (proc)))
+	thread_db_find_new_threads ();
       thread_db_look_up_symbols ();
       return 1;
     }

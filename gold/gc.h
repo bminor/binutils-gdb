@@ -109,11 +109,8 @@ class Garbage_collection
   {
     Section_id src_id(src_object, src_shndx);
     Section_id dst_id(dst_object, dst_shndx);
-    Section_ref::iterator p = this->section_reloc_map_.find(src_id);
-    if (p == this->section_reloc_map_.end())
-      this->section_reloc_map_[src_id].insert(dst_id);
-    else
-      p->second.insert(dst_id);
+    Sections_reachable& reachable = this->section_reloc_map_[src_id];
+    reachable.insert(dst_id);
   }
 
  private:

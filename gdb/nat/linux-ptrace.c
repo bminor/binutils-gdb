@@ -621,3 +621,16 @@ linux_is_extended_waitstatus (int wstat)
 {
   return (linux_ptrace_get_extended_event (wstat) != 0);
 }
+
+/* Return true if the event in LP may be caused by breakpoint.  */
+
+int
+linux_wstatus_maybe_breakpoint (int wstat)
+{
+  return (WIFSTOPPED (wstat)
+	  && (WSTOPSIG (wstat) == SIGTRAP
+	      /* SIGILL and SIGSEGV are also treated as traps in case a
+		 breakpoint is inserted at the current PC.  */
+	      || WSTOPSIG (wstat) == SIGILL
+	      || WSTOPSIG (wstat) == SIGSEGV));
+}

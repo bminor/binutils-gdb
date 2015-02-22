@@ -142,7 +142,12 @@ extern struct lwp_info *lwp_list;
 /* Attempt to initialize libthread_db.  */
 void check_for_thread_db (void);
 
-int thread_db_attach_lwp (ptid_t ptid);
+/* Called from the LWP layer to inform the thread_db layer that PARENT
+   spawned CHILD.  Both LWPs are currently stopped.  This function
+   does whatever is required to have the child LWP under the
+   thread_db's control --- e.g., enabling event reporting.  Returns
+   true on success, false if the process isn't using libpthread.  */
+extern int thread_db_notice_clone (ptid_t parent, ptid_t child);
 
 /* Return the set of signals used by the threads library.  */
 extern void lin_thread_get_thread_signals (sigset_t *mask);
@@ -154,6 +159,15 @@ void linux_proc_pending_signals (int pid, sigset_t *pending,
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
 extern void linux_stop_lwp (struct lwp_info *lwp);
+
+/* Stop all LWPs, synchronously.  (Any events that trigger while LWPs
+   are being stopped are left pending.)  */
+extern void linux_stop_and_wait_all_lwps (void);
+
+/* Set resumed LWPs running again, as they were before being stopped
+   with linux_stop_and_wait_all_lwps.  (LWPS with pending events are
+   left stopped.)  */
+extern void linux_unstop_all_lwps (void);
 
 /* Iterator function for lin-lwp's lwp list.  */
 struct lwp_info *iterate_over_lwps (ptid_t filter,

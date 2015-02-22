@@ -15976,7 +15976,8 @@ all_tracepoints (void)
 command" [PROBE_MODIFIER] [LOCATION] [thread THREADNUM] [if CONDITION]\n\
 PROBE_MODIFIER shall be present if the command is to be placed in a\n\
 probe point.  Accepted values are `-probe' (for a generic, automatically\n\
-guessed probe type) or `-probe-stap' (for a SystemTap probe).\n\
+guessed probe type), `-probe-stap' (for a SystemTap probe) or \n\
+`-probe-dtrace' (for a DTrace probe).\n\
 LOCATION may be a line number, function name, or \"*\" and an address.\n\
 If a line number is specified, break at start of code for that line.\n\
 If a function is specified, break at start of code for that function.\n\

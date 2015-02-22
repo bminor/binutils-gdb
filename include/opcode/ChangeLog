@@ -1,3 +1,12 @@
+2015-02-19  Pedro Alves  <palves@redhat.com>
+
+	* cgen.h [__cplusplus]: Wrap in extern "C".
+	* msp430-decode.h [__cplusplus]: Likewise.
+	* nios2.h [__cplusplus]: Likewise.
+	* rl78.h [__cplusplus]: Likewise.
+	* rx.h [__cplusplus]: Likewise.
+	* tilegx.h [__cplusplus]: Likewise.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32.h: New file.

@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
 #include <signal.h>
-#include "sysdep.h"
+#include <stdlib.h>
+#include <string.h>
 #include <sys/times.h>
 #include <sys/param.h>
-#include <netinet/in.h>	/* for byte ordering macros */
 #include <unistd.h>
 #include "bfd.h"
 #include "gdb/callback.h"
@@ -2119,13 +2119,6 @@ sim_create_inferior (sd, prog_bfd, argv, env)
     }
   
   return SIM_RC_OK;
-}
-
-void
-sim_kill (sd)
-     SIM_DESC sd;
-{
-  /* nothing to do */
 }
 
 void

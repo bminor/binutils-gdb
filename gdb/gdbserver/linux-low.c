@@ -1288,9 +1288,8 @@ status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
   ptid_t ptid = * (ptid_t *) arg;
 
   /* Check if we're only interested in events from a specific process
-     or its lwps.  */
-  if (!ptid_equal (minus_one_ptid, ptid)
-      && ptid_get_pid (ptid) != ptid_get_pid (thread->entry.id))
+     or a specific LWP.  */
+  if (!ptid_match (ptid_of (thread), ptid))
     return 0;
 
   if (lp->status_pending_p
@@ -1738,19 +1737,6 @@ dequeue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
   return 0;
 }
 
-/* Return true if the event in LP may be caused by breakpoint.  */
-
-static int
-wstatus_maybe_breakpoint (int wstatus)
-{
-  return (WIFSTOPPED (wstatus)
-	  && (WSTOPSIG (wstatus) == SIGTRAP
-	      /* SIGILL and SIGSEGV are also treated as traps in case a
-		 breakpoint is inserted at the current PC.  */
-	      || WSTOPSIG (wstatus) == SIGILL
-	      || WSTOPSIG (wstatus) == SIGSEGV));
-}
-
 /* Fetch the possibly triggered data watchpoint info and store it in
    CHILD.
 
@@ -1898,7 +1884,7 @@ linux_low_filter_event (int lwpid, int wstat)
   if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGTRAP
       && check_stopped_by_watchpoint (child))
     ;
-  else if (WIFSTOPPED (wstat) && wstatus_maybe_breakpoint (wstat))
+  else if (WIFSTOPPED (wstat) && linux_wstatus_maybe_breakpoint (wstat))
     {
       if (check_stopped_by_breakpoint (child))
 	have_stop_pc = 1;
@@ -2739,7 +2725,8 @@ linux_wait_1 (ptid_t ptid,
      any that GDB specifically requested we ignore.  But never ignore
      SIGSTOP if we sent it ourselves, and do not ignore signals when
      stepping - they may require special handling to skip the signal
-     handler.  */
+     handler. Also never ignore signals that could be caused by a
+     breakpoint.  */
   /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
      thread library?  */
   if (WIFSTOPPED (w)
@@ -2753,7 +2740,8 @@ linux_wait_1 (ptid_t ptid,
 #endif
 	  (pass_signals[gdb_signal_from_host (WSTOPSIG (w))]
 	   && !(WSTOPSIG (w) == SIGSTOP
-		&& current_thread->last_resume_kind == resume_stop))))
+		&& current_thread->last_resume_kind == resume_stop)
+	   && !linux_wstatus_maybe_breakpoint (w))))
     {
       siginfo_t info, *info_p;
 

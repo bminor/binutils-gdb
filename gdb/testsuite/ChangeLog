@@ -1,3 +1,63 @@
+2015-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR corefiles/17808
+	* gdb.arch/i386-biarch-core.core.bz2: New file.
+	* gdb.arch/i386-biarch-core.exp: New file.
+
+2015-02-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/multi-create-ns-info-thr.exp: Return early if
+	runto_main fails.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/solib-corrupted.exp: Expect "stap" as first column of
+	info probes.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/multi-create-ns-info-thr.exp: New file.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/no-attach-trace.exp: Don't run to main.  Do
+	clean_restart before gdb_target_supports_trace.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18006
+	* gdb.threads/clone-thread_db.c: New file.
+	* gdb.threads/clone-thread_db.exp: New file.
+
+2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16812
+	* gdb.base/catch-gdb-caused-signals.c: New file.
+	* gdb.base/catch-gdb-caused-signals.exp: New file.
+
+2015-02-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure: Regenerated.
+	* configure.ac: Use GDB_AC_TRANSFORM.
+	* aclocal.m4: sinclude ../transform.m4.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* lib/dtrace.exp: New file.
+	* gdb.base/dtrace-probe.exp: Likewise.
+	* gdb.base/dtrace-probe.d: Likewise.
+	* gdb.base/dtrace-probe.c: Likewise.
+	* lib/pdtrace.in: Likewise.
+	* configure.ac: Output variables with the transformed names of
+	the strip, readelf, as and nm tools.  AC_SUBST lib/pdtrace.in.
+	* configure: Regenerated.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.base/stap-probe.exp (stap_test): Remove "SystemTap" from
+	expected message when trying to access $_probe_* convenience
+	variables while not on a probe.
+
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-framefilter.exp (pagination quit - *): New tests.

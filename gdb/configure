@@ -13068,7 +13068,7 @@ $as_echo "$gdb_cv_var_elf" >&6; }
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS
 if test $gdb_cv_var_elf = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o"
+  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o"
 
 $as_echo "#define HAVE_ELF 1" >>confdefs.h
 
@@ -15141,17 +15141,21 @@ ac_config_links="$ac_config_links $ac_config_links_1"
 $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 
 
-# Undo the $ec_script escaping suitable for Makefile.
-transform=`echo "$program_transform_name" | sed -e 's/\\$\\$/\\$/g'`
-GDB_TRANSFORM_NAME=`echo gdb | sed -e "$transform"`
-if test "x$GDB_TRANSFORM_NAME" = x; then
-  GDB_TRANSFORM_NAME=gdb
-fi
 
-GCORE_TRANSFORM_NAME=`echo gcore | sed -e "$transform"`
-if test "x$GCORE_TRANSFORM_NAME" = x; then
-  GCORE_TRANSFORM_NAME=gcore
-fi
+  gdb_ac_transform=`echo "$program_transform_name" | sed -e 's/\\$\\$/\\$/g'`
+  GDB_TRANSFORM_NAME=`echo gdb | sed -e "$gdb_ac_transform"`
+  if test "x$GDB_TRANSFORM_NAME" = x; then
+     GDB_TRANSFORM_NAME=gdb
+  fi
+
+
+
+  gdb_ac_transform=`echo "$program_transform_name" | sed -e 's/\\$\\$/\\$/g'`
+  GCORE_TRANSFORM_NAME=`echo gcore | sed -e "$gdb_ac_transform"`
+  if test "x$GCORE_TRANSFORM_NAME" = x; then
+     GCORE_TRANSFORM_NAME=gcore
+  fi
+
 
 ac_config_files="$ac_config_files gcore"
 

@@ -110,7 +110,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* NOTYPE +LOCAL +DEFAULT +11 \.Lie0
 .* FILE +LOCAL +DEFAULT +ABS 
 .* OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
-.* NOTYPE +LOCAL +DEFAULT +UND \.__tls_get_addr
 .* NOTYPE +LOCAL +DEFAULT +6 .*\.plt_call\.__tls_get_addr
 .* NOTYPE +LOCAL +DEFAULT +6 __glink_PLTresolve
 .* TLS +GLOBAL +DEFAULT +UND gd

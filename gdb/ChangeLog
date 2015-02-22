@@ -1,3 +1,216 @@
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_handle_extended_wait): Call
+	thread_db_notice_clone whenever a new clone LWP is detected.
+	(linux_stop_and_wait_all_lwps, linux_unstop_all_lwps): New
+	functions.
+	* linux-nat.h (thread_db_attach_lwp): Delete declaration.
+	(thread_db_notice_clone, linux_stop_and_wait_all_lwps)
+	(linux_unstop_all_lwps): Declare.
+	* linux-thread-db.c (struct thread_get_info_inout): Delete.
+	(thread_get_info_callback): Delete.
+	(thread_from_lwp): Use td_thr_get_info and record_thread.
+	(thread_db_attach_lwp): Delete.
+	(thread_db_notice_clone): New function.
+	(try_thread_db_load_1): If /proc is mounted and shows the
+	process'es task list, walk over all LWPs and call thread_from_lwp
+	instead of relying on td_ta_thr_iter.
+	(attach_thread): Don't call check_thread_signals here.  Split the
+	tail part of the function (which adds the thread to the core GDB
+	thread list) to ...
+	(record_thread): ... this function.  Call check_thread_signals
+	here.
+	(thread_db_wait): Don't call thread_db_find_new_threads_1.  Always
+	call thread_from_lwp.
+	(thread_db_update_thread_list): Rename to ...
+	(thread_db_update_thread_list_org): ... this.
+	(thread_db_update_thread_list): New function.
+	(thread_db_find_thread_from_tid): Delete.
+	(thread_db_get_ada_task_ptid): Simplify.
+	* nat/linux-procfs.c: Include <sys/stat.h>.
+	(linux_proc_task_list_dir_exists): New function.
+	* nat/linux-procfs.h (linux_proc_task_list_dir_exists): Declare.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (lin_lwp_attach_lwp): No longer special case the
+	main LWP.  Handle the case of waitpid returning 0 if we're already
+	attached to the LWP.  Don't set the LWP's last_resume_kind to
+	resume_stop if we already knew about the LWP.
+	(linux_nat_filter_event): Add debug logs.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* target.h (forward_target_decr_pc_after_break): Delete
+	declaration.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18006
+	* linux-thread-db.c (thread_get_info_callback): Return early if
+	the thread's lwp id is -1.
+
+2015-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.9 released.
+
+2015-02-19  Steve Ellcey  <sellcey@imgtec.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Initialize arg.expr.
+	(dtrace_get_probes) Change type of variable 'dof'.
+
+2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16812
+	* linux-nat.c (linux_nat_filter_event): Report SIGTRAP,SIGILL,SIGSEGV.
+	* nat/linux-ptrace.c (linux_wstatus_maybe_breakpoint): Add.
+	* nat/linux-ptrace.h: Add linux_wstatus_maybe_breakpoint.
+
+2015-02-19  David Taylor  <dtaylor@emc.com>
+
+	* common/ax.def (setv): Fix consumed entry in setv DEFOP.
+
+2015-02-18  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_handle_resize_during_io): Remove this
+	function.
+	(tui_putc): Don't call tui_handle_resize_during_io.
+	(tui_getc): Likewise.
+	(tui_mld_getc): Likewise.
+	* tui/tui-win.c: Include event-loop.h and tui/tui-io.h.
+	(tui_sigwinch_token): New static variable.
+	(tui_initialize_win): Adjust documentation.  Set
+	tui_sigwinch_token.
+	(tui_async_resize_screen): New asynchronous callback.
+	(tui_sigwinch_handler): Adjust documentation.  Asynchronously
+	invoke tui_async_resize_screen.
+
+2015-02-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure: Regenerated.
+	* configure.ac: Use GDB_AC_TRANSFORM.
+	* Makefile.in (aclocal_m4_deps): Added transform.m4.
+	* acinclude.m4: sinclude transform.m4.
+	* transform.m4: New file.
+	(GDB_AC_TRANSFORM): New macro.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* NEWS: Announce the support for DTrace SDT probes.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* amd64-linux-tdep.c: Include "parser-defs.h" and "user-regs.h".
+	(amd64_dtrace_parse_probe_argument): New function.
+	(amd64_dtrace_probe_is_enabled): Likewise.
+	(amd64_dtrace_enable_probe): Likewise.
+	(amd64_dtrace_disable_probe): Likewise.
+	(amd64_linux_init_abi): Register the
+	`gdbarch_dtrace_probe_argument', `gdbarch_dtrace_enable_probe',
+	`gdbarch_dtrace_disable_probe' and
+	`gdbarch_dtrace_probe_is_enabled' hooks.
+	(amd64_dtrace_disabled_probe_sequence_1): New constant.
+	(amd64_dtrace_disabled_probe_sequence_2): Likewise.
+	(amd64_dtrace_enable_probe_sequence): Likewise.
+	(amd64_dtrace_disable_probe_sequence): Likewise.
+
+2015-01-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* breakpoint.c (BREAK_ARGS_HELP): Help string updated to mention
+	the -probe-dtrace new vpossible value for PROBE_MODIFIER.
+	* configure.ac (CONFIG_OBS): dtrace-probe.o added if BFD can
+	handle ELF files.
+	* Makefile.in (SFILES): dtrace-probe.c added.
+	* configure: Regenerate.
+	* dtrace-probe.c: New file.
+	(SHT_SUNW_dof): New constant.
+	(dtrace_probe_type): New enum.
+	(dtrace_probe_arg): New struct.
+	(dtrace_probe_arg_s): New typedef.
+	(struct dtrace_probe_enabler): New struct.
+	(dtrace_probe_enabler_s): New typedef.
+	(dtrace_probe): New struct.
+	(dtrace_probe_is_linespec): New function.
+	(dtrace_dof_sect_type): New enum.
+	(dtrace_dof_dofh_ident): Likewise.
+	(dtrace_dof_encoding): Likewise.
+	(DTRACE_DOF_ENCODE_LSB): Likewise.
+	(DTRACE_DOF_ENCODE_MSB): Likewise.
+	(dtrace_dof_hdr): New struct.
+	(dtrace_dof_sect): Likewise.
+	(dtrace_dof_provider): Likewise.
+	(dtrace_dof_probe): Likewise.
+	(DOF_UINT): New macro.
+	(DTRACE_DOF_PTR): Likewise.
+	(DTRACE_DOF_SECT): Likewise.
+	(dtrace_process_dof_probe): New function.
+	(dtrace_process_dof): Likewise.
+	(dtrace_build_arg_exprs): Likewise.
+	(dtrace_get_arg): Likewise.
+	(dtrace_get_probes): Likewise.
+	(dtrace_get_probe_argument_count): Likewise.
+	(dtrace_can_evaluate_probe_arguments): Likewise.
+	(dtrace_evaluate_probe_argument): Likewise.
+	(dtrace_compile_to_ax): Likewise.
+	(dtrace_probe_destroy): Likewise.
+	(dtrace_gen_info_probes_table_header): Likewise.
+	(dtrace_gen_info_probes_table_values): Likewise.
+	(dtrace_probe_is_enabled): Likewise.
+	(dtrace_probe_ops): New variable.
+	(info_probes_dtrace_command): New function.
+	(_initialize_dtrace_probe): Likewise.
+	(dtrace_type_name): Likewise.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdbarch.sh (dtrace_parse_probe_argument): New.
+	(dtrace_probe_is_enabled): Likewise.
+	(dtrace_enable_probe): Likewise.
+	(dtrace_disable_probe): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* stap-probe.c (stap_probe_ops): Add NULLs in the static
+	stap_probe_ops for `enable_probe' and `disable_probe'.
+	* probe.c (enable_probes_command): New function.
+	(disable_probes_command): Likewise.
+	(_initialize_probe): Define the cli commands `enable probe' and
+	`disable probe'.
+	(parse_probe_linespec): New function.
+	(info_probes_for_ops): Use parse_probe_linespec.
+	* probe.h (probe_ops): New hooks `enable_probe' and
+	`disable_probe'.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* probe.c (compute_probe_arg): Moved from stap-probe.c
+	(compile_probe_arg): Likewise.
+	(probe_funcs): Likewise.
+	* stap-probe.c (compute_probe_arg): Moved to probe.c.
+	(compile_probe_arg): Likewise.
+	(probe_funcs): Likewise.
+
+2015-02-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* probe.c (print_ui_out_not_applicables): New function.
+	(exists_probe_with_pops): Likewise.
+	(info_probes_for_ops): Do not include column headers for probe
+	types for which no probe has been actually found on any object.
+	Also invoke `print_ui_out_not_applicables' in order to match the
+	column rows with the header when probes of several types are
+	listed.
+	Print the "Type" column.
+	* probe.h (probe_ops): Added a new probe operation `type_name'.
+	* stap-probe.c (stap_probe_ops): Add `stap_type_name'.
+	(stap_type_name): New function.
+
+2015-02-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_getc): Don't call key_is_command_char.
+	(key_is_command_char): Delete.
+
 2015-02-17  Pedro Alves  <palves@redhat.com>
 
 	* tui/tui.c (tui_enable): Resize windows before anything

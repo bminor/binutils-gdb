@@ -8251,6 +8251,18 @@ elfcore_grok_s390_tdb (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bfd_boolean
+elfcore_grok_s390_vxrs_low (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-vxrs-low", note);
+}
+
+static bfd_boolean
+elfcore_grok_s390_vxrs_high (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-vxrs-high", note);
+}
+
+static bfd_boolean
 elfcore_grok_arm_vfp (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, ".reg-arm-vfp", note);
@@ -8713,6 +8725,20 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
         return elfcore_grok_s390_tdb (abfd, note);
       else
         return TRUE;
+
+    case NT_S390_VXRS_LOW:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_s390_vxrs_low (abfd, note);
+      else
+	return TRUE;
+
+    case NT_S390_VXRS_HIGH:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_s390_vxrs_high (abfd, note);
+      else
+	return TRUE;
 
     case NT_ARM_VFP:
       if (note->namesz == 6
@@ -9580,6 +9606,31 @@ elfcore_write_s390_tdb (bfd *abfd,
 }
 
 char *
+elfcore_write_s390_vxrs_low (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const void *s390_vxrs_low,
+			     int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_S390_VXRS_LOW, s390_vxrs_low, size);
+}
+
+char *
+elfcore_write_s390_vxrs_high (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const void *s390_vxrs_high,
+			     int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_S390_VXRS_HIGH,
+			     s390_vxrs_high, size);
+}
+
+char *
 elfcore_write_arm_vfp (bfd *abfd,
 		       char *buf,
 		       int *bufsiz,
@@ -9663,6 +9714,10 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_s390_system_call (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-s390-tdb") == 0)
     return elfcore_write_s390_tdb (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-vxrs-low") == 0)
+    return elfcore_write_s390_vxrs_low (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-vxrs-high") == 0)
+    return elfcore_write_s390_vxrs_high (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-arm-vfp") == 0)
     return elfcore_write_arm_vfp (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-aarch-tls") == 0)

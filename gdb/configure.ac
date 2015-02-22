@@ -2074,7 +2074,7 @@ AC_SUBST(WIN32LIBS)
 GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_elf,
                  [bfd_get_elf_phdr_upper_bound (NULL)], elf-bfd.h)
 if test $gdb_cv_var_elf = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o"
+  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
   # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
@@ -2444,18 +2444,8 @@ dnl  At the moment, we just assume it's UTF-8.
 AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
           [Define to be a string naming the default host character set.])
 
-# Undo the $ec_script escaping suitable for Makefile.
-transform=`echo "$program_transform_name" | sed -e 's/[\\$][\\$]/\\$/g'`
-GDB_TRANSFORM_NAME=`echo gdb | sed -e "$transform"`
-if test "x$GDB_TRANSFORM_NAME" = x; then
-  GDB_TRANSFORM_NAME=gdb
-fi
-AC_SUBST(GDB_TRANSFORM_NAME)
-GCORE_TRANSFORM_NAME=`echo gcore | sed -e "$transform"`
-if test "x$GCORE_TRANSFORM_NAME" = x; then
-  GCORE_TRANSFORM_NAME=gcore
-fi
-AC_SUBST(GCORE_TRANSFORM_NAME)
+GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])
+GDB_AC_TRANSFORM([gcore], [GCORE_TRANSFORM_NAME])
 AC_CONFIG_FILES([gcore], [chmod +x gcore])
 
 AC_OUTPUT(Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile,

@@ -18,10 +18,11 @@
 
 #include "config.h"
 #include <signal.h>
-#include "sysdep.h"
+#include <stdlib.h>
+#include <string.h>
 #include <sys/times.h>
 #include <sys/param.h>
-#include <netinet/in.h>	/* for byte ordering macros */
+#include <unistd.h>
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "libiberty.h"
@@ -997,12 +998,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
   /* For now ignore all parameters to the program */
 
   return SIM_RC_OK;
-}
-
-void
-sim_kill (SIM_DESC sd)
-{
-  /* nothing to do */
 }
 
 void

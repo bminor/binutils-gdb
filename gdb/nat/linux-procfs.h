@@ -68,4 +68,7 @@ typedef int (*linux_proc_attach_lwp_func) (ptid_t ptid);
 extern void linux_proc_attach_tgid_threads (pid_t pid,
 					    linux_proc_attach_lwp_func func);
 
+/* Return true if the /proc/PID/task/ directory exists.  */
+extern int linux_proc_task_list_dir_exists (pid_t pid);
+
 #endif /* COMMON_LINUX_PROCFS_H */

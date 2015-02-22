@@ -3660,8 +3660,8 @@ On the HPPA local symbols begin with @samp{L$}.
 
 Local symbols are defined and used within the assembler, but they are
 normally not saved in object files.  Thus, they are not visible when debugging.
-You may use the @samp{-L} option (@pxref{L, ,Include Local Symbols:
-@option{-L}}) to retain the local symbols in the object files.
+You may use the @samp{-L} option (@pxref{L, ,Include Local Symbols})
+to retain the local symbols in the object files.
 
 @subheading Local Labels
 

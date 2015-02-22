@@ -557,6 +557,10 @@
 					/*   note name must be "LINUX".  */
 #define NT_S390_TDB	0x308		/* S390 transaction diagnostic block */
 					/*   note name must be "LINUX".  */
+#define NT_S390_VXRS_LOW	0x309	/* S390 vector registers 0-15 upper half */
+					/*   note name must be "LINUX".  */
+#define NT_S390_VXRS_HIGH	0x30a	/* S390 vector registers 16-31 */
+					/*   note name must be "LINUX".  */
 #define NT_ARM_VFP	0x400		/* ARM VFP registers */
 /* The following definitions should really use NT_AARCH_..., but defined
    this way for compatibility with Linux.  */

@@ -1,3 +1,21 @@
+2015-02-18  Alan Modra  <amodra@gmail.com>
+
+	PR 17954
+	* powerpc.cc (Global_symbol_visitor_opd::operator()): Set default
+	visibility.
+
+2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* gc.h (Garbage_collection::add_reference): Don't use find.
+
+2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* object.cc (write_local_symbols): avoid std::vector copy.
+
+2015-02-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* merge.cc (get_output_offset): Use upper_bound instead of lower_bound.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* gdb-index.cc (Gdb_index_info_reader::visit_top_die): Recognize

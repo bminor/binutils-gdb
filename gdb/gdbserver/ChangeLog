@@ -1,3 +1,20 @@
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* thread-db.c: Include "nat/linux-procfs.h".
+	(thread_db_init): Skip listing new threads if the kernel supports
+	PTRACE_EVENT_CLONE and /proc/PID/task/ is accessible.
+
+2015-02-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (status_pending_p_callback): Use ptid_match.
+
+2015-02-19  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16812
+	* linux-low.c (wstatus_maybe_breakpoint): Remove.
+	(linux_low_filter_event): Update wstatus_maybe_breakpoint name.
+	(linux_wait_1): Report SIGTRAP,SIGILL,SIGSEGV.
+
 2015-02-10  Antoine Tremblay <antoine.tremblay@ericsson.com>
 
 	PR breakpoints/15956

@@ -32,8 +32,10 @@
 #include "cli/cli-cmds.h"
 #include "top.h"
 #include "source.h"
+#include "event-loop.h"
 
 #include "tui/tui.h"
+#include "tui/tui-io.h"
 #include "tui/tui-data.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-stack.h"
@@ -829,35 +831,62 @@ tui_resize_all (void)
 }
 
 #ifdef SIGWINCH
-/* SIGWINCH signal handler for the tui.  This signal handler is always
-   called, even when the readline package clears signals because it is
-   set as the old_sigwinch() (TUI only).  */
+/* Token for use by TUI's asynchronous SIGWINCH handler.  */
+static struct async_signal_handler *tui_sigwinch_token;
+
+/* TUI's SIGWINCH signal handler.  */
 static void
 tui_sigwinch_handler (int signal)
 {
-  /* Say that a resize was done so that the readline can do it later
-     when appropriate.  */
+  /* Set win_resized to TRUE and asynchronously invoke our resize callback.  If
+     the callback is invoked while TUI is active then it ought to successfully
+     resize the screen, resetting win_resized to FALSE.  Of course, if the
+     callback is invoked while TUI is inactive then it will do nothing; in that
+     case, win_resized will remain TRUE until we get a chance to synchronously
+     resize the screen from tui_enable().  */
+  mark_async_signal_handler (tui_sigwinch_token);
   tui_set_win_resized_to (TRUE);
+}
+
+/* Callback for asynchronously resizing TUI following a SIGWINCH signal.  */
+static void
+tui_async_resize_screen (gdb_client_data arg)
+{
+  if (!tui_active)
+    return;
+
+  tui_resize_all ();
+  tui_refresh_all_win ();
+  tui_update_gdb_sizes ();
+  tui_set_win_resized_to (FALSE);
+  tui_redisplay_readline ();
 }
 #endif
 
-/* Initializes SIGWINCH signal handler for the tui.  */
+/* Initialize TUI's SIGWINCH signal handler.  Note that the handler is not
+   uninstalled when we exit TUI, so the handler should not assume that TUI is
+   always active.  */
 void
 tui_initialize_win (void)
 {
 #ifdef SIGWINCH
-#ifdef HAVE_SIGACTION
-  struct sigaction old_winch;
+  tui_sigwinch_token
+    = create_async_signal_handler (tui_async_resize_screen, NULL);
 
-  memset (&old_winch, 0, sizeof (old_winch));
-  old_winch.sa_handler = &tui_sigwinch_handler;
+  {
+#ifdef HAVE_SIGACTION
+    struct sigaction old_winch;
+
+    memset (&old_winch, 0, sizeof (old_winch));
+    old_winch.sa_handler = &tui_sigwinch_handler;
 #ifdef SA_RESTART
-  old_winch.sa_flags = SA_RESTART;
+    old_winch.sa_flags = SA_RESTART;
 #endif
-  sigaction (SIGWINCH, &old_winch, NULL);
+    sigaction (SIGWINCH, &old_winch, NULL);
 #else
-  signal (SIGWINCH, &tui_sigwinch_handler);
+    signal (SIGWINCH, &tui_sigwinch_handler);
 #endif
+  }
 #endif
 }
 

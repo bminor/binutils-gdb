@@ -96,6 +96,15 @@ if test "${build}" = "${host}" -a "${host}" = "${target}"; then
 fi
 AC_SUBST(EXTRA_RULES)
 
+# Transform the name of some programs and generate the lib/pdtrace
+# test tool.
+AC_ARG_PROGRAM
+GDB_AC_TRANSFORM(strip, STRIP_TRANSFORM_NAME)
+GDB_AC_TRANSFORM(readelf, READELF_TRANSFORM_NAME)
+GDB_AC_TRANSFORM(as, GAS_TRANSFORM_NAME)
+GDB_AC_TRANSFORM(nm, NM_TRANSFORM_NAME)
+AC_CONFIG_FILES([lib/pdtrace], [chmod +x lib/pdtrace])
+
 AC_OUTPUT([Makefile \
   gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.btrace/Makefile \

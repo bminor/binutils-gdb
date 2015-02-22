@@ -4490,7 +4490,7 @@ process_program_headers (FILE * file)
       /* PR binutils/12467.  */
       if (elf_header.e_phoff != 0)
 	warn (_("possibly corrupt ELF header - it has a non-zero program"
-		" header offset, but no program headers"));
+		" header offset, but no program headers\n"));
       else if (do_segments)
 	printf (_("\nThere are no program headers in this file.\n"));
       return 0;
@@ -14513,6 +14513,10 @@ get_note_type (unsigned e_type)
 	return _("NT_S390_SYSTEM_CALL (s390 system call restart data)");
       case NT_S390_TDB:
 	return _("NT_S390_TDB (s390 transaction diagnostic block)");
+      case NT_S390_VXRS_LOW:
+	return _("NT_S390_VXRS_LOW (s390 vector registers 0-15 upper half)");
+      case NT_S390_VXRS_HIGH:
+	return _("NT_S390_VXRS_HIGH (s390 vector registers 16-31)");
       case NT_ARM_VFP:
 	return _("NT_ARM_VFP (arm VFP registers)");
       case NT_ARM_TLS:
