@@ -14109,7 +14109,12 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
        current_die != NULL;
        current_die = dwarf2_extension (die, &cu))
     {
-      name = dwarf2_name (current_die, cu);
+      /* We don't use dwarf2_name here so that we can detect the absence
+	 of a name -> anonymous namespace.  */
+      struct attribute *attr = dwarf2_attr (die, DW_AT_name, cu);
+
+      if (attr != NULL)
+	name = DW_STRING (attr);
       if (name != NULL)
 	break;
     }
@@ -19253,7 +19258,8 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
   return name;
 }
 
-/* Get name of a die, return NULL if not found.  */
+/* Get name of a die, return NULL if not found.
+   Anonymous namespaces are converted to their magic string.  */
 
 static const char *
 dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
@@ -19262,6 +19268,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if ((!attr || !DW_STRING (attr))
+      && die->tag != DW_TAG_namespace
       && die->tag != DW_TAG_class_type
       && die->tag != DW_TAG_interface_type
       && die->tag != DW_TAG_structure_type
@@ -19279,6 +19286,11 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       /* These tags always have simple identifiers already; no need
 	 to canonicalize them.  */
       return DW_STRING (attr);
+
+    case DW_TAG_namespace:
+      if (attr != NULL && DW_STRING (attr) != NULL)
+	return DW_STRING (attr);
+      return CP_ANONYMOUS_NAMESPACE_STR;
 
     case DW_TAG_subprogram:
       /* Java constructors will all be named "<init>", so return

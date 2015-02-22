@@ -1,3 +1,7 @@
+2015-02-21  Doug Evans  <dje@google.com>
+
+	* gdb.cp/anon-ns.exp: Add test for ptype '(anonymous namespace)'.
+
 2015-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR corefiles/17808
