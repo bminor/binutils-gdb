@@ -1,3 +1,8 @@
+2015-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (default_size): Set to 32 for x32.
+	* configure: Regenerated.
+
 2015-02-18  Alan Modra  <amodra@gmail.com>
 
 	PR 17954
