@@ -210,6 +210,7 @@ for targ in $target $canon_targets; do
 	  case "$target" in
 	  x86_64*-linux-gnux32)
 	    target_x32=yes
+	    default_size=32
 	    ;;
 	  *)
 	    target_x86_64=yes
