@@ -1,3 +1,8 @@
+2015-02-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 17915
+	* score.h: Fix typo in license header.
+
 2015-02-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* common.h (NT_S390_VXRS_LOW): New macro.
