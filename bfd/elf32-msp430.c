@@ -1656,9 +1656,38 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
   for (isymend = isym + symtab_hdr->sh_info; isym < isymend; isym++)
-    if (isym->st_shndx == sec_shndx
-	&& isym->st_value > addr && isym->st_value < toaddr)
-      isym->st_value -= count;
+    {
+      const char * name;
+
+      name = bfd_elf_string_from_elf_section
+	(abfd, symtab_hdr->sh_link, isym->st_name);
+      name = (name == NULL || * name == 0) ? bfd_section_name (abfd, sec) : name;
+
+      if (isym->st_shndx != sec_shndx)
+	continue;
+      
+      if (isym->st_value > addr
+	  && (isym->st_value < toaddr
+	      /* We also adjust a symbol at the end of the section if its name is
+		 on the list below.  These symbols are used for debug info
+		 generation and they refer to the end of the current section, not
+		 the start of the next section.  */
+	      || (isym->st_value == toaddr
+		  && name != NULL
+		  && (CONST_STRNEQ (name, ".Letext")
+		      || CONST_STRNEQ (name, ".LFE")))))
+	{
+	  if (isym->st_value < addr + count)
+	    isym->st_value = addr;
+	  else
+	    isym->st_value -= count;
+	}
+      /* Adjust the function symbol's size as well.  */
+      else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC
+	       && isym->st_value + isym->st_size > addr
+	       && isym->st_value + isym->st_size < toaddr)
+	isym->st_size -= count;
+    }
 
   /* Now adjust the global symbols defined in this section.  */
   symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
@@ -1674,7 +1703,19 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value > addr
 	  && sym_hash->root.u.def.value < toaddr)
-	sym_hash->root.u.def.value -= count;
+	{
+	  if (sym_hash->root.u.def.value < addr + count)
+	    sym_hash->root.u.def.value = addr;
+	  else
+	    sym_hash->root.u.def.value -= count;
+	}
+      /* Adjust the function symbol's size as well.  */
+      else if (sym_hash->root.type == bfd_link_hash_defined
+	       && sym_hash->root.u.def.section == sec
+	       && sym_hash->type == STT_FUNC
+	       && sym_hash->root.u.def.value + sym_hash->size > addr
+	       && sym_hash->root.u.def.value + sym_hash->size < toaddr)
+	sym_hash->size -= count;
     }
 
   return TRUE;

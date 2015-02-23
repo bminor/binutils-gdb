@@ -3,6 +3,10 @@
 	PR 17914
 	* cpu-w65.c: Correct typos in license notice.
 
+	PR 17940
+	* elf32-msp430.c (msp430_elf_relax_delete_bytes): Adjust debug
+	symbols at end of sections.  Adjust function sizes.
+
 2015-02-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* elf-bfd.h (elfcore_write_s390_vxrs_low): Add prototype.

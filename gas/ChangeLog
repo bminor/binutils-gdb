@@ -1,3 +1,12 @@
+2015-02-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 17940
+	* dwarf2dbg.c (out_header): When generating dwarf sections use
+	real symbols not temps for the start and end symbols.
+	* config/tc-msp430.h (TC_FORCE_RELOCATION_SUB_SAME): Also prevent
+	adjustments to relocations in debug sections.
+	(TC_LINKRELAX_FIXUP): Likewise.
+
 2015-02-19  Alan Modra  <amodra@gmail.com>
 
 	* doc/as.texinfo (Local Symbol Names): Don't use ':' in pxref.
