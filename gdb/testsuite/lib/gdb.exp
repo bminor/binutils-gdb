@@ -181,25 +181,35 @@ proc delete_breakpoints {} {
     # we need a larger timeout value here or this thing just confuses
     # itself.  May need a better implementation if possible. - guo
     #
-    send_gdb "delete breakpoints\n"
-    gdb_expect 100 {
-	 -re "Delete all breakpoints.*y or n.*$" {
+    set timeout 100
+
+    set msg "delete all breakpoints in delete_breakpoints"
+    set deleted 0
+    gdb_test_multiple "delete breakpoints" "$msg" {
+	-re "Delete all breakpoints.*y or n.*$" {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	 -re "$gdb_prompt $" { # This happens if there were no breakpoints
-	    }
-	 timeout { perror "Delete all breakpoints in delete_breakpoints (timeout)" ; return }
+	-re "$gdb_prompt $" {
+	    set deleted 1
+	}
     }
-    send_gdb "info breakpoints\n"
-    gdb_expect 100 {
-	 -re "No breakpoints or watchpoints..*$gdb_prompt $" {}
-	 -re "$gdb_prompt $" { perror "breakpoints not deleted" ; return }
-	 -re "Delete all breakpoints.*or n.*$" {
-	    send_gdb "y\n"
-	    exp_continue
+
+    if {$deleted} {
+	# Confirm with "info breakpoints".
+	set deleted 0
+	set msg "info breakpoints"
+	gdb_test_multiple $msg $msg {
+	    -re "No breakpoints or watchpoints..*$gdb_prompt $" {
+		set deleted 1
+	    }
+	    -re "$gdb_prompt $" {
+	    }
 	}
-	 timeout { perror "info breakpoints (timeout)" ; return }
+    }
+
+    if {!$deleted} {
+	perror "breakpoints not deleted"
     }
 }
 

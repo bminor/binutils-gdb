@@ -1,5 +1,10 @@
 2015-02-23  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (delete_breakpoints): Rewrite using
+	gdb_test_multiple.
+
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/info-os.c: Include stdlib.h.
 
 2015-02-22  Doug Evans  <xdje42@gmail.com>
