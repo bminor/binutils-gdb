@@ -1,3 +1,7 @@
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/info-os.c: Include stdlib.h.
+
 2015-02-22  Doug Evans  <xdje42@gmail.com>
 
 	PR symtab/17855
