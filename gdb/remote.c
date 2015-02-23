@@ -5489,6 +5489,16 @@ peek_stop_reply (ptid_t ptid)
 			 stop_reply_match_ptid_and_ws, &ptid);
 }
 
+/* Skip PACKET until the next semi-colon (or end of string).  */
+
+static char *
+skip_to_semicolon (char *p)
+{
+  while (*p != '\0' && *p != ';')
+    p++;
+  return p;
+}
+
 /* Parse the stop reply in BUF.  Either the function succeeds, and the
    result is stored in EVENT, or throws an error.  */
 
@@ -5521,107 +5531,93 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
       while (*p)
 	{
 	  char *p1;
-	  char *p_temp;
 	  int fieldsize;
-	  LONGEST pnum = 0;
 
-	  /* If the packet contains a register number, save it in
-	     pnum and set p1 to point to the character following it.
-	     Otherwise p1 points to p.  */
+	  p1 = strchr (p, ':');
+	  if (p1 == NULL)
+	    error (_("Malformed packet(a) (missing colon): %s\n\
+Packet: '%s'\n"),
+		   p, buf);
+	  if (p == p1)
+	    error (_("Malformed packet(a) (missing register number): %s\n\
+Packet: '%s'\n"),
+		   p, buf);
 
-	  /* If this packet is an awatch packet, don't parse the 'a'
-	     as a register number.  */
+	  /* Some "registers" are actually extended stop information.
+	     Note if you're adding a new entry here: GDB 7.9 and
+	     earlier assume that all register "numbers" that start
+	     with an hex digit are real register numbers.  Make sure
+	     the server only sends such a packet if it knows the
+	     client understands it.  */
 
-	  if (strncmp (p, "awatch", strlen("awatch")) != 0
-	      && strncmp (p, "core", strlen ("core") != 0))
+	  if (strncmp (p, "thread", p1 - p) == 0)
+	    event->ptid = read_ptid (++p1, &p);
+	  else if ((strncmp (p, "watch", p1 - p) == 0)
+		   || (strncmp (p, "rwatch", p1 - p) == 0)
+		   || (strncmp (p, "awatch", p1 - p) == 0))
 	    {
-	      /* Read the ``P'' register number.  */
-	      pnum = strtol (p, &p_temp, 16);
-	      p1 = p_temp;
+	      event->stopped_by_watchpoint_p = 1;
+	      p = unpack_varlen_hex (++p1, &addr);
+	      event->watch_data_address = (CORE_ADDR) addr;
+	    }
+	  else if (strncmp (p, "library", p1 - p) == 0)
+	    {
+	      event->ws.kind = TARGET_WAITKIND_LOADED;
+	      p = skip_to_semicolon (p1 + 1);
+	    }
+	  else if (strncmp (p, "replaylog", p1 - p) == 0)
+	    {
+	      event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
+	      /* p1 will indicate "begin" or "end", but it makes
+		 no difference for now, so ignore it.  */
+	      p = skip_to_semicolon (p1 + 1);
+	    }
+	  else if (strncmp (p, "core", p1 - p) == 0)
+	    {
+	      ULONGEST c;
+
+	      p = unpack_varlen_hex (++p1, &c);
+	      event->core = c;
 	    }
 	  else
-	    p1 = p;
-
-	  if (p1 == p)	/* No register number present here.  */
 	    {
-	      p1 = strchr (p, ':');
-	      if (p1 == NULL)
-		error (_("Malformed packet(a) (missing colon): %s\n\
+	      ULONGEST pnum;
+	      char *p_temp;
+
+	      /* Maybe a real ``P'' register number.  */
+	      p_temp = unpack_varlen_hex (p, &pnum);
+	      /* If the first invalid character is the colon, we got a
+		 register number.  Otherwise, it's an unknown stop
+		 reason.  */
+	      if (p_temp == p1)
+		{
+		  struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
+		  cached_reg_t cached_reg;
+
+		  if (reg == NULL)
+		    error (_("Remote sent bad register number %s: %s\n\
 Packet: '%s'\n"),
-		       p, buf);
-	      if (strncmp (p, "thread", p1 - p) == 0)
-		event->ptid = read_ptid (++p1, &p);
-	      else if ((strncmp (p, "watch", p1 - p) == 0)
-		       || (strncmp (p, "rwatch", p1 - p) == 0)
-		       || (strncmp (p, "awatch", p1 - p) == 0))
-		{
-		  event->stopped_by_watchpoint_p = 1;
-		  p = unpack_varlen_hex (++p1, &addr);
-		  event->watch_data_address = (CORE_ADDR) addr;
-		}
-	      else if (strncmp (p, "library", p1 - p) == 0)
-		{
-		  p1++;
-		  p_temp = p1;
-		  while (*p_temp && *p_temp != ';')
-		    p_temp++;
+			   hex_string (pnum), p, buf);
 
-		  event->ws.kind = TARGET_WAITKIND_LOADED;
-		  p = p_temp;
-		}
-	      else if (strncmp (p, "replaylog", p1 - p) == 0)
-		{
-		  event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
-		  /* p1 will indicate "begin" or "end", but it makes
-		     no difference for now, so ignore it.  */
-		  p_temp = strchr (p1 + 1, ';');
-		  if (p_temp)
-		    p = p_temp;
-		}
-	      else if (strncmp (p, "core", p1 - p) == 0)
-		{
-		  ULONGEST c;
+		  cached_reg.num = reg->regnum;
 
-		  p = unpack_varlen_hex (++p1, &c);
-		  event->core = c;
+		  p = p1 + 1;
+		  fieldsize = hex2bin (p, cached_reg.data,
+				       register_size (target_gdbarch (),
+						      reg->regnum));
+		  p += 2 * fieldsize;
+		  if (fieldsize < register_size (target_gdbarch (),
+						 reg->regnum))
+		    warning (_("Remote reply is too short: %s"), buf);
+
+		  VEC_safe_push (cached_reg_t, event->regcache, &cached_reg);
 		}
 	      else
 		{
-		  /* Silently skip unknown optional info.  */
-		  p_temp = strchr (p1 + 1, ';');
-		  if (p_temp)
-		    p = p_temp;
+		  /* Not a number.  Silently skip unknown optional
+		     info.  */
+		  p = skip_to_semicolon (p1 + 1);
 		}
-	    }
-	  else
-	    {
-	      struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
-	      cached_reg_t cached_reg;
-
-	      p = p1;
-
-	      if (*p != ':')
-		error (_("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n"),
-		       p, buf);
-	      ++p;
-
-	      if (reg == NULL)
-		error (_("Remote sent bad register number %s: %s\n\
-Packet: '%s'\n"),
-		       hex_string (pnum), p, buf);
-
-	      cached_reg.num = reg->regnum;
-
-	      fieldsize = hex2bin (p, cached_reg.data,
-				   register_size (target_gdbarch (),
-						  reg->regnum));
-	      p += 2 * fieldsize;
-	      if (fieldsize < register_size (target_gdbarch (),
-					     reg->regnum))
-		warning (_("Remote reply is too short: %s"), buf);
-
-	      VEC_safe_push (cached_reg_t, event->regcache, &cached_reg);
 	    }
 
 	  if (*p != ';')

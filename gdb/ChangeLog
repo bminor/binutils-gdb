@@ -1,3 +1,11 @@
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (skip_to_semicolon): New function.
+	(remote_parse_stop_reply) <T stop reply>: Use it.  Don't
+	special case the stop reasons that look like hex numbers
+	upfront.  Instead handle real register numbers after matching
+	all the known stop reasons.
+
 2015-02-21  Doug Evans  <dje@google.com>
 
 	PR c++/17976, symtab/17821
