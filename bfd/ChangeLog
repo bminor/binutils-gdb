@@ -1,3 +1,10 @@
+2015-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Heed -z nocopyreloc.
+	Use text relocs rather than giving an error on trying to use
+	.dynbss for protected shared lib vars.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+
 2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* elf32-avr.c (struct elf_avr_section_data): New structure.

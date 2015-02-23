@@ -5582,6 +5582,13 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (!h->non_got_ref)
     return TRUE;
 
+  /* If -z nocopyreloc was given, we won't generate them either.  */
+  if (info->nocopyreloc)
+    {
+      h->non_got_ref = 0;
+      return TRUE;
+    }
+
    /* If we didn't find any dynamic relocs in read-only sections, then
       we'll be keeping the dynamic relocs and avoiding the copy reloc.
       We can't do this if there are any small data relocations.  This
@@ -5593,6 +5600,16 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       && !htab->is_vxworks
       && !h->def_regular
       && !readonly_dynrelocs (h))
+    {
+      h->non_got_ref = 0;
+      return TRUE;
+    }
+
+  /* Protected variables do not work with .dynbss.  The copy in
+     .dynbss won't be used by the shared library with the protected
+     definition for the variable.  Text relocations are preferable
+     to an incorrect program.  */
+  if (h->protected_def)
     {
       h->non_got_ref = 0;
       return TRUE;
