@@ -33746,7 +33746,7 @@ with the @code{SIGQUIT} signal.
 
 Cause @value{GDBN} to call the internal function @code{internal_error},
 @code{internal_warning} or @code{demangler_warning} and hence behave
-as though an internal problam has been detected.  In addition to
+as though an internal problem has been detected.  In addition to
 reporting the internal problem, these functions give the user the
 opportunity to either quit @value{GDBN} or (for @code{internal_error}
 and @code{internal_warning}) create a core file of the current

@@ -1,3 +1,9 @@
+2015-02-23  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/18008
+	* gdb.texinfo (maint internal-error, maint internal-warning, maint
+	demangler-warning): Fix typo ("problam").
+
 2015-02-19  David Taylor  <dtaylor@emc.com>
 
 	* agentexpr.texi (Bytecode Descriptions): Fix summary line for setv.
