@@ -1,3 +1,8 @@
+2015-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (parse_args): Produce a more reasonable error message
+	when -ixxx or -rxxx is the last option on the linker command line.
+
 2015-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17973

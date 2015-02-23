@@ -999,7 +999,7 @@ parse_args (unsigned argc, char **argv)
 	       an error message here.  We cannot just make this a warning,
 	       increment optind, and continue because getopt is too confused
 	       and will seg-fault the next time around.  */
-	    einfo(_("%P%F: bad -rpath option\n"));
+	    einfo(_("%P%F: unrecognised option: %s\n"), argv[optind]);
 
 	  link_info.relocatable = TRUE;
 	  config.build_constructors = FALSE;
