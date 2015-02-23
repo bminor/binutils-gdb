@@ -1,3 +1,10 @@
+2015-03-27  Petr Machata  <pmachata@redhat.com>
+
+	* lib/dwarf.exp (Dwarf::_handle_DW_FORM): Handle DW_FORM_sec_offset.
+	(Dwarf::_line_count, Dwarf::_line_saw_file): New variables.
+	(Dwarf::assemble): Initialize them.
+	(Dwarf::lines): New function.
+
 2015-03-26  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* lib/gdb.exp (gdb_target_symbol_prefix_flags): Don't set
