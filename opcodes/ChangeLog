@@ -1,3 +1,9 @@
+2015-02-23  Vinay  <Vinay.G@kpit.com>
+
+	* rl78-decode.opc (MOV): Added space between two operands for
+	'mov' instruction in index addressing mode.
+	* rl78-decode.c: Regenerate.
+
 2015-02-19  Pedro Alves  <palves@redhat.com>
 
 	* microblaze-dis.h [__cplusplus]: Wrap in extern "C".
