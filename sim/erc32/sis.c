@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #endif
 #include <stdio.h>
-#include <time.h>
 #include <sys/fcntl.h>
 #include "sis.h"
 #include <dis-asm.h>
@@ -36,17 +35,8 @@
 
 /* Structures and functions from readline library */
 
-typedef struct {
-  char *line;
-  char *data;
-} HIST_ENTRY;
-
-extern char *	readline (char *prompt);
-extern void	using_history (void);
-extern void	add_history (char *string);
-extern HIST_ENTRY *remove_history (int which);
-
-
+#include "readline/readline.h"
+#include "readline/history.h"
 
 /* Command history buffer length - MUST be binary */
 #define HIST_LEN	64
@@ -86,7 +76,7 @@ run_sim(sregs, icount, dis)
 {
     int             irq, mexc, deb, asi;
 
-    sregs->starttime = time(NULL);
+    sregs->starttime = get_time();
     init_stdio();
     if (sregs->err_mode) icount = 0;
     deb = dis || sregs->histlen || sregs->bptnum;
@@ -146,7 +136,7 @@ run_sim(sregs, icount, dis)
 	    if (sregs->tlimit <= ebase.simtime) sregs->tlimit = -1;
 	}
     }
-    sregs->tottime += time(NULL) - sregs->starttime;
+    sregs->tottime += get_time() - sregs->starttime;
     restore_stdio();
     if (sregs->err_mode)
 	return (ERROR);
@@ -172,6 +162,7 @@ main(argc, argv)
     char           *cmdq[HIST_LEN];
     int             cmdi = 0;
     int             i;
+    int             lfile = 0;
 
     cfile = 0;
     for (i = 0; i < 64; i++)
@@ -220,7 +211,7 @@ main(argc, argv)
 		exit(1);
 	    }
 	} else {
-	    last_load_addr = bfd_load(argv[stat]);
+	    lfile = stat;
 	}
 	stat++;
     }
@@ -242,6 +233,8 @@ main(argc, argv)
     reset_all();
     init_bpt(&sregs);
     init_sim();
+    if (lfile)
+        last_load_addr = bfd_load(argv[lfile]);
 #ifdef STAT
     reset_stat(&sregs);
 #endif

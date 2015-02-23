@@ -743,6 +743,14 @@ mec_read(addr, asi, data)
 	*data = read_uart(addr);
 	break;
 
+    case 0xF4:		/* simulator RAM size in bytes */
+	*data = 4096*1024;
+	break;
+
+    case 0xF8:		/* simulator ROM size in bytes */
+	*data = 1024*1024;
+	break;
+
     default:
 	set_sfsr(MEC_ACC, addr, asi, 1);
 	return (1);
@@ -1886,4 +1894,20 @@ sis_memory_read(addr, data, length)
 
     memcpy(data, mem, length);
     return (length);
+}
+
+extern struct pstate sregs;
+
+void
+boot_init (void)
+{
+    mec_write(MEC_WCR, 0);	/* zero waitstates */
+    mec_write(MEC_TRAPD, 0);	/* turn off watch-dog */
+    mec_write(MEC_RTC_SCALER, sregs.freq - 1); /* generate 1 MHz RTC tick */
+    mec_write(MEC_MEMCFG, (3 << 18) | (4 << 10)); /* 1 MB ROM, 4 MB RAM */
+    sregs.wim = 2;
+    sregs.psr = 0x110010e0;
+    sregs.r[30] = RAM_END;
+    sregs.r[14] = sregs.r[30] - 96 * 4;
+    mec_mcr |= 1;		/* power-down enabled */
 }

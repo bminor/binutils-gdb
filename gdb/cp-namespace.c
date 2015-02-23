@@ -37,7 +37,7 @@ static struct symbol *
 			     const char *nested_name,
 			     const char *concatenated_name,
 			     const struct block *block,
-			     int basic_lookup);
+			     int basic_lookup, int is_in_anonymous);
 
 static struct type *cp_lookup_transparent_type_loop (const char *name,
 						     const char *scope,
@@ -327,7 +327,8 @@ static struct symbol *
 cp_search_static_and_baseclasses (const char *name,
 				  const struct block *block,
 				  const domain_enum domain,
-				  unsigned int prefix_len)
+				  unsigned int prefix_len,
+				  int is_in_anonymous)
 {
   struct symbol *sym;
   char *klass, *nested;
@@ -366,7 +367,8 @@ cp_search_static_and_baseclasses (const char *name,
   /* Look for a symbol named NESTED in this class.
      The caller is assumed to have already have done a basic lookup of NAME.
      So we pass zero for BASIC_LOOKUP to cp_lookup_nested_symbol_1 here.  */
-  sym = cp_lookup_nested_symbol_1 (klass_type, nested, name, block, 0);
+  sym = cp_lookup_nested_symbol_1 (klass_type, nested, name, block, 0,
+				   is_in_anonymous);
 
   do_cleanups (cleanup);
   return sym;
@@ -416,7 +418,8 @@ cp_lookup_symbol_in_namespace (const char *namespace, const char *name,
     return sym;
 
   if (search)
-    sym = cp_search_static_and_baseclasses (name, block, domain, prefix_len);
+    sym = cp_search_static_and_baseclasses (name, block, domain, prefix_len,
+					    is_in_anonymous);
 
   return sym;
 }
@@ -900,7 +903,7 @@ cp_find_type_baseclass_by_name (struct type *parent_type, const char *name)
 
 static struct symbol *
 find_symbol_in_baseclass (struct type *parent_type, const char *name,
-			   const struct block *block)
+			  const struct block *block, int is_in_anonymous)
 {
   int i;
   struct symbol *sym;
@@ -925,7 +928,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
       xsnprintf (concatenated_name, len, "%s::%s", base_name, name);
 
       sym = cp_lookup_nested_symbol_1 (base_type, name, concatenated_name,
-				       block, 1);
+				       block, 1, is_in_anonymous);
       if (sym != NULL)
 	break;
     }
@@ -942,16 +945,17 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
    passed as an argument so that callers can control how space for it is
    allocated.
    If BASIC_LOOKUP is non-zero then perform a basic lookup of
-   CONCATENATED_NAME.  See cp_basic_lookup_symbol for details.  */
+   CONCATENATED_NAME.  See cp_basic_lookup_symbol for details.
+   If IS_IN_ANONYMOUS is non-zero then CONCATENATED_NAME is in an anonymous
+   namespace.  */
 
 static struct symbol *
 cp_lookup_nested_symbol_1 (struct type *container_type,
 			   const char *nested_name,
 			   const char *concatenated_name,
 			   const struct block *block,
-			   int basic_lookup)
+			   int basic_lookup, int is_in_anonymous)
 {
-  int is_in_anonymous = cp_is_in_anonymous (concatenated_name);
   struct symbol *sym;
 
   /* NOTE: carlton/2003-11-10: We don't treat C++ class members
@@ -981,16 +985,22 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
 
   /* Nope.  We now have to search all static blocks in all objfiles,
      even if block != NULL, because there's no guarantees as to which
-     symtab the symbol we want is in.  */
-  sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
-  if (sym != NULL)
-    return sym;
+     symtab the symbol we want is in.  Except for symbols defined in
+     anonymous namespaces should be treated as local to a single file,
+     which we just searched.  */
+  if (!is_in_anonymous)
+    {
+      sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
+      if (sym != NULL)
+	return sym;
+    }
 
   /* If this is a class with baseclasses, search them next.  */
   CHECK_TYPEDEF (container_type);
   if (TYPE_N_BASECLASSES (container_type) > 0)
     {
-      sym = find_symbol_in_baseclass (container_type, nested_name, block);
+      sym = find_symbol_in_baseclass (container_type, nested_name, block,
+				      is_in_anonymous);
       if (sym != NULL)
 	return sym;
     }
@@ -1038,14 +1048,17 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	const char *parent_name = type_name_no_tag_or_error (saved_parent_type);
 	struct symbol *sym;
 	char *concatenated_name;
+	int is_in_anonymous;
 
 	size = strlen (parent_name) + 2 + strlen (nested_name) + 1;
 	concatenated_name = alloca (size);
 	xsnprintf (concatenated_name, size, "%s::%s",
 		   parent_name, nested_name);
+	is_in_anonymous = cp_is_in_anonymous (concatenated_name);
 
 	sym = cp_lookup_nested_symbol_1 (parent_type, nested_name,
-					 concatenated_name, block, 1);
+					 concatenated_name, block, 1,
+					 is_in_anonymous);
 
 	if (symbol_lookup_debug)
 	  {

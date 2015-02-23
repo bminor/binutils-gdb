@@ -468,6 +468,8 @@ exec_cmd(sregs, cmd)
 	    }
 	    sregs->pc = len & ~3;
 	    sregs->npc = sregs->pc + 4;
+	    if ((sregs->pc != 0) && (ebase.simtime == 0))
+	        boot_init();
 	    printf("resuming at 0x%08x\n",sregs->pc);
 	    if ((cmd2 = strtok(NULL, " \t\n\r")) != NULL) {
 		stat = run_sim(sregs, VAL(cmd2), 0);
@@ -611,7 +613,7 @@ void
 reset_stat(sregs)
     struct pstate  *sregs;
 {
-    sregs->tottime = 0;
+    sregs->tottime = 0.0;
     sregs->pwdtime = 0;
     sregs->ninst = 0;
     sregs->fholdt = 0;
@@ -630,9 +632,10 @@ show_stat(sregs)
     struct pstate  *sregs;
 {
     uint32          iinst;
-    uint32          stime, tottime;
+    uint32          stime;
 
-    if (sregs->tottime == 0) tottime = 1; else tottime = sregs->tottime;
+    if (sregs->tottime == 0.0)
+        sregs->tottime += 1E-6;
     stime = ebase.simtime - sregs->simstart;	/* Total simulated time */
 #ifdef STAT
 
@@ -667,12 +670,15 @@ show_stat(sregs)
 	   sregs->freq * (float) (sregs->ninst - sregs->finst) /
 	   (float) (stime - sregs->pwdtime),
      sregs->freq * (float) sregs->finst / (float) (stime - sregs->pwdtime));
-    printf(" Simulated ERC32 time        : %5.2f ms\n", (float) (ebase.simtime - sregs->simstart) / 1000.0 / sregs->freq);
-    printf(" Processor utilisation       : %5.2f %%\n", 100.0 * (1.0 - ((float) sregs->pwdtime / (float) stime)));
-    printf(" Real-time / simulator-time  : 1/%.2f \n",
-      ((float) sregs->tottime) / ((float) (stime) / (sregs->freq * 1.0E6)));
-    printf(" Simulator performance       : %d KIPS\n",sregs->ninst/tottime/1000);
-    printf(" Used time (sys + user)      : %3d s\n\n", sregs->tottime);
+    printf(" Simulated ERC32 time        : %.2f s\n",
+        (float) (ebase.simtime - sregs->simstart) / 1000000.0 / sregs->freq);
+    printf(" Processor utilisation       : %.2f %%\n",
+        100.0 * (1.0 - ((float) sregs->pwdtime / (float) stime)));
+    printf(" Real-time performance       : %.2f %%\n",
+        100.0 / (sregs->tottime / ((double) (stime) / (sregs->freq * 1.0E6))));
+    printf(" Simulator performance       : %.2f MIPS\n",
+        (double)(sregs->ninst) / sregs->tottime / 1E6);
+    printf(" Used time (sys + user)      : %.2f s\n\n", sregs->tottime);
 }
 
 
@@ -759,6 +765,17 @@ disp_regs(sregs,cwp)
     }
 }
 
+static void print_insn_sparc_sis(uint32 addr, struct disassemble_info *info)
+{
+    unsigned char           i[4];
+
+    sis_memory_read(addr, i, 4);
+    dinfo.buffer_vma = addr;
+    dinfo.buffer_length = 4;
+    dinfo.buffer = i;
+    print_insn_sparc(addr, info);
+}
+
 static void
 disp_ctrl(sregs)
     struct pstate  *sregs;
@@ -770,10 +787,10 @@ disp_ctrl(sregs)
 	   sregs->psr, sregs->wim, sregs->tbr, sregs->y);
     sis_memory_read(sregs->pc, i, 4);
     printf("\n  pc: %08X = %02X%02X%02X%02X    ", sregs->pc,i[0],i[1],i[2],i[3]);
-    print_insn_sparc(sregs->pc, &dinfo);
+    print_insn_sparc_sis(sregs->pc, &dinfo);
     sis_memory_read(sregs->npc, i, 4);
     printf("\n npc: %08X = %02X%02X%02X%02X    ",sregs->npc,i[0],i[1],i[2],i[3]);
-    print_insn_sparc(sregs->npc, &dinfo);
+    print_insn_sparc_sis(sregs->npc, &dinfo);
     if (sregs->err_mode)
 	printf("\n IU in error mode");
     printf("\n\n");
@@ -821,7 +838,7 @@ dis_mem(addr, len, info)
     for (i = addr & -3; i < ((addr & -3) + (len << 2)); i += 4) {
 	sis_memory_read(i, data, 4);
 	printf(" %08x  %02x%02x%02x%02x  ", i, data[0],data[1],data[2],data[3]);
-	print_insn_sparc(i, info);
+	print_insn_sparc_sis(i, info);
         if (i >= 0xfffffffc) break;
 	printf("\n");
     }
@@ -1114,4 +1131,15 @@ bfd_load(fname)
 	printf("\n");
 
     return(bfd_get_start_address (pbfd));
+}
+
+double get_time (void)
+{
+    double usec;
+
+    struct timeval tm;
+
+    gettimeofday (&tm, NULL);
+    usec = ((double) tm.tv_sec) * 1E6 + ((double) tm.tv_usec);
+    return (usec / 1E6);
 }

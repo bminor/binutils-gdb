@@ -110,14 +110,14 @@ struct pstate {
     float32         freq;	/* Simulated processor frequency */
 
 
-    uint64          tottime;
+    double          tottime;
     uint64          ninst;
     uint64          fholdt;
     uint64          holdt;
     uint64          icntt;
     uint64          finst;
     uint64          simstart;
-    uint64          starttime;
+    double          starttime;
     uint64          tlimit;	/* Simulation time limit */
     uint64          pwdtime;	/* Cycles in power-down mode */
     uint64          nstore;	/* Number of load instructions */
@@ -198,6 +198,7 @@ extern void	reset_all (void);
 extern void	sys_reset (void);
 extern void	sys_halt (void);
 extern int	bfd_load (char *fname);
+extern double	get_time (void);
 
 /* exec.c */
 extern int	dispatch_instruction (struct pstate *sregs);

@@ -1,3 +1,16 @@
+2015-02-21  Doug Evans  <dje@google.com>
+
+	PR c++/17976, symtab/17821
+	* cp-namespace.c (cp_search_static_and_baseclasses): New parameter
+	is_in_anonymous.  All callers updated.
+	(find_symbol_in_baseclass): Ditto.
+	(cp_lookup_nested_symbol_1): Ditto.  Don't search all static blocks
+	for symbols in an anonymous namespace.
+	* dwarf2read.c (namespace_name): Don't call dwarf2_name, fetch
+	DW_AT_name directly.
+	(dwarf2_name): Convert missing namespace name to
+	CP_ANONYMOUS_NAMESPACE_STR.
+
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_handle_extended_wait): Call
