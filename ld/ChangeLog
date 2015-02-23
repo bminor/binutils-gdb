@@ -1,3 +1,13 @@
+2015-01-21  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* Makefile.am: (ALL_EMULATION_SOURCES): Add new emulations.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add h8300-*-linux
+	* emulparams/h8300elf_linux.sh: Add new emulation.
+	* emulparams/h8300helf_linux.sh: Likewise.
+	* emulparams/h8300self_linux.sh: Likewise.
+	* emulparams/h8300sxelf_linux.sh: Likewise.
+
 2015-02-23  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (parse_args): Produce a more reasonable error message

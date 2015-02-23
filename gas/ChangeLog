@@ -1,3 +1,15 @@
+2015-02-23  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* config/tc-h8300.c (line_separater_chars): Add a version for
+	h8300-linux that includes a separator.
+	(default_mach): New variable.
+	(md_main): Use it.
+	(md_longopts): Add '--march' option.
+	(md_parse_option): Parse the new option.
+	* config/tc-h8300.h (TARGET_FORMAT): Add elf32-h8300-linux.
+	* configure.tgt: Add h8300-*-linux
+	* doc/c-h8300.texi: Document --march.
+
 2015-02-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 17940

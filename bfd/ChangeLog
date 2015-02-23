@@ -1,3 +1,11 @@
+2015-02-23  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* config.bfd: Add h8300-*-linux.
+	* configure.ac: Add h8300_elf32_linux_vec.
+	* configure: Regenerate.
+	* elf32-h8300.c: Likewise.
+	* targets.c(_bfd_target_vector): Likewise.
+
 2015-02-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 17914

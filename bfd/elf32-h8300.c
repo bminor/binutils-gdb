@@ -1744,3 +1744,12 @@ elf32_h8_get_relocated_section_contents (bfd *output_bfd,
 #define elf_symbol_leading_char '_'
 
 #include "elf32-target.h"
+
+#undef  TARGET_BIG_SYM
+#define TARGET_BIG_SYM			h8300_elf32_linux_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME			"elf32-h8300-linux"
+#undef  elf_symbol_leading_char
+#define elf32_bed			elf32_h8300_linux_bed
+
+#include "elf32-target.h"
