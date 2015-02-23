@@ -1,5 +1,13 @@
 2015-02-23  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (check_stopped_by_breakpoint): Don't check if the
+	thread was doing a step-over; always adjust the PC if
+	we stepped over a permanent breakpoint.
+	(linux_wait_1): If we stepped over breakpoint that was on top of a
+	permanent breakpoint, manually advance the PC past it.
+
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
 	* linux-x86-low.c (REGSIZE): Define in both 32-bit and 64-bit
 	modes.
 	(x86_fill_gregset, x86_store_gregset): Use it when handling

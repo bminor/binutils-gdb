@@ -507,14 +507,8 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
   /* We may have just stepped a breakpoint instruction.  E.g., in
      non-stop mode, GDB first tells the thread A to step a range, and
      then the user inserts a breakpoint inside the range.  In that
-     case, we need to report the breakpoint PC.  But, when we're
-     trying to step past one of our own breakpoints, that happens to
-     have been placed on top of a permanent breakpoint instruction, we
-     shouldn't adjust the PC, otherwise the program would keep
-     trapping the permanent breakpoint forever.  */
-  if ((!lwp->stepping
-       || (!ptid_equal (ptid_of (current_thread), step_over_bkpt)
-	   && lwp->stop_pc == sw_breakpoint_pc))
+     case we need to report the breakpoint PC.  */
+  if ((!lwp->stepping || lwp->stop_pc == sw_breakpoint_pc)
       && (*the_low_target.breakpoint_at) (sw_breakpoint_pc))
     {
       if (debug_threads)
@@ -2550,6 +2544,41 @@ linux_wait_1 (ptid_t ptid,
 	}
 
       return ptid_of (current_thread);
+    }
+
+  /* If step-over executes a breakpoint instruction, it means a
+     gdb/gdbserver breakpoint had been planted on top of a permanent
+     breakpoint.  The PC has been adjusted by
+     check_stopped_by_breakpoint to point at the breakpoint address.
+     Advance the PC manually past the breakpoint, otherwise the
+     program would keep trapping the permanent breakpoint forever.  */
+  if (!ptid_equal (step_over_bkpt, null_ptid)
+      && event_child->stop_reason == LWP_STOPPED_BY_SW_BREAKPOINT)
+    {
+      unsigned int increment_pc;
+
+      if (the_low_target.breakpoint_len > the_low_target.decr_pc_after_break)
+	increment_pc = the_low_target.breakpoint_len;
+      else
+	increment_pc = the_low_target.decr_pc_after_break;
+
+      if (debug_threads)
+	{
+	  debug_printf ("step-over for %s executed software breakpoint\n",
+			target_pid_to_str (ptid_of (current_thread)));
+	}
+
+      if (increment_pc != 0)
+	{
+	  struct regcache *regcache
+	    = get_thread_regcache (current_thread, 1);
+
+	  event_child->stop_pc += increment_pc;
+	  (*the_low_target.set_pc) (regcache, event_child->stop_pc);
+
+	  if (!(*the_low_target.breakpoint_at) (event_child->stop_pc))
+	    event_child->stop_reason = LWP_STOPPED_BY_NO_REASON;
+	}
     }
 
   /* If this event was not handled before, and is not a SIGTRAP, we
