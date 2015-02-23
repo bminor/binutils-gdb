@@ -176,6 +176,7 @@ static /*const*/ int i386_regmap[] =
 
 /* So code below doesn't have to care, i386 or amd64.  */
 #define ORIG_EAX ORIG_RAX
+#define REGSIZE 8
 
 static const int x86_64_regmap[] =
 {
@@ -220,6 +221,8 @@ static /*const*/ int i386_regmap[] =
 };
 
 #define I386_NUM_REGS (sizeof (i386_regmap) / sizeof (i386_regmap[0]))
+
+#define REGSIZE 4
 
 #endif
 
@@ -374,7 +377,7 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
     collect_register (regcache, i, ((char *) buf) + i386_regmap[i]);
 
   collect_register_by_name (regcache, "orig_eax",
-			    ((char *) buf) + ORIG_EAX * 4);
+			    ((char *) buf) + ORIG_EAX * REGSIZE);
 }
 
 static void
@@ -396,7 +399,7 @@ x86_store_gregset (struct regcache *regcache, const void *buf)
     supply_register (regcache, i, ((char *) buf) + i386_regmap[i]);
 
   supply_register_by_name (regcache, "orig_eax",
-			   ((char *) buf) + ORIG_EAX * 4);
+			   ((char *) buf) + ORIG_EAX * REGSIZE);
 }
 
 static void

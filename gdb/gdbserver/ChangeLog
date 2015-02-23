@@ -1,3 +1,10 @@
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
+	* linux-x86-low.c (REGSIZE): Define in both 32-bit and 64-bit
+	modes.
+	(x86_fill_gregset, x86_store_gregset): Use it when handling
+	$orig_eax.
+
 2015-02-20  Pedro Alves  <palves@redhat.com>
 
 	* thread-db.c: Include "nat/linux-procfs.h".
