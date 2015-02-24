@@ -10783,6 +10783,7 @@ process_symbol_table (FILE * file)
       unsigned long maxlength = 0;
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
+      unsigned long chained;
 
       printf (_("\nHistogram for bucket list length (total of %lu buckets):\n"),
 	      (unsigned long) nbuckets);
@@ -10797,21 +10798,23 @@ process_symbol_table (FILE * file)
       printf (_(" Length  Number     %% of total  Coverage\n"));
       for (hn = 0; hn < nbuckets; ++hn)
 	{
-	  for (si = buckets[hn]; si > 0 && si < nchains && si < nbuckets; si = chains[si])
+	  for (si = buckets[hn], chained = 0;
+	       si > 0 && si < nchains && si < nbuckets && chained <= nchains;
+	       si = chains[si], ++chained)
 	    {
 	      ++nsyms;
 	      if (maxlength < ++lengths[hn])
 		++maxlength;
-
-	      /* PR binutils/17531: A corrupt binary could contain broken
-		 histogram data.  Do not go into an infinite loop trying
-		 to process it.  */
-	      if (chains[si] == si)
-		{
-		  error (_("histogram chain links to itself\n"));
-		  break;
-		}
 	    }
+
+	    /* PR binutils/17531: A corrupt binary could contain broken
+	       histogram data.  Do not go into an infinite loop trying
+	       to process it.  */
+	    if (chained > nchains)
+	      {
+		error (_("histogram chain is corrupt\n"));
+		break;
+	      }
 	}
 
       counts = (unsigned long *) calloc (maxlength + 1, sizeof (*counts));

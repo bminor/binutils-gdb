@@ -1,3 +1,10 @@
+2015-02-24  Mike Frysinger  <vapier@gentoo.org>
+
+	PR binutils/17531
+	* readelf.c (process_symbol_table): Declare chained.  Increment it
+	in every loop.  Abort when chained is larger than nchains.  Move
+	error check outside of chain loop.
+
 2015-02-24  Dmitry Antipov  <dantipov@nvidia.com>
 
 	* readelf.c (find_symbol_for_address): Use a binary search to
