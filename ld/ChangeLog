@@ -1,3 +1,12 @@
+2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* emultempl/aarch64elf.em
+	(aarch64_elf_create_output_section_statements): Add parameter in
+	bfd_elf${ELFSIZE}_aarch64_set_options call.
+	(OPTION_FIX_ERRATUM_843419): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add fix-cortex-a53-843419.
+	(PARSE_AND_LIST_ARGS_CASES): Add OPTION_FIX_ERRATUM_843419.
+
 2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* emultempl/aarch64elf.em (_aarch64_add_stub_section): Set section

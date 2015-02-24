@@ -1,3 +1,44 @@
+2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* bfd-in.h (bfd_elf64_aarch64_set_options)
+	(bfd_elf32_aarch64_set_options): Add parameter.
+	* bfd-in2.h: Regenerated.
+	* elfnn-aarch64.c (aarch64_erratum_843419_stub)
+	(_bfd_aarch64_adrp_p, _bfd_aarch64_erratum_843419_sequence_p)
+	(_bfd_aarch64_erratum_843419_stub_name)
+	(_bfd_aarch64_erratum_843419_fixup)
+	(_bfd_aarch64_erratum_843419_scan)
+	(_bfd_aarch64_erratum_843419_branch_to_stub)
+	(_bfd_aarch64_erratum_843419_p): Define.
+	(enum elf_aarch64_stub_type): Define
+	aarch64_stub_erratum_843419_veneer.
+	(struct elf_aarch64_stub_hash_entry): Define adrp_offset.
+	(struct elf_aarch64_link_hash_table): Define fix_erratum_843419
+	and fix_erratum_843419_adr.
+	(stub_hash_newfunc): Initialize adrp_offset;
+	(_bfd_aarch64_add_stub_entry_after): Define.
+	(aarch64_map_one_stub, aarch64_build_one_stub)
+	(aarch64_size_one_stub): Handle
+	aarch64_stub_erratum_843419_veneer.
+	(_bfd_aarch64_resize_stubs): Round stub section size.
+	(elfNN_aarch64_size_stubs): Add scan for 843419.
+	(bfd_elfNN_aarch64_set_options): Add parameter. Initialize
+	fix_erratum_843419 and fix_erratum_843419_adr.
+	(struct erratum_835769_branch_to_stub_data): Add info.
+	(elfNN_aarch64_write_section): Initialise info.  Handle 843419.
+	(elfNN_aarch64_size_dynamic_sections): Handle 843419.
+	* elfxx-aarch64.c (_bfd_aarch64_decode_adrp_imm)
+	(_bfd_aarch64_sign_extend): Define.
+	(reencode_adr_imm): Remove static. Rename to:
+	(_bfd_aarch64_reencode_adr_imm): Define.
+	(_bfd_aarch64_elf_put_addend): Call _bfd_aarch64_reencode_adr_imm.
+	* elfxx-aarch64.h (AARCH64_ADR_OP, AARCH64_ADRP_OP)
+	(AARCH64_ADRP_OP_MASK, _bfd_aarch64_sign_extend)
+	(_bfd_aarch64_decode_adrp_imm, _bfd_aarch64_reencode_adr_imm):
+	Define.
+
 2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* elfnn-aarch64.c (_bfd_aarch64_resize_stubs): Adjust stub section

@@ -46,6 +46,7 @@ set aarch64elftests {
 }
 
 run_ld_link_tests $aarch64elftests
+run_dump_test "erratum843419"
 
 # Relocation Tests
 run_dump_test "weak-undefined"

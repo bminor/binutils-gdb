@@ -31,6 +31,7 @@ static int no_enum_size_warning = 0;
 static int no_wchar_size_warning = 0;
 static int pic_veneer = 0;
 static int fix_erratum_835769 = 0;
+static int fix_erratum_843419 = 0;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -303,7 +304,8 @@ aarch64_elf_create_output_section_statements (void)
   bfd_elf${ELFSIZE}_aarch64_set_options (link_info.output_bfd, &link_info,
 				 no_enum_size_warning,
 				 no_wchar_size_warning,
-				 pic_veneer, fix_erratum_835769);
+				 pic_veneer,
+				 fix_erratum_835769, fix_erratum_843419);
 
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
@@ -353,6 +355,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_STUBGROUP_SIZE           311
 #define OPTION_NO_WCHAR_SIZE_WARNING	312
 #define OPTION_FIX_ERRATUM_835769	313
+#define OPTION_FIX_ERRATUM_843419	314
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -364,6 +367,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
   { "no-wchar-size-warning", no_argument, NULL, OPTION_NO_WCHAR_SIZE_WARNING},
   { "fix-cortex-a53-835769", no_argument, NULL, OPTION_FIX_ERRATUM_835769},
+  { "fix-cortex-a53-843419", no_argument, NULL, OPTION_FIX_ERRATUM_843419},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -382,6 +386,7 @@ PARSE_AND_LIST_OPTIONS='
                            the linker should choose suitable defaults.\n"
 		   ));
   fprintf (file, _("  --fix-cortex-a53-835769      Fix erratum 835769\n"));
+  fprintf (file, _("  --fix-cortex-a53-843419      Fix erratum 843419\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -403,6 +408,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_FIX_ERRATUM_835769:
       fix_erratum_835769 = 1;
+      break;
+
+    case OPTION_FIX_ERRATUM_843419:
+      fix_erratum_843419 = 1;
       break;
 
     case OPTION_STUBGROUP_SIZE:
