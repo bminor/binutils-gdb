@@ -567,7 +567,7 @@ printable_section_name (Elf_Internal_Shdr * sec)
 	{
 	  if (remaining < 2)
 	    break;
-	  
+
 	  * buf ++ = '^';
 	  * buf ++ = c + 0x40;
 	  remaining -= 2;
@@ -3139,7 +3139,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & EF_SH_FDPIC)
 	    strcat (buf, ", fdpic");
 	  break;
-          
+
         case EM_OR1K:
           if (e_flags & EF_OR1K_NODELAY)
             strcat (buf, ", no delay");
@@ -6439,71 +6439,53 @@ process_relocs (FILE * file)
   return 1;
 }
 
-/* Process the unwind section.  */
-
-#include "unwind-ia64.h"
-
 /* An absolute address consists of a section and an offset.  If the
    section is NULL, the offset itself is the address, otherwise, the
    address equals to LOAD_ADDRESS(section) + offset.  */
 
 struct absaddr
-  {
-    unsigned short section;
-    bfd_vma offset;
-  };
+{
+  unsigned short section;
+  bfd_vma offset;
+};
 
 #define ABSADDR(a) \
   ((a).section \
    ? section_headers [(a).section].sh_addr + (a).offset \
    : (a).offset)
 
-struct ia64_unw_table_entry
-  {
-    struct absaddr start;
-    struct absaddr end;
-    struct absaddr info;
-  };
-
-struct ia64_unw_aux_info
-  {
-
-    struct ia64_unw_table_entry *table;	/* Unwind table.  */
-    unsigned long table_len;	/* Length of unwind table.  */
-    unsigned char * info;	/* Unwind info.  */
-    unsigned long info_size;	/* Size of unwind info.  */
-    bfd_vma info_addr;		/* starting address of unwind info.  */
-    bfd_vma seg_base;		/* Starting address of segment.  */
-    Elf_Internal_Sym * symtab;	/* The symbol table.  */
-    unsigned long nsyms;	/* Number of symbols.  */
-    char * strtab;		/* The string table.  */
-    unsigned long strtab_size;	/* Size of string table.  */
-  };
+/* Find the nearest symbol at or below ADDR.  Returns the symbol
+   name, if found, and the offset from the symbol to ADDR.  */
 
 static void
 find_symbol_for_address (Elf_Internal_Sym * symtab,
-			 unsigned long nsyms,
-			 const char * strtab,
-			 unsigned long strtab_size,
-			 struct absaddr addr,
-			 const char ** symname,
-			 bfd_vma * offset)
+			 unsigned long      nsyms,
+			 const char *       strtab,
+			 unsigned long      strtab_size,
+			 struct absaddr     addr,
+			 const char **      symname,
+			 bfd_vma *          offset)
 {
   bfd_vma dist = 0x100000;
   Elf_Internal_Sym * sym;
+  Elf_Internal_Sym * beg;
+  Elf_Internal_Sym * end;
   Elf_Internal_Sym * best = NULL;
-  unsigned long i;
 
   REMOVE_ARCH_BITS (addr.offset);
+  beg = symtab;
+  end = symtab + nsyms;
 
-  for (i = 0, sym = symtab; i < nsyms; ++i, ++sym)
+  while (beg < end)
     {
-      bfd_vma value = sym->st_value;
+      bfd_vma value;
 
+      sym = beg + (end - beg) / 2;
+
+      value = sym->st_value;
       REMOVE_ARCH_BITS (value);
 
-      if (ELF_ST_TYPE (sym->st_info) == STT_FUNC
-	  && sym->st_name != 0
+      if (sym->st_name != 0
 	  && (addr.section == SHN_UNDEF || addr.section == sym->st_shndx)
 	  && addr.offset >= value
 	  && addr.offset - value < dist)
@@ -6513,6 +6495,11 @@ find_symbol_for_address (Elf_Internal_Sym * symtab,
 	  if (!dist)
 	    break;
 	}
+
+      if (addr.offset < value)
+	end = sym;
+      else
+	beg = sym + 1;
     }
 
   if (best)
@@ -6527,11 +6514,55 @@ find_symbol_for_address (Elf_Internal_Sym * symtab,
   *offset = addr.offset;
 }
 
+static int
+symcmp (const void *p, const void *q)
+{
+  Elf_Internal_Sym *sp = (Elf_Internal_Sym *) p;
+  Elf_Internal_Sym *sq = (Elf_Internal_Sym *) q;
+
+  return sp->st_value > sq->st_value ? 1 : (sp->st_value < sq->st_value ? -1 : 0);
+}
+
+/* Process the unwind section.  */
+
+#include "unwind-ia64.h"
+
+struct ia64_unw_table_entry
+{
+  struct absaddr start;
+  struct absaddr end;
+  struct absaddr info;
+};
+
+struct ia64_unw_aux_info
+{
+  struct ia64_unw_table_entry *table;	/* Unwind table.  */
+  unsigned long table_len;		/* Length of unwind table.  */
+  unsigned char * info;			/* Unwind info.  */
+  unsigned long info_size;		/* Size of unwind info.  */
+  bfd_vma info_addr;			/* Starting address of unwind info.  */
+  bfd_vma seg_base;			/* Starting address of segment.  */
+  Elf_Internal_Sym * symtab;		/* The symbol table.  */
+  unsigned long nsyms;			/* Number of symbols.  */
+  Elf_Internal_Sym * funtab;		/* Sorted table of STT_FUNC symbols.  */
+  unsigned long nfuns;			/* Number of entries in funtab.  */
+  char * strtab;			/* The string table.  */
+  unsigned long strtab_size;		/* Size of string table.  */
+};
+
 static void
 dump_ia64_unwind (struct ia64_unw_aux_info * aux)
 {
   struct ia64_unw_table_entry * tp;
+  unsigned long j, nfuns;
   int in_body;
+
+  aux->funtab = xmalloc (aux->nsyms * sizeof (Elf_Internal_Sym));
+  for (nfuns = 0, j = 0; j < aux->nsyms; j++)
+    if (aux->symtab[j].st_value && ELF_ST_TYPE (aux->symtab[j].st_info) == STT_FUNC)
+      aux->funtab[nfuns++] = aux->symtab[j];
+  aux->nfuns = nfuns;
+  qsort (aux->funtab, aux->nfuns, sizeof (Elf_Internal_Sym), symcmp);
 
   for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
     {
@@ -6542,7 +6573,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
       const unsigned char * end;
       const char * procname;
 
-      find_symbol_for_address (aux->symtab, aux->nsyms, aux->strtab,
+      find_symbol_for_address (aux->funtab, aux->nfuns, aux->strtab,
 			       aux->strtab_size, tp->start, &procname, &offset);
 
       fputs ("\n<", stdout);
@@ -6598,6 +6629,8 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
       for (dp = head + 8; dp < end;)
 	dp = unw_decode (dp, in_body, & in_body);
     }
+
+  free (aux->funtab);
 }
 
 static bfd_boolean
@@ -6698,7 +6731,7 @@ slurp_ia64_unwind_table (FILE * file,
 	      warn (_("Skipping unknown relocation type: %u\n"), get_reloc_type (rp->r_info));
 	      continue;
 	    }
- 
+
 	  if (! const_strneq (relname, "R_IA64_SEGREL"))
 	    {
 	      warn (_("Skipping unexpected relocation type: %s\n"), relname);
@@ -6896,7 +6929,7 @@ struct hppa_unw_table_entry
   {
     struct absaddr start;
     struct absaddr end;
-    unsigned int Cannot_unwind:1;			/* 0 */
+    unsigned int Cannot_unwind:1;		/* 0 */
     unsigned int Millicode:1;			/* 1 */
     unsigned int Millicode_save_sr0:1;		/* 2 */
     unsigned int Region_description:2;		/* 3..4 */
@@ -6905,52 +6938,62 @@ struct hppa_unw_table_entry
     unsigned int Entry_FR:4;     /* number saved */	/* 7..10 */
     unsigned int Entry_GR:5;     /* number saved */	/* 11..15 */
     unsigned int Args_stored:1;			/* 16 */
-    unsigned int Variable_Frame:1;			/* 17 */
-    unsigned int Separate_Package_Body:1;		/* 18 */
+    unsigned int Variable_Frame:1;		/* 17 */
+    unsigned int Separate_Package_Body:1;	/* 18 */
     unsigned int Frame_Extension_Millicode:1;	/* 19 */
-    unsigned int Stack_Overflow_Check:1;		/* 20 */
-    unsigned int Two_Instruction_SP_Increment:1;	/* 21 */
+    unsigned int Stack_Overflow_Check:1;	/* 20 */
+    unsigned int Two_Instruction_SP_Increment:1;/* 21 */
     unsigned int Ada_Region:1;			/* 22 */
     unsigned int cxx_info:1;			/* 23 */
-    unsigned int cxx_try_catch:1;			/* 24 */
-    unsigned int sched_entry_seq:1;			/* 25 */
+    unsigned int cxx_try_catch:1;		/* 24 */
+    unsigned int sched_entry_seq:1;		/* 25 */
     unsigned int reserved2:1;			/* 26 */
-    unsigned int Save_SP:1;				/* 27 */
-    unsigned int Save_RP:1;				/* 28 */
+    unsigned int Save_SP:1;			/* 27 */
+    unsigned int Save_RP:1;			/* 28 */
     unsigned int Save_MRP_in_frame:1;		/* 29 */
     unsigned int extn_ptr_defined:1;		/* 30 */
-    unsigned int Cleanup_defined:1;			/* 31 */
+    unsigned int Cleanup_defined:1;		/* 31 */
 
-    unsigned int MPE_XL_interrupt_marker:1;		/* 0 */
-    unsigned int HP_UX_interrupt_marker:1;		/* 1 */
+    unsigned int MPE_XL_interrupt_marker:1;	/* 0 */
+    unsigned int HP_UX_interrupt_marker:1;	/* 1 */
     unsigned int Large_frame:1;			/* 2 */
-    unsigned int Pseudo_SP_Set:1;			/* 3 */
+    unsigned int Pseudo_SP_Set:1;		/* 3 */
     unsigned int reserved4:1;			/* 4 */
     unsigned int Total_frame_size:27;		/* 5..31 */
   };
 
 struct hppa_unw_aux_info
-  {
-    struct hppa_unw_table_entry *table;	/* Unwind table.  */
-    unsigned long table_len;	/* Length of unwind table.  */
-    bfd_vma seg_base;		/* Starting address of segment.  */
-    Elf_Internal_Sym * symtab;	/* The symbol table.  */
-    unsigned long nsyms;	/* Number of symbols.  */
-    char * strtab;		/* The string table.  */
-    unsigned long strtab_size;	/* Size of string table.  */
-  };
+{
+  struct hppa_unw_table_entry * table;	/* Unwind table.  */
+  unsigned long table_len;		/* Length of unwind table.  */
+  bfd_vma seg_base;			/* Starting address of segment.  */
+  Elf_Internal_Sym * symtab;		/* The symbol table.  */
+  unsigned long nsyms;			/* Number of symbols.  */
+  Elf_Internal_Sym * funtab;		/* Sorted table of STT_FUNC symbols.  */
+  unsigned long nfuns;			/* Number of entries in funtab.  */
+  char * strtab;			/* The string table.  */
+  unsigned long strtab_size;		/* Size of string table.  */
+};
 
 static void
 dump_hppa_unwind (struct hppa_unw_aux_info * aux)
 {
   struct hppa_unw_table_entry * tp;
+  unsigned long j, nfuns;
+
+  aux->funtab = xmalloc (aux->nsyms * sizeof (Elf_Internal_Sym));
+  for (nfuns = 0, j = 0; j < aux->nsyms; j++)
+    if (aux->symtab[j].st_value && ELF_ST_TYPE (aux->symtab[j].st_info) == STT_FUNC)
+      aux->funtab[nfuns++] = aux->symtab[j];
+  aux->nfuns = nfuns;
+  qsort (aux->funtab, aux->nfuns, sizeof (Elf_Internal_Sym), symcmp);
 
   for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
     {
       bfd_vma offset;
       const char * procname;
 
-      find_symbol_for_address (aux->symtab, aux->nsyms, aux->strtab,
+      find_symbol_for_address (aux->funtab, aux->nfuns, aux->strtab,
 			       aux->strtab_size, tp->start, &procname,
 			       &offset);
 
@@ -7004,6 +7047,8 @@ dump_hppa_unwind (struct hppa_unw_aux_info * aux)
     }
 
   printf ("\n");
+
+  free (aux->funtab);
 }
 
 static int
@@ -7240,6 +7285,8 @@ struct arm_unw_aux_info
   FILE *              file;		/* The file containing the unwind sections.  */
   Elf_Internal_Sym *  symtab;		/* The file's symbol table.  */
   unsigned long       nsyms;		/* Number of symbols.  */
+  Elf_Internal_Sym *  funtab;		/* Sorted table of STT_FUNC symbols.  */
+  unsigned long       nfuns;		/* Number of these symbols.  */
   char *              strtab;		/* The file's string table.  */
   unsigned long       strtab_size;	/* Size of string table.  */
 };
@@ -7254,7 +7301,7 @@ arm_print_vma_and_name (struct arm_unw_aux_info *aux,
   if (addr.section == SHN_UNDEF)
     addr.offset = fn;
 
-  find_symbol_for_address (aux->symtab, aux->nsyms, aux->strtab,
+  find_symbol_for_address (aux->funtab, aux->nfuns, aux->strtab,
 			   aux->strtab_size, addr, &procname,
 			   &sym_offset);
 
@@ -7549,11 +7596,13 @@ decode_tic6x_unwind_regmask (unsigned int mask)
   printf ("0x%02x ", OP)
 
 static void
-decode_arm_unwind_bytecode (struct arm_unw_aux_info *aux,
-			    unsigned int word, unsigned int remaining,
-			    unsigned int more_words,
-			    bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
-			    struct arm_section *data_arm_sec)
+decode_arm_unwind_bytecode (struct arm_unw_aux_info *  aux,
+			    unsigned int               word,
+			    unsigned int               remaining,
+			    unsigned int               more_words,
+			    bfd_vma                    data_offset,
+			    Elf_Internal_Shdr *        data_sec,
+			    struct arm_section *       data_arm_sec)
 {
   struct absaddr addr;
 
@@ -7760,11 +7809,13 @@ decode_arm_unwind_bytecode (struct arm_unw_aux_info *aux,
 }
 
 static void
-decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
-			    unsigned int word, unsigned int remaining,
-			    unsigned int more_words,
-			    bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
-			    struct arm_section *data_arm_sec)
+decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *  aux,
+			      unsigned int               word,
+			      unsigned int               remaining,
+			      unsigned int               more_words,
+			      bfd_vma                    data_offset,
+			      Elf_Internal_Shdr *        data_sec,
+			      struct arm_section *       data_arm_sec)
 {
   struct absaddr addr;
 
@@ -7882,7 +7933,7 @@ decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
 	      warn (_("Corrupt stack pointer adjustment detected\n"));
 	      return;
 	    }
-	  
+
 	  offset = read_uleb128 (buf, &len, buf + i + 1);
 	  assert (len == i + 1);
 	  offset = offset * 8 + 0x408;
@@ -8077,10 +8128,18 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 {
   struct arm_section exidx_arm_sec, extab_arm_sec;
   unsigned int i, exidx_len;
+  unsigned long j, nfuns;
 
   memset (&exidx_arm_sec, 0, sizeof (exidx_arm_sec));
   memset (&extab_arm_sec, 0, sizeof (extab_arm_sec));
   exidx_len = exidx_sec->sh_size / 8;
+
+  aux->funtab = xmalloc (aux->nsyms * sizeof (Elf_Internal_Sym));
+  for (nfuns = 0, j = 0; j < aux->nsyms; j++)
+    if (aux->symtab[j].st_value && ELF_ST_TYPE (aux->symtab[j].st_info) == STT_FUNC)
+      aux->funtab[nfuns++] = aux->symtab[j];
+  aux->nfuns = nfuns;
+  qsort (aux->funtab, aux->nfuns, sizeof (Elf_Internal_Sym), symcmp);
 
   for (i = 0; i < exidx_len; i++)
     {
@@ -8095,6 +8154,7 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	  || ! get_unwind_section_word (aux, & exidx_arm_sec, exidx_sec,
 					8 * i + 4, & exidx_entry, & entry_addr, NULL))
 	{
+	  free (aux->funtab);
 	  arm_free_section (& exidx_arm_sec);
 	  arm_free_section (& extab_arm_sec);
 	  return;
@@ -8158,6 +8218,7 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 
   printf ("\n");
 
+  free (aux->funtab);
   arm_free_section (&exidx_arm_sec);
   arm_free_section (&extab_arm_sec);
 }
@@ -9751,7 +9812,7 @@ process_version_sections (FILE * file)
 					    _("version def")) == NULL)
 				{
 				  ivd.vd_next = 0;
-				  /* PR 17531: file: 046-1082287-0.004.  */ 
+				  /* PR 17531: file: 046-1082287-0.004.  */
 				  ivd.vd_ndx  = (data[cnt + j] & VERSYM_VERSION) + 1;
 				  break;
 				}
@@ -10108,7 +10169,7 @@ get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
 	     (unsigned long long) number, ent_size);
       return NULL;
     }
-  
+
   /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
      attempting to allocate memory when the read is bound to fail.  */
   if (ent_size * number > current_file_size)
@@ -13849,7 +13910,7 @@ process_mips_specific (FILE * file)
 
       /* Find the section header so that we get the size.  */
       sect = find_section_by_type (SHT_MIPS_OPTIONS);
-      /* PR 17533 file: 012-277276-0.004.  */ 
+      /* PR 17533 file: 012-277276-0.004.  */
       if (sect == NULL)
 	{
 	  error (_("No MIPS_OPTIONS header found\n"));
@@ -14159,7 +14220,7 @@ process_mips_specific (FILE * file)
 	  error (_("Too many GOT symbols: %lu\n"), (unsigned long) symtabno);
 	  return 0;
 	}
-      
+
       offset = offset_from_vma (file, pltgot, global_end - pltgot);
       data = (unsigned char *) get_data (NULL, file, offset,
                                          global_end - pltgot, 1,
@@ -14925,7 +14986,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
     case NT_VMS_FPMODE:
       printf (_("   Floating Point mode: "));
       printf ("0x%016" BFD_VMA_FMT "x\n",
-              (bfd_vma)byte_get ((unsigned char *)pnote->descdata, 8));
+              (bfd_vma) byte_get ((unsigned char *)pnote->descdata, 8));
       break;
     case NT_VMS_LINKTIME:
       printf (_("   Link time: "));
@@ -14948,9 +15009,9 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
         ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata + 8, 8));
       printf (_("\n   Link flags  : "));
       printf ("0x%016" BFD_VMA_FMT "x\n",
-              (bfd_vma)byte_get ((unsigned char *)pnote->descdata + 16, 8));
+              (bfd_vma) byte_get ((unsigned char *)pnote->descdata + 16, 8));
       printf (_("   Header flags: 0x%08x\n"),
-              (unsigned)byte_get ((unsigned char *)pnote->descdata + 24, 4));
+              (unsigned) byte_get ((unsigned char *)pnote->descdata + 24, 4));
       printf (_("   Image id    : %s\n"), pnote->descdata + 32);
       break;
 #endif

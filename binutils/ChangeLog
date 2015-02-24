@@ -1,3 +1,15 @@
+2015-02-24  Dmitry Antipov  <dantipov@nvidia.com>
+
+	* readelf.c (find_symbol_for_address): Use a binary search to
+	speed up symbol location.  Skip check for function symbol type.
+	(*_unw_aux_info): Add funtab and nfuns fields contains a sorted
+	list of function symbols.
+	(dump_ia64_unwind): Initialise the funtab and nfuns fields and
+	pass them to find_symbol_for_address.
+	(dump_hppa_unwind): Likewise.
+	(arm_print_vma_and_name): Pass funtab to find_symbol_for_address.
+	(dump_arm_unwind): Initialise the funtab and nfuns fields.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (dump_section): Extend the warning message displayed
