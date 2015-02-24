@@ -1,3 +1,16 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Remove deprecated V850 machine
+	flags.
+	(get_v850_section_type_name): New function.  Handles V850 special
+	sections.
+	(get_section_type_name): Add support for V850.
+	(get_v850_elf_note_type): New function.  Returns the name of a
+	V850 note.
+	(print_v850_note): New function.  Prints a V850 note.
+	(process_v850_notes): New function.  Prints V850 notes.
+	(process_note_sections): Add support for V850.
+
 2015-02-24  Mike Frysinger  <vapier@gentoo.org>
 
 	PR binutils/17531

@@ -2952,12 +2952,8 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 		{
 		case EF_RH850_FPU_DOUBLE: strcat (buf, ", double precision FPU"); break;
 		case EF_RH850_FPU_SINGLE: strcat (buf, ", single precision FPU"); break;
-		case EF_RH850_SIMD: strcat (buf, ", SIMD"); break;
-		case EF_RH850_CACHE: strcat (buf, ", CACHE"); break;
-		case EF_RH850_MMU: strcat (buf, ", MMU"); break;
 		case EF_RH850_REGMODE22: strcat (buf, ", regmode:22"); break;
 		case EF_RH850_REGMODE32: strcat (buf, ", regmode:23"); break;
-		case EF_RH850_DATA_ALIGN8: strcat (buf, ", 8-byte alignment"); break;
 		case EF_RH850_GP_FIX: strcat (buf, ", r4 fixed"); break;
 		case EF_RH850_GP_NOFIX: strcat (buf, ", r4 free"); break;
 		case EF_RH850_EP_FIX: strcat (buf, ", r30 fixed"); break;
@@ -3759,6 +3755,20 @@ get_msp430x_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_v850_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_V850_SCOMMON: return "V850 Small Common";
+    case SHT_V850_TCOMMON: return "V850 Tiny Common";
+    case SHT_V850_ZCOMMON: return "V850 Zero Common";
+    case SHT_RENESAS_IOP:  return "RENESAS IOP";
+    case SHT_RENESAS_INFO: return "RENESAS INFO";
+    default: return NULL;
+    }
+}
+
+static const char *
 get_section_type_name (unsigned int sh_type)
 {
   static char buff[32];
@@ -3826,6 +3836,11 @@ get_section_type_name (unsigned int sh_type)
 	    case EM_MSP430:
 	      result = get_msp430x_section_type_name (sh_type);
 	      break;
+	    case EM_V800:
+	    case EM_V850:
+	    case EM_CYGNUS_V850:
+	      result = get_v850_section_type_name (sh_type);
+	      break;
 	    default:
 	      result = NULL;
 	      break;
@@ -3856,7 +3871,19 @@ get_section_type_name (unsigned int sh_type)
 	  sprintf (buff, "LOOS+%x", sh_type - SHT_LOOS);
 	}
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
-	sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
+	{
+	  switch (elf_header.e_machine)
+	    {
+	    case EM_V800:
+	    case EM_V850:
+	    case EM_CYGNUS_V850:
+	      return get_v850_section_type_name (sh_type);
+	    default:
+	      break;
+	    }
+
+	  sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
+	}
       else
 	/* This message is probably going to be displayed in a 15
 	   character wide field, so put the hex value first.  */
@@ -14808,6 +14835,85 @@ print_gnu_note (Elf_Internal_Note *pnote)
 }
 
 static const char *
+get_v850_elf_note_type (enum v850_notes n_type)
+{
+  static char buff[64];
+
+  switch (n_type)
+    {
+    case V850_NOTE_ALIGNMENT:  return _("Alignment of 8-byte objects");
+    case V850_NOTE_DATA_SIZE:  return _("Sizeof double and long double");
+    case V850_NOTE_FPU_INFO:   return _("Type of FPU support needed");
+    case V850_NOTE_SIMD_INFO:  return _("Use of SIMD instructions");
+    case V850_NOTE_CACHE_INFO: return _("Use of cache");
+    case V850_NOTE_MMU_INFO:   return _("Use of MMU");
+    default:
+      snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), n_type);
+      return buff;
+    }
+}
+
+static int
+print_v850_note (Elf_Internal_Note * pnote)
+{
+  unsigned int val;
+
+  if (pnote->descsz != 4)
+    return 0;
+  val = byte_get ((unsigned char *) pnote->descdata, pnote->descsz);
+
+  if (val == 0)
+    {
+      printf (_("not set\n"));
+      return 1;
+    }
+
+  switch (pnote->type)
+    {
+    case V850_NOTE_ALIGNMENT:
+      switch (val)
+	{
+	case EF_RH850_DATA_ALIGN4: printf (_("4-byte\n")); return 1;
+	case EF_RH850_DATA_ALIGN8: printf (_("8-byte\n")); return 1;
+	}
+      break;
+	
+    case V850_NOTE_DATA_SIZE:
+      switch (val)
+	{
+	case EF_RH850_DOUBLE32: printf (_("4-bytes\n")); return 1;
+	case EF_RH850_DOUBLE64: printf (_("8-bytes\n")); return 1;
+	}
+      break;
+	
+    case V850_NOTE_FPU_INFO:
+      switch (val)
+	{
+	case EF_RH850_FPU20: printf (_("FPU-2.0\n")); return 1;
+	case EF_RH850_FPU30: printf (_("FPU-3.0\n")); return 1;
+	}
+      break;
+	
+    case V850_NOTE_MMU_INFO:
+    case V850_NOTE_CACHE_INFO:
+    case V850_NOTE_SIMD_INFO:
+      if (val == EF_RH850_SIMD)
+	{
+	  printf (_("yes\n"));
+	  return 1;
+	}
+      break;
+
+    default:
+      /* An 'unknown note type' message will already have been displayed.  */
+      break;
+    }
+
+  printf (_("unknown value: %x\n"), val);
+  return 0;
+}
+
+static const char *
 get_netbsd_elfcore_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -15248,6 +15354,78 @@ process_corefile_note_segments (FILE * file)
 }
 
 static int
+process_v850_notes (FILE * file, bfd_vma offset, bfd_vma length)
+{
+  Elf_External_Note * pnotes;
+  Elf_External_Note * external;
+  int res = 1;
+
+  if (length <= 0)
+    return 0;
+
+  pnotes = (Elf_External_Note *) get_data (NULL, file, offset, 1, length,
+                                           _("v850 notes"));
+  if (pnotes == NULL)
+    return 0;
+
+  external = pnotes;
+
+  printf (_("\nDisplaying contents of Renesas V850 notes section at offset 0x%lx with length 0x%lx:\n"),
+	  (unsigned long) offset, (unsigned long) length);
+
+  while (external < (Elf_External_Note *) ((char *) pnotes + length))
+    {
+      Elf_External_Note * next;
+      Elf_Internal_Note inote;
+
+      inote.type     = BYTE_GET (external->type);
+      inote.namesz   = BYTE_GET (external->namesz);
+      inote.namedata = external->name;
+      inote.descsz   = BYTE_GET (external->descsz);
+      inote.descdata = inote.namedata + align_power (inote.namesz, 2);
+      inote.descpos  = offset + (inote.descdata - (char *) pnotes);
+
+      next = (Elf_External_Note *) (inote.descdata + align_power (inote.descsz, 2));
+
+      if (   ((char *) next > ((char *) pnotes) + length)
+	  || ((char *) next <  (char *) pnotes))
+	{
+	  warn (_("corrupt descsz found in note at offset 0x%lx\n"),
+		(unsigned long) ((char *) external - (char *) pnotes));
+	  warn (_(" type: 0x%lx, namesize: 0x%lx, descsize: 0x%lx\n"),
+		inote.type, inote.namesz, inote.descsz);
+	  break;
+	}
+
+      external = next;
+
+      /* Prevent out-of-bounds indexing.  */
+      if (   inote.namedata + inote.namesz > (char *) pnotes + length
+	  || inote.namedata + inote.namesz < inote.namedata)
+        {
+          warn (_("corrupt namesz found in note at offset 0x%lx\n"),
+                (unsigned long) ((char *) external - (char *) pnotes));
+          warn (_(" type: 0x%lx, namesize: 0x%lx, descsize: 0x%lx\n"),
+                inote.type, inote.namesz, inote.descsz);
+          break;
+        }
+
+      printf ("  %s: ", get_v850_elf_note_type (inote.type));
+
+      if (! print_v850_note (& inote))
+	{
+	  res = 0;
+	  printf ("<corrupt sizes: namesz: %lx, descsz: %lx>\n",
+		  inote.namesz, inote.descsz);
+	}
+    }
+
+  free (pnotes);
+
+  return res;
+}
+
+static int
 process_note_sections (FILE * file)
 {
   Elf_Internal_Shdr * section;
@@ -15258,13 +15436,26 @@ process_note_sections (FILE * file)
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum && section != NULL;
        i++, section++)
-    if (section->sh_type == SHT_NOTE)
-      {
-	res &= process_corefile_note_segment (file,
-					      (bfd_vma) section->sh_offset,
-					      (bfd_vma) section->sh_size);
-	n++;
-      }
+    {
+      if (section->sh_type == SHT_NOTE)
+	{
+	  res &= process_corefile_note_segment (file,
+						(bfd_vma) section->sh_offset,
+						(bfd_vma) section->sh_size);
+	  n++;
+	}
+
+      if ((   elf_header.e_machine == EM_V800
+	   || elf_header.e_machine == EM_V850
+	   || elf_header.e_machine == EM_CYGNUS_V850)
+	  && section->sh_type == SHT_RENESAS_INFO)
+	{
+	  res &= process_v850_notes (file,
+				     (bfd_vma) section->sh_offset,
+				     (bfd_vma) section->sh_size);
+	  n++;
+	}
+    }
 
   if (n == 0)
     /* Try processing NOTE segments instead.  */

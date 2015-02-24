@@ -1,3 +1,14 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c (soft_float): New variable.
+	(v850_data_8): New variable.
+	(md_show_usage): Add -msoft-float/-mhard-float.
+	(md_parse_option): Likewise.
+	(md_begin): Set the default value of soft_float.
+	(v850_md_end): New function.  Creates a note section.
+	* config/tc-v850.h (md_end): Define.
+	* doc/c-v850.texi: Document -msoft-float/-mhard-float.
+
 2015-02-23  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* config/tc-h8300.c (line_separater_chars): Add a version for

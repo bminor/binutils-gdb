@@ -1,5 +1,27 @@
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-v850.c (v850_set_note): New function.  Creates a Renesas
+	style note entry.
+	(v850_elf_make_note_section): New function.  Creates a note
+	section.
+	(v850_elf_create_sections): New function.  Create a note section
+	if one is not already present.
+	(v850_elf_set_note): New function.  Adds a note to a bfd.
+	(v850_elf_copy_private_bfd_data): New function.  Copies V850
+	notes.
+	(v850_elf_merge_notes): New function.  Merges V850 notes.
+	(print_v850_note): New function.  Displays a V850 note.
+	(v850_elf_print_notes): New function. Displays all notes attached
+	to a bfd.
+	(v850_elf_merge_private_bfd_data): Call v850_elf_merge_notes.
+	(v850_elf_print_private_bfd_data): Call v850_elf_print_notes.
+	(v850_elf_fake_sections): Set the type of the V850 note section.
+	* bfd-in.h (v850_elf_create_sections): Add prototype.
+	(v850_elf_set_note): Add prototype.
+	* bfd-in2.h: Regenerate.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
 	* configure.ac (AC_CHECK_HEADERS): Add wctype.h.
 	* configure: Regenerate.
 	* config.in: Regenerate.

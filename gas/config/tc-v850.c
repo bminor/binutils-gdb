@@ -31,6 +31,9 @@
 static bfd_boolean warn_signed_overflows   = FALSE;
 static bfd_boolean warn_unsigned_overflows = FALSE;
 
+/* Non-zero if floating point insns are not being used.  */
+static signed int soft_float = -1;
+
 /* Indicates the target BFD machine number.  */
 static int machine = -1;
 
@@ -1537,6 +1540,8 @@ struct option md_longopts[] =
 
 size_t md_longopts_size = sizeof (md_longopts);
 
+static bfd_boolean v850_data_8 = FALSE;
+
 void
 md_show_usage (FILE *stream)
 {
@@ -1560,6 +1565,8 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("  -mrh850-abi               Mark the binary as using the RH850 ABI (default)\n"));
   fprintf (stream, _("  -m8byte-align             Mark the binary as using 64-bit alignment\n"));
   fprintf (stream, _("  -m4byte-align             Mark the binary as using 32-bit alignment (default)\n"));
+  fprintf (stream, _("  -msoft-float              Mark the binary as not using FP insns (default for pre e2v3)\n"));
+  fprintf (stream, _("  -mhard-float              Mark the binary as using FP insns (default for e2v3 and up)\n"));
 }
 
 int
@@ -1645,6 +1652,14 @@ md_parse_option (int c, char *arg)
       v850_target_arch = bfd_arch_v850_rh850;
       v850_target_format = "elf32-v850-rh850";
     }
+  else if (strcmp (arg, "8byte-align") == 0)
+    v850_data_8 = TRUE;
+  else if (strcmp (arg, "4byte-align") == 0)
+    v850_data_8 = FALSE;
+  else if (strcmp (arg, "soft-float") == 0)
+    soft_float = 1;
+  else if (strcmp (arg, "hard-float") == 0)
+    soft_float = 0;
   else if (strcmp (arg, "8byte-align") == 0)
     v850_e_flags |= EF_RH850_DATA_ALIGN8;
   else if (strcmp (arg, "4byte-align") == 0)
@@ -1939,6 +1954,9 @@ md_begin (void)
     /* xgettext:c-format  */
     as_bad (_("Unable to determine default target processor from string: %s"),
 	    TARGET_CPU);
+
+  if (soft_float == -1)
+    soft_float = machine < bfd_mach_v850e2v3;
 
   v850_hash = hash_new ();
 
@@ -3715,4 +3733,74 @@ v850_force_relocation (struct fix *fixP)
     return 1;
 
   return generic_force_reloc (fixP);
+}
+
+/* Create a v850 note section.  */
+void
+v850_md_end (void)
+{
+  segT note_sec;
+  segT orig_seg = now_seg;
+  subsegT orig_subseg = now_subseg;
+  enum v850_notes id;
+
+  note_sec = subseg_new (V850_NOTE_SECNAME, 0);
+  bfd_set_section_flags (stdoutput, note_sec, SEC_HAS_CONTENTS | SEC_READONLY | SEC_MERGE);
+  bfd_set_section_alignment (stdoutput, note_sec, 2);
+
+  /* Provide default values for all of the notes.  */
+  for (id = V850_NOTE_ALIGNMENT; id <= NUM_V850_NOTES; id++)
+    {
+      int val = 0;
+      char * p;
+
+      /* Follow the standard note section layout:
+	 First write the length of the name string.  */
+      p = frag_more (4);
+      md_number_to_chars (p, 4, 4);
+
+      /* Next comes the length of the "descriptor", i.e., the actual data.  */
+      p = frag_more (4);
+      md_number_to_chars (p, 4, 4);
+
+      /* Write the note type.  */
+      p = frag_more (4);
+      md_number_to_chars (p, (valueT) id, 4);
+
+      /* Write the name field.  */
+      p = frag_more (4);
+      memcpy (p, V850_NOTE_NAME, 4);
+
+      /* Finally, write the descriptor.  */
+      p = frag_more (4);
+      switch (id)
+	{
+	case V850_NOTE_ALIGNMENT:
+	  val = v850_data_8 ? EF_RH850_DATA_ALIGN8 : EF_RH850_DATA_ALIGN4;
+	  break;
+
+	case V850_NOTE_DATA_SIZE:
+	  /* GCC does not currently support an option
+	     for 32-bit doubles with the V850 backend.  */
+	  val = EF_RH850_DOUBLE64;
+	  break;
+
+	case V850_NOTE_FPU_INFO:
+	  if (! soft_float)
+	    switch (machine)
+	      {
+	      case bfd_mach_v850e3v5: val = EF_RH850_FPU30; break;
+	      case bfd_mach_v850e2v3: val = EF_RH850_FPU20; break;
+	      default: break;
+	      }
+	  break;
+
+	default:
+	  break;
+	}
+      md_number_to_chars (p, val, 4);
+    }
+
+  /* Paranoia - we probably do not need this.  */
+  subseg_set (orig_seg, orig_subseg);
 }

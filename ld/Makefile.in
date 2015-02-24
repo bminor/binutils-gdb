@@ -3264,10 +3264,10 @@ etic54xcoff.c: $(srcdir)/emulparams/tic54xcoff.sh \
 etic80coff.c: $(srcdir)/emulparams/tic80coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic80coff.sc ${GEN_DEPENDS}
 
-ev850.c: $(srcdir)/emulparams/v850.sh \
+ev850.c: $(srcdir)/emulparams/v850.sh $(srcdir)/emultempl/v850elf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/v850.sc ${GEN_DEPENDS}
 
-ev850_rh850.c: $(srcdir)/emulparams/v850_rh850.sh \
+ev850_rh850.c: $(srcdir)/emulparams/v850_rh850.sh $(srcdir)/emultempl/v850elf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/v850_rh850.sc ${GEN_DEPENDS}
 
 evanilla.c: $(srcdir)/emulparams/vanilla.sh \

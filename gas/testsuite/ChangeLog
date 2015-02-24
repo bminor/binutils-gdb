@@ -1,3 +1,9 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/elf.exp: Add special version of the section2 test for
+	the V850.
+	* gas/elf/section2.e-v850: New file.
+
 2015-02-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/armv1.l: Remove 'Warning: ' from expected messages

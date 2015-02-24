@@ -1,3 +1,17 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* v850.h (EF_RH850_SIMD): Delete deprecated flag.
+	(EF_RH850_CACHE): Likewise.
+	(EF_RH850_MMU): Likewise.
+	(EF_RH850_DATA_ALIGN8): Likewise.
+	(SHT_RENESAS_IOP): Fix typo in name.
+	(SHT_RENESAS_INFO): Define.
+	(V850_NOTE_SECNAME): Define.
+	(SIZEOF_V850_NOTE): Define.
+	(V850_NOTE_NAME): Define.
+	(enum v850_notes): New enum.
+	(NUM_V850_NOTES): Define.
+
 2015-02-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 17915

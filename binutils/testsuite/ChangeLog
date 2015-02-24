@@ -1,3 +1,7 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objcopy.exp: Skip the strip-10 test for the V850.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
