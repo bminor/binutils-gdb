@@ -941,10 +941,10 @@ extern void bfd_elf32_aarch64_init_maps
   (bfd *);
 
 extern void bfd_elf64_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int, int);
+  (bfd *, struct bfd_link_info *, int, int, int, int, int);
 
 extern void bfd_elf32_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int, int);
+  (bfd *, struct bfd_link_info *, int, int, int, int, int);
 
 /* ELF AArch64 mapping symbol support.  */
 #define BFD_AARCH64_SPECIAL_SYM_TYPE_MAP	(1 << 0)
