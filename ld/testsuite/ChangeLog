@@ -1,3 +1,12 @@
+2015-02-28  Alan Modra  <amodra@gmail.com>
+
+	* ld-sparc/gotop32.rd: Update for changed padding in data sections.
+	* ld-sparc/gotop32.td: Likewise.
+	* ld-sparc/gotop64.rd: Likewise.
+	* ld-sparc/gotop64.td: Likewise.
+	* ld-tilegx/external.s: Align .data.
+	* ld-tilepro/external.s: Likewise.
+
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp (tls-tiny-desc, tls-tiny-desc-ie)

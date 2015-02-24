@@ -1,3 +1,8 @@
+2015-02-28  Alan Modra  <amodra@gmail.com>
+
+	* write.c (SUB_SEGMENT_ALIGN): Don't pad non-code sections at
+	end to their alignment.
+
 2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* config/tc-aarch64.c (reloc_table_entry): Generate
