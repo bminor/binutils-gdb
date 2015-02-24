@@ -1172,6 +1172,14 @@ NAME (aout, set_section_contents) (bfd *abfd,
       if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
 	  || bfd_bwrite (location, count, abfd) != count)
 	return FALSE;
+
+      /* If necessary, pad the section to its aligned size.  */
+      if ((section == obj_datasec (abfd)
+	   || section == obj_textsec (abfd))
+	  && count < section->size
+	  && (bfd_seek (abfd, section->filepos + offset + section->size - 1, SEEK_SET) != 0
+	      || bfd_bwrite ("", 1, abfd) != 1))
+	return FALSE;
     }
 
   return TRUE;

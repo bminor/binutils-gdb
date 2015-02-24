@@ -1,3 +1,8 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* pdp11.c (set_section_contents): Pad the .text and .data sections
+	to their aligned sizes.
+
 2015-02-23  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 	* config.bfd: Add h8300-*-linux.
