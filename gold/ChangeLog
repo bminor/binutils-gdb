@@ -1,6 +1,13 @@
 2015-03-18  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-02-24  Alan Modra  <amodra@gmail.com>
+	PR 18010
+	* powerpc.cc (Powerpc_relocate_functions::addr16_ds): Always
+	complain if value is not a multiple of four.
+	(Target_powerpc::Relocate::relocate): Correct handling of
+	R_POWERPC_GOT_TPREL16 and R_POWERPC_GOT_TPREL16_LO for ppc64.
+
 	2015-02-18  Alan Modra  <amodra@gmail.com>
 	PR 17954
 	* powerpc.cc (Global_symbol_visitor_opd::operator()): Set default
