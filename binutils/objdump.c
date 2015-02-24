@@ -2800,7 +2800,8 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 
   if (!bfd_get_full_section_contents (abfd, section, &data))
     {
-      non_fatal (_("Reading section failed"));
+      non_fatal (_("Reading section %s failed because: %s"),
+		 section->name, bfd_errmsg (bfd_get_error ()));
       return;
     }
 

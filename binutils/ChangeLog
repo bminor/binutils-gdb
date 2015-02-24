@@ -1,3 +1,8 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (dump_section): Extend the warning message displayed
+	when a section cannot be loaded.
+
 2015-02-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* readelf.c (process_program_headers): Add newline to warning
