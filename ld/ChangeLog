@@ -1,3 +1,10 @@
+2015-02-24  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* scripttempl/avr.sc: Add new user_signatures region.  Define and
+	use symbols for all region lengths.
+	* scripttempl/avrtiny.sc: Define and use symbols for all region
+	lengths.
+
 2015-01-21  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 	* Makefile.am: (ALL_EMULATION_SOURCES): Add new emulations.

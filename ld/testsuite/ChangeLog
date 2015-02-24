@@ -1,3 +1,8 @@
+2015-02-24  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-avr/region_overflow.d: New test.
+	* ld-avr/region_overflow.s: Likewise.
+
 2015-02-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4317
