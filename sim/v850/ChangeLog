@@ -1,3 +1,47 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* v850.igen: Add more e3v5 support.
+	(FMAF.S): New pattern.
+	(FMSF.S): New pattern.
+	(FNMAF.S): New pattern.
+	(FNMSF.S): New pattern.
+	(cnvq15q30): New pattern.
+	(cnvq30q15): New pattern.
+	(cnvq31q62): New pattern.
+	(cnvq62q31): New pattern.
+	(dup.h): New pattern.
+	(dup.w): New pattern.
+	(expq31): New pattern.
+	(modadd): New pattern.
+	(mov.dw): New pattern.
+	(mov.h): New pattern.
+	(mov.w): New pattern.
+	(pki16i32): New pattern.
+	(pki16ui8): New pattern.
+	(pki32i16): New pattern.
+	(pki64i32): New pattern.
+	(pkq15q31): New pattern.
+	(pkq30q31): New pattern.
+	(pkq31q15): New pattern.
+	(pkui8i16): New pattern.
+	(vabs.h): New pattern.
+	(vabs.w): New pattern.
+	(vadd.dw): New placeholder pattern.
+	(vadd.h): New placeholder pattern.
+	(vadd.w): New placeholder pattern.
+	(vadds.h): New placeholder pattern.
+	(vadds.w): New placeholder pattern.
+	(vaddsat.h): New placeholder pattern.
+	(vaddsat.w): New placeholder pattern.
+	(vand): New pattern.
+	(vbiq.h): New placeholder pattern.
+	(vbswap.dw): New placeholder pattern.
+	(vbswap.h): New placeholder pattern.
+	(vbswap.w): New placeholder pattern.
+	(vcalc.h): New placeholder pattern.
+	(vcalc.w): New placeholder pattern.
+	(vcmov): New placeholder pattern.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
