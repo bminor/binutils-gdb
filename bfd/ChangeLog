@@ -1,5 +1,15 @@
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
+	* configure.ac (AC_CHECK_HEADERS): Add wctype.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* peXXigen.c: Include wctype.h if HAVE_WCTYPE_H is defined.
+	(u16_mbtowc): Use wint_t types if HAVE_WCTYPE_H is defined.
+	(rsrc_cmp): Use towlower instead of wcsncasecmp if HAVE_WCTYPE_H
+	is defined.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
 	* pdp11.c (set_section_contents): Pad the .text and .data sections
 	to their aligned sizes.
 

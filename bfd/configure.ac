@@ -207,7 +207,7 @@ AC_SUBST(BFD_HOSTPTR_T)
 
 BFD_CC_FOR_BUILD
 
-AC_CHECK_HEADERS(alloca.h stddef.h string.h strings.h stdlib.h time.h unistd.h wchar.h)
+AC_CHECK_HEADERS(alloca.h stddef.h string.h strings.h stdlib.h time.h unistd.h wchar.h wctype.h)
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h sys/resource.h)
 GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
