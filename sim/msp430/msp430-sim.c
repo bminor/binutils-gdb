@@ -174,15 +174,18 @@ sim_open (SIM_OPEN_KIND kind,
   CPU_REG_FETCH (MSP430_CPU (sd)) = msp430_reg_fetch;
   CPU_REG_STORE (MSP430_CPU (sd)) = msp430_reg_store;
 
-  /* Allocate memory if none specified by user.  */
-  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x130, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0,0x20");
+  /* Allocate memory if none specified by user.
+     Note - these values match the memory regions in the libgloss/msp430/msp430[xl]-sim.ld scripts.  */
+  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x2, 1) == 0)
+    sim_do_commandf (sd, "memory-region 0,0x20"); /* Needed by the GDB testsuite.  */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x200, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0x200,0xffe00");
+    sim_do_commandf (sd, "memory-region 0x200,0xfd00");  /* RAM and/or ROM */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0xfffe, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0xfffe,2");
+    sim_do_commandf (sd, "memory-region 0xffc0,0x40"); /* VECTORS.  */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x10000, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0x10000,0x100000");
+    sim_do_commandf (sd, "memory-region 0x10000,0x80000"); /* HIGH FLASH RAM.  */
+  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x90000, 1) == 0)
+    sim_do_commandf (sd, "memory-region 0x90000,0x70000"); /* HIGH ROM.  */
 
   /* Check for/establish the a reference program image.  */
   if (sim_analyze_program (sd,
@@ -200,11 +203,7 @@ sim_open (SIM_OPEN_KIND kind,
 			    0 /* verbose */,
 			    1 /* use LMA instead of VMA */,
 			    loader_write_mem);
-  if (prog_bfd == NULL)
-    {
-      sim_state_free (sd);
-      return 0;
-    }
+  /* Allow prog_bfd to be NULL - this is needed by the GDB testsuite.  */
 
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
@@ -225,10 +224,13 @@ sim_open (SIM_OPEN_KIND kind,
 
   msp430_trace_init (STATE_PROG_BFD (sd));
 
-  MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
-  MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
-  if (MSP430_CPU (sd)->state.cio_buffer == -1)
-    MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
+  if (prog_bfd != NULL)
+    {
+      MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
+      MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
+      if (MSP430_CPU (sd)->state.cio_buffer == -1)
+	MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
+    }
 
   return sd;
 }
@@ -360,16 +362,25 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
       addr = op->addend;
       if (op->reg != MSR_None)
 	{
-	  int reg;
-	  /* Index values are signed, but the sum is limited to 16
-	     bits if the register < 64k, for MSP430 compatibility in
-	     MSP430X chips.  */
-	  if (addr & 0x8000)
-	    addr |= -1 << 16;
-	  reg = REG_GET (op->reg);
+	  int reg = REG_GET (op->reg);
+	  int sign = opc->ofs_430x ? 20 : 16;
+
+	  /* Index values are signed.  */
+	  if (addr & (1 << (sign - 1)))
+	    addr |= -1 << sign;
+
 	  addr += reg;
+
+	  /* For MSP430 instructions the sum is limited to 16 bits if the
+	     address in the index register is less than 64k even if we are
+	     running on an MSP430X CPU.  This is for MSP430 compatibility.  */
 	  if (reg < 0x10000 && ! opc->ofs_430x)
-	    addr &= 0xffff;
+	    {
+	      if (addr >= 0x10000)
+		fprintf (stderr, " XXX WRAPPING ADDRESS %x on read\n", addr);
+
+	      addr &= 0xffff;
+	    }
 	}
       addr &= 0xfffff;
       switch (opc->size)
@@ -407,7 +418,7 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 		case UNSIGN_32:
 		  rv = zero_ext (HWMULT (sd, hwmult_result), 16);
 		  break;
-		case SIGN_MAC_32: 
+		case SIGN_MAC_32:
 		case SIGN_32:
 		  rv = sign_ext (HWMULT (sd, hwmult_signed_result), 16);
 		  break;
@@ -468,7 +479,7 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 	      break;
 
 	    default:
-	      fprintf (stderr, "unimplemented HW MULT read!\n");
+	      fprintf (stderr, "unimplemented HW MULT read from %x!\n", addr);
 	      break;
 	    }
 	}
@@ -477,6 +488,7 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 	trace_generic (sd, MSP430_CPU (sd), TRACE_MEMORY_IDX,
 		       "GET: [%#x].%d -> %#x", addr, opc->size, rv);
       break;
+
     default:
       fprintf (stderr, "invalid operand %d type %d\n", n, op->type);
       abort ();
@@ -544,16 +556,25 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
       addr = op->addend;
       if (op->reg != MSR_None)
 	{
-	  int reg;
-	  /* Index values are signed, but the sum is limited to 16
-	     bits if the register < 64k, for MSP430 compatibility in
-	     MSP430X chips.  */
-	  if (addr & 0x8000)
-	    addr |= -1 << 16;
-	  reg = REG_GET (op->reg);
+	  int reg = REG_GET (op->reg);
+	  int sign = opc->ofs_430x ? 20 : 16;
+
+	  /* Index values are signed.  */
+	  if (addr & (1 << (sign - 1)))
+	    addr |= -1 << sign;
+
 	  addr += reg;
-	  if (reg < 0x10000)
-	    addr &= 0xffff;
+
+	  /* For MSP430 instructions the sum is limited to 16 bits if the
+	     address in the index register is less than 64k even if we are
+	     running on an MSP430X CPU.  This is for MSP430 compatibility.  */
+	  if (reg < 0x10000 && ! opc->ofs_430x)
+	    {
+	      if (addr >= 0x10000)
+		fprintf (stderr, " XXX WRAPPING ADDRESS %x on write\n", addr);
+		
+	      addr &= 0xffff;
+	    }
 	}
       addr &= 0xfffff;
 

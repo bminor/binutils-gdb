@@ -1,3 +1,15 @@
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-sim.c (sim_open): Allocate memory regions matching those
+	declared in the libgloss/msp430 linker scripts.
+	Allow sim_load_file to fail.
+	(get_op): Test the correct address bit when checking for out of
+	range addresses.
+	Include the address in the error message when an illegal access to
+	the hardware multiplier is detected.
+	(put_op): Test the correct address bit when checking for out of
+	range addresses.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
