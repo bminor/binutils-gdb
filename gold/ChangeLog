@@ -1,3 +1,11 @@
+2015-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR 18010
+	* powerpc.cc (Powerpc_relocate_functions::addr16_ds): Always
+	complain if value is not a multiple of four.
+	(Target_powerpc::Relocate::relocate): Correct handling of
+	R_POWERPC_GOT_TPREL16 and R_POWERPC_GOT_TPREL16_LO for ppc64.
+
 2015-02-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac (default_size): Set to 32 for x32.
