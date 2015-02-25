@@ -1,3 +1,8 @@
+2015-02-25  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* doc/c-arm.texi (-mcpu=): Add cortex-a53, cortex-a57 and
+	cortex-a72.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (soft_float): New variable.
