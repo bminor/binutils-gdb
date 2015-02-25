@@ -31,6 +31,33 @@
 
 /* Support for signal handlers.  */
 
+/* Return whether THIS_FRAME corresponds to a FreeBSD sigtramp
+   routine.  */
+
+static const gdb_byte amd64fbsd_sigtramp_code[] =
+{
+  0x48, 0x8d, 0x7c, 0x24, 0x10, /* lea     SIGF_UC(%rsp),%rdi */
+  0x6a, 0x00,			/* pushq   $0 */
+  0x48, 0xc7, 0xc0, 0xa1, 0x01, 0x00, 0x00,
+				/* movq    $SYS_sigreturn,%rax */
+  0x0f, 0x05                    /* syscall */
+};
+
+static int
+amd64fbsd_sigtramp_p (struct frame_info *this_frame)
+{
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  gdb_byte buf[sizeof amd64fbsd_sigtramp_code];
+
+  if (!safe_frame_unwind_memory (this_frame, pc, buf, sizeof buf))
+    return 0;
+  if (memcmp (buf, amd64fbsd_sigtramp_code, sizeof amd64fbsd_sigtramp_code) !=
+      0)
+    return 0;
+
+  return 1;
+}
+
 /* Assuming THIS_FRAME is for a BSD sigtramp routine, return the
    address of the associated sigcontext structure.  */
 
@@ -88,8 +115,8 @@ static int amd64fbsd_r_reg_offset[] =
 };
 
 /* Location of the signal trampoline.  */
-CORE_ADDR amd64fbsd_sigtramp_start_addr = 0x7fffffffffc0ULL;
-CORE_ADDR amd64fbsd_sigtramp_end_addr = 0x7fffffffffe0ULL;
+CORE_ADDR amd64fbsd_sigtramp_start_addr;
+CORE_ADDR amd64fbsd_sigtramp_end_addr;
 
 /* From <machine/signal.h>.  */
 int amd64fbsd_sc_reg_offset[] =
@@ -199,6 +226,7 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   amd64_init_abi (info, gdbarch);
 
+  tdep->sigtramp_p = amd64fbsd_sigtramp_p;
   tdep->sigtramp_start = amd64fbsd_sigtramp_start_addr;
   tdep->sigtramp_end = amd64fbsd_sigtramp_end_addr;
   tdep->sigcontext_addr = amd64fbsd_sigcontext_addr;

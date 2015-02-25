@@ -1,3 +1,27 @@
+2015-02-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64fbsd-nat.c: Include sys/user.h.
+	(_initialize_amd64fbsd_nat): Use the KERN_PROC_SIGTRAMP sysctl
+	instead of KERN_PS_STRINGS to locate the signal trampoline.
+	* i386fbsd-nat.c: Include sys/user.h.
+	(_initialize_i386fbsd_nat): Use the KERN_PROC_SIGTRAMP sysctl
+	instead of KERN_PS_STRINGS to locate the signal trampoline.
+	* amd64fbsd-tdep.c (amd64fbsd_sigtramp_code): New.
+	(amd64fbsd_sigtramp_p): New.
+	(amd64fbsd_sigtramp_start_addr, amd64fbsd_sigtramp_end_addr): No
+	longer set default values.
+	(amd64fbsd_init_abi): Set "sigtramp_p" to "amd64fbsd_sigtramp_p".
+	* i386fbsd-tdep.c (i386fbsd_sigtramp_start)
+	(i386fbsd_sigtramp_middle, i386fbsd_sigtramp_end)
+	(i386fbsd_freebsd4_sigtramp_start)
+	(i386fbsd_freebsd4_sigtramp_middle)
+	(i386fbsd_freebsd4_sigtramp_end, i386fbsd_osigtramp_start)
+	(i386fbsd_osigtramp_middle, i386fbsd_osigtramp_end): New.
+	(i386fbsd_sigtramp_p): New.
+	(i386fbsd_sigtramp_start_addr, i386fbsd_sigtramp_end_addr): No
+	longer set default values.
+	(i386fbsd_init_abi): Set "sigtramp_p" to "i386fbsd_sigtramp_p".
+
 2015-02-25  John Baldwin  <jhb@freebsd.org>
 
 	* amd64fbsd-tdep.c (amd64fbsd_sigcontext_addr): Use

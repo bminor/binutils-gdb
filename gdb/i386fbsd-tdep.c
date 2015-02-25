@@ -29,6 +29,154 @@
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
 
+/* Support for signal handlers.  */
+
+/* Return whether THIS_FRAME corresponds to a FreeBSD sigtramp
+   routine.  */
+
+/* FreeBSD/i386 supports three different signal trampolines, one for
+   versions before 4.0, a second for 4.x, and a third for 5.0 and
+   later.  To complicate matters, FreeBSD/i386 binaries running under
+   an amd64 kernel use a different set of trampolines.  These
+   trampolines differ from the i386 kernel trampolines in that they
+   omit a middle section that conditionally restores %gs.  */
+
+static const gdb_byte i386fbsd_sigtramp_start[] =
+{
+  0x8d, 0x44, 0x24, 0x20,       /* lea     SIGF_UC(%esp),%eax */
+  0x50				/* pushl   %eax */
+};
+
+static const gdb_byte i386fbsd_sigtramp_middle[] =
+{
+  0xf7, 0x40, 0x54, 0x00, 0x00, 0x02, 0x00,
+				/* testl   $PSL_VM,UC_EFLAGS(%eax) */
+  0x75, 0x03,			/* jne	   +3 */
+  0x8e, 0x68, 0x14		/* mov	   UC_GS(%eax),%gs */
+};
+
+static const gdb_byte i386fbsd_sigtramp_end[] =
+{
+  0xb8, 0xa1, 0x01, 0x00, 0x00, /* movl   $SYS_sigreturn,%eax */
+  0x50,			/* pushl   %eax */
+  0xcd, 0x80			/* int	   $0x80 */
+};
+
+static const gdb_byte i386fbsd_freebsd4_sigtramp_start[] =
+{
+  0x8d, 0x44, 0x24, 0x14,	/* lea	   SIGF_UC4(%esp),%eax */
+  0x50				/* pushl   %eax */
+};
+
+static const gdb_byte i386fbsd_freebsd4_sigtramp_middle[] =
+{
+  0xf7, 0x40, 0x54, 0x00, 0x00, 0x02, 0x00,
+				/* testl   $PSL_VM,UC4_EFLAGS(%eax) */
+  0x75, 0x03,			/* jne	   +3 */
+  0x8e, 0x68, 0x14		/* mov	   UC4_GS(%eax),%gs */
+};
+
+static const gdb_byte i386fbsd_freebsd4_sigtramp_end[] =
+{
+  0xb8, 0x58, 0x01, 0x00, 0x00, /* movl    $344,%eax */
+  0x50,			/* pushl   %eax */
+  0xcd, 0x80			/* int	   $0x80 */
+};
+
+static const gdb_byte i386fbsd_osigtramp_start[] =
+{
+  0x8d, 0x44, 0x24, 0x14,	/* lea	   SIGF_SC(%esp),%eax */
+  0x50				/* pushl   %eax */
+};
+
+static const gdb_byte i386fbsd_osigtramp_middle[] =
+{
+  0xf7, 0x40, 0x18, 0x00, 0x00, 0x02, 0x00,
+				/* testl   $PSL_VM,SC_PS(%eax) */
+  0x75, 0x03,			/* jne	   +3 */
+  0x8e, 0x68, 0x44		/* mov	   SC_GS(%eax),%gs */
+};
+
+static const gdb_byte i386fbsd_osigtramp_end[] =
+{
+  0xb8, 0x67, 0x00, 0x00, 0x00, /* movl    $103,%eax */
+  0x50,			/* pushl   %eax */
+  0xcd, 0x80			/* int	   $0x80 */
+};
+
+/* The three different trampolines are all the same size.  */
+gdb_static_assert (sizeof i386fbsd_sigtramp_start ==
+		   sizeof i386fbsd_freebsd4_sigtramp_start);
+gdb_static_assert (sizeof i386fbsd_sigtramp_start ==
+		   sizeof i386fbsd_osigtramp_start);
+gdb_static_assert (sizeof i386fbsd_sigtramp_middle ==
+		   sizeof i386fbsd_freebsd4_sigtramp_middle);
+gdb_static_assert (sizeof i386fbsd_sigtramp_middle ==
+		   sizeof i386fbsd_osigtramp_middle);
+gdb_static_assert (sizeof i386fbsd_sigtramp_end ==
+		   sizeof i386fbsd_freebsd4_sigtramp_end);
+gdb_static_assert (sizeof i386fbsd_sigtramp_end ==
+		   sizeof i386fbsd_osigtramp_end);
+
+/* We assume that the middle is the largest chunk below.  */
+gdb_static_assert (sizeof i386fbsd_sigtramp_middle >
+		   sizeof i386fbsd_sigtramp_start);
+gdb_static_assert (sizeof i386fbsd_sigtramp_middle >
+		   sizeof i386fbsd_sigtramp_end);
+
+static int
+i386fbsd_sigtramp_p (struct frame_info *this_frame)
+{
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  gdb_byte buf[sizeof i386fbsd_sigtramp_middle];
+  const gdb_byte *middle, *end;
+
+  /* Look for a matching start.  */
+  if (!safe_frame_unwind_memory (this_frame, pc, buf,
+				 sizeof i386fbsd_sigtramp_start))
+    return 0;
+  if (memcmp (buf, i386fbsd_sigtramp_start, sizeof i386fbsd_sigtramp_start) ==
+      0) {
+    middle = i386fbsd_sigtramp_middle;
+    end = i386fbsd_sigtramp_end;
+  } else if (memcmp (buf, i386fbsd_freebsd4_sigtramp_start,
+		     sizeof i386fbsd_freebsd4_sigtramp_start) == 0) {
+    middle = i386fbsd_freebsd4_sigtramp_middle;
+    end = i386fbsd_freebsd4_sigtramp_end;
+  } else if (memcmp (buf, i386fbsd_osigtramp_start,
+		     sizeof i386fbsd_osigtramp_start) == 0) {
+    middle = i386fbsd_osigtramp_middle;
+    end = i386fbsd_osigtramp_end;
+  } else
+    return 0;
+
+  /* Since the end is shorter than the middle, check for a matching end
+     next.  */
+  pc += sizeof i386fbsd_sigtramp_start;
+  if (!safe_frame_unwind_memory (this_frame, pc, buf,
+				 sizeof i386fbsd_sigtramp_end))
+    return 0;
+  if (memcmp (buf, end, sizeof i386fbsd_sigtramp_end) == 0)
+    return 1;
+
+  /* If the end didn't match, check for a matching middle.  */
+  if (!safe_frame_unwind_memory (this_frame, pc, buf,
+				 sizeof i386fbsd_sigtramp_middle))
+    return 0;
+  if (memcmp (buf, middle, sizeof i386fbsd_sigtramp_middle) != 0)
+    return 0;
+
+  /* The middle matched, check for a matching end.  */
+  pc += sizeof i386fbsd_sigtramp_middle;
+  if (!safe_frame_unwind_memory (this_frame, pc, buf,
+				 sizeof i386fbsd_sigtramp_end))
+    return 0;
+  if (memcmp (buf, end, sizeof i386fbsd_sigtramp_end) != 0)
+    return 0;
+
+  return 1;
+}
+
 /* FreeBSD 3.0-RELEASE or later.  */
 
 /* From <machine/reg.h>.  */
@@ -43,8 +191,8 @@ static int i386fbsd_r_reg_offset[] =
 };
 
 /* Sigtramp routine location.  */
-CORE_ADDR i386fbsd_sigtramp_start_addr = 0xbfbfdf20;
-CORE_ADDR i386fbsd_sigtramp_end_addr = 0xbfbfdff0;
+CORE_ADDR i386fbsd_sigtramp_start_addr;
+CORE_ADDR i386fbsd_sigtramp_end_addr;
 
 /* From <machine/signal.h>.  */
 int i386fbsd_sc_reg_offset[] =
@@ -138,6 +286,8 @@ i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* FreeBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;
+
+  tdep->sigtramp_p = i386fbsd_sigtramp_p;
 
   /* FreeBSD uses a different memory layout.  */
   tdep->sigtramp_start = i386fbsd_sigtramp_start_addr;
