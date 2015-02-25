@@ -1,3 +1,8 @@
+2015-02-25  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.xml/tdesc-regs.exp: Set core-regs to aarch64-core.xml for
+	aarch64*-*-* target.
+
 2015-02-23  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (delete_breakpoints): Rewrite using
