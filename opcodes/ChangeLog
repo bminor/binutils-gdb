@@ -1,3 +1,10 @@
+2015-02-25  Oleg Endo  <olegendo@gcc.gnu.org>
+
+	* sh-opc.h (clrs, sets): Mark as arch_sh3_nommu_up instead of
+	arch_sh_up.
+	(pref): Mark as arch_sh2a_nofpu_or_sh3_nommu_up instead of
+	arch_sh2a_nofpu_or_sh4_nommu_nofpu_up.
+
 2015-02-23  Vinay  <Vinay.G@kpit.com>
 
 	* rl78-decode.opc (MOV): Added space between two operands for

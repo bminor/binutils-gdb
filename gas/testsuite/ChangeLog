@@ -1,3 +1,32 @@
+2015-02-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+	    Oleg Endo  <olegendo@gcc.gnu.org>
+
+	* gas/sh/arch/arch.exp: Replace dead code to generate expected .s files
+	with ...
+	* gas/sh/arch/sh-opc-gen-as.pl: ... this new script.
+	* gas/sh/arch/arch_expected.txt: Regenerate.
+	* gas/sh/arch/sh-dsp.s: Likewise.
+	* gas/sh/arch/sh-opc-gen-as.pl: Likewise.
+	* gas/sh/arch/sh.s: Likewise.
+	* gas/sh/arch/sh2.s: Likewise.
+	* gas/sh/arch/sh2a-nofpu-or-sh3-nommu.s: Likewise.
+	* gas/sh/arch/sh2a-nofpu-or-sh4-nommu-nofpu.s: Likewise.
+	* gas/sh/arch/sh2a-nofpu.s: Likewise.
+	* gas/sh/arch/sh2a-or-sh3e.s: Likewise.
+	* gas/sh/arch/sh2a-or-sh4.s: Likewise.
+	* gas/sh/arch/sh2a.s: Likewise.
+	* gas/sh/arch/sh2e.s: Likewise.
+	* gas/sh/arch/sh3-dsp.s: Likewise.
+	* gas/sh/arch/sh3-nommu.s: Likewise.
+	* gas/sh/arch/sh3.s: Likewise.
+	* gas/sh/arch/sh3e.s: Likewise.
+	* gas/sh/arch/sh4-nofpu.s: Likewise.
+	* gas/sh/arch/sh4-nommu-nofpu.s: Likewise.
+	* gas/sh/arch/sh4.s: Likewise.
+	* gas/sh/arch/sh4a-nofpu.s: Likewise.
+	* gas/sh/arch/sh4a.s: Likewise.
+	* gas/sh/arch/sh4al-dsp.s: Likewise.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/elf.exp: Add special version of the section2 test for
