@@ -146,7 +146,8 @@ extern void gdbscm_define_functions (const scheme_function *, int public);
 extern void gdbscm_define_integer_constants (const scheme_integer_constant *,
 					     int public);
 
-extern void gdbscm_printf (SCM port, const char *format, ...);
+extern void gdbscm_printf (SCM port, const char *format, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 extern void gdbscm_debug_display (SCM obj);
 
@@ -484,7 +485,8 @@ extern char *gdbscm_scm_to_c_string (SCM string);
 
 extern SCM gdbscm_scm_from_c_string (const char *string);
 
-extern SCM gdbscm_scm_from_printf (const char *format, ...);
+extern SCM gdbscm_scm_from_printf (const char *format, ...)
+    ATTRIBUTE_PRINTF (1, 2);
 
 extern char *gdbscm_scm_to_string (SCM string, size_t *lenp,
 				   const char *charset,

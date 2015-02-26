@@ -1,5 +1,21 @@
 2015-02-26  Pedro Alves  <palves@redhat.com>
 
+	* auto-load.h (file_is_auto_load_safe): Add ATTRIBUTE_PRINTF.
+	* complaints.c (vcomplaint): Pass argument FMT directly to
+	printf-like functions instead of complaint->fmt.
+	* ctf.c (ctf_save_write_metadata): Add ATTRIBUTE_PRINTF.
+	* darwin-nat.c (inferior_debug): Add ATTRIBUTE_PRINTF.
+	* compile/compile-loc2c.c (pushf, unary, binary): Add
+	ATTRIBUTE_PRINTF.
+	(do_compile_dwarf_expr_to_c): Pass string literal as format string
+	to pushf.
+	(BINARY): Pass string literal as format string to 'binary'.
+	* compile/compile-object-load.c (link_callbacks_einfo): Add
+	ATTRIBUTE_PRINTF.
+	* guile/guile-internal.h (gdbscm_printf): Add ATTRIBUTE_PRINTF.
+
+2015-02-26  Pedro Alves  <palves@redhat.com>
+
 	* windows-termcap.c: Rename to ...
 	* stub-termcap.c: ... this.  Adjust header line.
 	* Makefile.in (SFILES): Refer to stub-termcap.c instead of

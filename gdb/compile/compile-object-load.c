@@ -224,6 +224,9 @@ link_callbacks_unattached_reloc (struct bfd_link_info *link_info,
 
 /* Helper for link_callbacks callbacks vector.  */
 
+static void link_callbacks_einfo (const char *fmt, ...)
+  ATTRIBUTE_PRINTF (1, 2);
+
 static void
 link_callbacks_einfo (const char *fmt, ...)
 {

@@ -6986,6 +6986,9 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
    FORMAT and the remaining arguments, then gets the reply.  Returns
    whether the packet was a success, a failure, or unknown.  */
 
+static enum packet_result remote_send_printf (const char *format, ...)
+  ATTRIBUTE_PRINTF (1, 2);
+
 static enum packet_result
 remote_send_printf (const char *format, ...)
 {

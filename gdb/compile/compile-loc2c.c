@@ -443,6 +443,9 @@ push (int indent, struct ui_file *stream, ULONGEST l)
 /* Emit code to push an arbitrary expression.  This works like
    printf.  */
 
+static void pushf (int indent, struct ui_file *stream, const char *format, ...)
+  ATTRIBUTE_PRINTF (3, 4);
+
 static void
 pushf (int indent, struct ui_file *stream, const char *format, ...)
 {
@@ -460,6 +463,9 @@ pushf (int indent, struct ui_file *stream, const char *format, ...)
 /* Emit code for a unary expression -- one which operates in-place on
    the top-of-stack.  This works like printf.  */
 
+static void unary (int indent, struct ui_file *stream, const char *format, ...)
+  ATTRIBUTE_PRINTF (3, 4);
+
 static void
 unary (int indent, struct ui_file *stream, const char *format, ...)
 {
@@ -474,6 +480,8 @@ unary (int indent, struct ui_file *stream, const char *format, ...)
 
 /* Emit code for a unary expression -- one which uses the top two
    stack items, popping the topmost one.  This works like printf.  */
+static void binary (int indent, struct ui_file *stream, const char *format, ...)
+  ATTRIBUTE_PRINTF (3, 4);
 
 static void
 binary (int indent, struct ui_file *stream, const char *format, ...)
@@ -651,7 +659,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
   fprintfi_filtered (indent, stream, "int __gdb_tos = -1;\n");
 
   if (initial != NULL)
-    pushf (indent, stream, core_addr_to_string (*initial));
+    pushf (indent, stream, "%s", core_addr_to_string (*initial));
 
   while (op_ptr < op_end)
     {
@@ -911,7 +919,8 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 
 	case DW_OP_pick:
 	  offset = *op_ptr++;
-	  pushf (indent, stream, "__gdb_stack[__gdb_tos - %d]", offset);
+	  pushf (indent, stream, "__gdb_stack[__gdb_tos - %s]",
+		 plongest (offset));
 	  break;
 
 	case DW_OP_swap:
@@ -1000,8 +1009,8 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 	  break;
 
 #define BINARY(OP)							\
-	  binary (indent, stream, ("__gdb_stack[__gdb_tos-1] " #OP	\
-				   " __gdb_stack[__gdb_tos]"));	\
+	  binary (indent, stream, "%s", "__gdb_stack[__gdb_tos-1] " #OP \
+				   " __gdb_stack[__gdb_tos]");	\
 	  break
 
 	case DW_OP_and:
@@ -1076,7 +1085,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 					    addr_size,
 					    cfa_start, cfa_end,
 					    &text_offset, per_cu);
-		pushf (indent, stream, cfa_name);
+		pushf (indent, stream, "%s", cfa_name);
 	      }
 	  }
 

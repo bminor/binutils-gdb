@@ -171,6 +171,9 @@ __attribute__ ((section ("__TEXT,__info_plist"),used)) =
   "</dict>\n"
   "</plist>\n";
 
+static void inferior_debug (int level, const char *fmt, ...)
+  ATTRIBUTE_PRINTF (2, 3);
+
 static void
 inferior_debug (int level, const char *fmt, ...)
 {
