@@ -1,3 +1,9 @@
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/cordic.ko.bz2: New file.
+	* gdb.arch/cordic.ko.debug.bz2: New file.
+	* gdb.arch/ppc64-symtab-cordic.exp: New file.
+
 2015-02-25  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.xml/tdesc-regs.exp: Set core-regs to aarch64-core.xml for

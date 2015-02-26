@@ -1,3 +1,8 @@
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elfread.c (elf_read_minimal_symbols): Use bfd_alloc for
+	bfd_canonicalize_symtab.
+
 2015-02-25  John Baldwin  <jhb@FreeBSD.org>
 
 	* amd64fbsd-nat.c: Include sys/user.h.
