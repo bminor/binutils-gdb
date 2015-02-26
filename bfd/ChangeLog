@@ -1,3 +1,9 @@
+2015-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (plt_stub_size, build_plt_stub): Don't build
+	thread-safe stubs for iplt.
+	(build_tls_get_addr_stub): Restore r2 immediately after call.
+
 2015-02-26  Terry Guo  <terry.guo@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Update how we
