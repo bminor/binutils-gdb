@@ -428,7 +428,16 @@ do_type (unsigned int i)
 
 	  if (aux->x_sym.x_tagndx.p)
 	    {
-	      unsigned int idx = INDEXOF (aux->x_sym.x_tagndx.p);
+	      unsigned int idx;
+
+	      /* PR 17512: file: e72f3988.  */
+	      if (aux->x_sym.x_tagndx.l < 0 || aux->x_sym.x_tagndx.p < rawsyms)
+		{
+		  non_fatal (_("Invalid tag index %#lx encountered"), aux->x_sym.x_tagndx.l);
+		  idx = 0;
+		}
+	      else
+		idx = INDEXOF (aux->x_sym.x_tagndx.p);
 
 	      if (idx >= rawcount)
 		{
@@ -515,7 +524,17 @@ do_type (unsigned int i)
 
 	    ++dimind;
 	    ptr->type = coff_array_type;
-	    ptr->size = els * res->size;
+	    /* PR 17512: file: ae1971e2.
+	       Check for integer overflow.  */
+	    {
+	      long long a, z;
+	      a = els;
+	      z = res->size;
+	      a *= z;
+	      ptr->size = (int) a;
+	      if (ptr->size != a)
+		non_fatal (_("Out of range sum for els (%#x) * size (%#x)"), els, res->size);
+	    }
 	    ptr->u.array.dim = els;
 	    ptr->u.array.array_of = res;
 	    res = ptr;
@@ -669,7 +688,19 @@ do_define (unsigned int i, struct coff_scope *b)
 	  if (!is->init)
 	    {
 	      is->low = s->where->offset;
-	      is->high = s->where->offset + s->type->size; 
+	      /* PR 17512: file: 37e7a80d.
+		 Check for integer overflow computing low + size.  */
+	      {
+		long long a, z;
+
+		a = s->where->offset;
+		z = s->type->size;
+		a += z;
+		is->high = (int) a;
+		if (a != is->high)
+		  non_fatal (_("Out of range sum for offset (%#x) + size (%#x)"),
+			     is->low, s->type->size);
+	      }
 	      /* PR 17512: file: 37e7a80d.  */
 	      if (is->high < s->where->offset)
 		fatal (_("Out of range type size: %u"), s->type->size);
