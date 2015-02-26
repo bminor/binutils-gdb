@@ -1,3 +1,8 @@
+2015-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	PR build/18033:
+	* iq2000-tdep.c (iq2000_frame_cache): Delete C++-style comment.
+
 2015-02-23  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (skip_to_semicolon): New function.
