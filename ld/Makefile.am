@@ -284,12 +284,12 @@ ALL_EMULATION_SOURCES = \
 	egld960coff.c \
 	eh8300.c \
 	eh8300elf.c \
+	eh8300elf_linux.c \
 	eh8300h.c \
 	eh8300helf.c \
-	eh8300elf_linux.c \
+	eh8300helf_linux.c \
 	eh8300hn.c \
 	eh8300hnelf.c \
-	eh8300helf_linux.c \
 	eh8300s.c \
 	eh8300self.c \
 	eh8300self_linux.c \
@@ -297,9 +297,9 @@ ALL_EMULATION_SOURCES = \
 	eh8300snelf.c \
 	eh8300sx.c \
 	eh8300sxelf.c \
+	eh8300sxelf_linux.c \
 	eh8300sxn.c \
 	eh8300sxnelf.c \
-	eh8300sxelf_linux.c \
 	eh8500.c \
 	eh8500b.c \
 	eh8500c.c \
@@ -1311,7 +1311,6 @@ eh8300elf.c: $(srcdir)/emulparams/h8300elf.sh \
 
 eh8300elf_linux.c: $(srcdir)/emulparams/h8300elf_linux.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} h8300elf_linux "$(tdir_h8300elf)"
 
 eh8300h.c: $(srcdir)/emulparams/h8300h.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300h.sc ${GEN_DEPENDS}
@@ -1323,7 +1322,6 @@ eh8300helf.c: $(srcdir)/emulparams/h8300helf.sh \
 eh8300helf_linux.c: $(srcdir)/emulparams/h8300helf_linux.sh \
   $(srcdir)/emulparams/h8300elf_linux.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} h8300helf_linux "$(tdir_h8300helf)"
 
 eh8300hn.c: $(srcdir)/emulparams/h8300hn.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300hn.sc ${GEN_DEPENDS}
@@ -1342,7 +1340,6 @@ eh8300self.c: $(srcdir)/emulparams/h8300self.sh \
 eh8300self_linux.c: $(srcdir)/emulparams/h8300self_linux.sh \
   $(srcdir)/emulparams/h8300elf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} h8300self_linux "$(tdir_h8300self)"
 
 eh8300sn.c: $(srcdir)/emulparams/h8300sn.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300sn.sc ${GEN_DEPENDS}
@@ -1361,7 +1358,6 @@ eh8300sxelf.c: $(srcdir)/emulparams/h8300sxelf.sh \
 eh8300sxelf_linux.c: $(srcdir)/emulparams/h8300sxelf_linux.sh \
   $(srcdir)/emulparams/h8300elf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} h8300sxelf_linux "$(tdir_h8300sxelf)"
 
 eh8300sxn.c: $(srcdir)/emulparams/h8300sxn.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300sxn.sc ${GEN_DEPENDS}

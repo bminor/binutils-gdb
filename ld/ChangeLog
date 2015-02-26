@@ -1,3 +1,10 @@
+2015-02-27  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Sort new h8300 entries.
+	(eh8300elf_linux.c, eh8300helf_linux.c, eh8300self_linux.c,
+	eh8300sxelf_linux.c): Do not invoke genscripts here.
+	* Makefile.in: Regenerate.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (ev850.c): Add dependency upon
