@@ -3547,25 +3547,25 @@ convert_efi_target (char *efi)
 }
 
 /* Allocate and return a pointer to a struct section_add, initializing the
-   structure using OPTARG, a string in the format "sectionname=filename".
+   structure using ARG, a string in the format "sectionname=filename".
    The returned structure will have its next pointer set to NEXT.  The
    OPTION field is the name of the command line option currently being
    parsed, and is only used if an error needs to be reported.  */
 
 static struct section_add *
-init_section_add (const char *optarg,
+init_section_add (const char *arg,
                   struct section_add *next,
                   const char *option)
 {
   struct section_add *pa;
   const char *s;
 
-  s = strchr (optarg, '=');
+  s = strchr (arg, '=');
   if (s == NULL)
     fatal (_("bad format for %s"), option);
 
   pa = (struct section_add *) xmalloc (sizeof (struct section_add));
-  pa->name = xstrndup (optarg, s - optarg);
+  pa->name = xstrndup (arg, s - arg);
   pa->filename = s + 1;
   pa->next = next;
   pa->contents = NULL;

@@ -1,3 +1,8 @@
+2015-02-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (init_section_add): Rename optarg to arg in order to
+	avoid shadowing a global variable.
+
 2015-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
