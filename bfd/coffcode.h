@@ -3170,6 +3170,15 @@ coff_compute_section_file_positions (bfd * abfd)
 	 This repairs 'ld -r' for arm-wince-pe target.  */
       if (page_size == 0)
 	page_size = 1;
+
+      /* PR 17512: file: 0ac816d3.  */
+      if (page_size < 0)
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  (*_bfd_error_handler)
+	    (_("%B: page size is too large (0x%x)"), abfd, page_size);
+	  return FALSE;
+	}
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;

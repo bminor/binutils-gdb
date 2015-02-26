@@ -2955,7 +2955,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size + (addr - section->vma)
 	      > bfd_get_section_size (section))
 	    {
-	      _bfd_error_handler (_("%A: Data Directory size (%lx) exceeds space left in section (%lx)"),
+	      _bfd_error_handler (_("%B: Data Directory size (%lx) exceeds space left in section (%lx)"),
 				  obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
 				  bfd_get_section_size (section) - (addr - section->vma));
 	      return FALSE;
@@ -2991,7 +2991,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
         }
       else if (section)
 	{
-	  _bfd_error_handler (_("%A: Failed to read debug data section"), obfd);
+	  _bfd_error_handler (_("%B: Failed to read debug data section"), obfd);
 	  return FALSE;
 	}
     }

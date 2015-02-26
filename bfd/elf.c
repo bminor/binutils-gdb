@@ -2758,6 +2758,15 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
   this_hdr->sh_offset = 0;
   this_hdr->sh_size = asect->size;
   this_hdr->sh_link = 0;
+  /* PR 17512: file: 0eb809fe, 8b0535ee.  */
+  if (asect->alignment_power >= (sizeof (bfd_vma) * 8) - 1)
+    {
+      (*_bfd_error_handler)
+	(_("%B: error: Alignment power %d of section `%A' is too big"),
+	 abfd, asect, asect->alignment_power);
+      arg->failed = TRUE;
+      return;
+    }
   this_hdr->sh_addralign = (bfd_vma) 1 << asect->alignment_power;
   /* The sh_entsize and sh_info fields may have been set already by
      copy_private_section_data.  */
@@ -5211,7 +5220,14 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      && (p->p_type != PT_NOTE
 		  || bfd_get_format (abfd) != bfd_core))
 	    {
-	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
+	      if (m->includes_filehdr || m->includes_phdrs)
+		{
+		  /* PR 17512: file: 2195325e.  */ 
+		  (*_bfd_error_handler)
+		    (_("%B: warning: non-load segment includes file header and/or program header"),
+		     abfd);
+		  return FALSE;
+		}
 
 	      p->p_filesz = 0;
 	      p->p_offset = m->sections[0]->filepos;
@@ -5952,8 +5968,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	     something.  They are allowed by the ELF spec however, so only
 	     a warning is produced.  */
 	  if (segment->p_type == PT_LOAD)
-	    (*_bfd_error_handler) (_("%B: warning: Empty loadable segment"
-				     " detected, is this intentional ?\n"),
+	    (*_bfd_error_handler) (_("\
+%B: warning: Empty loadable segment detected, is this intentional ?"),
 				   ibfd);
 
 	  map->count = 0;
@@ -6566,7 +6582,15 @@ rewrite:
 	   i++, segment++)
 	if (segment->p_type == PT_LOAD
 	    && maxpagesize < segment->p_align)
-	  maxpagesize = segment->p_align;
+	  {
+	    /* PR 17512: file: f17299af.  */
+	    if (segment->p_align > (bfd_vma) 1 << ((sizeof (bfd_vma) * 8) - 2))
+	      (*_bfd_error_handler) (_("\
+%B: warning: segment alignment of 0x%llx is too large"),
+				     ibfd, (long long) segment->p_align);
+	    else
+	      maxpagesize = segment->p_align;
+	  }
 
       if (maxpagesize != get_elf_backend_data (obfd)->maxpagesize)
 	bfd_emul_set_maxpagesize (bfd_get_target (obfd), maxpagesize);

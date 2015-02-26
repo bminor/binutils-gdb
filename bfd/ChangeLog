@@ -1,3 +1,18 @@
+2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_compute_section_file_positions): Report
+	negative page sizes.
+	* elf.c (elf_fake_sections): Handle excessive alignmment powers.
+	(assign_file_positions_for_non_load_sections): Replace assertion
+	with an error message.
+	(rewrite_elf_program_header): Handle excessive segment
+	alignments.
+	* mach-o.c (bfd_mach_o_read_section_32): Likewise.
+	(bfd_mach_o_read_section_64): Likewise.
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Use %B to
+	print a bfd name, not %A.
+
 2015-02-26  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (plt_stub_size, build_plt_stub): Don't build
