@@ -1,3 +1,8 @@
+2015-02-26  Terry Guo  <terry.guo@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Update how we
+	merge Tag_ABI_HardFP_use.
+
 2015-02-26  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Heed -z nocopyreloc.

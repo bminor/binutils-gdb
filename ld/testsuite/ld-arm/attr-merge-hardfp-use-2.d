@@ -1,13 +1,15 @@
-#source: attr-merge-vfp-5.s
-#source: attr-merge-vfp-5-sp.s
+#source: attr-merge-hardfp-use-2a.s
+#source: attr-merge-hardfp-use-2b.s
 #as:
-#ld: -r
+#ld: -e main
 #readelf: -A
 # This test is only valid on ELF based ports.
 # not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 Attribute Section: aeabi
 File Attributes
-  Tag_ARM_ISA_use: Yes
-  Tag_THUMB_ISA_use: Thumb-1
+  Tag_CPU_name: "Cortex-M4"
+  Tag_CPU_arch: v7E-M
+  Tag_CPU_arch_profile: Microcontroller
+  Tag_THUMB_ISA_use: Thumb-2
   Tag_FP_arch: FPv5/FP-D16 for ARMv8

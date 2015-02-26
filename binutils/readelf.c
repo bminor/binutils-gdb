@@ -12376,7 +12376,7 @@ static const char * arm_attr_tag_ABI_FP_number_model[] =
 static const char * arm_attr_tag_ABI_enum_size[] =
   {"Unused", "small", "int", "forced to int"};
 static const char * arm_attr_tag_ABI_HardFP_use[] =
-  {"As Tag_FP_arch", "SP only", "DP only", "SP and DP"};
+  {"As Tag_FP_arch", "SP only", "Reserved", "Deprecated"};
 static const char * arm_attr_tag_ABI_VFP_args[] =
   {"AAPCS", "VFP registers", "custom", "compatible"};
 static const char * arm_attr_tag_ABI_WMMX_args[] =

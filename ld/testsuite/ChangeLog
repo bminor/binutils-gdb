@@ -1,3 +1,21 @@
+2015-02-26  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-3.attr: Remove Tag_ABI_HardFP_use.
+	* ld-arm/attr-merge-vfp-10.d: Likewise.
+	* ld-arm/attr-merge-vfp-10r.d: Likewise.
+	* ld-arm/attr-merge-vfp-12.d: Likewise.
+	* ld-arm/attr-merge-vfp-12r.d: Likewise.
+	* ld-arm/attr-merge-vfp-13.d: Likewise.
+	* ld-arm/attr-merge-vfp-13r.d: Likewise.
+	* ld-arm/attr-merge-vfp-14.d: Likewise.
+	* ld-arm/attr-merge-vfp-14r.d: Likewise.
+	* ld-arm/attr-merge-vfp-6.d: Likewise.
+	* ld-arm/attr-merge-vfp-6r.d: Likewise.
+	* ld-arm/attr-merge-vfp-7.d: Likewise.
+	* ld-arm/attr-merge-vfp-7r.d: Likewise.
+	* ld-arm/attr-merge-vfp-8.d: Likewise.
+	* ld-arm/attr-merge-vfp-8r.d: Likewise.
+
 2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld-avr/avr-prop-1.d: New file.
