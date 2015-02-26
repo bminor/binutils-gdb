@@ -1,3 +1,15 @@
+2015-02-26  Pedro Alves  <palves@redhat.com>
+
+	* windows-termcap.c: Rename to ...
+	* stub-termcap.c: ... this.  Adjust header line.
+	* Makefile.in (SFILES): Refer to stub-termcap.c instead of
+	windows-termcap.c.
+	* configure: Regenerate.
+	* configure.ac: Refer to stub-termcap.o instead of
+	windows-termcap.o.
+	* gdb_curses.h: Mention stub-termcap.c instead of
+	windows-termcap.c.
+
 2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* compile/compile-c-symbols.c (convert_one_symbol, convert_symbol_bmsym)

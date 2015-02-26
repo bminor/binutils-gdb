@@ -7190,7 +7190,7 @@ case $host_os in
   *mingw32*)
     if test x"$curses_found" != xyes; then
       ac_cv_search_tgetent="none required"
-      CONFIG_OBS="$CONFIG_OBS windows-termcap.o"
+      CONFIG_OBS="$CONFIG_OBS stub-termcap.o"
     fi ;;
 esac
 
