@@ -1,3 +1,10 @@
+2015-02-26  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_wait_1): When incrementing the PC past a
+	program breakpoint always use the_low_target.breakpoint_len as
+	increment, rather than the maximum between that and
+	the_low_target.decr_pc_after_break.
+
 2015-02-23  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (check_stopped_by_breakpoint): Don't check if the

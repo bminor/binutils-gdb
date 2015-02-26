@@ -2555,12 +2555,7 @@ linux_wait_1 (ptid_t ptid,
   if (!ptid_equal (step_over_bkpt, null_ptid)
       && event_child->stop_reason == LWP_STOPPED_BY_SW_BREAKPOINT)
     {
-      unsigned int increment_pc;
-
-      if (the_low_target.breakpoint_len > the_low_target.decr_pc_after_break)
-	increment_pc = the_low_target.breakpoint_len;
-      else
-	increment_pc = the_low_target.decr_pc_after_break;
+      unsigned int increment_pc = the_low_target.breakpoint_len;
 
       if (debug_threads)
 	{
