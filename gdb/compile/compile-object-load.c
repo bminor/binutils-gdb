@@ -67,7 +67,7 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
       if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
 	return;
 
-      // Make the memory always readable.
+      /* Make the memory always readable.  */
       prot = GDB_MMAP_PROT_READ;
       if ((bfd_get_section_flags (abfd, sect) & SEC_READONLY) == 0)
 	prot |= GDB_MMAP_PROT_WRITE;

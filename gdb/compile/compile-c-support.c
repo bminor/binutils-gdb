@@ -351,7 +351,7 @@ c_compute_program (struct compile_instance *inst,
 			" __gdb_intptr;\n",
 			buf);
 
-      // Iterate all log2 sizes in bytes supported by c_get_mode_for_size.
+      /* Iterate all log2 sizes in bytes supported by c_get_mode_for_size.  */
       for (i = 0; i < 4; ++i)
 	{
 	  const char *mode = c_get_mode_for_size (1 << i);
