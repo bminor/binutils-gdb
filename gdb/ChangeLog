@@ -1,3 +1,9 @@
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR build/18033
+	* compile/compile-c-support.c (c_compute_program): Change // comment.
+	* compile/compile-object-load.c (setup_sections): Change // comment.
+
 2015-02-26  Joel Brobecker  <brobecker@adacore.com>
 
 	PR build/18033:
