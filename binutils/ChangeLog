@@ -4,6 +4,20 @@
 	* resrc.c (write_rc_messagetable): Tighten check for invalid
 	message lengths.
 
+	* dwarf.c (display_debug_loc): Pacify the undefined behaviour
+	sanitizer by simplifying address difference calculation.
+	(struct Frame_Chunk): Change type of cfa_offset to dwarf_vma in
+	order to avoid arithmetic overflows.
+	(frame_display_row): Cast cfa_offset before printing it.
+	(display_debug_frames): Likewise.
+	Check for an unexpected segment size.
+	Chnage type of 'l' local to dwarf_vma and cast it back to an int
+	when printing.
+	(process_cu_tu_index): Tighten check for an invalid ncols value.
+	* readelf.c (process_corefile_note_segment): Check for
+	inote.descdata extending beyond the end of the section.
+	(process_v850_notes): Likewise.
+
 2015-02-26  Terry Guo  <terry.guo@arm.com>
 
 	* readelf.c (arm_attr_tag_ABI_HardFP_use): Update how we

@@ -4719,11 +4719,11 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	      if (start < next)
 		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"),
 		      (unsigned long) (start - section_begin),
-		      (unsigned long) (next - section_begin));
+		      (unsigned long) offset);
 	      else if (start > next)
 		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"),
 		      (unsigned long) (start - section_begin),
-		      (unsigned long) (next - section_begin));
+		      (unsigned long) offset);
 	    }
 	  start = next;
 
@@ -5244,7 +5244,7 @@ typedef struct Frame_Chunk
   dwarf_vma pc_begin;
   dwarf_vma pc_range;
   int cfa_reg;
-  int cfa_offset;
+  dwarf_vma cfa_offset;
   unsigned int ra;
   unsigned char fde_encoding;
   unsigned char cfa_exp;
@@ -5481,7 +5481,7 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
   if (fc->cfa_exp)
     strcpy (tmp, "exp");
   else
-    sprintf (tmp, "%s%+d", regname (fc->cfa_reg, 1), fc->cfa_offset);
+    sprintf (tmp, "%s%+d", regname (fc->cfa_reg, 1), (int) fc->cfa_offset);
   printf ("%-8s ", tmp);
 
   for (r = 0; r < fc->ncols; r++)
@@ -5921,7 +5921,15 @@ display_debug_frames (struct dwarf_section *section,
 
 	  segment_selector = 0;
 	  if (fc->segment_size)
-	    SAFE_BYTE_GET_AND_INC (segment_selector, start, fc->segment_size, end);
+	    {
+	      if (fc->segment_size > sizeof (segment_selector))
+		{
+		  /* PR 17512: file: 9e196b3e.  */
+		  warn (_("Probably corrupt segment size: %d - using 4 instead\n"), fc->segment_size);
+		  fc->segment_size = 4;
+		}
+	      SAFE_BYTE_GET_AND_INC (segment_selector, start, fc->segment_size, end);
+	    }
 
 	  fc->pc_begin = get_encoded_value (&start, fc->fde_encoding, section, end);
 
@@ -6123,7 +6131,7 @@ display_debug_frames (struct dwarf_section *section,
 	  unsigned char * tmp;
 	  unsigned op, opa;
 	  unsigned long ul, reg, roffs;
-	  long l;
+	  dwarf_vma l;
 	  dwarf_vma ofs;
 	  dwarf_vma vma;
 	  const char *reg_prefix = "";
@@ -6375,7 +6383,7 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa: %s ofs %d\n",
-			regname (fc->cfa_reg, 0), fc->cfa_offset);
+			regname (fc->cfa_reg, 0), (int) fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_def_cfa_register:
@@ -6389,7 +6397,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_def_cfa_offset:
 	      fc->cfa_offset = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_def_cfa_offset: %d\n", fc->cfa_offset);
+		printf ("  DW_CFA_def_cfa_offset: %d\n", (int) fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_nop:
@@ -6473,7 +6481,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_offset_extended_sf: %s%s at cfa%+ld\n",
 			reg_prefix, regname (reg, 0),
-			l * fc->data_factor);
+			(long)(l * fc->data_factor));
 	      if (*reg_prefix == '\0')
 		{
 		  fc->col_type[reg] = DW_CFA_offset;
@@ -6489,7 +6497,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_val_offset_sf: %s%s at cfa%+ld\n",
 			reg_prefix, regname (reg, 0),
-			l * fc->data_factor);
+			(long)(l * fc->data_factor));
 	      if (*reg_prefix == '\0')
 		{
 		  fc->col_type[reg] = DW_CFA_val_offset;
@@ -6504,14 +6512,14 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_sf: %s ofs %d\n",
-			regname (fc->cfa_reg, 0), fc->cfa_offset);
+			regname (fc->cfa_reg, 0), (int) fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_def_cfa_offset_sf:
 	      fc->cfa_offset = SLEB ();
-	      fc->cfa_offset = fc->cfa_offset * fc->data_factor;
+	      fc->cfa_offset *= fc->data_factor;
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_def_cfa_offset_sf: %d\n", fc->cfa_offset);
+		printf ("  DW_CFA_def_cfa_offset_sf: %d\n", (int) fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_MIPS_advance_loc8:
@@ -6546,7 +6554,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_GNU_negative_offset_extended: %s%s at cfa%+ld\n",
 			reg_prefix, regname (reg, 0),
-			l * fc->data_factor);
+			(long)(l * fc->data_factor));
 	      if (*reg_prefix == '\0')
 		{
 		  fc->col_type[reg] = DW_CFA_offset;
@@ -7026,7 +7034,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
       /* PR 17531: file: 0dd159bf.
 	 Check for wraparound with an overlarge ncols value.  */
-      if ((unsigned int) ((poffsets - ppool) / 4) != ncols)
+      if (poffsets < ppool || (unsigned int) ((poffsets - ppool) / 4) != ncols)
 	{
 	  warn (_("Overlarge number of columns: %x\n"), ncols);
 	  return 0;

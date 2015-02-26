@@ -15205,6 +15205,7 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 {
   Elf_External_Note * pnotes;
   Elf_External_Note * external;
+  char * end;
   int res = 1;
 
   if (length <= 0)
@@ -15221,13 +15222,14 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 	  (unsigned long) offset, (unsigned long) length);
   printf (_("  %-20s %10s\tDescription\n"), _("Owner"), _("Data size"));
 
-  while ((char *) external < (char *) pnotes + length)
+  end = (char *) pnotes + length;
+  while ((char *) external < end)
     {
       Elf_Internal_Note inote;
       size_t min_notesz;
       char *next;
       char * temp = NULL;
-      size_t data_remaining = ((char *) pnotes + length) - (char *) external;
+      size_t data_remaining = end - (char *) external;
 
       if (!is_ia64_vms ())
 	{
@@ -15246,12 +15248,13 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 	  inote.descsz   = BYTE_GET (external->descsz);
 	  inote.descdata = inote.namedata + align_power (inote.namesz, 2);
 	  /* PR 17531: file: 3443835e.  */
-	  if (inote.descdata < (char *) pnotes)
+	  if (inote.descdata < (char *) pnotes || inote.descdata > end)
 	    {
 	      warn (_("Corrupt note: name size is too big: %lx\n"), inote.namesz);
 	      inote.descdata = inote.namedata;
 	      inote.namesz   = 0;
 	    }
+ 
 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 	  next = inote.descdata + align_power (inote.descsz, 2);
 	}
@@ -15358,6 +15361,7 @@ process_v850_notes (FILE * file, bfd_vma offset, bfd_vma length)
 {
   Elf_External_Note * pnotes;
   Elf_External_Note * external;
+  char * end;
   int res = 1;
 
   if (length <= 0)
@@ -15369,11 +15373,12 @@ process_v850_notes (FILE * file, bfd_vma offset, bfd_vma length)
     return 0;
 
   external = pnotes;
+  end = (char*) pnotes + length;
 
   printf (_("\nDisplaying contents of Renesas V850 notes section at offset 0x%lx with length 0x%lx:\n"),
 	  (unsigned long) offset, (unsigned long) length);
 
-  while (external < (Elf_External_Note *) ((char *) pnotes + length))
+  while ((char *) external + sizeof (Elf_External_Note) < end)
     {
       Elf_External_Note * next;
       Elf_Internal_Note inote;
@@ -15385,9 +15390,16 @@ process_v850_notes (FILE * file, bfd_vma offset, bfd_vma length)
       inote.descdata = inote.namedata + align_power (inote.namesz, 2);
       inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 
+      if (inote.descdata < (char *) pnotes || inote.descdata >= end)
+	{
+	  warn (_("Corrupt note: name size is too big: %lx\n"), inote.namesz);
+	  inote.descdata = inote.namedata;
+	  inote.namesz   = 0;
+	}
+
       next = (Elf_External_Note *) (inote.descdata + align_power (inote.descsz, 2));
 
-      if (   ((char *) next > ((char *) pnotes) + length)
+      if (   ((char *) next > end)
 	  || ((char *) next <  (char *) pnotes))
 	{
 	  warn (_("corrupt descsz found in note at offset 0x%lx\n"),
@@ -15400,7 +15412,7 @@ process_v850_notes (FILE * file, bfd_vma offset, bfd_vma length)
       external = next;
 
       /* Prevent out-of-bounds indexing.  */
-      if (   inote.namedata + inote.namesz > (char *) pnotes + length
+      if (   inote.namedata + inote.namesz > end
 	  || inote.namedata + inote.namesz < inote.namedata)
         {
           warn (_("corrupt namesz found in note at offset 0x%lx\n"),
