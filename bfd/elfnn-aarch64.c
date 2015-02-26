@@ -965,7 +965,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   HOWTO64 (AARCH64_R (TLSLE_MOVW_TPREL_G2),	/* type */
 	 32,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 12,			/* bitsize */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned,	/* complain_on_overflow */
@@ -979,7 +979,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   HOWTO (AARCH64_R (TLSLE_MOVW_TPREL_G1),	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 12,			/* bitsize */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
@@ -993,7 +993,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   HOWTO64 (AARCH64_R (TLSLE_MOVW_TPREL_G1_NC),	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 12,			/* bitsize */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
@@ -1007,7 +1007,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   HOWTO (AARCH64_R (TLSLE_MOVW_TPREL_G0),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 12,			/* bitsize */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
@@ -1021,7 +1021,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   HOWTO (AARCH64_R (TLSLE_MOVW_TPREL_G0_NC),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 12,			/* bitsize */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
