@@ -1,3 +1,8 @@
+2015-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/dwarf.exp (function_range): Adjust pattern when $func_length
+	is zero.
+
 2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/cordic.ko.bz2: New file.

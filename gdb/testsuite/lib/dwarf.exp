@@ -146,9 +146,14 @@ proc function_range { func src } {
     }
 
     # Compute the size of the last instruction.
+    if { $func_length == 0 } then {
+	set func_pattern "$func"
+    } else {
+	set func_pattern "$func\\+$func_length"
+    }
     set test "x/2i $func+$func_length"
     gdb_test_multiple $test $test {
-	-re ".*($hex) <$func\\+$func_length>:\[^\r\n\]+\r\n\[ \]+($hex).*\.\r\n$gdb_prompt $" {
+	-re ".*($hex) <$func_pattern>:\[^\r\n\]+\r\n\[ \]+($hex).*\.\r\n$gdb_prompt $" {
 	    set start $expect_out(1,string)
 	    set end $expect_out(2,string)
 
