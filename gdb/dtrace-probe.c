@@ -43,7 +43,7 @@
 
 /* Forward declaration.  */
 
-static const struct probe_ops dtrace_probe_ops;
+extern const struct probe_ops dtrace_probe_ops;
 
 /* The following structure represents a single argument for the
    probe.  */
@@ -865,7 +865,7 @@ dtrace_disable_probe (struct probe *probe)
 
 /* DTrace probe_ops.  */
 
-static const struct probe_ops dtrace_probe_ops =
+const struct probe_ops dtrace_probe_ops =
 {
   dtrace_probe_is_linespec,
   dtrace_get_probes,

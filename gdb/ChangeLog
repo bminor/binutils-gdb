@@ -1,5 +1,9 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* dtrace-probe.c (dtrace_probe_ops): Make extern.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.h (exception_none): Declare.
 	* common/common-exceptions.c (exception_none): Moved from
 	exceptions.c.
