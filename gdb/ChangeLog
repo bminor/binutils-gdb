@@ -1,3 +1,8 @@
+2015-02-25  John Baldwin  <jhb@freebsd.org>
+
+	* amd64fbsd-tdep.c (amd64fbsd_sigcontext_addr): Use
+	get_frame_register instead of frame_unwind_register_unsigned.
+
 2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR build/18033
