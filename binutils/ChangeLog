@@ -1,3 +1,9 @@
+2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* resrc.c (write_rc_messagetable): Tighten check for invalid
+	message lengths.
+
 2015-02-26  Terry Guo  <terry.guo@arm.com>
 
 	* readelf.c (arm_attr_tag_ABI_HardFP_use): Update how we
