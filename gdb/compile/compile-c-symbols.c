@@ -187,6 +187,8 @@ convert_one_symbol (struct compile_c_instance *context,
 	case LOC_BLOCK:
 	  kind = GCC_C_SYMBOL_FUNCTION;
 	  addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+	  if (is_global && TYPE_GNU_IFUNC (SYMBOL_TYPE (sym)))
+	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 	  break;
 
 	case LOC_CONST:
@@ -365,6 +367,8 @@ convert_symbol_bmsym (struct compile_c_instance *context,
   gcc_decl decl;
   CORE_ADDR addr;
 
+  addr = MSYMBOL_VALUE_ADDRESS (objfile, msym);
+
   /* Conversion copied from write_exp_msymbol.  */
   switch (MSYMBOL_TYPE (msym))
     {
@@ -376,8 +380,11 @@ convert_symbol_bmsym (struct compile_c_instance *context,
       break;
 
     case mst_text_gnu_ifunc:
-      type = objfile_type (objfile)->nodebug_text_gnu_ifunc_symbol;
+      /* nodebug_text_gnu_ifunc_symbol would cause:
+	 function return type cannot be function  */
+      type = objfile_type (objfile)->nodebug_text_symbol;
       kind = GCC_C_SYMBOL_FUNCTION;
+      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
       break;
 
     case mst_data:
@@ -400,7 +407,6 @@ convert_symbol_bmsym (struct compile_c_instance *context,
     }
 
   sym_type = convert_type (context, type);
-  addr = MSYMBOL_VALUE_ADDRESS (objfile, msym);
   decl = C_CTX (context)->c_ops->build_decl (C_CTX (context),
 					     MSYMBOL_NATURAL_NAME (msym),
 					     kind, sym_type, NULL, addr,
@@ -497,6 +503,8 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 				"gcc_symbol_address \"%s\": full symbol\n",
 				identifier);
 	  result = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+	  if (TYPE_GNU_IFUNC (SYMBOL_TYPE (sym)))
+	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	  found = 1;
 	}
       else
@@ -512,6 +520,8 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 				    "symbol\n",
 				    identifier);
 	      result = BMSYMBOL_VALUE_ADDRESS (msym);
+	      if (MSYMBOL_TYPE (msym.minsym) == mst_text_gnu_ifunc)
+		result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	      found = 1;
 	    }
 	}

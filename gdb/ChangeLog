@@ -1,3 +1,8 @@
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile-c-symbols.c (convert_one_symbol, convert_symbol_bmsym)
+	(gcc_symbol_address): Call gnu_ifunc_resolve_addr.
+
 2015-02-26  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb/infcmd.c (print_return_value): use type_to_string to print type.
