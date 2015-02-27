@@ -1283,6 +1283,8 @@ AC_CHECK_HEADERS(term.h, [], [],
 # Checks for declarations.  #
 # ------------------------- #
 
+libiberty_INIT
+
 AC_CHECK_DECLS([free, malloc, realloc, snprintf])
 AM_LC_MESSAGES
 

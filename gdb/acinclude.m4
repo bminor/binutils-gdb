@@ -57,6 +57,9 @@ sinclude([../config/zlib.m4])
 
 m4_include([common/common.m4])
 
+dnl For libiberty_INIT.
+m4_include(libiberty.m4)
+
 ## ----------------------------------------- ##
 ## ANSIfy the C compiler whenever possible.  ##
 ## From Franc,ois Pinard                     ##

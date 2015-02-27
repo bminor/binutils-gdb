@@ -1,3 +1,9 @@
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* acinclude.m4: Include libiberty.m4.
+	* configure.ac: Call libiberty_INIT.
+	* config.in, configure: Regenerate.
+
 2015-02-26  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_wait_1): When incrementing the PC past a

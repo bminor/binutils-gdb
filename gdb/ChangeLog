@@ -1,3 +1,10 @@
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* libiberty.m4: New file.
+	* acinclude.m4: Include libiberty.m4.
+	* configure.ac: Call libiberty_INIT.
+	* config.in, configure: Regenerate.
+
 2015-02-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (s390_gcc_target_options): Not just handle

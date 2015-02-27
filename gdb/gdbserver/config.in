@@ -22,9 +22,24 @@
    you don't. */
 #undef HAVE_DECL_ADDR_NO_RANDOMIZE
 
+/* Define to 1 if you have the declaration of `asprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_ASPRINTF
+
+/* Define to 1 if you have the declaration of `basename(char *)', and to 0 if
+   you don't. */
+#undef HAVE_DECL_BASENAME
+
+/* Define to 1 if you have the declaration of `ffs', and to 0 if you don't. */
+#undef HAVE_DECL_FFS
+
 /* Define to 1 if you have the declaration of `perror', and to 0 if you don't.
    */
 #undef HAVE_DECL_PERROR
+
+/* Define to 1 if you have the declaration of `snprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SNPRINTF
 
 /* Define to 1 if you have the declaration of `strerror', and to 0 if you
    don't. */
@@ -33,6 +48,26 @@
 /* Define to 1 if you have the declaration of `strstr', and to 0 if you don't.
    */
 #undef HAVE_DECL_STRSTR
+
+/* Define to 1 if you have the declaration of `strtol', and to 0 if you don't.
+   */
+#undef HAVE_DECL_STRTOL
+
+/* Define to 1 if you have the declaration of `strtoll', and to 0 if you
+   don't. */
+#undef HAVE_DECL_STRTOLL
+
+/* Define to 1 if you have the declaration of `strtoul', and to 0 if you
+   don't. */
+#undef HAVE_DECL_STRTOUL
+
+/* Define to 1 if you have the declaration of `strtoull', and to 0 if you
+   don't. */
+#undef HAVE_DECL_STRTOULL
+
+/* Define to 1 if you have the declaration of `strverscmp', and to 0 if you
+   don't. */
+#undef HAVE_DECL_STRVERSCMP
 
 /* Define to 1 if you have the declaration of `vasprintf', and to 0 if you
    don't. */
@@ -95,6 +130,9 @@
 
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
+
+/* Define to 1 if the system has the type `long long'. */
+#undef HAVE_LONG_LONG
 
 /* Define if <thread_db.h> has lwpid_t. */
 #undef HAVE_LWPID_T
@@ -252,6 +290,9 @@
 
 /* Bug reporting address */
 #undef REPORT_BUGS_TO
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be

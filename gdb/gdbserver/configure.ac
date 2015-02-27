@@ -193,6 +193,8 @@ LIBS="$LIBS -ldl"
 AC_CHECK_FUNCS(dladdr)
 LIBS="$old_LIBS"
 
+libiberty_INIT
+
 AC_CHECK_DECLS([strerror, perror, vasprintf, vsnprintf])
 
 AC_CHECK_TYPES(socklen_t, [], [],
