@@ -2561,7 +2561,7 @@ rrrr,011111100100 + wwww,010001010100:F_I:::cvtf_dl
 *v850e3v5
 "cvtf.dl r<reg2e>, r<reg3e>"
 {
-  unsigned64 ans;
+  signed64 ans;
   sim_fpu wop;
   sim_fpu_status status;
 
@@ -2604,7 +2604,7 @@ rrrr,011111100100 + wwwww,10001010000:F_I:::cvtf_dw
 *v850e3v5
 "cvtf.dw r<reg2e>, r<reg3>"
 {
-  uint32 ans;
+  int32 ans;
   sim_fpu wop;
   sim_fpu_status status;
 
@@ -2712,7 +2712,7 @@ rrrrr,11111100100 + wwwww,10001000000:F_I:::cvtf_sw
 *v850e3v5
 "cvtf.sw r<reg2>, r<reg3>"
 {
-  uint32 ans;
+  int32 ans;
   sim_fpu wop;
   sim_fpu_status status;
 
@@ -3471,7 +3471,7 @@ rrrr,011111110001 + wwww,010001010100:F_I:::trncf_dul
 *v850e3v5
 "trncf.dul r<reg2e>, r<reg3e>"
 {
-  signed64 ans;
+  unsigned64 ans;
   sim_fpu wop;
   sim_fpu_status status;
 
@@ -3493,7 +3493,7 @@ rrrr,011111100001 + wwwww,10001010000:F_I:::trncf_dw
 *v850e3v5
 "trncf.dw r<reg2e>, r<reg3>"
 {
-  uint32 ans;
+  int32 ans;
   sim_fpu wop;
   sim_fpu_status status;
 
@@ -3555,7 +3555,7 @@ rrrrr,11111110001 + wwww,010001000100:F_I:::trncf_sul
 *v850e3v5
 "trncf.sul r<reg2>, r<reg3e>"
 {
-  signed64 ans;
+  unsigned64 ans;
   sim_fpu wop;
   sim_fpu_status status;
 
@@ -3575,7 +3575,7 @@ rrrrr,11111100001 + wwwww,10001000000:F_I:::trncf_sw
 *v850e3v5
 "trncf.sw r<reg2>, r<reg3>"
 {
-  uint32 ans;
+  int32 ans;
   sim_fpu wop;
   sim_fpu_status status;
 

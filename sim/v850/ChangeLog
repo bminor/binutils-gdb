@@ -1,3 +1,15 @@
+2015-02-27  Nick Clifton  <nickc@redhat.com>
+
+	* sim-main.h (reg64_t): New type.
+	(v850_regs): Add selID_sregs field.
+	(VR, SAT16, SAT32, ABS16, ABS32 ): New macros.
+	* v850-dc: Add fields for v850e3v5 instructions.
+	* v850.igen (cvtf.dl): Use correctly signed local value.
+	(cvtf.dw, cvtf.sw, trncf.dul, trncf.dl, trncf.sul, trncf.sw):
+	Likewise.
+	* interp.c: Fix old style function declarations.
+	* simops.c: Likewise.
+
 2015-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* v850.igen: Add more e3v5 support.
