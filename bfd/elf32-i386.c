@@ -1429,6 +1429,10 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
   return TRUE;
 }
 
+/* Rename some of the generic section flags to better document how they
+   are used here.  */
+#define need_convert_mov_to_lea sec_flg0
+
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
    table, and dynamic reloc sections.  */
@@ -1884,6 +1888,10 @@ do_size:
 					     plt_got_align))
 	    return FALSE;
 	}
+
+      if (r_type == R_386_GOT32
+	  && (h == NULL || h->type != STT_GNU_IFUNC))
+	sec->need_convert_mov_to_lea = 1;
     }
 
   return TRUE;
@@ -2636,9 +2644,9 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
   if (!is_elf_hash_table (link_info->hash))
     return FALSE;
 
-  /* Nothing to do if there are no codes, no relocations or no output.  */
+  /* Nothing to do if there is no need or no output.  */
   if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
-      || sec->reloc_count == 0
+      || sec->need_convert_mov_to_lea == 0
       || bfd_is_abs_section (sec->output_section))
     return TRUE;
 

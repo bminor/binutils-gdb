@@ -1,3 +1,14 @@
+2015-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (need_convert_mov_to_lea): New.
+	(elf_i386_check_relocs): Set need_convert_mov_to_lea if needed.
+	(elf_i386_convert_mov_to_lea): Return TRUE if
+	need_convert_mov_to_lea is unset.
+	* elf64-x86-64.c (need_convert_mov_to_lea): New.
+	(elf_x86_64_check_relocs): Set need_convert_mov_to_lea if needed.
+	(elf_x86_64_convert_mov_to_lea): Return TRUE if
+	need_convert_mov_to_lea is unset.
+
 2015-02-27  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17910
