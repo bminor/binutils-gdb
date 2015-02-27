@@ -1,4 +1,4 @@
-2015-02-27  Jon TURNEY  <jon.turney@dronecode.org.uk>
+2015-02-27  Jon TURNEY  <jon.turney@dronecode.org.uk>  (tiny patch)
 
 	* windows-nat.c (CONTEXT_DEBUGGER): Remove.
 	(CONTEXT_DEBUGGER_DR): Add CONTEXT_SEGMENTS.  Incorporate flags
