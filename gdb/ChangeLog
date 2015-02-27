@@ -1,3 +1,11 @@
+2015-02-26  Doug Evans  <dje@google.com>
+
+	* gdbtypes.c (internal_type_vptr_fieldno): Add missing call to
+	CHECK_TYPEDEF.
+	(set_type_vptr_fieldno): Ditto.
+	(internal_type_vptr_basetype, set_type_vptr_basetype): Ditto.
+	* gnu-v3-abi.c (gnuv3_dynamic_class): Ditto.
+
 2015-02-26  Pedro Alves  <palves@redhat.com>
 
 	* auto-load.h (file_is_auto_load_safe): Add ATTRIBUTE_PRINTF.

@@ -1636,6 +1636,7 @@ get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
 int
 internal_type_vptr_fieldno (struct type *type)
 {
+  CHECK_TYPEDEF (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   if (!HAVE_CPLUS_STRUCT (type))
@@ -1648,6 +1649,7 @@ internal_type_vptr_fieldno (struct type *type)
 void
 set_type_vptr_fieldno (struct type *type, int fieldno)
 {
+  CHECK_TYPEDEF (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   if (!HAVE_CPLUS_STRUCT (type))
@@ -1661,6 +1663,7 @@ set_type_vptr_fieldno (struct type *type, int fieldno)
 struct type *
 internal_type_vptr_basetype (struct type *type)
 {
+  CHECK_TYPEDEF (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_CPLUS_STUFF);
@@ -1672,6 +1675,7 @@ internal_type_vptr_basetype (struct type *type)
 void
 set_type_vptr_basetype (struct type *type, struct type *basetype)
 {
+  CHECK_TYPEDEF (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   if (!HAVE_CPLUS_STRUCT (type))

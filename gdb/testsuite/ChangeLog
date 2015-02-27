@@ -1,3 +1,12 @@
+2015-02-26  Doug Evans  <dje@google.com>
+
+	* gdb.cp/class2.cc (Dbase, D): New classes.
+	(main): New local delta.
+	* gdb.cp/class2.exp: Test printing delta.
+	* gdb.cp/classes.cc (DynamicBase2, DynamicBar): New classes.
+	(dynbar): New global.
+	* gdb.cp/classes.exp (test_ptype_class_objects): Test ptype DynamicBar.
+
 2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.compile/compile-ifunc.c: New file.

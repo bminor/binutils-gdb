@@ -202,6 +202,7 @@ gnuv3_dynamic_class (struct type *type)
 {
   int fieldnum, fieldelem;
 
+  CHECK_TYPEDEF (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
 
