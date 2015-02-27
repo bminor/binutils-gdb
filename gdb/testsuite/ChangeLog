@@ -1,3 +1,8 @@
+2015-02-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.exp: Don't skip it on hppa*-hp-hpux*
+	target.
+
 2015-02-26  Doug Evans  <dje@google.com>
 
 	* gdb.cp/class2.cc (Dbase, D): New classes.
