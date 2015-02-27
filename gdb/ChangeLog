@@ -1,3 +1,9 @@
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/18021
+	* dwarf2read.c (dwarf2_add_member_fn): Issue a complaint
+	if we find a static method with DW_AT_vtable_elem_location.
+
 2015-03-21  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-io.c (tui_expand_tabs): Reinitialize the column counter
