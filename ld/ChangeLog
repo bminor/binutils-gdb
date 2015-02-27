@@ -1,3 +1,9 @@
+2015-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/17900
+	* ldlang.c (lang_set_flags): Allow exclamation mark to reverse the
+	sense of the following memory region attribute characters.
+
 2015-02-27  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Sort new h8300 entries.
