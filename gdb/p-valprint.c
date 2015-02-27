@@ -483,10 +483,10 @@ const char pascal_vtbl_ptr_name[] =
 int
 pascal_object_is_vtbl_ptr_type (struct type *type)
 {
-  const char *typename = type_name_no_tag (type);
+  const char *type_name = type_name_no_tag (type);
 
-  return (typename != NULL
-	  && strcmp (typename, pascal_vtbl_ptr_name) == 0);
+  return (type_name != NULL
+	  && strcmp (type_name, pascal_vtbl_ptr_name) == 0);
 }
 
 /* Return truth value for the assertion that TYPE is of the type

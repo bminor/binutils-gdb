@@ -1,3 +1,8 @@
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	Rename symbols whose names are reserved C++ keywords throughout.
+
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (COMPILER): New, get it from autoconf.

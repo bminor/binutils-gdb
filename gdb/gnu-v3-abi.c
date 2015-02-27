@@ -1077,7 +1077,7 @@ gnuv3_get_typeid (struct value *value)
   struct gdbarch *gdbarch;
   struct cleanup *cleanup;
   struct value *result;
-  char *typename, *canonical;
+  char *type_name, *canonical;
 
   /* We have to handle values a bit trickily here, to allow this code
      to work properly with non_lvalue values that are really just
@@ -1096,20 +1096,20 @@ gnuv3_get_typeid (struct value *value)
   type = make_cv_type (0, 0, type, NULL);
   gdbarch = get_type_arch (type);
 
-  typename = type_to_string (type);
-  if (typename == NULL)
+  type_name = type_to_string (type);
+  if (type_name == NULL)
     error (_("cannot find typeinfo for unnamed type"));
-  cleanup = make_cleanup (xfree, typename);
+  cleanup = make_cleanup (xfree, type_name);
 
   /* We need to canonicalize the type name here, because we do lookups
      using the demangled name, and so we must match the format it
      uses.  E.g., GDB tends to use "const char *" as a type name, but
      the demangler uses "char const *".  */
-  canonical = cp_canonicalize_string (typename);
+  canonical = cp_canonicalize_string (type_name);
   if (canonical != NULL)
     {
       make_cleanup (xfree, canonical);
-      typename = canonical;
+      type_name = canonical;
     }
 
   typeinfo_type = gnuv3_get_typeid_type (gdbarch);
@@ -1125,7 +1125,7 @@ gnuv3_get_typeid (struct value *value)
 
       vtable = gnuv3_get_vtable (gdbarch, type, address);
       if (vtable == NULL)
-	error (_("cannot find typeinfo for object of type '%s'"), typename);
+	error (_("cannot find typeinfo for object of type '%s'"), type_name);
       typeinfo_value = value_field (vtable, vtable_field_type_info);
       result = value_ind (value_cast (make_pointer_type (typeinfo_type, NULL),
 				      typeinfo_value));
@@ -1135,12 +1135,12 @@ gnuv3_get_typeid (struct value *value)
       char *sym_name;
       struct bound_minimal_symbol minsym;
 
-      sym_name = concat ("typeinfo for ", typename, (char *) NULL);
+      sym_name = concat ("typeinfo for ", type_name, (char *) NULL);
       make_cleanup (xfree, sym_name);
       minsym = lookup_minimal_symbol (sym_name, NULL, NULL);
 
       if (minsym.minsym == NULL)
-	error (_("could not find typeinfo symbol for '%s'"), typename);
+	error (_("could not find typeinfo symbol for '%s'"), type_name);
 
       result = value_at_lazy (typeinfo_type, BMSYMBOL_VALUE_ADDRESS (minsym));
     }
@@ -1188,21 +1188,21 @@ gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
 static struct type *
 gnuv3_get_type_from_type_info (struct value *type_info_ptr)
 {
-  char *typename;
+  char *type_name;
   struct cleanup *cleanup;
   struct value *type_val;
   struct expression *expr;
   struct type *result;
 
-  typename = gnuv3_get_typename_from_type_info (type_info_ptr);
-  cleanup = make_cleanup (xfree, typename);
+  type_name = gnuv3_get_typename_from_type_info (type_info_ptr);
+  cleanup = make_cleanup (xfree, type_name);
 
   /* We have to parse the type name, since in general there is not a
      symbol for a type.  This is somewhat bogus since there may be a
      mis-parse.  Another approach might be to re-use the demangler's
      internal form to reconstruct the type somehow.  */
 
-  expr = parse_expression (typename);
+  expr = parse_expression (type_name);
   make_cleanup (xfree, expr);
 
   type_val = evaluate_type (expr);

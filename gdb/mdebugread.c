@@ -430,24 +430,24 @@ static struct parse_stack
 static void
 push_parse_stack (void)
 {
-  struct parse_stack *new;
+  struct parse_stack *newobj;
 
   /* Reuse frames if possible.  */
   if (top_stack && top_stack->prev)
-    new = top_stack->prev;
+    newobj = top_stack->prev;
   else
-    new = (struct parse_stack *) xzalloc (sizeof (struct parse_stack));
+    newobj = (struct parse_stack *) xzalloc (sizeof (struct parse_stack));
   /* Initialize new frame with previous content.  */
   if (top_stack)
     {
-      struct parse_stack *prev = new->prev;
+      struct parse_stack *prev = newobj->prev;
 
-      *new = *top_stack;
-      top_stack->prev = new;
-      new->prev = prev;
-      new->next = top_stack;
+      *newobj = *top_stack;
+      top_stack->prev = newobj;
+      newobj->prev = prev;
+      newobj->next = top_stack;
     }
-  top_stack = new;
+  top_stack = newobj;
 }
 
 /* Exit a lexical context.  */
@@ -559,7 +559,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
   struct type *t;
   struct field *f;
   int count = 1;
-  enum address_class class;
+  enum address_class theclass;
   TIR tir;
   long svalue = sh->value;
   int bitsize;
@@ -600,7 +600,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       break;
 
     case stGlobal:		/* External symbol, goes into global block.  */
-      class = LOC_STATIC;
+      theclass = LOC_STATIC;
       b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
 			     GLOBAL_BLOCK);
       s = new_symbol (name);
@@ -608,7 +608,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       goto data;
 
     case stStatic:		/* Static data, goes into current block.  */
-      class = LOC_STATIC;
+      theclass = LOC_STATIC;
       b = top_stack->cur_block;
       s = new_symbol (name);
       if (SC_IS_COMMON (sh->sc))
@@ -629,13 +629,13 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s = new_symbol (name);
       SYMBOL_VALUE (s) = svalue;
       if (sh->sc == scRegister)
-	class = mdebug_register_index;
+	theclass = mdebug_register_index;
       else
-	class = LOC_LOCAL;
+	theclass = LOC_LOCAL;
 
     data:			/* Common code for symbols describing data.  */
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-      SYMBOL_ACLASS_INDEX (s) = class;
+      SYMBOL_ACLASS_INDEX (s) = theclass;
       add_symbol (s, top_stack->cur_st, b);
 
       /* Type could be missing if file is compiled without debugging info.  */
@@ -3416,7 +3416,7 @@ parse_partial_symbols (struct objfile *objfile)
 	  for (cur_sdx = 0; cur_sdx < fh->csym;)
 	    {
 	      char *name;
-	      enum address_class class;
+	      enum address_class theclass;
 	      CORE_ADDR minsym_value;
 
 	      (*swap_sym_in) (cur_bfd,
@@ -3572,7 +3572,7 @@ parse_partial_symbols (struct objfile *objfile)
 							 mst_file_bss,
 							 SECT_OFF_BSS (objfile),
 							 objfile);
-		  class = LOC_STATIC;
+		  theclass = LOC_STATIC;
 		  break;
 
 		case stIndirect:	/* Irix5 forward declaration */
@@ -3584,11 +3584,11 @@ parse_partial_symbols (struct objfile *objfile)
 		     structs from alpha and mips cc.  */
 		  if (sh.iss == 0 || has_opaque_xref (fh, &sh))
 		    goto skip;
-		  class = LOC_TYPEDEF;
+		  theclass = LOC_TYPEDEF;
 		  break;
 
 		case stConstant:	/* Constant decl */
-		  class = LOC_CONST;
+		  theclass = LOC_CONST;
 		  break;
 
 		case stUnion:
@@ -3644,7 +3644,7 @@ parse_partial_symbols (struct objfile *objfile)
 		}
 	      /* Use this gdb symbol.  */
 	      add_psymbol_to_list (name, strlen (name), 1,
-				   VAR_DOMAIN, class,
+				   VAR_DOMAIN, theclass,
 				   &objfile->static_psymbols,
 				   0, sh.value, psymtab_language, objfile);
 	    skip:
@@ -3658,7 +3658,7 @@ parse_partial_symbols (struct objfile *objfile)
 	  PST_PRIVATE (save_pst)->extern_tab = ext_ptr;
 	  for (; --cur_sdx >= 0; ext_ptr++)
 	    {
-	      enum address_class class;
+	      enum address_class theclass;
 	      SYMR *psh;
 	      char *name;
 	      CORE_ADDR svalue;
@@ -3708,7 +3708,7 @@ parse_partial_symbols (struct objfile *objfile)
 		     Ignore them, as parse_external will ignore them too.  */
 		  continue;
 		case stLabel:
-		  class = LOC_LABEL;
+		  theclass = LOC_LABEL;
 		  break;
 		default:
 		  unknown_ext_complaint (debug_info->ssext + psh->iss);
@@ -3719,12 +3719,12 @@ parse_partial_symbols (struct objfile *objfile)
 		  if (SC_IS_COMMON (psh->sc))
 		    continue;
 
-		  class = LOC_STATIC;
+		  theclass = LOC_STATIC;
 		  break;
 		}
 	      name = debug_info->ssext + psh->iss;
 	      add_psymbol_to_list (name, strlen (name), 1,
-				   VAR_DOMAIN, class,
+				   VAR_DOMAIN, theclass,
 				   &objfile->global_psymbols,
 				   0, svalue,
 				   psymtab_language, objfile);
@@ -4568,7 +4568,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 
 static struct symbol *
 mylookup_symbol (char *name, const struct block *block,
-		 domain_enum domain, enum address_class class)
+		 domain_enum domain, enum address_class theclass)
 {
   struct block_iterator iter;
   int inc;
@@ -4579,14 +4579,14 @@ mylookup_symbol (char *name, const struct block *block,
     {
       if (SYMBOL_LINKAGE_NAME (sym)[0] == inc
 	  && SYMBOL_DOMAIN (sym) == domain
-	  && SYMBOL_CLASS (sym) == class
+	  && SYMBOL_CLASS (sym) == theclass
 	  && strcmp (SYMBOL_LINKAGE_NAME (sym), name) == 0)
 	return sym;
     }
 
   block = BLOCK_SUPERBLOCK (block);
   if (block)
-    return mylookup_symbol (name, block, domain, class);
+    return mylookup_symbol (name, block, domain, theclass);
   return 0;
 }
 

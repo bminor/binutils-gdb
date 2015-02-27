@@ -532,15 +532,15 @@ jit_symtab_open_impl (struct gdb_symbol_callbacks *cb,
 
 static int
 compare_block (const struct gdb_block *const old,
-               const struct gdb_block *const new)
+               const struct gdb_block *const newobj)
 {
   if (old == NULL)
     return 1;
-  if (old->begin < new->begin)
+  if (old->begin < newobj->begin)
     return 1;
-  else if (old->begin == new->begin)
+  else if (old->begin == newobj->begin)
     {
-      if (old->end > new->end)
+      if (old->end > newobj->end)
         return 1;
       else
         return 0;
@@ -1220,20 +1220,20 @@ static void
 jit_frame_this_id (struct frame_info *this_frame, void **cache,
                    struct frame_id *this_id)
 {
-  struct jit_unwind_private private;
+  struct jit_unwind_private priv;
   struct gdb_frame_id frame_id;
   struct gdb_reader_funcs *funcs;
   struct gdb_unwind_callbacks callbacks;
 
-  private.registers = NULL;
-  private.this_frame = this_frame;
+  priv.registers = NULL;
+  priv.this_frame = this_frame;
 
   /* We don't expect the frame_id function to set any registers, so we
      set reg_set to NULL.  */
   callbacks.reg_get = jit_unwind_reg_get_impl;
   callbacks.reg_set = NULL;
   callbacks.target_read = jit_target_read_impl;
-  callbacks.priv_data = &private;
+  callbacks.priv_data = &priv;
 
   gdb_assert (loaded_jit_reader);
   funcs = loaded_jit_reader->functions;

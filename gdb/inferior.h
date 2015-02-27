@@ -381,7 +381,7 @@ struct inferior
   struct continuation *continuations;
 
   /* Private data used by the target vector implementation.  */
-  struct private_inferior *private;
+  struct private_inferior *priv;
 
   /* HAS_EXIT_CODE is true if the inferior exited with an exit code.
      In this case, the EXIT_CODE field is also valid.  */

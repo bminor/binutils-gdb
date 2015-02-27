@@ -139,12 +139,12 @@ extern SCM gdbscm_string_string;
 
 /* scm-utils.c */
 
-extern void gdbscm_define_variables (const scheme_variable *, int public);
+extern void gdbscm_define_variables (const scheme_variable *, int is_public);
 
-extern void gdbscm_define_functions (const scheme_function *, int public);
+extern void gdbscm_define_functions (const scheme_function *, int is_public);
 
 extern void gdbscm_define_integer_constants (const scheme_integer_constant *,
-					     int public);
+					     int is_public);
 
 extern void gdbscm_printf (SCM port, const char *format, ...)
   ATTRIBUTE_PRINTF (2, 3);

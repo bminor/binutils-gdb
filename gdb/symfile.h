@@ -238,7 +238,7 @@ struct quick_symbol_functions
   void (*expand_symtabs_with_fullname) (struct objfile *objfile,
 					const char *fullname);
 
-  /* Find global or static symbols in all tables that are in NAMESPACE 
+  /* Find global or static symbols in all tables that are in DOMAIN
      and for which MATCH (symbol name, NAME) == 0, passing each to 
      CALLBACK, reading in partial symbol tables as needed.  Look
      through global symbols if GLOBAL and otherwise static symbols.
@@ -256,7 +256,7 @@ struct quick_symbol_functions
      non-zero to indicate that the scan should be terminated.  */
 
   void (*map_matching_symbols) (struct objfile *,
-				const char *name, domain_enum namespace,
+				const char *name, domain_enum domain,
 				int global,
 				int (*callback) (struct block *,
 						 struct symbol *, void *),

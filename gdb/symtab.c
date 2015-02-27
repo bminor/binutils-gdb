@@ -5028,44 +5028,44 @@ completion_list_add_name (const char *symname,
      of matches.  Note that the name is moved to freshly malloc'd space.  */
 
   {
-    char *new;
+    char *newobj;
     enum maybe_add_completion_enum add_status;
 
     if (word == sym_text)
       {
-	new = xmalloc (strlen (symname) + 5);
-	strcpy (new, symname);
+	newobj = xmalloc (strlen (symname) + 5);
+	strcpy (newobj, symname);
       }
     else if (word > sym_text)
       {
 	/* Return some portion of symname.  */
-	new = xmalloc (strlen (symname) + 5);
-	strcpy (new, symname + (word - sym_text));
+	newobj = xmalloc (strlen (symname) + 5);
+	strcpy (newobj, symname + (word - sym_text));
       }
     else
       {
 	/* Return some of SYM_TEXT plus symname.  */
-	new = xmalloc (strlen (symname) + (sym_text - word) + 5);
-	strncpy (new, word, sym_text - word);
-	new[sym_text - word] = '\0';
-	strcat (new, symname);
+	newobj = xmalloc (strlen (symname) + (sym_text - word) + 5);
+	strncpy (newobj, word, sym_text - word);
+	newobj[sym_text - word] = '\0';
+	strcat (newobj, symname);
       }
 
-    add_status = maybe_add_completion (completion_tracker, new);
+    add_status = maybe_add_completion (completion_tracker, newobj);
 
     switch (add_status)
       {
       case MAYBE_ADD_COMPLETION_OK:
-	VEC_safe_push (char_ptr, return_val, new);
+	VEC_safe_push (char_ptr, return_val, newobj);
 	break;
       case MAYBE_ADD_COMPLETION_OK_MAX_REACHED:
-	VEC_safe_push (char_ptr, return_val, new);
+	VEC_safe_push (char_ptr, return_val, newobj);
 	throw_max_completions_reached_error ();
       case MAYBE_ADD_COMPLETION_MAX_REACHED:
-	xfree (new);
+	xfree (newobj);
 	throw_max_completions_reached_error ();
       case MAYBE_ADD_COMPLETION_DUPLICATE:
-	xfree (new);
+	xfree (newobj);
 	break;
       }
   }
@@ -5665,30 +5665,30 @@ static void
 add_filename_to_list (const char *fname, const char *text, const char *word,
 		      VEC (char_ptr) **list)
 {
-  char *new;
+  char *newobj;
   size_t fnlen = strlen (fname);
 
   if (word == text)
     {
       /* Return exactly fname.  */
-      new = xmalloc (fnlen + 5);
-      strcpy (new, fname);
+      newobj = xmalloc (fnlen + 5);
+      strcpy (newobj, fname);
     }
   else if (word > text)
     {
       /* Return some portion of fname.  */
-      new = xmalloc (fnlen + 5);
-      strcpy (new, fname + (word - text));
+      newobj = xmalloc (fnlen + 5);
+      strcpy (newobj, fname + (word - text));
     }
   else
     {
       /* Return some of TEXT plus fname.  */
-      new = xmalloc (fnlen + (text - word) + 5);
-      strncpy (new, word, text - word);
-      new[text - word] = '\0';
-      strcat (new, fname);
+      newobj = xmalloc (fnlen + (text - word) + 5);
+      strncpy (newobj, word, text - word);
+      newobj[text - word] = '\0';
+      strcat (newobj, fname);
     }
-  VEC_safe_push (char_ptr, *list, new);
+  VEC_safe_push (char_ptr, *list, newobj);
 }
 
 static int

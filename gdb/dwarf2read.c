@@ -3808,7 +3808,7 @@ dw2_expand_symtabs_with_fullname (struct objfile *objfile,
 
 static void
 dw2_map_matching_symbols (struct objfile *objfile,
-			  const char * name, domain_enum namespace,
+			  const char * name, domain_enum domain,
 			  int global,
 			  int (*callback) (struct block *,
 					   struct symbol *, void *),
@@ -11275,7 +11275,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct context_stack *new;
+  struct context_stack *newobj;
   CORE_ADDR lowpc;
   CORE_ADDR highpc;
   struct die_info *child_die;
@@ -11343,15 +11343,15 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  new = push_context (0, lowpc);
-  new->name = new_symbol_full (die, read_type_die (die, cu), cu,
+  newobj = push_context (0, lowpc);
+  newobj->name = new_symbol_full (die, read_type_die (die, cu), cu,
 			       (struct symbol *) templ_func);
 
   /* If there is a location expression for DW_AT_frame_base, record
      it.  */
   attr = dwarf2_attr (die, DW_AT_frame_base, cu);
   if (attr)
-    dwarf2_symbol_mark_computed (attr, new->name, cu, 1);
+    dwarf2_symbol_mark_computed (attr, newobj->name, cu, 1);
 
   cu->list_in_scope = &local_symbols;
 
@@ -11401,9 +11401,9 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  new = pop_context ();
+  newobj = pop_context ();
   /* Make a block for the local symbols within.  */
-  block = finish_block (new->name, &local_symbols, new->old_blocks,
+  block = finish_block (newobj->name, &local_symbols, newobj->old_blocks,
                         lowpc, highpc);
 
   /* For C++, set the block's scope.  */
@@ -11415,7 +11415,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);
 
-  gdbarch_make_symbol_special (gdbarch, new->name, objfile);
+  gdbarch_make_symbol_special (gdbarch, newobj->name, objfile);
 
   /* Attach template arguments to function.  */
   if (! VEC_empty (symbolp, template_args))
@@ -11437,8 +11437,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      a function declares a class that has methods).  This means that
      when we finish processing a function scope, we may need to go
      back to building a containing block's symbol lists.  */
-  local_symbols = new->locals;
-  using_directives = new->using_directives;
+  local_symbols = newobj->locals;
+  using_directives = newobj->using_directives;
 
   /* If we've finished processing a top-level function, subsequent
      symbols go in the file symbol list.  */
@@ -11454,7 +11454,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct context_stack *new;
+  struct context_stack *newobj;
   CORE_ADDR lowpc, highpc;
   struct die_info *child_die;
   CORE_ADDR baseaddr;
@@ -11481,13 +11481,13 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  child_die = sibling_die (child_die);
 	}
     }
-  new = pop_context ();
+  newobj = pop_context ();
 
   if (local_symbols != NULL || using_directives != NULL)
     {
       struct block *block
-        = finish_block (0, &local_symbols, new->old_blocks, new->start_addr,
-                        highpc);
+        = finish_block (0, &local_symbols, newobj->old_blocks,
+			newobj->start_addr, highpc);
 
       /* Note that recording ranges after traversing children, as we
          do here, means that recording a parent's ranges entails
@@ -11501,8 +11501,8 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
          to do.  */
       dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
-  local_symbols = new->locals;
-  using_directives = new->using_directives;
+  local_symbols = newobj->locals;
+  using_directives = newobj->using_directives;
 }
 
 /* Read in DW_TAG_GNU_call_site and insert it to CU->call_site_htab.  */
@@ -12715,7 +12715,7 @@ static int
 dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
 {
   const char *fieldname;
-  const char *typename;
+  const char *type_name;
   int len;
 
   if (die->parent == NULL)
@@ -12727,13 +12727,13 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
     return 0;
 
   fieldname = dwarf2_name (die, cu);
-  typename = dwarf2_name (die->parent, cu);
-  if (fieldname == NULL || typename == NULL)
+  type_name = dwarf2_name (die->parent, cu);
+  if (fieldname == NULL || type_name == NULL)
     return 0;
 
   len = strlen (fieldname);
-  return (strncmp (fieldname, typename, len) == 0
-	  && (typename[len] == '\0' || typename[len] == '<'));
+  return (strncmp (fieldname, type_name, len) == 0
+	  && (type_name[len] == '\0' || type_name[len] == '<'));
 }
 
 /* Add a member function to the proper fieldlist.  */

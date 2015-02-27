@@ -119,7 +119,7 @@ ia64_hpux_at_dld_breakpoint_1_p (ptid_t ptid)
   struct regcache *regcache = get_thread_regcache (ptid);
   CORE_ADDR pc = regcache_read_pc (regcache);
   struct address_space *aspace = get_regcache_aspace (regcache);
-  ia64_insn t0, t1, slot[3], template, insn;
+  ia64_insn t0, t1, slot[3], templ, insn;
   int slotnum;
   bfd_byte bundle[16];
 
@@ -139,12 +139,12 @@ ia64_hpux_at_dld_breakpoint_1_p (ptid_t ptid)
   /* bundles are always in little-endian byte order */
   t0 = bfd_getl64 (bundle);
   t1 = bfd_getl64 (bundle + 8);
-  template = (t0 >> 1) & 0xf;
+  templ = (t0 >> 1) & 0xf;
   slot[0] = (t0 >>  5) & 0x1ffffffffffLL;
   slot[1] = ((t0 >> 46) & 0x3ffff) | ((t1 & 0x7fffff) << 18);
   slot[2] = (t1 >> 23) & 0x1ffffffffffLL;
 
-  if (template == 2 && slotnum == 1)
+  if (templ == 2 && slotnum == 1)
     {
       /* skip L slot in MLI template: */
       slotnum = 2;

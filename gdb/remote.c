@@ -1659,15 +1659,15 @@ demand_private_info (ptid_t ptid)
 
   gdb_assert (info);
 
-  if (!info->private)
+  if (!info->priv)
     {
-      info->private = xmalloc (sizeof (*(info->private)));
+      info->priv = xmalloc (sizeof (*(info->priv)));
       info->private_dtor = free_private_thread_info;
-      info->private->core = -1;
-      info->private->extra = 0;
+      info->priv->core = -1;
+      info->priv->extra = 0;
     }
 
-  return info->private;
+  return info->priv;
 }
 
 /* Call this function as a result of
@@ -2910,8 +2910,8 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
     {
       struct thread_info *info = find_thread_ptid (tp->ptid);
 
-      if (info && info->private)
-	return info->private->extra;
+      if (info && info->priv)
+	return info->priv->extra;
       else
 	return NULL;
     }
@@ -11156,8 +11156,8 @@ remote_core_of_thread (struct target_ops *ops, ptid_t ptid)
 {
   struct thread_info *info = find_thread_ptid (ptid);
 
-  if (info && info->private)
-    return info->private->core;
+  if (info && info->priv)
+    return info->priv->core;
   return -1;
 }
 

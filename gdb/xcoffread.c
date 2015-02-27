@@ -1028,7 +1028,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it.  */
   union internal_auxent fcn_aux_saved = main_aux;
-  struct context_stack *new;
+  struct context_stack *newobj;
 
   char *filestring = " _start_ ";	/* Name of the current file.  */
 
@@ -1355,13 +1355,13 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
 	      within_function = 1;
 
-	      new = push_context (0, fcn_start_addr + off);
+	      newobj = push_context (0, fcn_start_addr + off);
 
-	      new->name = define_symbol
+	      newobj->name = define_symbol
 		(fcn_cs_saved.c_value + off,
 		 fcn_stab_saved.c_name, 0, 0, objfile);
-	      if (new->name != NULL)
-		SYMBOL_SECTION (new->name) = SECT_OFF_TEXT (objfile);
+	      if (newobj->name != NULL)
+		SYMBOL_SECTION (newobj->name) = SECT_OFF_TEXT (objfile);
 	    }
 	  else if (strcmp (cs->c_name, ".ef") == 0)
 	    {
@@ -1379,17 +1379,17 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		  within_function = 0;
 		  break;
 		}
-	      new = pop_context ();
+	      newobj = pop_context ();
 	      /* Stack must be empty now.  */
-	      if (context_stack_depth > 0 || new == NULL)
+	      if (context_stack_depth > 0 || newobj == NULL)
 		{
 		  ef_complaint (cs->c_symnum);
 		  within_function = 0;
 		  break;
 		}
 
-	      finish_block (new->name, &local_symbols, new->old_blocks,
-			    new->start_addr,
+	      finish_block (newobj->name, &local_symbols, newobj->old_blocks,
+			    newobj->start_addr,
 			    (fcn_cs_saved.c_value
 			     + fcn_aux_saved.x_sym.x_misc.x_fsize
 			     + ANOFFSET (objfile->section_offsets,
@@ -1459,7 +1459,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	  if (strcmp (cs->c_name, ".bb") == 0)
 	    {
 	      depth++;
-	      new = push_context (depth,
+	      newobj = push_context (depth,
 				  (cs->c_value
 				   + ANOFFSET (objfile->section_offsets,
 					       SECT_OFF_TEXT (objfile))));
@@ -1471,8 +1471,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		  eb_complaint (cs->c_symnum);
 		  break;
 		}
-	      new = pop_context ();
-	      if (depth-- != new->depth)
+	      newobj = pop_context ();
+	      if (depth-- != newobj->depth)
 		{
 		  eb_complaint (cs->c_symnum);
 		  break;
@@ -1480,13 +1480,13 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	      if (local_symbols && context_stack_depth > 0)
 		{
 		  /* Make a block for the local symbols within.  */
-		  finish_block (new->name, &local_symbols, new->old_blocks,
-				new->start_addr,
+		  finish_block (newobj->name, &local_symbols, newobj->old_blocks,
+				newobj->start_addr,
 				(cs->c_value
 				 + ANOFFSET (objfile->section_offsets,
 					     SECT_OFF_TEXT (objfile))));
 		}
-	      local_symbols = new->locals;
+	      local_symbols = newobj->locals;
 	    }
 	  break;
 

@@ -1519,7 +1519,7 @@ struct type *
 lookup_struct_elt_type (struct type *type, const char *name, int noerr)
 {
   int i;
-  char *typename;
+  char *type_name;
 
   for (;;)
     {
@@ -1533,9 +1533,9 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT 
       && TYPE_CODE (type) != TYPE_CODE_UNION)
     {
-      typename = type_to_string (type);
-      make_cleanup (xfree, typename);
-      error (_("Type %s is not a structure or union type."), typename);
+      type_name = type_to_string (type);
+      make_cleanup (xfree, type_name);
+      error (_("Type %s is not a structure or union type."), type_name);
     }
 
 #if 0
@@ -1544,10 +1544,10 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
      I.e. when doing "ptype bell->bar" for "struct foo { int bar; int
      foo; } bell;" Disabled by fnf.  */
   {
-    char *typename;
+    char *type_name;
 
-    typename = type_name_no_tag (type);
-    if (typename != NULL && strcmp (typename, name) == 0)
+    type_name = type_name_no_tag (type);
+    if (type_name != NULL && strcmp (type_name, name) == 0)
       return type;
   }
 #endif
@@ -1587,9 +1587,9 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
       return NULL;
     }
 
-  typename = type_to_string (type);
-  make_cleanup (xfree, typename);
-  error (_("Type %s has no component named %s."), typename, name);
+  type_name = type_to_string (type);
+  make_cleanup (xfree, type_name);
+  error (_("Type %s has no component named %s."), type_name, name);
 }
 
 /* Store in *MAX the largest number representable by unsigned integer type
@@ -2719,7 +2719,7 @@ class_types_same_p (const struct type *a, const struct type *b)
    distance_to_ancestor (A, D, 1) = -1.  */
 
 static int
-distance_to_ancestor (struct type *base, struct type *dclass, int public)
+distance_to_ancestor (struct type *base, struct type *dclass, int is_public)
 {
   int i;
   int d;
@@ -2732,10 +2732,10 @@ distance_to_ancestor (struct type *base, struct type *dclass, int public)
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
     {
-      if (public && ! BASETYPE_VIA_PUBLIC (dclass, i))
+      if (is_public && ! BASETYPE_VIA_PUBLIC (dclass, i))
 	continue;
 
-      d = distance_to_ancestor (base, TYPE_BASECLASS (dclass, i), public);
+      d = distance_to_ancestor (base, TYPE_BASECLASS (dclass, i), is_public);
       if (d >= 0)
 	return 1 + d;
     }
@@ -4190,7 +4190,7 @@ recursive_dump_type (struct type *type, int spaces)
 
 struct type_pair
 {
-  struct type *old, *new;
+  struct type *old, *newobj;
 };
 
 static hashval_t
@@ -4246,7 +4246,7 @@ copy_type_recursive (struct objfile *objfile,
   pair.old = type;
   slot = htab_find_slot (copied_types, &pair, INSERT);
   if (*slot != NULL)
-    return ((struct type_pair *) *slot)->new;
+    return ((struct type_pair *) *slot)->newobj;
 
   new_type = alloc_type_arch (get_type_arch (type));
 
@@ -4255,7 +4255,7 @@ copy_type_recursive (struct objfile *objfile,
   stored
     = obstack_alloc (&objfile->objfile_obstack, sizeof (struct type_pair));
   stored->old = type;
-  stored->new = new_type;
+  stored->newobj = new_type;
   *slot = stored;
 
   /* Copy the common fields of types.  For the main type, we simply

@@ -773,7 +773,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		  struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct context_stack *new;
+  struct context_stack *newobj;
   struct coff_symbol coff_symbol;
   struct coff_symbol *cs = &coff_symbol;
   static struct internal_syment main_sym;
@@ -1067,9 +1067,9 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	         context_stack_depth is zero, and complain if not.  */
 
 	      depth = 0;
-	      new = push_context (depth, fcn_start_addr);
+	      newobj = push_context (depth, fcn_start_addr);
 	      fcn_cs_saved.c_name = getsymname (&fcn_sym_saved);
-	      new->name =
+	      newobj->name =
 		process_coff_symbol (&fcn_cs_saved, 
 				     &fcn_aux_saved, objfile);
 	    }
@@ -1092,9 +1092,9 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		  break;
 		}
 
-	      new = pop_context ();
+	      newobj = pop_context ();
 	      /* Stack must be empty now.  */
-	      if (context_stack_depth > 0 || new == NULL)
+	      if (context_stack_depth > 0 || newobj == NULL)
 		{
 		  complaint (&symfile_complaints,
 			     _("Unmatched .ef symbol(s) ignored "
@@ -1129,8 +1129,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		enter_linenos (fcn_line_ptr, fcn_first_line,
 			       fcn_last_line, objfile);
 
-	      finish_block (new->name, &local_symbols,
-			    new->old_blocks, new->start_addr,
+	      finish_block (newobj->name, &local_symbols,
+			    newobj->old_blocks, newobj->start_addr,
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
 			    + ANOFFSET (objfile->section_offsets,
@@ -1158,8 +1158,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		  break;
 		}
 
-	      new = pop_context ();
-	      if (depth-- != new->depth)
+	      newobj = pop_context ();
+	      if (depth-- != newobj->depth)
 		{
 		  complaint (&symfile_complaints,
 			     _("Mismatched .eb symbol ignored "
@@ -1173,11 +1173,11 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		    cs->c_value + ANOFFSET (objfile->section_offsets,
 					    SECT_OFF_TEXT (objfile));
 		  /* Make a block for the local symbols within.  */
-		  finish_block (0, &local_symbols, new->old_blocks,
-				new->start_addr, tmpaddr);
+		  finish_block (0, &local_symbols, newobj->old_blocks,
+				newobj->start_addr, tmpaddr);
 		}
 	      /* Now pop locals of block just finished.  */
-	      local_symbols = new->locals;
+	      local_symbols = newobj->locals;
 	    }
 	  break;
 
@@ -2060,7 +2060,7 @@ coff_read_struct_type (int index, int length, int lastsym,
 
   struct type *type;
   struct nextfield *list = 0;
-  struct nextfield *new;
+  struct nextfield *newobj;
   int nfields = 0;
   int n;
   char *name;
@@ -2087,9 +2087,9 @@ coff_read_struct_type (int index, int length, int lastsym,
 	case C_MOU:
 
 	  /* Get space to record the next field's data.  */
-	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
-	  new->next = list;
-	  list = new;
+	  newobj = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  newobj->next = list;
+	  list = newobj;
 
 	  /* Save the data.  */
 	  list->field.name = obstack_copy0 (&objfile->objfile_obstack,
@@ -2104,9 +2104,9 @@ coff_read_struct_type (int index, int length, int lastsym,
 	case C_FIELD:
 
 	  /* Get space to record the next field's data.  */
-	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
-	  new->next = list;
-	  list = new;
+	  newobj = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  newobj->next = list;
+	  list = newobj;
 
 	  /* Save the data.  */
 	  list->field.name = obstack_copy0 (&objfile->objfile_obstack,

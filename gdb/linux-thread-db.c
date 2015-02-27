@@ -394,7 +394,7 @@ have_threads_callback (struct thread_info *thread, void *args)
   if (ptid_get_pid (thread->ptid) != pid)
     return 0;
 
-  return thread->private != NULL;
+  return thread->priv != NULL;
 }
 
 static int
@@ -1241,11 +1241,11 @@ thread_db_inferior_created (struct target_ops *target, int from_tty)
    from libthread_db thread state information.  */
 
 static void
-update_thread_state (struct private_thread_info *private,
+update_thread_state (struct private_thread_info *priv,
 		     const td_thrinfo_t *ti_p)
 {
-  private->dying = (ti_p->ti_state == TD_THR_UNKNOWN
-		    || ti_p->ti_state == TD_THR_ZOMBIE);
+  priv->dying = (ti_p->ti_state == TD_THR_UNKNOWN
+		 || ti_p->ti_state == TD_THR_ZOMBIE);
 }
 
 /* Attach to a new thread.  This function is called when we receive a
@@ -1272,16 +1272,16 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   tp = find_thread_ptid (ptid);
   if (tp != NULL)
     {
-      /* If tp->private is NULL, then GDB is already attached to this
+      /* If tp->priv is NULL, then GDB is already attached to this
 	 thread, but we do not know anything about it.  We can learn
 	 about it here.  This can only happen if we have some other
 	 way besides libthread_db to notice new threads (i.e.
 	 PTRACE_EVENT_CLONE); assume the same mechanism notices thread
 	 exit, so this can not be a stale thread recreated with the
 	 same ID.  */
-      if (tp->private != NULL)
+      if (tp->priv != NULL)
 	{
-	  if (!tp->private->dying)
+	  if (!tp->priv->dying)
 	    return 0;
 
 	  delete_thread (ptid);
@@ -1328,7 +1328,7 @@ record_thread (struct thread_db_info *info,
 	       const td_thrinfo_t *ti_p)
 {
   td_err_e err;
-  struct private_thread_info *private;
+  struct private_thread_info *priv;
   int new_thread = (tp == NULL);
 
   /* A thread ID of zero may mean the thread library has not
@@ -1338,18 +1338,18 @@ record_thread (struct thread_db_info *info,
     return;
 
   /* Construct the thread's private data.  */
-  private = xmalloc (sizeof (struct private_thread_info));
-  memset (private, 0, sizeof (struct private_thread_info));
+  priv = xmalloc (sizeof (struct private_thread_info));
+  memset (priv, 0, sizeof (struct private_thread_info));
 
-  private->th = *th_p;
-  private->tid = ti_p->ti_tid;
-  update_thread_state (private, ti_p);
+  priv->th = *th_p;
+  priv->tid = ti_p->ti_tid;
+  update_thread_state (priv, ti_p);
 
   /* Add the thread to GDB's thread list.  */
   if (tp == NULL)
-    tp = add_thread_with_info (ptid, private);
+    tp = add_thread_with_info (ptid, priv);
   else
-    tp->private = private;
+    tp->priv = priv;
 
   /* Enable thread event reporting for this thread, except when
      debugging a core file.  */
@@ -1379,8 +1379,8 @@ detach_thread (ptid_t ptid)
      something re-uses its thread ID.  We'll report the thread exit
      when the underlying LWP dies.  */
   thread_info = find_thread_ptid (ptid);
-  gdb_assert (thread_info != NULL && thread_info->private != NULL);
-  thread_info->private->dying = 1;
+  gdb_assert (thread_info != NULL && thread_info->priv != NULL);
+  thread_info->priv->dying = 1;
 }
 
 static void
@@ -1649,7 +1649,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 
   ptid = ptid_build (info->pid, ti.ti_lid, 0);
   tp = find_thread_ptid (ptid);
-  if (tp == NULL || tp->private == NULL)
+  if (tp == NULL || tp->priv == NULL)
     {
       if (attach_thread (ptid, th_p, &ti))
 	cb_data->new_threads += 1;
@@ -1666,7 +1666,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
     {
       /* Need to update this if not using the libthread_db events
 	 (particularly, the TD_DEATH event).  */
-      update_thread_state (tp->private, &ti);
+      update_thread_state (tp->priv, &ti);
     }
 
   return 0;
@@ -1829,12 +1829,12 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
   struct thread_info *thread_info = find_thread_ptid (ptid);
   struct target_ops *beneath;
 
-  if (thread_info != NULL && thread_info->private != NULL)
+  if (thread_info != NULL && thread_info->priv != NULL)
     {
       static char buf[64];
       thread_t tid;
 
-      tid = thread_info->private->tid;
+      tid = thread_info->priv->tid;
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
 		tid, ptid_get_lwp (ptid));
 
@@ -1852,10 +1852,10 @@ static char *
 thread_db_extra_thread_info (struct target_ops *self,
 			     struct thread_info *info)
 {
-  if (info->private == NULL)
+  if (info->priv == NULL)
     return NULL;
 
-  if (info->private->dying)
+  if (info->priv->dying)
     return "Exiting";
 
   return NULL;
@@ -1880,7 +1880,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
   /* Find the matching thread.  */
   thread_info = find_thread_ptid (ptid);
 
-  if (thread_info != NULL && thread_info->private != NULL)
+  if (thread_info != NULL && thread_info->priv != NULL)
     {
       td_err_e err;
       psaddr_t address;
@@ -1899,7 +1899,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 	  /* Note the cast through uintptr_t: this interface only works if
 	     a target address fits in a psaddr_t, which is a host pointer.
 	     So a 32-bit debugger can not access 64-bit TLS through this.  */
-	  err = info->td_thr_tls_get_addr_p (&thread_info->private->th,
+	  err = info->td_thr_tls_get_addr_p (&thread_info->priv->th,
 					     (psaddr_t)(uintptr_t) lm,
 					     offset, &address);
 	}
@@ -1917,7 +1917,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 	     PR libc/16831 due to GDB PR threads/16954 LOAD_MODULE is also NULL.
 	     The constant number 1 depends on GNU __libc_setup_tls
 	     initialization of l_tls_modid to 1.  */
-	  err = info->td_thr_tlsbase_p (&thread_info->private->th,
+	  err = info->td_thr_tlsbase_p (&thread_info->priv->th,
 					1, &address);
 	  address = (char *) address + offset;
 	}

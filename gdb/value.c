@@ -1790,13 +1790,13 @@ record_latest_value (struct value *val)
   i = value_history_count % VALUE_HISTORY_CHUNK;
   if (i == 0)
     {
-      struct value_history_chunk *new
+      struct value_history_chunk *newobj
 	= (struct value_history_chunk *)
 
       xmalloc (sizeof (struct value_history_chunk));
-      memset (new->values, 0, sizeof new->values);
-      new->next = value_history_chain;
-      value_history_chain = new;
+      memset (newobj->values, 0, sizeof newobj->values);
+      newobj->next = value_history_chain;
+      value_history_chain = newobj;
     }
 
   value_history_chain->values[i] = val;

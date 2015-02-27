@@ -1496,7 +1496,7 @@ display_command (char *arg, int from_tty)
 {
   struct format_data fmt;
   struct expression *expr;
-  struct display *new;
+  struct display *newobj;
   int display_it = 1;
   const char *exp = arg;
 
@@ -1535,20 +1535,20 @@ display_command (char *arg, int from_tty)
       innermost_block = NULL;
       expr = parse_expression (exp);
 
-      new = (struct display *) xmalloc (sizeof (struct display));
+      newobj = (struct display *) xmalloc (sizeof (struct display));
 
-      new->exp_string = xstrdup (exp);
-      new->exp = expr;
-      new->block = innermost_block;
-      new->pspace = current_program_space;
-      new->next = display_chain;
-      new->number = ++display_number;
-      new->format = fmt;
-      new->enabled_p = 1;
-      display_chain = new;
+      newobj->exp_string = xstrdup (exp);
+      newobj->exp = expr;
+      newobj->block = innermost_block;
+      newobj->pspace = current_program_space;
+      newobj->next = display_chain;
+      newobj->number = ++display_number;
+      newobj->format = fmt;
+      newobj->enabled_p = 1;
+      display_chain = newobj;
 
       if (from_tty)
-	do_one_display (new);
+	do_one_display (newobj);
 
       dont_repeat ();
     }

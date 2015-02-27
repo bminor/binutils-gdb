@@ -434,11 +434,11 @@ gdbscm_symbol_constant_p (SCM self)
   symbol_smob *s_smob
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
-  enum address_class class;
+  enum address_class theclass;
 
-  class = SYMBOL_CLASS (symbol);
+  theclass = SYMBOL_CLASS (symbol);
 
-  return scm_from_bool (class == LOC_CONST || class == LOC_CONST_BYTES);
+  return scm_from_bool (theclass == LOC_CONST || theclass == LOC_CONST_BYTES);
 }
 
 /* (symbol-function? <gdb:symbol>) -> boolean */
@@ -449,11 +449,11 @@ gdbscm_symbol_function_p (SCM self)
   symbol_smob *s_smob
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
-  enum address_class class;
+  enum address_class theclass;
 
-  class = SYMBOL_CLASS (symbol);
+  theclass = SYMBOL_CLASS (symbol);
 
-  return scm_from_bool (class == LOC_BLOCK);
+  return scm_from_bool (theclass == LOC_BLOCK);
 }
 
 /* (symbol-variable? <gdb:symbol>) -> boolean */
@@ -464,14 +464,14 @@ gdbscm_symbol_variable_p (SCM self)
   symbol_smob *s_smob
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
-  enum address_class class;
+  enum address_class theclass;
 
-  class = SYMBOL_CLASS (symbol);
+  theclass = SYMBOL_CLASS (symbol);
 
   return scm_from_bool (!SYMBOL_IS_ARGUMENT (symbol)
-			&& (class == LOC_LOCAL || class == LOC_REGISTER
-			    || class == LOC_STATIC || class == LOC_COMPUTED
-			    || class == LOC_OPTIMIZED_OUT));
+			&& (theclass == LOC_LOCAL || theclass == LOC_REGISTER
+			    || theclass == LOC_STATIC || theclass == LOC_COMPUTED
+			    || theclass == LOC_OPTIMIZED_OUT));
 }
 
 /* (symbol-needs-frame? <gdb:symbol>) -> boolean

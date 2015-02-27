@@ -274,7 +274,7 @@ struct cache_entry
   /* The name used to perform the lookup.  */
   const char *name;
   /* The namespace used during the lookup.  */
-  domain_enum namespace;
+  domain_enum domain;
   /* The symbol returned by the lookup, or NULL if no matching symbol
      was found.  */
   struct symbol *sym;
@@ -4426,11 +4426,11 @@ ada_clear_symbol_cache (void)
   ada_init_symbol_cache (sym_cache);
 }
 
-/* Search our cache for an entry matching NAME and NAMESPACE.
+/* Search our cache for an entry matching NAME and DOMAIN.
    Return it if found, or NULL otherwise.  */
 
 static struct cache_entry **
-find_entry (const char *name, domain_enum namespace)
+find_entry (const char *name, domain_enum domain)
 {
   struct ada_symbol_cache *sym_cache
     = ada_get_symbol_cache (current_program_space);
@@ -4439,23 +4439,23 @@ find_entry (const char *name, domain_enum namespace)
 
   for (e = &sym_cache->root[h]; *e != NULL; e = &(*e)->next)
     {
-      if (namespace == (*e)->namespace && strcmp (name, (*e)->name) == 0)
+      if (domain == (*e)->domain && strcmp (name, (*e)->name) == 0)
         return e;
     }
   return NULL;
 }
 
-/* Search the symbol cache for an entry matching NAME and NAMESPACE.
+/* Search the symbol cache for an entry matching NAME and DOMAIN.
    Return 1 if found, 0 otherwise.
 
    If an entry was found and SYM is not NULL, set *SYM to the entry's
    SYM.  Same principle for BLOCK if not NULL.  */
 
 static int
-lookup_cached_symbol (const char *name, domain_enum namespace,
+lookup_cached_symbol (const char *name, domain_enum domain,
                       struct symbol **sym, const struct block **block)
 {
-  struct cache_entry **e = find_entry (name, namespace);
+  struct cache_entry **e = find_entry (name, domain);
 
   if (e == NULL)
     return 0;
@@ -4467,10 +4467,10 @@ lookup_cached_symbol (const char *name, domain_enum namespace,
 }
 
 /* Assuming that (SYM, BLOCK) is the result of the lookup of NAME
-   in domain NAMESPACE, save this result in our symbol cache.  */
+   in domain DOMAIN, save this result in our symbol cache.  */
 
 static void
-cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
+cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
               const struct block *block)
 {
   struct ada_symbol_cache *sym_cache
@@ -4503,7 +4503,7 @@ cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
   e->name = copy = obstack_alloc (&sym_cache->cache_space, strlen (name) + 1);
   strcpy (copy, name);
   e->sym = sym;
-  e->namespace = namespace;
+  e->domain = domain;
   e->block = block;
 }
 
@@ -4725,7 +4725,7 @@ ada_lookup_simple_minsym (const char *name)
 
 static void
 add_symbols_from_enclosing_procs (struct obstack *obstackp,
-                                  const char *name, domain_enum namespace,
+                                  const char *name, domain_enum domain,
                                   int wild_match_p)
 {
 }
@@ -5404,7 +5404,7 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
 
 static int
 ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
-			       domain_enum namespace,
+			       domain_enum domain,
 			       struct ada_symbol_info **results,
 			       int full_search)
 {
@@ -5443,7 +5443,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
       if (full_search)
 	{
 	  ada_add_local_symbols (&symbol_list_obstack, name, block,
-				 namespace, wild_match_p);
+				 domain, wild_match_p);
 	}
       else
 	{
@@ -5451,7 +5451,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
 	     ada_iterate_over_symbols, and we don't want to search
 	     superblocks.  */
 	  ada_add_block_symbols (&symbol_list_obstack, block, name,
-				 namespace, NULL, wild_match_p);
+				 domain, NULL, wild_match_p);
 	}
       if (num_defns_collected (&symbol_list_obstack) > 0 || !full_search)
 	goto done;
@@ -5461,7 +5461,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
      already performed this search before.  If we have, then return
      the same result.  */
 
-  if (lookup_cached_symbol (name0, namespace, &sym, &block))
+  if (lookup_cached_symbol (name0, domain, &sym, &block))
     {
       if (sym != NULL)
         add_defn_to_vec (&symbol_list_obstack, sym, block);
@@ -5472,14 +5472,14 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
 
   /* Search symbols from all global blocks.  */
  
-  add_nonlocal_symbols (&symbol_list_obstack, name, namespace, 1,
+  add_nonlocal_symbols (&symbol_list_obstack, name, domain, 1,
 			wild_match_p);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
      (not strictly correct, but perhaps better than an error).  */
 
   if (num_defns_collected (&symbol_list_obstack) == 0)
-    add_nonlocal_symbols (&symbol_list_obstack, name, namespace, 0,
+    add_nonlocal_symbols (&symbol_list_obstack, name, domain, 0,
 			  wild_match_p);
 
 done:
@@ -5489,10 +5489,10 @@ done:
   ndefns = remove_extra_symbols (*results, ndefns);
 
   if (ndefns == 0 && full_search && syms_from_global_search)
-    cache_symbol (name0, namespace, NULL, NULL);
+    cache_symbol (name0, domain, NULL, NULL);
 
   if (ndefns == 1 && full_search && syms_from_global_search)
-    cache_symbol (name0, namespace, (*results)[0].sym, (*results)[0].block);
+    cache_symbol (name0, domain, (*results)[0].sym, (*results)[0].block);
 
   ndefns = remove_irrelevant_renamings (*results, ndefns, block0);
 
@@ -5564,7 +5564,7 @@ ada_name_for_lookup (const char *name)
 
 void
 ada_lookup_encoded_symbol (const char *name, const struct block *block,
-			   domain_enum namespace,
+			   domain_enum domain,
 			   struct ada_symbol_info *info)
 {
   struct ada_symbol_info *candidates;
@@ -5573,7 +5573,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
   gdb_assert (info != NULL);
   memset (info, 0, sizeof (struct ada_symbol_info));
 
-  n_candidates = ada_lookup_symbol_list (name, block, namespace, &candidates);
+  n_candidates = ada_lookup_symbol_list (name, block, domain, &candidates);
   if (n_candidates == 0)
     return;
 
@@ -5589,7 +5589,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
 
 struct symbol *
 ada_lookup_symbol (const char *name, const struct block *block0,
-                   domain_enum namespace, int *is_a_field_of_this)
+                   domain_enum domain, int *is_a_field_of_this)
 {
   struct ada_symbol_info info;
 
@@ -5597,7 +5597,7 @@ ada_lookup_symbol (const char *name, const struct block *block0,
     *is_a_field_of_this = 0;
 
   ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
-			     block0, namespace, &info);
+			     block0, domain, &info);
   return info.sym;
 }
 
@@ -7790,17 +7790,17 @@ struct type *
 ada_find_parallel_type (struct type *type, const char *suffix)
 {
   char *name;
-  const char *typename = ada_type_name (type);
+  const char *type_name = ada_type_name (type);
   int len;
 
-  if (typename == NULL)
+  if (type_name == NULL)
     return NULL;
 
-  len = strlen (typename);
+  len = strlen (type_name);
 
   name = (char *) alloca (len + strlen (suffix) + 1);
 
-  strcpy (name, typename);
+  strcpy (name, type_name);
   strcpy (name + len, suffix);
 
   return ada_find_parallel_type_with_name (type, name);
@@ -7863,9 +7863,9 @@ variant_field_index (struct type *type)
 /* A record type with no fields.  */
 
 static struct type *
-empty_record (struct type *template)
+empty_record (struct type *templ)
 {
-  struct type *type = alloc_type_copy (template);
+  struct type *type = alloc_type_copy (templ);
 
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   TYPE_NFIELDS (type) = 0;

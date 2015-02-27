@@ -162,7 +162,7 @@ check_status_exception_catchpoint (struct bpstats *bs)
 {
   struct exception_catchpoint *self
     = (struct exception_catchpoint *) bs->breakpoint_at;
-  char *typename = NULL;
+  char *type_name = NULL;
   volatile struct gdb_exception e;
 
   bkpt_breakpoint_ops.check_status (bs);
@@ -178,22 +178,22 @@ check_status_exception_catchpoint (struct bpstats *bs)
       char *canon;
 
       fetch_probe_arguments (NULL, &typeinfo_arg);
-      typename = cplus_typename_from_type_info (typeinfo_arg);
+      type_name = cplus_typename_from_type_info (typeinfo_arg);
 
-      canon = cp_canonicalize_string (typename);
+      canon = cp_canonicalize_string (type_name);
       if (canon != NULL)
 	{
-	  xfree (typename);
-	  typename = canon;
+	  xfree (type_name);
+	  type_name = canon;
 	}
     }
 
   if (e.reason < 0)
     exception_print (gdb_stderr, e);
-  else if (regexec (self->pattern, typename, 0, NULL, 0) != 0)
+  else if (regexec (self->pattern, type_name, 0, NULL, 0) != 0)
     bs->stop = 0;
 
-  xfree (typename);
+  xfree (type_name);
 }
 
 /* Implement the 're_set' method.  */

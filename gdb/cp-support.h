@@ -198,7 +198,7 @@ extern struct symbol *cp_lookup_symbol_nonlocal
       const struct block *block,
       const domain_enum domain);
 
-extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
+extern struct symbol *cp_lookup_symbol_namespace (const char *the_namespace,
 						  const char *name,
 						  const struct block *block,
 						  const domain_enum domain);
