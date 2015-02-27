@@ -26,6 +26,7 @@ AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
+AC_PROG_CXX
 AC_GNU_SOURCE
 AC_SYS_LARGEFILE
 
@@ -38,6 +39,9 @@ AC_PROG_RANLIB
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
+
+# See if we are building with C++, and substitute COMPILER.
+GDB_AC_BUILD_WITH_CXX
 
 # Set the 'development' global.
 . $srcdir/../../bfd/development.sh
@@ -150,8 +154,11 @@ AC_ARG_ENABLE(werror,
      *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
    esac])
 
-# Enable -Werror by default when using gcc.  Turn it off for releases.
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
+# Enable -Werror by default when using gcc in C mode.  Leave it off
+# for C++ until we're warning clean.  Turn it off for releases.
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" \
+   && test x"$enable_build_with_cxx" != x"yes" \
+   && $development; then
     ERROR_ON_WARNING=yes
 fi
 
@@ -163,6 +170,18 @@ fi
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wformat-nonliteral -Wno-char-subscripts -Wempty-body"
 
+# Now add in C and C++ specific options, depending on mode.
+if test "$enable_build_with_cxx" = "yes"; then
+   build_warnings="$build_warnings -Wno-sign-compare -Wno-write-strings \
+-Wno-narrowing"
+fi
+
+# The set of warnings supported by a C++ compiler is not the same as
+# of the C compiler.
+if test "$enable_build_with_cxx" = "yes"; then
+    AC_LANG_PUSH([C++])
+fi
+
 WARN_CFLAGS=""
 if test "x$GCC" = xyes
 then
@@ -172,17 +191,25 @@ then
     for w in ${build_warnings}; do
 	case $w in
 	-Werr*) WERROR_CFLAGS=-Werror ;;
-	*) # Check that GCC accepts it
+	*)
+	    # Check whether GCC accepts it.
 	    saved_CFLAGS="$CFLAGS"
 	    CFLAGS="$CFLAGS $w"
+	    saved_CXXFLAGS="$CXXFLAGS"
+	    CXXFLAGS="$CXXFLAGS $w"
 	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
 	    CFLAGS="$saved_CFLAGS"
+	    CXXFLAGS="$saved_CXXFLAGS"
 	esac
     done
     AC_MSG_RESULT(${WARN_CFLAGS} ${WERROR_CFLAGS})
 fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)
+
+if test "$enable_build_with_cxx" = "yes"; then
+   AC_LANG_POP([C++])
+fi
 
 dnl dladdr is glibc-specific.  It is used by thread-db.c but only for
 dnl debugging messages.  It lives in -ldl which is handled below so we don't

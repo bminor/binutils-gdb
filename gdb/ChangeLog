@@ -1,5 +1,21 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (COMPILER): New, get it from autoconf.
+	(COMPILE.pre, CC_LD): Use COMPILER.
+	(CXX): Get from autoconf instead.
+	(CXX_FOR_TARGET): Default to g++ instead of gcc.
+	* acinclude.m4: Include build-with-cxx.m4.
+	* build-with-cxx.m4: New file.
+	* configure.ac: Call AC_PROG_CXX and GDB_AC_BUILD_WITH_CXX.
+	Disable -Werror by default if building in C++ mode.
+	(build_warnings): Add -Wno-sign-compare, -Wno-write-strings and
+	-Wno-narrowing in C++ mode.  Only enable -Wpointer-sign in C mode.
+	Run supported-warning-flags tests with the C++ compiler.
+	Save/restore CXXFLAGS too.
+	* configure: Regenerate.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* libiberty.m4: New file.
 	* acinclude.m4: Include libiberty.m4.
 	* configure.ac: Call libiberty_INIT.
