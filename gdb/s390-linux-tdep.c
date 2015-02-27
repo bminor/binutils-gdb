@@ -2808,12 +2808,24 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
     return 0;
 }
 
-/* Implement gdbarch_gcc_target_options.  GCC does not know "-m32".  */
+/* Implement gdbarch_gcc_target_options.  GCC does not know "-m32" or
+   "-mcmodel=large".  */
 
 static char *
 s390_gcc_target_options (struct gdbarch *gdbarch)
 {
-  return xstrdup ("-m31");
+  return xstrdup (gdbarch_ptr_bit (gdbarch) == 64 ? "-m64" : "-m31");
+}
+
+/* Implement gdbarch_gnu_triplet_regexp.  Target triplets are "s390-*"
+   for 31-bit and "s390x-*" for 64-bit, while the BFD arch name is
+   always "s390".  Note that an s390x compiler supports "-m31" as
+   well.  */
+
+static const char *
+s390_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  return "s390x?";
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
@@ -3112,7 +3124,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case ABI_LINUX_S390:
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
-      set_gdbarch_gcc_target_options (gdbarch, s390_gcc_target_options);
       set_solib_svr4_fetch_link_map_offsets
 	(gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
@@ -3152,6 +3163,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stap_register_indirection_suffixes (gdbarch,
 					  stap_register_indirection_suffixes);
   set_gdbarch_stap_is_single_operand (gdbarch, s390_stap_is_single_operand);
+  set_gdbarch_gcc_target_options (gdbarch, s390_gcc_target_options);
+  set_gdbarch_gnu_triplet_regexp (gdbarch, s390_gnu_triplet_regexp);
 
   return gdbarch;
 }

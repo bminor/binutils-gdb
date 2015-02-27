@@ -1,3 +1,12 @@
+2015-02-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_gcc_target_options): Not just handle
+	31-bit targets, but 64-bit targets as well.
+	(s390_gnu_triplet_regexp): New function.
+	(s390_gdbarch_init): Set the gcc_target_options gdbarch method for
+	64-bit targets as well.  Set the gnu_triplet_regexp gdbarch
+	method.
+
 2015-02-27  Jon TURNEY  <jon.turney@dronecode.org.uk>  (tiny patch)
 
 	* windows-nat.c (CONTEXT_DEBUGGER): Remove.
