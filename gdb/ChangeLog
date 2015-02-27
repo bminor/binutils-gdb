@@ -1,3 +1,10 @@
+2015-03-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64fbsd-tdep.c (amd64fbsd_sigtramp_p): Style fixes.
+	* i386fbsd-tdep.c: Fix style in various gdb_static_assert
+	expressions.
+	(i386fbsd_sigtramp_p): Likewise.
+
 2015-03-12  John Baldwin  <jhb@FreeBSD.org>
 
 	* MAINTAINERS (Write After Approval): Add John Baldwin.
