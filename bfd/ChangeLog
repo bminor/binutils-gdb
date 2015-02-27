@@ -12,7 +12,8 @@
 
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
-	* elfnn-aarch64.c (IS_AARCH64_TLSDESC_RELOC) BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21 move.
+	* elfnn-aarch64.c (IS_AARCH64_TLSDESC_RELOC): Reorder R_TYPE
+	tests.
 	(aarch64_tls_transition_without_check)
 	(aarch64_reloc_got_type, elfNN_aarch64_final_link_relocate)
 	(elfNN_aarch64_tls_relax, elfNN_aarch64_relocate_section)
