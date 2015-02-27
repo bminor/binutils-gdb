@@ -1,3 +1,9 @@
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* lib/unbuffer_output.c: New file.
+	* gdb.base/interrupt.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+
 2015-02-27  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/catch-syscall.exp: Don't skip it on hppa*-hp-hpux*
