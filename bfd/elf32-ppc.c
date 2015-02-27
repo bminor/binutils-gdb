@@ -5093,6 +5093,9 @@ ppc_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
   htab = ppc_elf_hash_table (info);
   htab->tls_get_addr = elf_link_hash_lookup (&htab->elf, "__tls_get_addr",
 					     FALSE, FALSE, TRUE);
+  if (htab->plt_type != PLT_NEW)
+    htab->params->no_tls_get_addr_opt = TRUE;
+
   if (!htab->params->no_tls_get_addr_opt)
     {
       struct elf_link_hash_entry *opt, *tga;
