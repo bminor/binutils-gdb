@@ -2050,7 +2050,7 @@ struct PyModuleDef python_GdbModuleDef =
   "_gdb",
   NULL,
   -1,
-  GdbMethods,
+  python_GdbMethods,
   NULL,
   NULL,
   NULL,

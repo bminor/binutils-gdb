@@ -1,3 +1,8 @@
+2015-02-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/python.c (python_GdbModuleDef): Rename GdbMethods to
+	python_GdbMethods.
+
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
 	* dtrace-probe.c (dtrace_probe_ops): Make extern.
