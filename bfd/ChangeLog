@@ -1,3 +1,10 @@
+2015-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17910
+	* coffgen.c (_bfd_coff_internal_syment_name): Only check for
+	string length overflow when the string table length is actually
+	set.
+
 2015-02-27  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* bfd/bfd-in2.h: Regenerate.
