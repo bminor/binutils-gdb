@@ -1,3 +1,8 @@
+2015-02-27  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* bfd/bfd-in2.h: Regenerate.
+	* bfd/libbfd.h: Regenerate.
+
 2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Fix
