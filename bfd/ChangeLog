@@ -1,5 +1,10 @@
 2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (_bfd_aarch64_create_or_find_stub_sec): Adjust
+	update of section_group[].stub_sec.
+
+2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* elfnn-aarch64.c (struct aarch64_erratum_835769_fix) Remove.
 	(erratum_835769_scan) Drop fix_table_size_p and fixes_p arguments.
 	Delete fixes, fix_table_size and associated code.  Call
