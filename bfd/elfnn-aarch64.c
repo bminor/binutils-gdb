@@ -3082,13 +3082,11 @@ erratum_835769_scan (bfd *input_bfd,
   return FALSE;
 }
 
-/* Find or create a stub section.  Returns a pointer to the stub section, and
-   the section to which the stub section will be attached (in *LINK_SEC_P).
-   LINK_SEC_P may be NULL.  */
+/* Find or create a stub section.  */
 
 static asection *
-elf_aarch64_create_or_find_stub_sec (asection **link_sec_p, asection *section,
-				   struct elf_aarch64_link_hash_table *htab)
+elf_aarch64_create_or_find_stub_sec (asection *section,
+				     struct elf_aarch64_link_hash_table *htab)
 {
   asection *link_sec;
   asection *stub_sec;
@@ -3122,9 +3120,6 @@ elf_aarch64_create_or_find_stub_sec (asection **link_sec_p, asection *section,
 	}
       htab->stub_group[section->id].stub_sec = stub_sec;
     }
-
-  if (link_sec_p)
-    *link_sec_p = link_sec;
 
   return stub_sec;
 }
@@ -3481,8 +3476,8 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
       if (htab->fix_erratum_835769)
 	for (i = 0; i < num_erratum_835769_fixes; i++)
 	  {
-	    stub_sec = elf_aarch64_create_or_find_stub_sec (NULL,
-			 erratum_835769_fixes[i].section, htab);
+	    stub_sec = elf_aarch64_create_or_find_stub_sec
+	      (erratum_835769_fixes[i].section, htab);
 
 	    if (stub_sec == NULL)
 	      goto error_ret_free_local;
