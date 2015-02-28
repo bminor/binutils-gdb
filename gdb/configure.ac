@@ -1978,18 +1978,19 @@ if test "${ERROR_ON_WARNING}" = yes ; then
 fi
 
 # These options work in either C or C++ modes.
-build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
+build_warnings="-Wall -Wpointer-arith \
 -Wno-unused -Wunused-value -Wunused-function \
--Wno-switch -Wno-char-subscripts -Wmissing-prototypes \
--Wdeclaration-after-statement -Wempty-body -Wmissing-parameter-type \
--Wold-style-declaration -Wold-style-definition"
+-Wno-switch -Wno-char-subscripts \
+-Wempty-body"
 
 # Now add in C and C++ specific options, depending on mode.
 if test "$enable_build_with_cxx" = "yes"; then
    build_warnings="$build_warnings -Wno-sign-compare -Wno-write-strings \
 -Wno-narrowing"
 else
-   build_warnings="$build_warnings -Wpointer-sign"
+   build_warnings="$build_warnings -Wpointer-sign -Wmissing-prototypes \
+-Wdeclaration-after-statement -Wmissing-parameter-type \
+-Wold-style-declaration -Wold-style-definition"
 fi
 
 # Enable -Wno-format by default when using gcc on mingw since many

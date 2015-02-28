@@ -1,5 +1,11 @@
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (build_warnings): Move
+	-Wdeclaration-after-statement to the C-specific set.
+	* configure: Regenerate.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
 	* gdbreplay.c: No longer include <netinet/in.h>, <sys/socket.h>,
 	or <winsock2.h> here.  Instead include "gdb_socket.h".
 	(remote_open): Use union gdb_sockaddr_u.

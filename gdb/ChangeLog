@@ -1,5 +1,13 @@
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (build_warnings): Move -Wmissing-prototypes
+	-Wdeclaration-after-statement -Wmissing-parameter-type
+	-Wold-style-declaration -Wold-style-definition to the C-specific
+	set.
+	* configure: Regenerate.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
 	* common/gdb_socket.h: New file.
 	* ser-tcp.c: Include gdb_socket.h.  Don't include netinet/in.h nor
 	sys/socket.h.

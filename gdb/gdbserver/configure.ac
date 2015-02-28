@@ -167,13 +167,15 @@ if test "${ERROR_ON_WARNING}" = yes ; then
     WERROR_CFLAGS="-Werror"
 fi
 
-build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
+build_warnings="-Wall -Wpointer-arith \
 -Wformat-nonliteral -Wno-char-subscripts -Wempty-body"
 
 # Now add in C and C++ specific options, depending on mode.
 if test "$enable_build_with_cxx" = "yes"; then
    build_warnings="$build_warnings -Wno-sign-compare -Wno-write-strings \
 -Wno-narrowing"
+else
+   build_warnings="$build_warnings -Wdeclaration-after-statement"
 fi
 
 # The set of warnings supported by a C++ compiler is not the same as
