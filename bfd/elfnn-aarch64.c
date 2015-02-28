@@ -2326,20 +2326,21 @@ elfNN_aarch64_get_stub_entry (const asection *input_section,
   return stub_entry;
 }
 
-/* Add a new stub entry to the stub hash.  Not all fields of the new
-   stub entry are initialised.  */
 
-static struct elf_aarch64_stub_hash_entry *
-elfNN_aarch64_add_stub (const char *stub_name,
-			asection *section,
-			struct elf_aarch64_link_hash_table *htab)
+/* Find or create a stub section in the stub group for an input
+   section.  */
+
+static asection *
+_bfd_aarch64_create_or_find_stub_sec (asection *section,
+				      struct elf_aarch64_link_hash_table *htab)
 {
   asection *link_sec;
   asection *stub_sec;
-  struct elf_aarch64_stub_hash_entry *stub_entry;
 
   link_sec = htab->stub_group[section->id].link_sec;
+  BFD_ASSERT (link_sec != NULL);
   stub_sec = htab->stub_group[section->id].stub_sec;
+
   if (stub_sec == NULL)
     {
       stub_sec = htab->stub_group[link_sec->id].stub_sec;
@@ -2358,12 +2359,33 @@ elfNN_aarch64_add_stub (const char *stub_name,
 	  memcpy (s_name, link_sec->name, namelen);
 	  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
 	  stub_sec = (*htab->add_stub_section) (s_name, link_sec);
+
 	  if (stub_sec == NULL)
 	    return NULL;
 	  htab->stub_group[link_sec->id].stub_sec = stub_sec;
 	}
       htab->stub_group[section->id].stub_sec = stub_sec;
     }
+
+  return stub_sec;
+}
+
+
+/* Add a new stub entry in the stub group associated with an input
+   section to the stub hash.  Not all fields of the new stub entry are
+   initialised.  */
+
+static struct elf_aarch64_stub_hash_entry *
+_bfd_aarch64_add_stub_entry_in_group (const char *stub_name,
+				      asection *section,
+				      struct elf_aarch64_link_hash_table *htab)
+{
+  asection *link_sec;
+  asection *stub_sec;
+  struct elf_aarch64_stub_hash_entry *stub_entry;
+
+  link_sec = htab->stub_group[section->id].link_sec;
+  stub_sec = _bfd_aarch64_create_or_find_stub_sec (section, htab);
 
   /* Enter this entry into the linker stub hash table.  */
   stub_entry = aarch64_stub_hash_lookup (&htab->stub_hash_table, stub_name,
@@ -3087,48 +3109,6 @@ erratum_835769_scan (bfd *input_bfd,
   return TRUE;
 }
 
-/* Find or create a stub section.  */
-
-static asection *
-elf_aarch64_create_or_find_stub_sec (asection *section,
-				     struct elf_aarch64_link_hash_table *htab)
-{
-  asection *link_sec;
-  asection *stub_sec;
-
-  link_sec = htab->stub_group[section->id].link_sec;
-  BFD_ASSERT (link_sec != NULL);
-  stub_sec = htab->stub_group[section->id].stub_sec;
-
-  if (stub_sec == NULL)
-    {
-      stub_sec = htab->stub_group[link_sec->id].stub_sec;
-      if (stub_sec == NULL)
-	{
-	  size_t namelen;
-	  bfd_size_type len;
-	  char *s_name;
-
-	  namelen = strlen (link_sec->name);
-	  len = namelen + sizeof (STUB_SUFFIX);
-	  s_name = (char *) bfd_alloc (htab->stub_bfd, len);
-	  if (s_name == NULL)
-	    return NULL;
-
-	  memcpy (s_name, link_sec->name, namelen);
-	  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
-	  stub_sec = (*htab->add_stub_section) (s_name, link_sec);
-
-	  if (stub_sec == NULL)
-	    return NULL;
-	  htab->stub_group[link_sec->id].stub_sec = stub_sec;
-	}
-      htab->stub_group[section->id].stub_sec = stub_sec;
-    }
-
-  return stub_sec;
-}
-
 /* Determine and set the size of the stub section for a final link.
 
    The basic idea here is to examine all the relocations looking for
@@ -3413,8 +3393,8 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 		      continue;
 		    }
 
-		  stub_entry = elfNN_aarch64_add_stub (stub_name, section,
-						       htab);
+		  stub_entry = _bfd_aarch64_add_stub_entry_in_group
+		    (stub_name, section, htab);
 		  if (stub_entry == NULL)
 		    {
 		      free (stub_name);
@@ -3481,7 +3461,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
       if (htab->fix_erratum_835769)
 	for (i = 0; i < num_erratum_835769_fixes; i++)
 	  {
-	    stub_sec = elf_aarch64_create_or_find_stub_sec
+	    stub_sec = _bfd_aarch64_create_or_find_stub_sec
 	      (erratum_835769_fixes[i].section, htab);
 
 	    if (stub_sec == NULL)
