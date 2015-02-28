@@ -924,7 +924,8 @@ struct section_offsets
 
 struct symtab
 {
-  /* Unordered chain of all existing symtabs of this objfile.  */
+  /* Unordered chain of all filetabs in the compunit,  with the exception
+     that the "main" source file is the first entry in the list.  */
 
   struct symtab *next;
 

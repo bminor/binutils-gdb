@@ -1,3 +1,7 @@
+2015-02-28  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct symtab) <next>: Fix comment.
+
 2015-02-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/python.c (python_GdbModuleDef): Rename GdbMethods to
