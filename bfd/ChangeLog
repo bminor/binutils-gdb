@@ -1,5 +1,15 @@
 2015-03-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (_bfd_aarch64_create_or_find_stub_sec): Rename
+	from elf_aarch64_create_or_find_stub_sec.
+	(_bfd_aarch64_add_stub_entry_in_group): Rename from
+	elfNN_aarch64_add_stub.  Call
+	_bfd_aarch64_create_or_find_stub_sec.
+	(elfNN_aarch64_size_stubs, elfNN_aarch64_size_stubs): Call
+	_bfd_aarch64_add_stub_entry_in_group.
+
+2015-03-23  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* elfnn-aarch64.c (erratum_835769_scan) Add comment.  Reverse
 	sense of boolean return.
 	(elfNN_aarch64_size_stubs): Adjust for above.
