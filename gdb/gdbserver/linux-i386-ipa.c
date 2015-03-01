@@ -100,7 +100,7 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
 }
 
 IP_AGENT_EXPORT_FUNC ULONGEST
-gdb_agent_get_raw_reg (unsigned char *raw_regs, int regnum)
+gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
 {
   /* This should maybe be allowed to return an error code, or perhaps
      better, have the emit_reg detect this, and emit a constant zero,
