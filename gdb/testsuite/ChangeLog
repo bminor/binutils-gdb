@@ -1,3 +1,8 @@
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-vregs.exp: New test.
+	* gdb.arch/s390-vregs.S: New file.
+
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
 	* gdb.gdb/python-interrupts.exp (test_python_interrupts): Adjust
