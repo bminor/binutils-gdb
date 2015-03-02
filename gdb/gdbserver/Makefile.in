@@ -362,7 +362,9 @@ clean:
 	rm -f s390-linux32.c s390-linux64.c s390x-linux64.c
 	rm -f s390-linux32v1.c s390-linux32v2.c s390-linux64v1.c
 	rm -f s390-linux64v2.c s390x-linux64v1.c s390x-linux64v2.c
-	rm -f s390-te-linux32.c s390-te-linux64.c
+	rm -f s390-te-linux64.c s390x-te-linux64.c
+	rm -f s390-vx-linux64.c s390x-vx-linux64.c
+	rm -f s390-tevx-linux64.c s390x-tevx-linux64.c
 	rm -f tic6x-c64xp-linux.c tic6x-c64x-linux.c tic6x-c62x-linux.c
 	rm -f xml-builtin.c stamp-xml
 	rm -f i386-avx.c i386-avx-linux.c
@@ -705,6 +707,10 @@ s390-linux64v2.c : $(srcdir)/../regformats/s390-linux64v2.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64v2.dat s390-linux64v2.c
 s390-te-linux64.c : $(srcdir)/../regformats/s390-te-linux64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-te-linux64.dat s390-te-linux64.c
+s390-vx-linux64.c : $(srcdir)/../regformats/s390-vx-linux64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-vx-linux64.dat s390-vx-linux64.c
+s390-tevx-linux64.c : $(srcdir)/../regformats/s390-tevx-linux64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-tevx-linux64.dat s390-tevx-linux64.c
 s390x-linux64.c : $(srcdir)/../regformats/s390x-linux64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64.dat s390x-linux64.c
 s390x-linux64v1.c : $(srcdir)/../regformats/s390x-linux64v1.dat $(regdat_sh)
@@ -713,6 +719,10 @@ s390x-linux64v2.c : $(srcdir)/../regformats/s390x-linux64v2.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64v2.dat s390x-linux64v2.c
 s390x-te-linux64.c : $(srcdir)/../regformats/s390x-te-linux64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-te-linux64.dat s390x-te-linux64.c
+s390x-vx-linux64.c : $(srcdir)/../regformats/s390x-vx-linux64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-vx-linux64.dat s390x-vx-linux64.c
+s390x-tevx-linux64.c : $(srcdir)/../regformats/s390x-tevx-linux64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-tevx-linux64.dat s390x-tevx-linux64.c
 
 tic6x-c64xp-linux.c : $(srcdir)/../regformats/tic6x-c64xp-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c64xp-linux.dat tic6x-c64xp-linux.c

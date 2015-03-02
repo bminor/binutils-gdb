@@ -1,3 +1,29 @@
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* Makefile.in (s390-vx-linux64.c, s390-tevx-linux64.c)
+	(s390x-vx-linux64.c, s390x-tevx-linux64.c): New rules.
+	(clean): Add "rm -f" for above C files.
+	* configure.srv (srv_regobj): Add s390-vx-linux64.o,
+	s390-tevx-linux64.o, s390x-vx-linux64.o, and s390x-tevx-linux64.o.
+	(srv_xmlfiles): Add s390-vx-linux64.xml, s390-tevx-linux64.xml,
+	s390x-vx-linux64.xml, s390x-tevx-linux64.xml, and s390-vx.xml.
+	* linux-s390-low.c (HWCAP_S390_VX): New macro.
+	(init_registers_s390_vx_linux64, init_registers_s390_tevx_linux64)
+	(init_registers_s390x_vx_linux64)
+	(init_registers_s390x_tevx_linux64)
+	(tdesc_s390_vx_linux64, tdesc_s390_tevx_linux64)
+	(tdesc_s390x_vx_linux64, tdesc_s390x_tevx_linux64): New extern
+	declarations.
+	(s390_fill_vxrs_low, s390_store_vxrs_low, s390_fill_vxrs_high)
+	(s390_store_vxrs_high): New functions.
+	(s390_regsets): Add entries for NT_S390_VXRS_LOW and
+	NT_S390_VXRS_HIGH.
+	(s390_arch_setup): Add logic for selecting one of the new target
+	descriptions.  Activate the new vector regsets if applicable.
+	(initialize_low_arch): Also invoke init_registers_s390_vx_linux64,
+	init_registers_s390_tevx_linux64, init_registers_s390x_vx_linux64,
+	and init_registers_s390x_tevx_linux64.
+
 2015-03-01  Pedro Alves  <palves@redhat.com>
 
 	* linux-i386-ipa.c (gdb_agent_get_raw_reg): Constify 'raw_regs'
