@@ -1,3 +1,8 @@
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (S/390 and System z Features): Describe new feature
+	"org.gnu.gdb.s390.vx".
+
 2015-02-23  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/18008

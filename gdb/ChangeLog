@@ -1,3 +1,24 @@
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* features/s390-tevx-linux64.xml: New file.
+	* features/s390-vx-linux64.xml: New file.
+	* features/s390-vx.xml: New file.
+	* features/s390x-tevx-linux64.xml: New file.
+	* features/s390x-vx-linux64.xml: New file.
+	* features/Makefile (WHICH): Add s390-vx-linux64,
+	s390x-vx-linux64, s390-tevx-linux64, and s390x-tevx-linux64.
+	(s390-vx-linux64-expedite, s390-tevx-linux64-expedite)
+	(s390x-vx-linux64-expedite, s390x-tevx-linux64-expedite): New
+	macros.
+	* features/s390-tevx-linux64.c: New generated file.
+	* features/s390-vx-linux64.c: Likewise.
+	* features/s390x-tevx-linux64.c: Likewise.
+	* features/s390x-vx-linux64.c: Likewise.
+	* regformats/s390-tevx-linux64.dat: Likewise.
+	* regformats/s390-vx-linux64.dat: Likewise.
+	* regformats/s390x-tevx-linux64.dat: Likewise.
+	* regformats/s390x-vx-linux64.dat: Likewise.
+
 2015-02-28  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.h (struct symtab) <next>: Fix comment.

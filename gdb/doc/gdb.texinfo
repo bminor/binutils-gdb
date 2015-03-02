@@ -39933,6 +39933,14 @@ The @samp{org.gnu.gdb.s390.tdb} feature is optional.  It should
 contain the 64-bit registers @samp{tdb0}, @samp{tac}, @samp{tct},
 @samp{atia}, and @samp{tr0} through @samp{tr15}.
 
+The @samp{org.gnu.gdb.s390.vx} feature is optional.  It should contain
+64-bit wide registers @samp{v0l} through @samp{v15l}, which will be
+combined by @value{GDBN} with the floating point registers @samp{f0}
+through @samp{f15} to present the 128-bit wide vector registers
+@samp{v0} through @samp{v15}.  In addition, this feature should
+contain the 128-bit wide vector registers @samp{v16} through
+@samp{v31}.
+
 @node TIC6x Features
 @subsection TMS320C6x Features
 @cindex target descriptions, TIC6x features
