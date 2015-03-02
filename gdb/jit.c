@@ -39,6 +39,8 @@
 #include "gdb-dlfcn.h"
 #include <sys/stat.h>
 #include "gdb_bfd.h"
+#include "readline/tilde.h"
+#include "completer.h"
 
 static const char *jit_reader_dir = NULL;
 
@@ -208,15 +210,19 @@ jit_reader_load_command (char *args, int from_tty)
 
   if (args == NULL)
     error (_("No reader name provided."));
+  args = tilde_expand (args);
+  prev_cleanup = make_cleanup (xfree, args);
 
   if (loaded_jit_reader != NULL)
     error (_("JIT reader already loaded.  Run jit-reader-unload first."));
 
   if (IS_ABSOLUTE_PATH (args))
-    so_name = xstrdup (args);
+    so_name = args;
   else
-    so_name = xstrprintf ("%s%s%s", jit_reader_dir, SLASH_STRING, args);
-  prev_cleanup = make_cleanup (xfree, so_name);
+    {
+      so_name = xstrprintf ("%s%s%s", jit_reader_dir, SLASH_STRING, args);
+      make_cleanup (xfree, so_name);
+    }
 
   loaded_jit_reader = jit_reader_load (so_name);
   reinit_frame_cache ();
@@ -1529,15 +1535,21 @@ _initialize_jit (void)
   jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())
     {
-      add_com ("jit-reader-load", no_class, jit_reader_load_command, _("\
+      struct cmd_list_element *c;
+
+      c = add_com ("jit-reader-load", no_class, jit_reader_load_command, _("\
 Load FILE as debug info reader and unwinder for JIT compiled code.\n\
 Usage: jit-reader-load FILE\n\
 Try to load file FILE as a debug info reader (and unwinder) for\n\
 JIT compiled code.  The file is loaded from " JIT_READER_DIR ",\n\
 relocated relative to the GDB executable if required."));
-      add_com ("jit-reader-unload", no_class, jit_reader_unload_command, _("\
+      set_cmd_completer (c, filename_completer);
+
+      c = add_com ("jit-reader-unload", no_class,
+		   jit_reader_unload_command, _("\
 Unload the currently loaded JIT debug info reader.\n\
-Usage: jit-reader-unload FILE\n\n\
+Usage: jit-reader-unload\n\n\
 Do \"help jit-reader-load\" for info on loading debug info readers."));
+      set_cmd_completer (c, noop_completer);
     }
 }

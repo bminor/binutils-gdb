@@ -1,3 +1,10 @@
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR cli/18053:
+	* jit.c (jit_reader_load_command): Use tilde_expand.
+	(_initialize_jit): Fix help for jit-reader-unload.  Set completer
+	for new commands.
+
 2016-07-12  Tom Tromey  <tom@tromey.com>
 
 	PR python/19293:

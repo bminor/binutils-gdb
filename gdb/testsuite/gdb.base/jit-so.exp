@@ -117,3 +117,10 @@ proc one_jit_test {count match_str} {
 
 one_jit_test 1 "${hex}  jit_function_0000"
 one_jit_test 2 "${hex}  jit_function_0000\[\r\n\]+${hex}  jit_function_0001"
+
+# We don't intend to load the .so as a JIT debuginfo reader, but we
+# need some handy file name for a completion test.
+gdb_test \
+    "complete jit-reader-load [standard_output_file ${solib_testfile}.s]" \
+    "jit-reader-load $solib_binfile" \
+    "test jit-reader-load filename completion"

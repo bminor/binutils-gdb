@@ -1,3 +1,9 @@
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR cli/18053:
+	* gdb.base/jit-so.exp (one_jit_test): Add jit-reader-load
+	completion test.
+
 2016-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/atomic-type.exp: Use function_range for low_pc and high_pc.
