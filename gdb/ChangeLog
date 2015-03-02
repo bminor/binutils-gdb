@@ -1,3 +1,11 @@
+2015-03-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.h: Remove <stdbool.h> #include.
+	(producer_is_gcc): Change return type to "int".
+	* utils.c (producer_is_gcc): Change return type to int.
+	Return 1 instead of true, and 0 instead of false.
+	Adjust function documentation accordingly.
+
 2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-nat.c (have_regset_vxrs): New static variable.

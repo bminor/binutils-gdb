@@ -3269,11 +3269,11 @@ producer_is_gcc_ge_4 (const char *producer)
   return minor;
 }
 
-/* Returns true if the given PRODUCER string is GCC and sets the MAJOR
-   and MINOR versions when not NULL.  Returns false if the given PRODUCER
+/* Returns nonzero if the given PRODUCER string is GCC and sets the MAJOR
+   and MINOR versions when not NULL.  Returns zero if the given PRODUCER
    is NULL or it isn't GCC.  */
 
-bool
+int
 producer_is_gcc (const char *producer, int *major, int *minor)
 {
   const char *cs;
@@ -3299,11 +3299,11 @@ producer_is_gcc (const char *producer, int *major, int *minor)
       if (*cs && isspace (*cs))
         cs++;
       if (sscanf (cs, "%d.%d", major, minor) == 2)
-	return true;
+	return 1;
     }
 
   /* Not recognized as GCC.  */
-  return false;
+  return 0;
 }
 
 /* Helper for make_cleanup_free_char_ptr_vec.  */
