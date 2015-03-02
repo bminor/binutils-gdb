@@ -766,11 +766,28 @@ address_from_register (int regnum, struct frame_info *frame)
      would therefore abort in get_frame_id.  However, since we only need
      a temporary value that is never used as lvalue, we actually do not
      really need to set its VALUE_FRAME_ID.  Therefore, we re-implement
-     the core of value_from_register, but use the null_frame_id.
+     the core of value_from_register, but use the null_frame_id.  */
 
-     This works only if we do not require a special conversion routine,
-     which is true for plain pointer types for all current targets.  */
-  gdb_assert (!gdbarch_convert_register_p (gdbarch, regnum, type));
+  /* Some targets require a special conversion routine even for plain
+     pointer types.  Avoid constructing a value object in those cases.  */
+  if (gdbarch_convert_register_p (gdbarch, regnum, type))
+    {
+      gdb_byte *buf = alloca (TYPE_LENGTH (type));
+      int optim, unavail, ok;
+
+      ok = gdbarch_register_to_value (gdbarch, frame, regnum, type,
+				      buf, &optim, &unavail);
+      if (!ok)
+	{
+	  /* This function is used while computing a location expression.
+	     Complain about the value being optimized out, rather than
+	     letting value_as_address complain about some random register
+	     the expression depends on not being saved.  */
+	  error_value_optimized_out ();
+	}
+
+      return unpack_long (type, buf);
+    }
 
   value = gdbarch_value_from_register (gdbarch, type, regnum, null_frame_id);
   read_frame_register_value (value, frame);
