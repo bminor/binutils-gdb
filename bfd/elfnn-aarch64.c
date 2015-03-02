@@ -2338,6 +2338,22 @@ _bfd_aarch64_create_stub_section (asection *section,
 }
 
 
+/* Find or create a stub section for a link section.
+
+   Fix or create the stub section used to collect stubs attached to
+   the specified link section.  */
+
+static asection *
+_bfd_aarch64_get_stub_for_link_section (asection *link_section,
+					struct elf_aarch64_link_hash_table *htab)
+{
+  if (htab->stub_group[link_section->id].stub_sec == NULL)
+    htab->stub_group[link_section->id].stub_sec
+      = _bfd_aarch64_create_stub_section (link_section, htab);
+  return htab->stub_group[link_section->id].stub_sec;
+}
+
+
 /* Find or create a stub section in the stub group for an input
    section.  */
 
@@ -2345,18 +2361,8 @@ static asection *
 _bfd_aarch64_create_or_find_stub_sec (asection *section,
 				      struct elf_aarch64_link_hash_table *htab)
 {
-  asection *link_sec;
-  asection *stub_sec;
-
-  link_sec = htab->stub_group[section->id].link_sec;
-  BFD_ASSERT (link_sec != NULL);
-  stub_sec = htab->stub_group[link_sec->id].stub_sec;
-  if (stub_sec == NULL)
-    {
-      stub_sec = _bfd_aarch64_create_stub_section (link_sec, htab);
-      htab->stub_group[link_sec->id].stub_sec = stub_sec;
-    }
-  return stub_sec;
+  asection *link_sec = htab->stub_group[section->id].link_sec;
+  return _bfd_aarch64_get_stub_for_link_section (link_sec, htab);
 }
 
 
