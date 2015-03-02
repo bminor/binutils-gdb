@@ -1,3 +1,9 @@
+2015-03-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (aarch64_build_one_stub): Call abort.
+	(aarch64_size_one_stub): Likewise.
+	(aarch64_map_one_stub): Likewise.
+
 2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* cpu-s390.c (N): New macro.
