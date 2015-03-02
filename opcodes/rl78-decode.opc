@@ -610,7 +610,7 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 1001 1111			mov	%e!0, %1			*/
   ID(mov); DM(None, IMMU(2)); SR(A);
 
-/** 1001 1001			mov	%e0,%1				*/
+/** 1001 1001			mov	%e0, %1				*/
   ID(mov); DM(DE, 0); SR(A);
 
 /** 1100 1010			mov	%e0, #%1			*/
@@ -619,7 +619,7 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 1001 1010			mov	%e0, %1				*/
   ID(mov); DM(DE, IMMU(1)); SR(A);
 
-/** 1001 1011			mov	%e0,%1				*/
+/** 1001 1011			mov	%e0, %1				*/
   ID(mov); DM(HL, 0); SR(A);
 
 /** 0110 0001 1101 1001		mov	%e0, %1				*/

@@ -944,7 +944,7 @@ signal_completer (struct cmd_list_element *ignore,
 {
   VEC (char_ptr) *return_val = NULL;
   size_t len = strlen (word);
-  enum gdb_signal signum;
+  int signum;
   const char *signame;
 
   for (signum = GDB_SIGNAL_FIRST; signum != GDB_SIGNAL_LAST; ++signum)
@@ -953,7 +953,7 @@ signal_completer (struct cmd_list_element *ignore,
       if (signum == GDB_SIGNAL_0)
 	continue;
 
-      signame = gdb_signal_to_name (signum);
+      signame = gdb_signal_to_name ((enum gdb_signal) signum);
 
       /* Ignore the unknown signal case.  */
       if (!signame || strcmp (signame, "?") == 0)
@@ -1548,6 +1548,12 @@ gdb_complete_get_screenwidth (const struct match_list_displayer *displayer)
   return displayer->width;
 }
 
+extern int _rl_completion_prefix_display_length;
+extern int _rl_print_completions_horizontally;
+
+EXTERN_C int _rl_qsort_string_compare (const void *, const void *);
+typedef int QSFUNC (const void *, const void *);
+
 /* GDB version of readline/complete.c:rl_display_match_list.
    See gdb_display_match_list for a description of MATCHES, LEN, MAX.
    Returns non-zero if all matches are displayed.  */
@@ -1560,10 +1566,6 @@ gdb_display_match_list_1 (char **matches, int len, int max,
   int i, j, k, l, common_length, sind;
   char *temp, *t;
   int page_completions = displayer->height != INT_MAX && pagination_enabled;
-  extern int _rl_completion_prefix_display_length;
-  extern int _rl_qsort_string_compare (const void *, const void *);
-  extern int _rl_print_completions_horizontally;
-  typedef int QSFUNC (const void *, const void *);
 
   /* Find the length of the prefix common to all items: length as displayed
      characters (common_length) and as a byte index into the matches (sind) */

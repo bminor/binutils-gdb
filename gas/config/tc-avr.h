@@ -216,3 +216,20 @@ extern bfd_boolean avr_allow_local_subtract (expressionS *, expressionS *, segT)
 
 #define elf_tc_final_processing 	avr_elf_final_processing
 extern void avr_elf_final_processing (void);
+
+#define md_post_relax_hook avr_post_relax_hook ()
+extern void avr_post_relax_hook (void);
+
+#define HANDLE_ALIGN(fragP) avr_handle_align (fragP)
+extern void avr_handle_align (fragS *fragP);
+
+struct avr_frag_data
+{
+  unsigned is_org : 1;
+  unsigned is_align : 1;
+  unsigned has_fill : 1;
+
+  char fill;
+  offsetT alignment;
+};
+#define TC_FRAG_TYPE			struct avr_frag_data

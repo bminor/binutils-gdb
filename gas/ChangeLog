@@ -1,3 +1,103 @@
+2015-02-28  Alan Modra  <amodra@gmail.com>
+
+	* write.c (SUB_SEGMENT_ALIGN): Don't pad non-code sections at
+	end to their alignment.
+
+2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (reloc_table_entry): Generate
+	BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21.
+	(md_apply_fix, aarch64_force_relocation): Handle
+	BFD_RELOC_AARCH64_TLSGD_ADR_PREL21.
+
+2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (reloc_table_entry): Generate
+	BFD_RELOC_AARCH64_TLSGD_ADR_PREL21.
+	(md_apply_fix, aarch64_force_relocation): Handle
+	BFD_RELOC_AARCH64_TLSGD_ADR_PREL21.
+
+2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (reloc_table_entry): Generate
+	BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19.
+	(md_apply_fix, aarch64_force_relocation): Handle
+	BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (reloc_table_entry): Add ld_literal_type.
+	(reloc_table): Likewise.
+	(parse_address_main): Use ld_literal_type.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (reloc_table_entry): Add adr_type.
+	(reloc_table): Likewise.
+	(parse_address_main): Use adr_type.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (aarch64_arch_any, aarch64_arch_node): Remove.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-avr.c: Add elf32-avr.h include.
+	(struct avr_property_record_link): New structure.
+	(avr_output_property_section_header): New function.
+	(avr_record_size): New function.
+	(avr_output_property_record): New function.
+	(avr_create_property_section): New function.
+	(avr_handle_align): New function.
+	(exclude_section_from_property_tables): New function.
+	(create_record_for_frag): New function.
+	(append_records_for_section): New function.
+	(avr_create_and_fill_property_section): New function.
+	(avr_post_relax_hook): New function.
+	* config/tc-avr.h (md_post_relax_hook): Define.
+	(avr_post_relax_hook): Declare.
+	(HANDLE_ALIGN): Define.
+	(avr_handle_align): Declare.
+	(strut avr_frag_data): New structure.
+	(TC_FRAG_TYPE): Define.
+
+2015-02-25  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* doc/c-arm.texi (-mcpu=): Add cortex-a53, cortex-a57 and
+	cortex-a72.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c (soft_float): New variable.
+	(v850_data_8): New variable.
+	(md_show_usage): Add -msoft-float/-mhard-float.
+	(md_parse_option): Likewise.
+	(md_begin): Set the default value of soft_float.
+	(v850_md_end): New function.  Creates a note section.
+	* config/tc-v850.h (md_end): Define.
+	* doc/c-v850.texi: Document -msoft-float/-mhard-float.
+
+2015-02-23  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* config/tc-h8300.c (line_separater_chars): Add a version for
+	h8300-linux that includes a separator.
+	(default_mach): New variable.
+	(md_main): Use it.
+	(md_longopts): Add '--march' option.
+	(md_parse_option): Parse the new option.
+	* config/tc-h8300.h (TARGET_FORMAT): Add elf32-h8300-linux.
+	* configure.tgt: Add h8300-*-linux
+	* doc/c-h8300.texi: Document --march.
+
+2015-02-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 17940
+	* dwarf2dbg.c (out_header): When generating dwarf sections use
+	real symbols not temps for the start and end symbols.
+	* config/tc-msp430.h (TC_FORCE_RELOCATION_SUB_SAME): Also prevent
+	adjustments to relocations in debug sections.
+	(TC_LINKRELAX_FIXUP): Likewise.
+
 2015-02-19  Alan Modra  <amodra@gmail.com>
 
 	* doc/as.texinfo (Local Symbol Names): Don't use ':' in pxref.

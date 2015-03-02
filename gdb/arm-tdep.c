@@ -9405,7 +9405,7 @@ static void
 set_fp_model_sfunc (char *args, int from_tty,
 		    struct cmd_list_element *c)
 {
-  enum arm_float_model fp_model;
+  int fp_model;
 
   for (fp_model = ARM_FLOAT_AUTO; fp_model != ARM_FLOAT_LAST; fp_model++)
     if (strcmp (current_fp_model, fp_model_strings[fp_model]) == 0)
@@ -9442,7 +9442,7 @@ static void
 arm_set_abi (char *args, int from_tty,
 	     struct cmd_list_element *c)
 {
-  enum arm_abi_kind arm_abi;
+  int arm_abi;
 
   for (arm_abi = ARM_ABI_AUTO; arm_abi != ARM_ABI_LAST; arm_abi++)
     if (strcmp (arm_abi_string, arm_abi_strings[arm_abi]) == 0)
@@ -13811,7 +13811,7 @@ decode_insn (insn_decode_record *arm_record, record_type_t record_type,
 {
 
   /* (Starting from numerical 0); bits 25, 26, 27 decodes type of arm instruction.  */
-  static const sti_arm_hdl_fp_t const arm_handle_insn[8] =                    
+  static const sti_arm_hdl_fp_t arm_handle_insn[8] =
   {
     arm_record_data_proc_misc_ld_str,   /* 000.  */
     arm_record_data_proc_imm,           /* 001.  */
@@ -13824,7 +13824,7 @@ decode_insn (insn_decode_record *arm_record, record_type_t record_type,
   };
 
   /* (Starting from numerical 0); bits 13,14,15 decodes type of thumb instruction.  */
-  static const sti_arm_hdl_fp_t const thumb_handle_insn[8] =
+  static const sti_arm_hdl_fp_t thumb_handle_insn[8] =
   { \
     thumb_record_shift_add_sub,        /* 000.  */
     thumb_record_add_sub_cmp_mov,      /* 001.  */

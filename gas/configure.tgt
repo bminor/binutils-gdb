@@ -206,6 +206,7 @@ case ${generic_target} in
   hppa-*-hiux*)				fmt=som em=hppa ;;
 
   h8300-*-elf | h8300-*-rtems*)		fmt=elf ;;
+  h8300-*-linux*)			fmt=elf em=linux ;;
 
   i370-*-elf* | i370-*-linux*)		fmt=elf ;;
 

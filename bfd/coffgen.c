@@ -468,7 +468,10 @@ _bfd_coff_internal_syment_name (bfd *abfd,
 	  if (strings == NULL)
 	    return NULL;
 	}
-      if (sym->_n._n_n._n_offset >= obj_coff_strings_len (abfd))
+      /* PR 17910: Only check for string overflow if the length has been set.
+	 Some DLLs, eg those produced by Visual Studio, may not set the length field.  */
+      if (obj_coff_strings_len (abfd) > 0
+	  && sym->_n._n_n._n_offset >= obj_coff_strings_len (abfd))
 	return NULL;
       return strings + sym->_n._n_n._n_offset;
     }

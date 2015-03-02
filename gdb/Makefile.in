@@ -79,12 +79,16 @@ MSGMERGE = msgmerge
 PACKAGE = @PACKAGE@
 CATALOGS = @CATALOGS@
 
+# The name of the compiler to use.
+COMPILER = @COMPILER@
+
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the
 # -traditional flag.  Otherwise the ioctl calls in inflow.c
 # will be incorrectly compiled.  The "fixincludes" script in the gcc
 # distribution will fix your include files up.
 CC=@CC@
+CXX=@CXX@
 
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@
@@ -93,7 +97,7 @@ depcomp = $(SHELL) $(srcdir)/../depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CC)
+COMPILE.pre = $(COMPILER)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -123,7 +127,7 @@ MAKEHTMLFLAGS =
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
 #CC_LD=gcc -static
-CC_LD=$(CC)
+CC_LD=$(COMPILER)
 
 # Where is our "include" directory?  Typically $(srcdir)/../include.
 # This is essentially the header file directory for the library
@@ -762,19 +766,18 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
-CXX = gcc
 CXX_FOR_TARGET = ` \
-  if [ -f $${rootme}/../gcc/xgcc ] ; then \
+  if [ -f $${rootme}/../gcc/xg++ ] ; then \
     if [ -f $${rootme}/../$(target_subdir)newlib/Makefile ] ; then \
-      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/$(target_subdir)newlib/targ-include -idirafter $${rootsrc}/../$(target_subdir)newlib/libc/include -nostdinc -B$${rootme}/../$(target_subdir)newlib/; \
+      echo $${rootme}/../gcc/xg++ -B$${rootme}/../gcc/ -idirafter $${rootme}/$(target_subdir)newlib/targ-include -idirafter $${rootsrc}/../$(target_subdir)newlib/libc/include -nostdinc -B$${rootme}/../$(target_subdir)newlib/; \
     else \
-      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
+      echo $${rootme}/../gcc/xg++ -B$${rootme}/../gcc/; \
     fi; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+      t='$(program_transform_name)'; echo g++ | sed -e '' $$t; \
     fi; \
   fi`
 
@@ -868,7 +871,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	jit.c \
 	xml-syscall.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
-	sol-thread.c windows-termcap.c \
+	sol-thread.c stub-termcap.c \
 	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \

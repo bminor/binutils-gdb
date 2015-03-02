@@ -35,7 +35,11 @@
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
+#ifdef TE_LINUX
+const char line_separator_chars[] = "!";
+#else
 const char line_separator_chars[] = "";
+#endif
 
 static void sbranch (int);
 static void h8300hmode (int);
@@ -50,6 +54,8 @@ int Hmode;
 int Smode;
 int Nmode;
 int SXmode;
+
+static int default_mach = bfd_mach_h8300;
 
 #define PSIZE (Hmode && !Nmode ? L_32 : L_16)
 
@@ -238,7 +244,7 @@ md_begin (void)
   char prev_buffer[100];
   int idx = 0;
 
-  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300))
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, default_mach))
     as_warn (_("could not set architecture and machine"));
 
   opcode_hash_control = hash_new ();
@@ -2102,24 +2108,115 @@ md_atof (int type, char *litP, int *sizeP)
 }
 
 #define OPTION_H_TICK_HEX      (OPTION_MD_BASE)
+#define OPTION_MACH            (OPTION_MD_BASE+1)
 
 const char *md_shortopts = "";
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
   { "h-tick-hex", no_argument,	      NULL, OPTION_H_TICK_HEX  },
+  { "mach", required_argument, NULL, OPTION_MACH },
   {NULL, no_argument, NULL, 0}
 };
 
 size_t md_longopts_size = sizeof (md_longopts);
 
+struct mach_func
+{
+  const char *name;
+  void (*func) (void);
+};
+
+static void
+mach_h8300h (void)
+{
+  Hmode = 1;
+  Smode = 0;
+  Nmode = 0;
+  SXmode = 0;
+  default_mach = bfd_mach_h8300h;
+}
+
+static void
+mach_h8300hn (void)
+{
+  Hmode = 1;
+  Smode = 0;
+  Nmode = 1;
+  SXmode = 0;
+  default_mach = bfd_mach_h8300hn;
+}
+
+static void
+mach_h8300s (void)
+{
+  Hmode = 1;
+  Smode = 1;
+  Nmode = 0;
+  SXmode = 0;
+  default_mach = bfd_mach_h8300s;
+}
+
+static void
+mach_h8300sn (void)
+{
+  Hmode = 1;
+  Smode = 1;
+  Nmode = 1;
+  SXmode = 0;
+  default_mach = bfd_mach_h8300sn;
+}
+
+static void
+mach_h8300sx (void)
+{
+  Hmode = 1;
+  Smode = 1;
+  Nmode = 0;
+  SXmode = 1;
+  default_mach = bfd_mach_h8300sx;
+}
+
+static void
+mach_h8300sxn (void)
+{
+  Hmode = 1;
+  Smode = 1;
+  Nmode = 1;
+  SXmode = 1;
+  default_mach = bfd_mach_h8300sxn;
+}
+
+const struct mach_func mach_table[] =
+{
+  {"h8300h",  mach_h8300h},
+  {"h8300hn", mach_h8300hn},
+  {"h8300s",  mach_h8300s},
+  {"h8300sn", mach_h8300sn},
+  {"h8300sx", mach_h8300sx},
+  {"h8300sxn", mach_h8300sxn}
+};
+
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
+  unsigned int i;
   switch (c)
     {
     case OPTION_H_TICK_HEX:
       enable_h_tick_hex = 1;
       break;
-
+    case OPTION_MACH:
+      for (i = 0; i < sizeof(mach_table) / sizeof(struct mach_func); i++)
+	{
+	  if (strcasecmp (arg, mach_table[i].name) == 0)
+	    {
+	      mach_table[i].func();
+	      break;
+	    }
+	}
+      if (i >= sizeof(mach_table) / sizeof(struct mach_func))
+	as_bad (_("Invalid argument to --mach option: %s"), arg);
+      break;
     default:
       return 0;
     }
@@ -2127,8 +2224,14 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 }
 
 void
-md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
+md_show_usage (FILE *stream)
 {
+  fprintf (stream, _(" H8300-specific assembler options:\n"));
+  fprintf (stream, _("\
+  -mach=<name>             Set the H8300 machine type to one of:\n\
+                           h8300h, h8300hn, h8300s, h8300sn, h8300sx, h8300sxn\n"));
+  fprintf (stream, _("\
+  -h-tick-hex              Support H'00 style hex constants\n"));
 }
 
 void tc_aout_fix_to_chars (void);

@@ -20,6 +20,8 @@
 #include "common-defs.h"
 #include "common-exceptions.h"
 
+const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
+
 /* Possible catcher states.  */
 enum catcher_state {
   /* Initial state, a new catcher has just been created.  */
@@ -78,9 +80,7 @@ exceptions_state_mc_init (volatile struct gdb_exception *exception,
   struct catcher *new_catcher = XCNEW (struct catcher);
 
   /* Start with no exception, save it's address.  */
-  exception->reason = 0;
-  exception->error = GDB_NO_ERROR;
-  exception->message = NULL;
+  *exception = exception_none;
   new_catcher->exception = exception;
 
   new_catcher->mask = mask;

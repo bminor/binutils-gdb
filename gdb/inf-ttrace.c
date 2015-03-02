@@ -424,9 +424,9 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child,
       inf_ttrace_num_lwps_in_syscall = 0;
 
       ti = inferior_thread ();
-      ti->private =
+      ti->priv =
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
-      memset (ti->private, 0,
+      memset (ti->priv, 0,
 	      sizeof (struct inf_ttrace_private_thread_info));
     }
   else
@@ -610,7 +610,7 @@ inf_ttrace_create_threads_after_attach (int pid)
   /* Add the stopped thread.  */
   ptid = ptid_build (pid, tts.tts_lwpid, 0);
   ti = add_thread (ptid);
-  ti->private = xzalloc (sizeof (struct inf_ttrace_private_thread_info));
+  ti->priv = xzalloc (sizeof (struct inf_ttrace_private_thread_info));
   inf_ttrace_num_lwps++;
 
   /* We use the "first stopped thread" as the currently active thread.  */
@@ -631,7 +631,7 @@ inf_ttrace_create_threads_after_attach (int pid)
 
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
       ti = add_thread (ptid);
-      ti->private = xzalloc (sizeof (struct inf_ttrace_private_thread_info));
+      ti->priv = xzalloc (sizeof (struct inf_ttrace_private_thread_info));
       inf_ttrace_num_lwps++;
     }
 }
@@ -750,7 +750,7 @@ inf_ttrace_delete_dead_threads_callback (struct thread_info *info, void *arg)
     return 0;
 
   lwpid = ptid_get_lwp (info->ptid);
-  p = (struct inf_ttrace_private_thread_info *) info->private;
+  p = (struct inf_ttrace_private_thread_info *) info->priv;
 
   /* Check if an lwp that was dying is still there or not.  */
   if (p->dying && (kill (lwpid, 0) == -1))
@@ -772,7 +772,7 @@ inf_ttrace_resume_lwp (struct thread_info *info, ttreq_t request, int sig)
   if (ttrace (request, pid, lwpid, TT_NOPC, sig, 0) == -1)
     {
       struct inf_ttrace_private_thread_info *p
-	= (struct inf_ttrace_private_thread_info *) info->private;
+	= (struct inf_ttrace_private_thread_info *) info->priv;
       if (p->dying && errno == EPROTO)
 	/* This is expected, it means the dying lwp is really gone
 	   by now.  If ttrace had an event to inform the debugger
@@ -872,10 +872,10 @@ inf_ttrace_wait (struct target_ops *ops,
       /* We haven't set the private member on the main thread yet.  Do
 	 it now.  */
       ti = find_thread_ptid (inferior_ptid);
-      gdb_assert (ti != NULL && ti->private == NULL);
-      ti->private =
+      gdb_assert (ti != NULL && ti->priv == NULL);
+      ti->priv =
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
-      memset (ti->private, 0,
+      memset (ti->priv, 0,
 	      sizeof (struct inf_ttrace_private_thread_info));
 
       /* Notify the core that this ptid changed.  This changes
@@ -955,9 +955,9 @@ inf_ttrace_wait (struct target_ops *ops,
       lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
       ptid = ptid_build (tts.tts_pid, lwpid, 0);
       ti = add_thread (ptid);
-      ti->private =
+      ti->priv =
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
-      memset (ti->private, 0,
+      memset (ti->priv, 0,
 	      sizeof (struct inf_ttrace_private_thread_info));
       inf_ttrace_num_lwps++;
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
@@ -973,7 +973,7 @@ inf_ttrace_wait (struct target_ops *ops,
 	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (ptid));
       ti = find_thread_ptid (ptid);
       gdb_assert (ti != NULL);
-      ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
+      ((struct inf_ttrace_private_thread_info *)ti->priv)->dying = 1;
       inf_ttrace_num_lwps--;
       /* Let the thread really exit.  */
       ttrace (TT_LWP_CONTINUE, ptid_get_pid (ptid),
@@ -990,7 +990,7 @@ inf_ttrace_wait (struct target_ops *ops,
 			  target_pid_to_str (ptid));
       ti = find_thread_ptid (ptid);
       gdb_assert (ti != NULL);
-      ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
+      ((struct inf_ttrace_private_thread_info *)ti->priv)->dying = 1;
       inf_ttrace_num_lwps--;
 
       /* Resume the lwp_terminate-caller thread.  */
@@ -1146,10 +1146,10 @@ static char *
 inf_ttrace_extra_thread_info (struct target_ops *self,
 			      struct thread_info *info)
 {
-  struct inf_ttrace_private_thread_info* private =
-    (struct inf_ttrace_private_thread_info *) info->private;
+  struct inf_ttrace_private_thread_info* priv =
+    (struct inf_ttrace_private_thread_info *) info->priv;
 
-  if (private != NULL && private->dying)
+  if (priv != NULL && priv->dying)
     return "Exiting";
 
   return NULL;

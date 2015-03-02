@@ -426,7 +426,7 @@ pa64_current_sos (void)
     {
       struct load_module_desc dll_desc;
       char *dll_path;
-      struct so_list *new;
+      struct so_list *newobj;
       struct cleanup *old_chain;
 
       if (dll_index == 0)
@@ -443,22 +443,22 @@ pa64_current_sos (void)
 			    pa64_target_read_memory,
 			    0, dld_cache.load_map);
 
-      new = (struct so_list *) xmalloc (sizeof (struct so_list));
-      memset (new, 0, sizeof (struct so_list));
-      new->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
-      memset (new->lm_info, 0, sizeof (struct lm_info));
+      newobj = (struct so_list *) xmalloc (sizeof (struct so_list));
+      memset (newobj, 0, sizeof (struct so_list));
+      newobj->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
+      memset (newobj->lm_info, 0, sizeof (struct lm_info));
 
-      strncpy (new->so_name, dll_path, SO_NAME_MAX_PATH_SIZE - 1);
-      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      strcpy (new->so_original_name, new->so_name);
+      strncpy (newobj->so_name, dll_path, SO_NAME_MAX_PATH_SIZE - 1);
+      newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
+      strcpy (newobj->so_original_name, newobj->so_name);
 
-      memcpy (&new->lm_info->desc, &dll_desc, sizeof (dll_desc));
+      memcpy (&newobj->lm_info->desc, &dll_desc, sizeof (dll_desc));
 
 #ifdef SOLIB_PA64_DBG
       {
-        struct load_module_desc *d = &new->lm_info->desc;
+        struct load_module_desc *d = &newobj->lm_info->desc;
 
-	printf ("\n+ library \"%s\" is described at index %d\n", new->so_name, 
+	printf ("\n+ library \"%s\" is described at index %d\n", newobj->so_name,
 		dll_index);
 	printf ("    text_base = %s\n", hex_string (d->text_base));
 	printf ("    text_size = %s\n", hex_string (d->text_size));
@@ -475,9 +475,9 @@ pa64_current_sos (void)
 #endif
 
       /* Link the new object onto the list.  */
-      new->next = NULL;
-      *link_ptr = new;
-      link_ptr = &new->next;
+      newobj->next = NULL;
+      *link_ptr = newobj;
+      link_ptr = &newobj->next;
     }
 
   return head;

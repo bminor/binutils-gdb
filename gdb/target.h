@@ -39,6 +39,8 @@ struct traceframe_info;
 struct expression;
 struct dcache_struct;
 
+#include "infrun.h" /* For enum exec_direction_kind.  */
+
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
    specific to the communications interface between us and the

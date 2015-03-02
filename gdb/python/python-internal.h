@@ -21,6 +21,7 @@
 #define GDB_PYTHON_INTERNAL_H
 
 #include "extension.h"
+#include "extension-priv.h"
 
 /* These WITH_* macros are defined by the CPython API checker that
    comes with the Python plugin for GCC.  See:

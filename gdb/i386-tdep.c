@@ -4270,7 +4270,8 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
       TRIPLET,
       THREE_ARG_DISPLACEMENT,
       DONE
-    } current_state;
+    };
+  int current_state;
 
   current_state = TRIPLET;
 

@@ -32,8 +32,7 @@
 #ifndef X86_DREGS_H
 #define X86_DREGS_H 1
 
-/* Forward declaration.  */
-enum target_hw_bp_type;
+#include "break-common.h" /* target_hw_bp_type */
 
 /* Low-level function vector.  */
 

@@ -585,18 +585,18 @@ som_current_sos (void)
     {
       char *namebuf;
       CORE_ADDR addr;
-      struct so_list *new;
+      struct so_list *newobj;
       struct cleanup *old_chain;
       int errcode;
       struct dld_list dbuf;
       gdb_byte tsdbuf[4];
 
-      new = (struct so_list *) xmalloc (sizeof (struct so_list));
-      old_chain = make_cleanup (xfree, new);
+      newobj = (struct so_list *) xmalloc (sizeof (struct so_list));
+      old_chain = make_cleanup (xfree, newobj);
 
-      memset (new, 0, sizeof (*new));
-      new->lm_info = xmalloc (sizeof (struct lm_info));
-      make_cleanup (xfree, new->lm_info);
+      memset (newobj, 0, sizeof (*newobj));
+      newobj->lm_info = xmalloc (sizeof (struct lm_info));
+      make_cleanup (xfree, newobj->lm_info);
 
       read_memory (lm, (gdb_byte *)&dbuf, sizeof (struct dld_list));
 
@@ -608,15 +608,15 @@ som_current_sos (void)
 		 safe_strerror (errcode));
       else
 	{
-	  strncpy (new->so_name, namebuf, SO_NAME_MAX_PATH_SIZE - 1);
-	  new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
+	  strncpy (newobj->so_name, namebuf, SO_NAME_MAX_PATH_SIZE - 1);
+	  newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
 	  xfree (namebuf);
-	  strcpy (new->so_original_name, new->so_name);
+	  strcpy (newobj->so_original_name, newobj->so_name);
 	}
 
-	if (new->so_name[0] && !match_main (new->so_name))
+	if (newobj->so_name[0] && !match_main (newobj->so_name))
 	  {
-	    struct lm_info *lmi = new->lm_info;
+	    struct lm_info *lmi = newobj->lm_info;
 	    unsigned int tmp;
 
 	    lmi->lm_addr = lm;
@@ -642,41 +642,41 @@ som_current_sos (void)
 	      = extract_unsigned_integer (tsdbuf, 4, byte_order);
 
 #ifdef SOLIB_SOM_DBG
-	    printf ("\n+ library \"%s\" is described at %s\n", new->so_name,
+	    printf ("\n+ library \"%s\" is described at %s\n", newobj->so_name,
 	    	    paddress (target_gdbarch (), lm));
-	    printf ("  'version' is %d\n", new->lm_info->struct_version);
-	    printf ("  'bind_mode' is %d\n", new->lm_info->bind_mode);
+	    printf ("  'version' is %d\n", newobj->lm_info->struct_version);
+	    printf ("  'bind_mode' is %d\n", newobj->lm_info->bind_mode);
 	    printf ("  'library_version' is %d\n", 
-	    	    new->lm_info->library_version);
+		    newobj->lm_info->library_version);
 	    printf ("  'text_addr' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->text_addr));
+		    paddress (target_gdbarch (), newobj->lm_info->text_addr));
 	    printf ("  'text_link_addr' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->text_link_addr));
+		    paddress (target_gdbarch (), newobj->lm_info->text_link_addr));
 	    printf ("  'text_end' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->text_end));
+		    paddress (target_gdbarch (), newobj->lm_info->text_end));
 	    printf ("  'data_start' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->data_start));
+		    paddress (target_gdbarch (), newobj->lm_info->data_start));
 	    printf ("  'bss_start' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->bss_start));
+		    paddress (target_gdbarch (), newobj->lm_info->bss_start));
 	    printf ("  'data_end' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->data_end));
+		    paddress (target_gdbarch (), newobj->lm_info->data_end));
 	    printf ("  'got_value' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->got_value));
+		    paddress (target_gdbarch (), newobj->lm_info->got_value));
 	    printf ("  'tsd_start_addr' is %s\n",
-	    	    paddress (target_gdbarch (), new->lm_info->tsd_start_addr));
+		    paddress (target_gdbarch (), newobj->lm_info->tsd_start_addr));
 #endif
 
-	    new->addr_low = lmi->text_addr;
-	    new->addr_high = lmi->text_end;
+	    newobj->addr_low = lmi->text_addr;
+	    newobj->addr_high = lmi->text_end;
 
 	    /* Link the new object onto the list.  */
-	    new->next = NULL;
-	    *link_ptr = new;
-	    link_ptr = &new->next;
+	    newobj->next = NULL;
+	    *link_ptr = newobj;
+	    link_ptr = &newobj->next;
 	  }
  	else
 	  {
-	    free_so (new);
+	    free_so (newobj);
 	  }
 
       lm = EXTRACT (next);

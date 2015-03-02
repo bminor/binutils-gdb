@@ -403,31 +403,35 @@ enum type_instance_flag_value
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
+enum dynamic_prop_kind
+{
+  PROP_UNDEFINED, /* Not defined.  */
+  PROP_CONST,     /* Constant.  */
+  PROP_ADDR_OFFSET, /* Address offset.  */
+  PROP_LOCEXPR,   /* Location expression.  */
+  PROP_LOCLIST    /* Location list.  */
+};
+
+union dynamic_prop_data
+{
+  /* Storage for constant property.  */
+
+  LONGEST const_val;
+
+  /* Storage for dynamic property.  */
+
+  void *baton;
+};
+
 /* * Used to store a dynamic property.  */
 
 struct dynamic_prop
 {
   /* Determine which field of the union dynamic_prop.data is used.  */
-  enum
-  {
-    PROP_UNDEFINED, /* Not defined.  */
-    PROP_CONST,     /* Constant.  */
-    PROP_ADDR_OFFSET, /* Address offset.  */
-    PROP_LOCEXPR,   /* Location expression.  */
-    PROP_LOCLIST    /* Location list.  */
-  } kind;
+  enum dynamic_prop_kind kind;
 
   /* Storage for dynamic or static value.  */
-  union data
-  {
-    /* Storage for constant property.  */
-
-    LONGEST const_val;
-
-    /* Storage for dynamic property.  */
-
-    void *baton;
-  } data;
+  union dynamic_prop_data data;
 };
 
 
@@ -463,6 +467,128 @@ enum type_specific_kind
   /* Note: This is used by TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
   TYPE_SPECIFIC_FUNC,
   TYPE_SPECIFIC_SELF_TYPE
+};
+
+union type_owner
+{
+  struct objfile *objfile;
+  struct gdbarch *gdbarch;
+};
+
+union field_location
+{
+  /* * Position of this field, counting in bits from start of
+     containing structure.  For gdbarch_bits_big_endian=1
+     targets, it is the bit offset to the MSB.  For
+     gdbarch_bits_big_endian=0 targets, it is the bit offset to
+     the LSB.  */
+
+  int bitpos;
+
+  /* * Enum value.  */
+  LONGEST enumval;
+
+  /* * For a static field, if TYPE_FIELD_STATIC_HAS_ADDR then
+     physaddr is the location (in the target) of the static
+     field.  Otherwise, physname is the mangled label of the
+     static field.  */
+
+  CORE_ADDR physaddr;
+  const char *physname;
+
+  /* * The field location can be computed by evaluating the
+     following DWARF block.  Its DATA is allocated on
+     objfile_obstack - no CU load is needed to access it.  */
+
+  struct dwarf2_locexpr_baton *dwarf_block;
+};
+
+struct field
+{
+  union field_location loc;
+
+  /* * For a function or member type, this is 1 if the argument is
+     marked artificial.  Artificial arguments should not be shown
+     to the user.  For TYPE_CODE_RANGE it is set if the specific
+     bound is not defined.  */
+
+  unsigned int artificial : 1;
+
+  /* * Discriminant for union field_location.  */
+
+  ENUM_BITFIELD(field_loc_kind) loc_kind : 3;
+
+  /* * Size of this field, in bits, or zero if not packed.
+     If non-zero in an array type, indicates the element size in
+     bits (used only in Ada at the moment).
+     For an unpacked field, the field's type's length
+     says how many bytes the field occupies.  */
+
+  unsigned int bitsize : 28;
+
+  /* * In a struct or union type, type of this field.
+     - In a function or member type, type of this argument.
+     - In an array type, the domain-type of the array.  */
+
+  struct type *type;
+
+  /* * Name of field, value or argument.
+     NULL for range bounds, array domains, and member function
+     arguments.  */
+
+  const char *name;
+};
+
+struct range_bounds
+{
+  /* * Low bound of range.  */
+
+  struct dynamic_prop low;
+
+  /* * High bound of range.  */
+
+  struct dynamic_prop high;
+
+  /* True if HIGH range bound contains the number of elements in the
+     subrange. This affects how the final hight bound is computed.  */
+
+  int flag_upper_bound_is_count : 1;
+
+  /* True if LOW or/and HIGH are resolved into a static bound from
+     a dynamic one.  */
+
+  int flag_bound_evaluated : 1;
+};
+
+union type_specific
+{
+  /* * CPLUS_STUFF is for TYPE_CODE_STRUCT.  It is initialized to
+     point to cplus_struct_default, a default static instance of a
+     struct cplus_struct_type.  */
+
+  struct cplus_struct_type *cplus_stuff;
+
+  /* * GNAT_STUFF is for types for which the GNAT Ada compiler
+     provides additional information.  */
+
+  struct gnat_aux_type *gnat_stuff;
+
+  /* * FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to two
+     floatformat objects that describe the floating-point value
+     that resides within the type.  The first is for big endian
+     targets and the second is for little endian targets.  */
+
+  const struct floatformat **floatformat;
+
+  /* * For TYPE_CODE_FUNC and TYPE_CODE_METHOD types.  */
+
+  struct func_type *func_stuff;
+
+  /* * For types that are pointer to member types (TYPE_CODE_METHODPTR,
+     TYPE_CODE_MEMBERPTR), SELF_TYPE is the type that this pointer
+     is a member of.  */
+
+  struct type *self_type;
 };
 
 /* * Main structure representing a type in GDB.
@@ -548,11 +674,7 @@ struct main_type
      this is somewhat ugly, but without major overhaul of the internal
      type system, it can't be avoided for now.  */
 
-  union type_owner
-    {
-      struct objfile *objfile;
-      struct gdbarch *gdbarch;
-    } owner;
+  union type_owner owner;
 
   /* * For a pointer type, describes the type of object pointed to.
      - For an array type, describes the type of the elements.
@@ -584,125 +706,18 @@ struct main_type
 
   union 
   {
-    struct field
-    {
-      union field_location
-      {
-	/* * Position of this field, counting in bits from start of
-	   containing structure.  For gdbarch_bits_big_endian=1
-	   targets, it is the bit offset to the MSB.  For
-	   gdbarch_bits_big_endian=0 targets, it is the bit offset to
-	   the LSB.  */
-
-	int bitpos;
-
-	/* * Enum value.  */
-	LONGEST enumval;
-
-	/* * For a static field, if TYPE_FIELD_STATIC_HAS_ADDR then
-	   physaddr is the location (in the target) of the static
-	   field.  Otherwise, physname is the mangled label of the
-	   static field.  */
-
-	CORE_ADDR physaddr;
-	const char *physname;
-
-	/* * The field location can be computed by evaluating the
-	   following DWARF block.  Its DATA is allocated on
-	   objfile_obstack - no CU load is needed to access it.  */
-
-	struct dwarf2_locexpr_baton *dwarf_block;
-      }
-      loc;
-
-      /* * For a function or member type, this is 1 if the argument is
-	 marked artificial.  Artificial arguments should not be shown
-	 to the user.  For TYPE_CODE_RANGE it is set if the specific
-	 bound is not defined.  */
-      unsigned int artificial : 1;
-
-      /* * Discriminant for union field_location.  */
-      ENUM_BITFIELD(field_loc_kind) loc_kind : 3;
-
-      /* * Size of this field, in bits, or zero if not packed.
-	 If non-zero in an array type, indicates the element size in
-	 bits (used only in Ada at the moment).
-	 For an unpacked field, the field's type's length
-	 says how many bytes the field occupies.  */
-
-      unsigned int bitsize : 28;
-
-      /* * In a struct or union type, type of this field.
-	 - In a function or member type, type of this argument.
-	 - In an array type, the domain-type of the array.  */
-
-      struct type *type;
-
-      /* * Name of field, value or argument.
-	 NULL for range bounds, array domains, and member function
-	 arguments.  */
-
-      const char *name;
-    } *fields;
+    struct field *fields;
 
     /* * Union member used for range types.  */
 
-    struct range_bounds
-    {
-      /* * Low bound of range.  */
-
-      struct dynamic_prop low;
-
-      /* * High bound of range.  */
-
-      struct dynamic_prop high;
-
-      /* True if HIGH range bound contains the number of elements in the
-	 subrange. This affects how the final hight bound is computed.  */
-
-      int flag_upper_bound_is_count : 1;
-
-      /* True if LOW or/and HIGH are resolved into a static bound from
-	 a dynamic one.  */
-
-      int flag_bound_evaluated : 1;
-    } *bounds;
+    struct range_bounds *bounds;
 
   } flds_bnds;
 
   /* * Slot to point to additional language-specific fields of this
      type.  */
 
-  union type_specific
-  {
-    /* * CPLUS_STUFF is for TYPE_CODE_STRUCT.  It is initialized to
-       point to cplus_struct_default, a default static instance of a
-       struct cplus_struct_type.  */
-
-    struct cplus_struct_type *cplus_stuff;
-
-    /* * GNAT_STUFF is for types for which the GNAT Ada compiler
-       provides additional information.  */
-
-    struct gnat_aux_type *gnat_stuff;
-
-    /* * FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to two
-       floatformat objects that describe the floating-point value
-       that resides within the type.  The first is for big endian
-       targets and the second is for little endian targets.  */
-
-    const struct floatformat **floatformat;
-
-    /* * For TYPE_CODE_FUNC and TYPE_CODE_METHOD types.  */
-
-    struct func_type *func_stuff;
-
-    /* * For types that are pointer to member types (TYPE_CODE_METHODPTR,
-       TYPE_CODE_MEMBERPTR), SELF_TYPE is the type that this pointer
-       is a member of.  */
-
-    struct type *self_type;
-  } type_specific;
+  union type_specific type_specific;
 
   /* * Contains a location description value for the current type. Evaluating
      this field yields to the location of the data for an object.  */
@@ -779,6 +794,101 @@ struct type
 };
 
 #define	NULL_TYPE ((struct type *) 0)
+
+struct fn_fieldlist
+{
+
+  /* * The overloaded name.
+     This is generally allocated in the objfile's obstack.
+     However stabsread.c sometimes uses malloc.  */
+
+  const char *name;
+
+  /* * The number of methods with this name.  */
+
+  int length;
+
+  /* * The list of methods.  */
+
+  struct fn_field *fn_fields;
+};
+
+
+
+struct fn_field
+{
+  /* * If is_stub is clear, this is the mangled name which we can look
+     up to find the address of the method (FIXME: it would be cleaner
+     to have a pointer to the struct symbol here instead).
+
+     If is_stub is set, this is the portion of the mangled name which
+     specifies the arguments.  For example, "ii", if there are two int
+     arguments, or "" if there are no arguments.  See gdb_mangle_name
+     for the conversion from this format to the one used if is_stub is
+     clear.  */
+
+  const char *physname;
+
+  /* * The function type for the method.
+	       
+     (This comment used to say "The return value of the method", but
+     that's wrong.  The function type is expected here, i.e. something
+     with TYPE_CODE_METHOD, and *not* the return-value type).  */
+
+  struct type *type;
+
+  /* * For virtual functions.  First baseclass that defines this
+     virtual function.  */
+
+  struct type *fcontext;
+
+  /* Attributes.  */
+
+  unsigned int is_const:1;
+  unsigned int is_volatile:1;
+  unsigned int is_private:1;
+  unsigned int is_protected:1;
+  unsigned int is_public:1;
+  unsigned int is_abstract:1;
+  unsigned int is_static:1;
+  unsigned int is_final:1;
+  unsigned int is_synchronized:1;
+  unsigned int is_native:1;
+  unsigned int is_artificial:1;
+
+  /* * A stub method only has some fields valid (but they are enough
+     to reconstruct the rest of the fields).  */
+
+  unsigned int is_stub:1;
+
+  /* * True if this function is a constructor, false otherwise.  */
+
+  unsigned int is_constructor : 1;
+
+  /* * Unused.  */
+
+  unsigned int dummy:3;
+
+  /* * Index into that baseclass's virtual function table, minus 2;
+     else if static: VOFFSET_STATIC; else: 0.  */
+
+  unsigned int voffset:16;
+
+#define VOFFSET_STATIC 1
+
+};
+
+struct typedef_field
+{
+  /* * Unqualified name to be prefixed by owning class qualified
+     name.  */
+
+  const char *name;
+
+  /* * Type this typedef named NAME represents.  */
+
+  struct type *type;
+};
 
 /* * C++ language-specific information for TYPE_CODE_STRUCT and
    TYPE_CODE_UNION nodes.  */
@@ -876,107 +986,13 @@ struct cplus_struct_type
 
        fn_fieldlists points to an array of nfn_fields of these.  */
 
-    struct fn_fieldlist
-      {
-
-	/* * The overloaded name.
-	   This is generally allocated in the objfile's obstack.
-	   However stabsread.c sometimes uses malloc.  */
-
-	const char *name;
-
-	/* * The number of methods with this name.  */
-
-	int length;
-
-	/* * The list of methods.  */
-
-	struct fn_field
-	  {
-
-	    /* * If is_stub is clear, this is the mangled name which
-	       we can look up to find the address of the method
-	       (FIXME: it would be cleaner to have a pointer to the
-	       struct symbol here instead).
-
-	       If is_stub is set, this is the portion of the mangled
-	       name which specifies the arguments.  For example, "ii",
-	       if there are two int arguments, or "" if there are no
-	       arguments.  See gdb_mangle_name for the conversion from
-	       this format to the one used if is_stub is clear.  */
-
-	    const char *physname;
-
-	    /* * The function type for the method.
-	       
-	       (This comment used to say "The return value of the
-	       method", but that's wrong.  The function type is
-	       expected here, i.e. something with TYPE_CODE_METHOD, and
-	       *not* the return-value type).  */
-
-	    struct type *type;
-
-	    /* * For virtual functions.
-	       First baseclass that defines this virtual function.  */
-
-	    struct type *fcontext;
-
-	    /* Attributes.  */
-
-	    unsigned int is_const:1;
-	    unsigned int is_volatile:1;
-	    unsigned int is_private:1;
-	    unsigned int is_protected:1;
-	    unsigned int is_public:1;
-	    unsigned int is_abstract:1;
-	    unsigned int is_static:1;
-	    unsigned int is_final:1;
-	    unsigned int is_synchronized:1;
-	    unsigned int is_native:1;
-	    unsigned int is_artificial:1;
-
-	    /* * A stub method only has some fields valid (but they
-	       are enough to reconstruct the rest of the fields).  */
-
-	    unsigned int is_stub:1;
-
-	    /* * True if this function is a constructor, false
-	       otherwise.  */
-
-	    unsigned int is_constructor : 1;
-
-	    /* * Unused.  */
-
-	    unsigned int dummy:3;
-
-	    /* * Index into that baseclass's virtual function table,
-	       minus 2; else if static: VOFFSET_STATIC; else: 0.  */
-
-	    unsigned int voffset:16;
-
-#define VOFFSET_STATIC 1
-
-	  }
-	 *fn_fields;
-
-      }
-     *fn_fieldlists;
+    struct fn_fieldlist *fn_fieldlists;
 
     /* * typedefs defined inside this class.  typedef_field points to
        an array of typedef_field_count elements.  */
 
-    struct typedef_field
-      {
-	/* * Unqualified name to be prefixed by owning class qualified
-	   name.  */
+    struct typedef_field *typedef_field;
 
-	const char *name;
-
-	/* * Type this typedef named NAME represents.  */
-
-	struct type *type;
-      }
-    *typedef_field;
     unsigned typedef_field_count;
 
     /* * The template arguments.  This is an array with
@@ -1067,6 +1083,55 @@ enum call_site_parameter_kind
   CALL_SITE_PARAMETER_PARAM_OFFSET
 };
 
+struct call_site_target
+{
+  union field_location loc;
+
+  /* * Discriminant for union field_location.  */
+
+  ENUM_BITFIELD(field_loc_kind) loc_kind : 3;
+};
+
+union call_site_parameter_u
+{
+  /* * DW_TAG_formal_parameter's DW_AT_location's DW_OP_regX
+     as DWARF register number, for register passed
+     parameters.  */
+
+  int dwarf_reg;
+
+  /* * Offset from the callee's frame base, for stack passed
+     parameters.  This equals offset from the caller's stack
+     pointer.  */
+
+  CORE_ADDR fb_offset;
+
+  /* * Offset relative to the start of this PER_CU to
+     DW_TAG_formal_parameter which is referenced by both
+     caller and the callee.  */
+
+  cu_offset param_offset;
+};
+
+struct call_site_parameter
+{
+  ENUM_BITFIELD (call_site_parameter_kind) kind : 2;
+
+  union call_site_parameter_u u;
+
+  /* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_value.  It
+     is never NULL.  */
+
+  const gdb_byte *value;
+  size_t value_size;
+
+  /* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_data_value.
+     It may be NULL if not provided by DWARF.  */
+
+  const gdb_byte *data_value;
+  size_t data_value_size;
+};
+
 /* * A place where a function gets called from, represented by
    DW_TAG_GNU_call_site.  It can be looked up from
    symtab->call_site_htab.  */
@@ -1086,15 +1151,7 @@ struct call_site
     /* * Describe DW_AT_GNU_call_site_target.  Missing attribute uses
        FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
 
-    struct
-      {
-	union field_location loc;
-
-	/* * Discriminant for union field_location.  */
-
-	ENUM_BITFIELD(field_loc_kind) loc_kind : 3;
-      }
-    target;
+    struct call_site_target target;
 
     /* * Size of the PARAMETER array.  */
 
@@ -1107,45 +1164,7 @@ struct call_site
 
     /* * Describe DW_TAG_GNU_call_site's DW_TAG_formal_parameter.  */
 
-    struct call_site_parameter
-      {
-	ENUM_BITFIELD (call_site_parameter_kind) kind : 2;
-
-	union call_site_parameter_u
-	  {
-	    /* * DW_TAG_formal_parameter's DW_AT_location's DW_OP_regX
-	       as DWARF register number, for register passed
-	       parameters.  */
-
-	    int dwarf_reg;
-
-	    /* * Offset from the callee's frame base, for stack passed
-	       parameters.  This equals offset from the caller's stack
-	       pointer.  */
-
-	    CORE_ADDR fb_offset;
-
-	    /* * Offset relative to the start of this PER_CU to
-	       DW_TAG_formal_parameter which is referenced by both
-	       caller and the callee.  */
-
-	    cu_offset param_offset;
-	  }
-	u;
-
-	/* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_value.  It
-	   is never NULL.  */
-
-	const gdb_byte *value;
-	size_t value_size;
-
-	/* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_data_value.
-	   It may be NULL if not provided by DWARF.  */
-
-	const gdb_byte *data_value;
-	size_t data_value_size;
-      }
-    parameter[1];
+    struct call_site_parameter parameter[1];
   };
 
 /* * The default value of TYPE_CPLUS_SPECIFIC(T) points to this shared

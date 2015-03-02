@@ -995,6 +995,13 @@ extern void bfd_elf32_ia64_after_parse
 
 extern void bfd_elf64_ia64_after_parse
   (int);
+
+/* V850 Note manipulation routines.  */
+extern bfd_boolean v850_elf_create_sections
+  (struct bfd_link_info *);
+
+extern bfd_boolean v850_elf_set_note
+  (bfd *, unsigned int, unsigned int);
 /* Extracted from init.c.  */
 void bfd_init (void);
 
@@ -5708,6 +5715,9 @@ tls_index structure as part of an adrp instruction using a 21 bit PC
 relative value.  Used in conjunction with
 BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC.  */
   BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21,
+
+/* AArch64 TLS General Dynamic  */
+  BFD_RELOC_AARCH64_TLSGD_ADR_PREL21,
 
 /* Unsigned 12 bit byte offset to global offset table entry for a symbols
 tls_index structure.  Used in conjunction with

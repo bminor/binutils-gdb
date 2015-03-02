@@ -7089,9 +7089,26 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (!h->def_dynamic || !h->ref_regular || h->def_regular)
     return TRUE;
 
+  /* If -z nocopyreloc was given, don't generate them either.  */
+  if (info->nocopyreloc)
+    {
+      h->non_got_ref = 0;
+      return TRUE;
+    }
+
   /* If we didn't find any dynamic relocs in read-only sections, then
      we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
   if (ELIMINATE_COPY_RELOCS && !readonly_dynrelocs (h))
+    {
+      h->non_got_ref = 0;
+      return TRUE;
+    }
+
+  /* Protected variables do not work with .dynbss.  The copy in
+     .dynbss won't be used by the shared library with the protected
+     definition for the variable.  Text relocations are preferable
+     to an incorrect program.  */
+  if (h->protected_def)
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -10203,7 +10220,10 @@ plt_stub_size (struct ppc_link_hash_table *htab,
       size += 4;
       if (htab->params->plt_static_chain)
 	size += 4;
-      if (htab->params->plt_thread_safe)
+      if (htab->params->plt_thread_safe
+	  && htab->elf.dynamic_sections_created
+	  && stub_entry->h != NULL
+	  && stub_entry->h->elf.dynindx != -1)
 	size += 8;
       if (PPC_HA (off + 8 + 8 * htab->params->plt_static_chain) != PPC_HA (off))
 	size += 4;
@@ -10243,16 +10263,18 @@ build_plt_stub (struct ppc_link_hash_table *htab,
   bfd *obfd = htab->params->stub_bfd;
   bfd_boolean plt_load_toc = htab->opd_abi;
   bfd_boolean plt_static_chain = htab->params->plt_static_chain;
-  bfd_boolean plt_thread_safe = htab->params->plt_thread_safe;
+  bfd_boolean plt_thread_safe = (htab->params->plt_thread_safe
+				 && htab->elf.dynamic_sections_created
+				 && stub_entry->h != NULL
+				 && stub_entry->h->elf.dynindx != -1);
   bfd_boolean use_fake_dep = plt_thread_safe;
   bfd_vma cmp_branch_off = 0;
 
   if (!ALWAYS_USE_FAKE_DEP
       && plt_load_toc
       && plt_thread_safe
-      && !(stub_entry->h != NULL
-	   && (stub_entry->h == htab->tls_get_addr_fd
-	       || stub_entry->h == htab->tls_get_addr)
+      && !((stub_entry->h == htab->tls_get_addr_fd
+	    || stub_entry->h == htab->tls_get_addr)
 	   && !htab->params->no_tls_get_addr_opt))
     {
       bfd_vma pltoff = stub_entry->plt_ent->plt.offset & ~1;
@@ -10445,8 +10467,8 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   p = build_plt_stub (htab, stub_entry, p, offset, r);
   bfd_put_32 (obfd, BCTRL, p - 4);
 
-  bfd_put_32 (obfd, LD_R11_0R1 + STK_LINKER (htab), p),	p += 4;
   bfd_put_32 (obfd, LD_R2_0R1 + STK_TOC (htab), p),	p += 4;
+  bfd_put_32 (obfd, LD_R11_0R1 + STK_LINKER (htab), p),	p += 4;
   bfd_put_32 (obfd, MTLR_R11, p),		p += 4;
   bfd_put_32 (obfd, BLR, p),			p += 4;
 

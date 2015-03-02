@@ -214,6 +214,8 @@ SECTIONS
   ${RELOCATING+PROVIDE (end = .);}
   ${RELOCATING+PROVIDE (_heap_start = .);}
 
+  .note.renesas 0 : { KEEP(*(.note.renesas)) }  
+
   /* Stabs debugging sections.  */
   .stab 0		: { *(.stab) }
   .stabstr 0		: { *(.stabstr) }

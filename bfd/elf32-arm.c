@@ -11972,7 +11972,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      /* Tag_ABI_HardFP_use is handled along with Tag_FP_arch since
 		 the meaning of Tag_ABI_HardFP_use depends on Tag_FP_arch
 		 when it's 0.  It might mean absence of FP hardware if
-		 Tag_FP_arch is zero, otherwise it is effectively SP + DP.  */
+		 Tag_FP_arch is zero.  */
 
 #define VFP_VERSION_COUNT 9
 	      static const struct
@@ -12014,7 +12014,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		}
 
 	      /* Both the input and the output have nonzero Tag_FP_arch.
-		 So Tag_ABI_HardFP_use is (SP & DP) when it's zero.  */
+		 So Tag_ABI_HardFP_use is implied by Tag_FP_arch when it's zero.  */
 
 	      /* If both the input and the output have zero Tag_ABI_HardFP_use,
 		 do nothing.  */
@@ -12022,10 +12022,10 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		  && out_attr[Tag_ABI_HardFP_use].i == 0)
 		;
 	      /* If the input and the output have different Tag_ABI_HardFP_use,
-		 the combination of them is 3 (SP & DP).  */
+		 the combination of them is 0 (implied by Tag_FP_arch).  */
 	      else if (in_attr[Tag_ABI_HardFP_use].i
 		       != out_attr[Tag_ABI_HardFP_use].i)
-		out_attr[Tag_ABI_HardFP_use].i = 3;
+		out_attr[Tag_ABI_HardFP_use].i = 0;
 
 	      /* Now we can handle Tag_FP_arch.  */
 

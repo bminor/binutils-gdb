@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/sysctl.h>
+#include <sys/user.h>
 #include <machine/reg.h>
 
 #include "fbsd-nat.h"
@@ -244,24 +245,31 @@ Please report this to <bug-gdb@gnu.org>."),
 
   SC_RBP_OFFSET = offset;
 
-  /* FreeBSD provides a kern.ps_strings sysctl that we can use to
-     locate the sigtramp.  That way we can still recognize a sigtramp
-     if its location is changed in a new kernel.  Of course this is
-     still based on the assumption that the sigtramp is placed
-     directly under the location where the program arguments and
-     environment can be found.  */
+#ifdef KERN_PROC_SIGTRAMP
+  /* Normally signal frames are detected via amd64fbsd_sigtramp_p.
+     However, FreeBSD 9.2 through 10.1 do not include the page holding
+     the signal code in core dumps.  These releases do provide a
+     kern.proc.sigtramp.<pid> sysctl that returns the location of the
+     signal trampoline for a running process.  We fetch the location
+     of the current (gdb) process and use this to identify signal
+     frames in core dumps from these releases.  Note that this only
+     works for core dumps of 64-bit (FreeBSD/amd64) processes and does
+     not handle core dumps of 32-bit (FreeBSD/i386) processes.  */
   {
-    int mib[2];
-    long ps_strings;
+    int mib[4];
+    struct kinfo_sigtramp kst;
     size_t len;
 
     mib[0] = CTL_KERN;
-    mib[1] = KERN_PS_STRINGS;
-    len = sizeof (ps_strings);
-    if (sysctl (mib, 2, &ps_strings, &len, NULL, 0) == 0)
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_SIGTRAMP;
+    mib[3] = getpid ();
+    len = sizeof (kst);
+    if (sysctl (mib, 4, &kst, &len, NULL, 0) == 0)
       {
-	amd64fbsd_sigtramp_start_addr = ps_strings - 32;
-	amd64fbsd_sigtramp_end_addr = ps_strings;
+	amd64fbsd_sigtramp_start_addr = (uintptr_t) kst.ksigtramp_start;
+	amd64fbsd_sigtramp_end_addr = (uintptr_t) kst.ksigtramp_end;
       }
   }
+#endif
 }

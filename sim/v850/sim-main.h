@@ -12,7 +12,7 @@
 
 #define WITH_TARGET_WORD_MSB 31
 
-
+#include "config.h"
 #include "sim-basics.h"
 #include "sim-signal.h"
 #include "sim-fpu.h"
@@ -32,6 +32,7 @@ typedef unsigned16 uint16;
 typedef signed32 int32;
 typedef unsigned32 uint32;
 typedef unsigned32 reg_t;
+typedef unsigned64 reg64_t;
 
 
 /* The current state of the processor; registers, memory, etc.  */
@@ -44,6 +45,8 @@ typedef struct _v850_regs {
   reg_t mpu0_sregs[28];         /* mpu0 system registers */
   reg_t mpu1_sregs[28];         /* mpu1 system registers */
   reg_t fpu_sregs[28];          /* fpu system registers */
+  reg_t selID_sregs[7][32];	/* system registers, selID 1 thru selID 7 */
+  reg64_t vregs[32];		/* vector registers.  */
 } v850_regs;
 
 struct _sim_cpu
@@ -126,6 +129,7 @@ nia = PC
 /* new */
 #define GR  ((CPU)->reg.regs)
 #define SR  ((CPU)->reg.sregs)
+#define VR  ((CPU)->reg.vregs)
 #define MPU0_SR  ((STATE_CPU (sd, 0))->reg.mpu0_sregs)
 #define MPU1_SR  ((STATE_CPU (sd, 0))->reg.mpu1_sregs)
 #define FPU_SR   ((STATE_CPU (sd, 0))->reg.fpu_sregs)
@@ -680,5 +684,85 @@ extern void divn ( unsigned int       N,
 extern int type1_regs[];
 extern int type2_regs[];
 extern int type3_regs[];
+
+#define SESR_OV   (1 << 0)
+#define SESR_SOV  (1 << 1)
+
+#define SESR      (State.sregs[12])
+
+#define ROUND_Q62_Q31(X) ((((X) + (1 << 30)) >> 31) & 0xffffffff)
+#define ROUND_Q62_Q15(X) ((((X) + (1 << 30)) >> 47) & 0xffff)
+#define ROUND_Q31_Q15(X) ((((X) + (1 << 15)) >> 15) & 0xffff)
+#define ROUND_Q30_Q15(X) ((((X) + (1 << 14)) >> 15) & 0xffff)
+
+#define SAT16(X)			\
+  do					\
+    {					\
+      signed64 z = (X);			\
+      if (z > 0x7fff)			\
+	{				\
+	  SESR |= SESR_OV | SESR_SOV;	\
+	  z = 0x7fff;			\
+	}				\
+      else if (z < -0x8000)		\
+	{				\
+	  SESR |= SESR_OV | SESR_SOV;	\
+	  z = - 0x8000;			\
+	}				\
+      (X) = z;				\
+    }					\
+  while (0)
+
+#define SAT32(X)			\
+  do					\
+    {					\
+      signed64 z = (X);			\
+      if (z > 0x7fffffff)		\
+	{				\
+	  SESR |= SESR_OV | SESR_SOV;	\
+	  z = 0x7fffffff;		\
+	}				\
+      else if (z < -0x80000000)		\
+	{				\
+	  SESR |= SESR_OV | SESR_SOV;	\
+	  z = - 0x80000000;		\
+	}				\
+      (X) = z;				\
+    }					\
+  while (0)
+
+#define ABS16(X)			\
+  do					\
+    {					\
+      signed64 z = (X) & 0xffff;	\
+      if (z == 0x8000)			\
+	{				\
+	  SESR |= SESR_OV | SESR_SOV;	\
+	  z = 0x7fff;			\
+	}				\
+      else if (z & 0x8000)		\
+	{				\
+	  z = (- z) & 0xffff;		\
+	}				\
+      (X) = z;				\
+    }					\
+  while (0)
+
+#define ABS32(X)			\
+  do					\
+    {					\
+      signed64 z = (X) & 0xffffffff;	\
+      if (z == 0x80000000)		\
+	{				\
+	  SESR |= SESR_OV | SESR_SOV;	\
+	  z = 0x7fffffff;		\
+	}				\
+      else if (z & 0x80000000)		\
+	{				\
+	  z = (- z) & 0xffffffff;	\
+	}				\
+      (X) = z;				\
+    }					\
+  while (0)
 
 #endif

@@ -1,3 +1,76 @@
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-vregs.exp: New test.
+	* gdb.arch/s390-vregs.S: New file.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.gdb/python-interrupts.exp (test_python_interrupts): Adjust
+	call to catch_command_errors.
+	* gdb.gdb/python-selftest.exp (selftest_python): Adjust call to
+	catch_command_errors.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.gdb/complaints.exp (test_initial_complaints): Also accept
+	"true" for boolean result.
+	* gdb.gdb/selftest.exp (test_with_self): Also accept full
+	prototype of main.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* lib/unbuffer_output.c: New file.
+	* gdb.base/interrupt.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+
+2015-02-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.exp: Don't skip it on hppa*-hp-hpux*
+	target.
+
+2015-02-26  Doug Evans  <dje@google.com>
+
+	* gdb.cp/class2.cc (Dbase, D): New classes.
+	(main): New local delta.
+	* gdb.cp/class2.exp: Test printing delta.
+	* gdb.cp/classes.cc (DynamicBase2, DynamicBar): New classes.
+	(dynbar): New global.
+	* gdb.cp/classes.exp (test_ptype_class_objects): Test ptype DynamicBar.
+
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile-ifunc.c: New file.
+	* gdb.compile/compile-ifunc.exp: New file.
+
+2015-02-26  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.base/structs.exp: Check for correct struct on finish.
+
+2015-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/dwarf.exp (function_range): Adjust pattern when $func_length
+	is zero.
+
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/cordic.ko.bz2: New file.
+	* gdb.arch/cordic.ko.debug.bz2: New file.
+	* gdb.arch/ppc64-symtab-cordic.exp: New file.
+
+2015-02-25  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.xml/tdesc-regs.exp: Set core-regs to aarch64-core.xml for
+	aarch64*-*-* target.
+
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (delete_breakpoints): Rewrite using
+	gdb_test_multiple.
+
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/info-os.c: Include stdlib.h.
+
 2015-02-22  Doug Evans  <xdje42@gmail.com>
 
 	PR symtab/17855

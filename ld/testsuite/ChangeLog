@@ -1,3 +1,106 @@
+2015-02-28  Alan Modra  <amodra@gmail.com>
+
+	* ld-sparc/gotop32.rd: Update for changed padding in data sections.
+	* ld-sparc/gotop32.td: Likewise.
+	* ld-sparc/gotop64.rd: Likewise.
+	* ld-sparc/gotop64.td: Likewise.
+	* ld-tilegx/external.s: Align .data.
+	* ld-tilepro/external.s: Likewise.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (tls-tiny-desc, tls-tiny-desc-ie)
+	(tls-tiny-desc-le): Add.
+	* ld-aarch64/tls-tiny-desc.d: New.
+	* ld-aarch64/tls-tiny-desc.s: New.
+	* ld-aarch64/tls-tiny-desc-ie.d: New.
+	* ld-aarch64/tls-tiny-desc-ie.s: New.
+	* ld-aarch64/tls-tiny-desc-le.d: New.
+	* ld-aarch64/tls-tiny-desc-le.s: New.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (tls-tiny-gd, tls-tiny-gd-ie)
+	(tls-tiny-gd-le): Add.
+	* ld-aarch64/tls-tiny-gd.d: New.
+	* ld-aarch64/tls-tiny-gd.s: New.
+	* ld-aarch64/tls-tiny-gd-ie.d: New.
+	* ld-aarch64/tls-tiny-gd-ie.s: New.
+	* ld-aarch64/tls-tiny-gd-le.d: New.
+	* ld-aarch64/tls-tiny-gd-le.s: New.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Add tls-tiny-ie.
+	* ld-aarch64/tls-tiny-ie.d: New.
+	* ld-aarch64/tls-tiny-ie.s: New.
+
+2015-02-26  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-3.attr: Remove Tag_ABI_HardFP_use.
+	* ld-arm/attr-merge-vfp-10.d: Likewise.
+	* ld-arm/attr-merge-vfp-10r.d: Likewise.
+	* ld-arm/attr-merge-vfp-12.d: Likewise.
+	* ld-arm/attr-merge-vfp-12r.d: Likewise.
+	* ld-arm/attr-merge-vfp-13.d: Likewise.
+	* ld-arm/attr-merge-vfp-13r.d: Likewise.
+	* ld-arm/attr-merge-vfp-14.d: Likewise.
+	* ld-arm/attr-merge-vfp-14r.d: Likewise.
+	* ld-arm/attr-merge-vfp-6.d: Likewise.
+	* ld-arm/attr-merge-vfp-6r.d: Likewise.
+	* ld-arm/attr-merge-vfp-7.d: Likewise.
+	* ld-arm/attr-merge-vfp-7r.d: Likewise.
+	* ld-arm/attr-merge-vfp-8.d: Likewise.
+	* ld-arm/attr-merge-vfp-8r.d: Likewise.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-avr/avr-prop-1.d: New file.
+	* ld-avr/avr-prop-1.s: New file.
+	* ld-avr/avr-prop-2.d: New file.
+	* ld-avr/avr-prop-2.s: New file.
+	* ld-avr/avr-prop-3.d: New file.
+	* ld-avr/avr-prop-3.s: New file.
+	* ld-avr/avr-prop-4.d: New file.
+	* ld-avr/avr-prop-4.s: New file.
+
+2015-02-25  Oleg Endo  <olegendo@gcc.gnu.org>
+
+	* ld-sh/arch/arch_expected.txt: Regenerate.
+	* ld-sh/arch/sh-dsp.s: Likewise.
+	* ld-sh/arch/sh.s: Likewise.
+	* ld-sh/arch/sh2.s: Likewise.
+	* ld-sh/arch/sh2a-nofpu-or-sh3-nommu.s: Likewise.
+	* ld-sh/arch/sh2a-nofpu-or-sh4-nommu-nofpu.s: Likewise.
+	* ld-sh/arch/sh2a-nofpu.s: Likewise.
+	* ld-sh/arch/sh2a-or-sh3e.s: Likewise.
+	* ld-sh/arch/sh2a-or-sh4.s: Likewise.
+	* ld-sh/arch/sh2a.s: Likewise.
+	* ld-sh/arch/sh2e.s: Likewise.
+	* ld-sh/arch/sh3-dsp.s: Likewise.
+	* ld-sh/arch/sh3-nommu.s: Likewise.
+	* ld-sh/arch/sh3.s: Likewise.
+	* ld-sh/arch/sh3e.s: Likewise.
+	* ld-sh/arch/sh4-nofpu.s: Likewise.
+	* ld-sh/arch/sh4-nommu-nofpu.s: Likewise.
+	* ld-sh/arch/sh4.s: Likewise.
+	* ld-sh/arch/sh4a-nofpu.s: Likewise.
+	* ld-sh/arch/sh4a.s: Likewise.
+	* ld-sh/arch/sh4al-dsp.s: Likewise.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/extract-symbol-1sec.d: Expect to fail on the V850.
+
+2015-02-24  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/merge3.s, * ld-elf/merge3.d: New test.
+
+2015-02-24  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-avr/region_overflow.d: New test.
+	* ld-avr/region_overflow.s: Likewise.
+
 2015-02-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4317

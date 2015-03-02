@@ -145,10 +145,16 @@ enum tui_register_display_type
   TUI_GENERAL_AND_SPECIAL_REGS
 };
 
+enum tui_line_or_address_kind
+{
+  LOA_LINE,
+  LOA_ADDRESS
+};
+
 /* Structure describing source line or line address.  */
 struct tui_line_or_address
 {
-  enum { LOA_LINE, LOA_ADDRESS } loa;
+  enum tui_line_or_address_kind loa;
   union
     {
       int line_no;

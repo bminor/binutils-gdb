@@ -130,7 +130,6 @@ static CONTEXT saved_context;	/* Containes the saved context from a
 enum
   {
     FLAG_TRACE_BIT = 0x100,
-    CONTEXT_DEBUGGER = (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
   };
 #endif
 
@@ -140,8 +139,9 @@ enum
 #define CONTEXT_EXTENDED_REGISTERS 0
 #endif
 
-#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS \
-	| CONTEXT_EXTENDED_REGISTERS
+#define CONTEXT_DEBUGGER_DR CONTEXT_FULL | CONTEXT_FLOATING_POINT \
+        | CONTEXT_SEGMENTS | CONTEXT_DEBUG_REGISTERS \
+        | CONTEXT_EXTENDED_REGISTERS
 
 static uintptr_t dr[8];
 static int debug_registers_changed;

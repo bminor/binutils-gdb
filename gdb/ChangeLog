@@ -1,3 +1,418 @@
+2015-03-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* contrib/ari/gdb_ari.sh: Reinstate checks for "true" and "false".
+
+2015-03-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.h: Remove <stdbool.h> #include.
+	(producer_is_gcc): Change return type to "int".
+	* utils.c (producer_is_gcc): Change return type to int.
+	Return 1 instead of true, and 0 instead of false.
+	Adjust function documentation accordingly.
+
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (have_regset_vxrs): New static variable.
+	(s390_linux_fetch_inferior_registers): Handle vector registers, if
+	present.
+	(s390_linux_store_inferior_registers): Likewise.
+	(s390_get_hwcap): Remove function.  Embed its logic...
+	(s390_read_description): ...here.  Yield a target description with
+	vector registers if applicable.
+	* s390-linux-tdep.c: Include "features/s390-vx-linux64.c",
+	"features/s390-tevx-linux64.c", "features/s390x-vx-linux64.c", and
+	"features/s390x-tevx-linux64.c".
+	(struct gdbarch_tdep) <v0_full_regnum>: New field.
+	(s390_dwarf_regmap): Add vector registers.  Remove bogus entries
+	for "GNU/Linux-specific registers".
+	(s390_dwarf_reg_r0l): New enum value.
+	(s390_dwarf_reg_to_regnum): Support vector registers.
+	(s390_adjust_frame_regnum): Adjust pseudo DWARF register numbers
+	of GPR lower halves.
+	(regnum_is_vxr_full): New function.
+	(s390_register_name): New function.
+	(s390_pseudo_register_name): Handle v0-v15, which are composed of
+	f0-f15 and v0l-v15l.
+	(s390_pseudo_register_type): Likewise.
+	(s390_pseudo_register_read): Likewise.
+	(s390_pseudo_register_write): Likewise.
+	(s390_value_from_register): Account for the fact that values are
+	placed left-justified in vector registers.
+	(s390_pseudo_register_reggroup_p): Add pseudo registers v0-v15 to
+	the vector reggroup and omit them from the general reggroup.
+	(s390_regmap_vxrs_low, s390_regmap_vxrs_high): New register maps.
+	(s390_vxrs_low_regset, s390_vxrs_high_regset): New regsets.
+	(s390_iterate_over_regset_sections): Add iterations for the two
+	new vector regsets.
+	(s390_core_read_description): Yield a target description with
+	vector registers if applicable.
+	(s390_gdbarch_init): Handle target descriptions with vector
+	registers.  Add "register_name" gdbarch method.
+	(_initialize_s390_tdep): Call new tdesc initialization functions.
+	* s390-linux-tdep.h (HWCAP_S390_VX): New macro.
+	(S390_V0_LOWER_REGNUM, S390_V1_LOWER_REGNUM, S390_V2_LOWER_REGNUM)
+	(S390_V3_LOWER_REGNUM, S390_V4_LOWER_REGNUM, S390_V5_LOWER_REGNUM)
+	(S390_V6_LOWER_REGNUM, S390_V7_LOWER_REGNUM, S390_V8_LOWER_REGNUM)
+	(S390_V9_LOWER_REGNUM, S390_V10_LOWER_REGNUM)
+	(S390_V11_LOWER_REGNUM, S390_V12_LOWER_REGNUM)
+	(S390_V13_LOWER_REGNUM, S390_V14_LOWER_REGNUM)
+	(S390_V15_LOWER_REGNUM, S390_V16_REGNUM, S390_V17_REGNUM)
+	(S390_V18_REGNUM, S390_V19_REGNUM, S390_V20_REGNUM)
+	(S390_V21_REGNUM, S390_V22_REGNUM, S390_V23_REGNUM)
+	(S390_V24_REGNUM, S390_V25_REGNUM, S390_V26_REGNUM)
+	(S390_V27_REGNUM, S390_V28_REGNUM, S390_V29_REGNUM)
+	(S390_V30_REGNUM, S390_V31_REGNUM): New macros.
+	(S390_NUM_REGS): Adjust value.
+	(s390_vxrs_low_regset, s390_vxrs_high_regset): Declare.
+	(tdesc_s390_vx_linux64, tdesc_s390_tevx_linux64)
+	(tdesc_s390x_vx_linux64, tdesc_s390x_tevx_linux64): Likewise.
+	* NEWS: Announce S/390 vector register support.
+
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* features/s390-tevx-linux64.xml: New file.
+	* features/s390-vx-linux64.xml: New file.
+	* features/s390-vx.xml: New file.
+	* features/s390x-tevx-linux64.xml: New file.
+	* features/s390x-vx-linux64.xml: New file.
+	* features/Makefile (WHICH): Add s390-vx-linux64,
+	s390x-vx-linux64, s390-tevx-linux64, and s390x-tevx-linux64.
+	(s390-vx-linux64-expedite, s390-tevx-linux64-expedite)
+	(s390x-vx-linux64-expedite, s390x-tevx-linux64-expedite): New
+	macros.
+	* features/s390-tevx-linux64.c: New generated file.
+	* features/s390-vx-linux64.c: Likewise.
+	* features/s390x-tevx-linux64.c: Likewise.
+	* features/s390x-vx-linux64.c: Likewise.
+	* regformats/s390-tevx-linux64.dat: Likewise.
+	* regformats/s390-vx-linux64.dat: Likewise.
+	* regformats/s390x-tevx-linux64.dat: Likewise.
+	* regformats/s390x-vx-linux64.dat: Likewise.
+
+2015-02-28  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct symtab) <next>: Fix comment.
+
+2015-02-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/python.c (python_GdbModuleDef): Rename GdbMethods to
+	python_GdbMethods.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* dtrace-probe.c (dtrace_probe_ops): Make extern.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (exception_none): Declare.
+	* common/common-exceptions.c (exception_none): Moved from
+	exceptions.c.
+	(exceptions_state_mc_init): Use exception_none.
+	* exceptions.c (exception_none): Move to
+	common/common-exceptions.c.
+	* exceptions.h (exception_none): Move to
+	common/common-exceptions.h.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* main.c (catch_command_errors, catch_command_errors_const):
+	Remove 'mask' argument.  Adjust.
+	(captured_main): Adjust callers.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h: Include "extension-priv.h".
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.h (enum print_stop_action): Move further up in the
+	file.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch.sh: Include regcache.h.
+	* gdbarch.h: Regenerate.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* arm-tdep.c (decode_insn) <arm_handle_insn, thumb_handle_insn>:
+	Remove duplicate const.
+	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): Remove
+	duplicate const.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* cp-valprint.c (vtbl_ptr_name): Use EXPORTED_CONST.
+	* guile/guile.c (extension_language_guile): Use EXPORTED_CONST.
+	* features/feature_to_c.sh: Tag the generated xml_builtin array
+	with extern const in C++ mode.
+
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+
+	* minidebug.c (struct lzma_stream): Rename to ...
+	(struct gdb_lzma_stream): ... this.
+	(lzma_open, lzma_pread, lzma_close, lzma_stat): Adjust.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-cmd-stack.c (mi_apply_ext_lang_frame_filter): New
+	function.
+	(mi_cmd_stack_list_locals, mi_cmd_stack_list_args)
+	(mi_cmd_stack_list_variables): Use it.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* x86-linux-nat.c (u_debugreg_offset): New function.
+	(x86_linux_dr_get, x86_linux_dr_set): Use it.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* nat/x86-dregs.h (enum target_hw_bp_type): Remove forward
+	declaration.
+	Include break-common.h.
+
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* arm-tdep.c (set_fp_model_sfunc, arm_set_abi): Use 'int' for
+	local used to iterate over enums.
+	* completer.c (signal_completer): Likewise.
+	* i386-tdep.c (i386_stap_parse_special_token): Likewise.
+	* rs6000-tdep.c (powerpc_set_vector_abi): Likewise.
+	* tui/tui-data.c (tui_next_win, tui_prev_win): Likewise.
+	* tui/tui-layout.c (next_layout, prev_layout): Likewise.
+	* tui/tui-win.c (tui_refresh_all_win, tui_rehighlight_all)
+	(tui_resize_all, tui_set_focus_command, tui_all_windows_info): Likewise.
+	* tui-wingeneral.c (tui_refresh_all):  Likewise.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* target.h: Include "infrun.h".
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb_proc_service.h: Wrap with EXTERN_C_PUSH/EXTERN_C_POP.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* common/agent.h (IPA_SYM_EXPORTED_NAME): New.
+	(IPA_SYM): Use it.
+	* common/common-defs.h (EXTERN_C_PUSH, EXTERN_C_POP): New macros.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* cli-out.c (_rl_erase_entire_line): Move declaration out of
+	cli_mld_erase_entire_line, and make it extern "C".
+	* common/common-defs.h (EXTERN_C): New.
+	* completer.c (_rl_completion_prefix_display_length)
+	(_rl_print_completions_horizontally, QSFUNC): Move declarations
+	out of gdb_display_match_list_1.
+	(_rl_qsort_string_compare): Move declaration out of
+	gdb_display_match_list_1, and make it extern "C".
+	* defs.h (re_comp): Use EXTERN_C.
+	* maint.c (_mcleanup): Move declaration out of mcleanup_wrapper,
+	and make it extern "C".
+	(monstartup): Move declaration out of maintenance_set_profile_cmd,
+	and make it extern "C".
+	(main): Move declaration out of maintenance_set_profile_cmd.
+	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason_string): Use
+	EXTERN_C.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* python/python.c (GdbMethods): Rename to ...
+	(python_GdbMethods): ... this and make extern.
+	(GdbModuleDef): Rename to ...
+	(python_GdbModuleDef): ... this and make extern.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* record-btrace.c (set_record_btrace_cmdlist)
+	(show_record_btrace_cmdlist): Remove redefinitions.
+
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* dwarf2-frame.c (enum cfa_how_kind, struct
+	dwarf2_frame_state_reg_info): Move out of struct
+	dwarf2_frame_state.
+	* dwarf2read.c (struct tu_stats): Move out of struct
+	dwarf2_per_objfile.
+	(struct file_entry): Move out of struct line_header.
+	(struct nextfield, struct nextfnfield, struct fnfieldlist, struct
+	typedef_field_list): Move out of struct field_info.
+	* gdbtypes.h (enum dynamic_prop_kind, union dynamic_prop_data):
+	Move out of struct dynamic_prop.
+	(union type_owner, union field_location, struct field, struct
+	range_bounds, union type_specific): Move out of struct main_type.
+	(struct fn_fieldlist, struct fn_field, struct typedef_field)
+	(VOFFSET_STATIC): Move out of struct cplus_struct_type.
+	(struct call_site_target, union call_site_parameter_u, struct
+	call_site_parameter): Move out of struct call_site.
+	* m32c-tdep.c (enum m32c_prologue_kind): Move out of struct
+	m32c_prologue.
+	(enum srcdest_kind): Move out of struct srcdest.
+	* main.c (enum cmdarg_kind): Move out of struct cmdarg.
+	* prologue-value.h (enum prologue_value_kind): Move out of struct
+	prologue_value.
+	* s390-linux-tdep.c (enum s390_abi_kind): Move out of struct
+	gdbarch_tdep.
+	* stabsread.c (struct nextfield, struct next_fnfieldlist): Move
+	out of struct field_info.
+	* symfile.h (struct other_sections): Move out of struct
+	section_addr_info.
+	* symtab.c (struct symbol_cache_slot): Move out struct
+	block_symbol_cache.
+	* target-descriptions.c (enum tdesc_type_kind): Move out of
+	typedef struct tdesc_type.
+	* tui/tui-data.h (enum tui_line_or_address_kind): Move out of
+	struct tui_line_or_address.
+	* value.c (enum internalvar_kind, union internalvar_data): Move
+	out of struct internalvar.
+	* xtensa-tdep.h (struct ctype_cache): Move out of struct
+	gdbarch_tdep.
+
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	Rename symbols whose names are reserved C++ keywords throughout.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMPILER): New, get it from autoconf.
+	(COMPILE.pre, CC_LD): Use COMPILER.
+	(CXX): Get from autoconf instead.
+	(CXX_FOR_TARGET): Default to g++ instead of gcc.
+	* acinclude.m4: Include build-with-cxx.m4.
+	* build-with-cxx.m4: New file.
+	* configure.ac: Call AC_PROG_CXX and GDB_AC_BUILD_WITH_CXX.
+	Disable -Werror by default if building in C++ mode.
+	(build_warnings): Add -Wno-sign-compare, -Wno-write-strings and
+	-Wno-narrowing in C++ mode.  Only enable -Wpointer-sign in C mode.
+	Run supported-warning-flags tests with the C++ compiler.
+	Save/restore CXXFLAGS too.
+	* configure: Regenerate.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
+	* libiberty.m4: New file.
+	* acinclude.m4: Include libiberty.m4.
+	* configure.ac: Call libiberty_INIT.
+	* config.in, configure: Regenerate.
+
+2015-02-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_gcc_target_options): Not just handle
+	31-bit targets, but 64-bit targets as well.
+	(s390_gnu_triplet_regexp): New function.
+	(s390_gdbarch_init): Set the gcc_target_options gdbarch method for
+	64-bit targets as well.  Set the gnu_triplet_regexp gdbarch
+	method.
+
+2015-02-27  Jon TURNEY  <jon.turney@dronecode.org.uk>  (tiny patch)
+
+	* windows-nat.c (CONTEXT_DEBUGGER): Remove.
+	(CONTEXT_DEBUGGER_DR): Add CONTEXT_SEGMENTS.  Incorporate flags
+	from CONTEXT_DEBUGGER.
+
+2015-02-26  Doug Evans  <dje@google.com>
+
+	* gdbtypes.c (internal_type_vptr_fieldno): Add missing call to
+	CHECK_TYPEDEF.
+	(set_type_vptr_fieldno): Ditto.
+	(internal_type_vptr_basetype, set_type_vptr_basetype): Ditto.
+	* gnu-v3-abi.c (gnuv3_dynamic_class): Ditto.
+
+2015-02-26  Pedro Alves  <palves@redhat.com>
+
+	* auto-load.h (file_is_auto_load_safe): Add ATTRIBUTE_PRINTF.
+	* complaints.c (vcomplaint): Pass argument FMT directly to
+	printf-like functions instead of complaint->fmt.
+	* ctf.c (ctf_save_write_metadata): Add ATTRIBUTE_PRINTF.
+	* darwin-nat.c (inferior_debug): Add ATTRIBUTE_PRINTF.
+	* compile/compile-loc2c.c (pushf, unary, binary): Add
+	ATTRIBUTE_PRINTF.
+	(do_compile_dwarf_expr_to_c): Pass string literal as format string
+	to pushf.
+	(BINARY): Pass string literal as format string to 'binary'.
+	* compile/compile-object-load.c (link_callbacks_einfo): Add
+	ATTRIBUTE_PRINTF.
+	* guile/guile-internal.h (gdbscm_printf): Add ATTRIBUTE_PRINTF.
+
+2015-02-26  Pedro Alves  <palves@redhat.com>
+
+	* windows-termcap.c: Rename to ...
+	* stub-termcap.c: ... this.  Adjust header line.
+	* Makefile.in (SFILES): Refer to stub-termcap.c instead of
+	windows-termcap.c.
+	* configure: Regenerate.
+	* configure.ac: Refer to stub-termcap.o instead of
+	windows-termcap.o.
+	* gdb_curses.h: Mention stub-termcap.c instead of
+	windows-termcap.c.
+
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile-c-symbols.c (convert_one_symbol, convert_symbol_bmsym)
+	(gcc_symbol_address): Call gnu_ifunc_resolve_addr.
+
+2015-02-26  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb/infcmd.c (print_return_value): use type_to_string to print type.
+
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elfread.c (elf_read_minimal_symbols): Use bfd_alloc for
+	bfd_canonicalize_symtab.
+
+2015-02-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64fbsd-nat.c: Include sys/user.h.
+	(_initialize_amd64fbsd_nat): Use the KERN_PROC_SIGTRAMP sysctl
+	instead of KERN_PS_STRINGS to locate the signal trampoline.
+	* i386fbsd-nat.c: Include sys/user.h.
+	(_initialize_i386fbsd_nat): Use the KERN_PROC_SIGTRAMP sysctl
+	instead of KERN_PS_STRINGS to locate the signal trampoline.
+	* amd64fbsd-tdep.c (amd64fbsd_sigtramp_code): New.
+	(amd64fbsd_sigtramp_p): New.
+	(amd64fbsd_sigtramp_start_addr, amd64fbsd_sigtramp_end_addr): No
+	longer set default values.
+	(amd64fbsd_init_abi): Set "sigtramp_p" to "amd64fbsd_sigtramp_p".
+	* i386fbsd-tdep.c (i386fbsd_sigtramp_start)
+	(i386fbsd_sigtramp_middle, i386fbsd_sigtramp_end)
+	(i386fbsd_freebsd4_sigtramp_start)
+	(i386fbsd_freebsd4_sigtramp_middle)
+	(i386fbsd_freebsd4_sigtramp_end, i386fbsd_osigtramp_start)
+	(i386fbsd_osigtramp_middle, i386fbsd_osigtramp_end): New.
+	(i386fbsd_sigtramp_p): New.
+	(i386fbsd_sigtramp_start_addr, i386fbsd_sigtramp_end_addr): No
+	longer set default values.
+	(i386fbsd_init_abi): Set "sigtramp_p" to "i386fbsd_sigtramp_p".
+
+2015-02-25  John Baldwin  <jhb@freebsd.org>
+
+	* amd64fbsd-tdep.c (amd64fbsd_sigcontext_addr): Use
+	get_frame_register instead of frame_unwind_register_unsigned.
+
+2015-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR build/18033
+	* compile/compile-c-support.c (c_compute_program): Change // comment.
+	* compile/compile-object-load.c (setup_sections): Change // comment.
+
+2015-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	PR build/18033:
+	* iq2000-tdep.c (iq2000_frame_cache): Delete C++-style comment.
+
+2015-02-23  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (skip_to_semicolon): New function.
+	(remote_parse_stop_reply) <T stop reply>: Use it.  Don't
+	special case the stop reasons that look like hex numbers
+	upfront.  Instead handle real register numbers after matching
+	all the known stop reasons.
+
 2015-02-21  Doug Evans  <dje@google.com>
 
 	PR c++/17976, symtab/17821
@@ -258,7 +673,7 @@
 
 2015-02-12  Doug Evans  <dje@google.com>
 
-	* completer.c (completion_list_add_name): Fix memory leak.
+	* symtab.c (completion_list_add_name): Fix memory leak.
 
 2015-02-12  Doug Evans  <dje@google.com>
 

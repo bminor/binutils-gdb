@@ -71,6 +71,9 @@ Qbtrace-conf:bts:size
 * GDB now has support for DTrace USDT (Userland Static Defined
   Tracing) probes.  The supported targets are x86_64-*-linux-gnu.
 
+* GDB now supports access to vector registers on S/390 GNU/Linux
+  targets.
+
 *** Changes in GDB 7.9
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.

@@ -76,10 +76,6 @@ static struct btrace_config record_btrace_conf;
 /* Command list for "record btrace".  */
 static struct cmd_list_element *record_btrace_cmdlist;
 
-/* Command lists for "set/show record btrace".  */
-static struct cmd_list_element *set_record_btrace_cmdlist;
-static struct cmd_list_element *show_record_btrace_cmdlist;
-
 /* Command lists for "set/show record btrace bts".  */
 static struct cmd_list_element *set_record_btrace_bts_cmdlist;
 static struct cmd_list_element *show_record_btrace_bts_cmdlist;

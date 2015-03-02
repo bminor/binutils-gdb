@@ -1692,7 +1692,9 @@ set_symtab (void)
    of the section.  This allows proper nop-filling at the end of
    code-bearing sections.  */
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)					\
-  (!(FRCHAIN)->frch_next ? get_recorded_alignment (SEG) : 0)
+  (!(FRCHAIN)->frch_next && subseg_text_p (SEG)				\
+   ? get_recorded_alignment (SEG)					\
+   : 0)
 #else
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 #endif

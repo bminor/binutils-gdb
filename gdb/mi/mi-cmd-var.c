@@ -35,7 +35,7 @@ extern unsigned int varobjdebug;		/* defined in varobj.c.  */
 
 static void varobj_update_one (struct varobj *var,
 			       enum print_values print_values,
-			       int explicit);
+			       int is_explicit);
 
 static int mi_print_value_p (struct varobj *var,
 			     enum print_values print_values);
@@ -730,14 +730,14 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 
 static void
 varobj_update_one (struct varobj *var, enum print_values print_values,
-		   int explicit)
+		   int is_explicit)
 {
   struct ui_out *uiout = current_uiout;
   VEC (varobj_update_result) *changes;
   varobj_update_result *r;
   int i;
   
-  changes = varobj_update (&var, explicit);
+  changes = varobj_update (&var, is_explicit);
   
   for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
     {
@@ -803,14 +803,14 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
       ui_out_field_int (uiout, "has_more",
 			varobj_has_more (r->varobj, to));
 
-      if (r->new)
+      if (r->newobj)
 	{
 	  int j;
 	  varobj_p child;
 	  struct cleanup *cleanup;
 
 	  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "new_children");
-	  for (j = 0; VEC_iterate (varobj_p, r->new, j, child); ++j)
+	  for (j = 0; VEC_iterate (varobj_p, r->newobj, j, child); ++j)
 	    {
 	      struct cleanup *cleanup_child;
 
@@ -821,8 +821,8 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	    }
 
 	  do_cleanups (cleanup);
-	  VEC_free (varobj_p, r->new);
-	  r->new = NULL;	/* Paranoia.  */
+	  VEC_free (varobj_p, r->newobj);
+	  r->newobj = NULL;	/* Paranoia.  */
 	}
 
       do_cleanups (cleanup);

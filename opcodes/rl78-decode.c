@@ -4490,14 +4490,14 @@ rl78_decode_opcode (unsigned long pc AU,
       break;
     case 0x99:
         {
-          /** 1001 1001			mov	%e0,%1				*/
+          /** 1001 1001			mov	%e0, %1				*/
           if (trace)
             {
               printf ("\033[33m%s\033[0m  %02x\n",
-                     "/** 1001 1001			mov	%e0,%1				*/",
+                     "/** 1001 1001			mov	%e0, %1				*/",
                      op[0]);
             }
-          SYNTAX("mov	%e0,%1");
+          SYNTAX("mov	%e0, %1");
 #line 614 "rl78-decode.opc"
           ID(mov); DM(DE, 0); SR(A);
         
@@ -4520,14 +4520,14 @@ rl78_decode_opcode (unsigned long pc AU,
       break;
     case 0x9b:
         {
-          /** 1001 1011			mov	%e0,%1				*/
+          /** 1001 1011			mov	%e0, %1				*/
           if (trace)
             {
               printf ("\033[33m%s\033[0m  %02x\n",
-                     "/** 1001 1011			mov	%e0,%1				*/",
+                     "/** 1001 1011			mov	%e0, %1				*/",
                      op[0]);
             }
-          SYNTAX("mov	%e0,%1");
+          SYNTAX("mov	%e0, %1");
 #line 623 "rl78-decode.opc"
           ID(mov); DM(HL, 0); SR(A);
         

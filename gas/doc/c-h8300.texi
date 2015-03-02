@@ -29,6 +29,16 @@ machine-dependent option:
 @item -h-tick-hex
 Support H'00 style hex constants in addition to 0x00 style.
 
+@item -mach=@var{name}
+Sets the H8300 machine variant.  The following machine names
+are recognised:
+@code{h8300h},
+@code{h8300hn},
+@code{h8300s},
+@code{h8300sn},
+@code{h8300sx} and 
+@code{h8300sxn}.
+
 @end table
 @c man end
 

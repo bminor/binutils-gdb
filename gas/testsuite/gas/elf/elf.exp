@@ -76,6 +76,9 @@ if { [is_elf_format] } then {
     if {[istarget "rx-*-*"]} then {
 	set target_machine -rx
     }
+    if {[istarget "v850*-*-*"]} then {
+	set target_machine -v850
+    }
     if {[istarget "arm*-*-*"]} {
 	set target_machine -arm
     }

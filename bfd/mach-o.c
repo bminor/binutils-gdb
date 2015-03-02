@@ -3469,6 +3469,13 @@ bfd_mach_o_read_section_32 (bfd *abfd,
   section->size = bfd_h_get_32 (abfd, raw.size);
   section->offset = bfd_h_get_32 (abfd, raw.offset);
   section->align = bfd_h_get_32 (abfd, raw.align);
+  /* PR 17512: file: 0017eb76.  */
+  if (section->align > 64)
+    {
+      (*_bfd_error_handler) (_("bfd_mach_o_read_section_32: overlarge alignment value: 0x%x, using 32 instead"),
+			     section->align);
+      section->align = 32;
+    }
   section->reloff = bfd_h_get_32 (abfd, raw.reloff);
   section->nreloc = bfd_h_get_32 (abfd, raw.nreloc);
   section->flags = bfd_h_get_32 (abfd, raw.flags);
@@ -3508,6 +3515,12 @@ bfd_mach_o_read_section_64 (bfd *abfd,
   section->size = bfd_h_get_64 (abfd, raw.size);
   section->offset = bfd_h_get_32 (abfd, raw.offset);
   section->align = bfd_h_get_32 (abfd, raw.align);
+  if (section->align > 64)
+    {
+      (*_bfd_error_handler) (_("bfd_mach_o_read_section_64: overlarge alignment value: 0x%x, using 32 instead"),
+			     section->align);
+      section->align = 32;
+    }
   section->reloff = bfd_h_get_32 (abfd, raw.reloff);
   section->nreloc = bfd_h_get_32 (abfd, raw.nreloc);
   section->flags = bfd_h_get_32 (abfd, raw.flags);

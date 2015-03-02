@@ -1790,13 +1790,13 @@ record_latest_value (struct value *val)
   i = value_history_count % VALUE_HISTORY_CHUNK;
   if (i == 0)
     {
-      struct value_history_chunk *new
+      struct value_history_chunk *newobj
 	= (struct value_history_chunk *)
 
       xmalloc (sizeof (struct value_history_chunk));
-      memset (new->values, 0, sizeof new->values);
-      new->next = value_history_chain;
-      value_history_chain = new;
+      memset (newobj->values, 0, sizeof newobj->values);
+      newobj->next = value_history_chain;
+      value_history_chain = newobj;
     }
 
   value_history_chain->values[i] = val;
@@ -1891,6 +1891,66 @@ show_values (char *num_exp, int from_tty)
     }
 }
 
+enum internalvar_kind
+{
+  /* The internal variable is empty.  */
+  INTERNALVAR_VOID,
+
+  /* The value of the internal variable is provided directly as
+     a GDB value object.  */
+  INTERNALVAR_VALUE,
+
+  /* A fresh value is computed via a call-back routine on every
+     access to the internal variable.  */
+  INTERNALVAR_MAKE_VALUE,
+
+  /* The internal variable holds a GDB internal convenience function.  */
+  INTERNALVAR_FUNCTION,
+
+  /* The variable holds an integer value.  */
+  INTERNALVAR_INTEGER,
+
+  /* The variable holds a GDB-provided string.  */
+  INTERNALVAR_STRING,
+};
+
+union internalvar_data
+{
+  /* A value object used with INTERNALVAR_VALUE.  */
+  struct value *value;
+
+  /* The call-back routine used with INTERNALVAR_MAKE_VALUE.  */
+  struct
+  {
+    /* The functions to call.  */
+    const struct internalvar_funcs *functions;
+
+    /* The function's user-data.  */
+    void *data;
+  } make_value;
+
+  /* The internal function used with INTERNALVAR_FUNCTION.  */
+  struct
+  {
+    struct internal_function *function;
+    /* True if this is the canonical name for the function.  */
+    int canonical;
+  } fn;
+
+  /* An integer value used with INTERNALVAR_INTEGER.  */
+  struct
+  {
+    /* If type is non-NULL, it will be used as the type to generate
+       a value for this internal variable.  If type is NULL, a default
+       integer type for the architecture is used.  */
+    struct type *type;
+    LONGEST val;
+  } integer;
+
+  /* A string value used with INTERNALVAR_STRING.  */
+  char *string;
+};
+
 /* Internal variables.  These are variables within the debugger
    that hold values assigned by debugger commands.
    The user refers to them with a '$' prefix
@@ -1905,66 +1965,9 @@ struct internalvar
      enum internalvar_kind specifies the kind, and union internalvar_data
      provides the data associated with this particular kind.  */
 
-  enum internalvar_kind
-    {
-      /* The internal variable is empty.  */
-      INTERNALVAR_VOID,
+  enum internalvar_kind kind;
 
-      /* The value of the internal variable is provided directly as
-	 a GDB value object.  */
-      INTERNALVAR_VALUE,
-
-      /* A fresh value is computed via a call-back routine on every
-	 access to the internal variable.  */
-      INTERNALVAR_MAKE_VALUE,
-
-      /* The internal variable holds a GDB internal convenience function.  */
-      INTERNALVAR_FUNCTION,
-
-      /* The variable holds an integer value.  */
-      INTERNALVAR_INTEGER,
-
-      /* The variable holds a GDB-provided string.  */
-      INTERNALVAR_STRING,
-
-    } kind;
-
-  union internalvar_data
-    {
-      /* A value object used with INTERNALVAR_VALUE.  */
-      struct value *value;
-
-      /* The call-back routine used with INTERNALVAR_MAKE_VALUE.  */
-      struct
-        {
-	  /* The functions to call.  */
-	  const struct internalvar_funcs *functions;
-
-	  /* The function's user-data.  */
-	  void *data;
-        } make_value;
-
-      /* The internal function used with INTERNALVAR_FUNCTION.  */
-      struct
-	{
-	  struct internal_function *function;
-	  /* True if this is the canonical name for the function.  */
-	  int canonical;
-	} fn;
-
-      /* An integer value used with INTERNALVAR_INTEGER.  */
-      struct
-        {
-	  /* If type is non-NULL, it will be used as the type to generate
-	     a value for this internal variable.  If type is NULL, a default
-	     integer type for the architecture is used.  */
-	  struct type *type;
-	  LONGEST val;
-        } integer;
-
-      /* A string value used with INTERNALVAR_STRING.  */
-      char *string;
-    } u;
+  union internalvar_data u;
 };
 
 static struct internalvar *internalvars;

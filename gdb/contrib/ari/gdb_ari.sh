@@ -1145,6 +1145,26 @@ Do not use `boolean'\'',  use `int'\'' instead"
     }
 }
 
+BEGIN { doc["false"] = "\
+Definitely do not use `false'\'' in boolean expressions"
+    category["false"] = ari_regression
+}
+/(^|[^_[:alnum:]])false([^_[:alnum:]]|$)/ {
+    if (is_yacc_or_lex == 0) {
+       fail("false")
+    }
+}
+
+BEGIN { doc["true"] = "\
+Do not try to use `true'\'' in boolean expressions"
+    category["true"] = ari_regression
+}
+/(^|[^_[:alnum:]])true([^_[:alnum:]]|$)/ {
+    if (is_yacc_or_lex == 0) {
+       fail("true")
+    }
+}
+
 # Typedefs that are either redundant or can be reduced to `struct
 # type *''.
 # Must be placed before if assignment otherwise ARI exceptions

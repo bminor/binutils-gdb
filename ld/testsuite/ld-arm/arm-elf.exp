@@ -896,6 +896,8 @@ run_dump_test "attr-merge-vfp-14r"
 run_dump_test "attr-merge-incompatible"
 run_dump_test "attr-merge-arch-2"
 run_dump_test "attr-merge-nosection-1"
+run_dump_test "attr-merge-hardfp-use-1"
+run_dump_test "attr-merge-hardfp-use-2"
 run_dump_test "unresolved-1"
 if { ![istarget "arm*-*-nacl*"] } {
     run_dump_test "unresolved-1-dyn"

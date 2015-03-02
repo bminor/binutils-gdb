@@ -198,6 +198,9 @@ h8300-*-hms* | h8300-*-coff* | h8300-*-rtemscoff*)
 h8300-*-elf* | h8300-*-rtems*)
 			targ_emul=h8300elf;
 			targ_extra_emuls="h8300helf h8300self h8300hnelf h8300snelf h8300sxelf h8300sxnelf" ;;
+h8300-*-linux*)
+			targ_emul=h8300elf_linux;
+			targ_extra_emuls="h8300helf_linux h8300self_linux h8300sxelf_linux" ;;
 h8500-*-hms* | h8500-*-coff* | h8500-*-rtems*)
 			targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"

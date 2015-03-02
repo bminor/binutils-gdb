@@ -1532,7 +1532,7 @@ define_command (char *comname, int from_tty)
     {
       int q;
 
-      if (c->class == class_user || c->class == class_alias)
+      if (c->theclass == class_user || c->theclass == class_alias)
 	q = query (_("Redefine command \"%s\"? "), c->name);
       else
 	q = query (_("Really redefine built-in command \"%s\"? "), c->name);
@@ -1584,11 +1584,11 @@ define_command (char *comname, int from_tty)
 	     "Type commands for definition of \"%s\".", comfull);
   cmds = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
 
-  if (c && c->class == class_user)
+  if (c && c->theclass == class_user)
     free_command_lines (&c->user_commands);
 
   newc = add_cmd (comname, class_user, user_defined_command,
-		  (c && c->class == class_user)
+		  (c && c->theclass == class_user)
 		  ? c->doc : xstrdup ("User-defined."), list);
   newc->user_commands = cmds;
 
@@ -1629,7 +1629,7 @@ document_command (char *comname, int from_tty)
   tem = comname;
   c = lookup_cmd (&tem, *list, "", 0, 1);
 
-  if (c->class != class_user)
+  if (c->theclass != class_user)
     error (_("Command \"%s\" is built-in."), comfull);
 
   xsnprintf (tmpbuf, sizeof (tmpbuf), "Type documentation for \"%s\".",
@@ -1739,7 +1739,7 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
       const char *prefixname = c->prefixname;
 
       for (c = *c->prefixlist; c != NULL; c = c->next)
-	if (c->class == class_user || c->prefixlist != NULL)
+	if (c->theclass == class_user || c->prefixlist != NULL)
 	  show_user_1 (c, prefixname, c->name, gdb_stdout);
       return;
     }

@@ -471,6 +471,26 @@ struct bp_location
   struct symtab *symtab;
 };
 
+/* The possible return values for print_bpstat, print_it_normal,
+   print_it_done, print_it_noop.  */
+enum print_stop_action
+{
+  /* We printed nothing or we need to do some more analysis.  */
+  PRINT_UNKNOWN = -1,
+
+  /* We printed something, and we *do* desire that something to be
+     followed by a location.  */
+  PRINT_SRC_AND_LOC,
+
+  /* We printed something, and we do *not* desire that something to be
+     followed by a location.  */
+  PRINT_SRC_ONLY,
+
+  /* We already printed all we needed to print, don't print anything
+     else.  */
+  PRINT_NOTHING
+};
+
 /* This structure is a collection of function pointers that, if available,
    will be called instead of the performing the default action for this
    bptype.  */
@@ -964,26 +984,6 @@ struct bpstat_what
        BPSTAT_WHAT_CLEAR_LONGJMP_RESUME.  True if we are handling a
        longjmp, false if we are handling an exception.  */
     int is_longjmp;
-  };
-
-/* The possible return values for print_bpstat, print_it_normal,
-   print_it_done, print_it_noop.  */
-enum print_stop_action
-  {
-    /* We printed nothing or we need to do some more analysis.  */
-    PRINT_UNKNOWN = -1,
-
-    /* We printed something, and we *do* desire that something to be
-       followed by a location.  */
-    PRINT_SRC_AND_LOC,
-
-    /* We printed something, and we do *not* desire that something to
-       be followed by a location.  */
-    PRINT_SRC_ONLY,
-
-    /* We already printed all we needed to print, don't print anything
-       else.  */
-    PRINT_NOTHING
   };
 
 /* Tell what to do about this bpstat.  */

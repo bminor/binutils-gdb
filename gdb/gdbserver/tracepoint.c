@@ -99,70 +99,43 @@ trace_vdebug (const char *fmt, ...)
 #define trace_debug(FMT, args...)		\
   trace_debug_1 (1, FMT, ##args)
 
-#if defined(__GNUC__)
-#  define ATTR_USED __attribute__((used))
-#  define ATTR_NOINLINE __attribute__((noinline))
-#  define ATTR_CONSTRUCTOR __attribute__ ((constructor))
-#else
-#  define ATTR_USED
-#  define ATTR_NOINLINE
-#  define ATTR_CONSTRUCTOR
-#endif
-
-/* Make sure the functions the IPA needs to export (symbols GDBserver
-   needs to query GDB about) are exported.  */
-
-#ifdef IN_PROCESS_AGENT
-# if defined _WIN32 || defined __CYGWIN__
-#   define IP_AGENT_EXPORT __declspec(dllexport) ATTR_USED
-# else
-#   if __GNUC__ >= 4
-#     define IP_AGENT_EXPORT \
-  __attribute__ ((visibility("default"))) ATTR_USED
-#   else
-#     define IP_AGENT_EXPORT ATTR_USED
-#   endif
-# endif
-#else
-#  define IP_AGENT_EXPORT
-#endif
-
 /* Prefix exported symbols, for good citizenship.  All the symbols
-   that need exporting are defined in this module.  */
+   that need exporting are defined in this module.  Note that all
+   these symbols must be tagged with IP_AGENT_EXPORT_*.  */
 #ifdef IN_PROCESS_AGENT
-# define gdb_tp_heap_buffer gdb_agent_gdb_tp_heap_buffer
-# define gdb_jump_pad_buffer gdb_agent_gdb_jump_pad_buffer
-# define gdb_jump_pad_buffer_end gdb_agent_gdb_jump_pad_buffer_end
-# define gdb_trampoline_buffer gdb_agent_gdb_trampoline_buffer
-# define gdb_trampoline_buffer_end gdb_agent_gdb_trampoline_buffer_end
-# define gdb_trampoline_buffer_error gdb_agent_gdb_trampoline_buffer_error
-# define collecting gdb_agent_collecting
-# define gdb_collect gdb_agent_gdb_collect
-# define stop_tracing gdb_agent_stop_tracing
-# define flush_trace_buffer gdb_agent_flush_trace_buffer
-# define about_to_request_buffer_space gdb_agent_about_to_request_buffer_space
-# define trace_buffer_is_full gdb_agent_trace_buffer_is_full
-# define stopping_tracepoint gdb_agent_stopping_tracepoint
-# define expr_eval_result gdb_agent_expr_eval_result
-# define error_tracepoint gdb_agent_error_tracepoint
-# define tracepoints gdb_agent_tracepoints
-# define tracing gdb_agent_tracing
-# define trace_buffer_ctrl gdb_agent_trace_buffer_ctrl
-# define trace_buffer_ctrl_curr gdb_agent_trace_buffer_ctrl_curr
-# define trace_buffer_lo gdb_agent_trace_buffer_lo
-# define trace_buffer_hi gdb_agent_trace_buffer_hi
-# define traceframe_read_count gdb_agent_traceframe_read_count
-# define traceframe_write_count gdb_agent_traceframe_write_count
-# define traceframes_created gdb_agent_traceframes_created
-# define trace_state_variables gdb_agent_trace_state_variables
-# define get_raw_reg gdb_agent_get_raw_reg
+# define gdb_tp_heap_buffer IPA_SYM_EXPORTED_NAME (gdb_tp_heap_buffer)
+# define gdb_jump_pad_buffer IPA_SYM_EXPORTED_NAME (gdb_jump_pad_buffer)
+# define gdb_jump_pad_buffer_end IPA_SYM_EXPORTED_NAME (gdb_jump_pad_buffer_end)
+# define gdb_trampoline_buffer IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer)
+# define gdb_trampoline_buffer_end IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_end)
+# define gdb_trampoline_buffer_error IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_error)
+# define collecting IPA_SYM_EXPORTED_NAME (collecting)
+# define gdb_collect IPA_SYM_EXPORTED_NAME (gdb_collect)
+# define stop_tracing IPA_SYM_EXPORTED_NAME (stop_tracing)
+# define flush_trace_buffer IPA_SYM_EXPORTED_NAME (flush_trace_buffer)
+# define about_to_request_buffer_space IPA_SYM_EXPORTED_NAME (about_to_request_buffer_space)
+# define trace_buffer_is_full IPA_SYM_EXPORTED_NAME (trace_buffer_is_full)
+# define stopping_tracepoint IPA_SYM_EXPORTED_NAME (stopping_tracepoint)
+# define expr_eval_result IPA_SYM_EXPORTED_NAME (expr_eval_result)
+# define error_tracepoint IPA_SYM_EXPORTED_NAME (error_tracepoint)
+# define tracepoints IPA_SYM_EXPORTED_NAME (tracepoints)
+# define tracing IPA_SYM_EXPORTED_NAME (tracing)
+# define trace_buffer_ctrl IPA_SYM_EXPORTED_NAME (trace_buffer_ctrl)
+# define trace_buffer_ctrl_curr IPA_SYM_EXPORTED_NAME (trace_buffer_ctrl_curr)
+# define trace_buffer_lo IPA_SYM_EXPORTED_NAME (trace_buffer_lo)
+# define trace_buffer_hi IPA_SYM_EXPORTED_NAME (trace_buffer_hi)
+# define traceframe_read_count IPA_SYM_EXPORTED_NAME (traceframe_read_count)
+# define traceframe_write_count IPA_SYM_EXPORTED_NAME (traceframe_write_count)
+# define traceframes_created IPA_SYM_EXPORTED_NAME (traceframes_created)
+# define trace_state_variables IPA_SYM_EXPORTED_NAME (trace_state_variables)
+# define get_raw_reg IPA_SYM_EXPORTED_NAME (get_raw_reg)
 # define get_trace_state_variable_value \
-  gdb_agent_get_trace_state_variable_value
+  IPA_SYM_EXPORTED_NAME (get_trace_state_variable_value)
 # define set_trace_state_variable_value \
-  gdb_agent_set_trace_state_variable_value
-# define ust_loaded gdb_agent_ust_loaded
-# define helper_thread_id gdb_agent_helper_thread_id
-# define cmd_buf gdb_agent_cmd_buf
+  IPA_SYM_EXPORTED_NAME (set_trace_state_variable_value)
+# define ust_loaded IPA_SYM_EXPORTED_NAME (ust_loaded)
+# define helper_thread_id IPA_SYM_EXPORTED_NAME (helper_thread_id)
+# define cmd_buf IPA_SYM_EXPORTED_NAME (cmd_buf)
 #endif
 
 #ifndef IN_PROCESS_AGENT
@@ -395,14 +368,14 @@ read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 #  define UNKNOWN_SIDE_EFFECTS() do {} while (0)
 #endif
 
-IP_AGENT_EXPORT void ATTR_USED ATTR_NOINLINE
+IP_AGENT_EXPORT_FUNC void
 stop_tracing (void)
 {
   /* GDBserver places breakpoint here.  */
   UNKNOWN_SIDE_EFFECTS();
 }
 
-IP_AGENT_EXPORT void ATTR_USED ATTR_NOINLINE
+IP_AGENT_EXPORT_FUNC void
 flush_trace_buffer (void)
 {
   /* GDBserver places breakpoint here.  */
@@ -861,10 +834,26 @@ struct wstep_state
 
 #endif
 
+EXTERN_C_PUSH
+
 /* The linked list of all tracepoints.  Marked explicitly as used as
    the in-process library doesn't use it for the fast tracepoints
    support.  */
-IP_AGENT_EXPORT struct tracepoint *tracepoints ATTR_USED;
+IP_AGENT_EXPORT_VAR struct tracepoint *tracepoints;
+
+/* The first tracepoint to exceed its pass count.  */
+
+IP_AGENT_EXPORT_VAR struct tracepoint *stopping_tracepoint;
+
+/* True if the trace buffer is full or otherwise no longer usable.  */
+
+IP_AGENT_EXPORT_VAR int trace_buffer_is_full;
+
+/* The first error that occurred during expression evaluation.  */
+
+IP_AGENT_EXPORT_VAR enum eval_result_type expr_eval_result = expr_eval_no_error;
+
+EXTERN_C_POP
 
 #ifndef IN_PROCESS_AGENT
 
@@ -872,19 +861,6 @@ IP_AGENT_EXPORT struct tracepoint *tracepoints ATTR_USED;
    linked in at the end.  */
 
 static struct tracepoint *last_tracepoint;
-#endif
-
-/* The first tracepoint to exceed its pass count.  */
-
-IP_AGENT_EXPORT struct tracepoint *stopping_tracepoint;
-
-/* True if the trace buffer is full or otherwise no longer usable.  */
-
-IP_AGENT_EXPORT int trace_buffer_is_full;
-
-static enum eval_result_type expr_eval_result = expr_eval_no_error;
-
-#ifndef IN_PROCESS_AGENT
 
 static const char *eval_result_names[] =
   {
@@ -902,7 +878,9 @@ static const char *eval_result_names[] =
 
 /* The tracepoint in which the error occurred.  */
 
-static struct tracepoint *error_tracepoint;
+EXTERN_C_PUSH
+IP_AGENT_EXPORT_VAR struct tracepoint *error_tracepoint;
+EXTERN_C_POP
 
 struct trace_state_variable
 {
@@ -936,7 +914,7 @@ struct trace_state_variable
 struct trace_state_variable *alloced_trace_state_variables;
 #endif
 
-IP_AGENT_EXPORT struct trace_state_variable *trace_state_variables;
+IP_AGENT_EXPORT_VAR struct trace_state_variable *trace_state_variables;
 
 /* The results of tracing go into a fixed-size space known as the
    "trace buffer".  Because usage follows a limited number of
@@ -1019,14 +997,18 @@ static int circular_trace_buffer;
 
 static LONGEST trace_buffer_size;
 
+EXTERN_C_PUSH
+
 /* Pointer to the block of memory that traceframes all go into.  */
 
-static unsigned char *trace_buffer_lo;
+IP_AGENT_EXPORT_VAR unsigned char *trace_buffer_lo;
 
 /* Pointer to the end of the trace buffer, more precisely to the byte
    after the end of the buffer.  */
 
-static unsigned char *trace_buffer_hi;
+IP_AGENT_EXPORT_VAR unsigned char *trace_buffer_hi;
+
+EXTERN_C_POP
 
 /* Control structure holding the read/write/etc. pointers into the
    trace buffer.  We need more than one of these to implement a
@@ -1180,8 +1162,8 @@ A GDBserver update of `trace_buffer_ctrl_curr' does:
 #define GDBSERVER_UPDATED_FLUSH_COUNT_BIT 0x80000000
 
 #ifdef IN_PROCESS_AGENT
-IP_AGENT_EXPORT struct trace_buffer_control trace_buffer_ctrl[3];
-IP_AGENT_EXPORT unsigned int trace_buffer_ctrl_curr;
+IP_AGENT_EXPORT_VAR struct trace_buffer_control trace_buffer_ctrl[3];
+IP_AGENT_EXPORT_VAR unsigned int trace_buffer_ctrl_curr;
 
 # define TRACE_BUFFER_CTRL_CURR \
   (trace_buffer_ctrl_curr & ~GDBSERVER_FLUSH_COUNT_MASK)
@@ -1226,8 +1208,8 @@ struct trace_buffer_control trace_buffer_ctrl[1];
    of complete traceframes present in the trace buffer.  The IP agent
    writes to the write count, GDBserver writes to read count.  */
 
-IP_AGENT_EXPORT unsigned int traceframe_write_count;
-IP_AGENT_EXPORT unsigned int traceframe_read_count;
+IP_AGENT_EXPORT_VAR unsigned int traceframe_write_count;
+IP_AGENT_EXPORT_VAR unsigned int traceframe_read_count;
 
 /* Convenience macro.  */
 
@@ -1237,7 +1219,7 @@ IP_AGENT_EXPORT unsigned int traceframe_read_count;
 /* The count of all traceframes created in the current run, including
    ones that were discarded to make room.  */
 
-IP_AGENT_EXPORT int traceframes_created;
+IP_AGENT_EXPORT_VAR int traceframes_created;
 
 #ifndef IN_PROCESS_AGENT
 
@@ -1267,7 +1249,7 @@ static struct readonly_region *readonly_regions;
 
 /* The global that controls tracing overall.  */
 
-IP_AGENT_EXPORT int tracing;
+IP_AGENT_EXPORT_VAR int tracing;
 
 #ifndef IN_PROCESS_AGENT
 
@@ -1524,7 +1506,7 @@ init_trace_buffer (LONGEST bufsize)
 
 #ifdef IN_PROCESS_AGENT
 
-IP_AGENT_EXPORT void ATTR_USED ATTR_NOINLINE
+IP_AGENT_EXPORT_FUNC void
 about_to_request_buffer_space (void)
 {
   /* GDBserver places breakpoint here while it goes about to flush
@@ -2127,7 +2109,7 @@ create_trace_state_variable (int num, int gdb)
   return tsv;
 }
 
-IP_AGENT_EXPORT LONGEST
+IP_AGENT_EXPORT_FUNC LONGEST
 get_trace_state_variable_value (int num)
 {
   struct trace_state_variable *tsv;
@@ -2153,7 +2135,7 @@ get_trace_state_variable_value (int num)
   return tsv->value;
 }
 
-IP_AGENT_EXPORT void
+IP_AGENT_EXPORT_FUNC void
 set_trace_state_variable_value (int num, LONGEST val)
 {
   struct trace_state_variable *tsv;
@@ -5797,13 +5779,15 @@ fast_tracepoint_collecting, returning continue-until-break at %s",
    NULL if it isn't locked.  Note that this lock *must* be set while
    executing any *function other than the jump pad.  See
    fast_tracepoint_collecting.  */
-static collecting_t * ATTR_USED collecting;
+EXTERN_C_PUSH
+IP_AGENT_EXPORT_VAR collecting_t *collecting;
+EXTERN_C_POP
 
 /* This routine, called from the jump pad (in asm) is designed to be
    called from the jump pads of fast tracepoints, thus it is on the
    critical path.  */
 
-IP_AGENT_EXPORT void ATTR_USED
+IP_AGENT_EXPORT_FUNC void
 gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
 {
   struct fast_tracepoint_ctx ctx;
@@ -6554,8 +6538,8 @@ upload_fast_traceframes (void)
 
 #ifdef IN_PROCESS_AGENT
 
-IP_AGENT_EXPORT int ust_loaded;
-IP_AGENT_EXPORT char cmd_buf[IPA_CMD_BUF_SIZE];
+IP_AGENT_EXPORT_VAR int ust_loaded;
+IP_AGENT_EXPORT_VAR char cmd_buf[IPA_CMD_BUF_SIZE];
 
 #ifdef HAVE_UST
 
@@ -6846,7 +6830,9 @@ run_inferior_command (char *cmd, int len)
 
 /* Thread ID of the helper thread.  GDBserver reads this to know which
    is the help thread.  This is an LWP id on Linux.  */
-int helper_thread_id;
+EXTERN_C_PUSH
+IP_AGENT_EXPORT_VAR int helper_thread_id;
+EXTERN_C_POP
 
 static int
 init_named_socket (const char *name)
@@ -7276,7 +7262,9 @@ gdb_agent_helper_thread (void *arg)
 #include <signal.h>
 #include <pthread.h>
 
-IP_AGENT_EXPORT int gdb_agent_capability = AGENT_CAPA_STATIC_TRACE;
+EXTERN_C_PUSH
+IP_AGENT_EXPORT_VAR int gdb_agent_capability = AGENT_CAPA_STATIC_TRACE;
+EXTERN_C_POP
 
 static void
 gdb_agent_init (void)
@@ -7314,12 +7302,12 @@ gdb_agent_init (void)
 #include <sys/mman.h>
 #include <fcntl.h>
 
-IP_AGENT_EXPORT char *gdb_tp_heap_buffer;
-IP_AGENT_EXPORT char *gdb_jump_pad_buffer;
-IP_AGENT_EXPORT char *gdb_jump_pad_buffer_end;
-IP_AGENT_EXPORT char *gdb_trampoline_buffer;
-IP_AGENT_EXPORT char *gdb_trampoline_buffer_end;
-IP_AGENT_EXPORT char *gdb_trampoline_buffer_error;
+IP_AGENT_EXPORT_VAR char *gdb_tp_heap_buffer;
+IP_AGENT_EXPORT_VAR char *gdb_jump_pad_buffer;
+IP_AGENT_EXPORT_VAR char *gdb_jump_pad_buffer_end;
+IP_AGENT_EXPORT_VAR char *gdb_trampoline_buffer;
+IP_AGENT_EXPORT_VAR char *gdb_trampoline_buffer_end;
+IP_AGENT_EXPORT_VAR char *gdb_trampoline_buffer_error;
 
 /* Record the result of getting buffer space for fast tracepoint
    trampolines.  Any error message is copied, since caller may not be

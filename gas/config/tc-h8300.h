@@ -27,7 +27,11 @@
 /* Fixup debug sections since we will never relax them.  */
 #define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_ALLOC)
 #ifdef OBJ_ELF
+#ifndef TE_LINUX
 #define TARGET_FORMAT "elf32-h8300"
+#else
+#define TARGET_FORMAT "elf32-h8300-linux"
+#endif
 #define LOCAL_LABEL_PREFIX '.'
 #define LOCAL_LABEL(NAME) (NAME[0] == '.' && NAME[1] == 'L')
 #define FAKE_LABEL_NAME ".L0\001"

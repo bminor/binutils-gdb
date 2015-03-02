@@ -631,6 +631,7 @@ extern const bfd_target frv_elf32_vec;
 extern const bfd_target frv_elf32_fdpic_vec;
 extern const bfd_target h8300_coff_vec;
 extern const bfd_target h8300_elf32_vec;
+extern const bfd_target h8300_elf32_linux_vec;
 extern const bfd_target h8500_coff_vec;
 extern const bfd_target hppa_elf32_vec;
 extern const bfd_target hppa_elf32_linux_vec;
@@ -1045,6 +1046,7 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&h8300_coff_vec,
 	&h8300_elf32_vec,
+	&h8300_elf32_linux_vec,
 	&h8500_coff_vec,
 
 	&hppa_elf32_vec,

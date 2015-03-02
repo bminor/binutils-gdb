@@ -31,14 +31,17 @@
 #include "bfd.h"
 #include "elf/external.h"
 #include "elf/internal.h"
+#include "elf32-avr.h"
 
 /* Index of the options in the options[] array.  */
 #define OPT_MEMUSAGE 0
+#define OPT_AVRPROP 1
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
   {
     { "mem-usage", 0 },
+    { "avr-prop",  0},
     { NULL, 0 }
   };
 
@@ -50,6 +53,7 @@ elf32_avr_help (FILE *stream)
   fprintf (stream, _("\
 For AVR ELF files:\n\
   mem-usage   Display memory usage\n\
+  avr-prop    Display contents of .avr.prop section\n\
 "));
 }
 
@@ -234,10 +238,60 @@ elf32_avr_dump_mem_usage (bfd *abfd)
 }
 
 static void
+elf32_avr_dump_avr_prop (bfd *abfd)
+{
+  struct avr_property_record_list *r_list;
+  unsigned int i;
+
+  r_list = avr_elf32_load_property_records (abfd);
+  if (r_list == NULL)
+    return;
+
+  printf ("\nContents of `%s' section:\n\n", r_list->section->name);
+
+  printf ("  Version: %d\n", r_list->version);
+  printf ("  Flags:   %#x\n\n", r_list->flags);
+
+  for (i = 0; i < r_list->record_count; ++i)
+    {
+      printf ("   %d %s @ %s + %#08lx (%#08lx)\n",
+              i,
+              avr_elf32_property_record_name (&r_list->records [i]),
+              r_list->records [i].section->name,
+              r_list->records [i].offset,
+              (bfd_get_section_vma (abfd, r_list->records [i].section)
+               + r_list->records [i].offset));
+      switch (r_list->records [i].type)
+        {
+        case RECORD_ORG:
+          /* Nothing else to print.  */
+          break;
+        case RECORD_ORG_AND_FILL:
+          printf ("     Fill: %#08lx\n",
+                  r_list->records [i].data.org.fill);
+          break;
+        case RECORD_ALIGN:
+          printf ("    Align: %#08lx\n",
+                  r_list->records [i].data.align.bytes);
+          break;
+        case RECORD_ALIGN_AND_FILL:
+          printf ("    Align: %#08lx, Fill: %#08lx\n",
+                  r_list->records [i].data.align.bytes,
+                  r_list->records [i].data.org.fill);
+          break;
+        }
+    }
+
+  free (r_list);
+}
+
+static void
 elf32_avr_dump (bfd *abfd)
 {
   if (options[OPT_MEMUSAGE].selected)
     elf32_avr_dump_mem_usage (abfd);
+  if (options[OPT_AVRPROP].selected)
+    elf32_avr_dump_avr_prop (abfd);
 }
 
 const struct objdump_private_desc objdump_private_desc_elf32_avr =

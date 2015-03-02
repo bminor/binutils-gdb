@@ -28,12 +28,10 @@
 
 static const char * get_insn_name (sim_cpu *, int);
 
-/* For compatibility */
+/* For compatibility.  */
 SIM_DESC simulator;
 
-
-
-/* v850 interrupt model */
+/* V850 interrupt model.  */
 
 enum interrupt_type
 {
@@ -48,7 +46,8 @@ enum interrupt_type
   num_int_types
 };
 
-const char *interrupt_names[] = {
+const char *interrupt_names[] =
+{
   "reset",
   "nmi",
   "intov1",
@@ -61,9 +60,7 @@ const char *interrupt_names[] = {
 };
 
 static void
-do_interrupt (sd, data)
-     SIM_DESC sd;
-     void *data;
+do_interrupt (SIM_DESC sd, void *data)
 {
   const char **interrupt_name = (const char**)data;
   enum interrupt_type inttype;
@@ -189,11 +186,10 @@ uint32 OP[4];
 
 
 SIM_DESC
-sim_open (kind, cb, abfd, argv)
-     SIM_OPEN_KIND kind;
-     host_callback *cb;
-     struct bfd *abfd;
-     char **argv;
+sim_open (SIM_OPEN_KIND    kind,
+	  host_callback *  cb,
+	  struct bfd *     abfd,
+	  char **          argv)
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
   int mach;
@@ -292,19 +288,16 @@ sim_open (kind, cb, abfd, argv)
 
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
   sim_module_uninstall (sd);
 }
 
 SIM_RC
-sim_create_inferior (sd, prog_bfd, argv, env)
-     SIM_DESC sd;
-     struct bfd *prog_bfd;
-     char **argv;
-     char **env;
+sim_create_inferior (SIM_DESC      sd,
+		     struct bfd *  prog_bfd,
+		     char **       argv,
+		     char **       env)
 {
   memset (&State, 0, sizeof (State));
   if (prog_bfd != NULL)
@@ -313,23 +306,21 @@ sim_create_inferior (sd, prog_bfd, argv, env)
 }
 
 int
-sim_fetch_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_fetch_register (SIM_DESC         sd,
+		    int              rn,
+		    unsigned char *  memory,
+		    int              length)
 {
   *(unsigned32*)memory = H2T_4 (State.regs[rn]);
   return -1;
 }
  
 int
-sim_store_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_store_register (SIM_DESC        sd,
+		    int             rn,
+		    unsigned char * memory,
+		    int             length)
 {
-  State.regs[rn] = T2H_4 (*(unsigned32*)memory);
+  State.regs[rn] = T2H_4 (*(unsigned32 *) memory);
   return length;
 }

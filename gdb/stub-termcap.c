@@ -1,4 +1,4 @@
-/* Win32 termcap emulation.
+/* A very minimal do-nothing termcap emulation stub.
 
    Copyright (C) 2005-2015 Free Software Foundation, Inc.
 

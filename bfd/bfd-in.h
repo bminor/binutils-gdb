@@ -988,3 +988,10 @@ extern void bfd_elf32_ia64_after_parse
 
 extern void bfd_elf64_ia64_after_parse
   (int);
+
+/* V850 Note manipulation routines.  */
+extern bfd_boolean v850_elf_create_sections
+  (struct bfd_link_info *);
+
+extern bfd_boolean v850_elf_set_note
+  (bfd *, unsigned int, unsigned int);

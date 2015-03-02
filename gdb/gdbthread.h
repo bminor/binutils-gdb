@@ -261,7 +261,7 @@ struct thread_info
   struct frame_id initiating_frame;
 
   /* Private data used by the target vector implementation.  */
-  struct private_thread_info *private;
+  struct private_thread_info *priv;
 
   /* Function that is called to free PRIVATE.  If this is NULL, then
      xfree will be called on PRIVATE.  */

@@ -6125,10 +6125,18 @@ lang_set_flags (lang_memory_region_type *ptr, const char *flags, int invert)
   flagword *ptr_flags;
 
   ptr_flags = invert ? &ptr->not_flags : &ptr->flags;
+
   while (*flags)
     {
       switch (*flags)
 	{
+	  /* PR 17900: An exclamation mark in the attributes reverses
+	     the sense of any of the attributes that follow.  */
+	case '!':
+	  invert = ! invert;
+	  ptr_flags = invert ? &ptr->not_flags : &ptr->flags;
+	  break;
+
 	case 'A': case 'a':
 	  *ptr_flags |= SEC_ALLOC;
 	  break;
@@ -6151,7 +6159,7 @@ lang_set_flags (lang_memory_region_type *ptr, const char *flags, int invert)
 	  break;
 
 	default:
-	  einfo (_("%P%F: invalid syntax in flags\n"));
+	  einfo (_("%P%F: invalid character %c (%d) in flags\n"), * flags, * flags);
 	  break;
 	}
       flags++;

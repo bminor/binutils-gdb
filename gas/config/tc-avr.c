@@ -26,6 +26,14 @@
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 #include "elf/avr.h"
+#include "elf32-avr.h"
+
+/* For building a linked list of AVR_PROPERTY_RECORD structures.  */
+struct avr_property_record_link
+{
+  struct avr_property_record record;
+  struct avr_property_record_link *next;
+};
 
 struct avr_opcodes_s
 {
@@ -1863,4 +1871,333 @@ avr_elf_final_processing (void)
 {
   if (linkrelax)
     elf_elfheader (stdoutput)->e_flags |= EF_AVR_LINKRELAX_PREPARED;
+}
+
+/* Write out the header of a .avr.prop section into the area pointed to by
+   DATA.  The RECORD_COUNT will be placed in the header as the number of
+   records that are to follow.
+   The area DATA must be big enough the receive the header, which is
+   AVR_PROPERTY_SECTION_HEADER_SIZE bytes long.  */
+
+static char *
+avr_output_property_section_header (char *data,
+                                    unsigned int record_count)
+{
+  char *orig_data = data;
+
+  md_number_to_chars (data, AVR_PROPERTY_RECORDS_VERSION, 1);
+  data++;
+  /* There's space for a single byte flags field, but right now there's
+     nothing to go in here, so just set the value to zero.  */
+  md_number_to_chars (data, 0, 1);
+  data++;
+  md_number_to_chars (data, record_count, 2);
+  data+=2;
+
+  gas_assert (data - orig_data == AVR_PROPERTY_SECTION_HEADER_SIZE);
+
+  return data;
+}
+
+/* Return the number of bytes required to store RECORD into the .avr.prop
+   section. The size returned is the compressed size that corresponds to
+   how the record will be written out in AVR_OUTPUT_PROPERTY_RECORD.  */
+
+static int
+avr_record_size (const struct avr_property_record *record)
+{
+  /* The first 5 bytes are a 4-byte address, followed by a 1-byte type
+     identifier.  */
+  int size = 5;
+
+  switch (record->type)
+    {
+    case RECORD_ORG:
+      size += 0; /* No extra information.  */
+      break;
+
+    case RECORD_ORG_AND_FILL:
+      size += 4; /* A 4-byte fill value.  */
+      break;
+
+    case RECORD_ALIGN:
+      size += 4; /* A 4-byte alignment value.  */
+      break;
+
+    case RECORD_ALIGN_AND_FILL:
+      size += 8; /* A 4-byte alignment, and 4-byte fill value.  */
+      break;
+
+    default:
+      as_fatal (_("unknown record type %d (in %s)"),
+                record->type, __PRETTY_FUNCTION__);
+    }
+
+  return size;
+}
+
+/* Write out RECORD.  FRAG_BASE points to the start of the data area setup
+   to hold all of the .avr.prop content, FRAG_PTR points to the next
+   writable location.  The data area must be big enough to hold all of the
+   records.  The size of the data written out for this RECORD must match
+   the size from AVR_RECORD_SIZE.  */
+
+static char *
+avr_output_property_record (char * const frag_base, char *frag_ptr,
+                            const struct avr_property_record *record)
+{
+  fixS *fix;
+  int where;
+  char *init_frag_ptr = frag_ptr;
+
+  where = frag_ptr - frag_base;
+  fix = fix_new (frag_now, where, 4,
+                 section_symbol (record->section),
+                 record->offset, FALSE, BFD_RELOC_32);
+  fix->fx_file = "<internal>";
+  fix->fx_line = 0;
+  frag_ptr += 4;
+
+  md_number_to_chars (frag_ptr, (bfd_byte) record->type, 1);
+  frag_ptr += 1;
+
+  /* Write out the rest of the data.  */
+  switch (record->type)
+    {
+    case RECORD_ORG:
+      break;
+
+    case RECORD_ORG_AND_FILL:
+      md_number_to_chars (frag_ptr, record->data.org.fill, 4);
+      frag_ptr += 4;
+      break;
+
+    case RECORD_ALIGN:
+      md_number_to_chars (frag_ptr, record->data.align.bytes, 4);
+      frag_ptr += 4;
+      break;
+
+    case RECORD_ALIGN_AND_FILL:
+      md_number_to_chars (frag_ptr, record->data.align.bytes, 4);
+      md_number_to_chars (frag_ptr, record->data.align.fill, 4);
+      frag_ptr += 8;
+      break;
+
+    default:
+      as_fatal (_("unknown record type %d (in %s)"),
+                record->type, __PRETTY_FUNCTION__);
+    }
+
+  gas_assert (frag_ptr - init_frag_ptr == avr_record_size (record));
+
+  return frag_ptr;
+}
+
+/* Create the section to hold the AVR property information.  Return the
+   section.  */
+
+static asection *
+avr_create_property_section (void)
+{
+  asection *sec;
+  flagword flags = (SEC_RELOC | SEC_HAS_CONTENTS | SEC_READONLY);
+  const char *section_name = AVR_PROPERTY_RECORD_SECTION_NAME;
+
+  sec = bfd_make_section (stdoutput, section_name);
+  if (sec == NULL)
+    as_fatal (_("Failed to create property section `%s'\n"), section_name);
+  bfd_set_section_flags (stdoutput, sec, flags);
+  sec->output_section = sec;
+  return sec;
+}
+
+/* This hook is called when alignment is performed, and allows us to
+   capture the details of both .org and .align directives.  */
+
+void
+avr_handle_align (fragS *fragP)
+{
+  if (linkrelax)
+    {
+      /* Ignore alignment requests at FR_ADDRESS 0, these are at the very
+         start of a section, and will be handled by the standard section
+         alignment mechanism.  */
+      if ((fragP->fr_type == rs_align
+           || fragP->fr_type == rs_align_code)
+          && fragP->fr_address > 0
+          && fragP->fr_offset > 0)
+        {
+          fragP->tc_frag_data.is_align = TRUE;
+          fragP->tc_frag_data.alignment = fragP->fr_offset;
+        }
+
+      if (fragP->fr_type == rs_org && fragP->fr_offset > 0)
+        {
+          char *p = fragP->fr_literal + fragP->fr_fix;
+
+          fragP->tc_frag_data.is_org = TRUE;
+          fragP->tc_frag_data.fill = *p;
+          fragP->tc_frag_data.has_fill = (fragP->tc_frag_data.fill != 0);
+        }
+    }
+}
+
+/* Return TRUE if this section is not one for which we need to record
+   information in the avr property section.  */
+
+static bfd_boolean
+exclude_section_from_property_tables (segT sec)
+{
+  /* Only generate property information for sections on which linker
+     relaxation could be performed.  */
+  return !relaxable_section (sec);
+}
+
+/* Create a property record for fragment FRAGP from section SEC and place
+   it into an AVR_PROPERTY_RECORD_LINK structure, which can then formed
+   into a linked list by the caller.  */
+
+static struct avr_property_record_link *
+create_record_for_frag (segT sec, fragS *fragP)
+{
+  struct avr_property_record_link *link;
+
+  link = xmalloc (sizeof (struct avr_property_record_link));
+  memset (link, 0, sizeof (*link));
+
+  if (fragP->tc_frag_data.is_org)
+    {
+      link->record.offset = fragP->fr_next->fr_address;
+      link->record.section = sec;
+
+      if (fragP->tc_frag_data.has_fill)
+        {
+          link->record.data.org.fill = fragP->tc_frag_data.fill;
+          link->record.type = RECORD_ORG_AND_FILL;
+        }
+      else
+        link->record.type = RECORD_ORG;
+    }
+  else
+    {
+      link->record.offset = fragP->fr_address;
+      link->record.section = sec;
+
+      gas_assert (fragP->tc_frag_data.is_align);
+      if (fragP->tc_frag_data.has_fill)
+        {
+          link->record.data.align.fill = fragP->tc_frag_data.fill;
+          link->record.type = RECORD_ALIGN_AND_FILL;
+        }
+      else
+        link->record.type = RECORD_ALIGN;
+      link->record.data.align.bytes = fragP->tc_frag_data.alignment;
+    }
+
+  return link;
+}
+
+/* Build a list of AVR_PROPERTY_RECORD_LINK structures for section SEC, and
+   merged them onto the list pointed to by NEXT_PTR.  Return a pointer to
+   the last list item created.  */
+
+static struct avr_property_record_link **
+append_records_for_section (segT sec,
+                            struct avr_property_record_link **next_ptr)
+{
+  segment_info_type *seginfo = seg_info (sec);
+  fragS *fragP;
+
+  if (seginfo && seginfo->frchainP)
+    {
+      for (fragP = seginfo->frchainP->frch_root;
+           fragP;
+           fragP = fragP->fr_next)
+	{
+          if (fragP->tc_frag_data.is_align
+              || fragP->tc_frag_data.is_org)
+            {
+              /* Create a single new entry.  */
+              struct avr_property_record_link *new_link
+                = create_record_for_frag (sec, fragP);
+
+              *next_ptr = new_link;
+              next_ptr = &new_link->next;
+            }
+	}
+    }
+
+  return next_ptr;
+}
+
+/* Create the AVR property section and fill it with records of .org and
+   .align directives that were used.  The section is only created if it
+   will actually have any content.  */
+
+static void
+avr_create_and_fill_property_section (void)
+{
+  segT *seclist;
+  asection *prop_sec;
+  struct avr_property_record_link *r_list, **next_ptr;
+  char *frag_ptr, *frag_base;
+  bfd_size_type sec_size;
+  struct avr_property_record_link *rec;
+  unsigned int record_count;
+
+  /* First walk over all sections.  For sections on which linker
+     relaxation could be applied, extend the record list.  The record list
+     holds information that the linker will need to know.  */
+
+  prop_sec = NULL;
+  r_list = NULL;
+  next_ptr = &r_list;
+  for (seclist = &stdoutput->sections;
+       seclist && *seclist;
+       seclist = &(*seclist)->next)
+    {
+      segT sec = *seclist;
+
+      if (exclude_section_from_property_tables (sec))
+	continue;
+
+      next_ptr = append_records_for_section (sec, next_ptr);
+    }
+
+  /* Create property section and ensure the size is correct.  We've already
+     passed the point where gas could size this for us.  */
+  sec_size = AVR_PROPERTY_SECTION_HEADER_SIZE;
+  record_count = 0;
+  for (rec = r_list; rec != NULL; rec = rec->next)
+    {
+      record_count++;
+      sec_size += avr_record_size (&rec->record);
+    }
+
+  if (record_count == 0)
+    return;
+
+  prop_sec = avr_create_property_section ();
+  bfd_set_section_size (stdoutput, prop_sec, sec_size);
+
+  subseg_set (prop_sec, 0);
+  frag_base = frag_more (sec_size);
+
+  frag_ptr =
+    avr_output_property_section_header (frag_base, record_count);
+
+  for (rec = r_list; rec != NULL; rec = rec->next)
+    frag_ptr = avr_output_property_record (frag_base, frag_ptr, &rec->record);
+
+  frag_wane (frag_now);
+  frag_new (0);
+  frag_wane (frag_now);
+}
+
+/* We're using this hook to build up the AVR property section.  It's called
+   late in the assembly process which suits our needs.  */
+void
+avr_post_relax_hook (void)
+{
+  avr_create_and_fill_property_section ();
 }

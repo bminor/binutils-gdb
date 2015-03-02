@@ -1,3 +1,108 @@
+2015-02-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (update_sections): New list.
+	(command_line_switch): Add OPTION_UPDATE_SECTION.
+	(copy_options): Add update-section.
+	(copy_usage): Document new option.
+	(is_update_section): New function.
+	(is_strip_section_1): Add check for attempt to update and remove
+	the same section.
+	(copy_object): Update size and content of requested sections.
+	(skip_section): Don't copy for updated sections.
+	(copy_main): Handle --update-section.
+	* doc/binutils.texi (objcopy): Add description of --update-section
+	option.
+	* NEWS: Mention --update-section option.
+
+2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffgrok.c (do_type): Check for an out of range tag index.
+	Check for integer overflow computing array dimension.
+	(do_define): Likewise.
+
+2015-02-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (init_section_add): Rename optarg to arg in order to
+	avoid shadowing a global variable.
+
+2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* resrc.c (write_rc_messagetable): Tighten check for invalid
+	message lengths.
+
+	* dwarf.c (display_debug_loc): Pacify the undefined behaviour
+	sanitizer by simplifying address difference calculation.
+	(struct Frame_Chunk): Change type of cfa_offset to dwarf_vma in
+	order to avoid arithmetic overflows.
+	(frame_display_row): Cast cfa_offset before printing it.
+	(display_debug_frames): Likewise.
+	Check for an unexpected segment size.
+	Chnage type of 'l' local to dwarf_vma and cast it back to an int
+	when printing.
+	(process_cu_tu_index): Tighten check for an invalid ncols value.
+	* readelf.c (process_corefile_note_segment): Check for
+	inote.descdata extending beyond the end of the section.
+	(process_v850_notes): Likewise.
+
+2015-02-26  Terry Guo  <terry.guo@arm.com>
+
+	* readelf.c (arm_attr_tag_ABI_HardFP_use): Update how we
+	display it.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (init_section_add): New function.
+	(section_add_load_file): New function.
+	(copy_main): Make use of new functions.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* od-elf32_avr.c: Add elf32-avr.h include.
+	(OPT_AVRPROP): Define.
+	(options[]): Add 'avr-prop' entry.
+	(elf32_avr_help): Add avr-prop help text.
+	(elf32_avr_dump_avr_prop): New function.
+	(elf32_avr_dump): Add check for avr-prop.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Remove deprecated V850 machine
+	flags.
+	(get_v850_section_type_name): New function.  Handles V850 special
+	sections.
+	(get_section_type_name): Add support for V850.
+	(get_v850_elf_note_type): New function.  Returns the name of a
+	V850 note.
+	(print_v850_note): New function.  Prints a V850 note.
+	(process_v850_notes): New function.  Prints V850 notes.
+	(process_note_sections): Add support for V850.
+
+2015-02-24  Mike Frysinger  <vapier@gentoo.org>
+
+	PR binutils/17531
+	* readelf.c (process_symbol_table): Declare chained.  Increment it
+	in every loop.  Abort when chained is larger than nchains.  Move
+	error check outside of chain loop.
+
+2015-02-24  Dmitry Antipov  <dantipov@nvidia.com>
+
+	* readelf.c (find_symbol_for_address): Use a binary search to
+	speed up symbol location.  Skip check for function symbol type.
+	(*_unw_aux_info): Add funtab and nfuns fields contains a sorted
+	list of function symbols.
+	(dump_ia64_unwind): Initialise the funtab and nfuns fields and
+	pass them to find_symbol_for_address.
+	(dump_hppa_unwind): Likewise.
+	(arm_print_vma_and_name): Pass funtab to find_symbol_for_address.
+	(dump_arm_unwind): Initialise the funtab and nfuns fields.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (dump_section): Extend the warning message displayed
+	when a section cannot be loaded.
+
 2015-02-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* readelf.c (process_program_headers): Add newline to warning

@@ -84,3 +84,6 @@ extern long v850_pcrel_from_section (struct fix *, asection *);
    processed so that the resulting value can be inserted correctly.  */
 #define TC_FIX_TYPE             void *
 #define TC_INIT_FIX_DATA(fixP)  (fixP)->tc_fix_data = NULL
+
+#define md_end v850_md_end
+extern void    v850_md_end (void);

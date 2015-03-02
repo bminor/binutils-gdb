@@ -114,3 +114,5 @@
 [^:]*:123: Warning: unpredictable transfer with writeback -- `str x1,\[x1\],#8'
 [^:]*:124: Warning: unpredictable transfer with writeback -- `stp x0,x1,\[x0,#16\]!'
 [^:]*:125: Warning: unpredictable transfer with writeback -- `ldp x0,x1,\[x1\],#16'
+[^:]*:126: Error: this relocation modifier is not allowed on this instruction at operand 2 -- `adr x2,:got:s1'
+[^:]*:127: Error: this relocation modifier is not allowed on this instruction at operand 2 -- `ldr x0,\[x0,:got:s1\]'

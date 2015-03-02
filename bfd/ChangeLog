@@ -1,3 +1,226 @@
+2015-02-28  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_tls_setup): Set no_tls_get_addr_opt if
+	not PLT_NEW.
+
+2015-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (need_convert_mov_to_lea): New.
+	(elf_i386_check_relocs): Set need_convert_mov_to_lea if needed.
+	(elf_i386_convert_mov_to_lea): Return TRUE if
+	need_convert_mov_to_lea is unset.
+	* elf64-x86-64.c (need_convert_mov_to_lea): New.
+	(elf_x86_64_check_relocs): Set need_convert_mov_to_lea if needed.
+	(elf_x86_64_convert_mov_to_lea): Return TRUE if
+	need_convert_mov_to_lea is unset.
+
+2015-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17910
+	* coffgen.c (_bfd_coff_internal_syment_name): Only check for
+	string length overflow when the string table length is actually
+	set.
+
+2015-02-27  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* bfd/bfd-in2.h: Regenerate.
+	* bfd/libbfd.h: Regenerate.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Fix
+	TLSDESC_LD_PREL19 field width and masks.
+	(aarch64_tls_transition_without_check)
+	(aarch64_reloc_got_type, elfNN_aarch64_final_link_relocate)
+	(elfNN_aarch64_tls_relax, elfNN_aarch64_relocate_section)
+	(elfNN_aarch64_gc_sweep_hook, elfNN_aarch64_check_relocs): Handle
+	BFD_RELOC_AARCH64_TLSDESC_LD_PREL19.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend)
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (IS_AARCH64_TLSDESC_RELOC): Reorder R_TYPE
+	tests.
+	(aarch64_tls_transition_without_check)
+	(aarch64_reloc_got_type, elfNN_aarch64_final_link_relocate)
+	(elfNN_aarch64_tls_relax, elfNN_aarch64_relocate_section)
+	(elfNN_aarch64_gc_sweep_hook, elfNN_aarch64_check_relocs): Handle
+	BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend)
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+	* reloc.c (BFD_RELOC_AARCH64_TLSGD_ADR_PREL21): Define.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC)
+	(elfNN_aarch64_howto_table, aarch64_tls_transition_without_check)
+	(aarch64_reloc_got_type, elfNN_aarch64_final_link_relocate)
+	(elfNN_aarch64_tls_relax, elfNN_aarch64_relocate_section)
+	(elfNN_aarch64_gc_sweep_hook, elfNN_aarch64_check_relocs): Handle
+	BFD_RELOC_AARCH64_TLSGD_ADR_PREL21.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend)
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+	* reloc.c (BFD_RELOC_AARCH64_TLSGD_ADR_PREL21): Define.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c: (TLSIE_LD_GOTTREL_PREL19): Fix HOWTO bit field width.
+	(aarch64_tls_transition_without_check, aarch64_reloc_got_type)
+	(elfNN_aarch64_final_link_relocate, elfNN_aarch64_tls_relax)
+	(elfNN_aarch64_relocate_section, elfNN_aarch64_gc_sweep_hook)
+	(elfNN_aarch64_check_relocs): Handle
+	BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19.
+
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend)
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c: (TLSDESC_CALL): Fix HOWTO bit field width.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (TLSLE_MOVW_TPREL_G2)
+	(TLSLE_MOVW_TPREL_G1, TLSLE_MOVW_TPREL_G1_NC)
+	(TLSLE_MOVW_TPREL_G0, TLSLE_MOVW_TPREL_G0_NC): Fix bit field
+	width.
+
+2015-02-26  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c: (TLSIE_MOVW_GOTTPREL_G0_NC): Fix HOWTO bit
+	field width.
+
+2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_compute_section_file_positions): Report
+	negative page sizes.
+	* elf.c (elf_fake_sections): Handle excessive alignmment powers.
+	(assign_file_positions_for_non_load_sections): Replace assertion
+	with an error message.
+	(rewrite_elf_program_header): Handle excessive segment
+	alignments.
+	* mach-o.c (bfd_mach_o_read_section_32): Likewise.
+	(bfd_mach_o_read_section_64): Likewise.
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Use %B to
+	print a bfd name, not %A.
+
+2015-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (plt_stub_size, build_plt_stub): Don't build
+	thread-safe stubs for iplt.
+	(build_tls_get_addr_stub): Restore r2 immediately after call.
+
+2015-02-26  Terry Guo  <terry.guo@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Update how we
+	merge Tag_ABI_HardFP_use.
+
+2015-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Heed -z nocopyreloc.
+	Use text relocs rather than giving an error on trying to use
+	.dynbss for protected shared lib vars.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-avr.c (struct elf_avr_section_data): New structure.
+	(struct avr_relax_info): New structure.
+	(elf_avr_new_section_hook): New function.
+	(struct elf_avr_section_data): Add relax_info.
+	(get_avr_relax_info): New function.
+	(init_avr_relax_info): New function.
+	(elf32_avr_relax_delete_bytes): Find next property record before
+	deleting bytes.  When deleting don't move bytes beyond the next
+	property record.
+	(avr_elf32_assign_records_to_section): New function.
+	(avr_property_record_compare): New function.
+	(avr_load_all_property_sections): New function.
+	(elf32_avr_relax_section): Load property data.  After relaxing the
+	section, move any .align directives that have enough deleted bytes
+	before them.
+	(bfd_elf32_new_section_hook): Define.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-avr.h (struct avr_property_header): New strucure.
+	(avr_elf32_load_property_records): Declare.
+	(avr_elf32_property_record_name): Declare.
+	* elf32-avr.c: Add bfd_stdint.h include.
+	(retrieve_local_syms): New function.
+	(get_elf_r_symndx_section): New function.
+	(get_elf_r_symndx_offset): New function.
+	(internal_reloc_compare): New function.
+	(struct avr_find_section_data): New structure.
+	(avr_is_section_for_address): New function.
+	(avr_find_section_for_address): New function.
+	(avr_elf32_load_records_from_section): New function.
+	(avr_elf32_load_property_records): New function.
+	(avr_elf32_property_record_name): New function.
+
+2015-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-avr.h (AVR_PROPERTY_RECORD_SECTION_NAME): Define.
+	(AVR_PROPERTY_RECORDS_VERSION): Define.
+	(AVR_PROPERTY_SECTION_HEADER_SIZE): Define.
+	(struct avr_property_record): New structure.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (v850_set_note): New function.  Creates a Renesas
+	style note entry.
+	(v850_elf_make_note_section): New function.  Creates a note
+	section.
+	(v850_elf_create_sections): New function.  Create a note section
+	if one is not already present.
+	(v850_elf_set_note): New function.  Adds a note to a bfd.
+	(v850_elf_copy_private_bfd_data): New function.  Copies V850
+	notes.
+	(v850_elf_merge_notes): New function.  Merges V850 notes.
+	(print_v850_note): New function.  Displays a V850 note.
+	(v850_elf_print_notes): New function. Displays all notes attached
+	to a bfd.
+	(v850_elf_merge_private_bfd_data): Call v850_elf_merge_notes.
+	(v850_elf_print_private_bfd_data): Call v850_elf_print_notes.
+	(v850_elf_fake_sections): Set the type of the V850 note section.
+	* bfd-in.h (v850_elf_create_sections): Add prototype.
+	(v850_elf_set_note): Add prototype.
+	* bfd-in2.h: Regenerate.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (AC_CHECK_HEADERS): Add wctype.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* peXXigen.c: Include wctype.h if HAVE_WCTYPE_H is defined.
+	(u16_mbtowc): Use wint_t types if HAVE_WCTYPE_H is defined.
+	(rsrc_cmp): Use towlower instead of wcsncasecmp if HAVE_WCTYPE_H
+	is defined.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* pdp11.c (set_section_contents): Pad the .text and .data sections
+	to their aligned sizes.
+
+2015-02-23  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* config.bfd: Add h8300-*-linux.
+	* configure.ac: Add h8300_elf32_linux_vec.
+	* configure: Regenerate.
+	* elf32-h8300.c: Likewise.
+	* targets.c(_bfd_target_vector): Likewise.
+
+2015-02-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 17914
+	* cpu-w65.c: Correct typos in license notice.
+
+	PR 17940
+	* elf32-msp430.c (msp430_elf_relax_delete_bytes): Adjust debug
+	symbols at end of sections.  Adjust function sizes.
+
 2015-02-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* elf-bfd.h (elfcore_write_s390_vxrs_low): Add prototype.

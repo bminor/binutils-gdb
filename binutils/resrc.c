@@ -2923,6 +2923,7 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
 {
   int has_error = 0;
   const struct bin_messagetable *mt;
+
   fprintf (e, "BEGIN\n");
 
   write_rc_datablock (e, length, data, 0, 0, 0);
@@ -2952,6 +2953,7 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
 	    low = windres_get_32 (&wrtarget, mt->items[i].lowid, 4);
 	    high = windres_get_32 (&wrtarget, mt->items[i].highid, 4);
 	    offset = windres_get_32 (&wrtarget, mt->items[i].offset, 4);
+
 	    while (low <= high)
 	      {
 		rc_uint_type elen, flags;
@@ -2971,16 +2973,20 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
 		wr_printcomment (e, "MessageId = 0x%x", low);
 		wr_printcomment (e, "");
 
-		/* PR 17512: file: 5c3232dc.  */
-		if (elen)
+		if ((flags & MESSAGE_RESOURCE_UNICODE) == MESSAGE_RESOURCE_UNICODE)
 		  {
-		    if ((flags & MESSAGE_RESOURCE_UNICODE) == MESSAGE_RESOURCE_UNICODE)
+		    /* PR 17512: file: 5c3232dc.  */
+		    if (elen > BIN_MESSAGETABLE_ITEM_SIZE * 2)
 		      unicode_print (e, (const unichar *) mti->data,
 				     (elen - BIN_MESSAGETABLE_ITEM_SIZE) / 2);
-		    else
+		  }
+		else
+		  {
+		    if (elen > BIN_MESSAGETABLE_ITEM_SIZE)
 		      ascii_print (e, (const char *) mti->data,
 				   (elen - BIN_MESSAGETABLE_ITEM_SIZE));
 		  }
+
 		wr_printcomment (e,"");
 		++low;
 		offset += elen;
@@ -3005,7 +3011,7 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
     fprintf (e, "BEGIN\n");
 
   if (show_comment == -1)
-	  {
+    {
       if (test_rc_datablock_text(length, data))
 	{
 	  rc_uint_type i, c;
@@ -3018,7 +3024,7 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 		;
 	      if (i < length && data[i] == '\n')
 		++i, ++c;
-	      ascii_print (e, (const char *) &data[i - c], c);
+	      ascii_print(e, (const char *) &data[i - c], c);
 	    fprintf (e, "\"");
 	      if (i < length)
 		fprintf (e, "\n");

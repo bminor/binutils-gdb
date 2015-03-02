@@ -126,7 +126,7 @@ cp_add_using_directive (const char *dest,
                         struct obstack *obstack)
 {
   struct using_direct *current;
-  struct using_direct *new;
+  struct using_direct *newobj;
 
   /* Has it already been added?  */
 
@@ -163,39 +163,39 @@ cp_add_using_directive (const char *dest,
       return;
     }
 
-  new = obstack_alloc (obstack, (sizeof (*new)
+  newobj = obstack_alloc (obstack, (sizeof (*newobj)
 				 + (VEC_length (const_char_ptr, excludes)
-				    * sizeof (*new->excludes))));
-  memset (new, 0, sizeof (*new));
+				    * sizeof (*newobj->excludes))));
+  memset (newobj, 0, sizeof (*newobj));
 
   if (copy_names)
     {
-      new->import_src = obstack_copy0 (obstack, src, strlen (src));
-      new->import_dest = obstack_copy0 (obstack, dest, strlen (dest));
+      newobj->import_src = obstack_copy0 (obstack, src, strlen (src));
+      newobj->import_dest = obstack_copy0 (obstack, dest, strlen (dest));
     }
   else
     {
-      new->import_src = src;
-      new->import_dest = dest;
+      newobj->import_src = src;
+      newobj->import_dest = dest;
     }
 
   if (alias != NULL && copy_names)
-    new->alias = obstack_copy0 (obstack, alias, strlen (alias));
+    newobj->alias = obstack_copy0 (obstack, alias, strlen (alias));
   else
-    new->alias = alias;
+    newobj->alias = alias;
 
   if (declaration != NULL && copy_names)
-    new->declaration = obstack_copy0 (obstack,
+    newobj->declaration = obstack_copy0 (obstack,
 				      declaration, strlen (declaration));
   else
-    new->declaration = declaration;
+    newobj->declaration = declaration;
 
-  memcpy (new->excludes, VEC_address (const_char_ptr, excludes),
-	  VEC_length (const_char_ptr, excludes) * sizeof (*new->excludes));
-  new->excludes[VEC_length (const_char_ptr, excludes)] = NULL;
+  memcpy (newobj->excludes, VEC_address (const_char_ptr, excludes),
+	  VEC_length (const_char_ptr, excludes) * sizeof (*newobj->excludes));
+  newobj->excludes[VEC_length (const_char_ptr, excludes)] = NULL;
 
-  new->next = using_directives;
-  using_directives = new;
+  newobj->next = using_directives;
+  using_directives = newobj;
 }
 
 /* Test whether or not NAMESPACE looks like it mentions an anonymous
@@ -293,14 +293,14 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 
   if (search)
     {
-      struct symbol *this;
+      struct symbol *lang_this;
       struct type *type;
 
-      this = lookup_language_this (language_def (language_cplus), block);
-      if (this == NULL)
+      lang_this = lookup_language_this (language_def (language_cplus), block);
+      if (lang_this == NULL)
 	return NULL;
 
-      type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (this)));
+      type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this)));
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.
 	 This can happen for lambda functions compiled with clang++,
 	 which outputs no name for the container class.  */
@@ -384,7 +384,7 @@ cp_search_static_and_baseclasses (const char *name,
    "this" if we can compute it.  */
 
 static struct symbol *
-cp_lookup_symbol_in_namespace (const char *namespace, const char *name,
+cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
 			       const struct block *block,
 			       const domain_enum domain, int search)
 {
@@ -393,11 +393,11 @@ cp_lookup_symbol_in_namespace (const char *namespace, const char *name,
   unsigned int prefix_len;
   struct symbol *sym;
 
-  if (namespace[0] != '\0')
+  if (the_namespace[0] != '\0')
     {
-      concatenated_name = alloca (strlen (namespace) + 2
+      concatenated_name = alloca (strlen (the_namespace) + 2
 				  + strlen (name) + 1);
-      strcpy (concatenated_name, namespace);
+      strcpy (concatenated_name, the_namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
       name = concatenated_name;
@@ -412,7 +412,8 @@ cp_lookup_symbol_in_namespace (const char *namespace, const char *name,
      class/namespace.  Since we're only searching static and global blocks
      there's often no need to first do that lookup.  */
 
-  is_in_anonymous = namespace[0] != '\0' && cp_is_in_anonymous (namespace);
+  is_in_anonymous
+    = the_namespace[0] != '\0' && cp_is_in_anonymous (the_namespace);
   sym = cp_basic_lookup_symbol (name, block, domain, is_in_anonymous);
   if (sym != NULL)
     return sym;
@@ -786,7 +787,7 @@ lookup_namespace_scope (const struct language_defn *langdef,
 			const char *scope,
 			int scope_len)
 {
-  char *namespace;
+  char *the_namespace;
 
   if (scope[scope_len] != '\0')
     {
@@ -822,10 +823,10 @@ lookup_namespace_scope (const struct language_defn *langdef,
   if (scope_len == 0 && strchr (name, ':') == NULL)
     return cp_lookup_bare_symbol (langdef, name, block, domain, 1);
 
-  namespace = alloca (scope_len + 1);
-  strncpy (namespace, scope, scope_len);
-  namespace[scope_len] = '\0';
-  return cp_lookup_symbol_in_namespace (namespace, name,
+  the_namespace = alloca (scope_len + 1);
+  strncpy (the_namespace, scope, scope_len);
+  the_namespace[scope_len] = '\0';
+  return cp_lookup_symbol_in_namespace (the_namespace, name,
 					block, domain, 1);
 }
 
