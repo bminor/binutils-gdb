@@ -1,3 +1,7 @@
+2015-03-02  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Options <-z nocopyreloc>): Rewrite.
+
 2015-02-27  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/17900

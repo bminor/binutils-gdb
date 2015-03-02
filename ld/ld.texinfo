@@ -1088,7 +1088,8 @@ Allows multiple definitions.
 Disables multiple reloc sections combining.
 
 @item nocopyreloc
-Disables production of copy relocs.
+Disable linker generated .dynbss variables used in place of variables
+defined in shared libraries.  May result in dynamic text relocations.
 
 @item nodefaultlib
 Marks the object that the search for dependencies of this object will
