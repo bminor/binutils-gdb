@@ -1,5 +1,9 @@
 2015-03-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* contrib/ari/gdb_ari.sh: Reinstate checks for "true" and "false".
+
+2015-03-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* utils.h: Remove <stdbool.h> #include.
 	(producer_is_gcc): Change return type to "int".
 	* utils.c (producer_is_gcc): Change return type to int.
