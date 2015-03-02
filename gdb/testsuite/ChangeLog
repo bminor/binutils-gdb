@@ -1,3 +1,8 @@
+2015-03-02  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_test_multiple) <internal error>: Set result to
+	-1.
+
 2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-vregs.exp: New test.
