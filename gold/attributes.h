@@ -387,6 +387,11 @@ class Output_attributes_section_data : public Output_section_data
   { }
 
  protected:
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** attributes")); }
+
   // Write the data to the output file.
   void
   do_write(Output_file*);

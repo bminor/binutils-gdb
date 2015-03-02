@@ -1,3 +1,8 @@
+2015-02-02  Khem Raj  <raj.khem@gmail.com>
+
+	* attributes.h (class Output_attributes_section_data ): Add
+	do_print_to_mapfile function.
+
 2015-02-24  Alan Modra  <amodra@gmail.com>
 
 	PR 18010
