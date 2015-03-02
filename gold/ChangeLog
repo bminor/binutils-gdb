@@ -1,3 +1,9 @@
+2015-02-04  Peter Collingbourne  <pcc@google.com>
+            Cary Coutant  <ccoutant@google.com>
+
+	* output.cc (Output_section::add_merge_input_section): Do not
+	attempt to merge sections with an entsize of 0.
+
 2015-02-02  Khem Raj  <raj.khem@gmail.com>
 
 	* attributes.h (class Output_attributes_section_data ): Add

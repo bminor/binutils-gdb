@@ -2636,6 +2636,10 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 					uint64_t addralign,
 					bool keeps_input_sections)
 {
+  // We cannot merge sections with entsize == 0.
+  if (entsize == 0)
+    return false;
+
   bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
 
   // We cannot restore merged input section states.
