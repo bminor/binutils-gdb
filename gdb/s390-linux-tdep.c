@@ -62,10 +62,14 @@
 #include "features/s390-linux64v1.c"
 #include "features/s390-linux64v2.c"
 #include "features/s390-te-linux64.c"
+#include "features/s390-vx-linux64.c"
+#include "features/s390-tevx-linux64.c"
 #include "features/s390x-linux64.c"
 #include "features/s390x-linux64v1.c"
 #include "features/s390x-linux64v2.c"
 #include "features/s390x-te-linux64.c"
+#include "features/s390x-vx-linux64.c"
+#include "features/s390x-tevx-linux64.c"
 
 #define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
 #define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
@@ -87,6 +91,7 @@ struct gdbarch_tdep
   int gpr_full_regnum;
   int pc_regnum;
   int cc_regnum;
+  int v0_full_regnum;
 
   int have_linux_v1;
   int have_linux_v2;
@@ -154,41 +159,52 @@ s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
 
 static const short s390_dwarf_regmap[] =
 {
-  /* General Purpose Registers.  */
+  /* 0-15: General Purpose Registers.  */
   S390_R0_REGNUM, S390_R1_REGNUM, S390_R2_REGNUM, S390_R3_REGNUM,
   S390_R4_REGNUM, S390_R5_REGNUM, S390_R6_REGNUM, S390_R7_REGNUM,
   S390_R8_REGNUM, S390_R9_REGNUM, S390_R10_REGNUM, S390_R11_REGNUM,
   S390_R12_REGNUM, S390_R13_REGNUM, S390_R14_REGNUM, S390_R15_REGNUM,
 
-  /* Floating Point Registers.  */
+  /* 16-31: Floating Point Registers / Vector Registers 0-15. */
   S390_F0_REGNUM, S390_F2_REGNUM, S390_F4_REGNUM, S390_F6_REGNUM,
   S390_F1_REGNUM, S390_F3_REGNUM, S390_F5_REGNUM, S390_F7_REGNUM,
   S390_F8_REGNUM, S390_F10_REGNUM, S390_F12_REGNUM, S390_F14_REGNUM,
   S390_F9_REGNUM, S390_F11_REGNUM, S390_F13_REGNUM, S390_F15_REGNUM,
 
-  /* Control Registers (not mapped).  */
+  /* 32-47: Control Registers (not mapped).  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
 
-  /* Access Registers.  */
+  /* 48-63: Access Registers.  */
   S390_A0_REGNUM, S390_A1_REGNUM, S390_A2_REGNUM, S390_A3_REGNUM,
   S390_A4_REGNUM, S390_A5_REGNUM, S390_A6_REGNUM, S390_A7_REGNUM,
   S390_A8_REGNUM, S390_A9_REGNUM, S390_A10_REGNUM, S390_A11_REGNUM,
   S390_A12_REGNUM, S390_A13_REGNUM, S390_A14_REGNUM, S390_A15_REGNUM,
 
-  /* Program Status Word.  */
+  /* 64-65: Program Status Word.  */
   S390_PSWM_REGNUM,
   S390_PSWA_REGNUM,
+
+  /* 66-67: Reserved.  */
+  -1, -1,
+
+  /* 68-83: Vector Registers 16-31.  */
+  S390_V16_REGNUM, S390_V18_REGNUM, S390_V20_REGNUM, S390_V22_REGNUM,
+  S390_V17_REGNUM, S390_V19_REGNUM, S390_V21_REGNUM, S390_V23_REGNUM,
+  S390_V24_REGNUM, S390_V26_REGNUM, S390_V28_REGNUM, S390_V30_REGNUM,
+  S390_V25_REGNUM, S390_V27_REGNUM, S390_V29_REGNUM, S390_V31_REGNUM,
+
+  /* End of "official" DWARF registers.  The remainder of the map is
+     for GDB internal use only.  */
 
   /* GPR Lower Half Access.  */
   S390_R0_REGNUM, S390_R1_REGNUM, S390_R2_REGNUM, S390_R3_REGNUM,
   S390_R4_REGNUM, S390_R5_REGNUM, S390_R6_REGNUM, S390_R7_REGNUM,
   S390_R8_REGNUM, S390_R9_REGNUM, S390_R10_REGNUM, S390_R11_REGNUM,
   S390_R12_REGNUM, S390_R13_REGNUM, S390_R14_REGNUM, S390_R15_REGNUM,
-
-  /* GNU/Linux-specific registers (not mapped).  */
-  -1, -1, -1,
 };
+
+enum { s390_dwarf_reg_r0l = ARRAY_SIZE (s390_dwarf_regmap) - 16 };
 
 /* Convert DWARF register number REG to the appropriate register
    number used by GDB.  */
@@ -196,19 +212,30 @@ static int
 s390_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int gdb_reg = -1;
 
-  /* In a 32-on-64 debug scenario, debug info refers to the full 64-bit
-     GPRs.  Note that call frame information still refers to the 32-bit
-     lower halves, because s390_adjust_frame_regnum uses register numbers
-     66 .. 81 to access GPRs.  */
+  /* In a 32-on-64 debug scenario, debug info refers to the full
+     64-bit GPRs.  Note that call frame information still refers to
+     the 32-bit lower halves, because s390_adjust_frame_regnum uses
+     special register numbers to access GPRs.  */
   if (tdep->gpr_full_regnum != -1 && reg >= 0 && reg < 16)
     return tdep->gpr_full_regnum + reg;
 
   if (reg >= 0 && reg < ARRAY_SIZE (s390_dwarf_regmap))
-    return s390_dwarf_regmap[reg];
+    gdb_reg = s390_dwarf_regmap[reg];
 
-  warning (_("Unmapped DWARF Register #%d encountered."), reg);
-  return -1;
+  if (tdep->v0_full_regnum == -1)
+    {
+      if (gdb_reg >= S390_V16_REGNUM && gdb_reg <= S390_V31_REGNUM)
+	gdb_reg = -1;
+    }
+  else
+    {
+      if (gdb_reg >= S390_F0_REGNUM && gdb_reg <= S390_F15_REGNUM)
+	gdb_reg = gdb_reg - S390_F0_REGNUM + tdep->v0_full_regnum;
+    }
+
+  return gdb_reg;
 }
 
 /* Translate a .eh_frame register to DWARF register, or adjust a
@@ -217,7 +244,7 @@ static int
 s390_adjust_frame_regnum (struct gdbarch *gdbarch, int num, int eh_frame_p)
 {
   /* See s390_dwarf_reg_to_regnum for comments.  */
-  return (num >= 0 && num < 16)? num + 66 : num;
+  return (num >= 0 && num < 16) ? num + s390_dwarf_reg_r0l : num;
 }
 
 
@@ -229,6 +256,29 @@ regnum_is_gpr_full (struct gdbarch_tdep *tdep, int regnum)
   return (tdep->gpr_full_regnum != -1
 	  && regnum >= tdep->gpr_full_regnum
 	  && regnum <= tdep->gpr_full_regnum + 15);
+}
+
+/* Check whether REGNUM indicates a full vector register (v0-v15).
+   These pseudo-registers are composed of f0-f15 and v0l-v15l.  */
+
+static int
+regnum_is_vxr_full (struct gdbarch_tdep *tdep, int regnum)
+{
+  return (tdep->v0_full_regnum != -1
+	  && regnum >= tdep->v0_full_regnum
+	  && regnum <= tdep->v0_full_regnum + 15);
+}
+
+/* Return the name of register REGNO.  Return NULL for registers that
+   shouldn't be visible.  */
+
+static const char *
+s390_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  if (regnum >= S390_V0_LOWER_REGNUM
+      && regnum <= S390_V15_LOWER_REGNUM)
+    return NULL;
+  return tdesc_register_name (gdbarch, regnum);
 }
 
 static const char *
@@ -251,6 +301,15 @@ s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
       return full_name[regnum - tdep->gpr_full_regnum];
     }
 
+  if (regnum_is_vxr_full (tdep, regnum))
+    {
+      static const char *full_name[] = {
+	"v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7",
+	"v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15"
+      };
+      return full_name[regnum - tdep->v0_full_regnum];
+    }
+
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
@@ -267,6 +326,9 @@ s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 
   if (regnum_is_gpr_full (tdep, regnum))
     return builtin_type (gdbarch)->builtin_uint64;
+
+  if (regnum_is_vxr_full (tdep, regnum))
+    return tdesc_find_type (gdbarch, "vec128");
 
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
@@ -329,6 +391,19 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       return status;
     }
 
+  if (regnum_is_vxr_full (tdep, regnum))
+    {
+      enum register_status status;
+
+      regnum -= tdep->v0_full_regnum;
+
+      status = regcache_raw_read (regcache, S390_F0_REGNUM + regnum, buf);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache,
+				    S390_V0_LOWER_REGNUM + regnum, buf + 8);
+      return status;
+    }
+
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
@@ -376,22 +451,34 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       return;
     }
 
+  if (regnum_is_vxr_full (tdep, regnum))
+    {
+      regnum -= tdep->v0_full_regnum;
+      regcache_raw_write (regcache, S390_F0_REGNUM + regnum, buf);
+      regcache_raw_write (regcache, S390_V0_LOWER_REGNUM + regnum, buf + 8);
+      return;
+    }
+
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
 /* 'float' values are stored in the upper half of floating-point
-   registers, even though we are otherwise a big-endian platform.  */
+   registers, even though we are otherwise a big-endian platform.  The
+   same applies to a 'float' value within a vector.  */
 
 static struct value *
 s390_value_from_register (struct gdbarch *gdbarch, struct type *type,
 			  int regnum, struct frame_id frame_id)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct value *value = default_value_from_register (gdbarch, type,
 						     regnum, frame_id);
   check_typedef (type);
 
-  if (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM
-      && TYPE_LENGTH (type) < 8)
+  if ((regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM
+       && TYPE_LENGTH (type) < 8)
+      || regnum_is_vxr_full (tdep, regnum)
+      || (regnum >= S390_V16_REGNUM && regnum <= S390_V31_REGNUM))
     set_value_offset (value, 0);
 
   return value;
@@ -415,6 +502,12 @@ s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
      PC and CC at this point unconditionally.  */
   if (group == save_reggroup || group == restore_reggroup)
     return regnum == tdep->pc_regnum || regnum == tdep->cc_regnum;
+
+  if (group == vector_reggroup)
+    return regnum_is_vxr_full (tdep, regnum);
+
+  if (group == general_reggroup && regnum_is_vxr_full (tdep, regnum))
+    return 0;
 
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
@@ -472,6 +565,18 @@ static const struct regcache_map_entry s390_regmap_tdb[] =
     { 1, S390_TDB_ATIA_REGNUM, 8 },
     { 12, REGCACHE_MAP_SKIP, 8 },
     { 16, S390_TDB_R0_REGNUM, 8 },
+    { 0 }
+  };
+
+static const struct regcache_map_entry s390_regmap_vxrs_low[] =
+  {
+    { 16, S390_V0_LOWER_REGNUM, 8 },
+    { 0 }
+  };
+
+static const struct regcache_map_entry s390_regmap_vxrs_high[] =
+  {
+    { 16, S390_V16_REGNUM, 16 },
     { 0 }
   };
 
@@ -535,6 +640,18 @@ const struct regset s390_tdb_regset = {
   regcache_collect_regset
 };
 
+const struct regset s390_vxrs_low_regset = {
+  s390_regmap_vxrs_low,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+const struct regset s390_vxrs_high_regset = {
+  s390_regmap_vxrs_high,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
 /* Iterate over supported core file register note sections. */
 
 static void
@@ -573,37 +690,54 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
 						    S390_TDB_DWORD0_REGNUM)))
     cb (".reg-s390-tdb", s390_sizeof_tdbregset, &s390_tdb_regset,
 	"s390 TDB", cb_data);
+
+  if (tdep->v0_full_regnum != -1)
+    {
+      cb (".reg-s390-vxrs-low", 16 * 8, &s390_vxrs_low_regset,
+	  "s390 vector registers 0-15 lower half", cb_data);
+      cb (".reg-s390-vxrs-high", 16 * 16, &s390_vxrs_high_regset,
+	  "s390 vector registers 16-31", cb_data);
+    }
 }
 
 static const struct target_desc *
 s390_core_read_description (struct gdbarch *gdbarch,
 			    struct target_ops *target, bfd *abfd)
 {
-  asection *high_gprs = bfd_get_section_by_name (abfd, ".reg-s390-high-gprs");
-  asection *v1 = bfd_get_section_by_name (abfd, ".reg-s390-last-break");
-  asection *v2 = bfd_get_section_by_name (abfd, ".reg-s390-system-call");
   asection *section = bfd_get_section_by_name (abfd, ".reg");
   CORE_ADDR hwcap = 0;
+  int high_gprs, v1, v2, te, vx;
 
   target_auxv_search (target, AT_HWCAP, &hwcap);
   if (!section)
     return NULL;
 
+  high_gprs = (bfd_get_section_by_name (abfd, ".reg-s390-high-gprs")
+	       != NULL);
+  v1 = (bfd_get_section_by_name (abfd, ".reg-s390-last-break") != NULL);
+  v2 = (bfd_get_section_by_name (abfd, ".reg-s390-system-call") != NULL);
+  vx = (hwcap & HWCAP_S390_VX);
+  te = (hwcap & HWCAP_S390_TE);
+
   switch (bfd_section_size (abfd, section))
     {
     case s390_sizeof_gregset:
       if (high_gprs)
-	return ((hwcap & HWCAP_S390_TE) ? tdesc_s390_te_linux64 :
-		v2? tdesc_s390_linux64v2 :
-		v1? tdesc_s390_linux64v1 : tdesc_s390_linux64);
+	return (te && vx ? tdesc_s390_tevx_linux64 :
+		vx ? tdesc_s390_vx_linux64 :
+		te ? tdesc_s390_te_linux64 :
+		v2 ? tdesc_s390_linux64v2 :
+		v1 ? tdesc_s390_linux64v1 : tdesc_s390_linux64);
       else
-	return (v2? tdesc_s390_linux32v2 :
-		v1? tdesc_s390_linux32v1 : tdesc_s390_linux32);
+	return (v2 ? tdesc_s390_linux32v2 :
+		v1 ? tdesc_s390_linux32v1 : tdesc_s390_linux32);
 
     case s390x_sizeof_gregset:
-      return ((hwcap & HWCAP_S390_TE) ? tdesc_s390x_te_linux64 :
-	      v2? tdesc_s390x_linux64v2 :
-	      v1? tdesc_s390x_linux64v1 : tdesc_s390x_linux64);
+      return (te && vx ? tdesc_s390x_tevx_linux64 :
+	      vx ? tdesc_s390x_vx_linux64 :
+	      te ? tdesc_s390x_te_linux64 :
+	      v2 ? tdesc_s390x_linux64v2 :
+	      v1 ? tdesc_s390x_linux64v1 : tdesc_s390x_linux64);
 
     default:
       return NULL;
@@ -2860,6 +2994,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int have_linux_v1 = 0;
   int have_linux_v2 = 0;
   int have_tdb = 0;
+  int have_vx = 0;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -2918,6 +3053,14 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	"tdb0", "tac", "tct", "atia",
 	"tr0", "tr1", "tr2", "tr3", "tr4", "tr5", "tr6", "tr7",
 	"tr8", "tr9", "tr10", "tr11", "tr12", "tr13", "tr14", "tr15"
+      };
+      static const char *const vxrs_low[] = {
+	"v0l", "v1l", "v2l", "v3l", "v4l", "v5l", "v6l", "v7l", "v8l",
+	"v9l", "v10l", "v11l", "v12l", "v13l", "v14l", "v15l",
+      };
+      static const char *const vxrs_high[] = {
+	"v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24",
+	"v25", "v26", "v27", "v28", "v29", "v30", "v31",
       };
       const struct tdesc_feature *feature;
       int i, valid_p = 1;
@@ -3007,6 +3150,21 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  have_tdb = 1;
 	}
 
+      /* Vector registers.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.vx");
+      if (feature)
+	{
+	  for (i = 0; i < 16; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_V0_LOWER_REGNUM + i,
+						vxrs_low[i]);
+	  for (i = 0; i < 16; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_V16_REGNUM + i,
+						vxrs_high[i]);
+	  have_vx = 1;
+	}
+
       if (!valid_p)
 	{
 	  tdesc_data_cleanup (tdesc_data);
@@ -3076,6 +3234,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					s390_pseudo_register_reggroup_p);
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  set_gdbarch_register_name (gdbarch, s390_register_name);
 
   /* Assign pseudo register numbers.  */
   first_pseudo_reg = gdbarch_num_regs (gdbarch);
@@ -3084,6 +3243,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (have_upper)
     {
       tdep->gpr_full_regnum = last_pseudo_reg;
+      last_pseudo_reg += 16;
+    }
+  tdep->v0_full_regnum = -1;
+  if (have_vx)
+    {
+      tdep->v0_full_regnum = last_pseudo_reg;
       last_pseudo_reg += 16;
     }
   tdep->pc_regnum = last_pseudo_reg++;
@@ -3192,8 +3357,12 @@ _initialize_s390_tdep (void)
   initialize_tdesc_s390_linux64v1 ();
   initialize_tdesc_s390_linux64v2 ();
   initialize_tdesc_s390_te_linux64 ();
+  initialize_tdesc_s390_vx_linux64 ();
+  initialize_tdesc_s390_tevx_linux64 ();
   initialize_tdesc_s390x_linux64 ();
   initialize_tdesc_s390x_linux64v1 ();
   initialize_tdesc_s390x_linux64v2 ();
   initialize_tdesc_s390x_te_linux64 ();
+  initialize_tdesc_s390x_vx_linux64 ();
+  initialize_tdesc_s390x_tevx_linux64 ();
 }

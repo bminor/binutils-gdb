@@ -49,6 +49,7 @@
 static int have_regset_last_break = 0;
 static int have_regset_system_call = 0;
 static int have_regset_tdb = 0;
+static int have_regset_vxrs = 0;
 
 /* Register map for 32-bit executables running under a 64-bit
    kernel.  */
@@ -367,6 +368,18 @@ s390_linux_fetch_inferior_registers (struct target_ops *ops,
     if (regnum == -1 || S390_IS_TDBREGSET_REGNUM (regnum))
       fetch_regset (regcache, tid, NT_S390_TDB, s390_sizeof_tdbregset,
 		    &s390_tdb_regset);
+
+  if (have_regset_vxrs)
+    {
+      if (regnum == -1 || (regnum >= S390_V0_LOWER_REGNUM
+			   && regnum <= S390_V15_LOWER_REGNUM))
+	fetch_regset (regcache, tid, NT_S390_VXRS_LOW, 16 * 8,
+		      &s390_vxrs_low_regset);
+      if (regnum == -1 || (regnum >= S390_V16_REGNUM
+			   && regnum <= S390_V31_REGNUM))
+	fetch_regset (regcache, tid, NT_S390_VXRS_HIGH, 16 * 16,
+		      &s390_vxrs_high_regset);
+    }
 }
 
 /* Store register REGNUM back into the child process.  If REGNUM is
@@ -389,6 +402,18 @@ s390_linux_store_inferior_registers (struct target_ops *ops,
     if (regnum == -1 || regnum == S390_SYSTEM_CALL_REGNUM)
       store_regset (regcache, tid, NT_S390_SYSTEM_CALL, 4,
 		    &s390_system_call_regset);
+
+  if (have_regset_vxrs)
+    {
+      if (regnum == -1 || (regnum >= S390_V0_LOWER_REGNUM
+			   && regnum <= S390_V15_LOWER_REGNUM))
+	store_regset (regcache, tid, NT_S390_VXRS_LOW, 16 * 8,
+		      &s390_vxrs_low_regset);
+      if (regnum == -1 || (regnum >= S390_V16_REGNUM
+			   && regnum <= S390_V31_REGNUM))
+	store_regset (regcache, tid, NT_S390_VXRS_HIGH, 16 * 16,
+		      &s390_vxrs_high_regset);
+    }
 }
 
 
@@ -591,19 +616,6 @@ s390_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
   return 1;
 }
 
-#ifdef __s390x__
-static unsigned long
-s390_get_hwcap (void)
-{
-  CORE_ADDR field;
-
-  if (target_auxv_search (&current_target, AT_HWCAP, &field))
-    return (unsigned long) field;
-
-  return 0;
-}
-#endif
-
 static const struct target_desc *
 s390_read_description (struct target_ops *ops)
 {
@@ -614,27 +626,41 @@ s390_read_description (struct target_ops *ops)
   have_regset_system_call
     = check_regset (tid, NT_S390_SYSTEM_CALL, 4);
 
-#ifdef __s390x__
   /* If GDB itself is compiled as 64-bit, we are running on a machine in
      z/Architecture mode.  If the target is running in 64-bit addressing
      mode, report s390x architecture.  If the target is running in 31-bit
      addressing mode, but the kernel supports using 64-bit registers in
      that mode, report s390 architecture with 64-bit GPRs.  */
+#ifdef __s390x__
+  {
+    CORE_ADDR hwcap = 0;
 
-  have_regset_tdb = (s390_get_hwcap () & HWCAP_S390_TE) ?
-    check_regset (tid, NT_S390_TDB, s390_sizeof_tdbregset) : 0;
+    target_auxv_search (&current_target, AT_HWCAP, &hwcap);
+    have_regset_tdb = (hwcap & HWCAP_S390_TE)
+      && check_regset (tid, NT_S390_TDB, s390_sizeof_tdbregset);
 
-  if (s390_target_wordsize () == 8)
-    return (have_regset_tdb ? tdesc_s390x_te_linux64 :
-	    have_regset_system_call? tdesc_s390x_linux64v2 :
-	    have_regset_last_break? tdesc_s390x_linux64v1 :
-	    tdesc_s390x_linux64);
+    have_regset_vxrs = (hwcap & HWCAP_S390_VX)
+      && check_regset (tid, NT_S390_VXRS_LOW, 16 * 8)
+      && check_regset (tid, NT_S390_VXRS_HIGH, 16 * 16);
 
-  if (s390_get_hwcap () & HWCAP_S390_HIGH_GPRS)
-    return (have_regset_tdb ? tdesc_s390_te_linux64 :
-	    have_regset_system_call? tdesc_s390_linux64v2 :
-	    have_regset_last_break? tdesc_s390_linux64v1 :
-	    tdesc_s390_linux64);
+    if (s390_target_wordsize () == 8)
+      return (have_regset_vxrs ?
+	      (have_regset_tdb ? tdesc_s390x_tevx_linux64 :
+	       tdesc_s390x_vx_linux64) :
+	      have_regset_tdb ? tdesc_s390x_te_linux64 :
+	      have_regset_system_call ? tdesc_s390x_linux64v2 :
+	      have_regset_last_break ? tdesc_s390x_linux64v1 :
+	      tdesc_s390x_linux64);
+
+    if (hwcap & HWCAP_S390_HIGH_GPRS)
+      return (have_regset_vxrs ?
+	      (have_regset_tdb ? tdesc_s390_tevx_linux64 :
+	       tdesc_s390_vx_linux64) :
+	      have_regset_tdb ? tdesc_s390_te_linux64 :
+	      have_regset_system_call ? tdesc_s390_linux64v2 :
+	      have_regset_last_break ? tdesc_s390_linux64v1 :
+	      tdesc_s390_linux64);
+  }
 #endif
 
   /* If GDB itself is compiled as 31-bit, or if we're running a 31-bit inferior

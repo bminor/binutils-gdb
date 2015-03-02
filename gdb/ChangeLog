@@ -1,5 +1,63 @@
 2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c (have_regset_vxrs): New static variable.
+	(s390_linux_fetch_inferior_registers): Handle vector registers, if
+	present.
+	(s390_linux_store_inferior_registers): Likewise.
+	(s390_get_hwcap): Remove function.  Embed its logic...
+	(s390_read_description): ...here.  Yield a target description with
+	vector registers if applicable.
+	* s390-linux-tdep.c: Include "features/s390-vx-linux64.c",
+	"features/s390-tevx-linux64.c", "features/s390x-vx-linux64.c", and
+	"features/s390x-tevx-linux64.c".
+	(struct gdbarch_tdep) <v0_full_regnum>: New field.
+	(s390_dwarf_regmap): Add vector registers.  Remove bogus entries
+	for "GNU/Linux-specific registers".
+	(s390_dwarf_reg_r0l): New enum value.
+	(s390_dwarf_reg_to_regnum): Support vector registers.
+	(s390_adjust_frame_regnum): Adjust pseudo DWARF register numbers
+	of GPR lower halves.
+	(regnum_is_vxr_full): New function.
+	(s390_register_name): New function.
+	(s390_pseudo_register_name): Handle v0-v15, which are composed of
+	f0-f15 and v0l-v15l.
+	(s390_pseudo_register_type): Likewise.
+	(s390_pseudo_register_read): Likewise.
+	(s390_pseudo_register_write): Likewise.
+	(s390_value_from_register): Account for the fact that values are
+	placed left-justified in vector registers.
+	(s390_pseudo_register_reggroup_p): Add pseudo registers v0-v15 to
+	the vector reggroup and omit them from the general reggroup.
+	(s390_regmap_vxrs_low, s390_regmap_vxrs_high): New register maps.
+	(s390_vxrs_low_regset, s390_vxrs_high_regset): New regsets.
+	(s390_iterate_over_regset_sections): Add iterations for the two
+	new vector regsets.
+	(s390_core_read_description): Yield a target description with
+	vector registers if applicable.
+	(s390_gdbarch_init): Handle target descriptions with vector
+	registers.  Add "register_name" gdbarch method.
+	(_initialize_s390_tdep): Call new tdesc initialization functions.
+	* s390-linux-tdep.h (HWCAP_S390_VX): New macro.
+	(S390_V0_LOWER_REGNUM, S390_V1_LOWER_REGNUM, S390_V2_LOWER_REGNUM)
+	(S390_V3_LOWER_REGNUM, S390_V4_LOWER_REGNUM, S390_V5_LOWER_REGNUM)
+	(S390_V6_LOWER_REGNUM, S390_V7_LOWER_REGNUM, S390_V8_LOWER_REGNUM)
+	(S390_V9_LOWER_REGNUM, S390_V10_LOWER_REGNUM)
+	(S390_V11_LOWER_REGNUM, S390_V12_LOWER_REGNUM)
+	(S390_V13_LOWER_REGNUM, S390_V14_LOWER_REGNUM)
+	(S390_V15_LOWER_REGNUM, S390_V16_REGNUM, S390_V17_REGNUM)
+	(S390_V18_REGNUM, S390_V19_REGNUM, S390_V20_REGNUM)
+	(S390_V21_REGNUM, S390_V22_REGNUM, S390_V23_REGNUM)
+	(S390_V24_REGNUM, S390_V25_REGNUM, S390_V26_REGNUM)
+	(S390_V27_REGNUM, S390_V28_REGNUM, S390_V29_REGNUM)
+	(S390_V30_REGNUM, S390_V31_REGNUM): New macros.
+	(S390_NUM_REGS): Adjust value.
+	(s390_vxrs_low_regset, s390_vxrs_high_regset): Declare.
+	(tdesc_s390_vx_linux64, tdesc_s390_tevx_linux64)
+	(tdesc_s390x_vx_linux64, tdesc_s390x_tevx_linux64): Likewise.
+	* NEWS: Announce S/390 vector register support.
+
+2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* features/s390-tevx-linux64.xml: New file.
 	* features/s390-vx-linux64.xml: New file.
 	* features/s390-vx.xml: New file.
