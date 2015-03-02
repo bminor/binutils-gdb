@@ -1,3 +1,7 @@
+2015-03-02  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Specify Location): Fix syntax of filename:function.
+
 2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.texinfo (S/390 and System z Features): Describe new feature

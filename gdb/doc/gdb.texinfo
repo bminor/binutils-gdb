@@ -7611,7 +7611,7 @@ of a valid expression).  In Pascal and Modula-2, this is
 This form specifies the address of the function's first instruction,
 before the stack frame and arguments have been set up.
 
-@item '@var{filename}'::@var{funcaddr}
+@item '@var{filename}':@var{funcaddr}
 Like @var{funcaddr} above, but also specifies the name of the source
 file explicitly.  This is useful if the name of the function does not
 specify the function unambiguously, e.g., if there are several
