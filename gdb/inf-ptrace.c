@@ -289,6 +289,22 @@ inf_ptrace_stop (struct target_ops *self, ptid_t ptid)
   kill (-inferior_process_group (), SIGINT);
 }
 
+/* Return which PID to pass to ptrace in order to observe/control the
+   tracee identified by PTID.  */
+
+static pid_t
+get_ptrace_pid (ptid_t ptid)
+{
+  pid_t pid;
+
+  /* If we have an LWPID to work with, use it.  Otherwise, we're
+     dealing with a non-threaded program/target.  */
+  pid = ptid_get_lwp (ptid);
+  if (pid == 0)
+    pid = ptid_get_pid (ptid);
+  return pid;
+}
+
 /* Resume execution of thread PTID, or all threads if PTID is -1.  If
    STEP is nonzero, single-step it.  If SIGNAL is nonzero, give it
    that signal.  */
@@ -297,13 +313,16 @@ static void
 inf_ptrace_resume (struct target_ops *ops,
 		   ptid_t ptid, int step, enum gdb_signal signal)
 {
-  pid_t pid = ptid_get_pid (ptid);
+  pid_t pid;
+
   int request;
 
-  if (pid == -1)
+  if (ptid_equal (minus_one_ptid, ptid))
     /* Resume all threads.  Traditionally ptrace() only supports
        single-threaded processes, so simply resume the inferior.  */
-    pid = ptid_get_pid (inferior_ptid);
+    pid = get_ptrace_pid (inferior_ptid);
+  else
+    pid = get_ptrace_pid (ptid);
 
   if (catch_syscall_enabled () > 0)
     request = PT_SYSCALL;

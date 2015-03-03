@@ -1,3 +1,12 @@
+2015-03-03  Pedro Alves  <palves@redhat.com>
+
+	* i386-linux-nat.c (i386_linux_resume): Get the ptrace PID out of
+	the lwp field of ptid.  Pass the full ptid to get_thread_regcache.
+	* inf-ptrace.c (get_ptrace_pid): New function.
+	(inf_ptrace_resume): Use it.
+	* linux-nat.c (linux_resume_one_lwp): Pass the LWP's ptid ummodified
+	to the lower layer.
+
 2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* nat/linux-btrace.c: Include sys/utsname.h.

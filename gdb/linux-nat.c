@@ -1506,8 +1506,6 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 static void
 linux_resume_one_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 {
-  ptid_t ptid;
-
   lp->step = step;
 
   /* stop_pc doubles as the PC the LWP had when it was last resumed.
@@ -1524,9 +1522,7 @@ linux_resume_one_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 
   if (linux_nat_prepare_to_resume != NULL)
     linux_nat_prepare_to_resume (lp);
-  /* Convert to something the lower layer understands.  */
-  ptid = pid_to_ptid (ptid_get_lwp (lp->ptid));
-  linux_ops->to_resume (linux_ops, ptid, step, signo);
+  linux_ops->to_resume (linux_ops, lp->ptid, step, signo);
   lp->stop_reason = LWP_STOPPED_BY_NO_REASON;
   lp->stopped = 0;
   registers_changed_ptid (lp->ptid);
