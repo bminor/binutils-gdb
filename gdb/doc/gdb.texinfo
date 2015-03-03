@@ -25809,7 +25809,7 @@ The inferior has vforked.  This is reported in when @code{catch vfork}
 @item syscall-entry
 The inferior entered a system call.  This is reported when @code{catch
 syscall} (@pxref{Set Catchpoints}) has been used.
-@item syscall-entry
+@item syscall-return
 The inferior returned from a system call.  This is reported when
 @code{catch syscall} (@pxref{Set Catchpoints}) has been used.
 @item exec

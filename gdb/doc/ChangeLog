@@ -1,3 +1,8 @@
+2015-03-03  Philippe Proulx  eeppeliteloop@gmail.com
+
+	* gdb.texinfo (gdb/mi Async Records): Fix duplicate syscall-entry
+	under *stopped.
+
 2015-03-02  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.texinfo (Specify Location): Fix syntax of filename:function.
