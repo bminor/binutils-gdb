@@ -1,5 +1,11 @@
 2015-03-03  Pedro Alves  <palves@redhat.com>
 
+	* inf-ptrace.c (inf_ptrace_resume): Remove spurious whitespace.
+	Use ptid_get_pid to get the overall process id when resuming all
+	threads.
+
+2015-03-03  Pedro Alves  <palves@redhat.com>
+
 	* i386-linux-nat.c (i386_linux_resume): Get the ptrace PID out of
 	the lwp field of ptid.  Pass the full ptid to get_thread_regcache.
 	* inf-ptrace.c (get_ptrace_pid): New function.
