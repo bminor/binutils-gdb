@@ -2338,7 +2338,8 @@ rl78_elf_relax_section
 
 	}
 
-      if ((irel->r_addend &  RL78_RELAXA_MASK) == RL78_RELAXA_ADDR16)
+      if ((irel->r_addend &  RL78_RELAXA_MASK) == RL78_RELAXA_ADDR16
+          && nrelocs > 0)
 	{
 	  /*----------------------------------------------------------------------*/
 	  /* Some insns have both a 16-bit address operand and an 8-bit

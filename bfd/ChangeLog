@@ -1,3 +1,8 @@
+2015-03-03  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_relax_section): Only relax ADDR16's if
+	there's a symbol.
+
 2015-02-28  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_tls_setup): Set no_tls_get_addr_opt if
