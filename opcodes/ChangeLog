@@ -1,3 +1,7 @@
+2015-03-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (arm_symbol_is_valid): Skip ARM private symbols.
+
 2015-02-25  Oleg Endo  <olegendo@gcc.gnu.org>
 
 	* sh-opc.h (clrs, sets): Mark as arch_sh3_nommu_up instead of
