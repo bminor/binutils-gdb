@@ -1,5 +1,10 @@
 2015-03-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/thread-execl.exp (do_test): Handle non-stop.
+	(top level): Call do_test with non-stop as well.
+
+2015-03-02  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (gdb_test_multiple) <internal error>: Set result to
 	-1.
 

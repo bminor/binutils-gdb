@@ -1,3 +1,8 @@
+2015-03-02  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (follow_exec): Delete all threads of the process except
+	the event thread.  Extended comments.
+
 2015-03-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* contrib/ari/gdb_ari.sh: Reinstate checks for "true" and "false".

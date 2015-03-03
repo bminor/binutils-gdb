@@ -1060,10 +1060,11 @@ show_follow_exec_mode_string (struct ui_file *file, int from_tty,
 /* EXECD_PATHNAME is assumed to be non-NULL.  */
 
 static void
-follow_exec (ptid_t pid, char *execd_pathname)
+follow_exec (ptid_t ptid, char *execd_pathname)
 {
-  struct thread_info *th = inferior_thread ();
+  struct thread_info *th, *tmp;
   struct inferior *inf = current_inferior ();
+  int pid = ptid_get_pid (ptid);
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1088,23 +1089,46 @@ follow_exec (ptid_t pid, char *execd_pathname)
 
   mark_breakpoints_out ();
 
-  update_breakpoints_after_exec ();
+  /* The target reports the exec event to the main thread, even if
+     some other thread does the exec, and even if the main thread was
+     stopped or already gone.  We may still have non-leader threads of
+     the process on our list.  E.g., on targets that don't have thread
+     exit events (like remote); or on native Linux in non-stop mode if
+     there were only two threads in the inferior and the non-leader
+     one is the one that execs (and nothing forces an update of the
+     thread list up to here).  When debugging remotely, it's best to
+     avoid extra traffic, when possible, so avoid syncing the thread
+     list with the target, and instead go ahead and delete all threads
+     of the process but one that reported the event.  Note this must
+     be done before calling update_breakpoints_after_exec, as
+     otherwise clearing the threads' resources would reference stale
+     thread breakpoints -- it may have been one of these threads that
+     stepped across the exec.  We could just clear their stepping
+     states, but as long as we're iterating, might as well delete
+     them.  Deleting them now rather than at the next user-visible
+     stop provides a nicer sequence of events for user and MI
+     notifications.  */
+  ALL_NON_EXITED_THREADS_SAFE (th, tmp)
+    if (ptid_get_pid (th->ptid) == pid && !ptid_equal (th->ptid, ptid))
+      delete_thread (th->ptid);
 
-  /* If there was one, it's gone now.  We cannot truly step-to-next
-     statement through an exec().  */
+  /* We also need to clear any left over stale state for the
+     leader/event thread.  E.g., if there was any step-resume
+     breakpoint or similar, it's gone now.  We cannot truly
+     step-to-next statement through an exec().  */
+  th = inferior_thread ();
   th->control.step_resume_breakpoint = NULL;
   th->control.exception_resume_breakpoint = NULL;
   th->control.single_step_breakpoints = NULL;
   th->control.step_range_start = 0;
   th->control.step_range_end = 0;
 
-  /* The target reports the exec event to the main thread, even if
-     some other thread does the exec, and even if the main thread was
-     already stopped --- if debugging in non-stop mode, it's possible
-     the user had the main thread held stopped in the previous image
-     --- release it now.  This is the same behavior as step-over-exec
-     with scheduler-locking on in all-stop mode.  */
+  /* The user may have had the main thread held stopped in the
+     previous image (e.g., schedlock on, or non-stop).  Release
+     it now.  */
   th->stop_requested = 0;
+
+  update_breakpoints_after_exec ();
 
   /* What is this a.out's name?  */
   printf_unfiltered (_("%s is executing new program: %s\n"),
