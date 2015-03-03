@@ -1,3 +1,7 @@
+2015-03-03  Gary Benson  <gbenson@redhat.com>
+
+	* hostio.c (handle_vFile): Fix prefix lengths.
+
 2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* linux-low.c (linux_low_enable_btrace): Do not overwrite non-zero
