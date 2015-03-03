@@ -1,3 +1,8 @@
+2015-03-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.h (find_default_create_inferior): Remove declaration.
+	(find_default_attach): Likewise.
+
 2015-03-03  Pedro Alves  <palves@redhat.com>
 
 	* inf-ptrace.c (inf_ptrace_resume): Remove spurious whitespace.

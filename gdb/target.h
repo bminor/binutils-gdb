@@ -2175,11 +2175,6 @@ extern void noprocess (void) ATTRIBUTE_NORETURN;
 
 extern void target_require_runnable (void);
 
-extern void find_default_attach (struct target_ops *, const char *, int);
-
-extern void find_default_create_inferior (struct target_ops *,
-					  char *, char *, char **, int);
-
 extern struct target_ops *find_target_beneath (struct target_ops *);
 
 /* Find the target at STRATUM.  If no target is at that stratum,
