@@ -23,24 +23,6 @@
 
 struct arch_lwp_info;
 
-/* Reasons an LWP last stopped.  */
-
-enum lwp_stop_reason
-{
-  /* Either not stopped, or stopped for a reason that doesn't require
-     special tracking.  */
-  LWP_STOPPED_BY_NO_REASON,
-
-  /* Stopped by a software breakpoint.  */
-  LWP_STOPPED_BY_SW_BREAKPOINT,
-
-  /* Stopped by a hardware breakpoint.  */
-  LWP_STOPPED_BY_HW_BREAKPOINT,
-
-  /* Stopped by a watchpoint.  */
-  LWP_STOPPED_BY_WATCHPOINT
-};
-
 /* Structure describing an LWP.  This is public only for the purposes
    of ALL_LWPS; target-specific code should generally not access it
    directly.  */
@@ -93,7 +75,7 @@ struct lwp_info
 
   /* The reason the LWP last stopped, if we need to track it
      (breakpoint, watchpoint, etc.)  */
-  enum lwp_stop_reason stop_reason;
+  enum target_stop_reason stop_reason;
 
   /* On architectures where it is possible to know the data address of
      a triggered watchpoint, STOPPED_DATA_ADDRESS_P is non-zero, and

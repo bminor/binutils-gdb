@@ -1,5 +1,16 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+	enum lwp_stop_reason -> enum target_stop_reason
+	* linux-nat.c (linux_resume_one_lwp, check_stopped_by_watchpoint)
+	(linux_nat_stopped_by_watchpoint, status_callback)
+	(linux_nat_wait_1): Adjust.
+	* linux-nat.h (enum lwp_stop_reason): Delete.
+	(struct lwp_info) <stop_reason>: Now an enum target_stop_reason.
+	* x86-linux-nat.c (x86_linux_prepare_to_resume): Adjust.
+	* target/waitstatus.h (enum target_stop_reason): New.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (need_moribund_for_location_type): New function.
 	(bpstat_stop_status): Don't skipping checking moribund locations
 	of breakpoint types which the target tell caused a stop.

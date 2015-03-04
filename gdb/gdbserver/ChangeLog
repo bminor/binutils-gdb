@@ -1,3 +1,15 @@
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
+	enum lwp_stop_reason -> enum target_stop_reason
+	* linux-low.c (check_stopped_by_breakpoint): Adjust.
+	(thread_still_has_status_pending_p, check_stopped_by_watchpoint)
+	(linux_wait_1, stuck_in_jump_pad_callback)
+	(move_out_of_jump_pad_callback, linux_resume_one_lwp)
+	(linux_stopped_by_watchpoint):
+	* linux-low.h (enum lwp_stop_reason): Delete.
+	(struct lwp_info) <stop_reason>: Now an enum target_stop_reason.
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Adjust.
+
 2015-03-04  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (SFILES): Add linux-aarch64-low.c.

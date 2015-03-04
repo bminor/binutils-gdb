@@ -24,6 +24,7 @@
 
 /* Included for ptrace type definitions.  */
 #include "nat/linux-ptrace.h"
+#include "target/waitstatus.h" /* For enum target_stop_reason.  */
 
 #define PTRACE_XFER_TYPE long
 
@@ -230,24 +231,6 @@ extern struct linux_target_ops the_low_target;
 #define get_thread_lwp(thr) ((struct lwp_info *) (inferior_target_data (thr)))
 #define get_lwp_thread(lwp) ((lwp)->thread)
 
-/* Reasons an LWP last stopped.  */
-
-enum lwp_stop_reason
-{
-  /* Either not stopped, or stopped for a reason that doesn't require
-     special tracking.  */
-  LWP_STOPPED_BY_NO_REASON,
-
-  /* Stopped by a software breakpoint.  */
-  LWP_STOPPED_BY_SW_BREAKPOINT,
-
-  /* Stopped by a hardware breakpoint.  */
-  LWP_STOPPED_BY_HW_BREAKPOINT,
-
-  /* Stopped by a watchpoint.  */
-  LWP_STOPPED_BY_WATCHPOINT
-};
-
 /* This struct is recorded in the target_data field of struct thread_info.
 
    On linux ``all_threads'' is keyed by the LWP ID, which we use as the
@@ -299,7 +282,7 @@ struct lwp_info
 
   /* The reason the LWP last stopped, if we need to track it
      (breakpoint, watchpoint, etc.)  */
-  enum lwp_stop_reason stop_reason;
+  enum target_stop_reason stop_reason;
 
   /* On architectures where it is possible to know the data address of
      a triggered watchpoint, STOPPED_DATA_ADDRESS is non-zero, and
