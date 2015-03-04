@@ -1149,6 +1149,16 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	      *buf++ = tohex ((addr >> (i - 1) * 4) & 0xf);
 	    *buf++ = ';';
 	  }
+	else if (swbreak_feature && target_stopped_by_sw_breakpoint ())
+	  {
+	    sprintf (buf, "swbreak:;");
+	    buf += strlen (buf);
+	  }
+	else if (hwbreak_feature && target_stopped_by_hw_breakpoint ())
+	  {
+	    sprintf (buf, "hwbreak:;");
+	    buf += strlen (buf);
+	  }
 
 	while (*regp)
 	  {

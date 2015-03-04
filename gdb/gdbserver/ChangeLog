@@ -1,5 +1,20 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+	* remote-utils.c (prepare_resume_reply): Report swbreak/hbreak.
+	* server.c (swbreak_feature, hwbreak_feature): New globals.
+	(handle_query) <qSupported>: Handle "swbreak+" and "hwbreak+".
+	(captured_main): Clear swbreak_feature and hwbreak_feature.
+	* server.h (swbreak_feature, hwbreak_feature): Declare.
+	* target.h (struct target_ops) <stopped_by_sw_breakpoint,
+	supports_stopped_by_sw_breakpoint, stopped_by_hw_breakpoint,
+	supports_stopped_by_hw_breakpoint>: New fields.
+	(target_supports_stopped_by_sw_breakpoint)
+	(target_stopped_by_sw_breakpoint)
+	(target_supports_stopped_by_hw_breakpoint)
+	(target_stopped_by_hw_breakpoint): Declare.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	enum lwp_stop_reason -> enum target_stop_reason
 	* linux-low.c (check_stopped_by_breakpoint): Adjust.
 	(thread_still_has_status_pending_p, check_stopped_by_watchpoint)
