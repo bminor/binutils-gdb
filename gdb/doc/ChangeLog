@@ -1,3 +1,16 @@
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): Document the "set/show
+	remote swbreak-feature-packet" and "set/show remote
+	hwbreak-feature-packet" commands.
+	(Packets) <Z0>: Add cross link to the "swbreak" stop reason's
+	decription.
+	(Stop Reply Packets): Document the swbreak and hwbreak stop
+	reasons.
+	(General Query Packets): Document the swbreak and hwbreak
+	qSupported features.
+	(Remote Non-Stop): Explain that swbreak and hwbreak are required.
+
 2015-03-03  Philippe Proulx  eeppeliteloop@gmail.com
 
 	* gdb.texinfo (gdb/mi Async Records): Fix duplicate syscall-entry

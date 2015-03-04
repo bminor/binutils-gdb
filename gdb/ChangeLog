@@ -1,5 +1,33 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention the new "swbreak" and "hwbreak" stop reasons.
+	* remote.c (struct remote_state) <remote_stopped_by_watchpoint_p>:
+	Delete field.
+	<stop_reason>: New field.
+	(PACKET_swbreak_feature, PACKET_hwbreak_feature): New enum values.
+	(packet_set_cmd_state): New function.
+	(remote_protocol_features): Register the "swbreak" and "hwbreak"
+	features.
+	(remote_query_supported): If not disabled with the corresponding
+	"set remote foo-packet" command, report support for the swbreak
+	and hwbreak features.
+	(struct stop_reply) <remote_stopped_by_watchpoint_p>: Delete
+	field.
+	<stop_reason>: New field.
+	(remote_parse_stop_reply): Handle "swbreak" and "hwbreak".
+	(remote_wait_as): Adjust.
+	(remote_stopped_by_sw_breakpoint)
+	(remote_supports_stopped_by_sw_breakpoint)
+	(remote_stopped_by_hw_breakpoint)
+	(remote_supports_stopped_by_hw_breakpoint): New functions.
+	(remote_stopped_by_watchpoint): New function.
+	(init_remote_ops): Install them.
+	(_initialize_remote): Register new "set/show remote
+	swbreak-feature-packet" and "set/show remote
+	swbreak-feature-packet" commands.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	* btrace.h: Include target/waitstatus.h.
 	(struct btrace_thread_info) <stop_reason>: New field.
 	* record-btrace.c (record_btrace_step_thread): Use

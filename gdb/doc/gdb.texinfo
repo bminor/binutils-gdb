@@ -19783,6 +19783,15 @@ are:
 @item @code{conditional-breakpoints-packet}
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
+
+@item @code{swbreak-feature}
+@tab @code{swbreak stop reason}
+@tab @code{break}
+
+@item @code{hwbreak-feature}
+@tab @code{hwbreak stop reason}
+@tab @code{hbreak}
+
 @end multitable
 
 @node Remote Stub
@@ -34985,6 +34994,9 @@ form that should be evaluated on the target's side.  These are the
 conditions that should be taken into consideration when deciding if
 the breakpoint trigger should be reported back to @var{GDBN}.
 
+See also the @samp{swbreak} stop reason (@pxref{swbreak stop reason})
+for how to best report a memory breakpoint event to @value{GDBN}.
+
 The @var{cond_list} parameter is comprised of a series of expressions,
 concatenated without separators. Each expression has the following form:
 
@@ -35188,6 +35200,34 @@ logged execution events, because it has reached the end (or the
 beginning when executing backward) of the log.  The value of @var{r}
 will be either @samp{begin} or @samp{end}.  @xref{Reverse Execution}, 
 for more information.
+
+@item swbreak
+@anchor{swbreak stop reason}
+The packet indicates a memory breakpoint instruction was executed,
+irrespective of whether it was @value{GDBN} that planted the
+breakpoint or the breakpoint is hardcoded in the program.  The @var{r}
+part must be left empty.
+
+On some architectures, such as x86, at the architecture level, when a
+breakpoint instruction executes the program counter points at the
+breakpoint address plus an offset.  On such targets, the stub is
+responsible for adjusting the PC to point back at the breakpoint
+address.
+
+This packet should not be sent by default; older @value{GDBN} versions
+did not support it.  @value{GDBN} requests it, by supplying an
+appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
+remote stub must also supply the appropriate @samp{qSupported} feature
+indicating support.
+
+This packet is required for correct non-stop mode operation.
+
+@item hwbreak
+The packet indicates the target stopped for a hardware breakpoint.
+The @var{r} part must be left empty.
+
+The same remarks about @samp{qSupported} and non-stop mode above
+apply.
 @end table
 
 @item W @var{AA}
@@ -35772,6 +35812,14 @@ description.
 This feature indicates whether @value{GDBN} supports the
 @samp{qRelocInsn} packet (@pxref{Tracepoint Packets,,Relocate
 instruction reply packet}).
+
+@item swbreak
+This feature indicates whether @value{GDBN} supports the swbreak stop
+reason in stop replies.  @xref{swbreak stop reason}, for details.
+
+@item hwbreak
+This feature indicates whether @value{GDBN} supports the hwbreak stop
+reason in stop replies.  @xref{swbreak stop reason}, for details.
 @end table
 
 Stubs should ignore any unknown values for
@@ -36000,6 +36048,16 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{swbreak}
+@tab No
+@tab @samp{-}
+@tab No
+
+@item @samp{hwbreak}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36179,6 +36237,14 @@ The remote stub understands the @samp{Qbtrace:bts} packet.
 
 @item Qbtrace-conf:bts:size
 The remote stub understands the @samp{Qbtrace-conf:bts:size} packet.
+
+@item swbreak
+The remote stub reports the @samp{swbreak} stop reason for memory
+breakpoints.
+
+@item hwbreak
+The remote stub reports the @samp{hwbreak} stop reason for hardware
+breakpoints.
 
 @end table
 
@@ -37564,6 +37630,20 @@ asynchronous stop reply notifications until the sequence is complete.
 If all threads are running when the target receives the @samp{?} packet,
 or if the target is not attached to any process, it shall respond
 @samp{OK}.
+
+If the stub supports non-stop mode, it should also support the
+@samp{swbreak} stop reason if software breakpoints are supported, and
+the @samp{hwbreak} stop reason if hardware breakpoints are supported
+(@pxref{swbreak stop reason}).  This is because given the asynchronous
+nature of non-stop mode, between the time a thread hits a breakpoint
+and the time the event is finally processed by @value{GDBN}, the
+breakpoint may have already been removed from the target.  Due to
+this, @value{GDBN} needs to be able to tell whether a trap stop was
+caused by a delayed breakpoint event, which should be ignored, as
+opposed to a random trap signal, which should be reported to the user.
+Note the @samp{swbreak} feature implies that the target is responsible
+for adjusting the PC when a software breakpoint triggers, if
+necessary, such as on the x86 architecture.
 
 @node Packet Acknowledgment
 @section Packet Acknowledgment
