@@ -1,5 +1,33 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (need_moribund_for_location_type): New function.
+	(bpstat_stop_status): Don't skipping checking moribund locations
+	of breakpoint types which the target tell caused a stop.
+	(program_breakpoint_here_p): New function, factored out from ...
+	(bp_loc_is_permanent): ... this.
+	(update_global_location_list): Don't create a moribund location if
+	the target supports reporting stops of the type of the removed
+	breakpoint.
+	* breakpoint.h (program_breakpoint_here_p): New declaration.
+	* infrun.c (adjust_pc_after_break): Return early if the target has
+	already adjusted the PC.  Add comments.
+	(handle_signal_stop): If nothing explains a signal, and the target
+	tells us the stop was caused by a software breakpoint, check if
+	there's a breakpoint instruction in the memory.  If so, adjust the
+	PC before presenting the stop to the user.  Otherwise, ignore the
+	trap.  If nothing explains a signal, and the target tells us the
+	stop was caused by a hardware breakpoint, ignore the trap.
+	* target.h (struct target_ops) <to_stopped_by_sw_breakpoint,
+	to_supports_stopped_by_sw_breakpoint, to_stopped_by_hw_breakpoint,
+	to_supports_stopped_by_hw_breakpoint>: New fields.
+	(target_stopped_by_sw_breakpoint)
+	(target_supports_stopped_by_sw_breakpoint)
+	(target_stopped_by_hw_breakpoint)
+	(target_supports_stopped_by_hw_breakpoint): Define.
+	* target-delegates.c: Regenerate.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (follow_fork_inferior): Use the whole of the
 	inferior_ptid and pending_follow.related_pid ptids instead of
 	building ptids from the process components.  Adjust verbose output

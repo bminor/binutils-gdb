@@ -3468,6 +3468,18 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   if (execution_direction == EXEC_REVERSE)
     return;
 
+  /* If the target can tell whether the thread hit a SW breakpoint,
+     trust it.  Targets that can tell also adjust the PC
+     themselves.  */
+  if (target_supports_stopped_by_sw_breakpoint ())
+    return;
+
+  /* Note that relying on whether a breakpoint is planted in memory to
+     determine this can fail.  E.g,. the breakpoint could have been
+     removed since.  Or the thread could have been told to step an
+     instruction the size of a breakpoint instruction, and only
+     _after_ was a breakpoint inserted at its address.  */
+
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
   regcache = get_thread_regcache (ecs->ptid);
@@ -3483,6 +3495,11 @@ adjust_pc_after_break (struct execution_control_state *ecs)
      breakpoint would be.  */
   breakpoint_pc = regcache_read_pc (regcache) - decr_pc;
 
+  /* If the target can't tell whether a software breakpoint triggered,
+     fallback to figuring it out based on breakpoints we think were
+     inserted in the target, and on whether the thread was stepped or
+     continued.  */
+
   /* Check whether there actually is a software breakpoint inserted at
      that location.
 
@@ -3490,7 +3507,10 @@ adjust_pc_after_break (struct execution_control_state *ecs)
      removed a breakpoint, but stop events for that breakpoint were
      already queued and arrive later.  To suppress those spurious
      SIGTRAPs, we keep a list of such breakpoint locations for a bit,
-     and retire them after a number of stop events are reported.  */
+     and retire them after a number of stop events are reported.  Note
+     this is an heuristic and can thus get confused.  The real fix is
+     to get the "stopped by SW BP and needs adjustment" info out of
+     the target/kernel (and thus never reach here; see above).  */
   if (software_breakpoint_inserted_here_p (aspace, breakpoint_pc)
       || (non_stop && moribund_breakpoint_here_p (aspace, breakpoint_pc)))
     {
@@ -4504,6 +4524,54 @@ handle_signal_stop (struct execution_control_state *ecs)
   random_signal
     = !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
 			       ecs->event_thread->suspend.stop_signal);
+
+  /* Maybe this was a trap for a software breakpoint that has since
+     been removed.  */
+  if (random_signal && target_stopped_by_sw_breakpoint ())
+    {
+      if (program_breakpoint_here_p (gdbarch, stop_pc))
+	{
+	  struct regcache *regcache;
+	  int decr_pc;
+
+	  /* Re-adjust PC to what the program would see if GDB was not
+	     debugging it.  */
+	  regcache = get_thread_regcache (ecs->event_thread->ptid);
+	  decr_pc = target_decr_pc_after_break (gdbarch);
+	  if (decr_pc != 0)
+	    {
+	      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
+
+	      if (record_full_is_used ())
+		record_full_gdb_operation_disable_set ();
+
+	      regcache_write_pc (regcache, stop_pc + decr_pc);
+
+	      do_cleanups (old_cleanups);
+	    }
+	}
+      else
+	{
+	  /* A delayed software breakpoint event.  Ignore the trap.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: delayed software breakpoint "
+				"trap, ignoring\n");
+	  random_signal = 0;
+	}
+    }
+
+  /* Maybe this was a trap for a hardware breakpoint/watchpoint that
+     has since been removed.  */
+  if (random_signal && target_stopped_by_hw_breakpoint ())
+    {
+      /* A delayed hardware breakpoint event.  Ignore the trap.  */
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: delayed hardware breakpoint/watchpoint "
+			    "trap, ignoring\n");
+      random_signal = 0;
+    }
 
   /* If not, perhaps stepping/nexting can.  */
   if (random_signal)

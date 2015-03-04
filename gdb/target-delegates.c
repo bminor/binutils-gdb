@@ -293,6 +293,114 @@ debug_remove_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct b
 }
 
 static int
+delegate_stopped_by_sw_breakpoint (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_stopped_by_sw_breakpoint (self);
+}
+
+static int
+tdefault_stopped_by_sw_breakpoint (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
+debug_stopped_by_sw_breakpoint (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_stopped_by_sw_breakpoint (...)\n", debug_target.to_shortname);
+  result = debug_target.to_stopped_by_sw_breakpoint (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_stopped_by_sw_breakpoint (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
+delegate_supports_stopped_by_sw_breakpoint (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_supports_stopped_by_sw_breakpoint (self);
+}
+
+static int
+tdefault_supports_stopped_by_sw_breakpoint (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
+debug_supports_stopped_by_sw_breakpoint (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_supports_stopped_by_sw_breakpoint (...)\n", debug_target.to_shortname);
+  result = debug_target.to_supports_stopped_by_sw_breakpoint (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_supports_stopped_by_sw_breakpoint (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
+delegate_stopped_by_hw_breakpoint (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_stopped_by_hw_breakpoint (self);
+}
+
+static int
+tdefault_stopped_by_hw_breakpoint (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
+debug_stopped_by_hw_breakpoint (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_stopped_by_hw_breakpoint (...)\n", debug_target.to_shortname);
+  result = debug_target.to_stopped_by_hw_breakpoint (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_stopped_by_hw_breakpoint (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
+delegate_supports_stopped_by_hw_breakpoint (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_supports_stopped_by_hw_breakpoint (self);
+}
+
+static int
+tdefault_supports_stopped_by_hw_breakpoint (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
+debug_supports_stopped_by_hw_breakpoint (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_supports_stopped_by_hw_breakpoint (...)\n", debug_target.to_shortname);
+  result = debug_target.to_supports_stopped_by_hw_breakpoint (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_supports_stopped_by_hw_breakpoint (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
 delegate_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int arg3)
 {
   self = self->beneath;
@@ -3789,6 +3897,14 @@ install_delegators (struct target_ops *ops)
     ops->to_insert_breakpoint = delegate_insert_breakpoint;
   if (ops->to_remove_breakpoint == NULL)
     ops->to_remove_breakpoint = delegate_remove_breakpoint;
+  if (ops->to_stopped_by_sw_breakpoint == NULL)
+    ops->to_stopped_by_sw_breakpoint = delegate_stopped_by_sw_breakpoint;
+  if (ops->to_supports_stopped_by_sw_breakpoint == NULL)
+    ops->to_supports_stopped_by_sw_breakpoint = delegate_supports_stopped_by_sw_breakpoint;
+  if (ops->to_stopped_by_hw_breakpoint == NULL)
+    ops->to_stopped_by_hw_breakpoint = delegate_stopped_by_hw_breakpoint;
+  if (ops->to_supports_stopped_by_hw_breakpoint == NULL)
+    ops->to_supports_stopped_by_hw_breakpoint = delegate_supports_stopped_by_hw_breakpoint;
   if (ops->to_can_use_hw_breakpoint == NULL)
     ops->to_can_use_hw_breakpoint = delegate_can_use_hw_breakpoint;
   if (ops->to_ranged_break_num_registers == NULL)
@@ -4061,6 +4177,10 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_files_info = tdefault_files_info;
   ops->to_insert_breakpoint = memory_insert_breakpoint;
   ops->to_remove_breakpoint = memory_remove_breakpoint;
+  ops->to_stopped_by_sw_breakpoint = tdefault_stopped_by_sw_breakpoint;
+  ops->to_supports_stopped_by_sw_breakpoint = tdefault_supports_stopped_by_sw_breakpoint;
+  ops->to_stopped_by_hw_breakpoint = tdefault_stopped_by_hw_breakpoint;
+  ops->to_supports_stopped_by_hw_breakpoint = tdefault_supports_stopped_by_hw_breakpoint;
   ops->to_can_use_hw_breakpoint = tdefault_can_use_hw_breakpoint;
   ops->to_ranged_break_num_registers = tdefault_ranged_break_num_registers;
   ops->to_insert_hw_breakpoint = tdefault_insert_hw_breakpoint;
@@ -4205,6 +4325,10 @@ init_debug_target (struct target_ops *ops)
   ops->to_files_info = debug_files_info;
   ops->to_insert_breakpoint = debug_insert_breakpoint;
   ops->to_remove_breakpoint = debug_remove_breakpoint;
+  ops->to_stopped_by_sw_breakpoint = debug_stopped_by_sw_breakpoint;
+  ops->to_supports_stopped_by_sw_breakpoint = debug_supports_stopped_by_sw_breakpoint;
+  ops->to_stopped_by_hw_breakpoint = debug_stopped_by_hw_breakpoint;
+  ops->to_supports_stopped_by_hw_breakpoint = debug_supports_stopped_by_hw_breakpoint;
   ops->to_can_use_hw_breakpoint = debug_can_use_hw_breakpoint;
   ops->to_ranged_break_num_registers = debug_ranged_break_num_registers;
   ops->to_insert_hw_breakpoint = debug_insert_hw_breakpoint;

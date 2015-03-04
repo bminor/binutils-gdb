@@ -454,6 +454,35 @@ struct target_ops
     int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
 				 struct bp_target_info *)
       TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
+
+    /* Returns true if the target stopped because it executed a
+       software breakpoint.  This is necessary for correct background
+       execution / non-stop mode operation, and for correct PC
+       adjustment on targets where the PC needs to be adjusted when a
+       software breakpoint triggers.  In these modes, by the time GDB
+       processes a breakpoint event, the breakpoint may already be
+       done from the target, so GDB needs to be able to tell whether
+       it should ignore the event and whether it should adjust the PC.
+       See adjust_pc_after_break.  */
+    int (*to_stopped_by_sw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Returns true if the above method is supported.  */
+    int (*to_supports_stopped_by_sw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+
+    /* Returns true if the target stopped for a hardware breakpoint.
+       Likewise, if the target supports hardware breakpoints, this
+       method is necessary for correct background execution / non-stop
+       mode operation.  Even though hardware breakpoints do not
+       require PC adjustment, GDB needs to be able to tell whether the
+       hardware breakpoint event is a delayed event for a breakpoint
+       that is already gone and should thus be ignored.  */
+    int (*to_stopped_by_hw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Returns true if the above method is supported.  */
+    int (*to_supports_stopped_by_hw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+
     int (*to_can_use_hw_breakpoint) (struct target_ops *, int, int, int)
       TARGET_DEFAULT_RETURN (0);
     int (*to_ranged_break_num_registers) (struct target_ops *)
@@ -1742,6 +1771,21 @@ extern char *target_thread_name (struct thread_info *);
 
 #define target_stopped_by_watchpoint()		\
   ((*current_target.to_stopped_by_watchpoint) (&current_target))
+
+/* Returns non-zero if the target stopped because it executed a
+   software breakpoint instruction.  */
+
+#define target_stopped_by_sw_breakpoint()		\
+  ((*current_target.to_stopped_by_sw_breakpoint) (&current_target))
+
+#define target_supports_stopped_by_sw_breakpoint() \
+  ((*current_target.to_supports_stopped_by_sw_breakpoint) (&current_target))
+
+#define target_stopped_by_hw_breakpoint()				\
+  ((*current_target.to_stopped_by_hw_breakpoint) (&current_target))
+
+#define target_supports_stopped_by_hw_breakpoint() \
+  ((*current_target.to_supports_stopped_by_hw_breakpoint) (&current_target))
 
 /* Non-zero if we have steppable watchpoints  */
 
