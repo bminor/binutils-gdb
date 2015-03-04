@@ -1,3 +1,9 @@
+2015-03-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfxx-aarch64.c (decode_add_imm, decode_movw_imm)
+	(decode_tst_branch_ofs_14, decode_ld_lit_ofs_19)
+	(decode_cond_branch_ofs_19, decode_branch_ofs_26): Remove.
+
 2015-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17773
