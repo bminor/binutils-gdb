@@ -1,3 +1,10 @@
+2015-03-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c [PT_GET_PROCESS_STATE]
+	(inf_ptrace_insert_fork_catchpoint): New function.
+	(inf_ptrace_remove_fork_catchpoint): New function.
+	(inf_ptrace_target) [PT_GET_PROCESS_STATE]: Install them.
+
 2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (s390_register_name): Return empty string

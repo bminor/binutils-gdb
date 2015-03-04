@@ -58,6 +58,18 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child,
   return 0;
 }
 
+static int
+inf_ptrace_insert_fork_catchpoint (struct target_ops *self, int pid)
+{
+  return 0;
+}
+
+static int
+inf_ptrace_remove_fork_catchpoint (struct target_ops *self, int pid)
+{
+  return 0;
+}
+
 #endif /* PT_GET_PROCESS_STATE */
 
 
@@ -666,6 +678,8 @@ inf_ptrace_target (void)
   t->to_create_inferior = inf_ptrace_create_inferior;
 #ifdef PT_GET_PROCESS_STATE
   t->to_follow_fork = inf_ptrace_follow_fork;
+  t->to_insert_fork_catchpoint = inf_ptrace_insert_fork_catchpoint;
+  t->to_remove_fork_catchpoint = inf_ptrace_remove_fork_catchpoint;
   t->to_post_startup_inferior = inf_ptrace_post_startup_inferior;
   t->to_post_attach = inf_ptrace_post_attach;
 #endif
