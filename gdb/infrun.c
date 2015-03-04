@@ -3485,7 +3485,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   regcache = get_thread_regcache (ecs->ptid);
   gdbarch = get_regcache_arch (regcache);
 
-  decr_pc = target_decr_pc_after_break (gdbarch);
+  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
   if (decr_pc == 0)
     return;
 
@@ -4537,7 +4537,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  /* Re-adjust PC to what the program would see if GDB was not
 	     debugging it.  */
 	  regcache = get_thread_regcache (ecs->event_thread->ptid);
-	  decr_pc = target_decr_pc_after_break (gdbarch);
+	  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 	  if (decr_pc != 0)
 	    {
 	      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);

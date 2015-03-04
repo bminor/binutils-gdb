@@ -1,5 +1,19 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+	* target.h (struct target_ops) <to_decr_pc_after_break>: Delete.
+	(target_decr_pc_after_break): Delete declaration.
+	* target.c (default_target_decr_pc_after_break)
+	(target_decr_pc_after_break): Delete.
+	* linux-nat.c (check_stopped_by_breakpoint, linux_nat_wait_1): Use
+	gdbarch_decr_pc_after_break instead of target_decr_pc_after_break.
+	* linux-thread-db.c (check_event): Likewise.
+	* infrun.c (adjust_pc_after_break): Likewise.
+	* darwin-nat.c (cancel_breakpoint): Likewise.
+	* aix-thread.c (aix_thread_wait): Likewise.
+	* target-delegates.c: Regenerate.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (save_sigtrap): Check for breakpoints before
 	checking watchpoints.
 	(status_callback) [USE_SIGTRAP_SIGINFO]: Don't check whether a

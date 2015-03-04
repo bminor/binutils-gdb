@@ -1439,7 +1439,7 @@ check_event (ptid_t ptid)
   /* Bail out early if we're not at a thread event breakpoint.  */
   stop_pc = regcache_read_pc (regcache);
   if (!target_supports_stopped_by_sw_breakpoint ())
-    stop_pc -= target_decr_pc_after_break (gdbarch);
+    stop_pc -= gdbarch_decr_pc_after_break (gdbarch);
 
   if (stop_pc != info->td_create_bp_addr
       && stop_pc != info->td_death_bp_addr)

@@ -3805,29 +3805,6 @@ debug_get_tailcall_unwinder (struct target_ops *self)
   return result;
 }
 
-static CORE_ADDR
-delegate_decr_pc_after_break (struct target_ops *self, struct gdbarch *arg1)
-{
-  self = self->beneath;
-  return self->to_decr_pc_after_break (self, arg1);
-}
-
-static CORE_ADDR
-debug_decr_pc_after_break (struct target_ops *self, struct gdbarch *arg1)
-{
-  CORE_ADDR result;
-  fprintf_unfiltered (gdb_stdlog, "-> %s->to_decr_pc_after_break (...)\n", debug_target.to_shortname);
-  result = debug_target.to_decr_pc_after_break (&debug_target, arg1);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->to_decr_pc_after_break (", debug_target.to_shortname);
-  target_debug_print_struct_target_ops_p (&debug_target);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_struct_gdbarch_p (arg1);
-  fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (result);
-  fputs_unfiltered ("\n", gdb_stdlog);
-  return result;
-}
-
 static void
 delegate_prepare_to_generate_core (struct target_ops *self)
 {
@@ -4155,8 +4132,6 @@ install_delegators (struct target_ops *ops)
     ops->to_get_unwinder = delegate_get_unwinder;
   if (ops->to_get_tailcall_unwinder == NULL)
     ops->to_get_tailcall_unwinder = delegate_get_tailcall_unwinder;
-  if (ops->to_decr_pc_after_break == NULL)
-    ops->to_decr_pc_after_break = delegate_decr_pc_after_break;
   if (ops->to_prepare_to_generate_core == NULL)
     ops->to_prepare_to_generate_core = delegate_prepare_to_generate_core;
   if (ops->to_done_generating_core == NULL)
@@ -4306,7 +4281,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_augmented_libraries_svr4_read = tdefault_augmented_libraries_svr4_read;
   ops->to_get_unwinder = tdefault_get_unwinder;
   ops->to_get_tailcall_unwinder = tdefault_get_tailcall_unwinder;
-  ops->to_decr_pc_after_break = default_target_decr_pc_after_break;
   ops->to_prepare_to_generate_core = tdefault_prepare_to_generate_core;
   ops->to_done_generating_core = tdefault_done_generating_core;
 }
@@ -4454,7 +4428,6 @@ init_debug_target (struct target_ops *ops)
   ops->to_augmented_libraries_svr4_read = debug_augmented_libraries_svr4_read;
   ops->to_get_unwinder = debug_get_unwinder;
   ops->to_get_tailcall_unwinder = debug_get_tailcall_unwinder;
-  ops->to_decr_pc_after_break = debug_decr_pc_after_break;
   ops->to_prepare_to_generate_core = debug_prepare_to_generate_core;
   ops->to_done_generating_core = debug_done_generating_core;
 }

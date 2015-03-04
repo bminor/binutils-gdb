@@ -2685,7 +2685,7 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 #endif
 
   pc = regcache_read_pc (regcache);
-  sw_bp_pc = pc - target_decr_pc_after_break (gdbarch);
+  sw_bp_pc = pc - gdbarch_decr_pc_after_break (gdbarch);
 
 #if USE_SIGTRAP_SIGINFO
   if (linux_nat_get_siginfo (lp->ptid, &siginfo))
@@ -3460,7 +3460,7 @@ linux_nat_wait_1 (struct target_ops *ops,
     {
       struct regcache *regcache = get_thread_regcache (lp->ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
-      int decr_pc = target_decr_pc_after_break (gdbarch);
+      int decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 
       if (decr_pc != 0)
 	{
