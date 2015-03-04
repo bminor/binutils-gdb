@@ -1,3 +1,8 @@
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/clone-thread_db.c: Include unistd.h and pthread.h.
+	(main): Pass missing retval argument to pthread_join call.
+
 2015-03-02  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/thread-execl.exp (do_test): Handle non-stop.
