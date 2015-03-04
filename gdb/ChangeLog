@@ -1,5 +1,35 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+	* btrace.h: Include target/waitstatus.h.
+	(struct btrace_thread_info) <stop_reason>: New field.
+	* record-btrace.c (record_btrace_step_thread): Use
+	record_check_stopped_by_breakpoint instead of breakpoint_here_p.
+	(record_btrace_decr_pc_after_break): Delete.
+	(record_btrace_stopped_by_sw_breakpoint)
+	(record_btrace_supports_stopped_by_sw_breakpoint)
+	(record_btrace_stopped_by_hw_breakpoint)
+	(record_btrace_supports_stopped_by_hw_breakpoint): New functions.
+	(init_record_btrace_ops): Install them.
+	* record-full.c (record_full_hw_watchpoint): Delete and replace
+	with ...
+	(record_full_stop_reason): ... this throughout.
+	(record_full_exec_insn): Adjust.
+	(record_full_wait_1): Adjust.  No longer re-increment the PC.
+	(record_full_wait_1): Adjust.  Use
+	record_check_stopped_by_breakpoint instead of breakpoint_here_p.
+	(record_full_stopped_by_watchpoint): Adjust.
+	(record_full_stopped_by_sw_breakpoint)
+	(record_full_supports_stopped_by_sw_breakpoint)
+	(record_full_supports_stopped_by_sw_breakpoint)
+	(record_full_stopped_by_hw_breakpoint)
+	(record_full_supports_stopped_by_hw_breakpoint): New functions.
+	(init_record_full_ops, init_record_full_core_ops): Install them.
+	* record.c (record_check_stopped_by_breakpoint): New function.
+	* record.h: Include target/waitstatus.h.
+	(record_check_stopped_by_breakpoint): New declaration.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	enum lwp_stop_reason -> enum target_stop_reason
 	* linux-nat.c (linux_resume_one_lwp, check_stopped_by_watchpoint)
 	(linux_nat_stopped_by_watchpoint, status_callback)

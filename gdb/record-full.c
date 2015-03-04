@@ -688,7 +688,8 @@ record_full_gdb_operation_disable_set (void)
 }
 
 /* Flag set to TRUE for target_stopped_by_watchpoint.  */
-static int record_full_hw_watchpoint = 0;
+static enum target_stop_reason record_full_stop_reason
+  = TARGET_STOPPED_BY_NO_REASON;
 
 /* Execute one instruction from the record log.  Each instruction in
    the log will be represented by an arbitrary sequence of register
@@ -766,7 +767,7 @@ record_full_exec_insn (struct regcache *regcache,
 		    if (hardware_watchpoint_inserted_in_range
 			(get_regcache_aspace (regcache),
 			 entry->u.mem.addr, entry->u.mem.len))
-		      record_full_hw_watchpoint = 1;
+		      record_full_stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 		  }
               }
           }
@@ -1079,6 +1080,8 @@ record_full_wait_1 (struct target_ops *ops,
   record_full_get_sig = 0;
   signal (SIGINT, record_full_sig_handler);
 
+  record_full_stop_reason = TARGET_STOPPED_BY_NO_REASON;
+
   if (!RECORD_FULL_IS_REPLAY && ops != &record_full_core_ops)
     {
       if (record_full_resume_step)
@@ -1119,6 +1122,8 @@ record_full_wait_1 (struct target_ops *ops,
 		{
 		  struct regcache *regcache;
 		  struct address_space *aspace;
+		  enum target_stop_reason *stop_reason_p
+		    = &record_full_stop_reason;
 
 		  /* Yes -- this is likely our single-step finishing,
 		     but check if there's any reason the core would be
@@ -1133,20 +1138,11 @@ record_full_wait_1 (struct target_ops *ops,
 		    {
 		      /* Always interested in watchpoints.  */
 		    }
-		  else if (breakpoint_inserted_here_p (aspace, tmp_pc))
+		  else if (record_check_stopped_by_breakpoint (aspace, tmp_pc,
+							       stop_reason_p))
 		    {
 		      /* There is a breakpoint here.  Let the core
 			 handle it.  */
-		      if (software_breakpoint_inserted_here_p (aspace, tmp_pc))
-			{
-			  struct gdbarch *gdbarch
-			    = get_regcache_arch (regcache);
-			  CORE_ADDR decr_pc_after_break
-			    = target_decr_pc_after_break (gdbarch);
-			  if (decr_pc_after_break)
-			    regcache_write_pc (regcache,
-					       tmp_pc + decr_pc_after_break);
-			}
 		    }
 		  else
 		    {
@@ -1205,27 +1201,20 @@ record_full_wait_1 (struct target_ops *ops,
 	= make_cleanup (record_full_wait_cleanups, 0);
       CORE_ADDR tmp_pc;
 
-      record_full_hw_watchpoint = 0;
+      record_full_stop_reason = TARGET_STOPPED_BY_NO_REASON;
       status->kind = TARGET_WAITKIND_STOPPED;
 
       /* Check breakpoint when forward execute.  */
       if (execution_direction == EXEC_FORWARD)
 	{
 	  tmp_pc = regcache_read_pc (regcache);
-	  if (breakpoint_inserted_here_p (aspace, tmp_pc))
+	  if (record_check_stopped_by_breakpoint (aspace, tmp_pc,
+						  &record_full_stop_reason))
 	    {
-	      int decr_pc_after_break = target_decr_pc_after_break (gdbarch);
-
 	      if (record_debug)
 		fprintf_unfiltered (gdb_stdlog,
 				    "Process record: break at %s.\n",
 				    paddress (gdbarch, tmp_pc));
-
-	      if (decr_pc_after_break
-		  && !record_full_resume_step
-		  && software_breakpoint_inserted_here_p (aspace, tmp_pc))
-		regcache_write_pc (regcache,
-				   tmp_pc + decr_pc_after_break);
 	      goto replay_out;
 	    }
 	}
@@ -1293,27 +1282,19 @@ record_full_wait_1 (struct target_ops *ops,
 
 		  /* check breakpoint */
 		  tmp_pc = regcache_read_pc (regcache);
-		  if (breakpoint_inserted_here_p (aspace, tmp_pc))
+		  if (record_check_stopped_by_breakpoint (aspace, tmp_pc,
+							  &record_full_stop_reason))
 		    {
-		      int decr_pc_after_break
-			= target_decr_pc_after_break (gdbarch);
-
 		      if (record_debug)
 			fprintf_unfiltered (gdb_stdlog,
 					    "Process record: break "
 					    "at %s.\n",
 					    paddress (gdbarch, tmp_pc));
-		      if (decr_pc_after_break
-			  && execution_direction == EXEC_FORWARD
-			  && !record_full_resume_step
-			  && software_breakpoint_inserted_here_p (aspace,
-								  tmp_pc))
-			regcache_write_pc (regcache,
-					   tmp_pc + decr_pc_after_break);
+
 		      continue_flag = 0;
 		    }
 
-		  if (record_full_hw_watchpoint)
+		  if (record_full_stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
 		    {
 		      if (record_debug)
 			fprintf_unfiltered (gdb_stdlog,
@@ -1384,7 +1365,7 @@ static int
 record_full_stopped_by_watchpoint (struct target_ops *ops)
 {
   if (RECORD_FULL_IS_REPLAY)
-    return record_full_hw_watchpoint;
+    return record_full_stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
   else
     return ops->beneath->to_stopped_by_watchpoint (ops->beneath);
 }
@@ -1396,6 +1377,40 @@ record_full_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
     return 0;
   else
     return ops->beneath->to_stopped_data_address (ops->beneath, addr_p);
+}
+
+/* The to_stopped_by_sw_breakpoint method of target record-full.  */
+
+static int
+record_full_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  return record_full_stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT;
+}
+
+/* The to_supports_stopped_by_sw_breakpoint method of target
+   record-full.  */
+
+static int
+record_full_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  return 1;
+}
+
+/* The to_stopped_by_hw_breakpoint method of target record-full.  */
+
+static int
+record_full_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  return record_full_stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT;
+}
+
+/* The to_supports_stopped_by_sw_breakpoint method of target
+   record-full.  */
+
+static int
+record_full_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  return 1;
 }
 
 /* Record registers change (by user or by GDB) to list as an instruction.  */
@@ -1926,6 +1941,14 @@ init_record_full_ops (void)
   record_full_ops.to_remove_breakpoint = record_full_remove_breakpoint;
   record_full_ops.to_stopped_by_watchpoint = record_full_stopped_by_watchpoint;
   record_full_ops.to_stopped_data_address = record_full_stopped_data_address;
+  record_full_ops.to_stopped_by_sw_breakpoint
+    = record_full_stopped_by_sw_breakpoint;
+  record_full_ops.to_supports_stopped_by_sw_breakpoint
+    = record_full_supports_stopped_by_sw_breakpoint;
+  record_full_ops.to_stopped_by_hw_breakpoint
+    = record_full_stopped_by_hw_breakpoint;
+  record_full_ops.to_supports_stopped_by_hw_breakpoint
+    = record_full_supports_stopped_by_hw_breakpoint;
   record_full_ops.to_can_execute_reverse = record_full_can_execute_reverse;
   record_full_ops.to_stratum = record_stratum;
   /* Add bookmark target methods.  */
@@ -2164,6 +2187,14 @@ init_record_full_core_ops (void)
     = record_full_stopped_by_watchpoint;
   record_full_core_ops.to_stopped_data_address
     = record_full_stopped_data_address;
+  record_full_core_ops.to_stopped_by_sw_breakpoint
+    = record_full_stopped_by_sw_breakpoint;
+  record_full_core_ops.to_supports_stopped_by_sw_breakpoint
+    = record_full_supports_stopped_by_sw_breakpoint;
+  record_full_core_ops.to_stopped_by_hw_breakpoint
+    = record_full_stopped_by_hw_breakpoint;
+  record_full_core_ops.to_supports_stopped_by_hw_breakpoint
+    = record_full_supports_stopped_by_hw_breakpoint;
   record_full_core_ops.to_can_execute_reverse
     = record_full_can_execute_reverse;
   record_full_core_ops.to_has_execution = record_full_core_has_execution;
