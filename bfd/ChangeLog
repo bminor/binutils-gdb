@@ -1,3 +1,12 @@
+2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* cpu-s390.c (N): New macro.
+	(bfd_s390_31_arch): New.  Define only if default target word size
+	is 64 bits.  Otherwise define...
+	(bfd_390_64_arch): ...this.  Make static.
+	(bfd_s390_arch): Define according to the default target word size.
+	Let the 'next' field point to the alternate arch.
+
 2015-03-04  Richard Sandiford  <richard.sandiford@arm.com>
 
 	PR gas/17843
