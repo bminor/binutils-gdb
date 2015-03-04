@@ -1,4 +1,4 @@
-2015-03-04  Mark Kettenis  <kettenis@gnu.orgOB>
+2015-03-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/foll-fork.exp: Enable on *-*-openbsd*.
 
