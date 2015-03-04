@@ -1,3 +1,9 @@
+2015-03-04  Richard Sandiford  <richard.sandiford@arm.com>
+
+	PR gas/17843
+	* ld-aarch64/tlsle.s, ld-aarch64/tlsle.d: New test.
+	* ld-aarch64/aarch64-elf.exp: Run it.
+
 2015-02-28  Alan Modra  <amodra@gmail.com>
 
 	* ld-sparc/gotop32.rd: Update for changed padding in data sections.

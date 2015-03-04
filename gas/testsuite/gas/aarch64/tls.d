@@ -31,3 +31,7 @@ Disassembly of section \.text:
 			2c: R_AARCH64_TLSLE_ADD_TPREL_HI12	var
   30:	91000020 	add	x0, x1, #0x0
 			30: R_AARCH64_TLSLE_ADD_TPREL_LO12_NC	var
+  34:	d2a00000 	movz	x0, #0x0, lsl #16
+			34: R_AARCH64_TLSLE_MOVW_TPREL_G1	var
+  38:	f2800000 	movk	x0, #0x0
+			38: R_AARCH64_TLSLE_MOVW_TPREL_G0_NC	var

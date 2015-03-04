@@ -4520,9 +4520,7 @@ process_movw_reloc_info (void)
       case BFD_RELOC_AARCH64_MOVW_G1_S:
       case BFD_RELOC_AARCH64_MOVW_G2_S:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
-      case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
-      case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
 	set_syntax_error
 	  (_("the specified relocation type is not allowed for MOVK"));

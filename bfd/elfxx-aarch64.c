@@ -304,9 +304,7 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
 
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
@@ -327,6 +325,8 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
       /* Group relocations to create a 16, 32, 48 or 64 bit unsigned
          data or abs address inline.  */
 
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G1:
