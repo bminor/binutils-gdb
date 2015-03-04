@@ -269,15 +269,15 @@ regnum_is_vxr_full (struct gdbarch_tdep *tdep, int regnum)
 	  && regnum <= tdep->v0_full_regnum + 15);
 }
 
-/* Return the name of register REGNO.  Return NULL for registers that
-   shouldn't be visible.  */
+/* Return the name of register REGNO.  Return the empty string for
+   registers that shouldn't be visible.  */
 
 static const char *
 s390_register_name (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= S390_V0_LOWER_REGNUM
       && regnum <= S390_V15_LOWER_REGNUM)
-    return NULL;
+    return "";
   return tdesc_register_name (gdbarch, regnum);
 }
 

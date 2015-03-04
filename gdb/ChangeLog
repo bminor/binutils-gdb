@@ -1,5 +1,10 @@
 2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (s390_register_name): Return empty string
+	instead of NULL for registers that shouldn't be visible.
+
+2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (s390_gdbarch_init): Use the correct syscall
 	XML file for 64-bit targets.
 
