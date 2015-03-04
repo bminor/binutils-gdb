@@ -3313,7 +3313,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						    s390_address_class_type_flags_to_name);
       set_gdbarch_address_class_name_to_type_flags (gdbarch,
 						    s390_address_class_name_to_type_flags);
-      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390);
+      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390X);
       break;
     }
 

@@ -1,3 +1,8 @@
+2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_gdbarch_init): Use the correct syscall
+	XML file for 64-bit targets.
+
 2015-03-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target.h (find_default_create_inferior): Remove declaration.
