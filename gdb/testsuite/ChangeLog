@@ -1,5 +1,11 @@
 2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/breakpoint-in-ro-region.exp (test_single_step): In the
+	regexps for GDB's current line display, accept a hex address
+	preceding the line number.
+
+2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/catch-syscall.exp (test_catch_syscall_multi_arch): Set
 	the 'arch1' variable for "s390*-linux*" targets.
 
