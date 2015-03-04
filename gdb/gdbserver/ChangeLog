@@ -1,5 +1,22 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+        * linux-low.c (check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]:
+	Decide whether a breakpoint triggered based on the SIGTRAP's
+	siginfo.si_code.
+        (thread_still_has_status_pending_p) [USE_SIGTRAP_SIGINFO]: Don't check whether a
+        breakpoint is inserted if relying on SIGTRAP's siginfo.si_code.
+	(linux_low_filter_event): Check for breakpoints before checking
+	watchpoints.
+	(linux_wait_1): Don't re-increment the PC if relying on SIGTRAP's
+	siginfo.si_code.
+        (linux_stopped_by_sw_breakpoint)
+        (linux_supports_stopped_by_sw_breakpoint)
+        (linux_stopped_by_hw_breakpoint)
+        (linux_supports_stopped_by_hw_breakpoint): New functions.
+        (linux_target_ops): Install new target methods.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	* remote-utils.c (prepare_resume_reply): Report swbreak/hbreak.
 	* server.c (swbreak_feature, hwbreak_feature): New globals.
 	(handle_query) <qSupported>: Handle "swbreak+" and "hwbreak+".
