@@ -125,6 +125,7 @@ Parameters::set_target_once(Target* target)
 {
   gold_assert(this->target_ == NULL);
   this->target_ = target;
+  target->select_as_default_target();
   if (this->options_valid())
     {
       this->check_target_endianness();
@@ -297,7 +298,6 @@ void
 set_parameters_target(Target* target)
 {
   static_parameters.set_target(target);
-  target->select_as_default_target();
 }
 
 void

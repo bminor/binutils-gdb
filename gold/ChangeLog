@@ -1,4 +1,10 @@
-2015-03-02  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+2015-03-04  Cary Coutant  <ccoutant@google.com>
+
+	* parameters.cc (Parameters::set_target_once): Call
+	Target::select_as_default_target just once from here...
+	(set_parameters_target): ...instead of from here.
+
+2015-03-04  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* ehframe.cc (Cie::set_output_offset): Pass in and use a
 	Output_section_data instead of a Merge_map.
@@ -65,13 +71,13 @@
 	(Merged_symbol_value<size>::value_from_output_section): Use
 	object->merge_output_offset.
 
-2015-02-04  Peter Collingbourne  <pcc@google.com>
+2015-03-02  Peter Collingbourne  <pcc@google.com>
             Cary Coutant  <ccoutant@google.com>
 
 	* output.cc (Output_section::add_merge_input_section): Do not
 	attempt to merge sections with an entsize of 0.
 
-2015-02-02  Khem Raj  <raj.khem@gmail.com>
+2015-03-02  Khem Raj  <raj.khem@gmail.com>
 
 	* attributes.h (class Output_attributes_section_data ): Add
 	do_print_to_mapfile function.
