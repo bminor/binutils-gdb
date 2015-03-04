@@ -1,3 +1,13 @@
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (follow_fork_inferior): Use the whole of the
+	inferior_ptid and pending_follow.related_pid ptids instead of
+	building ptids from the process components.  Adjust verbose output
+	to use target_pid_to_str.
+	* linux-nat.c (linux_child_follow_fork): Use the whole of the
+	inferior_ptid and pending_follow.related_pid ptids instead of
+	building ptids from the process components.
+
 2015-03-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c [PT_GET_PROCESS_STATE]

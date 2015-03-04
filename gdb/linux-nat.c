@@ -387,20 +387,19 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
       int status = W_STOPCODE (0);
       struct cleanup *old_chain;
       int has_vforked;
+      ptid_t parent_ptid, child_ptid;
       int parent_pid, child_pid;
 
       has_vforked = (inferior_thread ()->pending_follow.kind
 		     == TARGET_WAITKIND_VFORKED);
-      parent_pid = ptid_get_lwp (inferior_ptid);
-      if (parent_pid == 0)
-	parent_pid = ptid_get_pid (inferior_ptid);
-      child_pid
-	= ptid_get_pid (inferior_thread ()->pending_follow.value.related_pid);
-
+      parent_ptid = inferior_ptid;
+      child_ptid = inferior_thread ()->pending_follow.value.related_pid;
+      parent_pid = ptid_get_lwp (parent_ptid);
+      child_pid = ptid_get_lwp (child_ptid);
 
       /* We're already attached to the parent, by default.  */
       old_chain = save_inferior_ptid ();
-      inferior_ptid = ptid_build (child_pid, child_pid, 0);
+      inferior_ptid = child_ptid;
       child_lp = add_lwp (inferior_ptid);
       child_lp->stopped = 1;
       child_lp->last_resume_kind = resume_stop;
@@ -457,7 +456,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	{
 	  struct lwp_info *parent_lp;
 
-	  parent_lp = find_lwp_pid (pid_to_ptid (parent_pid));
+	  parent_lp = find_lwp_pid (parent_ptid);
 	  gdb_assert (linux_supports_tracefork () >= 0);
 
 	  if (linux_supports_tracevforkdone ())
