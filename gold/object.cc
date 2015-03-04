@@ -41,6 +41,7 @@
 #include "plugin.h"
 #include "compressed_output.h"
 #include "incremental.h"
+#include "merge.h"
 
 namespace gold
 {
@@ -267,6 +268,50 @@ Object::handle_split_stack_section(const char* name)
 }
 
 // Class Relobj
+
+template<int size>
+void
+Relobj::initialize_input_to_output_map(unsigned int shndx,
+	  typename elfcpp::Elf_types<size>::Elf_Addr starting_address,
+	  Unordered_map<section_offset_type,
+	  typename elfcpp::Elf_types<size>::Elf_Addr>* output_addresses) const {
+  Object_merge_map *map = this->object_merge_map_;
+  map->initialize_input_to_output_map<size>(shndx, starting_address,
+					    output_addresses);
+}
+
+void
+Relobj::add_merge_mapping(Output_section_data *output_data,
+                          unsigned int shndx, section_offset_type offset,
+                          section_size_type length,
+                          section_offset_type output_offset) {
+  if (this->object_merge_map_ == NULL)
+    {
+      this->object_merge_map_ =  new Object_merge_map();
+    }
+
+  this->object_merge_map_->add_mapping(output_data, shndx, offset, length,
+				       output_offset);
+}
+
+bool
+Relobj::merge_output_offset(unsigned int shndx, section_offset_type offset,
+                            section_offset_type *poutput) const {
+  Object_merge_map* object_merge_map = this->object_merge_map_;
+  if (object_merge_map == NULL)
+    return false;
+  return object_merge_map->get_output_offset(shndx, offset, poutput);
+}
+
+bool
+Relobj::is_merge_section_for(const Output_section_data* output_data,
+                             unsigned int shndx) const {
+  Object_merge_map* object_merge_map = this->object_merge_map_;
+  if (object_merge_map == NULL)
+    return false;
+  return object_merge_map->is_merge_section_for(output_data, shndx);
+
+}
 
 // To copy the symbols data read from the file to a local data structure.
 // This function is called from do_layout only while doing garbage
@@ -3208,6 +3253,24 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 }
 
 // Instantiate the templates we need.
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+void
+Relobj::initialize_input_to_output_map<64>(unsigned int shndx,
+      typename elfcpp::Elf_types<64>::Elf_Addr starting_address,
+      Unordered_map<section_offset_type,
+      typename elfcpp::Elf_types<64>::Elf_Addr>* output_addresses) const;
+#endif
+
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+void
+Relobj::initialize_input_to_output_map<32>(unsigned int shndx,
+      typename elfcpp::Elf_types<32>::Elf_Addr starting_address,
+      Unordered_map<section_offset_type,
+      typename elfcpp::Elf_types<32>::Elf_Addr>* output_addresses) const;
+#endif
 
 #ifdef HAVE_TARGET_32_LITTLE
 template

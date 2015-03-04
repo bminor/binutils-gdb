@@ -62,15 +62,14 @@ Object_merge_map::get_input_merge_map(unsigned int shndx)
 // Get or create the Input_merge_map to use for an input section.
 
 Object_merge_map::Input_merge_map*
-Object_merge_map::get_or_make_input_merge_map(const Merge_map* merge_map,
-					      unsigned int shndx)
-{
+Object_merge_map::get_or_make_input_merge_map(
+    const Output_section_data* output_data, unsigned int shndx) {
   Input_merge_map* map = this->get_input_merge_map(shndx);
   if (map != NULL)
     {
       // For a given input section in a given object, every mapping
       // must be done with the same Merge_map.
-      gold_assert(map->merge_map == merge_map);
+      gold_assert(map->output_data == output_data);
       return map;
     }
 
@@ -78,18 +77,18 @@ Object_merge_map::get_or_make_input_merge_map(const Merge_map* merge_map,
   if (this->first_shnum_ == -1U)
     {
       this->first_shnum_ = shndx;
-      this->first_map_.merge_map = merge_map;
+      this->first_map_.output_data = output_data;
       return &this->first_map_;
     }
   if (this->second_shnum_ == -1U)
     {
       this->second_shnum_ = shndx;
-      this->second_map_.merge_map = merge_map;
+      this->second_map_.output_data = output_data;
       return &this->second_map_;
     }
 
   Input_merge_map* new_map = new Input_merge_map;
-  new_map->merge_map = merge_map;
+  new_map->output_data = output_data;
   this->section_merge_maps_[shndx] = new_map;
   return new_map;
 }
@@ -97,12 +96,13 @@ Object_merge_map::get_or_make_input_merge_map(const Merge_map* merge_map,
 // Add a mapping.
 
 void
-Object_merge_map::add_mapping(const Merge_map* merge_map, unsigned int shndx,
+Object_merge_map::add_mapping(const Output_section_data* output_data,
+			      unsigned int shndx,
 			      section_offset_type input_offset,
 			      section_size_type length,
 			      section_offset_type output_offset)
 {
-  Input_merge_map* map = this->get_or_make_input_merge_map(merge_map, shndx);
+  Input_merge_map* map = this->get_or_make_input_merge_map(output_data, shndx);
 
   // Try to merge the new entry in the last one we saw.
   if (!map->entries.empty())
@@ -142,14 +142,12 @@ Object_merge_map::add_mapping(const Merge_map* merge_map, unsigned int shndx,
 // Get the output offset for an input address.
 
 bool
-Object_merge_map::get_output_offset(const Merge_map* merge_map,
-				    unsigned int shndx,
+Object_merge_map::get_output_offset(unsigned int shndx,
 				    section_offset_type input_offset,
 				    section_offset_type* output_offset)
 {
   Input_merge_map* map = this->get_input_merge_map(shndx);
-  if (map == NULL
-      || (merge_map != NULL && map->merge_map != merge_map))
+  if (map == NULL)
     return false;
 
   if (!map->sorted)
@@ -181,12 +179,12 @@ Object_merge_map::get_output_offset(const Merge_map* merge_map,
 
 // Return whether this is the merge map for section SHNDX.
 
-inline bool
-Object_merge_map::is_merge_section_for(const Merge_map* merge_map,
+bool
+Object_merge_map::is_merge_section_for(const Output_section_data* output_data,
 				       unsigned int shndx)
 {
   Input_merge_map* map = this->get_input_merge_map(shndx);
-  return map != NULL && map->merge_map == merge_map;
+  return map != NULL && map->output_data == output_data;
 }
 
 // Initialize a mapping from input offsets to output addresses.
@@ -228,57 +226,6 @@ Object_merge_map::initialize_input_to_output_map(
     }
 }
 
-// Class Merge_map.
-
-// Add a mapping for the bytes from OFFSET to OFFSET + LENGTH in input
-// section SHNDX in object OBJECT to an OUTPUT_OFFSET in merged data
-// in an output section.
-
-void
-Merge_map::add_mapping(Relobj* object, unsigned int shndx,
-		       section_offset_type offset, section_size_type length,
-		       section_offset_type output_offset)
-{
-  gold_assert(object != NULL);
-  Object_merge_map* object_merge_map = object->merge_map();
-  if (object_merge_map == NULL)
-    {
-      object_merge_map = new Object_merge_map();
-      object->set_merge_map(object_merge_map);
-    }
-
-  object_merge_map->add_mapping(this, shndx, offset, length, output_offset);
-}
-
-// Return the output offset for an input address.  The input address
-// is at offset OFFSET in section SHNDX in OBJECT.  This sets
-// *OUTPUT_OFFSET to the offset in the merged data in the output
-// section.  This returns true if the mapping is known, false
-// otherwise.
-
-bool
-Merge_map::get_output_offset(const Relobj* object, unsigned int shndx,
-			     section_offset_type offset,
-			     section_offset_type* output_offset) const
-{
-  Object_merge_map* object_merge_map = object->merge_map();
-  if (object_merge_map == NULL)
-    return false;
-  return object_merge_map->get_output_offset(this, shndx, offset,
-					     output_offset);
-}
-
-// Return whether this is the merge section for SHNDX in OBJECT.
-
-bool
-Merge_map::is_merge_section_for(const Relobj* object, unsigned int shndx) const
-{
-  Object_merge_map* object_merge_map = object->merge_map();
-  if (object_merge_map == NULL)
-    return false;
-  return object_merge_map->is_merge_section_for(this, shndx);
-}
-
 // Class Output_merge_base.
 
 // Return the output offset for an input offset.  The input address is
@@ -291,16 +238,7 @@ Output_merge_base::do_output_offset(const Relobj* object,
 				    section_offset_type offset,
 				    section_offset_type* poutput) const
 {
-  return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
-}
-
-// Return whether this is the merge section for SHNDX in OBJECT.
-
-bool
-Output_merge_base::do_is_merge_section_for(const Relobj* object,
-					   unsigned int shndx) const
-{
-  return this->merge_map_.is_merge_section_for(object, shndx);
+  return object->merge_output_offset(shndx, offset, poutput);
 }
 
 // Record a merged input section for script processing.
@@ -436,7 +374,7 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
 	}
 
       // Record the offset of this constant in the output section.
-      this->add_mapping(object, shndx, i, entsize, k);
+      object->add_merge_mapping(this, shndx, i, entsize, k);
     }
 
   // For script processing, we keep the input sections.
@@ -625,8 +563,8 @@ Output_merge_string<Char_type>::finalize_merged_data()
 	{
 	  section_size_type length = p->offset - last_input_offset;
 	  if (length > 0)
-	    this->add_mapping((*l)->object, (*l)->shndx, last_input_offset,
-	    		      length, last_output_offset);
+	    (*l)->object->add_merge_mapping(this, (*l)->shndx,
+                              last_input_offset, length, last_output_offset);
 	  last_input_offset = p->offset;
 	  if (p->stringpool_key != 0)
 	    last_output_offset =

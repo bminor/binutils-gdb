@@ -1,3 +1,70 @@
+2015-03-02  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* ehframe.cc (Cie::set_output_offset): Pass in and use a
+	Output_section_data instead of a Merge_map.
+	(Eh_frame::Eh_frame): Don't initialize merge_map_.
+	(Eh_frame::read_cie): Use add_merge_mapping instead of
+	Merge_map::add_mapping.
+	(Eh_frame::read_fde): Ditto.
+	(Eh_frame::set_final_data_size): Use this instead of this->merge_map_.
+	(Eh_frame::do_output_offset): Use merge_output_offset istead of
+	merge_map_->get_output_offset.
+	(Eh_frame::do_is_merge_section_for): Delete.
+	* ehframe.h (Fde::add_mapping): Pass in and use a Output_section_data
+	instead of a Merge_map.
+	(Cie::set_output_offset): Pass in a Output_section_data instead of a
+	Merge_map.
+	(Eh_frame::do_is_merge_section_for): Delete.
+	(Eh_frame::merge_map_): Delete.
+	* merge.cc (Object_merge_map::get_or_make_input_merge_map): Pass in
+	and use a Output_section_data instead of a Merge_map.
+	(Object_merge_map::add_mapping): Ditto.
+	(Object_merge_map::get_output_offset): Remove the merge_map argument.
+	(Object_merge_map::is_merge_section_for): Pass in and use a
+	Output_section_data instead of a Merge_map.
+	(Merge_map): Delete.
+	(Output_merge_base::do_output_offset): Use merge_output_offset instead
+	of merge_map_.get_output_offset.
+	(Output_merge_base::do_is_merge_section_for): Delete.
+	(Output_merge_data::do_add_input_section): Use
+	object->add_merge_mapping instead of add_mapping.
+	(Output_merge_string<Char_type>::finalize_merged_data): Ditto.
+	* merge.h (Merge_map): Delete forward declaration.
+	(Object_merge_map::add_mapping): Pass in and use a Output_section_data
+	instead of a Merge_map.
+	(Object_merge_map::get_output_offset): Remove the merge_map argument.
+	(Object_merge_map::is_merge_section_for): Pass in and use a
+	Output_section_data instead of a Merge_map.
+	(Input_merge_map::Object_merge_map::merge_map): Replace with
+	output_data.
+	(Object_merge_map::get_or_make_input_merge_map): Pass in and use a
+	Output_section_data instead of a Merge_map.
+	(Merge_map): Delete.
+	(Output_merge_base::Output_merge_base): Don't initialize merge_map_.
+	(Output_merge_base::do_is_merge_section_for): Delete.
+	(Output_merge_base::add_mapping): Delete.
+	(Output_merge_base::merge_map_): Delete.
+	* object.cc (Relobj::initialize_input_to_output_map): New.
+	(Relobj::initialize_input_to_output_map): New.
+	(Relobj::merge_output_offset): New.
+	(Relobj::is_merge_section_for): New.
+	(Relobj::initialize_input_to_output_map): Instantiate for 32 and 64
+	bits.
+	* object.h (Relobj::merge_map): Delete.
+	(initialize_input_to_output_map): New.
+	(set_merge_map): Delete.
+	(add_merge_mapping): New.
+	(merge_output_offset): New.
+	(is_merge_section_for): New.
+	* output.cc (Output_section::Input_section::is_merge_section_for):
+	Use object->is_merge_section_for.
+	* output.h (Output_section_data::is_merge_section_for): Delete.
+	(Output_section_data::do_is_merge_section_for): Delete.
+	* reloc.cc (Merged_symbol_value<size>::initialize_input_to_output_map):
+	Use object->initialize_input_to_output_map.
+	(Merged_symbol_value<size>::value_from_output_section): Use
+	object->merge_output_offset.
+
 2015-02-04  Peter Collingbourne  <pcc@google.com>
             Cary Coutant  <ccoutant@google.com>
 

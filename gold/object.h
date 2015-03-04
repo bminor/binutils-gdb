@@ -41,6 +41,7 @@ class Cref;
 class Layout;
 class Output_data;
 class Output_section;
+class Output_section_data;
 class Output_file;
 class Output_symtab_xindex;
 class Pluginobj;
@@ -1200,18 +1201,26 @@ class Relobj : public Object
   relocs_must_follow_section_writes() const
   { return this->relocs_must_follow_section_writes_; }
 
-  // Return the object merge map.
-  Object_merge_map*
-  merge_map() const
-  { return this->object_merge_map_; }
-
-  // Set the object merge map.
+  template<int size>
   void
-  set_merge_map(Object_merge_map* object_merge_map)
-  {
-    gold_assert(this->object_merge_map_ == NULL);
-    this->object_merge_map_ = object_merge_map;
-  }
+  initialize_input_to_output_map(unsigned int shndx,
+      typename elfcpp::Elf_types<size>::Elf_Addr starting_address,
+      Unordered_map<section_offset_type,
+	    typename elfcpp::Elf_types<size>::Elf_Addr>* output_address) const;
+
+  void
+  add_merge_mapping(Output_section_data *output_data,
+                    unsigned int shndx, section_offset_type offset,
+                    section_size_type length,
+                    section_offset_type output_offset);
+
+  bool
+  merge_output_offset(unsigned int shndx, section_offset_type offset,
+                      section_offset_type *poutput) const;
+
+  bool
+  is_merge_section_for(const Output_section_data* output_data,
+                       unsigned int shndx) const;
 
   // Record the relocatable reloc info for an input reloc section.
   void
