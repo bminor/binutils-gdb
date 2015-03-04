@@ -1,5 +1,26 @@
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (save_sigtrap): Check for breakpoints before
+	checking watchpoints.
+	(status_callback) [USE_SIGTRAP_SIGINFO]: Don't check whether a
+	breakpoint is inserted if relying on SIGTRAP's siginfo.si_code.
+	(check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]: Decide whether
+	a breakpoint triggered based on the SIGTRAP's siginfo.si_code.
+	(linux_nat_stopped_by_sw_breakpoint)
+	(linux_nat_supports_stopped_by_sw_breakpoint)
+	(linux_nat_stopped_by_hw_breakpoint)
+	(linux_nat_supports_stopped_by_hw_breakpoint): New functions.
+	(linux_nat_wait_1): Don't re-increment the PC if relying on
+	SIGTRAP's siginfo->si_code.
+	(linux_nat_add_target): Install new target methods.
+	* linux-thread-db.c (check_event): Don't account for breakpoint PC
+	offset if the target already adjusted the PC.
+	* nat/linux-ptrace.h (USE_SIGTRAP_SIGINFO): New.
+	(GDB_ARCH_TRAP_BRKPT): New.
+	(TRAP_HWBKPT): Define if not already defined.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention the new "swbreak" and "hwbreak" stop reasons.
 	* remote.c (struct remote_state) <remote_stopped_by_watchpoint_p>:
 	Delete field.
