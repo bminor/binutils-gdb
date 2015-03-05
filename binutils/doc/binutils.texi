@@ -1684,8 +1684,42 @@ Prefix all the names of all allocated sections in the output file with
 @var{string}.
 
 @item --add-gnu-debuglink=@var{path-to-file}
-Creates a .gnu_debuglink section which contains a reference to @var{path-to-file}
-and adds it to the output file.
+Creates a .gnu_debuglink section which contains a reference to
+@var{path-to-file} and adds it to the output file.  Note: the file at
+@var{path-to-file} must exist.  Part of the process of adding the
+.gnu_debuglink section involves embedding a checksum of the contents
+of the debug info file into the section.
+
+If the debug info file is built in one location but it is going to be
+installed at a later time into a different location then do not use
+the path to the installed location.  The @option{--add-gnu-debuglink}
+option will fail because the installed file does not exist yet.
+Instead put the debug info file in the current directory and use the
+@option{--add-gnu-debuglink} option without any directory components,
+like this:
+
+@smallexample
+ objcopy --add-gnu-debuglink=foo.debug
+@end smallexample
+ 
+At debug time the debugger will attempt to look for the separate debug
+info file in a set of known locations.  The exact set of these
+locations varies depending upon the distribution being used, but it
+typically includes:
+
+@table @code
+
+@item * The same directory as the executable.
+
+@item * A sub-directory of the directory containing the executable
+called .debug
+
+@item * A global debug directory such as /usr/lib/debug.
+@end table
+
+As long as the debug info file has been installed into one of these
+locations before the debugger is run everything should work
+correctly.
 
 @item --keep-file-symbols
 When stripping a file, perhaps with @option{--strip-debug} or
