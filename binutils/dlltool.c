@@ -1994,6 +1994,31 @@ assemble_file (const char * source, const char * dest)
   run (as_name, cmd);
 }
 
+static const char * temp_file_to_remove[5];
+#define TEMP_EXPORT_FILE 0
+#define TEMP_HEAD_FILE   1
+#define TEMP_TAIL_FILE   2
+#define TEMP_HEAD_O_FILE 3
+#define TEMP_TAIL_O_FILE 4
+
+static void
+unlink_temp_files (void)
+{
+  unsigned i;
+
+  if (dontdeltemps > 0)
+    return;
+
+  for (i = 0; i < ARRAY_SIZE (temp_file_to_remove); i++)
+    {
+      if (temp_file_to_remove[i])
+	{
+	  unlink (temp_file_to_remove[i]);
+	  temp_file_to_remove[i] = NULL;
+	}
+    }
+}
+
 static void
 gen_exp_file (void)
 {
@@ -2010,6 +2035,8 @@ gen_exp_file (void)
     /* xgettext:c-format */
     fatal (_("Unable to open temporary assembler file: %s"), TMP_ASM);
 
+  temp_file_to_remove[TEMP_EXPORT_FILE] = TMP_ASM;
+  
   /* xgettext:c-format */
   inform (_("Opened temporary file: %s"), TMP_ASM);
 
@@ -2146,7 +2173,6 @@ gen_exp_file (void)
 	}
     }
 
-
   /* Add to the output file a way of getting to the exported names
      without using the import library.  */
   if (add_indirect)
@@ -2234,7 +2260,10 @@ gen_exp_file (void)
   assemble_file (TMP_ASM, exp_name);
 
   if (dontdeltemps == 0)
-    unlink (TMP_ASM);
+    {
+      temp_file_to_remove[TEMP_EXPORT_FILE] = NULL;
+      unlink (TMP_ASM);
+    }
 
   inform (_("Generated exports file"));
 }
@@ -2939,6 +2968,8 @@ make_head (void)
       return NULL;
     }
 
+  temp_file_to_remove[TEMP_HEAD_FILE] = TMP_HEAD_S;
+
   fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
   fprintf (f, "\t.section\t.idata$2\n");
 
@@ -3000,6 +3031,7 @@ make_head (void)
     fatal (_("failed to open temporary head file: %s: %s"),
 	   TMP_HEAD_O, bfd_get_errmsg ());
 
+  temp_file_to_remove[TEMP_HEAD_O_FILE] = TMP_HEAD_O;
   return abfd;
 }
 
@@ -3014,6 +3046,8 @@ make_delay_head (void)
       fatal (_("failed to open temporary head file: %s"), TMP_HEAD_S);
       return NULL;
     }
+
+  temp_file_to_remove[TEMP_HEAD_FILE] = TMP_HEAD_S;
 
   /* Output the __tailMerge__xxx function */
   fprintf (f, "%s Import trampoline\n", ASM_C);
@@ -3083,6 +3117,7 @@ make_delay_head (void)
     fatal (_("failed to open temporary head file: %s: %s"),
 	   TMP_HEAD_O, bfd_get_errmsg ());
 
+  temp_file_to_remove[TEMP_HEAD_O_FILE] = TMP_HEAD_O;
   return abfd;
 }
 
@@ -3097,6 +3132,8 @@ make_tail (void)
       fatal (_("failed to open temporary tail file: %s"), TMP_TAIL_S);
       return NULL;
     }
+
+  temp_file_to_remove[TEMP_TAIL_FILE] = TMP_TAIL_S;
 
   if (!no_idata4)
     {
@@ -3154,6 +3191,7 @@ make_tail (void)
     fatal (_("failed to open temporary tail file: %s: %s"),
 	   TMP_TAIL_O, bfd_get_errmsg ());
 
+  temp_file_to_remove[TEMP_TAIL_O_FILE] = TMP_TAIL_O;
   return abfd;
 }
 
@@ -3179,6 +3217,8 @@ gen_lib_file (int delay)
   /* xgettext:c-format */
   inform (_("Creating library file: %s"), imp_name);
 
+  xatexit (unlink_temp_files);
+  
   bfd_set_format (outarch, bfd_archive);
   outarch->has_armap = 1;
   outarch->is_thin_archive = 0;
@@ -3248,13 +3288,7 @@ gen_lib_file (int delay)
     }
 
   /* Delete all the temp files.  */
-  if (dontdeltemps == 0)
-    {
-      unlink (TMP_HEAD_O);
-      unlink (TMP_HEAD_S);
-      unlink (TMP_TAIL_O);
-      unlink (TMP_TAIL_S);
-    }
+  unlink_temp_files ();
 
   if (dontdeltemps < 2)
     {
