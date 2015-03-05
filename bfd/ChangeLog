@@ -1,3 +1,15 @@
+2015-03-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18025
+	* coffgen.c (coff_find_nearest_line_with_names): If the dwarf2
+	lookup fails, check for an address bias in the dwarf info, and if
+	one exists, retry the lookup with the biased value.
+	* dwarf2.c (_bfd_dwarf2_find_symbol_bias): New function.
+	Determines if a bias exists bewteen the addresses of functions
+	based on DWARF information vs symbol table information.
+	* libbfd-in.h (_bfd_dwarf2_find_symbol_bias): Prototype.
+	* libbfd.h: Regenerate.
+
 2015-03-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* elfxx-aarch64.c (decode_add_imm, decode_movw_imm)

@@ -2245,6 +2245,26 @@ coff_find_nearest_line_with_names (bfd *abfd,
 				     &coff_data(abfd)->dwarf2_find_line_info))
     return TRUE;
 
+  /* If the DWARF lookup failed, but there is DWARF information available
+     then the problem might be that the file has been rebased.  This tool
+     changes the VMAs of all the sections, but it does not update the DWARF
+     information.  So try again, using a bias against the address sought.  */
+  if (coff_data (abfd)->dwarf2_find_line_info != NULL)
+    {
+      bfd_signed_vma bias;
+
+      bias = _bfd_dwarf2_find_symbol_bias (symbols,
+					   & coff_data (abfd)->dwarf2_find_line_info);
+      
+      if (bias
+	  && _bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section,
+					    offset + bias,
+					    filename_ptr, functionname_ptr,
+					    line_ptr, NULL, debug_sections, 0,
+					    &coff_data(abfd)->dwarf2_find_line_info))
+	return TRUE;
+    }
+
   *filename_ptr = 0;
   *functionname_ptr = 0;
   *line_ptr = 0;
