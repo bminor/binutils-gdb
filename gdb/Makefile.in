@@ -1656,9 +1656,9 @@ ALLDEPFILES = \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c hppa-hpux-nat.c \
 	hppa-linux-tdep.c hppa-linux-nat.c \
-	hppabsd-nat.c hppabsd-tdep.c \
-	hppaobsd-tdep.c \
+	hppabsd-tdep.c \
 	hppanbsd-nat.c hppanbsd-tdep.c \
+	hppaobsd-nat.c hppaobsd-tdep.c \
 	i386-tdep.c i386-linux-nat.c \
 	i386v4-nat.c i386-cygwin-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c i386fbsd-tdep.c \
