@@ -1,3 +1,8 @@
+2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* output.cc (Relobj::initialize_input_to_output_map<size>):
+	Remove typename on elfcpp::Elf_types<size>::Elf_Addr.
+
 2015-03-04  Cary Coutant  <ccoutant@google.com>
 
 	* parameters.cc (Parameters::set_target_once): Call

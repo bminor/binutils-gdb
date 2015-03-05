@@ -3258,18 +3258,18 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 template
 void
 Relobj::initialize_input_to_output_map<64>(unsigned int shndx,
-      typename elfcpp::Elf_types<64>::Elf_Addr starting_address,
+      elfcpp::Elf_types<64>::Elf_Addr starting_address,
       Unordered_map<section_offset_type,
-      typename elfcpp::Elf_types<64>::Elf_Addr>* output_addresses) const;
+      elfcpp::Elf_types<64>::Elf_Addr>* output_addresses) const;
 #endif
 
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
 template
 void
 Relobj::initialize_input_to_output_map<32>(unsigned int shndx,
-      typename elfcpp::Elf_types<32>::Elf_Addr starting_address,
+      elfcpp::Elf_types<32>::Elf_Addr starting_address,
       Unordered_map<section_offset_type,
-      typename elfcpp::Elf_types<32>::Elf_Addr>* output_addresses) const;
+      elfcpp::Elf_types<32>::Elf_Addr>* output_addresses) const;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE
