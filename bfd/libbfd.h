@@ -556,6 +556,10 @@ extern bfd_boolean _bfd_dwarf2_find_nearest_line
    const char **, const char **, unsigned int *, unsigned int *,
    const struct dwarf_debug_section *, unsigned int, void **);
 
+/* Find the bias between DWARF addresses and real addresses.  */
+extern bfd_signed_vma _bfd_dwarf2_find_symbol_bias
+  (asymbol **, void **);
+  
 /* Find inliner info after calling bfd_find_nearest_line. */
 extern bfd_boolean _bfd_dwarf2_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *, void **);

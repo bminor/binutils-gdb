@@ -1807,6 +1807,10 @@ static struct target_ops win32_target_ops = {
   win32_supports_z_point_type,
   win32_insert_point,
   win32_remove_point,
+  NULL, /* stopped_by_sw_breakpoint */
+  NULL, /* supports_stopped_by_sw_breakpoint */
+  NULL, /* stopped_by_hw_breakpoint */
+  NULL, /* supports_stopped_by_hw_breakpoint */
   win32_stopped_by_watchpoint,
   win32_stopped_data_address,
   NULL, /* read_offsets */

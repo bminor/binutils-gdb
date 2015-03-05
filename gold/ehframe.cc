@@ -412,7 +412,7 @@ Cie::~Cie()
 section_offset_type
 Cie::set_output_offset(section_offset_type output_offset,
 		       unsigned int addralign,
-		       Merge_map* merge_map)
+		       Output_section_data *output_data)
 {
   size_t length = this->contents_.length();
 
@@ -422,8 +422,9 @@ Cie::set_output_offset(section_offset_type output_offset,
   if (this->object_ != NULL)
     {
       // Add a mapping so that relocations are applied correctly.
-      merge_map->add_mapping(this->object_, this->shndx_, this->input_offset_,
-			     length, output_offset);
+      this->object_->add_merge_mapping(output_data, this->shndx_,
+                                       this->input_offset_, length,
+                                       output_offset);
     }
 
   length = align_address(length, addralign);
@@ -432,7 +433,7 @@ Cie::set_output_offset(section_offset_type output_offset,
        p != this->fdes_.end();
        ++p)
     {
-      (*p)->add_mapping(output_offset + length, merge_map);
+      (*p)->add_mapping(output_offset + length, output_data);
 
       size_t fde_length = (*p)->length();
       fde_length = align_address(fde_length, addralign);
@@ -531,7 +532,6 @@ Eh_frame::Eh_frame()
     eh_frame_hdr_(NULL),
     cie_offsets_(),
     unmergeable_cie_offsets_(),
-    merge_map_(),
     mappings_are_done_(false),
     final_data_size_(0)
 {
@@ -958,8 +958,8 @@ Eh_frame::read_cie(Sized_relobj_file<size, big_endian>* object,
       // know for sure that we are doing a special mapping for this
       // input section, but that's OK--if we don't do a special
       // mapping, nobody will ever ask for the mapping we add here.
-      this->merge_map_.add_mapping(object, shndx, (pcie - 8) - pcontents,
-				   pcieend - (pcie - 8), -1);
+      object->add_merge_mapping(this, shndx, (pcie - 8) - pcontents,
+                                pcieend - (pcie - 8), -1);
     }
 
   // Record this CIE plus the offset in the input section.
@@ -1026,8 +1026,8 @@ Eh_frame::read_fde(Sized_relobj_file<size, big_endian>* object,
     {
       // This FDE applies to a section which we are discarding.  We
       // can discard this FDE.
-      this->merge_map_.add_mapping(object, shndx, (pfde - 8) - pcontents,
-				   pfdeend - (pfde - 8), -1);
+      object->add_merge_mapping(this, shndx, (pfde - 8) - pcontents,
+                                pfdeend - (pfde - 8), -1);
       return true;
     }
 
@@ -1107,14 +1107,14 @@ Eh_frame::set_final_data_size()
        ++p)
     output_offset = (*p)->set_output_offset(output_offset,
 					    this->addralign(),
-					    &this->merge_map_);
+					    this);
 
   for (Cie_offsets::iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
     output_offset = (*p)->set_output_offset(output_offset,
 					    this->addralign(),
-					    &this->merge_map_);
+					    this);
 
   this->mappings_are_done_ = true;
   this->final_data_size_ = output_offset - output_start;
@@ -1130,16 +1130,7 @@ Eh_frame::do_output_offset(const Relobj* object, unsigned int shndx,
 			   section_offset_type offset,
 			   section_offset_type* poutput) const
 {
-  return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
-}
-
-// Return whether this is the merge section for an input section.
-
-bool
-Eh_frame::do_is_merge_section_for(const Relobj* object,
-				  unsigned int shndx) const
-{
-  return this->merge_map_.is_merge_section_for(object, shndx);
+  return object->merge_output_offset(shndx, offset, poutput);
 }
 
 // Write the data to the output file.

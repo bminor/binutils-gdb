@@ -364,8 +364,8 @@ struct remote_state
      to stop for a watchpoint.  */
   CORE_ADDR remote_watch_data_address;
 
-  /* This is non-zero if target stopped for a watchpoint.  */
-  int remote_stopped_by_watchpoint_p;
+  /* Whether the target stopped for a breakpoint/watchpoint.  */
+  enum target_stop_reason stop_reason;
 
   threadref echo_nextthread;
   threadref nextthread;
@@ -1338,10 +1338,25 @@ enum {
   /* Support for the Qbtrace-conf:bts:size packet.  */
   PACKET_Qbtrace_conf_bts_size,
 
+  /* Support for swbreak+ feature.  */
+  PACKET_swbreak_feature,
+
+  /* Support for hwbreak+ feature.  */
+  PACKET_hwbreak_feature,
+
   PACKET_MAX
 };
 
 static struct packet_config remote_protocol_packets[PACKET_MAX];
+
+/* Returns the packet's corresponding "set remote foo-packet" command
+   state.  See struct packet_config for more details.  */
+
+static enum auto_boolean
+packet_set_cmd_state (int packet)
+{
+  return remote_protocol_packets[packet].detect;
+}
 
 /* Returns whether a given packet or feature is supported.  This takes
    into account the state of the corresponding "set remote foo-packet"
@@ -4025,7 +4040,9 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "qXfer:btrace-conf:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_btrace_conf },
   { "Qbtrace-conf:bts:size", PACKET_DISABLE, remote_supported_packet,
-    PACKET_Qbtrace_conf_bts_size }
+    PACKET_Qbtrace_conf_bts_size },
+  { "swbreak", PACKET_DISABLE, remote_supported_packet, PACKET_swbreak_feature },
+  { "hwbreak", PACKET_DISABLE, remote_supported_packet, PACKET_hwbreak_feature }
 };
 
 static char *remote_support_xml;
@@ -4093,6 +4110,11 @@ remote_query_supported (void)
       struct cleanup *old_chain = make_cleanup (free_current_contents, &q);
 
       q = remote_query_supported_append (q, "multiprocess+");
+
+      if (packet_set_cmd_state (PACKET_swbreak_feature) != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "swbreak+");
+      if (packet_set_cmd_state (PACKET_hwbreak_feature) != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "hwbreak+");
 
       if (remote_support_xml)
 	q = remote_query_supported_append (q, remote_support_xml);
@@ -5202,7 +5224,8 @@ typedef struct stop_reply
      fetch them is avoided).  */
   VEC(cached_reg_t) *regcache;
 
-  int stopped_by_watchpoint_p;
+  enum target_stop_reason stop_reason;
+
   CORE_ADDR watch_data_address;
 
   int core;
@@ -5513,7 +5536,7 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
   event->rs = get_remote_state ();
   event->ws.kind = TARGET_WAITKIND_IGNORE;
   event->ws.value.integer = 0;
-  event->stopped_by_watchpoint_p = 0;
+  event->stop_reason = TARGET_STOPPED_BY_NO_REASON;
   event->regcache = NULL;
   event->core = -1;
 
@@ -5556,9 +5579,35 @@ Packet: '%s'\n"),
 		   || (strncmp (p, "rwatch", p1 - p) == 0)
 		   || (strncmp (p, "awatch", p1 - p) == 0))
 	    {
-	      event->stopped_by_watchpoint_p = 1;
+	      event->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 	      p = unpack_varlen_hex (++p1, &addr);
 	      event->watch_data_address = (CORE_ADDR) addr;
+	    }
+	  else if (strncmp (p, "swbreak", p1 - p) == 0)
+	    {
+	      event->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
+
+	      /* Make sure the stub doesn't forget to indicate support
+		 with qSupported.  */
+	      if (packet_support (PACKET_swbreak_feature) != PACKET_ENABLE)
+		error (_("Unexpected swbreak stop reason"));
+
+	      /* The value part is documented as "must be empty",
+		 though we ignore it, in case we ever decide to make
+		 use of it in a backward compatible way.  */
+	      p = skip_to_semicolon (p1 + 1);
+	    }
+	  else if (strncmp (p, "hwbreak", p1 - p) == 0)
+	    {
+	      event->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
+
+	      /* Make sure the stub doesn't forget to indicate support
+		 with qSupported.  */
+	      if (packet_support (PACKET_hwbreak_feature) != PACKET_ENABLE)
+		error (_("Unexpected hwbreak stop reason"));
+
+	      /* See above.  */
+	      p = skip_to_semicolon (p1 + 1);
 	    }
 	  else if (strncmp (p, "library", p1 - p) == 0)
 	    {
@@ -5817,7 +5866,7 @@ process_stop_reply (struct stop_reply *stop_reply,
 	  VEC_free (cached_reg_t, stop_reply->regcache);
 	}
 
-      rs->remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
+      rs->stop_reason = stop_reply->stop_reason;
       rs->remote_watch_data_address = stop_reply->watch_data_address;
 
       remote_notice_new_inferior (ptid, 0);
@@ -5944,7 +5993,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
   buf = rs->buf;
 
-  rs->remote_stopped_by_watchpoint_p = 0;
+  rs->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* We got something.  */
   rs->waiting_for_stop_reply = 0;
@@ -8421,12 +8470,54 @@ remote_check_watch_resources (struct target_ops *self,
   return -1;
 }
 
+/* The to_stopped_by_sw_breakpoint method of target remote.  */
+
+static int
+remote_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT;
+}
+
+/* The to_supports_stopped_by_sw_breakpoint method of target
+   remote.  */
+
+static int
+remote_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return (packet_support (PACKET_swbreak_feature) == PACKET_ENABLE);
+}
+
+/* The to_stopped_by_hw_breakpoint method of target remote.  */
+
+static int
+remote_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT;
+}
+
+/* The to_supports_stopped_by_hw_breakpoint method of target
+   remote.  */
+
+static int
+remote_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return (packet_support (PACKET_hwbreak_feature) == PACKET_ENABLE);
+}
+
 static int
 remote_stopped_by_watchpoint (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
 
-  return rs->remote_stopped_by_watchpoint_p;
+  return rs->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
 static int
@@ -11617,6 +11708,10 @@ Specify the serial device it is connected to\n\
   remote_ops.to_files_info = remote_files_info;
   remote_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_ops.to_stopped_by_sw_breakpoint = remote_stopped_by_sw_breakpoint;
+  remote_ops.to_supports_stopped_by_sw_breakpoint = remote_supports_stopped_by_sw_breakpoint;
+  remote_ops.to_stopped_by_hw_breakpoint = remote_stopped_by_hw_breakpoint;
+  remote_ops.to_supports_stopped_by_hw_breakpoint = remote_supports_stopped_by_hw_breakpoint;
   remote_ops.to_stopped_by_watchpoint = remote_stopped_by_watchpoint;
   remote_ops.to_stopped_data_address = remote_stopped_data_address;
   remote_ops.to_watchpoint_addr_within_range =
@@ -12321,6 +12416,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_conf_bts_size],
        "Qbtrace-conf:bts:size", "btrace-conf-bts-size", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_swbreak_feature],
+                         "swbreak-feature", "swbreak-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_hwbreak_feature],
+                         "hwbreak-feature", "hwbreak-feature", 0);
 
   /* Assert that we've registered commands for all packet configs.  */
   {

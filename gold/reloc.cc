@@ -1457,10 +1457,9 @@ Merged_symbol_value<size>::initialize_input_to_output_map(
     const Relobj* object,
     unsigned int input_shndx)
 {
-  Object_merge_map* map = object->merge_map();
-  map->initialize_input_to_output_map<size>(input_shndx,
-					    this->output_start_address_,
-					    &this->output_addresses_);
+  object->initialize_input_to_output_map<size>(input_shndx,
+					       this->output_start_address_,
+					       &this->output_addresses_);
 }
 
 // Get the output value corresponding to an input offset if we
@@ -1474,9 +1473,8 @@ Merged_symbol_value<size>::value_from_output_section(
     typename elfcpp::Elf_types<size>::Elf_Addr input_offset) const
 {
   section_offset_type output_offset;
-  bool found = object->merge_map()->get_output_offset(NULL, input_shndx,
-						      input_offset,
-						      &output_offset);
+  bool found = object->merge_output_offset(input_shndx, input_offset,
+					   &output_offset);
 
   // If this assertion fails, it means that some relocation was
   // against a portion of an input merge section which we didn't map

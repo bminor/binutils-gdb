@@ -152,6 +152,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/proc-service.list $(srcdir)/regcache.c \
 	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
 	$(srcdir)/thread-db.c $(srcdir)/utils.c $(srcdir)/debug.c \
+	$(srcdir)/linux-aarch64-low.c \
 	$(srcdir)/linux-arm-low.c $(srcdir)/linux-bfin-low.c \
 	$(srcdir)/linux-cris-low.c $(srcdir)/linux-crisv32-low.c \
 	${srcdir}/x86-low.c $(srcdir)/i387-fp.c \

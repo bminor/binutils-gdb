@@ -5452,6 +5452,18 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
     }	
 }
 
+/* Returns true if we need to track moribund locations of LOC's type
+   on the current target.  */
+
+static int
+need_moribund_for_location_type (struct bp_location *loc)
+{
+  return ((loc->loc_type == bp_loc_software_breakpoint
+	   && !target_supports_stopped_by_sw_breakpoint ())
+	  || (loc->loc_type == bp_loc_hardware_breakpoint
+	      && !target_supports_stopped_by_hw_breakpoint ()));
+}
+
 
 /* Get a bpstat associated with having just stopped at address
    BP_ADDR in thread PTID.
@@ -5541,15 +5553,20 @@ bpstat_stop_status (struct address_space *aspace,
     }
 
   /* Check if a moribund breakpoint explains the stop.  */
-  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+  if (!target_supports_stopped_by_sw_breakpoint ()
+      || !target_supports_stopped_by_hw_breakpoint ())
     {
-      if (breakpoint_location_address_match (loc, aspace, bp_addr))
+      for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
 	{
-	  bs = bpstat_alloc (loc, &bs_link);
-	  /* For hits of moribund locations, we should just proceed.  */
-	  bs->stop = 0;
-	  bs->print = 0;
-	  bs->print_it = print_it_noop;
+	  if (breakpoint_location_address_match (loc, aspace, bp_addr)
+	      && need_moribund_for_location_type (loc))
+	    {
+	      bs = bpstat_alloc (loc, &bs_link);
+	      /* For hits of moribund locations, we should just proceed.  */
+	      bs->stop = 0;
+	      bs->print = 0;
+	      bs->print_it = print_it_noop;
+	    }
 	}
     }
 
@@ -9304,11 +9321,10 @@ add_location_to_breakpoint (struct breakpoint *b,
 }
 
 
-/* Return 1 if LOC is pointing to a permanent breakpoint, 
-   return 0 otherwise.  */
+/* See breakpoint.h.  */
 
-static int
-bp_loc_is_permanent (struct bp_location *loc)
+int
+program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   int len;
   CORE_ADDR addr;
@@ -9316,6 +9332,38 @@ bp_loc_is_permanent (struct bp_location *loc)
   gdb_byte *target_mem;
   struct cleanup *cleanup;
   int retval = 0;
+
+  addr = address;
+  bpoint = gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
+
+  /* Software breakpoints unsupported?  */
+  if (bpoint == NULL)
+    return 0;
+
+  target_mem = alloca (len);
+
+  /* Enable the automatic memory restoration from breakpoints while
+     we read the memory.  Otherwise we could say about our temporary
+     breakpoints they are permanent.  */
+  cleanup = make_show_memory_breakpoints_cleanup (0);
+
+  if (target_read_memory (address, target_mem, len) == 0
+      && memcmp (target_mem, bpoint, len) == 0)
+    retval = 1;
+
+  do_cleanups (cleanup);
+
+  return retval;
+}
+
+/* Return 1 if LOC is pointing to a permanent breakpoint,
+   return 0 otherwise.  */
+
+static int
+bp_loc_is_permanent (struct bp_location *loc)
+{
+  struct cleanup *cleanup;
+  int retval;
 
   gdb_assert (loc != NULL);
 
@@ -9333,26 +9381,10 @@ bp_loc_is_permanent (struct bp_location *loc)
   if (loc->owner->type == bp_call_dummy)
     return 0;
 
-  addr = loc->address;
-  bpoint = gdbarch_breakpoint_from_pc (loc->gdbarch, &addr, &len);
-
-  /* Software breakpoints unsupported?  */
-  if (bpoint == NULL)
-    return 0;
-
-  target_mem = alloca (len);
-
-  /* Enable the automatic memory restoration from breakpoints while
-     we read the memory.  Otherwise we could say about our temporary
-     breakpoints they are permanent.  */
   cleanup = save_current_space_and_thread ();
-
   switch_to_program_space_and_thread (loc->pspace);
-  make_show_memory_breakpoints_cleanup (0);
 
-  if (target_read_memory (loc->address, target_mem, len) == 0
-      && memcmp (target_mem, bpoint, len) == 0)
-    retval = 1;
+  retval = program_breakpoint_here_p (loc->gdbarch, loc->address);
 
   do_cleanups (cleanup);
 
@@ -12797,8 +12829,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
       if (!found_object)
 	{
 	  if (removed && non_stop
-	      && breakpoint_address_is_meaningful (old_loc->owner)
-	      && !is_hardware_watchpoint (old_loc->owner))
+	      && need_moribund_for_location_type (old_loc))
 	    {
 	      /* This location was removed from the target.  In
 		 non-stop mode, a race condition is possible where

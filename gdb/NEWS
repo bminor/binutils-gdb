@@ -63,6 +63,16 @@ qXfer:btrace-conf:read
 Qbtrace-conf:bts:size
   Set the requested ring buffer size for branch tracing in BTS format.
 
+swbreak stop reason
+  Indicates a memory breakpoint instruction was executed, irrespective
+  of whether it was GDB that planted the breakpoint or the breakpoint
+  is hardcoded in the program.  This is required for correct non-stop
+  mode operation.
+
+hwbreak stop reason
+  Indicates the target stopped for a hardware breakpoint.  This is
+  required for correct non-stop mode operation.
+
 * The info record command now shows the recording format and the
   branch tracing configuration for the current thread when using
   the btrace record target.

@@ -742,6 +742,10 @@ static struct target_ops lynx_target_ops = {
   NULL,  /* supports_z_point_type */
   NULL,  /* insert_point */
   NULL,  /* remove_point */
+  NULL,  /* stopped_by_sw_breakpoint */
+  NULL,  /* supports_stopped_by_sw_breakpoint */
+  NULL,  /* stopped_by_hw_breakpoint */
+  NULL,  /* supports_stopped_by_hw_breakpoint */
   NULL,  /* stopped_by_watchpoint */
   NULL,  /* stopped_data_address */
   NULL,  /* read_offsets */

@@ -269,15 +269,15 @@ regnum_is_vxr_full (struct gdbarch_tdep *tdep, int regnum)
 	  && regnum <= tdep->v0_full_regnum + 15);
 }
 
-/* Return the name of register REGNO.  Return NULL for registers that
-   shouldn't be visible.  */
+/* Return the name of register REGNO.  Return the empty string for
+   registers that shouldn't be visible.  */
 
 static const char *
 s390_register_name (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= S390_V0_LOWER_REGNUM
       && regnum <= S390_V15_LOWER_REGNUM)
-    return NULL;
+    return "";
   return tdesc_register_name (gdbarch, regnum);
 }
 
@@ -3313,7 +3313,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						    s390_address_class_type_flags_to_name);
       set_gdbarch_address_class_name_to_type_flags (gdbarch,
 						    s390_address_class_name_to_type_flags);
-      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390);
+      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390X);
       break;
     }
 

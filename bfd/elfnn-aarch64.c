@@ -2445,8 +2445,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
       template_size = sizeof (aarch64_erratum_835769_stub);
       break;
     default:
-      BFD_FAIL ();
-      return FALSE;
+      abort ();
     }
 
   for (i = 0; i < (template_size / sizeof template[0]); i++)
@@ -2504,7 +2503,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
       break;
 
     default:
-      break;
+      abort ();
     }
 
   return TRUE;
@@ -2535,9 +2534,7 @@ aarch64_size_one_stub (struct bfd_hash_entry *gen_entry,
       size = sizeof (aarch64_erratum_835769_stub);
       break;
     default:
-      BFD_FAIL ();
-      return FALSE;
-      break;
+      abort ();
     }
 
   size = (size + 7) & ~7;
@@ -6552,7 +6549,7 @@ aarch64_map_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	return FALSE;
       break;
     default:
-      BFD_FAIL ();
+      abort ();
     }
 
   return TRUE;

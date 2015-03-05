@@ -1,3 +1,66 @@
+2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr15228
+	PR ld/pr17709
+	* elf-bfd.h (elf_backend_data): Add extern_protected_data.
+	* elf32-i386.c (elf_backend_extern_protected_data): New.
+	Defined to 1.
+	* elf64-x86-64.c (elf_backend_extern_protected_data): Likewise.
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Don't error on
+	copy relocs against protected symbols if extern_protected_data
+	is true.
+	(_bfd_elf_symbol_refs_local_p): Don't return true on protected
+	non-function symbols if extern_protected_data is true.
+	* elfxx-target.h (elf_backend_extern_protected_data): New.
+	Default to 0.
+	(elfNN_bed): Initialize extern_protected_data with
+	elf_backend_extern_protected_data.
+
+2015-03-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18025
+	* coffgen.c (coff_find_nearest_line_with_names): If the dwarf2
+	lookup fails, check for an address bias in the dwarf info, and if
+	one exists, retry the lookup with the biased value.
+	* dwarf2.c (_bfd_dwarf2_find_symbol_bias): New function.
+	Determines if a bias exists bewteen the addresses of functions
+	based on DWARF information vs symbol table information.
+	* libbfd-in.h (_bfd_dwarf2_find_symbol_bias): Prototype.
+	* libbfd.h: Regenerate.
+
+2015-03-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfxx-aarch64.c (decode_add_imm, decode_movw_imm)
+	(decode_tst_branch_ofs_14, decode_ld_lit_ofs_19)
+	(decode_cond_branch_ofs_19, decode_branch_ofs_26): Remove.
+
+2015-03-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (aarch64_build_one_stub): Call abort.
+	(aarch64_size_one_stub): Likewise.
+	(aarch64_map_one_stub): Likewise.
+
+2015-03-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* cpu-s390.c (N): New macro.
+	(bfd_s390_31_arch): New.  Define only if default target word size
+	is 64 bits.  Otherwise define...
+	(bfd_390_64_arch): ...this.  Make static.
+	(bfd_s390_arch): Define according to the default target word size.
+	Let the 'next' field point to the alternate arch.
+
+2015-03-04  Richard Sandiford  <richard.sandiford@arm.com>
+
+	PR gas/17843
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Expect
+	R_AARCH64_TLSLE_MOVW_TPREL_G0_NC and R_AARCH64_TLSLE_MOVW_TPREL_G1_NC
+	to be used with MOVK rather than MOVZ.
+
+2015-03-03  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_relax_section): Only relax ADDR16's if
+	there's a symbol.
+
 2015-02-28  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_tls_setup): Set no_tls_get_addr_opt if

@@ -27,6 +27,7 @@
    list of sequential control-flow blocks, one such list per thread.  */
 
 #include "btrace-common.h"
+#include "target/waitstatus.h" /* For enum target_stop_reason.  */
 
 struct thread_info;
 struct btrace_function;
@@ -150,9 +151,6 @@ struct btrace_function
      a fixup to normalize function levels so the smallest level is zero.  */
   int level;
 
-  /* The source line range of this function segment (both inclusive).  */
-  int lbegin, lend;
-
   /* A bit-vector of btrace_function_flag.  */
   enum btrace_function_flag flags;
 };
@@ -261,6 +259,9 @@ struct btrace_thread_info
      Gaps are skipped during replay, so REPLAY always points to a valid
      instruction.  */
   struct btrace_insn_iterator *replay;
+
+  /* Why the thread stopped, if we need to track it.  */
+  enum target_stop_reason stop_reason;
 };
 
 /* Enable branch tracing for a thread.  */

@@ -818,7 +818,7 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       lwp->arch_private->debug_registers_changed = 0;
     }
 
-  if (clear_status || lwp->stop_reason == LWP_STOPPED_BY_WATCHPOINT)
+  if (clear_status || lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
     x86_linux_dr_set (ptid, DR_STATUS, 0);
 }
 

@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <pthread.h>
 
 #define STACK_SIZE 0x1000
 
@@ -67,7 +69,7 @@ main (int argc, char **argv)
   alarm (300);
 
   pthread_create (&child, NULL, thread_fn, NULL);
-  pthread_join (child);
+  pthread_join (child, NULL);
 
   return 0;
 }

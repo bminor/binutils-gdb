@@ -88,6 +88,57 @@ struct buffer;
 #define __WALL          0x40000000 /* Wait for any child.  */
 #endif
 
+/* True if whether a breakpoint/watchpoint triggered can be determined
+   from the si_code of SIGTRAP's siginfo_t (TRAP_BRKPT/TRAP_HWBKPT).
+   That is, if the kernel can tell us whether the thread executed a
+   software breakpoint, we trust it.  The kernel will be determining
+   that from the hardware (e.g., from which exception was raised in
+   the CPU).  Relying on whether a breakpoint is planted in memory at
+   the time the SIGTRAP is processed to determine whether the thread
+   stopped for a software breakpoint can be too late.  E.g., the
+   breakpoint could have been removed since.  Or the thread could have
+   stepped an instruction the size of a breakpoint instruction, and
+   before the stop is processed a breakpoint is inserted at its
+   address.  Getting these wrong is disastrous on decr_pc_after_break
+   architectures.  The moribund location mechanism helps with that
+   somewhat but it is an heuristic, and can well fail.  Getting that
+   information out of the kernel and ultimately out of the CPU is the
+   way to go.  That said, some architecture may get the si_code wrong,
+   and as such we're leaving fallback code in place.  We'll remove
+   this after a while if no problem is reported.  */
+#define USE_SIGTRAP_SIGINFO 1
+
+/* The x86 kernel gets some of the si_code values backwards, like
+   this:
+
+   | what                                     | si_code    |
+   |------------------------------------------+------------|
+   | software breakpoints (int3)              | SI_KERNEL  |
+   | single-steps                             | TRAP_TRACE |
+   | single-stepping a syscall                | TRAP_BRKPT |
+   | user sent SIGTRAP                        | 0          |
+   | exec SIGTRAP (when no PTRACE_EVENT_EXEC) | 0          |
+   | hardware breakpoints/watchpoints         | TRAP_HWBPT |
+
+   That is, it reports SI_KERNEL for software breakpoints (and only
+   for those), and TRAP_BRKPT for single-stepping a syscall...  If the
+   kernel is ever fixed, we'll just have to detect it like we detect
+   optional ptrace features: by forking and debugging ourselves,
+   running to a breakpoint and checking what comes out of
+   siginfo->si_code.
+
+   The generic Linux target code should use GDB_ARCH_TRAP_BRKPT
+   instead of TRAP_BRKPT to abstract out this x86 peculiarity.  */
+#if defined __i386__ || defined __x86_64__
+# define GDB_ARCH_TRAP_BRKPT SI_KERNEL
+#else
+# define GDB_ARCH_TRAP_BRKPT TRAP_BRKPT
+#endif
+
+#ifndef TRAP_HWBKPT
+# define TRAP_HWBKPT 4
+#endif
+
 extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
 
 /* Find all possible reasons we could have failed to attach to PTID

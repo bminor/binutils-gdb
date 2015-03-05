@@ -3788,6 +3788,57 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   return TRUE;
 }
 
+/* Scan the debug information in PINFO looking for a DW_TAG_subprogram
+   abbrev with a DW_AT_low_pc attached to it.  Then lookup that same
+   symbol in SYMBOLS and return the difference between the low_pc and
+   the symbol's address.  Returns 0 if no suitable symbol could be found.  */
+
+bfd_signed_vma
+_bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
+{
+  struct dwarf2_debug *stash;
+  struct comp_unit * unit;
+
+  stash = (struct dwarf2_debug *) *pinfo;
+
+  if (stash == NULL)
+    return 0;
+
+  for (unit = stash->all_comp_units; unit; unit = unit->next_unit)
+    {
+      struct funcinfo * func;
+
+      if (unit->function_table == NULL)
+	{
+	  if (unit->line_table == NULL)
+	    unit->line_table = decode_line_info (unit, stash);
+	  if (unit->line_table != NULL)
+	    scan_unit_for_symbols (unit);
+	}
+
+      for (func = unit->function_table; func != NULL; func = func->prev_func)
+	if (func->name && func->arange.low)
+	  {
+	    asymbol ** psym;
+
+	    /* FIXME: Do we need to scan the aranges looking for the lowest pc value ?  */
+
+	    for (psym = symbols; * psym != NULL; psym++)
+	      {
+		asymbol * sym = * psym;
+
+		if (sym->flags & BSF_FUNCTION
+		    && sym->section != NULL
+		    && strcmp (sym->name, func->name) == 0)
+		  return ((bfd_signed_vma) func->arange.low) -
+		    ((bfd_signed_vma) (sym->value + sym->section->vma));
+	      }
+	  }
+    }
+
+  return 0;
+}
+
 /* Find the source code location of SYMBOL.  If SYMBOL is NULL
    then find the nearest source code location corresponding to
    the address SECTION + OFFSET.

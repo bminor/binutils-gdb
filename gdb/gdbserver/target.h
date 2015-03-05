@@ -207,6 +207,21 @@ struct target_ops
   int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr,
 		       int size, struct raw_breakpoint *bp);
 
+  /* Returns 1 if the target stopped because it executed a software
+     breakpoint instruction, 0 otherwise.  */
+  int (*stopped_by_sw_breakpoint) (void);
+
+  /* Returns true if the target knows whether a trap was caused by a
+     SW breakpoint triggering.  */
+  int (*supports_stopped_by_sw_breakpoint) (void);
+
+  /* Returns 1 if the target stopped for a hardware breakpoint.  */
+  int (*stopped_by_hw_breakpoint) (void);
+
+  /* Returns true if the target knows whether a trap was caused by a
+     HW breakpoint triggering.  */
+  int (*supports_stopped_by_hw_breakpoint) (void);
+
   /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
 
   int (*stopped_by_watchpoint) (void);
@@ -514,6 +529,22 @@ int kill_inferior (int);
 #define target_supports_range_stepping() \
   (the_target->supports_range_stepping ? \
    (*the_target->supports_range_stepping) () : 0)
+
+#define target_supports_stopped_by_sw_breakpoint() \
+  (the_target->supports_stopped_by_sw_breakpoint ? \
+   (*the_target->supports_stopped_by_sw_breakpoint) () : 0)
+
+#define target_stopped_by_sw_breakpoint() \
+  (the_target->stopped_by_sw_breakpoint ? \
+   (*the_target->stopped_by_sw_breakpoint) () : 0)
+
+#define target_supports_stopped_by_hw_breakpoint() \
+  (the_target->supports_stopped_by_hw_breakpoint ? \
+   (*the_target->supports_stopped_by_hw_breakpoint) () : 0)
+
+#define target_stopped_by_hw_breakpoint() \
+  (the_target->stopped_by_hw_breakpoint ? \
+   (*the_target->stopped_by_hw_breakpoint) () : 0)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

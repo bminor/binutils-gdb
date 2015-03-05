@@ -1359,6 +1359,10 @@ struct elf_backend_data
      in length rather than sec->size in length, if sec->rawsize is
      non-zero and smaller than sec->size.  */
   unsigned caches_rawsize : 1;
+
+  /* Address of protected data defined in the shared library may be
+     external, i.e., due to copy relocation.   */
+  unsigned extern_protected_data : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data

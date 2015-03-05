@@ -105,9 +105,6 @@ static char *default_pid_to_str (struct target_ops *ops, ptid_t ptid);
 static enum exec_direction_kind default_execution_direction
     (struct target_ops *self);
 
-static CORE_ADDR default_target_decr_pc_after_break (struct target_ops *ops,
-						     struct gdbarch *gdbarch);
-
 static struct target_ops debug_target;
 
 #include "target-delegates.c"
@@ -3570,23 +3567,6 @@ const struct frame_unwind *
 target_get_tailcall_unwinder (void)
 {
   return current_target.to_get_tailcall_unwinder (&current_target);
-}
-
-/* Default implementation of to_decr_pc_after_break.  */
-
-static CORE_ADDR
-default_target_decr_pc_after_break (struct target_ops *ops,
-				    struct gdbarch *gdbarch)
-{
-  return gdbarch_decr_pc_after_break (gdbarch);
-}
-
-/* See target.h.  */
-
-CORE_ADDR
-target_decr_pc_after_break (struct gdbarch *gdbarch)
-{
-  return current_target.to_decr_pc_after_break (&current_target, gdbarch);
 }
 
 /* See target.h.  */

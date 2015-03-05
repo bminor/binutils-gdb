@@ -58,6 +58,8 @@ int run_once;
 
 int multi_process;
 int non_stop;
+int swbreak_feature;
+int hwbreak_feature;
 
 /* Whether we should attempt to disable the operating system's address
    space randomization feature before starting an inferior.  */
@@ -1977,6 +1979,21 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  /* GDB supports relocate instruction requests.  */
 		  gdb_supports_qRelocInsn = 1;
 		}
+	      else if (strcmp (p, "swbreak+") == 0)
+		{
+		  /* GDB wants us to report whether a trap is caused
+		     by a software breakpoint and for us to handle PC
+		     adjustment if necessary on this target.  */
+		  if (target_supports_stopped_by_sw_breakpoint ())
+		    swbreak_feature = 1;
+		}
+	      else if (strcmp (p, "hwbreak+") == 0)
+		{
+		  /* GDB wants us to report whether a trap is caused
+		     by a hardware breakpoint.  */
+		  if (target_supports_stopped_by_hw_breakpoint ())
+		    hwbreak_feature = 1;
+		}
 	      else
 		target_process_qsupported (p);
 
@@ -2060,6 +2077,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	strcat (own_buf, ";QAgent+");
 
       supported_btrace_packets (own_buf);
+
+      if (target_supports_stopped_by_sw_breakpoint ())
+	strcat (own_buf, ";swbreak+");
+
+      if (target_supports_stopped_by_hw_breakpoint ())
+	strcat (own_buf, ";hwbreak+");
 
       return;
     }
@@ -3376,6 +3399,8 @@ captured_main (int argc, char *argv[])
       /* Be sure we're out of tfind mode.  */
       current_traceframe = -1;
       cont_thread = null_ptid;
+      swbreak_feature = 0;
+      hwbreak_feature = 0;
 
       remote_open (port);
 

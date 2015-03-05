@@ -513,9 +513,9 @@ handle_vFile (char *own_buf, int packet_len, int *new_packet_len)
 {
   if (strncmp (own_buf, "vFile:open:", 11) == 0)
     handle_open (own_buf);
-  else if (strncmp (own_buf, "vFile:pread:", 11) == 0)
+  else if (strncmp (own_buf, "vFile:pread:", 12) == 0)
     handle_pread (own_buf, new_packet_len);
-  else if (strncmp (own_buf, "vFile:pwrite:", 12) == 0)
+  else if (strncmp (own_buf, "vFile:pwrite:", 13) == 0)
     handle_pwrite (own_buf, packet_len);
   else if (strncmp (own_buf, "vFile:close:", 12) == 0)
     handle_close (own_buf);

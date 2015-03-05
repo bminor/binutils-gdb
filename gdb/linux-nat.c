@@ -387,20 +387,19 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
       int status = W_STOPCODE (0);
       struct cleanup *old_chain;
       int has_vforked;
+      ptid_t parent_ptid, child_ptid;
       int parent_pid, child_pid;
 
       has_vforked = (inferior_thread ()->pending_follow.kind
 		     == TARGET_WAITKIND_VFORKED);
-      parent_pid = ptid_get_lwp (inferior_ptid);
-      if (parent_pid == 0)
-	parent_pid = ptid_get_pid (inferior_ptid);
-      child_pid
-	= ptid_get_pid (inferior_thread ()->pending_follow.value.related_pid);
-
+      parent_ptid = inferior_ptid;
+      child_ptid = inferior_thread ()->pending_follow.value.related_pid;
+      parent_pid = ptid_get_lwp (parent_ptid);
+      child_pid = ptid_get_lwp (child_ptid);
 
       /* We're already attached to the parent, by default.  */
       old_chain = save_inferior_ptid ();
-      inferior_ptid = ptid_build (child_pid, child_pid, 0);
+      inferior_ptid = child_ptid;
       child_lp = add_lwp (inferior_ptid);
       child_lp->stopped = 1;
       child_lp->last_resume_kind = resume_stop;
@@ -457,7 +456,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	{
 	  struct lwp_info *parent_lp;
 
-	  parent_lp = find_lwp_pid (pid_to_ptid (parent_pid));
+	  parent_lp = find_lwp_pid (parent_ptid);
 	  gdb_assert (linux_supports_tracefork () >= 0);
 
 	  if (linux_supports_tracevforkdone ())
@@ -1506,8 +1505,6 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 static void
 linux_resume_one_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 {
-  ptid_t ptid;
-
   lp->step = step;
 
   /* stop_pc doubles as the PC the LWP had when it was last resumed.
@@ -1524,10 +1521,8 @@ linux_resume_one_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 
   if (linux_nat_prepare_to_resume != NULL)
     linux_nat_prepare_to_resume (lp);
-  /* Convert to something the lower layer understands.  */
-  ptid = pid_to_ptid (ptid_get_lwp (lp->ptid));
-  linux_ops->to_resume (linux_ops, ptid, step, signo);
-  lp->stop_reason = LWP_STOPPED_BY_NO_REASON;
+  linux_ops->to_resume (linux_ops, lp->ptid, step, signo);
+  lp->stop_reason = TARGET_STOPPED_BY_NO_REASON;
   lp->stopped = 0;
   registers_changed_ptid (lp->ptid);
 }
@@ -2380,7 +2375,7 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
 
   if (linux_ops->to_stopped_by_watchpoint (linux_ops))
     {
-      lp->stop_reason = LWP_STOPPED_BY_WATCHPOINT;
+      lp->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 
       if (linux_ops->to_stopped_data_address != NULL)
 	lp->stopped_data_address_p =
@@ -2392,7 +2387,7 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
 
   do_cleanups (old_chain);
 
-  return lp->stop_reason == LWP_STOPPED_BY_WATCHPOINT;
+  return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
 /* Called when the LWP stopped for a trap that could be explained by a
@@ -2401,14 +2396,22 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
 static void
 save_sigtrap (struct lwp_info *lp)
 {
-  gdb_assert (lp->stop_reason == LWP_STOPPED_BY_NO_REASON);
+  gdb_assert (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON);
   gdb_assert (lp->status != 0);
 
-  if (check_stopped_by_watchpoint (lp))
-    return;
-
+  /* Check first if this was a SW/HW breakpoint before checking
+     watchpoints, because at least s390 can't tell the data address of
+     hardware watchpoint hits, and the kernel returns
+     stopped-by-watchpoint as long as there's a watchpoint set.  */
   if (linux_nat_status_is_event (lp->status))
     check_stopped_by_breakpoint (lp);
+
+  /* Note that TRAP_HWBKPT can indicate either a hardware breakpoint
+     or hardware watchpoint.  Check which is which if we got
+     TARGET_STOPPED_BY_HW_BREAKPOINT.  */
+  if (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON
+      || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
+    check_stopped_by_watchpoint (lp);
 }
 
 /* Returns true if the LWP had stopped for a watchpoint.  */
@@ -2420,7 +2423,7 @@ linux_nat_stopped_by_watchpoint (struct target_ops *ops)
 
   gdb_assert (lp != NULL);
 
-  return lp->stop_reason == LWP_STOPPED_BY_WATCHPOINT;
+  return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
 static int
@@ -2540,8 +2543,8 @@ status_callback (struct lwp_info *lp, void *data)
   if (!lp->resumed)
     return 0;
 
-  if (lp->stop_reason == LWP_STOPPED_BY_SW_BREAKPOINT
-      || lp->stop_reason == LWP_STOPPED_BY_HW_BREAKPOINT)
+  if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
+      || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
     {
       struct regcache *regcache = get_thread_regcache (lp->ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -2562,6 +2565,8 @@ status_callback (struct lwp_info *lp, void *data)
 				paddress (target_gdbarch (), pc));
 	  discard = 1;
 	}
+
+#if !USE_SIGTRAP_SIGINFO
       else if (!breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
 	{
 	  if (debug_linux_nat)
@@ -2572,6 +2577,7 @@ status_callback (struct lwp_info *lp, void *data)
 
 	  discard = 1;
 	}
+#endif
 
       if (discard)
 	{
@@ -2674,10 +2680,49 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR pc;
   CORE_ADDR sw_bp_pc;
+#if USE_SIGTRAP_SIGINFO
+  siginfo_t siginfo;
+#endif
 
   pc = regcache_read_pc (regcache);
-  sw_bp_pc = pc - target_decr_pc_after_break (gdbarch);
+  sw_bp_pc = pc - gdbarch_decr_pc_after_break (gdbarch);
 
+#if USE_SIGTRAP_SIGINFO
+  if (linux_nat_get_siginfo (lp->ptid, &siginfo))
+    {
+      if (siginfo.si_signo == SIGTRAP)
+	{
+	  if (siginfo.si_code == GDB_ARCH_TRAP_BRKPT)
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "CSBB: Push back software "
+				    "breakpoint for %s\n",
+				    target_pid_to_str (lp->ptid));
+
+	      /* Back up the PC if necessary.  */
+	      if (pc != sw_bp_pc)
+		regcache_write_pc (regcache, sw_bp_pc);
+
+	      lp->stop_pc = sw_bp_pc;
+	      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
+	      return 1;
+	    }
+	  else if (siginfo.si_code == TRAP_HWBKPT)
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "CSBB: Push back hardware "
+				    "breakpoint/watchpoint for %s\n",
+				    target_pid_to_str (lp->ptid));
+
+	      lp->stop_pc = pc;
+	      lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
+	      return 1;
+	    }
+	}
+    }
+#else
   if ((!lp->step || lp->stop_pc == sw_bp_pc)
       && software_breakpoint_inserted_here_p (get_regcache_aspace (regcache),
 					      sw_bp_pc))
@@ -2694,7 +2739,7 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 	regcache_write_pc (regcache, sw_bp_pc);
 
       lp->stop_pc = sw_bp_pc;
-      lp->stop_reason = LWP_STOPPED_BY_SW_BREAKPOINT;
+      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
       return 1;
     }
 
@@ -2706,11 +2751,54 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 			    target_pid_to_str (lp->ptid));
 
       lp->stop_pc = pc;
-      lp->stop_reason = LWP_STOPPED_BY_HW_BREAKPOINT;
+      lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
       return 1;
     }
+#endif
 
   return 0;
+}
+
+
+/* Returns true if the LWP had stopped for a software breakpoint.  */
+
+static int
+linux_nat_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  struct lwp_info *lp = find_lwp_pid (inferior_ptid);
+
+  gdb_assert (lp != NULL);
+
+  return lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT;
+}
+
+/* Implement the supports_stopped_by_sw_breakpoint method.  */
+
+static int
+linux_nat_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  return USE_SIGTRAP_SIGINFO;
+}
+
+/* Returns true if the LWP had stopped for a hardware
+   breakpoint/watchpoint.  */
+
+static int
+linux_nat_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  struct lwp_info *lp = find_lwp_pid (inferior_ptid);
+
+  gdb_assert (lp != NULL);
+
+  return lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT;
+}
+
+/* Implement the supports_stopped_by_hw_breakpoint method.  */
+
+static int
+linux_nat_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  return USE_SIGTRAP_SIGINFO;
 }
 
 /* Select one LWP out of those that have events pending.  */
@@ -3365,12 +3453,14 @@ linux_nat_wait_1 (struct target_ops *ops,
   gdb_assert (lp != NULL);
 
   /* Now that we've selected our final event LWP, un-adjust its PC if
-     it was a software breakpoint.  */
-  if (lp->stop_reason == LWP_STOPPED_BY_SW_BREAKPOINT)
+     it was a software breakpoint, and we can't reliably support the
+     "stopped by software breakpoint" stop reason.  */
+  if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
+      && !USE_SIGTRAP_SIGINFO)
     {
       struct regcache *regcache = get_thread_regcache (lp->ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
-      int decr_pc = target_decr_pc_after_break (gdbarch);
+      int decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 
       if (decr_pc != 0)
 	{
@@ -4656,6 +4746,10 @@ linux_nat_add_target (struct target_ops *t)
   t->to_thread_address_space = linux_nat_thread_address_space;
   t->to_stopped_by_watchpoint = linux_nat_stopped_by_watchpoint;
   t->to_stopped_data_address = linux_nat_stopped_data_address;
+  t->to_stopped_by_sw_breakpoint = linux_nat_stopped_by_sw_breakpoint;
+  t->to_supports_stopped_by_sw_breakpoint = linux_nat_supports_stopped_by_sw_breakpoint;
+  t->to_stopped_by_hw_breakpoint = linux_nat_stopped_by_hw_breakpoint;
+  t->to_supports_stopped_by_hw_breakpoint = linux_nat_supports_stopped_by_hw_breakpoint;
 
   t->to_can_async_p = linux_nat_can_async_p;
   t->to_is_async_p = linux_nat_is_async_p;

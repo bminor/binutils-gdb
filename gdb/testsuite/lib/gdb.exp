@@ -808,6 +808,7 @@ proc gdb_test_multiple { command message user_code } {
 	-re ".*A problem internal to GDB has been detected" {
 	    fail "$message (GDB internal error)"
 	    gdb_internal_error_resync
+	    set result -1
 	}
 	-re "\\*\\*\\* DOSEXIT code.*" {
 	    if { $message != "" } {

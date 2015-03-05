@@ -1,3 +1,15 @@
+2015-03-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17994
+	* dlltool.c (temp_file_to_remove): New local array.
+	(unlink_temp_files): New functions - unlinks any file in the
+	temp_file_to_remove array, unless dotdeltemps is set.
+	(gen_exp_file): Add temp files to array.
+	(make_head): Likewise.
+	(make_delay_head): Likewise.
+	(make_tail): Likewise.
+	(gen_lib_file): Call unlink_temp_files.
+
 2015-02-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* objcopy.c (update_sections): New list.

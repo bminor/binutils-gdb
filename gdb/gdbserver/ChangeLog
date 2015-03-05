@@ -1,3 +1,69 @@
+2015-03-05  Pedro Alves  <palves@redhat.com>
+
+	* lynx-low.c (lynx_target_ops): Install NULL hooks for
+	stopped_by_sw_breakpoint, supports_stopped_by_sw_breakpoint,
+	stopped_by_hw_breakpoint, supports_stopped_by_hw_breakpoint.
+	* nto-low.c (nto_target_ops): Likewise.
+	* spu-low.c (spu_target_ops): Likewise.
+	* win32-low.c (win32_target_ops): Likewise.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
+        * linux-low.c (check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]:
+	Decide whether a breakpoint triggered based on the SIGTRAP's
+	siginfo.si_code.
+        (thread_still_has_status_pending_p) [USE_SIGTRAP_SIGINFO]: Don't check whether a
+        breakpoint is inserted if relying on SIGTRAP's siginfo.si_code.
+	(linux_low_filter_event): Check for breakpoints before checking
+	watchpoints.
+	(linux_wait_1): Don't re-increment the PC if relying on SIGTRAP's
+	siginfo.si_code.
+        (linux_stopped_by_sw_breakpoint)
+        (linux_supports_stopped_by_sw_breakpoint)
+        (linux_stopped_by_hw_breakpoint)
+        (linux_supports_stopped_by_hw_breakpoint): New functions.
+        (linux_target_ops): Install new target methods.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
+	* remote-utils.c (prepare_resume_reply): Report swbreak/hbreak.
+	* server.c (swbreak_feature, hwbreak_feature): New globals.
+	(handle_query) <qSupported>: Handle "swbreak+" and "hwbreak+".
+	(captured_main): Clear swbreak_feature and hwbreak_feature.
+	* server.h (swbreak_feature, hwbreak_feature): Declare.
+	* target.h (struct target_ops) <stopped_by_sw_breakpoint,
+	supports_stopped_by_sw_breakpoint, stopped_by_hw_breakpoint,
+	supports_stopped_by_hw_breakpoint>: New fields.
+	(target_supports_stopped_by_sw_breakpoint)
+	(target_stopped_by_sw_breakpoint)
+	(target_supports_stopped_by_hw_breakpoint)
+	(target_stopped_by_hw_breakpoint): Declare.
+
+2015-03-04  Pedro Alves  <palves@redhat.com>
+
+	enum lwp_stop_reason -> enum target_stop_reason
+	* linux-low.c (check_stopped_by_breakpoint): Adjust.
+	(thread_still_has_status_pending_p, check_stopped_by_watchpoint)
+	(linux_wait_1, stuck_in_jump_pad_callback)
+	(move_out_of_jump_pad_callback, linux_resume_one_lwp)
+	(linux_stopped_by_watchpoint):
+	* linux-low.h (enum lwp_stop_reason): Delete.
+	(struct lwp_info) <stop_reason>: Now an enum target_stop_reason.
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Adjust.
+
+2015-03-04  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (SFILES): Add linux-aarch64-low.c.
+
+2015-03-03  Gary Benson  <gbenson@redhat.com>
+
+	* hostio.c (handle_vFile): Fix prefix lengths.
+
+2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* linux-low.c (linux_low_enable_btrace): Do not overwrite non-zero
+	ptr_bits.
+
 2015-03-02  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* Makefile.in (s390-vx-linux64.c, s390-tevx-linux64.c)

@@ -38,6 +38,7 @@
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <sys/utsname.h>
 
 /* A branch trace record in perf_event.  */
 struct perf_event_bts
@@ -100,6 +101,31 @@ static int
 perf_event_new_data (const struct perf_event_buffer *pev)
 {
   return *pev->data_head != pev->last_head;
+}
+
+/* Try to determine the size of a pointer in bits for the OS.
+
+   This is the same as the size of a pointer for the inferior process
+   except when a 32-bit inferior is running on a 64-bit OS.  */
+
+static int
+linux_determine_kernel_ptr_bits (void)
+{
+  struct utsname utsn;
+  int errcode;
+
+  memset (&utsn, 0, sizeof (utsn));
+
+  errcode = uname (&utsn);
+  if (errcode < 0)
+    return 0;
+
+  /* We only need to handle the 64-bit host case, here.  For 32-bit host,
+     the pointer size can be filled in later based on the inferior.  */
+  if (strcmp (utsn.machine, "x86_64") == 0)
+    return 64;
+
+  return 0;
 }
 
 /* Check whether an address is in the kernel.  */
@@ -434,7 +460,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
   tinfo = xzalloc (sizeof (*tinfo));
   tinfo->ptid = ptid;
-  tinfo->ptr_bits = 0;
+  tinfo->ptr_bits = linux_determine_kernel_ptr_bits ();
 
   tinfo->conf.format = BTRACE_FORMAT_BTS;
   bts = &tinfo->variant.bts;

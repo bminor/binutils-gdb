@@ -2210,7 +2210,7 @@ Output_section::Input_section::is_merge_section_for(const Relobj* object,
 {
   if (this->is_input_section())
     return false;
-  return this->u2_.posd->is_merge_section_for(object, shndx);
+  return object->is_merge_section_for(this->u2_.posd, shndx);
 }
 
 // Write out the data.  We don't have to do anything for an input
@@ -2636,6 +2636,10 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 					uint64_t addralign,
 					bool keeps_input_sections)
 {
+  // We cannot merge sections with entsize == 0.
+  if (entsize == 0)
+    return false;
+
   bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
 
   // We cannot restore merged input section states.

@@ -945,6 +945,10 @@ static struct target_ops nto_target_ops = {
   nto_supports_z_point_type,
   nto_insert_point,
   nto_remove_point,
+  NULL, /* stopped_by_sw_breakpoint */
+  NULL, /* supports_stopped_by_sw_breakpoint */
+  NULL, /* stopped_by_hw_breakpoint */
+  NULL, /* supports_stopped_by_hw_breakpoint */
   nto_stopped_by_watchpoint,
   nto_stopped_data_address,
   NULL, /* nto_read_offsets */

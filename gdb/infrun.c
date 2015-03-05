@@ -408,15 +408,12 @@ static int
 follow_fork_inferior (int follow_child, int detach_fork)
 {
   int has_vforked;
-  int parent_pid, child_pid;
+  ptid_t parent_ptid, child_ptid;
 
   has_vforked = (inferior_thread ()->pending_follow.kind
 		 == TARGET_WAITKIND_VFORKED);
-  parent_pid = ptid_get_lwp (inferior_ptid);
-  if (parent_pid == 0)
-    parent_pid = ptid_get_pid (inferior_ptid);
-  child_pid
-    = ptid_get_pid (inferior_thread ()->pending_follow.value.related_pid);
+  parent_ptid = inferior_ptid;
+  child_ptid = inferior_thread ()->pending_follow.value.related_pid;
 
   if (has_vforked
       && !non_stop /* Non-stop always resumes both branches.  */
@@ -460,10 +457,9 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	    {
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
-				_("Detaching after %s from "
-				  "child process %d.\n"),
+				_("Detaching after %s from child %s.\n"),
 				has_vforked ? "vfork" : "fork",
-				child_pid);
+				target_pid_to_str (child_ptid));
 	    }
 	}
       else
@@ -472,7 +468,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  struct cleanup *old_chain;
 
 	  /* Add process to GDB's tables.  */
-	  child_inf = add_inferior (child_pid);
+	  child_inf = add_inferior (ptid_get_pid (child_ptid));
 
 	  parent_inf = current_inferior ();
 	  child_inf->attach_flag = parent_inf->attach_flag;
@@ -483,7 +479,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  old_chain = save_inferior_ptid ();
 	  save_current_program_space ();
 
-	  inferior_ptid = ptid_build (child_pid, child_pid, 0);
+	  inferior_ptid = child_ptid;
 	  add_thread (inferior_ptid);
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 
@@ -549,17 +545,16 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	{
 	  target_terminal_ours_for_output ();
 	  fprintf_filtered (gdb_stdlog,
-			    _("Attaching after process %d "
-			      "%s to child process %d.\n"),
-			    parent_pid,
+			    _("Attaching after %s %s to child %s.\n"),
+			    target_pid_to_str (parent_ptid),
 			    has_vforked ? "vfork" : "fork",
-			    child_pid);
+			    target_pid_to_str (child_ptid));
 	}
 
       /* Add the new inferior first, so that the target_detach below
 	 doesn't unpush the target.  */
 
-      child_inf = add_inferior (child_pid);
+      child_inf = add_inferior (ptid_get_pid (child_ptid));
 
       parent_inf = current_inferior ();
       child_inf->attach_flag = parent_inf->attach_flag;
@@ -596,8 +591,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after fork from "
-				  "child process %d.\n"),
-				child_pid);
+				  "child %s.\n"),
+				target_pid_to_str (child_ptid));
 	    }
 
 	  target_detach (NULL, 0);
@@ -609,7 +604,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	 this new thread, before cloning the program space, and
 	 informing the solib layer about this new process.  */
 
-      inferior_ptid = ptid_build (child_pid, child_pid, 0);
+      inferior_ptid = child_ptid;
       add_thread (inferior_ptid);
 
       /* If this is a vfork child, then the address-space is shared
@@ -1060,10 +1055,11 @@ show_follow_exec_mode_string (struct ui_file *file, int from_tty,
 /* EXECD_PATHNAME is assumed to be non-NULL.  */
 
 static void
-follow_exec (ptid_t pid, char *execd_pathname)
+follow_exec (ptid_t ptid, char *execd_pathname)
 {
-  struct thread_info *th = inferior_thread ();
+  struct thread_info *th, *tmp;
   struct inferior *inf = current_inferior ();
+  int pid = ptid_get_pid (ptid);
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1088,23 +1084,46 @@ follow_exec (ptid_t pid, char *execd_pathname)
 
   mark_breakpoints_out ();
 
-  update_breakpoints_after_exec ();
+  /* The target reports the exec event to the main thread, even if
+     some other thread does the exec, and even if the main thread was
+     stopped or already gone.  We may still have non-leader threads of
+     the process on our list.  E.g., on targets that don't have thread
+     exit events (like remote); or on native Linux in non-stop mode if
+     there were only two threads in the inferior and the non-leader
+     one is the one that execs (and nothing forces an update of the
+     thread list up to here).  When debugging remotely, it's best to
+     avoid extra traffic, when possible, so avoid syncing the thread
+     list with the target, and instead go ahead and delete all threads
+     of the process but one that reported the event.  Note this must
+     be done before calling update_breakpoints_after_exec, as
+     otherwise clearing the threads' resources would reference stale
+     thread breakpoints -- it may have been one of these threads that
+     stepped across the exec.  We could just clear their stepping
+     states, but as long as we're iterating, might as well delete
+     them.  Deleting them now rather than at the next user-visible
+     stop provides a nicer sequence of events for user and MI
+     notifications.  */
+  ALL_NON_EXITED_THREADS_SAFE (th, tmp)
+    if (ptid_get_pid (th->ptid) == pid && !ptid_equal (th->ptid, ptid))
+      delete_thread (th->ptid);
 
-  /* If there was one, it's gone now.  We cannot truly step-to-next
-     statement through an exec().  */
+  /* We also need to clear any left over stale state for the
+     leader/event thread.  E.g., if there was any step-resume
+     breakpoint or similar, it's gone now.  We cannot truly
+     step-to-next statement through an exec().  */
+  th = inferior_thread ();
   th->control.step_resume_breakpoint = NULL;
   th->control.exception_resume_breakpoint = NULL;
   th->control.single_step_breakpoints = NULL;
   th->control.step_range_start = 0;
   th->control.step_range_end = 0;
 
-  /* The target reports the exec event to the main thread, even if
-     some other thread does the exec, and even if the main thread was
-     already stopped --- if debugging in non-stop mode, it's possible
-     the user had the main thread held stopped in the previous image
-     --- release it now.  This is the same behavior as step-over-exec
-     with scheduler-locking on in all-stop mode.  */
+  /* The user may have had the main thread held stopped in the
+     previous image (e.g., schedlock on, or non-stop).  Release
+     it now.  */
   th->stop_requested = 0;
+
+  update_breakpoints_after_exec ();
 
   /* What is this a.out's name?  */
   printf_unfiltered (_("%s is executing new program: %s\n"),
@@ -3449,12 +3468,24 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   if (execution_direction == EXEC_REVERSE)
     return;
 
+  /* If the target can tell whether the thread hit a SW breakpoint,
+     trust it.  Targets that can tell also adjust the PC
+     themselves.  */
+  if (target_supports_stopped_by_sw_breakpoint ())
+    return;
+
+  /* Note that relying on whether a breakpoint is planted in memory to
+     determine this can fail.  E.g,. the breakpoint could have been
+     removed since.  Or the thread could have been told to step an
+     instruction the size of a breakpoint instruction, and only
+     _after_ was a breakpoint inserted at its address.  */
+
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
   regcache = get_thread_regcache (ecs->ptid);
   gdbarch = get_regcache_arch (regcache);
 
-  decr_pc = target_decr_pc_after_break (gdbarch);
+  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
   if (decr_pc == 0)
     return;
 
@@ -3464,6 +3495,11 @@ adjust_pc_after_break (struct execution_control_state *ecs)
      breakpoint would be.  */
   breakpoint_pc = regcache_read_pc (regcache) - decr_pc;
 
+  /* If the target can't tell whether a software breakpoint triggered,
+     fallback to figuring it out based on breakpoints we think were
+     inserted in the target, and on whether the thread was stepped or
+     continued.  */
+
   /* Check whether there actually is a software breakpoint inserted at
      that location.
 
@@ -3471,7 +3507,10 @@ adjust_pc_after_break (struct execution_control_state *ecs)
      removed a breakpoint, but stop events for that breakpoint were
      already queued and arrive later.  To suppress those spurious
      SIGTRAPs, we keep a list of such breakpoint locations for a bit,
-     and retire them after a number of stop events are reported.  */
+     and retire them after a number of stop events are reported.  Note
+     this is an heuristic and can thus get confused.  The real fix is
+     to get the "stopped by SW BP and needs adjustment" info out of
+     the target/kernel (and thus never reach here; see above).  */
   if (software_breakpoint_inserted_here_p (aspace, breakpoint_pc)
       || (non_stop && moribund_breakpoint_here_p (aspace, breakpoint_pc)))
     {
@@ -4485,6 +4524,54 @@ handle_signal_stop (struct execution_control_state *ecs)
   random_signal
     = !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
 			       ecs->event_thread->suspend.stop_signal);
+
+  /* Maybe this was a trap for a software breakpoint that has since
+     been removed.  */
+  if (random_signal && target_stopped_by_sw_breakpoint ())
+    {
+      if (program_breakpoint_here_p (gdbarch, stop_pc))
+	{
+	  struct regcache *regcache;
+	  int decr_pc;
+
+	  /* Re-adjust PC to what the program would see if GDB was not
+	     debugging it.  */
+	  regcache = get_thread_regcache (ecs->event_thread->ptid);
+	  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
+	  if (decr_pc != 0)
+	    {
+	      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
+
+	      if (record_full_is_used ())
+		record_full_gdb_operation_disable_set ();
+
+	      regcache_write_pc (regcache, stop_pc + decr_pc);
+
+	      do_cleanups (old_cleanups);
+	    }
+	}
+      else
+	{
+	  /* A delayed software breakpoint event.  Ignore the trap.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: delayed software breakpoint "
+				"trap, ignoring\n");
+	  random_signal = 0;
+	}
+    }
+
+  /* Maybe this was a trap for a hardware breakpoint/watchpoint that
+     has since been removed.  */
+  if (random_signal && target_stopped_by_hw_breakpoint ())
+    {
+      /* A delayed hardware breakpoint event.  Ignore the trap.  */
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: delayed hardware breakpoint/watchpoint "
+			    "trap, ignoring\n");
+      random_signal = 0;
+    }
 
   /* If not, perhaps stepping/nexting can.  */
   if (random_signal)

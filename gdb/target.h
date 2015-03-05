@@ -454,6 +454,35 @@ struct target_ops
     int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
 				 struct bp_target_info *)
       TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
+
+    /* Returns true if the target stopped because it executed a
+       software breakpoint.  This is necessary for correct background
+       execution / non-stop mode operation, and for correct PC
+       adjustment on targets where the PC needs to be adjusted when a
+       software breakpoint triggers.  In these modes, by the time GDB
+       processes a breakpoint event, the breakpoint may already be
+       done from the target, so GDB needs to be able to tell whether
+       it should ignore the event and whether it should adjust the PC.
+       See adjust_pc_after_break.  */
+    int (*to_stopped_by_sw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Returns true if the above method is supported.  */
+    int (*to_supports_stopped_by_sw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+
+    /* Returns true if the target stopped for a hardware breakpoint.
+       Likewise, if the target supports hardware breakpoints, this
+       method is necessary for correct background execution / non-stop
+       mode operation.  Even though hardware breakpoints do not
+       require PC adjustment, GDB needs to be able to tell whether the
+       hardware breakpoint event is a delayed event for a breakpoint
+       that is already gone and should thus be ignored.  */
+    int (*to_stopped_by_hw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Returns true if the above method is supported.  */
+    int (*to_supports_stopped_by_hw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+
     int (*to_can_use_hw_breakpoint) (struct target_ops *, int, int, int)
       TARGET_DEFAULT_RETURN (0);
     int (*to_ranged_break_num_registers) (struct target_ops *)
@@ -1128,13 +1157,6 @@ struct target_ops
     const struct frame_unwind *(*to_get_tailcall_unwinder) (struct target_ops *self)
       TARGET_DEFAULT_RETURN (NULL);
 
-    /* Return the number of bytes by which the PC needs to be decremented
-       after executing a breakpoint instruction.
-       Defaults to gdbarch_decr_pc_after_break (GDBARCH).  */
-    CORE_ADDR (*to_decr_pc_after_break) (struct target_ops *ops,
-					 struct gdbarch *gdbarch)
-      TARGET_DEFAULT_FUNC (default_target_decr_pc_after_break);
-
     /* Prepare to generate a core file.  */
     void (*to_prepare_to_generate_core) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
@@ -1743,6 +1765,21 @@ extern char *target_thread_name (struct thread_info *);
 #define target_stopped_by_watchpoint()		\
   ((*current_target.to_stopped_by_watchpoint) (&current_target))
 
+/* Returns non-zero if the target stopped because it executed a
+   software breakpoint instruction.  */
+
+#define target_stopped_by_sw_breakpoint()		\
+  ((*current_target.to_stopped_by_sw_breakpoint) (&current_target))
+
+#define target_supports_stopped_by_sw_breakpoint() \
+  ((*current_target.to_supports_stopped_by_sw_breakpoint) (&current_target))
+
+#define target_stopped_by_hw_breakpoint()				\
+  ((*current_target.to_stopped_by_hw_breakpoint) (&current_target))
+
+#define target_supports_stopped_by_hw_breakpoint() \
+  ((*current_target.to_supports_stopped_by_hw_breakpoint) (&current_target))
+
 /* Non-zero if we have steppable watchpoints  */
 
 #define target_have_steppable_watchpoint \
@@ -2175,11 +2212,6 @@ extern void noprocess (void) ATTRIBUTE_NORETURN;
 
 extern void target_require_runnable (void);
 
-extern void find_default_attach (struct target_ops *, const char *, int);
-
-extern void find_default_create_inferior (struct target_ops *,
-					  char *, char *, char **, int);
-
 extern struct target_ops *find_target_beneath (struct target_ops *);
 
 /* Find the target at STRATUM.  If no target is at that stratum,
@@ -2288,9 +2320,6 @@ extern void target_call_history_from (ULONGEST begin, int size, int flags);
 
 /* See to_call_history_range.  */
 extern void target_call_history_range (ULONGEST begin, ULONGEST end, int flags);
-
-/* See to_decr_pc_after_break.  */
-extern CORE_ADDR target_decr_pc_after_break (struct gdbarch *gdbarch);
 
 /* See to_prepare_to_generate_core.  */
 extern void target_prepare_to_generate_core (void);

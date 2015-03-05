@@ -675,13 +675,6 @@ class Output_section_data : public Output_data
 		section_offset_type* poutput) const
   { return this->do_output_offset(object, shndx, offset, poutput); }
 
-  // Return whether this is the merge section for the input section
-  // SHNDX in OBJECT.  This should return true when output_offset
-  // would return true for some values of OFFSET.
-  bool
-  is_merge_section_for(const Relobj* object, unsigned int shndx) const
-  { return this->do_is_merge_section_for(object, shndx); }
-
   // Write the contents to a buffer.  This is used for sections which
   // require postprocessing, such as compression.
   void
@@ -713,11 +706,6 @@ class Output_section_data : public Output_data
   virtual bool
   do_output_offset(const Relobj*, unsigned int, section_offset_type,
 		   section_offset_type*) const
-  { return false; }
-
-  // The child class may implement is_merge_section_for.
-  virtual bool
-  do_is_merge_section_for(const Relobj*, unsigned int) const
   { return false; }
 
   // The child class may implement write_to_buffer.  Most child
