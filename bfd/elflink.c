@@ -7793,28 +7793,32 @@ put_value (bfd_vma size,
 {
   location += (size - chunksz);
 
-  for (; size; size -= chunksz, location -= chunksz, x >>= (chunksz * 8))
+  for (; size; size -= chunksz, location -= chunksz)
     {
       switch (chunksz)
 	{
-	default:
-	case 0:
-	  abort ();
 	case 1:
 	  bfd_put_8 (input_bfd, x, location);
+	  x >>= 8;
 	  break;
 	case 2:
 	  bfd_put_16 (input_bfd, x, location);
+	  x >>= 16;
 	  break;
 	case 4:
 	  bfd_put_32 (input_bfd, x, location);
+	  x >>= 32;
 	  break;
-	case 8:
 #ifdef BFD64
+	case 8:
 	  bfd_put_64 (input_bfd, x, location);
-#else
-	  abort ();
+	  /* Computed this way because x >>= 64 is undefined if x is a 64-bit value.  */
+	  x >>= 32;
+	  x >>= 32;
+	  break;
 #endif
+	default:
+	  abort ();
 	  break;
 	}
     }

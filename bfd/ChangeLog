@@ -1,3 +1,9 @@
+2015-03-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17765
+	* elflink.c (put_value): Avoid using an undefined shift
+	operation.
+
 2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/pr15228
