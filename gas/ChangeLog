@@ -1,3 +1,9 @@
+2015-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c (md_parse_option): Fix code to set or clear
+	EF_RH850_DATA_ALIGN8 bit in ELF header, based upon the use of the
+	-m8byte-align and -m4byte-align command line options.
+
 2015-03-04  Richard Sandiford  <richard.sandiford@arm.com>
 
 	PR gas/17843

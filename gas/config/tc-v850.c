@@ -1653,17 +1653,19 @@ md_parse_option (int c, char *arg)
       v850_target_format = "elf32-v850-rh850";
     }
   else if (strcmp (arg, "8byte-align") == 0)
-    v850_data_8 = TRUE;
+    {
+      v850_data_8 = TRUE;
+      v850_e_flags |= EF_RH850_DATA_ALIGN8;
+    }
   else if (strcmp (arg, "4byte-align") == 0)
-    v850_data_8 = FALSE;
+    {
+      v850_data_8 = FALSE;
+      v850_e_flags &= ~ EF_RH850_DATA_ALIGN8;
+    }
   else if (strcmp (arg, "soft-float") == 0)
     soft_float = 1;
   else if (strcmp (arg, "hard-float") == 0)
     soft_float = 0;
-  else if (strcmp (arg, "8byte-align") == 0)
-    v850_e_flags |= EF_RH850_DATA_ALIGN8;
-  else if (strcmp (arg, "4byte-align") == 0)
-    v850_e_flags &= ~ EF_RH850_DATA_ALIGN8;
   else
     return 0;
 
