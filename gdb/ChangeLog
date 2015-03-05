@@ -1,3 +1,9 @@
+2015-03-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18002
+	* mem-break.c (default_memory_insert_breakpoint): Set shadow_len
+	after reading the breakpoint's shadow memory.
+
 2015-03-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppabsd-nat.c: Remove file.
