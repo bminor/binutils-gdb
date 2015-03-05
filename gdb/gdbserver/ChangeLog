@@ -1,3 +1,12 @@
+2015-03-05  Pedro Alves  <palves@redhat.com>
+
+	* lynx-low.c (lynx_target_ops): Install NULL hooks for
+	stopped_by_sw_breakpoint, supports_stopped_by_sw_breakpoint,
+	stopped_by_hw_breakpoint, supports_stopped_by_hw_breakpoint.
+	* nto-low.c (nto_target_ops): Likewise.
+	* spu-low.c (spu_target_ops): Likewise.
+	* win32-low.c (win32_target_ops): Likewise.
+
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
         * linux-low.c (check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]:
