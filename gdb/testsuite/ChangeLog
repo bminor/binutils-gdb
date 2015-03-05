@@ -1,3 +1,9 @@
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/actions.exp: Use gdb_breakpoint instead of gdb_test
+	that doesn't expect anything.  Return early if running to main
+	fails.
+
 2015-04-07  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.threads/non-stop-fair-events.c (SECONDS): New macro.
