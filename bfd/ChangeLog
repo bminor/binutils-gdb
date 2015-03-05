@@ -1,3 +1,21 @@
+2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr15228
+	PR ld/pr17709
+	* elf-bfd.h (elf_backend_data): Add extern_protected_data.
+	* elf32-i386.c (elf_backend_extern_protected_data): New.
+	Defined to 1.
+	* elf64-x86-64.c (elf_backend_extern_protected_data): Likewise.
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Don't error on
+	copy relocs against protected symbols if extern_protected_data
+	is true.
+	(_bfd_elf_symbol_refs_local_p): Don't return true on protected
+	non-function symbols if extern_protected_data is true.
+	* elfxx-target.h (elf_backend_extern_protected_data): New.
+	Default to 0.
+	(elfNN_bed): Initialize extern_protected_data with
+	elf_backend_extern_protected_data.
+
 2015-03-05  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18025

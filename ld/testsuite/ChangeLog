@@ -1,3 +1,22 @@
+2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr15228
+	PR ld/pr17709
+	* ld-i386/i386.exp (i386tests): Add a test for PR ld/17709.
+	* ld-i386/pr17709-nacl.rd: New file.
+	* ld-i386/pr17709.rd: Likewise.
+	* ld-i386/pr17709a.s: Likewise.
+	* ld-i386/pr17709b.s: Likewise.
+	* ld-i386/protected3.d: Updated.
+	* ld-i386/protected3.s: Likewise.
+	* ld-x86-64/pr17709-nacl.rd: New file.
+	* ld-x86-64/pr17709.rd: Likewise.
+	* ld-x86-64/pr17709a.s: Likewise.
+	* ld-x86-64/pr17709b.s: Likewise.
+	* ld-x86-64/protected3.d: Updated.
+	* ld-x86-64/protected3.s: Likewise.
+	* ld-x86-64/x86-64.exp (x86_64tests): Add a test for PR ld/17709.
+
 2015-03-04  Richard Sandiford  <richard.sandiford@arm.com>
 
 	PR gas/17843
