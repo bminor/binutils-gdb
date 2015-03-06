@@ -1,3 +1,9 @@
+2015-03-06  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_insert_point): Use
+	show_debug_regs as a boolean.
+	(aarch64_remove_point): Likewise.
+
 2015-03-05  Pedro Alves  <palves@redhat.com>
 
 	* lynx-low.c (lynx_target_ops): Install NULL hooks for
