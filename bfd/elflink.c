@@ -7807,7 +7807,9 @@ put_value (bfd_vma size,
 	  break;
 	case 4:
 	  bfd_put_32 (input_bfd, x, location);
-	  x >>= 32;
+	  /* Computed this way because x >>= 32 is undefined if x is a 32-bit value.  */
+	  x >>= 16;
+	  x >>= 16;
 	  break;
 #ifdef BFD64
 	case 8:

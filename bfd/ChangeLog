@@ -1,3 +1,9 @@
+2015-03-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17765
+	* elflink.c (put_value): Like previous delta, but for the 32-bit
+	case.
+
 2015-03-05  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17765
