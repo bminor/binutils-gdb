@@ -1,3 +1,7 @@
+2015-03-12  John Baldwin  <jhb@FreeBSD.org>
+
+	* MAINTAINERS (Write After Approval): Add John Baldwin.
+
 2015-03-12  Gary Benson <gbenson@redhat.com>
 
 	* solib.c (_initialize_solib): Make "set/show sysroot" use
