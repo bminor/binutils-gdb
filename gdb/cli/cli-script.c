@@ -800,7 +800,7 @@ locate_arg (char *p)
 {
   while ((p = strchr (p, '$')))
     {
-      if (strncmp (p, "$arg", 4) == 0
+      if (startswith (p, "$arg")
 	  && (isdigit (p[4]) || p[4] == 'c'))
 	return p;
       p++;
@@ -988,7 +988,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 
   /* 'end' is always recognized, regardless of parse_commands value.
      We also permit whitespace before end and after.  */
-  if (p_end - p_start == 3 && !strncmp (p_start, "end", 3))
+  if (p_end - p_start == 3 && startswith (p_start, "end"))
     return end_command;
   
   if (parse_commands)
@@ -1005,14 +1005,14 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	return nop_command;
 
       /* Is the else clause of an if control structure?  */
-      if (p_end - p == 4 && !strncmp (p, "else", 4))
+      if (p_end - p == 4 && startswith (p, "else"))
 	return else_command;
 
       /* Check for while, if, break, continue, etc and build a new
 	 command line structure for them.  */
-      if ((p_end - p >= 14 && !strncmp (p, "while-stepping", 14))
-	  || (p_end - p >= 8 && !strncmp (p, "stepping", 8))
-	  || (p_end - p >= 2 && !strncmp (p, "ws", 2)))
+      if ((p_end - p >= 14 && startswith (p, "while-stepping"))
+	  || (p_end - p >= 8 && startswith (p, "stepping"))
+	  || (p_end - p >= 2 && startswith (p, "ws")))
 	{
 	  /* Because validate_actionline and encode_action lookup
 	     command's line as command, we need the line to
@@ -1027,7 +1027,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	     not.  */
 	  *command = build_command_line (while_stepping_control, p);
 	}
-      else if (p_end - p > 5 && !strncmp (p, "while", 5))
+      else if (p_end - p > 5 && startswith (p, "while"))
 	{
 	  char *first_arg;
 
@@ -1036,7 +1036,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	    first_arg++;
 	  *command = build_command_line (while_control, first_arg);
 	}
-      else if (p_end - p > 2 && !strncmp (p, "if", 2))
+      else if (p_end - p > 2 && startswith (p, "if"))
 	{
 	  char *first_arg;
 
@@ -1045,7 +1045,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	    first_arg++;
 	  *command = build_command_line (if_control, first_arg);
 	}
-      else if (p_end - p >= 8 && !strncmp (p, "commands", 8))
+      else if (p_end - p >= 8 && startswith (p, "commands"))
 	{
 	  char *first_arg;
 
@@ -1054,13 +1054,13 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	    first_arg++;
 	  *command = build_command_line (commands_control, first_arg);
 	}
-      else if (p_end - p == 6 && !strncmp (p, "python", 6))
+      else if (p_end - p == 6 && startswith (p, "python"))
 	{
 	  /* Note that we ignore the inline "python command" form
 	     here.  */
 	  *command = build_command_line (python_control, "");
 	}
-      else if (p_end - p == 6 && !strncmp (p, "compile", 7))
+      else if (p_end - p == 6 && startswith (p, "compile"))
 	{
 	  /* Note that we ignore the inline "compile command" form
 	     here.  */
@@ -1068,12 +1068,12 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	  (*command)->control_u.compile.scope = COMPILE_I_INVALID_SCOPE;
 	}
 
-      else if (p_end - p == 5 && !strncmp (p, "guile", 5))
+      else if (p_end - p == 5 && startswith (p, "guile"))
 	{
 	  /* Note that we ignore the inline "guile command" form here.  */
 	  *command = build_command_line (guile_control, "");
 	}
-      else if (p_end - p == 10 && !strncmp (p, "loop_break", 10))
+      else if (p_end - p == 10 && startswith (p, "loop_break"))
 	{
 	  *command = (struct command_line *)
 	    xmalloc (sizeof (struct command_line));
@@ -1083,7 +1083,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	  (*command)->body_count = 0;
 	  (*command)->body_list = NULL;
 	}
-      else if (p_end - p == 13 && !strncmp (p, "loop_continue", 13))
+      else if (p_end - p == 13 && startswith (p, "loop_continue"))
 	{
 	  *command = (struct command_line *)
 	    xmalloc (sizeof (struct command_line));

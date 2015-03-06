@@ -2220,7 +2220,7 @@ static int
 rs6000_in_solib_return_trampoline (struct gdbarch *gdbarch,
 				   CORE_ADDR pc, const char *name)
 {
-  return name && !strncmp (name, "@FIX", 4);
+  return name && startswith (name, "@FIX");
 }
 
 /* Skip code that the user doesn't want to see when stepping:

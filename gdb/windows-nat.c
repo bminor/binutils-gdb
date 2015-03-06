@@ -813,11 +813,10 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	&s, 1024, 0)
       || !s || !*s)
     /* nothing to do */;
-  else if (strncmp (s, _CYGWIN_SIGNAL_STRING,
-		    sizeof (_CYGWIN_SIGNAL_STRING) - 1) != 0)
+  else if (!startswith (s, _CYGWIN_SIGNAL_STRING))
     {
 #ifdef __CYGWIN__
-      if (strncmp (s, "cYg", 3) != 0)
+      if (!startswith (s, "cYg"))
 #endif
 	warning (("%s"), s);
     }
@@ -1014,8 +1013,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 	if ((!cygwin_exceptions && (addr >= cygwin_load_start
 				    && addr < cygwin_load_end))
 	    || (find_pc_partial_function (addr, &fn, NULL, NULL)
-		&& strncmp (fn, "KERNEL32!IsBad",
-			    strlen ("KERNEL32!IsBad")) == 0))
+		&& startswith (fn, "KERNEL32!IsBad")))
 	  return 0;
       }
 #endif

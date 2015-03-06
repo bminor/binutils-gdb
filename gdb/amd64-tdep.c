@@ -2378,8 +2378,7 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && strncmp (COMPUNIT_PRODUCER (cust), "clang ",
-			  sizeof ("clang ") - 1) == 0))
+	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
         return max (start_pc, post_prologue_pc);
     }
 

@@ -1342,7 +1342,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 		t = n;
 	      }
 	    /* Chop a leading builtin_type.  */
-	    if (strncmp (t, blt, strlen (blt)) == 0)
+	    if (startswith (t, blt))
 	      t += strlen (blt);
 	  }
 	fprintf_unfiltered (file, " %-15s", t);

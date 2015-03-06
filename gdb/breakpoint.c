@@ -9729,7 +9729,7 @@ parse_breakpoint_sals (char **address,
   /* If no arg given, or if first arg is 'if ', use the default
      breakpoint.  */
   if ((*address) == NULL
-      || (strncmp ((*address), "if", 2) == 0 && isspace ((*address)[2])))
+      || (startswith ((*address), "if") && isspace ((*address)[2])))
     {
       /* The last displayed codepoint, if it's valid, is our default breakpoint
          address.  */
@@ -11401,7 +11401,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  tok++;
 	  toklen = end_tok - tok + 1;
 
-	  if (toklen == 6 && !strncmp (tok, "thread", 6))
+	  if (toklen == 6 && startswith (tok, "thread"))
 	    {
 	      /* At this point we've found a "thread" token, which means
 		 the user is trying to set a watchpoint that triggers
@@ -11423,7 +11423,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	      if (!valid_thread_id (thread))
 		invalid_thread_id_error (thread);
 	    }
-	  else if (toklen == 4 && !strncmp (tok, "mask", 4))
+	  else if (toklen == 4 && startswith (tok, "mask"))
 	    {
 	      /* We've found a "mask" token, which means the user wants to
 		 create a hardware watchpoint that is going to have the mask
@@ -15493,7 +15493,7 @@ strace_command (char *arg, int from_tty)
 
   /* Decide if we are dealing with a static tracepoint marker (`-m'),
      or with a normal static tracepoint.  */
-  if (arg && strncmp (arg, "-m", 2) == 0 && isspace (arg[2]))
+  if (arg && startswith (arg, "-m") && isspace (arg[2]))
     ops = &strace_marker_breakpoint_ops;
   else
     ops = &tracepoint_breakpoint_ops;

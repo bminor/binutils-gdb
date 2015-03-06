@@ -535,7 +535,7 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
     || (newname && strcmp (field_name, newname) == 0);
 
   if (!is_destructor)
-    is_destructor = (strncmp (physname, "__dt", 4) == 0);
+    is_destructor = (startswith (physname, "__dt"));
 
   if (is_destructor || is_full_physname_constructor)
     {
@@ -3950,7 +3950,7 @@ static const char *
 operator_chars (const char *p, const char **end)
 {
   *end = "";
-  if (strncmp (p, "operator", 8))
+  if (!startswith (p, "operator"))
     return *end;
   p += 8;
 
@@ -6003,7 +6003,7 @@ producer_is_realview (const char *producer)
     return 0;
 
   for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
-    if (strncmp (producer, arm_idents[i], strlen (arm_idents[i])) == 0)
+    if (startswith (producer, arm_idents[i]))
       return 1;
 
   return 0;

@@ -538,7 +538,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
   /* Print the tag if it exists.  */
   if (TYPE_TAG_NAME (type) != NULL)
     {
-      if (strncmp (TYPE_TAG_NAME (type), "$$", 2) != 0)
+      if (!startswith (TYPE_TAG_NAME (type), "$$"))
 	{
 	  fputs_filtered (TYPE_TAG_NAME (type), stream);
 	  if (show > 0)

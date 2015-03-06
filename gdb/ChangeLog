@@ -1,3 +1,8 @@
+2015-03-06  Gary Benson <gbenson@redhat.com>
+
+	* common/common-utils.h (startswith): New inline function.
+	All places where this logic was used updated to use the above.
+
 2015-03-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18002

@@ -778,7 +778,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	return;
     }
 
-  if (strncmp (s, "cYg", 3) != 0)
+  if (!startswith (s, "cYg"))
     {
       if (!server_waiting)
 	{

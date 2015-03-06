@@ -491,7 +491,7 @@ remote_get_noisy_reply (char **buf_p,
       buf = *buf_p;
       if (buf[0] == 'E')
 	trace_error (buf);
-      else if (strncmp (buf, "qRelocInsn:", strlen ("qRelocInsn:")) == 0)
+      else if (startswith (buf, "qRelocInsn:"))
 	{
 	  ULONGEST ul;
 	  CORE_ADDR from, to, org_to;
@@ -3157,14 +3157,14 @@ get_offsets (void)
   ptr = buf;
   lose = 0;
 
-  if (strncmp (ptr, "Text=", 5) == 0)
+  if (startswith (ptr, "Text="))
     {
       ptr += 5;
       /* Don't use strtol, could lose on big values.  */
       while (*ptr && *ptr != ';')
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
 
-      if (strncmp (ptr, ";Data=", 6) == 0)
+      if (startswith (ptr, ";Data="))
 	{
 	  ptr += 6;
 	  while (*ptr && *ptr != ';')
@@ -3173,7 +3173,7 @@ get_offsets (void)
       else
 	lose = 1;
 
-      if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
+      if (!lose && startswith (ptr, ";Bss="))
 	{
 	  ptr += 5;
 	  while (*ptr && *ptr != ';')
@@ -3185,7 +3185,7 @@ get_offsets (void)
       else
 	lose = 1;
     }
-  else if (strncmp (ptr, "TextSeg=", 8) == 0)
+  else if (startswith (ptr, "TextSeg="))
     {
       ptr += 8;
       /* Don't use strtol, could lose on big values.  */
@@ -3193,7 +3193,7 @@ get_offsets (void)
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
       num_segments = 1;
 
-      if (strncmp (ptr, ";DataSeg=", 9) == 0)
+      if (startswith (ptr, ";DataSeg="))
 	{
 	  ptr += 9;
 	  while (*ptr && *ptr != ';')
@@ -3800,7 +3800,7 @@ remote_check_symbols (void)
   packet_ok (rs->buf, &remote_protocol_packets[PACKET_qSymbol]);
   reply = rs->buf;
 
-  while (strncmp (reply, "qSymbol:", 8) == 0)
+  while (startswith (reply, "qSymbol:"))
     {
       struct bound_minimal_symbol sym;
 
@@ -3840,7 +3840,7 @@ remote_serial_open (const char *name)
      of in ser-tcp.c, because it is the remote protocol assuming that the
      serial connection is reliable and not the serial connection promising
      to be.  */
-  if (!udp_warning && strncmp (name, "udp:", 4) == 0)
+  if (!udp_warning && startswith (name, "udp:"))
     {
       warning (_("The remote protocol may be unreliable over UDP.\n"
 		 "Some events may be lost, rendering further debugging "
@@ -4631,7 +4631,7 @@ remote_vcont_probe (struct remote_state *rs)
   buf = rs->buf;
 
   /* Make sure that the features we assume are supported.  */
-  if (strncmp (buf, "vCont", 5) == 0)
+  if (startswith (buf, "vCont"))
     {
       char *p = &buf[5];
       int support_s, support_S, support_c, support_C;
@@ -5729,8 +5729,7 @@ Packet: '%s'\n"),
 
 	    if (*p == '\0')
 	      ;
-	    else if (strncmp (p,
-			      "process:", sizeof ("process:") - 1) == 0)
+	    else if (startswith (p, "process:"))
 	      {
 		ULONGEST upid;
 
@@ -10212,9 +10211,7 @@ remote_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 int
 remote_filename_p (const char *filename)
 {
-  return strncmp (filename,
-		  REMOTE_SYSROOT_PREFIX,
-		  sizeof (REMOTE_SYSROOT_PREFIX) - 1) == 0;
+  return startswith (filename, REMOTE_SYSROOT_PREFIX);
 }
 
 bfd *

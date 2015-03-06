@@ -2376,7 +2376,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     }
 
   /* If we read one argument and it was ``void'', don't count it.  */
-  if (strncmp (argtypetext, "(void)", 6) == 0)
+  if (startswith (argtypetext, "(void)"))
     argcount -= 1;
 
   /* We need one extra slot, for the THIS pointer.  */
@@ -2471,7 +2471,7 @@ check_stub_method_group (struct type *type, int method_id)
 
      Therefore the only thing we need to handle here are v2 operator
      names.  */
-  if (found_stub && strncmp (TYPE_FN_FIELD_PHYSNAME (f, 0), "_Z", 2) != 0)
+  if (found_stub && !startswith (TYPE_FN_FIELD_PHYSNAME (f, 0), "_Z"))
     {
       int ret;
       char dem_opname[256];

@@ -1824,8 +1824,7 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && strncmp (COMPUNIT_PRODUCER (cust), "clang ",
-			  sizeof ("clang ") - 1) == 0))
+	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
         return max (start_pc, post_prologue_pc);
     }
  
@@ -3854,8 +3853,8 @@ i386_pe_skip_trampoline_code (struct frame_info *frame,
 
       if (symname)
 	{
-	  if (strncmp (symname, "__imp_", 6) == 0
-	      || strncmp (symname, "_imp_", 5) == 0)
+	  if (startswith (symname, "__imp_")
+	      || startswith (symname, "_imp_"))
 	    return name ? 1 :
 		   read_memory_unsigned_integer (indirect, 4, byte_order);
 	}

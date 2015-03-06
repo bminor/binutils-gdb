@@ -2663,8 +2663,7 @@ subset_compare (char *string_to_compare, char *template_string)
   if (template_string != (char *) NULL && string_to_compare != (char *) NULL
       && strlen (string_to_compare) <= strlen (template_string))
     match =
-      (strncmp
-       (template_string, string_to_compare, strlen (string_to_compare)) == 0);
+      (startswith (template_string, string_to_compare));
   else
     match = 0;
   return match;
@@ -3278,7 +3277,7 @@ producer_is_gcc (const char *producer, int *major, int *minor)
 {
   const char *cs;
 
-  if (producer != NULL && strncmp (producer, "GNU ", strlen ("GNU ")) == 0)
+  if (producer != NULL && startswith (producer, "GNU "))
     {
       int maj, min;
 

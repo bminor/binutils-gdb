@@ -1992,9 +1992,9 @@ search_struct_method (const char *name, struct value **arg1p,
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
 
       /* FIXME!  May need to check for ARM demangling here.  */
-      if (strncmp (t_field_name, "__", 2) == 0 ||
-	  strncmp (t_field_name, "op", 2) == 0 ||
-	  strncmp (t_field_name, "type", 4) == 0)
+      if (startswith (t_field_name, "__") ||
+	  startswith (t_field_name, "op") ||
+	  startswith (t_field_name, "type"))
 	{
 	  if (cplus_demangle_opname (t_field_name, dem_opname, DMGL_ANSI))
 	    t_field_name = dem_opname;
@@ -3386,9 +3386,9 @@ value_struct_elt_for_reference (struct type *domain, int offset,
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (t, i);
       char dem_opname[64];
 
-      if (strncmp (t_field_name, "__", 2) == 0 
-	  || strncmp (t_field_name, "op", 2) == 0 
-	  || strncmp (t_field_name, "type", 4) == 0)
+      if (startswith (t_field_name, "__") 
+	  || startswith (t_field_name, "op") 
+	  || startswith (t_field_name, "type"))
 	{
 	  if (cplus_demangle_opname (t_field_name, 
 				     dem_opname, DMGL_ANSI))

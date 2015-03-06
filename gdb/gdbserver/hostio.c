@@ -511,17 +511,17 @@ handle_readlink (char *own_buf, int *new_packet_len)
 int
 handle_vFile (char *own_buf, int packet_len, int *new_packet_len)
 {
-  if (strncmp (own_buf, "vFile:open:", 11) == 0)
+  if (startswith (own_buf, "vFile:open:"))
     handle_open (own_buf);
-  else if (strncmp (own_buf, "vFile:pread:", 12) == 0)
+  else if (startswith (own_buf, "vFile:pread:"))
     handle_pread (own_buf, new_packet_len);
-  else if (strncmp (own_buf, "vFile:pwrite:", 13) == 0)
+  else if (startswith (own_buf, "vFile:pwrite:"))
     handle_pwrite (own_buf, packet_len);
-  else if (strncmp (own_buf, "vFile:close:", 12) == 0)
+  else if (startswith (own_buf, "vFile:close:"))
     handle_close (own_buf);
-  else if (strncmp (own_buf, "vFile:unlink:", 13) == 0)
+  else if (startswith (own_buf, "vFile:unlink:"))
     handle_unlink (own_buf);
-  else if (strncmp (own_buf, "vFile:readlink:", 15) == 0)
+  else if (startswith (own_buf, "vFile:readlink:"))
     handle_readlink (own_buf, new_packet_len);
   else
     return 0;

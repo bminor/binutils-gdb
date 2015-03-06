@@ -454,8 +454,7 @@ is_ada_operator (const char *string)
 
   for (mapping = ada_opname_table;
        mapping->encoded != NULL
-	 && strncmp (mapping->decoded, string,
-		     strlen (mapping->decoded)) != 0; ++mapping)
+	 && !startswith (string, mapping->decoded); ++mapping)
     ;
 
   return mapping->decoded == NULL ? 0 : strlen (mapping->decoded);
@@ -1122,9 +1121,9 @@ find_methods (struct type *t, const char *name,
 	  const char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
 	  char dem_opname[64];
 
-	  if (strncmp (method_name, "__", 2) == 0 ||
-	      strncmp (method_name, "op", 2) == 0 ||
-	      strncmp (method_name, "type", 4) == 0)
+	  if (startswith (method_name, "__") ||
+	      startswith (method_name, "op") ||
+	      startswith (method_name, "type"))
 	    {
 	      if (cplus_demangle_opname (method_name, dem_opname, DMGL_ANSI))
 		method_name = dem_opname;
@@ -1210,7 +1209,7 @@ find_toplevel_string (const char *haystack, const char *needle)
       if (s != NULL)
 	{
 	  /* Found first char in HAYSTACK;  check rest of string.  */
-	  if (strncmp (s, needle, strlen (needle)) == 0)
+	  if (startswith (s, needle))
 	    return s;
 
 	  /* Didn't find it; loop over HAYSTACK, looking for the next

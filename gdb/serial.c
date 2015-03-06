@@ -190,9 +190,9 @@ serial_open (const char *name)
 
   if (strcmp (name, "pc") == 0)
     ops = serial_interface_lookup ("pc");
-  else if (strncmp (name, "lpt", 3) == 0)
+  else if (startswith (name, "lpt"))
     ops = serial_interface_lookup ("parallel");
-  else if (strncmp (name, "|", 1) == 0)
+  else if (startswith (name, "|"))
     {
       ops = serial_interface_lookup ("pipe");
       /* Discard ``|'' and any space before the command itself.  */

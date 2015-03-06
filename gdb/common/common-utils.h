@@ -68,4 +68,13 @@ char *savestring (const char *ptr, size_t len);
 
 extern char *safe_strerror (int);
 
+/* Return non-zero if the start of STRING matches PATTERN, zero
+   otherwise.  */
+
+static inline int
+startswith (const char *string, const char *pattern)
+{
+  return strncmp (string, pattern, strlen (pattern)) == 0;
+}
+
 #endif

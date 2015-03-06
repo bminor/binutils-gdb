@@ -996,7 +996,7 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
       --name_len;
     }
 
-  if (ms_type == mst_file_text && strncmp (name, "__gnu_compiled", 14) == 0)
+  if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))
     return (NULL);
 
   if (msym_bunch_index == BUNCH_SIZE)

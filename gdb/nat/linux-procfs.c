@@ -93,7 +93,7 @@ linux_proc_pid_get_state (pid_t pid, char *buffer, size_t buffer_size,
 
   have_state = 0;
   while (fgets (buffer, buffer_size, procfile) != NULL)
-    if (strncmp (buffer, "State:", 6) == 0)
+    if (startswith (buffer, "State:"))
       {
 	have_state = 1;
 	break;

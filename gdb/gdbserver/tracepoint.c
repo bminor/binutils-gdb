@@ -3551,14 +3551,14 @@ cmd_qtframe (char *own_buf)
 
   packet += strlen ("QTFrame:");
 
-  if (strncmp (packet, "pc:", strlen ("pc:")) == 0)
+  if (startswith (packet, "pc:"))
     {
       packet += strlen ("pc:");
       unpack_varlen_hex (packet, &pc);
       trace_debug ("Want to find next traceframe at pc=0x%s", paddress (pc));
       tframe = find_next_traceframe_in_range (pc, pc, 1, &tfnum);
     }
-  else if (strncmp (packet, "range:", strlen ("range:")) == 0)
+  else if (startswith (packet, "range:"))
     {
       packet += strlen ("range:");
       packet = unpack_varlen_hex (packet, &lo);
@@ -3568,7 +3568,7 @@ cmd_qtframe (char *own_buf)
 		   paddress (lo), paddress (hi));
       tframe = find_next_traceframe_in_range (lo, hi, 1, &tfnum);
     }
-  else if (strncmp (packet, "outside:", strlen ("outside:")) == 0)
+  else if (startswith (packet, "outside:"))
     {
       packet += strlen ("outside:");
       packet = unpack_varlen_hex (packet, &lo);
@@ -3579,7 +3579,7 @@ cmd_qtframe (char *own_buf)
 		   paddress (lo), paddress (hi));
       tframe = find_next_traceframe_in_range (lo, hi, 0, &tfnum);
     }
-  else if (strncmp (packet, "tdp:", strlen ("tdp:")) == 0)
+  else if (startswith (packet, "tdp:"))
     {
       packet += strlen ("tdp:");
       unpack_varlen_hex (packet, &num);
@@ -3653,7 +3653,7 @@ cmd_qtstatus (char *packet)
   /* The user visible error string in terror needs to be hex encoded.
      We leave it as plain string in `tracing_stop_reason' to ease
      debugging.  */
-  if (strncmp (stop_reason_rsp, "terror:", strlen ("terror:")) == 0)
+  if (startswith (stop_reason_rsp, "terror:"))
     {
       const char *result_name;
       int hexstr_len;
@@ -4106,7 +4106,7 @@ cmd_qtnotes (char *own_buf)
 
   while (*packet)
     {
-      if (strncmp ("user:", packet, strlen ("user:")) == 0)
+      if (startswith (packet, "user:"))
 	{
 	  packet += strlen ("user:");
 	  saved = packet;
@@ -4120,7 +4120,7 @@ cmd_qtnotes (char *own_buf)
 	  xfree (tracing_user_name);
 	  tracing_user_name = user;
 	}
-      else if (strncmp ("notes:", packet, strlen ("notes:")) == 0)
+      else if (startswith (packet, "notes:"))
 	{
 	  packet += strlen ("notes:");
 	  saved = packet;
@@ -4134,7 +4134,7 @@ cmd_qtnotes (char *own_buf)
 	  xfree (tracing_notes);
 	  tracing_notes = notes;
 	}
-      else if (strncmp ("tstop:", packet, strlen ("tstop:")) == 0)
+      else if (startswith (packet, "tstop:"))
 	{
 	  packet += strlen ("tstop:");
 	  saved = packet;
@@ -4163,32 +4163,32 @@ handle_tracepoint_general_set (char *packet)
       cmd_qtinit (packet);
       return 1;
     }
-  else if (strncmp ("QTDP:", packet, strlen ("QTDP:")) == 0)
+  else if (startswith (packet, "QTDP:"))
     {
       cmd_qtdp (packet);
       return 1;
     }
-  else if (strncmp ("QTDPsrc:", packet, strlen ("QTDPsrc:")) == 0)
+  else if (startswith (packet, "QTDPsrc:"))
     {
       cmd_qtdpsrc (packet);
       return 1;
     }
-  else if (strncmp ("QTEnable:", packet, strlen ("QTEnable:")) == 0)
+  else if (startswith (packet, "QTEnable:"))
     {
       cmd_qtenable_disable (packet, 1);
       return 1;
     }
-  else if (strncmp ("QTDisable:", packet, strlen ("QTDisable:")) == 0)
+  else if (startswith (packet, "QTDisable:"))
     {
       cmd_qtenable_disable (packet, 0);
       return 1;
     }
-  else if (strncmp ("QTDV:", packet, strlen ("QTDV:")) == 0)
+  else if (startswith (packet, "QTDV:"))
     {
       cmd_qtdv (packet);
       return 1;
     }
-  else if (strncmp ("QTro:", packet, strlen ("QTro:")) == 0)
+  else if (startswith (packet, "QTro:"))
     {
       cmd_qtro (packet);
       return 1;
@@ -4203,28 +4203,27 @@ handle_tracepoint_general_set (char *packet)
       cmd_qtstop (packet);
       return 1;
     }
-  else if (strncmp ("QTDisconnected:", packet,
-		    strlen ("QTDisconnected:")) == 0)
+  else if (startswith (packet, "QTDisconnected:"))
     {
       cmd_qtdisconnected (packet);
       return 1;
     }
-  else if (strncmp ("QTFrame:", packet, strlen ("QTFrame:")) == 0)
+  else if (startswith (packet, "QTFrame:"))
     {
       cmd_qtframe (packet);
       return 1;
     }
-  else if (strncmp ("QTBuffer:circular:", packet, strlen ("QTBuffer:circular:")) == 0)
+  else if (startswith (packet, "QTBuffer:circular:"))
     {
       cmd_bigqtbuffer_circular (packet);
       return 1;
     }
-  else if (strncmp ("QTBuffer:size:", packet, strlen ("QTBuffer:size:")) == 0)
+  else if (startswith (packet, "QTBuffer:size:"))
     {
       cmd_bigqtbuffer_size (packet);
       return 1;
     }
-  else if (strncmp ("QTNotes:", packet, strlen ("QTNotes:")) == 0)
+  else if (startswith (packet, "QTNotes:"))
     {
       cmd_qtnotes (packet);
       return 1;
@@ -4241,7 +4240,7 @@ handle_tracepoint_query (char *packet)
       cmd_qtstatus (packet);
       return 1;
     }
-  else if (strncmp ("qTP:", packet, strlen ("qTP:")) == 0)
+  else if (startswith (packet, "qTP:"))
     {
       cmd_qtp (packet);
       return 1;
@@ -4266,12 +4265,12 @@ handle_tracepoint_query (char *packet)
       cmd_qtsv (packet);
       return 1;
     }
-  else if (strncmp ("qTV:", packet, strlen ("qTV:")) == 0)
+  else if (startswith (packet, "qTV:"))
     {
       cmd_qtv (packet);
       return 1;
     }
-  else if (strncmp ("qTBuffer:", packet, strlen ("qTBuffer:")) == 0)
+  else if (startswith (packet, "qTBuffer:"))
     {
       cmd_qtbuffer (packet);
       return 1;
@@ -4286,7 +4285,7 @@ handle_tracepoint_query (char *packet)
       cmd_qtsstm (packet);
       return 1;
     }
-  else if (strncmp ("qTSTMat:", packet, strlen ("qTSTMat:")) == 0)
+  else if (startswith (packet, "qTSTMat:"))
     {
       cmd_qtstmat (packet);
       return 1;
@@ -6123,7 +6122,7 @@ tracepoint_send_agent (struct tracepoint *tpoint)
   if (ret)
     return ret;
 
-  if (strncmp (buf, "OK", 2) != 0)
+  if (!startswith (buf, "OK"))
     return 1;
 
   /* The value of tracepoint's target address is stored in BUF.  */
@@ -7202,7 +7201,7 @@ gdb_agent_helper_thread (void *arg)
 
 	  if (cmd_buf[0])
 	    {
-	      if (strncmp ("close", cmd_buf, 5) == 0)
+	      if (startswith (cmd_buf, "close"))
 		{
 		  stop_loop = 1;
 		}
@@ -7215,21 +7214,15 @@ gdb_agent_helper_thread (void *arg)
 		{
 		  cmd_qtsstm (cmd_buf);
 		}
-	      else if (strncmp ("unprobe_marker_at:",
-				cmd_buf,
-				sizeof ("unprobe_marker_at:") - 1) == 0)
+	      else if (startswith (cmd_buf, "unprobe_marker_at:"))
 		{
 		  unprobe_marker_at (cmd_buf);
 		}
-	      else if (strncmp ("probe_marker_at:",
-				cmd_buf,
-				sizeof ("probe_marker_at:") - 1) == 0)
+	      else if (startswith (cmd_buf, "probe_marker_at:"))
 		{
 		  probe_marker_at (cmd_buf);
 		}
-	      else if (strncmp ("qTSTMat:",
-				cmd_buf,
-				sizeof ("qTSTMat:") - 1) == 0)
+	      else if (startswith (cmd_buf, "qTSTMat:"))
 		{
 		  cmd_qtstmat (cmd_buf);
 		}

@@ -4215,13 +4215,13 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
 	 Unfortunately some Red Hat kernels include the shared pending
 	 queue but not the ShdPnd status field.  */
 
-      if (strncmp (buffer, "SigPnd:\t", 8) == 0)
+      if (startswith (buffer, "SigPnd:\t"))
 	add_line_to_sigset (buffer + 8, pending);
-      else if (strncmp (buffer, "ShdPnd:\t", 8) == 0)
+      else if (startswith (buffer, "ShdPnd:\t"))
 	add_line_to_sigset (buffer + 8, pending);
-      else if (strncmp (buffer, "SigBlk:\t", 8) == 0)
+      else if (startswith (buffer, "SigBlk:\t"))
 	add_line_to_sigset (buffer + 8, blocked);
-      else if (strncmp (buffer, "SigIgn:\t", 8) == 0)
+      else if (startswith (buffer, "SigIgn:\t"))
 	add_line_to_sigset (buffer + 8, ignored);
     }
 

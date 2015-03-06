@@ -539,12 +539,12 @@ dbx_symfile_read (struct objfile *objfile, int symfile_flags)
      differently from Solaris), and false for SunOS4 and other a.out
      file formats.  */
   block_address_function_relative =
-    ((0 == strncmp (bfd_get_target (sym_bfd), "elf", 3))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "som", 3))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "coff", 4))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "pe", 2))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "epoc-pe", 7))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "nlm", 3)));
+    ((startswith (bfd_get_target (sym_bfd), "elf"))
+     || (startswith (bfd_get_target (sym_bfd), "som"))
+     || (startswith (bfd_get_target (sym_bfd), "coff"))
+     || (startswith (bfd_get_target (sym_bfd), "pe"))
+     || (startswith (bfd_get_target (sym_bfd), "epoc-pe"))
+     || (startswith (bfd_get_target (sym_bfd), "nlm")));
 
   val = bfd_seek (sym_bfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
   if (val < 0)
@@ -2547,7 +2547,7 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	    processing_gcc_compilation = 2;
 	  if (tempstring[0] == bfd_get_symbol_leading_char (symfile_bfd))
 	    ++tempstring;
-	  if (strncmp (tempstring, "__gnu_compiled", 14) == 0)
+	  if (startswith (tempstring, "__gnu_compiled"))
 	    processing_gcc_compilation = 2;
 	}
     }

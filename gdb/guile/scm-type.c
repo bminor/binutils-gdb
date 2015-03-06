@@ -1216,11 +1216,11 @@ tyscm_lookup_typename (const char *type_name, const struct block *block)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      if (!strncmp (type_name, "struct ", 7))
+      if (startswith (type_name, "struct "))
 	type = lookup_struct (type_name + 7, NULL);
-      else if (!strncmp (type_name, "union ", 6))
+      else if (startswith (type_name, "union "))
 	type = lookup_union (type_name + 6, NULL);
-      else if (!strncmp (type_name, "enum ", 5))
+      else if (startswith (type_name, "enum "))
 	type = lookup_enum (type_name + 5, NULL);
       else
 	type = lookup_typename (current_language, get_current_arch (),

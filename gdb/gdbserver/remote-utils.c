@@ -531,7 +531,7 @@ hex_or_minus_one (char *buf, char **obuf)
 {
   ULONGEST ret;
 
-  if (strncmp (buf, "-1", 2) == 0)
+  if (startswith (buf, "-1"))
     {
       ret = (ULONGEST) -1;
       buf += 2;
@@ -1447,7 +1447,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
 	return -1;
     }
 
-  if (strncmp (own_buf, "qSymbol:", strlen ("qSymbol:")) != 0)
+  if (!startswith (own_buf, "qSymbol:"))
     {
       warning ("Malformed response to qSymbol, ignoring: %s\n", own_buf);
       return -1;
@@ -1556,7 +1556,7 @@ relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
       return -1;
     }
 
-  if (strncmp (own_buf, "qRelocInsn:", strlen ("qRelocInsn:")) != 0)
+  if (!startswith (own_buf, "qRelocInsn:"))
     {
       warning ("Malformed response to qRelocInsn, ignoring: %s\n",
 	       own_buf);

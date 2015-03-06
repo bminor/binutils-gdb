@@ -429,7 +429,7 @@ handle_btrace_general_set (char *own_buf)
   const char *err;
   char *op;
 
-  if (strncmp ("Qbtrace:", own_buf, strlen ("Qbtrace:")) != 0)
+  if (!startswith (own_buf, "Qbtrace:"))
     return 0;
 
   op = own_buf + strlen ("Qbtrace:");
@@ -473,7 +473,7 @@ handle_btrace_conf_general_set (char *own_buf)
   struct thread_info *thread;
   char *op;
 
-  if (strncmp ("Qbtrace-conf:", own_buf, strlen ("Qbtrace-conf:")) != 0)
+  if (!startswith (own_buf, "Qbtrace-conf:"))
     return 0;
 
   op = own_buf + strlen ("Qbtrace-conf:");
@@ -492,7 +492,7 @@ handle_btrace_conf_general_set (char *own_buf)
       return -1;
     }
 
-  if (strncmp (op, "bts:size=", strlen ("bts:size=")) == 0)
+  if (startswith (op, "bts:size="))
     {
       unsigned long size;
       char *endp = NULL;
@@ -522,7 +522,7 @@ handle_btrace_conf_general_set (char *own_buf)
 static void
 handle_general_set (char *own_buf)
 {
-  if (strncmp ("QPassSignals:", own_buf, strlen ("QPassSignals:")) == 0)
+  if (startswith (own_buf, "QPassSignals:"))
     {
       int numsigs = (int) GDB_SIGNAL_LAST, i;
       const char *p = own_buf + strlen ("QPassSignals:");
@@ -547,7 +547,7 @@ handle_general_set (char *own_buf)
       return;
     }
 
-  if (strncmp ("QProgramSignals:", own_buf, strlen ("QProgramSignals:")) == 0)
+  if (startswith (own_buf, "QProgramSignals:"))
     {
       int numsigs = (int) GDB_SIGNAL_LAST, i;
       const char *p = own_buf + strlen ("QProgramSignals:");
@@ -587,7 +587,7 @@ handle_general_set (char *own_buf)
       return;
     }
 
-  if (strncmp (own_buf, "QNonStop:", 9) == 0)
+  if (startswith (own_buf, "QNonStop:"))
     {
       char *mode = own_buf + 9;
       int req = -1;
@@ -624,8 +624,7 @@ handle_general_set (char *own_buf)
       return;
     }
 
-  if (strncmp ("QDisableRandomization:", own_buf,
-	       strlen ("QDisableRandomization:")) == 0)
+  if (startswith (own_buf, "QDisableRandomization:"))
     {
       char *packet = own_buf + strlen ("QDisableRandomization:");
       ULONGEST setting;
@@ -649,7 +648,7 @@ handle_general_set (char *own_buf)
       && handle_tracepoint_general_set (own_buf))
     return;
 
-  if (strncmp ("QAgent:", own_buf, strlen ("QAgent:")) == 0)
+  if (startswith (own_buf, "QAgent:"))
     {
       char *mode = own_buf + strlen ("QAgent:");
       int req = 0;
@@ -1072,8 +1071,7 @@ handle_monitor_command (char *mon, char *own_buf)
       remote_debug = 0;
       monitor_output ("Protocol debug output disabled.\n");
     }
-  else if (strncmp (mon, "set debug-format ",
-		    sizeof ("set debug-format ") - 1) == 0)
+  else if (startswith (mon, "set debug-format "))
     {
       char *error_msg
 	= parse_debug_format_options (mon + sizeof ("set debug-format ") - 1,
@@ -1661,7 +1659,7 @@ handle_qxfer (char *own_buf, int packet_len, int *new_packet_len_p)
   char *annex;
   char *offset;
 
-  if (strncmp (own_buf, "qXfer:", 6) != 0)
+  if (!startswith (own_buf, "qXfer:"))
     return 0;
 
   /* Grab the object, r/w and annex.  */
@@ -1935,7 +1933,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     }
 
   /* Protocol features query.  */
-  if (strncmp ("qSupported", own_buf, 10) == 0
+  if (startswith (own_buf, "qSupported")
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
     {
       char *p = &own_buf[10];
@@ -2089,7 +2087,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   /* Thread-local storage support.  */
   if (the_target->get_tls_address != NULL
-      && strncmp ("qGetTLSAddr:", own_buf, 12) == 0)
+      && startswith (own_buf, "qGetTLSAddr:"))
     {
       char *p = own_buf + 12;
       CORE_ADDR parts[2], address = 0;
@@ -2154,7 +2152,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   /* Windows OS Thread Information Block address support.  */
   if (the_target->get_tib_address != NULL
-      && strncmp ("qGetTIBAddr:", own_buf, 12) == 0)
+      && startswith (own_buf, "qGetTIBAddr:"))
     {
       char *annex;
       int n;
@@ -2176,7 +2174,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     }
 
   /* Handle "monitor" commands.  */
-  if (strncmp ("qRcmd,", own_buf, 6) == 0)
+  if (startswith (own_buf, "qRcmd,"))
     {
       char *mon = malloc (PBUFSIZ);
       int len = strlen (own_buf + 6);
@@ -2207,8 +2205,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
-  if (strncmp ("qSearch:memory:", own_buf,
-	       sizeof ("qSearch:memory:") - 1) == 0)
+  if (startswith (own_buf, "qSearch:memory:"))
     {
       require_running (own_buf);
       handle_search_memory (own_buf, packet_len);
@@ -2216,7 +2213,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     }
 
   if (strcmp (own_buf, "qAttached") == 0
-      || strncmp (own_buf, "qAttached:", sizeof ("qAttached:") - 1) == 0)
+      || startswith (own_buf, "qAttached:"))
     {
       struct process_info *process;
 
@@ -2242,7 +2239,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
-  if (strncmp ("qCRC:", own_buf, 5) == 0)
+  if (startswith (own_buf, "qCRC:"))
     {
       /* CRC check (compare-section).  */
       char *comma;
@@ -2672,14 +2669,14 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 {
   if (!disable_packet_vCont)
     {
-      if (strncmp (own_buf, "vCont;", 6) == 0)
+      if (startswith (own_buf, "vCont;"))
 	{
 	  require_running (own_buf);
 	  handle_v_cont (own_buf);
 	  return;
 	}
 
-      if (strncmp (own_buf, "vCont?", 6) == 0)
+      if (startswith (own_buf, "vCont?"))
 	{
 	  strcpy (own_buf, "vCont;c;C;s;S;t");
 	  if (target_supports_range_stepping ())
@@ -2691,11 +2688,11 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 	}
     }
 
-  if (strncmp (own_buf, "vFile:", 6) == 0
+  if (startswith (own_buf, "vFile:")
       && handle_vFile (own_buf, packet_len, new_packet_len))
     return;
 
-  if (strncmp (own_buf, "vAttach;", 8) == 0)
+  if (startswith (own_buf, "vAttach;"))
     {
       if ((!extended_protocol || !multi_process) && target_running ())
 	{
@@ -2707,7 +2704,7 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
       return;
     }
 
-  if (strncmp (own_buf, "vRun;", 5) == 0)
+  if (startswith (own_buf, "vRun;"))
     {
       if ((!extended_protocol || !multi_process) && target_running ())
 	{
@@ -2719,7 +2716,7 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
       return;
     }
 
-  if (strncmp (own_buf, "vKill;", 6) == 0)
+  if (startswith (own_buf, "vKill;"))
     {
       if (!target_running ())
 	{
@@ -3211,9 +3208,7 @@ captured_main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--debug") == 0)
 	debug_threads = 1;
-      else if (strncmp (*next_arg,
-			"--debug-format=",
-			sizeof ("--debug-format=") - 1) == 0)
+      else if (startswith (*next_arg, "--debug-format="))
 	{
 	  char *error_msg
 	    = parse_debug_format_options ((*next_arg)
@@ -3232,9 +3227,7 @@ captured_main (int argc, char *argv[])
 	  gdbserver_show_disableable (stdout);
 	  exit (0);
 	}
-      else if (strncmp (*next_arg,
-			"--disable-packet=",
-			sizeof ("--disable-packet=") - 1) == 0)
+      else if (startswith (*next_arg, "--disable-packet="))
 	{
 	  char *packets, *tok;
 
@@ -3533,7 +3526,7 @@ process_point_options (struct breakpoint *bp, char **packet)
 	  if (!add_breakpoint_condition (bp, &dataptr))
 	    skip_to_semicolon (&dataptr);
 	}
-      else if (strncmp (dataptr, "cmds:", strlen ("cmds:")) == 0)
+      else if (startswith (dataptr, "cmds:"))
 	{
 	  dataptr += strlen ("cmds:");
 	  if (debug_threads)

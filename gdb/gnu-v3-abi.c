@@ -39,13 +39,13 @@ static struct gdbarch_data *std_type_info_gdbarch_data;
 static int
 gnuv3_is_vtable_name (const char *name)
 {
-  return strncmp (name, "_ZTV", 4) == 0;
+  return startswith (name, "_ZTV");
 }
 
 static int
 gnuv3_is_operator_name (const char *name)
 {
-  return strncmp (name, "operator", 8) == 0;
+  return startswith (name, "operator");
 }
 
 
@@ -330,7 +330,7 @@ gnuv3_rtti_type (struct value *value,
      should work just as well, and doesn't read target memory.  */
   vtable_symbol_name = MSYMBOL_DEMANGLED_NAME (vtable_symbol);
   if (vtable_symbol_name == NULL
-      || strncmp (vtable_symbol_name, "vtable for ", 11))
+      || !startswith (vtable_symbol_name, "vtable for "))
     {
       warning (_("can't find linker symbol for virtual table for `%s' value"),
 	       TYPE_SAFE_NAME (values_type));

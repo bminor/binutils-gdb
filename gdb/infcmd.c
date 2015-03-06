@@ -791,7 +791,7 @@ continue_command (char *args, int from_tty)
 
   if (args != NULL)
     {
-      if (strncmp (args, "-a", sizeof ("-a") - 1) == 0)
+      if (startswith (args, "-a"))
 	{
 	  all_threads = 1;
 	  args += sizeof ("-a") - 1;
@@ -2870,7 +2870,7 @@ interrupt_command (char *args, int from_tty)
       dont_repeat ();		/* Not for the faint of heart.  */
 
       if (args != NULL
-	  && strncmp (args, "-a", sizeof ("-a") - 1) == 0)
+	  && startswith (args, "-a"))
 	all_threads = 1;
 
       if (!non_stop && all_threads)

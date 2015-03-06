@@ -234,7 +234,7 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
   int fake_pid_p = 0;
   struct inferior *inf;
 
-  if (strncmp (bfd_section_name (abfd, asect), ".reg/", 5) != 0)
+  if (!startswith (bfd_section_name (abfd, asect), ".reg/"))
     return;
 
   core_tid = atoi (bfd_section_name (abfd, asect) + 5);

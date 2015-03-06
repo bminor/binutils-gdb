@@ -985,7 +985,7 @@ ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 static int
 ppc_linux_spu_section (bfd *abfd, asection *asect, void *user_data)
 {
-  return strncmp (bfd_section_name (abfd, asect), "SPU/", 4) == 0;
+  return startswith (bfd_section_name (abfd, asect), "SPU/");
 }
 
 static const struct target_desc *
