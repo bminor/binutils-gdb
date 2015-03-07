@@ -1,5 +1,10 @@
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
+	* main.c (handle_command_errors): Remove volatile qualifier from
+	parameter.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (save_breakpoints): Adjust to avoid code between
 	TRY and CATCH.
 	* gdbtypes.c (safe_parse_type): Remove empty line.

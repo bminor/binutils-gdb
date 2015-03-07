@@ -339,7 +339,7 @@ captured_command_loop (void *data)
    catch_command_errors/catch_command_errors_const.  */
 
 static int
-handle_command_errors (volatile struct gdb_exception e)
+handle_command_errors (struct gdb_exception e)
 {
   if (e.reason < 0)
     {
