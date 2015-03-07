@@ -1,5 +1,12 @@
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
+	* common/gdb_socket.h: New file.
+	* ser-tcp.c: Include gdb_socket.h.  Don't include netinet/in.h nor
+	sys/socket.h.
+	(net_open): Use union gdb_sockaddr_u.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.c [!__cplusplus] (enum catcher_state)
 	(exceptions_state_mc_action_iter)
 	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):

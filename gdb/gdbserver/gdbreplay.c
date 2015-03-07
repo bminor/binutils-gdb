@@ -36,24 +36,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
+#include "gdb_socket.h"
 
 #include <alloca.h>
 
-#if USE_WIN32API
-#include <winsock2.h>
-#endif
 
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
@@ -188,7 +180,7 @@ remote_open (char *name)
 #endif
       char *port_str;
       int port;
-      struct sockaddr_in sockaddr;
+      union gdb_sockaddr_u sockaddr;
       socklen_t tmp;
       int tmp_desc;
 
@@ -215,16 +207,16 @@ remote_open (char *name)
       setsockopt (tmp_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp,
 		  sizeof (tmp));
 
-      sockaddr.sin_family = PF_INET;
-      sockaddr.sin_port = htons (port);
-      sockaddr.sin_addr.s_addr = INADDR_ANY;
+      sockaddr.sa_in.sin_family = PF_INET;
+      sockaddr.sa_in.sin_port = htons (port);
+      sockaddr.sa_in.sin_addr.s_addr = INADDR_ANY;
 
-      if (bind (tmp_desc, (struct sockaddr *) &sockaddr, sizeof (sockaddr))
+      if (bind (tmp_desc, &sockaddr.sa, sizeof (sockaddr.sa_in))
 	  || listen (tmp_desc, 1))
 	perror_with_name ("Can't bind address");
 
-      tmp = sizeof (sockaddr);
-      remote_desc = accept (tmp_desc, (struct sockaddr *) &sockaddr, &tmp);
+      tmp = sizeof (sockaddr.sa_in);
+      remote_desc = accept (tmp_desc, &sockaddr.sa, &tmp);
       if (remote_desc == -1)
 	perror_with_name ("Accept failed");
 

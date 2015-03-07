@@ -1,5 +1,18 @@
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
+	* gdbreplay.c: No longer include <netinet/in.h>, <sys/socket.h>,
+	or <winsock2.h> here.  Instead include "gdb_socket.h".
+	(remote_open): Use union gdb_sockaddr_u.
+	* remote-utils.c: No longer include <netinet/in.h>, <sys/socket.h>
+	or <winsock2.h> here.  Instead include "gdb_socket.h".
+	(handle_accept_event, remote_prepare): Use union gdb_sockaddr_u.
+	* tracepoint.c: Include "gdb_socket.h" instead of <sys/socket.h>
+	or <sys/un.h>.
+	(init_named_socket, gdb_agent_helper_thread): Use union
+	gdb_sockaddr_u.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
 	Adjust all callers of TRY_CATCH to use TRY/CATCH/END_CATCH
 	instead.
 

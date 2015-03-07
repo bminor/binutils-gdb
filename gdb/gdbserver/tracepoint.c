@@ -6817,8 +6817,7 @@ run_inferior_command (char *cmd, int len)
 
 #else /* !IN_PROCESS_AGENT */
 
-#include <sys/socket.h>
-#include <sys/un.h>
+#include "gdb_socket.h"
 
 #ifndef UNIX_PATH_MAX
 #define UNIX_PATH_MAX sizeof(((struct sockaddr_un *) NULL)->sun_path)
@@ -6837,7 +6836,7 @@ static int
 init_named_socket (const char *name)
 {
   int result, fd;
-  struct sockaddr_un addr;
+  union gdb_sockaddr_u addr;
 
   result = fd = socket (PF_UNIX, SOCK_STREAM, 0);
   if (result == -1)
@@ -6846,10 +6845,10 @@ init_named_socket (const char *name)
       return -1;
     }
 
-  addr.sun_family = AF_UNIX;
+  addr.sa_un.sun_family = AF_UNIX;
 
-  strncpy (addr.sun_path, name, UNIX_PATH_MAX);
-  addr.sun_path[UNIX_PATH_MAX - 1] = '\0';
+  strncpy (addr.sa_un.sun_path, name, UNIX_PATH_MAX);
+  addr.sa_un.sun_path[UNIX_PATH_MAX - 1] = '\0';
 
   result = access (name, F_OK);
   if (result == 0)
@@ -6865,7 +6864,7 @@ init_named_socket (const char *name)
       warning ("socket %s already exists; overwriting", name);
     }
 
-  result = bind (fd, (struct sockaddr *) &addr, sizeof (addr));
+  result = bind (fd, &addr.sa, sizeof (addr.sa_un));
   if (result == -1)
     {
       warning ("bind failed: %s", strerror (errno));
@@ -7164,17 +7163,17 @@ gdb_agent_helper_thread (void *arg)
       while (1)
 	{
 	  socklen_t tmp;
-	  struct sockaddr_un sockaddr;
+	  union gdb_sockaddr_u sockaddr;
 	  int fd;
 	  char buf[1];
 	  int ret;
 	  int stop_loop = 0;
 
-	  tmp = sizeof (sockaddr);
+	  tmp = sizeof (sockaddr.sa_un);
 
 	  do
 	    {
-	      fd = accept (listen_fd, &sockaddr, &tmp);
+	      fd = accept (listen_fd, &sockaddr.sa, &tmp);
 	    }
 	  /* It seems an ERESTARTSYS can escape out of accept.  */
 	  while (fd == -512 || (fd == -1 && errno == EINTR));
