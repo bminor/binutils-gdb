@@ -1,4 +1,4 @@
-2015-03-06  Gary Benson <gbenson@redhat.com>
+2015-03-06  Gary Benson  <gbenson@redhat.com>
 
 	* common/common-utils.h (startswith): New inline function.
 	All places where this logic was used updated to use the above.

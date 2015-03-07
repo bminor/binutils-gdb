@@ -11,7 +11,7 @@
 	qSupported features.
 	(Remote Non-Stop): Explain that swbreak and hwbreak are required.
 
-2015-03-03  Philippe Proulx  eeppeliteloop@gmail.com
+2015-03-03  Philippe Proulx  <eeppeliteloop@gmail.com>
 
 	* gdb.texinfo (gdb/mi Async Records): Fix duplicate syscall-entry
 	under *stopped.
