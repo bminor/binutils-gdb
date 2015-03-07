@@ -2309,7 +2309,6 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
     {
       type = parse_and_eval_type (p, length);
     }
-
   CATCH (except, RETURN_MASK_ERROR)
     {
       type = builtin_type (gdbarch)->builtin_void;
@@ -3237,6 +3236,7 @@ check_types_worklist (VEC (type_equality_entry_d) **worklist,
 int
 types_deeply_equal (struct type *type1, struct type *type2)
 {
+  struct gdb_exception except = exception_none;
   int result = 0;
   struct bcache *cache;
   VEC (type_equality_entry_d) *worklist = NULL;
@@ -3254,22 +3254,26 @@ types_deeply_equal (struct type *type1, struct type *type2)
   entry.type2 = type2;
   VEC_safe_push (type_equality_entry_d, worklist, &entry);
 
+  /* check_types_worklist calls several nested helper functions, some
+     of which can raise a GDB exception, so we just check and rethrow
+     here.  If there is a GDB exception, a comparison is not capable
+     (or trusted), so exit.  */
   TRY
     {
       result = check_types_worklist (&worklist, cache);
     }
-  /* check_types_worklist calls several nested helper functions,
-     some of which can raise a GDB Exception, so we just check
-     and rethrow here.  If there is a GDB exception, a comparison
-     is not capable (or trusted), so exit.  */
-  bcache_xfree (cache);
-  VEC_free (type_equality_entry_d, worklist);
-  /* Rethrow if there was a problem.  */
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (ex, RETURN_MASK_ALL)
     {
-      throw_exception (except);
+      except = ex;
     }
   END_CATCH
+
+  bcache_xfree (cache);
+  VEC_free (type_equality_entry_d, worklist);
+
+  /* Rethrow if there was a problem.  */
+  if (except.reason < 0)
+    throw_exception (except);
 
   return result;
 }

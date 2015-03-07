@@ -503,15 +503,16 @@ bppy_get_commands (PyObject *self, void *closure)
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  ui_out_redirect (current_uiout, NULL);
   CATCH (except, RETURN_MASK_ALL)
     {
+      ui_out_redirect (current_uiout, NULL);
       do_cleanups (chain);
       gdbpy_convert_exception (except);
       return NULL;
     }
   END_CATCH
 
+  ui_out_redirect (current_uiout, NULL);
   cmdstr = ui_file_xstrdup (string_file, &length);
   make_cleanup (xfree, cmdstr);
   result = PyString_Decode (cmdstr, strlen (cmdstr), host_charset (), NULL);

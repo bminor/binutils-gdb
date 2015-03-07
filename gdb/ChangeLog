@@ -1,5 +1,19 @@
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (save_breakpoints): Adjust to avoid code between
+	TRY and CATCH.
+	* gdbtypes.c (safe_parse_type): Remove empty line.
+	(types_deeply_equal):
+	* guile/scm-frame.c (gdbscm_frame_name):
+	* linux-thread-db.c (find_new_threads_once):
+	* python/py-breakpoint.c (bppy_get_commands):
+	* record-btrace.c (record_btrace_insert_breakpoint)
+	(record_btrace_remove_breakpoint, record_btrace_start_replaying)
+	(record_btrace_start_replaying): Adjust to avoid code between TRY
+	and CATCH.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.c (struct catcher) <exception>: No
 	longer a pointer to volatile exception.  Now an exception value.
 	<mask>: Delete field.

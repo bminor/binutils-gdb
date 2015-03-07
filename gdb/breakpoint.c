@@ -15926,6 +15926,7 @@ save_breakpoints (char *filename, int from_tty,
 
     if (tp->type != bp_dprintf && tp->commands)
       {
+	struct gdb_exception exception;
 
 	fprintf_unfiltered (fp, "  commands\n");
 	
@@ -15934,14 +15935,14 @@ save_breakpoints (char *filename, int from_tty,
 	  {
 	    print_command_lines (current_uiout, tp->commands->commands, 2);
 	  }
-	ui_out_redirect (current_uiout, NULL);
-
 	CATCH (ex, RETURN_MASK_ALL)
 	  {
+	    ui_out_redirect (current_uiout, NULL);
 	    throw_exception (ex);
 	  }
 	END_CATCH
 
+	ui_out_redirect (current_uiout, NULL);
 	fprintf_unfiltered (fp, "  end\n");
       }
 

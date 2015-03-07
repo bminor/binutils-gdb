@@ -1702,16 +1702,18 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
 				    TD_SIGNO_MASK,
 				    TD_THR_ANY_USER_FLAGS);
     }
-
-  if (libthread_db_debug)
+  CATCH (except, RETURN_MASK_ERROR)
     {
-      CATCH (except, RETURN_MASK_ERROR)
+      if (libthread_db_debug)
 	{
 	  exception_fprintf (gdb_stdlog, except,
 			     "Warning: find_new_threads_once: ");
 	}
-      END_CATCH
+    }
+  END_CATCH
 
+  if (libthread_db_debug)
+    {
       fprintf_unfiltered (gdb_stdlog,
 			  _("Found %d new threads in iteration %d.\n"),
 			  data.new_threads, iteration);

@@ -426,7 +426,6 @@ gdbscm_frame_name (SCM self)
   enum language lang = language_minimal;
   struct frame_info *frame = NULL;
   SCM result;
-  struct gdb_exception except = exception_none;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
@@ -436,14 +435,12 @@ gdbscm_frame_name (SCM self)
       if (frame != NULL)
 	find_frame_funname (frame, &name, &lang, NULL);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  CATCH (except, RETURN_MASK_ALL)
     {
-      except = ex;
+      xfree (name);
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
   END_CATCH
-
-  xfree (name);
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
   if (frame == NULL)
     {
