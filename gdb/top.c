@@ -1481,47 +1481,43 @@ quit_force (char *args, int from_tty)
   qt.args = args;
   qt.from_tty = from_tty;
 
-  /* Wrappers to make the code below a bit more readable.  */
-#define DO_TRY \
-  TRY_CATCH (ex, RETURN_MASK_ALL)
-
-#define DO_PRINT_EX \
-  if (ex.reason < 0) \
-    exception_print (gdb_stderr, ex)
-
   /* We want to handle any quit errors and exit regardless.  */
 
   /* Get out of tfind mode, and kill or detach all inferiors.  */
-  DO_TRY
+  TRY_CATCH (ex, RETURN_MASK_ALL)
     {
       disconnect_tracing ();
       iterate_over_inferiors (kill_or_detach, &qt);
     }
-  DO_PRINT_EX;
+  if (ex.reason < 0)
+    exception_print (gdb_stderr, ex);
 
   /* Give all pushed targets a chance to do minimal cleanup, and pop
      them all out.  */
-  DO_TRY
+  TRY_CATCH (ex, RETURN_MASK_ALL)
     {
       pop_all_targets ();
     }
-  DO_PRINT_EX;
+  if (ex.reason < 0)
+    exception_print (gdb_stderr, ex);
 
   /* Save the history information if it is appropriate to do so.  */
-  DO_TRY
+  TRY_CATCH (ex, RETURN_MASK_ALL)
     {
       if (write_history_p && history_filename
 	  && input_from_terminal_p ())
 	gdb_safe_append_history ();
     }
-  DO_PRINT_EX;
+  if (ex.reason < 0)
+    exception_print (gdb_stderr, ex);
 
   /* Do any final cleanups before exiting.  */
-  DO_TRY
+  TRY_CATCH (ex, RETURN_MASK_ALL)
     {
       do_final_cleanups (all_cleanups ());
     }
-  DO_PRINT_EX;
+  if (ex.reason < 0)
+    exception_print (gdb_stderr, ex);
 
   exit (exit_code);
 }

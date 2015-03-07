@@ -1,3 +1,7 @@
+2015-03-07  Tom Tromey  <tromey@redhat.com>
+
+	* top.c (quit_force): Inline and delete DO_TRY, DO_PRINT_EX.
+
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
 	* amd64-tdep.c (amd64_frame_cache, amd64_sigtramp_frame_cache)
