@@ -1,3 +1,30 @@
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* amd64-tdep.c (amd64_frame_cache, amd64_sigtramp_frame_cache)
+	(amd64_epilogue_frame_cache): Normal exception handling code.
+	* break-catch-throw.c (check_status_exception_catchpoint)
+	(re_set_exception_catchpoint): Ditto.
+	* cli/cli-interp.c (safe_execute_command):
+	* cli/cli-script.c (script_from_file): Ditto.
+	* compile/compile-c-symbols.c (generate_c_for_for_one_variable):
+	Ditto.
+	* compile/compile-object-run.c (compile_object_run): Ditto.
+	* cp-abi.c (baseclass_offset): Ditto.
+	* cp-valprint.c (cp_print_value): Ditto.
+	* exceptions.c (catch_exceptions_with_msg):
+	* frame-unwind.c (frame_unwind_try_unwinder): Ditto.
+	* frame.c (get_frame_address_in_block_if_available): Ditto.
+	* i386-tdep.c (i386_frame_cache, i386_epilogue_frame_cache)
+	(i386_sigtramp_frame_cache): Ditto.
+	* infcmd.c (post_create_inferior): Ditto.
+	* linespec.c (parse_linespec, find_linespec_symbols):
+	* p-valprint.c (pascal_object_print_value): Ditto.
+	* parse.c (parse_expression_for_completion): Ditto.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Ditto.
+	* remote.c (remote_get_noisy_reply): Ditto.
+	* s390-linux-tdep.c (s390_frame_unwind_cache): Ditto.
+	* solib-svr4.c (solib_svr4_r_map): Ditto.
+
 2015-03-06  Gary Benson  <gbenson@redhat.com>
 
 	* common/common-utils.h (startswith): New inline function.

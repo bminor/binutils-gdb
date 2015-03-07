@@ -1290,8 +1290,13 @@ parse_expression_for_completion (const char *string, char **name,
       parse_completion = 1;
       exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp);
     }
+  if (except.reason < 0)
+    {
+      /* Nothing, EXP remains NULL.  */
+    }
+
   parse_completion = 0;
-  if (except.reason < 0 || ! exp)
+  if (exp == NULL)
     return NULL;
 
   if (expout_tag_completion_type != TYPE_CODE_UNDEF)

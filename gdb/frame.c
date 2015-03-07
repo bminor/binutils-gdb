@@ -2313,12 +2313,14 @@ get_frame_address_in_block_if_available (struct frame_info *this_frame,
     {
       *pc = get_frame_address_in_block (this_frame);
     }
-  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
-    return 0;
-  else if (ex.reason < 0)
-    throw_exception (ex);
-  else
-    return 1;
+  if (ex.reason < 0)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	return 0;
+      throw_exception (ex);
+    }
+
+  return 1;
 }
 
 void

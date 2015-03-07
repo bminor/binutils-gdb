@@ -3382,8 +3382,11 @@ rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
       trad_frame_set_value (cache->saved_regs,
 			    gdbarch_pc_regnum (gdbarch), lr);
     }
-  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
-    throw_exception (ex);
+  if (ex.reason < 0)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
 
   return cache;
 }

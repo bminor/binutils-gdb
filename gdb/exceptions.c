@@ -174,7 +174,8 @@ catch_exceptions_with_msg (struct ui_out *func_uiout,
 			   char **gdberrmsg,
 		  	   return_mask mask)
 {
-  volatile struct gdb_exception exception;
+  volatile struct gdb_exception ex;
+  struct gdb_exception exception = exception_none;
   volatile int val = 0;
   struct ui_out *saved_uiout;
 
@@ -182,9 +183,13 @@ catch_exceptions_with_msg (struct ui_out *func_uiout,
   saved_uiout = current_uiout;
   current_uiout = func_uiout;
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
+  TRY_CATCH (ex, RETURN_MASK_ALL)
     {
       val = (*func) (current_uiout, func_args);
+    }
+  if (ex.reason < 0)
+    {
+      exception = ex;
     }
 
   /* Restore the global builder.  */

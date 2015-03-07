@@ -430,8 +430,11 @@ post_create_inferior (struct target_ops *target, int from_tty)
     {
       stop_pc = regcache_read_pc (get_current_regcache ());
     }
-  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
-    throw_exception (ex);
+  if (ex.reason < 0)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
 
   if (exec_bfd)
     {

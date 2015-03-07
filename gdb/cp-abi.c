@@ -80,15 +80,17 @@ baseclass_offset (struct type *type, int index, const gdb_byte *valaddr,
 						embedded_offset,
 						address, val);
     }
+  if (ex.reason < 0)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
 
-  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
-    throw_error (NOT_AVAILABLE_ERROR,
-		 _("Cannot determine virtual baseclass offset "
-		   "of incomplete object"));
-  else if (ex.reason < 0)
-    throw_exception (ex);
-  else
-    return res;
+      throw_error (NOT_AVAILABLE_ERROR,
+		   _("Cannot determine virtual baseclass offset "
+		     "of incomplete object"));
+    }
+
+  return res;
 }
 
 struct value *

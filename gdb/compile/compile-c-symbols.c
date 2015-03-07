@@ -699,17 +699,17 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 	}
     }
 
-  if (e.reason >= 0)
-    return;
-
-  if (compiler->symbol_err_map == NULL)
-    compiler->symbol_err_map = htab_create_alloc (10,
-						  hash_symbol_error,
-						  eq_symbol_error,
-						  del_symbol_error,
-						  xcalloc,
-						  xfree);
-  insert_symbol_error (compiler->symbol_err_map, sym, e.message);
+  if (e.reason < 0)
+    {
+      if (compiler->symbol_err_map == NULL)
+	compiler->symbol_err_map = htab_create_alloc (10,
+						      hash_symbol_error,
+						      eq_symbol_error,
+						      del_symbol_error,
+						      xcalloc,
+						      xfree);
+      insert_symbol_error (compiler->symbol_err_map, sym, e.message);
+    }
 }
 
 /* See compile-internal.h.  */

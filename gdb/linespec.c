@@ -2153,7 +2153,7 @@ parse_linespec (linespec_parser *parser, const char **argptr)
 {
   linespec_token token;
   struct symtabs_and_lines values;
-  volatile struct gdb_exception file_exception;
+  struct gdb_exception file_exception = exception_none;
   struct cleanup *cleanup;
 
   /* A special case to start.  It has become quite popular for
@@ -2181,7 +2181,6 @@ parse_linespec (linespec_parser *parser, const char **argptr)
 
   parser->lexer.saved_arg = *argptr;
   parser->lexer.stream = argptr;
-  file_exception.reason = 0;
 
   /* Initialize the default symtab and line offset.  */
   initialize_defaults (&PARSER_STATE (parser)->default_symtab,
@@ -2261,16 +2260,21 @@ parse_linespec (linespec_parser *parser, const char **argptr)
   if (token.type == LSTOKEN_COLON)
     {
       char *user_filename;
+      volatile struct gdb_exception ex;
 
       /* Get the current token again and extract the filename.  */
       token = linespec_lexer_lex_one (parser);
       user_filename = copy_token_string (token);
 
       /* Check if the input is a filename.  */
-      TRY_CATCH (file_exception, RETURN_MASK_ERROR)
+      TRY_CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  PARSER_RESULT (parser)->file_symtabs
 	    = symtabs_from_filename (user_filename);
+	}
+      if (ex.reason < 0)
+	{
+	  file_exception = ex;
 	}
 
       if (file_exception.reason >= 0)
@@ -3198,8 +3202,11 @@ find_linespec_symbols (struct linespec_state *state,
 
 	  /* If successful, we're done.  If NOT_FOUND_ERROR
 	     was not thrown, rethrow the exception that we did get.  */
-	  if (except.reason < 0 && except.error != NOT_FOUND_ERROR)
-	    throw_exception (except);
+	  if (except.reason < 0)
+	    {
+	      if (except.error != NOT_FOUND_ERROR)
+		throw_exception (except);
+	    }
 	}
     }
 

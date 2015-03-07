@@ -498,6 +498,7 @@ remote_get_noisy_reply (char **buf_p,
 	  char *p, *pp;
 	  int adjusted_size = 0;
 	  volatile struct gdb_exception ex;
+	  int relocated = 0;
 
 	  p = buf + strlen ("qRelocInsn:");
 	  pp = unpack_varlen_hex (p, &ul);
@@ -514,30 +515,34 @@ remote_get_noisy_reply (char **buf_p,
 	  TRY_CATCH (ex, RETURN_MASK_ALL)
 	    {
 	      gdbarch_relocate_instruction (target_gdbarch (), &to, from);
+	      relocated = 1;
 	    }
-	  if (ex.reason >= 0)
+	  if (ex.reason < 0)
+	    {
+	      if (ex.error == MEMORY_ERROR)
+		{
+		  /* Propagate memory errors silently back to the
+		     target.  The stub may have limited the range of
+		     addresses we can write to, for example.  */
+		}
+	      else
+		{
+		  /* Something unexpectedly bad happened.  Be verbose
+		     so we can tell what, and propagate the error back
+		     to the stub, so it doesn't get stuck waiting for
+		     a response.  */
+		  exception_fprintf (gdb_stderr, ex,
+				     _("warning: relocating instruction: "));
+		}
+	      putpkt ("E01");
+	    }
+
+	  if (relocated)
 	    {
 	      adjusted_size = to - org_to;
 
 	      xsnprintf (buf, *sizeof_buf, "qRelocInsn:%x", adjusted_size);
 	      putpkt (buf);
-	    }
-	  else if (ex.reason < 0 && ex.error == MEMORY_ERROR)
-	    {
-	      /* Propagate memory errors silently back to the target.
-		 The stub may have limited the range of addresses we
-		 can write to, for example.  */
-	      putpkt ("E01");
-	    }
-	  else
-	    {
-	      /* Something unexpectedly bad happened.  Be verbose so
-		 we can tell what, and propagate the error back to the
-		 stub, so it doesn't get stuck waiting for a
-		 response.  */
-	      exception_fprintf (gdb_stderr, ex,
-				 _("warning: relocating instruction: "));
-	      putpkt ("E01");
 	    }
 	}
       else if (buf[0] == 'O' && buf[1] != 'K')

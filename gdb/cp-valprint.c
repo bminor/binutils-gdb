@@ -481,7 +481,7 @@ cp_print_value (struct type *type, struct type *real_type,
   for (i = 0; i < n_baseclasses; i++)
     {
       int boffset = 0;
-      int skip;
+      int skip = 0;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       const char *basename = TYPE_NAME (baseclass);
       const gdb_byte *base_valaddr = NULL;
@@ -510,14 +510,16 @@ cp_print_value (struct type *type, struct type *real_type,
 	{
 	  boffset = baseclass_offset (type, i, valaddr, offset, address, val);
 	}
-      if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
-	skip = -1;
-      else if (ex.reason < 0)
-	skip = 1;
-      else
- 	{
-	  skip = 0;
+      if (ex.reason < 0)
+	{
+	  if (ex.error == NOT_AVAILABLE_ERROR)
+	    skip = -1;
+	  else
+	    skip = 1;
+	}
 
+      if (skip == 0)
+	{
 	  if (BASETYPE_VIA_VIRTUAL (type, i))
 	    {
 	      /* The virtual base class pointer might have been

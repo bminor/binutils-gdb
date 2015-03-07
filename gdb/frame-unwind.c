@@ -105,18 +105,21 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
     {
       res = unwinder->sniffer (unwinder, this_frame, this_cache);
     }
-  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+  if (ex.reason < 0)
     {
-      /* This usually means that not even the PC is available,
-        thus most unwinders aren't able to determine if they're
-        the best fit.  Keep trying.  Fallback prologue unwinders
-        should always accept the frame.  */
-      do_cleanups (old_cleanup);
-      return 0;
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	{
+	  /* This usually means that not even the PC is available,
+	     thus most unwinders aren't able to determine if they're
+	     the best fit.  Keep trying.  Fallback prologue unwinders
+	     should always accept the frame.  */
+	  do_cleanups (old_cleanup);
+	  return 0;
+	}
+      throw_exception (ex);
     }
-  else if (ex.reason < 0)
-    throw_exception (ex);
-  else if (res)
+
+  if (res)
     {
       discard_cleanups (old_cleanup);
       return 1;

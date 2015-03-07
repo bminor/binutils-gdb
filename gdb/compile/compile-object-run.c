@@ -121,18 +121,19 @@ compile_object_run (struct compile_module *module)
 				       do_module_cleanup, data);
 	}
     }
-  dtor_found = find_dummy_frame_dtor (do_module_cleanup, data);
-  if (!executed)
-    data->executedp = NULL;
-  if (ex.reason >= 0)
-    gdb_assert (!dtor_found && executed);
-  else
+  if (ex.reason < 0)
     {
-      /* In the case od DTOR_FOUND or in the case of EXECUTED nothing
+      /* In the case of DTOR_FOUND or in the case of EXECUTED nothing
 	 needs to be done.  */
+      dtor_found = find_dummy_frame_dtor (do_module_cleanup, data);
+      if (!executed)
+	data->executedp = NULL;
       gdb_assert (!(dtor_found && executed));
       if (!dtor_found && !executed)
 	do_module_cleanup (data);
       throw_exception (ex);
     }
+
+  dtor_found = find_dummy_frame_dtor (do_module_cleanup, data);
+  gdb_assert (!dtor_found && executed);
 }

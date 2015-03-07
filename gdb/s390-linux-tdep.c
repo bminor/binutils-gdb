@@ -1970,8 +1970,11 @@ s390_frame_unwind_cache (struct frame_info *this_frame,
       if (!s390_prologue_frame_unwind_cache (this_frame, info))
 	s390_backchain_frame_unwind_cache (this_frame, info);
     }
-  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
-    throw_exception (ex);
+  if (ex.reason < 0)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
 
   return info;
 }

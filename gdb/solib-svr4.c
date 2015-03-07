@@ -881,7 +881,8 @@ solib_svr4_r_map (struct svr4_info *info)
       addr = read_memory_typed_address (info->debug_base + lmo->r_map_offset,
                                         ptr_type);
     }
-  exception_print (gdb_stderr, ex);
+  if (ex.reason < 0)
+    exception_print (gdb_stderr, ex);
   return addr;
 }
 

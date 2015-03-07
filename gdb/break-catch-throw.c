@@ -187,13 +187,16 @@ check_status_exception_catchpoint (struct bpstats *bs)
 	  type_name = canon;
 	}
     }
-
   if (e.reason < 0)
     exception_print (gdb_stderr, e);
-  else if (regexec (self->pattern, type_name, 0, NULL, 0) != 0)
-    bs->stop = 0;
 
-  xfree (type_name);
+  if (type_name != NULL)
+    {
+      if (regexec (self->pattern, type_name, 0, NULL, 0) != 0)
+	bs->stop = 0;
+
+      xfree (type_name);
+    }
 }
 
 /* Implement the 're_set' method.  */
@@ -227,11 +230,13 @@ re_set_exception_catchpoint (struct breakpoint *self)
 
 	  self->ops->decode_linespec (self, &spec, &sals);
 	}
-
-      /* NOT_FOUND_ERROR just means the breakpoint will be pending, so
-	 let it through.  */
-      if (ex.reason < 0 && ex.error != NOT_FOUND_ERROR)
-	throw_exception (ex);
+      if (ex.reason < 0)
+	{
+	  /* NOT_FOUND_ERROR just means the breakpoint will be
+	     pending, so let it through.  */
+	  if (ex.error != NOT_FOUND_ERROR)
+	    throw_exception (ex);
+	}
     }
 
   cleanup = make_cleanup (xfree, sals.sals);

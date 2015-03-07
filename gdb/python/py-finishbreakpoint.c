@@ -269,8 +269,13 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
             }
         }
     }
-  if (except.reason < 0
-      || !self_bpfinish->return_type || !self_bpfinish->function_value)
+  if (except.reason < 0)
+    {
+      /* Just swallow.  Either the return type or the function value
+	 remain NULL.  */
+    }
+
+  if (self_bpfinish->return_type == NULL || self_bpfinish->function_value == NULL)
     {
       /* Won't be able to compute return value.  */
       Py_XDECREF (self_bpfinish->return_type);
