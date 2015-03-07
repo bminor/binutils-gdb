@@ -121,10 +121,16 @@ struct gdb_exception
    the exceptions subsystem and not used other than via the TRY/CATCH
    macros defined below.  */
 
+#ifndef __cplusplus
 extern SIGJMP_BUF *exceptions_state_mc_init (void);
 extern int exceptions_state_mc_action_iter (void);
 extern int exceptions_state_mc_action_iter_1 (void);
 extern int exceptions_state_mc_catch (struct gdb_exception *, int);
+#else
+extern void *exception_try_scope_entry (void);
+extern void exception_try_scope_exit (void *saved_state);
+extern void exception_rethrow (void);
+#endif
 
 /* Macro to wrap up standard try/catch behavior.
 
@@ -151,6 +157,8 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 
   */
 
+#ifndef __cplusplus
+
 #define TRY \
      { \
        SIGJMP_BUF *buf = \
@@ -167,6 +175,65 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 
 #define END_CATCH				\
   }
+
+#else
+
+/* Prevent error/quit during TRY from calling cleanups established
+   prior to here.  This pops out the scope in either case of normal
+   exit or exception exit.  */
+struct exception_try_scope
+{
+  exception_try_scope ()
+  {
+    saved_state = exception_try_scope_entry ();
+  }
+  ~exception_try_scope ()
+  {
+    exception_try_scope_exit (saved_state);
+  }
+
+  void *saved_state;
+};
+
+/* We still need to wrap TRY/CATCH in C++ so that cleanups and C++
+   exceptions can coexist.  The TRY blocked is wrapped in a
+   do/while(0) so that break/continue within the block works the same
+   as in C.  */
+#define TRY								\
+  try									\
+    {									\
+      exception_try_scope exception_try_scope_instance;			\
+      do								\
+	{
+
+#define CATCH(EXCEPTION, MASK)						\
+	} while (0);							\
+    }								        \
+  catch (struct gdb_exception ## _ ## MASK &EXCEPTION)
+
+#define END_CATCH				\
+  catch (...)					\
+  {						\
+    exception_rethrow ();			\
+  }
+
+/* The exception types client code may catch.  They're just shims
+   around gdb_exception that add nothing but type info.  Which is used
+   is selected depending on the MASK argument passed to CATCH.  */
+
+struct gdb_exception_RETURN_MASK_ALL : public gdb_exception
+{
+};
+
+struct gdb_exception_RETURN_MASK_ERROR : public gdb_exception_RETURN_MASK_ALL
+{
+};
+
+struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
+{
+};
+
+#endif
 
 /* *INDENT-ON* */
 

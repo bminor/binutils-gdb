@@ -1,5 +1,32 @@
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.c [!__cplusplus] (enum catcher_state)
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):
+	Don't define.
+	[__cplusplus] (try_scope_depth): New global.
+	[__cplusplus] (exception_try_scope_entry)
+	(exception_try_scope_exit, gdb_exception_sliced_copy)
+	(exception_rethrow): New functions.
+	(throw_exception): In C++ mode, throw
+	gdb_exception_RETURN_MASK_QUIT for RETURN_QUIT and
+	gdb_exception_RETURN_MASK_ERROR for RETURN_ERROR.
+	(throw_it): In C++ mode, use try_scope_depth.
+	* common/common-exceptions.h [!__cplusplus]
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):
+	Don't declare.
+	[__cplusplus] (exception_try_scope_entry)
+	(exception_try_scope_exit, exception_rethrow): Declare.
+	[__cplusplus] (struct exception_try_scope): New struct.
+	[__cplusplus] (TRY, CATCH, END_CATCH): Reimplement on top of real
+	C++ exceptions.
+	(struct gdb_exception_RETURN_MASK_ALL)
+	(struct gdb_exception_RETURN_MASK_ERROR)
+	(struct gdb_exception_RETURN_MASK_QUIT): New types.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
 	* main.c (handle_command_errors): Remove volatile qualifier from
 	parameter.
 

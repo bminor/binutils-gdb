@@ -22,6 +22,8 @@
 
 const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
 
+#ifndef __cplusplus
+
 /* Possible catcher states.  */
 enum catcher_state {
   /* Initial state, a new catcher has just been created.  */
@@ -185,7 +187,7 @@ exceptions_state_mc_catch (struct gdb_exception *exception,
     {
       if (mask & RETURN_MASK (exception->reason))
 	{
-	  /* Exit normally and let the called handle the
+	  /* Exit normally and let the caller handle the
 	     exception.  */
 	  return 1;
 	}
@@ -211,6 +213,56 @@ exceptions_state_mc_action_iter_1 (void)
   return exceptions_state_mc (CATCH_ITER_1);
 }
 
+#else /* !__cplusplus */
+
+/* How many nested TRY blocks we have.  See exception_messages and
+   throw_it.  */
+
+static int try_scope_depth;
+
+/* Called on entry to a TRY scope.  */
+
+void *
+exception_try_scope_entry (void)
+{
+  ++try_scope_depth;
+  return (void *) save_cleanups ();
+}
+
+/* Called on exit of a TRY scope, either normal exit or exception
+   exit.  */
+
+void
+exception_try_scope_exit (void *saved_state)
+{
+  restore_cleanups ((struct cleanup *) saved_state);
+  --try_scope_depth;
+}
+
+/* Called by the default catch block.  IOW, we'll get here before
+   jumping out to the next outermost scope an exception if a GDB
+   exception is not caught.  */
+
+void
+exception_rethrow (void)
+{
+  /* Run this scope's cleanups before re-throwing to the next
+     outermost scope.  */
+  prepare_to_throw_exception ();
+  do_cleanups (all_cleanups ());
+  throw;
+}
+
+/* Copy the 'gdb_exception' portion of FROM to TO.  */
+
+static void
+gdb_exception_sliced_copy (struct gdb_exception *to, const struct gdb_exception *from)
+{
+  *to = *from;
+}
+
+#endif /* !__cplusplus */
+
 /* Return EXCEPTION to the nearest containing catch_errors().  */
 
 void
@@ -220,12 +272,31 @@ throw_exception (struct gdb_exception exception)
 
   do_cleanups (all_cleanups ());
 
+#ifndef __cplusplus
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h.  */
   exceptions_state_mc (CATCH_THROWING);
   current_catcher->exception = exception;
   SIGLONGJMP (current_catcher->buf, exception.reason);
+#else
+  if (exception.reason == RETURN_QUIT)
+    {
+      gdb_exception_RETURN_MASK_QUIT ex;
+
+      gdb_exception_sliced_copy (&ex, &exception);
+      throw ex;
+    }
+  else if (exception.reason == RETURN_ERROR)
+    {
+      gdb_exception_RETURN_MASK_ERROR ex;
+
+      gdb_exception_sliced_copy (&ex, &exception);
+      throw ex;
+    }
+  else
+    gdb_assert_not_reached ("invalid return reason");
+#endif
 }
 
 /* A stack of exception messages.
@@ -249,7 +320,11 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
 {
   struct gdb_exception e;
   char *new_message;
+#ifndef __cplusplus
   int depth = catcher_list_size ();
+#else
+  int depth = try_scope_depth;
+#endif
 
   gdb_assert (depth > 0);
 
