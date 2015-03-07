@@ -298,7 +298,6 @@ varobj_create (char *objname,
       const struct block *block;
       const char *p;
       struct value *value = NULL;
-      volatile struct gdb_exception except;
       CORE_ADDR pc;
 
       /* Parse and evaluate the expression, filling in as much of the
@@ -338,16 +337,17 @@ varobj_create (char *objname,
       innermost_block = NULL;
       /* Wrap the call to parse expression, so we can 
          return a sensible error.  */
-      TRY_CATCH (except, RETURN_MASK_ERROR)
+      TRY
 	{
 	  var->root->exp = parse_exp_1 (&p, pc, block, 0);
 	}
 
-      if (except.reason < 0)
+      CATCH (except, RETURN_MASK_ERROR)
 	{
 	  do_cleanups (old_chain);
 	  return NULL;
 	}
+      END_CATCH
 
       /* Don't allow variables to be created for types.  */
       if (var->root->exp->elts[0].opcode == OP_TYPE
@@ -388,12 +388,11 @@ varobj_create (char *objname,
       /* We definitely need to catch errors here.
          If evaluate_expression succeeds we got the value we wanted.
          But if it fails, we still go on with a call to evaluate_type().  */
-      TRY_CATCH (except, RETURN_MASK_ERROR)
+      TRY
 	{
 	  value = evaluate_expression (var->root->exp);
 	}
-
-      if (except.reason < 0)
+      CATCH (except, RETURN_MASK_ERROR)
 	{
 	  /* Error getting the value.  Try to at least get the
 	     right type.  */
@@ -401,14 +400,16 @@ varobj_create (char *objname,
 
 	  var->type = value_type (type_only_value);
 	}
-	else
-	  {
-	    int real_type_found = 0;
+      END_CATCH
 
-	    var->type = value_actual_type (value, 0, &real_type_found);
-	    if (real_type_found)
-	      value = value_cast (var->type, value);
-	  }
+      if (value != NULL)
+	{
+	  int real_type_found = 0;
+
+	  var->type = value_actual_type (value, 0, &real_type_found);
+	  if (real_type_found)
+	    value = value_cast (var->type, value);
+	}
 
       /* Set language info */
       var->root->lang_ops = var->root->exp->language_defn->la_varobj_ops;
@@ -1103,23 +1104,23 @@ varobj_set_value (struct varobj *var, char *expression)
   struct value *value = NULL; /* Initialize to keep gcc happy.  */
   int saved_input_radix = input_radix;
   const char *s = expression;
-  volatile struct gdb_exception except;
 
   gdb_assert (varobj_editable_p (var));
 
   input_radix = 10;		/* ALWAYS reset to decimal temporarily.  */
   exp = parse_exp_1 (&s, 0, 0, 0);
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       value = evaluate_expression (exp);
     }
 
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       /* We cannot proceed without a valid expression.  */
       xfree (exp);
       return 0;
     }
+  END_CATCH
 
   /* All types that are editable must also be changeable.  */
   gdb_assert (varobj_value_is_changeable_p (var));
@@ -1138,13 +1139,16 @@ varobj_set_value (struct varobj *var, char *expression)
 
   /* The new value may be lazy.  value_assign, or
      rather value_contents, will take care of this.  */
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       val = value_assign (var->value, value);
     }
 
-  if (except.reason < 0)
-    return 0;
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      return 0;
+    }
+  END_CATCH
 
   /* If the value has changed, record it, so that next -var-update can
      report this change.  If a variable had a value of '1', we've set it
@@ -1395,20 +1399,20 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	}
       else
 	{
-	  volatile struct gdb_exception except;
 
-	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      value_fetch_lazy (value);
 	    }
 
-	  if (except.reason < 0)
+	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      /* Set the value to NULL, so that for the next -var-update,
 		 we don't try to compare the new value with this value,
 		 that we couldn't even read.  */
 	      value = NULL;
 	    }
+	  END_CATCH
 	}
     }
 
@@ -2369,14 +2373,17 @@ value_of_root_1 (struct varobj **var_handle)
 
   if (within_scope)
     {
-      volatile struct gdb_exception except;
 
       /* We need to catch errors here, because if evaluate
          expression fails we want to just return NULL.  */
-      TRY_CATCH (except, RETURN_MASK_ERROR)
+      TRY
 	{
 	  new_val = evaluate_expression (var->root->exp);
 	}
+      CATCH (except, RETURN_MASK_ERROR)
+	{
+	}
+      END_CATCH
     }
 
   do_cleanups (back_to);

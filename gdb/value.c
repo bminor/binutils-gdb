@@ -2545,7 +2545,6 @@ show_convenience (char *ignore, int from_tty)
   get_user_print_options (&opts);
   for (var = internalvars; var; var = var->next)
     {
-      volatile struct gdb_exception ex;
 
       if (!varseen)
 	{
@@ -2553,15 +2552,19 @@ show_convenience (char *ignore, int from_tty)
 	}
       printf_filtered (("$%s = "), var->name);
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
 	{
 	  struct value *val;
 
 	  val = value_of_internalvar (gdbarch, var);
 	  value_print (val, gdb_stdout, &opts);
 	}
-      if (ex.reason < 0)
-	fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	}
+      END_CATCH
+
       printf_filtered (("\n"));
     }
   if (!varseen)

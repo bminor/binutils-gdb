@@ -424,7 +424,6 @@ gcc_convert_symbol (void *datum,
 {
   struct compile_c_instance *context = datum;
   domain_enum domain;
-  volatile struct gdb_exception e;
   int found = 0;
 
   switch (request)
@@ -444,7 +443,7 @@ gcc_convert_symbol (void *datum,
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
-  TRY_CATCH (e, RETURN_MASK_ALL)
+  TRY
     {
       struct symbol *sym;
 
@@ -467,8 +466,11 @@ gcc_convert_symbol (void *datum,
 	}
     }
 
-  if (e.reason < 0)
-    C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+  CATCH (e, RETURN_MASK_ALL)
+    {
+      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+    }
+  END_CATCH
 
   if (compile_debug && !found)
     fprintf_unfiltered (gdb_stdout,
@@ -484,13 +486,12 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 		    const char *identifier)
 {
   struct compile_c_instance *context = datum;
-  volatile struct gdb_exception e;
   gcc_address result = 0;
   int found = 0;
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       struct symbol *sym;
 
@@ -527,8 +528,11 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	}
     }
 
-  if (e.reason < 0)
-    C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+    }
+  END_CATCH
 
   if (compile_debug && !found)
     fprintf_unfiltered (gdb_stdout,
@@ -643,9 +647,8 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 				 CORE_ADDR pc,
 				 struct symbol *sym)
 {
-  volatile struct gdb_exception e;
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       if (is_dynamic_type (SYMBOL_TYPE (sym)))
 	{
@@ -699,7 +702,7 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 	}
     }
 
-  if (e.reason < 0)
+  CATCH (e, RETURN_MASK_ERROR)
     {
       if (compiler->symbol_err_map == NULL)
 	compiler->symbol_err_map = htab_create_alloc (10,
@@ -710,6 +713,7 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 						      xfree);
       insert_symbol_error (compiler->symbol_err_map, sym, e.message);
     }
+  END_CATCH
 }
 
 /* See compile-internal.h.  */

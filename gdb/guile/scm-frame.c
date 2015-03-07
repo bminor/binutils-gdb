@@ -220,7 +220,6 @@ frscm_scm_from_frame (struct frame_info *frame, struct inferior *inferior)
   SCM f_scm;
   htab_t htab;
   eqable_gdb_smob **slot;
-  volatile struct gdb_exception except;
   struct frame_id frame_id = null_frame_id;
   struct gdbarch *gdbarch = NULL;
   int frame_id_is_next = 0;
@@ -234,7 +233,7 @@ frscm_scm_from_frame (struct frame_info *frame, struct inferior *inferior)
   if (*slot != NULL)
     return (*slot)->containing_scm;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       /* Try to get the previous frame, to determine if this is the last frame
 	 in a corrupt stack.  If so, we need to store the frame_id of the next
@@ -253,8 +252,11 @@ frscm_scm_from_frame (struct frame_info *frame, struct inferior *inferior)
 	}
       gdbarch = get_frame_arch (frame);
     }
-  if (except.reason < 0)
-    return gdbscm_scm_from_gdb_exception (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      return gdbscm_scm_from_gdb_exception (except);
+    }
+  END_CATCH
 
   f_scm = frscm_make_frame_smob ();
   f_smob = (frame_smob *) SCM_SMOB_DATA (f_scm);
@@ -396,15 +398,18 @@ gdbscm_frame_valid_p (SCM self)
 {
   frame_smob *f_smob;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   return scm_from_bool (frame != NULL);
 }
@@ -421,18 +426,23 @@ gdbscm_frame_name (SCM self)
   enum language lang = language_minimal;
   struct frame_info *frame = NULL;
   SCM result;
-  volatile struct gdb_exception except;
+  struct gdb_exception except = exception_none;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	find_frame_funname (frame, &name, &lang, NULL);
     }
-  if (except.reason < 0)
-    xfree (name);
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      except = ex;
+    }
+  END_CATCH
+
+  xfree (name);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
   if (frame == NULL)
@@ -461,17 +471,20 @@ gdbscm_frame_type (SCM self)
   frame_smob *f_smob;
   enum frame_type type = NORMAL_FRAME;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	type = get_frame_type (frame);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -490,15 +503,18 @@ gdbscm_frame_arch (SCM self)
 {
   frame_smob *f_smob;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -517,16 +533,19 @@ gdbscm_frame_unwind_stop_reason (SCM self)
 {
   frame_smob *f_smob;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
   enum unwind_stop_reason stop_reason;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -548,17 +567,20 @@ gdbscm_frame_pc (SCM self)
   frame_smob *f_smob;
   CORE_ADDR pc = 0;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	pc = get_frame_pc (frame);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -578,17 +600,20 @@ gdbscm_frame_block (SCM self)
   frame_smob *f_smob;
   const struct block *block = NULL, *fn_block;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	block = get_frame_block (frame, NULL);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -626,17 +651,20 @@ gdbscm_frame_function (SCM self)
   frame_smob *f_smob;
   struct symbol *sym = NULL;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	sym = find_pc_function (get_frame_address_in_block (frame));
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -660,17 +688,20 @@ gdbscm_frame_older (SCM self)
   frame_smob *f_smob;
   struct frame_info *prev = NULL;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	prev = get_prev_frame (frame);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -694,17 +725,20 @@ gdbscm_frame_newer (SCM self)
   frame_smob *f_smob;
   struct frame_info *next = NULL;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	next = get_next_frame (frame);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -727,17 +761,20 @@ gdbscm_frame_sal (SCM self)
   frame_smob *f_smob;
   struct symtab_and_line sal;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	find_frame_sal (frame, &sal);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -767,15 +804,18 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
   struct frame_info *frame = NULL;
   struct symbol *var = NULL;
   struct value *value = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -797,7 +837,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
       char *var_name;
       const struct block *block = NULL;
       struct cleanup *cleanup;
-      volatile struct gdb_exception except;
+      struct gdb_exception except = exception_none;
 
       if (! SCM_UNBNDP (block_scm))
 	{
@@ -815,14 +855,19 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
       /* N.B. Between here and the call to do_cleanups, don't do anything
 	 to cause a Scheme exception without performing the cleanup.  */
 
-      TRY_CATCH (except, RETURN_MASK_ALL)
+      TRY
 	{
 	  if (block == NULL)
 	    block = get_frame_block (frame, NULL);
 	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
 	}
-      if (except.reason < 0)
-	do_cleanups (cleanup);
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  except = ex;
+	}
+      END_CATCH
+
+      do_cleanups (cleanup);
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
       if (var == NULL)
@@ -841,11 +886,15 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
 		       _("gdb:symbol or string"));
     }
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       value = read_var_value (var, frame);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   return vlscm_scm_from_value (value);
 }
@@ -858,17 +907,20 @@ gdbscm_frame_select (SCM self)
 {
   frame_smob *f_smob;
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
 	select_frame (frame);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (frame == NULL)
     {
@@ -886,13 +938,16 @@ static SCM
 gdbscm_newest_frame (void)
 {
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = get_current_frame ();
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   return frscm_scm_from_frame_unsafe (frame, current_inferior ());
 }
@@ -904,13 +959,16 @@ static SCM
 gdbscm_selected_frame (void)
 {
   struct frame_info *frame = NULL;
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       frame = get_selected_frame (_("No frame is currently selected"));
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   return frscm_scm_from_frame_unsafe (frame, current_inferior ());
 }

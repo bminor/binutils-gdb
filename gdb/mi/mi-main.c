@@ -2080,7 +2080,6 @@ mi_execute_command (const char *cmd, int from_tty)
 {
   char *token;
   struct mi_parse *command = NULL;
-  volatile struct gdb_exception exception;
 
   /* This is to handle EOF (^D). We just quit gdb.  */
   /* FIXME: we should call some API function here.  */
@@ -2089,18 +2088,19 @@ mi_execute_command (const char *cmd, int from_tty)
 
   target_log_command (cmd);
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
+  TRY
     {
       command = mi_parse (cmd, &token);
     }
-  if (exception.reason < 0)
+  CATCH (exception, RETURN_MASK_ALL)
     {
       mi_print_exception (token, exception);
       xfree (token);
     }
-  else
+  END_CATCH
+
+  if (command != NULL)
     {
-      volatile struct gdb_exception result;
       ptid_t previous_ptid = inferior_ptid;
 
       command->token = token;
@@ -2112,17 +2112,18 @@ mi_execute_command (const char *cmd, int from_tty)
 	  timestamp (command->cmd_start);
 	}
 
-      TRY_CATCH (result, RETURN_MASK_ALL)
+      TRY
 	{
 	  captured_mi_execute_command (current_uiout, command);
 	}
-      if (result.reason < 0)
+      CATCH (result, RETURN_MASK_ALL)
 	{
 	  /* The command execution failed and error() was called
 	     somewhere.  */
 	  mi_print_exception (command->token, result);
 	  mi_out_rewind (current_uiout);
 	}
+      END_CATCH
 
       bpstat_do_actions ();
 

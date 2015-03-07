@@ -96,16 +96,15 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
                           const struct frame_unwind *unwinder)
 {
   struct cleanup *old_cleanup;
-  volatile struct gdb_exception ex;
   int res = 0;
 
   old_cleanup = frame_prepare_for_sniffer (this_frame, unwinder);
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       res = unwinder->sniffer (unwinder, this_frame, this_cache);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
@@ -118,6 +117,7 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
 	}
       throw_exception (ex);
     }
+  END_CATCH
 
   if (res)
     {

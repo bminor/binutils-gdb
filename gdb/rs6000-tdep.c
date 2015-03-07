@@ -3355,7 +3355,6 @@ static const struct frame_unwind rs6000_frame_unwind =
 static struct rs6000_frame_cache *
 rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  volatile struct gdb_exception ex;
   struct rs6000_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -3367,7 +3366,7 @@ rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       /* At this point the stack looks as if we just entered the
 	 function, and the return address is stored in LR.  */
@@ -3382,11 +3381,12 @@ rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
       trad_frame_set_value (cache->saved_regs,
 			    gdbarch_pc_regnum (gdbarch), lr);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
+  END_CATCH
 
   return cache;
 }

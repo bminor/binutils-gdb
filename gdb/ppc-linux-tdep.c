@@ -1231,9 +1231,8 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
   if (!ptid_equal (spe_context_cache_ptid, inferior_ptid))
     {
       struct target_ops *target = &current_target;
-      volatile struct gdb_exception ex;
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
 	{
 	  /* We do not call target_translate_tls_address here, because
 	     svr4_fetch_objfile_link_map may invalidate the frame chain,
@@ -1248,8 +1247,11 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
 	  spe_context_cache_ptid = inferior_ptid;
 	}
 
-      if (ex.reason < 0)
-	return 0;
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  return 0;
+	}
+      END_CATCH
     }
 
   /* Read variable value.  */

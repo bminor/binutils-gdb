@@ -378,7 +378,6 @@ tfile_read (gdb_byte *readbuf, int size)
 static void
 tfile_open (const char *arg, int from_tty)
 {
-  volatile struct gdb_exception ex;
   char *temp;
   struct cleanup *old_chain;
   int flags;
@@ -443,7 +442,7 @@ tfile_open (const char *arg, int from_tty)
   ts->disconnected_tracing = 0;
   ts->circular_buffer = 0;
 
-  TRY_CATCH (ex, RETURN_MASK_ALL)
+  TRY
     {
       /* Read through a section of newline-terminated lines that
 	 define things like tracepoints.  */
@@ -476,12 +475,13 @@ tfile_open (const char *arg, int from_tty)
       if (trace_regblock_size == 0)
 	error (_("No register block size recorded in trace file"));
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ALL)
     {
       /* Remove the partially set up target.  */
       unpush_target (&tfile_ops);
       throw_exception (ex);
     }
+  END_CATCH
 
   inferior_appeared (current_inferior (), TFILE_PID);
   inferior_ptid = pid_to_ptid (TFILE_PID);

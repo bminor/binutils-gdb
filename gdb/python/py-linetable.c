@@ -172,18 +172,21 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
   linetable_entry_object *result;
   VEC (CORE_ADDR) *pcs = NULL;
   PyObject *tuple;
-  volatile struct gdb_exception except;
 
   LTPY_REQUIRE_VALID (self, symtab);
 
   if (! PyArg_ParseTuple (args, GDB_PY_LL_ARG, &py_line))
     return NULL;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       pcs = find_pcs_for_symtab_line (symtab, py_line, &best_entry);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
 
   tuple = build_line_table_tuple_from_pcs (py_line, pcs);
   VEC_free (CORE_ADDR, pcs);

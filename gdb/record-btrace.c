@@ -139,13 +139,15 @@ require_btrace (void)
 static void
 record_btrace_enable_warn (struct thread_info *tp)
 {
-  volatile struct gdb_exception error;
-
-  TRY_CATCH (error, RETURN_MASK_ERROR)
-    btrace_enable (tp, &record_btrace_conf);
-
-  if (error.message != NULL)
-    warning ("%s", error.message);
+  TRY
+    {
+      btrace_enable (tp, &record_btrace_conf);
+    }
+  CATCH (error, RETURN_MASK_ERROR)
+    {
+      warning ("%s", error.message);
+    }
+  END_CATCH
 }
 
 /* Callback function to disable branch tracing for one thread.  */
@@ -1140,7 +1142,6 @@ record_btrace_insert_breakpoint (struct target_ops *ops,
 				 struct gdbarch *gdbarch,
 				 struct bp_target_info *bp_tgt)
 {
-  volatile struct gdb_exception except;
   const char *old;
   int ret;
 
@@ -1150,13 +1151,18 @@ record_btrace_insert_breakpoint (struct target_ops *ops,
   replay_memory_access = replay_memory_access_read_write;
 
   ret = 0;
-  TRY_CATCH (except, RETURN_MASK_ALL)
-    ret = ops->beneath->to_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
+  TRY
+    {
+      ret = ops->beneath->to_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
+    }
 
   replay_memory_access = old;
 
-  if (except.reason < 0)
-    throw_exception (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      throw_exception (except);
+    }
+  END_CATCH
 
   return ret;
 }
@@ -1168,7 +1174,6 @@ record_btrace_remove_breakpoint (struct target_ops *ops,
 				 struct gdbarch *gdbarch,
 				 struct bp_target_info *bp_tgt)
 {
-  volatile struct gdb_exception except;
   const char *old;
   int ret;
 
@@ -1178,13 +1183,18 @@ record_btrace_remove_breakpoint (struct target_ops *ops,
   replay_memory_access = replay_memory_access_read_write;
 
   ret = 0;
-  TRY_CATCH (except, RETURN_MASK_ALL)
-    ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch, bp_tgt);
+  TRY
+    {
+      ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch, bp_tgt);
+    }
 
   replay_memory_access = old;
 
-  if (except.reason < 0)
-    throw_exception (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      throw_exception (except);
+    }
+  END_CATCH
 
   return ret;
 }
@@ -1622,7 +1632,6 @@ record_btrace_find_resume_thread (ptid_t ptid)
 static struct btrace_insn_iterator *
 record_btrace_start_replaying (struct thread_info *tp)
 {
-  volatile struct gdb_exception except;
   struct btrace_insn_iterator *replay;
   struct btrace_thread_info *btinfo;
   int executing;
@@ -1649,7 +1658,7 @@ record_btrace_start_replaying (struct thread_info *tp)
      Since frames are computed differently when we're replaying, we need to
      recompute those stored frames and fix them up so we can still detect
      subroutines after we started replaying.  */
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       struct frame_info *frame;
       struct frame_id frame_id;
@@ -1701,7 +1710,7 @@ record_btrace_start_replaying (struct thread_info *tp)
   /* Restore the previous execution state.  */
   set_executing (tp->ptid, executing);
 
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ALL)
     {
       xfree (btinfo->replay);
       btinfo->replay = NULL;
@@ -1710,6 +1719,7 @@ record_btrace_start_replaying (struct thread_info *tp)
 
       throw_exception (except);
     }
+  END_CATCH
 
   return replay;
 }
@@ -2298,21 +2308,22 @@ init_record_btrace_ops (void)
 static void
 cmd_record_btrace_bts_start (char *args, int from_tty)
 {
-  volatile struct gdb_exception exception;
 
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
 
   record_btrace_conf.format = BTRACE_FORMAT_BTS;
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
-    execute_command ("target record-btrace", from_tty);
-
-  if (exception.error != 0)
+  TRY
+    {
+      execute_command ("target record-btrace", from_tty);
+    }
+  CATCH (exception, RETURN_MASK_ALL)
     {
       record_btrace_conf.format = BTRACE_FORMAT_NONE;
       throw_exception (exception);
     }
+  END_CATCH
 }
 
 /* Alias for "target record".  */
@@ -2320,21 +2331,22 @@ cmd_record_btrace_bts_start (char *args, int from_tty)
 static void
 cmd_record_btrace_start (char *args, int from_tty)
 {
-  volatile struct gdb_exception exception;
 
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
 
   record_btrace_conf.format = BTRACE_FORMAT_BTS;
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
-    execute_command ("target record-btrace", from_tty);
-
-  if (exception.error == 0)
-    return;
-
-  record_btrace_conf.format = BTRACE_FORMAT_NONE;
-  throw_exception (exception);
+  TRY
+    {
+      execute_command ("target record-btrace", from_tty);
+    }
+  CATCH (exception, RETURN_MASK_ALL)
+    {
+      record_btrace_conf.format = BTRACE_FORMAT_NONE;
+      throw_exception (exception);
+    }
+  END_CATCH
 }
 
 /* The "set record btrace" command.  */

@@ -131,15 +131,18 @@ objfpy_get_build_id (PyObject *self, void *closure)
   objfile_object *obj = (objfile_object *) self;
   struct objfile *objfile = obj->objfile;
   const struct elf_build_id *build_id = NULL;
-  volatile struct gdb_exception except;
 
   OBJFPY_REQUIRE_VALID (obj);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       build_id = build_id_bfd_get (objfile->obfd);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
 
   if (build_id != NULL)
     {
@@ -386,20 +389,23 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
   objfile_object *obj = (objfile_object *) self;
   const char *file_name;
   int symfile_flags = 0;
-  volatile struct gdb_exception except;
 
   OBJFPY_REQUIRE_VALID (obj);
 
   if (!PyArg_ParseTupleAndKeywords (args, kw, "s", keywords, &file_name))
     return NULL;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       bfd *abfd = symfile_bfd_open (file_name);
 
       symbol_file_add_separate (abfd, file_name, symfile_flags, obj->objfile);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
 
   Py_RETURN_NONE;
 }

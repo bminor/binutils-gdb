@@ -90,11 +90,10 @@ static Keymap tui_readline_standard_keymap;
 static int
 tui_rl_switch_mode (int notused1, int notused2)
 {
-  volatile struct gdb_exception ex;
 
   /* Don't let exceptions escape.  We're in the middle of a readline
      callback that isn't prepared for that.  */
-  TRY_CATCH (ex, RETURN_MASK_ALL)
+  TRY
     {
       if (tui_active)
 	{
@@ -108,13 +107,14 @@ tui_rl_switch_mode (int notused1, int notused2)
 	  tui_enable ();
 	}
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ALL)
     {
       exception_print (gdb_stderr, ex);
 
       if (!tui_active)
 	rl_prep_terminal (0);
     }
+  END_CATCH
 
   /* Clear the readline in case switching occurred in middle of
      something.  */

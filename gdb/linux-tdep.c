@@ -1545,7 +1545,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   char *note_data = NULL;
   gdb_byte *auxv;
   int auxv_len;
-  volatile struct gdb_exception e;
 
   if (! gdbarch_iterate_over_regset_sections_p (gdbarch))
     return NULL;
@@ -1572,12 +1571,16 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     }
 
   /* Thread register information.  */
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       update_thread_list ();
     }
-  if (e.reason < 0)
-    exception_print (gdb_stderr, e);
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      exception_print (gdb_stderr, e);
+    }
+  END_CATCH
+
   thread_args.gdbarch = gdbarch;
   thread_args.pid = ptid_get_pid (inferior_ptid);
   thread_args.obfd = obfd;

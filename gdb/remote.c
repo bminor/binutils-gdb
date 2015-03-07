@@ -497,7 +497,6 @@ remote_get_noisy_reply (char **buf_p,
 	  CORE_ADDR from, to, org_to;
 	  char *p, *pp;
 	  int adjusted_size = 0;
-	  volatile struct gdb_exception ex;
 	  int relocated = 0;
 
 	  p = buf + strlen ("qRelocInsn:");
@@ -512,12 +511,12 @@ remote_get_noisy_reply (char **buf_p,
 
 	  org_to = to;
 
-	  TRY_CATCH (ex, RETURN_MASK_ALL)
+	  TRY
 	    {
 	      gdbarch_relocate_instruction (target_gdbarch (), &to, from);
 	      relocated = 1;
 	    }
-	  if (ex.reason < 0)
+	  CATCH (ex, RETURN_MASK_ALL)
 	    {
 	      if (ex.error == MEMORY_ERROR)
 		{
@@ -536,6 +535,7 @@ remote_get_noisy_reply (char **buf_p,
 		}
 	      putpkt ("E01");
 	    }
+	  END_CATCH
 
 	  if (relocated)
 	    {
@@ -4382,13 +4382,12 @@ remote_open_1 (const char *name, int from_tty,
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
   {
-    volatile struct gdb_exception ex;
 
-    TRY_CATCH (ex, RETURN_MASK_ALL)
+    TRY
       {
 	remote_start_remote (from_tty, target, extended_p);
       }
-    if (ex.reason < 0)
+    CATCH (ex, RETURN_MASK_ALL)
       {
 	/* Pop the partially set up target - unless something else did
 	   already before throwing the exception.  */
@@ -4398,6 +4397,7 @@ remote_open_1 (const char *name, int from_tty,
 	  wait_forever_enabled_p = 1;
 	throw_exception (ex);
       }
+    END_CATCH
   }
 
   remote_btrace_reset ();
@@ -7835,15 +7835,14 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 static void
 remote_kill (struct target_ops *ops)
 {
-  volatile struct gdb_exception ex;
 
   /* Catch errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       putpkt ("k");
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error == TARGET_CLOSE_ERROR)
 	{
@@ -7861,6 +7860,7 @@ remote_kill (struct target_ops *ops)
 	   user or higher layers decide what to do.  */
 	throw_exception (ex);
     }
+  END_CATCH
 
   /* We've killed the remote end, we get to mourn it.  Since this is
      target remote, single-process, mourning the inferior also
@@ -10948,7 +10948,6 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
   char *p = NULL;
   /* FIXME we need to get register block size some other way.  */
   extern int trace_regblock_size;
-  volatile struct gdb_exception ex;
   enum packet_result result;
 
   if (packet_support (PACKET_qTStatus) == PACKET_DISABLE)
@@ -10958,11 +10957,11 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 
   putpkt ("qTStatus");
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       p = remote_get_noisy_reply (&target_buf, &target_buf_size);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error != TARGET_CLOSE_ERROR)
 	{
@@ -10971,6 +10970,7 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 	}
       throw_exception (ex);
     }
+  END_CATCH
 
   result = packet_ok (p, &remote_protocol_packets[PACKET_qTStatus]);
 
@@ -11537,7 +11537,6 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid,
   struct remote_state *rs = get_remote_state ();
   char *buf = rs->buf;
   char *endbuf = rs->buf + get_remote_packet_size ();
-  volatile struct gdb_exception err;
 
   if (packet_config_support (packet) != PACKET_ENABLE)
     error (_("Target does not support branch tracing."));
@@ -11565,11 +11564,16 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid,
 
   /* If we fail to read the configuration, we lose some information, but the
      tracing itself is not impacted.  */
-  TRY_CATCH (err, RETURN_MASK_ERROR)
-    btrace_read_config (&tinfo->conf);
-
-  if (err.message != NULL)
-    warning ("%s", err.message);
+  TRY
+    {
+      btrace_read_config (&tinfo->conf);
+    }
+  CATCH (err, RETURN_MASK_ERROR)
+    {
+      if (err.message != NULL)
+	warning ("%s", err.message);
+    }
+  END_CATCH
 
   return tinfo;
 }

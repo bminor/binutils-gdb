@@ -1133,7 +1133,6 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 			const struct block *block,
 			int comma, int void_context_p, int *out_subexp)
 {
-  volatile struct gdb_exception except;
   struct cleanup *old_chain, *inner_chain;
   const struct language_defn *lang = NULL;
   struct parser_state ps;
@@ -1215,12 +1214,12 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
   inner_chain = make_cleanup_restore_current_language ();
   set_language (lang->la_language);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       if (lang->la_parser (&ps))
         lang->la_error (NULL);
     }
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ALL)
     {
       if (! parse_completion)
 	{
@@ -1228,6 +1227,7 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 	  throw_exception (except);
 	}
     }
+  END_CATCH
 
   reallocate_expout (&ps);
 
@@ -1283,17 +1283,17 @@ parse_expression_for_completion (const char *string, char **name,
   struct expression *exp = NULL;
   struct value *val;
   int subexp;
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       parse_completion = 1;
       exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp);
     }
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       /* Nothing, EXP remains NULL.  */
     }
+  END_CATCH
 
   parse_completion = 0;
   if (exp == NULL)

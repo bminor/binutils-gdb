@@ -91,15 +91,17 @@ adjust_value_for_child_access (struct value **value,
 	{
 	  if (value && *value)
 	    {
-	      volatile struct gdb_exception except;
 
-	      TRY_CATCH (except, RETURN_MASK_ERROR)
+	      TRY
 		{
 		  *value = value_ind (*value);
 		}
 
-	      if (except.reason < 0)
-		*value = NULL;
+	      CATCH (except, RETURN_MASK_ERROR)
+		{
+		  *value = NULL;
+		}
+	      END_CATCH
 	    }
 	  *type = target_type;
 	  if (was_ptr)
@@ -245,7 +247,6 @@ static struct value *
 value_struct_element_index (struct value *value, int type_index)
 {
   struct value *result = NULL;
-  volatile struct gdb_exception e;
   struct type *type = value_type (value);
 
   type = check_typedef (type);
@@ -253,21 +254,20 @@ value_struct_element_index (struct value *value, int type_index)
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       if (field_is_static (&TYPE_FIELD (type, type_index)))
 	result = value_static_field (type, type_index);
       else
 	result = value_primitive_field (value, 0, type_index, type);
     }
-  if (e.reason < 0)
+  CATCH (e, RETURN_MASK_ERROR)
     {
       return NULL;
     }
-  else
-    {
-      return result;
-    }
+  END_CATCH
+
+  return result;
 }
 
 /* Obtain the information about child INDEX of the variable
@@ -290,7 +290,6 @@ c_describe_child (const struct varobj *parent, int index,
   struct type *type = varobj_get_value_type (parent);
   char *parent_expression = NULL;
   int was_ptr;
-  volatile struct gdb_exception except;
 
   if (cname)
     *cname = NULL;
@@ -319,10 +318,14 @@ c_describe_child (const struct varobj *parent, int index,
 	{
 	  int real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
 
-	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      *cvalue = value_subscript (value, real_index);
 	    }
+	  CATCH (except, RETURN_MASK_ERROR)
+	    {
+	    }
+	  END_CATCH
 	}
 
       if (ctype)
@@ -391,13 +394,16 @@ c_describe_child (const struct varobj *parent, int index,
 
       if (cvalue && value)
 	{
-	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      *cvalue = value_ind (value);
 	    }
 
-	  if (except.reason < 0)
-	    *cvalue = NULL;
+	  CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      *cvalue = NULL;
+	    }
+	  END_CATCH
 	}
 
       /* Don't use get_target_type because it calls

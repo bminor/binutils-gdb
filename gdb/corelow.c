@@ -278,7 +278,6 @@ core_open (const char *arg, int from_tty)
   bfd *temp_bfd;
   int scratch_chan;
   int flags;
-  volatile struct gdb_exception except;
   char *filename;
 
   target_preopen (from_tty);
@@ -411,13 +410,16 @@ core_open (const char *arg, int from_tty)
      may be a thread_stratum target loaded on top of target core by
      now.  The layer above should claim threads found in the BFD
      sections.  */
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       target_update_thread_list ();
     }
 
-  if (except.reason < 0)
-    exception_print (gdb_stderr, except);
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      exception_print (gdb_stderr, except);
+    }
+  END_CATCH
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
@@ -462,12 +464,15 @@ core_open (const char *arg, int from_tty)
      anything about threads.  That is why the test is >= 2.  */
   if (thread_count () >= 2)
     {
-      TRY_CATCH (except, RETURN_MASK_ERROR)
+      TRY
 	{
 	  thread_command (NULL, from_tty);
 	}
-      if (except.reason < 0)
-	exception_print (gdb_stderr, except);
+      CATCH (except, RETURN_MASK_ERROR)
+	{
+	  exception_print (gdb_stderr, except);
+	}
+      END_CATCH
     }
 }
 

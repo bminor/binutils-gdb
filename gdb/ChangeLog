@@ -1,3 +1,20 @@
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (struct catcher) <exception>: No
+	longer a pointer to volatile exception.  Now an exception value.
+	<mask>: Delete field.
+	(exceptions_state_mc_init): Remove all parameters.  Adjust.
+	(exceptions_state_mc): No longer pop the catcher here.
+	(exceptions_state_mc_catch): New function.
+	(throw_exception): Adjust.
+	* common/common-exceptions.h (exceptions_state_mc_init): Remove
+	all parameters.
+	(exceptions_state_mc_catch): Declare.
+	(TRY_CATCH): Rename to ...
+	(TRY): ... this.  Remove EXCEPTION and MASK parameters.
+	(CATCH, END_CATCH): New.
+	All callers adjusted.
+
 2015-03-07  Tom Tromey  <tromey@redhat.com>
 
 	* top.c (quit_force): Inline and delete DO_TRY, DO_PRINT_EX.

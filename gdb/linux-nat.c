@@ -1202,16 +1202,15 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
   struct lwp_info *lp;
   int status;
   ptid_t ptid;
-  volatile struct gdb_exception ex;
 
   /* Make sure we report all signals during attach.  */
   linux_nat_pass_signals (ops, 0, NULL);
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       linux_ops->to_attach (ops, args, from_tty);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       pid_t pid = parse_pid_to_attach (args);
       struct buffer buffer;
@@ -1232,6 +1231,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
       else
 	throw_error (ex.error, "%s", message);
     }
+  END_CATCH
 
   /* The ptrace base target adds the main thread with (pid,0,0)
      format.  Decorate it with lwp info.  */

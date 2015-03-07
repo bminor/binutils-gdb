@@ -163,18 +163,20 @@ ia64_hpux_at_dld_breakpoint_1_p (ptid_t ptid)
 int
 ia64_hpux_at_dld_breakpoint_p (ptid_t ptid)
 {
-  volatile struct gdb_exception e;
   ptid_t saved_ptid = inferior_ptid;
   int result = 0;
 
   inferior_ptid = ptid;
-  TRY_CATCH (e, RETURN_MASK_ALL)
+  TRY
     {
       result = ia64_hpux_at_dld_breakpoint_1_p (ptid);
     }
   inferior_ptid = saved_ptid;
-  if (e.reason < 0)
-    warning (_("error while checking for dld breakpoint: %s"), e.message);
+  CATCH (e, RETURN_MASK_ALL)
+    {
+      warning (_("error while checking for dld breakpoint: %s"), e.message);
+    }
+  END_CATCH
 
   return result;
 }
@@ -277,17 +279,19 @@ ia64_hpux_handle_dld_breakpoint_1 (ptid_t ptid)
 void
 ia64_hpux_handle_dld_breakpoint (ptid_t ptid)
 {
-  volatile struct gdb_exception e;
   ptid_t saved_ptid = inferior_ptid;
 
   inferior_ptid = ptid;
-  TRY_CATCH (e, RETURN_MASK_ALL)
+  TRY
     {
       ia64_hpux_handle_dld_breakpoint_1 (ptid);
     }
   inferior_ptid = saved_ptid;
-  if (e.reason < 0)
-    warning (_("error detected while handling dld breakpoint: %s"), e.message);
+  CATCH (e, RETURN_MASK_ALL)
+    {
+      warning (_("error detected while handling dld breakpoint: %s"), e.message);
+    }
+  END_CATCH
 }
 
 /* Find the address of the code and data segments in ABFD, and update

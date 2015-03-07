@@ -213,11 +213,10 @@ find_pretty_printer (PyObject *value)
 static PyObject *
 pretty_print_one_value (PyObject *printer, struct value **out_value)
 {
-  volatile struct gdb_exception except;
   PyObject *result = NULL;
 
   *out_value = NULL;
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       result = PyObject_CallMethodObjArgs (printer, gdbpy_to_string_cst, NULL);
       if (result)
@@ -233,6 +232,10 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
 	    }
 	}
     }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+    }
+  END_CATCH
 
   return result;
 }
@@ -803,13 +806,16 @@ gdbpy_get_varobj_pretty_printer (struct value *value)
 {
   PyObject *val_obj;
   PyObject *pretty_printer = NULL;
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       value = value_copy (value);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
 
   val_obj = value_to_value_object (value);
   if (! val_obj)

@@ -3144,19 +3144,19 @@ static int exit_code;
 static void
 detach_or_kill_for_exit_cleanup (void *ignore)
 {
-  volatile struct gdb_exception exception;
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
+  TRY
     {
       detach_or_kill_for_exit ();
     }
 
-  if (exception.reason < 0)
+  CATCH (exception, RETURN_MASK_ALL)
     {
       fflush (stdout);
       fprintf (stderr, "Detach or kill failed: %s\n", exception.message);
       exit_code = 1;
     }
+  END_CATCH
 }
 
 /* Main function.  This is called by the real "main" function,
@@ -3385,7 +3385,6 @@ captured_main (int argc, char *argv[])
 
   while (1)
     {
-      volatile struct gdb_exception exception;
 
       noack_mode = 0;
       multi_process = 0;
@@ -3397,7 +3396,7 @@ captured_main (int argc, char *argv[])
 
       remote_open (port);
 
-      TRY_CATCH (exception, RETURN_MASK_ERROR)
+      TRY
 	{
 	  /* Wait for events.  This will return when all event sources
 	     are removed from the event loop.  */
@@ -3450,8 +3449,7 @@ captured_main (int argc, char *argv[])
 		}
 	    }
 	}
-
-      if (exception.reason == RETURN_ERROR)
+      CATCH (exception, RETURN_MASK_ERROR)
 	{
 	  if (response_needed)
 	    {
@@ -3459,6 +3457,7 @@ captured_main (int argc, char *argv[])
 	      putpkt (own_buf);
 	    }
 	}
+      END_CATCH
     }
 }
 
@@ -3467,25 +3466,26 @@ captured_main (int argc, char *argv[])
 int
 main (int argc, char *argv[])
 {
-  volatile struct gdb_exception exception;
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
+  TRY
     {
       captured_main (argc, argv);
     }
-
-  /* captured_main should never return.  */
-  gdb_assert (exception.reason < 0);
-
-  if (exception.reason == RETURN_ERROR)
+  CATCH (exception, RETURN_MASK_ALL)
     {
-      fflush (stdout);
-      fprintf (stderr, "%s\n", exception.message);
-      fprintf (stderr, "Exiting\n");
-      exit_code = 1;
-    }
+      if (exception.reason == RETURN_ERROR)
+	{
+	  fflush (stdout);
+	  fprintf (stderr, "%s\n", exception.message);
+	  fprintf (stderr, "Exiting\n");
+	  exit_code = 1;
+	}
 
-  exit (exit_code);
+      exit (exit_code);
+    }
+  END_CATCH
+
+  gdb_assert_not_reached ("captured_main should never return");
 }
 
 /* Skip PACKET until the next semi-colon (or end of string).  */

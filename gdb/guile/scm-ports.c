@@ -263,20 +263,23 @@ fputsn_filtered (const char *s, size_t size, struct ui_file *stream)
 static void
 ioscm_write (SCM port, const void *data, size_t size)
 {
-  volatile struct gdb_exception except;
 
   /* If we're called on stdin, punt.  */
   if (scm_is_eq (port, input_port_scm))
     return;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       if (scm_is_eq (port, error_port_scm))
 	fputsn_filtered (data, size, gdb_stderr);
       else
 	fputsn_filtered (data, size, gdb_stdout);
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 }
 
 /* Flush gdb's stdout or stderr.  */

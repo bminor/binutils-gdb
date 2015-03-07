@@ -114,12 +114,19 @@ write_gcore_file_1 (bfd *obfd)
 void
 write_gcore_file (bfd *obfd)
 {
-  volatile struct gdb_exception except;
+  struct gdb_exception except = exception_none;
 
   target_prepare_to_generate_core ();
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
-    write_gcore_file_1 (obfd);
+  TRY
+    {
+      write_gcore_file_1 (obfd);
+    }
+  CATCH (e, RETURN_MASK_ALL)
+    {
+      except = e;
+    }
+  END_CATCH
 
   target_done_generating_core ();
 

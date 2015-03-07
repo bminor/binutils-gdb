@@ -5500,21 +5500,21 @@ default_make_symbol_completion_list_break_on (const char *text,
 					      enum type_code code)
 {
   struct cleanup *back_to;
-  volatile struct gdb_exception except;
 
   return_val = NULL;
   back_to = make_cleanup (do_free_completion_list, &return_val);
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       default_make_symbol_completion_list_break_on_1 (text, word,
 						      break_on, code);
     }
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
 	throw_exception (except);
     }
+  END_CATCH
 
   discard_cleanups (back_to);
   return return_val;

@@ -2260,22 +2260,22 @@ parse_linespec (linespec_parser *parser, const char **argptr)
   if (token.type == LSTOKEN_COLON)
     {
       char *user_filename;
-      volatile struct gdb_exception ex;
 
       /* Get the current token again and extract the filename.  */
       token = linespec_lexer_lex_one (parser);
       user_filename = copy_token_string (token);
 
       /* Check if the input is a filename.  */
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
 	{
 	  PARSER_RESULT (parser)->file_symtabs
 	    = symtabs_from_filename (user_filename);
 	}
-      if (ex.reason < 0)
+      CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  file_exception = ex;
 	}
+      END_CATCH
 
       if (file_exception.reason >= 0)
 	{
@@ -3106,7 +3106,6 @@ find_linespec_symbols (struct linespec_state *state,
   struct cleanup *cleanup;
   char *canon;
   const char *lookup_name;
-  volatile struct gdb_exception except;
 
   cleanup = demangle_for_lookup (name, state->language->la_language,
 				 &lookup_name);
@@ -3194,7 +3193,7 @@ find_linespec_symbols (struct linespec_state *state,
       if (!VEC_empty (symbolp, classes))
 	{
 	  /* Now locate a list of suitable methods named METHOD.  */
-	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      find_method (state, file_symtabs, klass, method, classes,
 			   symbols, minsyms);
@@ -3202,11 +3201,12 @@ find_linespec_symbols (struct linespec_state *state,
 
 	  /* If successful, we're done.  If NOT_FOUND_ERROR
 	     was not thrown, rethrow the exception that we did get.  */
-	  if (except.reason < 0)
+	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      if (except.error != NOT_FOUND_ERROR)
 		throw_exception (except);
 	    }
+	  END_CATCH
 	}
     }
 

@@ -762,7 +762,6 @@ gdbscm_register_command_x (SCM self)
   char *cmd_name, *pfx_name;
   struct cmd_list_element **cmd_list;
   struct cmd_list_element *cmd = NULL;
-  volatile struct gdb_exception except;
 
   if (cmdscm_is_valid (c_smob))
     scm_misc_error (FUNC_NAME, _("command is already registered"), SCM_EOL);
@@ -772,7 +771,7 @@ gdbscm_register_command_x (SCM self)
   c_smob->cmd_name = gdbscm_gc_xstrdup (cmd_name);
   xfree (cmd_name);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       if (c_smob->is_prefix)
 	{
@@ -790,7 +789,11 @@ gdbscm_register_command_x (SCM self)
 			 NULL, c_smob->doc, cmd_list);
 	}
     }
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
 
   /* Note: At this point the command exists in gdb.
      So no more errors after this point.  */

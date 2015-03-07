@@ -118,14 +118,13 @@ struct gdb_exception
 
 /* Functions to drive the exceptions state machine.  Though declared
    here by necessity, these functions should be considered internal to
-   the exceptions subsystem and not used other than via the TRY_CATCH
-   macro defined below.  */
+   the exceptions subsystem and not used other than via the TRY/CATCH
+   macros defined below.  */
 
-extern SIGJMP_BUF *exceptions_state_mc_init (volatile struct
-					     gdb_exception *exception,
-					     return_mask mask);
+extern SIGJMP_BUF *exceptions_state_mc_init (void);
 extern int exceptions_state_mc_action_iter (void);
 extern int exceptions_state_mc_action_iter_1 (void);
+extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 
 /* Macro to wrap up standard try/catch behavior.
 
@@ -138,25 +137,36 @@ extern int exceptions_state_mc_action_iter_1 (void);
 
    *INDENT-OFF*
 
-   volatile struct gdb_exception e;
-   TRY_CATCH (e, RETURN_MASK_ERROR)
+   TRY
      {
      }
-   switch (e.reason)
+   CATCH (e, RETURN_MASK_ERROR)
      {
-     case RETURN_ERROR: ...
+       switch (e.reason)
+         {
+           case RETURN_ERROR: ...
+         }
      }
+   END_CATCH
 
   */
 
-#define TRY_CATCH(EXCEPTION,MASK) \
+#define TRY \
      { \
        SIGJMP_BUF *buf = \
-	 exceptions_state_mc_init (&(EXCEPTION), (MASK)); \
+	 exceptions_state_mc_init (); \
        SIGSETJMP (*buf); \
      } \
      while (exceptions_state_mc_action_iter ()) \
        while (exceptions_state_mc_action_iter_1 ())
+
+#define CATCH(EXCEPTION, MASK)				\
+  {							\
+    struct gdb_exception EXCEPTION;				\
+    if (exceptions_state_mc_catch (&(EXCEPTION), MASK))
+
+#define END_CATCH				\
+  }
 
 /* *INDENT-ON* */
 

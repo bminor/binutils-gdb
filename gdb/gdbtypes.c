@@ -2299,20 +2299,22 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;
   struct type *type = NULL; /* Initialize to keep gcc happy.  */
-  volatile struct gdb_exception except;
 
   /* Suppress error messages.  */
   saved_gdb_stderr = gdb_stderr;
   gdb_stderr = ui_file_new ();
 
   /* Call parse_and_eval_type() without fear of longjmp()s.  */
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       type = parse_and_eval_type (p, length);
     }
 
-  if (except.reason < 0)
-    type = builtin_type (gdbarch)->builtin_void;
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      type = builtin_type (gdbarch)->builtin_void;
+    }
+  END_CATCH
 
   /* Stop suppressing error messages.  */
   ui_file_delete (gdb_stderr);
@@ -3235,7 +3237,6 @@ check_types_worklist (VEC (type_equality_entry_d) **worklist,
 int
 types_deeply_equal (struct type *type1, struct type *type2)
 {
-  volatile struct gdb_exception except;
   int result = 0;
   struct bcache *cache;
   VEC (type_equality_entry_d) *worklist = NULL;
@@ -3253,7 +3254,7 @@ types_deeply_equal (struct type *type1, struct type *type2)
   entry.type2 = type2;
   VEC_safe_push (type_equality_entry_d, worklist, &entry);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       result = check_types_worklist (&worklist, cache);
     }
@@ -3264,8 +3265,11 @@ types_deeply_equal (struct type *type1, struct type *type2)
   bcache_xfree (cache);
   VEC_free (type_equality_entry_d, worklist);
   /* Rethrow if there was a problem.  */
-  if (except.reason < 0)
-    throw_exception (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      throw_exception (except);
+    }
+  END_CATCH
 
   return result;
 }

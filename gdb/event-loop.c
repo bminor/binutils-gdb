@@ -326,14 +326,13 @@ start_event_loop (void)
      processes it.  */
   while (1)
     {
-      volatile struct gdb_exception ex;
       int result = 0;
 
-      TRY_CATCH (ex, RETURN_MASK_ALL)
+      TRY
 	{
 	  result = gdb_do_one_event ();
 	}
-      if (ex.reason < 0)
+      CATCH (ex, RETURN_MASK_ALL)
 	{
 	  exception_print (gdb_stderr, ex);
 
@@ -356,6 +355,8 @@ start_event_loop (void)
 	  /* Maybe better to set a flag to be checked somewhere as to
 	     whether display the prompt or not.  */
 	}
+      END_CATCH
+
       if (result < 0)
 	break;
     }

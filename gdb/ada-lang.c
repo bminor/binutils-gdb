@@ -6479,7 +6479,6 @@ type_from_tag (struct value *tag)
 struct value *
 ada_tag_value_at_base_address (struct value *obj)
 {
-  volatile struct gdb_exception e;
   struct value *val;
   LONGEST offset_to_top = 0;
   struct type *ptr_type, *obj_type;
@@ -6514,13 +6513,16 @@ ada_tag_value_at_base_address (struct value *obj)
      see ada_tag_name for more details.  We do not print the error
      message for the same reason.  */
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       offset_to_top = value_as_long (value_ind (value_ptradd (val, -2)));
     }
 
-  if (e.reason < 0)
-    return obj;
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      return obj;
+    }
+  END_CATCH
 
   /* If offset is null, nothing to do.  */
 
@@ -6632,7 +6634,6 @@ ada_tag_name_from_tsd (struct value *tsd)
 const char *
 ada_tag_name (struct value *tag)
 {
-  volatile struct gdb_exception e;
   char *name = NULL;
 
   if (!ada_is_tag_type (value_type (tag)))
@@ -6647,13 +6648,17 @@ ada_tag_name (struct value *tag)
      We also do not print the error message either (which often is very
      low-level (Eg: "Cannot read memory at 0x[...]"), but instead let
      the caller print a more meaningful message if necessary.  */
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       struct value *tsd = ada_get_tsd_from_tag (tag);
 
       if (tsd != NULL)
 	name = ada_tag_name_from_tsd (tsd);
     }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH
 
   return name;
 }
@@ -11817,19 +11822,19 @@ static CORE_ADDR
 ada_exception_name_addr (enum ada_exception_catchpoint_kind ex,
                          struct breakpoint *b)
 {
-  volatile struct gdb_exception e;
   CORE_ADDR result = 0;
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       result = ada_exception_name_addr_1 (ex, b);
     }
 
-  if (e.reason < 0)
+  CATCH (e, RETURN_MASK_ERROR)
     {
       warning (_("failed to get exception name: %s"), e.message);
       return 0;
     }
+  END_CATCH
 
   return result;
 }
@@ -11929,16 +11934,15 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 
       if (!bl->shlib_disabled)
 	{
-	  volatile struct gdb_exception e;
 	  const char *s;
 
 	  s = cond_string;
-	  TRY_CATCH (e, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      exp = parse_exp_1 (&s, bl->address,
 				 block_for_pc (bl->address), 0);
 	    }
-	  if (e.reason < 0)
+	  CATCH (e, RETURN_MASK_ERROR)
 	    {
 	      warning (_("failed to reevaluate internal exception condition "
 			 "for catchpoint %d: %s"),
@@ -11951,6 +11955,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 		 to NULL.  */
 	      exp = NULL;
 	    }
+	  END_CATCH
 	}
 
       ada_loc->excep_cond_expr = exp;
@@ -12014,7 +12019,6 @@ should_stop_exception (const struct bp_location *bl)
   struct ada_catchpoint *c = (struct ada_catchpoint *) bl->owner;
   const struct ada_catchpoint_location *ada_loc
     = (const struct ada_catchpoint_location *) bl;
-  volatile struct gdb_exception ex;
   int stop;
 
   /* With no specific exception, should always stop.  */
@@ -12029,7 +12033,7 @@ should_stop_exception (const struct bp_location *bl)
     }
 
   stop = 1;
-  TRY_CATCH (ex, RETURN_MASK_ALL)
+  TRY
     {
       struct value *mark;
 
@@ -12037,9 +12041,13 @@ should_stop_exception (const struct bp_location *bl)
       stop = value_true (evaluate_expression (ada_loc->excep_cond_expr));
       value_free_to_mark (mark);
     }
-  if (ex.reason < 0)
-    exception_fprintf (gdb_stderr, ex,
-		       _("Error in testing exception condition:\n"));
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_fprintf (gdb_stderr, ex,
+			 _("Error in testing exception condition:\n"));
+    }
+  END_CATCH
+
   return stop;
 }
 

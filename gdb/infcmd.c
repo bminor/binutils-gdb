@@ -411,7 +411,6 @@ strip_bg_char (const char *args, int *bg_char_p)
 void
 post_create_inferior (struct target_ops *target, int from_tty)
 {
-  volatile struct gdb_exception ex;
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
   target_terminal_ours ();
@@ -426,15 +425,16 @@ post_create_inferior (struct target_ops *target, int from_tty)
      if the PC is unavailable (e.g., we're opening a core file with
      missing registers info), ignore it.  */
   stop_pc = 0;
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       stop_pc = regcache_read_pc (get_current_regcache ());
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
+  END_CATCH
 
   if (exec_bfd)
     {
@@ -1669,19 +1669,21 @@ finish_command_continuation (void *arg, int err)
 
 	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
 	    {
-	      volatile struct gdb_exception ex;
 	      struct value *func;
 
 	      func = read_var_value (a->function, get_current_frame ());
-	      TRY_CATCH (ex, RETURN_MASK_ALL)
+	      TRY
 		{
 		  /* print_return_value can throw an exception in some
 		     circumstances.  We need to catch this so that we still
 		     delete the breakpoint.  */
 		  print_return_value (func, value_type);
 		}
-	      if (ex.reason < 0)
-		exception_print (gdb_stdout, ex);
+	      CATCH (ex, RETURN_MASK_ALL)
+		{
+		  exception_print (gdb_stdout, ex);
+		}
+	      END_CATCH
 	    }
 	}
 

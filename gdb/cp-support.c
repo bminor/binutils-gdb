@@ -157,7 +157,6 @@ inspect_type (struct demangle_parse_info *info,
   int i;
   char *name;
   struct symbol *sym;
-  volatile struct gdb_exception except;
 
   /* Copy the symbol's name from RET_COMP and look it up
      in the symbol table.  */
@@ -173,12 +172,18 @@ inspect_type (struct demangle_parse_info *info,
     }
 
   sym = NULL;
-  TRY_CATCH (except, RETURN_MASK_ALL)
-  {
-    sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
-  }
 
-  if (except.reason >= 0 && sym != NULL)
+  TRY
+    {
+      sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      return 0;
+    }
+  END_CATCH
+
+  if (sym != NULL)
     {
       struct type *otype = SYMBOL_TYPE (sym);
 
@@ -241,18 +246,19 @@ inspect_type (struct demangle_parse_info *info,
 	    }
 
 	  buf = mem_fileopen ();
-	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	  TRY
 	  {
 	    type_print (type, "", buf, -1);
 	  }
 
 	  /* If type_print threw an exception, there is little point
 	     in continuing, so just bow out gracefully.  */
-	  if (except.reason < 0)
+	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      ui_file_delete (buf);
 	      return 0;
 	    }
+	  END_CATCH
 
 	  name = ui_file_obsavestring (buf, &info->obstack, &len);
 	  ui_file_delete (buf);
@@ -446,17 +452,21 @@ replace_typedefs (struct demangle_parse_info *info,
 
 	  if (local_name != NULL)
 	    {
-	      struct symbol *sym;
-	      volatile struct gdb_exception except;
+	      struct symbol *sym = NULL;
 
 	      sym = NULL;
-	      TRY_CATCH (except, RETURN_MASK_ALL)
+	      TRY
 		{
 		  sym = lookup_symbol (local_name, 0, VAR_DOMAIN, 0);
 		}
+	      CATCH (except, RETURN_MASK_ALL)
+		{
+		}
+	      END_CATCH
+
 	      xfree (local_name);
 
-	      if (except.reason >= 0 && sym != NULL)
+	      if (sym != NULL)
 		{
 		  struct type *otype = SYMBOL_TYPE (sym);
 		  const char *new_name = (*finder) (otype, data);

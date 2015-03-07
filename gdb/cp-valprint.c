@@ -313,18 +313,21 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		}
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
-		  volatile struct gdb_exception ex;
 		  struct value *v = NULL;
 
-		  TRY_CATCH (ex, RETURN_MASK_ERROR)
+		  TRY
 		    {
 		      v = value_static_field (type, i);
 		    }
 
-		  if (ex.reason < 0)
-		    fprintf_filtered (stream,
-				      _("<error reading variable: %s>"),
-				      ex.message);
+		  CATCH (ex, RETURN_MASK_ERROR)
+		    {
+		      fprintf_filtered (stream,
+					_("<error reading variable: %s>"),
+					ex.message);
+		    }
+		  END_CATCH
+
 		  cp_print_static_field (TYPE_FIELD_TYPE (type, i),
 					 v, stream, recurse + 1,
 					 options);
@@ -486,7 +489,6 @@ cp_print_value (struct type *type, struct type *real_type,
       const char *basename = TYPE_NAME (baseclass);
       const gdb_byte *base_valaddr = NULL;
       const struct value *base_val = NULL;
-      volatile struct gdb_exception ex;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -506,17 +508,18 @@ cp_print_value (struct type *type, struct type *real_type,
       thisoffset = offset;
       thistype = real_type;
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
 	{
 	  boffset = baseclass_offset (type, i, valaddr, offset, address, val);
 	}
-      if (ex.reason < 0)
+      CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  if (ex.error == NOT_AVAILABLE_ERROR)
 	    skip = -1;
 	  else
 	    skip = 1;
 	}
+      END_CATCH
 
       if (skip == 0)
 	{

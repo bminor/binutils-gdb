@@ -1,3 +1,8 @@
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	Adjust all callers of TRY_CATCH to use TRY/CATCH/END_CATCH
+	instead.
+
 2015-03-06  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_insert_point): Use

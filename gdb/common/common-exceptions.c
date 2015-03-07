@@ -46,9 +46,7 @@ struct catcher
   /* Jump buffer pointing back at the exception handler.  */
   SIGJMP_BUF buf;
   /* Status buffer belonging to the exception handler.  */
-  volatile struct gdb_exception *exception;
-  /* Saved/current state.  */
-  int mask;
+  struct gdb_exception exception;
   struct cleanup *saved_cleanup_chain;
   /* Back link.  */
   struct catcher *prev;
@@ -74,16 +72,12 @@ catcher_list_size (void)
 }
 
 SIGJMP_BUF *
-exceptions_state_mc_init (volatile struct gdb_exception *exception,
-			  return_mask mask)
+exceptions_state_mc_init (void)
 {
   struct catcher *new_catcher = XCNEW (struct catcher);
 
-  /* Start with no exception, save it's address.  */
-  *exception = exception_none;
-  new_catcher->exception = exception;
-
-  new_catcher->mask = mask;
+  /* Start with no exception.  */
+  new_catcher->exception = exception_none;
 
   /* Prevent error/quit during FUNC from calling cleanups established
      prior to here.  */
@@ -134,8 +128,7 @@ exceptions_state_mc (enum catcher_action action)
       switch (action)
 	{
 	case CATCH_ITER:
-	  /* No error/quit has occured.  Just clean up.  */
-	  catcher_pop ();
+	  /* No error/quit has occured.  */
 	  return 0;
 	case CATCH_ITER_1:
 	  current_catcher->state = CATCHER_RUNNING_1;
@@ -152,7 +145,6 @@ exceptions_state_mc (enum catcher_action action)
 	{
 	case CATCH_ITER:
 	  /* The did a "break" from the inner while loop.  */
-	  catcher_pop ();
 	  return 0;
 	case CATCH_ITER_1:
 	  current_catcher->state = CATCHER_RUNNING;
@@ -169,21 +161,10 @@ exceptions_state_mc (enum catcher_action action)
 	{
 	case CATCH_ITER:
 	  {
-	    struct gdb_exception exception = *current_catcher->exception;
-
-	    if (current_catcher->mask & RETURN_MASK (exception.reason))
-	      {
-		/* Exit normally if this catcher can handle this
-		   exception.  The caller analyses the func return
-		   values.  */
-		catcher_pop ();
-		return 0;
-	      }
-	    /* The caller didn't request that the event be caught,
-	       relay the event to the next containing
-	       catch_errors().  */
-	    catcher_pop ();
-	    throw_exception (exception);
+	    /* Exit normally if this catcher can handle this
+	       exception.  The caller analyses the func return
+	       values.  */
+	    return 0;
 	  }
 	default:
 	  internal_error (__FILE__, __LINE__, _("bad state"));
@@ -191,6 +172,31 @@ exceptions_state_mc (enum catcher_action action)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+}
+
+int
+exceptions_state_mc_catch (struct gdb_exception *exception,
+			   int mask)
+{
+  *exception = current_catcher->exception;
+  catcher_pop ();
+
+  if (exception->reason < 0)
+    {
+      if (mask & RETURN_MASK (exception->reason))
+	{
+	  /* Exit normally and let the called handle the
+	     exception.  */
+	  return 1;
+	}
+
+      /* The caller didn't request that the event be caught, relay the
+	 event to the next exception_catch/CATCH.  */
+      throw_exception (*exception);
+    }
+
+  /* No exception was thrown.  */
+  return 0;
 }
 
 int
@@ -218,7 +224,7 @@ throw_exception (struct gdb_exception exception)
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h.  */
   exceptions_state_mc (CATCH_THROWING);
-  *current_catcher->exception = exception;
+  current_catcher->exception = exception;
   SIGLONGJMP (current_catcher->buf, exception.reason);
 }
 

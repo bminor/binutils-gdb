@@ -87,7 +87,6 @@ compile_object_run (struct compile_module *module)
   struct frame_id dummy_id;
   struct cleanup *cleanups;
   struct do_module_cleanup *data;
-  volatile struct gdb_exception ex;
   const char *objfile_name_s = objfile_name (module->objfile);
   int dtor_found, executed = 0;
   CORE_ADDR func_addr = module->func_addr;
@@ -101,7 +100,7 @@ compile_object_run (struct compile_module *module)
   xfree (module->source_file);
   xfree (module);
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       func_val = value_from_pointer
 		 (builtin_type (target_gdbarch ())->builtin_func_ptr,
@@ -121,7 +120,7 @@ compile_object_run (struct compile_module *module)
 				       do_module_cleanup, data);
 	}
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       /* In the case of DTOR_FOUND or in the case of EXECUTED nothing
 	 needs to be done.  */
@@ -133,6 +132,7 @@ compile_object_run (struct compile_module *module)
 	do_module_cleanup (data);
       throw_exception (ex);
     }
+  END_CATCH
 
   dtor_found = find_dummy_frame_dtor (do_module_cleanup, data);
   gdb_assert (!dtor_found && executed);
