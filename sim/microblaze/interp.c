@@ -51,7 +51,7 @@ microblaze_extract_unsigned_integer (unsigned char *addr, int len)
 
   if (len > (int) sizeof (unsigned long))
     printf ("That operation is not available on integers of more than "
-	    "%ld bytes.", sizeof (unsigned long));
+	    "%zu bytes.", sizeof (unsigned long));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
