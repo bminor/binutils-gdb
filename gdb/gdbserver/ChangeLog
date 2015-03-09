@@ -1,3 +1,7 @@
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* server.c (handle_general_set): Make "req_str" const.
+
 2015-03-19  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_resume_one_lwp): Rename to ...
