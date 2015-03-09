@@ -957,7 +957,7 @@ get_first_locp_gte_addr (CORE_ADDR address)
 }
 
 void
-set_breakpoint_condition (struct breakpoint *b, char *exp,
+set_breakpoint_condition (struct breakpoint *b, const char *exp,
 			  int from_tty)
 {
   xfree (b->cond_string);

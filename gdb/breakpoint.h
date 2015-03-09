@@ -1525,7 +1525,7 @@ extern int breakpoints_should_be_inserted_now (void);
 extern void breakpoint_retire_moribund (void);
 
 /* Set break condition of breakpoint B to EXP.  */
-extern void set_breakpoint_condition (struct breakpoint *b, char *exp,
+extern void set_breakpoint_condition (struct breakpoint *b, const char *exp,
 				      int from_tty);
 
 /* Checks if we are catching syscalls or not.

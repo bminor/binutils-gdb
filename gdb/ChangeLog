@@ -1,5 +1,10 @@
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (set_breakpoint_condition): Make argument "exp" const.
+	* breakpoint.h (set_breakpoint_condition): Update declaration.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
 	* tui/tui-io.c (tui_expand_tabs): Make "s1" const.
 
 2015-03-20  Pedro Alves  <palves@redhat.com>
