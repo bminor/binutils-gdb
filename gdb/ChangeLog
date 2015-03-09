@@ -1,5 +1,9 @@
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
+	* tui/tui-io.c (tui_expand_tabs): Make "s1" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
 	* xcoffread.c (scan_xcoff_symtab): Make "p" and "q" const.
 
 2015-03-20  Pedro Alves  <palves@redhat.com>

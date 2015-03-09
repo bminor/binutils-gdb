@@ -692,7 +692,7 @@ tui_expand_tabs (const char *string, int col)
   /* 2. Copy the original string while replacing TABs with spaces.  */
   for (s = string; s; )
     {
-      char *s1 = strpbrk (s, "\t");
+      const char *s1 = strpbrk (s, "\t");
       if (s1)
 	{
 	  if (s1 > s)
