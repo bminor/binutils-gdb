@@ -1,5 +1,10 @@
 2015-03-09  Pedro Alves  <palves@redhat.com>
 
+	* tracepoint.c (gdb_agent_helper_thread): Cast '&sockaddr' to
+	'struct sockaddr' pointer in 'accept' call.
+
+2015-03-09  Pedro Alves  <palves@redhat.com>
+
 	Revert:
 	2015-03-07  Pedro Alves  <palves@redhat.com>
 	* gdbreplay.c: No longer include <netinet/in.h>, <sys/socket.h>,

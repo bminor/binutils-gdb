@@ -7174,7 +7174,7 @@ gdb_agent_helper_thread (void *arg)
 
 	  do
 	    {
-	      fd = accept (listen_fd, &sockaddr, &tmp);
+	      fd = accept (listen_fd, (struct sockaddr *) &sockaddr, &tmp);
 	    }
 	  /* It seems an ERESTARTSYS can escape out of accept.  */
 	  while (fd == -512 || (fd == -1 && errno == EINTR));
