@@ -1,5 +1,11 @@
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
+	* i386-sol2-tdep.c (i386_sol2_static_transform_name): Move "p" to
+	inner block and make it const.
+	* machoread.c (get_archive_prefix_len): Make "lparen" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (set_breakpoint_condition): Make argument "exp" const.
 	* breakpoint.h (set_breakpoint_condition): Update declaration.
 
