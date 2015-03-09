@@ -1,5 +1,10 @@
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp: Use
+	gdb_test_sequence and gdb_assert.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): Use
 	test messages that don't include the breakpoint address.
 
