@@ -30,6 +30,12 @@
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -51,7 +57,10 @@
 #include <arpa/inet.h>
 #endif
 #include <sys/stat.h>
-#include "gdb_socket.h"
+
+#if USE_WIN32API
+#include <winsock2.h>
+#endif
 
 #if __QNX__
 #include <sys/iomgr.h>
@@ -144,14 +153,14 @@ enable_async_notification (int fd)
 static int
 handle_accept_event (int err, gdb_client_data client_data)
 {
-  union gdb_sockaddr_u sockaddr;
+  struct sockaddr_in sockaddr;
   socklen_t tmp;
 
   if (debug_threads)
     debug_printf ("handling possible accept event\n");
 
-  tmp = sizeof (sockaddr.sa_in);
-  remote_desc = accept (listen_desc, &sockaddr.sa, &tmp);
+  tmp = sizeof (sockaddr);
+  remote_desc = accept (listen_desc, (struct sockaddr *) &sockaddr, &tmp);
   if (remote_desc == -1)
     perror_with_name ("Accept failed");
 
@@ -186,7 +195,7 @@ handle_accept_event (int err, gdb_client_data client_data)
 
   /* Convert IP address to string.  */
   fprintf (stderr, "Remote debugging from host %s\n",
-	   inet_ntoa (sockaddr.sa_in.sin_addr));
+	   inet_ntoa (sockaddr.sin_addr));
 
   enable_async_notification (remote_desc);
 
@@ -215,7 +224,7 @@ remote_prepare (char *name)
   static int winsock_initialized;
 #endif
   int port;
-  union gdb_sockaddr_u sockaddr;
+  struct sockaddr_in sockaddr;
   socklen_t tmp;
   char *port_end;
 
@@ -260,11 +269,11 @@ remote_prepare (char *name)
   setsockopt (listen_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp,
 	      sizeof (tmp));
 
-  sockaddr.sa_in.sin_family = PF_INET;
-  sockaddr.sa_in.sin_port = htons (port);
-  sockaddr.sa_in.sin_addr.s_addr = INADDR_ANY;
+  sockaddr.sin_family = PF_INET;
+  sockaddr.sin_port = htons (port);
+  sockaddr.sin_addr.s_addr = INADDR_ANY;
 
-  if (bind (listen_desc, &sockaddr.sa, sizeof (sockaddr.sa_in))
+  if (bind (listen_desc, (struct sockaddr *) &sockaddr, sizeof (sockaddr))
       || listen (listen_desc, 1))
     perror_with_name ("Can't bind address");
 

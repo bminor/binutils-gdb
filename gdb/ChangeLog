@@ -1,3 +1,12 @@
+2015-03-09  Pedro Alves  <palves@redhat.com>
+
+	Revert:
+	2015-03-07  Pedro Alves  <palves@redhat.com>
+	* common/gdb_socket.h: New file.
+	* ser-tcp.c: Include gdb_socket.h.  Don't include netinet/in.h nor
+	sys/socket.h.
+	(net_open): Use union gdb_sockaddr_u.
+
 2015-03-07  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac (build_warnings): Move -Wmissing-prototypes

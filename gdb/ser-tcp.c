@@ -37,8 +37,6 @@
 
 #include <sys/time.h>
 
-#include "gdb_socket.h"
-
 #ifdef USE_WIN32API
 #include <winsock2.h>
 #ifndef ETIMEDOUT
@@ -47,8 +45,10 @@
 #define close(fd) closesocket (fd)
 #define ioctl ioctlsocket
 #else
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <sys/socket.h>
 #include <netinet/tcp.h>
 #endif
 
@@ -159,7 +159,7 @@ net_open (struct serial *scb, const char *name)
   int n, port, tmp;
   int use_udp;
   struct hostent *hostent;
-  union gdb_sockaddr_u sockaddr;
+  struct sockaddr_in sockaddr;
 #ifdef USE_WIN32API
   u_long ioarg;
 #else
@@ -199,9 +199,9 @@ net_open (struct serial *scb, const char *name)
       return -1;
     }
 
-  sockaddr.sa_in.sin_family = PF_INET;
-  sockaddr.sa_in.sin_port = htons (port);
-  memcpy (&sockaddr.sa_in.sin_addr.s_addr, hostent->h_addr,
+  sockaddr.sin_family = PF_INET;
+  sockaddr.sin_port = htons (port);
+  memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
 	  sizeof (struct in_addr));
 
  retry:
@@ -220,7 +220,7 @@ net_open (struct serial *scb, const char *name)
 
   /* Use Non-blocking connect.  connect() will return 0 if connected
      already.  */
-  n = connect (scb->fd, &sockaddr.sa, sizeof (sockaddr.sa_in));
+  n = connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof (sockaddr));
 
   if (n < 0)
     {
