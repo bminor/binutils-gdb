@@ -1420,15 +1420,21 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 
   elfcpp::Elf_Xword orig_flags = os->flags();
 
-  if (!parameters->incremental()
-      && this->eh_frame_data_->add_ehframe_input_section(object,
-							 symbols,
-							 symbols_size,
-							 symbol_names,
-							 symbol_names_size,
-							 shndx,
-							 reloc_shndx,
-							 reloc_type))
+  Eh_frame::Eh_frame_section_disposition disp =
+      Eh_frame::EH_UNRECOGNIZED_SECTION;
+  if (!parameters->incremental())
+    {
+      disp = this->eh_frame_data_->add_ehframe_input_section(object,
+							     symbols,
+							     symbols_size,
+							     symbol_names,
+							     symbol_names_size,
+							     shndx,
+							     reloc_shndx,
+							     reloc_type);
+    }
+
+  if (disp == Eh_frame::EH_OPTIMIZABLE_SECTION)
     {
       os->update_flags_for_input_section(shdr.get_sh_flags());
 
@@ -1440,33 +1446,47 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 	  os->set_order(ORDER_RELRO);
 	}
 
-      // We found a .eh_frame section we are going to optimize, so now
-      // we can add the set of optimized sections to the output
-      // section.  We need to postpone adding this until we've found a
-      // section we can optimize so that the .eh_frame section in
-      // crtbegin.o winds up at the start of the output section.
-      if (!this->added_eh_frame_data_)
-	{
-	  os->add_output_section_data(this->eh_frame_data_);
-	  this->added_eh_frame_data_ = true;
-	}
       *off = -1;
+      return os;
     }
-  else
-    {
-      // We couldn't handle this .eh_frame section for some reason.
-      // Add it as a normal section.
-      bool saw_sections_clause = this->script_options_->saw_sections_clause();
-      *off = os->add_input_section(this, object, shndx, ".eh_frame", shdr,
-				   reloc_shndx, saw_sections_clause);
-      this->have_added_input_section_ = true;
 
-      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
-	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
-	os->set_order(this->default_section_order(os, false));
-    }
+  if (disp == Eh_frame::EH_END_MARKER_SECTION && !this->added_eh_frame_data_)
+    {
+      // We found the end marker section, so now we can add the set of
+      // optimized sections to the output section.  We need to postpone
+      // adding this until we've found a section we can optimize so that
+      // the .eh_frame section in crtbeginT.o winds up at the start of
+      // the output section.
+      os->add_output_section_data(this->eh_frame_data_);
+      this->added_eh_frame_data_ = true;
+     }
+
+  // We couldn't handle this .eh_frame section for some reason.
+  // Add it as a normal section.
+  bool saw_sections_clause = this->script_options_->saw_sections_clause();
+  *off = os->add_input_section(this, object, shndx, ".eh_frame", shdr,
+			       reloc_shndx, saw_sections_clause);
+  this->have_added_input_section_ = true;
+
+  if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
+      != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
+    os->set_order(this->default_section_order(os, false));
 
   return os;
+}
+
+void
+Layout::finalize_eh_frame_section()
+{
+  // If we never found an end marker section, we need to add the
+  // optimized eh sections to the output section now.
+  if (!parameters->incremental()
+      && this->eh_frame_section_ != NULL
+      && !this->added_eh_frame_data_)
+    {
+      this->eh_frame_section_->add_output_section_data(this->eh_frame_data_);
+      this->added_eh_frame_data_ = true;
+    }
 }
 
 // Create and return the magic .eh_frame section.  Create

@@ -1,3 +1,17 @@
+2015-03-09  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/14675
+	* ehframe.cc (Eh_frame::add_ehframe_input_section): Change return type;
+	return enum indicating whether .eh_frame section is empty, optimizable,
+	unrecognized, or an end marker. Adjust explicit instantiations.
+	* ehframe.h (Eh_frame::Eh_frame_section_disposition): New enum type.
+	(Eh_frame::add_ehframe_input_section): Change return type.
+	* gold.cc (queue_middle_tasks): Call Layout::finalize_eh_frame_section.
+	* layout.cc (Layout::layout_eh_frame): Don't add optimized sections
+	to the .eh_frame output section until we see the end marker.
+	(Layout::finalize_eh_frame_section): New.
+	* layout.h: (Layout::finalize_eh_frame_section): New.
+
 2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* output.cc (Relobj::initialize_input_to_output_map<size>):
