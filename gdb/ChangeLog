@@ -1,5 +1,9 @@
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
+	* xcoffread.c (scan_xcoff_symtab): Make "p" and "q" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
 	* remote-m32r-sdi.c (m32r_open): Make "port_str" const.
 
 2015-03-20  Pedro Alves  <palves@redhat.com>

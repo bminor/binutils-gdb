@@ -2636,7 +2636,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	case C_DECL:
 	case C_STSYM:
 	  {
-	    char *p;
+	    const char *p;
 
 	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		      &ssymnum, objfile);
@@ -2763,7 +2763,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		       Accept either.  */
 		    while (*p && *p != ';' && *p != ',')
 		      {
-			char *q;
+			const char *q;
 
 			/* Check for and handle cretinous dbx symbol name
 			   continuation!  */
