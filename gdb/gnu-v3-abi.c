@@ -39,13 +39,13 @@ static struct gdbarch_data *std_type_info_gdbarch_data;
 static int
 gnuv3_is_vtable_name (const char *name)
 {
-  return strncmp (name, "_ZTV", 4) == 0;
+  return startswith (name, "_ZTV");
 }
 
 static int
 gnuv3_is_operator_name (const char *name)
 {
-  return strncmp (name, "operator", 8) == 0;
+  return startswith (name, "operator");
 }
 
 
@@ -330,7 +330,7 @@ gnuv3_rtti_type (struct value *value,
      should work just as well, and doesn't read target memory.  */
   vtable_symbol_name = MSYMBOL_DEMANGLED_NAME (vtable_symbol);
   if (vtable_symbol_name == NULL
-      || strncmp (vtable_symbol_name, "vtable for ", 11))
+      || !startswith (vtable_symbol_name, "vtable for "))
     {
       warning (_("can't find linker symbol for virtual table for `%s' value"),
 	       TYPE_SAFE_NAME (values_type));
@@ -904,8 +904,8 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
     {
       /* Initialize it just to avoid a GCC false warning.  */
       CORE_ADDR addr = 0;
+      int got_error = 0;
       struct value *vfn;
-      volatile struct gdb_exception ex;
 
       printf_filtered ("[%d]: ", i);
 
@@ -916,13 +916,18 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
       if (gdbarch_vtable_function_descriptors (gdbarch))
 	vfn = value_addr (vfn);
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
 	{
 	  addr = value_as_address (vfn);
 	}
-      if (ex.reason < 0)
-	printf_filtered (_("<error: %s>"), ex.message);
-      else
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  printf_filtered (_("<error: %s>"), ex.message);
+	  got_error = 1;
+	}
+      END_CATCH
+
+      if (!got_error)
 	print_function_pointer_address (opts, gdbarch, addr, gdb_stdout);
       printf_filtered ("\n");
     }

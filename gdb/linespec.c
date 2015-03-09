@@ -454,8 +454,7 @@ is_ada_operator (const char *string)
 
   for (mapping = ada_opname_table;
        mapping->encoded != NULL
-	 && strncmp (mapping->decoded, string,
-		     strlen (mapping->decoded)) != 0; ++mapping)
+	 && !startswith (string, mapping->decoded); ++mapping)
     ;
 
   return mapping->decoded == NULL ? 0 : strlen (mapping->decoded);
@@ -1122,9 +1121,9 @@ find_methods (struct type *t, const char *name,
 	  const char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
 	  char dem_opname[64];
 
-	  if (strncmp (method_name, "__", 2) == 0 ||
-	      strncmp (method_name, "op", 2) == 0 ||
-	      strncmp (method_name, "type", 4) == 0)
+	  if (startswith (method_name, "__") ||
+	      startswith (method_name, "op") ||
+	      startswith (method_name, "type"))
 	    {
 	      if (cplus_demangle_opname (method_name, dem_opname, DMGL_ANSI))
 		method_name = dem_opname;
@@ -1210,7 +1209,7 @@ find_toplevel_string (const char *haystack, const char *needle)
       if (s != NULL)
 	{
 	  /* Found first char in HAYSTACK;  check rest of string.  */
-	  if (strncmp (s, needle, strlen (needle)) == 0)
+	  if (startswith (s, needle))
 	    return s;
 
 	  /* Didn't find it; loop over HAYSTACK, looking for the next
@@ -2154,7 +2153,7 @@ parse_linespec (linespec_parser *parser, const char **argptr)
 {
   linespec_token token;
   struct symtabs_and_lines values;
-  volatile struct gdb_exception file_exception;
+  struct gdb_exception file_exception = exception_none;
   struct cleanup *cleanup;
 
   /* A special case to start.  It has become quite popular for
@@ -2182,7 +2181,6 @@ parse_linespec (linespec_parser *parser, const char **argptr)
 
   parser->lexer.saved_arg = *argptr;
   parser->lexer.stream = argptr;
-  file_exception.reason = 0;
 
   /* Initialize the default symtab and line offset.  */
   initialize_defaults (&PARSER_STATE (parser)->default_symtab,
@@ -2268,11 +2266,16 @@ parse_linespec (linespec_parser *parser, const char **argptr)
       user_filename = copy_token_string (token);
 
       /* Check if the input is a filename.  */
-      TRY_CATCH (file_exception, RETURN_MASK_ERROR)
+      TRY
 	{
 	  PARSER_RESULT (parser)->file_symtabs
 	    = symtabs_from_filename (user_filename);
 	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  file_exception = ex;
+	}
+      END_CATCH
 
       if (file_exception.reason >= 0)
 	{
@@ -3103,7 +3106,6 @@ find_linespec_symbols (struct linespec_state *state,
   struct cleanup *cleanup;
   char *canon;
   const char *lookup_name;
-  volatile struct gdb_exception except;
 
   cleanup = demangle_for_lookup (name, state->language->la_language,
 				 &lookup_name);
@@ -3191,7 +3193,7 @@ find_linespec_symbols (struct linespec_state *state,
       if (!VEC_empty (symbolp, classes))
 	{
 	  /* Now locate a list of suitable methods named METHOD.  */
-	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      find_method (state, file_symtabs, klass, method, classes,
 			   symbols, minsyms);
@@ -3199,8 +3201,12 @@ find_linespec_symbols (struct linespec_state *state,
 
 	  /* If successful, we're done.  If NOT_FOUND_ERROR
 	     was not thrown, rethrow the exception that we did get.  */
-	  if (except.reason < 0 && except.error != NOT_FOUND_ERROR)
-	    throw_exception (except);
+	  CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      if (except.error != NOT_FOUND_ERROR)
+		throw_exception (except);
+	    }
+	  END_CATCH
 	}
     }
 

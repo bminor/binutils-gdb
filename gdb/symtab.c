@@ -535,7 +535,7 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
     || (newname && strcmp (field_name, newname) == 0);
 
   if (!is_destructor)
-    is_destructor = (strncmp (physname, "__dt", 4) == 0);
+    is_destructor = (startswith (physname, "__dt"));
 
   if (is_destructor || is_full_physname_constructor)
     {
@@ -3950,7 +3950,7 @@ static const char *
 operator_chars (const char *p, const char **end)
 {
   *end = "";
-  if (strncmp (p, "operator", 8))
+  if (!startswith (p, "operator"))
     return *end;
   p += 8;
 
@@ -5500,21 +5500,21 @@ default_make_symbol_completion_list_break_on (const char *text,
 					      enum type_code code)
 {
   struct cleanup *back_to;
-  volatile struct gdb_exception except;
 
   return_val = NULL;
   back_to = make_cleanup (do_free_completion_list, &return_val);
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       default_make_symbol_completion_list_break_on_1 (text, word,
 						      break_on, code);
     }
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
 	throw_exception (except);
     }
+  END_CATCH
 
   discard_cleanups (back_to);
   return return_val;
@@ -6003,7 +6003,7 @@ producer_is_realview (const char *producer)
     return 0;
 
   for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
-    if (strncmp (producer, arm_idents[i], strlen (arm_idents[i])) == 0)
+    if (startswith (producer, arm_idents[i]))
       return 1;
 
   return 0;

@@ -549,11 +549,10 @@ ftrace_update_insns (struct btrace_function *bfun,
 static enum btrace_insn_class
 ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  volatile struct gdb_exception error;
   enum btrace_insn_class iclass;
 
   iclass = BTRACE_INSN_OTHER;
-  TRY_CATCH (error, RETURN_MASK_ERROR)
+  TRY
     {
       if (gdbarch_insn_is_call (gdbarch, pc))
 	iclass = BTRACE_INSN_CALL;
@@ -562,6 +561,10 @@ ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
       else if (gdbarch_insn_is_jump (gdbarch, pc))
 	iclass = BTRACE_INSN_JUMP;
     }
+  CATCH (error, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH
 
   return iclass;
 }
@@ -598,7 +601,6 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 
       for (;;)
 	{
-	  volatile struct gdb_exception error;
 	  struct btrace_insn insn;
 	  int size;
 
@@ -628,8 +630,14 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	    level = min (level, end->level);
 
 	  size = 0;
-	  TRY_CATCH (error, RETURN_MASK_ERROR)
-	    size = gdb_insn_length (gdbarch, pc);
+	  TRY
+	    {
+	      size = gdb_insn_length (gdbarch, pc);
+	    }
+	  CATCH (error, RETURN_MASK_ERROR)
+	    {
+	    }
+	  END_CATCH
 
 	  insn.pc = pc;
 	  insn.size = size;

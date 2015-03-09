@@ -1157,8 +1157,8 @@ amd64_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
       if (symname)
 	{
-	  if (strncmp (symname, "__imp_", 6) == 0
-	      || strncmp (symname, "_imp_", 5) == 0)
+	  if (startswith (symname, "__imp_")
+	      || startswith (symname, "_imp_"))
 	    destination
 	      = read_memory_unsigned_integer (indirect_addr, 8, byte_order);
 	}

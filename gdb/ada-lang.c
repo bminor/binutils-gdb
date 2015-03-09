@@ -596,7 +596,7 @@ field_name_match (const char *field_name, const char *target)
   return
     (strncmp (field_name, target, len) == 0
      && (field_name[len] == '\0'
-         || (strncmp (field_name + len, "___", 3) == 0
+         || (startswith (field_name + len, "___")
              && strcmp (field_name + strlen (field_name) - 6,
                         "___XVN") != 0)));
 }
@@ -1003,8 +1003,7 @@ ada_encode (const char *decoded)
 
           for (mapping = ada_opname_table;
                mapping->encoded != NULL
-               && strncmp (mapping->decoded, p,
-                           strlen (mapping->decoded)) != 0; mapping += 1)
+               && !startswith (p, mapping->decoded); mapping += 1)
             ;
           if (mapping->encoded == NULL)
             error (_("invalid Ada operator name: %s"), p);
@@ -1085,9 +1084,9 @@ ada_remove_trailing_digits (const char *encoded, int *len)
         *len = i;
       else if (i >= 0 && encoded[i] == '$')
         *len = i;
-      else if (i >= 2 && strncmp (encoded + i - 2, "___", 3) == 0)
+      else if (i >= 2 && startswith (encoded + i - 2, "___"))
         *len = i - 2;
-      else if (i >= 1 && strncmp (encoded + i - 1, "__", 2) == 0)
+      else if (i >= 1 && startswith (encoded + i - 1, "__"))
         *len = i - 1;
     }
 }
@@ -1156,7 +1155,7 @@ ada_decode (const char *encoded)
   /* The name of the Ada main procedure starts with "_ada_".
      This prefix is not part of the decoded name, so skip this part
      if we see this prefix.  */
-  if (strncmp (encoded, "_ada_", 5) == 0)
+  if (startswith (encoded, "_ada_"))
     encoded += 5;
 
   /* If the name starts with '_', then it is not a properly encoded
@@ -1187,20 +1186,20 @@ ada_decode (const char *encoded)
      is for the body of a task, but that information does not actually
      appear in the decoded name.  */
 
-  if (len0 > 3 && strncmp (encoded + len0 - 3, "TKB", 3) == 0)
+  if (len0 > 3 && startswith (encoded + len0 - 3, "TKB"))
     len0 -= 3;
 
   /* Remove any trailing TB suffix.  The TB suffix is slightly different
      from the TKB suffix because it is used for non-anonymous task
      bodies.  */
 
-  if (len0 > 2 && strncmp (encoded + len0 - 2, "TB", 2) == 0)
+  if (len0 > 2 && startswith (encoded + len0 - 2, "TB"))
     len0 -= 2;
 
   /* Remove trailing "B" suffixes.  */
   /* FIXME: brobecker/2006-04-19: Not sure what this are used for...  */
 
-  if (len0 > 1 && strncmp (encoded + len0 - 1, "B", 1) == 0)
+  if (len0 > 1 && startswith (encoded + len0 - 1, "B"))
     len0 -= 1;
 
   /* Make decoded big enough for possible expansion by operator name.  */
@@ -1258,7 +1257,7 @@ ada_decode (const char *encoded)
       /* Replace "TK__" with "__", which will eventually be translated
          into "." (just below).  */
 
-      if (i < len0 - 4 && strncmp (encoded + i, "TK__", 4) == 0)
+      if (i < len0 - 4 && startswith (encoded + i, "TK__"))
         i += 2;
 
       /* Replace "__B_{DIGITS}+__" sequences by "__", which will eventually
@@ -1467,7 +1466,7 @@ match_name (const char *sym_name, const char *name, int wild)
 
       return (strncmp (sym_name, name, len_name) == 0
               && is_name_suffix (sym_name + len_name))
-        || (strncmp (sym_name, "_ada_", 5) == 0
+        || (startswith (sym_name, "_ada_")
             && strncmp (sym_name + 5, name, len_name) == 0
             && is_name_suffix (sym_name + len_name + 5));
     }
@@ -4604,7 +4603,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
           TYPE_CODE (type0) == TYPE_CODE (type1)
           && (equiv_types (type0, type1)
               || (len0 < strlen (name1) && strncmp (name0, name1, len0) == 0
-                  && strncmp (name1 + len0, "___XV", 5) == 0));
+                  && startswith (name1 + len0, "___XV")));
       }
     case LOC_CONST:
       return SYMBOL_VALUE (sym0) == SYMBOL_VALUE (sym1)
@@ -4700,7 +4699,7 @@ ada_lookup_simple_minsym (const char *name)
      using, for instance, Standard.Constraint_Error when Constraint_Error
      is ambiguous (due to the user defining its own Constraint_Error
      entity inside its program).  */
-  if (strncmp (name, "standard__", sizeof ("standard__") - 1) == 0)
+  if (startswith (name, "standard__"))
     name += sizeof ("standard__") - 1;
 
   ALL_MSYMBOLS (objfile, msymbol)
@@ -5028,11 +5027,11 @@ old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
      a library-level function.  Strip this prefix before doing the
      comparison, as the encoding for the renaming does not contain
      this prefix.  */
-  if (strncmp (function_name, "_ada_", 5) == 0)
+  if (startswith (function_name, "_ada_"))
     function_name += 5;
 
   {
-    int is_invisible = strncmp (function_name, scope, strlen (scope)) != 0;
+    int is_invisible = !startswith (function_name, scope);
 
     do_cleanups (old_chain);
     return is_invisible;
@@ -5430,7 +5429,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
      using, for instance, Standard.Constraint_Error when Constraint_Error
      is ambiguous (due to the user defining its own Constraint_Error
      entity inside its program).  */
-  if (strncmp (name0, "standard__", sizeof ("standard__") - 1) == 0)
+  if (startswith (name0, "standard__"))
     {
       block = NULL;
       name = name0 + sizeof ("standard__") - 1;
@@ -5830,7 +5829,7 @@ advance_wild_match (const char **namep, const char *name0, int target0)
 	  if ((t1 >= 'a' && t1 <= 'z') || (t1 >= '0' && t1 <= '9'))
 	    {
 	      name += 1;
-	      if (name == name0 + 5 && strncmp (name0, "_ada", 4) == 0)
+	      if (name == name0 + 5 && startswith (name0, "_ada"))
 		break;
 	      else
 		name += 1;
@@ -5984,7 +5983,7 @@ ada_add_block_symbols (struct obstack *obstackp,
             cmp = (int) '_' - (int) SYMBOL_LINKAGE_NAME (sym)[0];
             if (cmp == 0)
               {
-                cmp = strncmp ("_ada_", SYMBOL_LINKAGE_NAME (sym), 5);
+                cmp = !startswith (SYMBOL_LINKAGE_NAME (sym), "_ada_");
                 if (cmp == 0)
                   cmp = strncmp (name, SYMBOL_LINKAGE_NAME (sym) + 5,
                                  name_len);
@@ -6371,7 +6370,7 @@ ada_is_ignored_field (struct type *type, int field_num)
        for tagged types, and it contains the components inherited from
        the parent type.  This field should not be printed as is, but
        should not be ignored either.  */
-    if (name[0] == '_' && strncmp (name, "_parent", 7) != 0)
+    if (name[0] == '_' && !startswith (name, "_parent"))
       return 1;
   }
 
@@ -6480,7 +6479,6 @@ type_from_tag (struct value *tag)
 struct value *
 ada_tag_value_at_base_address (struct value *obj)
 {
-  volatile struct gdb_exception e;
   struct value *val;
   LONGEST offset_to_top = 0;
   struct type *ptr_type, *obj_type;
@@ -6515,13 +6513,16 @@ ada_tag_value_at_base_address (struct value *obj)
      see ada_tag_name for more details.  We do not print the error
      message for the same reason.  */
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       offset_to_top = value_as_long (value_ind (value_ptradd (val, -2)));
     }
 
-  if (e.reason < 0)
-    return obj;
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      return obj;
+    }
+  END_CATCH
 
   /* If offset is null, nothing to do.  */
 
@@ -6633,7 +6634,6 @@ ada_tag_name_from_tsd (struct value *tsd)
 const char *
 ada_tag_name (struct value *tag)
 {
-  volatile struct gdb_exception e;
   char *name = NULL;
 
   if (!ada_is_tag_type (value_type (tag)))
@@ -6648,13 +6648,17 @@ ada_tag_name (struct value *tag)
      We also do not print the error message either (which often is very
      low-level (Eg: "Cannot read memory at 0x[...]"), but instead let
      the caller print a more meaningful message if necessary.  */
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       struct value *tsd = ada_get_tsd_from_tag (tag);
 
       if (tsd != NULL)
 	name = ada_tag_name_from_tsd (tsd);
     }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH
 
   return name;
 }
@@ -6698,8 +6702,8 @@ ada_is_parent_field (struct type *type, int field_num)
   const char *name = TYPE_FIELD_NAME (ada_check_typedef (type), field_num);
 
   return (name != NULL
-          && (strncmp (name, "PARENT", 6) == 0
-              || strncmp (name, "_parent", 7) == 0));
+          && (startswith (name, "PARENT")
+              || startswith (name, "_parent")));
 }
 
 /* True iff field number FIELD_NUM of structure type TYPE is a
@@ -6714,9 +6718,9 @@ ada_is_wrapper_field (struct type *type, int field_num)
   const char *name = TYPE_FIELD_NAME (type, field_num);
 
   return (name != NULL
-          && (strncmp (name, "PARENT", 6) == 0
+          && (startswith (name, "PARENT")
               || strcmp (name, "REP") == 0
-              || strncmp (name, "_parent", 7) == 0
+              || startswith (name, "_parent")
               || name[0] == 'S' || name[0] == 'R' || name[0] == 'O'));
 }
 
@@ -6787,7 +6791,7 @@ ada_variant_discrim_name (struct type *type0)
   for (discrim_end = name + strlen (name) - 6; discrim_end != name;
        discrim_end -= 1)
     {
-      if (strncmp (discrim_end, "___XVN", 6) == 0)
+      if (startswith (discrim_end, "___XVN"))
         break;
     }
   if (discrim_end == name)
@@ -6799,7 +6803,7 @@ ada_variant_discrim_name (struct type *type0)
       if (discrim_start == name + 1)
         return "";
       if ((discrim_start > name + 3
-           && strncmp (discrim_start - 3, "___", 3) == 0)
+           && startswith (discrim_start - 3, "___"))
           || discrim_start[-1] == '.')
         break;
     }
@@ -7551,7 +7555,7 @@ field_alignment (struct type *type, int f)
   else
     align_offset = len - 1;
 
-  if (align_offset < 7 || strncmp ("___XV", name + align_offset - 6, 5) != 0)
+  if (align_offset < 7 || !startswith (name + align_offset - 6, "___XV"))
     return TARGET_CHAR_BIT;
 
   return atoi (name + align_offset) * TARGET_CHAR_BIT;
@@ -11818,19 +11822,19 @@ static CORE_ADDR
 ada_exception_name_addr (enum ada_exception_catchpoint_kind ex,
                          struct breakpoint *b)
 {
-  volatile struct gdb_exception e;
   CORE_ADDR result = 0;
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       result = ada_exception_name_addr_1 (ex, b);
     }
 
-  if (e.reason < 0)
+  CATCH (e, RETURN_MASK_ERROR)
     {
       warning (_("failed to get exception name: %s"), e.message);
       return 0;
     }
+  END_CATCH
 
   return result;
 }
@@ -11930,16 +11934,15 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 
       if (!bl->shlib_disabled)
 	{
-	  volatile struct gdb_exception e;
 	  const char *s;
 
 	  s = cond_string;
-	  TRY_CATCH (e, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      exp = parse_exp_1 (&s, bl->address,
 				 block_for_pc (bl->address), 0);
 	    }
-	  if (e.reason < 0)
+	  CATCH (e, RETURN_MASK_ERROR)
 	    {
 	      warning (_("failed to reevaluate internal exception condition "
 			 "for catchpoint %d: %s"),
@@ -11952,6 +11955,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 		 to NULL.  */
 	      exp = NULL;
 	    }
+	  END_CATCH
 	}
 
       ada_loc->excep_cond_expr = exp;
@@ -12015,7 +12019,6 @@ should_stop_exception (const struct bp_location *bl)
   struct ada_catchpoint *c = (struct ada_catchpoint *) bl->owner;
   const struct ada_catchpoint_location *ada_loc
     = (const struct ada_catchpoint_location *) bl;
-  volatile struct gdb_exception ex;
   int stop;
 
   /* With no specific exception, should always stop.  */
@@ -12030,7 +12033,7 @@ should_stop_exception (const struct bp_location *bl)
     }
 
   stop = 1;
-  TRY_CATCH (ex, RETURN_MASK_ALL)
+  TRY
     {
       struct value *mark;
 
@@ -12038,9 +12041,13 @@ should_stop_exception (const struct bp_location *bl)
       stop = value_true (evaluate_expression (ada_loc->excep_cond_expr));
       value_free_to_mark (mark);
     }
-  if (ex.reason < 0)
-    exception_fprintf (gdb_stderr, ex,
-		       _("Error in testing exception condition:\n"));
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_fprintf (gdb_stderr, ex,
+			 _("Error in testing exception condition:\n"));
+    }
+  END_CATCH
+
   return stop;
 }
 
@@ -12475,7 +12482,7 @@ catch_ada_exception_command_split (char *args,
   /* Check to see if we have a condition.  */
 
   args = skip_spaces (args);
-  if (strncmp (args, "if", 2) == 0
+  if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
@@ -12736,7 +12743,7 @@ catch_ada_assert_command_split (char *args, char **cond_string)
   args = skip_spaces (args);
 
   /* Check whether a condition was provided.  */
-  if (strncmp (args, "if", 2) == 0
+  if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;

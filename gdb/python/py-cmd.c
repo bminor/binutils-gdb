@@ -537,7 +537,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   int cmdtype;
   int completetype = -1;
   char *docstring = NULL;
-  volatile struct gdb_exception except;
   struct cmd_list_element **cmd_list;
   char *cmd_name, *pfx_name;
   static char *keywords[] = { "name", "command_class", "completer_class",
@@ -637,7 +636,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
   Py_INCREF (self);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       struct cmd_list_element *cmd;
 
@@ -668,7 +667,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	set_cmd_completer_handle_brkchars (cmd,
 					   cmdpy_completer_handle_brkchars);
     }
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ALL)
     {
       xfree (cmd_name);
       xfree (docstring);
@@ -679,6 +678,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 		    "%s", except.message);
       return -1;
     }
+  END_CATCH
+
   return 0;
 }
 

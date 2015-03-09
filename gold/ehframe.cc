@@ -567,7 +567,7 @@ Eh_frame::skip_leb128(const unsigned char** pp, const unsigned char* pend)
 // section.
 
 template<int size, bool big_endian>
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section(
     Sized_relobj_file<size, big_endian>* object,
     const unsigned char* symbols,
@@ -584,7 +584,7 @@ Eh_frame::add_ehframe_input_section(
 							    &contents_len,
 							    false);
   if (contents_len == 0)
-    return false;
+    return EH_EMPTY_SECTION;
 
   // If this is the marker section for the end of the data, then
   // return false to force it to be handled as an ordinary input
@@ -592,7 +592,7 @@ Eh_frame::add_ehframe_input_section(
   // of unrecognized .eh_frame sections.
   if (contents_len == 4
       && elfcpp::Swap<32, big_endian>::readval(pcontents) == 0)
-    return false;
+    return EH_END_MARKER_SECTION;
 
   New_cies new_cies;
   if (!this->do_add_ehframe_input_section(object, symbols, symbols_size,
@@ -609,7 +609,7 @@ Eh_frame::add_ehframe_input_section(
 	   ++p)
 	delete p->first;
 
-      return false;
+      return EH_UNRECOGNIZED_SECTION;
     }
 
   // Now that we know we are using this section, record any new CIEs
@@ -624,7 +624,7 @@ Eh_frame::add_ehframe_input_section(
 	this->unmergeable_cie_offsets_.push_back(p->first);
     }
 
-  return true;
+  return EH_OPTIMIZABLE_SECTION;
 }
 
 // The bulk of the implementation of add_ehframe_input_section.
@@ -1206,7 +1206,7 @@ Eh_frame::do_sized_write(unsigned char* oview)
 
 #ifdef HAVE_TARGET_32_LITTLE
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<32, false>(
     Sized_relobj_file<32, false>* object,
     const unsigned char* symbols,
@@ -1220,7 +1220,7 @@ Eh_frame::add_ehframe_input_section<32, false>(
 
 #ifdef HAVE_TARGET_32_BIG
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<32, true>(
     Sized_relobj_file<32, true>* object,
     const unsigned char* symbols,
@@ -1234,7 +1234,7 @@ Eh_frame::add_ehframe_input_section<32, true>(
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<64, false>(
     Sized_relobj_file<64, false>* object,
     const unsigned char* symbols,
@@ -1248,7 +1248,7 @@ Eh_frame::add_ehframe_input_section<64, false>(
 
 #ifdef HAVE_TARGET_64_BIG
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<64, true>(
     Sized_relobj_file<64, true>* object,
     const unsigned char* symbols,

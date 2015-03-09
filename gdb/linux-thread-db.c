@@ -611,14 +611,13 @@ enable_thread_event_reporting (void)
 static int
 thread_db_find_new_threads_silently (ptid_t ptid)
 {
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       thread_db_find_new_threads_2 (ptid, 1);
     }
 
-  if (except.reason < 0)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       if (libthread_db_debug)
 	exception_fprintf (gdb_stdlog, except,
@@ -648,6 +647,8 @@ thread_db_find_new_threads_silently (ptid_t ptid)
 	  return 1;
 	}
     }
+  END_CATCH
+
   return 0;
 }
 
@@ -1681,7 +1682,6 @@ static int
 find_new_threads_once (struct thread_db_info *info, int iteration,
 		       td_err_e *errp)
 {
-  volatile struct gdb_exception except;
   struct callback_data data;
   td_err_e err = TD_ERR;
 
@@ -1691,7 +1691,7 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
   /* See comment in thread_db_update_thread_list.  */
   gdb_assert (!target_has_execution || thread_db_use_events ());
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       /* Iterate over all user-space threads to discover new threads.  */
       err = info->td_ta_thr_iter_p (info->thread_agent,
@@ -1702,13 +1702,18 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
 				    TD_SIGNO_MASK,
 				    TD_THR_ANY_USER_FLAGS);
     }
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      if (libthread_db_debug)
+	{
+	  exception_fprintf (gdb_stdlog, except,
+			     "Warning: find_new_threads_once: ");
+	}
+    }
+  END_CATCH
 
   if (libthread_db_debug)
     {
-      if (except.reason < 0)
-	exception_fprintf (gdb_stdlog, except,
-			   "Warning: find_new_threads_once: ");
-
       fprintf_unfiltered (gdb_stdlog,
 			  _("Found %d new threads in iteration %d.\n"),
 			  data.new_threads, iteration);

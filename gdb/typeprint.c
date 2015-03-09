@@ -372,18 +372,20 @@ type_to_string (struct type *type)
   char *s = NULL;
   struct ui_file *stb;
   struct cleanup *old_chain;
-  volatile struct gdb_exception except;
 
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       type_print (type, "", stb, -1);
       s = ui_file_xstrdup (stb, NULL);
     }
-  if (except.reason < 0)
-    s = NULL;
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      s = NULL;
+    }
+  END_CATCH
 
   do_cleanups (old_chain);
 

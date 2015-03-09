@@ -172,7 +172,7 @@ do_rmdir (void *arg)
   char *zap;
   int wstat;
 
-  gdb_assert (strncmp (dir, TMP_PREFIX, strlen (TMP_PREFIX)) == 0);
+  gdb_assert (startswith (dir, TMP_PREFIX));
   zap = concat ("rm -rf ", dir, (char *) NULL);
   wstat = system (zap);
   if (wstat == -1 || !WIFEXITED (wstat) || WEXITSTATUS (wstat) != 0)
@@ -313,7 +313,7 @@ get_selected_pc_producer_options (void)
   const char *cs;
 
   if (symtab == NULL || symtab->producer == NULL
-      || strncmp (symtab->producer, "GNU ", strlen ("GNU ")) != 0)
+      || !startswith (symtab->producer, "GNU "))
     return NULL;
 
   cs = symtab->producer;

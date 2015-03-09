@@ -1,3 +1,141 @@
+2015-03-09  Pedro Alves  <palves@redhat.com>
+
+	Revert:
+	2015-03-07  Pedro Alves  <palves@redhat.com>
+	* common/gdb_socket.h: New file.
+	* ser-tcp.c: Include gdb_socket.h.  Don't include netinet/in.h nor
+	sys/socket.h.
+	(net_open): Use union gdb_sockaddr_u.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (build_warnings): Move -Wmissing-prototypes
+	-Wdeclaration-after-statement -Wmissing-parameter-type
+	-Wold-style-declaration -Wold-style-definition to the C-specific
+	set.
+	* configure: Regenerate.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_socket.h: New file.
+	* ser-tcp.c: Include gdb_socket.h.  Don't include netinet/in.h nor
+	sys/socket.h.
+	(net_open): Use union gdb_sockaddr_u.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c [!__cplusplus] (enum catcher_state)
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):
+	Don't define.
+	[__cplusplus] (try_scope_depth): New global.
+	[__cplusplus] (exception_try_scope_entry)
+	(exception_try_scope_exit, gdb_exception_sliced_copy)
+	(exception_rethrow): New functions.
+	(throw_exception): In C++ mode, throw
+	gdb_exception_RETURN_MASK_QUIT for RETURN_QUIT and
+	gdb_exception_RETURN_MASK_ERROR for RETURN_ERROR.
+	(throw_it): In C++ mode, use try_scope_depth.
+	* common/common-exceptions.h [!__cplusplus]
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):
+	Don't declare.
+	[__cplusplus] (exception_try_scope_entry)
+	(exception_try_scope_exit, exception_rethrow): Declare.
+	[__cplusplus] (struct exception_try_scope): New struct.
+	[__cplusplus] (TRY, CATCH, END_CATCH): Reimplement on top of real
+	C++ exceptions.
+	(struct gdb_exception_RETURN_MASK_ALL)
+	(struct gdb_exception_RETURN_MASK_ERROR)
+	(struct gdb_exception_RETURN_MASK_QUIT): New types.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* main.c (handle_command_errors): Remove volatile qualifier from
+	parameter.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (save_breakpoints): Adjust to avoid code between
+	TRY and CATCH.
+	* gdbtypes.c (safe_parse_type): Remove empty line.
+	(types_deeply_equal):
+	* guile/scm-frame.c (gdbscm_frame_name):
+	* linux-thread-db.c (find_new_threads_once):
+	* python/py-breakpoint.c (bppy_get_commands):
+	* record-btrace.c (record_btrace_insert_breakpoint)
+	(record_btrace_remove_breakpoint, record_btrace_start_replaying)
+	(record_btrace_start_replaying): Adjust to avoid code between TRY
+	and CATCH.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (struct catcher) <exception>: No
+	longer a pointer to volatile exception.  Now an exception value.
+	<mask>: Delete field.
+	(exceptions_state_mc_init): Remove all parameters.  Adjust.
+	(exceptions_state_mc): No longer pop the catcher here.
+	(exceptions_state_mc_catch): New function.
+	(throw_exception): Adjust.
+	* common/common-exceptions.h (exceptions_state_mc_init): Remove
+	all parameters.
+	(exceptions_state_mc_catch): Declare.
+	(TRY_CATCH): Rename to ...
+	(TRY): ... this.  Remove EXCEPTION and MASK parameters.
+	(CATCH, END_CATCH): New.
+	All callers adjusted.
+
+2015-03-07  Tom Tromey  <tromey@redhat.com>
+
+	* top.c (quit_force): Inline and delete DO_TRY, DO_PRINT_EX.
+
+2015-03-07  Pedro Alves  <palves@redhat.com>
+
+	* amd64-tdep.c (amd64_frame_cache, amd64_sigtramp_frame_cache)
+	(amd64_epilogue_frame_cache): Normal exception handling code.
+	* break-catch-throw.c (check_status_exception_catchpoint)
+	(re_set_exception_catchpoint): Ditto.
+	* cli/cli-interp.c (safe_execute_command):
+	* cli/cli-script.c (script_from_file): Ditto.
+	* compile/compile-c-symbols.c (generate_c_for_for_one_variable):
+	Ditto.
+	* compile/compile-object-run.c (compile_object_run): Ditto.
+	* cp-abi.c (baseclass_offset): Ditto.
+	* cp-valprint.c (cp_print_value): Ditto.
+	* exceptions.c (catch_exceptions_with_msg):
+	* frame-unwind.c (frame_unwind_try_unwinder): Ditto.
+	* frame.c (get_frame_address_in_block_if_available): Ditto.
+	* i386-tdep.c (i386_frame_cache, i386_epilogue_frame_cache)
+	(i386_sigtramp_frame_cache): Ditto.
+	* infcmd.c (post_create_inferior): Ditto.
+	* linespec.c (parse_linespec, find_linespec_symbols):
+	* p-valprint.c (pascal_object_print_value): Ditto.
+	* parse.c (parse_expression_for_completion): Ditto.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Ditto.
+	* remote.c (remote_get_noisy_reply): Ditto.
+	* s390-linux-tdep.c (s390_frame_unwind_cache): Ditto.
+	* solib-svr4.c (solib_svr4_r_map): Ditto.
+
+2015-03-06  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-utils.h (startswith): New inline function.
+	All places where this logic was used updated to use the above.
+
+2015-03-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18002
+	* mem-break.c (default_memory_insert_breakpoint): Set shadow_len
+	after reading the breakpoint's shadow memory.
+
+2015-03-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppabsd-nat.c: Remove file.
+	* hppaobsd-nat.c: New file.
+	* Makefile.in (ALLDEPFILES): Remove hppabsd-nat.c.  Add
+	hppaobsd-nat.c.
+	* config/pa/obsd.mh (NATDEPFILES): Replace hppabsd-nat.o with
+	hppaobsd-nat.o.
+
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
 	* target.h (struct target_ops) <to_decr_pc_after_break>: Delete.

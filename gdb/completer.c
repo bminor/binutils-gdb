@@ -395,18 +395,21 @@ expression_completer (struct cmd_list_element *ignore,
   struct type *type = NULL;
   char *fieldname;
   const char *p;
-  volatile struct gdb_exception except;
   enum type_code code = TYPE_CODE_UNDEF;
 
   /* Perform a tentative parse of the expression, to see whether a
      field completion is required.  */
   fieldname = NULL;
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       type = parse_expression_for_completion (text, &fieldname, &code);
     }
-  if (except.reason < 0)
-    return NULL;
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      return NULL;
+    }
+  END_CATCH
+
   if (fieldname && type)
     {
       for (;;)

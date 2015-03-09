@@ -96,7 +96,6 @@ stpy_convert_to_value  (PyObject *self, PyObject *args)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
   struct value *val = NULL;
-  volatile struct gdb_exception except;
 
   if (self_string->address == 0)
     {
@@ -105,11 +104,15 @@ stpy_convert_to_value  (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       val = value_at_lazy (self_string->type, self_string->address);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
 
   return value_to_value_object (val);
 }

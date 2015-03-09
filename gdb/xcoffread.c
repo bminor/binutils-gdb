@@ -2839,7 +2839,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		   loader-generated definitions.  Keeping the global
 		   symbols leads to "in psymbols but not in symbols"
 		   errors.  */
-		if (strncmp (namestring, "@FIX", 4) == 0)
+		if (startswith (namestring, "@FIX"))
 		  continue;
 
 		symbol.n_value += ANOFFSET (objfile->section_offsets,

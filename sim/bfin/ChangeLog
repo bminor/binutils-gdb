@@ -1,3 +1,10 @@
+2015-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/10143
+	* Makefile.in ($(srcdir)/linux-fixed-code.h): Specify the asm input
+	directly rather than use $<.  Move the file name to the end of the
+	sed command to be POSIX compliant.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

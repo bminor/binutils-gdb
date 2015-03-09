@@ -5903,9 +5903,9 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	break;
 
       len = sep - annex;
-      if (len == 5 && strncmp (annex, "start", 5) == 0)
+      if (len == 5 && startswith (annex, "start"))
 	addrp = &lm_addr;
-      else if (len == 4 && strncmp (annex, "prev", 4) == 0)
+      else if (len == 4 && startswith (annex, "prev"))
 	addrp = &lm_prev;
       else
 	{

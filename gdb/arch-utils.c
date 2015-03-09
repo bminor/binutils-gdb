@@ -661,7 +661,7 @@ initialize_current_architecture (void)
       chp = strchr (target_name, '-');
       if (chp != NULL
 	  && chp - 2 >= target_name
-	  && strncmp (chp - 2, "el", 2) == 0)
+	  && startswith (chp - 2, "el"))
 	default_byte_order = BFD_ENDIAN_LITTLE;
     }
   if (default_byte_order == BFD_ENDIAN_UNKNOWN)

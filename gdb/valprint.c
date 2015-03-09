@@ -740,7 +740,6 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	   const struct value_print_options *options,
 	   const struct language_defn *language)
 {
-  volatile struct gdb_exception except;
   int ret = 0;
   struct value_print_options local_opts = *options;
   struct type *real_type = check_typedef (type);
@@ -782,14 +781,17 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       return;
     }
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       language->la_val_print (type, valaddr, embedded_offset, address,
 			      stream, recurse, val,
 			      &local_opts);
     }
-  if (except.reason < 0)
-    fprintf_filtered (stream, _("<error reading variable>"));
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      fprintf_filtered (stream, _("<error reading variable>"));
+    }
+  END_CATCH
 }
 
 /* Check whether the value VAL is printable.  Return 1 if it is;

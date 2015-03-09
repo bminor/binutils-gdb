@@ -1992,9 +1992,9 @@ search_struct_method (const char *name, struct value **arg1p,
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
 
       /* FIXME!  May need to check for ARM demangling here.  */
-      if (strncmp (t_field_name, "__", 2) == 0 ||
-	  strncmp (t_field_name, "op", 2) == 0 ||
-	  strncmp (t_field_name, "type", 4) == 0)
+      if (startswith (t_field_name, "__") ||
+	  startswith (t_field_name, "op") ||
+	  startswith (t_field_name, "type"))
 	{
 	  if (cplus_demangle_opname (t_field_name, dem_opname, DMGL_ANSI))
 	    t_field_name = dem_opname;
@@ -3386,9 +3386,9 @@ value_struct_elt_for_reference (struct type *domain, int offset,
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (t, i);
       char dem_opname[64];
 
-      if (strncmp (t_field_name, "__", 2) == 0 
-	  || strncmp (t_field_name, "op", 2) == 0 
-	  || strncmp (t_field_name, "type", 4) == 0)
+      if (startswith (t_field_name, "__") 
+	  || startswith (t_field_name, "op") 
+	  || startswith (t_field_name, "type"))
 	{
 	  if (cplus_demangle_opname (t_field_name, 
 				     dem_opname, DMGL_ANSI))
@@ -3601,13 +3601,12 @@ value_rtti_indirect_type (struct value *v, int *full,
     target = coerce_ref (v);
   else if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
-      volatile struct gdb_exception except;
 
-      TRY_CATCH (except, RETURN_MASK_ERROR)
+      TRY
         {
 	  target = value_ind (v);
         }
-      if (except.reason < 0)
+      CATCH (except, RETURN_MASK_ERROR)
 	{
 	  if (except.error == MEMORY_ERROR)
 	    {
@@ -3618,6 +3617,7 @@ value_rtti_indirect_type (struct value *v, int *full,
 	    }
 	  throw_exception (except);
 	}
+      END_CATCH
     }
   else
     return NULL;
@@ -3754,12 +3754,15 @@ struct value *
 value_of_this_silent (const struct language_defn *lang)
 {
   struct value *ret = NULL;
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       ret = value_of_this (lang);
     }
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH
 
   return ret;
 }

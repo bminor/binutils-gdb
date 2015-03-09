@@ -613,11 +613,10 @@ solib_read_symbols (struct so_list *so, int flags)
     }
   else
     {
-      volatile struct gdb_exception e;
 
       flags |= current_inferior ()->symfile_flags;
 
-      TRY_CATCH (e, RETURN_MASK_ERROR)
+      TRY
 	{
 	  struct section_addr_info *sap;
 
@@ -638,14 +637,17 @@ solib_read_symbols (struct so_list *so, int flags)
 						  NULL);
 	  so->objfile->addr_low = so->addr_low;
 	  free_section_addr_info (sap);
-	}
 
-      if (e.reason < 0)
-	exception_fprintf (gdb_stderr, e, _("Error while reading shared"
-					    " library symbols for %s:\n"),
-			   so->so_name);
-      else
-	so->symbols_loaded = 1;
+	  so->symbols_loaded = 1;
+	}
+      CATCH (e, RETURN_MASK_ERROR)
+	{
+	  exception_fprintf (gdb_stderr, e, _("Error while reading shared"
+					      " library symbols for %s:\n"),
+			     so->so_name);
+	}
+      END_CATCH
+
       return 1;
     }
 
@@ -814,12 +816,11 @@ update_solib_list (int from_tty, struct target_ops *target)
       /* Fill in the rest of each of the `struct so_list' nodes.  */
       for (i = inferior; i; i = i->next)
 	{
-	  volatile struct gdb_exception e;
 
 	  i->pspace = current_program_space;
 	  VEC_safe_push (so_list_ptr, current_program_space->added_solibs, i);
 
-	  TRY_CATCH (e, RETURN_MASK_ERROR)
+	  TRY
 	    {
 	      /* Fill in the rest of the `struct so_list' node.  */
 	      if (!solib_map_sections (i))
@@ -830,10 +831,13 @@ update_solib_list (int from_tty, struct target_ops *target)
 		}
 	    }
 
-	  if (e.reason < 0)
-	    exception_fprintf (gdb_stderr, e,
-			       _("Error while mapping shared "
-				 "library sections:\n"));
+	  CATCH (e, RETURN_MASK_ERROR)
+	    {
+	      exception_fprintf (gdb_stderr, e,
+				 _("Error while mapping shared "
+				   "library sections:\n"));
+	    }
+	  END_CATCH
 
 	  /* Notify any observer that the shared object has been
 	     loaded now that we've added it to GDB's tables.  */
@@ -1320,17 +1324,25 @@ reload_shared_libraries_1 (int from_tty)
 	  && (!was_loaded
 	      || filename_cmp (found_pathname, so->so_name) != 0))
 	{
-	  volatile struct gdb_exception e;
+	  int got_error = 0;
 
-	  TRY_CATCH (e, RETURN_MASK_ERROR)
-	    solib_map_sections (so);
+	  TRY
+	    {
+	      solib_map_sections (so);
+	    }
 
-	  if (e.reason < 0)
-	    exception_fprintf (gdb_stderr, e,
-			       _("Error while mapping "
-				 "shared library sections:\n"));
-	  else if (auto_solib_add || was_loaded || libpthread_solib_p (so))
-	    solib_read_symbols (so, flags);
+	  CATCH (e, RETURN_MASK_ERROR)
+	    {
+	      exception_fprintf (gdb_stderr, e,
+				 _("Error while mapping "
+				   "shared library sections:\n"));
+	      got_error = 1;
+	    }
+	  END_CATCH
+
+	    if (!got_error
+		&& (auto_solib_add || was_loaded || libpthread_solib_p (so)))
+	      solib_read_symbols (so, flags);
 	}
     }
 

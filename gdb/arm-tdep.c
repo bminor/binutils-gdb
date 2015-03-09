@@ -484,15 +484,15 @@ skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
       /* On soft-float targets, __truncdfsf2 is called to convert promoted
 	 arguments to their argument types in non-prototyped
 	 functions.  */
-      if (strncmp (name, "__truncdfsf2", strlen ("__truncdfsf2")) == 0)
+      if (startswith (name, "__truncdfsf2"))
 	return 1;
-      if (strncmp (name, "__aeabi_d2f", strlen ("__aeabi_d2f")) == 0)
+      if (startswith (name, "__aeabi_d2f"))
 	return 1;
 
       /* Internal functions related to thread-local storage.  */
-      if (strncmp (name, "__tls_get_addr", strlen ("__tls_get_addr")) == 0)
+      if (startswith (name, "__tls_get_addr"))
 	return 1;
-      if (strncmp (name, "__aeabi_read_tp", strlen ("__aeabi_read_tp")) == 0)
+      if (startswith (name, "__aeabi_read_tp"))
 	return 1;
     }
   else
@@ -1314,9 +1314,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
   /* ADDR must correspond to a symbol whose name is __stack_chk_guard.
      Otherwise, this sequence cannot be for stack protector.  */
   if (stack_chk_guard.minsym == NULL
-      || strncmp (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
-		  "__stack_chk_guard",
-		  strlen ("__stack_chk_guard")) != 0)
+      || !startswith (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym), "__stack_chk_guard"))
    return pc;
 
   if (is_thumb)
@@ -1413,10 +1411,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (post_prologue_pc
 	  && (cust == NULL
 	      || COMPUNIT_PRODUCER (cust) == NULL
-	      || strncmp (COMPUNIT_PRODUCER (cust), "GNU ",
-			  sizeof ("GNU ") - 1) == 0
-	      || strncmp (COMPUNIT_PRODUCER (cust), "clang ",
-			  sizeof ("clang ") - 1) == 0))
+	      || startswith (COMPUNIT_PRODUCER (cust), "GNU ")
+	      || startswith (COMPUNIT_PRODUCER (cust), "clang ")))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)
@@ -9315,8 +9311,8 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
      _call_via_xx, where x is the register name.  The possible names
      are r0-r9, sl, fp, ip, sp, and lr.  ARM RealView has similar
      functions, named __ARM_call_via_r[0-7].  */
-  if (strncmp (name, "_call_via_", 10) == 0
-      || strncmp (name, "__ARM_call_via_", strlen ("__ARM_call_via_")) == 0)
+  if (startswith (name, "_call_via_")
+      || startswith (name, "__ARM_call_via_"))
     {
       /* Use the name suffix to determine which register contains the
          target PC.  */
@@ -9338,11 +9334,9 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
   namelen = strlen (name);
   if (name[0] == '_' && name[1] == '_'
       && ((namelen > 2 + strlen ("_from_thumb")
-	   && strncmp (name + namelen - strlen ("_from_thumb"), "_from_thumb",
-		       strlen ("_from_thumb")) == 0)
+	   && startswith (name + namelen - strlen ("_from_thumb"), "_from_thumb"))
 	  || (namelen > 2 + strlen ("_from_arm")
-	      && strncmp (name + namelen - strlen ("_from_arm"), "_from_arm",
-			  strlen ("_from_arm")) == 0)))
+	      && startswith (name + namelen - strlen ("_from_arm"), "_from_arm"))))
     {
       char *target_name;
       int target_len = namelen - 2;

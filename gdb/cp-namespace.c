@@ -497,8 +497,7 @@ cp_lookup_symbol_via_imports (const char *scope,
 
       len = strlen (current->import_dest);
       directive_match = (search_parents
-                         ? (strncmp (scope, current->import_dest,
-                                     strlen (current->import_dest)) == 0
+                         ? (startswith (scope, current->import_dest)
                             && (len == 0
                                 || scope[len] == ':'
 				|| scope[len] == '\0'))

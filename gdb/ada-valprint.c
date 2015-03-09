@@ -1159,15 +1159,18 @@ ada_val_print (struct type *type, const gdb_byte *valaddr,
 	       const struct value *val,
 	       const struct value_print_options *options)
 {
-  volatile struct gdb_exception except;
 
   /* XXX: this catches QUIT/ctrl-c as well.  Isn't that busted?  */
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       ada_val_print_1 (type, valaddr, embedded_offset, address,
 		       stream, recurse, val, options,
 		       current_language);
     }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+    }
+  END_CATCH
 }
 
 void

@@ -4221,14 +4221,13 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 void
 dwarf2_build_psymtabs (struct objfile *objfile)
 {
-  volatile struct gdb_exception except;
 
   if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
     {
       init_psymbol_list (objfile, 1024);
     }
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       /* This isn't really ideal: all the data we allocate on the
 	 objfile's obstack is still uselessly kept around.  However,
@@ -4238,8 +4237,11 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       dwarf2_build_psymtabs_hard (objfile);
       discard_cleanups (cleanups);
     }
-  if (except.reason < 0)
-    exception_print (gdb_stderr, except);
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      exception_print (gdb_stderr, except);
+    }
+  END_CATCH
 }
 
 /* Return the total length of the CU described by HEADER.  */
@@ -12306,7 +12308,7 @@ check_producer (struct dwarf2_cu *cu)
       cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
       cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
     }
-  else if (strncmp (cu->producer, "Intel(R) C", strlen ("Intel(R) C")) == 0)
+  else if (startswith (cu->producer, "Intel(R) C"))
     cu->producer_is_icc = 1;
   else
     {
@@ -12987,8 +12989,8 @@ is_vtable_name (const char *name, struct dwarf2_cu *cu)
 
   /* Look for the C++ and Java forms of the vtable.  */
   if ((cu->language == language_java
-       && strncmp (name, vtable, sizeof (vtable) - 1) == 0)
-       || (strncmp (name, vptr, sizeof (vptr) - 1) == 0
+       && startswith (name, vtable))
+       || (startswith (name, vptr)
        && is_cplus_marker (name[sizeof (vptr) - 1])))
     return 1;
 
@@ -13296,8 +13298,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		}
 	    }
 	  else if (cu->producer
-		   && strncmp (cu->producer,
-			       "IBM(R) XL C/C++ Advanced Edition", 32) == 0)
+		   && startswith (cu->producer, "IBM(R) XL C/C++ Advanced Edition"))
 	    {
 	      /* The IBM XLC compiler does not provide direct indication
 	         of the containing type, but the vtable pointer is
@@ -14695,7 +14696,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type_flags |= TYPE_FLAG_UNSIGNED;
 	if (cu->language == language_fortran
 	    && name
-	    && strncmp (name, "character(", sizeof ("character(") - 1) == 0)
+	    && startswith (name, "character("))
 	  code = TYPE_CODE_CHAR;
 	break;
       case DW_ATE_signed_char:
@@ -18262,7 +18263,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  if (cu->language == language_fortran && die->parent
 		      && die->parent->tag == DW_TAG_module
 		      && cu->producer
-		      && strncmp (cu->producer, "GNU Fortran ", 12) == 0)
+		      && startswith (cu->producer, "GNU Fortran "))
 		    SYMBOL_ACLASS_INDEX (sym) = LOC_UNRESOLVED;
 
 		  /* A variable with DW_AT_external is never static,
@@ -19339,8 +19340,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	 or simply "<anonymous struct>" or "<anonymous union>" in GCC 4.3
 	 and GCC 4.4.  We work around this problem by ignoring these.  */
       if (attr && DW_STRING (attr)
-	  && (strncmp (DW_STRING (attr), "._", 2) == 0
-	      || strncmp (DW_STRING (attr), "<anonymous", 10) == 0))
+	  && (startswith (DW_STRING (attr), "._")
+	      || startswith (DW_STRING (attr), "<anonymous")))
 	return NULL;
 
       /* GCC might emit a nameless typedef that has a linkage name.  See
@@ -23172,16 +23173,18 @@ save_gdb_index_command (char *arg, int from_tty)
     dwarf2_per_objfile = objfile_data (objfile, dwarf2_objfile_data_key);
     if (dwarf2_per_objfile)
       {
-	volatile struct gdb_exception except;
 
-	TRY_CATCH (except, RETURN_MASK_ERROR)
+	TRY
 	  {
 	    write_psymtabs_to_index (objfile, arg);
 	  }
-	if (except.reason < 0)
-	  exception_fprintf (gdb_stderr, except,
-			     _("Error while writing index for `%s': "),
-			     objfile_name (objfile));
+	CATCH (except, RETURN_MASK_ERROR)
+	  {
+	    exception_fprintf (gdb_stderr, except,
+			       _("Error while writing index for `%s': "),
+			       objfile_name (objfile));
+	  }
+	END_CATCH
       }
   }
 }

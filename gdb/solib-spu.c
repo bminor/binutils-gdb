@@ -110,8 +110,7 @@ append_ocl_sos (struct so_list **link_ptr)
         {
 	  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd)?
 					 BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
-	  volatile struct gdb_exception ex;
-	  TRY_CATCH (ex, RETURN_MASK_ALL)
+	  TRY
 	    {
 	      CORE_ADDR data =
 		read_memory_unsigned_integer (*ocl_program_addr_base,
@@ -134,7 +133,7 @@ append_ocl_sos (struct so_list **link_ptr)
 		  link_ptr = &newobj->next;
 		}
 	    }
-	  if (ex.reason < 0)
+	  CATCH (ex, RETURN_MASK_ALL)
 	    {
 	      /* Ignore memory errors.  */
 	      switch (ex.error)
@@ -146,6 +145,7 @@ append_ocl_sos (struct so_list **link_ptr)
 		  break;
 		}
 	    }
+	  END_CATCH
 	}
     }
 }

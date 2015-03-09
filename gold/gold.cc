@@ -492,6 +492,9 @@ queue_middle_tasks(const General_options& options,
   if (timer != NULL)
     timer->stamp(0);
 
+  // Finalize the .eh_frame section.
+  layout->finalize_eh_frame_section();
+
   // Add any symbols named with -u options to the symbol table.
   symtab->add_undefined_symbols_from_command_line(layout);
 

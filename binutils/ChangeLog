@@ -1,5 +1,14 @@
 2015-03-05  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/18064
+	* doc/binutils.texi (objcopy): Extend description of
+	--add-gnu-debuglink option to explain that the separate debug info
+	file must exist.  Add a description of what to do if the debug
+	info file is built in one place but then installed into a separate
+	location.
+
+2015-03-05  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17994
 	* dlltool.c (temp_file_to_remove): New local array.
 	(unlink_temp_files): New functions - unlinks any file in the

@@ -983,14 +983,13 @@ struct call_site_chain *
 call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 		      CORE_ADDR callee_pc)
 {
-  volatile struct gdb_exception e;
   struct call_site_chain *retval = NULL;
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       retval = call_site_find_chain_1 (gdbarch, caller_pc, callee_pc);
     }
-  if (e.reason < 0)
+  CATCH (e, RETURN_MASK_ERROR)
     {
       if (e.error == NO_ENTRY_VALUE_ERROR)
 	{
@@ -1002,6 +1001,8 @@ call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
       else
 	throw_exception (e);
     }
+  END_CATCH
+
   return retval;
 }
 
@@ -2183,7 +2184,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   struct dwarf_expr_context *ctx;
   struct cleanup *old_chain, *value_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
-  volatile struct gdb_exception ex;
 
   if (byte_offset < 0)
     invalid_synthetic_pointer ();
@@ -2206,11 +2206,11 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   ctx->baton = &baton;
   ctx->funcs = &dwarf_expr_ctx_funcs;
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       dwarf_expr_eval (ctx, data, size);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
@@ -2229,6 +2229,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
       else
 	throw_exception (ex);
     }
+  END_CATCH
 
   if (ctx->num_pieces > 0)
     {

@@ -310,11 +310,11 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 {
   int from_tty_arg_pos = -1, to_string_arg_pos = -1;
   int from_tty = 0, to_string = 0;
-  volatile struct gdb_exception except;
   const SCM keywords[] = { from_tty_keyword, to_string_keyword, SCM_BOOL_F };
   char *command;
   char *result = NULL;
   struct cleanup *cleanups;
+  struct gdb_exception except = exception_none;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, keywords, "s#tt",
 			      command_scm, &command, rest,
@@ -325,7 +325,7 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
      executed.  */
   cleanups = make_cleanup (xfree, command);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY
     {
       struct cleanup *inner_cleanups;
 
@@ -346,6 +346,12 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 
       do_cleanups (inner_cleanups);
     }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      except = ex;
+    }
+  END_CATCH
+
   do_cleanups (cleanups);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
 

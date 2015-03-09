@@ -322,7 +322,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 	     for that section is ".plt".  So, if there is a ".plt"
 	     section, and yet the section name of our symbol does not
 	     start with ".plt", we ignore that symbol.  */
-	  if (strncmp (sect->name, ".plt", 4) != 0
+	  if (!startswith (sect->name, ".plt")
 	      && bfd_get_section_by_name (abfd, ".plt") != NULL)
 	    continue;
 

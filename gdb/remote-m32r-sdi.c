@@ -1265,9 +1265,9 @@ m32r_load (struct target_ops *self, const char *args, int from_tty)
 
       if (*arg != '-')
 	filename = arg;
-      else if (strncmp (arg, "-quiet", strlen (arg)) == 0)
+      else if (startswith ("-quiet", arg))
 	quiet = 1;
-      else if (strncmp (arg, "-nostart", strlen (arg)) == 0)
+      else if (startswith ("-nostart", arg))
 	nostart = 1;
       else
 	error (_("Unknown option `%s'"), arg);

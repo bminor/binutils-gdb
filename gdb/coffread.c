@@ -231,7 +231,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
       csi->textaddr = bfd_section_vma (abfd, sectp);
       csi->textsize += bfd_section_size (abfd, sectp);
     }
-  else if (strncmp (name, ".text", sizeof ".text" - 1) == 0)
+  else if (startswith (name, ".text"))
     {
       csi->textsize += bfd_section_size (abfd, sectp);
     }
@@ -239,7 +239,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
     {
       csi->stabstrsect = sectp;
     }
-  else if (strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
+  else if (startswith (name, ".stab"))
     {
       const char *s;
 
@@ -448,7 +448,7 @@ is_import_fixup_symbol (struct coff_symbol *cs,
     return 0;
 
   /* The name must start with "__fu<digits>__".  */
-  if (strncmp (cs->c_name, "__fu", 4) != 0)
+  if (!startswith (cs->c_name, "__fu"))
     return 0;
   if (! isdigit (cs->c_name[4]))
     return 0;
@@ -605,8 +605,8 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
      FIXME: We should use BFD to read the symbol table, and thus avoid
      this problem.  */
   pe_file =
-    strncmp (bfd_get_target (objfile->obfd), "pe", 2) == 0
-    || strncmp (bfd_get_target (objfile->obfd), "epoc-pe", 7) == 0;
+    startswith (bfd_get_target (objfile->obfd), "pe")
+    || startswith (bfd_get_target (objfile->obfd), "epoc-pe");
 
   /* End of warning.  */
 
@@ -672,8 +672,8 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 	     symbol in OBJFILE.  Note that 'maintenance print msymbols'
 	     shows that type of these "_imp_XXXX" symbols is mst_data.  */
 	  if (MSYMBOL_TYPE (msym) == mst_data
-	      && (strncmp (name, "__imp_", 6) == 0
-		  || strncmp (name, "_imp_", 5) == 0))
+	      && (startswith (name, "__imp_")
+		  || startswith (name, "_imp_")))
 	    {
 	      const char *name1 = (name[1] == '_' ? &name[7] : &name[6]);
 	      struct bound_minimal_symbol found;
@@ -946,14 +946,14 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	    }
 	  else if (!SDB_TYPE (cs->c_type)
 		   && cs->c_name[0] == 'L'
-		   && (strncmp (cs->c_name, "LI%", 3) == 0
-		       || strncmp (cs->c_name, "LF%", 3) == 0
-		       || strncmp (cs->c_name, "LC%", 3) == 0
-		       || strncmp (cs->c_name, "LP%", 3) == 0
-		       || strncmp (cs->c_name, "LPB%", 4) == 0
-		       || strncmp (cs->c_name, "LBB%", 4) == 0
-		       || strncmp (cs->c_name, "LBE%", 4) == 0
-		       || strncmp (cs->c_name, "LPBX%", 5) == 0))
+		   && (startswith (cs->c_name, "LI%")
+		       || startswith (cs->c_name, "LF%")
+		       || startswith (cs->c_name, "LC%")
+		       || startswith (cs->c_name, "LP%")
+		       || startswith (cs->c_name, "LPB%")
+		       || startswith (cs->c_name, "LBB%")
+		       || startswith (cs->c_name, "LBE%")
+		       || startswith (cs->c_name, "LPBX%")))
 	    /* At least on a 3b1, gcc generates swbeg and string labels
 	       that look like this.  Ignore them.  */
 	    break;

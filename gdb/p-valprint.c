@@ -725,7 +725,6 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
       const char *basename = type_name_no_tag (baseclass);
       const gdb_byte *base_valaddr = NULL;
       int thisoffset;
-      volatile struct gdb_exception ex;
       int skip = 0;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -745,18 +744,21 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 
       thisoffset = offset;
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
 	{
 	  boffset = baseclass_offset (type, i, valaddr, offset, address, val);
 	}
-      if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
-	skip = -1;
-      else if (ex.reason < 0)
-	skip = 1;
-      else
+      CATCH (ex, RETURN_MASK_ERROR)
 	{
-	  skip = 0;
+	  if (ex.error == NOT_AVAILABLE_ERROR)
+	    skip = -1;
+	  else
+	    skip = 1;
+	}
+      END_CATCH
 
+      if (skip == 0)
+	{
 	  /* The virtual base class pointer might have been clobbered by the
 	     user program. Make sure that it still points to a valid memory
 	     location.  */

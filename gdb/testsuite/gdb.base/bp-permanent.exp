@@ -96,7 +96,7 @@ proc test {always_inserted sw_watchpoint} {
 
 	# Run the "setup" function in the inferior.  This memcpy's the
 	# breakpoint instruction to a buffer in the inferior.
-	gdb_test "next" "test.*" "next over setup"
+	gdb_test "next" "test_basics \\(\\).*" "next over setup"
 
 	delete_breakpoints
 

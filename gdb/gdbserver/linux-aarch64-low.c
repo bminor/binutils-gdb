@@ -990,7 +990,7 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     ret =
       aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */);
 
-  if (show_debug_regs > 1)
+  if (show_debug_regs)
     aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
 				  "insert_point", addr, len, targ_type);
 
@@ -1027,7 +1027,7 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
     ret =
       aarch64_handle_breakpoint (targ_type, addr, len, 0 /* is_insert */);
 
-  if (show_debug_regs > 1)
+  if (show_debug_regs)
     aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
 				  "remove_point", addr, len, targ_type);
 

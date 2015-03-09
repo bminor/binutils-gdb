@@ -1523,7 +1523,7 @@ x86_linux_process_qsupported (const char *query)
      with "i386" in qSupported query, it supports x86 XML target
      descriptions.  */
   use_xml = 0;
-  if (query != NULL && strncmp (query, "xmlRegisters=", 13) == 0)
+  if (query != NULL && startswith (query, "xmlRegisters="))
     {
       char *copy = xstrdup (query + 13);
       char *p;

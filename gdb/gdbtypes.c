@@ -2299,20 +2299,21 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;
   struct type *type = NULL; /* Initialize to keep gcc happy.  */
-  volatile struct gdb_exception except;
 
   /* Suppress error messages.  */
   saved_gdb_stderr = gdb_stderr;
   gdb_stderr = ui_file_new ();
 
   /* Call parse_and_eval_type() without fear of longjmp()s.  */
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       type = parse_and_eval_type (p, length);
     }
-
-  if (except.reason < 0)
-    type = builtin_type (gdbarch)->builtin_void;
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      type = builtin_type (gdbarch)->builtin_void;
+    }
+  END_CATCH
 
   /* Stop suppressing error messages.  */
   ui_file_delete (gdb_stderr);
@@ -2376,7 +2377,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     }
 
   /* If we read one argument and it was ``void'', don't count it.  */
-  if (strncmp (argtypetext, "(void)", 6) == 0)
+  if (startswith (argtypetext, "(void)"))
     argcount -= 1;
 
   /* We need one extra slot, for the THIS pointer.  */
@@ -2471,7 +2472,7 @@ check_stub_method_group (struct type *type, int method_id)
 
      Therefore the only thing we need to handle here are v2 operator
      names.  */
-  if (found_stub && strncmp (TYPE_FN_FIELD_PHYSNAME (f, 0), "_Z", 2) != 0)
+  if (found_stub && !startswith (TYPE_FN_FIELD_PHYSNAME (f, 0), "_Z"))
     {
       int ret;
       char dem_opname[256];
@@ -3235,7 +3236,7 @@ check_types_worklist (VEC (type_equality_entry_d) **worklist,
 int
 types_deeply_equal (struct type *type1, struct type *type2)
 {
-  volatile struct gdb_exception except;
+  struct gdb_exception except = exception_none;
   int result = 0;
   struct bcache *cache;
   VEC (type_equality_entry_d) *worklist = NULL;
@@ -3253,16 +3254,23 @@ types_deeply_equal (struct type *type1, struct type *type2)
   entry.type2 = type2;
   VEC_safe_push (type_equality_entry_d, worklist, &entry);
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  /* check_types_worklist calls several nested helper functions, some
+     of which can raise a GDB exception, so we just check and rethrow
+     here.  If there is a GDB exception, a comparison is not capable
+     (or trusted), so exit.  */
+  TRY
     {
       result = check_types_worklist (&worklist, cache);
     }
-  /* check_types_worklist calls several nested helper functions,
-     some of which can raise a GDB Exception, so we just check
-     and rethrow here.  If there is a GDB exception, a comparison
-     is not capable (or trusted), so exit.  */
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      except = ex;
+    }
+  END_CATCH
+
   bcache_xfree (cache);
   VEC_free (type_equality_entry_d, worklist);
+
   /* Rethrow if there was a problem.  */
   if (except.reason < 0)
     throw_exception (except);

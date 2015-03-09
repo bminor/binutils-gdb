@@ -491,13 +491,13 @@ remote_get_noisy_reply (char **buf_p,
       buf = *buf_p;
       if (buf[0] == 'E')
 	trace_error (buf);
-      else if (strncmp (buf, "qRelocInsn:", strlen ("qRelocInsn:")) == 0)
+      else if (startswith (buf, "qRelocInsn:"))
 	{
 	  ULONGEST ul;
 	  CORE_ADDR from, to, org_to;
 	  char *p, *pp;
 	  int adjusted_size = 0;
-	  volatile struct gdb_exception ex;
+	  int relocated = 0;
 
 	  p = buf + strlen ("qRelocInsn:");
 	  pp = unpack_varlen_hex (p, &ul);
@@ -511,33 +511,38 @@ remote_get_noisy_reply (char **buf_p,
 
 	  org_to = to;
 
-	  TRY_CATCH (ex, RETURN_MASK_ALL)
+	  TRY
 	    {
 	      gdbarch_relocate_instruction (target_gdbarch (), &to, from);
+	      relocated = 1;
 	    }
-	  if (ex.reason >= 0)
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      if (ex.error == MEMORY_ERROR)
+		{
+		  /* Propagate memory errors silently back to the
+		     target.  The stub may have limited the range of
+		     addresses we can write to, for example.  */
+		}
+	      else
+		{
+		  /* Something unexpectedly bad happened.  Be verbose
+		     so we can tell what, and propagate the error back
+		     to the stub, so it doesn't get stuck waiting for
+		     a response.  */
+		  exception_fprintf (gdb_stderr, ex,
+				     _("warning: relocating instruction: "));
+		}
+	      putpkt ("E01");
+	    }
+	  END_CATCH
+
+	  if (relocated)
 	    {
 	      adjusted_size = to - org_to;
 
 	      xsnprintf (buf, *sizeof_buf, "qRelocInsn:%x", adjusted_size);
 	      putpkt (buf);
-	    }
-	  else if (ex.reason < 0 && ex.error == MEMORY_ERROR)
-	    {
-	      /* Propagate memory errors silently back to the target.
-		 The stub may have limited the range of addresses we
-		 can write to, for example.  */
-	      putpkt ("E01");
-	    }
-	  else
-	    {
-	      /* Something unexpectedly bad happened.  Be verbose so
-		 we can tell what, and propagate the error back to the
-		 stub, so it doesn't get stuck waiting for a
-		 response.  */
-	      exception_fprintf (gdb_stderr, ex,
-				 _("warning: relocating instruction: "));
-	      putpkt ("E01");
 	    }
 	}
       else if (buf[0] == 'O' && buf[1] != 'K')
@@ -3157,14 +3162,14 @@ get_offsets (void)
   ptr = buf;
   lose = 0;
 
-  if (strncmp (ptr, "Text=", 5) == 0)
+  if (startswith (ptr, "Text="))
     {
       ptr += 5;
       /* Don't use strtol, could lose on big values.  */
       while (*ptr && *ptr != ';')
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
 
-      if (strncmp (ptr, ";Data=", 6) == 0)
+      if (startswith (ptr, ";Data="))
 	{
 	  ptr += 6;
 	  while (*ptr && *ptr != ';')
@@ -3173,7 +3178,7 @@ get_offsets (void)
       else
 	lose = 1;
 
-      if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
+      if (!lose && startswith (ptr, ";Bss="))
 	{
 	  ptr += 5;
 	  while (*ptr && *ptr != ';')
@@ -3185,7 +3190,7 @@ get_offsets (void)
       else
 	lose = 1;
     }
-  else if (strncmp (ptr, "TextSeg=", 8) == 0)
+  else if (startswith (ptr, "TextSeg="))
     {
       ptr += 8;
       /* Don't use strtol, could lose on big values.  */
@@ -3193,7 +3198,7 @@ get_offsets (void)
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
       num_segments = 1;
 
-      if (strncmp (ptr, ";DataSeg=", 9) == 0)
+      if (startswith (ptr, ";DataSeg="))
 	{
 	  ptr += 9;
 	  while (*ptr && *ptr != ';')
@@ -3800,7 +3805,7 @@ remote_check_symbols (void)
   packet_ok (rs->buf, &remote_protocol_packets[PACKET_qSymbol]);
   reply = rs->buf;
 
-  while (strncmp (reply, "qSymbol:", 8) == 0)
+  while (startswith (reply, "qSymbol:"))
     {
       struct bound_minimal_symbol sym;
 
@@ -3840,7 +3845,7 @@ remote_serial_open (const char *name)
      of in ser-tcp.c, because it is the remote protocol assuming that the
      serial connection is reliable and not the serial connection promising
      to be.  */
-  if (!udp_warning && strncmp (name, "udp:", 4) == 0)
+  if (!udp_warning && startswith (name, "udp:"))
     {
       warning (_("The remote protocol may be unreliable over UDP.\n"
 		 "Some events may be lost, rendering further debugging "
@@ -4377,13 +4382,12 @@ remote_open_1 (const char *name, int from_tty,
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
   {
-    volatile struct gdb_exception ex;
 
-    TRY_CATCH (ex, RETURN_MASK_ALL)
+    TRY
       {
 	remote_start_remote (from_tty, target, extended_p);
       }
-    if (ex.reason < 0)
+    CATCH (ex, RETURN_MASK_ALL)
       {
 	/* Pop the partially set up target - unless something else did
 	   already before throwing the exception.  */
@@ -4393,6 +4397,7 @@ remote_open_1 (const char *name, int from_tty,
 	  wait_forever_enabled_p = 1;
 	throw_exception (ex);
       }
+    END_CATCH
   }
 
   remote_btrace_reset ();
@@ -4631,7 +4636,7 @@ remote_vcont_probe (struct remote_state *rs)
   buf = rs->buf;
 
   /* Make sure that the features we assume are supported.  */
-  if (strncmp (buf, "vCont", 5) == 0)
+  if (startswith (buf, "vCont"))
     {
       char *p = &buf[5];
       int support_s, support_S, support_c, support_C;
@@ -5729,8 +5734,7 @@ Packet: '%s'\n"),
 
 	    if (*p == '\0')
 	      ;
-	    else if (strncmp (p,
-			      "process:", sizeof ("process:") - 1) == 0)
+	    else if (startswith (p, "process:"))
 	      {
 		ULONGEST upid;
 
@@ -7831,15 +7835,14 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 static void
 remote_kill (struct target_ops *ops)
 {
-  volatile struct gdb_exception ex;
 
   /* Catch errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       putpkt ("k");
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error == TARGET_CLOSE_ERROR)
 	{
@@ -7857,6 +7860,7 @@ remote_kill (struct target_ops *ops)
 	   user or higher layers decide what to do.  */
 	throw_exception (ex);
     }
+  END_CATCH
 
   /* We've killed the remote end, we get to mourn it.  Since this is
      target remote, single-process, mourning the inferior also
@@ -10212,9 +10216,7 @@ remote_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 int
 remote_filename_p (const char *filename)
 {
-  return strncmp (filename,
-		  REMOTE_SYSROOT_PREFIX,
-		  sizeof (REMOTE_SYSROOT_PREFIX) - 1) == 0;
+  return startswith (filename, REMOTE_SYSROOT_PREFIX);
 }
 
 bfd *
@@ -10946,7 +10948,6 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
   char *p = NULL;
   /* FIXME we need to get register block size some other way.  */
   extern int trace_regblock_size;
-  volatile struct gdb_exception ex;
   enum packet_result result;
 
   if (packet_support (PACKET_qTStatus) == PACKET_DISABLE)
@@ -10956,11 +10957,11 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 
   putpkt ("qTStatus");
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       p = remote_get_noisy_reply (&target_buf, &target_buf_size);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error != TARGET_CLOSE_ERROR)
 	{
@@ -10969,6 +10970,7 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 	}
       throw_exception (ex);
     }
+  END_CATCH
 
   result = packet_ok (p, &remote_protocol_packets[PACKET_qTStatus]);
 
@@ -11535,7 +11537,6 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid,
   struct remote_state *rs = get_remote_state ();
   char *buf = rs->buf;
   char *endbuf = rs->buf + get_remote_packet_size ();
-  volatile struct gdb_exception err;
 
   if (packet_config_support (packet) != PACKET_ENABLE)
     error (_("Target does not support branch tracing."));
@@ -11563,11 +11564,16 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid,
 
   /* If we fail to read the configuration, we lose some information, but the
      tracing itself is not impacted.  */
-  TRY_CATCH (err, RETURN_MASK_ERROR)
-    btrace_read_config (&tinfo->conf);
-
-  if (err.message != NULL)
-    warning ("%s", err.message);
+  TRY
+    {
+      btrace_read_config (&tinfo->conf);
+    }
+  CATCH (err, RETURN_MASK_ERROR)
+    {
+      if (err.message != NULL)
+	warning ("%s", err.message);
+    }
+  END_CATCH
 
   return tinfo;
 }
