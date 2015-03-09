@@ -1,5 +1,9 @@
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
+	* remote-m32r-sdi.c (m32r_open): Make "port_str" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
 	* nto-tdep.c (nto_find_and_open_solib): Make "endian" const.
 	(nto_init_solib_absolute_prefix): Likewise.
 
