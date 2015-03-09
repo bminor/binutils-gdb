@@ -1,5 +1,9 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* tracepoint.c (expr_eval_result): Now an int.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (struct regcache): Forward declare.
 	(struct thread_info) <regcache_data>: Now a struct regcache
 	pointer.
