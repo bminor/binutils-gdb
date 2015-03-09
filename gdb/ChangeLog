@@ -1,5 +1,10 @@
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
+	* nto-tdep.c (nto_find_and_open_solib): Make "endian" const.
+	(nto_init_solib_absolute_prefix): Likewise.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
 	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): Make "p" const.
 	* spu-tdep.c (spu_gdbarch_init): Make "name" const.
 
