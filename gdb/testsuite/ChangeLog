@@ -1,5 +1,9 @@
 2015-03-09  Pedro Alves  <palves@redhat.com>
 
+	* dg-extract-results.py: Delete.
+
+2015-03-09  Pedro Alves  <palves@redhat.com>
+
 	Merge dg-extract-results.sh from GCC upstream (r218843).
 
 	2014-12-17  Sergio Durigan Junior  <sergiodj@redhat.com>
