@@ -1,3 +1,8 @@
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): Make "p" const.
+	* spu-tdep.c (spu_gdbarch_init): Make "name" const.
+
 2015-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* config/djgpp/README: Remove gdb.hp.
