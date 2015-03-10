@@ -4232,11 +4232,6 @@ parse_args (int argc, char ** argv)
       && !do_section_groups && !do_archive_index
       && !do_dyn_syms)
     usage (stderr);
-  else if (argc < 3 || (do_wide && argc < 4))
-    {
-      warn (_("Nothing to do.\n"));
-      usage (stderr);
-    }
 }
 
 static const char *
@@ -16131,6 +16126,11 @@ main (int argc, char ** argv)
 
   if (optind < (argc - 1))
     show_name = 1;
+  else if (optind >= argc)
+    {
+      warn (_("Nothing to do.\n"));
+      usage (stderr);
+    }
 
   err = 0;
   while (optind < argc)
