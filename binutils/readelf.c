@@ -4232,7 +4232,7 @@ parse_args (int argc, char ** argv)
       && !do_section_groups && !do_archive_index
       && !do_dyn_syms)
     usage (stderr);
-  else if (argc < 3)
+  else if (argc < 3 || (do_wide && argc < 4))
     {
       warn (_("Nothing to do.\n"));
       usage (stderr);

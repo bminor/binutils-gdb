@@ -1,5 +1,9 @@
 2015-03-10  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/18101
+	* readelf.c (parse_args): Enhance check for nothing to do by
+	accounting for the --wide option.
+
 	PR binutils/17636
 	* objcopy.c (copy_object): Avoid calling fatal as that does not
 	allow the parent to clean up temporary files.
