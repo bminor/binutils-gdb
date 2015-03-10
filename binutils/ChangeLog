@@ -1,3 +1,9 @@
+2015-03-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17636
+	* objcopy.c (copy_object): Avoid calling fatal as that does not
+	allow the parent to clean up temporary files.
+
 2015-03-10  Yuri Gribov  <y.gribov@samsung.arm>
 
 	PR ld/16572

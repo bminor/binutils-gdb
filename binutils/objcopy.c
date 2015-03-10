@@ -1640,7 +1640,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    fatal (_("Unable to change endianness of input file(s)"));
+    {
+      /* PR 17636: Call non-fatal so that we return to our parent who
+	 may need to tidy temporary files.  */
+      non_fatal (_("Unable to change endianness of input file(s)"));
+      return FALSE;
+    }
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     {
@@ -1909,7 +1914,10 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
 	  pupdate->section = bfd_get_section_by_name (ibfd, pupdate->name);
 	  if (pupdate->section == NULL)
-	    fatal (_("error: %s not found, can't be updated"), pupdate->name);
+	    {
+	      non_fatal (_("error: %s not found, can't be updated"), pupdate->name);
+	      return FALSE;
+	    }
 
 	  osec = pupdate->section->output_section;
 	  if (! bfd_set_section_size (obfd, osec, pupdate->size))
@@ -1965,9 +1973,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  if (bfd_get_section_contents (ibfd, sec, contents, 0, size))
 	    {
 	      if (fwrite (contents, 1, size, f) != size)
-		fatal (_("error writing section contents to %s (error: %s)"),
-		       pdump->filename,
-		       strerror (errno));
+		{
+		  non_fatal (_("error writing section contents to %s (error: %s)"),
+			     pdump->filename,
+			     strerror (errno));
+		  return FALSE;
+		}
 	    }
 	  else
 	    bfd_nonfatal_message (NULL, ibfd, sec,
@@ -2365,7 +2376,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     {
       status = 1;
       bfd_nonfatal_message (NULL, obfd, NULL, NULL);
-      return;
+      goto cleanup_and_exit;
     }
 
   while (!status && this_element != NULL)
@@ -2526,6 +2537,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  unlink (l->name);
 	}
     }
+
   rmdir (dir);
 }
 
