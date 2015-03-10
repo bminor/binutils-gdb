@@ -37,11 +37,11 @@ gdb_test_no_output "record btrace"
 
 # we start without trace
 with_test_prefix "no trace" {
-  gdb_test "info record" [join [list \
+  gdb_test "info record" [multi_line \
     "Active record target: record-btrace" \
     "Recording format: .*" \
     "Recorded 0 instructions in 0 functions \\\(0 gaps\\\) for .*" \
-    ] "\r\n"]
+    ]
   gdb_test "record instruction-history" "No trace\."
   gdb_test "record function-call-history" "No trace\."
 }
@@ -50,11 +50,11 @@ with_test_prefix "no trace" {
 gdb_test "stepi"
 
 proc check_trace {} {
-  gdb_test "info record" [join [list \
+  gdb_test "info record" [multi_line \
     "Active record target: record-btrace" \
     "Recording format: .*" \
     "Recorded 1 instructions in 1 functions \\\(0 gaps\\\) for .*" \
-    ] "\r\n"]
+    ]
   gdb_test "record instruction-history /f 1" \
     "1\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tmov *\\\$0x0,%eax\r"
   gdb_test "record function-call-history /c 1" "1\tmain"
@@ -71,17 +71,17 @@ with_test_prefix "twice" {
 
 # check that we can reverse-stepi that instruction
 gdb_test "reverse-stepi"
-gdb_test "info record" [join [list \
+gdb_test "info record" [multi_line \
   "Active record target: record-btrace" \
   "Recording format: .*" \
   "Recorded 1 instructions in 1 functions \\\(0 gaps\\\) for .*" \
   "Replay in progress\.  At instruction 1\." \
-  ] "\r\n"] "reverse-stepi"
+  ] "reverse-stepi"
 
 # and back
 gdb_test "stepi"
-gdb_test "info record" [join [list \
+gdb_test "info record" [multi_line \
   "Active record target: record-btrace" \
   "Recording format: .*" \
   "Recorded 1 instructions in 1 functions \\\(0 gaps\\\) for .*" \
-  ] "\r\n"] "and back"
+  ] "and back"

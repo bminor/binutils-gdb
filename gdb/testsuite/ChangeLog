@@ -1,3 +1,26 @@
+2015-04-01  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/complete.exp: Remove "multi_line".
+	* gdb.ada/info_exc.exp: Remove "multi_line".
+	* gdb.ada/packed_tagged.exp: Remove "multi_line".
+	* gdb.ada/ptype_field.exp: Remove "multi_line".
+	* gdb.ada/sym_print_name.exp: Remove "multi_line".
+	* gdb.ada/tagged.exp: Remove "multi_line".
+	* gdb.btrace/buffer-size.exp: Replace [join [list ...]] with
+	[multi_line ...]
+	* gdb.btrace/delta.exp: Likewise.
+	* gdb.btrace/exception.exp: Likewise.
+	* gdb.btrace/function_call_history.exp: Likewise.
+	* gdb.btrace/instruction_history.exp: Likewise.
+	* gdb.btrace/nohist.exp: Likewise.
+	* gdb.btrace/record_goto.exp: Likewise.
+	* gdb.btrace/segv.exp: Likewise.
+	* gdb.btrace/stepi.exp: Likewise.
+	* gdb.btrace/tailcall.exp: Likewise.
+	* gdb.btrace/unknown_functions.exp: Likewise.
+	* gdb.dwarf2/dw2-undefined-ret-addr.exp: Likewise.
+	* lib/gdb.exp: Add the "multi_line" helper.
+
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/tid-reuse.c: New file.
