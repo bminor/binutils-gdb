@@ -1,3 +1,8 @@
+2015-03-10  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (mapping_state): Remove first MAP_DATA emitting code.
+	(mapping_state_2): Emit first MAP_DATA symbol here.
+
 2015-03-10  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (mapping_state): Set minimum alignment for

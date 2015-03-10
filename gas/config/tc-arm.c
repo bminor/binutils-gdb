@@ -2632,12 +2632,11 @@ static void mapping_state_2 (enum mstate state, int max_chars);
 /* Set the mapping state to STATE.  Only call this when about to
    emit some STATE bytes to the file.  */
 
+#define TRANSITION(from, to) (mapstate == (from) && state == (to))
 void
 mapping_state (enum mstate state)
 {
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
-
-#define TRANSITION(from, to) (mapstate == (from) && state == (to))
 
   if (mapstate == state)
     /* The mapping symbol has already been emitted.
@@ -2661,24 +2660,10 @@ mapping_state (enum mstate state)
     record_alignment (now_seg, state == MAP_ARM ? 2 : 1);
 
   if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
-    /* This case will be evaluated later in the next else.  */
+    /* This case will be evaluated later.  */
     return;
-  else if (TRANSITION (MAP_UNDEFINED, MAP_ARM)
-	  || TRANSITION (MAP_UNDEFINED, MAP_THUMB))
-    {
-      /* Only add the symbol if the offset is > 0:
-	 if we're at the first frag, check it's size > 0;
-	 if we're not at the first frag, then for sure
-	    the offset is > 0.  */
-      struct frag * const frag_first = seg_info (now_seg)->frchainP->frch_root;
-      const int add_symbol = (frag_now != frag_first) || (frag_now_fix () > 0);
-
-      if (add_symbol)
-	make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
-    }
 
   mapping_state_2 (state, 0);
-#undef TRANSITION
 }
 
 /* Same as mapping_state, but MAX_CHARS bytes have already been
@@ -2697,9 +2682,20 @@ mapping_state_2 (enum mstate state, int max_chars)
        There is nothing else to do.  */
     return;
 
+  if (TRANSITION (MAP_UNDEFINED, MAP_ARM)
+	  || TRANSITION (MAP_UNDEFINED, MAP_THUMB))
+    {
+      struct frag * const frag_first = seg_info (now_seg)->frchainP->frch_root;
+      const int add_symbol = (frag_now != frag_first) || (frag_now_fix () > 0);
+
+      if (add_symbol)
+	make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
+    }
+
   seg_info (now_seg)->tc_segment_info_data.mapstate = state;
   make_mapping_symbol (state, (valueT) frag_now_fix () - max_chars, frag_now);
 }
+#undef TRANSITION
 #else
 #define mapping_state(x) ((void)0)
 #define mapping_state_2(x, y) ((void)0)
