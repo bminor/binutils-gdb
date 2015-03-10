@@ -1,3 +1,12 @@
+2015-03-10  Renlin Li  <renlin.li@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Remove strub, ldurb, ldursb,
+	stur, ldur, sturh, ldurh, ldursh, ldursw, prfum F_HAS_ALIAS flag and
+	related alias.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+
 2014-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
