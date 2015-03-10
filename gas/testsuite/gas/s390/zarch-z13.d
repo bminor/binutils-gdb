@@ -546,3 +546,137 @@ Disassembly of section .text:
 .*:	e7 f1 ff db c4 4a [ 	]*vftci	%v15,%v17,4093,12,11
 .*:	e7 f1 ff d0 34 4a [ 	]*vftcidb	%v15,%v17,4093
 .*:	e7 f1 ff d8 34 4a [ 	]*wftcidb	%v15,%v17,4093
+.*:	ed fa 6f a0 3c ae [ 	]*cdpt	%f3,4000\(251,%r6\),12
+.*:	ed fa 6f a0 1c af [ 	]*cxpt	%f1,4000\(251,%r6\),12
+.*:	ed fa 6f a0 3c ac [ 	]*cpdt	%f3,4000\(251,%r6\),12
+.*:	ed fa 6f a0 1c ad [ 	]*cpxt	%f1,4000\(251,%r6\),12
+.*:	b9 e0 d0 69 [ 	]*locfhrnh	%r6,%r9
+.*:	b9 e0 10 69 [ 	]*locfhro	%r6,%r9
+.*:	b9 e0 20 69 [ 	]*locfhrh	%r6,%r9
+.*:	b9 e0 20 69 [ 	]*locfhrh	%r6,%r9
+.*:	b9 e0 30 69 [ 	]*locfhrnle	%r6,%r9
+.*:	b9 e0 40 69 [ 	]*locfhrl	%r6,%r9
+.*:	b9 e0 40 69 [ 	]*locfhrl	%r6,%r9
+.*:	b9 e0 50 69 [ 	]*locfhrnhe	%r6,%r9
+.*:	b9 e0 60 69 [ 	]*locfhrlh	%r6,%r9
+.*:	b9 e0 70 69 [ 	]*locfhrne	%r6,%r9
+.*:	b9 e0 70 69 [ 	]*locfhrne	%r6,%r9
+.*:	b9 e0 80 69 [ 	]*locfhre	%r6,%r9
+.*:	b9 e0 80 69 [ 	]*locfhre	%r6,%r9
+.*:	b9 e0 90 69 [ 	]*locfhrnlh	%r6,%r9
+.*:	b9 e0 a0 69 [ 	]*locfhrhe	%r6,%r9
+.*:	b9 e0 b0 69 [ 	]*locfhrnl	%r6,%r9
+.*:	b9 e0 b0 69 [ 	]*locfhrnl	%r6,%r9
+.*:	b9 e0 c0 69 [ 	]*locfhrle	%r6,%r9
+.*:	b9 e0 d0 69 [ 	]*locfhrnh	%r6,%r9
+.*:	b9 e0 d0 69 [ 	]*locfhrnh	%r6,%r9
+.*:	b9 e0 e0 69 [ 	]*locfhrno	%r6,%r9
+.*:	eb 6d 98 f0 fd e0 [ 	]*locfhnh	%r6,-10000\(%r9\)
+.*:	eb 61 98 f0 fd e0 [ 	]*locfho	%r6,-10000\(%r9\)
+.*:	eb 62 98 f0 fd e0 [ 	]*locfhh	%r6,-10000\(%r9\)
+.*:	eb 62 98 f0 fd e0 [ 	]*locfhh	%r6,-10000\(%r9\)
+.*:	eb 63 98 f0 fd e0 [ 	]*locfhnle	%r6,-10000\(%r9\)
+.*:	eb 64 98 f0 fd e0 [ 	]*locfhl	%r6,-10000\(%r9\)
+.*:	eb 64 98 f0 fd e0 [ 	]*locfhl	%r6,-10000\(%r9\)
+.*:	eb 65 98 f0 fd e0 [ 	]*locfhnhe	%r6,-10000\(%r9\)
+.*:	eb 66 98 f0 fd e0 [ 	]*locfhlh	%r6,-10000\(%r9\)
+.*:	eb 67 98 f0 fd e0 [ 	]*locfhne	%r6,-10000\(%r9\)
+.*:	eb 67 98 f0 fd e0 [ 	]*locfhne	%r6,-10000\(%r9\)
+.*:	eb 68 98 f0 fd e0 [ 	]*locfhe	%r6,-10000\(%r9\)
+.*:	eb 68 98 f0 fd e0 [ 	]*locfhe	%r6,-10000\(%r9\)
+.*:	eb 69 98 f0 fd e0 [ 	]*locfhnlh	%r6,-10000\(%r9\)
+.*:	eb 6a 98 f0 fd e0 [ 	]*locfhhe	%r6,-10000\(%r9\)
+.*:	eb 6b 98 f0 fd e0 [ 	]*locfhnl	%r6,-10000\(%r9\)
+.*:	eb 6b 98 f0 fd e0 [ 	]*locfhnl	%r6,-10000\(%r9\)
+.*:	eb 6c 98 f0 fd e0 [ 	]*locfhle	%r6,-10000\(%r9\)
+.*:	eb 6d 98 f0 fd e0 [ 	]*locfhnh	%r6,-10000\(%r9\)
+.*:	eb 6d 98 f0 fd e0 [ 	]*locfhnh	%r6,-10000\(%r9\)
+.*:	eb 6e 98 f0 fd e0 [ 	]*locfhno	%r6,-10000\(%r9\)
+.*:	ec 6c 80 03 00 42 [ 	]*lochile	%r6,-32765
+.*:	ec 61 80 03 00 42 [ 	]*lochio	%r6,-32765
+.*:	ec 62 80 03 00 42 [ 	]*lochih	%r6,-32765
+.*:	ec 62 80 03 00 42 [ 	]*lochih	%r6,-32765
+.*:	ec 63 80 03 00 42 [ 	]*lochinle	%r6,-32765
+.*:	ec 64 80 03 00 42 [ 	]*lochil	%r6,-32765
+.*:	ec 64 80 03 00 42 [ 	]*lochil	%r6,-32765
+.*:	ec 65 80 03 00 42 [ 	]*lochinhe	%r6,-32765
+.*:	ec 66 80 03 00 42 [ 	]*lochilh	%r6,-32765
+.*:	ec 67 80 03 00 42 [ 	]*lochine	%r6,-32765
+.*:	ec 67 80 03 00 42 [ 	]*lochine	%r6,-32765
+.*:	ec 68 80 03 00 42 [ 	]*lochie	%r6,-32765
+.*:	ec 68 80 03 00 42 [ 	]*lochie	%r6,-32765
+.*:	ec 69 80 03 00 42 [ 	]*lochinlh	%r6,-32765
+.*:	ec 6a 80 03 00 42 [ 	]*lochihe	%r6,-32765
+.*:	ec 6b 80 03 00 42 [ 	]*lochinl	%r6,-32765
+.*:	ec 6b 80 03 00 42 [ 	]*lochinl	%r6,-32765
+.*:	ec 6c 80 03 00 42 [ 	]*lochile	%r6,-32765
+.*:	ec 6d 80 03 00 42 [ 	]*lochinh	%r6,-32765
+.*:	ec 6d 80 03 00 42 [ 	]*lochinh	%r6,-32765
+.*:	ec 6e 80 03 00 42 [ 	]*lochino	%r6,-32765
+.*:	ec 6c 80 03 00 46 [ 	]*locghile	%r6,-32765
+.*:	ec 61 80 03 00 46 [ 	]*locghio	%r6,-32765
+.*:	ec 62 80 03 00 46 [ 	]*locghih	%r6,-32765
+.*:	ec 62 80 03 00 46 [ 	]*locghih	%r6,-32765
+.*:	ec 63 80 03 00 46 [ 	]*locghinle	%r6,-32765
+.*:	ec 64 80 03 00 46 [ 	]*locghil	%r6,-32765
+.*:	ec 64 80 03 00 46 [ 	]*locghil	%r6,-32765
+.*:	ec 65 80 03 00 46 [ 	]*locghinhe	%r6,-32765
+.*:	ec 66 80 03 00 46 [ 	]*locghilh	%r6,-32765
+.*:	ec 67 80 03 00 46 [ 	]*locghine	%r6,-32765
+.*:	ec 67 80 03 00 46 [ 	]*locghine	%r6,-32765
+.*:	ec 68 80 03 00 46 [ 	]*locghie	%r6,-32765
+.*:	ec 68 80 03 00 46 [ 	]*locghie	%r6,-32765
+.*:	ec 69 80 03 00 46 [ 	]*locghinlh	%r6,-32765
+.*:	ec 6a 80 03 00 46 [ 	]*locghihe	%r6,-32765
+.*:	ec 6b 80 03 00 46 [ 	]*locghinl	%r6,-32765
+.*:	ec 6b 80 03 00 46 [ 	]*locghinl	%r6,-32765
+.*:	ec 6c 80 03 00 46 [ 	]*locghile	%r6,-32765
+.*:	ec 6d 80 03 00 46 [ 	]*locghinh	%r6,-32765
+.*:	ec 6d 80 03 00 46 [ 	]*locghinh	%r6,-32765
+.*:	ec 6e 80 03 00 46 [ 	]*locghino	%r6,-32765
+.*:	ec 6c 80 03 00 4e [ 	]*lochhile	%r6,-32765
+.*:	ec 61 80 03 00 4e [ 	]*lochhio	%r6,-32765
+.*:	ec 62 80 03 00 4e [ 	]*lochhih	%r6,-32765
+.*:	ec 62 80 03 00 4e [ 	]*lochhih	%r6,-32765
+.*:	ec 63 80 03 00 4e [ 	]*lochhinle	%r6,-32765
+.*:	ec 64 80 03 00 4e [ 	]*lochhil	%r6,-32765
+.*:	ec 64 80 03 00 4e [ 	]*lochhil	%r6,-32765
+.*:	ec 65 80 03 00 4e [ 	]*lochhinhe	%r6,-32765
+.*:	ec 66 80 03 00 4e [ 	]*lochhilh	%r6,-32765
+.*:	ec 67 80 03 00 4e [ 	]*lochhine	%r6,-32765
+.*:	ec 67 80 03 00 4e [ 	]*lochhine	%r6,-32765
+.*:	ec 68 80 03 00 4e [ 	]*lochhie	%r6,-32765
+.*:	ec 68 80 03 00 4e [ 	]*lochhie	%r6,-32765
+.*:	ec 69 80 03 00 4e [ 	]*lochhinlh	%r6,-32765
+.*:	ec 6a 80 03 00 4e [ 	]*lochhihe	%r6,-32765
+.*:	ec 6b 80 03 00 4e [ 	]*lochhinl	%r6,-32765
+.*:	ec 6b 80 03 00 4e [ 	]*lochhinl	%r6,-32765
+.*:	ec 6c 80 03 00 4e [ 	]*lochhile	%r6,-32765
+.*:	ec 6d 80 03 00 4e [ 	]*lochhinh	%r6,-32765
+.*:	ec 6d 80 03 00 4e [ 	]*lochhinh	%r6,-32765
+.*:	ec 6e 80 03 00 4e [ 	]*lochhino	%r6,-32765
+.*:	eb 6d 98 f0 fd e1 [ 	]*stocfhnh	%r6,-10000\(%r9\)
+.*:	eb 61 98 f0 fd e1 [ 	]*stocfho	%r6,-10000\(%r9\)
+.*:	eb 62 98 f0 fd e1 [ 	]*stocfhh	%r6,-10000\(%r9\)
+.*:	eb 62 98 f0 fd e1 [ 	]*stocfhh	%r6,-10000\(%r9\)
+.*:	eb 63 98 f0 fd e1 [ 	]*stocfhnle	%r6,-10000\(%r9\)
+.*:	eb 64 98 f0 fd e1 [ 	]*stocfhl	%r6,-10000\(%r9\)
+.*:	eb 64 98 f0 fd e1 [ 	]*stocfhl	%r6,-10000\(%r9\)
+.*:	eb 65 98 f0 fd e1 [ 	]*stocfhnhe	%r6,-10000\(%r9\)
+.*:	eb 66 98 f0 fd e1 [ 	]*stocfhlh	%r6,-10000\(%r9\)
+.*:	eb 67 98 f0 fd e1 [ 	]*stocfhne	%r6,-10000\(%r9\)
+.*:	eb 67 98 f0 fd e1 [ 	]*stocfhne	%r6,-10000\(%r9\)
+.*:	eb 68 98 f0 fd e1 [ 	]*stocfhe	%r6,-10000\(%r9\)
+.*:	eb 68 98 f0 fd e1 [ 	]*stocfhe	%r6,-10000\(%r9\)
+.*:	eb 69 98 f0 fd e1 [ 	]*stocfhnlh	%r6,-10000\(%r9\)
+.*:	eb 6a 98 f0 fd e1 [ 	]*stocfhhe	%r6,-10000\(%r9\)
+.*:	eb 6b 98 f0 fd e1 [ 	]*stocfhnl	%r6,-10000\(%r9\)
+.*:	eb 6b 98 f0 fd e1 [ 	]*stocfhnl	%r6,-10000\(%r9\)
+.*:	eb 6c 98 f0 fd e1 [ 	]*stocfhle	%r6,-10000\(%r9\)
+.*:	eb 6d 98 f0 fd e1 [ 	]*stocfhnh	%r6,-10000\(%r9\)
+.*:	eb 6d 98 f0 fd e1 [ 	]*stocfhnh	%r6,-10000\(%r9\)
+.*:	eb 6e 98 f0 fd e1 [ 	]*stocfhno	%r6,-10000\(%r9\)
+.*:	e3 69 b8 f0 fd 3a [ 	]*llzrgf	%r6,-10000\(%r9,%r11\)
+.*:	e3 69 b8 f0 fd 3b [ 	]*lzrf	%r6,-10000\(%r9,%r11\)
+.*:	e3 69 b8 f0 fd 2a [ 	]*lzrg	%r6,-10000\(%r9,%r11\)
+.*:	b9 ec 00 69 [ 	]*ppno	%r6,%r9

@@ -311,6 +311,7 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RIE_R0I0     6, { R_8,I16_16,0,0,0,0 }             /* e.g. citne */
 #define INSTR_RIE_R0UU     6, { R_8,U16_16,U4_32,0,0,0 }         /* e.g. clfit */
 #define INSTR_RIE_R0U0     6, { R_8,U16_16,0,0,0,0 }             /* e.g. clfitne */
+#define INSTR_RIE_RUI0     6, { R_8,I16_16,U4_12,0,0,0 }         /* e.g. lochi */
 #define INSTR_RIE_RRUUU    6, { R_8,R_12,U8_16,U8_24,U8_32,0 }   /* e.g. rnsbg */
 #define INSTR_RIL_0P       6, { J32_16,0,0,0,0 }                 /* e.g. jg    */
 #define INSTR_RIL_RP       6, { R_8,J32_16,0,0,0,0 }             /* e.g. brasl */
@@ -515,6 +516,7 @@ const struct s390_operand s390_operands[] =
 #define MASK_RIE_R0I0     { 0xff, 0x0f, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RIE_R0UU     { 0xff, 0x0f, 0x00, 0x00, 0x0f, 0xff }
 #define MASK_RIE_R0U0     { 0xff, 0x0f, 0x00, 0x00, 0xff, 0xff }
+#define MASK_RIE_RUI0     { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RIE_RRUUU    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RIL_0P       { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIL_RP       { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
