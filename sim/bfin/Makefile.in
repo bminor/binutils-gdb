@@ -58,7 +58,7 @@ $(srcdir)/linux-fixed-code.h: @MAINTAINER_MODE_TRUE@ $(srcdir)/linux-fixed-code.
 		$(OBJDUMP_FOR_TARGET) -d -z linux-fixed-code.o > $@.dis; \
 		sed -n \
 			-e 's:^[^	]*	:0x:' \
-			-e '/^0x/{s:	.*::;s: *$$:,:;s: :, 0x:g;p}' \
+			-e '/^0x/{s:	.*::;s: *$$:,:;s: :, 0x:g;p;}' \
 			$@.dis; \
 		rm -f $@.dis; \
 		echo "};" \

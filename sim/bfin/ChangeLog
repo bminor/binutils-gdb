@@ -1,3 +1,9 @@
+2015-03-10  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/13160
+	* Makefile.in ($(srcdir)/linux-fixed-code.h): Put a ; after the
+	print sed command for BSD compatibility.
+
 2015-03-08  Mike Frysinger  <vapier@gentoo.org>
 
 	PR sim/13160
