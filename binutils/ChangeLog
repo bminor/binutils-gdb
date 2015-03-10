@@ -1,3 +1,8 @@
+2015-03-10  Yuri Gribov  <y.gribov@samsung.arm>
+
+	PR ld/16572
+	* readelf.c: Remove support for ELF_ARM_HASENTRY.
+
 2015-03-05  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18064

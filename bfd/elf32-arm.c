@@ -8234,18 +8234,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
   if (r_type != howto->type)
     howto = elf32_arm_howto_from_type (r_type);
 
-  /* If the start address has been set, then set the EF_ARM_HASENTRY
-     flag.  Setting this more than once is redundant, but the cost is
-     not too high, and it keeps the code simple.
-
-     The test is done  here, rather than somewhere else, because the
-     start address is only set just before the final link commences.
-
-     Note - if the user deliberately sets a start address of 0, the
-     flag will not be set.  */
-  if (bfd_get_start_address (output_bfd) != 0)
-    elf_elfheader (output_bfd)->e_flags |= EF_ARM_HASENTRY;
-
   eh = (struct elf32_arm_link_hash_entry *) h;
   sgot = globals->root.sgot;
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -12394,10 +12382,7 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
   if (flags & EF_ARM_RELEXEC)
     fprintf (file, _(" [relocatable executable]"));
 
-  if (flags & EF_ARM_HASENTRY)
-    fprintf (file, _(" [has entry point]"));
-
-  flags &= ~ (EF_ARM_RELEXEC | EF_ARM_HASENTRY);
+  flags &= ~EF_ARM_RELEXEC;
 
   if (flags)
     fprintf (file, _("<Unrecognised flag bits set>"));

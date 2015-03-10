@@ -2280,12 +2280,6 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
       e_flags &= ~ EF_ARM_RELEXEC;
     }
 
-  if (e_flags & EF_ARM_HASENTRY)
-    {
-      strcat (buf, ", has entry point");
-      e_flags &= ~ EF_ARM_HASENTRY;
-    }
-
   /* Now handle EABI specific flags.  */
   switch (eabi)
     {

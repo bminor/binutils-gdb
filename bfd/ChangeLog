@@ -1,3 +1,10 @@
+2015-03-10  Yuri Gribov  <y.gribov@samsung.arm>
+
+	PR ld/16572
+	* elf32-arm.c (elf32_arm_final_link_relocate): Remove support for
+	ELF_ARM_HASENTRY.
+	(elf32_arm_print_private_bfd_data): Likewise.
+
 2015-03-06  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17765

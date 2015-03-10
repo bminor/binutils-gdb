@@ -1,3 +1,8 @@
+2015-03-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR ld/16572
+	* elf/arm.h (EF_ARM_HASENTRY): Remove.
+
 2015-02-19  Pedro Alves  <palves@redhat.com>
 
 	* floatformat.h [__cplusplus]: Wrap in extern "C".
