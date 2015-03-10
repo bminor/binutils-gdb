@@ -1,3 +1,9 @@
+2015-03-10  Michael Perkins  <perkinsmg75@yahoo.co.uk>
+
+	* config/tc-arm.c (parse_operands): Fix bug setting writeback
+	values for '^' on OP_REGLSTs.
+	(do_push_pop): Add new writeback constraint.
+
 2015-03-10  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-arm.c (mapping_state): Remove first MAP_DATA emitting code.

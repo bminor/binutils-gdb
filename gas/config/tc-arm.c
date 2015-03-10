@@ -7038,7 +7038,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  val = parse_reg_list (&str);
 	  if (*str == '^')
 	    {
-	      inst.operands[1].writeback = 1;
+	      inst.operands[i].writeback = 1;
 	      str++;
 	    }
 	  break;
@@ -9036,6 +9036,8 @@ do_pli (void)
 static void
 do_push_pop (void)
 {
+  constraint (inst.operands[0].writeback,
+	      _("push/pop do not support {reglist}^"));
   inst.operands[1] = inst.operands[0];
   memset (&inst.operands[0], 0, sizeof inst.operands[0]);
   inst.operands[0].isreg = 1;
