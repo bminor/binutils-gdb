@@ -1,3 +1,9 @@
+2015-03-10  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/17852
+	* config/tc-arm.c (md_begin): Ensure that selected_cpu is
+	initialised when CPU_DEFAULT is defined.
+
 2015-03-05  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (md_parse_option): Fix code to set or clear

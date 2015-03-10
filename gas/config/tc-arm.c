@@ -23951,6 +23951,8 @@ md_begin (void)
       mcpu_cpu_opt = &cpu_default;
       selected_cpu = cpu_default;
     }
+  else if (no_cpu_selected ())
+    selected_cpu = cpu_default;
 #else
   if (mcpu_cpu_opt)
     selected_cpu = *mcpu_cpu_opt;
