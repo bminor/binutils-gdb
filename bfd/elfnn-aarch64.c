@@ -2327,6 +2327,28 @@ elfNN_aarch64_get_stub_entry (const asection *input_section,
 }
 
 
+/* Create a stub section.  */
+
+static asection *
+_bfd_aarch64_create_stub_section (asection *section,
+				  struct elf_aarch64_link_hash_table *htab)
+{
+  size_t namelen;
+  bfd_size_type len;
+  char *s_name;
+
+  namelen = strlen (section->name);
+  len = namelen + sizeof (STUB_SUFFIX);
+  s_name = bfd_alloc (htab->stub_bfd, len);
+  if (s_name == NULL)
+    return NULL;
+
+  memcpy (s_name, section->name, namelen);
+  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
+  return (*htab->add_stub_section) (s_name, section);
+}
+
+
 /* Find or create a stub section in the stub group for an input
    section.  */
 
@@ -2346,20 +2368,7 @@ _bfd_aarch64_create_or_find_stub_sec (asection *section,
       stub_sec = htab->stub_group[link_sec->id].stub_sec;
       if (stub_sec == NULL)
 	{
-	  size_t namelen;
-	  bfd_size_type len;
-	  char *s_name;
-
-	  namelen = strlen (link_sec->name);
-	  len = namelen + sizeof (STUB_SUFFIX);
-	  s_name = bfd_alloc (htab->stub_bfd, len);
-	  if (s_name == NULL)
-	    return NULL;
-
-	  memcpy (s_name, link_sec->name, namelen);
-	  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
-	  stub_sec = (*htab->add_stub_section) (s_name, link_sec);
-
+	  stub_sec = _bfd_aarch64_create_stub_section (link_sec, htab)
 	  if (stub_sec == NULL)
 	    return NULL;
 	  htab->stub_group[link_sec->id].stub_sec = stub_sec;
