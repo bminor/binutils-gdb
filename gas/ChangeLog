@@ -1,3 +1,8 @@
+2015-03-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (mapping_state): Set minimum alignment for
+	code sections.
+
 2015-03-10  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/17852
