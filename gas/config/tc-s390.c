@@ -1216,6 +1216,9 @@ md_gather_operands (char *str,
 	    }
 	  else
 	    {
+	      if ((operand->flags & S390_OPERAND_LENGTH)
+		  && ex.X_op != O_constant)
+		as_fatal (_("invalid length field specified"));
 	      if ((operand->flags & S390_OPERAND_INDEX)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
