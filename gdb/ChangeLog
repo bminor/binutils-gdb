@@ -1,5 +1,11 @@
 2015-03-11  Andy Wingo  <wingo@igalia.com>
 
+	* guile/scm-cmd.c (cmdscm_destroyer): Don't xfree the name and
+	other strings, as these are on the GC'd heap, and will be
+	collected along with the smob.
+
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
 	* guile/scm-objfile.c (gdbscm_objfile_progspace): New function.
 	(objfile_functions): Bind gdbscm_objfile_progspace to
 	objfile-progspace.
