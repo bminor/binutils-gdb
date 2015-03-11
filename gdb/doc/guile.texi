@@ -2250,6 +2250,11 @@ Return the file name of @var{objfile} as a string,
 with symbolic links resolved.
 @end deffn
 
+@deffn {Scheme Procedure} objfile-progspace objfile
+Return the @code{<gdb:progspace>} that this object file lives in.
+@xref{Progspaces In Guile}, for more on progspaces.
+@end deffn
+
 @deffn {Scheme Procedure} objfile-pretty-printers objfile
 Return the list of registered @code{<gdb:pretty-printer>} objects for
 @var{objfile}.  @xref{Guile Pretty Printing API}, for more information.

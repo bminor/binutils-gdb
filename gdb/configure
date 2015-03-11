@@ -9229,6 +9229,14 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
+if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = x""yes; then :
+
+$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
+
+
+fi
+
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -9305,6 +9313,14 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
+if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = x""yes; then :
+
+$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
+
+
+fi
+
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -9378,6 +9394,14 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
+if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = x""yes; then :
+
+$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
+
+
+fi
+
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -9461,6 +9485,14 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
+if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = x""yes; then :
+
+$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
+
+
+fi
+
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then

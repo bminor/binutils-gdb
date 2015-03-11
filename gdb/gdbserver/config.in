@@ -210,6 +210,12 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
+/* Define to 1 if `struct stat' is a member of `st_blksize'. */
+#undef HAVE_STRUCT_STAT_ST_BLKSIZE
+
+/* Define to 1 if `struct stat' is a member of `st_blocks'. */
+#undef HAVE_STRUCT_STAT_ST_BLOCKS
+
 /* Define to 1 if the target supports __sync_*_compare_and_swap */
 #undef HAVE_SYNC_BUILTINS
 

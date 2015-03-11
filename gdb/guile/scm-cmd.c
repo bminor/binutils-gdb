@@ -286,11 +286,6 @@ cmdscm_destroyer (struct cmd_list_element *self, void *context)
   command_smob *c_smob = (command_smob *) context;
 
   cmdscm_release_command (c_smob);
-
-  /* We allocated the name, doc string, and perhaps the prefix name.  */
-  xfree ((char *) self->name);
-  xfree ((char *) self->doc);
-  xfree ((char *) self->prefixname);
 }
 
 /* Called by gdb to invoke the command.  */

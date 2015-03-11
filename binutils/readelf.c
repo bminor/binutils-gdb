@@ -2280,12 +2280,6 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
       e_flags &= ~ EF_ARM_RELEXEC;
     }
 
-  if (e_flags & EF_ARM_HASENTRY)
-    {
-      strcat (buf, ", has entry point");
-      e_flags &= ~ EF_ARM_HASENTRY;
-    }
-
   /* Now handle EABI specific flags.  */
   switch (eabi)
     {
@@ -4238,11 +4232,6 @@ parse_args (int argc, char ** argv)
       && !do_section_groups && !do_archive_index
       && !do_dyn_syms)
     usage (stderr);
-  else if (argc < 3)
-    {
-      warn (_("Nothing to do.\n"));
-      usage (stderr);
-    }
 }
 
 static const char *
@@ -16137,6 +16126,11 @@ main (int argc, char ** argv)
 
   if (optind < (argc - 1))
     show_name = 1;
+  else if (optind >= argc)
+    {
+      warn (_("Nothing to do.\n"));
+      usage (stderr);
+    }
 
   err = 0;
   while (optind < argc)

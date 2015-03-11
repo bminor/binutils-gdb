@@ -46,6 +46,14 @@
 #define PTRACE_SETREGSET 0x4205
 #endif
 
+/* Per-thread arch-specific data.  */
+
+struct arch_lwp_info
+{
+  /* Non-zero if the thread's PER info must be re-written.  */
+  int per_info_changed;
+};
+
 static int have_regset_last_break = 0;
 static int have_regset_system_call = 0;
 static int have_regset_tdb = 0;
@@ -465,8 +473,10 @@ s390_stopped_by_watchpoint (struct target_ops *ops)
   return result;
 }
 
+/* Each time before resuming a thread, update its PER info.  */
+
 static void
-s390_fix_watch_points (struct lwp_info *lp)
+s390_prepare_to_resume (struct lwp_info *lp)
 {
   int tid;
 
@@ -475,6 +485,12 @@ s390_fix_watch_points (struct lwp_info *lp)
 
   CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
   struct watch_area *area;
+
+  if (lp->arch_private == NULL
+      || !lp->arch_private->per_info_changed)
+    return;
+
+  lp->arch_private->per_info_changed = 0;
 
   tid = ptid_get_lwp (lp->ptid);
   if (tid == 0)
@@ -509,6 +525,30 @@ s390_fix_watch_points (struct lwp_info *lp)
     perror_with_name (_("Couldn't modify watchpoint status"));
 }
 
+/* Make sure that LP is stopped and mark its PER info as changed, so
+   the next resume will update it.  */
+
+static void
+s390_refresh_per_info (struct lwp_info *lp)
+{
+  if (lp->arch_private == NULL)
+    lp->arch_private = XCNEW (struct arch_lwp_info);
+
+  lp->arch_private->per_info_changed = 1;
+
+  if (!lp->stopped)
+    linux_stop_lwp (lp);
+}
+
+/* When attaching to a new thread, mark its PER info as changed.  */
+
+static void
+s390_new_thread (struct lwp_info *lp)
+{
+  lp->arch_private = XCNEW (struct arch_lwp_info);
+  lp->arch_private->per_info_changed = 1;
+}
+
 static int
 s390_insert_watchpoint (struct target_ops *self,
 			CORE_ADDR addr, int len, int type,
@@ -527,7 +567,7 @@ s390_insert_watchpoint (struct target_ops *self,
   watch_base = area;
 
   ALL_LWPS (lp)
-    s390_fix_watch_points (lp);
+    s390_refresh_per_info (lp);
   return 0;
 }
 
@@ -556,7 +596,7 @@ s390_remove_watchpoint (struct target_ops *self,
   xfree (area);
 
   ALL_LWPS (lp)
-    s390_fix_watch_points (lp);
+    s390_refresh_per_info (lp);
   return 0;
 }
 
@@ -699,5 +739,6 @@ _initialize_s390_nat (void)
 
   /* Register the target.  */
   linux_nat_add_target (t);
-  linux_nat_set_new_thread (t, s390_fix_watch_points);
+  linux_nat_set_new_thread (t, s390_new_thread);
+  linux_nat_set_prepare_to_resume (t, s390_prepare_to_resume);
 }

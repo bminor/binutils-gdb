@@ -25,6 +25,9 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include "common-remote-fileio.h"
 
 extern int remote_debug;
 
@@ -412,6 +415,42 @@ handle_pwrite (char *own_buf, int packet_len)
 }
 
 static void
+handle_fstat (char *own_buf, int *new_packet_len)
+{
+  int fd, bytes_sent;
+  char *p;
+  struct stat st;
+  struct fio_stat fst;
+
+  p = own_buf + strlen ("vFile:fstat:");
+
+  if (require_int (&p, &fd)
+      || require_valid_fd (fd)
+      || require_end (p))
+    {
+      hostio_packet_error (own_buf);
+      return;
+    }
+
+  if (fstat (fd, &st) == -1)
+    {
+      hostio_error (own_buf);
+      return;
+    }
+
+  remote_fileio_to_fio_stat (&st, &fst);
+
+  bytes_sent = hostio_reply_with_data (own_buf,
+				       (char *) &fst, sizeof (fst),
+				       new_packet_len);
+
+  /* If the response does not fit into a single packet, do not attempt
+     to return a partial response, but simply fail.  */
+  if (bytes_sent < sizeof (fst))
+    write_enn (own_buf);
+}
+
+static void
 handle_close (char *own_buf)
 {
   int fd, ret;
@@ -517,6 +556,8 @@ handle_vFile (char *own_buf, int packet_len, int *new_packet_len)
     handle_pread (own_buf, new_packet_len);
   else if (startswith (own_buf, "vFile:pwrite:"))
     handle_pwrite (own_buf, packet_len);
+  else if (startswith (own_buf, "vFile:fstat:"))
+    handle_fstat (own_buf, new_packet_len);
   else if (startswith (own_buf, "vFile:close:"))
     handle_close (own_buf);
   else if (startswith (own_buf, "vFile:unlink:"))

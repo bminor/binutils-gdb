@@ -19748,6 +19748,10 @@ are:
 @tab @code{vFile:readlink}
 @tab Host I/O
 
+@item @code{hostio-fstat-packet}
+@tab @code{vFile:fstat}
+@tab Host I/O
+
 @item @code{noack-packet}
 @tab @code{QStartNoAckMode}
 @tab Packet acknowledgment
@@ -36058,6 +36062,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{vFile:fstat}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36245,6 +36254,9 @@ breakpoints.
 @item hwbreak
 The remote stub reports the @samp{hwbreak} stop reason for hardware
 breakpoints.
+
+@item vFile:fstat
+The remote stub understands the @samp{vFile:fstat} packet.
 
 @end table
 
@@ -37406,6 +37418,17 @@ separate @var{count} argument; the length of @var{data} in the
 packet is used.  @samp{vFile:write} returns the number of bytes written,
 which may be shorter than the length of @var{data}, or -1 if an
 error occurred.
+
+@item vFile:fstat: @var{fd}
+Get information about the open file corresponding to @var{fd}.
+On success the information is returned as a binary attachment
+and the return value is the size of this attachment in bytes.
+If an error occurs the return value is -1.  The format of the
+returned binary attachment is as described in @ref{struct stat}.
+
+This packet is not probed by default; the remote stub must request
+it, by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).
 
 @item vFile:unlink: @var{filename}
 Delete the file at @var{filename} on the target.  Return 0,

@@ -1478,7 +1478,14 @@ mapping_state (enum mstate state)
     /* The mapping symbol has already been emitted.
        There is nothing else to do.  */
     return;
-  else if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
+
+  if (state == MAP_INSN)
+    /* AArch64 instructions require 4-byte alignment.  When emitting
+       instructions into any section, record the appropriate section
+       alignment.  */
+    record_alignment (now_seg, 2);
+
+  if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
     /* This case will be evaluated later in the next else.  */
     return;
   else if (TRANSITION (MAP_UNDEFINED, MAP_INSN))

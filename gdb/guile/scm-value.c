@@ -572,7 +572,7 @@ gdbscm_value_dynamic_type (SCM self)
   struct value *value = v_smob->value;
   struct type *type = NULL;
 
-  if (! SCM_UNBNDP (v_smob->type))
+  if (! SCM_UNBNDP (v_smob->dynamic_type))
     return v_smob->dynamic_type;
 
   TRY

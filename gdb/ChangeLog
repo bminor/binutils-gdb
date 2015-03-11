@@ -1,3 +1,125 @@
+2015-03-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): New source break-catch-syscall.c.
+	(COMMON_OBS): New object break-catch-syscall.o.
+	* break-catch-syscall.c: New file.
+	* breakpoint.c: Remove inclusion of "xml-syscall.h".
+	(syscall_catchpoint_p): Move declaration to break-catch-syscall.c
+	(struct syscall_catchpoint): Likewise.
+	(dtor_catch_syscall): Likewise.
+	(catch_syscall_inferior_data): Likewise.
+	(struct catch_syscall_inferior_data): Likewise.
+	(get_catch_syscall_inferior_data): Likewise.
+	(catch_syscall_inferior_data_cleanup): Likewise.
+	(insert_catch_syscall): Likewise.
+	(remove_catch_syscall): Likewise.
+	(breakpoint_hit_catch_syscall): Likewise.
+	(print_it_catch_syscall): Likewise.
+	(print_one_catch_syscall): Likewise.
+	(print_mention_catch_syscall): Likewise.
+	(print_recreate_catch_syscall): Likewise.
+	(catch_syscall_breakpoint_ops): Likewise.
+	(syscall_catchpoint_p): Likewise.
+	(create_syscall_event_catchpoint): Likewise.
+	(catch_syscall_split_args): Likewise.
+	(catch_syscall_command_1): Likewise.
+	(is_syscall_catchpoint_enabled): Likewise.
+	(catch_syscall_enabled): Likewise.
+	(catching_syscall_number): Likewise.
+	(catch_syscall_completer): Likewise.
+	(clear_syscall_counts): Likewise.
+	(initialize_breakpoint_ops): Move initialization of syscall
+	catchpoints to break-catch-syscall.c.
+	(_initialize_breakpoint): Move code related to syscall catchpoints
+	to break-catch-syscall.c.
+
+2015-03-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* breakpoint.c (breakpoint_find_if): New function.
+	* breakpoint.h (breakpoint_find_if): New prototype.
+
+2015-03-11  Gary Benson <gbenson@redhat.com>
+
+	* remote-fileio.h (remote_fileio_to_host_stat): New declaration.
+	* remote-fileio.c (remote_fileio_to_host_uint): New function.
+	(remote_fileio_to_host_ulong): Likewise.
+	(remote_fileio_to_host_mode): Likewise.
+	(remote_fileio_to_host_time): Likewise.
+	(remote_fileio_to_host_stat): Likewise.
+	* remote.c (PACKET_vFile_fstat): New enum value.
+	(remote_protocol_features): Register the "vFile:fstat" feature.
+	(remote_hostio_fstat): New function.
+	(remote_bfd_iovec_stat): Use the above.
+	(_initialize_remote): Register new "set/show remote
+	hostio-fstat-packet" command.
+	* symfile.c (separate_debug_file_exists): Update comment.
+	* NEWS: Announce new vFile:fstat packet.
+
+2015-03-11  Gary Benson <gbenson@redhat.com>
+
+	* common/common-remote-fileio.h: New file.
+	* common/common-remote-fileio.c: Likewise.
+	* Makefile.in (SFILES): Add common/common-remote-fileio.c.
+	(HFILES_NO_SRCDIR): Add common/common-remote-fileio.h.
+	(COMMON_OBS): Add common-remote-fileio.o.
+	(common-remote-fileio.o): New rule.
+	* remote-fileio.h (common-remote-fileio.h): New include.
+	* remote-fileio.c (gdb/fileio.h): Do not include.
+	(remote_fileio_to_be): Moved to common-remote-fileio.h.
+	(remote_fileio_to_fio_uint): Likewise.
+	(remote_fileio_to_fio_time): Likewise.
+	(remote_fileio_mode_to_target): Moved to common-remote-fileio.c.
+	(remote_fileio_to_fio_mode): Likewise.
+	(remote_fileio_to_fio_ulong): Likewise.
+	(remote_fileio_to_fio_stat): Likewise.
+
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
+	* guile/scm-value.c (gdbscm_value_dynamic_type): Fix typo in which
+	we were checking the cached type, not the cached dynamic type.
+
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
+	* guile/scm-cmd.c (cmdscm_destroyer): Don't xfree the name and
+	other strings, as these are on the GC'd heap, and will be
+	collected along with the smob.
+
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
+	* guile/scm-objfile.c (gdbscm_objfile_progspace): New function.
+	(objfile_functions): Bind gdbscm_objfile_progspace to
+	objfile-progspace.
+	* guile/lib/gdb.scm: Add objfile-progspace to exports.
+
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
+	* guile/guile.c (_initialize_guile): Disable automatic
+	finalization, if Guile offers us that possibility.
+	* guile/guile.c (call_initialize_gdb_module):
+	* guile/scm-safe-call.c (gdbscm_with_catch): Arrange to run
+	finalizers in appropriate places.
+	* configure.ac (AC_TRY_LIBGUILE): Add a check for
+	scm_set_automatic_finalization_enabled.
+	* configure: Regenerated.
+
+2015-03-11  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_skip_prologue): Skip the prologue using
+	SAL, if possible.
+
+2015-03-11  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (struct arch_lwp_info): New.
+	(s390_fix_watch_points): Rename to...
+	(s390_prepare_to_resume): ...this.  Skip the PER info update
+	unless the watch points have changed.
+	(s390_refresh_per_info, s390_new_thread): New functions.
+	(s390_insert_watchpoint): Call s390_refresh_per_info instead of
+	s390_fix_watch_points.
+	(s390_remove_watchpoint): Likewise.
+	(_initialize_s390_nat): Reflect renaming of s390_fix_watch_points.
+	Register s390_prepare_to_resume.
+
 2015-03-09  Pedro Alves  <palves@redhat.com>
 
 	Revert:

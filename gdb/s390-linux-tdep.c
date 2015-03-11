@@ -1462,7 +1462,16 @@ static CORE_ADDR
 s390_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct s390_prologue_data data;
-  CORE_ADDR skip_pc;
+  CORE_ADDR skip_pc, func_addr;
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+    {
+      CORE_ADDR post_prologue_pc
+	= skip_prologue_using_sal (gdbarch, func_addr);
+      if (post_prologue_pc != 0)
+	return max (pc, post_prologue_pc);
+    }
+
   skip_pc = s390_analyze_prologue (gdbarch, pc, (CORE_ADDR)-1, &data);
   return skip_pc ? skip_pc : pc;
 }

@@ -1656,3 +1656,26 @@ e700000830e2 wfsdb VRR_VVV "vector fp subtract" z13 zarch
 e7000000004a vftci VRI_VVUUU "vector fp test data class immediate" z13 zarch
 e7000000304a vftcidb VRI_VVU2 "vector fp test data class immediate" z13 zarch
 e7000008304a wftcidb VRI_VVU2 "vector fp test data class immediate" z13 zarch
+
+ed00000000ae cdpt RSL_LRDFU "convert from packed to long dfp" z13 zarch
+ed00000000af cxpt RSL_LRDFEU "convert from packed to extended dfp" z13 zarch
+ed00000000ac cpdt RSL_LRDFU "convert from long dfp to packed" z13 zarch
+ed00000000ad cpxt RSL_LRDFEU "convert from extended dfp to packed" z13 zarch
+
+b9e0 locfhr RRF_U0RR "load high on condition from gpr" z13 zarch
+b9e000000000 locfhr*16 RRF_00RR "load high on condition from gpr" z13 zarch
+eb00000000e0 locfh RSY_RURD2 "load high on condition from memory" z13 zarch
+eb00000000e0 locfh*12 RSY_R0RD "load high on condition from memory" z13 zarch
+ec0000000042 lochi RIE_RUI0 "load halfword immediate on condition into 32 bit gpr" z13 zarch
+ec0000000042 lochi*12 RIE_R0I0 "load halfword immediate on condition into 32 bit gpr" z13 zarch
+ec0000000046 locghi RIE_RUI0 "load halfword immediate on condition into 64 bit gpr" z13 zarch
+ec0000000046 locghi*12 RIE_R0I0 "load halfword immediate on condition into 64 bit gpr" z13 zarch
+ec000000004e lochhi RIE_RUI0 "load halfword high immediate on condition" z13 zarch
+ec000000004e lochhi*12 RIE_R0I0 "load halfword high immediate on condition" z13 zarch
+eb00000000e1 stocfh RSY_RURD2 "store high on condition" z13 zarch
+eb00000000e1 stocfh*12 RSY_R0RD "store high on condition" z13 zarch
+
+e3000000003a llzrgf RXY_RRRD "load logical and zero rightmost bytes 32->64" z13 zarch
+e3000000003b lzrf RXY_RRRD "load and zero rightmost byte 32->32" z13 zarch
+e3000000002a lzrg RXY_RRRD "load and zero rightmost byte 64->64" z13 zarch
+b9ec ppno RRE_RR "perform pseudorandom number operation" z13 zarch

@@ -18,6 +18,11 @@ if { [is_remote host] } then {
     return
 }
 
+# These tests use ELF .section directives
+if ![is_elf_format] {
+    return
+}
+
 send_user "Version [binutil_version $OBJCOPY]"
 
 proc do_assemble {srcfile} {
