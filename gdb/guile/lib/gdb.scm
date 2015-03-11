@@ -271,6 +271,7 @@
  objfile?
  objfile-valid?
  objfile-filename
+ objfile-progspace
  objfile-pretty-printers
  set-objfile-pretty-printers!
  current-objfile

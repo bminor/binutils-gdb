@@ -1,3 +1,7 @@
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
+	* guile.texi (Objfiles In Guile): Document objfile-progspace.
+
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Remote Configuration): Document the "set/show

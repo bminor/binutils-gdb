@@ -1,5 +1,12 @@
 2015-03-11  Andy Wingo  <wingo@igalia.com>
 
+	* guile/scm-objfile.c (gdbscm_objfile_progspace): New function.
+	(objfile_functions): Bind gdbscm_objfile_progspace to
+	objfile-progspace.
+	* guile/lib/gdb.scm: Add objfile-progspace to exports.
+
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
 	* guile/guile.c (_initialize_guile): Disable automatic
 	finalization, if Guile offers us that possibility.
 	* guile/guile.c (call_initialize_gdb_module):

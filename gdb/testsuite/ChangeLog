@@ -1,3 +1,7 @@
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
+	* gdb.guile/scm-objfile.exp: Add objfile-progspace test.
+
 2015-03-11  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/catch-syscall.exp: Fix typo in comments.
