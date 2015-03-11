@@ -1,3 +1,16 @@
+2015-03-11  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (struct arch_lwp_info): New.
+	(s390_fix_watch_points): Rename to...
+	(s390_prepare_to_resume): ...this.  Skip the PER info update
+	unless the watch points have changed.
+	(s390_refresh_per_info, s390_new_thread): New functions.
+	(s390_insert_watchpoint): Call s390_refresh_per_info instead of
+	s390_fix_watch_points.
+	(s390_remove_watchpoint): Likewise.
+	(_initialize_s390_nat): Reflect renaming of s390_fix_watch_points.
+	Register s390_prepare_to_resume.
+
 2015-03-09  Pedro Alves  <palves@redhat.com>
 
 	Revert:
