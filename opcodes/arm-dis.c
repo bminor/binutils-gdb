@@ -5816,7 +5816,10 @@ print_insn_data (bfd_vma pc ATTRIBUTE_UNUSED,
 }
 
 /* Disallow mapping symbols ($a, $b, $d, $t etc) from
-   being displayed in symbol relative addresses.  */
+   being displayed in symbol relative addresses.
+
+   Also disallow private symbol, with __tagsym$$ prefix,
+   from ARM RVCT toolchain being displayed.  */
 
 bfd_boolean
 arm_symbol_is_valid (asymbol * sym,
@@ -5829,7 +5832,7 @@ arm_symbol_is_valid (asymbol * sym,
 
   name = bfd_asymbol_name (sym);
 
-  return (name && *name != '$');
+  return (name && *name != '$' && strncmp (name, "__tagsym$$", 10));
 }
 
 /* Parse an individual disassembler option.  */

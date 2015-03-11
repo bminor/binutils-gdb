@@ -1,3 +1,7 @@
+2015-03-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (arm_symbol_is_valid): Skip ARM private symbols.
+
 2014-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
