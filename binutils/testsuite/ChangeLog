@@ -1,3 +1,7 @@
+2015-03-11  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/update-section.exp: Only run on ELF targets.
+
 2015-03-03  Jiong Wang  <jiong.wang@arm.com>
 
 	* binutils-all/arm/rvct_symbol.s: New testcase.
