@@ -22,6 +22,8 @@
 #ifndef REMOTE_FILEIO_H
 #define REMOTE_FILEIO_H
 
+#include "common-remote-fileio.h"
+
 struct cmd_list_element;
 
 /* Unified interface to remote fileio, called in remote.c from

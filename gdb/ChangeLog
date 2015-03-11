@@ -1,3 +1,21 @@
+2015-03-11  Gary Benson <gbenson@redhat.com>
+
+	* common/common-remote-fileio.h: New file.
+	* common/common-remote-fileio.c: Likewise.
+	* Makefile.in (SFILES): Add common/common-remote-fileio.c.
+	(HFILES_NO_SRCDIR): Add common/common-remote-fileio.h.
+	(COMMON_OBS): Add common-remote-fileio.o.
+	(common-remote-fileio.o): New rule.
+	* remote-fileio.h (common-remote-fileio.h): New include.
+	* remote-fileio.c (gdb/fileio.h): Do not include.
+	(remote_fileio_to_be): Moved to common-remote-fileio.h.
+	(remote_fileio_to_fio_uint): Likewise.
+	(remote_fileio_to_fio_time): Likewise.
+	(remote_fileio_mode_to_target): Moved to common-remote-fileio.c.
+	(remote_fileio_to_fio_mode): Likewise.
+	(remote_fileio_to_fio_ulong): Likewise.
+	(remote_fileio_to_fio_stat): Likewise.
+
 2015-03-11  Andy Wingo  <wingo@igalia.com>
 
 	* guile/scm-value.c (gdbscm_value_dynamic_type): Fix typo in which

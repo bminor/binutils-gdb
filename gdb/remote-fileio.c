@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "remote.h"
-#include "gdb/fileio.h"
 #include "gdb_wait.h"
 #include <sys/stat.h>
 #include "remote-fileio.h"
@@ -194,48 +193,6 @@ remote_fileio_mode_to_host (long mode, int open_call)
   return hmode;
 }
 
-static LONGEST
-remote_fileio_mode_to_target (mode_t mode)
-{
-  mode_t tmode = 0;
-
-  if (S_ISREG(mode))
-    tmode |= FILEIO_S_IFREG;
-  if (S_ISDIR(mode))
-    tmode |= FILEIO_S_IFDIR;
-  if (S_ISCHR(mode))
-    tmode |= FILEIO_S_IFCHR;
-  if (mode & S_IRUSR)
-    tmode |= FILEIO_S_IRUSR;
-  if (mode & S_IWUSR)
-    tmode |= FILEIO_S_IWUSR;
-  if (mode & S_IXUSR)
-    tmode |= FILEIO_S_IXUSR;
-#ifdef S_IRGRP
-  if (mode & S_IRGRP)
-    tmode |= FILEIO_S_IRGRP;
-#endif
-#ifdef S_IWRGRP
-  if (mode & S_IWGRP)
-    tmode |= FILEIO_S_IWGRP;
-#endif
-#ifdef S_IXGRP
-  if (mode & S_IXGRP)
-    tmode |= FILEIO_S_IXGRP;
-#endif
-  if (mode & S_IROTH)
-    tmode |= FILEIO_S_IROTH;
-#ifdef S_IWOTH
-  if (mode & S_IWOTH)
-    tmode |= FILEIO_S_IWOTH;
-#endif
-#ifdef S_IXOTH
-  if (mode & S_IXOTH)
-    tmode |= FILEIO_S_IXOTH;
-#endif
-  return tmode;
-}
-
 static int
 remote_fileio_errno_to_target (int error)
 {
@@ -381,78 +338,10 @@ remote_fileio_extract_ptr_w_len (char **buf, CORE_ADDR *ptrval, int *length)
   return 0;
 }
 
-/* Convert to big endian.  */
-static void
-remote_fileio_to_be (LONGEST num, char *buf, int bytes)
-{
-  int i;
-
-  for (i = 0; i < bytes; ++i)
-    buf[i] = (num >> (8 * (bytes - i - 1))) & 0xff;
-}
-
-static void
-remote_fileio_to_fio_uint (long num, fio_uint_t fnum)
-{
-  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
-}
-
-static void
-remote_fileio_to_fio_mode (mode_t num, fio_mode_t fnum)
-{
-  remote_fileio_to_be (remote_fileio_mode_to_target(num), (char *) fnum, 4);
-}
-
-static void
-remote_fileio_to_fio_time (time_t num, fio_time_t fnum)
-{
-  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
-}
-
 static void
 remote_fileio_to_fio_long (LONGEST num, fio_long_t fnum)
 {
   remote_fileio_to_be (num, (char *) fnum, 8);
-}
-
-static void
-remote_fileio_to_fio_ulong (LONGEST num, fio_ulong_t fnum)
-{
-  remote_fileio_to_be (num, (char *) fnum, 8);
-}
-
-static void
-remote_fileio_to_fio_stat (struct stat *st, struct fio_stat *fst)
-{
-  LONGEST blksize;
-
-  /* `st_dev' is set in the calling function.  */
-  remote_fileio_to_fio_uint ((long) st->st_ino, fst->fst_ino);
-  remote_fileio_to_fio_mode (st->st_mode, fst->fst_mode);
-  remote_fileio_to_fio_uint ((long) st->st_nlink, fst->fst_nlink);
-  remote_fileio_to_fio_uint ((long) st->st_uid, fst->fst_uid);
-  remote_fileio_to_fio_uint ((long) st->st_gid, fst->fst_gid);
-  remote_fileio_to_fio_uint ((long) st->st_rdev, fst->fst_rdev);
-  remote_fileio_to_fio_ulong ((LONGEST) st->st_size, fst->fst_size);
-#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
-  blksize = st->st_blksize;
-#else
-  blksize = 512;
-#endif
-  remote_fileio_to_fio_ulong (blksize, fst->fst_blksize);
-#if HAVE_STRUCT_STAT_ST_BLOCKS
-  remote_fileio_to_fio_ulong ((LONGEST) st->st_blocks, fst->fst_blocks);
-#else
-  /* FIXME: This is correct for DJGPP, but other systems that don't
-     have st_blocks, if any, might prefer 512 instead of st_blksize.
-     (eliz, 30-12-2003)  */
-  remote_fileio_to_fio_ulong (((LONGEST) st->st_size + blksize - 1)
-			      / blksize,
-			      fst->fst_blocks);
-#endif
-  remote_fileio_to_fio_time (st->st_atime, fst->fst_atime);
-  remote_fileio_to_fio_time (st->st_mtime, fst->fst_mtime);
-  remote_fileio_to_fio_time (st->st_ctime, fst->fst_ctime);
 }
 
 static void
