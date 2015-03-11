@@ -1,5 +1,10 @@
 2015-03-11  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (s390_skip_prologue): Skip the prologue using
+	SAL, if possible.
+
+2015-03-11  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c (struct arch_lwp_info): New.
 	(s390_fix_watch_points): Rename to...
 	(s390_prepare_to_resume): ...this.  Skip the PER info update
