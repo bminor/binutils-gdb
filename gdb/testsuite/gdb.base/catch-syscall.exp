@@ -109,7 +109,7 @@ proc check_continue { syscall } {
     # first print that the infeior has called the syscall,
     # and after print that the syscall has returned.
 
-    # Testing if the inferiorr has called the syscall.
+    # Testing if the inferior has called the syscall.
     check_call_to_syscall $syscall
     # And now, that the syscall has returned.
     check_return_from_syscall $syscall
