@@ -3431,9 +3431,6 @@ md_assemble (char *str)
 	  size = bfd_get_reloc_size (reloc_howto);
 	  offset = target_big_endian ? (insn_length - size) : 0;
 
-	  if (size < 1 || size > 4)
-	    abort ();
-
 	  fixP = fix_new_exp (frag_now,
 			      f - frag_now->fr_literal + offset,
 			      size,
@@ -6773,6 +6770,29 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  fieldval += 2;
 	  break;
 #endif
+
+	case BFD_RELOC_VTABLE_INHERIT:
+	case BFD_RELOC_VTABLE_ENTRY:
+	case BFD_RELOC_PPC_DTPMOD:
+	case BFD_RELOC_PPC_TPREL:
+	case BFD_RELOC_PPC_DTPREL:
+	case BFD_RELOC_PPC_COPY:
+	case BFD_RELOC_PPC_GLOB_DAT:
+	case BFD_RELOC_32_PLT_PCREL:
+	case BFD_RELOC_PPC_EMB_NADDR32:
+	case BFD_RELOC_PPC64_TOC:
+	case BFD_RELOC_CTOR:
+	case BFD_RELOC_32:
+	case BFD_RELOC_32_PCREL:
+	case BFD_RELOC_RVA:
+	case BFD_RELOC_64:
+	case BFD_RELOC_64_PCREL:
+	case BFD_RELOC_PPC64_ADDR64_LOCAL:
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("%s unsupported as instruction fixup"),
+			bfd_get_reloc_code_name (fixP->fx_r_type));
+	  fixP->fx_done = 1;
+	  return;
 
 	default:
 	  break;
