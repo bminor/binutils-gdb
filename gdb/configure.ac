@@ -1090,6 +1090,11 @@ AC_DEFUN([AC_TRY_LIBGUILE],
                     GUILE_CPPFLAGS=$new_CPPFLAGS
                     GUILE_LIBS=$new_LIBS],
                    [found_usable_guile=no])
+    dnl scm_set_automatic_finalization_enabled added in Guile 2.2.
+    AC_CHECK_FUNC(scm_set_automatic_finalization_enabled,
+      AC_DEFINE(HAVE_GUILE_MANUAL_FINALIZATION, 1,
+                [Define if Guile supports manual finalization.])
+    )
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
