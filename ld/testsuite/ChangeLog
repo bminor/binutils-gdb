@@ -1,3 +1,18 @@
+2015-03-11  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tls32.s: Add GOT pointer setup.
+	* ld-powerpc/tls32.d: Update.
+	* ld-powerpc/tls32.g: Update.
+	* ld-powerpc/tls32.t: Update.
+	* ld-powerpc/tlsexe.d: Update.
+	* ld-powerpc/tlsexe32.d: Update.
+	* ld-powerpc/tlsexe32.g: Update.
+	* ld-powerpc/tlsexe32.r: Update.
+	* ld-powerpc/tlsexetoc.d: Update.
+	* ld-powerpc/tlsso32.d: Update.
+	* ld-powerpc/tlsso32.g: Update.
+	* ld-powerpc/tlsso32.r: Update.
+
 2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/pr15228

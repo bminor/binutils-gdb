@@ -1,3 +1,8 @@
+2015-03-11  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Examine stubs in
+	reverse order.  Account for larger size of __tls_get_addr_opt stub.
+
 2015-03-10  Yuri Gribov  <y.gribov@samsung.arm>
 
 	PR ld/16572
