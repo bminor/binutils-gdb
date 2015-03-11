@@ -1,5 +1,14 @@
 2015-03-11  Gary Benson  <gbenson@redhat.com>
 
+	* hostio.c (sys/types.h): New include.
+	(sys/stat.h): Likewise.
+	(common-remote-fileio.h): Likewise.
+	(handle_fstat): New function.
+	(handle_vFile): Handle vFile:fstat packets.
+	* server.c (handle_query): Report vFile:fstat as supported.
+
+2015-03-11  Gary Benson  <gbenson@redhat.com>
+
 	* configure.ac (AC_CHECK_MEMBERS): Add checks for
 	struct stat.st_blocks and struct stat.st_blksize.
 	* configure: Regenerate.
