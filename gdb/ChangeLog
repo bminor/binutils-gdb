@@ -1,3 +1,8 @@
+2015-03-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* breakpoint.c (breakpoint_find_if): New function.
+	* breakpoint.h (breakpoint_find_if): New prototype.
+
 2015-03-11  Gary Benson <gbenson@redhat.com>
 
 	* remote-fileio.h (remote_fileio_to_host_stat): New declaration.
