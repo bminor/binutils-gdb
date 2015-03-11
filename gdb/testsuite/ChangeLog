@@ -1,3 +1,8 @@
+2015-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/killed-outside.exp: New file.
+	* gdb.base/killed-outside.c: New file.
+
 2015-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.asm/asm-source.exp (f at main): Stop at gdbasm_enter.
