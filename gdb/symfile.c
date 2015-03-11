@@ -1377,11 +1377,12 @@ separate_debug_file_exists (const char *name, unsigned long crc,
 
      Some operating systems, e.g. Windows, do not provide a meaningful
      st_ino; they always set it to zero.  (Windows does provide a
-     meaningful st_dev.)  Do not indicate a duplicate library in that
-     case.  While there is no guarantee that a system that provides
-     meaningful inode numbers will never set st_ino to zero, this is
-     merely an optimization, so we do not need to worry about false
-     negatives.  */
+     meaningful st_dev.)  Files accessed from gdbservers that do not
+     support the vFile:fstat packet will also have st_ino set to zero.
+     Do not indicate a duplicate library in either case.  While there
+     is no guarantee that a system that provides meaningful inode
+     numbers will never set st_ino to zero, this is merely an
+     optimization, so we do not need to worry about false negatives.  */
 
   if (bfd_stat (abfd, &abfd_stat) == 0
       && abfd_stat.st_ino != 0
@@ -1409,9 +1410,9 @@ separate_debug_file_exists (const char *name, unsigned long crc,
     {
       unsigned long parent_crc;
 
-      /* If one (or both) the files are accessed for example the via "remote:"
-	 gdbserver way it does not support the bfd_stat operation.  Verify
-	 whether those two files are not the same manually.  */
+      /* If the files could not be verified as different with
+	 bfd_stat then we need to calculate the parent's CRC
+	 to verify whether the files are different or not.  */
 
       if (!verified_as_different)
 	{

@@ -1258,6 +1258,7 @@ enum {
   PACKET_vFile_close,
   PACKET_vFile_unlink,
   PACKET_vFile_readlink,
+  PACKET_vFile_fstat,
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
   PACKET_qXfer_libraries,
@@ -4047,7 +4048,9 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "Qbtrace-conf:bts:size", PACKET_DISABLE, remote_supported_packet,
     PACKET_Qbtrace_conf_bts_size },
   { "swbreak", PACKET_DISABLE, remote_supported_packet, PACKET_swbreak_feature },
-  { "hwbreak", PACKET_DISABLE, remote_supported_packet, PACKET_hwbreak_feature }
+  { "hwbreak", PACKET_DISABLE, remote_supported_packet, PACKET_hwbreak_feature },
+  { "vFile:fstat", PACKET_DISABLE, remote_supported_packet,
+    PACKET_vFile_fstat },
 };
 
 static char *remote_support_xml;
@@ -10064,6 +10067,68 @@ remote_hostio_readlink (struct target_ops *self,
   return ret;
 }
 
+/* Read information about the open file FD on the remote target
+   into ST.  Return 0 on success, or -1 if an error occurs (and
+   set *REMOTE_ERRNO).  */
+
+static int
+remote_hostio_fstat (struct target_ops *self,
+		     int fd, struct stat *st,
+		     int *remote_errno)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  int left = get_remote_packet_size ();
+  int attachment_len, ret;
+  char *attachment;
+  struct fio_stat fst;
+  int read_len;
+
+  if (packet_support (PACKET_vFile_fstat) != PACKET_ENABLE)
+    {
+      /* Strictly we should return -1, ENOSYS here, but when
+	 "set sysroot remote:" was implemented in August 2008
+	 BFD's need for a stat function was sidestepped with
+	 this hack.  This was not remedied until March 2015
+	 so we retain the previous behavior to avoid breaking
+	 compatibility.
+
+	 Note that the memset is a March 2015 addition; older
+	 GDBs set st_size *and nothing else* so the structure
+	 would have garbage in all other fields.  This might
+	 break something but retaining the previous behavior
+	 here would be just too wrong.  */
+
+      memset (st, 0, sizeof (struct stat));
+      st->st_size = INT_MAX;
+      return 0;
+    }
+
+  remote_buffer_add_string (&p, &left, "vFile:fstat:");
+
+  remote_buffer_add_int (&p, &left, fd);
+
+  ret = remote_hostio_send_command (p - rs->buf, PACKET_vFile_fstat,
+				    remote_errno, &attachment,
+				    &attachment_len);
+  if (ret < 0)
+    return ret;
+
+  read_len = remote_unescape_input ((gdb_byte *) attachment, attachment_len,
+				    (gdb_byte *) &fst, sizeof (fst));
+
+  if (read_len != ret)
+    error (_("vFile:fstat returned %d, but %d bytes."), ret, read_len);
+
+  if (read_len != sizeof (fst))
+    error (_("vFile:fstat returned %d bytes, but expecting %d."),
+	   read_len, (int) sizeof (fst));
+
+  remote_fileio_to_host_stat (&fst, st);
+
+  return 0;
+}
+
 static int
 remote_fileio_errno_to_host (int errnum)
 {
@@ -10208,9 +10273,20 @@ remote_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
 static int
 remote_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 {
-  /* FIXME: We should probably implement remote_hostio_stat.  */
-  sb->st_size = INT_MAX;
-  return 0;
+  int fd = *(int *) stream;
+  int remote_errno;
+  int result;
+
+  result = remote_hostio_fstat (find_target_at (process_stratum),
+				fd, sb, &remote_errno);
+
+  if (result == -1)
+    {
+      errno = remote_fileio_errno_to_host (remote_errno);
+      bfd_set_error (bfd_error_system_call);
+    }
+
+  return result;
 }
 
 int
@@ -12350,6 +12426,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_readlink],
 			 "vFile:readlink", "hostio-readlink", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_fstat],
+			 "vFile:fstat", "hostio-fstat", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vAttach],
 			 "vAttach", "attach", 0);

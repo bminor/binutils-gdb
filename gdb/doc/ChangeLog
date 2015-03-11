@@ -1,3 +1,11 @@
+2015-03-11  Gary Benson <gbenson@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): Document the
+	"set/show remote hostio-fstat-packet" command.
+	(General Query Packets): Document the vFile:fstat
+	qSupported features.
+	(Host I/O Packets): Document the vFile:fstat packet.
+
 2015-03-11  Andy Wingo  <wingo@igalia.com>
 
 	* guile.texi (Objfiles In Guile): Document objfile-progspace.

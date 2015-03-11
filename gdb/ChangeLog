@@ -1,5 +1,22 @@
 2015-03-11  Gary Benson <gbenson@redhat.com>
 
+	* remote-fileio.h (remote_fileio_to_host_stat): New declaration.
+	* remote-fileio.c (remote_fileio_to_host_uint): New function.
+	(remote_fileio_to_host_ulong): Likewise.
+	(remote_fileio_to_host_mode): Likewise.
+	(remote_fileio_to_host_time): Likewise.
+	(remote_fileio_to_host_stat): Likewise.
+	* remote.c (PACKET_vFile_fstat): New enum value.
+	(remote_protocol_features): Register the "vFile:fstat" feature.
+	(remote_hostio_fstat): New function.
+	(remote_bfd_iovec_stat): Use the above.
+	(_initialize_remote): Register new "set/show remote
+	hostio-fstat-packet" command.
+	* symfile.c (separate_debug_file_exists): Update comment.
+	* NEWS: Announce new vFile:fstat packet.
+
+2015-03-11  Gary Benson <gbenson@redhat.com>
+
 	* common/common-remote-fileio.h: New file.
 	* common/common-remote-fileio.c: Likewise.
 	* Makefile.in (SFILES): Add common/common-remote-fileio.c.

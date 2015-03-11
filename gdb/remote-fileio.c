@@ -1321,6 +1321,70 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
 
   remote_fileio_sig_exit ();
 }
+
+
+/* Unpack an fio_uint_t.  */
+
+static unsigned int
+remote_fileio_to_host_uint (fio_uint_t fnum)
+{
+  return extract_unsigned_integer ((gdb_byte *) fnum, 4,
+				   BFD_ENDIAN_BIG);
+}
+
+/* Unpack an fio_ulong_t.  */
+
+static ULONGEST
+remote_fileio_to_host_ulong (fio_ulong_t fnum)
+{
+  return extract_unsigned_integer ((gdb_byte *) fnum, 8,
+				   BFD_ENDIAN_BIG);
+}
+
+/* Unpack an fio_mode_t.  */
+
+static mode_t
+remote_fileio_to_host_mode (fio_mode_t fnum)
+{
+  return remote_fileio_mode_to_host (remote_fileio_to_host_uint (fnum),
+				     0);
+}
+
+/* Unpack an fio_time_t.  */
+
+static time_t
+remote_fileio_to_host_time (fio_time_t fnum)
+{
+  return remote_fileio_to_host_uint (fnum);
+}
+
+
+/* See remote-fileio.h.  */
+
+void
+remote_fileio_to_host_stat (struct fio_stat *fst, struct stat *st)
+{
+  memset (st, 0, sizeof (struct stat));
+
+  st->st_dev = remote_fileio_to_host_uint (fst->fst_dev);
+  st->st_ino = remote_fileio_to_host_uint (fst->fst_ino);
+  st->st_mode = remote_fileio_to_host_mode (fst->fst_mode);
+  st->st_nlink = remote_fileio_to_host_uint (fst->fst_nlink);
+  st->st_uid = remote_fileio_to_host_uint (fst->fst_uid);
+  st->st_gid = remote_fileio_to_host_uint (fst->fst_gid);
+  st->st_rdev = remote_fileio_to_host_uint (fst->fst_rdev);
+  st->st_size = remote_fileio_to_host_ulong (fst->fst_size);
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+  st->st_blksize = remote_fileio_to_host_ulong (fst->fst_blksize);
+#endif
+#if HAVE_STRUCT_STAT_ST_BLOCKS
+  st->st_blocks = remote_fileio_to_host_ulong (fst->fst_blocks);
+#endif
+  st->st_atime = remote_fileio_to_host_time (fst->fst_atime);
+  st->st_mtime = remote_fileio_to_host_time (fst->fst_mtime);
+  st->st_ctime = remote_fileio_to_host_time (fst->fst_ctime);
+}
+
 
 static void
 set_system_call_allowed (char *args, int from_tty)

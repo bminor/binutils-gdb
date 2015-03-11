@@ -73,6 +73,9 @@ hwbreak stop reason
   Indicates the target stopped for a hardware breakpoint.  This is
   required for correct non-stop mode operation.
 
+vFile:fstat:
+  Return information about files on the remote system.
+
 * The info record command now shows the recording format and the
   branch tracing configuration for the current thread when using
   the btrace record target.
