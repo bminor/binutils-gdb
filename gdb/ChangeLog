@@ -1,5 +1,40 @@
 2015-03-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* Makefile.in (SFILES): New source break-catch-syscall.c.
+	(COMMON_OBS): New object break-catch-syscall.o.
+	* break-catch-syscall.c: New file.
+	* breakpoint.c: Remove inclusion of "xml-syscall.h".
+	(syscall_catchpoint_p): Move declaration to break-catch-syscall.c
+	(struct syscall_catchpoint): Likewise.
+	(dtor_catch_syscall): Likewise.
+	(catch_syscall_inferior_data): Likewise.
+	(struct catch_syscall_inferior_data): Likewise.
+	(get_catch_syscall_inferior_data): Likewise.
+	(catch_syscall_inferior_data_cleanup): Likewise.
+	(insert_catch_syscall): Likewise.
+	(remove_catch_syscall): Likewise.
+	(breakpoint_hit_catch_syscall): Likewise.
+	(print_it_catch_syscall): Likewise.
+	(print_one_catch_syscall): Likewise.
+	(print_mention_catch_syscall): Likewise.
+	(print_recreate_catch_syscall): Likewise.
+	(catch_syscall_breakpoint_ops): Likewise.
+	(syscall_catchpoint_p): Likewise.
+	(create_syscall_event_catchpoint): Likewise.
+	(catch_syscall_split_args): Likewise.
+	(catch_syscall_command_1): Likewise.
+	(is_syscall_catchpoint_enabled): Likewise.
+	(catch_syscall_enabled): Likewise.
+	(catching_syscall_number): Likewise.
+	(catch_syscall_completer): Likewise.
+	(clear_syscall_counts): Likewise.
+	(initialize_breakpoint_ops): Move initialization of syscall
+	catchpoints to break-catch-syscall.c.
+	(_initialize_breakpoint): Move code related to syscall catchpoints
+	to break-catch-syscall.c.
+
+2015-03-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* breakpoint.c (breakpoint_find_if): New function.
 	* breakpoint.h (breakpoint_find_if): New prototype.
 
