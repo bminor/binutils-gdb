@@ -1,3 +1,7 @@
+2015-03-11  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.exp: Skip it on HP-UX target.
+
 2015-03-09  Pedro Alves  <palves@redhat.com>
 
 	* dg-extract-results.py: Delete.
