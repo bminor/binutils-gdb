@@ -1,5 +1,10 @@
 2015-03-11  Andy Wingo  <wingo@igalia.com>
 
+	* guile/scm-value.c (gdbscm_value_dynamic_type): Fix typo in which
+	we were checking the cached type, not the cached dynamic type.
+
+2015-03-11  Andy Wingo  <wingo@igalia.com>
+
 	* guile/scm-cmd.c (cmdscm_destroyer): Don't xfree the name and
 	other strings, as these are on the GC'd heap, and will be
 	collected along with the smob.
