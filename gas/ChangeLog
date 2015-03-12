@@ -1,3 +1,12 @@
+2015-03-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/17444
+	* config/tc-arm.h (MD_APPLY_SYM_VALUE): Pass the current segment
+	to arm_apply_sym_value.  Update prototype.
+	* config/tc-arm.c (arm_apply_sym_value): Add segment argument.
+	Do not apply the value if the symbol is in a different segment to
+	the current segment.
+
 2015-03-11  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_assemble): Don't abort on 8 byte insn fixups.

@@ -25647,14 +25647,18 @@ arm_convert_symbolic_attribute (const char *name)
 }
 
 
-/* Apply sym value for relocations only in the case that
-   they are for local symbols and you have the respective
-   architectural feature for blx and simple switches.  */
+/* Apply sym value for relocations only in the case that they are for
+   local symbols in the same segment as the fixup and you have the
+   respective architectural feature for blx and simple switches.  */
 int
-arm_apply_sym_value (struct fix * fixP)
+arm_apply_sym_value (struct fix * fixP, segT this_seg)
 {
   if (fixP->fx_addsy
       && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
+      /* PR 17444: If the local symbol is in a different section then a reloc
+	 will always be generated for it, so applying the symbol value now
+	 will result in a double offset being stored in the relocation.  */
+      && (S_GET_SEGMENT (fixP->fx_addsy) == this_seg)
       && !S_FORCE_RELOC (fixP->fx_addsy, TRUE))
     {
       switch (fixP->fx_r_type)
@@ -25668,7 +25672,7 @@ arm_apply_sym_value (struct fix * fixP)
 	case BFD_RELOC_ARM_PCREL_CALL:
 	case BFD_RELOC_THUMB_PCREL_BLX:
 	  if (THUMB_IS_FUNC (fixP->fx_addsy))
-	      return 1;
+	    return 1;
 	  break;
 
 	default:

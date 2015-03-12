@@ -327,7 +327,7 @@ struct arm_segment_info_type
 
 #ifdef OBJ_ELF
 /* Values passed to md_apply_fix don't include the symbol value.  */
-# define MD_APPLY_SYM_VALUE(FIX) 		arm_apply_sym_value (FIX)
+# define MD_APPLY_SYM_VALUE(FIX) 		arm_apply_sym_value (FIX, this_segment)
 #endif
 
 #ifdef OBJ_COFF
@@ -372,7 +372,7 @@ void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 #ifdef OBJ_ELF
 #define CONVERT_SYMBOLIC_ATTRIBUTE(name) arm_convert_symbolic_attribute (name)
 extern int arm_convert_symbolic_attribute (const char *);
-extern int arm_apply_sym_value (struct fix *);
+extern int arm_apply_sym_value (struct fix *, segT);
 #endif
 
 #define tc_comment_chars arm_comment_chars
