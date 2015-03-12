@@ -2755,12 +2755,19 @@ group_sections (struct elf_aarch64_link_hash_table *htab,
 #define AARCH64_LDST_SIMD_S(insn) (((insn) & 0xbf9f0000) == 0x0d000000)
 #define AARCH64_LDST_SIMD_S_PI(insn) (((insn) & 0xbf800000) == 0x0d800000)
 
-/* Classify an INSN if it is indeed a load/store.  Return TRUE if INSN
-   is a load/store along with the Rt and Rtn.  Return FALSE if not a
-   load/store.  */
+/* Classify an INSN if it is indeed a load/store.
+
+   Return TRUE if INSN is a LD/ST instruction otherwise return FALSE.
+
+   For scalar LD/ST instructions PAIR is FALSE, RT is returned and RT2
+   is set equal to RT.
+
+   For LD/ST pair instructions PAIR is TRUE, RT and RT2 are returned.
+
+ */
 
 static bfd_boolean
-aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rtn,
+aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rt2,
 		  bfd_boolean *pair, bfd_boolean *load)
 {
   uint32_t opcode;
@@ -2779,11 +2786,11 @@ aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rtn,
   if (AARCH64_LDST_EX (insn))
     {
       *rt = AARCH64_RT (insn);
-      *rtn = *rt;
+      *rt2 = *rt;
       if (AARCH64_BIT (insn, 21) == 1)
         {
 	  *pair = TRUE;
-	  *rtn = AARCH64_RT2 (insn);
+	  *rt2 = AARCH64_RT2 (insn);
 	}
       *load = AARCH64_LD (insn);
       return TRUE;
@@ -2795,7 +2802,7 @@ aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rtn,
     {
       *pair = TRUE;
       *rt = AARCH64_RT (insn);
-      *rtn = AARCH64_RT2 (insn);
+      *rt2 = AARCH64_RT2 (insn);
       *load = AARCH64_LD (insn);
       return TRUE;
     }
@@ -2808,7 +2815,7 @@ aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rtn,
 	   || AARCH64_LDST_UIMM (insn))
    {
       *rt = AARCH64_RT (insn);
-      *rtn = *rt;
+      *rt2 = *rt;
       if (AARCH64_LDST_PCREL (insn))
 	*load = TRUE;
       opc = AARCH64_BITS (insn, 22, 2);
@@ -2828,21 +2835,21 @@ aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rtn,
 	{
 	case 0:
 	case 2:
-	  *rtn = *rt + 3;
+	  *rt2 = *rt + 3;
 	  break;
 
 	case 4:
 	case 6:
-	  *rtn = *rt + 2;
+	  *rt2 = *rt + 2;
 	  break;
 
 	case 7:
-	  *rtn = *rt;
+	  *rt2 = *rt;
 	  break;
 
 	case 8:
 	case 10:
-	  *rtn = *rt + 1;
+	  *rt2 = *rt + 1;
 	  break;
 
 	default:
@@ -2862,21 +2869,21 @@ aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rtn,
 	case 0:
 	case 2:
 	case 4:
-	  *rtn = *rt + r;
+	  *rt2 = *rt + r;
 	  break;
 
 	case 1:
 	case 3:
 	case 5:
-	  *rtn = *rt + (r == 0 ? 2 : 3);
+	  *rt2 = *rt + (r == 0 ? 2 : 3);
 	  break;
 
 	case 6:
-	  *rtn = *rt + r;
+	  *rt2 = *rt + r;
 	  break;
 
 	case 7:
-	  *rtn = *rt + (r == 0 ? 2 : 3);
+	  *rt2 = *rt + (r == 0 ? 2 : 3);
 	  break;
 
 	default:
@@ -2922,7 +2929,7 @@ static bfd_boolean
 aarch64_erratum_sequence (uint32_t insn_1, uint32_t insn_2)
 {
   uint32_t rt;
-  uint32_t rtn;
+  uint32_t rt2;
   uint32_t rn;
   uint32_t rm;
   uint32_t ra;
@@ -2930,7 +2937,7 @@ aarch64_erratum_sequence (uint32_t insn_1, uint32_t insn_2)
   bfd_boolean load;
 
   if (aarch64_mlxl_p (insn_2)
-      && aarch64_mem_op_p (insn_1, &rt, &rtn, &pair, &load))
+      && aarch64_mem_op_p (insn_1, &rt, &rt2, &pair, &load))
     {
       /* Any SIMD memory op is independent of the subsequent MLA
 	 by definition of the erratum.  */
@@ -2946,7 +2953,7 @@ aarch64_erratum_sequence (uint32_t insn_1, uint32_t insn_2)
 	 and this is not an erratum sequence.  */
       if (load &&
 	  (rt == rn || rt == rm || rt == ra
-	   || (pair && (rtn == rn || rtn == rm || rtn == ra))))
+	   || (pair && (rt2 == rn || rt2 == rm || rt2 == ra))))
 	return FALSE;
 
       /* We conservatively put out stubs for all other cases (including
