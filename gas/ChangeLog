@@ -1,3 +1,8 @@
+2015-03-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add i6400 entry.
+	* doc/c-mips.texi: Document i6400 -march option.
+
 2015-03-12  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/17444
