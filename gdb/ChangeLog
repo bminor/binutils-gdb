@@ -1,3 +1,9 @@
+2015-03-12  Gary Benson <gbenson@redhat.com>
+
+	* solib.c (_initialize_solib): Make "set/show sysroot" use
+	add_setshow_optional_filename_cmd so it can be restored to
+	empty after being set.
+
 2015-03-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (SFILES): New source break-catch-syscall.c.
