@@ -1,3 +1,18 @@
+2015-03-11  Cary Coutant  <ccoutant@google.com>
+
+	* options.cc (General_options::finalize): Don't allow -z relro
+	with incremental linking.
+	* testsuite/Makefile.am (incremental_test): Add -z norelro.
+	(incremental_test_2): Likewise.
+	(incremental_test_3): Likewise.
+	(incremental_test_4): Likewise.
+	(incremental_test_5): Likewise.
+	(incremental_test_6): Likewise.
+	(incremental_copy_test): Likewise.
+	(incremental_common_test_1): Likewise.
+	(incremental_comdat_test_1): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
 2015-03-09  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/14675
