@@ -1,3 +1,7 @@
+2015-03-13  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.h (SUB_SEGMENT_ALIGN): Define to be zero.
+
 2015-03-12  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add i6400 entry.
