@@ -1,3 +1,9 @@
+2015-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/watchpoint-reuse-slot.exp (valid_addr_p): New proc.
+	(top level): Skip tests if valid_addr_p returns false for
+	$cmd1 or $cmd2.
+
 2015-03-11  Andy Wingo  <wingo@igalia.com>
 
 	* gdb.guile/scm-objfile.exp: Add objfile-progspace test.
