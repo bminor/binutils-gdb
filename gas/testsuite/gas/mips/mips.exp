@@ -1454,4 +1454,6 @@ if { [istarget mips*-*-vxworks*] } {
     }
     run_list_test_arches "r6-removed"	"-32" [mips_arch_list_matching mips32r6]
     run_list_test_arches "r6-64-removed"	[mips_arch_list_matching mips64r6]
+
+    run_list_test_arches "r6-branch-constraints"	[mips_arch_list_matching mips32r6]
 }

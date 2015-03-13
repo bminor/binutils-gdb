@@ -48,11 +48,11 @@ decode_mips_operand (const char *p)
 	case 'd': SPECIAL (0, 0, REPEAT_DEST_REG);
 	case 's': SPECIAL (5, 21, NON_ZERO_REG);
 	case 't': SPECIAL (5, 16, NON_ZERO_REG);
-	case 'u': PREV_CHECK (5, 16, TRUE, FALSE, FALSE, TRUE);
+	case 'u': PREV_CHECK (5, 16, TRUE, FALSE, FALSE, FALSE);
 	case 'v': PREV_CHECK (5, 16, TRUE, TRUE, FALSE, FALSE);
 	case 'w': PREV_CHECK (5, 16, FALSE, TRUE, TRUE, TRUE);
 	case 'x': PREV_CHECK (5, 21, TRUE, FALSE, FALSE, TRUE);
-	case 'y': PREV_CHECK (5, 21, FALSE, TRUE, TRUE, FALSE);
+	case 'y': PREV_CHECK (5, 21, FALSE, TRUE, FALSE, FALSE);
 	case 'A': PCREL (19, 0, TRUE, 2, 2, FALSE, FALSE);
 	case 'B': PCREL (18, 0, TRUE, 3, 3, FALSE, FALSE);
 	}

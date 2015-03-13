@@ -1,5 +1,11 @@
 2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
 
+	* gas/mips/mips.exp: Added branch constraints testcase.
+	* gas/mips/r6-branch-constraints.s: New test.
+	* gas/mips/r6-branch-constraints.l: New test.
+
+2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
+
 	* gas/mips/r6.s: Add evp and dvp instructions.
 	* gas/mips/r6.d: Likewise.
 	* gas/mips/r6-n32.d: Likewise.

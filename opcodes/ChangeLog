@@ -1,5 +1,10 @@
 2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
 
+	* mips-opc.c (decode_mips_operand): Fix constraint issues
+	with u and y operands.
+
+2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
+
 	* mips-opc.c (mips_builtin_opcodes): Add evp and dvp instructions.
 
 2015-03-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
