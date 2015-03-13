@@ -1147,6 +1147,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dsubu",		"d,v,I",	0,    (int) M_DSUBU_I,	INSN_MACRO,		0,		I3,		0,	0 },
 {"dvpe",		"",		0x41600001, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
 {"dvpe",		"t",		0x41600001, 0xffe0ffff, WR_1|TRAP,		0,		0,		MT32,	0 },
+{"dvp",			"",		0x41600024, 0xffffffff, TRAP,			0,		I37,		0,	0 },
+{"dvp",			"t",		0x41600024, 0xffe0ffff, WR_1|TRAP,		0,		I37,		0,	0 },
 {"ei",			"",		0x42000038, 0xffffffff,	WR_C0,			0,		EE,		0,	0 },
 {"ei",			"",		0x41606020, 0xffffffff,	WR_C0,			0,		I33,		0,	0 },
 {"ei",			"t",		0x41606020, 0xffe0ffff,	WR_1|WR_C0,		0,		I33,		0,	0 },
@@ -1156,6 +1158,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"eretnc",		"",		0x42000058, 0xffffffff, NODS,      		0,		I36,		0,	0 },
 {"evpe",		"",		0x41600021, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
 {"evpe",		"t",		0x41600021, 0xffe0ffff, WR_1|TRAP,		0,		0,		MT32,	0 },
+{"evp",			"",		0x41600004, 0xffffffff, TRAP,			0,		I37,		0,	0 },
+{"evp",			"t",		0x41600004, 0xffe0ffff, WR_1|TRAP,		0,		I37,		0,	0 },
 {"ext",			"t,r,+A,+C",	0x7c000000, 0xfc00003f, WR_1|RD_2,    		0,		I33,		0,	0 },
 {"exts32",		"t,r,+p,+s",	0x7000003b, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 },
 {"exts",		"t,r,+P,+S",	0x7000003b, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 }, /* exts32 */

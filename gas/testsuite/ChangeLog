@@ -1,3 +1,10 @@
+2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* gas/mips/r6.s: Add evp and dvp instructions.
+	* gas/mips/r6.d: Likewise.
+	* gas/mips/r6-n32.d: Likewise.
+	* gas/mips/r6-n64.d: Likewise.
+
 2015-03-13  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/aarch64/diagnostic.s: New testcases.

@@ -1,3 +1,7 @@
+2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add evp and dvp instructions.
+
 2015-03-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-opc.c: Add new IBM z13 instructions.
