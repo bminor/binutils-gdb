@@ -1,3 +1,7 @@
+2015-03-23  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_write_section): Adjust layout.
+
 2015-03-19  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-rl78.c (rl78_cpu_name): New function.  Prints the name of

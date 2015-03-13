@@ -4071,7 +4071,7 @@ elfNN_aarch64_write_section (bfd *output_bfd  ATTRIBUTE_UNUSED,
 
 {
   struct elf_aarch64_link_hash_table *globals =
-					elf_aarch64_hash_table (link_info);
+    elf_aarch64_hash_table (link_info);
 
   if (globals == NULL)
     return FALSE;
