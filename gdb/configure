@@ -7101,64 +7101,6 @@ fi
   fi
 
 
-# On HP/UX we may need libxpdl for dlgetmodinfo (used by solib-pa64.c).
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlgetmodinfo" >&5
-$as_echo_n "checking for library containing dlgetmodinfo... " >&6; }
-if test "${ac_cv_search_dlgetmodinfo+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dlgetmodinfo ();
-int
-main ()
-{
-return dlgetmodinfo ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' dl xpdl; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_dlgetmodinfo=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if test "${ac_cv_search_dlgetmodinfo+set}" = set; then :
-  break
-fi
-done
-if test "${ac_cv_search_dlgetmodinfo+set}" = set; then :
-
-else
-  ac_cv_search_dlgetmodinfo=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_dlgetmodinfo" >&5
-$as_echo "$ac_cv_search_dlgetmodinfo" >&6; }
-ac_res=$ac_cv_search_dlgetmodinfo
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-
 # On FreeBSD we may need libutil for kinfo_getvmmap (used by fbsd-nat.c).
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kinfo_getvmmap" >&5
 $as_echo_n "checking for library containing kinfo_getvmmap... " >&6; }
@@ -13801,54 +13743,6 @@ $as_echo "$gdb_cv_var_macho" >&6; }
   LIBS=$OLD_LIBS
 if test $gdb_cv_var_macho = yes; then
   CONFIG_OBS="$CONFIG_OBS machoread.o"
-fi
-
-# Add SOM support to GDB, but only if BFD includes it.
-
-  OLD_CFLAGS=$CFLAGS
-  OLD_LDFLAGS=$LDFLAGS
-  OLD_LIBS=$LIBS
-  # Put the old CFLAGS/LDFLAGS last, in case the user's (C|LD)FLAGS
-  # points somewhere with bfd, with -I/foo/lib and -L/foo/lib.  We
-  # always want our bfd.
-  CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
-  LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
-  intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-  LIBS="-lbfd -liberty $intl $LIBS"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SOM support in BFD" >&5
-$as_echo_n "checking for SOM support in BFD... " >&6; }
-if test "${gdb_cv_var_som+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <stdlib.h>
-  #include "bfd.h"
-  #include "som.h"
-
-int
-main ()
-{
-return bfd_som_attach_aux_hdr (NULL, 0, NULL);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  gdb_cv_var_som=yes
-else
-  gdb_cv_var_som=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_var_som" >&5
-$as_echo "$gdb_cv_var_som" >&6; }
-  CFLAGS=$OLD_CFLAGS
-  LDFLAGS=$OLD_LDFLAGS
-  LIBS=$OLD_LIBS
-if test $gdb_cv_var_som = yes; then
-  CONFIG_OBS="$CONFIG_OBS somread.o"
 fi
 
 # Add any host-specific objects to GDB.
