@@ -1,3 +1,13 @@
+2015-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* common.h (ELFOSABI_CLOUDABI): New.
+	(SHF_COMPRESSED): Likewise.
+	(ELFCOMPRESS_ZLIB): Likewise.
+	(ELFCOMPRESS_LOOS): Likewise.
+	(ELFCOMPRESS_HIOS): Likewise.
+	(ELFCOMPRESS_LOPROC): Likewise.
+	(ELFCOMPRESS_HIPROC): Likewise.
+
 2015-03-19  Nick Clifton  <nickc@redhat.com>
 
 	* rl78.h (E_FLAG_RL78_G10): Redefine.
