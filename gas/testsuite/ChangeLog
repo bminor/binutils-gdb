@@ -1,5 +1,10 @@
 2015-03-13  Jiong Wang  <jiong.wang@arm.com>
 
+	* gas/aarch64/diagnostic.s: New testcases.
+	* gas/aarch64/diagnostic.l: New error match.
+
+2015-03-13  Jiong Wang  <jiong.wang@arm.com>
+
 	* gas/aarch64/tail_padding.s: New testcase.
 	* gas/aarch64/tail_padding.d: New expectation file.
 

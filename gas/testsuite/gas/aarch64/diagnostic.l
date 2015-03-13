@@ -116,3 +116,7 @@
 [^:]*:125: Warning: unpredictable transfer with writeback -- `ldp x0,x1,\[x1\],#16'
 [^:]*:126: Error: this relocation modifier is not allowed on this instruction at operand 2 -- `adr x2,:got:s1'
 [^:]*:127: Error: this relocation modifier is not allowed on this instruction at operand 2 -- `ldr x0,\[x0,:got:s1\]'
+[^:]*:130: Error: integer 64-bit register expected at operand 2 -- `ldr x1,\[wsp,#8\]!'
+[^:]*:131: Error: integer 64-bit register expected at operand 3 -- `ldp x6,x29,\[w7,#8\]!'
+[^:]*:132: Error: integer 64-bit register expected at operand 2 -- `str x30,\[w11,#8\]!'
+[^:]*:133: Error: integer 64-bit register expected at operand 3 -- `stp x8,x27,\[wsp,#8\]!'

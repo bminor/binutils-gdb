@@ -1,5 +1,10 @@
 2015-03-13  Jiong Wang  <jiong.wang@arm.com>
 
+	* config/tc-aarch64.c (warn_unpredictable_ldst): Don't warn on reg
+	number 31.
+
+2015-03-13  Jiong Wang  <jiong.wang@arm.com>
+
 	* config/tc-aarch64.h (SUB_SEGMENT_ALIGN): Define to be zero.
 
 2015-03-12  Andrew Bennett  <andrew.bennett@imgtec.com>
