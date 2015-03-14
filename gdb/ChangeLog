@@ -1,3 +1,8 @@
+2015-03-16  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_make_corefile_notes): Fetch all target registers
+	before writing core register notes.
+
 2015-03-16  Yuanhui Zhang  <asmwarrior@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 
