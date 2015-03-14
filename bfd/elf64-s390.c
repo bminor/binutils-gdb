@@ -3840,6 +3840,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_init_index_section	      _bfd_elf_init_1_index_section
 #define elf_backend_plt_sym_val		      elf_s390_plt_sym_val
 #define elf_backend_add_symbol_hook           elf_s390_add_symbol_hook
+#define elf_backend_sort_relocs_p             elf_s390_elf_sort_relocs_p
 
 #define bfd_elf64_mkobject		elf_s390_mkobject
 #define elf_backend_object_p		elf_s390_object_p
