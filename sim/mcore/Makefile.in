@@ -23,10 +23,5 @@ SIM_EXTRA_CFLAGS = -DSIM_USE_DEPRECATED_RUN_FRONTEND
 
 SIM_OBJS = interp.o sim-load.o
 SIM_EXTRA_LIBS = -lm
-SIM_EXTRA_CLEAN = mcore-clean
 
 ## COMMON_POST_CONFIG_FRAG
-
-interp.o: interp.c
-
-mcore-clean:
