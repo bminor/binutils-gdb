@@ -1,3 +1,10 @@
+2015-03-14  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf-s390-common.c (elf_s390_elf_sort_relocs_p): Don't sort
+	relocs against code sections.
+	* elf32-s390.c: Define elf_backend_sort_relocs_p.
+	* elf64-s390.c: Likewise.
+
 2015-03-11  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Examine stubs in
