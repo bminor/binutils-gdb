@@ -1,3 +1,9 @@
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-assert.h [!SIM_ASSERT, WITH_ASSERT]: Include sim-io.h.
+	[!ASSERT, WITH_ASSERT]: Likewise.
+	* sim-endian.c: Delete sim-io.h include.
+
 2015-02-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* run-sim.h (sim_kill): Delete unused prototype.
