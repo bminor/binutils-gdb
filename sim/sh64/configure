@@ -13453,7 +13453,7 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\
 if test "${enable_sim_hardware+set}" = set; then :
   enableval=$enable_sim_hardware;
 else
-  enable_sim_hardware="no"
+  enable_sim_hardware="yes"
 fi
 
 case ${enable_sim_hardware} in
@@ -15808,6 +15808,5 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
-
 
 

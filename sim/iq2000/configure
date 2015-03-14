@@ -13453,7 +13453,7 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\
 if test "${enable_sim_hardware+set}" = set; then :
   enableval=$enable_sim_hardware;
 else
-  enable_sim_hardware="no"
+  enable_sim_hardware="yes"
 fi
 
 case ${enable_sim_hardware} in
