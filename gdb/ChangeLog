@@ -1,4 +1,9 @@
-2014-10-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2015-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* NEWS: New Removed targets and native configurations.
+
+2015-03-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Remove HPUX.
 	* Makefile.in (ALL_64_TARGET_OBS): Remove ia64-hpux-tdep.o.
