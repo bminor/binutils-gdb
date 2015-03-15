@@ -1,5 +1,9 @@
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.c (decode_dsp32alu_0): Change v to bu32.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_RUN_OBJS): Delete.
 
 2015-03-10  Mike Frysinger  <vapier@gentoo.org>
