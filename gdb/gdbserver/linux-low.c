@@ -2238,6 +2238,7 @@ static int
 count_events_callback (struct inferior_list_entry *entry, void *data)
 {
   struct thread_info *thread = (struct thread_info *) entry;
+  struct lwp_info *lp = get_thread_lwp (thread);
   int *count = data;
 
   gdb_assert (count != NULL);
@@ -2245,7 +2246,7 @@ count_events_callback (struct inferior_list_entry *entry, void *data)
   /* Count only resumed LWPs that have an event pending. */
   if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
       && thread->last_resume_kind != resume_stop
-      && thread->status_pending_p)
+      && lp->status_pending_p)
     (*count)++;
 
   return 0;
@@ -2273,6 +2274,7 @@ static int
 select_event_lwp_callback (struct inferior_list_entry *entry, void *data)
 {
   struct thread_info *thread = (struct thread_info *) entry;
+  struct lwp_info *lp = get_thread_lwp (thread);
   int *selector = data;
 
   gdb_assert (selector != NULL);
@@ -2280,7 +2282,7 @@ select_event_lwp_callback (struct inferior_list_entry *entry, void *data)
   /* Select only resumed LWPs that have an event pending. */
   if (thread->last_resume_kind != resume_stop
       && thread->last_status.kind == TARGET_WAITKIND_IGNORE
-      && thread->status_pending_p)
+      && lp->status_pending_p)
     if ((*selector)-- == 0)
       return 1;
 
@@ -2324,6 +2326,7 @@ select_event_lwp (struct lwp_info **orig_lp)
 
       /* First see how many events we have.  */
       find_inferior (&all_threads, count_events_callback, &num_events);
+      gdb_assert (num_events > 0);
 
       /* Now randomly pick a LWP out of those that have had
 	 events.  */

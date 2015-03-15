@@ -2841,6 +2841,7 @@ select_event_lwp (ptid_t filter, struct lwp_info **orig_lp, int *status)
 
       /* First see how many events we have.  */
       iterate_over_lwps (filter, count_events_callback, &num_events);
+      gdb_assert (num_events > 0);
 
       /* Now randomly pick a LWP out of those that have had
 	 events.  */

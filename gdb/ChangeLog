@@ -1,3 +1,8 @@
+2015-03-19 Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (count_events_callback, select_event_lwp_callback):
+	Use the lwp's status_pending_p field, not the thread's.
+
 2015-03-19  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (status_callback): Return early if the LWP has no

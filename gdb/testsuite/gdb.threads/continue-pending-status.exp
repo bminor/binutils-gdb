@@ -56,6 +56,13 @@ proc get_current_thread {} {
 
 set attempts 20
 
+# These track whether we saw events for both threads 2 and 3.  If the
+# backend always returns the breakpoint hit for the same thread, then
+# it fails to make sure threads aren't starved, and we'll fail the
+# assert after the loop.
+set saw_thread_2 0
+set saw_thread_3 0
+
 for {set i 0} {$i < $attempts} {incr i} {
     with_test_prefix "attempt $i" {
 	gdb_test "b $srcfile:$break_line" \
@@ -71,8 +78,10 @@ for {set i 0} {$i < $attempts} {incr i} {
 	# the resume and go straight to consuming the pending event.
 	set thread [get_current_thread]
 	if {$thread == 2} {
+	    incr saw_thread_2
 	    set thread 3
 	} else {
+	    incr saw_thread_3
 	    set thread 2
 	}
 	gdb_test "thread $thread" \
@@ -108,3 +117,8 @@ for {set i 0} {$i < $attempts} {incr i} {
 	}
     }
 }
+
+verbose -log "saw_thread_2=$saw_thread_2"
+verbose -log "saw_thread_3=$saw_thread_3"
+
+gdb_assert {$saw_thread_2 > 0 && $saw_thread_3 > 0} "no thread starvation"

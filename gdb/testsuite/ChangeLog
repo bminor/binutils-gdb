@@ -1,5 +1,13 @@
 2015-03-19  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/continue-pending-status.exp (saw_thread_2)
+	(saw_thread_3): New globals.
+	(top level): Increment them when an event for the corresponding
+	thread is seen.
+	(no thread starvation): New test.
+
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/continue-pending-status.c: New file.
 	* gdb.threads/continue-pending-status.exp: New file.
 
