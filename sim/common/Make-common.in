@@ -447,15 +447,6 @@ $(all_object_files) : $(generated_files)
 # Dependencies.
 @GMAKE_TRUE@-include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
 
-BUILT_SRC_FROM_COMMON= \
-	sim-inline.c
-
-sim-inline.c: $(srccom)/sim-inline.c
-	rm -f $@ tmp-$@
-	echo "# 1 \"$(srccom)/$@\"" > tmp-$@
-	cat $(srccom)/$@ >> tmp-$@
-	$(SHELL) $(srcdir)/../../move-if-change tmp-$@ $@
-
 # FIXME This is one very simple-minded way of generating the file hw-config.h
 hw-config.h: Makefile.in $(srccom)/Make-common.in config.status Makefile
 	rm -f tmp-hw.h
