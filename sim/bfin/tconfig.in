@@ -7,18 +7,6 @@
    Common sim core by default sets hw_system_cpu to NULL for WITH_HW.  */
 #define WITH_DEVICES 1
 
-/* FIXME: This is unnecessarily necessary: */
-#include "ansidecl.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
-#include "sim-module.h"
-
-/* FIXME: Revisit.  */
-#ifdef HAVE_DV_SOCKSER
-MODULE_INSTALL_FN dv_sockser_install;
-#define MODULE_LIST dv_sockser_install,
-#endif
-
 /* ??? Temporary hack until model support unified.  */
 #define SIM_HAVE_MODEL
 

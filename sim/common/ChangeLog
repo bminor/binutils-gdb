@@ -1,3 +1,11 @@
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-socker.h (dv_sockser_install): Declare.
+	* sim-module.c: Include config.h.
+	[HAVE_DV_SOCKSER]: Include dv-sockser.h.
+	(modules) [HAVE_DV_SOCKSER]: Add dv_sockser_install.
+	* sim-module.h: Include gdb/remote-sim.h.
+
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (BUILT_SRC_FROM_COMMON): Delete.

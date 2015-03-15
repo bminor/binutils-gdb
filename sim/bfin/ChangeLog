@@ -1,3 +1,8 @@
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.in: Delete includes.
+	[HAVE_DV_SOCKSER]: Delete.
+
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (decode_dsp32alu_0): Change v to bu32.

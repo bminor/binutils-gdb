@@ -1,3 +1,7 @@
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.in: Delete file.
+
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_RUN_OBJS): Delete.

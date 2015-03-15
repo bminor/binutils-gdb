@@ -16,12 +16,6 @@
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 1
 
-/* FIXME: Revisit.  */
-#ifdef HAVE_DV_SOCKSER
-MODULE_INSTALL_FN dv_sockser_install;
-#define MODULE_LIST dv_sockser_install,
-#endif
-
 #if 0
 /* Enable watchpoints.  */
 #define WITH_WATCHPOINTS 1

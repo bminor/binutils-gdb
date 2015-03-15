@@ -12,6 +12,7 @@ SIM_OBJS = \
 	sim-model.o \
 	sim-reg.o \
 	sim-signal.o \
+	@SIM_DV_SOCKSER_O@ \
         cgen-utils.o cgen-trace.o cgen-scache.o \
         cgen-run.o sim-reason.o sim-engine.o sim-stop.o \
         sim-if.o arch.o \

@@ -1,3 +1,7 @@
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add @SIM_DV_SOCKSER_O@.
+
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_RUN_OBJS): Delete.
