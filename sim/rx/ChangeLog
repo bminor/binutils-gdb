@@ -1,3 +1,7 @@
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
 2015-12-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb-if.c (open): Rename to...

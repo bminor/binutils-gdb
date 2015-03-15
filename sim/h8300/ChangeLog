@@ -1,3 +1,9 @@
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_RUN_OBJS): Delete.

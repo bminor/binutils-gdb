@@ -53,6 +53,9 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
+dnl Pull in the target configuration file directly.
+AH_BOTTOM([#include "tconfig.h"])
+
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
 # is defined.
@@ -246,16 +249,6 @@ AC_EXEEXT
 dnl These are available to append to as desired.
 sim_link_files=
 sim_link_links=
-
-dnl Create tconfig.h either from simulator's tconfig.in or default one
-dnl in common.
-sim_link_links=tconfig.h
-if test -f ${srcdir}/tconfig.in
-then
-  sim_link_files=tconfig.in
-else
-  sim_link_files=../common/tconfig.in
-fi
 
 # targ-vals.def points to the libc macro description file.
 case "${target}" in

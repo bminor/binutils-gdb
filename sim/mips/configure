@@ -8318,6 +8318,8 @@ else
 fi
 
 
+
+
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
 # is defined.
@@ -12400,7 +12402,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12403 "configure"
+#line 12405 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12506,7 +12508,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12509 "configure"
+#line 12511 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12986,14 +12988,6 @@ _ACEOF
 
 sim_link_files=
 sim_link_links=
-
-sim_link_links=tconfig.h
-if test -f ${srcdir}/tconfig.in
-then
-  sim_link_files=tconfig.in
-else
-  sim_link_files=../common/tconfig.in
-fi
 
 # targ-vals.def points to the libc macro description file.
 case "${target}" in

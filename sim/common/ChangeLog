@@ -1,3 +1,12 @@
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_COMMON): Call AH_BOTTOM.  Delete logic for
+	symlinking tconfig.h to tconfig.in.
+	* config.in, configure: Regenerate.
+	* nrun.c, run.c, sim-basics.h: Delete tconfig.h include.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
 2015-03-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-socker.h (dv_sockser_install): Declare.
