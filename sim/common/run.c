@@ -85,9 +85,7 @@ cntrl_c (int sig ATTRIBUTE_UNUSED)
 }
 
 int
-main (ac, av)
-     int ac;
-     char **av;
+main (int ac, char **av)
 {
   RETSIGTYPE (*prev_sigint) ();
   bfd *abfd;
@@ -357,7 +355,7 @@ usage (int help)
 }
 
 static void
-print_version ()
+print_version (void)
 {
   printf ("GNU simulator %s%s\n", PKGVERSION, version);
 }

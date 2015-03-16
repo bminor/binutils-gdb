@@ -1,5 +1,9 @@
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* gentmap.c, run.c: Convert old style prototypes.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (SIM_AC_COMMON): Call AH_BOTTOM.  Delete logic for
 	symlinking tconfig.h to tconfig.in.
 	* config.in, configure: Regenerate.
