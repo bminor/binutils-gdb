@@ -1,3 +1,7 @@
+2015-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (out_header): Remove spurious #if 1.
+
 2015-03-13  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (warn_unpredictable_ldst): Don't warn on reg
