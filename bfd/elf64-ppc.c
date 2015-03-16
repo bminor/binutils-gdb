@@ -3146,7 +3146,8 @@ section_covers_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *section, void *ptr)
 }
 
 /* Create synthetic symbols, effectively restoring "dot-symbol" function
-   entry syms.  Also generate @plt symbols for the glink branch table.  */
+   entry syms.  Also generate @plt symbols for the glink branch table.
+   Returns count of synthetic symbols in RET or -1 on error.  */
 
 static long
 ppc64_elf_get_synthetic_symtab (bfd *abfd,
@@ -3289,6 +3290,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    }
 	}
 
+      if (size == 0)
+	goto done;
       s = *ret = bfd_malloc (size);
       if (s == NULL)
 	{
@@ -3349,10 +3352,11 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
       if (opd != NULL && !bfd_malloc_and_get_section (abfd, opd, &contents))
 	{
+	free_contents_and_exit_err:
+	  count = -1;
 	free_contents_and_exit:
 	  if (contents)
 	    free (contents);
-	  count = -1;
 	  goto done;
 	}
 
@@ -3383,7 +3387,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	  void (*swap_dyn_in) (bfd *, const void *, Elf_Internal_Dyn *);
 
 	  if (!bfd_malloc_and_get_section (abfd, dynamic, &dynbuf))
-	    goto free_contents_and_exit;
+	    goto free_contents_and_exit_err;
 
 	  extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
 	  swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
@@ -3445,7 +3449,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    {
 	      slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
 	      if (! (*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
-		goto free_contents_and_exit;
+		goto free_contents_and_exit_err;
 
 	      plt_count = relplt->size / sizeof (Elf64_External_Rela);
 	      size += plt_count * sizeof (asymbol);
@@ -3460,9 +3464,11 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    }
 	}
 
+      if (size == 0)
+	goto free_contents_and_exit;
       s = *ret = bfd_malloc (size);
       if (s == NULL)
-	goto free_contents_and_exit;
+	goto free_contents_and_exit_err;
 
       names = (char *) (s + count + plt_count + (resolv_vma != 0));
 
