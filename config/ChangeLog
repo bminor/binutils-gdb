@@ -1,5 +1,10 @@
 2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* bootstrap-asan.mk: Sync with GCC tree.
+	* bootstrap-lto.mk: Likewise.
+
+2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* cloog.m4: Removed.
 
 2014-08-19  Alan Modra  <amodra@gmail.com>
