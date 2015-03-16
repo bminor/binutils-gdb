@@ -1,3 +1,16 @@
+2015-03-16  Jiri Gaisler  <jiri@gaisler.se>
+
+	* Makefile.in (end, end.h): Remove target rules.
+	(clean): Remove end and end.h.
+	(erc32.o, exec.o, float.o, func.o, help.o, interf.o, sis.o): Delete
+	rules.
+	* configure, config.in: Regenerate.
+	* configure.ac: Use SIM_AC_OPTION_HOSTENDIAN
+	* end.c: Delete.
+	* erc32.c: Remove end.h include.
+	* exec.c: Remove end.h include. Use HOST_LITTLE_ENDIAN.
+	* func.c, sis.c: Likewise.
+
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_RUN_OBJS): Set to sis.o.

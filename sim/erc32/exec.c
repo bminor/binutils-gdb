@@ -21,7 +21,6 @@
 
 #include "config.h"
 #include "sis.h"
-#include "end.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -1696,7 +1695,7 @@ fpexec(op3, rd, rs1, rs2, sregs)
        but what about machines where float values are different endianness
        from integer values? */
 
-#ifdef HOST_LITTLE_ENDIAN_FLOAT
+#ifdef HOST_LITTLE_ENDIAN
     rs1 &= 0x1f;
     switch (opf) {
 	case FADDd:
@@ -1874,7 +1873,7 @@ fpexec(op3, rd, rs1, rs2, sregs)
 
     accex = get_accex();
 
-#ifdef HOST_LITTLE_ENDIAN_FLOAT
+#ifdef HOST_LITTLE_ENDIAN
     switch (opf) {
     case FADDd:
     case FDIVd:
@@ -2021,7 +2020,7 @@ init_regs(sregs)
     sregs->err_mode = 0;
     ext_irl = 0;
     sregs->g[0] = 0;
-#ifdef HOST_LITTLE_ENDIAN_FLOAT
+#ifdef HOST_LITTLE_ENDIAN
     sregs->fdp = (float32 *) sregs->fd;
     sregs->fsi = (int32 *) sregs->fs;
 #else

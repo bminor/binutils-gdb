@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "sis.h"
-#include "end.h"
 #include <dis-asm.h>
 #include "sim-config.h"
 
@@ -730,7 +729,7 @@ disp_fpu(sregs)
 
     printf("\n fsr: %08X\n\n", sregs->fsr);
 
-#ifdef HOST_LITTLE_ENDIAN_FLOAT
+#ifdef HOST_LITTLE_ENDIAN
     for (i = 0; i < 32; i++)
       sregs->fdp[i ^ 1] = sregs->fs[i];
 #endif

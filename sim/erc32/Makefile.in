@@ -42,21 +42,13 @@ sis: sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) -o sis \
 	  sis.o $(SIS_OFILES) $(COMMON_OBJS) $(EXTRA_LIBS)
 
-# FIXME: This computes the build host's endianness, doesn't it?
-# There is AC_C_BIGENDIAN but it doesn't handle float endianness.
-# [Are int/float endians every different on a sparc?]
-end: $(srcdir)/end.c
-	$(CC_FOR_BUILD) -I. $(srcdir)/end.c -o end
-end.h: end
-	./end > end.h
-
 # Copy the files into directories where they will be run.
 install-sis: installdirs
 	n=`echo sis | sed '$(program_transform_name)'`; \
 	$(INSTALL_PROGRAM) sis$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 
 clean-sis:
-	rm -f sis end end.h
+	rm -f sis
 
 configure:
 	@echo "Rebuilding configure..."
@@ -65,11 +57,3 @@ configure:
 	else true ; fi ; \
 	(cd $${srcdir}; autoconf --localdir=../common)
 
-# Circumvent Sun Make bug with VPATH.
-erc32.o: erc32.c sis.h end.h
-exec.o: exec.c sis.h end.h
-float.o: float.c sis.h end.h
-func.o: func.c sis.h end.h
-help.o: help.c sis.h end.h
-interf.o: interf.c sis.h end.h 
-sis.o: sis.c sis.h end.h
