@@ -1,5 +1,9 @@
 2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* isl.m4: Sync with GCC tree.
+
+2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	Sync with GCC
 	2015-02-18  Thomas Schwinge  <thomas@codesourcery.com>
 
