@@ -1,5 +1,13 @@
 2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.def: Updated from GCC trunk.
+	* Makefile.tpl: Likewise.
+	* configure.ac: Likewise.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
+2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.ac (target_configdirs): Unset if not building gcc.
 	* configure: Regenerated.
 
