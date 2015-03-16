@@ -1,3 +1,8 @@
+2015-03-16  Pedro Alves  <palves@redhat.com>
+	    Yuanhui Zhang  <asmwarrior@gmail.com>
+
+	* stub-termcap.c (tputs): Change prototype.
+
 2015-03-16  Yuanhui Zhang  <asmwarrior@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 
