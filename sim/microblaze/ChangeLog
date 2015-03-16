@@ -1,5 +1,17 @@
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
+	* confingure: Regenerate.
+	* interp.c: Include run-sim.h.
+	(microblaze_extract_unsigned_integer): Mark static.
+	(microblaze_store_unsigned_integer): Likewise.
+	(int_sbrk, SEXTB, SEXTW, IOMEM): Delete.
+	(init_pointers, set_initial_gprs): Add (void) to prototype.
+	(opened, log_open, log_close, is_opened, handle_trap1, process_stub,
+	util, iu_carry): Delete.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>

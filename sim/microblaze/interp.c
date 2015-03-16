@@ -27,6 +27,7 @@
 #include "gdb/callback.h"
 #include "libiberty.h"
 #include "gdb/remote-sim.h"
+#include "run-sim.h"
 #include "sim-main.h"
 #include "sim-utils.h"
 #include "microblaze-dis.h"
@@ -41,7 +42,7 @@ static unsigned long heap_ptr = 0;
 static unsigned long stack_ptr = 0;
 host_callback *callback;
 
-unsigned long
+static unsigned long
 microblaze_extract_unsigned_integer (unsigned char *addr, int len)
 {
   unsigned long retval;
@@ -71,7 +72,7 @@ microblaze_extract_unsigned_integer (unsigned char *addr, int len)
   return retval;
 }
 
-void
+static void
 microblaze_store_unsigned_integer (unsigned char *addr, int len,
 				   unsigned long val)
 {
@@ -105,21 +106,6 @@ static SIM_OPEN_KIND sim_kind;
 static char *myname;
 
 static int issue_messages = 0;
-
-long
-int_sbrk (int inc_bytes)
-{
-  long addr;
-
-  addr = heap_ptr;
-
-  heap_ptr += inc_bytes;
-
-  if (issue_messages && heap_ptr > SP)
-    fprintf (stderr, "Warning: heap_ptr overlaps stack!\n");
-
-  return addr;
-}
 
 static void /* INLINE */
 wbat (word x, word v)
@@ -298,15 +284,6 @@ rhat (word x)
     }
 }
 
-
-#define SEXTB(x) (((x & 0xff) ^ (~ 0x7f)) + 0x80)
-#define SEXTW(y) ((int)((short)y))
-
-static int
-IOMEM (int addr, int write, int value)
-{
-}
-
 /* Default to a 8 Mbyte (== 2^23) memory space.  */
 static int sim_memory_size = 1 << 23;
 
@@ -335,14 +312,14 @@ sim_size (int size)
 }
 
 static void
-init_pointers ()
+init_pointers (void)
 {
   if (CPU.msize != (sim_memory_size))
     sim_size (sim_memory_size);
 }
 
 static void
-set_initial_gprs ()
+set_initial_gprs (void)
 {
   int i;
   long space;
@@ -366,122 +343,6 @@ set_initial_gprs ()
   CPU.insts = 0;
   CPU.cycles = 0;
   CPU.imm_enable = 0;
-
-}
-
-/* Functions so that trapped open/close don't interfere with the
-   parent's functions.  We say that we can't close the descriptors
-   that we didn't open.  exit() and cleanup() get in trouble here,
-   to some extent.  That's the price of emulation.  */
-
-unsigned char opened[100];
-
-static void
-log_open (int fd)
-{
-  if (fd < 0 || fd > NUM_ELEM (opened))
-    return;
-
-  opened[fd] = 1;
-}
-
-static void
-log_close (int fd)
-{
-  if (fd < 0 || fd > NUM_ELEM (opened))
-    return;
-
-  opened[fd] = 0;
-}
-
-static int
-is_opened (int fd)
-{
-  if (fd < 0 || fd > NUM_ELEM (opened))
-    return 0;
-
-  return opened[fd];
-}
-
-static void
-handle_trap1 ()
-{
-}
-
-static void
-process_stub (int what)
-{
-  /* These values should match those in libgloss/microblaze/syscalls.s.  */
-  switch (what)
-    {
-    case 3:  /* _read */
-    case 4:  /* _write */
-    case 5:  /* _open */
-    case 6:  /* _close */
-    case 10: /* _unlink */
-    case 19: /* _lseek */
-    case 43: /* _times */
-      handle_trap1 ();
-      break;
-
-    default:
-      if (issue_messages)
-	fprintf (stderr, "Unhandled stub opcode: %d\n", what);
-      break;
-    }
-}
-
-static void
-util (unsigned what)
-{
-  switch (what)
-    {
-    case 0:	/* exit */
-      CPU.exception = SIGQUIT;
-      break;
-
-    case 1:	/* printf */
-      {
-	unsigned long a[6];
-	unsigned char *s;
-	int i;
-
-	for (s = (unsigned char *)a[0], i = 1 ; *s && i < 6 ; s++)
-	  if (*s == '%')
-	    i++;
-      }
-      break;
-
-    case 2:	/* scanf */
-      if (issue_messages)
-	fprintf (stderr, "WARNING: scanf unimplemented\n");
-      break;
-
-    case 3:	/* utime */
-      break;
-
-    case 0xFF:
-      process_stub (CPU.regs[1]);
-      break;
-
-    default:
-      if (issue_messages)
-	fprintf (stderr, "Unhandled util code: %x\n", what);
-      break;
-    }
-}
-
-/* For figuring out whether we carried; addc/subc use this. */
-static int
-iu_carry (unsigned long a, unsigned long b, int cin)
-{
-  unsigned long	x;
-
-  x = (a & 0xffff) + (b & 0xffff) + cin;
-  x = (x >> 16) + (a >> 16) + (b >> 16);
-  x >>= 16;
-
-  return (x != 0);
 }
 
 #define WATCHFUNCTIONS 1

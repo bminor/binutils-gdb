@@ -1,5 +1,27 @@
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
+	* confingure: Regenerate.
+	* interp.c (mcore_extract_unsigned_integer): Make static and update
+	prototype.  Fix up printf string.
+	(mcore_store_unsigned_integer): Make static and update prototype.
+	(int_sbrk): Likewise.
+	(wbat, wlat, what, rbat, rlat, rhat): Delete INLINE and update
+	prototype.
+	(SEXTB, SEXTW, IOMEM): Delete.
+	(sim_size): Update prototype.  Fix up printf string.
+	(init_pointers): Update prototype.
+	(set_initial_gprs): Update prototype.  Fix up printf string.
+	(log_open, log_close, is_opened, handle_trap1, process_stub, util,
+	iu_carry): Update prototype.
+	(sim_resume): Update prototype.  Change addr to a word.
+	(sim_write, sim_read, sim_store_register, sim_fetch_register,
+	sim_trace, sim_stop_reason, sim_stop, sim_info, sim_open,
+	sim_close, sim_load, sim_create_inferior, sim_do_command,
+	sim_set_callbacks): Update prototype.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
