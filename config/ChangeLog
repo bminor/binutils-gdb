@@ -1,9 +1,17 @@
-2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2014-04-25  Marc Glisse  <marc.glisse@inria.fr>
+
+	PR target/43538
+	* mt-gnu: Don't reset CXXFLAGS_FOR_TARGET.
+
+2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bootstrap-asan.mk: Sync with GCC tree.
 	* bootstrap-lto.mk: Likewise.
 
-2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* cloog.m4: Removed.
 
