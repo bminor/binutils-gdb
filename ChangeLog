@@ -1,3 +1,8 @@
+2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (target_configdirs): Unset if not building gcc.
+	* configure: Regenerated.
+
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* configure.ac: Add FT32 support.

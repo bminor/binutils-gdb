@@ -2039,6 +2039,9 @@ Supported languages are: ${potential_languages}])
 
   AC_SUBST(stage1_languages)
   ac_configure_args=`echo " $ac_configure_args" | sed -e "s/ '--enable-languages=[[^ ]]*'//g" -e "s/$/ '--enable-languages="$enable_languages"'/" `
+else
+  # Disable all target libraries if not building gcc.
+  target_configdirs=
 fi
 
 # Handle --disable-<component> generically.
