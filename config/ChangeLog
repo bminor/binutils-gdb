@@ -1,6 +1,15 @@
 2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
+	2014-11-17  Bob Dunlop  <bob.dunlop@xyzzy.org.uk>
+
+	* mt-ospace (CFLAGS_FOR_TARGET): Append -g -Os rather than
+	overwriting.
+	(CXXFLAGS_FOR_TARGET): Similarly.
+
+2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
 	2014-04-25  Marc Glisse  <marc.glisse@inria.fr>
 
 	PR target/43538
