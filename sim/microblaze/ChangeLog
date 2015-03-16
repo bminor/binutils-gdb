@@ -1,5 +1,9 @@
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c: Strip trailing whitespace.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
 	* confingure: Regenerate.
 	* interp.c: Include run-sim.h.

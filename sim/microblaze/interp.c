@@ -392,13 +392,13 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   memops = 0;
   bonus_cycles = 0;
   insts = 0;
-  
+
   do
     {
       /* Fetch the initial instructions that we'll decode. */
       inst = rlat (PC & 0xFFFFFFFC);
 
-      op = get_insn_microblaze (inst, &imm_unsigned, &insn_type, 
+      op = get_insn_microblaze (inst, &imm_unsigned, &insn_type,
 				&num_delay_slot);
 
       if (op == invalid_inst)
@@ -461,12 +461,12 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    bonus_cycles += 33;
 
 	  if ((insn_type == branch_inst || insn_type == return_inst)
-	      && branch_taken) 
+	      && branch_taken)
 	    {
 	      /* Add an extra cycle for taken branches */
 	      bonus_cycles++;
 	      /* For branch instructions handle the instruction in the delay slot */
-	      if (delay_slot_enable) 
+	      if (delay_slot_enable)
 	        {
 	          newpc = PC;
 	          PC = oldpc + INST_SIZE;
@@ -513,7 +513,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		      /* Update cycle counts */
 		      insts++;
 		      if (insn_type == memory_store_inst
-		          || insn_type == memory_load_inst) 
+		          || insn_type == memory_load_inst)
 		        memops++;
 		      if (insn_type == mult_inst)
 		        bonus_cycles++;
