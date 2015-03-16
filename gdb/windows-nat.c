@@ -177,9 +177,9 @@ static enum gdb_signal last_sig = GDB_SIGNAL_0;
 
 /* Thread information structure used to track information that is
    not available in gdb's thread structure.  */
-typedef struct thread_info_struct
+typedef struct windows_thread_info_struct
   {
-    struct thread_info_struct *next;
+    struct windows_thread_info_struct *next;
     DWORD id;
     HANDLE h;
     CORE_ADDR thread_local_base;
@@ -189,16 +189,16 @@ typedef struct thread_info_struct
     CONTEXT context;
     STACKFRAME sf;
   }
-thread_info;
+windows_thread_info;
 
-static thread_info thread_head;
+static windows_thread_info thread_head;
 
 /* The process and thread handles for the above context.  */
 
 static DEBUG_EVENT current_event;	/* The current debug event from
 					   WaitForDebugEvent */
 static HANDLE current_process_handle;	/* Currently executing process */
-static thread_info *current_thread;	/* Info on currently selected thread */
+static windows_thread_info *current_thread;	/* Info on currently selected thread */
 static DWORD main_thread_id;		/* Thread ID of the main thread */
 
 /* Counts of things.  */
@@ -291,10 +291,10 @@ check (BOOL ok, const char *file, int line)
 /* Find a thread record given a thread id.  If GET_CONTEXT is not 0,
    then also retrieve the context for this thread.  If GET_CONTEXT is
    negative, then don't suspend the thread.  */
-static thread_info *
+static windows_thread_info *
 thread_rec (DWORD id, int get_context)
 {
-  thread_info *th;
+  windows_thread_info *th;
 
   for (th = &thread_head; (th = th->next) != NULL;)
     if (th->id == id)
@@ -331,10 +331,10 @@ thread_rec (DWORD id, int get_context)
 }
 
 /* Add a thread to the thread list.  */
-static thread_info *
+static windows_thread_info *
 windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
 {
-  thread_info *th;
+  windows_thread_info *th;
   DWORD id;
 
   gdb_assert (ptid_get_tid (ptid) != 0);
@@ -344,7 +344,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
   if ((th = thread_rec (id, FALSE)))
     return th;
 
-  th = XCNEW (thread_info);
+  th = XCNEW (windows_thread_info);
   th->id = id;
   th->h = h;
   th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
@@ -374,13 +374,13 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
 static void
 windows_init_thread_list (void)
 {
-  thread_info *th = &thread_head;
+  windows_thread_info *th = &thread_head;
 
   DEBUG_EVENTS (("gdb: windows_init_thread_list\n"));
   init_thread_list ();
   while (th->next != NULL)
     {
-      thread_info *here = th->next;
+      windows_thread_info *here = th->next;
       th->next = here->next;
       xfree (here);
     }
@@ -391,7 +391,7 @@ windows_init_thread_list (void)
 static void
 windows_delete_thread (ptid_t ptid, DWORD exit_code)
 {
-  thread_info *th;
+  windows_thread_info *th;
   DWORD id;
 
   gdb_assert (ptid_get_tid (ptid) != 0);
@@ -412,7 +412,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
 
   if (th->next != NULL)
     {
-      thread_info *here = th->next;
+      windows_thread_info *here = th->next;
       th->next = here->next;
       xfree (here);
     }
@@ -446,7 +446,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
       else
 #endif
 	{
-	  thread_info *th = current_thread;
+	  windows_thread_info *th = current_thread;
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  CHECK (GetThreadContext (th->h, &th->context));
 	  /* Copy dr values from that thread.
@@ -983,7 +983,7 @@ display_selectors (char * args, int from_tty)
 static int
 handle_exception (struct target_waitstatus *ourstatus)
 {
-  thread_info *th;
+  windows_thread_info *th;
   DWORD code = current_event.u.Exception.ExceptionRecord.ExceptionCode;
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
@@ -1114,7 +1114,7 @@ static BOOL
 windows_continue (DWORD continue_status, int id, int killed)
 {
   int i;
-  thread_info *th;
+  windows_thread_info *th;
   BOOL res;
 
   DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s);\n",
@@ -1192,7 +1192,7 @@ static void
 windows_resume (struct target_ops *ops,
 		ptid_t ptid, int step, enum gdb_signal sig)
 {
-  thread_info *th;
+  windows_thread_info *th;
   DWORD continue_status = DBG_CONTINUE;
 
   /* A specific PTID means `step only this thread id'.  */
@@ -1315,8 +1315,8 @@ get_windows_debug_event (struct target_ops *ops,
 {
   BOOL debug_event;
   DWORD continue_status, event_code;
-  thread_info *th;
-  static thread_info dummy_thread_info;
+  windows_thread_info *th;
+  static windows_thread_info dummy_thread_info;
   int retval = 0;
 
   last_sig = GDB_SIGNAL_0;
@@ -2450,7 +2450,7 @@ static int
 windows_get_tib_address (struct target_ops *self,
 			 ptid_t ptid, CORE_ADDR *addr)
 {
-  thread_info *th;
+  windows_thread_info *th;
 
   th = thread_rec (ptid_get_tid (ptid), 0);
   if (th == NULL)

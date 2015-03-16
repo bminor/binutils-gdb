@@ -1,3 +1,12 @@
+2015-03-16  Yuanhui Zhang  <asmwarrior@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (struct thread_info_struct): Rename to ...
+	(struct windows_thread_info_struct): ... this.
+	(thread_info): Rename to ...
+	(windows_thread_info): ... this.
+	All users updated.
+
 2015-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
