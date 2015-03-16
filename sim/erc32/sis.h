@@ -23,8 +23,13 @@
 #include "ansidecl.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
-
-#include "end.h"
+#include <sim-config.h>
+ 
+#if WITH_HOST_BYTE_ORDER == BIG_ENDIAN
+#define HOST_BIG_ENDIAN
+#else
+#define HOST_LITTLE_ENDIAN
+#endif
 
 #define I_ACC_EXC 1
 
@@ -60,7 +65,7 @@ typedef long long int64;	   /* 64-bit signed int */
 struct pstate {
 
     float64         fd[16];	/* FPU registers */
-#ifdef HOST_LITTLE_ENDIAN_FLOAT
+#ifdef HOST_LITTLE_ENDIAN
     float32         fs[32];
     float32        *fdp;
 #else

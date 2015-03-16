@@ -1561,6 +1561,18 @@ elf32_rx_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
   irel = elf_section_data (sec)->relocs;
   irelend = irel + sec->reloc_count;
 
+  if (irel == NULL && sec->reloc_count > 0)
+    {
+      /* If the relocs have not been kept in the section data
+	 structure (because -no-keep-memory was used) then
+	 reread them now.  */
+      irel = (_bfd_elf_link_read_relocs
+	      (abfd, sec, NULL, (Elf_Internal_Rela *) NULL, FALSE));
+      if (irel == NULL)
+	/* FIXME: Return FALSE instead ?  */
+	irelend = irel;
+    }
+
   /* Actually delete the bytes.  */
   memmove (contents + addr, contents + addr + count,
 	   (size_t) (toaddr - addr - count));
@@ -1574,7 +1586,7 @@ elf32_rx_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
     memset (contents + toaddr - count, 0x03, count);
 
   /* Adjust all the relocs.  */
-  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
+  for (; irel < irelend; irel++)
     {
       /* Get the new reloc address.  */
       if (irel->r_offset > addr

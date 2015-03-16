@@ -1467,7 +1467,7 @@ out_header (asection *sec, expressionS *exp)
   symbolS *end_sym;
 
   subseg_set (sec, 0);
-#if 1
+
   if (flag_dwarf_sections)
     {
       /* If we are going to put the start and end symbols in different
@@ -1478,7 +1478,6 @@ out_header (asection *sec, expressionS *exp)
       symbol_set_value_now (start_sym);
     }
   else
-#endif
     {
       start_sym = symbol_temp_new_now ();
       end_sym = symbol_temp_make ();

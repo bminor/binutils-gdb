@@ -20,11 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef CRIS_TCONFIG_H
 #define CRIS_TCONFIG_H
 
-#include "ansidecl.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
-#include "sim-module.h"
-
 /* There's basically a a big ??? FIXME: CHECK THIS on everything in this
    file.  I just copied it from m32r, pruned some stuff and added
    HAVE_MODEL because it seemed useful.  */
@@ -35,15 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 1
 
+#include "sim-module.h"
 extern MODULE_INSTALL_FN cris_option_install;
-
-/* FIXME: Revisit.  */
-#ifdef HAVE_DV_SOCKSER
-extern MODULE_INSTALL_FN dv_sockser_install;
-#define MODULE_LIST dv_sockser_install, cris_option_install,
-#else
 #define MODULE_LIST cris_option_install,
-#endif
 
 #define SIM_HAVE_MODEL
 

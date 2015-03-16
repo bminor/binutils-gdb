@@ -1,3 +1,17 @@
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.in [HAVE_DV_SOCKSER]: Delete.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+
 2014-08-23  Hans-Peter Nilsson  <hp@axis.com>
 
     	* configure.ac: Default simulator hardware to off again

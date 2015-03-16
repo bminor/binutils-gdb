@@ -67,10 +67,6 @@ SIM_EXTRA_ALL = $(SIM_@sim_gen@_ALL)
 
 SIM_EXTRA_LIBS = $(MIPS_EXTRA_LIBS)
 
-# List of main object files for `run'.
-SIM_RUN_OBJS = nrun.o
-
-
 
 ## COMMON_POST_CONFIG_FRAG
 

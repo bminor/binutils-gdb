@@ -51,8 +51,8 @@ amd64fbsd_sigtramp_p (struct frame_info *this_frame)
 
   if (!safe_frame_unwind_memory (this_frame, pc, buf, sizeof buf))
     return 0;
-  if (memcmp (buf, amd64fbsd_sigtramp_code, sizeof amd64fbsd_sigtramp_code) !=
-      0)
+  if (memcmp (buf, amd64fbsd_sigtramp_code, sizeof amd64fbsd_sigtramp_code)
+      != 0)
     return 0;
 
   return 1;

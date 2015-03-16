@@ -1,3 +1,41 @@
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* gentmap.c, run.c: Convert old style prototypes.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_COMMON): Call AH_BOTTOM.  Delete logic for
+	symlinking tconfig.h to tconfig.in.
+	* config.in, configure: Regenerate.
+	* nrun.c, run.c, sim-basics.h: Delete tconfig.h include.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-socker.h (dv_sockser_install): Declare.
+	* sim-module.c: Include config.h.
+	[HAVE_DV_SOCKSER]: Include dv-sockser.h.
+	(modules) [HAVE_DV_SOCKSER]: Add dv_sockser_install.
+	* sim-module.h: Include gdb/remote-sim.h.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (BUILT_SRC_FROM_COMMON): Delete.
+	(sim-inline.c): Delete rule.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_RUN_OBJS): Change to nrun.o.
+	* run.c [SIM_USE_DEPRECATED_RUN_FRONTEND]: Issue a warning.
+	[!SIM_USE_DEPRECATED_RUN_FRONTEND]: Throw an error.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-assert.h [!SIM_ASSERT, WITH_ASSERT]: Include sim-io.h.
+	[!ASSERT, WITH_ASSERT]: Likewise.
+	* sim-endian.c: Delete sim-io.h include.
+
 2015-02-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* run-sim.h (sim_kill): Delete unused prototype.

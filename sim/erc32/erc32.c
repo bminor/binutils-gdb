@@ -30,7 +30,6 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include "sis.h"
-#include "end.h"
 #include "sim-config.h"
 
 extern int      ctrl_c;

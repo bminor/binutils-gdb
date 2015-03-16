@@ -20,9 +20,6 @@ NL_TARGET = -DNL_TARGET_bfin
 
 ## COMMON_PRE_CONFIG_FRAG
 
-# List of main object files for `run'.
-SIM_RUN_OBJS = nrun.o
-
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	bfin-sim.o \

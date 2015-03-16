@@ -46,13 +46,44 @@ static int hppa_debug = 0;
 static const int hppa32_num_regs = 128;
 static const int hppa64_num_regs = 96;
 
+/* We use the objfile->obj_private pointer for two things:
+ * 1.  An unwind table;
+ *
+ * 2.  A pointer to any associated shared library object.
+ *
+ * #defines are used to help refer to these objects.
+ */
+
+/* Info about the unwind table associated with an object file.
+ * This is hung off of the "objfile->obj_private" pointer, and
+ * is allocated in the objfile's psymbol obstack.  This allows
+ * us to have unique unwind info for each executable and shared
+ * library that we are debugging.
+ */
+struct hppa_unwind_info
+  {
+    struct unwind_table_entry *table;	/* Pointer to unwind info */
+    struct unwind_table_entry *cache;	/* Pointer to last entry we found */
+    int last;				/* Index of last entry */
+  };
+
+struct hppa_objfile_private
+  {
+    struct hppa_unwind_info *unwind_info;	/* a pointer */
+    struct so_list *so_info;			/* a pointer  */
+    CORE_ADDR dp;
+
+    int dummy_call_sequence_reg;
+    CORE_ADDR dummy_call_sequence_addr;
+  };
+
 /* hppa-specific object data -- unwind and solib info.
    TODO/maybe: think about splitting this into two parts; the unwind data is 
    common to all hppa targets, but is only used in this file; we can register 
    that separately and make this static. The solib data is probably hpux-
    specific, so we can create a separate extern objfile_data that is registered
    by hppa-hpux-tdep.c and shared with pa64solib.c and somsolib.c.  */
-const struct objfile_data *hppa_objfile_priv_data = NULL;
+static const struct objfile_data *hppa_objfile_priv_data = NULL;
 
 /* Get at various relevent fields of an instruction word.  */
 #define MASK_5 0x1f
@@ -170,7 +201,7 @@ hppa_symbol_address(const char *sym)
     return (CORE_ADDR)-1;
 }
 
-struct hppa_objfile_private *
+static struct hppa_objfile_private *
 hppa_init_objfile_priv_data (struct objfile *objfile)
 {
   struct hppa_objfile_private *priv;
@@ -2777,14 +2808,6 @@ hppa_frame_prev_register_helper (struct frame_info *this_frame,
 				     size, byte_order);
       return frame_unwind_got_constant (this_frame, regnum, pc + 4);
     }
-
-  /* Make sure the "flags" register is zero in all unwound frames.
-     The "flags" registers is a HP-UX specific wart, and only the code
-     in hppa-hpux-tdep.c depends on it.  However, it is easier to deal
-     with it here.  This shouldn't affect other systems since those
-     should provide zero for the "flags" register anyway.  */
-  if (regnum == HPPA_FLAGS_REGNUM)
-    return frame_unwind_got_constant (this_frame, regnum, 0);
 
   return trad_frame_get_prev_register (this_frame, saved_regs, regnum);
 }

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_CONFIG_H
 #include "cconfig.h"
-#include "tconfig.h"
 #endif
 
 #include <signal.h>
@@ -50,6 +49,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "run-sim.h"
 #include "version.h"
 
+#ifdef SIM_USE_DEPRECATED_RUN_FRONTEND
+# warning "This sim is using the deprecated run.c; please migrate to nrun.c."
+#else
+# error "Please do not create new sim ports using run.c; use nrun.c instead." \
+        "New submissions using run.c will not be accepted."
+#endif
+
 static void usage (int help);
 static void print_version (void);
 extern int optind;
@@ -79,9 +85,7 @@ cntrl_c (int sig ATTRIBUTE_UNUSED)
 }
 
 int
-main (ac, av)
-     int ac;
-     char **av;
+main (int ac, char **av)
 {
   RETSIGTYPE (*prev_sigint) ();
   bfd *abfd;
@@ -351,7 +355,7 @@ usage (int help)
 }
 
 static void
-print_version ()
+print_version (void)
 {
   printf ("GNU simulator %s%s\n", PKGVERSION, version);
 }

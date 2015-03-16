@@ -1,3 +1,102 @@
+2015-03-16  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_make_corefile_notes): Fetch all target registers
+	before writing core register notes.
+
+2015-03-16  Yuanhui Zhang  <asmwarrior@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb_curses.h (tgetnum): Mark with EXTERN_C.
+	* stub-termcap.c (tgetent, tgetnum, tgetflag, tgetstr, tputs)
+	(tgoto): Wrap with extern "C".
+
+2015-03-16  Pedro Alves  <palves@redhat.com>
+	    Yuanhui Zhang  <asmwarrior@gmail.com>
+
+	* stub-termcap.c (tputs): Change prototype.
+
+2015-03-16  Yuanhui Zhang  <asmwarrior@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (struct thread_info_struct): Rename to ...
+	(struct windows_thread_info_struct): ... this.
+	(thread_info): Rename to ...
+	(windows_thread_info): ... this.
+	All users updated.
+
+2015-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* NEWS: New Removed targets and native configurations.
+
+2015-03-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove HPUX.
+	* Makefile.in (ALL_64_TARGET_OBS): Remove ia64-hpux-tdep.o.
+	(ALL_TARGET_OBS): Remove hppa-hpux-tdep.o, solib-som.o and solib-pa64.o.
+	(HFILES_NO_SRCDIR): Remove solib-som.h, inf-ttrace.h, solib-pa64.h and
+	ia64-hpux-tdep.h, solib-ia64-hpux.h.
+	(ALLDEPFILES): Remove hppa-hpux-tdep.c, hppa-hpux-nat.c,
+	ia64-hpux-nat.c, ia64-hpux-tdep.c, somread.c and solib-som.c.
+	* config/djgpp/fnchange.lst: Remove hppa-hpux-nat.c and
+	hppa-hpux-tdep.c.
+	* config/ia64/hpux.mh: Remove file.
+	* config/pa/hpux.mh: Remove file.
+	* configure: Rebuilt.
+	* configure.ac (dlgetmodinfo, somread.o): Remove.
+	* configure.host (hppa*-*-hpux*, ia64-*-hpux*): Make them obsolete.
+	(ia64-*-hpux*): Remove its float format exception.
+	* configure.tgt (hppa*-*-hpux*, ia64-*-hpux*): Make them obsolete.
+	* hppa-hpux-nat.c: Remove file.
+	* hppa-hpux-tdep.c: Remove file.
+	* hppa-tdep.c (struct hppa_unwind_info, struct hppa_objfile_private):
+	Move them here from hppa-tdep.h
+	(hppa_objfile_priv_data, hppa_init_objfile_priv_data): Make it static.
+	(hppa_frame_prev_register_helper): Remove HPPA_FLAGS_REGNUM exception.
+	* hppa-tdep.h (struct hppa_unwind_info, struct hppa_objfile_private):
+	Move them to hppa-tdep.c.
+	(hppa_objfile_priv_data, hppa_init_objfile_priv_data): Remove
+	declarations.
+	* ia64-hpux-nat.c: Remove file.
+	* ia64-hpux-tdep.c: Remove file.
+	* ia64-hpux-tdep.h: Remove file.
+	* inf-ttrace.c: Remove file.
+	* inf-ttrace.h: Remove file.
+	* solib-ia64-hpux.c: Remove file.
+	* solib-ia64-hpux.h: Remove file.
+	* solib-pa64.c: Remove file.
+	* solib-pa64.h: Remove file.
+	* solib-som.c: Remove file.
+	* solib-som.h: Remove file.
+	* somread.c: Remove file.
+
+2015-03-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.ac: AC_SEARCH_LIBS(kinfo_getvmmap, util).
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* fbsd-nat.c [!HAVE_KINFO_GETVMMAP] (fbsd_read_mapping): Don't
+        define.
+	(fbsd_find_memory_regions): Use kinfo_getvmmap to
+	enumerate memory regions if present.
+
+2015-03-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64fbsd-tdep.c (amd64fbsd_sigtramp_p): Style fixes.
+	* i386fbsd-tdep.c: Fix style in various gdb_static_assert
+	expressions.
+	(i386fbsd_sigtramp_p): Likewise.
+
+2015-03-12  John Baldwin  <jhb@FreeBSD.org>
+
+	* MAINTAINERS (Write After Approval): Add John Baldwin.
+
+2015-03-12  Gary Benson <gbenson@redhat.com>
+
+	* solib.c (_initialize_solib): Make "set/show sysroot" use
+	add_setshow_optional_filename_cmd so it can be restored to
+	empty after being set.
+
 2015-03-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (SFILES): New source break-catch-syscall.c.

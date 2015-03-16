@@ -146,6 +146,8 @@ struct aarch64_frag_type
       goto LABEL;								\
     }
 
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
+
 #define DWARF2_LINE_MIN_INSN_LENGTH 	4
 
 /* The lr register is r30.  */

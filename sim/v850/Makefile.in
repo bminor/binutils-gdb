@@ -30,8 +30,6 @@ SIM_OBJS = \
 	sim-reason.o \
 	sim-stop.o
 
-SIM_RUN_OBJS = nrun.o
-
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.
 SIM_EXTRA_DEPS = v850_sim.h sim-main.h simops.h itable.h

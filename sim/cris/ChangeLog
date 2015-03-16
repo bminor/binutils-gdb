@@ -1,3 +1,19 @@
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+	* rvdummy.c: Delete tconfig.h include.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.in: Delete most includes.
+	[HAVE_DV_SOCKSER]: Delete.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+
 2014-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* traps.c (cris_break_13_handler): Adjust call to "fstat" callback

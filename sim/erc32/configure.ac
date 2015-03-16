@@ -5,8 +5,6 @@ sinclude(../common/acinclude.m4)
 
 SIM_AC_COMMON
 
-AC_CHECK_HEADERS(stdlib.h)
-
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], sim_cv_os_cygwin,
 [AC_EGREP_CPP(lose, [
@@ -32,4 +30,5 @@ else
 	       AC_ERROR([the required "readline" library is missing]), $TERMCAP)
 fi
 AC_SUBST(READLINE)
+SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OUTPUT

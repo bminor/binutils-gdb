@@ -24,13 +24,21 @@
 
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* -Wmissing-prototypes */
 extern int tgetent (char *buffer, char *termtype);
 extern int tgetnum (char *name);
 extern int tgetflag (char *name);
 extern char* tgetstr (char *name, char **area);
-extern int tputs (char *string, int nlines, int (*outfun) ());
+extern int tputs (char *string, int nlines, int (*outfun) (int));
 extern char *tgoto (const char *cap, int col, int row);
+
+#ifdef __cplusplus
+}
+#endif
 
 /* Each of the files below is a minimal implementation of the standard
    termcap function with the same name, suitable for use in a Windows
@@ -61,7 +69,7 @@ tgetstr (char *name, char **area)
 }
 
 int
-tputs (char *string, int nlines, int (*outfun) ())
+tputs (char *string, int nlines, int (*outfun) (int))
 {
   while (*string)
     outfun (*string++);

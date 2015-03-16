@@ -27,8 +27,6 @@ case "${target}" in
 esac
 SIM_AC_OPTION_HARDWARE($hw_enabled,$hw_devices,$hw_extra_devices)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h fcntl.h)
-
 m68hc11_extra_objs="$SIM_DV_SOCKSER_O"
 AC_SUBST(m68hc11_extra_objs)
 

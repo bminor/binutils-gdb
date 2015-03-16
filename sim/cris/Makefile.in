@@ -45,7 +45,6 @@ SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) $(srccom)/cgen-ops.h \
 	arch.h cpuall.h cris-sim.h cris-desc.h
 
-SIM_RUN_OBJS = nrun.o
 SIM_EXTRA_CLEAN = cris-clean
 
 # This selects the cris newlib/libgloss syscall definitions.

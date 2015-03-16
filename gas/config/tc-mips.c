@@ -18686,6 +18686,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
      MIPS64R2 rather than MIPS64.  */
   { "xlp",	      0, 0,			ISA_MIPS64R2, CPU_XLR },
 
+  /* i6400.  */
+  { "i6400",	      0, ASE_MSA,		ISA_MIPS64R6, CPU_MIPS64R6},
+
   /* End marker */
   { NULL, 0, 0, 0, 0 }
 };

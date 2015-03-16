@@ -1256,6 +1256,8 @@ General_options::finalize()
 		     "--emit-relocs"));
       if (this->has_plugins())
 	gold_fatal(_("incremental linking is not compatible with --plugin"));
+      if (this->relro())
+	gold_fatal(_("incremental linking is not compatible with -z relro"));
       if (this->gc_sections())
 	{
 	  gold_warning(_("ignoring --gc-sections for an incremental link"));

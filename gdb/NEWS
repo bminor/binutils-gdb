@@ -87,6 +87,11 @@ vFile:fstat:
 * GDB now supports access to vector registers on S/390 GNU/Linux
   targets.
 
+* Removed targets and native configurations
+
+HP/PA running HP-UX           hppa*-*-hpux*
+Itanium running HP-UX         ia64-*-hpux*
+
 *** Changes in GDB 7.9
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.

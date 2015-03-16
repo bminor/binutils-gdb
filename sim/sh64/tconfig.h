@@ -1,10 +1,10 @@
-/* IQ2000 target configuration file.  -*- C -*- */
+/* SH64 target configuration file.  -*- C -*- */
 
 /* Define this if the simulator can vary the size of memory.
    See the xxx simulator for an example.
    This enables the `-m size' option.
    The memory size is stored in STATE_MEM_SIZE.  */
-/* Not used for IQ2000 since we use the memory module. TODO -- check this  */
+/* Not used for SH64 since we use the memory module. TODO -- check this  */
 /* #define SIM_HAVE_MEM_SIZE */
 
 /* See sim-hload.c.  We properly handle LMA. -- TODO: check this */
@@ -12,12 +12,6 @@
 
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 0
-
-/* FIXME: Revisit.  */
-#ifdef HAVE_DV_SOCKSER
-MODULE_INSTALL_FN dv_sockser_install;
-#define MODULE_LIST dv_sockser_install,
-#endif
 
 #if 0
 /* Enable watchpoints.  */
@@ -40,3 +34,6 @@ MODULE_INSTALL_FN dv_sockser_install;
    and -pbb.  However some cpu families may use -simple while others use
    one of -scache/-pbb. ???? */
 #define WITH_SCACHE_PBB 1
+
+/* Define this if the target cpu is bi-endian and the simulator supports it.  */
+#define SIM_HAVE_BIENDIAN

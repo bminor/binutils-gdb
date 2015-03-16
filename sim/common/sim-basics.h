@@ -126,11 +126,6 @@ typedef enum {
 
 /* Basic definitions - ordered so that nothing calls what comes after it.  */
 
-/* FIXME: conditionalizing tconfig.h on HAVE_CONFIG_H seems wrong.  */
-#ifdef HAVE_CONFIG_H
-#include "tconfig.h"
-#endif
-
 #include "ansidecl.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"

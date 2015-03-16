@@ -31,9 +31,6 @@ MN10300_OBJS = \
 
 SIM_OBJS = $(MN10300_OBJS) interp.o
 
-# List of main object files for `run'.
-SIM_RUN_OBJS = nrun.o
-
 SIM_EXTRA_CLEAN = clean-igen
 # Extra dependencies for "sim-main.h"
 SIM_EXTRA_DEPS = mn10300_sim.h itable.h idecode.h

@@ -31,7 +31,7 @@ static struct tdefs open_tdefs[] = {
 };
 
 static void
-gen_targ_vals_h ()
+gen_targ_vals_h (void)
 {
   struct tdefs *t;
 
@@ -60,7 +60,7 @@ gen_targ_vals_h ()
 }
 
 static void
-gen_targ_map_c ()
+gen_targ_map_c (void)
 {
   struct tdefs *t;
 
@@ -110,9 +110,7 @@ gen_targ_map_c ()
 }
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
   if (argc != 2)
     abort ();
