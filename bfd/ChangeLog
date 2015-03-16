@@ -1,3 +1,9 @@
+2015-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rx.c (elf32_rx_relax_delete_bytes): If the relocs are not
+	stored in the elf_section_data structure then load them as
+	necessary.
+
 2015-03-14  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* elf-s390-common.c (elf_s390_elf_sort_relocs_p): Don't sort
