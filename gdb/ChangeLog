@@ -1,3 +1,10 @@
+2015-03-16  Yuanhui Zhang  <asmwarrior@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb_curses.h (tgetnum): Mark with EXTERN_C.
+	* stub-termcap.c (tgetent, tgetnum, tgetflag, tgetstr, tputs)
+	(tgoto): Wrap with extern "C".
+
 2015-03-16  Pedro Alves  <palves@redhat.com>
 	    Yuanhui Zhang  <asmwarrior@gmail.com>
 
