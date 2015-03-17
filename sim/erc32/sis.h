@@ -184,7 +184,7 @@ extern struct pstate  sregs;
 extern void	set_regi (struct pstate *sregs, int32 reg,
 			  uint32 rval);
 extern void	get_regi (struct pstate *sregs, int32 reg, char *buf);
-extern int	exec_cmd (struct pstate *sregs, char *cmd);
+extern int	exec_cmd (struct pstate *sregs, const char *cmd);
 extern void	reset_stat (struct pstate  *sregs);
 extern void	show_stat (struct pstate  *sregs);
 extern void	init_bpt (struct pstate  *sregs);
@@ -202,7 +202,7 @@ extern int	check_bpt (struct pstate *sregs);
 extern void	reset_all (void);
 extern void	sys_reset (void);
 extern void	sys_halt (void);
-extern int	bfd_load (char *fname);
+extern int	bfd_load (const char *fname);
 extern double	get_time (void);
 
 /* exec.c */

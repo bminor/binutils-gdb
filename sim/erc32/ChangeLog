@@ -1,5 +1,13 @@
 2015-03-28  Jiri Gaisler  <jiri@gaisler.se>
 
+	* func.c (exec_cmd): Fix old style prototype.  Mark cmd const.  Save
+	the command in a new cmdsave2 to avoid modifying.
+	(bfd_load): Fix old style prototype.  Mark fname const.
+	* sis.h (exec_cmd): Mark cmd const.
+	(bfd_load): Mark fname const.
+
+2015-03-28  Jiri Gaisler  <jiri@gaisler.se>
+
 	* erc32.c (memory_iread): New function to fetch instructions.
 	(memory_read): Print message in verbose mode.
 	* interf.c (run_sim): Use memory_iread.

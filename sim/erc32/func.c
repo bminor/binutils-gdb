@@ -377,21 +377,20 @@ limcalc (freq)
     }
     return lim;
 }
-    
+
 int
-exec_cmd(sregs, cmd)
-    char           *cmd;
-    struct pstate  *sregs;
+exec_cmd(struct pstate *sregs, const char *cmd)
 {
     char           *cmd1, *cmd2;
     int32           stat;
     uint32          len, i, clen, j;
     static uint32   daddr = 0;
-    char           *cmdsave;
+    char           *cmdsave, *cmdsave2 = NULL;
 
     stat = OK;
     cmdsave = strdup(cmd);
-    if ((cmd1 = strtok(cmd, " \t")) != NULL) {
+    cmdsave2 = strdup (cmd);
+    if ((cmd1 = strtok (cmdsave2, " \t")) != NULL) {
 	clen = strlen(cmd1);
 	if (strncmp(cmd1, "bp", clen) == 0) {
 	    for (i = 0; i < sregs->bptnum; i++) {
@@ -608,6 +607,8 @@ exec_cmd(sregs, cmd)
 	} else
 	    printf("syntax error\n");
     }
+    if (cmdsave2 != NULL)
+	free(cmdsave2);
     if (cmdsave != NULL)
 	free(cmdsave);
     return stat;
@@ -1035,8 +1036,7 @@ sys_halt()
 #define LOAD_ADDRESS 0
 
 int
-bfd_load(fname)
-    char           *fname;
+bfd_load (const char *fname)
 {
     asection       *section;
     bfd            *pbfd;
