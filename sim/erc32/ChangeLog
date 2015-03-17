@@ -1,3 +1,12 @@
+2015-03-17  Jiri Gaisler  <jiri@gaisler.se>
+
+	* func.c (show_stat): Print simulation time in portable long long
+	format.
+	* help.c (usage): Update usage help print-out.
+	* sis.c (run_sim): Increase debug level with -v. Also print
+	simulation time in portable long long format.
+	* sis.h: Use stdint.h for portable 32- and 64-bit ints.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

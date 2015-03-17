@@ -28,6 +28,7 @@
 #include "sis.h"
 #include <dis-asm.h>
 #include "sim-config.h"
+#include <inttypes.h>
 
 
 #define	VAL(x)	strtoul(x,(char **)NULL,0)
@@ -642,8 +643,8 @@ show_stat(sregs)
 	sregs->nbranch;
 #endif
 
-    printf("\n Cycles       : %9d\n\r", ebase.simtime - sregs->simstart);
-    printf(" Instructions : %9d\n", sregs->ninst);
+    printf("\n Cycles       : %9" PRIu64 "\n\r", ebase.simtime - sregs->simstart);
+    printf(" Instructions : %9" PRIu64 "\n", sregs->ninst);
 
 #ifdef STAT
     printf("   integer    : %9.2f %%\n", 100.0 * (float) iinst / (float) sregs->ninst);

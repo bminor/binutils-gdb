@@ -24,7 +24,8 @@
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
 #include <sim-config.h>
- 
+#include <stdint.h>
+
 #if WITH_HOST_BYTE_ORDER == BIG_ENDIAN
 #define HOST_BIG_ENDIAN
 #else
@@ -56,11 +57,8 @@ typedef unsigned int uint32;	/* 32-bit unsigned int */
 typedef float   float32;	/* 32-bit float */
 typedef double  float64;	/* 64-bit float */
 
-/* FIXME: what about host compilers that don't support 64-bit ints? */
-typedef unsigned long long uint64; /* 64-bit unsigned int */
-typedef long long int64;	   /* 64-bit signed int */
-
-#define UINT64_MAX 18446744073709551615ULL
+typedef uint64_t uint64; /* 64-bit unsigned int */
+typedef int64_t int64;	   /* 64-bit signed int */
 
 struct pstate {
 
