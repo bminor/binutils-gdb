@@ -788,6 +788,8 @@ static const arch_entry cpu_arch[] =
     CPU_BDVER3_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("bdver4"), PROCESSOR_BD,
     CPU_BDVER4_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN ("znver1"), PROCESSOR_ZNVER,
+    CPU_ZNVER1_FLAGS, 0, 0 }, 
   { STRING_COMMA_LEN ("btver1"), PROCESSOR_BT,
     CPU_BTVER1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("btver2"), PROCESSOR_BT,
@@ -942,6 +944,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512IFMA_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".avx512vbmi"), PROCESSOR_UNKNOWN,
     CPU_AVX512VBMI_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".clzero"), PROCESSOR_UNKNOWN,
+    CPU_CLZERO_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
@@ -1283,6 +1287,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_K8:
 	    case PROCESSOR_AMDFAM10:
 	    case PROCESSOR_BD:
+	    case PROCESSOR_ZNVER:
 	    case PROCESSOR_BT:
 	      patt = alt_short_patt;
 	      break;
@@ -1313,6 +1318,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_K8:
 	    case PROCESSOR_AMDFAM10:
 	    case PROCESSOR_BD:
+	    case PROCESSOR_ZNVER:
 	    case PROCESSOR_BT:
 	    case PROCESSOR_GENERIC32:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize

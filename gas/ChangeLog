@@ -1,3 +1,10 @@
+2015-03-17  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add PROCESSOR_ZNVER flags.
+	(i386_align_code): Add PROCESSOR_ZNVER cases.
+	* config/tc-i386.h (processor_type): Add PROCESSOR_ZNVER.
+	* doc/c-i386.texi: Add znver1 and clzero.
+
 2015-03-16  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2dbg.c (out_header): Remove spurious #if 1.

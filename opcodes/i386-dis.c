@@ -12036,6 +12036,9 @@ static const struct dis386 rm_table[][8] = {
     /* RM_0F01_REG_7 */
     { "swapgs",		{ Skip_MODRM } },
     { "rdtscp",		{ Skip_MODRM } },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "clzero",		{ Skip_MODRM } },
   },
   {
     /* RM_0FAE_REG_5 */

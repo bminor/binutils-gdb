@@ -1,3 +1,14 @@
+2015-03-17  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
+
+	* i386-dis.c (rm_table): Add clzero.
+	* i386-gen.c (cpu_flag_init): Add new CPU_ZNVER1_FLAGS.
+	Add CPU_CLZERO_FLAGS.
+	(cpu_flags): Add CpuCLZERO.
+	* i386-opc.h: Add CpuCLZERO.
+	* i386-opc.tbl: Add clzero.
+	* i386-init.h: Re-generated.
+	* i386-tbl.h: Re-generated.
+
 2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* mips-opc.c (decode_mips_operand): Fix constraint issues

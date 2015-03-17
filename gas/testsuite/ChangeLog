@@ -1,3 +1,18 @@
+2015-03-17  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
+
+	* gas/i386/i386.exp: Add new znver1 test cases.
+	* gas/i386/arch-13-znver1.d: New.
+	* gas/i386/arch-13.d: New.
+	* gas/i386/arch-13.s: New.
+	* gas/i386/clzero.d: New.
+	* gas/i386/clzero.s: New.
+	* gas/i386/nops-1-znver1.d: New.
+	* gas/i386/x86-64-arch-3-znver1.d: New.
+	* gas/i386/x86-64-arch-3.d: New.
+	* gas/i386/x86-64-arch-3.s: New.
+	* gas/i386/x86-64-clzero.d: New.
+	* gas/i386/x86-64-nops-1-znver1.d: New.
+
 2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* gas/mips/mips.exp: Added branch constraints testcase.
