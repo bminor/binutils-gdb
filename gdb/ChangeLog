@@ -1,3 +1,10 @@
+2015-03-17  Gary Benson <gbenson@redhat.com>
+	    Luke Allardyce <lukeallardyce@gmail.com>
+
+	PR gdb/18131
+	* common/common-remote-fileio.h (sys/stat.h): New include.
+	(stuct stat): Remove forward declaration.
+
 2015-03-16  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (fbsd_make_corefile_notes): Fetch all target registers

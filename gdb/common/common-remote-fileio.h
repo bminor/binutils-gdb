@@ -21,8 +21,7 @@
 #define COMMON_REMOTE_FILEIO_H
 
 #include "gdb/fileio.h"
-
-struct stat;
+#include <sys/stat.h>
 
 /* Pack a host-format integer into a byte buffer in big-endian format
    ready for transmission over the remote protocol.  BYTES specifies
