@@ -1,3 +1,10 @@
+2015-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2014-06-13  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* config-ml.in: Robustify ac_configure_args parsing.
+
 2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.def: Updated from GCC trunk.
