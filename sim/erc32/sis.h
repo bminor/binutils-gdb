@@ -169,6 +169,7 @@ extern void	sim_halt (void);
 extern void	exit_sim (void);
 extern void	init_stdio (void);
 extern void	restore_stdio (void);
+extern int	memory_iread (uint32 addr, uint32 *data, int32 *ws);
 extern int	memory_read (int32 asi, uint32 addr, uint32 *data,
 			     int32 sz, int32 *ws);
 extern int	memory_write (int32 asi, uint32 addr, uint32 *data,
@@ -179,6 +180,7 @@ extern int	sis_memory_read (uint32 addr, char *data,
 				 uint32 length);
 
 /* func.c */
+extern struct pstate  sregs;
 extern void	set_regi (struct pstate *sregs, int32 reg,
 			  uint32 rval);
 extern void	get_regi (struct pstate *sregs, int32 reg, char *buf);

@@ -1648,6 +1648,31 @@ store_bytes (mem, data, sz)
 /* Memory emulation */
 
 int
+memory_iread (uint32 addr, uint32 *data, int32 *ws)
+{
+    uint32          asi;
+    if ((addr >= mem_ramstart) && (addr < (mem_ramstart + mem_ramsz))) {
+	memcpy (data, &ramb[addr & mem_rammask & ~3], 4);
+	*ws = mem_ramr_ws;
+	return 0;
+    } else if (addr < mem_romsz) {
+	memcpy (data, &romb[addr & ~3], 4);
+	*ws = mem_romr_ws;
+	return 0;
+    }
+
+    if (sis_verbose)
+	printf ("Memory exception at %x (illegal address)\n", addr);
+    if (sregs.psr & 0x080)
+        asi = 9;
+    else
+        asi = 8;
+    set_sfsr (UIMP_ACC, addr, asi, 1);
+    *ws = MEM_EX_WS;
+    return 1;
+}
+
+int
 memory_read(asi, addr, data, sz, ws)
     int32           asi;
     uint32          addr;
@@ -1712,7 +1737,8 @@ memory_read(asi, addr, data, sz, ws)
 
     }
 
-    printf("Memory exception at %x (illegal address)\n", addr);
+    if (sis_verbose)
+	printf ("Memory exception at %x (illegal address)\n", addr);
     set_sfsr(UIMP_ACC, addr, asi, 1);
     *ws = MEM_EX_WS;
     return 1;

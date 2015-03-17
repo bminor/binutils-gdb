@@ -75,7 +75,7 @@ run_sim(sregs, icount, dis)
     uint64          icount;
     int             dis;
 {
-    int             irq, mexc, deb, asi;
+    int             irq, mexc, deb;
 
     sregs->starttime = get_time();
     init_stdio();
@@ -84,11 +84,7 @@ run_sim(sregs, icount, dis)
     irq = 0;
     while (icount > 0) {
 
-	if (sregs->psr & 0x080)
-	    asi = 9;
-   	else
-	    asi = 8;
-	mexc = memory_read(asi, sregs->pc, &sregs->inst, 2, &sregs->hold);
+	mexc = memory_iread (sregs->pc, &sregs->inst, &sregs->hold);
 	sregs->icnt = 1;
 	if (sregs->annul) {
 	    sregs->annul = 0;

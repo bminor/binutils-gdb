@@ -1,3 +1,12 @@
+2015-03-28  Jiri Gaisler  <jiri@gaisler.se>
+
+	* erc32.c (memory_iread): New function to fetch instructions.
+	(memory_read): Print message in verbose mode.
+	* interf.c (run_sim): Use memory_iread.
+	* sis.c (run_sim): As above.
+	* sis.h (memory_iread): New prototype.
+	(sregs): Declare.
+
 2015-03-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* erc32.c (mec_read): Delete parenthesis around return statement.

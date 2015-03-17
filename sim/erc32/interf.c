@@ -95,9 +95,8 @@ run_sim(sregs, icount, dis)
             if (sregs->pc == 0 || sregs->npc == 0)
                 printf ("bogus pc or npc\n");
 #endif
-        mexc = memory_read(sregs->asi, sregs->pc, &sregs->inst,
-                           2, &sregs->hold);
-#if 1	/* DELETE ME! for debugging purposes only */
+        mexc = memory_iread (sregs->pc, &sregs->inst, &sregs->hold);
+#if 0	/* DELETE ME! for debugging purposes only */
         if (sis_verbose > 2)
             printf("pc %x, np %x, sp %x, fp %x, wm %x, cw %x, i %08x\n",
                    sregs->pc, sregs->npc,
