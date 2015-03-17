@@ -80,20 +80,23 @@ batch(sregs, fname)
     char           *fname;
 {
     FILE           *fp;
-    char            lbuf[1024];
+    char           *lbuf = NULL;
+    size_t         len = 0;
+    size_t         slen;
 
     if ((fp = fopen(fname, "r")) == NULL) {
 	fprintf(stderr, "couldn't open batch file %s\n", fname);
 	return (0);
     }
-    while (!feof(fp)) {
-	lbuf[0] = 0;
-	fgets(lbuf, 1023, fp);
-	if ((strlen(lbuf) > 0) && (lbuf[strlen(lbuf) - 1] == '\n'))
-	    lbuf[strlen(lbuf) - 1] = 0;
-	printf("sis> %s\n", lbuf);
-	exec_cmd(sregs, lbuf);
+    while (getline(&lbuf, &len, fp) > -1) {
+	slen = strlen(lbuf);
+	if (slen && (lbuf[slen - 1] == '\n')) {
+	    lbuf[slen - 1] = 0;
+	    printf("sis> %s\n", lbuf);
+	    exec_cmd(sregs, lbuf);
+	}
     }
+    free(lbuf);
     fclose(fp);
     return (1);
 }
@@ -554,7 +557,9 @@ exec_cmd(sregs, cmd)
 	    sim_halt();
 	} else if (strncmp(cmd1, "shell", clen) == 0) {
 	    if ((cmd1 = strtok(NULL, " \t\n\r")) != NULL) {
-		system(&cmdsave[clen]);
+		if (system(&cmdsave[clen])) {
+		    /* Silence unused return value warning.  */
+		}
 	    }
 	} else if (strncmp(cmd1, "step", clen) == 0) {
 	    stat = run_sim(sregs, 1, 1);

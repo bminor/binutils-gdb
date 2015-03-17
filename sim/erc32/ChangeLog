@@ -1,5 +1,10 @@
 2015-03-17  Jiri Gaisler  <jiri@gaisler.se>
 
+	* func.c (exec_cmd): Silence compiler warnings when calling system().
+	(batch): Replace fgets() with getline().
+
+2015-03-17  Jiri Gaisler  <jiri@gaisler.se>
+
 	* func.c (show_stat): Print simulation time in portable long long
 	format.
 	* help.c (usage): Update usage help print-out.
