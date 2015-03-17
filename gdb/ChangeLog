@@ -1,3 +1,8 @@
+2015-03-17  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
+
+	* ser-base.h (ser_base_setstopbits): Change second argument name
+	from "rate" to "num".
+
 2015-03-17  Gary Benson <gbenson@redhat.com>
 	    Luke Allardyce <lukeallardyce@gmail.com>
 
