@@ -1,3 +1,14 @@
+2015-03-18  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/18107
+	* gdb.base/catch-syscall.c [!SYS_pipe] (pipe2_syscall): New
+	variable.
+	* gdb.base/catch-syscall.exp: Don't skip it on
+	aarch64*-*-linux* target.  Remove elements in all_syscalls.
+	(test_catch_syscall_multi_arch): Skip it on aarch64*-linux*
+	target.
+	(setup_all_syscalls): New proc.
+
 2015-03-16  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/watchpoint-reuse-slot.exp (valid_addr_p): New proc.

@@ -1,3 +1,12 @@
+2015-03-11  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/18107
+	* aarch64-linux-tdep.c: Include xml-syscall.h
+	(aarch64_linux_get_syscall_number): New function.
+	(aarch64_linux_init_abi): Call
+	set_gdbarch_get_syscall_number.
+	* syscalls/aarch64-linux.xml: New file.
+
 2015-03-17  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
 
 	* ser-base.h (ser_base_setstopbits): Change second argument name
