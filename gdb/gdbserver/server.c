@@ -2082,8 +2082,6 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_stopped_by_hw_breakpoint ())
 	strcat (own_buf, ";hwbreak+");
 
-      strcat (own_buf, ";vFile:fstat+");
-
       return;
     }
 

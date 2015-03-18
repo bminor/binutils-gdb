@@ -1,3 +1,7 @@
+2015-03-18  Gary Benson  <gbenson@redhat.com>
+
+	* server.c (handle_query): Do not report vFile:fstat as supported.
+
 2015-03-11  Gary Benson  <gbenson@redhat.com>
 
 	* hostio.c (sys/types.h): New include.
@@ -5,7 +9,6 @@
 	(common-remote-fileio.h): Likewise.
 	(handle_fstat): New function.
 	(handle_vFile): Handle vFile:fstat packets.
-	* server.c (handle_query): Report vFile:fstat as supported.
 
 2015-03-11  Gary Benson  <gbenson@redhat.com>
 

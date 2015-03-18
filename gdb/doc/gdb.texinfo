@@ -36062,11 +36062,6 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
-@item @samp{vFile:fstat}
-@tab No
-@tab @samp{-}
-@tab No
-
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36254,9 +36249,6 @@ breakpoints.
 @item hwbreak
 The remote stub reports the @samp{hwbreak} stop reason for hardware
 breakpoints.
-
-@item vFile:fstat
-The remote stub understands the @samp{vFile:fstat} packet.
 
 @end table
 
@@ -37425,10 +37417,6 @@ On success the information is returned as a binary attachment
 and the return value is the size of this attachment in bytes.
 If an error occurs the return value is -1.  The format of the
 returned binary attachment is as described in @ref{struct stat}.
-
-This packet is not probed by default; the remote stub must request
-it, by supplying an appropriate @samp{qSupported} response
-(@pxref{qSupported}).
 
 @item vFile:unlink: @var{filename}
 Delete the file at @var{filename} on the target.  Return 0,

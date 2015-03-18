@@ -1,3 +1,8 @@
+2015-03-18  Gary Benson <gbenson@redhat.com>
+
+	(remote_protocol_features): Remove the "vFile:fstat" feature.
+	(remote_hostio_fstat): Probe for "vFile:fstat" support.
+
 2015-03-11  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/18107
