@@ -1,3 +1,8 @@
+2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* compress.c (bfd_compress_section_contents): Make it static.
+	* bfd/bfd-in2.h: Regenerated.
+
 2015-03-18  Eric Youngdale  <eyoungdale@ptc.com>
 
 	PR ld/16598

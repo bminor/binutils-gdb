@@ -63,28 +63,16 @@ decompress_contents (bfd_byte *compressed_buffer,
 }
 #endif
 
-/*
-FUNCTION
-	bfd_compress_section_contents
+/* Compress data of the size specified in @var{uncompressed_size}
+   and pointed to by @var{uncompressed_buffer} using zlib and store
+   as the contents field.  This function assumes the contents
+   field was allocated using bfd_malloc() or equivalent.  If zlib
+   is not installed on this machine, the input is unmodified.
 
-SYNOPSIS
-	bfd_boolean bfd_compress_section_contents
-	  (bfd *abfd, asection *section, bfd_byte *uncompressed_buffer,
-	   bfd_size_type uncompressed_size);
+   Return @code{TRUE} if the full section contents is compressed
+   successfully.  */
 
-DESCRIPTION
-
-	Compress data of the size specified in @var{uncompressed_size}
-	and pointed to by @var{uncompressed_buffer} using zlib and store
-	as the contents field.  This function assumes the contents
-	field was allocated using bfd_malloc() or equivalent.  If zlib
-	is not installed on this machine, the input is unmodified.
-
-	Return @code{TRUE} if the full section contents is compressed
-	successfully.
-*/
-
-bfd_boolean
+static bfd_boolean
 bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
 			       sec_ptr sec ATTRIBUTE_UNUSED,
 			       bfd_byte *uncompressed_buffer ATTRIBUTE_UNUSED,
