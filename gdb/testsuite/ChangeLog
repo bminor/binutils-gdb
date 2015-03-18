@@ -1,3 +1,12 @@
+2015-03-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/disp-step-syscall.exp (disp_step_cross_syscall):
+	Use gdb_is_target_remote instead of is_remote.  Use
+	gdb_test_multiple instead of gdb_expect.  Exit early if
+	gdb_test_multiple hits its internal matches.  Tighten stepi tests
+	expected output.  Fail on exit with any signal, instead of just
+	SIGILL.
+
 2015-03-18  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/18107
