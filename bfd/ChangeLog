@@ -1,3 +1,9 @@
+2015-03-18  Eric Youngdale  <eyoungdale@ptc.com>
+
+	PR ld/16598
+	* peicode.h (pe_ILF_build_a_bfd): Add support for creating relocs
+	suitable for the AMD64.
+
 2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
 	    Nick Clifton  <nickc@redhat.com>
 

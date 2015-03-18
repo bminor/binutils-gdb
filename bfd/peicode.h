@@ -973,6 +973,15 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 	}
       else
 #endif
+#ifdef AMD64MAGIC
+      if (magic == AMD64MAGIC)
+	{
+	  pe_ILF_make_a_symbol_reloc (&vars, (bfd_vma) jtab[i].offset,
+				      BFD_RELOC_32_PCREL, (asymbol **) imp_sym,
+				      imp_index);
+	}
+      else
+#endif
 	pe_ILF_make_a_symbol_reloc (&vars, (bfd_vma) jtab[i].offset,
 				    BFD_RELOC_32, (asymbol **) imp_sym,
 				    imp_index);
