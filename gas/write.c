@@ -1530,7 +1530,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
      the section smaller, just keep it uncompressed.  */
   if (compressed_size > sec->size)
     return;
-  
+
   /* Replace the uncompressed frag list with the compressed frag list.  */
   seginfo->frchainP->frch_root = first_newf;
   seginfo->frchainP->frch_last = last_newf;

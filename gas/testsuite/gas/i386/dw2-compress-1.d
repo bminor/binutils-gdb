@@ -2,7 +2,7 @@
 #readelf: -w
 #name: DWARF2 debugging information 1
 
-Contents of the .debug_info section:
+Contents of the .zdebug_info section:
 
   Compilation Unit @ offset 0x0:
    Length:        0x4e \(32-bit\)

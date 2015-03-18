@@ -426,6 +426,7 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
 	run_list_test_stdin "list-2" "-al"
 	run_list_test_stdin "list-3" "-al"
 	run_dump_test "dw2-compress-1"
+	run_dump_test "dw2-compress-3"
     }
 }
 
