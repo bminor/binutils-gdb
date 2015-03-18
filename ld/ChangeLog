@@ -1,3 +1,7 @@
+2015-03-18  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* ldmain.c (main): Use %F instead of %X for einfo.
+
 2015-03-02  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (Options <-z nocopyreloc>): Rewrite.
