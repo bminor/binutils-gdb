@@ -1,3 +1,14 @@
+2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18087
+	* coffgen.c (make_a_section_from_file): Only prepend a z to a
+	debug section's name if the section was actually compressed.
+	* elf.c (_bfd_elf_make_section_from_shdr): Likewise.
+	* compress.c (bfd_init_section_compress_status): Do not compress
+	the section if doing so would make it bigger.  In such cases leave
+	the section alone and return COMPRESS_SECTION_NONE.
+
 2015-03-17  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Return count of 0

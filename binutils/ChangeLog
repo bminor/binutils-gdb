@@ -1,3 +1,11 @@
+2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18087
+	* doc/binutils.texi: Note that when objcopy compresses debug
+	sections the compression is only performed if it makes the section
+	smaller.
+
 2015-03-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18101

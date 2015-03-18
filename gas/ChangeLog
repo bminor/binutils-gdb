@@ -1,3 +1,12 @@
+2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18087
+	* doc/as.texinfo: Note that when gas compresses debug sections the
+	compression is only performed if it makes the section smaller.
+	* write.c (compress_debug): Do not compress a debug section if
+	doing so would make it larger.
+
 2015-03-17  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add PROCESSOR_ZNVER flags.

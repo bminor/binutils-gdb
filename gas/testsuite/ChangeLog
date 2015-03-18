@@ -1,3 +1,10 @@
+2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18087
+	* gas/i386/dw2-compress-1.d: Do not expect the .debug_abbrev or
+	.debug_info sections to be compressed.
+
 2015-03-17  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
 
 	* gas/i386/i386.exp: Add new znver1 test cases.

@@ -1844,10 +1844,14 @@ It can also be a useful way of reducing the size of a @option{--just-symbols}
 linker input file.
 
 @item --compress-debug-sections
-Compress DWARF debug sections using zlib.
+Compress DWARF debug sections using zlib.  The debug sections are
+renamed to begin with @samp{.zdebug} instead of @samp{.debug}.  Note -
+if compression would actually make a section @emph{larger} then it is
+not compressed or renamed. 
 
 @item --decompress-debug-sections
-Decompress DWARF debug sections using zlib.
+Decompress DWARF debug sections using zlib.  The original section
+names of the compressed sections are restored.
 
 @item -V
 @itemx --version

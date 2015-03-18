@@ -2,7 +2,7 @@
 #readelf: -w
 #name: DWARF2 debugging information 1
 
-Contents of the .zdebug_info section:
+Contents of the .debug_info section:
 
   Compilation Unit @ offset 0x0:
    Length:        0x4e \(32-bit\)
@@ -31,7 +31,7 @@ Contents of the .zdebug_info section:
     <50>   DW_AT_encoding    : 5	\(signed\)
  <1><51>: Abbrev Number: 0
 
-Contents of the .zdebug_abbrev section:
+Contents of the .debug_abbrev section:
 
   Number TAG \(0x0\)
    1      DW_TAG_compile_unit    \[has children\]

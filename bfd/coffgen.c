@@ -178,18 +178,21 @@ make_a_section_from_file (bfd *abfd,
 		 abfd, name);
 	      return FALSE;
 	    }
-	  if (name[1] != 'z')
+	  if (return_section->compress_status == COMPRESS_SECTION_DONE)
 	    {
-	      unsigned int len = strlen (name);
+	      if (name[1] != 'z')
+		{
+		  unsigned int len = strlen (name);
 
-	      new_name = bfd_alloc (abfd, len + 2);
-	      if (new_name == NULL)
-		return FALSE;
-	      new_name[0] = '.';
-	      new_name[1] = 'z';
-	      memcpy (new_name + 2, name + 1, len);
+		  new_name = bfd_alloc (abfd, len + 2);
+		  if (new_name == NULL)
+		    return FALSE;
+		  new_name[0] = '.';
+		  new_name[1] = 'z';
+		  memcpy (new_name + 2, name + 1, len);
+		}
 	    }
-	  break;
+         break;
 	case decompress:
 	  if (!bfd_init_section_decompress_status (abfd, return_section))
 	    {
