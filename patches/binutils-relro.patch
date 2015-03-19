@@ -1,0 +1,109 @@
+From bef3feda9768bc10d45aba21bf6c0de891f13f18 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Thu, 19 Mar 2015 05:49:29 -0700
+Subject: [PATCH] Reduce file size for PT_GNU_RELRO segment
+
+When a padding in file is used to align PT_GNU_RELRO segment, the maximum
+padding size is maximum page size minus 1.  This patch trades memory size
+for file size by increasing memory size to avoid padding if file size
+will be reduced by more than maximum page minus a page and memory size
+will be increased by less than a page.
+
+	* ldlang.c (output_prev_load_sec_find): New.
+	(lang_size_sections_1): Reduce file size for PT_GNU_RELRO
+	segment by increasing memory size.
+---
+ ld/ldlang.c | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 63 insertions(+)
+
+diff --git a/ld/ldlang.c b/ld/ldlang.c
+index 8880821..3450c9d 100644
+--- a/ld/ldlang.c
++++ b/ld/ldlang.c
+@@ -1718,6 +1718,31 @@ output_prev_sec_find (lang_output_section_statement_type *os)
+   return NULL;
+ }
+ 
++/* Find the last output load section with contents before given output
++   statement.  */
++
++static asection *
++output_prev_load_sec_find (lang_output_section_statement_type *os)
++{
++  lang_output_section_statement_type *lookup;
++
++  for (lookup = os->prev; lookup != NULL; lookup = lookup->prev)
++    {
++      if (lookup->constraint < 0)
++	continue;
++
++      if (lookup->bfd_section != NULL
++	  && lookup->bfd_section->owner != NULL
++	  && ((lookup->bfd_section->flags & (SEC_ALLOC
++					     | SEC_LOAD
++					     | SEC_HAS_CONTENTS))
++	      == (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS)))
++	return lookup->bfd_section;
++    }
++
++  return NULL;
++}
++
+ /* Look for a suitable place for a new output section statement.  The
+    idea is to skip over anything that might be inside a SECTIONS {}
+    statement in a script, before we find another output section
+@@ -4776,6 +4801,12 @@ lang_size_sections_1
+    bfd_boolean check_regions)
+ {
+   lang_statement_union_type *s;
++  bfd_boolean reduce_padding
++    = (link_info.relro
++       && expld.dataseg.phase == exp_dataseg_relro_adjust
++       && expld.dataseg.maxpagesize > expld.dataseg.pagesize);
++  bfd_vma pagsizediff
++    = expld.dataseg.maxpagesize - expld.dataseg.pagesize;
+ 
+   /* Size up the sections from their constituent parts.  */
+   for (s = *prev; s != NULL; s = s->header.next)
+@@ -4918,6 +4949,38 @@ lang_size_sections_1
+ 		  {
+ 		    bfd_vma savedot = newdot;
+ 		    newdot = align_power (newdot, section_alignment);
++		    if (reduce_padding && expld.dataseg.base == newdot)
++		      {
++			/* If a padding in file will be used for
++			   PT_GNU_RELRO segment, check if we can reduce
++			   the padding by increase the address of the
++			   first relro section.  It is a tradeoff between
++			   memory size and file size.  We only do it if
++			   file size will be reduced by more than maximum
++			   page minus a page and memory size will be
++			   increased by less than a page.  */
++			asection *prev_sec
++			  = output_prev_load_sec_find (os);
++			if (prev_sec)
++			  {
++			    bfd_vma pad
++			      = ((newdot - (bfd_section_vma (prev_sec->owner,
++							     prev_sec)
++					    + bfd_get_section_size (prev_sec)))
++				 % expld.dataseg.maxpagesize);
++			    if (pad)
++			      {
++				bfd_vma nextdot
++				  = expld.dataseg.maxpagesize - pad;
++				nextdot = align_power (newdot + nextdot,
++						       section_alignment);
++				if (((nextdot - newdot)
++				     < expld.dataseg.pagesize)
++				    && pad > pagsizediff)
++				  newdot = nextdot;
++			      }
++			  }
++		      }
+ 
+ 		    dotdelta = newdot - savedot;
+ 		    if (dotdelta != 0
+-- 
+1.9.3
+
