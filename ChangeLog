@@ -1,3 +1,16 @@
+2015-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (target_configdirs): Exclude target-zlib if
+	target-libjava isn't built.
+	* configure: Regenerated.
+
+2015-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2014-06-13  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* config-ml.in: Robustify ac_configure_args parsing.
+
 2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.def: Updated from GCC trunk.
@@ -5,11 +18,6 @@
 	* configure.ac: Likewise.
 	* Makefile.in: Regenerated.
 	* configure: Likewise.
-
-2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* configure.ac (target_configdirs): Unset if not building gcc.
-	* configure: Regenerated.
 
 2015-01-28  James Bowman  <james.bowman@ftdichip.com>
 

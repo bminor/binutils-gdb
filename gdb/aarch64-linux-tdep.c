@@ -39,6 +39,7 @@
 #include "stap-probe.h"
 #include "parser-defs.h"
 #include "user-regs.h"
+#include "xml-syscall.h"
 #include <ctype.h>
 
 /* Signal frame handling.
@@ -341,6 +342,28 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
   return 1;
 }
 
+/* Implement the "get_syscall_number" gdbarch method.  */
+
+static LONGEST
+aarch64_linux_get_syscall_number (struct gdbarch *gdbarch,
+				  ptid_t ptid)
+{
+  struct regcache *regs = get_thread_regcache (ptid);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  /* The content of register x8.  */
+  gdb_byte buf[X_REGISTER_SIZE];
+  /* The result.  */
+  LONGEST ret;
+
+  /* Getting the system call number from the register x8.  */
+  regcache_cooked_read (regs, AARCH64_DWARF_X0 + 8, buf);
+
+  ret = extract_signed_integer (buf, X_REGISTER_SIZE, byte_order);
+
+  return ret;
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -385,6 +408,10 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_stap_is_single_operand (gdbarch, aarch64_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
 					aarch64_stap_parse_special_token);
+
+  /* `catch syscall' */
+  set_xml_syscall_file_name (gdbarch, "syscalls/aarch64-linux.xml");
+  set_gdbarch_get_syscall_number (gdbarch, aarch64_linux_get_syscall_number);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

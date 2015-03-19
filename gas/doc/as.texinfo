@@ -627,7 +627,8 @@ Begin in alternate macro mode.
 @item --compress-debug-sections
 Compress DWARF debug sections using zlib.  The debug sections are renamed
 to begin with @samp{.zdebug}, and the resulting object file may not be
-compatible with older linkers and object file utilities.
+compatible with older linkers and object file utilities.  Note if compression
+would make a given section @emph{larger} then it is not compressed or renamed.
 
 @item --nocompress-debug-sections
 Do not compress DWARF debug sections.  This is the default.

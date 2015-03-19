@@ -2129,9 +2129,6 @@ Supported languages are: ${potential_languages}])
 
   AC_SUBST(stage1_languages)
   ac_configure_args=`echo " $ac_configure_args" | sed -e "s/ '--enable-languages=[[^ ]]*'//g" -e "s/$/ '--enable-languages="$enable_languages"'/" `
-else
-  # Disable all target libraries if not building gcc.
-  target_configdirs=
 fi
 
 # Handle --disable-<component> generically.
@@ -2250,6 +2247,15 @@ for i in ${target_configdirs_all} ; do
     target_configdirs="${target_configdirs} $i"
   fi
 done
+
+# Exclude target-zlib if target-libjava isn't built.
+case ${target_configdirs} in
+*target-libjava*)
+  ;;
+*)
+  target_configdirs="`echo ${target_configdirs} | sed -e 's/target-zlib//'`"
+  ;;
+esac
 
 # libiberty-linker-plugin is special: it doesn't have its own source directory,
 # so we have to add it after the preceding checks.

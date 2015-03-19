@@ -1,3 +1,39 @@
+2015-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18087
+	* gas/i386/dw2-compress-1.d: Allow the test to pass regardless of
+	whether the .debug_info section was compressed on not.
+
+2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18087
+	* gas/i386/dw2-compress-1.d: Revert the last change.
+	* gas/i386/dw2-compress-3.d: New.
+	* gas/i386/dw2-compress-3.s: Likewise.
+	* gas/i386/i386.exp: Run dw2-compress-3 for ELF targets.
+
+2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18087
+	* gas/i386/dw2-compress-1.d: Do not expect the .debug_abbrev or
+	.debug_info sections to be compressed.
+
+2015-03-17  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
+
+	* gas/i386/i386.exp: Add new znver1 test cases.
+	* gas/i386/arch-13-znver1.d: New.
+	* gas/i386/arch-13.d: New.
+	* gas/i386/arch-13.s: New.
+	* gas/i386/clzero.d: New.
+	* gas/i386/clzero.s: New.
+	* gas/i386/nops-1-znver1.d: New.
+	* gas/i386/x86-64-arch-3-znver1.d: New.
+	* gas/i386/x86-64-arch-3.d: New.
+	* gas/i386/x86-64-arch-3.s: New.
+	* gas/i386/x86-64-clzero.d: New.
+	* gas/i386/x86-64-nops-1-znver1.d: New.
+
 2015-03-13  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* gas/mips/mips.exp: Added branch constraints testcase.

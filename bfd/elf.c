@@ -1069,16 +1069,22 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 		 abfd, name);
 	      return FALSE;
 	    }
-	  if (name[1] != 'z')
+	  /* PR binutils/18087: Compression does not always make a section
+	     smaller.  So only rename the section when compression has
+	     actually taken place.  */
+	  if (newsect->compress_status == COMPRESS_SECTION_DONE)
 	    {
-	      unsigned int len = strlen (name);
+	      if (name[1] != 'z')
+		{
+		  unsigned int len = strlen (name);
 
-	      new_name = bfd_alloc (abfd, len + 2);
-	      if (new_name == NULL)
-		return FALSE;
-	      new_name[0] = '.';
-	      new_name[1] = 'z';
-	      memcpy (new_name + 2, name + 1, len);
+		  new_name = bfd_alloc (abfd, len + 2);
+		  if (new_name == NULL)
+		    return FALSE;
+		  new_name[0] = '.';
+		  new_name[1] = 'z';
+		  memcpy (new_name + 2, name + 1, len);
+		}
 	    }
 	  break;
 	case decompress:

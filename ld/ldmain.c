@@ -484,10 +484,10 @@ main (int argc, char **argv)
 	      dst = fopen (dst_name, FOPEN_WB);
 
 	      if (!src)
-		einfo (_("%X%P: unable to open for source of copy `%s'\n"),
+		einfo (_("%P%F: unable to open for source of copy `%s'\n"),
 		       output_filename);
 	      if (!dst)
-		einfo (_("%X%P: unable to open for destination of copy `%s'\n"),
+		einfo (_("%P%F: unable to open for destination of copy `%s'\n"),
 		       dst_name);
 	      while ((l = fread (buf, 1, bsize, src)) > 0)
 		{

@@ -2543,6 +2543,9 @@ status_callback (struct lwp_info *lp, void *data)
   if (!lp->resumed)
     return 0;
 
+  if (!lwp_status_pending_p (lp))
+    return 0;
+
   if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
       || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
     {
@@ -2550,8 +2553,6 @@ status_callback (struct lwp_info *lp, void *data)
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
       CORE_ADDR pc;
       int discard = 0;
-
-      gdb_assert (lp->status != 0);
 
       pc = regcache_read_pc (regcache);
 
@@ -2590,10 +2591,9 @@ status_callback (struct lwp_info *lp, void *data)
 	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  return 0;
 	}
-      return 1;
     }
 
-  return lwp_status_pending_p (lp);
+  return 1;
 }
 
 /* Return non-zero if LP isn't stopped.  */
@@ -2644,7 +2644,7 @@ lwp_status_pending_p (struct lwp_info *lp)
   return lp->status != 0 || lp->waitstatus.kind != TARGET_WAITKIND_IGNORE;
 }
 
-/* Select the Nth LWP that has had a SIGTRAP event.  */
+/* Select the Nth LWP that has had an event.  */
 
 static int
 select_event_lwp_callback (struct lwp_info *lp, void *data)
@@ -2841,6 +2841,7 @@ select_event_lwp (ptid_t filter, struct lwp_info **orig_lp, int *status)
 
       /* First see how many events we have.  */
       iterate_over_lwps (filter, count_events_callback, &num_events);
+      gdb_assert (num_events > 0);
 
       /* Now randomly pick a LWP out of those that have had
 	 events.  */

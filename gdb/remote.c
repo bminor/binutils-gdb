@@ -4049,8 +4049,6 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_Qbtrace_conf_bts_size },
   { "swbreak", PACKET_DISABLE, remote_supported_packet, PACKET_swbreak_feature },
   { "hwbreak", PACKET_DISABLE, remote_supported_packet, PACKET_hwbreak_feature },
-  { "vFile:fstat", PACKET_DISABLE, remote_supported_packet,
-    PACKET_vFile_fstat },
 };
 
 static char *remote_support_xml;
@@ -10084,8 +10082,18 @@ remote_hostio_fstat (struct target_ops *self,
   struct fio_stat fst;
   int read_len;
 
-  if (packet_support (PACKET_vFile_fstat) != PACKET_ENABLE)
+  remote_buffer_add_string (&p, &left, "vFile:fstat:");
+
+  remote_buffer_add_int (&p, &left, fd);
+
+  ret = remote_hostio_send_command (p - rs->buf, PACKET_vFile_fstat,
+				    remote_errno, &attachment,
+				    &attachment_len);
+  if (ret < 0)
     {
+      if (*remote_errno != FILEIO_ENOSYS)
+	return ret;
+
       /* Strictly we should return -1, ENOSYS here, but when
 	 "set sysroot remote:" was implemented in August 2008
 	 BFD's need for a stat function was sidestepped with
@@ -10103,16 +10111,6 @@ remote_hostio_fstat (struct target_ops *self,
       st->st_size = INT_MAX;
       return 0;
     }
-
-  remote_buffer_add_string (&p, &left, "vFile:fstat:");
-
-  remote_buffer_add_int (&p, &left, fd);
-
-  ret = remote_hostio_send_command (p - rs->buf, PACKET_vFile_fstat,
-				    remote_errno, &attachment,
-				    &attachment_len);
-  if (ret < 0)
-    return ret;
 
   read_len = remote_unescape_input ((gdb_byte *) attachment, attachment_len,
 				    (gdb_byte *) &fst, sizeof (fst));

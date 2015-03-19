@@ -1,3 +1,51 @@
+2015-03-19 Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (count_events_callback, select_event_lwp_callback):
+	Use the lwp's status_pending_p field, not the thread's.
+
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (status_callback): Return early if the LWP has no
+	status pending.
+
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (select_event_lwp_callback): Update comment to no
+	longer mention SIGTRAP.
+
+2015-03-18  Tristan Gingold  <gingold@adacore.com>
+
+        * amd64-windows-tdep.c (amd64_windows_find_unwind_info): Move
+        redirection code to ...
+        (amd64_windows_frame_decode_insns): ... Here.  Fix in prologue
+        checks.  Fix SAVE_NONVOL operations.  Add debug code and comments.
+
+2015-03-18  Gary Benson <gbenson@redhat.com>
+
+	(remote_protocol_features): Remove the "vFile:fstat" feature.
+	(remote_hostio_fstat): Probe for "vFile:fstat" support.
+
+2015-03-11  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/18107
+	* aarch64-linux-tdep.c: Include xml-syscall.h
+	(aarch64_linux_get_syscall_number): New function.
+	(aarch64_linux_init_abi): Call
+	set_gdbarch_get_syscall_number.
+	* syscalls/aarch64-linux.xml: New file.
+
+2015-03-17  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
+
+	* ser-base.h (ser_base_setstopbits): Change second argument name
+	from "rate" to "num".
+
+2015-03-17  Gary Benson <gbenson@redhat.com>
+	    Luke Allardyce <lukeallardyce@gmail.com>
+
+	PR gdb/18131
+	* common/common-remote-fileio.h (sys/stat.h): New include.
+	(stuct stat): Remove forward declaration.
+
 2015-03-16  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (fbsd_make_corefile_notes): Fetch all target registers

@@ -61,39 +61,22 @@ decompress_contents (bfd_byte *compressed_buffer,
   rc |= inflateEnd (&strm);
   return rc == Z_OK && strm.avail_out == 0;
 }
-#endif
 
-/*
-FUNCTION
-	bfd_compress_section_contents
+/* Compress data of the size specified in @var{uncompressed_size}
+   and pointed to by @var{uncompressed_buffer} using zlib and store
+   as the contents field.  This function assumes the contents
+   field was allocated using bfd_malloc() or equivalent.  If zlib
+   is not installed on this machine, the input is unmodified.
 
-SYNOPSIS
-	bfd_boolean bfd_compress_section_contents
-	  (bfd *abfd, asection *section, bfd_byte *uncompressed_buffer,
-	   bfd_size_type uncompressed_size);
+   Return @code{TRUE} if the full section contents is compressed
+   successfully.  */
 
-DESCRIPTION
-
-	Compress data of the size specified in @var{uncompressed_size}
-	and pointed to by @var{uncompressed_buffer} using zlib and store
-	as the contents field.  This function assumes the contents
-	field was allocated using bfd_malloc() or equivalent.  If zlib
-	is not installed on this machine, the input is unmodified.
-
-	Return @code{TRUE} if the full section contents is compressed
-	successfully.
-*/
-
-bfd_boolean
+static bfd_boolean
 bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
 			       sec_ptr sec ATTRIBUTE_UNUSED,
 			       bfd_byte *uncompressed_buffer ATTRIBUTE_UNUSED,
 			       bfd_size_type uncompressed_size ATTRIBUTE_UNUSED)
 {
-#ifndef HAVE_ZLIB_H
-  bfd_set_error (bfd_error_invalid_operation);
-  return FALSE;
-#else
   uLong compressed_size;
   bfd_byte *compressed_buffer;
 
@@ -135,8 +118,8 @@ bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
   sec->compress_status = COMPRESS_SECTION_DONE;
 
   return TRUE;
-#endif  /* HAVE_ZLIB_H */
 }
+#endif  /* HAVE_ZLIB_H */
 
 /*
 FUNCTION
@@ -441,7 +424,18 @@ bfd_init_section_compress_status (bfd *abfd ATTRIBUTE_UNUSED,
 					 uncompressed_buffer,
 					 uncompressed_size);
 
-  free (uncompressed_buffer);
+  /* PR binutils/18087: If compression didn't make
+     the section smaller, just keep it uncompressed.  */
+  if (ret && uncompressed_size < sec->size)
+    {
+      free (sec->contents);
+      sec->contents = uncompressed_buffer;
+      sec->size = uncompressed_size;
+      sec->compress_status = COMPRESS_SECTION_NONE;
+    }
+  else
+    free (uncompressed_buffer);
+
   return ret;
 #endif
 }

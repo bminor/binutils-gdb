@@ -7,8 +7,8 @@ usage()
 {
 
     printf("usage: sis [-uart1 uart_device1] [-uart2 uart_device2]\n");
+    printf("[-sparclite] [-dumbio] [-v] \n");
     printf("[-nfp] [-freq frequency] [-c batch_file] [files]\n");
-    printf("[-sparclite] [-dumbio]\n");
 }
 
 void

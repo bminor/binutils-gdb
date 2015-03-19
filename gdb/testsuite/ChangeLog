@@ -1,3 +1,42 @@
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/continue-pending-status.exp (saw_thread_2)
+	(saw_thread_3): New globals.
+	(top level): Increment them when an event for the corresponding
+	thread is seen.
+	(no thread starvation): New test.
+
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/continue-pending-status.c: New file.
+	* gdb.threads/continue-pending-status.exp: New file.
+
+2015-03-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/disp-step-syscall.exp (disp_step_cross_syscall):
+	Use gdb_is_target_remote instead of is_remote.  Use
+	gdb_test_multiple instead of gdb_expect.  Exit early if
+	gdb_test_multiple hits its internal matches.  Tighten stepi tests
+	expected output.  Fail on exit with any signal, instead of just
+	SIGILL.
+
+2015-03-18  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/18107
+	* gdb.base/catch-syscall.c [!SYS_pipe] (pipe2_syscall): New
+	variable.
+	* gdb.base/catch-syscall.exp: Don't skip it on
+	aarch64*-*-linux* target.  Remove elements in all_syscalls.
+	(test_catch_syscall_multi_arch): Skip it on aarch64*-linux*
+	target.
+	(setup_all_syscalls): New proc.
+
+2015-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/watchpoint-reuse-slot.exp (valid_addr_p): New proc.
+	(top level): Skip tests if valid_addr_p returns false for
+	$cmd1 or $cmd2.
+
 2015-03-11  Andy Wingo  <wingo@igalia.com>
 
 	* gdb.guile/scm-objfile.exp: Add objfile-progspace test.
