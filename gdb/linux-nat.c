@@ -2644,7 +2644,7 @@ lwp_status_pending_p (struct lwp_info *lp)
   return lp->status != 0 || lp->waitstatus.kind != TARGET_WAITKIND_IGNORE;
 }
 
-/* Select the Nth LWP that has had a SIGTRAP event.  */
+/* Select the Nth LWP that has had an event.  */
 
 static int
 select_event_lwp_callback (struct lwp_info *lp, void *data)

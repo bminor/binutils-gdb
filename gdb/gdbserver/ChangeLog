@@ -1,3 +1,8 @@
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (select_event_lwp_callback): Update comments to
+	no longer mention SIGTRAP.
+
 2015-03-18  Gary Benson  <gbenson@redhat.com>
 
 	* server.c (handle_query): Do not report vFile:fstat as supported.

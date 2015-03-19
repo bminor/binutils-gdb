@@ -1,3 +1,8 @@
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (select_event_lwp_callback): Update comment to no
+	longer mention SIGTRAP.
+
 2015-03-18  Tristan Gingold  <gingold@adacore.com>
 
         * amd64-windows-tdep.c (amd64_windows_find_unwind_info): Move
