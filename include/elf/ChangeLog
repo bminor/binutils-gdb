@@ -1,3 +1,9 @@
+2015-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* rl78.h (E_FLAG_RL78_G10): Redefine.
+	(E_FLAG_RL78_CPU_MASK, E_FLAG_RL78_ANY_CPU, E_FLAG_RL78_G13
+	E_FLAG_RL78_G14): New flags.
+
 2015-02-19  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* aarch64.h (R_AARCH64_P32_TLSGD_ADR_PREL21): Add.

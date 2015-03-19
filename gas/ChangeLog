@@ -1,3 +1,11 @@
+2015-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.c (enum options): Add G13 and G14.
+	(md_longopts): Add -mg13 and -mg14.
+	(md_parse_option): Handle -mg13 and -mg14.
+	(md_show_usage): List -mg13 and -mg14.
+	* doc/c-rl78.texi: Add description of -mg13 and -mg14 options.
+
 2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
 	    Nick Clifton  <nickc@redhat.com>
 

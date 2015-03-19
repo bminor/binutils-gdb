@@ -281,6 +281,8 @@ enum options
 {
   OPTION_RELAX = OPTION_MD_BASE,
   OPTION_G10,
+  OPTION_G13,
+  OPTION_G14,
   OPTION_32BIT_DOUBLES,
   OPTION_64BIT_DOUBLES,
 };
@@ -293,6 +295,9 @@ struct option md_longopts[] =
 {
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"mg10", no_argument, NULL, OPTION_G10},
+  {"mg13", no_argument, NULL, OPTION_G13},
+  {"mg14", no_argument, NULL, OPTION_G14},
+  {"mrl78", no_argument, NULL, OPTION_G14},
   {"m32bit-doubles", no_argument, NULL, OPTION_32BIT_DOUBLES},
   {"m64bit-doubles", no_argument, NULL, OPTION_64BIT_DOUBLES},
   {NULL, no_argument, NULL, 0}
@@ -309,7 +314,18 @@ md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
       return 1;
 
     case OPTION_G10:
+      elf_flags &= ~ E_FLAG_RL78_CPU_MASK;
       elf_flags |= E_FLAG_RL78_G10;
+      return 1;
+
+    case OPTION_G13:
+      elf_flags &= ~ E_FLAG_RL78_CPU_MASK;
+      elf_flags |= E_FLAG_RL78_G13;
+      return 1;
+
+    case OPTION_G14:
+      elf_flags &= ~ E_FLAG_RL78_CPU_MASK;
+      elf_flags |= E_FLAG_RL78_G14;
       return 1;
 
     case OPTION_32BIT_DOUBLES:
@@ -328,6 +344,9 @@ md_show_usage (FILE * stream ATTRIBUTE_UNUSED)
 {
   fprintf (stream, _(" RL78 specific command line options:\n"));
   fprintf (stream, _("  --mg10            Enable support for G10 variant\n"));
+  fprintf (stream, _("  --mg13            Selects the G13 core.\n"));
+  fprintf (stream, _("  --mg14            Selects the G14 core [default]\n"));
+  fprintf (stream, _("  --mrl78           Alias for --mg14\n"));
   fprintf (stream, _("  --m32bit-doubles  [default]\n"));
   fprintf (stream, _("  --m64bit-doubles\n"));
 }

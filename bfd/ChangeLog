@@ -1,5 +1,14 @@
 2015-03-19  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-rl78.c (rl78_cpu_name): New function.  Prints the name of
+	the RL78 core based upon the flags.
+	(rl78_elf_merge_private_bfd_data): Handle merging of G13 and G14
+	flags.
+	(rl78_elf_print_private_bfd_data): Use rl78_cpu_name.
+	(elf32_rl78_machine): Always return bfd_mach_rl78.
+
+2015-03-19  Nick Clifton  <nickc@redhat.com>
+
 	PR 18078
 	* compress.c (bfd_compress_section_contents): Do not define this
 	function if it is not used.
