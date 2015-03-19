@@ -1,5 +1,10 @@
 2015-03-19  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (status_callback): Return early if the LWP has no
+	status pending.
+
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (select_event_lwp_callback): Update comment to no
 	longer mention SIGTRAP.
 

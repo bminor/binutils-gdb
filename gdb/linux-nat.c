@@ -2543,6 +2543,9 @@ status_callback (struct lwp_info *lp, void *data)
   if (!lp->resumed)
     return 0;
 
+  if (!lwp_status_pending_p (lp))
+    return 0;
+
   if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
       || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
     {
@@ -2550,8 +2553,6 @@ status_callback (struct lwp_info *lp, void *data)
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
       CORE_ADDR pc;
       int discard = 0;
-
-      gdb_assert (lp->status != 0);
 
       pc = regcache_read_pc (regcache);
 
@@ -2590,10 +2591,9 @@ status_callback (struct lwp_info *lp, void *data)
 	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  return 0;
 	}
-      return 1;
     }
 
-  return lwp_status_pending_p (lp);
+  return 1;
 }
 
 /* Return non-zero if LP isn't stopped.  */
