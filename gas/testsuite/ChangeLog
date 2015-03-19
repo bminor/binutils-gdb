@@ -1,3 +1,9 @@
+2015-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18087
+	* gas/i386/dw2-compress-1.d: Allow the test to pass regardless of
+	whether the .debug_info section was compressed on not.
+
 2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/18087

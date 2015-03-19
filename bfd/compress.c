@@ -61,7 +61,6 @@ decompress_contents (bfd_byte *compressed_buffer,
   rc |= inflateEnd (&strm);
   return rc == Z_OK && strm.avail_out == 0;
 }
-#endif
 
 /* Compress data of the size specified in @var{uncompressed_size}
    and pointed to by @var{uncompressed_buffer} using zlib and store
@@ -78,10 +77,6 @@ bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
 			       bfd_byte *uncompressed_buffer ATTRIBUTE_UNUSED,
 			       bfd_size_type uncompressed_size ATTRIBUTE_UNUSED)
 {
-#ifndef HAVE_ZLIB_H
-  bfd_set_error (bfd_error_invalid_operation);
-  return FALSE;
-#else
   uLong compressed_size;
   bfd_byte *compressed_buffer;
 
@@ -123,8 +118,8 @@ bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
   sec->compress_status = COMPRESS_SECTION_DONE;
 
   return TRUE;
-#endif  /* HAVE_ZLIB_H */
 }
+#endif  /* HAVE_ZLIB_H */
 
 /*
 FUNCTION

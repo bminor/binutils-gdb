@@ -1,3 +1,9 @@
+2015-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 18078
+	* compress.c (bfd_compress_section_contents): Do not define this
+	function if it is not used.
+
 2015-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* compress.c (bfd_compress_section_contents): Make it static.
