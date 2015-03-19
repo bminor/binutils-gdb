@@ -1,5 +1,15 @@
 2015-03-19  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (linux_resume_one_lwp): Rename to ...
+	(linux_resume_one_lwp_throw): ... this.  Don't handle ESRCH here,
+	instead call perror_with_name.
+	(check_ptrace_stopped_lwp_gone): New function.
+	(linux_resume_one_lwp): Reimplement as wrapper around
+	linux_resume_one_lwp_throw that swallows errors if the LWP is
+	gone.
+
+2015-03-19  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (count_events_callback, select_event_lwp_callback):
 	No longer check whether the thread has resume_stop as last resume
 	kind.

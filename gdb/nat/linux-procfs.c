@@ -151,6 +151,15 @@ linux_proc_pid_is_stopped (pid_t pid)
   return linux_proc_pid_has_state (pid, "T (stopped)", 1);
 }
 
+/* Detect `T (tracing stop)' in `/proc/PID/status'.
+   Other states including `T (stopped)' are reported as false.  */
+
+int
+linux_proc_pid_is_trace_stopped_nowarn (pid_t pid)
+{
+  return linux_proc_pid_has_state (pid, "T (tracing stop)", 1);
+}
+
 /* Return non-zero if PID is a zombie.  If WARN, warn on failure to
    open the /proc file.  */
 
