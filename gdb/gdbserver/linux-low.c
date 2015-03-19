@@ -2245,7 +2245,6 @@ count_events_callback (struct inferior_list_entry *entry, void *data)
 
   /* Count only resumed LWPs that have an event pending. */
   if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
-      && thread->last_resume_kind != resume_stop
       && lp->status_pending_p)
     (*count)++;
 
@@ -2280,8 +2279,7 @@ select_event_lwp_callback (struct inferior_list_entry *entry, void *data)
   gdb_assert (selector != NULL);
 
   /* Select only resumed LWPs that have an event pending. */
-  if (thread->last_resume_kind != resume_stop
-      && thread->last_status.kind == TARGET_WAITKIND_IGNORE
+  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
       && lp->status_pending_p)
     if ((*selector)-- == 0)
       return 1;
