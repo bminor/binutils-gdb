@@ -1713,17 +1713,6 @@ _aarch64_elf_section_data;
 #define elf_aarch64_section_data(sec) \
   ((_aarch64_elf_section_data *) elf_section_data (sec))
 
-/* A fix-descriptor for erratum 835769.  */
-struct aarch64_erratum_835769_fix
-{
-  bfd *input_bfd;
-  asection *section;
-  bfd_vma offset;
-  uint32_t veneered_insn;
-  char *stub_name;
-  enum elf_aarch64_stub_type stub_type;
-};
-
 /* The size of the thread control block which is defined to be two pointers.  */
 #define TCB_SIZE	(ARCH_SIZE/8)*2
 
@@ -3027,17 +3016,13 @@ _bfd_aarch64_erratum_835769_stub_name (unsigned num_fixes)
    Return TRUE else FALSE on abnormal termination.  */
 
 static bfd_boolean
-erratum_835769_scan (bfd *input_bfd,
-		     struct bfd_link_info *info,
-		     struct aarch64_erratum_835769_fix **fixes_p,
-		     unsigned int *num_fixes_p,
-		     unsigned int *fix_table_size_p)
+_bfd_aarch64_erratum_835769_scan (bfd *input_bfd,
+				  struct bfd_link_info *info,
+				  unsigned int *num_fixes_p)
 {
   asection *section;
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
-  struct aarch64_erratum_835769_fix *fixes = *fixes_p;
   unsigned int num_fixes = *num_fixes_p;
-  unsigned int fix_table_size = *fix_table_size_p;
 
   if (htab == NULL)
     return TRUE;
@@ -3086,28 +3071,22 @@ erratum_835769_scan (bfd *input_bfd,
 
 	      if (aarch64_erratum_sequence (insn_1, insn_2))
 		{
+		  struct elf_aarch64_stub_hash_entry *stub_entry;
 		  char *stub_name = _bfd_aarch64_erratum_835769_stub_name (num_fixes);
 		  if (! stub_name)
 		    return FALSE;
 
-		  if (num_fixes == fix_table_size)
-		    {
-		      fix_table_size *= 2;
-		      fixes =
-			(struct aarch64_erratum_835769_fix *)
-			  bfd_realloc (fixes,
-				       sizeof (struct aarch64_erratum_835769_fix)
-					 * fix_table_size);
-		      if (fixes == NULL)
-			return FALSE;
-		    }
+		  stub_entry = _bfd_aarch64_add_stub_entry_in_group (stub_name,
+								     section,
+								     htab);
+		  if (! stub_entry)
+		    return FALSE;
 
-		  fixes[num_fixes].input_bfd = input_bfd;
-		  fixes[num_fixes].section = section;
-		  fixes[num_fixes].offset = i + 4;
-		  fixes[num_fixes].veneered_insn = insn_2;
-		  fixes[num_fixes].stub_name = stub_name;
-		  fixes[num_fixes].stub_type = aarch64_stub_erratum_835769_veneer;
+		  stub_entry->stub_type = aarch64_stub_erratum_835769_veneer;
+		  stub_entry->target_section = section;
+		  stub_entry->target_value = i + 4;
+		  stub_entry->veneered_insn = insn_2;
+		  stub_entry->output_name = stub_name;
 		  num_fixes++;
 		}
 	    }
@@ -3116,9 +3095,6 @@ erratum_835769_scan (bfd *input_bfd,
 	free (contents);
     }
 
-  *fixes_p = fixes;
-  *num_fixes_p = num_fixes;
-  *fix_table_size_p = fix_table_size;
   return TRUE;
 }
 
@@ -3162,23 +3138,9 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 {
   bfd_size_type stub_group_size;
   bfd_boolean stubs_always_before_branch;
-  bfd_boolean stub_changed = 0;
+  bfd_boolean stub_changed = FALSE;
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
-  struct aarch64_erratum_835769_fix *erratum_835769_fixes = NULL;
   unsigned int num_erratum_835769_fixes = 0;
-  unsigned int erratum_835769_fix_table_size = 10;
-  unsigned int i;
-
-  if (htab->fix_erratum_835769)
-    {
-      erratum_835769_fixes
-	= (struct aarch64_erratum_835769_fix *)
-	    bfd_zmalloc
-	      (sizeof (struct aarch64_erratum_835769_fix) *
-					erratum_835769_fix_table_size);
-      if (erratum_835769_fixes == NULL)
-	goto error_ret_free_local;
-    }
 
   /* Propagate mach to stub bfd, because it may not have been
      finalized when we created stub_bfd.  */
@@ -3204,13 +3166,23 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 
   group_sections (htab, stub_group_size, stubs_always_before_branch);
 
+  if (htab->fix_erratum_835769)
+    {
+      bfd *input_bfd;
+
+      for (input_bfd = info->input_bfds;
+	   input_bfd != NULL; input_bfd = input_bfd->link.next)
+	if (!_bfd_aarch64_erratum_835769_scan (input_bfd, info,
+					       &num_erratum_835769_fixes))
+	  return FALSE;
+
+      stub_changed = TRUE;
+    }
+
   while (1)
     {
       bfd *input_bfd;
-      asection *stub_sec;
-      unsigned prev_num_erratum_835769_fixes = num_erratum_835769_fixes;
 
-      num_erratum_835769_fixes = 0;
       for (input_bfd = info->input_bfds;
 	   input_bfd != NULL; input_bfd = input_bfd->link.next)
 	{
@@ -3463,64 +3435,16 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	      if (elf_section_data (section)->relocs == NULL)
 		free (internal_relocs);
 	    }
-
-	  if (htab->fix_erratum_835769)
-	    {
-	      /* Scan for sequences which might trigger erratum 835769.  */
-	      if (!erratum_835769_scan (input_bfd, info, &erratum_835769_fixes,
-					&num_erratum_835769_fixes,
-					&erratum_835769_fix_table_size))
-		goto error_ret_free_local;
-	    }
 	}
-
-      if (prev_num_erratum_835769_fixes != num_erratum_835769_fixes)
-	stub_changed = TRUE;
 
       if (!stub_changed)
 	break;
 
       _bfd_aarch64_resize_stubs (htab);
 
-      /* Add erratum 835769 veneers to stub section sizes too.  */
-      if (htab->fix_erratum_835769)
-	for (i = 0; i < num_erratum_835769_fixes; i++)
-	  {
-	    stub_sec = _bfd_aarch64_create_or_find_stub_sec
-	      (erratum_835769_fixes[i].section, htab);
-
-	    if (stub_sec == NULL)
-	      goto error_ret_free_local;
-
-	    stub_sec->size += 8;
-	  }
-
       /* Ask the linker to do its stuff.  */
       (*htab->layout_sections_again) ();
       stub_changed = FALSE;
-    }
-
-  /* Add stubs for erratum 835769 fixes now.  */
-  if (htab->fix_erratum_835769)
-    {
-      for (i = 0; i < num_erratum_835769_fixes; i++)
-	{
-	  struct elf_aarch64_stub_hash_entry *stub_entry;
-	  char *stub_name = erratum_835769_fixes[i].stub_name;
-	  asection *section = erratum_835769_fixes[i].section;
-
-	  stub_entry = _bfd_aarch64_add_stub_entry_in_group (stub_name,
-							     section,
-							     htab);
-	  if (! stub_entry)
-	    return FALSE;
-
-	  stub_entry->stub_type = erratum_835769_fixes[i].stub_type;
-	  stub_entry->target_section = section;
-	  stub_entry->target_value = erratum_835769_fixes[i].offset;
-	  stub_entry->veneered_insn = erratum_835769_fixes[i].veneered_insn;
-	  stub_entry->output_name = erratum_835769_fixes[i].stub_name;
-	}
     }
 
   return TRUE;
