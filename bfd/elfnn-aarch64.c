@@ -3013,6 +3013,15 @@ elf_aarch64_compare_mapping (const void *a, const void *b)
 }
 
 
+static char *
+_bfd_aarch64_erratum_835769_stub_name (unsigned num_fixes)
+{
+  char *stub_name = (char *) bfd_malloc
+    (strlen ("__erratum_835769_veneer_") + 16);
+  sprintf (stub_name,"__erratum_835769_veneer_%d", num_fixes);
+  return stub_name;
+}
+
 /* Scan for cortex-a53 erratum 835769 sequence.
 
    Return TRUE else FALSE on abnormal termination.  */
@@ -3077,13 +3086,8 @@ erratum_835769_scan (bfd *input_bfd,
 
 	      if (aarch64_erratum_sequence (insn_1, insn_2))
 		{
-		  char *stub_name = NULL;
-		  stub_name = (char *) bfd_malloc
-				(strlen ("__erratum_835769_veneer_") + 16);
-		  if (stub_name != NULL)
-		    sprintf
-		      (stub_name,"__erratum_835769_veneer_%d", num_fixes);
-		  else
+		  char *stub_name = _bfd_aarch64_erratum_835769_stub_name (num_fixes);
+		  if (! stub_name)
 		    return FALSE;
 
 		  if (num_fixes == fix_table_size)
