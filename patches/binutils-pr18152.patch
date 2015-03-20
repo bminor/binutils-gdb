@@ -1,0 +1,271 @@
+From fedaa3916f1631c3ed481848a4eeea2f802ec732 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Fri, 20 Mar 2015 08:44:35 -0700
+Subject: [PATCH] Revert "Fix failure in exception_static_test."
+
+This reverts commit e16631979e847a6b39db3435bea7708b9f34b36d.
+
+This fixes
+
+https://sourceware.org/bugzilla/show_bug.cgi?id=18152
+---
+ gold/ehframe.cc | 18 ++++++-------
+ gold/ehframe.h  | 10 +-------
+ gold/gold.cc    |  3 ---
+ gold/layout.cc  | 80 ++++++++++++++++++++++-----------------------------------
+ gold/layout.h   |  6 -----
+ 5 files changed, 40 insertions(+), 77 deletions(-)
+
+diff --git a/gold/ehframe.cc b/gold/ehframe.cc
+index 262766e..711103b 100644
+--- a/gold/ehframe.cc
++++ b/gold/ehframe.cc
+@@ -567,7 +567,7 @@ Eh_frame::skip_leb128(const unsigned char** pp, const unsigned char* pend)
+ // section.
+ 
+ template<int size, bool big_endian>
+-Eh_frame::Eh_frame_section_disposition
++bool
+ Eh_frame::add_ehframe_input_section(
+     Sized_relobj_file<size, big_endian>* object,
+     const unsigned char* symbols,
+@@ -584,7 +584,7 @@ Eh_frame::add_ehframe_input_section(
+ 							    &contents_len,
+ 							    false);
+   if (contents_len == 0)
+-    return EH_EMPTY_SECTION;
++    return false;
+ 
+   // If this is the marker section for the end of the data, then
+   // return false to force it to be handled as an ordinary input
+@@ -592,7 +592,7 @@ Eh_frame::add_ehframe_input_section(
+   // of unrecognized .eh_frame sections.
+   if (contents_len == 4
+       && elfcpp::Swap<32, big_endian>::readval(pcontents) == 0)
+-    return EH_END_MARKER_SECTION;
++    return false;
+ 
+   New_cies new_cies;
+   if (!this->do_add_ehframe_input_section(object, symbols, symbols_size,
+@@ -609,7 +609,7 @@ Eh_frame::add_ehframe_input_section(
+ 	   ++p)
+ 	delete p->first;
+ 
+-      return EH_UNRECOGNIZED_SECTION;
++      return false;
+     }
+ 
+   // Now that we know we are using this section, record any new CIEs
+@@ -624,7 +624,7 @@ Eh_frame::add_ehframe_input_section(
+ 	this->unmergeable_cie_offsets_.push_back(p->first);
+     }
+ 
+-  return EH_OPTIMIZABLE_SECTION;
++  return true;
+ }
+ 
+ // The bulk of the implementation of add_ehframe_input_section.
+@@ -1206,7 +1206,7 @@ Eh_frame::do_sized_write(unsigned char* oview)
+ 
+ #ifdef HAVE_TARGET_32_LITTLE
+ template
+-Eh_frame::Eh_frame_section_disposition
++bool
+ Eh_frame::add_ehframe_input_section<32, false>(
+     Sized_relobj_file<32, false>* object,
+     const unsigned char* symbols,
+@@ -1220,7 +1220,7 @@ Eh_frame::add_ehframe_input_section<32, false>(
+ 
+ #ifdef HAVE_TARGET_32_BIG
+ template
+-Eh_frame::Eh_frame_section_disposition
++bool
+ Eh_frame::add_ehframe_input_section<32, true>(
+     Sized_relobj_file<32, true>* object,
+     const unsigned char* symbols,
+@@ -1234,7 +1234,7 @@ Eh_frame::add_ehframe_input_section<32, true>(
+ 
+ #ifdef HAVE_TARGET_64_LITTLE
+ template
+-Eh_frame::Eh_frame_section_disposition
++bool
+ Eh_frame::add_ehframe_input_section<64, false>(
+     Sized_relobj_file<64, false>* object,
+     const unsigned char* symbols,
+@@ -1248,7 +1248,7 @@ Eh_frame::add_ehframe_input_section<64, false>(
+ 
+ #ifdef HAVE_TARGET_64_BIG
+ template
+-Eh_frame::Eh_frame_section_disposition
++bool
+ Eh_frame::add_ehframe_input_section<64, true>(
+     Sized_relobj_file<64, true>* object,
+     const unsigned char* symbols,
+diff --git a/gold/ehframe.h b/gold/ehframe.h
+index e6e21b2..bb47381 100644
+--- a/gold/ehframe.h
++++ b/gold/ehframe.h
+@@ -359,14 +359,6 @@ extern bool operator==(const Cie&, const Cie&);
+ class Eh_frame : public Output_section_data
+ {
+  public:
+-  enum Eh_frame_section_disposition
+-  {
+-    EH_EMPTY_SECTION,
+-    EH_UNRECOGNIZED_SECTION,
+-    EH_OPTIMIZABLE_SECTION,
+-    EH_END_MARKER_SECTION
+-  };
+-
+   Eh_frame();
+ 
+   // Record the associated Eh_frame_hdr, if any.
+@@ -382,7 +374,7 @@ class Eh_frame : public Output_section_data
+   // returns whether the section was incorporated into the .eh_frame
+   // data.
+   template<int size, bool big_endian>
+-  Eh_frame_section_disposition
++  bool
+   add_ehframe_input_section(Sized_relobj_file<size, big_endian>* object,
+ 			    const unsigned char* symbols,
+ 			    section_size_type symbols_size,
+diff --git a/gold/gold.cc b/gold/gold.cc
+index e345887..ab15980 100644
+--- a/gold/gold.cc
++++ b/gold/gold.cc
+@@ -492,9 +492,6 @@ queue_middle_tasks(const General_options& options,
+   if (timer != NULL)
+     timer->stamp(0);
+ 
+-  // Finalize the .eh_frame section.
+-  layout->finalize_eh_frame_section();
+-
+   // Add any symbols named with -u options to the symbol table.
+   symtab->add_undefined_symbols_from_command_line(layout);
+ 
+diff --git a/gold/layout.cc b/gold/layout.cc
+index 14bfda0..7836640 100644
+--- a/gold/layout.cc
++++ b/gold/layout.cc
+@@ -1420,21 +1420,15 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
+ 
+   elfcpp::Elf_Xword orig_flags = os->flags();
+ 
+-  Eh_frame::Eh_frame_section_disposition disp =
+-      Eh_frame::EH_UNRECOGNIZED_SECTION;
+-  if (!parameters->incremental())
+-    {
+-      disp = this->eh_frame_data_->add_ehframe_input_section(object,
+-							     symbols,
+-							     symbols_size,
+-							     symbol_names,
+-							     symbol_names_size,
+-							     shndx,
+-							     reloc_shndx,
+-							     reloc_type);
+-    }
+-
+-  if (disp == Eh_frame::EH_OPTIMIZABLE_SECTION)
++  if (!parameters->incremental()
++      && this->eh_frame_data_->add_ehframe_input_section(object,
++							 symbols,
++							 symbols_size,
++							 symbol_names,
++							 symbol_names_size,
++							 shndx,
++							 reloc_shndx,
++							 reloc_type))
+     {
+       os->update_flags_for_input_section(shdr.get_sh_flags());
+ 
+@@ -1446,49 +1440,35 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
+ 	  os->set_order(ORDER_RELRO);
+ 	}
+ 
++      // We found a .eh_frame section we are going to optimize, so now
++      // we can add the set of optimized sections to the output
++      // section.  We need to postpone adding this until we've found a
++      // section we can optimize so that the .eh_frame section in
++      // crtbegin.o winds up at the start of the output section.
++      if (!this->added_eh_frame_data_)
++	{
++	  os->add_output_section_data(this->eh_frame_data_);
++	  this->added_eh_frame_data_ = true;
++	}
+       *off = -1;
+-      return os;
+     }
+-
+-  if (disp == Eh_frame::EH_END_MARKER_SECTION && !this->added_eh_frame_data_)
++  else
+     {
+-      // We found the end marker section, so now we can add the set of
+-      // optimized sections to the output section.  We need to postpone
+-      // adding this until we've found a section we can optimize so that
+-      // the .eh_frame section in crtbeginT.o winds up at the start of
+-      // the output section.
+-      os->add_output_section_data(this->eh_frame_data_);
+-      this->added_eh_frame_data_ = true;
+-     }
+-
+-  // We couldn't handle this .eh_frame section for some reason.
+-  // Add it as a normal section.
+-  bool saw_sections_clause = this->script_options_->saw_sections_clause();
+-  *off = os->add_input_section(this, object, shndx, ".eh_frame", shdr,
+-			       reloc_shndx, saw_sections_clause);
+-  this->have_added_input_section_ = true;
++      // We couldn't handle this .eh_frame section for some reason.
++      // Add it as a normal section.
++      bool saw_sections_clause = this->script_options_->saw_sections_clause();
++      *off = os->add_input_section(this, object, shndx, ".eh_frame", shdr,
++				   reloc_shndx, saw_sections_clause);
++      this->have_added_input_section_ = true;
+ 
+-  if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
+-      != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
+-    os->set_order(this->default_section_order(os, false));
++      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
++	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
++	os->set_order(this->default_section_order(os, false));
++    }
+ 
+   return os;
+ }
+ 
+-void
+-Layout::finalize_eh_frame_section()
+-{
+-  // If we never found an end marker section, we need to add the
+-  // optimized eh sections to the output section now.
+-  if (!parameters->incremental()
+-      && this->eh_frame_section_ != NULL
+-      && !this->added_eh_frame_data_)
+-    {
+-      this->eh_frame_section_->add_output_section_data(this->eh_frame_data_);
+-      this->added_eh_frame_data_ = true;
+-    }
+-}
+-
+ // Create and return the magic .eh_frame section.  Create
+ // .eh_frame_hdr also if appropriate.  OBJECT is the object with the
+ // input .eh_frame section; it may be NULL.
+diff --git a/gold/layout.h b/gold/layout.h
+index 9039ee8..aec0c53 100644
+--- a/gold/layout.h
++++ b/gold/layout.h
+@@ -635,12 +635,6 @@ class Layout
+ 		  unsigned int reloc_shndx, unsigned int reloc_type,
+ 		  off_t* offset);
+ 
+-  // After processing all input files, we call this to make sure that
+-  // the optimized .eh_frame sections have been added to the output
+-  // section.
+-  void
+-  finalize_eh_frame_section();
+-
+   // Add .eh_frame information for a PLT.  The FDE must start with a
+   // 4-byte PC-relative reference to the start of the PLT, followed by
+   // a 4-byte size of PLT.
+-- 
+1.9.3
+
