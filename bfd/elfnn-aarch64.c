@@ -2981,6 +2981,11 @@ elf_aarch64_compare_mapping (const void *a, const void *b)
     return 0;
 }
 
+
+/* Scan for cortex-a53 erratum 835769 sequence.
+
+   Return TRUE else FALSE on abnormal termination.  */
+
 static bfd_boolean
 erratum_835769_scan (bfd *input_bfd,
 		     struct bfd_link_info *info,
@@ -2995,7 +3000,7 @@ erratum_835769_scan (bfd *input_bfd,
   unsigned int fix_table_size = *fix_table_size_p;
 
   if (htab == NULL)
-    return FALSE;
+    return TRUE;
 
   for (section = input_bfd->sections;
        section != NULL;
@@ -3015,7 +3020,7 @@ erratum_835769_scan (bfd *input_bfd,
       if (elf_section_data (section)->this_hdr.contents != NULL)
 	contents = elf_section_data (section)->this_hdr.contents;
       else if (! bfd_malloc_and_get_section (input_bfd, section, &contents))
-	return TRUE;
+	return FALSE;
 
       sec_data = elf_aarch64_section_data (section);
 
@@ -3048,7 +3053,7 @@ erratum_835769_scan (bfd *input_bfd,
 		    sprintf
 		      (stub_name,"__erratum_835769_veneer_%d", num_fixes);
 		  else
-		    return TRUE;
+		    return FALSE;
 
 		  if (num_fixes == fix_table_size)
 		    {
@@ -3059,7 +3064,7 @@ erratum_835769_scan (bfd *input_bfd,
 				       sizeof (struct aarch64_erratum_835769_fix)
 					 * fix_table_size);
 		      if (fixes == NULL)
-			return TRUE;
+			return FALSE;
 		    }
 
 		  fixes[num_fixes].input_bfd = input_bfd;
@@ -3079,7 +3084,7 @@ erratum_835769_scan (bfd *input_bfd,
   *fixes_p = fixes;
   *num_fixes_p = num_fixes;
   *fix_table_size_p = fix_table_size;
-  return FALSE;
+  return TRUE;
 }
 
 /* Find or create a stub section.  */
@@ -3446,9 +3451,9 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	  if (htab->fix_erratum_835769)
 	    {
 	      /* Scan for sequences which might trigger erratum 835769.  */
-	      if (erratum_835769_scan (input_bfd, info, &erratum_835769_fixes,
-				       &num_erratum_835769_fixes,
-				       &erratum_835769_fix_table_size)  != 0)
+	      if (!erratum_835769_scan (input_bfd, info, &erratum_835769_fixes,
+					&num_erratum_835769_fixes,
+					&erratum_835769_fix_table_size))
 		goto error_ret_free_local;
 	    }
 	}
