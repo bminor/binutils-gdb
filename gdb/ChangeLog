@@ -1,5 +1,11 @@
 2015-05-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2read.c (attr_to_dynamic_prop)
+	<DW_AT_data_member_location>: Use read_type_die isntead of
+	get_die_type.
+
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_convert_actual): Add handling of formals
 	passed inside an aligner type.
 

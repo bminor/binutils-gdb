@@ -14851,8 +14851,8 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 		return 0;
 
 	      baton = obstack_alloc (obstack, sizeof (*baton));
-	      baton->referenced_type = get_die_type (target_die->parent,
-						     target_cu);
+	      baton->referenced_type = read_type_die (target_die->parent,
+						      target_cu);
 	      baton->offset_info.offset = offset;
 	      baton->offset_info.type = die_type (target_die, target_cu);
 	      prop->data.baton = baton;
