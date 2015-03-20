@@ -1,3 +1,7 @@
+2015-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config/djgpp/README: Remove gdb.hp.
+
 2015-03-20  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_gdbarch_init): Don't call

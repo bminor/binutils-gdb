@@ -111,9 +111,7 @@ AC_OUTPUT([Makefile \
   gdb.cell/Makefile gdb.compile/Makefile gdb.cp/Makefile gdb.disasm/Makefile \
   gdb.dwarf2/Makefile gdb.dlang/Makefile gdb.fortran/Makefile gdb.gdb/Makefile \
   gdb.go/Makefile gdb.server/Makefile gdb.java/Makefile \
-  gdb.hp/Makefile gdb.hp/gdb.objdbg/Makefile gdb.hp/gdb.base-hp/Makefile \
-  gdb.hp/gdb.aCC/Makefile gdb.hp/gdb.compat/Makefile \
-  gdb.hp/gdb.defects/Makefile gdb.guile/Makefile gdb.linespec/Makefile \
+  gdb.guile/Makefile gdb.linespec/Makefile \
   gdb.mi/Makefile gdb.modula2/Makefile gdb.multi/Makefile \
   gdb.objc/Makefile gdb.opencl/Makefile gdb.opt/Makefile gdb.pascal/Makefile \
   gdb.perf/Makefile gdb.python/Makefile gdb.reverse/Makefile gdb.stabs/Makefile \
