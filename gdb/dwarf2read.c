@@ -22085,11 +22085,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   /* Read DW_AT_data_location and set in type.  */
   attr = dwarf2_attr (die, DW_AT_data_location, cu);
   if (attr_to_dynamic_prop (attr, die, cu, &prop))
-    {
-      TYPE_DATA_LOCATION (type)
-        = obstack_alloc (&objfile->objfile_obstack, sizeof (prop));
-      *TYPE_DATA_LOCATION (type) = prop;
-    }
+    add_dyn_prop (DYN_ATTR_DATA_LOCATION, prop, type, objfile);
 
   if (dwarf2_per_objfile->die_type_hash == NULL)
     {

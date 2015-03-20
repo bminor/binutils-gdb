@@ -1,3 +1,15 @@
+2015-03-20  Keven Boell  <keven.boell@intel.com>
+
+	* gdbtypes.c (resolve_dynamic_type_internal): Adapt
+	data_location usage to linked list.
+	(resolve_dynamic_type_internal): Adapt data_location to
+	linked list.
+	(get_dyn_prop, add_dyn_prop, copy_dynamic_prop_list): New function.
+	(copy_type_recursive, copy_type): Add copy of linked list.
+	* gdbtypes.h (enum dynamic_prop_node_kind): New enum.
+	(struct dynamic_prop_list): New struct.
+	* dwarf2read.c (set_die_type): Set data_location data.
+
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
 	* i386-sol2-tdep.c (i386_sol2_static_transform_name): Move "p" to
