@@ -3256,8 +3256,13 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  break;
 
 	case EM_RL78:
-	  if (e_flags & E_FLAG_RL78_G10)
-	    strcat (buf, ", G10");
+	  switch (e_flags & E_FLAG_RL78_CPU_MASK)
+	    {
+	    case E_FLAG_RL78_ANY_CPU: break;
+	    case E_FLAG_RL78_G10: strcat (buf, ", G10"); break;
+	    case E_FLAG_RL78_G13: strcat (buf, ", G13"); break;
+	    case E_FLAG_RL78_G14: strcat (buf, ", G14"); break;
+	    }
 	  if (e_flags & E_FLAG_RL78_64BIT_DOUBLES)
 	    strcat (buf, ", 64-bit doubles");
 	  break;

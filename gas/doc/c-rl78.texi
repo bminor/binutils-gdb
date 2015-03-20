@@ -32,6 +32,15 @@ Enable support for link-time relaxation.
 Mark the generated binary as targeting the G10 variant of the RL78
 architecture.
 
+@item mg13
+Mark the generated binary as targeting the G13 variant of the RL78
+architecture.
+
+@item mg14
+@itemx mrl78
+Mark the generated binary as targeting the G14 variant of the RL78
+architecture.  This is the default.
+
 @item m32bit-doubles
 Mark the generated binary as one that uses 32-bits to hold the
 @code{double} floating point type.  This is the default.

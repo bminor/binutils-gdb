@@ -1,3 +1,12 @@
+2015-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* load.c (rl78_load): If the G10, G13 or G14 flag bits are set in
+	the ELF header use them to select the proper emulation mode.
+	* mem.c (mem_put_byte): Use mem_put_hi to store a value into the
+	MDB register.
+	(mem_get_byte): Use mem_get_hi to extract a value from the MDB
+	register.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.

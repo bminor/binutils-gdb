@@ -140,6 +140,10 @@ mem_put_byte (int address, unsigned char value)
       printf ("Warning: SP value 0x%04x truncated at pc=0x%05x\n", value, pc);
       value &= ~1;
     }
+
+  if (! g13_multiply)
+    return;
+
   if (address == MDUC)
     {
       if ((value & 0x81) == 0x81)
@@ -166,20 +170,23 @@ mem_put_byte (int address, unsigned char value)
 	      ahu = mem_get_hi (MDAH);
 	      rvu = alu * ahu;
 	      tprintf  ("MDUC: %lu * %lu = %lu\n", alu, ahu, rvu);
-	      mem_put_si (MDBL, rvu);
+	      mem_put_hi (MDBL, rvu & 0xffff);
+	      mem_put_hi (MDBH, rvu >> 16);
 	      break;
 	    case 0x08:
 	      als = sign_ext (mem_get_hi (MDAL), 16);
 	      ahs = sign_ext (mem_get_hi (MDAH), 16);
 	      rvs = als * ahs;
 	      tprintf  ("MDUC: %ld * %ld = %ld\n", als, ahs, rvs);
-	      mem_put_si (MDBL, rvs);
+	      mem_put_hi (MDBL, rvs & 0xffff);
+	      mem_put_hi (MDBH, rvs >> 16);
 	      break;
 	    case 0x40:
 	      alu = mem_get_hi (MDAL);
 	      ahu = mem_get_hi (MDAH);
 	      rvu = alu * ahu;
-	      mem_put_si (MDBL, rvu);
+	      mem_put_hi (MDBL, rvu & 0xffff);
+	      mem_put_hi (MDBH, rvu >> 16);
 	      mdc = mem_get_si (MDCL);
 	      tprintf  ("MDUC: %lu * %lu + %lu = ", alu, ahu, mdc);
 	      mdc += (long) rvu;
@@ -190,7 +197,8 @@ mem_put_byte (int address, unsigned char value)
 	      als = sign_ext (mem_get_hi (MDAL), 16);
 	      ahs = sign_ext (mem_get_hi (MDAH), 16);
 	      rvs = als * ahs;
-	      mem_put_si (MDBL, rvs);
+	      mem_put_hi (MDBL, rvs & 0xffff);
+	      mem_put_hi (MDBH, rvs >> 16);
 	      mdc = mem_get_si (MDCL);
 	      tprintf  ("MDUC: %ld * %ld + %ld = ", als, ahs, mdc);
 	      tprintf ("%ld\n", mdc);
@@ -228,7 +236,7 @@ mem_get_byte (int address)
 	    unsigned long a, b, q, r;
 	    memory [MDUC] &= 0xfe;
 	    a = mem_get_si (MDAL);
-	    b = mem_get_si (MDAL);
+	    b = mem_get_hi (MDBL) | (mem_get_hi (MDBH) << 16);
 	    if (b == 0)
 	      {
 		q = ~0;

@@ -1,3 +1,7 @@
+2015-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Decode RL78's G13 and G14 flags.
+
 2015-03-18  Jon Turney  <jon.turney@dronecode.org.uk>
 	    Nick Clifton  <nickc@redhat.com>
 
