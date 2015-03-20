@@ -1,3 +1,55 @@
+2015-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Don't run nops-1-bdver1, nops-1-bdver2,
+	nops-1-bdver3, nops-1-bdver4, nops-1-znver1, nops-1-btver1
+	nops-1-btver2, x86-64-nops-1-nocona, x86-64-nops-1-bdver1,
+	x86-64-nops-1-bdver2, x86-64-nops-1-bdver3, x86-64-nops-1-bdver4,
+	x86-64-nops-1-znver1, x86-64-nops-1-btver1 nor
+	x86-64-nops-1-btver2.
+	* gas/i386/nops-1-core2.d: Updated.
+	* gas/i386/nops-1-k8.d: Likewise.
+	* gas/i386/nops-4a-i686.d: Likewise.
+	* gas/i386/nops-5-i686.d: Likewise.
+	* gas/i386/nops-5.d: Likewise.
+	* gas/i386/nops-6.d: Likewise.
+	* gas/i386/x86-64-nops-1-core2.d: Likewise.
+	* gas/i386/x86-64-nops-1-g64.d: Likewise.
+	* gas/i386/x86-64-nops-1-k8.d: Likewise.
+	* gas/i386/x86-64-nops-1.d: Likewise.
+	* gas/i386/x86-64-nops-2.d: Likewise.
+	* gas/i386/x86-64-nops-3.d: Likewise.
+	* gas/i386/x86-64-nops-4-core2.d: Likewise.
+	* gas/i386/x86-64-nops-4-k8.d: Likewise.
+	* gas/i386/x86-64-nops-4.d: Likewise.
+	* gas/i386/x86-64-nops-5-k8.d: Likewise.
+	* gas/i386/x86-64-nops-5.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-1-core2.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-1-k8.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-1.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-2.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-3.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-4-core2.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-4-k8.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-4.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-5-k8.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-5.d: Likewise.
+	* gas/i386/nops-1-bdver1.d: Removed.
+	* gas/i386/nops-1-bdver2.d: Likewise.
+	* gas/i386/nops-1-bdver3.d: Likewise.
+	* gas/i386/nops-1-bdver4.d: Likewise.
+	* gas/i386/nops-1-btver1.d: Likewise.
+	* gas/i386/nops-1-btver2.d: Likewise.
+	* gas/i386/nops-1-znver1.d: Likewise.
+	* gas/i386/x86-64-nops-1-bdver1.d: Likewise.
+	* gas/i386/x86-64-nops-1-bdver2.d: Likewise.
+	* gas/i386/x86-64-nops-1-bdver3.d: Likewise.
+	* gas/i386/x86-64-nops-1-bdver4.d: Likewise.
+	* gas/i386/x86-64-nops-1-btver1.d: Likewise.
+	* gas/i386/x86-64-nops-1-btver2.d: Likewise.
+	* gas/i386/x86-64-nops-1-nocona.d: Likewise.
+	* gas/i386/x86-64-nops-1-znver1.d: Likewise.
+	* gas/i386/ilp32/x86-64-nops-1-nocona.d: Likewise.
+
 2015-03-19  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/18087

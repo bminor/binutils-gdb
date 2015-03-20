@@ -1,3 +1,8 @@
+2015-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_align_code): Limit multi-byte nop
+	instructions to 10 bytes.
+
 2015-03-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rl78.c (enum options): Add G13 and G14.
