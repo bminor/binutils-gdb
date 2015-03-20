@@ -3118,6 +3118,29 @@ erratum_835769_scan (bfd *input_bfd,
   return TRUE;
 }
 
+
+/* Resize all stub sections.  */
+
+static void
+_bfd_aarch64_resize_stubs (struct elf_aarch64_link_hash_table *htab)
+{
+  asection *section;
+
+  /* OK, we've added some stubs.  Find out the new size of the
+     stub sections.  */
+  for (section = htab->stub_bfd->sections;
+       section != NULL; section = section->next)
+    {
+      /* Ignore non-stub sections.  */
+      if (!strstr (section->name, STUB_SUFFIX))
+	continue;
+      section->size = 0;
+    }
+
+  bfd_hash_traverse (&htab->stub_hash_table, aarch64_size_one_stub, htab);
+}
+
+
 /* Determine and set the size of the stub section for a final link.
 
    The basic idea here is to examine all the relocations looking for
@@ -3453,18 +3476,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
       if (!stub_changed)
 	break;
 
-      /* OK, we've added some stubs.  Find out the new size of the
-         stub sections.  */
-      for (stub_sec = htab->stub_bfd->sections;
-	   stub_sec != NULL; stub_sec = stub_sec->next)
-	{
-	  /* Ignore non-stub sections.  */
-	  if (!strstr (stub_sec->name, STUB_SUFFIX))
-	    continue;
-	  stub_sec->size = 0;
-	}
-
-      bfd_hash_traverse (&htab->stub_hash_table, aarch64_size_one_stub, htab);
+      _bfd_aarch64_resize_stubs (htab);
 
       /* Add erratum 835769 veneers to stub section sizes too.  */
       if (htab->fix_erratum_835769)
