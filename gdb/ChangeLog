@@ -1,3 +1,8 @@
+2015-03-20  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Don't call
+	set_gdbarch_cannot_step_breakpoint.
+
 2015-03-19  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_resume_one_lwp): Rename to ...
