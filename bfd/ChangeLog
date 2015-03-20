@@ -1,5 +1,18 @@
 2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (struct aarch64_erratum_835769_fix) Remove.
+	(erratum_835769_scan) Drop fix_table_size_p and fixes_p arguments.
+	Delete fixes, fix_table_size and associated code.  Call
+	_bfd_aarch64_add_stub_entry_in_group. Rename to...
+	(bfd_aarch64_erratum_835769_scan): Define.
+	(elfNN_aarch64_size_stubs): Delete erratum_835769_fixes,
+	erratum_835769_fix_table_size, i and associated code.  Relocate
+	call to _bfd_aarch64_erratum_835769_scan.  Delete adhoc stub size
+	correction.  Delete construction of stub entry from
+	erratum_835769_fixes array.
+
+2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_size_stubs): Use
 	_bfd_aarch64_add_stub_entry_in_group.
 
