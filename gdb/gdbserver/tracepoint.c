@@ -3615,7 +3615,8 @@ static void
 cmd_qtstatus (char *packet)
 {
   char *stop_reason_rsp = NULL;
-  char *buf1, *buf2, *buf3, *str;
+  char *buf1, *buf2, *buf3;
+  const char *str;
   int slen;
 
   /* Translate the plain text of the notes back into hex for

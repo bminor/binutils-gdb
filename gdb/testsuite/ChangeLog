@@ -1,3 +1,78 @@
+2015-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (ALL_SUBDIRS): Remove gdb.hp.
+	* README: Remove HP-UX and gdb.hp.
+	(configuration):
+	* configure: Regenerate.
+	* configure.ac (AC_OUTPUT): Remove gdb.hp/Makefile,
+	gdb.hp/gdb.objdbg/Makefile, gdb.hp/gdb.base-hp/Makefile,
+	gdb.hp/gdb.aCC/Makefile, gdb.hp/gdb.compat/Makefile,
+	gdb.hp/gdb.defects/Makefile.
+	* gdb.hp/Makefile.in: File deleted.
+	* gdb.hp/gdb.aCC/Makefile.in: File deleted.
+	* gdb.hp/gdb.aCC/optimize.c: File deleted.
+	* gdb.hp/gdb.aCC/optimize.exp: File deleted.
+	* gdb.hp/gdb.aCC/run.c: File deleted.
+	* gdb.hp/gdb.aCC/watch-cmd.exp: File deleted.
+	* gdb.hp/gdb.base-hp/Makefile.in: File deleted.
+	* gdb.hp/gdb.base-hp/callfwmall.c: File deleted.
+	* gdb.hp/gdb.base-hp/callfwmall.exp: File deleted.
+	* gdb.hp/gdb.base-hp/dollar.c: File deleted.
+	* gdb.hp/gdb.base-hp/dollar.exp: File deleted.
+	* gdb.hp/gdb.base-hp/genso-thresh.c: File deleted.
+	* gdb.hp/gdb.base-hp/hwwatchbus.c: File deleted.
+	* gdb.hp/gdb.base-hp/hwwatchbus.exp: File deleted.
+	* gdb.hp/gdb.base-hp/pxdb.c: File deleted.
+	* gdb.hp/gdb.base-hp/pxdb.exp: File deleted.
+	* gdb.hp/gdb.base-hp/reg-pa64.exp: File deleted.
+	* gdb.hp/gdb.base-hp/reg-pa64.s: File deleted.
+	* gdb.hp/gdb.base-hp/reg.exp: File deleted.
+	* gdb.hp/gdb.base-hp/reg.s: File deleted.
+	* gdb.hp/gdb.base-hp/sized-enum.c: File deleted.
+	* gdb.hp/gdb.base-hp/sized-enum.exp: File deleted.
+	* gdb.hp/gdb.base-hp/so-thresh.exp: File deleted.
+	* gdb.hp/gdb.base-hp/so-thresh.mk: File deleted.
+	* gdb.hp/gdb.base-hp/so-thresh.sh: File deleted.
+	* gdb.hp/gdb.compat/Makefile.in: File deleted.
+	* gdb.hp/gdb.compat/average.c: File deleted.
+	* gdb.hp/gdb.compat/sum.c: File deleted.
+	* gdb.hp/gdb.compat/xdb.c: File deleted.
+	* gdb.hp/gdb.compat/xdb0.c: File deleted.
+	* gdb.hp/gdb.compat/xdb0.h: File deleted.
+	* gdb.hp/gdb.compat/xdb1.c: File deleted.
+	* gdb.hp/gdb.compat/xdb1.exp: File deleted.
+	* gdb.hp/gdb.compat/xdb2.exp: File deleted.
+	* gdb.hp/gdb.compat/xdb3.exp: File deleted.
+	* gdb.hp/gdb.defects/Makefile.in: File deleted.
+	* gdb.hp/gdb.defects/bs14602.c: File deleted.
+	* gdb.hp/gdb.defects/bs14602.exp: File deleted.
+	* gdb.hp/gdb.defects/solib-d.c: File deleted.
+	* gdb.hp/gdb.defects/solib-d.exp: File deleted.
+	* gdb.hp/gdb.defects/solib-d1.c: File deleted.
+	* gdb.hp/gdb.defects/solib-d2.c: File deleted.
+	* gdb.hp/gdb.objdbg/Makefile.in: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg01.exp: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg01/x1.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg01/x2.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg01/x3.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg01/x3.h: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg02.exp: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg02/x1.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg02/x2.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg02/x3.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg03.exp: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg03/x1.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg03/x2.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg03/x3.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg04.exp: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg04/x.h: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg04/x1.cc: File deleted.
+	* gdb.hp/gdb.objdbg/objdbg04/x2.cc: File deleted.
+	* gdb.hp/gdb.objdbg/tools/symaddr: File deleted.
+	* gdb.hp/gdb.objdbg/tools/symaddr.pa64: File deleted.
+	* gdb.hp/gdb.objdbg/tools/test-objdbg.cc: File deleted.
+	* gdb.hp/tools/odump: File deleted.
+
 2015-03-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/continue-pending-status.exp (saw_thread_2)

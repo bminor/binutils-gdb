@@ -1,3 +1,58 @@
+2015-03-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-io.c (tui_expand_tabs): Reinitialize the column counter
+	before the second loop, to avoid undefined behavior.  Reported by
+	Anton Blanchard <anton@samba.org>.
+
+2015-03-20  Keven Boell  <keven.boell@intel.com>
+
+	* gdbtypes.c (resolve_dynamic_type_internal): Adapt
+	data_location usage to linked list.
+	(resolve_dynamic_type_internal): Adapt data_location to
+	linked list.
+	(get_dyn_prop, add_dyn_prop, copy_dynamic_prop_list): New function.
+	(copy_type_recursive, copy_type): Add copy of linked list.
+	* gdbtypes.h (enum dynamic_prop_node_kind): New enum.
+	(struct dynamic_prop_list): New struct.
+	* dwarf2read.c (set_die_type): Set data_location data.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* i386-sol2-tdep.c (i386_sol2_static_transform_name): Move "p" to
+	inner block and make it const.
+	* machoread.c (get_archive_prefix_len): Make "lparen" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (set_breakpoint_condition): Make argument "exp" const.
+	* breakpoint.h (set_breakpoint_condition): Update declaration.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-io.c (tui_expand_tabs): Make "s1" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* xcoffread.c (scan_xcoff_symtab): Make "p" and "q" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* remote-m32r-sdi.c (m32r_open): Make "port_str" const.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* nto-tdep.c (nto_find_and_open_solib): Make "endian" const.
+	(nto_init_solib_absolute_prefix): Likewise.
+
+2015-03-20  Pedro Alves  <palves@redhat.com>
+
+	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): Make "p" const.
+	* spu-tdep.c (spu_gdbarch_init): Make "name" const.
+
+2015-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config/djgpp/README: Remove gdb.hp.
+
 2015-03-20  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_gdbarch_init): Don't call

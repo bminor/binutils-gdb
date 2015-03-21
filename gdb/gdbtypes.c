@@ -2025,7 +2025,7 @@ resolve_dynamic_type_internal (struct type *type,
 {
   struct type *real_type = check_typedef (type);
   struct type *resolved_type = type;
-  const struct dynamic_prop *prop;
+  struct dynamic_prop *prop;
   CORE_ADDR value;
 
   if (!is_dynamic_type_internal (real_type, top_level))
@@ -2080,13 +2080,11 @@ resolve_dynamic_type_internal (struct type *type,
 
   /* Resolve data_location attribute.  */
   prop = TYPE_DATA_LOCATION (resolved_type);
-  if (dwarf2_evaluate_property (prop, addr_stack, &value))
+  if (prop != NULL && dwarf2_evaluate_property (prop, addr_stack, &value))
     {
-      TYPE_DATA_LOCATION_ADDR (resolved_type) = value;
-      TYPE_DATA_LOCATION_KIND (resolved_type) = PROP_CONST;
+      TYPE_DYN_PROP_ADDR (prop) = value;
+      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
     }
-  else
-    TYPE_DATA_LOCATION (resolved_type) = NULL;
 
   return resolved_type;
 }
@@ -2100,6 +2098,42 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
 
   return resolve_dynamic_type_internal (type, &pinfo, 1);
 }
+
+/* See gdbtypes.h  */
+
+struct dynamic_prop *
+get_dyn_prop (enum dynamic_prop_node_kind prop_kind, const struct type *type)
+{
+  struct dynamic_prop_list *node = TYPE_DYN_PROP_LIST (type);
+
+  while (node != NULL)
+    {
+      if (node->prop_kind == prop_kind)
+        return node->prop;
+      node = node->next;
+    }
+  return NULL;
+}
+
+/* See gdbtypes.h  */
+
+void
+add_dyn_prop (enum dynamic_prop_node_kind prop_kind, struct dynamic_prop prop,
+              struct type *type, struct objfile *objfile)
+{
+  struct dynamic_prop_list *temp;
+
+  gdb_assert (TYPE_OBJFILE_OWNED (type));
+
+  temp = obstack_alloc (&objfile->objfile_obstack,
+			sizeof (struct dynamic_prop_list));
+  temp->prop_kind = prop_kind;
+  temp->prop = obstack_copy (&objfile->objfile_obstack, &prop, sizeof (prop));
+  temp->next = TYPE_DYN_PROP_LIST (type);
+
+  TYPE_DYN_PROP_LIST (type) = temp;
+}
+
 
 /* Find the real type of TYPE.  This function returns the real type,
    after removing all layers of typedefs, and completing opaque or stub
@@ -4230,6 +4264,31 @@ create_copied_types_hash (struct objfile *objfile)
 			       dummy_obstack_deallocate);
 }
 
+/* Recursively copy (deep copy) a dynamic attribute list of a type.  */
+
+static struct dynamic_prop_list *
+copy_dynamic_prop_list (struct obstack *objfile_obstack,
+			struct dynamic_prop_list *list)
+{
+  struct dynamic_prop_list *copy = list;
+  struct dynamic_prop_list **node_ptr = &copy;
+
+  while (*node_ptr != NULL)
+    {
+      struct dynamic_prop_list *node_copy;
+
+      node_copy = obstack_copy (objfile_obstack, *node_ptr,
+				sizeof (struct dynamic_prop_list));
+      node_copy->prop = obstack_copy (objfile_obstack, (*node_ptr)->prop,
+				      sizeof (struct dynamic_prop));
+      *node_ptr = node_copy;
+
+      node_ptr = &node_copy->next;
+    }
+
+  return copy;
+}
+
 /* Recursively copy (deep copy) TYPE, if it is associated with
    OBJFILE.  Return a new type allocated using malloc, a saved type if
    we have already visited TYPE (using COPIED_TYPES), or TYPE if it is
@@ -4333,14 +4392,11 @@ copy_type_recursive (struct objfile *objfile,
       *TYPE_RANGE_DATA (new_type) = *TYPE_RANGE_DATA (type);
     }
 
-  /* Copy the data location information.  */
-  if (TYPE_DATA_LOCATION (type) != NULL)
-    {
-      TYPE_DATA_LOCATION (new_type)
-	= TYPE_ALLOC (new_type, sizeof (struct dynamic_prop));
-      memcpy (TYPE_DATA_LOCATION (new_type), TYPE_DATA_LOCATION (type),
-	      sizeof (struct dynamic_prop));
-    }
+  if (TYPE_DYN_PROP_LIST (type) != NULL)
+    TYPE_DYN_PROP_LIST (new_type)
+      = copy_dynamic_prop_list (&objfile->objfile_obstack,
+				TYPE_DYN_PROP_LIST (type));
+
 
   /* Copy pointers to other types.  */
   if (TYPE_TARGET_TYPE (type))
@@ -4404,13 +4460,10 @@ copy_type (const struct type *type)
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
   memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
 	  sizeof (struct main_type));
-  if (TYPE_DATA_LOCATION (type) != NULL)
-    {
-      TYPE_DATA_LOCATION (new_type)
-	= TYPE_ALLOC (new_type, sizeof (struct dynamic_prop));
-      memcpy (TYPE_DATA_LOCATION (new_type), TYPE_DATA_LOCATION (type),
-	      sizeof (struct dynamic_prop));
-    }
+  if (TYPE_DYN_PROP_LIST (type) != NULL)
+    TYPE_DYN_PROP_LIST (new_type)
+      = copy_dynamic_prop_list (&TYPE_OBJFILE (type) -> objfile_obstack,
+				TYPE_DYN_PROP_LIST (type));
 
   return new_type;
 }

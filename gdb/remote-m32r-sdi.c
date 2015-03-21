@@ -362,7 +362,8 @@ m32r_open (const char *args, int from_tty)
 {
   struct hostent *host_ent;
   struct sockaddr_in server_addr;
-  char *port_str, hostname[256];
+  char hostname[256];
+  const char *port_str;
   int port;
   int i, n;
   int yes = 1;

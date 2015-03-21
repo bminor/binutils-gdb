@@ -591,7 +591,7 @@ handle_general_set (char *own_buf)
     {
       char *mode = own_buf + 9;
       int req = -1;
-      char *req_str;
+      const char *req_str;
 
       if (strcmp (mode, "0") == 0)
 	req = 0;

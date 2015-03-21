@@ -2698,7 +2698,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      This assumes the filename convention employed by solib-spu.c.  */
   else if (info.abfd)
     {
-      char *name = strrchr (info.abfd->filename, '@');
+      const char *name = strrchr (info.abfd->filename, '@');
       if (name)
 	sscanf (name, "@0x%*x <%d>", &id);
     }

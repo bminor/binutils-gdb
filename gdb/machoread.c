@@ -343,7 +343,7 @@ macho_symtab_read (struct objfile *objfile,
 static int
 get_archive_prefix_len (const char *name)
 {
-  char *lparen;
+  const char *lparen;
   int name_len = strlen (name);
 
   if (name_len == 0 || name[name_len - 1] != ')')

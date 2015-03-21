@@ -244,7 +244,7 @@ sparc_sol2_static_transform_name (const char *name)
 
   if (name[0] == '$')
     {
-      char *p = strrchr (name, '.');
+      const char *p = strrchr (name, '.');
       if (p)
         return p + 1;
     }

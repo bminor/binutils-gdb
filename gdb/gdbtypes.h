@@ -434,6 +434,26 @@ struct dynamic_prop
   union dynamic_prop_data data;
 };
 
+/* * Define a type's dynamic property node kind.  */
+enum dynamic_prop_node_kind
+{
+  /* A property providing a type's data location.
+     Evaluating this field yields to the location of an object's data.  */
+  DYN_ATTR_DATA_LOCATION,
+};
+
+/* * List for dynamic type attributes.  */
+struct dynamic_prop_list
+{
+  /* The kind of dynamic prop in this node.  */
+  enum dynamic_prop_node_kind prop_kind;
+
+  /* The dynamic property itself.  */
+  struct dynamic_prop *prop;
+
+  /* A pointer to the next dynamic property.  */
+  struct dynamic_prop_list *next;
+};
 
 /* * Determine which field of the union main_type.fields[x].loc is
    used.  */
@@ -719,10 +739,8 @@ struct main_type
 
   union type_specific type_specific;
 
-  /* * Contains a location description value for the current type. Evaluating
-     this field yields to the location of the data for an object.  */
-
-  struct dynamic_prop *data_location;
+  /* * Contains all dynamic type properties.  */
+  struct dynamic_prop_list *dyn_prop_list;
 };
 
 /* * A ``struct type'' describes a particular instance of a type, with
@@ -1238,15 +1256,26 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_LOW_BOUND_KIND(range_type) \
   TYPE_RANGE_DATA(range_type)->low.kind
 
-/* Attribute accessors for the type data location.  */
+/* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \
-  TYPE_MAIN_TYPE(thistype)->data_location
+  get_dyn_prop (DYN_ATTR_DATA_LOCATION, thistype)
 #define TYPE_DATA_LOCATION_BATON(thistype) \
   TYPE_DATA_LOCATION (thistype)->data.baton
 #define TYPE_DATA_LOCATION_ADDR(thistype) \
   TYPE_DATA_LOCATION (thistype)->data.const_val
 #define TYPE_DATA_LOCATION_KIND(thistype) \
   TYPE_DATA_LOCATION (thistype)->kind
+
+/* Attribute accessors for dynamic properties.  */
+#define TYPE_DYN_PROP_LIST(thistype) \
+  TYPE_MAIN_TYPE(thistype)->dyn_prop_list
+#define TYPE_DYN_PROP_BATON(dynprop) \
+  dynprop->data.baton
+#define TYPE_DYN_PROP_ADDR(dynprop) \
+  dynprop->data.const_val
+#define TYPE_DYN_PROP_KIND(dynprop) \
+  dynprop->kind
+
 
 /* Moto-specific stuff for FORTRAN arrays.  */
 
@@ -1766,6 +1795,20 @@ extern struct type *resolve_dynamic_type (struct type *type, CORE_ADDR addr);
 
 /* * Predicate if the type has dynamic values, which are not resolved yet.  */
 extern int is_dynamic_type (struct type *type);
+
+/* * Return the dynamic property of the requested KIND from TYPE's
+   list of dynamic properties.  */
+extern struct dynamic_prop *get_dyn_prop
+  (enum dynamic_prop_node_kind kind, const struct type *type);
+
+/* * Given a dynamic property PROP of a given KIND, add this dynamic
+   property to the given TYPE.
+
+   This function assumes that TYPE is objfile-owned, and that OBJFILE
+   is the TYPE's objfile.  */
+extern void add_dyn_prop
+  (enum dynamic_prop_node_kind kind, struct dynamic_prop prop,
+   struct type *type, struct objfile *objfile);
 
 extern struct type *check_typedef (struct type *);
 

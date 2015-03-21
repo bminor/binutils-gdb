@@ -84,7 +84,8 @@ nto_map_arch_to_cputype (const char *arch)
 int
 nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
 {
-  char *buf, *arch_path, *nto_root, *endian;
+  char *buf, *arch_path, *nto_root;
+  const char *endian;
   const char *base;
   const char *arch;
   int arch_len, len, ret;
@@ -147,7 +148,8 @@ void
 nto_init_solib_absolute_prefix (void)
 {
   char buf[PATH_MAX * 2], arch_path[PATH_MAX];
-  char *nto_root, *endian;
+  char *nto_root;
+  const char *endian;
   const char *arch;
 
   nto_root = nto_target ();
