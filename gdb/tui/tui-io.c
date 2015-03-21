@@ -668,20 +668,20 @@ tui_getc (FILE *fp)
 char *
 tui_expand_tabs (const char *string, int col)
 {
-  int n_adjust;
+  int n_adjust, ncol;
   const char *s;
   char *ret, *q;
 
   /* 1. How many additional characters do we need?  */
-  for (n_adjust = 0, s = string; s; )
+  for (ncol = col, n_adjust = 0, s = string; s; )
     {
       s = strpbrk (s, "\t");
       if (s)
 	{
-	  col += (s - string) + n_adjust;
+	  ncol += (s - string) + n_adjust;
 	  /* Adjustment for the next tab stop, minus one for the TAB
 	     we replace with spaces.  */
-	  n_adjust += 8 - (col % 8) - 1;
+	  n_adjust += 8 - (ncol % 8) - 1;
 	  s++;
 	}
     }
@@ -690,7 +690,7 @@ tui_expand_tabs (const char *string, int col)
   ret = q = xmalloc (strlen (string) + n_adjust + 1);
 
   /* 2. Copy the original string while replacing TABs with spaces.  */
-  for (s = string; s; )
+  for (ncol = col, s = string; s; )
     {
       const char *s1 = strpbrk (s, "\t");
       if (s1)
@@ -699,12 +699,12 @@ tui_expand_tabs (const char *string, int col)
 	    {
 	      strncpy (q, s, s1 - s);
 	      q += s1 - s;
-	      col += s1 - s;
+	      ncol += s1 - s;
 	    }
 	  do {
 	    *q++ = ' ';
-	    col++;
-	  } while ((col % 8) != 0);
+	    ncol++;
+	  } while ((ncol % 8) != 0);
 	  s1++;
 	}
       else

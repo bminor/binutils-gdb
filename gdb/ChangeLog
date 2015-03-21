@@ -1,3 +1,9 @@
+2015-03-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-io.c (tui_expand_tabs): Reinitialize the column counter
+	before the second loop, to avoid undefined behavior.  Reported by
+	Anton Blanchard <anton@samba.org>.
+
 2015-03-20  Keven Boell  <keven.boell@intel.com>
 
 	* gdbtypes.c (resolve_dynamic_type_internal): Adapt
