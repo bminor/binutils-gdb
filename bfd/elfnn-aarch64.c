@@ -3191,13 +3191,12 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
   while (1)
     {
       bfd *input_bfd;
-      unsigned int bfd_indx;
       asection *stub_sec;
       unsigned prev_num_erratum_835769_fixes = num_erratum_835769_fixes;
 
       num_erratum_835769_fixes = 0;
-      for (input_bfd = info->input_bfds, bfd_indx = 0;
-	   input_bfd != NULL; input_bfd = input_bfd->link.next, bfd_indx++)
+      for (input_bfd = info->input_bfds;
+	   input_bfd != NULL; input_bfd = input_bfd->link.next)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
