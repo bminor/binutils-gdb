@@ -155,7 +155,7 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 
 static asection *
 elf${ELFSIZE}_aarch64_add_stub_section (const char *stub_sec_name,
-				asection *input_section)
+					asection *input_section)
 {
   asection *stub_sec;
   flagword flags;

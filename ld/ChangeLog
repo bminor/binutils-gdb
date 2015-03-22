@@ -1,3 +1,8 @@
+2015-03-23  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* emultempl/aarch64elf.em
+	(elf${ELFSIZE}_aarch64_add_stub_section): Adjust layout.
+
 2015-03-18  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* ldmain.c (main): Use %F instead of %X for einfo.
