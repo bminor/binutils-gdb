@@ -1,5 +1,13 @@
 2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (_bfd_aarch64_resize_stubs): Adjust stub section
+	size for initial branch.
+	(elfNN_aarch64_build_stubs): Write initial branch.
+	_bfd_aarch64_decode_(elfNN_aarch64_output_arch_local_syms): Write
+	mapping symbol on initial branch.
+
+2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* elfnn-aarch64.c (_bfd_aarch64_erratum_835769_scan):
 	Update erratum count.
 

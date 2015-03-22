@@ -3117,8 +3117,17 @@ _bfd_aarch64_resize_stubs (struct elf_aarch64_link_hash_table *htab)
     }
 
   bfd_hash_traverse (&htab->stub_hash_table, aarch64_size_one_stub, htab);
-}
 
+  for (section = htab->stub_bfd->sections;
+       section != NULL; section = section->next)
+    {
+      if (!strstr (section->name, STUB_SUFFIX))
+	continue;
+
+      if (section->size)
+	section->size += 4;
+    }
+}
 
 /* Determine and set the size of the stub section for a final link.
 
@@ -3482,6 +3491,9 @@ elfNN_aarch64_build_stubs (struct bfd_link_info *info)
       if (stub_sec->contents == NULL && size != 0)
 	return FALSE;
       stub_sec->size = 0;
+
+      bfd_putl32 (0x14000000 | (size >> 2), stub_sec->contents);
+      stub_sec->size += 4;
     }
 
   /* Build the stubs as directed by the stub hash table.  */
@@ -6500,6 +6512,10 @@ elfNN_aarch64_output_arch_local_syms (bfd *output_bfd,
 
 	  osi.sec_shndx = _bfd_elf_section_from_bfd_section
 	    (output_bfd, osi.sec->output_section);
+
+	  /* The first instruction in a stub is always a branch.  */
+	  if (!elfNN_aarch64_output_map_sym (&osi, AARCH64_MAP_INSN, 0))
+	    return FALSE;
 
 	  bfd_hash_traverse (&htab->stub_hash_table, aarch64_map_one_stub,
 			     &osi);
