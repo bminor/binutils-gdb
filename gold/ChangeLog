@@ -1,3 +1,9 @@
+2015-03-21  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/18152
+	* gold.cc (queue_middle_tasks): Finalize .eh_frame after laying out
+	deferred objects.
+
 2015-03-11  Cary Coutant  <ccoutant@google.com>
 
 	* options.cc (General_options::finalize): Don't allow -z relro

@@ -492,9 +492,6 @@ queue_middle_tasks(const General_options& options,
   if (timer != NULL)
     timer->stamp(0);
 
-  // Finalize the .eh_frame section.
-  layout->finalize_eh_frame_section();
-
   // Add any symbols named with -u options to the symbol table.
   symtab->add_undefined_symbols_from_command_line(layout);
 
@@ -554,6 +551,9 @@ queue_middle_tasks(const General_options& options,
       gold_assert(plugins != NULL);
       plugins->layout_deferred_objects();
     }
+
+  // Finalize the .eh_frame section.
+  layout->finalize_eh_frame_section();
 
   /* If plugins have specified a section order, re-arrange input sections
      according to a specified section order.  If --section-ordering-file is
