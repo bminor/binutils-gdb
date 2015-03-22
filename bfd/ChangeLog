@@ -1,4 +1,4 @@
-2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* elfnn-aarch64.c (_bfd_aarch64_erratum_835769_scan):
 	Update erratum count.

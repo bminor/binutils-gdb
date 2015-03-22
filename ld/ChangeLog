@@ -1,3 +1,8 @@
+2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* emultempl/aarch64elf.em (_aarch64_add_stub_section): Set section
+	alignment to 2.
+
 2014-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
