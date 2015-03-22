@@ -1,5 +1,11 @@
 2015-03-21  Cary Coutant  <cary@google.com>
 
+	PR gold/18010
+	* stringpool.cc (Stringpool_template): Don't optimize if section
+	alignment is greater than sizeof(char).
+
+2015-03-21  Cary Coutant  <cary@google.com>
+
 	PR gold/18048
 	* script-c.h (script_include_directive): Add first_token parameter.
 	* script.cc (script_include_directive): Add first_token parameter, and
