@@ -4176,8 +4176,7 @@ Output_segment::is_first_section_relro() const
 {
   for (int i = 0; i < static_cast<int>(ORDER_MAX); ++i)
     {
-      if (i == static_cast<int>(ORDER_TLS_DATA)
-	  || i == static_cast<int>(ORDER_TLS_BSS))
+      if (i == static_cast<int>(ORDER_TLS_BSS))
 	continue;
       const Output_data_list* pdl = &this->output_lists_[i];
       if (!pdl->empty())
@@ -4305,11 +4304,11 @@ Output_segment::set_section_addresses(const Target* target,
 		  align = max_align;
 		  in_tls = false;
 		}
-	      relro_size = align_address(relro_size, align);
 	      // Ignore the size of the .tbss section.
 	      if ((*p)->is_section_flag_set(elfcpp::SHF_TLS)
 		  && (*p)->is_section_type(elfcpp::SHT_NOBITS))
 		continue;
+	      relro_size = align_address(relro_size, align);
 	      if ((*p)->is_address_valid())
 		relro_size += (*p)->data_size();
 	      else

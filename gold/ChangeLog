@@ -1,3 +1,78 @@
+2015-03-21  Cary Coutant  <cary@google.com>
+
+	PR gold/14217
+	* output.cc (Output_segment::is_first_section_relro): Don't ignore
+	.tdata section.
+	(Output_segment::set_section_addresses): Don't align size of relro
+	segment for .tbss.
+
+2015-03-21  Cary Coutant  <cary@google.com>
+
+	PR gold/18010
+	* stringpool.cc (Stringpool_template): Don't optimize if section
+	alignment is greater than sizeof(char).
+
+2015-03-21  Cary Coutant  <cary@google.com>
+
+	PR gold/18048
+	* script-c.h (script_include_directive): Add first_token parameter.
+	* script.cc (script_include_directive): Add first_token parameter, and
+	pass it to read_script_file.
+	* yyscript.y (PARSING_SECTIONS_BLOCK, PARSING_SECTION_CMDS)
+	(PARSING_MEMORY_DEF): New tokens.
+	(top): Add new productions for INCLUDE files.
+	(file_cmd): Replace file_or_sections_cmd with copy of its productions.
+	Pass PARSING_LINKER_SCRIPT to script_include_directive.
+	(section_block_cmd): Likewise; pass PARSING_SECTIONS_BLOCK.
+	(section_cmd): Pass PARSING_SECTION_CMDS.
+	(file_or_sections_cmd): Remove.
+	(memory_def): Pass PARSING_MEMORY_DEF.
+	* testsuite/Makefile.am (memory_test_2): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/memory_test_inc.t: New script file.
+	* testsuite/memory_test_inc_1.t.src: New script file.
+	* testsuite/memory_test_inc_2.t.src: New script file.
+	* testsuite/memory_test_inc_3.t.src: New script file.
+
+2015-03-21  Cary Coutant  <cary@google.com>
+
+	* dwp.cc (Sized_relobj_dwo::do_section_contents): Delete.
+	(Sized_relobj_dwo::setup): Build compressed section map.
+	(Sized_relobj_dwo::do_decompressed_section_contents): Delete.
+	* dynobj.cc (Sized_dynobj::base_read_symbols): Build compressed
+	section map.
+	* object.cc (Sized_relobj_file::Sized_relobj_file): Remove
+	compressed_sections_ field.
+	(build_compressed_section_map): Take Object instead of
+	Sized_relobj_file parameter; add decompress_if_needed parameter.
+	(Sized_relobj_file::do_find_special_sections): Store compressed
+	section map in parent Object.
+	(Sized_relobj_file::do_decompressed_section_contents): Move
+	implementation to Object::decompressed_section_contents.
+	(Sized_relobj_file::do_discard_decompressed_sections): Move
+	implementation to Object::discard_decompressed_sections.
+	* object.h (build_compressed_section_map): Declare.
+	(Object::Object): Add compressed_sections_ field.
+	(Object::section_is_compressed): Move implementation here.
+	(Object::decompressed_section_contents): De-virtualize.
+	(Object::discard_decompressed_sections): De-virtualize.
+	(Object::do_section_is_compressed): Delete.
+	(Object::do_decompressed_section_contents): Delete.
+	(Object::set_compressed_sections): New method.
+	(Object::compressed_sections): New method.
+	(Object::compressed_sections_): New data member.
+	(Compressed_section_info, Compressed_section_map): Move to top of file.
+	(Sized_relobj_file::do_section_is_compressed): Delete.
+	(Sized_relobj_file::do_decompressed_section_contents): Delete.
+	(Sized_relobj_file::do_discard_decompressed_sections): Delete.
+	(Sized_relobj_file::compressed_sections_): Move to Object class.
+
+2015-03-21  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/18152
+	* gold.cc (queue_middle_tasks): Finalize .eh_frame after laying out
+	deferred objects.
+
 2015-03-11  Cary Coutant  <ccoutant@google.com>
 
 	* options.cc (General_options::finalize): Don't allow -z relro

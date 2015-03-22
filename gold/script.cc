@@ -3366,13 +3366,14 @@ script_parse_memory_attr(void* closurev, const char* attrs, size_t attrlen,
 }
 
 extern "C" void
-script_include_directive(void* closurev, const char* filename, size_t length)
+script_include_directive(int first_token, void* closurev,
+			 const char* filename, size_t length)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   std::string name(filename, length);
   Command_line* cmdline = closure->command_line();
   read_script_file(name.c_str(), cmdline, &cmdline->script_options(),
-                   PARSING_LINKER_SCRIPT, Lex::LINKER_SCRIPT);
+                   first_token, Lex::LINKER_SCRIPT);
 }
 
 // Functions for memory regions.

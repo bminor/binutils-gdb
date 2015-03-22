@@ -424,6 +424,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	strong_ref_weak_def.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.sh memory_test.sh
+
+# Test INCLUDE directives in linker scripts.
+# The binary isn't runnable, so we just check that we can build it without errors.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_46 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test1.syms \
@@ -433,7 +436,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	strong_ref_weak_def.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout memory_test_2
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_47 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
@@ -460,7 +463,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libstart_lib_test.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout memory_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_inc_1.t \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_inc_2.t \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_inc_3.t
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_48 = large
 @GCC_FALSE@large_DEPENDENCIES =
 @MCMODEL_MEDIUM_FALSE@large_DEPENDENCIES =
@@ -5664,6 +5670,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.stdout: memory_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lWS  $< > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test_inc_1.t: $(srcdir)/memory_test_inc_1.t.src
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp $< $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test_inc_2.t: $(srcdir)/memory_test_inc_2.t.src
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp $< $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test_inc_3.t: $(srcdir)/memory_test_inc_3.t.src
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp $< $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test_2: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test.o: gdb_index_test.cc
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -gno-pubnames -c -o $@ $<
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_1: gdb_index_test.o gcctestdir/ld

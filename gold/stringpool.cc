@@ -39,7 +39,9 @@ Stringpool_template<Stringpool_char>::Stringpool_template(uint64_t addralign)
     zero_null_(true), optimize_(false), offset_(sizeof(Stringpool_char)),
     addralign_(addralign)
 {
-  if (parameters->options_valid() && parameters->options().optimize() >= 2)
+  if (parameters->options_valid()
+      && parameters->options().optimize() >= 2
+      && addralign <= sizeof(Stringpool_char))
     this->optimize_ = true;
 }
 
