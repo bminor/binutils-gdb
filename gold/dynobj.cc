@@ -374,6 +374,17 @@ Sized_dynobj<size, big_endian>::base_read_symbols(Read_symbols_data* sd)
   sd->verneed_size = 0;
   sd->verneed_info = 0;
 
+  const unsigned char* namesu = sd->section_names->data();
+  const char* names = reinterpret_cast<const char*>(namesu);
+  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL)
+    {
+      Compressed_section_map* compressed_sections =
+	  build_compressed_section_map<size, big_endian>(
+	      pshdrs, this->shnum(), names, sd->section_names_size, this, true);
+      if (compressed_sections != NULL)
+        this->set_compressed_sections(compressed_sections);
+    }
+
   if (this->dynsym_shndx_ != -1U)
     {
       // Get the dynamic symbols.

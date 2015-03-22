@@ -1,3 +1,36 @@
+2015-03-21  Cary Coutant  <cary@google.com>
+
+	* dwp.cc (Sized_relobj_dwo::do_section_contents): Delete.
+	(Sized_relobj_dwo::setup): Build compressed section map.
+	(Sized_relobj_dwo::do_decompressed_section_contents): Delete.
+	* dynobj.cc (Sized_dynobj::base_read_symbols): Build compressed
+	section map.
+	* object.cc (Sized_relobj_file::Sized_relobj_file): Remove
+	compressed_sections_ field.
+	(build_compressed_section_map): Take Object instead of
+	Sized_relobj_file parameter; add decompress_if_needed parameter.
+	(Sized_relobj_file::do_find_special_sections): Store compressed
+	section map in parent Object.
+	(Sized_relobj_file::do_decompressed_section_contents): Move
+	implementation to Object::decompressed_section_contents.
+	(Sized_relobj_file::do_discard_decompressed_sections): Move
+	implementation to Object::discard_decompressed_sections.
+	* object.h (build_compressed_section_map): Declare.
+	(Object::Object): Add compressed_sections_ field.
+	(Object::section_is_compressed): Move implementation here.
+	(Object::decompressed_section_contents): De-virtualize.
+	(Object::discard_decompressed_sections): De-virtualize.
+	(Object::do_section_is_compressed): Delete.
+	(Object::do_decompressed_section_contents): Delete.
+	(Object::set_compressed_sections): New method.
+	(Object::compressed_sections): New method.
+	(Object::compressed_sections_): New data member.
+	(Compressed_section_info, Compressed_section_map): Move to top of file.
+	(Sized_relobj_file::do_section_is_compressed): Delete.
+	(Sized_relobj_file::do_decompressed_section_contents): Delete.
+	(Sized_relobj_file::do_discard_decompressed_sections): Delete.
+	(Sized_relobj_file::compressed_sections_): Move to Object class.
+
 2015-03-21  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/18152
