@@ -1,5 +1,9 @@
 2015-03-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (aarch64_erratum_835769_fixes)
+	(num_aarch64_erratum_835769_fixes): Remove.
+	(elfNN_aarch64_size_stubs): Remove assignments to above.
+
 	* elfxx-aarch64.c (decode_add_imm, decode_movw_imm)
 	(decode_tst_branch_ofs_14, decode_ld_lit_ofs_19)
 	(decode_cond_branch_ofs_19, decode_branch_ofs_26): Remove.
