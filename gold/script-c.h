@@ -434,7 +434,7 @@ extern void
 script_set_section_region(void*, const char*, size_t, int);
 
 extern void
-script_include_directive(void *, const char*, size_t);
+script_include_directive(int, void *, const char*, size_t);
   
 /* Called by the bison parser for expressions.  */
 

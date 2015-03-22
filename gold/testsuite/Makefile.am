@@ -2181,6 +2181,19 @@ memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 
+# Test INCLUDE directives in linker scripts.
+# The binary isn't runnable, so we just check that we can build it without errors.
+check_DATA += memory_test_2
+MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+memory_test_inc_1.t: $(srcdir)/memory_test_inc_1.t.src
+	cp $< $@
+memory_test_inc_2.t: $(srcdir)/memory_test_inc_2.t.src
+	cp $< $@
+memory_test_inc_3.t: $(srcdir)/memory_test_inc_3.t.src
+	cp $< $@
+memory_test_2: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
+
 if HAVE_PUBNAMES
 
 # Test that --gdb-index functions correctly without gcc-generated pubnames.
