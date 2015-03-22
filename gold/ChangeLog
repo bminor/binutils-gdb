@@ -1,5 +1,13 @@
 2015-03-21  Cary Coutant  <cary@google.com>
 
+	PR gold/14217
+	* output.cc (Output_segment::is_first_section_relro): Don't ignore
+	.tdata section.
+	(Output_segment::set_section_addresses): Don't align size of relro
+	segment for .tbss.
+
+2015-03-21  Cary Coutant  <cary@google.com>
+
 	PR gold/18010
 	* stringpool.cc (Stringpool_template): Don't optimize if section
 	alignment is greater than sizeof(char).
