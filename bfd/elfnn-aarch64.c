@@ -1847,12 +1847,6 @@ struct elf_aarch64_link_hash_table
   /* Fix erratum 835769.  */
   int fix_erratum_835769;
 
-  /* A table of fix locations for erratum 835769.  This holds erratum
-     fix locations between elfNN_aarch64_size_stubs() and
-     elfNN_aarch64_write_section().  */
-  struct aarch64_erratum_835769_fix *aarch64_erratum_835769_fixes;
-  unsigned int num_aarch64_erratum_835769_fixes;
-
   /* The number of bytes in the initial entry in the PLT.  */
   bfd_size_type plt_header_size;
 
@@ -3533,16 +3527,6 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	  stub_entry->veneered_insn = erratum_835769_fixes[i].veneered_insn;
 	  stub_entry->output_name = erratum_835769_fixes[i].stub_name;
 	}
-
-      /* Stash the erratum 835769 fix array for use later in
-	 elfNN_aarch64_write_section().  */
-      htab->aarch64_erratum_835769_fixes = erratum_835769_fixes;
-      htab->num_aarch64_erratum_835769_fixes = num_erratum_835769_fixes;
-    }
-  else
-    {
-      htab->aarch64_erratum_835769_fixes = NULL;
-      htab->num_aarch64_erratum_835769_fixes = 0;
     }
 
   return TRUE;

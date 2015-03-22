@@ -1,5 +1,11 @@
 2015-03-23  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (aarch64_erratum_835769_fixes)
+	(num_aarch64_erratum_835769_fixes): Remove.
+	(elfNN_aarch64_size_stubs): Remove assignments to above.
+
+2015-03-23  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	(aarch64_mem_op_p): Update comment. Rename rtn to rt2.
 	(aarch64_erratum_seqeunce): Rename rtn to rt2.
 
