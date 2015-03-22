@@ -3253,6 +3253,8 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 {
   // leal foo(,%ebx,1),%eax; call ___tls_get_addr
   //  ==> movl %gs:0,%eax; addl foo@gotntpoff(%ebx),%eax
+  // leal foo(%ebx),%eax; call ___tls_get_addr; nop
+  //  ==> movl %gs:0,%eax; addl foo@gotntpoff(%ebx),%eax
 
   tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
   tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 9);
@@ -3264,10 +3266,7 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 		 op2 == 0x8d || op2 == 0x04);
   tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[4] == 0xe8);
 
-  int roff = 5;
-
-  // FIXME: For now, support only the first (SIB) form.
-  tls::check_tls(relinfo, relnum, rel.get_r_offset(), op2 == 0x04);
+  int roff;
 
   if (op2 == 0x04)
     {
@@ -3275,28 +3274,18 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
       tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[-3] == 0x8d);
       tls::check_tls(relinfo, relnum, rel.get_r_offset(),
 		     ((op1 & 0xc7) == 0x05 && op1 != (4 << 3)));
-      memcpy(view - 3, "\x65\xa1\0\0\0\0\x03\x83\0\0\0", 12);
+      roff = 5;
     }
   else
     {
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 10);
       tls::check_tls(relinfo, relnum, rel.get_r_offset(),
 		     (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
-      if (rel.get_r_offset() + 9 < view_size
-	  && view[9] == 0x90)
-	{
-	  // FIXME: This is not the right instruction sequence.
-	  // There is a trailing nop.  Use the size byte subl.
-	  memcpy(view - 2, "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
-	  roff = 6;
-	}
-      else
-	{
-	  // FIXME: This is not the right instruction sequence.
-	  // Use the five byte subl.
-	  memcpy(view - 2, "\x65\xa1\0\0\0\0\x2d\0\0\0", 11);
-	}
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[9] == 0x90);
+      roff = 6;
     }
 
+  memcpy(view + roff - 8, "\x65\xa1\0\0\0\0\x03\x83\0\0\0", 12);
   Relocate_functions<32, false>::rel32(view + roff, value);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
