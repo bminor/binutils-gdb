@@ -170,7 +170,7 @@ elf${ELFSIZE}_aarch64_add_stub_section (const char *stub_sec_name,
   if (stub_sec == NULL)
     goto err_ret;
 
-  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);
+  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 2);
 
   output_section = input_section->output_section;
   os = lang_output_section_get (output_section);

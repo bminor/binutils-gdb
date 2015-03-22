@@ -1,3 +1,8 @@
+2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/erratum835769.d: Adjust for removal of padding before
+	835769 workaround stubs.
+
 2015-03-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* ld-gc/all-debug-sections.d: New file.
