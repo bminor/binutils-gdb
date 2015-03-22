@@ -1,5 +1,13 @@
 2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* ld-aarch64/erratum835769.d: Adjust for initial branch over stub
+	section.
+	* ld-aarch64/farcall-b.d: Likewise.
+	* ld-aarch64/farcall-bl.d: Likewise.
+	* ld-aarch64/farcall-back.d: Likewise.
+
+2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* ld-aarch64/erratum835769.d: Adjust for removal of padding before
 	835769 workaround stubs.
 
