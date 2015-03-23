@@ -651,6 +651,7 @@ ALL_TARGET_OBS = \
 	dicos-tdep.o \
 	fbsd-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
+	ft32-tdep.o \
 	h8300-tdep.o \
 	hppabsd-tdep.o hppanbsd-tdep.o hppaobsd-tdep.o \
 	hppa-linux-tdep.o hppa-tdep.o \
@@ -949,7 +950,8 @@ psymtab.h psympriv.h progspace.h bfin-tdep.h \
 amd64-darwin-tdep.h charset-list.h \
 config/djgpp/langinfo.h config/djgpp/nl_types.h darwin-nat.h \
 dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
-i386-darwin-tdep.h x86-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
+i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
+ft32-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 record-full.h solib-aix.h \
@@ -1655,6 +1657,7 @@ ALLDEPFILES = \
 	fbsd-nat.c \
 	fbsd-tdep.c \
 	fork-child.c \
+	ft32-tdep.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c \

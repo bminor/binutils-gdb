@@ -1,3 +1,12 @@
+2015-03-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add ft32-tdep.o.
+	(HFILES_NO_SRCDIR): Add ft32-tdep.h.
+	(ALLDEPFILES): Add ft32-tdep.c.
+	* configure.tgt: Add FT32 entry.
+	* ft32-tdep.c: New file, FT32 target-dependent code.
+	* ft32-tdep.h: New file, FT32 target-dependent code.
+
 2015-03-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert:
