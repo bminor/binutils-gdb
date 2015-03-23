@@ -100,7 +100,7 @@ rl78_load (bfd *prog, host_callback *callbacks, const char * const simname)
     case E_FLAG_RL78_G14:
     default:
       break;
-    }  
+    }
 
   for (i = 0; i < num_headers; i++)
     {
