@@ -9335,8 +9335,7 @@ parse_breakpoint_sals (char **address,
 {
   /* If no arg given, or if first arg is 'if ', use the default
      breakpoint.  */
-  if ((*address) == NULL
-      || (startswith ((*address), "if") && isspace ((*address)[2])))
+  if ((*address) == NULL || linespec_lexer_lex_keyword (*address))
     {
       /* The last displayed codepoint, if it's valid, is our default breakpoint
          address.  */
