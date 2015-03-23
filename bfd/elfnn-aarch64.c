@@ -2368,7 +2368,7 @@ _bfd_aarch64_create_or_find_stub_sec (asection *section,
       stub_sec = htab->stub_group[link_sec->id].stub_sec;
       if (stub_sec == NULL)
 	{
-	  stub_sec = _bfd_aarch64_create_stub_section (link_sec, htab)
+	  stub_sec = _bfd_aarch64_create_stub_section (link_sec, htab);
 	  if (stub_sec == NULL)
 	    return NULL;
 	  htab->stub_group[link_sec->id].stub_sec = stub_sec;
