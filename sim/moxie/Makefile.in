@@ -26,7 +26,7 @@ SIM_EXTRA_CFLAGS = -DSIM_USE_DEPRECATED_RUN_FRONTEND
 SIM_OBJS = interp.o sim-load.o sim-io.o sim-config.o sim-utils.o	\
 sim-options.o sim-module.o sim-core.o sim-endian.o sim-trace.o 	\
 sim-engine.o sim-fpu.o sim-bits.o sim-profile.o sim-events.o \
-sim-memopt.o
+sim-memopt.o sim-command.o
 
 SIM_EXTRA_LIBS = -lm -lz
 SIM_EXTRA_INSTALL = install-dtb

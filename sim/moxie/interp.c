@@ -1451,17 +1451,6 @@ sim_create_inferior (sd, prog_bfd, argv, env)
 }
 
 void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     const char *cmd;
-{
-  if (sim_args_command (sd, cmd) != SIM_RC_OK)
-    sim_io_printf (sd, 
-		   "Error: \"%s\" is not a valid moxie simulator command.\n",
-		   cmd);
-}
-
-void
 sim_set_callbacks (ptr)
      host_callback * ptr;
 {
