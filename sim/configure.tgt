@@ -111,6 +111,10 @@ case "${target}" in
    powerpc*-*-*)
        SIM_ARCH(ppc)
        ;;
+   ft32-*-*)
+       SIM_ARCH(ft32)
+       sim_testsuite=yes
+       ;;
    v850*-*-*)
        SIM_ARCH(v850)
        sim_igen=yes

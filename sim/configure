@@ -659,6 +659,7 @@ sh64
 sh
 erc32
 ppc
+ft32
 v850
 testsuite
 common
@@ -3821,6 +3822,14 @@ subdirs="$subdirs arm"
   subdirs="$subdirs ppc"
 
 
+       ;;
+   ft32-*-*)
+
+  sim_arch=ft32
+  subdirs="$subdirs ft32"
+
+
+       sim_testsuite=yes
        ;;
    v850*-*-*)
 

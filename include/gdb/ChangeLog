@@ -1,3 +1,7 @@
+2015-03-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* sim-ft32.h: New file.
+
 2015-05-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.h (struct host_callback_struct): Define.

@@ -1918,6 +1918,10 @@ case "${target}" in
    powerpc*-*-*)
        sim_arch=ppc
        ;;
+   ft32-*-*)
+       sim_arch=ft32
+       sim_testsuite=yes
+       ;;
    v850*-*-*)
        sim_arch=v850
        sim_igen=yes

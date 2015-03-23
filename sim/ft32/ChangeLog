@@ -1,0 +1,8 @@
+2015-03-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.in: New file, FT32 sim Makefile.
+	* configure.ac: New file, FT32 sim config.
+	* ft32-sim.h: New file, FT32 sim CPU object.
+	* interp.c: New file, FT32 simulator.
+	* sim-main.h: New file, FT32 simulator wrapper.
+	* aclocal.m4, config.in, configure: Regenerate.
