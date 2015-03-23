@@ -223,7 +223,7 @@ ser_windows_setparity (struct serial *scb, int parity)
       break;
     default:
       internal_warning (__FILE__, __LINE__,
-                  "Incorrect parity value: %d", parity);
+			"Incorrect parity value: %d", parity);
       return -1;
     }
 
