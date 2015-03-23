@@ -67,14 +67,6 @@ sim_open (kind, callback, abfd, argv)
       return 0;
     }
 
-#if 0 /* FIXME: pc is in mach-specific struct */
-  /* FIXME: watchpoints code shouldn't need this */
-  {
-    SIM_CPU *current_cpu = STATE_CPU (sd, 0);
-    STATE_WATCHPOINTS (sd)->pc = &(PC);
-  }
-#endif
-
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
       free_state (sd);

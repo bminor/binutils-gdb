@@ -1,5 +1,9 @@
 2021-02-06  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_open): Delete call to STATE_WATCHPOINTS.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
@@ -1573,4 +1577,3 @@ Mon Nov 25 12:46:38 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in, config.in, configure, configure.in: New files.
 	* gencode.c, interp.c, mn10300_sim.h, simops.c: New files.
-

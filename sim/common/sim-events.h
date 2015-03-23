@@ -149,6 +149,17 @@ extern sim_event *sim_events_watch_clock
  void *data);
 
 
+/* Schedule an event when a PC matches a range.  */
+
+extern sim_event *sim_events_watch_pc
+(SIM_DESC sd,
+ int is_within,
+ unsigned64 lb,
+ unsigned64 ub,
+ sim_event_handler *handler,
+ void *data);
+
+
 /* Schedule an event when the test (IS_WITHIN == (VAL >= LB && VAL <=
    UB)) of the NR_BYTES value at HOST_ADDR with BYTE_ORDER endian is
    true.

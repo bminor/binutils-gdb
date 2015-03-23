@@ -1,5 +1,16 @@
 2021-02-06  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-events.c: Include sim-cpu.h.
+	(sim_event_watchpoints): Define watch_pc.
+	(sim_events_watch_pc): New function.
+	(WATCH_SIM): Handle watch_pc.
+	* sim-events.h (sim_events_watch_pc): New prototype.
+	* sim-watch.c (schedule_watchpoint): Replace sim_events_watch_sim with
+	sim_events_watch_pc.
+	* sim-watch.h (sim_watchpoints): Delete pc.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (SIM_AC_COMMON): Replace AC_CONFIG_HEADER with
 	AC_CONFIG_HEADERS.
 

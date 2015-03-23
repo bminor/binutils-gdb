@@ -167,18 +167,16 @@ schedule_watchpoint (SIM_DESC sd,
 		     sim_watch_point *point)
 {
   sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
+
   switch (point->type)
     {
     case pc_watchpoint:
-      point->event = sim_events_watch_sim (sd,
-					   watch->pc,
-					   sizeof (sim_cia),
-					   HOST_BYTE_ORDER,
-					   point->is_within,
-					   point->arg0, point->arg1,
-					   /* PC in arg0..arg1 */
-					   handle_watchpoint,
-					   point);
+      point->event = sim_events_watch_pc (sd,
+					  point->is_within,
+					  point->arg0, point->arg1,
+					  /* PC in arg0..arg1 */
+					  handle_watchpoint,
+					  point);
       return SIM_RC_OK;
     case clock_watchpoint:
       point->event = sim_events_watch_clock (sd,

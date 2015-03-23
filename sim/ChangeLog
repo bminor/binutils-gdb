@@ -1,5 +1,9 @@
 2021-02-06  Mike Frysinger  <vapier@gentoo.org>
 
+	* README-HACKING: Replace STATE_WATCHPOINTS with CPU_PC_FETCH.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (HDEFINES): Delete AC_SUBST call.
 	* configure: Regenerate.
 

@@ -102,7 +102,6 @@ sim_open (SIM_OPEN_KIND kind,
   /* FIXME: should be better way of setting up interrupts.  For
      moment, only support watchpoints causing a breakpoint (gdb
      halt). */
-  STATE_WATCHPOINTS (sd)->pc = &(PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = NULL;
   STATE_WATCHPOINTS (sd)->interrupt_names = NULL;
 

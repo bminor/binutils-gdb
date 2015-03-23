@@ -1203,8 +1203,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       return 0;
     }
 
-  STATE_WATCHPOINTS (sd)->pc = &cpu.asregs.regs[PC_REGNO];
-
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
       free_state (sd);

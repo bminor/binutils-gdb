@@ -267,8 +267,8 @@ And in your insn fetcher:
   PROFILE_COUNT_CORE (cpu, target_addr, size_in_bytes, map_exec);
 
 To use the PC profiling code, you simply have to tell the system where to find
-your simulator's PC.  So in your sim_open() function:
-  STATE_WATCHPOINTS (sd)->pc = address_of_cpu0_pc;
+your simulator's PC.  So in your model initialization function:
+  CPU_PC_FETCH (cpu) = function_that_fetches_the_pc;
 
 To profile branches, in every location where a branch insn is executed, call
 one of the related helpers:
