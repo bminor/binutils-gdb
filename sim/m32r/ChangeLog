@@ -1,5 +1,9 @@
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-if.c (sim_open): Delete dv_sockser_install call.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
