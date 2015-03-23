@@ -172,7 +172,7 @@ schedule_watchpoint (SIM_DESC sd,
     case pc_watchpoint:
       point->event = sim_events_watch_sim (sd,
 					   watch->pc,
-					   watch->sizeof_pc,
+					   sizeof (sim_cia),
 					   HOST_BYTE_ORDER,
 					   point->is_within,
 					   point->arg0, point->arg1,
@@ -377,8 +377,8 @@ static const OPTION watchpoint_options[] =
 static const char *default_interrupt_names[] = { "int", 0, };
 
 /* This default handler is "good enough" for targets that just want to trap into
-   gdb when watchpoints are hit, and have only configured STATE_WATCHPOINTS pc &
-   sizeof_pc fields.  */
+   gdb when watchpoints are hit, and have only configured the STATE_WATCHPOINTS
+   pc field.  */
 static void
 default_interrupt_handler (SIM_DESC sd, void *data)
 {

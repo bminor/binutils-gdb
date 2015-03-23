@@ -267,10 +267,8 @@ And in your insn fetcher:
   PROFILE_COUNT_CORE (cpu, target_addr, size_in_bytes, map_exec);
 
 To use the PC profiling code, you simply have to tell the system where to find
-your simulator's PC and its size.  So in your sim_open() function:
+your simulator's PC.  So in your sim_open() function:
   STATE_WATCHPOINTS (sd)->pc = address_of_cpu0_pc;
-  STATE_WATCHPOINTS (sd)->sizeof_pc = number_of_bytes_for_pc_storage;
-In a typical 32bit system, the sizeof_pc will be 4 bytes.
 
 To profile branches, in every location where a branch insn is executed, call
 one of the related helpers:

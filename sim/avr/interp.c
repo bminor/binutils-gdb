@@ -1694,7 +1694,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
     /* XXX: Only first core gets profiled ?  */
     SIM_CPU *cpu = STATE_CPU (sd, 0);
     STATE_WATCHPOINTS (sd)->pc = &cpu->pc;
-    STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (cpu->pc);
   }
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)

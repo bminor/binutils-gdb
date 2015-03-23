@@ -103,7 +103,6 @@ sim_open (SIM_OPEN_KIND kind,
      moment, only support watchpoints causing a breakpoint (gdb
      halt). */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
-  STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = NULL;
   STATE_WATCHPOINTS (sd)->interrupt_names = NULL;
 

@@ -1,5 +1,11 @@
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-watch.c (schedule_watchpoint): Change sizeof_pc to sizeof
+	sim_cia.
+	* sim-watch.h (struct _sim_watchpoints): Delete sizeof_pc.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-profile.c (profile_pc_init): Change 1 in shifts to 1ULL.
 
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>

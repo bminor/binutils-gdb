@@ -356,7 +356,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
-  STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = interrupt_event;
 
   /* Initialize the mechanism for doing insn profiling.  */

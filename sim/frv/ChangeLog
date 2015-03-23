@@ -1,3 +1,7 @@
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete STATE_WATCHPOINTS (sd)->sizeof_pc.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Call SIM_AC_OPTION_WARNINGS.

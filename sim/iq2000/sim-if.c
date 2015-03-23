@@ -72,7 +72,6 @@ sim_open (kind, callback, abfd, argv)
   {
     SIM_CPU *current_cpu = STATE_CPU (sd, 0);
     STATE_WATCHPOINTS (sd)->pc = &(PC);
-    STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   }
 #endif
 

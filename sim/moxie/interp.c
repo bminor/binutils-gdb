@@ -1204,7 +1204,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
     }
 
   STATE_WATCHPOINTS (sd)->pc = &cpu.asregs.regs[PC_REGNO];
-  STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (word);
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
