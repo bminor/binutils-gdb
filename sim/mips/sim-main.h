@@ -24,9 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) */
 /* #define SIM_ENGINE_RESUME_HOOK(SD, LAST_CPU, CIA) */
 
-#define SIM_HAVE_BIENDIAN
-
-
 /* hobble some common features for moment */
 #define WITH_WATCHPOINTS 1
 #define WITH_MODULO_MEMORY 1

@@ -15,5 +15,6 @@
 /* #define SIM_HAVE_SIMCACHE */
 
 /* Define this if the target cpu is bi-endian
-   and the simulator supports it.  */
+   and the simulator supports it.
+   TODO: This is specific to the old run.o main.  */
 /* #define SIM_HAVE_BIENDIAN */

@@ -1,5 +1,9 @@
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* tconfig.h (SIM_HAVE_BIENDIAN): Delete.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>

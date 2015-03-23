@@ -19,9 +19,5 @@
    The target is required to provide sim_set_simcache_size.  */
 /* #define SIM_HAVE_SIMCACHE */
 
-/* Define this if the target cpu is bi-endian
-   and the simulator supports it.  */
-#define SIM_HAVE_BIENDIAN
-
 /* MIPS uses an unusual format for floating point quiet NaNs.  */
 #define SIM_QUIET_NAN_NEGATED
