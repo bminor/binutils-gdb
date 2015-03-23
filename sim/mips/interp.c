@@ -834,33 +834,14 @@ get_insn_name (sim_cpu *cpu, int i)
 }
 
 void
-sim_close (SIM_DESC sd, int quitting)
+mips_sim_close (SIM_DESC sd, int quitting)
 {
-#ifdef DEBUG
-  printf("DBG: sim_close: entered (quitting = %d)\n",quitting);
-#endif
-
-
-  /* "quitting" is non-zero if we cannot hang on errors */
-
-  /* shut down modules */
-  sim_module_uninstall (sd);
-
-  /* Ensure that any resources allocated through the callback
-     mechanism are released: */
-  sim_io_shutdown (sd);
-
 #if WITH_TRACE_ANY_P
   if (tracefh != NULL && tracefh != stderr)
    fclose(tracefh);
   tracefh = NULL;
 #endif
-
-  /* FIXME - free SD */
-
-  return;
 }
-
 
 int
 sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)

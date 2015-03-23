@@ -1758,12 +1758,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   return sd;
 }
 
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  sim_module_uninstall (sd);
-}
-
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {

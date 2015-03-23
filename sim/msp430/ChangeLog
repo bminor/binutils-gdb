@@ -1,3 +1,10 @@
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_close): Rename to ...
+	(msp430_sim_close): ... this.  Delete call to sim_state_free.
+	* sim-main.h (msp430_sim_close): Declare.
+	(SIM_CLOSE_HOOK): Define.
+
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* msp430-sim.c (trace_reg_put): Change TRACE_VPU to TRACE_REGISTER.

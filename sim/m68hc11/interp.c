@@ -499,22 +499,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   return sd;
 }
 
-
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* shut down modules */
-  sim_module_uninstall (sd);
-
-  /* Ensure that any resources allocated through the callback
-     mechanism are released: */
-  sim_io_shutdown (sd);
-
-  /* FIXME - free SD */
-  sim_state_free (sd);
-  return;
-}
-
 /* Generic implementation of sim_engine_run that works within the
    sim_engine setjmp/longjmp framework. */
 

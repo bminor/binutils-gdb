@@ -2501,12 +2501,6 @@ parse_and_set_memory_size (const char *str)
     callback->printf_filtered (callback, "Bad memory size %d; must be 1 to 24, inclusive\n", n);
 }
 
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* nothing to do */
-}
-
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 {

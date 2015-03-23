@@ -914,13 +914,6 @@ sim_open (SIM_OPEN_KIND kind,
 }
 
 void
-sim_close (SIM_DESC sd ATTRIBUTE_UNUSED,
-	   int quitting ATTRIBUTE_UNUSED)
-{
-  /* Nothing to do.  */
-}
-
-void
 sim_stop_reason (SIM_DESC sd ATTRIBUTE_UNUSED,
 		 enum sim_stop *reason,
 		 int *sigrc)

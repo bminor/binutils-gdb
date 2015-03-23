@@ -1,3 +1,7 @@
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_close): Delete.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

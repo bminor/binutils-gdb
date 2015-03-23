@@ -43,6 +43,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "profile.h"
 
 void frv_sim_engine_halt_hook (SIM_DESC, SIM_CPU *, sim_cia);
+
+extern void frv_sim_close (SIM_DESC sd, int quitting);
+#define SIM_CLOSE_HOOK(...) frv_sim_close (__VA_ARGS__)
 
 /* The _sim_cpu struct.  */
 

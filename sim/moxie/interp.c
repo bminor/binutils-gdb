@@ -1246,13 +1246,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   return sd;
 }
 
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* nothing to do */
-}
-
-
 /* Load the device tree blob.  */
 
 static void

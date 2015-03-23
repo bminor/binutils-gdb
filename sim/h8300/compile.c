@@ -4966,12 +4966,6 @@ sim_open (SIM_OPEN_KIND kind,
   return sd;
 }
 
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* Nothing to do.  */
-}
-
 /* Called by gdb to load a program into memory.  */
 
 SIM_RC

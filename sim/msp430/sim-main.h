@@ -54,4 +54,7 @@ struct sim_state
 #include "sim-engine.h"
 #include "sim-options.h"
 
+extern void msp430_sim_close (SIM_DESC sd, int quitting);
+#define SIM_CLOSE_HOOK(...) msp430_sim_close (__VA_ARGS__)
+
 #endif /* _MSP430_MAIN_SIM_H_ */

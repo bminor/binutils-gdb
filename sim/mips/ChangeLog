@@ -1,3 +1,11 @@
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_close): Rename to ...
+	(mips_sim_close): ... this.  Delete calls to sim_module_uninstall and
+	sim_io_shutdown.
+	* sim-main.h (mips_sim_close): Declare.
+	(SIM_CLOSE_HOOK): Define.
+
 2015-09-25  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Ali Lown  <ali.lown@imgtec.com>
 

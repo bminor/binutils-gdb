@@ -1,3 +1,7 @@
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_close): Delete.
+
 2015-11-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_cr16_translate_dmap_addr): Mark static.

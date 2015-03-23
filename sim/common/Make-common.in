@@ -173,6 +173,7 @@ SIM_COMMON_HW_OBJS = \
 SIM_NEW_COMMON_OBJS = \
 	sim-arange.o \
 	sim-bits.o \
+	sim-close.o \
 	sim-command.o \
 	sim-config.o \
 	sim-core.o \

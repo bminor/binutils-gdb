@@ -317,14 +317,6 @@ sim_open (SIM_OPEN_KIND kind,
   return sd;
 }
 
-
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  sim_module_uninstall (sd);
-}
-
-
 SIM_RC
 sim_create_inferior (SIM_DESC sd,
 		     struct bfd *prog_bfd,

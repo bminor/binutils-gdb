@@ -1,3 +1,7 @@
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_close): Delete.
+
 2015-09-29  James Bowman  <james.bowman@ftdichip.com>
 
 	* interp.c (step_once): Correct length for MEMSET and MEMCPY

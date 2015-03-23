@@ -1060,13 +1060,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   return sd;
 }
-
-void
-sim_close (SIM_DESC sd, int quitting ATTRIBUTE_UNUSED)
-{
-  cris_cgen_cpu_close (CPU_CPU_DESC (STATE_CPU (sd, 0)));
-  sim_module_uninstall (sd);
-}
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd,

@@ -474,6 +474,8 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
+extern void mips_sim_close (SIM_DESC sd, int quitting);
+#define SIM_CLOSE_HOOK(...) mips_sim_close (__VA_ARGS__)
 
 /* MIPS specific simulator watch config */
 

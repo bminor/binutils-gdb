@@ -1,3 +1,8 @@
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-close.o
+	* sim-close.c: New file.
+
 2015-09-25  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Ali Lown  <ali.lown@imgtec.com>
 

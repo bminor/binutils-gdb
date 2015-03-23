@@ -866,13 +866,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   return sd;
 }
 
-
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* Nothing to do.  */
-}
-
 uint8 *
 dmem_addr (uint16 offset)
 {

@@ -1452,12 +1452,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   return sd;
 }
 
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* nothing to do */
-}
-
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 {

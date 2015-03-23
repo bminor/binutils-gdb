@@ -199,7 +199,7 @@ sim_open (kind, callback, abfd, argv)
 }
 
 void
-sim_close (sd, quitting)
+frv_sim_close (sd, quitting)
      SIM_DESC sd;
      int quitting;
 {
@@ -211,9 +211,6 @@ sim_close (sd, quitting)
       frv_cache_term (CPU_INSN_CACHE (cpu));
       frv_cache_term (CPU_DATA_CACHE (cpu));
     }
-
-  frv_cgen_cpu_close (CPU_CPU_DESC (STATE_CPU (sd, 0)));
-  sim_module_uninstall (sd);
 }
 
 SIM_RC
