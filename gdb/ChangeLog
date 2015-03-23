@@ -1,5 +1,20 @@
 2015-03-23  Keith Seitz  <keiths@redhat.com>
 
+	* breakpoint.c (parse_breakpoint_sals): Use
+	linespec_lexer_lex_keyword to ascertain if the user specified
+	a NULL location.
+	* linespec.c [IF_KEYWORD_INDEX]: Define.
+	(linespec_lexer_lex_keyword): Export.
+	(struct ls_parser) <keyword_ok>: Remove.
+	A keyword is only a keyword if not followed by another keyword.
+	(linespec_lexer_lex_one): Remove keyword_ok handling.
+	Add comment explaining why the parsing stream is not advanced
+	when a keyword is seen.
+	(parse_linespec): Remove parser->keyword_ok.
+	* linespec.h (linespec_lexer_lex_keyword): Add declaration.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
 	PR gdb/18021
 	* dwarf2read.c (dwarf2_add_member_fn): Issue a complaint
 	if we find a static method with DW_AT_vtable_elem_location.

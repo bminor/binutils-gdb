@@ -1,5 +1,10 @@
 2015-03-23  Keith Seitz  <keiths@redhat.com>
 
+	* gdb.linespec/keywords.c: New file.
+	* gdb.linespec/keywords.exp: New file.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
 	PR gdb/18021
 	* gdb.dwarf2/staticvirtual.exp: New test.
 
