@@ -2201,18 +2201,6 @@ Output_section::Input_section::output_offset(
     }
 }
 
-// Return whether this is the merge section for the input section
-// SHNDX in OBJECT.
-
-inline bool
-Output_section::Input_section::is_merge_section_for(const Relobj* object,
-						    unsigned int shndx) const
-{
-  if (this->is_input_section())
-    return false;
-  return object->is_merge_section_for(this->u2_.posd, shndx);
-}
-
 // Write out the data.  We don't have to do anything for an input
 // section--they are handled via Object::relocate--but this is where
 // we write out the data for an Output_section_data.
@@ -2698,9 +2686,6 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 	  this->lookup_maps_->add_merge_section(msp, pomb);
 	}
 
-      // Add input section to new merge section and link input section to new
-      // merge section in map.
-      this->lookup_maps_->add_merge_input_section(object, shndx, pomb);
       return true;
     }
   else
@@ -2857,17 +2842,15 @@ Output_section::update_flags_for_input_section(elfcpp::Elf_Xword flags)
 // Find the merge section into which an input section with index SHNDX in
 // OBJECT has been added.  Return NULL if none found.
 
-Output_section_data*
+const Output_section_data*
 Output_section::find_merge_section(const Relobj* object,
 				   unsigned int shndx) const
 {
-  if (!this->lookup_maps_->is_valid())
-    this->build_lookup_maps();
-  return this->lookup_maps_->find_merge_section(object, shndx);
+  return object->find_merge_section(shndx);
 }
 
-// Build the lookup maps for merge and relaxed sections.  This is needs
-// to be declared as a const methods so that it is callable with a const
+// Build the lookup maps for relaxed sections.  This needs
+// to be declared as a const method so that it is callable with a const
 // Output_section pointer.  The method only updates states of the maps.
 
 void
@@ -2878,24 +2861,7 @@ Output_section::build_lookup_maps() const
        p != this->input_sections_.end();
        ++p)
     {
-      if (p->is_merge_section())
-	{
-	  Output_merge_base* pomb = p->output_merge_base();
-	  Merge_section_properties msp(pomb->is_string(), pomb->entsize(),
-				       pomb->addralign());
-	  this->lookup_maps_->add_merge_section(msp, pomb);
-	  for (Output_merge_base::Input_sections::const_iterator is =
-		 pomb->input_sections_begin();
-	       is != pomb->input_sections_end();
-	       ++is)
-	    {
-	      const Const_section_id& csid = *is;
-	    this->lookup_maps_->add_merge_input_section(csid.first,
-							csid.second, pomb);
-	    }
-
-	}
-      else if (p->is_relaxed_input_section())
+      if (p->is_relaxed_input_section())
 	{
 	  Output_relaxed_input_section* poris = p->relaxed_input_section();
 	  this->lookup_maps_->add_relaxed_input_section(poris->relobj(),
@@ -2935,7 +2901,8 @@ Output_section::is_input_address_mapped(const Relobj* object,
     {
       section_offset_type output_offset;
       bool found = posd->output_offset(object, shndx, offset, &output_offset);
-      gold_assert(found);
+      if (!found)
+        return false;
       return output_offset != -1;
     }
 
@@ -3045,6 +3012,10 @@ Output_section::find_starting_output_address(const Relobj* object,
 					     unsigned int shndx,
 					     uint64_t* paddr) const
 {
+  const Output_section_data* data = this->find_merge_section(object, shndx);
+  if (data == NULL)
+    return false;
+
   // FIXME: This becomes a bottle-neck if we have many relaxed sections.
   // Looking up the merge section map does not always work as we sometimes
   // find a merge section without its address set.
@@ -3059,7 +3030,7 @@ Output_section::find_starting_output_address(const Relobj* object,
       // method to get the output offset of input offset 0.
       // Unfortunately we don't know for sure that input offset 0 is
       // mapped at all.
-      if (p->is_merge_section_for(object, shndx))
+      if (!p->is_input_section() && p->output_section_data() == data)
 	{
 	  *paddr = addr;
 	  return true;
@@ -3885,20 +3856,7 @@ Output_section::add_script_input_section(const Input_section& sis)
   // Update fast lookup maps if necessary.
   if (this->lookup_maps_->is_valid())
     {
-      if (sis.is_merge_section())
-	{
-	  Output_merge_base* pomb = sis.output_merge_base();
-	  Merge_section_properties msp(pomb->is_string(), pomb->entsize(),
-				       pomb->addralign());
-	  this->lookup_maps_->add_merge_section(msp, pomb);
-	  for (Output_merge_base::Input_sections::const_iterator p =
-		 pomb->input_sections_begin();
-	       p != pomb->input_sections_end();
-	       ++p)
-	    this->lookup_maps_->add_merge_input_section(p->first, p->second,
-							pomb);
-	}
-      else if (sis.is_relaxed_input_section())
+      if (sis.is_relaxed_input_section())
 	{
 	  Output_relaxed_input_section* poris = sis.relaxed_input_section();
 	  this->lookup_maps_->add_relaxed_input_section(poris->relobj(),

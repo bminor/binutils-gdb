@@ -2857,7 +2857,7 @@ class Output_section_lookup_maps
  public:
   Output_section_lookup_maps()
     : is_valid_(true), merge_sections_by_properties_(),
-      merge_sections_by_id_(), relaxed_input_sections_by_id_()
+      relaxed_input_sections_by_id_()
   { }
 
   // Whether the maps are valid.
@@ -2875,7 +2875,6 @@ class Output_section_lookup_maps
   clear()
   {
     this->merge_sections_by_properties_.clear();
-    this->merge_sections_by_id_.clear();
     this->relaxed_input_sections_by_id_.clear();
     // A cleared map is valid.
     this->is_valid_ = true;
@@ -2892,17 +2891,6 @@ class Output_section_lookup_maps
     return p != this->merge_sections_by_properties_.end() ? p->second : NULL;
   }
 
-  // Find a merge section by section ID of a merge input section.  Return NULL
-  // if none is found.
-  Output_merge_base*
-  find_merge_section(const Object* object, unsigned int shndx) const
-  {
-    gold_assert(this->is_valid_);
-    Merge_sections_by_id::const_iterator p =
-      this->merge_sections_by_id_.find(Const_section_id(object, shndx));
-    return p != this->merge_sections_by_id_.end() ? p->second : NULL;
-  }
-
   // Add a merge section pointed by POMB with properties MSP.
   void
   add_merge_section(const Merge_section_properties& msp,
@@ -2911,19 +2899,6 @@ class Output_section_lookup_maps
     std::pair<Merge_section_properties, Output_merge_base*> value(msp, pomb);
     std::pair<Merge_sections_by_properties::iterator, bool> result =
       this->merge_sections_by_properties_.insert(value);
-    gold_assert(result.second);
-  }
-
-  // Add a mapping from a merged input section in OBJECT with index SHNDX
-  // to a merge output section pointed by POMB.
-  void
-  add_merge_input_section(const Object* object, unsigned int shndx,
-			  Output_merge_base* pomb)
-  {
-    Const_section_id csid(object, shndx);
-    std::pair<Const_section_id, Output_merge_base*> value(csid, pomb);
-    std::pair<Merge_sections_by_id::iterator, bool> result =
-      this->merge_sections_by_id_.insert(value);
     gold_assert(result.second);
   }
 
@@ -2952,10 +2927,6 @@ class Output_section_lookup_maps
   }
 
  private:
-  typedef Unordered_map<Const_section_id, Output_merge_base*,
-			Const_section_id_hash>
-    Merge_sections_by_id;
-
   typedef Unordered_map<Merge_section_properties, Output_merge_base*,
 			Merge_section_properties::hash,
 			Merge_section_properties::equal_to>
@@ -2969,8 +2940,6 @@ class Output_section_lookup_maps
   bool is_valid_;
   // Merge sections by merge section properties.
   Merge_sections_by_properties merge_sections_by_properties_;
-  // Merge sections by section IDs.
-  Merge_sections_by_id merge_sections_by_id_;
   // Relaxed sections by section IDs.
   Relaxed_input_sections_by_id relaxed_input_sections_by_id_;
 };
@@ -3761,11 +3730,6 @@ class Output_section : public Output_data
 		  section_offset_type offset,
 		  section_offset_type* poutput) const;
 
-    // Return whether this is the merge section for the input section
-    // SHNDX in OBJECT.
-    bool
-    is_merge_section_for(const Relobj* object, unsigned int shndx) const;
-
     // Write out the data.  This does nothing for an input section.
     void
     write(Output_file*);
@@ -4290,7 +4254,7 @@ class Output_section : public Output_data
 
   // Find the merge section into which an input section with index SHNDX in
   // OBJECT has been added.  Return NULL if none found.
-  Output_section_data*
+  const Output_section_data*
   find_merge_section(const Relobj* object, unsigned int shndx) const;
 
   // Build a relaxation map.

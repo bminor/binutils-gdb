@@ -45,8 +45,8 @@ Object_merge_map::~Object_merge_map()
 
 // Get the Input_merge_map to use for an input section, or NULL.
 
-Object_merge_map::Input_merge_map*
-Object_merge_map::get_input_merge_map(unsigned int shndx)
+const Object_merge_map::Input_merge_map*
+Object_merge_map::get_input_merge_map(unsigned int shndx) const
 {
   gold_assert(shndx != -1U);
   if (shndx == this->first_shnum_)
@@ -179,12 +179,13 @@ Object_merge_map::get_output_offset(unsigned int shndx,
 
 // Return whether this is the merge map for section SHNDX.
 
-bool
-Object_merge_map::is_merge_section_for(const Output_section_data* output_data,
-				       unsigned int shndx)
-{
-  Input_merge_map* map = this->get_input_merge_map(shndx);
-  return map != NULL && map->output_data == output_data;
+const Output_section_data*
+Object_merge_map::find_merge_section(unsigned int shndx) const {
+  const Object_merge_map::Input_merge_map* map =
+    this->get_input_merge_map(shndx);
+  if (map == NULL)
+    return NULL;
+  return map->output_data;
 }
 
 // Initialize a mapping from input offsets to output addresses.

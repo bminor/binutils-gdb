@@ -71,9 +71,8 @@ class Object_merge_map
 		    section_offset_type offset,
 		    section_offset_type* output_offset);
 
-  // Return whether this is the merge map for section SHNDX.
-  bool
-  is_merge_section_for(const Output_section_data*, unsigned int shndx);
+  const Output_section_data*
+  find_merge_section(unsigned int shndx) const;
 
   // Initialize an mapping from input offsets to output addresses for
   // section SHNDX.  STARTING_ADDRESS is the output address of the
@@ -148,8 +147,14 @@ class Object_merge_map
 
   // Return a pointer to the Input_merge_map to use for the input
   // section SHNDX, or NULL.
-  Input_merge_map*
-  get_input_merge_map(unsigned int shndx);
+  const Input_merge_map*
+  get_input_merge_map(unsigned int shndx) const;
+
+  Input_merge_map *
+  get_input_merge_map(unsigned int shndx) {
+    return const_cast<Input_merge_map *>(static_cast<const Object_merge_map *>(
+                                             this)->get_input_merge_map(shndx));
+  }
 
   // Get or make the Input_merge_map to use for the section SHNDX
   // with MERGE_MAP.
