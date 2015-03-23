@@ -61,7 +61,6 @@ struct sim_state {
 #include "sim-types.h"
 #include "sim-engine.h"
 #include "sim-options.h"
-#include "run-sim.h"
 #include "dv-bfin_trace.h"
 
 #undef MAX

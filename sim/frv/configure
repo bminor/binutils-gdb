@@ -601,7 +601,6 @@ ac_includes_default="\
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 cgen_breaks
-SIM_DV_SOCKSER_O
 sim_trapdump
 cgen
 cgendir
@@ -12378,7 +12377,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12381 "configure"
+#line 12380 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12484,7 +12483,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12487 "configure"
+#line 12486 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13464,10 +13463,12 @@ else
     esac
   done
   # mingw does not support sockser
-  SIM_DV_SOCKSER_O=""
   case ${host} in
     *mingw*) ;;
-    *) SIM_DV_SOCKSER_O="dv-sockser.o"
+    *) # TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
+       # that you instatiate.  Instead, other code will call into it directly.
+       # At some point, we should convert it over.
+       sim_hw_objs="$sim_hw_objs dv-sockser.o"
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DV_SOCKSER 1
@@ -13475,7 +13476,6 @@ _ACEOF
 
        ;;
   esac
-
   if test x"$silent" != x"yes"; then
     echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
   fi

@@ -1232,9 +1232,8 @@ class Relobj : public Object
   merge_output_offset(unsigned int shndx, section_offset_type offset,
                       section_offset_type *poutput) const;
 
-  bool
-  is_merge_section_for(const Output_section_data* output_data,
-                       unsigned int shndx) const;
+  const Output_section_data*
+  find_merge_section(unsigned int shndx) const;
 
   // Record the relocatable reloc info for an input reloc section.
   void

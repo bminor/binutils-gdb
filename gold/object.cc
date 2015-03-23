@@ -303,14 +303,12 @@ Relobj::merge_output_offset(unsigned int shndx, section_offset_type offset,
   return object_merge_map->get_output_offset(shndx, offset, poutput);
 }
 
-bool
-Relobj::is_merge_section_for(const Output_section_data* output_data,
-                             unsigned int shndx) const {
+const Output_section_data*
+Relobj::find_merge_section(unsigned int shndx) const {
   Object_merge_map* object_merge_map = this->object_merge_map_;
   if (object_merge_map == NULL)
-    return false;
-  return object_merge_map->is_merge_section_for(output_data, shndx);
-
+    return NULL;
+  return object_merge_map->find_merge_section(shndx);
 }
 
 // To copy the symbols data read from the file to a local data structure.

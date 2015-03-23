@@ -37,13 +37,11 @@ SIM_M16_OBJ = \
 
 SIM_MULTI_OBJ = itable.o @sim_multi_obj@
 
-MIPS_EXTRA_OBJS = @mips_extra_objs@
 MIPS_EXTRA_LIBS = @mips_extra_libs@
 
 SIM_OBJS = \
 	$(SIM_@sim_gen@_OBJ) \
 	$(SIM_NEW_COMMON_OBJS) \
-	$(MIPS_EXTRA_OBJS) \
 	cp1.o \
 	interp.o \
 	mdmx.o \

@@ -67,7 +67,6 @@ struct sim_state
 #include "sim-types.h"
 #include "sim-engine.h"
 #include "sim-options.h"
-#include "run-sim.h"
 
 #define MAYBE_TRACE(type, cpu, fmt, ...)				\
   do									\
