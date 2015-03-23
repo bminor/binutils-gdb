@@ -1,5 +1,12 @@
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-profile.c (profile_pc_event): Get pc via sim_pc_get.  Delete
+	usage of STATE_WATCHPOINTS.
+	(profile_pc_init): Delete STATE_WATCHPOINTS (sd)->pc check.  Change
+	STATE_WATCHPOINTS (sd)->sizeof_pc to sizeof (sim_cia).
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* tconfig.h: Note SIM_HAVE_PROFILE is deprecated.
 
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
