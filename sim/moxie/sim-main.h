@@ -48,11 +48,11 @@ struct _sim_cpu {
 
 struct sim_state {
 
-  sim_cpu cpu[MAX_NR_PROCESSORS];
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
 #if (WITH_SMP)
-#define STATE_CPU(sd,n) (&(sd)->cpu[n])
+#define STATE_CPU(sd,n) ((sd)->cpu[n])
 #else
-#define STATE_CPU(sd,n) (&(sd)->cpu[0])
+#define STATE_CPU(sd,n) ((sd)->cpu[0])
 #endif
 
   sim_state_base base;

@@ -1,7 +1,7 @@
 #    Makefile template for Configure for the moxie sim library.
 #    Copyright (C) 2008-2015 Free Software Foundation, Inc.
 #    Written by Anthony Green
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -19,14 +19,15 @@
 
 dtbdir = @datadir@/gdb/dtb
 
-# Use the deprecated run frontend until we migrate to nrun.o
-SIM_RUN_OBJS = run.o
-SIM_EXTRA_CFLAGS = -DSIM_USE_DEPRECATED_RUN_FRONTEND
-
-SIM_OBJS = interp.o sim-load.o sim-io.o sim-config.o sim-utils.o	\
-sim-options.o sim-module.o sim-core.o sim-endian.o sim-trace.o 	\
-sim-engine.o sim-fpu.o sim-bits.o sim-profile.o sim-events.o \
-sim-memopt.o sim-command.o
+SIM_OBJS = \
+	$(SIM_NEW_COMMON_OBJS) \
+	interp.o \
+	sim-cpu.o \
+	sim-engine.o \
+	sim-hload.o \
+	sim-hrw.o \
+	sim-reason.o \
+	sim-stop.o
 
 SIM_EXTRA_LIBS = -lm -lz
 SIM_EXTRA_INSTALL = install-dtb
