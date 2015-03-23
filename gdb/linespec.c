@@ -414,8 +414,7 @@ linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
   return 1;
 }
 
-/* Does P represent one of the keywords?  If so, return
-   the keyword.  If not, return NULL.  */
+/* See linespec.h.  */
 
 const char *
 linespec_lexer_lex_keyword (const char *p)

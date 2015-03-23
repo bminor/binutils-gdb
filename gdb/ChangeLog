@@ -1,5 +1,9 @@
 2015-03-23  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (linespec_lexer_lex_keyword): Update comment.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
 	* breakpoint.c (parse_breakpoint_sals): Use
 	linespec_lexer_lex_keyword to ascertain if the user specified
 	a NULL location.
