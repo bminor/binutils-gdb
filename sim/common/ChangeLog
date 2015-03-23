@@ -1,3 +1,11 @@
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-sockser.c: Include config.h.
+	* dv-sockser.h: Include sim-inline.h.
+	[HAVE_DV_SOCKSER]: Move all prototypes here.
+	[!HAVE_DV_SOCKSER] (dv_sockser_status, dv_sockser_write,
+	dv_sockser_write_buffer, dv_sockser_read): New stub functions.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* gentmap.c, run.c: Convert old style prototypes.

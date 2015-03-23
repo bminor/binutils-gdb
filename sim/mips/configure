@@ -14126,15 +14126,6 @@ fi
 mips_extra_objs="$SIM_DV_SOCKSER_O"
 
 
-if test "$sim_hw_p" = yes -a -z "$SIM_DV_SOCKSER_O"; then
-	case " $sim_hw " in
-	*" tx3904sio "*)
-		as_fn_error "Sorry, but tx3904sio hardware support is
-unavailable for your target.  Please use --disable-sim-hardware, or pass a
-list of devices to enable that does not include that." "$LINENO" 5
-	esac
-fi
-
 
 # Choose simulator engine
 case "${target}" in

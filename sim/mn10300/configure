@@ -13793,12 +13793,6 @@ fi
 fi
 
 
-if test -z "$SIM_DV_SOCKSER_O"; then
-	as_fn_error "Sorry, but hardware support in this simulator
-unconditionally relies on dv-sockser.o which is unavailable for your host.
-Please fix this simulator." "$LINENO" 5
-fi
-
 
 ac_sources="$sim_link_files"
 ac_dests="$sim_link_links"

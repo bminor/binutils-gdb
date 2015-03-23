@@ -19,10 +19,4 @@ AC_CHECK_HEADERS(utime.h)
 
 SIM_AC_OPTION_HARDWARE(always,"","")
 
-if test -z "$SIM_DV_SOCKSER_O"; then
-	AC_MSG_ERROR([Sorry, but hardware support in this simulator
-unconditionally relies on dv-sockser.o which is unavailable for your host.
-Please fix this simulator.])
-fi
-
 SIM_AC_OUTPUT
