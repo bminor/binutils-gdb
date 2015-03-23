@@ -419,8 +419,6 @@ case "${target}" in
 	;;
 esac
 SIM_AC_OPTION_HARDWARE($hw_enabled,$hw_devices,$hw_extra_devices)
-mips_extra_objs="$SIM_DV_SOCKSER_O"
-AC_SUBST(mips_extra_objs)
 
 
 # Choose simulator engine

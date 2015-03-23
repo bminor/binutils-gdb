@@ -638,15 +638,16 @@ else
     esac
   done
   # mingw does not support sockser
-  SIM_DV_SOCKSER_O=""
   case ${host} in
     *mingw*) ;;
-    *) SIM_DV_SOCKSER_O="dv-sockser.o"
+    *) # TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
+       # that you instatiate.  Instead, other code will call into it directly.
+       # At some point, we should convert it over.
+       sim_hw_objs="$sim_hw_objs dv-sockser.o"
        AC_DEFINE_UNQUOTED(
          [HAVE_DV_SOCKSER], 1, [Define if dv-sockser is usable.])
        ;;
   esac
-  AC_SUBST(SIM_DV_SOCKSER_O)
   if test x"$silent" != x"yes"; then
     echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
   fi

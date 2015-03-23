@@ -1,5 +1,10 @@
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Delete SIM_DV_SOCKSER_O.
+	Add dv-sockser.o to sim_hw_objs.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-sockser.c: Include config.h.
 	* dv-sockser.h: Include sim-inline.h.
 	[HAVE_DV_SOCKSER]: Move all prototypes here.

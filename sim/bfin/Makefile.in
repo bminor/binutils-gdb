@@ -36,7 +36,6 @@ SIM_OBJS = \
 	sim-reg.o \
 	sim-resume.o \
 	sim-stop.o \
-	@BFIN_SIM_EXTRA_OBJS@ \
 	$(SIM_EXTRA_OBJS)
 
 INCLUDE = bfin-sim.h

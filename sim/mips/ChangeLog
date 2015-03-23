@@ -1,6 +1,13 @@
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
+	* configure.ac (mips_extra_objs): Delete.
+	* Makefile.in (MIPS_EXTRA_OBJS): Delete.
+	(SIM_OBJS): Delete MIPS_EXTRA_OBJS.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
 	* configure.ac: Delete sim_hw checks for dv-sockser.
 
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>

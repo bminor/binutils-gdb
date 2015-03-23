@@ -1,3 +1,10 @@
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* configure.ac (m68hc11_extra_objs): Delete.
+	* Makefile.in (SIM_OBJS): Delete SIM_EXTRA_OBJS.
+	(SIM_EXTRA_OBJS): Delete.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
