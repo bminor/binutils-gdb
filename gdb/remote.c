@@ -4308,6 +4308,7 @@ remote_open_1 (const char *name, int from_tty,
 	}
     }
 
+  serial_setparity (rs->remote_desc, serial_parity);
   serial_raw (rs->remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a

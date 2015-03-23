@@ -767,6 +767,7 @@ monitor_open (const char *args, struct monitor_ops *mon_ops, int from_tty)
 	}
     }
 
+  serial_setparity (monitor_desc, serial_parity);
   serial_raw (monitor_desc);
 
   serial_flush_input (monitor_desc);

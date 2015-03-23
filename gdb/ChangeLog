@@ -1,3 +1,37 @@
+2015-03-23  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
+
+	* NEWS: Mention set/show serial parity command.
+	* monitor.c (monitor_open): Call serial_setparity.
+	* remote.c (remote_open_1): Likewise.
+	* ser-base.c (ser_base_serparity): New function.
+	* ser-base.h (ser_base_setparity): Add  declaration.
+	* ser-go32.c (dos_ops): Set "setparity" field.
+	* ser-mingw.c (ser_windows_raw): Do not set state.fParity and
+	state.Parity.
+	(ser_windows_setparity): New function.
+	(hardwire_ops): Add ser_windows_setparity.
+	(tty_ops): Add NULL for setparity field.
+	(pipe_ops): Add ser_base_setparity.
+	(tcp_ops): Likewise.
+	* ser-pipe.c (pipe_ops): Likewise.
+	* ser-tcp.c (tcp_ops): Likewise.
+	* ser-unix.c (hardwire_setparity): Add declaration.
+	(hardwire_raw): Don't reset PARENB flag.
+	(hardwire_setparity): New function.
+	(hardwire_ops): Add hardwire_setparity.
+	* serial.c (serial_setparity): New function.
+	(serial_parity): New global.
+	(parity_none, parity_odd, parity_even, parity_enums, parity):
+	New static globals.
+	(set_parity): New function.
+	(_initialize_serial): Add set/show serial parity commands.
+	* serial.h (GDBPARITY_NONE): Define.
+	(GDBPARITY_ODD): Define.
+	(GDBPARITY_EVEN): Define.
+	(serial_setparity) Add declaration.
+	(struct serial_ops): Add setparity field.
+	* target.h (serial_parity): Add declaration.
+
 2015-03-23  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (linespec_lexer_lex_keyword): Update comment.

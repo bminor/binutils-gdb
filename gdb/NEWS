@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.9
 
+* GDB has two new commands: "set serial parity odd|even|none" and
+  "show serial parity".  These allows to set or show parity for the
+  remote serial I/O.
+
 * The "info source" command now displays the producer string if it was
   present in the debug info.  This typically includes the compiler version
   and may include things like its command line arguments.

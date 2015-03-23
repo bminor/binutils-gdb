@@ -1,3 +1,8 @@
+2015-03-23  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
+
+	* gdb.texinfo (Remote configuration): Document "set/show
+	serial parity" command.
+
 2015-03-18  Gary Benson <gbenson@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Remove documentation

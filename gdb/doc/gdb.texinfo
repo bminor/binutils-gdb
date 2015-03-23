@@ -19443,6 +19443,13 @@ remote targets.
 @item show serial baud
 Show the current speed of the remote connection.
 
+@item set serial parity @var{parity}
+Set the parity for the remote serial I/O.  Supported values of @var{parity} are:
+@code{even}, @code{none}, and @code{odd}.  The default is @code{none}.
+
+@item show serial parity
+Show the current parity of the serial port.
+
 @item set remotebreak
 @cindex interrupt remote programs
 @cindex BREAK signal instead of Ctrl-C
