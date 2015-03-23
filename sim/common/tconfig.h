@@ -5,7 +5,8 @@
 /* Define this if the simulator supports profiling.
    See the mips simulator for an example.
    This enables the `-p foo' and `-s bar' options.
-   The target is required to provide sim_set_profile{,_size}.  */
+   The target is required to provide sim_set_profile{,_size}.
+   TODO: This is specific to the old run.o main.  */
 /* #define SIM_HAVE_PROFILE */
 
 /* Define this if the simulator uses an instruction cache.

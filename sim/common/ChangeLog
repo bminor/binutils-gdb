@@ -1,5 +1,9 @@
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* tconfig.h: Note SIM_HAVE_PROFILE is deprecated.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* tconfig.h: Note SIM_HAVE_BIENDIAN is deprecated.
 
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>

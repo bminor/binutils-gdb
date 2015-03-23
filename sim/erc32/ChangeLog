@@ -1,3 +1,7 @@
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* interf.c (sim_set_callbacks, sim_size, sim_trace): Delete.
+
 2015-03-17  Jiri Gaisler  <jiri@gaisler.se>
 
 	* func.c (exec_cmd): Silence compiler warnings when calling system().

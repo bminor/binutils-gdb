@@ -162,19 +162,6 @@ run_sim(sregs, icount, dis)
     return (TIME_OUT);
 }
 
-void
-sim_set_callbacks (ptr)
-     host_callback *ptr;
-{
-  sim_callback = ptr;
-}
-
-void
-sim_size (memsize)
-     int memsize;
-{
-}
-
 SIM_DESC
 sim_open (kind, callback, abfd, argv)
      SIM_OPEN_KIND kind;
@@ -466,15 +453,6 @@ sim_resume(SIM_DESC sd, int step, int siggnal)
     simstat = run_sim(&sregs, UINT64_MAX, 0);
 
     if (sis_gdb_break) flush_windows ();
-}
-
-int
-sim_trace (sd)
-     SIM_DESC sd;
-{
-  /* FIXME: unfinished */
-  sim_resume (sd, 0, 0);
-  return 1;
 }
 
 void

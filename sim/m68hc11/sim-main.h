@@ -587,8 +587,6 @@ struct sim_state {
   sim_state_base base;
 };
 
-extern void sim_set_profile (int n);
-extern void sim_set_profile_size (int n);
 extern void sim_board_reset (SIM_DESC sd);
 
 #define PRINT_TIME  0x01

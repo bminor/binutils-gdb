@@ -4595,15 +4595,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 }
 
 int
-sim_trace (SIM_DESC sd)
-{
-  /* FIXME: Unfinished.  */
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "sim_trace: trace not supported.\n");
-  return 1;	/* Done.  */
-}
-
-int
 sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   int i;
@@ -4788,14 +4779,6 @@ void
 sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
   sim_engine_get_run_state (sd, reason, sigrc);
-}
-
-/* FIXME: Rename to sim_set_mem_size.  */
-
-void
-sim_size (int n)
-{
-  /* Memory size is fixed.  */
 }
 
 static void
@@ -5093,10 +5076,4 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
     }
   
   return SIM_RC_OK;
-}
-
-void
-sim_set_callbacks (struct host_callback_struct *ptr)
-{
-  sim_callback = ptr;
 }

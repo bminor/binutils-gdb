@@ -502,16 +502,6 @@ sim_close (SIM_DESC sd, int quitting)
   return;
 }
 
-void
-sim_set_profile (int n)
-{
-}
-
-void
-sim_set_profile_size (int n)
-{
-}
-
 /* Generic implementation of sim_engine_run that works within the
    sim_engine setjmp/longjmp framework. */
 
@@ -535,13 +525,6 @@ sim_engine_run (SIM_DESC sd,
 	  sim_events_process (sd);
 	}
     }
-}
-
-int
-sim_trace (SIM_DESC sd)
-{
-  sim_resume (sd, 0, 0);
-  return 1;
 }
 
 void
@@ -572,14 +555,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   return sim_prepare_for_program (sd, abfd);
 }
-
-
-void
-sim_set_callbacks (host_callback *p)
-{
-  /*  m6811_callback = p; */
-}
-
 
 int
 sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
@@ -702,12 +677,6 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
 
   return 2;
-}
-
-void
-sim_size (int s)
-{
-  ;
 }
 
 /* Halt the simulator after just one instruction */
