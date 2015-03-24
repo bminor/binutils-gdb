@@ -148,6 +148,23 @@ ptid_of_lwp (struct lwp_info *lwp)
 
 /* See nat/linux-nat.h.  */
 
+void
+lwp_set_arch_private_info (struct lwp_info *lwp,
+			   struct arch_lwp_info *info)
+{
+  lwp->arch_private = info;
+}
+
+/* See nat/linux-nat.h.  */
+
+struct arch_lwp_info *
+lwp_arch_private_info (struct lwp_info *lwp)
+{
+  return lwp->arch_private;
+}
+
+/* See nat/linux-nat.h.  */
+
 int
 lwp_is_stopped (struct lwp_info *lwp)
 {

@@ -21,6 +21,7 @@
 #define LINUX_NAT_H
 
 struct lwp_info;
+struct arch_lwp_info;
 
 /* Unlike other extended result codes, WSTOPSIG (status) on
    PTRACE_O_TRACESYSGOOD syscall events doesn't return SIGTRAP, but
@@ -50,6 +51,17 @@ extern struct lwp_info *iterate_over_lwps (ptid_t filter,
 /* Return the ptid of LWP.  */
 
 extern ptid_t ptid_of_lwp (struct lwp_info *lwp);
+
+/* Set the architecture-specific data of LWP.  This function must be
+   provided by the client. */
+
+extern void lwp_set_arch_private_info (struct lwp_info *lwp,
+				       struct arch_lwp_info *info);
+
+/* Return the architecture-specific data of LWP.  This function must
+   be provided by the client. */
+
+extern struct arch_lwp_info *lwp_arch_private_info (struct lwp_info *lwp);
 
 /* Return nonzero if LWP is stopped, zero otherwise.  This function
    must be provided by the client.  */

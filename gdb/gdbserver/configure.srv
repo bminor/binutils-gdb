@@ -109,7 +109,7 @@ case "${target}" in
 			    srv_xmlfiles="${srv_xmlfiles} $srv_amd64_linux_xmlfiles"
 			fi
 			srv_tgtobj="$srv_linux_obj linux-x86-low.o x86-low.o x86-dregs.o i387-fp.o"
-			srv_tgtobj="${srv_tgtobj} linux-btrace.o"
+			srv_tgtobj="${srv_tgtobj} linux-btrace.o x86-linux.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
@@ -325,7 +325,7 @@ case "${target}" in
 			;;
   x86_64-*-linux*)	srv_regobj="$srv_amd64_linux_regobj $srv_i386_linux_regobj"
 			srv_tgtobj="$srv_linux_obj linux-x86-low.o x86-low.o x86-dregs.o i387-fp.o"
-			srv_tgtobj="${srv_tgtobj} linux-btrace.o"
+			srv_tgtobj="${srv_tgtobj} linux-btrace.o x86-linux.o"
 			srv_xmlfiles="$srv_i386_linux_xmlfiles $srv_amd64_linux_xmlfiles"
 			srv_linux_usrregs=yes # This is for i386 progs.
 			srv_linux_regsets=yes

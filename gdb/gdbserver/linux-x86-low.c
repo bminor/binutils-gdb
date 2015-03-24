@@ -38,6 +38,7 @@
 #include "tracepoint.h"
 #include "ax.h"
 #include "nat/linux-nat.h"
+#include "nat/x86-linux.h"
 
 #ifdef __x86_64__
 /* Defined in auto-generated file amd64-linux.c.  */
@@ -150,14 +151,6 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 struct arch_process_info
 {
   struct x86_debug_reg_state debug_reg_state;
-};
-
-/* Per-thread arch-specific data we want to keep.  */
-
-struct arch_lwp_info
-{
-  /* Non-zero if our copy differs from what's recorded in the thread.  */
-  int debug_registers_changed;
 };
 
 #ifdef __x86_64__
@@ -579,7 +572,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 {
   /* The actual update is done later just before resuming the lwp,
      we just mark that the registers need updating.  */
-  lwp->arch_private->debug_registers_changed = 1;
+  lwp_set_debug_registers_changed (lwp, 1);
 
   /* If the lwp isn't stopped, force it to momentarily pause, so
      we can update its debug registers.  */
@@ -760,11 +753,7 @@ x86_linux_new_process (void)
 static void
 x86_linux_new_thread (struct lwp_info *lwp)
 {
-  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
-
-  info->debug_registers_changed = 1;
-
-  lwp->arch_private = info;
+  lwp_set_debug_registers_changed (lwp, 1);
 }
 
 /* See nat/x86-dregs.h.  */
@@ -786,7 +775,7 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
   ptid_t ptid = ptid_of_lwp (lwp);
   int clear_status = 0;
 
-  if (lwp->arch_private->debug_registers_changed)
+  if (lwp_debug_registers_changed (lwp))
     {
       struct x86_debug_reg_state *state
 	= x86_debug_reg_state (ptid_get_pid (ptid));
@@ -809,7 +798,7 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       if (state->dr_control_mirror != 0)
 	x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
 
-      lwp->arch_private->debug_registers_changed = 0;
+      lwp_set_debug_registers_changed (lwp, 0);
     }
 
   if (clear_status

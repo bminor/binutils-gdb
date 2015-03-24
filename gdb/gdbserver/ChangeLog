@@ -1,5 +1,19 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* Makefile.in (x86-linux.o): New rule.
+	* configure.srv: Add x86-linux.o to relevant targets.
+	* linux-low.c (lwp_set_arch_private_info): New function.
+	(lwp_arch_private_info): Likewise.
+	* linux-x86-low.c: Include nat/x86-linux.h.
+	(arch_lwp_info): Removed structure.
+	(update_debug_registers_callback):
+	Use lwp_set_debug_registers_changed.
+	(x86_linux_prepare_to_resume): Use lwp_debug_registers_changed
+	and lwp_set_debug_registers_changed.
+	(x86_linux_new_thread): Use lwp_set_debug_registers_changed.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-low.h (linux_target_ops) <new_thread>: Changed signature.
 	* linux-arm-low.c (arm_new_thread): Likewise.
 	* linux-aarch64-low.c (aarch64_linux_new_thread): Likewise.
