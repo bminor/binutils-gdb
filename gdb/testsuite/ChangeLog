@@ -1,5 +1,9 @@
 2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* gdb.mi/mi-pending.exp: Fix output of breakpoint test.
+
+2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	PR breakpoints/16466
 	* gdb.mi/Makefile.in: Add mi-pendshr2.sl to cleanup.
 	* gdb.mi/mi-pending.c (thread_func): New function.

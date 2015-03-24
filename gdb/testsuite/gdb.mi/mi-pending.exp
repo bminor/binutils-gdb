@@ -66,7 +66,7 @@ mi_gdb_test "-break-insert -f pendfunc1" \
 # Set pending breakpoint with a condition via MI.
 mi_gdb_test "-break-insert -f -c x==4 ${libsrc1}:pendfunc2" \
     ".*\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"${libsrc1}:pendfunc2\",cond=\"x==4\",times=\"0\",original-location=\"${libsrc1}:pendfunc2\"\}"\
-    "MI pending breakpoint on ${libsrc1}:pendfunc2 if x==4"
+    "MI pending breakpoint on ${libfile1}.c:pendfunc2 if x==4"
 
 # Set breakpoint so that we can stop when the thread is created
 mi_gdb_test "-break-insert -f thread_func" \
