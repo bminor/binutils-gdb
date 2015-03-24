@@ -583,7 +583,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 
   /* If the lwp isn't stopped, force it to momentarily pause, so
      we can update its debug registers.  */
-  if (!lwp->stopped)
+  if (!lwp_is_stopped (lwp))
     linux_stop_lwp (lwp);
 
   return 0;
@@ -783,7 +783,7 @@ x86_debug_reg_state (pid_t pid)
 static void
 x86_linux_prepare_to_resume (struct lwp_info *lwp)
 {
-  ptid_t ptid = ptid_of (get_lwp_thread (lwp));
+  ptid_t ptid = ptid_of_lwp (lwp);
   int clear_status = 0;
 
   if (lwp->arch_private->debug_registers_changed)
@@ -812,7 +812,8 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       lwp->arch_private->debug_registers_changed = 0;
     }
 
-  if (clear_status || lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
+  if (clear_status
+      || lwp_stop_reason (lwp) == TARGET_STOPPED_BY_WATCHPOINT)
     x86_linux_dr_set (ptid, DR_STATUS, 0);
 }
 

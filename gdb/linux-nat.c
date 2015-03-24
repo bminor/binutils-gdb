@@ -282,6 +282,33 @@ static int sigtrap_is_event (int status);
 static int (*linux_nat_status_is_event) (int status) = sigtrap_is_event;
 
 
+/* LWP accessors.  */
+
+/* See nat/linux-nat.h.  */
+
+ptid_t
+ptid_of_lwp (struct lwp_info *lwp)
+{
+  return lwp->ptid;
+}
+
+/* See nat/linux-nat.h.  */
+
+int
+lwp_is_stopped (struct lwp_info *lwp)
+{
+  return lwp->stopped;
+}
+
+/* See nat/linux-nat.h.  */
+
+enum target_stop_reason
+lwp_stop_reason (struct lwp_info *lwp)
+{
+  return lwp->stop_reason;
+}
+
+
 /* Trivial list manipulation functions to keep track of a list of
    new stopped processes.  */
 static void

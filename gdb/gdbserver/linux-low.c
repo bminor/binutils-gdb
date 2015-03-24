@@ -136,6 +136,32 @@ typedef struct
 } Elf64_auxv_t;
 #endif
 
+/* LWP accessors.  */
+
+/* See nat/linux-nat.h.  */
+
+ptid_t
+ptid_of_lwp (struct lwp_info *lwp)
+{
+  return ptid_of (get_lwp_thread (lwp));
+}
+
+/* See nat/linux-nat.h.  */
+
+int
+lwp_is_stopped (struct lwp_info *lwp)
+{
+  return lwp->stopped;
+}
+
+/* See nat/linux-nat.h.  */
+
+enum target_stop_reason
+lwp_stop_reason (struct lwp_info *lwp)
+{
+  return lwp->stop_reason;
+}
+
 /* A list of all unknown processes which receive stop signals.  Some
    other process will presumably claim each of these as forked
    children momentarily.  */

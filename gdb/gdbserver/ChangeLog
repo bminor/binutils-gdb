@@ -1,5 +1,15 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-low.c (ptid_of_lwp): New function.
+	(lwp_is_stopped): Likewise.
+	(lwp_stop_reason): Likewise.
+	* linux-x86-low.c (update_debug_registers_callback):
+	Use lwp_is_stopped.
+	(x86_linux_prepare_to_resume): Use ptid_of_lwp and
+	lwp_stop_reason.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-low.h (linux_stop_lwp): Remove declaration.
 
 2015-03-24  Gary Benson  <gbenson@redhat.com>

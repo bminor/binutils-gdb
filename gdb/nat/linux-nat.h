@@ -47,6 +47,20 @@ extern struct lwp_info *iterate_over_lwps (ptid_t filter,
 					   iterate_over_lwps_ftype callback,
 					   void *data);
 
+/* Return the ptid of LWP.  */
+
+extern ptid_t ptid_of_lwp (struct lwp_info *lwp);
+
+/* Return nonzero if LWP is stopped, zero otherwise.  This function
+   must be provided by the client.  */
+
+extern int lwp_is_stopped (struct lwp_info *lwp);
+
+/* Return the reason the LWP last stopped.  This function must be
+   provided by the client.  */
+
+extern enum target_stop_reason lwp_stop_reason (struct lwp_info *lwp);
+
 /* Cause LWP to stop.  This function must be provided by the
    client.  */
 

@@ -142,7 +142,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 
   /* If the lwp isn't stopped, force it to momentarily pause, so we
      can update its debug registers.  */
-  if (!lwp->stopped)
+  if (!lwp_is_stopped (lwp))
     linux_stop_lwp (lwp);
 
   /* Continue the iteration.  */
@@ -178,6 +178,7 @@ x86_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 static void
 x86_linux_prepare_to_resume (struct lwp_info *lwp)
 {
+  ptid_t ptid = ptid_of_lwp (lwp);
   int clear_status = 0;
 
   /* NULL means this is the main thread still going through the shell,
@@ -189,7 +190,7 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
   if (lwp->arch_private->debug_registers_changed)
     {
       struct x86_debug_reg_state *state
-	= x86_debug_reg_state (ptid_get_pid (lwp->ptid));
+	= x86_debug_reg_state (ptid_get_pid (ptid));
       int i;
 
       /* On Linux kernel before 2.6.33 commit
@@ -202,12 +203,12 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       /* Clear DR_CONTROL first.  In some cases, setting DR0-3 to a
 	 value that doesn't match what is enabled in DR_CONTROL
 	 results in EINVAL.  */
-      x86_linux_dr_set (lwp->ptid, DR_CONTROL, 0);
+      x86_linux_dr_set (ptid, DR_CONTROL, 0);
 
       ALL_DEBUG_ADDRESS_REGISTERS (i)
 	if (state->dr_ref_count[i] > 0)
 	  {
-	    x86_linux_dr_set (lwp->ptid, i, state->dr_mirror[i]);
+	    x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
 
 	    /* If we're setting a watchpoint, any change the inferior
 	       had done itself to the debug registers needs to be
@@ -219,13 +220,14 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       /* If DR_CONTROL is supposed to be zero, we've already set it
 	 above.  */
       if (state->dr_control_mirror != 0)
-	x86_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
+	x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
 
       lwp->arch_private->debug_registers_changed = 0;
     }
 
-  if (clear_status || lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
-    x86_linux_dr_set (lwp->ptid, DR_STATUS, 0);
+  if (clear_status
+      || lwp_stop_reason (lwp) == TARGET_STOPPED_BY_WATCHPOINT)
+    x86_linux_dr_set (ptid, DR_STATUS, 0);
 }
 
 static void
