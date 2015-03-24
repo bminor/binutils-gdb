@@ -4,6 +4,138 @@
 	2015-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
+	* coffgrok.c (do_type): Check for an out of range tag index.
+	Check for integer overflow computing array dimension.
+	(do_define): Likewise.
+
+	2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* resrc.c (write_rc_messagetable): Tighten check for invalid
+	message lengths.
+
+	2015-02-13  Nick Clifton  <nickc@redhat.com>
+
+	* coffgrok.c (do_define): Add check for type size overflow.
+	* srconv.c (walk_tree_sfile): Check that enough sections are
+	available before parsing.
+	(prescan): Likewise.
+
+	2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* objdump.c (display_any_bfd): Fail if archives nest too deeply.
+
+	2015-01-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dlltool.c (identify_search_archive): If the last archive was the
+	same as the current archive, terminate the loop.
+
+	* addr2line.c (slurp_symtab): If the symcount is zero, free the
+	symbol table pointer.
+
+	* rcparse.y: Add checks to avoid integer divide by zero.
+	* rescoff.c (read_coff_rsrc): Add check on the size of the
+	resource section.
+	(read_coff_res_dir): Add check on the nesting level.
+	Check for resource names overrunning the buffer.
+	* resrc.c (write_rc_messagetable): Update formatting.
+	Add check of 'elen' being zero.
+
+	2015-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* nlmconv.c (powerpc_mangle_relocs): Fix build errors introduced
+	by recent delta, when compiling on for a 32-bit host.
+
+	2015-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* addr2line.c (main): Call bfd_set_error_program_name.
+	* ar.c (main): Likewise.
+	* coffdump.c (main): Likewise.
+	* cxxfilt.c (main): Likewise.
+	* dlltool.c (main): Likewise.
+	* nlmconv.c (main): Likewise.
+	* nm.c (main): Likewise.
+	* objdump.c (main): Likewise.
+	* size.c (main): Likewise.
+	* srconv.c (main): Likewise.
+	* strings.c (main): Likewise.
+	* sysdump.c (main): Likewise.
+	* windmc.c (main): Likewise.
+	* windres.c (main): Likewise.
+	* objcopy.c (main): Likewise.
+	(copy_relocations_in_section): Check for relocs without associated
+	symbol pointers.
+
+	2015-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffgrok.c (do_type): Check that computed ref exists.
+	(doit): Add range checks when computing section for scope.
+
+	2015-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ojcopy.c (copy_object): Free the symbol table if no symbols
+	could be loaded.
+	(copy_file): Use bfd_close_all_done to close files that could not
+	be copied.
+
+	* sysdump.c (getINT): Fail if reading off the end of the buffer.
+	Replace call to abort with a call to fatal.
+	(getCHARS): Prevetn reading off the end of the buffer.
+
+	* nlmconv.c (i386_mangle_relocs): Skip relocs without an
+	associated symbol.
+	(powerpc_mangle_relocs): Skip unrecognised relocs.  Check address
+	range before applying a reloc.
+
+	2015-01-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dlltool.c (scan_obj_file): Break loop if the last archive
+	displayed matches the current archive.
+
+	* objdump.c (display_any_bfd): Add a depth limit to nested archive
+	display in order to avoid infinite loops.
+	* srconv.c: Replace calls to abort with calls to fatal with an
+	error message.
+
+	2015-01-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffdump.c (dump_coff_section): Check for a symbol being
+	available before printing its name.
+	(main): Check the return value from coff_grok.
+	* coffgrok.c: Reformat and tidy.
+	Add range checks to most functions.
+	(coff_grok): Return NULL if the input bfd is not in a COFF
+	format.
+	* coffgrok.h: Reformat and tidy.
+	(struct coff_section): Change the nrelocs field to unsigned.
+	* srconv.c (main): Check the return value from coff_grok.
+
+	2015-01-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* nm.c (print_symbol): Add 'is_synthetic' parameter.  Use it to
+	help initialize the info.elfinfo field.
+	(print_size_symbols): Add 'synth_count' parameter.  Use it to set
+	the is_synthetic parameter when calling print_symbol.
+	(print_symbols): Likewise.
+	(display_rel_file): Pass synth_count to printing function.
+	(display_archive): Break loop if the last archive displayed
+	matches the current archive.
+	* size.c (display_archive): Likewise.
+
+2015-03-24  Nick Clifton  <nickc@redhat.com>
+
+	Apply from master:
+	2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
 	* dwarf.c (display_debug_loc): Pacify the undefined behaviour
 	sanitizer by simplifying address difference calculation.
 	(struct Frame_Chunk): Change type of cfa_offset to dwarf_vma in
