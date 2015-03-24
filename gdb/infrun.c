@@ -2588,10 +2588,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   pc = regcache_read_pc (regcache);
   tp = inferior_thread ();
 
-  if (step > 0)
+  if (step)
     step_start_function = find_pc_function (pc);
-  if (step < 0)
-    stop_after_trap = 1;
 
   /* Fill in with reasonable starting values.  */
   init_thread_stepping_state (tp);
