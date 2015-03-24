@@ -65,3 +65,7 @@ gdb_test "continue" \
 gdb_test "info threads" \
 	 "\r\n\[ \t\]*Id\[ \t\]+Target\[ \t\]+Id\[ \t\]+Frame\[ \t\]*\r\n *3 *Thread \[^\r\n\]* \[^\r\n\]*.*The current thread <Thread ID 1> has terminated.*" \
 	 "only thread 3 left, main thread terminated"
+
+# Make sure thread apply all works when we have exited threads in the
+# list.
+gdb_test "thread apply all print 999" " = 999" "thread apply all with exited thread"

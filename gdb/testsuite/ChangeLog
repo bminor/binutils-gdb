@@ -1,5 +1,9 @@
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/no-unwaited-for-left.exp: Test "thread apply all".
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/schedlock.exp (test_step): No longer expect that
 	"set scheduler-locking step" with "next" over a function call runs
 	threads unlocked.

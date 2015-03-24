@@ -1,5 +1,10 @@
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (thread_apply_all_command): Take exited threads into
+	account.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (resume, proceed): Mention
 	switch_back_to_stepped_thread, not switch_back_to_stepping.
 
