@@ -3508,23 +3508,13 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	  struct elf_aarch64_stub_hash_entry *stub_entry;
 	  char *stub_name = erratum_835769_fixes[i].stub_name;
 	  asection *section = erratum_835769_fixes[i].section;
-	  unsigned int section_id = erratum_835769_fixes[i].section->id;
-	  asection *link_sec = htab->stub_group[section_id].link_sec;
-	  asection *stub_sec = htab->stub_group[section_id].stub_sec;
 
-	  stub_entry = aarch64_stub_hash_lookup (&htab->stub_hash_table,
-						 stub_name, TRUE, FALSE);
-	  if (stub_entry == NULL)
-	    {
-	      (*_bfd_error_handler) (_("%s: cannot create stub entry %s"),
-				     section->owner,
-				     stub_name);
-	      return FALSE;
-	    }
+	  stub_entry = _bfd_aarch64_add_stub_entry_in_group (stub_name,
+							     section,
+							     htab);
+	  if (! stub_entry)
+	    return FALSE;
 
-	  stub_entry->stub_sec = stub_sec;
-	  stub_entry->stub_offset = 0;
-	  stub_entry->id_sec = link_sec;
 	  stub_entry->stub_type = erratum_835769_fixes[i].stub_type;
 	  stub_entry->target_section = section;
 	  stub_entry->target_value = erratum_835769_fixes[i].offset;
