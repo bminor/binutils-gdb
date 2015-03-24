@@ -1,5 +1,25 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* nat/x86-linux-dregs.h: New file.
+	* nat/x86-linux-dregs.c: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/x86-linux-dregs.h.
+	(x86-linux-dregs.o): New rule.
+	* config/i386/linux.mh (NATDEPFILES): Add x86-linux-dregs.o.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* x86-linux-nat.c: Include nat/x86-linux-dregs.h.
+	(u_debugreg_offset): Moved to nat/x86-linux-dregs.c.
+	(x86_linux_dr_get): Likewise.
+	(x86_linux_dr_set): Likewise.
+	(x86_linux_dr_get_addr): Likewise.
+	(x86_linux_dr_get_control): Likewise.
+	(x86_linux_dr_get_status): Likewise.
+	(update_debug_registers_callback): Likewise.
+	(x86_linux_dr_set_control): Likewise.
+	(x86_linux_dr_set_addr): Likewise.
+	(x86_linux_update_debug_registers): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* x86-linux-nat.c (x86_linux_update_debug_registers):
 	New function, factored out from...
 	(x86_linux_prepare_to_resume): ...this.

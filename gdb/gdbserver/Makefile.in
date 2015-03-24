@@ -612,6 +612,9 @@ btrace-common.o: ../common/btrace-common.c
 x86-linux.o: ../nat/x86-linux.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+x86-linux-dregs.o: ../nat/x86-linux-dregs.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
 aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
