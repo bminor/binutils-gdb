@@ -25,4 +25,11 @@
    instead SIGTRAP with bit 7 set.  */
 #define SYSCALL_SIGTRAP (SIGTRAP | 0x80)
 
+/* Return the ptid of the current lightweight process.  With NPTL
+   threads and LWPs map 1:1, so this is equivalent to returning the
+   ptid of the current thread.  This function must be provided by
+   the client. */
+
+extern ptid_t current_lwp_ptid (void);
+
 #endif /* LINUX_NAT_H */

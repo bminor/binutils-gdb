@@ -4938,6 +4938,15 @@ linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
   return 1;
 }
 
+/* See nat/linux-nat.h.  */
+
+ptid_t
+current_lwp_ptid (void)
+{
+  gdb_assert (ptid_lwp_p (inferior_ptid));
+  return inferior_ptid;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_linux_nat;
 

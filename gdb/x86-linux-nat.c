@@ -38,6 +38,7 @@
 #endif
 #include "x86-xstate.h"
 #include "nat/linux-btrace.h"
+#include "nat/linux-nat.h"
 
 /* Per-thread arch-specific data we want to keep.  */
 
@@ -107,7 +108,7 @@ x86_linux_dr_get_addr (int regnum)
   /* DR6 and DR7 are retrieved with some other way.  */
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
-  return x86_linux_dr_get (inferior_ptid, regnum);
+  return x86_linux_dr_get (current_lwp_ptid (), regnum);
 }
 
 /* Return the inferior's DR7 debug control register.  */
@@ -115,7 +116,7 @@ x86_linux_dr_get_addr (int regnum)
 static unsigned long
 x86_linux_dr_get_control (void)
 {
-  return x86_linux_dr_get (inferior_ptid, DR_CONTROL);
+  return x86_linux_dr_get (current_lwp_ptid (), DR_CONTROL);
 }
 
 /* Get DR_STATUS from only the one LWP of INFERIOR_PTID.  */
@@ -123,7 +124,7 @@ x86_linux_dr_get_control (void)
 static unsigned long
 x86_linux_dr_get_status (void)
 {
-  return x86_linux_dr_get (inferior_ptid, DR_STATUS);
+  return x86_linux_dr_get (current_lwp_ptid (), DR_STATUS);
 }
 
 /* Callback for iterate_over_lwps.  Update the debug registers of
@@ -153,7 +154,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 static void
 x86_linux_dr_set_control (unsigned long control)
 {
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
 
   iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
@@ -164,7 +165,7 @@ x86_linux_dr_set_control (unsigned long control)
 static void
 x86_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
 
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 

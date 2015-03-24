@@ -1,3 +1,11 @@
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* linux-low.c (current_lwp_ptid): New function.
+	* linux-x86-low.c: Include nat/linux-nat.h.
+	(x86_dr_low_get_addr): Use current_lwp_ptid.
+	(x86_dr_low_get_control): Likewise.
+	(x86_dr_low_get_status): Likewise.
+
 2015-03-20  Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (cmd_qtstatus): Make "str" const.

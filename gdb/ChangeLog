@@ -1,3 +1,14 @@
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-nat.h (current_lwp_ptid): New declaration.
+	* linux-nat.c (current_lwp_ptid): New function.
+	* x86-linux-nat.c: Include nat/linux-nat.h.
+	(x86_linux_dr_get_addr): Use current_lwp_ptid.
+	(x86_linux_dr_get_control): Likewise.
+	(x86_linux_dr_get_status): Likewise.
+	(x86_linux_dr_set_control): Likewise.
+	(x86_linux_dr_set_addr): Likewise.
+
 2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	PR breakpoints/16466

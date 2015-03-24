@@ -37,6 +37,7 @@
 #include "tdesc.h"
 #include "tracepoint.h"
 #include "ax.h"
+#include "nat/linux-nat.h"
 
 #ifdef __x86_64__
 /* Defined in auto-generated file amd64-linux.c.  */
@@ -615,11 +616,9 @@ x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 static CORE_ADDR
 x86_dr_low_get_addr (int regnum)
 {
-  ptid_t ptid = ptid_of (current_thread);
-
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
-  return x86_linux_dr_get (ptid, regnum);
+  return x86_linux_dr_get (current_lwp_ptid (), regnum);
 }
 
 /* Update the inferior's DR7 debug control register from STATE.  */
@@ -638,9 +637,7 @@ x86_dr_low_set_control (unsigned long control)
 static unsigned long
 x86_dr_low_get_control (void)
 {
-  ptid_t ptid = ptid_of (current_thread);
-
-  return x86_linux_dr_get (ptid, DR_CONTROL);
+  return x86_linux_dr_get (current_lwp_ptid (), DR_CONTROL);
 }
 
 /* Get the value of the DR6 debug status register from the inferior
@@ -649,9 +646,7 @@ x86_dr_low_get_control (void)
 static unsigned long
 x86_dr_low_get_status (void)
 {
-  ptid_t ptid = ptid_of (current_thread);
-
-  return x86_linux_dr_get (ptid, DR_STATUS);
+  return x86_linux_dr_get (current_lwp_ptid (), DR_STATUS);
 }
 
 /* Low-level function vector.  */

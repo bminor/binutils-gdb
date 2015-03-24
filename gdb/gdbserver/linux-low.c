@@ -6218,6 +6218,14 @@ linux_low_btrace_conf (const struct btrace_target_info *tinfo,
 }
 #endif /* HAVE_LINUX_BTRACE */
 
+/* See nat/linux-nat.h.  */
+
+ptid_t
+current_lwp_ptid (void)
+{
+  return ptid_of (current_thread);
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
