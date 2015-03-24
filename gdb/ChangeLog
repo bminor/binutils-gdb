@@ -1,5 +1,15 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-nat.h: Include nat/linux-nat.h.
+	(iterate_over_lwps): Move declaration to nat/linux-nat.h.
+	* nat/linux-nat.h (struct lwp_info): New forward declaration.
+	(iterate_over_lwps_ftype): New typedef.
+	(iterate_over_lwps): New declaration.
+	* linux-nat.h (iterate_over_lwps): Update comment.  Use
+	iterate_over_lwps_ftype.  Update callback return value check.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* x86-nat.h (x86_debug_reg_state): Move declaration to...
 	* nat/x86-dregs.h (x86_debug_reg_state): New declaration.
 

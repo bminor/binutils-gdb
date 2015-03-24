@@ -1,5 +1,17 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-low.h: Include nat/linux-nat.h.
+	* linux-low.c (iterate_over_lwps_args): New structure.
+	(iterate_over_lwps_filter): New function.
+	(iterate_over_lwps): Likewise.
+	* linux-x86-low.c (update_debug_registers_callback):
+	Update signature to what iterate_over_lwps expects.
+	Remove PID check that iterate_over_lwps now performs.
+	(x86_dr_low_set_addr): Use iterate_over_lwps.
+	(x86_dr_low_set_control): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-x86-low.c (x86_debug_reg_state): New function.
 	(x86_linux_prepare_to_resume): Use the above.
 

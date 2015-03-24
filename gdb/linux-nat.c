@@ -834,14 +834,11 @@ find_lwp_pid (ptid_t ptid)
   return NULL;
 }
 
-/* Call CALLBACK with its second argument set to DATA for every LWP in
-   the list.  If CALLBACK returns 1 for a particular LWP, return a
-   pointer to the structure describing that LWP immediately.
-   Otherwise return NULL.  */
+/* See nat/linux-nat.h.  */
 
 struct lwp_info *
 iterate_over_lwps (ptid_t filter,
-		   int (*callback) (struct lwp_info *, void *),
+		   iterate_over_lwps_ftype callback,
 		   void *data)
 {
   struct lwp_info *lp, *lpnext;
@@ -852,7 +849,7 @@ iterate_over_lwps (ptid_t filter,
 
       if (ptid_match (lp->ptid, filter))
 	{
-	  if ((*callback) (lp, data))
+	  if ((*callback) (lp, data) != 0)
 	    return lp;
 	}
     }

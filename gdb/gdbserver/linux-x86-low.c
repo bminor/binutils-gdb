@@ -575,25 +575,16 @@ x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 }
 
 static int
-update_debug_registers_callback (struct inferior_list_entry *entry,
-				 void *pid_p)
+update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 {
-  struct thread_info *thr = (struct thread_info *) entry;
-  struct lwp_info *lwp = get_thread_lwp (thr);
-  int pid = *(int *) pid_p;
+  /* The actual update is done later just before resuming the lwp,
+     we just mark that the registers need updating.  */
+  lwp->arch_private->debug_registers_changed = 1;
 
-  /* Only update the threads of this process.  */
-  if (pid_of (thr) == pid)
-    {
-      /* The actual update is done later just before resuming the lwp,
-	 we just mark that the registers need updating.  */
-      lwp->arch_private->debug_registers_changed = 1;
-
-      /* If the lwp isn't stopped, force it to momentarily pause, so
-	 we can update its debug registers.  */
-      if (!lwp->stopped)
-	linux_stop_lwp (lwp);
-    }
+  /* If the lwp isn't stopped, force it to momentarily pause, so
+     we can update its debug registers.  */
+  if (!lwp->stopped)
+    linux_stop_lwp (lwp);
 
   return 0;
 }
@@ -604,11 +595,11 @@ static void
 x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
   /* Only update the threads of this process.  */
-  int pid = pid_of (current_thread);
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
 
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
-  find_inferior (&all_threads, update_debug_registers_callback, &pid);
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
 
 /* Return the inferior's debug register REGNUM.  */
@@ -627,9 +618,9 @@ static void
 x86_dr_low_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
-  int pid = pid_of (current_thread);
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
 
-  find_inferior (&all_threads, update_debug_registers_callback, &pid);
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
 
 /* Return the inferior's DR7 debug control register.  */
