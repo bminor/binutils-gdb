@@ -1,5 +1,10 @@
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume, proceed): Mention
+	switch_back_to_stepped_thread, not switch_back_to_stepping.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (user_visible_resume_ptid): Rewrite going from
 	most-locked to unlocked instead of the opposite.  Move comment ...
 	* infrun.h (user_visible_resume_ptid): ... here.

@@ -2180,9 +2180,9 @@ resume (enum gdb_signal sig)
 		 reported to handle_inferior_event.  Set a breakpoint
 		 at the current PC, and run to it.  Don't update
 		 prev_pc, because if we end in
-		 switch_back_to_stepping, we want the "expected thread
-		 advanced also" branch to be taken.  IOW, we don't
-		 want this thread to step further from PC
+		 switch_back_to_stepped_thread, we want the "expected
+		 thread advanced also" branch to be taken.  IOW, we
+		 don't want this thread to step further from PC
 		 (overstep).  */
 	      insert_single_step_breakpoint (gdbarch, aspace, pc);
 	      insert_breakpoints ();
@@ -2668,7 +2668,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 				target_pid_to_str (step_over->ptid));
 
 	  /* Store the prev_pc for the stepping thread too, needed by
-	     switch_back_to_stepping thread.  */
+	     switch_back_to_stepped_thread.  */
 	  tp->prev_pc = regcache_read_pc (get_current_regcache ());
 	  switch_to_thread (step_over->ptid);
 	  tp = step_over;
