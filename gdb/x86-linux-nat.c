@@ -171,14 +171,16 @@ x86_linux_dr_set_addr (int regnum, CORE_ADDR addr)
   iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
 
-/* Called prior to resuming a thread.  Updates the thread's debug
-   registers if the values in our local mirror have been changed.  */
+/* Update the thread's debug registers if the values in our local
+   mirror have been changed.  */
 
 static void
-x86_linux_prepare_to_resume (struct lwp_info *lwp)
+x86_linux_update_debug_registers (struct lwp_info *lwp)
 {
   ptid_t ptid = ptid_of_lwp (lwp);
   int clear_status = 0;
+
+  gdb_assert (lwp_is_stopped (lwp));
 
   if (lwp_debug_registers_changed (lwp))
     {
@@ -215,6 +217,14 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
   if (clear_status
       || lwp_stop_reason (lwp) == TARGET_STOPPED_BY_WATCHPOINT)
     x86_linux_dr_set (ptid, DR_STATUS, 0);
+}
+
+/* Called prior to resuming a thread.  */
+
+static void
+x86_linux_prepare_to_resume (struct lwp_info *lwp)
+{
+  x86_linux_update_debug_registers (lwp);
 }
 
 /* Called when a new thread is detected.  */

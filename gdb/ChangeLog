@@ -1,5 +1,11 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* x86-linux-nat.c (x86_linux_update_debug_registers):
+	New function, factored out from...
+	(x86_linux_prepare_to_resume): ...this.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* x86-linux-nat.c (x86_linux_dr_get): Update comments.
 	(x86_linux_dr_set): Likewise.
 	(x86_linux_dr_get_addr): Likewise.
