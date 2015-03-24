@@ -1,3 +1,20 @@
+2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* config/tc-arm.c (no_cpu_selected): Use new macro to compare
+	features.
+	(parse_psr): Likewise.
+	(do_t_mrs): Likewise.
+	(do_t_msr): Likewise.
+	(static const arm_feature_set arm_ext_*): Defined with new macros.
+	(static const arm_feature_set arm_cext_*): Likewise.
+	(static const arm_feature_set fpu_fpa_ext_*): Likewise.
+	(static const arm_feature_set fpu_vfp_ext_*): Likewise.
+	(deprecated_coproc_regs): Likewise.
+	(UL_BARRIER): Likewise.
+	(barrier_opt_names): Likewise.
+	(arm_cpus): Likewise.
+	(arm_extensions): Likewise.
+
 2015-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_align_code): Limit multi-byte nop
