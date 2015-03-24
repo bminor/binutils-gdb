@@ -1,3 +1,8 @@
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Move default option setting
+	of enable_sim_hardware to AC_ARG_ENABLE.
+
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Delete SIM_DV_SOCKSER_O.

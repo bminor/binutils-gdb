@@ -14007,12 +14007,6 @@ case "${target}" in
 	;;
 esac
 
-if test x"$hw_enabled" != x"no"; then
-  enable_sim_hardware=yes
-else
-  enable_sim_hardware=no
-fi
-
 if test "$hw_devices"; then
   hardware="$hw_devices"
 else
@@ -14027,6 +14021,8 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\
 # Check whether --enable-sim-hardware was given.
 if test "${enable_sim_hardware+set}" = set; then :
   enableval=$enable_sim_hardware;
+else
+  enable_sim_hardware="$hw_enabled"
 fi
 
 case ${enable_sim_hardware} in

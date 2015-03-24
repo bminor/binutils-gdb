@@ -13535,12 +13535,6 @@ fi
 fi
 
 
-if test x"yes" != x"no"; then
-  enable_sim_hardware=yes
-else
-  enable_sim_hardware=no
-fi
-
 if test ""; then
   hardware=""
 else
@@ -13555,6 +13549,8 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\
 # Check whether --enable-sim-hardware was given.
 if test "${enable_sim_hardware+set}" = set; then :
   enableval=$enable_sim_hardware;
+else
+  enable_sim_hardware="yes"
 fi
 
 case ${enable_sim_hardware} in

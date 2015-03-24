@@ -590,12 +590,6 @@ dnl arg[2] is a space separated list of devices that override the defaults
 dnl arg[3] is a space separated list of extra target specific devices.
 AC_DEFUN([SIM_AC_OPTION_HARDWARE],
 [
-if test x"[$1]" != x"no"; then
-  enable_sim_hardware=yes
-else
-  enable_sim_hardware=no
-fi
-
 if test "[$2]"; then
   hardware="[$2]"
 else
@@ -609,7 +603,8 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/
 
 AC_ARG_ENABLE(sim-hardware,
   [AS_HELP_STRING([--enable-sim-hardware=LIST],
-                  [Specify the hardware to be included in the build.])])
+                  [Specify the hardware to be included in the build.])],
+  ,[enable_sim_hardware="[$1]"])
 case ${enable_sim_hardware} in
   yes|no) ;;
   ,*) hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
