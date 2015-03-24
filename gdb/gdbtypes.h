@@ -439,7 +439,7 @@ enum dynamic_prop_node_kind
 {
   /* A property providing a type's data location.
      Evaluating this field yields to the location of an object's data.  */
-  DYN_ATTR_DATA_LOCATION,
+  DYN_PROP_DATA_LOCATION,
 };
 
 /* * List for dynamic type attributes.  */
@@ -1258,7 +1258,7 @@ extern void allocate_gnat_aux_type (struct type *);
 
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \
-  get_dyn_prop (DYN_ATTR_DATA_LOCATION, thistype)
+  get_dyn_prop (DYN_PROP_DATA_LOCATION, thistype)
 #define TYPE_DATA_LOCATION_BATON(thistype) \
   TYPE_DATA_LOCATION (thistype)->data.baton
 #define TYPE_DATA_LOCATION_ADDR(thistype) \

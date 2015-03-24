@@ -1,3 +1,12 @@
+2015-03-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.h (enum dynamic_prop_node_kind) <DYN_PROP_DATA_LOCATION>:
+	Renames DYN_ATTR_DATA_LOCATION.
+	(TYPE_DATA_LOCATION): Use DYN_PROP_DATA_LOCATION instead of
+	DYN_ATTR_DATA_LOCATION.
+	* dwarf2read.c (set_die_type): Use DYN_PROP_DATA_LOCATION
+	instead of DYN_ATTR_DATA_LOCATION.
+
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (until_break_command): Adjust call to proceed.
