@@ -1,3 +1,9 @@
+2015-03-24  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffgen.c (coff_get_normalized_symtab): Fix test for out of
+	range auxillary sections.
+
 2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* elfnn-aarch64.c (_bfd_aarch64_create_or_find_stub_sec): Factor

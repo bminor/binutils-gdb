@@ -1808,7 +1808,7 @@ coff_get_normalized_symtab (bfd *abfd)
       if (symbol_ptr->u.syment.n_sclass == C_FILE
 	  && symbol_ptr->u.syment.n_numaux > 0
 	  && raw_src + symesz + symbol_ptr->u.syment.n_numaux
-	  * sizeof (union internal_auxent) >= raw_end)
+	  * symesz > raw_end)
 	{
 	  bfd_release (abfd, internal);
 	  return NULL;
@@ -1827,7 +1827,6 @@ coff_get_normalized_symtab (bfd *abfd)
 	    }
 
 	  raw_src += symesz;
-
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,
 				symbol_ptr->u.syment.n_sclass,
