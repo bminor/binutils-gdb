@@ -1,3 +1,12 @@
+2015-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18087
+	* compress.c (bfd_compress_section_contents): Don't write the
+	zlib header and set contents as well as compress_status if
+	compression didn't make the section smaller.
+	(bfd_init_section_compress_status): Don't check compression
+	size here.
+
 2015-03-24  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

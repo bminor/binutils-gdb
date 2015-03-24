@@ -96,26 +96,34 @@ bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
       return FALSE;
     }
 
-  /* Write the zlib header.  In this case, it should be "ZLIB" followed
-     by the uncompressed section size, 8 bytes in big-endian order.  */
-  memcpy (compressed_buffer, "ZLIB", 4);
-  compressed_buffer[11] = uncompressed_size; uncompressed_size >>= 8;
-  compressed_buffer[10] = uncompressed_size; uncompressed_size >>= 8;
-  compressed_buffer[9] = uncompressed_size; uncompressed_size >>= 8;
-  compressed_buffer[8] = uncompressed_size; uncompressed_size >>= 8;
-  compressed_buffer[7] = uncompressed_size; uncompressed_size >>= 8;
-  compressed_buffer[6] = uncompressed_size; uncompressed_size >>= 8;
-  compressed_buffer[5] = uncompressed_size; uncompressed_size >>= 8;
-  compressed_buffer[4] = uncompressed_size;
   compressed_size += 12;
 
-  /* Free the uncompressed contents if we compress in place.  */
-  if (uncompressed_buffer == sec->contents)
-    free (uncompressed_buffer);
+  /* PR binutils/18087: If compression didn't make the section smaller,
+     just keep it uncompressed.  */
+  if (compressed_size < uncompressed_size)
+    {
+      /* Write the zlib header.  In this case, it should be "ZLIB" followed
+	 by the uncompressed section size, 8 bytes in big-endian order.  */
+      memcpy (compressed_buffer, "ZLIB", 4);
+      compressed_buffer[11] = uncompressed_size; uncompressed_size >>= 8;
+      compressed_buffer[10] = uncompressed_size; uncompressed_size >>= 8;
+      compressed_buffer[9] = uncompressed_size; uncompressed_size >>= 8;
+      compressed_buffer[8] = uncompressed_size; uncompressed_size >>= 8;
+      compressed_buffer[7] = uncompressed_size; uncompressed_size >>= 8;
+      compressed_buffer[6] = uncompressed_size; uncompressed_size >>= 8;
+      compressed_buffer[5] = uncompressed_size; uncompressed_size >>= 8;
+      compressed_buffer[4] = uncompressed_size;
 
-  sec->contents = compressed_buffer;
-  sec->size = compressed_size;
-  sec->compress_status = COMPRESS_SECTION_DONE;
+      free (uncompressed_buffer);
+      sec->contents = compressed_buffer;
+      sec->size = compressed_size;
+      sec->compress_status = COMPRESS_SECTION_DONE;
+    }
+  else
+    {
+      sec->contents = uncompressed_buffer;
+      sec->compress_status = COMPRESS_SECTION_NONE;
+    }
 
   return TRUE;
 }
@@ -423,18 +431,6 @@ bfd_init_section_compress_status (bfd *abfd ATTRIBUTE_UNUSED,
     ret = bfd_compress_section_contents (abfd, sec,
 					 uncompressed_buffer,
 					 uncompressed_size);
-
-  /* PR binutils/18087: If compression didn't make
-     the section smaller, just keep it uncompressed.  */
-  if (ret && uncompressed_size < sec->size)
-    {
-      free (sec->contents);
-      sec->contents = uncompressed_buffer;
-      sec->size = uncompressed_size;
-      sec->compress_status = COMPRESS_SECTION_NONE;
-    }
-  else
-    free (uncompressed_buffer);
 
   return ret;
 #endif
