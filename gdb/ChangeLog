@@ -1,5 +1,10 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* x86-nat.h (x86_debug_reg_state): Move declaration to...
+	* nat/x86-dregs.h (x86_debug_reg_state): New declaration.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* nat/linux-nat.h (current_lwp_ptid): New declaration.
 	* linux-nat.c (current_lwp_ptid): New function.
 	* x86-linux-nat.c: Include nat/linux-nat.h.

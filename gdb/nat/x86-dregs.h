@@ -92,6 +92,11 @@ struct x86_debug_reg_state
 #define ALL_DEBUG_ADDRESS_REGISTERS(i) \
   for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 
+/* Return a pointer to the local mirror of the debug registers of
+   process PID.  This function must be provided by the client
+   if required.  */
+extern struct x86_debug_reg_state *x86_debug_reg_state (pid_t pid);
+
 /* Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses
    of the type TYPE.  Return 0 on success, -1 on failure.  */

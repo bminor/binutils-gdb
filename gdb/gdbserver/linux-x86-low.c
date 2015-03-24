@@ -776,6 +776,16 @@ x86_linux_new_thread (void)
   return info;
 }
 
+/* See nat/x86-dregs.h.  */
+
+struct x86_debug_reg_state *
+x86_debug_reg_state (pid_t pid)
+{
+  struct process_info *proc = find_process_pid (pid);
+
+  return &proc->priv->arch_private->debug_reg_state;
+}
+
 /* Called when resuming a thread.
    If the debug regs have changed, update the thread's copies.  */
 
@@ -787,11 +797,9 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 
   if (lwp->arch_private->debug_registers_changed)
     {
-      int i;
-      int pid = ptid_get_pid (ptid);
-      struct process_info *proc = find_process_pid (pid);
       struct x86_debug_reg_state *state
-	= &proc->priv->arch_private->debug_reg_state;
+	= x86_debug_reg_state (ptid_get_pid (ptid));
+      int i;
 
       x86_linux_dr_set (ptid, DR_CONTROL, 0);
 

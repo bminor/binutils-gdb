@@ -1,5 +1,10 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-x86-low.c (x86_debug_reg_state): New function.
+	(x86_linux_prepare_to_resume): Use the above.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-low.c (current_lwp_ptid): New function.
 	* linux-x86-low.c: Include nat/linux-nat.h.
 	(x86_dr_low_get_addr): Use current_lwp_ptid.
