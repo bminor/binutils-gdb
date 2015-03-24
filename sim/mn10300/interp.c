@@ -396,6 +396,11 @@ sim_store_register (SIM_DESC sd,
   return length;
 }
 
+sim_cia
+sim_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}
 
 void
 mn10300_core_signal (SIM_DESC sd,

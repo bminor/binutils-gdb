@@ -679,6 +679,12 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return 2;
 }
 
+sim_cia
+sim_pc_get (sim_cpu *cpu)
+{
+  return CIA_GET (cpu);
+}
+
 /* Halt the simulator after just one instruction */
 
 static void

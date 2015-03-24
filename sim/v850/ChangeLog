@@ -1,3 +1,7 @@
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_pc_get): New function.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

@@ -1,5 +1,9 @@
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_pc_get): New function.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c (sim_set_profile, sim_set_profile_size, sim_set_callbacks,
 	sim_size, sim_trace): Delete.
 	* sim-main.h (sim_set_profile, sim_set_profile_size): Delete.
