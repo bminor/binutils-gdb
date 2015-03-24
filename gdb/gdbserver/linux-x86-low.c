@@ -585,7 +585,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 /* Update the inferior's debug register REGNUM from STATE.  */
 
 static void
-x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
+x86_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
   /* Only update the threads of this process.  */
   ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
@@ -598,7 +598,7 @@ x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 /* Return the inferior's debug register REGNUM.  */
 
 static CORE_ADDR
-x86_dr_low_get_addr (int regnum)
+x86_linux_dr_get_addr (int regnum)
 {
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
@@ -608,7 +608,7 @@ x86_dr_low_get_addr (int regnum)
 /* Update the inferior's DR7 debug control register from STATE.  */
 
 static void
-x86_dr_low_set_control (unsigned long control)
+x86_linux_dr_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
   ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
@@ -619,7 +619,7 @@ x86_dr_low_set_control (unsigned long control)
 /* Return the inferior's DR7 debug control register.  */
 
 static unsigned long
-x86_dr_low_get_control (void)
+x86_linux_dr_get_control (void)
 {
   return x86_linux_dr_get (current_lwp_ptid (), DR_CONTROL);
 }
@@ -628,7 +628,7 @@ x86_dr_low_get_control (void)
    and record it in STATE.  */
 
 static unsigned long
-x86_dr_low_get_status (void)
+x86_linux_dr_get_status (void)
 {
   return x86_linux_dr_get (current_lwp_ptid (), DR_STATUS);
 }
@@ -636,11 +636,11 @@ x86_dr_low_get_status (void)
 /* Low-level function vector.  */
 struct x86_dr_low_type x86_dr_low =
   {
-    x86_dr_low_set_control,
-    x86_dr_low_set_addr,
-    x86_dr_low_get_addr,
-    x86_dr_low_get_status,
-    x86_dr_low_get_control,
+    x86_linux_dr_set_control,
+    x86_linux_dr_set_addr,
+    x86_linux_dr_get_addr,
+    x86_linux_dr_get_status,
+    x86_linux_dr_get_control,
     sizeof (void *),
   };
 

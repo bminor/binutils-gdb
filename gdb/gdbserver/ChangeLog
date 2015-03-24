@@ -1,5 +1,19 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-x86-low.c (x86_dr_low_set_addr): Rename to...
+	(x86_linux_dr_set_addr): ...this.
+	(x86_dr_low_get_addr): Rename to...
+	(x86_linux_dr_get_addr): ...this.
+	(x86_dr_low_set_control): Rename to...
+	(x86_linux_dr_set_control): ...this.
+	(x86_dr_low_get_control): Rename to...
+	(x86_linux_dr_get_control): ...this.
+	(x86_dr_low_get_status): Rename to...
+	(x86_linux_dr_get_status): ...this.
+	(x86_dr_low): Update with new function names.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* Makefile.in (x86-linux.o): New rule.
 	* configure.srv: Add x86-linux.o to relevant targets.
 	* linux-low.c (lwp_set_arch_private_info): New function.
