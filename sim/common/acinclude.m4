@@ -585,7 +585,7 @@ AC_SUBST(sim_default_model)
 
 
 dnl --enable-sim-hardware is for users of the simulator
-dnl arg[1] Enable sim-hw by default? ("yes", "no", or "always")
+dnl arg[1] Enable sim-hw by default? ("yes" or "no")
 dnl arg[2] is a space separated list of devices that override the defaults
 dnl arg[3] is a space separated list of extra target specific devices.
 AC_DEFUN([SIM_AC_OPTION_HARDWARE],
@@ -611,18 +611,13 @@ AC_ARG_ENABLE(sim-hardware,
   [AS_HELP_STRING([--enable-sim-hardware=LIST],
                   [Specify the hardware to be included in the build.])])
 case ${enable_sim_hardware} in
-  yes)  sim_hw_p=yes;;
-  no)   sim_hw_p=no;;
-  ,*)   sim_hw_p=yes; hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
-  *,)   sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
-  *)    sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
+  yes|no) ;;
+  ,*) hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
+  *,) hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
+  *)  hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
 esac
 
-if test "$sim_hw_p" != yes; then
-  if test "[$1]" = "always"; then
-    AC_MSG_ERROR([Sorry, but this simulator requires that hardware support
-be enabled. Please configure without --disable-hw-support.])
-  fi
+if test "$enable_sim_hardware" = no; then
   sim_hw_objs=
   sim_hw_cflags="-DWITH_HW=0"
   sim_hw=

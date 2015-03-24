@@ -13,6 +13,10 @@
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
 	* configure.ac: Delete SIM_DV_SOCKSER_O check.
 
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>

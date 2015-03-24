@@ -1,6 +1,10 @@
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
 	* configure.ac (BFIN_SIM_EXTRA_OBJS): Delete.
 	* Makefile.in (SIM_OBJS): Delete @BFIN_SIM_EXTRA_OBJS@.
 

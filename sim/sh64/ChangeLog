@@ -4,6 +4,10 @@
 
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (CONFIG_DEVICES): Delete.
 	(SIM_OBJS): Delete CONFIG_DEVICES.
 

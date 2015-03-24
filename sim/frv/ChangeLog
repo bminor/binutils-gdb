@@ -1,5 +1,9 @@
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* devices.c: Delete dv-sockser.h include.
 	(device_io_read_buffer): Delete uart code.
 	(device_io_write_buffer): Likewise.
