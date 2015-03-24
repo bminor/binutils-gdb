@@ -73,6 +73,9 @@ struct thread_control_state
   CORE_ADDR step_range_start;	/* Inclusive */
   CORE_ADDR step_range_end;	/* Exclusive */
 
+  /* Function the thread was in as of last it started stepping.  */
+  struct symbol *step_start_function;
+
   /* If GDB issues a target step request, and this is nonzero, the
      target should single-step this thread once, and then continue
      single-stepping it without GDB core involvement as long as the

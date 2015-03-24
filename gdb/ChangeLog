@@ -1,5 +1,14 @@
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (step_start_function): Delete and ...
+	* gdbthread.h (struct thread_control_state) <step_start_function>:
+	... now a field here.
+	* infrun.c (clear_proceed_status_thread): Clear the thread's
+	step_start_function.
+	(proceed, process_event_stop_test, print_stop_event): Adjust.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (proceed): No longer handle negative step.
 
 2015-03-24  Gary Benson  <gbenson@redhat.com>

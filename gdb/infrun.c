@@ -326,10 +326,6 @@ update_signals_program_target (void)
 
 static struct cmd_list_element *stop_command;
 
-/* Function inferior was in as of last step command.  */
-
-static struct symbol *step_start_function;
-
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 int stop_on_solib_events;
@@ -2409,6 +2405,7 @@ clear_proceed_status_thread (struct thread_info *tp)
   tp->control.step_frame_id = null_frame_id;
   tp->control.step_stack_frame_id = null_frame_id;
   tp->control.step_over_calls = STEP_OVER_UNDEBUGGABLE;
+  tp->control.step_start_function = NULL;
   tp->stop_requested = 0;
 
   tp->control.stop_step = 0;
@@ -2589,7 +2586,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   tp = inferior_thread ();
 
   if (step)
-    step_start_function = find_pc_function (pc);
+    tp->control.step_start_function = find_pc_function (pc);
 
   /* Fill in with reasonable starting values.  */
   init_thread_stepping_state (tp);
@@ -5171,7 +5168,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 		       ecs->event_thread->control.step_stack_frame_id)
 	  && (!frame_id_eq (ecs->event_thread->control.step_stack_frame_id,
 			    outer_frame_id)
-	      || step_start_function != find_pc_function (stop_pc))))
+	      || (ecs->event_thread->control.step_start_function
+		  != find_pc_function (stop_pc)))))
     {
       CORE_ADDR real_stop_pc;
 
@@ -6444,7 +6442,7 @@ print_stop_event (struct target_waitstatus *ws)
       if (tp->control.stop_step
 	  && frame_id_eq (tp->control.step_frame_id,
 			  get_frame_id (get_current_frame ()))
-	  && step_start_function == find_pc_function (stop_pc))
+	  && tp->control.step_start_function == find_pc_function (stop_pc))
 	{
 	  /* Finished step, just print source line.  */
 	  source_flag = SRC_LINE;
