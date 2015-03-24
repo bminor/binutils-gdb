@@ -1,3 +1,16 @@
+2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* arm-dis.c (opcode32): Updated to use new arm feature struct.
+	(opcode16): Likewise.
+	(coprocessor_opcodes): Replace bit with feature struct.
+	(neon_opcodes): Likewise.
+	(arm_opcodes): Likewise.
+	(thumb_opcodes): Likewise.
+	(thumb32_opcodes): Likewise.
+	(print_insn_coprocessor): Likewise.
+	(print_insn_arm): Likewise.
+	(select_arm_features): Follow new feature struct.
+
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-tbl.h (aarch64_feature_rdma): New.
