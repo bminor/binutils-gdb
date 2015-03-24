@@ -1,3 +1,8 @@
+2015-03-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Don't break on
+	first matching debug section.
+
 2015-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/18087

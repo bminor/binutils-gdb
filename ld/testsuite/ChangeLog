@@ -1,3 +1,9 @@
+2015-03-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-gc/all-debug-sections.d: New file.
+	* ld-gc/all-debug-sections.s: Likewise.
+	* ld-gc/gc.exp: Execute new testcase.
+
 2015-03-11  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tls32.s: Add GOT pointer setup.

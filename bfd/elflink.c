@@ -12102,7 +12102,6 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 				isec->name, ilen) == 0)
 		  {
 		    dsec->gc_mark = 0;
-		    break;
 		  }
 	      }
 	  }
