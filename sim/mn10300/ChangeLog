@@ -1,5 +1,9 @@
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (MN10300_OBJS): Delete dv-sockser.o.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
