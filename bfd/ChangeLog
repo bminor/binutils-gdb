@@ -1,3 +1,126 @@
+2015-03-24  Nick Clifton  <nickc@redhat.com>
+
+	Apply from master:
+	2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_compute_section_file_positions): Report
+	negative page sizes.
+
+	2015-02-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (styp_to_sec_flags): Use an unsigned long type to
+	hold the flag bits.
+
+	2015-02-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* peXXigen.c (rsrc_print_resource_entries): Add range check for
+	addresses that wrap around the address space.
+	(rsrc_parse_entry): Likewise.
+
+	2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ecoff.c: Use bfd_alloc2 to allocate space for structure arrays.
+	(_bfd_ecoff_slurp_symbol_table): Check for a negative symbol
+	index or an out of range fdr index.
+	* peXXigen.c (pe_print_edata):  Check for numeric overflow in edt
+	fields.
+
+	2015-01-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (handle_COMDAT): When searching for the section
+	symbol, make sure that there is space left in the symbol table.
+
+	2015-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_set_arch_mach_hook): Check return value from
+	bfd_malloc.
+	(coff_slurp_line_table): Return FALSE if the line number
+	information was corrupt.
+	(coff_slurp_symbol_table): Return FALSE if the symbol information
+	was corrupt.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Set bfd_error if the
+	read fails.
+	(slurp_symtab): Check the return from bfd_malloc.
+	(_bfd_XX_bfd_copy_private_bfd_data_common): Fail if the copy
+	encountered an error.
+	(_bfd_XXi_final_link_postscript): Fail if a section could not be
+	copied.
+	* peicode.h (pe_bfd_object_p): Fail if the header could not be
+	swapped in.
+
+	2015-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_symbol_table): Return false if we failed
+	to load the line table.
+
+	2015-01-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coff-i860.c (CALC_ADDEND): Always set an addend value.
+
+	2014-11-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ecoff.c (_bfd_ecoff_slurp_symbol_table): Warn about and correct
+	a discrepancy between the isymMax and ifdMax values in the
+	symbolic header.
+
+	2014-11-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coff-h8300.c (rtype2howto): Replace abort with returning a NULL
+	value.
+	* coff-h8500.c (rtype2howto): Likewise.
+	* coff-tic30.c (rtype2howto): Likewise.
+	* coff-z80.c (rtype2howto): Likewise.
+	* coff-z8k.c (rtype2howto): Likewise.
+	* coff-ia64.c (RTYPE2HOWTO): Always return a valid howto.
+	* coff-m68k.c (m68k_rtype2howto): Return a NULL howto if none
+	could be found.
+	* coff-mcore.c (RTYPE2HOWTO): Add range checking.
+	* coff-w65.c (rtype2howto): Likewise.
+	* coff-we32k.c (RTYPE2HOWTO): Likewise.
+	* pe-mips.c (RTYPE2HOWTO): Likewise.
+	* coff-x86_64.c (coff_amd64_reloc): Likewise.  Replace abort with
+	an error return.
+	* coffcode.h (coff_slurp_reloc_table): Allow the rel parameter to
+	be unused.
+	* coffgen.c (make_a_section_from_file): Check the length of a
+	section name before testing to see if it is a debug section name.
+	(coff_object_p): Zero out any uninitialised bytes in the opt
+	header.
+	* ecoff.c (_bfd_ecoff_slurp_symbolic_info): Test for the raw
+	source being empty when there are values to be processed.
+	(_bfd_ecoff_slurp_symbol_table): Add range check.
+
+	2014-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffgen.c (coff_get_normalized_symtab): Check for an excessive
+	number of auxillary entries.
+
+	2014-11-21  Alexander Cherepanov  <cherepan@mccme.ru>
+
+	PR binutils/17512
+	* coffgen.c (_bfd_coff_read_string_table): Test allocation of
+	string table before clearing the first few bytes.
+
+2014-11-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* peXXigen.c (pe_print_pdata): Fail if the section's virtual size
+	is larger than its real size.
+	(rsrc_print_section): Fix off-by-one error checking for overflow.
+	* pei-x86_64.c (pex64_bfd_print_pdata): Handle empty unwind
+	sections.
+
 2015-03-18  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

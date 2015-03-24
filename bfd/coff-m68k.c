@@ -143,6 +143,7 @@ m68k_rtype2howto (arelent *internal, int relocentry)
     case R_PCRWORD:	internal->howto = m68kcoff_howto_table + 4; break;
     case R_PCRLONG:	internal->howto = m68kcoff_howto_table + 5; break;
     case R_RELLONG_NEG:	internal->howto = m68kcoff_howto_table + 6; break;
+    default:            internal->howto = NULL; break;
     }
 }
 

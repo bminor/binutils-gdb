@@ -42,6 +42,8 @@ static reloc_howto_type howto_table[] =
     HOWTO (R_W65_DP,      0,  0, 8,  FALSE, 0, complain_overflow_bitfield, 0, "dp", TRUE, 0x000000ff, 0x000000ff, FALSE),
   };
 
+#define NUM_HOWTOS (sizeof (howto_table) / sizeof (howto_table[0]))
+
 /* Turn a howto into a reloc number.  */
 
 #define SELECT_RELOC(x,howto) \
@@ -61,7 +63,7 @@ static reloc_howto_type howto_table[] =
 static int
 select_reloc (reloc_howto_type *howto)
 {
-  return howto->type ;
+  return howto->type;
 }
 
 /* Code to turn a r_type into a howto ptr, uses the above howto table.  */
@@ -70,7 +72,10 @@ static void
 rtype2howto (arelent *internal,
 	     struct internal_reloc *dst)
 {
-  internal->howto = howto_table + dst->r_type - 1;
+  if (dst->r_type > 0 && dst->r_type <= NUM_HOWTOS)
+    internal->howto = howto_table + dst->r_type - 1;
+  else
+    internal->howto = NULL;
 }
 
 #define RTYPE2HOWTO(internal, relocentry) rtype2howto(internal,relocentry)
