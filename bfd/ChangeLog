@@ -1,3 +1,8 @@
+2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_size_stubs): Use
+	_bfd_aarch64_add_stub_entry_in_group.
+
 2015-03-23  Keith Seitz  <keiths@redhat.com>
 
 	* elfnn-aarch64.c (_bfd_aarch64_create_or_find_stub_sec): Add
