@@ -1997,19 +1997,13 @@ maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
   return hw_step;
 }
 
+/* See infrun.h.  */
+
 ptid_t
 user_visible_resume_ptid (int step)
 {
-  /* By default, resume all threads of all processes.  */
-  ptid_t resume_ptid = RESUME_ALL;
+  ptid_t resume_ptid;
 
-  /* Maybe resume only all threads of the current process.  */
-  if (!sched_multi && target_supports_multi_process ())
-    {
-      resume_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-    }
-
-  /* Maybe resume a single thread after all.  */
   if (non_stop)
     {
       /* With non-stop mode on, threads are always handled
@@ -2019,16 +2013,22 @@ user_visible_resume_ptid (int step)
   else if ((scheduler_mode == schedlock_on)
 	   || (scheduler_mode == schedlock_step && step))
     {
-      /* User-settable 'scheduler' mode requires solo thread resume.  */
+      /* User-settable 'scheduler' mode requires solo thread
+	 resume.  */
       resume_ptid = inferior_ptid;
     }
+  else if (!sched_multi && target_supports_multi_process ())
+    {
+      /* Resume all threads of the current process (and none of other
+	 processes).  */
+      resume_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+    }
+  else
+    {
+      /* Resume all threads of all processes.  */
+      resume_ptid = RESUME_ALL;
+    }
 
-  /* We may actually resume fewer threads at first, e.g., if a thread
-     is stopped at a breakpoint that needs stepping-off, but that
-     should not be visible to the user/frontend, and neither should
-     the frontend/user be allowed to proceed any of the threads that
-     happen to be stopped for internal run control handling, if a
-     previous command wanted them resumed.  */
   return resume_ptid;
 }
 

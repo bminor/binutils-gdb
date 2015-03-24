@@ -95,7 +95,13 @@ extern void proceed (CORE_ADDR, enum gdb_signal);
 extern void resume (enum gdb_signal);
 
 /* Return a ptid representing the set of threads that we will proceed,
-   in the perspective of the user/frontend.  */
+   in the perspective of the user/frontend.  We may actually resume
+   fewer threads at first, e.g., if a thread is stopped at a
+   breakpoint that needs stepping-off, but that should not be visible
+   to the user/frontend, and neither should the frontend/user be
+   allowed to proceed any of the threads that happen to be stopped for
+   internal run control handling, if a previous command wanted them
+   resumed.  */
 extern ptid_t user_visible_resume_ptid (int step);
 
 extern void wait_for_inferior (void);
