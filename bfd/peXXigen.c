@@ -526,6 +526,8 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
 	(*_bfd_error_handler)
 	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
 	   abfd, a->NumberOfRvaAndSizes);
+	bfd_set_error (bfd_error_bad_value);
+
 	/* Paranoia: If the number is corrupt, then assume that the
 	   actual entries themselves might be corrupt as well.  */
 	a->NumberOfRvaAndSizes = 0;
@@ -1149,7 +1151,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
   /* Ensure null termination of filename.  */
   buffer[256] = '\0';
 
-  cvinfo->CVSignature = H_GET_32(abfd, buffer);
+  cvinfo->CVSignature = H_GET_32 (abfd, buffer);
   cvinfo->Age = 0;
 
   if ((cvinfo->CVSignature == CVINFO_PDB70_CVSIGNATURE)
@@ -1755,6 +1757,8 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   /* PR 17512: Handle corrupt PE binaries.  */
   if (edt.eat_addr + (edt.num_functions * 4) - adj >= datasize
+      /* PR 17512: file: 092b1829 */
+      || (edt.num_functions * 4) < edt.num_functions
       /* PR 17512 file: 140-165018-0.004.  */
       || data + edt.eat_addr - adj < data)
     fprintf (file, _("\tInvalid Export Address Table rva (0x%lx) or entry count (0x%lx)\n"),
@@ -1799,6 +1803,8 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   /* PR 17512: Handle corrupt PE binaries.  */
   if (edt.npt_addr + (edt.num_names * 4) - adj >= datasize
+      /* PR 17512: file: bb68816e.  */
+      || edt.num_names * 4 < edt.num_names
       || (data + edt.npt_addr - adj) < data)
     fprintf (file, _("\tInvalid Name Pointer Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.npt_addr,
@@ -1889,6 +1895,14 @@ pe_print_pdata (bfd * abfd, void * vfile)
   datasize = section->size;
   if (datasize == 0)
     return TRUE;
+
+  /* PR 17512: file: 002-193900-0.004.  */
+  if (datasize < stop)
+    {
+      fprintf (file, _("Virtual size of .pdata section (%ld) larger than real size (%ld)\n"),
+	       (long) stop, (long) datasize);
+      return FALSE;
+    }
 
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
@@ -1999,7 +2013,11 @@ slurp_symtab (bfd *abfd, sym_cache *psc)
   if (storage < 0)
     return NULL;
   if (storage)
-    sy = (asymbol **) bfd_malloc (storage);
+    {
+      sy = (asymbol **) bfd_malloc (storage);
+      if (sy == NULL)
+	return NULL;
+    }
 
   psc->symcount = bfd_canonicalize_symtab (abfd, sy);
   if (psc->symcount < 0)
@@ -2198,7 +2216,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
     {
       int j;
       bfd_vma virtual_address;
-      long number, size;
+      unsigned long number, size;
       bfd_byte *chunk_end;
 
       /* The .reloc section is a sequence of blocks, with a header consisting
@@ -2213,7 +2231,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 
       fprintf (file,
 	       _("\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"),
-	       (unsigned long) virtual_address, size, (unsigned long) size, number);
+	       (unsigned long) virtual_address, size, size, number);
 
       chunk_end = p + size;
       if (chunk_end > end)
@@ -2284,6 +2302,7 @@ rsrc_print_resource_entries (FILE *         file,
 			     bfd_vma        rva_bias)
 {
   unsigned long entry, addr, size;
+  bfd_byte * leaf;
 
   if (data + 8 >= regions->section_end)
     return regions->section_end + 1;
@@ -2364,18 +2383,21 @@ rsrc_print_resource_entries (FILE *         file,
 					    regions, rva_bias);
     }
 
-  if (regions->section_start + entry + 16 >= regions->section_end)
+  leaf = regions->section_start + entry;
+
+  if (leaf + 16 >= regions->section_end
+      /* PR 17512: file: 055dff7e.  */
+      || leaf < regions->section_start)
     return regions->section_end + 1;
 
   fprintf (file, _("%03x %*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
-	   (int) (entry),
-	   indent, " ",
-	   addr = (long) bfd_get_32 (abfd, regions->section_start + entry),
-	   size = (long) bfd_get_32 (abfd, regions->section_start + entry + 4),
-	   (int) bfd_get_32 (abfd, regions->section_start + entry + 8));
+	   (int) (entry), indent, " ",
+	   addr = (long) bfd_get_32 (abfd, leaf),
+	   size = (long) bfd_get_32 (abfd, leaf + 4),
+	   (int) bfd_get_32 (abfd, leaf + 8));
 
   /* Check that the reserved entry is 0.  */
-  if (bfd_get_32 (abfd, regions->section_start + entry + 12) != 0
+  if (bfd_get_32 (abfd, leaf + 12) != 0
       /* And that the data address/size is valid too.  */
       || (regions->section_start + (addr - rva_bias) + size > regions->section_end))
     return regions->section_end + 1;
@@ -2526,7 +2548,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	      /* If the extra data is all zeros then do not complain.
 		 This is just padding so that the section meets the
 		 page size requirements.  */
-	      while (data ++ < regions.section_end)
+	      while (++ data < regions.section_end)
 		if (*data != 0)
 		  break;
 	      if (data < regions.section_end)
@@ -2652,7 +2674,10 @@ pe_print_debugdata (bfd * abfd, void * vfile)
       if (idd.Type == PE_IMAGE_DEBUG_TYPE_CODEVIEW)
         {
           char signature[CV_INFO_SIGNATURE_LENGTH * 2 + 1];
-          char buffer[256 + 1];
+	  /* PR 17512: file: 065-29434-0.001:0.1
+	     We need to use a 32-bit aligned buffer
+	     to safely read in a codeview record.  */
+          char buffer[256 + 1] ATTRIBUTE_ALIGNED_ALIGNOF (CODEVIEW_INFO);
           CODEVIEW_INFO *cvinfo = (CODEVIEW_INFO *) buffer;
 
           /* The debug entry doesn't have to have to be in a section,
@@ -2922,6 +2947,16 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
           struct external_IMAGE_DEBUG_DIRECTORY *dd =
 	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
 
+	  /* PR 17512: file: 0f15796a.  */
+	  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size + (addr - section->vma)
+	      > bfd_get_section_size (section))
+	    {
+	      _bfd_error_handler (_("%B: Data Directory size (%lx) exceeds space left in section (%lx)"),
+				  obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
+				  bfd_get_section_size (section) - (addr - section->vma));
+	      return FALSE;
+	    }
+
           for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
 		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
             {
@@ -2945,8 +2980,16 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
             }
 
           if (!bfd_set_section_contents (obfd, section, data, 0, section->size))
-            _bfd_error_handler (_("Failed to update file offsets in debug directory"));
+	    {
+	      _bfd_error_handler (_("Failed to update file offsets in debug directory"));
+	      return FALSE;
+	    }
         }
+      else if (section)
+	{
+	  _bfd_error_handler (_("%B: Failed to read debug data section"), obfd);
+	  return FALSE;
+	}
     }
 
   return TRUE;
@@ -3228,9 +3271,14 @@ rsrc_parse_entry (bfd *            abfd,
   if (entry->value.leaf == NULL)
     return dataend;
 
-  addr = bfd_get_32 (abfd, datastart + val);
-  size = entry->value.leaf->size = bfd_get_32 (abfd, datastart + val + 4);
-  entry->value.leaf->codepage = bfd_get_32 (abfd, datastart + val + 8);
+  data = datastart + val;
+  if (data < datastart || data >= dataend)
+    return dataend;
+
+  addr = bfd_get_32 (abfd, data);
+  size = entry->value.leaf->size = bfd_get_32 (abfd, data + 4);
+  entry->value.leaf->codepage = bfd_get_32 (abfd, data + 8);
+  /* FIXME: We assume that the reserved field (data + 12) is OK.  */
 
   entry->value.leaf->data = bfd_malloc (size);
   if (entry->value.leaf->data == NULL)
@@ -3560,6 +3608,7 @@ rsrc_cmp (bfd_boolean is_name, rsrc_entry * a, rsrc_entry * b)
 #elif defined HAVE_WCHAR_H
   {
     unsigned int  i;
+
     res = 0;
     for (i = min (alen, blen); i--; astring += 2, bstring += 2)
       {
@@ -4457,6 +4506,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	      }
 	    free (tmp_data);
 	  }
+	else
+	  result = FALSE;
       }
   }
 #endif

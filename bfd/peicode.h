@@ -1343,7 +1343,10 @@ pe_bfd_object_p (bfd * abfd)
 	  != (bfd_size_type) opt_hdr_size)
 	return NULL;
 
+      bfd_set_error (bfd_error_no_error);
       bfd_coff_swap_aouthdr_in (abfd, opthdr, & internal_a);
+      if (bfd_get_error () != bfd_error_no_error)
+	return NULL;
     }
 
   return coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,

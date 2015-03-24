@@ -136,7 +136,7 @@ rtype2howto (arelent *internal, struct internal_reloc *dst)
       internal->howto = &tic30_coff_howto_table[4];
       break;
     default:
-      abort ();
+      internal->howto = NULL;
       break;
     }
 }

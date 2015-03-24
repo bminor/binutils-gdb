@@ -1009,6 +1009,13 @@ handle_COMDAT (bfd * abfd,
 
 		seen_state = 1;
 
+		/* PR 17512: file: e2cfe54f.  */
+		if (esym + bfd_coff_symesz (abfd) >= esymend)
+		  {
+		    _bfd_error_handler (_("%B: warning: No symbol for section '%s' found"),
+					abfd, symname);
+		    break;
+		  }
 		/* This is the section symbol.  */
 		bfd_coff_swap_aux_in (abfd, (esym + bfd_coff_symesz (abfd)),
 				      isym.n_type, isym.n_sclass,
@@ -1162,7 +1169,7 @@ styp_to_sec_flags (bfd *abfd,
 		   flagword *flags_ptr)
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
-  long styp_flags = internal_s->s_flags;
+  unsigned long styp_flags = internal_s->s_flags;
   flagword sec_flags;
   bfd_boolean result = TRUE;
   bfd_boolean is_dbg = FALSE;
@@ -1185,7 +1192,7 @@ styp_to_sec_flags (bfd *abfd,
   /* Process each flag bit in styp_flags in turn.  */
   while (styp_flags)
     {
-      long flag = styp_flags & - styp_flags;
+      unsigned long flag = styp_flags & - styp_flags;
       char * unhandled = NULL;
 
       styp_flags &= ~ flag;
@@ -2073,7 +2080,11 @@ coff_mkobject_hook (bfd * abfd,
 #endif
 
   if ((internal_f->f_flags & F_GO32STUB) != 0)
-    coff->go32stub = (char *) bfd_alloc (abfd, (bfd_size_type) GO32_STUBSIZE);
+    {
+      coff->go32stub = (char *) bfd_alloc (abfd, (bfd_size_type) GO32_STUBSIZE);
+      if (coff->go32stub == NULL)
+	return NULL;
+    }
   if (coff->go32stub != NULL)
     memcpy (coff->go32stub, internal_f->go32stub, GO32_STUBSIZE);
 
@@ -2278,6 +2289,8 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
 		bfd_size_type amt = bfd_coff_symesz (abfd);
 
 		buf = bfd_malloc (amt);
+		if (buf == NULL)
+		  return FALSE;
 		if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
 		    || bfd_bread (buf, amt, abfd) != amt)
 		  {
@@ -2666,10 +2679,16 @@ coff_write_relocs (bfd * abfd, int first_undef)
 	amt = s->reloc_count;
 	amt *= sizeof (arelent *);
 	p = bfd_malloc (amt);
-	if (p == NULL && s->reloc_count > 0)
-	  return FALSE;
-	memcpy (p, s->orelocation, (size_t) amt);
-	qsort (p, s->reloc_count, sizeof (arelent *), compare_arelent_ptr);
+	if (p == NULL)
+	  {
+	    if (s->reloc_count > 0)
+	      return FALSE;
+	  }
+	else
+	  {
+	    memcpy (p, s->orelocation, (size_t) amt);
+	    qsort (p, s->reloc_count, sizeof (arelent *), compare_arelent_ptr);
+	  }
       }
 #endif
 
@@ -3151,6 +3170,15 @@ coff_compute_section_file_positions (bfd * abfd)
 	 This repairs 'ld -r' for arm-wince-pe target.  */
       if (page_size == 0)
 	page_size = 1;
+
+      /* PR 17512: file: 0ac816d3.  */
+      if (page_size < 0)
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  (*_bfd_error_handler)
+	    (_("%B: page size is too large (0x%x)"), abfd, page_size);
+	  return FALSE;
+	}
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;
@@ -4526,6 +4554,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   unsigned int nbr_func;
   LINENO *src;
   bfd_boolean have_func;
+  bfd_boolean ret = TRUE;
 
   BFD_ASSERT (asect->lineno == NULL);
 
@@ -4575,6 +4604,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
 		 abfd, (long) symndx, counter);
 	      cache_ptr->line_number = -1;
+	      ret = FALSE;
 	      continue;
 	    }
 
@@ -4587,6 +4617,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
 		 abfd, (long) symndx, counter);
 	      cache_ptr->line_number = -1;
+	      ret = FALSE;
 	      continue;
 	    }
 	  sym = (coff_symbol_type *) (ent->u.syment._n._n_n._n_zeroes);
@@ -4599,6 +4630,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		(_("%B: warning: illegal symbol in line number entry %d"),
 		 abfd, counter);
 	      cache_ptr->line_number = -1;
+	      ret = FALSE;
 	      continue;
 	    }
 
@@ -4678,11 +4710,15 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
+	  else
+	    ret = FALSE;
 	  bfd_release (abfd, func_table);
 	}
+      else
+	ret = FALSE;
     }
 
-  return TRUE;
+  return ret;
 }
 
 /* Slurp in the symbol table, converting it to generic form.  Note
@@ -4697,6 +4733,7 @@ coff_slurp_symbol_table (bfd * abfd)
   unsigned int *table_ptr;
   bfd_size_type amt;
   unsigned int number_of_symbols = 0;
+  bfd_boolean ret = TRUE;
 
   if (obj_symbols (abfd))
     return TRUE;
@@ -5012,13 +5049,14 @@ coff_slurp_symbol_table (bfd * abfd)
 #if defined(TIC80COFF) || defined(TICOFF)
 	    case C_UEXT:	/* Tentative external definition.  */
 #endif
-	    case C_EXTLAB:	/* External load time label.  */
-	    case C_HIDDEN:	/* Ext symbol in dmert public lib.  */
 	    default:
 	      (*_bfd_error_handler)
 		(_("%B: Unrecognized storage class %d for %s symbol `%s'"),
 		 abfd, src->u.syment.n_sclass,
 		 dst->symbol.section->name, dst->symbol.name);
+	      ret = FALSE;
+	    case C_EXTLAB:	/* External load time label.  */
+	    case C_HIDDEN:	/* Ext symbol in dmert public lib.  */
 	      dst->symbol.flags = BSF_DEBUGGING;
 	      dst->symbol.value = (src->u.syment.n_value);
 	      break;
@@ -5046,12 +5084,13 @@ coff_slurp_symbol_table (bfd * abfd)
     p = abfd->sections;
     while (p)
       {
-	coff_slurp_line_table (abfd, p);
+	if (! coff_slurp_line_table (abfd, p))
+	  return FALSE;
 	p = p->next;
       }
   }
 
-  return TRUE;
+  return ret;
 }
 
 /* Classify a COFF symbol.  A couple of targets have globally visible
@@ -5310,7 +5349,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 static reloc_howto_type *
 coff_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 		     asection *sec ATTRIBUTE_UNUSED,
-		     struct internal_reloc *rel,
+		     struct internal_reloc *rel ATTRIBUTE_UNUSED,
 		     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED,
 		     struct internal_syment *sym ATTRIBUTE_UNUSED,
 		     bfd_vma *addendp ATTRIBUTE_UNUSED)

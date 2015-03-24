@@ -504,7 +504,6 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   struct fdr *fdr_ptr;
   bfd_size_type raw_end;
   bfd_size_type cb_end;
-  bfd_size_type amt;
   file_ptr pos;
 
   BFD_ASSERT (debug == &ecoff_data (abfd)->debug_info);
@@ -607,14 +606,16 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
 
      We need to look at the fdr to deal with a lot of information in
      the symbols, so we swap them here.  */
-  amt = internal_symhdr->ifdMax;
-  amt *= sizeof (struct fdr);
-  debug->fdr = (FDR *) bfd_alloc (abfd, amt);
+  debug->fdr = (FDR *) bfd_alloc2 (abfd, internal_symhdr->ifdMax,
+				   sizeof (struct fdr));
   if (debug->fdr == NULL)
     return FALSE;
   external_fdr_size = backend->debug_swap.external_fdr_size;
   fdr_ptr = debug->fdr;
   fraw_src = (char *) debug->external_fdr;
+  /* PR 17512: file: 3372-1243-0.004.  */
+  if (fraw_src == NULL && internal_symhdr->ifdMax > 0)
+    return FALSE;
   fraw_end = fraw_src + internal_symhdr->ifdMax * external_fdr_size;
   for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
     (*backend->debug_swap.swap_fdr_in) (abfd, (void *) fraw_src, fdr_ptr);
@@ -856,7 +857,6 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
     = backend->debug_swap.swap_ext_in;
   void (* const swap_sym_in) (bfd *, void *, SYMR *)
     = backend->debug_swap.swap_sym_in;
-  bfd_size_type internal_size;
   ecoff_symbol_type *internal;
   ecoff_symbol_type *internal_ptr;
   char *eraw_src;
@@ -875,9 +875,8 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
   if (bfd_get_symcount (abfd) == 0)
     return TRUE;
 
-  internal_size = bfd_get_symcount (abfd);
-  internal_size *= sizeof (ecoff_symbol_type);
-  internal = (ecoff_symbol_type *) bfd_alloc (abfd, internal_size);
+  internal = (ecoff_symbol_type *) bfd_alloc2 (abfd, bfd_get_symcount (abfd),
+					       sizeof (ecoff_symbol_type)); 
   if (internal == NULL)
     return FALSE;
 
@@ -891,16 +890,30 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
       EXTR internal_esym;
 
       (*swap_ext_in) (abfd, (void *) eraw_src, &internal_esym);
+
+      /* PR 17512: file: 3372-1000-0.004.  */
+      if (internal_esym.asym.iss >= ecoff_data (abfd)->debug_info.symbolic_header.issExtMax
+	  || internal_esym.asym.iss < 0)
+	return FALSE;
+
       internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ssext
 				   + internal_esym.asym.iss);
+
       if (!ecoff_set_symbol_info (abfd, &internal_esym.asym,
 				  &internal_ptr->symbol, 1,
 				  internal_esym.weakext))
 	return FALSE;
+
       /* The alpha uses a negative ifd field for section symbols.  */
       if (internal_esym.ifd >= 0)
-	internal_ptr->fdr = (ecoff_data (abfd)->debug_info.fdr
-			     + internal_esym.ifd);
+	{
+	  /* PR 17512: file: 3372-1983-0.004.  */
+	  if (internal_esym.ifd >= ecoff_data (abfd)->debug_info.symbolic_header.ifdMax)
+	    internal_ptr->fdr = NULL;
+	  else
+	    internal_ptr->fdr = (ecoff_data (abfd)->debug_info.fdr
+				 + internal_esym.ifd);
+	}
       else
 	internal_ptr->fdr = NULL;
       internal_ptr->local = FALSE;
@@ -936,6 +949,20 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
 	  internal_ptr->local = TRUE;
 	  internal_ptr->native = (void *) lraw_src;
 	}
+    }
+
+  /* PR 17512: file: 3372-3080-0.004.
+     A discrepancy between ecoff_data (abfd)->debug_info.symbolic_header.isymMax
+     and ecoff_data (abfd)->debug_info.symbolic_header.ifdMax can mean that
+     we have fewer symbols than we were expecting.  Allow for this by updating
+     the symbol count and warning the user.  */
+  if (internal_ptr - internal < (ptrdiff_t) bfd_get_symcount (abfd))
+    {
+      bfd_get_symcount (abfd) = internal_ptr - internal;
+      (*_bfd_error_handler)
+	(_("%B: warning: isymMax (%ld) is greater than ifdMax (%d)\n"),
+	 abfd, ecoff_data (abfd)->debug_info.symbolic_header.isymMax,
+	 ecoff_data (abfd)->debug_info.symbolic_header.ifdMax);
     }
 
   ecoff_data (abfd)->canonical_symbols = internal;
@@ -3976,7 +4003,7 @@ ecoff_reloc_link_order (bfd *output_bfd,
 
       size = bfd_get_reloc_size (rel.howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
-      if (buf == NULL)
+      if (buf == NULL && size != 0)
 	return FALSE;
       rstat = _bfd_relocate_contents (rel.howto, output_bfd,
 				      (bfd_vma) addend, buf);
