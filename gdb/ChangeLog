@@ -1,3 +1,7 @@
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_handle_extended_wait): Always call set_running.
+
 2015-04-01  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* MAINTAINERS (Write After Approval): Add "Pierre-Marie de Rodat".

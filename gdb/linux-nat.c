@@ -2109,9 +2109,12 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	      add_thread (new_lp->ptid);
 	    }
 
+	  /* Even if we're stopping the thread for some reason
+	     internal to this module, from the user/frontend's
+	     perspective, this new thread is running.  */
+	  set_running (new_lp->ptid, 1);
 	  if (!stopping)
 	    {
-	      set_running (new_lp->ptid, 1);
 	      set_executing (new_lp->ptid, 1);
 	      /* thread_db_attach_lwp -> lin_lwp_attach_lwp forced
 		 resume_stop.  */
