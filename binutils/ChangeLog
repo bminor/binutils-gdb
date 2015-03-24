@@ -1,3 +1,133 @@
+2015-03-24  Nick Clifton  <nickc@redhat.com>
+
+	Apply from master:
+	2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* readelf.c (process_corefile_note_segment): Check for
+	inote.descdata extending beyond the end of the section.
+	(process_v850_notes): Likewise.
+
+	2015-02-24  Mike Frysinger  <vapier@gentoo.org>
+
+	PR binutils/17531
+	* readelf.c (process_symbol_table): Declare chained.  Increment it
+	in every loop.  Abort when chained is larger than nchains.  Move
+	error check outside of chain loop.
+
+	2015-02-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (dump_relocations): Handle printing offsets which are
+	MIN_INT.
+	(process_corefile_note_segment): Add range check of the namesz
+	field.
+
+	2015-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_mips_specific): Fail if an option has an
+	invalid size.
+
+	2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_data): Change parameter types from size_t to
+	bfd_size_type.  Add checks for loss of accuracy when casting from
+	bfd_size_type to size_t.
+	(get_dynamic_data): Likewise.
+	(process_section_groups): Limit number of error messages.
+
+	2015-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (slurp_ia64_unwind_table): Warn if the reloc could not
+	be indentified.
+	(dynamic_section_mips_val): Warn if the timestamp is invalid.
+	(print_mips_got_entry): Add a data_end parameter.  Warn if a read
+	would go beyond the end of the data, and return an error value.
+	(process_mips_specific): Do not read options from beyond the end
+	of the section.
+	Correct code to display optional data at the end of an option.
+	Warn if there are too many GOT symbols.
+	Update calls to print_mips_got_entry, and handle error returns.
+
+	2014-12-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (dump_ia64_unwind): Add range checks.
+	(slurp_ia64_unwind_table): Change to a boolean function.  Add
+	range checks.
+	(process_version_sections): Add range checks.
+	(get_symbol_version_string): Add check for missing section
+	headers.
+
+	2014-12-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_machine_flags): Replace call to abort with a
+	warning message and a return value.
+	(get_elf_section_flags): Likewise.
+	(get_symbol_visibility): Likewise.
+	(get_ia64_symbol_other): Likewise.
+	(get_ia64_symbol_other): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(apply_relocations): Likewise.
+	(display_arm_attribute): Likewise.
+
+	2014-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.h (struct dwarf_section): Add user_data field.
+	* dwarf.c (frame_need_space): Check for an over large register
+	number.
+	(display_debug_frames): Check the return value from
+	frame_need_space.  Check for a CFA expression that is so long the
+	start address wraps around.
+	(debug_displays): Initialise the user_data field.
+	* objdump.c (load_specific_debug_section): Save the BFD section
+	pointer in the user_data field of the dwarf_section structure.
+	(free_debug_section): Update BFD section data when freeing section
+	contents.
+	* readelf.c (load_specific_debug_section): Initialise the
+	user_data field.
+
+	2014-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (process_archive): Add range checks.
+
+	2014-11-28  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_32bit_elf_symbols): Cast bfd_size_type values to
+	unsigned long for %lx.
+	(get_64bit_elf_symbols, process_section_groups): Likewise.
+
+	2014-11-27  Espen Grindhaug <espen@grindhaug.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_data): Move excessive length check to earlier on
+	in the function and allow for wraparound in the arithmetic.
+	(get_32bit_elf_symbols): Terminate early if the section size is
+	zero.  Check for an invalid sh_entsize.  Check for an index
+	section with an invalid size.
+	(get_64bit_elf_symbols): Likewise.
+	(process_section_groups): Check for an invalid sh_entsize.
+
+	2014-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (process_version_sections): Prevent an infinite loop
+	processing corrupt version need data.
+	(process_corefile_note_segment): Handle corrupt notes.
+
+	2014-11-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_unwind_section_word): Skip reloc processing if
+	there are no relocs associated with the section.
+	(decode_tic6x_unwind_bytecode): Warn and return if the stack
+	pointer adjustment falls off the end of the buffer.
+
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
