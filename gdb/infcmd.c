@@ -1047,7 +1047,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	 THREAD is set.  */
       struct thread_info *tp = inferior_thread ();
 
-      clear_proceed_status (!skip_subroutines);
+      clear_proceed_status (1);
       set_step_frame ();
 
       if (!single_inst)
@@ -1121,6 +1121,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	tp->control.step_over_calls = STEP_OVER_ALL;
 
       tp->step_multi = (count > 1);
+      tp->control.stepping_command = 1;
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 1);
 
       /* For async targets, register a continuation to do any

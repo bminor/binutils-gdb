@@ -1,5 +1,22 @@
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (struct thread_control_state) <stepping_command>:
+	New field.
+	* infcmd.c (step_once): Pass step=1 to clear_proceed_status.  Set
+	the thread's stepping_command field.
+	* infrun.c (resume): Check the thread's stepping_command flag to
+	determine which threads should be resumed.  Rename 'entry_step'
+	local to user_step.
+	(clear_proceed_status_thread): Clear 'stepping_command'.
+	(schedlock_applies): Change parameter type to struct thread_info
+	pointer.  Adjust.
+	(find_thread_needs_step_over): Remove 'step' parameter.  Adjust.
+	(switch_back_to_stepped_thread): Adjust calls to
+	'schedlock_applies'.
+	(_initialize_infrun): Adjust "set scheduler-locking step" help.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (step_start_function): Delete and ...
 	* gdbthread.h (struct thread_control_state) <step_start_function>:
 	... now a field here.

@@ -1,3 +1,8 @@
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (test_step) <set scheduler-locking step>: No longer
+	mention that threads may sometimes run unlocked.
+
 2015-03-23  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
 
 	* gdb.texinfo (Remote configuration): Document "set/show

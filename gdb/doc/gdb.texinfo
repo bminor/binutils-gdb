@@ -5846,9 +5846,8 @@ current thread may run when the inferior is resumed.  The @code{step}
 mode optimizes for single-stepping; it prevents other threads 
 from preempting the current thread while you are stepping, so that 
 the focus of debugging does not change unexpectedly.
-Other threads only rarely (or never) get a chance to run
-when you step.  They are more likely to run when you @samp{next} over a
-function call, and they are completely free to run when you use commands
+Other threads never get a chance to run when you step, and they are
+completely free to run when you use commands
 like @samp{continue}, @samp{until}, or @samp{finish}.  However, unless another
 thread hits a breakpoint during its timeslice, @value{GDBN} does not change
 the current thread away from the thread that you are debugging.

@@ -1,3 +1,9 @@
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/schedlock.exp (test_step): No longer expect that
+	"set scheduler-locking step" with "next" over a function call runs
+	threads unlocked.
+
 2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb.mi/mi-pending.exp: Fix output of breakpoint test.

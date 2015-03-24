@@ -2038,7 +2038,6 @@ user_visible_resume_ptid (int step)
    we get a SIGINT random_signal, but for remote debugging and perhaps
    other targets, that's not true).
 
-   STEP nonzero if we should step (zero to continue instead).
    SIG is the signal to give the inferior (zero for none).  */
 void
 resume (int step, enum gdb_signal sig)
@@ -2050,13 +2049,10 @@ resume (int step, enum gdb_signal sig)
   CORE_ADDR pc = regcache_read_pc (regcache);
   struct address_space *aspace = get_regcache_aspace (regcache);
   ptid_t resume_ptid;
-  /* From here on, this represents the caller's step vs continue
-     request, while STEP represents what we'll actually request the
-     target to do.  STEP can decay from a step to a continue, if e.g.,
-     we need to implement single-stepping with breakpoints (software
-     single-step).  When deciding whether "set scheduler-locking step"
-     applies, it's the callers intention that counts.  */
-  const int entry_step = step;
+  /* This represents the user's step vs continue request.  When
+     deciding whether "set scheduler-locking step" applies, it's the
+     user's intention that counts.  */
+  const int user_step = tp->control.stepping_command;
 
   tp->stepped_breakpoint = 0;
 
@@ -2165,7 +2161,7 @@ resume (int step, enum gdb_signal sig)
 	      target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
 	      /* ... and safe to let other threads run, according to
 		 schedlock.  */
-	      resume_ptid = user_visible_resume_ptid (entry_step);
+	      resume_ptid = user_visible_resume_ptid (user_step);
 	      target_resume (resume_ptid, 0, GDB_SIGNAL_0);
 	      discard_cleanups (old_cleanups);
 	      return;
@@ -2207,7 +2203,7 @@ resume (int step, enum gdb_signal sig)
 	     Unless we're calling an inferior function, as in that
 	     case we pretend the inferior doesn't run at all.  */
 	  if (!tp->control.in_infcall)
-	    set_running (user_visible_resume_ptid (entry_step), 1);
+	    set_running (user_visible_resume_ptid (user_step), 1);
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
@@ -2280,7 +2276,7 @@ resume (int step, enum gdb_signal sig)
   /* Decide the set of threads to ask the target to resume.  Start
      by assuming everything will be resumed, than narrow the set
      by applying increasingly restricting conditions.  */
-  resume_ptid = user_visible_resume_ptid (entry_step);
+  resume_ptid = user_visible_resume_ptid (user_step);
 
   /* Even if RESUME_PTID is a wildcard, and we end up resuming less
      (e.g., we might need to step over a breakpoint), from the
@@ -2413,6 +2409,7 @@ clear_proceed_status_thread (struct thread_info *tp)
   tp->control.proceed_to_finish = 0;
 
   tp->control.command_interp = NULL;
+  tp->control.stepping_command = 0;
 
   /* Discard any remaining commands or status from previous stop.  */
   bpstat_clear (&tp->control.stop_bpstat);
@@ -2492,21 +2489,19 @@ thread_still_needs_step_over (struct thread_info *tp)
    we're about to do a step/next-like command to a thread.  */
 
 static int
-schedlock_applies (int step)
+schedlock_applies (struct thread_info *tp)
 {
   return (scheduler_mode == schedlock_on
 	  || (scheduler_mode == schedlock_step
-	      && step));
+	      && tp->control.stepping_command));
 }
 
 /* Look a thread other than EXCEPT that has previously reported a
    breakpoint event, and thus needs a step-over in order to make
-   progress.  Returns NULL is none is found.  STEP indicates whether
-   we're about to step the current thread, in order to decide whether
-   "set scheduler-locking step" applies.  */
+   progress.  Returns NULL is none is found.  */
 
 static struct thread_info *
-find_thread_needs_step_over (int step, struct thread_info *except)
+find_thread_needs_step_over (struct thread_info *except)
 {
   struct thread_info *tp, *current;
 
@@ -2517,7 +2512,7 @@ find_thread_needs_step_over (int step, struct thread_info *except)
 
   /* If scheduler locking applies, we can avoid iterating over all
      threads.  */
-  if (schedlock_applies (step))
+  if (schedlock_applies (except))
     {
       if (except != current
 	  && thread_still_needs_step_over (current))
@@ -2652,7 +2647,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
 
 	 Look for a thread other than the current (TP) that reported a
 	 breakpoint hit and hasn't been resumed yet since.  */
-      step_over = find_thread_needs_step_over (step, tp);
+      step_over = find_thread_needs_step_over (tp);
       if (step_over != NULL)
 	{
 	  if (debug_infrun)
@@ -5592,7 +5587,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	 current thread is stepping.  If some other thread not the
 	 event thread is stepping, then it must be that scheduler
 	 locking is not in effect.  */
-      if (schedlock_applies (0))
+      if (schedlock_applies (ecs->event_thread))
 	return 0;
 
       /* Look for the stepping/nexting thread, and check if any other
@@ -5628,7 +5623,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 		 stepping, then scheduler locking can't be in effect,
 		 otherwise we wouldn't have resumed the current event
 		 thread in the first place.  */
-	      gdb_assert (!schedlock_applies (currently_stepping (tp)));
+	      gdb_assert (!schedlock_applies (tp));
 
 	      stepping_thread = tp;
 	    }
@@ -7875,9 +7870,8 @@ Set mode for locking scheduler during execution."), _("\
 Show mode for locking scheduler during execution."), _("\
 off  == no locking (threads may preempt at any time)\n\
 on   == full locking (no thread except the current thread may run)\n\
-step == scheduler locked during every single-step operation.\n\
-	In this mode, no other thread may run during a step command.\n\
-	Other threads may run while stepping over a function call ('next')."), 
+step == scheduler locked during stepping commands (step, next, stepi, nexti).\n\
+	In this mode, other threads may run during other commands."),
 			set_schedlock_func,	/* traps on target vector */
 			show_scheduler_mode,
 			&setlist, &showlist);
