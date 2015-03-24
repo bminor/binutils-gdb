@@ -2109,7 +2109,7 @@ get_dyn_prop (enum dynamic_prop_node_kind prop_kind, const struct type *type)
   while (node != NULL)
     {
       if (node->prop_kind == prop_kind)
-        return node->prop;
+        return &node->prop;
       node = node->next;
     }
   return NULL;
@@ -2128,7 +2128,7 @@ add_dyn_prop (enum dynamic_prop_node_kind prop_kind, struct dynamic_prop prop,
   temp = obstack_alloc (&objfile->objfile_obstack,
 			sizeof (struct dynamic_prop_list));
   temp->prop_kind = prop_kind;
-  temp->prop = obstack_copy (&objfile->objfile_obstack, &prop, sizeof (prop));
+  temp->prop = prop;
   temp->next = TYPE_DYN_PROP_LIST (type);
 
   TYPE_DYN_PROP_LIST (type) = temp;
@@ -4279,8 +4279,7 @@ copy_dynamic_prop_list (struct obstack *objfile_obstack,
 
       node_copy = obstack_copy (objfile_obstack, *node_ptr,
 				sizeof (struct dynamic_prop_list));
-      node_copy->prop = obstack_copy (objfile_obstack, (*node_ptr)->prop,
-				      sizeof (struct dynamic_prop));
+      node_copy->prop = (*node_ptr)->prop;
       *node_ptr = node_copy;
 
       node_ptr = &node_copy->next;

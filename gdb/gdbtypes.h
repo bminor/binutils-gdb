@@ -449,7 +449,7 @@ struct dynamic_prop_list
   enum dynamic_prop_node_kind prop_kind;
 
   /* The dynamic property itself.  */
-  struct dynamic_prop *prop;
+  struct dynamic_prop prop;
 
   /* A pointer to the next dynamic property.  */
   struct dynamic_prop_list *next;
