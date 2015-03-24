@@ -52,10 +52,8 @@ typedef unsigned int uword;
     ((sim_core_read_aligned_1 (scpu, cia, read_map, addr) << 8)		\
      + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+1))) << 16) >> 16)
 
-unsigned long
-moxie_extract_unsigned_integer (addr, len)
-     unsigned char * addr;
-     int len;
+static unsigned long
+moxie_extract_unsigned_integer (unsigned char *addr, int len)
 {
   unsigned long retval;
   unsigned char * p;
@@ -63,7 +61,7 @@ moxie_extract_unsigned_integer (addr, len)
   unsigned char * endaddr = startaddr + len;
  
   if (len > (int) sizeof (unsigned long))
-    printf ("That operation is not available on integers of more than %d bytes.",
+    printf ("That operation is not available on integers of more than %zu bytes.",
 	    sizeof (unsigned long));
  
   /* Start at the most significant end of the integer, and work towards
@@ -76,11 +74,8 @@ moxie_extract_unsigned_integer (addr, len)
   return retval;
 }
 
-void
-moxie_store_unsigned_integer (addr, len, val)
-     unsigned char * addr;
-     int len;
-     unsigned long val;
+static void
+moxie_store_unsigned_integer (unsigned char *addr, int len, unsigned long val)
 {
   unsigned char * p;
   unsigned char * startaddr = (unsigned char *)addr;
@@ -154,7 +149,7 @@ set_initial_gprs (void)
 
 /* Write a 1 byte value to memory.  */
 
-static void INLINE 
+static INLINE void
 wbat (sim_cpu *scpu, word pc, word x, word v)
 {
   address_word cia = CIA_GET (scpu);
@@ -164,7 +159,7 @@ wbat (sim_cpu *scpu, word pc, word x, word v)
 
 /* Write a 2 byte value to memory.  */
 
-static void INLINE 
+static INLINE void
 wsat (sim_cpu *scpu, word pc, word x, word v)
 {
   address_word cia = CIA_GET (scpu);
@@ -174,7 +169,7 @@ wsat (sim_cpu *scpu, word pc, word x, word v)
 
 /* Write a 4 byte value to memory.  */
 
-static void INLINE 
+static INLINE void
 wlat (sim_cpu *scpu, word pc, word x, word v)
 {
   address_word cia = CIA_GET (scpu);
@@ -184,7 +179,7 @@ wlat (sim_cpu *scpu, word pc, word x, word v)
 
 /* Read 2 bytes from memory.  */
 
-static int INLINE 
+static INLINE int
 rsat (sim_cpu *scpu, word pc, word x)
 {
   address_word cia = CIA_GET (scpu);
@@ -194,7 +189,7 @@ rsat (sim_cpu *scpu, word pc, word x)
 
 /* Read 1 byte from memory.  */
 
-static int INLINE 
+static INLINE int
 rbat (sim_cpu *scpu, word pc, word x)
 {
   address_word cia = CIA_GET (scpu);
@@ -204,7 +199,7 @@ rbat (sim_cpu *scpu, word pc, word x)
 
 /* Read 4 bytes from memory.  */
 
-static int INLINE 
+static INLINE int
 rlat (sim_cpu *scpu, word pc, word x)
 {
   address_word cia = CIA_GET (scpu);
@@ -214,7 +209,7 @@ rlat (sim_cpu *scpu, word pc, word x)
 
 #define CHECK_FLAG(T,H) if (tflags & T) { hflags |= H; tflags ^= T; }
 
-unsigned int 
+static unsigned int
 convert_target_flags (unsigned int tflags)
 {
   unsigned int hflags = 0x0;
@@ -241,9 +236,7 @@ static const int tracing = 0;
 #define TRACE(str) if (tracing) fprintf(tracefile,"0x%08x, %s, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", opc, str, cpu.asregs.regs[0], cpu.asregs.regs[1], cpu.asregs.regs[2], cpu.asregs.regs[3], cpu.asregs.regs[4], cpu.asregs.regs[5], cpu.asregs.regs[6], cpu.asregs.regs[7], cpu.asregs.regs[8], cpu.asregs.regs[9], cpu.asregs.regs[10], cpu.asregs.regs[11], cpu.asregs.regs[12], cpu.asregs.regs[13], cpu.asregs.regs[14], cpu.asregs.regs[15]);
 
 void
-sim_resume (sd, step, siggnal)
-     SIM_DESC sd;
-     int step, siggnal;
+sim_resume (SIM_DESC sd, int step, int siggnal)
 {
   word pc, opc;
   unsigned long long insts;
@@ -416,9 +409,9 @@ sim_resume (sd, step, siggnal)
 	    case 0x01: /* ldi.l (immediate) */
 	      {
 		int reg = (inst >> 4) & 0xf;
+		unsigned int val = EXTRACT_WORD(pc+2);
 
 		TRACE("ldi.l");
-		unsigned int val = EXTRACT_WORD(pc+2);
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
 	      }
@@ -1118,11 +1111,7 @@ sim_resume (sd, step, siggnal)
 }
 
 int
-sim_store_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char * memory;
-     int length;
+sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   if (rn < NUM_MOXIE_REGS && rn >= 0)
     {
@@ -1142,11 +1131,7 @@ sim_store_register (sd, rn, memory, length)
 }
 
 int
-sim_fetch_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char * memory;
-     int length;
+sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   if (rn < NUM_MOXIE_REGS && rn >= 0)
     {
@@ -1174,11 +1159,7 @@ free_state (SIM_DESC sd)
 }
 
 SIM_DESC
-sim_open (kind, cb, abfd, argv)
-     SIM_OPEN_KIND kind;
-     host_callback * cb;
-     struct bfd * abfd;
-     char ** argv;
+sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
@@ -1244,9 +1225,7 @@ sim_open (kind, cb, abfd, argv)
 }
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
   /* nothing to do */
 }
@@ -1281,11 +1260,7 @@ load_dtb (SIM_DESC sd, const char *filename)
 }
 
 SIM_RC
-sim_create_inferior (sd, prog_bfd, argv, env)
-     SIM_DESC sd;
-     struct bfd * prog_bfd;
-     char ** argv;
-     char ** env;
+sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 {
   char ** avp;
   int l, argc, i, tp;

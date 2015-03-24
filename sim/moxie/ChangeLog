@@ -1,5 +1,16 @@
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (moxie_extract_unsigned_integer): Mark static.  Update
+	prototype.  Change printf %d to %zu.
+	(moxie_store_unsigned_integer): Mark static.  Update prototype.
+	(wbat, wsat, wlat, rsat, rbat, rlat): Move INLINE after static.
+	(convert_target_flags): Mark static.
+	(sim_resume): Update prototype.  Move val decl above local code.
+	(sim_store_register, sim_fetch_register, sim_open, sim_close,
+	sim_create_inferior): Update prototype.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
 	* interp.c: Delete gdb/callback.h include.  Add sim-options.h include.
