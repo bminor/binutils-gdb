@@ -1,5 +1,10 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* x86-linux-nat.c (x86_linux_dr_set_addr): Update assertion.
+	(x86_linux_new_thread): Rename argument.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* nat/x86-linux.h: New file.
 	* nat/x86-linux.c: Likewise.
 	* Makefile.in (HFILES_NO_SRCDIR): Add nat/x86-linux.h.

@@ -544,12 +544,13 @@ x86_linux_dr_get (ptid_t ptid, int regnum)
   int tid;
   unsigned long value;
 
+  gdb_assert (ptid_lwp_p (ptid));
   tid = ptid_get_lwp (ptid);
 
   errno = 0;
   value = ptrace (PTRACE_PEEKUSER, tid, u_debugreg_offset (regnum), 0);
   if (errno != 0)
-    error ("Couldn't read debug register");
+    perror_with_name (_("Couldn't read debug register"));
 
   return value;
 }
@@ -559,12 +560,13 @@ x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
   int tid;
 
+  gdb_assert (ptid_lwp_p (ptid));
   tid = ptid_get_lwp (ptid);
 
   errno = 0;
   ptrace (PTRACE_POKEUSER, tid, u_debugreg_offset (regnum), value);
   if (errno != 0)
-    error ("Couldn't write debug register");
+    perror_with_name (_("Couldn't write debug register"));
 }
 
 static int

@@ -165,7 +165,7 @@ x86_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
   ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
 
-  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
@@ -223,9 +223,9 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 }
 
 static void
-x86_linux_new_thread (struct lwp_info *lp)
+x86_linux_new_thread (struct lwp_info *lwp)
 {
-  lwp_set_debug_registers_changed (lp, 1);
+  lwp_set_debug_registers_changed (lwp, 1);
 }
 
 

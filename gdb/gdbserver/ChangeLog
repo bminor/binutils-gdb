@@ -1,5 +1,11 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-x86-low.c (x86_linux_dr_get): Add assertion.
+	Use perror_with_name.  Pass string through gettext.
+	(x86_linux_dr_set): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-x86-low.c (x86_dr_low_set_addr): Rename to...
 	(x86_linux_dr_set_addr): ...this.
 	(x86_dr_low_get_addr): Rename to...
