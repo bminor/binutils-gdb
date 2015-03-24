@@ -757,14 +757,14 @@ x86_linux_new_process (void)
 
 /* Called when a new thread is detected.  */
 
-static struct arch_lwp_info *
-x86_linux_new_thread (void)
+static void
+x86_linux_new_thread (struct lwp_info *lwp)
 {
   struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
   info->debug_registers_changed = 1;
 
-  return info;
+  lwp->arch_private = info;
 }
 
 /* See nat/x86-dregs.h.  */

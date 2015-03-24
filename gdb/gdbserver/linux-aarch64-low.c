@@ -1121,8 +1121,8 @@ aarch64_linux_new_process (void)
 
 /* Called when a new thread is detected.  */
 
-static struct arch_lwp_info *
-aarch64_linux_new_thread (void)
+static void
+aarch64_linux_new_thread (struct lwp_info *lwp)
 {
   struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
 
@@ -1132,7 +1132,7 @@ aarch64_linux_new_thread (void)
   DR_MARK_ALL_CHANGED (info->dr_changed_bp, aarch64_num_bp_regs);
   DR_MARK_ALL_CHANGED (info->dr_changed_wp, aarch64_num_wp_regs);
 
-  return info;
+  lwp->arch_private = info;
 }
 
 /* Called when resuming a thread.

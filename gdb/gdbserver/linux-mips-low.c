@@ -334,14 +334,14 @@ mips_linux_new_process (void)
    Mark the watch registers as changed, so the threads' copies will
    be updated.  */
 
-static struct arch_lwp_info *
-mips_linux_new_thread (void)
+static void
+mips_linux_new_thread (struct lwp_info *lwp)
 {
   struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
 
   info->watch_registers_changed = 1;
 
-  return info;
+  lwp->arch_private = info;
 }
 
 /* This is the implementation of linux_target_ops method

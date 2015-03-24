@@ -640,7 +640,7 @@ add_lwp (ptid_t ptid)
   memset (lwp, 0, sizeof (*lwp));
 
   if (the_low_target.new_thread != NULL)
-    lwp->arch_private = the_low_target.new_thread ();
+    the_low_target.new_thread (lwp);
 
   lwp->thread = add_thread (ptid, lwp);
 

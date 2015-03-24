@@ -1,5 +1,14 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-low.h (linux_target_ops) <new_thread>: Changed signature.
+	* linux-arm-low.c (arm_new_thread): Likewise.
+	* linux-aarch64-low.c (aarch64_linux_new_thread): Likewise.
+	* linux-mips-low.c (mips_linux_new_thread): Likewise.
+	* linux-x86-low.c (x86_linux_new_thread): Likewise.
+	* linux-low.c (add_lwp): Update the_low_target.new_thread call.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-low.c (ptid_of_lwp): New function.
 	(lwp_is_stopped): Likewise.
 	(lwp_stop_reason): Likewise.

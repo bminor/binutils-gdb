@@ -185,7 +185,7 @@ struct linux_target_ops
   /* Hook to call when a new thread is detected.
      If extra per-thread architecture-specific data is needed,
      allocate it here.  */
-  struct arch_lwp_info * (*new_thread) (void);
+  void (*new_thread) (struct lwp_info *);
 
   /* Hook to call prior to resuming a thread.  */
   void (*prepare_to_resume) (struct lwp_info *);
