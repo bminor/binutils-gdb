@@ -1,5 +1,11 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-x86-low.c (x86_linux_new_thread): Moved to
+	nat/x86-linux.c.
+	(x86_linux_prepare_to_resume): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* Makefile.in (x86-linux-dregs.o): New rule.
 	* configure.srv: Add x86-linux-dregs.o to relevant targets.
 	* linux-x86-low.c: Include nat/x86-linux-dregs.h.

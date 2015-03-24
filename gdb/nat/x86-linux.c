@@ -19,6 +19,7 @@
 
 #include "common-defs.h"
 #include "x86-linux.h"
+#include "x86-linux-dregs.h"
 
 /* Per-thread arch-specific data we want to keep.  */
 
@@ -54,4 +55,20 @@ lwp_debug_registers_changed (struct lwp_info *lwp)
     return 0;
 
   return info->debug_registers_changed;
+}
+
+/* See nat/x86-linux.h.  */
+
+void
+x86_linux_new_thread (struct lwp_info *lwp)
+{
+  lwp_set_debug_registers_changed (lwp, 1);
+}
+
+/* See nat/x86-linux.h.  */
+
+void
+x86_linux_prepare_to_resume (struct lwp_info *lwp)
+{
+  x86_linux_update_debug_registers (lwp);
 }

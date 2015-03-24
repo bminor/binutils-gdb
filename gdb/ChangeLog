@@ -1,5 +1,15 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* nat/x86-linux.h (x86_linux_new_thread): New declaration.
+	(x86_linux_prepare_to_resume): Likewise.
+	* x86-linux-nat.c (x86_linux_new_thread):
+	Moved to nat/x86-linux.c.
+	(x86_linux_prepare_to_resume): Likewise.
+	* nat/x86-linux.c (x86_linux_new_thread): New function.
+	(x86_linux_prepare_to_resume): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* nat/x86-linux-dregs.h: New file.
 	* nat/x86-linux-dregs.c: Likewise.
 	* Makefile.in (HFILES_NO_SRCDIR): Add nat/x86-linux-dregs.h.

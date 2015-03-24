@@ -35,4 +35,12 @@ extern void lwp_set_debug_registers_changed (struct lwp_info *lwp,
 
 extern int lwp_debug_registers_changed (struct lwp_info *lwp);
 
+/* Function to call when a new thread is detected.  */
+
+extern void x86_linux_new_thread (struct lwp_info *lwp);
+
+/* Function to call prior to resuming a thread.  */
+
+extern void x86_linux_prepare_to_resume (struct lwp_info *lwp);
+
 #endif /* X86_LINUX_H */

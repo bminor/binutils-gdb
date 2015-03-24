@@ -640,14 +640,6 @@ x86_linux_new_process (void)
   return info;
 }
 
-/* Called when a new thread is detected.  */
-
-static void
-x86_linux_new_thread (struct lwp_info *lwp)
-{
-  lwp_set_debug_registers_changed (lwp, 1);
-}
-
 /* See nat/x86-dregs.h.  */
 
 struct x86_debug_reg_state *
@@ -656,14 +648,6 @@ x86_debug_reg_state (pid_t pid)
   struct process_info *proc = find_process_pid (pid);
 
   return &proc->priv->arch_private->debug_reg_state;
-}
-
-/* Called prior to resuming a thread.  */
-
-static void
-x86_linux_prepare_to_resume (struct lwp_info *lwp)
-{
-  x86_linux_update_debug_registers (lwp);
 }
 
 /* When GDBSERVER is built as a 64-bit application on linux, the
