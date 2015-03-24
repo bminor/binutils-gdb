@@ -355,7 +355,7 @@ int linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine);
 int linux_attach_lwp (ptid_t ptid);
 
 struct lwp_info *find_lwp_pid (ptid_t ptid);
-void linux_stop_lwp (struct lwp_info *lwp);
+/* For linux_stop_lwp see nat/linux-nat.h.  */
 
 #ifdef HAVE_LINUX_REGSETS
 void initialize_regsets_info (struct regsets_info *regsets_info);

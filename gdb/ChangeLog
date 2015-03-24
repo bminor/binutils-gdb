@@ -1,5 +1,10 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-nat.h (linux_stop_lwp): Move declaration to...
+	* nat/linux-nat.h (linux_stop_lwp): New declaration.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-nat.h: Include nat/linux-nat.h.
 	(iterate_over_lwps): Move declaration to nat/linux-nat.h.
 	* nat/linux-nat.h (struct lwp_info): New forward declaration.

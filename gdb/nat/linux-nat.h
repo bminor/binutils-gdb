@@ -47,4 +47,9 @@ extern struct lwp_info *iterate_over_lwps (ptid_t filter,
 					   iterate_over_lwps_ftype callback,
 					   void *data);
 
+/* Cause LWP to stop.  This function must be provided by the
+   client.  */
+
+extern void linux_stop_lwp (struct lwp_info *lwp);
+
 #endif /* LINUX_NAT_H */

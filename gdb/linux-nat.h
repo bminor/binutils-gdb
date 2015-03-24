@@ -140,7 +140,7 @@ void linux_proc_pending_signals (int pid, sigset_t *pending,
 
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
-extern void linux_stop_lwp (struct lwp_info *lwp);
+/* For linux_stop_lwp see nat/linux-nat.h.  */
 
 /* Stop all LWPs, synchronously.  (Any events that trigger while LWPs
    are being stopped are left pending.)  */

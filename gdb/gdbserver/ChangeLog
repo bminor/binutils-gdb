@@ -1,5 +1,9 @@
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
+	* linux-low.h (linux_stop_lwp): Remove declaration.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
 	* linux-low.h: Include nat/linux-nat.h.
 	* linux-low.c (iterate_over_lwps_args): New structure.
 	(iterate_over_lwps_filter): New function.
