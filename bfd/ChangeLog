@@ -1,3 +1,12 @@
+2015-03-24  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Report overflow to
+	stubs, even those for undefined weak symbols.  Otherwise, don't
+	report relocation overflow on branches to undefined strong
+	symbols.  Fix memory leak.
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't report relocation
+	overflow on branches to undefined strong symbols.
+
 2015-03-23  Keith Seitz  <keiths@redhat.com>
 
 	* elfnn-aarch64.c (_bfd_aarch64_create_or_find_stub_sec): Add
