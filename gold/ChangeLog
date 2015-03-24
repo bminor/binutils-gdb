@@ -1,3 +1,9 @@
+2015-03-24  Alan Modra  <amodra@gmail.com>
+
+	PR 18147
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't report
+	relocation errors for branches to strong undefined symbols.
+
 2015-03-23  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* merge.cc (Object_merge_map::get_input_merge_map): Make it const.
