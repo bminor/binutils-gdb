@@ -634,7 +634,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* Start the target running.  Do not use -1 continuation as it would skip
      breakpoint right at the entry point.  */
-  proceed (regcache_read_pc (get_current_regcache ()), GDB_SIGNAL_0, 0);
+  proceed (regcache_read_pc (get_current_regcache ()), GDB_SIGNAL_0);
 
   /* Since there was no error, there's no need to finish the thread
      states here.  */
@@ -687,7 +687,7 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 
   switch_to_thread (thread->ptid);
   clear_proceed_status (0);
-  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
+  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
   return 0;
 }
 
@@ -771,7 +771,7 @@ continue_1 (int all_threads)
       ensure_valid_thread ();
       ensure_not_running ();
       clear_proceed_status (0);
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
+      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
 }
 
@@ -867,9 +867,14 @@ static void
 set_step_frame (void)
 {
   struct symtab_and_line sal;
+  CORE_ADDR pc;
+  struct frame_info *frame = get_current_frame ();
+  struct thread_info *tp = inferior_thread ();
 
-  find_frame_sal (get_current_frame (), &sal);
-  set_step_info (get_current_frame (), sal);
+  find_frame_sal (frame, &sal);
+  set_step_info (frame, sal);
+  pc = get_frame_pc (frame);
+  tp->control.step_start_function = find_pc_function (pc);
 }
 
 /* Step until outside of current statement.  */
@@ -1122,7 +1127,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 
       tp->step_multi = (count > 1);
       tp->control.stepping_command = 1;
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 1);
+      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 
       /* For async targets, register a continuation to do any
 	 additional steps.  For sync targets, the caller will handle
@@ -1229,7 +1234,7 @@ jump_command (char *arg, int from_tty)
     }
 
   clear_proceed_status (0);
-  proceed (addr, GDB_SIGNAL_0, 0);
+  proceed (addr, GDB_SIGNAL_0);
 }
 
 
@@ -1342,7 +1347,7 @@ signal_command (char *signum_exp, int from_tty)
     }
 
   clear_proceed_status (0);
-  proceed ((CORE_ADDR) -1, oursig, 0);
+  proceed ((CORE_ADDR) -1, oursig);
 }
 
 /* Queue a signal to be delivered to the current thread.  */
@@ -1462,7 +1467,7 @@ until_next_command (int from_tty)
   set_longjmp_breakpoint (tp, get_frame_id (frame));
   old_chain = make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
-  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 1);
+  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 
   if (target_can_async_p () && is_running (inferior_ptid))
     {
@@ -1746,14 +1751,14 @@ finish_backward (struct symbol *function)
       insert_step_resume_breakpoint_at_sal (gdbarch,
 					    sr_sal, null_frame_id);
 
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
+      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
   else
     {
       /* We're almost there -- we just need to back up by one more
 	 single-step.  */
       tp->control.step_range_start = tp->control.step_range_end = 1;
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 1);
+      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
 }
 
@@ -1795,7 +1800,7 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   cargs->function = function;
   add_continuation (tp, finish_command_continuation, cargs,
                     finish_command_continuation_free_arg);
-  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
+  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 
   discard_cleanups (old_chain);
   if (!target_can_async_p ())
@@ -1864,7 +1869,7 @@ finish_command (char *arg, int from_tty)
 	  print_stack_frame (get_selected_frame (NULL), 1, LOCATION, 0);
 	}
 
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 1);
+      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
       return;
     }
 
@@ -2454,7 +2459,7 @@ proceed_after_attach_callback (struct thread_info *thread,
     {
       switch_to_thread (thread->ptid);
       clear_proceed_status (0);
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
+      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
 
   return 0;
@@ -2541,7 +2546,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 	  if (inferior_thread ()->suspend.stop_signal == GDB_SIGNAL_0)
 	    {
 	      clear_proceed_status (0);
-	      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
+	      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 	    }
 	}
     }

@@ -405,7 +405,7 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
     {
       int was_sync = sync_execution;
 
-      proceed (real_pc, GDB_SIGNAL_0, 0);
+      proceed (real_pc, GDB_SIGNAL_0);
 
       /* Inferior function calls are always synchronous, even if the
 	 target supports asynchronous execution.  Do here what

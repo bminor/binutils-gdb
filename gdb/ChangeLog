@@ -1,5 +1,36 @@
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (until_break_command): Adjust call to proceed.
+	* gdbthread.h (struct thread_control_state) <stepping_command>:
+	New field.
+	* infcall.c (run_inferior_call): Adjust call to proceed.
+	* infcmd.c (run_command_1, proceed_thread_callback, continue_1):
+	Adjust calls to proceed.
+	(set_step_frame): Set the current thread's step_start_function
+	here.
+	(step_once): Adjust calls to proceed.
+	(jump_command, signal_command, until_next_command)
+	(finish_backward, finish_forward, proceed_after_attach_callback)
+	(attach_command_post_wait): Adjust calls to proceed.
+	* infrun.c (proceed_after_vfork_done): Adjust call to proceed.
+	(do_target_resume): New function, factored out from ...
+	(resume): ... here.  Remove 'step' parameter.  Instead, check
+	currently_stepping to determine whether the thread should be
+	single-stepped.
+	(proceed): Remove 'step' parameter and don't set the thread's
+	step_start_function here.  Adjust call to 'resume'.
+	(handle_inferior_event): Adjust calls to 'resume'.
+	(switch_back_to_stepped_thread): Use do_target_resume instead of
+	'resume'.
+	(keep_going): Adjust calls to 'resume'.
+	* infrun.h (proceed): Remove 'step' parameter.
+	(resume): Likewise.
+	* windows-nat.c (do_initial_windows_stuff): Adjust call to
+	'resume'.
+	* mi/mi-main.c (proceed_thread): Adjust call to 'proceed'.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (struct thread_control_state) <stepping_command>:
 	New field.
 	* infcmd.c (step_once): Pass step=1 to clear_proceed_status.  Set

@@ -11523,7 +11523,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
 					   stack_frame_id, bp_until);
   make_cleanup_delete_breakpoint (breakpoint);
 
-  proceed (-1, GDB_SIGNAL_DEFAULT, 0);
+  proceed (-1, GDB_SIGNAL_DEFAULT);
 
   /* If we are running asynchronously, and proceed call above has
      actually managed to start the target, arrange for breakpoints to

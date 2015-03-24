@@ -859,7 +859,7 @@ proceed_after_vfork_done (struct thread_info *thread,
 
       switch_to_thread (thread->ptid);
       clear_proceed_status (0);
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
+      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
 
   return 0;
@@ -2032,6 +2032,33 @@ user_visible_resume_ptid (int step)
   return resume_ptid;
 }
 
+/* Wrapper for target_resume, that handles infrun-specific
+   bookkeeping.  */
+
+static void
+do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
+{
+  struct thread_info *tp = inferior_thread ();
+
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
+
+  /* Avoid confusing the next resume, if the next stop/resume
+     happens to apply to another thread.  */
+  tp->suspend.stop_signal = GDB_SIGNAL_0;
+
+  /* Advise target which signals may be handled silently.  If we have
+     removed breakpoints because we are stepping over one (in any
+     thread), we need to receive all signals to avoid accidentally
+     skipping a breakpoint during execution of a signal handler.  */
+  if (step_over_info_valid_p ())
+    target_pass_signals (0, NULL);
+  else
+    target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
+
+  target_resume (resume_ptid, step, sig);
+}
+
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
    wants to interrupt some lengthy single-stepping operation
    (for child processes, the SIGINT goes to the inferior, and so
@@ -2040,7 +2067,7 @@ user_visible_resume_ptid (int step)
 
    SIG is the signal to give the inferior (zero for none).  */
 void
-resume (int step, enum gdb_signal sig)
+resume (enum gdb_signal sig)
 {
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   struct regcache *regcache = get_current_regcache ();
@@ -2053,6 +2080,11 @@ resume (int step, enum gdb_signal sig)
      deciding whether "set scheduler-locking step" applies, it's the
      user's intention that counts.  */
   const int user_step = tp->control.stepping_command;
+  /* This represents what we'll actually request the target to do.
+     This can decay from a step to a continue, if e.g., we need to
+     implement single-stepping with breakpoints (software
+     single-step).  */
+  int step = currently_stepping (tp);
 
   tp->stepped_breakpoint = 0;
 
@@ -2355,24 +2387,7 @@ resume (int step, enum gdb_signal sig)
       gdb_assert (pc_in_thread_step_range (pc, tp));
     }
 
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
-
-  /* Avoid confusing the next resume, if the next stop/resume
-     happens to apply to another thread.  */
-  tp->suspend.stop_signal = GDB_SIGNAL_0;
-
-  /* Advise target which signals may be handled silently.  If we have
-     removed breakpoints because we are stepping over one (in any
-     thread), we need to receive all signals to avoid accidentally
-     skipping a breakpoint during execution of a signal handler.  */
-  if (step_over_info_valid_p ())
-    target_pass_signals (0, NULL);
-  else
-    target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
-
-  target_resume (resume_ptid, step, sig);
-
+  do_target_resume (resume_ptid, step, sig);
   discard_cleanups (old_cleanups);
 }
 
@@ -2551,7 +2566,7 @@ find_thread_needs_step_over (struct thread_info *except)
    You should call clear_proceed_status before calling proceed.  */
 
 void
-proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
+proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 {
   struct regcache *regcache;
   struct gdbarch *gdbarch;
@@ -2579,9 +2594,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   aspace = get_regcache_aspace (regcache);
   pc = regcache_read_pc (regcache);
   tp = inferior_thread ();
-
-  if (step)
-    tp->control.step_start_function = find_pc_function (pc);
 
   /* Fill in with reasonable starting values.  */
   init_thread_stepping_state (tp);
@@ -2625,9 +2637,9 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
-			"infrun: proceed (addr=%s, signal=%s, step=%d)\n",
+			"infrun: proceed (addr=%s, signal=%s)\n",
 			paddress (gdbarch, addr),
-			gdb_signal_to_symbol_string (siggnal), step);
+			gdb_signal_to_symbol_string (siggnal));
 
   if (non_stop)
     /* In non-stop, each thread is handled individually.  The context
@@ -2713,8 +2725,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   tp->prev_pc = regcache_read_pc (get_current_regcache ());
 
   /* Resume inferior.  */
-  resume (tp->control.trap_expected || step || bpstat_should_step (),
-	  tp->suspend.stop_signal);
+  resume (tp->suspend.stop_signal);
 
   /* Wait for it to stop (if not standalone)
      and in any case decode why it stopped, and act accordingly.  */
@@ -3815,7 +3826,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     addresses.  Make sure new breakpoints are inserted.  */
 	  if (stop_soon == NO_STOP_QUIETLY)
 	    insert_breakpoints ();
-	  resume (0, GDB_SIGNAL_0);
+	  resume (GDB_SIGNAL_0);
 	  prepare_to_wait (ecs);
 	  return;
 	}
@@ -3839,7 +3850,7 @@ handle_inferior_event (struct execution_control_state *ecs)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SPURIOUS\n");
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	context_switch (ecs->ptid);
-      resume (0, GDB_SIGNAL_0);
+      resume (GDB_SIGNAL_0);
       prepare_to_wait (ecs);
       return;
 
@@ -5727,6 +5738,8 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 
 	  if (stop_pc != tp->prev_pc)
 	    {
+	      ptid_t resume_ptid;
+
 	      if (debug_infrun)
 		fprintf_unfiltered (gdb_stdlog,
 				    "infrun: expected thread advanced also\n");
@@ -5742,9 +5755,10 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	      insert_single_step_breakpoint (get_frame_arch (frame),
 					     get_frame_address_space (frame),
 					     stop_pc);
-	      ecs->event_thread->control.trap_expected = 1;
 
-	      resume (0, GDB_SIGNAL_0);
+	      resume_ptid = user_visible_resume_ptid (tp->control.stepping_command);
+	      do_target_resume (resume_ptid,
+				currently_stepping (tp), GDB_SIGNAL_0);
 	      prepare_to_wait (ecs);
 	    }
 	  else
@@ -6191,8 +6205,7 @@ keep_going (struct execution_control_state *ecs)
 	 are supposed to pass through to the inferior.  Simply
 	 continue.  */
       discard_cleanups (old_cleanups);
-      resume (currently_stepping (ecs->event_thread),
-	      ecs->event_thread->suspend.stop_signal);
+      resume (ecs->event_thread->suspend.stop_signal);
     }
   else
     {
@@ -6264,8 +6277,7 @@ keep_going (struct execution_control_state *ecs)
 	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 
       discard_cleanups (old_cleanups);
-      resume (currently_stepping (ecs->event_thread),
-	      ecs->event_thread->suspend.stop_signal);
+      resume (ecs->event_thread->suspend.stop_signal);
     }
 
   prepare_to_wait (ecs);

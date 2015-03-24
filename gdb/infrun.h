@@ -88,11 +88,11 @@ extern void start_remote (int from_tty);
    step/stepi command.  */
 extern void clear_proceed_status (int step);
 
-extern void proceed (CORE_ADDR, enum gdb_signal, int);
+extern void proceed (CORE_ADDR, enum gdb_signal);
 
 /* The `resume' routine should only be called in special circumstances.
    Normally, use `proceed', which handles a lot of bookkeeping.  */
-extern void resume (int, enum gdb_signal);
+extern void resume (enum gdb_signal);
 
 /* Return a ptid representing the set of threads that we will proceed,
    in the perspective of the user/frontend.  */
