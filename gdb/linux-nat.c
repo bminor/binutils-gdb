@@ -1799,15 +1799,15 @@ linux_nat_resume (struct target_ops *ops,
   if (resume_many)
     iterate_over_lwps (ptid, linux_nat_resume_callback, lp);
 
-  linux_resume_one_lwp (lp, step, signo);
-
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
 			"LLR: %s %s, %s (resume event thread)\n",
 			step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
-			target_pid_to_str (ptid),
+			target_pid_to_str (lp->ptid),
 			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"));
+
+  linux_resume_one_lwp (lp, step, signo);
 
   if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
@@ -2618,7 +2618,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
-				"SWC: Delayed SIGSTOP caught for %s.\n",
+				"SWC: Expected SIGSTOP caught for %s.\n",
 				target_pid_to_str (lp->ptid));
 
 	  /* Reset SIGNALLED only after the stop_wait_callback call
@@ -2795,8 +2795,8 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 	    {
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
-				    "CSBB: Push back software "
-				    "breakpoint for %s\n",
+				    "CSBB: %s stopped by software "
+				    "breakpoint\n",
 				    target_pid_to_str (lp->ptid));
 
 	      /* Back up the PC if necessary.  */
@@ -2811,13 +2811,20 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 	    {
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
-				    "CSBB: Push back hardware "
-				    "breakpoint/watchpoint for %s\n",
+				    "CSBB: %s stopped by hardware "
+				    "breakpoint/watchpoint\n",
 				    target_pid_to_str (lp->ptid));
 
 	      lp->stop_pc = pc;
 	      lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 	      return 1;
+	    }
+	  else if (siginfo.si_code == TRAP_TRACE)
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "CSBB: %s stopped by trace\n",
+				    target_pid_to_str (lp->ptid));
 	    }
 	}
     }
@@ -2830,7 +2837,7 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 	 breakpoint instruction.  */
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "CB: Push back software breakpoint for %s\n",
+			    "CSBB: %s stopped by software breakpoint\n",
 			    target_pid_to_str (lp->ptid));
 
       /* Back up the PC if necessary.  */
@@ -2846,7 +2853,7 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "CB: Push back hardware breakpoint for %s\n",
+			    "CSBB: stopped by hardware breakpoint %s\n",
 			    target_pid_to_str (lp->ptid));
 
       lp->stop_pc = pc;
@@ -3206,28 +3213,28 @@ linux_nat_filter_event (int lwpid, int status)
   if (lp->signalled
       && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP)
     {
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog,
-			    "LLW: Delayed SIGSTOP caught for %s.\n",
-			    target_pid_to_str (lp->ptid));
-
       lp->signalled = 0;
 
-      if (lp->last_resume_kind != resume_stop)
+      if (lp->last_resume_kind == resume_stop)
 	{
-	  /* This is a delayed SIGSTOP.  */
-
-	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
-				"LLW: %s %s, 0, 0 (discard SIGSTOP)\n",
+				"LLW: resume_stop SIGSTOP caught for %s.\n",
+				target_pid_to_str (lp->ptid));
+	}
+      else
+	{
+	  /* This is a delayed SIGSTOP.  Filter out the event.  */
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LLW: %s %s, 0, 0 (discard delayed SIGSTOP)\n",
 				lp->step ?
 				"PTRACE_SINGLESTEP" : "PTRACE_CONT",
 				target_pid_to_str (lp->ptid));
 
+	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  gdb_assert (lp->resumed);
-
-	  /* Discard the event.  */
 	  return NULL;
 	}
     }

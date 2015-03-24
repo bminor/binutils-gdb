@@ -562,7 +562,7 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 		{
 		  struct thread_info *thr = get_lwp_thread (lwp);
 
-		  debug_printf ("CSBB: Push back software breakpoint for %s\n",
+		  debug_printf ("CSBB: %s stopped by software breakpoint\n",
 				target_pid_to_str (ptid_of (thr)));
 		}
 
@@ -585,8 +585,8 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 		{
 		  struct thread_info *thr = get_lwp_thread (lwp);
 
-		  debug_printf ("CSBB: Push back hardware "
-				"breakpoint/watchpoint for %s\n",
+		  debug_printf ("CSBB: %s stopped by hardware "
+				"breakpoint/watchpoint\n",
 				target_pid_to_str (ptid_of (thr)));
 		}
 
@@ -594,6 +594,16 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 	      lwp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 	      current_thread = saved_thread;
 	      return 1;
+	    }
+	  else if (siginfo.si_code == TRAP_TRACE)
+	    {
+	      if (debug_threads)
+		{
+		  struct thread_info *thr = get_lwp_thread (lwp);
+
+		  debug_printf ("CSBB: %s stopped by trace\n",
+				target_pid_to_str (ptid_of (thr)));
+		}
 	    }
 	}
     }
@@ -2059,16 +2069,28 @@ linux_low_filter_event (int lwpid, int wstat)
 	{
 	  /* We want to report the stop to the core.  Treat the
 	     SIGSTOP as a normal event.  */
+	  if (debug_threads)
+	    debug_printf ("LLW: resume_stop SIGSTOP caught for %s.\n",
+			  target_pid_to_str (ptid_of (thread)));
 	}
       else if (stopping_threads != NOT_STOPPING_THREADS)
 	{
 	  /* Stopping threads.  We don't want this SIGSTOP to end up
 	     pending.  */
+	  if (debug_threads)
+	    debug_printf ("LLW: SIGSTOP caught for %s "
+			  "while stopping threads.\n",
+			  target_pid_to_str (ptid_of (thread)));
 	  return NULL;
 	}
       else
 	{
-	  /* Filter out the event.  */
+	  /* This is a delayed SIGSTOP.  Filter out the event.  */
+	  if (debug_threads)
+	    debug_printf ("LLW: %s %s, 0, 0 (discard delayed SIGSTOP)\n",
+			  child->stepping ? "step" : "continue",
+			  target_pid_to_str (ptid_of (thread)));
+
 	  linux_resume_one_lwp (child, child->stepping, 0, NULL);
 	  return NULL;
 	}

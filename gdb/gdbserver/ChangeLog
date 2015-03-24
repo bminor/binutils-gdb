@@ -1,3 +1,10 @@
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (check_stopped_by_breakpoint): Tweak debug log
+	output.  Also dump TRAP_TRACE.
+	(linux_low_filter_event): In debug output, distinguish a
+	resume_stop SIGSTOP from a delayed SIGSTOP.
+
 2015-03-24  Gary Benson  <gbenson@redhat.com>
 
 	* linux-x86-low.c (x86_linux_new_thread): Moved to

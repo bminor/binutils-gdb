@@ -1,3 +1,15 @@
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_resume): Output debug logs before trying
+	to resume the event lwp.  Use the lwp's ptid instead of the passed
+	in (maybe wildcard) ptid.
+	(stop_wait_callback): Tweak debug log output.
+	(check_stopped_by_breakpoint): Tweak debug log output.  Also dump
+	TRAP_TRACE.
+	(linux_nat_filter_event): In debug output, distinguish a
+	resume_stop SIGSTOP from a delayed SIGSTOP.  Output debug logs
+	before trying to resume the lwp.
+
 2015-03-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.h (struct dynamic_prop_list) <prop>: Remove
