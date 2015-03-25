@@ -1,3 +1,10 @@
+2015-03-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* NEWS: Mention info os cpus support.
+	* gdb/nat/linux-osdata.c (linux_xfer_osdata_cpus): New function.
+	(struct osdata_type): Add cpus entry, reorder the entries in
+	alphabetical order.
+
 2015-03-31  Matthias Klose  <doko@ubuntu.com>
 
 	* compile/compile.c (compile_to_object): Allow triplets with or

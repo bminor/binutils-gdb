@@ -1,3 +1,8 @@
+2015-03-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.texinfo (Operating System Auxiliary Information): Add info os cpus
+	documentation, reorder the info os entries in alphabetical order.
+
 2015-03-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (GDB/MI Data Manipulation): Fix copy-paste typo in

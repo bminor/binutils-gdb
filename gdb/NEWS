@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.9
 
+* The "info os" command on GNU/Linux can now display information on
+  cpu information :
+    "info os cpus" Listing of all cpus/cores on the system
+
 * GDB has two new commands: "set serial parity odd|even|none" and
   "show serial parity".  These allows to set or show parity for the
   remote serial I/O.
