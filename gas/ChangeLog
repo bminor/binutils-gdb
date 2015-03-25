@@ -1,3 +1,9 @@
+2015-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18087
+	* write.c (compress_debug): Don't write the zlib header if
+	compression didn't make the section smaller.
+
 2015-03-24  Terry Guo  <terry.guo@arm.com>
 
 	* config/tc-arm.c (no_cpu_selected): Use new macro to compare
