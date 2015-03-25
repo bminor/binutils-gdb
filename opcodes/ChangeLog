@@ -1,5 +1,10 @@
 2015-03-25  Anton Blanchard  <anton@samba.org>
 
+	* ppc-dis.c (disassemble_init_powerpc): Only initialise
+	powerpc_opcd_indices and vle_opcd_indices once.
+
+2015-03-25  Anton Blanchard  <anton@samba.org>
+
 	* ppc-opc.c (powerpc_opcodes): Add slbfee.
 
 2015-03-24  Terry Guo  <terry.guo@arm.com>
