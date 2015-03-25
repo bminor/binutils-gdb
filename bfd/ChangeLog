@@ -1,3 +1,8 @@
+2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (_bfd_aarch64_erratum_835769_scan):
+	Update erratum count.
+
 2015-03-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* elflink.c (_bfd_elf_gc_mark_extra_sections): Don't break on
