@@ -82,8 +82,8 @@ static reloc_howto_type crx_elf_howto_table[] =
 {
   HOWTO (R_CRX_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size */
-	 32,			/* bitsize */
+	 3,			/* size */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */

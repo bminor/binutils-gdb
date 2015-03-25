@@ -255,6 +255,11 @@ sh_elf_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol_in,
       && bfd_is_und_section (symbol_in->section))
     return bfd_reloc_undefined;
 
+  /* PR 17512: file: 9891ca98.  */
+  if (addr * bfd_octets_per_byte (abfd) + bfd_get_reloc_size (reloc_entry->howto)
+      > bfd_get_section_limit_octets (abfd, input_section))
+    return bfd_reloc_outofrange;
+
   if (bfd_is_com_section (symbol_in->section))
     sym_value = 0;
   else

@@ -110,11 +110,11 @@ static reloc_howto_type mcore_elf_howto_raw[] =
   /* This reloc does nothing.  */
   HOWTO (R_MCORE_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,  /* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 NULL,                  /* special_function */
 	 "R_MCORE_NONE",	/* name */
 	 FALSE,			/* partial_inplace */

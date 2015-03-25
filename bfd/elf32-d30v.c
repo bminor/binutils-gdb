@@ -254,11 +254,11 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_D30V_NONE,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
-	 32,			/* Bitsize.  */
+	 3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Bitsize.  */
 	 FALSE,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
-	 complain_overflow_bitfield, /* Complain_on_overflow.  */
+	 complain_overflow_dont,/* Complain_on_overflow.  */
 	 bfd_elf_generic_reloc,	/* Special_function.  */
 	 "R_D30V_NONE",		/* Name.  */
 	 FALSE,			/* Partial_inplace.  */

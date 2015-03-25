@@ -141,7 +141,7 @@ static reloc_howto_type ip2k_elf_howto_table [] =
           pr)                   /* pcrel_offset */
 
   /* This reloc does nothing.  */
-  IP2K_HOWTO (R_IP2K_NONE, 0,2,32, FALSE, 0, "R_IP2K_NONE", 0, 0),
+  IP2K_HOWTO (R_IP2K_NONE, 0,3,0, FALSE, 0, "R_IP2K_NONE", 0, 0),
   /* A 16 bit absolute relocation.  */
   IP2K_HOWTO (R_IP2K_16, 0,1,16, FALSE, 0, "R_IP2K_16", 0, 0xffff),
   /* A 32 bit absolute relocation.  */

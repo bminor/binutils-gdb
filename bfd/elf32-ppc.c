@@ -187,8 +187,8 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
   /* This reloc does nothing.  */
   HOWTO (R_PPC_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
@@ -2056,9 +2056,6 @@ ppc_elf_addr16_ha_reloc (bfd *abfd ATTRIBUTE_UNUSED,
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
-
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
-    return bfd_reloc_outofrange;
 
   if (bfd_is_com_section (symbol->section))
     relocation = 0;

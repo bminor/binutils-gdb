@@ -1,3 +1,305 @@
+2015-03-25  Nick Clifton  <nickc@redhat.com>
+
+	Apply from master:
+	2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* mach-o.c (bfd_mach_o_read_section_32): Likewise.
+	(bfd_mach_o_read_section_64): Likewise.
+
+	2015-02-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* versados.c (process_otr): Check the esdid value before using it
+	to access the EDATA.
+
+	2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* mach-o.c: Use bfd_alloc2 to allocate space for structure arrays.
+	(bfd_mach_o_canonicalize_one_reloc): Fix check on out
+	of range symbol indicies.
+	(bfd_mach_o_canonicalize_relocs): Check for out of range alloc.
+	(bfd_mach_o_canonicalize_dynamic_reloc): Likewise.
+	(bfd_mach_o_build_dysymtab): Likewise.
+	(bfd_mach_o_write_symtab_content): Set the string table size to
+	zero upon error.
+	(bfd_mach_o_read_symtab_symbols): Reset the nsyms value if the
+	read fails.
+	* tekhex.c (first_phase): Check for src pointer reaching end of
+	buffer.
+
+	2015-01-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* pdp11.c (aout_get_external_symbols): Return false if there are
+	no symbols.
+
+	2015-01-22  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_apply_reloc_24): New.
+	(m32c_elf_howto_table): Use it for R_M32C_24.
+	(m32c_elf_relocate_section): Handle R_M32C_24 specially.
+
+	2015-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* mach-o.c (bfd_mach_o_bfd_copy_private_header_data): Always
+	initialise the fields of the dyld_info structure.
+	(bfd_mach_o_build_exec_seg_command): Replace assertion with an
+	error message and a return value.
+	(bfd_mach_o_layout_commands): Change the function to boolean.
+	Return FALSE if the function fails.
+	(bfd_mach_o_build_commands): Fail if bfd_mach_o_layout_commands
+	fails.
+	(bfd_mach_o_read_command): Fail if an unrecognised command is
+	encountered.
+	* tekhex.c (first_phase): Fail if the section is too big.
+	* versados.c (struct esdid): Add content_size field.
+	(process_otr): Use and check the new field.
+	(versados_get_section_contents): Check that the section exists and
+	that the requested data is available.
+
+	2015-01-19  Alan Modra  <amodra@gmail.com>
+
+	* bfd-in.h (bfd_get_section_limit_octets): New define, extracted from..
+	(bfd_get_section_limit): ..here.
+	* reloc.c (bfd_perform_relocation): Correct bfd_reloc_outofrange check.
+	(bfd_install_relocation, _bfd_final_link_relocate): Add same check here.
+	* bfd-in2.h: Regenerate.
+
+	* cpu-ns32k.c (_bfd_do_ns32k_reloc_contents): Return bfd_reloc_ok
+	on zero size relocs.
+	* ecoff.c (ecoff_reloc_link_order): Likewise.
+	* elf32-nds32.c (nds32_relocate_contents): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+
+	* reloc.c (_bfd_relocate_contents): Don't bomb on zero size relocs.
+	(_bfd_clear_contents): Likewise.
+	* elfxx-mips.c (mips_elf_obtain_contents): Likewise.
+	(mips_elf_perform_relocation): Likewise.
+
+	* aoutx.h (aout_link_reloc_link_order): Allow for NULL return
+	from malloc on zero size alloc.
+	* cofflink.c (_bfd_coff_reloc_link_order): Likewise.
+	* elflink.c (elf_reloc_link_order): Likewise.
+	* linker.c (_bfd_generic_reloc_link_order): Likewise.
+	* pdp11.c (aout_link_reloc_link_order): Likewise.
+	* xcofflink.c (xcoff_reloc_link_order): Likewise.
+
+	* aoutx.h (howto_table_ext): Ensure NONE relocs have size 3,
+	bitsize 0, and complain_overflow_dont.
+	* coff-sparc.c (coff_sparc_howto_table): Likewise.
+	* elf-hppa.h (elf_hppa_howto_table): Likewise.
+	* elf-m10200.c (elf_mn10200_howto_table): Likewise.
+	* elf-m10300.c (elf_mn10300_howto_table): Likewise.
+	* elf32-arc.c (elf_arc_howto_table): Likewise.
+	* elf32-arm.c (elf32_arm_howto_table_1): Likewise.
+	* elf32-avr.c (elf_avr_howto_table): Likewise.
+	* elf32-bfin.c (bfin_howto_table): Likewise.
+	* elf32-cr16.c (cr16_elf_howto_table): Likewise.
+	* elf32-cris.c (cris_elf_howto_table): Likewise.
+	* elf32-crx.c (crx_elf_howto_table): Likewise.
+	* elf32-d10v.c (elf_d10v_howto_table): Likewise.
+	* elf32-d30v.c (elf_d30v_howto_table): Likewise.
+	* elf32-dlx.c (dlx_elf_howto_table): Likewise.
+	* elf32-epiphany.c (epiphany_elf_howto_table): Likewise.
+	* elf32-fr30.c (fr30_elf_howto_table): Likewise.
+	* elf32-frv.c (elf32_frv_howto_table): Likewise.
+	* elf32-h8300.c (h8_elf_howto_table): Likewise.
+	* elf32-i370.c (i370_elf_howto_raw): Likewise.
+	* elf32-i386.c (elf_howto_table): Likewise.
+	* elf32-i860.c (elf32_i860_howto_table): Likewise.
+	* elf32-i960.c (elf32_i960_relocate): Likewise.
+	* elf32-ip2k.c (ip2k_elf_howto_table): Likewise.
+	* elf32-iq2000.c (iq2000_elf_howto_table): Likewise.
+	* elf32-lm32.c (lm32_elf_howto_table): Likewise.
+	* elf32-m32c.c (m32c_elf_howto_table): Likewise.
+	* elf32-m32r.c (m32r_elf_howto_table): Likewise.
+	* elf32-m68hc11.c (elf_m68hc11_howto_table): Likewise.
+	* elf32-m68hc12.c (elf_m68hc11_howto_table): Likewise.
+	* elf32-m68k.c (howto_table): Likewise.
+	* elf32-mcore.c (mcore_elf_howto_raw): Likewise.
+	* elf32-mep.c (mep_elf_howto_table): Likewise.
+	* elf32-metag.c (elf_metag_howto_table): Likewise.
+	* elf32-microblaze.c (microblaze_elf_howto_raw): Likewise.
+	* elf32-mips.c (elf_mips_howto_table_rel): Likewise.
+	* elf32-moxie.c (moxie_elf_howto_table): Likewise.
+	* elf32-msp430.c (elf_msp430_howto_table): Likewise.
+	* elf32-mt.c (mt_elf_howto_table): Likewise.
+	* elf32-nds32.c (nds32_elf_howto_table): Likewise.
+	* elf32-nios2.c (elf_nios2_howto_table_rel): Likewise.
+	* elf32-or1k.c (or1k_elf_howto_table): Likewise.
+	* elf32-pj.c (pj_elf_howto_table): Likewise.
+	* elf32-ppc.c (ppc_elf_howto_raw): Likewise.
+	* elf32-rl78.c (rl78_elf_howto_table): Likewise.
+	* elf32-rx.c (rx_elf_howto_table): Likewise.
+	* elf32-s390.c (elf_howto_table): Likewise.
+	* elf32-score.c (elf32_score_howto_table): Likewise.
+	* elf32-score7.c (elf32_score_howto_table): Likewise.
+	* elf32-sh-relocs.h (R_SH_NONE): Likewise.
+	* elf32-spu.c (elf_howto_table): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_howto_table): Likewise.
+	* elf32-tilepro.c (tilepro_elf_howto_table): Likewise.
+	* elf32-v850.c (v850_elf_howto_table): Likewise.
+	* elf32-vax.c (howto_table): Likewise.
+	* elf32-xc16x.c (xc16x_elf_howto_table): Likewise.
+	* elf32-xgate.c (elf_xgate_howto_table): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_howto_table): Likewise.
+	* elf32-xtensa.c (elf_howto_table): Likewise.
+	* elf64-alpha.c (elf64_alpha_howto_table): Likewise.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Likewise.
+	* elf64-mmix.c (elf_mmix_howto_table): Likewise.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Likewise.
+	* elf64-s390.c (elf_howto_table): Likewise.
+	* elf64-sh64.c (sh_elf64_howto_table): Likewise.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Likewise.
+	* elfn32-mips.c (elf_mips_howto_table_rel): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Likewise.
+	(elfNN_aarch64_howto_none): Likewise.
+	* elfxx-ia64.c (ia64_howto_table): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_howto_table): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_howto_table): Likewise.
+	* nlm32-sparc.c (nlm32_sparc_howto_table): Likewise.
+
+	2015-01-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* mach-o.c (bfd_mach_o_read_symtab_strtab): Zero terminate the
+	string table.
+
+	* reloc.c (bfd_get_reloc_size): Handle a reloc size of -1.
+	(bfd_perform_relocation): Include the size of the reloc in the
+	test for an out of range relocation.
+	(bfd_generic_get_relocated_section_contents): Remove reloc range
+	test.
+
+	* tekhex.c (getvalue): Add an end pointer parameter.  Use it to
+	avoid reading off the end of the buffer.
+	(getsym): Likewise.
+	(first_phase): Likewise.
+	(pass_over): Pass an end pointer to the invoked function.
+
+	2015-01-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive.c (do_slurp_bsd_armap): Make sure that the parsed sized
+	is at least big enough for the header to be read.
+	* mach-o.c (bfd_mach_o_get_synthetic_symtab): Add range checks.
+	(bfd_mach_o_read_command): Prevetn duplicate error messages about
+	unrecognized commands.
+	* syms.c (_bfd_stab_section_find_nearest_line): Add range checks
+	when indexing into the string table.
+
+	2014-12-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive.c (do_slurp_bsd_armap): Return if the parsed_size is
+	zero.
+	(bfd_slurp_armap): Zero terminate the name.
+	(bfd_generic_stat_arch_elt): If there is no header, fail.
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): If no symbols have
+	been provided then set the reloc's symbol to undefined.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Add range
+	checking of the reloc to be applied.
+	* versados.c (process_otr): Add more range checks.
+	(versados_canonicalize_reloc): If the section is unknown, set the
+	symbol to undefined.
+	* vms-alpha.c (_bfd_vms_slurp_eisd): Add range checks.
+	(alpha_vms_object_p): Likewise.
+
+	2014-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* format.c (bfd_check_format_matches): Check for a matching vector
+	before using match priorities.
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Fix off-by-one
+	errors with previous delta.
+
+	2014-12-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive64.c (bfd_elf64_archive_slurp_armap): Add range checks.
+	* libbfd.c (safe_read_leb128): New function.
+	* libbfd-in.h (safe_read_leb128): Add prototype.
+	* libbfd.h: Regenerate.
+
+	2014-12-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* compress.c (bfd_get_full_section_contents): Fail if there are no
+	section contents available when the compress_status is
+	COMPRESS_SECTION_DONE.
+	* libbfd.c (bfd_malloc): Refuse to allocate a negative size.
+	(bfd_malloc2): Use bfd_malloc.
+	(bfd_realloc): Refuse to reallocate a negative size.
+	(bfd_realloc2): Use bfd_realloc.
+	(bfd_realloc_or_free): Use bfd_realloc.
+	(bfd_zmalloc): Use bfd_malloc.
+	(bfd_zmalloc): Use bfd_malloc2.
+	* opncls.c (bfd_alloc): Refuse to allocate a negative size.
+
+	2014-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* archive.c (do_slurp_coff_armap): Add range checks to prevent
+	running off the end of the string table.
+	* compress.c (bfd_get_full_section_contents): Return a NULL
+	pointer for zero sized sections.  Do not attempt to copy a buffer
+	onto itself.
+	* reloc.c (bfd_perform_relocation): Avoid seg-fault if the howto
+	parameter is NULL.
+
+	2014-11-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Likewise.
+	(bfd_mach_o_mangle_sections): Move test for too many sections to
+	before the allocation of the section table.
+	(bfd_mach_o_read_symtab_strtab): If the read fails, free the
+	memory and nullify the symbol pointer.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Add
+	handling of a bfd_reloc_notsupported return value.
+	* versados.c (EDATA): Add range checking.
+	(get_record): Likewise.
+	(process_otr): Check for contents being available before updating
+	them.
+	(versados_canonicalize_reloc): Add range check.
+
+	2014-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ieee.c (next_byte): Convert to a function.  Return FALSE if the
+	next byte is beyond the end of the buffer.
+	(parse_int): Test the return value of next_byte.
+	(parse_expression): Convert to boolean.  Return FALSE if the
+	parsing failed.  Test the return value of next_byte.
+	(ieee_seek): Convert to a function.  Return FALSE if the seek goes
+	beyond the end of the buffer.
+	(ieee_slurp_external_symbols): Test the return value of ieee_seek
+	and next_byte.
+	(ieee_slurp_sections): Convert to boolean.  Return FALSE if the
+	operation failed.  Test the return value of ieee_seek and
+	next_byte.
+	(ieee_archive_p): Test the return value of ieee_seek and
+	next_byte.
+	(do_one): Likewise.
+	(ieee_slurp_section_data): Likewise.
+	(ieee_object_p): Likewise.  Store the size of the buffer in the
+	total_amt field in the header.
+	* libieee.h (common_header_type): Add amt field.
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Check that the
+	reloc's value is within range.
+	(bfd_mach_o_read_symtab_symbols): Nullify the symbols field if the
+	operation fails.
+	* versados.c (process_otr): Check that the section exists before
+	taking its size.
+	(versados_object_p): Make sure that enough data was read for the
+	header to be checked.
+	* vms-alpha.c (vms_get_remaining_object_record): Change
+	read_so_far parameter to an unsigned int.  Check that the amount
+	read is in range.
+
 2015-03-24  Nick Clifton  <nickc@redhat.com>
 
 	Apply from master:
