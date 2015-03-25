@@ -1,3 +1,9 @@
+2015-03-25  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (mapping_state): Remove first MAP_DATA emitting
+	code.
+	(mapping_state_2): Emit first MAP_DATA symbol here.
+
 2015-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/18087
