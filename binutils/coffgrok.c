@@ -28,7 +28,6 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
-
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
 #include "bucomm.h"
@@ -54,7 +53,7 @@ static long symcount;
 #define N(x) ((x)->_n._n_nptr[1])
 
 static struct coff_ptr_struct *rawsyms;
-static int rawcount;
+static unsigned int rawcount;
 static bfd *abfd;
 
 #define PTR_SIZE	4
@@ -65,19 +64,6 @@ static bfd *abfd;
 #define DOUBLE_SIZE	8
 
 #define INDEXOF(p)  ((struct coff_ptr_struct *)(p)-(rawsyms))
-
-static struct coff_scope *empty_scope (void);
-static struct coff_symbol *empty_symbol (void);
-static void push_scope (int);
-static void pop_scope (void);
-static void do_sections_p1 (struct coff_ofile *);
-static void do_sections_p2 (struct coff_ofile *);
-static struct coff_where *do_where (int);
-static struct coff_line *do_lines (int, char *);
-static struct coff_type *do_type (int);
-static struct coff_visible *do_visible (int);
-static int do_define (int, struct coff_scope *);
-static struct coff_ofile *doit (void);
 
 static struct coff_scope *
 empty_scope (void)

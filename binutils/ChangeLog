@@ -1,3 +1,7 @@
+2015-03-25  Nick Clifton  <nickc@redhat.com>
+
+	* coffgrok.c: Remove redundant prototypes.
+
 2015-03-24  Nick Clifton  <nickc@redhat.com>
 
 	Apply from master:
