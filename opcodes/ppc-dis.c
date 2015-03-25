@@ -341,37 +341,41 @@ disassemble_init_powerpc (struct disassemble_info *info)
   int i;
   unsigned short last;
 
-  i = powerpc_num_opcodes;
-  while (--i >= 0)
+  if (powerpc_opcd_indices[PPC_OPCD_SEGS] == 0)
     {
-      unsigned op = PPC_OP (powerpc_opcodes[i].opcode);
 
-      powerpc_opcd_indices[op] = i;
-    }
+      i = powerpc_num_opcodes;
+      while (--i >= 0)
+        {
+          unsigned op = PPC_OP (powerpc_opcodes[i].opcode);
 
-  last = powerpc_num_opcodes;
-  for (i = PPC_OPCD_SEGS; i > 0; --i)
-    {
-      if (powerpc_opcd_indices[i] == 0)
-	powerpc_opcd_indices[i] = last;
-      last = powerpc_opcd_indices[i];
-    }
+          powerpc_opcd_indices[op] = i;
+        }
 
-  i = vle_num_opcodes;
-  while (--i >= 0)
-    {
-      unsigned op = VLE_OP (vle_opcodes[i].opcode, vle_opcodes[i].mask);
-      unsigned seg = VLE_OP_TO_SEG (op);
+      last = powerpc_num_opcodes;
+      for (i = PPC_OPCD_SEGS; i > 0; --i)
+        {
+          if (powerpc_opcd_indices[i] == 0)
+	    powerpc_opcd_indices[i] = last;
+          last = powerpc_opcd_indices[i];
+        }
 
-      vle_opcd_indices[seg] = i;
-    }
+      i = vle_num_opcodes;
+      while (--i >= 0)
+        {
+          unsigned op = VLE_OP (vle_opcodes[i].opcode, vle_opcodes[i].mask);
+          unsigned seg = VLE_OP_TO_SEG (op);
 
-  last = vle_num_opcodes;
-  for (i = VLE_OPCD_SEGS; i > 0; --i)
-    {
-      if (vle_opcd_indices[i] == 0)
-	vle_opcd_indices[i] = last;
-      last = vle_opcd_indices[i];
+          vle_opcd_indices[seg] = i;
+        }
+
+      last = vle_num_opcodes;
+      for (i = VLE_OPCD_SEGS; i > 0; --i)
+        {
+          if (vle_opcd_indices[i] == 0)
+	    vle_opcd_indices[i] = last;
+          last = vle_opcd_indices[i];
+        }
     }
 
   if (info->arch == bfd_arch_powerpc)
