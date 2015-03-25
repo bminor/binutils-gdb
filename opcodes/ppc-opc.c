@@ -5795,6 +5795,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tlbwelo",	XTLB(31,978,1),	XTLB_MASK,   PPC403,	PPCNONE,	{RT, RA}},
 {"tlbwe",	X(31,978),	X_MASK, PPC403|BOOKE|PPCA2|PPC476, PPCNONE, {RSO, RAOPT, SHO}},
 
+{"slbfee.",	XRC(31,979,1),	XRA_MASK,    POWER6,	PPCNONE,	{RT, RB}},
+
 {"stbcix",	X(31,981),	X_MASK,      POWER6,	PPCNONE,	{RS, RA0, RB}},
 
 {"icbi",	X(31,982),	XRT_MASK,    PPC|PPCVLE, PPCNONE,	{RA0, RB}},

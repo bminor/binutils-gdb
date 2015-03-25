@@ -1,3 +1,7 @@
+2015-03-25  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c (powerpc_opcodes): Add slbfee.
+
 2015-03-24  Terry Guo  <terry.guo@arm.com>
 
 	* arm-dis.c (opcode32): Updated to use new arm feature struct.
