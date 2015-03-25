@@ -3289,6 +3289,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    }
 	}
 
+      if (size == 0)
+	goto done;
       s = *ret = bfd_malloc (size);
       if (s == NULL)
 	{
@@ -3460,6 +3462,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    }
 	}
 
+      if (size == 0)
+	goto free_contents_and_exit;
       s = *ret = bfd_malloc (size);
       if (s == NULL)
 	goto free_contents_and_exit;
@@ -5943,6 +5947,10 @@ opd_entry_value (asection *opd_sec,
 	  ppc64_elf_tdata (opd_bfd)->opd.contents = contents;
 	}
 
+      /* PR 17512: file: 64b9dfbb.  */
+      if (offset + 7 >= opd_sec->size || offset + 7 < offset)
+	return (bfd_vma) -1;
+
       val = bfd_get_64 (opd_bfd, contents + offset);
       if (code_sec != NULL)
 	{
@@ -5978,10 +5986,12 @@ opd_entry_value (asection *opd_sec,
   relocs = ppc64_elf_tdata (opd_bfd)->opd.relocs;
   if (relocs == NULL)
     relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
+  /* PR 17512: file: df8e1fd6.  */
+  if (relocs == NULL)
+    return (bfd_vma) -1;
 
   /* Go find the opd reloc at the sym address.  */
   lo = relocs;
-  BFD_ASSERT (lo != NULL);
   hi = lo + opd_sec->reloc_count - 1; /* ignore last reloc */
   val = (bfd_vma) -1;
   while (lo < hi)
@@ -15305,4 +15315,3 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf64_bed	elf64_powerpc_fbsd_bed
 
 #include "elf64-target.h"
-

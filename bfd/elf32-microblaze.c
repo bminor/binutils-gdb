@@ -643,13 +643,22 @@ microblaze_elf_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
 			      arelent * cache_ptr,
 			      Elf_Internal_Rela * dst)
 {
+  unsigned int r_type;
+
   if (!microblaze_elf_howto_table [R_MICROBLAZE_32])
     /* Initialize howto table if needed.  */
     microblaze_elf_howto_init ();
 
-  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_MICROBLAZE_max);
+  r_type = ELF32_R_TYPE (dst->r_info);
+  if (r_type >= R_MICROBLAZE_max)
+    {
+      (*_bfd_error_handler) (_("%B: unrecognised MicroBlaze reloc number: %d"),
+			     abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      r_type = R_MICROBLAZE_NONE;
+    }
 
-  cache_ptr->howto = microblaze_elf_howto_table [ELF32_R_TYPE (dst->r_info)];
+  cache_ptr->howto = microblaze_elf_howto_table [r_type];
 }
 
 /* Microblaze ELF local labels start with 'L.' or '$L', not '.L'.  */

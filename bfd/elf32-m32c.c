@@ -266,7 +266,7 @@ m32c_reloc_type_lookup
 {
   unsigned int i;
 
-  for (i = ARRAY_SIZE (m32c_reloc_map); --i;)
+  for (i = ARRAY_SIZE (m32c_reloc_map); i--;)
     if (m32c_reloc_map [i].bfd_reloc_val == code)
       return & m32c_elf_howto_table [m32c_reloc_map[i].m32c_reloc_val];
 
@@ -299,7 +299,11 @@ m32c_info_to_howto_rela
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_M32C_max);
+  if (r_type >= (unsigned int) R_M32C_max)
+    {
+      _bfd_error_handler (_("%B: invalid M32C reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = & m32c_elf_howto_table [r_type];
 }
 

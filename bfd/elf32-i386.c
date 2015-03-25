@@ -379,7 +379,9 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
 			     abfd, (int) r_type);
       indx = R_386_NONE;
     }
-  BFD_ASSERT (elf_howto_table [indx].type == r_type);
+  /* PR 17512: file: 0f67f69d.  */
+  if (elf_howto_table [indx].type != r_type)
+    return NULL;
   return &elf_howto_table[indx];
 }
 
@@ -5015,7 +5017,7 @@ bad_return:
   if (plt_sym_val == NULL)
     goto bad_return;
 
-  for (i = 0; i < count; i++, p++)
+  for (i = 0; i < count; i++)
     plt_sym_val[i] = -1;
 
   plt_offset = bed->plt->plt_entry_size;
@@ -5023,6 +5025,10 @@ bad_return:
   for (i = 0; i < count; i++, p++)
     {
       long reloc_index;
+
+      /* Skip unknown relocation.  PR 17512: file: bc9d6cf5.  */
+      if (p->howto == NULL)
+	continue;
 
       if (p->howto->type != R_386_JUMP_SLOT
 	  && p->howto->type != R_386_IRELATIVE)

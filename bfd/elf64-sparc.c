@@ -97,7 +97,9 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
       else
 	relent->address = rela.r_offset - asect->vma;
 
-      if (ELF64_R_SYM (rela.r_info) == STN_UNDEF)
+      if (ELF64_R_SYM (rela.r_info) == STN_UNDEF
+	  /* PR 17512: file: 996185f8.  */
+	  || ELF64_R_SYM (rela.r_info) > bfd_get_symcount (abfd))
 	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else
 	{

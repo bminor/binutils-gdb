@@ -1377,7 +1377,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 static reloc_howto_type elfNN_aarch64_howto_none =
   HOWTO (R_AARCH64_NONE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1430,6 +1430,14 @@ elfNN_aarch64_bfd_reloc_from_type (unsigned int r_type)
 
   if (r_type == R_AARCH64_NONE || r_type == R_AARCH64_NULL)
     return BFD_RELOC_AARCH64_NONE;
+
+  /* PR 17512: file: b371e70a.  */
+  if (r_type >= R_AARCH64_end)
+    {
+      _bfd_error_handler (_("Invalid AArch64 reloc number: %d"), r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return BFD_RELOC_AARCH64_NONE;
+    }
 
   return BFD_RELOC_AARCH64_RELOC_START + offsets[r_type];
 }
