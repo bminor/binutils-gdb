@@ -2684,6 +2684,78 @@ default_fileio_target (void)
     return find_default_run_target ("file I/O");
 }
 
+/* File handle for target file operations.  */
+
+typedef struct
+{
+  /* The target on which this file is open.  */
+  struct target_ops *t;
+
+  /* The file descriptor on the target.  */
+  int fd;
+} fileio_fh_t;
+
+DEF_VEC_O (fileio_fh_t);
+
+/* Vector of currently open file handles.  The value returned by
+   target_fileio_open and passed as the FD argument to other
+   target_fileio_* functions is an index into this vector.  This
+   vector's entries are never freed; instead, files are marked as
+   closed, and the handle becomes available for reuse.  */
+static VEC (fileio_fh_t) *fileio_fhandles;
+
+/* Macro to check whether a fileio_fh_t represents a closed file.  */
+#define is_closed_fileio_fh(fd) ((fd) < 0)
+
+/* Index into fileio_fhandles of the lowest handle that might be
+   closed.  This permits handle reuse without searching the whole
+   list each time a new file is opened.  */
+static int lowest_closed_fd;
+
+/* Acquire a target fileio file descriptor.  */
+
+static int
+acquire_fileio_fd (struct target_ops *t, int fd)
+{
+  fileio_fh_t *fh, buf;
+
+  gdb_assert (!is_closed_fileio_fh (fd));
+
+  /* Search for closed handles to reuse.  */
+  for (;
+       VEC_iterate (fileio_fh_t, fileio_fhandles,
+                    lowest_closed_fd, fh);
+       lowest_closed_fd++)
+    if (is_closed_fileio_fh (fh->fd))
+      break;
+
+  /* Push a new handle if no closed handles were found.  */
+  if (lowest_closed_fd == VEC_length (fileio_fh_t, fileio_fhandles))
+    fh = VEC_safe_push (fileio_fh_t, fileio_fhandles, NULL);
+
+  /* Fill in the handle.  */
+  fh->t = t;
+  fh->fd = fd;
+
+  /* Return its index, and start the next lookup at
+     the next index.  */
+  return lowest_closed_fd++;
+}
+
+/* Release a target fileio file descriptor.  */
+
+static void
+release_fileio_fd (int fd, fileio_fh_t *fh)
+{
+  fh->fd = -1;
+  lowest_closed_fd = min (lowest_closed_fd, fd);
+}
+
+/* Return a pointer to the fileio_fhandle_t corresponding to FD.  */
+
+#define fileio_fd_to_fh(fd) \
+  VEC_index (fileio_fh_t, fileio_fhandles, (fd))
+
 /* Open FILENAME on the target, using FLAGS and MODE.  Return a
    target file descriptor, or -1 if an error occurs (and set
    *TARGET_ERRNO).  */
@@ -2698,6 +2770,11 @@ target_fileio_open (const char *filename, int flags, int mode,
       if (t->to_fileio_open != NULL)
 	{
 	  int fd = t->to_fileio_open (t, filename, flags, mode, target_errno);
+
+	  if (fd < 0)
+	    fd = -1;
+	  else
+	    fd = acquire_fileio_fd (t, fd);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -2719,27 +2796,22 @@ int
 target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
 		      ULONGEST offset, int *target_errno)
 {
-  struct target_ops *t;
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
 
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
-    {
-      if (t->to_fileio_pwrite != NULL)
-	{
-	  int ret = t->to_fileio_pwrite (t, fd, write_buf, len, offset,
-					 target_errno);
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
+    ret = fh->t->to_fileio_pwrite (fh->t, fh->fd, write_buf,
+				   len, offset, target_errno);
 
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_pwrite (%d,...,%d,%s) "
-				"= %d (%d)\n",
-				fd, len, pulongest (offset),
-				ret, ret != -1 ? 0 : *target_errno);
-	  return ret;
-	}
-    }
-
-  *target_errno = FILEIO_ENOSYS;
-  return -1;
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_pwrite (%d,...,%d,%s) "
+			"= %d (%d)\n",
+			fd, len, pulongest (offset),
+			ret, ret != -1 ? 0 : *target_errno);
+  return ret;
 }
 
 /* Read up to LEN bytes FD on the target into READ_BUF.
@@ -2749,27 +2821,22 @@ int
 target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 		     ULONGEST offset, int *target_errno)
 {
-  struct target_ops *t;
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
 
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
-    {
-      if (t->to_fileio_pread != NULL)
-	{
-	  int ret = t->to_fileio_pread (t, fd, read_buf, len, offset,
-					target_errno);
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
+    ret = fh->t->to_fileio_pread (fh->t, fh->fd, read_buf,
+				  len, offset, target_errno);
 
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_pread (%d,...,%d,%s) "
-				"= %d (%d)\n",
-				fd, len, pulongest (offset),
-				ret, ret != -1 ? 0 : *target_errno);
-	  return ret;
-	}
-    }
-
-  *target_errno = FILEIO_ENOSYS;
-  return -1;
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_pread (%d,...,%d,%s) "
+			"= %d (%d)\n",
+			fd, len, pulongest (offset),
+			ret, ret != -1 ? 0 : *target_errno);
+  return ret;
 }
 
 /* Close FD on the target.  Return 0, or -1 if an error occurs
@@ -2777,24 +2844,22 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 int
 target_fileio_close (int fd, int *target_errno)
 {
-  struct target_ops *t;
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
 
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
     {
-      if (t->to_fileio_close != NULL)
-	{
-	  int ret = t->to_fileio_close (t, fd, target_errno);
-
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_close (%d) = %d (%d)\n",
-				fd, ret, ret != -1 ? 0 : *target_errno);
-	  return ret;
-	}
+      ret = fh->t->to_fileio_close (fh->t, fh->fd, target_errno);
+      release_fileio_fd (fd, fh);
     }
 
-  *target_errno = FILEIO_ENOSYS;
-  return -1;
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_close (%d) = %d (%d)\n",
+			fd, ret, ret != -1 ? 0 : *target_errno);
+  return ret;
 }
 
 /* Unlink FILENAME on the target.  Return 0, or -1 if an error

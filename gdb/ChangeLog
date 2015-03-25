@@ -1,3 +1,18 @@
+2015-03-25  Gary Benson <gbenson@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* target.c (fileio_ft_t): New typedef, define object vector.
+	(fileio_fhandles): New static variable.
+	(is_closed_fileio_fh): New macro.
+	(lowest_closed_fd): New static variable.
+	(acquire_fileio_fd): New function.
+	(release_fileio_fd): Likewise.
+	(fileio_fd_to_fh): New macro.
+	(target_fileio_open): Wrap the file descriptor on success.
+	(target_fileio_pwrite): Updated to use wrapped file descriptor.
+	(target_fileio_pread): Likewise.
+	(target_fileio_close): Likewise.
+
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
 	* thread.c (thread_apply_all_command): Take exited threads into
