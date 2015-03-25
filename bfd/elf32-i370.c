@@ -294,12 +294,21 @@ i370_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
 {
+  unsigned int r_type;
+
   if (!i370_elf_howto_table[ R_I370_ADDR31 ])
     /* Initialize howto table.  */
     i370_elf_howto_init ();
 
-  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_I370_max);
-  cache_ptr->howto = i370_elf_howto_table[ELF32_R_TYPE (dst->r_info)];
+  r_type = ELF32_R_TYPE (dst->r_info);
+  if (r_type >= R_I370_max)
+    {
+      (*_bfd_error_handler) (_("%B: unrecognised I370 reloc number: %d"),
+			     abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      r_type = R_I370_NONE;
+    }
+  cache_ptr->howto = i370_elf_howto_table[r_type];
 }
 
 /* Hack alert --  the following several routines look generic to me ...

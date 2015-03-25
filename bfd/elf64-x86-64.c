@@ -302,7 +302,7 @@ elf_x86_64_reloc_type_lookup (bfd *abfd,
 	return elf_x86_64_rtype_to_howto (abfd,
 					  x86_64_reloc_map[i].elf_reloc_val);
     }
-  return 0;
+  return NULL;
 }
 
 static reloc_howto_type *
@@ -5410,7 +5410,7 @@ bad_return:
   if (plt_sym_val == NULL)
     goto bad_return;
 
-  for (i = 0; i < count; i++, p++)
+  for (i = 0; i < count; i++)
     plt_sym_val[i] = -1;
 
   plt_offset = bed->plt_entry_size;
@@ -5418,6 +5418,10 @@ bad_return:
   for (i = 0; i < count; i++, p++)
     {
       long reloc_index;
+
+      /* Skip unknown relocation.  */
+      if (p->howto == NULL)
+	continue;
 
       if (p->howto->type != R_X86_64_JUMP_SLOT
 	  && p->howto->type != R_X86_64_IRELATIVE)

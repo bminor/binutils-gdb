@@ -2019,19 +2019,28 @@ ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
 {
+  unsigned int r_type;
+
   /* Initialize howto table if not already done.  */
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
     ppc_elf_howto_init ();
 
-  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_PPC_max);
-  cache_ptr->howto = ppc_elf_howto_table[ELF32_R_TYPE (dst->r_info)];
+  r_type = ELF32_R_TYPE (dst->r_info);
+  if (r_type >= R_PPC_max)
+    {
+      (*_bfd_error_handler) (_("%B: unrecognised PPC reloc number: %d"),
+			     abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      r_type = R_PPC_NONE;
+    }
+  cache_ptr->howto = ppc_elf_howto_table[r_type];
 
   /* Just because the above assert didn't trigger doesn't mean that
      ELF32_R_TYPE (dst->r_info) is necessarily a valid relocation.  */
   if (!cache_ptr->howto)
     {
       (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-                             abfd, ELF32_R_TYPE (dst->r_info));
+                             abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
 
       cache_ptr->howto = ppc_elf_howto_table[R_PPC_NONE];

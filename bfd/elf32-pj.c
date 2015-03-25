@@ -319,7 +319,13 @@ pj_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   r = ELF32_R_TYPE (dst->r_info);
 
-  BFD_ASSERT (r < (unsigned int) R_PJ_max);
+  if (r >= R_PJ_max)
+    {
+      (*_bfd_error_handler) (_("%B: unrecognised PicoJava reloc number: %d"),
+			     abfd, r);
+      bfd_set_error (bfd_error_bad_value);
+      r = R_PJ_NONE;
+    }
 
   cache_ptr->howto = &pj_elf_howto_table[r];
 }

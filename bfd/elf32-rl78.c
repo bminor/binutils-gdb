@@ -246,7 +246,7 @@ rl78_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   if (code == BFD_RELOC_RL78_32_OP)
     return rl78_elf_howto_table + R_RL78_DIR32;
 
-  for (i = ARRAY_SIZE (rl78_reloc_map); --i;)
+  for (i = ARRAY_SIZE (rl78_reloc_map); i--;)
     if (rl78_reloc_map [i].bfd_reloc_val == code)
       return rl78_elf_howto_table + rl78_reloc_map[i].rl78_reloc_val;
 
@@ -276,7 +276,11 @@ rl78_info_to_howto_rela (bfd *               abfd ATTRIBUTE_UNUSED,
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_RL78_max);
+  if (r_type >= (unsigned int) R_RL78_max)
+    {
+      _bfd_error_handler (_("%B: invalid RL78 reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = rl78_elf_howto_table + r_type;
 }
 

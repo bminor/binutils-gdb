@@ -4,6 +4,211 @@
 	2015-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
+	* elf.c (elf_fake_sections): Handle excessive alignmment powers.
+	(assign_file_positions_for_non_load_sections): Replace assertion
+	with an error message.
+	(rewrite_elf_program_header): Handle excessive segment
+	alignments.
+
+	2015-02-13  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
+	* elf64-ppc.c (opd_entry_value): Tighten offset check.  Remove
+	now redundant assert.
+
+	2015-02-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf2.c (read_1_byte, read_1_signed_byte, read_2_bytes)
+	(read_4_bytes, read_8_bytes, read_n_bytes, read_string)
+	(read_indirect_string, read_alt_indirect_string)
+	(read_alt_indirect_ref, read_address, read_abbrevs)
+	(read_attribute_value, read_attribute, decode_line_info)
+	(find_abstract_instance_name, read_rangelist)
+	(scan_unit_for_symbols, parse_comp_unit)
+	(_bfd_dwarf2_find_nearest_line): Harden DWARF reading code.  Pass
+	end pointers to reading functions and check for offsets taking
+	pointers out of range.  Replace calls to read_*_leb128 with calls
+	to safe_read_leb128.
+
+	* elf64-ppc.c (opd_entry_value): Add a check for an overlarge
+	offset.
+
+	2015-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* elf-m10300.c (mn10300_info_to_howto): Fix typo in error message.
+	* elf32-arc.c (arc_info_to_howto_rel): Likewise.
+	* elf32-avr.c (avr_info_to_howto_rela): Likewise.
+	* elf32-cr16.c (elf_cr16_info_to_howto): Likewise.
+	* elf32-cr16c.c (elf_cr16c_info_to_howto_rel): Likewise.
+	* elf32-cris.c (cris_info_to_howto_rela): Likewise.
+	* elf32-crx.c (elf_crx_info_to_howto): Likewise.
+	* elf32-d10v.c (d10v_info_to_howto_rel): Likewise.
+	* elf32-d30v.c (d30v_info_to_howto_rel): Likewise.
+	* elf32-epiphany.c (epiphany_info_to_howto_rela): Likewise.
+	* elf32-fr30.c (fr30_info_to_howto_rela): Likewise.
+	* elf32-frv.c (frv_info_to_howto_rela): Likewise.
+	* elf32-i370.c (i370_elf_info_to_howto): Likewise.
+	* elf32-i960.c (elf32_i960_info_to_howto_rel): Likewise.
+	* elf32-ip2k.c (ip2k_info_to_howto_rela): Likewise.
+	* elf32-iq2000.c (iq2000_info_to_howto_rela): Likewise.
+	* elf32-lm32.c (lm32_info_to_howto_rela): Likewise.
+	* elf32-m32c.c (m32c_info_to_howto_rela): Likewise.
+	* elf32-m32r.c (m32r_info_to_howto_rel): Likewise.
+	* elf32-m68hc11.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-m68hc12.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-mcore.c (mcore_elf_info_to_howto): Likewise.
+	* elf32-mep.c (mep_info_to_howto_rela): Likewise.
+	* elf32-metag.c (metag_info_to_howto_rela): Likewise.
+	* elf32-microblaze.c (microblaze_elf_info_to_howto): Likewise.
+	* elf32-moxie.c (moxie_info_to_howto_rela): Likewise.
+	* elf32-msp430.c (msp430_info_to_howto_rela): Likewise.
+	* elf32-mt.c (mt_info_to_howto_rela): Likewise.
+	* elf32-nds32.c (nds32_info_to_howto_rel): Likewise.
+	* elf32-or1k.c (or1k_info_to_howto_rela): Likewise.
+	* elf32-pj.c (pj_elf_info_to_howto): Likewise.
+	* elf32-ppc.c (ppc_elf_info_to_howto): Likewise.
+	* elf32-rl78.c (rl78_info_to_howto_rela): Likewise.
+	* elf32-rx.c (rx_info_to_howto_rela): Likewise.
+	* elf32-sh.c (sh_elf_info_to_howto): Likewise.
+	* elf32-spu.c (spu_elf_info_to_howto): Likewise.
+	* elf32-v850.c (v850_elf_perform_relocation): Likewise.
+	* elf32-vax.c (rtype_to_howto): Likewise.
+	* elf32-visium.c (visium_info_to_howto_rela): Likewise.
+	* elf32-xgate.c (xgate_info_to_howto_rel): Likewise.
+	* elf32-xtensa.c (elf_xtensa_info_to_howto_rela): Likewise.
+	* elf64-alpha.c (elf64_alpha_info_to_howto): Likewise.
+	* elf64-mmix.c (mmix_info_to_howto_rela): Likewise.
+
+	2015-01-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf2.c (concat_filename): Check for an empty directory table.
+	(scan_unit_for_symbols): Check for reading off the end of the
+	unit.
+	(parse_comp_unit): Check for a DW_AT_comp_dir attribute with a
+	non-string form.
+
+	2015-01-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* elf-m10300.c (mn10300_info_to_howto): Replace assertion with an
+	error message.  Never return an invalid howto pointer.
+	* elf32-cr16.c (cr16_info_to_howto): Likewise.
+	* elf32-crx.c (elf_crx_info_to_howto): Likewise.
+	* elf32-i370.c (i370_elf_info_to_howto): Likewise.
+	* elf32-mcore.c (mcore_elf_info_to_howto): Likewise.
+	* elf32-microblaze.c (microblaze_elf_info_to_howto): Likewise.
+	* elf32-mips.c (mips_elf32_rtype_to_howto): Likewise.
+	* elf32-pj.c (pj_elf_info_to_howto): Likewise.
+	* elf32-ppc.c (ppc_elf_info_to_howto): Likewise.
+	* elf32-spu.c (spu_elf_info_to_howto): Likewise.
+	* elf32-v850.c (v850_elf_info_to_howto_rela): Likewise.
+	* elf32-vax.c (rtype_to_howto): Likewise.
+	* elf64-alpha.c (elf64_alpha_info_to_howto): Likewise.
+	* elf64-mips.c (mips_elf64_rtype_to_howto): Likewise.
+	* elfn32-mips.c (sh_elf_info_to_howto): Likewise.
+	* elf32-sh.c (sh_elf_info_to_howto): Likewise.
+	(sh_elf_reloc): Check that the reloc is in range.
+	* reloc.c (bfd_perform_relocation): Check that the section is big
+	enough for the entire reloc.
+	(bfd_generic_get_relocated_section_contents): Report unexpected
+	return values from perform_reloc.
+
+	2015-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* elf.c (_bfd_elf_map_sections_to_segments): Enforce a minimum
+	maxpagesize of 1.
+
+	2015-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/17512
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Skip unknown relocation.
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Likewise.
+
+	2014-12-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* elf32-arc.c (arc_info_to_howto_rel): Replace BFD_ASSERT with
+	error message.
+	* elf32-avr.c (avr_info_to_howto_rela): Likewise.
+	* elf32-cr16c.c (elf_cr16c_info_to_howto_rel): Likewise.
+	* elf32-cris.c (cris_info_to_howto_rela): Likewise.
+	* elf32-d10v.c (d10v_info_to_howto_rel): Likewise.
+	* elf32-d30v.c (d30v_info_to_howto_rel): Likewise.
+	* elf32-dlx.c (dlx_rtype_to_howto): Likewise.
+	* elf32-epiphany.c (epiphany_info_to_howto_rela): Likewise.
+	* elf32-fr30.c (fr30_info_to_howto_rela): Likewise.
+	* elf32-frv.c (frv_info_to_howto_rela): Likewise.
+	* elf32-i960.c (elf32_i960_info_to_howto_rel): Likewise.
+	* elf32-ip2k.c (ip2k_info_to_howto_rela): Likewise.
+	* elf32-iq2000.c (iq2000_info_to_howto_rela): Likewise.
+	* elf32-lm32.c (lm32_info_to_howto_rela): Likewise.
+	* elf32-m32c.c (m32c_info_to_howto_rela): Likewise.
+	* elf32-m32r.c (m32r_info_to_howto_rel): Likewise.
+	* elf32-m68hc11.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-m68hc12.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-mep.c (mep_info_to_howto_rela): Likewise.
+	* elf32-metag.c (metag_info_to_howto_rela): Likewise.
+	* elf32-moxie.c (moxie_info_to_howto_rela): Likewise.
+	* elf32-msp430.c (msp430_info_to_howto_rela): Likewise.
+	* elf32-mt.c (mt_info_to_howto_rela): Likewise.
+	* elf32-nds32.c (nds32_info_to_howto_rel): Likewise.
+	* elf32-or1k.c (or1k_info_to_howto_rela): Likewise.
+	* elf32-rl78.c (rl78_info_to_howto_rela): Likewise.
+	* elf32-rx.c (rx_info_to_howto_rela): Likewise.
+	* elf32-v850.c (v850_elf_info_to_howto_rel): Likewise.
+	* elf32-xgate.c (xgate_info_to_howto_rel): Likewise.
+	* elf32-xtensa.c (elf_xtensa_info_to_howto_rela): Likewise.
+	* elf64-mmix.c (mmix_info_to_howto_rela): Likewise.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_lookup): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_bfd_reloc_from_type): Likewise.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Add range
+	checking of reloc symbol index.
+
+	2014-12-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* elf-attrs.c (_bfd_elf_parse_attributes): Use safe_read_leb128.
+	Check for an over-long subsection length.
+	* elf.c (elf_parse_notes): Check that the namedata is long enough
+	for the string comparison that is about to be performed.
+	(elf_read_notes): Zero-terminate the note buffer.
+
+	2014-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* elf-attrs.c (_bfd_elf_parse_attributes): Check for an empty
+	header.  Add range checks to avoid running off the end of the
+	section.
+	* elf.c (bfd_elf_get_str_section): Seek before allocating so that
+	if the seek fails, no memory is allocated.
+	(bfd_elf_string_from_elf_section): Do not allocate a string from a
+	non string section.  It only leads to trouble later on.
+	(_bfd_elf_print_private_bfd_data): Check for there being too
+	little external dynamic data.
+	(bfd_section_from_shdr): Replace assertion with a failure mode.
+	(bfd_section_from_shdr): When walking a loaded group section use
+	the internal structure size, not the external size.  Check for the
+	group section being empty.
+	* elf32-i386.c (elf_i386_rtype_to_howto): Replace assertion with a
+	failure mode.
+	* elfcode.h (elf_slurp_reloc_table): Likewise.
+
+	2014-11-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* elf.c (_bfd_elf_print_private_bfd_data): Fix the range check
+	scanning the external dynamic entries.
+
+2015-03-25  Nick Clifton  <nickc@redhat.com>
+
+	Apply from master:
+	2015-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
 	* mach-o.c (bfd_mach_o_read_section_32): Likewise.
 	(bfd_mach_o_read_section_64): Likewise.
 

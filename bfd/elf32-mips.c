@@ -2204,7 +2204,12 @@ mips_elf32_rtype_to_howto (unsigned int r_type,
 	return &elf_micromips_howto_table_rel[r_type - R_MICROMIPS_min];
       if (r_type >= R_MIPS16_min && r_type < R_MIPS16_max)
         return &elf_mips16_howto_table_rel[r_type - R_MIPS16_min];
-      BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
+      if (r_type >= (unsigned int) R_MIPS_max)
+	{
+	  (*_bfd_error_handler) (_("Unrecognised MIPS reloc number: %d"), r_type);
+	  bfd_set_error (bfd_error_bad_value);
+	  r_type = R_MIPS_NONE;
+	}
       return &elf_mips_howto_table_rel[r_type];
     }
 }

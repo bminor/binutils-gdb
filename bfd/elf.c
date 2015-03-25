@@ -297,13 +297,14 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       /* Allocate and clear an extra byte at the end, to prevent crashes
 	 in case the string table is not terminated.  */
       if (shstrtabsize + 1 <= 1
-	  || (shstrtab = (bfd_byte *) bfd_alloc (abfd, shstrtabsize + 1)) == NULL
-	  || bfd_seek (abfd, offset, SEEK_SET) != 0)
+	  || bfd_seek (abfd, offset, SEEK_SET) != 0
+	  || (shstrtab = (bfd_byte *) bfd_alloc (abfd, shstrtabsize + 1)) == NULL)
 	shstrtab = NULL;
       else if (bfd_bread (shstrtab, shstrtabsize, abfd) != shstrtabsize)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_file_truncated);
+	  bfd_release (abfd, shstrtab);
 	  shstrtab = NULL;
 	  /* Once we've failed to read it, make sure we don't keep
 	     trying.  Otherwise, we'll keep allocating space for
@@ -332,9 +333,19 @@ bfd_elf_string_from_elf_section (bfd *abfd,
 
   hdr = elf_elfsections (abfd)[shindex];
 
-  if (hdr->contents == NULL
-      && bfd_elf_get_str_section (abfd, shindex) == NULL)
-    return NULL;
+  if (hdr->contents == NULL)
+    {
+      if (hdr->sh_type != SHT_STRTAB && hdr->sh_type < SHT_LOOS)
+	{
+	  /* PR 17512: file: f057ec89.  */
+	  _bfd_error_handler (_("%B: attempt to load strings from a non-string section (number %d)"),
+			      abfd, shindex);
+	  return NULL;
+	}
+  
+      if (bfd_elf_get_str_section (abfd, shindex) == NULL)
+	return NULL;
+    }
 
   if (strindex >= hdr->sh_size)
     {
@@ -1253,8 +1264,13 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
       swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
 
       extdyn = dynbuf;
+      /* PR 17512: file: 6f427532.  */
+      if (s->size < extdynsize)
+	goto error_return;
       extdynend = extdyn + s->size;
-      for (; extdyn < extdynend; extdyn += extdynsize)
+      /* PR 17512: file: id:000006,sig:06,src:000000,op:flip4,pos:5664.
+         Fix range check.  */
+      for (; extdyn <= (extdynend - extdynsize); extdyn += extdynsize)
 	{
 	  Elf_Internal_Dyn dyn;
 	  const char *name = "";
@@ -1589,7 +1605,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
   if (++ nesting > 3)
     {
       /* PR17512: A corrupt ELF binary might contain a recursive group of
-	 sections, each the string indicies pointing to the next in the
+	 sections, each with string indicies pointing to the next in the
 	 loop.  Detect this here, by refusing to load a section that we are
 	 already in the process of loading.  We only trigger this test if
 	 we have nested at least three sections deep as normal ELF binaries
@@ -1956,7 +1972,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	else
 	  p_hdr = &esdt->rel.hdr;
 
-	BFD_ASSERT (*p_hdr == NULL);
+	/* PR 17512: file: 0b4f81b7.  */
+	if (*p_hdr != NULL)
+	  goto fail;
 	amt = sizeof (*hdr2);
 	hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
 	if (hdr2 == NULL)
@@ -2013,9 +2031,11 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (hdr->contents != NULL)
 	{
 	  Elf_Internal_Group *idx = (Elf_Internal_Group *) hdr->contents;
-	  unsigned int n_elt = hdr->sh_size / GRP_ENTRY_SIZE;
+	  unsigned int n_elt = hdr->sh_size / sizeof (* idx);
 	  asection *s;
 
+	  if (n_elt == 0)
+	    goto fail;
 	  if (idx->flags & GRP_COMDAT)
 	    hdr->bfd_section->flags
 	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
@@ -2720,6 +2740,15 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
   this_hdr->sh_offset = 0;
   this_hdr->sh_size = asect->size;
   this_hdr->sh_link = 0;
+  /* PR 17512: file: 0eb809fe, 8b0535ee.  */
+  if (asect->alignment_power >= (sizeof (bfd_vma) * 8) - 1)
+    {
+      (*_bfd_error_handler)
+	(_("%B: error: Alignment power %d of section `%A' is too big"),
+	 abfd, asect, asect->alignment_power);
+      arg->failed = TRUE;
+      return;
+    }
   this_hdr->sh_addralign = (bfd_vma) 1 << asect->alignment_power;
   /* The sh_entsize and sh_info fields may have been set already by
      copy_private_section_data.  */
@@ -3973,6 +4002,11 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       last_size = 0;
       phdr_index = 0;
       maxpagesize = bed->maxpagesize;
+      /* PR 17512: file: c8455299.
+	 Avoid divide-by-zero errors later on.
+	 FIXME: Should we abort if the maxpagesize is zero ?  */
+      if (maxpagesize == 0)
+	maxpagesize = 1;
       writable = FALSE;
       dynsec = bfd_get_section_by_name (abfd, ".dynamic");
       if (dynsec != NULL
@@ -5168,7 +5202,14 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      && (p->p_type != PT_NOTE
 		  || bfd_get_format (abfd) != bfd_core))
 	    {
-	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
+	      if (m->includes_filehdr || m->includes_phdrs)
+		{
+		  /* PR 17512: file: 2195325e.  */ 
+		  (*_bfd_error_handler)
+		    (_("%B: warning: non-load segment includes file header and/or program header"),
+		     abfd);
+		  return FALSE;
+		}
 
 	      p->p_filesz = 0;
 	      p->p_offset = m->sections[0]->filepos;
@@ -6523,7 +6564,15 @@ rewrite:
 	   i++, segment++)
 	if (segment->p_type == PT_LOAD
 	    && maxpagesize < segment->p_align)
-	  maxpagesize = segment->p_align;
+	  {
+	    /* PR 17512: file: f17299af.  */
+	    if (segment->p_align > (bfd_vma) 1 << ((sizeof (bfd_vma) * 8) - 2))
+	      (*_bfd_error_handler) (_("\
+%B: warning: segment alignment of 0x%llx is too large"),
+				     ibfd, (long long) segment->p_align);
+	    else
+	      maxpagesize = segment->p_align;
+	  }
 
       if (maxpagesize != get_elf_backend_data (obfd)->maxpagesize)
 	bfd_emul_set_maxpagesize (bfd_get_target (obfd), maxpagesize);
@@ -9710,9 +9759,13 @@ elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return FALSE;
 
-  buf = (char *) bfd_malloc (size);
+  buf = (char *) bfd_malloc (size + 1);
   if (buf == NULL)
     return FALSE;
+
+  /* PR 17512: file: ec08f814
+     0-termintate the buffer so that string searches will not overflow.  */
+  buf[size] = 0;
 
   if (bfd_bread (buf, size, abfd) != size
       || !elf_parse_notes (abfd, buf, size, offset))

@@ -343,7 +343,7 @@ fr30_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned int i;
 
   for (i = sizeof (fr30_reloc_map) / sizeof (fr30_reloc_map[0]);
-       --i;)
+       i--;)
     if (fr30_reloc_map [i].bfd_reloc_val == code)
       return & fr30_elf_howto_table [fr30_reloc_map[i].fr30_reloc_val];
 
@@ -375,7 +375,11 @@ fr30_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_FR30_max);
+  if (r_type >= (unsigned int) R_FR30_max)
+    {
+      _bfd_error_handler (_("%B: invalid FR30 reloc number: %d"), abfd, r_type);
+      r_type = 0;
+    }
   cache_ptr->howto = & fr30_elf_howto_table [r_type];
 }
 
