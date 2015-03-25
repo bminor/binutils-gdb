@@ -1630,25 +1630,32 @@ emit_logicals (void)
 	out_opcode (DW_LNS_set_epilogue_begin);
 
       line_delta = e->loc.line - line;
-      lab = e->label;
-      frag = symbol_get_frag (lab);
-      frag_ofs = S_GET_VALUE (lab);
-
-      if (last_frag == NULL || e->seg != last_seg)
+      if (e->label == NULL)
 	{
-	  out_set_addr (lab);
 	  out_inc_line_addr (line_delta, 0);
 	}
-      else if (frag == last_frag && ! DWARF2_USE_FIXED_ADVANCE_PC)
-	out_inc_line_addr (line_delta, frag_ofs - last_frag_ofs);
       else
-	relax_inc_line_addr (line_delta, lab, last_lab);
+	{
+	  lab = e->label;
+	  frag = symbol_get_frag (lab);
+	  frag_ofs = S_GET_VALUE (lab);
 
-      line = e->loc.line;
-      last_seg = e->seg;
-      last_lab = lab;
-      last_frag = frag;
-      last_frag_ofs = frag_ofs;
+	  if (last_frag == NULL || e->seg != last_seg)
+	    {
+	      out_set_addr (lab);
+	      out_inc_line_addr (line_delta, 0);
+	    }
+	  else if (frag == last_frag && ! DWARF2_USE_FIXED_ADVANCE_PC)
+	    out_inc_line_addr (line_delta, frag_ofs - last_frag_ofs);
+	  else
+	    relax_inc_line_addr (line_delta, lab, last_lab);
+
+	  line = e->loc.line;
+	  last_seg = e->seg;
+	  last_lab = lab;
+	  last_frag = frag;
+	  last_frag_ofs = frag_ofs;
+	}
     }
 }
 
