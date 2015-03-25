@@ -629,7 +629,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     int (*to_is_async_p) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
-    void (*to_async) (struct target_ops *, async_callback_ftype *, void *)
+    void (*to_async) (struct target_ops *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* This method must be implemented in some situations.  See the
        comment on 'to_can_run'.  */
@@ -1686,9 +1686,9 @@ extern int target_async_permitted;
 /* Is the target in asynchronous execution mode?  */
 #define target_is_async_p() (current_target.to_is_async_p (&current_target))
 
-/* Put the target in async mode with the specified callback function.  */
-#define target_async(CALLBACK,CONTEXT) \
-     (current_target.to_async (&current_target, (CALLBACK), (CONTEXT)))
+/* Enables/disabled async target events.  */
+#define target_async(ENABLE) \
+     (current_target.to_async (&current_target, (ENABLE)))
 
 #define target_execution_direction() \
   (current_target.to_execution_direction (&current_target))

@@ -1341,7 +1341,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 				  attach_proc_task_lwp_callback);
 
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 }
 
 /* Get pending status of LP.  */
@@ -1789,7 +1789,7 @@ linux_nat_resume (struct target_ops *ops,
 
       if (target_can_async_p ())
 	{
-	  target_async (inferior_event_handler, 0);
+	  target_async (1);
 	  /* Tell the event loop we have something to process.  */
 	  async_file_mark ();
 	}
@@ -1810,7 +1810,7 @@ linux_nat_resume (struct target_ops *ops,
   linux_resume_one_lwp (lp, step, signo);
 
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 }
 
 /* Send a signal to an LWP.  */
@@ -4625,10 +4625,6 @@ linux_nat_terminal_ours (struct target_ops *self)
   async_terminal_is_ours = 1;
 }
 
-static void (*async_client_callback) (enum inferior_event_type event_type,
-				      void *context);
-static void *async_client_context;
-
 /* SIGCHLD handler that serves two purposes: In non-stop/async mode,
    so we notice when any child changes state, and notify the
    event-loop; it allows us to use sigsuspend in linux_nat_wait_1
@@ -4656,7 +4652,7 @@ sigchld_handler (int signo)
 static void
 handle_target_event (int error, gdb_client_data client_data)
 {
-  (*async_client_callback) (INF_REG_EVENT, async_client_context);
+  inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
 /* Create/destroy the target events pipe.  Returns previous state.  */
@@ -4700,15 +4696,10 @@ linux_async_pipe (int enable)
 /* target_async implementation.  */
 
 static void
-linux_nat_async (struct target_ops *ops,
-		 void (*callback) (enum inferior_event_type event_type,
-				   void *context),
-		 void *context)
+linux_nat_async (struct target_ops *ops, int enable)
 {
-  if (callback != NULL)
+  if (enable)
     {
-      async_client_callback = callback;
-      async_client_context = context;
       if (!linux_async_pipe (1))
 	{
 	  add_file_handler (linux_nat_event_pipe[0],
@@ -4720,8 +4711,6 @@ linux_nat_async (struct target_ops *ops,
     }
   else
     {
-      async_client_callback = callback;
-      async_client_context = context;
       delete_file_handler (linux_nat_event_pipe[0]);
       linux_async_pipe (0);
     }
@@ -4789,7 +4778,7 @@ linux_nat_close (struct target_ops *self)
 {
   /* Unregister from the event loop.  */
   if (linux_nat_is_async_p (self))
-    linux_nat_async (self, NULL, NULL);
+    linux_nat_async (self, 0);
 
   if (linux_ops->to_close)
     linux_ops->to_close (linux_ops);

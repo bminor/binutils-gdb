@@ -1,3 +1,36 @@
+2015-03-25  Pedro Alves  <palves@redhat.com>
+
+	* target.h <to_async>: Replace 'callback' and 'context' parameters
+	with boolean 'enable' parameter.
+	(target_async): Replace CALLBACK and CONTEXT parameters with
+	boolean ENABLE parameter.
+	* inf-loop.c (inferior_event_handler): Adjust.
+	* linux-nat.c (linux_nat_attach, linux_nat_resume)
+	(linux_nat_resume): Adjust.
+	(async_client_callback, async_client_context): Delete.
+	(handle_target_event): Call inferior_event_handler directly.
+	(linux_nat_async): Replace 'callback' and 'context' parameters
+	with boolean 'enable' parameter.  Adjust.  Remove references to
+	async_client_callback and async_client_context.
+	(linux_nat_close): Adjust.
+	* record-btrace.c (record_btrace_async): Replace 'callback' and
+	'context' parameters with boolean 'enable' parameter.  Adjust.
+	(record_btrace_resume): Adjust.
+	* record-full.c (record_full_async): Replace 'callback' and
+	'context' parameters with boolean 'enable' parameter.  Adjust.
+	(record_full_resume, record_full_core_resume): Adjust.
+	* remote.c (struct remote_state) <async_client_callback,
+	async_client_context>: Delete fields.
+	(remote_start_remote, extended_remote_attach_1, remote_resume)
+	(extended_remote_create_inferior): Adjust.
+	(remote_async_serial_handler): Call inferior_event_handler
+	directly.
+	(remote_async): Replace 'callback' and 'context' parameters with
+	boolean 'enable' parameter.  Adjust.
+	* top.c (gdb_readline_wrapper_cleanup, gdb_readline_wrapper):
+	Adjust.
+	* target-delegates.c: Regenerate.
+
 2015-03-25  Gary Benson <gbenson@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

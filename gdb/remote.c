@@ -124,10 +124,7 @@ static int remote_can_async_p (struct target_ops *);
 
 static int remote_is_async_p (struct target_ops *);
 
-static void remote_async (struct target_ops *ops,
-			  void (*callback) (enum inferior_event_type event_type,
-					    void *context),
-			  void *context);
+static void remote_async (struct target_ops *ops, int enable);
 
 static void sync_remote_interrupt_twice (int signo);
 
@@ -355,10 +352,6 @@ struct remote_state
      and set to false when the target fails to recognize it).  */
   int use_threadinfo_query;
   int use_threadextra_query;
-
-  void (*async_client_callback) (enum inferior_event_type event_type,
-				 void *context);
-  void *async_client_context;
 
   /* This is set to the data address of the access causing the target
      to stop for a watchpoint.  */
@@ -3661,7 +3654,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	}
 
       if (target_can_async_p ())
-	target_async (inferior_event_handler, 0);
+	target_async (1);
 
       if (thread_count () == 0)
 	{
@@ -4590,7 +4583,7 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
 
 	  push_stop_reply ((struct stop_reply *) reply);
 
-	  target_async (inferior_event_handler, 0);
+	  target_async (1);
 	}
       else
 	{
@@ -4929,7 +4922,7 @@ remote_resume (struct target_ops *ops,
      into infcmd.c in order to allow inferior function calls to work
      NOT asynchronously.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 
   /* We've just told the target to resume.  The remote server will
      wait for the inferior to stop, and then send a stop reply.  In
@@ -8112,7 +8105,7 @@ extended_remote_create_inferior (struct target_ops *ops,
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 
   /* Disable address space randomization if requested (and supported).  */
   if (extended_remote_supports_disable_randomization (ops))
@@ -11962,7 +11955,7 @@ remote_async_serial_handler (struct serial *scb, void *context)
 
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
-  rs->async_client_callback (INF_REG_EVENT, rs->async_client_context);
+  inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
 static void
@@ -11972,18 +11965,13 @@ remote_async_inferior_event_handler (gdb_client_data data)
 }
 
 static void
-remote_async (struct target_ops *ops,
-	      void (*callback) (enum inferior_event_type event_type,
-				void *context),
-	      void *context)
+remote_async (struct target_ops *ops, int enable)
 {
   struct remote_state *rs = get_remote_state ();
 
-  if (callback != NULL)
+  if (enable)
     {
       serial_async (rs->remote_desc, remote_async_serial_handler, rs);
-      rs->async_client_callback = callback;
-      rs->async_client_context = context;
 
       /* If there are pending events in the stop reply queue tell the
 	 event loop to process them.  */

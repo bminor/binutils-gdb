@@ -1692,29 +1692,27 @@ debug_is_async_p (struct target_ops *self)
 }
 
 static void
-delegate_async (struct target_ops *self, async_callback_ftype *arg1, void *arg2)
+delegate_async (struct target_ops *self, int arg1)
 {
   self = self->beneath;
-  self->to_async (self, arg1, arg2);
+  self->to_async (self, arg1);
 }
 
 static void
-tdefault_async (struct target_ops *self, async_callback_ftype *arg1, void *arg2)
+tdefault_async (struct target_ops *self, int arg1)
 {
   tcomplain ();
 }
 
 static void
-debug_async (struct target_ops *self, async_callback_ftype *arg1, void *arg2)
+debug_async (struct target_ops *self, int arg1)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_async (...)\n", debug_target.to_shortname);
-  debug_target.to_async (&debug_target, arg1, arg2);
+  debug_target.to_async (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_async (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_async_callback_ftype_p (arg1);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_void_p (arg2);
+  target_debug_print_int (arg1);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
