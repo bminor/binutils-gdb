@@ -1,5 +1,10 @@
 2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (_bfd_aarch64_erratum_835769_scan):
+	Update erratum count.
+
+2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* elfnn-aarch64.c (_bfd_aarch64_create_or_find_stub_sec): Factor
 	code into:
 	(_bfd_aarch64_get_stub_for_link_section): Define.

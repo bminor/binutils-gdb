@@ -3065,6 +3065,8 @@ _bfd_aarch64_erratum_835769_scan (bfd *input_bfd,
 	free (contents);
     }
 
+  *num_fixes_p = num_fixes;
+
   return TRUE;
 }
 
