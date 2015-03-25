@@ -296,7 +296,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 #if ARCH_SIZE == 64
   HOWTO (R_AARCH64_NULL,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
@@ -310,7 +310,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 #else
   HOWTO (R_AARCH64_NONE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */

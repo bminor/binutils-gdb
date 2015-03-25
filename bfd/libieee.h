@@ -66,6 +66,7 @@ typedef struct {
   unsigned char *input_p;
   unsigned char *first_byte;
   unsigned char *last_byte;
+  bfd_size_type total_amt;
   bfd *abfd;
 } common_header_type ;
 

@@ -42,7 +42,7 @@ static bfd_reloc_status_type mep_reloc (bfd *, arelent *, struct bfd_symbol *,
 static reloc_howto_type mep_elf_howto_table [] =
 {
   /* type, size, bits, leftshift, rightshift, pcrel, OD/OS/OU, mask.  */
-  MEPREL (R_MEP_NONE,     0,  0, 0, 0, 0, N, 0),
+  MEPREL (R_MEP_NONE,     3,  0, 0, 0, 0, N, 0),
   MEPREL (R_RELC,         0,  0, 0, 0, 0, N, 0),
   /* MEPRELOC:HOWTO */
     /* This section generated from bfd/mep-relocs.pl from include/elf/mep.h.  */

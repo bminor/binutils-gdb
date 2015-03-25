@@ -44,11 +44,11 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* This reloc does nothing.  */
    HOWTO (R_MICROBLAZE_NONE,	/* Type.  */
           0,			/* Rightshift.  */
-          2,			/* Size (0 = byte, 1 = short, 2 = long).  */
-          32,			/* Bitsize.  */
+          3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+          0,			/* Bitsize.  */
           FALSE,		/* PC_relative.  */
           0,			/* Bitpos.  */
-          complain_overflow_bitfield,  /* Complain on overflow.  */
+          complain_overflow_dont,/* Complain on overflow.  */
           NULL,                  /* Special Function.  */
           "R_MICROBLAZE_NONE", 	/* Name.  */
           FALSE,		/* Partial Inplace.  */
@@ -179,11 +179,11 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* This reloc does nothing.  Used for relaxation.  */
    HOWTO (R_MICROBLAZE_64_NONE,	/* Type.  */
           0,			/* Rightshift.  */
-          2,			/* Size (0 = byte, 1 = short, 2 = long).  */
-          32,			/* Bitsize.  */
+          3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+          0,			/* Bitsize.  */
           TRUE,			/* PC_relative.  */
           0,			/* Bitpos.  */
-          complain_overflow_bitfield,  /* Complain on overflow.  */
+          complain_overflow_dont,/* Complain on overflow.  */
           NULL,                  /* Special Function.  */
           "R_MICROBLAZE_64_NONE",/* Name.  */
           FALSE,		/* Partial Inplace.  */

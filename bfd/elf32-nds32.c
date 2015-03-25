@@ -321,11 +321,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_NDS32_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_NDS32_NONE",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -4182,11 +4182,10 @@ nds32_relocate_contents (reloc_howto_type *howto, bfd *input_bfd,
   switch (size)
     {
     default:
-    case 0:
-    case 1:
-    case 8:
       abort ();
       break;
+    case 0:
+      return bfd_reloc_ok;
     case 2:
       x = bfd_getb16 (location);
       break;

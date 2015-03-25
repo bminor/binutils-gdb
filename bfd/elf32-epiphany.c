@@ -63,7 +63,7 @@ static reloc_howto_type epiphany_elf_howto_table [] =
 	  pr)                   /* pcrel_offset */
 
   /* This reloc does nothing.  */
-  AHOW (R_EPIPHANY_NONE,    0, 0,32, FALSE, 0, complain_overflow_dont,     "R_EPIPHANY_NONE",        0,          0),
+  AHOW (R_EPIPHANY_NONE,    0, 3, 0, FALSE, 0, complain_overflow_dont,     "R_EPIPHANY_NONE",        0,          0),
 
   /* 8 bit absolute (not likely) */
   AHOW (R_EPIPHANY_8,       0, 0, 8, FALSE, 0, complain_overflow_bitfield, "R_EPIPHANY_8",      0x000000ff, 0x000000ff),

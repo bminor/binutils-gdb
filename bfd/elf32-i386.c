@@ -37,7 +37,7 @@
 
 static reloc_howto_type elf_howto_table[]=
 {
-  HOWTO(R_386_NONE, 0, 0, 0, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_386_NONE, 0, 3, 0, FALSE, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_NONE",
 	TRUE, 0x00000000, 0x00000000, FALSE),
   HOWTO(R_386_32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,

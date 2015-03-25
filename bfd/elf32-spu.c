@@ -37,7 +37,7 @@ static bfd_reloc_status_type spu_elf_rel9 (bfd *, arelent *, asymbol *,
    array, so it must be declared in the order of that type.  */
 
 static reloc_howto_type elf_howto_table[] = {
-  HOWTO (R_SPU_NONE,       0, 0,  0, FALSE,  0, complain_overflow_dont,
+  HOWTO (R_SPU_NONE,       0, 3,  0, FALSE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_NONE",
 	 FALSE, 0, 0x00000000, FALSE),
   HOWTO (R_SPU_ADDR10,     4, 2, 10, FALSE, 14, complain_overflow_bitfield,
@@ -105,6 +105,8 @@ spu_elf_bfd_to_reloc_type (bfd_reloc_code_real_type code)
   switch (code)
     {
     default:
+      return (enum elf_spu_reloc_type) -1;
+    case BFD_RELOC_NONE:
       return R_SPU_NONE;
     case BFD_RELOC_SPU_IMM10W:
       return R_SPU_ADDR10;

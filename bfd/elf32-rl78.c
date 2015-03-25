@@ -37,7 +37,7 @@
 
 static reloc_howto_type rl78_elf_howto_table [] =
 {
-  RL78REL (NONE,         0,  0, 0, dont,     FALSE),
+  RL78REL (NONE,         3,  0, 0, dont,     FALSE),
   RL78REL (DIR32,        2, 32, 0, signed,   FALSE),
   RL78REL (DIR24S,       2, 24, 0, signed,   FALSE),
   RL78REL (DIR16,        1, 16, 0, dont,     FALSE),

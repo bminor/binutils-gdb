@@ -115,8 +115,8 @@ static reloc_howto_type cr16_elf_howto_table[] =
 {
   HOWTO (R_CR16_NONE,              /* type */
          0,                        /* rightshift */
-         2,                        /* size */
-         32,                       /* bitsize */
+         3,                        /* size */
+         0,                        /* bitsize */
          FALSE,                    /* pc_relative */
          0,                        /* bitpos */
          complain_overflow_dont,   /* complain_on_overflow */

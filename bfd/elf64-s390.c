@@ -42,7 +42,7 @@ static reloc_howto_type elf_howto_table[] =
 {
   HOWTO (R_390_NONE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = 2 byte, 2 = 4 byte) */
+	 3,			/* size (0 = byte, 1 = 2 byte, 2 = 4 byte) */
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
