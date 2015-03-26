@@ -1,3 +1,8 @@
+2015-04-01  Evandro Menezes  <e.menezes@samsung.com>
+
+	* config/tc-arm.c: Add support for Samsung Exynos M1.
+	* doc/c-arm.texi (-mcpu=): Add "exynos-m1".
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
