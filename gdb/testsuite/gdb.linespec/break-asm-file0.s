@@ -24,8 +24,8 @@ _func2:
 	.type func2, %function
 func2:
 .Lbegin_func2:
-	.int 0
-	.int 0
+	nop
+	nop
 .Lend_func2:
 	.size func2, .-func2
 	.globl _func
@@ -35,8 +35,9 @@ _func:
 func:
 .Lbegin_func:
 	.file 1 "a/break-asm-file0.s"
-	.int 0
-	.int 0
+	nop
+.Lfunc_1:
+	nop
 .Lend_func:
 	.size func, .-func
 .Lend_text1:
@@ -199,7 +200,7 @@ func:
 	.byte		0	/* DW_LNE_set_address */
 	.uleb128	5
 	.byte		2
-	.4byte		.Lbegin_func+2
+	.4byte		.Lfunc_1
 
 	.byte		3	/* DW_LNS_advance_line */
 	.sleb128	1	/* ... to 8 */
