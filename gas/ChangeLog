@@ -1,5 +1,10 @@
 2015-04-01  Evandro Menezes  <e.menezes@samsung.com>
 
+	* config/tc-aarch64.c: Add support for Samsung Exynos M1.
+	* doc/c-aarch64.texi (-mcpu=): Add "exynos-m1".
+
+2015-04-01  Evandro Menezes  <e.menezes@samsung.com>
+
 	* config/tc-arm.c: Add support for Samsung Exynos M1.
 	* doc/c-arm.texi (-mcpu=): Add "exynos-m1".
 
