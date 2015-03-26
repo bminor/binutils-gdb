@@ -1,3 +1,11 @@
+2015-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18160
+	* ld-x86-64/pr18160.d: New file.
+	* ld-x86-64/pr18160.s: Likewise.
+	* ld-x86-64/pr18160.t: Likewise.
+	* ld-x86-64/x86-64.exp: Run pr18160.
+---
 2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* ld-aarch64/erratum835769.d: Adjust for initial branch over stub

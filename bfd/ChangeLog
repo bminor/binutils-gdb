@@ -1,3 +1,9 @@
+2015-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18160
+	* elflink.c (elf_gc_sweep): Skip if relocation is incompatible.
+	(bfd_elf_gc_sections): Likewise.
+
 2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* elfnn-aarch64.c (_bfd_aarch64_resize_stubs): Adjust stub section

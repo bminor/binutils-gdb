@@ -12159,7 +12159,8 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
     {
       asection *o;
 
-      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
 
       for (o = sub->sections; o != NULL; o = o->next)
@@ -12446,7 +12447,8 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
     {
       asection *o;
 
-      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
 
       /* Start at sections marked with SEC_KEEP (ref _bfd_elf_gc_keep).
