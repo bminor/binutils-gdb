@@ -1,5 +1,11 @@
 2015-03-26  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.linespec/break-asm-file.exp: Don't call prepare_for_testing.
+	Call gdb_compile instead to compile each .s files without debug
+	information.
+
+2015-03-26  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/savedregs.exp (process_saved_regs): Make
 	"Saved registers:" optional in the pattern.
 
