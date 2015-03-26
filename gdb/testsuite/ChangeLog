@@ -1,3 +1,8 @@
+2015-03-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/savedregs.exp (process_saved_regs): Make
+	"Saved registers:" optional in the pattern.
+
 2015-03-25  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/next.exp: Merged into step.exp.
