@@ -2477,24 +2477,17 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
 	   of range.  */
 	BFD_FAIL ();
 
-      _bfd_final_link_relocate
-	(elfNN_aarch64_howto_from_type (AARCH64_R (ADD_ABS_LO12_NC)),
-	 stub_bfd,
-	 stub_sec,
-	 stub_sec->contents,
-	 stub_entry->stub_offset + 4,
-	 sym_value,
-	 0);
+      if (aarch64_relocate (AARCH64_R (ADD_ABS_LO12_NC), stub_bfd, stub_sec,
+			    stub_entry->stub_offset + 4, sym_value))
+	BFD_FAIL ();
       break;
 
     case aarch64_stub_long_branch:
       /* We want the value relative to the address 12 bytes back from the
          value itself.  */
-      _bfd_final_link_relocate (elfNN_aarch64_howto_from_type
-				(AARCH64_R (PRELNN)), stub_bfd, stub_sec,
-				stub_sec->contents,
-				stub_entry->stub_offset + 16,
-				sym_value + 12, 0);
+      if (aarch64_relocate (AARCH64_R (PRELNN), stub_bfd, stub_sec,
+			    stub_entry->stub_offset + 16, sym_value + 12))
+	BFD_FAIL ();
       break;
 
     case aarch64_stub_erratum_835769_veneer:
