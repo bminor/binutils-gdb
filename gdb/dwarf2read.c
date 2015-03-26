@@ -1105,6 +1105,9 @@ struct partial_die_info
     /* Flag set if the DIE has a byte_size attribute.  */
     unsigned int has_byte_size : 1;
 
+    /* Flag set if the DIE has a DW_AT_const_value attribute.  */
+    unsigned int has_const_value : 1;
+
     /* Flag set if any of the DIE's children are template arguments.  */
     unsigned int has_template_arguments : 1;
 
@@ -6956,19 +6959,24 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  /* Static Variable.  Skip symbols without location descriptors.  */
-	  if (pdi->d.locdesc == NULL)
+	  int has_loc = pdi->d.locdesc != NULL;
+
+	  /* Static Variable.  Skip symbols whose value we cannot know (those
+	     without location descriptors or constant values).  */
+	  if (!has_loc && !pdi->has_const_value)
 	    {
 	      xfree (built_actual_name);
 	      return;
 	    }
+
 	  /* prim_record_minimal_symbol (actual_name, addr + baseaddr,
 	     mst_file_data, objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_STATIC,
 			       &objfile->static_psymbols,
-			       0, addr + baseaddr,
+			       0,
+			       has_loc ? addr + baseaddr : (CORE_ADDR) 0,
 			       cu->language, objfile);
 	}
       break;
@@ -15850,6 +15858,9 @@ read_partial_die (const struct die_reader_specs *reader,
 	  break;
         case DW_AT_byte_size:
           part_die->has_byte_size = 1;
+          break;
+        case DW_AT_const_value:
+          part_die->has_const_value = 1;
           break;
 	case DW_AT_calling_convention:
 	  /* DWARF doesn't provide a way to identify a program's source-level

@@ -1,3 +1,12 @@
+2015-03-26  Andy Wingo  <wingo@igalia.com>
+
+	PR symtab/18148
+	* dwarf2read.c (struct partial_die_info): Add has_const_value
+	member.
+	(add_partial_symbol): Don't punt on symbols that have const_value
+	attributes.
+	(read_partial_die): Detect DW_AT_const_value.
+
 2015-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

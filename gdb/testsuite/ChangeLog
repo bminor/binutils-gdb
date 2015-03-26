@@ -1,3 +1,11 @@
+2015-03-26  Andy Wingo  <wingo@igalia.com>
+
+	PR symtab/18148
+	* gdb.dwarf2/dw2-intercu.S (one, two): Add variables that have a
+	const_value but not a location.
+	* gdb.dwarf2/dw2-intercu.exp: Add tests that constants without
+	location defined in non-main CUs are visible.
+
 2015-03-26  Yao Qi  <yao.qi@linaro.org>
 
 	PR testsuite/18139
