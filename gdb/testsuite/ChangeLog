@@ -1,5 +1,9 @@
 2015-05-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/byte_packed_arr: New testcase.
+
+2015-05-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/pckd_neg: New testcase.
 
 2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>

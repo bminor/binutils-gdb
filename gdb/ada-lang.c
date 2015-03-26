@@ -7762,7 +7762,7 @@ ada_type_name (struct type *type)
 static struct type *
 find_parallel_type_by_descriptive_type (struct type *type, const char *name)
 {
-  struct type *result;
+  struct type *result, *tmp;
 
   if (ada_ignore_descriptive_types_p)
     return NULL;
@@ -7789,9 +7789,21 @@ find_parallel_type_by_descriptive_type (struct type *type, const char *name)
 
       /* Otherwise, look at the next item on the list, if any.  */
       if (HAVE_GNAT_AUX_INFO (result))
-	result = TYPE_DESCRIPTIVE_TYPE (result);
+	tmp = TYPE_DESCRIPTIVE_TYPE (result);
       else
-	result = NULL;
+	tmp = NULL;
+
+      /* If not found either, try after having resolved the typedef.  */
+      if (tmp != NULL)
+	result = tmp;
+      else
+	{
+	  CHECK_TYPEDEF (result);
+	  if (HAVE_GNAT_AUX_INFO (result))
+	    result = TYPE_DESCRIPTIVE_TYPE (result);
+	  else
+	    result = NULL;
+	}
     }
 
   /* If we didn't find a match, see whether this is a packed array.  With
@@ -8509,6 +8521,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   struct type *index_type_desc;
   struct type *result;
   int constrained_packed_array_p;
+  static const char *xa_suffix = "___XA";
 
   type0 = ada_check_typedef (type0);
   if (TYPE_FIXED_INSTANCE (type0))
@@ -8518,7 +8531,30 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   if (constrained_packed_array_p)
     type0 = decode_constrained_packed_array_type (type0);
 
-  index_type_desc = ada_find_parallel_type (type0, "___XA");
+  index_type_desc = ada_find_parallel_type (type0, xa_suffix);
+
+  /* As mentioned in exp_dbug.ads, for non bit-packed arrays an
+     encoding suffixed with 'P' may still be generated.  If so,
+     it should be used to find the XA type.  */
+
+  if (index_type_desc == NULL)
+    {
+      const char *typename = ada_type_name (type0);
+
+      if (typename != NULL)
+	{
+	  const int len = strlen (typename);
+	  char *name = (char *) alloca (len + strlen (xa_suffix));
+
+	  if (typename[len - 1] == 'P')
+	    {
+	      strcpy (name, typename);
+	      strcpy (name + len - 1, xa_suffix);
+	      index_type_desc = ada_find_parallel_type_with_name (type0, name);
+	    }
+	}
+    }
+
   ada_fixup_array_indexes_type (index_type_desc);
   if (index_type_desc != NULL
       && ada_is_redundant_index_type_desc (type0, index_type_desc))
