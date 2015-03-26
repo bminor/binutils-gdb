@@ -1,6 +1,11 @@
 2015-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
+	* printcmd.c (print_command_1): Move expr variable scope.
+
+2015-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* printcmd.c (validate_format): Make the parameter cmdname const.
 
 2015-03-26  Don Breazeal  <donb@codesourcery.com>

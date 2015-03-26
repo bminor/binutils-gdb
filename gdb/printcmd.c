@@ -946,7 +946,6 @@ validate_format (struct format_data fmt, const char *cmdname)
 static void
 print_command_1 (const char *exp, int voidprint)
 {
-  struct expression *expr;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   char format = 0;
   struct value *val;
@@ -969,6 +968,8 @@ print_command_1 (const char *exp, int voidprint)
 
   if (exp && *exp)
     {
+      struct expression *expr;
+
       expr = parse_expression (exp);
       make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
