@@ -38,6 +38,8 @@ func:
 	nop
 .Lfunc_1:
 	nop
+.Lfunc_2:
+	nop
 .Lend_func:
 	.size func, .-func
 .Lend_text1:
@@ -202,6 +204,18 @@ func:
 	.byte		2
 	.4byte		.Lfunc_1
 
+	/* A line number entry for the same line (7) denotes the end */
+	/* of prologue.  */
+	.byte		3	/* DW_LNS_advance_line */
+	.sleb128	0	/* ... to 7 */
+
+	.byte		1	/* DW_LNS_copy */
+
+	.byte		0	/* DW_LNE_set_address */
+	.uleb128	5
+	.byte		2
+	.4byte		.Lfunc_2
+	
 	.byte		3	/* DW_LNS_advance_line */
 	.sleb128	1	/* ... to 8 */
 

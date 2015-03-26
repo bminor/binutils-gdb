@@ -1,5 +1,13 @@
 2015-03-26  Yao Qi  <yao.qi@linaro.org>
 
+	PR testsuite/18139
+	* gdb.linespec/break-asm-file0.s (func): New label .Lfunc_2.
+	Add a line number entry for the same line.
+	* gdb.linespec/break-asm-file1.s (func): New label .Lfunc_2.
+	Add a line number entry for the same line.
+
+2015-03-26  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.linespec/break-asm-file0.s (func2): Use nop instead of
 	.int 0.
 	(func): Likewise.  Add .Lfunc_1 label.
