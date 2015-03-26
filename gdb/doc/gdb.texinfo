@@ -29975,7 +29975,7 @@ where:
 @table @samp
 @item @var{address}
 An expression specifying the address of the first memory word to be
-read.  Complex expressions containing embedded white space should be
+written.  Complex expressions containing embedded white space should be
 quoted using the C convention.
 
 @item @var{contents}

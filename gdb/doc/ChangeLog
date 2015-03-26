@@ -1,3 +1,8 @@
+2015-03-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Fix copy-paste typo in
+	-data-write-memory-bytes.
+
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (test_step) <set scheduler-locking step>: No longer
