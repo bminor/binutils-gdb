@@ -427,8 +427,18 @@ dtrace_process_dof_probe (struct objfile *objfile,
 	     this does not work then we set the type to `long
 	     int'.  */
           arg.type = builtin_type (gdbarch)->builtin_long;
-	  expr = parse_expression (arg.type_str);
-	  if (expr->elts[0].opcode == OP_TYPE)
+
+	  TRY
+	    {
+	      expr = parse_expression_with_language (arg.type_str, language_c);
+	    }
+	  CATCH (ex, RETURN_MASK_ERROR)
+	    {
+	      expr = NULL;
+	    }
+	  END_CATCH
+
+	  if (expr != NULL && expr->elts[0].opcode == OP_TYPE)
 	    arg.type = expr->elts[1].type;
 
 	  VEC_safe_push (dtrace_probe_arg_s, ret->args, &arg);

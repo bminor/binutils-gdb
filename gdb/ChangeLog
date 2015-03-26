@@ -1,3 +1,11 @@
+2015-03-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Contain any
+	exception raised while parsing the probe arguments.
+	Force parsing to be done using the C language parser.
+	* expression.h (parse_expression_with_language): Declare.
+	* parse.c (parse_expression_with_language): New function.
+
 2015-03-26  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* MAINTAINERS (Write After Approval): Add "Jon Turney".
