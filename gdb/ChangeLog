@@ -1,3 +1,11 @@
+2015-03-26  Pedro Alves  <palves@redhat.com>
+	    Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* coffread.c (coff_symfile_read): When constructing the name of an
+	import stub symbol from import symbol for amd64, only skip the
+	char after _imp_ if the target is underscored (like i386) and the
+	char is indeed the target's leading char.
+
 2015-03-25  Pedro Alves  <palves@redhat.com>
 
 	* target.h <to_async>: Replace 'callback' and 'context' parameters

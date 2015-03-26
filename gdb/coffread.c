@@ -671,20 +671,31 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 	     or "_imp_", get rid of the prefix, and search the minimal
 	     symbol in OBJFILE.  Note that 'maintenance print msymbols'
 	     shows that type of these "_imp_XXXX" symbols is mst_data.  */
-	  if (MSYMBOL_TYPE (msym) == mst_data
-	      && (startswith (name, "__imp_")
-		  || startswith (name, "_imp_")))
+	  if (MSYMBOL_TYPE (msym) == mst_data)
 	    {
-	      const char *name1 = (name[1] == '_' ? &name[7] : &name[6]);
-	      struct bound_minimal_symbol found;
+	      const char *name1 = NULL;
 
-	      found = lookup_minimal_symbol (name1, NULL, objfile);
-	      /* If found, there are symbols named "_imp_foo" and "foo"
-		 respectively in OBJFILE.  Set the type of symbol "foo"
-		 as 'mst_solib_trampoline'.  */
-	      if (found.minsym != NULL
-		  && MSYMBOL_TYPE (found.minsym) == mst_text)
-		MSYMBOL_TYPE (found.minsym) = mst_solib_trampoline;
+	      if (startswith (name, "_imp_"))
+		name1 = name + 5;
+	      else if (startswith (name, "__imp_"))
+		name1 = name + 6;
+	      if (name1 != NULL)
+		{
+		  int lead = bfd_get_symbol_leading_char (objfile->obfd);
+		  struct bound_minimal_symbol found;
+
+                  if (lead != '\0' && *name1 == lead)
+		    name1 += 1;
+
+		  found = lookup_minimal_symbol (name1, NULL, objfile);
+
+		  /* If found, there are symbols named "_imp_foo" and "foo"
+		     respectively in OBJFILE.  Set the type of symbol "foo"
+		     as 'mst_solib_trampoline'.  */
+		  if (found.minsym != NULL
+		      && MSYMBOL_TYPE (found.minsym) == mst_text)
+		    MSYMBOL_TYPE (found.minsym) = mst_solib_trampoline;
+		}
 	    }
 	}
     }
