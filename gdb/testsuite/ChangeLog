@@ -1,3 +1,8 @@
+2015-03-26  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* lib/gdb.exp (gdb_target_symbol_prefix_flags): Don't set
+	SYMBOL_PREFIX for x86_64-*-cygwin.
+
 2015-03-26  Andy Wingo  <wingo@igalia.com>
 
 	PR symtab/18148
