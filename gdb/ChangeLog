@@ -1,3 +1,7 @@
+2015-03-26  Don Breazeal  <donb@codesourcery.com>
+
+	* remote.c (_initialize_remote): Update comment.
+
 2015-03-26  Pedro Alves  <palves@redhat.com>
 	    Jon TURNEY  <jon.turney@dronecode.org.uk>
 

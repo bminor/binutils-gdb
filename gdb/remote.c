@@ -12495,7 +12495,8 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_hwbreak_feature],
                          "hwbreak-feature", "hwbreak-feature", 0);
 
-  /* Assert that we've registered commands for all packet configs.  */
+  /* Assert that we've registered "set remote foo-packet" commands
+     for all packet configs.  */
   {
     int i;
 
