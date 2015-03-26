@@ -350,6 +350,19 @@ tui_default_win_viewport_height (enum tui_win_type type,
   return h;
 }
 
+/* Complete possible layout names.  TEXT is the complete text entered so
+   far, WORD is the word currently being completed.  */
+
+static VEC (char_ptr) *
+layout_completer (struct cmd_list_element *ignore,
+		  const char *text, const char *word)
+{
+  static const char *layout_names [] =
+    { "src", "asm", "split", "regs", "next", "prev", NULL };
+
+  return complete_on_enum (layout_names, text, word);
+}
+
 /* Function to initialize gdb commands, for tui window layout
    manipulation.  */
 
@@ -359,7 +372,9 @@ extern initialize_file_ftype _initialize_tui_layout;
 void
 _initialize_tui_layout (void)
 {
-  add_com ("layout", class_tui, tui_layout_command, _("\
+  struct cmd_list_element *cmd;
+
+  cmd = add_com ("layout", class_tui, tui_layout_command, _("\
 Change the layout of windows.\n\
 Usage: layout prev | next | <layout_name> \n\
 Layout names are:\n\
@@ -372,6 +387,7 @@ Layout names are:\n\
            source/assembly/command (split) is displayed, \n\
            the register window is displayed with \n\
            the window that has current logical focus.\n"));
+  set_cmd_completer (cmd, layout_completer);
 }
 
 

@@ -1,5 +1,10 @@
 2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-layout.c (layout_completer): New function.
+	(_initialize_tui_layout): Set completer on layout command.
+
+2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-layout.c (tui_set_layout): Remove
 	tui_register_display_type parameter.  Remove all checking of this
 	parameter, and reindent function.  Update header comment.

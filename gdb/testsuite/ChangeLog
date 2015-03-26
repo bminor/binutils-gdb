@@ -1,3 +1,8 @@
+2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/completion.exp: Add test for completion of layout
+	names.
+
 2015-05-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/gdb.exp (skip_tui_tests): New proc.
