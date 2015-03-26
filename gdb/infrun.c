@@ -6251,6 +6251,7 @@ keep_going (struct execution_control_state *ecs)
 	{
 	  exception_print (gdb_stderr, e);
 	  stop_waiting (ecs);
+	  discard_cleanups (old_cleanups);
 	  return;
 	}
       END_CATCH
