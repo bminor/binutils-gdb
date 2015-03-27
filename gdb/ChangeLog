@@ -1,3 +1,10 @@
+2015-03-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert:
+	2015-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	Code cleanup.
+	* printcmd.c (print_command_1): Move expr variable scope.
+
 2015-03-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* dtrace-probe.c (dtrace_process_dof_probe): Initialize expr to NULL.
