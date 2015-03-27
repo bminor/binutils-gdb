@@ -6619,8 +6619,10 @@ static bfd_boolean compute_text_actions
   (bfd *, asection *, struct bfd_link_info *);
 static bfd_boolean compute_ebb_proposed_actions (ebb_constraint *);
 static bfd_boolean compute_ebb_actions (ebb_constraint *);
+typedef struct reloc_range_list_struct reloc_range_list;
 static bfd_boolean check_section_ebb_pcrels_fit
-  (bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, const ebb_constraint *,
+  (bfd *, asection *, bfd_byte *, Elf_Internal_Rela *,
+   reloc_range_list *, const ebb_constraint *,
    const xtensa_opcode *);
 static bfd_boolean check_section_ebb_reduces (const ebb_constraint *);
 static void text_action_add_proposed
@@ -7219,6 +7221,221 @@ build_reloc_opcodes (bfd *abfd,
   return reloc_opcodes;
 }
 
+struct reloc_range_struct
+{
+  bfd_vma addr;
+  bfd_boolean add; /* TRUE if start of a range, FALSE otherwise.  */
+  /* Original irel index in the array of relocations for a section.  */
+  unsigned irel_index;
+};
+typedef struct reloc_range_struct reloc_range;
+
+typedef struct reloc_range_list_entry_struct reloc_range_list_entry;
+struct reloc_range_list_entry_struct
+{
+  reloc_range_list_entry *next;
+  reloc_range_list_entry *prev;
+  Elf_Internal_Rela *irel;
+  xtensa_opcode opcode;
+  int opnum;
+};
+
+struct reloc_range_list_struct
+{
+  /* The rest of the structure is only meaningful when ok is TRUE.  */
+  bfd_boolean ok;
+
+  unsigned n_range; /* Number of range markers.  */
+  reloc_range *range; /* Sorted range markers.  */
+
+  unsigned first; /* Index of a first range element in the list.  */
+  unsigned last; /* One past index of a last range element in the list.  */
+
+  unsigned n_list; /* Number of list elements.  */
+  reloc_range_list_entry *reloc; /*  */
+  reloc_range_list_entry list_root;
+};
+
+static int
+reloc_range_compare (const void *a, const void *b)
+{
+  const reloc_range *ra = a;
+  const reloc_range *rb = b;
+
+  if (ra->addr != rb->addr)
+    return ra->addr < rb->addr ? -1 : 1;
+  if (ra->add != rb->add)
+    return ra->add ? -1 : 1;
+  return 0;
+}
+
+static void
+build_reloc_ranges (bfd *abfd, asection *sec,
+		    bfd_byte *contents,
+		    Elf_Internal_Rela *internal_relocs,
+		    xtensa_opcode *reloc_opcodes,
+		    reloc_range_list *list)
+{
+  unsigned i;
+  size_t n = 0;
+  size_t max_n = 0;
+  reloc_range *ranges = NULL;
+  reloc_range_list_entry *reloc =
+    bfd_malloc (sec->reloc_count * sizeof (*reloc));
+
+  memset (list, 0, sizeof (*list));
+  list->ok = TRUE;
+
+  for (i = 0; i < sec->reloc_count; i++)
+    {
+      Elf_Internal_Rela *irel = &internal_relocs[i];
+      int r_type = ELF32_R_TYPE (irel->r_info);
+      reloc_howto_type *howto = &elf_howto_table[r_type];
+      r_reloc r_rel;
+
+      if (r_type == R_XTENSA_ASM_SIMPLIFY
+	  || r_type == R_XTENSA_32_PCREL
+	  || !howto->pc_relative)
+	continue;
+
+      r_reloc_init (&r_rel, abfd, irel, contents,
+		    bfd_get_section_limit (abfd, sec));
+
+      if (r_reloc_get_section (&r_rel) != sec)
+	continue;
+
+      if (n + 2 > max_n)
+	{
+	  max_n = (max_n + 2) * 2;
+	  ranges = bfd_realloc (ranges, max_n * sizeof (*ranges));
+	}
+
+      ranges[n].addr = irel->r_offset;
+      ranges[n + 1].addr = r_rel.target_offset;
+
+      ranges[n].add = ranges[n].addr < ranges[n + 1].addr;
+      ranges[n + 1].add = !ranges[n].add;
+
+      ranges[n].irel_index = i;
+      ranges[n + 1].irel_index = i;
+
+      n += 2;
+
+      reloc[i].irel = irel;
+
+      /* Every relocation won't possibly be checked in the optimized version of
+         check_section_ebb_pcrels_fit, so this needs to be done here.  */
+      if (is_alt_relocation (ELF32_R_TYPE (irel->r_info)))
+	{
+	  /* None of the current alternate relocs are PC-relative,
+	     and only PC-relative relocs matter here.  */
+	}
+      else
+	{
+	  xtensa_opcode opcode;
+	  int opnum;
+
+	  if (reloc_opcodes)
+	    opcode = reloc_opcodes[i];
+	  else
+	    opcode = get_relocation_opcode (abfd, sec, contents, irel);
+
+	  if (opcode == XTENSA_UNDEFINED)
+	    {
+	      list->ok = FALSE;
+	      break;
+	    }
+
+	  opnum = get_relocation_opnd (opcode, ELF32_R_TYPE (irel->r_info));
+	  if (opnum == XTENSA_UNDEFINED)
+	    {
+	      list->ok = FALSE;
+	      break;
+	    }
+
+	  /* Record relocation opcode and opnum as we've calculated them
+	     anyway and they won't change.  */
+	  reloc[i].opcode = opcode;
+	  reloc[i].opnum = opnum;
+	}
+    }
+
+  if (list->ok)
+    {
+      ranges = bfd_realloc (ranges, n * sizeof (*ranges));
+      qsort (ranges, n, sizeof (*ranges), reloc_range_compare);
+
+      list->n_range = n;
+      list->range = ranges;
+      list->reloc = reloc;
+      list->list_root.prev = &list->list_root;
+      list->list_root.next = &list->list_root;
+    }
+  else
+    {
+      free (ranges);
+      free (reloc);
+    }
+}
+
+static void reloc_range_list_append (reloc_range_list *list,
+				     unsigned irel_index)
+{
+  reloc_range_list_entry *entry = list->reloc + irel_index;
+
+  entry->prev = list->list_root.prev;
+  entry->next = &list->list_root;
+  entry->prev->next = entry;
+  entry->next->prev = entry;
+  ++list->n_list;
+}
+
+static void reloc_range_list_remove (reloc_range_list *list,
+				     unsigned irel_index)
+{
+  reloc_range_list_entry *entry = list->reloc + irel_index;
+
+  entry->next->prev = entry->prev;
+  entry->prev->next = entry->next;
+  --list->n_list;
+}
+
+/* Update relocation list object so that it lists all relocations that cross
+   [first; last] range.  Range bounds should not decrease with successive
+   invocations.  */
+static void reloc_range_list_update_range (reloc_range_list *list,
+					   bfd_vma first, bfd_vma last)
+{
+  /* This should not happen: EBBs are iterated from lower addresses to higher.
+     But even if that happens there's no need to break: just flush current list
+     and start from scratch.  */
+  if ((list->last > 0 && list->range[list->last - 1].addr > last) ||
+      (list->first > 0 && list->range[list->first - 1].addr >= first))
+    {
+      list->first = 0;
+      list->last = 0;
+      list->n_list = 0;
+      list->list_root.next = &list->list_root;
+      list->list_root.prev = &list->list_root;
+      fprintf (stderr, "%s: move backwards requested\n", __func__);
+    }
+
+  for (; list->last < list->n_range &&
+       list->range[list->last].addr <= last; ++list->last)
+    if (list->range[list->last].add)
+      reloc_range_list_append (list, list->range[list->last].irel_index);
+
+  for (; list->first < list->n_range &&
+       list->range[list->first].addr < first; ++list->first)
+    if (!list->range[list->first].add)
+      reloc_range_list_remove (list, list->range[list->first].irel_index);
+}
+
+static void free_reloc_range_list (reloc_range_list *list)
+{
+  free (list->range);
+  free (list->reloc);
+}
 
 /* The compute_text_actions function will build a list of potential
    transformation actions for code in the extended basic block of each
@@ -7245,6 +7462,7 @@ compute_text_actions (bfd *abfd,
   property_table_entry *prop_table = 0;
   int ptblsize = 0;
   bfd_size_type sec_size;
+  reloc_range_list relevant_relocs;
 
   relax_info = get_xtensa_relax_info (sec);
   BFD_ASSERT (relax_info);
@@ -7276,6 +7494,12 @@ compute_text_actions (bfd *abfd,
       ok = FALSE;
       goto error_return;
     }
+
+  /* Precompute the opcode for each relocation.  */
+  reloc_opcodes = build_reloc_opcodes (abfd, sec, contents, internal_relocs);
+
+  build_reloc_ranges (abfd, sec, contents, internal_relocs, reloc_opcodes,
+		      &relevant_relocs);
 
   for (i = 0; i < sec->reloc_count; i++)
     {
@@ -7340,17 +7564,13 @@ compute_text_actions (bfd *abfd,
       ebb->start_reloc_idx = i;
       ebb->end_reloc_idx = i;
 
-      /* Precompute the opcode for each relocation.  */
-      if (reloc_opcodes == NULL)
-	reloc_opcodes = build_reloc_opcodes (abfd, sec, contents,
-					     internal_relocs);
-
       if (!extend_ebb_bounds (ebb)
 	  || !compute_ebb_proposed_actions (&ebb_table)
 	  || !compute_ebb_actions (&ebb_table)
 	  || !check_section_ebb_pcrels_fit (abfd, sec, contents,
-					    internal_relocs, &ebb_table,
-					    reloc_opcodes)
+					    internal_relocs,
+					    &relevant_relocs,
+					    &ebb_table, reloc_opcodes)
 	  || !check_section_ebb_reduces (&ebb_table))
 	{
 	  /* If anything goes wrong or we get unlucky and something does
@@ -7371,6 +7591,8 @@ compute_text_actions (bfd *abfd,
       i = ebb_table.ebb.end_reloc_idx;
       free_ebb_constraint (&ebb_table);
     }
+
+  free_reloc_range_list (&relevant_relocs);
 
 #if DEBUG
   if (relax_info->action_list.head)
@@ -7974,14 +8196,17 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 			      asection *sec,
 			      bfd_byte *contents,
 			      Elf_Internal_Rela *internal_relocs,
+			      reloc_range_list *relevant_relocs,
 			      const ebb_constraint *constraint,
 			      const xtensa_opcode *reloc_opcodes)
 {
   unsigned i, j;
+  unsigned n = sec->reloc_count;
   Elf_Internal_Rela *irel;
   xlate_map_t *xmap = NULL;
   bfd_boolean ok = TRUE;
   xtensa_relax_info *relax_info;
+  reloc_range_list_entry *entry = NULL;
 
   relax_info = get_xtensa_relax_info (sec);
 
@@ -7992,7 +8217,40 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 	 can still be used.  */
     }
 
-  for (i = 0; i < sec->reloc_count; i++)
+  if (relevant_relocs && constraint->action_count)
+    {
+      if (!relevant_relocs->ok)
+	{
+	  ok = FALSE;
+	  n = 0;
+	}
+      else
+	{
+	  bfd_vma min_offset, max_offset;
+	  min_offset = max_offset = constraint->actions[0].offset;
+
+	  for (i = 1; i < constraint->action_count; ++i)
+	    {
+	      proposed_action *action = &constraint->actions[i];
+	      bfd_vma offset = action->offset;
+
+	      if (offset < min_offset)
+		min_offset = offset;
+	      if (offset > max_offset)
+		max_offset = offset;
+	    }
+	  reloc_range_list_update_range (relevant_relocs, min_offset,
+					 max_offset);
+	  n = relevant_relocs->n_list;
+	  entry = &relevant_relocs->list_root;
+	}
+    }
+  else
+    {
+      relevant_relocs = NULL;
+    }
+
+  for (i = 0; i < n; i++)
     {
       r_reloc r_rel;
       bfd_vma orig_self_offset, orig_target_offset;
@@ -8001,7 +8259,15 @@ check_section_ebb_pcrels_fit (bfd *abfd,
       reloc_howto_type *howto;
       int self_removed_bytes, target_removed_bytes;
 
-      irel = &internal_relocs[i];
+      if (relevant_relocs)
+	{
+	  entry = entry->next;
+	  irel = entry->irel;
+	}
+      else
+	{
+	  irel = internal_relocs + i;
+	}
       r_type = ELF32_R_TYPE (irel->r_info);
 
       howto = &elf_howto_table[r_type];
@@ -8067,21 +8333,30 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 	  xtensa_opcode opcode;
 	  int opnum;
 
-	  if (reloc_opcodes)
-	    opcode = reloc_opcodes[i];
-	  else
-	    opcode = get_relocation_opcode (abfd, sec, contents, irel);
-	  if (opcode == XTENSA_UNDEFINED)
+	  if (relevant_relocs)
 	    {
-	      ok = FALSE;
-	      break;
+	      opcode = entry->opcode;
+	      opnum = entry->opnum;
 	    }
-
-	  opnum = get_relocation_opnd (opcode, ELF32_R_TYPE (irel->r_info));
-	  if (opnum == XTENSA_UNDEFINED)
+	  else
 	    {
-	      ok = FALSE;
-	      break;
+	      if (reloc_opcodes)
+		opcode = reloc_opcodes[relevant_relocs ?
+		  (unsigned)(entry - relevant_relocs->reloc) : i];
+	      else
+		opcode = get_relocation_opcode (abfd, sec, contents, irel);
+	      if (opcode == XTENSA_UNDEFINED)
+		{
+		  ok = FALSE;
+		  break;
+		}
+
+	      opnum = get_relocation_opnd (opcode, ELF32_R_TYPE (irel->r_info));
+	      if (opnum == XTENSA_UNDEFINED)
+		{
+		  ok = FALSE;
+		  break;
+		}
 	    }
 
 	  if (!pcrel_reloc_fits (opcode, opnum, self_offset, target_offset))
@@ -8778,7 +9053,7 @@ move_shared_literal (asection *sec,
   /* Check all of the PC-relative relocations to make sure they still fit.  */
   relocs_fit = check_section_ebb_pcrels_fit (target_sec->owner, target_sec,
 					     target_sec_cache->contents,
-					     target_sec_cache->relocs,
+					     target_sec_cache->relocs, NULL,
 					     &ebb_table, NULL);
 
   if (!relocs_fit)
