@@ -1,3 +1,8 @@
+2015-05-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/gdb.exp (skip_tui_tests): New proc.
+	* gdb.base/tui-layout.exp: Check skip_tui_tests.
+
 2015-05-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/gdbinit-history.exp (test_gdbinit_history_setting):
