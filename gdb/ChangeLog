@@ -1,5 +1,19 @@
 2015-05-15  Jerome Guitton  <guitton@adacore.com>
 
+	* ada-lang.c (ada_value_ptr_subscript): Use enum position of
+	index to get element instead of enum value.
+	(ada_value_slice_from_ptr, ada_value_slice): Use enum position
+	of index to compute length, but enum values to compute bounds.
+	(ada_array_length): Use enum position of index instead of enum value.
+	(pos_atr): Move position computation to...
+	(ada_evaluate_subexp): Use enum values to compute bounds.
+	* gdbtypes.c (discrete_position): ...this new function.
+	* gdbtypes.h (discrete_position): New function declaration.
+	* valprint.c (val_print_array_elements): Call discrete_position
+	to handle array indexed by non-contiguous enumeration types.
+
+2015-05-15  Jerome Guitton  <guitton@adacore.com>
+
 	* ada-lang.c (find_parallel_type_by_descriptive_type):
 	Go through typedefs during lookup.
 	(to_fixed_array_type): Add support for non-bit packed arrays

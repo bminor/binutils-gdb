@@ -1,5 +1,9 @@
 2015-05-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/arr_enum_with_gap: New testcase.
+
+2015-05-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/byte_packed_arr: New testcase.
 
 2015-05-15  Joel Brobecker  <brobecker@adacore.com>

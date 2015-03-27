@@ -1626,7 +1626,7 @@ val_print_array_elements (struct type *type,
 {
   unsigned int things_printed = 0;
   unsigned len;
-  struct type *elttype, *index_type;
+  struct type *elttype, *index_type, *base_index_type;
   unsigned eltlen;
   /* Position of the array element we are examining to see
      whether it is repeated.  */
@@ -1634,6 +1634,7 @@ val_print_array_elements (struct type *type,
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
   LONGEST low_bound, high_bound;
+  LONGEST low_pos, high_pos;
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
@@ -1641,15 +1642,33 @@ val_print_array_elements (struct type *type,
 
   if (get_array_bounds (type, &low_bound, &high_bound))
     {
-      /* The array length should normally be HIGH_BOUND - LOW_BOUND + 1.
+      if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+	base_index_type = TYPE_TARGET_TYPE (index_type);
+      else
+	base_index_type = index_type;
+
+      /* Non-contiguous enumerations types can by used as index types
+	 in some languages (e.g. Ada).  In this case, the array length
+	 shall be computed from the positions of the first and last
+	 literal in the enumeration type, and not from the values
+	 of these literals.  */
+      if (!discrete_position (base_index_type, low_bound, &low_pos)
+	  || !discrete_position (base_index_type, high_bound, &high_pos))
+	{
+	  warning (_("unable to get positions in array, use bounds instead"));
+	  low_pos = low_bound;
+	  high_pos = high_bound;
+	}
+
+      /* The array length should normally be HIGH_POS - LOW_POS + 1.
          But we have to be a little extra careful, because some languages
-	 such as Ada allow LOW_BOUND to be greater than HIGH_BOUND for
+	 such as Ada allow LOW_POS to be greater than HIGH_POS for
 	 empty arrays.  In that situation, the array length is just zero,
 	 not negative!  */
-      if (low_bound > high_bound)
+      if (low_pos > high_pos)
 	len = 0;
       else
-	len = high_bound - low_bound + 1;
+	len = high_pos - low_pos + 1;
     }
   else
     {

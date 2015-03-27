@@ -1837,6 +1837,8 @@ extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
 extern int get_array_bounds (struct type *type, LONGEST *low_bound,
 			     LONGEST *high_bound);
 
+extern int discrete_position (struct type *type, LONGEST val, LONGEST *pos);
+
 extern int class_types_same_p (const struct type *, const struct type *);
 
 extern int is_ancestor (struct type *, struct type *);

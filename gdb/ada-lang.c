@@ -2765,13 +2765,15 @@ ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
   for (k = 0; k < arity; k += 1)
     {
       LONGEST lwb, upb;
+      struct value *lwb_value;
 
       if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
         error (_("too many subscripts (%d expected)"), k);
       arr = value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
                         value_copy (arr));
       get_discrete_bounds (TYPE_INDEX_TYPE (type), &lwb, &upb);
-      arr = value_ptradd (arr, pos_atr (ind[k]) - lwb);
+      lwb_value = value_from_longest (value_type(ind[k]), lwb);
+      arr = value_ptradd (arr, pos_atr (ind[k]) - pos_atr (lwb_value));
       type = TYPE_TARGET_TYPE (type);
     }
 
@@ -2779,24 +2781,34 @@ ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
 }
 
 /* Given that ARRAY_PTR is a pointer or reference to an array of type TYPE (the
-   actual type of ARRAY_PTR is ignored), returns the Ada slice of HIGH-LOW+1
-   elements starting at index LOW.  The lower bound of this array is LOW, as
-   per Ada rules.  */
+   actual type of ARRAY_PTR is ignored), returns the Ada slice of
+   HIGH'Pos-LOW'Pos+1 elements starting at index LOW.  The lower bound of
+   this array is LOW, as per Ada rules.  */
 static struct value *
 ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
                           int low, int high)
 {
   struct type *type0 = ada_check_typedef (type);
-  CORE_ADDR base = value_as_address (array_ptr)
-    + ((low - ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0)))
-       * TYPE_LENGTH (TYPE_TARGET_TYPE (type0)));
+  struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0));
   struct type *index_type
-    = create_static_range_type (NULL,
-				TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0)),
-				low, high);
+    = create_static_range_type (NULL, base_index_type, low, high);
   struct type *slice_type =
     create_array_type (NULL, TYPE_TARGET_TYPE (type0), index_type);
+  int base_low =  ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0));
+  LONGEST base_low_pos, low_pos;
+  CORE_ADDR base;
 
+  if (!discrete_position (base_index_type, low, &low_pos)
+      || !discrete_position (base_index_type, base_low, &base_low_pos))
+    {
+      warning (_("unable to get positions in slice, use bounds instead"));
+      low_pos = low;
+      base_low_pos = base_low;
+    }
+
+  base = value_as_address (array_ptr)
+    + ((low_pos - base_low_pos)
+       * TYPE_LENGTH (TYPE_TARGET_TYPE (type0)));
   return value_at_lazy (slice_type, base);
 }
 
@@ -2805,12 +2817,23 @@ static struct value *
 ada_value_slice (struct value *array, int low, int high)
 {
   struct type *type = ada_check_typedef (value_type (array));
+  struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type));
   struct type *index_type
     = create_static_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
   struct type *slice_type =
     create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+  LONGEST low_pos, high_pos;
 
-  return value_cast (slice_type, value_slice (array, low, high - low + 1));
+  if (!discrete_position (base_index_type, low, &low_pos)
+      || !discrete_position (base_index_type, high, &high_pos))
+    {
+      warning (_("unable to get positions in slice, use bounds instead"));
+      low_pos = low;
+      high_pos = high;
+    }
+
+  return value_cast (slice_type,
+		     value_slice (array, low, high_pos - low_pos + 1));
 }
 
 /* If type is a record type in the form of a standard GNAT array
@@ -3012,7 +3035,8 @@ ada_array_bound (struct value *arr, int n, int which)
 static LONGEST
 ada_array_length (struct value *arr, int n)
 {
-  struct type *arr_type;
+  struct type *arr_type, *index_type;
+  int low, high;
 
   if (TYPE_CODE (check_typedef (value_type (arr))) == TYPE_CODE_PTR)
     arr = value_ind (arr);
@@ -3022,11 +3046,30 @@ ada_array_length (struct value *arr, int n)
     return ada_array_length (decode_constrained_packed_array (arr), n);
 
   if (ada_is_simple_array_type (arr_type))
-    return (ada_array_bound_from_type (arr_type, n, 1)
-	    - ada_array_bound_from_type (arr_type, n, 0) + 1);
+    {
+      low = ada_array_bound_from_type (arr_type, n, 0);
+      high = ada_array_bound_from_type (arr_type, n, 1);
+    }
   else
-    return (value_as_long (desc_one_bound (desc_bounds (arr), n, 1))
-	    - value_as_long (desc_one_bound (desc_bounds (arr), n, 0)) + 1);
+    {
+      low = value_as_long (desc_one_bound (desc_bounds (arr), n, 0));
+      high = value_as_long (desc_one_bound (desc_bounds (arr), n, 1));
+    }
+
+  CHECK_TYPEDEF (arr_type);
+  index_type = TYPE_INDEX_TYPE (arr_type);
+  if (index_type != NULL)
+    {
+      struct type *base_type;
+      if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+	base_type = TYPE_TARGET_TYPE (index_type);
+      else
+	base_type = index_type;
+
+      low = pos_atr (value_from_longest (base_type, low));
+      high = pos_atr (value_from_longest (base_type, high));
+    }
+  return high - low + 1;
 }
 
 /* An empty array whose type is that of ARR_TYPE (an array type),
@@ -8995,24 +9038,15 @@ pos_atr (struct value *arg)
 {
   struct value *val = coerce_ref (arg);
   struct type *type = value_type (val);
+  LONGEST result;
 
   if (!discrete_type_p (type))
     error (_("'POS only defined on discrete types"));
 
-  if (TYPE_CODE (type) == TYPE_CODE_ENUM)
-    {
-      int i;
-      LONGEST v = value_as_long (val);
+  if (!discrete_position (type, value_as_long (val), &result))
+    error (_("enumeration value is invalid: can't find 'POS"));
 
-      for (i = 0; i < TYPE_NFIELDS (type); i += 1)
-        {
-          if (v == TYPE_FIELD_ENUMVAL (type, i))
-            return i;
-        }
-      error (_("enumeration value is invalid: can't find 'POS"));
-    }
-  else
-    return value_as_long (val);
+  return result;
 }
 
 static struct value *
@@ -10613,8 +10647,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
         low_bound_val = coerce_ref (low_bound_val);
         high_bound_val = coerce_ref (high_bound_val);
-        low_bound = pos_atr (low_bound_val);
-        high_bound = pos_atr (high_bound_val);
+        low_bound = value_as_long (low_bound_val);
+        high_bound = value_as_long (high_bound_val);
 
         if (noside == EVAL_SKIP)
           goto nosideret;
