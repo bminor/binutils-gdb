@@ -413,7 +413,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
       for (j = 0; j < ret->probe_argc; j++)
 	{
 	  struct dtrace_probe_arg arg;
-	  struct expression *expr;
+	  struct expression *expr = NULL;
 
 	  /* Set arg.expr to ensure all fields in expr are initialized and
 	     the compiler will not warn when arg is used.  */
