@@ -1,3 +1,17 @@
+2015-03-27  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* merge.cc (Object_merge_map::add_mapping): call
+	Object_merge_map::Input_merge_map::add_mapping.
+	(Object_merge_map::Input_merge_map::add_mapping): New.
+	(Output_merge_data::do_add_input_section): Call
+	get_or_make_input_merge_map before a loop.
+	(Output_merge_string<Char_type>::finalize_merged_data): Call
+	get_or_make_input_merge_map before a loop.
+	* merge.h (Object_merge_map): Make Input_merge_map public.
+	* object.cc (Relobj::add_merge_mapping): Use get_or_create_merge_map.
+	(Relobj::get_or_create_merge_map): New.
+	* object.h (Relobj::get_or_create_merge_map): New.
+
 2015-03-24  Alan Modra  <amodra@gmail.com>
 
 	PR 18147

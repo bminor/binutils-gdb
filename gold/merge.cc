@@ -103,11 +103,17 @@ Object_merge_map::add_mapping(const Output_section_data* output_data,
 			      section_offset_type output_offset)
 {
   Input_merge_map* map = this->get_or_make_input_merge_map(output_data, shndx);
+  map->add_mapping(input_offset, length, output_offset);
+}
 
+void
+Object_merge_map::Input_merge_map::add_mapping(
+    section_offset_type input_offset, section_size_type length,
+    section_offset_type output_offset) {
   // Try to merge the new entry in the last one we saw.
-  if (!map->entries.empty())
+  if (!this->entries.empty())
     {
-      Input_merge_entry& entry(map->entries.back());
+      Input_merge_entry& entry(this->entries.back());
 
       // Use section_size_type to avoid signed/unsigned warnings.
       section_size_type input_offset_u = input_offset;
@@ -120,7 +126,7 @@ Object_merge_map::add_mapping(const Output_section_data* output_data,
 	  gold_assert(input_offset < entry.input_offset);
 	  gold_assert(input_offset_u + length
 		      <= static_cast<section_size_type>(entry.input_offset));
-	  map->sorted = false;
+	  this->sorted = false;
 	}
       else if (entry.input_offset + entry.length == input_offset_u
 	       && (output_offset == -1
@@ -136,7 +142,7 @@ Object_merge_map::add_mapping(const Output_section_data* output_data,
   entry.input_offset = input_offset;
   entry.length = length;
   entry.output_offset = output_offset;
-  map->entries.push_back(entry);
+  this->entries.push_back(entry);
 }
 
 // Get the output offset for an input address.
@@ -357,6 +363,10 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
 
   this->input_count_ += len / entsize;
 
+  Object_merge_map* merge_map = object->get_or_create_merge_map();
+  Object_merge_map::Input_merge_map* input_merge_map =
+    merge_map->get_or_make_input_merge_map(this, shndx);
+
   for (section_size_type i = 0; i < len; i += entsize, p += entsize)
     {
       // Add the constant to the section contents.  If we find that it
@@ -375,7 +385,7 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
 	}
 
       // Record the offset of this constant in the output section.
-      object->add_merge_mapping(this, shndx, i, entsize, k);
+      input_merge_map->add_mapping(i, entsize, k);
     }
 
   // For script processing, we keep the input sections.
@@ -557,6 +567,11 @@ Output_merge_string<Char_type>::finalize_merged_data()
     {
       section_offset_type last_input_offset = 0;
       section_offset_type last_output_offset = 0;
+      Relobj *object = (*l)->object;
+      Object_merge_map* merge_map = object->get_or_create_merge_map();
+      Object_merge_map::Input_merge_map* input_merge_map =
+        merge_map->get_or_make_input_merge_map(this, (*l)->shndx);
+
       for (typename Merged_strings::const_iterator p =
 	     (*l)->merged_strings.begin();
 	   p != (*l)->merged_strings.end();
@@ -564,8 +579,8 @@ Output_merge_string<Char_type>::finalize_merged_data()
 	{
 	  section_size_type length = p->offset - last_input_offset;
 	  if (length > 0)
-	    (*l)->object->add_merge_mapping(this, (*l)->shndx,
-                              last_input_offset, length, last_output_offset);
+	    input_merge_map->add_mapping(last_input_offset, length,
+                                         last_output_offset);
 	  last_input_offset = p->offset;
 	  if (p->stringpool_key != 0)
 	    last_output_offset =
