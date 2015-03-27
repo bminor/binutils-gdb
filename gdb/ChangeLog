@@ -1,3 +1,8 @@
+2015-03-27  Andrzej Kaczmarek  <andrzej.kaczmarek@tieto.com>
+
+	* gdb_bfd.c (gdb_bfd_section_index): Fix off-by-one for special
+	sections.
+
 2015-03-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* dtrace-probe.c (dtrace_process_dof_probe): Contain any

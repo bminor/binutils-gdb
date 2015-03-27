@@ -616,13 +616,13 @@ gdb_bfd_section_index (bfd *abfd, asection *section)
   if (section == NULL)
     return -1;
   else if (section == bfd_com_section_ptr)
-    return bfd_count_sections (abfd) + 1;
+    return bfd_count_sections (abfd);
   else if (section == bfd_und_section_ptr)
-    return bfd_count_sections (abfd) + 2;
+    return bfd_count_sections (abfd) + 1;
   else if (section == bfd_abs_section_ptr)
-    return bfd_count_sections (abfd) + 3;
+    return bfd_count_sections (abfd) + 2;
   else if (section == bfd_ind_section_ptr)
-    return bfd_count_sections (abfd) + 4;
+    return bfd_count_sections (abfd) + 3;
   return section->index;
 }
 
