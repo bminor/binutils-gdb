@@ -1,3 +1,7 @@
+2015-03-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_flags_set): Removed.
+
 2015-03-25  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (mapping_state): Remove first MAP_DATA emitting
