@@ -1,3 +1,11 @@
+2015-03-27  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15228
+	PR ld/18167
+	* elflink.c (elf_merge_st_other): Add "sec" parameter.  Don't set
+	protected_def when symbol section is read-only.  Adjust all calls.
+	* elf-bfd.h (struct elf_link_hash_entry): Update protected_def comment.
+
 2015-03-26  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* elfnn-aarch64.c (aarch64_build_one_stub): Replace the call to generic
