@@ -200,7 +200,8 @@ struct elf_link_hash_entry
   unsigned int pointer_equality_needed : 1;
   /* Symbol is a unique global symbol.  */
   unsigned int unique_global : 1;
-  /* Symbol is defined with non-default visibility.  */
+  /* Symbol is defined by a shared library with non-default visibility
+     in a read/write section.  */
   unsigned int protected_def : 1;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
