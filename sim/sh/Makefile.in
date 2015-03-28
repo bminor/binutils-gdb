@@ -41,7 +41,8 @@ ppi.c: gencode
 	./gencode -p >ppi.c
 
 gencode: gencode.c
-	$(CC_FOR_BUILD) -o gencode $(srcdir)/gencode.c
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) $(WARN_CFLAGS) \
+		-o gencode $(srcdir)/gencode.c
 
 sh-clean:
 	rm -f gencode code.c table.c
