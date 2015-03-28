@@ -3359,11 +3359,11 @@ ppi_gensim (void)
   printf ("      DSR |= res_grd >> 7 & 1;\n");
   printf ("    case 2: /* Zero Value Mode */\n");
   printf ("      DSR |= DSR >> 6 & 1;\n");
-  printf ("    case 3: /* Overflow mode\n");
+  printf ("    case 3: /* Overflow mode */\n");
   printf ("      DSR |= overflow >> 4;\n");
   printf ("    case 4: /* Signed Greater Than Mode */\n");
   printf ("      DSR |= DSR >> 7 & 1;\n");
-  printf ("    case 4: /* Signed Greater Than Or Equal Mode */\n");
+  printf ("    case 5: /* Signed Greater Than Or Equal Mode */\n");
   printf ("      DSR |= greater_equal >> 7;\n");
   printf ("    }\n");
   printf (" assign_z:\n");

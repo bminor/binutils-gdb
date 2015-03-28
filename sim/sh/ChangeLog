@@ -1,5 +1,9 @@
 2015-03-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* gencode.c (ppi_gensim): Add missing */.  Change case 4 to case 5.
+
+2015-03-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (gencode): Add $(BUILD_CFLAGS), $(BUILD_LDFLAGS),
 	and $(WARN_CFLAGS).
 	* gencode.c: Include ctype.h, stdlib.h, string.h, and unistd.h.
