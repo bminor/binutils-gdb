@@ -1,5 +1,28 @@
 2015-03-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_RUN_OBJS, SIM_EXTRA_CFLAGS): Delete.
+	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
+	* interp.c: Delete run-sim.h include.  Include sim-main.h, sim-base.h,
+	and sim-options.h.
+	(SEXT, SEXT32): Undefine.
+	(sim_write): Delete prototype.
+	(regstacktype, saved_state_type): Move to sim-main.h.
+	(target_little_endian): Replace with CURRENT_TARGET_BYTE_ORDER.
+	(host_little_endian): Replace with CURRENT_HOST_BYTE_ORDER.
+	(sim_kind, myname, tracing, sim_stop, sim_trace, sim_set_profile,
+	sim_set_profile_size, sim_load, sim_set_callbacks,
+	sim_complete_command): Delete.
+	(sim_size): Mark static.
+	(init_pointers): Delete host_little_endian setup.
+	(sim_resume): Delete tracing check.
+	(free_state): New cleanup function.
+	(sim_open): Rewrite to use new common logic.
+	(sim_create_inferior): Call init_dsp.
+	* sim-main.h: New file.
+	* tconfig.h: Delete file.
+
+2015-03-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* gencode.c (ppi_gensim): Convert old style prototype with ppi_insn.
 	* interp.c: Include ctype.h and run-sim.h.
 	[HAVE_TIME_H]: Include time.h

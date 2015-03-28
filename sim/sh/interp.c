@@ -67,7 +67,10 @@
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
 #include "gdb/sim-sh.h"
-#include "run-sim.h"
+
+#include "sim-main.h"
+#include "sim-base.h"
+#include "sim-options.h"
 
 /* This file is local - if newlib changes, then so should this.  */
 #include "syscall.h"
@@ -91,9 +94,11 @@
 #define SIGTRAP 5
 #endif
 
-extern unsigned short sh_jump_table[], sh_dsp_table[0x1000], ppi_table[];
+/* TODO: Stop using these names.  */
+#undef SEXT
+#undef SEXT32
 
-int sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size);
+extern unsigned short sh_jump_table[], sh_dsp_table[0x1000], ppi_table[];
 
 #define O_RECOMPILE 85
 #define DEFINE_TABLE
@@ -103,108 +108,7 @@ int sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size
    for a quit. */
 #define POLL_QUIT_INTERVAL 0x60000
 
-typedef struct
-{
-  int regs[20];
-} regstacktype;
-
-typedef union
-{
-
-  struct
-  {
-    int regs[16];
-    int pc;
-
-    /* System registers.  For sh-dsp this also includes A0 / X0 / X1 / Y0 / Y1
-       which are located in fregs, i.e. strictly speaking, these are
-       out-of-bounds accesses of sregs.i .  This wart of the code could be
-       fixed by making fregs part of sregs, and including pc too - to avoid
-       alignment repercussions - but this would cause very onerous union /
-       structure nesting, which would only be managable with anonymous
-       unions and structs.  */
-    union
-      {
-	struct
-	  {
-	    int mach;
-	    int macl;
-	    int pr;
-	    int dummy3, dummy4;
-	    int fpul; /* A1 for sh-dsp -  but only for movs etc.  */
-	    int fpscr; /* dsr for sh-dsp */
-	  } named;
-	int i[7];
-      } sregs;
-
-    /* sh3e / sh-dsp */
-    union fregs_u
-      {
-	float f[16];
-	double d[8];
-	int i[16];
-      }
-    fregs[2];
-
-    /* Control registers; on the SH4, ldc / stc is privileged, except when
-       accessing gbr.  */
-    union
-      {
-	struct
-	  {
-	    int sr;
-	    int gbr;
-	    int vbr;
-	    int ssr;
-	    int spc;
-	    int mod;
-	    /* sh-dsp */
-	    int rs;
-	    int re;
-	    /* sh3 */
-	    int bank[8];
-	    int dbr;		/* debug base register */
-	    int sgr;		/* saved gr15 */
-	    int ldst;		/* load/store flag (boolean) */
-	    int tbr;
-	    int ibcr;		/* sh2a bank control register */
-	    int ibnr;		/* sh2a bank number register */
-	  } named;
-	int i[16];
-      } cregs;
-
-    unsigned char *insn_end;
-
-    int ticks;
-    int stalls;
-    int memstalls;
-    int cycles;
-    int insts;
-
-    int prevlock;
-    int thislock;
-    int exception;
-
-    int end_of_registers;
-
-    int msize;
-#define PROFILE_FREQ 1
-#define PROFILE_SHIFT 2
-    int profile;
-    unsigned short *profile_hist;
-    unsigned char *memory;
-    int xyram_select, xram_start, yram_start;
-    unsigned char *xmem;
-    unsigned char *ymem;
-    unsigned char *xmem_offset;
-    unsigned char *ymem_offset;
-    unsigned long bfd_mach;
-    regstacktype *regstack;
-  }
-  asregs;
-  int asints[40];
-} saved_state_type;
-
+/* TODO: Move into sim_cpu.  */
 saved_state_type saved_state;
 
 struct loop_bounds { unsigned char *start, *end; };
@@ -212,19 +116,14 @@ struct loop_bounds { unsigned char *start, *end; };
 /* These variables are at file scope so that functions other than
    sim_resume can use the fetch/store macros */
 
-static int target_little_endian;
+#define target_little_endian (CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
 static int global_endianw, endianb;
 static int target_dsp;
-static int host_little_endian;
+#define host_little_endian (CURRENT_HOST_BYTE_ORDER == LITTLE_ENDIAN)
 static char **prog_argv;
 
 static int maskw = 0;
 static int maskl = 0;
-
-static SIM_OPEN_KIND sim_kind;
-static char *myname;
-static int   tracing = 0;
-
 
 /* Short hand definitions of the registers */
 
@@ -1687,7 +1586,7 @@ mcalloc (size_t nmemb, size_t size)
 
 /* Set the memory size to the power of two provided. */
 
-void
+static void
 sim_size (int power)
 {
   sim_memory_size = power;
@@ -1809,10 +1708,6 @@ init_dsp (struct bfd *abfd)
 static void
 init_pointers (void)
 {
-  host_little_endian = 0;
-  * (char*) &host_little_endian = 1;
-  host_little_endian &= 1;
-
   if (saved_state.asregs.msize != 1 << sim_memory_size)
     {
       sim_size (sim_memory_size);
@@ -1868,13 +1763,6 @@ gotcall (int from, int to)
 }
 
 #define MMASKB ((saved_state.asregs.msize -1) & ~0)
-
-int
-sim_stop (SIM_DESC sd)
-{
-  raise_exception (SIGINT);
-  return 1;
-}
 
 void
 sim_resume (SIM_DESC sd, int step, int siggnal)
@@ -1968,9 +1856,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
       insts++;
 #endif
     top:
-      if (tracing)
-	fprintf (stderr, "PC: %08lx, insn: %04x\n",
-		 (unsigned long) PH2T (insn_ptr), iword);
 
 #include "code.c"
 
@@ -2436,15 +2321,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return length;
 }
 
-int
-sim_trace (SIM_DESC sd)
-{
-  tracing = 1;
-  sim_resume (sd, 0, 0);
-  tracing = 0;
-  return 1;
-}
-
 void
 sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
@@ -2497,23 +2373,19 @@ sim_info (SIM_DESC sd, int verbose)
     }
 }
 
-void
-sim_set_profile (int n)
+static void
+free_state (SIM_DESC sd)
 {
-  saved_state.asregs.profile = n;
-}
-
-void
-sim_set_profile_size (int n)
-{
-  sim_profile_size = n;
+  if (STATE_MODULES (sd) != NULL)
+    sim_module_uninstall (sd);
+  sim_cpu_free_all (sd);
+  sim_state_free (sd);
 }
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
   char **p;
-  int endian_set = 0;
   int i;
   union
     {
@@ -2523,31 +2395,64 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     }
   mem_word;
 
-  sim_kind = kind;
-  myname = argv[0];
+  SIM_DESC sd = sim_state_alloc (kind, cb);
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
   callback = cb;
+
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* getopt will print the error message so we just have to exit if this fails.
+     FIXME: Hmmm...  in the case of gdb we need getopt to call
+     print_filtered.  */
+  if (sim_parse_args (sd, argv) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Check for/establish the a reference program image.  */
+  if (sim_analyze_program (sd,
+			   (STATE_PROG_ARGV (sd) != NULL
+			    ? *STATE_PROG_ARGV (sd)
+			    : NULL), abfd) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Configure/verify the target byte order and other runtime
+     configuration options.  */
+  if (sim_config (sd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
 
   for (p = argv + 1; *p != NULL; ++p)
     {
-      if (strcmp (*p, "-E") == 0)
-	{
-	  ++p;
-	  if (*p == NULL)
-	    {
-	      /* FIXME: This doesn't use stderr, but then the rest of the
-		 file doesn't either.  */
-	      callback->printf_filtered (callback, "Missing argument to `-E'.\n");
-	      return 0;
-	    }
-	  target_little_endian = strcmp (*p, "big") != 0;
-          endian_set = 1;
-	}
-      else if (isdigit (**p))
+      if (isdigit (**p))
 	parse_and_set_memory_size (*p);
     }
-
-  if (abfd != NULL && ! endian_set)
-      target_little_endian = ! bfd_big_endian (abfd);
 
   if (abfd)
     init_dsp (abfd);
@@ -2560,8 +2465,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     mem_word.c[i] = i;
   endianb = mem_word.i >> (target_little_endian ? 0 : 24) & 0xff;
 
-  /* fudge our descriptor for now */
-  return (SIM_DESC) 1;
+  return sd;
 }
 
 static void
@@ -2583,31 +2487,6 @@ sim_close (SIM_DESC sd, int quitting)
 }
 
 SIM_RC
-sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
-{
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
-  bfd *prog_bfd;
-
-  prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
-			    sim_kind == SIM_OPEN_DEBUG,
-			    0, sim_write);
-
-  /* Set the bfd machine type.  */
-  if (prog_bfd)
-    saved_state.asregs.bfd_mach = bfd_get_mach (prog_bfd);
-  else if (abfd)
-    saved_state.asregs.bfd_mach = bfd_get_mach (abfd);
-  else
-    saved_state.asregs.bfd_mach = 0;
-
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-  if (abfd == NULL)
-    bfd_close (prog_bfd);
-  return SIM_RC_OK;
-}
-
-SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 {
   /* Clear the registers. */
@@ -2621,6 +2500,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
   /* Set the bfd machine type.  */
   if (prog_bfd != NULL)
     saved_state.asregs.bfd_mach = bfd_get_mach (prog_bfd);
+
+  if (prog_bfd != NULL)
+    init_dsp (prog_bfd);
 
   /* Record the program's arguments. */
   prog_argv = argv;
@@ -2656,16 +2538,4 @@ sim_do_command (SIM_DESC sd, const char *cmd)
     {
       (callback->printf_filtered) (callback, "Error: \"%s\" is not a valid SH simulator command.\n", cmd);
     }
-}
-
-void
-sim_set_callbacks (host_callback *p)
-{
-  callback = p;
-}
-
-char **
-sim_complete_command (SIM_DESC sd, const char *text, const char *word)
-{
-  return NULL;
 }
