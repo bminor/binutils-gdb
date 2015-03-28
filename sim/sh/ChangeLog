@@ -1,3 +1,10 @@
+2015-03-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
+	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT,
+	SIM_AC_OPTION_INLINE, SIM_AC_OPTION_WARNINGS.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
