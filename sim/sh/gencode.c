@@ -3240,8 +3240,7 @@ ppi_gensim (void)
   printf ("  (greater_equal = ~(overflow << 3 & res_grd) & DSR_MASK_G)\n");
   printf ("\n");
   printf ("static void\n");
-  printf ("ppi_insn (iword)\n");
-  printf ("     int iword;\n");
+  printf ("ppi_insn (int iword)\n");
   printf ("{\n");
   printf ("  /* 'ee' = [x0, x1, y0, a1] */\n");
   printf ("  static char e_tab[] = { 8,  9, 10,  5};\n");

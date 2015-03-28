@@ -1,5 +1,37 @@
 2015-03-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* gencode.c (ppi_gensim): Convert old style prototype with ppi_insn.
+	* interp.c: Include ctype.h and run-sim.h.
+	[HAVE_TIME_H]: Include time.h
+	[HAVE_SYS_TIME_H]: Include sys/time.h
+	[!_WIN32]: Include utime.h and sys/wait.h.
+	(set_fpscr1, raise_exception, raise_buserror, get_dr, set_dr, set_sr,
+	do_rdat, do_wdat, process_wlat_addr, process_wwat_addr,
+	process_wbat_addr, process_rlat_addr, process_rwat_addr,
+	process_rbat_addr, IOMEM, get_now, now_persec, swapout, swapout16,
+	ptr, strswaplen, strnswap, dmul, macw, macl, get_loop_bounds_ext,
+	get_loop_bounds, sim_size, init_dsp, init_pointers, dump_profile,
+	gotcall, sim_stop, sim_write, sim_read, sim_store_register,
+	sim_fetch_register, sim_trace, sim_stop_reason, sim_info,
+	sim_set_profile, sim_set_profile_size, sim_open,
+	parse_and_set_memory_size, sim_close, sim_load, sim_create_inferior,
+	sim_do_command, sim_set_callbacks): Convert old style prototype.
+	(fail): Delete unused function.
+	(wlat_fast, wwat_fast, wbat_fast, rlat_fast, rwat_fast, rbat_fast):
+	Delete unused prototypes.
+	(wlat_fast, wwat_fast, wbat_fast, rlat_fast, rwat_fast, rbat_fast,
+	swap, swap16):
+	Convert old style prototype and move INLINE before the type.
+	(trap): Convert old style prototype.  Add casts to wait and sim_write
+	calls.
+	(div1): Convert old style prototype.  Change return to void.
+	(do_long_move_insn, do_blog_insn, fsca_s, fsrra_s, mcalloc): Mark
+	static.
+	(sim_resume): Convert old style prototype.  Align printf format and
+	args.
+
+2015-03-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* gencode.c (ppi_gensim): Add missing */.  Change case 4 to case 5.
 
 2015-03-28  Mike Frysinger  <vapier@gentoo.org>
