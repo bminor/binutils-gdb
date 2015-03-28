@@ -1,3 +1,8 @@
+2015-03-30  Ed Schouten  <ed@nuxi.nl>
+
+	* config.sub: Update from upstream, to 2015-03-04 version.
+	* config.guess: Likewise.
+
 2015-03-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.def (dependencies): Add all-zlib to all-bfd.
