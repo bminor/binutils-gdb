@@ -3642,6 +3642,7 @@ subdirs="$subdirs arm"
   subdirs="$subdirs avr"
 
 
+       sim_testsuite=yes
        ;;
    bfin-*-*)
 
