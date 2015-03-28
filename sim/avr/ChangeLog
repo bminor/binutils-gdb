@@ -1,3 +1,35 @@
+2015-03-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS, SIM_RUN_OBJS, SIM_EXTRA_LIBS): Delete.
+	(interp.o): Delete rule.
+	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
+	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT,
+	SIM_AC_OPTION_INLINE, and SIM_AC_OPTION_WARNINGS.
+	* interp.c: Delete gdb/callback.h, gdb/signals.h, dis-asm.h, and
+	sim-utils.h includes.  Include sim-main.h, sim-base.h, and
+	sim-options.h.
+	(tracing, lock_step, verbose): Delete.
+	(pc): Drop static.
+	(cur_bfd, cpu_exception, cpu_signal, sim_kind, myname, callback):
+	Delete.
+	(flash, sram): Add TODO.
+	(sim_size, disasm_read_memory, disasm_perror_memory,
+	disassemble_insn): Delete.
+	(sim_resume): Rename to ...
+	(step_once): ... this.  Mark static.  Delete step variable and while
+	loop, and unindent body.  Add #if 0 around tracing/verbose code.
+	Change cpu_exception to sim_engine_halt.
+	(sim_trace): Delete.
+	(sim_engine_run): New function.
+	(sim_stop_reason, sim_stop, sim_info): Delete.
+	(free_state): New function.
+	(sim_open, sim_close, sim_create_inferior): Rewrite from scratch.
+	(sim_load, sim_do_command, sim_set_callbacks,
+	sim_complete_command): delete.
+	* sim-main.h: New file.
+	* config.in, configure: Regenerate.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.
