@@ -83,7 +83,9 @@ do_proto_toplev()
 	<Makefile.in >tmp
     mv -f tmp Makefile.in
     #
-    ./configure --target=i386-pc-linux-gnu
+    ./configure --target=i386-pc-linux-gnu \
+	--with-target-subdir=. \
+	--disable-multilib
     $MAKE configure-host configure-target \
 	ALL_GCC="" ALL_GCC_C="" ALL_GCC_CXX="" \
 	CC_FOR_TARGET="$CC" CXX_FOR_TARGET="$CXX"
@@ -267,7 +269,7 @@ gdb_tar_compress()
 }
 
 # The FSF "binutils" release includes gprof and ld.
-BINUTILS_SUPPORT_DIRS="bfd gas include libiberty opcodes ld elfcpp gold gprof intl setup.com makefile.vms cpu"
+BINUTILS_SUPPORT_DIRS="bfd gas include libiberty opcodes ld elfcpp gold gprof intl setup.com makefile.vms cpu zlib"
 binutils_release()
 {
     compressors=$1
@@ -276,7 +278,7 @@ binutils_release()
     tar_compress $package $tool "$BINUTILS_SUPPORT_DIRS" "$compressors"
 }
 
-GAS_SUPPORT_DIRS="bfd include libiberty opcodes intl setup.com makefile.vms"
+GAS_SUPPORT_DIRS="bfd include libiberty opcodes intl setup.com makefile.vms zlib"
 gas_release()
 {
     compressors=$1
@@ -285,7 +287,7 @@ gas_release()
     tar_compress $package $tool "$GAS_SUPPORT_DIRS" "$compressors"
 }
 
-GDB_SUPPORT_DIRS="bfd include libiberty opcodes readline sim intl libdecnumber cpu"
+GDB_SUPPORT_DIRS="bfd include libiberty opcodes readline sim intl libdecnumber cpu zlib"
 gdb_release()
 {
     compressors=$1
@@ -295,7 +297,7 @@ gdb_release()
 }
 
 # Corresponding to the CVS "sim" module.
-SIM_SUPPORT_DIRS="bfd opcodes libiberty include intl gdb/version.in makefile.vms"
+SIM_SUPPORT_DIRS="bfd opcodes libiberty include intl gdb/version.in makefile.vms zlib"
 sim_release()
 {
     compressors=$1
