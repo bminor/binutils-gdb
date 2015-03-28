@@ -732,7 +732,7 @@ mec_read(addr, asi, data)
     case MEC_UARTB:		/* 0xE4 */
 	if (asi != 0xb) {
 	    set_sfsr(MEC_ACC, addr, asi, 1);
-	    return (1);
+	    return 1;
 	}
 	*data = read_uart(addr);
 	break;
@@ -752,10 +752,10 @@ mec_read(addr, asi, data)
 
     default:
 	set_sfsr(MEC_ACC, addr, asi, 1);
-	return (1);
+	return 1;
 	break;
     }
-    return (MOK);
+    return MOK;
 }
 
 static int
@@ -931,10 +931,10 @@ mec_write(addr, data)
 
     default:
 	set_sfsr(MEC_ACC, addr, 0xb, 0);
-	return (1);
+	return 1;
 	break;
     }
-    return (MOK);
+    return MOK;
 }
 
 
@@ -1086,7 +1086,7 @@ read_uart(addr)
 	return tmp;
 #endif
 #else
-	return(0);
+	return 0;
 #endif
 	break;
 
@@ -1118,7 +1118,7 @@ read_uart(addr)
 	return tmp;
 #endif
 #else
-	return(0);
+	return 0;
 #endif
 	break;
 
@@ -1153,12 +1153,12 @@ read_uart(addr)
 	}
 
 	Ucontrol |= 0x00060006;
-	return (Ucontrol);
+	return Ucontrol;
 #else
-	return (uart_stat_reg);
+	return uart_stat_reg;
 #endif
 #else
-	return(0x00060006);
+	return 0x00060006;
 #endif
 	break;
     default:
@@ -1166,7 +1166,7 @@ read_uart(addr)
 	    printf("Read from unimplemented MEC register (%x)\n", addr);
 
     }
-    return (0);
+    return 0;
 }
 
 static void
@@ -1428,7 +1428,7 @@ rtc_start()
 static uint32
 rtc_counter_read()
 {
-    return (rtc_counter);
+    return rtc_counter;
 }
 
 static void
@@ -1481,7 +1481,7 @@ gpt_start()
 static uint32
 gpt_counter_read()
 {
-    return (gpt_counter);
+    return gpt_counter;
 }
 
 static void
@@ -1665,14 +1665,14 @@ memory_read(asi, addr, data, sz, ws)
 	if (errmec == 5) mecparerror();
 	if (errmec == 6) iucomperr();
 	errmec = 0;
-	return(1);
+	return 1;
     }
 #endif
 
     if ((addr >= mem_ramstart) && (addr < (mem_ramstart + mem_ramsz))) {
 	fetch_bytes (asi, &ramb[addr & mem_rammask], data, sz);
 	*ws = mem_ramr_ws;
-	return (0);
+	return 0;
     } else if ((addr >= MEC_START) && (addr < MEC_END)) {
 	mexc = mec_read(addr, asi, data);
 	if (mexc) {
@@ -1681,7 +1681,7 @@ memory_read(asi, addr, data, sz, ws)
 	} else {
 	    *ws = 0;
 	}
-	return (mexc);
+	return mexc;
 
 #ifdef ERA
 
@@ -1690,24 +1690,24 @@ memory_read(asi, addr, data, sz, ws)
 	    ((addr>= 0x80000000) && (addr < 0x80100000))) {
 	    fetch_bytes (asi, &romb[addr & ROM_MASK], data, sz);
 	    *ws = 4;
-	    return (0);
+	    return 0;
 	} else if ((addr >= 0x10000000) && 
 		   (addr < (0x10000000 + (512 << (mec_iocr & 0x0f)))) &&
 		   (mec_iocr & 0x10))  {
 	    *data = erareg;
-	    return (0);
+	    return 0;
 	}
 	
     } else  if (addr < mem_romsz) {
 	    fetch_bytes (asi, &romb[addr], data, sz);
 	    *ws = mem_romr_ws;
-	    return (0);
+	    return 0;
 
 #else
     } else if (addr < mem_romsz) {
 	fetch_bytes (asi, &romb[addr], data, sz);
 	*ws = mem_romr_ws;
-	return (0);
+	return 0;
 #endif
 
     }
@@ -1715,7 +1715,7 @@ memory_read(asi, addr, data, sz, ws)
     printf("Memory exception at %x (illegal address)\n", addr);
     set_sfsr(UIMP_ACC, addr, asi, 1);
     *ws = MEM_EX_WS;
-    return (1);
+    return 1;
 }
 
 int
@@ -1742,7 +1742,7 @@ memory_write(asi, addr, data, sz, ws)
 	if (errmec == 5) mecparerror();
 	if (errmec == 6) iucomperr();
 	errmec = 0;
-	return(1);
+	return 1;
     }
 #endif
 
@@ -1764,7 +1764,7 @@ memory_write(asi, addr, data, sz, ws)
 		    printf("Memory access protection error at 0x%08x\n", addr);
 		set_sfsr(PROT_EXC, addr, asi, 0);
 		*ws = MEM_EX_WS;
-		return (1);
+		return 1;
 	    }
 	}
 
@@ -1782,12 +1782,12 @@ memory_write(asi, addr, data, sz, ws)
 	    *ws = 2 * mem_ramw_ws + STD_WS;
 	    break;
 	}
-	return (0);
+	return 0;
     } else if ((addr >= MEC_START) && (addr < MEC_END)) {
 	if ((sz != 2) || (asi != 0xb)) {
 	    set_sfsr(MEC_ACC, addr, asi, 0);
 	    *ws = MEM_EX_WS;
-	    return (1);
+	    return 1;
 	}
 	mexc = mec_write(addr, *data);
 	if (mexc) {
@@ -1796,7 +1796,7 @@ memory_write(asi, addr, data, sz, ws)
 	} else {
 	    *ws = 0;
 	}
-	return (mexc);
+	return mexc;
 
 #ifdef ERA
 
@@ -1806,12 +1806,12 @@ memory_write(asi, addr, data, sz, ws)
 	    addr &= ROM_MASK;
 	    *ws = sz == 3 ? 8 : 4;
 	    store_bytes (&romb[addr], data, sz);
-            return (0);
+            return 0;
 	} else if ((addr >= 0x10000000) && 
 		   (addr < (0x10000000 + (512 << (mec_iocr & 0x0f)))) &&
 		   (mec_iocr & 0x10))  {
 	    erareg = *data & 0x0e;
-	    return (0);
+	    return 0;
 	}
 
     } else if ((addr < mem_romsz) && (mec_memcfg & 0x10000) && (wrp) &&
@@ -1822,7 +1822,7 @@ memory_write(asi, addr, data, sz, ws)
 	if (sz == 3)
 	    *ws += mem_romw_ws + STD_WS;
 	store_bytes (&romb[addr], data, sz);
-        return (0);
+        return 0;
 
 #else
     } else if ((addr < mem_romsz) && (mec_memcfg & 0x10000) && (wrp) &&
@@ -1833,7 +1833,7 @@ memory_write(asi, addr, data, sz, ws)
 	if (sz == 3)
             *ws += mem_romw_ws + STD_WS;
 	store_bytes (&romb[addr], data, sz);
-        return (0);
+        return 0;
 
 #endif
 
@@ -1841,7 +1841,7 @@ memory_write(asi, addr, data, sz, ws)
 	
     *ws = MEM_EX_WS;
     set_sfsr(UIMP_ACC, addr, asi, 0);
-    return (1);
+    return 1;
 }
 
 static unsigned char  *
@@ -1850,19 +1850,19 @@ get_mem_ptr(addr, size)
     uint32          size;
 {
     if ((addr + size) < ROM_SZ) {
-	return (&romb[addr]);
+	return &romb[addr];
     } else if ((addr >= mem_ramstart) && ((addr + size) < mem_ramend)) {
-	return (&ramb[addr & mem_rammask]);
+	return &ramb[addr & mem_rammask];
     }
 
 #ifdef ERA
       else if ((era) && ((addr <0x100000) || 
 	((addr >= (unsigned) 0x80000000) && ((addr + size) < (unsigned) 0x80100000)))) {
-	return (&romb[addr & ROM_MASK]);
+	return &romb[addr & ROM_MASK];
     }
 #endif
 
-    return ((char *) -1);
+    return (char *) -1;
 }
 
 int
@@ -1874,10 +1874,10 @@ sis_memory_write(addr, data, length)
     char           *mem;
 
     if ((mem = get_mem_ptr(addr, length)) == ((char *) -1))
-	return (0);
+	return 0;
 
     memcpy(mem, data, length);
-    return (length);
+    return length;
 }
 
 int
@@ -1889,10 +1889,10 @@ sis_memory_read(addr, data, length)
     char           *mem;
 
     if ((mem = get_mem_ptr(addr, length)) == ((char *) -1))
-	return (0);
+	return 0;
 
     memcpy(data, mem, length);
-    return (length);
+    return length;
 }
 
 extern struct pstate sregs;

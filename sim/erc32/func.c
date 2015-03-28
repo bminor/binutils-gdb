@@ -86,7 +86,7 @@ batch(sregs, fname)
 
     if ((fp = fopen(fname, "r")) == NULL) {
 	fprintf(stderr, "couldn't open batch file %s\n", fname);
-	return (0);
+	return 0;
     }
     while (getline(&lbuf, &len, fp) > -1) {
 	slen = strlen(lbuf);
@@ -98,7 +98,7 @@ batch(sregs, fname)
     }
     free(lbuf);
     fclose(fp);
-    return (1);
+    return 1;
 }
 
 void
@@ -375,7 +375,7 @@ limcalc (freq)
             lim = -1;
         }
     }
-    return (lim);
+    return lim;
 }
     
 int
@@ -610,7 +610,7 @@ exec_cmd(sregs, cmd)
     }
     if (cmdsave != NULL)
 	free(cmdsave);
-    return (stat);
+    return stat;
 }
 
 
@@ -749,7 +749,7 @@ disp_fpu(sregs)
 	    printf("\n");
     }
     printf("\n");
-    return (OK);
+    return OK;
 }
 
 static void
@@ -950,7 +950,7 @@ advance_time(sregs)
 uint32
 now()
 {
-    return(ebase.simtime);
+    return ebase.simtime;
 }
 
 
@@ -982,7 +982,7 @@ wait_for_irq()
 	}
     }
     sregs.pwdtime += ebase.simtime - endtime;
-    return (ebase.simtime - endtime);
+    return ebase.simtime - endtime;
 }
 
 int
@@ -992,12 +992,12 @@ check_bpt(sregs)
     int32           i;
 
     if ((sregs->bphit) || (sregs->annul))
-	return (0);
+	return 0;
     for (i = 0; i < (int32) sregs->bptnum; i++) {
 	if (sregs->pc == sregs->bpts[i])
-	    return (BPT_HIT);
+	    return BPT_HIT;
     }
-    return (0);
+    return 0;
 }
 
 void
@@ -1046,11 +1046,11 @@ bfd_load(fname)
 
     if (pbfd == NULL) {
 	printf("open of %s failed\n", fname);
-	return (-1);
+	return -1;
     }
     if (!bfd_check_format(pbfd, bfd_object)) {
 	printf("file %s  doesn't seem to be an object file\n", fname);
-	return (-1);
+	return -1;
     }
 
     arch = bfd_get_arch_info (pbfd);
@@ -1135,7 +1135,7 @@ bfd_load(fname)
     if (sis_verbose)
 	printf("\n");
 
-    return(bfd_get_start_address (pbfd));
+    return bfd_get_start_address (pbfd);
 }
 
 double get_time (void)
@@ -1146,5 +1146,5 @@ double get_time (void)
 
     gettimeofday (&tm, NULL);
     usec = ((double) tm.tv_sec) * 1E6 + ((double) tm.tv_usec);
-    return (usec / 1E6);
+    return usec / 1E6;
 }

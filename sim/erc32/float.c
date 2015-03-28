@@ -52,7 +52,7 @@ get_accex()
         accx |= 8;
     if (fexc & FE_INVALID)
         accx |= 0x10;
-    return(accx);
+    return accx;
 }
 
 /* How to clear the accrued exceptions */

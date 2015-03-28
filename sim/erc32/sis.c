@@ -104,7 +104,7 @@ run_sim(sregs, icount, dis)
 		    if (deb) {
 	    		if ((sregs->bphit = check_bpt(sregs)) != 0) {
             		    restore_stdio();
-	    		    return (BPT_HIT);
+	    		    return BPT_HIT;
 	    		}
 		        if (sregs->histlen) {
 			    sregs->histbuf[sregs->histind].addr = sregs->pc;
@@ -140,12 +140,12 @@ run_sim(sregs, icount, dis)
     sregs->tottime += get_time() - sregs->starttime;
     restore_stdio();
     if (sregs->err_mode)
-	return (ERROR);
+	return ERROR;
     if (ctrl_c) {
 	ctrl_c = 0;
-	return (CTRL_C);
+	return CTRL_C;
     }
-    return (TIME_OUT);
+    return TIME_OUT;
 }
 
 int

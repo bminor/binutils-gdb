@@ -252,7 +252,7 @@ sub_cc(psr, operand1, operand2, result)
 			   (~operand1 & operand2 & result)) >> 10) & PSR_V);
     psr = (psr & ~PSR_C) | ((((~operand1 & operand2) |
 			 ((~operand1 | operand2) & result)) >> 11) & PSR_C);
-    return (psr);
+    return psr;
 }
 
 uint32
@@ -271,7 +271,7 @@ add_cc(psr, operand1, operand2, result)
 			  (~operand1 & ~operand2 & result)) >> 10) & PSR_V);
     psr = (psr & ~PSR_C) | ((((operand1 & operand2) |
 			 ((operand1 | operand2) & ~result)) >> 11) & PSR_C);
-    return(psr);
+    return psr;
 }
 
 static void
@@ -293,7 +293,7 @@ add32 (uint32 n1, uint32 n2, int *carry)
   uint32 result = n1 + n2;
 
   *carry = result < n1 || result < n1;
-  return(result);
+  return result;
 }
 
 /* Multiply two 32-bit integers.  */
@@ -1583,7 +1583,7 @@ dispatch_instruction(sregs)
 	sregs->pc = pc;
 	sregs->npc = npc;
     }
-    return (0);
+    return 0;
 }
 
 #define T_FABSs		2
@@ -1645,11 +1645,11 @@ fpexec(op3, rd, rs1, rs2, sregs)
     if (sregs->fpstate == FP_EXC_MODE) {
 	sregs->fsr = (sregs->fsr & ~FSR_TT) | FP_SEQ_ERR;
 	sregs->fpstate = FP_EXC_PE;
-	return (0);
+	return 0;
     }
     if (sregs->fpstate == FP_EXC_PE) {
 	sregs->fpstate = FP_EXC_MODE;
-	return (TRAP_FPEXC);
+	return TRAP_FPEXC;
     }
     opf = (sregs->inst >> 5) & 0x1ff;
 
@@ -1909,7 +1909,7 @@ fpexec(op3, rd, rs1, rs2, sregs)
     }
     clear_accex();
 
-    return (0);
+    return 0;
 
 
 }
@@ -1922,13 +1922,13 @@ chk_asi(sregs, asi, op3)
 {
     if (!(sregs->psr & PSR_S)) {
 	sregs->trap = TRAP_PRIVI;
-	return (0);
+	return 0;
     } else if (sregs->inst & INST_I) {
 	sregs->trap = TRAP_UNIMP;
-	return (0);
+	return 0;
     } else
 	*asi = (sregs->inst >> 5) & 0x0ff;
-    return(1);
+    return 1;
 }
 
 int
@@ -1942,11 +1942,11 @@ execute_trap(sregs)
 	sregs->npc = 4;
 	sregs->trap = 0;
     } else if (sregs->trap == 257) {
-	    return (ERROR);
+	    return ERROR;
     } else {
 
 	if ((sregs->psr & PSR_ET) == 0)
-	    return (ERROR);
+	    return ERROR;
 
 	sregs->tbr = (sregs->tbr & 0xfffff000) | (sregs->trap << 4);
 	sregs->trap = 0;
@@ -1973,7 +1973,7 @@ execute_trap(sregs)
     }
 
 
-    return (0);
+    return 0;
 
 }
 
@@ -1996,10 +1996,10 @@ check_interrupts(sregs)
 	if (sregs->trap == 0) {
 	    sregs->trap = 16 + ext_irl;
 	    irqarr[ext_irl & 0x0f].callback(irqarr[ext_irl & 0x0f].arg);
-	    return(1);
+	    return 1;
 	}
     }
-    return(0);
+    return 0;
 }
 
 void

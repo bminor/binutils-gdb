@@ -1,3 +1,16 @@
+2015-03-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* erc32.c (mec_read): Delete parenthesis around return statement.
+	(mec_write, read_uart, rtc_counter_read, gpt_counter_read, memory_read,
+	memory_write, get_mem_ptr, sis_memory_write, sis_memory_read): Likewise.
+	* exec.c (sub_cc, add_cc, add32, dispatch_instruction, fpexec, chk_asi,
+	execute_trap, check_interrupts): Likewise.
+	* float.c (get_accex): Likewise.
+	* func.c (batch, limcalc, exec_cmd, disp_fpu, now, wait_for_irq,
+	check_bpt, bfd_load, get_time): Likewise.
+	* interf.c (run_sim, sim_write, sim_read): Likewise.
+	* sis.c (run_sim): Likewise.
+
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* interf.c (sim_set_callbacks, sim_size, sim_trace): Delete.

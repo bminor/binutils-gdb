@@ -125,7 +125,7 @@ run_sim(sregs, icount, dis)
                         sim_halt();
 			restore_stdio();
 			clearerr(stdin);
-			return (BPT_HIT);
+			return BPT_HIT;
 		    } else
 			dispatch_instruction(sregs);
 		}
@@ -148,18 +148,18 @@ run_sim(sregs, icount, dis)
     if (sregs->err_mode)
 	error_mode(sregs->pc);
     if (sregs->err_mode)
-	return (ERROR);
+	return ERROR;
     if (sregs->bphit) {
 	if (sis_verbose)
 	    (*sim_callback->printf_filtered) (sim_callback,
 					      "HW BP hit at %x\n", sregs->pc);
-	return (BPT_HIT);
+	return BPT_HIT;
     }
     if (ctrl_c) {
 	ctrl_c = 0;
-	return (CTRL_C);
+	return CTRL_C;
     }
-    return (TIME_OUT);
+    return TIME_OUT;
 }
 
 SIM_DESC
@@ -343,7 +343,7 @@ sim_write(sd, mem, buf, length)
     const unsigned char  *buf;
     int             length;
 {
-    return (sis_memory_write(mem, buf, length));
+    return sis_memory_write (mem, buf, length);
 }
 
 int
@@ -353,7 +353,7 @@ sim_read(sd, mem, buf, length)
      unsigned char *buf;
      int length;
 {
-    return (sis_memory_read(mem, buf, length));
+    return sis_memory_read (mem, buf, length);
 }
 
 void
