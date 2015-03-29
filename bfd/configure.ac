@@ -236,9 +236,16 @@ AC_CHECK_DECLS(snprintf)
 AC_CHECK_DECLS(vsnprintf)
 AC_CHECK_DECLS(strnlen)
 
-# Link in zlib if we can.  This allows us to read compressed debug sections.
-# This is used only by compress.c.
-AM_ZLIB
+# Use the system's zlib library.
+zlibdir=-L../zlib
+zlibinc="-I\$(srcdir)/../zlib"
+AC_ARG_WITH(system-zlib,
+[AS_HELP_STRING([--with-system-zlib], [use installed libz])],
+zlibdir=
+zlibinc=
+)
+AC_SUBST(zlibdir)
+AC_SUBST(zlibinc)
 
 # If we are configured native, pick a core file support file.
 COREFILE=
