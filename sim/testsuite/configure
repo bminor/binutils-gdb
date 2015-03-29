@@ -1818,72 +1818,57 @@ esac
 
 
 
-sim_testsuite=no
 sim_common=yes
 sim_igen=no
 sim_arch=
 case "${target}" in
    arm*-*-*)
        sim_arch=arm
-       sim_testsuite=yes
        ;;
    avr*-*-*)
        sim_arch=avr
-       sim_testsuite=yes
        ;;
    bfin-*-*)
        sim_arch=bfin
-       sim_testsuite=yes
        ;;
    cr16*-*-*)
        sim_arch=cr16
-       sim_testsuite=yes
        ;;
    cris-*-* | crisv32-*-*)
        sim_arch=cris
-       sim_testsuite=yes
        ;;
    d10v-*-*)
        sim_arch=d10v
        ;;
    frv-*-*)
        sim_arch=frv
-       sim_testsuite=yes
        ;;
    h8300*-*-*)
        sim_arch=h8300
-       sim_testsuite=yes
        ;;
    iq2000-*-*)
        sim_arch=iq2000
-       sim_testsuite=yes
        ;;
    lm32-*-*)
        sim_arch=lm32
-       sim_testsuite=yes
        ;;
    m32c-*-*)
        sim_arch=m32c
        ;;
    m32r-*-*)
        sim_arch=m32r
-       sim_testsuite=yes
        ;;
    m68hc11-*-*|m6811-*-*)
        sim_arch=m68hc11
-       sim_testsuite=yes
        ;;
    mcore-*-*)
        sim_arch=mcore
-       sim_testsuite=yes
        ;;
    microblaze-*-*)
        sim_arch=microblaze
-       sim_testsuite=yes
        ;;
    mips*-*-*)
        sim_arch=mips
-       sim_testsuite=yes
        sim_igen=yes
        ;;
    mn10300*-*-*)
@@ -1892,11 +1877,9 @@ case "${target}" in
        ;;
    moxie-*-*)
        sim_arch=moxie
-       sim_testsuite=yes
        ;;
    msp430*-*-*)
        sim_arch=msp430
-       sim_testsuite=yes
        ;;
    rl78-*-*)
        sim_arch=rl78
@@ -1906,27 +1889,22 @@ case "${target}" in
        ;;
    sh64*-*-*)
        sim_arch=sh64
-       sim_testsuite=yes
        ;;
    sh*-*-*)
        sim_arch=sh
-       sim_testsuite=yes
        ;;
    sparc-*-rtems*|sparc-*-elf*)
        sim_arch=erc32
-       sim_testsuite=yes
        ;;
    powerpc*-*-*)
        sim_arch=ppc
        ;;
    ft32-*-*)
        sim_arch=ft32
-       sim_testsuite=yes
        ;;
    v850*-*-*)
        sim_arch=v850
        sim_igen=yes
-       sim_testsuite=yes
        ;;
    *)
        # No simulator subdir, so the subdir "common" isn't needed.
