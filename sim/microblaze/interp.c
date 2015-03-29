@@ -820,7 +820,7 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
   /* from sh -- dac */
   prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
 			    /* sim_kind == SIM_OPEN_DEBUG, */
-			    1,
+			    0,
 			    0, sim_write);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
