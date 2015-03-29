@@ -218,6 +218,7 @@ proc run_sim_test { name requested_machs } {
     set opts(xerror) "no"
     set opts(xfail) ""
     set opts(kfail) ""
+    set seen_output 0
 
     if ![info exists global_as_options] {
         set global_as_options ""
@@ -260,6 +261,7 @@ proc run_sim_test { name requested_machs } {
 	# Multiple "output" specifications concatenate, they don't override.
 	if { $opt_name == "output" } {
 	    set opt_val "$opts(output)$opt_val"
+	    set seen_output 1
 	}
 	# Similar with "xfail" and "kfail", but arguments are space-separated.
 	if { $opt_name == "xfail" || $opt_name == "kfail" } {
@@ -276,7 +278,7 @@ proc run_sim_test { name requested_machs } {
 
     set testname $name
     set sourcefile $file
-    if { $opts(output) == "" } {
+    if { $seen_output == 0 } {
 	if { "$opts(xerror)" == "no" } {
 	    set opts(output) "pass\n"
 	} else {

@@ -1,5 +1,11 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* lib/sim-defs.exp (run_sim_test): Declare seen_output as 0.  When
+	the test has an output keyword, set it to 1.  Set default output only
+	when seen_output is 0.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2015-03-28  Mike Frysinger  <vapier@gentoo.org>
