@@ -37,5 +37,6 @@
 # All assembler tests should start with a call to "start"
 	.macro start
 	.text
-__start:
+.global _start
+_start:
 	.endm
