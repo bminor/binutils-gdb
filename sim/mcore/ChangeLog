@@ -1,3 +1,9 @@
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (heap_ptr, int_sbrk): Delete.
+	(handle_trap1): Change case 69 (sbrk) to always return -1.
+	(sim_load): Delete bss checks and heap_ptr setup.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c: Strip trailing whitespace.

@@ -38,7 +38,6 @@ typedef long int           word;
 typedef unsigned long int  uword;
 
 static int            target_big_endian = 0;
-static unsigned long  heap_ptr = 0;
 host_callback *       callback;
 
 
@@ -173,21 +172,6 @@ static int issue_messages = 0;
 #define	PARM3	4
 #define	PARM4	5
 #define	RET1	2		/* register for return values. */
-
-static long
-int_sbrk (int inc_bytes)
-{
-  long addr;
-
-  addr = heap_ptr;
-
-  heap_ptr += inc_bytes;
-
-  if (issue_messages && heap_ptr>cpu.gr[0])
-    fprintf (stderr, "Warning: heap_ptr overlaps stack!\n");
-
-  return addr;
-}
 
 static void
 wbat (word x, word v)
@@ -588,8 +572,10 @@ handle_trap1 (void)
       break;
 
     case 69:
+      /* Historically this was sbrk(), but no one used it, and the
+	implementation didn't actually work, so it's a stub now.  */
       a[0] = (unsigned long) (cpu.gr[PARM1]);
-      cpu.gr[RET1] = int_sbrk (a[0]);
+      cpu.gr[RET1] = -1;
       break;
 
     default:
@@ -1871,7 +1857,6 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 
   {
     bfd * handle;
-    asection * s_bss;
     handle = bfd_openr (prog, 0);	/* could be "mcore" */
 
     if (!handle)
@@ -1889,27 +1874,6 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 	printf ("``%s'' is not appropriate object file.\n", prog);
 	return SIM_RC_FAIL;
       }
-
-    /* Look for that bss section.  */
-    s_bss = bfd_get_section_by_name (handle, ".bss");
-
-    if (!s_bss)
-      {
-	printf("``%s'' has no bss section.\n", prog);
-	return SIM_RC_FAIL;
-      }
-
-    /* Appropriately paranoid would check that we have
-       a traditional text/data/bss ordering within memory.  */
-
-    /* figure the end of the bss section */
-#if 0
-    printf ("bss section at 0x%08x for 0x%08x bytes\n",
-	    (unsigned long) bfd_get_section_vma (handle, s_bss),
-	    (unsigned long) bfd_section_size (handle, s_bss));
-#endif
-    heap_ptr = ((unsigned long) bfd_get_section_vma (handle, s_bss)
-		+ (unsigned long) bfd_section_size (handle, s_bss));
 
     /* Clean up after ourselves.  */
     bfd_close (handle);
