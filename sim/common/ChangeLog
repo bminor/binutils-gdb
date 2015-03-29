@@ -1,3 +1,9 @@
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-arange.h (SIM_ARANGE_INLINE): Move above sim_addr_range_hit_p.
+	(sim_addr_range_hit_p): Change INLINE to SIM_ARANGE_INLINE.
+	* sim-inline.h (INLINE2): Define to gnu_inline when available.
+
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-profile.c (profile_pc_event): Get pc via sim_pc_get.  Delete
