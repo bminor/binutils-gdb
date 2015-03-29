@@ -1,5 +1,15 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (NUM_ELEM, heap_ptr, stack_ptr, memcycles, struct aout,
+	LONG, SHORT): Delete.
+	[WATCHFUNCTIONS]: Delete.
+	(sim_info) [WATCHFUNCTIONS]: Delete.
+	(sim_create_inferior): Delete avp, nargs, nenv, s_length, strings,
+	pointers, and hi_stack.
+	(sim_do_command): Delete the "watch" command.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_load): Set verbose to 0 when calling sim_load_file.
 
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>

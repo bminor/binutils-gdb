@@ -32,14 +32,7 @@
 #include "sim-utils.h"
 #include "microblaze-dis.h"
 
-
-#ifndef NUM_ELEM
-#define NUM_ELEM(A) (sizeof (A) / sizeof (A)[0])
-#endif
-
 static int target_big_endian = 1;
-static unsigned long heap_ptr = 0;
-static unsigned long stack_ptr = 0;
 host_callback *callback;
 
 static unsigned long
@@ -99,8 +92,6 @@ microblaze_store_unsigned_integer (unsigned char *addr, int len,
 }
 
 struct sim_state microblaze_state;
-
-int memcycles = 1;
 
 static SIM_OPEN_KIND sim_kind;
 static char *myname;
@@ -344,24 +335,6 @@ set_initial_gprs (void)
   CPU.cycles = 0;
   CPU.imm_enable = 0;
 }
-
-#define WATCHFUNCTIONS 1
-#ifdef WATCHFUNCTIONS
-
-#define MAXWL 80
-word WL[MAXWL];
-char *WLstr[MAXWL];
-
-int ENDWL=0;
-int WLincyc;
-int WLcyc[MAXWL];
-int WLcnts[MAXWL];
-int WLmax[MAXWL];
-int WLmin[MAXWL];
-word WLendpc;
-int WLbcyc;
-int WLW;
-#endif
 
 static int tracing = 0;
 
@@ -667,54 +640,11 @@ sim_stop (SIM_DESC sd)
 void
 sim_info (SIM_DESC sd, int verbose)
 {
-#ifdef WATCHFUNCTIONS
-  int w, wcyc;
-#endif
-
   callback->printf_filtered (callback, "\n\n# instructions executed  %10d\n",
 			     CPU.insts);
   callback->printf_filtered (callback, "# cycles                 %10d\n",
 			     (CPU.cycles) ? CPU.cycles+2 : 0);
-
-#ifdef WATCHFUNCTIONS
-  callback->printf_filtered (callback, "\nNumber of watched functions: %d\n",
-			     ENDWL);
-
-  wcyc = 0;
-
-  for (w = 1; w <= ENDWL; w++)
-    {
-      callback->printf_filtered (callback, "WL = %s %8x\n",WLstr[w],WL[w]);
-      callback->printf_filtered (callback, "  calls = %d, cycles = %d\n",
-				 WLcnts[w],WLcyc[w]);
-
-      if (WLcnts[w] != 0)
-	callback->printf_filtered (callback,
-				   "  maxcpc = %d, mincpc = %d, avecpc = %d\n",
-				   WLmax[w],WLmin[w],WLcyc[w]/WLcnts[w]);
-      wcyc += WLcyc[w];
-    }
-
-  callback->printf_filtered (callback,
-			     "Total cycles for watched functions: %d\n",wcyc);
-#endif
 }
-
-struct	aout
-{
-  unsigned char  sa_machtype[2];
-  unsigned char  sa_magic[2];
-  unsigned char  sa_tsize[4];
-  unsigned char  sa_dsize[4];
-  unsigned char  sa_bsize[4];
-  unsigned char  sa_syms[4];
-  unsigned char  sa_entry[4];
-  unsigned char  sa_trelo[4];
-  unsigned char  sa_drelo[4];
-} aout;
-
-#define	LONG(x)		(((x)[0]<<24)|((x)[1]<<16)|((x)[2]<<8)|(x)[3])
-#define	SHORT(x)	(((x)[0]<<8)|(x)[1])
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
@@ -837,15 +767,7 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 {
-  char **avp;
-  int nargs = 0;
-  int nenv = 0;
-  int s_length;
   int l;
-  unsigned long strings;
-  unsigned long pointers;
-  unsigned long hi_stack;
-
 
   /* Set the initial register set.  */
   l = issue_messages;
@@ -853,7 +775,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
   set_initial_gprs ();
   issue_messages = l;
 
-  hi_stack = CPU.msize - 4;
   PC = bfd_get_start_address (prog_bfd);
 
   /* For now ignore all parameters to the program */
@@ -870,24 +791,7 @@ sim_do_command (SIM_DESC sd, const char *cmd)
     {
       char ** simargv = buildargv (cmd);
 
-      if (strcmp (simargv[0], "watch") == 0)
-	{
-	  if ((simargv[1] == NULL) || (simargv[2] == NULL))
-	    {
-	      fprintf (stderr, "Error: missing argument to watch cmd.\n");
-	      freeargv (simargv);
-	      return;
-	    }
-
-	  ENDWL++;
-
-	  WL[ENDWL] = strtol (simargv[2], NULL, 0);
-	  WLstr[ENDWL] = strdup (simargv[1]);
-	  fprintf (stderr, "Added %s (%x) to watchlist, #%d\n",WLstr[ENDWL],
-		   WL[ENDWL], ENDWL);
-
-	}
-      else if (strcmp (simargv[0], "dumpmem") == 0)
+      if (strcmp (simargv[0], "dumpmem") == 0)
 	{
 	  unsigned char * p;
 	  FILE * dumpfile;
@@ -908,7 +812,6 @@ sim_do_command (SIM_DESC sd, const char *cmd)
 	{
 	  CPU.cycles = 0;
 	  CPU.insts = 0;
-	  ENDWL = 0;
 	}
       else if (strcmp (simargv[0], "verbose") == 0)
 	{
@@ -925,7 +828,6 @@ sim_do_command (SIM_DESC sd, const char *cmd)
   else
     {
       fprintf (stderr, "M.CORE sim commands: \n");
-      fprintf (stderr, "  watch <funcname> <addr>\n");
       fprintf (stderr, "  dumpmem <filename>\n");
       fprintf (stderr, "  clearstats\n");
       fprintf (stderr, "  verbose\n");

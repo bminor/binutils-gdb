@@ -1779,22 +1779,6 @@ sim_info (SIM_DESC sd, int verbose)
 #endif
 }
 
-struct	aout
-{
-  unsigned char  sa_machtype[2];
-  unsigned char  sa_magic[2];
-  unsigned char  sa_tsize[4];
-  unsigned char  sa_dsize[4];
-  unsigned char  sa_bsize[4];
-  unsigned char  sa_syms[4];
-  unsigned char  sa_entry[4];
-  unsigned char  sa_trelo[4];
-  unsigned char  sa_drelo[4];
-} aout;
-
-#define	LONG(x)		(((x)[0]<<24)|((x)[1]<<16)|((x)[2]<<8)|(x)[3])
-#define	SHORT(x)	(((x)[0]<<8)|(x)[1])
-
 static void
 free_state (SIM_DESC sd)
 {

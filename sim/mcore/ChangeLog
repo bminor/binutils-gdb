@@ -1,5 +1,9 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (struct aout, LONG, SHORT): Delete.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_RUN_OBJS, SIM_EXTRA_CFLAGS, SIM_EXTRA_LIBS): Delete.
 	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
 	* interp.c: Include sim-main.h, sim-base.h, and sim-options.h.
