@@ -29,16 +29,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "libiberty.h"
 #include "gdb/remote-sim.h"
 
+#include "sim-main.h"
+#include "sim-base.h"
+#include "sim-options.h"
+
 #ifndef NUM_ELEM
 #define NUM_ELEM(A) (sizeof (A) / sizeof (A)[0])
 #endif
 
-
-typedef long int           word;
-typedef unsigned long int  uword;
-
-static int            target_big_endian = 0;
-host_callback *       callback;
+#define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
 
 
 static unsigned long
@@ -104,6 +103,7 @@ mcore_store_unsigned_integer (unsigned char *addr, int len, unsigned long val)
    read/write functions.  Keeping this data in native order improves
    the performance of the simulator.  Simulation speed is deemed more
    important.  */
+/* TODO: Should be moved to sim-main.h:sim_cpu.  */
 
 /* The ordering of the mcore_regset structure is matched in the
    gdb/config/mcore/tm-mcore.h file in the REGISTER_NAMES macro.  */
@@ -112,7 +112,6 @@ struct mcore_regset
   word	          gregs [16];		/* primary registers */
   word	          alt_gregs [16];	/* alt register file */
   word	          cregs [32];		/* control registers */
-  word	          pc;			/* the pc */
   int		  ticks;
   int		  stalls;
   int		  cycles;
@@ -132,10 +131,7 @@ union
 #define LAST_VALID_CREG	32		/* only 0..12 implemented */
 #define	NUM_MCORE_REGS	(16 + 16 + LAST_VALID_CREG + 1)
 
-int memcycles = 1;
-
-static SIM_OPEN_KIND sim_kind;
-static char * myname;
+static int memcycles = 1;
 
 static int issue_messages = 0;
 
@@ -352,10 +348,11 @@ rhat (word x)
 
 
 /* Default to a 8 Mbyte (== 2^23) memory space.  */
+/* TODO: Delete all this custom memory logic and move to common sim helpers.  */
 static int sim_memory_size = 23;
 
 #define	MEM_SIZE_FLOOR	64
-void
+static void
 sim_size (int power)
 {
   sim_memory_size = power;
@@ -391,7 +388,7 @@ init_pointers (void)
 }
 
 static void
-set_initial_gprs (void)
+set_initial_gprs (SIM_CPU *scpu)
 {
   int i;
   long space;
@@ -400,7 +397,7 @@ set_initial_gprs (void)
   init_pointers ();
 
   /* Set up machine just out of reset.  */
-  cpu.asregs.pc = 0;
+  CIA_SET (scpu, 0);
   cpu.sr = 0;
 
   memsize = cpu.asregs.msize / (1024 * 1024);
@@ -468,9 +465,10 @@ is_opened (int fd)
 }
 
 static void
-handle_trap1 (void)
+handle_trap1 (SIM_DESC sd)
 {
   unsigned long a[3];
+  host_callback *callback = STATE_CALLBACK (sd);
 
   switch ((unsigned long) (cpu.gr [TRAPCODE]))
     {
@@ -587,7 +585,7 @@ handle_trap1 (void)
 }
 
 static void
-process_stub (int what)
+process_stub (SIM_DESC sd, int what)
 {
   /* These values should match those in libgloss/mcore/syscalls.s.  */
   switch (what)
@@ -600,7 +598,7 @@ process_stub (int what)
     case 19: /* _lseek */
     case 43: /* _times */
       cpu.gr [TRAPCODE] = what;
-      handle_trap1 ();
+      handle_trap1 (sd);
       break;
 
     default:
@@ -611,7 +609,7 @@ process_stub (int what)
 }
 
 static void
-util (unsigned what)
+util (SIM_DESC sd, unsigned what)
 {
   switch (what)
     {
@@ -653,7 +651,7 @@ util (unsigned what)
       break;
 
     case 0xFF:
-      process_stub (cpu.gr[1]);
+      process_stub (sd, cpu.gr[1]);
       break;
 
     default:
@@ -705,6 +703,7 @@ static int tracing = 0;
 void
 sim_resume (SIM_DESC sd, int step, int siggnal)
 {
+  SIM_CPU *scpu = STATE_CPU (sd, 0);
   int needfetch;
   word ibuf;
   word pc;
@@ -717,7 +716,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   word WLhash;
 
   cpu.asregs.exception = step ? SIGTRAP: 0;
-  pc = cpu.asregs.pc;
+  pc = CIA_GET (scpu);
 
   /* Fetch the initial instructions that we'll decode. */
   ibuf = rlat (pc & 0xFFFFFFFC);
@@ -895,7 +894,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		  break;
 
 		case 0x9:				/* trap 1 */
-		  handle_trap1 ();
+		  handle_trap1 (sd);
 		  break;
 		}
 	      break;
@@ -1492,7 +1491,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  cpu.asregs.exception = SIGILL;
 	  break;
 	case 0x50:
-	  util (inst & 0xFF);
+	  util (sd, inst & 0xFF);
 	  break;
 	case 0x51: case 0x52: case 0x53:
 	case 0x54: case 0x55: case 0x56: case 0x57:
@@ -1649,7 +1648,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   while (!cpu.asregs.exception);
 
   /* Hide away the things we've cached while executing.  */
-  cpu.asregs.pc = pc;
+  CIA_SET (scpu, pc);
   cpu.asregs.insts += insts;		/* instructions done ... */
   cpu.asregs.cycles += insts;		/* and each takes a cycle */
   cpu.asregs.cycles += bonus_cycles;	/* and extra cycles for branches */
@@ -1723,19 +1722,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     return 0;
 }
 
-
-int
-sim_trace (SIM_DESC sd)
-{
-  tracing = 1;
-
-  sim_resume (sd, 0, 0);
-
-  tracing = 0;
-
-  return 1;
-}
-
 void
 sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
@@ -1751,15 +1737,6 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
     }
 }
 
-
-int
-sim_stop (SIM_DESC sd)
-{
-  cpu.asregs.exception = SIGINT;
-  return 1;
-}
-
-
 void
 sim_info (SIM_DESC sd, int verbose)
 {
@@ -1767,6 +1744,7 @@ sim_info (SIM_DESC sd, int verbose)
   int w, wcyc;
 #endif
   double virttime = cpu.asregs.cycles / 36.0e6;
+  host_callback *callback = STATE_CALLBACK (sd);
 
   callback->printf_filtered (callback, "\n\n# instructions executed  %10d\n",
 			     cpu.asregs.insts);
@@ -1817,12 +1795,71 @@ struct	aout
 #define	LONG(x)		(((x)[0]<<24)|((x)[1]<<16)|((x)[2]<<8)|(x)[3])
 #define	SHORT(x)	(((x)[0]<<8)|(x)[1])
 
+static void
+free_state (SIM_DESC sd)
+{
+  if (STATE_MODULES (sd) != NULL)
+    sim_module_uninstall (sd);
+  sim_cpu_free_all (sd);
+  sim_state_free (sd);
+}
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
-  int osize = sim_memory_size;
-  myname = argv[0];
-  callback = cb;
+  SIM_DESC sd = sim_state_alloc (kind, cb);
+  int i, osize;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* getopt will print the error message so we just have to exit if this fails.
+     FIXME: Hmmm...  in the case of gdb we need getopt to call
+     print_filtered.  */
+  if (sim_parse_args (sd, argv) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Check for/establish the a reference program image.  */
+  if (sim_analyze_program (sd,
+			   (STATE_PROG_ARGV (sd) != NULL
+			    ? *STATE_PROG_ARGV (sd)
+			    : NULL), abfd) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Configure/verify the target byte order and other runtime
+     configuration options.  */
+  if (sim_config (sd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  osize = sim_memory_size;
 
   if (kind == SIM_OPEN_STANDALONE)
     issue_messages = 1;
@@ -1831,10 +1868,14 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   sim_size (1);		/* small */
   sim_size (osize);	/* and back again */
 
-  set_initial_gprs ();	/* Reset the GPR registers.  */
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+      set_initial_gprs (cpu);	/* Reset the GPR registers.  */
+    }
 
-  /* Fudge our descriptor for now.  */
-  return (SIM_DESC) 1;
+  return sd;
 }
 
 void
@@ -1844,61 +1885,9 @@ sim_close (SIM_DESC sd, int quitting)
 }
 
 SIM_RC
-sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
-{
-  /* Do the right thing for ELF executables; this turns out to be
-     just about the right thing for any object format that:
-       - we crack using BFD routines
-       - follows the traditional UNIX text/data/bss layout
-       - calls the bss section ".bss".   */
-
-  extern bfd * sim_load_file (); /* ??? Don't know where this should live.  */
-  bfd * prog_bfd;
-
-  {
-    bfd * handle;
-    handle = bfd_openr (prog, 0);	/* could be "mcore" */
-
-    if (!handle)
-      {
-	printf("``%s'' could not be opened.\n", prog);
-	return SIM_RC_FAIL;
-      }
-
-    /* Makes sure that we have an object file, also cleans gets the
-       section headers in place.  */
-    if (!bfd_check_format (handle, bfd_object))
-      {
-	/* wasn't an object file */
-	bfd_close (handle);
-	printf ("``%s'' is not appropriate object file.\n", prog);
-	return SIM_RC_FAIL;
-      }
-
-    /* Clean up after ourselves.  */
-    bfd_close (handle);
-
-    /* XXX: do we need to free the s_bss and handle structures? */
-  }
-
-  /* from sh -- dac */
-  prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
-                            sim_kind == SIM_OPEN_DEBUG,
-                            0, sim_write);
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-
-  target_big_endian = bfd_big_endian (prog_bfd);
-
-  if (abfd == NULL)
-    bfd_close (prog_bfd);
-
-  return SIM_RC_OK;
-}
-
-SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 {
+  SIM_CPU *scpu = STATE_CPU (sd, 0);
   char ** avp;
   int nargs = 0;
   int nenv = 0;
@@ -1912,11 +1901,11 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
   /* Set the initial register set.  */
   l = issue_messages;
   issue_messages = 0;
-  set_initial_gprs ();
+  set_initial_gprs (scpu);
   issue_messages = l;
 
   hi_stack = cpu.asregs.msize - 4;
-  cpu.asregs.pc = bfd_get_start_address (prog_bfd);
+  CIA_SET (scpu, bfd_get_start_address (prog_bfd));
 
   /* Calculate the argument and environment strings.  */
   s_length = 0;
@@ -2084,10 +2073,4 @@ sim_do_command (SIM_DESC sd, const char *cmd)
       fprintf (stderr, "  clearstats\n");
       fprintf (stderr, "  verbose\n");
     }
-}
-
-void
-sim_set_callbacks (host_callback *ptr)
-{
-  callback = ptr;
 }

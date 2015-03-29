@@ -1,5 +1,28 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_RUN_OBJS, SIM_EXTRA_CFLAGS, SIM_EXTRA_LIBS): Delete.
+	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
+	* interp.c: Include sim-main.h, sim-base.h, and sim-options.h.
+	(word, uword): Move to sim-main.h.
+	(callback, sim_kind, myname): Delete.
+	(struct mcore_regset): Move pc to sim_cpu.
+	(memcycles, sim_size): Mark static.
+	(set_initial_gprs): Take a sim_cpu arg.  Set pc via CIA_SET.
+	(handle_trap1): Take a SIM_DESC arg.  Get callback from it.
+	(process_stub): Take a SIM_DESC arg.  Pass it to handle_trap1
+	(util): Take a SIM_DESC arg.  Pass it to process_stub.
+	(sim_resume): Get/set pc via CIA_GET/CIA_SET.  Pass sd to handle_trap1
+	and util.
+	(sim_trace, sim_stop, sim_load, sim_set_callbacks): Delete.
+	(sim_info): Get callback from SIM_DESC.
+	(free_state): New cleanup function.
+	(sim_open): Rewrite to use new common logic.
+	(sim_create_inferior): Get sim_cpu from sd.  Pass to set_initial_gprs
+	and set pc via CIA_SET.
+	* sim-main.h: New file.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
 	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT, and
 	SIM_AC_OPTION_INLINE.
