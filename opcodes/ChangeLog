@@ -1,3 +1,7 @@
+2015-03-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated.
+
 2015-03-25  Anton Blanchard  <anton@samba.org>
 
 	* ppc-dis.c (disassemble_init_powerpc): Only initialise
