@@ -1,5 +1,12 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
+	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT, and
+	SIM_AC_OPTION_INLINE.
+	* config.in, configure: Regenerate.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (heap_ptr, int_sbrk): Delete.
 	(handle_trap1): Change case 69 (sbrk) to always return -1.
 	(sim_load): Delete bss checks and heap_ptr setup.
