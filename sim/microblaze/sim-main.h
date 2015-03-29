@@ -1,6 +1,3 @@
-#ifndef MICROBLAZE_SIM_MAIN
-#define MICROBLAZE_SIM_MAIN
-
 /* Copyright 2009-2015 Free Software Foundation, Inc.
 
    This file is part of the Xilinx MicroBlaze simulator.
@@ -18,9 +15,19 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef MICROBLAZE_SIM_MAIN
+#define MICROBLAZE_SIM_MAIN
+
 #include "microblaze.h"
 #include "sim-basics.h"
+
 typedef address_word sim_cia;
+
+#define CIA_GET(cpu) (cpu)->microblaze_cpu.spregs[0]
+#define CIA_SET(cpu,val) (cpu)->microblaze_cpu.spregs[0] = (val)
+
+typedef struct _sim_cpu SIM_CPU;
+
 #include "sim-base.h"
 
 /* The machine state.
@@ -52,11 +59,16 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
-#define MAX_NR_PROCESSORS 1
 struct sim_state {
-  sim_cpu cpu[MAX_NR_PROCESSORS];
-#define STATE_CPU(sd, n) (&(sd)->cpu[0])
+
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
+#if (WITH_SMP)
+#define STATE_CPU(sd,n) ((sd)->cpu[n])
+#else
+#define STATE_CPU(sd,n) ((sd)->cpu[0])
+#endif
+
   sim_state_base base;
 };
-#endif /* MICROBLAZE_SIM_MAIN */
 
+#endif /* MICROBLAZE_SIM_MAIN */

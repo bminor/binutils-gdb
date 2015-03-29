@@ -1,5 +1,34 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_RUN_OBJS, SIM_EXTRA_CFLAGS, SIM_EXTRA_LIBS): Delete.
+	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
+	* interp.c: Drop sys/times.h, sys/param.h, run-sim.h, and sim-utils.h
+	includes.
+	(target_big_endian): Replace with CURRENT_TARGET_BYTE_ORDER.
+	(callback, microblaze_state, sim_kind, myname, sim_trace, sim_stop,
+	sim_load, sim_set_callbacks, sim_complete_command): Delete.
+	(wbat, wlat, what, rbat, rlat, rhat): Add SIM_CPU* as first arg.
+	(sim_size): Mark static and add SIM_CPU* as first arg.
+	(init_pointers): Add SIM_CPU* as first arg and pass to sim_size.
+	(set_initial_gprs): Add SIM_CPU* as first arg and pass to init_pointers.
+	(sim_resume): Add local cpu variable.  Pass it to rlat.
+	(sim_write, sim_read, sim_store_register, sim_fetch_register): Add local
+	cpu variable.  Pass it to init_pointers.
+	(sim_stop_reason, sim_do_command): Add local cpu variable.
+	(sim_info): Add local cpu and callback variables.
+	(free_state): New cleanup function.
+	(sim_open): Rewrite to use new common logic.
+	(sim_close): Delete body.
+	(sim_create_inferior): Delete call to set_initial_gprs.
+	* microblaze.h (CPU): Redefine using cpu.
+	(MEM_RD_BYTE, MEM_RD_HALF, MEM_RD_WORD, MEM_WR_BYTE, MEM_WR_HALF,
+	MEM_WR_WORD): Pass in cpu as first arg.
+	* sim-main.h (CIA_GET, CIA_SET, SIM_CPU): Define.
+	(MAX_NR_PROCESSORS): Delete.
+	(struct sim_state): Change cpu to *cpu, and rewrite STATE_CPU.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (NUM_ELEM, heap_ptr, stack_ptr, memcycles, struct aout,
 	LONG, SHORT): Delete.
 	[WATCHFUNCTIONS]: Delete.
