@@ -6,12 +6,11 @@
 	(libbfd_la_LIBADD): Add $(ZLIB).
 	* compress.c: Don't check HAVE_ZLIB_H to include <zlib.h>.
 	(decompress_contents): Don't check HAVE_ZLIB_H.
-	(decompress_contents): Likewise.
 	(bfd_compress_section_contents): Likewise.
 	(bfd_get_full_section_contents): Likewise.
 	(bfd_init_section_decompress_status): Likewise.
 	(bfd_init_section_compress_status): Likewise.
-	* configure.ac (AM_ZLIB): Removed
+	* configure.ac (AM_ZLIB): Removed.
 	(zlibdir): New.  AC_SUBST.
 	(zlibinc): Likewise.
 	Add --with-system-zlib.
