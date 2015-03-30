@@ -1,3 +1,8 @@
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_spawn_with_cmdline_opts): Append space to
+	GDBFLAGS if not empty.
+
 2015-04-01  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/complete.exp: Remove "multi_line".

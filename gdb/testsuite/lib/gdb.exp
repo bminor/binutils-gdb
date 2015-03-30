@@ -3423,6 +3423,9 @@ proc gdb_spawn_with_cmdline_opts { cmdline_flags } {
 
     set saved_gdbflags $GDBFLAGS
 
+    if {$GDBFLAGS != ""} {
+	append GDBFLAGS " "
+    }
     append GDBFLAGS $cmdline_flags
 
     set res [gdb_spawn]
