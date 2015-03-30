@@ -1,3 +1,19 @@
+2015-03-30  Jing Yu  <jingyu@google.com>
+
+	* aarch64-reloc.def: New TLSLD_ADD_DTPREL_HI12,
+	TLSLD_ADD_DTPREL_LO12_NC.
+	* aarch64.cc (Target_aarch64::define_tls_base_symbol): Always let
+	_TLS_MODULE_BASE_ point to the start of tls segment.
+	(Target_aarch64::optimize_tls_reloc): Add cases for
+	R_AARCH64_TLSLD_ADD_DTPREL_HI12 and
+	R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC.
+	(Target_aarch64::Scan::local): Likewise.
+	(Target_aarch64::Scan::global): Likewise.
+	(Target_aarch64::Relocate::relocate): Likewise.
+	(Target_aarch64::Relocate::relocate_tls): Likewise. And remove
+	subtracting tls segment size from symbol value for TLSLD_*_DTPREL
+	relocations.
+
 2015-03-27  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* merge.cc (Object_merge_map::add_mapping): call

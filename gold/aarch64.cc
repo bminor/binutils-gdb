@@ -4446,16 +4446,14 @@ Target_aarch64<size, big_endian>::define_tls_base_symbol(
   Output_segment* tls_segment = layout->tls_segment();
   if (tls_segment != NULL)
     {
-      bool is_exec = parameters->options().output_is_executable();
+      // _TLS_MODULE_BASE_ always points to the beginning of tls segment.
       symtab->define_in_output_segment("_TLS_MODULE_BASE_", NULL,
 				       Symbol_table::PREDEFINED,
 				       tls_segment, 0, 0,
 				       elfcpp::STT_TLS,
 				       elfcpp::STB_LOCAL,
 				       elfcpp::STV_HIDDEN, 0,
-				       (is_exec
-					? Symbol::SEGMENT_END
-					: Symbol::SEGMENT_START),
+				       Symbol::SEGMENT_START,
 				       true);
     }
   this->tls_base_symbol_defined_ = true;
@@ -4546,6 +4544,8 @@ Target_aarch64<size, big_endian>::optimize_tls_reloc(bool is_final,
     case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
       // These are Local-Dynamic, which refer to local symbols in the
       // dynamic TLS block. Since we know that we generating an
       // executable, we can switch to Local-Exec.
@@ -4894,6 +4894,8 @@ Target_aarch64<size, big_endian>::Scan::local(
 
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
       break;
 
     case elfcpp::R_AARCH64_TLSDESC_ADR_PAGE21:
@@ -5218,7 +5220,9 @@ Target_aarch64<size, big_endian>::Scan::global(
       break;
 
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
-    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:  // Other local dynamic
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:  // Other local dynamic
       break;
 
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
@@ -5784,6 +5788,8 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
@@ -5981,7 +5987,9 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
       break;
 
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
-    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:  // Other local-dynamic
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:  // Other local-dynamic
       {
 	AArch64_address value = psymval->value(object, 0);
 	if (tlsopt == tls::TLSOPT_TO_LE)
@@ -5992,9 +6000,6 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 			    || issue_undefined_symbol_error(gsym));
 		return aarch64_reloc_funcs::STATUS_BAD_RELOC;
 	      }
-	  // If building executable, _TLS_MODULE_BASE_ points to segment
-	  // end. Thus we must subtract it from value.
-	  value -= tls_segment->memsz();
 	  }
 	switch (r_type)
 	  {
@@ -6004,6 +6009,8 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 	    break;
 
 	  case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+	  case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+	  case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
 	    return aarch64_reloc_funcs::template rela_general<32>(
 		view, value, addend, reloc_property);
 	    break;
