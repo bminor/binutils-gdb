@@ -36,12 +36,7 @@ static char *myname;
 static SIM_OPEN_KIND sim_kind;
 int cr16_debug;
 
-/* Set this to true to get the previous segment layout. */
-
-int old_segment_mapping;
-
 host_callback *cr16_callback;
-unsigned long ins_type_counters[ (int)INS_MAX ];
 
 uint32 OP[4];
 uint32 sign_flag;
@@ -426,28 +421,6 @@ do_run(uint64 mcode)
   return h->size;
 }
 
-#if 0
-static char *
-add_commas(char *buf, int sizeof_buf, unsigned long value)
-{
-  int comma = 3;
-  char *endbuf = buf + sizeof_buf - 1;
-
-  *--endbuf = '\0';
-  do {
-    if (comma-- == 0)
-      {
-        *--endbuf = ',';
-        comma = 2;
-      }
-
-    *--endbuf = (value % 10) + '0';
-  } while ((value /= 10) != 0);
-
-  return endbuf;
-}
-#endif
-
 void
 sim_size (int power)
 {
@@ -485,23 +458,6 @@ enum
     DMAP2_OFFSET = 0xff0c
   };
 
-#if 0
-static void
-set_dmap_register (int reg_nr, unsigned long value)
-{
-  uint8 *raw = map_memory (SIM_CR16_MEMORY_DATA
-                           + DMAP0_OFFSET + 2 * reg_nr);
-  WRITE_16 (raw, value);
-#ifdef DEBUG
-  if ((cr16_debug & DEBUG_MEMORY))
-    {
-      (*cr16_callback->printf_filtered)
-        (cr16_callback, "mem: dmap%d=0x%04lx\n", reg_nr, value);
-    }
-#endif
-}
-#endif
-
 static unsigned long
 dmap_register (void *regcache, int reg_nr)
 {
@@ -510,23 +466,6 @@ dmap_register (void *regcache, int reg_nr)
   return READ_16 (raw);
 }
 
-#if 0
-static void
-set_imap_register (int reg_nr, unsigned long value)
-{
-  uint8 *raw = map_memory (SIM_CR16_MEMORY_DATA
-                           + IMAP0_OFFSET + 2 * reg_nr);
-  WRITE_16 (raw, value);
-#ifdef DEBUG
-  if ((cr16_debug & DEBUG_MEMORY))
-    {
-      (*cr16_callback->printf_filtered)
-        (cr16_callback, "mem: imap%d=0x%04lx\n", reg_nr, value);
-    }
-#endif
-}
-#endif
-
 static unsigned long
 imap_register (void *regcache, int reg_nr)
 {
@@ -534,38 +473,6 @@ imap_register (void *regcache, int reg_nr)
                            + IMAP0_OFFSET + 2 * reg_nr);
   return READ_16 (raw);
 }
-
-#if 0
-enum
-  {
-    HELD_SPI_IDX = 0,
-    HELD_SPU_IDX = 1
-  };
-
-static unsigned long
-spu_register (void)
-{
-    return GPR (SP_IDX);
-}
-
-static unsigned long
-spi_register (void)
-{
-    return GPR (SP_IDX);
-}
-
-static void
-set_spi_register (unsigned long value)
-{
-    SET_GPR (SP_IDX, value);
-}
-
-static void
-set_spu_register  (unsigned long value)
-{
-    SET_GPR (SP_IDX, value);
-}
-#endif
 
 /* Given a virtual address in the DMAP address space, translate it
    into a physical address. */
@@ -703,31 +610,6 @@ sim_cr16_translate_addr (unsigned long memaddr, int nr_bytes,
 
   seg = (memaddr >> 24);
   off = (memaddr & 0xffffffL);
-
-  /* However, if we've asked to use the previous generation of segment
-     mapping, rearrange the segments as follows. */
-
-  if (old_segment_mapping)
-    {
-      switch (seg)
-        {
-        case 0x00: /* DMAP translated memory */
-          seg = 0x10;
-          break;
-        case 0x01: /* IMAP translated memory */
-          seg = 0x11;
-          break;
-        case 0x10: /* On-chip data memory */
-          seg = 0x02;
-          break;
-        case 0x11: /* On-chip insn memory */
-          seg = 0x01;
-          break;
-        case 0x12: /* Unified memory */
-          seg = 0x00;
-          break;
-        }
-    }
 
   switch (seg)
     {
@@ -916,27 +798,7 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback, struct bfd 
   sim_kind = kind;
   cr16_callback = callback;
   myname = argv[0];
-  old_segment_mapping = 0;
 
-  /* NOTE: This argument parsing is only effective when this function
-     is called by GDB. Standalone argument parsing is handled by
-     sim/common/run.c. */
-#if 0
-  for (p = argv + 1; *p; ++p)
-    {
-      if (strcmp (*p, "-oldseg") == 0)
-        old_segment_mapping = 1;
-#ifdef DEBUG
-      else if (strcmp (*p, "-t") == 0)
-        cr16_debug = DEBUG;
-      else if (strncmp (*p, "-t", 2) == 0)
-        cr16_debug = atoi (*p + 2);
-#endif
-      else
-        (*cr16_callback->printf_filtered) (cr16_callback, "ERROR: unsupported option(s): %s\n",*p);
-    }
-#endif
-  
   /* put all the opcodes in the hash table.  */
   if (!init_p++)
     {
@@ -1259,106 +1121,6 @@ sim_set_trace (void)
 void
 sim_info (SIM_DESC sd, int verbose)
 {
-  char buf1[40];
-  char buf2[40];
-  char buf3[40];
-  char buf4[40];
-  char buf5[40];
-#if 0
-  unsigned long left                = ins_type_counters[ (int)INS_LEFT ] + ins_type_counters[ (int)INS_LEFT_COND_EXE ];
-  unsigned long left_nops        = ins_type_counters[ (int)INS_LEFT_NOPS ];
-  unsigned long left_parallel        = ins_type_counters[ (int)INS_LEFT_PARALLEL ];
-  unsigned long left_cond        = ins_type_counters[ (int)INS_LEFT_COND_TEST ];
-  unsigned long left_total        = left + left_parallel + left_cond + left_nops;
-
-  unsigned long right                = ins_type_counters[ (int)INS_RIGHT ] + ins_type_counters[ (int)INS_RIGHT_COND_EXE ];
-  unsigned long right_nops        = ins_type_counters[ (int)INS_RIGHT_NOPS ];
-  unsigned long right_parallel        = ins_type_counters[ (int)INS_RIGHT_PARALLEL ];
-  unsigned long right_cond        = ins_type_counters[ (int)INS_RIGHT_COND_TEST ];
-  unsigned long right_total        = right + right_parallel + right_cond + right_nops;
-
-  unsigned long unknown                = ins_type_counters[ (int)INS_UNKNOWN ];
-  unsigned long ins_long        = ins_type_counters[ (int)INS_LONG ];
-  unsigned long parallel        = ins_type_counters[ (int)INS_PARALLEL ];
-  unsigned long leftright        = ins_type_counters[ (int)INS_LEFTRIGHT ];
-  unsigned long rightleft        = ins_type_counters[ (int)INS_RIGHTLEFT ];
-  unsigned long cond_true        = ins_type_counters[ (int)INS_COND_TRUE ];
-  unsigned long cond_false        = ins_type_counters[ (int)INS_COND_FALSE ];
-  unsigned long cond_jump        = ins_type_counters[ (int)INS_COND_JUMP ];
-  unsigned long cycles                = ins_type_counters[ (int)INS_CYCLES ];
-  unsigned long total                = (unknown + left_total + right_total + ins_long);
-
-  int size                        = strlen (add_commas (buf1, sizeof (buf1), total));
-  int parallel_size                = strlen (add_commas (buf1, sizeof (buf1),
-                                                      (left_parallel > right_parallel) ? left_parallel : right_parallel));
-  int cond_size                        = strlen (add_commas (buf1, sizeof (buf1), (left_cond > right_cond) ? left_cond : right_cond));
-  int nop_size                        = strlen (add_commas (buf1, sizeof (buf1), (left_nops > right_nops) ? left_nops : right_nops));
-  int normal_size                = strlen (add_commas (buf1, sizeof (buf1), (left > right) ? left : right));
-
-  (*cr16_callback->printf_filtered) (cr16_callback,
-                                     "executed %*s left  instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
-                                     size, add_commas (buf1, sizeof (buf1), left_total),
-                                     normal_size, add_commas (buf2, sizeof (buf2), left),
-                                     parallel_size, add_commas (buf3, sizeof (buf3), left_parallel),
-                                     cond_size, add_commas (buf4, sizeof (buf4), left_cond),
-                                     nop_size, add_commas (buf5, sizeof (buf5), left_nops));
-
-  (*cr16_callback->printf_filtered) (cr16_callback,
-                                     "executed %*s right instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
-                                     size, add_commas (buf1, sizeof (buf1), right_total),
-                                     normal_size, add_commas (buf2, sizeof (buf2), right),
-                                     parallel_size, add_commas (buf3, sizeof (buf3), right_parallel),
-                                     cond_size, add_commas (buf4, sizeof (buf4), right_cond),
-                                     nop_size, add_commas (buf5, sizeof (buf5), right_nops));
-
-  if (ins_long)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "executed %*s long instruction(s)\n",
-                                       size, add_commas (buf1, sizeof (buf1), ins_long));
-
-  if (parallel)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "executed %*s parallel instruction(s)\n",
-                                       size, add_commas (buf1, sizeof (buf1), parallel));
-
-  if (leftright)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "executed %*s instruction(s) encoded L->R\n",
-                                       size, add_commas (buf1, sizeof (buf1), leftright));
-
-  if (rightleft)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "executed %*s instruction(s) encoded R->L\n",
-                                       size, add_commas (buf1, sizeof (buf1), rightleft));
-
-  if (unknown)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "executed %*s unknown instruction(s)\n",
-                                       size, add_commas (buf1, sizeof (buf1), unknown));
-
-  if (cond_true)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "executed %*s instruction(s) due to EXExxx condition being true\n",
-                                       size, add_commas (buf1, sizeof (buf1), cond_true));
-
-  if (cond_false)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "skipped  %*s instruction(s) due to EXExxx condition being false\n",
-                                       size, add_commas (buf1, sizeof (buf1), cond_false));
-
-  if (cond_jump)
-    (*cr16_callback->printf_filtered) (cr16_callback,
-                                       "skipped  %*s instruction(s) due to conditional branch succeeding\n",
-                                       size, add_commas (buf1, sizeof (buf1), cond_jump));
-
-  (*cr16_callback->printf_filtered) (cr16_callback,
-                                     "executed %*s cycle(s)\n",
-                                     size, add_commas (buf1, sizeof (buf1), cycles));
-
-  (*cr16_callback->printf_filtered) (cr16_callback,
-                                     "executed %*s total instructions\n",
-                                     size, add_commas (buf1, sizeof (buf1), total));
-#endif
 }
 
 SIM_RC

@@ -1,5 +1,15 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (old_segment_mapping, ins_type_counters, add_commas,
+	set_dmap_register, set_imap_register, HELD_SPI_IDX, HELD_SPU_IDX,
+	spu_register, spi_register, set_spi_register, set_spu_register):
+	Delete.
+	(sim_cr16_translate_addr): Delete old_segment_mapping handling.
+	(sim_open): Likewise.
+	(sim_info): Delete function body.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (gencode.o, cr16-opc.o): Add $(WARN_CFLAGS).
 	(gencode): Add $(BUILD_LDFLAGS).
 	* endian.c (get_word, get_longword, get_longlong, write_word,
