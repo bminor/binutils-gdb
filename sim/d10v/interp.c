@@ -1,8 +1,10 @@
 #include "config.h"
+#include <inttypes.h>
 #include <signal.h>
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
+#include "run-sim.h"
 
 #include "d10v_sim.h"
 #include "gdb/sim-d10v.h"
@@ -86,9 +88,7 @@ struct hash_entry
 struct hash_entry hash_table[MAX_HASH+1];
 
 INLINE static long 
-hash(insn, format)
-     long insn;
-     int format;
+hash (long insn, int format)
 {
   if (format & LONG_OPCODE)
     return ((insn & 0x3F000000) >> 24);
@@ -97,9 +97,7 @@ hash(insn, format)
 }
 
 INLINE static struct hash_entry *
-lookup_hash (ins, size)
-     uint32 ins;
-     int size;
+lookup_hash (uint32 ins, int size)
 {
   struct hash_entry *h;
 
@@ -140,7 +138,7 @@ get_operands (struct simops *s, uint32 ins)
 }
 
 bfd_vma
-decode_pc ()
+decode_pc (void)
 {
   asection *s;
   if (!init_text_p && prog_bfd != NULL)
@@ -160,8 +158,7 @@ decode_pc ()
 }
 
 static void
-do_long (ins)
-     uint32 ins;
+do_long (uint32 ins)
 {
   struct hash_entry *h;
 #ifdef DEBUG
@@ -178,9 +175,7 @@ do_long (ins)
 }
 
 static void
-do_2_short (ins1, ins2, leftright)
-     uint16 ins1, ins2;
-     enum _leftright leftright;
+do_2_short (uint16 ins1, uint16 ins2, enum _leftright leftright)
 {
   struct hash_entry *h;
   enum _ins_type first, second;
@@ -232,8 +227,7 @@ do_2_short (ins1, ins2, leftright)
 }
 
 static void
-do_parallel (ins1, ins2)
-     uint16 ins1, ins2;
+do_parallel (uint16 ins1, uint16 ins2)
 {
   struct hash_entry *h1, *h2;
 #ifdef DEBUG
@@ -299,10 +293,7 @@ do_parallel (ins1, ins2)
 }
  
 static char *
-add_commas(buf, sizeof_buf, value)
-     char *buf;
-     int sizeof_buf;
-     unsigned long value;
+add_commas (char *buf, int sizeof_buf, unsigned long value)
 {
   int comma = 3;
   char *endbuf = buf + sizeof_buf - 1;
@@ -322,9 +313,7 @@ add_commas(buf, sizeof_buf, value)
 }
 
 void
-sim_size (power)
-     int power;
-
+sim_size (int power)
 {
   int i;
   for (i = 0; i < IMEM_SEGMENTS; i++)
@@ -770,22 +759,14 @@ xfer_mem (SIM_ADDR virt,
 
 
 int
-sim_write (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     const unsigned char *buffer;
-     int size;
+sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
   return xfer_mem( addr, buffer, size, 1);
 }
 
 int
-sim_read (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
   return xfer_mem( addr, buffer, size, 0);
@@ -793,11 +774,7 @@ sim_read (sd, addr, buffer, size)
 
 
 SIM_DESC
-sim_open (kind, callback, abfd, argv)
-     SIM_OPEN_KIND kind;
-     host_callback *callback;
-     struct bfd *abfd;
-     char **argv;
+sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd, char **argv)
 {
   struct simops *s;
   struct hash_entry *h;
@@ -863,9 +840,7 @@ sim_open (kind, callback, abfd, argv)
 
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
   if (prog_bfd != NULL && prog_bfd_was_opened_p)
     {
@@ -876,15 +851,13 @@ sim_close (sd, quitting)
 }
 
 void
-sim_set_profile (n)
-     int n;
+sim_set_profile (int n)
 {
   (*d10v_callback->printf_filtered) (d10v_callback, "sim_set_profile %d\n",n);
 }
 
 void
-sim_set_profile_size (n)
-     int n;
+sim_set_profile_size (int n)
 {
   (*d10v_callback->printf_filtered) (d10v_callback, "sim_set_profile_size %d\n",n);
 }
@@ -951,8 +924,7 @@ imem_addr (uint32 offset)
 static int stop_simulator = 0;
 
 int
-sim_stop (sd)
-     SIM_DESC sd;
+sim_stop (SIM_DESC sd)
 {
   stop_simulator = 1;
   return 1;
@@ -961,9 +933,7 @@ sim_stop (sd)
 
 /* Run (or resume) the program.  */
 void
-sim_resume (sd, step, siggnal)
-     SIM_DESC sd;
-     int step, siggnal;
+sim_resume (SIM_DESC sd, int step, int siggnal)
 {
   uint32 inst;
   uint8 *iaddr;
@@ -1096,9 +1066,7 @@ sim_set_trace (void)
 }
 
 void
-sim_info (sd, verbose)
-     SIM_DESC sd;
-     int verbose;
+sim_info (SIM_DESC sd, int verbose)
 {
   char buf1[40];
   char buf2[40];
@@ -1201,16 +1169,12 @@ sim_info (sd, verbose)
 }
 
 SIM_RC
-sim_create_inferior (sd, abfd, argv, env)
-     SIM_DESC sd;
-     struct bfd *abfd;
-     char **argv;
-     char **env;
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {
   bfd_vma start_address;
 
   /* reset all state information */
-  memset (&State.regs, 0, (int)&State.mem - (int)&State.regs);
+  memset (&State.regs, 0, (uintptr_t)&State.mem - (uintptr_t)&State.regs);
 
   /* There was a hack here to copy the values of argc and argv into r0
      and r1.  The values were also saved into some high memory that
@@ -1262,8 +1226,7 @@ sim_create_inferior (sd, abfd, argv, env)
 
 
 void
-sim_set_callbacks (p)
-     host_callback *p;
+sim_set_callbacks (host_callback *p)
 {
   d10v_callback = p;
 }
@@ -1277,10 +1240,7 @@ sim_trace (SIM_DESC sd)
 }
 
 void
-sim_stop_reason (sd, reason, sigrc)
-     SIM_DESC sd;
-     enum sim_stop *reason;
-     int *sigrc;
+sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
 /*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_stop_reason:  PC=0x%x\n",PC<<2); */
 
@@ -1314,11 +1274,7 @@ sim_stop_reason (sd, reason, sigrc)
 }
 
 int
-sim_fetch_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   int size;
   switch ((enum sim_d10v_regs) rn)
@@ -1401,11 +1357,7 @@ sim_fetch_register (sd, rn, memory, length)
 }
  
 int
-sim_store_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   int size;
   switch ((enum sim_d10v_regs) rn)
@@ -1488,19 +1440,13 @@ sim_store_register (sd, rn, memory, length)
 
 
 void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     const char *cmd;
+sim_do_command (SIM_DESC sd, const char *cmd)
 { 
   (*d10v_callback->printf_filtered) (d10v_callback, "sim_do_command: %s\n",cmd);
 }
 
 SIM_RC
-sim_load (sd, prog, abfd, from_tty)
-     SIM_DESC sd;
-     const char *prog;
-     bfd *abfd;
-     int from_tty;
+sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 {
   extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
 

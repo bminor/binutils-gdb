@@ -1,5 +1,30 @@
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (gencode.o, d10v-opc.o): Add $(WARN_CFLAGS).
+	(gencode): Add $(BUILD_LDFLAGS).
+	* endian.c (get_word, get_longword, get_longlong, write_word,
+	write_longword, write_longlong): Convert old style prototypes.
+	* gencode.c: Include string.h.
+	(main): Convert old style prototype.
+	(write_header): Convert old style prototype and fix printf format.
+	(write_template, write_opcodes): Likewise.
+	(check_opcodes): Mark static void.
+	* interp.c: Include inttypes.h and run-sim.h.
+	(hash, lookup_hash, decode_pc, do_long, do_2_short, do_parallel,
+	add_commas, sim_size, sim_write, sim_read, sim_open, sim_close,
+	sim_set_profile, sim_set_profile_size, sim_stop, +sim_resume,
+	sim_info, sim_set_callbacks, sim_stop_reason, sim_fetch_register,
+	sim_store_register, sim_do_command, sim_load): Convert old style
+	prototypes.
+	(sim_create_inferior): Fix pointer cast to use uintptr_t.
+	* simops.c (strrchr): Delete prototype.
+	(trace_input_func): Mark name static.
+	(trace_input_func, trace_output_void, trace_output_flag): Convert old style
+	prototypes.
+	(OP_*): Convert old style prototypes.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (interp.o, simops.o, endian.o, table.o): Delete rules.
 	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
 	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT, and
