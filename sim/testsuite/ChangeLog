@@ -1,3 +1,8 @@
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Add d10v-*-elf.
+	* configure: Regenerate.
+
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* lib/sim-defs.exp (run_sim_test): Declare seen_output as 0.  When

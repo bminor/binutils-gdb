@@ -614,7 +614,8 @@ enable_option_checking
       ac_precious_vars='build_alias
 host_alias
 target_alias'
-ac_subdirs_all='frv-elf
+ac_subdirs_all='d10v-elf
+frv-elf
 m32r-elf
 mips64el-elf'
 
@@ -1792,10 +1793,14 @@ test -n "$target_alias" &&
 
 # Configure sub-directory for appropriate targets
 case ${target} in
+    d10v-*-elf )
+
+
+subdirs="$subdirs d10v-elf"
+
+	;;
     frv-*-elf )
-
-
-subdirs="$subdirs frv-elf"
+	subdirs="$subdirs frv-elf"
 
 	;;
     m32r-*-elf )
