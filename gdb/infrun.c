@@ -2084,11 +2084,14 @@ resume (enum gdb_signal sig)
      This can decay from a step to a continue, if e.g., we need to
      implement single-stepping with breakpoints (software
      single-step).  */
-  int step = currently_stepping (tp);
+  int step;
 
   tp->stepped_breakpoint = 0;
 
   QUIT;
+
+  /* Depends on stepped_breakpoint.  */
+  step = currently_stepping (tp);
 
   if (current_inferior ()->waiting_for_vfork_done)
     {

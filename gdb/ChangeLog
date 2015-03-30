@@ -1,5 +1,10 @@
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume): Check currently_stepping after clearing
+	stepped_breakpoint, not before.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (print_target_wait_results): Print all the ptid
 	elements.
 
