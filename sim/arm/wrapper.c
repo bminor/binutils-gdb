@@ -52,9 +52,6 @@ static char *myname;
 /* Memory size in bytes.  */
 static int mem_size = (1 << 21);
 
-/* Non-zero to display start up banner, and maybe other things.  */
-static int verbosity;
-
 /* Non-zero to set big endian mode.  */
 static int big_endian;
 
@@ -152,20 +149,9 @@ init (void)
       state->bigendSig = (big_endian ? HIGH : LOW);
       ARMul_MemoryInit (state, mem_size);
       ARMul_OSInit (state);
-      state->verbose = verbosity;
+      state->verbose = 0;
       done = 1;
     }
-}
-
-/* Set verbosity level of simulator.
-   This is not intended to produce detailed tracing or debugging information.
-   Just summaries.  */
-/* FIXME: common/run.c doesn't do this yet.  */
-
-void
-sim_set_verbose (int v)
-{
-  verbosity = v;
 }
 
 /* Set the memory size to SIZE bytes.

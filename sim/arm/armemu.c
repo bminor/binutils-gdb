@@ -272,6 +272,7 @@ extern int stop_simulator;
 /* Attempt to emulate an ARMv6 instruction.
    Returns non-zero upon success.  */
 
+#ifdef MODE32
 static int
 handle_v6_insn (ARMul_State * state, ARMword instr)
 {
@@ -473,6 +474,7 @@ handle_v6_insn (ARMul_State * state, ARMword instr)
   printf ("Unhandled v6 insn: UNKNOWN: %08x\n", instr);
   return 0;
 }
+#endif
 
 /* EMULATION of ARM6.  */
 
@@ -817,10 +819,11 @@ ARMul_Emulate26 (ARMul_State * state)
 	      else
 		{
 		  ARMword cp14r1;
-		  int do_int = 0;
+		  int do_int;
 
 		  state->CP14R0_CCD = -1;
 check_PMUintr:
+		  do_int = 0;
 		  cp14r0 |= ARMul_CP14_R0_FLAG2;
 		  (void) state->CPWrite[14] (state, 0, cp14r0);
 

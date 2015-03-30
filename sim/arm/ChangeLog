@@ -1,5 +1,24 @@
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* armemu.c [MODE32] (handle_v6_insn): Move definition.
+	(ARMul_Emulate26): Initialize do_int after label target.
+	* armemu.h (UNDEF_Test, UNDEF_Shift, UNDEF_MSRPC, UNDEF_MRSPC,
+	UNDEF_MULPCDest, UNDEF_MULDestEQOp1, UNDEF_LSRBPC,
+	UNDEF_LSRBaseEQOffWb, UNDEF_LSRBaseEQDestWb, UNDEF_LSRPCBaseWb,
+	UNDEF_LSRPCOffWb, UNDEF_LSMNoRegs, UNDEF_LSMPCBase,
+	UNDEF_LSMUserBankWb, UNDEF_LSMBaseInListWb, UNDEF_SWPPC,
+	UNDEF_CoProHS, UNDEF_MCRPC, UNDEF_LSCPCBaseWb,
+	UNDEF_UndefNotBounced, UNDEF_ShortInt, UNDEF_IllegalMode,
+	UNDEF_Prog32SigChange, UNDEF_Data32SigChange): Define to while(0).
+	* armsupp.c (ARMul_Align): Convert old style prototype.
+	* bag.c (addtolist, killwholelist): Mark static.
+	(BAG_newbag): Convert old style prototype.
+	* maverick.c (mv_compute_host_endianness): Delete.
+	* wrapper.c (verbosity, sim_set_verbose): Delete.
+	(init): Set state->verbose to 0.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
 	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT,
 	SIM_AC_OPTION_INLINE, and SIM_AC_OPTION_WARNINGS.
