@@ -1,5 +1,12 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_EXTRA_CFLAGS): Delete -DNEED_UI_LOOP_HOOK.
+	* interp.c [NEED_UI_LOOP_HOOK] (UI_LOOP_POLL_INTERVAL,
+	ui_loop_hook_counter, deprecated_ui_loop_hook): Delete.
+	(sim_resume) [NEED_UI_LOOP_HOOK]: Delete ui code.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (old_segment_mapping, ins_type_counters, add_commas,
 	set_dmap_register, set_imap_register, HELD_SPI_IDX, HELD_SPU_IDX,
 	spu_register, spi_register, set_spi_register, set_spu_register):
