@@ -25,15 +25,14 @@
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
-#include "run-sim.h"
 
-#include "cr16_sim.h"
+#include "sim-main.h"
+#include "sim-options.h"
+
 #include "gdb/sim-cr16.h"
 #include "gdb/signals.h"
 #include "opcode/cr16.h"
 
-static char *myname;
-static SIM_OPEN_KIND sim_kind;
 int cr16_debug;
 
 host_callback *cr16_callback;
@@ -41,28 +40,12 @@ host_callback *cr16_callback;
 uint32 OP[4];
 uint32 sign_flag;
 
-static int init_text_p = 0;
-/* non-zero if we opened prog_bfd */
-static int prog_bfd_was_opened_p;
-bfd *prog_bfd;
-asection *text;
-bfd_vma text_start;
-bfd_vma text_end;
-
 static struct hash_entry *lookup_hash (uint64 ins, int size);
 static void get_operands (operand_desc *s, uint64 mcode, int isize, int nops);
-static int do_run (uint64 mc);
 extern void sim_set_profile (int n);
 extern void sim_set_profile_size (int n);
 static INLINE uint8 *map_memory (unsigned phys_addr);
 
-#ifndef INLINE
-#if defined(__GNUC__) && defined(__OPTIMIZE__)
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-#endif
 #define MAX_HASH  16
 
 struct hash_entry
@@ -347,31 +330,10 @@ get_operands (operand_desc *s, uint64 ins, int isize, int nops)
   State.trace.psw = PSR;
 }
 
-bfd_vma
-decode_pc (void)
-{
-  asection *s;
-  if (!init_text_p && prog_bfd != NULL)
-    {
-      init_text_p = 1;
-      for (s = prog_bfd->sections; s; s = s->next)
-        if (strcmp (bfd_get_section_name (prog_bfd, s), ".text") == 0)
-          {
-            text = s;
-            text_start = bfd_get_section_vma (prog_bfd, s);
-            text_end = text_start + bfd_section_size (prog_bfd, s);
-            break;
-           }
-     }
-
-  return (PC) + text_start;
-}
-
-
-
 static int
-do_run(uint64 mcode)
+do_run (SIM_DESC sd, uint64 mcode)
 {
+  host_callback *cr16_callback = STATE_CALLBACK (sd);
   struct simops *s= Simops;
   struct hash_entry *h;
   char func[12]="\0";
@@ -410,7 +372,7 @@ do_run(uint64 mcode)
   return h->size;
 }
 
-void
+static void
 sim_size (int power)
 {
   int i;
@@ -721,11 +683,12 @@ map_memory (unsigned phys_addr)
    than aborting the entire run. */
 
 static int
-xfer_mem (SIM_ADDR virt,
+xfer_mem (SIM_DESC sd, SIM_ADDR virt,
           unsigned char *buffer,
           int size,
           int write_p)
 {
+  host_callback *cr16_callback = STATE_CALLBACK (sd);
   uint8 *memory;
   unsigned long phys;
   int phys_size;
@@ -766,27 +729,88 @@ int
 sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem( addr, buffer, size, 1);
+  return xfer_mem (sd, addr, buffer, size, 1);
 }
 
 int
 sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem( addr, buffer, size, 0);
+  return xfer_mem (sd, addr, buffer, size, 0);
 }
 
+static void
+free_state (SIM_DESC sd)
+{
+  if (STATE_MODULES (sd) != NULL)
+    sim_module_uninstall (sd);
+  sim_cpu_free_all (sd);
+  sim_state_free (sd);
+}
+
+SIM_DESC trace_sd = NULL;
+
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback, struct bfd *abfd, char **argv)
+sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd, char **argv)
 {
   struct simops *s;
   struct hash_entry *h;
   static int init_p = 0;
   char **p;
+  int i;
+  SIM_DESC sd = sim_state_alloc (kind, cb);
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
-  sim_kind = kind;
-  cr16_callback = callback;
-  myname = argv[0];
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* getopt will print the error message so we just have to exit if this fails.
+     FIXME: Hmmm...  in the case of gdb we need getopt to call
+     print_filtered.  */
+  if (sim_parse_args (sd, argv) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Check for/establish the a reference program image.  */
+  if (sim_analyze_program (sd,
+			   (STATE_PROG_ARGV (sd) != NULL
+			    ? *STATE_PROG_ARGV (sd)
+			    : NULL), abfd) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Configure/verify the target byte order and other runtime
+     configuration options.  */
+  if (sim_config (sd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  trace_sd = sd;
+  cr16_callback = cb;
 
   /* put all the opcodes in the hash table.  */
   if (!init_p++)
@@ -899,32 +923,14 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback, struct bfd 
     sim_size (1);
   sim_create_inferior ((SIM_DESC) 1, NULL, NULL, NULL);
 
-  /* Fudge our descriptor.  */
-  return (SIM_DESC) 1;
+  return sd;
 }
 
 
 void
 sim_close (SIM_DESC sd, int quitting)
 {
-  if (prog_bfd != NULL && prog_bfd_was_opened_p)
-    {
-      bfd_close (prog_bfd);
-      prog_bfd = NULL;
-      prog_bfd_was_opened_p = 0;
-    }
-}
-
-void
-sim_set_profile (int n)
-{
-  (*cr16_callback->printf_filtered) (cr16_callback, "sim_set_profile %d\n",n);
-}
-
-void
-sim_set_profile_size (int n)
-{
-  (*cr16_callback->printf_filtered) (cr16_callback, "sim_set_profile_size %d\n",n);
+  /* Nothing to do.  */
 }
 
 uint8 *
@@ -1054,7 +1060,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
  
       State.pc_changed = 0;
       
-      curr_ins_size = do_run(mcode);
+      curr_ins_size = do_run(sd, mcode);
 
 #if CR16_DEBUG
  (*cr16_callback->printf_filtered) (cr16_callback, "INS: PC=0x%X, mcode=0x%X\n",PC,mcode); 
@@ -1091,19 +1097,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
     State.exception = SIGTRAP;
 }
 
-void
-sim_set_trace (void)
-{
-#ifdef DEBUG
-  cr16_debug = DEBUG;
-#endif
-}
-
-void
-sim_info (SIM_DESC sd, int verbose)
-{
-}
-
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {
@@ -1133,21 +1126,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 
   SLOT_FLUSH ();
   return SIM_RC_OK;
-}
-
-
-void
-sim_set_callbacks (host_callback *p)
-{
-  cr16_callback = p;
-}
-
-int
-sim_trace (SIM_DESC sd)
-{
-  sim_resume (sd, 0, 0);
-
-  return 1;
 }
 
 void
@@ -1289,34 +1267,3 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   SLOT_FLUSH ();
   return size;
 }
-
-char **
-sim_complete_command (SIM_DESC sd, const char *text, const char *word)
-{
-  return NULL;
-}
-
-void
-sim_do_command (SIM_DESC sd, const char *cmd)
-{ 
-  (*cr16_callback->printf_filtered) (cr16_callback, "sim_do_command: %s\n",cmd);
-}
-
-SIM_RC
-sim_load (SIM_DESC sd, const char *prog, struct bfd *abfd, int from_tty)
-{
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
-
-  if (prog_bfd != NULL && prog_bfd_was_opened_p)
-    {
-      bfd_close (prog_bfd);
-      prog_bfd_was_opened_p = 0;
-    }
-  prog_bfd = sim_load_file (sd, myname, cr16_callback, prog, abfd,
-                            sim_kind == SIM_OPEN_DEBUG,
-                            1/*LMA*/, sim_write);
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-  prog_bfd_was_opened_p = abfd == NULL;
-  return SIM_RC_OK;
-} 

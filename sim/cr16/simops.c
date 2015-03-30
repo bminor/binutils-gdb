@@ -37,7 +37,7 @@
 #include <sys/time.h>
 #endif
 
-#include "cr16_sim.h"
+#include "sim-main.h"
 #include "simops.h"
 #include "targ-vals.h"
 
@@ -264,14 +264,21 @@ trace_input_func (const char *name, enum op_types in1, enum op_types in2, enum o
 
   else
     {
+      extern SIM_DESC trace_sd;
+
       buf[0] = '\0';
-      byte_pc = decode_pc ();
-      if (text && byte_pc >= text_start && byte_pc < text_end)
+      byte_pc = PC;
+      if (STATE_TEXT_SECTION (trace_sd)
+	  && byte_pc >= STATE_TEXT_START (trace_sd)
+	  && byte_pc < STATE_TEXT_END (trace_sd))
 	{
 	  filename = (const char *)0;
 	  functionname = (const char *)0;
 	  linenumber = 0;
-	  if (bfd_find_nearest_line (prog_bfd, text, (struct bfd_symbol **)0, byte_pc - text_start,
+	  if (bfd_find_nearest_line (STATE_PROG_BFD (trace_sd),
+				     STATE_TEXT_SECTION (trace_sd),
+				     (struct bfd_symbol **)0,
+				     byte_pc - STATE_TEXT_START (trace_sd),
 				     &filename, &functionname, &linenumber))
 	    {
 	      p = buf;
