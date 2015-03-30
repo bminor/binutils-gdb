@@ -1,5 +1,25 @@
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+	(SIM_EXTRA_CFLAGS): Delete -DSIM_TARGET_SWITCHES and
+	-DSIM_USE_DEPRECATED_RUN_FRONTEND.
+	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
+	* sim-main.h: New file.
+	* wrapper.c: Delete armdefs.h, sim-utils.h, and run-sim.h includes.
+	Add sim-main.h and sim-options.h includes.
+	(sim_callback, mem_size, trace): Add TODO comments.
+	(state): Delete static and add TODO comment.
+	(sim_kind, myname, big_endian): Delete.
+	(init): Change big_endian to CURRENT_TARGET_BYTE_ORDER check.
+	(sim_size, sim_trace, sim_info, sim_target_display_usage, sim_load,
+	sim_do_command, sim_set_callbacks, sim_complete_command): Delete.
+	(sim_target_parse_command_line): Mark static.
+	(free_state): New function.
+	(sim_open): Rewrite to use new common logic.
+	(sim_close): Delete body.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_EXTRA_CFLAGS): Delete -DNEED_UI_LOOP_HOOK.
 	* interp.c [NEED_UI_LOOP_HOOK] (UI_LOOP_POLL_INTERVAL,
 	ui_loop_hook_counter, deprecated_ui_loop_hook): Delete.
