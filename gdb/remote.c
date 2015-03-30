@@ -110,8 +110,6 @@ static void extended_remote_restart (void);
 
 static void extended_remote_mourn (struct target_ops *);
 
-static void remote_mourn_1 (struct target_ops *);
-
 static void remote_send (char **buf, long *sizeof_buf_p);
 
 static int readchar (int timeout);
@@ -4471,9 +4469,9 @@ remote_disconnect (struct target_ops *target, const char *args, int from_tty)
     error (_("Argument given to \"disconnect\" when remotely debugging."));
 
   /* Make sure we unpush even the extended remote targets; mourn
-     won't do it.  So call remote_mourn_1 directly instead of
+     won't do it.  So call remote_mourn directly instead of
      target_mourn_inferior.  */
-  remote_mourn_1 (target);
+  remote_mourn (target);
 
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
@@ -4483,8 +4481,8 @@ remote_disconnect (struct target_ops *target, const char *args, int from_tty)
    be chatty about it.  */
 
 static void
-extended_remote_attach_1 (struct target_ops *target, const char *args,
-			  int from_tty)
+extended_remote_attach (struct target_ops *target, const char *args,
+			int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
   int pid;
@@ -4594,12 +4592,6 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
     }
   else
     gdb_assert (wait_status == NULL);
-}
-
-static void
-extended_remote_attach (struct target_ops *ops, const char *args, int from_tty)
-{
-  extended_remote_attach_1 (ops, args, from_tty);
 }
 
 /* Implementation of the to_post_attach method.  */
@@ -7920,14 +7912,7 @@ extended_remote_kill (struct target_ops *ops)
 }
 
 static void
-remote_mourn (struct target_ops *ops)
-{
-  remote_mourn_1 (ops);
-}
-
-/* Worker function for remote_mourn.  */
-static void
-remote_mourn_1 (struct target_ops *target)
+remote_mourn (struct target_ops *target)
 {
   unpush_target (target);
 
@@ -7936,7 +7921,7 @@ remote_mourn_1 (struct target_ops *target)
 }
 
 static void
-extended_remote_mourn_1 (struct target_ops *target)
+extended_remote_mourn (struct target_ops *target)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -7994,12 +7979,6 @@ extended_remote_mourn_1 (struct target_ops *target)
 	    }
 	}
     }
-}
-
-static void
-extended_remote_mourn (struct target_ops *ops)
-{
-  extended_remote_mourn_1 (ops);
 }
 
 static int
