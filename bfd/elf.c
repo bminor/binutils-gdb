@@ -3074,6 +3074,40 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
   H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
 }
 
+/* Return the section which RELOC_SEC applies to.  */
+
+asection *
+_bfd_elf_get_reloc_section (asection *reloc_sec)
+{
+  const char *name;
+  unsigned int type;
+  bfd *abfd;
+
+  if (reloc_sec == NULL)
+    return NULL;
+
+  type = elf_section_data (reloc_sec)->this_hdr.sh_type;
+  if (type != SHT_REL && type != SHT_RELA)
+    return NULL;
+
+  /* We look up the section the relocs apply to by name.  */
+  name = reloc_sec->name;
+  if (type == SHT_REL)
+    name += 4;
+  else
+    name += 5;
+
+  /* If a target needs .got.plt section, relocations in rela.plt/rel.plt
+     section apply to .got.plt section.  */
+  abfd = reloc_sec->owner;
+  if (get_elf_backend_data (abfd)->want_got_plt
+      && strcmp (name, ".plt") == 0)
+    name = ".got.plt";
+
+  reloc_sec = bfd_get_section_by_name (abfd, name);
+  return reloc_sec;
+}
+
 /* Assign all ELF section numbers.  The dummy first section is handled here
    too.  The link/info pointers for the standard section types are filled
    in here too, while we're at it.  */
@@ -3209,7 +3243,6 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   for (sec = abfd->sections; sec; sec = sec->next)
     {
       asection *s;
-      const char *name;
 
       d = elf_section_data (sec);
 
@@ -3313,13 +3346,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 
-	  /* We look up the section the relocs apply to by name.  */
-	  name = sec->name;
-	  if (d->this_hdr.sh_type == SHT_REL)
-	    name += 4;
-	  else
-	    name += 5;
-	  s = bfd_get_section_by_name (abfd, name);
+	  s = get_elf_backend_data (abfd)->get_reloc_section (sec);
 	  if (s != NULL)
 	    {
 	      d->this_hdr.sh_info = elf_section_data (s)->this_idx;

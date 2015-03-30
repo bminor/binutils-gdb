@@ -1,3 +1,15 @@
+2015-03-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18169
+	* elf-bfd.h (elf_backend_data): Add get_reloc_section.
+	(_bfd_elf_get_reloc_section): New.
+	* elf.c (_bfd_elf_get_reloc_section): Likewise.
+	(assign_section_numbers): Call get_reloc_section to look up the
+	section the relocs apply.
+	* elfxx-target.h (elf_backend_get_reloc_section): Likewise.
+	(elfNN_bed): Initialize get_reloc_section with
+	elf_backend_get_reloc_section.
+
 2015-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ZLIB): New.

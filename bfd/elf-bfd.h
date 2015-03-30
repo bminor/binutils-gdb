@@ -1239,6 +1239,9 @@ struct elf_backend_data
   bfd_size_type (*maybe_function_sym) (const asymbol *sym, asection *sec,
 				       bfd_vma *code_off);
 
+  /* Return the section which RELOC_SEC applies to.  */
+  asection *(*get_reloc_section) (asection *reloc_sec);
+
   /* Used to handle bad SHF_LINK_ORDER input.  */
   bfd_error_handler_type link_order_error_handler;
 
@@ -2246,6 +2249,8 @@ extern bfd_boolean _bfd_elf_is_function_type (unsigned int);
 
 extern bfd_size_type _bfd_elf_maybe_function_sym (const asymbol *, asection *,
 						  bfd_vma *);
+
+extern asection *_bfd_elf_get_reloc_section (asection *);
 
 extern int bfd_elf_get_default_section_type (flagword);
 
