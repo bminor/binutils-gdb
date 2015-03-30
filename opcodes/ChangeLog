@@ -1,3 +1,7 @@
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* d10v-opc.c (d10v_reg_name_cnt): Convert old style prototype.
+
 2015-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated.
