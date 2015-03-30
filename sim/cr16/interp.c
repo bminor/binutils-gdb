@@ -18,12 +18,14 @@
    along with this program. If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
+#include <inttypes.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
+#include "run-sim.h"
 
 #include "cr16_sim.h"
 #include "gdb/sim-cr16.h"
@@ -55,7 +57,6 @@ bfd_vma text_end;
 static struct hash_entry *lookup_hash (uint64 ins, int size);
 static void get_operands (operand_desc *s, uint64 mcode, int isize, int nops);
 static int do_run (uint64 mc);
-static char *add_commas (char *buf, int sizeof_buf, unsigned long value);
 extern void sim_set_profile (int n);
 extern void sim_set_profile_size (int n);
 static INLINE uint8 *map_memory (unsigned phys_addr);
@@ -363,7 +364,7 @@ get_operands (operand_desc *s, uint64 ins, int isize, int nops)
 }
 
 bfd_vma
-decode_pc ()
+decode_pc (void)
 {
   asection *s;
   if (!init_text_p && prog_bfd != NULL)
@@ -398,7 +399,8 @@ do_run(uint64 mcode)
   
    h =  lookup_hash(mcode, 1);
 
-   if ((h == NULL) || (h->opcode == NULL)) return 0;
+  if ((h == NULL) || (h->opcode == 0))
+    return 0;
 
    if (h->size == 3)
     {
@@ -424,6 +426,7 @@ do_run(uint64 mcode)
   return h->size;
 }
 
+#if 0
 static char *
 add_commas(char *buf, int sizeof_buf, unsigned long value)
 {
@@ -443,6 +446,7 @@ add_commas(char *buf, int sizeof_buf, unsigned long value)
 
   return endbuf;
 }
+#endif
 
 void
 sim_size (int power)
@@ -481,6 +485,7 @@ enum
     DMAP2_OFFSET = 0xff0c
   };
 
+#if 0
 static void
 set_dmap_register (int reg_nr, unsigned long value)
 {
@@ -495,6 +500,7 @@ set_dmap_register (int reg_nr, unsigned long value)
     }
 #endif
 }
+#endif
 
 static unsigned long
 dmap_register (void *regcache, int reg_nr)
@@ -504,6 +510,7 @@ dmap_register (void *regcache, int reg_nr)
   return READ_16 (raw);
 }
 
+#if 0
 static void
 set_imap_register (int reg_nr, unsigned long value)
 {
@@ -518,6 +525,7 @@ set_imap_register (int reg_nr, unsigned long value)
     }
 #endif
 }
+#endif
 
 static unsigned long
 imap_register (void *regcache, int reg_nr)
@@ -527,6 +535,7 @@ imap_register (void *regcache, int reg_nr)
   return READ_16 (raw);
 }
 
+#if 0
 enum
   {
     HELD_SPI_IDX = 0,
@@ -556,6 +565,7 @@ set_spu_register  (unsigned long value)
 {
     SET_GPR (SP_IDX, value);
 }
+#endif
 
 /* Given a virtual address in the DMAP address space, translate it
    into a physical address. */
@@ -882,22 +892,14 @@ xfer_mem (SIM_ADDR virt,
 
 
 int
-sim_write (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     const unsigned char *buffer;
-     int size;
+sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
   return xfer_mem( addr, buffer, size, 1);
 }
 
 int
-sim_read (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
   return xfer_mem( addr, buffer, size, 0);
@@ -1052,9 +1054,7 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback, struct bfd 
 
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
   if (prog_bfd != NULL && prog_bfd_was_opened_p)
     {
@@ -1138,8 +1138,7 @@ imem_addr (uint32 offset)
 static int stop_simulator = 0;
 
 int
-sim_stop (sd)
-     SIM_DESC sd;
+sim_stop (SIM_DESC sd)
 {
   stop_simulator = 1;
   return 1;
@@ -1368,7 +1367,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   bfd_vma start_address;
 
   /* reset all state information */
-  memset (&State.regs, 0, (int)&State.mem - (int)&State.regs);
+  memset (&State.regs, 0, (uintptr_t)&State.mem - (uintptr_t)&State.regs);
 
   /* There was a hack here to copy the values of argc and argv into r0
      and r1.  The values were also saved into some high memory that
@@ -1395,8 +1394,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 
 
 void
-sim_set_callbacks (p)
-     host_callback *p;
+sim_set_callbacks (host_callback *p)
 {
   cr16_callback = p;
 }
@@ -1410,10 +1408,7 @@ sim_trace (SIM_DESC sd)
 }
 
 void
-sim_stop_reason (sd, reason, sigrc)
-     SIM_DESC sd;
-     enum sim_stop *reason;
-     int *sigrc;
+sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
 /*   (*cr16_callback->printf_filtered) (cr16_callback, "sim_stop_reason:  PC=0x%x\n",PC<<2); */
 
@@ -1452,11 +1447,7 @@ sim_stop_reason (sd, reason, sigrc)
 }
 
 int
-sim_fetch_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   int size;
   switch ((enum sim_cr16_regs) rn)
@@ -1507,11 +1498,7 @@ sim_fetch_register (sd, rn, memory, length)
 }
  
 int
-sim_store_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   int size;
   switch ((enum sim_cr16_regs) rn)
@@ -1567,9 +1554,7 @@ sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 }
 
 void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     const char *cmd;
+sim_do_command (SIM_DESC sd, const char *cmd)
 { 
   (*cr16_callback->printf_filtered) (cr16_callback, "sim_do_command: %s\n",cmd);
 }

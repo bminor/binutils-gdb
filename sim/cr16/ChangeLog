@@ -1,5 +1,38 @@
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (gencode.o, cr16-opc.o): Add $(WARN_CFLAGS).
+	(gencode): Add $(BUILD_LDFLAGS).
+	* endian.c (get_word, get_longword, get_longlong, write_word,
+	write_longword, write_longlong): Convert old style prototypes.
+	* gencode.c: Include string.h.
+	(write_header): Convert old style prototype and fix printf format.
+	(write_template, write_opcodes): Likewise.
+	(check_opcodes): Mark static void and put behind #if 0.
+	* interp.c: Include inttypes.h and run-sim.h.
+	(add_commas): Delete prototype.
+	(decode_pc): Convert old style prototype.
+	(do_run): Change h->op compare to 0.
+	(add_commas, set_dmap_register, set_imap_register, HELD_SPI_IDX,
+	HELD_SPU_IDX, spu_register, spi_register, set_spi_register,
+	set_spu_register): Wrap in #if 0.
+	(sim_write, sim_read, sim_close, sim_stop, sim_set_callbacks,
+	sim_stop_reason, sim_fetch_register, sim_store_register,
+	sim_do_command): Convert old style prototypes.
+	(sim_create_inferior): Fix pointer cast to use uintptr_t.
+	* simops.c [HAVE_TIME_H]: Include time.h.
+	[HAVE_SYS_TIME_H]: Include sys/time.h.
+	[TARGET_SYS_utime]: Include utime.h.
+	[TARGET_SYS_wait]: Include sys/wait.h.
+	(strrchr): Delete prototype.
+	(cond_stat): Mark static.
+	(trace_input_func): Mark name static.
+	(trace_input_func, trace_output_void, trace_output_flag): Convert old style prototypes.
+	(trace_output_40): Wrap in #if 0.
+	(OP_*): Convert old style prototypes.  Move trace_input call below
+	all variable decls.  Initialize tmp to 0 when appropriate.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_EXTRA_CFLAGS): Delete -DSIM_HAVE_ENVIRONMENT.
 	(interp.o, simops.o, endian.o, table.o): Delete rules.
 	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
