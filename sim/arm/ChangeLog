@@ -1,5 +1,12 @@
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
+	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT,
+	SIM_AC_OPTION_INLINE, and SIM_AC_OPTION_WARNINGS.
+	* config.in, configure: Regenerate.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (COPRO): Delete.
 	(SIM_OBJS): Expand COPRO.
 	* configure.ac: Deletd stdint.h check.
