@@ -1,3 +1,11 @@
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COPRO): Delete.
+	(SIM_OBJS): Expand COPRO.
+	* configure.ac: Deletd stdint.h check.
+	(COPRO): Delete.
+	* configure: Regenerate.
+
 2015-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
