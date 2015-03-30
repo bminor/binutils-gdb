@@ -1,3 +1,8 @@
+2016-02-24  Wei-cheng Wang  <cole945@gmail.com>
+
+	* rs6000-tdep.c (rs6000_frame_cache, rs6000_frame_this_id): Handle
+	unavailable PC/SP to build unavailable frame.
+
 2016-02-23  Doug Evans  <dje@google.com>
 
 	Extend "skip" command to support -file, -gfile, -function, -rfunction.
