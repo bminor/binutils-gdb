@@ -1268,6 +1268,14 @@ sim_set_callbacks (p)
   d10v_callback = p;
 }
 
+int
+sim_trace (SIM_DESC sd)
+{
+  sim_resume (sd, 0, 0);
+
+  return 1;
+}
+
 void
 sim_stop_reason (sd, reason, sigrc)
      SIM_DESC sd;
