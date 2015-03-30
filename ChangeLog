@@ -1,3 +1,8 @@
+2015-03-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.def (dependencies): Add all-zlib to all-bfd.
+	* Makefile.in: Regenerated.
+
 2015-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* src-release.sh (do_proto_toplev): Configure with --target
