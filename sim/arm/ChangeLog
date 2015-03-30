@@ -1,5 +1,12 @@
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_EXTRA_CFLAGS): Delete -DNEED_UI_LOOP_HOOK.
+	* interp.c [NEED_UI_LOOP_HOOK] (UI_LOOP_POLL_INTERVAL,
+	ui_loop_hook_counter, deprecated_ui_loop_hook): Delete.
+	(sim_resume) [NEED_UI_LOOP_HOOK]: Delete ui code.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* armemu.c [MODE32] (handle_v6_insn): Move definition.
 	(ARMul_Emulate26): Initialize do_int after label target.
 	* armemu.h (UNDEF_Test, UNDEF_Shift, UNDEF_MSRPC, UNDEF_MRSPC,
