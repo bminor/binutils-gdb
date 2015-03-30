@@ -3021,14 +3021,19 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
      is set.  */
 
   fprintf_unfiltered (tmp_stream,
-		      "infrun: target_wait (%d", ptid_get_pid (waiton_ptid));
+		      "infrun: target_wait (%d.%ld.%ld",
+		      ptid_get_pid (waiton_ptid),
+		      ptid_get_lwp (waiton_ptid),
+		      ptid_get_tid (waiton_ptid));
   if (ptid_get_pid (waiton_ptid) != -1)
     fprintf_unfiltered (tmp_stream,
 			" [%s]", target_pid_to_str (waiton_ptid));
   fprintf_unfiltered (tmp_stream, ", status) =\n");
   fprintf_unfiltered (tmp_stream,
-		      "infrun:   %d [%s],\n",
+		      "infrun:   %d.%ld.%ld [%s],\n",
 		      ptid_get_pid (result_ptid),
+		      ptid_get_lwp (result_ptid),
+		      ptid_get_tid (result_ptid),
 		      target_pid_to_str (result_ptid));
   fprintf_unfiltered (tmp_stream,
 		      "infrun:   %s\n",
