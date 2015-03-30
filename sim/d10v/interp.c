@@ -56,17 +56,6 @@ extern void sim_set_profile (int n);
 extern void sim_set_profile_size (int n);
 static INLINE uint8 *map_memory (unsigned phys_addr);
 
-#ifdef NEED_UI_LOOP_HOOK
-/* How often to run the ui_loop update, when in use */
-#define UI_LOOP_POLL_INTERVAL 0x14000
-
-/* Counter for the ui_loop_hook update */
-static long ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
-
-/* Actual hook to call to run through gdb's gui event loop */
-extern int (*deprecated_ui_loop_hook) (int signo);
-#endif /* NEED_UI_LOOP_HOOK */
-
 #ifndef INLINE
 #if defined(__GNUC__) && defined(__OPTIMIZE__)
 #define INLINE __inline__
@@ -1042,14 +1031,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
       /* Writeback all the DATA / PC changes */
       SLOT_FLUSH ();
-
-#ifdef NEED_UI_LOOP_HOOK
-      if (deprecated_ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
-	{
-	  ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
-	  deprecated_ui_loop_hook (0);
-	}
-#endif /* NEED_UI_LOOP_HOOK */
     }
   while ( !State.exception && !stop_simulator);
   

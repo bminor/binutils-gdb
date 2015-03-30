@@ -1,5 +1,12 @@
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_EXTRA_CFLAGS): Delete -DNEED_UI_LOOP_HOOK.
+	* interp.c [NEED_UI_LOOP_HOOK] (UI_LOOP_POLL_INTERVAL,
+	ui_loop_hook_counter, deprecated_ui_loop_hook): Delete.
+	(sim_resume) [NEED_UI_LOOP_HOOK]: Delete ui code.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (gencode.o, d10v-opc.o): Add $(WARN_CFLAGS).
 	(gencode): Add $(BUILD_LDFLAGS).
 	* endian.c (get_word, get_longword, get_longlong, write_word,
