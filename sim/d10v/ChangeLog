@@ -1,5 +1,26 @@
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* d10v_sim.h (text, text_start, text_end, prog_bfd): Delete.
+	(SEXT8, SEXT16, SEXT32, MASK32): Undefine.
+	* interp.c: Delete run-sim.h and d10v_sim.h includes.  Include
+	sim-main.h and sim-options.h.
+	(myname, sim_kind, init_text_p, prog_bfd_was_opened_p, prog_bfd,
+	text, text_start, text_end, decode_pc, sim_set_profile,
+	sim_set_profile_size, sim_set_trace, sim_set_callbacks,
+	sim_trace, sim_do_command, sim_load): Delete.
+	(INLINE): Delete define.
+	(free_state): New function.
+	(trace_sd): Declare global variable.
+	(sim_open): Rewrite to use new common logic.
+	(sim_close): Delete body.
+	* Makefile.in (SIM_RUN_OBJS, SIM_EXTRA_CFLAGS): Delete.
+	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
+	* sim-main.h: New file.
+	* simops.c: Change d10v_sim.h include to sim-main.h.
+	(trace_input_func): Rewrite pc checks to use trace_sd.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_EXTRA_CFLAGS): Delete -DNEED_UI_LOOP_HOOK.
 	* interp.c [NEED_UI_LOOP_HOOK] (UI_LOOP_POLL_INTERVAL,
 	ui_loop_hook_counter, deprecated_ui_loop_hook): Delete.

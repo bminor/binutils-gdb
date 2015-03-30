@@ -1,7 +1,7 @@
 #    Makefile template for Configure for the D10v sim library.
 #    Copyright (C) 1996-2015 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -17,12 +17,16 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-# Use the deprecated run frontend until we migrate to nrun.o
-SIM_RUN_OBJS = run.o
-
-SIM_OBJS = interp.o table.o simops.o endian.o sim-load.o
+SIM_OBJS = \
+	interp.o \
+	$(SIM_NEW_COMMON_OBJS) \
+	sim-cpu.o \
+	sim-engine.o \
+	sim-hload.o \
+	table.o \
+	simops.o \
+	endian.o
 SIM_EXTRA_CLEAN = clean-extra
-SIM_EXTRA_CFLAGS = -DSIM_HAVE_ENVIRONMENT -DSIM_USE_DEPRECATED_RUN_FRONTEND
 
 INCLUDE = d10v_sim.h $(srcroot)/include/gdb/callback.h targ-vals.h endian.c \
 	$(srcroot)/include/gdb/sim-d10v.h
