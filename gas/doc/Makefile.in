@@ -57,7 +57,6 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(as_TEXINFOS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
-	$(top_srcdir)/../config/zlib.m4 \
 	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
@@ -267,6 +266,7 @@ te_file = @te_file@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = 1.8 cygnus
 
 # What version of the manual you want; "all" includes everything

@@ -1,3 +1,21 @@
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ZLIBINC): New.
+	(AM_CFLAGS): Add $(ZLIBINC).
+	* as.c: (show_usage): Don't check HAVE_ZLIB_H.
+	(parse_args): Likewise.
+	* compress-debug.c: Don't check HAVE_ZLIB_H to include <zlib.h>.
+	(compress_init): Don't check HAVE_ZLIB_H.
+	(compress_data): Likewise.
+	(compress_finish): Likewise.
+	* configure.ac (AM_ZLIB): Removed.
+	(zlibinc): New.  AC_SUBST.
+	Add --with-system-zlib.
+	* Makefile.in: Regenerated.
+	* config.in: Likewise.
+	* configure: Likewise.
+	* doc/Makefile.in: Likewise.
+
 2015-03-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_flags_set): Removed.

@@ -816,8 +816,13 @@ AC_CHECK_DECLS([free, getenv, malloc, mempcpy, realloc, stpcpy, strstr, vsnprint
 
 BFD_BINARY_FOPEN
 
-# Link in zlib if we can.  This allows us to write compressed debug sections.
-AM_ZLIB
+# Use the system's zlib library.
+zlibinc="-I\$(srcdir)/../zlib"
+AC_ARG_WITH(system-zlib,
+[AS_HELP_STRING([--with-system-zlib], [use installed libz])],
+zlibinc=
+)
+AC_SUBST(zlibinc)
 
 # Support for VMS timestamps via cross compile
 

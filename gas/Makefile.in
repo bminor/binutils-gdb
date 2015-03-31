@@ -66,7 +66,6 @@ DIST_COMMON = NEWS README ChangeLog $(srcdir)/Makefile.in \
 	$(srcdir)/../ylwrap
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
-	$(top_srcdir)/../config/zlib.m4 \
 	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
@@ -298,16 +297,22 @@ te_file = @te_file@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = 1.11 dejagnu foreign no-dist
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 SUBDIRS = doc po
 tooldir = $(exec_prefix)/$(target_alias)
 
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIBINC = @zlibinc@
+
 # Automake 1.10+ disables lex and yacc output file regeneration if
 # maintainer mode is disabled.  Avoid this.
 am__skiplex = 
 am__skipyacc = 
-AM_CFLAGS = $(WARN_CFLAGS)
+AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
 TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c
 TARG_CPU_O = tc-@target_cpu_type@.@OBJEXT@
