@@ -1,3 +1,7 @@
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_set_profile, sim_set_profile_size): Delete.
+
 2015-03-31  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (simops.o): New rule.

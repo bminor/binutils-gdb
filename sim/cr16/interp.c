@@ -42,8 +42,6 @@ uint32 sign_flag;
 
 static struct hash_entry *lookup_hash (uint64 ins, int size);
 static void get_operands (operand_desc *s, uint64 mcode, int isize, int nops);
-extern void sim_set_profile (int n);
-extern void sim_set_profile_size (int n);
 static INLINE uint8 *map_memory (unsigned phys_addr);
 
 #define MAX_HASH  16

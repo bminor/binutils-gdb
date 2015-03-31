@@ -1,3 +1,8 @@
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* run-sim.h, run.c: Delete.
+	* tconfig.h (SIM_HAVE_PROFILE, SIM_HAVE_BIENDIAN): Delete.
+
 2015-03-31  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

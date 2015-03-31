@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_BIENDIAN
-
 #include "sim-basics.h"
 
 typedef address_word sim_cia;

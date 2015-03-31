@@ -1,3 +1,9 @@
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (armos.o, armcopro.o, maverick.o, iwmmxt.o, arminit.o,
+	armrdi.o, armsupp.o, thumbemu.o, bag.o, wrapper.o): Delete rules.
+	* tconfig.h: Delete file.
+
 2015-03-31  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

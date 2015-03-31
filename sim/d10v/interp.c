@@ -43,8 +43,6 @@ static void do_long (uint32 ins);
 static void do_2_short (uint16 ins1, uint16 ins2, enum _leftright leftright);
 static void do_parallel (uint16 ins1, uint16 ins2);
 static char *add_commas (char *buf, int sizeof_buf, unsigned long value);
-extern void sim_set_profile (int n);
-extern void sim_set_profile_size (int n);
 static INLINE uint8 *map_memory (unsigned phys_addr);
 
 #define MAX_HASH  63
