@@ -201,16 +201,10 @@ fi
 AC_CHECK_DECLS([environ, fprintf, getc_unlocked, getenv,
 		sbrk, snprintf, stpcpy, strnlen, strstr, vsnprintf])
 
-# Use the system's zlib library.
-zlibdir=-L../zlib
-zlibinc="-I\$(srcdir)/../zlib"
-AC_ARG_WITH(system-zlib,
-[AS_HELP_STRING([--with-system-zlib], [use installed libz])],
-zlibdir=
-zlibinc=
-)
-AC_SUBST(zlibdir)
-AC_SUBST(zlibinc)
+# Link in zlib if we can.  This allows us to read compressed debug
+# sections.  This is used only by readelf.c (objdump uses bfd for
+# reading compressed sections).
+AM_ZLIB
 
 BFD_BINARY_FOPEN
 
