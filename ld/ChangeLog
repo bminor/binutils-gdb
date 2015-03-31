@@ -1,3 +1,13 @@
+2015-03-31  Ed Schouten  <ed@nuxi.nl>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add
+	eelf_x86_64_cloudabi.c.
+	(eelf_x86_64_cloudabi.c): New.
+	* configure.tgt (targ_emul): Set to elf_x86_64_cloudabi for
+	x86_64-*-cloudabi*.
+	* Makefile.in: Regenerated.
+	* emulparams/elf_x86_64_cloudabi.sh: New file.
+
 2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac (AM_ZLIB): Removed.

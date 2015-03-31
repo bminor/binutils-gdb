@@ -1,3 +1,16 @@
+2015-03-31  Ed Schouten  <ed@nuxi.nl>
+
+	* config.bfd (targ_defvec): Set to x86_64_elf64_cloudabi_vec
+	for x86_64-*-cloudabi*.
+	* configure.ac: Handle x86_64_elf64_cloudabi_vec.
+	* configure: Regenerated.
+	* elf64-x86-64.c (TARGET_LITTLE_SYM): Support x86_64-*-cloudabi*.
+	(TARGET_LITTLE_NAME): Likewise.
+	(ELF_OSABI): Likewise.
+	(elf64_bed): Likewise.
+	* targets.c (x86_64_elf64_cloudabi_vec): New.
+	(_bfd_target_vector): Add x86_64_elf64_cloudabi_vec.
+
 2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac: Revert the AM_ZLIB change.

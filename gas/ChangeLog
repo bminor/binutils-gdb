@@ -1,3 +1,7 @@
+2015-03-31  Ed Schouten  <ed@nuxi.nl>
+
+	* configure.tgt (fmt): Set to elf for *-*-cloudabi*.
+
 2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac: Revert the AM_ZLIB change.

@@ -228,6 +228,7 @@ i[3-7]86-*-rtems*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-aros*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-rdos*)	targ_emul=elf_i386 ;;
 x86_64-*-rdos*)		targ_emul=elf64rdos ;;
+x86_64-*-cloudabi*)	targ_emul=elf_x86_64_cloudabi ;;
 i[3-7]86-*-bsd)		targ_emul=i386bsd ;;
 i[3-7]86-*-bsd386)	targ_emul=i386bsd ;;
 i[3-7]86-*-bsdi*)	targ_emul=i386bsd ;;
