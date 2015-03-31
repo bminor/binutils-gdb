@@ -1316,15 +1316,6 @@ This GDB was configured as follows:\n\
     fprintf_filtered (stream, _("\
              --with-system-gdbinit=%s%s\n\
 "), SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE ? " (relocatable)" : "");
-#if HAVE_ZLIB_H
-  fprintf_filtered (stream, _("\
-             --with-zlib\n\
-"));
-#else
-  fprintf_filtered (stream, _("\
-             --without-zlib\n\
-"));
-#endif
 #if HAVE_LIBBABELTRACE
     fprintf_filtered (stream, _("\
              --with-babeltrace\n\

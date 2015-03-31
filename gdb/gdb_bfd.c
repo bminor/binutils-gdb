@@ -24,9 +24,6 @@
 #include "hashtab.h"
 #include "filestuff.h"
 #include "vec.h"
-#ifdef HAVE_ZLIB_H
-#include <zlib.h>
-#endif
 #ifdef HAVE_MMAP
 #include <sys/mman.h>
 #ifndef MAP_FAILED
