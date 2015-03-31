@@ -1,3 +1,10 @@
+2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR corefiles/16092
+	* gdb.texinfo (gcore): Mention new command 'set
+	use-coredump-filter'.
+	(set use-coredump-filter): Document new command.
+
 2015-03-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb.texinfo (Operating System Auxiliary Information): Add info os cpus

@@ -1,4 +1,28 @@
 2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Oleg Nesterov  <oleg@redhat.com>
+
+	PR corefiles/16092
+	* linux-tdep.c: Include 'gdbcmd.h' and 'gdb_regex.h'.
+	New enum identifying the various options of the coredump_filter
+	file.
+	(struct smaps_vmflags): New struct.
+	(use_coredump_filter): New variable.
+	(decode_vmflags): New function.
+	(mapping_is_anonymous_p): Likewise.
+	(dump_mapping_p): Likewise.
+	(linux_find_memory_regions_full): New variables
+	'coredumpfilter_name', 'coredumpfilterdata', 'pid', 'filterflags'.
+	Removed variable 'modified'.  Read /proc/<PID>/smaps file; improve
+	parsing of its information.  Implement memory mapping filtering
+	based on its contents.
+	(show_use_coredump_filter): New function.
+	(_initialize_linux_tdep): New command 'set use-coredump-filter'.
+	* NEWS: Mention the possibility of using the
+	'/proc/PID/coredump_filter' file when generating a corefile.
+	Mention new command 'set use-coredump-filter'.
+
+2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* solib-svr4.c (solib_svr4_r_ldsomap): Catch possible exception by
 	read_memory_unsigned_integer.

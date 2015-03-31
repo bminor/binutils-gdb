@@ -1,3 +1,9 @@
+2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR corefiles/16092
+	* gdb.base/coredump-filter.c: New file.
+	* gdb.base/coredump-filter.exp: Likewise.
+
 2015-03-27  Petr Machata  <pmachata@redhat.com>
 
 	* lib/dwarf.exp (Dwarf::_handle_DW_FORM): Handle DW_FORM_sec_offset.
