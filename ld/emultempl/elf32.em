@@ -1412,7 +1412,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   asection *sinterp;
   bfd *abfd;
   struct elf_link_hash_entry *ehdr_start = NULL;
-  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_save;
+  struct bfd_link_hash_entry ehdr_start_save = {};
 
   if (is_elf_hash_table (link_info.hash))
     {
