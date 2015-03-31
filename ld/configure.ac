@@ -239,10 +239,6 @@ BFD_BINARY_FOPEN
 
 AC_CHECK_DECLS([strstr, free, sbrk, getenv, environ])
 
-# Link in zlib if we can.  This is needed only for the bootstrap tests
-# right now, since those tests use libbfd, which depends on zlib.
-AM_ZLIB
-
 # When converting linker scripts into strings for use in emulation
 # files, use astring.sed if the compiler supports ANSI string
 # concatenation, or ostring.sed otherwise.  This is to support the
