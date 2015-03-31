@@ -551,7 +551,7 @@ extern int cpu_initialize (SIM_DESC sd, sim_cpu *cpu);
 
 /* Returns the address of a 68HC12 indexed operand.
    Pre and post modifications are handled on the source register.  */
-extern uint16 cpu_get_indexed_operand_addr (sim_cpu* cpu, int restrict);
+extern uint16 cpu_get_indexed_operand_addr (sim_cpu *cpu, int restricted);
 
 extern void cpu_return (sim_cpu *cpu);
 extern void cpu_set_sp (sim_cpu *cpu, uint16 val);

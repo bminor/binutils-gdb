@@ -1,3 +1,10 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* m68hc11_sim.c (cpu_get_indexed_operand_addr,
+	cpu_get_indexed_operand8, cpu_get_indexed_operand16): Rename restrict
+	variable to restricted.
+	* sim-main.h (cpu_get_indexed_operand_addr): Likewise.
+
 2015-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_pc_get): New function.
