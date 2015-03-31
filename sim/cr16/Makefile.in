@@ -36,6 +36,8 @@ NL_TARGET = -DNL_TARGET_cr16
 
 ## COMMON_POST_CONFIG_FRAG
 
+simops.o: simops.h
+
 simops.h: gencode
 	./gencode -h >$@
 

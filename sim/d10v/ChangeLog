@@ -1,3 +1,7 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (simops.o): New rule.
+
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* d10v_sim.h (text, text_start, text_end, prog_bfd): Delete.
