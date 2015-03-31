@@ -1,3 +1,8 @@
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (resolve_dynamic_array): Use
+	create_array_type_with_stride instead of create_array_type.
+
 2015-04-30  DJ Delorie  <dj@redhat.com>
 
 	* rl78-tdep.c (rl78_analyze_prologue): Pass RL78_ISA_DEFAULT to

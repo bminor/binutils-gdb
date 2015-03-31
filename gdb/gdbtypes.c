@@ -1898,9 +1898,9 @@ resolve_dynamic_array (struct type *type,
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
-  return create_array_type (copy_type (type),
-			    elt_type,
-			    range_type);
+  return create_array_type_with_stride (copy_type (type),
+					elt_type, range_type,
+					TYPE_FIELD_BITSIZE (type, 0));
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
