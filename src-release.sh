@@ -83,9 +83,7 @@ do_proto_toplev()
 	<Makefile.in >tmp
     mv -f tmp Makefile.in
     #
-    ./configure --target=i386-pc-linux-gnu \
-	--with-target-subdir=. \
-	--disable-multilib
+    ./configure --target=i386-pc-linux-gnu
     $MAKE configure-host configure-target \
 	ALL_GCC="" ALL_GCC_C="" ALL_GCC_CXX="" \
 	CC_FOR_TARGET="$CC" CXX_FOR_TARGET="$CXX"
