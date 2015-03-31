@@ -1,3 +1,8 @@
+2015-03-31  Matthias Klose  <doko@ubuntu.com>
+
+	* compile/compile.c (compile_to_object): Allow triplets with or
+	without vendor set.
+
 2015-03-30  Doug Evans  <dje@google.com>
 
 	PR c++/18141
