@@ -42,7 +42,7 @@ DEVO_SUPPORT="README Makefile.in configure configure.ac \
 	COPYING COPYING.LIB install-sh config-ml.in symlink-tree \
 	mkinstalldirs ltmain.sh missing ylwrap \
 	libtool.m4 ltsugar.m4 ltversion.m4 ltoptions.m4 \
-	Makefile.def Makefile.tpl src-release config.rpath \
+	Makefile.def Makefile.tpl src-release.sh config.rpath \
 	ChangeLog MAINTAINERS README-maintainer-mode \
 	lt~obsolete.m4 ltgcc.m4 depcomp mkdep compile \
 	COPYING3 COPYING3.LIB"

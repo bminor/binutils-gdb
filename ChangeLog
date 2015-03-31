@@ -1,3 +1,8 @@
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* src-release.sh (DEVO_SUPPORT): Replace src-release with
+	src-release.sh.
+
 2015-03-30  Ed Schouten  <ed@nuxi.nl>
 
 	* config.sub: Update from upstream, to 2015-03-04 version.
