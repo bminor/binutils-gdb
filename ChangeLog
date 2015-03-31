@@ -1,5 +1,10 @@
 2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* src-release.sh: Don't configure with  --with-target-subdir=.
+	--disable-multilib.
+
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* src-release.sh (DEVO_SUPPORT): Replace src-release with
 	src-release.sh.
 
