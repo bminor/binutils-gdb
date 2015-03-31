@@ -1,3 +1,9 @@
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc32elf.em: Handle --no-pic-fixup.
+	(params): Init new field.
+	(ppc_before_allocation): Enable relaxation for pic_fixup.
+
 2015-04-02  Andrew Turner <andrew@freebsd.org>
 
 	* Makefile.am: Add FreeBSD aarch64 files.

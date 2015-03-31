@@ -1,3 +1,23 @@
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (struct ppc_elf_link_hash_entry): Add has_addr16_ha
+	and has_addr16_lo.  Make has_sda_refs a bitfield.
+	(ppc_elf_check_relocs): Set new flags.
+	(ppc_elf_link_hash_table_create): Update default_params.
+	(ppc_elf_adjust_dynamic_symbol): Clear protected_def in cases
+	where we won't be making .dynbss entries or editing code.  Set
+	params->pic_fixup when we'll edit code for protected var access.
+	(allocate_dynrelocs): Allocate got entry for edited code and
+	discard dyn_relocs.
+	(struct ppc_elf_relax_info): Add picfixup_size.
+	(ppc_elf_relax_section): Rename struct one_fixup to struct
+	one_branch_fixup.  Rename fixups to branch_fixups.  Size space for
+	pic fixups.
+	(ppc_elf_relocate_section): Edit non-PIC accessing protected
+	visibility variables to PIC.  Don't emit dyn_relocs for code
+	we've edited.
+	* elf32-ppc.h (struct ppc_elf_params): Add pic_fixup.
+
 2015-04-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_is_local_label_name): Treat assembler generated
