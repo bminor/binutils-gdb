@@ -1,3 +1,8 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-mem.h (MEMOPS_INLINE): Change to EXTERN_INLINE.
+	* cgen-ops.h (SEMOPS_INLINE): Likewise.
+
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-arange.h (SIM_ARANGE_INLINE): Move above sim_addr_range_hit_p.
