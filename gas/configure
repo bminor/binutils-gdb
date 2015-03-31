@@ -603,6 +603,7 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 zlibinc
+zlibdir
 LIBM
 ALLOCA
 GENINSRC_NEVER_FALSE
@@ -10968,7 +10969,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10971 "configure"
+#line 10972 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11074,7 +11075,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11077 "configure"
+#line 11078 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14320,14 +14321,20 @@ $as_echo "#define USE_BINARY_FOPEN 1" >>confdefs.h
  ;;
 esac
 
-# Use the system's zlib library.
-zlibinc="-I\$(srcdir)/../zlib"
+# Link in zlib if we can.  This allows us to write compressed debug sections.
+
+  # Use the system's zlib library.
+  zlibdir=-L../zlib
+  zlibinc="-I\$(srcdir)/../zlib"
 
 # Check whether --with-system-zlib was given.
 if test "${with_system_zlib+set}" = set; then :
-  withval=$with_system_zlib; zlibinc=
+  withval=$with_system_zlib; zlibdir=
+  zlibinc=
 
 fi
+
+
 
 
 

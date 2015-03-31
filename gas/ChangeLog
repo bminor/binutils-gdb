@@ -1,5 +1,12 @@
 2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.ac: Revert the AM_ZLIB change.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (ZLIBINC): New.
 	(AM_CFLAGS): Add $(ZLIBINC).
 	* as.c: (show_usage): Don't check HAVE_ZLIB_H.
