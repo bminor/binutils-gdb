@@ -1,5 +1,10 @@
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/manythreads.exp (interrupt_and_wait): Pass $message
+	to fail instead of non-existent $test.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (gdb_spawn_with_cmdline_opts): Append space to
 	GDBFLAGS if not empty.
 
