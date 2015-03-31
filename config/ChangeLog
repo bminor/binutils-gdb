@@ -1,3 +1,7 @@
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* zlib.m4 (AM_ZLIB): Replace --with-zlib with --with-system-zlib.
+
 2015-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* isl.m4: Sync with GCC tree.
