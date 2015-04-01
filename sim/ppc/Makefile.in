@@ -160,6 +160,11 @@ LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a $(ZLIB)
 ZLIB		= @zlibdir@ -lz
 
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIB = @zlibdir@ -lz
+
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
 INTL_CFLAGS = @INCINTL@
@@ -555,7 +560,7 @@ PACKAGE_OBJ = @sim_pk_obj@
 
 
 psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
-	$(CC) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
+	$(CC) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
 
 run: psim
 	rm -f run$(EXEEXT)

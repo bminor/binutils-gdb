@@ -8717,8 +8717,10 @@ fi
 
 # Check whether --with-system-zlib was given.
 if test "${with_system_zlib+set}" = set; then :
-  withval=$with_system_zlib; zlibdir=
-  zlibinc=
+  withval=$with_system_zlib; if test x$with_system_zlib = xyes ; then
+    zlibdir=
+    zlibinc=
+  fi
 
 fi
 
@@ -12314,7 +12316,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12317 "configure"
+#line 12319 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12420,7 +12422,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12423 "configure"
+#line 12425 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
