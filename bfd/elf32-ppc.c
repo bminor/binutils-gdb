@@ -9250,30 +9250,20 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  if (r == bfd_reloc_overflow)
 	    {
 	    overflow:
-	      if (warned)
-		continue;
-	      if (h != NULL
-		  && h->root.type == bfd_link_hash_undefweak
-		  && howto->pc_relative)
+	      /* On code like "if (foo) foo();" don't report overflow
+		 on a branch to zero when foo is undefined.  */
+	      if (!warned
+		  && !(h != NULL
+		       && (h->root.type == bfd_link_hash_undefweak
+			   || h->root.type == bfd_link_hash_undefined)
+		       && is_branch_reloc (r_type)))
 		{
-		  /* Assume this is a call protected by other code that
-		     detect the symbol is undefined.  If this is the case,
-		     we can safely ignore the overflow.  If not, the
-		     program is hosed anyway, and a little warning isn't
-		     going to help.  */
-
-		  continue;
+		  if (!((*info->callbacks->reloc_overflow)
+			(info, (h ? &h->root : NULL), sym_name,
+			 howto->name, rel->r_addend,
+			 input_bfd, input_section, rel->r_offset)))
+		    return FALSE;
 		}
-
-	      if (! (*info->callbacks->reloc_overflow) (info,
-							(h ? &h->root : NULL),
-							sym_name,
-							howto->name,
-							rel->r_addend,
-							input_bfd,
-							input_section,
-							rel->r_offset))
-		return FALSE;
 	    }
 	  else
 	    {

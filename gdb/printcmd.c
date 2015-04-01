@@ -927,7 +927,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 }
 
 static void
-validate_format (struct format_data fmt, char *cmdname)
+validate_format (struct format_data fmt, const char *cmdname)
 {
   if (fmt.size != 0)
     error (_("Size letters are meaningless in \"%s\" command."), cmdname);

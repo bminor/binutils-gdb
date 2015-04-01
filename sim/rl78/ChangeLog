@@ -1,3 +1,7 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-03-23  Nick Clifton  <nickc@redhat.com>
 
 	* cpu.c (rl78_g10_mode): Declare.

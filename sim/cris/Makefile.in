@@ -22,8 +22,6 @@
 CRISV10F_OBJS = crisv10f.o cpuv10.o decodev10.o modelv10.o mloopv10f.o
 CRISV32F_OBJS = crisv32f.o cpuv32.o decodev32.o modelv32.o mloopv32f.o
 
-CONFIG_DEVICES =
-
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-cpu.o \
@@ -36,7 +34,6 @@ SIM_OBJS = \
 	$(CRISV10F_OBJS) \
 	$(CRISV32F_OBJS) \
 	traps.o devices.o \
-	$(CONFIG_DEVICES) \
 	cris-desc.o
 
 # Extra headers included by sim-main.h.

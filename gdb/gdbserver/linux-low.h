@@ -16,6 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "nat/linux-nat.h"
 #include "nat/gdb_thread_db.h"
 #include <signal.h>
 
@@ -184,7 +185,7 @@ struct linux_target_ops
   /* Hook to call when a new thread is detected.
      If extra per-thread architecture-specific data is needed,
      allocate it here.  */
-  struct arch_lwp_info * (*new_thread) (void);
+  void (*new_thread) (struct lwp_info *);
 
   /* Hook to call prior to resuming a thread.  */
   void (*prepare_to_resume) (struct lwp_info *);
@@ -354,7 +355,7 @@ int linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine);
 int linux_attach_lwp (ptid_t ptid);
 
 struct lwp_info *find_lwp_pid (ptid_t ptid);
-void linux_stop_lwp (struct lwp_info *lwp);
+/* For linux_stop_lwp see nat/linux-nat.h.  */
 
 #ifdef HAVE_LINUX_REGSETS
 void initialize_regsets_info (struct regsets_info *regsets_info);

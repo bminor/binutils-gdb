@@ -40,6 +40,8 @@ gdb_breakpoint $bp_2
 
 # trace the code between the two breakpoints
 gdb_continue_to_breakpoint "cont to bp.1" ".*$srcfile:$bp_1\r\n.*"
+# increase the BTS buffer size - the trace can be quite big
+gdb_test_no_output "set record btrace bts buffer-size 128000"
 gdb_test_no_output "record btrace"
 gdb_continue_to_breakpoint "cont to bp.2" ".*$srcfile:$bp_2\r\n.*"
 

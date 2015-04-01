@@ -110,8 +110,6 @@ static void extended_remote_restart (void);
 
 static void extended_remote_mourn (struct target_ops *);
 
-static void remote_mourn_1 (struct target_ops *);
-
 static void remote_send (char **buf, long *sizeof_buf_p);
 
 static int readchar (int timeout);
@@ -124,10 +122,7 @@ static int remote_can_async_p (struct target_ops *);
 
 static int remote_is_async_p (struct target_ops *);
 
-static void remote_async (struct target_ops *ops,
-			  void (*callback) (enum inferior_event_type event_type,
-					    void *context),
-			  void *context);
+static void remote_async (struct target_ops *ops, int enable);
 
 static void sync_remote_interrupt_twice (int signo);
 
@@ -355,10 +350,6 @@ struct remote_state
      and set to false when the target fails to recognize it).  */
   int use_threadinfo_query;
   int use_threadextra_query;
-
-  void (*async_client_callback) (enum inferior_event_type event_type,
-				 void *context);
-  void *async_client_context;
 
   /* This is set to the data address of the access causing the target
      to stop for a watchpoint.  */
@@ -3661,7 +3652,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	}
 
       if (target_can_async_p ())
-	target_async (inferior_event_handler, 0);
+	target_async (1);
 
       if (thread_count () == 0)
 	{
@@ -4308,6 +4299,7 @@ remote_open_1 (const char *name, int from_tty,
 	}
     }
 
+  serial_setparity (rs->remote_desc, serial_parity);
   serial_raw (rs->remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a
@@ -4477,9 +4469,9 @@ remote_disconnect (struct target_ops *target, const char *args, int from_tty)
     error (_("Argument given to \"disconnect\" when remotely debugging."));
 
   /* Make sure we unpush even the extended remote targets; mourn
-     won't do it.  So call remote_mourn_1 directly instead of
+     won't do it.  So call remote_mourn directly instead of
      target_mourn_inferior.  */
-  remote_mourn_1 (target);
+  remote_mourn (target);
 
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
@@ -4489,8 +4481,8 @@ remote_disconnect (struct target_ops *target, const char *args, int from_tty)
    be chatty about it.  */
 
 static void
-extended_remote_attach_1 (struct target_ops *target, const char *args,
-			  int from_tty)
+extended_remote_attach (struct target_ops *target, const char *args,
+			int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
   int pid;
@@ -4589,7 +4581,7 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
 
 	  push_stop_reply ((struct stop_reply *) reply);
 
-	  target_async (inferior_event_handler, 0);
+	  target_async (1);
 	}
       else
 	{
@@ -4600,12 +4592,6 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
     }
   else
     gdb_assert (wait_status == NULL);
-}
-
-static void
-extended_remote_attach (struct target_ops *ops, const char *args, int from_tty)
-{
-  extended_remote_attach_1 (ops, args, from_tty);
 }
 
 /* Implementation of the to_post_attach method.  */
@@ -4928,7 +4914,7 @@ remote_resume (struct target_ops *ops,
      into infcmd.c in order to allow inferior function calls to work
      NOT asynchronously.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 
   /* We've just told the target to resume.  The remote server will
      wait for the inferior to stop, and then send a stop reply.  In
@@ -7926,14 +7912,7 @@ extended_remote_kill (struct target_ops *ops)
 }
 
 static void
-remote_mourn (struct target_ops *ops)
-{
-  remote_mourn_1 (ops);
-}
-
-/* Worker function for remote_mourn.  */
-static void
-remote_mourn_1 (struct target_ops *target)
+remote_mourn (struct target_ops *target)
 {
   unpush_target (target);
 
@@ -7942,7 +7921,7 @@ remote_mourn_1 (struct target_ops *target)
 }
 
 static void
-extended_remote_mourn_1 (struct target_ops *target)
+extended_remote_mourn (struct target_ops *target)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -8000,12 +7979,6 @@ extended_remote_mourn_1 (struct target_ops *target)
 	    }
 	}
     }
-}
-
-static void
-extended_remote_mourn (struct target_ops *ops)
-{
-  extended_remote_mourn_1 (ops);
 }
 
 static int
@@ -8111,7 +8084,7 @@ extended_remote_create_inferior (struct target_ops *ops,
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 
   /* Disable address space randomization if requested (and supported).  */
   if (extended_remote_supports_disable_randomization (ops))
@@ -11961,7 +11934,7 @@ remote_async_serial_handler (struct serial *scb, void *context)
 
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
-  rs->async_client_callback (INF_REG_EVENT, rs->async_client_context);
+  inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
 static void
@@ -11971,18 +11944,13 @@ remote_async_inferior_event_handler (gdb_client_data data)
 }
 
 static void
-remote_async (struct target_ops *ops,
-	      void (*callback) (enum inferior_event_type event_type,
-				void *context),
-	      void *context)
+remote_async (struct target_ops *ops, int enable)
 {
   struct remote_state *rs = get_remote_state ();
 
-  if (callback != NULL)
+  if (enable)
     {
       serial_async (rs->remote_desc, remote_async_serial_handler, rs);
-      rs->async_client_callback = callback;
-      rs->async_client_context = context;
 
       /* If there are pending events in the stop reply queue tell the
 	 event loop to process them.  */
@@ -12506,7 +12474,8 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_hwbreak_feature],
                          "hwbreak-feature", "hwbreak-feature", 0);
 
-  /* Assert that we've registered commands for all packet configs.  */
+  /* Assert that we've registered "set remote foo-packet" commands
+     for all packet configs.  */
   {
     int i;
 

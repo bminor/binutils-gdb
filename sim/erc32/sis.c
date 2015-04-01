@@ -75,7 +75,7 @@ run_sim(sregs, icount, dis)
     uint64          icount;
     int             dis;
 {
-    int             irq, mexc, deb, asi;
+    int             irq, mexc, deb;
 
     sregs->starttime = get_time();
     init_stdio();
@@ -84,11 +84,7 @@ run_sim(sregs, icount, dis)
     irq = 0;
     while (icount > 0) {
 
-	if (sregs->psr & 0x080)
-	    asi = 9;
-   	else
-	    asi = 8;
-	mexc = memory_read(asi, sregs->pc, &sregs->inst, 2, &sregs->hold);
+	mexc = memory_iread (sregs->pc, &sregs->inst, &sregs->hold);
 	sregs->icnt = 1;
 	if (sregs->annul) {
 	    sregs->annul = 0;
@@ -104,7 +100,7 @@ run_sim(sregs, icount, dis)
 		    if (deb) {
 	    		if ((sregs->bphit = check_bpt(sregs)) != 0) {
             		    restore_stdio();
-	    		    return (BPT_HIT);
+	    		    return BPT_HIT;
 	    		}
 		        if (sregs->histlen) {
 			    sregs->histbuf[sregs->histind].addr = sregs->pc;
@@ -140,12 +136,12 @@ run_sim(sregs, icount, dis)
     sregs->tottime += get_time() - sregs->starttime;
     restore_stdio();
     if (sregs->err_mode)
-	return (ERROR);
+	return ERROR;
     if (ctrl_c) {
 	ctrl_c = 0;
-	return (CTRL_C);
+	return CTRL_C;
     }
-    return (TIME_OUT);
+    return TIME_OUT;
 }
 
 int

@@ -1382,23 +1382,6 @@ cpu_flags_all_zero (const union i386_cpu_flags *x)
     }
 }
 
-static INLINE void
-cpu_flags_set (union i386_cpu_flags *x, unsigned int v)
-{
-  switch (ARRAY_SIZE(x->array))
-    {
-    case 3:
-      x->array[2] = v;
-    case 2:
-      x->array[1] = v;
-    case 1:
-      x->array[0] = v;
-      break;
-    default:
-      abort ();
-    }
-}
-
 static INLINE int
 cpu_flags_equal (const union i386_cpu_flags *x,
 		 const union i386_cpu_flags *y)

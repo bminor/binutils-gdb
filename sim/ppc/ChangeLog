@@ -1,3 +1,10 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* Makefile.in (INCLUDES): Add $(ZLIBINC).
+	(ZLIB, ZLIBINC): Define.
+	(BFD_LIB): Add $(ZLIB).
+
 2014-11-23  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* ChangeLog, ChangeLog.00, hw_com.c, ld-cache.h, ppc-instructions:

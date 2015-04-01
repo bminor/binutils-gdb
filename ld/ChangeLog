@@ -1,3 +1,68 @@
+2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* emultempl/aarch64elf.em
+	(aarch64_elf_create_output_section_statements): Add parameter in
+	bfd_elf${ELFSIZE}_aarch64_set_options call.
+	(OPTION_FIX_ERRATUM_843419): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add fix-cortex-a53-843419.
+	(PARSE_AND_LIST_ARGS_CASES): Add OPTION_FIX_ERRATUM_843419.
+
+2015-04-01  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* emulparams/elf32_tic6x_le.sh: Skip OTHER_BSS_SECTIONS for
+	relocating operation.
+
+2015-04-01  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18176
+	* ldlang.c (lang_size_sections): When alignment of sections
+	results in relro base adjustment being too large, don't go lower
+	than the initial value.
+	* ldexp.c (fold_binary <DATA_SEGMENT_RELRO_END>): Comment.
+	* scripttempl/elf.sc (DATA_SEGMENT_ALIGN): Omit SEGMENT_SIZE
+	alignment when SEGMENT_SIZE is the same as MAXPAGESIZE.
+
+2015-04-01  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Don't
+	init ehdr_start_save.
+
+2015-04-01  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (eelf32ppcvxworks.c): Depend on ppc32elf.em and
+	ldemul-list.h.
+	(eelf32lppc.c, eelf32lppclinux.c, eelf32lppcnto.c, eelf32lppcsim.c,
+	eelf32ppc.c, eelf32ppc_fbsd.c, eelf32ppclinux.c, eelf32ppcnto.c,
+	eelf32ppcsim.c): Rearrange deps for consistency.
+	* Makefile.in: Regenerate.
+
+2015-04-01  Ed Schouten  <ed@nuxi.nl>
+
+	* emultempl/elf32.em (gld*_before_allocation): Zero-initialize
+	the ehdr_start_save variable.
+
+2015-03-31  Ed Schouten  <ed@nuxi.nl>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add
+	eelf_x86_64_cloudabi.c.
+	(eelf_x86_64_cloudabi.c): New.
+	* configure.tgt (targ_emul): Set to elf_x86_64_cloudabi for
+	x86_64-*-cloudabi*.
+	* Makefile.in: Regenerated.
+	* emulparams/elf_x86_64_cloudabi.sh: New file.
+
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (AM_ZLIB): Removed.
+	* Makefile.in: Regenerated.
+	* config.in: Likewise.
+	* configure: Likewise.
+
+2015-03-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* emultempl/aarch64elf.em (_aarch64_add_stub_section): Set section
+	alignment to 2.
+
 2015-03-23  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* emultempl/aarch64elf.em

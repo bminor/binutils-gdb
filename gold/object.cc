@@ -285,13 +285,8 @@ Relobj::add_merge_mapping(Output_section_data *output_data,
                           unsigned int shndx, section_offset_type offset,
                           section_size_type length,
                           section_offset_type output_offset) {
-  if (this->object_merge_map_ == NULL)
-    {
-      this->object_merge_map_ =  new Object_merge_map();
-    }
-
-  this->object_merge_map_->add_mapping(output_data, shndx, offset, length,
-				       output_offset);
+  Object_merge_map* object_merge_map = this->get_or_create_merge_map();
+  object_merge_map->add_mapping(output_data, shndx, offset, length, output_offset);
 }
 
 bool
@@ -409,6 +404,14 @@ Relobj::finalize_incremental_relocs(Layout* layout, bool clear_counts)
 	this->reloc_counts_[i] = 0;
     }
   layout->incremental_inputs()->set_reloc_count(rindex);
+}
+
+Object_merge_map*
+Relobj::get_or_create_merge_map()
+{
+  if (!this->object_merge_map_)
+    this->object_merge_map_ = new Object_merge_map();
+  return this->object_merge_map_;
 }
 
 // Class Sized_relobj.

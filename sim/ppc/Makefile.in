@@ -152,11 +152,13 @@ MAKEOVERRIDES=
 LIB_INCLUDES	= -I$(srcdir)/../../include
 BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
 GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config
+ZLIBINC		= @zlibinc@
 
-INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
+INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES) $(ZLIBINC)
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
-BFD_LIB		= ../../bfd/libbfd.a
+BFD_LIB		= ../../bfd/libbfd.a $(ZLIB)
+ZLIB		= @zlibdir@ -lz
 
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@

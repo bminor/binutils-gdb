@@ -1438,15 +1438,6 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   last_newf->fr_type = rs_fill;
   last_newf->fr_fix = 12;
   header = last_newf->fr_literal;
-  memcpy (header, "ZLIB", 4);
-  header[11] = uncompressed_size; uncompressed_size >>= 8;
-  header[10] = uncompressed_size; uncompressed_size >>= 8;
-  header[9] = uncompressed_size; uncompressed_size >>= 8;
-  header[8] = uncompressed_size; uncompressed_size >>= 8;
-  header[7] = uncompressed_size; uncompressed_size >>= 8;
-  header[6] = uncompressed_size; uncompressed_size >>= 8;
-  header[5] = uncompressed_size; uncompressed_size >>= 8;
-  header[4] = uncompressed_size;
   compressed_size = 12;
 
   /* Stream the frags through the compression engine, adding new frags
@@ -1526,10 +1517,20 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	break;
     }
 
-  /* PR binutils/18087: If compression didn't make
-     the section smaller, just keep it uncompressed.  */
-  if (compressed_size > sec->size)
+  /* PR binutils/18087: If compression didn't make the section smaller,
+     just keep it uncompressed.  */
+  if (compressed_size > uncompressed_size)
     return;
+
+  memcpy (header, "ZLIB", 4);
+  header[11] = uncompressed_size; uncompressed_size >>= 8;
+  header[10] = uncompressed_size; uncompressed_size >>= 8;
+  header[9] = uncompressed_size; uncompressed_size >>= 8;
+  header[8] = uncompressed_size; uncompressed_size >>= 8;
+  header[7] = uncompressed_size; uncompressed_size >>= 8;
+  header[6] = uncompressed_size; uncompressed_size >>= 8;
+  header[5] = uncompressed_size; uncompressed_size >>= 8;
+  header[4] = uncompressed_size;
 
   /* Replace the uncompressed frag list with the compressed frag list.  */
   seginfo->frchainP->frch_root = first_newf;

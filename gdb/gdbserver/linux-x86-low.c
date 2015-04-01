@@ -37,6 +37,9 @@
 #include "tdesc.h"
 #include "tracepoint.h"
 #include "ax.h"
+#include "nat/linux-nat.h"
+#include "nat/x86-linux.h"
+#include "nat/x86-linux-dregs.h"
 
 #ifdef __x86_64__
 /* Defined in auto-generated file amd64-linux.c.  */
@@ -149,14 +152,6 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 struct arch_process_info
 {
   struct x86_debug_reg_state debug_reg_state;
-};
-
-/* Per-thread arch-specific data we want to keep.  */
-
-struct arch_lwp_info
-{
-  /* Non-zero if our copy differs from what's recorded in the thread.  */
-  int debug_registers_changed;
 };
 
 #ifdef __x86_64__
@@ -530,138 +525,14 @@ x86_breakpoint_at (CORE_ADDR pc)
   return 0;
 }
 
-
-/* Return the offset of REGNUM in the u_debugreg field of struct
-   user.  */
-
-static int
-u_debugreg_offset (int regnum)
-{
-  return (offsetof (struct user, u_debugreg)
-	  + sizeof (((struct user *) 0)->u_debugreg[0]) * regnum);
-}
-
-
-/* Support for debug registers.  */
-
-static unsigned long
-x86_linux_dr_get (ptid_t ptid, int regnum)
-{
-  int tid;
-  unsigned long value;
-
-  tid = ptid_get_lwp (ptid);
-
-  errno = 0;
-  value = ptrace (PTRACE_PEEKUSER, tid, u_debugreg_offset (regnum), 0);
-  if (errno != 0)
-    error ("Couldn't read debug register");
-
-  return value;
-}
-
-static void
-x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
-{
-  int tid;
-
-  tid = ptid_get_lwp (ptid);
-
-  errno = 0;
-  ptrace (PTRACE_POKEUSER, tid, u_debugreg_offset (regnum), value);
-  if (errno != 0)
-    error ("Couldn't write debug register");
-}
-
-static int
-update_debug_registers_callback (struct inferior_list_entry *entry,
-				 void *pid_p)
-{
-  struct thread_info *thr = (struct thread_info *) entry;
-  struct lwp_info *lwp = get_thread_lwp (thr);
-  int pid = *(int *) pid_p;
-
-  /* Only update the threads of this process.  */
-  if (pid_of (thr) == pid)
-    {
-      /* The actual update is done later just before resuming the lwp,
-	 we just mark that the registers need updating.  */
-      lwp->arch_private->debug_registers_changed = 1;
-
-      /* If the lwp isn't stopped, force it to momentarily pause, so
-	 we can update its debug registers.  */
-      if (!lwp->stopped)
-	linux_stop_lwp (lwp);
-    }
-
-  return 0;
-}
-
-/* Update the inferior's debug register REGNUM from STATE.  */
-
-static void
-x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
-{
-  /* Only update the threads of this process.  */
-  int pid = pid_of (current_thread);
-
-  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
-
-  find_inferior (&all_threads, update_debug_registers_callback, &pid);
-}
-
-/* Return the inferior's debug register REGNUM.  */
-
-static CORE_ADDR
-x86_dr_low_get_addr (int regnum)
-{
-  ptid_t ptid = ptid_of (current_thread);
-
-  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
-
-  return x86_linux_dr_get (ptid, regnum);
-}
-
-/* Update the inferior's DR7 debug control register from STATE.  */
-
-static void
-x86_dr_low_set_control (unsigned long control)
-{
-  /* Only update the threads of this process.  */
-  int pid = pid_of (current_thread);
-
-  find_inferior (&all_threads, update_debug_registers_callback, &pid);
-}
-
-/* Return the inferior's DR7 debug control register.  */
-
-static unsigned long
-x86_dr_low_get_control (void)
-{
-  ptid_t ptid = ptid_of (current_thread);
-
-  return x86_linux_dr_get (ptid, DR_CONTROL);
-}
-
-/* Get the value of the DR6 debug status register from the inferior
-   and record it in STATE.  */
-
-static unsigned long
-x86_dr_low_get_status (void)
-{
-  ptid_t ptid = ptid_of (current_thread);
-
-  return x86_linux_dr_get (ptid, DR_STATUS);
-}
-
 /* Low-level function vector.  */
 struct x86_dr_low_type x86_dr_low =
   {
-    x86_dr_low_set_control,
-    x86_dr_low_set_addr,
-    x86_dr_low_get_addr,
-    x86_dr_low_get_status,
-    x86_dr_low_get_control,
+    x86_linux_dr_set_control,
+    x86_linux_dr_set_addr,
+    x86_linux_dr_get_addr,
+    x86_linux_dr_get_status,
+    x86_linux_dr_get_control,
     sizeof (void *),
   };
 
@@ -769,57 +640,14 @@ x86_linux_new_process (void)
   return info;
 }
 
-/* Called when a new thread is detected.  */
+/* See nat/x86-dregs.h.  */
 
-static struct arch_lwp_info *
-x86_linux_new_thread (void)
+struct x86_debug_reg_state *
+x86_debug_reg_state (pid_t pid)
 {
-  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
+  struct process_info *proc = find_process_pid (pid);
 
-  info->debug_registers_changed = 1;
-
-  return info;
-}
-
-/* Called when resuming a thread.
-   If the debug regs have changed, update the thread's copies.  */
-
-static void
-x86_linux_prepare_to_resume (struct lwp_info *lwp)
-{
-  ptid_t ptid = ptid_of (get_lwp_thread (lwp));
-  int clear_status = 0;
-
-  if (lwp->arch_private->debug_registers_changed)
-    {
-      int i;
-      int pid = ptid_get_pid (ptid);
-      struct process_info *proc = find_process_pid (pid);
-      struct x86_debug_reg_state *state
-	= &proc->priv->arch_private->debug_reg_state;
-
-      x86_linux_dr_set (ptid, DR_CONTROL, 0);
-
-      ALL_DEBUG_ADDRESS_REGISTERS (i)
-	if (state->dr_ref_count[i] > 0)
-	  {
-	    x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
-
-	    /* If we're setting a watchpoint, any change the inferior
-	       had done itself to the debug registers needs to be
-	       discarded, otherwise, x86_dr_stopped_data_address can
-	       get confused.  */
-	    clear_status = 1;
-	  }
-
-      if (state->dr_control_mirror != 0)
-	x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
-
-      lwp->arch_private->debug_registers_changed = 0;
-    }
-
-  if (clear_status || lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
-    x86_linux_dr_set (ptid, DR_STATUS, 0);
+  return &proc->priv->arch_private->debug_reg_state;
 }
 
 /* When GDBSERVER is built as a 64-bit application on linux, the

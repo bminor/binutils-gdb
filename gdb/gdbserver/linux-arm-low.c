@@ -703,8 +703,8 @@ arm_new_process (void)
 }
 
 /* Called when a new thread is detected.  */
-static struct arch_lwp_info *
-arm_new_thread (void)
+static void
+arm_new_thread (struct lwp_info *lwp)
 {
   struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
   int i;
@@ -714,7 +714,7 @@ arm_new_thread (void)
   for (i = 0; i < MAX_WPTS; i++)
     info->wpts_changed[i] = 1;
 
-  return info;
+  lwp->arch_private = info;
 }
 
 /* Called when resuming a thread.

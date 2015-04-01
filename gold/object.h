@@ -1215,6 +1215,9 @@ class Relobj : public Object
   relocs_must_follow_section_writes() const
   { return this->relocs_must_follow_section_writes_; }
 
+  Object_merge_map*
+  get_or_create_merge_map();
+
   template<int size>
   void
   initialize_input_to_output_map(unsigned int shndx,

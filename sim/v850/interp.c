@@ -324,3 +324,9 @@ sim_store_register (SIM_DESC        sd,
   State.regs[rn] = T2H_4 (*(unsigned32 *) memory);
   return length;
 }
+
+sim_cia
+sim_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}

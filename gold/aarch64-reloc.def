@@ -71,6 +71,8 @@ ARD(TLSLD_ADR_PAGE21             , STATIC ,  AARCH64    ,   Y,  -1,   32,32     
 ARD(TLSLD_ADD_LO12_NC            , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,    0,11 , Symbol::TLS_REF ,                              ADD   )
 ARD(TLSLD_MOVW_DTPREL_G1         , STATIC ,  AARCH64    ,   Y,   1,   32,32               ,   16,31 , Symbol::TLS_REF ,                              ADRP  )
 ARD(TLSLD_MOVW_DTPREL_G0_NC      , STATIC ,  AARCH64    ,   Y,   0,    0,0                ,    0,15 , Symbol::TLS_REF ,                              MOVW  )
+ARD(TLSLD_ADD_DTPREL_HI12        , STATIC ,  AARCH64    ,   Y,  -1,    0,24               ,   12,23 , Symbol::TLS_REF ,                              ADD   )
+ARD(TLSLD_ADD_DTPREL_LO12_NC     , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,    0,11 , Symbol::TLS_REF ,                              ADD   )
 // Above is from Table 4-16, Local Dynamic TLS relocations, 517-573.
 
 ARD(TLSIE_MOVW_GOTTPREL_G1       , STATIC ,  AARCH64    ,   N,  -1,   32,32               ,   16,31 , Symbol::TLS_REF ,                              MOVW  )

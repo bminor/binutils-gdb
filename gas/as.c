@@ -245,14 +245,12 @@ Options:\n\
 
   fprintf (stream, _("\
   --alternate             initially turn on alternate macro syntax\n"));
-#ifdef HAVE_ZLIB_H
   fprintf (stream, _("\
   --compress-debug-sections\n\
                           compress DWARF debug sections using zlib\n"));
   fprintf (stream, _("\
   --nocompress-debug-sections\n\
                           don't compress DWARF debug sections\n"));
-#endif /* HAVE_ZLIB_H */
   fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
   fprintf (stream, _("\
@@ -657,11 +655,7 @@ This program has absolutely no warranty.\n"));
 	  exit (EXIT_SUCCESS);
 
 	case OPTION_COMPRESS_DEBUG:
-#ifdef HAVE_ZLIB_H
 	  flag_compress_debug = 1;
-#else
-	  as_warn (_("cannot compress debug sections (zlib not installed)"));
-#endif /* HAVE_ZLIB_H */
 	  break;
 
 	case OPTION_NOCOMPRESS_DEBUG:

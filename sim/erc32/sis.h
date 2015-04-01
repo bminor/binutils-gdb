@@ -169,6 +169,7 @@ extern void	sim_halt (void);
 extern void	exit_sim (void);
 extern void	init_stdio (void);
 extern void	restore_stdio (void);
+extern int	memory_iread (uint32 addr, uint32 *data, int32 *ws);
 extern int	memory_read (int32 asi, uint32 addr, uint32 *data,
 			     int32 sz, int32 *ws);
 extern int	memory_write (int32 asi, uint32 addr, uint32 *data,
@@ -179,10 +180,11 @@ extern int	sis_memory_read (uint32 addr, char *data,
 				 uint32 length);
 
 /* func.c */
+extern struct pstate  sregs;
 extern void	set_regi (struct pstate *sregs, int32 reg,
 			  uint32 rval);
 extern void	get_regi (struct pstate *sregs, int32 reg, char *buf);
-extern int	exec_cmd (struct pstate *sregs, char *cmd);
+extern int	exec_cmd (struct pstate *sregs, const char *cmd);
 extern void	reset_stat (struct pstate  *sregs);
 extern void	show_stat (struct pstate  *sregs);
 extern void	init_bpt (struct pstate  *sregs);
@@ -200,7 +202,7 @@ extern int	check_bpt (struct pstate *sregs);
 extern void	reset_all (void);
 extern void	sys_reset (void);
 extern void	sys_halt (void);
-extern int	bfd_load (char *fname);
+extern int	bfd_load (const char *fname);
 extern double	get_time (void);
 
 /* exec.c */

@@ -1,3 +1,46 @@
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* run-sim.h, run.c: Delete.
+	* tconfig.h (SIM_HAVE_PROFILE, SIM_HAVE_BIENDIAN): Delete.
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* Make-common.in (CSEARCH): Add $(ZLIBINC).
+	(ZLIB, ZLIBINC): Define.
+	(BFD_LIB): Add $(ZLIB).
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-mem.h (MEMOPS_INLINE): Change to EXTERN_INLINE.
+	* cgen-ops.h (SEMOPS_INLINE): Likewise.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-arange.h (SIM_ARANGE_INLINE): Move above sim_addr_range_hit_p.
+	(sim_addr_range_hit_p): Change INLINE to SIM_ARANGE_INLINE.
+	* sim-inline.h (INLINE2): Define to gnu_inline when available.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-profile.c (profile_pc_event): Get pc via sim_pc_get.  Delete
+	usage of STATE_WATCHPOINTS.
+	(profile_pc_init): Delete STATE_WATCHPOINTS (sd)->pc check.  Change
+	STATE_WATCHPOINTS (sd)->sizeof_pc to sizeof (sim_cia).
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h: Note SIM_HAVE_PROFILE is deprecated.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h: Note SIM_HAVE_BIENDIAN is deprecated.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Move default option setting
+	of enable_sim_hardware to AC_ARG_ENABLE.
+
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Delete SIM_DV_SOCKSER_O.

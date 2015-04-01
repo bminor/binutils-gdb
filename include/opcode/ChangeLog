@@ -1,3 +1,20 @@
+2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* arm.h (arm_feature_set): Extended to provide more available bits.
+	(ARM_ANY): Updated to follow above new definition.
+	(ARM_CPU_HAS_FEATURE): Likewise.
+	(ARM_CPU_IS_ANY): Likewise.
+	(ARM_MERGE_FEATURE_SETS): Likewise.
+	(ARM_CLEAR_FEATURE): Likewise.
+	(ARM_FEATURE): Likewise.
+	(ARM_FEATURE_COPY): New macro.
+	(ARM_FEATURE_EQUAL): Likewise.
+	(ARM_FEATURE_ZERO): Likewise.
+	(ARM_FEATURE_CORE_EQUAL): Likewise.
+	(ARM_FEATURE_LOW): Likewise.
+	(ARM_FEATURE_CORE_LOW): Likewise.
+	(ARM_FEATURE_CORE_COPROC): Likewise.
+
 2015-02-19  Pedro Alves  <palves@redhat.com>
 
 	* cgen.h [__cplusplus]: Wrap in extern "C".

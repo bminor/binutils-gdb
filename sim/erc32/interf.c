@@ -95,9 +95,8 @@ run_sim(sregs, icount, dis)
             if (sregs->pc == 0 || sregs->npc == 0)
                 printf ("bogus pc or npc\n");
 #endif
-        mexc = memory_read(sregs->asi, sregs->pc, &sregs->inst,
-                           2, &sregs->hold);
-#if 1	/* DELETE ME! for debugging purposes only */
+        mexc = memory_iread (sregs->pc, &sregs->inst, &sregs->hold);
+#if 0	/* DELETE ME! for debugging purposes only */
         if (sis_verbose > 2)
             printf("pc %x, np %x, sp %x, fp %x, wm %x, cw %x, i %08x\n",
                    sregs->pc, sregs->npc,
@@ -125,7 +124,7 @@ run_sim(sregs, icount, dis)
                         sim_halt();
 			restore_stdio();
 			clearerr(stdin);
-			return (BPT_HIT);
+			return BPT_HIT;
 		    } else
 			dispatch_instruction(sregs);
 		}
@@ -148,31 +147,18 @@ run_sim(sregs, icount, dis)
     if (sregs->err_mode)
 	error_mode(sregs->pc);
     if (sregs->err_mode)
-	return (ERROR);
+	return ERROR;
     if (sregs->bphit) {
 	if (sis_verbose)
 	    (*sim_callback->printf_filtered) (sim_callback,
 					      "HW BP hit at %x\n", sregs->pc);
-	return (BPT_HIT);
+	return BPT_HIT;
     }
     if (ctrl_c) {
 	ctrl_c = 0;
-	return (CTRL_C);
+	return CTRL_C;
     }
-    return (TIME_OUT);
-}
-
-void
-sim_set_callbacks (ptr)
-     host_callback *ptr;
-{
-  sim_callback = ptr;
-}
-
-void
-sim_size (memsize)
-     int memsize;
-{
+    return TIME_OUT;
 }
 
 SIM_DESC
@@ -356,7 +342,7 @@ sim_write(sd, mem, buf, length)
     const unsigned char  *buf;
     int             length;
 {
-    return (sis_memory_write(mem, buf, length));
+    return sis_memory_write (mem, buf, length);
 }
 
 int
@@ -366,7 +352,7 @@ sim_read(sd, mem, buf, length)
      unsigned char *buf;
      int length;
 {
-    return (sis_memory_read(mem, buf, length));
+    return sis_memory_read (mem, buf, length);
 }
 
 void
@@ -466,15 +452,6 @@ sim_resume(SIM_DESC sd, int step, int siggnal)
     simstat = run_sim(&sregs, UINT64_MAX, 0);
 
     if (sis_gdb_break) flush_windows ();
-}
-
-int
-sim_trace (sd)
-     SIM_DESC sd;
-{
-  /* FIXME: unfinished */
-  sim_resume (sd, 0, 0);
-  return 1;
 }
 
 void

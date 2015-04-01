@@ -26,8 +26,7 @@ MN10300_OBJS = \
 	sim-hrw.o \
 	sim-resume.o \
 	sim-reason.o \
-	sim-stop.o \
-	dv-sockser.o
+	sim-stop.o
 
 SIM_OBJS = $(MN10300_OBJS) interp.o
 

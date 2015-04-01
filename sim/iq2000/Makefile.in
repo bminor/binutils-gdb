@@ -19,9 +19,6 @@
 
 IQ2000_OBJS = iq2000.o cpu.o decode.o sem.o model.o mloop.o
 
-CONFIG_DEVICES = dv-sockser.o
-CONFIG_DEVICES =
-
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-cpu.o \
@@ -32,8 +29,7 @@ SIM_OBJS = \
 	cgen-utils.o cgen-trace.o cgen-scache.o \
 	cgen-run.o sim-reason.o sim-engine.o sim-stop.o \
 	sim-if.o arch.o \
-	$(IQ2000_OBJS) \
-	$(CONFIG_DEVICES)
+	$(IQ2000_OBJS)
 
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \

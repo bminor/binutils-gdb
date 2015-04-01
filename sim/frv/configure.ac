@@ -28,6 +28,6 @@ if test x"$silent" != x"yes" && test x"$sim_trapdump" != x""; then
 fi],[sim_trapdump=""])dnl
 AC_SUBST(sim_trapdump)
 
-SIM_AC_OPTION_HARDWARE(no,"","")
+SIM_AC_OPTION_HARDWARE(yes,"","")
 
 SIM_AC_OUTPUT

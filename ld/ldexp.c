@@ -588,6 +588,8 @@ fold_binary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_RELRO_END:
+	  /* Operands swapped!  DATA_SEGMENT_RELRO_END(offset,exp)
+	     has offset in expld.result and exp in lhs.  */
 	  expld.dataseg.relro = exp_dataseg_relro_end;
 	  if (expld.phase == lang_first_phase_enum
 	      || expld.section != bfd_abs_section_ptr)

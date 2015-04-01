@@ -278,17 +278,14 @@ record_btrace_close (struct target_ops *self)
 /* The to_async method of target record-btrace.  */
 
 static void
-record_btrace_async (struct target_ops *ops,
-		     void (*callback) (enum inferior_event_type event_type,
-				       void *context),
-		     void *context)
+record_btrace_async (struct target_ops *ops, int enable)
 {
-  if (callback != NULL)
+  if (enable)
     mark_async_event_handler (record_btrace_async_inferior_event_handler);
   else
     clear_async_event_handler (record_btrace_async_inferior_event_handler);
 
-  ops->beneath->to_async (ops->beneath, callback, context);
+  ops->beneath->to_async (ops->beneath, enable);
 }
 
 /* Adjusts the size and returns a human readable size suffix.  */
@@ -1789,7 +1786,7 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
   /* Async support.  */
   if (target_can_async_p ())
     {
-      target_async (inferior_event_handler, 0);
+      target_async (1);
       mark_async_event_handler (record_btrace_async_inferior_event_handler);
     }
 }

@@ -20,27 +20,18 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/times.h>
-#include <sys/param.h>
 #include <unistd.h>
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "libiberty.h"
 #include "gdb/remote-sim.h"
-#include "run-sim.h"
+
 #include "sim-main.h"
-#include "sim-utils.h"
+#include "sim-options.h"
+
 #include "microblaze-dis.h"
 
-
-#ifndef NUM_ELEM
-#define NUM_ELEM(A) (sizeof (A) / sizeof (A)[0])
-#endif
-
-static int target_big_endian = 1;
-static unsigned long heap_ptr = 0;
-static unsigned long stack_ptr = 0;
-host_callback *callback;
+#define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
 
 static unsigned long
 microblaze_extract_unsigned_integer (unsigned char *addr, int len)
@@ -98,17 +89,11 @@ microblaze_store_unsigned_integer (unsigned char *addr, int len,
     }
 }
 
-struct sim_state microblaze_state;
-
-int memcycles = 1;
-
-static SIM_OPEN_KIND sim_kind;
-static char *myname;
-
+/* TODO: Convert to common tracing framework.  */
 static int issue_messages = 0;
 
 static void /* INLINE */
-wbat (word x, word v)
+wbat (SIM_CPU *cpu, word x, word v)
 {
   if (((uword)x) >= CPU.msize)
     {
@@ -125,7 +110,7 @@ wbat (word x, word v)
 }
 
 static void /* INLINE */
-wlat (word x, word v)
+wlat (SIM_CPU *cpu, word x, word v)
 {
   if (((uword)x) >= CPU.msize)
     {
@@ -163,7 +148,7 @@ wlat (word x, word v)
 }
 
 static void /* INLINE */
-what (word x, word v)
+what (SIM_CPU *cpu, word x, word v)
 {
   if (((uword)x) >= CPU.msize)
     {
@@ -199,7 +184,7 @@ what (word x, word v)
 
 /* Read functions.  */
 static int /* INLINE */
-rbat (word x)
+rbat (SIM_CPU *cpu, word x)
 {
   if (((uword)x) >= CPU.msize)
     {
@@ -217,7 +202,7 @@ rbat (word x)
 }
 
 static int /* INLINE */
-rlat (word x)
+rlat (SIM_CPU *cpu, word x)
 {
   if (((uword) x) >= CPU.msize)
     {
@@ -251,7 +236,7 @@ rlat (word x)
 }
 
 static int /* INLINE */
-rhat (word x)
+rhat (SIM_CPU *cpu, word x)
 {
   if (((uword)x) >= CPU.msize)
     {
@@ -284,12 +269,13 @@ rhat (word x)
     }
 }
 
+/* TODO: Delete all sim_size and use common memory functions.  */
 /* Default to a 8 Mbyte (== 2^23) memory space.  */
 static int sim_memory_size = 1 << 23;
 
 #define	MEM_SIZE_FLOOR	64
-void
-sim_size (int size)
+static void
+sim_size (SIM_CPU *cpu, int size)
 {
   sim_memory_size = size;
   CPU.msize = sim_memory_size;
@@ -312,20 +298,20 @@ sim_size (int size)
 }
 
 static void
-init_pointers (void)
+init_pointers (SIM_CPU *cpu)
 {
   if (CPU.msize != (sim_memory_size))
-    sim_size (sim_memory_size);
+    sim_size (cpu, sim_memory_size);
 }
 
 static void
-set_initial_gprs (void)
+set_initial_gprs (SIM_CPU *cpu)
 {
   int i;
   long space;
   unsigned long memsize;
 
-  init_pointers ();
+  init_pointers (cpu);
 
   /* Set up machine just out of reset.  */
   PC = 0;
@@ -345,29 +331,12 @@ set_initial_gprs (void)
   CPU.imm_enable = 0;
 }
 
-#define WATCHFUNCTIONS 1
-#ifdef WATCHFUNCTIONS
-
-#define MAXWL 80
-word WL[MAXWL];
-char *WLstr[MAXWL];
-
-int ENDWL=0;
-int WLincyc;
-int WLcyc[MAXWL];
-int WLcnts[MAXWL];
-int WLmax[MAXWL];
-int WLmin[MAXWL];
-word WLendpc;
-int WLbcyc;
-int WLW;
-#endif
-
 static int tracing = 0;
 
 void
 sim_resume (SIM_DESC sd, int step, int siggnal)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   int needfetch;
   word inst;
   enum microblaze_instr op;
@@ -396,7 +365,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   do
     {
       /* Fetch the initial instructions that we'll decode. */
-      inst = rlat (PC & 0xFFFFFFFC);
+      inst = rlat (cpu, PC & 0xFFFFFFFC);
 
       op = get_insn_microblaze (inst, &imm_unsigned, &insn_type,
 				&num_delay_slot);
@@ -470,7 +439,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	        {
 	          newpc = PC;
 	          PC = oldpc + INST_SIZE;
-	          inst = rlat (PC & 0xFFFFFFFC);
+	          inst = rlat (cpu, PC & 0xFFFFFFFC);
 	          op = get_insn_microblaze (inst, &imm_unsigned, &insn_type,
 					    &num_delay_slot);
 	          if (op == invalid_inst)
@@ -557,8 +526,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 int
 sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   int i;
-  init_pointers ();
+
+  init_pointers (cpu);
 
   memcpy (&CPU.memory[addr], buffer, size);
 
@@ -568,8 +539,10 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 int
 sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   int i;
-  init_pointers ();
+
+  init_pointers (cpu);
 
   memcpy (buffer, &CPU.memory[addr], size);
 
@@ -580,7 +553,9 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 int
 sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
-  init_pointers ();
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
+
+  init_pointers (cpu);
 
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
     {
@@ -604,8 +579,10 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 int
 sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   long ival;
-  init_pointers ();
+
+  init_pointers (cpu);
 
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
     {
@@ -627,22 +604,11 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     return 0;
 }
 
-
-int
-sim_trace (SIM_DESC sd)
-{
-  tracing = 1;
-
-  sim_resume (sd, 0, 0);
-
-  tracing = 0;
-
-  return 1;
-}
-
 void
 sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
+
   if (CPU.exception == SIGQUIT)
     {
       *reason = sim_exited;
@@ -655,208 +621,113 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
     }
 }
 
-
-int
-sim_stop (SIM_DESC sd)
-{
-  CPU.exception = SIGINT;
-  return 1;
-}
-
-
 void
 sim_info (SIM_DESC sd, int verbose)
 {
-#ifdef WATCHFUNCTIONS
-  int w, wcyc;
-#endif
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
+  host_callback *callback = STATE_CALLBACK (sd);
 
   callback->printf_filtered (callback, "\n\n# instructions executed  %10d\n",
 			     CPU.insts);
   callback->printf_filtered (callback, "# cycles                 %10d\n",
 			     (CPU.cycles) ? CPU.cycles+2 : 0);
-
-#ifdef WATCHFUNCTIONS
-  callback->printf_filtered (callback, "\nNumber of watched functions: %d\n",
-			     ENDWL);
-
-  wcyc = 0;
-
-  for (w = 1; w <= ENDWL; w++)
-    {
-      callback->printf_filtered (callback, "WL = %s %8x\n",WLstr[w],WL[w]);
-      callback->printf_filtered (callback, "  calls = %d, cycles = %d\n",
-				 WLcnts[w],WLcyc[w]);
-
-      if (WLcnts[w] != 0)
-	callback->printf_filtered (callback,
-				   "  maxcpc = %d, mincpc = %d, avecpc = %d\n",
-				   WLmax[w],WLmin[w],WLcyc[w]/WLcnts[w]);
-      wcyc += WLcyc[w];
-    }
-
-  callback->printf_filtered (callback,
-			     "Total cycles for watched functions: %d\n",wcyc);
-#endif
 }
 
-struct	aout
+static void
+free_state (SIM_DESC sd)
 {
-  unsigned char  sa_machtype[2];
-  unsigned char  sa_magic[2];
-  unsigned char  sa_tsize[4];
-  unsigned char  sa_dsize[4];
-  unsigned char  sa_bsize[4];
-  unsigned char  sa_syms[4];
-  unsigned char  sa_entry[4];
-  unsigned char  sa_trelo[4];
-  unsigned char  sa_drelo[4];
-} aout;
-
-#define	LONG(x)		(((x)[0]<<24)|((x)[1]<<16)|((x)[2]<<8)|(x)[3])
-#define	SHORT(x)	(((x)[0]<<8)|(x)[1])
+  if (STATE_MODULES (sd) != NULL)
+    sim_module_uninstall (sd);
+  sim_cpu_free_all (sd);
+  sim_state_free (sd);
+}
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
-  /*  SIM_DESC sd = sim_state_alloc(kind, alloc);*/
+  int i;
+  SIM_DESC sd = sim_state_alloc (kind, cb);
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
-  int osize = sim_memory_size;
-  myname = argv[0];
-  callback = cb;
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* getopt will print the error message so we just have to exit if this fails.
+     FIXME: Hmmm...  in the case of gdb we need getopt to call
+     print_filtered.  */
+  if (sim_parse_args (sd, argv) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Check for/establish the a reference program image.  */
+  if (sim_analyze_program (sd,
+			   (STATE_PROG_ARGV (sd) != NULL
+			    ? *STATE_PROG_ARGV (sd)
+			    : NULL), abfd) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Configure/verify the target byte order and other runtime
+     configuration options.  */
+  if (sim_config (sd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
 
   if (kind == SIM_OPEN_STANDALONE)
     issue_messages = 1;
 
-  /* Discard and reacquire memory -- start with a clean slate.  */
-  sim_size (1);		/* small */
-  sim_size (osize);	/* and back again */
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+      int osize = sim_memory_size;
 
-  set_initial_gprs ();	/* Reset the GPR registers.  */
+      set_initial_gprs (cpu);
 
-  return ((SIM_DESC) 1);
+      /* Discard and reacquire memory -- start with a clean slate.  */
+      sim_size (cpu, 1);		/* small */
+      sim_size (cpu, osize);	/* and back again */
+    }
+
+  return sd;
 }
 
 void
 sim_close (SIM_DESC sd, int quitting)
 {
-  if (CPU.memory)
-    {
-      free(CPU.memory);
-      CPU.memory = NULL;
-      CPU.msize = 0;
-    }
-}
-
-SIM_RC
-sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
-{
-  /* Do the right thing for ELF executables; this turns out to be
-     just about the right thing for any object format that:
-       - we crack using BFD routines
-       - follows the traditional UNIX text/data/bss layout
-       - calls the bss section ".bss".   */
-
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
-  bfd *prog_bfd;
-
-  {
-    bfd *handle;
-    asection *s;
-    int found_loadable_section = 0;
-    bfd_vma max_addr = 0;
-    handle = bfd_openr (prog, 0);
-
-    if (!handle)
-      {
-	printf("``%s'' could not be opened.\n", prog);
-	return SIM_RC_FAIL;
-      }
-
-    /* Makes sure that we have an object file, also cleans gets the
-       section headers in place.  */
-    if (!bfd_check_format (handle, bfd_object))
-      {
-	/* wasn't an object file */
-	bfd_close (handle);
-	printf ("``%s'' is not appropriate object file.\n", prog);
-	return SIM_RC_FAIL;
-      }
-
-    for (s = handle->sections; s; s = s->next)
-      {
-	if (s->flags & SEC_ALLOC)
-	  {
-	    bfd_vma vma = 0;
-	    int size = bfd_get_section_size (s);
-	    if (size > 0)
-	      {
-		vma = bfd_section_vma (handle, s);
-		if (vma >= max_addr)
-		  {
-		    max_addr = vma + size;
-		  }
-	      }
-	    if (s->flags & SEC_LOAD)
-	      found_loadable_section = 1;
-	  }
-      }
-
-    if (!found_loadable_section)
-      {
-	/* No loadable sections */
-	bfd_close(handle);
-	printf("No loadable sections in file %s\n", prog);
-	return SIM_RC_FAIL;
-      }
-
-    sim_memory_size = (unsigned long) max_addr;
-
-    /* Clean up after ourselves.  */
-    bfd_close (handle);
-
-  }
-
-  /* from sh -- dac */
-  prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
-			    /* sim_kind == SIM_OPEN_DEBUG, */
-			    1,
-			    0, sim_write);
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-
-  target_big_endian = bfd_big_endian (prog_bfd);
-  PC = bfd_get_start_address (prog_bfd);
-
-  if (abfd == NULL)
-    bfd_close (prog_bfd);
-
-  return SIM_RC_OK;
+  /* Do nothing.  */
 }
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 {
-  char **avp;
-  int nargs = 0;
-  int nenv = 0;
-  int s_length;
-  int l;
-  unsigned long strings;
-  unsigned long pointers;
-  unsigned long hi_stack;
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
 
-
-  /* Set the initial register set.  */
-  l = issue_messages;
-  issue_messages = 0;
-  set_initial_gprs ();
-  issue_messages = l;
-
-  hi_stack = CPU.msize - 4;
   PC = bfd_get_start_address (prog_bfd);
-
-  /* For now ignore all parameters to the program */
 
   return SIM_RC_OK;
 }
@@ -864,30 +735,15 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 void
 sim_do_command (SIM_DESC sd, const char *cmd)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
+
   /* Nothing there yet; it's all an error.  */
 
   if (cmd != NULL)
     {
       char ** simargv = buildargv (cmd);
 
-      if (strcmp (simargv[0], "watch") == 0)
-	{
-	  if ((simargv[1] == NULL) || (simargv[2] == NULL))
-	    {
-	      fprintf (stderr, "Error: missing argument to watch cmd.\n");
-	      freeargv (simargv);
-	      return;
-	    }
-
-	  ENDWL++;
-
-	  WL[ENDWL] = strtol (simargv[2], NULL, 0);
-	  WLstr[ENDWL] = strdup (simargv[1]);
-	  fprintf (stderr, "Added %s (%x) to watchlist, #%d\n",WLstr[ENDWL],
-		   WL[ENDWL], ENDWL);
-
-	}
-      else if (strcmp (simargv[0], "dumpmem") == 0)
+      if (strcmp (simargv[0], "dumpmem") == 0)
 	{
 	  unsigned char * p;
 	  FILE * dumpfile;
@@ -908,7 +764,6 @@ sim_do_command (SIM_DESC sd, const char *cmd)
 	{
 	  CPU.cycles = 0;
 	  CPU.insts = 0;
-	  ENDWL = 0;
 	}
       else if (strcmp (simargv[0], "verbose") == 0)
 	{
@@ -925,21 +780,8 @@ sim_do_command (SIM_DESC sd, const char *cmd)
   else
     {
       fprintf (stderr, "M.CORE sim commands: \n");
-      fprintf (stderr, "  watch <funcname> <addr>\n");
       fprintf (stderr, "  dumpmem <filename>\n");
       fprintf (stderr, "  clearstats\n");
       fprintf (stderr, "  verbose\n");
     }
-}
-
-void
-sim_set_callbacks (host_callback *ptr)
-{
-  callback = ptr;
-}
-
-char **
-sim_complete_command (SIM_DESC sd, const char *text, const char *word)
-{
-  return NULL;
 }

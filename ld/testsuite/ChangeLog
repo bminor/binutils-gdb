@@ -1,3 +1,62 @@
+2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Add erratum843419 test.
+	* ld-aarch64/erratum843419.d: New.
+	* ld-aarch64/erratum843419.s: New.
+
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18176
+	* ld-x86-64/pr18176.d: New file.
+	* ld-x86-64/pr18176.s: Likewise.
+	* ld-x86-64/pr18176.t: Likewise.
+	* ld-x86-64/x86-64.exp: Run pr18176.
+
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-bootstrap/bootstrap.exp (extralibs): Add -lz.
+
+2015-03-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18169
+	* ld-elf/linkinfo1a.d: Updated.
+	* ld-elf/linkinfo1b.d: Likewise.
+
+2015-03-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/pr18160.d: Don't run for x86_64-*-nacl* target.
+
+2015-03-26  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* ld-aarch64/farcall-back-be.d: New.
+
+2015-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18160
+	* ld-x86-64/pr18160.d: New file.
+	* ld-x86-64/pr18160.s: Likewise.
+	* ld-x86-64/pr18160.t: Likewise.
+	* ld-x86-64/x86-64.exp: Run pr18160.
+---
+2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/erratum835769.d: Adjust for initial branch over stub
+	section.
+	* ld-aarch64/farcall-b.d: Likewise.
+	* ld-aarch64/farcall-bl.d: Likewise.
+	* ld-aarch64/farcall-back.d: Likewise.
+
+2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/erratum835769.d: Adjust for removal of padding before
+	835769 workaround stubs.
+
+2015-03-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-gc/all-debug-sections.d: New file.
+	* ld-gc/all-debug-sections.s: Likewise.
+	* ld-gc/gc.exp: Execute new testcase.
+
 2015-03-11  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tls32.s: Add GOT pointer setup.

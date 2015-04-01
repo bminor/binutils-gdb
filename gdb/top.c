@@ -806,7 +806,7 @@ gdb_readline_wrapper_cleanup (void *arg)
   saved_after_char_processing_hook = NULL;
 
   if (cleanup->target_is_async_orig)
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 
   xfree (cleanup);
 }
@@ -829,7 +829,7 @@ gdb_readline_wrapper (const char *prompt)
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
 
   if (cleanup->target_is_async_orig)
-    target_async (NULL, NULL);
+    target_async (0);
 
   /* Display our prompt and prevent double prompt display.  */
   display_gdb_prompt (prompt);
@@ -1316,15 +1316,6 @@ This GDB was configured as follows:\n\
     fprintf_filtered (stream, _("\
              --with-system-gdbinit=%s%s\n\
 "), SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE ? " (relocatable)" : "");
-#if HAVE_ZLIB_H
-  fprintf_filtered (stream, _("\
-             --with-zlib\n\
-"));
-#else
-  fprintf_filtered (stream, _("\
-             --without-zlib\n\
-"));
-#endif
 #if HAVE_LIBBABELTRACE
     fprintf_filtered (stream, _("\
              --with-babeltrace\n\

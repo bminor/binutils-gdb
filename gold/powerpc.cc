@@ -7792,7 +7792,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   if (status != Powerpc_relocate_functions<size, big_endian>::STATUS_OK
       && (has_stub_value
 	  || !(gsym != NULL
-	       && gsym->is_weak_undefined()
+	       && gsym->is_undefined()
 	       && is_branch_reloc(r_type))))
     {
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),

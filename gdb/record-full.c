@@ -914,17 +914,14 @@ record_full_close (struct target_ops *self)
 /* "to_async" target method.  */
 
 static void
-record_full_async (struct target_ops *ops,
-		   void (*callback) (enum inferior_event_type event_type,
-				     void *context),
-		   void *context)
+record_full_async (struct target_ops *ops, int enable)
 {
-  if (callback != NULL)
+  if (enable)
     mark_async_event_handler (record_full_async_inferior_event_token);
   else
     clear_async_event_handler (record_full_async_inferior_event_token);
 
-  ops->beneath->to_async (ops->beneath, callback, context);
+  ops->beneath->to_async (ops->beneath, enable);
 }
 
 static int record_full_resume_step = 0;
@@ -1006,7 +1003,7 @@ record_full_resume (struct target_ops *ops, ptid_t ptid, int step,
   /* We are about to start executing the inferior (or simulate it),
      let's register it with the event loop.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 }
 
 static int record_full_get_sig = 0;
@@ -1978,7 +1975,7 @@ record_full_core_resume (struct target_ops *ops, ptid_t ptid, int step,
   /* We are about to start executing the inferior (or simulate it),
      let's register it with the event loop.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 }
 
 /* "to_kill" method for prec over corefile.  */

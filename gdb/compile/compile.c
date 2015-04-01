@@ -483,7 +483,9 @@ compile_to_object (struct command_line *cmd, char *cmd_string,
 
   os_rx = osabi_triplet_regexp (gdbarch_osabi (gdbarch));
   arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
-  triplet_rx = concat (arch_rx, "-[^-]*-", os_rx, (char *) NULL);
+
+  /* Allow triplets with or without vendor set.  */
+  triplet_rx = concat (arch_rx, "(-[^-]*)?-", os_rx, (char *) NULL);
   make_cleanup (xfree, triplet_rx);
 
   /* Set compiler command-line arguments.  */

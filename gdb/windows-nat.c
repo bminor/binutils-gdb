@@ -1673,7 +1673,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
       wait_for_inferior ();
       tp = inferior_thread ();
       if (tp->suspend.stop_signal != GDB_SIGNAL_TRAP)
-	resume (0, tp->suspend.stop_signal);
+	resume (tp->suspend.stop_signal);
       else
 	break;
     }

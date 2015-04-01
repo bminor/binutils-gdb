@@ -1093,6 +1093,11 @@ sim_fetch_register (sd,rn,memory,length)
   return 0;
 }
 
+sim_cia
+sim_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}
 
 SIM_RC
 sim_create_inferior (sd, abfd, argv,env)

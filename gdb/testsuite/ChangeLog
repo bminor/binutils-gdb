@@ -1,3 +1,128 @@
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/tid-reuse.c: New file.
+	* gdb.threads/tid-reuse.exp: New file.
+
+2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR corefiles/16092
+	* gdb.base/coredump-filter.c: New file.
+	* gdb.base/coredump-filter.exp: Likewise.
+
+2015-03-27  Petr Machata  <pmachata@redhat.com>
+
+	* lib/dwarf.exp (Dwarf::_handle_DW_FORM): Handle DW_FORM_sec_offset.
+	(Dwarf::_line_count, Dwarf::_line_saw_file): New variables.
+	(Dwarf::assemble): Initialize them.
+	(Dwarf::lines): New function.
+
+2015-03-26  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* lib/gdb.exp (gdb_target_symbol_prefix_flags): Don't set
+	SYMBOL_PREFIX for x86_64-*-cygwin.
+
+2015-03-26  Andy Wingo  <wingo@igalia.com>
+
+	PR symtab/18148
+	* gdb.dwarf2/dw2-intercu.S (one, two): Add variables that have a
+	const_value but not a location.
+	* gdb.dwarf2/dw2-intercu.exp: Add tests that constants without
+	location defined in non-main CUs are visible.
+
+2015-03-26  Yao Qi  <yao.qi@linaro.org>
+
+	PR testsuite/18139
+	* gdb.linespec/break-asm-file0.s (func): New label .Lfunc_2.
+	Add a line number entry for the same line.
+	* gdb.linespec/break-asm-file1.s (func): New label .Lfunc_2.
+	Add a line number entry for the same line.
+
+2015-03-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.linespec/break-asm-file0.s (func2): Use nop instead of
+	.int 0.
+	(func): Likewise.  Add .Lfunc_1 label.
+	Use .Lfunc_1 label.
+	* gdb.linespec/break-asm-file1.s (func3): Use nop instead of
+	.int 0.
+	(func): Likewise.
+	Use .Lfunc_1 label.
+
+2015-03-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.linespec/break-asm-file.exp: Don't call prepare_for_testing.
+	Call gdb_compile instead to compile each .s files without debug
+	information.
+
+2015-03-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/savedregs.exp (process_saved_regs): Make
+	"Saved registers:" optional in the pattern.
+
+2015-03-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/next.exp: Merged into step.exp.
+	* gdb.btrace/finish.exp: Merged into step.exp.
+	* gdb.btrace/nexti.exp: Merged into stepi.exp.
+	* gdb.btrace/step.exp: Use record_goto.c as test file.  Avoid using
+	"record goto" and checking the exact replay position.
+	* gdb.btrace/stepi.exp: Choose test file based on target.  Do not
+	check for "Recording format" in "info record" output.
+	* gdb.btrace/record_goto.exp: Choose test file based on target.
+	* gdb.btrace/x86-record_goto.S: Renamed into ...
+	* gdb.btrace/x86_64-record_goto.S: ... this.
+	* gdb.btrace/i686-record_goto.S: New.
+	* gdb.btrace/x86-tailcall.S: Renamed into ...
+	* gdb.btrace/x86_64-tailcall.S: ... this.
+	* gdb.btrace/i686-tailcall.S: New.
+	* gdb.btrace/x86-tailcall.c: Renamed into ...
+	* gdb.btrace/tailcall.c: ... this.  Split "return ++answer" into two
+	separate statements.  Update test.
+	* gdb.btrace/delta.exp: Use record_goto.c as test file.
+	* gdb.btrace/gcore.exp: Use record_goto.c as test file.
+	* gdb.btrace/nohist.exp: Use record_goto.c as test file.
+	* gdb.btrace/tailcall.exp: Choose test file based on target.
+	* gdb.btrace/Makefile.in: Remove next, finish, and nexti.
+
+2015-03-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/exception.exp: Increase BTS buffer size.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/no-unwaited-for-left.exp: Test "thread apply all".
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/schedlock.exp (test_step): No longer expect that
+	"set scheduler-locking step" with "next" over a function call runs
+	threads unlocked.
+
+2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.mi/mi-pending.exp: Fix output of breakpoint test.
+
+2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16466
+	* gdb.mi/Makefile.in: Add mi-pendshr2.sl to cleanup.
+	* gdb.mi/mi-pending.c (thread_func): New function.
+	(int main): Add threading support required.
+	* gdb.mi/mi-pending.exp: Add tests for this issue.
+	* gdb.mi/mi-pendshr.c (pendfunc1): Remove stdio dependency.
+	(pendfunc2): Remove stdio dependency.
+	* gdb.mi/mi-pendshr2.c: New file.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.linespec/keywords.c: New file.
+	* gdb.linespec/keywords.exp: New file.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/18021
+	* gdb.dwarf2/staticvirtual.exp: New test.
+
 2015-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (ALL_SUBDIRS): Remove gdb.hp.

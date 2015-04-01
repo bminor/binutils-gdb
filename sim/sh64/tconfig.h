@@ -34,6 +34,3 @@
    and -pbb.  However some cpu families may use -simple while others use
    one of -scache/-pbb. ???? */
 #define WITH_SCACHE_PBB 1
-
-/* Define this if the target cpu is bi-endian and the simulator supports it.  */
-#define SIM_HAVE_BIENDIAN

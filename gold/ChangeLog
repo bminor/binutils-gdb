@@ -1,3 +1,39 @@
+2015-03-30  Jing Yu  <jingyu@google.com>
+
+	* aarch64-reloc.def: New TLSLD_ADD_DTPREL_HI12,
+	TLSLD_ADD_DTPREL_LO12_NC.
+	* aarch64.cc (Target_aarch64::define_tls_base_symbol): Always let
+	_TLS_MODULE_BASE_ point to the start of tls segment.
+	(Target_aarch64::optimize_tls_reloc): Add cases for
+	R_AARCH64_TLSLD_ADD_DTPREL_HI12 and
+	R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC.
+	(Target_aarch64::Scan::local): Likewise.
+	(Target_aarch64::Scan::global): Likewise.
+	(Target_aarch64::Relocate::relocate): Likewise.
+	(Target_aarch64::Relocate::relocate_tls): Likewise. And remove
+	subtracting tls segment size from symbol value for TLSLD_*_DTPREL
+	relocations.
+
+2015-03-27  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* merge.cc (Object_merge_map::add_mapping): call
+	Object_merge_map::Input_merge_map::add_mapping.
+	(Object_merge_map::Input_merge_map::add_mapping): New.
+	(Output_merge_data::do_add_input_section): Call
+	get_or_make_input_merge_map before a loop.
+	(Output_merge_string<Char_type>::finalize_merged_data): Call
+	get_or_make_input_merge_map before a loop.
+	* merge.h (Object_merge_map): Make Input_merge_map public.
+	* object.cc (Relobj::add_merge_mapping): Use get_or_create_merge_map.
+	(Relobj::get_or_create_merge_map): New.
+	* object.h (Relobj::get_or_create_merge_map): New.
+
+2015-03-24  Alan Modra  <amodra@gmail.com>
+
+	PR 18147
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't report
+	relocation errors for branches to strong undefined symbols.
+
 2015-03-23  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* merge.cc (Object_merge_map::get_input_merge_map): Make it const.

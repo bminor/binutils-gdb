@@ -1346,8 +1346,10 @@ record_thread (struct thread_db_info *info,
   priv->tid = ti_p->ti_tid;
   update_thread_state (priv, ti_p);
 
-  /* Add the thread to GDB's thread list.  */
-  if (tp == NULL)
+  /* Add the thread to GDB's thread list.  If we already know about a
+     thread with this PTID, but it's marked exited, then the kernel
+     reused the tid of an old thread.  */
+  if (tp == NULL || tp->state == THREAD_EXITED)
     tp = add_thread_with_info (ptid, priv);
   else
     tp->priv = priv;

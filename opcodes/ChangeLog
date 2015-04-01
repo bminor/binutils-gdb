@@ -1,3 +1,33 @@
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* d10v-opc.c (d10v_reg_name_cnt): Convert old style prototype.
+
+2015-03-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated.
+
+2015-03-25  Anton Blanchard  <anton@samba.org>
+
+	* ppc-dis.c (disassemble_init_powerpc): Only initialise
+	powerpc_opcd_indices and vle_opcd_indices once.
+
+2015-03-25  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c (powerpc_opcodes): Add slbfee.
+
+2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* arm-dis.c (opcode32): Updated to use new arm feature struct.
+	(opcode16): Likewise.
+	(coprocessor_opcodes): Replace bit with feature struct.
+	(neon_opcodes): Likewise.
+	(arm_opcodes): Likewise.
+	(thumb_opcodes): Likewise.
+	(thumb32_opcodes): Likewise.
+	(print_insn_coprocessor): Likewise.
+	(print_insn_arm): Likewise.
+	(select_arm_features): Follow new feature struct.
+
 2015-03-17  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
 
 	* i386-dis.c (rm_table): Add clzero.

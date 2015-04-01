@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "nat/linux-nat.h"
 #include "target.h"
-
 #include <signal.h>
 
 struct arch_lwp_info;
@@ -140,7 +140,7 @@ void linux_proc_pending_signals (int pid, sigset_t *pending,
 
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
-extern void linux_stop_lwp (struct lwp_info *lwp);
+/* For linux_stop_lwp see nat/linux-nat.h.  */
 
 /* Stop all LWPs, synchronously.  (Any events that trigger while LWPs
    are being stopped are left pending.)  */
@@ -150,12 +150,6 @@ extern void linux_stop_and_wait_all_lwps (void);
    with linux_stop_and_wait_all_lwps.  (LWPS with pending events are
    left stopped.)  */
 extern void linux_unstop_all_lwps (void);
-
-/* Iterator function for lin-lwp's lwp list.  */
-struct lwp_info *iterate_over_lwps (ptid_t filter,
-				    int (*callback) (struct lwp_info *,
-						     void *), 
-				    void *data);
 
 /* Create a prototype generic GNU/Linux target.  The client can
    override it with local methods.  */

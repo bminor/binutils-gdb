@@ -168,82 +168,96 @@ static const arm_feature_set fpu_endian_pure = FPU_ARCH_ENDIAN_PURE;
 static const arm_feature_set cpu_default = CPU_DEFAULT;
 #endif
 
-static const arm_feature_set arm_ext_v1 = ARM_FEATURE (ARM_EXT_V1, 0);
-static const arm_feature_set arm_ext_v2 = ARM_FEATURE (ARM_EXT_V1, 0);
-static const arm_feature_set arm_ext_v2s = ARM_FEATURE (ARM_EXT_V2S, 0);
-static const arm_feature_set arm_ext_v3 = ARM_FEATURE (ARM_EXT_V3, 0);
-static const arm_feature_set arm_ext_v3m = ARM_FEATURE (ARM_EXT_V3M, 0);
-static const arm_feature_set arm_ext_v4 = ARM_FEATURE (ARM_EXT_V4, 0);
-static const arm_feature_set arm_ext_v4t = ARM_FEATURE (ARM_EXT_V4T, 0);
-static const arm_feature_set arm_ext_v5 = ARM_FEATURE (ARM_EXT_V5, 0);
+static const arm_feature_set arm_ext_v1 = ARM_FEATURE_CORE_LOW (ARM_EXT_V1);
+static const arm_feature_set arm_ext_v2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V1);
+static const arm_feature_set arm_ext_v2s = ARM_FEATURE_CORE_LOW (ARM_EXT_V2S);
+static const arm_feature_set arm_ext_v3 = ARM_FEATURE_CORE_LOW (ARM_EXT_V3);
+static const arm_feature_set arm_ext_v3m = ARM_FEATURE_CORE_LOW (ARM_EXT_V3M);
+static const arm_feature_set arm_ext_v4 = ARM_FEATURE_CORE_LOW (ARM_EXT_V4);
+static const arm_feature_set arm_ext_v4t = ARM_FEATURE_CORE_LOW (ARM_EXT_V4T);
+static const arm_feature_set arm_ext_v5 = ARM_FEATURE_CORE_LOW (ARM_EXT_V5);
 static const arm_feature_set arm_ext_v4t_5 =
-  ARM_FEATURE (ARM_EXT_V4T | ARM_EXT_V5, 0);
-static const arm_feature_set arm_ext_v5t = ARM_FEATURE (ARM_EXT_V5T, 0);
-static const arm_feature_set arm_ext_v5e = ARM_FEATURE (ARM_EXT_V5E, 0);
-static const arm_feature_set arm_ext_v5exp = ARM_FEATURE (ARM_EXT_V5ExP, 0);
-static const arm_feature_set arm_ext_v5j = ARM_FEATURE (ARM_EXT_V5J, 0);
-static const arm_feature_set arm_ext_v6 = ARM_FEATURE (ARM_EXT_V6, 0);
-static const arm_feature_set arm_ext_v6k = ARM_FEATURE (ARM_EXT_V6K, 0);
-static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE (ARM_EXT_V6T2, 0);
-static const arm_feature_set arm_ext_v6m = ARM_FEATURE (ARM_EXT_V6M, 0);
-static const arm_feature_set arm_ext_v6_notm = ARM_FEATURE (ARM_EXT_V6_NOTM, 0);
-static const arm_feature_set arm_ext_v6_dsp = ARM_FEATURE (ARM_EXT_V6_DSP, 0);
-static const arm_feature_set arm_ext_barrier = ARM_FEATURE (ARM_EXT_BARRIER, 0);
-static const arm_feature_set arm_ext_msr = ARM_FEATURE (ARM_EXT_THUMB_MSR, 0);
-static const arm_feature_set arm_ext_div = ARM_FEATURE (ARM_EXT_DIV, 0);
-static const arm_feature_set arm_ext_v7 = ARM_FEATURE (ARM_EXT_V7, 0);
-static const arm_feature_set arm_ext_v7a = ARM_FEATURE (ARM_EXT_V7A, 0);
-static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
-static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
-static const arm_feature_set arm_ext_v8 = ARM_FEATURE (ARM_EXT_V8, 0);
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V4T | ARM_EXT_V5);
+static const arm_feature_set arm_ext_v5t = ARM_FEATURE_CORE_LOW (ARM_EXT_V5T);
+static const arm_feature_set arm_ext_v5e = ARM_FEATURE_CORE_LOW (ARM_EXT_V5E);
+static const arm_feature_set arm_ext_v5exp = ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP);
+static const arm_feature_set arm_ext_v5j = ARM_FEATURE_CORE_LOW (ARM_EXT_V5J);
+static const arm_feature_set arm_ext_v6 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6);
+static const arm_feature_set arm_ext_v6k = ARM_FEATURE_CORE_LOW (ARM_EXT_V6K);
+static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2);
+static const arm_feature_set arm_ext_v6m = ARM_FEATURE_CORE_LOW (ARM_EXT_V6M);
+static const arm_feature_set arm_ext_v6_notm =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V6_NOTM);
+static const arm_feature_set arm_ext_v6_dsp =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V6_DSP);
+static const arm_feature_set arm_ext_barrier =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_BARRIER);
+static const arm_feature_set arm_ext_msr =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_THUMB_MSR);
+static const arm_feature_set arm_ext_div = ARM_FEATURE_CORE_LOW (ARM_EXT_DIV);
+static const arm_feature_set arm_ext_v7 = ARM_FEATURE_CORE_LOW (ARM_EXT_V7);
+static const arm_feature_set arm_ext_v7a = ARM_FEATURE_CORE_LOW (ARM_EXT_V7A);
+static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
+static const arm_feature_set arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
+static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
-  ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M, 0);
-static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
-static const arm_feature_set arm_ext_sec = ARM_FEATURE (ARM_EXT_SEC, 0);
-static const arm_feature_set arm_ext_os = ARM_FEATURE (ARM_EXT_OS, 0);
-static const arm_feature_set arm_ext_adiv = ARM_FEATURE (ARM_EXT_ADIV, 0);
-static const arm_feature_set arm_ext_virt = ARM_FEATURE (ARM_EXT_VIRT, 0);
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M);
+static const arm_feature_set arm_ext_mp = ARM_FEATURE_CORE_LOW (ARM_EXT_MP);
+static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
+static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
+static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
+static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
-static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
+static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
 static const arm_feature_set arm_arch_v6m_only = ARM_ARCH_V6M_ONLY;
 
 static const arm_feature_set arm_cext_iwmmxt2 =
-  ARM_FEATURE (0, ARM_CEXT_IWMMXT2);
+  ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2);
 static const arm_feature_set arm_cext_iwmmxt =
-  ARM_FEATURE (0, ARM_CEXT_IWMMXT);
+  ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT);
 static const arm_feature_set arm_cext_xscale =
-  ARM_FEATURE (0, ARM_CEXT_XSCALE);
+  ARM_FEATURE_COPROC (ARM_CEXT_XSCALE);
 static const arm_feature_set arm_cext_maverick =
-  ARM_FEATURE (0, ARM_CEXT_MAVERICK);
-static const arm_feature_set fpu_fpa_ext_v1 = ARM_FEATURE (0, FPU_FPA_EXT_V1);
-static const arm_feature_set fpu_fpa_ext_v2 = ARM_FEATURE (0, FPU_FPA_EXT_V2);
+  ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK);
+static const arm_feature_set fpu_fpa_ext_v1 =
+  ARM_FEATURE_COPROC (FPU_FPA_EXT_V1);
+static const arm_feature_set fpu_fpa_ext_v2 =
+  ARM_FEATURE_COPROC (FPU_FPA_EXT_V2);
 static const arm_feature_set fpu_vfp_ext_v1xd =
-  ARM_FEATURE (0, FPU_VFP_EXT_V1xD);
-static const arm_feature_set fpu_vfp_ext_v1 = ARM_FEATURE (0, FPU_VFP_EXT_V1);
-static const arm_feature_set fpu_vfp_ext_v2 = ARM_FEATURE (0, FPU_VFP_EXT_V2);
-static const arm_feature_set fpu_vfp_ext_v3xd = ARM_FEATURE (0, FPU_VFP_EXT_V3xD);
-static const arm_feature_set fpu_vfp_ext_v3 = ARM_FEATURE (0, FPU_VFP_EXT_V3);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD);
+static const arm_feature_set fpu_vfp_ext_v1 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V1);
+static const arm_feature_set fpu_vfp_ext_v2 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V2);
+static const arm_feature_set fpu_vfp_ext_v3xd =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V3xD);
+static const arm_feature_set fpu_vfp_ext_v3 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V3);
 static const arm_feature_set fpu_vfp_ext_d32 =
-  ARM_FEATURE (0, FPU_VFP_EXT_D32);
-static const arm_feature_set fpu_neon_ext_v1 = ARM_FEATURE (0, FPU_NEON_EXT_V1);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_D32);
+static const arm_feature_set fpu_neon_ext_v1 =
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_V1);
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
-  ARM_FEATURE (0, FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
-static const arm_feature_set fpu_vfp_fp16 = ARM_FEATURE (0, FPU_VFP_EXT_FP16);
-static const arm_feature_set fpu_neon_ext_fma = ARM_FEATURE (0, FPU_NEON_EXT_FMA);
-static const arm_feature_set fpu_vfp_ext_fma = ARM_FEATURE (0, FPU_VFP_EXT_FMA);
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
+static const arm_feature_set fpu_vfp_fp16 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_FP16);
+static const arm_feature_set fpu_neon_ext_fma =
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_FMA);
+static const arm_feature_set fpu_vfp_ext_fma =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_FMA);
 static const arm_feature_set fpu_vfp_ext_armv8 =
-  ARM_FEATURE (0, FPU_VFP_EXT_ARMV8);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8);
 static const arm_feature_set fpu_vfp_ext_armv8xd =
-  ARM_FEATURE (0, FPU_VFP_EXT_ARMV8xD);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8xD);
 static const arm_feature_set fpu_neon_ext_armv8 =
-  ARM_FEATURE (0, FPU_NEON_EXT_ARMV8);
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8);
 static const arm_feature_set fpu_crypto_ext_armv8 =
-  ARM_FEATURE (0, FPU_CRYPTO_EXT_ARMV8);
+  ARM_FEATURE_COPROC (FPU_CRYPTO_EXT_ARMV8);
 static const arm_feature_set crc_ext_armv8 =
-  ARM_FEATURE (0, CRC_EXT_ARMV8);
+  ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -257,8 +271,7 @@ extern FLONUM_TYPE generic_floating_point_number;
 static bfd_boolean
 no_cpu_selected (void)
 {
-  return selected_cpu.core == arm_arch_none.core
-    && selected_cpu.coproc == arm_arch_none.coproc;
+  return ARM_FEATURE_EQUAL (selected_cpu, arm_arch_none);
 }
 
 #ifdef OBJ_ELF
@@ -5769,7 +5782,7 @@ parse_psr (char **str, bfd_boolean lhs)
   /* PR gas/12698:  If the user has specified -march=all then m_profile will
      be TRUE, but we want to ignore it in this case as we are building for any
      CPU type, including non-m variants.  */
-  if (selected_cpu.core == arm_arch_any.core)
+  if (ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
     m_profile = FALSE;
 
   /* CPSR's and SPSR's can now be lowercase.  This is just a convenience
@@ -8331,19 +8344,19 @@ struct deprecated_coproc_regs_s
 static struct deprecated_coproc_regs_s deprecated_coproc_regs[] =
 {
     {15, 0, 7, 10, 5,					/* CP15DMB.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {15, 0, 7, 10, 4,					/* CP15DSB.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {15, 0, 7,  5, 4,					/* CP15ISB.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {14, 6, 1,  0, 0,					/* TEEHBR.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {14, 6, 0,  0, 0,					/* TEECR.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
 };
 
@@ -11920,7 +11933,8 @@ do_t_mrs (void)
 	  /* PR gas/12698:  The constraint is only applied for m_profile.
 	     If the user has specified -march=all, we want to ignore it as
 	     we are building for any CPU type, including non-m variants.  */
-	  bfd_boolean m_profile = selected_cpu.core != arm_arch_any.core;
+	  bfd_boolean m_profile =
+	    !ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any);
 	  constraint ((flags != 0) && m_profile, _("selected processor does "
 						   "not support requested special purpose register"));
 	}
@@ -11960,7 +11974,8 @@ do_t_msr (void)
       /* PR gas/12698:  The constraint is only applied for m_profile.
 	 If the user has specified -march=all, we want to ignore it as
 	 we are building for any CPU type, including non-m variants.  */
-      bfd_boolean m_profile = selected_cpu.core != arm_arch_any.core;
+      bfd_boolean m_profile =
+	!ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any);
       constraint (((ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
 	   && (bits & ~(PSR_s | PSR_f)) != 0)
 	  || (!ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
@@ -18207,8 +18222,8 @@ static const struct asm_cond conds[] =
 };
 
 #define UL_BARRIER(L,U,CODE,FEAT) \
-  { L, CODE, ARM_FEATURE (FEAT, 0) }, \
-  { U, CODE, ARM_FEATURE (FEAT, 0) }
+  { L, CODE, ARM_FEATURE_CORE_LOW (FEAT) }, \
+  { U, CODE, ARM_FEATURE_CORE_LOW (FEAT) }
 
 static struct asm_barrier_opt barrier_opt_names[] =
 {
@@ -24433,11 +24448,11 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a7",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A7"),
   ARM_CPU_OPT ("cortex-a8",	ARM_ARCH_V7A_SEC,
-						 ARM_FEATURE (0, FPU_VFP_V3
+						 ARM_FEATURE_COPROC (FPU_VFP_V3
 							| FPU_NEON_EXT_V1),
 								  "Cortex-A8"),
   ARM_CPU_OPT ("cortex-a9",	ARM_ARCH_V7A_MP_SEC,
-						 ARM_FEATURE (0, FPU_VFP_V3
+						 ARM_FEATURE_COPROC (FPU_VFP_V3
 							| FPU_NEON_EXT_V1),
 								  "Cortex-A9"),
   ARM_CPU_OPT ("cortex-a12",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
@@ -24473,13 +24488,14 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("iwmmxt2",	ARM_ARCH_IWMMXT2,FPU_ARCH_VFP_V2, NULL),
   ARM_CPU_OPT ("i80200",	ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL),
   /* Maverick */
-  ARM_CPU_OPT ("ep9312",	ARM_FEATURE (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
+  ARM_CPU_OPT ("ep9312",	ARM_FEATURE_LOW (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
 						 FPU_ARCH_MAVERICK, "ARM920T"),
   /* Marvell processors.  */
-  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP | ARM_EXT_SEC, 0),
+  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE_CORE_LOW (ARM_AEXT_V7A | ARM_EXT_MP
+						      | ARM_EXT_SEC),
 						FPU_ARCH_VFP_V3D16, NULL),
-  ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP
-					       | ARM_EXT_SEC, 0),
+  ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE_CORE_LOW (ARM_AEXT_V7A | ARM_EXT_MP
+							| ARM_EXT_SEC),
 					       FPU_ARCH_NEON_VFP_V4, NULL),
   /* APM X-Gene family.  */
   ARM_CPU_OPT ("xgene1",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
@@ -24566,40 +24582,40 @@ struct arm_option_extension_value_table
 #define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, AA }
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
-  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE (0, CRC_EXT_ARMV8),
-			 ARM_FEATURE (ARM_EXT_V8, 0)),
+  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+			 ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
-			 ARM_FEATURE (0, FPU_CRYPTO_ARMV8),
-				   ARM_FEATURE (ARM_EXT_V8, 0)),
-  ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE (0, FPU_VFP_ARMV8),
-				   ARM_FEATURE (ARM_EXT_V8, 0)),
-  ARM_EXT_OPT ("idiv",	ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
-			ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
-				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
-  ARM_EXT_OPT ("iwmmxt",ARM_FEATURE (0, ARM_CEXT_IWMMXT),
-			ARM_FEATURE (0, ARM_CEXT_IWMMXT), ARM_ANY),
-  ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE (0, ARM_CEXT_IWMMXT2),
-			ARM_FEATURE (0, ARM_CEXT_IWMMXT2), ARM_ANY),
-  ARM_EXT_OPT ("maverick", ARM_FEATURE (0, ARM_CEXT_MAVERICK),
-			ARM_FEATURE (0, ARM_CEXT_MAVERICK), ARM_ANY),
-  ARM_EXT_OPT ("mp",	ARM_FEATURE (ARM_EXT_MP, 0),
-			ARM_FEATURE (ARM_EXT_MP, 0),
-				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
+			 ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE_COPROC (FPU_VFP_ARMV8),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
+  ARM_EXT_OPT ("iwmmxt",ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ANY),
+  ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2), ARM_ANY),
+  ARM_EXT_OPT ("maverick", ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK),
+			ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK), ARM_ANY),
+  ARM_EXT_OPT ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
   ARM_EXT_OPT ("simd",   FPU_ARCH_NEON_VFP_ARMV8,
-			ARM_FEATURE(0, FPU_NEON_ARMV8),
-				   ARM_FEATURE (ARM_EXT_V8, 0)),
-  ARM_EXT_OPT ("os",	ARM_FEATURE (ARM_EXT_OS, 0),
-			ARM_FEATURE (ARM_EXT_OS, 0),
-				   ARM_FEATURE (ARM_EXT_V6M, 0)),
-  ARM_EXT_OPT ("sec",	ARM_FEATURE (ARM_EXT_SEC, 0),
-			ARM_FEATURE (ARM_EXT_SEC, 0),
-				   ARM_FEATURE (ARM_EXT_V6K | ARM_EXT_V7A, 0)),
-  ARM_EXT_OPT ("virt",	ARM_FEATURE (ARM_EXT_VIRT | ARM_EXT_ADIV
-				     | ARM_EXT_DIV, 0),
-			ARM_FEATURE (ARM_EXT_VIRT, 0),
-				   ARM_FEATURE (ARM_EXT_V7A, 0)),
-  ARM_EXT_OPT ("xscale",ARM_FEATURE (0, ARM_CEXT_XSCALE),
-			ARM_FEATURE (0, ARM_CEXT_XSCALE), ARM_ANY),
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("os",	ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
+  ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),
+  ARM_EXT_OPT ("virt",	ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT | ARM_EXT_ADIV
+				     | ARM_EXT_DIV),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
+  ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
+			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 #undef ARM_EXT_OPT

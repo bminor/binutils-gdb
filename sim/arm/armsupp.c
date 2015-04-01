@@ -736,10 +736,7 @@ IntPending (ARMul_State * state)
 /* Align a word access to a non word boundary.  */
 
 ARMword
-ARMul_Align (state, address, data)
-     ARMul_State * state ATTRIBUTE_UNUSED;
-     ARMword address;
-     ARMword data;
+ARMul_Align (ARMul_State *state ATTRIBUTE_UNUSED, ARMword address, ARMword data)
 {
   /* This code assumes the address is really unaligned,
      as a shift by 32 is undefined in C.  */

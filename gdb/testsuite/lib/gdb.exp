@@ -4998,7 +4998,7 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
 # TODO: find out automatically if the target needs this.
 
 proc gdb_target_symbol_prefix_flags {} {
-    if { [istarget "*-*-cygwin*"] || [istarget "i?86-*-mingw*"]
+    if { [istarget "i?86-*-cygwin*"] || [istarget "i?86-*-mingw*"]
 	 || [istarget "*-*-msdosdjgpp*"] || [istarget "*-*-go32*"] } {
 	return "additional_flags=-DSYMBOL_PREFIX=\"_\""
     } else {

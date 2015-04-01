@@ -24,6 +24,11 @@ SUBDIRS = doc po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIBINC = @zlibinc@
+
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo @LEX@ ; fi`
 
@@ -34,7 +39,7 @@ am__skipyacc =
 
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
-AM_CFLAGS = $(WARN_CFLAGS)
+AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
 
 TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c

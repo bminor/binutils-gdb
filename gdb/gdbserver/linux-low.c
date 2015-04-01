@@ -136,6 +136,49 @@ typedef struct
 } Elf64_auxv_t;
 #endif
 
+/* LWP accessors.  */
+
+/* See nat/linux-nat.h.  */
+
+ptid_t
+ptid_of_lwp (struct lwp_info *lwp)
+{
+  return ptid_of (get_lwp_thread (lwp));
+}
+
+/* See nat/linux-nat.h.  */
+
+void
+lwp_set_arch_private_info (struct lwp_info *lwp,
+			   struct arch_lwp_info *info)
+{
+  lwp->arch_private = info;
+}
+
+/* See nat/linux-nat.h.  */
+
+struct arch_lwp_info *
+lwp_arch_private_info (struct lwp_info *lwp)
+{
+  return lwp->arch_private;
+}
+
+/* See nat/linux-nat.h.  */
+
+int
+lwp_is_stopped (struct lwp_info *lwp)
+{
+  return lwp->stopped;
+}
+
+/* See nat/linux-nat.h.  */
+
+enum target_stop_reason
+lwp_stop_reason (struct lwp_info *lwp)
+{
+  return lwp->stop_reason;
+}
+
 /* A list of all unknown processes which receive stop signals.  Some
    other process will presumably claim each of these as forked
    children momentarily.  */
@@ -519,7 +562,7 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 		{
 		  struct thread_info *thr = get_lwp_thread (lwp);
 
-		  debug_printf ("CSBB: Push back software breakpoint for %s\n",
+		  debug_printf ("CSBB: %s stopped by software breakpoint\n",
 				target_pid_to_str (ptid_of (thr)));
 		}
 
@@ -542,8 +585,8 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 		{
 		  struct thread_info *thr = get_lwp_thread (lwp);
 
-		  debug_printf ("CSBB: Push back hardware "
-				"breakpoint/watchpoint for %s\n",
+		  debug_printf ("CSBB: %s stopped by hardware "
+				"breakpoint/watchpoint\n",
 				target_pid_to_str (ptid_of (thr)));
 		}
 
@@ -551,6 +594,16 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 	      lwp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 	      current_thread = saved_thread;
 	      return 1;
+	    }
+	  else if (siginfo.si_code == TRAP_TRACE)
+	    {
+	      if (debug_threads)
+		{
+		  struct thread_info *thr = get_lwp_thread (lwp);
+
+		  debug_printf ("CSBB: %s stopped by trace\n",
+				target_pid_to_str (ptid_of (thr)));
+		}
 	    }
 	}
     }
@@ -614,7 +667,7 @@ add_lwp (ptid_t ptid)
   memset (lwp, 0, sizeof (*lwp));
 
   if (the_low_target.new_thread != NULL)
-    lwp->arch_private = the_low_target.new_thread ();
+    the_low_target.new_thread (lwp);
 
   lwp->thread = add_thread (ptid, lwp);
 
@@ -1397,6 +1450,60 @@ num_lwps (int pid)
   return count;
 }
 
+/* The arguments passed to iterate_over_lwps.  */
+
+struct iterate_over_lwps_args
+{
+  /* The FILTER argument passed to iterate_over_lwps.  */
+  ptid_t filter;
+
+  /* The CALLBACK argument passed to iterate_over_lwps.  */
+  iterate_over_lwps_ftype *callback;
+
+  /* The DATA argument passed to iterate_over_lwps.  */
+  void *data;
+};
+
+/* Callback for find_inferior used by iterate_over_lwps to filter
+   calls to the callback supplied to that function.  Returning a
+   nonzero value causes find_inferiors to stop iterating and return
+   the current inferior_list_entry.  Returning zero indicates that
+   find_inferiors should continue iterating.  */
+
+static int
+iterate_over_lwps_filter (struct inferior_list_entry *entry, void *args_p)
+{
+  struct iterate_over_lwps_args *args
+    = (struct iterate_over_lwps_args *) args_p;
+
+  if (ptid_match (entry->id, args->filter))
+    {
+      struct thread_info *thr = (struct thread_info *) entry;
+      struct lwp_info *lwp = get_thread_lwp (thr);
+
+      return (*args->callback) (lwp, args->data);
+    }
+
+  return 0;
+}
+
+/* See nat/linux-nat.h.  */
+
+struct lwp_info *
+iterate_over_lwps (ptid_t filter,
+		   iterate_over_lwps_ftype callback,
+		   void *data)
+{
+  struct iterate_over_lwps_args args = {filter, callback, data};
+  struct inferior_list_entry *entry;
+
+  entry = find_inferior (&all_threads, iterate_over_lwps_filter, &args);
+  if (entry == NULL)
+    return NULL;
+
+  return get_thread_lwp ((struct thread_info *) entry);
+}
+
 /* Detect zombie thread group leaders, and "exit" them.  We can't reap
    their exits until all other threads in the group have exited.  */
 
@@ -1962,16 +2069,28 @@ linux_low_filter_event (int lwpid, int wstat)
 	{
 	  /* We want to report the stop to the core.  Treat the
 	     SIGSTOP as a normal event.  */
+	  if (debug_threads)
+	    debug_printf ("LLW: resume_stop SIGSTOP caught for %s.\n",
+			  target_pid_to_str (ptid_of (thread)));
 	}
       else if (stopping_threads != NOT_STOPPING_THREADS)
 	{
 	  /* Stopping threads.  We don't want this SIGSTOP to end up
 	     pending.  */
+	  if (debug_threads)
+	    debug_printf ("LLW: SIGSTOP caught for %s "
+			  "while stopping threads.\n",
+			  target_pid_to_str (ptid_of (thread)));
 	  return NULL;
 	}
       else
 	{
-	  /* Filter out the event.  */
+	  /* This is a delayed SIGSTOP.  Filter out the event.  */
+	  if (debug_threads)
+	    debug_printf ("LLW: %s %s, 0, 0 (discard delayed SIGSTOP)\n",
+			  child->stepping ? "step" : "continue",
+			  target_pid_to_str (ptid_of (thread)));
+
 	  linux_resume_one_lwp (child, child->stepping, 0, NULL);
 	  return NULL;
 	}
@@ -6217,6 +6336,14 @@ linux_low_btrace_conf (const struct btrace_target_info *tinfo,
   return 0;
 }
 #endif /* HAVE_LINUX_BTRACE */
+
+/* See nat/linux-nat.h.  */
+
+ptid_t
+current_lwp_ptid (void)
+{
+  return ptid_of (current_thread);
+}
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,

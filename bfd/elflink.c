@@ -844,7 +844,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 
 static void
 elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
-		    const Elf_Internal_Sym *isym,
+		    const Elf_Internal_Sym *isym, asection *sec,
 		    bfd_boolean definition, bfd_boolean dynamic)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -865,7 +865,9 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
       if (symvis - 1 < hvis - 1)
 	h->other = symvis | (h->other & ~ELF_ST_VISIBILITY (-1));
     }
-  else if (definition && ELF_ST_VISIBILITY (isym->st_other) != STV_DEFAULT)
+  else if (definition
+	   && ELF_ST_VISIBILITY (isym->st_other) != STV_DEFAULT
+	   && (sec->flags & SEC_READONLY) == 0)
     h->protected_def = 1;
 }
 
@@ -1417,7 +1419,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       /* Merge st_other.  If the symbol already has a dynamic index,
 	 but visibility says it should not be visible, turn it into a
 	 local symbol.  */
-      elf_merge_st_other (abfd, h, sym, newdef, newdyn);
+      elf_merge_st_other (abfd, h, sym, sec, newdef, newdyn);
       if (h->dynindx != -1)
 	switch (ELF_ST_VISIBILITY (h->other))
 	  {
@@ -4358,7 +4360,7 @@ error_free_dyn:
 	    }
 
 	  /* Merge st_other field.  */
-	  elf_merge_st_other (abfd, h, isym, definition, dynamic);
+	  elf_merge_st_other (abfd, h, isym, sec, definition, dynamic);
 
 	  /* We don't want to make debug symbol dynamic.  */
 	  if (definition && (sec->flags & SEC_DEBUGGING) && !info->relocatable)
@@ -12102,7 +12104,6 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 				isec->name, ilen) == 0)
 		  {
 		    dsec->gc_mark = 0;
-		    break;
 		  }
 	      }
 	  }
@@ -12160,7 +12161,8 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
     {
       asection *o;
 
-      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
 
       for (o = sub->sections; o != NULL; o = o->next)
@@ -12447,7 +12449,8 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
     {
       asection *o;
 
-      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
 
       /* Start at sections marked with SEC_KEEP (ref _bfd_elf_gc_keep).
@@ -13267,7 +13270,7 @@ _bfd_elf_copy_link_hash_symbol_type (bfd *abfd,
   ehdest->target_internal = ehsrc->target_internal;
 
   isym.st_other = ehsrc->other;
-  elf_merge_st_other (abfd, ehdest, &isym, TRUE, FALSE);
+  elf_merge_st_other (abfd, ehdest, &isym, NULL, TRUE, FALSE);
 }
 
 /* Append a RELA relocation REL to section S in BFD.  */

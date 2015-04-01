@@ -43,9 +43,7 @@
 #include "sysdep.h"
 #include <assert.h>
 #include <time.h>
-#ifdef HAVE_ZLIB_H
 #include <zlib.h>
-#endif
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif
@@ -11956,12 +11954,9 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 /* Uncompresses a section that was compressed using zlib, in place.  */
 
 static int
-uncompress_section_contents (unsigned char **buffer ATTRIBUTE_UNUSED,
-			     dwarf_size_type *size ATTRIBUTE_UNUSED)
+uncompress_section_contents (unsigned char **buffer,
+			     dwarf_size_type *size)
 {
-#ifndef HAVE_ZLIB_H
-  return FALSE;
-#else
   dwarf_size_type compressed_size = *size;
   unsigned char * compressed_buffer = *buffer;
   dwarf_size_type uncompressed_size;
@@ -12022,7 +12017,6 @@ uncompress_section_contents (unsigned char **buffer ATTRIBUTE_UNUSED,
   /* Indicate decompression failure.  */
   *buffer = NULL;
   return 0;
-#endif  /* HAVE_ZLIB_H */
 }
 
 static int

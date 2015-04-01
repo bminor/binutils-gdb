@@ -120,6 +120,13 @@ foreach flags $test_flags {
 	}
     }
 
+    # Check if the system's zlib library is used.
+    if {[file exists ../zlib/Makefile ]} then {
+	set extralibs "$extralibs -L../zlib -lz"
+    } else {
+	set extralibs "$extralibs -lz"
+    }
+
     # Plugin support requires linking with libdl.
     if { $plugins == "yes" } {
 	if { ![istarget "*-*-freebsd*"]} {

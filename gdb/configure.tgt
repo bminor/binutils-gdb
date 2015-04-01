@@ -615,6 +615,11 @@ xstormy16-*-*)
 	# No simulator libraries are needed -- target uses SID.
 	;;
 
+ft32-*-elf)
+	gdb_target_obs="ft32-tdep.o"
+	gdb_sim=../sim/ft32/libsim.a
+	;;
+
 v850*-*-elf | v850*-*-rtems*)
 	# Target: NEC V850 processor
 	gdb_target_obs="v850-tdep.o"

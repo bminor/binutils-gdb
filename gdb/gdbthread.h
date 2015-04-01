@@ -73,6 +73,9 @@ struct thread_control_state
   CORE_ADDR step_range_start;	/* Inclusive */
   CORE_ADDR step_range_end;	/* Exclusive */
 
+  /* Function the thread was in as of last it started stepping.  */
+  struct symbol *step_start_function;
+
   /* If GDB issues a target step request, and this is nonzero, the
      target should single-step this thread once, and then continue
      single-stepping it without GDB core involvement as long as the
@@ -135,6 +138,11 @@ struct thread_control_state
      thread was resumed as a result of a command applied to some other
      thread (e.g., "next" with scheduler-locking off).  */
   struct interp *command_interp;
+
+  /* Whether the command that started the thread was a stepping
+     command.  This is used to decide whether "set scheduler-locking
+     step" behaves like "on" or "off".  */
+  int stepping_command;
 };
 
 /* Inferior thread specific part of `struct infcall_suspend_state'.

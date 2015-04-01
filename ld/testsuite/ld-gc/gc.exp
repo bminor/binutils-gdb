@@ -101,6 +101,9 @@ test_gc "Check --gc-section/-r/-u" "gcrel" $ld "-r --gc-sections -u used_func"
 run_dump_test "noent"
 run_dump_test "abi-note"
 run_dump_test "start"
+if { [is_elf_format] } then {
+    run_dump_test "all-debug-sections"
+}
 
 if { [is_elf_format] && [check_shared_lib_support] } then {
     set gasopt ""

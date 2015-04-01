@@ -85,7 +85,6 @@ class Object_merge_map
       Unordered_map<section_offset_type,
 		    typename elfcpp::Elf_types<size>::Elf_Addr>*);
 
- private:
   // Map input section offsets to a length and an output section
   // offset.  An output section offset of -1 means that this part of
   // the input section is being discarded.
@@ -99,17 +98,12 @@ class Object_merge_map
     section_offset_type output_offset;
   };
 
-  // A less-than comparison routine for Input_merge_entry.
-  struct Input_merge_compare
-  {
-    bool
-    operator()(const Input_merge_entry& i1, const Input_merge_entry& i2) const
-    { return i1.input_offset < i2.input_offset; }
-  };
-
   // A list of entries for a particular input section.
   struct Input_merge_map
   {
+    void add_mapping(section_offset_type input_offset, section_size_type length,
+                     section_offset_type output_offset);
+
     typedef std::vector<Input_merge_entry> Entries;
 
     // We store these with the Relobj, and we look them up by input
@@ -142,6 +136,21 @@ class Object_merge_map
     { }
   };
 
+  // Get or make the Input_merge_map to use for the section SHNDX
+  // with MERGE_MAP.
+  Input_merge_map*
+  get_or_make_input_merge_map(const Output_section_data* merge_map,
+                              unsigned int shndx);
+
+  private:
+  // A less-than comparison routine for Input_merge_entry.
+  struct Input_merge_compare
+  {
+    bool
+    operator()(const Input_merge_entry& i1, const Input_merge_entry& i2) const
+    { return i1.input_offset < i2.input_offset; }
+  };
+
   // Map input section indices to merge maps.
   typedef std::map<unsigned int, Input_merge_map*> Section_merge_maps;
 
@@ -155,12 +164,6 @@ class Object_merge_map
     return const_cast<Input_merge_map *>(static_cast<const Object_merge_map *>(
                                              this)->get_input_merge_map(shndx));
   }
-
-  // Get or make the Input_merge_map to use for the section SHNDX
-  // with MERGE_MAP.
-  Input_merge_map*
-  get_or_make_input_merge_map(const Output_section_data* merge_map,
-                              unsigned int shndx);
 
   // Any given object file will normally only have a couple of input
   // sections with mergeable contents.  So we keep the first two input

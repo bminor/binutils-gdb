@@ -282,6 +282,50 @@ static int sigtrap_is_event (int status);
 static int (*linux_nat_status_is_event) (int status) = sigtrap_is_event;
 
 
+/* LWP accessors.  */
+
+/* See nat/linux-nat.h.  */
+
+ptid_t
+ptid_of_lwp (struct lwp_info *lwp)
+{
+  return lwp->ptid;
+}
+
+/* See nat/linux-nat.h.  */
+
+void
+lwp_set_arch_private_info (struct lwp_info *lwp,
+			   struct arch_lwp_info *info)
+{
+  lwp->arch_private = info;
+}
+
+/* See nat/linux-nat.h.  */
+
+struct arch_lwp_info *
+lwp_arch_private_info (struct lwp_info *lwp)
+{
+  return lwp->arch_private;
+}
+
+/* See nat/linux-nat.h.  */
+
+int
+lwp_is_stopped (struct lwp_info *lwp)
+{
+  return lwp->stopped;
+}
+
+/* See nat/linux-nat.h.  */
+
+enum target_stop_reason
+lwp_stop_reason (struct lwp_info *lwp)
+{
+  return lwp->stop_reason;
+}
+
+
 /* Trivial list manipulation functions to keep track of a list of
    new stopped processes.  */
 static void
@@ -834,14 +878,11 @@ find_lwp_pid (ptid_t ptid)
   return NULL;
 }
 
-/* Call CALLBACK with its second argument set to DATA for every LWP in
-   the list.  If CALLBACK returns 1 for a particular LWP, return a
-   pointer to the structure describing that LWP immediately.
-   Otherwise return NULL.  */
+/* See nat/linux-nat.h.  */
 
 struct lwp_info *
 iterate_over_lwps (ptid_t filter,
-		   int (*callback) (struct lwp_info *, void *),
+		   iterate_over_lwps_ftype callback,
 		   void *data)
 {
   struct lwp_info *lp, *lpnext;
@@ -852,7 +893,7 @@ iterate_over_lwps (ptid_t filter,
 
       if (ptid_match (lp->ptid, filter))
 	{
-	  if ((*callback) (lp, data))
+	  if ((*callback) (lp, data) != 0)
 	    return lp;
 	}
     }
@@ -1300,7 +1341,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 				  attach_proc_task_lwp_callback);
 
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 }
 
 /* Get pending status of LP.  */
@@ -1748,7 +1789,7 @@ linux_nat_resume (struct target_ops *ops,
 
       if (target_can_async_p ())
 	{
-	  target_async (inferior_event_handler, 0);
+	  target_async (1);
 	  /* Tell the event loop we have something to process.  */
 	  async_file_mark ();
 	}
@@ -1758,18 +1799,18 @@ linux_nat_resume (struct target_ops *ops,
   if (resume_many)
     iterate_over_lwps (ptid, linux_nat_resume_callback, lp);
 
-  linux_resume_one_lwp (lp, step, signo);
-
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
 			"LLR: %s %s, %s (resume event thread)\n",
 			step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
-			target_pid_to_str (ptid),
+			target_pid_to_str (lp->ptid),
 			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"));
 
+  linux_resume_one_lwp (lp, step, signo);
+
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 }
 
 /* Send a signal to an LWP.  */
@@ -2577,7 +2618,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
-				"SWC: Delayed SIGSTOP caught for %s.\n",
+				"SWC: Expected SIGSTOP caught for %s.\n",
 				target_pid_to_str (lp->ptid));
 
 	  /* Reset SIGNALLED only after the stop_wait_callback call
@@ -2754,8 +2795,8 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 	    {
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
-				    "CSBB: Push back software "
-				    "breakpoint for %s\n",
+				    "CSBB: %s stopped by software "
+				    "breakpoint\n",
 				    target_pid_to_str (lp->ptid));
 
 	      /* Back up the PC if necessary.  */
@@ -2770,13 +2811,20 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 	    {
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
-				    "CSBB: Push back hardware "
-				    "breakpoint/watchpoint for %s\n",
+				    "CSBB: %s stopped by hardware "
+				    "breakpoint/watchpoint\n",
 				    target_pid_to_str (lp->ptid));
 
 	      lp->stop_pc = pc;
 	      lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 	      return 1;
+	    }
+	  else if (siginfo.si_code == TRAP_TRACE)
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "CSBB: %s stopped by trace\n",
+				    target_pid_to_str (lp->ptid));
 	    }
 	}
     }
@@ -2789,7 +2837,7 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 	 breakpoint instruction.  */
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "CB: Push back software breakpoint for %s\n",
+			    "CSBB: %s stopped by software breakpoint\n",
 			    target_pid_to_str (lp->ptid));
 
       /* Back up the PC if necessary.  */
@@ -2805,7 +2853,7 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "CB: Push back hardware breakpoint for %s\n",
+			    "CSBB: stopped by hardware breakpoint %s\n",
 			    target_pid_to_str (lp->ptid));
 
       lp->stop_pc = pc;
@@ -3165,28 +3213,28 @@ linux_nat_filter_event (int lwpid, int status)
   if (lp->signalled
       && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP)
     {
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog,
-			    "LLW: Delayed SIGSTOP caught for %s.\n",
-			    target_pid_to_str (lp->ptid));
-
       lp->signalled = 0;
 
-      if (lp->last_resume_kind != resume_stop)
+      if (lp->last_resume_kind == resume_stop)
 	{
-	  /* This is a delayed SIGSTOP.  */
-
-	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
-				"LLW: %s %s, 0, 0 (discard SIGSTOP)\n",
+				"LLW: resume_stop SIGSTOP caught for %s.\n",
+				target_pid_to_str (lp->ptid));
+	}
+      else
+	{
+	  /* This is a delayed SIGSTOP.  Filter out the event.  */
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LLW: %s %s, 0, 0 (discard delayed SIGSTOP)\n",
 				lp->step ?
 				"PTRACE_SINGLESTEP" : "PTRACE_CONT",
 				target_pid_to_str (lp->ptid));
 
+	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  gdb_assert (lp->resumed);
-
-	  /* Discard the event.  */
 	  return NULL;
 	}
     }
@@ -4577,10 +4625,6 @@ linux_nat_terminal_ours (struct target_ops *self)
   async_terminal_is_ours = 1;
 }
 
-static void (*async_client_callback) (enum inferior_event_type event_type,
-				      void *context);
-static void *async_client_context;
-
 /* SIGCHLD handler that serves two purposes: In non-stop/async mode,
    so we notice when any child changes state, and notify the
    event-loop; it allows us to use sigsuspend in linux_nat_wait_1
@@ -4608,7 +4652,7 @@ sigchld_handler (int signo)
 static void
 handle_target_event (int error, gdb_client_data client_data)
 {
-  (*async_client_callback) (INF_REG_EVENT, async_client_context);
+  inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
 /* Create/destroy the target events pipe.  Returns previous state.  */
@@ -4652,15 +4696,10 @@ linux_async_pipe (int enable)
 /* target_async implementation.  */
 
 static void
-linux_nat_async (struct target_ops *ops,
-		 void (*callback) (enum inferior_event_type event_type,
-				   void *context),
-		 void *context)
+linux_nat_async (struct target_ops *ops, int enable)
 {
-  if (callback != NULL)
+  if (enable)
     {
-      async_client_callback = callback;
-      async_client_context = context;
       if (!linux_async_pipe (1))
 	{
 	  add_file_handler (linux_nat_event_pipe[0],
@@ -4672,8 +4711,6 @@ linux_nat_async (struct target_ops *ops,
     }
   else
     {
-      async_client_callback = callback;
-      async_client_context = context;
       delete_file_handler (linux_nat_event_pipe[0]);
       linux_async_pipe (0);
     }
@@ -4741,7 +4778,7 @@ linux_nat_close (struct target_ops *self)
 {
   /* Unregister from the event loop.  */
   if (linux_nat_is_async_p (self))
-    linux_nat_async (self, NULL, NULL);
+    linux_nat_async (self, 0);
 
   if (linux_ops->to_close)
     linux_ops->to_close (linux_ops);
@@ -4936,6 +4973,15 @@ linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
       return 0;
     }
   return 1;
+}
+
+/* See nat/linux-nat.h.  */
+
+ptid_t
+current_lwp_ptid (void)
+{
+  gdb_assert (ptid_lwp_p (inferior_ptid));
+  return inferior_ptid;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

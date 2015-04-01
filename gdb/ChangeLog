@@ -1,3 +1,491 @@
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* linux-thread-db.c (record_thread): Readd the thread to gdb's
+	list if it was marked exited.
+
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Oleg Nesterov  <oleg@redhat.com>
+
+	PR corefiles/16092
+	* linux-tdep.c: Include 'gdbcmd.h' and 'gdb_regex.h'.
+	New enum identifying the various options of the coredump_filter
+	file.
+	(struct smaps_vmflags): New struct.
+	(use_coredump_filter): New variable.
+	(decode_vmflags): New function.
+	(mapping_is_anonymous_p): Likewise.
+	(dump_mapping_p): Likewise.
+	(linux_find_memory_regions_full): New variables
+	'coredumpfilter_name', 'coredumpfilterdata', 'pid', 'filterflags'.
+	Removed variable 'modified'.  Read /proc/<PID>/smaps file; improve
+	parsing of its information.  Implement memory mapping filtering
+	based on its contents.
+	(show_use_coredump_filter): New function.
+	(_initialize_linux_tdep): New command 'set use-coredump-filter'.
+	* NEWS: Mention the possibility of using the
+	'/proc/PID/coredump_filter' file when generating a corefile.
+	Mention new command 'set use-coredump-filter'.
+
+2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* solib-svr4.c (solib_svr4_r_ldsomap): Catch possible exception by
+	read_memory_unsigned_integer.
+
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (ZLIB): New.
+	(ZLIBINC): Likewise.
+	(INTERNAL_CFLAGS_BASE): Add $(ZLIBINC).
+	(CLIBS): Add $(ZLIB).
+	* acinclude.m4: (GDB_AC_CHECK_BFD): Add $zlibdir to LDFLAGS.
+	Add -lz to LIBS.
+	* gdb_bfd.c: Don't check HAVE_ZLIB_H to include <zlib.h>.
+	* top.c (print_gdb_configuration): Remove --with-zlib and
+	--without-zlib.
+	* config.in: Regenerated.
+	* configure: Likewise.
+
+2015-03-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* NEWS: Mention info os cpus support.
+	* gdb/nat/linux-osdata.c (linux_xfer_osdata_cpus): New function.
+	(struct osdata_type): Add cpus entry, reorder the entries in
+	alphabetical order.
+
+2015-03-31  Matthias Klose  <doko@ubuntu.com>
+
+	* compile/compile.c (compile_to_object): Allow triplets with or
+	without vendor set.
+
+2015-03-30  Doug Evans  <dje@google.com>
+
+	PR c++/18141
+	* cp-namespace.c (cp_search_static_and_baseclasses): Always look for
+	klass in VAR_DOMAIN.
+
+2015-03-30  Gary Benson <gbenson@redhat.com>
+
+	* remote.c (remote_mourn_1): Remove function.  Update all callers
+	to use remote_mourn.
+	(extended_remote_mourn_1): Remove function.  Update all callers
+	to use extended_remote_mourn.
+	(extended_remote_attach_1): Remove function.  Update all callers
+	to use extended_remote_attach.
+
+2015-03-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add ft32-tdep.o.
+	(HFILES_NO_SRCDIR): Add ft32-tdep.h.
+	(ALLDEPFILES): Add ft32-tdep.c.
+	* configure.tgt: Add FT32 entry.
+	* ft32-tdep.c: New file, FT32 target-dependent code.
+	* ft32-tdep.h: New file, FT32 target-dependent code.
+
+2015-03-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert:
+	2015-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	Code cleanup.
+	* printcmd.c (print_command_1): Move expr variable scope.
+
+2015-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Initialize expr to NULL.
+
+2015-03-27  Andrzej Kaczmarek  <andrzej.kaczmarek@tieto.com>
+
+	* gdb_bfd.c (gdb_bfd_section_index): Fix off-by-one for special
+	sections.
+
+2015-03-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Contain any
+	exception raised while parsing the probe arguments.
+	Force parsing to be done using the C language parser.
+	* expression.h (parse_expression_with_language): Declare.
+	* parse.c (parse_expression_with_language): New function.
+
+2015-03-26  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* MAINTAINERS (Write After Approval): Add "Jon Turney".
+
+2015-03-26  Andy Wingo  <wingo@igalia.com>
+
+	PR symtab/18148
+	* dwarf2read.c (struct partial_die_info): Add has_const_value
+	member.
+	(add_partial_symbol): Don't punt on symbols that have const_value
+	attributes.
+	(read_partial_die): Detect DW_AT_const_value.
+
+2015-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* printcmd.c (print_command_1): Move expr variable scope.
+
+2015-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* printcmd.c (validate_format): Make the parameter cmdname const.
+
+2015-03-26  Don Breazeal  <donb@codesourcery.com>
+
+	* remote.c (_initialize_remote): Update comment.
+
+2015-03-26  Pedro Alves  <palves@redhat.com>
+	    Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* coffread.c (coff_symfile_read): When constructing the name of an
+	import stub symbol from import symbol for amd64, only skip the
+	char after _imp_ if the target is underscored (like i386) and the
+	char is indeed the target's leading char.
+
+2015-03-25  Pedro Alves  <palves@redhat.com>
+
+	* target.h <to_async>: Replace 'callback' and 'context' parameters
+	with boolean 'enable' parameter.
+	(target_async): Replace CALLBACK and CONTEXT parameters with
+	boolean ENABLE parameter.
+	* inf-loop.c (inferior_event_handler): Adjust.
+	* linux-nat.c (linux_nat_attach, linux_nat_resume)
+	(linux_nat_resume): Adjust.
+	(async_client_callback, async_client_context): Delete.
+	(handle_target_event): Call inferior_event_handler directly.
+	(linux_nat_async): Replace 'callback' and 'context' parameters
+	with boolean 'enable' parameter.  Adjust.  Remove references to
+	async_client_callback and async_client_context.
+	(linux_nat_close): Adjust.
+	* record-btrace.c (record_btrace_async): Replace 'callback' and
+	'context' parameters with boolean 'enable' parameter.  Adjust.
+	(record_btrace_resume): Adjust.
+	* record-full.c (record_full_async): Replace 'callback' and
+	'context' parameters with boolean 'enable' parameter.  Adjust.
+	(record_full_resume, record_full_core_resume): Adjust.
+	* remote.c (struct remote_state) <async_client_callback,
+	async_client_context>: Delete fields.
+	(remote_start_remote, extended_remote_attach_1, remote_resume)
+	(extended_remote_create_inferior): Adjust.
+	(remote_async_serial_handler): Call inferior_event_handler
+	directly.
+	(remote_async): Replace 'callback' and 'context' parameters with
+	boolean 'enable' parameter.  Adjust.
+	* top.c (gdb_readline_wrapper_cleanup, gdb_readline_wrapper):
+	Adjust.
+	* target-delegates.c: Regenerate.
+
+2015-03-25  Gary Benson <gbenson@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* target.c (fileio_ft_t): New typedef, define object vector.
+	(fileio_fhandles): New static variable.
+	(is_closed_fileio_fh): New macro.
+	(lowest_closed_fd): New static variable.
+	(acquire_fileio_fd): New function.
+	(release_fileio_fd): Likewise.
+	(fileio_fd_to_fh): New macro.
+	(target_fileio_open): Wrap the file descriptor on success.
+	(target_fileio_pwrite): Updated to use wrapped file descriptor.
+	(target_fileio_pread): Likewise.
+	(target_fileio_close): Likewise.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (thread_apply_all_command): Take exited threads into
+	account.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (resume, proceed): Mention
+	switch_back_to_stepped_thread, not switch_back_to_stepping.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (user_visible_resume_ptid): Rewrite going from
+	most-locked to unlocked instead of the opposite.  Move comment ...
+	* infrun.h (user_visible_resume_ptid): ... here.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_resume): Output debug logs before trying
+	to resume the event lwp.  Use the lwp's ptid instead of the passed
+	in (maybe wildcard) ptid.
+	(stop_wait_callback): Tweak debug log output.
+	(check_stopped_by_breakpoint): Tweak debug log output.  Also dump
+	TRAP_TRACE.
+	(linux_nat_filter_event): In debug output, distinguish a
+	resume_stop SIGSTOP from a delayed SIGSTOP.  Output debug logs
+	before trying to resume the lwp.
+
+2015-03-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.h (struct dynamic_prop_list) <prop>: Remove
+	pointer indirection.
+	* gdbtypes.c (get_dyn_prop): Adjust, following change above.
+	(add_dyn_prop, copy_dynamic_prop_list): Likewise.
+
+2015-03-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.h (enum dynamic_prop_node_kind) <DYN_PROP_DATA_LOCATION>:
+	Renames DYN_ATTR_DATA_LOCATION.
+	(TYPE_DATA_LOCATION): Use DYN_PROP_DATA_LOCATION instead of
+	DYN_ATTR_DATA_LOCATION.
+	* dwarf2read.c (set_die_type): Use DYN_PROP_DATA_LOCATION
+	instead of DYN_ATTR_DATA_LOCATION.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (until_break_command): Adjust call to proceed.
+	* gdbthread.h (struct thread_control_state) <stepping_command>:
+	New field.
+	* infcall.c (run_inferior_call): Adjust call to proceed.
+	* infcmd.c (run_command_1, proceed_thread_callback, continue_1):
+	Adjust calls to proceed.
+	(set_step_frame): Set the current thread's step_start_function
+	here.
+	(step_once): Adjust calls to proceed.
+	(jump_command, signal_command, until_next_command)
+	(finish_backward, finish_forward, proceed_after_attach_callback)
+	(attach_command_post_wait): Adjust calls to proceed.
+	* infrun.c (proceed_after_vfork_done): Adjust call to proceed.
+	(do_target_resume): New function, factored out from ...
+	(resume): ... here.  Remove 'step' parameter.  Instead, check
+	currently_stepping to determine whether the thread should be
+	single-stepped.
+	(proceed): Remove 'step' parameter and don't set the thread's
+	step_start_function here.  Adjust call to 'resume'.
+	(handle_inferior_event): Adjust calls to 'resume'.
+	(switch_back_to_stepped_thread): Use do_target_resume instead of
+	'resume'.
+	(keep_going): Adjust calls to 'resume'.
+	* infrun.h (proceed): Remove 'step' parameter.
+	(resume): Likewise.
+	* windows-nat.c (do_initial_windows_stuff): Adjust call to
+	'resume'.
+	* mi/mi-main.c (proceed_thread): Adjust call to 'proceed'.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (struct thread_control_state) <stepping_command>:
+	New field.
+	* infcmd.c (step_once): Pass step=1 to clear_proceed_status.  Set
+	the thread's stepping_command field.
+	* infrun.c (resume): Check the thread's stepping_command flag to
+	determine which threads should be resumed.  Rename 'entry_step'
+	local to user_step.
+	(clear_proceed_status_thread): Clear 'stepping_command'.
+	(schedlock_applies): Change parameter type to struct thread_info
+	pointer.  Adjust.
+	(find_thread_needs_step_over): Remove 'step' parameter.  Adjust.
+	(switch_back_to_stepped_thread): Adjust calls to
+	'schedlock_applies'.
+	(_initialize_infrun): Adjust "set scheduler-locking step" help.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (step_start_function): Delete and ...
+	* gdbthread.h (struct thread_control_state) <step_start_function>:
+	... now a field here.
+	* infrun.c (clear_proceed_status_thread): Clear the thread's
+	step_start_function.
+	(proceed, process_event_stop_test, print_stop_event): Adjust.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (proceed): No longer handle negative step.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* nat/x86-linux.h (x86_linux_new_thread): New declaration.
+	(x86_linux_prepare_to_resume): Likewise.
+	* x86-linux-nat.c (x86_linux_new_thread):
+	Moved to nat/x86-linux.c.
+	(x86_linux_prepare_to_resume): Likewise.
+	* nat/x86-linux.c (x86_linux_new_thread): New function.
+	(x86_linux_prepare_to_resume): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* nat/x86-linux-dregs.h: New file.
+	* nat/x86-linux-dregs.c: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/x86-linux-dregs.h.
+	(x86-linux-dregs.o): New rule.
+	* config/i386/linux.mh (NATDEPFILES): Add x86-linux-dregs.o.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* x86-linux-nat.c: Include nat/x86-linux-dregs.h.
+	(u_debugreg_offset): Moved to nat/x86-linux-dregs.c.
+	(x86_linux_dr_get): Likewise.
+	(x86_linux_dr_set): Likewise.
+	(x86_linux_dr_get_addr): Likewise.
+	(x86_linux_dr_get_control): Likewise.
+	(x86_linux_dr_get_status): Likewise.
+	(update_debug_registers_callback): Likewise.
+	(x86_linux_dr_set_control): Likewise.
+	(x86_linux_dr_set_addr): Likewise.
+	(x86_linux_update_debug_registers): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* x86-linux-nat.c (x86_linux_update_debug_registers):
+	New function, factored out from...
+	(x86_linux_prepare_to_resume): ...this.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* x86-linux-nat.c (x86_linux_dr_get): Update comments.
+	(x86_linux_dr_set): Likewise.
+	(x86_linux_dr_get_addr): Likewise.
+	(x86_linux_dr_get_control): Likewise.
+	(x86_linux_dr_get_status): Likewise.
+	(update_debug_registers_callback): Likewise.
+	(x86_linux_dr_set_control): Likewise.
+	(x86_linux_dr_set_addr): Likewise.
+	(x86_linux_prepare_to_resume): Likewise.
+	(x86_linux_new_thread): Likewise.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* x86-linux-nat.c (x86_linux_dr_set_addr): Update assertion.
+	(x86_linux_new_thread): Rename argument.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* nat/x86-linux.h: New file.
+	* nat/x86-linux.c: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/x86-linux.h.
+	(x86-linux.o): New rule.
+	* config/i386/linux.mh (NATDEPFILES): Add x86-linux.o.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* nat/linux-nat.h (struct arch_lwp_info): New forward declaration.
+	(lwp_set_arch_private_info): New declaration.
+	(lwp_arch_private_info): Likewise.
+	* linux-nat.c (lwp_set_arch_private_info): New function.
+	(lwp_arch_private_info): Likewise.
+	* x86-linux-nat.c: Include nat/x86-linux.h.
+	(arch_lwp_info): Removed structure.
+	(update_debug_registers_callback):
+	Use lwp_set_debug_registers_changed.
+	(x86_linux_prepare_to_resume): Use lwp_debug_registers_changed
+	and lwp_set_debug_registers_changed.
+	(x86_linux_new_thread): Use lwp_set_debug_registers_changed.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-nat.h (ptid_of_lwp): New declaration.
+	(lwp_is_stopped): Likewise.
+	(lwp_stop_reason): Likewise.
+	* linux-nat.c (ptid_of_lwp): New function.
+	(lwp_is_stopped): Likewise.
+	(lwp_is_stopped_by_watchpoint): Likewise.
+	* x86-linux-nat.c (update_debug_registers_callback):
+	Use lwp_is_stopped.
+	(x86_linux_prepare_to_resume): Use ptid_of_lwp and
+	lwp_stop_reason.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* linux-nat.h (linux_stop_lwp): Move declaration to...
+	* nat/linux-nat.h (linux_stop_lwp): New declaration.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* linux-nat.h: Include nat/linux-nat.h.
+	(iterate_over_lwps): Move declaration to nat/linux-nat.h.
+	* nat/linux-nat.h (struct lwp_info): New forward declaration.
+	(iterate_over_lwps_ftype): New typedef.
+	(iterate_over_lwps): New declaration.
+	* linux-nat.h (iterate_over_lwps): Update comment.  Use
+	iterate_over_lwps_ftype.  Update callback return value check.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* x86-nat.h (x86_debug_reg_state): Move declaration to...
+	* nat/x86-dregs.h (x86_debug_reg_state): New declaration.
+
+2015-03-24  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-nat.h (current_lwp_ptid): New declaration.
+	* linux-nat.c (current_lwp_ptid): New function.
+	* x86-linux-nat.c: Include nat/linux-nat.h.
+	(x86_linux_dr_get_addr): Use current_lwp_ptid.
+	(x86_linux_dr_get_control): Likewise.
+	(x86_linux_dr_get_status): Likewise.
+	(x86_linux_dr_set_control): Likewise.
+	(x86_linux_dr_set_addr): Likewise.
+
+2015-03-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16466
+	* breakpoint.c (create_breakpoint): Set thread on breakpoint struct.
+
+2015-03-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* ser-mingw.c (ser_windows_setparity): Fix indentation.
+	* ser-unix.c (hardwire_setparity): Likewise.
+
+2015-03-23  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
+
+	* NEWS: Mention set/show serial parity command.
+	* monitor.c (monitor_open): Call serial_setparity.
+	* remote.c (remote_open_1): Likewise.
+	* ser-base.c (ser_base_serparity): New function.
+	* ser-base.h (ser_base_setparity): Add  declaration.
+	* ser-go32.c (dos_ops): Set "setparity" field.
+	* ser-mingw.c (ser_windows_raw): Do not set state.fParity and
+	state.Parity.
+	(ser_windows_setparity): New function.
+	(hardwire_ops): Add ser_windows_setparity.
+	(tty_ops): Add NULL for setparity field.
+	(pipe_ops): Add ser_base_setparity.
+	(tcp_ops): Likewise.
+	* ser-pipe.c (pipe_ops): Likewise.
+	* ser-tcp.c (tcp_ops): Likewise.
+	* ser-unix.c (hardwire_setparity): Add declaration.
+	(hardwire_raw): Don't reset PARENB flag.
+	(hardwire_setparity): New function.
+	(hardwire_ops): Add hardwire_setparity.
+	* serial.c (serial_setparity): New function.
+	(serial_parity): New global.
+	(parity_none, parity_odd, parity_even, parity_enums, parity):
+	New static globals.
+	(set_parity): New function.
+	(_initialize_serial): Add set/show serial parity commands.
+	* serial.h (GDBPARITY_NONE): Define.
+	(GDBPARITY_ODD): Define.
+	(GDBPARITY_EVEN): Define.
+	(serial_setparity) Add declaration.
+	(struct serial_ops): Add setparity field.
+	* target.h (serial_parity): Add declaration.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (linespec_lexer_lex_keyword): Update comment.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (parse_breakpoint_sals): Use
+	linespec_lexer_lex_keyword to ascertain if the user specified
+	a NULL location.
+	* linespec.c [IF_KEYWORD_INDEX]: Define.
+	(linespec_lexer_lex_keyword): Export.
+	(struct ls_parser) <keyword_ok>: Remove.
+	A keyword is only a keyword if not followed by another keyword.
+	(linespec_lexer_lex_one): Remove keyword_ok handling.
+	Add comment explaining why the parsing stream is not advanced
+	when a keyword is seen.
+	(parse_linespec): Remove parser->keyword_ok.
+	* linespec.h (linespec_lexer_lex_keyword): Add declaration.
+
+2015-03-23  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/18021
+	* dwarf2read.c (dwarf2_add_member_fn): Issue a complaint
+	if we find a static method with DW_AT_vtable_elem_location.
+
 2015-03-21  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-io.c (tui_expand_tabs): Reinitialize the column counter

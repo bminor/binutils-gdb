@@ -9335,8 +9335,7 @@ parse_breakpoint_sals (char **address,
 {
   /* If no arg given, or if first arg is 'if ', use the default
      breakpoint.  */
-  if ((*address) == NULL
-      || (startswith ((*address), "if") && isspace ((*address)[2])))
+  if ((*address) == NULL || linespec_lexer_lex_keyword (*address))
     {
       /* The last displayed codepoint, if it's valid, is our default breakpoint
          address.  */
@@ -9785,6 +9784,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      make_cleanup (xfree, cond_string);
 	    }
 	  b->cond_string = cond_string;
+	  b->thread = thread;
 	}
       b->extra_string = NULL;
       b->ignore_count = ignore_count;
@@ -11523,7 +11523,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
 					   stack_frame_id, bp_until);
   make_cleanup_delete_breakpoint (breakpoint);
 
-  proceed (-1, GDB_SIGNAL_DEFAULT, 0);
+  proceed (-1, GDB_SIGNAL_DEFAULT);
 
   /* If we are running asynchronously, and proceed call above has
      actually managed to start the target, arrange for breakpoints to

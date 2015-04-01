@@ -1,3 +1,69 @@
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-03-31  Ed Schouten  <ed@nuxi.nl>
+
+	* configure.tgt (fmt): Set to elf for *-*-cloudabi*.
+
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Revert the AM_ZLIB change.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+
+2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ZLIBINC): New.
+	(AM_CFLAGS): Add $(ZLIBINC).
+	* as.c: (show_usage): Don't check HAVE_ZLIB_H.
+	(parse_args): Likewise.
+	* compress-debug.c: Don't check HAVE_ZLIB_H to include <zlib.h>.
+	(compress_init): Don't check HAVE_ZLIB_H.
+	(compress_data): Likewise.
+	(compress_finish): Likewise.
+	* configure.ac (AM_ZLIB): Removed.
+	(zlibinc): New.  AC_SUBST.
+	Add --with-system-zlib.
+	* Makefile.in: Regenerated.
+	* config.in: Likewise.
+	* configure: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2015-03-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_flags_set): Removed.
+
+2015-03-25  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (mapping_state): Remove first MAP_DATA emitting
+	code.
+	(mapping_state_2): Emit first MAP_DATA symbol here.
+
+2015-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18087
+	* write.c (compress_debug): Don't write the zlib header if
+	compression didn't make the section smaller.
+
+2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* config/tc-arm.c (no_cpu_selected): Use new macro to compare
+	features.
+	(parse_psr): Likewise.
+	(do_t_mrs): Likewise.
+	(do_t_msr): Likewise.
+	(static const arm_feature_set arm_ext_*): Defined with new macros.
+	(static const arm_feature_set arm_cext_*): Likewise.
+	(static const arm_feature_set fpu_fpa_ext_*): Likewise.
+	(static const arm_feature_set fpu_vfp_ext_*): Likewise.
+	(deprecated_coproc_regs): Likewise.
+	(UL_BARRIER): Likewise.
+	(barrier_opt_names): Likewise.
+	(arm_cpus): Likewise.
+	(arm_extensions): Likewise.
+
 2015-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_align_code): Limit multi-byte nop

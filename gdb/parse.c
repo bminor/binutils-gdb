@@ -1268,6 +1268,28 @@ parse_expression (const char *string)
   return exp;
 }
 
+/* Same as parse_expression, but using the given language (LANG)
+   to parse the expression.  */
+
+struct expression *
+parse_expression_with_language (const char *string, enum language lang)
+{
+  struct cleanup *old_chain = NULL;
+  struct expression *expr;
+
+  if (current_language->la_language != lang)
+    {
+      old_chain = make_cleanup_restore_current_language ();
+      set_language (lang);
+    }
+
+  expr = parse_expression (string);
+
+  if (old_chain != NULL)
+    do_cleanups (old_chain);
+  return expr;
+}
+
 /* Parse STRING as an expression.  If parsing ends in the middle of a
    field reference, return the type of the left-hand-side of the
    reference; furthermore, if the parsing ends in the field name,

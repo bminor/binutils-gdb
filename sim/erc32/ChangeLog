@@ -1,3 +1,41 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-03-28  Jiri Gaisler  <jiri@gaisler.se>
+
+	* func.c (exec_cmd): Fix old style prototype.  Mark cmd const.  Save
+	the command in a new cmdsave2 to avoid modifying.
+	(bfd_load): Fix old style prototype.  Mark fname const.
+	* sis.h (exec_cmd): Mark cmd const.
+	(bfd_load): Mark fname const.
+
+2015-03-28  Jiri Gaisler  <jiri@gaisler.se>
+
+	* erc32.c (memory_iread): New function to fetch instructions.
+	(memory_read): Print message in verbose mode.
+	* interf.c (run_sim): Use memory_iread.
+	* sis.c (run_sim): As above.
+	* sis.h (memory_iread): New prototype.
+	(sregs): Declare.
+
+2015-03-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* erc32.c (mec_read): Delete parenthesis around return statement.
+	(mec_write, read_uart, rtc_counter_read, gpt_counter_read, memory_read,
+	memory_write, get_mem_ptr, sis_memory_write, sis_memory_read): Likewise.
+	* exec.c (sub_cc, add_cc, add32, dispatch_instruction, fpexec, chk_asi,
+	execute_trap, check_interrupts): Likewise.
+	* float.c (get_accex): Likewise.
+	* func.c (batch, limcalc, exec_cmd, disp_fpu, now, wait_for_irq,
+	check_bpt, bfd_load, get_time): Likewise.
+	* interf.c (run_sim, sim_write, sim_read): Likewise.
+	* sis.c (run_sim): Likewise.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* interf.c (sim_set_callbacks, sim_size, sim_trace): Delete.
+
 2015-03-17  Jiri Gaisler  <jiri@gaisler.se>
 
 	* func.c (exec_cmd): Silence compiler warnings when calling system().

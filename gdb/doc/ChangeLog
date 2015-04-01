@@ -1,3 +1,30 @@
+2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR corefiles/16092
+	* gdb.texinfo (gcore): Mention new command 'set
+	use-coredump-filter'.
+	(set use-coredump-filter): Document new command.
+
+2015-03-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.texinfo (Operating System Auxiliary Information): Add info os cpus
+	documentation, reorder the info os entries in alphabetical order.
+
+2015-03-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Fix copy-paste typo in
+	-data-write-memory-bytes.
+
+2015-03-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (test_step) <set scheduler-locking step>: No longer
+	mention that threads may sometimes run unlocked.
+
+2015-03-23  Yurij Grechishhev  <yurij.grechishhev@gmail.com>
+
+	* gdb.texinfo (Remote configuration): Document "set/show
+	serial parity" command.
+
 2015-03-18  Gary Benson <gbenson@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Remove documentation

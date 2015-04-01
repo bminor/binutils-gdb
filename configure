@@ -747,6 +747,7 @@ ospace_frag'
 ac_user_opts='
 enable_option_checking
 with_build_libsubdir
+with_system_zlib
 enable_as_accelerator_for
 enable_offload_targets
 enable_gold
@@ -1518,6 +1519,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-build-libsubdir=DIR  Directory where to find libraries for build system
+  --with-system-zlib      use installed libz
   --with-mpc=PATH         specify prefix directory for installed MPC package.
                           Equivalent to --with-mpc-include=PATH/include plus
                           --with-mpc-lib=PATH/lib
@@ -2854,6 +2856,12 @@ if test x$with_gnu_as = xno ; then
 fi
 
 use_included_zlib=
+
+# Check whether --with-system-zlib was given.
+if test "${with_system_zlib+set}" = set; then :
+  withval=$with_system_zlib;
+fi
+
 # Make sure we don't let ZLIB be added if we didn't want it.
 if test x$with_system_zlib = xyes ; then
   use_included_zlib=no
