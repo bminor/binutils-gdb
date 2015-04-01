@@ -1,3 +1,20 @@
+2015-04-01  Ilya Tocar  <ilya.tocar@intel.com>
+
+	PR gold/17640
+	* i386.cc (Target_i386::can_convert_mov_to_lea): New.
+	(Target_i386::Scan::local): Don't create GOT entry, when we
+	can convert GOT to GOTOFF.
+	(Target_i386::Scan::global): Ditto.
+	(Target_i386::Relocate::relocate): Convert  mov foo@GOT(%reg), %reg to
+	lea foo@GOTOFF(%reg), %reg if possible.
+	* testsuite/Makefile.am (i386_mov_to_lea): New test.
+	* testsuite/i386_mov_to_lea1.s: New.
+	* testsuite/i386_mov_to_lea2.s: Ditto.
+	* testsuite/i386_mov_to_lea3.s: Ditto.
+	* testsuite/i386_mov_to_lea4.s: Ditto.
+	* testsuite/i386_mov_to_lea5.s: Ditto.
+	* testsuite/i386_mov_to_lea.sh: Ditto.
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ZLIB): New.

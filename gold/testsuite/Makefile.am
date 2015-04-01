@@ -962,6 +962,62 @@ endif FN_PTRS_IN_SO_WITHOUT_PIC
 
 endif TLS
 
+if DEFAULT_TARGET_I386
+
+check_SCRIPTS += i386_mov_to_lea.sh
+check_DATA += i386_mov_to_lea1.stdout  i386_mov_to_lea2.stdout \
+	i386_mov_to_lea3.stdout  i386_mov_to_lea4.stdout \
+	i386_mov_to_lea5.stdout i386_mov_to_lea6.stdout \
+	i386_mov_to_lea7.stdout i386_mov_to_lea8.stdout
+MOSTLYCLEANFILES += i386_mov_to_lea1 i386_mov_to_lea2 i386_mov_to_lea3 \
+	i386_mov_to_lea4 i386_mov_to_lea5 i386_mov_to_lea6 \
+	i386_mov_to_lea7 i386_mov_to_lea8
+
+i386_mov_to_lea1.o: i386_mov_to_lea1.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea2.o: i386_mov_to_lea2.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea3.o: i386_mov_to_lea3.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea4.o: i386_mov_to_lea4.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea5.o: i386_mov_to_lea5.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea1: i386_mov_to_lea1.o
+	../ld-new -Bsymbolic -shared -melf_i386  -o $@ $<
+i386_mov_to_lea2: i386_mov_to_lea1.o
+	../ld-new  -pie -melf_i386  -o $@ $<
+i386_mov_to_lea3: i386_mov_to_lea1.o
+	../ld-new -melf_i386  -o $@ $<
+i386_mov_to_lea4: i386_mov_to_lea1.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea5: i386_mov_to_lea2.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea6: i386_mov_to_lea3.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea7: i386_mov_to_lea4.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea8: i386_mov_to_lea5.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea1.stdout: i386_mov_to_lea1
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea2.stdout: i386_mov_to_lea2
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea3.stdout: i386_mov_to_lea3
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea4.stdout: i386_mov_to_lea4
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea5.stdout: i386_mov_to_lea5
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea6.stdout: i386_mov_to_lea6
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea7.stdout: i386_mov_to_lea7
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea8.stdout: i386_mov_to_lea8
+	$(TEST_OBJDUMP) -dw $< > $@
+
+endif DEFAULT_TARGET_I386
+
 check_PROGRAMS += many_sections_test
 many_sections_test_SOURCES = many_sections_test.cc
 many_sections_test_DEPENDENCIES = gcctestdir/ld
