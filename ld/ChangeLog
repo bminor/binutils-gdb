@@ -1,5 +1,10 @@
 2015-04-01  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Don't
+	init ehdr_start_save.
+
+2015-04-01  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (eelf32ppcvxworks.c): Depend on ppc32elf.em and
 	ldemul-list.h.
 	(eelf32lppc.c, eelf32lppclinux.c, eelf32lppcnto.c, eelf32lppcsim.c,
