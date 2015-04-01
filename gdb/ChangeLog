@@ -1,3 +1,8 @@
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* linux-thread-db.c (record_thread): Readd the thread to gdb's
+	list if it was marked exited.
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
