@@ -695,17 +695,10 @@ class General_options
 	      N_("Check segment addresses for overlaps (default)"),
 	      N_("Do not check segment addresses for overlaps"));
 
-#ifdef HAVE_ZLIB_H
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
 	      N_("Compress .debug_* sections in the output file"),
 	      ("[none,zlib]"),
 	      {"none", "zlib"});
-#else
-  DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
-	      N_("Compress .debug_* sections in the output file"),
-	      N_("[none]"),
-	      {"none"});
-#endif
 
   DEFINE_bool(copy_dt_needed_entries, options::TWO_DASHES, '\0', false,
 	      N_("Not supported"),

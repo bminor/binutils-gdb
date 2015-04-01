@@ -1,3 +1,26 @@
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ZLIB): New.
+	(ZLIBINC): Likewise.
+	(AM_CFLAGS): Add $(ZLIBINC).
+	(AM_CXXFLAGS): Likewise.
+	(ldadd_varldadd_var): Add $(ZLIB).
+	(incremental_dump_LDADD): Likewise.
+	(dwp_LDADD): Likewise.
+	* compressed_output.cc: Don't check HAVE_ZLIB_H to include
+	<zlib.h>.
+	(zlib_compress): Don't check HAVE_ZLIB_H.
+	(zlib_decompress): Likewise.
+	* options.h (compress_debug_sections): Likewise.
+	* configure.ac (AM_CONDITIONAL): Removed.
+	* testsuite/Makefile.am (ZLIB): New.
+	(LDADD): Add $(ZLIB).
+	Don't check HAVE_ZLIB.
+	* Makefile.in: Regenerated.
+	* config.in: Likewise.
+	* configure: Likewise.
+	* testsuite/Makefile.in: Likewise.
+
 2015-03-30  Jing Yu  <jingyu@google.com>
 
 	* aarch64-reloc.def: New TLSLD_ADD_DTPREL_HI12,

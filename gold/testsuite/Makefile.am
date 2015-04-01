@@ -7,6 +7,11 @@
 # Ignore warning about AM_PROG_CC_C_O due to large_CFLAGS
 AUTOMAKE_OPTIONS = foreign -Wno-portability
 
+# This is where we get zlib from.  zlib is in ../../zlib unless we were
+# configured with --with-system-zlib, in which case ../../zlib either
+# doesn't exist or not configured.
+ZLIB = -L../../zlib -lz
+
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  For compilers that do not support the command-line option,
 # we assume they just always emit SHF_MERGE sections unconditionally.
@@ -102,7 +107,7 @@ libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 DEPENDENCIES = \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADSLIB) $(LIBDL)
+	$(THREADSLIB) $(LIBDL) $(ZLIB)
 
 
 # The unittests themselves
@@ -1052,8 +1057,6 @@ missing_key_func.err: missing_key_func.o gcctestdir/ld
 	  exit 1; \
 	fi
 
-if HAVE_ZLIB
-
 # Check that --detect-odr-violations works with compressed debug sections.
 check_DATA += debug_msg_cdebug.err
 MOSTLYCLEANFILES += debug_msg_cdebug.err
@@ -1071,8 +1074,6 @@ debug_msg_cdebug.err: debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_
 	  rm -f $@; \
 	  exit 1; \
 	fi
-
-endif HAVE_ZLIB
 
 # See if we can also detect problems when we're linking .so's, not .o's.
 check_DATA += debug_msg_so.err
@@ -1137,8 +1138,6 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 	chmod a+x $@
 	test -s $@
 
-if HAVE_ZLIB
-
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 check_PROGRAMS += flagstest_compress_debug_sections
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
@@ -1154,8 +1153,6 @@ flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 	chmod a+x $@
 	test -s $@
-
-endif HAVE_ZLIB
 
 # Test -TText and -Tdata.
 check_PROGRAMS += flagstest_o_ttext_1
@@ -2207,8 +2204,6 @@ gdb_index_test_1: gdb_index_test.o gcctestdir/ld
 gdb_index_test_1.stdout: gdb_index_test_1
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
-if HAVE_ZLIB
-
 # Test that --gdb-index functions correctly with compressed debug sections.
 check_SCRIPTS += gdb_index_test_2.sh
 check_DATA += gdb_index_test_2.stdout
@@ -2219,8 +2214,6 @@ gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
 gdb_index_test_2.stdout: gdb_index_test_2
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
-
-endif HAVE_ZLIB
 
 # Another simple C test (DW_AT_high_pc encoding) for --gdb-index.
 check_SCRIPTS += gdb_index_test_3.sh
