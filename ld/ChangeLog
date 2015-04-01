@@ -1,3 +1,8 @@
+2015-04-01  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* emulparams/elf32_tic6x_le.sh: Skip OTHER_BSS_SECTIONS for
+	relocating operation.
+
 2015-04-01  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_size_sections): When alignment of sections
