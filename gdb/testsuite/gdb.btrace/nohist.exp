@@ -31,11 +31,11 @@ if ![runto_main] {
 }
 
 proc check_not_replaying {} {
-  gdb_test "info record" [join [list \
+  gdb_test "info record" [multi_line \
     "Active record target: record-btrace" \
     "Recording format: .*" \
 	"Recorded 0 instructions in 0 functions \\\(0 gaps\\\) for \[^\\\r\\\n\]*" \
-    ] "\r\n"]
+    ]
 }
 
 gdb_test_no_output "record btrace"

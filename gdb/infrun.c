@@ -2084,11 +2084,14 @@ resume (enum gdb_signal sig)
      This can decay from a step to a continue, if e.g., we need to
      implement single-stepping with breakpoints (software
      single-step).  */
-  int step = currently_stepping (tp);
+  int step;
 
   tp->stepped_breakpoint = 0;
 
   QUIT;
+
+  /* Depends on stepped_breakpoint.  */
+  step = currently_stepping (tp);
 
   if (current_inferior ()->waiting_for_vfork_done)
     {
@@ -2184,17 +2187,12 @@ resume (enum gdb_signal sig)
 		 thread advanced also" branch to be taken.  IOW, we
 		 don't want this thread to step further from PC
 		 (overstep).  */
+	      gdb_assert (!step_over_info_valid_p ());
 	      insert_single_step_breakpoint (gdbarch, aspace, pc);
 	      insert_breakpoints ();
 
-	      tp->suspend.stop_signal = GDB_SIGNAL_0;
-	      /* We're continuing with all breakpoints inserted.  It's
-		 safe to let the target bypass signals.  */
-	      target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
-	      /* ... and safe to let other threads run, according to
-		 schedlock.  */
 	      resume_ptid = user_visible_resume_ptid (user_step);
-	      target_resume (resume_ptid, 0, GDB_SIGNAL_0);
+	      do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
 	      discard_cleanups (old_cleanups);
 	      return;
 	    }
@@ -3026,14 +3024,19 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
      is set.  */
 
   fprintf_unfiltered (tmp_stream,
-		      "infrun: target_wait (%d", ptid_get_pid (waiton_ptid));
+		      "infrun: target_wait (%d.%ld.%ld",
+		      ptid_get_pid (waiton_ptid),
+		      ptid_get_lwp (waiton_ptid),
+		      ptid_get_tid (waiton_ptid));
   if (ptid_get_pid (waiton_ptid) != -1)
     fprintf_unfiltered (tmp_stream,
 			" [%s]", target_pid_to_str (waiton_ptid));
   fprintf_unfiltered (tmp_stream, ", status) =\n");
   fprintf_unfiltered (tmp_stream,
-		      "infrun:   %d [%s],\n",
+		      "infrun:   %d.%ld.%ld [%s],\n",
 		      ptid_get_pid (result_ptid),
+		      ptid_get_lwp (result_ptid),
+		      ptid_get_tid (result_ptid),
 		      target_pid_to_str (result_ptid));
   fprintf_unfiltered (tmp_stream,
 		      "infrun:   %s\n",
@@ -3137,6 +3140,7 @@ void
 wait_for_inferior (void)
 {
   struct cleanup *old_cleanups;
+  struct cleanup *thread_state_chain;
 
   if (debug_infrun)
     fprintf_unfiltered
@@ -3146,11 +3150,15 @@ wait_for_inferior (void)
     = make_cleanup (delete_just_stopped_threads_infrun_breakpoints_cleanup,
 		    NULL);
 
+  /* If an error happens while handling the event, propagate GDB's
+     knowledge of the executing state to the frontend/user running
+     state.  */
+  thread_state_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+
   while (1)
     {
       struct execution_control_state ecss;
       struct execution_control_state *ecs = &ecss;
-      struct cleanup *old_chain;
       ptid_t waiton_ptid = minus_one_ptid;
 
       memset (ecs, 0, sizeof (*ecs));
@@ -3171,20 +3179,15 @@ wait_for_inferior (void)
       if (debug_infrun)
 	print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
 
-      /* If an error happens while handling the event, propagate GDB's
-	 knowledge of the executing state to the frontend/user running
-	 state.  */
-      old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
-
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
-
-      /* No error, don't finish the state yet.  */
-      discard_cleanups (old_chain);
 
       if (!ecs->wait_some_more)
 	break;
     }
+
+  /* No error, don't finish the state yet.  */
+  discard_cleanups (thread_state_chain);
 
   do_cleanups (old_cleanups);
 }
@@ -6256,6 +6259,7 @@ keep_going (struct execution_control_state *ecs)
 	{
 	  exception_print (gdb_stderr, e);
 	  stop_waiting (ecs);
+	  discard_cleanups (old_cleanups);
 	  return;
 	}
       END_CATCH

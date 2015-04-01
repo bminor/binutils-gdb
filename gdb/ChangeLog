@@ -1,5 +1,39 @@
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume): Check currently_stepping after clearing
+	stepped_breakpoint, not before.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (print_target_wait_results): Print all the ptid
+	elements.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (keep_going): Also discard cleanups if inserting
+	breakpoints fails.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (wait_for_inferior): Install the
+	finish_thread_state_cleanup cleanup across the whole function, not
+	just around handle_inferior_event.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (resume) <step past permanent breakpoint>: Use
+	do_target_resume.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_handle_extended_wait): Always call set_running.
+
+2015-04-01  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* MAINTAINERS (Write After Approval): Add "Pierre-Marie de Rodat".
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
 	* linux-thread-db.c (record_thread): Readd the thread to gdb's
 	list if it was marked exited.
 

@@ -21,19 +21,13 @@
 // MA 02110-1301, USA.
 
 #include "gold.h"
-
-#ifdef HAVE_ZLIB_H
 #include <zlib.h>
-#endif
-
 #include "parameters.h"
 #include "options.h"
 #include "compressed_output.h"
 
 namespace gold
 {
-
-#ifdef HAVE_ZLIB_H
 
 // Compress UNCOMPRESSED_DATA of size UNCOMPRESSED_SIZE.  Returns true
 // if it successfully compressed, false if it failed for any reason
@@ -123,24 +117,6 @@ zlib_decompress(const unsigned char* compressed_data,
 
   return true;
 }
-
-#else // !defined(HAVE_ZLIB_H)
-
-static bool
-zlib_compress(const unsigned char*, unsigned long,
-              unsigned char**, unsigned long*)
-{
-  return false;
-}
-
-static bool
-zlib_decompress(const unsigned char*, unsigned long,
-		unsigned char*, unsigned long)
-{
-  return false;
-}
-
-#endif // !defined(HAVE_ZLIB_H)
 
 // Read the compression header of a compressed debug section and return
 // the uncompressed size.
