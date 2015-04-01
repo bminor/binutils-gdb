@@ -1,3 +1,8 @@
+2015-04-01  Sasha Smundak  <asmundak@google.com>
+
+	* doc/python.texi (Writing a Frame Unwinder in Python): Add
+	section.
+
 2015-03-31  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR corefiles/16092

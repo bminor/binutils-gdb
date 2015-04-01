@@ -29,6 +29,7 @@
   ** gdb.Objfile objects have a new attribute "username",
      which is the name of the objfile as specified by the user,
      without, for example, resolving symlinks.
+  ** You can now write frame unwinders in Python.
 
 * New commands
 

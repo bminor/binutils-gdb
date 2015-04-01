@@ -1,3 +1,35 @@
+2015-04-01  Sasha Smundak  <asmundak@google.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBJS): Add py-unwind.o.
+	(SUBDIR_PYTHON_SRCS): Add py-unwind.c.
+	(py-unwind.o): New recipe.
+	* NEWS: mention Python frame unwinding.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Add
+	gdb/unwinder.py and gdb/command/unwinder.py
+	* python/lib/gdb/__init__.py (packages): Add frame_unwinders
+	list.
+	(execute_unwinders): New function.
+	* python/lib/gdb/command/unwinders.py: New file.
+	* python/lib/gdb/unwinder.py: New file.
+	* python/py-objfile.c (objfile_object): Add frame_unwinders field.
+	(objfpy_dealloc): Decrement frame_unwinders reference count.
+	(objfpy_initialize): Create frame_unwinders list.
+	(objfpy_get_frame_unwinders): New function.
+	(objfpy_set_frame_unwinders): Ditto.
+	(objfile_getset): Add frame_unwinders attribute to Objfile.
+	* python/py-progspace.c (pspace_object): Add frame_unwinders field.
+	(pspy_dealloc): Decrement frame_unwinders reference count.
+	(pspy_initialize): Create frame_unwinders list.
+	(pspy_get_frame_unwinders): New function.
+	(pspy_set_frame_unwinders): Ditto.
+	(pspy_getset): Add frame_unwinders attribute to gdb.Progspace.
+	* python/py-unwind.c: New file.
+	* python/python-internal.h (pspy_get_name_unwinders): New prototype.
+	(objpy_get_frame_unwinders): New prototype.
+	(gdbpy_initialize_unwind): New prototype.
+	* python/python.c (gdbpy_apply_type_printers): Call
+	gdbpy_initialize_unwind.
+
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (resume): Check currently_stepping after clearing

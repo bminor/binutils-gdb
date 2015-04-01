@@ -404,6 +404,7 @@ SUBDIR_PYTHON_OBS = \
 	py-symtab.o \
 	py-threadevent.o \
 	py-type.o \
+	py-unwind.o \
 	py-utils.o \
 	py-value.o \
 	py-varobj.o
@@ -443,6 +444,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-symtab.c \
 	python/py-threadevent.c \
 	python/py-type.c \
+	python/py-unwind.c \
 	python/py-utils.c \
 	python/py-value.c \
 	python/py-varobj.c
@@ -2637,6 +2639,10 @@ py-threadevent.o: $(srcdir)/python/py-threadevent.c
 
 py-type.o: $(srcdir)/python/py-type.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-type.c
+	$(POSTCOMPILE)
+
+py-unwind.o: $(srcdir)/python/py-unwind.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-unwind.c
 	$(POSTCOMPILE)
 
 py-utils.o: $(srcdir)/python/py-utils.c

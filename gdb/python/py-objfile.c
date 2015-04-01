@@ -42,6 +42,10 @@ typedef struct
 
   /* The frame filter list of functions.  */
   PyObject *frame_filters;
+
+  /* The list of frame unwinders.  */
+  PyObject *frame_unwinders;
+
   /* The type-printer list.  */
   PyObject *type_printers;
 
@@ -184,6 +188,7 @@ objfpy_dealloc (PyObject *o)
   Py_XDECREF (self->dict);
   Py_XDECREF (self->printers);
   Py_XDECREF (self->frame_filters);
+  Py_XDECREF (self->frame_unwinders);
   Py_XDECREF (self->type_printers);
   Py_XDECREF (self->xmethods);
   Py_TYPE (self)->tp_free (self);
@@ -204,6 +209,10 @@ objfpy_initialize (objfile_object *self)
 
   self->frame_filters = PyDict_New ();
   if (self->frame_filters == NULL)
+    return 0;
+
+  self->frame_unwinders = PyList_New (0);
+  if (self->frame_unwinders == NULL)
     return 0;
 
   self->type_printers = PyList_New (0);
@@ -308,6 +317,48 @@ objfpy_set_frame_filters (PyObject *o, PyObject *filters, void *ignore)
   tmp = self->frame_filters;
   Py_INCREF (filters);
   self->frame_filters = filters;
+  Py_XDECREF (tmp);
+
+  return 0;
+}
+
+/* Return the frame unwinders attribute for this object file.  */
+
+PyObject *
+objfpy_get_frame_unwinders (PyObject *o, void *ignore)
+{
+  objfile_object *self = (objfile_object *) o;
+
+  Py_INCREF (self->frame_unwinders);
+  return self->frame_unwinders;
+}
+
+/* Set this object file's frame unwinders list to UNWINDERS.  */
+
+static int
+objfpy_set_frame_unwinders (PyObject *o, PyObject *unwinders, void *ignore)
+{
+  PyObject *tmp;
+  objfile_object *self = (objfile_object *) o;
+
+  if (!unwinders)
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Cannot delete the frame unwinders attribute."));
+      return -1;
+    }
+
+  if (!PyList_Check (unwinders))
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("The frame_unwinders attribute must be a list."));
+      return -1;
+    }
+
+  /* Take care in case the LHS and RHS are related somehow.  */
+  tmp = self->frame_unwinders;
+  Py_INCREF (unwinders);
+  self->frame_unwinders = unwinders;
   Py_XDECREF (tmp);
 
   return 0;
@@ -651,6 +702,8 @@ static PyGetSetDef objfile_getset[] =
     "Pretty printers.", NULL },
   { "frame_filters", objfpy_get_frame_filters,
     objfpy_set_frame_filters, "Frame Filters.", NULL },
+  { "frame_unwinders", objfpy_get_frame_unwinders,
+    objfpy_set_frame_unwinders, "Frame Unwinders", NULL },
   { "type_printers", objfpy_get_type_printers, objfpy_set_type_printers,
     "Type printers.", NULL },
   { "xmethods", objfpy_get_xmethods, NULL,
