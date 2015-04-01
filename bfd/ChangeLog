@@ -1,3 +1,7 @@
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-03-31  Ed Schouten  <ed@nuxi.nl>
 
 	* config.bfd (targ_defvec): Set to x86_64_elf64_cloudabi_vec

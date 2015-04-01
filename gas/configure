@@ -14329,8 +14329,10 @@ esac
 
 # Check whether --with-system-zlib was given.
 if test "${with_system_zlib+set}" = set; then :
-  withval=$with_system_zlib; zlibdir=
-  zlibinc=
+  withval=$with_system_zlib; if test x$with_system_zlib = xyes ; then
+    zlibdir=
+    zlibinc=
+  fi
 
 fi
 
