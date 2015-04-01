@@ -2184,17 +2184,12 @@ resume (enum gdb_signal sig)
 		 thread advanced also" branch to be taken.  IOW, we
 		 don't want this thread to step further from PC
 		 (overstep).  */
+	      gdb_assert (!step_over_info_valid_p ());
 	      insert_single_step_breakpoint (gdbarch, aspace, pc);
 	      insert_breakpoints ();
 
-	      tp->suspend.stop_signal = GDB_SIGNAL_0;
-	      /* We're continuing with all breakpoints inserted.  It's
-		 safe to let the target bypass signals.  */
-	      target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
-	      /* ... and safe to let other threads run, according to
-		 schedlock.  */
 	      resume_ptid = user_visible_resume_ptid (user_step);
-	      target_resume (resume_ptid, 0, GDB_SIGNAL_0);
+	      do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
 	      discard_cleanups (old_cleanups);
 	      return;
 	    }

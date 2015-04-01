@@ -1,5 +1,10 @@
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume) <step past permanent breakpoint>: Use
+	do_target_resume.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (linux_handle_extended_wait): Always call set_running.
 
 2015-04-01  Pierre-Marie de Rodat  <derodat@adacore.com>
