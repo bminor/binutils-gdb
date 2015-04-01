@@ -1,3 +1,7 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h: Delete run-sim.h include.

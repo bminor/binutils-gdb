@@ -248,14 +248,16 @@ CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
   -I../../opcodes -I$(srcroot)/opcodes \
-  @INCINTL@
+  @INCINTL@ $(ZLIBINC)
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(CFLAGS)
 BUILD_CFLAGS = -g -O $(CSEARCH)
 
 COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH)
 
+ZLIB = @zlibdir@ -lz
+ZLIBINC = @zlibinc@
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
-BFD_LIB = ../../bfd/libbfd.a
+BFD_LIB = ../../bfd/libbfd.a $(ZLIB)
 @PLUGINS_TRUE@LIBDL = @lt_cv_dlopen_libs@
 OPCODES_LIB = ../../opcodes/libopcodes.a
 LIBINTL = @LIBINTL@

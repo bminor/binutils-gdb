@@ -1,3 +1,7 @@
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-03-28  Jiri Gaisler  <jiri@gaisler.se>
 
 	* func.c (exec_cmd): Fix old style prototype.  Mark cmd const.  Save

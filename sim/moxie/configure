@@ -633,6 +633,8 @@ SED
 LIBTOOL
 PLUGINS_FALSE
 PLUGINS_TRUE
+zlibinc
+zlibdir
 CATOBJEXT
 GENCAT
 INSTOBJEXT
@@ -743,7 +745,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-with_zlib
+with_system_zlib
 enable_plugins
 enable_shared
 enable_static
@@ -1424,7 +1426,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-zlib             include zlib support (auto/yes/no) default=auto
+  --with-system-zlib      use installed libz
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
@@ -2277,7 +2279,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # Helper to AC_CHECK_DECLS, which generates the check for a single
 # SYMBOL with INCLUDES, performs the AC_DEFINE, then expands
 # ACTION-IF-FOUND or ACTION-IF-NOT-FOUND.
-
 
 
 
@@ -8701,88 +8702,19 @@ fi
 # BFD conditionally uses zlib, so we must link it in if libbfd does, by
 # using the same condition.
 
-  # See if the user specified whether he wants zlib support or not.
+  # Use the system's zlib library.
+  zlibdir=-L../zlib
+  zlibinc="-I\$(srcdir)/../zlib"
 
-# Check whether --with-zlib was given.
-if test "${with_zlib+set}" = set; then :
-  withval=$with_zlib;
-else
-  with_zlib=auto
-fi
-
-
-  if test "$with_zlib" != "no"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing zlibVersion" >&5
-$as_echo_n "checking for library containing zlibVersion... " >&6; }
-if test "${ac_cv_search_zlibVersion+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char zlibVersion ();
-int
-main ()
-{
-return zlibVersion ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' z; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_zlibVersion=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if test "${ac_cv_search_zlibVersion+set}" = set; then :
-  break
-fi
-done
-if test "${ac_cv_search_zlibVersion+set}" = set; then :
-
-else
-  ac_cv_search_zlibVersion=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_zlibVersion" >&5
-$as_echo "$ac_cv_search_zlibVersion" >&6; }
-ac_res=$ac_cv_search_zlibVersion
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  for ac_header in zlib.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_zlib_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_ZLIB_H 1
-_ACEOF
+# Check whether --with-system-zlib was given.
+if test "${with_system_zlib+set}" = set; then :
+  withval=$with_system_zlib; zlibdir=
+  zlibinc=
 
 fi
 
-done
 
-fi
 
-    if test "$with_zlib" = "yes" -a "$ac_cv_header_zlib_h" != "yes"; then
-      as_fn_error "zlib (libz) library was explicitly requested but not found" "$LINENO" 5
-    fi
-  fi
 
 
 # BFD uses libdl when when plugins enabled.
@@ -12373,7 +12305,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12376 "configure"
+#line 12308 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12479,7 +12411,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12482 "configure"
+#line 12414 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

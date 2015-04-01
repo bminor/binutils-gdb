@@ -1,5 +1,12 @@
 2015-03-31  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+	* Make-common.in (CSEARCH): Add $(ZLIBINC).
+	(ZLIB, ZLIBINC): Define.
+	(BFD_LIB): Add $(ZLIB).
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-mem.h (MEMOPS_INLINE): Change to EXTERN_INLINE.
 	* cgen-ops.h (SEMOPS_INLINE): Likewise.
 
