@@ -42,7 +42,6 @@ SIM_OBJS = \
 	sim-signal.o	\
 	sim-stop.o	\
 	sim-trace.o	\
-	sim-utils.o	\
-	$(SIM_EXTRA_OBJS)
+	sim-utils.o
 
 ## COMMON_POST_CONFIG_FRAG

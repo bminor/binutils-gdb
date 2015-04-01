@@ -35,8 +35,7 @@ SIM_OBJS = \
 	sim-reason.o \
 	sim-reg.o \
 	sim-resume.o \
-	sim-stop.o \
-	$(SIM_EXTRA_OBJS)
+	sim-stop.o
 
 INCLUDE = bfin-sim.h
 
