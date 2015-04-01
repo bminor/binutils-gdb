@@ -1,3 +1,8 @@
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Work
+	around a GCC uninitialized warning bug fixed in GCC 4.6.
+
 2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* emultempl/aarch64elf.em
