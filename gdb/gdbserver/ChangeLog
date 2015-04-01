@@ -1,3 +1,9 @@
+2015-04-01  Pedro Alves  <palves@redhat.com>
+	    Cleber Rosa  <crosa@redhat.com>
+
+	* server.c (gdbserver_usage): Reorganize and extend the usage
+	message.
+
 2015-03-24  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (check_stopped_by_breakpoint): Tweak debug log
