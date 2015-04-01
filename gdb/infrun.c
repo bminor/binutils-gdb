@@ -3132,6 +3132,7 @@ void
 wait_for_inferior (void)
 {
   struct cleanup *old_cleanups;
+  struct cleanup *thread_state_chain;
 
   if (debug_infrun)
     fprintf_unfiltered
@@ -3141,11 +3142,15 @@ wait_for_inferior (void)
     = make_cleanup (delete_just_stopped_threads_infrun_breakpoints_cleanup,
 		    NULL);
 
+  /* If an error happens while handling the event, propagate GDB's
+     knowledge of the executing state to the frontend/user running
+     state.  */
+  thread_state_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+
   while (1)
     {
       struct execution_control_state ecss;
       struct execution_control_state *ecs = &ecss;
-      struct cleanup *old_chain;
       ptid_t waiton_ptid = minus_one_ptid;
 
       memset (ecs, 0, sizeof (*ecs));
@@ -3166,20 +3171,15 @@ wait_for_inferior (void)
       if (debug_infrun)
 	print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
 
-      /* If an error happens while handling the event, propagate GDB's
-	 knowledge of the executing state to the frontend/user running
-	 state.  */
-      old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
-
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
-
-      /* No error, don't finish the state yet.  */
-      discard_cleanups (old_chain);
 
       if (!ecs->wait_some_more)
 	break;
     }
+
+  /* No error, don't finish the state yet.  */
+  discard_cleanups (thread_state_chain);
 
   do_cleanups (old_cleanups);
 }

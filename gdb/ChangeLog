@@ -1,5 +1,11 @@
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (wait_for_inferior): Install the
+	finish_thread_state_cleanup cleanup across the whole function, not
+	just around handle_inferior_event.
+
+2015-04-01  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (resume) <step past permanent breakpoint>: Use
 	do_target_resume.
 
