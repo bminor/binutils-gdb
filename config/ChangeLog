@@ -1,3 +1,8 @@
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* zlib.m4 (AM_ZLIB): Unset zlibdir and zlibinc only for
+	--with-system-zlib.
+
 2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* zlib.m4 (AM_ZLIB): Replace --with-zlib with --with-system-zlib.
