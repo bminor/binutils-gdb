@@ -1,3 +1,7 @@
+2015-04-01  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* MAINTAINERS (Write After Approval): Add "Pierre-Marie de Rodat".
+
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
 	* linux-thread-db.c (record_thread): Readd the thread to gdb's
