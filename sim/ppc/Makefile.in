@@ -152,18 +152,12 @@ MAKEOVERRIDES=
 LIB_INCLUDES	= -I$(srcdir)/../../include
 BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
 GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config
-ZLIBINC		= @zlibinc@
 
-INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES) $(ZLIBINC)
+INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
-BFD_LIB		= ../../bfd/libbfd.a $(ZLIB)
+BFD_LIB		= ../../bfd/libbfd.a
 ZLIB		= @zlibdir@ -lz
-
-# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
-# -I../zlib, unless we were configured with --with-system-zlib, in which
-# case both are empty.
-ZLIB = @zlibdir@ -lz
 
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@

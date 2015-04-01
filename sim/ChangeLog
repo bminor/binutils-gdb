@@ -1,5 +1,14 @@
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* common/Make-common.in (CSEARCH): Remove $(ZLIBINC).
+	(BFD_LIB): Remove $(ZLIB).
+	(CONFIG_LIBS): Add $(ZLIB).
+	* ppc/Makefile.in (ZLIBINC): Removed.
+	(INCLUDES): Remove $(ZLIBINC).
+	(BFD_LIB): Remove $(ZLIB).
+
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* arm/configure: Regenerated.
 	* avr/configure: Likewise.
 	* bfin/configure: Likewise.
