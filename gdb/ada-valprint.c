@@ -1095,6 +1095,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 
   offset_aligned = offset + ada_aligned_value_addr (type, valaddr) - valaddr;
   type = printable_val_type (type, valaddr + offset_aligned);
+  type = resolve_dynamic_type (type, valaddr + offset_aligned,
+			       address + offset_aligned);
 
   switch (TYPE_CODE (type))
     {

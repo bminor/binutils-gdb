@@ -1,5 +1,10 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_1): Resolve TYPE before trying
+	to print it.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2loc.h (struct property_addr_info): Add "valaddr" field.
 	* dwarf2loc.c (dwarf2_evaluate_property): Add handling of
 	pinfo->valaddr.
