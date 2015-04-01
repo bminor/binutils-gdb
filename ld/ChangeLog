@@ -5,6 +5,7 @@
 
 2015-04-01  Alan Modra  <amodra@gmail.com>
 
+	PR ld/18176
 	* ldlang.c (lang_size_sections): When alignment of sections
 	results in relro base adjustment being too large, don't go lower
 	than the initial value.

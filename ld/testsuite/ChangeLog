@@ -1,3 +1,11 @@
+2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18176
+	* ld-x86-64/pr18176.d: New file.
+	* ld-x86-64/pr18176.s: Likewise.
+	* ld-x86-64/pr18176.t: Likewise.
+	* ld-x86-64/x86-64.exp: Run pr18176.
+
 2015-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-bootstrap/bootstrap.exp (extralibs): Add -lz.
