@@ -1,5 +1,22 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2loc.h (struct property_addr_info): Add "valaddr" field.
+	* dwarf2loc.c (dwarf2_evaluate_property): Add handling of
+	pinfo->valaddr.
+	* gdbtypes.h (resolve_dynamic_type): Add "valaddr" parameter.
+	* gdbtypes.c (resolve_dynamic_struct): Set pinfo.valaddr.
+	(resolve_dynamic_type_internal): Set pinfo.valaddr.
+	Add handling of addr_stack->valaddr.
+	(resolve_dynamic_type): Add "valaddr" parameter.
+	Set pinfo.valaddr field.
+	* ada-lang.c (ada_discrete_type_high_bound): Update call to
+	resolve_dynamic_type.
+	(ada_discrete_type_low_bound): Likewise.
+	* findvar.c (default_read_var_value): Likewise.
+	* value.c (value_from_contents_and_address): Likewise.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.c (resolve_dynamic_array): Use
 	create_array_type_with_stride instead of create_array_type.
 

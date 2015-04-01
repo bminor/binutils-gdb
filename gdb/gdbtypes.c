@@ -1984,6 +1984,7 @@ resolve_dynamic_struct (struct type *type,
 		 " (invalid location kind)"));
 
       pinfo.type = check_typedef (TYPE_FIELD_TYPE (type, i));
+      pinfo.valaddr = addr_stack->valaddr;
       pinfo.addr = addr_stack->addr;
       pinfo.next = addr_stack;
 
@@ -2054,7 +2055,11 @@ resolve_dynamic_type_internal (struct type *type,
 	    struct property_addr_info pinfo;
 
 	    pinfo.type = check_typedef (TYPE_TARGET_TYPE (type));
-	    pinfo.addr = read_memory_typed_address (addr_stack->addr, type);
+	    pinfo.valaddr = NULL;
+	    if (addr_stack->valaddr != NULL)
+	      pinfo.addr = extract_typed_address (addr_stack->valaddr, type);
+	    else
+	      pinfo.addr = read_memory_typed_address (addr_stack->addr, type);
 	    pinfo.next = addr_stack;
 
 	    resolved_type = copy_type (type);
@@ -2096,9 +2101,11 @@ resolve_dynamic_type_internal (struct type *type,
 /* See gdbtypes.h  */
 
 struct type *
-resolve_dynamic_type (struct type *type, CORE_ADDR addr)
+resolve_dynamic_type (struct type *type, const gdb_byte *valaddr,
+		      CORE_ADDR addr)
 {
-  struct property_addr_info pinfo = {check_typedef (type), addr, NULL};
+  struct property_addr_info pinfo
+    = {check_typedef (type), valaddr, addr, NULL};
 
   return resolve_dynamic_type_internal (type, &pinfo, 1);
 }
