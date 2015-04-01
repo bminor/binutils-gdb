@@ -1,5 +1,14 @@
 2015-04-01  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (lang_size_sections): When alignment of sections
+	results in relro base adjustment being too large, don't go lower
+	than the initial value.
+	* ldexp.c (fold_binary <DATA_SEGMENT_RELRO_END>): Comment.
+	* scripttempl/elf.sc (DATA_SEGMENT_ALIGN): Omit SEGMENT_SIZE
+	alignment when SEGMENT_SIZE is the same as MAXPAGESIZE.
+
+2015-04-01  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Don't
 	init ehdr_start_save.
 

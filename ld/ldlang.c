@@ -5382,20 +5382,20 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
   if (expld.dataseg.phase == exp_dataseg_end_seen
       && link_info.relro && expld.dataseg.relro_end)
     {
-      /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END pair was seen, try
-	 to put expld.dataseg.relro_end on a (common) page boundary.  */
-      bfd_vma min_base, relro_end, maxpage;
+      bfd_vma initial_base, min_base, relro_end, maxpage;
 
       expld.dataseg.phase = exp_dataseg_relro_adjust;
       maxpage = expld.dataseg.maxpagesize;
-      /* MIN_BASE is the absolute minimum address we are allowed to start the
-	 read-write segment (byte before will be mapped read-only).  */
-      min_base = (expld.dataseg.min_base + maxpage - 1) & ~(maxpage - 1);
+      initial_base = expld.dataseg.base;
+      /* Try to put expld.dataseg.relro_end on a (common) page boundary.  */
       expld.dataseg.base += (-expld.dataseg.relro_end
 			     & (expld.dataseg.pagesize - 1));
       /* Compute the expected PT_GNU_RELRO segment end.  */
       relro_end = ((expld.dataseg.relro_end + expld.dataseg.pagesize - 1)
 		   & ~(expld.dataseg.pagesize - 1));
+      /* MIN_BASE is the absolute minimum address we are allowed to start the
+	 read-write segment (byte before will be mapped read-only).  */
+      min_base = (expld.dataseg.min_base + maxpage - 1) & ~(maxpage - 1);
       if (min_base + maxpage < expld.dataseg.base)
 	{
 	  expld.dataseg.base -= maxpage;
@@ -5420,16 +5420,17 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 		&& sec->alignment_power > max_alignment_power)
 	      max_alignment_power = sec->alignment_power;
 
-	  if (((bfd_vma) 1 << max_alignment_power) < expld.dataseg.pagesize)
-	    {
-	      /* Aligning the adjusted base guarantees the padding
-		 between sections won't change.  This is better than
-		 simply subtracting 1 << max_alignment_power which is
-		 what we used to do here.  */
-	      expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
-	      lang_reset_memory_regions ();
-	      one_lang_size_sections_pass (relax, check_regions);
-	    }
+	  /* Aligning the adjusted base guarantees the padding
+	     between sections won't change.  This is better than
+	     simply subtracting 1 << max_alignment_power which is
+	     what we used to do here.  */
+	  expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
+	  /* It doesn't make much sense to go lower than the initial
+	     base.  That can only increase padding.  */
+	  if (expld.dataseg.base < initial_base)
+	    expld.dataseg.base = initial_base;
+	  lang_reset_memory_regions ();
+	  one_lang_size_sections_pass (relax, check_regions);
 	}
       link_info.relro_start = expld.dataseg.base;
       link_info.relro_end = expld.dataseg.relro_end;
