@@ -1,3 +1,12 @@
+2015-04-01  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (eelf32ppcvxworks.c): Depend on ppc32elf.em and
+	ldemul-list.h.
+	(eelf32lppc.c, eelf32lppclinux.c, eelf32lppcnto.c, eelf32lppcsim.c,
+	eelf32ppc.c, eelf32ppc_fbsd.c, eelf32ppclinux.c, eelf32ppcnto.c,
+	eelf32ppcsim.c): Rearrange deps for consistency.
+	* Makefile.in: Regenerate.
+
 2015-04-01  Ed Schouten  <ed@nuxi.nl>
 
 	* emultempl/elf32.em (gld*_before_allocation): Zero-initialize
