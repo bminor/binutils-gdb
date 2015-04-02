@@ -1,5 +1,9 @@
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
+	* exec.c (exec_file_attach): Support "target:" filenames.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
 	* solib.c (solib_find): Strip "target:" prefix from sysroot
 	if accessing local files.
 
