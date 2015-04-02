@@ -24,6 +24,13 @@
   present in the debug info.  This typically includes the compiler version
   and may include things like its command line arguments.
 
+* Directory names supplied to the "set sysroot" commands may be
+  prefixed with "target:" to tell GDB to access shared libraries from
+  the target system, be it local or remote.  This replaces the prefix
+  "remote:".  The default sysroot has been changed from "" to
+  "target:".  "remote:" is automatically converted to "target:" for
+  backward compatibility.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",

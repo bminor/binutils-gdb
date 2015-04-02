@@ -1,5 +1,9 @@
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
+	* NEWS: Announce the new default sysroot of "target:".
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
 	* main.c (captured_main): Set gdb_sysroot to "target:"
 	if not otherwise set.
 

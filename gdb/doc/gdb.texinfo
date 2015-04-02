@@ -17854,15 +17854,20 @@ libraries, they need to be laid out in the same way that they are on
 the target, with e.g.@: a @file{/lib} and @file{/usr/lib} hierarchy
 under @var{path}.
 
-If @var{path} starts with the sequence @file{remote:}, @value{GDBN} will 
-retrieve the target libraries from the remote system.  This is only
-supported when using a remote target that supports the @code{remote get}
-command (@pxref{File Transfer,,Sending files to a remote system}).
-The part of @var{path} following the initial @file{remote:}
-(if present) is used as system root prefix on the remote file system.
-@footnote{If you want to specify a local system root using a directory
-that happens to be named @file{remote:}, you need to use some equivalent
-variant of the name like @file{./remote:}.}
+If @var{path} starts with the sequence @file{target:} and the target
+system is remote then @value{GDBN} will retrieve the target binaries
+from the remote system.  This is only supported when using a remote
+target that supports the @code{remote get} command (@pxref{File
+Transfer,,Sending files to a remote system}).  The part of @var{path}
+following the initial @file{target:} (if present) is used as system
+root prefix on the remote file system.  If @var{path} starts with the
+sequence @file{remote:} this is converted to the sequence
+@file{target:} by @code{set sysroot}@footnote{Historically the
+functionality to retrieve binaries from the remote system was
+provided by prefixing @var{path} with @file{remote:}}.  If you want
+to specify a local system root using a directory that happens to be
+named @file{target:} or @file{remote:}, you need to use some
+equivalent variant of the name like @file{./target:}.
 
 For targets with an MS-DOS based filesystem, such as MS-Windows and
 SymbianOS, @value{GDBN} tries prefixing a few variants of the target
