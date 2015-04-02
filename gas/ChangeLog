@@ -2,7 +2,7 @@
 
 	PR gas/18189
 	* config/tc-microblaze.c (parse_imm): Use offsetT as the type for
-	min and max parameters.
+	min and max parameters.  Sign extend values before testing.
 
 2015-04-02  Renlin Li  <renlin.li@arm.com>
 

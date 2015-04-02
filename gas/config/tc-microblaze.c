@@ -736,11 +736,17 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
     ; /* An error message has already been emitted.  */
   else if ((e->X_op != O_constant && e->X_op != O_symbol) )
     as_fatal (_("operand must be a constant or a label"));
-  else if ((e->X_op == O_constant) && (e->X_add_number < min
-				       || e->X_add_number > max))
+  else if (e->X_op == O_constant)
     {
-      as_fatal (_("operand must be absolute in range %lx..%lx, not %lx"),
-                (long) min, (long) max, (long) e->X_add_number);
+      /* Special case: sign extend negative 32-bit values to 64-bits.  */
+      if ((e->X_add_number >> 31) == 1)
+	e->X_add_number |= (-1 << 31);
+
+      if (e->X_add_number < min || e->X_add_number > max)
+	{
+	  as_fatal (_("operand must be absolute in range %lx..%lx, not %lx"),
+		    (long) min, (long) max, (long) e->X_add_number);
+	}
     }
 
   if (atp)
