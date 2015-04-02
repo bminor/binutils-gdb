@@ -1,5 +1,35 @@
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
+	* remote.h (REMOTE_SYSROOT_PREFIX): Remove definition.
+	(remote_filename_p): Remove declaration.
+	(remote_bfd_open): Likewise.
+	* remote.c (remote_bfd_iovec_open): Remove function.
+	(remote_bfd_iovec_close): Likewise.
+	(remote_bfd_iovec_pread): Likewise.
+	(remote_bfd_iovec_stat): Likewise.
+	(remote_filename_p): Likewise.
+	(remote_bfd_open): Likewise.
+	* symfile.h (gdb_bfd_open_maybe_remote): Remove declaration.
+	* symfile.c (separate_debug_file_exists): Use gdb_bfd_open.
+	(gdb_bfd_open_maybe_remote): Remove function.
+	(symfile_bfd_open):  Replace remote filename check with
+	target filename check.
+	(reread_symbols): Use gdb_bfd_open.
+	* build-id.c (gdbcore.h): New include.
+	(build_id_to_debug_bfd): Use gdb_bfd_open.
+	* infcmd.c (attach_command_post_wait): Remove remote filename
+	check.
+	* solib.c (solib_find): Replace remote-specific handling with
+	target-specific handling.  Update comments where necessary.
+	(solib_bfd_open): Replace remote-specific handling with
+	target-specific handling.
+	(gdb_sysroot_changed): New function.
+	(_initialize_solib): Call the above when gdb_sysroot changes.
+	* windows-tdep.c (gdbcore.h): New include.
+	(windows_xfer_shared_library): Use gdb_bfd_open.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
 	* gdb/gdb_bfd.h (TARGET_SYSROOT_PREFIX): New definition.
 	(is_target_filename): New declaration.
 	(gdb_bfd_has_target_filename): Likewise.

@@ -26,6 +26,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "filenames.h"
+#include "gdbcore.h"
 
 /* See build-id.h.  */
 
@@ -118,7 +119,7 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 	continue;
 
       /* We expect to be silent on the non-existing files.  */
-      abfd = gdb_bfd_open_maybe_remote (filename);
+      abfd = gdb_bfd_open (filename, gnutarget, -1);
       if (abfd == NULL)
 	continue;
 

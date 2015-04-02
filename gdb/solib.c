@@ -236,17 +236,17 @@ solib_find (char *in_pathname, int *fd)
         |-----------------+-----------+----------------|
         | /some/dir       | /         | c:/foo/bar.dll |
         | /some/dir       |           | /foo/bar.dll   |
-        | remote:         |           | c:/foo/bar.dll |
-        | remote:         |           | /foo/bar.dll   |
-        | remote:some/dir | /         | c:/foo/bar.dll |
-        | remote:some/dir |           | /foo/bar.dll   |
+        | target:         |           | c:/foo/bar.dll |
+        | target:         |           | /foo/bar.dll   |
+        | target:some/dir | /         | c:/foo/bar.dll |
+        | target:some/dir |           | /foo/bar.dll   |
 
 	IOW, we don't need to add a separator if IN_PATHNAME already
-	has one, or when the the sysroot is exactly "remote:".
+	has one, or when the the sysroot is exactly "target:".
 	There's no need to check for drive spec explicitly, as we only
 	get here if IN_PATHNAME is considered an absolute path.  */
       need_dir_separator = !(IS_DIR_SEPARATOR (in_pathname[0])
-			     || strcmp (REMOTE_SYSROOT_PREFIX, sysroot) == 0);
+			     || strcmp (TARGET_SYSROOT_PREFIX, sysroot) == 0);
 
       /* Cat the prefixed pathname together.  */
       temp_pathname = concat (sysroot,
@@ -254,8 +254,8 @@ solib_find (char *in_pathname, int *fd)
 			      in_pathname, (char *) NULL);
     }
 
-  /* Handle remote files.  */
-  if (remote_filename_p (temp_pathname))
+  /* Handle files to be accessed via the target.  */
+  if (is_target_filename (temp_pathname))
     {
       *fd = -1;
       do_cleanups (old_chain);
@@ -382,20 +382,10 @@ solib_find (char *in_pathname, int *fd)
 bfd *
 solib_bfd_fopen (char *pathname, int fd)
 {
-  bfd *abfd;
+  bfd *abfd = gdb_bfd_open (pathname, gnutarget, fd);
 
-  if (remote_filename_p (pathname))
-    {
-      gdb_assert (fd == -1);
-      abfd = remote_bfd_open (pathname, gnutarget);
-    }
-  else
-    {
-      abfd = gdb_bfd_open (pathname, gnutarget, fd);
-
-      if (abfd)
-	bfd_set_cacheable (abfd, 1);
-    }
+  if (abfd != NULL && !gdb_bfd_has_target_filename (abfd))
+    bfd_set_cacheable (abfd, 1);
 
   if (!abfd)
     {
@@ -1403,6 +1393,36 @@ reload_shared_libraries (char *ignored, int from_tty,
   ops->special_symbol_handling ();
 }
 
+/* Wrapper for reload_shared_libraries that replaces "remote:"
+   at the start of gdb_sysroot with "target:".  */
+
+static void
+gdb_sysroot_changed (char *ignored, int from_tty,
+		     struct cmd_list_element *e)
+{
+  const char *old_prefix = "remote:";
+  const char *new_prefix = TARGET_SYSROOT_PREFIX;
+
+  if (startswith (gdb_sysroot, old_prefix))
+    {
+      static int warning_issued = 0;
+
+      gdb_assert (strlen (old_prefix) == strlen (new_prefix));
+      memcpy (gdb_sysroot, new_prefix, strlen (new_prefix));
+
+      if (!warning_issued)
+	{
+	  warning (_("\"%s\" is deprecated, use \"%s\" instead."),
+		   old_prefix, new_prefix);
+	  warning (_("sysroot set to \"%s\"."), gdb_sysroot);
+
+	  warning_issued = 1;
+	}
+    }
+
+  reload_shared_libraries (ignored, from_tty, e);
+}
+
 static void
 show_auto_solib_add (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
@@ -1597,7 +1617,7 @@ Show the current system root."), _("\
 The system root is used to load absolute shared library symbol files.\n\
 For other (relative) files, you can add directories using\n\
 `set solib-search-path'."),
-				     reload_shared_libraries,
+				     gdb_sysroot_changed,
 				     NULL,
 				     &setlist, &showlist);
 

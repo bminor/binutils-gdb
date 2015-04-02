@@ -1368,7 +1368,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
   if (filename_cmp (name, objfile_name (parent_objfile)) == 0)
     return 0;
 
-  abfd = gdb_bfd_open_maybe_remote (name);
+  abfd = gdb_bfd_open (name, gnutarget, -1);
 
   if (!abfd)
     return 0;
@@ -1712,23 +1712,6 @@ set_initial_language (void)
   expected_language = current_language; /* Don't warn the user.  */
 }
 
-/* If NAME is a remote name open the file using remote protocol, otherwise
-   open it normally.  Returns a new reference to the BFD.  On error,
-   returns NULL with the BFD error set.  */
-
-bfd *
-gdb_bfd_open_maybe_remote (const char *name)
-{
-  bfd *result;
-
-  if (remote_filename_p (name))
-    result = remote_bfd_open (name, gnutarget);
-  else
-    result = gdb_bfd_open (name, gnutarget, -1);
-
-  return result;
-}
-
 /* Open the file specified by NAME and hand it off to BFD for
    preliminary analysis.  Return a newly initialized bfd *, which
    includes a newly malloc'd` copy of NAME (tilde-expanded and made
@@ -1742,9 +1725,9 @@ symfile_bfd_open (const char *cname)
   char *name, *absolute_name;
   struct cleanup *back_to;
 
-  if (remote_filename_p (cname))
+  if (is_target_filename (cname))
     {
-      sym_bfd = remote_bfd_open (cname, gnutarget);
+      sym_bfd = gdb_bfd_open (cname, gnutarget, -1);
       if (!sym_bfd)
 	error (_("`%s': can't open to read symbols: %s."), cname,
 	       bfd_errmsg (bfd_get_error ()));
@@ -2596,7 +2579,7 @@ reread_symbols (void)
 	    obfd_filename = bfd_get_filename (objfile->obfd);
 	    /* Open the new BFD before freeing the old one, so that
 	       the filename remains live.  */
-	    objfile->obfd = gdb_bfd_open_maybe_remote (obfd_filename);
+	    objfile->obfd = gdb_bfd_open (obfd_filename, gnutarget, -1);
 	    if (objfile->obfd == NULL)
 	      {
 		/* We have to make a cleanup and error here, rather
