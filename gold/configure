@@ -6876,8 +6876,8 @@ fi
 # Link in zlib if we can.  This allows us to write compressed sections.
 
   # Use the system's zlib library.
-  zlibdir=-L../zlib
-  zlibinc="-I\$(srcdir)/../zlib"
+  zlibdir="-L\$(top_builddir)/../zlib"
+  zlibinc="-I\$(top_srcdir)/../zlib"
 
 # Check whether --with-system-zlib was given.
 if test "${with_system_zlib+set}" = set; then :

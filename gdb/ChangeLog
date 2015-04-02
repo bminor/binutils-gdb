@@ -1,3 +1,8 @@
+2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (top_srcdir): New.
+	* configure: Regenerated.
+
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
 	* NEWS: Announce the new default sysroot of "target:".
