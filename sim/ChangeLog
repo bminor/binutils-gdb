@@ -1,3 +1,35 @@
+2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* arm/configure: Regenerated.
+	* avr/configure: Likewise.
+	* bfin/configure: Likewise.
+	* common/configure: Likewise.
+	* cr16/configure: Likewise.
+	* cris/configure: Likewise.
+	* d10v/configure: Likewise.
+	* erc32/configure: Likewise.
+	* frv/configure: Likewise.
+	* ft32/configure: Likewise.
+	* h8300/configure: Likewise.
+	* igen/configure: Likewise.
+	* iq2000/configure: Likewise.
+	* lm32/configure: Likewise.
+	* m32c/configure: Likewise.
+	* m32r/configure: Likewise.
+	* m68hc11/configure: Likewise.
+	* mcore/configure: Likewise.
+	* microblaze/configure: Likewise.
+	* mips/configure: Likewise.
+	* mn10300/configure: Likewise.
+	* moxie/configure: Likewise.
+	* msp430/configure: Likewise.
+	* ppc/configure: Likewise.
+	* rl78/configure: Likewise.
+	* rx/configure: Likewise.
+	* sh/configure: Likewise.
+	* sh64/configure: Likewise.
+	* v850/configure: Likewise.
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* common/Make-common.in (CSEARCH): Remove $(ZLIBINC).
