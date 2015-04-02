@@ -1,5 +1,14 @@
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
+	* target.h (struct target_ops) <to_filesystem_is_local>:
+	New field.
+	(target_filesystem_is_local): New macro.
+	* target-delegates.c: Regenerate.
+	* remote.c (remote_filesystem_is_local): New function.
+	(init_remote_ops): Initialize to_filesystem_is_local.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
 	* target.h (struct target_ops) <to_fileio_fstat>: New field.
 	(target_fileio_fstat): New declaration.
 	* target.c (target_fileio_fstat): New function.

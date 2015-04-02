@@ -825,6 +825,12 @@ struct target_ops
 
     /* Target file operations.  */
 
+    /* Return nonzero if the filesystem accessed by the
+       target_fileio_* methods is the local filesystem,
+       zero otherwise.  */
+    int (*to_filesystem_is_local) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (1);
+
     /* Open FILENAME on the target, using FLAGS and MODE.  Return a
        target file descriptor, or -1 if an error occurs (and set
        *TARGET_ERRNO).  */
@@ -1920,6 +1926,11 @@ extern int target_search_memory (CORE_ADDR start_addr,
                                  CORE_ADDR *found_addrp);
 
 /* Target file operations.  */
+
+/* Return nonzero if the filesystem accessed by the target_fileio_*
+   methods is the local filesystem, zero otherwise.  */
+#define target_filesystem_is_local() \
+  current_target.to_filesystem_is_local (&current_target)
 
 /* Open FILENAME on the target, using FLAGS and MODE.  Return a
    target file descriptor, or -1 if an error occurs (and set

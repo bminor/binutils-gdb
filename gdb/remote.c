@@ -9863,6 +9863,15 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   return ret;
 }
 
+/* Return nonzero if the filesystem accessed by the target_fileio_*
+   methods is the local filesystem, zero otherwise.  */
+
+static int
+remote_filesystem_is_local (struct target_ops *self)
+{
+  return 0;
+}
+
 /* Open FILENAME on the remote target, using FLAGS and MODE.  Return a
    remote file descriptor, or -1 if an error occurs (and set
    *REMOTE_ERRNO).  */
@@ -11814,6 +11823,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_supports_multi_process = remote_supports_multi_process;
   remote_ops.to_supports_disable_randomization
     = remote_supports_disable_randomization;
+  remote_ops.to_filesystem_is_local = remote_filesystem_is_local;
   remote_ops.to_fileio_open = remote_hostio_open;
   remote_ops.to_fileio_pwrite = remote_hostio_pwrite;
   remote_ops.to_fileio_pread = remote_hostio_pread;
