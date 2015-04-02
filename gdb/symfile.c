@@ -1718,60 +1718,51 @@ set_initial_language (void)
    absolute).  In case of trouble, error() is called.  */
 
 bfd *
-symfile_bfd_open (const char *cname)
+symfile_bfd_open (const char *name)
 {
   bfd *sym_bfd;
-  int desc;
-  char *name, *absolute_name;
-  struct cleanup *back_to;
+  int desc = -1;
+  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
-  if (is_target_filename (cname))
+  if (!is_target_filename (name))
     {
-      sym_bfd = gdb_bfd_open (cname, gnutarget, -1);
-      if (!sym_bfd)
-	error (_("`%s': can't open to read symbols: %s."), cname,
-	       bfd_errmsg (bfd_get_error ()));
+      char *expanded_name, *absolute_name;
 
-      if (!bfd_check_format (sym_bfd, bfd_object))
+      expanded_name = tilde_expand (name); /* Returns 1st new malloc'd copy.  */
+
+      /* Look down path for it, allocate 2nd new malloc'd copy.  */
+      desc = openp (getenv ("PATH"),
+		    OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
+		    expanded_name, O_RDONLY | O_BINARY, &absolute_name);
+#if defined(__GO32__) || defined(_WIN32) || defined (__CYGWIN__)
+      if (desc < 0)
 	{
-	  make_cleanup_bfd_unref (sym_bfd);
-	  error (_("`%s': can't read symbols: %s."), cname,
-		 bfd_errmsg (bfd_get_error ()));
+	  char *exename = alloca (strlen (expanded_name) + 5);
+
+	  strcat (strcpy (exename, expanded_name), ".exe");
+	  desc = openp (getenv ("PATH"),
+			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
+			exename, O_RDONLY | O_BINARY, &absolute_name);
+	}
+#endif
+      if (desc < 0)
+	{
+	  make_cleanup (xfree, expanded_name);
+	  perror_with_name (expanded_name);
 	}
 
-      return sym_bfd;
+      xfree (expanded_name);
+      make_cleanup (xfree, absolute_name);
+      name = absolute_name;
     }
-
-  name = tilde_expand (cname);	/* Returns 1st new malloc'd copy.  */
-
-  /* Look down path for it, allocate 2nd new malloc'd copy.  */
-  desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH, name,
-		O_RDONLY | O_BINARY, &absolute_name);
-#if defined(__GO32__) || defined(_WIN32) || defined (__CYGWIN__)
-  if (desc < 0)
-    {
-      char *exename = alloca (strlen (name) + 5);
-
-      strcat (strcpy (exename, name), ".exe");
-      desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
-		    exename, O_RDONLY | O_BINARY, &absolute_name);
-    }
-#endif
-  if (desc < 0)
-    {
-      make_cleanup (xfree, name);
-      perror_with_name (name);
-    }
-
-  xfree (name);
-  name = absolute_name;
-  back_to = make_cleanup (xfree, name);
 
   sym_bfd = gdb_bfd_open (name, gnutarget, desc);
   if (!sym_bfd)
     error (_("`%s': can't open to read symbols: %s."), name,
 	   bfd_errmsg (bfd_get_error ()));
-  bfd_set_cacheable (sym_bfd, 1);
+
+  if (!gdb_bfd_has_target_filename (sym_bfd))
+    bfd_set_cacheable (sym_bfd, 1);
 
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
