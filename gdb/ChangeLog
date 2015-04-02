@@ -1,5 +1,10 @@
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
+	* solib.c (solib_find): Strip "target:" prefix from sysroot
+	if accessing local files.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
 	* symfile.c (symfile_bfd_open): Reorder to remove duplicated
 	checks and error messages.
 
