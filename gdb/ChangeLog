@@ -1,5 +1,23 @@
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
+	* gdb/gdb_bfd.h (TARGET_SYSROOT_PREFIX): New definition.
+	(is_target_filename): New declaration.
+	(gdb_bfd_has_target_filename): Likewise.
+	(gdb_bfd_open): Update documentation comment.
+	* gdb_bfd.c (target.h): New include.
+	(gdb/fileio.h): Likewise.
+	(is_target_filename): New function.
+	(gdb_bfd_has_target_filename): Likewise.
+	(fileio_errno_to_host): Likewise.
+	(gdb_bfd_iovec_fileio_open): Likewise.
+	(gdb_bfd_iovec_fileio_pread): Likewise.
+	(gdb_bfd_iovec_fileio_close): Likewise.
+	(gdb_bfd_iovec_fileio_fstat): Likewise.
+	(gdb_bfd_open): Use target fileio to access paths prefixed
+	with "target:" where necessary.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
 	* target.h (struct target_ops) <to_filesystem_is_local>:
 	New field.
 	(target_filesystem_is_local): New macro.

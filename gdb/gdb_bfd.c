@@ -30,6 +30,8 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 #endif
+#include "target.h"
+#include "gdb/fileio.h"
 
 typedef bfd *bfdp;
 DEF_VEC_P (bfdp);
@@ -138,6 +140,177 @@ eq_bfd (const void *a, const void *b)
 
 /* See gdb_bfd.h.  */
 
+int
+is_target_filename (const char *name)
+{
+  return startswith (name, TARGET_SYSROOT_PREFIX);
+}
+
+/* See gdb_bfd.h.  */
+
+int
+gdb_bfd_has_target_filename (struct bfd *abfd)
+{
+  return is_target_filename (bfd_get_filename (abfd));
+}
+
+
+/* Return the system error number corresponding to ERRNUM.  */
+
+static int
+fileio_errno_to_host (int errnum)
+{
+  switch (errnum)
+    {
+      case FILEIO_EPERM:
+        return EPERM;
+      case FILEIO_ENOENT:
+        return ENOENT;
+      case FILEIO_EINTR:
+        return EINTR;
+      case FILEIO_EIO:
+        return EIO;
+      case FILEIO_EBADF:
+        return EBADF;
+      case FILEIO_EACCES:
+        return EACCES;
+      case FILEIO_EFAULT:
+        return EFAULT;
+      case FILEIO_EBUSY:
+        return EBUSY;
+      case FILEIO_EEXIST:
+        return EEXIST;
+      case FILEIO_ENODEV:
+        return ENODEV;
+      case FILEIO_ENOTDIR:
+        return ENOTDIR;
+      case FILEIO_EISDIR:
+        return EISDIR;
+      case FILEIO_EINVAL:
+        return EINVAL;
+      case FILEIO_ENFILE:
+        return ENFILE;
+      case FILEIO_EMFILE:
+        return EMFILE;
+      case FILEIO_EFBIG:
+        return EFBIG;
+      case FILEIO_ENOSPC:
+        return ENOSPC;
+      case FILEIO_ESPIPE:
+        return ESPIPE;
+      case FILEIO_EROFS:
+        return EROFS;
+      case FILEIO_ENOSYS:
+        return ENOSYS;
+      case FILEIO_ENAMETOOLONG:
+        return ENAMETOOLONG;
+    }
+  return -1;
+}
+
+/* Wrapper for target_fileio_open suitable for passing as the
+   OPEN_FUNC argument to gdb_bfd_openr_iovec.  The supplied
+   OPEN_CLOSURE is unused.  */
+
+static void *
+gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *open_closure)
+{
+  const char *filename = bfd_get_filename (abfd);
+  int fd, target_errno;
+  int *stream;
+
+  gdb_assert (is_target_filename (filename));
+
+  fd = target_fileio_open (filename + strlen (TARGET_SYSROOT_PREFIX),
+			   FILEIO_O_RDONLY, 0,
+			   &target_errno);
+  if (fd == -1)
+    {
+      errno = fileio_errno_to_host (target_errno);
+      bfd_set_error (bfd_error_system_call);
+      return NULL;
+    }
+
+  stream = XCNEW (int);
+  *stream = fd;
+  return stream;
+}
+
+/* Wrapper for target_fileio_pread suitable for passing as the
+   PREAD_FUNC argument to gdb_bfd_openr_iovec.  */
+
+static file_ptr
+gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
+			    file_ptr nbytes, file_ptr offset)
+{
+  int fd = *(int *) stream;
+  int target_errno;
+  file_ptr pos, bytes;
+
+  pos = 0;
+  while (nbytes > pos)
+    {
+      bytes = target_fileio_pread (fd, (gdb_byte *) buf + pos,
+				   nbytes - pos, offset + pos,
+				   &target_errno);
+      if (bytes == 0)
+        /* Success, but no bytes, means end-of-file.  */
+        break;
+      if (bytes == -1)
+	{
+	  errno = fileio_errno_to_host (target_errno);
+	  bfd_set_error (bfd_error_system_call);
+	  return -1;
+	}
+
+      pos += bytes;
+    }
+
+  return pos;
+}
+
+/* Wrapper for target_fileio_close suitable for passing as the
+   CLOSE_FUNC argument to gdb_bfd_openr_iovec.  */
+
+static int
+gdb_bfd_iovec_fileio_close (struct bfd *abfd, void *stream)
+{
+  int fd = *(int *) stream;
+  int target_errno;
+
+  xfree (stream);
+
+  /* Ignore errors on close.  These may happen with remote
+     targets if the connection has already been torn down.  */
+  target_fileio_close (fd, &target_errno);
+
+  /* Zero means success.  */
+  return 0;
+}
+
+/* Wrapper for target_fileio_fstat suitable for passing as the
+   STAT_FUNC argument to gdb_bfd_openr_iovec.  */
+
+static int
+gdb_bfd_iovec_fileio_fstat (struct bfd *abfd, void *stream,
+			    struct stat *sb)
+{
+  int fd = *(int *) stream;
+  int target_errno;
+  int result;
+
+  result = target_fileio_fstat (fd, sb, &target_errno);
+  if (result == -1)
+    {
+      errno = fileio_errno_to_host (target_errno);
+      bfd_set_error (bfd_error_system_call);
+    }
+
+  return result;
+}
+
+/* See gdb_bfd.h.  */
+
 struct bfd *
 gdb_bfd_open (const char *name, const char *target, int fd)
 {
@@ -146,6 +319,36 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   bfd *abfd;
   struct gdb_bfd_cache_search search;
   struct stat st;
+
+  if (is_target_filename (name))
+    {
+      if (!target_filesystem_is_local ())
+	{
+	  gdb_assert (fd == -1);
+
+	  abfd = gdb_bfd_openr_iovec (name, target,
+				      gdb_bfd_iovec_fileio_open, NULL,
+				      gdb_bfd_iovec_fileio_pread,
+				      gdb_bfd_iovec_fileio_close,
+				      gdb_bfd_iovec_fileio_fstat);
+
+	  if (abfd != NULL || errno != ENOSYS)
+	    return abfd;
+
+	  /* gdb_bfd_iovec_fileio_open failed with ENOSYS.  This can
+	     happen, for example, with vgdb (Valgrind GDB), which
+	     presents itself as a remote target but works on the local
+	     filesystem: it does not implement remote get and users
+	     are not expected to set gdb_sysroot.  To handle this case
+	     we fall back to trying the local filesystem iff
+	     gdb_sysroot is exactly TARGET_SYSROOT_PREFIX.  */
+	  if (gdb_sysroot == NULL
+	      || strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) != 0)
+	    return NULL;
+	}
+
+      name += strlen (TARGET_SYSROOT_PREFIX);
+    }
 
   if (gdb_bfd_cache == NULL)
     gdb_bfd_cache = htab_create_alloc (1, hash_bfd, eq_bfd, NULL,
