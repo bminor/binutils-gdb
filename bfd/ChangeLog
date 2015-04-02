@@ -1,3 +1,7 @@
+2015-04-02  Andrew Turner  <andrew@freebsd.org>
+
+	* config.bfd: Add aarch64-*-freebsd* target triple.
+
 2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
