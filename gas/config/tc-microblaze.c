@@ -685,7 +685,7 @@ static symbolS * GOT_symbol;
 #define GOT_SYMBOL_NAME "_GLOBAL_OFFSET_TABLE_"
 
 static char *
-parse_imm (char * s, expressionS * e, int min, int max)
+parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
 {
   char *new_pointer;
   char *atp;
@@ -736,11 +736,11 @@ parse_imm (char * s, expressionS * e, int min, int max)
     ; /* An error message has already been emitted.  */
   else if ((e->X_op != O_constant && e->X_op != O_symbol) )
     as_fatal (_("operand must be a constant or a label"));
-  else if ((e->X_op == O_constant) && ((int) e->X_add_number < min
-				       || (int) e->X_add_number > max))
+  else if ((e->X_op == O_constant) && (e->X_add_number < min
+				       || e->X_add_number > max))
     {
-      as_fatal (_("operand must be absolute in range %d..%d, not %d"),
-                min, max, (int) e->X_add_number);
+      as_fatal (_("operand must be absolute in range %lx..%lx, not %lx"),
+                (long) min, (long) max, (long) e->X_add_number);
     }
 
   if (atp)
