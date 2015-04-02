@@ -424,6 +424,7 @@ to do so!
 
 PowerPC			Andrew Cagney		cagney@gnu.org
 ARM			Richard Earnshaw	rearnsha@arm.com
+Blackfin		Mike Frysinger		vapier@gentoo.org
 CRIS			Hans-Peter Nilsson	hp@axis.com
 IA64			Jeff Johnston		jjohnstn@redhat.com
 MIPS			Joel Brobecker		brobecker@adacore.com
@@ -518,6 +519,7 @@ Brian Ford					ford@vss.fsi.com
 Orjan Friberg					orjanf@axis.com
 Andreas From					andreas.from@ericsson.com
 Nathan Froyd					froydnj@codesourcery.com
+Mike Frysinger					vapier@gentoo.org
 Gary Funck					gary@intrepid.com
 Chen Gang					gang.chen.5i5j@gmail.com
 Mircea Gherzan					mircea.gherzan@intel.com

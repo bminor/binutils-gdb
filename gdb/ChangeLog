@@ -1,3 +1,7 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* MAINTAINERS: Add myself for Blackfin/write-after-approval.
+
 2015-04-16  Yao Qi  <yao.qi@linaro.org>
 
 	* infrun.c (maybe_software_singlestep): Declare.
