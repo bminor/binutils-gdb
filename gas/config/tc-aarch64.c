@@ -171,22 +171,10 @@ get_error_message (void)
   return inst.parsing_error.error;
 }
 
-static inline void
-set_error_message (const char *error)
-{
-  inst.parsing_error.error = error;
-}
-
 static inline enum aarch64_operand_error_kind
 get_error_kind (void)
 {
   return inst.parsing_error.kind;
-}
-
-static inline void
-set_error_kind (enum aarch64_operand_error_kind kind)
-{
-  inst.parsing_error.kind = kind;
 }
 
 static inline void
