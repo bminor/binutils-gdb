@@ -1,3 +1,12 @@
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_fstat>: New field.
+	(target_fileio_fstat): New declaration.
+	* target.c (target_fileio_fstat): New function.
+	* inf-child.c (inf_child_fileio_fstat): Likewise.
+	(inf_child_target): Initialize to_fileio_fstat.
+	* remote.c (init_remote_ops): Likewise.
+
 2015-04-01  Sasha Smundak  <asmundak@google.com>
 
 	* Makefile.in (SUBDIR_PYTHON_OBJS): Add py-unwind.o.

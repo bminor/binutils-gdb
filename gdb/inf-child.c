@@ -374,6 +374,20 @@ inf_child_fileio_pread (struct target_ops *self,
   return ret;
 }
 
+/* Implementation of to_fileio_fstat.  */
+static int
+inf_child_fileio_fstat (struct target_ops *self, int fd,
+			struct stat *sb, int *target_errno)
+{
+  int ret;
+
+  ret = fstat (fd, sb);
+  if (ret == -1)
+    *target_errno = inf_child_errno_to_fileio_error (errno);
+
+  return ret;
+}
+
 /* Close FD on the target.  Return 0, or -1 if an error occurs
    (and set *TARGET_ERRNO).  */
 static int
@@ -500,6 +514,7 @@ inf_child_target (void)
   t->to_fileio_open = inf_child_fileio_open;
   t->to_fileio_pwrite = inf_child_fileio_pwrite;
   t->to_fileio_pread = inf_child_fileio_pread;
+  t->to_fileio_fstat = inf_child_fileio_fstat;
   t->to_fileio_close = inf_child_fileio_close;
   t->to_fileio_unlink = inf_child_fileio_unlink;
   t->to_fileio_readlink = inf_child_fileio_readlink;
