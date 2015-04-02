@@ -1,5 +1,10 @@
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
+	* main.c (captured_main): Set gdb_sysroot to "target:"
+	if not otherwise set.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
 	* exec.c (exec_file_attach): Support "target:" filenames.
 
 2015-04-02  Gary Benson <gbenson@redhat.com>
