@@ -1,5 +1,11 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Use a more
+	correct address in call to value_at.  Adjust call to
+	value_address accordingly.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_1): Resolve TYPE before trying
 	to print it.
 

@@ -2417,10 +2417,10 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
-      v = value_at (type, value_address (obj));
+      v = value_at (type, value_address (obj) + offset);
       type = value_type (v);
       bytes = (unsigned char *) alloca (len);
-      read_memory (value_address (v) + offset, bytes, len);
+      read_memory (value_address (v), bytes, len);
     }
   else
     {
