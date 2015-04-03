@@ -1,3 +1,7 @@
+2015-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/binutils-common.exp (is_zlib_supported): Always return 1.
+
 2015-04-02  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/readelf.ss-64: Move possible location of the $d
