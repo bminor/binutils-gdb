@@ -1,5 +1,18 @@
 2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
 
+	* gdbtypes.c (is_dynamic_type_internal): Remove the unused
+	"top_level" parameter.
+	(resolve_dynamic_type_internal): Remove the unused "top_level"
+	parameter.  Update call to is_dynamic_type_internal.
+	(is_dynamic_type): Update call to is_dynamic_type_internal.
+	(resolve_dynamic_range): Update call to
+	resolve_dynamic_type_internal.
+	(resolve_dynamic_union): Likewise.
+	(resolve_dynamic_struct): Likewise.
+	(resolve_dynamic_type): Likewise.
+
+2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
 	* gdbtypes.c (is_dynamic_type_internal): Remove special handling of
 	TYPE_CODE_REF types so that they are not considered as dynamic
 	depending on the referenced type.
