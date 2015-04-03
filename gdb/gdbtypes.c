@@ -1752,10 +1752,6 @@ is_dynamic_type_internal (struct type *type, int top_level)
 {
   type = check_typedef (type);
 
-  /* We only want to recognize references at the outermost level.  */
-  if (top_level && TYPE_CODE (type) == TYPE_CODE_REF)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
-
   /* Types that have a dynamic TYPE_DATA_LOCATION are considered
      dynamic, even if the type itself is statically defined.
      From a user's point of view, this may appear counter-intuitive;
@@ -2045,21 +2041,6 @@ resolve_dynamic_type_internal (struct type *type,
 
       switch (TYPE_CODE (type))
 	{
-	case TYPE_CODE_REF:
-	  {
-	    struct property_addr_info pinfo;
-
-	    pinfo.type = check_typedef (TYPE_TARGET_TYPE (type));
-	    pinfo.addr = read_memory_typed_address (addr_stack->addr, type);
-	    pinfo.next = addr_stack;
-
-	    resolved_type = copy_type (type);
-	    TYPE_TARGET_TYPE (resolved_type)
-	      = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
-					       &pinfo, top_level);
-	    break;
-	  }
-
 	case TYPE_CODE_ARRAY:
 	  resolved_type = resolve_dynamic_array (type, addr_stack);
 	  break;
