@@ -1,3 +1,9 @@
+2015-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* external.h (Elf32_External_Chdr): New.
+	(Elf64_External_Chdr): Likewise.
+	* internal.h (Elf_Internal_Chdr): Likewise.
+
 2015-03-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* common.h (ELFOSABI_CLOUDABI): New.
