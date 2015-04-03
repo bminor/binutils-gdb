@@ -1,3 +1,25 @@
+2015-04-19  Jiri Gaisler  <jiri@gaisler.se>
+
+	* erc32.c (current_target_byte_order): Delete.
+	(fetch_bytes): Remove.
+	(store_bytes): Remove byte twisting.
+	(memory_read, memory_write): Access memory directly.
+	(extract_short, extract_short_signed, extract_byte,
+	extract_byte_signed): New function for for sub-word LD instructions.
+	* exec.c (extract_short, extract_short_signed, extract_byte,
+	extract_byte_signed): New functions.
+	(dispatch_instruction): Update memory reads.
+	* func.c (current_target_byte_order): Delete.
+	(get_regi): Delete little endian handling.
+	(disp_ctrl, dis_mem): Adjust print-out to new data endian.
+	(bfd_load): Delete little endian handling.
+	* interf.c (current_target_byte_order): Delete.
+	(sim_open): Set dinfo to host endian to get correct disassembly.
+	(sim_write, sim_read): Convert endian when gdb reads or writes
+	memory.
+	* sis.c (main): Set endian.
+	* sis.h (EBT): Define.
+
 2015-04-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

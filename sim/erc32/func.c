@@ -30,10 +30,8 @@
 #include "sim-config.h"
 #include <inttypes.h>
 
-
 #define	VAL(x)	strtoul(x,(char **)NULL,0)
 
-extern int	current_target_byte_order;
 struct disassemble_info dinfo;
 struct pstate   sregs;
 extern struct estate ebase;
@@ -184,18 +182,10 @@ get_regi(struct pstate * sregs, int32 reg, char *buf)
     default:break;
 	}
     }
-    if (current_target_byte_order == BIG_ENDIAN) {
-	buf[0] = (rval >> 24) & 0x0ff;
-	buf[1] = (rval >> 16) & 0x0ff;
-	buf[2] = (rval >> 8) & 0x0ff;
-	buf[3] = rval & 0x0ff;
-    }
-    else {
-	buf[3] = (rval >> 24) & 0x0ff;
-	buf[2] = (rval >> 16) & 0x0ff;
-	buf[1] = (rval >> 8) & 0x0ff;
-	buf[0] = rval & 0x0ff;
-    }
+    buf[0] = (rval >> 24) & 0x0ff;
+    buf[1] = (rval >> 16) & 0x0ff;
+    buf[2] = (rval >> 8) & 0x0ff;
+    buf[3] = rval & 0x0ff;
 }
 
 
@@ -787,15 +777,15 @@ disp_ctrl(sregs)
     struct pstate  *sregs;
 {
 
-    unsigned char           i[4];
+    uint32           i;
 
     printf("\n psr: %08X   wim: %08X   tbr: %08X   y: %08X\n",
 	   sregs->psr, sregs->wim, sregs->tbr, sregs->y);
-    sis_memory_read(sregs->pc, i, 4);
-    printf("\n  pc: %08X = %02X%02X%02X%02X    ", sregs->pc,i[0],i[1],i[2],i[3]);
+    sis_memory_read (sregs->pc, (char *) &i, 4);
+    printf ("\n  pc: %08X = %08X    ", sregs->pc, i);
     print_insn_sparc_sis(sregs->pc, &dinfo);
-    sis_memory_read(sregs->npc, i, 4);
-    printf("\n npc: %08X = %02X%02X%02X%02X    ",sregs->npc,i[0],i[1],i[2],i[3]);
+    sis_memory_read (sregs->npc, (char *) &i, 4);
+    printf ("\n npc: %08X = %08X    ", sregs->npc, i);
     print_insn_sparc_sis(sregs->npc, &dinfo);
     if (sregs->err_mode)
 	printf("\n IU in error mode");
@@ -809,22 +799,25 @@ disp_mem(addr, len)
 {
 
     uint32          i;
-    unsigned char   data[4];
+    union {
+	    unsigned char u8[4];
+	    uint32 u32;
+    } data;
     uint32          mem[4], j;
     char           *p;
 
     for (i = addr & ~3; i < ((addr + len) & ~3); i += 16) {
 	printf("\n %8X  ", i);
 	for (j = 0; j < 4; j++) {
-	    sis_memory_read((i + (j * 4)), data, 4);
-	    printf("%02x%02x%02x%02x  ", data[0],data[1],data[2],data[3]);
-	    mem[j] = *((int *) &data);
+	    sis_memory_read ((i + (j * 4)), data.u8, 4);
+	    printf ("%08x  ", data.u32);
+	    mem[j] = data.u32;
 	}
 	printf("  ");
 	p = (char *) mem;
 	for (j = 0; j < 16; j++) {
-	    if (isprint(p[j]))
-		putchar(p[j]);
+	    if (isprint (p[j ^ EBT]))
+		putchar (p[j ^ EBT]);
 	    else
 		putchar('.');
 	}
@@ -839,11 +832,14 @@ dis_mem(addr, len, info)
     struct disassemble_info *info;
 {
     uint32          i;
-    unsigned char   data[4];
+    union {
+	    unsigned char u8[4];
+	    uint32 u32;
+    } data;
 
     for (i = addr & -3; i < ((addr & -3) + (len << 2)); i += 4) {
-	sis_memory_read(i, data, 4);
-	printf(" %08x  %02x%02x%02x%02x  ", i, data[0],data[1],data[2],data[3]);
+	sis_memory_read (i, data.u8, 4);
+	printf (" %08x  %08x  ", i, data.u32);
 	print_insn_sparc_sis(i, info);
         if (i >= 0xfffffffc) break;
 	printf("\n");
@@ -1041,6 +1037,7 @@ bfd_load (const char *fname)
     asection       *section;
     bfd            *pbfd;
     const bfd_arch_info_type *arch;
+    int            i;
 
     pbfd = bfd_openr(fname, 0);
 
@@ -1054,14 +1051,6 @@ bfd_load (const char *fname)
     }
 
     arch = bfd_get_arch_info (pbfd);
-    if (bfd_little_endian (pbfd) || arch->mach == bfd_mach_sparc_sparclite_le)
-        current_target_byte_order = LITTLE_ENDIAN;
-    else
-	current_target_byte_order = BIG_ENDIAN;
-    if (sis_verbose)
-	printf("file %s is %s-endian.\n", fname,
-	       current_target_byte_order == BIG_ENDIAN ? "big" : "little");
-
     if (sis_verbose)
 	printf("loading %s:", fname);
     for (section = pbfd->sections; section; section = section->next) {
@@ -1093,10 +1082,7 @@ bfd_load (const char *fname)
 					      sizeof (marker));
 		    if (strncmp (marker.signature, "DaTa", 4) == 0)
 		      {
-			if (current_target_byte_order == BIG_ENDIAN)
-			  section_address = bfd_getb32 (marker.sdata);
-			else
-			  section_address = bfd_getl32 (marker.sdata);
+			section_address = bfd_getb32 (marker.sdata);
 		      }
 		}
 	    }
@@ -1121,7 +1107,8 @@ bfd_load (const char *fname)
 
 		    bfd_get_section_contents(pbfd, section, buffer, fptr, count);
 
-		    sis_memory_write(section_address, buffer, count);
+		    for (i = 0; i < count; i++)
+			sis_memory_write ((section_address + i) ^ EBT, &buffer[i], 1);
 
 		    section_address += count;
 		    fptr += count;

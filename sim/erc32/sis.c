@@ -223,7 +223,11 @@ main(argc, argv)
     sregs.freq = freq;
 
     INIT_DISASSEMBLE_INFO(dinfo, stdout, (fprintf_ftype) fprintf);
+#ifdef HOST_LITTLE_ENDIAN
+    dinfo.endian = BFD_ENDIAN_LITTLE;
+#else
     dinfo.endian = BFD_ENDIAN_BIG;
+#endif
 
     termsave = fcntl(0, F_GETFL, 0);
     using_history();

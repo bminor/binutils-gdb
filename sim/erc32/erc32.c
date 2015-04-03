@@ -54,11 +54,6 @@ int dumbio = 0; /* normal, smart, terminal oriented IO by default */
 extern int errmec;
 #endif
 
-/* The target's byte order is big-endian by default until we load a
-   little-endian program.  */
-
-int	current_target_byte_order = BIG_ENDIAN;
-
 #define MEC_WS	0		/* Waitstates per MEC access (0 ws) */
 #define MOK	0
 
@@ -296,11 +291,8 @@ static void	gpt_reload_set (uint32 val);
 static void	timer_ctrl (uint32 val);
 static unsigned char *
 		get_mem_ptr (uint32 addr, uint32 size);
-
-static void	fetch_bytes (int asi, unsigned char *mem,
-			     uint32 *data, int sz);
-
-static void	store_bytes (unsigned char *mem, uint32 *data, int sz);
+static void	store_bytes (unsigned char *mem, uint32 waddr,
+			uint32 *data, int sz, int32 *ws);
 
 extern int	ext_irl;
 
@@ -1524,123 +1516,38 @@ timer_ctrl(val)
 	gpt_start();
 }
 
-
-/* Retrieve data from target memory.  MEM points to location from which
-   to read the data; DATA points to words where retrieved data will be
-   stored in host byte order.  SZ contains log(2) of the number of bytes
-   to retrieve, and can be 0 (1 byte), 1 (one half-word), 2 (one word),
-   or 3 (two words). */
-
-static void
-fetch_bytes (asi, mem, data, sz)
-    int		    asi;
-    unsigned char  *mem;
-    uint32	   *data;
-    int		    sz;
-{
-    if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN
-	|| asi == 8 || asi == 9) {
-	switch (sz) {
-	case 3:
-	    data[1] =  (((uint32) mem[7]) & 0xff) |
-		      ((((uint32) mem[6]) & 0xff) <<  8) |
-		      ((((uint32) mem[5]) & 0xff) << 16) |
-		      ((((uint32) mem[4]) & 0xff) << 24);
-	    /* Fall through to 2 */
-	case 2:
-	    data[0] =  (((uint32) mem[3]) & 0xff) |
-		      ((((uint32) mem[2]) & 0xff) <<  8) |
-		      ((((uint32) mem[1]) & 0xff) << 16) |
-		      ((((uint32) mem[0]) & 0xff) << 24);
-	    break;
-	case 1:
-	    data[0] =  (((uint32) mem[1]) & 0xff) |
-		      ((((uint32) mem[0]) & 0xff) << 8);
-	    break;
-	case 0:
-	    data[0] = mem[0] & 0xff;
-	    break;
-	    
-	}
-    } else {
-	switch (sz) {
-	case 3:
-	    data[1] = ((((uint32) mem[7]) & 0xff) << 24) |
-		      ((((uint32) mem[6]) & 0xff) << 16) |
-		      ((((uint32) mem[5]) & 0xff) <<  8) |
-		       (((uint32) mem[4]) & 0xff);
-	    /* Fall through to 4 */
-	case 2:
-	    data[0] = ((((uint32) mem[3]) & 0xff) << 24) |
-		      ((((uint32) mem[2]) & 0xff) << 16) |
-		      ((((uint32) mem[1]) & 0xff) <<  8) |
-		       (((uint32) mem[0]) & 0xff);
-	    break;
-	case 1:
-	    data[0] = ((((uint32) mem[1]) & 0xff) <<  8) |
-		       (((uint32) mem[0]) & 0xff);
-	    break;
-	case 0:
-	    data[0] = mem[0] & 0xff;
-	    break;
-	}
-    }
-}
-
-
-/* Store data in target byte order.  MEM points to location to store data;
+/* Store data in host byte order.  MEM points to the beginning of the
+   emulated memory; WADDR contains the index the emulated memory,
    DATA points to words in host byte order to be stored.  SZ contains log(2)
    of the number of bytes to retrieve, and can be 0 (1 byte), 1 (one half-word),
-   2 (one word), or 3 (two words). */
+   2 (one word), or 3 (two words); WS should return the number of
+   wait-states.  */
 
 static void
-store_bytes (mem, data, sz)
-    unsigned char  *mem;
-    uint32	   *data;
-    int		    sz;
+store_bytes (unsigned char *mem, uint32 waddr, uint32 *data, int32 sz,
+	     int32 *ws)
 {
-    if (CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN) {
-	switch (sz) {
-	case 3:
-	    mem[7] = (data[1] >> 24) & 0xff;
-	    mem[6] = (data[1] >> 16) & 0xff;
-	    mem[5] = (data[1] >>  8) & 0xff;
-	    mem[4] = data[1] & 0xff;
-	    /* Fall through to 2 */
-	case 2:
-	    mem[3] = (data[0] >> 24) & 0xff;
-	    mem[2] = (data[0] >> 16) & 0xff;
-	    /* Fall through to 1 */
-	case 1:
-	    mem[1] = (data[0] >>  8) & 0xff;
-	    /* Fall through to 0 */
+    switch (sz) {
 	case 0:
-	    mem[0] = data[0] & 0xff;
-	    break;
-	}
-    } else {
-	switch (sz) {
-	case 3:
-	    mem[7] = data[1] & 0xff;
-	    mem[6] = (data[1] >>  8) & 0xff;
-	    mem[5] = (data[1] >> 16) & 0xff;
-	    mem[4] = (data[1] >> 24) & 0xff;
-	    /* Fall through to 2 */
-	case 2:
-	    mem[3] = data[0] & 0xff;
-	    mem[2] = (data[0] >>  8) & 0xff;
-	    mem[1] = (data[0] >> 16) & 0xff;
-	    mem[0] = (data[0] >> 24) & 0xff;
+	    waddr ^= EBT;
+	    mem[waddr] = *data & 0x0ff;
+	    *ws = mem_ramw_ws + 3;
 	    break;
 	case 1:
-	    mem[1] = data[0] & 0xff;
-	    mem[0] = (data[0] >> 8) & 0xff;
+#ifdef HOST_LITTLE_ENDIAN
+	    waddr ^= 2;
+#endif
+	    memcpy (&mem[waddr], data, 2);
+	    *ws = mem_ramw_ws + 3;
 	    break;
-	case 0:
-	    mem[0] = data[0] & 0xff;
+	case 2:
+	    memcpy (&mem[waddr], data, 4);
+	    *ws = mem_ramw_ws;
 	    break;
-	    
-	}
+	case 3:
+	    memcpy (&mem[waddr], data, 8);
+	    *ws = 2 * mem_ramw_ws + STD_WS;
+	    break;
     }
 }
 
@@ -1695,7 +1602,7 @@ memory_read(asi, addr, data, sz, ws)
 #endif
 
     if ((addr >= mem_ramstart) && (addr < (mem_ramstart + mem_ramsz))) {
-	fetch_bytes (asi, &ramb[addr & mem_rammask], data, sz);
+	memcpy (data, &ramb[addr & mem_rammask & ~3], 4);
 	*ws = mem_ramr_ws;
 	return 0;
     } else if ((addr >= MEC_START) && (addr < MEC_END)) {
@@ -1713,7 +1620,7 @@ memory_read(asi, addr, data, sz, ws)
     } else if (era) {
     	if ((addr < 0x100000) || 
 	    ((addr>= 0x80000000) && (addr < 0x80100000))) {
-	    fetch_bytes (asi, &romb[addr & ROM_MASK], data, sz);
+	    memcpy (data, &romb[addr & ROM_MASK & ~3], 4);
 	    *ws = 4;
 	    return 0;
 	} else if ((addr >= 0x10000000) && 
@@ -1724,13 +1631,12 @@ memory_read(asi, addr, data, sz, ws)
 	}
 	
     } else  if (addr < mem_romsz) {
-	    fetch_bytes (asi, &romb[addr], data, sz);
-	    *ws = mem_romr_ws;
-	    return 0;
-
+	memcpy (data, &romb[addr & ~3], 4);
+	*ws = mem_romr_ws;
+	return 0;
 #else
     } else if (addr < mem_romsz) {
-	fetch_bytes (asi, &romb[addr], data, sz);
+	memcpy (data, &romb[addr & ~3], 4);
 	*ws = mem_romr_ws;
 	return 0;
 #endif
@@ -1793,21 +1699,8 @@ memory_write(asi, addr, data, sz, ws)
 		return 1;
 	    }
 	}
-
-	store_bytes (&ramb[addr & mem_rammask], data, sz);
-
-	switch (sz) {
-	case 0:
-	case 1:
-	    *ws = mem_ramw_ws + 3;
-	    break;
-	case 2:
-	    *ws = mem_ramw_ws;
-	    break;
-	case 3:
-	    *ws = 2 * mem_ramw_ws + STD_WS;
-	    break;
-	}
+	waddr = addr & mem_rammask;
+	store_bytes (ramb, waddr, data, sz, ws);
 	return 0;
     } else if ((addr >= MEC_START) && (addr < MEC_END)) {
 	if ((sz != 2) || (asi != 0xb)) {
@@ -1831,7 +1724,7 @@ memory_write(asi, addr, data, sz, ws)
 	((addr < 0x100000) || ((addr >= 0x80000000) && (addr < 0x80100000)))) {
 	    addr &= ROM_MASK;
 	    *ws = sz == 3 ? 8 : 4;
-	    store_bytes (&romb[addr], data, sz);
+	    store_bytes (romb, addr, data, sz, ws);
             return 0;
 	} else if ((addr >= 0x10000000) && 
 		   (addr < (0x10000000 + (512 << (mec_iocr & 0x0f)))) &&
@@ -1847,7 +1740,7 @@ memory_write(asi, addr, data, sz, ws)
 	*ws = mem_romw_ws + 1;
 	if (sz == 3)
 	    *ws += mem_romw_ws + STD_WS;
-	store_bytes (&romb[addr], data, sz);
+	store_bytes (romb, addr, data, sz, ws);
         return 0;
 
 #else
@@ -1858,7 +1751,7 @@ memory_write(asi, addr, data, sz, ws)
 	*ws = mem_romw_ws + 1;
 	if (sz == 3)
             *ws += mem_romw_ws + STD_WS;
-	store_bytes (&romb[addr], data, sz);
+	store_bytes (romb, addr, data, sz, ws);
         return 0;
 
 #endif
