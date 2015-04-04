@@ -650,6 +650,9 @@ x86_64-*-dicos*)
 	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o \
 			dicos-tdep.o i386-dicos-tdep.o amd64-dicos-tdep.o"
 	;;
+x86_64-*-elf* | x86_64-*-rtems*)
+	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o i386bsd-tdep.o"
+	 ;;
 x86_64-*-linux*)
 	# Target: GNU/Linux x86-64
 	gdb_target_obs="amd64-tdep.o amd64-linux-tdep.o i386-tdep.o \
