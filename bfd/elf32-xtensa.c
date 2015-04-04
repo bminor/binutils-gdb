@@ -5832,6 +5832,7 @@ print_action_list (FILE *fp, text_action_list *action_list)
    by the "from" offset field.  */
 
 typedef struct removed_literal_struct removed_literal;
+typedef struct removed_literal_map_entry_struct removed_literal_map_entry;
 typedef struct removed_literal_list_struct removed_literal_list;
 
 struct removed_literal_struct
@@ -5841,10 +5842,19 @@ struct removed_literal_struct
   removed_literal *next;
 };
 
+struct removed_literal_map_entry_struct
+{
+  bfd_vma addr;
+  removed_literal *literal;
+};
+
 struct removed_literal_list_struct
 {
   removed_literal *head;
   removed_literal *tail;
+
+  unsigned n_map;
+  removed_literal_map_entry *map;
 };
 
 
@@ -5893,6 +5903,39 @@ add_removed_literal (removed_literal_list *removed_list,
     }
 }
 
+static void
+map_removed_literal (removed_literal_list *removed_list)
+{
+  unsigned n_map = 0;
+  unsigned i;
+  removed_literal_map_entry *map = NULL;
+  removed_literal *r = removed_list->head;
+
+  for (i = 0; r; ++i, r = r->next)
+    {
+      if (i == n_map)
+	{
+	  n_map = (n_map * 2) + 2;
+	  map = bfd_realloc (map, n_map * sizeof (*map));
+	}
+      map[i].addr = r->from.target_offset;
+      map[i].literal = r;
+    }
+  removed_list->map = map;
+  removed_list->n_map = i;
+}
+
+static int
+removed_literal_compare (const void *a, const void *b)
+{
+  const removed_literal_map_entry *pa = a;
+  const removed_literal_map_entry *pb = b;
+
+  if (pa->addr == pb->addr)
+    return 0;
+  else
+    return pa->addr < pb->addr ? -1 : 1;
+}
 
 /* Check if the list of removed literals contains an entry for the
    given address.  Return the entry if found.  */
@@ -5900,12 +5943,21 @@ add_removed_literal (removed_literal_list *removed_list,
 static removed_literal *
 find_removed_literal (removed_literal_list *removed_list, bfd_vma addr)
 {
-  removed_literal *r = removed_list->head;
-  while (r && r->from.target_offset < addr)
-    r = r->next;
-  if (r && r->from.target_offset == addr)
-    return r;
-  return NULL;
+  removed_literal_map_entry *p;
+  removed_literal *r = NULL;
+
+  if (removed_list->map == NULL)
+    map_removed_literal (removed_list);
+
+  p = bsearch (&addr, removed_list->map, removed_list->n_map,
+	       sizeof (*removed_list->map), removed_literal_compare);
+  if (p)
+    {
+      while (p != removed_list->map && (p - 1)->addr == addr)
+	--p;
+      r = p->literal;
+    }
+  return r;
 }
 
 
