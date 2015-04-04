@@ -20,43 +20,55 @@ if { [is_remote host] || ![is_elf_format] || ![is_zlib_supported] } then {
     return
 }
 
-set testfile tmpdir/dw2-1.o
-set compressedfile tmpdir/dw2-1-compressed.o
+set testfile tmpdir/dw2-1
+set compressedfile tmpdir/dw2-1-compressed
 set copyfile tmpdir/dw2-copy
-set compressedfile2 tmpdir/dw2-2-compressed.o
-set libfile tmpdir/libdw2.a
+set compressedfile2 tmpdir/dw2-2-compressed
+set libfile tmpdir/libdw2
 set compressedcopyfile tmpdir/dw2-copy-compressed
+set testfile3 tmpdir/dw2-3
+set compressedfile3 tmpdir/dw2-3-compressed
 
-if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S $testfile --nocompress-debug-sections] } then {
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S ${testfile}.o --nocompress-debug-sections] } then {
     unsupported "compressed debug sections"
     return
 }
 
-if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S $compressedfile --compress-debug-sections] } then {
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S ${compressedfile}.o --compress-debug-sections] } then {
     unsupported "compressed debug sections"
     return
 }
 
-if { ![binutils_assemble_flags $srcdir/$subdir/dw2-2.S $compressedfile2 --compress-debug-sections] } then {
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-2.S ${compressedfile2}.o --compress-debug-sections] } then {
     unsupported "compressed debug sections"
     return
 }
 
-remote_file host delete $libfile
-set got [binutils_run $AR "rc $libfile $compressedfile $compressedfile2"]
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-3.S ${testfile3}.o --nocompress-debug-sections] } then {
+    unsupported "compressed debug sections"
+    return
+}
+
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-3.S ${compressedfile3}.o --compress-debug-sections] } then {
+    unsupported "compressed debug sections"
+    return
+}
+
+remote_file host delete ${libfile}.a
+set got [binutils_run $AR "rc ${libfile}.a ${compressedfile}.o ${compressedfile2}.o ${compressedfile3}.o"]
 if ![string match "" $got] then {
     fail "compressed debug sections"
     return
 }
 
 set testname "objcopy compress debug sections"
-set got [binutils_run $OBJCOPY "--compress-debug-sections $testfile ${copyfile}.o"]
+set got [binutils_run $OBJCOPY "--compress-debug-sections ${testfile}.o ${copyfile}.o"]
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
 } else {
-    send_log "cmp $compressedfile ${copyfile}.o\n"
-    verbose "cmp $compressedfile ${copyfile}.o"
-    set src1 ${compressedfile}
+    send_log "cmp ${compressedfile}.o ${copyfile}.o\n"
+    verbose "cmp ${compressedfile}.o ${copyfile}.o"
+    set src1 ${compressedfile}.o
     set src2 ${copyfile}.o
     set status [remote_exec build cmp "${src1} ${src2}"]
     set exec_output [lindex $status 1]
@@ -72,13 +84,13 @@ if ![string match "" $got] then {
 }
 
 set testname "objcopy decompress compressed debug sections"
-set got [binutils_run $OBJCOPY "--decompress-debug-sections $compressedfile ${copyfile}.o"]
+set got [binutils_run $OBJCOPY "--decompress-debug-sections ${compressedfile}.o ${copyfile}.o"]
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
 } else {
-    send_log "cmp $testfile ${copyfile}.o\n"
-    verbose "cmp $testfile ${copyfile}.o"
-    set src1 ${testfile}
+    send_log "cmp ${testfile}.o ${copyfile}.o\n"
+    verbose "cmp ${testfile}.o ${copyfile}.o"
+    set src1 ${testfile}.o
     set src2 ${copyfile}.o
     set status [remote_exec build cmp "${src1} ${src2}"]
     set exec_output [lindex $status 1]
@@ -94,7 +106,7 @@ if ![string match "" $got] then {
 }
 
 set testname "objcopy decompress debug sections in archive"
-set got [binutils_run $OBJCOPY "--decompress-debug-sections $libfile ${copyfile}.a"]
+set got [binutils_run $OBJCOPY "--decompress-debug-sections ${libfile}.a ${copyfile}.a"]
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
 } else {
@@ -134,7 +146,7 @@ if ![string match "" $got] then {
 }
 
 set testname "objdump compress debug sections"
-set got [remote_exec host "$OBJDUMP -W $compressedfile" "" "/dev/null" "objdump.out"]
+set got [remote_exec host "$OBJDUMP -W ${compressedfile}.o" "" "/dev/null" "objdump.out"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
     fail "$testname"
     send_log "$got\n"
@@ -145,22 +157,32 @@ if { [regexp_diff objdump.out $srcdir/$subdir/dw2-1.W] } then {
     pass "$testname"
 }
 
-set testfile tmpdir/dw2-emty.o
+set testname "objdump compress debug sections 3"
+set got [remote_exec host "$OBJDUMP -W ${compressedfile3}.o" "" "/dev/null" "objdump.out"]
+if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+    fail "$testname"
+    send_log "$got\n"
+}
+if { [regexp_diff objdump.out $srcdir/$subdir/dw2-3.W] } then {
+    fail "$testname"
+} else {
+    pass "$testname"
+}
 
-if { ![binutils_assemble_flags $srcdir/$subdir/dw2-empty.S $testfile --nocompress-debug-sections] } then {
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-empty.S ${testfile}empty.o --nocompress-debug-sections] } then {
     unsupported "compressed debug sections"
     return
 }
 
 set testname "objcopy compress empty debug sections"
-set got [binutils_run $OBJCOPY "--compress-debug-sections $testfile ${copyfile}.o"]
+set got [binutils_run $OBJCOPY "--compress-debug-sections ${testfile}empty.o ${copyfile}empty.o"]
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
 } else {
-    send_log "cmp $testfile ${copyfile}.o\n"
-    verbose "cmp $testfile ${copyfile}.o"
-    set src1 ${testfile}
-    set src2 ${copyfile}.o
+    send_log "cmp ${testfile}empty.o ${copyfile}empty.o\n"
+    verbose "cmp ${testfile}empty.o ${copyfile}empty.o"
+    set src1 ${testfile}empty.o
+    set src2 ${copyfile}empty.o
     set status [remote_exec build cmp "${src1} ${src2}"]
     set exec_output [lindex $status 1]
     set exec_output [prune_warnings $exec_output]

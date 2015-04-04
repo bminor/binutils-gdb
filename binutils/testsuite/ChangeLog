@@ -1,3 +1,19 @@
+2015-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp (testfile): Remove suffix.
+	(compressedfile): Likewise.
+	(compressedfile2): Likewise.
+	(libfile): Likewise.
+	(testfile3): New.
+	(compressedfile3): Likewise.
+	Updated.
+	Add a dw2-3.S test.
+	(${libfile}.a): Add ${compressedfile3}.o.
+	* binutils-all/dw2-3.S: New file.
+	* binutils-all/dw2-3.W: Likewise.
+	* binutils-all/libdw2-compressed.out: Updated.
+	* binutils-all/libdw2.out: Likewise.
+
 2015-04-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lib/binutils-common.exp (is_zlib_supported): Always return 1.
