@@ -1,3 +1,8 @@
+2015-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* compress.c (get_uncompressed_size): New.  Extracted from ...
+	(bfd_init_section_decompress_status): This.  Use it.
+
 2015-04-02  Andrew Turner  <andrew@freebsd.org>
 
 	* config.bfd: Add aarch64-*-freebsd* target triple.
