@@ -6680,6 +6680,11 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
 	  elf_next_in_group (osec) = elf_next_in_group (isec);
 	  elf_section_data (osec)->group = elf_section_data (isec)->group;
 	}
+
+      /* If not decompress, preserve SHF_COMPRESSED.  */
+      if ((ibfd->flags & BFD_DECOMPRESS) == 0)
+	elf_section_flags (osec) |= (elf_section_flags (isec)
+				     & SHF_COMPRESSED);
     }
 
   ihdr = &elf_section_data (isec)->this_hdr;

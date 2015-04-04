@@ -1,5 +1,10 @@
 2015-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (_bfd_elf_init_private_section_data): Also preserve the
+	SHF_COMPRESSED bit if not decompress.
+
+2015-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* compress.c (get_uncompressed_size): New.  Extracted from ...
 	(bfd_init_section_decompress_status): This.  Use it.
 
