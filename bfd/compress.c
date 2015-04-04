@@ -60,23 +60,23 @@ decompress_contents (bfd_byte *compressed_buffer,
 }
 
 static bfd_size_type
-get_uncompressed_size (bfd_byte *uncompressed_size_buffer)
+get_uncompressed_size (bfd_byte *compressed_size_buffer)
 {
-  bfd_size_type uncompressed_size = uncompressed_size_buffer[0];
+  bfd_size_type uncompressed_size = compressed_size_buffer[0];
   uncompressed_size <<= 8;
-  uncompressed_size += uncompressed_size_buffer[1];
+  uncompressed_size += compressed_size_buffer[1];
   uncompressed_size <<= 8;
-  uncompressed_size += uncompressed_size_buffer[2];
+  uncompressed_size += compressed_size_buffer[2];
   uncompressed_size <<= 8;
-  uncompressed_size += uncompressed_size_buffer[3];
+  uncompressed_size += compressed_size_buffer[3];
   uncompressed_size <<= 8;
-  uncompressed_size += uncompressed_size_buffer[4];
+  uncompressed_size += compressed_size_buffer[4];
   uncompressed_size <<= 8;
-  uncompressed_size += uncompressed_size_buffer[5];
+  uncompressed_size += compressed_size_buffer[5];
   uncompressed_size <<= 8;
-  uncompressed_size += uncompressed_size_buffer[6];
+  uncompressed_size += compressed_size_buffer[6];
   uncompressed_size <<= 8;
-  uncompressed_size += uncompressed_size_buffer[7];
+  uncompressed_size += compressed_size_buffer[7];
   return uncompressed_size;;
 }
 
