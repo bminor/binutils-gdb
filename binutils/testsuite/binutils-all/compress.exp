@@ -39,6 +39,15 @@ if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S ${compressedfile}.o --com
     return
 }
 
+set got [remote_exec host "cmp ${testfile}.o ${compressedfile}.o" "" "/dev/null"]
+# Use it to set up xfail.
+set exec_output [lindex $got 1]
+if [string match "" $exec_output] then {
+    set compression_used ""
+} else {
+    set compression_used "yes"
+}
+
 if { ![binutils_assemble_flags $srcdir/$subdir/dw2-2.S ${compressedfile2}.o --compress-debug-sections] } then {
     unsupported "compressed debug sections"
     return
@@ -125,6 +134,8 @@ if ![string match "" $got] then {
     }
 }
 
+# Xfail this test if there are no compressed sections.
+setup_xfail "$compression_used$target_triplet"
 set testname "objcopy compress debug sections in archive"
 set got [binutils_run $OBJCOPY "--compress-debug-sections ${copyfile}.a ${compressedcopyfile}.a"]
 if ![string match "" $got] then {
@@ -138,6 +149,7 @@ if ![string match "" $got] then {
 	send_log "\n"
     }
 
+    setup_xfail "$compression_used$target_triplet"
     if { [regexp_diff tmpdir/libdw2-compressed.out $srcdir/$subdir/libdw2-compressed.out] } then {
 	fail "$testname"
     } else {

@@ -1519,7 +1519,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   /* PR binutils/18087: If compression didn't make the section smaller,
      just keep it uncompressed.  */
-  if (compressed_size > uncompressed_size)
+  if (compressed_size >= uncompressed_size)
     return;
 
   memcpy (header, "ZLIB", 4);

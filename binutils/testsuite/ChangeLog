@@ -1,3 +1,8 @@
+2015-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp (compression_used): New.
+	Xfail test if compression didn't make the section smaller.
+
 2015-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/compress.exp (testfile): Remove suffix.
