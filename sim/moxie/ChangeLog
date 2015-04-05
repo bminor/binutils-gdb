@@ -1,3 +1,13 @@
+2015-04-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add sim-resume.o.
+	* interp.c (moxie_regset): Delete exception.
+	(sim_resume): Rename to ...
+	(sim_engine_run): ... this.  Delete insts variable and references
+	to cpu.asregs.exception, and change most to sim_engine_halt.  Move
+	trailing insts and PC_REGNO updates into the loop.
+	(load_dtb): Delete open warning.  Change printf to sim_io_eprintf.
+
 2015-04-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HAVE_BIENDIAN): Delete.

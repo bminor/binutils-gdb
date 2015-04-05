@@ -27,6 +27,7 @@ SIM_OBJS = \
 	sim-hload.o \
 	sim-hrw.o \
 	sim-reason.o \
+	sim-resume.o \
 	sim-stop.o
 
 SIM_EXTRA_LIBS = -lm -lz
