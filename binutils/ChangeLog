@@ -1,3 +1,13 @@
+2015-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_elf_section_flags): Support SHF_COMPRESSED.
+	(get_compression_header): New.
+	(process_section_headers): Dump compression header if needed.
+	(uncompress_section_contents): Don't free compressed_buffer here.
+	(load_specific_debug_section): Free the compressed buffer, update
+	the section buffer and the section size if uncompress is
+	successful.
+
 2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
