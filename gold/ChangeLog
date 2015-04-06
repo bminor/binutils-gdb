@@ -1,5 +1,10 @@
 2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
+	* gc.cc (Garbage_collection::do_transitive_closure): Avoid a call
+	to find by using the return value of insert.
+
+2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
 	* gc.cc (Garbage_collection::do_transitive_closure): Avoid a copy
 	constructor call.
 
