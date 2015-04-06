@@ -1,3 +1,10 @@
+2015-04-06  Doug Evans  <xdje42@gmail.com>
+
+	* lib/pascal.exp (gpc_compile): Rename dest arg to destfile.
+	Fix dest parameter to board_info.
+	(fpc_compile): Ditto.
+	(gdb_compile_pascal): Rename dest arg to destfile.
+
 2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/funcall_ref.exp: New file.
