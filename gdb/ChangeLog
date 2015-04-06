@@ -1,3 +1,10 @@
+2015-04-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (hash_symbol_entry): Hash STRUCT_DOMAIN symbols as
+	VAR_DOMAIN.
+	(symbol_cache_lookup): Clarify use of bsc_ptr, slot_ptr parameters.
+	Include symbol domain in debugging output.
+
 2015-04-06  Pedro Alves  <palves@redhat.com>
 	    Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
