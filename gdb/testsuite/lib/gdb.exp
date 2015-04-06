@@ -4711,6 +4711,7 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
 
 # Starts fresh GDB binary and loads EXECUTABLE into GDB. EXECUTABLE is
 # the basename of the binary.
+# The return value is 0 for success, -1 for failure.
 proc clean_restart { executable } {
     global srcdir
     global subdir
@@ -4719,7 +4720,7 @@ proc clean_restart { executable } {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
+    return [gdb_load ${binfile}]
 }
 
 # Prepares for testing by calling build_executable_full, then
