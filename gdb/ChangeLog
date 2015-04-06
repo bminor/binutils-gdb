@@ -1,3 +1,12 @@
+2015-04-06  Pedro Alves  <palves@redhat.com>
+	    Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* configure.ac: Remove the mingw32-specific stub-termcap.o
+	fallback, and instead fallback to the stub termcap on all hosts.
+	* configure: Regenerate.
+	* stub-termcap.c [!__MINGW32__] (PC, BC, UP): Define as weak
+	symbols.
+
 2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdbtypes.c (is_dynamic_type_internal): Remove the unused

@@ -7455,11 +7455,6 @@ case $host_os in
   go32* | *djgpp*)
     ac_cv_search_tgetent="none required"
     ;;
-  *mingw32*)
-    if test x"$curses_found" != xyes; then
-      ac_cv_search_tgetent="none required"
-      CONFIG_OBS="$CONFIG_OBS stub-termcap.o"
-    fi ;;
 esac
 
 # These are the libraries checked by Readline.
@@ -7521,7 +7516,7 @@ fi
 
 
 if test "$ac_cv_search_tgetent" = no; then
-  as_fn_error "no termcap library found" "$LINENO" 5
+  CONFIG_OBS="$CONFIG_OBS stub-termcap.o"
 fi
 
 
