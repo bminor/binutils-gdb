@@ -1,3 +1,7 @@
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/gas-defs.exp (run_dump_test): Remove is_zlib_supported check.
+
 2015-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Don't run nops-1-bdver1, nops-1-bdver2,

@@ -1,5 +1,13 @@
 2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* binutils-all/compress.exp: Remove is_zlib_supported check.
+	* binutils-all/objdump.exp: Likewise.
+	* binutils-all/readelf.exp (readelf_compressed_wa_test): Likewise.
+	* lib/utils-lib.exp (run_dump_test): Likewise.
+	* lib/binutils-common.exp (is_zlib_supported): Removed.
+
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* binutils-all/compress.exp (compression_used): Remove "/dev/null"
 	from remote_exec.
 

@@ -152,11 +152,6 @@ proc is_elf64 { binary_file } {
     return 0
 }
 
-# True if the build supports zlib compression.
-proc is_zlib_supported {} {
-    return 1
-}
-
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #

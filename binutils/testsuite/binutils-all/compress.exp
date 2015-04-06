@@ -16,7 +16,7 @@
 
 # Test compressed .debug section.
 
-if { [is_remote host] || ![is_elf_format] || ![is_zlib_supported] } then {
+if { [is_remote host] || ![is_elf_format] } then {
     return
 }
 

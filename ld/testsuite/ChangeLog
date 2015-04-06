@@ -1,3 +1,9 @@
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp: Remove is_zlib_supported check.
+	Fail if --compress-debug-sections doesn't work.
+	* lib/ld-lib.exp (run_dump_test): Remove is_zlib_supported check.
+
 2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp: Add erratum843419 test.
