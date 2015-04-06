@@ -1,5 +1,9 @@
 2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
+	* aarch64.cc (do_reloc_addend): Fix signature to match the parent one.
+
+2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
 	* gc.cc (Garbage_collection::do_transitive_closure): Avoid a call
 	to find by using the return value of insert.
 
