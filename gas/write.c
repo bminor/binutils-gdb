@@ -1523,14 +1523,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     return;
 
   memcpy (header, "ZLIB", 4);
-  header[11] = uncompressed_size; uncompressed_size >>= 8;
-  header[10] = uncompressed_size; uncompressed_size >>= 8;
-  header[9] = uncompressed_size; uncompressed_size >>= 8;
-  header[8] = uncompressed_size; uncompressed_size >>= 8;
-  header[7] = uncompressed_size; uncompressed_size >>= 8;
-  header[6] = uncompressed_size; uncompressed_size >>= 8;
-  header[5] = uncompressed_size; uncompressed_size >>= 8;
-  header[4] = uncompressed_size;
+  bfd_putb64 (uncompressed_size, header + 4);
 
   /* Replace the uncompressed frag list with the compressed frag list.  */
   seginfo->frchainP->frch_root = first_newf;

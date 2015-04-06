@@ -59,27 +59,6 @@ decompress_contents (bfd_byte *compressed_buffer,
   return rc == Z_OK && strm.avail_out == 0;
 }
 
-static bfd_size_type
-get_uncompressed_size (bfd_byte *compressed_size_buffer)
-{
-  bfd_size_type uncompressed_size = compressed_size_buffer[0];
-  uncompressed_size <<= 8;
-  uncompressed_size += compressed_size_buffer[1];
-  uncompressed_size <<= 8;
-  uncompressed_size += compressed_size_buffer[2];
-  uncompressed_size <<= 8;
-  uncompressed_size += compressed_size_buffer[3];
-  uncompressed_size <<= 8;
-  uncompressed_size += compressed_size_buffer[4];
-  uncompressed_size <<= 8;
-  uncompressed_size += compressed_size_buffer[5];
-  uncompressed_size <<= 8;
-  uncompressed_size += compressed_size_buffer[6];
-  uncompressed_size <<= 8;
-  uncompressed_size += compressed_size_buffer[7];
-  return uncompressed_size;;
-}
-
 /* Compress data of the size specified in @var{uncompressed_size}
    and pointed to by @var{uncompressed_buffer} using zlib and store
    as the contents field.  This function assumes the contents
@@ -122,15 +101,7 @@ bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED, sec_ptr sec,
       /* Write the zlib header.  In this case, it should be "ZLIB" followed
 	 by the uncompressed section size, 8 bytes in big-endian order.  */
       memcpy (compressed_buffer, "ZLIB", 4);
-      compressed_buffer[11] = uncompressed_size; uncompressed_size >>= 8;
-      compressed_buffer[10] = uncompressed_size; uncompressed_size >>= 8;
-      compressed_buffer[9] = uncompressed_size; uncompressed_size >>= 8;
-      compressed_buffer[8] = uncompressed_size; uncompressed_size >>= 8;
-      compressed_buffer[7] = uncompressed_size; uncompressed_size >>= 8;
-      compressed_buffer[6] = uncompressed_size; uncompressed_size >>= 8;
-      compressed_buffer[5] = uncompressed_size; uncompressed_size >>= 8;
-      compressed_buffer[4] = uncompressed_size;
-
+      bfd_putb64 (uncompressed_size, compressed_buffer + 4);
       free (uncompressed_buffer);
       sec->contents = compressed_buffer;
       sec->size = compressed_size;
@@ -368,7 +339,7 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
       return FALSE;
     }
 
-  uncompressed_size = get_uncompressed_size (compressed_buffer + 4);
+  uncompressed_size = bfd_getb64 (compressed_buffer + 4);
   sec->compressed_size = sec->size;
   sec->size = uncompressed_size;
   sec->compress_status = DECOMPRESS_SECTION_SIZED;

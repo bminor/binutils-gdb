@@ -1,3 +1,8 @@
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (compress_debug): Use bfd_putb64 to write uncompressed
+	section size.
+
 2015-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* write.c (compress_debug): Don't write the zlib header if
