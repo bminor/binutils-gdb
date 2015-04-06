@@ -962,6 +962,97 @@ endif FN_PTRS_IN_SO_WITHOUT_PIC
 
 endif TLS
 
+if DEFAULT_TARGET_X86_64
+
+check_SCRIPTS += x86_64_mov_to_lea.sh
+check_DATA += x86_64_mov_to_lea1.stdout x86_64_mov_to_lea2.stdout \
+	x86_64_mov_to_lea3.stdout x86_64_mov_to_lea4.stdout \
+	x86_64_mov_to_lea5.stdout x86_64_mov_to_lea6.stdout \
+	x86_64_mov_to_lea7.stdout x86_64_mov_to_lea8.stdout \
+	x86_64_mov_to_lea9.stdout x86_64_mov_to_lea10.stdout \
+	x86_64_mov_to_lea11.stdout x86_64_mov_to_lea12.stdout \
+	x86_64_mov_to_lea13.stdout x86_64_mov_to_lea14.stdout
+MOSTLYCLEANFILES += x86_64_mov_to_lea1 x86_64_mov_to_lea2 \
+	x86_64_mov_to_lea3 x86_64_mov_to_lea4 x86_64_mov_to_lea5 \
+	x86_64_mov_to_lea6 x86_64_mov_to_lea7 x86_64_mov_to_lea8 \
+	x86_64_mov_to_lea9 x86_64_mov_to_lea10 x86_64_mov_to_lea11 \
+	x86_64_mov_to_lea12 x86_64_mov_to_lea13 x86_64_mov_to_lea14
+
+x86_64_mov_to_lea1.o: x86_64_mov_to_lea1.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea2.o: x86_64_mov_to_lea1.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea3.o: x86_64_mov_to_lea2.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea4.o: x86_64_mov_to_lea2.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea5.o: x86_64_mov_to_lea3.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea6.o: x86_64_mov_to_lea3.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea7.o: x86_64_mov_to_lea4.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea8.o: x86_64_mov_to_lea4.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea1: x86_64_mov_to_lea1.o
+	../ld-new -Bsymbolic -shared  -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea2: x86_64_mov_to_lea1.o
+	../ld-new -pie -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea3: x86_64_mov_to_lea1.o
+	../ld-new -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea4: x86_64_mov_to_lea2.o
+	../ld-new -Bsymbolic -shared  -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea5: x86_64_mov_to_lea2.o
+	../ld-new -pie -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea6: x86_64_mov_to_lea2.o
+	../ld-new -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea7: x86_64_mov_to_lea3.o
+	../ld-new -melf32_x86_64 -pie -o $@ $<
+x86_64_mov_to_lea8: x86_64_mov_to_lea4.o
+	../ld-new -melf_x86_64 -pie -o $@ $<
+x86_64_mov_to_lea9: x86_64_mov_to_lea5.o
+	../ld-new -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea10: x86_64_mov_to_lea6.o
+	../ld-new -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea11: x86_64_mov_to_lea1.o
+	../ld-new -melf32_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea12: x86_64_mov_to_lea2.o
+	../ld-new -melf_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea13: x86_64_mov_to_lea7.o
+	../ld-new -melf32_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea14: x86_64_mov_to_lea8.o
+	../ld-new -melf_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea1.stdout: x86_64_mov_to_lea1
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea2.stdout: x86_64_mov_to_lea2
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea3.stdout: x86_64_mov_to_lea3
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea4.stdout: x86_64_mov_to_lea4
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea5.stdout: x86_64_mov_to_lea5
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea6.stdout: x86_64_mov_to_lea6
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea7.stdout: x86_64_mov_to_lea7
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea8.stdout: x86_64_mov_to_lea8
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea9.stdout: x86_64_mov_to_lea9
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea10.stdout: x86_64_mov_to_lea10
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea11.stdout: x86_64_mov_to_lea11
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea12.stdout: x86_64_mov_to_lea12
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
+	$(TEST_OBJDUMP) -dw $< > $@
+
+endif DEFAULT_TARGET_X86_64
+
 if DEFAULT_TARGET_I386
 
 check_SCRIPTS += i386_mov_to_lea.sh
