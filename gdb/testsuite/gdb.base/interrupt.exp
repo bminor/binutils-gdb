@@ -58,12 +58,10 @@ if ![file exists $binfile] then {
 	    eof { fail "run (eof)" }
 	}
 	# This should appear twice, once for the echo and once for the
-	# program's output.  Under dejagnu (but not interactively) for
-	# SunOS4, it only appears once.  Don't worry about it, I imagine
-	# dejagnu has just done something to the tty modes.
+	# program's output.
 	send_gdb "a\n"
 	gdb_expect {
-	    -re "^a\r\n(|a\r\n)$" {
+	    -re "^a\r\na\r\n$" {
 		pass "child process ate our char"
 	    }
 	    timeout { fail "echo a (timeout)" }
@@ -155,7 +153,7 @@ if ![file exists $binfile] then {
         # but the success is spurious. Need to provide the right reg.expr.
         # here.
 	gdb_expect {
-	    -re "^(\r\n|)data\r\n(|data\r\n)$" { pass "echo data" }
+	    -re "^(\r\n|)data\r\ndata\r\n$" { pass "echo data" }
 	    -re "Undefined command.*$gdb_prompt " { fail "echo data" }
 	    timeout { fail "echo data (timeout)" }
 	    eof { fail "echo data (eof)" }
@@ -184,7 +182,7 @@ if ![file exists $binfile] then {
 	    # We should be back in the loop.
 	    send_gdb "more data\n"
 	    gdb_expect {
-		-re "^(\r\n|)more data\r\n(|more data\r\n)$" { pass "echo more data" }
+		-re "^(\r\n|)more data\r\nmore data\r\n$" { pass "echo more data" }
 		timeout { fail "echo more data (timeout)" }
 		eof { fail "echo more data (eof)" }
 	    }

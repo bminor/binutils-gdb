@@ -1,5 +1,10 @@
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/interrupt.exp: Don't handle the case of the inferior
+	output appearing once only.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.trace/actions.exp: Use gdb_breakpoint instead of gdb_test
 	that doesn't expect anything.  Return early if running to main
 	fails.
