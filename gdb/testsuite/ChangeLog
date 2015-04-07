@@ -1,3 +1,11 @@
+2015-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/non-stop-fair-events.c (SECONDS): New macro.
+	(child_function): Call alarm.
+	(main): Move call to alarm into the loop.
+	* gdb.threads/non-stop-fair-events.exp: Build program with
+	-DTIMEOUT=$timeout.
+
 2015-04-06  Doug Evans  <xdje42@gmail.com>
 
 	* lib/pascal.exp (gpc_compile): Rename dest arg to destfile.
