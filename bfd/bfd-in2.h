@@ -6326,6 +6326,12 @@ enum bfd_plugin_format
     bfd_plugin_no = 2
   };
 
+struct bfd_build_id
+  {
+    size_t size;
+    bfd_byte data[1];
+  };
+
 struct bfd
 {
   /* The filename the application opened the BFD with.  */
@@ -6610,6 +6616,9 @@ struct bfd
      struct objalloc *, but we use void * to avoid requiring the inclusion
      of objalloc.h.  */
   void *memory;
+
+  /* For input BFDs, the build ID, if the object has one. */
+  const struct bfd_build_id *build_id;
 };
 
 /* See note beside bfd_set_section_userdata.  */

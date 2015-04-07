@@ -1,3 +1,15 @@
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf-bfd.h : Remove struct elf_build_id.
+	* bfd.c : Add struct bfd_build_id.
+	* bfd-in2.h: Regenerate.
+	* elf.c (elfobj_grok_gnu_build_id): Update to use bfd_build_id.
+	* libpei.h: Add protoype and macros for
+	bfd_XXi_slurp_codeview_record.
+	* peXXigen.c (_bfd_XXi_slurp_codeview_record): Make public
+	* peicode.h (pe_bfd_read_buildid): Add.
+	(pe_bfd_object_p): Use pe_bfd_read_buildid().
+
 2015-06-15  Renlin Li  <renlin.li@arm.com>
 
 	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTOFF_LO15): New entry.

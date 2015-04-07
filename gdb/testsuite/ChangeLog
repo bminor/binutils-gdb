@@ -1,3 +1,10 @@
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* gdb.base/sepdebug.exp: Add EXEEXT where needed.
+	* lib/gdb.exp (get_build_id): Teach how to extract build-id from a
+	PE file.
+	* lib/future.exp (gdb_find_objdump): Add gdb_find_objdump.
+
 2015-06-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	PR breakpoints/16465

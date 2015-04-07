@@ -1563,13 +1563,6 @@ struct sdt_note
   bfd_byte data[1];
 };
 
-/* NT_GNU_BUILD_ID note type info for input BFDs.  */
-struct elf_build_id
-{
-  size_t size;
-  bfd_byte data[1];
-};
-
 /* tdata information grabbed from an elf core file.  */
 struct core_elf_obj_tdata
 {
@@ -1703,9 +1696,6 @@ struct elf_obj_tdata
 
   obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
   obj_attribute_list *other_obj_attributes[2];
-
-  /* NT_GNU_BUILD_ID note type.  */
-  struct elf_build_id *build_id;
 
   /* Linked-list containing information about every Systemtap section
      found in the object file.  Each section corresponds to one entry

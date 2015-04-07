@@ -4539,28 +4539,41 @@ gdb_caching_proc gdb_has_argv0 {
 # Returns "" if there is none.
 
 proc get_build_id { filename } {
-    set tmp [standard_output_file "${filename}-tmp"]
-    set objcopy_program [gdb_find_objcopy]
-
-    set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $filename $tmp" output]
-    verbose "result is $result"
-    verbose "output is $output"
-    if {$result == 1} {
-	return ""
+    if { ([istarget "*-*-mingw*"]
+	  || [istarget *-*-cygwin*]) } {
+	set objdump_program [gdb_find_objdump]
+	set result [catch {set data [exec $objdump_program -p $filename | grep signature | cut "-d " -f4]} output]
+	verbose "result is $result"
+	verbose "output is $output"
+	if {$result == 1} {
+	    return ""
+	}
+	return $data
     }
-    set fi [open $tmp]
-    fconfigure $fi -translation binary
-    # Skip the NOTE header.
-    read $fi 16
-    set data [read $fi]
-    close $fi
-    file delete $tmp
-    if ![string compare $data ""] then {
-	return ""
+    else
+    {
+	set tmp [standard_output_file "${filename}-tmp"]
+	set objcopy_program [gdb_find_objcopy]
+	set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $filename $tmp" output]
+	verbose "result is $result"
+	verbose "output is $output"
+	if {$result == 1} {
+	    return ""
+	}
+	set fi [open $tmp]
+	fconfigure $fi -translation binary
+	# Skip the NOTE header.
+	read $fi 16
+	set data [read $fi]
+	close $fi
+	file delete $tmp
+	if ![string compare $data ""] then {
+	    return ""
+	}
+	# Convert it to hex.
+	binary scan $data H* data
+	return $data
     }
-    # Convert it to hex.
-    binary scan $data H* data
-    return $data
 }
 
 # Return the build-id hex string (usually 160 bits as 40 hex characters)

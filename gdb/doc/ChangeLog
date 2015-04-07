@@ -1,3 +1,8 @@
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* gdb.texinfo (Separate Debug Files): Document that PE is also
+	supported.
+
 2015-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (TUI Commands): Bring all 'tui reg' commands into a

@@ -1,3 +1,16 @@
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* build-id.c: Don't include elf-bfd.h.
+	(build_id_bfd_get): Use bfd_build_id.
+	(build_id_verify): Ditto.
+	* build-id.h: Ditto.
+	(find_separate_debug_file_by_buildid): Ditto.
+	* python/py-objfile.c: Don't include elf-bfd.h.
+	(objfpy_get_build_id) Use bfd_build_id.
+	(objfpy_build_id_matches, objfpy_lookup_objfile_by_build_id): Ditto.
+	* coffread.c: Include build-id.h.
+	(coff_symfile_read): Try find_separate_debug_file_by_buildid.
+
 2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (do_windows_fetch_inferior_registers)
