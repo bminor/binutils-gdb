@@ -1,5 +1,11 @@
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/interrupt.exp: Don't skip if $inferior_spawn_id !=
+	$gdb_spawn_id.  Use send_inferior and $inferior_spawn_id to
+	interact with inferior program.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (inferior_spawn_id): New global.
 	(gdb_test_multiple): Handle "-i".  Reset the spawn id to GDB's
 	spawn id after processing the user code.

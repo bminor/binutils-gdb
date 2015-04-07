@@ -18,12 +18,6 @@ if [target_info exists gdb,nointerrupts] {
     continue
 }
 
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping interrupt.exp because of noinferiorio."
-    return
-}
-
-
 standard_testfile
 
 set options { debug }
@@ -49,9 +43,16 @@ if ![file exists $binfile] then {
     gdb_test "shell stty intr '^C'" ".*" \
 	"set interrupt character in interrupt.exp"
     if [runto_main] then {
+	global inferior_spawn_id gdb_spawn_id
+
+	if {[target_info exists gdb,noinferiorio] && $inferior_spawn_id == $gdb_spawn_id} {
+	    verbose "Skipping interrupt.exp because of noinferiorio."
+	    return
+	}
+
 	set msg "process is alive"
 	gdb_test_multiple "continue" $msg {
-	    -re "\r\ntalk to me baby\r\n" {
+	    -i "$inferior_spawn_id" -re "talk to me baby\r\n" {
 		pass $msg
 	    }
 	}
@@ -60,9 +61,9 @@ if ![file exists $binfile] then {
 	# program's output.
 
 	set msg "child process ate our char"
-	send_gdb "a\n"
+	send_inferior "a\n"
 	gdb_test_multiple "" $msg {
-	    -re "^a\r\na\r\n$" {
+	    -i "$inferior_spawn_id" -re "^a\r\na\r\n$" {
 		pass $msg
 	    }
 	}
@@ -120,8 +121,8 @@ if ![file exists $binfile] then {
 		setup_xfail "*-*-hpux*"
 		setup_xfail "*-*-*lynx*"
 		fail "$msg (stays asleep)"
-		# Send_Gdb a newline to wake it up
-		send_gdb "\n"
+		# Send the inferior a newline to wake it up.
+		send_inferior "\n"
 		gdb_test "" " = 4" "call function after waking it"
 	    }
 	}
@@ -148,7 +149,7 @@ if ![file exists $binfile] then {
 	    }
 	}
 
-	send_gdb "data\n"
+	send_inferior "data\n"
 	# The optional leading \r\n is in case we sent a newline above
 	# to wake the program, in which case the program now sends it
 	# back.
@@ -158,10 +159,10 @@ if ![file exists $binfile] then {
 
 	set msg "echo data"
 	gdb_test_multiple "" $msg {
-	    -re "^(\r\n|)data\r\ndata\r\n$" {
+	    -i "$inferior_spawn_id" -re "^(\r\n|)data\r\ndata\r\n$" {
 		pass $msg
 	    }
-	    -re "Undefined command.*$gdb_prompt " {
+	    -i "$gdb_spawn_id" -re "Undefined command.*$gdb_prompt " {
 		fail $msg
 	    }
 	}
@@ -189,23 +190,40 @@ if ![file exists $binfile] then {
 	    }
 
 	    # We should be back in the loop.
-	    send_gdb "more data\n"
+	    send_inferior "more data\n"
 
 	    set msg "echo more data"
 	    gdb_test_multiple "" $msg {
-		-re "^(\r\n|)more data\r\nmore data\r\n$" {
+		-i "$inferior_spawn_id" -re "^(\r\n|)more data\r\nmore data\r\n$" {
 		    pass $msg
 		}
 	    }
 	}
 
+	set saw_eof 0
+	set saw_inferior_exit 0
+
 	set msg "send end of file"
-	send_gdb "\004"
+	send_inferior "\004"
 	gdb_test_multiple "" $msg {
-	    -re "end of file.*$inferior_exited_re normally.*$gdb_prompt $" {
-		pass $msg
+	    -i "$inferior_spawn_id" -re "end of file" {
+		verbose -log "saw eof: $saw_eof"
+		set saw_eof 1
+		verbose -log "saw eof"
+		if {!$saw_inferior_exit} {
+		    exp_continue
+		}
+	    }
+	    -i "$gdb_spawn_id" -re "$inferior_exited_re normally.*$gdb_prompt " {
+		set saw_inferior_exit 1
+		verbose -log "saw inferior exit"
+		if {!$saw_eof} {
+		    exp_continue
+		}
 	    }
 	}
+
+	gdb_assert { $saw_eof && $saw_inferior_exit } $msg
     }
 }
 return 0
