@@ -1,5 +1,10 @@
 2015-04-07  Alan Modra  <amodra@gmail.com>
 
+	PR ld/18176
+	* ldlang.c (lang_size_sections): Cast shift expression.
+
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc32elf.em: Handle --no-pic-fixup.
 	(params): Init new field.
 	(ppc_before_allocation): Enable relaxation for pic_fixup.

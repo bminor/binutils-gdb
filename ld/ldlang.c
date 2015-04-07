@@ -5424,7 +5424,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	     between sections won't change.  This is better than
 	     simply subtracting 1 << max_alignment_power which is
 	     what we used to do here.  */
-	  expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
+	  expld.dataseg.base &= ~(((bfd_vma) 1 << max_alignment_power) - 1);
 	  /* It doesn't make much sense to go lower than the initial
 	     base.  That can only increase padding.  */
 	  if (expld.dataseg.base < initial_base)
