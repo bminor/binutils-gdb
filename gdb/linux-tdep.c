@@ -445,7 +445,7 @@ read_mapping (const char *line,
 static void
 decode_vmflags (char *p, struct smaps_vmflags *v)
 {
-  char *saveptr;
+  char *saveptr = NULL;
   const char *s;
 
   v->initialized_p = 1;

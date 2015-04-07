@@ -1,3 +1,7 @@
+2015-04-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* linux-tdep.c (decode_vmflags): Initialize 'saveptr'.
+
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (ALL_NON_EXITED_THREADS_SAFE): Rename to ...
