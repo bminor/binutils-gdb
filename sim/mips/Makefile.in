@@ -48,7 +48,6 @@ SIM_OBJS = \
 	dsp.o \
 	sim-main.o \
 	sim-hload.o \
-	sim-engine.o \
 	sim-stop.o \
 	sim-resume.o \
 	sim-reason.o \

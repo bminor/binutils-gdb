@@ -23,9 +23,7 @@ SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	interp.o \
 	sim-cpu.o \
-	sim-engine.o \
 	sim-hload.o \
-	sim-hrw.o \
 	sim-reason.o \
 	sim-resume.o \
 	sim-stop.o

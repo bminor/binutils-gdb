@@ -24,9 +24,7 @@ SIM_OBJS = $(M68HC11_OBJS) \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-load.o \
 	sim-hload.o \
-	sim-engine.o \
 	sim-stop.o \
-	sim-hrw.o \
 	sim-reason.o
 
 SIM_PROFILE= -DPROFILE=1 -DWITH_PROFILE=-1

@@ -28,9 +28,7 @@ SIM_OBJS = \
 	interp.o \
 	machs.o \
 	sim-cpu.o \
-	sim-engine.o \
 	sim-hload.o \
-	sim-hrw.o \
 	sim-model.o \
 	sim-reason.o \
 	sim-reg.o \

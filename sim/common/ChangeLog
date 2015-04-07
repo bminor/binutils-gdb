@@ -1,3 +1,7 @@
+2015-04-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-engine.o and sim-hrw.o.
+
 2015-04-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* run-sim.h, run.c: Delete.

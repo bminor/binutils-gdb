@@ -20,7 +20,6 @@
 SIM_OBJS = compile.o \
 	   $(SIM_NEW_COMMON_OBJS) \
 	   sim-cpu.o \
-	   sim-engine.o \
 	   sim-load.o
 
 ## COMMON_POST_CONFIG_FRAG

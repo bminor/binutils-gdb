@@ -29,9 +29,7 @@ SIM_OBJS = \
 	msp430-sim.o \
 	trace.o \
 	sim-cpu.o \
-	sim-engine.o \
 	sim-hload.o \
-	sim-hrw.o \
 	sim-reason.o \
 	sim-reg.o \
 	sim-resume.o \

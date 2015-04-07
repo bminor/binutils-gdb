@@ -26,7 +26,6 @@ SIM_OBJS = \
 	sim-core.o	\
 	sim-cpu.o	\
 	sim-endian.o	\
-	sim-engine.o	\
 	sim-events.o	\
 	sim-fpu.o	\
 	sim-hload.o	\
