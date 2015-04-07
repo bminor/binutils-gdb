@@ -1,5 +1,16 @@
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (inferior_spawn_id): New global.
+	(gdb_test_multiple): Handle "-i".  Reset the spawn id to GDB's
+	spawn id after processing the user code.
+	(default_gdb_start): Set inferior_spawn_id.
+	(send_inferior): New procedure.
+	* lib/gdbserver-support.exp (gdbserver_start): Set
+	inferior_spawn_id.
+	(close_gdbserver, gdb_exit): Unset inferior_spawn_id.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (gdb_finish): Delete persistent gdbserver handling.
 	* lib/gdbserver-support.exp (gdbserver_start): Make
 	$server_spawn_id global.
