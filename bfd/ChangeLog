@@ -1,3 +1,8 @@
+2015-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_is_local_label_name): Treat assembler generated
+	local labels as local.
+
 2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* compress.c (get_uncompressed_size): Removed.

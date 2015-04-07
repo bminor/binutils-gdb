@@ -7743,6 +7743,10 @@ _bfd_elf_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
   if (name[0] == '_' && name[1] == '.' && name[2] == 'L' && name[3] == '_')
     return TRUE;
 
+  /* Treat assembler generated local labels as local.  */
+  if (name[0] == 'L' && name[strlen (name) - 1] < 32)
+    return TRUE;
+
   return FALSE;
 }
 
