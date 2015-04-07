@@ -1,5 +1,10 @@
 2015-04-07  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (_bfd_elf_get_reloc_section): Allow for .got.plt being
+	mapped to output .got section.
+
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (struct ppc_elf_link_hash_entry): Add has_addr16_ha
 	and has_addr16_lo.  Make has_sda_refs a bitfield.
 	(ppc_elf_check_relocs): Set new flags.

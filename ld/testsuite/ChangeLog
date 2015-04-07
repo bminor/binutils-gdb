@@ -1,3 +1,16 @@
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
+	* ld-arm/tls-gdesc-nlazy.g: Adjust for readelf note.
+	* ld-tic6x/shlib-1.rd: Expect corrected .rela.plt sh_info.
+	* ld-tic6x/shlib-1b.rd: Likewise.
+	* ld-tic6x/shlib-1r.rd: Likewise.
+	* ld-tic6x/shlib-1rb.rd: Likewise.
+	* ld-tic6x/shlib-app-1.rd: Likewise.
+	* ld-tic6x/shlib-app-1b.rd: Likewise.
+	* ld-tic6x/shlib-app-1r.rd: Likewise.
+	* ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* ld-tic6x/shlib-noindex.rd: Likewise.
+
 2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/compress.exp: Remove is_zlib_supported check.

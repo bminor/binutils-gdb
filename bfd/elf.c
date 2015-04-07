@@ -3102,7 +3102,15 @@ _bfd_elf_get_reloc_section (asection *reloc_sec)
   abfd = reloc_sec->owner;
   if (get_elf_backend_data (abfd)->want_got_plt
       && strcmp (name, ".plt") == 0)
-    name = ".got.plt";
+    {
+      /* .got.plt is a linker created input section.  It may be mapped
+	 to some other output section.  Try two likely sections.  */
+      name = ".got.plt";
+      reloc_sec = bfd_get_section_by_name (abfd, name);
+      if (reloc_sec != NULL)
+	return reloc_sec;
+      name = ".got";
+    }
 
   reloc_sec = bfd_get_section_by_name (abfd, name);
   return reloc_sec;
