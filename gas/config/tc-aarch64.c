@@ -1472,8 +1472,8 @@ mapping_state (enum mstate state)
     record_alignment (now_seg, 2);
 
 #define TRANSITION(from, to) (mapstate == (from) && state == (to))
-  if (TRANSITION (MAP_UNDEFINED, MAP_DATA) && now_seg != text_section)
-    /* Emit MAP_DATA within text section in order. Otherwise, it will be
+  if (TRANSITION (MAP_UNDEFINED, MAP_DATA) && !subseg_text_p (now_seg))
+    /* Emit MAP_DATA within executable section in order.  Otherwise, it will be
        evaluated later in the next else.  */
     return;
   else if (TRANSITION (MAP_UNDEFINED, MAP_INSN))
@@ -1855,13 +1855,13 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  /* Sections are assumed to start aligned. In text section, there is no
+  /* Sections are assumed to start aligned. In executable section, there is no
      MAP_DATA symbol pending. So we only align the address during
      MAP_DATA --> MAP_INSN transition.
      For other sections, this is not guaranteed, align it anyway.  */
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
-  if (!need_pass_2 && ((now_seg == text_section && mapstate == MAP_DATA)
-		       || now_seg != text_section))
+  if (!need_pass_2 && ((subseg_text_p (now_seg) && mapstate == MAP_DATA)
+		       || !subseg_text_p (now_seg)))
     frag_align_code (2, 0);
 
 #ifdef OBJ_ELF
@@ -5705,14 +5705,14 @@ md_assemble (char *str)
 	dump_opcode_operands (opcode);
 #endif /* DEBUG_AARCH64 */
 
-    /* Sections are assumed to start aligned. In text section, there is no
+    /* Sections are assumed to start aligned. In executable section, there is no
        MAP_DATA symbol pending. So we only align the address during
        MAP_DATA --> MAP_INSN transition.
        For other sections, this is not guaranteed, align it anyway.  */
     enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
-    if (!need_pass_2 && ((now_seg == text_section && mapstate == MAP_DATA)
-			 || now_seg != text_section))
-	frag_align_code (2, 0);
+    if (!need_pass_2 && ((subseg_text_p (now_seg) && mapstate == MAP_DATA)
+			 || !subseg_text_p (now_seg)))
+      frag_align_code (2, 0);
 
       mapping_state (MAP_INSN);
 
