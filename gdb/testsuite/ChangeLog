@@ -1,5 +1,10 @@
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/interrupt.exp: Use gdb_test_multiple instead of
+	gdb_expect.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/interrupt.exp: Don't handle the case of the inferior
 	output appearing once only.
 

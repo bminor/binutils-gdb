@@ -49,24 +49,24 @@ if ![file exists $binfile] then {
     gdb_test "shell stty intr '^C'" ".*" \
 	"set interrupt character in interrupt.exp"
     if [runto_main] then {
-	send_gdb "continue\n"
-	gdb_expect {
-	    -re "\r\ntalk to me baby\r\n$" {
-		pass "child process is alive"
+	set msg "process is alive"
+	gdb_test_multiple "continue" $msg {
+	    -re "\r\ntalk to me baby\r\n" {
+		pass $msg
 	    }
-	    timeout { fail "run (timeout)" }
-	    eof { fail "run (eof)" }
 	}
+
 	# This should appear twice, once for the echo and once for the
 	# program's output.
+
+	set msg "child process ate our char"
 	send_gdb "a\n"
-	gdb_expect {
+	gdb_test_multiple "" $msg {
 	    -re "^a\r\na\r\n$" {
-		pass "child process ate our char"
+		pass $msg
 	    }
-	    timeout { fail "echo a (timeout)" }
-	    eof { fail "echo a (eof)" }
 	}
+
 	# Wait until the program is in the read system call again.
 	sleep 2
 
@@ -79,18 +79,19 @@ if ![file exists $binfile] then {
 	# the read and delivering the cntrl-c.
 
 	send_gdb "\003"
-	gdb_expect {
+	set msg "send_gdb control C"
+	gdb_test_multiple "" $msg {
 	    -re "Program received signal SIGINT.*$gdb_prompt $" {
-		pass "send_gdb control C"
+		pass $msg
 	    }
-	    -re ".*$gdb_prompt $" { fail "send_gdb control C" }
-	    timeout { fail "send_gdb control C (timeout)" }
-	    eof { fail "send_gdb control C (eof)" }
 	}
 
+	set msg "call function when asleep"
 	send_gdb "p func1 ()\n"
-	gdb_expect {
-	    -re " = 4.*$gdb_prompt $" { pass "call function when asleep" }
+	gdb_test_multiple "" $msg {
+	    -re " = 4.*$gdb_prompt $" {
+		pass $msg
+	    }
 	    -re ".*Program received signal SIG(SEGV|ILL).*$gdb_prompt $" {
 		setup_xfail "i*86-pc-linux*-gnu*"
 		fail "child died when we called func1, skipped rest of tests"
@@ -118,12 +119,11 @@ if ![file exists $binfile] then {
 		setup_xfail "*-*-*bsd*"
 		setup_xfail "*-*-hpux*"
 		setup_xfail "*-*-*lynx*"
-		fail "call function when asleep (stays asleep)"
+		fail "$msg (stays asleep)"
 		# Send_Gdb a newline to wake it up
 		send_gdb "\n"
 		gdb_test "" " = 4" "call function after waking it"
 	    }
-#	    eof { fail "call function when asleep (eof)" }
 	}
 
 	# Now try calling the function again.
@@ -137,12 +137,15 @@ if ![file exists $binfile] then {
 	send_gdb "continue\n"
 	# For some reason, i386-*-sysv4 gdb fails to issue the Continuing
 	# message, but otherwise appears normal (FIXME).
-	gdb_expect {
-	    -re "^continue\r\nContinuing.\r\n(\r\n|)$" { pass "continue" }
-	    -re "^continue\r\n\r\n" { fail "continue (missing Continuing.)" }
-	    -re "$gdb_prompt $" { fail "continue" }
-	    timeout { fail "continue (timeout)" }
-	    eof { fail "continue (eof)" }
+
+	set msg "continue"
+	gdb_test_multiple "" "$msg" {
+	    -re "^continue\r\nContinuing.\r\n(\r\n|)$" {
+		pass $msg
+	    }
+	    -re "^continue\r\n\r\n" {
+		fail "$msg (missing Continuing.)"
+	    }
 	}
 
 	send_gdb "data\n"
@@ -152,11 +155,15 @@ if ![file exists $binfile] then {
         # FIXME: The pattern below leads to an expected success on HPUX-11.0
         # but the success is spurious. Need to provide the right reg.expr.
         # here.
-	gdb_expect {
-	    -re "^(\r\n|)data\r\ndata\r\n$" { pass "echo data" }
-	    -re "Undefined command.*$gdb_prompt " { fail "echo data" }
-	    timeout { fail "echo data (timeout)" }
-	    eof { fail "echo data (eof)" }
+
+	set msg "echo data"
+	gdb_test_multiple "" $msg {
+	    -re "^(\r\n|)data\r\ndata\r\n$" {
+		pass $msg
+	    }
+	    -re "Undefined command.*$gdb_prompt " {
+		fail $msg
+	    }
 	}
 
  	if { ! [target_info exists gdb,nosignals] } {
@@ -176,26 +183,28 @@ if ![file exists $binfile] then {
 	    # return to the loop.
 	    set msg "signal SIGINT"
 	    gdb_test_multiple "signal SIGINT" "$msg" {
-		-re "^signal SIGINT\r\nContinuing with signal SIGINT.\r\n(\r\n|)$" { pass "$msg" }
+		-re "^signal SIGINT\r\nContinuing with signal SIGINT.\r\n(\r\n|)$" {
+		    pass "$msg"
+		}
 	    }
 
 	    # We should be back in the loop.
 	    send_gdb "more data\n"
-	    gdb_expect {
-		-re "^(\r\n|)more data\r\nmore data\r\n$" { pass "echo more data" }
-		timeout { fail "echo more data (timeout)" }
-		eof { fail "echo more data (eof)" }
+
+	    set msg "echo more data"
+	    gdb_test_multiple "" $msg {
+		-re "^(\r\n|)more data\r\nmore data\r\n$" {
+		    pass $msg
+		}
 	    }
 	}
 
+	set msg "send end of file"
 	send_gdb "\004"
-	gdb_expect {
+	gdb_test_multiple "" $msg {
 	    -re "end of file.*$inferior_exited_re normally.*$gdb_prompt $" {
-		pass "send end of file"
+		pass $msg
 	    }
-	    -re "$gdb_prompt $" { fail "send end of file" }
-	    timeout { fail "send end of file (timeout)" }
-	    eof { fail "send end of file (eof)" }
 	}
     }
 }
