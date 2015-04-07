@@ -4000,20 +4000,6 @@ proc gdb_finish { } {
     global gdb_prompt
     global cleanfiles
 
-    # Give persistent gdbserver a chance to terminate before GDB is killed.
-    if {[info exists gdbserver_reconnect_p] && $gdbserver_reconnect_p
-	&& [info exists gdb_spawn_id]} {
-	send_gdb "kill\n";
-	gdb_expect 10 {
-	    -re "y or n" {
-		send_gdb "y\n";
-		exp_continue;
-	    }
-	    -re "$gdb_prompt $" {
-	    }
-	}
-    }
-
     # Exit first, so that the files are no longer in use.
     gdb_exit
 

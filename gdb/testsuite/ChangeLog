@@ -1,5 +1,15 @@
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (gdb_finish): Delete persistent gdbserver handling.
+	* lib/gdbserver-support.exp (gdbserver_start): Make
+	$server_spawn_id global.
+	(gdbserver_start): Don't wait for gdbserver's spawn id with
+	expect_background.
+	(close_gdbserver): New procedure.
+	(gdb_exit): Rename the default version and reimplement.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
         * lib/gdb.exp (gdb_test_multiple): When processing an argument,
 	append the substituted item, not the original item.
 
