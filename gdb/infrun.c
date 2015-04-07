@@ -1099,7 +1099,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
      them.  Deleting them now rather than at the next user-visible
      stop provides a nicer sequence of events for user and MI
      notifications.  */
-  ALL_NON_EXITED_THREADS_SAFE (th, tmp)
+  ALL_THREADS_SAFE (th, tmp)
     if (ptid_get_pid (th->ptid) == pid && !ptid_equal (th->ptid, ptid))
       delete_thread (th->ptid);
 

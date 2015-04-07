@@ -1,3 +1,15 @@
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (ALL_NON_EXITED_THREADS_SAFE): Rename to ...
+	(ALL_THREADS_SAFE): ... this, and don't skip exited threads.
+	(delete_exited_threads): New declaration.
+	* infrun.c (follow_exec): Use ALL_THREADS_SAFE.
+	* linux-nat.c (linux_nat_update_thread_list): New function.
+	(linux_nat_add_target): Install it.
+	* remote.c (remote_update_thread_list): Use ALL_THREADS_SAFE.
+	* thread.c (prune_threads): Use ALL_THREADS_SAFE.
+	(delete_exited_threads): New function.
+
 2015-04-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (resume) <displaced stepping debug output>: Get the

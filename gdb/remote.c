@@ -2835,7 +2835,7 @@ remote_update_thread_list (struct target_ops *ops)
       /* CONTEXT now holds the current thread list on the remote
 	 target end.  Delete GDB-side threads no longer found on the
 	 target.  */
-      ALL_NON_EXITED_THREADS_SAFE (tp, tmp)
+      ALL_THREADS_SAFE (tp, tmp)
         {
 	  for (i = 0;
 	       VEC_iterate (thread_item_t, context.items, i, item);
