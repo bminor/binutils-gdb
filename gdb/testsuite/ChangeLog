@@ -1,5 +1,10 @@
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
+        * lib/gdb.exp (gdb_test_multiple): When processing an argument,
+	append the substituted item, not the original item.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/interrupt.exp: Use gdb_test_multiple instead of
 	gdb_expect.
 

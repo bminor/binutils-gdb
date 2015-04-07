@@ -730,7 +730,7 @@ proc gdb_test_multiple { command message user_code } {
 	}
 	if { $expecting_arg } {
 	    set expecting_arg 0
-	    lappend processed_code $item
+	    lappend processed_code $subst_item
 	    continue
 	}
 	if { $expecting_action } {
