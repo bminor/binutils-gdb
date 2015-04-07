@@ -9,6 +9,18 @@
 	(params): Init new field.
 	(ppc_before_allocation): Enable relaxation for pic_fixup.
 
+2015-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld.h (struct ld_config_type): Add new field: warn_orphan.
+	* ldlex.h (enum option_values): Add OPTION_WARN_ORPHAN and
+	OPTION_NO_WARN_ORPHAN.
+	* lexsup.c (ld_options): Add --warn-orphan and --no-warn-orphan.
+	(parse_args): Handle the new options.
+	* ldemul.c (ldemul_place_orphan): If requested, generate a warning
+	message when an orphan section is placed in the output file.
+	* ld.texinfo: Document the new option.
+	* NEWS: Mention the new feature.
+
 2015-04-02  Andrew Turner <andrew@freebsd.org>
 
 	* Makefile.am: Add FreeBSD aarch64 files.

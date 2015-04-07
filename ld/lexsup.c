@@ -489,6 +489,10 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Warn if the multiple GP values are used"), TWO_DASHES },
   { {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
     '\0', NULL, N_("Warn only once per undefined symbol"), TWO_DASHES },
+  { {"warn-orphan", no_argument, NULL, OPTION_WARN_ORPHAN},
+    '\0', NULL, N_("Warn if any orphan sections are encountered"), TWO_DASHES },
+  { {"no-warn-orphan", no_argument, NULL, OPTION_NO_WARN_ORPHAN},
+    '\0', NULL, N_("Do not warn if orphan sections are encountered (default)"), TWO_DASHES },
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
@@ -1349,6 +1353,12 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WARN_ONCE:
 	  config.warn_once = TRUE;
+	  break;
+	case OPTION_WARN_ORPHAN:
+	  config.warn_orphan = TRUE;
+	  break;
+	case OPTION_NO_WARN_ORPHAN:
+	  config.warn_orphan = FALSE;
 	  break;
 	case OPTION_WARN_SECTION_ALIGN:
 	  config.warn_section_align = TRUE;

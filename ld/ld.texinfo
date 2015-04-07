@@ -2064,6 +2064,17 @@ option causes a warning to be issued whenever this case occurs.
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
 
+@kindex --warn-orphan
+@kindex --no-warn-orphan
+@cindex warnings, on orphan sections
+@cindex orphan sections, warnings on
+@item --warn-orphan
+The @option{--warn-orphan} option tells the linker to generate a
+warning message whenever it has to place an orphan section into the
+output file.  @xref{Orphan Sections}  The @option{--no-warn-orphan}
+option restores the default behaviour of just silently placing these
+sections.
+
 @kindex --warn-section-align
 @cindex warnings, on section alignment
 @cindex section alignment, warnings on

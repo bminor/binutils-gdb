@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add --warn-orphan option to report orphan sections.
+
 * Add support for LLVM plugin.
 
 Changes in 2.25:
