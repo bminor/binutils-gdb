@@ -1,3 +1,8 @@
+2015-04-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (resume) <displaced stepping debug output>: Get the
+	leader thread's regcache, not resume_ptid's.
+
 2015-04-06  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.c (hash_symbol_entry): Hash STRUCT_DOMAIN symbols as
