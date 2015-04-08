@@ -235,6 +235,9 @@ gdb_test "info tracepoints" \
 \[\t \]+not installed on target." \
 		"5.10a: verify teval actions set for two tracepoints"
 
+# Load the binary to the target too.
+gdb_load $binfile
+
 # Can't use runto_main here, because that would delete the tracepoints
 # created above.
 gdb_breakpoint "main"

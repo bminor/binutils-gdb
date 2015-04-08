@@ -1,3 +1,11 @@
+2015-04-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/actions.exp: Use gdb_load before gdb_run_cmd.
+	* gdb.trace/infotrace.exp: Use gdb_load before gdb_run_cmd.  Use
+	gdb_breakpoint instead of gdb_test that doesn't expect anything.
+	Return early if running to main fails.
+	* gdb.trace/while-stepping.exp: Likewise.
+
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/interrupt.exp: Don't skip if $inferior_spawn_id !=
