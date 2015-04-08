@@ -344,6 +344,9 @@ datarootdir = @datarootdir@
 do_compare = @do_compare@
 docdir = @docdir@
 dvidir = @dvidir@
+elf_list_options = @elf_list_options@
+elf_plt_unwind_list_options = @elf_plt_unwind_list_options@
+elf_shlib_list_options = @elf_shlib_list_options@
 enable_initfini_array = @enable_initfini_array@
 exec_prefix = @exec_prefix@
 host = @host@
@@ -391,7 +394,11 @@ tooldir = $(exec_prefix)/$(target_alias)
 # maintainer mode is disabled.  Avoid this.
 am__skiplex = 
 am__skipyacc = 
-AM_CFLAGS = $(WARN_CFLAGS)
+ELF_CLFAGS = -DELF_LIST_OPTIONS=@elf_list_options@ \
+	   -DELF_SHLIB_LIST_OPTIONS=@elf_shlib_list_options@ \
+	   -DELF_PLT_UNWIND_LIST_OPTIONS=@elf_plt_unwind_list_options@
+
+AM_CFLAGS = $(WARN_CFLAGS) $(ELF_CLFAGS)
 @ENABLE_PLUGINS_FALSE@PLUGIN_C = 
 
 # Conditionally enable the plugin interface.

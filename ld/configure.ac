@@ -281,6 +281,9 @@ if test x${want64} = xfalse; then
   fi
 fi
 
+elf_list_options=FALSE
+elf_shlib_list_options=FALSE
+elf_plt_unwind_list_options=FALSE
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
   if test "$targ_alias" = "all"; then
@@ -311,7 +314,20 @@ do
 
     for i in $targ_emul $targ_extra_emuls $targ_extra_libpath; do
 	case " $all_emuls " in
-	*" e${i}.o "*) ;;
+	*" e${i}.o "*)
+	  case "${i}" in
+	  *elf*)
+	    elf_list_options=TRUE
+	    . ${srcdir}/emulparams/${i}.sh
+	    if test x${GENERATE_SHLIB_SCRIPT} = xyes; then
+	      elf_shlib_list_options=TRUE
+	    fi
+	    if test x${PLT_UNWIND} = xyes; then
+	      elf_plt_unwind_list_options=TRUE
+	    fi
+	    ;;
+	  esac
+	  ;;
 	*)
 	  all_emuls="$all_emuls e${i}.o"
 	  eval result=\$tdir_$i
@@ -346,6 +362,9 @@ do
   fi
 done
 
+AC_SUBST(elf_list_options)
+AC_SUBST(elf_shlib_list_options)
+AC_SUBST(elf_plt_unwind_list_options)
 AC_SUBST(EMUL)
 
 TDIRS=tdirs

@@ -1,3 +1,25 @@
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ELF_CLFAGS): New.
+	(AM_CFLAGS): Add $(ELF_CLFAGS).
+	* configure.ac (elf_list_options): New.  AC_SUBST.
+	(elf_shlib_list_options): Likewise.
+	(elf_plt_unwind_list_options): Likewise.
+	* lexsup.c (elf_shlib_list_options): New.
+	(elf_static_list_options): Likewise.
+	(elf_plt_unwind_list_options): Likewise.
+	(ld_list_options): Likewise.
+	(help): Call ld_list_options.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+	* emulparams/plt_unwind.sh (PLT_UNWIND): New.
+	(PARSE_AND_LIST_OPTIONS): Removed.
+	* emultempl/elf32.em (gld_list_options): New.
+	(gld${EMULATION_NAME}_list_options): Define only if BNDPLT or
+	PARSE_AND_LIST_OPTIONS is defined.
+	(ld_${EMULATION_NAME}_emulation): Replace
+	gld${EMULATION_NAME}_list_options with ${gld_list_options.
+
 2015-04-07  Alan Modra  <amodra@gmail.com>
 
 	PR ld/18176

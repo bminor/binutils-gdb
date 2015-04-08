@@ -2366,117 +2366,14 @@ fragment <<EOF
 EOF
 
 if test x"$LDEMUL_LIST_OPTIONS" != xgld"$EMULATION_NAME"_list_options; then
+gld_list_options="gld${EMULATION_NAME}_list_options"
+if test -n "$PARSE_AND_LIST_OPTIONS" || test x"$BNDPLT" = xyes; then
 fragment <<EOF
 
 static void
 gld${EMULATION_NAME}_list_options (FILE * file)
 {
 EOF
-if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-fragment <<EOF
-  fprintf (file, _("\
-  --audit=AUDITLIB            Specify a library to use for auditing\n"));
-  fprintf (file, _("\
-  -Bgroup                     Selects group name lookup rules for DSO\n"));
-EOF
-fi
-fragment <<EOF
-  fprintf (file, _("\
-  --build-id[=STYLE]          Generate build ID note\n"));
-EOF
-if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-fragment <<EOF
-  fprintf (file, _("\
-  -P AUDITLIB, --depaudit=AUDITLIB\n" "\
-			      Specify a library to use for auditing dependencies\n"));
-  fprintf (file, _("\
-  --disable-new-dtags         Disable new dynamic tags\n"));
-  fprintf (file, _("\
-  --enable-new-dtags          Enable new dynamic tags\n"));
-  fprintf (file, _("\
-  --eh-frame-hdr              Create .eh_frame_hdr section\n"));
-  fprintf (file, _("\
-  --exclude-libs=LIBS         Make all symbols in LIBS hidden\n"));
-  fprintf (file, _("\
-  --hash-style=STYLE          Set hash style to sysv, gnu or both\n"));
-  fprintf (file, _("\
-  -z combreloc                Merge dynamic relocs into one section and sort\n"));
-EOF
-fi
-
-fragment <<EOF
-  fprintf (file, _("\
-  -z common-page-size=SIZE    Set common page size to SIZE\n"));
-  fprintf (file, _("\
-  -z defs                     Report unresolved symbols in object files.\n"));
-  fprintf (file, _("\
-  -z execstack                Mark executable as requiring executable stack\n"));
-EOF
-
-if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-fragment <<EOF
-  fprintf (file, _("\
-  -z global                   Make symbols in DSO available for subsequently\n\
-			       loaded objects\n"));
-  fprintf (file, _("\
-  -z initfirst                Mark DSO to be initialized first at runtime\n"));
-  fprintf (file, _("\
-  -z interpose                Mark object to interpose all DSOs but executable\n"));
-  fprintf (file, _("\
-  -z lazy                     Mark object lazy runtime binding (default)\n"));
-  fprintf (file, _("\
-  -z loadfltr                 Mark object requiring immediate process\n"));
-EOF
-fi
-
-fragment <<EOF
-  fprintf (file, _("\
-  -z max-page-size=SIZE       Set maximum page size to SIZE\n"));
-  fprintf (file, _("\
-  -z muldefs                  Allow multiple definitions\n"));
-EOF
-
-if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-fragment <<EOF
-  fprintf (file, _("\
-  -z nocombreloc              Don't merge dynamic relocs into one section\n"));
-  fprintf (file, _("\
-  -z nocopyreloc              Don't create copy relocs\n"));
-  fprintf (file, _("\
-  -z nodefaultlib             Mark object not to use default search paths\n"));
-  fprintf (file, _("\
-  -z nodelete                 Mark DSO non-deletable at runtime\n"));
-  fprintf (file, _("\
-  -z nodlopen                 Mark DSO not available to dlopen\n"));
-  fprintf (file, _("\
-  -z nodump                   Mark DSO not available to dldump\n"));
-EOF
-fi
-fragment <<EOF
-  fprintf (file, _("\
-  -z noexecstack              Mark executable as not requiring executable stack\n"));
-EOF
-if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-fragment <<EOF
-  fprintf (file, _("\
-  -z text                     Treat DT_TEXTREL in shared object as error\n"));
-  fprintf (file, _("\
-  -z notext                   Don't treat DT_TEXTREL in shared object as error\n"));
-  fprintf (file, _("\
-  -z textoff                  Don't treat DT_TEXTREL in shared object as error\n"));
-  fprintf (file, _("\
-  -z norelro                  Don't create RELRO program header\n"));
-  fprintf (file, _("\
-  -z now                      Mark object non-lazy runtime binding\n"));
-  fprintf (file, _("\
-  -z origin                   Mark object requiring immediate \$ORIGIN\n\
-				processing at runtime\n"));
-  fprintf (file, _("\
-  -z relro                    Create RELRO program header\n"));
-  fprintf (file, _("\
-  -z stacksize=SIZE           Set size of stack segment\n"));
-EOF
-fi
 
 if test x"$BNDPLT" = xyes; then
 fragment <<EOF
@@ -2494,6 +2391,9 @@ fi
 fragment <<EOF
 }
 EOF
+else
+  gld_list_options="NULL"
+fi
 
 if test -n "$PARSE_AND_LIST_EPILOGUE" ; then
 fragment <<EOF
@@ -2527,7 +2427,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_add_options,
   gld${EMULATION_NAME}_handle_option,
   ${LDEMUL_UNRECOGNIZED_FILE-NULL},
-  ${LDEMUL_LIST_OPTIONS-gld${EMULATION_NAME}_list_options},
+  ${LDEMUL_LIST_OPTIONS-${gld_list_options}},
   ${LDEMUL_RECOGNIZED_FILE-gld${EMULATION_NAME}_load_symbols},
   ${LDEMUL_FIND_POTENTIAL_LIBRARIES-NULL},
   ${LDEMUL_NEW_VERS_PATTERN-NULL},

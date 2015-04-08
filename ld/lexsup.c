@@ -1652,6 +1652,112 @@ set_segment_start (const char *section, char *valstr)
   lang_section_start (section, exp_intop (val), seg);
 }
 
+static void
+elf_shlib_list_options (FILE *file)
+{
+  fprintf (file, _("\
+  --audit=AUDITLIB            Specify a library to use for auditing\n"));
+  fprintf (file, _("\
+  -Bgroup                     Selects group name lookup rules for DSO\n"));
+  fprintf (file, _("\
+  --disable-new-dtags         Disable new dynamic tags\n"));
+  fprintf (file, _("\
+  --enable-new-dtags          Enable new dynamic tags\n"));
+  fprintf (file, _("\
+  --eh-frame-hdr              Create .eh_frame_hdr section\n"));
+  fprintf (file, _("\
+  --exclude-libs=LIBS         Make all symbols in LIBS hidden\n"));
+  fprintf (file, _("\
+  --hash-style=STYLE          Set hash style to sysv, gnu or both\n"));
+  fprintf (file, _("\
+  -P AUDITLIB, --depaudit=AUDITLIB\n" "\
+			      Specify a library to use for auditing dependencies\n"));
+  fprintf (file, _("\
+  -z combreloc                Merge dynamic relocs into one section and sort\n"));
+  fprintf (file, _("\
+  -z nocombreloc              Don't merge dynamic relocs into one section\n"));
+  fprintf (file, _("\
+  -z global                   Make symbols in DSO available for subsequently\n\
+			       loaded objects\n"));
+  fprintf (file, _("\
+  -z initfirst                Mark DSO to be initialized first at runtime\n"));
+  fprintf (file, _("\
+  -z interpose                Mark object to interpose all DSOs but executable\n"));
+  fprintf (file, _("\
+  -z lazy                     Mark object lazy runtime binding (default)\n"));
+  fprintf (file, _("\
+  -z loadfltr                 Mark object requiring immediate process\n"));
+  fprintf (file, _("\
+  -z nocopyreloc              Don't create copy relocs\n"));
+  fprintf (file, _("\
+  -z nodefaultlib             Mark object not to use default search paths\n"));
+  fprintf (file, _("\
+  -z nodelete                 Mark DSO non-deletable at runtime\n"));
+  fprintf (file, _("\
+  -z nodlopen                 Mark DSO not available to dlopen\n"));
+  fprintf (file, _("\
+  -z nodump                   Mark DSO not available to dldump\n"));
+  fprintf (file, _("\
+  -z now                      Mark object non-lazy runtime binding\n"));
+  fprintf (file, _("\
+  -z origin                   Mark object requiring immediate $ORIGIN\n\
+				processing at runtime\n"));
+  fprintf (file, _("\
+  -z relro                    Create RELRO program header\n"));
+  fprintf (file, _("\
+  -z norelro                  Don't create RELRO program header\n"));
+  fprintf (file, _("\
+  -z stacksize=SIZE           Set size of stack segment\n"));
+  fprintf (file, _("\
+  -z text                     Treat DT_TEXTREL in shared object as error\n"));
+  fprintf (file, _("\
+  -z notext                   Don't treat DT_TEXTREL in shared object as error\n"));
+  fprintf (file, _("\
+  -z textoff                  Don't treat DT_TEXTREL in shared object as error\n"));
+}
+
+static void
+elf_static_list_options (FILE *file)
+{
+  fprintf (file, _("\
+  --build-id[=STYLE]          Generate build ID note\n"));
+  fprintf (file, _("\
+  -z common-page-size=SIZE    Set common page size to SIZE\n"));
+  fprintf (file, _("\
+  -z max-page-size=SIZE       Set maximum page size to SIZE\n"));
+  fprintf (file, _("\
+  -z defs                     Report unresolved symbols in object files.\n"));
+  fprintf (file, _("\
+  -z muldefs                  Allow multiple definitions\n"));
+  fprintf (file, _("\
+  -z execstack                Mark executable as requiring executable stack\n"));
+  fprintf (file, _("\
+  -z noexecstack              Mark executable as not requiring executable stack\n"));
+}
+
+static void
+elf_plt_unwind_list_options (FILE *file)
+{
+  fprintf (file, _("\
+  --ld-generated-unwind-info  Generate exception handling info for PLT\n\
+  --no-ld-generated-unwind-info\n\
+                              Don't generate exception handling info for PLT\n"));
+}
+
+static void
+ld_list_options (FILE *file, bfd_boolean elf, bfd_boolean shlib,
+		 bfd_boolean plt_unwind)
+{
+  if (!elf)
+    return;
+  printf (_("ELF emulations:\n"));
+  if (plt_unwind)
+    elf_plt_unwind_list_options (file);
+  elf_static_list_options (file);
+  if (shlib)
+    elf_shlib_list_options (file);
+}
+
 
 /* Print help messages for the options.  */
 
@@ -1764,6 +1870,8 @@ help (void)
 
   /* xgettext:c-format */
   printf (_("%s: emulation specific options:\n"), program_name);
+  ld_list_options (stdout, ELF_LIST_OPTIONS, ELF_SHLIB_LIST_OPTIONS,
+		   ELF_PLT_UNWIND_LIST_OPTIONS);
   ldemul_list_emulation_options (stdout);
   printf ("\n");
 
