@@ -429,6 +429,7 @@ enum SHF
   SHF_OS_NONCONFORMING = 0x100,
   SHF_GROUP = 0x200,
   SHF_TLS = 0x400,
+  SHF_COMPRESSED = 0x800,
   SHF_MASKOS = 0x0ff00000,
   SHF_MASKPROC = 0xf0000000,
 
@@ -449,6 +450,17 @@ enum SHF
 
   // x86_64 specific large section.
   SHF_X86_64_LARGE = 0x10000000
+};
+
+// Values which appear in the first Elf_WXword of the section data
+// of a SHF_COMPRESSED section.
+enum
+{
+  ELFCOMPRESS_ZLIB = 1,
+  ELFCOMPRESS_LOOS = 0x60000000,
+  ELFCOMPRESS_HIOS = 0x6fffffff,
+  ELFCOMPRESS_LOPROC = 0x70000000,
+  ELFCOMPRESS_HIPROC = 0x7fffffff,
 };
 
 // Bit flags which appear in the first 32-bit word of the section data

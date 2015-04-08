@@ -1,3 +1,12 @@
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfcpp.h (SHF): Add SHF_COMPRESSED.
+	(ELFCOMPRESS_ZLIB): New.
+	(ELFCOMPRESS_LOOS): Likewise.
+	(ELFCOMPRESS_HIOS): Likewise.
+	(ELFCOMPRESS_LOPROC): Likewise.
+	(ELFCOMPRESS_HIPROC): Likewise.
+
 2015-04-07  HC Yen <hc.yen@mediatek.com>
 
 	* arm.h: Add TAG_CPU_ARCH_V8 in Tag_CPU_arch EABI attribute.
