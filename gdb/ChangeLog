@@ -1,3 +1,13 @@
+2015-04-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR python/16699
+	* python/py-cmd.c (cmdpy_completer_helper): Adjust function to not
+	use a caching mechanism.  Adjust comments and code to reflect
+	that.  Replace 'sizeof' by 'strlen' when fetching 'wordobj'.
+	(cmdpy_completer_handle_brkchars): Adjust call to
+	cmdpy_completer_helper.  Call Py_XDECREF for 'resultobj'.
+	(cmdpy_completer): Likewise.
+
 2015-04-08  Yao Qi  <yao.qi@linaro.org>
 
 	* spu-tdep.c (spu_gdbarch_init): Don't call

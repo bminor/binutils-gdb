@@ -1,3 +1,15 @@
+2015-04-08  Keith Seitz  <keiths@redhat.com>
+
+	PR python/16699
+	* gdb.python/py-completion.exp: New tests for completion.
+	* gdb.python/py-completion.py (CompleteLimit1): New class.
+	(CompleteLimit2): Likewise.
+	(CompleteLimit3): Likewise.
+	(CompleteLimit4): Likewise.
+	(CompleteLimit5): Likewise.
+	(CompleteLimit6): Likewise.
+	(CompleteLimit7): Likewise.
+
 2015-04-08  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18214
