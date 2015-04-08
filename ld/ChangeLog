@@ -1,5 +1,9 @@
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* emulparams/elf32bmipn32-defs.sh: Skip empty EMULATION_NAME.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (ELF_CLFAGS): New.
 	(AM_CFLAGS): Add $(ELF_CLFAGS).
 	* configure.ac (elf_list_options): New.  AC_SUBST.
