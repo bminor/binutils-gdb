@@ -1,5 +1,12 @@
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfcpp.h (Elf_sizes): Add chdr_size.
+	(Chdr): New.
+	(Chdr_write): Likewise.
+	* elfcpp_internal.h (Chdr_data): Likewise.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfcpp.h (SHF): Add SHF_COMPRESSED.
 	(ELFCOMPRESS_ZLIB): New.
 	(ELFCOMPRESS_LOOS): Likewise.

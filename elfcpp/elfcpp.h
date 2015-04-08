@@ -1009,6 +1009,8 @@ struct Elf_sizes
   static const int phdr_size = sizeof(internal::Phdr_data<size>);
   // Size of ELF section header.
   static const int shdr_size = sizeof(internal::Shdr_data<size>);
+  // Size of ELF compression header.
+  static const int chdr_size = sizeof(internal::Chdr_data<size>);
   // Size of ELF symbol table entry.
   static const int sym_size = sizeof(internal::Sym_data<size>);
   // Sizes of ELF reloc entries.
@@ -1282,6 +1284,65 @@ class Shdr_write
 
  private:
   internal::Shdr_data<size>* p_;
+};
+
+// Accessor class for an ELF compression header.
+
+template<int size, bool big_endian>
+class Chdr
+{
+ public:
+  Chdr(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Chdr_data<size>*>(p))
+  { }
+
+  template<typename File>
+  Chdr(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Chdr_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  typename Elf_types<size>::Elf_WXword
+  get_ch_type() const
+  { return Convert<size, big_endian>::convert_host(this->p_->ch_type); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_ch_size() const
+  { return Convert<size, big_endian>::convert_host(this->p_->ch_size); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_ch_addralign() const
+  { return
+      Convert<size, big_endian>::convert_host(this->p_->ch_addralign); }
+
+ private:
+  const internal::Chdr_data<size>* p_;
+};
+
+// Write class for an ELF compression header.
+
+template<int size, bool big_endian>
+class Chdr_write
+{
+ public:
+  Chdr_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Chdr_data<size>*>(p))
+  { }
+
+  void
+  put_ch_type(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->ch_type = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_ch_size(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->ch_size = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_ch_addralign(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->ch_addralign = Convert<size, big_endian>::convert_host(v); }
+
+ private:
+  internal::Chdr_data<size>* p_;
 };
 
 // Accessor class for an ELF segment header.

@@ -79,6 +79,16 @@ struct Shdr_data
   typename Elf_types<size>::Elf_WXword sh_entsize;
 };
 
+// An ELF compression header.
+
+template<int size>
+struct Chdr_data
+{
+  typename Elf_types<size>::Elf_WXword ch_type;
+  typename Elf_types<size>::Elf_WXword ch_size;
+  typename Elf_types<size>::Elf_WXword ch_addralign;
+};
+
 // An ELF segment header.  We use template specialization for the
 // 32-bit and 64-bit versions because the fields are in a different
 // order.
