@@ -79,7 +79,12 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
   bfd_byte *buffer;
   bfd_size_type buffer_size;
   bfd_boolean decompress;
+#if defined(__GNUC__) && GCC_VERSION < 4007
+  /* Work around a GCC uninitialized warning bug fixed in GCC 4.7.  */
+  int zlib_size = 0;
+#else
   int zlib_size;
+#endif
   int orig_compression_header_size;
   int compression_header_size
     = bfd_get_compression_header_size (abfd, NULL);

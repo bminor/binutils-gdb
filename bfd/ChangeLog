@@ -1,5 +1,10 @@
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* compress.c (bfd_compress_section_contents): Work around a GCC
+	uninitialized warning bug fixed in GCC 4.7.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* archive.c (_bfd_get_elt_at_filepos): Also copy BFD_COMPRESS_GABI
 	bit.
 	* bfd.c (bfd::flags): Increase size to 18 bits.
