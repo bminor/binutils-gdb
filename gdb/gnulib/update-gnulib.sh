@@ -45,6 +45,7 @@ IMPORTED_GNULIB_MODULES="\
     readlink \
     rename \
     strstr \
+    strtok_r \
     sys_stat \
     unistd \
     update-copyright \
