@@ -1,3 +1,8 @@
+2015-04-08  Yao Qi  <yao.qi@linaro.org>
+
+	* spu-tdep.c (spu_gdbarch_init): Don't call
+	set_gdbarch_cannot_step_breakpoint.
+
 2015-04-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* linux-tdep.c (decode_vmflags): Initialize 'saveptr'.
