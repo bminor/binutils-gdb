@@ -1,3 +1,9 @@
+2015-04-07  HC Yen <hc.yen@mediatek.com>
+
+	Add AArch32 support for gold linker.
+	gold/
+	* arm.cc: Add V8 arch combine table.
+
 2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* aarch64.cc (do_reloc_addend): Fix signature to match the parent one.

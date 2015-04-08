@@ -1,3 +1,7 @@
+2015-04-07  HC Yen <hc.yen@mediatek.com>
+
+	* arm.h: Add TAG_CPU_ARCH_V8 in Tag_CPU_arch EABI attribute.
+
 2015-02-09  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf.h (enum DW_LANG): Add DW_LANG_C_plus_plus_11,
