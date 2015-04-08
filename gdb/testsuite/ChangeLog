@@ -1,5 +1,20 @@
 2015-04-08  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18214
+	PR gdb/18216
+	* gdb.threads/multiple-step-overs.c (sigusr1_handler): New
+	function.
+	(main): Install it as SIGUSR1 handler.
+	* gdb.threads/multiple-step-overs.exp (setup): Remove 'prefix'
+	parameter.  Always use "setup" as prefix.  Toggle "set
+	displaced-stepping" off/on depending on global.  Don't switch to
+	thread 1 here.
+	(top level): Add displaced stepping "off/on" test axis.  Update
+	"setup" calls.  Wrap each subtest with with_test_prefix.  Test
+	continuing with a queued signal in each thread.
+
+2015-04-08  Pedro Alves  <palves@redhat.com>
+
 	* gdb.trace/actions.exp: Use gdb_load before gdb_run_cmd.
 	* gdb.trace/infotrace.exp: Use gdb_load before gdb_run_cmd.  Use
 	gdb_breakpoint instead of gdb_test that doesn't expect anything.
