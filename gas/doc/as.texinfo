@@ -630,6 +630,22 @@ to begin with @samp{.zdebug}, and the resulting object file may not be
 compatible with older linkers and object file utilities.  Note if compression
 would make a given section @emph{larger} then it is not compressed or renamed.
 
+@ifset ELF
+@cindex @samp{--compress-debug-sections=} option
+@item --compress-debug-sections=none
+@itemx --compress-debug-sections=zlib
+@itemx --compress-debug-sections=zlib-gnu
+@itemx --compress-debug-sections=zlib-gabi
+These options control how DWARF debug sections are compressed.
+@option{--compress-debug-sections=none} is equivalent to
+@option{--nocompress-debug-sections}.
+@option{--compress-debug-sections=zlib} and
+@option{--compress-debug-sections=zlib-gnu} are equivalent to
+@option{--compress-debug-sections}.
+@option{--compress-debug-sections=zlib-gabi} compresses
+DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+@end ifset
+
 @item --nocompress-debug-sections
 Do not compress DWARF debug sections.  This is the default.
 

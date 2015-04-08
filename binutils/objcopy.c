@@ -204,6 +204,9 @@ static enum
 {
   nothing,
   compress,
+  compress_zlib,
+  compress_gnu_zlib,
+  compress_gabi_zlib,
   decompress
 } do_debug_sections = nothing;
 
@@ -380,7 +383,7 @@ static struct option copy_options[] =
   {"change-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_VMA},
   {"change-start", required_argument, 0, OPTION_CHANGE_START},
   {"change-warnings", no_argument, 0, OPTION_CHANGE_WARNINGS},
-  {"compress-debug-sections", no_argument, 0, OPTION_COMPRESS_DEBUG_SECTIONS},
+  {"compress-debug-sections", optional_argument, 0, OPTION_COMPRESS_DEBUG_SECTIONS},
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"decompress-debug-sections", no_argument, 0, OPTION_DECOMPRESS_DEBUG_SECTIONS},
   {"disable-deterministic-archives", no_argument, 0, 'U'},
@@ -601,7 +604,8 @@ copy_usage (FILE *stream, int exit_status)
                                    <commit>\n\
      --subsystem <name>[:<version>]\n\
                                    Set PE subsystem to <name> [& <version>]\n\
-     --compress-debug-sections     Compress DWARF debug sections using zlib\n\
+     --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
+                                   Compress DWARF debug sections using zlib\n\
      --decompress-debug-sections   Decompress DWARF debug sections using zlib\n\
   -v --verbose                     List all object files modified\n\
   @<file>                          Read options from <file>\n\
@@ -2588,7 +2592,18 @@ copy_file (const char *input_filename, const char *output_filename,
   switch (do_debug_sections)
     {
     case compress:
+    case compress_zlib:
+    case compress_gnu_zlib:
+    case compress_gabi_zlib:
       ibfd->flags |= BFD_COMPRESS;
+      if (do_debug_sections != compress)
+	{
+	  if (ibfd->xvec->flavour != bfd_target_elf_flavour)
+	    fatal (_("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported for `%s'"),
+		   bfd_get_target (ibfd));
+	  if (do_debug_sections == compress_gabi_zlib)
+	    ibfd->flags |= BFD_COMPRESS_GABI;
+	}
       break;
     case decompress:
       ibfd->flags |= BFD_DECOMPRESS;
@@ -3998,7 +4013,22 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_COMPRESS_DEBUG_SECTIONS:
-	  do_debug_sections = compress;
+	  if (optarg)
+	    {
+	      if (strcasecmp (optarg, "none") == 0)
+		do_debug_sections = decompress;
+	      else if (strcasecmp (optarg, "zlib") == 0)
+		do_debug_sections = compress_zlib;
+	      else if (strcasecmp (optarg, "zlib-gnu") == 0)
+		do_debug_sections = compress_gnu_zlib;
+	      else if (strcasecmp (optarg, "zlib-gabi") == 0)
+		do_debug_sections = compress_gabi_zlib;
+	      else
+		fatal (_("unrecognized --compress-debug-sections type `%s'"),
+		       optarg);
+	    }
+	  else
+	    do_debug_sections = compress;
 	  break;
 
 	case OPTION_DEBUGGING:

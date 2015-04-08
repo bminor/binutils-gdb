@@ -1,3 +1,32 @@
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archive.c (_bfd_get_elt_at_filepos): Also copy BFD_COMPRESS_GABI
+	bit.
+	* bfd.c (bfd::flags): Increase size to 18 bits.
+	(BFD_COMPRESS_GABI): New.
+	(BFD_FLAGS_SAVED): Add BFD_COMPRESS_GABI.
+	(BFD_FLAGS_FOR_BFD_USE_MASK): Likewise.
+	(bfd_update_compression_header): New fuction.
+	(bfd_check_compression_header): Likewise.
+	(bfd_get_compression_header_size): Likewise.
+	(bfd_is_section_compressed_with_header): Likewise.
+	* compress.c (MAX_COMPRESSION_HEADER_SIZE): New.
+	(bfd_compress_section_contents): Return the uncompressed size if
+	the full section contents is compressed successfully.  Support
+	converting from/to .zdebug* sections.
+	(bfd_get_full_section_contents): Call
+	bfd_get_compression_header_size to get compression header size.
+	(bfd_is_section_compressed): Renamed to ...
+	(bfd_is_section_compressed_with_header): This.  Add a pointer
+	argument to return compression header size.
+	(bfd_is_section_compressed): Use it.
+	(bfd_init_section_decompress_status): Call
+	bfd_get_compression_header_size to get compression header size.
+	Return FALSE if uncompressed section size is 0.
+	* elf.c (_bfd_elf_make_section_from_shdr): Support converting
+	from/to .zdebug* sections.
+	* bfd-in2.h: Regenerated.
+
 2015-04-07  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (_bfd_elf_get_reloc_section): Allow for .got.plt being

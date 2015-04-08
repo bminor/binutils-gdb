@@ -1,3 +1,14 @@
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp: Add a test for
+	--compress-debug-sections=zlib-gabi.
+	(build_tests): Add 2 tests for --compress-debug-sections=zlib-gabi.
+	(run_tests): Likewise.
+	Verify linker output with zlib-gabi compressed debug input.
+	* ld-elf/compressed1a.d: New file.
+	* ld-elf/compressed1b.d: Likewise.
+	* ld-elf/compressed1c.d: Likewise.
+
 2015-04-07  Alan Modra  <amodra@gmail.com>
 
 	* ld-arm/tls-gdesc-nlazy.g: Adjust for readelf note.

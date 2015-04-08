@@ -1042,26 +1042,35 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
     {
       enum { nothing, compress, decompress } action = nothing;
       char *new_name;
+      int compression_header_size;
+      bfd_boolean compressed
+	= bfd_is_section_compressed_with_header (abfd, newsect,
+						 &compression_header_size);
 
-      if (bfd_is_section_compressed (abfd, newsect))
+      if (compressed)
 	{
 	  /* Compressed section.  Check if we should decompress.  */
 	  if ((abfd->flags & BFD_DECOMPRESS))
 	    action = decompress;
 	}
-      else
+
+      /* Compress the uncompressed section or convert from/to .zdebug*
+	 section.  Check if we should compress.  */
+      if (action == nothing)
 	{
-	  /* Normal section.  Check if we should compress.  */
-	  if ((abfd->flags & BFD_COMPRESS) && newsect->size != 0)
+	  if (newsect->size != 0
+	      && (abfd->flags & BFD_COMPRESS)
+	      && compression_header_size >= 0
+	      && (!compressed
+		  || ((compression_header_size > 0)
+		      != ((abfd->flags & BFD_COMPRESS_GABI) != 0))))
 	    action = compress;
+	  else
+	    return TRUE;
 	}
 
-      new_name = NULL;
-      switch (action)
+      if (action == compress)
 	{
-	case nothing:
-	  break;
-	case compress:
 	  if (!bfd_init_section_compress_status (abfd, newsect))
 	    {
 	      (*_bfd_error_handler)
@@ -1069,25 +1078,9 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 		 abfd, name);
 	      return FALSE;
 	    }
-	  /* PR binutils/18087: Compression does not always make a section
-	     smaller.  So only rename the section when compression has
-	     actually taken place.  */
-	  if (newsect->compress_status == COMPRESS_SECTION_DONE)
-	    {
-	      if (name[1] != 'z')
-		{
-		  unsigned int len = strlen (name);
-
-		  new_name = bfd_alloc (abfd, len + 2);
-		  if (new_name == NULL)
-		    return FALSE;
-		  new_name[0] = '.';
-		  new_name[1] = 'z';
-		  memcpy (new_name + 2, name + 1, len);
-		}
-	    }
-	  break;
-	case decompress:
+	}
+      else
+	{
 	  if (!bfd_init_section_decompress_status (abfd, newsect))
 	    {
 	      (*_bfd_error_handler)
@@ -1095,6 +1088,13 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 		 abfd, name);
 	      return FALSE;
 	    }
+	}
+
+      new_name = NULL;
+      if (action == decompress
+	   || (action == compress
+	       && (abfd->flags & BFD_COMPRESS_GABI) != 0))
+	{
 	  if (name[1] == 'z')
 	    {
 	      unsigned int len = strlen (name);
@@ -1105,7 +1105,24 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	      new_name[0] = '.';
 	      memcpy (new_name + 1, name + 2, len - 1);
 	    }
-	  break;
+	}
+      else if (action == compress
+	       && newsect->compress_status == COMPRESS_SECTION_DONE)
+	{
+	  /* PR binutils/18087: Compression does not always make a section
+	     smaller.  So only rename the section when compression has
+	     actually taken place.  */
+	  if (name[1] != 'z')
+	    {
+	      unsigned int len = strlen (name);
+
+	      new_name = bfd_alloc (abfd, len + 2);
+	      if (new_name == NULL)
+		return FALSE;
+	      new_name[0] = '.';
+	      new_name[1] = 'z';
+	      memcpy (new_name + 2, name + 1, len);
+	    }
 	}
       if (new_name != NULL)
 	bfd_rename_section (abfd, newsect, new_name);

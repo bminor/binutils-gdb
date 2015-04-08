@@ -1,5 +1,18 @@
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* objcopy.c (do_debug_sections): Add compress_zlib,
+	compress_gnu_zlib and compress_gabi_zlib.
+	(copy_options): Use optional_argument on compress-debug-sections.
+	(copy_usage): Update --compress-debug-sections.
+	(copy_file): Handle compress_zlib, compress_gnu_zlib and
+	compress_gabi_zlib.
+	(copy_main): Handle
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* doc/binutils.texi: Document
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* objcopy.c (copy_usage): Replace "--interleave [<number>]" with
 	--interleave[=<number>].
 

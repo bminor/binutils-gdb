@@ -1,3 +1,11 @@
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* compress.exp: Add tests for
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* binutils-all/dw2-3.rS: New file.
+	* binutils-all/dw2-3.rt: Likewise.
+	* binutils-all/libdw2-compressedgabi.out: Likewise.
+
 2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/compress.exp: Remove is_zlib_supported check.

@@ -6323,7 +6323,7 @@ struct bfd
   ENUM_BITFIELD (bfd_direction) direction : 2;
 
   /* Format_specific flags.  */
-  flagword flags : 17;
+  flagword flags : 18;
 
   /* Values that may appear in the flags field of a BFD.  These also
      appear in the object_flags field of the bfd_target structure, where
@@ -6400,14 +6400,19 @@ struct bfd
   /* BFD is a dummy, for plugins.  */
 #define BFD_PLUGIN 0x10000
 
+  /* Compress sections in this BFD with SHF_COMPRESSED from gABI.  */
+#define BFD_COMPRESS_GABI 0x20000
+
   /* Flags bits to be saved in bfd_preserve_save.  */
 #define BFD_FLAGS_SAVED \
-  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_PLUGIN)
+  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_PLUGIN \
+   | BFD_COMPRESS_GABI)
 
   /* Flags bits which are for BFD use only.  */
 #define BFD_FLAGS_FOR_BFD_USE_MASK \
   (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
-   | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT)
+   | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT \
+   | BFD_COMPRESS_GABI)
 
   /* Is the file descriptor being cached?  That is, can it be closed as
      needed, and re-opened when accessed later?  */
@@ -6776,6 +6781,15 @@ bfd_vma bfd_emul_get_commonpagesize (const char *);
 void bfd_emul_set_commonpagesize (const char *, bfd_vma);
 
 char *bfd_demangle (bfd *, const char *, int);
+
+void bfd_update_compression_header
+   (bfd *abfd, bfd_byte *contents, asection *sec);
+
+bfd_boolean bfd_check_compression_header
+   (bfd *abfd, bfd_byte *contents, asection *sec,
+    bfd_size_type uncompressed_size);
+
+int bfd_get_compression_header_size (bfd *abfd, asection *sec);
 
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
@@ -7288,6 +7302,10 @@ bfd_boolean bfd_get_full_section_contents
 
 void bfd_cache_section_contents
    (asection *sec, void *contents);
+
+bfd_boolean bfd_is_section_compressed_with_header
+   (bfd *abfd, asection *section,
+    int *compression_header_size_p);
 
 bfd_boolean bfd_is_section_compressed
    (bfd *abfd, asection *section);

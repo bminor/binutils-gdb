@@ -1,3 +1,21 @@
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.c (show_usage): Update --compress-debug-sections.
+	(std_longopts): Use optional_argument on compress-debug-sections.
+	(parse_args): Handle
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* as.h (compressed_debug_section_type): New.
+	(flag_compress_debug): Change type to compressed_debug_section_type.
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* write.c (compress_debug): Set BFD_COMPRESS_GABI for
+	--compress-debug-sections=zlib-gabi.  Call
+	bfd_get_compression_header_size to get compression header size.
+	Don't rename section name for --compress-debug-sections=zlib-gabi.
+	* config/tc-i386.c (compressed_debug_section_type): Set to
+	COMPRESS_DEBUG_ZLIB.
+	* doc/as.texinfo: Document
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+
 2015-04-07  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (mapping_state): Use subseg_text_p.

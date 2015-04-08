@@ -40,6 +40,10 @@ if { ![ld_assemble $as "--compress-debug-sections $srcdir/$subdir/empty.s" tmpdi
     fail "linker compressed debug sections"
 }
 
+if { ![ld_assemble $as "--compress-debug-sections=zlib-gabi $srcdir/$subdir/empty.s" tmpdir/emptyzlib.o ] } {
+    fail "linker compressed debug sections"
+}
+
 set build_tests {
   {"Build libfoo.so with compressed debug sections"
    "-shared" "-fPIC -g -Wa,--compress-debug-sections"
@@ -47,13 +51,31 @@ set build_tests {
   {"Build libbar.so with compressed debug sections"
    "-shared" "-fPIC -g -Wa,--compress-debug-sections"
    {begin.c end.c} {} "libbar.so"}
+  {"Build libfoozlib.so with compressed debug sections with zlib-gabi"
+   "-shared" "-fPIC -g -Wa,--compress-debug-sections=zlib-gabi"
+   {foo.c} {} "libfoozlib.so"}
+  {"Build libbarzlib.so with compressed debug sections with zlib-gabi"
+   "-shared" "-fPIC -g -Wa,--compress-debug-sections=zlib-gabi"
+   {begin.c end.c} {} "libbarzlib.so"}
 }
 
 set run_tests {
     {"Run normal with libfoo.so with compressed debug sections"
-     "tmpdir/begin.o tmpdir/libfoo.so tmpdir/end.o" "-Wa,--compress-debug-sections"
-     {main.c} "normal" "normal.out"}
+     "tmpdir/begin.o tmpdir/libfoo.so tmpdir/end.o" ""
+     {main.c} "normal" "normal.out" "-Wa,--compress-debug-sections"}
+    {"Run normal with libfoo.so with compressed debug sections with zlib-gabi"
+     "tmpdir/begin.o tmpdir/libfoozlib.so tmpdir/end.o" ""
+     {main.c} "normal" "normal.out" "-Wa,--compress-debug-sections=zlib-gabi"}
 }
 
 run_cc_link_tests $build_tests
 run_ld_link_exec_tests [] $run_tests
+
+set test_name "Link with zlib-gabi compressed debug input"
+send_log "cmp tmpdir/libfoo.so tmpdir/libfoozlib.so\n"
+if { [catch {exec cmp tmpdir/libfoo.so tmpdir/libfoozlib.so}] } then {
+    send_log "tmpdir/libfoo.so tmpdir/libfoozlib.so differ.\n"
+    fail "$test_name"
+} else {
+    pass "$test_name"
+}

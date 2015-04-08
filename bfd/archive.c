@@ -725,8 +725,10 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 
   n_bfd->arelt_data = new_areldata;
 
-  /* Copy BFD_COMPRESS and BFD_DECOMPRESS flags.  */
-  n_bfd->flags |= archive->flags & (BFD_COMPRESS | BFD_DECOMPRESS);
+  /* Copy BFD_COMPRESS, BFD_DECOMPRESS and BFD_COMPRESS_GABI flags.  */
+  n_bfd->flags |= archive->flags & (BFD_COMPRESS
+				    | BFD_DECOMPRESS
+				    | BFD_COMPRESS_GABI);
 
   if (_bfd_add_bfd_to_archive_cache (archive, filepos, n_bfd))
     return n_bfd;
