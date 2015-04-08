@@ -537,7 +537,7 @@ copy_usage (FILE *stream, int exit_status)
   -w --wildcard                    Permit wildcard in symbol comparison\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
-  -i --interleave [<number>]       Only copy N out of every <number> bytes\n\
+  -i --interleave[=<number>]       Only copy N out of every <number> bytes\n\
      --interleave-width <number>   Set N for --interleave\n\
   -b --byte <num>                  Select byte <num> in every interleaved block\n\
      --gap-fill <val>              Fill gaps between sections with <val>\n\
