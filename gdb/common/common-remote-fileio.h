@@ -23,6 +23,11 @@
 #include "gdb/fileio.h"
 #include <sys/stat.h>
 
+/* Convert a errno error number to a File-I/O error number for
+   transmission over the remote protocol.  */
+
+extern int remote_fileio_to_fio_error (int error);
+
 /* Pack a host-format integer into a byte buffer in big-endian format
    ready for transmission over the remote protocol.  BYTES specifies
    the size of the integer to pack in bytes.  */

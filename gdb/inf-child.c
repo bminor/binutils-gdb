@@ -30,7 +30,7 @@
 #include "inferior.h"
 #include <sys/stat.h>
 #include "inf-child.h"
-#include "gdb/fileio.h"
+#include "common-remote-fileio.h"
 #include "agent.h"
 #include "gdb_wait.h"
 #include "filestuff.h"
@@ -239,57 +239,6 @@ inf_child_fileio_open_flags_to_host (int fileio_open_flags, int *open_flags_p)
   return 0;
 }
 
-static int
-inf_child_errno_to_fileio_error (int errnum)
-{
-  switch (errnum)
-    {
-      case EPERM:
-        return FILEIO_EPERM;
-      case ENOENT:
-        return FILEIO_ENOENT;
-      case EINTR:
-        return FILEIO_EINTR;
-      case EIO:
-        return FILEIO_EIO;
-      case EBADF:
-        return FILEIO_EBADF;
-      case EACCES:
-        return FILEIO_EACCES;
-      case EFAULT:
-        return FILEIO_EFAULT;
-      case EBUSY:
-        return FILEIO_EBUSY;
-      case EEXIST:
-        return FILEIO_EEXIST;
-      case ENODEV:
-        return FILEIO_ENODEV;
-      case ENOTDIR:
-        return FILEIO_ENOTDIR;
-      case EISDIR:
-        return FILEIO_EISDIR;
-      case EINVAL:
-        return FILEIO_EINVAL;
-      case ENFILE:
-        return FILEIO_ENFILE;
-      case EMFILE:
-        return FILEIO_EMFILE;
-      case EFBIG:
-        return FILEIO_EFBIG;
-      case ENOSPC:
-        return FILEIO_ENOSPC;
-      case ESPIPE:
-        return FILEIO_ESPIPE;
-      case EROFS:
-        return FILEIO_EROFS;
-      case ENOSYS:
-        return FILEIO_ENOSYS;
-      case ENAMETOOLONG:
-        return FILEIO_ENAMETOOLONG;
-    }
-  return FILEIO_EUNKNOWN;
-}
-
 /* Open FILENAME on the target, using FLAGS and MODE.  Return a
    target file descriptor, or -1 if an error occurs (and set
    *TARGET_ERRNO).  */
@@ -311,7 +260,7 @@ inf_child_fileio_open (struct target_ops *self,
      the standard values.  */
   fd = gdb_open_cloexec (filename, nat_flags, mode);
   if (fd == -1)
-    *target_errno = inf_child_errno_to_fileio_error (errno);
+    *target_errno = remote_fileio_to_fio_error (errno);
 
   return fd;
 }
@@ -340,7 +289,7 @@ inf_child_fileio_pwrite (struct target_ops *self,
     }
 
   if (ret == -1)
-    *target_errno = inf_child_errno_to_fileio_error (errno);
+    *target_errno = remote_fileio_to_fio_error (errno);
 
   return ret;
 }
@@ -369,7 +318,7 @@ inf_child_fileio_pread (struct target_ops *self,
     }
 
   if (ret == -1)
-    *target_errno = inf_child_errno_to_fileio_error (errno);
+    *target_errno = remote_fileio_to_fio_error (errno);
 
   return ret;
 }
@@ -383,7 +332,7 @@ inf_child_fileio_fstat (struct target_ops *self, int fd,
 
   ret = fstat (fd, sb);
   if (ret == -1)
-    *target_errno = inf_child_errno_to_fileio_error (errno);
+    *target_errno = remote_fileio_to_fio_error (errno);
 
   return ret;
 }
@@ -397,7 +346,7 @@ inf_child_fileio_close (struct target_ops *self, int fd, int *target_errno)
 
   ret = close (fd);
   if (ret == -1)
-    *target_errno = inf_child_errno_to_fileio_error (errno);
+    *target_errno = remote_fileio_to_fio_error (errno);
 
   return ret;
 }
@@ -412,7 +361,7 @@ inf_child_fileio_unlink (struct target_ops *self,
 
   ret = unlink (filename);
   if (ret == -1)
-    *target_errno = inf_child_errno_to_fileio_error (errno);
+    *target_errno = remote_fileio_to_fio_error (errno);
 
   return ret;
 }
@@ -434,7 +383,7 @@ inf_child_fileio_readlink (struct target_ops *self,
   len = readlink (filename, buf, sizeof buf);
   if (len < 0)
     {
-      *target_errno = inf_child_errno_to_fileio_error (errno);
+      *target_errno = remote_fileio_to_fio_error (errno);
       return NULL;
     }
 

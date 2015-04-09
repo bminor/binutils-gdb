@@ -194,57 +194,6 @@ remote_fileio_mode_to_host (long mode, int open_call)
 }
 
 static int
-remote_fileio_errno_to_target (int error)
-{
-  switch (error)
-    {
-      case EPERM:
-        return FILEIO_EPERM;
-      case ENOENT:
-        return FILEIO_ENOENT;
-      case EINTR:
-        return FILEIO_EINTR;
-      case EIO:
-        return FILEIO_EIO;
-      case EBADF:
-        return FILEIO_EBADF;
-      case EACCES:
-        return FILEIO_EACCES;
-      case EFAULT:
-        return FILEIO_EFAULT;
-      case EBUSY:
-        return FILEIO_EBUSY;
-      case EEXIST:
-        return FILEIO_EEXIST;
-      case ENODEV:
-        return FILEIO_ENODEV;
-      case ENOTDIR:
-        return FILEIO_ENOTDIR;
-      case EISDIR:
-        return FILEIO_EISDIR;
-      case EINVAL:
-        return FILEIO_EINVAL;
-      case ENFILE:
-        return FILEIO_ENFILE;
-      case EMFILE:
-        return FILEIO_EMFILE;
-      case EFBIG:
-        return FILEIO_EFBIG;
-      case ENOSPC:
-        return FILEIO_ENOSPC;
-      case ESPIPE:
-        return FILEIO_ESPIPE;
-      case EROFS:
-        return FILEIO_EROFS;
-      case ENOSYS:
-        return FILEIO_ENOSYS;
-      case ENAMETOOLONG:
-        return FILEIO_ENAMETOOLONG;
-    }
-  return FILEIO_EUNKNOWN;
-}
-
-static int
 remote_fileio_seek_flag_to_host (long num, int *flag)
 {
   if (!flag)
@@ -459,7 +408,7 @@ static void
 remote_fileio_return_errno (int retcode)
 {
   remote_fileio_reply (retcode, retcode < 0
-		       ? remote_fileio_errno_to_target (errno) : 0);
+		       ? remote_fileio_to_fio_error (errno) : 0);
 }
 
 static void

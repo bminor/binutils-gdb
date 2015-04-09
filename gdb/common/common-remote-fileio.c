@@ -21,6 +21,59 @@
 #include "common-remote-fileio.h"
 #include <sys/stat.h>
 
+/* See common-remote-fileio.h.  */
+
+int
+remote_fileio_to_fio_error (int error)
+{
+  switch (error)
+    {
+      case EPERM:
+        return FILEIO_EPERM;
+      case ENOENT:
+        return FILEIO_ENOENT;
+      case EINTR:
+        return FILEIO_EINTR;
+      case EIO:
+        return FILEIO_EIO;
+      case EBADF:
+        return FILEIO_EBADF;
+      case EACCES:
+        return FILEIO_EACCES;
+      case EFAULT:
+        return FILEIO_EFAULT;
+      case EBUSY:
+        return FILEIO_EBUSY;
+      case EEXIST:
+        return FILEIO_EEXIST;
+      case ENODEV:
+        return FILEIO_ENODEV;
+      case ENOTDIR:
+        return FILEIO_ENOTDIR;
+      case EISDIR:
+        return FILEIO_EISDIR;
+      case EINVAL:
+        return FILEIO_EINVAL;
+      case ENFILE:
+        return FILEIO_ENFILE;
+      case EMFILE:
+        return FILEIO_EMFILE;
+      case EFBIG:
+        return FILEIO_EFBIG;
+      case ENOSPC:
+        return FILEIO_ENOSPC;
+      case ESPIPE:
+        return FILEIO_ESPIPE;
+      case EROFS:
+        return FILEIO_EROFS;
+      case ENOSYS:
+        return FILEIO_ENOSYS;
+      case ENAMETOOLONG:
+        return FILEIO_ENAMETOOLONG;
+    }
+  return FILEIO_EUNKNOWN;
+}
+
 /* Convert a host-format mode_t into a bitmask of File-I/O flags.  */
 
 static LONGEST

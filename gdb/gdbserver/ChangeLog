@@ -1,3 +1,8 @@
+2015-04-09  Gary Benson <gbenson@redhat.com>
+
+	* hostio-errno.c (errno_to_fileio_error): Remove function.
+	Update caller to use remote_fileio_to_fio_error.
+
 2015-04-09  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-low.c (linux_insert_point): Call
