@@ -1,3 +1,78 @@
+2015-04-09  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (splay-tree.h): include header.
+	(text_action_struct): drop next pointer.
+	(text_action_list_struct): drop head pointer, add count and
+	tree fields.
+	(find_fill_action): instead of linear search in text_action_list
+	search in the tree.
+	(text_action_compare, action_first, action_next): new functions.
+	(text_action_add, text_action_add_literal): instead of linear
+	search and insertion insert new node into the tree.
+	(removed_by_actions): pass additional parameter: action_list,
+	use it to traverse the tree.
+	(offset_with_removed_text): pass additional action_list parameter
+	to removed_by_actions.
+	(map_action_fn_context): new typedef.
+	(map_action_fn_context_struct): new structure.
+	(map_action_fn): new function.
+	(map_removal_by_action): use splay_tree_foreach to build map.
+	(find_insn_action): replace linear search in text_action_list
+	with series of splay_tree_lookups.
+	(print_action, print_action_list_fn): new functions.
+	(print_action_list): use splay_tree_foreach.
+	(init_xtensa_relax_info): drop action_list.head initialization.
+	Initialize the tree.
+	(compute_text_actions): use non-zero action_list_count instead of
+	non-NULL action list.
+	(xlate_map_context): new typedef.
+	(xlate_map_context_struct): new structure.
+	(xlate_map_fn): new function.
+	(build_xlate_map): use splay_tree_foreach to build map.
+	(action_remove_bytes_fn): new function.
+	(relax_section): use zero action_list_count instead of NULL
+	action list. Use splay_tree_foreach to count final section size.
+	Drop unused variable 'removed'.
+
+2015-04-09  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (removed_literal_map_entry): new typedef.
+	(removed_literal_map_entry_struct): new structure.
+	(removed_literal_list_struct): add new fields: n_map and map.
+	(map_removed_literal, removed_literal_compare): new functions.
+	(find_removed_literal): build index array for literals ordered
+	by VMA, use binary search to find removed literal.
+
+2015-04-09  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (removal_by_action_entry_struct,
+	removal_by_action_map_struct): new structures.
+	(removal_by_action_entry, removal_by_action_map): new typedefs.
+	(text_action_list_struct): add new field: map.
+	(map_removal_by_action, removed_by_actions_map,
+	offset_with_removed_text_map): new functions.
+	(relax_section): replace offset_with_removed_text with
+	offset_with_removed_text_map.
+	(translate_reloc, relax_property_section, relax_section_symbols):
+	replace removed_by_actions with removed_by_actions_map.
+
+2015-04-09  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (reloc_range_list, reloc_range_list_entry,
+	reloc_range): new typedef.
+	(reloc_range_list_struct, reloc_range_list_entry_struct,
+	reloc_range_struct): new structures.
+	(reloc_range_compare, build_reloc_ranges,
+	reloc_range_list_append, reloc_range_list_remove,
+	reloc_range_list_update_range, free_reloc_range_list): new
+	functions.
+	(compute_text_actions): precompute relocation opcodes before the
+	loop. Add relevant_relocs variable, initialize it before the
+	loop, pass it to the check_section_ebb_pcrels_fit.
+	(check_section_ebb_pcrels_fit): add new parameter:
+	relevant_relocs. Update address range in the relevant_relocs if
+	it's non-NULL and iterate only over relevant relocations.
+
 2015-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-rx.c (describe_flags): Report the settings of the string
