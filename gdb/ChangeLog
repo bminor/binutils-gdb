@@ -1,3 +1,9 @@
+2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* acinclude.m4: (GDB_AC_CHECK_BFD): Set ZLIBDIR with $zlibdir.
+	Replace $zlibdir with $ZLIBDIR in LDFLAGS.
+	* configure: Regenerated.
+
 2015-04-09  Pedro Alves  <palves@redhat.com>
 
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add strtok_r.

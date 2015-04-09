@@ -465,7 +465,8 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   # points somewhere with bfd, with -I/foo/lib and -L/foo/lib.  We
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
-  LDFLAGS="-L../bfd -L../libiberty $zlibdir $LDFLAGS"
+  ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
+  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
   LIBS="-lbfd -liberty -lz $intl $LIBS"
   AC_CACHE_CHECK([$1], [$2],
