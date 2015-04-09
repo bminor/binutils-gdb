@@ -1,5 +1,13 @@
 2015-04-09  Cary Coutant  <ccoutant@google.com>
 
+	* symtab.cc (Symbol::final_value_is_known): Check for TLS symbol
+	in a PIE link.
+	* testsuite/Makefile.am (tls_pie_test.sh): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/tls_pie_test.sh: New.
+
+2015-04-09  Cary Coutant  <ccoutant@google.com>
+
 	* debug.h (DEBUG_LOCATION): New.
 	(DEBUG_ALL): Include DEBUG_LOCATION.
 	(debug_string_to_enum): Add DEBUG_LOCATION.

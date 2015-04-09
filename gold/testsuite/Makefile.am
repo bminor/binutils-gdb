@@ -875,6 +875,11 @@ tls_pie_test: tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o \
 		tls_test_c_pie.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o tls_test_c_pie.o -lpthread
 
+check_SCRIPTS += tls_pie_test.sh
+check_DATA += tls_pie_test.stdout
+tls_pie_test.stdout: tls_pie_test
+	$(TEST_READELF) -rW $< > $@ 2>/dev/null
+
 tls_pie_pic_test: tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o \
 		tls_test_c_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -lpthread

@@ -437,9 +437,12 @@ bool
 Symbol::final_value_is_known() const
 {
   // If we are not generating an executable, then no final values are
-  // known, since they will change at runtime.
-  if (parameters->options().output_is_position_independent()
-      || parameters->options().relocatable())
+  // known, since they will change at runtime, with the exception of
+  // TLS symbols in a position-independent executable.
+  if ((parameters->options().output_is_position_independent()
+       || parameters->options().relocatable())
+      && !(this->type() == elfcpp::STT_TLS
+           && parameters->options().pie()))
     return false;
 
   // If the symbol is not from an object file, and is not undefined,
