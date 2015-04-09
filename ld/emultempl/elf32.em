@@ -2286,13 +2286,6 @@ fragment <<EOF
 	}
 EOF
 
-if test x"$BNDPLT" = xyes; then
-fragment <<EOF
-      else if (strcmp (optarg, "bndplt") == 0)
-	link_info.bndplt = TRUE;
-EOF
-fi
-
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
       else if (strcmp (optarg, "global") == 0)
@@ -2345,6 +2338,12 @@ fragment <<EOF
 EOF
 fi
 
+if test -n "$PARSE_AND_LIST_ARGS_CASE_Z" ; then
+fragment <<EOF
+ $PARSE_AND_LIST_ARGS_CASE_Z
+EOF
+fi
+
 fragment <<EOF
       else
 	einfo (_("%P: warning: -z %s ignored.\n"), optarg);
@@ -2367,20 +2366,13 @@ EOF
 
 if test x"$LDEMUL_LIST_OPTIONS" != xgld"$EMULATION_NAME"_list_options; then
 gld_list_options="gld${EMULATION_NAME}_list_options"
-if test -n "$PARSE_AND_LIST_OPTIONS" || test x"$BNDPLT" = xyes; then
+if test -n "$PARSE_AND_LIST_OPTIONS"; then
 fragment <<EOF
 
 static void
 gld${EMULATION_NAME}_list_options (FILE * file)
 {
 EOF
-
-if test x"$BNDPLT" = xyes; then
-fragment <<EOF
-  fprintf (file, _("\
-  -z bndplt                   Always generate BND prefix in PLT entries\n"));
-EOF
-fi
 
 if test -n "$PARSE_AND_LIST_OPTIONS" ; then
 fragment <<EOF
