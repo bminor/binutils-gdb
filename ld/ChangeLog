@@ -1,5 +1,13 @@
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.ac (elf_list_options): Set to TRUE for
+	--enable-targets=all.
+	(elf_shlib_list_options): Likewise.
+	(elf_plt_unwind_list_options): Likewise.
+	* configure: Regenerated.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* emulparams/elf32bmipn32-defs.sh: Skip empty EMULATION_NAME.
 
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
