@@ -1,3 +1,13 @@
+2015-04-09  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_insert_point): Call
+	insert_memory_breakpoint if TYPE is raw_bkpt_type_sw.
+	(linux_remove_point): Call remove_memory_breakpoint if type is
+	raw_bkpt_type_sw.
+	* linux-x86-low.c (x86_insert_point): Don't call
+	insert_memory_breakpoint.
+	(x86_remove_point): Don't call remove_memory_breakpoint.
+
 2015-04-01  Pedro Alves  <palves@redhat.com>
 	    Cleber Rosa  <crosa@redhat.com>
 
