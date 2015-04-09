@@ -1,3 +1,8 @@
+2015-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Report the setting of the string
+	insn using bits.
+
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (do_debug_sections): Add compress_zlib,

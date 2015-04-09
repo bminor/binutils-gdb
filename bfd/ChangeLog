@@ -1,3 +1,10 @@
+2015-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rx.c (describe_flags): Report the settings of the string
+	insn using bits.
+	(rx_elf_merge_private_bfd_data): Handle merging of the string insn
+	using bits.
+
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* compress.c (bfd_compress_section_contents): Work around a GCC

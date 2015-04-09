@@ -3086,6 +3086,9 @@ describe_flags (flagword flags)
   else
     strcat (buf, ", GCC ABI");
 
+  if (flags & E_FLAG_RX_SINSNS_SET)
+    strcat (buf, flags & E_FLAG_RX_SINSNS_YES ? ", uses String instructions" : ", bans String instructions");
+
   return buf;
 }
 
@@ -3112,8 +3115,22 @@ rx_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
     {
       flagword known_flags;
 
+      if (old_flags & E_FLAG_RX_SINSNS_SET)
+	{
+	  if ((new_flags & E_FLAG_RX_SINSNS_SET) == 0)
+	    {
+	      new_flags &= ~ E_FLAG_RX_SINSNS_MASK;
+	      new_flags |= (old_flags & E_FLAG_RX_SINSNS_MASK);
+	    }
+	}
+      else if (new_flags & E_FLAG_RX_SINSNS_SET)
+	{
+	  old_flags &= ~ E_FLAG_RX_SINSNS_MASK;
+	  old_flags |= (new_flags & E_FLAG_RX_SINSNS_MASK);
+	}
+
       known_flags = E_FLAG_RX_ABI | E_FLAG_RX_64BIT_DOUBLES
-	| E_FLAG_RX_DSP | E_FLAG_RX_PID;
+	| E_FLAG_RX_DSP | E_FLAG_RX_PID | E_FLAG_RX_SINSNS_MASK;
 
       if ((old_flags ^ new_flags) & known_flags)
 	{

@@ -3274,6 +3274,9 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", pid");
 	  if (e_flags & E_FLAG_RX_ABI)
 	    strcat (buf, ", RX ABI");
+	  if (e_flags & E_FLAG_RX_SINSNS_SET)
+	    strcat (buf, e_flags & E_FLAG_RX_SINSNS_YES
+		    ? ", uses String instructions" : ", bans String instructions");
 	  break;
 
 	case EM_S390:

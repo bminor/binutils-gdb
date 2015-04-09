@@ -1,3 +1,16 @@
+2015-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (enum options): Add OPTION_DISALLOW_STRING_INSNS.
+	(md_longopts): Add -mno-allow-string-insns.
+	(md_parse_option): Handle -mno-allow-string-insns.
+	(md_show_usage): Mention -mno-allow-string-insns.
+	(rx_note_string_insn_use): New function.  Produces an error
+	message if a string insn is used when it is not allowed.
+	* config/rx-parse.y (SCMPU): Call rx_note_string_insn_use.
+	(SMOVU, SMOVB, SMOVF, SUNTIL, SWHILE, RMPA): Likewise.
+	* config/rx-defs.h (rx_note_string_insn_use): Prototype.
+	* doc/c-rx.texi: Document -mno-allow-string-insns.
+
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* as.c (show_usage): Update --compress-debug-sections.

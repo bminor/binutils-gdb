@@ -112,6 +112,21 @@ This option tells the assembler the target CPU type.  Currently the
 cpu names.  Attempting to assemble an instruction not supported by the
 indicated cpu type will result in an error message being generated.
 
+@cindex @samp{-mno-allow-string-insns}
+@item -mno-allow-string-insns
+This option tells the assembler to mark the object file that it is
+building as one that does not use the string instructions
+@code{SMOVF}, @code{SCMPU}, @code {SMOVB}, @code{SMOVU}, @code{SUNTIL} 
+@code {SWHILE} or the @code {RMPA} instruction.  In addition the mark
+tells the linker to complain if an attempt is made to link the binary
+with another one that does use any of these instructions.
+
+Note - the inverse of this option, @code{-mallow-string-insns}, is
+not needed.  The assembler automatically detects the use of the
+the instructions in the source code and labels the resulting
+object file appropriately.  If no string instructions are detected
+then the object file is labelled as being one that can be linked with
+either string-using or string-banned object files.
 @end table
 
 @node RX-Modifiers
