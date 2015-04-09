@@ -2673,9 +2673,7 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
   /* Increment the size of DYNBSS to make room for the symbol.  */
   dynbss->size += h->size;
 
-  /* No error if extern_protected_data is true.  */
-  if (h->protected_def
-      && !get_elf_backend_data (dynbss->owner)->extern_protected_data)
+  if (h->protected_def)
     {
       info->callbacks->einfo
 	(_("%P: copy reloc against protected `%T' is invalid\n"),
@@ -2839,9 +2837,8 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
 
   bed = get_elf_backend_data (hash_table->dynobj);
 
-  /* If extern_protected_data is false, STV_PROTECTED non-function
-     symbols are local.  */
-  if (!bed->extern_protected_data && !bed->is_function_type (h->type))
+  /* STV_PROTECTED non-function symbols are local.  */
+  if (!bed->is_function_type (h->type))
     return TRUE;
 
   /* Function pointer equality tests may require that STV_PROTECTED

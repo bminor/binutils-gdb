@@ -5292,7 +5292,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_alignment	4
-#define elf_backend_extern_protected_data 1
 
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel
