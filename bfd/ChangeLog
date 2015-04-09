@@ -1,5 +1,11 @@
 2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* compress.c (bfd_compress_section_contents): Update comments.
+	(bfd_init_section_decompress_status): Likewise.
+	(bfd_init_section_compress_status): Likewise.
+
+2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-target.h (TARGET_BIG_SYM): Add BFD_COMPRESS_GABI to
 	object_flags.
 	(TARGET_LITTLE_SYM): Likewise.

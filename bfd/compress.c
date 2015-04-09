@@ -64,8 +64,7 @@ decompress_contents (bfd_byte *compressed_buffer,
 /* Compress data of the size specified in @var{uncompressed_size}
    and pointed to by @var{uncompressed_buffer} using zlib and store
    as the contents field.  This function assumes the contents
-   field was allocated using bfd_malloc() or equivalent.  If zlib
-   is not installed on this machine, the input is unmodified.
+   field was allocated using bfd_malloc() or equivalent.
 
    Return the uncompressed size if the full section contents is
    compressed successfully.  Otherwise return 0.  */
@@ -449,8 +448,7 @@ DESCRIPTION
 	DECOMPRESS_SECTION_SIZED.
 
 	Return @code{FALSE} if the section is not a valid compressed
-	section or zlib is not installed on this machine.  Otherwise,
-	return @code{TRUE}.
+	section.  Otherwise, return @code{TRUE}.
 */
 
 bfd_boolean
@@ -511,8 +509,7 @@ DESCRIPTION
 	compressed size and set compress_status to COMPRESS_SECTION_DONE.
 
 	Return @code{FALSE} if the section is not a valid compressed
-	section or zlib is not installed on this machine.  Otherwise,
-	return @code{TRUE}.
+	section.  Otherwise, return @code{TRUE}.
 */
 
 bfd_boolean
