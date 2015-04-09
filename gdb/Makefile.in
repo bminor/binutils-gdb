@@ -888,7 +888,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
-	common/btrace-common.c common/common-remote-fileio.c \
+	common/btrace-common.c common/fileio.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -979,7 +979,7 @@ i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
-common/common-remote-fileio.h nat/x86-linux.h nat/x86-linux-dregs.h
+common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1079,7 +1079,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
-	common-exceptions.o btrace-common.o common-remote-fileio.o \
+	common-exceptions.o btrace-common.o fileio.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -2257,8 +2257,8 @@ btrace-common.o: ${srcdir}/common/btrace-common.c
 	$(COMPILE) $(srcdir)/common/btrace-common.c
 	$(POSTCOMPILE)
 
-common-remote-fileio.o: ${srcdir}/common/common-remote-fileio.c
-	$(COMPILE) $(srcdir)/common/common-remote-fileio.c
+fileio.o: ${srcdir}/common/fileio.c
+	$(COMPILE) $(srcdir)/common/fileio.c
 	$(POSTCOMPILE)
 #
 # gdb/target/ dependencies

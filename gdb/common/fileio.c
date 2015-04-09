@@ -1,4 +1,4 @@
-/* Remote File-I/O communications
+/* File-I/O functions for GDB, the GNU debugger.
 
    Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
@@ -18,13 +18,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
-#include "common-remote-fileio.h"
+#include "fileio.h"
 #include <sys/stat.h>
 
-/* See common-remote-fileio.h.  */
+/* See fileio.h.  */
 
 int
-remote_fileio_to_fio_error (int error)
+host_to_fileio_error (int error)
 {
   switch (error)
     {
@@ -77,7 +77,7 @@ remote_fileio_to_fio_error (int error)
 /* Convert a host-format mode_t into a bitmask of File-I/O flags.  */
 
 static LONGEST
-remote_fileio_mode_to_target (mode_t mode)
+fileio_mode_pack (mode_t mode)
 {
   mode_t tmode = 0;
 
@@ -121,52 +121,51 @@ remote_fileio_mode_to_target (mode_t mode)
 /* Pack a host-format mode_t into an fio_mode_t.  */
 
 static void
-remote_fileio_to_fio_mode (mode_t num, fio_mode_t fnum)
+host_to_fileio_mode (mode_t num, fio_mode_t fnum)
 {
-  remote_fileio_to_be (remote_fileio_mode_to_target (num),
-		       (char *) fnum, 4);
+  host_to_bigendian (fileio_mode_pack (num), (char *) fnum, 4);
 }
 
 /* Pack a host-format integer into an fio_ulong_t.  */
 
 static void
-remote_fileio_to_fio_ulong (LONGEST num, fio_ulong_t fnum)
+host_to_fileio_ulong (LONGEST num, fio_ulong_t fnum)
 {
-  remote_fileio_to_be (num, (char *) fnum, 8);
+  host_to_bigendian (num, (char *) fnum, 8);
 }
 
-/* See common-remote-fileio.h.  */
+/* See fileio.h.  */
 
 void
-remote_fileio_to_fio_stat (struct stat *st, struct fio_stat *fst)
+host_to_fileio_stat (struct stat *st, struct fio_stat *fst)
 {
   LONGEST blksize;
 
-  remote_fileio_to_fio_uint ((long) st->st_dev, fst->fst_dev);
-  remote_fileio_to_fio_uint ((long) st->st_ino, fst->fst_ino);
-  remote_fileio_to_fio_mode (st->st_mode, fst->fst_mode);
-  remote_fileio_to_fio_uint ((long) st->st_nlink, fst->fst_nlink);
-  remote_fileio_to_fio_uint ((long) st->st_uid, fst->fst_uid);
-  remote_fileio_to_fio_uint ((long) st->st_gid, fst->fst_gid);
-  remote_fileio_to_fio_uint ((long) st->st_rdev, fst->fst_rdev);
-  remote_fileio_to_fio_ulong ((LONGEST) st->st_size, fst->fst_size);
+  host_to_fileio_uint ((long) st->st_dev, fst->fst_dev);
+  host_to_fileio_uint ((long) st->st_ino, fst->fst_ino);
+  host_to_fileio_mode (st->st_mode, fst->fst_mode);
+  host_to_fileio_uint ((long) st->st_nlink, fst->fst_nlink);
+  host_to_fileio_uint ((long) st->st_uid, fst->fst_uid);
+  host_to_fileio_uint ((long) st->st_gid, fst->fst_gid);
+  host_to_fileio_uint ((long) st->st_rdev, fst->fst_rdev);
+  host_to_fileio_ulong ((LONGEST) st->st_size, fst->fst_size);
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
   blksize = st->st_blksize;
 #else
   blksize = 512;
 #endif
-  remote_fileio_to_fio_ulong (blksize, fst->fst_blksize);
+  host_to_fileio_ulong (blksize, fst->fst_blksize);
 #if HAVE_STRUCT_STAT_ST_BLOCKS
-  remote_fileio_to_fio_ulong ((LONGEST) st->st_blocks, fst->fst_blocks);
+  host_to_fileio_ulong ((LONGEST) st->st_blocks, fst->fst_blocks);
 #else
   /* FIXME: This is correct for DJGPP, but other systems that don't
      have st_blocks, if any, might prefer 512 instead of st_blksize.
      (eliz, 30-12-2003)  */
-  remote_fileio_to_fio_ulong (((LONGEST) st->st_size + blksize - 1)
-			      / blksize,
-			      fst->fst_blocks);
+  host_to_fileio_ulong (((LONGEST) st->st_size + blksize - 1)
+			/ blksize,
+			fst->fst_blocks);
 #endif
-  remote_fileio_to_fio_time (st->st_atime, fst->fst_atime);
-  remote_fileio_to_fio_time (st->st_mtime, fst->fst_mtime);
-  remote_fileio_to_fio_time (st->st_ctime, fst->fst_ctime);
+  host_to_fileio_time (st->st_atime, fst->fst_atime);
+  host_to_fileio_time (st->st_mtime, fst->fst_mtime);
+  host_to_fileio_time (st->st_ctime, fst->fst_ctime);
 }

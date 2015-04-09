@@ -30,7 +30,7 @@
 #include "inferior.h"
 #include <sys/stat.h>
 #include "inf-child.h"
-#include "common-remote-fileio.h"
+#include "fileio.h"
 #include "agent.h"
 #include "gdb_wait.h"
 #include "filestuff.h"
@@ -260,7 +260,7 @@ inf_child_fileio_open (struct target_ops *self,
      the standard values.  */
   fd = gdb_open_cloexec (filename, nat_flags, mode);
   if (fd == -1)
-    *target_errno = remote_fileio_to_fio_error (errno);
+    *target_errno = host_to_fileio_error (errno);
 
   return fd;
 }
@@ -289,7 +289,7 @@ inf_child_fileio_pwrite (struct target_ops *self,
     }
 
   if (ret == -1)
-    *target_errno = remote_fileio_to_fio_error (errno);
+    *target_errno = host_to_fileio_error (errno);
 
   return ret;
 }
@@ -318,7 +318,7 @@ inf_child_fileio_pread (struct target_ops *self,
     }
 
   if (ret == -1)
-    *target_errno = remote_fileio_to_fio_error (errno);
+    *target_errno = host_to_fileio_error (errno);
 
   return ret;
 }
@@ -332,7 +332,7 @@ inf_child_fileio_fstat (struct target_ops *self, int fd,
 
   ret = fstat (fd, sb);
   if (ret == -1)
-    *target_errno = remote_fileio_to_fio_error (errno);
+    *target_errno = host_to_fileio_error (errno);
 
   return ret;
 }
@@ -346,7 +346,7 @@ inf_child_fileio_close (struct target_ops *self, int fd, int *target_errno)
 
   ret = close (fd);
   if (ret == -1)
-    *target_errno = remote_fileio_to_fio_error (errno);
+    *target_errno = host_to_fileio_error (errno);
 
   return ret;
 }
@@ -361,7 +361,7 @@ inf_child_fileio_unlink (struct target_ops *self,
 
   ret = unlink (filename);
   if (ret == -1)
-    *target_errno = remote_fileio_to_fio_error (errno);
+    *target_errno = host_to_fileio_error (errno);
 
   return ret;
 }
@@ -383,7 +383,7 @@ inf_child_fileio_readlink (struct target_ops *self,
   len = readlink (filename, buf, sizeof buf);
   if (len < 0)
     {
-      *target_errno = remote_fileio_to_fio_error (errno);
+      *target_errno = host_to_fileio_error (errno);
       return NULL;
     }
 

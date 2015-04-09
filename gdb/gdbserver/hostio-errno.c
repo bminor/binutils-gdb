@@ -22,12 +22,12 @@
    on top of errno.  */
 
 #include "server.h"
-#include "common-remote-fileio.h"
+#include "fileio.h"
 
 void
 hostio_last_error_from_errno (char *buf)
 {
   int error = errno;
-  int fileio_error = remote_fileio_to_fio_error (error);
+  int fileio_error = host_to_fileio_error (error);
   sprintf (buf, "F-1,%x", fileio_error);
 }

@@ -290,13 +290,13 @@ remote_fileio_extract_ptr_w_len (char **buf, CORE_ADDR *ptrval, int *length)
 static void
 remote_fileio_to_fio_long (LONGEST num, fio_long_t fnum)
 {
-  remote_fileio_to_be (num, (char *) fnum, 8);
+  host_to_bigendian (num, (char *) fnum, 8);
 }
 
 static void
 remote_fileio_to_fio_timeval (struct timeval *tv, struct fio_timeval *ftv)
 {
-  remote_fileio_to_fio_time (tv->tv_sec, ftv->ftv_sec);
+  host_to_fileio_time (tv->tv_sec, ftv->ftv_sec);
   remote_fileio_to_fio_long (tv->tv_usec, ftv->ftv_usec);
 }
 
@@ -408,7 +408,7 @@ static void
 remote_fileio_return_errno (int retcode)
 {
   remote_fileio_reply (retcode, retcode < 0
-		       ? remote_fileio_to_fio_error (errno) : 0);
+		       ? host_to_fileio_error (errno) : 0);
 }
 
 static void
@@ -953,8 +953,8 @@ remote_fileio_func_stat (char *buf)
     }
   if (statptr)
     {
-      remote_fileio_to_fio_stat (&st, &fst);
-      remote_fileio_to_fio_uint (0, fst.fst_dev);
+      host_to_fileio_stat (&st, &fst);
+      host_to_fileio_uint (0, fst.fst_dev);
 
       errno = target_write_memory (statptr, (gdb_byte *) &fst, sizeof fst);
       if (errno != 0)
@@ -1000,7 +1000,7 @@ remote_fileio_func_fstat (char *buf)
   remote_fio_no_longjmp = 1;
   if (fd == FIO_FD_CONSOLE_IN || fd == FIO_FD_CONSOLE_OUT)
     {
-      remote_fileio_to_fio_uint (1, fst.fst_dev);
+      host_to_fileio_uint (1, fst.fst_dev);
       memset (&st, 0, sizeof (st));
       st.st_mode = S_IFCHR | (fd == FIO_FD_CONSOLE_IN ? S_IRUSR : S_IWUSR);
       st.st_nlink = 1;
@@ -1032,7 +1032,7 @@ remote_fileio_func_fstat (char *buf)
     }
   if (ptrval)
     {
-      remote_fileio_to_fio_stat (&st, &fst);
+      host_to_fileio_stat (&st, &fst);
 
       errno = target_write_memory (ptrval, (gdb_byte *) &fst, sizeof fst);
       if (errno != 0)

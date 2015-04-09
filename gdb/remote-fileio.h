@@ -22,7 +22,7 @@
 #ifndef REMOTE_FILEIO_H
 #define REMOTE_FILEIO_H
 
-#include "common-remote-fileio.h"
+#include "fileio.h"
 
 struct cmd_list_element;
 

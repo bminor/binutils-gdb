@@ -1,4 +1,4 @@
-/* Remote File-I/O communications
+/* File-I/O functions for GDB, the GNU debugger.
 
    Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
@@ -17,23 +17,22 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_REMOTE_FILEIO_H
-#define COMMON_REMOTE_FILEIO_H
+#ifndef FILEIO_H
+#define FILEIO_H
 
 #include "gdb/fileio.h"
 #include <sys/stat.h>
 
-/* Convert a errno error number to a File-I/O error number for
-   transmission over the remote protocol.  */
+/* Convert a host-format errno value to a File-I/O error number.  */
 
-extern int remote_fileio_to_fio_error (int error);
+extern int host_to_fileio_error (int error);
 
-/* Pack a host-format integer into a byte buffer in big-endian format
-   ready for transmission over the remote protocol.  BYTES specifies
-   the size of the integer to pack in bytes.  */
+/* Pack a host-format integer into a byte buffer in big-endian
+   format.  BYTES specifies the size of the integer to pack in
+   bytes.  */
 
 static inline void
-remote_fileio_to_be (LONGEST num, char *buf, int bytes)
+host_to_bigendian (LONGEST num, char *buf, int bytes)
 {
   int i;
 
@@ -44,22 +43,21 @@ remote_fileio_to_be (LONGEST num, char *buf, int bytes)
 /* Pack a host-format integer into an fio_uint_t.  */
 
 static inline void
-remote_fileio_to_fio_uint (long num, fio_uint_t fnum)
+host_to_fileio_uint (long num, fio_uint_t fnum)
 {
-  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
+  host_to_bigendian ((LONGEST) num, (char *) fnum, 4);
 }
 
 /* Pack a host-format time_t into an fio_time_t.  */
 
 static inline void
-remote_fileio_to_fio_time (time_t num, fio_time_t fnum)
+host_to_fileio_time (time_t num, fio_time_t fnum)
 {
-  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
+  host_to_bigendian ((LONGEST) num, (char *) fnum, 4);
 }
 
 /* Pack a host-format struct stat into a struct fio_stat.  */
 
-extern void remote_fileio_to_fio_stat (struct stat *st,
-				       struct fio_stat *fst);
+extern void host_to_fileio_stat (struct stat *st, struct fio_stat *fst);
 
-#endif /* COMMON_REMOTE_FILEIO_H */
+#endif /* FILEIO_H */
