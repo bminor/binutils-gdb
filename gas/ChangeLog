@@ -1,3 +1,7 @@
+2015-04-09  Hans-Peter Nilsson  <hp@axis.com>
+
+	* doc/c-rx.texi: Fix markup typos in last change.
+
 2015-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rx.c (enum options): Add OPTION_DISALLOW_STRING_INSNS.

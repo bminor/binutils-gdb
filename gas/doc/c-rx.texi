@@ -116,8 +116,8 @@ indicated cpu type will result in an error message being generated.
 @item -mno-allow-string-insns
 This option tells the assembler to mark the object file that it is
 building as one that does not use the string instructions
-@code{SMOVF}, @code{SCMPU}, @code {SMOVB}, @code{SMOVU}, @code{SUNTIL} 
-@code {SWHILE} or the @code {RMPA} instruction.  In addition the mark
+@code{SMOVF}, @code{SCMPU}, @code{SMOVB}, @code{SMOVU}, @code{SUNTIL}
+@code{SWHILE} or the @code{RMPA} instruction.  In addition the mark
 tells the linker to complain if an attempt is made to link the binary
 with another one that does use any of these instructions.
 
