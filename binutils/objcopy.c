@@ -202,12 +202,12 @@ static bfd_boolean convert_debugging = FALSE;
 /* Whether to compress/decompress DWARF debug sections.  */
 static enum
 {
-  nothing,
-  compress,
-  compress_zlib,
-  compress_gnu_zlib,
-  compress_gabi_zlib,
-  decompress
+  nothing = 0,
+  compress = 1 << 0,
+  compress_zlib = compress | 1 << 1,
+  compress_gnu_zlib = compress | 1 << 2,
+  compress_gabi_zlib = compress | 1 << 3,
+  decompress = 1 << 4
 } do_debug_sections = nothing;
 
 /* Whether to change the leading character in symbol names.  */
@@ -1664,6 +1664,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       return FALSE;
     }
 
+  if ((do_debug_sections & compress) != 0
+      && do_debug_sections != compress
+      && ibfd->xvec->flavour != bfd_target_elf_flavour)
+    {
+      non_fatal (_("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"),
+		 bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
   if (verbose)
     printf (_("copy from `%s' [%s] to `%s' [%s]\n"),
 	    bfd_get_archive_filename (ibfd), bfd_get_target (ibfd),
@@ -2596,14 +2605,10 @@ copy_file (const char *input_filename, const char *output_filename,
     case compress_gnu_zlib:
     case compress_gabi_zlib:
       ibfd->flags |= BFD_COMPRESS;
-      if (do_debug_sections != compress)
-	{
-	  if (ibfd->xvec->flavour != bfd_target_elf_flavour)
-	    fatal (_("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported for `%s'"),
-		   bfd_get_target (ibfd));
-	  if (do_debug_sections == compress_gabi_zlib)
-	    ibfd->flags |= BFD_COMPRESS_GABI;
-	}
+      /* Don't check if input is ELF here since this information is
+	 only available after bfd_check_format_matches is called.  */
+      if (do_debug_sections == compress_gabi_zlib)
+	ibfd->flags |= BFD_COMPRESS_GABI;
       break;
     case decompress:
       ibfd->flags |= BFD_DECOMPRESS;

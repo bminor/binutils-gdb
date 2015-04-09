@@ -1,3 +1,10 @@
+2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (do_debug_sections): Use bit patterns.
+	(copy_object): Return FALSE for compress_zlib, compress_gnu_zlib
+	and compress_gabi_zlib on non-ELF input.
+	(copy_file): Don't check non-ELF input here.
+
 2015-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Report the setting of the string
