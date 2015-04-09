@@ -1,3 +1,17 @@
+2015-04-09  Cary Coutant  <ccoutant@google.com>
+
+	* debug.h (DEBUG_LOCATION): New.
+	(DEBUG_ALL): Include DEBUG_LOCATION.
+	(debug_string_to_enum): Add DEBUG_LOCATION.
+	* dwarf_reader.cc (Sized_dwarf_line_info::read_lines): Fix debug
+	output to print correct context.
+	(Sized_dwarf_line_info::do_addr2line): Add debug output. Return
+	up to 4 more locations at the beginning of the function.
+	* symtab.cc (Symbol_table::detect_odr_violations): Get canonical
+	result before sorting list of line numbers.
+	* testsuite/debug_msg.sh: Allow range of line numbers for
+	canonical results on optimized code.
+
 2015-04-07  HC Yen <hc.yen@mediatek.com>
 
 	Add AArch32 support for gold linker.
