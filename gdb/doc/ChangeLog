@@ -1,3 +1,7 @@
+2015-04-09  Andy Wingo  <wingo@igalia.com>
+
+	* guile.texi (Frames In Guile): Describe frame-read-register.
+
 2015-04-02  Gary Benson <gbenson@redhat.com>
 
 	* gdb.texinfo (set sysroot): Document "target:".

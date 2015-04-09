@@ -2436,6 +2436,11 @@ Return the frame's @code{<gdb:sal>} (symtab and line) object.
 @xref{Symbol Tables In Guile}.
 @end deffn
 
+@deffn {Scheme Procedure} frame-read-register frame register
+Return the value of @var{register} in @var{frame}.  @var{register}
+should be a string, like @samp{pc}.
+@end deffn
+
 @deffn {Scheme Procedure} frame-read-var frame variable @r{[}#:block block@r{]}
 Return the value of @var{variable} in @var{frame}.  If the optional
 argument @var{block} is provided, search for the variable from that

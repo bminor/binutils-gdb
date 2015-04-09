@@ -28,6 +28,7 @@
 #include "symfile.h"
 #include "symtab.h"
 #include "stack.h"
+#include "user-regs.h"
 #include "value.h"
 #include "guile-internal.h"
 
@@ -782,6 +783,60 @@ gdbscm_frame_sal (SCM self)
   return stscm_scm_from_sal (sal);
 }
 
+/* (frame-read-register <gdb:frame> string) -> <gdb:value>
+   The register argument must be a string.  */
+
+static SCM
+gdbscm_frame_read_register (SCM self, SCM register_scm)
+{
+  char *register_str;
+  struct value *value = NULL;
+  struct frame_info *frame = NULL;
+  struct cleanup *cleanup;
+  frame_smob *f_smob;
+
+  f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
+  gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, NULL, "s",
+			      register_scm, &register_str);
+  cleanup = make_cleanup (xfree, register_str);
+
+  TRY
+    {
+      int regnum;
+
+      frame = frscm_frame_smob_to_frame (f_smob);
+      if (frame)
+	{
+	  regnum = user_reg_map_name_to_regnum (get_frame_arch (frame),
+						register_str,
+						strlen (register_str));
+	  if (regnum >= 0)
+	    value = value_of_register (regnum, frame);
+	}
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
+
+  do_cleanups (cleanup);
+
+  if (frame == NULL)
+    {
+      gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
+				   _("<gdb:frame>"));
+    }
+
+  if (value == NULL)
+    {
+      gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG2, register_scm,
+				 _("unknown register"));
+    }
+
+  return vlscm_scm_from_value (value);
+}
+
 /* (frame-read-var <gdb:frame> <gdb:symbol>) -> <gdb:value>
    (frame-read-var <gdb:frame> string [#:block <gdb:block>]) -> <gdb:value>
    If the optional block argument is provided start the search from that block,
@@ -1075,6 +1130,12 @@ Return the value of the symbol in the frame.\n\
 \n\
   Arguments: <gdb:frame> <gdb:symbol>\n\
          Or: <gdb:frame> string [#:block <gdb:block>]" },
+
+  { "frame-read-register", 2, 0, 0, gdbscm_frame_read_register,
+    "\
+Return the value of the register in the frame.\n\
+\n\
+  Arguments: <gdb:frame> string" },
 
   { "frame-select", 1, 0, 0, gdbscm_frame_select,
     "\
