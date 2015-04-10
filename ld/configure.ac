@@ -317,7 +317,12 @@ do
 
     for i in $targ_emul $targ_extra_emuls $targ_extra_libpath; do
 	case " $all_emuls " in
-	*" e${i}.o "*)
+	*" e${i}.o "*) ;;
+	*)
+	  all_emuls="$all_emuls e${i}.o"
+	  eval result=\$tdir_$i
+	  test -z "$result" && result=$targ_alias
+	  echo tdir_$i=$result >> tdirs
 	  case "${i}" in
 	  *elf*)
 	    elf_list_options=TRUE
@@ -330,12 +335,6 @@ do
 	    fi
 	    ;;
 	  esac
-	  ;;
-	*)
-	  all_emuls="$all_emuls e${i}.o"
-	  eval result=\$tdir_$i
-	  test -z "$result" && result=$targ_alias
-	  echo tdir_$i=$result >> tdirs
 	  ;;
 	esac
     done

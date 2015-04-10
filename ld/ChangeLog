@@ -6,6 +6,11 @@
 
 2015-04-10  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac: Set elf_list_options etc. in proper case.
+	* configure: Regenerate.
+
+2015-04-10  Alan Modra  <amodra@gmail.com>
+
 	PR ld/18223
 	* ldlang.c (lang_process): Add _init and _fini to gc_sym_list.
 
