@@ -1,5 +1,15 @@
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/sigstep.exp (breakpoint_to_handler)
+	(breakpoint_to_handler_entry): New parameter 'displaced'.  Use it.
+	Test "backtrace" in handler.
+	(breakpoint_over_handler): New parameter 'displaced'.  Use it.
+	(top level): Add new "displaced" test axis to
+	breakpoint_to_handler, breakpoint_to_handler_entry and
+	breakpoint_over_handler.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18216
 	* gdb.threads/multiple-step-overs.exp: Remove expected eof.
 

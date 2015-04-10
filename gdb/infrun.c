@@ -1465,6 +1465,20 @@ get_displaced_stepping_state (int pid)
   return NULL;
 }
 
+/* Return true if process PID has a thread doing a displaced step.  */
+
+static int
+displaced_step_in_progress (int pid)
+{
+  struct displaced_step_inferior_state *displaced;
+
+  displaced = get_displaced_stepping_state (pid);
+  if (displaced != NULL && !ptid_equal (displaced->step_ptid, null_ptid))
+    return 1;
+
+  return 0;
+}
+
 /* Add a new displaced stepping state for process PID to the displaced
    stepping state list, or return a pointer to an already existing
    entry, if it already exists.  Never returns NULL.  */
@@ -2047,11 +2061,27 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
      happens to apply to another thread.  */
   tp->suspend.stop_signal = GDB_SIGNAL_0;
 
-  /* Advise target which signals may be handled silently.  If we have
-     removed breakpoints because we are stepping over one (in any
-     thread), we need to receive all signals to avoid accidentally
-     skipping a breakpoint during execution of a signal handler.  */
-  if (step_over_info_valid_p ())
+  /* Advise target which signals may be handled silently.
+
+     If we have removed breakpoints because we are stepping over one
+     in-line (in any thread), we need to receive all signals to avoid
+     accidentally skipping a breakpoint during execution of a signal
+     handler.
+
+     Likewise if we're displaced stepping, otherwise a trap for a
+     breakpoint in a signal handler might be confused with the
+     displaced step finishing.  We don't make the displaced_step_fixup
+     step distinguish the cases instead, because:
+
+     - a backtrace while stopped in the signal handler would show the
+       scratch pad as frame older than the signal handler, instead of
+       the real mainline code.
+
+     - when the thread is later resumed, the signal handler would
+       return to the scratch pad area, which would no longer be
+       valid.  */
+  if (step_over_info_valid_p ()
+      || displaced_step_in_progress (ptid_get_pid (tp->ptid)))
     target_pass_signals (0, NULL);
   else
     target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);

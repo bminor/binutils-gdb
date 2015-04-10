@@ -1,5 +1,11 @@
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (displaced_step_in_progress): New function.
+	(do_target_resume): Advise target to report all signals if
+	displaced stepping.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18216
 	* infrun.c (process_event_stop_test): Don't assume a step-resume
 	is set if tp->stepped_breakpoint is true.
