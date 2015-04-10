@@ -1,5 +1,14 @@
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/step-over-trips-on-watchpoint.c (child_function):
+	Remove comment.
+	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): Find
+	both the address of the instruction that triggers the watchpoint
+	and the address of the instruction immediately after, and use
+	those addresses for the test.  Fix comment.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/sigstep.exp (breakpoint_to_handler)
 	(breakpoint_to_handler_entry): New parameter 'displaced'.  Use it.
 	Test "backtrace" in handler.
