@@ -1,3 +1,7 @@
+2015-04-13  Stan Shebs  <stanshebs@google.com>
+
+	* MAINTAINERS: Update my email address.
+
 2015-04-13  John Baldwin  <jhb@FreeBSD.org>
 
 	* amd64-tdep.c (amd64_target_description): New function.
