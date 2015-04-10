@@ -150,6 +150,33 @@ proc valid_addr_p {cmd offset width} {
 		return 0
 	    }
 	}
+    } elseif { [istarget "arm*-*-linux*"] } {
+	if { $cmd == "hbreak" } {
+	    # Breakpoints must be of length 2 (thumb) or 4 (ARM) bytes.
+	    if { $width != 2 && $width != 4 } {
+		return 0
+	    }
+	} else {
+	    # Watchpoints can be of length 1, 2, 4 or 8 bytes.
+	    if { [expr $width % 2] != 0 } {
+		return 0
+	    }
+	}
+
+	if { [expr ($offset) % 8] == 0 && $width == 8 } {
+	    # If WIDTH is 8 byte, the address should be 8-byte aligned.
+	    return 1
+	} elseif { [expr ($offset) % 4] == 0 } {
+	    return 1
+	} elseif { [expr ($offset) % 4] == 2 && $width == 2 } {
+	    # Halfword watchpoints and breakpoints.
+	    return 1
+	} elseif { [expr ($offset) % 4] == 1 && $width == 1 && $cmd != "hbreak" } {
+	    # Single byte watchpoints.
+	    return 1
+	} else {
+	    return 0
+	}
     }
 
     return 1

@@ -1,3 +1,9 @@
+2015-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/watchpoint-reuse-slot.exp (valid_addr_p): Return
+	false for some offset and width combinations which aren't
+	supported by linux kernel.
+
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/step-over-lands-on-breakpoint.exp (do_test): New
