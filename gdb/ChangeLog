@@ -1,3 +1,10 @@
+2015-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (install_alu_reg): Update comment.
+	(thumb_copy_alu_reg): Remove local variable rn.  Update
+	debugging message.  Use r2 instead of r1 in the modified
+	instruction.
+
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13858

@@ -6407,7 +6407,7 @@ install_alu_reg (struct gdbarch *gdbarch, struct regcache *regs,
 
      Preparation: tmp1, tmp2, tmp3 <- r0, r1, r2;
 		  r0, r1, r2 <- rd, rn, rm
-     Insn: <op><cond> r0, r1, r2 [, <shift>]
+     Insn: <op><cond> r0, [r1,] r2 [, <shift>]
      Cleanup: rd <- r0; r0, r1, r2 <- tmp1, tmp2, tmp3
   */
 
@@ -6454,22 +6454,21 @@ thumb_copy_alu_reg (struct gdbarch *gdbarch, uint16_t insn,
 		    struct regcache *regs,
 		    struct displaced_step_closure *dsc)
 {
-  unsigned rn, rm, rd;
+  unsigned rm, rd;
 
-  rd = bits (insn, 3, 6);
-  rn = (bit (insn, 7) << 3) | bits (insn, 0, 2);
-  rm = 2;
+  rm = bits (insn, 3, 6);
+  rd = (bit (insn, 7) << 3) | bits (insn, 0, 2);
 
-  if (rd != ARM_PC_REGNUM && rn != ARM_PC_REGNUM)
+  if (rd != ARM_PC_REGNUM && rm != ARM_PC_REGNUM)
     return thumb_copy_unmodified_16bit (gdbarch, insn, "ALU reg", dsc);
 
   if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: copying reg %s insn %.4x\n",
-			"ALU", (unsigned short) insn);
+    fprintf_unfiltered (gdb_stdlog, "displaced: copying ALU reg insn %.4x\n",
+			(unsigned short) insn);
 
-  dsc->modinsn[0] = ((insn & 0xff00) | 0x08);
+  dsc->modinsn[0] = ((insn & 0xff00) | 0x10);
 
-  install_alu_reg (gdbarch, regs, dsc, rd, rn, rm);
+  install_alu_reg (gdbarch, regs, dsc, rd, rd, rm);
 
   return 0;
 }

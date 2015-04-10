@@ -1,3 +1,10 @@
+2015-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-disp-step.S (main): Call test_add_rn_pc.
+	(test_add_rn_pc): New function.
+	* gdb.arch/arm-disp-step.exp (test_add_rn_pc): New proc.
+	(top level): Invoke test_add_rn_pc.
+
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13858
