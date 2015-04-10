@@ -1,3 +1,25 @@
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13858
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Install
+	linux_displaced_step_location as gdbarch_displaced_step_location
+	hook.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* linux-tdep.c (linux_displaced_step_location): New function,
+	based on ppc_linux_displaced_step_location.
+	* linux-tdep.h (linux_displaced_step_location): New declaration.
+	* ppc-linux-tdep.c (ppc_linux_entry_point_addr): Delete.
+	(ppc_linux_inferior_created, ppc_linux_displaced_step_location):
+	Delete.
+	(ppc_linux_init_abi): Install linux_displaced_step_location as
+	gdbarch_displaced_step_location hook, even without Cell/B.E..
+	(_initialize_ppc_linux_tdep): Don't install
+	ppc_linux_inferior_created as inferior_created observer.
+	* s390-linux-tdep.c (s390_gdbarch_init): Install
+	linux_displaced_step_location as gdbarch_displaced_step_location
+	hook.
+
 2015-04-09  Gary Benson <gbenson@redhat.com>
 
 	* common/common-remote-fileio.h: Rename to...

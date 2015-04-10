@@ -37,6 +37,11 @@ extern enum gdb_signal linux_gdb_signal_from_target (struct gdbarch *gdbarch,
 extern int linux_gdb_signal_to_target (struct gdbarch *gdbarch,
 				       enum gdb_signal signal);
 
+/* Default GNU/Linux implementation of `displaced_step_location', as
+   defined in gdbarch.h.  Determines the entry point from AT_ENTRY in
+   the target auxiliary vector.  */
+extern CORE_ADDR linux_displaced_step_location (struct gdbarch *gdbarch);
+
 extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
 extern int linux_is_uclinux (void);
