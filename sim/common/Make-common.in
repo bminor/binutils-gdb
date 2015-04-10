@@ -304,8 +304,9 @@ stamp-tvals: gentmap
 	$(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
 	touch stamp-tvals
 
-version.c: Makefile $(srccom)/create-version.sh ../../bfd/version.h ../../gdb/version.in
-	$(SHELL) $(srccom)/create-version.sh $(srcsim) $(host_alias) $(target_alias) version.c
+version.c: Makefile $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcroot)/gdb/common/create-version.sh
+	$(SHELL) $(srcroot)/gdb/common/create-version.sh $(srcroot)/gdb \
+	    $(host_alias) $(target_alias) version.c
 
 #
 # Rules for building sim-* components.  Triggered by listing the corresponding
