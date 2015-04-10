@@ -1,3 +1,9 @@
+2015-04-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18198
+	* ld.texinfo (--be8): Add a note about the interaction of this
+	option with the assembler's -EB option.
+
 2015-04-10  Alan Modra  <amodra@gmail.com>
 
 	PR ld/18223

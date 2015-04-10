@@ -1,3 +1,9 @@
+2015-04-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18198
+	* doc/c-arm.texi (ARM Options): Add a note about the interaction of
+	the -EB option with the linker's --be8 option.
+
 2015-04-09  Hans-Peter Nilsson  <hp@axis.com>
 
 	* doc/c-rx.texi: Fix markup typos in last change.

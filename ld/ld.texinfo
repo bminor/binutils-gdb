@@ -6424,8 +6424,10 @@ import tables. By default this option is turned off.
 @cindex BE8
 @kindex --be8
 The @samp{--be8} switch instructs @command{ld} to generate BE8 format
-executables.  This option is only valid when linking big-endian objects.
-The resulting image will contain big-endian data and little-endian code.
+executables.  This option is only valid when linking big-endian
+objects - ie ones which have been assembled with the @option{-EB}
+option.  The resulting image will contain big-endian data and
+little-endian code.
 
 @cindex TARGET1
 @kindex --target1-rel
