@@ -131,7 +131,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
       decompress = FALSE;
       buffer_size = compressed_size + compression_header_size;
     }
-  buffer = (bfd_byte *) bfd_malloc (buffer_size);
+  buffer = (bfd_byte *) bfd_alloc (abfd, buffer_size);
   if (buffer == NULL)
     return 0;
 
@@ -144,7 +144,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 				    buffer, uncompressed_size))
 	    {
 	      bfd_set_error (bfd_error_bad_value);
-	      free (buffer);
+	      bfd_release (abfd, buffer);
 	      return 0;
 	    }
 	  free (uncompressed_buffer);
@@ -169,7 +169,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 		    (const Bytef*) uncompressed_buffer,
 		    uncompressed_size) != Z_OK)
 	{
-	  free (buffer);
+	  bfd_release (abfd, buffer);
 	  bfd_set_error (bfd_error_bad_value);
 	  return 0;
 	}
@@ -189,6 +189,9 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 	}
       else
 	{
+	  /* NOTE: There is a small memory leak here since
+	     uncompressed_buffer is malloced and won't be freed.  */
+	  bfd_release (abfd, buffer);
 	  sec->contents = uncompressed_buffer;
 	  sec->compress_status = COMPRESS_SECTION_NONE;
 	  return uncompressed_size;
