@@ -23,7 +23,6 @@ NL_TARGET = -DNL_TARGET_mcore
 SIM_OBJS = \
 	interp.o \
 	$(SIM_NEW_COMMON_OBJS) \
-	sim-hload.o \
 	sim-resume.o
 
 ## COMMON_POST_CONFIG_FRAG

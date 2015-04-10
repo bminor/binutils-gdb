@@ -1,3 +1,7 @@
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (cris_program_offset_write, sim_load): Delete.
+
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

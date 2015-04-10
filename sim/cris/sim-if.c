@@ -318,52 +318,6 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
   return TRUE;
 }
 
-/* Helper for sim_load (needed just for ELF files): like sim_write,
-   but offset load at cris_program_offset offset.  */
-
-static int
-cris_program_offset_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf,
-			   int length)
-{
-  return sim_write (sd, mem + cris_program_offset, buf, length);
-}
-
-/* Replacement for ../common/sim-hload.c:sim_load, so we can treat ELF
-   files differently.  */
-
-SIM_RC
-sim_load (SIM_DESC sd, const char *prog_name, struct bfd *prog_bfd,
-	  int from_tty ATTRIBUTE_UNUSED)
-{
-  bfd *result_bfd;
-
-  if (bfd_get_flavour (prog_bfd) != bfd_target_elf_flavour)
-    {
-      SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-      if (sim_analyze_program (sd, prog_name, prog_bfd) != SIM_RC_OK)
-	return SIM_RC_FAIL;
-      SIM_ASSERT (STATE_PROG_BFD (sd) != NULL);
-
-      result_bfd = sim_load_file (sd, STATE_MY_NAME (sd),
-				  STATE_CALLBACK (sd),
-				  prog_name,
-				  STATE_PROG_BFD (sd),
-				  STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG,
-				  STATE_LOAD_AT_LMA_P (sd),
-				  sim_write);
-      if (result_bfd == NULL)
-	{
-	  bfd_close (STATE_PROG_BFD (sd));
-	  STATE_PROG_BFD (sd) = NULL;
-	  return SIM_RC_FAIL;
-	}
-      return SIM_RC_OK;
-    }
-
-  return cris_load_elf_file (sd, prog_bfd, cris_program_offset_write)
-    ? SIM_RC_OK : SIM_RC_FAIL;
-}
-
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
 static void

@@ -29,7 +29,6 @@ SIM_OBJS = \
 	cpustate.o \
 	simulator.o \
 	memory.o \
-	sim-hload.o \
 	sim-resume.o \
 
 ## COMMON_POST_CONFIG_FRAG

@@ -22,7 +22,6 @@ dtbdir = @datadir@/gdb/dtb
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	interp.o \
-	sim-hload.o \
 	sim-resume.o
 
 SIM_EXTRA_LIBS = -lm -lz

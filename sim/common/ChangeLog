@@ -1,3 +1,7 @@
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_NEW_COMMON_OBJS): Add sim-hload.o.
+
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (AH_BOTTOM): Delete tconfig.h appending.

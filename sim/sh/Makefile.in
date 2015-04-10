@@ -20,7 +20,6 @@
 SIM_OBJS = \
 	interp.o \
 	$(SIM_NEW_COMMON_OBJS) \
-	sim-hload.o \
 	table.o
 SIM_EXTRA_LIBS = -lm
 SIM_EXTRA_CLEAN = sh-clean

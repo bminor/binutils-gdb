@@ -185,6 +185,7 @@ SIM_NEW_COMMON_OBJS = \
 	sim-engine.o \
 	sim-events.o \
 	sim-fpu.o \
+	sim-hload.o \
 	sim-hrw.o \
 	sim-io.o \
 	sim-info.o \
