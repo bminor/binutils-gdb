@@ -17223,6 +17223,66 @@ compile file /home/user/example.c
 @end smallexample
 @end table
 
+@noindent
+The process of compiling and injecting the code can be inspected using:
+
+@table @code
+@anchor{set debug compile}
+@item set debug compile
+@cindex compile command debugging info
+Turns on or off display of @value{GDBN} process of compiling and
+injecting the code.  The default is off.
+
+@item show debug compile
+Displays the current state of displaying @value{GDBN} process of
+compiling and injecting the code.
+@end table
+
+@subsection Compilation options for the @code{compile} command
+
+@value{GDBN} needs to specify the right compilation options for the code
+to be injected, in part to make its ABI compatible with the inferior
+and in part to make the injected code compatible with @value{GDBN}'s
+injecting process.
+
+@noindent
+The options used, in increasing precedence:
+
+@table @asis
+@item target architecture and OS options (@code{gdbarch})
+These options depend on target processor type and target operating
+system, usually they specify at least 32-bit (@code{-m32}) or 64-bit
+(@code{-m64}) compilation option.
+
+@item compilation options recorded in the target
+@value{NGCC} (since version 4.7) stores the options used for compilation
+into @code{DW_AT_producer} part of DWARF debugging information according
+to the @value{NGCC} option @code{-grecord-gcc-switches}.  One has to
+explicitly specify @code{-g} during inferior compilation otherwise
+@value{NGCC} produces no DWARF.  This feature is only relevant for
+platforms where @code{-g} produces DWARF by default, otherwise one may
+try to enforce DWARF by using @code{-gdwarf-4}.
+
+@item compilation options set by @code{set compile-args}
+@end table
+
+@noindent
+You can override compilation options using the following command:
+
+@table @code
+@item set compile-args
+@cindex compile command options override
+Set compilation options used for compiling and injecting code with the
+@code{compile} commands.  These options override any conflicting ones
+from the target architecture and/or options stored during inferior
+compilation.
+
+@item show compile-args
+Displays the current state of compilation options override.
+This does not show all the options actually used during compilation,
+use @ref{set debug compile} for that.
+@end table
+
 @subsection Caveats when using the @code{compile} command
 
 There are a few caveats to keep in mind when using the @code{compile}
@@ -17379,6 +17439,24 @@ accessible to the code submitted to the @code{compile} command.
 Access to those variables will generate a compiler error which @value{GDBN}
 will print to the console.
 @end table
+
+@subsection Compiler search for the @code{compile} command
+
+@value{GDBN} needs to find @value{NGCC} for the inferior being debugged which
+may not be obvious for remote targets of different architecture than where
+@value{GDBN} is running.  Environment variable @code{PATH} (@code{PATH} from
+shell that executed @value{GDBN}, not the one set by @value{GDBN}
+command @code{set environment}).  @xref{Environment}.  @code{PATH} on
+@value{GDBN} host is searched for @value{NGCC} binary matching the
+target architecture and operating system.
+
+Specifically @code{PATH} is searched for binaries matching regular expression
+@code{@var{arch}(-[^-]*)?-@var{os}-gcc} according to the inferior target being
+debugged.  @var{arch} is processor name --- multiarch is supported, so for
+example both @code{i386} and @code{x86_64} targets look for pattern
+@code{(x86_64|i.86)} and both @code{s390} and @code{s390x} targets look
+for pattern @code{s390x?}.  @var{os} is currently supported only for
+pattern @code{linux(-gnu)?}.
 
 @node GDB Files
 @chapter @value{GDBN} Files

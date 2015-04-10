@@ -1,3 +1,11 @@
+2015-04-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Compiling and Injecting Code): Describe set debug 
+	compile, show debug compile.  New subsection Compilation options for 
+	the compile command.  New subsection Compiler search for the compile
+	command.
+
 2015-04-09  Andy Wingo  <wingo@igalia.com>
 
 	* guile.texi (Frames In Guile): Describe frame-read-register.
