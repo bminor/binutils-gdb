@@ -10,7 +10,6 @@ foo:
 .globl bar
 	.type	bar, @function
 bar:
-	movl	foo@GOT(%ecx), %eax
-	movl	(%eax), %eax
+	movl	foo@GOTOFF(%ecx), %eax
 	ret
 	.size	bar, .-bar

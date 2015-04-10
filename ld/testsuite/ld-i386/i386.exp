@@ -191,10 +191,6 @@ set i386tests {
      "--32" {pr17306b.s} {} ""}
     {"PR ld/17306 (2)" "-melf_i386 -shared -Bsymbolic --just-symbols=tmpdir/pr17306b.o" ""
      "--32" {pr17306a.s} {} "libpr17306.so"}
-    {"PR ld/17709 (1)" "-melf_i386 -shared" ""
-     "--32" {pr17709a.s} {} "libpr17709.so"}
-    {"PR ld/17709 (2)" "-melf_i386 tmpdir/libpr17709.so" ""
-     "--32" {pr17709b.s} {{readelf -r pr17709.rd}} "pr17709"}
 }
 
 # So as to avoid rewriting every last test case here in a nacl variant,
