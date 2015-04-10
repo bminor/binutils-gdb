@@ -1,3 +1,85 @@
+2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr15228
+	PR ld/pr17709
+	* ld-i386/i386.exp (i386tests): Add a test for PR ld/17709.
+	* ld-i386/pr17709-nacl.rd: New file.
+	* ld-i386/pr17709.rd: Likewise.
+	* ld-i386/pr17709a.s: Likewise.
+	* ld-i386/pr17709b.s: Likewise.
+	* ld-i386/protected3.d: Updated.
+	* ld-i386/protected3.s: Likewise.
+	* ld-x86-64/pr17709-nacl.rd: New file.
+	* ld-x86-64/pr17709.rd: Likewise.
+	* ld-x86-64/pr17709a.s: Likewise.
+	* ld-x86-64/pr17709b.s: Likewise.
+	* ld-x86-64/protected3.d: Updated.
+	* ld-x86-64/protected3.s: Likewise.
+	* ld-x86-64/x86-64.exp (x86_64tests): Add a test for PR ld/17709.
+
+2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18223
+	* ld-gc/gc.exp: Run pr18223.
+	* ld-gc/pr18223.d: New file.
+	* ld-gc/pr18223.s: Likewise.
+
+2015-04-10  Alan Modra  <amodra@gmail.com>
+
+	Revert 2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/pr15228
+	PR ld/pr17709
+	* ld-i386/i386.exp (i386tests): Remove test for PR ld/17709.
+	* ld-i386/pr17709-nacl.rd: Delete.
+	* ld-i386/pr17709.rd: Likewise.
+	* ld-i386/pr17709a.s: Likewise.
+	* ld-i386/pr17709b.s: Likewise.
+	* ld-i386/protected3.d: Updated.
+	* ld-i386/protected3.s: Likewise.
+	* ld-x86-64/pr17709-nacl.rd: Delete.
+	* ld-x86-64/pr17709.rd: Likewise.
+	* ld-x86-64/pr17709a.s: Likewise.
+	* ld-x86-64/pr17709b.s: Likewise.
+	* ld-x86-64/protected3.d: Updated.
+	* ld-x86-64/protected3.s: Likewise.
+	* ld-x86-64/x86-64.exp (x86_64tests): Remove test for PR ld/17709.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp: Add a test for
+	--compress-debug-sections=zlib-gabi.
+	(build_tests): Add 2 tests for --compress-debug-sections=zlib-gabi.
+	(run_tests): Likewise.
+	Verify linker output with zlib-gabi compressed debug input.
+	* ld-elf/compressed1a.d: New file.
+	* ld-elf/compressed1b.d: Likewise.
+	* ld-elf/compressed1c.d: Likewise.
+
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
+	* ld-arm/tls-gdesc-nlazy.g: Adjust for readelf note.
+	* ld-tic6x/shlib-1.rd: Expect corrected .rela.plt sh_info.
+	* ld-tic6x/shlib-1b.rd: Likewise.
+	* ld-tic6x/shlib-1r.rd: Likewise.
+	* ld-tic6x/shlib-1rb.rd: Likewise.
+	* ld-tic6x/shlib-app-1.rd: Likewise.
+	* ld-tic6x/shlib-app-1b.rd: Likewise.
+	* ld-tic6x/shlib-app-1r.rd: Likewise.
+	* ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* ld-tic6x/shlib-noindex.rd: Likewise.
+
+2015-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/orphan-5.l: New test - checks the linker's output with
+	--warn-orphan enabled.
+	* ld-elf/elf.exp: Run the new test.
+
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp: Remove is_zlib_supported check.
+	Fail if --compress-debug-sections doesn't work.
+	* lib/ld-lib.exp (run_dump_test): Remove is_zlib_supported check.
+
 2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp: Add erratum843419 test.

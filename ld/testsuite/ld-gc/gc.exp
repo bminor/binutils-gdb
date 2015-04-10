@@ -116,6 +116,7 @@ if { [is_elf_format] && [check_shared_lib_support] } then {
     } else {
 	run_dump_test "personality"
     }
+    run_dump_test "pr18223"
 }
 
 if { [is_remote host] || [which $CC] != 0 } {

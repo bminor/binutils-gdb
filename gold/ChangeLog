@@ -1,3 +1,65 @@
+2015-04-09  Cary Coutant  <ccoutant@google.com>
+
+	* symtab.cc (Symbol::final_value_is_known): Check for TLS symbol
+	in a PIE link.
+	* testsuite/Makefile.am (tls_pie_test.sh): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/tls_pie_test.sh: New.
+
+2015-04-09  Cary Coutant  <ccoutant@google.com>
+
+	* debug.h (DEBUG_LOCATION): New.
+	(DEBUG_ALL): Include DEBUG_LOCATION.
+	(debug_string_to_enum): Add DEBUG_LOCATION.
+	* dwarf_reader.cc (Sized_dwarf_line_info::read_lines): Fix debug
+	output to print correct context.
+	(Sized_dwarf_line_info::do_addr2line): Add debug output. Return
+	up to 4 more locations at the beginning of the function.
+	* symtab.cc (Symbol_table::detect_odr_violations): Get canonical
+	result before sorting list of line numbers.
+	* testsuite/debug_msg.sh: Allow range of line numbers for
+	canonical results on optimized code.
+
+2015-04-07  HC Yen <hc.yen@mediatek.com>
+
+	Add AArch32 support for gold linker.
+	gold/
+	* arm.cc: Add V8 arch combine table.
+
+2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* aarch64.cc (do_reloc_addend): Fix signature to match the parent one.
+
+2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* gc.cc (Garbage_collection::do_transitive_closure): Avoid a call
+	to find by using the return value of insert.
+
+2015-04-06  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* gc.cc (Garbage_collection::do_transitive_closure): Avoid a copy
+	constructor call.
+
+2015-04-06  Ilya Tocar  <ilya.tocar@intel.com>
+
+	PR gold/17641
+	* x86_64.cc (Target_x86_64::can_convert_mov_to_lea): New.
+	(Target_x86_64::Scan::local): Don't create GOT entry, when we
+	can convert mov to lea.
+	(Target_x86_64::Scan::global): Ditto.
+	(Target_x86_64::Relocate::relocate): Convert mov foo@GOTPCREL(%rip),
+	%reg to lea foo(%rip), %reg if possible.
+	* testsuite/Makefile.am (x86_64_mov_to_lea): New test.
+	* testsuite/x86_64_mov_to_lea1.s: New.
+	* testsuite/x86_64_mov_to_lea2.s: Ditto.
+	* testsuite/x86_64_mov_to_lea3.s: Ditto.
+	* testsuite/x86_64_mov_to_lea4.s: Ditto.
+	* testsuite/x86_64_mov_to_lea.sh: Ditto.
+
+2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-04-01  Ilya Tocar  <ilya.tocar@intel.com>
 
 	PR gold/17640

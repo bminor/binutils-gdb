@@ -119,24 +119,30 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 
    Global variable GDB_SYSROOT is used as a prefix directory
    to search for shared libraries if they have an absolute path.
+   If GDB_SYSROOT starts with "target:" and target filesystem
+   is the local filesystem then the "target:" prefix will be
+   stripped before the search starts.  This ensures that the
+   same search algorithm is used for local files regardless of
+   whether a "target:" prefix was used.
 
    Global variable SOLIB_SEARCH_PATH is used as a prefix directory
    (or set of directories, as in LD_LIBRARY_PATH) to search for all
-   shared libraries if not found in GDB_SYSROOT.
+   shared libraries if not found in either the sysroot (if set) or
+   the local filesystem.
 
    Search algorithm:
-   * If there is a gdb_sysroot and path is absolute:
-   *   Search for gdb_sysroot/path.
+   * If a sysroot is set and path is absolute:
+   *   Search for sysroot/path.
    * else
    *   Look for it literally (unmodified).
    * Look in SOLIB_SEARCH_PATH.
    * If available, use target defined search function.
-   * If gdb_sysroot is NOT set, perform the following two searches:
+   * If NO sysroot is set, perform the following two searches:
    *   Look in inferior's $PATH.
    *   Look in inferior's $LD_LIBRARY_PATH.
    *
    * The last check avoids doing this search when targetting remote
-   * machines since gdb_sysroot will almost always be set.
+   * machines since a sysroot will almost always be set.
 */
 
 char *
@@ -145,12 +151,11 @@ solib_find (char *in_pathname, int *fd)
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   int found_file = -1;
   char *temp_pathname = NULL;
-  int gdb_sysroot_is_empty;
   const char *solib_symbols_extension
     = gdbarch_solib_symbols_extension (target_gdbarch ());
   const char *fskind = effective_target_file_system_kind ();
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  char *sysroot = NULL;
+  char *sysroot = gdb_sysroot;
 
   /* If solib_symbols_extension is set, replace the file's
      extension.  */
@@ -175,18 +180,32 @@ solib_find (char *in_pathname, int *fd)
 	}
     }
 
-  gdb_sysroot_is_empty = (gdb_sysroot == NULL || *gdb_sysroot == 0);
-
-  if (!gdb_sysroot_is_empty)
+  if (sysroot != NULL)
     {
-      int prefix_len = strlen (gdb_sysroot);
+      /* If the absolute prefix starts with "target:" but the
+	 filesystem accessed by the target_fileio_* methods
+	 is the local filesystem then we strip the "target:"
+	 prefix now and work with the local filesystem.  This
+	 ensures that the same search algorithm is used for
+	 all local files regardless of whether a "target:"
+	 prefix was used.  */
+      if (is_target_filename (sysroot) && target_filesystem_is_local ())
+	sysroot += strlen (TARGET_SYSROOT_PREFIX);
+
+      if (*sysroot == '\0')
+	sysroot = NULL;
+    }
+
+  if (sysroot != NULL)
+    {
+      int prefix_len = strlen (sysroot);
 
       /* Remove trailing slashes from absolute prefix.  */
       while (prefix_len > 0
-	     && IS_DIR_SEPARATOR (gdb_sysroot[prefix_len - 1]))
+	     && IS_DIR_SEPARATOR (sysroot[prefix_len - 1]))
 	prefix_len--;
 
-      sysroot = savestring (gdb_sysroot, prefix_len);
+      sysroot = savestring (sysroot, prefix_len);
       make_cleanup (xfree, sysroot);
     }
 
@@ -222,7 +241,7 @@ solib_find (char *in_pathname, int *fd)
        3rd attempt, c:/foo/bar.dll ==> /sysroot/foo/bar.dll
   */
 
-  if (!IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname) || gdb_sysroot_is_empty)
+  if (!IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname) || sysroot == NULL)
     temp_pathname = xstrdup (in_pathname);
   else
     {
@@ -236,17 +255,17 @@ solib_find (char *in_pathname, int *fd)
         |-----------------+-----------+----------------|
         | /some/dir       | /         | c:/foo/bar.dll |
         | /some/dir       |           | /foo/bar.dll   |
-        | remote:         |           | c:/foo/bar.dll |
-        | remote:         |           | /foo/bar.dll   |
-        | remote:some/dir | /         | c:/foo/bar.dll |
-        | remote:some/dir |           | /foo/bar.dll   |
+        | target:         |           | c:/foo/bar.dll |
+        | target:         |           | /foo/bar.dll   |
+        | target:some/dir | /         | c:/foo/bar.dll |
+        | target:some/dir |           | /foo/bar.dll   |
 
 	IOW, we don't need to add a separator if IN_PATHNAME already
-	has one, or when the the sysroot is exactly "remote:".
+	has one, or when the the sysroot is exactly "target:".
 	There's no need to check for drive spec explicitly, as we only
 	get here if IN_PATHNAME is considered an absolute path.  */
       need_dir_separator = !(IS_DIR_SEPARATOR (in_pathname[0])
-			     || strcmp (REMOTE_SYSROOT_PREFIX, sysroot) == 0);
+			     || strcmp (TARGET_SYSROOT_PREFIX, sysroot) == 0);
 
       /* Cat the prefixed pathname together.  */
       temp_pathname = concat (sysroot,
@@ -254,8 +273,8 @@ solib_find (char *in_pathname, int *fd)
 			      in_pathname, (char *) NULL);
     }
 
-  /* Handle remote files.  */
-  if (remote_filename_p (temp_pathname))
+  /* Handle files to be accessed via the target.  */
+  if (is_target_filename (temp_pathname))
     {
       *fd = -1;
       do_cleanups (old_chain);
@@ -273,7 +292,7 @@ solib_find (char *in_pathname, int *fd)
        c:/foo/bar.dll ==> /sysroot/c/foo/bar.dll.  */
 
   if (found_file < 0
-      && !gdb_sysroot_is_empty
+      && sysroot != NULL
       && HAS_TARGET_DRIVE_SPEC (fskind, in_pathname))
     {
       int need_dir_separator = !IS_DIR_SEPARATOR (in_pathname[2]);
@@ -353,7 +372,7 @@ solib_find (char *in_pathname, int *fd)
 					   &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable.  */
-  if (found_file < 0 && gdb_sysroot_is_empty)
+  if (found_file < 0 && sysroot == NULL)
     found_file = openp (get_in_environ (current_inferior ()->environment,
 					"PATH"),
 			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH, in_pathname,
@@ -361,7 +380,7 @@ solib_find (char *in_pathname, int *fd)
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH
      environment variable.  */
-  if (found_file < 0 && gdb_sysroot_is_empty)
+  if (found_file < 0 && sysroot == NULL)
     found_file = openp (get_in_environ (current_inferior ()->environment,
 					"LD_LIBRARY_PATH"),
 			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH, in_pathname,
@@ -382,20 +401,10 @@ solib_find (char *in_pathname, int *fd)
 bfd *
 solib_bfd_fopen (char *pathname, int fd)
 {
-  bfd *abfd;
+  bfd *abfd = gdb_bfd_open (pathname, gnutarget, fd);
 
-  if (remote_filename_p (pathname))
-    {
-      gdb_assert (fd == -1);
-      abfd = remote_bfd_open (pathname, gnutarget);
-    }
-  else
-    {
-      abfd = gdb_bfd_open (pathname, gnutarget, fd);
-
-      if (abfd)
-	bfd_set_cacheable (abfd, 1);
-    }
+  if (abfd != NULL && !gdb_bfd_has_target_filename (abfd))
+    bfd_set_cacheable (abfd, 1);
 
   if (!abfd)
     {
@@ -1403,6 +1412,36 @@ reload_shared_libraries (char *ignored, int from_tty,
   ops->special_symbol_handling ();
 }
 
+/* Wrapper for reload_shared_libraries that replaces "remote:"
+   at the start of gdb_sysroot with "target:".  */
+
+static void
+gdb_sysroot_changed (char *ignored, int from_tty,
+		     struct cmd_list_element *e)
+{
+  const char *old_prefix = "remote:";
+  const char *new_prefix = TARGET_SYSROOT_PREFIX;
+
+  if (startswith (gdb_sysroot, old_prefix))
+    {
+      static int warning_issued = 0;
+
+      gdb_assert (strlen (old_prefix) == strlen (new_prefix));
+      memcpy (gdb_sysroot, new_prefix, strlen (new_prefix));
+
+      if (!warning_issued)
+	{
+	  warning (_("\"%s\" is deprecated, use \"%s\" instead."),
+		   old_prefix, new_prefix);
+	  warning (_("sysroot set to \"%s\"."), gdb_sysroot);
+
+	  warning_issued = 1;
+	}
+    }
+
+  reload_shared_libraries (ignored, from_tty, e);
+}
+
 static void
 show_auto_solib_add (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
@@ -1597,7 +1636,7 @@ Show the current system root."), _("\
 The system root is used to load absolute shared library symbol files.\n\
 For other (relative) files, you can add directories using\n\
 `set solib-search-path'."),
-				     reload_shared_libraries,
+				     gdb_sysroot_changed,
 				     NULL,
 				     &setlist, &showlist);
 

@@ -226,6 +226,9 @@ typedef struct {
   /* If TRUE, only warn once about a particular undefined symbol.  */
   bfd_boolean warn_once;
 
+  /* If TRUE, issue warning messages when orphan sections are encountered.  */
+  bfd_boolean warn_orphan;
+
   /* If TRUE, warn if multiple global-pointers are needed (Alpha
      only).  */
   bfd_boolean warn_multiple_gp;

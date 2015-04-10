@@ -158,7 +158,7 @@ if [regexp $want $got] then {
 
 # Test objdump -s on a file that contains a compressed .debug section
 
-if { ![is_elf_format] || ![is_zlib_supported] } then {
+if { ![is_elf_format] } then {
     unsupported "objdump compressed debug"
 } elseif { ![binutils_assemble $srcdir/$subdir/dw2-compressed.S tmpdir/dw2-compressed.o] } then {
     fail "objdump compressed debug"

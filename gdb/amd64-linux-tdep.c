@@ -1833,7 +1833,7 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_displaced_step_free_closure (gdbarch,
                                            simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch,
-                                       displaced_step_at_entry_point);
+                                       linux_displaced_step_location);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 

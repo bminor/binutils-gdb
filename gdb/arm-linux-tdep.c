@@ -1448,7 +1448,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_displaced_step_fixup (gdbarch, arm_displaced_step_fixup);
   set_gdbarch_displaced_step_free_closure (gdbarch,
 					   simple_displaced_step_free_closure);
-  set_gdbarch_displaced_step_location (gdbarch, displaced_step_at_entry_point);
+  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
 
   /* Reversible debugging, process record.  */
   set_gdbarch_process_record (gdbarch, arm_process_record);

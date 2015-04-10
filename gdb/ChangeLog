@@ -1,3 +1,325 @@
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (displaced_step_fixup): Switch to the event ptid
+	earlier.  If the thread stopped for a watchpoint and the
+	target/arch has non-continuable watchpoints, cancel the displaced
+	step.
+	(resume): Don't start a displaced step if in-line step-over info
+	is valid.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (displaced_step_in_progress): New function.
+	(do_target_resume): Advise target to report all signals if
+	displaced stepping.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18216
+	* infrun.c (process_event_stop_test): Don't assume a step-resume
+	is set if tp->stepped_breakpoint is true.
+
+2015-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (install_alu_reg): Update comment.
+	(thumb_copy_alu_reg): Remove local variable rn.  Update
+	debugging message.  Use r2 instead of r1 in the modified
+	instruction.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13858
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Install
+	linux_displaced_step_location as gdbarch_displaced_step_location
+	hook.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* linux-tdep.c (linux_displaced_step_location): New function,
+	based on ppc_linux_displaced_step_location.
+	* linux-tdep.h (linux_displaced_step_location): New declaration.
+	* ppc-linux-tdep.c (ppc_linux_entry_point_addr): Delete.
+	(ppc_linux_inferior_created, ppc_linux_displaced_step_location):
+	Delete.
+	(ppc_linux_init_abi): Install linux_displaced_step_location as
+	gdbarch_displaced_step_location hook, even without Cell/B.E..
+	(_initialize_ppc_linux_tdep): Don't install
+	ppc_linux_inferior_created as inferior_created observer.
+	* s390-linux-tdep.c (s390_gdbarch_init): Install
+	linux_displaced_step_location as gdbarch_displaced_step_location
+	hook.
+
+2015-04-09  Gary Benson <gbenson@redhat.com>
+
+	* common/common-remote-fileio.h: Rename to...
+	* common/fileio.h: ...this.  Update all references.
+	(remote_fileio_to_fio_error): Rename to...
+	(host_to_fileio_error): ...this.
+	(remote_fileio_to_be): Rename to...
+	(host_to_bigendian): ...this.  Update all callers.
+	(remote_fileio_to_fio_uint): Rename to...
+	(host_to_fileio_uint): ...this.  Update all callers.
+	(remote_fileio_to_fio_time): Rename to...
+	(host_to_fileio_time): ...this.  Update all callers.
+	(remote_fileio_to_fio_stat): Rename to...
+	(host_to_fileio_stat): ...this.
+	Update all references.
+	* common/common-remote-fileio.c: Rename to...
+	* common/fileio.c: ...this.  Update all references.
+	(remote_fileio_to_fio_error): Rename to...
+	(host_to_fileio_error): ...this.  Update all callers.
+	(remote_fileio_mode_to_target): Rename to...
+	(fileio_mode_pack): ...this.  Update all callers.
+	(remote_fileio_to_fio_mode): Rename to...
+	(host_to_fileio_mode): ...this.  Update all callers.
+	(remote_fileio_to_fio_ulong): Rename to...
+	(host_to_fileio_ulong): ...this.  Update all callers.
+	(remote_fileio_to_fio_stat): Rename to...
+	(host_to_fileio_stat): ...this.  Update all callers.
+
+2015-04-09  Andy Wingo  <wingo@igalia.com>
+
+	* guile/scm-frame.c (gdbscm_frame_read_register): New function.
+	(frame_functions): Bind gdbscm_frame_read_register to
+	frame-read-register.
+	* guile/lib/gdb.scm (frame-read-register): Export.
+
+2015-04-09  Gary Benson <gbenson@redhat.com>
+
+	* common/common-remote-fileio.h (remote_fileio_to_fio_error):
+	New declaration.
+	* common/common-remote-fileio.c (remote_fileio_to_fio_error):
+	New function, factored out the named functions below.
+	* inf-child.c (gdb/fileio.h): Remove include.
+	(common-remote-fileio.h): New include.
+	(inf_child_errno_to_fileio_error): Remove function.  Update
+	all callers to use remote_fileio_to_fio_error.
+	* remote-fileio.c (remote_fileio_errno_to_target): Likewise.
+
+2015-04-09  Andy Wingo  <wingo@igalia.com>
+
+	* MAINTAINERS (Write After Approval): Add Andy Wingo.
+
+2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* acinclude.m4: (GDB_AC_CHECK_BFD): Set ZLIBDIR with $zlibdir.
+	Replace $zlibdir with $ZLIBDIR in LDFLAGS.
+	* configure: Regenerated.
+
+2015-04-09  Pedro Alves  <palves@redhat.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add strtok_r.
+	* gnulib/Makefile.in (aclocal_m4_deps): Add import/m4/strtok_r.m4.
+	* gnulib/configure, gnulib/config.in, gnulib/aclocal.m4: Regenerate.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Update.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/strtok_r.m4: New file.
+	* gnulib/import/strtok_r.c: New file.
+
+2015-04-09  Pedro Alves  <palves@redhat.com>
+
+	* gnulib/update-gnulib.sh (aclocal version check): Filter out
+	"called too early to check prototype".
+
+2015-04-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR python/16699
+	* python/py-cmd.c (cmdpy_completer_helper): Adjust function to not
+	use a caching mechanism.  Adjust comments and code to reflect
+	that.  Replace 'sizeof' by 'strlen' when fetching 'wordobj'.
+	(cmdpy_completer_handle_brkchars): Adjust call to
+	cmdpy_completer_helper.  Call Py_XDECREF for 'resultobj'.
+	(cmdpy_completer): Likewise.
+
+2015-04-08  Yao Qi  <yao.qi@linaro.org>
+
+	* spu-tdep.c (spu_gdbarch_init): Don't call
+	set_gdbarch_cannot_step_breakpoint.
+
+2015-04-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* linux-tdep.c (decode_vmflags): Initialize 'saveptr'.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (ALL_NON_EXITED_THREADS_SAFE): Rename to ...
+	(ALL_THREADS_SAFE): ... this, and don't skip exited threads.
+	(delete_exited_threads): New declaration.
+	* infrun.c (follow_exec): Use ALL_THREADS_SAFE.
+	* linux-nat.c (linux_nat_update_thread_list): New function.
+	(linux_nat_add_target): Install it.
+	* remote.c (remote_update_thread_list): Use ALL_THREADS_SAFE.
+	* thread.c (prune_threads): Use ALL_THREADS_SAFE.
+	(delete_exited_threads): New function.
+
+2015-04-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (resume) <displaced stepping debug output>: Get the
+	leader thread's regcache, not resume_ptid's.
+
+2015-04-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (hash_symbol_entry): Hash STRUCT_DOMAIN symbols as
+	VAR_DOMAIN.
+	(symbol_cache_lookup): Clarify use of bsc_ptr, slot_ptr parameters.
+	Include symbol domain in debugging output.
+
+2015-04-06  Pedro Alves  <palves@redhat.com>
+	    Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* configure.ac: Remove the mingw32-specific stub-termcap.o
+	fallback, and instead fallback to the stub termcap on all hosts.
+	* configure: Regenerate.
+	* stub-termcap.c [!__MINGW32__] (PC, BC, UP): Define as weak
+	symbols.
+
+2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdbtypes.c (is_dynamic_type_internal): Remove the unused
+	"top_level" parameter.
+	(resolve_dynamic_type_internal): Remove the unused "top_level"
+	parameter.  Update call to is_dynamic_type_internal.
+	(is_dynamic_type): Update call to is_dynamic_type_internal.
+	(resolve_dynamic_range): Update call to
+	resolve_dynamic_type_internal.
+	(resolve_dynamic_union): Likewise.
+	(resolve_dynamic_struct): Likewise.
+	(resolve_dynamic_type): Likewise.
+
+2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdbtypes.c (is_dynamic_type_internal): Remove special handling of
+	TYPE_CODE_REF types so that they are not considered as dynamic
+	depending on the referenced type.
+	(resolve_dynamic_type_internal): Likewise.
+
+2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (top_srcdir): New.
+	* configure: Regenerated.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* NEWS: Announce the new default sysroot of "target:".
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* main.c (captured_main): Set gdb_sysroot to "target:"
+	if not otherwise set.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* exec.c (exec_file_attach): Support "target:" filenames.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* solib.c (solib_find): Strip "target:" prefix from sysroot
+	if accessing local files.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* symfile.c (symfile_bfd_open): Reorder to remove duplicated
+	checks and error messages.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* remote.h (REMOTE_SYSROOT_PREFIX): Remove definition.
+	(remote_filename_p): Remove declaration.
+	(remote_bfd_open): Likewise.
+	* remote.c (remote_bfd_iovec_open): Remove function.
+	(remote_bfd_iovec_close): Likewise.
+	(remote_bfd_iovec_pread): Likewise.
+	(remote_bfd_iovec_stat): Likewise.
+	(remote_filename_p): Likewise.
+	(remote_bfd_open): Likewise.
+	* symfile.h (gdb_bfd_open_maybe_remote): Remove declaration.
+	* symfile.c (separate_debug_file_exists): Use gdb_bfd_open.
+	(gdb_bfd_open_maybe_remote): Remove function.
+	(symfile_bfd_open):  Replace remote filename check with
+	target filename check.
+	(reread_symbols): Use gdb_bfd_open.
+	* build-id.c (gdbcore.h): New include.
+	(build_id_to_debug_bfd): Use gdb_bfd_open.
+	* infcmd.c (attach_command_post_wait): Remove remote filename
+	check.
+	* solib.c (solib_find): Replace remote-specific handling with
+	target-specific handling.  Update comments where necessary.
+	(solib_bfd_open): Replace remote-specific handling with
+	target-specific handling.
+	(gdb_sysroot_changed): New function.
+	(_initialize_solib): Call the above when gdb_sysroot changes.
+	* windows-tdep.c (gdbcore.h): New include.
+	(windows_xfer_shared_library): Use gdb_bfd_open.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* gdb/gdb_bfd.h (TARGET_SYSROOT_PREFIX): New definition.
+	(is_target_filename): New declaration.
+	(gdb_bfd_has_target_filename): Likewise.
+	(gdb_bfd_open): Update documentation comment.
+	* gdb_bfd.c (target.h): New include.
+	(gdb/fileio.h): Likewise.
+	(is_target_filename): New function.
+	(gdb_bfd_has_target_filename): Likewise.
+	(fileio_errno_to_host): Likewise.
+	(gdb_bfd_iovec_fileio_open): Likewise.
+	(gdb_bfd_iovec_fileio_pread): Likewise.
+	(gdb_bfd_iovec_fileio_close): Likewise.
+	(gdb_bfd_iovec_fileio_fstat): Likewise.
+	(gdb_bfd_open): Use target fileio to access paths prefixed
+	with "target:" where necessary.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* target.h (struct target_ops) <to_filesystem_is_local>:
+	New field.
+	(target_filesystem_is_local): New macro.
+	* target-delegates.c: Regenerate.
+	* remote.c (remote_filesystem_is_local): New function.
+	(init_remote_ops): Initialize to_filesystem_is_local.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_fstat>: New field.
+	(target_fileio_fstat): New declaration.
+	* target.c (target_fileio_fstat): New function.
+	* inf-child.c (inf_child_fileio_fstat): Likewise.
+	(inf_child_target): Initialize to_fileio_fstat.
+	* remote.c (init_remote_ops): Likewise.
+
+2015-04-01  Sasha Smundak  <asmundak@google.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBJS): Add py-unwind.o.
+	(SUBDIR_PYTHON_SRCS): Add py-unwind.c.
+	(py-unwind.o): New recipe.
+	* NEWS: mention Python frame unwinding.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Add
+	gdb/unwinder.py and gdb/command/unwinder.py
+	* python/lib/gdb/__init__.py (packages): Add frame_unwinders
+	list.
+	(execute_unwinders): New function.
+	* python/lib/gdb/command/unwinders.py: New file.
+	* python/lib/gdb/unwinder.py: New file.
+	* python/py-objfile.c (objfile_object): Add frame_unwinders field.
+	(objfpy_dealloc): Decrement frame_unwinders reference count.
+	(objfpy_initialize): Create frame_unwinders list.
+	(objfpy_get_frame_unwinders): New function.
+	(objfpy_set_frame_unwinders): Ditto.
+	(objfile_getset): Add frame_unwinders attribute to Objfile.
+	* python/py-progspace.c (pspace_object): Add frame_unwinders field.
+	(pspy_dealloc): Decrement frame_unwinders reference count.
+	(pspy_initialize): Create frame_unwinders list.
+	(pspy_get_frame_unwinders): New function.
+	(pspy_set_frame_unwinders): Ditto.
+	(pspy_getset): Add frame_unwinders attribute to gdb.Progspace.
+	* python/py-unwind.c: New file.
+	* python/python-internal.h (pspy_get_name_unwinders): New prototype.
+	(objpy_get_frame_unwinders): New prototype.
+	(gdbpy_initialize_unwind): New prototype.
+	* python/python.c (gdbpy_apply_type_printers): Call
+	gdbpy_initialize_unwind.
+
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (resume): Check currently_stepping after clearing

@@ -1,3 +1,97 @@
+2015-04-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18198
+	* ld.texinfo (--be8): Add a note about the interaction of this
+	option with the assembler's -EB option.
+
+2015-04-10  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Set elf_list_options etc. in proper case.
+	* configure: Regenerate.
+
+2015-04-10  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18223
+	* ldlang.c (lang_process): Add _init and _fini to gc_sym_list.
+
+2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf_x86_64.sh (BNDPLT): Removed.
+	(PARSE_AND_LIST_OPTIONS): New.
+	(PARSE_AND_LIST_ARGS_CASE_Z): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Remove
+	BNDPLT check.  Handle PARSE_AND_LIST_ARGS_CASE_Z.
+	(gld${EMULATION_NAME}_list_options): Remove BNDPLT check.
+
+2015-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (elf_list_options): Set to TRUE for
+	--enable-targets=all.
+	(elf_shlib_list_options): Likewise.
+	(elf_plt_unwind_list_options): Likewise.
+	* configure: Regenerated.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32bmipn32-defs.sh: Skip empty EMULATION_NAME.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ELF_CLFAGS): New.
+	(AM_CFLAGS): Add $(ELF_CLFAGS).
+	* configure.ac (elf_list_options): New.  AC_SUBST.
+	(elf_shlib_list_options): Likewise.
+	(elf_plt_unwind_list_options): Likewise.
+	* lexsup.c (elf_shlib_list_options): New.
+	(elf_static_list_options): Likewise.
+	(elf_plt_unwind_list_options): Likewise.
+	(ld_list_options): Likewise.
+	(help): Call ld_list_options.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+	* emulparams/plt_unwind.sh (PLT_UNWIND): New.
+	(PARSE_AND_LIST_OPTIONS): Removed.
+	* emultempl/elf32.em (gld_list_options): New.
+	(gld${EMULATION_NAME}_list_options): Define only if BNDPLT or
+	PARSE_AND_LIST_OPTIONS is defined.
+	(ld_${EMULATION_NAME}_emulation): Replace
+	gld${EMULATION_NAME}_list_options with ${gld_list_options.
+
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18176
+	* ldlang.c (lang_size_sections): Cast shift expression.
+
+2015-04-07  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc32elf.em: Handle --no-pic-fixup.
+	(params): Init new field.
+	(ppc_before_allocation): Enable relaxation for pic_fixup.
+
+2015-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld.h (struct ld_config_type): Add new field: warn_orphan.
+	* ldlex.h (enum option_values): Add OPTION_WARN_ORPHAN and
+	OPTION_NO_WARN_ORPHAN.
+	* lexsup.c (ld_options): Add --warn-orphan and --no-warn-orphan.
+	(parse_args): Handle the new options.
+	* ldemul.c (ldemul_place_orphan): If requested, generate a warning
+	message when an orphan section is placed in the output file.
+	* ld.texinfo: Document the new option.
+	* NEWS: Mention the new feature.
+
+2015-04-02  Andrew Turner <andrew@freebsd.org>
+
+	* Makefile.am: Add FreeBSD aarch64 files.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add aarch64-*-freebsd* target triple.
+	* emulparams/aarch64fbsd.sh: New file.
+	* emulparams/aarch64fbsdb.sh: New file.
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Work

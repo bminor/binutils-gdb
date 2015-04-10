@@ -114,7 +114,6 @@ struct moxie_regset
   word		  regs[NUM_MOXIE_REGS + 1]; /* primary registers */
   word		  sregs[256];             /* special registers */
   word            cc;                   /* the condition code reg */
-  int		  exception;
   unsigned long long insts;                /* instruction counter */
 };
 
@@ -236,17 +235,17 @@ static const int tracing = 0;
 #define TRACE(str) if (tracing) fprintf(tracefile,"0x%08x, %s, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", opc, str, cpu.asregs.regs[0], cpu.asregs.regs[1], cpu.asregs.regs[2], cpu.asregs.regs[3], cpu.asregs.regs[4], cpu.asregs.regs[5], cpu.asregs.regs[6], cpu.asregs.regs[7], cpu.asregs.regs[8], cpu.asregs.regs[9], cpu.asregs.regs[10], cpu.asregs.regs[11], cpu.asregs.regs[12], cpu.asregs.regs[13], cpu.asregs.regs[14], cpu.asregs.regs[15]);
 
 void
-sim_resume (SIM_DESC sd, int step, int siggnal)
+sim_engine_run (SIM_DESC sd,
+		int next_cpu_nr, /* ignore  */
+		int nr_cpus, /* ignore  */
+		int siggnal) /* ignore  */
 {
   word pc, opc;
-  unsigned long long insts;
   unsigned short inst;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
   address_word cia = CIA_GET (scpu);
 
-  cpu.asregs.exception = step ? SIGTRAP: 0;
   pc = cpu.asregs.regs[PC_REGNO];
-  insts = cpu.asregs.insts;
 
   /* Run instructions here. */
   do 
@@ -339,7 +338,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		default:
 		  {
 		    TRACE("SIGILL3");
-		    cpu.asregs.exception = SIGILL;
+		    sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 		    break;
 		  }
 		}
@@ -390,7 +389,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		  break;
 		default:
 		  TRACE("SIGILL2");
-		  cpu.asregs.exception = SIGILL;
+		  sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 		  break;
 		}
 	    }
@@ -404,7 +403,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    case 0x00: /* bad */
 	      opc = opcode;
 	      TRACE("SIGILL0");
-	      cpu.asregs.exception = SIGILL;
+	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 	      break;
 	    case 0x01: /* ldi.l (immediate) */
 	      {
@@ -662,7 +661,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      {
 		opc = opcode;
 		TRACE("SIGILL0");
-		cpu.asregs.exception = SIGILL;
+		sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 		break;
 	      }
 	    case 0x19: /* jsr */
@@ -929,7 +928,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		  {
 		  case 0x1: /* SYS_exit */
 		    {
-		      cpu.asregs.exception = SIGQUIT;
+		      sim_engine_halt (sd, NULL, NULL, pc, sim_exited,
+				       cpu.asregs.regs[2]);
 		      break;
 		    }
 		  case 0x2: /* SYS_open */
@@ -1041,7 +1041,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      break;
 	    case 0x35: /* brk */
 	      TRACE("brk");
-	      cpu.asregs.exception = SIGTRAP;
+	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGTRAP);
 	      pc -= 2; /* Adjust pc */
 	      break;
 	    case 0x36: /* ldo.b */
@@ -1095,19 +1095,15 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    default:
 	      opc = opcode;
 	      TRACE("SIGILL1");
-	      cpu.asregs.exception = SIGILL;
+	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 	      break;
 	    }
 	}
 
-      insts++;
+      cpu.asregs.insts++;
       pc += 2;
-
-    } while (!cpu.asregs.exception);
-
-  /* Hide away the things we've cached while executing.  */
-  cpu.asregs.regs[PC_REGNO] = pc;
-  cpu.asregs.insts += insts;		/* instructions done ... */
+      cpu.asregs.regs[PC_REGNO] = pc;
+    } while (1);
 }
 
 int
@@ -1240,18 +1236,17 @@ load_dtb (SIM_DESC sd, const char *filename)
   FILE *f = fopen (filename, "rb");
   char *buf;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */ 
- if (f == NULL)
-    {
-      printf ("WARNING: ``%s'' could not be opened.\n", filename);
-      return;
-    }
+
+  /* Don't warn as the sim works fine w/out a device tree.  */
+  if (f == NULL)
+    return;
   fseek (f, 0, SEEK_END);
   size = ftell(f);
   fseek (f, 0, SEEK_SET);
   buf = alloca (size);
   if (size != fread (buf, 1, size, f))
     {
-      printf ("ERROR: error reading ``%s''.\n", filename);
+      sim_io_eprintf (sd, "ERROR: error reading ``%s''.\n", filename);
       return;
     }
   sim_core_write_buffer (sd, scpu, write_map, buf, 0xE0000000, size);

@@ -80,7 +80,7 @@ lookup_hash (uint32 ins, int size)
     {
       if (h->next == NULL)
 	{
-	  State.exception = SIGILL;
+	  State.exception = GDB_SIGNAL_ILL;
 	  State.pc_changed = 1; /* Don't increment the PC. */
 	  return NULL;
 	}
@@ -936,17 +936,14 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
     {
     case 0:
       break;
-#ifdef SIGBUS
-    case SIGBUS:
-#endif
-    case SIGSEGV:
+    case GDB_SIGNAL_BUS:
       SET_BPC (PC);
       SET_BPSW (PSW);
       SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
       JMP (AE_VECTOR_START);
       SLOT_FLUSH ();
       break;
-    case SIGILL:
+    case GDB_SIGNAL_ILL:
       SET_BPC (PC);
       SET_BPSW (PSW);
       SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
@@ -963,7 +960,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
       iaddr = imem_addr ((uint32)PC << 2);
       if (iaddr == State.mem.fault)
  	{
- 	  State.exception = SIGBUS;
+	  State.exception = GDB_SIGNAL_BUS;
  	  break;
  	}
  
@@ -1035,7 +1032,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   while ( !State.exception && !stop_simulator);
   
   if (step && !State.exception)
-    State.exception = SIGTRAP;
+    State.exception = GDB_SIGNAL_TRAP;
 }
 
 void

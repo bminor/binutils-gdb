@@ -703,47 +703,6 @@ static struct tramp_frame ppc64_linux_sighandler_tramp_frame = {
   ppc64_linux_sighandler_cache_init
 };
 
-
-/* Address to use for displaced stepping.  When debugging a stand-alone
-   SPU executable, entry_point_address () will point to an SPU local-store
-   address and is thus not usable as displaced stepping location.  We use
-   the auxiliary vector to determine the PowerPC-side entry point address
-   instead.  */
-
-static CORE_ADDR ppc_linux_entry_point_addr = 0;
-
-static void
-ppc_linux_inferior_created (struct target_ops *target, int from_tty)
-{
-  ppc_linux_entry_point_addr = 0;
-}
-
-static CORE_ADDR
-ppc_linux_displaced_step_location (struct gdbarch *gdbarch)
-{
-  if (ppc_linux_entry_point_addr == 0)
-    {
-      CORE_ADDR addr;
-
-      /* Determine entry point from target auxiliary vector.  */
-      if (target_auxv_search (&current_target, AT_ENTRY, &addr) <= 0)
-	error (_("Cannot find AT_ENTRY auxiliary vector entry."));
-
-      /* Make certain that the address points at real code, and not a
-	 function descriptor.  */
-      addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
-						 &current_target);
-
-      /* Inferior calls also use the entry point as a breakpoint location.
-	 We don't want displaced stepping to interfere with those
-	 breakpoints, so leave space.  */
-      ppc_linux_entry_point_addr = addr + 2 * PPC_INSN_SIZE;
-    }
-
-  return ppc_linux_entry_point_addr;
-}
-
-
 /* Return 1 if PPC_ORIG_R3_REGNUM and PPC_TRAP_REGNUM are usable.  */
 int
 ppc_linux_trap_reg_p (struct gdbarch *gdbarch)
@@ -1837,12 +1796,10 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
       /* Cell/B.E. cross-architecture unwinder support.  */
       frame_unwind_prepend_unwinder (gdbarch, &ppu2spu_unwind);
-
-      /* The default displaced_step_at_entry_point doesn't work for
-	 SPU stand-alone executables.  */
-      set_gdbarch_displaced_step_location (gdbarch,
-					   ppc_linux_displaced_step_location);
     }
+
+  set_gdbarch_displaced_step_location (gdbarch,
+				       linux_displaced_step_location);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 
@@ -1869,9 +1826,6 @@ _initialize_ppc_linux_tdep (void)
                          ppc_linux_init_abi);
   gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
                          ppc_linux_init_abi);
-
-  /* Attach to inferior_created observer.  */
-  observer_attach_inferior_created (ppc_linux_inferior_created);
 
   /* Attach to observers to track __spe_current_active_context.  */
   observer_attach_inferior_created (ppc_linux_spe_context_inferior_created);

@@ -22,7 +22,6 @@ SIM_EXTRA_CFLAGS = -DMODET
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-cpu.o \
-	sim-engine.o \
 	sim-hload.o \
 	armemu26.o armemu32.o arminit.o armos.o armsupp.o \
 	armvirt.o bag.o thumbemu.o wrapper.o \

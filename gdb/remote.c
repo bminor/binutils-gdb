@@ -2835,7 +2835,7 @@ remote_update_thread_list (struct target_ops *ops)
       /* CONTEXT now holds the current thread list on the remote
 	 target end.  Delete GDB-side threads no longer found on the
 	 target.  */
-      ALL_NON_EXITED_THREADS_SAFE (tp, tmp)
+      ALL_THREADS_SAFE (tp, tmp)
         {
 	  for (i = 0;
 	       VEC_iterate (thread_item_t, context.items, i, item);
@@ -9863,6 +9863,15 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   return ret;
 }
 
+/* Return nonzero if the filesystem accessed by the target_fileio_*
+   methods is the local filesystem, zero otherwise.  */
+
+static int
+remote_filesystem_is_local (struct target_ops *self)
+{
+  return 0;
+}
+
 /* Open FILENAME on the remote target, using FLAGS and MODE.  Return a
    remote file descriptor, or -1 if an error occurs (and set
    *REMOTE_ERRNO).  */
@@ -10169,113 +10178,6 @@ remote_hostio_close_cleanup (void *opaque)
   int remote_errno;
 
   remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno);
-}
-
-
-static void *
-remote_bfd_iovec_open (struct bfd *abfd, void *open_closure)
-{
-  const char *filename = bfd_get_filename (abfd);
-  int fd, remote_errno;
-  int *stream;
-
-  gdb_assert (remote_filename_p (filename));
-
-  fd = remote_hostio_open (find_target_at (process_stratum),
-			   filename + 7, FILEIO_O_RDONLY, 0, &remote_errno);
-  if (fd == -1)
-    {
-      errno = remote_fileio_errno_to_host (remote_errno);
-      bfd_set_error (bfd_error_system_call);
-      return NULL;
-    }
-
-  stream = xmalloc (sizeof (int));
-  *stream = fd;
-  return stream;
-}
-
-static int
-remote_bfd_iovec_close (struct bfd *abfd, void *stream)
-{
-  int fd = *(int *)stream;
-  int remote_errno;
-
-  xfree (stream);
-
-  /* Ignore errors on close; these may happen if the remote
-     connection was already torn down.  */
-  remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno);
-
-  /* Zero means success.  */
-  return 0;
-}
-
-static file_ptr
-remote_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
-			file_ptr nbytes, file_ptr offset)
-{
-  int fd = *(int *)stream;
-  int remote_errno;
-  file_ptr pos, bytes;
-
-  pos = 0;
-  while (nbytes > pos)
-    {
-      bytes = remote_hostio_pread (find_target_at (process_stratum),
-				   fd, (gdb_byte *) buf + pos, nbytes - pos,
-				   offset + pos, &remote_errno);
-      if (bytes == 0)
-        /* Success, but no bytes, means end-of-file.  */
-        break;
-      if (bytes == -1)
-	{
-	  errno = remote_fileio_errno_to_host (remote_errno);
-	  bfd_set_error (bfd_error_system_call);
-	  return -1;
-	}
-
-      pos += bytes;
-    }
-
-  return pos;
-}
-
-static int
-remote_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
-{
-  int fd = *(int *) stream;
-  int remote_errno;
-  int result;
-
-  result = remote_hostio_fstat (find_target_at (process_stratum),
-				fd, sb, &remote_errno);
-
-  if (result == -1)
-    {
-      errno = remote_fileio_errno_to_host (remote_errno);
-      bfd_set_error (bfd_error_system_call);
-    }
-
-  return result;
-}
-
-int
-remote_filename_p (const char *filename)
-{
-  return startswith (filename, REMOTE_SYSROOT_PREFIX);
-}
-
-bfd *
-remote_bfd_open (const char *remote_file, const char *target)
-{
-  bfd *abfd = gdb_bfd_openr_iovec (remote_file, target,
-				   remote_bfd_iovec_open, NULL,
-				   remote_bfd_iovec_pread,
-				   remote_bfd_iovec_close,
-				   remote_bfd_iovec_stat);
-
-  return abfd;
 }
 
 void
@@ -11814,9 +11716,11 @@ Specify the serial device it is connected to\n\
   remote_ops.to_supports_multi_process = remote_supports_multi_process;
   remote_ops.to_supports_disable_randomization
     = remote_supports_disable_randomization;
+  remote_ops.to_filesystem_is_local = remote_filesystem_is_local;
   remote_ops.to_fileio_open = remote_hostio_open;
   remote_ops.to_fileio_pwrite = remote_hostio_pwrite;
   remote_ops.to_fileio_pread = remote_hostio_pread;
+  remote_ops.to_fileio_fstat = remote_hostio_fstat;
   remote_ops.to_fileio_close = remote_hostio_close;
   remote_ops.to_fileio_unlink = remote_hostio_unlink;
   remote_ops.to_fileio_readlink = remote_hostio_readlink;

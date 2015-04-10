@@ -73,6 +73,7 @@ enum options
   OPTION_USES_GCC_ABI,
   OPTION_USES_RX_ABI,
   OPTION_CPU,
+  OPTION_DISALLOW_STRING_INSNS,
 };
 
 #define RX_SHORTOPTS ""
@@ -99,7 +100,8 @@ struct option md_longopts[] =
   {"mint-register", required_argument, NULL, OPTION_INT_REGS},
   {"mgcc-abi", no_argument, NULL, OPTION_USES_GCC_ABI},
   {"mrx-abi", no_argument, NULL, OPTION_USES_RX_ABI},
-  {"mcpu",required_argument,NULL,OPTION_CPU},
+  {"mcpu", required_argument, NULL, OPTION_CPU},
+  {"mno-allow-string-insns", no_argument, NULL, OPTION_DISALLOW_STRING_INSNS},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -173,6 +175,10 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
 	  break;
 	}
       return 1;
+
+    case OPTION_DISALLOW_STRING_INSNS:
+      elf_flags |= E_FLAG_RX_SINSNS_SET | E_FLAG_RX_SINSNS_NO;
+      return 1;
     }
   return 0;
 }
@@ -192,6 +198,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  --mpid\n"));
   fprintf (stream, _("  --mint-register=<value>\n"));
   fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610>\n"));
+  fprintf (stream, _("  --mno-allow-string-insns"));
 }
 
 static void
@@ -2621,6 +2628,14 @@ tc_gen_reloc (asection * sec ATTRIBUTE_UNUSED, fixS * fixp)
     }
 
   return reloc;
+}
+
+void
+rx_note_string_insn_use (void)
+{
+  if ((elf_flags & E_FLAG_RX_SINSNS_MASK) == (E_FLAG_RX_SINSNS_SET | E_FLAG_RX_SINSNS_NO))
+    as_bad (_("Use of an RX string instruction detected in a file being assembled without string instruction support"));
+  elf_flags |= E_FLAG_RX_SINSNS_SET | E_FLAG_RX_SINSNS_YES;
 }
 
 /* Set the ELF specific flags.  */

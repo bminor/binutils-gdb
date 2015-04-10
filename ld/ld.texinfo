@@ -2064,6 +2064,17 @@ option causes a warning to be issued whenever this case occurs.
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
 
+@kindex --warn-orphan
+@kindex --no-warn-orphan
+@cindex warnings, on orphan sections
+@cindex orphan sections, warnings on
+@item --warn-orphan
+The @option{--warn-orphan} option tells the linker to generate a
+warning message whenever it has to place an orphan section into the
+output file.  @xref{Orphan Sections}  The @option{--no-warn-orphan}
+option restores the default behaviour of just silently placing these
+sections.
+
 @kindex --warn-section-align
 @cindex warnings, on section alignment
 @cindex section alignment, warnings on
@@ -6413,8 +6424,10 @@ import tables. By default this option is turned off.
 @cindex BE8
 @kindex --be8
 The @samp{--be8} switch instructs @command{ld} to generate BE8 format
-executables.  This option is only valid when linking big-endian objects.
-The resulting image will contain big-endian data and little-endian code.
+executables.  This option is only valid when linking big-endian
+objects - ie ones which have been assembled with the @option{-EB}
+option.  The resulting image will contain big-endian data and
+little-endian code.
 
 @cindex TARGET1
 @kindex --target1-rel

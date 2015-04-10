@@ -865,6 +865,25 @@ class Target_x86_64 : public Sized_target<size, false>
     get_size_for_reloc(unsigned int, Relobj*);
   };
 
+  // Check if relocation against this symbol is a candidate for
+  // conversion from
+  // mov foo@GOTPCREL(%rip), %reg
+  // to lea foo(%rip), %reg.
+  static bool
+  can_convert_mov_to_lea(const Symbol* gsym)
+  {
+    gold_assert(gsym != NULL);
+    return (gsym->type() != elfcpp::STT_GNU_IFUNC
+	    && !gsym->is_undefined ()
+	    && !gsym->is_from_dynobj()
+	    && !gsym->is_preemptible()
+	    && (!parameters->options().shared()
+		|| (gsym->visibility() != elfcpp::STV_DEFAULT
+		    && gsym->visibility() != elfcpp::STV_PROTECTED)
+		|| parameters->options().Bsymbolic())
+	    && strcmp(gsym->name(), "_DYNAMIC") != 0);
+  }
+
   // Adjust TLS relocation type based on the options and whether this
   // is a local symbol.
   static tls::Tls_optimization
@@ -2458,8 +2477,27 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPLT64:
       {
-	// The symbol requires a GOT entry.
+	// The symbol requires a GOT section.
 	Output_data_got<64, false>* got = target->got_section(symtab, layout);
+
+	// If the relocation symbol isn't IFUNC,
+	// and is local, then we will convert
+	// mov foo@GOTPCREL(%rip), %reg
+	// to lea foo(%rip), %reg.
+	// in Relocate::relocate.
+	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	    && reloc.get_r_offset() >= 2
+	    && !is_ifunc)
+	  {
+	    section_size_type stype;
+	    const unsigned char* view = object->section_contents(data_shndx,
+								 &stype, true);
+	    if (view[reloc.get_r_offset() - 2] == 0x8b)
+	      break;
+	  }
+
+
+	// The symbol requires a GOT entry.
 	unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 
 	// For a STT_GNU_IFUNC symbol we want the PLT offset.  That
@@ -2867,6 +2905,22 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
       {
 	// The symbol requires a GOT entry.
 	Output_data_got<64, false>* got = target->got_section(symtab, layout);
+
+	// If we convert this from
+	// mov foo@GOTPCREL(%rip), %reg
+	// to lea foo(%rip), %reg.
+	// in Relocate::relocate, then there is nothing to do here.
+	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	    && reloc.get_r_offset() >= 2
+	    && Target_x86_64<size>::can_convert_mov_to_lea(gsym))
+	  {
+	    section_size_type stype;
+	    const unsigned char* view = object->section_contents(data_shndx,
+								 &stype, true);
+	    if (view[reloc.get_r_offset() - 2] == 0x8b)
+	      break;
+	  }
+
 	if (gsym->final_value_is_known())
 	  {
 	    // For a STT_GNU_IFUNC symbol we want the PLT address.
@@ -3340,7 +3394,6 @@ Target_x86_64<size>::Relocate::relocate(
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOT64:
     case elfcpp::R_X86_64_GOTPLT64:
-    case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPCREL64:
       if (gsym != NULL)
 	{
@@ -3486,10 +3539,38 @@ Target_x86_64<size>::Relocate::relocate(
 
     case elfcpp::R_X86_64_GOTPCREL:
       {
-	gold_assert(have_got_offset);
-	typename elfcpp::Elf_types<size>::Elf_Addr value;
-	value = target->got_plt_section()->address() + got_offset;
-	Relocate_functions<size, false>::pcrela32(view, value, addend, address);
+      // Convert
+      // mov foo@GOTPCREL(%rip), %reg
+      // to lea foo(%rip), %reg.
+      // if possible.
+      if (rela.get_r_offset() >= 2
+	  && view[-2] == 0x8b
+	  && ((gsym == NULL && !psymval->is_ifunc_symbol())
+	      || (gsym != NULL
+		  && Target_x86_64<size>::can_convert_mov_to_lea(gsym))))
+	{
+	  view[-2] = 0x8d;
+	  Relocate_functions<size, false>::pcrela32(view, object, psymval, addend,
+						    address);
+	}
+      else
+	{
+	  if (gsym != NULL)
+	    {
+	      gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+	      got_offset = gsym->got_offset(GOT_TYPE_STANDARD) - target->got_size();
+	    }
+	  else
+	    {
+	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	      gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
+	      got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
+			    - target->got_size());
+	    }
+	  typename elfcpp::Elf_types<size>::Elf_Addr value;
+	  value = target->got_plt_section()->address() + got_offset;
+	  Relocate_functions<size, false>::pcrela32(view, value, addend, address);
+	}
       }
       break;
 

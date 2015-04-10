@@ -10759,6 +10759,24 @@ Target_arm<big_endian>::tag_cpu_arch_combine(
       T(V7E_M),	// V6S_M.
       T(V7E_M)	// V7E_M.
     };
+  static const int v8[] =
+    {
+      T(V8),   // PRE_V4.
+      T(V8),   // V4.
+      T(V8),   // V4T.
+      T(V8),   // V5T.
+      T(V8),   // V5TE.
+      T(V8),   // V5TEJ.
+      T(V8),   // V6.
+      T(V8),   // V6KZ.
+      T(V8),   // V6T2.
+      T(V8),   // V6K.
+      T(V8),   // V7.
+      T(V8),   // V6_M.
+      T(V8),   // V6S_M.
+      T(V8),   // V7E_M.
+      T(V8)    // V8.
+    };
   static const int v4t_plus_v6_m[] =
     {
       -1,		// PRE_V4.
@@ -10775,6 +10793,7 @@ Target_arm<big_endian>::tag_cpu_arch_combine(
       T(V6_M),		// V6_M.
       T(V6S_M),		// V6S_M.
       T(V7E_M),		// V7E_M.
+      T(V8),		// V8.
       T(V4T_PLUS_V6_M)	// V4T plus V6_M.
     };
   static const int* comb[] =
@@ -10785,6 +10804,7 @@ Target_arm<big_endian>::tag_cpu_arch_combine(
       v6_m,
       v6s_m,
       v7e_m,
+      v8,
       // Pseudo-architecture.
       v4t_plus_v6_m
     };
@@ -10882,7 +10902,8 @@ Target_arm<big_endian>::tag_cpu_name_value(unsigned int value)
    "ARM v7",
    "ARM v6-M",
    "ARM v6S-M",
-   "ARM v7E-M"
+   "ARM v7E-M",
+   "ARM v8"
  };
  const size_t name_table_size = sizeof(name_table) / sizeof(name_table[0]);
 

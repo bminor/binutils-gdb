@@ -10,7 +10,7 @@ Section Headers:
   \[ 5\] \.rela\.got         RELA            0000814c 00114c 000024 0c  AI  2  11  4
   \[ 6\] \.rela\.neardata    RELA            00008170 001170 000018 0c  AI  2  12  4
   \[ 7\] \.dynamic          DYNAMIC         00008188 001188 0000b0 08  WA  3   0  4
-  \[ 8\] \.rela\.plt         RELA            10000000 002000 000018 0c  AI  2   9  4
+  \[ 8\] \.rela\.plt         RELA            10000000 002000 000018 0c  AI  2  11  4
   \[ 9\] \.plt              PROGBITS        10000020 002020 000060 18  AX  0   0 32
   \[10\] \.text             PROGBITS        10000080 002080 000080 00  AX  0   0 32
   \[11\] \.got              PROGBITS        10000100 002100 000028 00  WA  0   0  4

@@ -779,12 +779,6 @@ proc run_dump_test { name {extra_options {}} } {
 	set dfile $srcdir/$subdir/$opts(dump)
     }
 
-    if { [string match "*--compress-debug-sections*" $opts(as)] \
-	 && ![is_zlib_supported] } {
-	unsupported $testname
-	return
-    }
-
     # Time to setup xfailures.
     foreach targ $opts(xfail) {
 	setup_xfail $targ

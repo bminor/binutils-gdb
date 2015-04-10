@@ -1,3 +1,15 @@
+2015-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* rx.h (E_FLAG_RX_SINSNS_SET): New bit in e_flags field.
+	(E_FLAG_RX_SINSNS_YES): Likewise.
+	(E_FLAG_RX_SINSNS_MASK): New define.
+
+2015-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* external.h (Elf32_External_Chdr): New.
+	(Elf64_External_Chdr): Likewise.
+	* internal.h (Elf_Internal_Chdr): Likewise.
+
 2015-03-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* common.h (ELFOSABI_CLOUDABI): New.

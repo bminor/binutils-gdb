@@ -120,6 +120,10 @@ ldemul_open_dynamic_archive (const char *arch, search_dirs_type *search,
 lang_output_section_statement_type *
 ldemul_place_orphan (asection *s, const char *name, int constraint)
 {
+  if (config.warn_orphan)
+    einfo (_("%P: Warning: input section '%s' from file '%B' is not mentioned in linker script\n"),
+	   name, s->owner);
+
   if (ld_emulation->place_orphan)
     return (*ld_emulation->place_orphan) (s, name, constraint);
   return NULL;

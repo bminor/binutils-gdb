@@ -1175,7 +1175,12 @@ hash_symbol_entry (const struct objfile *objfile_context,
   if (name != NULL)
     hash += htab_hash_string (name);
 
-  hash += domain;
+  /* Because of symbol_matches_domain we need VAR_DOMAIN and STRUCT_DOMAIN
+     to map to the same slot.  */
+  if (domain == STRUCT_DOMAIN)
+    hash += VAR_DOMAIN * 7;
+  else
+    hash += domain * 7;
 
   return hash;
 }
@@ -1389,8 +1394,9 @@ set_symbol_cache_size_handler (char *args, int from_tty,
    The result is the symbol if found, SYMBOL_LOOKUP_FAILED if a previous lookup
    failed (and thus this one will too), or NULL if the symbol is not present
    in the cache.
-   *BSC_PTR, *SLOT_PTR are set to the cache and slot of the symbol, whether
-   found or not found.  */
+   If the symbol is not present in the cache, then *BSC_PTR and *SLOT_PTR are
+   set to the cache and slot of the symbol to save the result of a full lookup
+   attempt.  */
 
 static struct symbol *
 symbol_cache_lookup (struct symbol_cache *cache,
@@ -1416,8 +1422,6 @@ symbol_cache_lookup (struct symbol_cache *cache,
 
   hash = hash_symbol_entry (objfile_context, name, domain);
   slot = bsc->symbols + hash % bsc->size;
-  *bsc_ptr = bsc;
-  *slot_ptr = slot;
 
   if (eq_symbol_entry (slot, objfile_context, name, domain))
     {
@@ -1433,6 +1437,11 @@ symbol_cache_lookup (struct symbol_cache *cache,
 	return SYMBOL_LOOKUP_FAILED;
       return slot->value.found;
     }
+
+  /* Symbol is not present in the cache.  */
+
+  *bsc_ptr = bsc;
+  *slot_ptr = slot;
 
   if (symbol_lookup_debug)
     {
@@ -1582,14 +1591,16 @@ symbol_cache_dump (const struct symbol_cache *cache)
 	    case SYMBOL_SLOT_UNUSED:
 	      break;
 	    case SYMBOL_SLOT_NOT_FOUND:
-	      printf_filtered ("  [%-4u] = %s, %s (not found)\n", i,
+	      printf_filtered ("  [%4u] = %s, %s %s (not found)\n", i,
 			       host_address_to_string (slot->objfile_context),
-			       slot->value.not_found.name);
+			       slot->value.not_found.name,
+			       domain_name (slot->value.not_found.domain));
 	      break;
 	    case SYMBOL_SLOT_FOUND:
-	      printf_filtered ("  [%-4u] = %s, %s\n", i,
+	      printf_filtered ("  [%4u] = %s, %s %s\n", i,
 			       host_address_to_string (slot->objfile_context),
-			       SYMBOL_PRINT_NAME (slot->value.found));
+			       SYMBOL_PRINT_NAME (slot->value.found),
+			       domain_name (SYMBOL_DOMAIN (slot->value.found)));
 	      break;
 	    }
 	}

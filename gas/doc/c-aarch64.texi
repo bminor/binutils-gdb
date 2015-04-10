@@ -58,6 +58,7 @@ on the target processor.  The following processor names are recognized:
 @code{cortex-a53},
 @code{cortex-a57},
 @code{cortex-a72},
+@code{exynos-m1},
 @code{thunderx},
 @code{xgene1}
 and

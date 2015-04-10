@@ -171,22 +171,10 @@ get_error_message (void)
   return inst.parsing_error.error;
 }
 
-static inline void
-set_error_message (const char *error)
-{
-  inst.parsing_error.error = error;
-}
-
 static inline enum aarch64_operand_error_kind
 get_error_kind (void)
 {
   return inst.parsing_error.kind;
-}
-
-static inline void
-set_error_kind (enum aarch64_operand_error_kind kind)
-{
-  inst.parsing_error.kind = kind;
 }
 
 static inline void
@@ -1467,7 +1455,6 @@ static void mapping_state_2 (enum mstate state, int max_chars);
 /* Set the mapping state to STATE.  Only call this when about to
    emit some STATE bytes to the file.  */
 
-#define TRANSITION(from, to) (mapstate == (from) && state == (to))
 void
 mapping_state (enum mstate state)
 {
@@ -1484,9 +1471,25 @@ mapping_state (enum mstate state)
        alignment.  */
     record_alignment (now_seg, 2);
 
-  if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
-    /* This case will be evaluated later in the next else.  */
+#define TRANSITION(from, to) (mapstate == (from) && state == (to))
+  if (TRANSITION (MAP_UNDEFINED, MAP_DATA) && !subseg_text_p (now_seg))
+    /* Emit MAP_DATA within executable section in order.  Otherwise, it will be
+       evaluated later in the next else.  */
     return;
+  else if (TRANSITION (MAP_UNDEFINED, MAP_INSN))
+    {
+      /* Only add the symbol if the offset is > 0:
+	 if we're at the first frag, check it's size > 0;
+	 if we're not at the first frag, then for sure
+	 the offset is > 0.  */
+      struct frag *const frag_first = seg_info (now_seg)->frchainP->frch_root;
+      const int add_symbol = (frag_now != frag_first)
+	|| (frag_now_fix () > 0);
+
+      if (add_symbol)
+	make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
+    }
+#undef TRANSITION
 
   mapping_state_2 (state, 0);
 }
@@ -1507,24 +1510,9 @@ mapping_state_2 (enum mstate state, int max_chars)
        There is nothing else to do.  */
     return;
 
-  if (TRANSITION (MAP_UNDEFINED, MAP_INSN))
-    {
-      /* Only add the symbol if the offset is > 0:
-	 if we're at the first frag, check it's size > 0;
-	 if we're not at the first frag, then for sure
-	 the offset is > 0.  */
-      struct frag *const frag_first = seg_info (now_seg)->frchainP->frch_root;
-      const int add_symbol = (frag_now != frag_first)
-	|| (frag_now_fix () > 0);
-
-      if (add_symbol)
-	make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
-    }
-
   seg_info (now_seg)->tc_segment_info_data.mapstate = state;
   make_mapping_symbol (state, (valueT) frag_now_fix () - max_chars, frag_now);
 }
-#undef TRANSITION
 #else
 #define mapping_state(x)	/* nothing */
 #define mapping_state_2(x, y)	/* nothing */
@@ -1867,8 +1855,15 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  if (!need_pass_2)
+  /* Sections are assumed to start aligned. In executable section, there is no
+     MAP_DATA symbol pending. So we only align the address during
+     MAP_DATA --> MAP_INSN transition.
+     For other sections, this is not guaranteed, align it anyway.  */
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+  if (!need_pass_2 && ((subseg_text_p (now_seg) && mapstate == MAP_DATA)
+		       || !subseg_text_p (now_seg)))
     frag_align_code (2, 0);
+
 #ifdef OBJ_ELF
   mapping_state (MAP_INSN);
 #endif
@@ -5710,6 +5705,15 @@ md_assemble (char *str)
 	dump_opcode_operands (opcode);
 #endif /* DEBUG_AARCH64 */
 
+    /* Sections are assumed to start aligned. In executable section, there is no
+       MAP_DATA symbol pending. So we only align the address during
+       MAP_DATA --> MAP_INSN transition.
+       For other sections, this is not guaranteed, align it anyway.  */
+    enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+    if (!need_pass_2 && ((subseg_text_p (now_seg) && mapstate == MAP_DATA)
+			 || !subseg_text_p (now_seg)))
+      frag_align_code (2, 0);
+
       mapping_state (MAP_INSN);
 
       inst_base = &inst.base;
@@ -7320,6 +7324,9 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 				  AARCH64_FEATURE_CRC), "Cortex-A57"},
   {"cortex-a72", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				  AARCH64_FEATURE_CRC), "Cortex-A72"},
+  {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+				"Samsung Exynos M1"},
   {"thunderx", AARCH64_ARCH_V8, "Cavium ThunderX"},
   /* The 'xgene-1' name is an older name for 'xgene1', which was used
      in earlier releases and is superseded by 'xgene1' in all

@@ -5424,7 +5424,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	     between sections won't change.  This is better than
 	     simply subtracting 1 << max_alignment_power which is
 	     what we used to do here.  */
-	  expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
+	  expld.dataseg.base &= ~(((bfd_vma) 1 << max_alignment_power) - 1);
 	  /* It doesn't make much sense to go lower than the initial
 	     base.  That can only increase padding.  */
 	  if (expld.dataseg.base < initial_base)
@@ -6692,6 +6692,22 @@ lang_process (void)
   link_info.gc_sym_list = &entry_symbol;
   if (entry_symbol.name == NULL)
     link_info.gc_sym_list = ldlang_undef_chain_list_head;
+  if (link_info.init_function != NULL)
+    {
+      struct bfd_sym_chain *sym
+	= (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
+      sym->next = link_info.gc_sym_list;
+      sym->name = link_info.init_function;
+      link_info.gc_sym_list = sym;
+    }
+  if (link_info.fini_function != NULL)
+    {
+      struct bfd_sym_chain *sym
+	= (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
+      sym->next = link_info.gc_sym_list;
+      sym->name = link_info.fini_function;
+      link_info.gc_sym_list = sym;
+    }
 
   ldemul_after_open ();
   if (config.map_file != NULL)

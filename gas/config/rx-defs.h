@@ -62,6 +62,7 @@ extern void   rx_linkrelax_imm (int);
 extern void   rx_linkrelax_branch (void);
 extern int    rx_parse (void);
 extern int    rx_wrap (void);
+extern void   rx_note_string_insn_use (void);
 
 extern char * rx_lex_start;
 extern char * rx_lex_end;

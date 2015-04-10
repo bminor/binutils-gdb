@@ -27,7 +27,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "common-remote-fileio.h"
+#include "fileio.h"
 
 extern int remote_debug;
 
@@ -438,7 +438,7 @@ handle_fstat (char *own_buf, int *new_packet_len)
       return;
     }
 
-  remote_fileio_to_fio_stat (&st, &fst);
+  host_to_fileio_stat (&st, &fst);
 
   bytes_sent = hostio_reply_with_data (own_buf,
 				       (char *) &fst, sizeof (fst),

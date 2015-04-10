@@ -615,13 +615,6 @@ proc run_dump_test { name {extra_options {}} } {
 	}
     }
 
-    if { [string match "*--compress-debug-sections*" $opts(as)] \
-	 && ![is_zlib_supported] } {
-	unsupported $testname
-	return
-    }
-
-
     if { $opts(source) == "" } {
 	set sourcefile ${file}.s
     } else {

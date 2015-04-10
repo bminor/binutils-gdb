@@ -40,22 +40,16 @@ Garbage_collection::do_transitive_closure()
       // one by one.
       Section_id entry = this->worklist().front();
       this->worklist().pop();
-      if (this->referenced_list().find(entry)
-          == this->referenced_list().end()) 
-        {
-          this->referenced_list().insert(entry);
-        }
-      else
-        {
-          continue;
-        }
+      if (!this->referenced_list().insert(entry).second)
+        continue;
       Garbage_collection::Section_ref::iterator find_it = 
                 this->section_reloc_map().find(entry);
       if (find_it == this->section_reloc_map().end()) 
           continue;
-      Garbage_collection::Sections_reachable v = find_it->second;
+      const Garbage_collection::Sections_reachable &v = find_it->second;
       // Scan the vector of references for each work_list entry. 
-      for (Garbage_collection::Sections_reachable::iterator it_v = v.begin();
+      for (Garbage_collection::Sections_reachable::const_iterator it_v =
+               v.begin();
            it_v != v.end();
            ++it_v)
         {

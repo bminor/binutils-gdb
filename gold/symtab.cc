@@ -437,9 +437,12 @@ bool
 Symbol::final_value_is_known() const
 {
   // If we are not generating an executable, then no final values are
-  // known, since they will change at runtime.
-  if (parameters->options().output_is_position_independent()
-      || parameters->options().relocatable())
+  // known, since they will change at runtime, with the exception of
+  // TLS symbols in a position-independent executable.
+  if ((parameters->options().output_is_position_independent()
+       || parameters->options().relocatable())
+      && !(this->type() == elfcpp::STT_TLS
+           && parameters->options().pie()))
     return false;
 
   // If the symbol is not from an object file, and is not undefined,
@@ -3336,8 +3339,11 @@ Symbol_table::detect_odr_violations(const Task* task,
           first_object_name = locs->object->name();
           first_object_linenos = this->linenos_from_loc(task, *locs);
         }
+      if (first_object_linenos.empty())
+	continue;
 
       // Sort by Odr_violation_compare to make std::set_intersection work.
+      std::string first_object_canonical_result = first_object_linenos.back();
       std::sort(first_object_linenos.begin(), first_object_linenos.end(),
                 Odr_violation_compare());
 
@@ -3349,6 +3355,8 @@ Symbol_table::detect_odr_violations(const Task* task,
           if (linenos.empty())
             continue;
           // Sort by Odr_violation_compare to make std::set_intersection work.
+          gold_assert(!linenos.empty());
+          std::string second_object_canonical_result = linenos.back();
           std::sort(linenos.begin(), linenos.end(), Odr_violation_compare());
 
           Check_intersection intersection_result =
@@ -3367,13 +3375,11 @@ Symbol_table::detect_odr_violations(const Task* task,
               // which may not be the location we expect to intersect
               // with another definition.  We could print the whole
               // set of locations, but that seems too verbose.
-              gold_assert(!first_object_linenos.empty());
-              gold_assert(!linenos.empty());
               fprintf(stderr, _("  %s from %s\n"),
-                      first_object_linenos[0].c_str(),
+                      first_object_canonical_result.c_str(),
                       first_object_name.c_str());
               fprintf(stderr, _("  %s from %s\n"),
-                      linenos[0].c_str(),
+                      second_object_canonical_result.c_str(),
                       locs->object->name().c_str());
               // Only print one broken pair, to avoid needing to
               // compare against a list of the disjoint definition

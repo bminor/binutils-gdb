@@ -1,3 +1,51 @@
+2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (do_debug_sections): Use bit patterns.
+	(copy_object): Return FALSE for compress_zlib, compress_gnu_zlib
+	and compress_gabi_zlib on non-ELF input.
+	(copy_file): Don't check non-ELF input here.
+
+2015-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Report the setting of the string
+	insn using bits.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (do_debug_sections): Add compress_zlib,
+	compress_gnu_zlib and compress_gabi_zlib.
+	(copy_options): Use optional_argument on compress-debug-sections.
+	(copy_usage): Update --compress-debug-sections.
+	(copy_file): Handle compress_zlib, compress_gnu_zlib and
+	compress_gabi_zlib.
+	(copy_main): Handle
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* doc/binutils.texi: Document
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (copy_usage): Replace "--interleave [<number>]" with
+	--interleave[=<number>].
+
+2015-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_elf_section_flags): Support SHF_COMPRESSED.
+	(get_compression_header): New.
+	(process_section_headers): Dump compression header if needed.
+	(uncompress_section_contents): Don't free compressed_buffer here.
+	(load_specific_debug_section): Free the compressed buffer, update
+	the section buffer and the section size if uncompress is
+	successful.
+
+2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* MAINTAINERS: Update my e-mail address.
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

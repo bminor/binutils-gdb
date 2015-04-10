@@ -1,3 +1,191 @@
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp: Use
+	gdb_test_sequence and gdb_assert.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): Use
+	test messages that don't include the breakpoint address.
+
+2015-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/watchpoint-reuse-slot.exp (valid_addr_p): Return
+	false for some offset and width combinations which aren't
+	supported by linux kernel.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-over-lands-on-breakpoint.exp (do_test): New
+	procedure, factored out from ...
+	(top level): ... here.  Add "set displaced-stepping" testing axis.
+	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): New
+	parameter "displaced".  Use it.
+	(top level): Use foreach and add "set displaced-stepping" testing
+	axis.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-over-trips-on-watchpoint.c (child_function):
+	Remove comment.
+	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): Find
+	both the address of the instruction that triggers the watchpoint
+	and the address of the instruction immediately after, and use
+	those addresses for the test.  Fix comment.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/sigstep.exp (breakpoint_to_handler)
+	(breakpoint_to_handler_entry): New parameter 'displaced'.  Use it.
+	Test "backtrace" in handler.
+	(breakpoint_over_handler): New parameter 'displaced'.  Use it.
+	(top level): Add new "displaced" test axis to
+	breakpoint_to_handler, breakpoint_to_handler_entry and
+	breakpoint_over_handler.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18216
+	* gdb.threads/multiple-step-overs.exp: Remove expected eof.
+
+2015-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-disp-step.S (main): Call test_add_rn_pc.
+	(test_add_rn_pc): New function.
+	* gdb.arch/arm-disp-step.exp (test_add_rn_pc): New proc.
+	(top level): Invoke test_add_rn_pc.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13858
+	* gdb.base/step-over-no-symbols.exp: New file.
+
+2015-04-09  Andy Wingo  <wingo@igalia.com>
+
+	* gdb.guile/scm-frame.exp: Add frame-read-register tests, modelled
+	after the Python tests.
+
+2015-04-08  Keith Seitz  <keiths@redhat.com>
+
+	PR python/16699
+	* gdb.python/py-completion.exp: New tests for completion.
+	* gdb.python/py-completion.py (CompleteLimit1): New class.
+	(CompleteLimit2): Likewise.
+	(CompleteLimit3): Likewise.
+	(CompleteLimit4): Likewise.
+	(CompleteLimit5): Likewise.
+	(CompleteLimit6): Likewise.
+	(CompleteLimit7): Likewise.
+
+2015-04-08  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18214
+	PR gdb/18216
+	* gdb.threads/multiple-step-overs.c (sigusr1_handler): New
+	function.
+	(main): Install it as SIGUSR1 handler.
+	* gdb.threads/multiple-step-overs.exp (setup): Remove 'prefix'
+	parameter.  Always use "setup" as prefix.  Toggle "set
+	displaced-stepping" off/on depending on global.  Don't switch to
+	thread 1 here.
+	(top level): Add displaced stepping "off/on" test axis.  Update
+	"setup" calls.  Wrap each subtest with with_test_prefix.  Test
+	continuing with a queued signal in each thread.
+
+2015-04-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/actions.exp: Use gdb_load before gdb_run_cmd.
+	* gdb.trace/infotrace.exp: Use gdb_load before gdb_run_cmd.  Use
+	gdb_breakpoint instead of gdb_test that doesn't expect anything.
+	Return early if running to main fails.
+	* gdb.trace/while-stepping.exp: Likewise.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/interrupt.exp: Don't skip if $inferior_spawn_id !=
+	$gdb_spawn_id.  Use send_inferior and $inferior_spawn_id to
+	interact with inferior program.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (inferior_spawn_id): New global.
+	(gdb_test_multiple): Handle "-i".  Reset the spawn id to GDB's
+	spawn id after processing the user code.
+	(default_gdb_start): Set inferior_spawn_id.
+	(send_inferior): New procedure.
+	* lib/gdbserver-support.exp (gdbserver_start): Set
+	inferior_spawn_id.
+	(close_gdbserver, gdb_exit): Unset inferior_spawn_id.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_finish): Delete persistent gdbserver handling.
+	* lib/gdbserver-support.exp (gdbserver_start): Make
+	$server_spawn_id global.
+	(gdbserver_start): Don't wait for gdbserver's spawn id with
+	expect_background.
+	(close_gdbserver): New procedure.
+	(gdb_exit): Rename the default version and reimplement.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+        * lib/gdb.exp (gdb_test_multiple): When processing an argument,
+	append the substituted item, not the original item.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/interrupt.exp: Use gdb_test_multiple instead of
+	gdb_expect.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/interrupt.exp: Don't handle the case of the inferior
+	output appearing once only.
+
+2015-04-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/actions.exp: Use gdb_breakpoint instead of gdb_test
+	that doesn't expect anything.  Return early if running to main
+	fails.
+
+2015-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/non-stop-fair-events.c (SECONDS): New macro.
+	(child_function): Call alarm.
+	(main): Move call to alarm into the loop.
+	* gdb.threads/non-stop-fair-events.exp: Build program with
+	-DTIMEOUT=$timeout.
+
+2015-04-06  Doug Evans  <xdje42@gmail.com>
+
+	* lib/pascal.exp (gpc_compile): Rename dest arg to destfile.
+	Fix dest parameter to board_info.
+	(fpc_compile): Ditto.
+	(gdb_compile_pascal): Rename dest arg to destfile.
+
+2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/funcall_ref.exp: New file.
+	* gdb.ada/funcall_ref/foo.adb: New file.
+
+2015-04-02  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/no-unwaited-for-left.exp: Set up kfail if target
+	is remote.
+
+2015-04-02  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/break-probes.exp: Cope with "target:" sysroot.
+
+2015-04-01  Sasha Smundak  <asmundak@google.com>
+
+	* gdb.python/py-unwind-maint.c: New file.
+	* gdb.python/py-unwind-maint.exp: New test.
+	* gdb.python/py-unwind-maint.py: New file.
+	* gdb.python/py-unwind.c: New file.
+	* gdb.python/py-unwind.exp: New test.
+	* gdb.python/py-unwind.py: New test.
+
 2015-04-01  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/manythreads.exp (interrupt_and_wait): Pass $message

@@ -1,3 +1,92 @@
+2015-04-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18198
+	* doc/c-arm.texi (ARM Options): Add a note about the interaction of
+	the -EB option with the linker's --be8 option.
+
+2015-04-09  Hans-Peter Nilsson  <hp@axis.com>
+
+	* doc/c-rx.texi: Fix markup typos in last change.
+
+2015-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (enum options): Add OPTION_DISALLOW_STRING_INSNS.
+	(md_longopts): Add -mno-allow-string-insns.
+	(md_parse_option): Handle -mno-allow-string-insns.
+	(md_show_usage): Mention -mno-allow-string-insns.
+	(rx_note_string_insn_use): New function.  Produces an error
+	message if a string insn is used when it is not allowed.
+	* config/rx-parse.y (SCMPU): Call rx_note_string_insn_use.
+	(SMOVU, SMOVB, SMOVF, SUNTIL, SWHILE, RMPA): Likewise.
+	* config/rx-defs.h (rx_note_string_insn_use): Prototype.
+	* doc/c-rx.texi: Document -mno-allow-string-insns.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.c (show_usage): Update --compress-debug-sections.
+	(std_longopts): Use optional_argument on compress-debug-sections.
+	(parse_args): Handle
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* as.h (compressed_debug_section_type): New.
+	(flag_compress_debug): Change type to compressed_debug_section_type.
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* write.c (compress_debug): Set BFD_COMPRESS_GABI for
+	--compress-debug-sections=zlib-gabi.  Call
+	bfd_get_compression_header_size to get compression header size.
+	Don't rename section name for --compress-debug-sections=zlib-gabi.
+	* config/tc-i386.c (compressed_debug_section_type): Set to
+	COMPRESS_DEBUG_ZLIB.
+	* doc/as.texinfo: Document
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+
+2015-04-07  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (mapping_state): Use subseg_text_p.
+	(s_aarch64_inst): Likewise.
+	(md_assemble): Likewise.
+
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (compress_debug): Use bfd_putb64 to write uncompressed
+	section size.
+
+2015-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (compress_debug): Don't write the zlib header if
+	compressed section size is the same as before compression.
+
+2015-04-02  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18189
+	* config/tc-microblaze.c (parse_imm): Use offsetT as the type for
+	min and max parameters.  Sign extend values before testing.
+
+2015-04-02  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (mapping_state): Emit MAP_DATA within text section in order.
+	(mapping_state_2): Don't emit MAP_DATA here.
+	(s_aarch64_inst): Align frag during state transition.
+	(md_assemble): Likewise.
+
+2015-04-02  Ed Maste  <emaste@freebsd.org>
+
+	* config/tc-aarch64.c (set_error_kind): Delete.
+	(set_error_message): Delete.
+
+2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-04-01  Evandro Menezes  <e.menezes@samsung.com>
+
+	* config/tc-aarch64.c: Add support for Samsung Exynos M1.
+	* doc/c-aarch64.texi (-mcpu=): Add "exynos-m1".
+
+2015-04-01  Evandro Menezes  <e.menezes@samsung.com>
+
+	* config/tc-arm.c: Add support for Samsung Exynos M1.
+	* doc/c-arm.texi (-mcpu=): Add "exynos-m1".
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

@@ -28,15 +28,12 @@ SIM_OBJS = \
 	interp.o \
 	machs.o \
 	sim-cpu.o \
-	sim-engine.o \
 	sim-hload.o \
-	sim-hrw.o \
 	sim-model.o \
 	sim-reason.o \
 	sim-reg.o \
 	sim-resume.o \
-	sim-stop.o \
-	$(SIM_EXTRA_OBJS)
+	sim-stop.o
 
 INCLUDE = bfin-sim.h
 

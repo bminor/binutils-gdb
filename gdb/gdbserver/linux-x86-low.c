@@ -561,9 +561,6 @@ x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 
   switch (type)
     {
-    case raw_bkpt_type_sw:
-      return insert_memory_breakpoint (bp);
-
     case raw_bkpt_type_hw:
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:
@@ -590,9 +587,6 @@ x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 
   switch (type)
     {
-    case raw_bkpt_type_sw:
-      return remove_memory_breakpoint (bp);
-
     case raw_bkpt_type_hw:
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:

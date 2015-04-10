@@ -1749,9 +1749,8 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   }
 
   // Return the addend to use for a target specific relocation.
-  typename elfcpp::Elf_types<size>::Elf_Addr
-  do_reloc_addend(void* arg, unsigned int r_type,
-		  typename elfcpp::Elf_types<size>::Elf_Addr addend) const;
+  uint64_t
+  do_reloc_addend(void* arg, unsigned int r_type, uint64_t addend) const;
 
   // Return the PLT section.
   uint64_t
@@ -4389,10 +4388,9 @@ Target_aarch64<size, big_endian>::new_stub_table(
 
 
 template<int size, bool big_endian>
-typename elfcpp::Elf_types<size>::Elf_Addr
+uint64_t
 Target_aarch64<size, big_endian>::do_reloc_addend(
-    void* arg, unsigned int r_type,
-    typename elfcpp::Elf_types<size>::Elf_Addr) const
+    void* arg, unsigned int r_type, uint64_t) const
 {
   gold_assert(r_type == elfcpp::R_AARCH64_TLSDESC);
   uintptr_t intarg = reinterpret_cast<uintptr_t>(arg);

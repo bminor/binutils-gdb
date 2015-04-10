@@ -116,6 +116,18 @@ foreach t $test_list {
     run_dump_test [file rootname $t]
 }
 
+# Check that the --warn-orphan option works correctly.
+run_ld_link_tests {
+    {"Report orphan sections"
+	"--script orphan.ld --warn-orphan"
+	""
+	""
+	{orphan.s}
+	{ { ld "orphan-5.l" } }
+	"orphan"
+    }
+}
+
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {

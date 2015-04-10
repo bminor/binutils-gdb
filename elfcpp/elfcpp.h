@@ -429,6 +429,7 @@ enum SHF
   SHF_OS_NONCONFORMING = 0x100,
   SHF_GROUP = 0x200,
   SHF_TLS = 0x400,
+  SHF_COMPRESSED = 0x800,
   SHF_MASKOS = 0x0ff00000,
   SHF_MASKPROC = 0xf0000000,
 
@@ -449,6 +450,17 @@ enum SHF
 
   // x86_64 specific large section.
   SHF_X86_64_LARGE = 0x10000000
+};
+
+// Values which appear in the first Elf_WXword of the section data
+// of a SHF_COMPRESSED section.
+enum
+{
+  ELFCOMPRESS_ZLIB = 1,
+  ELFCOMPRESS_LOOS = 0x60000000,
+  ELFCOMPRESS_HIOS = 0x6fffffff,
+  ELFCOMPRESS_LOPROC = 0x70000000,
+  ELFCOMPRESS_HIPROC = 0x7fffffff,
 };
 
 // Bit flags which appear in the first 32-bit word of the section data
@@ -997,6 +1009,8 @@ struct Elf_sizes
   static const int phdr_size = sizeof(internal::Phdr_data<size>);
   // Size of ELF section header.
   static const int shdr_size = sizeof(internal::Shdr_data<size>);
+  // Size of ELF compression header.
+  static const int chdr_size = sizeof(internal::Chdr_data<size>);
   // Size of ELF symbol table entry.
   static const int sym_size = sizeof(internal::Sym_data<size>);
   // Sizes of ELF reloc entries.
@@ -1270,6 +1284,65 @@ class Shdr_write
 
  private:
   internal::Shdr_data<size>* p_;
+};
+
+// Accessor class for an ELF compression header.
+
+template<int size, bool big_endian>
+class Chdr
+{
+ public:
+  Chdr(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Chdr_data<size>*>(p))
+  { }
+
+  template<typename File>
+  Chdr(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Chdr_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  typename Elf_types<size>::Elf_WXword
+  get_ch_type() const
+  { return Convert<size, big_endian>::convert_host(this->p_->ch_type); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_ch_size() const
+  { return Convert<size, big_endian>::convert_host(this->p_->ch_size); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_ch_addralign() const
+  { return
+      Convert<size, big_endian>::convert_host(this->p_->ch_addralign); }
+
+ private:
+  const internal::Chdr_data<size>* p_;
+};
+
+// Write class for an ELF compression header.
+
+template<int size, bool big_endian>
+class Chdr_write
+{
+ public:
+  Chdr_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Chdr_data<size>*>(p))
+  { }
+
+  void
+  put_ch_type(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->ch_type = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_ch_size(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->ch_size = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_ch_addralign(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->ch_addralign = Convert<size, big_endian>::convert_host(v); }
+
+ private:
+  internal::Chdr_data<size>* p_;
 };
 
 // Accessor class for an ELF segment header.

@@ -4030,6 +4030,23 @@ linux_nat_thread_alive (struct target_ops *ops, ptid_t ptid)
   return linux_thread_alive (ptid);
 }
 
+/* Implement the to_update_thread_list target method for this
+   target.  */
+
+static void
+linux_nat_update_thread_list (struct target_ops *ops)
+{
+  if (linux_supports_traceclone ())
+    {
+      /* With support for clone events, we add/delete threads from the
+	 list as clone/exit events are processed, so just try deleting
+	 exited threads still in the thread list.  */
+      delete_exited_threads ();
+    }
+  else
+    prune_threads ();
+}
+
 static char *
 linux_nat_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
@@ -4854,6 +4871,7 @@ linux_nat_add_target (struct target_ops *t)
   t->to_kill = linux_nat_kill;
   t->to_mourn_inferior = linux_nat_mourn_inferior;
   t->to_thread_alive = linux_nat_thread_alive;
+  t->to_update_thread_list = linux_nat_update_thread_list;
   t->to_pid_to_str = linux_nat_pid_to_str;
   t->to_thread_name = linux_nat_thread_name;
   t->to_has_thread_control = tc_schedlock;

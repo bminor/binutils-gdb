@@ -23,9 +23,7 @@ SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	simops.o interp.o \
 	itable.o semantics.o idecode.o icache.o engine.o irun.o support.o \
-	sim-engine.o \
 	sim-hload.o \
-	sim-hrw.o \
 	sim-resume.o \
 	sim-reason.o \
 	sim-stop.o

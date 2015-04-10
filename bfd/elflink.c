@@ -2676,13 +2676,9 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
   /* No error if extern_protected_data is true.  */
   if (h->protected_def
       && !get_elf_backend_data (dynbss->owner)->extern_protected_data)
-    {
-      info->callbacks->einfo
-	(_("%P: copy reloc against protected `%T' is invalid\n"),
-	 h->root.root.string);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
+    info->callbacks->einfo
+      (_("%P: copy reloc against protected `%T' is dangerous\n"),
+       h->root.root.string);
 
   return TRUE;
 }

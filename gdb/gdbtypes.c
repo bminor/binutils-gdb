@@ -1748,13 +1748,9 @@ stub_noname_complaint (void)
 /* Worker for is_dynamic_type.  */
 
 static int
-is_dynamic_type_internal (struct type *type, int top_level)
+is_dynamic_type_internal (struct type *type)
 {
   type = check_typedef (type);
-
-  /* We only want to recognize references at the outermost level.  */
-  if (top_level && TYPE_CODE (type) == TYPE_CODE_REF)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
 
   /* Types that have a dynamic TYPE_DATA_LOCATION are considered
      dynamic, even if the type itself is statically defined.
@@ -1777,7 +1773,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	   of the range type are static.  It allows us to assume that
 	   the subtype of a static range type is also static.  */
 	return (!has_static_range (TYPE_RANGE_DATA (type))
-		|| is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0));
+		|| is_dynamic_type_internal (TYPE_TARGET_TYPE (type)));
       }
 
     case TYPE_CODE_ARRAY:
@@ -1786,9 +1782,9 @@ is_dynamic_type_internal (struct type *type, int top_level)
 
 	/* The array is dynamic if either the bounds are dynamic,
 	   or the elements it contains have a dynamic contents.  */
-	if (is_dynamic_type_internal (TYPE_INDEX_TYPE (type), 0))
+	if (is_dynamic_type_internal (TYPE_INDEX_TYPE (type)))
 	  return 1;
-	return is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0);
+	return is_dynamic_type_internal (TYPE_TARGET_TYPE (type));
       }
 
     case TYPE_CODE_STRUCT:
@@ -1798,7 +1794,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
 
 	for (i = 0; i < TYPE_NFIELDS (type); ++i)
 	  if (!field_is_static (&TYPE_FIELD (type, i))
-	      && is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i), 0))
+	      && is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i)))
 	    return 1;
       }
       break;
@@ -1812,11 +1808,11 @@ is_dynamic_type_internal (struct type *type, int top_level)
 int
 is_dynamic_type (struct type *type)
 {
-  return is_dynamic_type_internal (type, 1);
+  return is_dynamic_type_internal (type);
 }
 
 static struct type *resolve_dynamic_type_internal
-  (struct type *type, struct property_addr_info *addr_stack, int top_level);
+  (struct type *type, struct property_addr_info *addr_stack);
 
 /* Given a dynamic range type (dyn_range_type) and a stack of
    struct property_addr_info elements, return a static version
@@ -1864,7 +1860,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
   static_target_type
     = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (dyn_range_type),
-				     addr_stack, 0);
+				     addr_stack);
   static_range_type = create_range_type (copy_type (dyn_range_type),
 					 static_target_type,
 					 &low_bound, &high_bound);
@@ -1932,7 +1928,7 @@ resolve_dynamic_union (struct type *type,
 	continue;
 
       t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
-					 addr_stack, 0);
+					 addr_stack);
       TYPE_FIELD_TYPE (resolved_type, i) = t;
       if (TYPE_LENGTH (t) > max_len)
 	max_len = TYPE_LENGTH (t);
@@ -1989,7 +1985,7 @@ resolve_dynamic_struct (struct type *type,
 
       TYPE_FIELD_TYPE (resolved_type, i)
 	= resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
-					 &pinfo, 0);
+					 &pinfo);
       gdb_assert (TYPE_FIELD_LOC_KIND (resolved_type, i)
 		  == FIELD_LOC_KIND_BITPOS);
 
@@ -2020,23 +2016,21 @@ resolve_dynamic_struct (struct type *type,
 
 static struct type *
 resolve_dynamic_type_internal (struct type *type,
-			       struct property_addr_info *addr_stack,
-			       int top_level)
+			       struct property_addr_info *addr_stack)
 {
   struct type *real_type = check_typedef (type);
   struct type *resolved_type = type;
   struct dynamic_prop *prop;
   CORE_ADDR value;
 
-  if (!is_dynamic_type_internal (real_type, top_level))
+  if (!is_dynamic_type_internal (real_type))
     return type;
 
   if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {
       resolved_type = copy_type (type);
       TYPE_TARGET_TYPE (resolved_type)
-	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr_stack,
-					 top_level);
+	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr_stack);
     }
   else 
     {
@@ -2045,21 +2039,6 @@ resolve_dynamic_type_internal (struct type *type,
 
       switch (TYPE_CODE (type))
 	{
-	case TYPE_CODE_REF:
-	  {
-	    struct property_addr_info pinfo;
-
-	    pinfo.type = check_typedef (TYPE_TARGET_TYPE (type));
-	    pinfo.addr = read_memory_typed_address (addr_stack->addr, type);
-	    pinfo.next = addr_stack;
-
-	    resolved_type = copy_type (type);
-	    TYPE_TARGET_TYPE (resolved_type)
-	      = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
-					       &pinfo, top_level);
-	    break;
-	  }
-
 	case TYPE_CODE_ARRAY:
 	  resolved_type = resolve_dynamic_array (type, addr_stack);
 	  break;
@@ -2096,7 +2075,7 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
 {
   struct property_addr_info pinfo = {check_typedef (type), addr, NULL};
 
-  return resolve_dynamic_type_internal (type, &pinfo, 1);
+  return resolve_dynamic_type_internal (type, &pinfo);
 }
 
 /* See gdbtypes.h  */

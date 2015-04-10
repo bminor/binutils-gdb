@@ -825,6 +825,12 @@ struct target_ops
 
     /* Target file operations.  */
 
+    /* Return nonzero if the filesystem accessed by the
+       target_fileio_* methods is the local filesystem,
+       zero otherwise.  */
+    int (*to_filesystem_is_local) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (1);
+
     /* Open FILENAME on the target, using FLAGS and MODE.  Return a
        target file descriptor, or -1 if an error occurs (and set
        *TARGET_ERRNO).  */
@@ -845,6 +851,12 @@ struct target_ops
     int (*to_fileio_pread) (struct target_ops *,
 			    int fd, gdb_byte *read_buf, int len,
 			    ULONGEST offset, int *target_errno);
+
+    /* Get information about the file opened as FD and put it in
+       SB.  Return 0 on success, or -1 if an error occurs (and set
+       *TARGET_ERRNO).  */
+    int (*to_fileio_fstat) (struct target_ops *,
+			    int fd, struct stat *sb, int *target_errno);
 
     /* Close FD on the target.  Return 0, or -1 if an error occurs
        (and set *TARGET_ERRNO).  */
@@ -1915,6 +1927,11 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 /* Target file operations.  */
 
+/* Return nonzero if the filesystem accessed by the target_fileio_*
+   methods is the local filesystem, zero otherwise.  */
+#define target_filesystem_is_local() \
+  current_target.to_filesystem_is_local (&current_target)
+
 /* Open FILENAME on the target, using FLAGS and MODE.  Return a
    target file descriptor, or -1 if an error occurs (and set
    *TARGET_ERRNO).  */
@@ -1932,6 +1949,12 @@ extern int target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
    (and set *TARGET_ERRNO).  */
 extern int target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 				ULONGEST offset, int *target_errno);
+
+/* Get information about the file opened as FD on the target
+   and put it in SB.  Return 0 on success, or -1 if an error
+   occurs (and set *TARGET_ERRNO).  */
+extern int target_fileio_fstat (int fd, struct stat *sb,
+				int *target_errno);
 
 /* Close FD on the target.  Return 0, or -1 if an error occurs
    (and set *TARGET_ERRNO).  */

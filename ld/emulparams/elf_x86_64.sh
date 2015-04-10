@@ -36,7 +36,14 @@ case "$target" in
     case "$EMULATION_NAME" in
       *64*)
         LIBPATH_SUFFIX=64
-        BNDPLT=yes
+	PARSE_AND_LIST_OPTIONS='
+  fprintf (file, _("\
+  -z bndplt                   Always generate BND prefix in PLT entries\n"));
+'
+	PARSE_AND_LIST_ARGS_CASE_Z='
+      else if (strcmp (optarg, "bndplt") == 0)
+	link_info.bndplt = TRUE;
+'
         ;;
     esac
     ;;

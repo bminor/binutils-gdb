@@ -370,8 +370,18 @@ COMMON int flag_strip_local_absolute;
 /* True if we should generate a traditional format object file.  */
 COMMON int flag_traditional_format;
 
-/* TRUE if debug sections should be compressed.  */
-COMMON int flag_compress_debug;
+/* Types of compressed debug sections.  We currently support zlib.  */
+enum compressed_debug_section_type
+{
+  COMPRESS_DEBUG_NONE = 0,
+  COMPRESS_DEBUG,
+  COMPRESS_DEBUG_ZLIB,
+  COMPRESS_DEBUG_GNU_ZLIB,
+  COMPRESS_DEBUG_GABI_ZLIB
+};
+
+/* Type of compressed debug sections we should generate.   */
+COMMON enum compressed_debug_section_type flag_compress_debug;
 
 /* TRUE if .note.GNU-stack section with SEC_CODE should be created */
 COMMON int flag_execstack;

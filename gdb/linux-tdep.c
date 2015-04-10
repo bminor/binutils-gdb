@@ -445,7 +445,7 @@ read_mapping (const char *line,
 static void
 decode_vmflags (char *p, struct smaps_vmflags *v)
 {
-  char *saveptr;
+  char *saveptr = NULL;
   const char *s;
 
   v->initialized_p = 1;
@@ -2346,6 +2346,37 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
     error (_("Failed inferior mmap call for %s bytes, errno is changed."),
 	   pulongest (size));
   return retval;
+}
+
+/* See linux-tdep.h.  */
+
+CORE_ADDR
+linux_displaced_step_location (struct gdbarch *gdbarch)
+{
+  CORE_ADDR addr;
+  int bp_len;
+
+  /* Determine entry point from target auxiliary vector.  This avoids
+     the need for symbols.  Also, when debugging a stand-alone SPU
+     executable, entry_point_address () will point to an SPU
+     local-store address and is thus not usable as displaced stepping
+     location.  The auxiliary vector gets us the PowerPC-side entry
+     point address instead.  */
+  if (target_auxv_search (&current_target, AT_ENTRY, &addr) <= 0)
+    error (_("Cannot find AT_ENTRY auxiliary vector entry."));
+
+  /* Make certain that the address points at real code, and not a
+     function descriptor.  */
+  addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
+					     &current_target);
+
+  /* Inferior calls also use the entry point as a breakpoint location.
+     We don't want displaced stepping to interfere with those
+     breakpoints, so leave space.  */
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &bp_len);
+  addr += bp_len * 2;
+
+  return addr;
 }
 
 /* Display whether the gcore command is using the

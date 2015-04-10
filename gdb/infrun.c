@@ -1099,7 +1099,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
      them.  Deleting them now rather than at the next user-visible
      stop provides a nicer sequence of events for user and MI
      notifications.  */
-  ALL_NON_EXITED_THREADS_SAFE (th, tmp)
+  ALL_THREADS_SAFE (th, tmp)
     if (ptid_get_pid (th->ptid) == pid && !ptid_equal (th->ptid, ptid))
       delete_thread (th->ptid);
 
@@ -1465,6 +1465,20 @@ get_displaced_stepping_state (int pid)
   return NULL;
 }
 
+/* Return true if process PID has a thread doing a displaced step.  */
+
+static int
+displaced_step_in_progress (int pid)
+{
+  struct displaced_step_inferior_state *displaced;
+
+  displaced = get_displaced_stepping_state (pid);
+  if (displaced != NULL && !ptid_equal (displaced->step_ptid, null_ptid))
+    return 1;
+
+  return 0;
+}
+
 /* Add a new displaced stepping state for process PID to the displaced
    stepping state list, or return a pointer to an already existing
    entry, if it already exists.  Never returns NULL.  */
@@ -1796,13 +1810,17 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
 
   displaced_step_restore (displaced, displaced->step_ptid);
 
-  /* Did the instruction complete successfully?  */
-  if (signal == GDB_SIGNAL_TRAP)
-    {
-      /* Fixup may need to read memory/registers.  Switch to the
-	 thread that we're fixing up.  */
-      switch_to_thread (event_ptid);
+  /* Fixup may need to read memory/registers.  Switch to the thread
+     that we're fixing up.  Also, target_stopped_by_watchpoint checks
+     the current thread.  */
+  switch_to_thread (event_ptid);
 
+  /* Did the instruction complete successfully?  */
+  if (signal == GDB_SIGNAL_TRAP
+      && !(target_stopped_by_watchpoint ()
+	   && (gdbarch_have_nonsteppable_watchpoint (displaced->step_gdbarch)
+	       || target_have_steppable_watchpoint)))
+    {
       /* Fix up the resulting state.  */
       gdbarch_displaced_step_fixup (displaced->step_gdbarch,
                                     displaced->step_closure,
@@ -2047,11 +2065,27 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
      happens to apply to another thread.  */
   tp->suspend.stop_signal = GDB_SIGNAL_0;
 
-  /* Advise target which signals may be handled silently.  If we have
-     removed breakpoints because we are stepping over one (in any
-     thread), we need to receive all signals to avoid accidentally
-     skipping a breakpoint during execution of a signal handler.  */
-  if (step_over_info_valid_p ())
+  /* Advise target which signals may be handled silently.
+
+     If we have removed breakpoints because we are stepping over one
+     in-line (in any thread), we need to receive all signals to avoid
+     accidentally skipping a breakpoint during execution of a signal
+     handler.
+
+     Likewise if we're displaced stepping, otherwise a trap for a
+     breakpoint in a signal handler might be confused with the
+     displaced step finishing.  We don't make the displaced_step_fixup
+     step distinguish the cases instead, because:
+
+     - a backtrace while stopped in the signal handler would show the
+       scratch pad as frame older than the signal handler, instead of
+       the real mainline code.
+
+     - when the thread is later resumed, the signal handler would
+       return to the scratch pad area, which would no longer be
+       valid.  */
+  if (step_over_info_valid_p ()
+      || displaced_step_in_progress (ptid_get_pid (tp->ptid)))
     target_pass_signals (0, NULL);
   else
     target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
@@ -2217,6 +2251,7 @@ resume (enum gdb_signal sig)
      step software breakpoint.  */
   if (use_displaced_stepping (gdbarch)
       && tp->control.trap_expected
+      && !step_over_info_valid_p ()
       && sig == GDB_SIGNAL_0
       && !current_inferior ()->waiting_for_vfork_done)
     {
@@ -2362,9 +2397,10 @@ resume (enum gdb_signal sig)
 
   if (debug_displaced
       && use_displaced_stepping (gdbarch)
-      && tp->control.trap_expected)
+      && tp->control.trap_expected
+      && !step_over_info_valid_p ())
     {
-      struct regcache *resume_regcache = get_thread_regcache (resume_ptid);
+      struct regcache *resume_regcache = get_thread_regcache (tp->ptid);
       struct gdbarch *resume_gdbarch = get_regcache_arch (resume_regcache);
       CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
       gdb_byte buf[4];
@@ -4961,7 +4997,8 @@ process_event_stop_test (struct execution_control_state *ecs)
       struct breakpoint *sr_bp
 	= ecs->event_thread->control.step_resume_breakpoint;
 
-      if (sr_bp->loc->permanent
+      if (sr_bp != NULL
+	  && sr_bp->loc->permanent
 	  && sr_bp->type == bp_hp_step_resume
 	  && sr_bp->loc->address == ecs->event_thread->prev_pc)
 	{
@@ -6240,7 +6277,12 @@ keep_going (struct execution_control_state *ecs)
       remove_wps = (ecs->event_thread->stepping_over_watchpoint
 		    && !target_have_steppable_watchpoint);
 
-      if (remove_bp && !use_displaced_stepping (get_regcache_arch (regcache)))
+      /* We can't use displaced stepping if we need to step past a
+	 watchpoint.  The instruction copied to the scratch pad would
+	 still trigger the watchpoint.  */
+      if (remove_bp
+	  && (remove_wps
+	      || !use_displaced_stepping (get_regcache_arch (regcache))))
 	{
 	  set_step_over_info (get_regcache_aspace (regcache),
 			      regcache_read_pc (regcache), remove_wps);

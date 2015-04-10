@@ -380,13 +380,12 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
   for (T = thread_list; T; T = T->next) \
     if ((T)->state != THREAD_EXITED)
 
-/* Like ALL_NON_EXITED_THREADS, but allows deleting the currently
-   iterated thread.  */
-#define ALL_NON_EXITED_THREADS_SAFE(T, TMP)	\
+/* Traverse all threads, including those that have THREAD_EXITED
+   state.  Allows deleting the currently iterated thread.  */
+#define ALL_THREADS_SAFE(T, TMP)	\
   for ((T) = thread_list;			\
        (T) != NULL ? ((TMP) = (T)->next, 1): 0;	\
-       (T) = (TMP))				\
-    if ((T)->state != THREAD_EXITED)
+       (T) = (TMP))
 
 extern int thread_count (void);
 
@@ -483,6 +482,11 @@ extern void update_thread_list (void);
 /* Delete any thread the target says is no longer alive.  */
 
 extern void prune_threads (void);
+
+/* Delete threads marked THREAD_EXITED.  Unlike prune_threads, this
+   does not consult the target about whether the thread is alive right
+   now.  */
+extern void delete_exited_threads (void);
 
 /* Return true if PC is in the stepping range of THREAD.  */
 

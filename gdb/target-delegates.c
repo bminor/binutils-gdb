@@ -2343,6 +2343,33 @@ debug_thread_address_space (struct target_ops *self, ptid_t arg1)
   return result;
 }
 
+static int
+delegate_filesystem_is_local (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_filesystem_is_local (self);
+}
+
+static int
+tdefault_filesystem_is_local (struct target_ops *self)
+{
+  return 1;
+}
+
+static int
+debug_filesystem_is_local (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_filesystem_is_local (...)\n", debug_target.to_shortname);
+  result = debug_target.to_filesystem_is_local (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_filesystem_is_local (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
 static void
 delegate_trace_init (struct target_ops *self)
 {
@@ -4022,6 +4049,8 @@ install_delegators (struct target_ops *ops)
     ops->to_thread_architecture = delegate_thread_architecture;
   if (ops->to_thread_address_space == NULL)
     ops->to_thread_address_space = delegate_thread_address_space;
+  if (ops->to_filesystem_is_local == NULL)
+    ops->to_filesystem_is_local = delegate_filesystem_is_local;
   if (ops->to_trace_init == NULL)
     ops->to_trace_init = delegate_trace_init;
   if (ops->to_download_tracepoint == NULL)
@@ -4225,6 +4254,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_can_run_breakpoint_commands = tdefault_can_run_breakpoint_commands;
   ops->to_thread_architecture = default_thread_architecture;
   ops->to_thread_address_space = default_thread_address_space;
+  ops->to_filesystem_is_local = tdefault_filesystem_is_local;
   ops->to_trace_init = tdefault_trace_init;
   ops->to_download_tracepoint = tdefault_download_tracepoint;
   ops->to_can_download_tracepoint = tdefault_can_download_tracepoint;
@@ -4372,6 +4402,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_can_run_breakpoint_commands = debug_can_run_breakpoint_commands;
   ops->to_thread_architecture = debug_thread_architecture;
   ops->to_thread_address_space = debug_thread_address_space;
+  ops->to_filesystem_is_local = debug_filesystem_is_local;
   ops->to_trace_init = debug_trace_init;
   ops->to_download_tracepoint = debug_download_tracepoint;
   ops->to_can_download_tracepoint = debug_can_download_tracepoint;

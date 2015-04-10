@@ -625,12 +625,25 @@ thread_alive (struct thread_info *tp)
 void
 prune_threads (void)
 {
-  struct thread_info *tp, *next;
+  struct thread_info *tp, *tmp;
 
-  for (tp = thread_list; tp; tp = next)
+  ALL_THREADS_SAFE (tp, tmp)
     {
-      next = tp->next;
       if (!thread_alive (tp))
+	delete_thread (tp->ptid);
+    }
+}
+
+/* See gdbthreads.h.  */
+
+void
+delete_exited_threads (void)
+{
+  struct thread_info *tp, *tmp;
+
+  ALL_THREADS_SAFE (tp, tmp)
+    {
+      if (tp->state == THREAD_EXITED)
 	delete_thread (tp->ptid);
     }
 }

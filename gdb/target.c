@@ -2839,6 +2839,25 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
   return ret;
 }
 
+/* See target.h.  */
+int
+target_fileio_fstat (int fd, struct stat *sb, int *target_errno)
+{
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
+
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
+    ret = fh->t->to_fileio_fstat (fh->t, fh->fd, sb, target_errno);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_fstat (%d) = %d (%d)\n",
+			fd, ret, ret != -1 ? 0 : *target_errno);
+  return ret;
+}
+
 /* Close FD on the target.  Return 0, or -1 if an error occurs
    (and set *TARGET_ERRNO).  */
 int

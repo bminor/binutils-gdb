@@ -514,8 +514,6 @@ extern void find_lowest_section (bfd *, asection *, void *);
 
 extern bfd *symfile_bfd_open (const char *);
 
-extern bfd *gdb_bfd_open_maybe_remote (const char *);
-
 extern int get_section_index (struct objfile *, char *);
 
 extern int print_symbol_loading_p (int from_tty, int mainline, int full);

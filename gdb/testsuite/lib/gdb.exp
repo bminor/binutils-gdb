@@ -31,6 +31,14 @@ load_lib gdb-utils.exp
 
 global GDB
 
+# The spawn ID used for I/O interaction with the inferior.  For native
+# targets, or remote targets that can do I/O through GDB
+# (semi-hosting) this will be the same as the host/GDB's spawn ID.
+# Otherwise, the board may set this to some other spawn ID.  E.g.,
+# when debugging with GDBserver, this is set to GDBserver's spawn ID,
+# so input/output is done on gdbserver's tty.
+global inferior_spawn_id
+
 if [info exists TOOL_EXECUTABLE] {
     set GDB $TOOL_EXECUTABLE
 }
@@ -656,13 +664,31 @@ proc gdb_internal_error_resync {} {
 #    }
 # }
 #
+# Like with "expect", you can also specify the spawn id to match with
+# -i "$id".  Interesting spawn ids are $inferior_spawn_id and
+# $gdb_spawn_id.  The former matches inferior I/O, while the latter
+# matches GDB I/O.  E.g.:
+#
+# send_inferior "hello\n"
+# gdb_test_multiple "continue" "test echo" {
+#    -i "$inferior_spawn_id" -re "^hello\r\nhello\r\n$" {
+#        pass "got echo"
+#    }
+#    -i "$gdb_spawn_id" -re "Breakpoint.*$gdb_prompt $" {
+#        fail "hit breakpoint"
+#    }
+# }
+#
 # The standard patterns, such as "Inferior exited..." and "A problem
-# ...", all being implicitly appended to that list.
+# ...", all being implicitly appended to that list.  These are always
+# expected from $gdb_spawn_id.  IOW, callers do not need to worry
+# about resetting "-i" back to $gdb_spawn_id explicitly.
 #
 proc gdb_test_multiple { command message user_code } {
     global verbose use_gdb_stub
     global gdb_prompt pagination_prompt
     global GDB
+    global gdb_spawn_id
     global inferior_exited_re
     upvar timeout timeout
     upvar expect_out expect_out
@@ -723,14 +749,14 @@ proc gdb_test_multiple { command message user_code } {
 	    lappend processed_code $item
 	    continue
 	}
-	if { $item == "-timeout" } {
+	if { $item == "-timeout" || $item == "-i" } {
 	    set expecting_arg 1
 	    lappend processed_code $item
 	    continue
 	}
 	if { $expecting_arg } {
 	    set expecting_arg 0
-	    lappend processed_code $item
+	    lappend processed_code $subst_item
 	    continue
 	}
 	if { $expecting_action } {
@@ -820,6 +846,9 @@ proc gdb_test_multiple { command message user_code } {
     }
     append code $processed_code
     append code {
+	# Reset the spawn id, in case the processed code used -i.
+	-i "$gdb_spawn_id"
+
 	-re "Ending remote debugging.*$gdb_prompt $" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
@@ -1465,6 +1494,7 @@ proc default_gdb_spawn { } {
 proc default_gdb_start { } {
     global gdb_prompt pagination_prompt
     global gdb_spawn_id
+    global inferior_spawn_id
 
     if [info exists gdb_spawn_id] {
 	return 0
@@ -1473,6 +1503,11 @@ proc default_gdb_start { } {
     set res [gdb_spawn]
     if { $res != 0} {
 	return $res
+    }
+
+    # Default to assuming inferior I/O is done on GDB's terminal.
+    if {![info exists inferior_spawn_id]} {
+	set inferior_spawn_id $gdb_spawn_id
     }
 
     # When running over NFS, particularly if running many simultaneous
@@ -3206,6 +3241,18 @@ proc send_gdb { string } {
     return [remote_send host "$string"]
 }
 
+# Send STRING to the inferior's terminal.
+
+proc send_inferior { string } {
+    global inferior_spawn_id
+
+    if {[catch "send -i $inferior_spawn_id -- \$string" errorInfo]} {
+	return "$errorInfo"
+    } else {
+	return ""
+    }
+}
+
 #
 #
 
@@ -4000,20 +4047,6 @@ proc gdb_finish { } {
     global gdb_prompt
     global cleanfiles
 
-    # Give persistent gdbserver a chance to terminate before GDB is killed.
-    if {[info exists gdbserver_reconnect_p] && $gdbserver_reconnect_p
-	&& [info exists gdb_spawn_id]} {
-	send_gdb "kill\n";
-	gdb_expect 10 {
-	    -re "y or n" {
-		send_gdb "y\n";
-		exp_continue;
-	    }
-	    -re "$gdb_prompt $" {
-	    }
-	}
-    }
-
     # Exit first, so that the files are no longer in use.
     gdb_exit
 
@@ -4711,6 +4744,7 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
 
 # Starts fresh GDB binary and loads EXECUTABLE into GDB. EXECUTABLE is
 # the basename of the binary.
+# The return value is 0 for success, -1 for failure.
 proc clean_restart { executable } {
     global srcdir
     global subdir
@@ -4719,7 +4753,7 @@ proc clean_restart { executable } {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
+    return [gdb_load ${binfile}]
 }
 
 # Prepares for testing by calling build_executable_full, then

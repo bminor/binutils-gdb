@@ -224,11 +224,6 @@ proc readelf_compressed_wa_test {} {
     global srcdir
     global subdir
 
-    if { ![is_zlib_supported] } {
-	unsupported "readelf -wa (compressed)"
-	return
-    }
-
     # Compile the compressed-debug-section test file.
     if { [target_compile $srcdir/$subdir/dw2-compressed.S tmpdir/dw2-compressed.o object debug] != "" } {
 	verbose "Unable to compile test file."
