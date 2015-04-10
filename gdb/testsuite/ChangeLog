@@ -1,5 +1,15 @@
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/step-over-lands-on-breakpoint.exp (do_test): New
+	procedure, factored out from ...
+	(top level): ... here.  Add "set displaced-stepping" testing axis.
+	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): New
+	parameter "displaced".  Use it.
+	(top level): Use foreach and add "set displaced-stepping" testing
+	axis.
+
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/step-over-trips-on-watchpoint.c (child_function):
 	Remove comment.
 	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): Find
