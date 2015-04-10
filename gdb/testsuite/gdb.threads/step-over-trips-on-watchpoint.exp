@@ -96,7 +96,8 @@ proc do_test { displaced with_bp } {
 		    delete_breakpoints
 		}
 
-		gdb_breakpoint "*$address_triggers_watch"
+		gdb_test "break *$address_triggers_watch" "Breakpoint .*" \
+		    "set breakpoint at address that triggers watch"
 		gdb_continue_to_breakpoint \
 		    "run to instruction that triggers watch in thread 2"
 
@@ -105,7 +106,9 @@ proc do_test { displaced with_bp } {
 		gdb_test "watch watch_me" "Hardware watchpoint .*"
 
 		if ${with_bp} {
-		    gdb_test "b *$after_address_triggers_watch thread 1"
+		    gdb_test "b *$after_address_triggers_watch thread 1" \
+			"Breakpoint .*" \
+			"set breakpoint specific to thread 1"
 		}
 
 		# Switch back to thread 1 and disable scheduler locking.
