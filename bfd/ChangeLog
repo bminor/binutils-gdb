@@ -1,5 +1,11 @@
 2015-04-10  Alan Modra  <amodra@gmail.com>
 
+	PR ld/18222
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Don't report an error
+	on adding a protected visibility variable to .dynbss.
+
+2015-04-10  Alan Modra  <amodra@gmail.com>
+
 	Revert 2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 	PR ld/pr15228
 	PR ld/pr17709

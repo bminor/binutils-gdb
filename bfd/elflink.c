@@ -2674,13 +2674,9 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
   dynbss->size += h->size;
 
   if (h->protected_def)
-    {
-      info->callbacks->einfo
-	(_("%P: copy reloc against protected `%T' is invalid\n"),
-	 h->root.root.string);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
+    info->callbacks->einfo
+      (_("%P: copy reloc against protected `%T' is dangerous\n"),
+       h->root.root.string);
 
   return TRUE;
 }
