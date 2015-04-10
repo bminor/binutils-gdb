@@ -1,5 +1,14 @@
 2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/pr17709
+	* elf32-i386.c (elf_i386_relocate_section): Also check R_386_GOTOFF
+	against protected data symbol when building shared library.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Also check
+	R_X86_64_GOTOFF64 against protected data symbol when building
+	shared library.
+
+2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/pr15228
 	PR ld/pr17709
 	* elf-bfd.h (elf_backend_data): Add extern_protected_data.

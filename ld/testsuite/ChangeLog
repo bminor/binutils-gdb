@@ -1,5 +1,17 @@
 2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/pr17709
+	* ld-i386/protected6.d: New file.
+	* ld-i386/protected6.s: Likewise.
+	* ld-x86-64/protected6.d: Likewise.
+	* ld-x86-64/protected6.s: Likewise.
+	* ld-x86-64/protected7.d: Likewise.
+	* ld-x86-64/protected7.s: Likewise.
+	* ld-x86-64/protected7a.d: Likewise.
+	* ld-x86-64/protected7b.d: Likewise.
+
+2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/pr15228
 	PR ld/pr17709
 	* ld-i386/i386.exp (i386tests): Add a test for PR ld/17709.
