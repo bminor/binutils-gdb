@@ -10,7 +10,6 @@ foo:
 .globl bar
 	.type	bar, @function
 bar:
-	movq	foo@GOTPCREL(%rip), %rax
-	movl	(%rax), %eax
+	movl	foo(%rip), %eax
 	ret
 	.size	bar, .-bar
