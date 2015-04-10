@@ -1,3 +1,10 @@
+2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18223
+	* ld-gc/gc.exp: Run pr18223.
+	* ld-gc/pr18223.d: New file.
+	* ld-gc/pr18223.s: Likewise.
+
 2015-04-10  Alan Modra  <amodra@gmail.com>
 
 	Revert 2015-03-05  H.J. Lu  <hongjiu.lu@intel.com>
