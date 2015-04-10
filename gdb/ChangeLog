@@ -1,3 +1,9 @@
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18216
+	* infrun.c (process_event_stop_test): Don't assume a step-resume
+	is set if tp->stepped_breakpoint is true.
+
 2015-04-10  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (install_alu_reg): Update comment.

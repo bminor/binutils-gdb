@@ -118,13 +118,6 @@ foreach displaced { "off" "on" } {
 			}
 			fail $msg
 		    }
-		    eof {
-			if {[can_single_step_to_signal_handler]
-			    && $displaced == "on"} {
-			    setup_kfail "gdb/18216" "*-*-*"
-			}
-			fail $msg
-		    }
 		}
 	    }
 	}

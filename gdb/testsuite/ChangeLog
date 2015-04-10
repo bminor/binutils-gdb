@@ -1,3 +1,8 @@
+2015-04-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18216
+	* gdb.threads/multiple-step-overs.exp: Remove expected eof.
+
 2015-04-10  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.arch/arm-disp-step.S (main): Call test_add_rn_pc.
