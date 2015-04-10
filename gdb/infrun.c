@@ -1810,13 +1810,17 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
 
   displaced_step_restore (displaced, displaced->step_ptid);
 
-  /* Did the instruction complete successfully?  */
-  if (signal == GDB_SIGNAL_TRAP)
-    {
-      /* Fixup may need to read memory/registers.  Switch to the
-	 thread that we're fixing up.  */
-      switch_to_thread (event_ptid);
+  /* Fixup may need to read memory/registers.  Switch to the thread
+     that we're fixing up.  Also, target_stopped_by_watchpoint checks
+     the current thread.  */
+  switch_to_thread (event_ptid);
 
+  /* Did the instruction complete successfully?  */
+  if (signal == GDB_SIGNAL_TRAP
+      && !(target_stopped_by_watchpoint ()
+	   && (gdbarch_have_nonsteppable_watchpoint (displaced->step_gdbarch)
+	       || target_have_steppable_watchpoint)))
+    {
       /* Fix up the resulting state.  */
       gdbarch_displaced_step_fixup (displaced->step_gdbarch,
                                     displaced->step_closure,
@@ -2247,6 +2251,7 @@ resume (enum gdb_signal sig)
      step software breakpoint.  */
   if (use_displaced_stepping (gdbarch)
       && tp->control.trap_expected
+      && !step_over_info_valid_p ()
       && sig == GDB_SIGNAL_0
       && !current_inferior ()->waiting_for_vfork_done)
     {
@@ -2392,7 +2397,8 @@ resume (enum gdb_signal sig)
 
   if (debug_displaced
       && use_displaced_stepping (gdbarch)
-      && tp->control.trap_expected)
+      && tp->control.trap_expected
+      && !step_over_info_valid_p ())
     {
       struct regcache *resume_regcache = get_thread_regcache (tp->ptid);
       struct gdbarch *resume_gdbarch = get_regcache_arch (resume_regcache);
@@ -6271,7 +6277,12 @@ keep_going (struct execution_control_state *ecs)
       remove_wps = (ecs->event_thread->stepping_over_watchpoint
 		    && !target_have_steppable_watchpoint);
 
-      if (remove_bp && !use_displaced_stepping (get_regcache_arch (regcache)))
+      /* We can't use displaced stepping if we need to step past a
+	 watchpoint.  The instruction copied to the scratch pad would
+	 still trigger the watchpoint.  */
+      if (remove_bp
+	  && (remove_wps
+	      || !use_displaced_stepping (get_regcache_arch (regcache))))
 	{
 	  set_step_over_info (get_regcache_aspace (regcache),
 			      regcache_read_pc (regcache), remove_wps);
