@@ -497,7 +497,8 @@ bfd_cache_init (bfd *abfd)
 	return FALSE;
     }
 #ifdef HAVE_MMAP
-  pagesize_m1 = getpagesize () - 1;
+  if (pagesize_m1 == 0)
+    pagesize_m1 = getpagesize () - 1;
 #endif
   abfd->iovec = &cache_iovec;
   insert (abfd);
