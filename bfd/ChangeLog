@@ -1,5 +1,11 @@
 2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* cache.c (cache_bmmap): Move pagesize_m1 ... to
+	(pagesize_m1): Here.
+	(bfd_cache_init): Initialize pagesize_m1.
+
+2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_relocate_section): Replace SYMBOLIC_BIND
 	with SYMBOL_REFERENCES_LOCAL when checking R_386_GOTOFF against
 	protected data symbol when building shared library.

@@ -418,6 +418,10 @@ cache_bstat (struct bfd *abfd, struct stat *sb)
   return sts;
 }
 
+#ifdef HAVE_MMAP
+static uintptr_t pagesize_m1;
+#endif
+
 static void *
 cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 	     void *addr ATTRIBUTE_UNUSED,
@@ -435,7 +439,6 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 #ifdef HAVE_MMAP
   else
     {
-      static uintptr_t pagesize_m1;
       FILE *f;
       file_ptr pg_offset;
       bfd_size_type pg_len;
@@ -443,9 +446,6 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
       f = bfd_cache_lookup (abfd, CACHE_NO_SEEK_ERROR);
       if (f == NULL)
 	return ret;
-
-      if (pagesize_m1 == 0)
-        pagesize_m1 = getpagesize () - 1;
 
       /* Handle archive members.  */
       if (abfd->my_archive != NULL)
@@ -496,6 +496,9 @@ bfd_cache_init (bfd *abfd)
       if (! close_one ())
 	return FALSE;
     }
+#ifdef HAVE_MMAP
+  pagesize_m1 = getpagesize () - 1;
+#endif
   abfd->iovec = &cache_iovec;
   insert (abfd);
   ++open_files;
