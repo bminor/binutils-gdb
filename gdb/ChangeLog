@@ -1,3 +1,42 @@
+2015-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes since GDB 7.9): Add removed -xdb.
+	* breakpoint.c (command_line_is_silent): Remove xdb_commands
+	conditional.
+	(_initialize_breakpoint): Remove xdb_commands for bc, ab, sb, db, ba
+	and lb.
+	* cli/cli-cmds.c (_initialize_cli_cmds): Remove xdb_commands for v and
+	va.
+	* cli/cli-decode.c (find_command_name_length): Remove xdb_commands
+	conditional.
+	* defs.h (xdb_commands): Remove declaration.
+	* f-valprint.c (_initialize_f_valprint): Remove xdb_commands for lc.
+	* guile/scm-cmd.c (command_classes): Remove xdb from comment.
+	* infcmd.c (run_no_args_command, go_command): Remove.
+	(_initialize_infcmd): Remove xdb_commands for S, go, g, R and lr.
+	* infrun.c (xdb_handle_command): Remove.
+	(_initialize_infrun): Remove xdb_commands for lz and z.
+	* main.c (xdb_commands): Remove variable.
+	(captured_main): Remove "xdb" from long_options.
+	(print_gdb_help): Remove --xdb from help.
+	* python/py-cmd.c (gdbpy_initialize_commands): Remove xdb from comment.
+	* source.c (_initialize_source): Remove xdb_commands for D, ld, / and ?.
+	* stack.c (backtrace_full_command, args_plus_locals_info)
+	(current_frame_command): Remove.
+	(_initialize_stack): Remove xdb_commands for t, T and l.
+	* symtab.c (_initialize_symtab): Remove xdb_commands for lf and lg.
+	* thread.c (_initialize_thread): Remove xdb_commands condition.
+	* tui/tui-layout.c (tui_toggle_layout_command)
+	(tui_toggle_split_layout_command, tui_handle_xdb_layout): Remove.
+	(_initialize_tui_layout): Remove xdb_commands for td and ts.
+	* tui/tui-regs.c (tui_scroll_regs_forward_command)
+	(tui_scroll_regs_backward_command): Remove.
+	(_initialize_tui_regs): Remove xdb_commands for fr, gr, sr, +r and -r.
+	* tui/tui-win.c (tui_xdb_set_win_height_command): Remove.
+	(_initialize_tui_win): Remove xdb_commands for U and w.
+	* utils.c (pagination_on_command, pagination_off_command): Remove.
+	(initialize_utils): Remove xdb_commands for am and sm.
+
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (displaced_step_fixup): Switch to the event ptid

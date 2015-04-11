@@ -58,9 +58,6 @@ static enum tui_status tui_get_register (struct frame_info *frame,
 					 struct tui_data_element *data,
 					 int regnum, int *changedp);
 
-static void tui_scroll_regs_forward_command (char *, int);
-static void tui_scroll_regs_backward_command (char *, int);
-
 
 
 /*****************************************
@@ -637,20 +634,6 @@ _initialize_tui_regs (void)
   add_cmd ("next", class_tui, tui_reg_next_command,
            _("Display next register group."),
            &tuireglist);
-
-  if (xdb_commands)
-    {
-      add_com ("fr", class_tui, tui_reg_float_command,
-	       _("Display only floating point registers\n"));
-      add_com ("gr", class_tui, tui_reg_general_command,
-	       _("Display only general registers\n"));
-      add_com ("sr", class_tui, tui_reg_system_command,
-	       _("Display only special registers\n"));
-      add_com ("+r", class_tui, tui_scroll_regs_forward_command,
-	       _("Scroll the registers window forward\n"));
-      add_com ("-r", class_tui, tui_scroll_regs_backward_command,
-	       _("Scroll the register window backward\n"));
-    }
 }
 
 
@@ -729,17 +712,4 @@ tui_get_register (struct frame_info *frame,
       ret = TUI_SUCCESS;
     }
   return ret;
-}
-
-static void
-tui_scroll_regs_forward_command (char *arg, int from_tty)
-{
-  tui_scroll (FORWARD_SCROLL, TUI_DATA_WIN, 1);
-}
-
-
-static void
-tui_scroll_regs_backward_command (char *arg, int from_tty)
-{
-  tui_scroll (BACKWARD_SCROLL, TUI_DATA_WIN, 1);
 }

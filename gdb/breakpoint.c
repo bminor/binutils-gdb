@@ -4571,8 +4571,7 @@ cleanup_executing_breakpoints (void *ignore)
 static int
 command_line_is_silent (struct command_line *cmd)
 {
-  return cmd && (strcmp ("silent", cmd->line) == 0
-		 || (xdb_commands && strcmp ("Q", cmd->line) == 0));
+  return cmd && (strcmp ("silent", cmd->line) == 0);
 }
 
 /* Execute all the commands associated with all the breakpoints at
@@ -15799,8 +15798,6 @@ _initialize_breakpoint (void)
   add_com ("ignore", class_breakpoint, ignore_command, _("\
 Set ignore-count of breakpoint number N to COUNT.\n\
 Usage is `ignore N COUNT'."));
-  if (xdb_commands)
-    add_com_alias ("bc", "ignore", class_breakpoint, 1);
 
   add_com ("commands", class_breakpoint, commands_command, _("\
 Set commands to be executed when a breakpoint is hit.\n\
@@ -15849,13 +15846,6 @@ With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
 With a subcommand you can enable temporarily."),
 		  &enablelist, "enable ", 1, &cmdlist);
-  if (xdb_commands)
-    add_com ("ab", class_breakpoint, enable_command, _("\
-Enable some breakpoints.\n\
-Give breakpoint numbers (separated by spaces) as arguments.\n\
-With no subcommand, breakpoints are enabled until you command otherwise.\n\
-This is used to cancel the effect of the \"disable\" command.\n\
-With a subcommand you can enable temporarily."));
 
   add_com_alias ("en", "enable", class_breakpoint, 1);
 
@@ -15906,12 +15896,6 @@ A disabled breakpoint is not forgotten, but has no effect until re-enabled."),
 		  &disablelist, "disable ", 1, &cmdlist);
   add_com_alias ("dis", "disable", class_breakpoint, 1);
   add_com_alias ("disa", "disable", class_breakpoint, 1);
-  if (xdb_commands)
-    add_com ("sb", class_breakpoint, disable_command, _("\
-Disable some breakpoints.\n\
-Arguments are breakpoint numbers with spaces in between.\n\
-To disable all breakpoints, give no argument.\n\
-A disabled breakpoint is not forgotten, but has no effect until re-enabled."));
 
   add_cmd ("breakpoints", class_alias, disable_command, _("\
 Disable some breakpoints.\n\
@@ -15931,11 +15915,6 @@ The \"unset\" command is also an alias for \"delete\"."),
 		  &deletelist, "delete ", 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
   add_com_alias ("del", "delete", class_breakpoint, 1);
-  if (xdb_commands)
-    add_com ("db", class_breakpoint, delete_command, _("\
-Delete some breakpoints.\n\
-Arguments are breakpoint numbers with spaces in between.\n\
-To delete all breakpoints, give no argument.\n"));
 
   add_cmd ("breakpoints", class_alias, delete_command, _("\
 Delete some breakpoints or auto-display expressions.\n\
@@ -15966,9 +15945,6 @@ BREAK_ARGS_HELP ("break")));
   add_com_alias ("br", "break", class_run, 1);
   add_com_alias ("bre", "break", class_run, 1);
   add_com_alias ("brea", "break", class_run, 1);
-
-  if (xdb_commands)
-   add_com_alias ("ba", "break", class_breakpoint, 1);
 
   if (dbx_commands)
     {
@@ -16013,23 +15989,6 @@ Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
 
   add_info_alias ("b", "breakpoints", 1);
-
-  if (xdb_commands)
-    add_com ("lb", class_breakpoint, breakpoints_info, _("\
-Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
-The \"Type\" column indicates one of:\n\
-\tbreakpoint     - normal breakpoint\n\
-\twatchpoint     - watchpoint\n\
-The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
-the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
-breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
-address and file/line number respectively.\n\
-\n\
-Convenience variable \"$_\" and default examine address for \"x\"\n\
-are set to the address of the last breakpoint listed unless the command\n\
-is prefixed with \"server \".\n\n\
-Convenience variable \"$bpnum\" contains the number of the last\n\
-breakpoint set."));
 
   add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints, _("\
 Status of all breakpoints, or breakpoint number NUMBER.\n\

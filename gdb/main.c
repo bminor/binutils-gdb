@@ -50,9 +50,6 @@
    do_setshow_command will free it.  */
 char *interpreter_p;
 
-/* Whether xdb commands will be handled.  */
-int xdb_commands = 0;
-
 /* Whether dbx commands will be handled.  */
 int dbx_commands = 0;
 
@@ -602,7 +599,6 @@ captured_main (void *data)
     static struct option long_options[] =
     {
       {"tui", no_argument, 0, OPT_TUI},
-      {"xdb", no_argument, &xdb_commands, 1},
       {"dbx", no_argument, &dbx_commands, 1},
       {"readnow", no_argument, &readnow_symbol_files, 1},
       {"r", no_argument, &readnow_symbol_files, 1},
@@ -1237,7 +1233,6 @@ Output and user interface control:\n\n\
 #endif
   fputs_unfiltered (_("\
   --dbx              DBX compatibility mode.\n\
-  --xdb              XDB compatibility mode.\n\
   -q, --quiet, --silent\n\
                      Do not print version number on startup.\n\n\
 "), stream);

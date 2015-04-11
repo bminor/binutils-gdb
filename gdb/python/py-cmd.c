@@ -682,7 +682,7 @@ gdbpy_initialize_commands (void)
     return -1;
 
   /* Note: alias and user are special; pseudo appears to be unused,
-     and there is no reason to expose tui or xdb, I think.  */
+     and there is no reason to expose tui, I think.  */
   if (PyModule_AddIntConstant (gdb_module, "COMMAND_NONE", no_class) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_RUNNING", class_run) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_DATA", class_vars) < 0

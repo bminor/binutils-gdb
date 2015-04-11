@@ -100,9 +100,6 @@ enum compile_i_scope_types
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-/* * Enable xdb commands if set.  */
-extern int xdb_commands;
-
 /* * Enable dbx commands if set.  */
 extern int dbx_commands;
 

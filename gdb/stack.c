@@ -1940,13 +1940,6 @@ backtrace_command (char *arg, int from_tty)
   do_cleanups (old_chain);
 }
 
-static void
-backtrace_full_command (char *arg, int from_tty)
-{
-  backtrace_command_1 (arg, 1 /* show_locals */, 0, from_tty);
-}
-
-
 /* Iterate over the local variables of a block B, calling CB with
    CB_DATA.  */
 
@@ -2218,15 +2211,6 @@ args_info (char *ignore, int from_tty)
 			gdb_stdout);
 }
 
-
-static void
-args_plus_locals_info (char *ignore, int from_tty)
-{
-  args_info (ignore, from_tty);
-  locals_info (ignore, from_tty);
-}
-
-
 /* Select frame FRAME.  Also print the stack frame and show the source
    if this is the tui version.  */
 static void
@@ -2313,14 +2297,6 @@ frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
-}
-
-/* The XDB Compatibility command to print the current frame.  */
-
-static void
-current_frame_command (char *level_exp, int from_tty)
-{
-  print_stack_frame (get_selected_frame (_("No stack.")), 1, SRC_AND_LOC, 1);
 }
 
 /* Select the frame up one or COUNT_EXP stack levels from the
@@ -2670,12 +2646,6 @@ a command file or a user-defined command."));
 
   add_com_alias ("f", "frame", class_stack, 1);
 
-  if (xdb_commands)
-    {
-      add_com ("L", class_stack, current_frame_command,
-	       _("Print the current stack frame.\n"));
-      add_com_alias ("V", "frame", class_stack, 1);
-    }
   add_com ("select-frame", class_stack, select_frame_command, _("\
 Select a stack frame without printing anything.\n\
 An argument specifies the frame to select.\n\
@@ -2688,15 +2658,6 @@ With a negative argument, print outermost -COUNT frames.\nUse of the \
 Use of the 'no-filters' qualifier prohibits frame filters from executing\n\
 on this backtrace.\n"));
   add_com_alias ("bt", "backtrace", class_stack, 0);
-  if (xdb_commands)
-    {
-      add_com_alias ("t", "backtrace", class_stack, 0);
-      add_com ("T", class_stack, backtrace_full_command, _("\
-Print backtrace of all stack frames, or innermost COUNT frames\n\
-and the values of the local variables.\n\
-With a negative argument, print outermost -COUNT frames.\n\
-Usage: T <count>\n"));
-    }
 
   add_com_alias ("where", "backtrace", class_alias, 0);
   add_info ("stack", backtrace_command,
@@ -2709,9 +2670,6 @@ Usage: T <count>\n"));
 	    _("Local variables of current stack frame."));
   add_info ("args", args_info,
 	    _("Argument variables of current stack frame."));
-  if (xdb_commands)
-    add_com ("l", class_info, args_plus_locals_info,
-	     _("Argument and local variables of current stack frame."));
 
   if (dbx_commands)
     add_com ("func", class_stack, func_command, _("\

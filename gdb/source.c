@@ -2047,16 +2047,6 @@ Setting the value to an empty string sets it to $cdir:$cwd, the default."),
 			    show_directories_command,
 			    &setlist, &showlist);
 
-  if (xdb_commands)
-    {
-      add_com_alias ("D", "directory", class_files, 0);
-      add_cmd ("ld", no_class, show_directories_1, _("\
-Current search path for finding source files.\n\
-$cwd in the path means the current working directory.\n\
-$cdir in the path means the compilation directory of the source file."),
-	       &cmdlist);
-    }
-
   add_info ("source", source_info,
 	    _("Information about the current source file."));
 
@@ -2082,12 +2072,6 @@ The matching line number is also stored as the value of \"$_\"."));
 Search backward for regular expression (see regex(3)) from last line listed.\n\
 The matching line number is also stored as the value of \"$_\"."));
   add_com_alias ("rev", "reverse-search", class_files, 1);
-
-  if (xdb_commands)
-    {
-      add_com_alias ("/", "forward-search", class_files, 0);
-      add_com_alias ("?", "reverse-search", class_files, 0);
-    }
 
   add_setshow_integer_cmd ("listsize", class_support, &lines_to_list, _("\
 Set number of source lines gdb will list by default."), _("\

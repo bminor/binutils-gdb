@@ -1248,11 +1248,6 @@ find_command_name_length (const char *text)
   /* Some characters are only used for TUI specific commands.
      However, they are always allowed for the sake of consistency.
 
-     The XDB compatibility characters are only allowed when using the
-     right mode because they clash with other GDB commands -
-     specifically '/' is used as a suffix for print, examine and
-     display.
-
      Note that this is larger than the character set allowed when
      creating user-defined commands.  */
 
@@ -1263,9 +1258,7 @@ find_command_name_length (const char *text)
 
   while (isalnum (*p) || *p == '-' || *p == '_'
 	 /* Characters used by TUI specific commands.  */
-	 || *p == '+' || *p == '<' || *p == '>' || *p == '$'
-	 /* Characters used for XDB compatibility.  */
-	 || (xdb_commands && (*p == '/' || *p == '?')))
+	 || *p == '+' || *p == '<' || *p == '>' || *p == '$')
     p++;
 
   return p - text;

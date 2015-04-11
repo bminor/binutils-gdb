@@ -100,10 +100,6 @@ static void step_command (char *, int);
 
 static void run_command (char *, int);
 
-static void run_no_args_command (char *args, int from_tty);
-
-static void go_command (char *line_no, int from_tty);
-
 void _initialize_infcmd (void);
 
 #define ERROR_NO_INFERIOR \
@@ -646,13 +642,6 @@ run_command (char *args, int from_tty)
 {
   run_command_1 (args, from_tty, 0);
 }
-
-static void
-run_no_args_command (char *args, int from_tty)
-{
-  set_inferior_args ("");
-}
-
 
 /* Start the execution of the program up until the beginning of the main
    program.  */
@@ -1237,22 +1226,6 @@ jump_command (char *arg, int from_tty)
   proceed (addr, GDB_SIGNAL_0);
 }
 
-
-/* Go to line or address in current procedure.  */
-
-static void
-go_command (char *line_no, int from_tty)
-{
-  if (line_no == (char *) NULL || !*line_no)
-    printf_filtered (_("Usage: go <location>\n"));
-  else
-    {
-      tbreak_command (line_no, from_tty);
-      jump_command (line_no, from_tty);
-    }
-}
-
-
 /* Continue program giving it specified signal.  */
 
 static void
@@ -3173,8 +3146,6 @@ Unlike \"step\", if the current source line calls a subroutine,\n\
 this command does not enter the subroutine, but instead steps over\n\
 the call, in effect treating it as a single source line."));
   add_com_alias ("n", "next", class_run, 1);
-  if (xdb_commands)
-    add_com_alias ("S", "next", class_run, 1);
 
   add_com ("step", class_run, step_command, _("\
 Step program until it reaches a different source line.\n\
@@ -3204,21 +3175,6 @@ for an address to start at."));
   set_cmd_completer (c, location_completer);
   add_com_alias ("j", "jump", class_run, 1);
 
-  if (xdb_commands)
-    {
-      c = add_com ("go", class_run, go_command, _("\
-Usage: go <location>\n\
-Continue program being debugged, stopping at specified line or \n\
-address.\n\
-Give as argument either LINENUM or *ADDR, where ADDR is an \n\
-expression for an address to start at.\n\
-This command is a combination of tbreak and jump."));
-      set_cmd_completer (c, location_completer);
-    }
-
-  if (xdb_commands)
-    add_com_alias ("g", "go", class_run, 1);
-
   add_com ("continue", class_run, continue_command, _("\
 Continue program being debugged, after signal or breakpoint.\n\
 Usage: continue [N]\n\
@@ -3244,9 +3200,6 @@ To cancel previous arguments and run with no arguments,\n\
 use \"set args\" without arguments."));
   set_cmd_completer (c, filename_completer);
   add_com_alias ("r", "run", class_run, 1);
-  if (xdb_commands)
-    add_com ("R", class_run, run_no_args_command,
-	     _("Start debugged program with no arguments."));
 
   c = add_com ("start", class_run, start_command, _("\
 Run the debugged program until the beginning of the main procedure.\n\
@@ -3265,14 +3218,6 @@ List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
   add_info_alias ("r", "registers", 1);
   set_cmd_completer (c, reg_or_group_completer);
-
-  if (xdb_commands)
-    {
-      c = add_com ("lr", class_info, nofp_registers_info, _("\
-List of integer registers and their contents, for selected stack frame.\n\
-Register name as argument means describe only that register."));
-      set_cmd_completer (c, reg_or_group_completer);
-    }
 
   c = add_info ("all-registers", all_registers_info, _("\
 List of all registers and their contents, for selected stack frame.\n\

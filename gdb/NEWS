@@ -112,6 +112,10 @@ vFile:fstat:
 * GDB now supports access to vector registers on S/390 GNU/Linux
   targets.
 
+* Removed command line options
+
+-xdb  HP-UX XDB compatibility mode.
+
 * Removed targets and native configurations
 
 HP/PA running HP-UX           hppa*-*-hpux*

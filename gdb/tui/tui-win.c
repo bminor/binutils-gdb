@@ -64,7 +64,6 @@ static int new_height_ok (struct tui_win_info *, int);
 static void tui_set_tab_width_command (char *, int);
 static void tui_refresh_all_command (char *, int);
 static void tui_set_win_height_command (char *, int);
-static void tui_xdb_set_win_height_command (char *, int);
 static void tui_all_windows_info (char *, int);
 static void tui_set_focus_command (char *, int);
 static void tui_scroll_forward_command (char *, int);
@@ -380,8 +379,6 @@ _initialize_tui_win (void)
 
   add_com ("refresh", class_tui, tui_refresh_all_command,
            _("Refresh the terminal display.\n"));
-  if (xdb_commands)
-    add_com_alias ("U", "refresh", class_tui, 0);
   add_com ("tabset", class_tui, tui_set_tab_width_command, _("\
 Set the width (in characters) of tab stops.\n\
 Usage: tabset <n>\n"));
@@ -417,10 +414,6 @@ Usage: < [win] [n]\n"));
   add_com (">", class_tui, tui_scroll_right_command, _("\
 Scroll window text to the right.\n\
 Usage: > [win] [n]\n"));
-  if (xdb_commands)
-    add_com ("w", class_xdb, tui_xdb_set_win_height_command, _("\
-XDB compatibility command for setting the height of a command window.\n\
-Usage: w <#lines>\n"));
 
   /* Define the tui control variables.  */
   add_setshow_enum_cmd ("border-kind", no_class, tui_border_kind_enums,
@@ -1166,45 +1159,6 @@ tui_set_win_height_command (char *arg, int from_tty)
   tui_enable ();
   tui_set_win_height (arg, from_tty);
 }
-
-
-/* XDB Compatibility command for setting the window height.  This will
-   increase or decrease the command window by the specified
-   amount.  */
-static void
-tui_xdb_set_win_height (char *arg, int from_tty)
-{
-  /* Make sure the curses mode is enabled.  */
-  tui_enable ();
-  if (arg != (char *) NULL)
-    {
-      int input_no = atoi (arg);
-
-      if (input_no > 0)
-	{			/* Add 1 for the locator.  */
-	  int new_height = tui_term_height () - (input_no + 1);
-
-	  if (!new_height_ok (tui_win_list[CMD_WIN], new_height)
-	      || tui_adjust_win_heights (tui_win_list[CMD_WIN],
-					 new_height) == TUI_FAILURE)
-	    warning (_("Invalid window height specified.\n%s"),
-		     XDBWIN_HEIGHT_USAGE);
-	}
-      else
-	warning (_("Invalid window height specified.\n%s"),
-		 XDBWIN_HEIGHT_USAGE);
-    }
-  else
-    warning (_("Invalid window height specified.\n%s"), XDBWIN_HEIGHT_USAGE);
-}
-
-/* Set the height of the specified window, with va_list.  */
-static void
-tui_xdb_set_win_height_command (char *arg, int from_tty)
-{
-  tui_xdb_set_win_height (arg, from_tty);
-}
-
 
 /* Function to adjust all window heights around the primary.   */
 static enum tui_status

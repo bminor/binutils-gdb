@@ -556,7 +556,7 @@ gdbscm_parse_command_name (const char *name,
 static const scheme_integer_constant command_classes[] =
 {
   /* Note: alias and user are special; pseudo appears to be unused,
-     and there is no reason to expose tui or xdb, I think.  */
+     and there is no reason to expose tui, I think.  */
   { "COMMAND_NONE", no_class },
   { "COMMAND_RUNNING", class_run },
   { "COMMAND_DATA", class_vars },

@@ -2670,18 +2670,6 @@ subset_compare (char *string_to_compare, char *template_string)
 }
 
 static void
-pagination_on_command (char *arg, int from_tty)
-{
-  pagination_enabled = 1;
-}
-
-static void
-pagination_off_command (char *arg, int from_tty)
-{
-  pagination_enabled = 0;
-}
-
-static void
 show_debug_timestamp (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
@@ -2724,14 +2712,6 @@ Turning pagination off is an alternative to \"set height unlimited\"."),
 			   NULL,
 			   show_pagination_enabled,
 			   &setlist, &showlist);
-
-  if (xdb_commands)
-    {
-      add_com ("am", class_support, pagination_on_command,
-	       _("Enable pagination"));
-      add_com ("sm", class_support, pagination_off_command,
-	       _("Disable pagination"));
-    }
 
   add_setshow_boolean_cmd ("sevenbit-strings", class_support,
 			   &sevenbit_strings, _("\
