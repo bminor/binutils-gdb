@@ -1,3 +1,7 @@
+2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (plugin_load_plugins): Removed an extra ';'.
+
 2015-04-10  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18198

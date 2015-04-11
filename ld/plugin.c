@@ -1003,7 +1003,7 @@ plugin_load_plugins (void)
   register_ld_plugin_object_p (plugin_object_p);
 
 #if HAVE_MMAP && HAVE_GETPAGESIZE
-  plugin_pagesize = getpagesize ();;
+  plugin_pagesize = getpagesize ();
 #endif
 }
 
