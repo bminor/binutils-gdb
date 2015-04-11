@@ -1,3 +1,14 @@
+2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Replace SYMBOLIC_BIND
+	with SYMBOL_REFERENCES_LOCAL when checking R_386_GOTOFF against
+	protected data symbol when building shared library.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Check
+	R_X86_64_GOTOFF64 against undefined symbol and replace
+	SYMBOLIC_BIND with SYMBOL_REFERENCES_LOCAL when checking
+	R_X86_64_GOTOFF64 against protected data symbol when building
+	shared library.
+
 2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/pr17709

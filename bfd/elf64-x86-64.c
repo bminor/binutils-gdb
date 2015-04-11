@@ -3957,22 +3957,50 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 	  /* Check to make sure it isn't a protected function or data
 	     symbol for shared library since it may not be local when
-	     used as function address or with copy relocation.  */
-	  if (!info->executable
-	      && h
-	      && !SYMBOLIC_BIND (info, h)
-	      && h->def_regular
-	      && (h->type == STT_FUNC
-		  || h->type == STT_OBJECT)
-	      && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+	     used as function address or with copy relocation.  We also
+	     need to make sure that a symbol is referenced locally.  */
+	  if (info->shared && h)
 	    {
-	      (*_bfd_error_handler)
-		(_("%B: relocation R_X86_64_GOTOFF64 against protected %s `%s' can not be used when making a shared object"),
-		 input_bfd,
-		 h->type == STT_FUNC ? "function" : "data",
-		 h->root.root.string);
-	      bfd_set_error (bfd_error_bad_value);
+	      if (!h->def_regular)
+		{
+		  const char *v;
+
+		  switch (ELF_ST_VISIBILITY (h->other))
+		    {
+		    case STV_HIDDEN:
+		      v = _("hidden symbol");
+		      break;
+		    case STV_INTERNAL:
+		      v = _("internal symbol");
+		      break;
+		    case STV_PROTECTED:
+		      v = _("protected symbol");
+		      break;
+		    default:
+		      v = _("symbol");
+		      break;
+		    }
+
+		  (*_bfd_error_handler)
+		    (_("%B: relocation R_X86_64_GOTOFF64 against undefined %s `%s' can not be used when making a shared object"),
+		     input_bfd, v, h->root.root.string);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+	      else if (!info->executable
+		       && !SYMBOL_REFERENCES_LOCAL (info, h)
+		       && (h->type == STT_FUNC
+			   || h->type == STT_OBJECT)
+		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+		{
+		  (*_bfd_error_handler)
+		    (_("%B: relocation R_X86_64_GOTOFF64 against protected %s `%s' can not be used when making a shared object"),
+		     input_bfd,
+		     h->type == STT_FUNC ? "function" : "data",
+		     h->root.root.string);
+		  bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
+		}
 	    }
 
 	  /* Note that sgot is not involved in this

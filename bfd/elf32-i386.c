@@ -3717,7 +3717,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  /* Check to make sure it isn't a protected function or data
 	     symbol for shared library since it may not be local when
 	     used as function address or with copy relocation.  We also
-	     need to make sure that a symbol is defined locally.  */
+	     need to make sure that a symbol is referenced locally.  */
 	  if (info->shared && h)
 	    {
 	      if (!h->def_regular)
@@ -3747,7 +3747,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  return FALSE;
 		}
 	      else if (!info->executable
-		       && !SYMBOLIC_BIND (info, h)
+		       && !SYMBOL_REFERENCES_LOCAL (info, h)
 		       && (h->type == STT_FUNC
 			   || h->type == STT_OBJECT)
 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)

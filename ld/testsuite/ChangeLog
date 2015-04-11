@@ -1,3 +1,17 @@
+2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Run protected6a.
+	* ld-i386/protected6.d: Renamed to ...
+	* ld-i386/protected6a.d: This.
+	* ld-x86-64/hidden4.d: New file.
+	* ld-x86-64/hidden4.s: Likewise.
+	* ld-x86-64/hidden5.d: Likewise.
+	* ld-x86-64/hidden5.s: Likewise.
+	* ld-x86-64/protected6.d: Renamed to ...
+	* ld-x86-64/protected6a.d: This.
+	* ld-x86-64/x86-64.exp: Run hidden4, hidden5, protected6a,
+	protected7a and protected7b.
+
 2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/pr17709
