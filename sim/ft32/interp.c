@@ -688,28 +688,6 @@ sim_engine_run (SIM_DESC sd,
     }
 }
 
-int
-sim_write (SIM_DESC sd,
-	   SIM_ADDR addr,
-	   const unsigned char *buffer,
-	   int size)
-{
-  sim_cpu *cpu = STATE_CPU (sd, 0);
-
-  return sim_core_write_buffer (sd, cpu, write_map, buffer, addr, size);
-}
-
-int
-sim_read (SIM_DESC sd,
-	  SIM_ADDR addr,
-	  unsigned char *buffer,
-	  int size)
-{
-  sim_cpu *cpu = STATE_CPU (sd, 0);
-
-  return sim_core_read_buffer (sd, cpu, read_map, buffer, addr, size);
-}
-
 static uint32_t *
 ft32_lookup_register (SIM_CPU *cpu, int nr)
 {
