@@ -45,8 +45,6 @@ typedef struct _sim_cpu SIM_CPU;
   int		  cycles;
   int		  insts;
   int		  exception;
-  unsigned long   msize;
-  unsigned char  *memory;
   ubyte           imm_enable;
   half            imm_high;
 };

@@ -89,239 +89,15 @@ microblaze_store_unsigned_integer (unsigned char *addr, int len,
     }
 }
 
-/* TODO: Convert to common tracing framework.  */
-static int issue_messages = 0;
-
-static void /* INLINE */
-wbat (SIM_CPU *cpu, word x, word v)
-{
-  if (((uword)x) >= CPU.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "byte write to 0x%x outside memory range\n", x);
-
-      CPU.exception = SIGSEGV;
-    }
-  else
-    {
-      unsigned char *p = CPU.memory + x;
-      p[0] = v;
-    }
-}
-
-static void /* INLINE */
-wlat (SIM_CPU *cpu, word x, word v)
-{
-  if (((uword)x) >= CPU.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "word write to 0x%x outside memory range\n", x);
-
-      CPU.exception = SIGSEGV;
-    }
-  else
-    {
-      if ((x & 3) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "word write to unaligned memory address: 0x%x\n", x);
-
-	  CPU.exception = SIGBUS;
-	}
-      else if (!target_big_endian)
-	{
-	  unsigned char *p = CPU.memory + x;
-	  p[3] = v >> 24;
-	  p[2] = v >> 16;
-	  p[1] = v >> 8;
-	  p[0] = v;
-	}
-      else
-	{
-	  unsigned char *p = CPU.memory + x;
-	  p[0] = v >> 24;
-	  p[1] = v >> 16;
-	  p[2] = v >> 8;
-	  p[3] = v;
-	}
-    }
-}
-
-static void /* INLINE */
-what (SIM_CPU *cpu, word x, word v)
-{
-  if (((uword)x) >= CPU.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "short write to 0x%x outside memory range\n", x);
-
-      CPU.exception = SIGSEGV;
-    }
-  else
-    {
-      if ((x & 1) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "short write to unaligned memory address: 0x%x\n",
-		     x);
-
-	  CPU.exception = SIGBUS;
-	}
-      else if (!target_big_endian)
-	{
-	  unsigned char *p = CPU.memory + x;
-	  p[1] = v >> 8;
-	  p[0] = v;
-	}
-      else
-	{
-	  unsigned char *p = CPU.memory + x;
-	  p[0] = v >> 8;
-	  p[1] = v;
-	}
-    }
-}
-
-/* Read functions.  */
-static int /* INLINE */
-rbat (SIM_CPU *cpu, word x)
-{
-  if (((uword)x) >= CPU.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "byte read from 0x%x outside memory range\n", x);
-
-      CPU.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      unsigned char *p = CPU.memory + x;
-      return p[0];
-    }
-}
-
-static int /* INLINE */
-rlat (SIM_CPU *cpu, word x)
-{
-  if (((uword) x) >= CPU.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "word read from 0x%x outside memory range\n", x);
-
-      CPU.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      if ((x & 3) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "word read from unaligned address: 0x%x\n", x);
-
-	  CPU.exception = SIGBUS;
-	  return 0;
-	}
-      else if (! target_big_endian)
-	{
-	  unsigned char *p = CPU.memory + x;
-	  return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
-	}
-      else
-	{
-	  unsigned char *p = CPU.memory + x;
-	  return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-	}
-    }
-}
-
-static int /* INLINE */
-rhat (SIM_CPU *cpu, word x)
-{
-  if (((uword)x) >= CPU.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "short read from 0x%x outside memory range\n", x);
-
-      CPU.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      if ((x & 1) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "short read from unaligned address: 0x%x\n", x);
-
-	  CPU.exception = SIGBUS;
-	  return 0;
-	}
-      else if (!target_big_endian)
-	{
-	  unsigned char *p = CPU.memory + x;
-	  return (p[1] << 8) | p[0];
-	}
-      else
-	{
-	  unsigned char *p = CPU.memory + x;
-	  return (p[0] << 8) | p[1];
-	}
-    }
-}
-
-/* TODO: Delete all sim_size and use common memory functions.  */
-/* Default to a 8 Mbyte (== 2^23) memory space.  */
-static int sim_memory_size = 1 << 23;
-
-#define	MEM_SIZE_FLOOR	64
-static void
-sim_size (SIM_CPU *cpu, int size)
-{
-  sim_memory_size = size;
-  CPU.msize = sim_memory_size;
-
-  if (CPU.memory)
-    free (CPU.memory);
-
-  CPU.memory = (unsigned char *) calloc (1, CPU.msize);
-
-  if (!CPU.memory)
-    {
-      if (issue_messages)
-	fprintf (stderr,
-		 "Not enough VM for simulation of %ld bytes of RAM\n",
-		 CPU.msize);
-
-      CPU.msize = 1;
-      CPU.memory = (unsigned char *) calloc (1, 1);
-    }
-}
-
-static void
-init_pointers (SIM_CPU *cpu)
-{
-  if (CPU.msize != (sim_memory_size))
-    sim_size (cpu, sim_memory_size);
-}
-
 static void
 set_initial_gprs (SIM_CPU *cpu)
 {
   int i;
   long space;
-  unsigned long memsize;
-
-  init_pointers (cpu);
 
   /* Set up machine just out of reset.  */
   PC = 0;
   MSR = 0;
-
-  memsize = CPU.msize / (1024 * 1024);
-
-  if (issue_messages > 1)
-    fprintf (stderr, "Simulated memory of %ld Mbytes (0x0 .. 0x%08lx)\n",
-	     memsize, CPU.msize - 1);
 
   /* Clean out the GPRs */
   for (i = 0; i < 32; i++)
@@ -365,7 +141,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   do
     {
       /* Fetch the initial instructions that we'll decode. */
-      inst = rlat (cpu, PC & 0xFFFFFFFC);
+      inst = MEM_RD_WORD (PC & 0xFFFFFFFC);
 
       op = get_insn_microblaze (inst, &imm_unsigned, &insn_type,
 				&num_delay_slot);
@@ -439,7 +215,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	        {
 	          newpc = PC;
 	          PC = oldpc + INST_SIZE;
-	          inst = rlat (cpu, PC & 0xFFFFFFFC);
+	          inst = MEM_RD_WORD (PC & 0xFFFFFFFC);
 	          op = get_insn_microblaze (inst, &imm_unsigned, &insn_type,
 					    &num_delay_slot);
 	          if (op == invalid_inst)
@@ -452,14 +228,14 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	          /*	      immword = IMM_W; */
 	          if (op == microblaze_brk)
 		    {
-		      if (issue_messages)
+		      if (STATE_VERBOSE_P (sd))
 		        fprintf (stderr, "Breakpoint set in delay slot "
 			         "(at address 0x%x) will not be honored\n", PC);
 		      /* ignore the breakpoint */
 		    }
 	          else if (insn_type == branch_inst || insn_type == return_inst)
 		    {
-		      if (issue_messages)
+		      if (STATE_VERBOSE_P (sd))
 		        fprintf (stderr, "Cannot have branch or return instructions "
 			         "in delay slot (at address 0x%x)\n", PC);
 		      CPU.exception = SIGILL;
@@ -522,40 +298,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   CPU.cycles += memops; 	/* and memop cycle delays */
 }
 
-
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
-  int i;
-
-  init_pointers (cpu);
-
-  memcpy (&CPU.memory[addr], buffer, size);
-
-  return size;
-}
-
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
-  int i;
-
-  init_pointers (cpu);
-
-  memcpy (buffer, &CPU.memory[addr], size);
-
-  return size;
-}
-
-
 int
 sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
-
-  init_pointers (cpu);
 
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
     {
@@ -581,8 +327,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   long ival;
-
-  init_pointers (cpu);
 
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
     {
@@ -709,24 +453,19 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
       return 0;
     }
 
-  if (kind == SIM_OPEN_STANDALONE)
-    issue_messages = 1;
-
   /* CPU specific initialization.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
-      int osize = sim_memory_size;
 
       CPU_PC_FETCH (cpu) = microblaze_pc_get;
       CPU_PC_STORE (cpu) = microblaze_pc_set;
 
       set_initial_gprs (cpu);
-
-      /* Discard and reacquire memory -- start with a clean slate.  */
-      sim_size (cpu, 1);		/* small */
-      sim_size (cpu, osize);	/* and back again */
     }
+
+  /* Default to a 8 Mbyte (== 2^23) memory space.  */
+  sim_do_commandf (sd, "memory-size 0x800000");
 
   return sd;
 }
@@ -745,58 +484,4 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
   PC = bfd_get_start_address (prog_bfd);
 
   return SIM_RC_OK;
-}
-
-void
-sim_do_command (SIM_DESC sd, const char *cmd)
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
-
-  /* Nothing there yet; it's all an error.  */
-
-  if (cmd != NULL)
-    {
-      char ** simargv = buildargv (cmd);
-
-      if (strcmp (simargv[0], "dumpmem") == 0)
-	{
-	  unsigned char * p;
-	  FILE * dumpfile;
-
-	  if (simargv[1] == NULL)
-	    fprintf (stderr, "Error: missing argument to dumpmem cmd.\n");
-
-	  fprintf (stderr, "Writing dumpfile %s...",simargv[1]);
-
-	  dumpfile = fopen (simargv[1], "w");
-	  p = CPU.memory;
-	  fwrite (p, CPU.msize-1, 1, dumpfile);
-	  fclose (dumpfile);
-
-	  fprintf (stderr, "done.\n");
-	}
-      else if (strcmp (simargv[0], "clearstats") == 0)
-	{
-	  CPU.cycles = 0;
-	  CPU.insts = 0;
-	}
-      else if (strcmp (simargv[0], "verbose") == 0)
-	{
-	  issue_messages = 2;
-	}
-      else
-	{
-	  fprintf (stderr,"Error: \"%s\" is not a valid M.CORE simulator command.\n",
-		   cmd);
-	}
-
-      freeargv (simargv);
-    }
-  else
-    {
-      fprintf (stderr, "M.CORE sim commands: \n");
-      fprintf (stderr, "  dumpmem <filename>\n");
-      fprintf (stderr, "  clearstats\n");
-      fprintf (stderr, "  verbose\n");
-    }
 }
