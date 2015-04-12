@@ -91,6 +91,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the `fallocate' function. */
+#undef HAVE_FALLOCATE
+
 /* Define to 1 if you have the `fcntl' function. */
 #undef HAVE_FCNTL
 
@@ -160,8 +163,17 @@
 /* Define to 1 if you have the `mprotect' function. */
 #undef HAVE_MPROTECT
 
+/* Define to 1 if you have the mremap function with MREMAP_MAYMOVE support */
+#undef HAVE_MREMAP
+
+/* Define to 1 if you have the msync function with MS_SYNC support */
+#undef HAVE_MSYNC
+
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
+
+/* Define to 1 if you have the `posix_fallocate' function. */
+#undef HAVE_POSIX_FALLOCATE
 
 /* Define if <sys/procfs.h> has prpsinfo32_t. */
 #undef HAVE_PRPSINFO32_T

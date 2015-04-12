@@ -204,7 +204,7 @@ AC_HEADER_DIRENT
 
 ACX_HEADER_STRING
 AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno)
-AC_CHECK_FUNCS(strtoull getrlimit)
+AC_CHECK_FUNCS(strtoull getrlimit posix_fallocate fallocate)
 
 AC_CHECK_DECLS(basename)
 AC_CHECK_DECLS(ftello)
@@ -1181,6 +1181,28 @@ AC_CHECK_FUNCS(madvise mprotect)
 case ${want_mmap}+${ac_cv_func_mmap_fixed_mapped} in
   true+yes )  AC_DEFINE(USE_MMAP, 1, [Use mmap if it's available?]) ;;
 esac
+
+AC_CACHE_CHECK([mremap with MREMAP_MAYMOVE], [bfd_cv_mremap_maymove],
+[AC_LINK_IFELSE([
+AC_LANG_PROGRAM([[
+#include <sys/mman.h>
+void f() { mremap (0, 0, 0, MREMAP_MAYMOVE); }
+]])], [bfd_cv_mremap_maymove=yes], [bfd_cv_mremap_maymove=no])])
+if test "$bfd_cv_mremap_maymove" = "yes"; then
+  AC_DEFINE(HAVE_MREMAP, 1,
+    [Define to 1 if you have the mremap function with MREMAP_MAYMOVE support])
+fi
+
+AC_CACHE_CHECK([msync with MS_SYNC], [bfd_cv_msync_ms_sync],
+[AC_LINK_IFELSE([
+AC_LANG_PROGRAM([[
+#include <sys/mman.h>
+void f() { msync (0, 0, MS_SYNC); }
+]])], [bfd_cv_msync_ms_sync=yes], [bfd_cv_msync_ms_sync=no])])
+if test "$bfd_cv_msync_ms_sync" = "yes"; then
+  AC_DEFINE(HAVE_MSYNC, 1,
+    [Define to 1 if you have the msync function with MS_SYNC support])
+fi
 
 rm -f doc/config.status
 AC_CONFIG_FILES([Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in])

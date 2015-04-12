@@ -656,7 +656,7 @@ bfd_open_file (bfd *abfd)
     bfd_set_error (bfd_error_system_call);
   else
     {
-      if (! bfd_cache_init (abfd))
+      if (! bfd_mmap_init (abfd))
 	return NULL;
     }
 

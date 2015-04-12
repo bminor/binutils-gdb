@@ -353,7 +353,7 @@ SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c \
 	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
 	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
 	$(srcdir)/../hash.c $(srcdir)/../linker.c \
-	$(srcdir)/../mmo.c
+	$(srcdir)/../mmo.c $(srcdir)/../mmap.c
 
 SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c \
 	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../corefile.c \
@@ -367,7 +367,7 @@ SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c \
 	$(srcdir)/../bfdio.c $(srcdir)/../bfdwin.c \
 	$(srcdir)/../reloc.c $(srcdir)/../cpu-h8300.c \
 	$(srcdir)/../cpu-i960.c $(srcdir)/../archures.c \
-	$(srcdir)/../init.c
+	$(srcdir)/../init.c $(srcdir)/../mmap.c
 
 TEXIDIR = $(srcdir)/../../texinfo/fsf
 info_TEXINFOS = bfd.texinfo
@@ -386,6 +386,7 @@ LIBBFD_H_DEP = \
 	$(srcdir)/../reloc.c		\
 	$(srcdir)/../archures.c		\
 	$(srcdir)/../elf.c		\
+	$(srcdir)/../mmap.c		\
 	$(srcdir)/header.sed		\
 	$(srcdir)/proto.str		\
 	$(MKDOC)

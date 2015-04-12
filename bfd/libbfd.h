@@ -1,6 +1,6 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
    generated from "libbfd-in.h", "init.c", "libbfd.c", "bfdio.c", 
-   "bfdwin.c", "cache.c", "reloc.c", "archures.c" and "elf.c".
+   "bfdwin.c", "cache.c", "reloc.c", "archures.c", "elf.c" and "mmap.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* libbfd.h -- Declarations used by bfd library *implementation*.
@@ -3171,6 +3171,9 @@ void *bfd_arch_default_fill (bfd_size_type count,
     bfd_boolean code);
 
 /* Extracted from elf.c.  */
+/* Extracted from mmap.c.  */
+bfd_boolean bfd_mmap_init (bfd *abfd);
+
 #ifdef __cplusplus
 }
 #endif

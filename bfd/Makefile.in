@@ -146,9 +146,9 @@ LTLIBRARIES = $(bfdlib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am__objects_1 = archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo \
 	cache.lo coff-bfd.lo compress.lo corefile.lo format.lo hash.lo \
-	init.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
-	section.lo simple.lo stab-syms.lo stabs.lo syms.lo targets.lo \
-	binary.lo ihex.lo srec.lo tekhex.lo verilog.lo
+	init.lo libbfd.lo linker.lo mmap.lo merge.lo opncls.lo \
+	reloc.lo section.lo simple.lo stab-syms.lo stabs.lo syms.lo \
+	targets.lo binary.lo ihex.lo srec.lo tekhex.lo verilog.lo
 am_libbfd_la_OBJECTS = $(am__objects_1)
 libbfd_la_OBJECTS = $(am_libbfd_la_OBJECTS)
 libbfd_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -412,7 +412,7 @@ BFD64_LIBS = archive64.lo
 BFD32_LIBS_CFILES = \
 	archive.c archures.c bfd.c bfdio.c bfdwin.c \
 	cache.c coff-bfd.c compress.c corefile.c format.c hash.c \
-	init.c libbfd.c linker.c merge.c opncls.c reloc.c \
+	init.c libbfd.c linker.c mmap.c merge.c opncls.c reloc.c \
 	section.c simple.c stab-syms.c stabs.c syms.c targets.c \
 	binary.c ihex.c srec.c tekhex.c verilog.c
 
@@ -1175,7 +1175,7 @@ BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
 
 BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c bfdio.c bfdwin.c \
-	cache.c reloc.c archures.c elf.c
+	cache.c reloc.c archures.c elf.c mmap.c
 
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 MOSTLYCLEANFILES = ofiles stamp-ofiles
@@ -1579,6 +1579,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mach-o.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mipsbsd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netbsd-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newsos3.Plo@am__quote@

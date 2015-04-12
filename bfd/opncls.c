@@ -242,7 +242,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
   else
     nbfd->direction = write_direction;
 
-  if (! bfd_cache_init (nbfd))
+  if (! bfd_mmap_init (nbfd))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -400,7 +400,7 @@ bfd_openstreamr (const char *filename, const char *target, void *streamarg)
   nbfd->filename = xstrdup (filename);
   nbfd->direction = read_direction;
 
-  if (! bfd_cache_init (nbfd))
+  if (! bfd_mmap_init (nbfd))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;

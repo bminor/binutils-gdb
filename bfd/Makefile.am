@@ -80,7 +80,7 @@ BFD64_LIBS = archive64.lo
 BFD32_LIBS_CFILES = \
 	archive.c archures.c bfd.c bfdio.c bfdwin.c \
 	cache.c coff-bfd.c compress.c corefile.c format.c hash.c \
-	init.c libbfd.c linker.c merge.c opncls.c reloc.c \
+	init.c libbfd.c linker.c mmap.c merge.c opncls.c reloc.c \
 	section.c simple.c stab-syms.c stabs.c syms.c targets.c \
 	binary.c ihex.c srec.c tekhex.c verilog.c
 
@@ -1002,7 +1002,7 @@ BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
 	archive.c corefile.c targets.c format.c compress.c
 BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c bfdio.c bfdwin.c \
-	cache.c reloc.c archures.c elf.c
+	cache.c reloc.c archures.c elf.c mmap.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
 # Could really use a "copy-if-change"...

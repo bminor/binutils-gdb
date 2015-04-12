@@ -6783,6 +6783,9 @@ struct bfd
   /* Pointer to structure which contains architecture information.  */
   const struct bfd_arch_info *arch_info;
 
+  /* Used by mmap_iovec.  */
+  int mmap_fd;
+  file_ptr mmap_size;
   /* Stuff only useful for archives.  */
   void *arelt_data;
   struct bfd *my_archive;      /* The containing archive BFD.  */
