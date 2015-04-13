@@ -22,6 +22,7 @@ M68HC11_OBJS = interp.o m68hc11int.o m68hc12int.o \
 
 SIM_OBJS = $(M68HC11_OBJS) \
 	$(SIM_NEW_COMMON_OBJS) \
+	sim-cpu.o \
 	sim-load.o \
 	sim-hload.o \
 	sim-stop.o \

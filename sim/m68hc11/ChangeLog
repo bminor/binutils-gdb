@@ -1,3 +1,14 @@
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add sim-cpu.o.
+	* interp.c (m68hc11_pc_get, m68hc11_pc_set): New functions.
+	(sim_open): Declare new local var i.  Call sim_cpu_alloc_all.
+	Call CPU_PC_FETCH & CPU_PC_STORE for all cpus.
+	(sim_pc_get): Delete.
+	* sim-main.h (SIM_CPU): Define.
+	(STATE_CPU): Drop &.
+	(struct sim_state): Change cpu to an array of pointers.
+
 2015-04-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-engine.o and sim-hrw.o.
