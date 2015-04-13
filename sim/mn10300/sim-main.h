@@ -43,8 +43,8 @@
 #include "idecode.h"
 
 typedef instruction_address sim_cia;
-static const sim_cia null_cia = {0}; /* Dummy */
-#define NULL_CIA null_cia
+typedef struct _sim_cpu SIM_CPU;
+
 /* FIXME: Perhaps igen should generate access macros for
    `instruction_address' that we could use.  */
 /*#define CIA_ADDR(cia) ((cia).ip) doesn't work for mn10300*/
@@ -85,8 +85,12 @@ struct _sim_cpu {
 struct sim_state {
 
   /* the processors proper */
-  sim_cpu cpu;
-#define STATE_CPU(sd, n) (&(sd)->cpu)
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
+#if (WITH_SMP)
+#define STATE_CPU(sd,n) ((sd)->cpu[n])
+#else
+#define STATE_CPU(sd,n) ((sd)->cpu[0])
+#endif
 
   /* The base class.  */
   sim_state_base base;

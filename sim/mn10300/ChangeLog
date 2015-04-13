@@ -1,3 +1,15 @@
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (MN10300_OBJS): Add sim-cpu.o.
+	* interp.c (mn10300_pc_get, mn10300_pc_set): New functions.
+	(sim_open): Declare new local var i.  Call sim_cpu_alloc_all.
+	Call CPU_PC_FETCH & CPU_PC_STORE for all cpus.
+	(sim_pc_get): Delete.
+	* sim-main.h (null_cia, NULL_CIA): Delete.
+	(SIM_CPU): Define.
+	(struct sim_state): Change cpu to an array of pointers.
+	(STATE_CPU): Drop & and handle WITH_SMP.
+
 2015-04-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-engine.o and sim-hrw.o.
