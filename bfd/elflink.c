@@ -2936,6 +2936,10 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
   if (abfd == NULL)
     return FALSE;
 
+  /* Return FALSE if the object has been claimed by plugin.  */
+  if (abfd->plugin_format == bfd_plugin_yes)
+    return FALSE;
+
   if (! bfd_check_format (abfd, bfd_object))
     return FALSE;
 

@@ -1,3 +1,9 @@
+2015-04-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18250
+	* elflink.c (elf_link_is_defined_archive_symbol): Return FALSE
+	if the object has been claimed by plugin.
+
 2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Replace SYMBOLIC_BIND
