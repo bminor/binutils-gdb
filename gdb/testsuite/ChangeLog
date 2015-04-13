@@ -1,5 +1,10 @@
 2015-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.base/bp-permanent.exp (test): Handle the case of being unable
+	to write to the .text section.
+
+2015-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.base/coredump-filter.exp: Restrict test to Linux systems only.
 	Handle the case of targets that do not provide PID information.
 
