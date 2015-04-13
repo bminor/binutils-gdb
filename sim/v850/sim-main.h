@@ -19,6 +19,8 @@
 
 typedef address_word sim_cia;
 
+typedef struct _sim_cpu SIM_CPU;
+
 #include "sim-base.h"
 
 #include "simops.h"
@@ -63,11 +65,11 @@ struct _sim_cpu
 #define CIA_SET(CPU,VAL) ((CPU)->reg.pc = (VAL))
 
 struct sim_state {
-  sim_cpu cpu[MAX_NR_PROCESSORS];
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
 #if (WITH_SMP)
-#define STATE_CPU(sd,n) (&(sd)->cpu[n])
+#define STATE_CPU(sd,n) ((sd)->cpu[n])
 #else
-#define STATE_CPU(sd,n) (&(sd)->cpu[0])
+#define STATE_CPU(sd,n) ((sd)->cpu[0])
 #endif
 #if 0
   SIM_ADDR rom_size;
