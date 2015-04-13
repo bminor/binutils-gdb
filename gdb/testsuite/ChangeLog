@@ -1,3 +1,8 @@
+2015-04-13  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp (gdb_exit): Catch exception
+	and use expect instead of gdb_expect.
+
 2015-04-13  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/coredump-filter.exp: Rename variable "addr" to
