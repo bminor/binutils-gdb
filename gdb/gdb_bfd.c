@@ -122,6 +122,16 @@ show_bfd_sharing  (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("BFD sharing is %s.\n"), value);
 }
 
+/* When non-zero debugging of the bfd caches is enabled.  */
+
+static unsigned int debug_bfd_cache;
+static void
+show_bfd_cache_debug (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("BFD cache debugging is %s.\n"), value);
+}
+
 /* The type of an object being looked up in gdb_bfd_cache.  We use
    htab's capability of storing one kind of object (BFD in this case)
    and using a different sort of object for searching.  */
@@ -407,6 +417,11 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   abfd = htab_find_with_hash (gdb_bfd_cache, &search, hash);
   if (bfd_sharing && abfd != NULL)
     {
+      if (debug_bfd_cache)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Reusing cached bfd %s for %s\n",
+			    host_address_to_string (abfd),
+			    bfd_get_filename (abfd));
       close (fd);
       gdb_bfd_ref (abfd);
       return abfd;
@@ -415,6 +430,12 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   abfd = bfd_fopen (name, target, FOPEN_RB, fd);
   if (abfd == NULL)
     return NULL;
+
+  if (debug_bfd_cache)
+    fprintf_unfiltered (gdb_stdlog,
+			"Creating new bfd %s for %s\n",
+			host_address_to_string (abfd),
+			bfd_get_filename (abfd));
 
   if (bfd_sharing)
     {
@@ -484,6 +505,12 @@ gdb_bfd_ref (struct bfd *abfd)
 
   gdata = bfd_usrdata (abfd);
 
+  if (debug_bfd_cache)
+    fprintf_unfiltered (gdb_stdlog,
+			"Increase reference count on bfd %s (%s)\n",
+			host_address_to_string (abfd),
+			bfd_get_filename (abfd));
+
   if (gdata != NULL)
     {
       gdata->refc += 1;
@@ -537,7 +564,20 @@ gdb_bfd_unref (struct bfd *abfd)
 
   gdata->refc -= 1;
   if (gdata->refc > 0)
-    return;
+    {
+      if (debug_bfd_cache)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Decrease reference count on bfd %s (%s)\n",
+			    host_address_to_string (abfd),
+			    bfd_get_filename (abfd));
+      return;
+    }
+
+  if (debug_bfd_cache)
+    fprintf_unfiltered (gdb_stdlog,
+			"Delete final reference count on bfd %s (%s)\n",
+			host_address_to_string (abfd),
+			bfd_get_filename (abfd));
 
   archive_bfd = gdata->archive_bfd;
   search.filename = bfd_get_filename (abfd);
@@ -968,4 +1008,13 @@ filename, file size, file modification time, and file inode."),
 			   &show_bfd_sharing,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
+
+  add_setshow_zuinteger_cmd ("bfd-cache", class_maintenance,
+			     &debug_bfd_cache, _("\
+Set bfd cache debugging."), _("\
+Show bfd cache debugging."), _("\
+When non-zero, bfd cache specific debugging is enabled."),
+			     NULL,
+			     &show_bfd_cache_debug,
+			     &setdebuglist, &showdebuglist);
 }

@@ -24,6 +24,10 @@ maint set bfd-sharing
 maint show bfd-sharing
   Control the reuse of bfd objects.
 
+set debug bfd-cache
+show debug bfd-cache
+  Control display of debugging info regarding bfd caching.
+
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
   - disassembled instructions are now printed in program order, and

@@ -18371,6 +18371,16 @@ already shared @code{bfd} objects to be unshared, but all future files
 that are opened will create a new @code{bfd} object.  Similarly,
 re-enabling sharing does not cause multiple existing @code{bfd}
 objects to be collapsed into a single shared @code{bfd} object.
+
+@kindex set debug bfd-cache @var{level}
+@kindex bfd caching
+@item set debug bfd-cache @var{level}
+Turns on debugging of the bfd cache, setting the level to @var{level}.
+
+@kindex show debug bfd-cache
+@kindex bfd caching
+@item show debug bfd-cache
+Show the current debugging level of the bfd cache.
 @end table
 
 @node Separate Debug Files

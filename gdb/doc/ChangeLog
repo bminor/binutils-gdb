@@ -1,5 +1,9 @@
 2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.texinfo (File Caching): Document "set/show debug bfd-cache".
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.texinfo (Maintenance Commands): Move documentation of "main
 	info bfds" to...
 	(File Caching): A New section.  Outline bfd caching, and add new
