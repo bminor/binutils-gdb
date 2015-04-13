@@ -1,3 +1,8 @@
+2015-04-13  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/coredump-filter.exp: Rename variable "addr" to
+	"coredump_var_addr" to avoid naming conflict with other testcases.
+
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp: Use

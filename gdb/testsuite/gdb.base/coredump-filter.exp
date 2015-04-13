@@ -38,7 +38,7 @@ proc do_save_core { filter_flag core ipid } {
 }
 
 proc do_load_and_test_core { core var working_var working_value } {
-    global hex decimal addr
+    global hex decimal coredump_var_addr
 
     set core_loaded [gdb_core_cmd "$core" "load core"]
     if { $core_loaded == -1 } {
@@ -47,9 +47,9 @@ proc do_load_and_test_core { core var working_var working_value } {
     }
 
     # Access the memory the addresses point to.
-    gdb_test "print/x *(char *) $addr($var)" "\(\\\$$decimal = <error: \)?Cannot access memory at address $hex\(>\)?" \
+    gdb_test "print/x *(char *) $coredump_var_addr($var)" "\(\\\$$decimal = <error: \)?Cannot access memory at address $hex\(>\)?" \
 	"printing $var when core is loaded (should not work)"
-    gdb_test "print/x *(char *) $addr($working_var)" " = $working_value.*" \
+    gdb_test "print/x *(char *) $coredump_var_addr($working_var)" " = $working_value.*" \
 	"print/x *$working_var ( = $working_value)"
 }
 
@@ -163,7 +163,7 @@ foreach item $all_anon_corefiles {
 	set test "print/x $name"
 	gdb_test_multiple $test $test {
 	    -re " = \($hex\)\r\n$gdb_prompt $" {
-		set addr($name) $expect_out(1,string)
+		set coredump_var_addr($name) $expect_out(1,string)
 	    }
 	}
     }
