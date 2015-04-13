@@ -18343,6 +18343,36 @@ Set whether a source file may have multiple base names.
 Show whether a source file may have multiple base names.
 @end table
 
+@node File Caching
+@section File Caching
+@cindex caching of opened files
+@cindex caching of bfd objects
+
+To speed up file loading, and reduce memory usage, @value{GDBN} will
+reuse the @code{bfd} objects used to track open files.  @xref{Top, ,
+BFD, bfd, The Binary File Descriptor Library}.  The following commands
+allow visibility and control of the caching behavior.
+
+@table @code
+@kindex maint info bfds
+@item maint info bfds
+This prints information about each @code{bfd} object that is known to
+@value{GDBN}.
+
+@kindex maint set bfd-sharing
+@kindex maint show bfd-sharing
+@kindex bfd caching
+@item maint set bfd-sharing
+@item maint show bfd-sharing
+Control whether @code{bfd} objects can be shared.  When sharing is
+enabled @value{GDBN} reuses already open @code{bfd} objects rather
+than reopening the same file.  Turning sharing off does not cause
+already shared @code{bfd} objects to be unshared, but all future files
+that are opened will create a new @code{bfd} object.  Similarly,
+re-enabling sharing does not cause multiple existing @code{bfd}
+objects to be collapsed into a single shared @code{bfd} object.
+@end table
+
 @node Separate Debug Files
 @section Debugging Information in Separate Files
 @cindex separate debugging information files
@@ -34161,11 +34191,6 @@ Temporary internal breakpoint used by the @value{GDBN} @code{finish} command.
 Shared library events.
 
 @end table
-
-@kindex maint info bfds
-@item maint info bfds
-This prints information about each @code{bfd} object that is known to
-@value{GDBN}.  @xref{Top, , BFD, bfd, The Binary File Descriptor Library}.
 
 @kindex maint info btrace
 @item maint info btrace

@@ -20,6 +20,10 @@ maint show target-non-stop
   "set non-stop" is "off".  The default is "auto", meaning non-stop
   mode is enabled if supported by the target.
 
+maint set bfd-sharing
+maint show bfd-sharing
+  Control the reuse of bfd objects.
+
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
   - disassembled instructions are now printed in program order, and
