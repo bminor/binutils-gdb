@@ -1,5 +1,9 @@
 2015-04-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (MN10300_OBJS): Add sim-cpu.o.
 	* interp.c (mn10300_pc_get, mn10300_pc_set): New functions.
 	(sim_open): Declare new local var i.  Call sim_cpu_alloc_all.

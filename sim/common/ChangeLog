@@ -1,5 +1,10 @@
 2015-04-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (ACX_PKGVERSION): Change GDB to SIM.
+	* configure: Regenerate.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-options.c: Include version.h.
 	(OPTIONS_VERSION): New enum.
 	(standard_options): Add "version".

@@ -1,5 +1,9 @@
 2015-04-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (ft32_pc_get): Return the pc value.
 
 2015-04-12  Mike Frysinger  <vapier@gentoo.org>
