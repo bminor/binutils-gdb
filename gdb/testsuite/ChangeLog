@@ -1,3 +1,8 @@
+2015-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/coredump-filter.exp: Restrict test to Linux systems only.
+	Handle the case of targets that do not provide PID information.
+
 2015-04-13  Yao Qi  <yao.qi@linaro.org>
 
 	* lib/gdbserver-support.exp (gdb_exit): Catch exception

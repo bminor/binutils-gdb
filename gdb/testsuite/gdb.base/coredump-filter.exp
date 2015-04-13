@@ -15,6 +15,12 @@
 
 standard_testfile
 
+# This test is Linux-only.
+if ![istarget *-*-linux*] then {
+    untested "coredump-filter.exp"
+    return -1
+}
+
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
     untested "could not compile test program"
     return -1
@@ -145,6 +151,12 @@ set infpid ""
 gdb_test_multiple "info inferiors" "getting inferior pid" {
     -re "process \($decimal\).*\r\n$gdb_prompt $" {
 	set infpid $expect_out(1,string)
+    }
+    -re "Remote target.*$gdb_prompt $" {
+	# If the target does not provide PID information (like usermode QEMU),
+	# just bail out as the rest of the test may rely on it, giving spurious
+	# failures.
+	return -1
     }
 }
 
