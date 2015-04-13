@@ -1,5 +1,12 @@
 2015-04-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-options.c: Include version.h.
+	(OPTIONS_VERSION): New enum.
+	(standard_options): Add "version".
+	(standard_option_handler): Handle OPTIONS_VERSION.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (version.o): Change to using create-version.sh from gdb.
 	(create-version.sh): Delete.
 
