@@ -758,7 +758,7 @@ ft32_reg_fetch (SIM_CPU *cpu,
 static sim_cia
 ft32_pc_get (SIM_CPU *cpu)
 {
-  return 32;
+  return cpu->state.pc;
 }
 
 static void
