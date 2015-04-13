@@ -336,13 +336,32 @@ static void device_init(SIM_DESC sd) {
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+static sim_cia
+mips_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}
+
+static void
+mips_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  PC = pc;
+}
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
-  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
+  sim_cpu *cpu;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    return 0;
+
+  cpu = STATE_CPU (sd, 0); /* FIXME */
 
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
@@ -790,7 +809,14 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     }
   }
 
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_PC_FETCH (cpu) = mips_pc_get;
+      CPU_PC_STORE (cpu) = mips_pc_set;
+    }
 
   return sd;
 }
@@ -1064,12 +1090,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
 
   return 0;
-}
-
-sim_cia
-sim_pc_get (sim_cpu *cpu)
-{
-  return PC;
 }
 
 SIM_RC

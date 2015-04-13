@@ -46,6 +46,7 @@ SIM_OBJS = \
 	cp1.o \
 	mdmx.o \
 	dsp.o \
+	sim-cpu.o \
 	sim-main.o \
 	sim-hload.o \
 	sim-stop.o \

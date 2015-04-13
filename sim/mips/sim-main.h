@@ -36,6 +36,8 @@ mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ER
 
 typedef address_word sim_cia;
 
+typedef struct _sim_cpu SIM_CPU;
+
 #include "sim-base.h"
 #include "bfd.h"
 
@@ -486,13 +488,12 @@ struct sim_state {
 
   struct swatch watch;
 
-  sim_cpu cpu[MAX_NR_PROCESSORS];
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
 #if (WITH_SMP)
-#define STATE_CPU(sd,n) (&(sd)->cpu[n])
+#define STATE_CPU(sd,n) ((sd)->cpu[n])
 #else
-#define STATE_CPU(sd,n) (&(sd)->cpu[0])
+#define STATE_CPU(sd,n) ((sd)->cpu[0])
 #endif
-
 
   sim_state_base base;
 };

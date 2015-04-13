@@ -1,5 +1,16 @@
 2015-04-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Add sim-cpu.o.
+	* interp.c (mips_pc_get, mips_pc_set): New functions.
+	(sim_open): Declare new local var i.  Call sim_cpu_alloc_all.
+	Call CPU_PC_FETCH & CPU_PC_STORE for all cpus.
+	(sim_pc_get): Delete.
+	* sim-main.h (SIM_CPU): Define.
+	(struct sim_state): Change cpu to an array of pointers.
+	(STATE_CPU): Drop &.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (mips_option_handler, open_trace, sim_close,
 	sim_write, sim_read, sim_store_register, sim_fetch_register,
 	sim_create_inferior, pr_addr, pr_uword64): Convert old style
