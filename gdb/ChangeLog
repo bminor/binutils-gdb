@@ -1,3 +1,13 @@
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb_bfd.c (struct gdb_bfd_data): Add size, inode, and device id
+	field.
+	(struct gdb_bfd_cache_search): Likewise.
+	(eq_bfd): Compare the size, inode, and device id fields.
+	(gdb_bfd_open): Initialise the size, inode, and device id fields.
+	(gdb_bfd_ref): Likewise.
+	(gdb_bfd_unref): Likewise.
+
 2015-08-18  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_nat_always_non_stop_p): If the linux_ops

@@ -69,6 +69,15 @@ struct gdb_bfd_data
   /* The mtime of the BFD at the point the cache entry was made.  */
   time_t mtime;
 
+  /* The file size (in bytes) at the point the cache entry was made.  */
+  off_t size;
+
+  /* The inode of the file at the point the cache entry was made.  */
+  ino_t inode;
+
+  /* The device id of the file at the point the cache entry was made.  */
+  dev_t device_id;
+
   /* This is true if we have determined whether this BFD has any
      sections requiring relocation.  */
   unsigned int relocation_computed : 1;
@@ -112,6 +121,12 @@ struct gdb_bfd_cache_search
   const char *filename;
   /* The mtime.  */
   time_t mtime;
+  /* The file size (in bytes).  */
+  off_t size;
+  /* The inode of the file.  */
+  ino_t inode;
+  /* The device id of the file.  */
+  dev_t device_id;
 };
 
 /* A hash function for BFDs.  */
@@ -136,6 +151,9 @@ eq_bfd (const void *a, const void *b)
   struct gdb_bfd_data *gdata = bfd_usrdata (abfd);
 
   return (gdata->mtime == s->mtime
+	  && gdata->size == s->size
+	  && gdata->inode == s->inode
+	  && gdata->device_id == s->device_id
 	  && strcmp (bfd_get_filename (abfd), s->filename) == 0);
 }
 
@@ -358,9 +376,17 @@ gdb_bfd_open (const char *name, const char *target, int fd)
     {
       /* Weird situation here.  */
       search.mtime = 0;
+      search.size = 0;
+      search.inode = 0;
+      search.device_id = 0;
     }
   else
-    search.mtime = st.st_mtime;
+    {
+      search.mtime = st.st_mtime;
+      search.size = st.st_size;
+      search.inode = st.st_ino;
+      search.device_id = st.st_dev;
+    }
 
   /* Note that this must compute the same result as hash_bfd.  */
   hash = htab_hash_string (name);
@@ -435,6 +461,7 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
 void
 gdb_bfd_ref (struct bfd *abfd)
 {
+  struct stat buf;
   struct gdb_bfd_data *gdata;
   void **slot;
 
@@ -455,7 +482,19 @@ gdb_bfd_ref (struct bfd *abfd)
   gdata = bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
   gdata->refc = 1;
   gdata->mtime = bfd_get_mtime (abfd);
+  gdata->size = bfd_get_size (abfd);
   gdata->archive_bfd = NULL;
+  if (bfd_stat (abfd, &buf) == 0)
+    {
+      gdata->inode = buf.st_ino;
+      gdata->device_id = buf.st_dev;
+    }
+  else
+    {
+      /* The stat failed.  */
+      gdata->inode = 0;
+      gdata->device_id = 0;
+    }
   bfd_usrdata (abfd) = gdata;
 
   bfd_alloc_data (abfd);
@@ -495,6 +534,9 @@ gdb_bfd_unref (struct bfd *abfd)
       void **slot;
 
       search.mtime = gdata->mtime;
+      search.size = gdata->size;
+      search.inode = gdata->inode;
+      search.device_id = gdata->device_id;
       slot = htab_find_slot_with_hash (gdb_bfd_cache, &search, hash,
 				       NO_INSERT);
 
