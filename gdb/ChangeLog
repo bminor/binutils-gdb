@@ -1,5 +1,11 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Recompute
+	BIT_SIZE and LEN if the size of the resolved type is smaller
+	than BIT_SIZE * HOST_CHAR_BIT.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Use a more
 	correct address in call to value_at.  Adjust call to
 	value_address accordingly.

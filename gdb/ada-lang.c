@@ -2419,6 +2419,17 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     {
       v = value_at (type, value_address (obj) + offset);
       type = value_type (v);
+      if (TYPE_LENGTH (type) * HOST_CHAR_BIT < bit_size)
+	{
+	  /* This can happen in the case of an array of dynamic objects,
+	     where the size of each element changes from element to element.
+	     In that case, we're initially given the array stride, but
+	     after resolving the element type, we find that its size is
+	     less than this stride.  In that case, adjust bit_size to
+	     match TYPE's length, and recompute LEN accordingly.  */
+	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
+	  len = TYPE_LENGTH (type) + (bit_offset + HOST_CHAR_BIT - 1) / 8;
+	}
       bytes = (unsigned char *) alloca (len);
       read_memory (value_address (v), bytes, len);
     }
