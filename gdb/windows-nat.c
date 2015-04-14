@@ -1307,8 +1307,8 @@ ctrl_c_handler (DWORD event_type)
   return TRUE;
 }
 
-/* Get the next event from the child.  Return 1 if the event requires
-   handling by WFI (or whatever).  */
+/* Get the next event from the child.  Returns a non-zero thread id if the event
+   requires handling by WFI (or whatever).  */
 static int
 get_windows_debug_event (struct target_ops *ops,
 			 int pid, struct target_waitstatus *ourstatus)
@@ -1317,7 +1317,7 @@ get_windows_debug_event (struct target_ops *ops,
   DWORD continue_status, event_code;
   windows_thread_info *th;
   static windows_thread_info dummy_thread_info;
-  int retval = 0;
+  DWORD thread_id = 0;
 
   last_sig = GDB_SIGNAL_0;
 
@@ -1348,14 +1348,14 @@ get_windows_debug_event (struct target_ops *ops,
 	      /* Kludge around a Windows bug where first event is a create
 		 thread event.  Caused when attached process does not have
 		 a main thread.  */
-	      retval = fake_create_process ();
-	      if (retval)
+	      thread_id = fake_create_process ();
+	      if (thread_id)
 		saw_create++;
 	    }
 	  break;
 	}
       /* Record the existence of this thread.  */
-      retval = current_event.dwThreadId;
+      thread_id = current_event.dwThreadId;
       th = windows_add_thread (ptid_build (current_event.dwProcessId, 0,
 					 current_event.dwThreadId),
 			     current_event.u.CreateThread.hThread,
@@ -1398,7 +1398,7 @@ get_windows_debug_event (struct target_ops *ops,
 					   current_event.dwThreadId),
 	     current_event.u.CreateProcessInfo.hThread,
 	     current_event.u.CreateProcessInfo.lpThreadLocalBase);
-      retval = current_event.dwThreadId;
+      thread_id = current_event.dwThreadId;
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
@@ -1417,7 +1417,7 @@ get_windows_debug_event (struct target_ops *ops,
 	{
 	  ourstatus->kind = TARGET_WAITKIND_EXITED;
 	  ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
-	  retval = main_thread_id;
+	  thread_id = main_thread_id;
 	}
       break;
 
@@ -1432,7 +1432,7 @@ get_windows_debug_event (struct target_ops *ops,
       catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
-      retval = main_thread_id;
+      thread_id = main_thread_id;
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
@@ -1445,7 +1445,7 @@ get_windows_debug_event (struct target_ops *ops,
       catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
-      retval = main_thread_id;
+      thread_id = main_thread_id;
       break;
 
     case EXCEPTION_DEBUG_EVENT:
@@ -1461,7 +1461,7 @@ get_windows_debug_event (struct target_ops *ops,
 	  continue_status = DBG_EXCEPTION_NOT_HANDLED;
 	  break;
 	case 1:
-	  retval = current_event.dwThreadId;
+	  thread_id = current_event.dwThreadId;
 	  break;
 	case -1:
 	  last_sig = 1;
@@ -1477,7 +1477,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     "OUTPUT_DEBUG_STRING_EVENT"));
       if (saw_create != 1)
 	break;
-      retval = handle_output_debug_string (ourstatus);
+      thread_id = handle_output_debug_string (ourstatus);
       break;
 
     default:
@@ -1491,7 +1491,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
     }
 
-  if (!retval || saw_create != 1)
+  if (!thread_id || saw_create != 1)
     {
       if (continue_status == -1)
 	windows_resume (ops, minus_one_ptid, 0, 1);
@@ -1501,14 +1501,14 @@ get_windows_debug_event (struct target_ops *ops,
   else
     {
       inferior_ptid = ptid_build (current_event.dwProcessId, 0,
-				  retval);
+				  thread_id);
       current_thread = th;
       if (!current_thread)
 	current_thread = thread_rec (current_event.dwThreadId, TRUE);
     }
 
 out:
-  return retval;
+  return thread_id;
 }
 
 /* Wait for interesting events to occur in the target process.  */

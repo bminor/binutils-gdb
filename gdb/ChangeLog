@@ -1,5 +1,10 @@
 2015-04-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* windows-nat.c (get_windows_debug_event): Replace retval with
+	thread_id throughout.  Update stale comment.
+
+2015-04-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
 	* windows-nat.c (get_windows_debug_event): Don't use ternary
 	conditional operator.
 
