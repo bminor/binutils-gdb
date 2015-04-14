@@ -1502,7 +1502,9 @@ get_windows_debug_event (struct target_ops *ops,
     {
       inferior_ptid = ptid_build (current_event.dwProcessId, 0,
 				  retval);
-      current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
+      current_thread = th;
+      if (!current_thread)
+	current_thread = thread_rec (current_event.dwThreadId, TRUE);
     }
 
 out:
