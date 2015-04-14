@@ -1,5 +1,9 @@
 2015-04-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* windows-nat.c (windows_resume): Fix misspelling in debug output.
+
+2015-04-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
 	* windows-nat.c (get_windows_debug_event): Replace retval with
 	thread_id throughout.  Update stale comment.
 

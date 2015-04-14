@@ -1233,7 +1233,7 @@ windows_resume (struct target_ops *ops,
 	    }
 	}
 #endif
-	DEBUG_EXCEPT(("Can only continue with recieved signal %d.\n",
+	DEBUG_EXCEPT(("Can only continue with received signal %d.\n",
 	  last_sig));
     }
 
