@@ -1,3 +1,21 @@
+2015-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rl78.c (RL78_OP_REL): New macro.
+	(rl78_elf_howto_table): Use it for complex relocs.
+	(get_symbol_value): Handle the cases when the info or status
+	arguments are NULL.
+	(get_romstart): Cache the status returned by get_symbol_value.
+	(get_ramstart): Likewise.
+	(RL78_STACK_PUSH): Generate an error message if the stack
+	overflows.
+	(RL78_STACK_POP): Likewise for underflows.
+	(rl78_compute_complex_reloc): New function.  Contains the basic
+	processing code for all RL78 complex relocs.
+	(rl78_special_reloc): New function.  Provides special reloc
+	handling for complex relocs.
+	(rl78_elf_relocate_section): Use rl78_compute_complex_reloc.
+	(rl78_offset_for_reloc): Likewise.
+
 2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/pr17709

@@ -1,3 +1,9 @@
+2015-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.h (TC_LINKRELAX_FIXUP): Define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+	(DWARF2_USE_FIXED_ADVANCE_PC): Define.
+
 2015-04-10  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18198

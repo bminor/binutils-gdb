@@ -1,3 +1,8 @@
+2015-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* gas/lns/lns.exp: Add RL78 to list of targets using
+	DW_LNS_fixed_advance_pc.
+
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/dw2-compressed-1.d: New file.

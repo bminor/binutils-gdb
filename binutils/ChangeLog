@@ -1,3 +1,8 @@
+2015-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (target_specific_reloc_handling): Add code to handle
+	RL78 complex relocs.
+
 2015-04-13  Doug Evans  <dje@google.com>
 
 	PR binutils/18218

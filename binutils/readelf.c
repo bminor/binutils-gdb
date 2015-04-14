@@ -11161,6 +11161,42 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	  }
 	break;
       }
+
+    case EM_RL78:
+      {
+	static bfd_vma saved_sym1 = 0;
+	static bfd_vma saved_sym2 = 0;
+	static bfd_vma value;
+
+	switch (reloc_type)
+	  {
+	  case 0x80: /* R_RL78_SYM.  */
+	    saved_sym1 = saved_sym2;
+	    saved_sym2 = symtab[get_reloc_symindex (reloc->r_info)].st_value;
+	    saved_sym2 += reloc->r_addend;
+	    return TRUE;
+
+	  case 0x83: /* R_RL78_OPsub.  */
+	    value = saved_sym1 - saved_sym2;
+	    saved_sym2 = saved_sym1 = 0;
+	    return TRUE;
+	    break;
+
+	  case 0x41: /* R_RL78_ABS32.  */
+	    byte_put (start + reloc->r_offset, value, 4);
+	    value = 0;
+	    return TRUE;
+
+	  case 0x43: /* R_RL78_ABS16.  */
+	    byte_put (start + reloc->r_offset, value, 2);
+	    value = 0;
+	    return TRUE;
+
+	  default:
+	    break;
+	  }
+	break;
+      }
     }
 
   return FALSE;
