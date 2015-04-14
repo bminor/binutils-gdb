@@ -1,3 +1,29 @@
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr17709
+	* ld.texinfo: Document "-z noextern-protected-data".
+	* ldmain.c (main): Initialize link_info.extern_protected_data
+	to -1.
+	* lexsup.c (elf_shlib_list_options): Add
+	"-z [no]extern-protected-data".
+	* emulparams/elf32_x86_64.sh: Source extern_protected_data.sh.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_i386_be.sh: Likewise.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Source extern_protected_data.sh.
+	(PARSE_AND_LIST_OPTIONS): Renamed to ...
+	(PARSE_AND_LIST_OPTIONS_BNDPLT): This.
+	(PARSE_AND_LIST_ARGS_CASE_Z): Renamed to ...
+	(PARSE_AND_LIST_ARGS_CASE_Z_BNDPLT): This.
+	(PARSE_AND_LIST_OPTIONS): Append $PARSE_AND_LIST_OPTIONS_BNDPLT.
+	(PARSE_AND_LIST_ARGS_CASE_Z): Append
+	$PARSE_AND_LIST_ARGS_CASE_Z_BNDPLT.
+	* emulparams/extern_protected_data.sh: New file.
+
 2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* plugin.c (plugin_load_plugins): Removed an extra ';'.

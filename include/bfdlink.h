@@ -517,6 +517,11 @@ struct bfd_link_info
      relaxation returning true in *AGAIN.  */
   int relax_trip;
 
+  /* > 0 to treat protected data defined in the shared library as
+     reference external.  0 to treat it as internal.  -1 to let
+     backend to decide.  */
+  int extern_protected_data;
+
   /* Non-zero if auto-import thunks for DATA items in pei386 DLLs
      should be generated/linked against.  Set to 1 if this feature
      is explicitly requested by the user, -1 if enabled by default.  */
