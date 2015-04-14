@@ -1,3 +1,8 @@
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (version.o): Change to using create-version.sh from gdb.
+	(create-version.sh): Delete.
+
 2015-03-31  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
