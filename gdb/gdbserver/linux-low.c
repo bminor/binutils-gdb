@@ -5209,7 +5209,7 @@ static int
 linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 {
   unsigned long text, text_end, data;
-  int pid = lwpid_of (get_thread_lwp (current_thread));
+  int pid = lwpid_of (current_thread);
 
   errno = 0;
 
