@@ -1,3 +1,7 @@
+2015-04-14  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/bp-permanent.exp (test): Reinstate correct test message.
+
 2015-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/bp-permanent.exp (test): Handle the case of being unable
