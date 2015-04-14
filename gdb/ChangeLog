@@ -1,3 +1,10 @@
+2015-04-14  Gary Benson <gbenson@redhat.com>
+
+	* jit.c (mem_bfd_iovec_stat): Zero supplied buffer.
+	* minidebug.c (lzma_stat): Likewise.
+	* solib-spu.c (spu_bfd_iovec_stat): Likewise.
+	* spu-linux-nat.c (spu_bfd_iovec_stat): Likewise.
+
 2015-04-13  Stan Shebs  <stanshebs@google.com>
 
 	* MAINTAINERS: Update my email address.

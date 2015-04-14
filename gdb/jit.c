@@ -126,6 +126,7 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 {
   struct target_buffer *buffer = (struct target_buffer*) stream;
 
+  memset (sb, 0, sizeof (struct stat));
   sb->st_size = buffer->size;
   return 0;
 }
