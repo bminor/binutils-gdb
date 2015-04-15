@@ -1,5 +1,19 @@
 2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/17898
+	* i386-dis.c (PREFIX_0FC7_REG_6): Renamed to ...
+	(PREFIX_MOD_0_0FC7_REG_6): This.
+	(PREFIX_MOD_3_0FC7_REG_6): New.
+	(PREFIX_MOD_3_0FC7_REG_7): Likewise.
+	(prefix_table): Replace PREFIX_0FC7_REG_6 with
+	PREFIX_MOD_0_0FC7_REG_6.  Add PREFIX_MOD_3_0FC7_REG_6 and
+	PREFIX_MOD_3_0FC7_REG_7.
+	(mod_table): Replace PREFIX_0FC7_REG_6 with
+	PREFIX_MOD_0_0FC7_REG_6.  Use PREFIX_MOD_3_0FC7_REG_6 and
+	PREFIX_MOD_3_0FC7_REG_7.
+
+2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (PREFIX_MANDATORY_REPZ): Removed.
 	(PREFIX_MANDATORY_REPNZ): Likewise.
 	(PREFIX_MANDATORY_DATA): Likewise.
