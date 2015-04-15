@@ -1,5 +1,11 @@
 2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (prefix_requirement): Removed.
+	(print_insn): Don't set prefix_requirement.  Check
+	dp->prefix_requirement instead of prefix_requirement.
+
+2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/17898
 	* i386-dis.c (PREFIX_0FC7_REG_6): Renamed to ...
 	(PREFIX_MOD_0_0FC7_REG_6): This.
