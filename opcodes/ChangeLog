@@ -1,3 +1,9 @@
+2015-04-15  Renlin Li  <renlin.li@arm.com>
+
+	* arm-dis.c (thumb32_opcodes): Define 'D' format control code,
+	use it for ssat and ssat16.
+	(print_insn_thumb32): Add handle case for 'D' control code.
+
 2015-04-06  Ilya Tocar  <ilya.tocar@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
