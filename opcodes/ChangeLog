@@ -1,5 +1,14 @@
 2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (PREFIX_UD_SHIFT): Removed.
+	(PREFIX_UD_REPZ): Likewise.
+	(PREFIX_UD_REPNZ): Likewise.
+	(PREFIX_UD_DATA): Likewise.
+	(PREFIX_UD_ADDR): Likewise.
+	(PREFIX_UD_LOCK): Likewise.
+
+2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (prefix_requirement): Removed.
 	(print_insn): Don't set prefix_requirement.  Check
 	dp->prefix_requirement instead of prefix_requirement.
