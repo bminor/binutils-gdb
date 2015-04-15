@@ -1423,6 +1423,8 @@ psym_expand_symtabs_matching
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
     {
+      QUIT;
+
       if (ps->readin)
 	continue;
 
