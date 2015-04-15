@@ -1,3 +1,8 @@
+2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention
+	--compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi].
+
 2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* as.h (compressed_debug_section_type): Removed.
