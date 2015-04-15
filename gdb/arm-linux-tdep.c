@@ -1022,8 +1022,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 			    "sigreturn/rt_sigreturn\n");
     }
   else if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: sigreturn/rt_sigreturn "
-			"SVC call not in signal trampoline frame\n");
+    fprintf_unfiltered (gdb_stdlog, "displaced: found SVC call\n");
 
   /* Preparation: If we detect sigreturn, set momentary breakpoint at resume
 		  location, else nothing.

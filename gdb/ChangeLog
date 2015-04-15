@@ -1,5 +1,9 @@
 2015-04-15  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-tdep.c (arm_linux_copy_svc): Update debug message.
+
+2015-04-15  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-tdep.c (arm_linux_copy_svc): Fix indentation.
 
 2015-04-15  Yao Qi  <yao.qi@linaro.org>
