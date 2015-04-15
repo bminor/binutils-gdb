@@ -1160,6 +1160,11 @@ windows_continue (DWORD continue_status, int id, int killed)
 			    current_event.dwThreadId,
 			    continue_status);
 
+  if (!res)
+    error (_("Failed to resume program execution"
+	     " (ContinueDebugEvent failed, error %u)"),
+	   (unsigned int) GetLastError ());
+
   debug_registers_changed = 0;
   return res;
 }
