@@ -850,7 +850,6 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 					 __COPY_CONTEXT_SIZE, &n)
 		   && n == __COPY_CONTEXT_SIZE)
 	    have_saved_context = 1;
-	  current_event.dwThreadId = retval;
 	}
     }
 #endif
@@ -1509,7 +1508,7 @@ get_windows_debug_event (struct target_ops *ops,
 				  thread_id);
       current_thread = th;
       if (!current_thread)
-	current_thread = thread_rec (current_event.dwThreadId, TRUE);
+	current_thread = thread_rec (thread_id, TRUE);
     }
 
 out:

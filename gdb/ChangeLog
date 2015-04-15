@@ -1,5 +1,12 @@
 2015-04-22  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* windows-nat.c (handle_output_debug_string): Don't change
+	current_event.dwThreadId.
+	(get_windows_debug_event): Use thread_id, rather than relying on
+	current_event.dwThreadId being changed.
+
+2015-04-22  Jon Turney  <jon.turney@dronecode.org.uk>
+
 	* windows-nat.c (windows_continue): Report an error if
 	ContinueDebugEvent() fails.
 
