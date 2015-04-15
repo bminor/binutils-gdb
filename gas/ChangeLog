@@ -1,3 +1,7 @@
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.h (compressed_debug_section_type): Removed.
+
 2015-04-14  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rl78.h (TC_LINKRELAX_FIXUP): Define.

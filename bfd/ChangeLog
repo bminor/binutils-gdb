@@ -1,3 +1,36 @@
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (compressed_debug_section_type): New.
+	* compress.c (bfd_compress_section_contents): Add an argument
+	for linker write compression and always generate .zdebug_*
+	section when linking.
+	(bfd_init_section_compress_status): Pass FALSE to
+	bfd_compress_section_contents.
+	(bfd_compress_section): New function.
+	* elf.c (elf_fake_sections): For linking, set SEC_ELF_COMPRESS
+	on DWARF debug sections if COMPRESS_DEBUG is set and rename
+	section if COMPRESS_DEBUG_GABI_ZLIB isn't set.
+	(assign_file_positions_for_non_load_sections): Set sh_offset
+	to -1 if SEC_ELF_COMPRESS is set.
+	(assign_file_positions_except_relocs): Likwise.
+	(_bfd_elf_assign_file_positions_for_relocs): Renamed to ...
+	(_bfd_elf_assign_file_positions_for_non_load): This.  Change
+	return time to bfd_boolean.  Compress the section if
+	SEC_ELF_COMPRESS is set.
+	(_bfd_elf_write_object_contents): Updated.
+	(_bfd_elf_set_section_contents): Write section contents to
+	the buffer if SEC_ELF_COMPRESS is set.
+	* merge.c: Include "elf-bfd.h".
+	(sec_merge_emit): Add arguments for contents and offset.  Write
+	to contents with offset if contents isn't NULL.
+	(_bfd_write_merged_section): Write section contents to the
+	buffer if SEC_ELF_COMPRESS is set.  Pass contents and
+	output_offset to sec_merge_emit.
+	* elflink.c (bfd_elf_final_link): Allocate the buffer for
+	output section contents if SEC_ELF_COMPRESS is set.
+	* section.c (SEC_ELF_COMPRESS): New.
+	* bfd-in2.h: Regenerated.
+
 2015-04-15  Alan Modra  <amodra@gmail.com>
 
 	* elf32-rl78.c (rl78_elf_relocate_section): Typo fix.

@@ -72,7 +72,8 @@ decompress_contents (bfd_byte *compressed_buffer,
 static bfd_size_type
 bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 			       bfd_byte *uncompressed_buffer,
-			       bfd_size_type uncompressed_size)
+			       bfd_size_type uncompressed_size,
+			       bfd_boolean write_compress)
 {
   uLong compressed_size;
   bfd_byte *buffer;
@@ -176,8 +177,11 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 
       compressed_size += header_size;
       /* PR binutils/18087: If compression didn't make the section smaller,
-	 just keep it uncompressed.  */
-      if (compressed_size < uncompressed_size)
+	 just keep it uncompressed.  We always generate .zdebug_* section
+	 when linking since section names have been finalized and they
+	 can't be changed easily.  */
+      if ((write_compress && compression_header_size == 0)
+	   || compressed_size < uncompressed_size)
 	{
 	  bfd_update_compression_header (abfd, buffer, sec);
 
@@ -543,9 +547,48 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
     {
       uncompressed_size = bfd_compress_section_contents (abfd, sec,
 							 uncompressed_buffer,
-							 uncompressed_size);
+							 uncompressed_size,
+							 FALSE);
       ret = uncompressed_size != 0;
     }
 
   return ret;
+}
+
+/*
+FUNCTION
+	bfd_compress_section
+
+SYNOPSIS
+	bfd_boolean bfd_compress_section
+	  (bfd *abfd, asection *section, bfd_byte *uncompressed_buffer);
+
+DESCRIPTION
+	If open for write, compress section, update section size with
+	compressed size and set compress_status to COMPRESS_SECTION_DONE.
+
+	Return @code{FALSE} if compression fail.  Otherwise, return
+	@code{TRUE}.
+*/
+
+bfd_boolean
+bfd_compress_section (bfd *abfd, sec_ptr sec, bfd_byte *uncompressed_buffer)
+{
+  bfd_size_type uncompressed_size = sec->size;
+
+  /* Error if not opened for write.  */
+  if (abfd->direction != write_direction
+      || uncompressed_size == 0
+      || uncompressed_buffer == NULL
+      || sec->contents != NULL
+      || sec->compressed_size != 0
+      || sec->compress_status != COMPRESS_SECTION_NONE)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return FALSE;
+    }
+
+  /* Compress it.  */
+  return bfd_compress_section_contents (abfd, sec, uncompressed_buffer,
+					uncompressed_size, TRUE) != 0;
 }

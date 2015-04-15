@@ -1722,6 +1722,9 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --build-id[=STYLE]          Generate build ID note\n"));
   fprintf (file, _("\
+  --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi]\n\
+                              Compress DWARF debug sections using zlib\n"));
+  fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
   fprintf (file, _("\
   -z max-page-size=SIZE       Set maximum page size to SIZE\n"));

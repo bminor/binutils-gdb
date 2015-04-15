@@ -1,5 +1,18 @@
 2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld.texinfo: Document --compress-debug-sections=.
+	* ldmain.c (main): Set BFD_COMPRESS on output_bfd if
+	COMPRESS_DEBUG is set.  Set BFD_COMPRESS_GABI on output_bfd
+	for COMPRESS_DEBUG_GABI_ZLIB.
+	* lexsup.c (elf_static_list_options): Add
+	--compress-debug-sections=.
+	* emultempl/elf32.em (OPTION_COMPRESS_DEBUG): New.
+	(xtra_long): Add "compress-debug-sections".
+	(gld${EMULATION_NAME}_handle_option): Handle
+	OPTION_COMPRESS_DEBUG.
+
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/pr17709
 	* ld.texinfo: Document "-z noextern-protected-data".
 	* ldmain.c (main): Initialize link_info.extern_protected_data

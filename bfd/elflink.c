@@ -10890,6 +10890,21 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	 to count upwards while actually outputting the relocations.  */
       esdo->rel.count = 0;
       esdo->rela.count = 0;
+
+      if (esdo->this_hdr.sh_offset == (file_ptr) -1)
+	{
+	  /* Cache the section contents so that they can be compressed
+	     later.  Use bfd_malloc since it will be freed by
+	     bfd_compress_section_contents.  */
+	  unsigned char *contents = esdo->this_hdr.contents;
+	  if ((o->flags & SEC_ELF_COMPRESS) == 0 || contents != NULL)
+	    abort ();
+	  contents
+	    = (unsigned char *) bfd_malloc (esdo->this_hdr.sh_size);
+	  if (contents == NULL)
+	    goto error_return;
+	  esdo->this_hdr.contents = contents;
+	}
     }
 
   /* We have now assigned file positions for all the sections except

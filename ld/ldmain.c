@@ -425,6 +425,13 @@ main (int argc, char **argv)
   else
     link_info.output_bfd->flags |= EXEC_P;
 
+  if ((link_info.compress_debug & COMPRESS_DEBUG))
+    {
+      link_info.output_bfd->flags |= BFD_COMPRESS;
+      if (link_info.compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
+	link_info.output_bfd->flags |= BFD_COMPRESS_GABI;
+    }
+
   ldwrite ();
 
   if (config.map_file != NULL)

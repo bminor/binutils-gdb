@@ -444,6 +444,17 @@ extern void bfd_hash_traverse
    this size.  */
 extern unsigned long bfd_hash_set_default_size (unsigned long);
 
+/* Types of compressed DWARF debug sections.  We currently support
+   zlib.  */
+enum compressed_debug_section_type
+{
+  COMPRESS_DEBUG_NONE = 0,
+  COMPRESS_DEBUG = 1 << 0,
+  COMPRESS_DEBUG_ZLIB = COMPRESS_DEBUG | 1 << 1,
+  COMPRESS_DEBUG_GNU_ZLIB = COMPRESS_DEBUG | 1 << 2,
+  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 3
+};
+
 /* This structure is used to keep track of stabs in sections
    information while linking.  */
 
@@ -1377,6 +1388,10 @@ typedef struct bfd_section
   /* This section contains data which may be shared with other
      executables or shared objects. This is for COFF only.  */
 #define SEC_COFF_SHARED 0x8000000
+
+  /* This section should be compressed.  This is for ELF linker
+     internal use only.  */
+#define SEC_ELF_COMPRESS 0x8000000
 
   /* When a section with this flag is being linked, then if the size of
      the input section is less than a page, it should not cross a page
@@ -7315,6 +7330,9 @@ bfd_boolean bfd_init_section_decompress_status
 
 bfd_boolean bfd_init_section_compress_status
    (bfd *abfd, asection *section);
+
+bfd_boolean bfd_compress_section
+   (bfd *abfd, asection *section, bfd_byte *uncompressed_buffer);
 
 #ifdef __cplusplus
 }

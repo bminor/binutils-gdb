@@ -1,5 +1,9 @@
 2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* bfdlink.h (bfd_link_info): Add compress_debug.
+
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/pr17709
 	* bfdlink.h (bfd_link_info): Add extern_protected_data.
 
