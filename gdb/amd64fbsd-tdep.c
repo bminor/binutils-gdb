@@ -23,6 +23,9 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "regset.h"
+#include "i386fbsd-tdep.h"
+#include "x86-xstate.h"
 
 #include "amd64-tdep.h"
 #include "bsd-uthread.h"
@@ -169,6 +172,59 @@ static int amd64fbsd_jmp_buf_reg_offset[] =
   0 * 8				/* %rip */
 };
 
+/* Implement the core_read_description gdbarch method.  */
+
+static const struct target_desc *
+amd64fbsd_core_read_description (struct gdbarch *gdbarch,
+				 struct target_ops *target,
+				 bfd *abfd)
+{
+  return amd64_target_description (i386fbsd_core_read_xcr0 (abfd));
+}
+
+/* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64fbsd_supply_xstateregset (const struct regset *regset,
+			       struct regcache *regcache, int regnum,
+			       const void *xstateregs, size_t len)
+{
+  amd64_supply_xsave (regcache, regnum, xstateregs);
+}
+
+/* Similar to amd64_collect_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64fbsd_collect_xstateregset (const struct regset *regset,
+				const struct regcache *regcache,
+				int regnum, void *xstateregs, size_t len)
+{
+  amd64_collect_xsave (regcache, regnum, xstateregs, 1);
+}
+
+static const struct regset amd64fbsd_xstateregset =
+  {
+    NULL,
+    amd64fbsd_supply_xstateregset,
+    amd64fbsd_collect_xstateregset
+  };
+
+/* Iterate over core file register note sections.  */
+
+static void
+amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  cb (".reg", tdep->sizeof_gregset, &i386_gregset, NULL, cb_data);
+  cb (".reg2", tdep->sizeof_fpregset, &amd64_fpregset, NULL, cb_data);
+  cb (".reg-xstate", X86_XSTATE_SIZE(tdep->xcr0),
+      &amd64fbsd_xstateregset, "XSAVE extended state", cb_data);
+}
+
 static void
 amd64fbsd_supply_uthread (struct regcache *regcache,
 			  int regnum, CORE_ADDR addr)
@@ -232,6 +288,15 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigcontext_addr = amd64fbsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64fbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64fbsd_sc_reg_offset);
+
+  tdep->xsave_xcr0_offset = I386_FBSD_XSAVE_XCR0_OFFSET;
+
+  /* Iterate over core file register note sections.  */
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, amd64fbsd_iterate_over_regset_sections);
+
+  set_gdbarch_core_read_description (gdbarch,
+				     amd64fbsd_core_read_description);
 
   /* FreeBSD provides a user-level threads implementation.  */
   bsd_uthread_set_supply_uthread (gdbarch, amd64fbsd_supply_uthread);

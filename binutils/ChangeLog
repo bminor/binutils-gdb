@@ -1,3 +1,21 @@
+2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention
+	--compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi].
+
+2015-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (target_specific_reloc_handling): Add code to handle
+	RL78 complex relocs.
+
+2015-04-13  Doug Evans  <dje@google.com>
+
+	PR binutils/18218
+	* readelf.c (printable_section_name): Constify sec argument.
+	(apply_relocations): Ditto.  New arg "size".  All callers updated.
+	(load_specific_debug_section): Constify sec argument.
+	Remove side-effect of modifying sec->sh_size.
+
 2015-04-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (do_debug_sections): Use bit patterns.

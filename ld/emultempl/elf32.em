@@ -2110,6 +2110,7 @@ fragment <<EOF
 #define OPTION_HASH_STYLE		(OPTION_EXCLUDE_LIBS + 1)
 #define OPTION_BUILD_ID			(OPTION_HASH_STYLE + 1)
 #define OPTION_AUDIT			(OPTION_BUILD_ID + 1)
+#define OPTION_COMPRESS_DEBUG		(OPTION_AUDIT + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -2137,6 +2138,7 @@ EOF
 fi
 fragment <<EOF
     {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
+    {"compress-debug-sections", required_argument, NULL, OPTION_COMPRESS_DEBUG},
 EOF
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
@@ -2186,6 +2188,19 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	emit_note_gnu_build_id = xstrdup (optarg);
       break;
 
+    case OPTION_COMPRESS_DEBUG:
+      if (strcasecmp (optarg, "none") == 0)
+	link_info.compress_debug = COMPRESS_DEBUG_NONE;
+      else if (strcasecmp (optarg, "zlib") == 0)
+	link_info.compress_debug = COMPRESS_DEBUG_ZLIB;
+      else if (strcasecmp (optarg, "zlib-gnu") == 0)
+	link_info.compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
+      else if (strcasecmp (optarg, "zlib-gabi") == 0)
+	link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
+      else
+	einfo (_("%P%F: invalid --compress-debug-sections option: \`%s'\n"),
+	       optarg);
+      break;
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then

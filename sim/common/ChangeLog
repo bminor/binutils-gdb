@@ -1,3 +1,25 @@
+2015-04-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_NEW_COMMON_OBJS): Add sim-cpu.o.
+	* sim-main.h (STATE_CPU): Remove from comment and define.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (ACX_PKGVERSION): Change GDB to SIM.
+	* configure: Regenerate.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c: Include version.h.
+	(OPTIONS_VERSION): New enum.
+	(standard_options): Add "version".
+	(standard_option_handler): Handle OPTIONS_VERSION.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (version.o): Change to using create-version.sh from gdb.
+	(create-version.sh): Delete.
+
 2015-04-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-engine.o and sim-hrw.o.

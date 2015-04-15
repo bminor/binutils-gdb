@@ -34,6 +34,7 @@
 #include "gdb/sim-h8300.h"
 #include "sys/stat.h"
 #include "sys/types.h"
+#include "sim-options.h"
 
 #ifndef SIGTRAP
 # define SIGTRAP 5
@@ -4886,7 +4887,14 @@ sim_open (SIM_OPEN_KIND kind,
   sim_cpu *cpu;
 
   sd = sim_state_alloc (kind, callback);
-  sd->cpu = sim_cpu_alloc (sd, 0);
+
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
   cpu = STATE_CPU (sd, 0);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   sim_state_initialize (sd, cpu);

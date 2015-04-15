@@ -285,6 +285,7 @@ main (int argc, char **argv)
   link_info.init_function = "_init";
   link_info.fini_function = "_fini";
   link_info.relax_pass = 1;
+  link_info.extern_protected_data = -1;
   link_info.pei386_auto_import = -1;
   link_info.spare_dynamic_tags = 5;
   link_info.path_separator = ':';
@@ -423,6 +424,13 @@ main (int argc, char **argv)
     link_info.output_bfd->flags &= ~EXEC_P;
   else
     link_info.output_bfd->flags |= EXEC_P;
+
+  if ((link_info.compress_debug & COMPRESS_DEBUG))
+    {
+      link_info.output_bfd->flags |= BFD_COMPRESS;
+      if (link_info.compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
+	link_info.output_bfd->flags |= BFD_COMPRESS_GABI;
+    }
 
   ldwrite ();
 

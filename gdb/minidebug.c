@@ -241,6 +241,7 @@ lzma_stat (struct bfd *abfd,
 {
   struct gdb_lzma_stream *lstream = stream;
 
+  memset (sb, 0, sizeof (struct stat));
   sb->st_size = lzma_index_uncompressed_size (lstream->index);
   return 0;
 }

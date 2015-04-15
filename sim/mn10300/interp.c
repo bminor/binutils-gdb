@@ -84,6 +84,18 @@ static const OPTION mn10300_options[] =
 /* For compatibility */
 SIM_DESC simulator;
 
+static sim_cia
+mn10300_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}
+
+static void
+mn10300_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  PC = pc;
+}
+
 /* These default values correspond to expected usage for the chip.  */
 
 SIM_DESC
@@ -92,10 +104,15 @@ sim_open (SIM_OPEN_KIND kind,
 	  struct bfd *abfd,
 	  char **argv)
 {
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   mn10300_callback = cb;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    return 0;
 
   /* for compatibility */
   simulator = sd;
@@ -297,6 +314,15 @@ sim_open (SIM_OPEN_KIND kind,
 /*   STATE_CPU (sd, 0)->psw_mask = (PSW_NP | PSW_EP | PSW_ID | PSW_SAT */
 /* 			     | PSW_CY | PSW_OV | PSW_S | PSW_Z); */
 
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = mn10300_pc_get;
+      CPU_PC_STORE (cpu) = mn10300_pc_set;
+    }
+
   return sd;
 }
 
@@ -394,12 +420,6 @@ sim_store_register (SIM_DESC sd,
 {
   State.regs[rn] = get_word (memory);
   return length;
-}
-
-sim_cia
-sim_pc_get (sim_cpu *cpu)
-{
-  return PC;
 }
 
 void

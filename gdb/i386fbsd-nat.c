@@ -116,6 +116,37 @@ i386fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 
+#ifdef PT_GETXSTATE_INFO
+/* Implement the to_read_description method.  */
+
+static const struct target_desc *
+i386fbsd_read_description (struct target_ops *ops)
+{
+  static int xsave_probed;
+  static uint64_t xcr0;
+
+  if (!xsave_probed)
+    {
+      struct ptrace_xstate_info info;
+
+      if (ptrace (PT_GETXSTATE_INFO, ptid_get_pid (inferior_ptid),
+		  (PTRACE_TYPE_ARG3) &info, sizeof (info)) == 0)
+	{
+	  i386bsd_xsave_len = info.xsave_len;
+	  xcr0 = info.xsave_mask;
+	}
+      xsave_probed = 1;
+    }
+
+  if (i386bsd_xsave_len != 0)
+    {
+      return i386_target_description (xcr0);
+    }
+  else
+    return tdesc_i386;
+}
+#endif
+
 /* Prevent warning from -Wmissing-prototypes.  */
 void _initialize_i386fbsd_nat (void);
 
@@ -140,6 +171,9 @@ _initialize_i386fbsd_nat (void)
 
 #endif /* HAVE_PT_GETDBREGS */
 
+#ifdef PT_GETXSTATE_INFO
+  t->to_read_description = i386fbsd_read_description;
+#endif
 
   t->to_resume = i386fbsd_resume;
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;

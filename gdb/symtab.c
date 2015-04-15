@@ -6250,14 +6250,6 @@ All global and static variable names, or those matching REGEXP."));
   add_com ("rbreak", class_breakpoint, rbreak_command,
 	   _("Set a breakpoint for all functions matching REGEXP."));
 
-  if (xdb_commands)
-    {
-      add_com ("lf", class_info, sources_info,
-	       _("Source files in the program"));
-      add_com ("lg", class_info, variables_info, _("\
-All global and static variable names, or those matching REGEXP."));
-    }
-
   add_setshow_enum_cmd ("multiple-symbols", no_class,
                         multiple_symbols_modes, &multiple_symbols_mode,
                         _("\

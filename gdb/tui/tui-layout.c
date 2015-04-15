@@ -63,10 +63,7 @@ static void show_data (enum tui_layout_type);
 static enum tui_layout_type next_layout (void);
 static enum tui_layout_type prev_layout (void);
 static void tui_layout_command (char *, int);
-static void tui_toggle_layout_command (char *, int);
-static void tui_toggle_split_layout_command (char *, int);
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
-static void tui_handle_xdb_layout (struct tui_layout_def *);
 
 
 /***************************************
@@ -396,14 +393,6 @@ Layout names are:\n\
            source/assembly/command (split) is displayed, \n\
            the register window is displayed with \n\
            the window that has current logical focus.\n"));
-  if (xdb_commands)
-    {
-      add_com ("td", class_tui, tui_toggle_layout_command, _("\
-Toggle between Source/Command and Disassembly/Command layouts.\n"));
-      add_com ("ts", class_tui, tui_toggle_split_layout_command, _("\
-Toggle between Source/Command or Disassembly/Command and \n\
-Source/Disassembly/Command layouts.\n"));
-    }
 }
 
 
@@ -550,53 +539,6 @@ extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 
   *gdbarch_p = gdbarch;
   *addr_p = addr;
-}
-
-
-static void
-tui_handle_xdb_layout (struct tui_layout_def *layout_def)
-{
-  if (layout_def->split)
-    {
-      tui_set_layout (SRC_DISASSEM_COMMAND, TUI_UNDEFINED_REGS);
-      tui_set_win_focus_to (tui_win_list[layout_def->display_mode]);
-    }
-  else
-    {
-      if (layout_def->display_mode == SRC_WIN)
-	tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
-      else
-	tui_set_layout (DISASSEM_DATA_COMMAND, layout_def->regs_display_type);
-    }
-}
-
-
-static void
-tui_toggle_layout_command (char *arg, int from_tty)
-{
-  struct tui_layout_def *layout_def = tui_layout_def ();
-
-  /* Make sure the curses mode is enabled.  */
-  tui_enable ();
-  if (layout_def->display_mode == SRC_WIN)
-    layout_def->display_mode = DISASSEM_WIN;
-  else
-    layout_def->display_mode = SRC_WIN;
-
-  if (!layout_def->split)
-    tui_handle_xdb_layout (layout_def);
-}
-
-
-static void
-tui_toggle_split_layout_command (char *arg, int from_tty)
-{
-  struct tui_layout_def *layout_def = tui_layout_def ();
-
-  /* Make sure the curses mode is enabled.  */
-  tui_enable ();
-  layout_def->split = (!layout_def->split);
-  tui_handle_xdb_layout (layout_def);
 }
 
 

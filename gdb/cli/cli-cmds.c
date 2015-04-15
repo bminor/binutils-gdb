@@ -1846,10 +1846,7 @@ Lines can be specified in these ways:\n\
 With two args if one is empty it stands for ten lines away from \
 the other arg."));
 
-  if (!xdb_commands)
-    add_com_alias ("l", "list", class_files, 1);
-  else
-    add_com_alias ("v", "list", class_files, 1);
+  add_com_alias ("l", "list", class_files, 1);
 
   if (dbx_commands)
     add_com_alias ("file", "list", class_files, 1);
@@ -1868,8 +1865,6 @@ like in the \"break\" command.\n\
 So, for example, if you want to disassemble function bar in file foo.c\n\
 you must type \"disassemble 'foo.c'::bar\" and not \"disassemble foo.c:bar\"."));
   set_cmd_completer (c, location_completer);
-  if (xdb_commands)
-    add_com_alias ("va", "disassemble", class_xdb, 0);
 
   add_com_alias ("!", "shell", class_support, 0);
 

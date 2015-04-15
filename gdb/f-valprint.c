@@ -516,7 +516,4 @@ _initialize_f_valprint (void)
 {
   add_info ("common", info_common_command,
 	    _("Print out the values contained in a Fortran COMMON block."));
-  if (xdb_commands)
-    add_com ("lc", class_info, info_common_command,
-	     _("Print out the values contained in a Fortran COMMON block."));
 }

@@ -24,7 +24,7 @@ class TestGlobalUnwinder(Unwinder):
         super(TestGlobalUnwinder, self).__init__("global_unwinder")
 
     def __call__(self, unwinder_info):
-        print "%s called" % self.name
+        print("%s called" % self.name)
         return None
 
 class TestProgspaceUnwinder(Unwinder):
@@ -32,7 +32,7 @@ class TestProgspaceUnwinder(Unwinder):
         super(TestProgspaceUnwinder, self).__init__("%s_ps_unwinder" % name)
 
     def __call__(self, unwinder_info):
-        print "%s called" % self.name
+        print("%s called" % self.name)
         return None
 
 class TestObjfileUnwinder(Unwinder):
@@ -40,7 +40,7 @@ class TestObjfileUnwinder(Unwinder):
         super(TestObjfileUnwinder, self).__init__("%s_obj_unwinder" % name)
 
     def __call__(self, unwinder_info):
-        print "%s called" % self.name
+        print("%s called" % self.name)
         return None
 
 
@@ -56,4 +56,4 @@ if not saw_runtime_error:
 gdb.unwinder.register_unwinder(None, TestGlobalUnwinder(), replace=True)
 gdb.unwinder.register_unwinder(gdb.current_progspace(),
                                TestProgspaceUnwinder("py_unwind_maint"))
-print "Python script imported"
+print("Python script imported")

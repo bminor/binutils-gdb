@@ -46,11 +46,7 @@ struct _sim_cpu {
 
 struct sim_state {
   sim_cpu *cpu[MAX_NR_PROCESSORS];
-#if (WITH_SMP)
-#define STATE_CPU(sd,n) ((sd)->cpu[n])
-#else
-#define STATE_CPU(sd,n) ((sd)->cpu[0])
-#endif
+
   /* ... simulator specific members ... */
   struct bfin_board_data board;
 #define STATE_BOARD_DATA(sd) (&(sd)->board)

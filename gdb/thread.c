@@ -1804,8 +1804,7 @@ Usage: thread find REGEXP\n\
 Will display thread ids whose name, target ID, or extra info matches REGEXP."),
 	   &thread_cmd_list);
 
-  if (!xdb_commands)
-    add_com_alias ("t", "thread", class_run, 1);
+  add_com_alias ("t", "thread", class_run, 1);
 
   add_setshow_boolean_cmd ("thread-events", no_class,
          &print_thread_events, _("\

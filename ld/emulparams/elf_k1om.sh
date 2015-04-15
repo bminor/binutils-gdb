@@ -1,4 +1,5 @@
 . ${srcdir}/emulparams/plt_unwind.sh
+. ${srcdir}/emulparams/extern_protected_data.sh
 SCRIPT_NAME=elf
 ELFSIZE=64
 OUTPUT_FORMAT="elf64-k1om"

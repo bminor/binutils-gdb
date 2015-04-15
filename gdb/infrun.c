@@ -88,8 +88,6 @@ static void set_schedlock_func (char *args, int from_tty,
 
 static int currently_stepping (struct thread_info *tp);
 
-static void xdb_handle_command (char *args, int from_tty);
-
 void _initialize_infrun (void);
 
 void nullify_last_target_wait_ptid (void);
@@ -7101,72 +7099,6 @@ handle_completer (struct cmd_list_element *ignore,
   return return_val;
 }
 
-static void
-xdb_handle_command (char *args, int from_tty)
-{
-  char **argv;
-  struct cleanup *old_chain;
-
-  if (args == NULL)
-    error_no_arg (_("xdb command"));
-
-  /* Break the command line up into args.  */
-
-  argv = gdb_buildargv (args);
-  old_chain = make_cleanup_freeargv (argv);
-  if (argv[1] != (char *) NULL)
-    {
-      char *argBuf;
-      int bufLen;
-
-      bufLen = strlen (argv[0]) + 20;
-      argBuf = (char *) xmalloc (bufLen);
-      if (argBuf)
-	{
-	  int validFlag = 1;
-	  enum gdb_signal oursig;
-
-	  oursig = gdb_signal_from_name (argv[0]);
-	  memset (argBuf, 0, bufLen);
-	  if (strcmp (argv[1], "Q") == 0)
-	    sprintf (argBuf, "%s %s", argv[0], "noprint");
-	  else
-	    {
-	      if (strcmp (argv[1], "s") == 0)
-		{
-		  if (!signal_stop[oursig])
-		    sprintf (argBuf, "%s %s", argv[0], "stop");
-		  else
-		    sprintf (argBuf, "%s %s", argv[0], "nostop");
-		}
-	      else if (strcmp (argv[1], "i") == 0)
-		{
-		  if (!signal_program[oursig])
-		    sprintf (argBuf, "%s %s", argv[0], "pass");
-		  else
-		    sprintf (argBuf, "%s %s", argv[0], "nopass");
-		}
-	      else if (strcmp (argv[1], "r") == 0)
-		{
-		  if (!signal_print[oursig])
-		    sprintf (argBuf, "%s %s", argv[0], "print");
-		  else
-		    sprintf (argBuf, "%s %s", argv[0], "noprint");
-		}
-	      else
-		validFlag = 0;
-	    }
-	  if (validFlag)
-	    handle_command (argBuf, from_tty);
-	  else
-	    printf_filtered (_("Invalid signal handling flag.\n"));
-	  if (argBuf)
-	    xfree (argBuf);
-	}
-    }
-  do_cleanups (old_chain);
-}
-
 enum gdb_signal
 gdb_signal_from_command (int num)
 {
@@ -7748,29 +7680,6 @@ Multiple signals may be specified.  Signal numbers and signal names\n\
 may be interspersed with actions, with the actions being performed for\n\
 all signals cumulatively specified."));
   set_cmd_completer (c, handle_completer);
-
-  if (xdb_commands)
-    {
-      add_com ("lz", class_info, signals_info, _("\
-What debugger does when program gets various signals.\n\
-Specify a signal as argument to print info on that signal only."));
-      add_com ("z", class_run, xdb_handle_command, _("\
-Specify how to handle a signal.\n\
-Args are signals and actions to apply to those signals.\n\
-Symbolic signals (e.g. SIGSEGV) are recommended but numeric signals\n\
-from 1-15 are allowed for compatibility with old versions of GDB.\n\
-Numeric ranges may be specified with the form LOW-HIGH (e.g. 1-5).\n\
-The special arg \"all\" is recognized to mean all signals except those\n\
-used by the debugger, typically SIGTRAP and SIGINT.\n\
-Recognized actions include \"s\" (toggles between stop and nostop),\n\
-\"r\" (toggles between print and noprint), \"i\" (toggles between pass and \
-nopass), \"Q\" (noprint)\n\
-Stop means reenter debugger if this signal happens (implies print).\n\
-Print means print a message if this signal happens.\n\
-Pass means let program see this signal; otherwise program doesn't know.\n\
-Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
-Pass and Stop may be combined."));
-    }
 
   if (!dbx_commands)
     stop_command = add_cmd ("stop", class_obscure,

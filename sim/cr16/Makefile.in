@@ -19,7 +19,6 @@
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
-	sim-cpu.o \
 	sim-hload.o \
 	interp.o \
 	table.o \

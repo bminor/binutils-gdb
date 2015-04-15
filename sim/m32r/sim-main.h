@@ -68,8 +68,7 @@ struct _sim_cpu {
 /* The sim_state struct.  */
 
 struct sim_state {
-  sim_cpu *cpu;
-#define STATE_CPU(sd, n) (/*&*/ (sd)->cpu)
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
 
   CGEN_STATE cgen_state;
 

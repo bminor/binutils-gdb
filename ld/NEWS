@@ -1,5 +1,8 @@
 -*- text -*-
 
+* New command line option for ELF targets to compress DWARF debug
+  sections, --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi].
+
 * Add --warn-orphan option to report orphan sections.
 
 * Add support for LLVM plugin.

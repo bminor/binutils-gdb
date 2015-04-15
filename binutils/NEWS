@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Extend objcopy --compress-debug-sections option to support
+  --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi] for ELF
+  targets.
+
 * Add --update-section option to objcopy.
 
 Changes in 2.25:

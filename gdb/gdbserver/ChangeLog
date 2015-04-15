@@ -1,3 +1,7 @@
+2015-04-14  Romain Naour <romain.naour@openwide.fr>  (tiny change)
+
+	* linux-low.c (linux_read_offsets): Remove get_thread_lwp.
+
 2015-04-09  Gary Benson <gbenson@redhat.com>
 
 	* hostio-errno.c (errno_to_fileio_error): Remove function.

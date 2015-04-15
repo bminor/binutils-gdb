@@ -1,3 +1,12 @@
+2015-04-15  Mike Frysinger  <vapier@gentoo.org>
+	    Hans-Peter Nilsson  <hp@axis.com>
+
+	Adjust src-release.sh for sim using the gdb create-version.sh.
+	* src-release.sh (tar_compress): If there's a fifth parameter,
+	use that in the getver call instead of $tool.
+	(sim_release): Pass gdb as fifth parameter to tar_compress.
+	(SIM_SUPPORT_DIRS): Add gdb/common/create-version.sh.
+
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac: Add --with-system-zlib.

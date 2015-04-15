@@ -550,7 +550,7 @@ print_symbol (int width, const char *symbol)
    to print multibyte characters, it just interprets them as hex values.  */
 
 static const char *
-printable_section_name (Elf_Internal_Shdr * sec)
+printable_section_name (const Elf_Internal_Shdr * sec)
 {
 #define MAX_PRINT_SEC_NAME_LEN 128
   static char  sec_name_buf [MAX_PRINT_SEC_NAME_LEN + 1];
@@ -11161,6 +11161,42 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	  }
 	break;
       }
+
+    case EM_RL78:
+      {
+	static bfd_vma saved_sym1 = 0;
+	static bfd_vma saved_sym2 = 0;
+	static bfd_vma value;
+
+	switch (reloc_type)
+	  {
+	  case 0x80: /* R_RL78_SYM.  */
+	    saved_sym1 = saved_sym2;
+	    saved_sym2 = symtab[get_reloc_symindex (reloc->r_info)].st_value;
+	    saved_sym2 += reloc->r_addend;
+	    return TRUE;
+
+	  case 0x83: /* R_RL78_OPsub.  */
+	    value = saved_sym1 - saved_sym2;
+	    saved_sym2 = saved_sym1 = 0;
+	    return TRUE;
+	    break;
+
+	  case 0x41: /* R_RL78_ABS32.  */
+	    byte_put (start + reloc->r_offset, value, 4);
+	    value = 0;
+	    return TRUE;
+
+	  case 0x43: /* R_RL78_ABS16.  */
+	    byte_put (start + reloc->r_offset, value, 2);
+	    value = 0;
+	    return TRUE;
+
+	  default:
+	    break;
+	  }
+	break;
+      }
     }
 
   return FALSE;
@@ -11633,11 +11669,11 @@ is_none_reloc (unsigned int reloc_type)
 
 static void
 apply_relocations (void * file,
-		   Elf_Internal_Shdr * section,
-		   unsigned char * start)
+		   const Elf_Internal_Shdr * section,
+		   unsigned char * start, bfd_size_type size)
 {
   Elf_Internal_Shdr * relsec;
-  unsigned char * end = start + section->sh_size;
+  unsigned char * end = start + size;
 
   if (elf_header.e_type != ET_REL)
     return;
@@ -11929,7 +11965,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 
   if (relocate)
     {
-      apply_relocations (file, section, start);
+      apply_relocations (file, section, start, section->sh_size);
     }
   else
     {
@@ -12069,7 +12105,7 @@ uncompress_section_contents (unsigned char **buffer,
 
 static int
 load_specific_debug_section (enum dwarf_section_display_enum debug,
-			     Elf_Internal_Shdr * sec, void * file)
+			     const Elf_Internal_Shdr * sec, void * file)
 {
   struct dwarf_section * section = &debug_displays [debug].section;
   char buf [64];
@@ -12109,7 +12145,6 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	     and the section size if uncompress is successful.  */
 	  free (section->start);
 	  section->start = start;
-	  sec->sh_size = size;
 	}
       section->size = size;
     }
@@ -12118,7 +12153,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     return 0;
 
   if (debug_displays [debug].relocate)
-    apply_relocations ((FILE *) file, sec, section->start);
+    apply_relocations ((FILE *) file, sec, section->start, section->size);
 
   return 1;
 }

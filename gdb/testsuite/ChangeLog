@@ -1,3 +1,53 @@
+2015-04-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-framefilter.py (ErrorFilter.filter): Use map function
+	if itertools.imap is not present.
+	* gdb.python/py-objfile.exp: Add parentheses.
+	* gdb.python/py-type.exp: Same.
+	* gdb.python/py-unwind-maint.py: Same.
+
+2015-04-15  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.dwarf2/dynarr-ptr.exp (assemble): Use $ptr_size instead
+	of ":$ptr_size" and set its form explicitly.
+
+2015-04-15  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/watch-bitfields.exp (test_watch_location): Increase
+	timeout by factor of 4.
+	(test_regular_watch): Likewise.
+	* gdb.base/watchpoint-solib.exp: Use with_timeout_factor.
+	* gdb.reverse/sigall-reverse.exp: Likewise.
+	* gdb.reverse/until-precsave.exp: Likewise.
+	* lib/gdb.exp (with_timeout_factor): New proc.
+	(gdb_expect): Move some code to ...
+	(get_largest_timeout): ... here.  New procedure.
+
+2015-04-14  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/bp-permanent.exp (test): Reinstate correct test message.
+
+2015-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/bp-permanent.exp (test): Handle the case of being unable
+	to write to the .text section.
+
+2015-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/coredump-filter.exp: Restrict test to Linux systems only.
+	Handle the case of targets that do not provide PID information.
+
+2015-04-13  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp (gdb_exit): Catch exception
+	and use expect instead of gdb_expect.
+
+2015-04-13  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/coredump-filter.exp: Rename variable "addr" to
+	"coredump_var_addr" to avoid naming conflict with other testcases.
+
 2015-04-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp: Use

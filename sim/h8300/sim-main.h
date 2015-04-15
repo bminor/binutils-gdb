@@ -138,7 +138,7 @@ struct _sim_cpu {
 
 /* The sim_state struct.  */
 struct sim_state {
-  struct _sim_cpu *cpu;
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
   unsigned int sim_cache_size;
   decoded_inst *sim_cache;
   unsigned short *cache_idx;
@@ -155,7 +155,6 @@ struct sim_state {
 
 #define CIA_GET(CPU)		(cpu_get_pc (CPU))
 #define CIA_SET(CPU, VAL)	(cpu_set_pc ((CPU), (VAL)))
-#define STATE_CPU(SD, N)	((SD)->cpu)	/* Single Processor.  */
 #define cpu_set_pc(CPU, VAL)	(((CPU)->pc)  = (VAL))
 #define cpu_get_pc(CPU)		(((CPU)->pc))
 

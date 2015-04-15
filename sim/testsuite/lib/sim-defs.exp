@@ -12,6 +12,16 @@ proc sim_init { args } {
     global sim_path
     set sim_path [board_info target sim]
     # Need to return an empty string (copied from GAS).
+
+    # As gross as it is, we unset the linker script specified by the target
+    # board.  The simulator board file mips-sim.exp, sets ldscript to the
+    # MIPS libgloss linker scripts which include libgcc (and possibly other
+    # libraries), which the linker (used to link these tests rather than the
+    # compiler) can't necessarily find.  Similarly iq2000-sim.exp and
+    # m68hc11-sim.exp.  So, we make it a common rule to clear the slate for
+    # all simulators.
+    unset_currtarget_info ldscript
+
     return ""
 }
 

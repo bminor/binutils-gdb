@@ -1431,7 +1431,7 @@ Optional Packages:
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
-  --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
+  --with-pkgversion=PKG   Use PKG in the version string in place of "SIM"
   --with-bugurl=URL       Direct users to URL to report a bug
 
 Some influential environment variables:
@@ -12810,7 +12810,7 @@ if test "${with_pkgversion+set}" = set; then :
       *)   PKGVERSION="($withval) " ;;
      esac
 else
-  PKGVERSION="(GDB) "
+  PKGVERSION="(SIM) "
 
 fi
 

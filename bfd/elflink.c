@@ -2675,7 +2675,9 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
 
   /* No error if extern_protected_data is true.  */
   if (h->protected_def
-      && !get_elf_backend_data (dynbss->owner)->extern_protected_data)
+      && (!info->extern_protected_data
+	  || (info->extern_protected_data < 0
+	      && !get_elf_backend_data (dynbss->owner)->extern_protected_data)))
     info->callbacks->einfo
       (_("%P: copy reloc against protected `%T' is dangerous\n"),
        h->root.root.string);
@@ -2837,7 +2839,10 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
 
   /* If extern_protected_data is false, STV_PROTECTED non-function
      symbols are local.  */
-  if (!bed->extern_protected_data && !bed->is_function_type (h->type))
+  if ((!info->extern_protected_data
+       || (info->extern_protected_data < 0
+	   && !bed->extern_protected_data))
+      && !bed->is_function_type (h->type))
     return TRUE;
 
   /* Function pointer equality tests may require that STV_PROTECTED
@@ -2934,6 +2939,10 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
 
   abfd = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
   if (abfd == NULL)
+    return FALSE;
+
+  /* Return FALSE if the object has been claimed by plugin.  */
+  if (abfd->plugin_format == bfd_plugin_yes)
     return FALSE;
 
   if (! bfd_check_format (abfd, bfd_object))
@@ -10881,6 +10890,21 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	 to count upwards while actually outputting the relocations.  */
       esdo->rel.count = 0;
       esdo->rela.count = 0;
+
+      if (esdo->this_hdr.sh_offset == (file_ptr) -1)
+	{
+	  /* Cache the section contents so that they can be compressed
+	     later.  Use bfd_malloc since it will be freed by
+	     bfd_compress_section_contents.  */
+	  unsigned char *contents = esdo->this_hdr.contents;
+	  if ((o->flags & SEC_ELF_COMPRESS) == 0 || contents != NULL)
+	    abort ();
+	  contents
+	    = (unsigned char *) bfd_malloc (esdo->this_hdr.sh_size);
+	  if (contents == NULL)
+	    goto error_return;
+	  esdo->this_hdr.contents = contents;
+	}
     }
 
   /* We have now assigned file positions for all the sections except

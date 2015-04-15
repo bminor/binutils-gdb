@@ -340,15 +340,16 @@ md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
 }
 
 void
-md_show_usage (FILE * stream ATTRIBUTE_UNUSED)
+md_show_usage (FILE * stream)
 {
   fprintf (stream, _(" RL78 specific command line options:\n"));
+  fprintf (stream, _("  --mrelax          Enable link time relaxation\n"));
   fprintf (stream, _("  --mg10            Enable support for G10 variant\n"));
   fprintf (stream, _("  --mg13            Selects the G13 core.\n"));
   fprintf (stream, _("  --mg14            Selects the G14 core [default]\n"));
   fprintf (stream, _("  --mrl78           Alias for --mg14\n"));
   fprintf (stream, _("  --m32bit-doubles  [default]\n"));
-  fprintf (stream, _("  --m64bit-doubles\n"));
+  fprintf (stream, _("  --m64bit-doubles  Source code uses 64-bit doubles\n"));
 }
 
 static void
@@ -662,13 +663,23 @@ rl78_cons_fix_new (fragS *	frag,
     case BFD_RELOC_RL78_LO16:
     case BFD_RELOC_RL78_HI16:
       if (size != 2)
-	as_bad (_("%%hi16/%%lo16 only applies to .short or .hword"));
-      type = exp->X_md;
+	{
+	  /* Fixups to assembler generated expressions do not use %hi or %lo.  */
+	  if (frag->fr_file)
+	    as_bad (_("%%hi16/%%lo16 only applies to .short or .hword"));
+	}
+      else
+	type = exp->X_md;
       break;
     case BFD_RELOC_RL78_HI8:
       if (size != 1)
-	as_bad (_("%%hi8 only applies to .byte"));
-      type = exp->X_md;
+	{
+	  /* Fixups to assembler generated expressions do not use %hi or %lo.  */
+	  if (frag->fr_file)
+	    as_bad (_("%%hi8 only applies to .byte"));
+	}
+      else
+	type = exp->X_md;
       break;
     default:
       break;
@@ -823,7 +834,7 @@ rl78_frag_fix_value (fragS *    fragP,
 /* Estimate how big the opcode is after this relax pass.  The return
    value is the difference between fr_fix and the actual size.  We
    compute the total size in rl78_relax_frag and store it in fr_subtype,
-   sowe only need to subtract fx_fix and return it.  */
+   so we only need to subtract fx_fix and return it.  */
 
 int
 md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED, segT segment ATTRIBUTE_UNUSED)
@@ -960,8 +971,8 @@ rl78_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
   fragP->fr_subtype = newsize;
   tprintf (" -> new %d old %d delta %d\n", newsize, oldsize, newsize-oldsize);
   return newsize - oldsize;
- }
- 
+}
+
 /* This lets us test for the opcode type and the desired size in a
    switch statement.  */
 #define OPCODE(type,size) ((type) * 16 + (size))

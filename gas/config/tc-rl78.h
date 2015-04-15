@@ -85,3 +85,17 @@ extern void rl78_elf_final_processing (void);
 
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES)	\
   ((EXP)->X_md = 0, expression (EXP), TC_PARSE_CONS_RETURN_NONE)
+
+#define TC_LINKRELAX_FIXUP(seg) ((seg->flags & SEC_CODE) || (seg->flags & SEC_DEBUGGING))
+
+/* Do not adjust relocations involving symbols in code sections,
+   because it breaks linker relaxations.  This could be fixed in the
+   linker, but this fix is simpler, and it pretty much only affects
+   object size a little bit.  */
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
+  (   ((SEC)->flags & SEC_CODE) != 0		\
+   || ((SEC)->flags & SEC_DEBUGGING) != 0	\
+   || ! SEG_NORMAL (SEC)			\
+   || TC_FORCE_RELOCATION (FIX))
+
+#define DWARF2_USE_FIXED_ADVANCE_PC 1

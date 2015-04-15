@@ -8598,6 +8598,25 @@ i386_coff_osabi_sniffer (bfd *abfd)
 }
 
 
+/* Return the target description for a specified XSAVE feature mask.  */
+
+const struct target_desc *
+i386_target_description (uint64_t xcr0)
+{
+  switch (xcr0 & X86_XSTATE_ALL_MASK)
+    {
+    case X86_XSTATE_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX512_MASK:
+      return tdesc_i386_avx512;
+    case X86_XSTATE_MPX_MASK:
+      return tdesc_i386_mpx;
+    case X86_XSTATE_AVX_MASK:
+      return tdesc_i386_avx;
+    default:
+      return tdesc_i386;
+    }
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_i386_tdep (void);
 

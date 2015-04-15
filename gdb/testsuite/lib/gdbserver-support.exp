@@ -353,15 +353,23 @@ proc gdb_exit {} {
     global gdb_prompt
 
     if {[info exists gdb_spawn_id] && [info exists server_spawn_id]} {
-	send_gdb "monitor exit\n";
-	gdb_expect {
-	    -re "$gdb_prompt $" {
-		exp_continue
-	    }
-	    -i "$server_spawn_id" eof {
-		wait -i $expect_out(spawn_id)
-		unset server_spawn_id
-		unset inferior_spawn_id
+	# GDB may be terminated in an expected way or an unexpected way,
+	# but DejaGNU doesn't know that, so gdb_spawn_id isn't unset.
+	# Catch the exceptions.
+	catch {
+	    send_gdb "monitor exit\n";
+	    # We use expect rather than gdb_expect because
+	    # we want to suppress printing exception messages, otherwise,
+	    # remote_expect, invoked by gdb_expect, prints the exceptions.
+	    expect {
+		-i "$gdb_spawn_id" -re "$gdb_prompt $" {
+		    exp_continue
+		}
+		-i "$server_spawn_id" eof {
+		    wait -i $expect_out(spawn_id)
+		    unset server_spawn_id
+		    unset inferior_spawn_id
+		}
 	    }
 	}
     }

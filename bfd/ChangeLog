@@ -1,3 +1,99 @@
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (compressed_debug_section_type): New.
+	* compress.c (bfd_compress_section_contents): Add an argument
+	for linker write compression and always generate .zdebug_*
+	section when linking.
+	(bfd_init_section_compress_status): Pass FALSE to
+	bfd_compress_section_contents.
+	(bfd_compress_section): New function.
+	* elf.c (elf_fake_sections): For linking, set SEC_ELF_COMPRESS
+	on DWARF debug sections if COMPRESS_DEBUG is set and rename
+	section if COMPRESS_DEBUG_GABI_ZLIB isn't set.
+	(assign_file_positions_for_non_load_sections): Set sh_offset
+	to -1 if SEC_ELF_COMPRESS is set.
+	(assign_file_positions_except_relocs): Likwise.
+	(_bfd_elf_assign_file_positions_for_relocs): Renamed to ...
+	(_bfd_elf_assign_file_positions_for_non_load): This.  Change
+	return time to bfd_boolean.  Compress the section if
+	SEC_ELF_COMPRESS is set.
+	(_bfd_elf_write_object_contents): Updated.
+	(_bfd_elf_set_section_contents): Write section contents to
+	the buffer if SEC_ELF_COMPRESS is set.
+	* merge.c: Include "elf-bfd.h".
+	(sec_merge_emit): Add arguments for contents and offset.  Write
+	to contents with offset if contents isn't NULL.
+	(_bfd_write_merged_section): Write section contents to the
+	buffer if SEC_ELF_COMPRESS is set.  Pass contents and
+	output_offset to sec_merge_emit.
+	* elflink.c (bfd_elf_final_link): Allocate the buffer for
+	output section contents if SEC_ELF_COMPRESS is set.
+	* section.c (SEC_ELF_COMPRESS): New.
+	* bfd-in2.h: Regenerated.
+
+2015-04-15  Alan Modra  <amodra@gmail.com>
+
+	* elf32-rl78.c (rl78_elf_relocate_section): Typo fix.
+
+2015-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rl78.c (RL78_OP_REL): New macro.
+	(rl78_elf_howto_table): Use it for complex relocs.
+	(get_symbol_value): Handle the cases when the info or status
+	arguments are NULL.
+	(get_romstart): Cache the status returned by get_symbol_value.
+	(get_ramstart): Likewise.
+	(RL78_STACK_PUSH): Generate an error message if the stack
+	overflows.
+	(RL78_STACK_POP): Likewise for underflows.
+	(rl78_compute_complex_reloc): New function.  Contains the basic
+	processing code for all RL78 complex relocs.
+	(rl78_special_reloc): New function.  Provides special reloc
+	handling for complex relocs.
+	(rl78_elf_relocate_section): Use rl78_compute_complex_reloc.
+	(rl78_offset_for_reloc): Likewise.
+
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr17709
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Check
+	info->extern_protected_data when warning copy relocs against
+	protected symbols.
+	(_bfd_elf_symbol_refs_local_p): Check info->extern_protected_data
+	when checking protected non-function symbols.
+
+2015-04-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_note): Recognize NT_X86_XSTATE on
+	FreeBSD.
+	(elfcore_write_xstatereg): Use correct note name on FreeBSD.
+
+2015-04-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18250
+	* elflink.c (elf_link_is_defined_archive_symbol): Return FALSE
+	if the object has been claimed by plugin.
+
+2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Replace SYMBOLIC_BIND
+	with SYMBOL_REFERENCES_LOCAL when checking R_386_GOTOFF against
+	protected data symbol when building shared library.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Check
+	R_X86_64_GOTOFF64 against undefined symbol and replace
+	SYMBOLIC_BIND with SYMBOL_REFERENCES_LOCAL when checking
+	R_X86_64_GOTOFF64 against protected data symbol when building
+	shared library.
+
+2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr17709
+	* elf32-i386.c (elf_i386_relocate_section): Also check R_386_GOTOFF
+	against protected data symbol when building shared library.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Also check
+	R_X86_64_GOTOFF64 against protected data symbol when building
+	shared library.
+
 2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/pr15228

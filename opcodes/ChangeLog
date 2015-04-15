@@ -1,3 +1,57 @@
+2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/17898
+	* i386-dis.c (PREFIX_0FC7_REG_6): Renamed to ...
+	(PREFIX_MOD_0_0FC7_REG_6): This.
+	(PREFIX_MOD_3_0FC7_REG_6): New.
+	(PREFIX_MOD_3_0FC7_REG_7): Likewise.
+	(prefix_table): Replace PREFIX_0FC7_REG_6 with
+	PREFIX_MOD_0_0FC7_REG_6.  Add PREFIX_MOD_3_0FC7_REG_6 and
+	PREFIX_MOD_3_0FC7_REG_7.
+	(mod_table): Replace PREFIX_0FC7_REG_6 with
+	PREFIX_MOD_0_0FC7_REG_6.  Use PREFIX_MOD_3_0FC7_REG_6 and
+	PREFIX_MOD_3_0FC7_REG_7.
+
+2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PREFIX_MANDATORY_REPZ): Removed.
+	(PREFIX_MANDATORY_REPNZ): Likewise.
+	(PREFIX_MANDATORY_DATA): Likewise.
+	(PREFIX_MANDATORY_ADDR): Likewise.
+	(PREFIX_MANDATORY_LOCK): Likewise.
+	(PREFIX_MANDATORY): Likewise.
+	(PREFIX_UD_SHIFT): Set to 8
+	(PREFIX_UD_REPZ): Updated.
+	(PREFIX_UD_REPNZ): Likewise.
+	(PREFIX_UD_DATA): Likewise.
+	(PREFIX_UD_ADDR): Likewise.
+	(PREFIX_UD_LOCK): Likewise.
+	(PREFIX_IGNORED_SHIFT): New.
+	(PREFIX_IGNORED_REPZ): Likewise.
+	(PREFIX_IGNORED_REPNZ): Likewise.
+	(PREFIX_IGNORED_DATA): Likewise.
+	(PREFIX_IGNORED_ADDR): Likewise.
+	(PREFIX_IGNORED_LOCK): Likewise.
+	(PREFIX_OPCODE): Likewise.
+	(PREFIX_IGNORED): Likewise.
+	(Bad_Opcode): Replace PREFIX_MANDATORY with 0.
+	(dis386_twobyte): Replace PREFIX_MANDATORY with PREFIX_OPCODE.
+	(three_byte_table): Likewise.
+	(mod_table): Likewise.
+	(mandatory_prefix): Renamed to ...
+	(prefix_requirement): This.
+	(prefix_table): Replace PREFIX_MANDATORY with PREFIX_OPCODE.
+	Update PREFIX_90 entry.
+	(get_valid_dis386): Check prefix_requirement to see if a prefix
+	should be ignored.
+	(print_insn): Replace mandatory_prefix with prefix_requirement.
+
+2015-04-15  Renlin Li  <renlin.li@arm.com>
+
+	* arm-dis.c (thumb32_opcodes): Define 'D' format control code,
+	use it for ssat and ssat16.
+	(print_insn_thumb32): Add handle case for 'D' control code.
+
 2015-04-06  Ilya Tocar  <ilya.tocar@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

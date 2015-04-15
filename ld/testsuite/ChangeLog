@@ -1,3 +1,54 @@
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp (build_tests): Add tests for
+	--compress-debug-sections=.
+	(run_tests): Likewise.
+	Add additonal tests for --compress-debug-sections=.
+	* ld-elf/gabiend.rt: New file.
+	* ld-elf/gabinormal.rt: Likewise.
+	* ld-elf/gnubegin.rS: Likewise.
+	* ld-elf/gnunormal.rS: Likewise.
+	* ld-elf/zlibbegin.rS: Likewise.
+	* ld-elf/zlibnormal.rS: Likewise.
+
+2015-04-15  Alan Modra  <amodra@gmail.com>
+
+	* ld-gc/pr18223.d: xfail tic6x.
+
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr17709
+	* ld-i386/i386.exp: Run protected6b.
+	* ld-i386/protected6b.d: New file.
+	* ld-x86-64/protected6b.d: Likewise.
+	* ld-x86-64/x86-64.exp:  Run protected6b.
+
+2015-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Run protected6a.
+	* ld-i386/protected6.d: Renamed to ...
+	* ld-i386/protected6a.d: This.
+	* ld-x86-64/hidden4.d: New file.
+	* ld-x86-64/hidden4.s: Likewise.
+	* ld-x86-64/hidden5.d: Likewise.
+	* ld-x86-64/hidden5.s: Likewise.
+	* ld-x86-64/protected6.d: Renamed to ...
+	* ld-x86-64/protected6a.d: This.
+	* ld-x86-64/x86-64.exp: Run hidden4, hidden5, protected6a,
+	protected7a and protected7b.
+
+2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr17709
+	* ld-i386/protected6.d: New file.
+	* ld-i386/protected6.s: Likewise.
+	* ld-x86-64/protected6.d: Likewise.
+	* ld-x86-64/protected6.s: Likewise.
+	* ld-x86-64/protected7.d: Likewise.
+	* ld-x86-64/protected7.s: Likewise.
+	* ld-x86-64/protected7a.d: Likewise.
+	* ld-x86-64/protected7b.d: Likewise.
+
 2015-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/pr15228

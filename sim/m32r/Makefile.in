@@ -26,7 +26,6 @@ TRAPS_OBJ = @traps_obj@
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
-	sim-cpu.o \
 	sim-hload.o \
 	sim-model.o \
 	sim-reg.o \

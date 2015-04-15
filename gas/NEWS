@@ -2,6 +2,10 @@
 
 Changes in 2.26:
 
+* Extend --compress-debug-sections option to support
+  --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi] for ELF
+  targets.
+
 * --compress-debug-sections is turned on for Linux/x86 by default.
 
 Changes in 2.25:

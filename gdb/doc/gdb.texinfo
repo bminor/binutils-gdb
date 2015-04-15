@@ -1235,13 +1235,6 @@ source, assembly, registers and @value{GDBN} command outputs
 option if you run @value{GDBN} from Emacs (@pxref{Emacs, ,
 Using @value{GDBN} under @sc{gnu} Emacs}).
 
-@c @item -xdb
-@c @cindex @code{--xdb}
-@c Run in XDB compatibility mode, allowing the use of certain XDB commands.
-@c For information, see the file @file{xdb_trans.html}, which is usually
-@c installed in the directory @code{/opt/langtools/wdb/doc} on HP-UX
-@c systems.
-
 @item -interpreter @var{interp}
 @cindex @code{--interpreter}
 Use the interpreter @var{interp} for interface with the controlling

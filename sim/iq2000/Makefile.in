@@ -21,7 +21,6 @@ IQ2000_OBJS = iq2000.o cpu.o decode.o sem.o model.o mloop.o
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
-	sim-cpu.o \
 	sim-hload.o \
 	sim-model.o \
 	sim-reg.o \

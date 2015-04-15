@@ -2471,6 +2471,7 @@ static const struct opcode16 thumb_opcodes[] =
        %X		print "\t; unpredictable <IT:code>" if conditional
 
        %<bitfield>d	print bitfield in decimal
+       %<bitfield>D     print bitfield plus one in decimal
        %<bitfield>W	print bitfield*4 in decimal
        %<bitfield>r	print bitfield as an ARM register
        %<bitfield>R	as %<>r but r15 is UNPREDICTABLE
@@ -2731,7 +2732,7 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
     0xe8c00f40, 0xfff00fe0, "strex%4?hb%c\t%0-3r, %12-15r, [%16-19r]"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
-    0xf3200000, 0xfff0f0e0, "ssat16%c\t%8-11r, #%0-4d, %16-19r"},
+    0xf3200000, 0xfff0f0e0, "ssat16%c\t%8-11r, #%0-4D, %16-19r"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
     0xf3a00000, 0xfff0f0e0, "usat16%c\t%8-11r, #%0-4d, %16-19r"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
@@ -2839,7 +2840,7 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
     0xf8100e00, 0xfe900f00, "ldr%wt%c\t%12-15r, %a"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
-    0xf3000000, 0xffd08020, "ssat%c\t%8-11r, #%0-4d, %16-19r%s"},
+    0xf3000000, 0xffd08020, "ssat%c\t%8-11r, #%0-4D, %16-19r%s"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
     0xf3800000, 0xffd08020, "usat%c\t%8-11r, #%0-4d, %16-19r%s"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
@@ -5677,6 +5678,11 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    case 'd':
 		      func (stream, "%lu", val);
 		      value_in_comment = val;
+		      break;
+
+		    case 'D':
+		      func (stream, "%lu", val + 1);
+		      value_in_comment = val + 1;
 		      break;
 
 		    case 'W':
