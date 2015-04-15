@@ -2,7 +2,7 @@
 	    Hans-Peter Nilsson  <hp@axis.com>
 
 	Adjust src-release.sh for sim using the gdb create-version.sh.
-	* sim-release.sh (tar_compress): If there's a fifth parameter,
+	* src-release.sh (tar_compress): If there's a fifth parameter,
 	use that in the getver call instead of $tool.
 	(sim_release): Pass gdb as fifth parameter to tar_compress.
 	(SIM_SUPPORT_DIRS): Add gdb/common/create-version.sh.
