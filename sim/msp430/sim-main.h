@@ -42,12 +42,6 @@ struct sim_state
 {
   sim_cpu *cpu[MAX_NR_PROCESSORS];
 
-#if (WITH_SMP)
-#error WITH_SMP not supported by MSP430 sim
-#else
-#define STATE_CPU(sd,n) ((sd)->cpu[0])
-#endif
-
   asymbol **symbol_table;
   long number_of_symbols;
 #define STATE_SYMBOL_TABLE(sd)   ((sd)->symbol_table)

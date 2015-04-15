@@ -44,11 +44,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
      struct sim_state {
        sim_cpu *cpu[MAX_NR_PROCESSORS];
-     #if (WITH_SMP)
-     #define STATE_CPU(sd,n) ((sd)->cpu[n])
-     #else
-     #define STATE_CPU(sd,n) ((sd)->cpu[0])
-     #endif
        ... simulator specific members ...
        sim_state_base base;
      };
@@ -113,6 +108,15 @@ extern struct sim_state *current_state;
 /* The simulator may provide different (and faster) definition.  */
 #ifndef CURRENT_STATE
 #define CURRENT_STATE current_state
+#endif
+
+
+/* We require all sims to dynamically allocate cpus.  See comment up top about
+   struct sim_state.  */
+#if (WITH_SMP)
+# define STATE_CPU(sd, n) ((sd)->cpu[n])
+#else
+# define STATE_CPU(sd, n) ((sd)->cpu[0])
 #endif
 
 

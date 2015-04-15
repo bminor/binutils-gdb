@@ -176,6 +176,7 @@ SIM_NEW_COMMON_OBJS = \
 	sim-command.o \
 	sim-config.o \
 	sim-core.o \
+	sim-cpu.o \
 	sim-endian.o \
 	sim-engine.o \
 	sim-events.o \

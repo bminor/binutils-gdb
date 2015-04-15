@@ -1,5 +1,10 @@
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.
+	* sim-main.h (STATE_CPU): Delete.
+
+2015-04-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c: Include sim-options.h.
 	(sim_open): Call sim_cpu_alloc_all instead of sim_cpu_alloc.
 	* sim-main.h (struct sim_state): Change cpu to an array of pointers.

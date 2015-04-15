@@ -86,11 +86,6 @@ struct sim_state {
 
   /* the processors proper */
   sim_cpu *cpu[MAX_NR_PROCESSORS];
-#if (WITH_SMP)
-#define STATE_CPU(sd,n) ((sd)->cpu[n])
-#else
-#define STATE_CPU(sd,n) ((sd)->cpu[0])
-#endif
 
   /* The base class.  */
   sim_state_base base;

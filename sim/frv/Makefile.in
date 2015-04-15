@@ -21,7 +21,6 @@ FRV_OBJS = frv.o cpu.o decode.o sem.o model.o mloop.o cgen-par.o
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
-	sim-cpu.o \
 	sim-hload.o \
 	sim-model.o \
 	sim-reg.o \

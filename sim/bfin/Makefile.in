@@ -27,7 +27,6 @@ SIM_OBJS = \
 	gui.o \
 	interp.o \
 	machs.o \
-	sim-cpu.o \
 	sim-hload.o \
 	sim-model.o \
 	sim-reason.o \
