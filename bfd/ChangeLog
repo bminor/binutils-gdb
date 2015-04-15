@@ -1,3 +1,7 @@
+2015-04-15  Alan Modra  <amodra@gmail.com>
+
+	* elf32-rl78.c (rl78_elf_relocate_section): Typo fix.
+
 2015-04-14  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-rl78.c (RL78_OP_REL): New macro.
