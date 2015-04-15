@@ -244,7 +244,8 @@ tar_compress()
     tool=$2
     support_files=$3
     compressors=$4
-    ver=$(getver $tool)
+    verdir=${5:-$tool}
+    ver=$(getver $verdir)
     do_proto_toplev $package $ver $tool "$support_files"
     do_md5sum
     do_tar $package $ver
@@ -295,13 +296,13 @@ gdb_release()
 }
 
 # Corresponding to the CVS "sim" module.
-SIM_SUPPORT_DIRS="bfd opcodes libiberty include intl gdb/version.in makefile.vms zlib"
+SIM_SUPPORT_DIRS="bfd opcodes libiberty include intl gdb/version.in gdb/common/create-version.sh makefile.vms zlib"
 sim_release()
 {
     compressors=$1
     package=sim
     tool=sim
-    tar_compress $package $tool "$SIM_SUPPORT_DIRS" "$compressors"
+    tar_compress $package $tool "$SIM_SUPPORT_DIRS" "$compressors" gdb
 }
 
 usage()
