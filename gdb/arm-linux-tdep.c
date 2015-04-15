@@ -939,7 +939,6 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 		       struct regcache *regs,
 		       struct displaced_step_closure *dsc)
 {
-  CORE_ADDR from = dsc->insn_addr;
   ULONGEST apparent_pc;
   int within_scratch;
 
@@ -960,7 +959,8 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
     }
 
   if (within_scratch)
-    displaced_write_reg (regs, dsc, ARM_PC_REGNUM, from + 4, BRANCH_WRITE_PC);
+    displaced_write_reg (regs, dsc, ARM_PC_REGNUM,
+			 dsc->insn_addr + dsc->insn_size, BRANCH_WRITE_PC);
 }
 
 static int
@@ -1027,7 +1027,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
   /* Preparation: If we detect sigreturn, set momentary breakpoint at resume
 		  location, else nothing.
      Insn: unmodified svc.
-     Cleanup: if pc lands in scratch space, pc <- insn_addr + 4
+     Cleanup: if pc lands in scratch space, pc <- insn_addr + insn_size
               else leave pc alone.  */
 
 

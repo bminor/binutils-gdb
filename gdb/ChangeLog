@@ -1,3 +1,8 @@
+2015-04-15  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_cleanup_svc): Use
+	dsc->insn_size instead of 4.
+
 2015-04-14  Gary Benson <gbenson@redhat.com>
 
 	* jit.c (mem_bfd_iovec_stat): Zero supplied buffer.
