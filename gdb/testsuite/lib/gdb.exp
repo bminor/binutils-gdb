@@ -1894,6 +1894,54 @@ proc with_target_charset { target_charset body } {
     }
 }
 
+# Select the largest timeout from all the timeouts:
+# - the local "timeout" variable of the scope two levels above,
+# - the global "timeout" variable,
+# - the board variable "gdb,timeout".
+
+proc get_largest_timeout {} {
+    upvar #0 timeout gtimeout
+    upvar 2 timeout timeout
+
+    set tmt 0
+    if [info exists timeout] {
+      set tmt $timeout
+    }
+    if { [info exists gtimeout] && $gtimeout > $tmt } {
+	set tmt $gtimeout
+    }
+    if { [target_info exists gdb,timeout]
+	 && [target_info gdb,timeout] > $tmt } {
+	set tmt [target_info gdb,timeout]
+    }
+    if { $tmt == 0 } {
+	# Eeeeew.
+	set tmt 60
+    }
+
+    return $tmt
+}
+
+# Run tests in BODY with timeout increased by factor of FACTOR.  When
+# BODY is finished, restore timeout.
+
+proc with_timeout_factor { factor body } {
+    global timeout
+
+    set savedtimeout $timeout
+
+    set timeout [expr [get_largest_timeout] * $factor]
+    set code [catch {uplevel 1 $body} result]
+
+    set timeout $savedtimeout
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
 # Return 1 if _Complex types are supported, otherwise, return 0.
 
 gdb_caching_proc support_complex_tests {
@@ -3266,26 +3314,10 @@ proc gdb_expect { args } {
 
     # A timeout argument takes precedence, otherwise of all the timeouts
     # select the largest.
-    upvar #0 timeout gtimeout
-    upvar timeout timeout
     if [info exists atimeout] {
 	set tmt $atimeout
     } else {
-	set tmt 0
-	if [info exists timeout] {
-	    set tmt $timeout
-	}
-	if { [info exists gtimeout] && $gtimeout > $tmt } {
-	    set tmt $gtimeout
-	}
-	if { [target_info exists gdb,timeout]
-	     && [target_info gdb,timeout] > $tmt } {
-	    set tmt [target_info gdb,timeout]
-	}
-	if { $tmt == 0 } {
-	    # Eeeeew.
-	    set tmt 60
-	}
+	set tmt [get_largest_timeout]
     }
 
     global suppress_flag

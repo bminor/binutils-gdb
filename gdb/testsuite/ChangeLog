@@ -1,3 +1,16 @@
+2015-04-15  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/watch-bitfields.exp (test_watch_location): Increase
+	timeout by factor of 4.
+	(test_regular_watch): Likewise.
+	* gdb.base/watchpoint-solib.exp: Use with_timeout_factor.
+	* gdb.reverse/sigall-reverse.exp: Likewise.
+	* gdb.reverse/until-precsave.exp: Likewise.
+	* lib/gdb.exp (with_timeout_factor): New proc.
+	(gdb_expect): Move some code to ...
+	(get_largest_timeout): ... here.  New procedure.
+
 2015-04-14  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/bp-permanent.exp (test): Reinstate correct test message.
