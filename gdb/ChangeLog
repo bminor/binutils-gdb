@@ -1,3 +1,7 @@
+2015-04-15  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_expand_symtabs_matching): Add some QUIT calls.
+
 2015-04-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/lib/gdb/command/unwinders.py: Add parentheses.
