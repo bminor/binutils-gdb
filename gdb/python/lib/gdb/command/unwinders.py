@@ -83,7 +83,7 @@ class InfoUnwinder(gdb.Command):
         """
         if not unwinders:
             return
-        print title
+        print(title)
         for unwinder in unwinders:
             if name_re.match(unwinder.name):
                 print("  %s%s" % (unwinder.name,

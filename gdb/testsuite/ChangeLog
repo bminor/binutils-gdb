@@ -1,3 +1,11 @@
+2015-04-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-framefilter.py (ErrorFilter.filter): Use map function
+	if itertools.imap is not present.
+	* gdb.python/py-objfile.exp: Add parentheses.
+	* gdb.python/py-type.exp: Same.
+	* gdb.python/py-unwind-maint.py: Same.
+
 2015-04-15  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.dwarf2/dynarr-ptr.exp (assemble): Use $ptr_size instead

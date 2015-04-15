@@ -88,9 +88,9 @@ if { [gdb_unload] < 0 } {
     return -1
 }
 
-gdb_test "python print objfile.filename" "None" \
+gdb_test "python print(objfile.filename)" "None" \
     "objfile.filename after objfile is unloaded"
-gdb_test "python print objfile.username" "None" \
+gdb_test "python print(objfile.username)" "None" \
     "objfile.username after objfile is unloaded"
 
 # Now build another copy of the testcase, this time without debug info.
