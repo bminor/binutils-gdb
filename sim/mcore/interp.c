@@ -1779,6 +1779,18 @@ sim_info (SIM_DESC sd, int verbose)
 #endif
 }
 
+static sim_cia
+mcore_pc_get (sim_cpu *cpu)
+{
+  return cpu->pc;
+}
+
+static void
+mcore_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  cpu->pc = pc;
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -1856,6 +1868,10 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = mcore_pc_get;
+      CPU_PC_STORE (cpu) = mcore_pc_set;
+
       set_initial_gprs (cpu);	/* Reset the GPR registers.  */
     }
 

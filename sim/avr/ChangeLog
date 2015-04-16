@@ -1,3 +1,9 @@
+2015-04-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (avr_pc_get, avr_pc_set): New functions.
+	(sim_open): Declare new local var i.  Call CPU_PC_FETCH &
+	CPU_PC_STORE for all cpus.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.

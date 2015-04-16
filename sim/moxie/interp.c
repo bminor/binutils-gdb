@@ -1145,6 +1145,18 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     return 0;
 }
 
+static sim_cia
+moxie_pc_get (sim_cpu *cpu)
+{
+  return cpu->registers[PCIDX];
+}
+
+static void
+moxie_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  cpu->registers[PCIDX] = pc;
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -1157,6 +1169,7 @@ free_state (SIM_DESC sd)
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
@@ -1215,7 +1228,15 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     }
 
   /* CPU specific initialization.  */
-  set_initial_gprs ();
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = moxie_pc_get;
+      CPU_PC_STORE (cpu) = moxie_pc_set;
+
+      set_initial_gprs ();	/* Reset the GPR registers.  */
+    }
 
   return sd;
 }
