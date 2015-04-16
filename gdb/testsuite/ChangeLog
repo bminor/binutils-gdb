@@ -1,3 +1,8 @@
+2015-04-16  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdbserver-support.exp (gdb_exit): If gdbserver_reconnect_p
+	is set, don't exit gdbserver.
+
 2015-04-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-vregs.S (change_vrs): Replace exrl by an

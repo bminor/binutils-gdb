@@ -351,6 +351,14 @@ if { [info procs gdbserver_gdb_exit] == "" } {
 proc gdb_exit {} {
     global gdb_spawn_id server_spawn_id inferior_spawn_id
     global gdb_prompt
+    global gdbserver_reconnect_p
+
+    # Leave GDBserver running if we're exiting GDB in order to
+    # reconnect to the same instance of GDBserver again.
+    if {[info exists gdbserver_reconnect_p] && $gdbserver_reconnect_p} {
+	gdbserver_orig_gdb_exit
+	return
+    }
 
     if {[info exists gdb_spawn_id] && [info exists server_spawn_id]} {
 	# GDB may be terminated in an expected way or an unexpected way,
