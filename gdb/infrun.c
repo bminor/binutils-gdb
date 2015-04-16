@@ -98,6 +98,8 @@ static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
+static int maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc);
+
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
@@ -1863,6 +1865,7 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
       regcache = get_thread_regcache (ptid);
       actual_pc = regcache_read_pc (regcache);
       aspace = get_regcache_aspace (regcache);
+      gdbarch = get_regcache_arch (regcache);
 
       if (breakpoint_here_p (aspace, actual_pc))
 	{
@@ -1872,8 +1875,6 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
 				target_pid_to_str (ptid));
 
 	  displaced_step_prepare (ptid);
-
-	  gdbarch = get_regcache_arch (regcache);
 
 	  if (debug_displaced)
 	    {
@@ -1906,6 +1907,9 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
 
 	  /* Go back to what we were trying to do.  */
 	  step = currently_stepping (tp);
+
+	  if (step)
+	    step = maybe_software_singlestep (gdbarch, actual_pc);
 
 	  if (debug_displaced)
 	    fprintf_unfiltered (gdb_stdlog,
