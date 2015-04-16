@@ -29,7 +29,8 @@ if [isnative] {
     remote_exec build "mkdir $coredir"
 }
 
-if { [prepare_for_testing ${testfile}.exp $testfile $srcfile] } {
+if { [prepare_for_testing ${testfile}.exp $testfile $srcfile \
+	  [list "additional_flags=-mzarch"]] } {
     return -1
 }
 

@@ -1,5 +1,12 @@
 2015-04-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.arch/s390-vregs.S (change_vrs): Replace exrl by an
+	appropriate .insn, such that an older assembler can be used.
+	* gdb.arch/s390-vregs.exp: Add the compile flag -mzarch, to enable
+	the z/Architecture instruction set on 31-bit targets as well.
+
+2015-04-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.go/handcall.exp: Remove all logic related to the first
 	breakpoint and rely on go_runto_main instead.
 	* gdb.go/strings.exp: Likewise.
