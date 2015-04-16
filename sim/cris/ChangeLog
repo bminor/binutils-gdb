@@ -1,3 +1,9 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* crisv10f.c (deliver_interrupt): Change CIA_GET to CPU_PC_GET.
+	* crisv32f.c (deliver_interrupt): Likewise.
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.

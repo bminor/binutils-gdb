@@ -1,5 +1,9 @@
 2015-04-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c (h8300_pc_get, h8300_pc_set): New functions.
 	(sim_open): Declare new local var i.  Call CPU_PC_FETCH &
 	CPU_PC_STORE for all cpus.

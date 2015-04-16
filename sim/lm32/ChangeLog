@@ -1,3 +1,11 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-lm32cpu.c (deliver_lm32cpu_interrupt): Change CIA_GET to
+	CPU_PC_GET.
+	(lm32cpu_port_event): Likewise.
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+	* traps.c (lm32_core_signal): Change CIA_SET to CPU_PC_SET.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.

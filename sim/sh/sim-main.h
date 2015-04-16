@@ -23,9 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 typedef address_word sim_cia;
 
-#define CIA_GET(cpu)     saved_state.asregs.pc
-#define CIA_SET(cpu,val) saved_state.asregs.pc = (val)
-
 typedef struct _sim_cpu SIM_CPU;
 
 #include "sim-base.h"

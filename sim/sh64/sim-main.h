@@ -22,9 +22,6 @@ typedef struct _sim_cpu SIM_CPU;
 /* These must be defined before sim-base.h.  */
 typedef UDI sim_cia;
 
-#define CIA_GET(cpu)     CPU_PC_GET (cpu)
-#define CIA_SET(cpu,val) CPU_PC_SET ((cpu), (val) | (sh64_h_ism_get (cpu)))
-
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "sh64-sim.h"

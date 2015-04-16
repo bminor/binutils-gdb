@@ -54,9 +54,6 @@ struct sim_state
 #define MSP430_CPU(sd)       (STATE_CPU ((sd), 0))
 #define MSP430_CPU_STATE(sd) (MSP430_CPU ((sd)->state))
 
-#define CIA_GET(CPU)     ((CPU)->state.regs[0] + 0)
-#define CIA_SET(CPU,VAL) ((CPU)->state.regs[0] = (VAL))
-
 #include "sim-config.h"
 #include "sim-types.h"
 #include "sim-engine.h"

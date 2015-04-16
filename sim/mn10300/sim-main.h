@@ -71,9 +71,6 @@ mn10300_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), 
 /* FIXME: For moment, save/restore PC value found in struct State.
    Struct State will one day go away, being placed in the sim_cpu
    state. */
-#define CIA_GET(CPU) ((PC) + 0)
-#define CIA_SET(CPU,VAL) ((CPU)->cia = (VAL), PC = (VAL))
-
 
 struct _sim_cpu {
   sim_event *pending_nmi;

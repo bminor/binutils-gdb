@@ -397,7 +397,7 @@ set_initial_gprs (SIM_CPU *scpu)
   init_pointers ();
 
   /* Set up machine just out of reset.  */
-  CIA_SET (scpu, 0);
+  CPU_PC_SET (scpu, 0);
   cpu.sr = 0;
 
   memsize = cpu.asregs.msize / (1024 * 1024);
@@ -716,7 +716,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   word WLhash;
 
   cpu.asregs.exception = step ? SIGTRAP: 0;
-  pc = CIA_GET (scpu);
+  pc = CPU_PC_GET (scpu);
 
   /* Fetch the initial instructions that we'll decode. */
   ibuf = rlat (pc & 0xFFFFFFFC);
@@ -1648,7 +1648,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   while (!cpu.asregs.exception);
 
   /* Hide away the things we've cached while executing.  */
-  CIA_SET (scpu, pc);
+  CPU_PC_SET (scpu, pc);
   cpu.asregs.insts += insts;		/* instructions done ... */
   cpu.asregs.cycles += insts;		/* and each takes a cycle */
   cpu.asregs.cycles += bonus_cycles;	/* and extra cycles for branches */
@@ -1905,7 +1905,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
   issue_messages = l;
 
   hi_stack = cpu.asregs.msize - 4;
-  CIA_SET (scpu, bfd_get_start_address (prog_bfd));
+  CPU_PC_SET (scpu, bfd_get_start_address (prog_bfd));
 
   /* Calculate the argument and environment strings.  */
   s_length = 0;

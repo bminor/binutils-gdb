@@ -245,7 +245,7 @@ lm32_core_signal (SIM_DESC sd,
       SET_H_GR (30, ip);
       /* Save and clear interrupt enable.  */
       SET_H_CSR (LM32_CSR_IE, (GET_H_CSR (LM32_CSR_IE) & 1) << 1);
-      CIA_SET (cpu, GET_H_CSR (LM32_CSR_EBA) + LM32_EID_DATA_BUS_ERROR * 32);
+      CPU_PC_SET (cpu, GET_H_CSR (LM32_CSR_EBA) + LM32_EID_DATA_BUS_ERROR * 32);
       sim_engine_halt (sd, cpu, NULL, LM32_EID_DATA_BUS_ERROR * 32,
 		       sim_stopped, SIM_SIGSEGV);
       break;
@@ -257,7 +257,7 @@ lm32_core_signal (SIM_DESC sd,
       SET_H_GR (30, ip);
       /* Save and clear interrupt enable.  */
       SET_H_CSR (LM32_CSR_IE, (GET_H_CSR (LM32_CSR_IE) & 1) << 1);
-      CIA_SET (cpu, GET_H_CSR (LM32_CSR_EBA) + LM32_EID_DATA_BUS_ERROR * 32);
+      CPU_PC_SET (cpu, GET_H_CSR (LM32_CSR_EBA) + LM32_EID_DATA_BUS_ERROR * 32);
       sim_engine_halt (sd, cpu, NULL, LM32_EID_DATA_BUS_ERROR * 32,
 		       sim_stopped, SIM_SIGBUS);
       break;

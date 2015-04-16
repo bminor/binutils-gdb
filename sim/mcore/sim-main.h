@@ -30,9 +30,6 @@ typedef struct _sim_cpu SIM_CPU;
 #include "sim-base.h"
 #include "bfd.h"
 
-#define CIA_GET(cpu)     (cpu)->pc
-#define CIA_SET(cpu,val) (cpu)->pc = (val)
-
 struct _sim_cpu {
 
   word pc;

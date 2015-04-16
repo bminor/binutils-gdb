@@ -1,3 +1,11 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (set_initial_gprs): Change CIA_SET to CPU_PC_SET.
+	(sim_resume): Change CIA_GET to CPU_PC_GET and CIA_SET to
+	CPU_PC_SET.
+	(sim_create_inferior): Change CIA_SET to CPU_PC_SET.
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
 2015-04-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (mcore_pc_get, mcore_pc_set): New functions.

@@ -35,8 +35,6 @@ typedef struct _sim_cpu SIM_CPU;
 struct _sim_cpu {
 
   /* The following are internal simulator state variables: */
-#define CIA_GET(CPU) ((CPU)->state.pc + 0)
-#define CIA_SET(CPU,CIA) ((CPU)->state.pc = (CIA))
 
   struct ft32_cpu_state state;
 

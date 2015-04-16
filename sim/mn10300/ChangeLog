@@ -1,3 +1,15 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-mn103cpu.c (deliver_mn103cpu_interrupt): Change CIA_GET to
+	CPU_PC_GET and CIA_SET to CPU_PC_SET.
+	* interp.c (sim_create_inferior): Change CIA_SET to CPU_PC_SET.
+	(program_interrupt): Change CIA_GET to CPU_PC_GET and CIA_SET to
+	CPU_PC_SET.
+	(mn10300_cpu_exception_trigger): Change CIA_SET to CPU_PC_SET.
+	(mn10300_cpu_exception_suspend): Likewise.
+	(mn10300_cpu_exception_resume): Likewise.
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (MN10300_OBJS): Delete sim-cpu.o.

@@ -23,9 +23,6 @@
 
 typedef address_word sim_cia;
 
-#define CIA_GET(cpu) (cpu)->microblaze_cpu.spregs[0]
-#define CIA_SET(cpu,val) (cpu)->microblaze_cpu.spregs[0] = (val)
-
 typedef struct _sim_cpu SIM_CPU;
 
 #include "sim-base.h"

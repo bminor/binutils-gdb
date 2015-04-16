@@ -151,7 +151,7 @@ set_initial_gprs (void)
 static INLINE void
 wbat (sim_cpu *scpu, word pc, word x, word v)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   sim_core_write_aligned_1 (scpu, cia, write_map, x, v);
 }
@@ -161,7 +161,7 @@ wbat (sim_cpu *scpu, word pc, word x, word v)
 static INLINE void
 wsat (sim_cpu *scpu, word pc, word x, word v)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   sim_core_write_aligned_2 (scpu, cia, write_map, x, v);
 }
@@ -171,7 +171,7 @@ wsat (sim_cpu *scpu, word pc, word x, word v)
 static INLINE void
 wlat (sim_cpu *scpu, word pc, word x, word v)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
 	
   sim_core_write_aligned_4 (scpu, cia, write_map, x, v);
 }
@@ -181,7 +181,7 @@ wlat (sim_cpu *scpu, word pc, word x, word v)
 static INLINE int
 rsat (sim_cpu *scpu, word pc, word x)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   return (sim_core_read_aligned_2 (scpu, cia, read_map, x));
 }
@@ -191,7 +191,7 @@ rsat (sim_cpu *scpu, word pc, word x)
 static INLINE int
 rbat (sim_cpu *scpu, word pc, word x)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   return (sim_core_read_aligned_1 (scpu, cia, read_map, x));
 }
@@ -201,7 +201,7 @@ rbat (sim_cpu *scpu, word pc, word x)
 static INLINE int
 rlat (sim_cpu *scpu, word pc, word x)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   return (sim_core_read_aligned_4 (scpu, cia, read_map, x));
 }
@@ -243,7 +243,7 @@ sim_engine_run (SIM_DESC sd,
   word pc, opc;
   unsigned short inst;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
 
   pc = cpu.asregs.regs[PC_REGNO];
 

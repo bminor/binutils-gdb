@@ -24,9 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 typedef address_word sim_cia;
 extern unsigned int pc;
 
-#define CIA_GET(cpu)     pc
-#define CIA_SET(cpu,val) (pc) = (val)
-
 typedef struct _sim_cpu SIM_CPU;
 
 #include "sim-base.h"

@@ -1,5 +1,9 @@
 2015-04-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sh_pc_get, sh_pc_set): New functions.
 	(sim_open): Call CPU_PC_FETCH & CPU_PC_STORE for all cpus.
 

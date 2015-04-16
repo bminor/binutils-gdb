@@ -43,9 +43,6 @@ typedef struct _sim_cpu SIM_CPU;
 /* These must be defined before sim-base.h.  */
 typedef USI sim_cia;
 
-#define CIA_GET(cpu)     CPU_PC_GET (cpu)
-#define CIA_SET(cpu,val) CPU_PC_SET ((cpu), (val))
-
 void frv_sim_engine_halt_hook (SIM_DESC, SIM_CPU *, sim_cia);
 #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) \
   frv_sim_engine_halt_hook ((SD), (LAST_CPU), (CIA))

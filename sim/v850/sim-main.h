@@ -61,9 +61,6 @@ struct _sim_cpu
   sim_cpu_base base;
 };
 
-#define CIA_GET(CPU) ((CPU)->reg.pc + 0)
-#define CIA_SET(CPU,VAL) ((CPU)->reg.pc = (VAL))
-
 struct sim_state {
   sim_cpu *cpu[MAX_NR_PROCESSORS];
 #if 0

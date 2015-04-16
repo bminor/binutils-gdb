@@ -1,3 +1,7 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
 2015-04-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (avr_pc_get, avr_pc_set): New functions.

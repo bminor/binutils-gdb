@@ -1,3 +1,9 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (wbat, wsat, wlat, rsat, rbat, rlat, sim_engine_run):
+	Change CIA_GET to CPU_PC_GET.
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
 2015-04-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (moxie_pc_get, moxie_pc_set): New functions.
