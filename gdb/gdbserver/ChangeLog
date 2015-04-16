@@ -1,5 +1,11 @@
 2015-04-17  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* linux-xtensa-low.c (xtensa_fill_gregset)
+	(xtensa_store_gregset): Check XCHAL_HAVE_LOOPS instead of
+	XCHAL_HAVE_LOOP.
+
+2015-04-17  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* linux-xtensa-low.c (xtensa_usrregs_info): Remove.
 	(regs_info): Replace usrregs pointer with NULL.
 
