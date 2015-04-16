@@ -1,5 +1,10 @@
 2015-04-16  Pedro Alves  <palves@redhat.com>
 
+	* boards/native-extended-gdbserver.exp (mi_gdb_start): Don't start
+	a new gdbserver if gdbserver_reconnect_p is set.
+
+2015-04-16  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdbserver-support.exp (gdb_exit): If gdbserver_reconnect_p
 	is set, don't exit gdbserver.
 
