@@ -1,3 +1,11 @@
+2015-04-17  Gary Benson  <gbenson@redhat.com>
+
+	* target.h (struct target_ops) <pid_to_exec_file>: New field.
+	* linux-low.c (linux_target_ops): Initialize pid_to_exec_file.
+	* server.c (handle_qxfer_exec_file): New function.
+	(qxfer_packets): Add exec-file entry.
+	(handle_query): Report qXfer:exec-file:read as supported packet.
+
 2015-04-14  Romain Naour <romain.naour@openwide.fr>  (tiny change)
 
 	* linux-low.c (linux_read_offsets): Remove get_thread_lwp.
