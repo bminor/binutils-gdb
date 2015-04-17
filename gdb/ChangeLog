@@ -1,3 +1,10 @@
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* gdbcore.h (exec_file_locate_attach): New declaration.
+	* exec.c (exec_file_locate_attach): New function, factored
+	out from...
+	* infcmd.c (attach_command_post_wait): ...here.
+
 2015-04-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* MAINTAINERS: Add myself for Blackfin/write-after-approval.

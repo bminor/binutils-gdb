@@ -134,6 +134,37 @@ exec_file_clear (int from_tty)
     printf_unfiltered (_("No executable file now.\n"));
 }
 
+/* See gdbcore.h.  */
+
+void
+exec_file_locate_attach (int pid, int from_tty)
+{
+  char *exec_file, *full_exec_path = NULL;
+
+  /* Do nothing if we already have an executable filename.  */
+  exec_file = (char *) get_exec_file (0);
+  if (exec_file != NULL)
+    return;
+
+  /* Try to determine a filename from the process itself.  */
+  exec_file = target_pid_to_exec_file (pid);
+  if (exec_file == NULL)
+    return;
+
+  /* It's possible we don't have a full path, but rather just a
+     filename.  Some targets, such as HP-UX, don't provide the
+     full path, sigh.
+
+     Attempt to qualify the filename against the source path.
+     (If that fails, we'll just fall back on the original
+     filename.  Not much more we can do...)  */
+  if (!source_full_path_of (exec_file, &full_exec_path))
+    full_exec_path = xstrdup (exec_file);
+
+  exec_file_attach (full_exec_path, from_tty);
+  symbol_file_add_main (full_exec_path, from_tty);
+}
+
 /* Set FILENAME as the new exec file.
 
    This function is intended to be behave essentially the same
