@@ -1516,10 +1516,13 @@ remote_query_attached (int pid)
    inferior.  If ATTACHED is 1, then we had just attached to this
    inferior.  If it is 0, then we just created this inferior.  If it
    is -1, then try querying the remote stub to find out if it had
-   attached to the inferior or not.  */
+   attached to the inferior or not.  If TRY_OPEN_EXEC is true then
+   attempt to open this inferior's executable as the main executable
+   if no main executable is open already.  */
 
 static struct inferior *
-remote_add_inferior (int fake_pid_p, int pid, int attached)
+remote_add_inferior (int fake_pid_p, int pid, int attached,
+		     int try_open_exec)
 {
   struct inferior *inf;
 
@@ -1552,6 +1555,11 @@ remote_add_inferior (int fake_pid_p, int pid, int attached)
 
   inf->attach_flag = attached;
   inf->fake_pid_p = fake_pid_p;
+
+  /* If no main executable is currently open then attempt to
+     open the file that was executed to create this inferior.  */
+  if (try_open_exec && !fake_pid_p && get_exec_file (0) == NULL)
+    exec_file_locate_attach (pid, 1);
 
   return inf;
 }
@@ -1643,7 +1651,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	  int fake_pid_p = !remote_multi_process_p (rs);
 
 	  inf = remote_add_inferior (fake_pid_p,
-				     ptid_get_pid (currthread), -1);
+				     ptid_get_pid (currthread), -1, 1);
 	}
 
       /* This is really a new thread.  Add it.  */
@@ -3413,7 +3421,7 @@ add_current_inferior_and_thread (char *wait_status)
       fake_pid_p = 1;
     }
 
-  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1);
+  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1, 1);
 
   /* Add the main thread.  */
   add_thread_silent (inferior_ptid);
@@ -4539,7 +4547,7 @@ extended_remote_attach (struct target_ops *target, const char *args,
 	     target_pid_to_str (pid_to_ptid (pid)));
     }
 
-  set_current_inferior (remote_add_inferior (0, pid, 1));
+  set_current_inferior (remote_add_inferior (0, pid, 1, 0));
 
   inferior_ptid = pid_to_ptid (pid);
 

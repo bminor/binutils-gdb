@@ -18952,10 +18952,15 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 @node Connecting
 @section Connecting to a Remote Target
 
-On the @value{GDBN} host machine, you will need an unstripped copy of
-your program, since @value{GDBN} needs symbol and debugging information.
-Start up @value{GDBN} as usual, using the name of the local copy of your
-program as the first argument.
+@value{GDBN} needs an unstripped copy of your program to access symbol
+and debugging information.  Some remote targets (@pxref{qXfer
+executable filename read}, and @pxref{Host I/O Packets}) allow
+@value{GDBN} to access program files over the same connection used to
+communicate with @value{GDBN}.  With such a target, if the remote
+program is unstripped, the only command you need is @code{target
+remote}.  Otherwise, start up @value{GDBN} using the name of the local
+unstripped copy of your program as the first argument, or use the
+@code{file} command.
 
 @cindex @code{target remote}
 @value{GDBN} can communicate with the target over a serial line, or

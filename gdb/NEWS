@@ -36,6 +36,12 @@
   the operating system) when starting processes remotely, and when
   attaching to already-running local or remote processes.
 
+* GDB now supports automatic location and retrieval of executable
+  files from remote targets.  Remote debugging can now be initiated
+  using only a "target remote" or "target extended-remote" command
+  (no "set sysroot" or "file" commands are required).  See "New remote
+  packets" below.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",

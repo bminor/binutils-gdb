@@ -1,5 +1,14 @@
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
+	* remote.c (remote_add_inferior): New argument try_open_exec.
+	If nonzero, attempt to open the inferior's executable file as
+	the main executable if no main executable is open already.
+	All callers updated.
+	* NEWS: Mention that GDB now supports automatic location and
+	retrieval of executable + files from remote targets.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
 	* target.h (TARGET_OBJECT_EXEC_FILE): New enum value.
 	* remote.c (PACKET_qXfer_exec_file): Likewise.
 	(remote_protocol_features): Register the

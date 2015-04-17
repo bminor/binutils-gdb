@@ -1,3 +1,8 @@
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* gdb.server/server-exec-info.exp: Inhibit GDB from accessing
+	the main executable over the remote protocol.
+
 2015-04-16  Pedro Alves  <palves@redhat.com>
 
 	* boards/native-extended-gdbserver.exp (mi_gdb_start): Don't start

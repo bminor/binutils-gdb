@@ -1,5 +1,11 @@
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
+	* gdb.texinfo (Connecting to a Remote Target): Mention that
+	GDB can access program files from remote targets that support
+	qXfer:exec-file:read and Host I/O packets.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
 	* gdb.texinfo (Remote Configuration): Document the "set/show
 	remote pid-to-exec-file-packet" command.
 	(General Query Packets): Document the qXfer:exec-file:read
