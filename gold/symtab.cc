@@ -649,7 +649,7 @@ Symbol_table::gc_mark_symbol(Symbol* sym)
   if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
     {
       gold_assert(this->gc_!= NULL);
-      this->gc_->worklist().push(Section_id(sym->object(), shndx));
+      this->gc_->worklist().push_back(Section_id(sym->object(), shndx));
     }
   parameters->target().gc_mark_symbol(this, sym);
 }

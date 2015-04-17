@@ -238,7 +238,7 @@ public:
       if (this->opd_ent_[i].gc_mark)
 	{
 	  unsigned int shndx = this->opd_ent_[i].shndx;
-	  symtab->gc()->worklist().push(Section_id(this, shndx));
+	  symtab->gc()->worklist().push_back(Section_id(this, shndx));
 	}
   }
 
@@ -6434,7 +6434,8 @@ Target_powerpc<size, big_endian>::do_gc_mark_symbol(
 	  if (ppc_object->opd_valid())
 	    {
 	      unsigned int dst_indx = ppc_object->get_opd_ent(dst_off);
-	      symtab->gc()->worklist().push(Section_id(ppc_object, dst_indx));
+	      symtab->gc()->worklist().push_back(Section_id(ppc_object,
+                                                            dst_indx));
 	    }
 	  else
 	    ppc_object->add_gc_mark(dst_off);

@@ -1602,7 +1602,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	      || shdr.get_sh_type() == elfcpp::SHT_INIT_ARRAY
 	      || shdr.get_sh_type() == elfcpp::SHT_FINI_ARRAY)
 	    {
-	      symtab->gc()->worklist().push(Section_id(this, i));
+	      symtab->gc()->worklist().push_back(Section_id(this, i));
 	    }
 	  // If the section name XXX can be represented as a C identifier
 	  // it cannot be discarded if there are references to

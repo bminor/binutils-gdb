@@ -1,3 +1,13 @@
+2015-04-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* gc.cc (Garbage_collection::do_transitive_closure): Use back and
+	push_back.
+	* gc.h (Garbage_collection): Use a std::vector instead of a std::queue.
+	* object.cc (Sized_relobj_file::do_layout): Use push_back.
+	* powerpc.cc (process_gc_mark): Use push_back.
+	(Target_powerpc::do_gc_mark_symbol): Use push_back.
+	* symtab.cc (Symbol_table::gc_mark_symbol): Use push_back.
+
 2015-04/16  Han Shen  <shenhan@google.com>
 
     * aarch64.cc (AArch64_insn_utilities): New utility class.
