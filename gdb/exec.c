@@ -42,6 +42,7 @@
 
 #include <ctype.h>
 #include <sys/stat.h>
+#include "solist.h"
 
 void (*deprecated_file_changed_hook) (char *);
 
@@ -151,15 +152,30 @@ exec_file_locate_attach (int pid, int from_tty)
   if (exec_file == NULL)
     return;
 
-  /* It's possible we don't have a full path, but rather just a
-     filename.  Some targets, such as HP-UX, don't provide the
-     full path, sigh.
+  /* If gdb_sysroot is not empty and the discovered filename
+     is absolute then prefix the filename with gdb_sysroot.  */
+  if (gdb_sysroot != NULL && *gdb_sysroot != '\0'
+      && IS_ABSOLUTE_PATH (exec_file))
+    {
+      int fd = -1;
 
-     Attempt to qualify the filename against the source path.
-     (If that fails, we'll just fall back on the original
-     filename.  Not much more we can do...)  */
-  if (!source_full_path_of (exec_file, &full_exec_path))
-    full_exec_path = xstrdup (exec_file);
+      full_exec_path = exec_file_find (exec_file, &fd);
+      if (fd >= 0)
+	close (fd);
+    }
+
+  if (full_exec_path == NULL)
+    {
+      /* It's possible we don't have a full path, but rather just a
+	 filename.  Some targets, such as HP-UX, don't provide the
+	 full path, sigh.
+
+	 Attempt to qualify the filename against the source path.
+	 (If that fails, we'll just fall back on the original
+	 filename.  Not much more we can do...)  */
+      if (!source_full_path_of (exec_file, &full_exec_path))
+	full_exec_path = xstrdup (exec_file);
+    }
 
   exec_file_attach (full_exec_path, from_tty);
   symbol_file_add_main (full_exec_path, from_tty);

@@ -17912,7 +17912,7 @@ may try to load the host's libraries.  @value{GDBN} has two variables
 to specify the search directories for target libraries.
 
 @table @code
-@cindex prefix for shared library file names
+@cindex prefix for executable and shared library file names
 @cindex system root, alternate
 @kindex set solib-absolute-prefix
 @kindex set sysroot
@@ -17920,10 +17920,14 @@ to specify the search directories for target libraries.
 Use @var{path} as the system root for the program being debugged.  Any
 absolute shared library paths will be prefixed with @var{path}; many
 runtime loaders store the absolute paths to the shared library in the
-target program's memory.  If you use @code{set sysroot} to find shared
-libraries, they need to be laid out in the same way that they are on
-the target, with e.g.@: a @file{/lib} and @file{/usr/lib} hierarchy
-under @var{path}.
+target program's memory.  When starting processes remotely, and when
+attaching to already-running processes (local or remote), their
+executable filenames will be prefixed with @var{path} if reported to
+@value{GDBN} as absolute by the operating system.  If you use
+@code{set sysroot} to find executables and shared libraries, they need
+to be laid out in the same way that they are on the target, with
+e.g.@: a @file{/bin}, @file{/lib} and @file{/usr/lib} hierarchy under
+@var{path}.
 
 If @var{path} starts with the sequence @file{target:} and the target
 system is remote then @value{GDBN} will retrieve the target binaries
@@ -17958,7 +17962,7 @@ system:
   c:/foo/bar.dll @result{} /path/to/sysroot/c:/foo/bar.dll
 @end smallexample
 
-If that does not find the shared library, @value{GDBN} tries removing
+If that does not find the binary, @value{GDBN} tries removing
 the @samp{:} character from the drive spec, both for convenience, and,
 for the case of the host file system not supporting file names with
 colons:
@@ -17983,7 +17987,7 @@ and point the system root at @file{/path/to/sysroot}, so that
 @value{GDBN} can find the correct copies of both
 @file{c:\sys\bin\foo.dll}, and @file{z:\sys\bin\bar.dll}.
 
-If that still does not find the shared library, @value{GDBN} tries
+If that still does not find the binary, @value{GDBN} tries
 removing the whole drive spec from the target file name:
 
 @smallexample
@@ -18007,7 +18011,7 @@ location.
 
 @kindex show sysroot
 @item show sysroot
-Display the current shared library prefix.
+Display the current executable and shared library prefix.
 
 @kindex set solib-search-path
 @item set solib-search-path @var{path}

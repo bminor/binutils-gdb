@@ -1,5 +1,13 @@
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
+	* exec.c (solist.h): New include.
+	(exec_file_locate_attach): Prefix absolute executable
+	paths with gdb_sysroot if set.
+	* NEWS: Mention that executable paths may be prepended
+	with sysroot.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
 	* solist.h (exec_file_find): New declaration.
 	* solib.c (solib_find_1): New function, factored out from...
 	(solib_find): ...here.

@@ -31,6 +31,11 @@
   "target:".  "remote:" is automatically converted to "target:" for
   backward compatibility.
 
+* The system root specified by "set sysroot" will be prepended to the
+  filename of the main executable (if reported to GDB as absolute by
+  the operating system) when starting processes remotely, and when
+  attaching to already-running local or remote processes.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",
