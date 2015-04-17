@@ -73,4 +73,10 @@ extern void linux_proc_attach_tgid_threads (pid_t pid,
 /* Return true if the /proc/PID/task/ directory exists.  */
 extern int linux_proc_task_list_dir_exists (pid_t pid);
 
+/* Return the full absolute name of the executable file that was run
+   to create the process PID.  The returned value persists until this
+   function is next called.  */
+
+extern char *linux_proc_pid_to_exec_file (int pid);
+
 #endif /* COMMON_LINUX_PROCFS_H */

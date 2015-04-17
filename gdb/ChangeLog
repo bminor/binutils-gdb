@@ -1,5 +1,13 @@
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
+	* nat/linux-procfs.h (linux_proc_pid_to_exec_file):
+	New declaration.
+	* nat/linux-procfs.c (linux_proc_pid_to_exec_file):
+	New function, factored out from...
+	* linux-nat.c (linux_child_pid_to_exec_file): ...here.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
 	* exec.c (solist.h): New include.
 	(exec_file_locate_attach): Prefix absolute executable
 	paths with gdb_sysroot if set.
