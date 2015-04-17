@@ -186,16 +186,10 @@ static struct regsets_info xtensa_regsets_info =
     NULL, /* disabled_regsets */
   };
 
-static struct usrregs_info xtensa_usrregs_info =
-  {
-    xtensa_num_regs,
-    xtensa_regmap,
-  };
-
 static struct regs_info regs_info =
   {
     NULL, /* regset_bitmap */
-    &xtensa_usrregs_info,
+    NULL, /* usrregs */
     &xtensa_regsets_info
   };
 

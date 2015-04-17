@@ -1,3 +1,8 @@
+2015-04-17  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* linux-xtensa-low.c (xtensa_usrregs_info): Remove.
+	(regs_info): Replace usrregs pointer with NULL.
+
 2015-04-17  Gary Benson  <gbenson@redhat.com>
 
 	* target.h (struct target_ops) <pid_to_exec_file>: New field.
