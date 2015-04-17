@@ -1,3 +1,15 @@
+2015-04-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Mark static.
+	(fbsd_find_memory_regions): Mark static.
+	(fbsd_nat_add_target): New function.
+	* fbsd-nat.h: Export fbsd_nat_add_target and remove prototypes for
+	fbsd_pid_to_exec_file and fbsd_find_memory_regions.
+	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): Use fbsd_nat_add_target.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Likewise.
+	* ppcfbsd-nat.c (_initialize_ppcfbsd_nat): Likewise.
+	* sparc64fbsd-nat.c (_initialize_sparc64fbsd_nat): Likewise.
+
 2015-04-27  Gary Benson <gbenson@redhat.com>
 
 	* objfiles.c (allocate_objfile): Do not attempt to expand name

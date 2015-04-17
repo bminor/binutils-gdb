@@ -37,7 +37,7 @@
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
-char *
+static char *
 fbsd_pid_to_exec_file (struct target_ops *self, int pid)
 {
   ssize_t len = PATH_MAX;
@@ -71,7 +71,7 @@ fbsd_pid_to_exec_file (struct target_ops *self, int pid)
    calling FUNC for each memory region.  OBFD is passed as the last
    argument to FUNC.  */
 
-int
+static int
 fbsd_find_memory_regions (struct target_ops *self,
 			  find_memory_region_ftype func, void *obfd)
 {
@@ -149,7 +149,7 @@ fbsd_read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
    calling FUNC for each memory region.  OBFD is passed as the last
    argument to FUNC.  */
 
-int
+static int
 fbsd_find_memory_regions (struct target_ops *self,
 			  find_memory_region_ftype func, void *obfd)
 {
@@ -200,3 +200,11 @@ fbsd_find_memory_regions (struct target_ops *self,
   return 0;
 }
 #endif
+
+void
+fbsd_nat_add_target (struct target_ops *t)
+{
+  t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
+  t->to_find_memory_regions = fbsd_find_memory_regions;
+  add_target (t);
+}
