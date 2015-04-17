@@ -1,5 +1,12 @@
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
+	* solist.h (exec_file_find): New declaration.
+	* solib.c (solib_find_1): New function, factored out from...
+	(solib_find): ...here.
+	(exec_file_find): New function.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
 	* gdbcore.h (exec_file_locate_attach): New declaration.
 	* exec.c (exec_file_locate_attach): New function, factored
 	out from...
