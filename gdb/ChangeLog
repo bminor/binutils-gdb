@@ -1,3 +1,8 @@
+2015-04-17  Pedro Alves  <palves@redhat.com>
+
+	* arm-linux-nat.c (arm_linux_can_use_hw_breakpoint): Return zero
+	if HW point of TYPE isn't supported.
+
 2015-04-17  Yao Qi  <yao.qi@linaro.org>
 	    Pedro Alves  <palves@redhat.com>
 

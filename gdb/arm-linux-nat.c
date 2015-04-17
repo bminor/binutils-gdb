@@ -771,12 +771,20 @@ arm_linux_can_use_hw_breakpoint (struct target_ops *self,
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
     {
-      if (cnt + ot > arm_linux_get_hw_watchpoint_count ())
+      int count = arm_linux_get_hw_watchpoint_count ();
+
+      if (count == 0)
+	return 0;
+      else if (cnt + ot > count)
 	return -1;
     }
   else if (type == bp_hardware_breakpoint)
     {
-      if (cnt > arm_linux_get_hw_breakpoint_count ())
+      int count = arm_linux_get_hw_breakpoint_count ();
+
+      if (count == 0)
+	return 0;
+      else if (cnt > count)
 	return -1;
     }
   else
