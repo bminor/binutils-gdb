@@ -2560,7 +2560,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 {
   /* ENTRY_POINT is a possible function descriptor - before
      a call to gdbarch_convert_from_func_ptr_addr.  */
-  CORE_ADDR entry_point, displacement;
+  CORE_ADDR entry_point, exec_displacement;
 
   if (exec_bfd == NULL)
     return 0;
@@ -2575,9 +2575,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
   if (target_auxv_search (&current_target, AT_ENTRY, &entry_point) <= 0)
     return 0;
 
-  displacement = entry_point - bfd_get_start_address (exec_bfd);
+  exec_displacement = entry_point - bfd_get_start_address (exec_bfd);
 
-  /* Verify the DISPLACEMENT candidate complies with the required page
+  /* Verify the EXEC_DISPLACEMENT candidate complies with the required page
      alignment.  It is cheaper than the program headers comparison below.  */
 
   if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
@@ -2589,7 +2589,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	   p_offset % p_align == p_vaddr % p_align
 	 Kernel is free to load the executable with lower alignment.  */
 
-      if ((displacement & (elf->minpagesize - 1)) != 0)
+      if ((exec_displacement & (elf->minpagesize - 1)) != 0)
 	return 0;
     }
 
@@ -2910,11 +2910,11 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
       printf_unfiltered (_("Using PIE (Position Independent Executable) "
 			   "displacement %s for \"%s\".\n"),
-			 paddress (target_gdbarch (), displacement),
+			 paddress (target_gdbarch (), exec_displacement),
 			 bfd_get_filename (exec_bfd));
     }
 
-  *displacementp = displacement;
+  *displacementp = exec_displacement;
   return 1;
 }
 

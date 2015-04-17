@@ -1,3 +1,8 @@
+2015-04-17  Doug Evans  <dje@google.com>
+
+	* solib-svr4.c (svr4_exec_displacement): Rename outer "displacement"
+	to "exec_displacement" to avoid confusion with inner use of the name.
+
 2015-04-17  Pedro Alves  <palves@redhat.com>
 
 	* arm-linux-nat.c (arm_linux_can_use_hw_breakpoint): Return zero
