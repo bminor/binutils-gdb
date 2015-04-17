@@ -1,5 +1,31 @@
 2015-04-27  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c: [PT_LWPINFO] New variable super_wait.
+	[TDP_RFPPWAIT] New variable fbsd_pending_children.
+	[TDP_RFPPWAIT] (fbsd_remember_child): New function.
+	[TDP_RFPPWAIT] (fbsd_is_child_pending): New function.
+	[TDP_RFPPWAIT] (fbsd_fetch_kinfo_proc): New function.
+	[PT_LWPINFO] (fbsd_wait): New function.
+	[TDP_RFPPWAIT] (fbsd_follow_fork): New function.
+	[TDP_RFPPWAIT] (fbsd_insert_fork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_remove_fork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_insert_vfork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_remove_vfork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_enable_follow_fork): New function.
+	[TDP_RFPPWAIT] (fbsd_post_startup_inferior): New function.
+	[TDP_RFPPWAIT] (fbsd_post_attach): New function.
+	(fbsd_nat_add_target) [PT_LWPINFO] Set "to_wait" to
+	"fbsd_wait".
+	[TDP_RFPPWAIT] Set "to_follow_fork" to "fbsd_follow_fork".
+	Set "to_insert_fork_catchpoint" to "fbsd_insert_fork_catchpoint".
+	Set "to_remove_fork_catchpoint" to "fbsd_remove_fork_catchpoint".
+	Set "to_insert_vfork_catchpoint" to "fbsd_insert_vfork_catchpoint".
+	Set "to_remove_vfork_catchpoint" to "fbsd_remove_vfork_catchpoint".
+	Set "to_post_startup_inferior" to "fbsd_post_startup_inferior".
+	Set "to_post_attach" to "fbsd_post_attach".
+
+2015-04-27  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (fbsd_pid_to_exec_file): Mark static.
 	(fbsd_find_memory_regions): Mark static.
 	(fbsd_nat_add_target): New function.
