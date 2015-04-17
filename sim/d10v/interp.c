@@ -722,6 +722,18 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
   return xfer_mem( addr, buffer, size, 0);
 }
 
+static sim_cia
+d10v_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}
+
+static void
+d10v_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  SET_PC (pc);
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -740,6 +752,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   struct hash_entry *h;
   static int init_p = 0;
   char **p;
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
@@ -789,6 +802,15 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 	 file descriptor leaks, etc.  */
       sim_module_uninstall (sd);
       return 0;
+    }
+
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = d10v_pc_get;
+      CPU_PC_STORE (cpu) = d10v_pc_set;
     }
 
   trace_sd = sd;

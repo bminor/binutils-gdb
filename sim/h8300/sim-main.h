@@ -91,6 +91,8 @@ enum h8_typecodes {
 /* Define sim_cia.  */
 typedef unsigned32 sim_cia;
 
+typedef struct _sim_cpu SIM_CPU;
+
 #include "sim-base.h"
 
 /* Structure used to describe addressing */

@@ -633,6 +633,18 @@ sim_info (SIM_DESC sd, int verbose)
 			     (CPU.cycles) ? CPU.cycles+2 : 0);
 }
 
+static sim_cia
+microblaze_pc_get (sim_cpu *cpu)
+{
+  return cpu->microblaze_cpu.spregs[0];
+}
+
+static void
+microblaze_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  cpu->microblaze_cpu.spregs[0] = pc;
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -705,6 +717,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
       int osize = sim_memory_size;
+
+      CPU_PC_FETCH (cpu) = microblaze_pc_get;
+      CPU_PC_STORE (cpu) = microblaze_pc_set;
 
       set_initial_gprs (cpu);
 

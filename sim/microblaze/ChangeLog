@@ -1,3 +1,8 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (microblaze_pc_get, microblaze_pc_set): New functions.
+	(sim_open): Call CPU_PC_FETCH & CPU_PC_STORE for all cpus.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.

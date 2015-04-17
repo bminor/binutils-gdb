@@ -1,3 +1,9 @@
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (arm_pc_get, arm_pc_set): New functions.
+	(sim_open): Declare new local var i.  Call CPU_PC_FETCH &
+	CPU_PC_STORE for all cpus.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.
