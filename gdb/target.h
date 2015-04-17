@@ -1812,14 +1812,17 @@ extern char *target_thread_name (struct thread_info *);
 /* If the *_hw_beakpoint functions have not been defined
    elsewhere use the definitions in the target vector.  */
 
-/* Returns non-zero if we can set a hardware watchpoint of type TYPE.  TYPE is
-   one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint, or
-   bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
-   (including this one?).  OTHERTYPE is who knows what...  */
+/* Returns positive if we can set a hardware watchpoint of type TYPE.
+   Returns negative if the target doesn't have enough hardware debug
+   registers available.  Return zero if hardware watchpoint of type
+   TYPE isn't supported.  TYPE is one of bp_hardware_watchpoint,
+   bp_read_watchpoint, bp_write_watchpoint, or bp_hardware_breakpoint.
+   CNT is the number of such watchpoints used so far, including this
+   one.  OTHERTYPE is who knows what...  */
 
 #define target_can_use_hardware_watchpoint(TYPE,CNT,OTHERTYPE) \
  (*current_target.to_can_use_hw_breakpoint) (&current_target,  \
-					     TYPE, CNT, OTHERTYPE);
+					     TYPE, CNT, OTHERTYPE)
 
 /* Returns the number of debug registers needed to watch the given
    memory region, or zero if not supported.  */
