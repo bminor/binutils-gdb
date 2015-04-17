@@ -106,6 +106,10 @@ hwbreak stop reason
 vFile:fstat:
   Return information about files on the remote system.
 
+qXfer:exec-file:read
+  Return the full absolute name of the file that was executed to
+  create a process running on the remote system.
+
 * The info record command now shows the recording format and the
   branch tracing configuration for the current thread when using
   the btrace record target.

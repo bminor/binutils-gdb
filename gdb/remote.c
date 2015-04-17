@@ -1252,6 +1252,7 @@ enum {
   PACKET_vFile_fstat,
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
+  PACKET_qXfer_exec_file,
   PACKET_qXfer_libraries,
   PACKET_qXfer_libraries_svr4,
   PACKET_qXfer_memory_map,
@@ -3963,6 +3964,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_auxv },
+  { "qXfer:exec-file:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_exec_file },
   { "qXfer:features:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_features },
   { "qXfer:libraries:read", PACKET_DISABLE, remote_supported_packet,
@@ -9035,6 +9038,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 				len, xfered_len,
 	&remote_protocol_packets[PACKET_qXfer_btrace_conf]);
 
+    case TARGET_OBJECT_EXEC_FILE:
+      return remote_read_qxfer (ops, "exec-file", annex, readbuf, offset,
+				len, xfered_len,
+	&remote_protocol_packets[PACKET_qXfer_exec_file]);
+
     default:
       return TARGET_XFER_E_IO;
     }
@@ -11642,6 +11650,29 @@ remote_load (struct target_ops *self, const char *name, int from_tty)
   generic_load (name, from_tty);
 }
 
+/* Accepts an integer PID; returns a string representing a file that
+   can be opened on the remote side to get the symbols for the child
+   process.  Returns NULL if the operation is not supported.  */
+
+static char *
+remote_pid_to_exec_file (struct target_ops *self, int pid)
+{
+  static char *filename = NULL;
+  char annex[9];
+
+  if (packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)
+    return NULL;
+
+  if (filename != NULL)
+    xfree (filename);
+
+  xsnprintf (annex, sizeof (annex), "%x", pid);
+  filename = target_read_stralloc (&current_target,
+				   TARGET_OBJECT_EXEC_FILE, annex);
+
+  return filename;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -11691,6 +11722,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_stop = remote_stop;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
+  remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
   remote_ops.to_log_command = serial_log_command;
   remote_ops.to_get_thread_local_address = remote_get_thread_local_address;
   remote_ops.to_stratum = process_stratum;
@@ -12218,6 +12250,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_auxv],
 			 "qXfer:auxv:read", "read-aux-vector", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_exec_file],
+			 "qXfer:exec-file:read", "pid-to-exec-file", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_features],
 			 "qXfer:features:read", "target-features", 0);

@@ -19791,6 +19791,10 @@ are:
 @tab @code{Z4}
 @tab @code{awatch}
 
+@item @code{pid-to-exec-file}
+@tab @code{qXfer:exec-file:read}
+@tab @code{attach}, @code{run}
+
 @item @code{target-features}
 @tab @code{qXfer:features:read}
 @tab @code{set architecture}
@@ -36016,6 +36020,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:exec-file:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:features:read}
 @tab No
 @tab @samp{-}
@@ -36218,6 +36227,10 @@ packet (@pxref{qXfer btrace read}).
 @item qXfer:btrace-conf:read
 The remote stub understands the @samp{qXfer:btrace-conf:read}
 packet (@pxref{qXfer btrace-conf read}).
+
+@item qXfer:exec-file:read
+The remote stub understands the @samp{qXfer:exec-file:read} packet
+(@pxref{qXfer executable filename read}).
 
 @item qXfer:features:read
 The remote stub understands the @samp{qXfer:features:read} packet
@@ -36531,6 +36544,16 @@ Return a description of the current branch trace configuration.
 @xref{Branch Trace Configuration Format}.
 
 This packet is not probed by default; the remote stub must request it
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:exec-file:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer executable filename read}
+Return the full absolute name of the file that was executed to create
+a process running on the remote system.  The annex specifies the
+numeric process ID of the process to query, encoded as a hexadecimal
+number.
+
+This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 
 @item qXfer:features:read:@var{annex}:@var{offset},@var{length}

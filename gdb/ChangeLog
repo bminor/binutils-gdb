@@ -1,5 +1,18 @@
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
+	* target.h (TARGET_OBJECT_EXEC_FILE): New enum value.
+	* remote.c (PACKET_qXfer_exec_file): Likewise.
+	(remote_protocol_features): Register the
+	"qXfer:exec-file:read" feature.
+	(remote_xfer_partial): Handle TARGET_OBJECT_EXEC_FILE.
+	(remote_pid_to_exec_file): New function.
+	(init_remote_ops): Initialize to_pid_to_exec_file.
+	(_initialize_remote): Register new "set/show remote
+	pid-to-exec-file-packet" command.
+	* NEWS: Announce new qXfer:exec-file:read packet.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
 	* nat/linux-procfs.h (linux_proc_pid_to_exec_file):
 	New declaration.
 	* nat/linux-procfs.c (linux_proc_pid_to_exec_file):

@@ -204,7 +204,12 @@ enum target_object
   /* Branch trace data, in XML format.  */
   TARGET_OBJECT_BTRACE,
   /* Branch trace configuration, in XML format.  */
-  TARGET_OBJECT_BTRACE_CONF
+  TARGET_OBJECT_BTRACE_CONF,
+  /* The pathname of the executable file that was run to create
+     a specified process.  ANNEX should be a string representation
+     of the process ID of the process in question, in hexadecimal
+     format.  */
+  TARGET_OBJECT_EXEC_FILE,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

@@ -1,5 +1,12 @@
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
+	* gdb.texinfo (Remote Configuration): Document the "set/show
+	remote pid-to-exec-file-packet" command.
+	(General Query Packets): Document the qXfer:exec-file:read
+	qSupported features.  Document the qXfer:exec-file:read packet.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
 	* gdb.texinfo (set sysroot): Document that "set sysroot" also
 	applies to executable paths if supplied to GDB as absolute.
 
