@@ -23,8 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 extern unsigned int pc;
 
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 
 struct _sim_cpu {

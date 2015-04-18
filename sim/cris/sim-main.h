@@ -26,9 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define USING_SIM_BASE_H
 
-struct _sim_cpu;
-typedef struct _sim_cpu SIM_CPU;
-
 #include "symcat.h"
 #include "sim-basics.h"
 #include "cgen-types.h"

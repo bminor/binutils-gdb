@@ -23,9 +23,6 @@
 
 #include "sim-basics.h"
 #include "sim-signal.h"
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "msp430-sim.h"
 #include "sim-base.h"
 

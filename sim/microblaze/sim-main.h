@@ -20,9 +20,6 @@
 
 #include "microblaze.h"
 #include "sim-basics.h"
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 
 /* The machine state.

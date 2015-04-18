@@ -16,9 +16,6 @@
 #include "sim-basics.h"
 #include "sim-signal.h"
 #include "sim-fpu.h"
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 
 #include "simops.h"

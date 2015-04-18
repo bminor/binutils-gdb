@@ -25,9 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_HANDLES_LMA 1
 
 #include "sim-basics.h"
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-signal.h"
 #include "sim-base.h"
 

@@ -20,9 +20,6 @@
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 #include "bfd.h"
 

@@ -21,9 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define USING_SIM_BASE_H /* FIXME: quick hack */
 
-struct _sim_cpu; /* FIXME: should be in sim-basics.h */
-typedef struct _sim_cpu SIM_CPU;
-
 /* Set the mask of unsupported traces.  */
 #define WITH_TRACE \
   (~(TRACE_alu | TRACE_decode | TRACE_memory | TRACE_model | TRACE_fpu \

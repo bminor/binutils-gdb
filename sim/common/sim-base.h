@@ -72,6 +72,8 @@ typedef address_word sim_cia;
 #define INVALID_INSTRUCTION_ADDRESS ((address_word)0 - 1)
 #endif
 
+/* TODO: Probably should just delete SIM_CPU.  */
+typedef struct _sim_cpu SIM_CPU;
 typedef struct _sim_cpu sim_cpu;
 
 #include "sim-module.h"

@@ -87,9 +87,6 @@ enum h8_typecodes {
 };
 
 #include "sim-basics.h"
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 
 /* Structure used to describe addressing */

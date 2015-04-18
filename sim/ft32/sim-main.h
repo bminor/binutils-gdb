@@ -25,8 +25,6 @@
 #include "sim-base.h"
 #include "bfd.h"
 
-typedef struct _sim_cpu SIM_CPU;
-
 #include "ft32-sim.h"
 
 struct _sim_cpu {

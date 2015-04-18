@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 typedef long int           word;
 typedef unsigned long int  uword;
 
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 #include "bfd.h"
 

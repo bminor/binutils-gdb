@@ -42,8 +42,6 @@
 #include "itable.h"
 #include "idecode.h"
 
-typedef struct _sim_cpu SIM_CPU;
-
 #define WITH_WATCHPOINTS 1
 
 #define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR)  \
