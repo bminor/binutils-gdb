@@ -24,8 +24,6 @@
 #include "sim-basics.h"
 #include "sim-signal.h"
 
-typedef unsigned32 sim_cia;
-
 typedef struct _sim_cpu SIM_CPU;
 
 #include "bfin-sim.h"

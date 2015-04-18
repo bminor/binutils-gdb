@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-basics.h"
 
-typedef address_word sim_cia;
 typedef long int           word;
 typedef unsigned long int  uword;
 

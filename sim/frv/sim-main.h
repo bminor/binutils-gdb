@@ -40,10 +40,6 @@ typedef struct _sim_cpu SIM_CPU;
 #include "frv-opc.h"
 #include "arch.h"
 
-/* These must be defined before sim-base.h.  */
-typedef USI sim_cia;
-
-void frv_sim_engine_halt_hook (SIM_DESC, SIM_CPU *, sim_cia);
 #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) \
   frv_sim_engine_halt_hook ((SD), (LAST_CPU), (CIA))
 
@@ -55,6 +51,8 @@ void frv_sim_engine_halt_hook (SIM_DESC, SIM_CPU *, sim_cia);
 #include "cache.h"
 #include "registers.h"
 #include "profile.h"
+
+void frv_sim_engine_halt_hook (SIM_DESC, SIM_CPU *, sim_cia);
 
 /* The _sim_cpu struct.  */
 

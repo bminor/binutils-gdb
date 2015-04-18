@@ -28,9 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    information), include ``sim-base.h'':
 
      #include "sim-basics.h"
-     typedef address_word sim_cia;
      /-* If `sim_cia' is not an integral value (e.g. a struct), define
          CIA_ADDR to return the integral value.  *-/
+     /-* typedef struct {...} sim_cia; *-/
      /-* #define CIA_ADDR(cia) (...) *-/
      #include "sim-base.h"
 
@@ -66,6 +66,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    (e.g. for delay slot handling).  */
 #ifndef CIA_ADDR
 #define CIA_ADDR(cia) (cia)
+typedef address_word sim_cia;
 #endif
 #ifndef INVALID_INSTRUCTION_ADDRESS
 #define INVALID_INSTRUCTION_ADDRESS ((address_word)0 - 1)

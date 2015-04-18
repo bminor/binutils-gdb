@@ -42,12 +42,7 @@
 #include "itable.h"
 #include "idecode.h"
 
-typedef instruction_address sim_cia;
 typedef struct _sim_cpu SIM_CPU;
-
-/* FIXME: Perhaps igen should generate access macros for
-   `instruction_address' that we could use.  */
-/*#define CIA_ADDR(cia) ((cia).ip) doesn't work for mn10300*/
 
 #define WITH_WATCHPOINTS 1
 

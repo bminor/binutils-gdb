@@ -1,3 +1,7 @@
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+
 2015-04-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-tx3904cpu.c (deliver_tx3904cpu_interrupt): Change CIA_GET to

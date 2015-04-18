@@ -1,3 +1,9 @@
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-engine.h (CIA_ADDR): Delete.
+	* sim-base.h: Update sim_cia example.
+	[!CIA_ADDR] (sim_cia): New typedef.
+
 2015-04-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* cgen-utils.c (cgen_rtx_error): Change CIA_GET to CPU_PC_GET.

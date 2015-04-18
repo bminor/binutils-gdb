@@ -36,9 +36,6 @@ typedef struct _sim_cpu SIM_CPU;
 #include "cris-opc.h"
 #include "arch.h"
 
-/* These must be defined before sim-base.h.  */
-typedef USI sim_cia;
-
 #define SIM_ENGINE_HALT_HOOK(sd, cpu, cia) \
 do { \
   if (cpu) /* Null if ctrl-c.  */ \

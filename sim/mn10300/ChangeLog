@@ -1,3 +1,8 @@
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+	(SIM_ADDR): Delete comment.
+
 2015-04-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-mn103cpu.c (deliver_mn103cpu_interrupt): Change CIA_GET to

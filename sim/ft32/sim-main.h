@@ -22,9 +22,6 @@
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-
-typedef address_word sim_cia;
-
 #include "sim-base.h"
 #include "bfd.h"
 

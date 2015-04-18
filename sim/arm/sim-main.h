@@ -21,8 +21,6 @@
 
 #include "sim-basics.h"
 
-typedef address_word sim_cia;
-
 typedef struct _sim_cpu SIM_CPU;
 
 #include "sim-base.h"

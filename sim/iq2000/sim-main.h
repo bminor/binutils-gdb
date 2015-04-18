@@ -23,9 +23,6 @@ typedef struct _sim_cpu SIM_CPU;
 /* Pull in IQ2000_{DATA,INSN}_{MASK,VALUE}.  */
 #include "elf/iq2000.h"
 
-/* These must be defined before sim-base.h.  */
-typedef USI sim_cia;
-
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "iq2000-sim.h"

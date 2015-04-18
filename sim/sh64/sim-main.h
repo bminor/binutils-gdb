@@ -21,6 +21,7 @@ typedef struct _sim_cpu SIM_CPU;
 
 /* These must be defined before sim-base.h.  */
 typedef UDI sim_cia;
+#define CIA_ADDR(cia) (cia)
 
 #include "sim-base.h"
 #include "cgen-sim.h"
