@@ -30,17 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cris-desc.h"
 #include "cris-opc.h"
 #include "arch.h"
-
-#define SIM_ENGINE_HALT_HOOK(sd, cpu, cia) \
-do { \
-  if (cpu) /* Null if ctrl-c.  */ \
-    sim_pc_set ((cpu), (cia)); \
-} while (0)
-#define SIM_ENGINE_RESTART_HOOK(sd, cpu, cia) \
-do { \
-  sim_pc_set ((cpu), (cia)); \
-} while (0)
-
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "cris-sim.h"

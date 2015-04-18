@@ -29,17 +29,6 @@
 #include "lm32-desc.h"
 #include "lm32-opc.h"
 #include "arch.h"
-
-#define SIM_ENGINE_HALT_HOOK(sd, cpu, cia) \
-do { \
-  if (cpu) /* null if ctrl-c */ \
-    sim_pc_set ((cpu), (cia)); \
-} while (0)
-#define SIM_ENGINE_RESTART_HOOK(sd, cpu, cia) \
-do { \
-  sim_pc_set ((cpu), (cia)); \
-} while (0)
-
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "lm32-sim.h"
