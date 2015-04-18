@@ -1,7 +1,7 @@
 
 .*: +file format .*
 
-Contents of the .zdebug_info section:
+Contents of the .debug_info section:
 
   Compilation Unit @ offset 0x0:
    Length:        0x5e \(32-bit\)
@@ -56,7 +56,7 @@ Contents of the .zdebug_info section:
     <9b>   DW_AT_const_value : 2
  <1><9c>: Abbrev Number: 0
 
-Contents of the .zdebug_abbrev section:
+Contents of the .debug_abbrev section:
 
   Number TAG \(0x0\)
    1      DW_TAG_compile_unit    \[has children\]
@@ -110,7 +110,7 @@ Contents of the .zdebug_abbrev section:
     DW_AT_const_value  DW_FORM_data1
     DW_AT value: 0     DW_FORM value: 0
 
-Raw dump of debug contents of section .z?debug_line:
+Raw dump of debug contents of section .debug_line:
 
   Offset:                      0x0
   Length:                      62

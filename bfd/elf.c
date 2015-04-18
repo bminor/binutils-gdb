@@ -855,6 +855,31 @@ bfd_elf_is_group_section (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
   return elf_next_in_group (sec) != NULL;
 }
 
+static char *
+convert_debug_to_zdebug (bfd *abfd, const char *name)
+{
+  unsigned int len = strlen (name);
+  char *new_name = bfd_alloc (abfd, len + 2);
+  if (new_name == NULL)
+    return NULL;
+  new_name[0] = '.';
+  new_name[1] = 'z';
+  memcpy (new_name + 2, name + 1, len);
+  return new_name;
+}
+
+static char *
+convert_zdebug_to_debug (bfd *abfd, const char *name)
+{
+  unsigned int len = strlen (name);
+  char *new_name = bfd_alloc (abfd, len);
+  if (new_name == NULL)
+    return NULL;
+  new_name[0] = '.';
+  memcpy (new_name + 1, name + 2, len - 1);
+  return new_name;
+}
+
 /* Make a BFD section from an ELF section.  We store a pointer to the
    BFD section in the bfd_section field of the header.  */
 
@@ -1041,7 +1066,6 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  || (name[1] == 'z' && name[7] == '_')))
     {
       enum { nothing, compress, decompress } action = nothing;
-      char *new_name;
       int compression_header_size;
       bfd_boolean compressed
 	= bfd_is_section_compressed_with_header (abfd, newsect,
@@ -1090,42 +1114,26 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	    }
 	}
 
-      new_name = NULL;
-      if (action == decompress
-	   || (action == compress
-	       && (abfd->flags & BFD_COMPRESS_GABI) != 0))
+      if (abfd->is_linker_input)
 	{
-	  if (name[1] == 'z')
+	  if (name[1] == 'z'
+	      && (action == decompress
+		  || (action == compress
+		      && (abfd->flags & BFD_COMPRESS_GABI) != 0)))
 	    {
-	      unsigned int len = strlen (name);
-
-	      new_name = bfd_alloc (abfd, len);
+	      /* Convert section name from .zdebug_* to .debug_* so
+		 that linker will consider this section as a debug
+		 section.  */
+	      char *new_name = convert_zdebug_to_debug (abfd, name);
 	      if (new_name == NULL)
 		return FALSE;
-	      new_name[0] = '.';
-	      memcpy (new_name + 1, name + 2, len - 1);
+	      bfd_rename_section (abfd, newsect, new_name);
 	    }
 	}
-      else if (action == compress
-	       && newsect->compress_status == COMPRESS_SECTION_DONE)
-	{
-	  /* PR binutils/18087: Compression does not always make a section
-	     smaller.  So only rename the section when compression has
-	     actually taken place.  */
-	  if (name[1] != 'z')
-	    {
-	      unsigned int len = strlen (name);
-
-	      new_name = bfd_alloc (abfd, len + 2);
-	      if (new_name == NULL)
-		return FALSE;
-	      new_name[0] = '.';
-	      new_name[1] = 'z';
-	      memcpy (new_name + 2, name + 1, len);
-	    }
-	}
-      if (new_name != NULL)
-	bfd_rename_section (abfd, newsect, new_name);
+      else
+	/* For objdump, don't rename the section.  For objcopy, delay
+	   section rename to elf_fake_sections.  */
+	newsect->flags |= SEC_ELF_RENAME;
     }
 
   return TRUE;
@@ -2689,7 +2697,7 @@ _bfd_elf_single_rel_hdr (asection *sec)
 static bfd_boolean
 _bfd_elf_init_reloc_shdr (bfd *abfd,
 			  struct bfd_elf_section_reloc_data *reldata,
-			  asection *asect,
+			  const char *sec_name,
 			  bfd_boolean use_rela_p)
 {
   Elf_Internal_Shdr *rel_hdr;
@@ -2702,11 +2710,11 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
   rel_hdr = bfd_zalloc (abfd, amt);
   reldata->hdr = rel_hdr;
 
-  amt = sizeof ".rela" + strlen (asect->name);
+  amt = sizeof ".rela" + strlen (sec_name);
   name = (char *) bfd_alloc (abfd, amt);
   if (name == NULL)
     return FALSE;
-  sprintf (name, "%s%s", use_rela_p ? ".rela" : ".rel", asect->name);
+  sprintf (name, "%s%s", use_rela_p ? ".rela" : ".rel", sec_name);
   rel_hdr->sh_name =
     (unsigned int) _bfd_elf_strtab_add (elf_shstrtab (abfd), name,
 					FALSE);
@@ -2763,33 +2771,66 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 
   this_hdr = &esd->this_hdr;
 
-  /* For linking, compress DWARF debug sections with names: .debug_*.  */
-  if (arg->link_info
-      && (arg->link_info->compress_debug & COMPRESS_DEBUG)
-      && (asect->flags & SEC_DEBUGGING)
-      && name[1] == 'd'
-      && name[6] == '_')
+  if (arg->link_info)
     {
-      /* Set SEC_ELF_COMPRESS to indicate this section should be
-	 compressed.  */
-      asect->flags |= SEC_ELF_COMPRESS;
-
-      if (arg->link_info->compress_debug != COMPRESS_DEBUG_GABI_ZLIB)
+      /* ld: compress DWARF debug sections with names: .debug_*.  */
+      if ((arg->link_info->compress_debug & COMPRESS_DEBUG)
+	  && (asect->flags & SEC_DEBUGGING)
+	  && name[1] == 'd'
+	  && name[6] == '_')
 	{
-	  /* If SHF_COMPRESSED isn't used, rename compressed DWARF
-	     debug section to .zdebug_*.  */
-	  unsigned int len = strlen (name);
-	  char *new_name = bfd_alloc (abfd, len + 2);
+	  /* Set SEC_ELF_COMPRESS to indicate this section should be
+	     compressed.  */
+	  asect->flags |= SEC_ELF_COMPRESS;
+
+	  if (arg->link_info->compress_debug != COMPRESS_DEBUG_GABI_ZLIB)
+	    {
+	      /* If SHF_COMPRESSED isn't used, rename compressed DWARF
+		 debug section to .zdebug_*.  */
+	      char *new_name = convert_debug_to_zdebug (abfd, name);
+	      if (new_name == NULL)
+		{
+		  arg->failed = TRUE;
+		  return;
+		}
+	      bfd_rename_section (abfd, asect, new_name);
+	      name = asect->name;
+	    }
+	}
+    }
+  else if ((asect->flags & SEC_ELF_RENAME))
+    {
+      /* objcopy: rename output DWARF debug section.  */
+      if ((abfd->flags & (BFD_DECOMPRESS | BFD_COMPRESS_GABI)))
+	{
+	  /* When we decompress or compress with SHF_COMPRESSED,
+	     convert section name from .zdebug_* to .debug_* if
+	     needed.  */
+	  if (name[1] == 'z')
+	    {
+	      char *new_name = convert_zdebug_to_debug (abfd, name);
+	      if (new_name == NULL)
+		{
+		  arg->failed = TRUE;
+		  return;
+		}
+	      name = new_name;
+	    }
+	}
+      else if (asect->compress_status == COMPRESS_SECTION_DONE)
+	{
+	  /* PR binutils/18087: Compression does not always make a
+	     section smaller.  So only rename the section when
+	     compression has actually taken place.  If input section
+	     name is .zdebug_*, we should never compress it again.  */
+	  char *new_name = convert_debug_to_zdebug (abfd, name);
 	  if (new_name == NULL)
 	    {
 	      arg->failed = TRUE;
 	      return;
 	    }
-	  new_name[0] = '.';
-	  new_name[1] = 'z';
-	  memcpy (new_name + 2, name + 1, len);
-	  bfd_rename_section (abfd, asect, new_name);
-	  name = asect->name;
+	  BFD_ASSERT (name[1] != 'z');
+	  name = new_name;
 	}
     }
 
@@ -2972,13 +3013,13 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	  && (arg->link_info->relocatable || arg->link_info->emitrelocations))
 	{
 	  if (esd->rel.count && esd->rel.hdr == NULL
-	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, asect, FALSE))
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, name, FALSE))
 	    {
 	      arg->failed = TRUE;
 	      return;
 	    }
 	  if (esd->rela.count && esd->rela.hdr == NULL
-	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, asect, TRUE))
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, name, TRUE))
 	    {
 	      arg->failed = TRUE;
 	      return;
@@ -2987,7 +3028,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       else if (!_bfd_elf_init_reloc_shdr (abfd,
 					  (asect->use_rela_p
 					   ? &esd->rela : &esd->rel),
-					  asect,
+					  name,
 					  asect->use_rela_p))
 	  arg->failed = TRUE;
     }
