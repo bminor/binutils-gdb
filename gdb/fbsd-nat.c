@@ -376,6 +376,16 @@ fbsd_wait (struct target_ops *ops,
 	      continue;
 	    }
 #endif
+
+#ifdef PL_FLAG_EXEC
+	  if (pl.pl_flags & PL_FLAG_EXEC)
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_EXECD;
+	      ourstatus->value.execd_pathname
+		= xstrdup (fbsd_pid_to_exec_file (NULL, pid));
+	      return wptid;
+	    }
+#endif
 	}
       return wptid;
     }
@@ -458,6 +468,23 @@ fbsd_post_attach (struct target_ops *self, int pid)
   fbsd_enable_follow_fork (pid);
 }
 #endif
+
+#ifdef PL_FLAG_EXEC
+/* If the FreeBSD kernel supports PL_FLAG_EXEC, then traced processes
+   will always stop after exec.  */
+
+static int
+fbsd_insert_exec_catchpoint (struct target_ops *self, int pid)
+{
+  return 0;
+}
+
+static int
+fbsd_remove_exec_catchpoint (struct target_ops *self, int pid)
+{
+  return 0;
+}
+#endif
 #endif
 
 void
@@ -476,6 +503,10 @@ fbsd_nat_add_target (struct target_ops *t)
   t->to_remove_vfork_catchpoint = fbsd_remove_vfork_catchpoint;
   t->to_post_startup_inferior = fbsd_post_startup_inferior;
   t->to_post_attach = fbsd_post_attach;
+#endif
+#ifdef PL_FLAG_EXEC
+  t->to_insert_exec_catchpoint = fbsd_insert_exec_catchpoint;
+  t->to_remove_exec_catchpoint = fbsd_remove_exec_catchpoint;
 #endif
 #endif
   add_target (t);

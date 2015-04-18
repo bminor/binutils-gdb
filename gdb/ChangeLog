@@ -1,5 +1,15 @@
 2015-04-27  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c: (fbsd_wait) [PL_FLAG_EXEC]: Report TARGET_WAITKIND_EXECD
+	event if PL_FLAG_EXEC is set.
+	[PL_FLAG_EXEC] (fbsd_insert_exec_catchpoint): New function.
+	[PL_FLAG_EXEC] (fbsd_remove_exec_catchpoint): New function.
+	(fbsd_nat_add_target) [PL_FLAG_EXEC]: Set
+	"to_insert_exec_catchpoint" to "fbsd_insert_exec_catchpoint".
+	Set "to_remove_exec_catchpoint" to "fbsd_remove_exec_catchpoint".
+
+2015-04-27  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c: [PT_LWPINFO] New variable super_wait.
 	[TDP_RFPPWAIT] New variable fbsd_pending_children.
 	[TDP_RFPPWAIT] (fbsd_remember_child): New function.
