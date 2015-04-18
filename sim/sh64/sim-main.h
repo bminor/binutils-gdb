@@ -3,8 +3,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define USING_SIM_BASE_H /* FIXME: quick hack */
-
 /* sim-basics.h includes config.h but cgen-types.h must be included before
    sim-basics.h and cgen-types.h needs config.h.  */
 #include "config.h"

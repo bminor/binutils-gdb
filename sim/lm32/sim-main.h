@@ -23,8 +23,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define USING_SIM_BASE_H	/* FIXME: quick hack */
-
 #include "symcat.h"
 #include "sim-basics.h"
 #include "cgen-types.h"

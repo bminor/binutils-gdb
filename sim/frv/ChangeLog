@@ -1,5 +1,9 @@
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (USING_SIM_BASE_H): Delete.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-main.h (_sim_cpu, SIM_CPU): Delete.
 
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>

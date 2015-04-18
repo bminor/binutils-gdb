@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define USING_SIM_BASE_H
-
 #include "symcat.h"
 #include "sim-basics.h"
 #include "cgen-types.h"
