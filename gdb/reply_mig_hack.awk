@@ -49,7 +49,7 @@ parse_phase == 2 {
   print; next;
 }
 
-parse_phase == 3 && /}/ {
+parse_phase == 3 && /} Request/ {
   # The args structure is over.
   if (num_args > 1)
     parse_phase = 5;
@@ -62,6 +62,9 @@ parse_phase == 3 && /}/ {
 
 parse_phase == 3 && num_args == 0 {
   # The type field for an argument.
+  # This won't be accurate in case of unions being used in the Request struct,
+  # but that doesn't matter, as we'll only be looking at arg_type_code_name[0],
+  # which will not be a union type.
   arg_type_code_name[num_args] = $2;
   sub (/;$/, "", arg_type_code_name[num_args]) # Get rid of the semi-colon
   parse_phase = 4;
@@ -82,6 +85,9 @@ parse_phase == 3 {
 
 parse_phase == 4 {
   # The value field for an argument.
+  # This won't be accurate in case of unions being used in the Request struct,
+  # but that doesn't matter, as we'll only be looking at arg_name[0], which
+  # will not be a union type.
   arg_name[num_args] = $2;
   sub (/;$/, "", arg_name[num_args]) # Get rid of the semi-colon
   num_args++;
