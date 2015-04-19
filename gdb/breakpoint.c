@@ -9057,7 +9057,6 @@ update_dprintf_command_list (struct breakpoint *b)
     struct command_line *printf_cmd_line
       = xmalloc (sizeof (struct command_line));
 
-    printf_cmd_line = xmalloc (sizeof (struct command_line));
     printf_cmd_line->control_type = simple_control;
     printf_cmd_line->body_count = 0;
     printf_cmd_line->body_list = NULL;

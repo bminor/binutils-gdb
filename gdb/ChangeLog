@@ -1,3 +1,8 @@
+2015-04-19  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* breakpoint.c (update_dprintf_command_list): Remove duplicated
+	xmalloc.
+
 2015-04-20  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* reply_mig_hack.awk: Robustify parsing.
