@@ -1,5 +1,9 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/out_of_line_in_inlined: New testcase.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/var_rec_arr: New testcase.
 
 2015-04-30  Yao Qi  <yao.qi@linaro.org>

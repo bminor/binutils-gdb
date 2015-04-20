@@ -11216,17 +11216,28 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
   cleanups = make_cleanup (xfree, offsets);
 
   offsets_end = offsets;
-  child_die = die->child;
-  while (child_die && child_die->tag)
+  for (child_die = die->child;
+       child_die && child_die->tag;
+       child_die = sibling_die (child_die))
     {
+      struct die_info *child_origin_die;
+      struct dwarf2_cu *child_origin_cu;
+
+      /* We are trying to process concrete instance entries:
+	 DW_TAG_GNU_call_site DIEs indeed have a DW_AT_abstract_origin tag, but
+	 it's not relevant to our analysis here. i.e. detecting DIEs that are
+	 present in the abstract instance but not referenced in the concrete
+	 one.  */
+      if (child_die->tag == DW_TAG_GNU_call_site)
+	continue;
+
       /* For each CHILD_DIE, find the corresponding child of
 	 ORIGIN_DIE.  If there is more than one layer of
 	 DW_AT_abstract_origin, follow them all; there shouldn't be,
 	 but GCC versions at least through 4.4 generate this (GCC PR
 	 40573).  */
-      struct die_info *child_origin_die = child_die;
-      struct dwarf2_cu *child_origin_cu = cu;
-
+      child_origin_die = child_die;
+      child_origin_cu = cu;
       while (1)
 	{
 	  attr = dwarf2_attr (child_origin_die, DW_AT_abstract_origin,
@@ -11256,7 +11267,6 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  else
 	    *offsets_end++ = child_origin_die->offset;
 	}
-      child_die = sibling_die (child_die);
     }
   qsort (offsets, offsets_end - offsets, sizeof (*offsets),
 	 unsigned_int_compar);
@@ -11503,6 +11513,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  child_die = sibling_die (child_die);
 	}
     }
+  inherit_abstract_dies (die, cu);
   newobj = pop_context ();
 
   if (local_symbols != NULL || using_directives != NULL)
