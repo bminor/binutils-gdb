@@ -1,3 +1,12 @@
+2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/i386/compressed-1b.d: Don't hardcode offset of
+	.shstrtab section.
+	* binutils-all/i386/compressed-1c.d: Likewise.
+	* binutils-all/readelf.s-64: Likewise.
+	* binutils-all/x86-64/compressed-1b.d: Likewise.
+	* binutils-all/x86-64/compressed-1c.d: Likewise.
+
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* compress.exp: Add tests for

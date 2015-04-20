@@ -14,7 +14,7 @@ Section Headers:
  +0+4 +0+ +AX +0 +0 +4
  +\[ 2\] \.MMIX\.spec_data\.2 PROGBITS +0+ +0+7c
  +0+4 +0+ +0 +0 +4
- +\[ 3\] \.shstrtab +STRTAB +0+ +0+80
+ +\[ 3\] \.shstrtab +STRTAB +0+ +[0-9a-f]+
  +0+33 +0+ +0 +0 +1
  +\[ 4\] \.symtab +SYMTAB +0+ .*
  +0+d8 +0+18 +5 +3 +8

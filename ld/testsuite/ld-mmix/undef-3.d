@@ -11,7 +11,7 @@ Section Headers:
  +0+ +0+ +0 +0 +0
  +\[ 1\] \.text +PROGBITS +0+ +0+78
  +0+4 +0+ +AX +0 +0 +4
- +\[ 2\] \.shstrtab +STRTAB +0+ +0+7c
+ +\[ 2\] \.shstrtab +STRTAB +0+ +[0-9a-f]+
  +0+21 +0+ +0 +0 +1
  +\[ 3\] \.symtab +SYMTAB +0+ .*
  +0+a8 +0+18 +4 +2 +8
