@@ -3479,11 +3479,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
     }
 
   for (secn = 1; secn < section_number; ++secn)
-    if (i_shdrp[secn] == NULL)
-      i_shdrp[secn] = i_shdrp[0];
-    else
-      i_shdrp[secn]->sh_name = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
-						       i_shdrp[secn]->sh_name);
+    i_shdrp[secn]->sh_name = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
+						     i_shdrp[secn]->sh_name);
   return TRUE;
 }
 

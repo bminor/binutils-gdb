@@ -1,5 +1,9 @@
 2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (assign_section_numbers): Always set up sh_name.
+
+2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf.c (assign_file_positions_for_non_load_sections): Iterate
 	sections by pointer.
 	(_bfd_elf_assign_file_positions_for_non_load): Likewise.
