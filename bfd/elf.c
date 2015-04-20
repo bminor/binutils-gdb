@@ -5616,7 +5616,7 @@ static bfd_boolean
 _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 {
   file_ptr off;
-  Elf_Internal_Shdr **shdrpp, **end_shdrpp;
+  Elf_Internal_Shdr **shdrpp, **end_shdrpp, **debug_shdrpp = NULL;
   Elf_Internal_Shdr *shdrp;
   Elf_Internal_Ehdr *i_ehdrp;
   const struct elf_backend_data *bed;
@@ -5677,14 +5677,18 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 						      name, FALSE))
 		    return FALSE;
 
+		  if (debug_shdrpp == NULL)
+		    debug_shdrpp = shdrpp;
+
 		  /* Update section size and contents.  */
 		  shdrp->sh_size = sec->size;
 		  shdrp->contents = sec->contents;
 		  shdrp->bfd_section->contents = NULL;
 		}
-	      off = _bfd_elf_assign_file_position_for_section (shdrp,
-							       off,
-							       TRUE);
+	      else
+		off = _bfd_elf_assign_file_position_for_section (shdrp,
+								 off,
+								 TRUE);
 	    }
 	}
     }
@@ -5695,6 +5699,15 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
   shdrp = &elf_tdata (abfd)->shstrtab_hdr;
   shdrp->sh_size = _bfd_elf_strtab_size (elf_shstrtab (abfd));
   off = _bfd_elf_assign_file_position_for_section (shdrp, off, TRUE);
+
+  /* Place DWARF debug sections after section name section.  */
+  if (debug_shdrpp)
+    for (shdrpp = debug_shdrpp; shdrpp < end_shdrpp; shdrpp++)
+      {
+	shdrp = *shdrpp;
+	if (shdrp->sh_offset == -1)
+	  off = _bfd_elf_assign_file_position_for_section (shdrp, off, TRUE);
+      }
 
   /* Place the section headers.  */
   i_ehdrp = elf_elfheader (abfd);
