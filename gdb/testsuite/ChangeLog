@@ -1,3 +1,7 @@
+2015-04-20  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/attach.exp: Fix three extended remote failures.
+
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
 	* gdb.server/server-exec-info.exp: Inhibit GDB from accessing
