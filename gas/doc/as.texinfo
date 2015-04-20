@@ -4219,7 +4219,7 @@ Some machine configurations provide additional directives.
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Balign::                      @code{.balign @var{abs-expr} , @var{abs-expr}}
-* Bundle directives::           @code{.bundle_align_mode @var{abs-expr}}, @code{.bundle_lock}, @code{.bundle_unlock}
+* Bundle directives::           @code{.bundle_align_mode @var{abs-expr}}, etc
 * Byte::                        @code{.byte @var{expressions}}
 * CFI directives::		@code{.cfi_startproc [simple]}, @code{.cfi_endproc}, etc.
 * Comm::                        @code{.comm @var{symbol} , @var{length} }
@@ -4543,7 +4543,8 @@ the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
 
 @node Bundle directives
-@section @code{.bundle_align_mode @var{abs-expr}}
+@section Bundle directives
+@subsection @code{.bundle_align_mode @var{abs-expr}}
 @cindex @code{bundle_align_mode} directive
 @cindex bundle
 @cindex instruction bundle
@@ -4567,7 +4568,7 @@ end of that bundle is filled with no-op instructions so the instruction
 starts in the next bundle.  As a corollary, it's an error if any single
 instruction's encoding is longer than the bundle size.
 
-@section @code{.bundle_lock} and @code{.bundle_unlock}
+@subsection @code{.bundle_lock} and @code{.bundle_unlock}
 @cindex @code{bundle_lock} directive
 @cindex @code{bundle_unlock} directive
 The @code{.bundle_lock} and directive @code{.bundle_unlock} directives
@@ -4607,7 +4608,8 @@ same number of @code{.bundle_lock} and @code{.bundle_unlock} directives.
 Each expression is assembled into the next byte.
 
 @node CFI directives
-@section @code{.cfi_sections @var{section_list}}
+@section CFI directives
+@subsection @code{.cfi_sections @var{section_list}}
 @cindex @code{cfi_sections} directive
 @code{.cfi_sections} may be used to specify whether CFI directives
 should emit @code{.eh_frame} section and/or @code{.debug_frame} section.
@@ -4616,7 +4618,7 @@ if @var{section_list} is @code{.debug_frame}, @code{.debug_frame} is emitted.
 To emit both use @code{.eh_frame, .debug_frame}.  The default if this
 directive is not used is @code{.cfi_sections .eh_frame}.
 
-@section @code{.cfi_startproc [simple]}
+@subsection @code{.cfi_startproc [simple]}
 @cindex @code{cfi_startproc} directive
 @code{.cfi_startproc} is used at the beginning of each function that
 should have an entry in @code{.eh_frame}. It initializes some internal
@@ -4626,13 +4628,13 @@ data structures. Don't forget to close the function by
 Unless @code{.cfi_startproc} is used along with parameter @code{simple}
 it also emits some architecture dependent initial CFI instructions.
 
-@section @code{.cfi_endproc}
+@subsection @code{.cfi_endproc}
 @cindex @code{cfi_endproc} directive
 @code{.cfi_endproc} is used at the end of a function where it closes its
 unwind entry previously opened by
 @code{.cfi_startproc}, and emits it to @code{.eh_frame}.
 
-@section @code{.cfi_personality @var{encoding} [, @var{exp}]}
+@subsection @code{.cfi_personality @var{encoding} [, @var{exp}]}
 @code{.cfi_personality} defines personality routine and its encoding.
 @var{encoding} must be a constant determining how the personality
 should be encoded.  If it is 255 (@code{DW_EH_PE_omit}), second
@@ -4643,7 +4645,7 @@ can be loaded from, not the personality routine itself.
 The default after @code{.cfi_startproc} is @code{.cfi_personality 0xff},
 no personality routine.
 
-@section @code{.cfi_lsda @var{encoding} [, @var{exp}]}
+@subsection @code{.cfi_lsda @var{encoding} [, @var{exp}]}
 @code{.cfi_lsda} defines LSDA and its encoding.
 @var{encoding} must be a constant determining how the LSDA
 should be encoded.  If it is 255 (@code{DW_EH_PE_omit}), second
@@ -4651,73 +4653,73 @@ argument is not present, otherwise second argument should be a constant
 or a symbol name.  The default after @code{.cfi_startproc} is @code{.cfi_lsda 0xff},
 no LSDA.
 
-@section @code{.cfi_def_cfa @var{register}, @var{offset}}
+@subsection @code{.cfi_def_cfa @var{register}, @var{offset}}
 @code{.cfi_def_cfa} defines a rule for computing CFA as: @i{take
 address from @var{register} and add @var{offset} to it}.
 
-@section @code{.cfi_def_cfa_register @var{register}}
+@subsection @code{.cfi_def_cfa_register @var{register}}
 @code{.cfi_def_cfa_register} modifies a rule for computing CFA. From
 now on @var{register} will be used instead of the old one. Offset
 remains the same.
 
-@section @code{.cfi_def_cfa_offset @var{offset}}
+@subsection @code{.cfi_def_cfa_offset @var{offset}}
 @code{.cfi_def_cfa_offset} modifies a rule for computing CFA. Register
 remains the same, but @var{offset} is new. Note that it is the
 absolute offset that will be added to a defined register to compute
 CFA address.
 
-@section @code{.cfi_adjust_cfa_offset @var{offset}}
+@subsection @code{.cfi_adjust_cfa_offset @var{offset}}
 Same as @code{.cfi_def_cfa_offset} but @var{offset} is a relative
 value that is added/substracted from the previous offset.
 
-@section @code{.cfi_offset @var{register}, @var{offset}}
+@subsection @code{.cfi_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
 CFA.
 
-@section @code{.cfi_rel_offset @var{register}, @var{offset}}
+@subsection @code{.cfi_rel_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
 the current CFA register.  This is transformed to @code{.cfi_offset}
 using the known displacement of the CFA register from the CFA.
 This is often easier to use, because the number will match the
 code it's annotating.
 
-@section @code{.cfi_register @var{register1}, @var{register2}}
+@subsection @code{.cfi_register @var{register1}, @var{register2}}
 Previous value of @var{register1} is saved in register @var{register2}.
 
-@section @code{.cfi_restore @var{register}}
+@subsection @code{.cfi_restore @var{register}}
 @code{.cfi_restore} says that the rule for @var{register} is now the
 same as it was at the beginning of the function, after all initial
 instruction added by @code{.cfi_startproc} were executed.
 
-@section @code{.cfi_undefined @var{register}}
+@subsection @code{.cfi_undefined @var{register}}
 From now on the previous value of @var{register} can't be restored anymore.
 
-@section @code{.cfi_same_value @var{register}}
+@subsection @code{.cfi_same_value @var{register}}
 Current value of @var{register} is the same like in the previous frame,
 i.e. no restoration needed.
 
-@section @code{.cfi_remember_state},
+@subsection @code{.cfi_remember_state},
 First save all current rules for all registers by @code{.cfi_remember_state},
 then totally screw them up by subsequent @code{.cfi_*} directives and when
 everything is hopelessly bad, use @code{.cfi_restore_state} to restore
 the previous saved state.
 
-@section @code{.cfi_return_column @var{register}}
+@subsection @code{.cfi_return_column @var{register}}
 Change return column @var{register}, i.e. the return address is either
 directly in @var{register} or can be accessed by rules for @var{register}.
 
-@section @code{.cfi_signal_frame}
+@subsection @code{.cfi_signal_frame}
 Mark current function as signal trampoline.
 
-@section @code{.cfi_window_save}
+@subsection @code{.cfi_window_save}
 SPARC register window has been saved.
 
-@section @code{.cfi_escape} @var{expression}[, @dots{}]
+@subsection @code{.cfi_escape} @var{expression}[, @dots{}]
 Allows the user to add arbitrary bytes to the unwind info.  One
 might use this to add OS-specific CFI opcodes, or generic CFI
 opcodes that GAS does not yet support.
 
-@section @code{.cfi_val_encoded_addr @var{register}, @var{encoding}, @var{label}}
+@subsection @code{.cfi_val_encoded_addr @var{register}, @var{encoding}, @var{label}}
 The current value of @var{register} is @var{label}.  The value of @var{label}
 will be encoded in the output file according to @var{encoding}; see the
 description of @code{.cfi_personality} for details on this encoding.
@@ -7263,10 +7265,6 @@ subject, see the hardware manufacturer's manual.
 @ifset NS32K
 * NS32K-Dependent::		NS32K Dependent Features
 @end ifset
-@ifset SH
-* SH-Dependent::                Renesas / SuperH SH Dependent Features
-* SH64-Dependent::              SuperH SH64 Dependent Features
-@end ifset
 @ifset PDP11
 * PDP-11-Dependent::            PDP-11 Dependent Features
 @end ifset
@@ -7287,6 +7285,10 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset SCORE
 * SCORE-Dependent::             SCORE Dependent Features
+@end ifset
+@ifset SH
+* SH-Dependent::                Renesas / SuperH SH Dependent Features
+* SH64-Dependent::              SuperH SH64 Dependent Features
 @end ifset
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
