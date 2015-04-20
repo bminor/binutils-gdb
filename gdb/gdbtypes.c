@@ -1748,7 +1748,7 @@ stub_noname_complaint (void)
 /* Worker for is_dynamic_type.  */
 
 static int
-is_dynamic_type_internal (struct type *type)
+is_dynamic_type_internal (struct type *type, int top_level)
 {
   type = check_typedef (type);
 
@@ -1773,7 +1773,7 @@ is_dynamic_type_internal (struct type *type)
 	   of the range type are static.  It allows us to assume that
 	   the subtype of a static range type is also static.  */
 	return (!has_static_range (TYPE_RANGE_DATA (type))
-		|| is_dynamic_type_internal (TYPE_TARGET_TYPE (type)));
+		|| is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0));
       }
 
     case TYPE_CODE_ARRAY:
@@ -1782,9 +1782,9 @@ is_dynamic_type_internal (struct type *type)
 
 	/* The array is dynamic if either the bounds are dynamic,
 	   or the elements it contains have a dynamic contents.  */
-	if (is_dynamic_type_internal (TYPE_INDEX_TYPE (type)))
+	if (is_dynamic_type_internal (TYPE_INDEX_TYPE (type), 0))
 	  return 1;
-	return is_dynamic_type_internal (TYPE_TARGET_TYPE (type));
+	return is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0);
       }
 
     case TYPE_CODE_STRUCT:
@@ -1794,7 +1794,7 @@ is_dynamic_type_internal (struct type *type)
 
 	for (i = 0; i < TYPE_NFIELDS (type); ++i)
 	  if (!field_is_static (&TYPE_FIELD (type, i))
-	      && is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i)))
+	      && is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i), 0))
 	    return 1;
       }
       break;
@@ -1808,11 +1808,11 @@ is_dynamic_type_internal (struct type *type)
 int
 is_dynamic_type (struct type *type)
 {
-  return is_dynamic_type_internal (type);
+  return is_dynamic_type_internal (type, 1);
 }
 
 static struct type *resolve_dynamic_type_internal
-  (struct type *type, struct property_addr_info *addr_stack);
+  (struct type *type, struct property_addr_info *addr_stack, int top_level);
 
 /* Given a dynamic range type (dyn_range_type) and a stack of
    struct property_addr_info elements, return a static version
@@ -1860,7 +1860,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
   static_target_type
     = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (dyn_range_type),
-				     addr_stack);
+				     addr_stack, 0);
   static_range_type = create_range_type (copy_type (dyn_range_type),
 					 static_target_type,
 					 &low_bound, &high_bound);
@@ -1928,7 +1928,7 @@ resolve_dynamic_union (struct type *type,
 	continue;
 
       t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
-					 addr_stack);
+					 addr_stack, 0);
       TYPE_FIELD_TYPE (resolved_type, i) = t;
       if (TYPE_LENGTH (t) > max_len)
 	max_len = TYPE_LENGTH (t);
@@ -1985,7 +1985,7 @@ resolve_dynamic_struct (struct type *type,
 
       TYPE_FIELD_TYPE (resolved_type, i)
 	= resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
-					 &pinfo);
+					 &pinfo, 0);
       gdb_assert (TYPE_FIELD_LOC_KIND (resolved_type, i)
 		  == FIELD_LOC_KIND_BITPOS);
 
@@ -2016,21 +2016,23 @@ resolve_dynamic_struct (struct type *type,
 
 static struct type *
 resolve_dynamic_type_internal (struct type *type,
-			       struct property_addr_info *addr_stack)
+			       struct property_addr_info *addr_stack,
+			       int top_level)
 {
   struct type *real_type = check_typedef (type);
   struct type *resolved_type = type;
   struct dynamic_prop *prop;
   CORE_ADDR value;
 
-  if (!is_dynamic_type_internal (real_type))
+  if (!is_dynamic_type_internal (real_type, top_level))
     return type;
 
   if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {
       resolved_type = copy_type (type);
       TYPE_TARGET_TYPE (resolved_type)
-	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr_stack);
+	= resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr_stack,
+					 top_level);
     }
   else 
     {
@@ -2075,7 +2077,7 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
 {
   struct property_addr_info pinfo = {check_typedef (type), addr, NULL};
 
-  return resolve_dynamic_type_internal (type, &pinfo);
+  return resolve_dynamic_type_internal (type, &pinfo, 1);
 }
 
 /* See gdbtypes.h  */
