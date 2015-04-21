@@ -419,9 +419,13 @@ Symbol::should_add_dynsym_entry(Symbol_table* symtab) const
     }
 
   // If exporting all symbols or building a shared library,
+  // or the symbol should be globally unique (GNU_UNIQUE),
   // and the symbol is defined in a regular object and is
   // externally visible, we need to add it.
-  if ((parameters->options().export_dynamic() || parameters->options().shared())
+  if ((parameters->options().export_dynamic()
+       || parameters->options().shared()
+       || (parameters->options().gnu_unique()
+           && this->binding() == elfcpp::STB_GNU_UNIQUE))
       && !this->is_from_dynobj()
       && !this->is_undefined()
       && this->is_externally_visible())
