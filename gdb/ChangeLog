@@ -1,3 +1,10 @@
+2015-04-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (RL78_SP_ADDR): Define.
+	(opc_reg_to_gdb_regnum): New static function.
+	(rl78_analyze_prologue): Recognize instructions forming slightly
+	more interesting prologues.
+
 2015-04-20  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	Revert:
