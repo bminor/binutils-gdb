@@ -93,6 +93,13 @@ proc gpc_compile {source destfile type options} {
 		append add_flags " -g"
 	    }
 	}
+	if { $i == "class" } {
+	    if [board_info $dest exists pascal_class_flags] {
+		append add_flags " [board_info $dest pascal_class_flags]"
+	    } else {
+		append add_flags " --extended-syntax"
+	    }
+	}
     }
 
     set result [remote_exec host $gpc_compiler "-o $destfile --automake $add_flags $source"]
@@ -122,6 +129,13 @@ proc fpc_compile {source destfile type options} {
 		append add_flags " [board_info $dest debug_flags]"
 	    } else {
 		append add_flags " -g"
+	    }
+	}
+	if { $i == "class" } {
+	    if [board_info $dest exists pascal_class_flags] {
+		append add_flags " [board_info $dest pascal_class_flags]"
+	    } else {
+		append add_flags " -Mobjfpc"
 	    }
 	}
     }

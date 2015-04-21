@@ -1,3 +1,9 @@
+2015-04-21  Pierre Muller  <muller@sourceware.org>
+
+	PR pascal/17815
+	p-exp.y (yylex): Reorganize code to return the matched pattern
+	for a field of this.
+
 2015-04-21  Gary Benson <gbenson@redhat.com>
 
 	* common/fileio.h (fileio_to_host_openflags): New declaration.
