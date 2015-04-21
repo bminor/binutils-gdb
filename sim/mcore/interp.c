@@ -469,7 +469,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 #endif
 
       if (tracing)
-	fprintf (stderr, "%.4x: inst = %.4x ", pc, inst);
+	fprintf (stderr, "%.4lx: inst = %.4x ", pc, inst);
 
       oldpc = pc;
 
@@ -648,7 +648,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    case 0xC:					/* jmp */
 	      pc = cpu.gr[RD];
 	      if (tracing && RD == 15)
-		fprintf (stderr, "Func return, r2 = %x, r3 = %x\n",
+		fprintf (stderr, "Func return, r2 = %lxx, r3 = %lx\n",
 			 cpu.gr[2], cpu.gr[3]);
 	      bonus_cycles++;
 	      needfetch = 1;
@@ -776,7 +776,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  }
 	  bonus_cycles += 2;  /* min. is 3, so add 2, plus ticks above */
 	  if (tracing)
-	    fprintf (stderr, "  mult %x by %x to give %x",
+	    fprintf (stderr, "  mult %lx by %lx to give %lx",
 		     cpu.gr[RD], cpu.gr[RS], cpu.gr[RD] * cpu.gr[RS]);
 	  cpu.gr[RD] = cpu.gr[RD] * cpu.gr[RS];
 	  break;
@@ -859,7 +859,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	case 0x12:					/* mov */
 	  cpu.gr[RD] = cpu.gr[RS];
 	  if (tracing)
-	    fprintf (stderr, "MOV %x into reg %d", cpu.gr[RD], RD);
+	    fprintf (stderr, "MOV %lx into reg %d", cpu.gr[RD], RD);
 	  break;
 
 	case 0x13:					/* bgenr */
@@ -1168,7 +1168,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	case 0x7C: case 0x7D: case 0x7E:		/* lrw */
 	  cpu.gr[RX] =  rlat ((pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
 	  if (tracing)
-	    fprintf (stderr, "LRW of 0x%x from 0x%x to reg %d",
+	    fprintf (stderr, "LRW of 0x%x from 0x%lx to reg %d",
 		     rlat ((pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC),
 		     (pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC, RX);
 	  memops++;
@@ -1176,7 +1176,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	case 0x7F:					/* jsri */
 	  cpu.gr[15] = pc;
 	  if (tracing)
-	    fprintf (stderr, "func call: r2 = %x r3 = %x r4 = %x r5 = %x r6 = %x r7 = %x\n",
+	    fprintf (stderr,
+		     "func call: r2 = %lx r3 = %lx r4 = %lx r5 = %lx r6 = %lx r7 = %lx\n",
 		     cpu.gr[2], cpu.gr[3], cpu.gr[4], cpu.gr[5], cpu.gr[6], cpu.gr[7]);
 	case 0x70:					/* jmpi */
 	  pc = rlat ((pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
@@ -1191,7 +1192,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	case 0x8C: case 0x8D: case 0x8E: case 0x8F:	/* ld */
 	  cpu.gr[RX] = rlat (cpu.gr[RD] + ((inst >> 2) & 0x003C));
 	  if (tracing)
-	    fprintf (stderr, "load reg %d from 0x%x with 0x%x",
+	    fprintf (stderr, "load reg %d from 0x%lx with 0x%lx",
 		     RX,
 		     cpu.gr[RD] + ((inst >> 2) & 0x003C), cpu.gr[RX]);
 	  memops++;
@@ -1202,7 +1203,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	case 0x9C: case 0x9D: case 0x9E: case 0x9F:	/* st */
 	  wlat (cpu.gr[RD] + ((inst >> 2) & 0x003C), cpu.gr[RX]);
 	  if (tracing)
-	    fprintf (stderr, "store reg %d (containing 0x%x) to 0x%x",
+	    fprintf (stderr, "store reg %d (containing 0x%lx) to 0x%lx",
 		     RX, cpu.gr[RX],
 		     cpu.gr[RD] + ((inst >> 2) & 0x003C));
 	  memops++;

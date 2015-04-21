@@ -1,5 +1,9 @@
 2015-04-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_resume): Change %x to %lx for all cpu registers.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (mcore_regset): Delete msize & memory.
 	(issue_messages, mem, wbat, what, wlat, rbat, what, wlat,
 	sim_memory_size, MEM_SIZE_FLOOR, sim_size, init_pointers): Delete.
