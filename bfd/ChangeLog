@@ -1,6 +1,11 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-04-23  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (TOC_BASE_ALIGN): Define.
+	(ppc64_elf_next_toc_section): Align multi-got toc base.
+	(ppc64_elf_set_toc): Likewise initial toc base and .TOC. symbol.
+
 	2015-03-24  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_relocate_section): Report overflow to
 	stubs, even those for undefined weak symbols.  Otherwise, don't

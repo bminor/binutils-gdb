@@ -1,6 +1,9 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-04-23  Alan Modra  <amodra@gmail.com>
+	* emulparams/elf64ppc.sh (GOT): Align.
+
 	2015-04-22  Alan Modra  <amodra@gmail.com>
 	* ldexp.h (struct ldexp_control): Delete dataseg.min_base.  Add
 	data_seg.relro_offset.
