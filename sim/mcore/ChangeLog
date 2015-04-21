@@ -1,5 +1,11 @@
 2015-04-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (WATCHFUNCTIONS): Undef it.
+	(sim_resume): Move WLhash behind WATCHFUNCTIONS.
+	(sim_do_command): Delete.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (NL_TARGET): Define.
 	* interp.c (NUM_ELEM, opened, log_open, log_close, is_opened): Delete.
 	(syscall_read_mem, syscall_write_mem): New functions.

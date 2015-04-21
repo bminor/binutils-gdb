@@ -561,7 +561,8 @@ iu_carry (unsigned long a, unsigned long b, int cin)
   return (x != 0);
 }
 
-#define WATCHFUNCTIONS 1
+/* TODO: Convert to common watchpoints.  */
+#undef WATCHFUNCTIONS
 #ifdef WATCHFUNCTIONS
 
 #define MAXWL 80
@@ -600,7 +601,9 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   int insts;
   int w;
   int cycs;
+#ifdef WATCHFUNCTIONS
   word WLhash;
+#endif
 
   cpu.asregs.exception = step ? SIGTRAP: 0;
   pc = CPU_PC_GET (scpu);
@@ -619,11 +622,13 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   else
     cpu.asregs.active_gregs = & cpu.asregs.gregs[0];
 
+#ifdef WATCHFUNCTIONS
   /* make a hash to speed exec loop, hope it's nonzero */
   WLhash = 0xFFFFFFFF;
 
   for (w = 1; w <= ENDWL; w++)
     WLhash = WLhash & WL[w];
+#endif
 
   do
     {
@@ -1888,76 +1893,4 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
     }
 
   return SIM_RC_OK;
-}
-
-void
-sim_do_command (SIM_DESC sd, const char *cmd)
-{
-  /* Nothing there yet; it's all an error.  */
-
-  if (cmd != NULL)
-    {
-      char ** simargv = buildargv (cmd);
-
-      if (strcmp (simargv[0], "watch") == 0)
-	{
-	  if ((simargv[1] == NULL) || (simargv[2] == NULL))
-	    {
-	      fprintf (stderr, "Error: missing argument to watch cmd.\n");
-	      freeargv (simargv);
-	      return;
-	    }
-
-	  ENDWL++;
-
-	  WL[ENDWL] = strtol (simargv[2], NULL, 0);
-	  WLstr[ENDWL] = strdup (simargv[1]);
-	  fprintf (stderr, "Added %s (%x) to watchlist, #%d\n",WLstr[ENDWL],
-		   WL[ENDWL], ENDWL);
-
-	}
-      else if (strcmp (simargv[0], "dumpmem") == 0)
-	{
-	  unsigned char * p;
-	  FILE * dumpfile;
-
-	  if (simargv[1] == NULL)
-	    fprintf (stderr, "Error: missing argument to dumpmem cmd.\n");
-
-	  fprintf (stderr, "Writing dumpfile %s...",simargv[1]);
-
-	  dumpfile = fopen (simargv[1], "w");
-	  p = cpu.mem;
-	  fwrite (p, cpu.asregs.msize-1, 1, dumpfile);
-	  fclose (dumpfile);
-
-	  fprintf (stderr, "done.\n");
-	}
-      else if (strcmp (simargv[0], "clearstats") == 0)
-	{
-	  cpu.asregs.cycles = 0;
-	  cpu.asregs.insts = 0;
-	  cpu.asregs.stalls = 0;
-	  ENDWL = 0;
-	}
-      else if (strcmp (simargv[0], "verbose") == 0)
-	{
-	  issue_messages = 2;
-	}
-      else
-	{
-	  fprintf (stderr,"Error: \"%s\" is not a valid M.CORE simulator command.\n",
-		   cmd);
-	}
-
-      freeargv (simargv);
-    }
-  else
-    {
-      fprintf (stderr, "M.CORE sim commands: \n");
-      fprintf (stderr, "  watch <funcname> <addr>\n");
-      fprintf (stderr, "  dumpmem <filename>\n");
-      fprintf (stderr, "  clearstats\n");
-      fprintf (stderr, "  verbose\n");
-    }
 }
