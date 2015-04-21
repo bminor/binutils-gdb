@@ -17,9 +17,9 @@ Symbol table '\.dynsym' contains 5 entries:
 .*
      0: .*
      1: 0+00000000     0 FUNC    GLOBAL DEFAULT  UND my_func
-     2: 0+10010390     0 NOTYPE  GLOBAL DEFAULT   11 __bss_start
-     3: 0+10010390     0 NOTYPE  GLOBAL DEFAULT   11 _edata
-     4: 0+10010390     0 NOTYPE  GLOBAL DEFAULT   11 _end
+     2: 0+10010408     0 NOTYPE  GLOBAL DEFAULT   11 __bss_start
+     3: 0+10010408     0 NOTYPE  GLOBAL DEFAULT   11 _edata
+     4: 0+10010408     0 NOTYPE  GLOBAL DEFAULT   11 _end
 
 Symbol table '\.symtab' contains 19 entries:
    Num:    Value          Size Type    Bind   Vis      Ndx Name
@@ -34,11 +34,11 @@ Symbol table '\.symtab' contains 19 entries:
      8: 0+10010268     0 SECTION LOCAL  DEFAULT    8 
      9: 0+10010368     0 SECTION LOCAL  DEFAULT    9 
     10: 0+10010370     0 SECTION LOCAL  DEFAULT   10 
-    11: 0+10010388     0 SECTION LOCAL  DEFAULT   11 
+    11: 0+10010400     0 SECTION LOCAL  DEFAULT   11 
     12: 0+10010268     0 OBJECT  LOCAL  DEFAULT    8 _DYNAMIC
     13: 0+10010368     0 NOTYPE  GLOBAL DEFAULT    9 func_tab
     14: 0+00000000     0 FUNC    GLOBAL DEFAULT  UND my_func
     15: 0+10010370     0 FUNC    GLOBAL DEFAULT   10 _start
-    16: 0+10010390     0 NOTYPE  GLOBAL DEFAULT   11 __bss_start
-    17: 0+10010390     0 NOTYPE  GLOBAL DEFAULT   11 _edata
-    18: 0+10010390     0 NOTYPE  GLOBAL DEFAULT   11 _end
+    16: 0+10010408     0 NOTYPE  GLOBAL DEFAULT   11 __bss_start
+    17: 0+10010408     0 NOTYPE  GLOBAL DEFAULT   11 _edata
+    18: 0+10010408     0 NOTYPE  GLOBAL DEFAULT   11 _end

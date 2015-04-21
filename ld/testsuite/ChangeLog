@@ -1,3 +1,35 @@
+2015-07-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2015-04-23  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/ambiguousv1.d: Update for aligned .got.
+	* ld-powerpc/ambiguousv1b.d: Likewise.
+	* ld-powerpc/ambiguousv2.d: Likewise.
+	* ld-powerpc/defsym.d: Likewise.
+	* ld-powerpc/elfv2-2exe.d: Likewise.
+	* ld-powerpc/elfv2exe.d: Likewise.
+	* ld-powerpc/elfv2so.d: Likewise.
+	* ld-powerpc/relbrlt.d: Likewise.
+	* ld-powerpc/tls.g: Likewise.
+	* ld-powerpc/tlsexe.d: Likewise.
+	* ld-powerpc/tlsexe.g: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.d: Likewise.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.d: Likewise.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstoc.g: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+	* ld-powerpc/tlstocso.g: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+	* ld-powerpc/tocopt.d: Likewise.
+	* ld-powerpc/tocopt2.d: Likewise.
+	* ld-powerpc/tocopt3.d: Likewise.
+	* ld-powerpc/tocopt4.d: Likewise.
+	* ld-powerpc/tocopt5.d: Likewise.
+
 2015-06-23  Jiong Wang  <jiong.wang@arm.com>
 
 	Apply from master:
