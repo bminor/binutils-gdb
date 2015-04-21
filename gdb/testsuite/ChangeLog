@@ -1,5 +1,9 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/out_of_line_in_inlined.exp: Add run and "bt" tests.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/out_of_line_in_inlined: New testcase.
 
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>

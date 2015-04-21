@@ -29,3 +29,15 @@ clean_restart ${testfile}
 setup_xfail "*-*-*"
 gdb_test "break foo_o224_021.child1.child2" \
          "Breakpoint \[0-9\]+ at.*: file .*foo_o224_021.adb, line \[0-9\]+."
+
+gdb_run_cmd
+setup_xfail "*-*-*"
+gdb_test "" \
+         "Breakpoint $decimal, foo_o224_021\\.child1\\.child2 \\(s=\\.\\.\\.\\).*"
+
+set opt_addr_in "($hex in)?"
+setup_xfail "*-*-*"
+gdb_test "bt" \
+    [multi_line "#0 +$opt_addr_in +foo_o224_021\\.child1\\.child2 \\(s=\\.\\.\\.\\).*" \
+                "#1 +$opt_addr_in +foo_o224_021\\.child1 \\(\\).*" \
+                "#2 +$opt_addr_in +foo_o224_021 \\(\\).*" ]
