@@ -113,8 +113,6 @@ struct mcore_regset
   int		  cycles;
   int		  insts;
   int		  exception;
-  unsigned long   msize;
-  unsigned char * memory;
   word *          active_gregs;
 };
 
@@ -128,8 +126,6 @@ union
 #define	NUM_MCORE_REGS	(16 + 16 + LAST_VALID_CREG + 1)
 
 static int memcycles = 1;
-
-static int issue_messages = 0;
 
 #define gr	asregs.active_gregs
 #define cr	asregs.cregs
@@ -146,7 +142,6 @@ static int issue_messages = 0;
 #define	ss4	asregs.cregs[10]
 #define	gcr	asregs.cregs[11]
 #define	gsr	asregs.cregs[12]
-#define mem	asregs.memory
 
 /* maniuplate the carry bit */
 #define	C_ON()	 (cpu.sr & 1)
@@ -165,242 +160,18 @@ static int issue_messages = 0;
 #define	PARM4	5
 #define	RET1	2		/* register for return values. */
 
-static void
-wbat (word x, word v)
-{
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "byte write to 0x%x outside memory range\n", x);
-
-      cpu.asregs.exception = SIGSEGV;
-    }
-  else
-    {
-      unsigned char *p = cpu.mem + x;
-      p[0] = v;
-    }
-}
-
-static void
-wlat (word x, word v)
-{
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "word write to 0x%x outside memory range\n", x);
-
-      cpu.asregs.exception = SIGSEGV;
-    }
-  else
-    {
-      if ((x & 3) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "word write to unaligned memory address: 0x%x\n", x);
-
-	  cpu.asregs.exception = SIGBUS;
-	}
-      else if (! target_big_endian)
-	{
-	  unsigned char * p = cpu.mem + x;
-	  p[3] = v >> 24;
-	  p[2] = v >> 16;
-	  p[1] = v >> 8;
-	  p[0] = v;
-	}
-      else
-	{
-	  unsigned char * p = cpu.mem + x;
-	  p[0] = v >> 24;
-	  p[1] = v >> 16;
-	  p[2] = v >> 8;
-	  p[3] = v;
-	}
-    }
-}
-
-static void
-what (word x, word v)
-{
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "short write to 0x%x outside memory range\n", x);
-
-      cpu.asregs.exception = SIGSEGV;
-    }
-  else
-    {
-      if ((x & 1) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "short write to unaligned memory address: 0x%x\n",
-		     x);
-
-	  cpu.asregs.exception = SIGBUS;
-	}
-      else if (! target_big_endian)
-	{
-	  unsigned char * p = cpu.mem + x;
-	  p[1] = v >> 8;
-	  p[0] = v;
-	}
-      else
-	{
-	  unsigned char * p = cpu.mem + x;
-	  p[0] = v >> 8;
-	  p[1] = v;
-	}
-    }
-}
-
-/* Read functions.  */
-static int
-rbat (word x)
-{
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "byte read from 0x%x outside memory range\n", x);
-
-      cpu.asregs.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      unsigned char * p = cpu.mem + x;
-      return p[0];
-    }
-}
-
-static int
-rlat (word x)
-{
-  if (((uword) x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "word read from 0x%x outside memory range\n", x);
-
-      cpu.asregs.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      if ((x & 3) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "word read from unaligned address: 0x%x\n", x);
-
-	  cpu.asregs.exception = SIGBUS;
-	  return 0;
-	}
-      else if (! target_big_endian)
-	{
-	  unsigned char * p = cpu.mem + x;
-	  return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
-	}
-      else
-	{
-	  unsigned char * p = cpu.mem + x;
-	  return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-	}
-    }
-}
-
-static int
-rhat (word x)
-{
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "short read from 0x%x outside memory range\n", x);
-
-      cpu.asregs.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      if ((x & 1) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "short read from unaligned address: 0x%x\n", x);
-
-	  cpu.asregs.exception = SIGBUS;
-	  return 0;
-	}
-      else if (! target_big_endian)
-	{
-	  unsigned char * p = cpu.mem + x;
-	  return (p[1] << 8) | p[0];
-	}
-      else
-	{
-	  unsigned char * p = cpu.mem + x;
-	  return (p[0] << 8) | p[1];
-	}
-    }
-}
-
-
 /* Default to a 8 Mbyte (== 2^23) memory space.  */
-/* TODO: Delete all this custom memory logic and move to common sim helpers.  */
-static int sim_memory_size = 23;
-
-#define	MEM_SIZE_FLOOR	64
-static void
-sim_size (int power)
-{
-  sim_memory_size = power;
-  cpu.asregs.msize = 1 << sim_memory_size;
-
-  if (cpu.mem)
-    free (cpu.mem);
-
-  /* Watch out for the '0 count' problem. There's probably a better
-     way.. e.g., why do we use 64 here?  */
-  if (cpu.asregs.msize < 64)	/* Ensure a boundary.  */
-    cpu.mem = (unsigned char *) calloc (64, (64 + cpu.asregs.msize) / 64);
-  else
-    cpu.mem = (unsigned char *) calloc (64, cpu.asregs.msize / 64);
-
-  if (!cpu.mem)
-    {
-      if (issue_messages)
-	fprintf (stderr,
-		 "Not enough VM for simulation of %lu bytes of RAM\n",
-		 cpu.asregs.msize);
-
-      cpu.asregs.msize = 1;
-      cpu.mem = (unsigned char *) calloc (1, 1);
-    }
-}
-
-static void
-init_pointers (void)
-{
-  if (cpu.asregs.msize != (1 << sim_memory_size))
-    sim_size (sim_memory_size);
-}
+#define DEFAULT_MEMORY_SIZE 0x800000
 
 static void
 set_initial_gprs (SIM_CPU *scpu)
 {
   int i;
   long space;
-  unsigned long memsize;
-
-  init_pointers ();
 
   /* Set up machine just out of reset.  */
   CPU_PC_SET (scpu, 0);
   cpu.sr = 0;
-
-  memsize = cpu.asregs.msize / (1024 * 1024);
-
-  if (issue_messages > 1)
-    fprintf (stderr, "Simulated memory of %lu Mbytes (0x0 .. 0x%08lx)\n",
-	     memsize, cpu.asregs.msize - 1);
 
   /* Clean out the GPRs and alternate GPRs.  */
   for (i = 0; i < 16; i++)
@@ -416,7 +187,7 @@ set_initial_gprs (SIM_CPU *scpu)
     cpu.asregs.active_gregs = &cpu.asregs.gregs[0];
 
   /* ABI specifies initial values for these registers.  */
-  cpu.gr[0] = cpu.asregs.msize - 4;
+  cpu.gr[0] = DEFAULT_MEMORY_SIZE - 4;
 
   /* dac fix, the stack address must be 8-byte aligned! */
   cpu.gr[0] = cpu.gr[0] - cpu.gr[0] % 8;
@@ -432,16 +203,20 @@ static int
 syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
 		  unsigned long taddr, char *buf, int bytes)
 {
-  memcpy (buf, cpu.mem + taddr, bytes);
-  return bytes;
+  SIM_DESC sd = (SIM_DESC) sc->p1;
+  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
+
+  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
 }
 
 static int
 syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
 		  unsigned long taddr, const char *buf, int bytes)
 {
-  memcpy (cpu.mem + taddr, buf, bytes);
-  return bytes;
+  SIM_DESC sd = (SIM_DESC) sc->p1;
+  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
+
+  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
 }
 
 /* Simulate a monitor trap.  */
@@ -489,7 +264,7 @@ process_stub (SIM_DESC sd, int what)
       break;
 
     default:
-      if (issue_messages)
+      if (STATE_VERBOSE_P (sd))
 	fprintf (stderr, "Unhandled stub opcode: %d\n", what);
       break;
     }
@@ -505,31 +280,12 @@ util (SIM_DESC sd, unsigned what)
       break;
 
     case 1:	/* printf */
-      {
-	unsigned long a[6];
-	unsigned char *s;
-	int i;
-
-	a[0] = (unsigned long)(cpu.mem + cpu.gr[PARM1]);
-
-	for (s = (unsigned char *)a[0], i = 1 ; *s && i < 6 ; s++)
-	  {
-	    if (*s == '%')
-	      {
-		if (*++s == 's')
-		  a[i] = (unsigned long)(cpu.mem + cpu.gr[PARM1+i]);
-		else
-		  a[i] = cpu.gr[i+PARM1];
-		i++;
-	      }
-	  }
-
-	cpu.gr[RET1] = printf ((char *)a[0], a[1], a[2], a[3], a[4], a[5]);
-      }
+      if (STATE_VERBOSE_P (sd))
+	fprintf (stderr, "WARNING: printf unimplemented\n");
       break;
 
     case 2:	/* scanf */
-      if (issue_messages)
+      if (STATE_VERBOSE_P (sd))
 	fprintf (stderr, "WARNING: scanf unimplemented\n");
       break;
 
@@ -542,7 +298,7 @@ util (SIM_DESC sd, unsigned what)
       break;
 
     default:
-      if (issue_messages)
+      if (STATE_VERBOSE_P (sd))
 	fprintf (stderr, "Unhandled util code: %x\n", what);
       break;
     }
@@ -585,6 +341,13 @@ int WLW;
 #define RX	((inst >> 8) & 0xF)
 #define IMM5	((inst >> 4) & 0x1F)
 #define IMM4	((inst) & 0xF)
+
+#define rbat(X)	sim_core_read_1 (scpu, 0, read_map, X)
+#define rhat(X)	sim_core_read_2 (scpu, 0, read_map, X)
+#define rlat(X)	sim_core_read_4 (scpu, 0, read_map, X)
+#define wbat(X, D) sim_core_write_1 (scpu, 0, write_map, X, D)
+#define what(X, D) sim_core_write_2 (scpu, 0, write_map, X, D)
+#define wlat(X, D) sim_core_write_4 (scpu, 0, write_map, X, D)
 
 static int tracing = 0;
 
@@ -751,17 +514,17 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		  break;
 
 		case 0x4:				/* stop */
-		  if (issue_messages)
+		  if (STATE_VERBOSE_P (sd))
 		    fprintf (stderr, "WARNING: stop unimplemented\n");
 		  break;
 
 		case 0x5:				/* wait */
-		  if (issue_messages)
+		  if (STATE_VERBOSE_P (sd))
 		    fprintf (stderr, "WARNING: wait unimplemented\n");
 		  break;
 
 		case 0x6:				/* doze */
-		  if (issue_messages)
+		  if (STATE_VERBOSE_P (sd))
 		    fprintf (stderr, "WARNING: doze unimplemented\n");
 		  break;
 
@@ -1522,19 +1285,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
       if (needfetch)
 	{
-	  /* Do not let him fetch from a bad address! */
-	  if (((uword)pc) >= cpu.asregs.msize)
-	    {
-	      if (issue_messages)
-		fprintf (stderr, "PC loaded at 0x%x is outside of available memory! (0x%x)\n", oldpc, pc);
-
-	      cpu.asregs.exception = SIGSEGV;
-	    }
-	  else
-	    {
-	      ibuf = rlat (pc & 0xFFFFFFFC);
-	      needfetch = 0;
-	    }
+	  ibuf = rlat (pc & 0xFFFFFFFC);
+	  needfetch = 0;
 	}
     }
   while (!cpu.asregs.exception);
@@ -1547,35 +1299,9 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   cpu.asregs.cycles += memops * memcycles;	/* and memop cycle delays */
 }
 
-
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
-{
-  int i;
-  init_pointers ();
-
-  memcpy (& cpu.mem[addr], buffer, size);
-
-  return size;
-}
-
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
-{
-  int i;
-  init_pointers ();
-
-  memcpy (buffer, & cpu.mem[addr], size);
-
-  return size;
-}
-
-
 int
 sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
-  init_pointers ();
-
   if (rn < NUM_MCORE_REGS && rn >= 0)
     {
       if (length == 4)
@@ -1596,8 +1322,6 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 int
 sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
-  init_pointers ();
-
   if (rn < NUM_MCORE_REGS && rn >= 0)
     {
       if (length == 4)
@@ -1695,8 +1419,8 @@ free_state (SIM_DESC sd)
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
-  int i, osize;
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
@@ -1747,15 +1471,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
       return 0;
     }
 
-  osize = sim_memory_size;
-
-  if (kind == SIM_OPEN_STANDALONE)
-    issue_messages = 1;
-
-  /* Discard and reacquire memory -- start with a clean slate.  */
-  sim_size (1);		/* small */
-  sim_size (osize);	/* and back again */
-
   /* CPU specific initialization.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
@@ -1766,6 +1481,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 
       set_initial_gprs (cpu);	/* Reset the GPR registers.  */
     }
+
+  /* Default to a 8 Mbyte (== 2^23) memory space.  */
+  sim_do_commandf (sd, "memory-size %#x", DEFAULT_MEMORY_SIZE);
 
   return sd;
 }
@@ -1791,12 +1509,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 
 
   /* Set the initial register set.  */
-  l = issue_messages;
-  issue_messages = 0;
   set_initial_gprs (scpu);
-  issue_messages = l;
 
-  hi_stack = cpu.asregs.msize - 4;
+  hi_stack = DEFAULT_MEMORY_SIZE - 4;
   CPU_PC_SET (scpu, bfd_get_start_address (prog_bfd));
 
   /* Calculate the argument and environment strings.  */
@@ -1848,7 +1563,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 
 	  /* Copy the string.  */
 	  l = strlen (* avp) + 1;
-	  strcpy ((char *)(cpu.mem + strings), *avp);
+	  sim_core_write_buffer (sd, scpu, write_map, *avp, strings, l);
 
 	  /* Bump the pointers.  */
 	  avp++;
@@ -1879,7 +1594,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
 
 	  /* Copy the string.  */
 	  l = strlen (* avp) + 1;
-	  strcpy ((char *)(cpu.mem + strings), *avp);
+	  sim_core_write_buffer (sd, scpu, write_map, *avp, strings, l);
 
 	  /* Bump the pointers.  */
 	  avp++;
