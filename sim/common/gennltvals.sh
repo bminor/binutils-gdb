@@ -68,6 +68,10 @@ dir=libgloss target=m32r
 $shell ${srccom}/gentvals.sh $target sys ${newlibroot}/$dir \
 	"syscall.h" 'SYS_[_[:alnum:]]*' "${cpp}"
 
+dir=libgloss/mcore target=mcore
+$shell ${srccom}/gentvals.sh $target sys ${newlibroot}/$dir \
+	"syscall.h" 'SYS_[_[:alnum:]]*' "${cpp}"
+
 dir=libgloss target=mn10200
 $shell ${srccom}/gentvals.sh $target sys ${newlibroot}/$dir \
 	"syscall.h" 'SYS_[_[:alnum:]]*' "${cpp}"

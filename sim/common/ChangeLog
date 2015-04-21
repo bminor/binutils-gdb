@@ -1,5 +1,10 @@
 2015-04-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* gennltvals.sh: Add mcore support.
+	* nltvals.def: Regenerate.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen.sh: Add +x permissions.
 	* genmloop.sh: Likewise.
 	* gentvals.sh: Likewise.

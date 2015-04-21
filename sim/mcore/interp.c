@@ -33,10 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-base.h"
 #include "sim-options.h"
 
-#ifndef NUM_ELEM
-#define NUM_ELEM(A) (sizeof (A) / sizeof (A)[0])
-#endif
-
 #define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
 
 
@@ -430,158 +426,49 @@ set_initial_gprs (SIM_CPU *scpu)
   cpu.gr[PARM4] = cpu.gr[0];
 }
 
-/* Functions so that trapped open/close don't interfere with the
-   parent's functions.  We say that we can't close the descriptors
-   that we didn't open.  exit() and cleanup() get in trouble here,
-   to some extent.  That's the price of emulation.  */
+/* Read/write functions for system call interface.  */
 
-unsigned char opened[100];
-
-static void
-log_open (int fd)
+static int
+syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
+		  unsigned long taddr, char *buf, int bytes)
 {
-  if (fd < 0 || fd > NUM_ELEM (opened))
-    return;
-
-  opened[fd] = 1;
-}
-
-static void
-log_close (int fd)
-{
-  if (fd < 0 || fd > NUM_ELEM (opened))
-    return;
-
-  opened[fd] = 0;
+  memcpy (buf, cpu.mem + taddr, bytes);
+  return bytes;
 }
 
 static int
-is_opened (int fd)
+syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
+		  unsigned long taddr, const char *buf, int bytes)
 {
-  if (fd < 0 || fd > NUM_ELEM (opened))
-    return 0;
-
-  return opened[fd];
+  memcpy (cpu.mem + taddr, buf, bytes);
+  return bytes;
 }
+
+/* Simulate a monitor trap.  */
 
 static void
 handle_trap1 (SIM_DESC sd)
 {
-  unsigned long a[3];
-  host_callback *callback = STATE_CALLBACK (sd);
+  host_callback *cb = STATE_CALLBACK (sd);
+  CB_SYSCALL sc;
 
-  switch ((unsigned long) (cpu.gr [TRAPCODE]))
-    {
-    case 3:
-      a[0] = (unsigned long) (cpu.gr[PARM1]);
-      a[1] = (unsigned long) (cpu.mem + cpu.gr[PARM2]);
-      a[2] = (unsigned long) (cpu.gr[PARM3]);
-      cpu.gr[RET1] = callback->read (callback, a[0], (char *) a[1], a[2]);
-      break;
+  CB_SYSCALL_INIT (&sc);
 
-    case 4:
-      a[0] = (unsigned long) (cpu.gr[PARM1]);
-      a[1] = (unsigned long) (cpu.mem + cpu.gr[PARM2]);
-      a[2] = (unsigned long) (cpu.gr[PARM3]);
-      cpu.gr[RET1] = (int)callback->write (callback, a[0], (char *) a[1], a[2]);
-      break;
+  sc.func = cpu.gr[TRAPCODE];
+  sc.arg1 = cpu.gr[PARM1];
+  sc.arg2 = cpu.gr[PARM2];
+  sc.arg3 = cpu.gr[PARM3];
+  sc.arg4 = cpu.gr[PARM4];
 
-    case 5:
-      a[0] = (unsigned long) (cpu.mem + cpu.gr[PARM1]);
-      a[1] = (unsigned long) (cpu.gr[PARM2]);
-      /* a[2] = (unsigned long) (cpu.gr[PARM3]); */
-      cpu.gr[RET1] = callback->open (callback, (char *) a[0], a[1]);
-      log_open (cpu.gr[RET1]);
-      break;
+  sc.p1 = (PTR) sd;
+  sc.p2 = (PTR) STATE_CPU (sd, 0);
+  sc.read_mem = syscall_read_mem;
+  sc.write_mem = syscall_write_mem;
 
-    case 6:
-      a[0] = (unsigned long) (cpu.gr[PARM1]);
-      /* Watch out for debugger's files. */
-      if (is_opened (a[0]))
-	{
-	  log_close (a[0]);
-	  cpu.gr[RET1] = callback->close (callback, a[0]);
-	}
-      else
-	{
-	  /* Don't let him close it.  */
-	  cpu.gr[RET1] = (-1);
-	}
-      break;
+  cb_syscall (cb, &sc);
 
-    case 9:
-      a[0] = (unsigned long) (cpu.mem + cpu.gr[PARM1]);
-      a[1] = (unsigned long) (cpu.mem + cpu.gr[PARM2]);
-      cpu.gr[RET1] = link ((char *) a[0], (char *) a[1]);
-      break;
-
-    case 10:
-      a[0] = (unsigned long) (cpu.mem + cpu.gr[PARM1]);
-      cpu.gr[RET1] = callback->unlink (callback, (char *) a[0]);
-      break;
-
-    case 13:
-      /* handle time(0) vs time(&var) */
-      a[0] = (unsigned long) (cpu.gr[PARM1]);
-      if (a[0])
-	a[0] += (unsigned long) cpu.mem;
-      cpu.gr[RET1] = callback->time (callback, (time_t *) a[0]);
-      break;
-
-    case 19:
-      a[0] = (unsigned long) (cpu.gr[PARM1]);
-      a[1] = (unsigned long) (cpu.gr[PARM2]);
-      a[2] = (unsigned long) (cpu.gr[PARM3]);
-      cpu.gr[RET1] = callback->lseek (callback, a[0], a[1], a[2]);
-      break;
-
-    case 33:
-      a[0] = (unsigned long) (cpu.mem + cpu.gr[PARM1]);
-      a[1] = (unsigned long) (cpu.gr[PARM2]);
-      cpu.gr[RET1] = access ((char *) a[0], a[1]);
-      break;
-
-    case 43:
-      a[0] = (unsigned long) (cpu.mem + cpu.gr[PARM1]);
-#if 0
-      cpu.gr[RET1] = times ((char *)a[0]);
-#else
-      {
-	/* Give him simulated cycles for utime
-	   and an instruction count for stime. */
-	struct tms
-	{
-	  time_t tms_utime;
-	  time_t tms_stime;
-	  time_t tms_cutime;
-	  time_t tms_cstime;
-	} t;
-
-	t.tms_utime = cpu.asregs.cycles;
-	t.tms_stime = cpu.asregs.insts;
-	t.tms_cutime = t.tms_utime;
-	t.tms_cstime = t.tms_stime;
-
-	memcpy ((struct tms *)(a[0]), &t, sizeof (t));
-
-	cpu.gr[RET1] = cpu.asregs.cycles;
-      }
-#endif
-      break;
-
-    case 69:
-      /* Historically this was sbrk(), but no one used it, and the
-	implementation didn't actually work, so it's a stub now.  */
-      a[0] = (unsigned long) (cpu.gr[PARM1]);
-      cpu.gr[RET1] = -1;
-      break;
-
-    default:
-      if (issue_messages)
-	fprintf (stderr, "WARNING: sys call %d unimplemented\n",
-		 cpu.gr[TRAPCODE]);
-      break;
-    }
+  /* XXX: We don't pass back the actual errno value.  */
+  cpu.gr[RET1] = sc.result;
 }
 
 static void
