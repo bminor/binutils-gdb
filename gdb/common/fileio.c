@@ -20,6 +20,7 @@
 #include "common-defs.h"
 #include "fileio.h"
 #include <sys/stat.h>
+#include <fcntl.h>
 
 /* See fileio.h.  */
 
@@ -72,6 +73,40 @@ host_to_fileio_error (int error)
         return FILEIO_ENAMETOOLONG;
     }
   return FILEIO_EUNKNOWN;
+}
+
+/* See fileio.h.  */
+
+int
+fileio_to_host_openflags (int fileio_open_flags, int *open_flags_p)
+{
+  int open_flags = 0;
+
+  if (fileio_open_flags & ~FILEIO_O_SUPPORTED)
+    return -1;
+
+  if (fileio_open_flags & FILEIO_O_CREAT)
+    open_flags |= O_CREAT;
+  if (fileio_open_flags & FILEIO_O_EXCL)
+    open_flags |= O_EXCL;
+  if (fileio_open_flags & FILEIO_O_TRUNC)
+    open_flags |= O_TRUNC;
+  if (fileio_open_flags & FILEIO_O_APPEND)
+    open_flags |= O_APPEND;
+  if (fileio_open_flags & FILEIO_O_RDONLY)
+    open_flags |= O_RDONLY;
+  if (fileio_open_flags & FILEIO_O_WRONLY)
+    open_flags |= O_WRONLY;
+  if (fileio_open_flags & FILEIO_O_RDWR)
+    open_flags |= O_RDWR;
+  /* On systems supporting binary and text mode, always open files
+     in binary mode. */
+#ifdef O_BINARY
+  open_flags |= O_BINARY;
+#endif
+
+  *open_flags_p = open_flags;
+  return 0;
 }
 
 /* Convert a host-format mode_t into a bitmask of File-I/O flags.  */

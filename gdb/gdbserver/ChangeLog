@@ -1,3 +1,9 @@
+2015-04-21  Gary Benson <gbenson@redhat.com>
+
+	* hostio.c (fileio_open_flags_to_host): Factored out to
+	fileio_to_host_openflags in common/fileio.c.  Single use
+	updated.
+
 2015-04-17  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* linux-xtensa-low.c (xtensa_fill_gregset)

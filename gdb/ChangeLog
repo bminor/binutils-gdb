@@ -1,3 +1,11 @@
+2015-04-21  Gary Benson <gbenson@redhat.com>
+
+	* common/fileio.h (fileio_to_host_openflags): New declaration.
+	* common/fileio.c (fcntl.h): New include.
+	(fileio_to_host_openflags): New function, factored out from...
+	* inf-child.c (inf_child_fileio_open_flags_to_host): ...here.
+	Single use updated.
+
 2015-04-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* rl78-tdep.c (RL78_SP_ADDR): Define.
