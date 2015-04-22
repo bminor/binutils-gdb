@@ -1,3 +1,8 @@
+2015-04-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (tui_async_resize_screen): Call
+	rl_resize_terminal().
+
 2015-04-22  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (handle_output_debug_string): Don't change
