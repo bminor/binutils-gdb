@@ -1,3 +1,16 @@
+2015-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18289
+	* elf32-i386.c (elf_i386_link_hash_entry): Add gotoff_ref.
+	(elf_i386_link_hash_newfunc): Initialize gotoff_ref to 0.
+	(elf_i386_create_dynamic_sections): Always allow copy relocs for
+	building executables.
+	(elf_i386_copy_indirect_symbol): Also copy gotoff_ref.
+	(elf_i386_check_relocs): Set gotoff_ref for R_386_GOTOFF.
+	(elf_i386_adjust_dynamic_symbol): Also allocate copy relocs for
+	PIE and R_386_GOTOFF.
+	(elf_i386_relocate_section): Allow R_386_GOTOFF in executable.
+
 2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (assign_section_numbers): Always set up sh_name.

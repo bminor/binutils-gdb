@@ -1,3 +1,20 @@
+2015-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18289
+	* ld-i386/copyreloc-lib.c: New file.
+	* ld-i386/copyreloc-main.S: Likewise.
+	* ld-i386/copyreloc-main.out: Likewise.
+	* ld-i386/copyreloc-main1.rd: Likewise.
+	* ld-i386/copyreloc-main2.rd: Likewise.
+	* ld-i386/dummy.c: Likewise.
+	* ld-i386/pr17689.out: Likewise.
+	* ld-i386/pr17689.rd: Likewise.
+	* ld-i386/pr17689a.c: Likewise.
+	* ld-i386/pr17689b.S: Likewise.
+	* ld-i386/pr17827.rd: Likewise.
+	* ld-i386/pr17827ver.rd: Likewise.
+	* ld-i386/i386.exp: Run copyreloc tests.
+
 2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-mmix/bspec1.d: Don't hardcode offset of .shstrtab section.
