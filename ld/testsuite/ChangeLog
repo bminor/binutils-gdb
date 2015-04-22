@@ -25,6 +25,7 @@
 	* ld-powerpc/tocopt3.d: Likewise.
 	* ld-powerpc/tocopt4.d: Likewise.
 	* ld-powerpc/tocopt5.d: Likewise.
+	* ld-powerpc/tocnovar.d: Adjust.
 
 2015-04-22  Alan Modra  <amodra@gmail.com>
 
