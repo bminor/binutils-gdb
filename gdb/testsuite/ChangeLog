@@ -1,3 +1,8 @@
+2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/dump.exp: Add *.verilog files to all_files list.  Add
+	new tests for verilog output.
+
 2015-04-24  Yao Qi  <yao.qi@linaro.org>
 
 	* boards/remote-gdbserver-on-localhost.exp: New file.

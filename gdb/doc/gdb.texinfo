@@ -10868,9 +10868,9 @@ You can use the commands @code{dump}, @code{append}, and
 @code{restore} to copy data between target memory and a file.  The
 @code{dump} and @code{append} commands write data to a file, and the
 @code{restore} command reads data from a file back into the inferior's
-memory.  Files may be in binary, Motorola S-record, Intel hex, or
-Tektronix Hex format; however, @value{GDBN} can only append to binary
-files.
+memory.  Files may be in binary, Motorola S-record, Intel hex,
+Tektronix Hex, or Verilog Hex format; however, @value{GDBN} can only
+append to binary files, and cannot read from Verilog Hex files.
 
 @table @code
 
@@ -10890,6 +10890,8 @@ Intel hex format.
 Motorola S-record format.
 @item tekhex
 Tektronix Hex format.
+@item verilog
+Verilog Hex format.
 @end table
 
 @value{GDBN} uses the same definitions of these formats as the

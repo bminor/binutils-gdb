@@ -1,3 +1,8 @@
+2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Dump/Restore Files): Add detail about verilog dump
+	format.
+
 2015-04-24  Doug Evans  <dje@google.com>
 
 	* python.texi (Xmethods In Python): Fix name of method to call the

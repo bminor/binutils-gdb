@@ -42,6 +42,8 @@
   (no "set sysroot" or "file" commands are required).  See "New remote
   packets" below.
 
+* The "dump" command now supports verilog hex format.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",

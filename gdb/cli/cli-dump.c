@@ -150,6 +150,7 @@ static struct cmd_list_element *dump_cmdlist;
 static struct cmd_list_element *append_cmdlist;
 static struct cmd_list_element *srec_cmdlist;
 static struct cmd_list_element *ihex_cmdlist;
+static struct cmd_list_element *verilog_cmdlist;
 static struct cmd_list_element *tekhex_cmdlist;
 static struct cmd_list_element *binary_dump_cmdlist;
 static struct cmd_list_element *binary_append_cmdlist;
@@ -332,6 +333,18 @@ static void
 dump_ihex_value (char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "ihex");
+}
+
+static void
+dump_verilog_memory (char *args, int from_tty)
+{
+  dump_memory_to_file (args, FOPEN_WB, "verilog");
+}
+
+static void
+dump_verilog_value (char *args, int from_tty)
+{
+  dump_value_to_file (args, FOPEN_WB, "verilog");
 }
 
 static void
@@ -636,6 +649,13 @@ ihex_dump_command (char *cmd, int from_tty)
 }
 
 static void
+verilog_dump_command (char *cmd, int from_tty)
+{
+  printf_unfiltered (_("\"dump verilog\" must be followed by a subcommand.\n"));
+  help_list (verilog_cmdlist, "dump verilog ", all_commands, gdb_stdout);
+}
+
+static void
 tekhex_dump_command (char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump tekhex\" must be followed by a subcommand.\n");
@@ -697,6 +717,12 @@ the specified FILE in raw target ordered bytes.");
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
+  add_prefix_cmd ("verilog", all_commands, verilog_dump_command,
+		  _("Write target code/data to a verilog hex file."),
+		  &verilog_cmdlist, "dump verilog ",
+		  0 /*allow-unknown*/,
+		  &dump_cmdlist);
+
   add_prefix_cmd ("tekhex", all_commands, tekhex_dump_command,
 		  _("Write target code/data to a tekhex file."),
 		  &tekhex_cmdlist, "dump tekhex ", 
@@ -738,6 +764,18 @@ Write the value of an expression to an ihex file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in intel hex format."),
 	   &ihex_cmdlist);
+
+  add_cmd ("memory", all_commands, dump_verilog_memory, _("\
+Write contents of memory to a verilog hex file.\n\
+Arguments are FILE START STOP.  Writes the contents of memory within\n\
+the range [START .. STOP) to the specified FILE in verilog hex format."),
+	   &verilog_cmdlist);
+
+  add_cmd ("value", all_commands, dump_verilog_value, _("\
+Write the value of an expression to a verilog hex file.\n\
+Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
+to the specified FILE in verilog hex format."),
+	   &verilog_cmdlist);
 
   add_cmd ("memory", all_commands, dump_tekhex_memory, _("\
 Write contents of memory to a tekhex file.\n\
