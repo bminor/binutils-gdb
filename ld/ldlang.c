@@ -5379,55 +5379,51 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
   if (expld.dataseg.phase == exp_dataseg_end_seen
       && link_info.relro && expld.dataseg.relro_end)
     {
-      /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END pair was seen, try
-	 to put expld.dataseg.relro_end on a (common) page boundary.  */
-      bfd_vma min_base, relro_end, maxpage;
+      bfd_vma initial_base, relro_end, desired_end;
+      asection *sec;
 
-      expld.dataseg.phase = exp_dataseg_relro_adjust;
-      maxpage = expld.dataseg.maxpagesize;
-      /* MIN_BASE is the absolute minimum address we are allowed to start the
-	 read-write segment (byte before will be mapped read-only).  */
-      min_base = (expld.dataseg.min_base + maxpage - 1) & ~(maxpage - 1);
-      expld.dataseg.base += (-expld.dataseg.relro_end
-			     & (expld.dataseg.pagesize - 1));
       /* Compute the expected PT_GNU_RELRO segment end.  */
       relro_end = ((expld.dataseg.relro_end + expld.dataseg.pagesize - 1)
 		   & ~(expld.dataseg.pagesize - 1));
-      if (min_base + maxpage < expld.dataseg.base)
-	{
-	  expld.dataseg.base -= maxpage;
-	  relro_end -= maxpage;
-	}
+
+      /* Adjust by the offset arg of DATA_SEGMENT_RELRO_END.  */
+      desired_end = relro_end - expld.dataseg.relro_offset;
+
+      /* For sections in the relro segment..  */
+      for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
+	if (!IGNORE_SECTION (sec)
+	    && sec->vma >= expld.dataseg.base
+	    && sec->vma < expld.dataseg.relro_end - expld.dataseg.relro_offset)
+	  {
+	    /* Where do we want to put this section so that it ends as
+	       desired?  */
+	    bfd_vma start = sec->vma;
+	    bfd_vma end = start + sec->size;
+	    bfd_vma bump = desired_end - end;
+	    /* We'd like to increase START by BUMP, but we must heed
+	       alignment so the increase might be less than optimum.  */
+	    start += bump & ~(((bfd_vma) 1 << sec->alignment_power) - 1);
+	    /* This is now the desired end for the previous section.  */
+	    desired_end = start;
+	  }
+
+      expld.dataseg.phase = exp_dataseg_relro_adjust;
+      ASSERT (desired_end >= expld.dataseg.base);
+      initial_base = expld.dataseg.base;
+      expld.dataseg.base = desired_end;
       lang_reset_memory_regions ();
       one_lang_size_sections_pass (relax, check_regions);
+
       if (expld.dataseg.relro_end > relro_end)
 	{
-	  /* The alignment of sections between DATA_SEGMENT_ALIGN
-	     and DATA_SEGMENT_RELRO_END can cause excessive padding to
-	     be inserted at DATA_SEGMENT_RELRO_END.  Try to start a
-	     bit lower so that the section alignments will fit in.  */
-	  asection *sec;
-	  unsigned int max_alignment_power = 0;
-
-	  /* Find maximum alignment power of sections between
-	     DATA_SEGMENT_ALIGN and DATA_SEGMENT_RELRO_END.  */
-	  for (sec = link_info.output_bfd->sections; sec; sec = sec->next)
-	    if (sec->vma >= expld.dataseg.base
-		&& sec->vma < expld.dataseg.relro_end
-		&& sec->alignment_power > max_alignment_power)
-	      max_alignment_power = sec->alignment_power;
-
-	  if (((bfd_vma) 1 << max_alignment_power) < expld.dataseg.pagesize)
-	    {
-	      /* Aligning the adjusted base guarantees the padding
-		 between sections won't change.  This is better than
-		 simply subtracting 1 << max_alignment_power which is
-		 what we used to do here.  */
-	      expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
-	      lang_reset_memory_regions ();
-	      one_lang_size_sections_pass (relax, check_regions);
-	    }
+	  /* Assignments to dot, or to output section address in a
+	     user script have increased padding over the original.
+	     Revert.  */
+	  expld.dataseg.base = initial_base;
+	  lang_reset_memory_regions ();
+	  one_lang_size_sections_pass (relax, check_regions);
 	}
+
       link_info.relro_start = expld.dataseg.base;
       link_info.relro_end = expld.dataseg.relro_end;
     }

@@ -565,7 +565,6 @@ fold_binary (etree_type *tree)
 		  else if (expld.dataseg.phase == exp_dataseg_none)
 		    {
 		      expld.dataseg.phase = exp_dataseg_align_seen;
-		      expld.dataseg.min_base = expld.dot;
 		      expld.dataseg.base = expld.result.value;
 		      expld.dataseg.pagesize = commonpage;
 		      expld.dataseg.maxpagesize = maxpage;
@@ -579,6 +578,7 @@ fold_binary (etree_type *tree)
 
 	case DATA_SEGMENT_RELRO_END:
 	  expld.dataseg.relro = exp_dataseg_relro_end;
+	  expld.dataseg.relro_offset = expld.result.value;
 	  if (expld.phase == lang_first_phase_enum
 	      || expld.section != bfd_abs_section_ptr)
 	    expld.result.valid_p = FALSE;
