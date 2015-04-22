@@ -28,8 +28,10 @@
 
 #if WITH_HOST_BYTE_ORDER == BIG_ENDIAN
 #define HOST_BIG_ENDIAN
+#define EBT 0
 #else
 #define HOST_LITTLE_ENDIAN
+#define EBT 3
 #endif
 
 #define I_ACC_EXC 1

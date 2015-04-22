@@ -20,11 +20,6 @@
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-
-typedef address_word sim_cia;
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 #include "bfd.h"
 
@@ -32,9 +27,6 @@ typedef struct _sim_cpu SIM_CPU;
 #include "armdefs.h"
 
 extern struct ARMul_State *state;
-
-#define CIA_GET(cpu)     PC
-#define CIA_SET(cpu,val) ARMul_SetPC (state, (val))
 
 struct _sim_cpu {
 

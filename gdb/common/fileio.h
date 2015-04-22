@@ -27,6 +27,11 @@
 
 extern int host_to_fileio_error (int error);
 
+/* Convert File-I/O open flags FFLAGS to host format, storing
+   the result in *FLAGS.  Return 0 on success, -1 on error.  */
+
+extern int fileio_to_host_openflags (int fflags, int *flags);
+
 /* Pack a host-format integer into a byte buffer in big-endian
    format.  BYTES specifies the size of the integer to pack in
    bytes.  */

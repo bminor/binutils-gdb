@@ -23,7 +23,6 @@
 #ifndef GOLD_GC_H
 #define GOLD_GC_H
 
-#include <queue>
 #include <vector>
 
 #include "elfcpp.h"
@@ -52,7 +51,7 @@ class Garbage_collection
 
   typedef Unordered_set<Section_id, Section_id_hash> Sections_reachable;
   typedef std::map<Section_id, Sections_reachable> Section_ref;
-  typedef std::queue<Section_id> Worklist_type;
+  typedef std::vector<Section_id> Worklist_type;
   // This maps the name of the section which can be represented as a C
   // identifier (cident) to the list of sections that have that name.
   // Different object files can have cident sections with the same name.

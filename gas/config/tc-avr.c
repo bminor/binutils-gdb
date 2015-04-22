@@ -2060,41 +2060,41 @@ exclude_section_from_property_tables (segT sec)
 static struct avr_property_record_link *
 create_record_for_frag (segT sec, fragS *fragP)
 {
-  struct avr_property_record_link *link;
+  struct avr_property_record_link *prop_rec_link;
 
-  link = xmalloc (sizeof (struct avr_property_record_link));
-  memset (link, 0, sizeof (*link));
+  prop_rec_link = xmalloc (sizeof (struct avr_property_record_link));
+  memset (prop_rec_link, 0, sizeof (*prop_rec_link));
 
   if (fragP->tc_frag_data.is_org)
     {
-      link->record.offset = fragP->fr_next->fr_address;
-      link->record.section = sec;
+      prop_rec_link->record.offset = fragP->fr_next->fr_address;
+      prop_rec_link->record.section = sec;
 
       if (fragP->tc_frag_data.has_fill)
         {
-          link->record.data.org.fill = fragP->tc_frag_data.fill;
-          link->record.type = RECORD_ORG_AND_FILL;
+          prop_rec_link->record.data.org.fill = fragP->tc_frag_data.fill;
+          prop_rec_link->record.type = RECORD_ORG_AND_FILL;
         }
       else
-        link->record.type = RECORD_ORG;
+        prop_rec_link->record.type = RECORD_ORG;
     }
   else
     {
-      link->record.offset = fragP->fr_address;
-      link->record.section = sec;
+      prop_rec_link->record.offset = fragP->fr_address;
+      prop_rec_link->record.section = sec;
 
       gas_assert (fragP->tc_frag_data.is_align);
       if (fragP->tc_frag_data.has_fill)
         {
-          link->record.data.align.fill = fragP->tc_frag_data.fill;
-          link->record.type = RECORD_ALIGN_AND_FILL;
+          prop_rec_link->record.data.align.fill = fragP->tc_frag_data.fill;
+          prop_rec_link->record.type = RECORD_ALIGN_AND_FILL;
         }
       else
-        link->record.type = RECORD_ALIGN;
-      link->record.data.align.bytes = fragP->tc_frag_data.alignment;
+        prop_rec_link->record.type = RECORD_ALIGN;
+      prop_rec_link->record.data.align.bytes = fragP->tc_frag_data.alignment;
     }
 
-  return link;
+  return prop_rec_link;
 }
 
 /* Build a list of AVR_PROPERTY_RECORD_LINK structures for section SEC, and

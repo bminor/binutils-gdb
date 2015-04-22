@@ -21,19 +21,13 @@
 
 #include "sim-basics.h"
 
-typedef address_word sim_cia;
 typedef long int           word;
 typedef unsigned long int  uword;
-
-typedef struct _sim_cpu SIM_CPU;
 
 #include "sim-base.h"
 #include "bfd.h"
 
 #include "cr16_sim.h"
-
-#define CIA_GET(cpu)     PC
-#define CIA_SET(cpu,val) SET_PC (val)
 
 struct _sim_cpu {
 

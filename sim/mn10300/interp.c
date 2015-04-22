@@ -346,7 +346,7 @@ sim_create_inferior (SIM_DESC sd,
   } else {
     PC = 0;
   }
-  CIA_SET (STATE_CPU (sd, 0), (unsigned64) PC);
+  CPU_PC_SET (STATE_CPU (sd, 0), (unsigned64) PC);
 
   if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33_2)
     PSW |= PSW_FE;
@@ -482,7 +482,7 @@ program_interrupt (SIM_DESC sd,
     {
       in_interrupt = 1;
       /* copy NMI handler code from dv-mn103cpu.c */
-      store_word (SP - 4, CIA_GET (cpu));
+      store_word (SP - 4, CPU_PC_GET (cpu));
       store_half (SP - 8, PSW);
 
       /* Set the SYSEF flag in NMICR by backdoor method.  See
@@ -496,7 +496,7 @@ program_interrupt (SIM_DESC sd,
 
   PSW &= ~PSW_IE;
   SP = SP - 8;
-  CIA_SET (cpu, 0x40000008);
+  CPU_PC_SET (cpu, 0x40000008);
 
   in_interrupt = 0;
   sim_engine_halt(sd, cpu, NULL, cia, sim_stopped, sig);
@@ -511,7 +511,7 @@ mn10300_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word cia)
   if(State.exc_suspended > 0)
     sim_io_eprintf(sd, "Warning, nested exception triggered (%d)\n", State.exc_suspended); 
 
-  CIA_SET (cpu, cia);
+  CPU_PC_SET (cpu, cia);
   memcpy(State.exc_trigger_regs, State.regs, sizeof(State.exc_trigger_regs));
   State.exc_suspended = 0;
 }
@@ -527,7 +527,7 @@ mn10300_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception)
 
   memcpy(State.exc_suspend_regs, State.regs, sizeof(State.exc_suspend_regs));
   memcpy(State.regs, State.exc_trigger_regs, sizeof(State.regs));
-  CIA_SET (cpu, PC); /* copy PC back from new State.regs */
+  CPU_PC_SET (cpu, PC); /* copy PC back from new State.regs */
   State.exc_suspended = exception;
 }
 
@@ -549,7 +549,7 @@ mn10300_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception)
 		       State.exc_suspended, exception); 
       
       memcpy(State.regs, State.exc_suspend_regs, sizeof(State.regs)); 
-      CIA_SET (cpu, PC); /* copy PC back from new State.regs */
+      CPU_PC_SET (cpu, PC); /* copy PC back from new State.regs */
     }
   else if(exception != 0 && State.exc_suspended == 0)
     {

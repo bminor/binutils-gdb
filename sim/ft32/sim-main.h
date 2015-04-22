@@ -22,21 +22,14 @@
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-
-typedef address_word sim_cia;
-
 #include "sim-base.h"
 #include "bfd.h"
-
-typedef struct _sim_cpu SIM_CPU;
 
 #include "ft32-sim.h"
 
 struct _sim_cpu {
 
   /* The following are internal simulator state variables: */
-#define CIA_GET(CPU) ((CPU)->state.pc + 0)
-#define CIA_SET(CPU,CIA) ((CPU)->state.pc = (CIA))
 
   struct ft32_cpu_state state;
 

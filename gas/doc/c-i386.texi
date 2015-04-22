@@ -487,7 +487,8 @@ The @samp{;} character can be used to separate statements on the same
 line.
 
 @node i386-Mnemonics
-@section Instruction Naming
+@section i386-Mnemonics
+@subsection Instruction Naming
 
 @cindex i386 instruction naming
 @cindex instruction naming, i386
@@ -571,7 +572,7 @@ Far call/jump instructions are @samp{lcall} and @samp{ljmp} in
 AT&T syntax, but are @samp{call far} and @samp{jump far} in Intel
 convention.
 
-@section AT&T Mnemonic versus Intel Mnemonic
+@subsection AT&T Mnemonic versus Intel Mnemonic
 
 @cindex i386 mnemonic compatibility
 @cindex mnemonic compatibility, i386

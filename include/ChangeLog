@@ -1,3 +1,11 @@
+2015-04-17  Richard Earnshaw  <rearnsha@arm.com>
+
+	Merge from gcc:
+	2015-03-19  Richard Biener  <rguenther@suse.de>
+
+		* partition.h (struct partition_elem): Re-order elements to
+		avoid padding.
+
 2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfdlink.h (bfd_link_info): Add compress_debug.

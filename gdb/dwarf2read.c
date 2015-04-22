@@ -3875,6 +3875,8 @@ dw2_expand_symtabs_matching
 	  struct quick_file_names *file_data;
 	  void **slot;
 
+	  QUIT;
+
 	  per_cu->v.quick->mark = 0;
 
 	  /* We only need to look at symtabs not already expanded.  */
@@ -3934,6 +3936,8 @@ dw2_expand_symtabs_matching
       const char *name;
       offset_type *vec, vec_len, vec_idx;
       int global_seen = 0;
+
+      QUIT;
 
       if (index->symbol_table[idx] == 0 && index->symbol_table[idx + 1] == 0)
 	continue;

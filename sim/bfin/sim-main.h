@@ -24,11 +24,8 @@
 #include "sim-basics.h"
 #include "sim-signal.h"
 
-typedef unsigned32 sim_cia;
-
-#define CIA_GET(cpu)     CPU_PC_GET (cpu)
-#define CIA_SET(cpu,val) CPU_PC_SET ((cpu), (val))
-
+/* TODO: Delete this.  Need to convert bu32/etc... to common sim types
+         and unwind the bfin-sim.h/machs.h include below first though.  */
 typedef struct _sim_cpu SIM_CPU;
 
 #include "bfin-sim.h"

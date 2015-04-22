@@ -20,10 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-/* This simulator doesn't cache the Current Instruction Address */
-/* #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) */
-/* #define SIM_ENGINE_RESUME_HOOK(SD, LAST_CPU, CIA) */
-
 /* hobble some common features for moment */
 #define WITH_WATCHPOINTS 1
 #define WITH_MODULO_MEMORY 1
@@ -33,11 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ERROR))
 
 #include "sim-basics.h"
-
-typedef address_word sim_cia;
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 #include "bfd.h"
 
@@ -257,8 +248,6 @@ struct _sim_cpu {
 
 
   /* The following are internal simulator state variables: */
-#define CIA_GET(CPU) ((CPU)->registers[PCIDX] + 0)
-#define CIA_SET(CPU,CIA) ((CPU)->registers[PCIDX] = (CIA))
   address_word dspc;  /* delay-slot PC */
 #define DSPC ((CPU)->dspc)
 

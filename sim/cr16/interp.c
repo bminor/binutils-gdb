@@ -737,6 +737,18 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
   return xfer_mem (sd, addr, buffer, size, 0);
 }
 
+static sim_cia
+cr16_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}
+
+static void
+cr16_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  SET_PC (pc);
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -805,6 +817,15 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
 	 file descriptor leaks, etc.  */
       sim_module_uninstall (sd);
       return 0;
+    }
+
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = cr16_pc_get;
+      CPU_PC_STORE (cpu) = cr16_pc_set;
     }
 
   trace_sd = sd;

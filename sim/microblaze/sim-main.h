@@ -20,14 +20,6 @@
 
 #include "microblaze.h"
 #include "sim-basics.h"
-
-typedef address_word sim_cia;
-
-#define CIA_GET(cpu) (cpu)->microblaze_cpu.spregs[0]
-#define CIA_SET(cpu,val) (cpu)->microblaze_cpu.spregs[0] = (val)
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-base.h"
 
 /* The machine state.
@@ -48,8 +40,6 @@ typedef struct _sim_cpu SIM_CPU;
   int		  cycles;
   int		  insts;
   int		  exception;
-  unsigned long   msize;
-  unsigned char  *memory;
   ubyte           imm_enable;
   half            imm_high;
 };

@@ -1,3 +1,31 @@
+2015-04-20  Ian Coolidge  <icoolidge@google.com>
+
+	* symtab.cc (Symbol::should_add_dynsym_entry): Return true for
+	GNU_UNIQUE.
+
+2015-04-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* gc.cc (Garbage_collection::do_transitive_closure): Use back and
+	push_back.
+	* gc.h (Garbage_collection): Use a std::vector instead of a std::queue.
+	* object.cc (Sized_relobj_file::do_layout): Use push_back.
+	* powerpc.cc (process_gc_mark): Use push_back.
+	(Target_powerpc::do_gc_mark_symbol): Use push_back.
+	* symtab.cc (Symbol_table::gc_mark_symbol): Use push_back.
+
+2015-04/16  Han Shen  <shenhan@google.com>
+
+    * aarch64.cc (AArch64_insn_utilities): New utility class.
+    (AArch64_relobj::Mapping_symbol_position): New struct.
+    (AArch64_relobj::Mapping_symbol_info): New typedef.
+    (AArch64_relobj::do_count_local_symbols): New function overriding
+    parent's implementation.
+    (AArch64_relobj::mapping_symbol_info_): New member
+    (AArch64_relobj::scan_erratum_843419): New method.
+    (Target_aarch64::scan_erratum_843419_span): New method.
+    (Target_aarch64::is_erratum_843419_sequence): New method.
+    * options.h (fix_cortex_a53): New option.
+
 2015-04-09  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.cc (Symbol::final_value_is_known): Check for TLS symbol

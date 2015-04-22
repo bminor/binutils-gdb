@@ -25,11 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_HANDLES_LMA 1
 
 #include "sim-basics.h"
-
-typedef address_word sim_cia;
-
-typedef struct _sim_cpu SIM_CPU;
-
 #include "sim-signal.h"
 #include "sim-base.h"
 
@@ -573,9 +568,6 @@ extern void m68hc11cpu_set_port (struct hw *me, sim_cpu *cpu,
 				 unsigned addr, uint8 val);
 
 /* The current state of the processor; registers, memory, etc.  */
-
-#define CIA_GET(CPU)      (cpu_get_pc (CPU))
-#define CIA_SET(CPU,VAL)  (cpu_set_pc ((CPU), (VAL)))
 
 struct sim_state {
   sim_cpu        *cpu[MAX_NR_PROCESSORS];

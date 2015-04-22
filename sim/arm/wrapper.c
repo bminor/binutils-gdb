@@ -800,6 +800,18 @@ sim_target_parse_arg_array (char ** argv)
   sim_target_parse_command_line (i, argv);
 }
 
+static sim_cia
+arm_pc_get (sim_cpu *cpu)
+{
+  return PC;
+}
+
+static void
+arm_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  ARMul_SetPC (state, pc);
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -815,6 +827,7 @@ sim_open (SIM_OPEN_KIND kind,
 	  struct bfd *abfd,
 	  char **argv)
 {
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
@@ -864,6 +877,15 @@ sim_open (SIM_OPEN_KIND kind,
 	 file descriptor leaks, etc.  */
       sim_module_uninstall (sd);
       return 0;
+    }
+
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = arm_pc_get;
+      CPU_PC_STORE (cpu) = arm_pc_set;
     }
 
   sim_callback = cb;

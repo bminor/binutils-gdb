@@ -243,38 +243,6 @@ hostio_reply_with_data (char *own_buf, char *buffer, int len,
   return input_index;
 }
 
-static int
-fileio_open_flags_to_host (int fileio_open_flags, int *open_flags_p)
-{
-  int open_flags = 0;
-
-  if (fileio_open_flags & ~FILEIO_O_SUPPORTED)
-    return -1;
-
-  if (fileio_open_flags & FILEIO_O_CREAT)
-    open_flags |= O_CREAT;
-  if (fileio_open_flags & FILEIO_O_EXCL)
-    open_flags |= O_EXCL;
-  if (fileio_open_flags & FILEIO_O_TRUNC)
-    open_flags |= O_TRUNC;
-  if (fileio_open_flags & FILEIO_O_APPEND)
-    open_flags |= O_APPEND;
-  if (fileio_open_flags & FILEIO_O_RDONLY)
-    open_flags |= O_RDONLY;
-  if (fileio_open_flags & FILEIO_O_WRONLY)
-    open_flags |= O_WRONLY;
-  if (fileio_open_flags & FILEIO_O_RDWR)
-    open_flags |= O_RDWR;
-/* On systems supporting binary and text mode, always open files in
-   binary mode. */
-#ifdef O_BINARY
-  open_flags |= O_BINARY;
-#endif
-
-  *open_flags_p = open_flags;
-  return 0;
-}
-
 static void
 handle_open (char *own_buf)
 {
@@ -291,7 +259,7 @@ handle_open (char *own_buf)
       || require_comma (&p)
       || require_int (&p, &mode)
       || require_end (p)
-      || fileio_open_flags_to_host (fileio_flags, &flags))
+      || fileio_to_host_openflags (fileio_flags, &flags))
     {
       hostio_packet_error (own_buf);
       return;

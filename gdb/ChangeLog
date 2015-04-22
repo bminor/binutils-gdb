@@ -1,3 +1,145 @@
+2015-04-21  Pierre Muller  <muller@sourceware.org>
+
+	PR pascal/17815
+	p-exp.y (yylex): Reorganize code to return the matched pattern
+	for a field of this.
+
+2015-04-21  Gary Benson <gbenson@redhat.com>
+
+	* common/fileio.h (fileio_to_host_openflags): New declaration.
+	* common/fileio.c (fcntl.h): New include.
+	(fileio_to_host_openflags): New function, factored out from...
+	* inf-child.c (inf_child_fileio_open_flags_to_host): ...here.
+	Single use updated.
+
+2015-04-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (RL78_SP_ADDR): Define.
+	(opc_reg_to_gdb_regnum): New static function.
+	(rl78_analyze_prologue): Recognize instructions forming slightly
+	more interesting prologues.
+
+2015-04-20  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	Revert:
+	2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+	* gdbtypes.c (is_dynamic_type_internal): Remove special handling of
+	TYPE_CODE_REF types so that they are not considered as dynamic
+	depending on the referenced type.
+	(resolve_dynamic_type_internal): Likewise.
+
+2015-04-20  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	Revert:
+	2015-04-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+	* gdbtypes.c (is_dynamic_type_internal): Remove the unused
+	"top_level" parameter.
+	(resolve_dynamic_type_internal): Remove the unused "top_level"
+	parameter.  Update call to is_dynamic_type_internal.
+	(is_dynamic_type): Update call to is_dynamic_type_internal.
+	(resolve_dynamic_range): Update call to
+	resolve_dynamic_type_internal.
+	(resolve_dynamic_union): Likewise.
+	(resolve_dynamic_struct): Likewise.
+	(resolve_dynamic_type): Likewise.
+
+2015-04-19  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* breakpoint.c (update_dprintf_command_list): Remove duplicated
+	xmalloc.
+
+2015-04-20  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* reply_mig_hack.awk: Robustify parsing.
+
+	* reply_mig_hack.awk: Don't bother to declare an intermediate
+	function pointer variable.
+
+2015-04-17  Doug Evans  <dje@google.com>
+
+	* solib-svr4.c (svr4_exec_displacement): Rename outer "displacement"
+	to "exec_displacement" to avoid confusion with inner use of the name.
+
+2015-04-17  Pedro Alves  <palves@redhat.com>
+
+	* arm-linux-nat.c (arm_linux_can_use_hw_breakpoint): Return zero
+	if HW point of TYPE isn't supported.
+
+2015-04-17  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	* target.h (target_can_use_hardware_watchpoint): Update comments.
+	Remove trailing ";".
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* remote.c (remote_add_inferior): New argument try_open_exec.
+	If nonzero, attempt to open the inferior's executable file as
+	the main executable if no main executable is open already.
+	All callers updated.
+	* NEWS: Mention that GDB now supports automatic location and
+	retrieval of executable + files from remote targets.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* target.h (TARGET_OBJECT_EXEC_FILE): New enum value.
+	* remote.c (PACKET_qXfer_exec_file): Likewise.
+	(remote_protocol_features): Register the
+	"qXfer:exec-file:read" feature.
+	(remote_xfer_partial): Handle TARGET_OBJECT_EXEC_FILE.
+	(remote_pid_to_exec_file): New function.
+	(init_remote_ops): Initialize to_pid_to_exec_file.
+	(_initialize_remote): Register new "set/show remote
+	pid-to-exec-file-packet" command.
+	* NEWS: Announce new qXfer:exec-file:read packet.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* nat/linux-procfs.h (linux_proc_pid_to_exec_file):
+	New declaration.
+	* nat/linux-procfs.c (linux_proc_pid_to_exec_file):
+	New function, factored out from...
+	* linux-nat.c (linux_child_pid_to_exec_file): ...here.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* exec.c (solist.h): New include.
+	(exec_file_locate_attach): Prefix absolute executable
+	paths with gdb_sysroot if set.
+	* NEWS: Mention that executable paths may be prepended
+	with sysroot.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* solist.h (exec_file_find): New declaration.
+	* solib.c (solib_find_1): New function, factored out from...
+	(solib_find): ...here.
+	(exec_file_find): New function.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* gdbcore.h (exec_file_locate_attach): New declaration.
+	* exec.c (exec_file_locate_attach): New function, factored
+	out from...
+	* infcmd.c (attach_command_post_wait): ...here.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* MAINTAINERS: Add myself for Blackfin/write-after-approval.
+
+2015-04-16  Yao Qi  <yao.qi@linaro.org>
+
+	* infrun.c (maybe_software_singlestep): Declare.
+	(displaced_step_fixup): Call maybe_software_singlestep.
+
+2015-04-15  Doug Evans  <dje@google.com>
+
+	* psymtab.c (psym_expand_symtabs_matching): Add QUIT call.
+
+2015-04-15  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_expand_symtabs_matching): Add some QUIT calls.
+
 2015-04-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/lib/gdb/command/unwinders.py: Add parentheses.

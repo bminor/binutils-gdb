@@ -273,3 +273,22 @@ linux_proc_task_list_dir_exists (pid_t pid)
   xsnprintf (pathname, sizeof (pathname), "/proc/%ld/task", (long) pid);
   return (stat (pathname, &buf) == 0);
 }
+
+/* See linux-procfs.h.  */
+
+char *
+linux_proc_pid_to_exec_file (int pid)
+{
+  static char buf[PATH_MAX];
+  char name[PATH_MAX];
+  ssize_t len;
+
+  xsnprintf (name, PATH_MAX, "/proc/%d/exe", pid);
+  len = readlink (name, buf, PATH_MAX - 1);
+  if (len <= 0)
+    strcpy (buf, name);
+  else
+    buf[len] = '\0';
+
+  return buf;
+}

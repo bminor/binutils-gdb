@@ -1,3 +1,16 @@
+2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/as.texinfo (Bundle directives): Shorten menu entry and
+	use @subsection.
+	(CFI directives): Use @subsection.
+	(SH-Dependent, SH64-Dependent): Moved after SCORE-Dependent.
+	* doc/c-i386.texi (i386-Mnemonics): Use @subsection.
+
+2015-04-17  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* config/tc-avr.c (create_record_for_frag): Rename link to
+	prop_rec_link.
+
 2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention

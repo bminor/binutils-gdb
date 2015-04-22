@@ -2373,6 +2373,18 @@ sim_info (SIM_DESC sd, int verbose)
     }
 }
 
+static sim_cia
+sh_pc_get (sim_cpu *cpu)
+{
+  return saved_state.asregs.pc;
+}
+
+static void
+sh_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  saved_state.asregs.pc = pc;
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -2446,6 +2458,15 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 	 file descriptor leaks, etc.  */
       sim_module_uninstall (sd);
       return 0;
+    }
+
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = sh_pc_get;
+      CPU_PC_STORE (cpu) = sh_pc_set;
     }
 
   for (p = argv + 1; *p != NULL; ++p)

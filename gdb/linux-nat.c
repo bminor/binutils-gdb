@@ -4106,15 +4106,7 @@ linux_nat_thread_name (struct target_ops *self, struct thread_info *thr)
 static char *
 linux_child_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  static char buf[PATH_MAX];
-  char name[PATH_MAX];
-
-  xsnprintf (name, PATH_MAX, "/proc/%d/exe", pid);
-  memset (buf, 0, PATH_MAX);
-  if (readlink (name, buf, PATH_MAX - 1) <= 0)
-    strcpy (buf, name);
-
-  return buf;
+  return linux_proc_pid_to_exec_file (pid);
 }
 
 /* Implement the to_xfer_partial interface for memory reads using the /proc

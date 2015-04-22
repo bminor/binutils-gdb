@@ -151,7 +151,7 @@ set_initial_gprs (void)
 static INLINE void
 wbat (sim_cpu *scpu, word pc, word x, word v)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   sim_core_write_aligned_1 (scpu, cia, write_map, x, v);
 }
@@ -161,7 +161,7 @@ wbat (sim_cpu *scpu, word pc, word x, word v)
 static INLINE void
 wsat (sim_cpu *scpu, word pc, word x, word v)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   sim_core_write_aligned_2 (scpu, cia, write_map, x, v);
 }
@@ -171,7 +171,7 @@ wsat (sim_cpu *scpu, word pc, word x, word v)
 static INLINE void
 wlat (sim_cpu *scpu, word pc, word x, word v)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
 	
   sim_core_write_aligned_4 (scpu, cia, write_map, x, v);
 }
@@ -181,7 +181,7 @@ wlat (sim_cpu *scpu, word pc, word x, word v)
 static INLINE int
 rsat (sim_cpu *scpu, word pc, word x)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   return (sim_core_read_aligned_2 (scpu, cia, read_map, x));
 }
@@ -191,7 +191,7 @@ rsat (sim_cpu *scpu, word pc, word x)
 static INLINE int
 rbat (sim_cpu *scpu, word pc, word x)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   return (sim_core_read_aligned_1 (scpu, cia, read_map, x));
 }
@@ -201,7 +201,7 @@ rbat (sim_cpu *scpu, word pc, word x)
 static INLINE int
 rlat (sim_cpu *scpu, word pc, word x)
 {
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
   
   return (sim_core_read_aligned_4 (scpu, cia, read_map, x));
 }
@@ -243,7 +243,7 @@ sim_engine_run (SIM_DESC sd,
   word pc, opc;
   unsigned short inst;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
-  address_word cia = CIA_GET (scpu);
+  address_word cia = CPU_PC_GET (scpu);
 
   pc = cpu.asregs.regs[PC_REGNO];
 
@@ -1145,6 +1145,18 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     return 0;
 }
 
+static sim_cia
+moxie_pc_get (sim_cpu *cpu)
+{
+  return cpu->registers[PCIDX];
+}
+
+static void
+moxie_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  cpu->registers[PCIDX] = pc;
+}
+
 static void
 free_state (SIM_DESC sd)
 {
@@ -1157,6 +1169,7 @@ free_state (SIM_DESC sd)
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
@@ -1215,7 +1228,15 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     }
 
   /* CPU specific initialization.  */
-  set_initial_gprs ();
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = moxie_pc_get;
+      CPU_PC_STORE (cpu) = moxie_pc_set;
+
+      set_initial_gprs ();	/* Reset the GPR registers.  */
+    }
 
   return sd;
 }

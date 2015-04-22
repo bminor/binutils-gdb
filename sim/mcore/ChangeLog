@@ -1,3 +1,66 @@
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_resume): Change %x to %lx for all cpu registers.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (mcore_regset): Delete msize & memory.
+	(issue_messages, mem, wbat, what, wlat, rbat, what, wlat,
+	sim_memory_size, MEM_SIZE_FLOOR, sim_size, init_pointers): Delete.
+	(DEFAULT_MEMORY_SIZE): Define.
+	(set_initial_gprs): Delete memsize handling and call to init_pointers.
+	Change cpu.asregs.msize to DEFAULT_MEMORY_SIZE.
+	(syscall_read_mem): Change memcpy to sim_core_read_buffer.
+	(syscall_write_mem): Change memcpy to sim_core_write_buffer.
+	(process_stub): Change issue_messages to STATE_VERBOSE_P.
+	(util): Turn printf into a stub.  Change issue_messages to
+	STATE_VERBOSE_P.
+	(rbat, rhat, rlat, wbat, what, wlat): Define to sim core funcs.
+	(sim_resume): Change issue_messages to STATE_VERBOSE_P.
+	Delete cpu.asregs.msize range checks.
+	(sim_write, sim_read): Delete.
+	(sim_store_register, sim_fetch_register): Delete call to
+	init_pointers.
+	(sim_open): Delete osize, call to sim_size, and issue_messages.  Call
+	sim_do_commandf to setup memory.
+	(sim_create_inferior): Delete issue_messages handling.  Change
+	cpu.asregs.msize to DEFAULT_MEMORY_SIZE.  Change strcpy to
+	sim_core_write_buffer.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (WATCHFUNCTIONS): Undef it.
+	(sim_resume): Move WLhash behind WATCHFUNCTIONS.
+	(sim_do_command): Delete.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Define.
+	* interp.c (NUM_ELEM, opened, log_open, log_close, is_opened): Delete.
+	(syscall_read_mem, syscall_write_mem): New functions.
+	(handle_trap1): Delete entire body.  Replace with call to cb_syscall.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_CPU): Delete.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (set_initial_gprs): Change CIA_SET to CPU_PC_SET.
+	(sim_resume): Change CIA_GET to CPU_PC_GET and CIA_SET to
+	CPU_PC_SET.
+	(sim_create_inferior): Change CIA_SET to CPU_PC_SET.
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
+2015-04-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (mcore_pc_get, mcore_pc_set): New functions.
+	(sim_open): Call CPU_PC_FETCH & CPU_PC_STORE for all cpus.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.

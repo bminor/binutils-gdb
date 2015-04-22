@@ -87,10 +87,6 @@ enum h8_typecodes {
 };
 
 #include "sim-basics.h"
-
-/* Define sim_cia.  */
-typedef unsigned32 sim_cia;
-
 #include "sim-base.h"
 
 /* Structure used to describe addressing */
@@ -153,8 +149,6 @@ struct sim_state {
 
 /* The current state of the processor; registers, memory, etc.  */
 
-#define CIA_GET(CPU)		(cpu_get_pc (CPU))
-#define CIA_SET(CPU, VAL)	(cpu_set_pc ((CPU), (VAL)))
 #define cpu_set_pc(CPU, VAL)	(((CPU)->pc)  = (VAL))
 #define cpu_get_pc(CPU)		(((CPU)->pc))
 

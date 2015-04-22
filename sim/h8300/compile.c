@@ -4865,6 +4865,18 @@ set_h8300h (unsigned long machine)
     h8300_normal_mode = 1;
 }
 
+static sim_cia
+h8300_pc_get (sim_cpu *cpu)
+{
+  return cpu->pc;
+}
+
+static void
+h8300_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  cpu->pc = pc;
+}
+
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
 static void
@@ -4883,6 +4895,7 @@ sim_open (SIM_OPEN_KIND kind,
 	  struct bfd *abfd, 
 	  char **argv)
 {
+  int i;
   SIM_DESC sd;
   sim_cpu *cpu;
 
@@ -4945,6 +4958,15 @@ sim_open (SIM_OPEN_KIND kind,
          file descriptor leaks, etc.  */
       free_state (sd);
       return 0;
+    }
+
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = h8300_pc_get;
+      CPU_PC_STORE (cpu) = h8300_pc_set;
     }
 
   /*  sim_hw_configure (sd); */

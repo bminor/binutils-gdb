@@ -21,9 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-
-typedef address_word sim_cia;
-
 #include "sim-base.h"
 #include "bfd.h"
 
@@ -32,8 +29,6 @@ typedef address_word sim_cia;
 struct _sim_cpu {
 
   /* The following are internal simulator state variables: */
-#define CIA_GET(CPU) ((CPU)->registers[PCIDX] + 0)
-#define CIA_SET(CPU,CIA) ((CPU)->registers[PCIDX] = (CIA))
 
 /* To keep this default simulator simple, and fast, we use a direct
    vector of registers. The internal simulator engine then uses
@@ -52,4 +47,3 @@ struct sim_state {
 };
 
 #endif
-

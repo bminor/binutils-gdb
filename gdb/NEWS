@@ -31,6 +31,17 @@
   "target:".  "remote:" is automatically converted to "target:" for
   backward compatibility.
 
+* The system root specified by "set sysroot" will be prepended to the
+  filename of the main executable (if reported to GDB as absolute by
+  the operating system) when starting processes remotely, and when
+  attaching to already-running local or remote processes.
+
+* GDB now supports automatic location and retrieval of executable
+  files from remote targets.  Remote debugging can now be initiated
+  using only a "target remote" or "target extended-remote" command
+  (no "set sysroot" or "file" commands are required).  See "New remote
+  packets" below.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",
@@ -100,6 +111,10 @@ hwbreak stop reason
 
 vFile:fstat:
   Return information about files on the remote system.
+
+qXfer:exec-file:read
+  Return the full absolute name of the file that was executed to
+  create a process running on the remote system.
 
 * The info record command now shows the recording format and the
   branch tracing configuration for the current thread when using

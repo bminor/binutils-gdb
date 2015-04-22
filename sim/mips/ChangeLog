@@ -1,3 +1,26 @@
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_ENGINE_HALT_HOOK, SIM_ENGINE_RESTART_HOOK): Delete
+	comments.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_CPU): Delete.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-tx3904cpu.c (deliver_tx3904cpu_interrupt): Change CIA_GET to
+	PU_PC_GET.
+	* interp.c (interrupt_event): Change CIA_GET to CPU_PC_GET.
+	(sim_create_inferior): Change CIA_SET to CPU_PC_SET.
+	* m16run.c (sim_engine_run): Change CIA_GET to CPU_PC_GET and
+	CIA_SET to CPU_PC_SET.
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.

@@ -6433,6 +6433,7 @@ static struct target_ops linux_target_ops = {
   NULL,
 #endif
   linux_supports_range_stepping,
+  linux_proc_pid_to_exec_file,
 };
 
 static void

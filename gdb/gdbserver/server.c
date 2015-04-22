@@ -1137,6 +1137,42 @@ handle_qxfer_auxv (const char *annex,
   return (*the_target->read_auxv) (offset, readbuf, len);
 }
 
+/* Handle qXfer:exec-file:read.  */
+
+static int
+handle_qxfer_exec_file (const char *const_annex,
+			gdb_byte *readbuf, const gdb_byte *writebuf,
+			ULONGEST offset, LONGEST len)
+{
+  char *annex, *file;
+  ULONGEST pid;
+  int total_len;
+
+  if (the_target->pid_to_exec_file == NULL || writebuf != NULL)
+    return -2;
+
+  annex = alloca (strlen (const_annex) + 1);
+  strcpy (annex, const_annex);
+  annex = unpack_varlen_hex (annex, &pid);
+  if (annex[0] != '\0' || pid == 0)
+    return -1;
+
+  file = (*the_target->pid_to_exec_file) (pid);
+  if (file == NULL)
+    return -1;
+
+  total_len = strlen (file);
+
+  if (offset > total_len)
+    return -1;
+
+  if (offset + len > total_len)
+    len = total_len - offset;
+
+  memcpy (readbuf, file + offset, len);
+  return len;
+}
+
 /* Handle qXfer:features:read.  */
 
 static int
@@ -1638,6 +1674,7 @@ static const struct qxfer qxfer_packets[] =
     { "auxv", handle_qxfer_auxv },
     { "btrace", handle_qxfer_btrace },
     { "btrace-conf", handle_qxfer_btrace_conf },
+    { "exec-file", handle_qxfer_exec_file},
     { "fdpic", handle_qxfer_fdpic},
     { "features", handle_qxfer_features },
     { "libraries", handle_qxfer_libraries },
@@ -2081,6 +2118,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (target_supports_stopped_by_hw_breakpoint ())
 	strcat (own_buf, ";hwbreak+");
+
+      if (the_target->pid_to_exec_file != NULL)
+	strcat (own_buf, ";qXfer:exec-file:read+");
 
       return;
     }

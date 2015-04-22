@@ -40,7 +40,6 @@ extern struct disassemble_info dinfo;
 extern struct pstate sregs;
 extern struct estate ebase;
 
-extern int	current_target_byte_order;
 extern int      ctrl_c;
 extern int      nfp;
 extern int      ift;
@@ -252,7 +251,11 @@ sim_open (kind, callback, abfd, argv)
     sregs.freq = freq ? freq : 15;
     termsave = fcntl(0, F_GETFL, 0);
     INIT_DISASSEMBLE_INFO(dinfo, stdout,(fprintf_ftype)fprintf);
+#ifdef HOST_LITTLE_ENDIAN
+    dinfo.endian = BFD_ENDIAN_LITTLE;
+#else
     dinfo.endian = BFD_ENDIAN_BIG;
+#endif
     reset_all();
     ebase.simtime = 0;
     init_sim();
@@ -311,14 +314,10 @@ sim_store_register(sd, regno, value, length)
     unsigned char  *value;
     int length;
 {
-    /* FIXME: Review the computation of regval.  */
     int regval;
-    if (current_target_byte_order == BIG_ENDIAN)
-	regval = (value[0] << 24) | (value[1] << 16)
+
+    regval = (value[0] << 24) | (value[1] << 16)
 		 | (value[2] << 8) | value[3];
-    else
-	regval = (value[3] << 24) | (value[2] << 16)
-		 | (value[1] << 8) | value[0];
     set_regi(&sregs, regno, regval);
     return length;
 }
@@ -336,23 +335,25 @@ sim_fetch_register(sd, regno, buf, length)
 }
 
 int
-sim_write(sd, mem, buf, length)
-     SIM_DESC sd;
-    SIM_ADDR             mem;
-    const unsigned char  *buf;
-    int             length;
+sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
 {
-    return sis_memory_write (mem, buf, length);
+    int i, len;
+
+    for (i = 0; i < length; i++) {
+	sis_memory_write ((mem + i) ^ EBT, &buf[i], 1);
+    }
+    return length;
 }
 
 int
-sim_read(sd, mem, buf, length)
-     SIM_DESC sd;
-     SIM_ADDR mem;
-     unsigned char *buf;
-     int length;
+sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {
-    return sis_memory_read (mem, buf, length);
+    int i, len;
+
+    for (i = 0; i < length; i++) {
+	sis_memory_read ((mem + i) ^ EBT, &buf[i], 1);
+    }
+    return length;
 }
 
 void

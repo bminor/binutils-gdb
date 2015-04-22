@@ -17912,7 +17912,7 @@ may try to load the host's libraries.  @value{GDBN} has two variables
 to specify the search directories for target libraries.
 
 @table @code
-@cindex prefix for shared library file names
+@cindex prefix for executable and shared library file names
 @cindex system root, alternate
 @kindex set solib-absolute-prefix
 @kindex set sysroot
@@ -17920,10 +17920,14 @@ to specify the search directories for target libraries.
 Use @var{path} as the system root for the program being debugged.  Any
 absolute shared library paths will be prefixed with @var{path}; many
 runtime loaders store the absolute paths to the shared library in the
-target program's memory.  If you use @code{set sysroot} to find shared
-libraries, they need to be laid out in the same way that they are on
-the target, with e.g.@: a @file{/lib} and @file{/usr/lib} hierarchy
-under @var{path}.
+target program's memory.  When starting processes remotely, and when
+attaching to already-running processes (local or remote), their
+executable filenames will be prefixed with @var{path} if reported to
+@value{GDBN} as absolute by the operating system.  If you use
+@code{set sysroot} to find executables and shared libraries, they need
+to be laid out in the same way that they are on the target, with
+e.g.@: a @file{/bin}, @file{/lib} and @file{/usr/lib} hierarchy under
+@var{path}.
 
 If @var{path} starts with the sequence @file{target:} and the target
 system is remote then @value{GDBN} will retrieve the target binaries
@@ -17958,7 +17962,7 @@ system:
   c:/foo/bar.dll @result{} /path/to/sysroot/c:/foo/bar.dll
 @end smallexample
 
-If that does not find the shared library, @value{GDBN} tries removing
+If that does not find the binary, @value{GDBN} tries removing
 the @samp{:} character from the drive spec, both for convenience, and,
 for the case of the host file system not supporting file names with
 colons:
@@ -17983,7 +17987,7 @@ and point the system root at @file{/path/to/sysroot}, so that
 @value{GDBN} can find the correct copies of both
 @file{c:\sys\bin\foo.dll}, and @file{z:\sys\bin\bar.dll}.
 
-If that still does not find the shared library, @value{GDBN} tries
+If that still does not find the binary, @value{GDBN} tries
 removing the whole drive spec from the target file name:
 
 @smallexample
@@ -18007,7 +18011,7 @@ location.
 
 @kindex show sysroot
 @item show sysroot
-Display the current shared library prefix.
+Display the current executable and shared library prefix.
 
 @kindex set solib-search-path
 @item set solib-search-path @var{path}
@@ -18948,10 +18952,15 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 @node Connecting
 @section Connecting to a Remote Target
 
-On the @value{GDBN} host machine, you will need an unstripped copy of
-your program, since @value{GDBN} needs symbol and debugging information.
-Start up @value{GDBN} as usual, using the name of the local copy of your
-program as the first argument.
+@value{GDBN} needs an unstripped copy of your program to access symbol
+and debugging information.  Some remote targets (@pxref{qXfer
+executable filename read}, and @pxref{Host I/O Packets}) allow
+@value{GDBN} to access program files over the same connection used to
+communicate with @value{GDBN}.  With such a target, if the remote
+program is unstripped, the only command you need is @code{target
+remote}.  Otherwise, start up @value{GDBN} using the name of the local
+unstripped copy of your program as the first argument, or use the
+@code{file} command.
 
 @cindex @code{target remote}
 @value{GDBN} can communicate with the target over a serial line, or
@@ -19786,6 +19795,10 @@ are:
 @item @code{access-watchpoint}
 @tab @code{Z4}
 @tab @code{awatch}
+
+@item @code{pid-to-exec-file}
+@tab @code{qXfer:exec-file:read}
+@tab @code{attach}, @code{run}
 
 @item @code{target-features}
 @tab @code{qXfer:features:read}
@@ -36012,6 +36025,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:exec-file:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:features:read}
 @tab No
 @tab @samp{-}
@@ -36214,6 +36232,10 @@ packet (@pxref{qXfer btrace read}).
 @item qXfer:btrace-conf:read
 The remote stub understands the @samp{qXfer:btrace-conf:read}
 packet (@pxref{qXfer btrace-conf read}).
+
+@item qXfer:exec-file:read
+The remote stub understands the @samp{qXfer:exec-file:read} packet
+(@pxref{qXfer executable filename read}).
 
 @item qXfer:features:read
 The remote stub understands the @samp{qXfer:features:read} packet
@@ -36527,6 +36549,16 @@ Return a description of the current branch trace configuration.
 @xref{Branch Trace Configuration Format}.
 
 This packet is not probed by default; the remote stub must request it
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:exec-file:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer executable filename read}
+Return the full absolute name of the file that was executed to create
+a process running on the remote system.  The annex specifies the
+numeric process ID of the process to query, encoded as a hexadecimal
+number.
+
+This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 
 @item qXfer:features:read:@var{annex}:@var{offset},@var{length}

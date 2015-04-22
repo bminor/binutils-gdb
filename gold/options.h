@@ -802,6 +802,10 @@ class General_options
 	      N_("(ARM only) Fix binaries for Cortex-A8 erratum."),
 	      N_("(ARM only) Do not fix binaries for Cortex-A8 erratum."));
 
+  DEFINE_bool(fix_cortex_a53, options::TWO_DASHES, '\0', false,
+	      N_("(AArch64 only) Scan and fix binaries for Cortex-A53 errata."),
+	      N_("(AArch64 only) Do not scan for Cortex-A53 errata."));
+
   DEFINE_bool(fix_arm1176, options::TWO_DASHES, '\0', true,
 	      N_("(ARM only) Fix binaries for ARM1176 erratum."),
 	      N_("(ARM only) Do not fix binaries for ARM1176 erratum."));

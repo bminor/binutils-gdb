@@ -1252,6 +1252,7 @@ enum {
   PACKET_vFile_fstat,
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
+  PACKET_qXfer_exec_file,
   PACKET_qXfer_libraries,
   PACKET_qXfer_libraries_svr4,
   PACKET_qXfer_memory_map,
@@ -1515,10 +1516,13 @@ remote_query_attached (int pid)
    inferior.  If ATTACHED is 1, then we had just attached to this
    inferior.  If it is 0, then we just created this inferior.  If it
    is -1, then try querying the remote stub to find out if it had
-   attached to the inferior or not.  */
+   attached to the inferior or not.  If TRY_OPEN_EXEC is true then
+   attempt to open this inferior's executable as the main executable
+   if no main executable is open already.  */
 
 static struct inferior *
-remote_add_inferior (int fake_pid_p, int pid, int attached)
+remote_add_inferior (int fake_pid_p, int pid, int attached,
+		     int try_open_exec)
 {
   struct inferior *inf;
 
@@ -1551,6 +1555,11 @@ remote_add_inferior (int fake_pid_p, int pid, int attached)
 
   inf->attach_flag = attached;
   inf->fake_pid_p = fake_pid_p;
+
+  /* If no main executable is currently open then attempt to
+     open the file that was executed to create this inferior.  */
+  if (try_open_exec && !fake_pid_p && get_exec_file (0) == NULL)
+    exec_file_locate_attach (pid, 1);
 
   return inf;
 }
@@ -1642,7 +1651,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	  int fake_pid_p = !remote_multi_process_p (rs);
 
 	  inf = remote_add_inferior (fake_pid_p,
-				     ptid_get_pid (currthread), -1);
+				     ptid_get_pid (currthread), -1, 1);
 	}
 
       /* This is really a new thread.  Add it.  */
@@ -3412,7 +3421,7 @@ add_current_inferior_and_thread (char *wait_status)
       fake_pid_p = 1;
     }
 
-  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1);
+  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1, 1);
 
   /* Add the main thread.  */
   add_thread_silent (inferior_ptid);
@@ -3963,6 +3972,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_auxv },
+  { "qXfer:exec-file:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_exec_file },
   { "qXfer:features:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_features },
   { "qXfer:libraries:read", PACKET_DISABLE, remote_supported_packet,
@@ -4536,7 +4547,7 @@ extended_remote_attach (struct target_ops *target, const char *args,
 	     target_pid_to_str (pid_to_ptid (pid)));
     }
 
-  set_current_inferior (remote_add_inferior (0, pid, 1));
+  set_current_inferior (remote_add_inferior (0, pid, 1, 0));
 
   inferior_ptid = pid_to_ptid (pid);
 
@@ -9035,6 +9046,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 				len, xfered_len,
 	&remote_protocol_packets[PACKET_qXfer_btrace_conf]);
 
+    case TARGET_OBJECT_EXEC_FILE:
+      return remote_read_qxfer (ops, "exec-file", annex, readbuf, offset,
+				len, xfered_len,
+	&remote_protocol_packets[PACKET_qXfer_exec_file]);
+
     default:
       return TARGET_XFER_E_IO;
     }
@@ -11642,6 +11658,29 @@ remote_load (struct target_ops *self, const char *name, int from_tty)
   generic_load (name, from_tty);
 }
 
+/* Accepts an integer PID; returns a string representing a file that
+   can be opened on the remote side to get the symbols for the child
+   process.  Returns NULL if the operation is not supported.  */
+
+static char *
+remote_pid_to_exec_file (struct target_ops *self, int pid)
+{
+  static char *filename = NULL;
+  char annex[9];
+
+  if (packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)
+    return NULL;
+
+  if (filename != NULL)
+    xfree (filename);
+
+  xsnprintf (annex, sizeof (annex), "%x", pid);
+  filename = target_read_stralloc (&current_target,
+				   TARGET_OBJECT_EXEC_FILE, annex);
+
+  return filename;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -11691,6 +11730,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_stop = remote_stop;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
+  remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
   remote_ops.to_log_command = serial_log_command;
   remote_ops.to_get_thread_local_address = remote_get_thread_local_address;
   remote_ops.to_stratum = process_stratum;
@@ -12218,6 +12258,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_auxv],
 			 "qXfer:auxv:read", "read-aux-vector", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_exec_file],
+			 "qXfer:exec-file:read", "pid-to-exec-file", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_features],
 			 "qXfer:features:read", "target-features", 0);

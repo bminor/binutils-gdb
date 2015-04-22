@@ -2462,8 +2462,6 @@ proceed_after_attach (int pid)
 static void
 attach_command_post_wait (char *args, int from_tty, int async_exec)
 {
-  char *exec_file;
-  char *full_exec_path = NULL;
   struct inferior *inferior;
 
   inferior = current_inferior ();
@@ -2471,27 +2469,8 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
-  exec_file = (char *) get_exec_file (0);
-  if (!exec_file)
-    {
-      exec_file = target_pid_to_exec_file (ptid_get_pid (inferior_ptid));
-      if (exec_file)
-	{
-	  /* It's possible we don't have a full path, but rather just a
-	     filename.  Some targets, such as HP-UX, don't provide the
-	     full path, sigh.
-
-	     Attempt to qualify the filename against the source path.
-	     (If that fails, we'll just fall back on the original
-	     filename.  Not much more we can do...)  */
-
-	  if (!source_full_path_of (exec_file, &full_exec_path))
-	    full_exec_path = xstrdup (exec_file);
-
-	  exec_file_attach (full_exec_path, from_tty);
-	  symbol_file_add_main (full_exec_path, from_tty);
-	}
-    }
+  if (get_exec_file (0) == NULL)
+    exec_file_locate_attach (ptid_get_pid (inferior_ptid), from_tty);
   else
     {
       reopen_exec_file ();

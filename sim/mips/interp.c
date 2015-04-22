@@ -311,7 +311,7 @@ void
 interrupt_event (SIM_DESC sd, void *data)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
-  address_word cia = CIA_GET (cpu);
+  address_word cia = CPU_PC_GET (cpu);
   if (SR & status_IE)
     {
       interrupt_pending = 0;
@@ -1112,7 +1112,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
       for (cpu_nr = 0; cpu_nr < sim_engine_nr_cpus (sd); cpu_nr++)
 	{
 	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
-	  CIA_SET (cpu, (unsigned64) bfd_get_start_address (abfd));
+	  CPU_PC_SET (cpu, (unsigned64) bfd_get_start_address (abfd));
 	}
     }
 

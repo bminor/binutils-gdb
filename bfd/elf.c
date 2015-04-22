@@ -3479,11 +3479,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
     }
 
   for (secn = 1; secn < section_number; ++secn)
-    if (i_shdrp[secn] == NULL)
-      i_shdrp[secn] = i_shdrp[0];
-    else
-      i_shdrp[secn]->sh_name = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
-						       i_shdrp[secn]->sh_name);
+    i_shdrp[secn]->sh_name = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
+						     i_shdrp[secn]->sh_name);
   return TRUE;
 }
 
@@ -5101,7 +5098,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   Elf_Internal_Shdr **i_shdrpp;
-  Elf_Internal_Shdr **hdrpp;
+  Elf_Internal_Shdr **hdrpp, **end_hdrpp;
   Elf_Internal_Phdr *phdrs;
   Elf_Internal_Phdr *p;
   struct elf_segment_map *m;
@@ -5109,14 +5106,12 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   bfd_vma filehdr_vaddr, filehdr_paddr;
   bfd_vma phdrs_vaddr, phdrs_paddr;
   file_ptr off;
-  unsigned int num_sec;
-  unsigned int i;
   unsigned int count;
 
   i_shdrpp = elf_elfsections (abfd);
-  num_sec = elf_numsections (abfd);
+  end_hdrpp = i_shdrpp + elf_numsections (abfd);
   off = elf_next_file_pos (abfd);
-  for (i = 1, hdrpp = i_shdrpp + 1; i < num_sec; i++, hdrpp++)
+  for (hdrpp = i_shdrpp + 1; hdrpp < end_hdrpp; hdrpp++)
     {
       Elf_Internal_Shdr *hdr;
 
@@ -5308,6 +5303,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	}
       else if (m->count != 0)
 	{
+	  unsigned int i;
 	  if (p->p_type != PT_LOAD
 	      && (p->p_type != PT_NOTE
 		  || bfd_get_format (abfd) != bfd_core))
@@ -5559,15 +5555,15 @@ static bfd_boolean
 _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 {
   file_ptr off;
-  unsigned int i, num_sec;
-  Elf_Internal_Shdr **shdrpp;
+  Elf_Internal_Shdr **shdrpp, **end_shdrpp;
   Elf_Internal_Ehdr *i_ehdrp;
   const struct elf_backend_data *bed;
 
   off = elf_next_file_pos (abfd);
 
-  num_sec = elf_numsections (abfd);
-  for (i = 1, shdrpp = elf_elfsections (abfd) + 1; i < num_sec; i++, shdrpp++)
+  shdrpp = elf_elfsections (abfd);
+  end_shdrpp = shdrpp + elf_numsections (abfd);
+  for (shdrpp++; shdrpp < end_shdrpp; shdrpp++)
     {
       Elf_Internal_Shdr *shdrp;
 

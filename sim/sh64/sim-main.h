@@ -3,11 +3,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define USING_SIM_BASE_H /* FIXME: quick hack */
-
-struct _sim_cpu; /* FIXME: should be in sim-basics.h */
-typedef struct _sim_cpu SIM_CPU;
-
 /* sim-basics.h includes config.h but cgen-types.h must be included before
    sim-basics.h and cgen-types.h needs config.h.  */
 #include "config.h"
@@ -21,9 +16,7 @@ typedef struct _sim_cpu SIM_CPU;
 
 /* These must be defined before sim-base.h.  */
 typedef UDI sim_cia;
-
-#define CIA_GET(cpu)     CPU_PC_GET (cpu)
-#define CIA_SET(cpu,val) CPU_PC_SET ((cpu), (val) | (sh64_h_ism_get (cpu)))
+#define CIA_ADDR(cia) (cia)
 
 #include "sim-base.h"
 #include "cgen-sim.h"

@@ -222,12 +222,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 }
 
 /* Possible values for prefix requirement.  */
-#define PREFIX_UD_SHIFT		8
-#define PREFIX_UD_REPZ		(PREFIX_REPZ << PREFIX_UD_SHIFT)
-#define PREFIX_UD_REPNZ		(PREFIX_REPNZ << PREFIX_UD_SHIFT)
-#define PREFIX_UD_DATA		(PREFIX_DATA << PREFIX_UD_SHIFT)
-#define PREFIX_UD_ADDR		(PREFIX_ADDR << PREFIX_UD_SHIFT)
-#define PREFIX_UD_LOCK		(PREFIX_LOCK << PREFIX_UD_SHIFT)
 #define PREFIX_IGNORED_SHIFT	16
 #define PREFIX_IGNORED_REPZ	(PREFIX_REPZ << PREFIX_IGNORED_SHIFT)
 #define PREFIX_IGNORED_REPNZ	(PREFIX_REPNZ << PREFIX_IGNORED_SHIFT)
@@ -3082,8 +3076,6 @@ static int last_addr_prefix;
 static int last_rex_prefix;
 static int last_seg_prefix;
 static int fwait_prefix;
-/* The PREFIX_REPZ/PREFIX_REPNZ/PREFIX_DATA prefix is mandatory.  */
-static int prefix_requirement;
 /* The active segment register prefix.  */
 static int active_seg_prefix;
 #define MAX_CODE_LENGTH 15
@@ -13053,14 +13045,12 @@ print_insn (bfd_vma pc, disassemble_info *info)
       threebyte = *++codep;
       dp = &dis386_twobyte[threebyte];
       need_modrm = twobyte_has_modrm[*codep];
-      prefix_requirement = dp->prefix_requirement;
       codep++;
     }
   else
     {
       dp = &dis386[*codep];
       need_modrm = onebyte_has_modrm[*codep];
-      prefix_requirement = 0;
       codep++;
     }
 
@@ -13160,7 +13150,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
      used by putop and MMX/SSE operand and may be overriden by the
      PREFIX_REPZ/PREFIX_REPNZ fix, we check the PREFIX_DATA prefix
      separately.  */
-  if (prefix_requirement == PREFIX_OPCODE
+  if (dp->prefix_requirement == PREFIX_OPCODE
       && dp != &bad_opcode
       && (((prefixes
 	    & (PREFIX_REPZ | PREFIX_REPNZ)) != 0

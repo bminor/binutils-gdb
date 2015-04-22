@@ -56,8 +56,8 @@ change_vrs:
 	.cfi_startproc
 	lghi	%r1,16
 	lghi	%r3,0xff
-1:	exrl	%r3,2f
-	exrl	%r3,1f
+1:	.insn	ril,0xc60000000000,%r3,2f /* exrl */
+	.insn	ril,0xc60000000000,%r3,1f /* exrl */
 	aghi	%r3,-0x11
 	brctg	%r1,1b
 	br	%r14

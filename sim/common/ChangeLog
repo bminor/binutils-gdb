@@ -1,3 +1,34 @@
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.sh: Add mcore support.
+	* nltvals.def: Regenerate.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen.sh: Add +x permissions.
+	* genmloop.sh: Likewise.
+	* gentvals.sh: Likewise.
+	* gennltvals.sh (newlibroot): New variable to hold the path to newlib.
+	Change all uses of srcroot for newlib to newlibroot.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-base.h (SIM_CPU): New typedef.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-engine.h (CIA_ADDR): Delete.
+	* sim-base.h: Update sim_cia example.
+	[!CIA_ADDR] (sim_cia): New typedef.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-utils.c (cgen_rtx_error): Change CIA_GET to CPU_PC_GET.
+	* sim-core.c (sim_core_read_buffer, sim_core_write_buffer): Likewise.
+	* sim-engine.h (SIM_ENGINE_HALT_HOOK): Change CIA_SET to CPU_PC_SET.
+	* sim-run.c (sim_engine_run): Change CIA_GET to CPU_PC_GET and
+	CIA_SET to CPU_PC_SET.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_NEW_COMMON_OBJS): Add sim-cpu.o.

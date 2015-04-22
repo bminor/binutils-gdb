@@ -1,3 +1,52 @@
+2015-04-21  Pierre Muller  <muller@sourceware.org>
+
+	PR pascal/17815
+	* lib/pascal.exp (gpc_compile): Add new option "class".
+	(fpc_compile): Likewise.
+	* gdb.pascal/case-insensitive-symbols.pas: New file.
+	* gdb.pascal/case-insensitive-symbols.exp: New file.
+
+2015-04-20  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/attach.exp: Fix three extended remote failures.
+
+2015-04-17  Gary Benson <gbenson@redhat.com>
+
+	* gdb.server/server-exec-info.exp: Inhibit GDB from accessing
+	the main executable over the remote protocol.
+
+2015-04-16  Pedro Alves  <palves@redhat.com>
+
+	* boards/native-extended-gdbserver.exp (mi_gdb_start): Don't start
+	a new gdbserver if gdbserver_reconnect_p is set.
+
+2015-04-16  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdbserver-support.exp (gdb_exit): If gdbserver_reconnect_p
+	is set, don't exit gdbserver.
+
+2015-04-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-vregs.S (change_vrs): Replace exrl by an
+	appropriate .insn, such that an older assembler can be used.
+	* gdb.arch/s390-vregs.exp: Add the compile flag -mzarch, to enable
+	the z/Architecture instruction set on 31-bit targets as well.
+
+2015-04-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.go/handcall.exp: Remove all logic related to the first
+	breakpoint and rely on go_runto_main instead.
+	* gdb.go/strings.exp: Likewise.
+	* gdb.go/unsafe.exp: Likewise.
+	* gdb.go/hello.exp: Likewise.  Also rename the remaining
+	breakpoint marker to "breakpoint 1".
+	* gdb.go/handcall.go: Remove comment "set breakpoint 1 here".
+	* gdb.go/strings.go: Likewise.
+	* gdb.go/unsafe.go: Likewise.
+	* gdb.go/hello.go: Likewise.  Also remove the second occurrence of
+	"set breakpoint 2 here" and rename the remaining breakpoint marker
+	to "breakpoint 1".
+
 2015-04-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-framefilter.py (ErrorFilter.filter): Use map function

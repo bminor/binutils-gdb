@@ -1,3 +1,40 @@
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_CPU): Delete.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (issue_messages, wbat, wlat, what, rbat, rlat, rhat,
+	sim_memory_size, MEM_SIZE_FLOOR, sim_size, init_pointers, sim_write,
+	sim_read, sim_do_command): Delete.
+	(set_initial_gprs): Delete memsize and call to init_pointers.
+	(sim_resume): Change rlat to MEM_RD_WORD.  Change issue_messages to
+	STATE_VERBOSE_P.
+	(sim_store_register, sim_fetch_register): Drop call to init_pointers.
+	(sim_open): Drop issue_messages setup.  Delete osize and call to
+	sim_size.  Call sim_do_commandf to set the memory size.
+	* microblaze.h (MEM): Delete.
+	(MEM_RD_BYTE): Change rbat to sim_core_read_1.
+	(MEM_RD_HALF): Change rhat to sim_core_read_2.
+	(MEM_RD_WORD): Change rlat to sim_core_read_4.
+	(MEM_WR_BYTE): Change wbat to sim_core_write_1.
+	(MEM_WR_HALF): Change what to sim_core_write_2.
+	(MEM_WR_WORD): Change wlat to sim_core_write_4.
+	* sim-main.h (microblaze_regset): Delete msize and memory.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (microblaze_pc_get, microblaze_pc_set): New functions.
+	(sim_open): Call CPU_PC_FETCH & CPU_PC_STORE for all cpus.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.
