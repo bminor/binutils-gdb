@@ -1,3 +1,8 @@
+2015-04-23  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Match eof/full_buffer/timeout
+	on $any_spawn_id instead of only on $gdb_spawn_id.
+
 2015-04-21  Pierre Muller  <muller@sourceware.org>
 
 	PR pascal/17815
