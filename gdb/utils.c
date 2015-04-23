@@ -1795,6 +1795,18 @@ set_height_command (char *args, int from_tty, struct cmd_list_element *c)
   set_screen_size ();
 }
 
+/* See utils.h.  */
+
+void
+set_screen_width_and_height (int width, int height)
+{
+  lines_per_page = height;
+  chars_per_line = width;
+
+  set_screen_size ();
+  set_width ();
+}
+
 /* Wait, so the user can read what's on the screen.  Prompt the user
    to continue by pressing RETURN.  */
 

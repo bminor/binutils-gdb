@@ -465,15 +465,20 @@ bold-standout   use extra bright or bold with standout mode"),
 void
 tui_update_gdb_sizes (void)
 {
-  char cmd[50];
+  int width, height;
 
-  /* Set to TUI command window dimension or use readline values.  */
-  xsnprintf (cmd, sizeof (cmd), "set width %d",
-           tui_active ? TUI_CMD_WIN->generic.width : tui_term_width());
-  execute_command (cmd, 0);
-  xsnprintf (cmd, sizeof (cmd), "set height %d",
-           tui_active ? TUI_CMD_WIN->generic.height : tui_term_height());
-  execute_command (cmd, 0);
+  if (tui_active)
+    {
+      width = TUI_CMD_WIN->generic.width;
+      height = TUI_CMD_WIN->generic.height;
+    }
+  else
+    {
+      width = tui_term_width ();
+      height = tui_term_height ();
+    }
+
+  set_screen_width_and_height (width, height);
 }
 
 

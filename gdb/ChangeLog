@@ -1,3 +1,9 @@
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* utils.h (set_screen_width_and_height): Declare.
+	* utils.c (set_screen_width_and_height): Define.
+	* tui/tui-win.c (tui_update_gdb_sizes): Use it.
+
 2015-04-28  Gary Benson <gbenson@redhat.com>
 
 	* infrun.c (solist.h): New include.
