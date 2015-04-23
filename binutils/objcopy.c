@@ -2929,6 +2929,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* Copy merge entity size.  */
   osection->entsize = isection->entsize;
 
+  /* Copy compress status.  */
+  osection->compress_status = isection->compress_status;
+
   /* This used to be mangle_section; we do here to avoid using
      bfd_get_section_by_name since some formats allow multiple
      sections with the same name.  */

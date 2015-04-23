@@ -1400,6 +1400,10 @@ typedef struct bfd_section
      TMS320C54X only.  */
 #define SEC_TIC54X_BLOCK 0x10000000
 
+  /* This section should be renamed.  This is for ELF linker
+     internal use only.  */
+#define SEC_ELF_RENAME 0x10000000
+
   /* Conditionally link this section; do not link if there are no
      references found to any symbol in the section.  This is for TI
      TMS320C54X only.  */
@@ -6464,6 +6468,9 @@ struct bfd
 
   /* Set if this is the linker output BFD.  */
   unsigned int is_linker_output : 1;
+
+  /* Set if this is the linker input BFD.  */
+  unsigned int is_linker_input : 1;
 
   /* If this is an input for a compiler plug-in library.  */
   ENUM_BITFIELD (bfd_plugin_format) plugin_format : 2;

@@ -566,7 +566,7 @@ if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
     fail "$testname"
     send_log "$got\n"
 }
-if { [regexp_diff objdump.out $srcdir/$subdir/dw2-3.W] } then {
+if { [regexp_diff objdump.out $srcdir/$subdir/dw2-3gabi.W] } then {
     fail "$testname"
 } else {
     pass "$testname"
