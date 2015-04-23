@@ -1,5 +1,13 @@
 2015-04-23  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* gas/mips/dla-warn.l: New file.
+	* gas/mips/dla-warn.s: New file.
+	* gas/mips/la-warn.l: New file.
+	* gas/mips/la-warn.s: New file.
+	* gas/mips/mips.exp: Run new tests.
+
+2015-04-23  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* gas/mips/mips.exp: Require o32 for r6-branch-constraints.
 
 2015-04-23  Jan Beulich  <jbeulich@suse.com>
