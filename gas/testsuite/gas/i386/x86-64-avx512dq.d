@@ -213,13 +213,13 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 93 fd 48 66 ee ab[ 	]*vfpclasspd \$0xab,%zmm30,%k5
 [ 	]*[a-f0-9]+:[ 	]*62 93 fd 4f 66 ee ab[ 	]*vfpclasspd \$0xab,%zmm30,%k5\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 93 fd 48 66 ee 7b[ 	]*vfpclasspd \$0x7b,%zmm30,%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 29 7b[ 	]*vfpclasspd \$0x7b,\(%rcx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 b3 fd 48 66 ac f0 23 01 00 00 7b[ 	]*vfpclasspd \$0x7b,0x123\(%rax,%r14,8\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 29 7b[ 	]*vfpclasspdz \$0x7b,\(%rcx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 b3 fd 48 66 ac f0 23 01 00 00 7b[ 	]*vfpclasspdz \$0x7b,0x123\(%rax,%r14,8\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 29 7b[ 	]*vfpclasspd \$0x7b,\(%rcx\)\{1to8\},%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 7f 7b[ 	]*vfpclasspd \$0x7b,0x1fc0\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa 00 20 00 00 7b[ 	]*vfpclasspd \$0x7b,0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 80 7b[ 	]*vfpclasspd \$0x7b,-0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa c0 df ff ff 7b[ 	]*vfpclasspd \$0x7b,-0x2040\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 7f 7b[ 	]*vfpclasspdz \$0x7b,0x1fc0\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa 00 20 00 00 7b[ 	]*vfpclasspdz \$0x7b,0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 80 7b[ 	]*vfpclasspdz \$0x7b,-0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa c0 df ff ff 7b[ 	]*vfpclasspdz \$0x7b,-0x2040\(%rdx\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 6a 7f 7b[ 	]*vfpclasspd \$0x7b,0x3f8\(%rdx\)\{1to8\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 aa 00 04 00 00 7b[ 	]*vfpclasspd \$0x7b,0x400\(%rdx\)\{1to8\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 6a 80 7b[ 	]*vfpclasspd \$0x7b,-0x400\(%rdx\)\{1to8\},%k5
@@ -227,13 +227,13 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 93 7d 48 66 ee ab[ 	]*vfpclassps \$0xab,%zmm30,%k5
 [ 	]*[a-f0-9]+:[ 	]*62 93 7d 4f 66 ee ab[ 	]*vfpclassps \$0xab,%zmm30,%k5\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 93 7d 48 66 ee 7b[ 	]*vfpclassps \$0x7b,%zmm30,%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 29 7b[ 	]*vfpclassps \$0x7b,\(%rcx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 b3 7d 48 66 ac f0 23 01 00 00 7b[ 	]*vfpclassps \$0x7b,0x123\(%rax,%r14,8\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 29 7b[ 	]*vfpclasspsz \$0x7b,\(%rcx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 b3 7d 48 66 ac f0 23 01 00 00 7b[ 	]*vfpclasspsz \$0x7b,0x123\(%rax,%r14,8\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 29 7b[ 	]*vfpclassps \$0x7b,\(%rcx\)\{1to16\},%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 7f 7b[ 	]*vfpclassps \$0x7b,0x1fc0\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa 00 20 00 00 7b[ 	]*vfpclassps \$0x7b,0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 80 7b[ 	]*vfpclassps \$0x7b,-0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa c0 df ff ff 7b[ 	]*vfpclassps \$0x7b,-0x2040\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 7f 7b[ 	]*vfpclasspsz \$0x7b,0x1fc0\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa 00 20 00 00 7b[ 	]*vfpclasspsz \$0x7b,0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 80 7b[ 	]*vfpclasspsz \$0x7b,-0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa c0 df ff ff 7b[ 	]*vfpclasspsz \$0x7b,-0x2040\(%rdx\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 6a 7f 7b[ 	]*vfpclassps \$0x7b,0x1fc\(%rdx\)\{1to16\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 aa 00 02 00 00 7b[ 	]*vfpclassps \$0x7b,0x200\(%rdx\)\{1to16\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 6a 80 7b[ 	]*vfpclassps \$0x7b,-0x200\(%rdx\)\{1to16\},%k5
@@ -911,13 +911,13 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 93 fd 48 66 ee ab[ 	]*vfpclasspd \$0xab,%zmm30,%k5
 [ 	]*[a-f0-9]+:[ 	]*62 93 fd 4f 66 ee ab[ 	]*vfpclasspd \$0xab,%zmm30,%k5\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 93 fd 48 66 ee 7b[ 	]*vfpclasspd \$0x7b,%zmm30,%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 29 7b[ 	]*vfpclasspd \$0x7b,\(%rcx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 b3 fd 48 66 ac f0 34 12 00 00 7b[ 	]*vfpclasspd \$0x7b,0x1234\(%rax,%r14,8\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 29 7b[ 	]*vfpclasspdz \$0x7b,\(%rcx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 b3 fd 48 66 ac f0 34 12 00 00 7b[ 	]*vfpclasspdz \$0x7b,0x1234\(%rax,%r14,8\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 29 7b[ 	]*vfpclasspd \$0x7b,\(%rcx\)\{1to8\},%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 7f 7b[ 	]*vfpclasspd \$0x7b,0x1fc0\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa 00 20 00 00 7b[ 	]*vfpclasspd \$0x7b,0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 80 7b[ 	]*vfpclasspd \$0x7b,-0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa c0 df ff ff 7b[ 	]*vfpclasspd \$0x7b,-0x2040\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 7f 7b[ 	]*vfpclasspdz \$0x7b,0x1fc0\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa 00 20 00 00 7b[ 	]*vfpclasspdz \$0x7b,0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 6a 80 7b[ 	]*vfpclasspdz \$0x7b,-0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 fd 48 66 aa c0 df ff ff 7b[ 	]*vfpclasspdz \$0x7b,-0x2040\(%rdx\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 6a 7f 7b[ 	]*vfpclasspd \$0x7b,0x3f8\(%rdx\)\{1to8\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 aa 00 04 00 00 7b[ 	]*vfpclasspd \$0x7b,0x400\(%rdx\)\{1to8\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 fd 58 66 6a 80 7b[ 	]*vfpclasspd \$0x7b,-0x400\(%rdx\)\{1to8\},%k5
@@ -925,13 +925,13 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 93 7d 48 66 ee ab[ 	]*vfpclassps \$0xab,%zmm30,%k5
 [ 	]*[a-f0-9]+:[ 	]*62 93 7d 4f 66 ee ab[ 	]*vfpclassps \$0xab,%zmm30,%k5\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 93 7d 48 66 ee 7b[ 	]*vfpclassps \$0x7b,%zmm30,%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 29 7b[ 	]*vfpclassps \$0x7b,\(%rcx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 b3 7d 48 66 ac f0 34 12 00 00 7b[ 	]*vfpclassps \$0x7b,0x1234\(%rax,%r14,8\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 29 7b[ 	]*vfpclasspsz \$0x7b,\(%rcx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 b3 7d 48 66 ac f0 34 12 00 00 7b[ 	]*vfpclasspsz \$0x7b,0x1234\(%rax,%r14,8\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 29 7b[ 	]*vfpclassps \$0x7b,\(%rcx\)\{1to16\},%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 7f 7b[ 	]*vfpclassps \$0x7b,0x1fc0\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa 00 20 00 00 7b[ 	]*vfpclassps \$0x7b,0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 80 7b[ 	]*vfpclassps \$0x7b,-0x2000\(%rdx\),%k5
-[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa c0 df ff ff 7b[ 	]*vfpclassps \$0x7b,-0x2040\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 7f 7b[ 	]*vfpclasspsz \$0x7b,0x1fc0\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa 00 20 00 00 7b[ 	]*vfpclasspsz \$0x7b,0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 6a 80 7b[ 	]*vfpclasspsz \$0x7b,-0x2000\(%rdx\),%k5
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7d 48 66 aa c0 df ff ff 7b[ 	]*vfpclasspsz \$0x7b,-0x2040\(%rdx\),%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 6a 7f 7b[ 	]*vfpclassps \$0x7b,0x1fc\(%rdx\)\{1to16\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 aa 00 02 00 00 7b[ 	]*vfpclassps \$0x7b,0x200\(%rdx\)\{1to16\},%k5
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7d 58 66 6a 80 7b[ 	]*vfpclassps \$0x7b,-0x200\(%rdx\)\{1to16\},%k5

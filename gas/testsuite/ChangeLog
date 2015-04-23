@@ -1,5 +1,19 @@
 2015-04-23  Jan Beulich  <jbeulich@suse.com>
 
+	* gas/i386/avx512dq.d: Add 'z' suffix to vfpclassp{d,s} non-
+	register, non-broadcast cases.
+	* gas/i386/x86-64-avx512dq.d: Likewise.
+	* gas/i386/avx512dq_vl.d: Add 'x' and 'y' suffixes to
+	vcvt{,u}qq2ps and vfpclassp{d,s} non-register, non-broadcast
+	cases.
+	* gas/i386/x86-64-avx512dq_vl.d: Likewise.
+	* gas/i386/avx512f_vl.d: Add 'x' and 'y' suffixes to
+	vcvt{,t}pd2{,u}dq and vcvtpd2ps non-register, non-broadcast
+	cases.
+	* gas/i386/x86-64-avx512f_vl.d: Likewise.
+
+2015-04-23  Jan Beulich  <jbeulich@suse.com>
+
 	* gas/i386/avx512dq.s: Drop 'z' suffix from vfpclassp{d,s} in
 	some AT&T and all Intel cases.
 	* gas/i386/x86-64-avx512dq.s: Likewise.

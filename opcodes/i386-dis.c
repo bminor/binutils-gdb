@@ -2413,8 +2413,10 @@ struct dis386 {
    '%' => add 1 upper case letter to the macro.
 
    2 upper case letter macros:
-   "XY" => print 'x' or 'y' if no register operands or suffix_always
-	   is true.
+   "XY" => print 'x' or 'y' if suffix_always is true or no register
+	   operands and no broadcast.
+   "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
+	   register operands and no broadcast.
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand
 	   or suffix_always is true
@@ -13795,6 +13797,34 @@ case_B:
 	    *obufp++ = 'd';
 	  break;
 	case 'Z':
+	  if (l != 0 || len != 1)
+	    {
+	      if (l != 1 || len != 2 || last[0] != 'X')
+		{
+		  SAVE_LAST (*p);
+		  break;
+		}
+	      if (!need_vex || !vex.evex)
+		abort ();
+	      if (intel_syntax
+		  || ((modrm.mod == 3 || vex.b) && !(sizeflag & SUFFIX_ALWAYS)))
+		break;
+	      switch (vex.length)
+		{
+		case 128:
+		  *obufp++ = 'x';
+		  break;
+		case 256:
+		  *obufp++ = 'y';
+		  break;
+		case 512:
+		  *obufp++ = 'z';
+		  break;
+		default:
+		  abort ();
+		}
+	      break;
+	    }
 	  if (intel_syntax)
 	    break;
 	  if (address_mode == mode_64bit && (sizeflag & SUFFIX_ALWAYS))
@@ -14093,7 +14123,7 @@ case_S:
 	      if (!need_vex)
 		abort ();
 	      if (intel_syntax
-		  || (modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS)))
+		  || ((modrm.mod == 3 || vex.b) && !(sizeflag & SUFFIX_ALWAYS)))
 		break;
 	      switch (vex.length)
 		{
@@ -14103,8 +14133,10 @@ case_S:
 		case 256:
 		  *obufp++ = 'y';
 		  break;
+		case 512:
+		  if (!vex.evex)
 		default:
-		  abort ();
+		    abort ();
 		}
 	    }
 	  break;

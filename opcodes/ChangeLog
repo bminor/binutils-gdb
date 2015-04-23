@@ -1,3 +1,10 @@
+2015-04-23  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (putop): Extend "XY" handling to AVX512. Handle "XZ".
+	* i386-dis-evex.h.c (vcvtpd2ps, vcvtqq2ps, vcvttpd2udq,
+	vcvtpd2udq, vcvtuqq2ps, vcvttpd2dq, vcvtpd2dq): Add %XY.
+	(vfpclasspd, vfpclassps): Add %XZ.
+
 2015-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PREFIX_UD_SHIFT): Removed.
