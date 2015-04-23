@@ -1,3 +1,17 @@
+2015-04-23  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/i386/avx512dq.s: Drop 'z' suffix from vfpclassp{d,s} in
+	some AT&T and all Intel cases.
+	* gas/i386/x86-64-avx512dq.s: Likewise.
+	* gas/i386/avx512dq_vl.s: Drop 'x' and 'y' suffixes from
+	vcvt{,u}qq2ps and vfpclassp{d,s} in some AT&T and all Intel
+	cases.
+	* gas/i386/x86-64-avx512dq_vl.s: Likewise.
+	* gas/i386/avx512f_vl.s: Drop 'x' and 'y' suffixes from
+	vcvt{,t}pd2{,u}dq and vcvtpd2ps in some AT&T and all Intel
+	cases.
+	* gas/i386/x86-64-avx512f_vl.s: Likewise.
+
 2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/x86-64-unwind.d: Don't hardcode offset of

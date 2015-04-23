@@ -1686,6 +1686,7 @@ match_mem_size (const insn_template *t, unsigned int j)
 {
   return (match_reg_size (t, j)
 	  && !((i.types[j].bitfield.unspecified
+		&& !i.broadcast
 		&& !t->operand_types[j].bitfield.unspecified)
 	       || (i.types[j].bitfield.fword
 		   && !t->operand_types[j].bitfield.fword)
