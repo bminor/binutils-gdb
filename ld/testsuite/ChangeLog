@@ -1,3 +1,9 @@
+2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18277
+	* ld-elf/compressed1d.d: New.
+	* ld-elf/compressed1e.d: Likewise.
+
 2015-04-23  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/ambiguousv1b.d: Update for aligned .got.

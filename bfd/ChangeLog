@@ -1,5 +1,34 @@
 2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/18277
+	* compress.c (bfd_compress_section_contents): Remove the
+	write_compress argument.
+	(bfd_init_section_compress_status): Updated.
+	(bfd_compress_section): Likewise.
+	* elf.c (_bfd_elf_set_reloc_sh_name): New.
+	(_bfd_elf_init_reloc_shdr): Add delay_st_name_p.  Set sh_name
+	to (unsigned int) -1 if delay_st_name_p is TRUE.  Use
+	_bfd_elf_set_reloc_sh_name.
+	(elf_fake_sections): Don't rename DWARF debug section for
+	linker output if it will be compressed.  Instead, set
+	delay_st_name_p to TRUE and pass it to _bfd_elf_init_reloc_shdr.
+	(assign_section_numbers): Call _bfd_elf_strtab_addref only if
+	sh_name != (unsigned int) -1.  Don't finalize nor assign
+	shstrtab section here.  Delay setting output section names to
+	_bfd_elf_write_object_contents.
+	(_bfd_elf_compute_section_file_positions): Update comments on
+	sh_offset for shstrtab section.
+	(assign_file_positions_for_non_load_sections): Set sh_offset to
+	-1 for shstrtab section.
+	(assign_file_positions_except_relocs): Likewise.
+	(_bfd_elf_assign_file_positions_for_non_load): Set up sh_name
+	when compressing DWARF debug sections.  Place shstrtab section
+	after DWARF debug sections have been compressed.
+	(_bfd_elf_write_object_contents): Setting sh_name for output
+	sections.
+
+2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/18209
 	* bfd.c (bfd): Add is_linker_input.
 	* elf.c (convert_debug_to_zdebug): New.

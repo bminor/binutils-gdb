@@ -72,8 +72,7 @@ decompress_contents (bfd_byte *compressed_buffer,
 static bfd_size_type
 bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 			       bfd_byte *uncompressed_buffer,
-			       bfd_size_type uncompressed_size,
-			       bfd_boolean write_compress)
+			       bfd_size_type uncompressed_size)
 {
   uLong compressed_size;
   bfd_byte *buffer;
@@ -177,11 +176,8 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 
       compressed_size += header_size;
       /* PR binutils/18087: If compression didn't make the section smaller,
-	 just keep it uncompressed.  We always generate .zdebug_* section
-	 when linking since section names have been finalized and they
-	 can't be changed easily.  */
-      if ((write_compress && compression_header_size == 0)
-	   || compressed_size < uncompressed_size)
+	 just keep it uncompressed.  */
+      if (compressed_size < uncompressed_size)
 	{
 	  bfd_update_compression_header (abfd, buffer, sec);
 
@@ -547,8 +543,7 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
     {
       uncompressed_size = bfd_compress_section_contents (abfd, sec,
 							 uncompressed_buffer,
-							 uncompressed_size,
-							 FALSE);
+							 uncompressed_size);
       ret = uncompressed_size != 0;
     }
 
@@ -590,5 +585,5 @@ bfd_compress_section (bfd *abfd, sec_ptr sec, bfd_byte *uncompressed_buffer)
 
   /* Compress it.  */
   return bfd_compress_section_contents (abfd, sec, uncompressed_buffer,
-					uncompressed_size, TRUE) != 0;
+					uncompressed_size) != 0;
 }
