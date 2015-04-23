@@ -1,5 +1,14 @@
 2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli/cli-dump.c (srec_dump_command): Add internationalization
+	mark ups.
+	(ihex_dump_command): Likewise.
+	(tekhex_dump_command): Likewise.
+	(binary_dump_command): Likewise.
+	(binary_append_command): Likewise.
+
+2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-dump.c (verilog_cmdlist): New variable.
 	(dump_verilog_memory): New function.
 	(dump_verilog_value): New function.

@@ -637,14 +637,14 @@ restore_command (char *args_in, int from_tty)
 static void
 srec_dump_command (char *cmd, int from_tty)
 {
-  printf_unfiltered ("\"dump srec\" must be followed by a subcommand.\n");
+  printf_unfiltered (_("\"dump srec\" must be followed by a subcommand.\n"));
   help_list (srec_cmdlist, "dump srec ", all_commands, gdb_stdout);
 }
 
 static void
 ihex_dump_command (char *cmd, int from_tty)
 {
-  printf_unfiltered ("\"dump ihex\" must be followed by a subcommand.\n");
+  printf_unfiltered (_("\"dump ihex\" must be followed by a subcommand.\n"));
   help_list (ihex_cmdlist, "dump ihex ", all_commands, gdb_stdout);
 }
 
@@ -658,21 +658,21 @@ verilog_dump_command (char *cmd, int from_tty)
 static void
 tekhex_dump_command (char *cmd, int from_tty)
 {
-  printf_unfiltered ("\"dump tekhex\" must be followed by a subcommand.\n");
+  printf_unfiltered (_("\"dump tekhex\" must be followed by a subcommand.\n"));
   help_list (tekhex_cmdlist, "dump tekhex ", all_commands, gdb_stdout);
 }
 
 static void
 binary_dump_command (char *cmd, int from_tty)
 {
-  printf_unfiltered ("\"dump binary\" must be followed by a subcommand.\n");
+  printf_unfiltered (_("\"dump binary\" must be followed by a subcommand.\n"));
   help_list (binary_dump_cmdlist, "dump binary ", all_commands, gdb_stdout);
 }
 
 static void
 binary_append_command (char *cmd, int from_tty)
 {
-  printf_unfiltered ("\"append binary\" must be followed by a subcommand.\n");
+  printf_unfiltered (_("\"append binary\" must be followed by a subcommand.\n"));
   help_list (binary_append_cmdlist, "append binary ", all_commands,
 	     gdb_stdout);
 }
