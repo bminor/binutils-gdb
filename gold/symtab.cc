@@ -2920,6 +2920,13 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
       typename elfcpp::Elf_types<size>::Elf_Addr dynsym_value = sym_value;
       elfcpp::STB binding = sym->binding();
 
+      // If --weak-unresolved-symbols is set, change binding of unresolved
+      // global symbols to STB_WEAK.
+      if (parameters->options().weak_unresolved_symbols()
+	  && binding == elfcpp::STB_GLOBAL
+	  && sym->is_undefined())
+	binding = elfcpp::STB_WEAK;
+
       // If --no-gnu-unique is set, change STB_GNU_UNIQUE to STB_GLOBAL.
       if (binding == elfcpp::STB_GNU_UNIQUE
 	  && !parameters->options().gnu_unique())

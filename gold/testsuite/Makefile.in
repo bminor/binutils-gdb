@@ -147,7 +147,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_unresolved_symbols_test
 
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
@@ -842,7 +843,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_unresolved_symbols_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_9 = two_file_shared_1_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_nonpic_test$(EXEEXT) \
@@ -1966,6 +1968,17 @@ weak_undef_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 weak_undef_test_2_OBJECTS = $(am_weak_undef_test_2_OBJECTS)
 weak_undef_test_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(weak_undef_test_2_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_unresolved_symbols_test_OBJECTS = weak_unresolved_symbols_test-weak_unresolved_symbols_test.$(OBJEXT)
+weak_unresolved_symbols_test_OBJECTS =  \
+	$(am_weak_unresolved_symbols_test_OBJECTS)
+weak_unresolved_symbols_test_LDADD = $(LDADD)
+weak_unresolved_symbols_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
+weak_unresolved_symbols_test_LINK = $(CXXLD) \
+	$(weak_unresolved_symbols_test_CXXFLAGS) $(CXXFLAGS) \
+	$(weak_unresolved_symbols_test_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -2057,7 +2070,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(ver_test_8_SOURCES) $(ver_test_9_SOURCES) \
 	$(weak_alias_test_SOURCES) weak_plt.c $(weak_test_SOURCES) \
 	$(weak_undef_nonpic_test_SOURCES) $(weak_undef_test_SOURCES) \
-	$(weak_undef_test_2_SOURCES)
+	$(weak_undef_test_2_SOURCES) \
+	$(weak_unresolved_symbols_test_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -2465,6 +2479,9 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_CXXFLAGS = -fno-exceptions -fno-asynchronous-unwind-tables
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -pie
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_LDADD = pie_copyrelocs_shared_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_unresolved_symbols_test_SOURCES = weak_unresolved_symbols_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_unresolved_symbols_test_CXXFLAGS = -fPIE
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_unresolved_symbols_test_LDFLAGS = -Bgcctestdir/ -pie -Wl,--weak-unresolved-symbols
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic_test_SOURCES = \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_2.cc two_file_test_main.cc
 
@@ -3722,6 +3739,9 @@ weak_undef_test$(EXEEXT): $(weak_undef_test_OBJECTS) $(weak_undef_test_DEPENDENC
 weak_undef_test_2$(EXEEXT): $(weak_undef_test_2_OBJECTS) $(weak_undef_test_2_DEPENDENCIES) 
 	@rm -f weak_undef_test_2$(EXEEXT)
 	$(weak_undef_test_2_LINK) $(weak_undef_test_2_OBJECTS) $(weak_undef_test_2_LDADD) $(LIBS)
+weak_unresolved_symbols_test$(EXEEXT): $(weak_unresolved_symbols_test_OBJECTS) $(weak_unresolved_symbols_test_DEPENDENCIES) 
+	@rm -f weak_unresolved_symbols_test$(EXEEXT)
+	$(weak_unresolved_symbols_test_LINK) $(weak_unresolved_symbols_test_OBJECTS) $(weak_unresolved_symbols_test_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -3852,6 +3872,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test_2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -3978,6 +3999,20 @@ pie_copyrelocs_test-pie_copyrelocs_test.obj: pie_copyrelocs_test.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pie_copyrelocs_test.cc' object='pie_copyrelocs_test-pie_copyrelocs_test.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pie_copyrelocs_test_CXXFLAGS) $(CXXFLAGS) -c -o pie_copyrelocs_test-pie_copyrelocs_test.obj `if test -f 'pie_copyrelocs_test.cc'; then $(CYGPATH_W) 'pie_copyrelocs_test.cc'; else $(CYGPATH_W) '$(srcdir)/pie_copyrelocs_test.cc'; fi`
+
+weak_unresolved_symbols_test-weak_unresolved_symbols_test.o: weak_unresolved_symbols_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_unresolved_symbols_test_CXXFLAGS) $(CXXFLAGS) -MT weak_unresolved_symbols_test-weak_unresolved_symbols_test.o -MD -MP -MF $(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Tpo -c -o weak_unresolved_symbols_test-weak_unresolved_symbols_test.o `test -f 'weak_unresolved_symbols_test.cc' || echo '$(srcdir)/'`weak_unresolved_symbols_test.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Tpo $(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='weak_unresolved_symbols_test.cc' object='weak_unresolved_symbols_test-weak_unresolved_symbols_test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_unresolved_symbols_test_CXXFLAGS) $(CXXFLAGS) -c -o weak_unresolved_symbols_test-weak_unresolved_symbols_test.o `test -f 'weak_unresolved_symbols_test.cc' || echo '$(srcdir)/'`weak_unresolved_symbols_test.cc
+
+weak_unresolved_symbols_test-weak_unresolved_symbols_test.obj: weak_unresolved_symbols_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_unresolved_symbols_test_CXXFLAGS) $(CXXFLAGS) -MT weak_unresolved_symbols_test-weak_unresolved_symbols_test.obj -MD -MP -MF $(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Tpo -c -o weak_unresolved_symbols_test-weak_unresolved_symbols_test.obj `if test -f 'weak_unresolved_symbols_test.cc'; then $(CYGPATH_W) 'weak_unresolved_symbols_test.cc'; else $(CYGPATH_W) '$(srcdir)/weak_unresolved_symbols_test.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Tpo $(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='weak_unresolved_symbols_test.cc' object='weak_unresolved_symbols_test-weak_unresolved_symbols_test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_unresolved_symbols_test_CXXFLAGS) $(CXXFLAGS) -c -o weak_unresolved_symbols_test-weak_unresolved_symbols_test.obj `if test -f 'weak_unresolved_symbols_test.cc'; then $(CYGPATH_W) 'weak_unresolved_symbols_test.cc'; else $(CYGPATH_W) '$(srcdir)/weak_unresolved_symbols_test.cc'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -4403,6 +4438,8 @@ two_file_pie_test.log: two_file_pie_test$(EXEEXT)
 	@p='two_file_pie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 pie_copyrelocs_test.log: pie_copyrelocs_test$(EXEEXT)
 	@p='pie_copyrelocs_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_unresolved_symbols_test.log: weak_unresolved_symbols_test$(EXEEXT)
+	@p='weak_unresolved_symbols_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_shared_1_nonpic_test.log: two_file_shared_1_nonpic_test$(EXEEXT)
 	@p='two_file_shared_1_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_shared_2_nonpic_test.log: two_file_shared_2_nonpic_test$(EXEEXT)

@@ -1219,6 +1219,9 @@ class General_options
 		    options::TWO_DASHES, '\0',
 		    N_("Report unresolved symbols as errors"),
 		    NULL, true);
+  DEFINE_bool(weak_unresolved_symbols, options::TWO_DASHES, '\0', false,
+	      N_("Convert unresolved symbols to weak references"),
+	      NULL);
 
   DEFINE_bool(wchar_size_warning, options::TWO_DASHES, '\0', true, NULL,
 	      N_("(ARM only) Do not warn about objects with incompatible "

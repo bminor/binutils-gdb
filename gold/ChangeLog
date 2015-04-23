@@ -1,3 +1,13 @@
+2015-04-23  Sriraman Tallam  <tmsriram@google.com>	
+	* options.h (--weak-unresolved-symbols): New option.
+	* symtab.cc (Symbol_table::sized_write_globals): Change symbol
+	binding to weak with new option.
+	* symtab.h (is_weak_undefined): Check for new option.
+	(is_strong_undefined): Check for new option.
+	* testsuite/Makefile.am (weak_unresolved_symbols_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/weak_unresolved_symbols_test.cc: New file.
+
 2015-04-20  Ian Coolidge  <icoolidge@google.com>
 
 	* symtab.cc (Symbol::should_add_dynsym_entry): Return true for

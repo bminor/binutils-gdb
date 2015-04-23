@@ -526,7 +526,8 @@ class Symbol
   {
     return (this->is_undefined()
 	    && (this->binding() == elfcpp::STB_WEAK
-		|| this->is_undef_binding_weak()));
+		|| this->is_undef_binding_weak()
+		|| parameters->options().weak_unresolved_symbols()));
   }
 
   // Return whether this is a strong undefined symbol.
@@ -535,7 +536,8 @@ class Symbol
   {
     return (this->is_undefined()
 	    && this->binding() != elfcpp::STB_WEAK
-	    && !this->is_undef_binding_weak());
+	    && !this->is_undef_binding_weak()
+	    && !parameters->options().weak_unresolved_symbols());
   }
 
   // Return whether this is an absolute symbol.
