@@ -1696,6 +1696,9 @@ init_page_info (void)
 #endif
     }
 
+  /* We handle SIGWINCH ourselves.  */
+  rl_catch_sigwinch = 0;
+
   set_screen_size ();
   set_width ();
 }
@@ -2711,8 +2714,6 @@ Setting this to \"unlimited\" or zero causes GDB never pause during output."),
 			    set_height_command,
 			    show_lines_per_page,
 			    &setlist, &showlist);
-
-  init_page_info ();
 
   add_setshow_boolean_cmd ("pagination", class_support,
 			   &pagination_enabled, _("\

@@ -1939,6 +1939,8 @@ gdb_init (char *argv0)
   initialize_targets ();    /* Setup target_terminal macros for utils.c.  */
   initialize_utils ();	    /* Make errors and warnings possible.  */
 
+  init_page_info ();
+
   /* Here is where we call all the _initialize_foo routines.  */
   initialize_all_files ();
 
