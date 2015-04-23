@@ -205,12 +205,21 @@ if ![file exists $binfile] then {
 
 	set msg "send end of file"
 	send_inferior "\004"
+
+	set spawn_list "$inferior_spawn_id"
+
 	gdb_test_multiple "" $msg {
-	    -i $inferior_spawn_id -re "end of file" {
-		verbose -log "saw \"end of file\": $saw_end_of_file"
+	    -i spawn_list -re "end of file" {
 		set saw_end_of_file 1
 		verbose -log "saw \"end of file\""
 		if {!$saw_inferior_exit} {
+		    # When $inferior_spawn_id != $gdb_spawn_id, such
+		    # as when testing with gdbserver, we may see the
+		    # eof (the process exit, not the string just
+		    # matched) for $inferior_spawn_id before the
+		    # expected gdb output.  Clear this so we no longer
+		    # expect anything out of $inferior_spawn_id.
+		    set spawn_list ""
 		    exp_continue
 		}
 	    }
