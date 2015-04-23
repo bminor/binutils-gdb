@@ -200,16 +200,16 @@ if ![file exists $binfile] then {
 	    }
 	}
 
-	set saw_eof 0
+	set saw_end_of_file 0
 	set saw_inferior_exit 0
 
 	set msg "send end of file"
 	send_inferior "\004"
 	gdb_test_multiple "" $msg {
-	    -i "$inferior_spawn_id" -re "end of file" {
-		verbose -log "saw eof: $saw_eof"
-		set saw_eof 1
-		verbose -log "saw eof"
+	    -i $inferior_spawn_id -re "end of file" {
+		verbose -log "saw \"end of file\": $saw_end_of_file"
+		set saw_end_of_file 1
+		verbose -log "saw \"end of file\""
 		if {!$saw_inferior_exit} {
 		    exp_continue
 		}
@@ -217,13 +217,13 @@ if ![file exists $binfile] then {
 	    -i "$gdb_spawn_id" -re "$inferior_exited_re normally.*$gdb_prompt " {
 		set saw_inferior_exit 1
 		verbose -log "saw inferior exit"
-		if {!$saw_eof} {
+		if {!$saw_end_of_file} {
 		    exp_continue
 		}
 	    }
 	}
 
-	gdb_assert { $saw_eof && $saw_inferior_exit } $msg
+	gdb_assert { $saw_end_of_file && $saw_inferior_exit } $msg
     }
 }
 return 0
