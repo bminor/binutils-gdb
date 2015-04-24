@@ -1,7 +1,7 @@
-From 3fc835d5fce7b163ae7a5862fbde9763fb7de1a3 Mon Sep 17 00:00:00 2001
+From 97345be30f7160d264003bc3165520ad034b273a Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sun, 22 Mar 2015 11:59:53 -0700
-Subject: [PATCH 2/2] Extend --compress-debug-sections in gold
+Subject: [PATCH] Extend --compress-debug-sections in gold
 
 This patch extends --compress-debug-sections= with [zlib-gnu|zlib-gabi]
 in gold.
@@ -53,7 +53,7 @@ in gold.
  5 files changed, 310 insertions(+), 14 deletions(-)
 
 diff --git a/gold/compressed_output.cc b/gold/compressed_output.cc
-index 8c9fc1e..c6e3375 100644
+index 8c9fc1e..db9749a 100644
 --- a/gold/compressed_output.cc
 +++ b/gold/compressed_output.cc
 @@ -39,12 +39,13 @@ namespace gold
@@ -129,14 +129,14 @@ index 8c9fc1e..c6e3375 100644
 +	    {
 +	      if (is_big_endian)
 +		{
-+		  typename elfcpp::Chdr_write<32, true> chdr(this->data_);
++		  elfcpp::Chdr_write<32, true> chdr(this->data_);
 +		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
 +		  chdr.put_ch_size(uncompressed_size);
 +		  chdr.put_ch_addralign(addralign);
 +		}
 +	      else
 +		{
-+		  typename elfcpp::Chdr_write<32, false> chdr(this->data_);
++		  elfcpp::Chdr_write<32, false> chdr(this->data_);
 +		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
 +		  chdr.put_ch_size(uncompressed_size);
 +		  chdr.put_ch_addralign(addralign);
@@ -146,14 +146,14 @@ index 8c9fc1e..c6e3375 100644
 +	    {
 +	      if (is_big_endian)
 +		{
-+		  typename elfcpp::Chdr_write<64, true> chdr(this->data_);
++		  elfcpp::Chdr_write<64, true> chdr(this->data_);
 +		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
 +		  chdr.put_ch_size(uncompressed_size);
 +		  chdr.put_ch_addralign(addralign);
 +		}
 +	      else
 +		{
-+		  typename elfcpp::Chdr_write<64, false> chdr(this->data_);
++		  elfcpp::Chdr_write<64, false> chdr(this->data_);
 +		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
 +		  chdr.put_ch_size(uncompressed_size);
 +		  chdr.put_ch_addralign(addralign);
