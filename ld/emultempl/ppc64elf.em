@@ -546,13 +546,16 @@ gld${EMULATION_NAME}_after_allocation (void)
   else if (ret > 0)
     need_laying_out = 1;
 
-  if (need_laying_out != -1)
-    {
-      gld${EMULATION_NAME}_map_segments (need_laying_out);
+  /* Call map_segments regardless of the state of need_laying_out.
+     need_laying_out set to -1 means we have just laid everything out,
+     but ppc64_elf_size_stubs strips .branch_lt and .eh_frame if
+     unneeded, after ppc_layout_sections_again.  Another call removes
+     these sections from the segment map.  Their presence is
+     innocuous except for confusing ELF_SECTION_IN_SEGMENT.  */
+  gld${EMULATION_NAME}_map_segments (need_laying_out > 0);
 
-      if (!link_info.relocatable)
-	ppc64_elf_set_toc (&link_info, link_info.output_bfd);
-    }
+  if (need_laying_out != -1 && !link_info.relocatable)
+    ppc64_elf_set_toc (&link_info, link_info.output_bfd);
 }
 
 

@@ -1,3 +1,7 @@
+2015-04-24  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tocnovar.d: Revert last change.
+
 2015-04-24  Richard Earnshaw  <rearnsha@arm.com>
 
 	* ld-arm/armthumb-lib.d: Regenerate expected output.
