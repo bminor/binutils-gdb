@@ -1,3 +1,10 @@
+2015-07-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2015-04-24  Alan Modra  <amodra@gmail.com>
+	* internal.h (ELF_SECTION_IN_SEGMENT_1): Ensure PT_LOAD and
+	similar segments only contain alloc sections.
+
 2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc.h (Tag_GNU_Sparc_HWCAPS2): New object attribute.
