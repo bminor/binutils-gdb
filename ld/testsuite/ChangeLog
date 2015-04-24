@@ -1,3 +1,30 @@
+2015-04-24  Richard Earnshaw  <rearnsha@arm.com>
+
+	* ld-arm/armthumb-lib.d: Regenerate expected output.
+	* ld-arm/armthumb-lib.d: Likewise.
+	* ld-arm/armthumb-lib.sym: Likewise.
+	* ld-arm/cortex-a8-fix-b-rel-arm.d: Likewise.
+	* ld-arm/cortex-a8-fix-b-rel-thumb.d: Likewise.
+	* ld-arm/cortex-a8-fix-b.d: Likewise.
+	* ld-arm/cortex-a8-fix-bcc-rel-thumb.d: Likewise.
+	* ld-arm/cortex-a8-fix-bcc.d: Likewise.
+	* ld-arm/cortex-a8-fix-bl-rel-arm.d: Likewise.
+	* ld-arm/cortex-a8-fix-bl-rel-plt.d: Likewise.
+	* ld-arm/cortex-a8-fix-bl-rel-thumb.d: Likewise.
+	* ld-arm/cortex-a8-fix-bl.d: Likewise.
+	* ld-arm/cortex-a8-fix-blx-bcond.d: Likewise.
+	* ld-arm/cortex-a8-fix-blx-rel-arm.d: Likewise.
+	* ld-arm/cortex-a8-fix-blx-rel-thumb.d: Likewise.
+	* ld-arm/cortex-a8-fix-blx.d: Likewise.
+	* ld-arm/cortex-a8-fix-hdr.d: Likewise.
+	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-lib-v4t.d: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/mixed-app-v5.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+	* ld-arm/mixed-lib.d: Likewise.
+
 2015-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/compressed1d.d: Add notarget for ELF based targets that

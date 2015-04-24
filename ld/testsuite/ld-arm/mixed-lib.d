@@ -30,10 +30,4 @@ Disassembly of section .text:
 
 .* <lib_func2>:
  .*:	4770      	bx	lr
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
+#...
