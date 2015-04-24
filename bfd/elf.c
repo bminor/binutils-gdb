@@ -342,7 +342,7 @@ bfd_elf_string_from_elf_section (bfd *abfd,
 			      abfd, shindex);
 	  return NULL;
 	}
-  
+
       if (bfd_elf_get_str_section (abfd, shindex) == NULL)
 	return NULL;
     }
@@ -5370,7 +5370,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	    {
 	      if (m->includes_filehdr || m->includes_phdrs)
 		{
-		  /* PR 17512: file: 2195325e.  */ 
+		  /* PR 17512: file: 2195325e.  */
 		  (*_bfd_error_handler)
 		    (_("%B: warning: non-load segment includes file header and/or program header"),
 		     abfd);
@@ -7930,9 +7930,46 @@ _bfd_elf_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
   if (name[0] == '_' && name[1] == '.' && name[2] == 'L' && name[3] == '_')
     return TRUE;
 
-  /* Treat assembler generated local labels as local.  */
-  if (name[0] == 'L' && name[strlen (name) - 1] < 32)
-    return TRUE;
+  /* Treat assembler generated fake symbols, dollar local labels and
+     forward-backward labels (aka local labels) as locals.
+     These labels have the form:
+
+       L0^A.*                                  (fake symbols)
+
+       [.]?L[0123456789]+{^A|^B}[0123456789]*  (local labels)
+
+     Versions which start with .L will have already been matched above,
+     so we only need to match the rest.  */
+  if (name[0] == 'L' && ISDIGIT (name[1]))
+    {
+      bfd_boolean ret = FALSE;
+      const char * p;
+      char c;
+
+      for (p = name + 2; (c = *p); p++)
+	{
+	  if (c == 1 || c == 2)
+	    {
+	      if (c == 1 && p == name + 2)
+		/* A fake symbol.  */
+		return TRUE;
+
+	      /* FIXME: We are being paranoid here and treating symbols like
+		 L0^Bfoo as if there were non-local, on the grounds that the
+		 assembler will never generate them.  But can any symbol
+		 containing an ASCII value in the range 1-31 ever be anything
+		 other than some kind of local ?  */
+	      ret = TRUE;
+	    }
+
+	  if (! ISDIGIT (c))
+	    {
+	      ret = FALSE;
+	      break;
+	    }
+	}
+      return ret;
+    }
 
   return FALSE;
 }

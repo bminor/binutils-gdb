@@ -1,3 +1,9 @@
+2015-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_is_local_label_name): Extend test for assembler
+	local labels to include local labels with a numeric suffix and
+	fake symbols.
+
 2015-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18316
