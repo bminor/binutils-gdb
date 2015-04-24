@@ -1,3 +1,7 @@
+2015-04-24  Yao Qi  <yao.qi@linaro.org>
+
+	* boards/remote-gdbserver-on-localhost.exp: New file.
+
 2015-04-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/interrupt.exp: Use an indirect spawn id list holding
