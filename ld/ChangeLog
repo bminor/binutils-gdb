@@ -1,3 +1,13 @@
+2015-04-24  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am (msp430): Rename primary emulation to msp430elf.
+	(emsp430.c): Rename to emsp430elf.c, update dependencies
+	(emsp430X.c): Update dependencies.
+	* Makefile.in: Likewise.
+	* configure.tgt (msp430-*-*): Rename primary emulation to msp430elf.
+	* emulparame/msp430.sh: Rename to msp430elf.sh.
+	* emulparams/msp430X.sh: Update.
+
 2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18209
