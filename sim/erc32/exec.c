@@ -292,7 +292,7 @@ add32 (uint32 n1, uint32 n2, int *carry)
 {
   uint32 result = n1 + n2;
 
-  *carry = result < n1 || result < n1;
+  *carry = result < n1 || result < n2;
   return result;
 }
 

@@ -4318,7 +4318,7 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       SET_AREG (1, 0);
     }
   else if ((aop == 0 || aop == 1 || aop == 2) && s == 1 && aopcde == 8
-	   && x == 0 && s == 1 && HL == 0)
+	   && x == 0 && HL == 0)
     {
       bs40 acc0 = get_extended_acc (cpu, 0);
       bs40 acc1 = get_extended_acc (cpu, 1);
