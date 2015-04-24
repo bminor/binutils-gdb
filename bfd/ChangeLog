@@ -1,3 +1,8 @@
+2015-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18209
+	* archive.c (_bfd_get_elt_at_filepos): Copy is_linker_input.
+
 2015-04-24  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Reject
