@@ -1,5 +1,10 @@
 2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/compressed1e.d: Only run for Linux/gnu.  Xfail cris and
+	frv.
+
+2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/18277
 	* ld-elf/compressed1d.d: New.
 	* ld-elf/compressed1e.d: Likewise.
