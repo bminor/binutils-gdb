@@ -1,3 +1,39 @@
+2015-04-24  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdbtypes.c (print_gnat_stuff): Do not recurse on the
+	descriptive type when there is none.
+
+2015-04-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (tui_async_resize_screen): Call
+	rl_resize_terminal().
+
+2015-04-22  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (handle_output_debug_string): Don't change
+	current_event.dwThreadId.
+	(get_windows_debug_event): Use thread_id, rather than relying on
+	current_event.dwThreadId being changed.
+
+2015-04-22  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (windows_continue): Report an error if
+	ContinueDebugEvent() fails.
+
+2015-04-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (windows_resume): Fix misspelling in debug output.
+
+2015-04-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (get_windows_debug_event): Replace retval with
+	thread_id throughout.  Update stale comment.
+
+2015-04-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (get_windows_debug_event): Don't use ternary
+	conditional operator.
+
 2015-04-21  Pierre Muller  <muller@sourceware.org>
 
 	PR pascal/17815

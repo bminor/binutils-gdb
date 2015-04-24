@@ -3025,7 +3025,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F5A_P_2 */
   {
     { Bad_Opcode },
-    { "vcvtpd2ps",	{ XMxmmq, EXx, EXxEVexR }, 0 },
+    { "vcvtpd2ps%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_0F5A_P_3 */
   {
@@ -3035,7 +3035,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F5B_P_0 */
   {
     { "vcvtdq2ps",	{ XM, EXx, EXxEVexR }, 0 },
-    { "vcvtqq2ps",	{ XMxmmq, EXx, EXxEVexR }, 0 },
+    { "vcvtqq2ps%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_0F5B_P_1 */
   {
@@ -3192,7 +3192,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F78_P_0 */
   {
     { "vcvttps2udq",	{ XM, EXx, EXxEVexS }, 0 },
-    { "vcvttpd2udq",	{ XMxmmq, EXx, EXxEVexS }, 0 },
+    { "vcvttpd2udq%XY",	{ XMxmmq, EXx, EXxEVexS }, 0 },
   },
   /* EVEX_W_0F78_P_2 */
   {
@@ -3202,7 +3202,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F79_P_0 */
   {
     { "vcvtps2udq",	{ XM, EXx, EXxEVexR }, 0 },
-    { "vcvtpd2udq",	{ XMxmmq, EXx, EXxEVexR }, 0 },
+    { "vcvtpd2udq%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_0F79_P_2 */
   {
@@ -3222,7 +3222,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F7A_P_3 */
   {
     { "vcvtudq2ps",	{ XM, EXx, EXxEVexR }, 0 },
-    { "vcvtuqq2ps",	{ XMxmmq, EXx, EXxEVexR }, 0 },
+    { "vcvtuqq2ps%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_0F7B_P_1 */
   {
@@ -3318,12 +3318,12 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0FE6_P_2 */
   {
     { Bad_Opcode },
-    { "vcvttpd2dq",	{ XMxmmq, EXx, EXxEVexS }, 0 },
+    { "vcvttpd2dq%XY",	{ XMxmmq, EXx, EXxEVexS }, 0 },
   },
   /* EVEX_W_0FE6_P_3 */
   {
     { Bad_Opcode },
-    { "vcvtpd2dq",	{ XMxmmq, EXx, EXxEVexR }, 0 },
+    { "vcvtpd2dq%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_0FE7_P_2 */
   {
@@ -3800,8 +3800,8 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F3A66_P_2 */
   {
-    { "vfpclassps",	{ XMask, EXx, Ib }, 0 },
-    { "vfpclasspd",	{ XMask, EXx, Ib }, 0 },
+    { "vfpclassps%XZ",	{ XMask, EXx, Ib }, 0 },
+    { "vfpclasspd%XZ",	{ XMask, EXx, Ib }, 0 },
   },
   /* EVEX_W_0F3A67_P_2 */
   {

@@ -533,6 +533,11 @@ pie_copyrelocs_shared_test.o: pie_copyrelocs_shared_test.cc
 pie_copyrelocs_shared_test.so: pie_copyrelocs_shared_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared pie_copyrelocs_shared_test.o
 
+check_PROGRAMS += weak_unresolved_symbols_test
+weak_unresolved_symbols_test_SOURCES = weak_unresolved_symbols_test.cc
+weak_unresolved_symbols_test_CXXFLAGS = -fPIE
+weak_unresolved_symbols_test_LDFLAGS = -Bgcctestdir/ -pie -Wl,--weak-unresolved-symbols
+
 check_SCRIPTS += two_file_shared.sh
 check_DATA += two_file_shared.dbg
 MOSTLYCLEANFILES += two_file_shared.dbg

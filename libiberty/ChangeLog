@@ -1,3 +1,7 @@
+2015-04-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* setenv.c <environ>: Declare only if not a macro.
+
 2015-01-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* strerror.c <sys_nerr, sys_errlist>: Declare only if they aren't

@@ -848,6 +848,7 @@ tui_async_resize_screen (gdb_client_data arg)
   if (!tui_active)
     return;
 
+  rl_resize_terminal ();
   tui_resize_all ();
   tui_refresh_all_win ();
   tui_update_gdb_sizes ();

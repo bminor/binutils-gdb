@@ -3888,7 +3888,13 @@ print_gnat_stuff (struct type *type, int spaces)
 {
   struct type *descriptive_type = TYPE_DESCRIPTIVE_TYPE (type);
 
-  recursive_dump_type (descriptive_type, spaces + 2);
+  if (descriptive_type == NULL)
+    printfi_filtered (spaces + 2, "no descriptive type\n");
+  else
+    {
+      printfi_filtered (spaces + 2, "descriptive type\n");
+      recursive_dump_type (descriptive_type, spaces + 4);
+    }
 }
 
 static struct obstack dont_print_type_obstack;

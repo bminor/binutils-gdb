@@ -1,3 +1,8 @@
+2015-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18316
+	* mep.h (SEC_MEP_VLIW): Removed.
+
 2015-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* rx.h (E_FLAG_RX_SINSNS_SET): New bit in e_flags field.

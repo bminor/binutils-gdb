@@ -142,6 +142,9 @@ ldfile_try_open_bfd (const char *attempt,
   /* Linker needs to decompress sections.  */
   entry->the_bfd->flags |= BFD_DECOMPRESS;
 
+  /* This is a linker input BFD.  */
+  entry->the_bfd->is_linker_input = 1;
+
 #ifdef ENABLE_PLUGINS
   if (entry->flags.lto_output)
     entry->the_bfd->lto_output = 1;

@@ -345,10 +345,17 @@ CODE_FRAGMENT
 .     TMS320C54X only.  *}
 .#define SEC_TIC54X_BLOCK 0x10000000
 .
+.  {* This section should be renamed.  This is for ELF linker
+.     internal use only.  *}
+.#define SEC_ELF_RENAME 0x10000000
+.
 .  {* Conditionally link this section; do not link if there are no
 .     references found to any symbol in the section.  This is for TI
 .     TMS320C54X only.  *}
 .#define SEC_TIC54X_CLINK 0x20000000
+.
+.  {* This section contains vliw code.  This is for Toshiba MeP only.  *}
+.#define SEC_MEP_VLIW 0x20000000
 .
 .  {* Indicate that section has the no read flag set. This happens
 .     when memory read flag isn't set. *}

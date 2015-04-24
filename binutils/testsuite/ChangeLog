@@ -1,3 +1,13 @@
+2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18209
+	* binutils-all/compress.exp: Replace dw2-3.W with dw2-3gabi.W
+	on zlib-gabi output.
+	* binutils-all/dw2-1.W: Convert section names to .zdebug_*.
+	* binutils-all/dw2-3.W: Likewise.
+	* binutils-all/objdump.W: Likewise.
+	* binutils-all/dw2-3gabi.W: New file.
+
 2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/i386/compressed-1b.d: Don't hardcode offset of

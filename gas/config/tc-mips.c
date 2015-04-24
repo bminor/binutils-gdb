@@ -10331,10 +10331,12 @@ macro (struct mips_cl_insn *ip, char *str)
 
       breg = op[2];
       if (dbl && GPR_SIZE == 32)
-	as_warn (_("dla used to load 32-bit register"));
+	as_warn (_("dla used to load 32-bit register; recommend using la "
+		   "instead"));
 
       if (!dbl && HAVE_64BIT_OBJECTS)
-	as_warn (_("la used to load 64-bit address"));
+	as_warn (_("la used to load 64-bit address; recommend using dla "
+		   "instead"));
 
       if (small_offset_p (0, align, 16))
 	{

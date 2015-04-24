@@ -212,6 +212,9 @@ CODE_FRAGMENT
 .  {* Set if this is the linker output BFD.  *}
 .  unsigned int is_linker_output : 1;
 .
+.  {* Set if this is the linker input BFD.  *}
+.  unsigned int is_linker_input : 1;
+.
 .  {* If this is an input for a compiler plug-in library.  *}
 .  ENUM_BITFIELD (bfd_plugin_format) plugin_format : 2;
 .

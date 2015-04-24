@@ -16,9 +16,9 @@ Relocation section .* contains 1 entries:
 Symbol table '\.dynsym' contains 5 entries:
 .*
      0: .*
-     1: 0+10010390     4 FUNC    GLOBAL DEFAULT   12 my_func
+     1: 0+10010408     4 FUNC    GLOBAL DEFAULT   12 my_func
 #...
 Symbol table '\.symtab' contains 20 entries:
 #...
-    15: 0+10010390     4 FUNC    GLOBAL DEFAULT   12 my_func
+    15: 0+10010408     4 FUNC    GLOBAL DEFAULT   12 my_func
 #pass
