@@ -354,6 +354,9 @@ CODE_FRAGMENT
 .     TMS320C54X only.  *}
 .#define SEC_TIC54X_CLINK 0x20000000
 .
+.  {* This section contains vliw code.  This is for Toshiba MeP only.  *}
+.#define SEC_MEP_VLIW 0x20000000
+.
 .  {* Indicate that section has the no read flag set. This happens
 .     when memory read flag isn't set. *}
 .#define SEC_COFF_NOREAD 0x40000000
