@@ -2360,7 +2360,7 @@ xmethod worker is found to be equivalent to the winning C@t{++}
 method, then the xmethod worker is treated as a replacement for
 the C@t{++} method.  @value{GDBN} uses the overall winner to invoke the
 method.  If the winning xmethod worker is the overall winner, then
-the corresponding xmethod is invoked via the @code{invoke} method
+the corresponding xmethod is invoked via the @code{__call__} method
 of the worker object.
 
 If one wants to implement an xmethod as a replacement for an

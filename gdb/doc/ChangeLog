@@ -1,3 +1,8 @@
+2015-04-24  Doug Evans  <dje@google.com>
+
+	* python.texi (Xmethods In Python): Fix name of method to call the
+	xmethod.
+
 2015-04-17  Gary Benson <gbenson@redhat.com>
 
 	* gdb.texinfo (Connecting to a Remote Target): Mention that
