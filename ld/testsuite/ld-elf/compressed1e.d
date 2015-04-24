@@ -3,7 +3,7 @@
 #ld: -shared --compress-debug-sections=zlib-gnu
 #readelf: -SW
 #target: *-*-linux* *-*-gnu*
-#xfail: cris*-*-* frv-*-*
+#notarget: cris*-*-elf frv-*-*
 
 #failif
 #...

@@ -1,3 +1,8 @@
+2015-04-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-elf/compressed1e.d: Correct xfail to notarget and cris*-*-*
+	to cris*-*-elf.
+
 2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/compressed1e.d: Only run for Linux/gnu.  Xfail cris and
