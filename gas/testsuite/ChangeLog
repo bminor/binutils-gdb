@@ -1,3 +1,7 @@
+2015-04-24  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/align64.d: Delete trailing padding NOPs.
+
 2015-04-23  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/dla-warn.l: New file.

@@ -730,6 +730,9 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 				    | BFD_DECOMPRESS
 				    | BFD_COMPRESS_GABI);
 
+  /* Copy is_linker_input.  */
+  n_bfd->is_linker_input = archive->is_linker_input;
+
   if (_bfd_add_bfd_to_archive_cache (archive, filepos, n_bfd))
     return n_bfd;
 

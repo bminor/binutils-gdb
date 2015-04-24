@@ -1,3 +1,13 @@
+2015-04-24  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add CRC and CRYPTO features
+	for thunderx.
+
+2015-04-24  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.h (arm_min): New function.
+	(SUB_SEGMENT_ALIGN): Define.
+
 2015-04-23  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (macro): State the recommended way of creating

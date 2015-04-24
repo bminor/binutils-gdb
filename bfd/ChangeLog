@@ -1,3 +1,19 @@
+2015-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18209
+	* archive.c (_bfd_get_elt_at_filepos): Copy is_linker_input.
+
+2015-04-24  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Reject
+	PC-relative relocation for external symbol.
+
+2015-04-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 18313
+	* compress.c (decompress_contents): Zero initialse the z_stream
+	structure.
+
 2015-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_is_local_label_name): Extend test for assembler

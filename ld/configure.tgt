@@ -522,7 +522,7 @@ mn10300-*-*)		targ_emul=mn10300
 			;;
 mt-*elf)                targ_emul=elf32mt
 			;;
-msp430-*-*)             targ_emul=msp430
+msp430-*-*)             targ_emul=msp430elf
 			targ_extra_emuls="msp430X"
 			;;
 nds32*le-*-elf*)	targ_emul=nds32elf

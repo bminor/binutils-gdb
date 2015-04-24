@@ -39,8 +39,7 @@ Disassembly of section .text:
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
  .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
+#...
 
 .* <__app_func_veneer>:
  .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__app_func_veneer\+0x4>
@@ -51,8 +50,8 @@ Disassembly of section .far_arm:
 .* <app_func>:
  .*:	e1a0c00d 	mov	ip, sp
  .*:	e92dd800 	push	{fp, ip, lr, pc}
- .*:	eb000008 	bl	.* <__lib_func1_veneer>
- .*:	eb000009 	bl	.* <__lib_func2_veneer>
+ .*:	eb0000.. 	bl	.* <__lib_func1_veneer>
+ .*:	eb0000.. 	bl	.* <__lib_func2_veneer>
  .*:	e89d6800 	ldm	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
  .*:	e1a00000 	nop			; \(mov r0, r0\)
@@ -60,15 +59,13 @@ Disassembly of section .far_arm:
 
 .* <app_func2>:
  .*:	e12fff1e 	bx	lr
- .*:	e1a00000 	nop			; \(mov r0, r0\)
- .*:	e1a00000 	nop			; \(mov r0, r0\)
- .*:	e1a00000 	nop			; \(mov r0, r0\)
+#...
 
 .* <__lib_func1_veneer>:
- .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2100034 <__lib_func1_veneer\+0x4>
+ .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__lib_func1_veneer\+0x4>
  .*:	000081e8 	.word	0x000081e8
 .* <__lib_func2_veneer>:
- .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 210003c <__lib_func2_veneer\+0x4>
+ .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__lib_func2_veneer\+0x4>
  .*:	000081dc 	.word	0x000081dc
 
 Disassembly of section .far_thumb:
@@ -79,8 +76,7 @@ Disassembly of section .far_thumb:
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
  .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
+#...
 
 .* <__lib_func2_from_thumb>:
  .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2200014 <__lib_func2_from_thumb\+0x4>
