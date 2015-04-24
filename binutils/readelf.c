@@ -12067,9 +12067,12 @@ uncompress_section_contents (unsigned char **buffer,
 
   /* It is possible the section consists of several compressed
      buffers concatenated together, so we uncompress in a loop.  */
-  strm.zalloc = NULL;
-  strm.zfree = NULL;
-  strm.opaque = NULL;
+  /* PR 18313: The state field in the z_stream structure is supposed
+     to be invisible to the user (ie us), but some compilers will
+     still complain about it being used without initialisation.  So
+     we first zero the entire z_stream structure and then set the fields
+     that we need.  */
+  memset (& strm, 0, sizeof strm);
   strm.avail_in = compressed_size - header_size;
   strm.next_in = (Bytef *) compressed_buffer + header_size;
   strm.avail_out = uncompressed_size;

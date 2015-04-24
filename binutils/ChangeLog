@@ -1,3 +1,10 @@
+2015-04-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 18313
+	* ieee.c (ieee_read_cxx_class): Initialise the varargs variable.
+	* readelf.c (uncompress_section_contents): Zero initialise the
+	zstream structure.
+
 2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18209
