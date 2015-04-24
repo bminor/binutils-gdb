@@ -1,3 +1,36 @@
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-data.h (struct tui_win_element): Forward-declare.
+	(tui_win_content): Move declaration.
+	(struct tui_gen_win_info): Give 'content' field the
+	type tui_win_content.
+	* tui/tui-data.c (init_content_element): Remove redundant and
+	erroneous casts.
+	(tui_add_content_elements): Remove erroneous cast.
+	* tui/tui-disasm.c (tui_set_disassem_content): Remove redundant
+	casts.
+	(tui_get_begin_asm_address): Likewise.
+	* tui/tui-regs.c (tui_show_registers): Likewise.
+	(tui_show_register_group): Likewise.
+	(tui_display_registers_from): Likewise.
+	(tui_check_register_values): Likewise.
+	* tui/tui-source.c (tui_set_source_content): Likewise.
+	(tui_set_source_content_nil): Likewise.
+	(tui_source_is_displayed): Likewise.
+	* tui/tui-stack.c (tui_show_locator_content): Likewise.
+	(tui_set_locator_fullname): Likewise.
+	(tui_set_locator_info): Likewise.
+	(tui_show_frame_info): Likewise.
+	* tui/tui-winsource.c (tui_clear_source_content): Likewise.
+	(tui_show_source_line): Likewise.
+	(tui_horizontal_source_scroll): Likewise.
+	(tui_update_breakpoint_info): Likewise.
+	(tui_set_exec_info_content): Likewise.
+	(tui_show_exec_info_content): Likewise.
+	(tui_alloc_source_buffer): Likewise.
+	(tui_line_is_displayed): Likewise.
+	(tui_addr_is_displayed): Likewise.
+
 2015-04-27  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c: (fbsd_wait) [PL_FLAG_EXEC]: Report TARGET_WAITKIND_EXECD

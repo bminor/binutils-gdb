@@ -31,6 +31,11 @@ struct tui_point
   int x, y;
 };
 
+struct tui_win_element;
+
+/* This describes the content of the window.  */
+typedef struct tui_win_element **tui_win_content;
+
 /* Generic window information.  */
 struct tui_gen_win_info
 {
@@ -39,7 +44,7 @@ struct tui_gen_win_info
   int width;		    /* Window width.  */
   int height;		    /* Window height.  */
   struct tui_point origin;  /* Origin of window.  */
-  void **content;	    /* Content of window.  */
+  tui_win_content content;  /* Content of window.  */
   int content_size;	    /* Size of content (# of elements).  */
   int content_in_use;	    /* Can it be used, or is it already used?  */
   int viewport_height;	    /* Viewport height.  */
@@ -249,11 +254,6 @@ struct tui_win_element
   int highlight;
   union tui_which_element which_element;
 };
-
-
-/* This describes the content of the window.  */
-typedef struct tui_win_element **tui_win_content;
-
 
 /* This struct defines the specific information about a data display
    window.  */
