@@ -1,3 +1,8 @@
+2015-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/compressed1d.d: Add notarget for ELF based targets that
+	do not use elf.em.
+
 2015-04-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-elf/compressed1e.d: Correct xfail to notarget and cris*-*-*
