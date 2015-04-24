@@ -1,6 +1,10 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-04-24  Alan Modra  <amodra@gmail.com>
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_after_allocation):
+	Call gld${EMULATION_NAME}_map_segments regardless of need_laying_out.
+
 	2015-04-23  Alan Modra  <amodra@gmail.com>
 	* emulparams/elf64ppc.sh (GOT): Align.
 
