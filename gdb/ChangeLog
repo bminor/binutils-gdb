@@ -1,3 +1,8 @@
+2015-04-24  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdbtypes.c (print_gnat_stuff): Do not recurse on the
+	descriptive type when there is none.
+
 2015-04-23  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-win.c (tui_async_resize_screen): Call
