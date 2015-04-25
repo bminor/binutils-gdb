@@ -1,4 +1,4 @@
-#define BFD_VERSION_DATE 20150424
+#define BFD_VERSION_DATE 20150425
 #define BFD_VERSION @bfd_version@
 /* Various parts of GCC parse Binutils version string in different fragile ways,
    and we need to be very careful to not break them.  So far it seems that
