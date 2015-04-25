@@ -1704,6 +1704,27 @@ value_copy (struct value *arg)
   return val;
 }
 
+/* Return a "const" and/or "volatile" qualified version of the value V.
+   If CNST is true, then the returned value will be qualified with
+   "const".
+   if VOLTL is true, then the returned value will be qualified with
+   "volatile".  */
+
+struct value *
+make_cv_value (int cnst, int voltl, struct value *v)
+{
+  struct type *val_type = value_type (v);
+  struct type *enclosing_type = value_enclosing_type (v);
+  struct value *cv_val = value_copy (v);
+
+  deprecated_set_value_type (cv_val,
+			     make_cv_type (cnst, voltl, val_type, NULL));
+  set_value_enclosing_type (cv_val,
+			    make_cv_type (cnst, voltl, enclosing_type, NULL));
+
+  return cv_val;
+}
+
 /* Return a version of ARG that is non-lvalue.  */
 
 struct value *

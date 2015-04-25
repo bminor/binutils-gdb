@@ -1,3 +1,12 @@
+2015-05-09  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* NEWS (Python Scripting): Mention the new gdb.Value methods.
+	* python/py-value.c (valpy_reference_value): New function.
+	(valpy_const_value): Likewise.
+	(value_object_methods): Add new methods.
+	* value.c (make_cv_value): New function.
+	* value.h (make_cv_value): Declare.
+
 2015-05-08  Yao Qi  <yao@codesourcery.com>
 	    Sandra Loosemore  <sandra@codesourcery.com>
 
