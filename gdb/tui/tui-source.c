@@ -218,7 +218,9 @@ tui_set_source_content (struct symtab *s,
 			}
 		      /* Now copy the line taking the offset into
 			 account.  */
-		      if (strlen (src_line) > offset)
+		      if (offset == 0)
+			;
+		      else if (strlen (src_line) > offset)
 			strcpy (TUI_SRC_WIN->generic.content[cur_line]
 				  ->which_element.source.line,
 				&src_line[offset]);

@@ -1,5 +1,10 @@
 2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* tui/tui-source.c (tui_set_source_content): Avoid calling
+	strcpy() when offset is 0.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
 	PR gdb/18155
 	* tui/tui-data.c (tui_free_window): Don't free the locator
 	window when passed an SRC_WIN or a DISASSEM_WIN.
