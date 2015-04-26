@@ -1,3 +1,8 @@
+2015-04-26  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/coredump-filter.exp: Clear variable "coredump_var_addr"
+	before using it.
+
 2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/dump.exp: Add *.verilog files to all_files list.  Add
