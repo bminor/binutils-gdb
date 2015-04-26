@@ -1,3 +1,8 @@
+2015-05-08  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/18291
+	* gdb.python/py-xmethods.exp: Add tests.
+
 2015-05-08  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/18208
