@@ -1,3 +1,17 @@
+2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/17820
+	* top.c (history_size_setshow_var): Change type to signed.
+	Initialize to -2.  Update documentation.
+	(set_readline_history_size): Define.
+	(set_history_size_command): Use it.  Remove logic for handling
+	out-of-range sizes.
+	(init_history): Use set_readline_history_size().  Test for a
+	value of -2 instead of 0 when determining whether to set a
+	default history size.
+	(init_main): Decode the argument of the "size" command as a
+	zuinteger_unlimited.
+
 2015-05-12  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct file_entry): Tweak comments.
