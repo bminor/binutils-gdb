@@ -106,6 +106,8 @@ extern int compile_register_name_demangle (struct gdbarch *gdbarch,
 struct type;
 extern gcc_type convert_type (struct compile_c_instance *context,
 			      struct type *type);
+extern gcc_type convert_cplus_type (struct compile_c_instance *context,
+				    struct type *type);
 
 /* A callback suitable for use as the GCC C symbol oracle.  */
 
@@ -115,10 +117,23 @@ extern gcc_c_oracle_function gcc_convert_symbol;
 
 extern gcc_c_symbol_address_function gcc_symbol_address;
 
+/* A callback suitable for use as the GCC C++ symbol oracle.  */
+
+extern gcc_c_oracle_function gcc_cplus_convert_symbol;
+
+/* A callback suitable for use as the GCC C++ address oracle.  */
+
+extern gcc_c_symbol_address_function gcc_cplus_symbol_address;
+
 /* Instantiate a GDB object holding state for the GCC context FE.  The
    new object is returned.  */
 
 extern struct compile_instance *new_compile_instance (struct gcc_c_context *fe);
+
+/* Instantiate a GDB object holding state for the GCC context FE.  The
+   new object is returned.  */
+
+extern struct compile_instance *new_cplus_compile_instance (struct gcc_c_context *fe);
 
 /* Emit code to compute the address for all the local variables in
    scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb
@@ -132,9 +147,25 @@ extern unsigned char *generate_c_for_variable_locations
       const struct block *block,
       CORE_ADDR pc);
 
+/* Emit code to compute the address for all the local variables in
+   scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb
+   register number, where each element indicates if the corresponding
+   register is needed to compute a local variable.  */
+
+extern unsigned char *generate_cplus_for_variable_locations
+     (struct compile_c_instance *compiler,
+      struct ui_file *stream,
+      struct gdbarch *gdbarch,
+      const struct block *block,
+      CORE_ADDR pc);
+
 /* Get the GCC mode attribute value for a given type size.  */
 
 extern const char *c_get_mode_for_size (int size);
+
+/* Get the GCC mode attribute value for a given type size.  */
+
+extern const char *cplus_get_mode_for_size (int size);
 
 /* Given a dynamic property, return an xmallocd name that is used to
    represent its size.  The result must be freed by the caller.  The
@@ -143,5 +174,6 @@ extern const char *c_get_mode_for_size (int size);
 
 struct dynamic_prop;
 extern char *c_get_range_decl_name (const struct dynamic_prop *prop);
+extern char *cplus_get_range_decl_name (const struct dynamic_prop *prop);
 
 #endif /* GDB_COMPILE_INTERNAL_H */

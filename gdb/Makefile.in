@@ -295,19 +295,25 @@ SUBDIR_TUI_CFLAGS= \
 # GCC Compile support sub-directory definitions
 #
 SUBDIR_GCC_COMPILE_OBS = \
-	compile.o compile-c-symbols.o compile-c-types.o \
+	compile.o compile-c-symbols.o compile-cplus-symbols.o \
+	compile-c-types.o compile-cplus-types.o \
 	compile-object-load.o compile-object-run.o \
-	compile-loc2c.o compile-c-support.o
+	compile-loc2c.o compile-c-support.o \
+	compile-cplus-support.o
+
 SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile.c \
 	compile/compile-c-symbols.c \
+	compile/compile-cplus-symbols.c \
 	compile/compile-c-types.c \
+	compile/compile-cplus-types.c \
 	compile/compile-object-load.c \
 	compile/compile-object-load.h \
 	compile/compile-object-run.c \
 	compile/compile-object-run.h \
 	compile/compile-loc2c.c \
-	compile/compile-c-support.c
+	compile/compile-c-support.c \
+	compile/compile-cplus-support.c
 
 # Guile sub directory definitons for guile support.
 
@@ -1967,8 +1973,16 @@ compile-c-types.o: $(srcdir)/compile/compile-c-types.c
 	$(COMPILE) $(srcdir)/compile/compile-c-types.c
 	$(POSTCOMPILE)
 
+compile-cplus-types.o: $(srcdir)/compile/compile-cplus-types.c
+	$(COMPILE) $(srcdir)/compile/compile-cplus-types.c
+	$(POSTCOMPILE)
+
 compile-c-symbols.o: $(srcdir)/compile/compile-c-symbols.c
 	$(COMPILE) $(srcdir)/compile/compile-c-symbols.c
+	$(POSTCOMPILE)
+
+compile-cplus-symbols.o: $(srcdir)/compile/compile-cplus-symbols.c
+	$(COMPILE) $(srcdir)/compile/compile-cplus-symbols.c
 	$(POSTCOMPILE)
 
 compile-object-load.o: $(srcdir)/compile/compile-object-load.c
@@ -1985,6 +1999,10 @@ compile-loc2c.o: $(srcdir)/compile/compile-loc2c.c
 
 compile-c-support.o: $(srcdir)/compile/compile-c-support.c
 	$(COMPILE) $(srcdir)/compile/compile-c-support.c
+	$(POSTCOMPILE)
+
+compile-cplus-support.o: $(srcdir)/compile/compile-cplus-support.c
+	$(COMPILE) $(srcdir)/compile/compile-cplus-support.c
 	$(POSTCOMPILE)
 
 

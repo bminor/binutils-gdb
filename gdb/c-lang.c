@@ -992,8 +992,8 @@ const struct language_defn cplus_language_defn =
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &cplus_varobj_ops,
-  NULL,
-  NULL,
+  cplus_get_compile_context,
+  cplus_compute_program,
   LANG_MAGIC
 };
 
