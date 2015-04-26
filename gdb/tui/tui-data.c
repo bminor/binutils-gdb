@@ -719,13 +719,6 @@ tui_free_window (struct tui_win_info *win_info)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
-      generic_win = tui_locator_win_info_ptr ();
-      if (generic_win != (struct tui_gen_win_info *) NULL)
-	{
-	  tui_delete_win (generic_win->handle);
-	  generic_win->handle = (WINDOW *) NULL;
-	}
-      tui_free_win_content (generic_win);
       if (win_info->detail.source_info.fullname)
         {
           xfree (win_info->detail.source_info.fullname);

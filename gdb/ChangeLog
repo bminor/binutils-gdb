@@ -1,5 +1,11 @@
 2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
 
+	PR gdb/18155
+	* tui/tui-data.c (tui_free_window): Don't free the locator
+	window when passed an SRC_WIN or a DISASSEM_WIN.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* tui/tui-data.h (struct tui_win_element): Forward-declare.
 	(tui_win_content): Move declaration.
 	(struct tui_gen_win_info): Give 'content' field the
