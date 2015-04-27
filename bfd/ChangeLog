@@ -1,3 +1,10 @@
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf-s390-common.c (elf_s390_merge_obj_attributes): New function.
+	* elf32-s390.c (elf32_s390_merge_private_bfd_data): Call
+	elf_s390_merge_obj_attributes.
+	* elf64-s390.c (elf64_s390_merge_private_bfd_data): New function.
+
 2015-04-24  Jiong Wang  <jiong.wang@arm.com>
 
 	PR ld/18270

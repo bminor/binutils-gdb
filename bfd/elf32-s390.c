@@ -3980,9 +3980,18 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + PLT_FIRST_ENTRY_SIZE + i * PLT_ENTRY_SIZE;
 }
 
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
 static bfd_boolean
 elf32_s390_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
+  if (!is_s390_elf (ibfd) || !is_s390_elf (obfd))
+    return TRUE;
+
+  if (!elf_s390_merge_obj_attributes (ibfd, obfd))
+    return FALSE;
+
   elf_elfheader (obfd)->e_flags |= elf_elfheader (ibfd)->e_flags;
   return TRUE;
 }

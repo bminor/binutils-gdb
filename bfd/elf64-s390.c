@@ -3766,6 +3766,21 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + PLT_FIRST_ENTRY_SIZE + i * PLT_ENTRY_SIZE;
 }
 
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+static bfd_boolean
+elf64_s390_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  if (!is_s390_elf (ibfd) || !is_s390_elf (obfd))
+    return TRUE;
+
+  if (!elf_s390_merge_obj_attributes (ibfd, obfd))
+    return FALSE;
+
+  return TRUE;
+}
+
 /* Why was the hash table entry size definition changed from
    ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
    this is the only reason for the s390_elf64_size_info structure.  */
@@ -3824,7 +3839,8 @@ const struct elf_size_info s390_elf64_size_info =
 #define bfd_elf64_bfd_is_local_label_name     elf_s390_is_local_label_name
 #define bfd_elf64_bfd_link_hash_table_create  elf_s390_link_hash_table_create
 #define bfd_elf64_bfd_reloc_type_lookup	      elf_s390_reloc_type_lookup
-#define bfd_elf64_bfd_reloc_name_lookup elf_s390_reloc_name_lookup
+#define bfd_elf64_bfd_reloc_name_lookup       elf_s390_reloc_name_lookup
+#define bfd_elf64_bfd_merge_private_bfd_data  elf64_s390_merge_private_bfd_data
 
 #define elf_backend_adjust_dynamic_symbol     elf_s390_adjust_dynamic_symbol
 #define elf_backend_check_relocs	      elf_s390_check_relocs

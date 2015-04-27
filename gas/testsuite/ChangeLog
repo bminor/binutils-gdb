@@ -1,5 +1,9 @@
 2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
+	* doc/as.texinfo: Document Tag_GNU_S390_ABI_Vector.
+
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
 	* gas/s390/zarch-z13.d: Fix tests for VFCE, VLDE, VFSQ, WFK, and
 	WFC.
 	* gas/s390/zarch-z13.s: Likewise.

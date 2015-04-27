@@ -12845,6 +12845,41 @@ display_power_gnu_attribute (unsigned char * p,
   return display_tag_value (tag & 1, p, end);
 }
 
+static unsigned char *
+display_s390_gnu_attribute (unsigned char * p,
+			    int tag,
+			    const unsigned char * const end)
+{
+  unsigned int len;
+  int val;
+
+  if (tag == Tag_GNU_S390_ABI_Vector)
+    {
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_GNU_S390_ABI_Vector: ");
+
+      switch (val)
+	{
+	case 0:
+	  printf (_("any\n"));
+	  break;
+	case 1:
+	  printf (_("software\n"));
+	  break;
+	case 2:
+	  printf (_("hardware\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+   }
+
+  return display_tag_value (tag & 1, p, end);
+}
+
 static void
 display_sparc_hwcaps (int mask)
 {
@@ -13613,6 +13648,13 @@ process_power_specific (FILE * file)
 {
   return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
 			     display_power_gnu_attribute);
+}
+
+static int
+process_s390_specific (FILE * file)
+{
+  return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
+			     display_s390_gnu_attribute);
 }
 
 static int
@@ -15608,6 +15650,10 @@ process_arch_specific (FILE * file)
       break;
     case EM_PPC:
       return process_power_specific (file);
+      break;
+    case EM_S390:
+    case EM_S390_OLD:
+      return process_s390_specific (file);
       break;
     case EM_SPARC:
     case EM_SPARC32PLUS:

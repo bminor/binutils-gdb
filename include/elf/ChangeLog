@@ -1,3 +1,7 @@
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390.h: Define Tag_GNU_S390_ABI_Vector.
+
 2015-04-24  Alan Modra  <amodra@gmail.com>
 
 	* internal.h (ELF_SECTION_IN_SEGMENT_1): Ensure PT_LOAD and
