@@ -1,3 +1,13 @@
+2015-04-27  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	PR gold/18327
+	* output.cc (Output_section::is_input_address_mapped): Assume a missing
+	entry is mapped.
+	* testsuite/Makefile.am: Add the eh_test test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/eh_test_a.cc: New test.
+	* testsuite/eh_test_b.cc: New test.
+
 2015-04-23  Sriraman Tallam  <tmsriram@google.com>	
 	* options.h (--weak-unresolved-symbols): New option.
 	* symtab.cc (Symbol_table::sized_write_globals): Change symbol

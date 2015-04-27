@@ -2901,8 +2901,10 @@ Output_section::is_input_address_mapped(const Relobj* object,
     {
       section_offset_type output_offset;
       bool found = posd->output_offset(object, shndx, offset, &output_offset);
+      // By default we assume that the address is mapped. See comment at the
+      // end.
       if (!found)
-        return false;
+        return true;
       return output_offset != -1;
     }
 

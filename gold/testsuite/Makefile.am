@@ -375,6 +375,14 @@ basic_test.o: basic_test.cc
 basic_test: basic_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ basic_test.o
 
+check_PROGRAMS += eh_test
+eh_test_a.o: eh_test_a.cc
+	$(CXXCOMPILE) -O0 -c -o $@ $<
+eh_test_b.o: eh_test_b.cc
+	$(CXXCOMPILE) -O0 -c -o $@ $<
+eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
+	$(CXXLINK_S) -Bgcctestdir/ eh_test_a.o eh_test_b.o
+
 if HAVE_STATIC
 check_PROGRAMS += basic_static_test
 basic_static_test: basic_test.o gcctestdir/ld

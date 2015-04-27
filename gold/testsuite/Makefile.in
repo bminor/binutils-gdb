@@ -123,7 +123,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libweak_undef_2.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_pic_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_pic_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test
 @GCC_FALSE@large_symbol_alignment_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@large_symbol_alignment_DEPENDENCIES =
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = basic_static_test \
@@ -824,7 +825,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_2 = icf_virtual_function_folding_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test$(EXEEXT)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 = basic_static_test$(EXEEXT) \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_4 = basic_pie_test$(EXEEXT) \
@@ -1081,6 +1083,13 @@ discard_locals_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 dynamic_list_2_OBJECTS = $(am_dynamic_list_2_OBJECTS)
 dynamic_list_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(dynamic_list_2_LDFLAGS) $(LDFLAGS) -o $@
+eh_test_SOURCES = eh_test.c
+eh_test_OBJECTS = eh_test.$(OBJEXT)
+eh_test_LDADD = $(LDADD)
+eh_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ehdr_start_test_1_OBJECTS = ehdr_start_test_1-ehdr_start_test.$(OBJEXT)
 ehdr_start_test_1_OBJECTS = $(am_ehdr_start_test_1_OBJECTS)
 ehdr_start_test_1_LINK = $(CXXLD) $(ehdr_start_test_1_CXXFLAGS) \
@@ -1991,9 +2000,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(common_test_1_SOURCES) $(common_test_2_SOURCES) \
 	$(constructor_static_test_SOURCES) $(constructor_test_SOURCES) \
 	$(copy_test_SOURCES) $(discard_locals_test_SOURCES) \
-	$(dynamic_list_2_SOURCES) $(ehdr_start_test_1_SOURCES) \
-	$(ehdr_start_test_2_SOURCES) $(ehdr_start_test_3_SOURCES) \
-	$(ehdr_start_test_5_SOURCES) \
+	$(dynamic_list_2_SOURCES) eh_test.c \
+	$(ehdr_start_test_1_SOURCES) $(ehdr_start_test_2_SOURCES) \
+	$(ehdr_start_test_3_SOURCES) $(ehdr_start_test_5_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
 	$(exception_separate_shared_21_test_SOURCES) \
@@ -2989,6 +2998,12 @@ discard_locals_test$(EXEEXT): $(discard_locals_test_OBJECTS) $(discard_locals_te
 dynamic_list_2$(EXEEXT): $(dynamic_list_2_OBJECTS) $(dynamic_list_2_DEPENDENCIES) 
 	@rm -f dynamic_list_2$(EXEEXT)
 	$(dynamic_list_2_LINK) $(dynamic_list_2_OBJECTS) $(dynamic_list_2_LDADD) $(LIBS)
+@GCC_FALSE@eh_test$(EXEEXT): $(eh_test_OBJECTS) $(eh_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f eh_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(eh_test_OBJECTS) $(eh_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@eh_test$(EXEEXT): $(eh_test_OBJECTS) $(eh_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f eh_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(eh_test_OBJECTS) $(eh_test_LDADD) $(LIBS)
 ehdr_start_test_1$(EXEEXT): $(ehdr_start_test_1_OBJECTS) $(ehdr_start_test_1_DEPENDENCIES) 
 	@rm -f ehdr_start_test_1$(EXEEXT)
 	$(ehdr_start_test_1_LINK) $(ehdr_start_test_1_OBJECTS) $(ehdr_start_test_1_LDADD) $(LIBS)
@@ -3761,6 +3776,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/discard_locals_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynamic_list_2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eh_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehdr_start_test_1-ehdr_start_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehdr_start_test_2-ehdr_start_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehdr_start_test_3-ehdr_start_test.Po@am__quote@
@@ -4402,6 +4418,8 @@ basic_test.log: basic_test$(EXEEXT)
 	@p='basic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 basic_pic_test.log: basic_pic_test$(EXEEXT)
 	@p='basic_pic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+eh_test.log: eh_test$(EXEEXT)
+	@p='eh_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 basic_static_test.log: basic_static_test$(EXEEXT)
 	@p='basic_static_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 basic_static_pic_test.log: basic_static_pic_test$(EXEEXT)
@@ -5009,6 +5027,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test: basic_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_a.o: eh_test_a.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_b.o: eh_test_b.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK_S) -Bgcctestdir/ eh_test_a.o eh_test_b.o
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@basic_static_test: basic_test.o gcctestdir/ld
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -static basic_test.o
 
