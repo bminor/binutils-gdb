@@ -301,7 +301,8 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
       gdb_assert ((flags & OBJF_NOT_FILENAME) != 0);
       expanded_name = xstrdup ("<<anonymous objfile>>");
     }
-  else if ((flags & OBJF_NOT_FILENAME) != 0)
+  else if ((flags & OBJF_NOT_FILENAME) != 0
+	   || is_target_filename (name))
     expanded_name = xstrdup (name);
   else
     expanded_name = gdb_abspath (name);

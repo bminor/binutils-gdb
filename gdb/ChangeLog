@@ -1,3 +1,10 @@
+2015-04-27  Gary Benson <gbenson@redhat.com>
+
+	* objfiles.c (allocate_objfile): Do not attempt to expand name
+	if name is a "target:" filename.
+	* auto-load.c (load_auto_scripts_for_objfile): Do not attempt
+	to load auto-load scripts for objfiles with "target:" filenames.
+
 2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c: Include "elf/s390.h" and "elf-bfd.h".
