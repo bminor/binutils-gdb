@@ -6399,6 +6399,8 @@ ada_is_tagged_type (struct type *type, int refok)
 int
 ada_is_tag_type (struct type *type)
 {
+  type = ada_check_typedef (type);
+
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_PTR)
     return 0;
   else
@@ -7322,7 +7324,7 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
         {
           if (dispp != NULL)
             *dispp += TYPE_FIELD_BITPOS (type, i) / 8;
-          return ada_check_typedef (TYPE_FIELD_TYPE (type, i));
+          return TYPE_FIELD_TYPE (type, i);
         }
 
       else if (ada_is_wrapper_field (type, i))
@@ -7354,7 +7356,7 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
               disp = 0;
 	      if (v_field_name != NULL 
 		  && field_name_match (v_field_name, name))
-		t = ada_check_typedef (TYPE_FIELD_TYPE (field_type, j));
+		t = TYPE_FIELD_TYPE (field_type, j);
 	      else
 		t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (field_type,
 								 j),
@@ -8177,11 +8179,14 @@ template_to_static_fixed_type (struct type *type0)
 
   for (f = 0; f < nfields; f += 1)
     {
-      struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type0, f));
+      struct type *field_type = TYPE_FIELD_TYPE (type0, f);
       struct type *new_type;
 
       if (is_dynamic_field (type0, f))
-        new_type = to_static_fixed_type (TYPE_TARGET_TYPE (field_type));
+	{
+	  field_type = ada_check_typedef (field_type);
+          new_type = to_static_fixed_type (TYPE_TARGET_TYPE (field_type));
+	}
       else
         new_type = static_unwrap_type (field_type);
       if (type == type0 && new_type != field_type)

@@ -1,3 +1,10 @@
+2015-04-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_is_tagged_type): Add call to ada_check_typedef.
+	(ada_lookup_struct_elt_type): Remove calls to ada_check_typedef.
+	(template_to_static_fixed_type): Call ada_check_typedef only
+	when necessary.
+
 2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli/cli-dump.c (srec_dump_command): Add internationalization
