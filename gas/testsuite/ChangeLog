@@ -1,3 +1,9 @@
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* gas/s390/zarch-z13.d: Fix tests for VFCE, VLDE, VFSQ, WFK, and
+	WFC.
+	* gas/s390/zarch-z13.s: Likewise.
+
 2015-04-24  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/align64.d: Delete trailing padding NOPs.
