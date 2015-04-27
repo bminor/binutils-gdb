@@ -1,3 +1,10 @@
+2015-04-27  Han Shen  <shenhan@google.com>
+
+	* options.h (--fix-cortex-a53-843419): Rename option.
+	* aarch64.cc (AArch64_relobj::do_count_local_symbols): Use renamed
+	option.
+	(AArch64_relobj::scan_sections_for_stubs): Use renamed option.
+
 2015-04-27  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	PR gold/18327
@@ -33,7 +40,7 @@
 	(Target_powerpc::do_gc_mark_symbol): Use push_back.
 	* symtab.cc (Symbol_table::gc_mark_symbol): Use push_back.
 
-2015-04/16  Han Shen  <shenhan@google.com>
+2015-04-16  Han Shen  <shenhan@google.com>
 
     * aarch64.cc (AArch64_insn_utilities): New utility class.
     (AArch64_relobj::Mapping_symbol_position): New struct.

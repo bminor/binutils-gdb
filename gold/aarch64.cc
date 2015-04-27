@@ -1282,7 +1282,7 @@ AArch64_relobj<size, big_endian>::do_count_local_symbols(
 
   // Only erratum-fixing work needs mapping symbols, so skip this time consuming
   // processing if not fixing erratum.
-  if (!parameters->options().fix_cortex_a53())
+  if (!parameters->options().fix_cortex_a53_843419())
     return;
 
   const unsigned int loccount = this->local_symbol_count();
@@ -1590,7 +1590,7 @@ AArch64_relobj<size, big_endian>::scan_sections_for_stubs(
   for (unsigned int i = 1; i < shnum; ++i, p += shdr_size)
     {
       const elfcpp::Shdr<size, big_endian> shdr(p);
-      if (parameters->options().fix_cortex_a53())
+      if (parameters->options().fix_cortex_a53_843419())
 	scan_erratum_843419(i, shdr, out_sections[i], symtab, target);
       if (this->section_needs_reloc_stub_scanning(shdr, out_sections, symtab,
 						  pshdrs))
