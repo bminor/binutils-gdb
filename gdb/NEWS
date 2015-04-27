@@ -44,6 +44,8 @@
 
 * The "dump" command now supports verilog hex format.
 
+* GDB now supports the vector ABI on S/390 GNU/Linux targets.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",

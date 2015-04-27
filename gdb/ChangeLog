@@ -1,5 +1,27 @@
 2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c: Include "elf/s390.h" and "elf-bfd.h".
+	(enum s390_vector_abi_kind): New enum.
+	(struct gdbarch_tdep)<vector_abi>: New field.
+	(s390_effective_inner_type): Add parameter min_size.  Stop
+	unwrapping if the inner type is smaller than min_size.
+	(s390_function_arg_float): Adjust call to
+	s390_effective_inner_type.
+	(s390_function_arg_vector): New function.
+	(s390_function_arg_integer): Adjust comment.
+	(struct s390_arg_state)<vr>: New field.
+	(s390_handle_arg): Add parameter 'is_unnamed'.  Pass vector
+	arguments according to vector ABI when appropriate.
+	(s390_push_dummy_call): Initialize the argument state's field
+	'vr'.  Adjust calls to s390_handle_arg.
+	(s390_register_return_value): Handle vector return values.
+	(s390_return_value): Apply the "register" return value convention
+	to a vector when appropriate.
+	(s390_gdbarch_init): Initialize tdep->vector_abi.
+	* NEWS: Announce S390 vector ABI support.
+
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (s390_return_value_convention): Remove
 	function.  Inline its logic...
 	(s390_return_value): ...here.  Instead, move the handling of the

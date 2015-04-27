@@ -54,6 +54,8 @@
 #include "cli/cli-utils.h"
 #include <ctype.h>
 #include "elf/common.h"
+#include "elf/s390.h"
+#include "elf-bfd.h"
 
 #include "features/s390-linux32.c"
 #include "features/s390-linux32v1.c"
@@ -80,12 +82,21 @@ enum s390_abi_kind
   ABI_LINUX_ZSERIES
 };
 
+enum s390_vector_abi_kind
+{
+  S390_VECTOR_ABI_NONE,
+  S390_VECTOR_ABI_128
+};
+
 /* The tdep structure.  */
 
 struct gdbarch_tdep
 {
   /* ABI version.  */
   enum s390_abi_kind abi;
+
+  /* Vector ABI.  */
+  enum s390_vector_abi_kind vector_abi;
 
   /* Pseudo register numbers.  */
   int gpr_full_regnum;
@@ -2395,14 +2406,24 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
      float x;
      struct { float x };
      struct { struct { float x; } x; };
-     struct { struct { struct { float x; } x; } x; };  */
+     struct { struct { struct { float x; } x; } x; };
+
+   However, if an inner type is smaller than MIN_SIZE, abort the
+   unwrapping.  */
 
 static struct type *
-s390_effective_inner_type (struct type *type)
+s390_effective_inner_type (struct type *type, unsigned int min_size)
 {
   while (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	 && TYPE_NFIELDS (type) == 1)
-    type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+    {
+      struct type *inner = check_typedef (TYPE_FIELD_TYPE (type, 0));
+
+      if (TYPE_LENGTH (inner) < min_size)
+	break;
+      type = inner;
+    }
+
   return type;
 }
 
@@ -2419,10 +2440,24 @@ s390_function_arg_float (struct type *type)
 
   /* A struct containing just a float or double is passed like a float
      or double.  */
-  type = s390_effective_inner_type (type);
+  type = s390_effective_inner_type (type, 0);
 
   return (TYPE_CODE (type) == TYPE_CODE_FLT
 	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT);
+}
+
+/* Return non-zero if TYPE should be passed like a vector.  */
+
+static int
+s390_function_arg_vector (struct type *type)
+{
+  if (TYPE_LENGTH (type) > 16)
+    return 0;
+
+  /* Structs containing just a vector are passed like a vector.  */
+  type = s390_effective_inner_type (type, TYPE_LENGTH (type));
+
+  return TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type);
 }
 
 /* Determine whether N is a power of two.  */
@@ -2434,8 +2469,8 @@ is_power_of_two (unsigned int n)
 }
 
 /* For an argument whose type is TYPE and which is not passed like a
-   float, return non-zero if it should be passed like "int" or "long
-   long".  */
+   float or vector, return non-zero if it should be passed like "int"
+   or "long long".  */
 
 static int
 s390_function_arg_integer (struct type *type)
@@ -2465,9 +2500,9 @@ struct s390_arg_state
   {
     /* Register cache, or NULL, if we are in "preparation mode".  */
     struct regcache *regcache;
-    /* Next available general/floating-point register for argument
-       passing.  */
-    int gr, fr;
+    /* Next available general/floating-point/vector register for
+       argument passing.  */
+    int gr, fr, vr;
     /* Current pointer to copy area (grows downwards).  */
     CORE_ADDR copy;
     /* Current pointer to parameter area (grows upwards).  */
@@ -2482,7 +2517,7 @@ struct s390_arg_state
 static void
 s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 		 struct gdbarch_tdep *tdep, int word_size,
-		 enum bfd_endian byte_order)
+		 enum bfd_endian byte_order, int is_unnamed)
 {
   struct type *type = check_typedef (value_type (arg));
   unsigned int length = TYPE_LENGTH (type);
@@ -2512,6 +2547,28 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	  if (write_mode)
 	    write_memory (as->argp - length, value_contents (arg),
 			  length);
+	}
+    }
+  else if (tdep->vector_abi == S390_VECTOR_ABI_128
+	   && s390_function_arg_vector (type))
+    {
+      static const char use_vr[] = {24, 26, 28, 30, 25, 27, 29, 31};
+
+      if (!is_unnamed && as->vr < ARRAY_SIZE (use_vr))
+	{
+	  int regnum = S390_V24_REGNUM + use_vr[as->vr] - 24;
+
+	  if (write_mode)
+	    regcache_cooked_write_part (as->regcache, regnum,
+					0, length,
+					value_contents (arg));
+	  as->vr++;
+	}
+      else
+	{
+	  if (write_mode)
+	    write_memory (as->argp, value_contents (arg), length);
+	  as->argp = align_up (as->argp + length, word_size);
 	}
     }
   else if (s390_function_arg_integer (type) && length <= word_size)
@@ -2626,10 +2683,15 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int i;
   struct s390_arg_state arg_state, arg_prep;
   CORE_ADDR param_area_start, new_sp;
+  struct type *ftype = check_typedef (value_type (function));
+
+  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
 
   arg_prep.copy = sp;
   arg_prep.gr = struct_return ? 3 : 2;
   arg_prep.fr = 0;
+  arg_prep.vr = 0;
   arg_prep.argp = 0;
   arg_prep.regcache = NULL;
 
@@ -2639,7 +2701,8 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Update arg_state.copy with the start of the reference-to-copy area
      and arg_state.argp with the size of the parameter area.  */
   for (i = 0; i < nargs; i++)
-    s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order);
+    s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
+		     TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
 
   param_area_start = align_down (arg_state.copy - arg_state.argp, 8);
 
@@ -2665,7 +2728,8 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Write all parameters.  */
   for (i = 0; i < nargs; i++)
-    s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order);
+    s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
+		     TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
 
   /* Store return PSWA.  In 31-bit mode, keep addressing mode bit.  */
   if (word_size == 4)
@@ -2731,6 +2795,16 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 	regcache_cooked_read_part (regcache, S390_F0_REGNUM,
 				   0, length, out);
     }
+  else if (code == TYPE_CODE_ARRAY)
+    {
+      /* Vector: left-aligned in v24.  */
+      if (in != NULL)
+	regcache_cooked_write_part (regcache, S390_V24_REGNUM,
+				    0, length, in);
+      else
+	regcache_cooked_read_part (regcache, S390_V24_REGNUM,
+				   0, length, out);
+    }
   else if (length <= word_size)
     {
       /* Integer: zero- or sign-extended in r2.  */
@@ -2782,9 +2856,14 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-    case TYPE_CODE_ARRAY:
     case TYPE_CODE_COMPLEX:
       rvc = RETURN_VALUE_STRUCT_CONVENTION;
+      break;
+    case TYPE_CODE_ARRAY:
+      rvc = (gdbarch_tdep (gdbarch)->vector_abi == S390_VECTOR_ABI_128
+	     && TYPE_LENGTH (type) <= 16 && TYPE_VECTOR (type))
+	? RETURN_VALUE_REGISTER_CONVENTION
+	: RETURN_VALUE_STRUCT_CONVENTION;
       break;
     default:
       rvc = TYPE_LENGTH (type) <= 8
@@ -2901,6 +2980,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int tdep_abi;
+  enum s390_vector_abi_kind vector_abi;
   int have_upper = 0;
   int have_linux_v1 = 0;
   int have_linux_v2 = 0;
@@ -3083,6 +3163,18 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 
+  /* Determine vector ABI.  */
+  vector_abi = S390_VECTOR_ABI_NONE;
+#ifdef HAVE_ELF
+  if (have_vx
+      && info.abfd != NULL
+      && info.abfd->format == bfd_object
+      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour
+      && bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
+				   Tag_GNU_S390_ABI_Vector) == 2)
+    vector_abi = S390_VECTOR_ABI_128;
+#endif
+
   /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
@@ -3092,6 +3184,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (!tdep)
 	continue;
       if (tdep->abi != tdep_abi)
+	continue;
+      if (tdep->vector_abi != vector_abi)
 	continue;
       if ((tdep->gpr_full_regnum != -1) != have_upper)
 	continue;
@@ -3103,6 +3197,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Otherwise create a new gdbarch for the specified machine type.  */
   tdep = XCNEW (struct gdbarch_tdep);
   tdep->abi = tdep_abi;
+  tdep->vector_abi = vector_abi;
   tdep->have_linux_v1 = have_linux_v1;
   tdep->have_linux_v2 = have_linux_v2;
   tdep->have_tdb = have_tdb;
