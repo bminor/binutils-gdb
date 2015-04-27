@@ -1,3 +1,8 @@
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (is_power_of_two): Add comment.  Return
+	  false if the argument is zero.
+
 2015-04-27  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c (template_to_static_fixed_type): Return input type

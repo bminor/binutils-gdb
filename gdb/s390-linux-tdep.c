@@ -2484,11 +2484,12 @@ is_float_like (struct type *type)
 	  || is_float_singleton (type));
 }
 
+/* Determine whether N is a power of two.  */
 
 static int
 is_power_of_two (unsigned int n)
 {
-  return ((n & (n - 1)) == 0);
+  return n && ((n & (n - 1)) == 0);
 }
 
 /* Return non-zero if TYPE should be passed as a pointer to a copy,
