@@ -2708,13 +2708,75 @@ s390_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 }
 
 
-/* Function return value access.  */
+/* Helper for s390_return_value: Set or retrieve a function return
+   value if it resides in a register.  */
+
+static void
+s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
+			    struct regcache *regcache,
+			    gdb_byte *out, const gdb_byte *in)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int word_size = gdbarch_ptr_bit (gdbarch) / 8;
+  int length = TYPE_LENGTH (type);
+  int code = TYPE_CODE (type);
+
+  if (code == TYPE_CODE_FLT || code == TYPE_CODE_DECFLOAT)
+    {
+      /* Float-like value: left-aligned in f0.  */
+      if (in != NULL)
+	regcache_cooked_write_part (regcache, S390_F0_REGNUM,
+				    0, length, in);
+      else
+	regcache_cooked_read_part (regcache, S390_F0_REGNUM,
+				   0, length, out);
+    }
+  else if (length <= word_size)
+    {
+      /* Integer: zero- or sign-extended in r2.  */
+      if (out != NULL)
+	regcache_cooked_read_part (regcache, S390_R2_REGNUM,
+				   word_size - length, length, out);
+      else if (TYPE_UNSIGNED (type))
+	regcache_cooked_write_unsigned
+	  (regcache, S390_R2_REGNUM,
+	   extract_unsigned_integer (in, length, byte_order));
+      else
+	regcache_cooked_write_signed
+	  (regcache, S390_R2_REGNUM,
+	   extract_signed_integer (in, length, byte_order));
+    }
+  else if (length == 2 * word_size)
+    {
+      /* Double word: in r2 and r3.  */
+      if (in != NULL)
+	{
+	  regcache_cooked_write (regcache, S390_R2_REGNUM, in);
+	  regcache_cooked_write (regcache, S390_R3_REGNUM,
+				 in + word_size);
+	}
+      else
+	{
+	  regcache_cooked_read (regcache, S390_R2_REGNUM, out);
+	  regcache_cooked_read (regcache, S390_R3_REGNUM,
+				out + word_size);
+	}
+    }
+  else
+    internal_error (__FILE__, __LINE__, _("invalid return type"));
+}
+
+
+/* Implement the 'return_value' gdbarch method.  */
 
 static enum return_value_convention
-s390_return_value_convention (struct gdbarch *gdbarch, struct type *type)
+s390_return_value (struct gdbarch *gdbarch, struct value *function,
+		   struct type *type, struct regcache *regcache,
+		   gdb_byte *out, const gdb_byte *in)
 {
-  if (TYPE_LENGTH (type) > 8)
-    return RETURN_VALUE_STRUCT_CONVENTION;
+  enum return_value_convention rvc;
+
+  type = check_typedef (type);
 
   switch (TYPE_CODE (type))
     {
@@ -2722,96 +2784,22 @@ s390_return_value_convention (struct gdbarch *gdbarch, struct type *type)
     case TYPE_CODE_UNION:
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_COMPLEX:
-      return RETURN_VALUE_STRUCT_CONVENTION;
-
+      rvc = RETURN_VALUE_STRUCT_CONVENTION;
+      break;
     default:
-      return RETURN_VALUE_REGISTER_CONVENTION;
+      rvc = TYPE_LENGTH (type) <= 8
+	? RETURN_VALUE_REGISTER_CONVENTION
+	: RETURN_VALUE_STRUCT_CONVENTION;
     }
-}
 
-static enum return_value_convention
-s390_return_value (struct gdbarch *gdbarch, struct value *function,
-		   struct type *type, struct regcache *regcache,
-		   gdb_byte *out, const gdb_byte *in)
-{
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int word_size = gdbarch_ptr_bit (gdbarch) / 8;
-  enum return_value_convention rvc;
-  int length;
-
-  type = check_typedef (type);
-  rvc = s390_return_value_convention (gdbarch, type);
-  length = TYPE_LENGTH (type);
-
-  if (in)
+  if (in != NULL || out != NULL)
     {
-      switch (rvc)
-	{
-	case RETURN_VALUE_REGISTER_CONVENTION:
-	  if (TYPE_CODE (type) == TYPE_CODE_FLT
-	      || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
-	    {
-	      /* When we store a single-precision value in an FP register,
-		 it occupies the leftmost bits.  */
-	      regcache_cooked_write_part (regcache, S390_F0_REGNUM,
-					  0, length, in);
-	    }
-	  else if (length <= word_size)
-	    {
-	      /* Integer arguments are always extended to word size.  */
-	      if (TYPE_UNSIGNED (type))
-		regcache_cooked_write_unsigned (regcache, S390_R2_REGNUM,
-			extract_unsigned_integer (in, length, byte_order));
-	      else
-		regcache_cooked_write_signed (regcache, S390_R2_REGNUM,
-			extract_signed_integer (in, length, byte_order));
-	    }
-	  else if (length == 2*word_size)
-	    {
-	      regcache_cooked_write (regcache, S390_R2_REGNUM, in);
-	      regcache_cooked_write (regcache, S390_R3_REGNUM, in + word_size);
-	    }
-	  else
-	    internal_error (__FILE__, __LINE__, _("invalid return type"));
-	  break;
-
-	case RETURN_VALUE_STRUCT_CONVENTION:
-	  error (_("Cannot set function return value."));
-	  break;
-	}
-    }
-  else if (out)
-    {
-      switch (rvc)
-	{
-	case RETURN_VALUE_REGISTER_CONVENTION:
-	  if (TYPE_CODE (type) == TYPE_CODE_FLT
-	      || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
-	    {
-	      /* When we store a single-precision value in an FP register,
-		 it occupies the leftmost bits.  */
-	      regcache_cooked_read_part (regcache, S390_F0_REGNUM,
-					 0, length, out);
-	    }
-	  else if (length <= word_size)
-	    {
-	      /* Integer arguments occupy the rightmost bits.  */
-	      regcache_cooked_read_part (regcache, S390_R2_REGNUM,
-					 word_size - length, length, out);
-	    }
-	  else if (length == 2*word_size)
-	    {
-	      regcache_cooked_read (regcache, S390_R2_REGNUM, out);
-	      regcache_cooked_read (regcache, S390_R3_REGNUM, out + word_size);
-	    }
-	  else
-	    internal_error (__FILE__, __LINE__, _("invalid return type"));
-	  break;
-
-	case RETURN_VALUE_STRUCT_CONVENTION:
-	  error (_("Function return value unknown."));
-	  break;
-	}
+      if (rvc == RETURN_VALUE_REGISTER_CONVENTION)
+	s390_register_return_value (gdbarch, type, regcache, out, in);
+      else if (in != NULL)
+	error (_("Cannot set function return value."));
+      else
+	error (_("Function return value unknown."));
     }
 
   return rvc;

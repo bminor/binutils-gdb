@@ -1,5 +1,13 @@
 2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (s390_return_value_convention): Remove
+	function.  Inline its logic...
+	(s390_return_value): ...here.  Instead, move the handling of the
+	"register" return value convention...
+	(s390_register_return_value): ...here.  New function.
+
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c
 	(is_float_singleton): Remove function.  Move the "singleton" part
 	of the logic...
