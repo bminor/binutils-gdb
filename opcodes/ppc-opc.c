@@ -2756,6 +2756,12 @@ extract_vleil (unsigned long insn,
 #define E6500	PPC_OPCODE_E6500
 #define PPCVLE  PPC_OPCODE_VLE
 #define PPCHTM  PPC_OPCODE_HTM
+/* The list of embedded processors that use the embedded operand ordering
+   for the 3 operand dcbt and dcbtst instructions.  */
+#define DCBT_EO	(PPC_OPCODE_E500 | PPC_OPCODE_E500MC | PPC_OPCODE_476 \
+		 | PPC_OPCODE_A2 | PPC_OPCODE_VLE)
+
+
 
 /* The opcode table.
 
@@ -4463,7 +4469,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mfvrd",	X(31,51)|1,	XX1RB_MASK|1, PPCVSX2,	PPCNONE,	{RA, VS}},
 {"eratilx",	X(31,51),	X_MASK,	     PPCA2,	PPCNONE,	{ERAT_T, RA, RB}},
 
-{"lbarx",	X(31,52),	XEH_MASK,    POWER7|PPCVLE, PPCNONE,	{RT, RA0, RB, EH}},
+{"lbarx",	X(31,52),	XEH_MASK,    POWER8|PPCVLE, PPCNONE,	{RT, RA0, RB, EH}},
 
 {"ldux",	X(31,53),	X_MASK,      PPC64|PPCVLE, PPCNONE,	{RT, RAL, RB}},
  
@@ -4478,8 +4484,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"andc",	XRC(31,60,0),	X_MASK,	     COM|PPCVLE, PPCNONE,	{RA, RS, RB}},
 {"andc.",	XRC(31,60,1),	X_MASK,	     COM|PPCVLE, PPCNONE,	{RA, RS, RB}},
 
-{"waitrsv",	X(31,62)|(1<<21), 0xffffffff, POWER7|E500MC|PPCA2, PPCNONE, {0}},
-{"waitimpl",	X(31,62)|(2<<21), 0xffffffff, POWER7|E500MC|PPCA2, PPCNONE, {0}},
+{"waitrsv",	X(31,62)|(1<<21), 0xffffffff, E500MC|PPCA2, PPCNONE,	{0}},
+{"waitimpl",	X(31,62)|(2<<21), 0xffffffff, E500MC|PPCA2, PPCNONE,	{0}},
 {"wait",	X(31,62),	XWC_MASK,    POWER7|E500MC|PPCA2|PPCVLE, PPCNONE, {WC}},
  
 {"dcbstep",	XRT(31,63,0),	XRT_MASK,    E500MC|PPCA2|PPCVLE, PPCNONE, {RA0, RB}},
@@ -4543,7 +4549,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mfvrwz",	X(31,115)|1,	XX1RB_MASK|1, PPCVSX2,	PPCNONE,	{RA, VS}},
 {"mfvsrwz",	X(31,115),	XX1RB_MASK,   PPCVSX2,	PPCNONE,	{RA, XS6}},
 
-{"lharx",	X(31,116),	XEH_MASK,    POWER7|PPCVLE, PPCNONE,	{RT, RA0, RB, EH}},
+{"lharx",	X(31,116),	XEH_MASK,    POWER8|PPCVLE, PPCNONE,	{RT, RA0, RB, EH}},
 
 {"clf",		X(31,118),	XTO_MASK,    POWER,	PPCNONE,	{RA, RB}},
 
@@ -4711,9 +4717,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mtvsrwz",	X(31,243),	XX1RB_MASK,   PPCVSX2,	PPCNONE,	{XT6, RA}},
 
 {"dcbtstt",	XRT(31,246,0x10), XRT_MASK,  POWER7,	PPCNONE,	{RA0, RB}},
-{"dcbtst",	X(31,246),	X_MASK,      POWER4,	PPCNONE,	{RA0, RB, CT}},
-{"dcbtst",	X(31,246),	X_MASK,      PPC|PPCVLE, POWER4,	{CT, RA0, RB}},
- 
+{"dcbtst",	X(31,246),	X_MASK,      POWER4,	DCBT_EO,	{RA0, RB, CT}},
+{"dcbtst",	X(31,246),	X_MASK,      DCBT_EO,	PPCNONE,	{CT, RA0, RB}},
+{"dcbtst",	X(31,246),	X_MASK,      PPC,	POWER4|DCBT_EO,	{RA0, RB}},
+
 {"stbux",	X(31,247),	X_MASK,	     COM|PPCVLE, PPCNONE,	{RS, RAS, RB}},
 
 {"slliq",	XRC(31,248,0),	X_MASK,      M601,	PPCNONE,	{RA, RS, SH}},
@@ -4753,9 +4760,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lscbx.",	XRC(31,277,1),	X_MASK,      M601,	PPCNONE,	{RT, RA, RB}},
 
 {"dcbtt",	XRT(31,278,0x10), XRT_MASK,  POWER7,	PPCNONE,	{RA0, RB}},
-{"dcbt",	X(31,278),	X_MASK,      POWER4,	PPCNONE,	{RA0, RB, CT}},
-{"dcbt",	X(31,278),	X_MASK,      PPC|PPCVLE, POWER4,	{CT, RA0, RB}},
- 
+{"dcbt",	X(31,278),	X_MASK,      POWER4,	DCBT_EO,	{RA0, RB, CT}},
+{"dcbt",	X(31,278),	X_MASK,      DCBT_EO,	PPCNONE,	{CT, RA0, RB}},
+{"dcbt",	X(31,278),	X_MASK,      PPC,	POWER4|DCBT_EO,	{RA0, RB}},
+
 {"lhzx",	X(31,279),	X_MASK,      COM|PPCVLE, PPCNONE,	{RT, RA0, RB}},
 
 {"cdtbcd",	X(31,282),	XRB_MASK,    POWER6,	PPCNONE,	{RA, RS}},
@@ -5531,7 +5539,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tendall.",	XRC(31,686,1)|(1<<25), XRTRARB_MASK, PPCHTM, PPCNONE,	{0}},
 {"tend.",	XRC(31,686,1), XRTARARB_MASK, PPCHTM,	PPCNONE,	{HTM_A}},
 
-{"stbcx.",	XRC(31,694,1),	X_MASK,      POWER7,	PPCNONE,	{RS, RA0, RB}},
+{"stbcx.",	XRC(31,694,1),	X_MASK,      POWER8,	PPCNONE,	{RS, RA0, RB}},
 
 {"stfsux",	X(31,695),	X_MASK,      COM,	PPCEFS,		{FRS, RAS, RB}},
 
@@ -5561,7 +5569,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stswi",	X(31,725),	X_MASK, PPCCOM|PPCVLE,	E500|E500MC,	{RS, RA0, NB}},
 {"stsi",	X(31,725),	X_MASK,      PWRCOM,	PPCNONE,	{RS, RA0, NB}},
 
-{"sthcx.",	XRC(31,726,1),	X_MASK,      POWER7,	PPCNONE,	{RS, RA0, RB}},
+{"sthcx.",	XRC(31,726,1),	X_MASK,      POWER8,	PPCNONE,	{RS, RA0, RB}},
 
 {"stfdx",	X(31,727),	X_MASK,      COM,	PPCEFS,		{FRS, RA0, RB}},
 

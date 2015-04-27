@@ -1,3 +1,15 @@
+2015-04-27  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/a2.s: Fixup test case due to dcbt/dcbtst embedded operand
+	ordering change.
+	* gas/ppc/a2.d: Likewise.
+	* gas/ppc/476.d: Likewise.
+	* gas/ppc/booke.s: Remove invalid 3 operand dcbt tests.
+	* gas/ppc/booke.d: Likewise.
+	* gas/ppc/power7.s: Remove lbarx, lharx, stbcx., sthcx., waitrsv
+	and waitimpl tests.
+	* gas/ppc/power7.d: Likewise.
+
 2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* doc/as.texinfo: Document Tag_GNU_S390_ABI_Vector.
