@@ -1,3 +1,9 @@
+2015-04-27  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (s_aarch64_inst): Don't align code for non-text
+	section.
+	(md_assemble): Likewise, move the align code outside the loop.
+
 2015-04-24  Jim Wilson  <jim.wilson@linaro.org>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add CRC and CRYPTO features
