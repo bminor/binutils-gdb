@@ -8171,11 +8171,21 @@ template_to_static_fixed_type (struct type *type0)
   int nfields;
   int f;
 
+  /* No need no do anything if the input type is already fixed.  */
+  if (TYPE_FIXED_INSTANCE (type0))
+    return type0;
+
+  /* Likewise if we already have computed the static approximation.  */
   if (TYPE_TARGET_TYPE (type0) != NULL)
     return TYPE_TARGET_TYPE (type0);
 
-  nfields = TYPE_NFIELDS (type0);
+  /* Don't clone TYPE0 until we are sure we are going to need a copy.  */
   type = type0;
+  nfields = TYPE_NFIELDS (type0);
+
+  /* Whether or not we cloned TYPE0, cache the result so that we don't do
+     recompute all over next time.  */
+  TYPE_TARGET_TYPE (type0) = type;
 
   for (f = 0; f < nfields; f += 1)
     {
@@ -8189,24 +8199,30 @@ template_to_static_fixed_type (struct type *type0)
 	}
       else
         new_type = static_unwrap_type (field_type);
-      if (type == type0 && new_type != field_type)
-        {
-          TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
-          TYPE_CODE (type) = TYPE_CODE (type0);
-          INIT_CPLUS_SPECIFIC (type);
-          TYPE_NFIELDS (type) = nfields;
-          TYPE_FIELDS (type) = (struct field *)
-            TYPE_ALLOC (type, nfields * sizeof (struct field));
-          memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
-                  sizeof (struct field) * nfields);
-          TYPE_NAME (type) = ada_type_name (type0);
-          TYPE_TAG_NAME (type) = NULL;
-	  TYPE_FIXED_INSTANCE (type) = 1;
-          TYPE_LENGTH (type) = 0;
-        }
-      TYPE_FIELD_TYPE (type, f) = new_type;
-      TYPE_FIELD_NAME (type, f) = TYPE_FIELD_NAME (type0, f);
+
+      if (new_type != field_type)
+	{
+	  /* Clone TYPE0 only the first time we get a new field type.  */
+	  if (type == type0)
+	    {
+	      TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
+	      TYPE_CODE (type) = TYPE_CODE (type0);
+	      INIT_CPLUS_SPECIFIC (type);
+	      TYPE_NFIELDS (type) = nfields;
+	      TYPE_FIELDS (type) = (struct field *)
+		TYPE_ALLOC (type, nfields * sizeof (struct field));
+	      memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
+		      sizeof (struct field) * nfields);
+	      TYPE_NAME (type) = ada_type_name (type0);
+	      TYPE_TAG_NAME (type) = NULL;
+	      TYPE_FIXED_INSTANCE (type) = 1;
+	      TYPE_LENGTH (type) = 0;
+	    }
+	  TYPE_FIELD_TYPE (type, f) = new_type;
+	  TYPE_FIELD_NAME (type, f) = TYPE_FIELD_NAME (type0, f);
+	}
     }
+
   return type;
 }
 

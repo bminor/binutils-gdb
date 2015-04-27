@@ -2013,6 +2013,10 @@ resolve_dynamic_struct (struct type *type,
   TYPE_LENGTH (resolved_type)
     = (resolved_type_bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
 
+  /* The Ada language uses this field as a cache for static fixed types: reset
+     it as RESOLVED_TYPE must have its own static fixed type.  */
+  TYPE_TARGET_TYPE (resolved_type) = NULL;
+
   return resolved_type;
 }
 

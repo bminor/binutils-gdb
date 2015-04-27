@@ -1,3 +1,12 @@
+2015-04-27  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (template_to_static_fixed_type): Return input type
+	when it is already fixed.  Cache the input type itself when not
+	creating a static fixed copy.  Make it explicit that we never
+	molestate the input type.
+	* gdbtypes.c (resolve_dynamic_struct): Reset the
+	TYPE_TARGET_TYPE field for resolved copies.
+
 2015-04-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_is_tagged_type): Add call to ada_check_typedef.
