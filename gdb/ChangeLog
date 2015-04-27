@@ -1,5 +1,25 @@
 2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c
+	(is_float_singleton): Remove function.  Move the "singleton" part
+	of the logic...
+	(s390_effective_inner_type): ...here.  New function.
+	(is_float_like): Remove function.  Inline its logic...
+	(s390_function_arg_float): ...here.
+	(is_pointer_like, is_integer_like, is_struct_like): Remove
+	functions.  Inline their logic...
+	(s390_function_arg_integer): ...here.
+	(s390_function_arg_pass_by_reference): Remove function.
+	(extend_simple_arg): Remove function.
+	(alignment_of): Remove function.
+	(struct s390_arg_state): New structure.
+	(s390_handle_arg): New function.
+	(s390_push_dummy_call): Move parameter placement logic to the new
+	function s390_handle_arg.  Call it for calculating the stack area
+	sizes first, and again for actually writing the parameters.
+
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (is_power_of_two): Add comment.  Return
 	  false if the argument is zero.
 

@@ -2389,99 +2389,40 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 
 /* Dummy function calls.  */
 
-/* Return non-zero if TYPE is an integer-like type, zero otherwise.
-   "Integer-like" types are those that should be passed the way
-   integers are: integers, enums, ranges, characters, and booleans.  */
-static int
-is_integer_like (struct type *type)
-{
-  enum type_code code = TYPE_CODE (type);
+/* Unwrap any single-field structs in TYPE and return the effective
+   "inner" type.  E.g., yield "float" for all these cases:
 
-  return (code == TYPE_CODE_INT
-	  || code == TYPE_CODE_ENUM
-	  || code == TYPE_CODE_RANGE
-	  || code == TYPE_CODE_CHAR
-	  || code == TYPE_CODE_BOOL);
+     float x;
+     struct { float x };
+     struct { struct { float x; } x; };
+     struct { struct { struct { float x; } x; } x; };  */
+
+static struct type *
+s390_effective_inner_type (struct type *type)
+{
+  while (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	 && TYPE_NFIELDS (type) == 1)
+    type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+  return type;
 }
 
-/* Return non-zero if TYPE is a pointer-like type, zero otherwise.
-   "Pointer-like" types are those that should be passed the way
-   pointers are: pointers and references.  */
+/* Return non-zero if TYPE should be passed like "float" or
+   "double".  */
+
 static int
-is_pointer_like (struct type *type)
+s390_function_arg_float (struct type *type)
 {
-  enum type_code code = TYPE_CODE (type);
+  /* Note that long double as well as complex types are intentionally
+     excluded. */
+  if (TYPE_LENGTH (type) > 8)
+    return 0;
 
-  return (code == TYPE_CODE_PTR
-	  || code == TYPE_CODE_REF);
-}
+  /* A struct containing just a float or double is passed like a float
+     or double.  */
+  type = s390_effective_inner_type (type);
 
-
-/* Return non-zero if TYPE is a `float singleton' or `double
-   singleton', zero otherwise.
-
-   A `T singleton' is a struct type with one member, whose type is
-   either T or a `T singleton'.  So, the following are all float
-   singletons:
-
-   struct { float x };
-   struct { struct { float x; } x; };
-   struct { struct { struct { float x; } x; } x; };
-
-   ... and so on.
-
-   All such structures are passed as if they were floats or doubles,
-   as the (revised) ABI says.  */
-static int
-is_float_singleton (struct type *type)
-{
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
-    {
-      struct type *singleton_type = TYPE_FIELD_TYPE (type, 0);
-      CHECK_TYPEDEF (singleton_type);
-
-      return (TYPE_CODE (singleton_type) == TYPE_CODE_FLT
-	      || TYPE_CODE (singleton_type) == TYPE_CODE_DECFLOAT
-	      || is_float_singleton (singleton_type));
-    }
-
-  return 0;
-}
-
-
-/* Return non-zero if TYPE is a struct-like type, zero otherwise.
-   "Struct-like" types are those that should be passed as structs are:
-   structs and unions.
-
-   As an odd quirk, not mentioned in the ABI, GCC passes float and
-   double singletons as if they were a plain float, double, etc.  (The
-   corresponding union types are handled normally.)  So we exclude
-   those types here.  *shrug* */
-static int
-is_struct_like (struct type *type)
-{
-  enum type_code code = TYPE_CODE (type);
-
-  return (code == TYPE_CODE_UNION
-	  || (code == TYPE_CODE_STRUCT && ! is_float_singleton (type)));
-}
-
-
-/* Return non-zero if TYPE is a float-like type, zero otherwise.
-   "Float-like" types are those that should be passed as
-   floating-point values are.
-
-   You'd think this would just be floats, doubles, long doubles, etc.
-   But as an odd quirk, not mentioned in the ABI, GCC passes float and
-   double singletons as if they were a plain float, double, etc.  (The
-   corresponding union types are handled normally.)  So we include
-   those types here.  *shrug* */
-static int
-is_float_like (struct type *type)
-{
   return (TYPE_CODE (type) == TYPE_CODE_FLT
-	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT
-	  || is_float_singleton (type));
+	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT);
 }
 
 /* Determine whether N is a power of two.  */
@@ -2492,100 +2433,171 @@ is_power_of_two (unsigned int n)
   return n && ((n & (n - 1)) == 0);
 }
 
-/* Return non-zero if TYPE should be passed as a pointer to a copy,
-   zero otherwise.  */
-static int
-s390_function_arg_pass_by_reference (struct type *type)
-{
-  if (TYPE_LENGTH (type) > 8)
-    return 1;
+/* For an argument whose type is TYPE and which is not passed like a
+   float, return non-zero if it should be passed like "int" or "long
+   long".  */
 
-  return (is_struct_like (type) && !is_power_of_two (TYPE_LENGTH (type)))
-	  || TYPE_CODE (type) == TYPE_CODE_COMPLEX
-	  || (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type));
-}
-
-/* Return non-zero if TYPE should be passed in a float register
-   if possible.  */
-static int
-s390_function_arg_float (struct type *type)
-{
-  if (TYPE_LENGTH (type) > 8)
-    return 0;
-
-  return is_float_like (type);
-}
-
-/* Return non-zero if TYPE should be passed in an integer register
-   (or a pair of integer registers) if possible.  */
 static int
 s390_function_arg_integer (struct type *type)
 {
+  enum type_code code = TYPE_CODE (type);
+
   if (TYPE_LENGTH (type) > 8)
     return 0;
 
-   return is_integer_like (type)
-	  || is_pointer_like (type)
-	  || (is_struct_like (type) && is_power_of_two (TYPE_LENGTH (type)));
+  if (code == TYPE_CODE_INT
+      || code == TYPE_CODE_ENUM
+      || code == TYPE_CODE_RANGE
+      || code == TYPE_CODE_CHAR
+      || code == TYPE_CODE_BOOL
+      || code == TYPE_CODE_PTR
+      || code == TYPE_CODE_REF)
+    return 1;
+
+  return ((code == TYPE_CODE_UNION || code == TYPE_CODE_STRUCT)
+	  && is_power_of_two (TYPE_LENGTH (type)));
 }
 
-/* Return ARG, a `SIMPLE_ARG', sign-extended or zero-extended to a full
-   word as required for the ABI.  */
-static LONGEST
-extend_simple_arg (struct gdbarch *gdbarch, struct value *arg)
+/* Argument passing state: Internal data structure passed to helper
+   routines of s390_push_dummy_call.  */
+
+struct s390_arg_state
+  {
+    /* Register cache, or NULL, if we are in "preparation mode".  */
+    struct regcache *regcache;
+    /* Next available general/floating-point register for argument
+       passing.  */
+    int gr, fr;
+    /* Current pointer to copy area (grows downwards).  */
+    CORE_ADDR copy;
+    /* Current pointer to parameter area (grows upwards).  */
+    CORE_ADDR argp;
+  };
+
+/* Prepare one argument ARG for a dummy call and update the argument
+   passing state AS accordingly.  If the regcache field in AS is set,
+   operate in "write mode" and write ARG into the inferior.  Otherwise
+   run "preparation mode" and skip all updates to the inferior.  */
+
+static void
+s390_handle_arg (struct s390_arg_state *as, struct value *arg,
+		 struct gdbarch_tdep *tdep, int word_size,
+		 enum bfd_endian byte_order)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct type *type = check_typedef (value_type (arg));
+  unsigned int length = TYPE_LENGTH (type);
+  int write_mode = as->regcache != NULL;
 
-  /* Even structs get passed in the least significant bits of the
-     register / memory word.  It's not really right to extract them as
-     an integer, but it does take care of the extension.  */
-  if (TYPE_UNSIGNED (type))
-    return extract_unsigned_integer (value_contents (arg),
-				     TYPE_LENGTH (type), byte_order);
-  else
-    return extract_signed_integer (value_contents (arg),
-				   TYPE_LENGTH (type), byte_order);
-}
-
-
-/* Return the alignment required by TYPE.  */
-static int
-alignment_of (struct type *type)
-{
-  int alignment;
-
-  if (is_integer_like (type)
-      || is_pointer_like (type)
-      || TYPE_CODE (type) == TYPE_CODE_FLT
-      || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
-    alignment = TYPE_LENGTH (type);
-  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	   || TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (s390_function_arg_float (type))
     {
-      int i;
-
-      alignment = 1;
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      /* The GNU/Linux for S/390 ABI uses FPRs 0 and 2 to pass
+	 arguments.  The GNU/Linux for zSeries ABI uses 0, 2, 4, and
+	 6.  */
+      if (as->fr <= (tdep->abi == ABI_LINUX_S390 ? 2 : 6))
 	{
-	  int field_alignment
-	    = alignment_of (check_typedef (TYPE_FIELD_TYPE (type, i)));
+	  /* When we store a single-precision value in an FP register,
+	     it occupies the leftmost bits.  */
+	  if (write_mode)
+	    regcache_cooked_write_part (as->regcache,
+					S390_F0_REGNUM + as->fr,
+					0, length,
+					value_contents (arg));
+	  as->fr += 2;
+	}
+      else
+	{
+	  /* When we store a single-precision value in a stack slot,
+	     it occupies the rightmost bits.  */
+	  as->argp = align_up (as->argp + length, word_size);
+	  if (write_mode)
+	    write_memory (as->argp - length, value_contents (arg),
+			  length);
+	}
+    }
+  else if (s390_function_arg_integer (type) && length <= word_size)
+    {
+      ULONGEST val;
 
-	  if (field_alignment > alignment)
-	    alignment = field_alignment;
+      if (write_mode)
+	{
+	  /* Place value in least significant bits of the register or
+	     memory word and sign- or zero-extend to full word size.
+	     This also applies to a struct or union.  */
+	  val = TYPE_UNSIGNED (type)
+	    ? extract_unsigned_integer (value_contents (arg),
+					length, byte_order)
+	    : extract_signed_integer (value_contents (arg),
+				      length, byte_order);
+	}
+
+      if (as->gr <= 6)
+	{
+	  if (write_mode)
+	    regcache_cooked_write_unsigned (as->regcache,
+					    S390_R0_REGNUM + as->gr,
+					    val);
+	  as->gr++;
+	}
+      else
+	{
+	  if (write_mode)
+	    write_memory_unsigned_integer (as->argp, word_size,
+					   byte_order, val);
+	  as->argp += word_size;
+	}
+    }
+  else if (s390_function_arg_integer (type) && length == 8)
+    {
+      if (as->gr <= 5)
+	{
+	  if (write_mode)
+	    {
+	      regcache_cooked_write (as->regcache,
+				     S390_R0_REGNUM + as->gr,
+				     value_contents (arg));
+	      regcache_cooked_write (as->regcache,
+				     S390_R0_REGNUM + as->gr + 1,
+				     value_contents (arg) + word_size);
+	    }
+	  as->gr += 2;
+	}
+      else
+	{
+	  /* If we skipped r6 because we couldn't fit a DOUBLE_ARG
+	     in it, then don't go back and use it again later.  */
+	  as->gr = 7;
+
+	  if (write_mode)
+	    write_memory (as->argp, value_contents (arg), length);
+	  as->argp += length;
 	}
     }
   else
-    alignment = 1;
+    {
+      /* This argument type is never passed in registers.  Place the
+	 value in the copy area and pass a pointer to it.  Use 8-byte
+	 alignment as a conservative assumption.  */
+      as->copy = align_down (as->copy - length, 8);
+      if (write_mode)
+	write_memory (as->copy, value_contents (arg), length);
 
-  /* Check that everything we ever return is a power of two.  Lots of
-     code doesn't want to deal with aligning things to arbitrary
-     boundaries.  */
-  gdb_assert ((alignment & (alignment - 1)) == 0);
-
-  return alignment;
+      if (as->gr <= 6)
+	{
+	  if (write_mode)
+	    regcache_cooked_write_unsigned (as->regcache,
+					    S390_R0_REGNUM + as->gr,
+					    as->copy);
+	  as->gr++;
+	}
+      else
+	{
+	  if (write_mode)
+	    write_memory_unsigned_integer (as->argp, word_size,
+					   byte_order, as->copy);
+	  as->argp += word_size;
+	}
+    }
 }
-
 
 /* Put the actual parameter values pointed to by ARGS[0..NARGS-1] in
    place to be passed to a function, as specified by the "GNU/Linux
@@ -2601,6 +2613,7 @@ alignment_of (struct type *type)
 
    Our caller has taken care of any type promotions needed to satisfy
    prototypes or the old K&R argument-passing rules.  */
+
 static CORE_ADDR
 s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
@@ -2611,151 +2624,48 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
+  struct s390_arg_state arg_state, arg_prep;
+  CORE_ADDR param_area_start, new_sp;
 
-  /* If the i'th argument is passed as a reference to a copy, then
-     copy_addr[i] is the address of the copy we made.  */
-  CORE_ADDR *copy_addr = alloca (nargs * sizeof (CORE_ADDR));
+  arg_prep.copy = sp;
+  arg_prep.gr = struct_return ? 3 : 2;
+  arg_prep.fr = 0;
+  arg_prep.argp = 0;
+  arg_prep.regcache = NULL;
 
-  /* Reserve space for the reference-to-copy area.  */
+  /* Initialize arg_state for "preparation mode".  */
+  arg_state = arg_prep;
+
+  /* Update arg_state.copy with the start of the reference-to-copy area
+     and arg_state.argp with the size of the parameter area.  */
   for (i = 0; i < nargs; i++)
-    {
-      struct value *arg = args[i];
-      struct type *type = check_typedef (value_type (arg));
+    s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order);
 
-      if (s390_function_arg_pass_by_reference (type))
-	{
-	  sp -= TYPE_LENGTH (type);
-	  sp = align_down (sp, alignment_of (type));
-	  copy_addr[i] = sp;
-	}
-    }
-
-  /* Reserve space for the parameter area.  As a conservative
-     simplification, we assume that everything will be passed on the
-     stack.  Since every argument larger than 8 bytes will be
-     passed by reference, we use this simple upper bound.  */
-  sp -= nargs * 8;
-
-  /* After all that, make sure it's still aligned on an eight-byte
-     boundary.  */
-  sp = align_down (sp, 8);
+  param_area_start = align_down (arg_state.copy - arg_state.argp, 8);
 
   /* Allocate the standard frame areas: the register save area, the
-     word reserved for the compiler (which seems kind of meaningless),
-     and the back chain pointer.  */
-  sp -= 16*word_size + 32;
+     word reserved for the compiler, and the back chain pointer.  */
+  new_sp = param_area_start - (16 * word_size + 32);
 
-  /* Now we have the final SP value.  Make sure we didn't underflow;
-     on 31-bit, this would result in addresses with the high bit set,
-     which causes confusion elsewhere.  Note that if we error out
-     here, stack and registers remain untouched.  */
-  if (gdbarch_addr_bits_remove (gdbarch, sp) != sp)
+  /* Now we have the final stack pointer.  Make sure we didn't
+     underflow; on 31-bit, this would result in addresses with the
+     high bit set, which causes confusion elsewhere.  Note that if we
+     error out here, stack and registers remain untouched.  */
+  if (gdbarch_addr_bits_remove (gdbarch, new_sp) != new_sp)
     error (_("Stack overflow"));
 
+  /* Pass the structure return address in general register 2.  */
+  if (struct_return)
+    regcache_cooked_write_unsigned (regcache, S390_R2_REGNUM, struct_addr);
 
-  /* Finally, place the actual parameters, working from SP towards
-     higher addresses.  The code above is supposed to reserve enough
-     space for this.  */
-  {
-    int fr = 0;
-    int gr = 2;
-    CORE_ADDR starg = sp + 16*word_size + 32;
+  /* Initialize arg_state for "write mode".  */
+  arg_state = arg_prep;
+  arg_state.argp = param_area_start;
+  arg_state.regcache = regcache;
 
-    /* A struct is returned using general register 2.  */
-    if (struct_return)
-      {
-	regcache_cooked_write_unsigned (regcache, S390_R0_REGNUM + gr,
-					struct_addr);
-	gr++;
-      }
-
-    for (i = 0; i < nargs; i++)
-      {
-	struct value *arg = args[i];
-	struct type *type = check_typedef (value_type (arg));
-	unsigned length = TYPE_LENGTH (type);
-
-	if (s390_function_arg_pass_by_reference (type))
-	  {
-	    /* Actually copy the argument contents to the stack slot
-	       that was reserved above.  */
-	    write_memory (copy_addr[i], value_contents (arg), length);
-
-	    if (gr <= 6)
-	      {
-		regcache_cooked_write_unsigned (regcache, S390_R0_REGNUM + gr,
-						copy_addr[i]);
-		gr++;
-	      }
-	    else
-	      {
-		write_memory_unsigned_integer (starg, word_size, byte_order,
-					       copy_addr[i]);
-		starg += word_size;
-	      }
-	  }
-	else if (s390_function_arg_float (type))
-	  {
-	    /* The GNU/Linux for S/390 ABI uses FPRs 0 and 2 to pass arguments,
-	       the GNU/Linux for zSeries ABI uses 0, 2, 4, and 6.  */
-	    if (fr <= (tdep->abi == ABI_LINUX_S390 ? 2 : 6))
-	      {
-		/* When we store a single-precision value in an FP register,
-		   it occupies the leftmost bits.  */
-		regcache_cooked_write_part (regcache, S390_F0_REGNUM + fr,
-					    0, length, value_contents (arg));
-		fr += 2;
-	      }
-	    else
-	      {
-		/* When we store a single-precision value in a stack slot,
-		   it occupies the rightmost bits.  */
-		starg = align_up (starg + length, word_size);
-		write_memory (starg - length, value_contents (arg), length);
-	      }
-	  }
-	else if (s390_function_arg_integer (type) && length <= word_size)
-	  {
-	    if (gr <= 6)
-	      {
-		/* Integer arguments are always extended to word size.  */
-		regcache_cooked_write_signed (regcache, S390_R0_REGNUM + gr,
-					      extend_simple_arg (gdbarch,
-								 arg));
-		gr++;
-	      }
-	    else
-	      {
-		/* Integer arguments are always extended to word size.  */
-		write_memory_signed_integer (starg, word_size, byte_order,
-					     extend_simple_arg (gdbarch, arg));
-		starg += word_size;
-	      }
-	  }
-	else if (s390_function_arg_integer (type) && length == 2*word_size)
-	  {
-	    if (gr <= 5)
-	      {
-		regcache_cooked_write (regcache, S390_R0_REGNUM + gr,
-				       value_contents (arg));
-		regcache_cooked_write (regcache, S390_R0_REGNUM + gr + 1,
-				       value_contents (arg) + word_size);
-		gr += 2;
-	      }
-	    else
-	      {
-		/* If we skipped r6 because we couldn't fit a DOUBLE_ARG
-		   in it, then don't go back and use it again later.  */
-		gr = 7;
-
-		write_memory (starg, value_contents (arg), length);
-		starg += length;
-	      }
-	  }
-	else
-	  internal_error (__FILE__, __LINE__, _("unknown argument type"));
-      }
-  }
+  /* Write all parameters.  */
+  for (i = 0; i < nargs; i++)
+    s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order);
 
   /* Store return PSWA.  In 31-bit mode, keep addressing mode bit.  */
   if (word_size == 4)
@@ -2767,11 +2677,11 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_write_unsigned (regcache, S390_RETADDR_REGNUM, bp_addr);
 
   /* Store updated stack pointer.  */
-  regcache_cooked_write_unsigned (regcache, S390_SP_REGNUM, sp);
+  regcache_cooked_write_unsigned (regcache, S390_SP_REGNUM, new_sp);
 
   /* We need to return the 'stack part' of the frame ID,
      which is actually the top of the register save area.  */
-  return sp + 16*word_size + 32;
+  return param_area_start;
 }
 
 /* Assuming THIS_FRAME is a dummy, return the frame ID of that
