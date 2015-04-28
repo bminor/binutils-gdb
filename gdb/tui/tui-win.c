@@ -858,10 +858,10 @@ tui_async_resize_screen (gdb_client_data arg)
     }
   else
     {
+      tui_set_win_resized_to (FALSE);
       tui_resize_all ();
       tui_refresh_all_win ();
       tui_update_gdb_sizes ();
-      tui_set_win_resized_to (FALSE);
       tui_redisplay_readline ();
     }
 }
