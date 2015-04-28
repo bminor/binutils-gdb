@@ -1,3 +1,8 @@
+2015-04-28  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't assert
+	on missing global entry stub due to bogus debug info.
+
 2015-04-27  Han Shen  <shenhan@google.com>
 
 	* options.h (--fix-cortex-a53-843419): Rename option.
@@ -15,7 +20,8 @@
 	* testsuite/eh_test_a.cc: New test.
 	* testsuite/eh_test_b.cc: New test.
 
-2015-04-23  Sriraman Tallam  <tmsriram@google.com>	
+2015-04-23  Sriraman Tallam  <tmsriram@google.com>
+
 	* options.h (--weak-unresolved-symbols): New option.
 	* symtab.cc (Symbol_table::sized_write_globals): Change symbol
 	binding to weak with new option.
@@ -42,16 +48,16 @@
 
 2015-04-16  Han Shen  <shenhan@google.com>
 
-    * aarch64.cc (AArch64_insn_utilities): New utility class.
-    (AArch64_relobj::Mapping_symbol_position): New struct.
-    (AArch64_relobj::Mapping_symbol_info): New typedef.
-    (AArch64_relobj::do_count_local_symbols): New function overriding
-    parent's implementation.
-    (AArch64_relobj::mapping_symbol_info_): New member
-    (AArch64_relobj::scan_erratum_843419): New method.
-    (Target_aarch64::scan_erratum_843419_span): New method.
-    (Target_aarch64::is_erratum_843419_sequence): New method.
-    * options.h (fix_cortex_a53): New option.
+	* aarch64.cc (AArch64_insn_utilities): New utility class.
+	(AArch64_relobj::Mapping_symbol_position): New struct.
+	(AArch64_relobj::Mapping_symbol_info): New typedef.
+	(AArch64_relobj::do_count_local_symbols): New function overriding
+	parent's implementation.
+	(AArch64_relobj::mapping_symbol_info_): New member
+	(AArch64_relobj::scan_erratum_843419): New method.
+	(Target_aarch64::scan_erratum_843419_span): New method.
+	(Target_aarch64::is_erratum_843419_sequence): New method.
+	* options.h (fix_cortex_a53): New option.
 
 2015-04-09  Cary Coutant  <ccoutant@google.com>
 
