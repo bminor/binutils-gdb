@@ -2,6 +2,15 @@
 
 	Apply from master
 	2015-04-28  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::do_dynsym_value): Use Address rather
+	than unsigned int for find_global_entry result temp.  Compare
+	against invalid_address.
+	(Target_powerpc::do_plt_address_for_global): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.  Don't assert
+	on plt call stub existence for debug info.  Do assert for plt
+	and global entry stub existence if an alloc section.
+
+	2015-04-28  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't assert
 	on missing global entry stub due to bogus debug info.
 
