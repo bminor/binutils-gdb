@@ -6835,8 +6835,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  && !parameters->options().output_is_position_independent()
 	  && !is_branch_reloc(r_type))
 	{
-	  unsigned int off = target->glink_section()->find_global_entry(gsym);
-	  if (off != (unsigned int)-1)
+	  Address off = target->glink_section()->find_global_entry(gsym);
+	  if (off != invalid_address)
 	    {
 	      value = target->glink_section()->global_entry_address() + off;
 	      has_stub_value = true;
@@ -6852,18 +6852,26 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      if (target->stub_tables().size() != 0)
 		stub_table = target->stub_tables()[0];
 	    }
-	  gold_assert(stub_table != NULL);
-	  Address off;
-	  if (gsym != NULL)
-	    off = stub_table->find_plt_call_entry(object, gsym, r_type,
-						  rela.get_r_addend());
-	  else
-	    off = stub_table->find_plt_call_entry(object, r_sym, r_type,
-						  rela.get_r_addend());
-	  gold_assert(off != invalid_address);
-	  value = stub_table->stub_address() + off;
-	  has_stub_value = true;
+	  if (stub_table != NULL)
+	    {
+	      Address off;
+	      if (gsym != NULL)
+		off = stub_table->find_plt_call_entry(object, gsym, r_type,
+						      rela.get_r_addend());
+	      else
+		off = stub_table->find_plt_call_entry(object, r_sym, r_type,
+						      rela.get_r_addend());
+	      if (off != invalid_address)
+		{
+		  value = stub_table->stub_address() + off;
+		  has_stub_value = true;
+		}
+	    }
 	}
+      // We don't care too much about bogus debug references to
+      // non-local functions, but otherwise there had better be a plt
+      // call stub or global entry stub as appropriate.
+      gold_assert(has_stub_value || !(os->flags() & elfcpp::SHF_ALLOC));
     }
 
   if (r_type == elfcpp::R_POWERPC_GOT16
@@ -8232,8 +8240,8 @@ Target_powerpc<size, big_endian>::do_dynsym_value(const Symbol* gsym) const
     }
   else if (this->abiversion() >= 2)
     {
-      unsigned int off = this->glink_section()->find_global_entry(gsym);
-      if (off != (unsigned int)-1)
+      Address off = this->glink_section()->find_global_entry(gsym);
+      if (off != invalid_address)
 	return this->glink_section()->global_entry_address() + off;
     }
   gold_unreachable();
@@ -8282,8 +8290,8 @@ Target_powerpc<size, big_endian>::do_plt_address_for_global(
     }
   else if (this->abiversion() >= 2)
     {
-      unsigned int off = this->glink_section()->find_global_entry(gsym);
-      if (off != (unsigned int)-1)
+      Address off = this->glink_section()->find_global_entry(gsym);
+      if (off != invalid_address)
 	return this->glink_section()->global_entry_address() + off;
     }
   gold_unreachable();
