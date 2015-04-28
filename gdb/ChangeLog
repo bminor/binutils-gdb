@@ -1,3 +1,9 @@
+2015-04-28  Gary Benson <gbenson@redhat.com>
+
+	* infrun.c (solist.h): New include.
+	(follow_exec): Use exec_file_find to prefix execd_pathname
+	with gdb_sysroot.
+
 2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-source.c (tui_set_source_content): Avoid calling

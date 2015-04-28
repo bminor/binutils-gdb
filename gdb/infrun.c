@@ -60,6 +60,7 @@
 #include "target-descriptions.h"
 #include "target-dcache.h"
 #include "terminal.h"
+#include "solist.h"
 
 /* Prototypes for local functions */
 
@@ -1133,15 +1134,18 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   breakpoint_init_inferior (inf_execd);
 
-  if (gdb_sysroot && *gdb_sysroot)
+  if (gdb_sysroot != NULL && *gdb_sysroot != '\0')
     {
-      char *name = alloca (strlen (gdb_sysroot)
-			    + strlen (execd_pathname)
-			    + 1);
+      int fd = -1;
+      char *name;
 
-      strcpy (name, gdb_sysroot);
-      strcat (name, execd_pathname);
-      execd_pathname = name;
+      name = exec_file_find (execd_pathname, &fd);
+      if (fd >= 0)
+	close (fd);
+
+      execd_pathname = alloca (strlen (name) + 1);
+      strcpy (execd_pathname, name);
+      xfree (name);
     }
 
   /* Reset the shared library package.  This ensures that we get a
