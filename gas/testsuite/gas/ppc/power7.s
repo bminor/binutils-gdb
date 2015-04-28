@@ -24,10 +24,6 @@ power7:
 	xvcpsgndp 43,44,45
 	wait
 	wait 0
-	waitrsv
-	wait 1
-	waitimpl
-	wait 2
 	doze
 	nap
 	sleep
@@ -83,14 +79,6 @@ power7:
 	dcbtstt   8,9
 	dcffix    10,12
 	dcffix.   20,22
-	lbarx     10,11,12
-	lbarx     10,11,12,0
-	lbarx     10,11,12,1
-	lharx     20,21,22
-	lharx     20,21,22,0
-	lharx     20,21,22,1
-	stbcx.    10,11,12
-	sthcx.    10,11,12
 	fre       14,15
 	fre.      14,15
 	fres      14,15

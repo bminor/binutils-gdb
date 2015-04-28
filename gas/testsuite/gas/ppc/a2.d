@@ -117,12 +117,12 @@ Disassembly of section \.text:
  164:	(7c 0a 58 6c|6c 58 0a 7c) 	dcbst   r10,r11
  168:	(7c 0a 58 7e|7e 58 0a 7c) 	dcbstep r10,r11
  16c:	(7c 0a 5a 2c|2c 5a 0a 7c) 	dcbt    r10,r11
- 170:	(7c 2a 5a 2c|2c 5a 2a 7c) 	dcbt    r10,r11,1
+ 170:	(7c 2a 5a 2c|2c 5a 2a 7c) 	dcbt    1,r10,r11
  174:	(7d 4b 62 7e|7e 62 4b 7d) 	dcbtep  r10,r11,r12
  178:	(7c 0a 59 4c|4c 59 0a 7c) 	dcbtls  r10,r11
  17c:	(7c 2a 59 4c|4c 59 2a 7c) 	dcbtls  1,r10,r11
  180:	(7c 0a 59 ec|ec 59 0a 7c) 	dcbtst  r10,r11
- 184:	(7c 2a 59 ec|ec 59 2a 7c) 	dcbtst  r10,r11,1
+ 184:	(7c 2a 59 ec|ec 59 2a 7c) 	dcbtst  1,r10,r11
  188:	(7d 4b 61 fe|fe 61 4b 7d) 	dcbtstep r10,r11,r12
  18c:	(7c 0a 59 0c|0c 59 0a 7c) 	dcbtstls r10,r11
  190:	(7c 2a 59 0c|0c 59 2a 7c) 	dcbtstls 1,r10,r11

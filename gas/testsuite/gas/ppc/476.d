@@ -90,13 +90,13 @@ Disassembly of section \.text:
  140:	(7c 06 3b ac|ac 3b 06 7c) 	dcbi    r6,r7
  144:	(7c 85 33 0c|0c 33 85 7c) 	dcblc   4,r5,r6
  148:	(7c 06 38 6c|6c 38 06 7c) 	dcbst   r6,r7
- 14c:	(7c c0 2a 2c|2c 2a c0 7c) 	dcbt    0,r5,6
+ 14c:	(7c 05 32 2c|2c 32 05 7c) 	dcbt    r5,r6
  150:	(7c 05 32 2c|2c 32 05 7c) 	dcbt    r5,r6
- 154:	(7c c8 2a 2c|2c 2a c8 7c) 	dcbt    r8,r5,6
+ 154:	(7d 05 32 2c|2c 32 05 7d) 	dcbt    8,r5,r6
  158:	(7c e8 49 4c|4c 49 e8 7c) 	dcbtls  7,r8,r9
- 15c:	(7c e0 31 ec|ec 31 e0 7c) 	dcbtst  0,r6,7
+ 15c:	(7c 06 39 ec|ec 39 06 7c) 	dcbtst  r6,r7
  160:	(7c 06 39 ec|ec 39 06 7c) 	dcbtst  r6,r7
- 164:	(7c e9 31 ec|ec 31 e9 7c) 	dcbtst  r9,r6,7
+ 164:	(7d 26 39 ec|ec 39 26 7d) 	dcbtst  9,r6,r7
  168:	(7d 4b 61 0c|0c 61 4b 7d) 	dcbtstls 10,r11,r12
  16c:	(7c 01 17 ec|ec 17 01 7c) 	dcbz    r1,r2
  170:	(7c 05 37 ec|ec 37 05 7c) 	dcbz    r5,r6

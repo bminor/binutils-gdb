@@ -1,3 +1,20 @@
+2015-04-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Applied from master.
+	2015-04-27  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (DCBT_EO): New define.
+	(powerpc_opcodes) <lbarx>: Enable for POWER8 and later.
+	<lharx>: Likewise.
+	<stbcx.>: Likewise.
+	<sthcx.>: Likewise.
+	<waitrsv>: Do not enable for POWER7 and later.
+	<waitimpl>: Likewise.
+	<dcbt>: Default to the two operand form of the instruction for all
+	"old" cpus.  For "new" cpus, use the operand ordering that matches
+	whether the cpu is server or embedded.
+	<dcbtst>: Likewise.
+
 2015-03-11  Jiong Wang  <jiong.wang@arm.com>
 
 	* arm-dis.c (arm_symbol_is_valid): Skip ARM private symbols.
