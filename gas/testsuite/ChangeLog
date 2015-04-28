@@ -1,3 +1,8 @@
+2015-04-28  Renlin Li  <renlin.li@arm.com>
+
+	* gas/arm/thumb2_vpool_be.d: Adjust the desired output.
+	* gas/arm/vldconst_be.d: Ditto.
+
 2015-04-27  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/a2.s: Fixup test case due to dcbt/dcbtst embedded operand

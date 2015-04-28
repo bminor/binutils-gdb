@@ -1,3 +1,7 @@
+2015-04-28  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (arm_init_frag): Always emit mapping symbols.
+
 2015-04-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 18313
