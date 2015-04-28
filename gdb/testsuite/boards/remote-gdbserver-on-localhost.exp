@@ -27,6 +27,9 @@ set_board_info compiler  "[find_gcc]"
 
 process_multilib_options ""
 
+# The sshd should be running on localhost and ssh key should be
+# correctly set up that you ssh to localhost without having to type
+# password.
 set_board_info rcp_prog "/usr/bin/scp"
 set_board_info rsh_prog "/usr/bin/ssh"
 set_board_info protocol standard

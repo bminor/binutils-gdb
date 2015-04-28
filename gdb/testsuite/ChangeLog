@@ -1,5 +1,9 @@
 2015-06-22  Yao Qi  <yao.qi@linaro.org>
 
+	* boards/remote-gdbserver-on-localhost.exp: Add comments.
+
+2015-06-22  Yao Qi  <yao.qi@linaro.org>
+
 	* lib/gdb.exp (skip_hw_breakpoint_tests): Return 0 for target
 	aarch64*-*-*.
 	(skip_hw_watchpoint_tests): Likewise.
