@@ -1,3 +1,10 @@
+2015-04-28  Andy Wingo  <wingo@igalia.com>
+
+	* gdb.python/py-parameter.exp:
+	* gdb.guile/scm-parameter.exp: Escape the path that we are
+	matching against, as it might contain characters that are special
+	to regular expressions.
+
 2015-04-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/rec_comp: New testcase.
