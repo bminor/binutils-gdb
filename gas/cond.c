@@ -128,7 +128,7 @@ s_if (int arg)
   struct conditional_frame cframe;
   int t;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -261,7 +261,7 @@ void
 s_ifc (int arg)
 {
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
   char *s1, *s2;
   int len1, len2;
   int res;
