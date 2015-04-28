@@ -6748,8 +6748,11 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  && !is_branch_reloc(r_type))
 	{
 	  unsigned int off = target->glink_section()->find_global_entry(gsym);
-	  gold_assert(off != (unsigned int)-1);
-	  value = target->glink_section()->global_entry_address() + off;
+	  if (off != (unsigned int)-1)
+	    {
+	      value = target->glink_section()->global_entry_address() + off;
+	      has_stub_value = true;
+	    }
 	}
       else
 	{
@@ -6771,8 +6774,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 						  rela.get_r_addend());
 	  gold_assert(off != invalid_address);
 	  value = stub_table->stub_address() + off;
+	  has_stub_value = true;
 	}
-      has_stub_value = true;
     }
 
   if (r_type == elfcpp::R_POWERPC_GOT16
