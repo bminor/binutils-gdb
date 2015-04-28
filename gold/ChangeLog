@@ -1,6 +1,10 @@
 2015-06-05  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-04-28  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't assert
+	on missing global entry stub due to bogus debug info.
+
 	2015-03-24  Alan Modra  <amodra@gmail.com>
 	PR 18147
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't report
