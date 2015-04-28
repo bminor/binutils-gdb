@@ -1,3 +1,18 @@
+2015-04-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Applied from master.
+	2015-04-27  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/a2.s: Fixup test case due to dcbt/dcbtst embedded operand
+	ordering change.
+	* gas/ppc/a2.d: Likewise.
+	* gas/ppc/476.d: Likewise.
+	* gas/ppc/booke.s: Remove invalid 3 operand dcbt tests.
+	* gas/ppc/booke.d: Likewise.
+	* gas/ppc/power7.s: Remove lbarx, lharx, stbcx., sthcx., waitrsv
+	and waitimpl tests.
+	* gas/ppc/power7.d: Likewise.
+
 2015-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Apply patch from master:
