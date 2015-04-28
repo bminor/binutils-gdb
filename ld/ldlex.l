@@ -450,7 +450,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				  return *yytext;
 				}
 
-<VERS_START,VERS_NODE,VERS_SCRIPT>[\n]		{ lineno++; }
+<VERS_START,VERS_NODE,VERS_SCRIPT,INPUTLIST>[\n]	{ lineno++; }
 
 <VERS_START,VERS_NODE,VERS_SCRIPT>#.*		{ /* Eat up comments */ }
 

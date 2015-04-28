@@ -1,3 +1,8 @@
+2015-04-28  Andreas Schwab  <schwab@linux-m68k.org>
+
+	PR ld/18344
+	* ldlex.l (INPUTLIST): Increment lineno on newline.
+
 2015-04-24  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_after_allocation):
