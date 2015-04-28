@@ -23,11 +23,11 @@
 #include "regcache.h"
 #include "regset.h"
 #include "gdbthread.h"
+#include "gdb_wait.h"
 #include <sys/types.h>
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 #include <sys/sysctl.h>
-#include <sys/wait.h>
 #ifdef HAVE_KINFO_GETVMMAP
 #include <sys/user.h>
 #include <libutil.h>

@@ -1,3 +1,7 @@
+2015-04-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c: Include "gdb_wait.h" instead of <sys/wait.h>.
+
 2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* utils.c (init_page_info): Set rl_catch_sigwinch to zero.
