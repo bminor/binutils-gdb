@@ -1,5 +1,13 @@
 2015-04-28  Doug Evans  <dje@google.com>
 
+	PR python/18089
+	* python/py-prettyprint.c (print_children): Verify result of children
+	iterator.  Provide better error message.
+	* python/python-internal..h (gdbpy_print_python_errors_p): Declare.
+	* python/python.c (gdbpy_print_python_errors_p): New function.
+
+2015-04-28  Doug Evans  <dje@google.com>
+
 	* gdbtypes.h (struct cplus_struct_type) <n_baseclasses>: Fix comment.
 
 2015-04-28  Sasha Smundak  <asmundak@google.com>

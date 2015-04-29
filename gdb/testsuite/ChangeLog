@@ -1,3 +1,9 @@
+2015-04-28  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-bad-printers.c: New file.
+	* gdb.python/py-bad-printers.py: New file.
+	* gdb.python/py-bad-printers.exp: New file.
+
 2015-04-28  Sasha Smundak  <asmundak@google.com>
 
 	* gdb.python/py-type.exp: New test.

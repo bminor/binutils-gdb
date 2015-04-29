@@ -1182,6 +1182,14 @@ gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
   Py_RETURN_NONE;
 }
 
+/* Return non-zero if print-stack is not "none".  */
+
+int
+gdbpy_print_python_errors_p (void)
+{
+  return gdbpy_should_print_stack != python_excp_none;
+}
+
 /* Print a python exception trace, print just a message, or print
    nothing and clear the python exception, depending on
    gdbpy_should_print_stack.  Only call this if a python exception is

@@ -527,6 +527,7 @@ extern const struct language_defn *python_language;
 	}								\
     } while (0)
 
+int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
 
 PyObject *python_string_to_unicode (PyObject *obj);
