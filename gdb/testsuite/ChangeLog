@@ -1,5 +1,10 @@
 2015-04-29  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.base/watch-bitfields.exp: Switch to software watchpoints if
+	the target does not support hardware watchpoints.
+
+2015-04-29  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.base/break-always.exp: Abort testing if writing to memory
 	causes an error.
 
