@@ -1,3 +1,8 @@
+2015-04-29  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/break-always.exp: Abort testing if writing to memory
+	causes an error.
+
 2015-04-28  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-pp-maint.py: Move "replace" testing to ...
