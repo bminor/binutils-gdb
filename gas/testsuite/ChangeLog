@@ -1,3 +1,10 @@
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18265
+	* gas/arm/pr18256.s: New file: Test case.
+	* gas/arm/pr18256.l: New file: Expected assembler output.
+	* gas/arm/pr18256.d: New file: Test driver.
+
 2015-04-28  Renlin Li  <renlin.li@arm.com>
 
 	* gas/arm/thumb2_vpool_be.d: Adjust the desired output.

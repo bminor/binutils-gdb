@@ -7891,7 +7891,12 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
 {
   if (!inst.operands[i].isreg)
     {
-      gas_assert (inst.operands[0].isvec);
+      /* PR 18256 */
+      if (! inst.operands[0].isvec)
+	{
+	  inst.error = _("invalid co-processor operand");
+	  return FAIL;
+	}
       if (move_or_literal_pool (0, CONST_VEC, /*mode_3=*/FALSE))
 	return SUCCESS;
     }

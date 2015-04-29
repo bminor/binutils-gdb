@@ -1,5 +1,11 @@
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
+	PR 18256
+	* config/tc-arm.c (encode_arm_cp_address): Issue an error message
+	if the operand is neither a register nor a vector.
+
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
 	* doc/as.texinfo (Set): Note that a symbol cannot be set multiple
 	times if the expression is not constant and the target uses linker
 	relaxation.
