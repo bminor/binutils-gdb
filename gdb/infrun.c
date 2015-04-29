@@ -1136,12 +1136,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   if (gdb_sysroot != NULL && *gdb_sysroot != '\0')
     {
-      int fd = -1;
-      char *name;
-
-      name = exec_file_find (execd_pathname, &fd);
-      if (fd >= 0)
-	close (fd);
+      char *name = exec_file_find (execd_pathname, NULL);
 
       execd_pathname = alloca (strlen (name) + 1);
       strcpy (execd_pathname, name);

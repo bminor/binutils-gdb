@@ -1,3 +1,13 @@
+2015-04-29  Gary Benson <gbenson@redhat.com>
+
+	* solib.c (solib_find_1): Allow fd argument to be NULL.
+	(exec_file_find): Update comment.
+	(solib_find): Likewise.
+	* exec.c (exec_file_locate_attach): Use NULL as fd
+	argument to exec_file_find to avoid having to close
+	the opened file.
+	* infrun.c (follow_exec): Likewise.
+
 2015-04-28  Doug Evans  <dje@google.com>
 
 	PR python/18299
