@@ -1,3 +1,9 @@
+2015-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18354
+	* ld-elf/compress.exp (run_tests): Link the last zlibnormal,
+	gnunormal and gabinormal against libfoozlib.so.
+
 2015-04-27  Renlin Li  <renlin.li@arm.com>
 
 	* ld-arm/ifunc-10.dd: Adjust expected output.
