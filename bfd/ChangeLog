@@ -1,3 +1,9 @@
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 17099
+	* coff-i386.c (coff_i386_rtype_to_howto): Allow absolute PCRLONG
+	relocs.
+
 2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* elf-s390-common.c (elf_s390_merge_obj_attributes): New function.
