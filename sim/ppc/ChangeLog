@@ -1,3 +1,8 @@
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 18273
+	* hw_htab.c (htab_map_binary): Fix overlap check.
+
 2015-04-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (version.o): Change to using create-version.sh from gdb.

@@ -169,7 +169,7 @@ main(argc, argv)
     while (stat < argc) {
 	if (argv[stat][0] == '-') {
 	    if (strcmp(argv[stat], "-v") == 0) {
-		sis_verbose = 1;
+		sis_verbose += 1;
 	    } else if (strcmp(argv[stat], "-c") == 0) {
 		if ((stat + 1) < argc) {
 		    copt = 1;
@@ -202,8 +202,6 @@ main(argc, argv)
 #endif
             } else if (strcmp(argv[stat], "-dumbio") == 0) {
 		dumbio = 1;
-            } else if (strcmp(argv[stat], "-v") == 0) {
-		sis_verbose += 1;
 	    } else {
 		printf("unknown option %s\n", argv[stat]);
 		usage();
