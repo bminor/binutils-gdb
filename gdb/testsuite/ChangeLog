@@ -1,3 +1,10 @@
+2015-04-28  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-pp-maint.py: Move "replace" testing to ...
+	* gdb.python/py-pp-registration.exp: ... here.  New file.
+	* gdb.python/py-pp-registration.c: New file.
+	* gdb.python/py-pp-registration.py: New file.
+
 2015-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-framefilter.exp (pagination quit - *): New tests.

@@ -1,3 +1,9 @@
+2015-04-28  Doug Evans  <dje@google.com>
+
+	PR python/18299
+	* python/lib/gdb/printing.py (register_pretty_printer): Handle
+	name or __name__ attributes.  Handle gdb module as first argument.
+
 2015-03-31  Matthias Klose  <doko@ubuntu.com>
 
 	* compile/compile.c (compile_to_object): Allow triplets with or
