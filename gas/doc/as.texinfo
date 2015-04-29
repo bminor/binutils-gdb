@@ -6351,7 +6351,14 @@ changes @var{symbol}'s value and type to conform to
 @var{expression}.  If @var{symbol} was flagged as external, it remains
 flagged (@pxref{Symbol Attributes}).
 
-You may @code{.set} a symbol many times in the same assembly.
+You may @code{.set} a symbol many times in the same assembly provided that the
+values given to the symbol are constants.  Values that are based on expressions
+involving other symbols are allowed, but some targets may restrict this to only
+being done once per assembly.  This is because those targets do not set the
+addresses of symbols at assembly time, but rather delay the assignment until a
+final link is performed.  This allows the linker a chance to change the code in
+the files, changing the location of, and the relative distance between, various
+different symbols.
 
 If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
