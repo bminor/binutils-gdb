@@ -1,3 +1,8 @@
+2017-02-14  Tom Tromey  <tom@tromey.com>
+
+	PR python/13598:
+	* gdb.python/py-events.exp: Add before_prompt event tests.
+
 2017-02-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.dwarf2/implptrpiece.exp: Fix check for big-endian targets.

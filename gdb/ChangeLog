@@ -1,3 +1,12 @@
+2017-02-14  Tom Tromey  <tom@tromey.com>
+
+	PR python/13598:
+	* python/python.c (gdbpy_before_prompt_hook): Emit before_prompt
+	event.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add
+	before_prompt registry.
+	* python/py-events.h (events_object) <before_prompt>: New field.
+
 2017-02-14  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (ftrace_new_switch): Preserve up link and flags.

@@ -210,3 +210,28 @@ gdb_test "continue" ".*event type: continue.*
 .*exit code: 12.*
 .*exit inf: 2.*
 dir ok: True.*" "Inferior 2 terminated."
+
+
+# Test before_prompt event.
+gdb_py_test_multiple "define new user command" \
+    "define xxz" "End with a line saying just .end.." \
+    "set variable \$x = 72" "" \
+    "set variable \$y = 93" "" \
+    "end" ""
+
+gdb_py_test_multiple "add before_prompt listener" \
+    "python" "" \
+    "count = 0" "" \
+    "def listener():" "" \
+    "  global count" "" \
+    "  count = count + 1" "" \
+    "gdb.events.before_prompt.connect(listener)" "" \
+    "end" ""
+
+gdb_test_no_output "set variable \$x = 32" "do something"
+# Result is due to one emitted before "set var" and one emitted before
+# this command.
+gdb_test "python print(count)" 2 "check for before_prompt event"
+
+gdb_test_no_output "xxz" "run a canned sequence"
+gdb_test "python print(count)" 4 "check for before_prompt event"

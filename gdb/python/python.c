@@ -100,6 +100,7 @@ const struct extension_language_defn extension_language_python =
 #include "interps.h"
 #include "event-top.h"
 #include "py-ref.h"
+#include "py-event.h"
 
 /* True if Python has been successfully initialized, false
    otherwise.  */
@@ -968,6 +969,10 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
     return EXT_LANG_RC_NOP;
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
+
+  if (!evregpy_no_listeners_p (gdb_py_events.before_prompt)
+      && evpy_emit_event (NULL, gdb_py_events.before_prompt) < 0)
+    return EXT_LANG_RC_ERROR;
 
   if (gdb_python_module
       && PyObject_HasAttrString (gdb_python_module, "prompt_hook"))

@@ -2981,6 +2981,10 @@ emitted, the @code{gdb.Breakpoint} object will already be in its
 invalid state; that is, the @code{is_valid} method will return
 @code{False}.
 
+@item events.before_prompt
+This event carries no payload.  It is emitted each time @value{GDBN}
+presents a prompt to the user.
+
 @end table
 
 @node Threads In Python

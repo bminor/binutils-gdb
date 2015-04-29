@@ -53,6 +53,7 @@ typedef struct
   eventregistry_object *breakpoint_created;
   eventregistry_object *breakpoint_deleted;
   eventregistry_object *breakpoint_modified;
+  eventregistry_object *before_prompt;
 
   PyObject *module;
 
