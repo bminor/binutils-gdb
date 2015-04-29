@@ -1,3 +1,9 @@
+2015-04-29  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-xmethods.exp: Add ptype tests.
+	* gdb.python/py-xmethods.py (E_method_char_worker): Add
+	get_result_type method.
+
 2015-04-29  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/watch-bitfields.exp: Switch to software watchpoints if

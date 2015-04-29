@@ -2,7 +2,6 @@
 	     (Organized release by release)
 
 *** Changes since GDB 7.9
-=======
 
 * GDB now honors the content of the file /proc/PID/coredump_filter
   (PID is the process ID) on GNU/Linux systems.  This file can be used
@@ -54,6 +53,7 @@
   ** You can now write frame unwinders in Python.
   ** gdb.Type objects have a new method "optimized_out",
      returning optimized out gdb.Value instance of this type.
+  ** Xmethods can now specify a result type.
 
 * New commands
 

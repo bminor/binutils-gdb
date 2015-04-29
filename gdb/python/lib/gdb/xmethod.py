@@ -101,9 +101,11 @@ class XMethodWorker(object):
     invokes the method when GDB wants it to.  Internally, GDB first invokes the
     'get_arg_types' method to perform overload resolution.  If GDB selects to
     invoke this Python xmethod, then it invokes it via the overridden
-    '__call__' method.
+    '__call__' method.  The 'get_result_type' method is used to implement
+    'ptype' on the xmethod.
 
-    Derived classes should override the 'get_arg_types' and '__call__' methods.
+    Derived classes should override the 'get_arg_types', 'get_result_type'
+    and '__call__' methods.
     """
 
     def get_arg_types(self):
@@ -116,6 +118,20 @@ class XMethodWorker(object):
         element is returned.
         """
         raise NotImplementedError("XMethodWorker get_arg_types")
+
+    def get_result_type(self, *args):
+        """Return the type of the result of the xmethod.
+
+        Args:
+            args: Arguments to the method.  Each element of the tuple is a
+                gdb.Value object.  The first element is the 'this' pointer
+                value.  These are the same arguments passed to '__call__'.
+
+        Returns:
+            A gdb.Type object representing the type of the result of the
+            xmethod.
+        """
+        raise NotImplementedError("XMethodWorker get_result_type")
 
     def __call__(self, *args):
         """Invoke the xmethod.
