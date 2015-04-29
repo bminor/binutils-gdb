@@ -1060,6 +1060,11 @@ If @var{block} is given, then @var{name} is looked up in that scope.
 Otherwise, it is searched for globally.
 @end defun
 
+@defun Type.optimized_out ()
+Return @code{gdb.Value} instance of this type whose value is optimized
+out.  This allows a frame decorator to indicate that the value of an
+argument or a local variable is not known.
+@end defun
 
 Each type has a code, which indicates what category this type falls
 into.  The available type categories are represented by constants

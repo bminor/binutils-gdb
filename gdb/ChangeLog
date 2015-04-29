@@ -1,3 +1,8 @@
+2015-04-28  Sasha Smundak  <asmundak@google.com>
+
+	* NEWS: Mention gdb.Type.optimized_out method.
+	* python/py-type.c (typy_optimized_out):  New function.
+
 2015-04-28  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c: Include "gdb_wait.h" instead of <sys/wait.h>.

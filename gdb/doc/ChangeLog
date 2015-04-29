@@ -1,3 +1,7 @@
+2015-04-28  Sasha Smundak  <asmundak@google.com>
+
+	* python.texi: New method documented.
+
 2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Dump/Restore Files): Add detail about verilog dump
