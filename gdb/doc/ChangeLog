@@ -1,3 +1,7 @@
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Debugging Output): Document "set/show debug fbsd-lwp".
+
 2016-01-18  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Threads): Mention that GDB displays the ID and name

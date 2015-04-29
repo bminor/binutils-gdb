@@ -23608,6 +23608,11 @@ expression parsing.  The default is off.
 @item show debug expression
 Displays the current state of displaying debugging info about
 @value{GDBN} expression parsing.
+@item set debug fbsd-lwp
+@cindex FreeBSD LWP debug messages
+Turns on or off debugging messages from the FreeBSD LWP debug support.
+@item show debug fbsd-lwp
+Show the current state of FreeBSD LWP debugging messages.
 @item set debug frame
 @cindex frame debugging info
 Turns on or off display of @value{GDBN} frame debugging info.  The

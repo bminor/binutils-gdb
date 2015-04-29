@@ -12965,6 +12965,22 @@ $as_echo "#define HAVE_PT_GETXMMREGS 1" >>confdefs.h
 
 fi
 
+# See if <sys/ptrace.h> supports LWP names on FreeBSD
+# Older FreeBSD versions don't have the pl_tdname member of
+# `struct ptrace_lwpinfo'.
+ac_fn_c_check_member "$LINENO" "struct ptrace_lwpinfo" "pl_tdname" "ac_cv_member_struct_ptrace_lwpinfo_pl_tdname" "#include <sys/ptrace.h>
+"
+if test "x$ac_cv_member_struct_ptrace_lwpinfo_pl_tdname" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME 1
+_ACEOF
+
+
+fi
+
+
+
 # Detect which type of /proc is in use, such as for Solaris.
 
 if test "${target}" = "${host}"; then

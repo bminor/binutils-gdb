@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.10
 
+* GDB now supports debugging kernel-based threads on FreeBSD.
+
 * Per-inferior thread numbers
 
   Thread numbers are now per inferior instead of global.  If you're
@@ -99,6 +101,10 @@ maint show bfd-sharing
 set debug bfd-cache
 show debug bfd-cache
   Control display of debugging info regarding bfd caching.
+
+set debug fbsd-lwp
+show debug fbsd-lwp
+  Control display of debugging info regarding FreeBSD threads.
 
 set remote multiprocess-extensions-packet
 show remote multiprocess-extensions-packet

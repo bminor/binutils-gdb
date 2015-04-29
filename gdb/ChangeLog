@@ -1,5 +1,42 @@
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
+	* configure.ac: Check for support for LWP names on FreeBSD.
+	* fbsd-nat.c [PT_LWPINFO] New variable debug_fbsd_lwp.
+	[TDP_RFPPWAIT || HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME]
+	(fbsd_fetch_kinfo_proc): Move function earlier.
+	[PT_LWPINFO] (fbsd_thread_alive): New function.
+	[PT_LWPINFO] (fbsd_pid_to_str): New function.
+	[HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME] (fbsd_thread_name): New function.
+	[PT_LWP_EVENTS] (fbsd_enable_lwp_events): New function.
+	[PT_LWPINFO] (fbsd_add_threads): New function.
+	[PT_LWPINFO] (fbsd_update_thread_list): New function.
+	[PT_LWPINFO] New variable super_resume.
+	[PT_LWPINFO] (resume_one_thread_cb): New function.
+	[PT_LWPINFO] (resume_all_threads_cb): New function.
+	[PT_LWPINFO] (fbsd_resume): New function.
+	(fbsd_remember_child): Save full ptid instead of plain pid.
+	(fbsd_is_child_pending): Return ptid of saved child process.
+	(fbsd_wait): Include lwp in returned ptid and switch to LWP ptid on
+	first stop.
+	[PT_LWP_EVENTS] Handle LWP events.
+	[TDP_RFPPWAIT] Include LWP in child ptid.
+	(fbsd_post_startup_inferior) [PT_LWP_EVENTS]: Enable LWP events.
+	(fbsd_post_attach) [PT_LWP_EVENTS]: Enable LWP events.
+	Add threads for existing processes.
+	(fbsd_nat_add_target) [PT_LWPINFO]: Set "to_thread_alive" to
+	"fbsd_thread_alive".
+	Set "to_pid_to_str" to "fbsd_pid_to_str".
+	[HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME]: Set "to_thread_name" to
+	"fbsd_thread_name".
+	[PT_LWPINFO]: Set "to_update_thread_list" to "fbsd_update_thread_list".
+	Set "to_has_thread_control" to "tc_schedlock".
+	Set "to_resume" to "fbsd_resume".
+	(_initialize_fbsd_nat): New function.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
 	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
 	get_ptrace_pid.
 	(amd64bsd_store_inferior_registers): Use get_ptrace_pid.

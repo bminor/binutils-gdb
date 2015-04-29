@@ -1511,6 +1511,13 @@ if test $gdb_cv_have_pt_getxmmregs = yes; then
   [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
 fi
 
+# See if <sys/ptrace.h> supports LWP names on FreeBSD
+# Older FreeBSD versions don't have the pl_tdname member of
+# `struct ptrace_lwpinfo'.
+AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
+                 [#include <sys/ptrace.h>])
+
+
 # Detect which type of /proc is in use, such as for Solaris.
 
 if test "${target}" = "${host}"; then
