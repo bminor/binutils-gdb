@@ -1,3 +1,7 @@
+2015-04-28  Doug Evans  <dje@google.com>
+
+	* gdbtypes.h (struct cplus_struct_type) <n_baseclasses>: Fix comment.
+
 2015-04-28  Sasha Smundak  <asmundak@google.com>
 
 	* NEWS: Mention gdb.Type.optimized_out method.
