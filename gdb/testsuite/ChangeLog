@@ -1,5 +1,12 @@
 2015-04-28  Doug Evans  <dje@google.com>
 
+	* gdb.python/py-pp-maint.py: Move "replace" testing to ...
+	* gdb.python/py-pp-registration.exp: ... here.  New file.
+	* gdb.python/py-pp-registration.c: New file.
+	* gdb.python/py-pp-registration.py: New file.
+
+2015-04-28  Doug Evans  <dje@google.com>
+
 	* gdb.python/py-bad-printers.c: New file.
 	* gdb.python/py-bad-printers.py: New file.
 	* gdb.python/py-bad-printers.exp: New file.
