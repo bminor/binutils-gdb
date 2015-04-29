@@ -267,7 +267,7 @@ Disassembly of section \.text:
 
 0000a010 <tbf1>:
     a010:	46f7      	mov	pc, lr
-    a012:	0000      	movs	r0, r0
+    a012:	0000      	.short	0x0000
     a014:	e1a0f00e 	mov	pc, lr
     a018:	e1a0f00e 	mov	pc, lr
     a01c:	e1a0f00e 	mov	pc, lr
