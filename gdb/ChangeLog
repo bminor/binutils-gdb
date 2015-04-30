@@ -1,5 +1,14 @@
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (val_print_packed_array_elements): Delete
+	variable "len".  Add a type-length check when comparing two
+	consecutive elements of the array.  Use the element's actual
+	length in call to value_contents_eq.
+	* ada-lang.c (ada_value_primitive_packed_val): Always return
+	a value whose type has been resolved.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Recompute
 	BIT_SIZE and LEN if the size of the resolved type is smaller
 	than BIT_SIZE * HOST_CHAR_BIT.
