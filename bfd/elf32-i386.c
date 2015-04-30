@@ -5403,6 +5403,8 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-sol2"
 
+#undef elf_backend_post_process_headers
+
 /* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
    objects won't be recognized.  */
 #undef ELF_OSABI

@@ -1,3 +1,8 @@
+2015-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_backend_post_process_headers): Undef for
+	Solaris 2.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 17099
