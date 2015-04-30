@@ -1,5 +1,11 @@
 2015-04-30  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/break-idempotent.exp: If
+	skip_hw_watchpoint_multi_tests returns true, skip the tests
+	on "rwatch" and "awatch".
+
+2015-04-30  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/relativedebug.exp: Invoke gdb command
 	"info sharedlibrary", and if libc.so doesn't have debug info,
 	skip the test.
