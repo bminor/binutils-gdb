@@ -1,3 +1,8 @@
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18353
+	* doc/as.texinfo (Zero): Add documentation of the .zero pseudo-op.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 18256
