@@ -10049,7 +10049,7 @@ i386_target_format (void)
 	      as_fatal (_("Intel L1OM is 64bit only"));
 	    return ELF_TARGET_L1OM_FORMAT;
 	  }
-	if (cpu_arch_isa == PROCESSOR_K1OM)
+	else if (cpu_arch_isa == PROCESSOR_K1OM)
 	  {
 	    if (x86_elf_abi != X86_64_ABI)
 	      as_fatal (_("Intel K1OM is 64bit only"));
