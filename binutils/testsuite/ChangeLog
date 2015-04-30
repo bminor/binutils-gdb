@@ -1,3 +1,7 @@
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Add MeP CPU names.
+
 2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18209

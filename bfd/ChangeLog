@@ -3,6 +3,13 @@
 	* elf32-i386.c (elf_backend_post_process_headers): Undef for
 	Solaris 2.
 
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 18317
+	* elf32-mep.c (MEPREL): Use bfd_elf_generic_reloc instead of
+	mep_reloc.
+	(mep_reloc): Delete unused function.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 17099

@@ -2892,6 +2892,40 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    }
 	  break;
 
+	case EM_CYGNUS_MEP:
+	  switch (e_flags & EF_MEP_CPU_MASK)
+	    {
+	    case EF_MEP_CPU_MEP: strcat (buf, ", generic MeP"); break;
+	    case EF_MEP_CPU_C2: strcat (buf, ", MeP C2"); break;
+	    case EF_MEP_CPU_C3: strcat (buf, ", MeP C3"); break;
+	    case EF_MEP_CPU_C4: strcat (buf, ", MeP C4"); break;
+	    case EF_MEP_CPU_C5: strcat (buf, ", MeP C5"); break;
+	    case EF_MEP_CPU_H1: strcat (buf, ", MeP H1"); break;
+	    default: strcat (buf, _(", <unknown MeP cpu type>")); break;
+	    }
+
+	  switch (e_flags & EF_MEP_COP_MASK)
+	    {
+	    case EF_MEP_COP_NONE: break;
+	    case EF_MEP_COP_AVC: strcat (buf, ", AVC coprocessor"); break;
+	    case EF_MEP_COP_AVC2: strcat (buf, ", AVC2 coprocessor"); break;
+	    case EF_MEP_COP_FMAX: strcat (buf, ", FMAX coprocessor"); break;
+	    case EF_MEP_COP_IVC2: strcat (buf, ", IVC2 coprocessor"); break;
+	    default: strcat (buf, _("<unknown MeP copro type>")); break;
+	    }
+
+	  if (e_flags & EF_MEP_LIBRARY)
+	    strcat (buf, ", Built for Library");
+
+	  if (e_flags & EF_MEP_INDEX_MASK)
+	    sprintf (buf + strlen (buf), ", Configuration Index: %#x",
+		     e_flags & EF_MEP_INDEX_MASK);
+
+	  if (e_flags & ~ EF_MEP_ALL_FLAGS)
+	    sprintf (buf + strlen (buf), _(", unknown flags bits: %#x"),
+		     e_flags & ~ EF_MEP_ALL_FLAGS);
+	  break;
+
 	case EM_PPC:
 	  if (e_flags & EF_PPC_EMB)
 	    strcat (buf, ", emb");
