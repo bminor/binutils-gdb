@@ -921,7 +921,7 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
 
       opcode_handle.pc = pc;
       bytes_read = rl78_decode_opcode (pc, &opc, rl78_get_opcode_byte,
-				     &opcode_handle);
+				       &opcode_handle, RL78_ISA_DEFAULT);
       next_pc = pc + bytes_read;
 
       if (opc.id == RLO_sel)

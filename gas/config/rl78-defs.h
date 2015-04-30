@@ -47,6 +47,10 @@ extern void   rl78_linkrelax_branch (void);
 extern int    rl78_parse (void);
 extern int    rl78_wrap (void);
 
+extern int    rl78_isa_g10 (void);
+extern int    rl78_isa_g13 (void);
+extern int    rl78_isa_g14 (void);
+
 extern char * rl78_lex_start;
 extern char * rl78_lex_end;
 #endif

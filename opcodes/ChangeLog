@@ -1,3 +1,18 @@
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* disassemble.c (disassembler): Choose suitable disassembler based
+	on E_ABI.
+	* rl78-decode.opc (rl78_decode_opcode): Take ISA parameter.  Use
+	it to decode mul/div insns.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78): Rename to...
+	(print_insn_rl78_common): ...this, take ISA parameter.
+	(print_insn_rl78): New.
+	(print_insn_rl78_g10): New.
+	(print_insn_rl78_g13): New.
+	(print_insn_rl78_g14): New.
+	(rl78_get_disassembler): New.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

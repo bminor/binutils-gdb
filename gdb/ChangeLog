@@ -1,3 +1,8 @@
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* rl78-tdep.c (rl78_analyze_prologue): Pass RL78_ISA_DEFAULT to
+	rl78_decode_opcode
+
 2015-04-29  Doug Evans  <dje@google.com>
 
 	PR python/18285

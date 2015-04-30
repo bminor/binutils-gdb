@@ -34,6 +34,7 @@ int rl78_in_gdb = 1;
 int timer_enabled = 2;
 int rl78_g10_mode = 0;
 int g13_multiply = 0;
+int g14_multiply = 0;
 
 #define REGISTER_ADDRESS 0xffee0
 

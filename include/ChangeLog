@@ -1,3 +1,10 @@
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* dis-asm.h (print_insn_rl78_g10): New.
+	(print_insn_rl78_g13): New.
+	(print_insn_rl78_g14): New.
+	(rl78_get_disassembler): New.
+
 2015-04-17  Richard Earnshaw  <rearnsha@arm.com>
 
 	Merge from gcc:

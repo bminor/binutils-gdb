@@ -99,5 +99,6 @@ extern unsigned int counts_per_insn[0x100000];
 
 extern int rl78_g10_mode;
 extern int g13_multiply;
+extern int g14_multiply;
 
 #endif
