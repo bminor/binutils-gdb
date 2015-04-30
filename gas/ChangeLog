@@ -1,5 +1,14 @@
 2015-04-30  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/18347
+	* config/tc-arm.c (md_undefined_symbol): Issue a warning message
+	(if enabled) when the user creates a symbol with the same name as
+	an ARM instruction.
+	(flag_warn_syms): New static variable.
+	(arm_opts): Add mwarn-syms and mno-warn-syms.
+	* doc/c-arm.texi (ARM Options): Document the -m[no-]warn-syms
+	options.
+
 	PR gas/18353
 	* doc/as.texinfo (Zero): Add documentation of the .zero pseudo-op.
 

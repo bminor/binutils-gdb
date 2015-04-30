@@ -1,3 +1,10 @@
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18347
+	* gas/arm/pr18347.s: New file: Test case.
+	* gas/arm/pr18347.l: New file: Expected assembler output.
+	* gas/arm/pr18347.d: New file: Test driver.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/18265
