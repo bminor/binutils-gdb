@@ -1,5 +1,13 @@
 2015-05-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* gas/sparc/natural-32.d: Test ldn, ldna, stn, stna, slln, srln,
+	sran, casn, casna and clrn.
+	* gas/sparc/natural-32.s: Likewise.
+	* gas/sparc/natural.s: Likewise.
+	* gas/sparc/natural.d: Likewise.
+
+2015-05-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 
 	* gas/sparc/natural.s: New file.
 	* gas/sparc/natural-32.s: Likewise.
