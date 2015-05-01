@@ -1211,7 +1211,7 @@ synthetize_setsw (const struct sparc_opcode *insn)
   output_insn (insn, &the_insn);
 }
 
-/* Handle the setsw synthetic instruction.  */
+/* Handle the setx synthetic instruction.  */
 
 static void
 synthetize_setx (const struct sparc_opcode *insn)
