@@ -1,3 +1,7 @@
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.bfd: Support i[3-7]86-*-elf*.
+
 2015-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_backend_post_process_headers): Undef for

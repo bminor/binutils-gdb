@@ -1,3 +1,7 @@
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt: Support i386-*-elf*.
+
 2015-04-30  DJ Delorie  <dj@redhat.com>
 
 	* config/rl78-defs.h (rl78_isa_g10): New.
