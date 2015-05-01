@@ -1,3 +1,8 @@
+2015-05-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/rl78-parse.y (MULU): Remove ISA_G14.
+	(MULH, DIVHU, DIVWU, MACHI, MACH): Update error strings.
+
 2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_elf_emit_arch_note): Removed.

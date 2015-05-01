@@ -507,13 +507,13 @@ statement :
 	| MULHU { ISA_G14 ("MULHU"); }
 	  { B3 (0xce, 0xfb, 0x01); }
 
-	| MULH { ISA_G14 ("MULHU"); }
+	| MULH { ISA_G14 ("MULH"); }
 	  { B3 (0xce, 0xfb, 0x02); }
 
-	| MULU X { ISA_G14 ("MULHU"); }
+	| MULU X
 	  { B1 (0xd6); }
 
-	| DIVHU { ISA_G14 ("MULHU"); }
+	| DIVHU { ISA_G14 ("DIVHU"); }
 	  { B3 (0xce, 0xfb, 0x03); }
 
 /* Note that the DIVWU encoding was changed from [0xce,0xfb,0x04] to
@@ -521,13 +521,13 @@ statement :
    with the same version number, but varying encodings.  The version
    here matches the hardware.  */
 
-	| DIVWU { ISA_G14 ("MULHU"); }
+	| DIVWU { ISA_G14 ("DIVWU"); }
 	  { B3 (0xce, 0xfb, 0x0b); }
 
-	| MACHU { ISA_G14 ("MULHU"); }
+	| MACHU { ISA_G14 ("MACHU"); }
 	  { B3 (0xce, 0xfb, 0x05); }
 
-	| MACH { ISA_G14 ("MULHU"); }
+	| MACH { ISA_G14 ("MACH"); }
 	  { B3 (0xce, 0xfb, 0x06); }
 
 /* ---------------------------------------------------------------------- */
