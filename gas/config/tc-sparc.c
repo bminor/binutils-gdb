@@ -1973,7 +1973,8 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%icc", 4) == 0)
+	      if ((strncmp (s, "%icc", 4) == 0)
+                  || (sparc_arch_size == 32 && strncmp (s, "%ncc", 4) == 0))
 		{
 		  s += 4;
 		  continue;
@@ -1985,7 +1986,8 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%xcc", 4) == 0)
+              if ((strncmp (s, "%xcc", 4) == 0)
+                  || (sparc_arch_size == 64 && strncmp (s, "%ncc", 4) == 0))
 		{
 		  s += 4;
 		  continue;

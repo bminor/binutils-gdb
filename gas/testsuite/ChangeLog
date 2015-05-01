@@ -1,3 +1,13 @@
+2015-05-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+
+	* gas/sparc/natural.s: New file.
+	* gas/sparc/natural-32.s: Likewise.
+	* gas/sparc/natural.d: Likewise.
+	* gas/sparc/natural-32.d: Likewise.
+	* gas/sparc/sparc.exp (sparc_elf_setup): Run the tests natural and
+	natural-32.
+
 2015-05-06  Renlin Li  <renlin.li@arm.com>
 
 	* gas/aarch64/codealign_1.s: New.

@@ -1,3 +1,9 @@
+2015-05-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Support the %ncc "natural"
+	condition codes
+	* doc/c-sparc.texi (Sparc-Regs): Document %ncc.
+
 2015-05-06  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (Dollar Local Labels): Note that these are only
