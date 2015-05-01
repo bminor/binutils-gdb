@@ -1,3 +1,12 @@
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18355
+	* Makefile.def: Add extra_configure_flags to host zlib.
+	* configure.ac (extra_host_zlib_configure_flags): New.  Set
+	to --enable-host-shared When bfd is to be built as shared
+	library.  AC_SUBST.
+	* Makefile.in: Regenerated.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
