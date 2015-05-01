@@ -1,3 +1,16 @@
+2015-05-02  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (cached_fixupS, fixup_cacheS): New typedefs.
+	(struct cached_fixup, struct fixup_cache): New structures.
+	(fixup_order, xtensa_make_cached_fixup),
+	(xtensa_realloc_fixup_cache, xtensa_cache_relaxable_fixups),
+	(xtensa_find_first_cached_fixup, xtensa_delete_cached_fixup),
+	(xtensa_add_cached_fixup): New functions.
+	(xtensa_relax_frag): Cache fixups pointing at potentially
+	oversized jumps at the beginning of every relaxation pass. Only
+	check subset of this cache in the reach of single jump from the
+	trampoline frag currently being relaxed.
+
 2015-05-01  Nick Clifton  <nickc@redhat.com>
 
 	* config/rl78-parse.y (MULU): Remove ISA_G14.

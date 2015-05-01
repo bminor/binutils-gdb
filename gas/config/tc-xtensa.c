@@ -8785,6 +8785,154 @@ static long relax_frag_for_align (fragS *, long);
 static long relax_frag_immed
   (segT, fragS *, long, int, xtensa_format, int, int *, bfd_boolean);
 
+typedef struct cached_fixup cached_fixupS;
+struct cached_fixup
+{
+  int addr;
+  int target;
+  int delta;
+  fixS *fixP;
+};
+
+typedef struct fixup_cache fixup_cacheS;
+struct fixup_cache
+{
+  cached_fixupS *fixups;
+  unsigned n_fixups;
+  unsigned n_max;
+
+  segT seg;
+  fragS *first_frag;
+};
+
+static int fixup_order (const void *a, const void *b)
+{
+  const cached_fixupS *pa = a;
+  const cached_fixupS *pb = b;
+
+  if (pa->addr == pb->addr)
+    {
+      if (pa->target == pb->target)
+	{
+	  if (pa->fixP->fx_r_type == pb->fixP->fx_r_type)
+	    return 0;
+	  return pa->fixP->fx_r_type < pb->fixP->fx_r_type ?  -1 : 1;
+	}
+      return pa->target - pb->target;
+    }
+  return pa->addr - pb->addr;
+}
+
+static bfd_boolean xtensa_make_cached_fixup (cached_fixupS *o, fixS *fixP)
+{
+  xtensa_isa isa = xtensa_default_isa;
+  int addr = fixP->fx_frag->fr_address;
+  int target;
+  int delta;
+  symbolS *s = fixP->fx_addsy;
+  int slot;
+  xtensa_format fmt;
+  xtensa_opcode opcode;
+
+  if (fixP->fx_r_type < BFD_RELOC_XTENSA_SLOT0_OP ||
+      fixP->fx_r_type > BFD_RELOC_XTENSA_SLOT14_OP)
+    return FALSE;
+  target = S_GET_VALUE (s);
+  delta = target - addr;
+
+  if (abs(delta) < J_RANGE / 2)
+    return FALSE;
+
+  xtensa_insnbuf_from_chars (isa, trampoline_buf,
+			     (unsigned char *) fixP->fx_frag->fr_literal +
+			     fixP->fx_where, 0);
+  fmt = xtensa_format_decode (isa, trampoline_buf);
+  gas_assert (fmt != XTENSA_UNDEFINED);
+  slot = fixP->tc_fix_data.slot;
+  xtensa_format_get_slot (isa, fmt, slot, trampoline_buf, trampoline_slotbuf);
+  opcode = xtensa_opcode_decode (isa, fmt, slot, trampoline_slotbuf);
+  if (opcode != xtensa_j_opcode)
+    return FALSE;
+
+  o->addr = addr;
+  o->target = target;
+  o->delta = delta;
+  o->fixP = fixP;
+
+  return TRUE;
+}
+
+static void xtensa_realloc_fixup_cache (fixup_cacheS *cache, unsigned add)
+{
+  if (cache->n_fixups + add > cache->n_max)
+    {
+      cache->n_max = (cache->n_fixups + add) * 2;
+      cache->fixups = xrealloc (cache->fixups,
+				sizeof (*cache->fixups) * cache->n_max);
+    }
+}
+
+static void xtensa_cache_relaxable_fixups (fixup_cacheS *cache,
+					   segment_info_type *seginfo)
+{
+  fixS *fixP;
+
+  cache->n_fixups = 0;
+
+  for (fixP = seginfo->fix_root; fixP ; fixP = fixP->fx_next)
+    {
+      xtensa_realloc_fixup_cache (cache, 1);
+
+      if (xtensa_make_cached_fixup (cache->fixups + cache->n_fixups, fixP))
+	++cache->n_fixups;
+    }
+  qsort (cache->fixups, cache->n_fixups, sizeof (*cache->fixups), fixup_order);
+}
+
+static unsigned xtensa_find_first_cached_fixup (const fixup_cacheS *cache,
+						int addr)
+{
+  unsigned a = 0;
+  unsigned b = cache->n_fixups;
+
+  while (b - a > 1)
+    {
+      unsigned c = (a + b) / 2;
+
+      if (cache->fixups[c].addr < addr)
+	a = c;
+      else
+	b = c;
+    }
+  return a;
+}
+
+static void xtensa_delete_cached_fixup (fixup_cacheS *cache, unsigned i)
+{
+  memmove (cache->fixups + i, cache->fixups + i + 1,
+	   (cache->n_fixups - i - 1) * sizeof (*cache->fixups));
+  --cache->n_fixups;
+}
+
+static bfd_boolean xtensa_add_cached_fixup (fixup_cacheS *cache, fixS *fixP)
+{
+  cached_fixupS o;
+  unsigned i;
+
+  if (!xtensa_make_cached_fixup (&o, fixP))
+    return FALSE;
+  xtensa_realloc_fixup_cache (cache, 1);
+  i = xtensa_find_first_cached_fixup (cache, o.addr);
+  if (i < cache->n_fixups)
+    {
+      ++i;
+      memmove (cache->fixups + i + 1, cache->fixups + i,
+	       (cache->n_fixups - i) * sizeof (*cache->fixups));
+    }
+  cache->fixups[i] = o;
+  ++cache->n_fixups;
+  return TRUE;
+}
 
 /* Return the number of bytes added to this fragment, given that the
    input has been stretched already by "stretch".  */
@@ -8896,35 +9044,43 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
     case RELAX_TRAMPOLINE:
       if (fragP->tc_frag_data.relax_seen)
         {
-          segment_info_type *seginfo = seg_info (now_seg);
-          fragS *fP; /* The out-of-range jump.  */
-          fixS *fixP;
+	  static fixup_cacheS fixup_cache;
+	  segment_info_type *seginfo = seg_info (now_seg);
+	  int trampaddr = fragP->fr_address + fragP->fr_fix;
+	  int searchaddr = trampaddr < J_RANGE ? 0 : trampaddr - J_RANGE;
+	  unsigned i;
+
+	  if (now_seg != fixup_cache.seg ||
+	      fragP == fixup_cache.first_frag ||
+	      fixup_cache.first_frag == NULL)
+	    {
+	      xtensa_cache_relaxable_fixups (&fixup_cache, seginfo);
+	      fixup_cache.seg = now_seg;
+	      fixup_cache.first_frag = fragP;
+	    }
 
           /* Scan for jumps that will not reach.  */
-          for (fixP = seginfo->fix_root; fixP ; fixP = fixP->fx_next)
-            {
-              symbolS *s = fixP->fx_addsy;
-	      xtensa_opcode opcode;
-              int target;
-              int addr;
-              int delta;
+          for (i = xtensa_find_first_cached_fixup (&fixup_cache, searchaddr);
+	       i < fixup_cache.n_fixups; ++i)
 
-              if (fixP->fx_r_type < BFD_RELOC_XTENSA_SLOT0_OP ||
-                  fixP->fx_r_type > BFD_RELOC_XTENSA_SLOT14_OP)
-                continue;
-	      xtensa_insnbuf_from_chars (isa, trampoline_buf,
-					 (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where,
-					 0);
-	      fmt = xtensa_format_decode (isa, trampoline_buf);
-	      gas_assert (fmt != XTENSA_UNDEFINED);
-	      slot = fixP->tc_fix_data.slot;
-	      xtensa_format_get_slot (isa, fmt, slot, trampoline_buf, trampoline_slotbuf);
-	      opcode = xtensa_opcode_decode (isa, fmt, slot, trampoline_slotbuf);
-	      if (opcode != xtensa_j_opcode)
+            {
+	      fixS *fixP = fixup_cache.fixups[i].fixP;
+	      int target = fixup_cache.fixups[i].target;
+	      int addr = fixup_cache.fixups[i].addr;
+	      int delta = fixup_cache.fixups[i].delta + stretch;
+
+	      trampaddr = fragP->fr_address + fragP->fr_fix;
+
+	      if ((addr + J_RANGE < trampaddr) ||
+		  abs (addr - trampaddr) < J_RANGE / 2)
 		continue;
-              target = S_GET_VALUE (s);
-              addr = fixP->fx_frag->fr_address;
-              delta = target - addr + stretch;
+	      if (addr > trampaddr + J_RANGE)
+		break;
+	      if (abs (delta) < J_RANGE)
+		continue;
+
+	      slot = fixP->tc_fix_data.slot;
+
               if (delta > J_RANGE  || delta < -1 * J_RANGE)
                 { /* Found an out-of-range jump; scan the list of trampolines for the best match.  */
 		  struct trampoline_seg *ts = find_trampoline_seg (now_seg);
@@ -8978,14 +9134,13 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
 		    }
 		  if (tf->fragP == fragP)
 		    {
-		      int trampaddr = fragP->fr_address + fragP->fr_fix;
-
 		      if (abs (addr - trampaddr) < J_RANGE)
 			{ /* The trampoline is in range of original; fix it!  */
 			  fixS *newfixP;
 			  int offset;
 			  TInsn insn;
 			  symbolS *lsym;
+			  fragS *fP; /* The out-of-range jump.  */
 
 			  new_stretch += init_trampoline_frag (tf);
 			  offset = fragP->fr_fix; /* Where to assemble the j insn.  */
@@ -9009,10 +9164,20 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
 			  newfixP->tc_fix_data.X_add_symbol = lsym;
 			  newfixP->tc_fix_data.X_add_number = offset;
 			  newfixP->tc_fix_data.slot = slot;
+
+			  xtensa_delete_cached_fixup (&fixup_cache, i);
+			  xtensa_add_cached_fixup (&fixup_cache, newfixP);
+
 			  /* Move the fix-up from the original j insn to this one.  */
 			  fixP->fx_frag = fragP;
 			  fixP->fx_where = fragP->fr_fix - 3;
 			  fixP->tc_fix_data.slot = 0;
+
+			  xtensa_add_cached_fixup (&fixup_cache, fixP);
+
+			  /* re-do current fixup */
+			  --i;
+
 			  /* Adjust the jump around this trampoline (if present).  */
 			  if (tf->fixP != NULL)
 			    {
@@ -9027,6 +9192,8 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
 			      fragP->fr_subtype = 0;
 			      /* Remove from the trampoline_list.  */
 			      prev->next = tf->next;
+			      if (fragP == fixup_cache.first_frag)
+				fixup_cache.first_frag = NULL;
 			      break;
 			    }
 			}
