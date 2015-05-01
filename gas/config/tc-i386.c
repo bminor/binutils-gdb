@@ -10077,48 +10077,6 @@ i386_target_format (void)
 }
 
 #endif /* OBJ_MAYBE_ more than one  */
-
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
-void
-i386_elf_emit_arch_note (void)
-{
-  if (IS_ELF && cpu_arch_name != NULL)
-    {
-      char *p;
-      asection *seg = now_seg;
-      subsegT subseg = now_subseg;
-      Elf_Internal_Note i_note;
-      Elf_External_Note e_note;
-      asection *note_secp;
-      int len;
-
-      /* Create the .note section.  */
-      note_secp = subseg_new (".note", 0);
-      bfd_set_section_flags (stdoutput,
-			     note_secp,
-			     SEC_HAS_CONTENTS | SEC_READONLY);
-
-      /* Process the arch string.  */
-      len = strlen (cpu_arch_name);
-
-      i_note.namesz = len + 1;
-      i_note.descsz = 0;
-      i_note.type = NT_ARCH;
-      p = frag_more (sizeof (e_note.namesz));
-      md_number_to_chars (p, (valueT) i_note.namesz, sizeof (e_note.namesz));
-      p = frag_more (sizeof (e_note.descsz));
-      md_number_to_chars (p, (valueT) i_note.descsz, sizeof (e_note.descsz));
-      p = frag_more (sizeof (e_note.type));
-      md_number_to_chars (p, (valueT) i_note.type, sizeof (e_note.type));
-      p = frag_more (len + 1);
-      strcpy (p, cpu_arch_name);
-
-      frag_align (2, 0, 0);
-
-      subseg_set (seg, subseg);
-    }
-}
-#endif
 
 symbolS *
 md_undefined_symbol (char *name)

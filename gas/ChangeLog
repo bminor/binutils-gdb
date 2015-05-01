@@ -1,5 +1,11 @@
 2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (i386_elf_emit_arch_note): Removed.
+	* config/tc-i386.h (md_end): Likewise.
+	(i386_elf_emit_arch_note): Likewise.
+
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.tgt: Support i386-*-elf*.
 
 2015-04-30  DJ Delorie  <dj@redhat.com>
