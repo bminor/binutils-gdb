@@ -1,3 +1,11 @@
+2015-05-02  Pierre Muller  <muller@sourceware.org>
+
+	PR pascal/17815
+	* lib/pascal.exp (gpc_compile): Add new option "class".
+	(fpc_compile): Likewise.
+	* gdb.pascal/case-insensitive-symbols.pas: New file.
+	* gdb.pascal/case-insensitive-symbols.exp: New file.
+
 2015-04-28  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-pp-maint.py: Move "replace" testing to ...

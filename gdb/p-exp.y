@@ -1551,7 +1551,7 @@ yylex (void)
     int is_a_field = 0;
     int hextype;
 
-
+    is_a_field_of_this.type = NULL;
     if (search_field && current_type)
       is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
     if (is_a_field)
@@ -1598,15 +1598,20 @@ yylex (void)
 			      VAR_DOMAIN, &is_a_field_of_this);
       }
 
-    if (is_a_field)
+    if (is_a_field || (is_a_field_of_this.type != NULL))
       {
 	tempbuf = (char *) realloc (tempbuf, namelen + 1);
 	strncpy (tempbuf, tmp, namelen);
 	tempbuf [namelen] = 0;
 	yylval.sval.ptr = tempbuf;
 	yylval.sval.length = namelen;
+	yylval.ssym.sym = NULL;
 	free (uptokstart);
-	return FIELDNAME;
+        yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
+	if (is_a_field)
+	  return FIELDNAME;
+	else
+	  return NAME;
       }
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
@@ -1739,7 +1744,6 @@ yylex (void)
     free(uptokstart);
     /* Any other kind of symbol.  */
     yylval.ssym.sym = sym;
-    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
     return NAME;
   }
 }

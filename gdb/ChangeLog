@@ -1,3 +1,9 @@
+2015-05-02  Pierre Muller  <muller@sourceware.org>
+
+	PR pascal/17815
+	p-exp.y (yylex): Reorganize code to return the matched pattern
+	for a field of this.
+
 2015-04-28  Doug Evans  <dje@google.com>
 
 	PR python/18299
