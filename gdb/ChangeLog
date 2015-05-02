@@ -1,3 +1,12 @@
+2015-05-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib.c (_initialize_solib): Add "info dll" alias creation.
+	* windows-nat.c (set_windows_aliases): Delete.
+	(_initialize_windows_nat): Remove deprecated_init_ui_hook
+	assignment.
+	* NEWS: Add news entry about "info dll" now being available
+	on all platforms.
+
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (value_assign_to_component): Reformat and improve

@@ -23,6 +23,9 @@
   present in the debug info.  This typically includes the compiler version
   and may include things like its command line arguments.
 
+* The "info dll", an alias of the "info sharedlibrary" command,
+  is now available on all platforms.
+
 * Directory names supplied to the "set sysroot" commands may be
   prefixed with "target:" to tell GDB to access shared libraries from
   the target system, be it local or remote.  This replaces the prefix

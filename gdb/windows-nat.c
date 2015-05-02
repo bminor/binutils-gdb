@@ -2502,12 +2502,6 @@ windows_target (void)
   return t;
 }
 
-static void
-set_windows_aliases (char *argv0)
-{
-  add_info_alias ("dll", "sharedlibrary", 1);
-}
-
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_windows_nat;
 
@@ -2601,7 +2595,6 @@ Show whether to display kernel exceptions in child process."), NULL,
   add_cmd ("selector", class_info, display_selectors,
 	   _("Display selectors infos."),
 	   &info_w32_cmdlist);
-  deprecated_init_ui_hook = set_windows_aliases;
 }
 
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */
