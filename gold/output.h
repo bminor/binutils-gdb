@@ -2904,7 +2904,7 @@ class Output_section_lookup_maps
 
   // Find a relaxed input section of OBJECT with index SHNDX.
   Output_relaxed_input_section*
-  find_relaxed_input_section(const Object* object, unsigned int shndx) const
+  find_relaxed_input_section(const Relobj* object, unsigned int shndx) const
   {
     gold_assert(this->is_valid_);
     Relaxed_input_sections_by_id::const_iterator p =

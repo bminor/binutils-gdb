@@ -212,7 +212,7 @@ public:
   // Add a reference from SRC_OBJ, SRC_INDX to this object's .opd
   // section at DST_OFF.
   void
-  add_reference(Object* src_obj,
+  add_reference(Relobj* src_obj,
 		unsigned int src_indx,
 		typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
   {
@@ -780,9 +780,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
   // section of a function descriptor.
   void
   do_gc_add_reference(Symbol_table* symtab,
-		      Object* src_obj,
+		      Relobj* src_obj,
 		      unsigned int src_shndx,
-		      Object* dst_obj,
+		      Relobj* dst_obj,
 		      unsigned int dst_shndx,
 		      Address dst_off) const;
 
@@ -6347,7 +6347,7 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
 	  typename Powerpc_relobj<size, big_endian>::Section_refs::iterator s;
 	  for (s = p->second.begin(); s != p->second.end(); ++s)
 	    {
-	      Object* src_obj = s->first;
+	      Relobj* src_obj = s->first;
 	      unsigned int src_indx = s->second;
 	      symtab->gc()->add_reference(src_obj, src_indx,
 					  ppc_object, dst_indx);
@@ -6384,9 +6384,9 @@ template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::do_gc_add_reference(
     Symbol_table* symtab,
-    Object* src_obj,
+    Relobj* src_obj,
     unsigned int src_shndx,
-    Object* dst_obj,
+    Relobj* dst_obj,
     unsigned int dst_shndx,
     Address dst_off) const
 {

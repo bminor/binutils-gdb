@@ -87,7 +87,7 @@ class Garbage_collection
   do_transitive_closure();
 
   bool
-  is_section_garbage(Object* obj, unsigned int shndx)
+  is_section_garbage(Relobj* obj, unsigned int shndx)
   { return (this->referenced_list().find(Section_id(obj, shndx))
             == this->referenced_list().end()); }
 
@@ -103,8 +103,8 @@ class Garbage_collection
   // Add a reference from the SRC_SHNDX-th section of SRC_OBJECT to
   // DST_SHNDX-th section of DST_OBJECT.
   void
-  add_reference(Object* src_object, unsigned int src_shndx,
-		Object* dst_object, unsigned int dst_shndx)
+  add_reference(Relobj* src_object, unsigned int src_shndx,
+		Relobj* dst_object, unsigned int dst_shndx)
   {
     Section_id src_id(src_object, src_shndx);
     Section_id dst_id(dst_object, dst_shndx);
@@ -229,7 +229,7 @@ gc_process_relocs(
       unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
       typename elfcpp::Elf_types<size>::Elf_Swxword addend =
       Reloc_types<sh_type, size, big_endian>::get_reloc_addend_noerror(&reloc);
-      Object* dst_obj;
+      Relobj* dst_obj;
       unsigned int dst_indx;
       typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
       Address dst_off;
@@ -249,7 +249,7 @@ gc_process_relocs(
             {
 	      Address symvalue = dst_off - addend;
 	      if (is_ordinary) 
-		(*secvec).push_back(Section_id(dst_obj, dst_indx));
+		(*secvec).push_back(Section_id(src_obj, dst_indx));
 	      else
                 (*secvec).push_back(Section_id(NULL, 0));
               (*symvec).push_back(NULL);
@@ -289,9 +289,10 @@ gc_process_relocs(
           dst_obj = NULL;
           dst_indx = 0;
           bool is_ordinary = false;
-          if (gsym->source() == Symbol::FROM_OBJECT)
+          if (gsym->source() == Symbol::FROM_OBJECT
+	      && !gsym->object()->is_dynamic())
             {
-              dst_obj = gsym->object();
+              dst_obj = static_cast<Relobj*>(gsym->object());
               dst_indx = gsym->shndx(&is_ordinary);
             }
 	  dst_off = static_cast<const Sized_symbol<size>*>(gsym)->value();
@@ -301,7 +302,7 @@ gc_process_relocs(
 	  // of a function pointer being taken.
 	  if (gsym->source() == Symbol::FROM_OBJECT
               && check_section_for_function_pointers
-              && gsym->type() != elfcpp::STT_OBJECT
+              && dst_obj != NULL
               && (!is_ordinary
                   || scan.global_reloc_may_be_function_pointer(
                        symtab, NULL, NULL, src_obj, src_indx, NULL, reloc,
@@ -324,7 +325,7 @@ gc_process_relocs(
           if (is_icf_tracked)
             {
 	      Address symvalue = dst_off - addend;
-              if (is_ordinary && gsym->source() == Symbol::FROM_OBJECT)
+              if (is_ordinary && dst_obj != NULL)
 		(*secvec).push_back(Section_id(dst_obj, dst_indx));
 	      else
                 (*secvec).push_back(Section_id(NULL, 0));
@@ -340,7 +341,7 @@ gc_process_relocs(
                                                          src_obj));
 	    }
 
-          if (gsym->source() != Symbol::FROM_OBJECT)
+          if (dst_obj == NULL)
             continue;
           if (!is_ordinary)
             continue;
@@ -349,8 +350,8 @@ gc_process_relocs(
         {
 	  symtab->gc()->add_reference(src_obj, src_indx, dst_obj, dst_indx);
 	  parameters->sized_target<size, big_endian>()
-	    ->gc_add_reference(symtab, src_obj, src_indx,
-			       dst_obj, dst_indx, dst_off);
+	    ->gc_add_reference(symtab, src_obj, src_indx, dst_obj, dst_indx,
+			       dst_off);
           if (cident_section_name != NULL)
             {
               Garbage_collection::Cident_section_map::iterator ele =

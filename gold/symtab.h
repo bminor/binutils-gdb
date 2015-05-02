@@ -1372,7 +1372,7 @@ class Symbol_table
  
   // Returns true if ICF determined that this is a duplicate section. 
   bool
-  is_section_folded(Object* obj, unsigned int shndx) const;
+  is_section_folded(Relobj* obj, unsigned int shndx) const;
 
   void
   set_gc(Garbage_collection* gc)

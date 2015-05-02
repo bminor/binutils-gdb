@@ -1,3 +1,38 @@
+2015-04-29  Cary Coutant  <cary@google.com>
+	    Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* gc.h (Garbage_collection::is_section_garbage): Change Object*
+	to Relobj*.
+	(Garbage_collection::add_reference): Likewise.
+	(Garbage_collection::gc_process_relocs): Likewise. Don't push
+	object/shndx pair onto *secvec for dynamic objects. Don't follow
+	relocations pointing to dynamic objects for GC.
+	* icf.cc (Icf::find_identical_sections): Change Object* to Relobj*.
+	(Icf::unfold_section): Likewise.
+	(Icf::is_section_folded): Likewise.
+	(Icf::get_folded_section): Likewise.
+	* icf.h: (Icf::get_folded_section): Likewise.
+	(Icf::unfold_section): Likewise.
+	(Icf::is_section_folded): Likewise.
+	(Icf::section_has_function_pointers): Likewise.
+	(Icf::set_section_has_function_pointers): Likewise.
+	* object.h (Section_id): Likewise.
+	(Const_section_id): Likewise.
+	* output.cc (Output_section::update_section_layout): Likewise.
+	* output.h: (Output_section_lookup_maps::find_relaxed_input_section):
+	Likewise.
+	* plugin.cc (update_section_order): Likewise.
+	(unique_segment_for_sections): Likewise.
+	* powerpc.cc (Powerpc_relobj::add_reference): Likewise.
+	(Target_powerpc::do_gc_add_reference): Likewise.
+	(Target_powerpc::gc_process_relocs): Likewise.
+	(Target_powerpc::do_gc_add_reference): Likewise.
+	* symtab.cc (Symbol_table::is_section_folded): Likewise.
+	(Symbol_table::gc_mark_symbol): Likewise.
+	* symtab.h: (Symbol_table::is_section_folded): Likewise.
+	* target.h: (Sized_target::gc_add_reference): Likewise.
+	(Sized_target::do_gc_add_reference): Likewise.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.

@@ -3503,7 +3503,7 @@ Output_section::update_section_layout(
       if (p->is_input_section()
 	  || p->is_relaxed_input_section())
 	{
-	  Object* obj = (p->is_input_section()
+	  Relobj* obj = (p->is_input_section()
 			 ? p->relobj()
 			 : p->relaxed_input_section()->relobj());
 	  unsigned int shndx = p->shndx();

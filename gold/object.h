@@ -2863,11 +2863,11 @@ struct Relocate_info
 
 // This is used to represent a section in an object and is used as the
 // key type for various section maps.
-typedef std::pair<Object*, unsigned int> Section_id;
+typedef std::pair<Relobj*, unsigned int> Section_id;
 
 // This is similar to Section_id but is used when the section
 // pointers are const.
-typedef std::pair<const Object*, unsigned int> Const_section_id;
+typedef std::pair<const Relobj*, unsigned int> Const_section_id;
 
 // The hash value is based on the address of an object in memory during
 // linking.  It is okay to use this for looking up sections but never use
