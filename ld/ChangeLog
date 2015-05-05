@@ -1,3 +1,17 @@
+2015-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/msp430elf.sh (TEMPLATE_NAME): Change to msp430.
+	* scripttempl/msp430.sc (.text): Add .lower.text and .either.text.
+	(.data): Add .lower.data and .either.data.
+	(.bss): Add .lower.bss and .either.bss.
+	(.rodata): Add .lower.rodata and .either.rodata.
+	* emultempl/msp430.em: New file.  Implements a new orphan
+	placement algorithm that divides sections between lower and upper
+	memory regions.
+	* Makefile.am (emsp430elf.c): Depend upon msp430.em.
+	*emsp430X.c): Likewise.
+	* Makefine.in: Regenerate.
+
 2015-04-28  Andreas Schwab  <schwab@linux-m68k.org>
 
 	PR ld/18344

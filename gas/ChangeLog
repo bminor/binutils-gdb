@@ -1,3 +1,10 @@
+2015-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (MAX_OP_LEN): Increase to 4096.
+	(msp430_make_init_symbols): New function.
+	(msp430_section): Call it.
+	(msp430_frob_section): Likewise.
+
 2015-05-02  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (cached_fixupS, fixup_cacheS): New typedefs.
