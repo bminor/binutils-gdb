@@ -4406,10 +4406,11 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   bfd_reloc_code_real_type new_bfd_r_type;
   unsigned long r_symndx;
   bfd_byte *hit_data = contents + rel->r_offset;
-  bfd_vma place;
+  bfd_vma place, off;
   bfd_signed_vma signed_addend;
   struct elf_aarch64_link_hash_table *globals;
   bfd_boolean weak_undef_p;
+  asection *base_got;
 
   globals = elf_aarch64_hash_table (info);
 
@@ -4449,8 +4450,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     {
       asection *plt;
       const char *name;
-      asection *base_got;
-      bfd_vma off;
 
       if ((input_section->flags & SEC_ALLOC) == 0
 	  || h->plt.offset == (bfd_vma) -1)
@@ -4825,6 +4824,58 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						       0, weak_undef_p);
 	}
+      else
+      {
+	struct elf_aarch64_local_symbol *locals
+	  = elf_aarch64_locals (input_bfd);
+
+	if (locals == NULL)
+	  {
+	    int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	    (*_bfd_error_handler)
+	      (_("%B: Local symbol descriptor table be NULL when applying "
+		 "relocation %s against local symbol"),
+	       input_bfd, elfNN_aarch64_howto_table[howto_index].name);
+	    abort ();
+	  }
+
+	off = symbol_got_offset (input_bfd, h, r_symndx);
+	base_got = globals->root.sgot;
+	bfd_vma got_entry_addr = (base_got->output_section->vma
+				  + base_got->output_offset + off);
+
+	if (!symbol_got_offset_mark_p (input_bfd, h, r_symndx))
+	  {
+	    bfd_put_64 (output_bfd, value, base_got->contents + off);
+
+	    if (info->shared)
+	      {
+		asection *s;
+		Elf_Internal_Rela outrel;
+
+		/* For local symbol, we have done absolute relocation in static
+		   linking stageh. While for share library, we need to update
+		   the content of GOT entry according to the share objects
+		   loading base address. So we need to generate a
+		   R_AARCH64_RELATIVE reloc for dynamic linker.  */
+		s = globals->root.srelgot;
+		if (s == NULL)
+		  abort ();
+
+		outrel.r_offset = got_entry_addr;
+		outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
+		outrel.r_addend = value;
+		elf_append_rela (output_bfd, s, &outrel);
+	      }
+
+	    symbol_got_offset_mark (input_bfd, h, r_symndx);
+	  }
+
+	/* Update the relocation value to GOT entry addr as we have transformed
+	   the direct data access into indirect data access through GOT.  */
+	value = got_entry_addr;
+      }
+
       break;
 
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -7371,17 +7422,14 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  htab->root.sgot->size += GOT_ENTRY_SIZE * 2;
 		}
 
-	      if (got_type & GOT_TLS_IE)
+	      if (got_type & GOT_TLS_IE
+		  || got_type & GOT_NORMAL)
 		{
 		  locals[i].got_offset = htab->root.sgot->size;
 		  htab->root.sgot->size += GOT_ENTRY_SIZE;
 		}
 
 	      if (got_type == GOT_UNKNOWN)
-		{
-		}
-
-	      if (got_type == GOT_NORMAL)
 		{
 		}
 
@@ -7397,7 +7445,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  if (got_type & GOT_TLS_GD)
 		    htab->root.srelgot->size += RELOC_SIZE (htab) * 2;
 
-		  if (got_type & GOT_TLS_IE)
+		  if (got_type & GOT_TLS_IE
+		      || got_type & GOT_NORMAL)
 		    htab->root.srelgot->size += RELOC_SIZE (htab);
 		}
 	    }
