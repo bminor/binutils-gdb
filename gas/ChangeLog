@@ -1,3 +1,8 @@
+2015-05-05  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (aarch64_init_frag): Always generate mapping
+	symbols.
+
 2015-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (MAX_OP_LEN): Increase to 4096.
