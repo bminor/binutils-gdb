@@ -4,6 +4,18 @@
 
 	2015-04-24  Jiong. Wang  <jiong.wang@arm.com>
 
+	PR ld/18270
+	* elfnn-aarch64.c (elfNN_aarch64_size_dynamic): Count local symbol for
+	GOT_NORMAL for both sgot/srelgot section.
+	(elfNN_aarch64_final_link_relocate): Relocate against GOT entry address
+	and generate necessary runtime relocation for GOT entry.
+
+2015-05-05  Jiong Wang  <jiong.wang@arm.com>
+
+	Apply from master:
+
+	2015-04-24  Jiong. Wang  <jiong.wang@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Reject
 	PC-relative relocation for external symbol.
 
