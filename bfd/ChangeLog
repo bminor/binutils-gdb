@@ -1,3 +1,12 @@
+2015-05-05  Jiong Wang  <jiong.wang@arm.com>
+
+	Apply from master:
+
+	2015-04-24  Jiong. Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Reject
+	PC-relative relocation for external symbol.
+
 2015-04-10  Alan Modra  <amodra@gmail.com>
 
 	PR ld/18222
