@@ -1,5 +1,19 @@
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
+	PR python/15620, PR python/18620:
+	* python/py-evts.c (gdbpy_initialize_py_events): Call
+	add_new_registry for new events.
+	* python/py-events.h (events_object) <breakpoint_created,
+	breakpoint_deleted, breakpoint_modified>: New fields.
+	* python/py-breakpoint.c (gdbpy_breakpoint_created): Emit the
+	breakpoint changed event.
+	(gdbpy_breakpoint_deleted): Emit the breakpoint deleted event.
+	(gdbpy_breakpoint_modified): New function.
+	(gdbpy_initialize_breakpoints): Attach to the breakpoint modified
+	observer.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
 	PR python/17698:
 	* NEWS: Update.
 	* python/py-breakpoint.c (bppy_get_pending): New function.

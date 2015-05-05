@@ -2965,6 +2965,21 @@ A gdb.Frame object representing the frame in which the register was modified.
 Denotes which register was modified.
 @end defvar
 
+@item events.breakpoint_created
+This is emitted when a new breakpoint has been created.  The argument
+that is passed is the new @code{gdb.Breakpoint} object.
+
+@item events.breakpoint_modified
+This is emitted when a breakpoint has been modified in some way.  The
+argument that is passed is the new @code{gdb.Breakpoint} object.
+
+@item events.breakpoint_deleted
+This is emitted when a breakpoint has been deleted.  The argument that
+is passed is the @code{gdb.Breakpoint} object.  When this event is
+emitted, the @code{gdb.Breakpoint} object will already be in its
+invalid state; that is, the @code{is_valid} method will return
+@code{False}.
+
 @end table
 
 @node Threads In Python

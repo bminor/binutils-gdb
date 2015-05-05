@@ -1,5 +1,11 @@
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
+	PR python/15620, PR python/18620:
+	* gdb.python/py-breakpoint.exp (connect_event, check_last_event)
+	(test_bkpt_events): New procs.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
 	PR python/17698:
 	* gdb.python/py-breakpoint.exp (test_bkpt_basic): Add "pending"
 	test.

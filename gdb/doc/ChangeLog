@@ -1,5 +1,10 @@
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
+	PR python/15620, PR python/18620:
+	* python.texi (Events In Python): Document new breakpoint events.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
 	PR python/17698:
 	* python.texi (Breakpoints In Python): Document
 	Breakpoint.pending.
