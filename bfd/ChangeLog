@@ -1,3 +1,9 @@
+2015-05-06  Toni Spets  <toni.spets@iki.fi>
+
+	PR ld/18372
+	* peXXigen.c (rsrc_process_section): Skip discarded resource
+	sections.
+
 2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config.bfd: Support i[3-7]86-*-elf*.
