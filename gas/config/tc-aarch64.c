@@ -1460,16 +1460,16 @@ mapping_state (enum mstate state)
 {
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
 
-  if (mapstate == state)
-    /* The mapping symbol has already been emitted.
-       There is nothing else to do.  */
-    return;
-
   if (state == MAP_INSN)
     /* AArch64 instructions require 4-byte alignment.  When emitting
        instructions into any section, record the appropriate section
        alignment.  */
     record_alignment (now_seg, 2);
+
+  if (mapstate == state)
+    /* The mapping symbol has already been emitted.
+       There is nothing else to do.  */
+    return;
 
 #define TRANSITION(from, to) (mapstate == (from) && state == (to))
   if (TRANSITION (MAP_UNDEFINED, MAP_DATA) && !subseg_text_p (now_seg))
