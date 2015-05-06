@@ -1,5 +1,10 @@
 2015-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* compile/compile-object-load.c (compile_object_load): Support
+	mst_text_gnu_ifunc.
+
+2015-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* compile/compile.c (compile_to_object): Make the cmd_string parameter
 	const.  Use new variables for the const compatibility.
 	(eval_compile_command): Make the cmd_string parameter const.

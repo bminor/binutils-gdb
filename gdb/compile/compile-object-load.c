@@ -554,6 +554,10 @@ compile_object_load (const char *object_file, const char *source_file)
 	case mst_text:
 	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
 	  break;
+	case mst_text_gnu_ifunc:
+	  sym->value = gnu_ifunc_resolve_addr (target_gdbarch (),
+					       BMSYMBOL_VALUE_ADDRESS (bmsym));
+	  break;
 	default:
 	  warning (_("Could not find symbol \"%s\" "
 		     "for compiled module \"%s\"."),
