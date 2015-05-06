@@ -1,3 +1,8 @@
+2015-05-06  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Dollar Local Labels): Note that these are only
+	supported on some targets.
+
 2015-05-06  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (mapping_state): Recording alignment before exit.

@@ -3654,6 +3654,9 @@ on the H8/300), and underscores.
 Case of letters is significant: @code{foo} is a different symbol name
 than @code{Foo}.
 
+Symbol names do not start with a digit.  An exception to this rule is made for
+Local Labels.  See below.
+
 Multibyte characters are supported.  To generate a symbol name containing
 multibyte characters enclose it within double quotes and use escape codes. cf
 @xref{Strings}.  Generating a multibyte symbol name from a label is not
@@ -3685,15 +3688,15 @@ to retain the local symbols in the object files.
 @cindex local labels
 @cindex temporary symbol names
 @cindex symbol names, temporary
-Local labels help compilers and programmers use names temporarily.
-They create symbols which are guaranteed to be unique over the entire scope of
-the input source code and which can be referred to by a simple notation.
-To define a local label, write a label of the form @samp{@b{N}:} (where @b{N}
-represents any positive integer).  To refer to the most recent previous
-definition of that label write @samp{@b{N}b}, using the same number as when
-you defined the label.  To refer to the next definition of a local label, write
-@samp{@b{N}f}---the @samp{b} stands for ``backwards'' and the @samp{f} stands
-for ``forwards''.
+Local labels are different from local symbols.  Local labels help compilers and
+programmers use names temporarily.  They create symbols which are guaranteed to
+be unique over the entire scope of the input source code and which can be
+referred to by a simple notation.  To define a local label, write a label of
+the form @samp{@b{N}:} (where @b{N} represents any positive integer).  To refer
+to the most recent previous definition of that label write @samp{@b{N}b}, using
+the same number as when you defined the label.  To refer to the next definition
+of a local label, write @samp{@b{N}f}---the @samp{b} stands for ``backwards''
+and the @samp{f} stands for ``forwards''.
 
 There is no restriction on how you can use these labels, and you can reuse them
 too.  So that it is possible to repeatedly define the same local label (using
@@ -3758,12 +3761,12 @@ the 44th @code{3:} may be named @code{.L3@kbd{C-B}44}.
 @subheading Dollar Local Labels
 @cindex dollar local symbols
 
-@code{@value{AS}} also supports an even more local form of local labels called
-dollar labels.  These labels go out of scope (i.e., they become undefined) as
-soon as a non-local label is defined.  Thus they remain valid for only a small
-region of the input source code.  Normal local labels, by contrast, remain in
-scope for the entire file, or until they are redefined by another occurrence of
-the same local label.
+On some targets @code{@value{AS}} also supports an even more local form of
+local labels called dollar labels.  These labels go out of scope (i.e., they
+become undefined) as soon as a non-local label is defined.  Thus they remain
+valid for only a small region of the input source code.  Normal local labels,
+by contrast, remain in scope for the entire file, or until they are redefined
+by another occurrence of the same local label.
 
 Dollar labels are defined in exactly the same way as ordinary local labels,
 except that they have a dollar sign suffix to their numeric value, e.g.,
