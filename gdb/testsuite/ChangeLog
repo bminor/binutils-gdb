@@ -1,3 +1,8 @@
+2015-05-06  Pedro Alves  <palves@redhat.com>
+
+	PR server/18081
+	* gdb.server/non-existing-program.exp: New file.
+
 2015-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/out_of_line_in_inlined.exp: Add run and "bt" tests.
