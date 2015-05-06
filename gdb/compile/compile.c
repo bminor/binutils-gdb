@@ -415,11 +415,12 @@ print_callback (void *ignore, const char *message)
    freeing both strings.  */
 
 static char *
-compile_to_object (struct command_line *cmd, char *cmd_string,
+compile_to_object (struct command_line *cmd, const char *cmd_string,
 		   enum compile_i_scope_types scope,
 		   char **source_filep)
 {
   char *code;
+  const char *input;
   char *source_file, *object_file;
   struct compile_instance *compiler;
   struct cleanup *cleanup, *inner_cleanup;
@@ -459,6 +460,7 @@ compile_to_object (struct command_line *cmd, char *cmd_string,
     {
       struct ui_file *stream = mem_fileopen ();
       struct command_line *iter;
+      char *stream_buf;
 
       make_cleanup_ui_file_delete (stream);
       for (iter = cmd->body_list[0]; iter; iter = iter->next)
@@ -467,15 +469,16 @@ compile_to_object (struct command_line *cmd, char *cmd_string,
 	  fputs_unfiltered ("\n", stream);
 	}
 
-      code = ui_file_xstrdup (stream, NULL);
-      make_cleanup (xfree, code);
+      stream_buf = ui_file_xstrdup (stream, NULL);
+      make_cleanup (xfree, stream_buf);
+      input = stream_buf;
     }
   else if (cmd_string != NULL)
-    code = cmd_string;
+    input = cmd_string;
   else
     error (_("Neither a simple expression, or a multi-line specified."));
 
-  code = current_language->la_compute_program (compiler, code, gdbarch,
+  code = current_language->la_compute_program (compiler, input, gdbarch,
 					       expr_block, expr_pc);
   make_cleanup (xfree, code);
   if (compile_debug)
@@ -556,7 +559,7 @@ compile_command (char *args, int from_tty)
 /* See compile.h.  */
 
 void
-eval_compile_command (struct command_line *cmd, char *cmd_string,
+eval_compile_command (struct command_line *cmd, const char *cmd_string,
 		      enum compile_i_scope_types scope)
 {
   char *object_file, *source_file;
