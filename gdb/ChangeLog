@@ -1,5 +1,15 @@
 2015-05-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* defs.h (deprecated_init_ui_hook): Delete.  Remove associated
+	comment.
+	* top.c (deprecated_init_ui_hook): Delete.
+	(gdb_init): Remove handling of deprecated_init_ui_hook.
+	* interps.c (clear_interpreter_hooks): Remove handling of
+	deprecated_init_ui_hook.
+	* main.c (captured_main): Update comment.
+
+2015-05-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* solib.c (_initialize_solib): Add "info dll" alias creation.
 	* windows-nat.c (set_windows_aliases): Delete.
 	(_initialize_windows_nat): Remove deprecated_init_ui_hook
