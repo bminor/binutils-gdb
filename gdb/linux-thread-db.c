@@ -178,8 +178,6 @@ struct thread_db_info
 
   td_err_e (*td_ta_new_p) (struct ps_prochandle * ps,
 				td_thragent_t **ta);
-  td_err_e (*td_ta_map_id2thr_p) (const td_thragent_t *ta, thread_t pt,
-				  td_thrhandle_t *__th);
   td_err_e (*td_ta_map_lwp2thr_p) (const td_thragent_t *ta,
 				   lwpid_t lwpid, td_thrhandle_t *th);
   td_err_e (*td_ta_thr_iter_p) (const td_thragent_t *ta,
@@ -721,10 +719,6 @@ try_thread_db_load_1 (struct thread_db_info *info)
           }
       return 0;
     }
-
-  info->td_ta_map_id2thr_p = verbose_dlsym (info->handle, "td_ta_map_id2thr");
-  if (info->td_ta_map_id2thr_p == NULL)
-    return 0;
 
   info->td_ta_map_lwp2thr_p = verbose_dlsym (info->handle,
 					     "td_ta_map_lwp2thr");
