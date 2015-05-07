@@ -1,3 +1,8 @@
+2015-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (elf_symbol_resolved_in_segment_p): New.
+	(md_estimate_size_before_relax): Use it.
+
 2015-05-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c: Typo in comment fixed.

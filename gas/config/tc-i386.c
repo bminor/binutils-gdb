@@ -8772,6 +8772,25 @@ i386_frag_max_var (fragS *frag)
   return TYPE_FROM_RELAX_STATE (frag->fr_subtype) == UNCOND_JUMP ? 4 : 5;
 }
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+static int
+elf_symbol_resolved_in_segment_p (symbolS *fr_symbol)
+{
+  /* STT_GNU_IFUNC symbol must go through PLT.  */
+  if ((symbol_get_bfdsym (fr_symbol)->flags
+       & BSF_GNU_INDIRECT_FUNCTION) != 0)
+    return 0;
+
+  if (!S_IS_EXTERNAL (fr_symbol))
+    /* Symbol may be weak or local.  */
+    return !S_IS_WEAK (fr_symbol);
+
+  /* Global symbols with default visibility in a shared library may be
+     preempted by another definition.  */
+  return ELF_ST_VISIBILITY (S_GET_OTHER (fr_symbol)) != STV_DEFAULT;
+}
+#endif
+
 /* md_estimate_size_before_relax()
 
    Called just before relax() for rs_machine_dependent frags.  The x86
@@ -8795,10 +8814,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       || (IS_ELF
-	  && (S_IS_EXTERNAL (fragP->fr_symbol)
-	      || S_IS_WEAK (fragP->fr_symbol)
-	      || ((symbol_get_bfdsym (fragP->fr_symbol)->flags
-		   & BSF_GNU_INDIRECT_FUNCTION))))
+	  && !elf_symbol_resolved_in_segment_p (fragP->fr_symbol))
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
       || (OUTPUT_FLAVOR == bfd_target_coff_flavour
