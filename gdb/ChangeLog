@@ -1,3 +1,9 @@
+2015-05-07  Gary Benson <gbenson@redhat.com>
+
+	* linux-thread-db.c (struct thread_db_info)
+	<td_thr_validate_p>: Remove field.
+	(try_thread_db_load_1): Remove initialization for the above.
+
 2015-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* compile/compile-object-load.c (compile_object_load): Support
