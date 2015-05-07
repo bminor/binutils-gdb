@@ -1,3 +1,42 @@
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* disassemble.c (disassembler): Choose suitable disassembler based
+	on E_ABI.
+	* rl78-decode.opc (rl78_decode_opcode): Take ISA parameter.  Use
+	it to decode mul/div insns.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78): Rename to...
+	(print_insn_rl78_common): ...this, take ISA parameter.
+	(print_insn_rl78): New.
+	(print_insn_rl78_g10): New.
+	(print_insn_rl78_g13): New.
+	(print_insn_rl78_g14): New.
+	(rl78_get_disassembler): New.
+
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2015-04-27  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (DCBT_EO): New define.
+	(powerpc_opcodes) <lbarx>: Enable for POWER8 and later.
+	<lharx>: Likewise.
+	<stbcx.>: Likewise.
+	<sthcx.>: Likewise.
+	<waitrsv>: Do not enable for POWER7 and later.
+	<waitimpl>: Likewise.
+	<dcbt>: Default to the two operand form of the instruction for all
+	"old" cpus.  For "new" cpus, use the operand ordering that matches
+	whether the cpu is server or embedded.
+	<dcbtst>: Likewise.
+
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-opc.c: New instruction type VV0UU2.
+	* s390-opc.txt: Fix instruction types for VFCE, VLDE, VFSQ, WFK,
+	and WFC.
+
 2015-04-23  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (putop): Extend "XY" handling to AVX512. Handle "XZ".

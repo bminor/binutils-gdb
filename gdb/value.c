@@ -2600,6 +2600,18 @@ value_of_xmethod (struct xmethod_worker *worker)
   return worker->value;
 }
 
+/* Return the type of the result of TYPE_CODE_XMETHOD value METHOD.  */
+
+struct type *
+result_type_of_xmethod (struct value *method, int argc, struct value **argv)
+{
+  gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
+	      && method->lval == lval_xcallable && argc > 0);
+
+  return get_xmethod_result_type (method->location.xm_worker,
+				  argv[0], argv + 1, argc - 1);
+}
+
 /* Call the xmethod corresponding to the TYPE_CODE_XMETHOD value METHOD.  */
 
 struct value *
@@ -3497,7 +3509,7 @@ value_from_contents_and_address (struct type *type,
 				 const gdb_byte *valaddr,
 				 CORE_ADDR address)
 {
-  struct type *resolved_type = resolve_dynamic_type (type, address);
+  struct type *resolved_type = resolve_dynamic_type (type, valaddr, address);
   struct type *resolved_type_no_typedef = check_typedef (resolved_type);
   struct value *v;
 

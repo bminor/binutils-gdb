@@ -104,11 +104,6 @@ extern const char *i386_target_format (void);
 #endif
 #endif
 
-#if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF))
-#define md_end i386_elf_emit_arch_note
-extern void i386_elf_emit_arch_note (void);
-#endif
-
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
 /* '$' may be used as immediate prefix.  */

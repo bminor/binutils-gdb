@@ -1529,9 +1529,11 @@ emn10300.c: $(srcdir)/emulparams/mn10300.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 emsp430elf.c: $(srcdir)/emulparams/msp430elf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/msp430.em \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc ${GEN_DEPENDS}
 
 emsp430X.c: $(srcdir)/emulparams/msp430elf.sh $(srcdir)/emulparams/msp430X.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/msp430.em \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc ${GEN_DEPENDS}
 
 ends32elf.c: $(srcdir)/emulparams/nds32elf.sh \

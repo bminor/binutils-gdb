@@ -1460,16 +1460,16 @@ mapping_state (enum mstate state)
 {
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
 
-  if (mapstate == state)
-    /* The mapping symbol has already been emitted.
-       There is nothing else to do.  */
-    return;
-
   if (state == MAP_INSN)
     /* AArch64 instructions require 4-byte alignment.  When emitting
        instructions into any section, record the appropriate section
        alignment.  */
     record_alignment (now_seg, 2);
+
+  if (mapstate == state)
+    /* The mapping symbol has already been emitted.
+       There is nothing else to do.  */
+    return;
 
 #define TRANSITION(from, to) (mapstate == (from) && state == (to))
   if (TRANSITION (MAP_UNDEFINED, MAP_DATA) && !subseg_text_p (now_seg))
@@ -1858,10 +1858,9 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
   /* Sections are assumed to start aligned. In executable section, there is no
      MAP_DATA symbol pending. So we only align the address during
      MAP_DATA --> MAP_INSN transition.
-     For other sections, this is not guaranteed, align it anyway.  */
+     For other sections, this is not guaranteed.  */
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
-  if (!need_pass_2 && ((subseg_text_p (now_seg) && mapstate == MAP_DATA)
-		       || !subseg_text_p (now_seg)))
+  if (!need_pass_2 && subseg_text_p (now_seg) && mapstate == MAP_DATA)
     frag_align_code (2, 0);
 
 #ifdef OBJ_ELF
@@ -5690,6 +5689,14 @@ md_assemble (char *str)
 
   init_operand_error_report ();
 
+  /* Sections are assumed to start aligned. In executable section, there is no
+     MAP_DATA symbol pending. So we only align the address during
+     MAP_DATA --> MAP_INSN transition.
+     For other sections, this is not guaranteed.  */
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+  if (!need_pass_2 && subseg_text_p (now_seg) && mapstate == MAP_DATA)
+    frag_align_code (2, 0);
+
   saved_cond = inst.cond;
   reset_aarch64_instruction (&inst);
   inst.cond = saved_cond;
@@ -5704,15 +5711,6 @@ md_assemble (char *str)
       if (debug_dump)
 	dump_opcode_operands (opcode);
 #endif /* DEBUG_AARCH64 */
-
-    /* Sections are assumed to start aligned. In executable section, there is no
-       MAP_DATA symbol pending. So we only align the address during
-       MAP_DATA --> MAP_INSN transition.
-       For other sections, this is not guaranteed, align it anyway.  */
-    enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
-    if (!need_pass_2 && ((subseg_text_p (now_seg) && mapstate == MAP_DATA)
-			 || !subseg_text_p (now_seg)))
-      frag_align_code (2, 0);
 
       mapping_state (MAP_INSN);
 
@@ -6030,21 +6028,20 @@ aarch64_init_frag (fragS * fragP, int max_chars)
   /* Record a mapping symbol for alignment frags.  We will delete this
      later if the alignment ends up empty.  */
   if (!fragP->tc_frag_data.recorded)
+    fragP->tc_frag_data.recorded = 1;
+
+  switch (fragP->fr_type)
     {
-      fragP->tc_frag_data.recorded = 1;
-      switch (fragP->fr_type)
-	{
-	case rs_align:
-	case rs_align_test:
-	case rs_fill:
-	  mapping_state_2 (MAP_DATA, max_chars);
-	  break;
-	case rs_align_code:
-	  mapping_state_2 (MAP_INSN, max_chars);
-	  break;
-	default:
-	  break;
-	}
+    case rs_align:
+    case rs_align_test:
+    case rs_fill:
+      mapping_state_2 (MAP_DATA, max_chars);
+      break;
+    case rs_align_code:
+      mapping_state_2 (MAP_INSN, max_chars);
+      break;
+    default:
+      break;
     }
 }
 

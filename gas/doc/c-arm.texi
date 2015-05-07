@@ -394,6 +394,12 @@ features.  The default is to warn.
 @item -mccs
 Turns on CodeComposer Studio assembly syntax compatibility mode.
 
+@cindex @code{-mwarn-syms} command line option, ARM
+@item -mwarn-syms
+@itemx -mno-warn-syms
+Enable or disable warnings about symbols that match the names of ARM
+instructions.  The default is to warn.
+
 @end table
 
 

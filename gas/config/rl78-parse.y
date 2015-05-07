@@ -105,6 +105,10 @@ static int    rl78_bit_insn = 0;
 
 #define WA(x) if (!expr_is_word_aligned (x)) rl78_error ("Expression not word-aligned");
 
+#define ISA_G10(s) if (!rl78_isa_g10()) rl78_error (s " is only supported on the G10")
+#define ISA_G13(s) if (!rl78_isa_g13()) rl78_error (s " is only supported on the G13")
+#define ISA_G14(s) if (!rl78_isa_g14()) rl78_error (s " is only supported on the G14")
+
 static void check_expr_is_bit_index (expressionS);
 #define Bit(e) check_expr_is_bit_index (e);
 
@@ -500,16 +504,16 @@ statement :
 
 /* ---------------------------------------------------------------------- */
 
-	| MULHU
+	| MULHU { ISA_G14 ("MULHU"); }
 	  { B3 (0xce, 0xfb, 0x01); }
 
-	| MULH
+	| MULH { ISA_G14 ("MULH"); }
 	  { B3 (0xce, 0xfb, 0x02); }
 
 	| MULU X
 	  { B1 (0xd6); }
 
-	| DIVHU
+	| DIVHU { ISA_G14 ("DIVHU"); }
 	  { B3 (0xce, 0xfb, 0x03); }
 
 /* Note that the DIVWU encoding was changed from [0xce,0xfb,0x04] to
@@ -517,13 +521,13 @@ statement :
    with the same version number, but varying encodings.  The version
    here matches the hardware.  */
 
-	| DIVWU
+	| DIVWU { ISA_G14 ("DIVWU"); }
 	  { B3 (0xce, 0xfb, 0x0b); }
 
-	| MACHU
+	| MACHU { ISA_G14 ("MACHU"); }
 	  { B3 (0xce, 0xfb, 0x05); }
 
-	| MACH
+	| MACH { ISA_G14 ("MACH"); }
 	  { B3 (0xce, 0xfb, 0x06); }
 
 /* ---------------------------------------------------------------------- */

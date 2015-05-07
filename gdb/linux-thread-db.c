@@ -178,8 +178,6 @@ struct thread_db_info
 
   td_err_e (*td_ta_new_p) (struct ps_prochandle * ps,
 				td_thragent_t **ta);
-  td_err_e (*td_ta_map_id2thr_p) (const td_thragent_t *ta, thread_t pt,
-				  td_thrhandle_t *__th);
   td_err_e (*td_ta_map_lwp2thr_p) (const td_thragent_t *ta,
 				   lwpid_t lwpid, td_thrhandle_t *th);
   td_err_e (*td_ta_thr_iter_p) (const td_thragent_t *ta,
@@ -196,7 +194,6 @@ struct thread_db_info
   td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
 				    td_event_msg_t *msg);
 
-  td_err_e (*td_thr_validate_p) (const td_thrhandle_t *th);
   td_err_e (*td_thr_get_info_p) (const td_thrhandle_t *th,
 				 td_thrinfo_t *infop);
   td_err_e (*td_thr_event_enable_p) (const td_thrhandle_t *th,
@@ -723,10 +720,6 @@ try_thread_db_load_1 (struct thread_db_info *info)
       return 0;
     }
 
-  info->td_ta_map_id2thr_p = verbose_dlsym (info->handle, "td_ta_map_id2thr");
-  if (info->td_ta_map_id2thr_p == NULL)
-    return 0;
-
   info->td_ta_map_lwp2thr_p = verbose_dlsym (info->handle,
 					     "td_ta_map_lwp2thr");
   if (info->td_ta_map_lwp2thr_p == NULL)
@@ -734,10 +727,6 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   info->td_ta_thr_iter_p = verbose_dlsym (info->handle, "td_ta_thr_iter");
   if (info->td_ta_thr_iter_p == NULL)
-    return 0;
-
-  info->td_thr_validate_p = verbose_dlsym (info->handle, "td_thr_validate");
-  if (info->td_thr_validate_p == NULL)
     return 0;
 
   info->td_thr_get_info_p = verbose_dlsym (info->handle, "td_thr_get_info");

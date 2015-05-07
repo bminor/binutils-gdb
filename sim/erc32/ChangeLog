@@ -1,3 +1,8 @@
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 18273
+	* sis.c (main): Remove unreachable code.
+
 2015-04-24  David Binderman  <dcb314@hotmail.com>
 	    Nick Clifton  <nickc@redhat.com>
 

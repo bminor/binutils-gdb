@@ -17854,6 +17854,10 @@ Print the names of the shared libraries which are currently loaded
 that match @var{regex}.  If @var{regex} is omitted then print
 all shared libraries that are loaded.
 
+@kindex info dll
+@item info dll @var{regex}
+This is an alias of @code{info sharedlibrary}.
+
 @kindex sharedlibrary
 @kindex share
 @item sharedlibrary @var{regex}
@@ -20700,10 +20704,6 @@ about the six segment registers.
 This command displays thread specific information stored in the
 Thread Information Block (readable on the X86 CPU family using @code{$fs}
 selector for 32-bit programs and @code{$gs} for 64-bit programs).
-
-@kindex info dll
-@item info dll
-This is a Cygwin-specific alias of @code{info shared}.
 
 @kindex set cygwin-exceptions
 @cindex debugging the Cygwin DLL

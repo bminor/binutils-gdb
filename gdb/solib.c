@@ -114,8 +114,9 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 
 /* Return the full pathname of a binary file (the main executable
    or a shared library file), or NULL if not found.  The returned
-   pathname is malloc'ed and must be freed by the caller.  *FD is
-   set to either -1 or an open file handle for the binary file.
+   pathname is malloc'ed and must be freed by the caller.  If FD
+   is non-NULL, *FD is set to either -1 or an open file handle for
+   the binary file.
 
    Global variable GDB_SYSROOT is used as a prefix directory
    to search for binary files if they have an absolute path.
@@ -254,7 +255,8 @@ solib_find_1 (char *in_pathname, int *fd, int is_solib)
   /* Handle files to be accessed via the target.  */
   if (is_target_filename (temp_pathname))
     {
-      *fd = -1;
+      if (fd != NULL)
+	*fd = -1;
       do_cleanups (old_chain);
       return temp_pathname;
     }
@@ -367,14 +369,21 @@ solib_find_1 (char *in_pathname, int *fd, int is_solib)
 			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH, in_pathname,
 			O_RDONLY | O_BINARY, &temp_pathname);
 
-  *fd = found_file;
+  if (fd == NULL)
+    {
+      if (found_file >= 0)
+	close (found_file);
+    }
+  else
+    *fd = found_file;
+
   return temp_pathname;
 }
 
 /* Return the full pathname of the main executable, or NULL if not
    found.  The returned pathname is malloc'ed and must be freed by
-   the caller.  *FD is set to either -1 or an open file handle for
-   the main executable.
+   the caller.  If FD is non-NULL, *FD is set to either -1 or an open
+   file handle for the main executable.
 
    The search algorithm used is described in solib_find_1's comment
    above.  */
@@ -405,8 +414,8 @@ exec_file_find (char *in_pathname, int *fd)
 
 /* Return the full pathname of a shared library file, or NULL if not
    found.  The returned pathname is malloc'ed and must be freed by
-   the caller.  *FD is set to either -1 or an open file handle for
-   the shared library.
+   the caller.  If FD is non-NULL, *FD is set to either -1 or an open
+   file handle for the shared library.
 
    The search algorithm used is described in solib_find_1's comment
    above.  */
@@ -1666,6 +1675,7 @@ _initialize_solib (void)
 	   _("Load shared object library symbols for files matching REGEXP."));
   add_info ("sharedlibrary", info_sharedlibrary_command,
 	    _("Status of loaded shared object libraries."));
+  add_info_alias ("dll", "sharedlibrary", 1);
   add_com ("nosharedlibrary", class_files, no_shared_libraries,
 	   _("Unload all shared object library symbols."));
 

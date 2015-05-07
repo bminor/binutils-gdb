@@ -476,11 +476,11 @@ Disassembly of section .text:
 .*:	e7 f1 40 0c d6 e3 [ 	]*vfa	%v15,%v17,%v20,13,12
 .*:	e7 f1 40 00 36 e3 [ 	]*vfadb	%v15,%v17,%v20
 .*:	e7 f1 40 08 36 e3 [ 	]*wfadb	%v15,%v17,%v20
-.*:	e7 f1 00 cd 04 cb [ 	]*wfc	%v15,%v17,13,12
+.*:	e7 f1 00 0c d4 cb [ 	]*wfc	%v15,%v17,13,12
 .*:	e7 f1 00 00 34 cb [ 	]*wfcdb	%v15,%v17
-.*:	e7 f1 00 cd 04 ca [ 	]*wfk	%v15,%v17,13,12
+.*:	e7 f1 00 0c d4 ca [ 	]*wfk	%v15,%v17,13,12
 .*:	e7 f1 00 00 34 ca [ 	]*wfkdb	%v15,%v17
-.*:	e7 f1 40 00 06 e8 [ 	]*vfce	%v15,%v17,%v20
+.*:	e7 f1 40 bc d6 e8 [ 	]*vfce	%v15,%v17,%v20,13,12,11
 .*:	e7 f1 40 00 36 e8 [ 	]*vfcedb	%v15,%v17,%v20
 .*:	e7 f1 40 10 36 e8 [ 	]*vfcedbs	%v15,%v17,%v20
 .*:	e7 f1 40 08 36 e8 [ 	]*wfcedb	%v15,%v17,%v20
@@ -513,7 +513,7 @@ Disassembly of section .text:
 .*:	e7 f1 00 bc d4 c7 [ 	]*vfi	%v15,%v17,13,12,11
 .*:	e7 f1 00 cd 34 c7 [ 	]*wfidb	%v15,%v17,5,12
 .*:	e7 f1 00 cd 34 c7 [ 	]*wfidb	%v15,%v17,5,12
-.*:	e7 f1 00 cd 04 c4 [ 	]*vlde	%v15,%v17,13,12
+.*:	e7 f1 00 0c d4 c4 [ 	]*vlde	%v15,%v17,13,12
 .*:	e7 f1 00 00 24 c4 [ 	]*vldeb	%v15,%v17
 .*:	e7 f1 00 08 24 c4 [ 	]*wldeb	%v15,%v17
 .*:	e7 f1 00 bc d4 c5 [ 	]*vled	%v15,%v17,13,12,11
@@ -537,7 +537,7 @@ Disassembly of section .text:
 .*:	e7 f1 00 18 34 cc [ 	]*wflndb	%v15,%v17
 .*:	e7 f1 00 20 34 cc [ 	]*vflpdb	%v15,%v17
 .*:	e7 f1 00 28 34 cc [ 	]*wflpdb	%v15,%v17
-.*:	e7 f1 00 cd 04 ce [ 	]*vfsq	%v15,%v17,13,12
+.*:	e7 f1 00 0c d4 ce [ 	]*vfsq	%v15,%v17,13,12
 .*:	e7 f1 00 00 34 ce [ 	]*vfsqdb	%v15,%v17
 .*:	e7 f1 00 08 34 ce [ 	]*wfsqdb	%v15,%v17
 .*:	e7 f1 40 0c d6 e2 [ 	]*vfs	%v15,%v17,%v20,13,12

@@ -528,7 +528,7 @@ case "${targ}" in
     targ_selvecs=i386_elf32_vec
     ;;
   i[3-7]86-*-sysv4* | i[3-7]86-*-unixware* | \
-  i[3-7]86-*-elf | i[3-7]86-*-sco3.2v5* | \
+  i[3-7]86-*-elf* | i[3-7]86-*-sco3.2v5* | \
   i[3-7]86-*-dgux* | i[3-7]86-*-sysv5*)
     targ_defvec=i386_elf32_vec
     targ_selvecs=i386_coff_vec

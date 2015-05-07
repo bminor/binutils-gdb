@@ -4160,7 +4160,8 @@ rsrc_process_section (bfd * abfd,
     {
       asection * rsrc_sec = bfd_get_section_by_name (input, ".rsrc");
 
-      if (rsrc_sec != NULL)
+      /* PR 18372 - skip discarded .rsrc sections.  */
+      if (rsrc_sec != NULL && !discarded_section (rsrc_sec))
 	{
 	  if (num_input_rsrc == max_num_input_rsrc)
 	    {

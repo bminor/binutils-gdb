@@ -3654,6 +3654,9 @@ on the H8/300), and underscores.
 Case of letters is significant: @code{foo} is a different symbol name
 than @code{Foo}.
 
+Symbol names do not start with a digit.  An exception to this rule is made for
+Local Labels.  See below.
+
 Multibyte characters are supported.  To generate a symbol name containing
 multibyte characters enclose it within double quotes and use escape codes. cf
 @xref{Strings}.  Generating a multibyte symbol name from a label is not
@@ -3685,15 +3688,15 @@ to retain the local symbols in the object files.
 @cindex local labels
 @cindex temporary symbol names
 @cindex symbol names, temporary
-Local labels help compilers and programmers use names temporarily.
-They create symbols which are guaranteed to be unique over the entire scope of
-the input source code and which can be referred to by a simple notation.
-To define a local label, write a label of the form @samp{@b{N}:} (where @b{N}
-represents any positive integer).  To refer to the most recent previous
-definition of that label write @samp{@b{N}b}, using the same number as when
-you defined the label.  To refer to the next definition of a local label, write
-@samp{@b{N}f}---the @samp{b} stands for ``backwards'' and the @samp{f} stands
-for ``forwards''.
+Local labels are different from local symbols.  Local labels help compilers and
+programmers use names temporarily.  They create symbols which are guaranteed to
+be unique over the entire scope of the input source code and which can be
+referred to by a simple notation.  To define a local label, write a label of
+the form @samp{@b{N}:} (where @b{N} represents any positive integer).  To refer
+to the most recent previous definition of that label write @samp{@b{N}b}, using
+the same number as when you defined the label.  To refer to the next definition
+of a local label, write @samp{@b{N}f}---the @samp{b} stands for ``backwards''
+and the @samp{f} stands for ``forwards''.
 
 There is no restriction on how you can use these labels, and you can reuse them
 too.  So that it is possible to repeatedly define the same local label (using
@@ -3758,12 +3761,12 @@ the 44th @code{3:} may be named @code{.L3@kbd{C-B}44}.
 @subheading Dollar Local Labels
 @cindex dollar local symbols
 
-@code{@value{AS}} also supports an even more local form of local labels called
-dollar labels.  These labels go out of scope (i.e., they become undefined) as
-soon as a non-local label is defined.  Thus they remain valid for only a small
-region of the input source code.  Normal local labels, by contrast, remain in
-scope for the entire file, or until they are redefined by another occurrence of
-the same local label.
+On some targets @code{@value{AS}} also supports an even more local form of
+local labels called dollar labels.  These labels go out of scope (i.e., they
+become undefined) as soon as a non-local label is defined.  Thus they remain
+valid for only a small region of the input source code.  Normal local labels,
+by contrast, remain in scope for the entire file, or until they are redefined
+by another occurrence of the same local label.
 
 Dollar labels are defined in exactly the same way as ordinary local labels,
 except that they have a dollar sign suffix to their numeric value, e.g.,
@@ -4380,6 +4383,9 @@ Some machine configurations provide additional directives.
 * Weak::                        @code{.weak @var{names}}
 * Weakref::                     @code{.weakref @var{alias}, @var{symbol}}
 * Word::                        @code{.word @var{expressions}}
+@ifclear no-space-dir
+* Zero::                        @code{.zero @var{size}}
+@end ifclear
 * Deprecated::                  Deprecated Directives
 @end menu
 
@@ -6351,7 +6357,14 @@ changes @var{symbol}'s value and type to conform to
 @var{expression}.  If @var{symbol} was flagged as external, it remains
 flagged (@pxref{Symbol Attributes}).
 
-You may @code{.set} a symbol many times in the same assembly.
+You may @code{.set} a symbol many times in the same assembly provided that the
+values given to the symbol are constants.  Values that are based on expressions
+involving other symbols are allowed, but some targets may restrict this to only
+being done once per assembly.  This is because those targets do not set the
+addresses of symbols at assembly time, but rather delay the assignment until a
+final link is performed.  This allows the linker a chance to change the code in
+the files, changing the location of, and the relative distance between, various
+different symbols.
 
 If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
@@ -6988,6 +7001,18 @@ assembly language programmers.
 @end ifset
 @c end     DIFF-TBL-KLUGE
 
+@ifclear no-space-dir
+@node Zero
+@section @code{.zero @var{size}}
+
+@cindex @code{zero} directive
+@cindex filling memory with zero bytes
+This directive emits @var{size} 0-valued bytes.  @var{size} must be an absolute
+expression.  This directive is actually an alias for the @samp{.skip} directive
+so in can take an optional second argument of the value to store in the bytes
+instead of zero.  Using @samp{.zero} in this way would be confusing however.
+@end ifclear
+
 @node Deprecated
 @section Deprecated Directives
 
@@ -7123,6 +7148,22 @@ The vector ABI used by this object file.  The value will be:
 2 for files using AltiVec registers to pass vectors.
 @item
 3 for files using SPE registers to pass vectors.
+@end itemize
+@end table
+
+@subsection IBM z Systems Attributes
+
+@table @r
+@item Tag_GNU_S390_ABI_Vector (8)
+The vector ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not affected by the vector ABI.
+@item
+1 for files using software vector ABI.
+@item
+2 for files using hardware vector ABI.
 @end itemize
 @end table
 

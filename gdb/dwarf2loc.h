@@ -111,6 +111,9 @@ struct property_addr_info
      being resolved.  */
   struct type *type;
 
+  /* If not NULL, a buffer containing the object's value.  */
+  const gdb_byte *valaddr;
+
   /* The address of that object.  */
   CORE_ADDR addr;
 

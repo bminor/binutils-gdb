@@ -1,3 +1,46 @@
+2015-05-06  Toni Spets  <toni.spets@iki.fi>
+
+	PR ld/18372
+	* peXXigen.c (rsrc_process_section): Skip discarded resource
+	sections.
+
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.bfd: Support i[3-7]86-*-elf*.
+
+2015-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_backend_post_process_headers): Undef for
+	Solaris 2.
+
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 18317
+	* elf32-mep.c (MEPREL): Use bfd_elf_generic_reloc instead of
+	mep_reloc.
+	(mep_reloc): Delete unused function.
+
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 17099
+	* coff-i386.c (coff_i386_rtype_to_howto): Allow absolute PCRLONG
+	relocs.
+
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf-s390-common.c (elf_s390_merge_obj_attributes): New function.
+	* elf32-s390.c (elf32_s390_merge_private_bfd_data): Call
+	elf_s390_merge_obj_attributes.
+	* elf64-s390.c (elf64_s390_merge_private_bfd_data): New function.
+
+2015-04-24  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/18270
+	* elfnn-aarch64.c (elfNN_aarch64_size_dynamic): Count local symbol for
+	GOT_NORMAL for both sgot/srelgot section.
+	(elfNN_aarch64_final_link_relocate): Relocate against GOT entry address
+	and generate necessary runtime relocation for GOT entry.
+
 2015-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18209

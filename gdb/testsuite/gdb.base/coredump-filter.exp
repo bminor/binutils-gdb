@@ -170,6 +170,7 @@ gdb_test_multiple "print/x &main" "getting main's address" {
 
 # Obtain the address of each variable that will be checked on each
 # case.
+set coredump_var_addr ""
 foreach item $all_anon_corefiles {
     foreach name [list [lindex $item 3] [lindex $item 4]] {
 	set test "print/x $name"

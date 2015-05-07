@@ -164,7 +164,8 @@ int
 rl78_decode_opcode (unsigned long pc AU,
 		  RL78_Opcode_Decoded * rl78,
 		  int (* getbyte)(void *),
-		  void * ptr)
+		  void * ptr,
+		  RL78_Dis_Isa isa)
 {
   LocalData lds, * ld = &lds;
   unsigned char op_buf[20] = {0};
@@ -749,7 +750,7 @@ rl78_decode_opcode (unsigned long pc AU,
   op0 = SFR;
   op1 = IMMU(1);
   ID(mov); DM(None, op0); SC(op1);
-  if (op0 == 0xffffb)
+  if (op0 == 0xffffb && isa == RL78_ISA_G14)
     switch (op1)
       {
       case 0x01:
@@ -902,7 +903,8 @@ rl78_decode_opcode (unsigned long pc AU,
 /*----------------------------------------------------------------------*/
 
 /** 1101 0110			mulu	x				*/
-  ID(mulu);
+  if (isa == RL78_ISA_G14)
+    ID(mulu);
 
 /*----------------------------------------------------------------------*/
 

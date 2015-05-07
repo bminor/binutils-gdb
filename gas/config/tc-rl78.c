@@ -339,6 +339,24 @@ md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
   return 0;
 }
 
+int
+rl78_isa_g10 (void)
+{
+  return (elf_flags & E_FLAG_RL78_CPU_MASK) == E_FLAG_RL78_G10;
+}
+
+int
+rl78_isa_g13 (void)
+{
+  return (elf_flags & E_FLAG_RL78_CPU_MASK) == E_FLAG_RL78_G13;
+}
+
+int
+rl78_isa_g14 (void)
+{
+  return (elf_flags & E_FLAG_RL78_CPU_MASK) == E_FLAG_RL78_G14;
+}
+
 void
 md_show_usage (FILE * stream)
 {

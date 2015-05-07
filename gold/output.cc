@@ -2901,8 +2901,10 @@ Output_section::is_input_address_mapped(const Relobj* object,
     {
       section_offset_type output_offset;
       bool found = posd->output_offset(object, shndx, offset, &output_offset);
+      // By default we assume that the address is mapped. See comment at the
+      // end.
       if (!found)
-        return false;
+        return true;
       return output_offset != -1;
     }
 
@@ -3501,7 +3503,7 @@ Output_section::update_section_layout(
       if (p->is_input_section()
 	  || p->is_relaxed_input_section())
 	{
-	  Object* obj = (p->is_input_section()
+	  Relobj* obj = (p->is_input_section()
 			 ? p->relobj()
 			 : p->relaxed_input_section()->relobj());
 	  unsigned int shndx = p->shndx();

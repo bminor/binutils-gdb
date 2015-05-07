@@ -1060,6 +1060,11 @@ If @var{block} is given, then @var{name} is looked up in that scope.
 Otherwise, it is searched for globally.
 @end defun
 
+@defun Type.optimized_out ()
+Return @code{gdb.Value} instance of this type whose value is optimized
+out.  This allows a frame decorator to indicate that the value of an
+argument or a local variable is not known.
+@end defun
 
 Each type has a code, which indicates what category this type falls
 into.  The available type categories are represented by constants
@@ -2450,6 +2455,13 @@ If the xmethod takes a single argument, then a single
 @code{gdb.Type} object corresponding to it can be returned.
 @end defun
 
+@defun XMethodWorker.get_result_type (self, *args)
+This method returns a @code{gdb.Type} object representing the type
+of the result of invoking this xmethod.
+The @var{args} argument is the same tuple of arguments that would be
+passed to the @code{__call__} method of this worker.
+@end defun
+
 @defun XMethodWorker.__call__ (self, *args)
 This is the method which does the @emph{work} of the xmethod.  The
 @var{args} arguments is the tuple of arguments to the xmethod.  Each
@@ -2566,6 +2578,9 @@ above is as follows:
 class MyClassWorker_geta(gdb.xmethod.XMethodWorker):
     def get_arg_types(self):
         return None
+
+    def get_result_type(self, obj):
+        return gdb.lookup_type('int')
  
     def __call__(self, obj):
         return obj['a_']
@@ -2574,6 +2589,9 @@ class MyClassWorker_geta(gdb.xmethod.XMethodWorker):
 class MyClassWorker_plus(gdb.xmethod.XMethodWorker):
     def get_arg_types(self):
         return gdb.lookup_type('MyClass')
+
+    def get_result_type(self, obj):
+        return gdb.lookup_type('int')
  
     def __call__(self, obj, other):
         return obj['a_'] + other['a_']
@@ -2637,10 +2655,13 @@ of the xmethod workers and xmethod matchers is as follows:
 class MyTemplateWorker_footprint(gdb.xmethod.XMethodWorker):
     def __init__(self, class_type):
         self.class_type = class_type
- 
+
     def get_arg_types(self):
         return None
- 
+
+    def get_result_type(self):
+        return gdb.lookup_type('int')
+
     def __call__(self, obj):
         return (self.class_type.sizeof +
                 obj['dsize_'] *

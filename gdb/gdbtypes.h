@@ -915,8 +915,8 @@ struct cplus_struct_type
   {
     /* * Number of base classes this type derives from.  The
        baseclasses are stored in the first N_BASECLASSES fields
-       (i.e. the `fields' field of the struct type).  I think only the
-       `type' field of such a field has any meaning.  */
+       (i.e. the `fields' field of the struct type).  The only fields
+       of struct field that are used are: type, name, loc.bitpos.  */
 
     short n_baseclasses;
 
@@ -1791,7 +1791,9 @@ extern void get_signed_type_minmax (struct type *, LONGEST *, LONGEST *);
    ADDR specifies the location of the variable the type is bound to.
    If TYPE has no dynamic properties return TYPE; otherwise a new type with
    static properties is returned.  */
-extern struct type *resolve_dynamic_type (struct type *type, CORE_ADDR addr);
+extern struct type *resolve_dynamic_type (struct type *type,
+					  const gdb_byte *valaddr,
+					  CORE_ADDR addr);
 
 /* * Predicate if the type has dynamic values, which are not resolved yet.  */
 extern int is_dynamic_type (struct type *type);

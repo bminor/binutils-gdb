@@ -1696,6 +1696,9 @@ init_page_info (void)
 #endif
     }
 
+  /* We handle SIGWINCH ourselves.  */
+  rl_catch_sigwinch = 0;
+
   set_screen_size ();
   set_width ();
 }
@@ -1793,6 +1796,18 @@ static void
 set_height_command (char *args, int from_tty, struct cmd_list_element *c)
 {
   set_screen_size ();
+}
+
+/* See utils.h.  */
+
+void
+set_screen_width_and_height (int width, int height)
+{
+  lines_per_page = height;
+  chars_per_line = width;
+
+  set_screen_size ();
+  set_width ();
 }
 
 /* Wait, so the user can read what's on the screen.  Prompt the user
@@ -2699,8 +2714,6 @@ Setting this to \"unlimited\" or zero causes GDB never pause during output."),
 			    set_height_command,
 			    show_lines_per_page,
 			    &setlist, &showlist);
-
-  init_page_info ();
 
   add_setshow_boolean_cmd ("pagination", class_support,
 			   &pagination_enabled, _("\

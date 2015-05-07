@@ -1,3 +1,128 @@
+2015-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (elf_symbol_resolved_in_segment_p): New.
+	(md_estimate_size_before_relax): Use it.
+
+2015-05-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c: Typo in comment fixed.
+
+2015-05-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Support the %ncc "natural"
+	condition codes
+	* doc/c-sparc.texi (Sparc-Regs): Document %ncc.
+
+2015-05-06  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Dollar Local Labels): Note that these are only
+	supported on some targets.
+
+2015-05-06  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (mapping_state): Recording alignment before exit.
+
+2015-05-05  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (aarch64_init_frag): Always generate mapping
+	symbols.
+
+2015-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (MAX_OP_LEN): Increase to 4096.
+	(msp430_make_init_symbols): New function.
+	(msp430_section): Call it.
+	(msp430_frob_section): Likewise.
+
+2015-05-02  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (cached_fixupS, fixup_cacheS): New typedefs.
+	(struct cached_fixup, struct fixup_cache): New structures.
+	(fixup_order, xtensa_make_cached_fixup),
+	(xtensa_realloc_fixup_cache, xtensa_cache_relaxable_fixups),
+	(xtensa_find_first_cached_fixup, xtensa_delete_cached_fixup),
+	(xtensa_add_cached_fixup): New functions.
+	(xtensa_relax_frag): Cache fixups pointing at potentially
+	oversized jumps at the beginning of every relaxation pass. Only
+	check subset of this cache in the reach of single jump from the
+	trampoline frag currently being relaxed.
+
+2015-05-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/rl78-parse.y (MULU): Remove ISA_G14.
+	(MULH, DIVHU, DIVWU, MACHI, MACH): Update error strings.
+
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_elf_emit_arch_note): Removed.
+	* config/tc-i386.h (md_end): Likewise.
+	(i386_elf_emit_arch_note): Likewise.
+
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt: Support i386-*-elf*.
+
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-defs.h (rl78_isa_g10): New.
+	(rl78_isa_g13): New.
+	(rl78_isa_g14): New.
+	* config/rl78-parse.y (ISA_G10): New.
+	(ISA_G13): New.
+	(ISA_G14): New.
+	(MULHU, MULH, MULU, DIVHU, DIVWU, MACHU, MACH): Use them.
+	* config/tc-rl78.c (rl78_isa_g10): New.
+	(rl78_isa_g13): New.
+	(rl78_isa_g14): New.
+
+2015-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_target_format): Use "else if" on
+	cpu_arch_isa.
+
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18347
+	* config/tc-arm.c (md_undefined_symbol): Issue a warning message
+	(if enabled) when the user creates a symbol with the same name as
+	an ARM instruction.
+	(flag_warn_syms): New static variable.
+	(arm_opts): Add mwarn-syms and mno-warn-syms.
+	* doc/c-arm.texi (ARM Options): Document the -m[no-]warn-syms
+	options.
+
+	PR gas/18353
+	* doc/as.texinfo (Zero): Add documentation of the .zero pseudo-op.
+
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 18256
+	* config/tc-arm.c (encode_arm_cp_address): Issue an error message
+	if the operand is neither a register nor a vector.
+
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Set): Note that a symbol cannot be set multiple
+	times if the expression is not constant and the target uses linker
+	relaxation.
+
+2015-04-28  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (arm_init_frag): Always emit mapping symbols.
+
+2015-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 18313
+	* cond.c (s_if): Stop compile time warning about stopc being used
+	before it is set.
+	(s_ifc): Likewise.
+
+2015-04-27  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (s_aarch64_inst): Don't align code for non-text
+	section.
+	(md_assemble): Likewise, move the align code outside the loop.
+
 2015-04-24  Jim Wilson  <jim.wilson@linaro.org>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add CRC and CRYPTO features

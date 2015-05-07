@@ -385,7 +385,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_rl78
     case bfd_arch_rl78:
-      disassemble = print_insn_rl78;
+      disassemble = rl78_get_disassembler (abfd);
       break;
 #endif
 #ifdef ARCH_rx

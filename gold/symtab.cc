@@ -585,7 +585,7 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 }
 
 bool
-Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
+Symbol_table::is_section_folded(Relobj* obj, unsigned int shndx) const
 {
   return (parameters->options().icf_enabled()
           && this->icf_->is_section_folded(obj, shndx));
@@ -650,10 +650,11 @@ Symbol_table::gc_mark_symbol(Symbol* sym)
   // Add the object and section to the work list.
   bool is_ordinary;
   unsigned int shndx = sym->shndx(&is_ordinary);
-  if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
+  if (is_ordinary && shndx != elfcpp::SHN_UNDEF && !sym->object()->is_dynamic())
     {
       gold_assert(this->gc_!= NULL);
-      this->gc_->worklist().push_back(Section_id(sym->object(), shndx));
+      Relobj* relobj = static_cast<Relobj*>(sym->object());
+      this->gc_->worklist().push_back(Section_id(relobj, shndx));
     }
   parameters->target().gc_mark_symbol(this, sym);
 }

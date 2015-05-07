@@ -2,7 +2,6 @@
 	     (Organized release by release)
 
 *** Changes since GDB 7.9
-=======
 
 * GDB now honors the content of the file /proc/PID/coredump_filter
   (PID is the process ID) on GNU/Linux systems.  This file can be used
@@ -24,6 +23,9 @@
   present in the debug info.  This typically includes the compiler version
   and may include things like its command line arguments.
 
+* The "info dll", an alias of the "info sharedlibrary" command,
+  is now available on all platforms.
+
 * Directory names supplied to the "set sysroot" commands may be
   prefixed with "target:" to tell GDB to access shared libraries from
   the target system, be it local or remote.  This replaces the prefix
@@ -44,12 +46,17 @@
 
 * The "dump" command now supports verilog hex format.
 
+* GDB now supports the vector ABI on S/390 GNU/Linux targets.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",
      which is the name of the objfile as specified by the user,
      without, for example, resolving symlinks.
   ** You can now write frame unwinders in Python.
+  ** gdb.Type objects have a new method "optimized_out",
+     returning optimized out gdb.Value instance of this type.
+  ** Xmethods can now specify a result type.
 
 * New commands
 

@@ -227,9 +227,7 @@ _initialize_amd64fbsd_nat (void)
   t->to_mourn_inferior = amd64fbsd_mourn_inferior;
   t->to_read_description = amd64fbsd_read_description;
 
-  t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
-  t->to_find_memory_regions = fbsd_find_memory_regions;
-  add_target (t);
+  fbsd_nat_add_target (t);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (amd64fbsd_supply_pcb);

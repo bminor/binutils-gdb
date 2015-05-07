@@ -91,5 +91,10 @@ proc test_regular_watch {} {
     }
 }
 
+# Disable hardware watchpoints if the target does not support them.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test_no_output "set can-use-hw-watchpoints 0"
+}
+
 test_watch_location
 test_regular_watch

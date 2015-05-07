@@ -3,7 +3,7 @@
 # This called by genscripts_extra.sh
 
 SCRIPT_NAME=elf32msp430
-TEMPLATE_NAME=generic
+TEMPLATE_NAME=msp430
 EXTRA_EM_FILE=genelf
 OUTPUT_FORMAT="elf32-msp430"
 MACHINE=

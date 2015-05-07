@@ -465,15 +465,20 @@ bold-standout   use extra bright or bold with standout mode"),
 void
 tui_update_gdb_sizes (void)
 {
-  char cmd[50];
+  int width, height;
 
-  /* Set to TUI command window dimension or use readline values.  */
-  xsnprintf (cmd, sizeof (cmd), "set width %d",
-           tui_active ? TUI_CMD_WIN->generic.width : tui_term_width());
-  execute_command (cmd, 0);
-  xsnprintf (cmd, sizeof (cmd), "set height %d",
-           tui_active ? TUI_CMD_WIN->generic.height : tui_term_height());
-  execute_command (cmd, 0);
+  if (tui_active)
+    {
+      width = TUI_CMD_WIN->generic.width;
+      height = TUI_CMD_WIN->generic.height;
+    }
+  else
+    {
+      width = tui_term_width ();
+      height = tui_term_height ();
+    }
+
+  set_screen_width_and_height (width, height);
 }
 
 
@@ -831,12 +836,6 @@ static struct async_signal_handler *tui_sigwinch_token;
 static void
 tui_sigwinch_handler (int signal)
 {
-  /* Set win_resized to TRUE and asynchronously invoke our resize callback.  If
-     the callback is invoked while TUI is active then it ought to successfully
-     resize the screen, resetting win_resized to FALSE.  Of course, if the
-     callback is invoked while TUI is inactive then it will do nothing; in that
-     case, win_resized will remain TRUE until we get a chance to synchronously
-     resize the screen from tui_enable().  */
   mark_async_signal_handler (tui_sigwinch_token);
   tui_set_win_resized_to (TRUE);
 }
@@ -845,15 +844,26 @@ tui_sigwinch_handler (int signal)
 static void
 tui_async_resize_screen (gdb_client_data arg)
 {
-  if (!tui_active)
-    return;
-
   rl_resize_terminal ();
-  tui_resize_all ();
-  tui_refresh_all_win ();
-  tui_update_gdb_sizes ();
-  tui_set_win_resized_to (FALSE);
-  tui_redisplay_readline ();
+
+  if (!tui_active)
+    {
+      int screen_height, screen_width;
+
+      rl_get_screen_size (&screen_height, &screen_width);
+      set_screen_width_and_height (screen_width, screen_height);
+
+      /* win_resized is left set so that the next call to tui_enable()
+	 resizes the TUI windows.  */
+    }
+  else
+    {
+      tui_resize_all ();
+      tui_refresh_all_win ();
+      tui_update_gdb_sizes ();
+      tui_set_win_resized_to (FALSE);
+      tui_redisplay_readline ();
+    }
 }
 #endif
 

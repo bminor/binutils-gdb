@@ -1056,9 +1056,9 @@ class Sized_target : public Target
   // and DST_OFF.
   void
   gc_add_reference(Symbol_table* symtab,
-		   Object* src_obj,
+		   Relobj* src_obj,
 		   unsigned int src_shndx,
-		   Object* dst_obj,
+		   Relobj* dst_obj,
 		   unsigned int dst_shndx,
 		   typename elfcpp::Elf_types<size>::Elf_Addr dst_off) const
   {
@@ -1080,8 +1080,8 @@ class Sized_target : public Target
 
   // Handle target specific gc actions when adding a gc reference.
   virtual void
-  do_gc_add_reference(Symbol_table*, Object*, unsigned int,
-		      Object*, unsigned int,
+  do_gc_add_reference(Symbol_table*, Relobj*, unsigned int,
+		      Relobj*, unsigned int,
 		      typename elfcpp::Elf_types<size>::Elf_Addr) const
   { }
 

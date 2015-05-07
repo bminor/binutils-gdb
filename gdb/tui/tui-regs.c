@@ -171,7 +171,7 @@ tui_show_registers (struct reggroup *group)
 
 	  data_item_win = &display_info->regs_content[i]
             ->which_element.data_window;
-          win = (struct tui_win_element *) data_item_win->content[0];
+          win = data_item_win->content[0];
           win->which_element.data.highlight = FALSE;
 	}
       display_info->current_group = group;
@@ -274,8 +274,7 @@ tui_show_register_group (struct reggroup *group,
 
 	  data_item_win =
             &display_info->regs_content[pos]->which_element.data_window;
-          data = &((struct tui_win_element *)
-		   data_item_win->content[0])->which_element.data;
+          data = &data_item_win->content[0]->which_element.data;
           if (data)
             {
               if (!refresh_values_only)
@@ -322,8 +321,7 @@ tui_display_registers_from (int start_element_no)
 
           data_item_win
 	    = &display_info->regs_content[i]->which_element.data_window;
-          data = &((struct tui_win_element *)
-                   data_item_win->content[0])->which_element.data;
+          data = &data_item_win->content[0]->which_element.data;
           len = 0;
           p = data->content;
           if (p != 0)
@@ -365,8 +363,7 @@ tui_display_registers_from (int start_element_no)
 	      /* Create the window if necessary.  */
 	      data_item_win = &display_info->regs_content[i]
                 ->which_element.data_window;
-	      data_element_ptr = &((struct tui_win_element *)
-				   data_item_win->content[0])->which_element.data;
+	      data_element_ptr = &data_item_win->content[0]->which_element.data;
               if (data_item_win->handle != (WINDOW*) NULL
                   && (data_item_win->height != 1
                       || data_item_win->width != item_win_width
@@ -508,8 +505,7 @@ tui_check_register_values (struct frame_info *frame)
 
 	      data_item_win_ptr = &display_info->regs_content[i]->
                 which_element.data_window;
-	      data = &((struct tui_win_element *)
-                       data_item_win_ptr->content[0])->which_element.data;
+	      data = &data_item_win_ptr->content[0]->which_element.data;
 	      was_hilighted = data->highlight;
 
               tui_get_register (frame, data,

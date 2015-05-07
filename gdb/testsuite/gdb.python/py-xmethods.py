@@ -60,6 +60,9 @@ class E_method_char_worker(XMethodWorker):
     def get_arg_types(self):
         return gdb.lookup_type('char')
 
+    def get_result_type(self, obj, arg):
+        return gdb.lookup_type('void')
+
     def __call__(self, obj, arg):
         print('From Python <E_method_char>')
         return None
@@ -71,6 +74,8 @@ class E_method_int_worker(XMethodWorker):
 
     def get_arg_types(self):
         return gdb.lookup_type('int')
+
+    # Note: get_result_type method elided on purpose
 
     def __call__(self, obj, arg):
         print('From Python <E_method_int>')

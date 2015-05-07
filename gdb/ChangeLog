@@ -1,3 +1,375 @@
+2015-05-07  Gary Benson <gbenson@redhat.com>
+
+	* linux-thread-db.c (struct thread_db_info)
+	<td_ta_map_id2thr_p>: Remove field.
+	(try_thread_db_load_1): Remove initialization for the above.
+
+2015-05-07  Gary Benson <gbenson@redhat.com>
+
+	* linux-thread-db.c (struct thread_db_info)
+	<td_thr_validate_p>: Remove field.
+	(try_thread_db_load_1): Remove initialization for the above.
+
+2015-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile-object-load.c (compile_object_load): Support
+	mst_text_gnu_ifunc.
+
+2015-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile.c (compile_to_object): Make the cmd_string parameter
+	const.  Use new variables for the const compatibility.
+	(eval_compile_command): Make the cmd_string parameter const.
+	* compile/compile.h (eval_compile_command): Make the cmd_string
+	parameter const.
+
+2015-05-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* defs.h (deprecated_init_ui_hook): Delete.  Remove associated
+	comment.
+	* top.c (deprecated_init_ui_hook): Delete.
+	(gdb_init): Remove handling of deprecated_init_ui_hook.
+	* interps.c (clear_interpreter_hooks): Remove handling of
+	deprecated_init_ui_hook.
+	* main.c (captured_main): Update comment.
+
+2015-05-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib.c (_initialize_solib): Add "info dll" alias creation.
+	* windows-nat.c (set_windows_aliases): Delete.
+	(_initialize_windows_nat): Remove deprecated_init_ui_hook
+	assignment.
+	* NEWS: Add news entry about "info dll" now being available
+	on all platforms.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (value_assign_to_component): Reformat and improve
+	documentation. Remove all trailing spaces.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* inline-frame.c (inline_frame_sniffer, skip_inline_frames):
+	Stop counting inlined frames as soon as an out-of-line function
+	is found.
+
+2014-05-05  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* dwarf2read.c (inherit_abstract_dies): Skip
+	DW_TAG_GNU_call_site dies while inheriting children of an
+	abstract DIE into a scope.
+	(read_lexical_block_scope): Inherit abstract DIE's for
+	lexical scopes.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (val_print_packed_array_elements): Delete
+	variable "len".  Add a type-length check when comparing two
+	consecutive elements of the array.  Use the element's actual
+	length in call to value_contents_eq.
+	* ada-lang.c (ada_value_primitive_packed_val): Always return
+	a value whose type has been resolved.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Recompute
+	BIT_SIZE and LEN if the size of the resolved type is smaller
+	than BIT_SIZE * HOST_CHAR_BIT.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Use a more
+	correct address in call to value_at.  Adjust call to
+	value_address accordingly.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (ada_val_print_1): Resolve TYPE before trying
+	to print it.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2loc.h (struct property_addr_info): Add "valaddr" field.
+	* dwarf2loc.c (dwarf2_evaluate_property): Add handling of
+	pinfo->valaddr.
+	* gdbtypes.h (resolve_dynamic_type): Add "valaddr" parameter.
+	* gdbtypes.c (resolve_dynamic_struct): Set pinfo.valaddr.
+	(resolve_dynamic_type_internal): Set pinfo.valaddr.
+	Add handling of addr_stack->valaddr.
+	(resolve_dynamic_type): Add "valaddr" parameter.
+	Set pinfo.valaddr field.
+	* ada-lang.c (ada_discrete_type_high_bound): Update call to
+	resolve_dynamic_type.
+	(ada_discrete_type_low_bound): Likewise.
+	* findvar.c (default_read_var_value): Likewise.
+	* value.c (value_from_contents_and_address): Likewise.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (resolve_dynamic_array): Use
+	create_array_type_with_stride instead of create_array_type.
+
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* rl78-tdep.c (rl78_analyze_prologue): Pass RL78_ISA_DEFAULT to
+	rl78_decode_opcode
+
+2015-04-29  Doug Evans  <dje@google.com>
+
+	PR python/18285
+	* NEWS: Document new gdb.XMethodWorker.get_result_type method.
+	* eval.c (evaluate_subexp_standard) <OP_FUNCALL>: Handle
+	EVAL_AVOID_SIDE_EFFECTS for xmethods.
+	* extension-priv.h (struct extension_language_ops)
+	<get_xmethod_result_type>: New member.
+	* extension.c (get_xmethod_result_type): New function.
+	* extension.h (get_xmethod_result_type): Declare.
+	* python/py-xmethods.c (get_result_type_method_name): New static
+	global.
+	(py_get_result_type_method_name): Ditto.
+	(gdbpy_get_xmethod_result_type): New function.
+	(gdbpy_initialize_xmethods): Initialize py_get_result_type_method_name.
+	* python/python-internal.h (gdbpy_get_xmethod_result_type): Declare.
+	* python/python.c (python_extension_ops): Add
+	gdbpy_get_xmethod_result_type.
+	* python/lib/gdb/xmethod.py (XMethodWorker): Add get_result_type.
+	* valarith.c (value_x_binop): Handle EVAL_AVOID_SIDE_EFFECTS for
+	xmethods.
+	(value_x_unop): Ditto.
+	* value.c (result_type_of_xmethod): New function.
+	* value.h (result_type_of_xmethod): Declare.
+
+2015-04-29  Gary Benson <gbenson@redhat.com>
+
+	* solib.c (solib_find_1): Allow fd argument to be NULL.
+	(exec_file_find): Update comment.
+	(solib_find): Likewise.
+	* exec.c (exec_file_locate_attach): Use NULL as fd
+	argument to exec_file_find to avoid having to close
+	the opened file.
+	* infrun.c (follow_exec): Likewise.
+
+2015-04-28  Doug Evans  <dje@google.com>
+
+	PR python/18299
+	* python/lib/gdb/printing.py (register_pretty_printer): Handle
+	name or __name__ attributes.  Handle gdb module as first argument.
+
+2015-04-28  Doug Evans  <dje@google.com>
+
+	PR python/18089
+	* python/py-prettyprint.c (print_children): Verify result of children
+	iterator.  Provide better error message.
+	* python/python-internal..h (gdbpy_print_python_errors_p): Declare.
+	* python/python.c (gdbpy_print_python_errors_p): New function.
+
+2015-04-28  Doug Evans  <dje@google.com>
+
+	* gdbtypes.h (struct cplus_struct_type) <n_baseclasses>: Fix comment.
+
+2015-04-28  Sasha Smundak  <asmundak@google.com>
+
+	* NEWS: Mention gdb.Type.optimized_out method.
+	* python/py-type.c (typy_optimized_out):  New function.
+
+2015-04-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c: Include "gdb_wait.h" instead of <sys/wait.h>.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* utils.c (init_page_info): Set rl_catch_sigwinch to zero.
+	(initialize_utils): Move call of init_page_info() to ...
+	* top.c (gdb_init): ... here.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (tui_sigwinch_handler): Remove now-stale comment.
+	(tui_sigwinch_handler): Still update our idea of
+	the terminal's width and height even when TUI is not active.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* utils.h (set_screen_width_and_height): Declare.
+	* utils.c (set_screen_width_and_height): Define.
+	* tui/tui-win.c (tui_update_gdb_sizes): Use it.
+
+2015-04-28  Gary Benson <gbenson@redhat.com>
+
+	* infrun.c (solist.h): New include.
+	(follow_exec): Use exec_file_find to prefix execd_pathname
+	with gdb_sysroot.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-source.c (tui_set_source_content): Avoid calling
+	strcpy() when offset is 0.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/18155
+	* tui/tui-data.c (tui_free_window): Don't free the locator
+	window when passed an SRC_WIN or a DISASSEM_WIN.
+
+2015-04-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-data.h (struct tui_win_element): Forward-declare.
+	(tui_win_content): Move declaration.
+	(struct tui_gen_win_info): Give 'content' field the
+	type tui_win_content.
+	* tui/tui-data.c (init_content_element): Remove redundant and
+	erroneous casts.
+	(tui_add_content_elements): Remove erroneous cast.
+	* tui/tui-disasm.c (tui_set_disassem_content): Remove redundant
+	casts.
+	(tui_get_begin_asm_address): Likewise.
+	* tui/tui-regs.c (tui_show_registers): Likewise.
+	(tui_show_register_group): Likewise.
+	(tui_display_registers_from): Likewise.
+	(tui_check_register_values): Likewise.
+	* tui/tui-source.c (tui_set_source_content): Likewise.
+	(tui_set_source_content_nil): Likewise.
+	(tui_source_is_displayed): Likewise.
+	* tui/tui-stack.c (tui_show_locator_content): Likewise.
+	(tui_set_locator_fullname): Likewise.
+	(tui_set_locator_info): Likewise.
+	(tui_show_frame_info): Likewise.
+	* tui/tui-winsource.c (tui_clear_source_content): Likewise.
+	(tui_show_source_line): Likewise.
+	(tui_horizontal_source_scroll): Likewise.
+	(tui_update_breakpoint_info): Likewise.
+	(tui_set_exec_info_content): Likewise.
+	(tui_show_exec_info_content): Likewise.
+	(tui_alloc_source_buffer): Likewise.
+	(tui_line_is_displayed): Likewise.
+	(tui_addr_is_displayed): Likewise.
+
+2015-04-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c: (fbsd_wait) [PL_FLAG_EXEC]: Report TARGET_WAITKIND_EXECD
+	event if PL_FLAG_EXEC is set.
+	[PL_FLAG_EXEC] (fbsd_insert_exec_catchpoint): New function.
+	[PL_FLAG_EXEC] (fbsd_remove_exec_catchpoint): New function.
+	(fbsd_nat_add_target) [PL_FLAG_EXEC]: Set
+	"to_insert_exec_catchpoint" to "fbsd_insert_exec_catchpoint".
+	Set "to_remove_exec_catchpoint" to "fbsd_remove_exec_catchpoint".
+
+2015-04-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c: [PT_LWPINFO] New variable super_wait.
+	[TDP_RFPPWAIT] New variable fbsd_pending_children.
+	[TDP_RFPPWAIT] (fbsd_remember_child): New function.
+	[TDP_RFPPWAIT] (fbsd_is_child_pending): New function.
+	[TDP_RFPPWAIT] (fbsd_fetch_kinfo_proc): New function.
+	[PT_LWPINFO] (fbsd_wait): New function.
+	[TDP_RFPPWAIT] (fbsd_follow_fork): New function.
+	[TDP_RFPPWAIT] (fbsd_insert_fork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_remove_fork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_insert_vfork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_remove_vfork_catchpoint): New function.
+	[TDP_RFPPWAIT] (fbsd_enable_follow_fork): New function.
+	[TDP_RFPPWAIT] (fbsd_post_startup_inferior): New function.
+	[TDP_RFPPWAIT] (fbsd_post_attach): New function.
+	(fbsd_nat_add_target) [PT_LWPINFO] Set "to_wait" to
+	"fbsd_wait".
+	[TDP_RFPPWAIT] Set "to_follow_fork" to "fbsd_follow_fork".
+	Set "to_insert_fork_catchpoint" to "fbsd_insert_fork_catchpoint".
+	Set "to_remove_fork_catchpoint" to "fbsd_remove_fork_catchpoint".
+	Set "to_insert_vfork_catchpoint" to "fbsd_insert_vfork_catchpoint".
+	Set "to_remove_vfork_catchpoint" to "fbsd_remove_vfork_catchpoint".
+	Set "to_post_startup_inferior" to "fbsd_post_startup_inferior".
+	Set "to_post_attach" to "fbsd_post_attach".
+
+2015-04-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Mark static.
+	(fbsd_find_memory_regions): Mark static.
+	(fbsd_nat_add_target): New function.
+	* fbsd-nat.h: Export fbsd_nat_add_target and remove prototypes for
+	fbsd_pid_to_exec_file and fbsd_find_memory_regions.
+	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): Use fbsd_nat_add_target.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Likewise.
+	* ppcfbsd-nat.c (_initialize_ppcfbsd_nat): Likewise.
+	* sparc64fbsd-nat.c (_initialize_sparc64fbsd_nat): Likewise.
+
+2015-04-27  Gary Benson <gbenson@redhat.com>
+
+	* objfiles.c (allocate_objfile): Do not attempt to expand name
+	if name is a "target:" filename.
+	* auto-load.c (load_auto_scripts_for_objfile): Do not attempt
+	to load auto-load scripts for objfiles with "target:" filenames.
+
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c: Include "elf/s390.h" and "elf-bfd.h".
+	(enum s390_vector_abi_kind): New enum.
+	(struct gdbarch_tdep)<vector_abi>: New field.
+	(s390_effective_inner_type): Add parameter min_size.  Stop
+	unwrapping if the inner type is smaller than min_size.
+	(s390_function_arg_float): Adjust call to
+	s390_effective_inner_type.
+	(s390_function_arg_vector): New function.
+	(s390_function_arg_integer): Adjust comment.
+	(struct s390_arg_state)<vr>: New field.
+	(s390_handle_arg): Add parameter 'is_unnamed'.  Pass vector
+	arguments according to vector ABI when appropriate.
+	(s390_push_dummy_call): Initialize the argument state's field
+	'vr'.  Adjust calls to s390_handle_arg.
+	(s390_register_return_value): Handle vector return values.
+	(s390_return_value): Apply the "register" return value convention
+	to a vector when appropriate.
+	(s390_gdbarch_init): Initialize tdep->vector_abi.
+	* NEWS: Announce S390 vector ABI support.
+
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_return_value_convention): Remove
+	function.  Inline its logic...
+	(s390_return_value): ...here.  Instead, move the handling of the
+	"register" return value convention...
+	(s390_register_return_value): ...here.  New function.
+
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c
+	(is_float_singleton): Remove function.  Move the "singleton" part
+	of the logic...
+	(s390_effective_inner_type): ...here.  New function.
+	(is_float_like): Remove function.  Inline its logic...
+	(s390_function_arg_float): ...here.
+	(is_pointer_like, is_integer_like, is_struct_like): Remove
+	functions.  Inline their logic...
+	(s390_function_arg_integer): ...here.
+	(s390_function_arg_pass_by_reference): Remove function.
+	(extend_simple_arg): Remove function.
+	(alignment_of): Remove function.
+	(struct s390_arg_state): New structure.
+	(s390_handle_arg): New function.
+	(s390_push_dummy_call): Move parameter placement logic to the new
+	function s390_handle_arg.  Call it for calculating the stack area
+	sizes first, and again for actually writing the parameters.
+
+2015-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (is_power_of_two): Add comment.  Return
+	  false if the argument is zero.
+
+2015-04-27  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (template_to_static_fixed_type): Return input type
+	when it is already fixed.  Cache the input type itself when not
+	creating a static fixed copy.  Make it explicit that we never
+	molestate the input type.
+	* gdbtypes.c (resolve_dynamic_struct): Reset the
+	TYPE_TARGET_TYPE field for resolved copies.
+
+2015-04-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_is_tagged_type): Add call to ada_check_typedef.
+	(ada_lookup_struct_elt_type): Remove calls to ada_check_typedef.
+	(template_to_static_fixed_type): Call ada_check_typedef only
+	when necessary.
+
 2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli/cli-dump.c (srec_dump_command): Add internationalization

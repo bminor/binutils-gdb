@@ -284,6 +284,8 @@ start_inferior (char **argv)
       current_thread->last_resume_kind = resume_stop;
       current_thread->last_status = last_status;
     }
+  else
+    mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
 
   return signal_pid;
 }

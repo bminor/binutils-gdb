@@ -1,3 +1,81 @@
+2015-05-06  Pedro Alves  <palves@redhat.com>
+
+	PR server/18081
+	* gdb.server/non-existing-program.exp: New file.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/out_of_line_in_inlined.exp: Add run and "bt" tests.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/out_of_line_in_inlined: New testcase.
+
+2015-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/var_rec_arr: New testcase.
+
+2015-04-30  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/break-idempotent.exp: If
+	skip_hw_watchpoint_multi_tests returns true, skip the tests
+	on "rwatch" and "awatch".
+
+2015-04-30  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/relativedebug.exp: Invoke gdb command
+	"info sharedlibrary", and if libc.so doesn't have debug info,
+	skip the test.
+
+2015-04-29  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-xmethods.exp: Add ptype tests.
+	* gdb.python/py-xmethods.py (E_method_char_worker): Add
+	get_result_type method.
+
+2015-04-29  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/watch-bitfields.exp: Switch to software watchpoints if
+	the target does not support hardware watchpoints.
+
+2015-04-29  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/break-always.exp: Abort testing if writing to memory
+	causes an error.
+
+2015-04-28  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-pp-maint.py: Move "replace" testing to ...
+	* gdb.python/py-pp-registration.exp: ... here.  New file.
+	* gdb.python/py-pp-registration.c: New file.
+	* gdb.python/py-pp-registration.py: New file.
+
+2015-04-28  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-bad-printers.c: New file.
+	* gdb.python/py-bad-printers.py: New file.
+	* gdb.python/py-bad-printers.exp: New file.
+
+2015-04-28  Sasha Smundak  <asmundak@google.com>
+
+	* gdb.python/py-type.exp: New test.
+
+2015-04-28  Andy Wingo  <wingo@igalia.com>
+
+	* gdb.python/py-parameter.exp:
+	* gdb.guile/scm-parameter.exp: Escape the path that we are
+	matching against, as it might contain characters that are special
+	to regular expressions.
+
+2015-04-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/rec_comp: New testcase.
+
+2015-04-26  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/coredump-filter.exp: Clear variable "coredump_var_addr"
+	before using it.
+
 2015-04-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/dump.exp: Add *.verilog files to all_files list.  Add

@@ -212,7 +212,7 @@ public:
   // Add a reference from SRC_OBJ, SRC_INDX to this object's .opd
   // section at DST_OFF.
   void
-  add_reference(Object* src_obj,
+  add_reference(Relobj* src_obj,
 		unsigned int src_indx,
 		typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
   {
@@ -780,9 +780,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
   // section of a function descriptor.
   void
   do_gc_add_reference(Symbol_table* symtab,
-		      Object* src_obj,
+		      Relobj* src_obj,
 		      unsigned int src_shndx,
-		      Object* dst_obj,
+		      Relobj* dst_obj,
 		      unsigned int dst_shndx,
 		      Address dst_off) const;
 
@@ -6347,7 +6347,7 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
 	  typename Powerpc_relobj<size, big_endian>::Section_refs::iterator s;
 	  for (s = p->second.begin(); s != p->second.end(); ++s)
 	    {
-	      Object* src_obj = s->first;
+	      Relobj* src_obj = s->first;
 	      unsigned int src_indx = s->second;
 	      symtab->gc()->add_reference(src_obj, src_indx,
 					  ppc_object, dst_indx);
@@ -6384,9 +6384,9 @@ template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::do_gc_add_reference(
     Symbol_table* symtab,
-    Object* src_obj,
+    Relobj* src_obj,
     unsigned int src_shndx,
-    Object* dst_obj,
+    Relobj* dst_obj,
     unsigned int dst_shndx,
     Address dst_off) const
 {
@@ -6835,9 +6835,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  && !parameters->options().output_is_position_independent()
 	  && !is_branch_reloc(r_type))
 	{
-	  unsigned int off = target->glink_section()->find_global_entry(gsym);
-	  gold_assert(off != (unsigned int)-1);
-	  value = target->glink_section()->global_entry_address() + off;
+	  Address off = target->glink_section()->find_global_entry(gsym);
+	  if (off != invalid_address)
+	    {
+	      value = target->glink_section()->global_entry_address() + off;
+	      has_stub_value = true;
+	    }
 	}
       else
 	{
@@ -6849,18 +6852,26 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      if (target->stub_tables().size() != 0)
 		stub_table = target->stub_tables()[0];
 	    }
-	  gold_assert(stub_table != NULL);
-	  Address off;
-	  if (gsym != NULL)
-	    off = stub_table->find_plt_call_entry(object, gsym, r_type,
-						  rela.get_r_addend());
-	  else
-	    off = stub_table->find_plt_call_entry(object, r_sym, r_type,
-						  rela.get_r_addend());
-	  gold_assert(off != invalid_address);
-	  value = stub_table->stub_address() + off;
+	  if (stub_table != NULL)
+	    {
+	      Address off;
+	      if (gsym != NULL)
+		off = stub_table->find_plt_call_entry(object, gsym, r_type,
+						      rela.get_r_addend());
+	      else
+		off = stub_table->find_plt_call_entry(object, r_sym, r_type,
+						      rela.get_r_addend());
+	      if (off != invalid_address)
+		{
+		  value = stub_table->stub_address() + off;
+		  has_stub_value = true;
+		}
+	    }
 	}
-      has_stub_value = true;
+      // We don't care too much about bogus debug references to
+      // non-local functions, but otherwise there had better be a plt
+      // call stub or global entry stub as appropriate.
+      gold_assert(has_stub_value || !(os->flags() & elfcpp::SHF_ALLOC));
     }
 
   if (r_type == elfcpp::R_POWERPC_GOT16
@@ -8229,8 +8240,8 @@ Target_powerpc<size, big_endian>::do_dynsym_value(const Symbol* gsym) const
     }
   else if (this->abiversion() >= 2)
     {
-      unsigned int off = this->glink_section()->find_global_entry(gsym);
-      if (off != (unsigned int)-1)
+      Address off = this->glink_section()->find_global_entry(gsym);
+      if (off != invalid_address)
 	return this->glink_section()->global_entry_address() + off;
     }
   gold_unreachable();
@@ -8279,8 +8290,8 @@ Target_powerpc<size, big_endian>::do_plt_address_for_global(
     }
   else if (this->abiversion() >= 2)
     {
-      unsigned int off = this->glink_section()->find_global_entry(gsym);
-      if (off != (unsigned int)-1)
+      Address off = this->glink_section()->find_global_entry(gsym);
+      if (off != invalid_address)
 	return this->glink_section()->global_entry_address() + off;
     }
   gold_unreachable();

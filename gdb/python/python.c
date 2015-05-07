@@ -192,6 +192,7 @@ const struct extension_language_ops python_extension_ops =
   gdbpy_free_xmethod_worker_data,
   gdbpy_get_matching_xmethod_workers,
   gdbpy_get_xmethod_arg_types,
+  gdbpy_get_xmethod_result_type,
   gdbpy_invoke_xmethod
 };
 
@@ -1180,6 +1181,14 @@ gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
     }
 
   Py_RETURN_NONE;
+}
+
+/* Return non-zero if print-stack is not "none".  */
+
+int
+gdbpy_print_python_errors_p (void)
+{
+  return gdbpy_should_print_stack != python_excp_none;
 }
 
 /* Print a python exception trace, print just a message, or print

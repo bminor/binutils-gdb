@@ -1,3 +1,8 @@
+2015-05-06  Pedro Alves  <palves@redhat.com>
+
+	PR server/18081
+	* server.c (start_inferior): If the process exits, mourn it.
+
 2015-04-21  Gary Benson <gbenson@redhat.com>
 
 	* hostio.c (fileio_open_flags_to_host): Factored out to

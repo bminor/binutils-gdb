@@ -1731,10 +1731,10 @@ update_section_order(const struct ld_plugin_section* section_list,
     {
       Object* obj = parameters->options().plugins()->get_elf_object(
           section_list[i].handle);
-      if (obj == NULL)
+      if (obj == NULL || obj->is_dynamic())
 	return LDPS_BAD_HANDLE;
       unsigned int shndx = section_list[i].shndx;
-      Section_id secn_id(obj, shndx);
+      Section_id secn_id(static_cast<Relobj*>(obj), shndx);
       (*order_map)[secn_id] = i + 1;
     }
 
@@ -1800,10 +1800,10 @@ unique_segment_for_sections(const char* segment_name,
     {
       Object* obj = parameters->options().plugins()->get_elf_object(
           section_list[i].handle);
-      if (obj == NULL)
+      if (obj == NULL || obj->is_dynamic())
 	return LDPS_BAD_HANDLE;
       unsigned int shndx = section_list[i].shndx;
-      Const_section_id secn_id(obj, shndx);
+      Const_section_id secn_id(static_cast<Relobj*>(obj), shndx);
       layout->insert_section_segment_map(secn_id, s);
     }
 

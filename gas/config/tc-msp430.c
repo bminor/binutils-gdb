@@ -255,7 +255,7 @@ relax_typeS md_relax_table[] =
 };
 
 
-#define MAX_OP_LEN	256
+#define MAX_OP_LEN	4096
 
 typedef enum msp_isa
 {
@@ -840,14 +840,11 @@ md_parse_option (int c, char * arg)
 
    The code which initializes these sections should have a global
    label for these symbols, and should be marked with KEEP() in the
-   linker script.
- */
-static void
-msp430_section (int arg)
-{
-  char * saved_ilp = input_line_pointer;
-  char * name = obj_elf_section_name ();
+   linker script.  */
 
+static void
+msp430_make_init_symbols (const char * name)
+{
   if (strncmp (name, ".bss", 4) == 0
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
@@ -856,6 +853,27 @@ msp430_section (int arg)
       || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_movedata");
 
+  /* Note - data assigned to the .either.data section may end up being
+     placed in the .upper.data section if the .lower.data section is
+     full.  Hence the need to define the crt0 symbol.  */
+  if (strncmp (name, ".either.data", 12) == 0
+      || strncmp (name, ".upper.data", 11) == 0)
+    (void) symbol_find_or_make ("__crt0_move_highdata");
+
+  /* See note about .either.data above.  */
+  if (strncmp (name, ".upper.bss", 10) == 0
+      || strncmp (name, ".either.bss", 11) == 0)
+    (void) symbol_find_or_make ("__crt0_init_highbss");
+}
+
+static void
+msp430_section (int arg)
+{
+  char * saved_ilp = input_line_pointer;
+  char * name = obj_elf_section_name ();
+
+  msp430_make_init_symbols (name);
+    
   input_line_pointer = saved_ilp;
   obj_elf_section (arg);
 }
@@ -868,13 +886,7 @@ msp430_frob_section (asection *sec)
   if (sec->size == 0)
     return;
 
-  if (strncmp (name, ".bss", 4) == 0
-      || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
-    (void) symbol_find_or_make ("__crt0_init_bss");
-
-  if (strncmp (name, ".data", 5) == 0
-      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
-    (void) symbol_find_or_make ("__crt0_movedata");
+  msp430_make_init_symbols (name);
 }
 
 static void

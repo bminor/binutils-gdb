@@ -8772,6 +8772,25 @@ i386_frag_max_var (fragS *frag)
   return TYPE_FROM_RELAX_STATE (frag->fr_subtype) == UNCOND_JUMP ? 4 : 5;
 }
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+static int
+elf_symbol_resolved_in_segment_p (symbolS *fr_symbol)
+{
+  /* STT_GNU_IFUNC symbol must go through PLT.  */
+  if ((symbol_get_bfdsym (fr_symbol)->flags
+       & BSF_GNU_INDIRECT_FUNCTION) != 0)
+    return 0;
+
+  if (!S_IS_EXTERNAL (fr_symbol))
+    /* Symbol may be weak or local.  */
+    return !S_IS_WEAK (fr_symbol);
+
+  /* Global symbols with default visibility in a shared library may be
+     preempted by another definition.  */
+  return ELF_ST_VISIBILITY (S_GET_OTHER (fr_symbol)) != STV_DEFAULT;
+}
+#endif
+
 /* md_estimate_size_before_relax()
 
    Called just before relax() for rs_machine_dependent frags.  The x86
@@ -8795,10 +8814,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       || (IS_ELF
-	  && (S_IS_EXTERNAL (fragP->fr_symbol)
-	      || S_IS_WEAK (fragP->fr_symbol)
-	      || ((symbol_get_bfdsym (fragP->fr_symbol)->flags
-		   & BSF_GNU_INDIRECT_FUNCTION))))
+	  && !elf_symbol_resolved_in_segment_p (fragP->fr_symbol))
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
       || (OUTPUT_FLAVOR == bfd_target_coff_flavour
@@ -10049,7 +10065,7 @@ i386_target_format (void)
 	      as_fatal (_("Intel L1OM is 64bit only"));
 	    return ELF_TARGET_L1OM_FORMAT;
 	  }
-	if (cpu_arch_isa == PROCESSOR_K1OM)
+	else if (cpu_arch_isa == PROCESSOR_K1OM)
 	  {
 	    if (x86_elf_abi != X86_64_ABI)
 	      as_fatal (_("Intel K1OM is 64bit only"));
@@ -10077,48 +10093,6 @@ i386_target_format (void)
 }
 
 #endif /* OBJ_MAYBE_ more than one  */
-
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
-void
-i386_elf_emit_arch_note (void)
-{
-  if (IS_ELF && cpu_arch_name != NULL)
-    {
-      char *p;
-      asection *seg = now_seg;
-      subsegT subseg = now_subseg;
-      Elf_Internal_Note i_note;
-      Elf_External_Note e_note;
-      asection *note_secp;
-      int len;
-
-      /* Create the .note section.  */
-      note_secp = subseg_new (".note", 0);
-      bfd_set_section_flags (stdoutput,
-			     note_secp,
-			     SEC_HAS_CONTENTS | SEC_READONLY);
-
-      /* Process the arch string.  */
-      len = strlen (cpu_arch_name);
-
-      i_note.namesz = len + 1;
-      i_note.descsz = 0;
-      i_note.type = NT_ARCH;
-      p = frag_more (sizeof (e_note.namesz));
-      md_number_to_chars (p, (valueT) i_note.namesz, sizeof (e_note.namesz));
-      p = frag_more (sizeof (e_note.descsz));
-      md_number_to_chars (p, (valueT) i_note.descsz, sizeof (e_note.descsz));
-      p = frag_more (sizeof (e_note.type));
-      md_number_to_chars (p, (valueT) i_note.type, sizeof (e_note.type));
-      p = frag_more (len + 1);
-      strcpy (p, cpu_arch_name);
-
-      frag_align (2, 0, 0);
-
-      subseg_set (seg, subseg);
-    }
-}
-#endif
 
 symbolS *
 md_undefined_symbol (char *name)

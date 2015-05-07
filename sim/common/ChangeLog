@@ -1,3 +1,10 @@
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 18273
+	* sim-fpu.c (INLINE_SIM_FPU): Fix static analysis warning by
+	increasing parenthesis around casts to signed values.
+	
+
 2015-04-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* gennltvals.sh: Add mcore support.

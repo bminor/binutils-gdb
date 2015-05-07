@@ -7891,7 +7891,12 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
 {
   if (!inst.operands[i].isreg)
     {
-      gas_assert (inst.operands[0].isvec);
+      /* PR 18256 */
+      if (! inst.operands[0].isvec)
+	{
+	  inst.error = _("invalid co-processor operand");
+	  return FAIL;
+	}
       if (move_or_literal_pool (0, CONST_VEC, /*mode_3=*/FALSE))
 	return SUCCESS;
     }
@@ -21028,24 +21033,22 @@ arm_init_frag (fragS * fragP, int max_chars)
   /* If the current ARM vs THUMB mode has not already
      been recorded into this frag then do so now.  */
   if ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) == 0)
-    {
       fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
 
-      /* Record a mapping symbol for alignment frags.  We will delete this
-	 later if the alignment ends up empty.  */
-      switch (fragP->fr_type)
-	{
-	  case rs_align:
-	  case rs_align_test:
-	  case rs_fill:
-	    mapping_state_2 (MAP_DATA, max_chars);
-	    break;
-	  case rs_align_code:
-	    mapping_state_2 (thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
-	    break;
-	  default:
-	    break;
-	}
+  /* Record a mapping symbol for alignment frags.  We will delete this
+     later if the alignment ends up empty.  */
+  switch (fragP->fr_type)
+    {
+    case rs_align:
+    case rs_align_test:
+    case rs_fill:
+      mapping_state_2 (MAP_DATA, max_chars);
+      break;
+    case rs_align_code:
+      mapping_state_2 (thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
+      break;
+    default:
+      break;
     }
 }
 
@@ -21620,6 +21623,8 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     }
 }
 
+static bfd_boolean flag_warn_syms = TRUE;
+
 /* Under ELF we need to default _GLOBAL_OFFSET_TABLE.
    Otherwise we have no need to default values of symbols.  */
 
@@ -21643,6 +21648,52 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
     }
 #endif
 
+  /* PR 18347 - Warn if the user attempts to create a symbol with the same
+     name as an ARM instruction.  Whilst strictly speaking it is allowed, it
+     does mean that the resulting code might be very confusing to the reader.
+     Also this warning can be triggered if the user omits an operand before
+     an immediate address, eg:
+
+       LDR =foo
+
+     GAS treats this as an assignment of the value of the symbol foo to a
+     symbol LDR, and so (without this code) it will not issue any kind of
+     warning or error message.
+
+     Note - ARM instructions are case-insensitive but the strings in the hash
+     table are all stored in lower case, so we must first ensure that name is
+     lower case too.
+
+     Some names are problematical.  Several gas tests for example use:
+
+       b:
+
+     as a label, but of course this matches the branch instruction.  For now
+     we punt and only check names longer than 1.
+
+     FIXME: Should this be made into generic code for all targets ?  */
+  if (flag_warn_syms && arm_ops_hsh && strlen (name) > 1)
+    {
+      char * nbuf = strdup (name);
+      char * p;
+
+      for (p = nbuf; *p; p++)
+	*p = TOLOWER (*p);
+      if (hash_find (arm_ops_hsh, nbuf) != NULL)
+	{
+	  static struct hash_control * already_warned = NULL;
+
+	  if (already_warned == NULL)
+	    already_warned = hash_new ();
+	  /* Only warn about the symbol once.  To keep the code
+	     simple we let hash_insert do the lookup for us.  */
+	  if (hash_insert (already_warned, name, NULL) == NULL)
+	    as_warn (_("[-mwarn-syms]: Symbol '%s' matches an ARM instruction - is this intentional ?"), name);
+	}
+      else
+	free (nbuf);
+    }
+  
   return NULL;
 }
 
@@ -24113,6 +24164,7 @@ md_begin (void)
 	      -mthumb-interwork		 Code supports ARM/Thumb interworking
 
 	      -m[no-]warn-deprecated     Warn about deprecated features
+	      -m[no-]warn-syms		 Warn when symbols match instructions
 
       For now we will also provide support for:
 
@@ -24181,6 +24233,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
+
 size_t md_longopts_size = sizeof (md_longopts);
 
 struct arm_option_table
@@ -24215,6 +24268,8 @@ struct arm_option_table arm_opts[] =
   {"mwarn-deprecated", NULL, &warn_on_deprecated, 1, NULL},
   {"mno-warn-deprecated", N_("do not warn on use of deprecated feature"),
    &warn_on_deprecated, 0, NULL},
+  {"mwarn-syms", N_("warn about symbols that match instruction names [default]"), (int *) (& flag_warn_syms), TRUE, NULL},
+  {"mno-warn-syms", N_("disable warnings about symobls that match instructions"), (int *) (& flag_warn_syms), FALSE, NULL},
   {NULL, NULL, NULL, 0, NULL}
 };
 

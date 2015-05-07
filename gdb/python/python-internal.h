@@ -348,6 +348,11 @@ extern enum ext_lang_rc gdbpy_get_xmethod_arg_types
    struct xmethod_worker *worker,
    int *nargs,
    struct type ***arg_types);
+extern enum ext_lang_rc gdbpy_get_xmethod_result_type
+  (const struct extension_language_defn *extlang,
+   struct xmethod_worker *worker,
+   struct value *object, struct value **args, int nargs,
+   struct type **result_type);
 extern struct value *gdbpy_invoke_xmethod
   (const struct extension_language_defn *extlang,
    struct xmethod_worker *worker,
@@ -527,6 +532,7 @@ extern const struct language_defn *python_language;
 	}								\
     } while (0)
 
+int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
 
 PyObject *python_string_to_unicode (PyObject *obj);

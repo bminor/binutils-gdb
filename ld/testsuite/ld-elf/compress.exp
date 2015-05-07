@@ -88,17 +88,26 @@ set run_tests {
     {"Run normal with libfoo.so with compressed debug sections"
      "tmpdir/begin.o tmpdir/libfoo.so tmpdir/end.o" ""
      {main.c} "normal" "normal.out" "-Wa,--compress-debug-sections"}
-    {"Run normal with libfoo.so with compressed debug sections with zlib-gabi"
+    {"Run normal with libfoozlib.so with compressed debug sections with zlib-gabi"
      "tmpdir/begin.o tmpdir/libfoozlib.so tmpdir/end.o" ""
      {main.c} "normal" "normal.out" "-Wa,--compress-debug-sections=zlib-gabi"}
     {"Run zlibnormal with libzlibfoo.so with zlib compressed debug sections"
      "tmpdir/begin.o tmpdir/libzlibfoo.so tmpdir/end.o --compress-debug-sections=zlib" ""
      {main.c} "zlibnormal" "normal.out" "-Wa,--compress-debug-sections=zlib"}
+    {"Run zlibnormal with libfoozlib.so with zlib compressed debug sections"
+     "tmpdir/begin.o tmpdir/libfoozlib.so tmpdir/end.o --compress-debug-sections=zlib" ""
+     {main.c} "zlibnormal" "normal.out" "-Wa,--compress-debug-sections=zlib"}
     {"Run gnunormal with libgnufoo.so with zlib-gnu compressed debug sections"
      "tmpdir/gnubegin.o tmpdir/libgnufoo.so tmpdir/end.o --compress-debug-sections=zlib-gnu" ""
      {main.c} "gnunormal" "normal.out" "-Wa,--compress-debug-sections=zlib-gnu"}
+    {"Run gnunormal with libfoozlib.so with zlib-gnu compressed debug sections"
+     "tmpdir/gnubegin.o tmpdir/libfoozlib.so tmpdir/end.o --compress-debug-sections=zlib-gnu" ""
+     {main.c} "gnunormal" "normal.out" "-Wa,--compress-debug-sections=zlib-gnu"}
     {"Run gabinormal with libgabifoo.so with zlib-gabi compressed debug sections"
      "tmpdir/zlibbegin.o tmpdir/libgabifoo.so tmpdir/gabiend.o --compress-debug-sections=zlib-gabi" ""
+     {main.c} "gabinormal" "normal.out" "-Wa,--compress-debug-sections=zlib-gabi"}
+    {"Run gabinormal with libfoozlib.so with zlib-gabi compressed debug sections"
+     "tmpdir/zlibbegin.o tmpdir/libfoozlib.so tmpdir/gabiend.o --compress-debug-sections=zlib-gabi" ""
      {main.c} "gabinormal" "normal.out" "-Wa,--compress-debug-sections=zlib-gabi"}
 }
 

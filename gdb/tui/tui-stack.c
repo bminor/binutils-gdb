@@ -253,7 +253,7 @@ tui_show_locator_content (void)
     {
       struct tui_win_element *element;
 
-      element = (struct tui_win_element *) locator->content[0];
+      element = locator->content[0];
 
       string = tui_make_status_line (&element->which_element.locator);
       wmove (locator->handle, 0, 0);
@@ -287,8 +287,7 @@ tui_set_locator_fullname (const char *fullname)
       return;
     }
 
-  element = &((struct tui_win_element *)
-	      locator->content[0])->which_element.locator;
+  element = &locator->content[0]->which_element.locator;
   element->full_name[0] = 0;
   strcat_to_buf (element->full_name, MAX_LOCATOR_ELEMENT_LEN, fullname);
 }
@@ -307,12 +306,11 @@ tui_set_locator_info (struct gdbarch *gdbarch,
   /* Allocate the locator content if necessary.  */
   if (locator->content_size <= 0)
     {
-      locator->content = (void **) tui_alloc_content (1, locator->type);
+      locator->content = tui_alloc_content (1, locator->type);
       locator->content_size = 1;
     }
 
-  element = &((struct tui_win_element *)
-	      locator->content[0])->which_element.locator;
+  element = &locator->content[0]->which_element.locator;
   element->proc_name[0] = (char) 0;
   strcat_to_buf (element->proc_name, MAX_LOCATOR_ELEMENT_LEN, procname);
   element->line_no = lineno;
@@ -369,8 +367,7 @@ tui_show_frame_info (struct frame_info *fi)
 
 	  win_info = (tui_source_windows ())->list[i];
 
-	  item = &((struct tui_win_element *)
-		   locator->content[0])->which_element;
+	  item = &locator->content[0]->which_element;
 	  if (win_info == TUI_SRC_WIN)
 	    {
 	      start_line = (item->locator.line_no -

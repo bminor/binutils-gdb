@@ -1,3 +1,22 @@
+2015-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18354
+	* ld-elf/compress.exp (run_tests): Link the last zlibnormal,
+	gnunormal and gabinormal against libfoozlib.so.
+
+2015-04-27  Renlin Li  <renlin.li@arm.com>
+
+	* ld-arm/ifunc-10.dd: Adjust expected output.
+	* ld-arm/ifunc-2.dd: Likewise.
+
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* ld-s390/gotreloc_31-1.dd: Use instruction mnemonics.
+
+2015-04-24  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tocnovar.d: Revert last change.
+
 2015-04-24  Richard Earnshaw  <rearnsha@arm.com>
 
 	* ld-arm/armthumb-lib.d: Regenerate expected output.

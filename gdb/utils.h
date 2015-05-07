@@ -174,6 +174,10 @@ extern struct ui_file *gdb_stdtarg;
 extern struct ui_file *gdb_stdtargerr;
 extern struct ui_file *gdb_stdtargin;
 
+/* Set the screen dimensions to WIDTH and HEIGHT.  */
+
+extern void set_screen_width_and_height (int width, int height);
+
 /* More generic printf like operations.  Filtered versions may return
    non-locally on error.  */
 

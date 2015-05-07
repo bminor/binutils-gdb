@@ -794,7 +794,7 @@ min_of_type (struct type *t)
 LONGEST
 ada_discrete_type_high_bound (struct type *type)
 {
-  type = resolve_dynamic_type (type, 0);
+  type = resolve_dynamic_type (type, NULL, 0);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -815,7 +815,7 @@ ada_discrete_type_high_bound (struct type *type)
 LONGEST
 ada_discrete_type_low_bound (struct type *type)
 {
-  type = resolve_dynamic_type (type, 0);
+  type = resolve_dynamic_type (type, NULL, 0);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -2417,10 +2417,21 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
-      v = value_at (type, value_address (obj));
+      v = value_at (type, value_address (obj) + offset);
       type = value_type (v);
+      if (TYPE_LENGTH (type) * HOST_CHAR_BIT < bit_size)
+	{
+	  /* This can happen in the case of an array of dynamic objects,
+	     where the size of each element changes from element to element.
+	     In that case, we're initially given the array stride, but
+	     after resolving the element type, we find that its size is
+	     less than this stride.  In that case, adjust bit_size to
+	     match TYPE's length, and recompute LEN accordingly.  */
+	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
+	  len = TYPE_LENGTH (type) + (bit_offset + HOST_CHAR_BIT - 1) / 8;
+	}
       bytes = (unsigned char *) alloca (len);
-      read_memory (value_address (v) + offset, bytes, len);
+      read_memory (value_address (v), bytes, len);
     }
   else
     {
@@ -2538,6 +2549,9 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       targ += delta;
     }
 
+  if (is_dynamic_type (value_type (v)))
+    v = value_from_contents_and_address (value_type (v), value_contents (v),
+					 0);
   return v;
 }
 
@@ -2668,21 +2682,27 @@ ada_value_assign (struct value *toval, struct value *fromval)
 }
 
 
-/* Given that COMPONENT is a memory lvalue that is part of the lvalue 
- * CONTAINER, assign the contents of VAL to COMPONENTS's place in 
- * CONTAINER.  Modifies the VALUE_CONTENTS of CONTAINER only, not 
- * COMPONENT, and not the inferior's memory.  The current contents 
- * of COMPONENT are ignored.  */
+/* Given that COMPONENT is a memory lvalue that is part of the lvalue
+   CONTAINER, assign the contents of VAL to COMPONENTS's place in
+   CONTAINER.  Modifies the VALUE_CONTENTS of CONTAINER only, not
+   COMPONENT, and not the inferior's memory.  The current contents
+   of COMPONENT are ignored.
+
+   Although not part of the initial design, this function also works
+   when CONTAINER and COMPONENT are not_lval's: it works as if CONTAINER
+   had a null address, and COMPONENT had an address which is equal to
+   its offset inside CONTAINER.  */
+
 static void
 value_assign_to_component (struct value *container, struct value *component,
 			   struct value *val)
 {
   LONGEST offset_in_container =
     (LONGEST)  (value_address (component) - value_address (container));
-  int bit_offset_in_container = 
+  int bit_offset_in_container =
     value_bitpos (component) - value_bitpos (container);
   int bits;
-  
+
   val = value_cast (value_type (component), val);
 
   if (value_bitsize (component) == 0)
@@ -2691,17 +2711,17 @@ value_assign_to_component (struct value *container, struct value *component,
     bits = value_bitsize (component);
 
   if (gdbarch_bits_big_endian (get_type_arch (value_type (container))))
-    move_bits (value_contents_writeable (container) + offset_in_container, 
+    move_bits (value_contents_writeable (container) + offset_in_container,
 	       value_bitpos (container) + bit_offset_in_container,
 	       value_contents (val),
 	       TYPE_LENGTH (value_type (component)) * TARGET_CHAR_BIT - bits,
 	       bits, 1);
   else
-    move_bits (value_contents_writeable (container) + offset_in_container, 
+    move_bits (value_contents_writeable (container) + offset_in_container,
 	       value_bitpos (container) + bit_offset_in_container,
 	       value_contents (val), 0, bits, 0);
-}	       
-			
+}
+
 /* The value of the element of array ARR at the ARITY indices given in IND.
    ARR may be either a simple array, GNAT array descriptor, or pointer
    thereto.  */
@@ -6399,6 +6419,8 @@ ada_is_tagged_type (struct type *type, int refok)
 int
 ada_is_tag_type (struct type *type)
 {
+  type = ada_check_typedef (type);
+
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_PTR)
     return 0;
   else
@@ -7322,7 +7344,7 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
         {
           if (dispp != NULL)
             *dispp += TYPE_FIELD_BITPOS (type, i) / 8;
-          return ada_check_typedef (TYPE_FIELD_TYPE (type, i));
+          return TYPE_FIELD_TYPE (type, i);
         }
 
       else if (ada_is_wrapper_field (type, i))
@@ -7354,7 +7376,7 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
               disp = 0;
 	      if (v_field_name != NULL 
 		  && field_name_match (v_field_name, name))
-		t = ada_check_typedef (TYPE_FIELD_TYPE (field_type, j));
+		t = TYPE_FIELD_TYPE (field_type, j);
 	      else
 		t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (field_type,
 								 j),
@@ -8169,39 +8191,58 @@ template_to_static_fixed_type (struct type *type0)
   int nfields;
   int f;
 
+  /* No need no do anything if the input type is already fixed.  */
+  if (TYPE_FIXED_INSTANCE (type0))
+    return type0;
+
+  /* Likewise if we already have computed the static approximation.  */
   if (TYPE_TARGET_TYPE (type0) != NULL)
     return TYPE_TARGET_TYPE (type0);
 
-  nfields = TYPE_NFIELDS (type0);
+  /* Don't clone TYPE0 until we are sure we are going to need a copy.  */
   type = type0;
+  nfields = TYPE_NFIELDS (type0);
+
+  /* Whether or not we cloned TYPE0, cache the result so that we don't do
+     recompute all over next time.  */
+  TYPE_TARGET_TYPE (type0) = type;
 
   for (f = 0; f < nfields; f += 1)
     {
-      struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type0, f));
+      struct type *field_type = TYPE_FIELD_TYPE (type0, f);
       struct type *new_type;
 
       if (is_dynamic_field (type0, f))
-        new_type = to_static_fixed_type (TYPE_TARGET_TYPE (field_type));
+	{
+	  field_type = ada_check_typedef (field_type);
+          new_type = to_static_fixed_type (TYPE_TARGET_TYPE (field_type));
+	}
       else
         new_type = static_unwrap_type (field_type);
-      if (type == type0 && new_type != field_type)
-        {
-          TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
-          TYPE_CODE (type) = TYPE_CODE (type0);
-          INIT_CPLUS_SPECIFIC (type);
-          TYPE_NFIELDS (type) = nfields;
-          TYPE_FIELDS (type) = (struct field *)
-            TYPE_ALLOC (type, nfields * sizeof (struct field));
-          memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
-                  sizeof (struct field) * nfields);
-          TYPE_NAME (type) = ada_type_name (type0);
-          TYPE_TAG_NAME (type) = NULL;
-	  TYPE_FIXED_INSTANCE (type) = 1;
-          TYPE_LENGTH (type) = 0;
-        }
-      TYPE_FIELD_TYPE (type, f) = new_type;
-      TYPE_FIELD_NAME (type, f) = TYPE_FIELD_NAME (type0, f);
+
+      if (new_type != field_type)
+	{
+	  /* Clone TYPE0 only the first time we get a new field type.  */
+	  if (type == type0)
+	    {
+	      TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
+	      TYPE_CODE (type) = TYPE_CODE (type0);
+	      INIT_CPLUS_SPECIFIC (type);
+	      TYPE_NFIELDS (type) = nfields;
+	      TYPE_FIELDS (type) = (struct field *)
+		TYPE_ALLOC (type, nfields * sizeof (struct field));
+	      memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
+		      sizeof (struct field) * nfields);
+	      TYPE_NAME (type) = ada_type_name (type0);
+	      TYPE_TAG_NAME (type) = NULL;
+	      TYPE_FIXED_INSTANCE (type) = 1;
+	      TYPE_LENGTH (type) = 0;
+	    }
+	  TYPE_FIELD_TYPE (type, f) = new_type;
+	  TYPE_FIELD_NAME (type, f) = TYPE_FIELD_NAME (type0, f);
+	}
     }
+
   return type;
 }
 
