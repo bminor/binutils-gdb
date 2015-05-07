@@ -1864,8 +1864,14 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  if (!need_pass_2)
+  /* Sections are assumed to start aligned. In text section, there is no
+     MAP_DATA symbol pending. So we only align the address during
+     MAP_DATA --> MAP_INSN transition.
+     For other sections, this is not guaranteed.  */
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+  if (!need_pass_2 && (subseg_text_p (now_seg) && mapstate == MAP_DATA))
     frag_align_code (2, 0);
+
 #ifdef OBJ_ELF
   mapping_state (MAP_INSN);
 #endif
@@ -5629,6 +5635,14 @@ md_assemble (char *str)
     }
 
   init_operand_error_report ();
+
+  /* Sections are assumed to start aligned. In text section, there is no
+     MAP_DATA symbol pending. So we only align the address during
+     MAP_DATA --> MAP_INSN transition.
+     For other sections, this is not guaranteed.  */
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+  if (!need_pass_2 && (subseg_text_p (now_seg) && mapstate == MAP_DATA))
+    frag_align_code (2, 0);
 
   saved_cond = inst.cond;
   reset_aarch64_instruction (&inst);
