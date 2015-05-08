@@ -156,19 +156,29 @@ fill_gregset (const struct regcache *regcache, gregset_t *regp, int regno)
 	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	  ULONGEST pswa, pswm;
 	  gdb_byte buf[4];
+	  gdb_byte *pswm_p = (gdb_byte *) regp + S390_PSWM_OFFSET;
+	  gdb_byte *pswa_p = (gdb_byte *) regp + S390_PSWA_OFFSET;
 
-	  regcache_raw_collect (regcache, S390_PSWM_REGNUM, buf);
-	  pswm = extract_unsigned_integer (buf, 4, byte_order);
-	  regcache_raw_collect (regcache, S390_PSWA_REGNUM, buf);
-	  pswa = extract_unsigned_integer (buf, 4, byte_order);
+	  pswm = extract_unsigned_integer (pswm_p, 8, byte_order);
 
 	  if (regno == -1 || regno == S390_PSWM_REGNUM)
-	    store_unsigned_integer ((gdb_byte *) regp + S390_PSWM_OFFSET, 8,
-				    byte_order, ((pswm & 0xfff7ffff) << 32) |
-				    (pswa & 0x80000000));
+	    {
+	      pswm &= 0x80000000;
+	      regcache_raw_collect (regcache, S390_PSWM_REGNUM, buf);
+	      pswm |= (extract_unsigned_integer (buf, 4, byte_order)
+		       & 0xfff7ffff) << 32;
+	    }
+
 	  if (regno == -1 || regno == S390_PSWA_REGNUM)
-	    store_unsigned_integer ((gdb_byte *) regp + S390_PSWA_OFFSET, 8,
-				    byte_order, pswa & 0x7fffffff);
+	    {
+	      regcache_raw_collect (regcache, S390_PSWA_REGNUM, buf);
+	      pswa = extract_unsigned_integer (buf, 4, byte_order);
+	      pswm ^= (pswm ^ pswa) & 0x80000000;
+	      pswa &= 0x7fffffff;
+	      store_unsigned_integer (pswa_p, 8, byte_order, pswa);
+	    }
+
+	  store_unsigned_integer (pswm_p, 8, byte_order, pswm);
 	}
       return;
     }
