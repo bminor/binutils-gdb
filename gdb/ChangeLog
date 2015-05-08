@@ -1,3 +1,7 @@
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* copyright.py (NOT_FSF_LIST): Remove sim/erc32 entries.
+
 2015-05-08  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/18291
