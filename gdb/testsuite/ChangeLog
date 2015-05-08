@@ -1,3 +1,7 @@
+2015-05-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/non-existing-program.exp: Unset spawn_id.
+
 2015-05-08  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/18291
