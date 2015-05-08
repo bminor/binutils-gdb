@@ -5177,6 +5177,19 @@ linux_supports_stopped_by_hw_breakpoint (void)
   return USE_SIGTRAP_SIGINFO;
 }
 
+/* Implement the supports_conditional_breakpoints target_ops
+   method.  */
+
+static int
+linux_supports_conditional_breakpoints (void)
+{
+  /* GDBserver needs to step over the breakpoint if the condition is
+     false.  GDBserver software single step is too simple, so disable
+     conditional breakpoints if the target doesn't have hardware single
+     step.  */
+  return can_hardware_single_step ();
+}
+
 static int
 linux_stopped_by_watchpoint (void)
 {
@@ -6375,6 +6388,7 @@ static struct target_ops linux_target_ops = {
   linux_supports_stopped_by_sw_breakpoint,
   linux_stopped_by_hw_breakpoint,
   linux_supports_stopped_by_hw_breakpoint,
+  linux_supports_conditional_breakpoints,
   linux_stopped_by_watchpoint,
   linux_stopped_data_address,
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)	      \

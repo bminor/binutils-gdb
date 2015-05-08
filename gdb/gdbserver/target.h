@@ -222,6 +222,10 @@ struct target_ops
      HW breakpoint triggering.  */
   int (*supports_stopped_by_hw_breakpoint) (void);
 
+  /* Returns true if the target can evaluate conditions of
+     breakpoints.  */
+  int (*supports_conditional_breakpoints) (void);
+
   /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
 
   int (*stopped_by_watchpoint) (void);
@@ -549,6 +553,10 @@ int kill_inferior (int);
 #define target_supports_stopped_by_hw_breakpoint() \
   (the_target->supports_stopped_by_hw_breakpoint ? \
    (*the_target->supports_stopped_by_hw_breakpoint) () : 0)
+
+#define target_supports_conditional_breakpoints() \
+  (the_target->supports_conditional_breakpoints ? \
+   (*the_target->supports_conditional_breakpoints) () : 0)
 
 #define target_stopped_by_hw_breakpoint() \
   (the_target->stopped_by_hw_breakpoint ? \
