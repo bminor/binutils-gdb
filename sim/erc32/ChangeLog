@@ -1,3 +1,10 @@
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add copyright header.
+	* erc32.c: Change copyright holder to FSF.  Reformat.
+	* exec.c, float.c, func.c, interf.c, sis.c, sis.h: Likewise.
+	* help.c, startsim: Add copyright header.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 18273
