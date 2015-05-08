@@ -1,3 +1,12 @@
+2015-05-08  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/18208
+	* gdb.base/coredump-filter.c (set_coredump_filter): New function.
+	* gdb.base/coredump-filter.exp (do_save_core): Call inferior
+	function set_coredump_filter, and remove remote_exec call.
+	Remove argument ipid.  Callers update.
+	(top level): Don't get inferior's PID.
+
 2015-05-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/watch_thread_num.exp: Skip test on targets without
