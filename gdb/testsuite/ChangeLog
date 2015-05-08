@@ -1,3 +1,8 @@
+2015-05-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/coredump-filter.exp: Correctly unset
+	"coredump_var_addr" array.
+
 2015-05-08  Pedro Alves  <palves@redhat.com>
 
 	* gdb.server/non-existing-program.exp: Unset spawn_id.
