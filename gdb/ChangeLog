@@ -1,5 +1,12 @@
 2015-05-08  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* nios2-linux-tdep.c (NIOS2_SIGRETURN_TRAMP_ADDR): Define.
+	(NIOS2_SIGRETURN_REGSAVE_OFFSET): Define.
+	(nios2_linux_rt_sigreturn_init): Adjust base address of
+	register save area.
+
+2015-05-08  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* nios2-tdep.c (nios2_breakpoint_from_pc): Revert to using
 	"trap 31" as the breakpoint instruction on all targets.
 
