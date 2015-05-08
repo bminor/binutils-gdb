@@ -59,9 +59,6 @@
 
 static void nofp_registers_info (char *, int);
 
-static void print_return_value (struct value *function,
-				struct type *value_type);
-
 static void until_next_command (int);
 
 static void until_command (char *, int);
