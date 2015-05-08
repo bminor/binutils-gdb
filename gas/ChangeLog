@@ -1,3 +1,11 @@
+2015-05-08  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18347
+	* config/tc-arm.h (TC_EQUAL_IN_INSN): Define.
+	* config/tc-arm.c (arm_tc_equal_in_insn): New function.  Move
+	the symbol name checking code to here from...
+	(md_undefined_symbo): ... here.
+
 2015-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (no_shared): New.

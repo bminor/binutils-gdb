@@ -21625,6 +21625,49 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 
 static bfd_boolean flag_warn_syms = TRUE;
 
+bfd_boolean
+arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
+{
+  /* PR 18347 - Warn if the user attempts to create a symbol with the same
+     name as an ARM instruction.  Whilst strictly speaking it is allowed, it
+     does mean that the resulting code might be very confusing to the reader.
+     Also this warning can be triggered if the user omits an operand before
+     an immediate address, eg:
+
+       LDR =foo
+
+     GAS treats this as an assignment of the value of the symbol foo to a
+     symbol LDR, and so (without this code) it will not issue any kind of
+     warning or error message.
+
+     Note - ARM instructions are case-insensitive but the strings in the hash
+     table are all stored in lower case, so we must first ensure that name is
+     lower case too.  */
+  if (flag_warn_syms && arm_ops_hsh)
+    {
+      char * nbuf = strdup (name);
+      char * p;
+
+      for (p = nbuf; *p; p++)
+	*p = TOLOWER (*p);
+      if (hash_find (arm_ops_hsh, nbuf) != NULL)
+	{
+	  static struct hash_control * already_warned = NULL;
+
+	  if (already_warned == NULL)
+	    already_warned = hash_new ();
+	  /* Only warn about the symbol once.  To keep the code
+	     simple we let hash_insert do the lookup for us.  */
+	  if (hash_insert (already_warned, name, NULL) == NULL)
+	    as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
+	}
+      else
+	free (nbuf);
+    }
+  
+  return FALSE;
+}
+
 /* Under ELF we need to default _GLOBAL_OFFSET_TABLE.
    Otherwise we have no need to default values of symbols.  */
 
@@ -21648,52 +21691,6 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
     }
 #endif
 
-  /* PR 18347 - Warn if the user attempts to create a symbol with the same
-     name as an ARM instruction.  Whilst strictly speaking it is allowed, it
-     does mean that the resulting code might be very confusing to the reader.
-     Also this warning can be triggered if the user omits an operand before
-     an immediate address, eg:
-
-       LDR =foo
-
-     GAS treats this as an assignment of the value of the symbol foo to a
-     symbol LDR, and so (without this code) it will not issue any kind of
-     warning or error message.
-
-     Note - ARM instructions are case-insensitive but the strings in the hash
-     table are all stored in lower case, so we must first ensure that name is
-     lower case too.
-
-     Some names are problematical.  Several gas tests for example use:
-
-       b:
-
-     as a label, but of course this matches the branch instruction.  For now
-     we punt and only check names longer than 1.
-
-     FIXME: Should this be made into generic code for all targets ?  */
-  if (flag_warn_syms && arm_ops_hsh && strlen (name) > 1)
-    {
-      char * nbuf = strdup (name);
-      char * p;
-
-      for (p = nbuf; *p; p++)
-	*p = TOLOWER (*p);
-      if (hash_find (arm_ops_hsh, nbuf) != NULL)
-	{
-	  static struct hash_control * already_warned = NULL;
-
-	  if (already_warned == NULL)
-	    already_warned = hash_new ();
-	  /* Only warn about the symbol once.  To keep the code
-	     simple we let hash_insert do the lookup for us.  */
-	  if (hash_insert (already_warned, name, NULL) == NULL)
-	    as_warn (_("[-mwarn-syms]: Symbol '%s' matches an ARM instruction - is this intentional ?"), name);
-	}
-      else
-	free (nbuf);
-    }
-  
   return NULL;
 }
 

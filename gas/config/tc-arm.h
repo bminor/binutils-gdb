@@ -389,3 +389,6 @@ extern char arm_comment_chars[];
 
 #define tc_line_separator_chars arm_line_separator_chars
 extern char arm_line_separator_chars[];
+
+#define TC_EQUAL_IN_INSN(c, s) arm_tc_equal_in_insn ((c), (s))
+extern bfd_boolean arm_tc_equal_in_insn (int, char *);

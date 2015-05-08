@@ -1,3 +1,10 @@
+2015-05-08  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18347
+	* gas/arm/pr18347.s: Add tests of other symbol assignments which
+	should not generate the warning.
+	* gas/arm/pr18347.l: Update expected output.
+
 2015-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run relax-4 and x86-64-relax-3.
