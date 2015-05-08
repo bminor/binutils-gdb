@@ -1,3 +1,13 @@
+2015-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (no_shared): New.
+	(OPTION_MNO_SHARED): Likewise.
+	(elf_symbol_resolved_in_segment_p): Check no_shared.
+	(md_longopts): Add mno-shared.
+	(md_parse_option): Handle OPTION_MNO_SHARED.
+	(md_show_usage): Add -mno-shared.
+	* doc/c-i386.texi: Document -mno-shared.
+
 2015-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (elf_symbol_resolved_in_segment_p): New.

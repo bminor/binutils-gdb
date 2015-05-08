@@ -2107,7 +2107,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
 
       /* Support target-side breakpoint conditions and commands.  */
-      strcat (own_buf, ";ConditionalBreakpoints+");
+      if (target_supports_conditional_breakpoints ())
+	strcat (own_buf, ";ConditionalBreakpoints+");
       strcat (own_buf, ";BreakpointCommands+");
 
       if (target_supports_agent ())

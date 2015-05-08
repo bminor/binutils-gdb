@@ -1,3 +1,19 @@
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* copyright.py (NOT_FSF_LIST): Remove sim/erc32 entries.
+
+2015-05-08  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/18291
+	* python/lib/gdb/command/xmethods.py (print_xm_info): Fix typo.
+	Print xmethod matcher status.
+
+2015-05-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (fill_gregset): Avoid relying on the PSWA
+	register in the regcache when treating the PSWM register, and vice
+	versa.
+
 2015-05-07  Gary Benson <gbenson@redhat.com>
 
 	* linux-thread-db.c (struct thread_db_info)

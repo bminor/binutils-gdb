@@ -662,6 +662,7 @@ static struct target_ops spu_target_ops = {
   NULL, /* supports_stopped_by_sw_breakpoint */
   NULL, /* stopped_by_hw_breakpoint */
   NULL, /* supports_stopped_by_hw_breakpoint */
+  NULL, /* supports_conditional_breakpoints */
   NULL,
   NULL,
   NULL,

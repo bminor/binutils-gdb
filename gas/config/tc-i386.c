@@ -524,6 +524,11 @@ static enum x86_elf_abi x86_elf_abi = I386_ABI;
 static int use_big_obj = 0;
 #endif
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+/* 1 if not generating code for a shared library.  */
+static int no_shared = 0;
+#endif
+
 /* 1 for intel syntax,
    0 if att syntax.  */
 static int intel_syntax = 0;
@@ -8785,6 +8790,10 @@ elf_symbol_resolved_in_segment_p (symbolS *fr_symbol)
     /* Symbol may be weak or local.  */
     return !S_IS_WEAK (fr_symbol);
 
+  /* Non-weak symbols won't be preempted.  */
+  if (no_shared)
+    return 1;
+
   /* Global symbols with default visibility in a shared library may be
      preempted by another definition.  */
   return ELF_ST_VISIBILITY (S_GET_OTHER (fr_symbol)) != STV_DEFAULT;
@@ -9484,6 +9493,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MBIG_OBJ (OPTION_MD_BASE + 18)
 #define OPTION_OMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
 #define OPTION_MEVEXRCIG (OPTION_MD_BASE + 20)
+#define OPTION_MNO_SHARED (OPTION_MD_BASE + 21)
 
 struct option md_longopts[] =
 {
@@ -9494,6 +9504,7 @@ struct option md_longopts[] =
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"x32", no_argument, NULL, OPTION_X32},
+  {"mno-shared", no_argument, NULL, OPTION_MNO_SHARED},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
   {"march", required_argument, NULL, OPTION_MARCH},
@@ -9553,6 +9564,10 @@ md_parse_option (int c, char *arg)
     case 's':
       /* -s: On i386 Solaris, this tells the native assembler to use
 	 .stab instead of .stab.excl.  We always use .stab anyhow.  */
+      break;
+
+    case OPTION_MNO_SHARED:
+      no_shared = 1;
       break;
 #endif
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
@@ -9980,6 +9995,8 @@ md_show_usage (FILE *stream)
   -mold-gcc               support old (<= 2.8.1) versions of gcc\n"));
   fprintf (stream, _("\
   -madd-bnd-prefix        add BND prefix for all valid branches\n"));
+  fprintf (stream, _("\
+  -mno-shared             enable branch optimization for non shared code\n"));
 # if defined (TE_PE) || defined (TE_PEP)
   fprintf (stream, _("\
   -mbig-obj               generate big object files\n"));
