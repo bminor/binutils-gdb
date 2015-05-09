@@ -1,3 +1,8 @@
+2015-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Make sure
+	accumSize is never negative.
+
 2015-05-14  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-command.c: Remove include of <ctype.h>.
