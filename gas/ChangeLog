@@ -1,3 +1,8 @@
+2015-05-13  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_relax_frag): Allow trampoline to be
+	closer than J_RANGE / 2 to jump frag.
+
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt (arch): Set to iamcu for i386-*-elfiamcu target.

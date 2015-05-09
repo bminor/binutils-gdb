@@ -26,3 +26,13 @@
 	.endr
 4:
 	j	4b
+
+5:
+	j	6f
+
+	.rep	43691
+	_nop
+	.endr
+
+6:
+	j	5b

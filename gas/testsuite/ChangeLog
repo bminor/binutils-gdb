@@ -1,3 +1,7 @@
+2015-05-13  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* gas/xtensa/trampoline.s: Add regression testcase.
+
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run iamcu-1, iamcu-2, iamcu-3, iamcu-inval-1,
