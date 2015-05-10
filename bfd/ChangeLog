@@ -1,3 +1,9 @@
+2015-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Replace input_bfd
+	and output_bfd with abfd.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+
 2015-05-06  Toni Spets  <toni.spets@iki.fi>
 
 	PR ld/18372

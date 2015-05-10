@@ -2945,11 +2945,9 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  */
 	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC
 	      && irel->r_offset >= 2
-	      && bfd_get_8 (input_bfd,
-			    contents + irel->r_offset - 2) == 0x8b)
+	      && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
 	    {
-	      bfd_put_8 (output_bfd, 0x8d,
-			 contents + irel->r_offset - 2);
+	      bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
 	      irel->r_info = htab->r_info (r_symndx, R_X86_64_PC32);
 	      if (local_got_refcounts != NULL
 		  && local_got_refcounts[r_symndx] > 0)
@@ -2976,11 +2974,9 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  && h != htab->elf.hdynamic
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
 	  && irel->r_offset >= 2
-	  && bfd_get_8 (input_bfd,
-			contents + irel->r_offset - 2) == 0x8b)
+	  && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
 	{
-	  bfd_put_8 (output_bfd, 0x8d,
-		     contents + irel->r_offset - 2);
+	  bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
 	  irel->r_info = htab->r_info (r_symndx, R_X86_64_PC32);
 	  if (h->got.refcount > 0)
 	    h->got.refcount -= 1;
