@@ -412,11 +412,6 @@ proc run_dump_test { name {extra_options {}} } {
 	if {$skip} { return }
     }
     if { $opts(target) != "" } then {
-	if { $opts(not-target) != "" } then {
-	    perror "$testname: mixing target and not-target directives is invalid"
-	    unresolved $testname
-	    return
-	}
 	set skip 1
 	foreach glob $opts(target) {
 	    if {[istarget $glob]} {
