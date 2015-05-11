@@ -1,4 +1,37 @@
 2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c: Include linux-record.h and
+	record-full.h.
+	(struct linux_record_tdep aarch64_linux_record_tdep): Declare.
+	(aarch64_syscall): New enum.
+	(aarch64_canonicalize_syscall): New function.
+	(aarch64_all_but_pc_registers_record): New function.
+	(aarch64_linux_syscall_record): New function.
+	(aarch64_linux_init_abi): Install AArch64 process record
+	handler.  Update to handle syscall recording.
+	* aarch64-tdep.c: Include record.h and record-full.h.
+	(submask, bit, bits, REG_ALLOC, MEM_ALLOC): New macros.
+	(struct aarch64_mem_r): Define.
+	(aarch64_record_result): New enum.
+	(struct insn_decode_record): Define.
+	(insn_decode_record): New typedef.
+	(aarch64_record_data_proc_reg): New function.
+	(aarch64_record_data_proc_imm): New function.
+	(aarch64_record_branch_except_sys): New function.
+	(aarch64_record_load_store): New function.
+	(aarch64_record_data_proc_simd_fp): New function.
+	(aarch64_record_asimd_load_store): New function.
+	(aarch64_record_decode_insn_handler): New function.
+	(deallocate_reg_mem): New function.
+	(aarch64_process_record): New function.
+	* aarch64-tdep.h (struct gdbarch_tdep) <aarch64_syscall_record>:
+	New field.
+	(aarch64_process_record): New extern declaration.
+	* configure.tgt: Add linux-record.o to gdb_target_obs.
+	* linux-record.h (struct linux_record_tdep) <arg7>: New field.
+
+2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
 
 	* NEWS: Add a note on process record-replay support on aarch64*-linux*
 	targets.
