@@ -4614,8 +4614,8 @@ Set the matching input ELF machine type to @var{machine}.  If
 @option{--input-mach} isn't specified, it will match any ELF
 machine types.
 
-The supported ELF machine types are, @var{L1OM}, @var{K1OM} and
-@var{x86-64}.
+The supported ELF machine types are, @var{i386}, @var{IAMCU}, @var{L1OM},
+@var{K1OM} and @var{x86-64}.
 
 @item --output-mach=@var{machine}
 Change the ELF machine type in the ELF header to @var{machine}.  The

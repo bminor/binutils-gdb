@@ -4310,6 +4310,16 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
     }
   else if (TYPE_CODE (actual_type) == TYPE_CODE_PTR)
     return ada_value_ind (actual);
+  else if (ada_is_aligner_type (formal_type))
+    {
+      /* We need to turn this parameter into an aligner type
+	 as well.  */
+      struct value *aligner = allocate_value (formal_type);
+      struct value *component = ada_value_struct_elt (aligner, "F", 0);
+
+      value_assign_to_component (aligner, component, actual);
+      return aligner;
+    }
 
   return actual;
 }

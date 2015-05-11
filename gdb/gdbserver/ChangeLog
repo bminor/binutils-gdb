@@ -1,3 +1,10 @@
+2015-05-08  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* linux-nios2-low.c: Include elf/common.h.  Adjust comments.
+	Remove HAVE_PTRACE_GETREGS conditionals.
+	(nios2_regsets): Use PTRACE_GETREGSET and PTRACE_SETREGSET
+	instead of PTRACE_GETREGS and PTRACE_SETREGS.
+
 2015-05-08  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-low.c (linux_supports_conditional_breakpoints): New

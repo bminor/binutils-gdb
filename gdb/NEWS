@@ -57,6 +57,9 @@
   ** gdb.Type objects have a new method "optimized_out",
      returning optimized out gdb.Value instance of this type.
   ** Xmethods can now specify a result type.
+  ** gdb.Value objects have new methods "reference_value" and
+     "const_value" which return a reference to the value and a
+     "const" version of the value respectively.
 
 * New commands
 

@@ -772,6 +772,8 @@ static const arch_entry cpu_arch[] =
     CPU_L1OM_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k1om"), PROCESSOR_K1OM,
     CPU_K1OM_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN ("iamcu"), PROCESSOR_IAMCU,
+    CPU_IAMCU_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k6"), PROCESSOR_K6,
     CPU_K6_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k6_2"), PROCESSOR_K6,
@@ -1218,6 +1220,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_I486:
 	    case PROCESSOR_PENTIUM:
 	    case PROCESSOR_PENTIUMPRO:
+	    case PROCESSOR_IAMCU:
 	    case PROCESSOR_GENERIC32:
 	      patt = f32_patt;
 	      break;
@@ -1236,6 +1239,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_I386:
 	    case PROCESSOR_I486:
 	    case PROCESSOR_PENTIUM:
+	    case PROCESSOR_IAMCU:
 	    case PROCESSOR_K6:
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
@@ -1467,6 +1471,20 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
       abort ();
     }
   return x;
+}
+
+static int
+valid_iamcu_cpu_flags (const i386_cpu_flags *flags)
+{
+  if (cpu_arch_isa == PROCESSOR_IAMCU)
+    {
+      static const i386_cpu_flags iamcu_flags = CPU_IAMCU_COMPAT_FLAGS;
+      i386_cpu_flags compat_flags;
+      compat_flags = cpu_flags_and_not (*flags, iamcu_flags);
+      return cpu_flags_all_zero (&compat_flags);
+    }
+  else
+    return 1;
 }
 
 #define CPU_FLAGS_ARCH_MATCH		0x1
@@ -2278,6 +2296,11 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
 	arch = default_arch;
     }
 
+  /* If we are targeting Intel MCU, we must enable it.  */
+  if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_IAMCU
+      || new_flag.bitfield.cpuiamcu)
+    return;
+
   /* If we are targeting Intel L1OM, we must enable it.  */
   if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_L1OM
       || new_flag.bitfield.cpul1om)
@@ -2341,7 +2364,11 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	      else
 		flags = cpu_flags_and_not (cpu_arch_flags,
 					   cpu_arch[j].flags);
-	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+
+	      if (!valid_iamcu_cpu_flags (&flags))
+		as_fatal (_("`%s' isn't valid for Intel MCU"),
+			  cpu_arch[j].name);
+	      else if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
 		  if (cpu_sub_arch_name)
 		    {
@@ -2406,6 +2433,13 @@ i386_arch (void)
 	as_fatal (_("Intel K1OM is 64bit ELF only"));
       return bfd_arch_k1om;
     }
+  else if (cpu_arch_isa == PROCESSOR_IAMCU)
+    {
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour
+	  || flag_code == CODE_64BIT)
+	as_fatal (_("Intel MCU is 32bit ELF only"));
+      return bfd_arch_iamcu;
+    }
   else
     return bfd_arch_i386;
 }
@@ -2434,8 +2468,18 @@ i386_mach (void)
       else
 	return bfd_mach_x64_32;
     }
-  else if (!strcmp (default_arch, "i386"))
-    return bfd_mach_i386_i386;
+  else if (!strcmp (default_arch, "i386")
+	   || !strcmp (default_arch, "iamcu"))
+    {
+      if (cpu_arch_isa == PROCESSOR_IAMCU)
+	{
+	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	    as_fatal (_("Intel MCU is 32bit ELF only"));
+	  return bfd_mach_i386_iamcu;
+	}
+      else
+	return bfd_mach_i386_i386;
+    }
   else
     as_fatal (_("unknown architecture"));
 }
@@ -9678,7 +9722,10 @@ md_parse_option (int c, char *arg)
 		  else
 		    flags = cpu_flags_and_not (cpu_arch_flags,
 					       cpu_arch[j].flags);
-		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+
+		  if (!valid_iamcu_cpu_flags (&flags))
+		    as_fatal (_("`%s' isn't valid for Intel MCU"), arch);
+		  else if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
 		      if (cpu_sub_arch_name)
 			{
@@ -10025,6 +10072,27 @@ i386_target_format (void)
     }
   else if (!strcmp (default_arch, "i386"))
     update_code_flag (CODE_32BIT, 1);
+  else if (!strcmp (default_arch, "iamcu"))
+    {
+      update_code_flag (CODE_32BIT, 1);
+      if (cpu_arch_isa == PROCESSOR_UNKNOWN)
+	{
+	  static const i386_cpu_flags iamcu_flags = CPU_IAMCU_FLAGS;
+	  cpu_arch_name = "iamcu";
+	  cpu_sub_arch_name = NULL;
+	  cpu_arch_flags = iamcu_flags;
+	  cpu_arch_isa = PROCESSOR_IAMCU;
+	  cpu_arch_isa_flags = iamcu_flags;
+	  if (!cpu_arch_tune_set)
+	    {
+	      cpu_arch_tune = cpu_arch_isa;
+	      cpu_arch_tune_flags = cpu_arch_isa_flags;
+	    }
+	}
+      else
+	as_fatal (_("Intel MCU doesn't support `%s' architecture"),
+		  cpu_arch_name);
+    }
   else
     as_fatal (_("unknown architecture"));
 
@@ -10087,6 +10155,12 @@ i386_target_format (void)
 	    if (x86_elf_abi != X86_64_ABI)
 	      as_fatal (_("Intel K1OM is 64bit only"));
 	    return ELF_TARGET_K1OM_FORMAT;
+	  }
+	else if (cpu_arch_isa == PROCESSOR_IAMCU)
+	  {
+	    if (x86_elf_abi != I386_ABI)
+	      as_fatal (_("Intel MCU is 32bit only"));
+	    return ELF_TARGET_IAMCU_FORMAT;
 	  }
 	else
 	  return format;

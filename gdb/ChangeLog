@@ -1,3 +1,49 @@
+2015-05-09  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* NEWS (Python Scripting): Mention the new gdb.Value methods.
+	* python/py-value.c (valpy_reference_value): New function.
+	(valpy_const_value): Likewise.
+	(value_object_methods): Add new methods.
+	* value.c (make_cv_value): New function.
+	* value.h (make_cv_value): Declare.
+
+2015-05-08  Yao Qi  <yao@codesourcery.com>
+	    Sandra Loosemore  <sandra@codesourcery.com>
+
+	* dwarf2read.c (setup_type_unit_groups): Do NULL pointer check
+	to 'lh->include_dirs' before accessing to it.
+	(psymtab_include_file_name): Likewise.
+	(dwarf_decode_lines_1): Likewise.
+	(dwarf_decode_lines): Likewise.
+	(file_file_name): Likewise.
+
+2015-05-08  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-linux-tdep.c (NIOS2_SIGRETURN_TRAMP_ADDR): Define.
+	(NIOS2_SIGRETURN_REGSAVE_OFFSET): Define.
+	(nios2_linux_rt_sigreturn_init): Adjust base address of
+	register save area.
+
+2015-05-08  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_breakpoint_from_pc): Revert to using
+	"trap 31" as the breakpoint instruction on all targets.
+
+2015-05-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* infcmd.c (print_return_value): Remove unused declaration.
+
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (attr_to_dynamic_prop)
+	<DW_AT_data_member_location>: Use read_type_die isntead of
+	get_die_type.
+
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_convert_actual): Add handling of formals
+	passed inside an aligner type.
+
 2015-05-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* copyright.py (NOT_FSF_LIST): Remove sim/erc32 entries.

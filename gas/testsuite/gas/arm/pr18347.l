@@ -1,2 +1,2 @@
 [^:]*: Assembler messages:
-[^:]*:2: Warning: \[-mwarn-syms\]: Symbol 'LDR' matches an ARM instruction - is this intentional \?
+[^:]*:2: Warning: \[-mwarn-syms\]: Assignment makes a symbol match an ARM instruction: LDR

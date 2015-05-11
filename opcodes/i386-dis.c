@@ -1632,6 +1632,8 @@ enum
   X86_64_CE,
   X86_64_D4,
   X86_64_D5,
+  X86_64_E8,
+  X86_64_E9,
   X86_64_EA,
   X86_64_0F01_REG_0,
   X86_64_0F01_REG_1,
@@ -2401,9 +2403,12 @@ struct dis386 {
 	  is true
    'R' => print 'w', 'l' or 'q' ('d' for 'l' and 'e' in Intel mode)
    'S' => print 'w', 'l' or 'q' if suffix_always is true
-   'T' => print 'q' in 64bit mode and behave as 'P' otherwise
-   'U' => print 'q' in 64bit mode and behave as 'Q' otherwise
-   'V' => print 'q' in 64bit mode and behave as 'S' otherwise
+   'T' => print 'q' in 64bit mode if instruction has no operand size
+	  prefix and behave as 'P' otherwise
+   'U' => print 'q' in 64bit mode if instruction has no operand size
+	  prefix and behave as 'Q' otherwise
+   'V' => print 'q' in 64bit mode if instruction has no operand size
+	  prefix and behave as 'S' otherwise
    'W' => print 'b', 'w' or 'l' ('d' in Intel mode)
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
    'Y' => 'q' if instruction has an REX 64bit overwrite prefix and
@@ -2411,6 +2416,8 @@ struct dis386 {
    'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
    '!' => change condition from true to false or from false to true.
    '%' => add 1 upper case letter to the macro.
+   '^' => print 'w' or 'l' depending on operand size prefix or
+	  suffix_always is true (lcall/ljmp).
 
    2 upper case letter macros:
    "XY" => print 'x' or 'y' if suffix_always is true or no register
@@ -2697,8 +2704,8 @@ static const struct dis386 dis386[] = {
   { "outB",		{ Ib, AL }, 0 },
   { "outG",		{ Ib, zAX }, 0 },
   /* e8 */
-  { "callT",		{ Jv, BND }, 0 },
-  { "jmpT",		{ Jv, BND }, 0 },
+  { X86_64_TABLE (X86_64_E8) },
+  { X86_64_TABLE (X86_64_E9) },
   { X86_64_TABLE (X86_64_EA) },
   { "jmp",		{ Jb, BND }, 0 },
   { "inB",		{ AL, indirDX }, 0 },
@@ -6832,6 +6839,18 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_D5 */
   {
     { "aad", { Ib }, 0 },
+  },
+
+  /* X86_64_E8 */
+  {
+    { "callP",		{ Jv, BND }, 0 },
+    { "callq",		{ Jv, BND }, 0 }
+  },
+
+  /* X86_64_E9 */
+  {
+    { "jmpP",		{ Jv, BND }, 0 },
+    { "jmpq",		{ Jv, BND }, 0 }
   },
 
   /* X86_64_EA */
@@ -11576,11 +11595,11 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_FF_REG_3 */
-    { "Jcall{T|}", { indirEp }, 0 },
+    { "Jcall^", { indirEp }, 0 },
   },
   {
     /* MOD_FF_REG_5 */
-    { "Jjmp{T|}", { indirEp }, 0 },
+    { "Jjmp^", { indirEp }, 0 },
   },
   {
     /* MOD_0F01_REG_0 */
@@ -14177,6 +14196,18 @@ case_S:
 		*obufp++ = vex.w ? 'q': 'd';
 	    }
 	  break;
+	case '^':
+	  if (intel_syntax)
+	    break;
+	  if ((prefixes & PREFIX_DATA) || (sizeflag & SUFFIX_ALWAYS))
+	    {
+	      if (sizeflag & DFLAG)
+		*obufp++ = 'l';
+	      else
+		*obufp++ = 'w';
+	      used_prefixes |= (prefixes & PREFIX_DATA);
+	    }
+	  break;
 	}
       alt = 0;
     }
@@ -15693,8 +15724,7 @@ OP_J (int bytemode, int sizeflag)
 	disp -= 0x100;
       break;
     case v_mode:
-      USED_REX (REX_W);
-      if ((sizeflag & DFLAG) || (rex & REX_W))
+      if (address_mode == mode_64bit || (sizeflag & DFLAG))
 	disp = get32s ();
       else
 	{
@@ -15710,7 +15740,7 @@ OP_J (int bytemode, int sizeflag)
 	    segment = ((start_pc + codep - start_codep)
 		       & ~((bfd_vma) 0xffff));
 	}
-      if (!(rex & REX_W))
+      if (address_mode != mode_64bit)
 	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:

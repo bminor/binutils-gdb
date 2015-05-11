@@ -1,3 +1,16 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt: Support i[3-7]86-*-elfiamcu target.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf_iamcu.c.
+	(eelf_iamcu.c): New.
+	* configure.tgt (targ_extra_emuls): Add elf_iamcu if elf_i386 is
+	enabled in BFD.
+	* Makefile.in: Regenerated.
+	* emulparams/elf_iamcu.sh: New file.
+
 2015-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* emulparams/msp430elf.sh (TEMPLATE_NAME): Change to msp430.

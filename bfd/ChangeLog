@@ -1,3 +1,35 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-iamcu.lo.
+	(ALL_MACHINES_CFILES): Likewise.
+	* archures.c (bfd_mach_iamcu): New.
+	(bfd_mach_i386_iamcu): Likewise.
+	(bfd_mach_i386_iamcu_intel_syntax): Likewise.
+	(bfd_iamcu_arch): Likewise.
+	(bfd_archures_list): Add &bfd_iamcu_arch.
+	* config.bfd (targ_selvecs): Add iamcu_elf32_vec to
+	i386_elf32_vec.
+	(targ_archs): Add bfd_iamcu_arch if needed.
+	* configure.ac: Support iamcu_elf32_vec.
+	* cpu-iamcu.c: New file.
+	* elf32-i386.c (elf32_iamcu_elf_object_p): New function.
+	Add support for iamcu_elf32_vec and elf32_iamcu_bed.
+	* targets.c (iamcu_elf32_vec): New.
+	(_bfd_target_vector): Add iamcu_elf32_vec.
+	* Makefile.in: Regenerated.
+	* bfd-in2.h: Likewise.
+	* configure: Likewise.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfcode.h (elf_object_p): Replace EM_486 with EM_IAMCU.
+
+2015-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Replace input_bfd
+	and output_bfd with abfd.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+
 2015-05-06  Toni Spets  <toni.spets@iki.fi>
 
 	PR ld/18372

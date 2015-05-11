@@ -196,6 +196,7 @@ extern int dwarf_check;
 
 extern void init_dwarf_regnames (unsigned int);
 extern void init_dwarf_regnames_i386 (void);
+extern void init_dwarf_regnames_iamcu (void);
 extern void init_dwarf_regnames_x86_64 (void);
 extern void init_dwarf_regnames_aarch64 (void);
 

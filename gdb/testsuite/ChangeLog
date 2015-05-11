@@ -1,3 +1,21 @@
+2015-05-09  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-xmethods.cc: Enhance test case.
+	* gdb.python/py-xmethods.exp: New tests.
+	* gdb.python/py-xmethods.py (A_indexoper): New xmethod worker
+	function.
+	(B_indexoper): Likewise.
+	(global_dm_list) : Add new xmethod worker functions.
+
+2015-05-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/coredump-filter.exp: Correctly unset
+	"coredump_var_addr" array.
+
+2015-05-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/non-existing-program.exp: Unset spawn_id.
+
 2015-05-08  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/18291

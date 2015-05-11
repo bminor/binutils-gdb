@@ -2724,11 +2724,9 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  /* STT_GNU_IFUNC must keep R_386_GOT32 relocation.  */
 	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC
 	      && irel->r_offset >= 2
-	      && bfd_get_8 (input_bfd,
-			    contents + irel->r_offset - 2) == 0x8b)
+	      && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
 	    {
-	      bfd_put_8 (output_bfd, 0x8d,
-			 contents + irel->r_offset - 2);
+	      bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
 	      irel->r_info = ELF32_R_INFO (r_symndx, R_386_GOTOFF);
 	      if (local_got_refcounts != NULL
 		  && local_got_refcounts[r_symndx] > 0)
@@ -2754,11 +2752,9 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  && h != htab->elf.hdynamic
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
 	  && irel->r_offset >= 2
-	  && bfd_get_8 (input_bfd,
-			contents + irel->r_offset - 2) == 0x8b)
+	  && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
 	{
-	  bfd_put_8 (output_bfd, 0x8d,
-		     contents + irel->r_offset - 2);
+	  bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
 	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_GOTOFF);
 	  if (h->got.refcount > 0)
 	    h->got.refcount -= 1;
@@ -5425,6 +5421,47 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 #define elf_backend_want_plt_sym	1
 
 #include "elf32-target.h"
+
+/* Intel MCU support.  */
+
+static bfd_boolean
+elf32_iamcu_elf_object_p (bfd *abfd)
+{
+  /* Set the right machine number for an IAMCU elf32 file.  */
+  bfd_default_set_arch_mach (abfd, bfd_arch_iamcu, bfd_mach_i386_iamcu);
+  return TRUE;
+}
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		iamcu_elf32_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elf32-iamcu"
+#undef ELF_ARCH
+#define ELF_ARCH			bfd_arch_iamcu
+
+#undef	ELF_MACHINE_CODE
+#define	ELF_MACHINE_CODE		EM_IAMCU
+
+#undef	ELF_OSABI
+
+#undef  elf32_bed
+#define elf32_bed			elf32_iamcu_bed
+
+#undef	elf_backend_object_p
+#define elf_backend_object_p		elf32_iamcu_elf_object_p
+
+#undef	elf_backend_static_tls_alignment
+
+#undef	elf_backend_want_plt_sym
+#define elf_backend_want_plt_sym	    0
+
+#include "elf32-target.h"
+
+/* Restore defaults.  */
+#undef	ELF_ARCH
+#define ELF_ARCH			bfd_arch_i386
+#undef	ELF_MACHINE_CODE
+#define ELF_MACHINE_CODE		EM_386
 
 /* Native Client support.  */
 

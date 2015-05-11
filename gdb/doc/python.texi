@@ -781,6 +781,16 @@ The @code{gdb.Value} object @code{py_val} is identical to that
 corresponding to @code{val}.
 @end defun
 
+@defun Value.reference_value ()
+Return a @code{gdb.Value} object which is a reference to the value
+encapsulated by this instance.
+@end defun
+
+@defun Value.const_value ()
+Return a @code{gdb.Value} object which is a @code{const} version of the
+value encapsulated by this instance.
+@end defun
+
 @defun Value.dynamic_cast (type)
 Like @code{Value.cast}, but works as if the C@t{++} @code{dynamic_cast}
 operator were used.  Consult a C@t{++} reference for details.

@@ -1,3 +1,35 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (dwarf_regnames_iamcu): New.
+	(init_dwarf_regnames_iamcu): Likewise.
+	(init_dwarf_regnames): Call init_dwarf_regnames_iamcu for EM_IAMCU.
+	* dwarf.h (init_dwarf_regnames_iamcu): New.
+	* objdump.c (dump_dwarf): Call init_dwarf_regnames_iamcu for
+	bfd_arch_iamcu.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfedit.c (enum elfclass): New.
+	(input_elf_class): Change type to enum elfclass.
+	(output_elf_class): New.
+	(elf_class): Change return type to enum elfclass.  Support EM_386
+	and EM_IAMCU.
+	(update_elf_header): Check if input and output ELF classes match.
+	(elf_machine): Support EM_386 and EM_IAMCU.
+	(main): Update input_elf_class.  Set output_elf_class.
+	* doc/binutils.texi: Update elfedit.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (init_dwarf_regnames): Replace EM_486 with EM_IAMCU.
+	* readelf.c (guess_is_rela): Likewise.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(get_elf_section_flags): Likewise.
+	(process_section_headers): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_32bit_pcrel_reloc): Likewise.
+
 2015-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Add description of MeP flags.

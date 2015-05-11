@@ -1189,7 +1189,15 @@ nios2_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   return nios2_analyze_prologue (gdbarch, start_pc, start_pc, &cache, NULL);
 }
 
-/* Implement the breakpoint_from_pc gdbarch hook.  */
+/* Implement the breakpoint_from_pc gdbarch hook.
+
+   The Nios II ABI for Linux says: "Userspace programs should not use
+   the break instruction and userspace debuggers should not insert
+   one." and "Userspace breakpoints are accomplished using the trap
+   instruction with immediate operand 31 (all ones)."
+
+   So, we use "trap 31" consistently as the breakpoint on bare-metal
+   as well as Linux targets.  */
 
 static const gdb_byte*
 nios2_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
@@ -1198,11 +1206,11 @@ nios2_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
 
-  /* R1 break encoding:
-     ((0x1e << 17) | (0x34 << 11) | (0x1f << 6) | (0x3a << 0))
-     0x003da7fa */
-  static const gdb_byte r1_breakpoint_le[] = {0xfa, 0xa7, 0x3d, 0x0};
-  static const gdb_byte r1_breakpoint_be[] = {0x0, 0x3d, 0xa7, 0xfa};
+  /* R1 trap encoding:
+     ((0x1d << 17) | (0x2d << 11) | (0x1f << 6) | (0x3a << 0))
+     0x003b6ffa */
+  static const gdb_byte r1_breakpoint_le[] = {0xfa, 0x6f, 0x3b, 0x0};
+  static const gdb_byte r1_breakpoint_be[] = {0x0, 0x3b, 0x6f, 0xfa};
   *bp_size = NIOS2_OPCODE_SIZE;
   if (byte_order_for_code == BFD_ENDIAN_BIG)
     return r1_breakpoint_be;

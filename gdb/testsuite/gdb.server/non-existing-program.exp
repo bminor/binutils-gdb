@@ -61,3 +61,7 @@ expect {
 	fail "$msg (timeout)"
     }
 }
+
+# expect defaults to spawn_id in many places.  Avoid confusing any
+# following code.
+unset spawn_id

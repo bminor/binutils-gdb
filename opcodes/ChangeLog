@@ -1,3 +1,16 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Support bfd_iamcu_arch.
+	* disassemble.c (disassembler): Support bfd_iamcu_arch.
+	* i386-gen.c (cpu_flag_init): Add CPU_IAMCU_FLAGS and
+	CPU_IAMCU_COMPAT_FLAGS.
+	(cpu_flags): Add CpuIAMCU.
+	* i386-opc.h (CpuIAMCU): New.
+	(i386_cpu_flags): Add cpuiamcu.
+	* configure: Regenerated.
+	* i386-init.h: Likewise.
+	* i386-tbl.h: Likewise.
+
 2015-04-30  DJ Delorie  <dj@redhat.com>
 
 	* disassemble.c (disassembler): Choose suitable disassembler based
