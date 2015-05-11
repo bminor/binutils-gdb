@@ -1,3 +1,15 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/abs-iamcu.d: New file.
+	* ld-i386/dummy.s: Likewise.
+	* ld-i386/foo.s: Likewise.
+	* ld-i386/iamcu-1.d: Likewise.
+	* ld-i386/iamcu-2.d: Likewise.
+	* ld-i386/iamcu-3.d: Likewise.
+	* ld-i386/start.s: Likewise.
+	* ld-i386/i386.exp (iamcu_tests): New.
+	Run iamcu_tests.
+
 2015-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18354
