@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.9
 
+* Support for process record-replay and reverse debugging on aarch64*-linux*
+  targets has been added.  GDB now supports recording of A64 instruction set
+  including advance SIMD instructions.
+
 * GDB now honors the content of the file /proc/PID/coredump_filter
   (PID is the process ID) on GNU/Linux systems.  This file can be used
   to specify the types of memory mappings that will be included in a
