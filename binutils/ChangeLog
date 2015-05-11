@@ -1,3 +1,14 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (init_dwarf_regnames): Replace EM_486 with EM_IAMCU.
+	* readelf.c (guess_is_rela): Likewise.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(get_elf_section_flags): Likewise.
+	(process_section_headers): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_32bit_pcrel_reloc): Likewise.
+
 2015-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Add description of MeP flags.

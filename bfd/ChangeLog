@@ -1,3 +1,7 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfcode.h (elf_object_p): Replace EM_486 with EM_IAMCU.
+
 2015-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_mov_to_lea): Replace input_bfd

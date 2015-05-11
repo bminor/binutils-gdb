@@ -5413,7 +5413,7 @@ init_dwarf_regnames (unsigned int e_machine)
   switch (e_machine)
     {
     case EM_386:
-    case EM_486:
+    case EM_IAMCU:
       init_dwarf_regnames_i386 ();
       break;
 

@@ -701,7 +701,7 @@ guess_is_rela (unsigned int e_machine)
     {
       /* Targets that use REL relocations.  */
     case EM_386:
-    case EM_486:
+    case EM_IAMCU:
     case EM_960:
     case EM_ARM:
     case EM_D10V:
@@ -1178,7 +1178,7 @@ dump_relocations (FILE * file,
 	  break;
 
 	case EM_386:
-	case EM_486:
+	case EM_IAMCU:
 	  rtype = elf_i386_reloc_type (type);
 	  break;
 
@@ -2091,7 +2091,7 @@ get_machine_name (unsigned e_machine)
     case EM_386:		return "Intel 80386";
     case EM_68K:		return "MC68000";
     case EM_88K:		return "MC88000";
-    case EM_486:		return "Intel 80486";
+    case EM_IAMCU:		return "Intel MCU";
     case EM_860:		return "Intel 80860";
     case EM_MIPS:		return "MIPS R3000";
     case EM_S370:		return "IBM System/370";
@@ -5252,7 +5252,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  break;
 
 		case EM_386:
-		case EM_486:
+		case EM_IAMCU:
 		case EM_X86_64:
 		case EM_L1OM:
 		case EM_K1OM:
@@ -5734,7 +5734,7 @@ process_section_headers (FILE * file)
 	      switch (elf_header.e_machine)
 		{
 		case EM_386:
-		case EM_486:
+		case EM_IAMCU:
 		case EM_X86_64:
 		case EM_L1OM:
 		case EM_K1OM:
@@ -11253,7 +11253,7 @@ is_32bit_abs_reloc (unsigned int reloc_type)
   switch (elf_header.e_machine)
     {
     case EM_386:
-    case EM_486:
+    case EM_IAMCU:
       return reloc_type == 1; /* R_386_32.  */
     case EM_68K:
       return reloc_type == 1; /* R_68K_32.  */
@@ -11430,7 +11430,7 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
   switch (elf_header.e_machine)
     {
     case EM_386:
-    case EM_486:
+    case EM_IAMCU:
       return reloc_type == 2;  /* R_386_PC32.  */
     case EM_68K:
       return reloc_type == 4;  /* R_68K_PC32.  */
