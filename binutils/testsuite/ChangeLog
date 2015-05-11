@@ -1,3 +1,8 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-5.d: New file.
+	* binutils-all/elfedit.exp: Run elfedit-5.
+
 2015-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/objdump.exp (cpus_expected): Add MeP CPU names.
