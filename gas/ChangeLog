@@ -1,5 +1,11 @@
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.tgt (arch): Set to iamcu for i386-*-elfiamcu target.
+	* config/tc-i386.c (i386_mach): Support iamcu.
+	(i386_target_format): Likewise.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (cpu_arch): Add iamcu.
 	(i386_align_code): Handle PROCESSOR_IAMCU.
 	(i386_arch): Likewise.

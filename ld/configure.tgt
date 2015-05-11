@@ -304,6 +304,8 @@ x86_64-*-netbsd*)	targ_emul=elf_x86_64
 				        sed -e 's/netbsd/netbsdelf/'`;;
 			esac ;;
 i[3-7]86-*-netware)	targ_emul=i386nw ;;
+i[3-7]86-*-elfiamcu)	targ_emul=elf_iamcu
+			targ_extra_emuls=elf_i386 ;;
 i[3-7]86-*-elf*)	targ_emul=elf_i386
 			targ_extra_emuls=elf_iamcu ;;
 x86_64-*-elf*)		targ_emul=elf_x86_64

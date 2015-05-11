@@ -2468,7 +2468,8 @@ i386_mach (void)
       else
 	return bfd_mach_x64_32;
     }
-  else if (!strcmp (default_arch, "i386"))
+  else if (!strcmp (default_arch, "i386")
+	   || !strcmp (default_arch, "iamcu"))
     {
       if (cpu_arch_isa == PROCESSOR_IAMCU)
 	{
@@ -10071,6 +10072,27 @@ i386_target_format (void)
     }
   else if (!strcmp (default_arch, "i386"))
     update_code_flag (CODE_32BIT, 1);
+  else if (!strcmp (default_arch, "iamcu"))
+    {
+      update_code_flag (CODE_32BIT, 1);
+      if (cpu_arch_isa == PROCESSOR_UNKNOWN)
+	{
+	  static const i386_cpu_flags iamcu_flags = CPU_IAMCU_FLAGS;
+	  cpu_arch_name = "iamcu";
+	  cpu_sub_arch_name = NULL;
+	  cpu_arch_flags = iamcu_flags;
+	  cpu_arch_isa = PROCESSOR_IAMCU;
+	  cpu_arch_isa_flags = iamcu_flags;
+	  if (!cpu_arch_tune_set)
+	    {
+	      cpu_arch_tune = cpu_arch_isa;
+	      cpu_arch_tune_flags = cpu_arch_isa_flags;
+	    }
+	}
+      else
+	as_fatal (_("Intel MCU doesn't support `%s' architecture"),
+		  cpu_arch_name);
+    }
   else
     as_fatal (_("unknown architecture"));
 
