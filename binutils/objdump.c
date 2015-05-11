@@ -2449,6 +2449,10 @@ dump_dwarf (bfd *abfd)
 	}
       break;
 
+    case bfd_arch_iamcu:
+      init_dwarf_regnames_iamcu ();
+      break;
+
     case bfd_arch_aarch64:
       init_dwarf_regnames_aarch64();
       break;

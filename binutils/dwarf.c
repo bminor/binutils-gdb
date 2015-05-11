@@ -5338,11 +5338,39 @@ static const char *const dwarf_regnames_i386[] =
   "k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7"  /* 93 - 100  */
 };
 
+static const char *const dwarf_regnames_iamcu[] =
+{
+  "eax", "ecx", "edx", "ebx",			  /* 0 - 3  */
+  "esp", "ebp", "esi", "edi",			  /* 4 - 7  */
+  "eip", "eflags", NULL,			  /* 8 - 10  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 11 - 18  */
+  NULL, NULL,					  /* 19 - 20  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 21 - 28  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 29 - 36  */
+  NULL, NULL, NULL,				  /* 37 - 39  */
+  "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL, /* 40 - 47  */
+  "tr", "ldtr",					  /* 48 - 49  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 50 - 57  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 58 - 65  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 66 - 73  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 74 - 81  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 82 - 89  */
+  NULL, NULL, NULL,				  /* 90 - 92  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL  /* 93 - 100  */
+};
+
 void
 init_dwarf_regnames_i386 (void)
 {
   dwarf_regnames = dwarf_regnames_i386;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_i386);
+}
+
+void
+init_dwarf_regnames_iamcu (void)
+{
+  dwarf_regnames = dwarf_regnames_iamcu;
+  dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_iamcu);
 }
 
 static const char *const dwarf_regnames_x86_64[] =
@@ -5413,8 +5441,11 @@ init_dwarf_regnames (unsigned int e_machine)
   switch (e_machine)
     {
     case EM_386:
-    case EM_IAMCU:
       init_dwarf_regnames_i386 ();
+      break;
+
+    case EM_IAMCU:
+      init_dwarf_regnames_iamcu ();
       break;
 
     case EM_X86_64:
