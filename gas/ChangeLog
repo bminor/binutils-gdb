@@ -1,3 +1,20 @@
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add iamcu.
+	(i386_align_code): Handle PROCESSOR_IAMCU.
+	(i386_arch): Likewise.
+	(i386_mach): Likewise.
+	(i386_target_format): Likewise.
+	(valid_iamcu_cpu_flags): New function.
+	(check_cpu_arch_compatible): Only allow Intel MCU instructions
+	when targeting Intel MCU.
+	(set_cpu_arch): Call valid_iamcu_cpu_flags to check if CPU flags
+	are valid for Intel MCU.
+	(md_parse_option): Likewise.
+	* tc-i386.h (ELF_TARGET_IAMCU_FORMAT): New.
+	(processor_type): Add PROCESSOR_IAMCU.
+	* doc/c-i386.texi: Document iamcu.
+
 2015-05-08  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/18347
