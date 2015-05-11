@@ -1,5 +1,12 @@
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* opcodes/i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
+	direct branch.
+	(jmp): Likewise.
+	* i386-tbl.h: Regenerated.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.ac: Support bfd_iamcu_arch.
 	* disassemble.c (disassembler): Support bfd_iamcu_arch.
 	* i386-gen.c (cpu_flag_init): Add CPU_IAMCU_FLAGS and
