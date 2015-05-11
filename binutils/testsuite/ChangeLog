@@ -1,5 +1,9 @@
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* binutils-all/objdump.exp (cpus_expected): Append iamcu.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* binutils-all/elfedit-5.d: New file.
 	* binutils-all/elfedit.exp: Run elfedit-5.
 

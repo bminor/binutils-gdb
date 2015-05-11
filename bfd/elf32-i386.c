@@ -5422,6 +5422,47 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 
 #include "elf32-target.h"
 
+/* Intel MCU support.  */
+
+static bfd_boolean
+elf32_iamcu_elf_object_p (bfd *abfd)
+{
+  /* Set the right machine number for an IAMCU elf32 file.  */
+  bfd_default_set_arch_mach (abfd, bfd_arch_iamcu, bfd_mach_i386_iamcu);
+  return TRUE;
+}
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		iamcu_elf32_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elf32-iamcu"
+#undef ELF_ARCH
+#define ELF_ARCH			bfd_arch_iamcu
+
+#undef	ELF_MACHINE_CODE
+#define	ELF_MACHINE_CODE		EM_IAMCU
+
+#undef	ELF_OSABI
+
+#undef  elf32_bed
+#define elf32_bed			elf32_iamcu_bed
+
+#undef	elf_backend_object_p
+#define elf_backend_object_p		elf32_iamcu_elf_object_p
+
+#undef	elf_backend_static_tls_alignment
+
+#undef	elf_backend_want_plt_sym
+#define elf_backend_want_plt_sym	    0
+
+#include "elf32-target.h"
+
+/* Restore defaults.  */
+#undef	ELF_ARCH
+#define ELF_ARCH			bfd_arch_i386
+#undef	ELF_MACHINE_CODE
+#define ELF_MACHINE_CODE		EM_386
+
 /* Native Client support.  */
 
 #undef	TARGET_LITTLE_SYM
