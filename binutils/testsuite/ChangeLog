@@ -1,5 +1,11 @@
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* binutils-all/elfedit-1.d: Skip x86_64-*-gnux32.
+	* lib/utils-lib.exp (run_dump_test): Allow mixing target and
+	not-target directives.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* binutils-all/objdump.exp (cpus_expected): Append iamcu.
 
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
