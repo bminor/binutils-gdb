@@ -1,3 +1,8 @@
+2015-05-12  Gary Benson <gbenson@redhat.com>
+
+	* gdb.texinfo (General Query Packets): Document
+	qXfer:exec-file:read with empty annex.
+
 2015-05-09  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python.texi (Values From Inferior): Add descriptions of new

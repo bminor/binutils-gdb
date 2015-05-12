@@ -1146,17 +1146,32 @@ handle_qxfer_exec_file (const char *const_annex,
 			gdb_byte *readbuf, const gdb_byte *writebuf,
 			ULONGEST offset, LONGEST len)
 {
-  char *annex, *file;
+  char *file;
   ULONGEST pid;
   int total_len;
 
   if (the_target->pid_to_exec_file == NULL || writebuf != NULL)
     return -2;
 
-  annex = alloca (strlen (const_annex) + 1);
-  strcpy (annex, const_annex);
-  annex = unpack_varlen_hex (annex, &pid);
-  if (annex[0] != '\0' || pid == 0)
+  if (const_annex[0] == '\0')
+    {
+      if (current_thread == NULL)
+	return -1;
+
+      pid = pid_of (current_thread);
+    }
+  else
+    {
+      char *annex = alloca (strlen (const_annex) + 1);
+
+      strcpy (annex, const_annex);
+      annex = unpack_varlen_hex (annex, &pid);
+
+      if (annex[0] != '\0')
+	return -1;
+    }
+
+  if (pid <= 0)
     return -1;
 
   file = (*the_target->pid_to_exec_file) (pid);

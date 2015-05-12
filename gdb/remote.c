@@ -1558,7 +1558,7 @@ remote_add_inferior (int fake_pid_p, int pid, int attached,
 
   /* If no main executable is currently open then attempt to
      open the file that was executed to create this inferior.  */
-  if (try_open_exec && !fake_pid_p && get_exec_file (0) == NULL)
+  if (try_open_exec && get_exec_file (0) == NULL)
     exec_file_locate_attach (pid, 1);
 
   return inf;
@@ -11666,7 +11666,8 @@ static char *
 remote_pid_to_exec_file (struct target_ops *self, int pid)
 {
   static char *filename = NULL;
-  char annex[9];
+  struct inferior *inf;
+  char *annex = NULL;
 
   if (packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)
     return NULL;
@@ -11674,7 +11675,19 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
   if (filename != NULL)
     xfree (filename);
 
-  xsnprintf (annex, sizeof (annex), "%x", pid);
+  inf = find_inferior_pid (pid);
+  if (inf == NULL)
+    internal_error (__FILE__, __LINE__,
+		    _("not currently attached to process %d"), pid);
+
+  if (!inf->fake_pid_p)
+    {
+      const int annex_size = 9;
+
+      annex = alloca (annex_size);
+      xsnprintf (annex, annex_size, "%x", pid);
+    }
+
   filename = target_read_stralloc (&current_target,
 				   TARGET_OBJECT_EXEC_FILE, annex);
 

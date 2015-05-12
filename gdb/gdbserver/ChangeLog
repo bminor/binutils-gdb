@@ -1,3 +1,8 @@
+2015-05-12  Gary Benson <gbenson@redhat.com>
+
+	* server.c (handle_qxfer_exec_file): Use current process
+	if annex is empty.
+
 2015-05-08  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* linux-nios2-low.c: Include elf/common.h.  Adjust comments.

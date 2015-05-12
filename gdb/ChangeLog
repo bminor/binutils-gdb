@@ -1,3 +1,9 @@
+2015-05-12  Gary Benson <gbenson@redhat.com>
+
+	* remote.c (remote_add_inferior): Call exec_file_locate_attach
+	for fake PIDs as well as real ones.
+	(remote_pid_to_exec_file): Send empty annex if PID is fake.
+
 2015-05-09  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* NEWS (Python Scripting): Mention the new gdb.Value methods.

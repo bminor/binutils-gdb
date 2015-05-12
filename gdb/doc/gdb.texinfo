@@ -36558,7 +36558,8 @@ by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 Return the full absolute name of the file that was executed to create
 a process running on the remote system.  The annex specifies the
 numeric process ID of the process to query, encoded as a hexadecimal
-number.
+number.  If the annex part is empty the remote stub should return the
+filename corresponding to the currently executing process.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
