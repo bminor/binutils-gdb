@@ -260,7 +260,7 @@ struct extension_language_ops
   /* xmethod support:
      clone_xmethod_worker_data, free_xmethod_worker_data,
      get_matching_xmethod_workers, get_xmethod_arg_types,
-     invoke_xmethod.
+     get_xmethod_return_type, invoke_xmethod.
      These methods are optional and may be NULL, but if one of them is
      implemented then they all must be.  */
 
@@ -292,6 +292,18 @@ struct extension_language_ops
      struct xmethod_worker *worker,
      int *nargs,
      struct type ***arg_types);
+
+  /* Given a WORKER servicing a particular method, fetch the type of the
+     result of the method.  OBJECT, ARGS, NARGS are the same as for
+     invoke_xmethod.  The result type is stored in *RESULT_TYPE.
+     For backward compatibility with 7.9, which did not support getting the
+     result type, if the get_result_type operation is not provided by WORKER
+     then EXT_LANG_RC_OK is returned and NULL is returned in *RESULT_TYPE.  */
+  enum ext_lang_rc (*get_xmethod_result_type)
+    (const struct extension_language_defn *extlang,
+     struct xmethod_worker *worker,
+     struct value *object, struct value **args, int nargs,
+     struct type **result_type);
 
   /* Invoke the xmethod serviced by WORKER.  The xmethod is invoked
      on OBJECT with arguments in the array ARGS.  NARGS is the length of

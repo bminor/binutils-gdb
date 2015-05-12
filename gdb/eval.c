@@ -1739,6 +1739,15 @@ evaluate_subexp_standard (struct type *expect_type,
 	      return value_zero (builtin_type (exp->gdbarch)->builtin_int,
 				 not_lval);
 	    }
+	  else if (TYPE_CODE (ftype) == TYPE_CODE_XMETHOD)
+	    {
+	      struct type *return_type
+		= result_type_of_xmethod (argvec[0], nargs, argvec + 1);
+
+	      if (return_type == NULL)
+		error (_("Xmethod is missing return type."));
+	      return value_zero (return_type, not_lval);
+	    }
 	  else if (TYPE_GNU_IFUNC (ftype))
 	    return allocate_value (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (ftype)));
 	  else if (TYPE_TARGET_TYPE (ftype))

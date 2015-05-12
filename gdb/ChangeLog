@@ -1,3 +1,28 @@
+2015-05-12  Doug Evans  <dje@google.com>
+
+	PR python/18285
+	* NEWS: Document new gdb.XMethodWorker.get_result_type method.
+	* eval.c (evaluate_subexp_standard) <OP_FUNCALL>: Handle
+	EVAL_AVOID_SIDE_EFFECTS for xmethods.
+	* extension-priv.h (struct extension_language_ops)
+	<get_xmethod_result_type>: New member.
+	* extension.c (get_xmethod_result_type): New function.
+	* extension.h (get_xmethod_result_type): Declare.
+	* python/py-xmethods.c (get_result_type_method_name): New static
+	global.
+	(py_get_result_type_method_name): Ditto.
+	(gdbpy_get_xmethod_result_type): New function.
+	(gdbpy_initialize_xmethods): Initialize py_get_result_type_method_name.
+	* python/python-internal.h (gdbpy_get_xmethod_result_type): Declare.
+	* python/python.c (python_extension_ops): Add
+	gdbpy_get_xmethod_result_type.
+	* python/lib/gdb/xmethod.py (XMethodWorker): Add get_result_type.
+	* valarith.c (value_x_binop): Handle EVAL_AVOID_SIDE_EFFECTS for
+	xmethods.
+	(value_x_unop): Ditto.
+	* value.c (result_type_of_xmethod): New function.
+	* value.h (result_type_of_xmethod): Declare.
+
 2015-05-02  Pierre Muller  <muller@sourceware.org>
 
 	PR pascal/17815

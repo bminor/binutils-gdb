@@ -1,3 +1,9 @@
+2015-05-12  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-xmethods.exp: Add ptype tests.
+	* gdb.python/py-xmethods.py (E_method_char_worker): Add
+	get_result_type method.
+
 2015-05-02  Pierre Muller  <muller@sourceware.org>
 
 	PR pascal/17815

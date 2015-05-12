@@ -30,11 +30,13 @@
 static const char enabled_field_name[] = "enabled";
 static const char match_method_name[] = "match";
 static const char get_arg_types_method_name[] = "get_arg_types";
+static const char get_result_type_method_name[] = "get_result_type";
 static const char invoke_method_name[] = "invoke";
 static const char matchers_attr_str[] = "xmethods";
 
 static PyObject *py_match_method_name = NULL;
 static PyObject *py_get_arg_types_method_name = NULL;
+static PyObject *py_get_result_type_method_name = NULL;
 static PyObject *py_invoke_method_name = NULL;
 
 struct gdbpy_worker_data
@@ -502,6 +504,106 @@ gdbpy_get_xmethod_arg_types (const struct extension_language_defn *extlang,
   return EXT_LANG_RC_OK;
 }
 
+/* Implementation of get_xmethod_result_type for Python.  */
+
+enum ext_lang_rc
+gdbpy_get_xmethod_result_type (const struct extension_language_defn *extlang,
+			       struct xmethod_worker *worker,
+			       struct value *obj,
+			       struct value **args, int nargs,
+			       struct type **result_type_ptr)
+{
+  struct gdbpy_worker_data *worker_data = worker->data;
+  PyObject *py_worker = worker_data->worker;
+  PyObject *py_value_obj, *py_arg_tuple, *py_result_type;
+  PyObject *get_result_type_method;
+  struct type *obj_type, *this_type;
+  struct cleanup *cleanups;
+  int i;
+
+  cleanups = ensure_python_env (get_current_arch (), current_language);
+
+  /* First see if there is a get_result_type method.
+     If not this could be an old xmethod (pre 7.9.1).  */
+  get_result_type_method
+    = PyObject_GetAttrString (py_worker, get_result_type_method_name);
+  if (get_result_type_method == NULL)
+    {
+      PyErr_Clear ();
+      do_cleanups (cleanups);
+      *result_type_ptr = NULL;
+      return EXT_LANG_RC_OK;
+    }
+  make_cleanup_py_decref (get_result_type_method);
+
+  obj_type = check_typedef (value_type (obj));
+  this_type = check_typedef (type_object_to_type (worker_data->this_type));
+  if (TYPE_CODE (obj_type) == TYPE_CODE_PTR)
+    {
+      struct type *this_ptr = lookup_pointer_type (this_type);
+
+      if (!types_equal (obj_type, this_ptr))
+	obj = value_cast (this_ptr, obj);
+    }
+  else if (TYPE_CODE (obj_type) == TYPE_CODE_REF)
+    {
+      struct type *this_ref = lookup_reference_type (this_type);
+
+      if (!types_equal (obj_type, this_ref))
+	obj = value_cast (this_ref, obj);
+    }
+  else
+    {
+      if (!types_equal (obj_type, this_type))
+	obj = value_cast (this_type, obj);
+    }
+  py_value_obj = value_to_value_object (obj);
+  if (py_value_obj == NULL)
+    goto Fail;
+  make_cleanup_py_decref (py_value_obj);
+
+  py_arg_tuple = PyTuple_New (nargs + 1);
+  if (py_arg_tuple == NULL)
+    goto Fail;
+  make_cleanup_py_decref (py_arg_tuple);
+
+  /* PyTuple_SET_ITEM steals the reference of the element.  Hence INCREF the
+     reference to the 'this' object as we have a cleanup to DECREF it.  */
+  Py_INCREF (py_value_obj);
+  PyTuple_SET_ITEM (py_arg_tuple, 0, py_value_obj);
+
+  for (i = 0; i < nargs; i++)
+    {
+      PyObject *py_value_arg = value_to_value_object (args[i]);
+
+      if (py_value_arg == NULL)
+	goto Fail;
+      PyTuple_SET_ITEM (py_arg_tuple, i + 1, py_value_arg);
+    }
+
+  py_result_type = PyObject_CallObject (get_result_type_method, py_arg_tuple);
+  if (py_result_type == NULL)
+    goto Fail;
+  make_cleanup_py_decref (py_result_type);
+
+  *result_type_ptr = type_object_to_type (py_result_type);
+  if (*result_type_ptr == NULL)
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Type returned by the get_result_type method of an"
+			 " xmethod worker object is not a gdb.Type object."));
+      goto Fail;
+    }
+
+  do_cleanups (cleanups);
+  return EXT_LANG_RC_OK;
+
+ Fail:
+  gdbpy_print_stack ();
+  do_cleanups (cleanups);
+  return EXT_LANG_RC_ERROR;
+}
+
 /* Implementation of invoke_xmethod for Python.  */
 
 struct value *
@@ -636,6 +738,11 @@ gdbpy_initialize_xmethods (void)
   py_get_arg_types_method_name
     = PyString_FromString (get_arg_types_method_name);
   if (py_get_arg_types_method_name == NULL)
+    return -1;
+
+  py_get_result_type_method_name
+    = PyString_FromString (get_result_type_method_name);
+  if (py_get_result_type_method_name == NULL)
     return -1;
 
   return 1;

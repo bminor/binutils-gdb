@@ -482,6 +482,21 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	  argvec[1] = argvec[0];
 	  argvec++;
 	}
+      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_XMETHOD)
+	{
+	  /* Static xmethods are not supported yet.  */
+	  gdb_assert (static_memfuncp == 0);
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    {
+	      struct type *return_type
+		= result_type_of_xmethod (argvec[0], 2, argvec + 1);
+
+	      if (return_type == NULL)
+		error (_("Xmethod is missing return type."));
+	      return value_zero (return_type, VALUE_LVAL (arg1));
+	    }
+	  return call_xmethod (argvec[0], 2, argvec + 1);
+	}
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  struct type *return_type;
@@ -490,16 +505,8 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-
-      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_XMETHOD)
-	{
-	  /* Static xmethods are not supported yet.  */
-	  gdb_assert (static_memfuncp == 0);
-	  return call_xmethod (argvec[0], 2, argvec + 1);
-	}
-      else
-	return call_function_by_hand (argvec[0], 2 - static_memfuncp,
-				      argvec + 1);
+      return call_function_by_hand (argvec[0], 2 - static_memfuncp,
+				    argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);
@@ -594,6 +601,21 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	  nargs --;
 	  argvec++;
 	}
+      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_XMETHOD)
+	{
+	  /* Static xmethods are not supported yet.  */
+	  gdb_assert (static_memfuncp == 0);
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    {
+	      struct type *return_type
+		= result_type_of_xmethod (argvec[0], 1, argvec + 1);
+
+	      if (return_type == NULL)
+		error (_("Xmethod is missing return type."));
+	      return value_zero (return_type, VALUE_LVAL (arg1));
+	    }
+	  return call_xmethod (argvec[0], 1, argvec + 1);
+	}
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  struct type *return_type;
@@ -602,14 +624,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_XMETHOD)
-	{
-	  /* Static xmethods are not supported yet.  */
-	  gdb_assert (static_memfuncp == 0);
-	  return call_xmethod (argvec[0], 1, argvec + 1);
-	}
-      else
-	return call_function_by_hand (argvec[0], nargs, argvec + 1);
+      return call_function_by_hand (argvec[0], nargs, argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);

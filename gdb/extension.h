@@ -251,4 +251,8 @@ extern xmethod_worker_vec *get_matching_xmethod_workers
 
 extern struct type **get_xmethod_arg_types (struct xmethod_worker *, int *);
 
+extern struct type *get_xmethod_result_type (struct xmethod_worker *,
+					     struct value *object,
+					     struct value **args, int nargs);
+
 #endif /* EXTENSION_H */

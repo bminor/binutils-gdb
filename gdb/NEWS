@@ -1,6 +1,12 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes in GDB 7.9.1
+
+* Python Scripting
+
+  ** Xmethods can now specify a result type.
+
 *** Changes in GDB 7.9
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.

@@ -343,6 +343,11 @@ extern enum ext_lang_rc gdbpy_get_xmethod_arg_types
    struct xmethod_worker *worker,
    int *nargs,
    struct type ***arg_types);
+extern enum ext_lang_rc gdbpy_get_xmethod_result_type
+  (const struct extension_language_defn *extlang,
+   struct xmethod_worker *worker,
+   struct value *object, struct value **args, int nargs,
+   struct type **result_type);
 extern struct value *gdbpy_invoke_xmethod
   (const struct extension_language_defn *extlang,
    struct xmethod_worker *worker,

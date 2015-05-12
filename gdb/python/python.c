@@ -190,6 +190,7 @@ static const struct extension_language_ops python_extension_ops =
   gdbpy_free_xmethod_worker_data,
   gdbpy_get_matching_xmethod_workers,
   gdbpy_get_xmethod_arg_types,
+  gdbpy_get_xmethod_result_type,
   gdbpy_invoke_xmethod
 };
 
