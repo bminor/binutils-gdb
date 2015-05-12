@@ -128,6 +128,30 @@ qXfer:exec-file:read
   Return the full absolute name of the file that was executed to
   create a process running on the remote system.
 
+fork stop reason
+  Indicates that a fork system call was executed.
+
+vfork stop reason
+  Indicates that a vfork system call was executed.
+
+vforkdone stop reason
+  Indicates that a vfork child of the specified process has executed
+  an exec or exit, allowing the vfork parent to resume execution.
+
+fork-events and vfork-events features in qSupported
+  The qSupported packet allows GDB to request support for fork and 
+  vfork events using new 'gdbfeatures' fork-events and vfork-events,
+  and the qSupported response can contain the corresponding
+  'stubfeatures'.  Set and show commands can be used to display
+  whether these features are enabled.
+
+* Extended-remote fork events
+
+  ** GDB now has support for fork events on extended-remote Linux
+     targets.  For targets with Linux kernels 2.5.60 and later, this
+     enables follow-fork-mode and detach-on-fork for both fork and
+     vfork, as well as fork and vfork catchpoints.
+
 * The info record command now shows the recording format and the
   branch tracing configuration for the current thread when using
   the btrace record target.

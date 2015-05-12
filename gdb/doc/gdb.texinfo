@@ -3135,6 +3135,9 @@ create additional processes using the @code{fork} or @code{vfork} functions.
 Currently, the only platforms with this feature are HP-UX (11.x and later
 only?) and @sc{gnu}/Linux (kernel version 2.5.60 and later).
 
+The fork debugging commands are supported in both native mode and when
+connected to @code{gdbserver} using @kbd{target extended-remote}.
+
 By default, when a program forks, @value{GDBN} will continue to debug
 the parent process and the child process will run unimpeded.
 
@@ -19938,6 +19941,14 @@ are:
 @tab @code{hwbreak stop reason}
 @tab @code{hbreak}
 
+@item @code{fork-event-feature}
+@tab @code{fork stop reason}
+@tab @code{fork}
+
+@item @code{vfork-event-feature}
+@tab @code{vfork stop reason}
+@tab @code{vfork}
+
 @end multitable
 
 @node Remote Stub
@@ -35372,6 +35383,49 @@ The @var{r} part must be left empty.
 
 The same remarks about @samp{qSupported} and non-stop mode above
 apply.
+
+@cindex fork events, remote reply
+@item fork
+The packet indicates that @code{fork} was called, and @var{r}
+is the thread ID of the new child process.  Refer to
+@ref{thread-id syntax} for the format of the @var{thread-id}
+field.  This packet is only applicable to targets that support
+fork events.
+
+This packet should not be sent by default; older @value{GDBN} versions
+did not support it.  @value{GDBN} requests it, by supplying an
+appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
+remote stub must also supply the appropriate @samp{qSupported} feature
+indicating support.
+
+@cindex vfork events, remote reply
+@item vfork
+The packet indicates that @code{vfork} was called, and @var{r}
+is the thread ID of the new child process. Refer to
+@ref{thread-id syntax} for the format of the @var{thread-id}
+field.  This packet is only applicable to targets that support
+vfork events.
+
+This packet should not be sent by default; older @value{GDBN} versions
+did not support it.  @value{GDBN} requests it, by supplying an
+appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
+remote stub must also supply the appropriate @samp{qSupported} feature
+indicating support.
+
+@cindex vforkdone events, remote reply
+@item vforkdone
+The packet indicates that a child process created by a vfork
+has either called @code{exec} or terminated, so that the
+address spaces of the parent and child process are no longer
+shared. The @var{r} part is ignored.  This packet is only
+applicable to targets that support vforkdone events.
+
+This packet should not be sent by default; older @value{GDBN} versions
+did not support it.  @value{GDBN} requests it, by supplying an
+appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
+remote stub must also supply the appropriate @samp{qSupported} feature
+indicating support.
+
 @end table
 
 @item W @var{AA}
@@ -35964,6 +36018,18 @@ reason in stop replies.  @xref{swbreak stop reason}, for details.
 @item hwbreak
 This feature indicates whether @value{GDBN} supports the hwbreak stop
 reason in stop replies.  @xref{swbreak stop reason}, for details.
+
+@item fork-events
+This feature indicates whether @value{GDBN} supports fork event
+extensions to the remote protocol.  @value{GDBN} does not use such
+extensions unless the stub also reports that it supports them by
+including @samp{fork-events+} in its @samp{qSupported} reply.
+
+@item vfork-events
+This feature indicates whether @value{GDBN} supports vfork event
+extensions to the remote protocol.  @value{GDBN} does not use such
+extensions unless the stub also reports that it supports them by
+including @samp{vfork-events+} in its @samp{qSupported} reply.
 @end table
 
 Stubs should ignore any unknown values for
@@ -36207,6 +36273,16 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{fork-events}
+@tab No
+@tab @samp{-}
+@tab No
+
+@item @samp{vfork-events}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36398,6 +36474,13 @@ breakpoints.
 @item hwbreak
 The remote stub reports the @samp{hwbreak} stop reason for hardware
 breakpoints.
+
+@item fork-events
+The remote stub reports the @samp{fork} stop reason for fork events.
+
+@item vfork-events
+The remote stub reports the @samp{vfork} stop reason for vfork events
+and vforkdone events.
 
 @end table
 

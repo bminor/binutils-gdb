@@ -1,3 +1,15 @@
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.texinfo (Forks): Note that fork debugging is
+	supported in extended mode.
+	(Remote Configuration): Add fork event features to table
+	of packet settings.
+	(Stop Reply Packets): Add fork events to list of stop reasons.
+	(General Query Packets): Add fork events to tables of
+	'gdbfeatures' and 'stub features' supported in the qSupported
+	packet, as well as to the list containing stub feature
+	details.
+
 2015-05-12  Gary Benson <gbenson@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Document

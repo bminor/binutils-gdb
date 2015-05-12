@@ -1,5 +1,10 @@
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
+	* NEWS: Announce fork support in the RSP and support
+	for fork debugging in extended mode.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
 	* remote.c (remote_insert_fork_catchpoint): New function.
 	(remote_remove_fork_catchpoint): New function.
 	(remote_insert_vfork_catchpoint): New function.
