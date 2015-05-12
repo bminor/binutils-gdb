@@ -1462,6 +1462,14 @@ remote_multi_process_p (struct remote_state *rs)
   return packet_support (PACKET_multiprocess_feature) == PACKET_ENABLE;
 }
 
+/* Returns true if fork events are supported.  */
+
+static int
+remote_fork_event_p (struct remote_state *rs)
+{
+  return packet_support (PACKET_fork_event_feature) == PACKET_ENABLE;
+}
+
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
 static struct async_signal_handler *async_sigint_remote_twice_token;
 static struct async_signal_handler *async_sigint_remote_token;
@@ -4430,16 +4438,42 @@ remote_open_1 (const char *name, int from_tty,
     wait_forever_enabled_p = 1;
 }
 
-/* This takes a program previously attached to and detaches it.  After
-   this is done, GDB can be used to debug some other program.  We
-   better not have left any breakpoints in the target program or it'll
-   die when it hits one.  */
+/* Detach the specified process.  */
 
 static void
-remote_detach_1 (const char *args, int from_tty, int extended)
+remote_detach_pid (int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (remote_multi_process_p (rs))
+    xsnprintf (rs->buf, get_remote_packet_size (), "D;%x", pid);
+  else
+    strcpy (rs->buf, "D");
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0] == 'O' && rs->buf[1] == 'K')
+    ;
+  else if (rs->buf[0] == '\0')
+    error (_("Remote doesn't know how to detach"));
+  else
+    error (_("Can't detach process."));
+}
+
+/* This detaches a program to which we previously attached, using
+   inferior_ptid to identify the process.  After this is done, GDB
+   can be used to debug some other program.  We better not have left
+   any breakpoints in the target program or it'll die when it hits
+   one.  */
+
+static void
+remote_detach_1 (const char *args, int from_tty)
 {
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
+  struct thread_info *tp = find_thread_ptid (inferior_ptid);
+  int is_fork_parent;
 
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
@@ -4458,37 +4492,74 @@ remote_detach_1 (const char *args, int from_tty, int extended)
     }
 
   /* Tell the remote target to detach.  */
-  if (remote_multi_process_p (rs))
-    xsnprintf (rs->buf, get_remote_packet_size (), "D;%x", pid);
-  else
-    strcpy (rs->buf, "D");
+  remote_detach_pid (pid);
 
-  putpkt (rs->buf);
-  getpkt (&rs->buf, &rs->buf_size, 0);
-
-  if (rs->buf[0] == 'O' && rs->buf[1] == 'K')
-    ;
-  else if (rs->buf[0] == '\0')
-    error (_("Remote doesn't know how to detach"));
-  else
-    error (_("Can't detach process."));
-
-  if (from_tty && !extended)
+  if (from_tty && !rs->extended)
     puts_filtered (_("Ending remote debugging.\n"));
 
-  target_mourn_inferior ();
+  /* Check to see if we are detaching a fork parent.  Note that if we
+     are detaching a fork child, tp == NULL.  */
+  is_fork_parent = (tp != NULL
+		    && tp->pending_follow.kind == TARGET_WAITKIND_FORKED);
+
+  /* If doing detach-on-fork, we don't mourn, because that will delete
+     breakpoints that should be available for the followed inferior.  */
+  if (!is_fork_parent)
+    target_mourn_inferior ();
+  else
+    {
+      inferior_ptid = null_ptid;
+      detach_inferior (pid);
+    }
 }
 
 static void
 remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
-  remote_detach_1 (args, from_tty, 0);
+  remote_detach_1 (args, from_tty);
 }
 
 static void
 extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
-  remote_detach_1 (args, from_tty, 1);
+  remote_detach_1 (args, from_tty);
+}
+
+/* Target follow-fork function for remote targets.  On entry, and
+   at return, the current inferior is the fork parent.
+
+   Note that although this is currently only used for extended-remote,
+   it is named remote_follow_fork in anticipation of using it for the
+   remote target as well.  */
+
+static int
+remote_follow_fork (struct target_ops *ops, int follow_child,
+		    int detach_fork)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (remote_fork_event_p (rs))
+    {
+      /* When following the parent and detaching the child, we detach
+	 the child here.  For the case of following the child and
+	 detaching the parent, the detach is done in the target-
+	 independent follow fork code in infrun.c.  We can't use
+	 target_detach when detaching an unfollowed child because
+	 the client side doesn't know anything about the child.  */
+      if (detach_fork && !follow_child)
+	{
+	  /* Detach the fork child.  */
+	  ptid_t child_ptid;
+	  pid_t child_pid;
+
+	  child_ptid = inferior_thread ()->pending_follow.value.related_pid;
+	  child_pid = ptid_get_pid (child_ptid);
+
+	  remote_detach_pid (child_pid);
+	  detach_inferior (child_pid);
+	}
+    }
+  return 0;
 }
 
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
@@ -5650,6 +5721,11 @@ Packet: '%s'\n"),
 
 	      p = unpack_varlen_hex (++p1, &c);
 	      event->core = c;
+	    }
+	  else if (strncmp (p, "fork", p1 - p) == 0)
+	    {
+	      event->ws.value.related_pid = read_ptid (++p1, &p);
+	      event->ws.kind = TARGET_WAITKIND_FORKED;
 	    }
 	  else
 	    {
@@ -9505,8 +9581,11 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
       if (ptid_equal (magic_null_ptid, ptid))
 	xsnprintf (buf, sizeof buf, "Thread <main>");
       else if (rs->extended && remote_multi_process_p (rs))
-	xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		   ptid_get_pid (ptid), ptid_get_lwp (ptid));
+	if (ptid_get_lwp (ptid) == 0)
+	  return normal_pid_to_str (ptid);
+	else
+	  xsnprintf (buf, sizeof buf, "Thread %d.%ld",
+		     ptid_get_pid (ptid), ptid_get_lwp (ptid));
       else
 	xsnprintf (buf, sizeof buf, "Thread %ld",
 		   ptid_get_lwp (ptid));
@@ -11870,6 +11949,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_kill = extended_remote_kill;
   extended_remote_ops.to_supports_disable_randomization
     = extended_remote_supports_disable_randomization;
+  extended_remote_ops.to_follow_fork = remote_follow_fork;
 }
 
 static int

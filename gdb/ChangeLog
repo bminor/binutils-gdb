@@ -1,5 +1,35 @@
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
+	* linux-nat.c (linux_nat_ptrace_options): New function.
+	(linux_init_ptrace, wait_lwp, linux_nat_filter_event):
+	Call linux_nat_ptrace_options and use different argument to
+	linux_enable_event_reporting.
+	(_initialize_linux_nat): Delete call to
+	linux_ptrace_set_additional_flags.
+	* nat/linux-ptrace.c (current_ptrace_options): Rename to 
+	supported_ptrace_options.
+	(additional_flags): Delete variable.
+	(linux_check_ptrace_features): Use supported_ptrace_options.
+	(linux_test_for_tracesysgood, linux_test_for_tracefork):
+	Likewise, and remove additional_flags check.
+	(linux_enable_event_reporting): Change 'attached' argument to
+	'options'.  Use supported_ptrace_options.
+	(ptrace_supports_feature): Change comment.  Use 
+	supported_ptrace_options.
+	(linux_ptrace_set_additional_flags): Delete function.
+	* nat/linux-ptrace.h (linux_ptrace_set_additional_flags):
+	Delete function prototype.
+	* remote.c (remote_fork_event_p): New function.
+	(remote_detach_pid): New function.
+	(remote_detach_1): Call remote_detach_pid, don't mourn inferior
+	if doing detach-on-fork.
+	(remote_follow_fork): New function.
+	(remote_parse_stop_reply): Handle new "T" stop reason "fork".
+	(remote_pid_to_str): Print "process" strings for pid/0/0 ptids.
+	(init_extended_remote_ops): Initialize to_follow_fork.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
 	* nat/linux-ptrace.c (linux_check_ptrace_features): Change
 	from static to extern.
 	* nat/linux-ptrace.h (linux_check_ptrace_features): Declare.

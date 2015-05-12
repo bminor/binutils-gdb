@@ -84,6 +84,7 @@ extern int disable_packet_qfThreadInfo;
 
 extern int run_once;
 extern int multi_process;
+extern int report_fork_events;
 extern int non_stop;
 
 /* True if the "swbreak+" feature is active.  In that case, GDB wants

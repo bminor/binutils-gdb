@@ -287,6 +287,9 @@ struct target_ops
   /* Returns true if vfork events are supported.  */
   int (*supports_vfork_events) (void);
 
+  /* Allows target to re-initialize connection-specific settings.  */
+  void (*handle_new_gdb_connection) (void);
+
   /* If not NULL, target-specific routine to process monitor command.
      Returns 1 if handled, or 0 to perform default processing.  */
   int (*handle_monitor_command) (char *);
@@ -433,6 +436,10 @@ int kill_inferior (int);
 #define target_supports_vfork_events() \
   (the_target->supports_vfork_events ? \
    (*the_target->supports_vfork_events) () : 0)
+
+#define target_handle_new_gdb_connection() \
+  (the_target->handle_new_gdb_connection ? \
+   (*the_target->handle_new_gdb_connection) () : 0)
 
 #define detach_inferior(pid) \
   (*the_target->detach) (pid)

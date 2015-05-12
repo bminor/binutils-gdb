@@ -1,5 +1,32 @@
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
+	* linux-low.c (handle_extended_wait): Implement return value,
+	rename argument 'event_child' to 'event_lwp', handle
+	PTRACE_EVENT_FORK, call internal_error for unrecognized event.
+	(linux_low_ptrace_options): New function.
+	(linux_low_filter_event): Call linux_low_ptrace_options,
+	use different argument fo linux_enable_event_reporting,
+	use return value from handle_extended_wait.
+	(extended_event_reported): New function.
+	(linux_wait_1): Call extended_event_reported and set
+	status to report fork events.
+	(linux_write_memory): Add pid to debug message.
+	(reset_lwp_ptrace_options_callback): New function.
+	(linux_handle_new_gdb_connection): New function.
+	(linux_target_ops): Initialize new structure member.
+	* linux-low.h (struct lwp_info) <waitstatus>: New member.
+	* lynx-low.c: Initialize new structure member.
+	* remote-utils.c (prepare_resume_reply): Implement stop reason
+	"fork" for "T" stop message.
+	* server.c (handle_query): Call handle_new_gdb_connection.
+	* server.h (report_fork_events): Declare global flag.
+	* target.h (struct target_ops) <handle_new_gdb_connection>:
+	New member.
+	(target_handle_new_gdb_connection): New macro.
+	* win32-low.c: Initialize new structure member.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
 	* mem-break.c (APPEND_TO_LIST): Define macro.
 	(clone_agent_expr): New function.
 	(clone_one_breakpoint): New function.

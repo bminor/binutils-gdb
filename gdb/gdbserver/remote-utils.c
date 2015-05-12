@@ -1114,12 +1114,24 @@ prepare_resume_reply (char *buf, ptid_t ptid,
   switch (status->kind)
     {
     case TARGET_WAITKIND_STOPPED:
+    case TARGET_WAITKIND_FORKED:
       {
 	struct thread_info *saved_thread;
 	const char **regp;
 	struct regcache *regcache;
 
-	sprintf (buf, "T%02x", status->value.sig);
+	if (status->kind == TARGET_WAITKIND_FORKED && report_fork_events)
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+
+	    sprintf (buf, "T%02xfork:", signal);
+	    buf += strlen (buf);
+	    buf = write_ptid (buf, status->value.related_pid);
+	    strcat (buf, ";");
+	  }
+	else
+	  sprintf (buf, "T%02x", status->value.sig);
+
 	buf += strlen (buf);
 
 	saved_thread = current_thread;

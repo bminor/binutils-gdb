@@ -271,6 +271,10 @@ struct lwp_info
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
 
+  /* This is used to store extended ptrace event information until
+     it is reported to GDB.  */
+  struct target_waitstatus waitstatus;
+
   /* When stopped is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is
      running, this is the address at which the lwp was resumed.  */

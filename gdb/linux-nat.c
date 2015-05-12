@@ -368,6 +368,25 @@ pull_pid_from_list (struct simple_pid_list **listp, int pid, int *statusp)
   return 0;
 }
 
+/* Return the ptrace options that we want to try to enable.  */
+
+static int
+linux_nat_ptrace_options (int attached)
+{
+  int options = 0;
+
+  if (!attached)
+    options |= PTRACE_O_EXITKILL;
+
+  options |= (PTRACE_O_TRACESYSGOOD
+	      | PTRACE_O_TRACEVFORKDONE
+	      | PTRACE_O_TRACEVFORK
+	      | PTRACE_O_TRACEFORK
+	      | PTRACE_O_TRACEEXEC);
+
+  return options;
+}
+
 /* Initialize ptrace warnings and check for supported ptrace
    features given PID.
 
@@ -376,7 +395,9 @@ pull_pid_from_list (struct simple_pid_list **listp, int pid, int *statusp)
 static void
 linux_init_ptrace (pid_t pid, int attached)
 {
-  linux_enable_event_reporting (pid, attached);
+  int options = linux_nat_ptrace_options (attached);
+
+  linux_enable_event_reporting (pid, options);
   linux_ptrace_init_warnings ();
 }
 
@@ -2301,8 +2322,9 @@ wait_lwp (struct lwp_info *lp)
   if (lp->must_set_ptrace_flags)
     {
       struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      int options = linux_nat_ptrace_options (inf->attach_flag);
 
-      linux_enable_event_reporting (ptid_get_lwp (lp->ptid), inf->attach_flag);
+      linux_enable_event_reporting (ptid_get_lwp (lp->ptid), options);
       lp->must_set_ptrace_flags = 0;
     }
 
@@ -3102,8 +3124,9 @@ linux_nat_filter_event (int lwpid, int status)
   if (WIFSTOPPED (status) && lp->must_set_ptrace_flags)
     {
       struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      int options = linux_nat_ptrace_options (inf->attach_flag);
 
-      linux_enable_event_reporting (ptid_get_lwp (lp->ptid), inf->attach_flag);
+      linux_enable_event_reporting (ptid_get_lwp (lp->ptid), options);
       lp->must_set_ptrace_flags = 0;
     }
 
@@ -5028,14 +5051,6 @@ Enables printf debugging output."),
   sigdelset (&suspend_mask, SIGCHLD);
 
   sigemptyset (&blocked_mask);
-
-  /* Do not enable PTRACE_O_TRACEEXIT until GDB is more prepared to
-     support read-only process state.  */
-  linux_ptrace_set_additional_flags (PTRACE_O_TRACESYSGOOD
-				     | PTRACE_O_TRACEVFORKDONE
-				     | PTRACE_O_TRACEVFORK
-				     | PTRACE_O_TRACEFORK
-				     | PTRACE_O_TRACEEXEC);
 }
 
 
