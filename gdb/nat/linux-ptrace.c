@@ -337,7 +337,7 @@ static void linux_test_for_exitkill (int child_pid);
 
 /* Determine ptrace features available on this target.  */
 
-static void
+void
 linux_check_ptrace_features (void)
 {
   int child_pid, ret, status;

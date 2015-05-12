@@ -5438,6 +5438,22 @@ linux_supports_multi_process (void)
   return 1;
 }
 
+/* Check if fork events are supported.  */
+
+static int
+linux_supports_fork_events (void)
+{
+  return linux_supports_tracefork ();
+}
+
+/* Check if vfork events are supported.  */
+
+static int
+linux_supports_vfork_events (void)
+{
+  return linux_supports_tracefork ();
+}
+
 static int
 linux_supports_disable_randomization (void)
 {
@@ -6411,6 +6427,8 @@ static struct target_ops linux_target_ops = {
   linux_async,
   linux_start_non_stop,
   linux_supports_multi_process,
+  linux_supports_fork_events,
+  linux_supports_vfork_events,
 #ifdef USE_THREAD_DB
   thread_db_handle_monitor_command,
 #else
@@ -6488,4 +6506,6 @@ initialize_low (void)
   sigaction (SIGCHLD, &sigchld_action, NULL);
 
   initialize_low_arch ();
+
+  linux_check_ptrace_features ();
 }

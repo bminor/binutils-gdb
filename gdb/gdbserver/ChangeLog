@@ -1,3 +1,24 @@
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-low.c (linux_supports_fork_events): New function.
+	(linux_supports_vfork_events): New function.
+	(linux_target_ops): Initialize new structure members.
+	(initialize_low): Call linux_check_ptrace_features.
+	* lynx-low.c (lynx_target_ops): Initialize new structure
+	members.
+	* server.c (report_fork_events, report_vfork_events):
+	New global flags.
+	(handle_query): Add new features to qSupported packet and
+	response.
+	(captured_main): Initialize new global variables.
+	* target.h (struct target_ops) <supports_fork_events>:
+	New member.
+	<supports_vfork_events>: New member.
+	(target_supports_fork_events): New macro.
+	(target_supports_vfork_events): New macro.
+	* win32-low.c (win32_target_ops): Initialize new structure
+	members.
+
 2015-05-12  Gary Benson <gbenson@redhat.com>
 
 	* server.c (handle_qxfer_exec_file): Use current process

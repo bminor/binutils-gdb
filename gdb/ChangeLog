@@ -1,3 +1,14 @@
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* nat/linux-ptrace.c (linux_check_ptrace_features): Change
+	from static to extern.
+	* nat/linux-ptrace.h (linux_check_ptrace_features): Declare.
+	* remote.c (anonymous enum): <PACKET_fork_event_feature,
+	* PACKET_vfork_event_feature>: New enumeration constants.
+	(remote_protocol_features): Add table entries for new packets.
+	(remote_query_supported): Add new feature queries to qSupported
+	packet.
+
 2015-05-12  Gary Benson <gbenson@redhat.com>
 
 	* remote.c (remote_add_inferior): Call exec_file_locate_attach

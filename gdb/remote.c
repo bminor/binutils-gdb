@@ -1342,6 +1342,12 @@ enum {
   /* Support for hwbreak+ feature.  */
   PACKET_hwbreak_feature,
 
+  /* Support for fork events.  */
+  PACKET_fork_event_feature,
+
+  /* Support for vfork events.  */
+  PACKET_vfork_event_feature,
+
   PACKET_MAX
 };
 
@@ -4051,6 +4057,10 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_Qbtrace_conf_bts_size },
   { "swbreak", PACKET_DISABLE, remote_supported_packet, PACKET_swbreak_feature },
   { "hwbreak", PACKET_DISABLE, remote_supported_packet, PACKET_hwbreak_feature },
+  { "fork-events", PACKET_DISABLE, remote_supported_packet,
+    PACKET_fork_event_feature },
+  { "vfork-events", PACKET_DISABLE, remote_supported_packet,
+    PACKET_vfork_event_feature },
 };
 
 static char *remote_support_xml;
@@ -4128,6 +4138,16 @@ remote_query_supported (void)
 	q = remote_query_supported_append (q, remote_support_xml);
 
       q = remote_query_supported_append (q, "qRelocInsn+");
+
+      if (rs->extended)
+	{
+	  if (packet_set_cmd_state (PACKET_fork_event_feature)
+	      != AUTO_BOOLEAN_FALSE)
+	    q = remote_query_supported_append (q, "fork-events+");
+	  if (packet_set_cmd_state (PACKET_vfork_event_feature)
+	      != AUTO_BOOLEAN_FALSE)
+	    q = remote_query_supported_append (q, "vfork-events+");
+	}
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
       putpkt (q);
@@ -12433,6 +12453,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_hwbreak_feature],
                          "hwbreak-feature", "hwbreak-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_fork_event_feature],
+			 "fork-event-feature", "fork-event-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vfork_event_feature],
+			 "vfork-event-feature", "vfork-event-feature", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */
