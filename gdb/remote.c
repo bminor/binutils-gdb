@@ -104,6 +104,10 @@ static void remote_open_1 (const char *, int, struct target_ops *,
 
 static void remote_close (struct target_ops *self);
 
+struct remote_state;
+
+static int remote_vkill (int pid, struct remote_state *rs);
+
 static void remote_mourn (struct target_ops *ops);
 
 static void extended_remote_restart (void);
@@ -181,7 +185,6 @@ static ptid_t read_ptid (char *buf, char **obuf);
 
 static void remote_set_permissions (struct target_ops *self);
 
-struct remote_state;
 static int remote_get_trace_status (struct target_ops *self,
 				    struct trace_status *ts);
 
@@ -203,6 +206,9 @@ static void remote_parse_stop_reply (char *, struct stop_reply *);
 static void push_stop_reply (struct stop_reply *);
 static void discard_pending_stop_replies_in_queue (struct remote_state *);
 static int peek_stop_reply (ptid_t ptid);
+
+struct threads_listing_context;
+static void remove_new_fork_children (struct threads_listing_context *);
 
 static void remote_async_inferior_event_handler (gdb_client_data);
 
@@ -1478,6 +1484,46 @@ remote_vfork_event_p (struct remote_state *rs)
   return packet_support (PACKET_vfork_event_feature) == PACKET_ENABLE;
 }
 
+/* Insert fork catchpoint target routine.  If fork events are enabled
+   then return success, nothing more to do.  */
+
+static int
+remote_insert_fork_catchpoint (struct target_ops *ops, int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return !remote_fork_event_p (rs);
+}
+
+/* Remove fork catchpoint target routine.  Nothing to do, just
+   return success.  */
+
+static int
+remote_remove_fork_catchpoint (struct target_ops *ops, int pid)
+{
+  return 0;
+}
+
+/* Insert vfork catchpoint target routine.  If vfork events are enabled
+   then return success, nothing more to do.  */
+
+static int
+remote_insert_vfork_catchpoint (struct target_ops *ops, int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return !remote_vfork_event_p (rs);
+}
+
+/* Remove vfork catchpoint target routine.  Nothing to do, just
+   return success.  */
+
+static int
+remote_remove_vfork_catchpoint (struct target_ops *ops, int pid)
+{
+  return 0;
+}
+
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
 static struct async_signal_handler *async_sigint_remote_twice_token;
 static struct async_signal_handler *async_sigint_remote_token;
@@ -2645,6 +2691,27 @@ clear_threads_listing_context (void *p)
   VEC_free (thread_item_t, context->items);
 }
 
+/* Remove the thread specified as the related_pid field of WS
+   from the CONTEXT list.  */
+
+static void
+threads_listing_context_remove (struct target_waitstatus *ws,
+				struct threads_listing_context *context)
+{
+  struct thread_item *item;
+  int i;
+  ptid_t child_ptid = ws->value.related_pid;
+
+  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
+    {
+      if (ptid_equal (item->ptid, child_ptid))
+	{
+	  VEC_ordered_remove (thread_item_t, context->items, i);
+	  break;
+	}
+    }
+}
+
 static int
 remote_newthread_step (threadref *ref, void *data)
 {
@@ -2867,7 +2934,7 @@ remote_update_thread_list (struct target_ops *ops)
 	 target end.  Delete GDB-side threads no longer found on the
 	 target.  */
       ALL_THREADS_SAFE (tp, tmp)
-        {
+	{
 	  for (i = 0;
 	       VEC_iterate (thread_item_t, context.items, i, item);
 	       ++i)
@@ -2881,7 +2948,12 @@ remote_update_thread_list (struct target_ops *ops)
 	      /* Not found.  */
 	      delete_thread (tp->ptid);
 	    }
-        }
+	}
+
+      /* Remove any unreported fork child threads from CONTEXT so
+	 that we don't interfere with follow fork, which is where
+	 creation of such threads is handled.  */
+      remove_new_fork_children (&context);
 
       /* And now add threads we don't know about yet to our list.  */
       for (i = 0;
@@ -5427,6 +5499,81 @@ struct queue_iter_param
   struct stop_reply *output;
 };
 
+/* Determine if THREAD is a pending fork parent thread.  ARG contains
+   the pid of the process that owns the threads we want to check, or
+   -1 if we want to check all threads.  */
+
+static int
+is_pending_fork_parent (struct target_waitstatus *ws, int event_pid,
+			ptid_t thread_ptid)
+{
+  if (ws->kind == TARGET_WAITKIND_FORKED
+      || ws->kind == TARGET_WAITKIND_VFORKED)
+    {
+      if (event_pid == -1 || event_pid == ptid_get_pid (thread_ptid))
+	return 1;
+    }
+
+  return 0;
+}
+
+/* Check whether EVENT is a fork event, and if it is, remove the
+   fork child from the context list passed in DATA.  */
+
+static int
+remove_child_of_pending_fork (QUEUE (stop_reply_p) *q,
+			      QUEUE_ITER (stop_reply_p) *iter,
+			      stop_reply_p event,
+			      void *data)
+{
+  struct queue_iter_param *param = data;
+  struct threads_listing_context *context = param->input;
+
+  if (event->ws.kind == TARGET_WAITKIND_FORKED
+      || event->ws.kind == TARGET_WAITKIND_VFORKED)
+    {
+      threads_listing_context_remove (&event->ws, context);
+    }
+
+  return 1;
+}
+
+/* If CONTEXT contains any fork child threads that have not been
+   reported yet, remove them from the CONTEXT list.  If such a
+   thread exists it is because we are stopped at a fork catchpoint
+   and have not yet called follow_fork, which will set up the
+   host-side data structures for the new process.  */
+
+static void
+remove_new_fork_children (struct threads_listing_context *context)
+{
+  struct thread_info * thread;
+  int pid = -1;
+  struct notif_client *notif = &notif_client_stop;
+  struct queue_iter_param param;
+
+  /* For any threads stopped at a fork event, remove the corresponding
+     fork child threads from the CONTEXT list.  */
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      struct target_waitstatus *ws = &thread->pending_follow;
+
+      if (is_pending_fork_parent (ws, pid, thread->ptid))
+	{
+	  threads_listing_context_remove (ws, context);
+	}
+    }
+
+  /* Check for any pending fork events (not reported or processed yet)
+     in process PID and remove those fork child threads from the
+     CONTEXT list as well.  */
+  remote_notif_get_pending_events (notif);
+  param.input = context;
+  param.output = NULL;
+  QUEUE_iterate (stop_reply_p, stop_reply_queue,
+		 remove_child_of_pending_fork, &param);
+}
+
 /* Remove stop replies in the queue if its pid is equal to the given
    inferior's pid.  */
 
@@ -7945,6 +8092,69 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 				 is_notif);
 }
 
+/* Check whether EVENT is a fork event for the process specified
+   by the pid passed in DATA, and if it is, kill the fork child.  */
+
+static int
+kill_child_of_pending_fork (QUEUE (stop_reply_p) *q,
+			    QUEUE_ITER (stop_reply_p) *iter,
+			    stop_reply_p event,
+			    void *data)
+{
+  struct queue_iter_param *param = data;
+  int parent_pid = *(int *) param->input;
+
+  if (is_pending_fork_parent (&event->ws, parent_pid, event->ptid))
+    {
+      struct remote_state *rs = get_remote_state ();
+      int child_pid = ptid_get_pid (event->ws.value.related_pid);
+      int res;
+
+      res = remote_vkill (child_pid, rs);
+      if (res != 0)
+	error (_("Can't kill fork child process %d"), child_pid);
+    }
+
+  return 1;
+}
+
+/* Kill any new fork children of process PID that haven't been
+   processed by follow_fork.  */
+
+static void
+kill_new_fork_children (int pid, struct remote_state *rs)
+{
+  struct thread_info *thread;
+  struct notif_client *notif = &notif_client_stop;
+  struct queue_iter_param param;
+
+  /* Kill the fork child threads of any threads in process PID
+     that are stopped at a fork event.  */
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      struct target_waitstatus *ws = &thread->pending_follow;
+
+      if (is_pending_fork_parent (ws, pid, thread->ptid))
+	{
+	  struct remote_state *rs = get_remote_state ();
+	  int child_pid = ptid_get_pid (ws->value.related_pid);
+	  int res;
+
+	  res = remote_vkill (child_pid, rs);
+	  if (res != 0)
+	    error (_("Can't kill fork child process %d"), child_pid);
+	}
+    }
+
+  /* Check for any pending fork events (not reported or processed yet)
+     in process PID and kill those fork child threads as well.  */
+  remote_notif_get_pending_events (notif);
+  param.input = &pid;
+  param.output = NULL;
+  QUEUE_iterate (stop_reply_p, stop_reply_queue,
+		 kill_child_of_pending_fork, &param);
+}
+
 
 static void
 remote_kill (struct target_ops *ops)
@@ -8013,6 +8223,11 @@ extended_remote_kill (struct target_ops *ops)
   int res;
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
+
+  /* If we're stopped while forking and we haven't followed yet, kill the
+     child task.  We need to do this before killing the parent task
+     because if this is a vfork then the parent will be sleeping.  */
+  kill_new_fork_children (pid, rs);
 
   res = remote_vkill (pid, rs);
   if (res == -1 && !(rs->extended && remote_multi_process_p (rs)))
@@ -11970,6 +12185,14 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_supports_disable_randomization
     = extended_remote_supports_disable_randomization;
   extended_remote_ops.to_follow_fork = remote_follow_fork;
+  extended_remote_ops.to_insert_fork_catchpoint
+    = remote_insert_fork_catchpoint;
+  extended_remote_ops.to_remove_fork_catchpoint
+    = remote_remove_fork_catchpoint;
+  extended_remote_ops.to_insert_vfork_catchpoint
+    = remote_insert_vfork_catchpoint;
+  extended_remote_ops.to_remove_vfork_catchpoint
+    = remote_remove_vfork_catchpoint;
 }
 
 static int

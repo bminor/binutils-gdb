@@ -1,5 +1,20 @@
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
+	* remote.c (remote_insert_fork_catchpoint): New function.
+	(remote_remove_fork_catchpoint): New function.
+	(remote_insert_vfork_catchpoint): New function.
+	(remote_remove_vfork_catchpoint): New function.
+	(pending_fork_parent_callback): New function.
+	(remove_new_fork_child): New function.
+	(remote_update_thread_list): Call remote_notif_get_pending_events
+	and remove_new_fork_child.
+	(extended_remote_kill): Kill fork child when killing the
+	parent before follow_fork completes.
+	(init_extended_remote_ops): Initialize target vector with
+	new fork catchpoint functions.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
 	* remote.c (remove_vfork_event_p): New function.
 	(remote_follow_fork): Add vfork event type to event checking.
 	(remote_parse_stop_reply): New stop reasons "vfork" and
