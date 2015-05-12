@@ -493,3 +493,11 @@ if { [isnative]
 	] \
     ]
 }
+
+if { !([istarget "i?86-*-linux*"]
+       || [istarget "x86_64-*-linux*"]) } {
+    return
+}
+
+# Linux only tests
+run_dump_test "pltgot-1"

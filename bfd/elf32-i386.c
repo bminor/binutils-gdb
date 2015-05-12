@@ -2338,15 +2338,16 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  asection *s = htab->elf.splt;
 	  asection *got_s = htab->plt_got;
 
-	  /* If this is the first .plt entry, make room for the special
-	     first entry.  */
-	  if (s->size == 0)
-	    s->size = plt_entry_size;
-
 	  if (use_plt_got)
 	    eh->plt_got.offset = got_s->size;
 	  else
-	    h->plt.offset = s->size;
+	    {
+	      /* If this is the first .plt entry, make room for the
+		 special first entry.  */
+	      if (s->size == 0)
+		s->size = plt_entry_size;
+	      h->plt.offset = s->size;
+	    }
 
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
