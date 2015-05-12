@@ -1,3 +1,7 @@
+2015-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-1.d: Also skip x86_64-*-nacl*.
+
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/elfedit-1.d: Skip x86_64-*-gnux32.
