@@ -1,5 +1,12 @@
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
+	PR gdb/16999
+	* NEWS: Mention new GDBHISTSIZE behavior.
+	* top.c (init_history): For null or out-of-range GDBHISTSIZE,
+	set history size to unlimited.  Ignore non-numeric GDBHISTSIZE.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* NEWS: Mention that GDBHISTSIZE is read instead of HISTSIZE.
 	* top.c (init_history): Read from GDBHISTSIZE instead of
 	HISTSIZE.

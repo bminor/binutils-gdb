@@ -1,5 +1,10 @@
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
+	PR gdb/16999
+	* gdb.base/gdbhistsize-history.exp: New test.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* gdb.base/gdbinit-history.exp: Replace occurrences of HISTSIZE
 	with GDBHISTSIZE.
 	* gdb.base/readline.exp: Likewise.

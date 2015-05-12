@@ -1684,21 +1684,31 @@ init_history (void)
   tmpenv = getenv ("GDBHISTSIZE");
   if (tmpenv)
     {
-      int var;
+      long var;
+      char *endptr;
 
-      var = atoi (tmpenv);
-      if (var < 0)
-	{
-	  /* Prefer ending up with no history rather than overflowing
-	     readline's history interface, which uses signed 'int'
-	     everywhere.  */
-	  var = 0;
-	}
+      tmpenv = skip_spaces (tmpenv);
+      var = strtol (tmpenv, &endptr, 10);
+      endptr = skip_spaces (endptr);
 
-      history_size_setshow_var = var;
+      /* If GDBHISTSIZE is non-numeric then ignore it.  If GDBHISTSIZE is the
+	 empty string, a negative number or a huge positive number (larger than
+	 INT_MAX) then set the history size to unlimited.  Otherwise set our
+	 history size to the number we have read.  This behavior is consistent
+	 with how bash handles HISTSIZE.  */
+      if (*endptr != '\0')
+	;
+      else if (*tmpenv == '\0'
+	       || var < 0
+	       || var > INT_MAX)
+	history_size_setshow_var = -1;
+      else
+	history_size_setshow_var = var;
     }
-  /* If the init file hasn't set a size yet, pick the default.  */
-  else if (history_size_setshow_var == -2)
+
+  /* If neither the init file nor GDBHISTSIZE has set a size yet, pick the
+     default.  */
+  if (history_size_setshow_var == -2)
     history_size_setshow_var = 256;
 
   set_readline_history_size (history_size_setshow_var);
