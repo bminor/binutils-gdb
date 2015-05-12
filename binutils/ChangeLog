@@ -1,3 +1,8 @@
+2015-05-12  Stephen Kitt  <steve@sk2.org>
+
+	* dlltool.c (main): Accept -t as an abbreviation for
+	--temp-prefix.
+
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (dwarf_regnames_iamcu): New.
