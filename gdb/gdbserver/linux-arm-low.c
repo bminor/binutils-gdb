@@ -717,6 +717,47 @@ arm_new_thread (struct lwp_info *lwp)
   lwp->arch_private = info;
 }
 
+static void
+arm_new_fork (struct process_info *parent, struct process_info *child)
+{
+  struct arch_process_info *parent_proc_info = parent->private->arch_private;
+  struct arch_process_info *child_proc_info = child->private->arch_private;
+  struct lwp_info *child_lwp;
+  struct arch_lwp_info *child_lwp_info;
+  int i;
+
+  /* These are allocated by linux_add_process.  */
+  gdb_assert (parent->private != NULL
+	      && parent->private->arch_private != NULL);
+  gdb_assert (child->private != NULL
+	      && child->private->arch_private != NULL);
+
+  /* Linux kernel before 2.6.33 commit
+     72f674d203cd230426437cdcf7dd6f681dad8b0d
+     will inherit hardware debug registers from parent
+     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+     zeroed debug registers.
+
+     GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  The debug registers mirror will become zeroed
+     in the end before detaching the forked off process, thus making
+     this compatible with older Linux kernels too.  */
+
+  *child_proc_info = *parent_proc_info;
+
+  /* Mark all the hardware breakpoints and watchpoints as changed to
+     make sure that the registers will be updated.  */
+  child_lwp = find_lwp_pid (ptid_of (child));
+  child_lwp_info = child_lwp->arch_private;
+  for (i = 0; i < MAX_BPTS; i++)
+    child_lwp_info->bpts_changed[i] = 1;
+  for (i = 0; i < MAX_WPTS; i++)
+    child_lwp_info->wpts_changed[i] = 1;
+}
+
 /* Called when resuming a thread.
    If the debug regs have changed, update the thread's copies.  */
 static void
@@ -920,6 +961,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* siginfo_fixup */
   arm_new_process,
   arm_new_thread,
+  arm_new_fork,
   arm_prepare_to_resume,
 };
 

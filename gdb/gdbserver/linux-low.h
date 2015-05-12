@@ -187,6 +187,9 @@ struct linux_target_ops
      allocate it here.  */
   void (*new_thread) (struct lwp_info *);
 
+  /* Hook to call, if any, when a new fork is attached.  */
+  void (*new_fork) (struct process_info *parent, struct process_info *child);
+
   /* Hook to call prior to resuming a thread.  */
   void (*prepare_to_resume) (struct lwp_info *);
 

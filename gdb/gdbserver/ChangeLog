@@ -1,5 +1,22 @@
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
+	* linux-aarch64-low.c (aarch64_linux_new_fork): New function.
+	(the_low_target) <new_fork>: Initialize new member.
+	* linux-arm-low.c (arm_new_fork): New function.
+	(the_low_target) <new_fork>: Initialize new member.
+	* linux-low.c (handle_extended_wait): Call new target function
+	new_fork.
+	* linux-low.h (struct linux_target_ops) <new_fork>: New member.
+	* linux-mips-low.c (mips_add_watchpoint): New function
+	extracted from mips_insert_point.
+	(the_low_target) <new_fork>: Initialize new member.
+	(mips_linux_new_fork): New function.
+	(mips_insert_point): Call mips_add_watchpoint.
+	* linux-x86-low.c (x86_linux_new_fork): New function.
+	(the_low_target) <new_fork>: Initialize new member.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
 	* linux-low.c (handle_extended_wait): Implement return value,
 	rename argument 'event_child' to 'event_lwp', handle
 	PTRACE_EVENT_FORK, call internal_error for unrecognized event.

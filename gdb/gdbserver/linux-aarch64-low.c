@@ -1135,6 +1135,33 @@ aarch64_linux_new_thread (struct lwp_info *lwp)
   lwp->arch_private = info;
 }
 
+static void
+aarch64_linux_new_fork (struct process_info *parent,
+			struct process_info *child)
+{
+  /* These are allocated by linux_add_process.  */
+  gdb_assert (parent->private != NULL
+	      && parent->private->arch_private != NULL);
+  gdb_assert (child->private != NULL
+	      && child->private->arch_private != NULL);
+
+  /* Linux kernel before 2.6.33 commit
+     72f674d203cd230426437cdcf7dd6f681dad8b0d
+     will inherit hardware debug registers from parent
+     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+     zeroed debug registers.
+
+     GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  The debug registers mirror will become zeroed
+     in the end before detaching the forked off process, thus making
+     this compatible with older Linux kernels too.  */
+
+  *child->private->arch_private = *parent->private->arch_private;
+}
+
 /* Called when resuming a thread.
    If the debug regs have changed, update the thread's copies.  */
 
@@ -1299,6 +1326,7 @@ struct linux_target_ops the_low_target =
   NULL,
   aarch64_linux_new_process,
   aarch64_linux_new_thread,
+  aarch64_linux_new_fork,
   aarch64_linux_prepare_to_resume,
 };
 

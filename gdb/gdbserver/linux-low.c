@@ -489,6 +489,10 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 	  child_proc->tdesc = tdesc;
 	  child_lwp->must_set_ptrace_flags = 1;
 
+	  /* Clone arch-specific process data.  */
+	  if (the_low_target.new_fork != NULL)
+	    the_low_target.new_fork (parent_proc, child_proc);
+
 	  /* Save fork info in the parent thread.  */
 	  event_lwp->waitstatus.kind = TARGET_WAITKIND_FORKED;
 	  event_lwp->waitstatus.value.related_pid = ptid;
