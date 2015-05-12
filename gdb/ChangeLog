@@ -1,3 +1,8 @@
+2015-05-12  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct file_entry): Tweak comments.
+	(get_debug_line_section): Tweak comments.
+
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
 	* NEWS: Announce fork support in the RSP and support

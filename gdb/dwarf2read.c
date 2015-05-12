@@ -1030,8 +1030,10 @@ struct file_entry
   unsigned int dir_index;
   unsigned int mod_time;
   unsigned int length;
-  int included_p; /* Non-zero if referenced by the Line Number Program.  */
-  struct symtab *symtab; /* The associated symbol table, if any.  */
+  /* Non-zero if referenced by the Line Number Program.  */
+  int included_p;
+  /* The associated symbol table, if any.  */
+  struct symtab *symtab;
 };
 
 /* The line number information for a compilation unit (found in the
@@ -17200,8 +17202,7 @@ add_file_name (struct line_header *lh,
   fe->symtab = NULL;
 }
 
-/* A convenience function to find the proper .debug_line section for a
-   CU.  */
+/* A convenience function to find the proper .debug_line section for a CU.  */
 
 static struct dwarf2_section_info *
 get_debug_line_section (struct dwarf2_cu *cu)
