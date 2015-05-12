@@ -425,7 +425,8 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
   struct thread_info *event_thr = get_lwp_thread (event_lwp);
   struct lwp_info *new_lwp;
 
-  if ((event == PTRACE_EVENT_FORK) || (event == PTRACE_EVENT_CLONE))
+  if ((event == PTRACE_EVENT_FORK) || (event == PTRACE_EVENT_VFORK)
+      || (event == PTRACE_EVENT_CLONE))
     {
       ptid_t ptid;
       unsigned long new_pid;
@@ -451,7 +452,7 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 	    warning ("wait returned unexpected status 0x%x", status);
 	}
 
-      if (event == PTRACE_EVENT_FORK)
+      if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
 	{
 	  struct process_info *parent_proc;
 	  struct process_info *child_proc;
@@ -494,8 +495,13 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 	    the_low_target.new_fork (parent_proc, child_proc);
 
 	  /* Save fork info in the parent thread.  */
-	  event_lwp->waitstatus.kind = TARGET_WAITKIND_FORKED;
+	  if (event == PTRACE_EVENT_FORK)
+	    event_lwp->waitstatus.kind = TARGET_WAITKIND_FORKED;
+	  else if (event == PTRACE_EVENT_VFORK)
+	    event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORKED;
+
 	  event_lwp->waitstatus.value.related_pid = ptid;
+
 	  /* The status_pending field contains bits denoting the
 	     extended event, so when the pending event is handled,
 	     the handler will look at lwp->waitstatus.  */
@@ -537,6 +543,13 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 
       /* Don't report the event.  */
       return 1;
+    }
+  else if (event == PTRACE_EVENT_VFORK_DONE)
+    {
+      event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
+
+      /* Report the event.  */
+      return 0;
     }
 
   internal_error (__FILE__, __LINE__, _("unknown ptrace event %d"), event);
@@ -2010,6 +2023,9 @@ linux_low_ptrace_options (int attached)
   if (report_fork_events)
     options |= PTRACE_O_TRACEFORK;
 
+  if (report_vfork_events)
+    options |= (PTRACE_O_TRACEVFORK | PTRACE_O_TRACEVFORKDONE);
+
   return options;
 }
 
@@ -2714,7 +2730,9 @@ extended_event_reported (const struct target_waitstatus *waitstatus)
   if (waitstatus == NULL)
     return 0;
 
-  return (waitstatus->kind == TARGET_WAITKIND_FORKED);
+  return (waitstatus->kind == TARGET_WAITKIND_FORKED
+	  || waitstatus->kind == TARGET_WAITKIND_VFORKED
+	  || waitstatus->kind == TARGET_WAITKIND_VFORK_DONE);
 }
 
 /* Wait for process, returns status.  */

@@ -1,5 +1,16 @@
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
+	* linux-low.c (handle_extended_wait): Handle PTRACE_EVENT_FORK and
+	PTRACE_EVENT_VFORK_DONE.
+	(linux_low_ptrace_options, extended_event_reported): Add vfork
+	events.
+	* remote-utils.c (prepare_resume_reply): New stop reasons "vfork"
+	and "vforkdone" for RSP 'T' Stop Reply Packet.
+	* server.h (report_vfork_events): Declare
+	global variable.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
 	* linux-aarch64-low.c (aarch64_linux_new_fork): New function.
 	(the_low_target) <new_fork>: Initialize new member.
 	* linux-arm-low.c (arm_new_fork): New function.

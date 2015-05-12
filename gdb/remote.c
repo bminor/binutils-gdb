@@ -1470,6 +1470,14 @@ remote_fork_event_p (struct remote_state *rs)
   return packet_support (PACKET_fork_event_feature) == PACKET_ENABLE;
 }
 
+/* Returns true if vfork events are supported.  */
+
+static int
+remote_vfork_event_p (struct remote_state *rs)
+{
+  return packet_support (PACKET_vfork_event_feature) == PACKET_ENABLE;
+}
+
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
 static struct async_signal_handler *async_sigint_remote_twice_token;
 static struct async_signal_handler *async_sigint_remote_token;
@@ -4537,8 +4545,10 @@ remote_follow_fork (struct target_ops *ops, int follow_child,
 		    int detach_fork)
 {
   struct remote_state *rs = get_remote_state ();
+  enum target_waitkind kind = inferior_thread ()->pending_follow.kind;
 
-  if (remote_fork_event_p (rs))
+  if ((kind == TARGET_WAITKIND_FORKED && remote_fork_event_p (rs))
+      || (kind == TARGET_WAITKIND_VFORKED && remote_vfork_event_p (rs)))
     {
       /* When following the parent and detaching the child, we detach
 	 the child here.  For the case of following the child and
@@ -5726,6 +5736,16 @@ Packet: '%s'\n"),
 	    {
 	      event->ws.value.related_pid = read_ptid (++p1, &p);
 	      event->ws.kind = TARGET_WAITKIND_FORKED;
+	    }
+	  else if (strncmp (p, "vfork", p1 - p) == 0)
+	    {
+	      event->ws.value.related_pid = read_ptid (++p1, &p);
+	      event->ws.kind = TARGET_WAITKIND_VFORKED;
+	    }
+	  else if (strncmp (p, "vforkdone", p1 - p) == 0)
+	    {
+	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
+	      p = skip_to_semicolon (p1 + 1);
 	    }
 	  else
 	    {

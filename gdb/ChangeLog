@@ -1,5 +1,12 @@
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
+	* remote.c (remove_vfork_event_p): New function.
+	(remote_follow_fork): Add vfork event type to event checking.
+	(remote_parse_stop_reply): New stop reasons "vfork" and
+	"vforkdone" for RSP 'T' Stop Reply Packet.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
 	* linux-nat.c (linux_nat_ptrace_options): New function.
 	(linux_init_ptrace, wait_lwp, linux_nat_filter_event):
 	Call linux_nat_ptrace_options and use different argument to
