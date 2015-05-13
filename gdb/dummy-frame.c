@@ -28,6 +28,7 @@
 #include "gdbcmd.h"
 #include "observer.h"
 #include "gdbthread.h"
+#include "infcall.h"
 
 struct dummy_frame_id
 {
@@ -62,8 +63,7 @@ struct dummy_frame
   /* The caller's state prior to the call.  */
   struct infcall_suspend_state *caller_state;
 
-  /* If non-NULL, a destructor that is run when this dummy frame is
-     popped.  */
+  /* If non-NULL, a destructor that is run when this dummy frame is freed.  */
   dummy_frame_dtor_ftype *dtor;
 
   /* Arbitrary data that is passed to DTOR.  */
@@ -95,6 +95,9 @@ static void
 remove_dummy_frame (struct dummy_frame **dummy_ptr)
 {
   struct dummy_frame *dummy = *dummy_ptr;
+
+  if (dummy->dtor != NULL)
+    dummy->dtor (dummy->dtor_data, 0);
 
   *dummy_ptr = dummy->next;
   discard_infcall_suspend_state (dummy->caller_state);
@@ -136,7 +139,7 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
   gdb_assert (ptid_equal (dummy->id.ptid, inferior_ptid));
 
   if (dummy->dtor != NULL)
-    dummy->dtor (dummy->dtor_data);
+    dummy->dtor (dummy->dtor_data, 1);
 
   restore_infcall_suspend_state (dummy->caller_state);
 
