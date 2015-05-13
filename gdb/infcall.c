@@ -490,7 +490,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 struct value *
 call_function_by_hand_dummy (struct value *function,
 			     int nargs, struct value **args,
-			     call_function_by_hand_dummy_dtor_ftype *dummy_dtor,
+			     dummy_frame_dtor_ftype *dummy_dtor,
 			     void *dummy_dtor_data)
 {
   CORE_ADDR sp;

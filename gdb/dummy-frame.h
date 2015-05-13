@@ -54,10 +54,12 @@ extern void dummy_frame_discard (struct frame_id dummy_id, ptid_t ptid);
 
 extern const struct frame_unwind dummy_frame_unwind;
 
+/* Destructor for dummy_frame.  DATA is supplied by registrant.  */
+typedef void (dummy_frame_dtor_ftype) (void *data);
+
 /* Call DTOR with DTOR_DATA when DUMMY_ID frame of thread PTID gets discarded.
    Dummy frame with DUMMY_ID must exist.  There must be no other call of
    register_dummy_frame_dtor for that dummy frame.  */
-typedef void (dummy_frame_dtor_ftype) (void *data);
 extern void register_dummy_frame_dtor (struct frame_id dummy_id, ptid_t ptid,
 				       dummy_frame_dtor_ftype *dtor,
 				       void *dtor_data);

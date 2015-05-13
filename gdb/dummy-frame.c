@@ -64,7 +64,7 @@ struct dummy_frame
 
   /* If non-NULL, a destructor that is run when this dummy frame is
      popped.  */
-  void (*dtor) (void *data);
+  dummy_frame_dtor_ftype *dtor;
 
   /* Arbitrary data that is passed to DTOR.  */
   void *dtor_data;

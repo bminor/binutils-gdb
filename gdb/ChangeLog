@@ -1,3 +1,14 @@
+2015-05-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dummy-frame.c (struct dummy_frame): Use proper typedef for dtor.
+	* dummy-frame.h (dummy_frame_dtor_ftype): Add its comment.
+	* infcall.c (call_function_by_hand_dummy): Use proper typedef for
+	dummy_dtor parameter.
+	* infcall.h: Include dummy-frame.h.
+	(call_function_by_hand_dummy_dtor_ftype): Remove.
+	(call_function_by_hand_dummy): Use proper typedef for dummy_dtor
+	parameter.
+
 2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
 
 	PR gdb/17820
