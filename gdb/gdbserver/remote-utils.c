@@ -1114,12 +1114,28 @@ prepare_resume_reply (char *buf, ptid_t ptid,
   switch (status->kind)
     {
     case TARGET_WAITKIND_STOPPED:
+    case TARGET_WAITKIND_FORKED:
+    case TARGET_WAITKIND_VFORKED:
       {
 	struct thread_info *saved_thread;
 	const char **regp;
 	struct regcache *regcache;
 
-	sprintf (buf, "T%02x", status->value.sig);
+	if ((status->kind == TARGET_WAITKIND_FORKED && report_fork_events)
+	    || (status->kind == TARGET_WAITKIND_VFORKED && report_vfork_events))
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+	    const char *event = (status->kind == TARGET_WAITKIND_FORKED
+				 ? "fork" : "vfork");
+
+	    sprintf (buf, "T%02x%s:", signal, event);
+	    buf += strlen (buf);
+	    buf = write_ptid (buf, status->value.related_pid);
+	    strcat (buf, ";");
+	  }
+	else
+	  sprintf (buf, "T%02x", status->value.sig);
+
 	buf += strlen (buf);
 
 	saved_thread = current_thread;
@@ -1231,6 +1247,16 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		 status->value.sig, ptid_get_pid (ptid));
       else
 	sprintf (buf, "X%02x", status->value.sig);
+      break;
+    case TARGET_WAITKIND_VFORK_DONE:
+      if (report_vfork_events)
+	{
+	  enum gdb_signal signal = GDB_SIGNAL_TRAP;
+
+	  sprintf (buf, "T%02xvforkdone:;", signal);
+	}
+      else
+	sprintf (buf, "T%02x", GDB_SIGNAL_0);
       break;
     default:
       error ("unhandled waitkind");

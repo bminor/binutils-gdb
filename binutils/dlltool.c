@@ -4091,9 +4091,9 @@ main (int ac, char **av)
 
   while ((c = getopt_long (ac, av,
 #ifdef DLLTOOL_MCORE_ELF
-			   "m:e:l:aD:d:z:b:xp:cCuUkAS:f:nI:vVHhM:L:F:",
+                           "m:e:l:aD:d:z:b:xp:cCuUkAS:t:f:nI:vVHhM:L:F:",
 #else
-			   "m:e:l:y:aD:d:z:b:xp:cCuUkAS:f:nI:vVHh",
+                           "m:e:l:y:aD:d:z:b:xp:cCuUkAS:t:f:nI:vVHh",
 #endif
 			   long_options, 0))
 	 != EOF)

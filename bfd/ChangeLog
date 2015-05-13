@@ -1,3 +1,9 @@
+2015-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Allocate space
+	for the first .plt entry only if needed.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewise.
+
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-iamcu.lo.

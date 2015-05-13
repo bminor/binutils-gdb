@@ -1,3 +1,92 @@
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-low.c (handle_extended_wait): Handle PTRACE_EVENT_FORK and
+	PTRACE_EVENT_VFORK_DONE.
+	(linux_low_ptrace_options, extended_event_reported): Add vfork
+	events.
+	* remote-utils.c (prepare_resume_reply): New stop reasons "vfork"
+	and "vforkdone" for RSP 'T' Stop Reply Packet.
+	* server.h (report_vfork_events): Declare
+	global variable.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-aarch64-low.c (aarch64_linux_new_fork): New function.
+	(the_low_target) <new_fork>: Initialize new member.
+	* linux-arm-low.c (arm_new_fork): New function.
+	(the_low_target) <new_fork>: Initialize new member.
+	* linux-low.c (handle_extended_wait): Call new target function
+	new_fork.
+	* linux-low.h (struct linux_target_ops) <new_fork>: New member.
+	* linux-mips-low.c (mips_add_watchpoint): New function
+	extracted from mips_insert_point.
+	(the_low_target) <new_fork>: Initialize new member.
+	(mips_linux_new_fork): New function.
+	(mips_insert_point): Call mips_add_watchpoint.
+	* linux-x86-low.c (x86_linux_new_fork): New function.
+	(the_low_target) <new_fork>: Initialize new member.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-low.c (handle_extended_wait): Implement return value,
+	rename argument 'event_child' to 'event_lwp', handle
+	PTRACE_EVENT_FORK, call internal_error for unrecognized event.
+	(linux_low_ptrace_options): New function.
+	(linux_low_filter_event): Call linux_low_ptrace_options,
+	use different argument fo linux_enable_event_reporting,
+	use return value from handle_extended_wait.
+	(extended_event_reported): New function.
+	(linux_wait_1): Call extended_event_reported and set
+	status to report fork events.
+	(linux_write_memory): Add pid to debug message.
+	(reset_lwp_ptrace_options_callback): New function.
+	(linux_handle_new_gdb_connection): New function.
+	(linux_target_ops): Initialize new structure member.
+	* linux-low.h (struct lwp_info) <waitstatus>: New member.
+	* lynx-low.c: Initialize new structure member.
+	* remote-utils.c (prepare_resume_reply): Implement stop reason
+	"fork" for "T" stop message.
+	* server.c (handle_query): Call handle_new_gdb_connection.
+	* server.h (report_fork_events): Declare global flag.
+	* target.h (struct target_ops) <handle_new_gdb_connection>:
+	New member.
+	(target_handle_new_gdb_connection): New macro.
+	* win32-low.c: Initialize new structure member.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* mem-break.c (APPEND_TO_LIST): Define macro.
+	(clone_agent_expr): New function.
+	(clone_one_breakpoint): New function.
+	(clone_all_breakpoints): New function.
+	* mem-break.h: Declare new functions.
+
+2015-05-12  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-low.c (linux_supports_fork_events): New function.
+	(linux_supports_vfork_events): New function.
+	(linux_target_ops): Initialize new structure members.
+	(initialize_low): Call linux_check_ptrace_features.
+	* lynx-low.c (lynx_target_ops): Initialize new structure
+	members.
+	* server.c (report_fork_events, report_vfork_events):
+	New global flags.
+	(handle_query): Add new features to qSupported packet and
+	response.
+	(captured_main): Initialize new global variables.
+	* target.h (struct target_ops) <supports_fork_events>:
+	New member.
+	<supports_vfork_events>: New member.
+	(target_supports_fork_events): New macro.
+	(target_supports_vfork_events): New macro.
+	* win32-low.c (win32_target_ops): Initialize new structure
+	members.
+
+2015-05-12  Gary Benson <gbenson@redhat.com>
+
+	* server.c (handle_qxfer_exec_file): Use current process
+	if annex is empty.
+
 2015-05-08  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* linux-nios2-low.c: Include elf/common.h.  Adjust comments.

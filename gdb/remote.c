@@ -104,6 +104,10 @@ static void remote_open_1 (const char *, int, struct target_ops *,
 
 static void remote_close (struct target_ops *self);
 
+struct remote_state;
+
+static int remote_vkill (int pid, struct remote_state *rs);
+
 static void remote_mourn (struct target_ops *ops);
 
 static void extended_remote_restart (void);
@@ -181,7 +185,6 @@ static ptid_t read_ptid (char *buf, char **obuf);
 
 static void remote_set_permissions (struct target_ops *self);
 
-struct remote_state;
 static int remote_get_trace_status (struct target_ops *self,
 				    struct trace_status *ts);
 
@@ -203,6 +206,9 @@ static void remote_parse_stop_reply (char *, struct stop_reply *);
 static void push_stop_reply (struct stop_reply *);
 static void discard_pending_stop_replies_in_queue (struct remote_state *);
 static int peek_stop_reply (ptid_t ptid);
+
+struct threads_listing_context;
+static void remove_new_fork_children (struct threads_listing_context *);
 
 static void remote_async_inferior_event_handler (gdb_client_data);
 
@@ -1342,6 +1348,12 @@ enum {
   /* Support for hwbreak+ feature.  */
   PACKET_hwbreak_feature,
 
+  /* Support for fork events.  */
+  PACKET_fork_event_feature,
+
+  /* Support for vfork events.  */
+  PACKET_vfork_event_feature,
+
   PACKET_MAX
 };
 
@@ -1456,6 +1468,62 @@ remote_multi_process_p (struct remote_state *rs)
   return packet_support (PACKET_multiprocess_feature) == PACKET_ENABLE;
 }
 
+/* Returns true if fork events are supported.  */
+
+static int
+remote_fork_event_p (struct remote_state *rs)
+{
+  return packet_support (PACKET_fork_event_feature) == PACKET_ENABLE;
+}
+
+/* Returns true if vfork events are supported.  */
+
+static int
+remote_vfork_event_p (struct remote_state *rs)
+{
+  return packet_support (PACKET_vfork_event_feature) == PACKET_ENABLE;
+}
+
+/* Insert fork catchpoint target routine.  If fork events are enabled
+   then return success, nothing more to do.  */
+
+static int
+remote_insert_fork_catchpoint (struct target_ops *ops, int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return !remote_fork_event_p (rs);
+}
+
+/* Remove fork catchpoint target routine.  Nothing to do, just
+   return success.  */
+
+static int
+remote_remove_fork_catchpoint (struct target_ops *ops, int pid)
+{
+  return 0;
+}
+
+/* Insert vfork catchpoint target routine.  If vfork events are enabled
+   then return success, nothing more to do.  */
+
+static int
+remote_insert_vfork_catchpoint (struct target_ops *ops, int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return !remote_vfork_event_p (rs);
+}
+
+/* Remove vfork catchpoint target routine.  Nothing to do, just
+   return success.  */
+
+static int
+remote_remove_vfork_catchpoint (struct target_ops *ops, int pid)
+{
+  return 0;
+}
+
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
 static struct async_signal_handler *async_sigint_remote_twice_token;
 static struct async_signal_handler *async_sigint_remote_token;
@@ -1558,7 +1626,7 @@ remote_add_inferior (int fake_pid_p, int pid, int attached,
 
   /* If no main executable is currently open then attempt to
      open the file that was executed to create this inferior.  */
-  if (try_open_exec && !fake_pid_p && get_exec_file (0) == NULL)
+  if (try_open_exec && get_exec_file (0) == NULL)
     exec_file_locate_attach (pid, 1);
 
   return inf;
@@ -2623,6 +2691,27 @@ clear_threads_listing_context (void *p)
   VEC_free (thread_item_t, context->items);
 }
 
+/* Remove the thread specified as the related_pid field of WS
+   from the CONTEXT list.  */
+
+static void
+threads_listing_context_remove (struct target_waitstatus *ws,
+				struct threads_listing_context *context)
+{
+  struct thread_item *item;
+  int i;
+  ptid_t child_ptid = ws->value.related_pid;
+
+  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
+    {
+      if (ptid_equal (item->ptid, child_ptid))
+	{
+	  VEC_ordered_remove (thread_item_t, context->items, i);
+	  break;
+	}
+    }
+}
+
 static int
 remote_newthread_step (threadref *ref, void *data)
 {
@@ -2845,7 +2934,7 @@ remote_update_thread_list (struct target_ops *ops)
 	 target end.  Delete GDB-side threads no longer found on the
 	 target.  */
       ALL_THREADS_SAFE (tp, tmp)
-        {
+	{
 	  for (i = 0;
 	       VEC_iterate (thread_item_t, context.items, i, item);
 	       ++i)
@@ -2859,7 +2948,12 @@ remote_update_thread_list (struct target_ops *ops)
 	      /* Not found.  */
 	      delete_thread (tp->ptid);
 	    }
-        }
+	}
+
+      /* Remove any unreported fork child threads from CONTEXT so
+	 that we don't interfere with follow fork, which is where
+	 creation of such threads is handled.  */
+      remove_new_fork_children (&context);
 
       /* And now add threads we don't know about yet to our list.  */
       for (i = 0;
@@ -4051,6 +4145,10 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_Qbtrace_conf_bts_size },
   { "swbreak", PACKET_DISABLE, remote_supported_packet, PACKET_swbreak_feature },
   { "hwbreak", PACKET_DISABLE, remote_supported_packet, PACKET_hwbreak_feature },
+  { "fork-events", PACKET_DISABLE, remote_supported_packet,
+    PACKET_fork_event_feature },
+  { "vfork-events", PACKET_DISABLE, remote_supported_packet,
+    PACKET_vfork_event_feature },
 };
 
 static char *remote_support_xml;
@@ -4128,6 +4226,16 @@ remote_query_supported (void)
 	q = remote_query_supported_append (q, remote_support_xml);
 
       q = remote_query_supported_append (q, "qRelocInsn+");
+
+      if (rs->extended)
+	{
+	  if (packet_set_cmd_state (PACKET_fork_event_feature)
+	      != AUTO_BOOLEAN_FALSE)
+	    q = remote_query_supported_append (q, "fork-events+");
+	  if (packet_set_cmd_state (PACKET_vfork_event_feature)
+	      != AUTO_BOOLEAN_FALSE)
+	    q = remote_query_supported_append (q, "vfork-events+");
+	}
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
       putpkt (q);
@@ -4410,16 +4518,42 @@ remote_open_1 (const char *name, int from_tty,
     wait_forever_enabled_p = 1;
 }
 
-/* This takes a program previously attached to and detaches it.  After
-   this is done, GDB can be used to debug some other program.  We
-   better not have left any breakpoints in the target program or it'll
-   die when it hits one.  */
+/* Detach the specified process.  */
 
 static void
-remote_detach_1 (const char *args, int from_tty, int extended)
+remote_detach_pid (int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (remote_multi_process_p (rs))
+    xsnprintf (rs->buf, get_remote_packet_size (), "D;%x", pid);
+  else
+    strcpy (rs->buf, "D");
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0] == 'O' && rs->buf[1] == 'K')
+    ;
+  else if (rs->buf[0] == '\0')
+    error (_("Remote doesn't know how to detach"));
+  else
+    error (_("Can't detach process."));
+}
+
+/* This detaches a program to which we previously attached, using
+   inferior_ptid to identify the process.  After this is done, GDB
+   can be used to debug some other program.  We better not have left
+   any breakpoints in the target program or it'll die when it hits
+   one.  */
+
+static void
+remote_detach_1 (const char *args, int from_tty)
 {
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
+  struct thread_info *tp = find_thread_ptid (inferior_ptid);
+  int is_fork_parent;
 
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
@@ -4438,37 +4572,76 @@ remote_detach_1 (const char *args, int from_tty, int extended)
     }
 
   /* Tell the remote target to detach.  */
-  if (remote_multi_process_p (rs))
-    xsnprintf (rs->buf, get_remote_packet_size (), "D;%x", pid);
-  else
-    strcpy (rs->buf, "D");
+  remote_detach_pid (pid);
 
-  putpkt (rs->buf);
-  getpkt (&rs->buf, &rs->buf_size, 0);
-
-  if (rs->buf[0] == 'O' && rs->buf[1] == 'K')
-    ;
-  else if (rs->buf[0] == '\0')
-    error (_("Remote doesn't know how to detach"));
-  else
-    error (_("Can't detach process."));
-
-  if (from_tty && !extended)
+  if (from_tty && !rs->extended)
     puts_filtered (_("Ending remote debugging.\n"));
 
-  target_mourn_inferior ();
+  /* Check to see if we are detaching a fork parent.  Note that if we
+     are detaching a fork child, tp == NULL.  */
+  is_fork_parent = (tp != NULL
+		    && tp->pending_follow.kind == TARGET_WAITKIND_FORKED);
+
+  /* If doing detach-on-fork, we don't mourn, because that will delete
+     breakpoints that should be available for the followed inferior.  */
+  if (!is_fork_parent)
+    target_mourn_inferior ();
+  else
+    {
+      inferior_ptid = null_ptid;
+      detach_inferior (pid);
+    }
 }
 
 static void
 remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
-  remote_detach_1 (args, from_tty, 0);
+  remote_detach_1 (args, from_tty);
 }
 
 static void
 extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
-  remote_detach_1 (args, from_tty, 1);
+  remote_detach_1 (args, from_tty);
+}
+
+/* Target follow-fork function for remote targets.  On entry, and
+   at return, the current inferior is the fork parent.
+
+   Note that although this is currently only used for extended-remote,
+   it is named remote_follow_fork in anticipation of using it for the
+   remote target as well.  */
+
+static int
+remote_follow_fork (struct target_ops *ops, int follow_child,
+		    int detach_fork)
+{
+  struct remote_state *rs = get_remote_state ();
+  enum target_waitkind kind = inferior_thread ()->pending_follow.kind;
+
+  if ((kind == TARGET_WAITKIND_FORKED && remote_fork_event_p (rs))
+      || (kind == TARGET_WAITKIND_VFORKED && remote_vfork_event_p (rs)))
+    {
+      /* When following the parent and detaching the child, we detach
+	 the child here.  For the case of following the child and
+	 detaching the parent, the detach is done in the target-
+	 independent follow fork code in infrun.c.  We can't use
+	 target_detach when detaching an unfollowed child because
+	 the client side doesn't know anything about the child.  */
+      if (detach_fork && !follow_child)
+	{
+	  /* Detach the fork child.  */
+	  ptid_t child_ptid;
+	  pid_t child_pid;
+
+	  child_ptid = inferior_thread ()->pending_follow.value.related_pid;
+	  child_pid = ptid_get_pid (child_ptid);
+
+	  remote_detach_pid (child_pid);
+	  detach_inferior (child_pid);
+	}
+    }
+  return 0;
 }
 
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
@@ -5326,6 +5499,81 @@ struct queue_iter_param
   struct stop_reply *output;
 };
 
+/* Determine if THREAD is a pending fork parent thread.  ARG contains
+   the pid of the process that owns the threads we want to check, or
+   -1 if we want to check all threads.  */
+
+static int
+is_pending_fork_parent (struct target_waitstatus *ws, int event_pid,
+			ptid_t thread_ptid)
+{
+  if (ws->kind == TARGET_WAITKIND_FORKED
+      || ws->kind == TARGET_WAITKIND_VFORKED)
+    {
+      if (event_pid == -1 || event_pid == ptid_get_pid (thread_ptid))
+	return 1;
+    }
+
+  return 0;
+}
+
+/* Check whether EVENT is a fork event, and if it is, remove the
+   fork child from the context list passed in DATA.  */
+
+static int
+remove_child_of_pending_fork (QUEUE (stop_reply_p) *q,
+			      QUEUE_ITER (stop_reply_p) *iter,
+			      stop_reply_p event,
+			      void *data)
+{
+  struct queue_iter_param *param = data;
+  struct threads_listing_context *context = param->input;
+
+  if (event->ws.kind == TARGET_WAITKIND_FORKED
+      || event->ws.kind == TARGET_WAITKIND_VFORKED)
+    {
+      threads_listing_context_remove (&event->ws, context);
+    }
+
+  return 1;
+}
+
+/* If CONTEXT contains any fork child threads that have not been
+   reported yet, remove them from the CONTEXT list.  If such a
+   thread exists it is because we are stopped at a fork catchpoint
+   and have not yet called follow_fork, which will set up the
+   host-side data structures for the new process.  */
+
+static void
+remove_new_fork_children (struct threads_listing_context *context)
+{
+  struct thread_info * thread;
+  int pid = -1;
+  struct notif_client *notif = &notif_client_stop;
+  struct queue_iter_param param;
+
+  /* For any threads stopped at a fork event, remove the corresponding
+     fork child threads from the CONTEXT list.  */
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      struct target_waitstatus *ws = &thread->pending_follow;
+
+      if (is_pending_fork_parent (ws, pid, thread->ptid))
+	{
+	  threads_listing_context_remove (ws, context);
+	}
+    }
+
+  /* Check for any pending fork events (not reported or processed yet)
+     in process PID and remove those fork child threads from the
+     CONTEXT list as well.  */
+  remote_notif_get_pending_events (notif);
+  param.input = context;
+  param.output = NULL;
+  QUEUE_iterate (stop_reply_p, stop_reply_queue,
+		 remove_child_of_pending_fork, &param);
+}
+
 /* Remove stop replies in the queue if its pid is equal to the given
    inferior's pid.  */
 
@@ -5630,6 +5878,21 @@ Packet: '%s'\n"),
 
 	      p = unpack_varlen_hex (++p1, &c);
 	      event->core = c;
+	    }
+	  else if (strncmp (p, "fork", p1 - p) == 0)
+	    {
+	      event->ws.value.related_pid = read_ptid (++p1, &p);
+	      event->ws.kind = TARGET_WAITKIND_FORKED;
+	    }
+	  else if (strncmp (p, "vfork", p1 - p) == 0)
+	    {
+	      event->ws.value.related_pid = read_ptid (++p1, &p);
+	      event->ws.kind = TARGET_WAITKIND_VFORKED;
+	    }
+	  else if (strncmp (p, "vforkdone", p1 - p) == 0)
+	    {
+	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
+	      p = skip_to_semicolon (p1 + 1);
 	    }
 	  else
 	    {
@@ -7829,6 +8092,69 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 				 is_notif);
 }
 
+/* Check whether EVENT is a fork event for the process specified
+   by the pid passed in DATA, and if it is, kill the fork child.  */
+
+static int
+kill_child_of_pending_fork (QUEUE (stop_reply_p) *q,
+			    QUEUE_ITER (stop_reply_p) *iter,
+			    stop_reply_p event,
+			    void *data)
+{
+  struct queue_iter_param *param = data;
+  int parent_pid = *(int *) param->input;
+
+  if (is_pending_fork_parent (&event->ws, parent_pid, event->ptid))
+    {
+      struct remote_state *rs = get_remote_state ();
+      int child_pid = ptid_get_pid (event->ws.value.related_pid);
+      int res;
+
+      res = remote_vkill (child_pid, rs);
+      if (res != 0)
+	error (_("Can't kill fork child process %d"), child_pid);
+    }
+
+  return 1;
+}
+
+/* Kill any new fork children of process PID that haven't been
+   processed by follow_fork.  */
+
+static void
+kill_new_fork_children (int pid, struct remote_state *rs)
+{
+  struct thread_info *thread;
+  struct notif_client *notif = &notif_client_stop;
+  struct queue_iter_param param;
+
+  /* Kill the fork child threads of any threads in process PID
+     that are stopped at a fork event.  */
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      struct target_waitstatus *ws = &thread->pending_follow;
+
+      if (is_pending_fork_parent (ws, pid, thread->ptid))
+	{
+	  struct remote_state *rs = get_remote_state ();
+	  int child_pid = ptid_get_pid (ws->value.related_pid);
+	  int res;
+
+	  res = remote_vkill (child_pid, rs);
+	  if (res != 0)
+	    error (_("Can't kill fork child process %d"), child_pid);
+	}
+    }
+
+  /* Check for any pending fork events (not reported or processed yet)
+     in process PID and kill those fork child threads as well.  */
+  remote_notif_get_pending_events (notif);
+  param.input = &pid;
+  param.output = NULL;
+  QUEUE_iterate (stop_reply_p, stop_reply_queue,
+		 kill_child_of_pending_fork, &param);
+}
+
 
 static void
 remote_kill (struct target_ops *ops)
@@ -7897,6 +8223,11 @@ extended_remote_kill (struct target_ops *ops)
   int res;
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
+
+  /* If we're stopped while forking and we haven't followed yet, kill the
+     child task.  We need to do this before killing the parent task
+     because if this is a vfork then the parent will be sleeping.  */
+  kill_new_fork_children (pid, rs);
 
   res = remote_vkill (pid, rs);
   if (res == -1 && !(rs->extended && remote_multi_process_p (rs)))
@@ -9485,8 +9816,11 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
       if (ptid_equal (magic_null_ptid, ptid))
 	xsnprintf (buf, sizeof buf, "Thread <main>");
       else if (rs->extended && remote_multi_process_p (rs))
-	xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		   ptid_get_pid (ptid), ptid_get_lwp (ptid));
+	if (ptid_get_lwp (ptid) == 0)
+	  return normal_pid_to_str (ptid);
+	else
+	  xsnprintf (buf, sizeof buf, "Thread %d.%ld",
+		     ptid_get_pid (ptid), ptid_get_lwp (ptid));
       else
 	xsnprintf (buf, sizeof buf, "Thread %ld",
 		   ptid_get_lwp (ptid));
@@ -11666,7 +12000,8 @@ static char *
 remote_pid_to_exec_file (struct target_ops *self, int pid)
 {
   static char *filename = NULL;
-  char annex[9];
+  struct inferior *inf;
+  char *annex = NULL;
 
   if (packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)
     return NULL;
@@ -11674,7 +12009,19 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
   if (filename != NULL)
     xfree (filename);
 
-  xsnprintf (annex, sizeof (annex), "%x", pid);
+  inf = find_inferior_pid (pid);
+  if (inf == NULL)
+    internal_error (__FILE__, __LINE__,
+		    _("not currently attached to process %d"), pid);
+
+  if (!inf->fake_pid_p)
+    {
+      const int annex_size = 9;
+
+      annex = alloca (annex_size);
+      xsnprintf (annex, annex_size, "%x", pid);
+    }
+
   filename = target_read_stralloc (&current_target,
 				   TARGET_OBJECT_EXEC_FILE, annex);
 
@@ -11837,6 +12184,15 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_kill = extended_remote_kill;
   extended_remote_ops.to_supports_disable_randomization
     = extended_remote_supports_disable_randomization;
+  extended_remote_ops.to_follow_fork = remote_follow_fork;
+  extended_remote_ops.to_insert_fork_catchpoint
+    = remote_insert_fork_catchpoint;
+  extended_remote_ops.to_remove_fork_catchpoint
+    = remote_remove_fork_catchpoint;
+  extended_remote_ops.to_insert_vfork_catchpoint
+    = remote_insert_vfork_catchpoint;
+  extended_remote_ops.to_remove_vfork_catchpoint
+    = remote_remove_vfork_catchpoint;
 }
 
 static int
@@ -12420,6 +12776,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_hwbreak_feature],
                          "hwbreak-feature", "hwbreak-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_fork_event_feature],
+			 "fork-event-feature", "fork-event-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vfork_event_feature],
+			 "vfork-event-feature", "vfork-event-feature", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */

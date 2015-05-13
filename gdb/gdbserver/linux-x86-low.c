@@ -634,6 +634,34 @@ x86_linux_new_process (void)
   return info;
 }
 
+/* Target routine for linux_new_fork.  */
+
+static void
+x86_linux_new_fork (struct process_info *parent, struct process_info *child)
+{
+  /* These are allocated by linux_add_process.  */
+  gdb_assert (parent->priv != NULL
+	      && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL
+	      && child->priv->arch_private != NULL);
+
+  /* Linux kernel before 2.6.33 commit
+     72f674d203cd230426437cdcf7dd6f681dad8b0d
+     will inherit hardware debug registers from parent
+     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+     zeroed debug registers.
+
+     GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  The debug registers mirror will become zeroed
+     in the end before detaching the forked off process, thus making
+     this compatible with older Linux kernels too.  */
+
+  *child->priv->arch_private = *parent->priv->arch_private;
+}
+
 /* See nat/x86-dregs.h.  */
 
 struct x86_debug_reg_state *
@@ -3263,6 +3291,7 @@ struct linux_target_ops the_low_target =
   x86_siginfo_fixup,
   x86_linux_new_process,
   x86_linux_new_thread,
+  x86_linux_new_fork,
   x86_linux_prepare_to_resume,
   x86_linux_process_qsupported,
   x86_supports_tracepoints,

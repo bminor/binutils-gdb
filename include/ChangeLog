@@ -1,3 +1,7 @@
+2015-05-12  Jiong Wang  <jiong.wang@arm.com>
+
+	* elf/aarch64.h (R_AARCH64_P32_LD32_GOTPAGE_LO14): New enumeration.
+
 2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Merge with gcc:

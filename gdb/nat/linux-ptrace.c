@@ -25,14 +25,10 @@
 
 #include <stdint.h>
 
-/* Stores the currently supported ptrace options.  A value of
-   -1 means we did not check for features yet.  A value of 0 means
-   there are no supported features.  */
-static int current_ptrace_options = -1;
-
-/* Additional flags to test.  */
-
-static int additional_flags;
+/* Stores the ptrace options supported by the running kernel.
+   A value of -1 means we did not check for features yet.  A value
+   of 0 means there are no supported features.  */
+static int supported_ptrace_options = -1;
 
 /* Find all possible reasons we could fail to attach PID and append
    these as strings to the already initialized BUFFER.  '\0'
@@ -337,13 +333,13 @@ static void linux_test_for_exitkill (int child_pid);
 
 /* Determine ptrace features available on this target.  */
 
-static void
+void
 linux_check_ptrace_features (void)
 {
   int child_pid, ret, status;
 
   /* Initialize the options.  */
-  current_ptrace_options = 0;
+  supported_ptrace_options = 0;
 
   /* Fork a child so we can do some testing.  The child will call
      linux_child_function and will get traced.  The child will
@@ -387,14 +383,11 @@ linux_test_for_tracesysgood (int child_pid)
 {
   int ret;
 
-  if ((additional_flags & PTRACE_O_TRACESYSGOOD) == 0)
-    return;
-
   ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
 		(PTRACE_TYPE_ARG4) PTRACE_O_TRACESYSGOOD);
 
   if (ret == 0)
-    current_ptrace_options |= PTRACE_O_TRACESYSGOOD;
+    supported_ptrace_options |= PTRACE_O_TRACESYSGOOD;
 }
 
 /* Determine if PTRACE_O_TRACEFORK can be used to follow fork
@@ -414,15 +407,12 @@ linux_test_for_tracefork (int child_pid)
   if (ret != 0)
     return;
 
-  if ((additional_flags & PTRACE_O_TRACEVFORKDONE) != 0)
-    {
-      /* Check if the target supports PTRACE_O_TRACEVFORKDONE.  */
-      ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
-		    (PTRACE_TYPE_ARG4) (PTRACE_O_TRACEFORK
-					| PTRACE_O_TRACEVFORKDONE));
-      if (ret == 0)
-	current_ptrace_options |= PTRACE_O_TRACEVFORKDONE;
-    }
+  /* Check if the target supports PTRACE_O_TRACEVFORKDONE.  */
+  ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
+		(PTRACE_TYPE_ARG4) (PTRACE_O_TRACEFORK
+				    | PTRACE_O_TRACEVFORKDONE));
+  if (ret == 0)
+    supported_ptrace_options |= PTRACE_O_TRACEVFORKDONE;
 
   /* Setting PTRACE_O_TRACEFORK did not cause an error, however we
      don't know for sure that the feature is available; old
@@ -458,10 +448,10 @@ linux_test_for_tracefork (int child_pid)
 
 	  /* We got the PID from the grandchild, which means fork
 	     tracing is supported.  */
-	  current_ptrace_options |= PTRACE_O_TRACECLONE;
-	  current_ptrace_options |= (additional_flags & (PTRACE_O_TRACEFORK
-                                                         | PTRACE_O_TRACEVFORK
-                                                         | PTRACE_O_TRACEEXEC));
+	  supported_ptrace_options |= PTRACE_O_TRACECLONE;
+	  supported_ptrace_options |= (PTRACE_O_TRACEFORK
+				       | PTRACE_O_TRACEVFORK
+				       | PTRACE_O_TRACEEXEC);
 
 	  /* Do some cleanup and kill the grandchild.  */
 	  my_waitpid (second_pid, &second_status, 0);
@@ -489,33 +479,31 @@ linux_test_for_exitkill (int child_pid)
 		(PTRACE_TYPE_ARG4) PTRACE_O_EXITKILL);
 
   if (ret == 0)
-    current_ptrace_options |= PTRACE_O_EXITKILL;
+    supported_ptrace_options |= PTRACE_O_EXITKILL;
 }
 
 /* Enable reporting of all currently supported ptrace events.
-   ATTACHED should be nonzero if we have attached to the inferior.  */
+   OPTIONS is a bit mask of extended features we want enabled,
+   if supported by the kernel.  PTRACE_O_TRACECLONE is always
+   enabled, if supported.  */
 
 void
-linux_enable_event_reporting (pid_t pid, int attached)
+linux_enable_event_reporting (pid_t pid, int options)
 {
-  int ptrace_options;
-
   /* Check if we have initialized the ptrace features for this
      target.  If not, do it now.  */
-  if (current_ptrace_options == -1)
+  if (supported_ptrace_options == -1)
     linux_check_ptrace_features ();
 
-  ptrace_options = current_ptrace_options;
-  if (attached)
-    {
-      /* When attached to our inferior, we do not want the inferior
-	 to die with us if we terminate unexpectedly.  */
-      ptrace_options &= ~PTRACE_O_EXITKILL;
-    }
+  /* We always want clone events.  */
+  options |= PTRACE_O_TRACECLONE;
+
+  /* Filter out unsupported options.  */
+  options &= supported_ptrace_options;
 
   /* Set the options.  */
   ptrace (PTRACE_SETOPTIONS, pid, (PTRACE_TYPE_ARG3) 0,
-	  (PTRACE_TYPE_ARG4) (uintptr_t) ptrace_options);
+	  (PTRACE_TYPE_ARG4) (uintptr_t) options);
 }
 
 /* Disable reporting of all currently supported ptrace events.  */
@@ -528,16 +516,16 @@ linux_disable_event_reporting (pid_t pid)
 }
 
 /* Returns non-zero if PTRACE_OPTIONS is contained within
-   CURRENT_PTRACE_OPTIONS, therefore supported.  Returns 0
+   SUPPORTED_PTRACE_OPTIONS, therefore supported.  Returns 0
    otherwise.  */
 
 static int
 ptrace_supports_feature (int ptrace_options)
 {
-  if (current_ptrace_options == -1)
+  if (supported_ptrace_options == -1)
     linux_check_ptrace_features ();
 
-  return ((current_ptrace_options & ptrace_options) == ptrace_options);
+  return ((supported_ptrace_options & ptrace_options) == ptrace_options);
 }
 
 /* Returns non-zero if PTRACE_EVENT_FORK is supported by ptrace,
@@ -593,17 +581,6 @@ linux_ptrace_init_warnings (void)
   warned = 1;
 
   linux_ptrace_test_ret_to_nx ();
-}
-
-/* Set additional ptrace flags to use.  Some such flags may be checked
-   by the implementation above.  This function must be called before
-   any other function in this file; otherwise the flags may not take
-   effect appropriately.  */
-
-void
-linux_ptrace_set_additional_flags (int flags)
-{
-  additional_flags = flags;
 }
 
 /* Extract extended ptrace event from wait status.  */

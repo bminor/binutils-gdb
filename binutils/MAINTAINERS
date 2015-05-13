@@ -124,6 +124,7 @@ responsibility among the other maintainers.
   RX               DJ Delorie <dj@redhat.com>
   RX               Nick Clifton <nickc@redhat.com>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
+  s390, s390x	   Andreas Krebbel <krebbel@linux.vnet.ibm.com>
   SCORE		   Mei Ligang <ligang@sunnorth.com.cn>
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>

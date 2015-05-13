@@ -149,13 +149,13 @@ extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
 extern char *linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
 
 extern void linux_ptrace_init_warnings (void);
+extern void linux_check_ptrace_features (void);
 extern void linux_enable_event_reporting (pid_t pid, int attached);
 extern void linux_disable_event_reporting (pid_t pid);
 extern int linux_supports_tracefork (void);
 extern int linux_supports_traceclone (void);
 extern int linux_supports_tracevforkdone (void);
 extern int linux_supports_tracesysgood (void);
-extern void linux_ptrace_set_additional_flags (int);
 extern int linux_ptrace_get_extended_event (int wstat);
 extern int linux_is_extended_waitstatus (int wstat);
 extern int linux_wstatus_maybe_breakpoint (int wstat);

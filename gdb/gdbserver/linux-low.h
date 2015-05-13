@@ -187,6 +187,9 @@ struct linux_target_ops
      allocate it here.  */
   void (*new_thread) (struct lwp_info *);
 
+  /* Hook to call, if any, when a new fork is attached.  */
+  void (*new_fork) (struct process_info *parent, struct process_info *child);
+
   /* Hook to call prior to resuming a thread.  */
   void (*prepare_to_resume) (struct lwp_info *);
 
@@ -270,6 +273,10 @@ struct lwp_info
 
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
+
+  /* This is used to store extended ptrace event information until
+     it is reported to GDB.  */
+  struct target_waitstatus waitstatus;
 
   /* When stopped is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is

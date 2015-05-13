@@ -20,6 +20,7 @@
 #include "linux-low.h"
 #include "nat/linux-osdata.h"
 #include "agent.h"
+#include "tdesc.h"
 
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
@@ -414,22 +415,24 @@ linux_add_process (int pid, int attached)
 static CORE_ADDR get_pc (struct lwp_info *lwp);
 
 /* Handle a GNU/Linux extended wait response.  If we see a clone
-   event, we need to add the new LWP to our list (and not report the
-   trap to higher layers).  */
+   event, we need to add the new LWP to our list (and return 0 so as
+   not to report the trap to higher layers).  */
 
-static void
-handle_extended_wait (struct lwp_info *event_child, int wstat)
+static int
+handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 {
   int event = linux_ptrace_get_extended_event (wstat);
-  struct thread_info *event_thr = get_lwp_thread (event_child);
+  struct thread_info *event_thr = get_lwp_thread (event_lwp);
   struct lwp_info *new_lwp;
 
-  if (event == PTRACE_EVENT_CLONE)
+  if ((event == PTRACE_EVENT_FORK) || (event == PTRACE_EVENT_VFORK)
+      || (event == PTRACE_EVENT_CLONE))
     {
       ptid_t ptid;
       unsigned long new_pid;
       int ret, status;
 
+      /* Get the pid of the new lwp.  */
       ptrace (PTRACE_GETEVENTMSG, lwpid_of (event_thr), (PTRACE_TYPE_ARG3) 0,
 	      &new_pid);
 
@@ -447,6 +450,66 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 	    warning ("wait returned unexpected PID %d", ret);
 	  else if (!WIFSTOPPED (status))
 	    warning ("wait returned unexpected status 0x%x", status);
+	}
+
+      if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
+	{
+	  struct process_info *parent_proc;
+	  struct process_info *child_proc;
+	  struct lwp_info *child_lwp;
+	  struct target_desc *tdesc;
+
+	  ptid = ptid_build (new_pid, new_pid, 0);
+
+	  if (debug_threads)
+	    {
+	      debug_printf ("HEW: Got fork event from LWP %ld, "
+			    "new child is %d\n",
+			    ptid_get_lwp (ptid_of (event_thr)),
+			    ptid_get_pid (ptid));
+	    }
+
+	  /* Add the new process to the tables and clone the breakpoint
+	     lists of the parent.  We need to do this even if the new process
+	     will be detached, since we will need the process object and the
+	     breakpoints to remove any breakpoints from memory when we
+	     detach, and the client side will access registers.  */
+	  child_proc = linux_add_process (new_pid, 0);
+	  gdb_assert (child_proc != NULL);
+	  child_lwp = add_lwp (ptid);
+	  gdb_assert (child_lwp != NULL);
+	  child_lwp->stopped = 1;
+	  parent_proc = get_thread_process (event_thr);
+	  child_proc->attached = parent_proc->attached;
+	  clone_all_breakpoints (&child_proc->breakpoints,
+				 &child_proc->raw_breakpoints,
+				 parent_proc->breakpoints);
+
+	  tdesc = xmalloc (sizeof (struct target_desc));
+	  copy_target_description (tdesc, parent_proc->tdesc);
+	  child_proc->tdesc = tdesc;
+	  child_lwp->must_set_ptrace_flags = 1;
+
+	  /* Clone arch-specific process data.  */
+	  if (the_low_target.new_fork != NULL)
+	    the_low_target.new_fork (parent_proc, child_proc);
+
+	  /* Save fork info in the parent thread.  */
+	  if (event == PTRACE_EVENT_FORK)
+	    event_lwp->waitstatus.kind = TARGET_WAITKIND_FORKED;
+	  else if (event == PTRACE_EVENT_VFORK)
+	    event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORKED;
+
+	  event_lwp->waitstatus.value.related_pid = ptid;
+
+	  /* The status_pending field contains bits denoting the
+	     extended event, so when the pending event is handled,
+	     the handler will look at lwp->waitstatus.  */
+	  event_lwp->status_pending_p = 1;
+	  event_lwp->status_pending = wstat;
+
+	  /* Report the event.  */
+	  return 0;
 	}
 
       if (debug_threads)
@@ -477,7 +540,19 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 	  new_lwp->status_pending_p = 1;
 	  new_lwp->status_pending = status;
 	}
+
+      /* Don't report the event.  */
+      return 1;
     }
+  else if (event == PTRACE_EVENT_VFORK_DONE)
+    {
+      event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
+
+      /* Report the event.  */
+      return 0;
+    }
+
+  internal_error (__FILE__, __LINE__, _("unknown ptrace event %d"), event);
 }
 
 /* Return the PC as read from the regcache of LWP, without any
@@ -1935,6 +2010,25 @@ check_stopped_by_watchpoint (struct lwp_info *child)
   return child->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
+/* Return the ptrace options that we want to try to enable.  */
+
+static int
+linux_low_ptrace_options (int attached)
+{
+  int options = 0;
+
+  if (!attached)
+    options |= PTRACE_O_EXITKILL;
+
+  if (report_fork_events)
+    options |= PTRACE_O_TRACEFORK;
+
+  if (report_vfork_events)
+    options |= (PTRACE_O_TRACEVFORK | PTRACE_O_TRACEVFORKDONE);
+
+  return options;
+}
+
 /* Do low-level handling of the event, and check if we should go on
    and pass it to caller code.  Return the affected lwp if we are, or
    NULL otherwise.  */
@@ -2022,8 +2116,9 @@ linux_low_filter_event (int lwpid, int wstat)
   if (WIFSTOPPED (wstat) && child->must_set_ptrace_flags)
     {
       struct process_info *proc = find_process_pid (pid_of (thread));
+      int options = linux_low_ptrace_options (proc->attached);
 
-      linux_enable_event_reporting (lwpid, proc->attached);
+      linux_enable_event_reporting (lwpid, options);
       child->must_set_ptrace_flags = 0;
     }
 
@@ -2033,8 +2128,12 @@ linux_low_filter_event (int lwpid, int wstat)
       && linux_is_extended_waitstatus (wstat))
     {
       child->stop_pc = get_pc (child);
-      handle_extended_wait (child, wstat);
-      return NULL;
+      if (handle_extended_wait (child, wstat))
+	{
+	  /* The event has been handled, so just return without
+	     reporting it.  */
+	  return NULL;
+	}
     }
 
   /* Check first whether this was a SW/HW breakpoint before checking
@@ -2622,6 +2721,20 @@ ignore_event (struct target_waitstatus *ourstatus)
   return null_ptid;
 }
 
+/* Return non-zero if WAITSTATUS reflects an extended linux
+   event.  Otherwise, return zero.  */
+
+static int
+extended_event_reported (const struct target_waitstatus *waitstatus)
+{
+  if (waitstatus == NULL)
+    return 0;
+
+  return (waitstatus->kind == TARGET_WAITKIND_FORKED
+	  || waitstatus->kind == TARGET_WAITKIND_VFORKED
+	  || waitstatus->kind == TARGET_WAITKIND_VFORK_DONE);
+}
+
 /* Wait for process, returns status.  */
 
 static ptid_t
@@ -2988,7 +3101,8 @@ linux_wait_1 (ptid_t ptid,
 		       && !bp_explains_trap && !trace_event)
 		   || (gdb_breakpoint_here (event_child->stop_pc)
 		       && gdb_condition_true_at_breakpoint (event_child->stop_pc)
-		       && gdb_no_commands_at_breakpoint (event_child->stop_pc)));
+		       && gdb_no_commands_at_breakpoint (event_child->stop_pc))
+		   || extended_event_reported (&event_child->waitstatus));
 
   run_breakpoint_commands (event_child->stop_pc);
 
@@ -3010,6 +3124,13 @@ linux_wait_1 (ptid_t ptid,
 			  paddress (event_child->stop_pc),
 			  paddress (event_child->step_range_start),
 			  paddress (event_child->step_range_end));
+	  if (extended_event_reported (&event_child->waitstatus))
+	    {
+	      char *str = target_waitstatus_to_string (ourstatus);
+	      debug_printf ("LWP %ld: extended event with waitstatus %s\n",
+			    lwpid_of (get_lwp_thread (event_child)), str);
+	      xfree (str);
+	    }
 	}
 
       /* We're not reporting this breakpoint to GDB, so apply the
@@ -3119,7 +3240,17 @@ linux_wait_1 (ptid_t ptid,
 	unstop_all_lwps (1, event_child);
     }
 
-  ourstatus->kind = TARGET_WAITKIND_STOPPED;
+  if (extended_event_reported (&event_child->waitstatus))
+    {
+      /* If the reported event is a fork, vfork or exec, let GDB know.  */
+      ourstatus->kind = event_child->waitstatus.kind;
+      ourstatus->value = event_child->waitstatus.value;
+
+      /* Clear the event lwp's waitstatus since we handled it already.  */
+      event_child->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+    }
+  else
+    ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
   /* Now that we've selected our final event LWP, un-adjust its PC if
      it was a software breakpoint, and the client doesn't know we can
@@ -3152,7 +3283,7 @@ linux_wait_1 (ptid_t ptid,
 	 but, it stopped for other reasons.  */
       ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
     }
-  else
+  else if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
     {
       ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
     }
@@ -4996,8 +5127,8 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 	val = val & 0xffff;
       else if (len == 3)
 	val = val & 0xffffff;
-      debug_printf ("Writing %0*x to 0x%08lx\n", 2 * ((len < 4) ? len : 4),
-		    val, (long)memaddr);
+      debug_printf ("Writing %0*x to 0x%08lx in process %d\n",
+		    2 * ((len < 4) ? len : 4), val, (long)memaddr, pid);
     }
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
@@ -5436,6 +5567,64 @@ static int
 linux_supports_multi_process (void)
 {
   return 1;
+}
+
+/* Check if fork events are supported.  */
+
+static int
+linux_supports_fork_events (void)
+{
+  return linux_supports_tracefork ();
+}
+
+/* Check if vfork events are supported.  */
+
+static int
+linux_supports_vfork_events (void)
+{
+  return linux_supports_tracefork ();
+}
+
+/* Callback for 'find_inferior'.  Set the (possibly changed) ptrace
+   options for the specified lwp.  */
+
+static int
+reset_lwp_ptrace_options_callback (struct inferior_list_entry *entry,
+				   void *args)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct lwp_info *lwp = get_thread_lwp (thread);
+
+  if (!lwp->stopped)
+    {
+      /* Stop the lwp so we can modify its ptrace options.  */
+      lwp->must_set_ptrace_flags = 1;
+      linux_stop_lwp (lwp);
+    }
+  else
+    {
+      /* Already stopped; go ahead and set the ptrace options.  */
+      struct process_info *proc = find_process_pid (pid_of (thread));
+      int options = linux_low_ptrace_options (proc->attached);
+
+      linux_enable_event_reporting (lwpid_of (thread), options);
+      lwp->must_set_ptrace_flags = 0;
+    }
+
+  return 0;
+}
+
+/* Target hook for 'handle_new_gdb_connection'.  Causes a reset of the
+   ptrace flags for all inferiors.  This is in case the new GDB connection
+   doesn't support the same set of events that the previous one did.  */
+
+static void
+linux_handle_new_gdb_connection (void)
+{
+  pid_t pid;
+
+  /* Request that all the lwps reset their ptrace options.  */
+  find_inferior (&all_threads, reset_lwp_ptrace_options_callback , &pid);
 }
 
 static int
@@ -6411,6 +6600,9 @@ static struct target_ops linux_target_ops = {
   linux_async,
   linux_start_non_stop,
   linux_supports_multi_process,
+  linux_supports_fork_events,
+  linux_supports_vfork_events,
+  linux_handle_new_gdb_connection,
 #ifdef USE_THREAD_DB
   thread_db_handle_monitor_command,
 #else
@@ -6488,4 +6680,6 @@ initialize_low (void)
   sigaction (SIGCHLD, &sigchld_action, NULL);
 
   initialize_low_arch ();
+
+  linux_check_ptrace_features ();
 }
