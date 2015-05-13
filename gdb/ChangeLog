@@ -1,4 +1,10 @@
-2015-05-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (tui_async_resize_screen): Clear win_resized
+	first before resizing the window.
+	* tui.c (tui_enable): Likewise.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dummy-frame.c (struct dummy_frame): Use proper typedef for dtor.
 	* dummy-frame.h (dummy_frame_dtor_ftype): Add its comment.
