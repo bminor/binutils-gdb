@@ -24,6 +24,12 @@
 	* ld-i386/i386.exp (iamcu_tests): New.
 	Run iamcu_tests.
 
+2015-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* ld-x86-64/tlsgdesc.dd: Updated.
+	* ld-x86-64/tlspic.dd: Likewise.
+
 2015-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18354

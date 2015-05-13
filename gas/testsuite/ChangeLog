@@ -15,6 +15,17 @@
 	* gas/i386/iamcu-inval-3.l: Likewise.
 	* gas/i386/iamcu-inval-3.s: Likewise.
 
+2015-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* gas/i386/i386.exp: Run x86-64-jump.
+	* gas/i386/x86-64-branch.d: Updated.
+	* gas/i386/ilp32/x86-64-branch.d: Likewise.
+	* gas/i386/x86-64-branch.s: Add tests for the operand size prefix
+	with call, jmp and jb.
+	* gas/i386/x86-64-jump.d: New file.
+	* gas/i386/x86-64-jump.s: Likewise.
+
 2015-05-08  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/18347
