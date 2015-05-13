@@ -1,5 +1,12 @@
 2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* regcache.c (regcache_cpy_no_passthrough): New declaration.
+	(regcache_cpy_no_passthrough): Make it static, add function comment.
+	* regcache.h (regcache_dup, regcache_cpy): Reduce/update their comment.
+	(regcache_cpy_no_passthrough): Remove declaration.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdbthread.h (struct thread_control_state): Update comment for
 	proceed_to_finish.
 	* infcall.c (run_inferior_call): Update comment about
