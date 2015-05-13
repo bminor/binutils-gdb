@@ -1,3 +1,8 @@
+2015-05-14  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-command.c: Remove include of <ctype.h>.
+	(tui_dispatch_ctrl_char): Remove workaround for xterm terminals.
+
 2015-05-13  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* dwarf2read.c (die_needs_namespace): Return 1 for
@@ -87,7 +92,7 @@
 
 	* tui/tui-win.c (tui_async_resize_screen): Clear win_resized
 	first before resizing the window.
-	* tui.c (tui_enable): Likewise.
+	* tui/tui.c (tui_enable): Likewise.
 
 2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
