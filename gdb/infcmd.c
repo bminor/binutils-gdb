@@ -54,6 +54,7 @@
 #include "continuations.h"
 #include "linespec.h"
 #include "cli/cli-utils.h"
+#include "infcall.h"
 
 /* Local functions: */
 
@@ -1506,18 +1507,22 @@ advance_command (char *arg, int from_tty)
 }
 
 /* Return the value of the result of a function at the end of a 'finish'
-   command/BP.  */
+   command/BP.  DTOR_DATA (if not NULL) can represent inferior registers
+   right after an inferior call has finished.  */
 
 struct value *
-get_return_value (struct value *function, struct type *value_type)
+get_return_value (struct value *function, struct type *value_type,
+		  struct dummy_frame_context_saver *ctx_saver)
 {
-  struct regcache *stop_regs = stop_registers;
+  struct regcache *stop_regs = NULL;
   struct gdbarch *gdbarch;
   struct value *value;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   /* If stop_registers were not saved, use the current registers.  */
-  if (!stop_regs)
+  if (ctx_saver != NULL)
+    stop_regs = dummy_frame_context_saver_get_regs (ctx_saver);
+  else
     {
       stop_regs = regcache_dup (get_current_regcache ());
       make_cleanup_regcache_xfree (stop_regs);
@@ -1557,12 +1562,15 @@ get_return_value (struct value *function, struct type *value_type)
   return value;
 }
 
-/* Print the result of a function at the end of a 'finish' command.  */
+/* Print the result of a function at the end of a 'finish' command.
+   DTOR_DATA (if not NULL) can represent inferior registers right after
+   an inferior call has finished.  */
 
 static void
-print_return_value (struct value *function, struct type *value_type)
+print_return_value (struct value *function, struct type *value_type,
+		    struct dummy_frame_context_saver *ctx_saver)
 {
-  struct value *value = get_return_value (function, value_type);
+  struct value *value = get_return_value (function, value_type, ctx_saver);
   struct ui_out *uiout = current_uiout;
 
   if (value)
@@ -1613,6 +1621,11 @@ struct finish_command_continuation_args
   int thread;
   struct breakpoint *breakpoint;
   struct symbol *function;
+
+  /* Inferior registers stored right before dummy_frame has been freed
+     after an inferior call.  It can be NULL if no inferior call was
+     involved, GDB will then use current inferior registers.  */
+  struct dummy_frame_context_saver *ctx_saver;
 };
 
 static void
@@ -1653,7 +1666,7 @@ finish_command_continuation (void *arg, int err)
 		  /* print_return_value can throw an exception in some
 		     circumstances.  We need to catch this so that we still
 		     delete the breakpoint.  */
-		  print_return_value (func, value_type);
+		  print_return_value (func, value_type, a->ctx_saver);
 		}
 	      CATCH (ex, RETURN_MASK_ALL)
 		{
@@ -1677,7 +1690,11 @@ finish_command_continuation (void *arg, int err)
 static void
 finish_command_continuation_free_arg (void *arg)
 {
-  xfree (arg);
+  struct finish_command_continuation_args *cargs = arg;
+
+  if (cargs->ctx_saver != NULL)
+    dummy_frame_context_saver_drop (cargs->ctx_saver);
+  xfree (cargs);
 }
 
 /* finish_backward -- helper function for finish_command.  */
@@ -1742,12 +1759,20 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
   struct breakpoint *breakpoint;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct finish_command_continuation_args *cargs;
   int thread = tp->num;
+  struct dummy_frame_context_saver *saver = NULL;
 
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
+
+  if (get_frame_type (frame) == DUMMY_FRAME)
+    {
+      saver = dummy_frame_context_saver_setup (get_stack_frame_id (frame),
+					       inferior_ptid);
+      make_cleanup (dummy_frame_context_saver_cleanup, saver);
+    }
 
   breakpoint = set_momentary_breakpoint (gdbarch, sal,
 					 get_stack_frame_id (frame),
@@ -1756,7 +1781,7 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   /* set_momentary_breakpoint invalidates FRAME.  */
   frame = NULL;
 
-  old_chain = make_cleanup_delete_breakpoint (breakpoint);
+  make_cleanup_delete_breakpoint (breakpoint);
 
   set_longjmp_breakpoint (tp, frame_id);
   make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
@@ -1768,6 +1793,7 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   cargs->thread = thread;
   cargs->breakpoint = breakpoint;
   cargs->function = function;
+  cargs->ctx_saver = saver;
   add_continuation (tp, finish_command_continuation, cargs,
                     finish_command_continuation_free_arg);
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);

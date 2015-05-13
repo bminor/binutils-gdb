@@ -1,5 +1,33 @@
 2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* infcall.c (struct dummy_frame_context_saver)
+	(dummy_frame_context_saver_data_free, dummy_frame_context_saver_dtor)
+	(dummy_frame_context_saver_drop, dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs, dummy_frame_context_saver_setup):
+	New.
+	(call_function_by_hand_dummy): Move discard_cleanups of
+	inf_status_cleanup before dummy_frame_push.  Call
+	dummy_frame_context_saver_setup and prepare context_saver_cleanup.
+	Use dummy_frame_context_saver_get_regs instead of stop_registers.
+	* infcall.h (struct dummy_frame_context_saver)
+	(dummy_frame_context_saver_drop, dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs, dummy_frame_context_saver_setup):
+	New declarations.
+	* infcmd.c: Include infcall.h.
+	(get_return_value): Add parameter ctx_saver, use it instead of
+	stop_registers.
+	(print_return_value): Add parameter ctx_saver, pass it.
+	(struct finish_command_continuation_args): Add field ctx_saver.
+	(finish_command_continuation): Update print_return_value caller.
+	(finish_command_continuation_free_arg): Free also ctx_saver.
+	(finish_forward): Call dummy_frame_context_saver_setup.
+	* inferior.h (struct dummy_frame_context_saver): New declaration.
+	(get_return_value): Add parameter ctx_saver.
+	* python/py-finishbreakpoint.c (bpfinishpy_pre_stop_hook): Update
+	get_return_value caller.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dummy-frame.c (struct dummy_frame_dtor_list): New.
 	(struct dummy_frame): Replace dtor and dtor_data by dtor_list.
 	(remove_dummy_frame): Process dtor_list.

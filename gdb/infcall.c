@@ -469,6 +469,96 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   return call_function_by_hand_dummy (function, nargs, args, NULL, NULL);
 }
 
+/* Data for dummy_frame_context_saver.  Structure can be freed only
+   after both dummy_frame_context_saver_dtor and
+   dummy_frame_context_saver_drop have been called for it.  */
+
+struct dummy_frame_context_saver
+{
+  /* Inferior registers fetched before associated dummy_frame got freed
+     and before any other destructors of associated dummy_frame got called.
+     It is initialized to NULL.  */
+  struct regcache *retbuf;
+
+  /* It is 1 if this dummy_frame_context_saver_drop has been already
+     called.  */
+  int drop_done;
+};
+
+/* Free struct dummy_frame_context_saver.  */
+
+static void
+dummy_frame_context_saver_free (struct dummy_frame_context_saver *saver)
+{
+  regcache_xfree (saver->retbuf);
+  xfree (saver);
+}
+
+/* Destructor for associated dummy_frame.  */
+
+static void
+dummy_frame_context_saver_dtor (void *data_voidp, int registers_valid)
+{
+  struct dummy_frame_context_saver *data = data_voidp;
+
+  gdb_assert (data->retbuf == NULL);
+
+  if (data->drop_done)
+    dummy_frame_context_saver_free (data);
+  else if (registers_valid)
+    data->retbuf = regcache_dup (get_current_regcache ());
+}
+
+/* Caller is no longer interested in this
+   struct dummy_frame_context_saver.  After its associated dummy_frame
+   gets freed struct dummy_frame_context_saver can be also freed.  */
+
+void
+dummy_frame_context_saver_drop (struct dummy_frame_context_saver *saver)
+{
+  saver->drop_done = 1;
+
+  if (!find_dummy_frame_dtor (dummy_frame_context_saver_dtor, saver))
+    dummy_frame_context_saver_free (saver);
+}
+
+/* Stub dummy_frame_context_saver_drop compatible with make_cleanup.  */
+
+void
+dummy_frame_context_saver_cleanup (void *data)
+{
+  struct dummy_frame_context_saver *saver = data;
+
+  dummy_frame_context_saver_drop (saver);
+}
+
+/* Fetch RETBUF field of possibly opaque DTOR_DATA.
+   RETBUF must not be NULL.  */
+
+struct regcache *
+dummy_frame_context_saver_get_regs (struct dummy_frame_context_saver *saver)
+{
+  gdb_assert (saver->retbuf != NULL);
+  return saver->retbuf;
+}
+
+/* Register provider of inferior registers at the time DUMMY_ID frame of
+   PTID gets freed (before inferior registers get restored to those
+   before dummy_frame).  */
+
+struct dummy_frame_context_saver *
+dummy_frame_context_saver_setup (struct frame_id dummy_id, ptid_t ptid)
+{
+  struct dummy_frame_context_saver *saver;
+
+  saver = xmalloc (sizeof (*saver));
+  saver->retbuf = NULL;
+  saver->drop_done = 0;
+  register_dummy_frame_dtor (dummy_id, inferior_ptid,
+			     dummy_frame_context_saver_dtor, saver);
+  return saver;
+}
+
 /* All this stuff with a dummy frame may seem unnecessarily complicated
    (why not just save registers in GDB?).  The purpose of pushing a dummy
    frame which looks just like a real frame is so that if you call a
@@ -513,6 +603,8 @@ call_function_by_hand_dummy (struct value *function,
   struct gdb_exception e;
   char name_buf[RAW_FUNCTION_ADDRESS_SIZE];
   int stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
+  struct dummy_frame_context_saver *context_saver;
+  struct cleanup *context_saver_cleanup;
 
   if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
@@ -886,6 +978,11 @@ call_function_by_hand_dummy (struct value *function,
   if (unwind_on_terminating_exception_p)
     set_std_terminate_breakpoint ();
 
+  /* Discard both inf_status and caller_state cleanups.
+     From this point on we explicitly restore the associated state
+     or discard it.  */
+  discard_cleanups (inf_status_cleanup);
+
   /* Everything's ready, push all the info needed to restore the
      caller (and identify the dummy-frame) onto the dummy-frame
      stack.  */
@@ -894,10 +991,12 @@ call_function_by_hand_dummy (struct value *function,
     register_dummy_frame_dtor (dummy_id, inferior_ptid,
 			       dummy_dtor, dummy_dtor_data);
 
-  /* Discard both inf_status and caller_state cleanups.
-     From this point on we explicitly restore the associated state
-     or discard it.  */
-  discard_cleanups (inf_status_cleanup);
+  /* dummy_frame_context_saver_setup must be called last so that its
+     saving of inferior registers gets called first (before possible
+     DUMMY_DTOR destructor).  */
+  context_saver = dummy_frame_context_saver_setup (dummy_id, inferior_ptid);
+  context_saver_cleanup = make_cleanup (dummy_frame_context_saver_cleanup,
+					context_saver);
 
   /* Register a clean-up for unwind_on_terminating_exception_breakpoint.  */
   terminate_bp_cleanup = make_cleanup (cleanup_delete_std_terminate_breakpoint,
@@ -1112,12 +1211,7 @@ When the function is done executing, GDB will silently stop."),
      and the dummy frame has already been popped.  */
 
   {
-    struct address_space *aspace = get_regcache_aspace (stop_registers);
-    struct regcache *retbuf = regcache_xmalloc (gdbarch, aspace);
-    struct cleanup *retbuf_cleanup = make_cleanup_regcache_xfree (retbuf);
     struct value *retval = NULL;
-
-    regcache_cpy_no_passthrough (retbuf, stop_registers);
 
     /* Inferior call is successful.  Restore the inferior status.
        At this stage, leave the RETBUF alone.  */
@@ -1145,7 +1239,8 @@ When the function is done executing, GDB will silently stop."),
       {
 	retval = allocate_value (values_type);
 	gdbarch_return_value (gdbarch, function, values_type,
-			      retbuf, value_contents_raw (retval), NULL);
+			      dummy_frame_context_saver_get_regs (context_saver),
+			      value_contents_raw (retval), NULL);
 	if (stack_temporaries && class_or_union_p (values_type))
 	  {
 	    /* Values of class type returned in registers are copied onto
@@ -1160,7 +1255,7 @@ When the function is done executing, GDB will silently stop."),
 	  }
       }
 
-    do_cleanups (retbuf_cleanup);
+    do_cleanups (context_saver_cleanup);
 
     gdb_assert (retval);
     return retval;
