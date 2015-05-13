@@ -1,6 +1,6 @@
 /* Go language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -233,8 +233,8 @@ unpack_mangled_go_symbol (const char *mangled_name,
      libgo_.*: used by gccgo's runtime
 
      Thus we don't support -fgo-prefix (except as used by the runtime).  */
-  if (strncmp (mangled_name, "go.", 3) != 0
-      && strncmp (mangled_name, "libgo_", 6) != 0)
+  if (!startswith (mangled_name, "go.")
+      && !startswith (mangled_name, "libgo_"))
     return NULL;
 
   /* Quick check for whether a search may be fruitful.  */

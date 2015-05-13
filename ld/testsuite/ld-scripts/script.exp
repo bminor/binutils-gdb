@@ -1,6 +1,6 @@
 # Test basic linker script functionality
 # By Ian Lance Taylor, Cygnus Support
-#   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+#   Copyright (C) 1999-2015 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -66,6 +66,13 @@ proc check_script { } {
 	set passes 0
     } 
 
+    if {[info exists nm_output(tred)] \
+        && $nm_output(tred) != (0x100 + 0x8000)} {
+	send_log "tred == $nm_output(tred)\n"
+	verbose "tred == $nm_output(tred)"
+	set passes 0
+    }
+
     if {$nm_output(text_end) < $text_end \
 	    || $nm_output(text_end) > 0x110} {
 	send_log "text_end == $nm_output(text_end)\n"
@@ -78,6 +85,13 @@ proc check_script { } {
 	verbose "data_start == $nm_output(data_start)"
 	set passes 0
     } 
+
+    if {[info exists nm_output(fred)] \
+        && $nm_output(fred) != (0x1000 + 0x10000)} {
+	send_log "fred == $nm_output(fred)\n"
+	verbose "fred == $nm_output(fred)"
+	set passes 0
+    }
 
     if {$nm_output(data_end) < $data_end \
 	    || $nm_output(data_end) > 0x1010} {
@@ -121,6 +135,13 @@ if ![ld_simple_link $ld tmpdir/script "$flags -c $srcdir/$subdir/scriptm.t"] {
 set testname "MEMORY"
 
 if ![ld_simple_link $ld tmpdir/script "$flags -T $srcdir/$subdir/memory.t tmpdir/script.o"] {
+    fail $testname
+} else {
+    check_script
+}
+
+set testname "MEMORY with symbols"
+if ![ld_simple_link $ld tmpdir/script "$flags -defsym DATA_ORIGIN=0x1000 -defsym DATA_LENGTH=0x10000 -T $srcdir/$subdir/memory_sym.t tmpdir/script.o"] {
     fail $testname
 } else {
     check_script

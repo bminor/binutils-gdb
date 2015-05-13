@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1992,9 +1992,9 @@ search_struct_method (const char *name, struct value **arg1p,
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
 
       /* FIXME!  May need to check for ARM demangling here.  */
-      if (strncmp (t_field_name, "__", 2) == 0 ||
-	  strncmp (t_field_name, "op", 2) == 0 ||
-	  strncmp (t_field_name, "type", 4) == 0)
+      if (startswith (t_field_name, "__") ||
+	  startswith (t_field_name, "op") ||
+	  startswith (t_field_name, "type"))
 	{
 	  if (cplus_demangle_opname (t_field_name, dem_opname, DMGL_ANSI))
 	    t_field_name = dem_opname;
@@ -2544,7 +2544,7 @@ find_overload_match (struct value **args, int nargs,
 	 value_find_oload_method_list above.  */
       if (fns_ptr)
 	{
-	  gdb_assert (TYPE_DOMAIN_TYPE (fns_ptr[0].type) != NULL);
+	  gdb_assert (TYPE_SELF_TYPE (fns_ptr[0].type) != NULL);
 
 	  src_method_oload_champ = find_oload_champ (args, nargs,
 						     num_fns, fns_ptr, NULL,
@@ -3360,7 +3360,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		  type = check_typedef (value_type (ptr));
 		  gdb_assert (type != NULL
 			      && TYPE_CODE (type) == TYPE_CODE_MEMBERPTR);
-		  tmp = lookup_pointer_type (TYPE_DOMAIN_TYPE (type));
+		  tmp = lookup_pointer_type (TYPE_SELF_TYPE (type));
 		  v = value_cast_pointers (tmp, v, 1);
 		  mem_offset = value_as_long (ptr);
 		  tmp = lookup_pointer_type (TYPE_TARGET_TYPE (type));
@@ -3386,9 +3386,9 @@ value_struct_elt_for_reference (struct type *domain, int offset,
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (t, i);
       char dem_opname[64];
 
-      if (strncmp (t_field_name, "__", 2) == 0 
-	  || strncmp (t_field_name, "op", 2) == 0 
-	  || strncmp (t_field_name, "type", 4) == 0)
+      if (startswith (t_field_name, "__") 
+	  || startswith (t_field_name, "op") 
+	  || startswith (t_field_name, "type"))
 	{
 	  if (cplus_demangle_opname (t_field_name, 
 				     dem_opname, DMGL_ANSI))
@@ -3592,7 +3592,7 @@ struct type *
 value_rtti_indirect_type (struct value *v, int *full, 
 			  int *top, int *using_enc)
 {
-  struct value *target;
+  struct value *target = NULL;
   struct type *type, *real_type, *target_type;
 
   type = value_type (v);
@@ -3600,7 +3600,25 @@ value_rtti_indirect_type (struct value *v, int *full,
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     target = coerce_ref (v);
   else if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    target = value_ind (v);
+    {
+
+      TRY
+        {
+	  target = value_ind (v);
+        }
+      CATCH (except, RETURN_MASK_ERROR)
+	{
+	  if (except.error == MEMORY_ERROR)
+	    {
+	      /* value_ind threw a memory error. The pointer is NULL or
+	         contains an uninitialized value: we can't determine any
+	         type.  */
+	      return NULL;
+	    }
+	  throw_exception (except);
+	}
+      END_CATCH
+    }
   else
     return NULL;
 
@@ -3736,12 +3754,15 @@ struct value *
 value_of_this_silent (const struct language_defn *lang)
 {
   struct value *ret = NULL;
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       ret = value_of_this (lang);
     }
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH
 
   return ret;
 }

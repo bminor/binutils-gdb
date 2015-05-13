@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2015 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,11 @@ SUBDIRS = doc po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIBINC = @zlibinc@
+
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo @LEX@ ; fi`
 
@@ -34,7 +39,7 @@ am__skipyacc =
 
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
-AM_CFLAGS = $(WARN_CFLAGS)
+AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
 
 TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c
@@ -139,6 +144,7 @@ TARGET_CPU_CFILES = \
 	config/tc-epiphany.c \
 	config/tc-fr30.c \
 	config/tc-frv.c \
+	config/tc-ft32.c \
 	config/tc-h8300.c \
 	config/tc-hppa.c \
 	config/tc-ia64.c \
@@ -212,6 +218,7 @@ TARGET_CPU_HFILES = \
 	config/tc-epiphany.h \
 	config/tc-fr30.h \
 	config/tc-frv.h \
+	config/tc-ft32.h \
 	config/tc-h8300.h \
 	config/tc-hppa.h \
 	config/tc-ia64.h \

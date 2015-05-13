@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2009-2014 Free Software Foundation, Inc.
+   Copyright 2009-2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,11 @@ unsigned int args[2];
 
 pthread_barrier_t barrier;
 pthread_t child_thread_2, child_thread_3;
+
+void
+sigusr1_handler (int signo)
+{
+}
 
 void
 callme (void)
@@ -75,6 +80,8 @@ main ()
 {
   int res;
   long i;
+
+  signal (SIGUSR1, sigusr1_handler);
 
   /* Call these early so that PLTs for these are resolved soon,
      instead of in the threads.  RTLD_NOW should work as well.  */

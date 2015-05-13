@@ -1,8 +1,8 @@
 /* moxie-specific support for 32-bit ELF.
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
    Copied from elf32-fr30.c which is..
-   Copyright (C) 1998-2014 Free Software Foundation, Inc.
+   Copyright (C) 1998-2015 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -34,11 +34,11 @@ static reloc_howto_type moxie_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_MOXIE_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MOXIE_NONE",		/* name */
 	 FALSE,			/* partial_inplace */
@@ -99,7 +99,7 @@ moxie_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned int i;
 
   for (i = sizeof (moxie_reloc_map) / sizeof (moxie_reloc_map[0]);
-       --i;)
+       i--;)
     if (moxie_reloc_map [i].bfd_reloc_val == code)
       return & moxie_elf_howto_table [moxie_reloc_map[i].moxie_reloc_val];
 
@@ -133,7 +133,7 @@ moxie_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_MOXIE_max)
     {
-      _bfd_error_handler (_("%A: invalid Moxie reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid Moxie reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & moxie_elf_howto_table [r_type];
@@ -371,6 +371,7 @@ moxie_elf_check_relocs (bfd *abfd,
 
 #define ELF_ARCH		bfd_arch_moxie
 #define ELF_MACHINE_CODE	EM_MOXIE
+#define ELF_MACHINE_ALT1        EM_MOXIE_OLD
 #define ELF_MAXPAGESIZE		0x1
 
 #define TARGET_BIG_SYM          moxie_elf32_be_vec

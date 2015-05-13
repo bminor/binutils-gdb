@@ -1,6 +1,6 @@
 /* Remote File-I/O communications
 
-   Copyright (C) 2003-2014 Free Software Foundation, Inc.
+   Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,8 @@
 #ifndef REMOTE_FILEIO_H
 #define REMOTE_FILEIO_H
 
+#include "fileio.h"
+
 struct cmd_list_element;
 
 /* Unified interface to remote fileio, called in remote.c from
@@ -35,5 +37,9 @@ extern void remote_fileio_reset (void);
 extern void initialize_remote_fileio (
   struct cmd_list_element *remote_set_cmdlist,
   struct cmd_list_element *remote_show_cmdlist);
+
+/* Unpack a struct fio_stat.  */
+extern void remote_fileio_to_host_stat (struct fio_stat *fst,
+					struct stat *st);
 
 #endif

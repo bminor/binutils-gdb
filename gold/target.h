@@ -1,6 +1,6 @@
 // target.h -- target support for gold   -*- C++ -*-
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1056,9 +1056,9 @@ class Sized_target : public Target
   // and DST_OFF.
   void
   gc_add_reference(Symbol_table* symtab,
-		   Object* src_obj,
+		   Relobj* src_obj,
 		   unsigned int src_shndx,
-		   Object* dst_obj,
+		   Relobj* dst_obj,
 		   unsigned int dst_shndx,
 		   typename elfcpp::Elf_types<size>::Elf_Addr dst_off) const
   {
@@ -1080,8 +1080,8 @@ class Sized_target : public Target
 
   // Handle target specific gc actions when adding a gc reference.
   virtual void
-  do_gc_add_reference(Symbol_table*, Object*, unsigned int,
-		      Object*, unsigned int,
+  do_gc_add_reference(Symbol_table*, Relobj*, unsigned int,
+		      Relobj*, unsigned int,
 		      typename elfcpp::Elf_types<size>::Elf_Addr) const
   { }
 

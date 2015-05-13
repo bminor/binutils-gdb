@@ -1,4 +1,4 @@
-# Copyright 2012-2014 Free Software Foundation, Inc.
+# Copyright 2012-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ if { $res < 0 || $res == "" } {
 }
 pass $test
 # Declare GDB now as running.
-set gdb_spawn_id -1
+set gdb_spawn_id $res
 
 # GDB started by vgdb stops already after the startup is executed, like with
 # non-extended gdbserver.  It is also not correct to run/attach the inferior.

@@ -42,7 +42,7 @@ DEVO_SUPPORT="README Makefile.in configure configure.ac \
 	COPYING COPYING.LIB install-sh config-ml.in symlink-tree \
 	mkinstalldirs ltmain.sh missing ylwrap \
 	libtool.m4 ltsugar.m4 ltversion.m4 ltoptions.m4 \
-	Makefile.def Makefile.tpl src-release config.rpath \
+	Makefile.def Makefile.tpl src-release.sh config.rpath \
 	ChangeLog MAINTAINERS README-maintainer-mode \
 	lt~obsolete.m4 ltgcc.m4 depcomp mkdep compile \
 	COPYING3 COPYING3.LIB"
@@ -244,7 +244,8 @@ tar_compress()
     tool=$2
     support_files=$3
     compressors=$4
-    ver=$(getver $tool)
+    verdir=${5:-$tool}
+    ver=$(getver $verdir)
     do_proto_toplev $package $ver $tool "$support_files"
     do_md5sum
     do_tar $package $ver
@@ -267,7 +268,7 @@ gdb_tar_compress()
 }
 
 # The FSF "binutils" release includes gprof and ld.
-BINUTILS_SUPPORT_DIRS="bfd gas include libiberty opcodes ld elfcpp gold gprof intl setup.com makefile.vms cpu"
+BINUTILS_SUPPORT_DIRS="bfd gas include libiberty opcodes ld elfcpp gold gprof intl setup.com makefile.vms cpu zlib"
 binutils_release()
 {
     compressors=$1
@@ -276,7 +277,7 @@ binutils_release()
     tar_compress $package $tool "$BINUTILS_SUPPORT_DIRS" "$compressors"
 }
 
-GAS_SUPPORT_DIRS="bfd include libiberty opcodes intl setup.com makefile.vms"
+GAS_SUPPORT_DIRS="bfd include libiberty opcodes intl setup.com makefile.vms zlib"
 gas_release()
 {
     compressors=$1
@@ -285,7 +286,7 @@ gas_release()
     tar_compress $package $tool "$GAS_SUPPORT_DIRS" "$compressors"
 }
 
-GDB_SUPPORT_DIRS="bfd include libiberty opcodes readline sim intl libdecnumber cpu"
+GDB_SUPPORT_DIRS="bfd include libiberty opcodes readline sim intl libdecnumber cpu zlib"
 gdb_release()
 {
     compressors=$1
@@ -295,13 +296,13 @@ gdb_release()
 }
 
 # Corresponding to the CVS "sim" module.
-SIM_SUPPORT_DIRS="bfd opcodes libiberty include intl gdb/version.in makefile.vms"
+SIM_SUPPORT_DIRS="bfd opcodes libiberty include intl gdb/version.in gdb/common/create-version.sh makefile.vms zlib"
 sim_release()
 {
     compressors=$1
     package=sim
     tool=sim
-    tar_compress $package $tool "$SIM_SUPPORT_DIRS" "$compressors"
+    tar_compress $package $tool "$SIM_SUPPORT_DIRS" "$compressors" gdb
 }
 
 usage()

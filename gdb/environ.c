@@ -1,6 +1,6 @@
 /* environ.c -- library for manipulating environments for GNU.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -78,10 +78,10 @@ init_environ (struct gdb_environ *e)
   while (--i >= 0)
     {
       int len = strlen (e->vector[i]);
-      char *new = (char *) xmalloc (len + 1);
+      char *newobj = (char *) xmalloc (len + 1);
 
-      memcpy (new, e->vector[i], len + 1);
-      e->vector[i] = new;
+      memcpy (newobj, e->vector[i], len + 1);
+      e->vector[i] = newobj;
     }
 }
 

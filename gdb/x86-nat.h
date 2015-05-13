@@ -3,7 +3,7 @@
    Low level functions to implement Oeprating System specific
    code to manipulate x86 debug registers.
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -43,11 +43,6 @@ extern void x86_set_debug_register_length (int len);
 /* Use this function to reset the x86-nat.c debug register state.  */
 
 extern void x86_cleanup_dregs (void);
-
-/* Return a pointer to the local mirror of the debug registers of
-   process PID.  */
-
-extern struct x86_debug_reg_state *x86_debug_reg_state (pid_t pid);
 
 /* Called whenever GDB is no longer debugging process PID.  It deletes
    data structures that keep track of debug register state.  */

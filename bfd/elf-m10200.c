@@ -1,5 +1,5 @@
 /* Matsushita 10200 specific support for 32-bit ELF
-   Copyright (C) 1996-2014 Free Software Foundation, Inc.
+   Copyright (C) 1996-2015 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -46,11 +46,11 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Dummy relocation.  Does nothing.  */
   HOWTO (R_MN10200_NONE,
 	 0,
-	 2,
-	 16,
+	 3,
+	 0,
 	 FALSE,
 	 0,
-	 complain_overflow_bitfield,
+	 complain_overflow_dont,
 	 bfd_elf_generic_reloc,
 	 "R_MN10200_NONE",
 	 FALSE,

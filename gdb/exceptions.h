@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,9 +21,6 @@
 #define EXCEPTIONS_H
 
 #include "ui-out.h"
-
-/* A pre-defined non-exception.  */
-extern const struct gdb_exception exception_none;
 
 /* If E is an exception, print it's error message on the specified
    stream.  For _fprintf, prefix the message with PREFIX...  */

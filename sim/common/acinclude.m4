@@ -53,6 +53,9 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
+dnl Pull in the target configuration file directly.
+AH_BOTTOM([#include "tconfig.h"])
+
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
 # is defined.
@@ -232,7 +235,7 @@ if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
 fi],[sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1"])dnl
 AC_SUBST(sim_profile)
 
-ACX_PKGVERSION([GDB])
+ACX_PKGVERSION([SIM])
 ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
 AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
@@ -246,16 +249,6 @@ AC_EXEEXT
 dnl These are available to append to as desired.
 sim_link_files=
 sim_link_links=
-
-dnl Create tconfig.h either from simulator's tconfig.in or default one
-dnl in common.
-sim_link_links=tconfig.h
-if test -f ${srcdir}/tconfig.in
-then
-  sim_link_files=tconfig.in
-else
-  sim_link_files=../common/tconfig.in
-fi
 
 # targ-vals.def points to the libc macro description file.
 case "${target}" in
@@ -592,17 +585,11 @@ AC_SUBST(sim_default_model)
 
 
 dnl --enable-sim-hardware is for users of the simulator
-dnl arg[1] Enable sim-hw by default? ("yes", "no", or "always")
+dnl arg[1] Enable sim-hw by default? ("yes" or "no")
 dnl arg[2] is a space separated list of devices that override the defaults
 dnl arg[3] is a space separated list of extra target specific devices.
 AC_DEFUN([SIM_AC_OPTION_HARDWARE],
 [
-if test x"[$1]" != x"no"; then
-  enable_sim_hardware=yes
-else
-  enable_sim_hardware=no
-fi
-
 if test "[$2]"; then
   hardware="[$2]"
 else
@@ -616,20 +603,16 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/
 
 AC_ARG_ENABLE(sim-hardware,
   [AS_HELP_STRING([--enable-sim-hardware=LIST],
-                  [Specify the hardware to be included in the build.])])
+                  [Specify the hardware to be included in the build.])],
+  ,[enable_sim_hardware="[$1]"])
 case ${enable_sim_hardware} in
-  yes)  sim_hw_p=yes;;
-  no)   sim_hw_p=no;;
-  ,*)   sim_hw_p=yes; hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
-  *,)   sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
-  *)    sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
+  yes|no) ;;
+  ,*) hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
+  *,) hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
+  *)  hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
 esac
 
-if test "$sim_hw_p" != yes; then
-  if test "[$1]" = "always"; then
-    AC_MSG_ERROR([Sorry, but this simulator requires that hardware support
-be enabled. Please configure without --disable-hw-support.])
-  fi
+if test "$enable_sim_hardware" = no; then
   sim_hw_objs=
   sim_hw_cflags="-DWITH_HW=0"
   sim_hw=
@@ -645,15 +628,16 @@ else
     esac
   done
   # mingw does not support sockser
-  SIM_DV_SOCKSER_O=""
   case ${host} in
     *mingw*) ;;
-    *) SIM_DV_SOCKSER_O="dv-sockser.o"
+    *) # TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
+       # that you instatiate.  Instead, other code will call into it directly.
+       # At some point, we should convert it over.
+       sim_hw_objs="$sim_hw_objs dv-sockser.o"
        AC_DEFINE_UNQUOTED(
          [HAVE_DV_SOCKSER], 1, [Define if dv-sockser is usable.])
        ;;
   esac
-  AC_SUBST(SIM_DV_SOCKSER_O)
   if test x"$silent" != x"yes"; then
     echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
   fi

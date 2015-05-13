@@ -1,6 +1,6 @@
 // stringpool.cc -- a string pool for gold
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -39,7 +39,9 @@ Stringpool_template<Stringpool_char>::Stringpool_template(uint64_t addralign)
     zero_null_(true), optimize_(false), offset_(sizeof(Stringpool_char)),
     addralign_(addralign)
 {
-  if (parameters->options_valid() && parameters->options().optimize() >= 2)
+  if (parameters->options_valid()
+      && parameters->options().optimize() >= 2
+      && addralign <= sizeof(Stringpool_char))
     this->optimize_ = true;
 }
 

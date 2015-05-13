@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 1996-2014 Free Software Foundation, Inc.
+# Copyright 1996-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -428,7 +428,7 @@ proc test_struct_returns { n } {
 	-re "Value returned is .*${gdb_prompt} $" {
 	    pass "${test}"
 	}
-	-re "Cannot determine contents.*${gdb_prompt} $" {
+	-re "Value returned has type: struct struct$n. Cannot determine contents.*${gdb_prompt} $" {
 	    # Expected bad value.  For the moment this is ok.
 	    set finish_value_known 0
 	    pass "${test}"

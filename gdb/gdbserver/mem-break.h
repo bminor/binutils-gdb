@@ -1,5 +1,5 @@
 /* Memory breakpoint interfaces for the remote server for GDB.
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -89,6 +89,16 @@ int breakpoint_here (CORE_ADDR addr);
    breakpoint set at ADDR.  */
 
 int breakpoint_inserted_here (CORE_ADDR addr);
+
+/* Returns TRUE if there's any inserted software breakpoint at
+   ADDR.  */
+
+int software_breakpoint_inserted_here (CORE_ADDR addr);
+
+/* Returns TRUE if there's any inserted hardware (code) breakpoint at
+   ADDR.  */
+
+int hardware_breakpoint_inserted_here (CORE_ADDR addr);
 
 /* Clear all breakpoint conditions and commands associated with a
    breakpoint.  */
@@ -242,5 +252,11 @@ int insert_memory_breakpoint (struct raw_breakpoint *bp);
 /* Remove a previously inserted memory breakpoint.  */
 
 int remove_memory_breakpoint (struct raw_breakpoint *bp);
+
+/* Create a new breakpoint list NEW_BKPT_LIST that is a copy of SRC.  */
+
+void clone_all_breakpoints (struct breakpoint **new_bkpt_list,
+			    struct raw_breakpoint **new_raw_bkpt_list,
+			    const struct breakpoint *src);
 
 #endif /* MEM_BREAK_H */

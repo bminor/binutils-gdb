@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -225,6 +225,9 @@ typedef struct {
 
   /* If TRUE, only warn once about a particular undefined symbol.  */
   bfd_boolean warn_once;
+
+  /* If TRUE, issue warning messages when orphan sections are encountered.  */
+  bfd_boolean warn_orphan;
 
   /* If TRUE, warn if multiple global-pointers are needed (Alpha
      only).  */

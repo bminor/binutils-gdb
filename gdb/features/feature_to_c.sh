@@ -2,7 +2,7 @@
 
 # Convert text files to compilable C arrays.
 #
-# Copyright (C) 2007-2014 Free Software Foundation, Inc.
+# Copyright (C) 2007-2015 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -63,7 +63,13 @@ for input; do
 done
 
 echo >> $output
-echo "const char *const xml_builtin[][2] = {" >> $output
+
+echo "#ifdef __cplusplus"                    >> $output
+echo "#  define EXPORTED_CONST extern const" >> $output
+echo "#else"                                 >> $output
+echo "#  define EXPORTED_CONST const"        >> $output
+echo "#endif"                                >> $output
+echo "EXPORTED_CONST char *const xml_builtin[][2] = {" >> $output
 
 for input; do
   basename=`echo $input | sed 's,.*/,,'`

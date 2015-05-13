@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994-2014 Free Software Foundation, Inc.
+   Copyright (C) 1994-2015 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
@@ -168,82 +168,96 @@ static const arm_feature_set fpu_endian_pure = FPU_ARCH_ENDIAN_PURE;
 static const arm_feature_set cpu_default = CPU_DEFAULT;
 #endif
 
-static const arm_feature_set arm_ext_v1 = ARM_FEATURE (ARM_EXT_V1, 0);
-static const arm_feature_set arm_ext_v2 = ARM_FEATURE (ARM_EXT_V1, 0);
-static const arm_feature_set arm_ext_v2s = ARM_FEATURE (ARM_EXT_V2S, 0);
-static const arm_feature_set arm_ext_v3 = ARM_FEATURE (ARM_EXT_V3, 0);
-static const arm_feature_set arm_ext_v3m = ARM_FEATURE (ARM_EXT_V3M, 0);
-static const arm_feature_set arm_ext_v4 = ARM_FEATURE (ARM_EXT_V4, 0);
-static const arm_feature_set arm_ext_v4t = ARM_FEATURE (ARM_EXT_V4T, 0);
-static const arm_feature_set arm_ext_v5 = ARM_FEATURE (ARM_EXT_V5, 0);
+static const arm_feature_set arm_ext_v1 = ARM_FEATURE_CORE_LOW (ARM_EXT_V1);
+static const arm_feature_set arm_ext_v2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V1);
+static const arm_feature_set arm_ext_v2s = ARM_FEATURE_CORE_LOW (ARM_EXT_V2S);
+static const arm_feature_set arm_ext_v3 = ARM_FEATURE_CORE_LOW (ARM_EXT_V3);
+static const arm_feature_set arm_ext_v3m = ARM_FEATURE_CORE_LOW (ARM_EXT_V3M);
+static const arm_feature_set arm_ext_v4 = ARM_FEATURE_CORE_LOW (ARM_EXT_V4);
+static const arm_feature_set arm_ext_v4t = ARM_FEATURE_CORE_LOW (ARM_EXT_V4T);
+static const arm_feature_set arm_ext_v5 = ARM_FEATURE_CORE_LOW (ARM_EXT_V5);
 static const arm_feature_set arm_ext_v4t_5 =
-  ARM_FEATURE (ARM_EXT_V4T | ARM_EXT_V5, 0);
-static const arm_feature_set arm_ext_v5t = ARM_FEATURE (ARM_EXT_V5T, 0);
-static const arm_feature_set arm_ext_v5e = ARM_FEATURE (ARM_EXT_V5E, 0);
-static const arm_feature_set arm_ext_v5exp = ARM_FEATURE (ARM_EXT_V5ExP, 0);
-static const arm_feature_set arm_ext_v5j = ARM_FEATURE (ARM_EXT_V5J, 0);
-static const arm_feature_set arm_ext_v6 = ARM_FEATURE (ARM_EXT_V6, 0);
-static const arm_feature_set arm_ext_v6k = ARM_FEATURE (ARM_EXT_V6K, 0);
-static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE (ARM_EXT_V6T2, 0);
-static const arm_feature_set arm_ext_v6m = ARM_FEATURE (ARM_EXT_V6M, 0);
-static const arm_feature_set arm_ext_v6_notm = ARM_FEATURE (ARM_EXT_V6_NOTM, 0);
-static const arm_feature_set arm_ext_v6_dsp = ARM_FEATURE (ARM_EXT_V6_DSP, 0);
-static const arm_feature_set arm_ext_barrier = ARM_FEATURE (ARM_EXT_BARRIER, 0);
-static const arm_feature_set arm_ext_msr = ARM_FEATURE (ARM_EXT_THUMB_MSR, 0);
-static const arm_feature_set arm_ext_div = ARM_FEATURE (ARM_EXT_DIV, 0);
-static const arm_feature_set arm_ext_v7 = ARM_FEATURE (ARM_EXT_V7, 0);
-static const arm_feature_set arm_ext_v7a = ARM_FEATURE (ARM_EXT_V7A, 0);
-static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
-static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
-static const arm_feature_set arm_ext_v8 = ARM_FEATURE (ARM_EXT_V8, 0);
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V4T | ARM_EXT_V5);
+static const arm_feature_set arm_ext_v5t = ARM_FEATURE_CORE_LOW (ARM_EXT_V5T);
+static const arm_feature_set arm_ext_v5e = ARM_FEATURE_CORE_LOW (ARM_EXT_V5E);
+static const arm_feature_set arm_ext_v5exp = ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP);
+static const arm_feature_set arm_ext_v5j = ARM_FEATURE_CORE_LOW (ARM_EXT_V5J);
+static const arm_feature_set arm_ext_v6 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6);
+static const arm_feature_set arm_ext_v6k = ARM_FEATURE_CORE_LOW (ARM_EXT_V6K);
+static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2);
+static const arm_feature_set arm_ext_v6m = ARM_FEATURE_CORE_LOW (ARM_EXT_V6M);
+static const arm_feature_set arm_ext_v6_notm =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V6_NOTM);
+static const arm_feature_set arm_ext_v6_dsp =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V6_DSP);
+static const arm_feature_set arm_ext_barrier =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_BARRIER);
+static const arm_feature_set arm_ext_msr =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_THUMB_MSR);
+static const arm_feature_set arm_ext_div = ARM_FEATURE_CORE_LOW (ARM_EXT_DIV);
+static const arm_feature_set arm_ext_v7 = ARM_FEATURE_CORE_LOW (ARM_EXT_V7);
+static const arm_feature_set arm_ext_v7a = ARM_FEATURE_CORE_LOW (ARM_EXT_V7A);
+static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
+static const arm_feature_set arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
+static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
-  ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M, 0);
-static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
-static const arm_feature_set arm_ext_sec = ARM_FEATURE (ARM_EXT_SEC, 0);
-static const arm_feature_set arm_ext_os = ARM_FEATURE (ARM_EXT_OS, 0);
-static const arm_feature_set arm_ext_adiv = ARM_FEATURE (ARM_EXT_ADIV, 0);
-static const arm_feature_set arm_ext_virt = ARM_FEATURE (ARM_EXT_VIRT, 0);
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M);
+static const arm_feature_set arm_ext_mp = ARM_FEATURE_CORE_LOW (ARM_EXT_MP);
+static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
+static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
+static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
+static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
-static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
+static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
 static const arm_feature_set arm_arch_v6m_only = ARM_ARCH_V6M_ONLY;
 
 static const arm_feature_set arm_cext_iwmmxt2 =
-  ARM_FEATURE (0, ARM_CEXT_IWMMXT2);
+  ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2);
 static const arm_feature_set arm_cext_iwmmxt =
-  ARM_FEATURE (0, ARM_CEXT_IWMMXT);
+  ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT);
 static const arm_feature_set arm_cext_xscale =
-  ARM_FEATURE (0, ARM_CEXT_XSCALE);
+  ARM_FEATURE_COPROC (ARM_CEXT_XSCALE);
 static const arm_feature_set arm_cext_maverick =
-  ARM_FEATURE (0, ARM_CEXT_MAVERICK);
-static const arm_feature_set fpu_fpa_ext_v1 = ARM_FEATURE (0, FPU_FPA_EXT_V1);
-static const arm_feature_set fpu_fpa_ext_v2 = ARM_FEATURE (0, FPU_FPA_EXT_V2);
+  ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK);
+static const arm_feature_set fpu_fpa_ext_v1 =
+  ARM_FEATURE_COPROC (FPU_FPA_EXT_V1);
+static const arm_feature_set fpu_fpa_ext_v2 =
+  ARM_FEATURE_COPROC (FPU_FPA_EXT_V2);
 static const arm_feature_set fpu_vfp_ext_v1xd =
-  ARM_FEATURE (0, FPU_VFP_EXT_V1xD);
-static const arm_feature_set fpu_vfp_ext_v1 = ARM_FEATURE (0, FPU_VFP_EXT_V1);
-static const arm_feature_set fpu_vfp_ext_v2 = ARM_FEATURE (0, FPU_VFP_EXT_V2);
-static const arm_feature_set fpu_vfp_ext_v3xd = ARM_FEATURE (0, FPU_VFP_EXT_V3xD);
-static const arm_feature_set fpu_vfp_ext_v3 = ARM_FEATURE (0, FPU_VFP_EXT_V3);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD);
+static const arm_feature_set fpu_vfp_ext_v1 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V1);
+static const arm_feature_set fpu_vfp_ext_v2 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V2);
+static const arm_feature_set fpu_vfp_ext_v3xd =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V3xD);
+static const arm_feature_set fpu_vfp_ext_v3 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_V3);
 static const arm_feature_set fpu_vfp_ext_d32 =
-  ARM_FEATURE (0, FPU_VFP_EXT_D32);
-static const arm_feature_set fpu_neon_ext_v1 = ARM_FEATURE (0, FPU_NEON_EXT_V1);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_D32);
+static const arm_feature_set fpu_neon_ext_v1 =
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_V1);
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
-  ARM_FEATURE (0, FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
-static const arm_feature_set fpu_vfp_fp16 = ARM_FEATURE (0, FPU_VFP_EXT_FP16);
-static const arm_feature_set fpu_neon_ext_fma = ARM_FEATURE (0, FPU_NEON_EXT_FMA);
-static const arm_feature_set fpu_vfp_ext_fma = ARM_FEATURE (0, FPU_VFP_EXT_FMA);
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
+static const arm_feature_set fpu_vfp_fp16 =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_FP16);
+static const arm_feature_set fpu_neon_ext_fma =
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_FMA);
+static const arm_feature_set fpu_vfp_ext_fma =
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_FMA);
 static const arm_feature_set fpu_vfp_ext_armv8 =
-  ARM_FEATURE (0, FPU_VFP_EXT_ARMV8);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8);
 static const arm_feature_set fpu_vfp_ext_armv8xd =
-  ARM_FEATURE (0, FPU_VFP_EXT_ARMV8xD);
+  ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8xD);
 static const arm_feature_set fpu_neon_ext_armv8 =
-  ARM_FEATURE (0, FPU_NEON_EXT_ARMV8);
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8);
 static const arm_feature_set fpu_crypto_ext_armv8 =
-  ARM_FEATURE (0, FPU_CRYPTO_EXT_ARMV8);
+  ARM_FEATURE_COPROC (FPU_CRYPTO_EXT_ARMV8);
 static const arm_feature_set crc_ext_armv8 =
-  ARM_FEATURE (0, CRC_EXT_ARMV8);
+  ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -257,8 +271,7 @@ extern FLONUM_TYPE generic_floating_point_number;
 static bfd_boolean
 no_cpu_selected (void)
 {
-  return selected_cpu.core == arm_arch_none.core
-    && selected_cpu.coproc == arm_arch_none.coproc;
+  return ARM_FEATURE_EQUAL (selected_cpu, arm_arch_none);
 }
 
 #ifdef OBJ_ELF
@@ -2632,12 +2645,11 @@ static void mapping_state_2 (enum mstate state, int max_chars);
 /* Set the mapping state to STATE.  Only call this when about to
    emit some STATE bytes to the file.  */
 
+#define TRANSITION(from, to) (mapstate == (from) && state == (to))
 void
 mapping_state (enum mstate state)
 {
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
-
-#define TRANSITION(from, to) (mapstate == (from) && state == (to))
 
   if (mapstate == state)
     /* The mapping symbol has already been emitted.
@@ -2661,24 +2673,10 @@ mapping_state (enum mstate state)
     record_alignment (now_seg, state == MAP_ARM ? 2 : 1);
 
   if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
-    /* This case will be evaluated later in the next else.  */
+    /* This case will be evaluated later.  */
     return;
-  else if (TRANSITION (MAP_UNDEFINED, MAP_ARM)
-	  || TRANSITION (MAP_UNDEFINED, MAP_THUMB))
-    {
-      /* Only add the symbol if the offset is > 0:
-	 if we're at the first frag, check it's size > 0;
-	 if we're not at the first frag, then for sure
-	    the offset is > 0.  */
-      struct frag * const frag_first = seg_info (now_seg)->frchainP->frch_root;
-      const int add_symbol = (frag_now != frag_first) || (frag_now_fix () > 0);
-
-      if (add_symbol)
-	make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
-    }
 
   mapping_state_2 (state, 0);
-#undef TRANSITION
 }
 
 /* Same as mapping_state, but MAX_CHARS bytes have already been
@@ -2697,9 +2695,20 @@ mapping_state_2 (enum mstate state, int max_chars)
        There is nothing else to do.  */
     return;
 
+  if (TRANSITION (MAP_UNDEFINED, MAP_ARM)
+	  || TRANSITION (MAP_UNDEFINED, MAP_THUMB))
+    {
+      struct frag * const frag_first = seg_info (now_seg)->frchainP->frch_root;
+      const int add_symbol = (frag_now != frag_first) || (frag_now_fix () > 0);
+
+      if (add_symbol)
+	make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
+    }
+
   seg_info (now_seg)->tc_segment_info_data.mapstate = state;
   make_mapping_symbol (state, (valueT) frag_now_fix () - max_chars, frag_now);
 }
+#undef TRANSITION
 #else
 #define mapping_state(x) ((void)0)
 #define mapping_state_2(x, y) ((void)0)
@@ -4961,6 +4970,16 @@ parse_ifimm_zero (char **in)
     return FALSE;
 
   ++*in;
+
+  /* Accept #0x0 as a synonym for #0.  */
+  if (strncmp (*in, "0x", 2) == 0)
+    {
+      int val;
+      if (parse_immediate (in, &val, 0, 0, TRUE) == FAIL)
+        return FALSE;
+      return TRUE;
+    }
+
   error_code = atof_generic (in, ".", EXP_CHARS,
                              &generic_floating_point_number);
 
@@ -5763,7 +5782,7 @@ parse_psr (char **str, bfd_boolean lhs)
   /* PR gas/12698:  If the user has specified -march=all then m_profile will
      be TRUE, but we want to ignore it in this case as we are building for any
      CPU type, including non-m variants.  */
-  if (selected_cpu.core == arm_arch_any.core)
+  if (ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
     m_profile = FALSE;
 
   /* CPSR's and SPSR's can now be lowercase.  This is just a convenience
@@ -7032,7 +7051,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  val = parse_reg_list (&str);
 	  if (*str == '^')
 	    {
-	      inst.operands[1].writeback = 1;
+	      inst.operands[i].writeback = 1;
 	      str++;
 	    }
 	  break;
@@ -7248,7 +7267,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 #define warn_deprecated_sp(reg)			\
   do						\
     if (warn_on_deprecated && reg == REG_SP)	\
-       as_warn (_("use of r13 is deprecated"));	\
+       as_tsktsk (_("use of r13 is deprecated"));	\
   while (0)
 
 /* Functions for operand encoding.  ARM, then Thumb.  */
@@ -7480,7 +7499,7 @@ encode_arm_addr_mode_2 (int i, bfd_boolean is_t)
 	  if (warn_on_deprecated
 	      && !is_load
 	      && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7))
-	    as_warn (_("use of PC in this instruction is deprecated"));
+	    as_tsktsk (_("use of PC in this instruction is deprecated"));
 	}
 
       if (inst.reloc.type == BFD_RELOC_UNUSED)
@@ -7872,7 +7891,12 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
 {
   if (!inst.operands[i].isreg)
     {
-      gas_assert (inst.operands[0].isvec);
+      /* PR 18256 */
+      if (! inst.operands[0].isvec)
+	{
+	  inst.error = _("invalid co-processor operand");
+	  return FAIL;
+	}
       if (move_or_literal_pool (0, CONST_VEC, /*mode_3=*/FALSE))
 	return SUCCESS;
     }
@@ -7979,7 +8003,7 @@ check_obsolete (const arm_feature_set *feature, const char *msg)
 {
   if (ARM_CPU_IS_ANY (cpu_variant))
     {
-      as_warn ("%s", msg);
+      as_tsktsk ("%s", msg);
       return TRUE;
     }
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
@@ -8007,7 +8031,7 @@ do_rd_rm_rn (void)
 			   _("swp{b} use is obsoleted for ARMv8 and later"))
 	  && warn_on_deprecated
 	  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6))
-	as_warn (_("swp{b} use is deprecated for ARMv6 and ARMv7"));
+	as_tsktsk (_("swp{b} use is deprecated for ARMv6 and ARMv7"));
     }
 
   inst.instruction |= inst.operands[0].reg << 12;
@@ -8325,19 +8349,19 @@ struct deprecated_coproc_regs_s
 static struct deprecated_coproc_regs_s deprecated_coproc_regs[] =
 {
     {15, 0, 7, 10, 5,					/* CP15DMB.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {15, 0, 7, 10, 4,					/* CP15DSB.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {15, 0, 7,  5, 4,					/* CP15ISB.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {14, 6, 1,  0, 0,					/* TEEHBR.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
     {14, 6, 0,  0, 0,					/* TEECR.  */
-     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     ARM_FEATURE_CORE_LOW (ARM_EXT_V8), ARM_ARCH_NONE,
      DEPR_ACCESS_V8, NULL},
 };
 
@@ -8384,7 +8408,7 @@ do_co_reg (void)
 	    if (! ARM_CPU_IS_ANY (cpu_variant)
 		&& warn_on_deprecated
 		&& ARM_CPU_HAS_FEATURE (cpu_variant, r->deprecated))
-	      as_warn ("%s", r->dep_msg);
+	      as_tsktsk ("%s", r->dep_msg);
 	  }
       }
 
@@ -9030,6 +9054,8 @@ do_pli (void)
 static void
 do_push_pop (void)
 {
+  constraint (inst.operands[0].writeback,
+	      _("push/pop do not support {reglist}^"));
   inst.operands[1] = inst.operands[0];
   memset (&inst.operands[0], 0, sizeof inst.operands[0]);
   inst.operands[0].isreg = 1;
@@ -9107,7 +9133,7 @@ do_setend (void)
 {
   if (warn_on_deprecated
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
-      as_warn (_("setend use is deprecated for ARMv8"));
+      as_tsktsk (_("setend use is deprecated for ARMv8"));
 
   if (inst.operands[0].imm)
     inst.instruction |= 0x200;
@@ -11550,7 +11576,7 @@ do_t_mov_cmp (void)
 		  if ((Rn == REG_SP || Rn == REG_PC)
 		      && (Rm == REG_SP || Rm == REG_PC))
 		    {
-		      as_warn (_("Use of r%u as a source register is "
+		      as_tsktsk (_("Use of r%u as a source register is "
 				 "deprecated when r%u is the destination "
 				 "register."), Rm, Rn);
 		    }
@@ -11912,7 +11938,8 @@ do_t_mrs (void)
 	  /* PR gas/12698:  The constraint is only applied for m_profile.
 	     If the user has specified -march=all, we want to ignore it as
 	     we are building for any CPU type, including non-m variants.  */
-	  bfd_boolean m_profile = selected_cpu.core != arm_arch_any.core;
+	  bfd_boolean m_profile =
+	    !ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any);
 	  constraint ((flags != 0) && m_profile, _("selected processor does "
 						   "not support requested special purpose register"));
 	}
@@ -11952,7 +11979,8 @@ do_t_msr (void)
       /* PR gas/12698:  The constraint is only applied for m_profile.
 	 If the user has specified -march=all, we want to ignore it as
 	 we are building for any CPU type, including non-m variants.  */
-      bfd_boolean m_profile = selected_cpu.core != arm_arch_any.core;
+      bfd_boolean m_profile =
+	!ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any);
       constraint (((ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
 	   && (bits & ~(PSR_s | PSR_f)) != 0)
 	  || (!ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
@@ -12374,7 +12402,7 @@ do_t_setend (void)
 {
   if (warn_on_deprecated
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
-      as_warn (_("setend use is deprecated for ARMv8"));
+      as_tsktsk (_("setend use is deprecated for ARMv8"));
 
   set_it_insn_type (OUTSIDE_IT_INSN);
   if (inst.operands[0].imm)
@@ -14102,8 +14130,12 @@ do_neon_shl_imm (void)
     {
       enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
       struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_KEY | N_I_ALL);
+      int imm = inst.operands[2].imm;
+
+      constraint (imm < 0 || (unsigned)imm >= et.size,
+		  _("immediate out of range for shift"));
       NEON_ENCODE (IMMED, inst);
-      neon_imm_shift (FALSE, 0, neon_quad (rs), et, inst.operands[2].imm);
+      neon_imm_shift (FALSE, 0, neon_quad (rs), et, imm);
     }
   else
     {
@@ -14134,10 +14166,12 @@ do_neon_qshl_imm (void)
     {
       enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
       struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_SU_ALL | N_KEY);
+      int imm = inst.operands[2].imm;
 
+      constraint (imm < 0 || (unsigned)imm >= et.size,
+		  _("immediate out of range for shift"));
       NEON_ENCODE (IMMED, inst);
-      neon_imm_shift (TRUE, et.type == NT_unsigned, neon_quad (rs), et,
-		      inst.operands[2].imm);
+      neon_imm_shift (TRUE, et.type == NT_unsigned, neon_quad (rs), et, imm);
     }
   else
     {
@@ -16088,7 +16122,7 @@ do_neon_ldr_str (void)
       if (thumb_mode)
 	inst.error = _("Use of PC here is UNPREDICTABLE");
       else if (warn_on_deprecated)
-	as_warn (_("Use of PC here is deprecated"));
+	as_tsktsk (_("Use of PC here is deprecated"));
     }
 
   if (inst.operands[0].issingle)
@@ -17115,7 +17149,7 @@ opcode_lookup (char **str)
 	}
 
       if (warn_on_deprecated && unified_syntax)
-	as_warn (_("conditional infixes are deprecated in unified syntax"));
+	as_tsktsk (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
       cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
       gas_assert (cond);
@@ -17201,7 +17235,7 @@ opcode_lookup (char **str)
       if (warn_on_deprecated && unified_syntax
 	  && (opcode->tag == OT_cinfix3
 	      || opcode->tag == OT_cinfix3_deprecated))
-	as_warn (_("conditional infixes are deprecated in unified syntax"));
+	as_tsktsk (_("conditional infixes are deprecated in unified syntax"));
 
       inst.cond = cond->value;
       return opcode;
@@ -17531,7 +17565,7 @@ it_fsm_post_encode (void)
     {
       if (inst.instruction >= 0x10000)
 	{
-	  as_warn (_("IT blocks containing 32-bit Thumb instructions are "
+	  as_tsktsk (_("IT blocks containing 32-bit Thumb instructions are "
 		     "deprecated in ARMv8"));
 	  now_it.warn_deprecated = TRUE;
 	}
@@ -17543,7 +17577,7 @@ it_fsm_post_encode (void)
 	    {
 	      if ((inst.instruction & p->mask) == p->pattern)
 		{
-		  as_warn (_("IT blocks containing 16-bit Thumb instructions "
+		  as_tsktsk (_("IT blocks containing 16-bit Thumb instructions "
 			     "of the following class are deprecated in ARMv8: "
 			     "%s"), p->description);
 		  now_it.warn_deprecated = TRUE;
@@ -17556,7 +17590,7 @@ it_fsm_post_encode (void)
 
       if (now_it.block_length > 1)
 	{
-	  as_warn (_("IT blocks containing more than one conditional "
+	  as_tsktsk (_("IT blocks containing more than one conditional "
 		     "instruction are deprecated in ARMv8"));
 	  now_it.warn_deprecated = TRUE;
 	}
@@ -17620,7 +17654,7 @@ md_assemble (char *str)
     }
 
   if (warn_on_deprecated && opcode->tag == OT_cinfix3_deprecated)
-    as_warn (_("s suffix on comparison instruction is deprecated"));
+    as_tsktsk (_("s suffix on comparison instruction is deprecated"));
 
   /* The value which unconditional instructions should have in place of the
      condition field.  */
@@ -18193,8 +18227,8 @@ static const struct asm_cond conds[] =
 };
 
 #define UL_BARRIER(L,U,CODE,FEAT) \
-  { L, CODE, ARM_FEATURE (FEAT, 0) }, \
-  { U, CODE, ARM_FEATURE (FEAT, 0) }
+  { L, CODE, ARM_FEATURE_CORE_LOW (FEAT) }, \
+  { U, CODE, ARM_FEATURE_CORE_LOW (FEAT) }
 
 static struct asm_barrier_opt barrier_opt_names[] =
 {
@@ -20999,24 +21033,22 @@ arm_init_frag (fragS * fragP, int max_chars)
   /* If the current ARM vs THUMB mode has not already
      been recorded into this frag then do so now.  */
   if ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) == 0)
-    {
       fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
 
-      /* Record a mapping symbol for alignment frags.  We will delete this
-	 later if the alignment ends up empty.  */
-      switch (fragP->fr_type)
-	{
-	  case rs_align:
-	  case rs_align_test:
-	  case rs_fill:
-	    mapping_state_2 (MAP_DATA, max_chars);
-	    break;
-	  case rs_align_code:
-	    mapping_state_2 (thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
-	    break;
-	  default:
-	    break;
-	}
+  /* Record a mapping symbol for alignment frags.  We will delete this
+     later if the alignment ends up empty.  */
+  switch (fragP->fr_type)
+    {
+    case rs_align:
+    case rs_align_test:
+    case rs_fill:
+      mapping_state_2 (MAP_DATA, max_chars);
+      break;
+    case rs_align_code:
+      mapping_state_2 (thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
+      break;
+    default:
+      break;
     }
 }
 
@@ -21589,6 +21621,51 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     default:
       return base;
     }
+}
+
+static bfd_boolean flag_warn_syms = TRUE;
+
+bfd_boolean
+arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
+{
+  /* PR 18347 - Warn if the user attempts to create a symbol with the same
+     name as an ARM instruction.  Whilst strictly speaking it is allowed, it
+     does mean that the resulting code might be very confusing to the reader.
+     Also this warning can be triggered if the user omits an operand before
+     an immediate address, eg:
+
+       LDR =foo
+
+     GAS treats this as an assignment of the value of the symbol foo to a
+     symbol LDR, and so (without this code) it will not issue any kind of
+     warning or error message.
+
+     Note - ARM instructions are case-insensitive but the strings in the hash
+     table are all stored in lower case, so we must first ensure that name is
+     lower case too.  */
+  if (flag_warn_syms && arm_ops_hsh)
+    {
+      char * nbuf = strdup (name);
+      char * p;
+
+      for (p = nbuf; *p; p++)
+	*p = TOLOWER (*p);
+      if (hash_find (arm_ops_hsh, nbuf) != NULL)
+	{
+	  static struct hash_control * already_warned = NULL;
+
+	  if (already_warned == NULL)
+	    already_warned = hash_new ();
+	  /* Only warn about the symbol once.  To keep the code
+	     simple we let hash_insert do the lookup for us.  */
+	  if (hash_insert (already_warned, name, NULL) == NULL)
+	    as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
+	}
+      else
+	free (nbuf);
+    }
+  
+  return FALSE;
 }
 
 /* Under ELF we need to default _GLOBAL_OFFSET_TABLE.
@@ -23935,6 +24012,8 @@ md_begin (void)
       mcpu_cpu_opt = &cpu_default;
       selected_cpu = cpu_default;
     }
+  else if (no_cpu_selected ())
+    selected_cpu = cpu_default;
 #else
   if (mcpu_cpu_opt)
     selected_cpu = *mcpu_cpu_opt;
@@ -24082,6 +24161,7 @@ md_begin (void)
 	      -mthumb-interwork		 Code supports ARM/Thumb interworking
 
 	      -m[no-]warn-deprecated     Warn about deprecated features
+	      -m[no-]warn-syms		 Warn when symbols match instructions
 
       For now we will also provide support for:
 
@@ -24150,6 +24230,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
+
 size_t md_longopts_size = sizeof (md_longopts);
 
 struct arm_option_table
@@ -24184,6 +24265,8 @@ struct arm_option_table arm_opts[] =
   {"mwarn-deprecated", NULL, &warn_on_deprecated, 1, NULL},
   {"mno-warn-deprecated", N_("do not warn on use of deprecated feature"),
    &warn_on_deprecated, 0, NULL},
+  {"mwarn-syms", N_("warn about symbols that match instruction names [default]"), (int *) (& flag_warn_syms), TRUE, NULL},
+  {"mno-warn-syms", N_("disable warnings about symobls that match instructions"), (int *) (& flag_warn_syms), FALSE, NULL},
   {NULL, NULL, NULL, 0, NULL}
 };
 
@@ -24417,11 +24500,11 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a7",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A7"),
   ARM_CPU_OPT ("cortex-a8",	ARM_ARCH_V7A_SEC,
-						 ARM_FEATURE (0, FPU_VFP_V3
+						 ARM_FEATURE_COPROC (FPU_VFP_V3
 							| FPU_NEON_EXT_V1),
 								  "Cortex-A8"),
   ARM_CPU_OPT ("cortex-a9",	ARM_ARCH_V7A_MP_SEC,
-						 ARM_FEATURE (0, FPU_VFP_V3
+						 ARM_FEATURE_COPROC (FPU_VFP_V3
 							| FPU_NEON_EXT_V1),
 								  "Cortex-A9"),
   ARM_CPU_OPT ("cortex-a12",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
@@ -24434,6 +24517,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
 								  "Cortex-A53"),
   ARM_CPU_OPT ("cortex-a57",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A57"),
+  ARM_CPU_OPT ("cortex-a72",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+								  "Cortex-A72"),
   ARM_CPU_OPT ("cortex-r4",	ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"),
   ARM_CPU_OPT ("cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,
 								  "Cortex-R4F"),
@@ -24448,6 +24533,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-m1",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M1"),
   ARM_CPU_OPT ("cortex-m0",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M0"),
   ARM_CPU_OPT ("cortex-m0plus",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M0+"),
+  ARM_CPU_OPT ("exynos-m1",	ARM_ARCH_V8A,	 FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+								  "Samsung " \
+								  "Exynos M1"),
   /* ??? XSCALE is really an architecture.  */
   ARM_CPU_OPT ("xscale",	ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL),
   /* ??? iwmmxt is not a processor.  */
@@ -24455,14 +24543,20 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("iwmmxt2",	ARM_ARCH_IWMMXT2,FPU_ARCH_VFP_V2, NULL),
   ARM_CPU_OPT ("i80200",	ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL),
   /* Maverick */
-  ARM_CPU_OPT ("ep9312",	ARM_FEATURE (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
+  ARM_CPU_OPT ("ep9312",	ARM_FEATURE_LOW (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
 						 FPU_ARCH_MAVERICK, "ARM920T"),
   /* Marvell processors.  */
-  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP | ARM_EXT_SEC, 0),
+  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE_CORE_LOW (ARM_AEXT_V7A | ARM_EXT_MP
+						      | ARM_EXT_SEC),
 						FPU_ARCH_VFP_V3D16, NULL),
-  ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP
-					       | ARM_EXT_SEC, 0),
+  ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE_CORE_LOW (ARM_AEXT_V7A | ARM_EXT_MP
+							| ARM_EXT_SEC),
 					       FPU_ARCH_NEON_VFP_V4, NULL),
+  /* APM X-Gene family.  */
+  ARM_CPU_OPT ("xgene1",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+	                                                          "APM X-Gene 1"),
+  ARM_CPU_OPT ("xgene2",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+	                                                          "APM X-Gene 2"),
 
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }
 };
@@ -24533,40 +24627,51 @@ struct arm_option_extension_value_table
 {
   char *name;
   size_t name_len;
-  const arm_feature_set value;
+  const arm_feature_set merge_value;
+  const arm_feature_set clear_value;
   const arm_feature_set allowed_archs;
 };
 
 /* The following table must be in alphabetical order with a NULL last entry.
    */
-#define ARM_EXT_OPT(N, V, AA) { N, sizeof (N) - 1, V, AA }
+#define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, AA }
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
-  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE (ARM_EXT_V8, 0)),
+  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+			 ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
-				   ARM_FEATURE (ARM_EXT_V8, 0)),
-  ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8,
-				   ARM_FEATURE (ARM_EXT_V8, 0)),
-  ARM_EXT_OPT ("idiv",	ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
-				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
-  ARM_EXT_OPT ("iwmmxt",ARM_FEATURE (0, ARM_CEXT_IWMMXT),	ARM_ANY),
-  ARM_EXT_OPT ("iwmmxt2",
-			ARM_FEATURE (0, ARM_CEXT_IWMMXT2),	ARM_ANY),
-  ARM_EXT_OPT ("maverick",
-			ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY),
-  ARM_EXT_OPT ("mp",	ARM_FEATURE (ARM_EXT_MP, 0),
-				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
+			 ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE_COPROC (FPU_VFP_ARMV8),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
+  ARM_EXT_OPT ("iwmmxt",ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ANY),
+  ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2), ARM_ANY),
+  ARM_EXT_OPT ("maverick", ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK),
+			ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK), ARM_ANY),
+  ARM_EXT_OPT ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
   ARM_EXT_OPT ("simd",   FPU_ARCH_NEON_VFP_ARMV8,
-				   ARM_FEATURE (ARM_EXT_V8, 0)),
-  ARM_EXT_OPT ("os",	ARM_FEATURE (ARM_EXT_OS, 0),
-				   ARM_FEATURE (ARM_EXT_V6M, 0)),
-  ARM_EXT_OPT ("sec",	ARM_FEATURE (ARM_EXT_SEC, 0),
-				   ARM_FEATURE (ARM_EXT_V6K | ARM_EXT_V7A, 0)),
-  ARM_EXT_OPT ("virt",	ARM_FEATURE (ARM_EXT_VIRT | ARM_EXT_ADIV
-				     | ARM_EXT_DIV, 0),
-				   ARM_FEATURE (ARM_EXT_V7A, 0)),
-  ARM_EXT_OPT ("xscale",ARM_FEATURE (0, ARM_CEXT_XSCALE),	ARM_ANY),
-  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("os",	ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
+  ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),
+  ARM_EXT_OPT ("virt",	ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT | ARM_EXT_ADIV
+				     | ARM_EXT_DIV),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
+  ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
+			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 #undef ARM_EXT_OPT
 
@@ -24743,9 +24848,9 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
 
 	    /* Add or remove the extension.  */
 	    if (adding_value)
-	      ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->value);
+	      ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->merge_value);
 	    else
-	      ARM_CLEAR_FEATURE (*ext_set, *ext_set, opt->value);
+	      ARM_CLEAR_FEATURE (*ext_set, *ext_set, opt->clear_value);
 
 	    break;
 	  }
@@ -25480,9 +25585,10 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 	  }
 
 	if (adding_value)
-	  ARM_MERGE_FEATURE_SETS (selected_cpu, selected_cpu, opt->value);
+	  ARM_MERGE_FEATURE_SETS (selected_cpu, selected_cpu,
+				  opt->merge_value);
 	else
-	  ARM_CLEAR_FEATURE (selected_cpu, selected_cpu, opt->value);
+	  ARM_CLEAR_FEATURE (selected_cpu, selected_cpu, opt->clear_value);
 
 	mcpu_cpu_opt = &selected_cpu;
 	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
@@ -25612,14 +25718,18 @@ arm_convert_symbolic_attribute (const char *name)
 }
 
 
-/* Apply sym value for relocations only in the case that
-   they are for local symbols and you have the respective
-   architectural feature for blx and simple switches.  */
+/* Apply sym value for relocations only in the case that they are for
+   local symbols in the same segment as the fixup and you have the
+   respective architectural feature for blx and simple switches.  */
 int
-arm_apply_sym_value (struct fix * fixP)
+arm_apply_sym_value (struct fix * fixP, segT this_seg)
 {
   if (fixP->fx_addsy
       && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
+      /* PR 17444: If the local symbol is in a different section then a reloc
+	 will always be generated for it, so applying the symbol value now
+	 will result in a double offset being stored in the relocation.  */
+      && (S_GET_SEGMENT (fixP->fx_addsy) == this_seg)
       && !S_FORCE_RELOC (fixP->fx_addsy, TRUE))
     {
       switch (fixP->fx_r_type)
@@ -25633,7 +25743,7 @@ arm_apply_sym_value (struct fix * fixP)
 	case BFD_RELOC_ARM_PCREL_CALL:
 	case BFD_RELOC_THUMB_PCREL_BLX:
 	  if (THUMB_IS_FUNC (fixP->fx_addsy))
-	      return 1;
+	    return 1;
 	  break;
 
 	default:

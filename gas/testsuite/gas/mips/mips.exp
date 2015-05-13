@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2014 Free Software Foundation, Inc.
+# Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1223,8 +1223,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test "ase-errors-4" "-mabi=o64 -march=mips3" "ASE errors (4)"
 
     run_dump_test_arches "la-reloc"	[mips_arch_list_matching mips1]
+    run_list_test "dla-warn" "-mabi=32 -march=mips3" \
+			     "DLA with 32-bit addresses"
     if { $has_newabi } {
 	run_dump_test_arches "dla-reloc" [mips_arch_list_matching mips3]
+	run_list_test "la-warn" "-mabi=64 -march=mips3" \
+				"LA with 64-bit addresses"
     }
 
     # Start with MIPS II to avoid load delay nops.
@@ -1454,4 +1458,7 @@ if { [istarget mips*-*-vxworks*] } {
     }
     run_list_test_arches "r6-removed"	"-32" [mips_arch_list_matching mips32r6]
     run_list_test_arches "r6-64-removed"	[mips_arch_list_matching mips64r6]
+
+    run_list_test_arches "r6-branch-constraints"  "-32" \
+			[mips_arch_list_matching mips32r6]
 }

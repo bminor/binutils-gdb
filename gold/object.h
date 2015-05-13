@@ -1,6 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -41,6 +41,7 @@ class Cref;
 class Layout;
 class Output_data;
 class Output_section;
+class Output_section_data;
 class Output_file;
 class Output_symtab_xindex;
 class Pluginobj;
@@ -314,6 +315,22 @@ class Got_offset_list
   Got_offset_list* got_next_;
 };
 
+// Type for mapping section index to uncompressed size and contents.
+
+struct Compressed_section_info
+{
+  section_size_type size;
+  section_size_type flag;
+  const unsigned char* contents;
+};
+typedef std::map<unsigned int, Compressed_section_info> Compressed_section_map;
+
+template<int size, bool big_endian>
+Compressed_section_map*
+build_compressed_section_map(const unsigned char* pshdrs, unsigned int shnum,
+			     const char* names, section_size_type names_size,
+			     Object* obj, bool decompress_if_needed);
+
 // Object is an abstract base class which represents either a 32-bit
 // or a 64-bit input object.  This can be a regular object file
 // (ET_REL) or a shared object (ET_DYN).
@@ -332,7 +349,8 @@ class Object
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
       is_dynamic_(is_dynamic), is_needed_(false), uses_split_stack_(false),
       has_no_split_stack_(false), no_export_(false),
-      is_in_system_directory_(false), as_needed_(false), xindex_(NULL)
+      is_in_system_directory_(false), as_needed_(false), xindex_(NULL),
+      compressed_sections_(NULL)
   {
     if (input_file != NULL)
       {
@@ -725,26 +743,34 @@ class Object
   set_no_export(bool value)
   { this->no_export_ = value; }
 
-  // Return TRUE if the section is a compressed debug section, and set
-  // *UNCOMPRESSED_SIZE to the size of the uncompressed data.
   bool
   section_is_compressed(unsigned int shndx,
 			section_size_type* uncompressed_size) const
-  { return this->do_section_is_compressed(shndx, uncompressed_size); }
+  {
+    if (this->compressed_sections_ == NULL)
+      return false;
+    Compressed_section_map::const_iterator p =
+        this->compressed_sections_->find(shndx);
+    if (p != this->compressed_sections_->end())
+      {
+	if (uncompressed_size != NULL)
+	  *uncompressed_size = p->second.size;
+	return true;
+      }
+    return false;
+  }
 
   // Return a view of the decompressed contents of a section.  Set *PLEN
   // to the size.  Set *IS_NEW to true if the contents need to be freed
   // by the caller.
   const unsigned char*
   decompressed_section_contents(unsigned int shndx, section_size_type* plen,
-				bool* is_cached)
-  { return this->do_decompressed_section_contents(shndx, plen, is_cached); }
+				bool* is_cached);
 
   // Discard any buffers of decompressed sections.  This is done
   // at the end of the Add_symbols task.
   void
-  discard_decompressed_sections()
-  { this->do_discard_decompressed_sections(); }
+  discard_decompressed_sections();
 
   // Return the index of the first incremental relocation for symbol SYMNDX.
   unsigned int
@@ -923,27 +949,6 @@ class Object
   bool
   handle_split_stack_section(const char* name);
 
-  // Return TRUE if the section is a compressed debug section, and set
-  // *UNCOMPRESSED_SIZE to the size of the uncompressed data.
-  virtual bool
-  do_section_is_compressed(unsigned int, section_size_type*) const
-  { return false; }
-
-  // Return a view of the decompressed contents of a section.  Set *PLEN
-  // to the size.  This default implementation simply returns the
-  // raw section contents and sets *IS_NEW to false to indicate
-  // that the contents do not need to be freed by the caller.
-  // This function must be overridden for any types of object files
-  // that might contain compressed sections.
-  virtual const unsigned char*
-  do_decompressed_section_contents(unsigned int shndx,
-				   section_size_type* plen,
-				   bool* is_new)
-  {
-    *is_new = false;
-    return this->do_section_contents(shndx, plen, false);
-  }
-
   // Discard any buffers of decompressed sections.  This is done
   // at the end of the Add_symbols task.
   virtual void
@@ -961,6 +966,14 @@ class Object
   virtual unsigned int
   do_get_incremental_reloc_count(unsigned int) const
   { gold_unreachable(); }
+
+  void
+  set_compressed_sections(Compressed_section_map* compressed_sections)
+  { this->compressed_sections_ = compressed_sections; }
+
+  Compressed_section_map*
+  compressed_sections()
+  { return this->compressed_sections_; }
 
  private:
   // This class may not be copied.
@@ -996,6 +1009,9 @@ class Object
   bool as_needed_ : 1;
   // Many sections for objects with more than SHN_LORESERVE sections.
   Xindex* xindex_;
+  // For compressed debug sections, map section index to uncompressed size
+  // and contents.
+  Compressed_section_map* compressed_sections_;
 };
 
 // A regular object (ET_REL).  This is an abstract base class itself.
@@ -1200,18 +1216,28 @@ class Relobj : public Object
   relocs_must_follow_section_writes() const
   { return this->relocs_must_follow_section_writes_; }
 
-  // Return the object merge map.
   Object_merge_map*
-  merge_map() const
-  { return this->object_merge_map_; }
+  get_or_create_merge_map();
 
-  // Set the object merge map.
+  template<int size>
   void
-  set_merge_map(Object_merge_map* object_merge_map)
-  {
-    gold_assert(this->object_merge_map_ == NULL);
-    this->object_merge_map_ = object_merge_map;
-  }
+  initialize_input_to_output_map(unsigned int shndx,
+      typename elfcpp::Elf_types<size>::Elf_Addr starting_address,
+      Unordered_map<section_offset_type,
+	    typename elfcpp::Elf_types<size>::Elf_Addr>* output_address) const;
+
+  void
+  add_merge_mapping(Output_section_data *output_data,
+                    unsigned int shndx, section_offset_type offset,
+                    section_size_type length,
+                    section_offset_type output_offset);
+
+  bool
+  merge_output_offset(unsigned int shndx, section_offset_type offset,
+                      section_offset_type *poutput) const;
+
+  const Output_section_data*
+  find_merge_section(unsigned int shndx) const;
 
   // Record the relocatable reloc info for an input reloc section.
   void
@@ -1862,15 +1888,6 @@ class Reloc_symbol_changes
   std::vector<Symbol*> vec_;
 };
 
-// Type for mapping section index to uncompressed size and contents.
-
-struct Compressed_section_info
-{
-  section_size_type size;
-  const unsigned char* contents;
-};
-typedef std::map<unsigned int, Compressed_section_info> Compressed_section_map;
-
 // Abstract base class for a regular object file, either a real object file
 // or an incremental (unchanged) object.  This is size and endian specific.
 
@@ -2453,38 +2470,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   set_output_local_symbol_count(unsigned int value)
   { this->output_local_symbol_count_ = value; }
 
-  // Return TRUE if the section is a compressed debug section, and set
-  // *UNCOMPRESSED_SIZE to the size of the uncompressed data.
-  bool
-  do_section_is_compressed(unsigned int shndx,
-			   section_size_type* uncompressed_size) const
-  {
-    if (this->compressed_sections_ == NULL)
-      return false;
-    Compressed_section_map::const_iterator p =
-        this->compressed_sections_->find(shndx);
-    if (p != this->compressed_sections_->end())
-      {
-	if (uncompressed_size != NULL)
-	  *uncompressed_size = p->second.size;
-	return true;
-      }
-    return false;
-  }
-
-  // Return a view of the uncompressed contents of a section.  Set *PLEN
-  // to the size.  Set *IS_NEW to true if the contents need to be deleted
-  // by the caller.
-  const unsigned char*
-  do_decompressed_section_contents(unsigned int shndx,
-				   section_size_type* plen,
-				   bool* is_new);
-
-  // Discard any buffers of decompressed sections.  This is done
-  // at the end of the Add_symbols task.
-  void
-  do_discard_decompressed_sections();
-
  private:
   // For convenience.
   typedef Sized_relobj_file<size, big_endian> This;
@@ -2751,9 +2736,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   std::vector<Deferred_layout> deferred_layout_;
   // The list of relocation sections whose layout was deferred.
   std::vector<Deferred_layout> deferred_layout_relocs_;
-  // For compressed debug sections, map section index to uncompressed size
-  // and contents.
-  Compressed_section_map* compressed_sections_;
 };
 
 // A class to manage the list of all objects.
@@ -2882,11 +2864,11 @@ struct Relocate_info
 
 // This is used to represent a section in an object and is used as the
 // key type for various section maps.
-typedef std::pair<Object*, unsigned int> Section_id;
+typedef std::pair<Relobj*, unsigned int> Section_id;
 
 // This is similar to Section_id but is used when the section
 // pointers are const.
-typedef std::pair<const Object*, unsigned int> Const_section_id;
+typedef std::pair<const Relobj*, unsigned int> Const_section_id;
 
 // The hash value is based on the address of an object in memory during
 // linking.  It is okay to use this for looking up sections but never use

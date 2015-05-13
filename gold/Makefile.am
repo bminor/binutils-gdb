@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#  Copyright (C) 2006-2014 Free Software Foundation, Inc.
+#  Copyright (C) 2006-2015 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,8 +25,14 @@ tooldir = $(exec_prefix)/$(target_alias)
 
 ACLOCAL_AMFLAGS = -I ../bfd -I ../config
 
-AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS)
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS)
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIB = @zlibdir@ -lz
+ZLIBINC = @zlibinc@
+
+AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS) $(ZLIBINC)
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS) $(ZLIBINC)
 
 AM_CPPFLAGS = \
 	-I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../elfcpp \
@@ -178,7 +184,7 @@ libgold_a_LIBADD = $(LIBOBJS)
 sources_var = main.cc
 deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
 ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(GOLD_LDADD) $(LIBINTL) \
-	 $(THREADSLIB) $(LIBDL)
+	 $(THREADSLIB) $(LIBDL) $(ZLIB)
 ldflags_var = $(GOLD_LDFLAGS)
 
 ld_new_SOURCES = $(sources_var)
@@ -192,12 +198,12 @@ incremental_dump_SOURCES = incremental-dump.cc
 incremental_dump_DEPENDENCIES = $(TARGETOBJS) libgold.a $(LIBIBERTY) \
 	$(LIBINTL_DEP)
 incremental_dump_LDADD = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) \
-	 $(THREADSLIB) $(LIBDL)
+	 $(THREADSLIB) $(LIBDL) $(ZLIB)
 
 dwp_SOURCES = dwp.cc
 dwp_DEPENDENCIES = libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
 dwp_LDADD = libgold.a $(LIBIBERTY) $(GOLD_LDADD) $(LIBINTL) $(THREADSLIB) \
-	$(LIBDL)
+	$(LIBDL) $(ZLIB)
 dwp_LDFLAGS = $(GOLD_LDFLAGS)
 
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/../bfd/development.sh

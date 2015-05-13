@@ -1,6 +1,6 @@
 /* Python interface to inferior thread event registries.
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,7 @@
 
 events_object gdb_py_events;
 
-static PyTypeObject eventregistry_object_type
+extern PyTypeObject eventregistry_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("eventregistry_object");
 
 /* Implementation of EventRegistry.connect () -> NULL.
@@ -132,7 +132,7 @@ static PyMethodDef eventregistry_object_methods[] =
   { NULL } /* Sentinel.  */
 };
 
-static PyTypeObject eventregistry_object_type =
+PyTypeObject eventregistry_object_type =
 {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.EventRegistry",                        /* tp_name */

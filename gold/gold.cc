@@ -1,6 +1,6 @@
 // gold.cc -- main linker functions
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -551,6 +551,9 @@ queue_middle_tasks(const General_options& options,
       gold_assert(plugins != NULL);
       plugins->layout_deferred_objects();
     }
+
+  // Finalize the .eh_frame section.
+  layout->finalize_eh_frame_section();
 
   /* If plugins have specified a section order, re-arrange input sections
      according to a specified section order.  If --section-ordering-file is

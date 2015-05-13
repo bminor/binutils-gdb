@@ -2,7 +2,7 @@
    Written by Fred Fish <fnf@cygnus.com>
    Rewritten by Jim Blandy <jimb@cygnus.com>
 
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -264,14 +264,14 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
 
   /* The user's string isn't in the list.  Insert it after *ps.  */
   {
-    struct bstring *new
+    struct bstring *newobj
       = obstack_alloc (&bcache->cache, BSTRING_SIZE (length));
 
-    memcpy (&new->d.data, addr, length);
-    new->length = length;
-    new->next = bcache->bucket[hash_index];
-    new->half_hash = half_hash;
-    bcache->bucket[hash_index] = new;
+    memcpy (&newobj->d.data, addr, length);
+    newobj->length = length;
+    newobj->next = bcache->bucket[hash_index];
+    newobj->half_hash = half_hash;
+    bcache->bucket[hash_index] = newobj;
 
     bcache->unique_count++;
     bcache->unique_size += length;
@@ -280,7 +280,7 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
     if (added)
       *added = 1;
 
-    return &new->d.data;
+    return &newobj->d.data;
   }
 }
 

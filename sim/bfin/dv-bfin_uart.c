@@ -1,7 +1,7 @@
 /* Blackfin Universal Asynchronous Receiver/Transmitter (UART) model.
    For "old style" UARTs on BF53x/etc... parts.
 
-   Copyright (C) 2010-2014 Free Software Foundation, Inc.
+   Copyright (C) 2010-2015 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc.
 
    This file is part of simulators.
@@ -73,12 +73,6 @@ static const char *mmr_name (struct bfin_uart *uart, bu32 idx)
   return mmr_names[idx];
 }
 #define mmr_name(off) mmr_name (uart, (off) / 4)
-
-#ifndef HAVE_DV_SOCKSER
-# define dv_sockser_status(sd) -1
-# define dv_sockser_write(sd, byte) do { ; } while (0)
-# define dv_sockser_read(sd) 0xff
-#endif
 
 static void
 bfin_uart_poll (struct hw *me, void *data)

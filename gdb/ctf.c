@@ -1,6 +1,6 @@
 /* CTF format support.
 
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
    Contributed by Hui Zhu <hui_zhu@mentor.com>
    Contributed by Yao Qi <yao@codesourcery.com>
 
@@ -98,6 +98,11 @@ struct trace_write_handler
 };
 
 /* Write metadata in FORMAT.  */
+
+static void
+ctf_save_write_metadata (struct trace_write_handler *handler,
+			 const char *format, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 static void
 ctf_save_write_metadata (struct trace_write_handler *handler,

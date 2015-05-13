@@ -1,5 +1,5 @@
 /* ELF support for BFD.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -73,6 +73,7 @@
 #define ELFOSABI_NSK	     14	/* Hewlett-Packard Non-Stop Kernel */
 #define ELFOSABI_AROS	     15	/* AROS */
 #define ELFOSABI_FENIXOS     16 /* FenixOS */
+#define ELFOSABI_CLOUDABI    17 /* Nuxi CloudABI */
 #define ELFOSABI_C6000_ELFABI 64 /* Bare-metal TMS320C6000 */
 #define ELFOSABI_C6000_LINUX 65 /* Linux TMS320C6000 */
 #define ELFOSABI_ARM	     97	/* ARM */
@@ -105,7 +106,7 @@
 #define EM_386		  3	/* Intel 80386 */
 #define EM_68K		  4	/* Motorola m68k family */
 #define EM_88K		  5	/* Motorola m88k family */
-#define EM_486		  6	/* Intel 80486 *//* Reserved for future use */
+#define EM_IAMCU	  6	/* Intel MCU */
 #define EM_860		  7	/* Intel 80860 */
 #define EM_MIPS		  8	/* MIPS R3000 (officially, big-endian only) */
 #define EM_S370		  9	/* IBM System/370 */
@@ -302,6 +303,8 @@
 #define EM_INTEL208	208	/* Reserved by Intel */
 #define EM_INTEL209	209	/* Reserved by Intel */
 #define EM_VISIUM	221	/* Controls and Data Services VISIUMcore processor */
+#define EM_FT32         222     /* FTDI Chip FT32 high performance 32-bit RISC architecture */
+#define EM_MOXIE        223     /* Moxie processor family */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -394,7 +397,8 @@
 
 #define EM_CYGNUS_MEP		0xF00D  /* Toshiba MeP */
 
-#define EM_MOXIE                0xFEED  /* Moxie */
+/* Old, unofficial value for Moxie.  */
+#define EM_MOXIE_OLD            0xFEED
 
 /* Old Sunplus S+core7 backend magic number. Written in the absence of an ABI.  */
 #define EM_SCORE_OLD            95
@@ -505,6 +509,7 @@
 #define SHF_OS_NONCONFORMING (1 << 8)	/* OS specific processing required */
 #define SHF_GROUP	(1 << 9)	/* Member of a section group */
 #define SHF_TLS		(1 << 10)	/* Thread local storage section */
+#define SHF_COMPRESSED	(1 << 11)	/* Section with compressed data */
 
 /* #define SHF_MASKOS	0x0F000000    *//* OS-specific semantics */
 #define SHF_MASKOS	0x0FF00000	/* New value, Oct 4, 1999 Draft */
@@ -520,6 +525,13 @@
 					   relocated.  */
 
 #define SHF_GNU_SHARABLE 0x01000000	/* sharable section */
+
+/* Compression types */
+#define ELFCOMPRESS_ZLIB   1		/* Compressed with zlib.  */
+#define ELFCOMPRESS_LOOS   0x60000000	/* OS-specific semantics, lo */
+#define ELFCOMPRESS_HIOS   0x6FFFFFFF	/* OS-specific semantics, hi */
+#define ELFCOMPRESS_LOPROC 0x70000000	/* Processor-specific semantics, lo */
+#define ELFCOMPRESS_HIPROC 0x7FFFFFFF	/* Processor-specific semantics, hi */
 
 /* Values of note segment descriptor types for core files.  */
 
@@ -557,6 +569,10 @@
 #define NT_S390_SYSTEM_CALL     0x307   /* S390 system call restart data */
 					/*   note name must be "LINUX".  */
 #define NT_S390_TDB	0x308		/* S390 transaction diagnostic block */
+					/*   note name must be "LINUX".  */
+#define NT_S390_VXRS_LOW	0x309	/* S390 vector registers 0-15 upper half */
+					/*   note name must be "LINUX".  */
+#define NT_S390_VXRS_HIGH	0x30a	/* S390 vector registers 16-31 */
 					/*   note name must be "LINUX".  */
 #define NT_ARM_VFP	0x400		/* ARM VFP registers */
 /* The following definitions should really use NT_AARCH_..., but defined

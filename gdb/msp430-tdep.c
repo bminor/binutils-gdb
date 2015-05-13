@@ -1,7 +1,7 @@
 /* Target-dependent code for the Texas Instruments MSP430 for GDB, the
    GNU debugger.
 
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -834,8 +834,7 @@ msp430_in_return_stub (struct gdbarch *gdbarch, CORE_ADDR pc,
 		       const char *name)
 {
   return (name != NULL
-	  && strncmp (msp430_epilog_name_prefix, name,
-		      strlen (msp430_epilog_name_prefix)) == 0);
+	  && startswith (name, msp430_epilog_name_prefix));
 }
 
 /* Implement the "skip_trampoline_code" gdbarch method.  */

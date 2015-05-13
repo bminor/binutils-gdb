@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2014 Free Software Foundation, Inc.
+   Copyright 2002-2015 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -102,7 +102,7 @@ a2i (const char *a)
   if (strcmp (a, "true") == 0 || strcmp (a, "TRUE") == 0)
     return 1;
 
-  if (strcmp (a, "false") == 0 || strcmp (a, "false") == 0)
+  if (strcmp (a, "false") == 0 || strcmp (a, "FALSE") == 0)
     return 0;
 
   if (*a == '-')
@@ -118,7 +118,7 @@ a2i (const char *a)
 	  a += 2;
 	  base = 16;
 	}
-      else if (a[1] == 'b' || a[1] == 'b')
+      else if (a[1] == 'b' || a[1] == 'B')
 	{
 	  a += 2;
 	  base = 2;

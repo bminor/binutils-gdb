@@ -1,6 +1,6 @@
 /* Python interface to inferior continue events.
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "py-event.h"
 
-static PyTypeObject continue_event_object_type
+extern PyTypeObject continue_event_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
 static PyObject *
@@ -51,5 +51,4 @@ GDBPY_NEW_EVENT_TYPE (continue,
                       "gdb.ContinueEvent",
                       "ContinueEvent",
                       "GDB continue event object",
-                      thread_event_object_type,
-                      static);
+                      thread_event_object_type);

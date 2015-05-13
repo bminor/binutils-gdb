@@ -1,6 +1,6 @@
 /* Definitions for expressions stored in reversed prefix form, for GDB.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -96,6 +96,9 @@ struct expression
 /* From parse.c */
 
 extern struct expression *parse_expression (const char *);
+
+extern struct expression *parse_expression_with_language (const char *string,
+							  enum language lang);
 
 extern struct type *parse_expression_for_completion (const char *, char **,
 						     enum type_code *);

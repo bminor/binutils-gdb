@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright (C) 1994-2014 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2015 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -509,6 +509,7 @@ proc ld_simple_link_defsyms {} {
 #       run_dump_test will guess which program to run by seeing which of
 #       the flags options below is present.
 #
+#   readelf: FLAGS
 #   objdump: FLAGS
 #   nm: FLAGS
 #   objcopy: FLAGS
@@ -545,14 +546,22 @@ proc ld_simple_link_defsyms {} {
 #
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
-#	to pass.  The PROG, objdump, nm and objcopy options have no
-#	meaning and need not supplied if this is present.  Multiple "error"
-#	directives append to the expected linker error message.
+#	to pass.  The PROG, readelf, objdump, nm and objcopy options have
+#	no meaning and need not be supplied if this is present.  Multiple
+#	"error" directives append to the expected linker error message.
 #
 #   warning: REGEX
 #	Expect a linker warning matching REGEX.  It is an error to issue
 #	both "error" and "warning".  Multiple "warning" directives
 #	append to the expected linker warning message.
+#
+#   map: FILE
+#       Adding this option will cause the linker to generate a linker
+#       map file, using the -Map=MAPFILE command line option.  If
+#       there is no -Map=MAPFILE in the 'ld: FLAGS' then one will be
+#       added to the linker command line.  The contents of the
+#       generated MAPFILE are then compared against the regexp lines
+#       in FILE using `regexp_diff' (see below for details).
 #
 # Each option may occur at most once unless otherwise mentioned.
 #
@@ -606,6 +615,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(warning) {}
     set opts(objcopy_linked_file) {}
     set opts(objcopy_objects) {}
+    set opts(map) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -769,12 +779,6 @@ proc run_dump_test { name {extra_options {}} } {
 	set dfile $srcdir/$subdir/$opts(dump)
     }
 
-    if { [string match "*--compress-debug-sections*" $opts(as)] \
-	 && ![is_zlib_supported] } {
-	unsupported $testname
-	return
-    }
-
     # Time to setup xfailures.
     foreach targ $opts(xfail) {
 	setup_xfail $targ
@@ -859,6 +863,20 @@ proc run_dump_test { name {extra_options {}} } {
 	set cmd "$LD $LDFLAGS -L$srcdir/$subdir \
 		   $opts(ld) -o $objfile $objfiles $opts(ld_after_inputfiles)"
 
+        # If needed then check for, or add a -Map option.
+        set mapfile ""
+        if { $opts(map) != "" } then {
+            if { [regexp -- "-Map=(\[^ \]+)" $cmd all mapfile] } then {
+                # Found existing mapfile option
+                verbose -log "Existing mapfile '$mapfile' found"
+            } else {
+                # No mapfile option.
+                set mapfile "tmpdir/dump.map"
+                verbose -log "Adding mapfile '$mapfile'"
+                set cmd "$cmd -Map=$mapfile"
+            }
+        }
+
 	send_log "$cmd\n"
 	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
 	remote_upload host "ld.tmp"
@@ -907,6 +925,17 @@ proc run_dump_test { name {extra_options {}} } {
 		return
 	    }
 	}
+
+        if { $opts(map) != "" } then {
+            # Check the map file matches.
+            set map_pattern_file $srcdir/$subdir/$opts(map)
+            verbose -log "Compare '$mapfile' against '$map_pattern_file'"
+            if { [regexp_diff $mapfile $map_pattern_file] } then {
+                fail "$testname (map file check)"
+            } else {
+                pass "$testname (map file check)"
+            }
+        }
     } else {
 	set objfile "tmpdir/dump0.o"
     }
@@ -1023,7 +1052,7 @@ proc set_file_contents { filename contents } {
 proc ar_simple_create { ar aropts target objects } {
     remote_file host delete $target
 
-    set exec_output [run_host_cmd "$ar" "$aropts -rc $target $objects"]
+    set exec_output [run_host_cmd "$ar" "-rc $aropts $target $objects"]
     set exec_output [prune_warnings $exec_output]
 
     if [string match "" $exec_output] then {

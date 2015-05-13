@@ -182,12 +182,8 @@ enum {
 static int display_mem_info = 0;
 
 static SIM_RC
-mips_option_handler (sd, cpu, opt, arg, is_command)
-     SIM_DESC sd;
-     sim_cpu *cpu;
-     int opt;
-     char *arg;
-     int is_command;
+mips_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt, char *arg,
+                     int is_command)
 {
   int cpu_nr;
   switch (opt)
@@ -315,7 +311,7 @@ void
 interrupt_event (SIM_DESC sd, void *data)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
-  address_word cia = CIA_GET (cpu);
+  address_word cia = CPU_PC_GET (cpu);
   if (SR & status_IE)
     {
       interrupt_pending = 0;
@@ -340,17 +336,32 @@ static void device_init(SIM_DESC sd) {
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-SIM_DESC
-sim_open (kind, cb, abfd, argv)
-     SIM_OPEN_KIND kind;
-     host_callback *cb;
-     struct bfd *abfd;
-     char **argv;
+static sim_cia
+mips_pc_get (sim_cpu *cpu)
 {
+  return PC;
+}
+
+static void
+mips_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  PC = pc;
+}
+
+SIM_DESC
+sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
+{
+  int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
-  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
+  sim_cpu *cpu;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    return 0;
+
+  cpu = STATE_CPU (sd, 0); /* FIXME */
 
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
@@ -719,7 +730,7 @@ sim_open (kind, cb, abfd, argv)
 			     (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK)
 			      << RSVD_INSTRUCTION_ARG_SHIFT));
 	  H2T (insn);
-	  sim_write (sd, vaddr, (char *)&insn, sizeof (insn));
+	  sim_write (sd, vaddr, (unsigned char *)&insn, sizeof (insn));
 	}
     }
 
@@ -767,13 +778,13 @@ sim_open (kind, cb, abfd, argv)
 	if (pmon_monitor_base != 0)
 	  {
 	    address_word vaddr = (pmon_monitor_base + (loop * 4));
-	    sim_write (sd, vaddr, (char *)&value, sizeof (value));
+	    sim_write (sd, vaddr, (unsigned char *)&value, sizeof (value));
 	  }
 
 	if (lsipmon_monitor_base != 0)
 	  {
 	    address_word vaddr = (lsipmon_monitor_base + (loop * 4));
-	    sim_write (sd, vaddr, (char *)&value, sizeof (value));
+	    sim_write (sd, vaddr, (unsigned char *)&value, sizeof (value));
 	  }
       }
 
@@ -788,25 +799,31 @@ sim_open (kind, cb, abfd, argv)
 			     HALT_INSTRUCTION /* BREAK */ };
       H2T (halt[0]);
       H2T (halt[1]);
-      sim_write (sd, 0x80000000, (char *) halt, sizeof (halt));
-      sim_write (sd, 0x80000180, (char *) halt, sizeof (halt));
-      sim_write (sd, 0x80000200, (char *) halt, sizeof (halt));
+      sim_write (sd, 0x80000000, (unsigned char *) halt, sizeof (halt));
+      sim_write (sd, 0x80000180, (unsigned char *) halt, sizeof (halt));
+      sim_write (sd, 0x80000200, (unsigned char *) halt, sizeof (halt));
       /* XXX: Write here unconditionally? */
-      sim_write (sd, 0xBFC00200, (char *) halt, sizeof (halt));
-      sim_write (sd, 0xBFC00380, (char *) halt, sizeof (halt));
-      sim_write (sd, 0xBFC00400, (char *) halt, sizeof (halt));
+      sim_write (sd, 0xBFC00200, (unsigned char *) halt, sizeof (halt));
+      sim_write (sd, 0xBFC00380, (unsigned char *) halt, sizeof (halt));
+      sim_write (sd, 0xBFC00400, (unsigned char *) halt, sizeof (halt));
     }
   }
 
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_PC_FETCH (cpu) = mips_pc_get;
+      CPU_PC_STORE (cpu) = mips_pc_set;
+    }
 
   return sd;
 }
 
 #if defined(TRACE)
 static void
-open_trace(sd)
-     SIM_DESC sd;
+open_trace (SIM_DESC sd)
 {
   tracefh = fopen(tracefile,"wb+");
   if (tracefh == NULL)
@@ -825,9 +842,7 @@ get_insn_name (sim_cpu *cpu, int i)
 }
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
 #ifdef DEBUG
   printf("DBG: sim_close: entered (quitting = %d)\n",quitting);
@@ -856,11 +871,7 @@ sim_close (sd, quitting)
 
 
 int
-sim_write (sd,addr,buffer,size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     const unsigned char *buffer;
-     int size;
+sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   int index;
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
@@ -888,11 +899,7 @@ sim_write (sd,addr,buffer,size)
 }
 
 int
-sim_read (sd,addr,buffer,size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   int index;
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
@@ -917,11 +924,7 @@ sim_read (sd,addr,buffer,size)
 }
 
 int
-sim_store_register (sd,rn,memory,length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
@@ -1006,11 +1009,7 @@ sim_store_register (sd,rn,memory,length)
 }
 
 int
-sim_fetch_register (sd,rn,memory,length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
@@ -1093,13 +1092,8 @@ sim_fetch_register (sd,rn,memory,length)
   return 0;
 }
 
-
 SIM_RC
-sim_create_inferior (sd, abfd, argv,env)
-     SIM_DESC sd;
-     struct bfd *abfd;
-     char **argv;
-     char **env;
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {
 
 #ifdef DEBUG
@@ -1118,7 +1112,7 @@ sim_create_inferior (sd, abfd, argv,env)
       for (cpu_nr = 0; cpu_nr < sim_engine_nr_cpus (sd); cpu_nr++)
 	{
 	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
-	  CIA_SET (cpu, (unsigned64) bfd_get_start_address (abfd));
+	  CPU_PC_SET (cpu, (unsigned64) bfd_get_start_address (abfd));
 	}
     }
 
@@ -1150,11 +1144,11 @@ fetch_str (SIM_DESC sd,
 {
   char *buf;
   int nr = 0;
-  char null;
+  unsigned char null;
   while (sim_read (sd, addr + nr, &null, 1) == 1 && null != 0)
     nr++;
   buf = NZALLOC (char, nr + 1);
-  sim_read (sd, addr, buf, nr);
+  sim_read (sd, addr, (unsigned char *)buf, nr);
   return buf;
 }
 
@@ -1282,7 +1276,7 @@ sim_monitor (SIM_DESC sd,
 	int nr = A2;
 	char *buf = zalloc (nr);
 	V0 = sim_io_read (sd, fd, buf, nr);
-	sim_write (sd, A1, buf, nr);
+	sim_write (sd, A1, (unsigned char *)buf, nr);
 	free (buf);
       }
       break;
@@ -1292,7 +1286,7 @@ sim_monitor (SIM_DESC sd,
 	int fd = A0;
 	int nr = A2;
 	char *buf = zalloc (nr);
-	sim_read (sd, A1, buf, nr);
+	sim_read (sd, A1, (unsigned char *)buf, nr);
 	V0 = sim_io_write (sd, fd, buf, nr);
 	if (fd == 1)
 	    sim_io_flush_stdout (sd);
@@ -1389,9 +1383,9 @@ sim_monitor (SIM_DESC sd,
 
 	value = mem_size;
 	H2T (value);
-	sim_write (sd, A0 + 0, (char *)&value, 4);
-	sim_write (sd, A0 + 4, (char *)&zero, 4);
-	sim_write (sd, A0 + 8, (char *)&zero, 4);
+	sim_write (sd, A0 + 0, (unsigned char *)&value, 4);
+	sim_write (sd, A0 + 4, (unsigned char *)&zero, 4);
+	sim_write (sd, A0 + 8, (unsigned char *)&zero, 4);
 	/* sim_io_eprintf (sd, "sim: get_mem_info() deprecated\n"); */
 	break;
       }
@@ -1405,7 +1399,7 @@ sim_monitor (SIM_DESC sd,
       /* The following is based on the PMON printf source */
       {
 	address_word s = A0;
-	char c;
+	unsigned char c;
 	signed_word *ap = &A1; /* 1st argument */
         /* This isn't the quickest way, since we call the host print
            routine for every character almost. But it does avoid
@@ -1462,7 +1456,7 @@ sim_monitor (SIM_DESC sd,
 		    if ((int)*ap != 0)
 		      {
 			address_word p = *ap++;
-			char ch;
+			unsigned char ch;
 			while (sim_read (sd, p++, &ch, 1) == 1 && ch != '\0')
 			  sim_io_printf(sd, "%c", ch);
 		      }
@@ -2466,8 +2460,7 @@ get_cell (void)
 static int thirty_two = 32;	
 
 char* 
-pr_addr(addr)
-  SIM_ADDR addr;
+pr_addr (SIM_ADDR addr)
 {
   char *paddr_str=get_cell();
   switch (sizeof(addr))
@@ -2489,8 +2482,7 @@ pr_addr(addr)
 }
 
 char* 
-pr_uword64(addr)
-  uword64 addr;
+pr_uword64 (uword64 addr)
 {
   char *paddr_str=get_cell();
   sprintf(paddr_str,"%08lx%08lx",

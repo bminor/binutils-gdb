@@ -1,5 +1,5 @@
 /* Module support.
-   Copyright (C) 1996-2014 Free Software Foundation, Inc.
+   Copyright (C) 1996-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
    TODO: Add facilities for saving/restoring state to/from a file.  */
 
+#include "gdb/remote-sim.h"
 
 /* Various function types.  */
 

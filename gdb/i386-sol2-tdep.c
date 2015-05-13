@@ -1,6 +1,6 @@
 /* Target-dependent code for Solaris x86.
 
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -80,9 +80,10 @@ i386_sol2_mcontext_addr (struct frame_info *this_frame)
 static const char *
 i386_sol2_static_transform_name (const char *name)
 {
-  char *p;
   if (name[0] == '.')
     {
+      const char *p;
+
       /* For file-local statics there will be a period, a bunch of
          junk (the contents of which match a string given in the
          N_OPT), a period and the name.  For function-local statics

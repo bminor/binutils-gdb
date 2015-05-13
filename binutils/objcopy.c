@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -186,6 +186,9 @@ struct section_add
 /* List of sections to add to the output BFD.  */
 static struct section_add *add_sections;
 
+/* List of sections to update in the output BFD.  */
+static struct section_add *update_sections;
+
 /* List of sections to dump from the output BFD.  */
 static struct section_add *dump_sections;
 
@@ -199,9 +202,12 @@ static bfd_boolean convert_debugging = FALSE;
 /* Whether to compress/decompress DWARF debug sections.  */
 static enum
 {
-  nothing,
-  compress,
-  decompress
+  nothing = 0,
+  compress = 1 << 0,
+  compress_zlib = compress | 1 << 1,
+  compress_gnu_zlib = compress | 1 << 2,
+  compress_gabi_zlib = compress | 1 << 3,
+  decompress = 1 << 4
 } do_debug_sections = nothing;
 
 /* Whether to change the leading character in symbol names.  */
@@ -262,6 +268,7 @@ static enum long_section_name_handling long_section_names = KEEP;
 enum command_line_switch
   {
     OPTION_ADD_SECTION=150,
+    OPTION_UPDATE_SECTION,
     OPTION_DUMP_SECTION,
     OPTION_CHANGE_ADDRESSES,
     OPTION_CHANGE_LEADING_CHAR,
@@ -361,6 +368,7 @@ static struct option copy_options[] =
 {
   {"add-gnu-debuglink", required_argument, 0, OPTION_ADD_GNU_DEBUGLINK},
   {"add-section", required_argument, 0, OPTION_ADD_SECTION},
+  {"update-section", required_argument, 0, OPTION_UPDATE_SECTION},
   {"adjust-start", required_argument, 0, OPTION_CHANGE_START},
   {"adjust-vma", required_argument, 0, OPTION_CHANGE_ADDRESSES},
   {"adjust-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_ADDRESS},
@@ -375,7 +383,7 @@ static struct option copy_options[] =
   {"change-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_VMA},
   {"change-start", required_argument, 0, OPTION_CHANGE_START},
   {"change-warnings", no_argument, 0, OPTION_CHANGE_WARNINGS},
-  {"compress-debug-sections", no_argument, 0, OPTION_COMPRESS_DEBUG_SECTIONS},
+  {"compress-debug-sections", optional_argument, 0, OPTION_COMPRESS_DEBUG_SECTIONS},
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"decompress-debug-sections", no_argument, 0, OPTION_DECOMPRESS_DEBUG_SECTIONS},
   {"disable-deterministic-archives", no_argument, 0, 'U'},
@@ -532,7 +540,7 @@ copy_usage (FILE *stream, int exit_status)
   -w --wildcard                    Permit wildcard in symbol comparison\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
-  -i --interleave [<number>]       Only copy N out of every <number> bytes\n\
+  -i --interleave[=<number>]       Only copy N out of every <number> bytes\n\
      --interleave-width <number>   Set N for --interleave\n\
   -b --byte <num>                  Select byte <num> in every interleaved block\n\
      --gap-fill <val>              Fill gaps between sections with <val>\n\
@@ -553,6 +561,9 @@ copy_usage (FILE *stream, int exit_status)
      --set-section-flags <name>=<flags>\n\
                                    Set section <name>'s properties to <flags>\n\
      --add-section <name>=<file>   Add section <name> found in <file> to output\n\
+     --update-section <name>=<file>\n\
+                                   Update contents of section <name> with\n\
+                                   contents found in <file>\n\
      --dump-section <name>=<file>  Dump the contents of section <name> into <file>\n\
      --rename-section <old>=<new>[,<flags>] Rename section <old> to <new>\n\
      --long-section-names {enable|disable|keep}\n\
@@ -593,7 +604,8 @@ copy_usage (FILE *stream, int exit_status)
                                    <commit>\n\
      --subsystem <name>[:<version>]\n\
                                    Set PE subsystem to <name> [& <version>]\n\
-     --compress-debug-sections     Compress DWARF debug sections using zlib\n\
+     --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
+                                   Compress DWARF debug sections using zlib\n\
      --decompress-debug-sections   Decompress DWARF debug sections using zlib\n\
   -v --verbose                     List all object files modified\n\
   @<file>                          Read options from <file>\n\
@@ -1020,6 +1032,27 @@ is_dwo_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
   return strncmp (name + len - 4, ".dwo", 4) == 0;
 }
 
+/* Return TRUE if section SEC is in the update list.  */
+
+static bfd_boolean
+is_update_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+{
+  if (update_sections != NULL)
+    {
+      struct section_add *pupdate;
+
+      for (pupdate = update_sections;
+           pupdate != NULL;
+           pupdate = pupdate->next)
+	{
+          if (strcmp (sec->name, pupdate->name) == 0)
+            return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
 /* See if a non-group section is being removed.  */
 
 static bfd_boolean
@@ -1038,6 +1071,9 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       if (p && q)
 	fatal (_("error: section %s matches both remove and copy options"),
 	       bfd_get_section_name (abfd, sec));
+      if (p && is_update_section (abfd, sec))
+        fatal (_("error: section %s matches both update and remove options"),
+               bfd_get_section_name (abfd, sec));
 
       if (p != NULL)
 	return TRUE;
@@ -1584,7 +1620,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    fatal (_("Unable to change endianness of input file(s)"));
+    {
+      /* PR 17636: Call non-fatal so that we return to our parent who
+	 may need to tidy temporary files.  */
+      non_fatal (_("Unable to change endianness of input file(s)"));
+      return FALSE;
+    }
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     {
@@ -1595,6 +1636,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (ibfd->sections == NULL)
     {
       non_fatal (_("error: the input file '%s' has no sections"),
+		 bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
+  if ((do_debug_sections & compress) != 0
+      && do_debug_sections != compress
+      && ibfd->xvec->flavour != bfd_target_elf_flavour)
+    {
+      non_fatal (_("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"),
 		 bfd_get_archive_filename (ibfd));
       return FALSE;
     }
@@ -1752,6 +1802,14 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
       return FALSE;
     }
+  /* PR 17512: file:  d6323821
+     If the symbol table could not be loaded do not pretend that we have
+     any symbols.  This trips us up later on when we load the relocs.  */
+  if (symcount == 0)
+    {
+      free (isympp);
+      osympp = isympp = NULL;
+    }
 
   /* BFD mandates that all output sections be created and sizes set before
      any output is done.  Thus, we traverse all sections multiple times.  */
@@ -1833,6 +1891,32 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
+  if (update_sections != NULL)
+    {
+      struct section_add *pupdate;
+
+      for (pupdate = update_sections;
+	   pupdate != NULL;
+	   pupdate = pupdate->next)
+	{
+	  asection *osec;
+
+	  pupdate->section = bfd_get_section_by_name (ibfd, pupdate->name);
+	  if (pupdate->section == NULL)
+	    {
+	      non_fatal (_("error: %s not found, can't be updated"), pupdate->name);
+	      return FALSE;
+	    }
+
+	  osec = pupdate->section->output_section;
+	  if (! bfd_set_section_size (obfd, osec, pupdate->size))
+	    {
+	      bfd_nonfatal_message (NULL, obfd, osec, NULL);
+	      return FALSE;
+	    }
+	}
+    }
+
   if (dump_sections != NULL)
     {
       struct section_add * pdump;
@@ -1878,9 +1962,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  if (bfd_get_section_contents (ibfd, sec, contents, 0, size))
 	    {
 	      if (fwrite (contents, 1, size, f) != size)
-		fatal (_("error writing section contents to %s (error: %s)"),
-		       pdump->filename,
-		       strerror (errno));
+		{
+		  non_fatal (_("error writing section contents to %s (error: %s)"),
+			     pdump->filename,
+			     strerror (errno));
+		  return FALSE;
+		}
 	    }
 	  else
 	    bfd_nonfatal_message (NULL, ibfd, sec,
@@ -2118,6 +2205,26 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
+  if (update_sections != NULL)
+    {
+      struct section_add *pupdate;
+
+      for (pupdate = update_sections;
+           pupdate != NULL;
+           pupdate = pupdate->next)
+	{
+	  asection *osec;
+
+	  osec = pupdate->section->output_section;
+	  if (! bfd_set_section_contents (obfd, osec, pupdate->contents,
+	                                  0, pupdate->size))
+	    {
+	      bfd_nonfatal_message (NULL, obfd, osec, NULL);
+	      return FALSE;
+	    }
+	}
+    }
+
   if (gnu_debuglink_filename != NULL)
     {
       if (! bfd_fill_in_gnu_debuglink_section
@@ -2258,7 +2365,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     {
       status = 1;
       bfd_nonfatal_message (NULL, obfd, NULL, NULL);
-      return;
+      goto cleanup_and_exit;
     }
 
   while (!status && this_element != NULL)
@@ -2419,6 +2526,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  unlink (l->name);
 	}
     }
+
   rmdir (dir);
 }
 
@@ -2469,7 +2577,14 @@ copy_file (const char *input_filename, const char *output_filename,
   switch (do_debug_sections)
     {
     case compress:
+    case compress_zlib:
+    case compress_gnu_zlib:
+    case compress_gabi_zlib:
       ibfd->flags |= BFD_COMPRESS;
+      /* Don't check if input is ELF here since this information is
+	 only available after bfd_check_format_matches is called.  */
+      if (do_debug_sections == compress_gabi_zlib)
+	ibfd->flags |= BFD_COMPRESS_GABI;
       break;
     case decompress:
       ibfd->flags |= BFD_DECOMPRESS;
@@ -2528,7 +2643,11 @@ copy_file (const char *input_filename, const char *output_filename,
       if (! copy_object (ibfd, obfd, input_arch))
 	status = 1;
 
-      if (!bfd_close (obfd))
+      /* PR 17512: file: 0f15796a.
+	 If the file could not be copied it may not be in a writeable
+	 state.  So use bfd_close_all_done to avoid the possibility of
+	 writing uninitialised data into the file.  */
+      if (! (status ? bfd_close_all_done (obfd) : bfd_close (obfd)))
 	{
 	  status = 1;
 	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
@@ -2786,6 +2905,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* Copy merge entity size.  */
   osection->entsize = isection->entsize;
 
+  /* Copy compress status.  */
+  osection->compress_status = isection->compress_status;
+
   /* This used to be mangle_section; we do here to avoid using
      bfd_get_section_by_name since some formats allow multiple
      sections with the same name.  */
@@ -2843,6 +2965,9 @@ skip_section (bfd *ibfd, sec_ptr isection)
     return TRUE;
 
   if (is_strip_section (ibfd, isection))
+    return TRUE;
+
+  if (is_update_section (ibfd, isection))
     return TRUE;
 
   flags = bfd_get_section_flags (ibfd, isection);
@@ -2924,9 +3049,13 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
 	  temp_relpp = (arelent **) xmalloc (relsize);
 	  for (i = 0; i < relcount; i++)
-	    if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
-				     keep_specific_htab))
-	      temp_relpp [temp_relcount++] = relpp [i];
+	    {
+	      /* PR 17512: file: 9e907e0c.  */
+	      if (relpp[i]->sym_ptr_ptr)
+		if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
+					 keep_specific_htab))
+		  temp_relpp [temp_relcount++] = relpp [i];
+	    }
 	  relcount = temp_relcount;
 	  free (relpp);
 	  relpp = temp_relpp;
@@ -3506,6 +3635,79 @@ convert_efi_target (char *efi)
     }
 }
 
+/* Allocate and return a pointer to a struct section_add, initializing the
+   structure using ARG, a string in the format "sectionname=filename".
+   The returned structure will have its next pointer set to NEXT.  The
+   OPTION field is the name of the command line option currently being
+   parsed, and is only used if an error needs to be reported.  */
+
+static struct section_add *
+init_section_add (const char *arg,
+                  struct section_add *next,
+                  const char *option)
+{
+  struct section_add *pa;
+  const char *s;
+
+  s = strchr (arg, '=');
+  if (s == NULL)
+    fatal (_("bad format for %s"), option);
+
+  pa = (struct section_add *) xmalloc (sizeof (struct section_add));
+  pa->name = xstrndup (arg, s - arg);
+  pa->filename = s + 1;
+  pa->next = next;
+  pa->contents = NULL;
+  pa->size = 0;
+
+  return pa;
+}
+
+/* Load the file specified in PA, allocating memory to hold the file
+   contents, and store a pointer to the allocated memory in the contents
+   field of PA.  The size field of PA is also updated.  All errors call
+   FATAL.  */
+
+static void
+section_add_load_file (struct section_add *pa)
+{
+  size_t off, alloc;
+  FILE *f;
+
+  /* We don't use get_file_size so that we can do
+     --add-section .note.GNU_stack=/dev/null
+     get_file_size doesn't work on /dev/null.  */
+
+  f = fopen (pa->filename, FOPEN_RB);
+  if (f == NULL)
+    fatal (_("cannot open: %s: %s"),
+           pa->filename, strerror (errno));
+
+  off = 0;
+  alloc = 4096;
+  pa->contents = (bfd_byte *) xmalloc (alloc);
+  while (!feof (f))
+    {
+      off_t got;
+
+      if (off == alloc)
+        {
+          alloc <<= 1;
+          pa->contents = (bfd_byte *) xrealloc (pa->contents, alloc);
+        }
+
+      got = fread (pa->contents + off, 1, alloc - off, f);
+      if (ferror (f))
+        fatal (_("%s: fread failed"), pa->filename);
+
+      off += got;
+    }
+
+  pa->size = off;
+
+  fclose (f);
+}
+
 static int
 copy_main (int argc, char *argv[])
 {
@@ -3677,76 +3879,20 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_ADD_SECTION:
-	  {
-	    const char *s;
-	    size_t off, alloc;
-	    struct section_add *pa;
-	    FILE *f;
+          add_sections = init_section_add (optarg, add_sections,
+                                           "--add-section");
+          section_add_load_file (add_sections);
+	  break;
 
-	    s = strchr (optarg, '=');
-
-	    if (s == NULL)
-	      fatal (_("bad format for %s"), "--add-section");
-
-	    pa = (struct section_add *) xmalloc (sizeof (struct section_add));
-	    pa->name = xstrndup (optarg, s - optarg);
-	    pa->filename = s + 1;
-
-	    /* We don't use get_file_size so that we can do
-	         --add-section .note.GNU_stack=/dev/null
-	       get_file_size doesn't work on /dev/null.  */
-
-	    f = fopen (pa->filename, FOPEN_RB);
-	    if (f == NULL)
-	      fatal (_("cannot open: %s: %s"),
-		     pa->filename, strerror (errno));
-
-	    off = 0;
-	    alloc = 4096;
-	    pa->contents = (bfd_byte *) xmalloc (alloc);
-	    while (!feof (f))
-	      {
-		off_t got;
-
-		if (off == alloc)
-		  {
-		    alloc <<= 1;
-		    pa->contents = (bfd_byte *) xrealloc (pa->contents, alloc);
-		  }
-
-		got = fread (pa->contents + off, 1, alloc - off, f);
-		if (ferror (f))
-		  fatal (_("%s: fread failed"), pa->filename);
-
-		off += got;
-	      }
-
-	    pa->size = off;
-
-	    fclose (f);
-
-	    pa->next = add_sections;
-	    add_sections = pa;
-	  }
+	case OPTION_UPDATE_SECTION:
+	  update_sections = init_section_add (optarg, update_sections,
+                                              "--update-section");
+	  section_add_load_file (update_sections);
 	  break;
 
 	case OPTION_DUMP_SECTION:
-	  {
-	    const char *s;
-	    struct section_add *pa;
-
-	    s = strchr (optarg, '=');
-
-	    if (s == NULL)
-	      fatal (_("bad format for %s"), "--dump-section");
-
-	    pa = (struct section_add *) xmalloc (sizeof * pa);
-	    pa->name = xstrndup (optarg, s - optarg);
-	    pa->filename = s + 1;
-	    pa->next = dump_sections;
-	    pa->contents = NULL;
-	    dump_sections = pa;
-	  }
+          dump_sections = init_section_add (optarg, dump_sections,
+                                            "--dump-section");
 	  break;
 	  
 	case OPTION_CHANGE_START:
@@ -3851,7 +3997,22 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_COMPRESS_DEBUG_SECTIONS:
-	  do_debug_sections = compress;
+	  if (optarg)
+	    {
+	      if (strcasecmp (optarg, "none") == 0)
+		do_debug_sections = decompress;
+	      else if (strcasecmp (optarg, "zlib") == 0)
+		do_debug_sections = compress_zlib;
+	      else if (strcasecmp (optarg, "zlib-gnu") == 0)
+		do_debug_sections = compress_gnu_zlib;
+	      else if (strcasecmp (optarg, "zlib-gabi") == 0)
+		do_debug_sections = compress_gabi_zlib;
+	      else
+		fatal (_("unrecognized --compress-debug-sections type `%s'"),
+		       optarg);
+	    }
+	  else
+	    do_debug_sections = compress;
 	  break;
 
 	case OPTION_DEBUGGING:
@@ -4374,6 +4535,9 @@ main (int argc, char *argv[])
     }
 
   create_symbol_htabs ();
+
+  if (argv != NULL)
+    bfd_set_error_program_name (argv[0]);
 
   if (is_strip)
     strip_main (argc, argv);

@@ -1,4 +1,4 @@
-# Copyright 2011-2014 Free Software Foundation, Inc.
+# Copyright 2011-2015 Free Software Foundation, Inc.
 #
 # Contributed by Red Hat, originally written by Keith Seitz.
 #
@@ -63,6 +63,10 @@ foreach test $methods {
 	pass "break '$test'"
     }
 }
+
+# PR c++/17976
+gdb_test "ptype '(anonymous namespace)'" \
+    "type = namespace \\\(anonymous namespace\\\)"
 
 gdb_exit
 return 0

@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -41,7 +41,6 @@
 #ifdef ENABLE_PLUGINS
 #include "plugin.h"
 #include "plugin-api.h"
-#include "libbfd.h"
 #endif /* ENABLE_PLUGINS */
 
 /* Somewhere above, sys/stat.h got included.  */
@@ -290,6 +289,7 @@ main (int argc, char **argv)
   link_info.init_function = "_init";
   link_info.fini_function = "_fini";
   link_info.relax_pass = 1;
+  link_info.extern_protected_data = -1;
   link_info.pei386_auto_import = -1;
   link_info.spare_dynamic_tags = 5;
   link_info.path_separator = ':';
@@ -403,6 +403,13 @@ main (int argc, char **argv)
   else
     link_info.output_bfd->flags |= EXEC_P;
 
+  if ((link_info.compress_debug & COMPRESS_DEBUG))
+    {
+      link_info.output_bfd->flags |= BFD_COMPRESS;
+      if (link_info.compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
+	link_info.output_bfd->flags |= BFD_COMPRESS_GABI;
+    }
+
   ldwrite ();
 
   if (config.map_file != NULL)
@@ -465,10 +472,10 @@ main (int argc, char **argv)
 	      dst = fopen (dst_name, FOPEN_WB);
 
 	      if (!src)
-		einfo (_("%X%P: unable to open for source of copy `%s'\n"),
+		einfo (_("%P%F: unable to open for source of copy `%s'\n"),
 		       output_filename);
 	      if (!dst)
-		einfo (_("%X%P: unable to open for destination of copy `%s'\n"),
+		einfo (_("%P%F: unable to open for destination of copy `%s'\n"),
 		       dst_name);
 	      while ((l = fread (buf, 1, bsize, src)) > 0)
 		{
@@ -773,30 +780,14 @@ add_archive_element (struct bfd_link_info *info,
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
 #ifdef ENABLE_PLUGINS
-  if (plugin_active_plugins_p () && !no_more_claiming)
+  if (link_info.lto_plugin_active && !no_more_claiming)
     {
       /* We must offer this archive member to the plugins to claim.  */
-      const char *filename = (bfd_my_archive (abfd) != NULL
-			      ? bfd_my_archive (abfd)->filename : abfd->filename);
-      int fd = open (filename, O_RDONLY | O_BINARY);
-      if (fd >= 0)
+      plugin_maybe_claim (input);
+      if (input->flags.claimed)
 	{
-	  struct ld_plugin_input_file file;
-
-	  /* Offset and filesize must refer to the individual archive
-	     member, not the whole file, and must exclude the header.
-	     Fortunately for us, that is how the data is stored in the
-	     origin field of the bfd and in the arelt_data.  */
-	  file.name = filename;
-	  file.offset = abfd->origin;
-	  file.filesize = arelt_size (abfd);
-	  file.fd = fd;
-	  plugin_maybe_claim (&file, input);
-	  if (input->flags.claimed)
-	    {
-	      input->flags.claim_archive = TRUE;
-	      *subsbfd = input->the_bfd;
-	    }
+	  input->flags.claim_archive = TRUE;
+	  *subsbfd = input->the_bfd;
 	}
     }
   else

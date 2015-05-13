@@ -1,5 +1,5 @@
 /* Support for printing Java types for GDB, the GNU debugger.
-   Copyright (C) 1997-2014 Free Software Foundation, Inc.
+   Copyright (C) 1997-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -168,12 +168,12 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      if (strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5) == 0
+	      if (startswith (TYPE_FIELD_NAME (type, i), "_vptr")
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
 
 	      /* Don't print the dummy field "class".  */
-	      if (strncmp (TYPE_FIELD_NAME (type, i), "class", 5) == 0)
+	      if (startswith (TYPE_FIELD_NAME (type, i), "class"))
 		continue;
 
 	      print_spaces_filtered (level + 4, stream);

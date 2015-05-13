@@ -1,5 +1,5 @@
 /* Low level interface to Windows debugging, for gdbserver.
-   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+   Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
    Contributed by Leo Zayas.  Based on "win32-nat.c" from GDB.
 
@@ -778,7 +778,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	return;
     }
 
-  if (strncmp (s, "cYg", 3) != 0)
+  if (!startswith (s, "cYg"))
     {
       if (!server_waiting)
 	{
@@ -1807,6 +1807,14 @@ static struct target_ops win32_target_ops = {
   win32_supports_z_point_type,
   win32_insert_point,
   win32_remove_point,
+  NULL, /* stopped_by_sw_breakpoint */
+  NULL, /* supports_stopped_by_sw_breakpoint */
+  NULL, /* stopped_by_hw_breakpoint */
+  NULL, /* supports_stopped_by_hw_breakpoint */
+  /* Although win32-i386 has hardware single step, still disable this
+     feature for win32, because it is implemented in linux-low.c instead
+     of in generic code.  */
+  NULL, /* supports_conditional_breakpoints */
   win32_stopped_by_watchpoint,
   win32_stopped_data_address,
   NULL, /* read_offsets */
@@ -1823,6 +1831,9 @@ static struct target_ops win32_target_ops = {
   NULL, /* async */
   NULL, /* start_non_stop */
   NULL, /* supports_multi_process */
+  NULL, /* supports_fork_events */
+  NULL, /* supports_vfork_events */
+  NULL, /* handle_new_gdb_connection */
   NULL, /* handle_monitor_command */
   NULL, /* core_of_thread */
   NULL, /* read_loadmap */

@@ -1,3 +1,126 @@
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_CPU): Delete.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (arm_pc_get, arm_pc_set): New functions.
+	(sim_open): Declare new local var i.  Call CPU_PC_FETCH &
+	CPU_PC_STORE for all cpus.
+
+2015-04-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.
+	* sim-main.h (STATE_CPU): Delete.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Move wrapper.o to the start of the list.
+
+2015-04-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-engine.o.
+
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (armos.o, armcopro.o, maverick.o, iwmmxt.o, arminit.o,
+	armrdi.o, armsupp.o, thumbemu.o, bag.o, wrapper.o): Delete rules.
+	* tconfig.h: Delete file.
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+	(SIM_EXTRA_CFLAGS): Delete -DSIM_TARGET_SWITCHES and
+	-DSIM_USE_DEPRECATED_RUN_FRONTEND.
+	(SIM_OBJS): Change to $(SIM_NEW_COMMON_OBJS).
+	* sim-main.h: New file.
+	* wrapper.c: Delete armdefs.h, sim-utils.h, and run-sim.h includes.
+	Add sim-main.h and sim-options.h includes.
+	(sim_callback, mem_size, trace): Add TODO comments.
+	(state): Delete static and add TODO comment.
+	(sim_kind, myname, big_endian): Delete.
+	(init): Change big_endian to CURRENT_TARGET_BYTE_ORDER check.
+	(sim_size, sim_trace, sim_info, sim_target_display_usage, sim_load,
+	sim_do_command, sim_set_callbacks, sim_complete_command): Delete.
+	(sim_target_parse_command_line): Mark static.
+	(free_state): New function.
+	(sim_open): Rewrite to use new common logic.
+	(sim_close): Delete body.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Delete -DNEED_UI_LOOP_HOOK.
+	* interp.c [NEED_UI_LOOP_HOOK] (UI_LOOP_POLL_INTERVAL,
+	ui_loop_hook_counter, deprecated_ui_loop_hook): Delete.
+	(sim_resume) [NEED_UI_LOOP_HOOK]: Delete ui code.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* armemu.c [MODE32] (handle_v6_insn): Move definition.
+	(ARMul_Emulate26): Initialize do_int after label target.
+	* armemu.h (UNDEF_Test, UNDEF_Shift, UNDEF_MSRPC, UNDEF_MRSPC,
+	UNDEF_MULPCDest, UNDEF_MULDestEQOp1, UNDEF_LSRBPC,
+	UNDEF_LSRBaseEQOffWb, UNDEF_LSRBaseEQDestWb, UNDEF_LSRPCBaseWb,
+	UNDEF_LSRPCOffWb, UNDEF_LSMNoRegs, UNDEF_LSMPCBase,
+	UNDEF_LSMUserBankWb, UNDEF_LSMBaseInListWb, UNDEF_SWPPC,
+	UNDEF_CoProHS, UNDEF_MCRPC, UNDEF_LSCPCBaseWb,
+	UNDEF_UndefNotBounced, UNDEF_ShortInt, UNDEF_IllegalMode,
+	UNDEF_Prog32SigChange, UNDEF_Data32SigChange): Define to while(0).
+	* armsupp.c (ARMul_Align): Convert old style prototype.
+	* bag.c (addtolist, killwholelist): Mark static.
+	(BAG_newbag): Convert old style prototype.
+	* maverick.c (mv_compute_host_endianness): Delete.
+	* wrapper.c (verbosity, sim_set_verbose): Delete.
+	(init): Set state->verbose to 0.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN, SIM_AC_OPTION_ALIGNMENT,
+	SIM_AC_OPTION_HOSTENDIAN, SIM_AC_OPTION_ENVIRONMENT,
+	SIM_AC_OPTION_INLINE, and SIM_AC_OPTION_WARNINGS.
+	* config.in, configure: Regenerate.
+
+2015-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COPRO): Delete.
+	(SIM_OBJS): Expand COPRO.
+	* configure.ac: Deletd stdint.h check.
+	(COPRO): Delete.
+	* configure: Regenerate.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Add
+	-DSIM_USE_DEPRECATED_RUN_FRONTEND.
+	(SIM_RUN_OBJS): Set to run.o.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_HEADERS): Delete unistd.h.
+	* aclocal.m4, configure: Regenerate.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

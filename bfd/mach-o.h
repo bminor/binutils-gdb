@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -23,6 +23,10 @@
 
 #include "bfd.h"
 #include "mach-o/loader.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct bfd_mach_o_header
 {
@@ -745,5 +749,9 @@ bfd_mach_o_backend_data;
 
 #define SYM_MACHO_FIELDS_UNSET ((bfd_vma) -1)
 #define SYM_MACHO_FIELDS_NOT_VALIDATED ((bfd_vma) -2)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _BFD_MACH_O_H_ */

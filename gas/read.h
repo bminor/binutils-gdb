@@ -1,5 +1,5 @@
 /* read.h - of read.c
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -127,6 +127,7 @@ extern void pseudo_set (symbolS * symbolP);
 extern void read_a_source_file (char *name);
 extern void read_begin (void);
 extern void read_print_statistics (FILE *);
+extern char *read_symbol_name (void);
 extern int sizeof_leb128 (valueT, int sign);
 extern void stabs_generate_asm_file (void);
 extern void stabs_generate_asm_lineno (void);

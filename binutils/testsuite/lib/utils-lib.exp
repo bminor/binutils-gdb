@@ -1,4 +1,4 @@
-# Copyright (C) 1993-2014 Free Software Foundation, Inc.
+# Copyright (C) 1993-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -412,11 +412,6 @@ proc run_dump_test { name {extra_options {}} } {
 	if {$skip} { return }
     }
     if { $opts(target) != "" } then {
-	if { $opts(not-target) != "" } then {
-	    perror "$testname: mixing target and not-target directives is invalid"
-	    unresolved $testname
-	    return
-	}
 	set skip 1
 	foreach glob $opts(target) {
 	    if {[istarget $glob]} {
@@ -436,12 +431,6 @@ proc run_dump_test { name {extra_options {}} } {
 		return
 	    }
 	}
-    }
-
-    if { [string match "*--compress-debug-sections*" $opts(as)] \
-	 && ![is_zlib_supported] } {
-	unsupported $testname
-	return
     }
 
     if { $opts(source) == "" } {

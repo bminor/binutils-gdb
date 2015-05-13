@@ -1,6 +1,6 @@
 /* Print values for GNU debugger GDB.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -927,7 +927,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 }
 
 static void
-validate_format (struct format_data fmt, char *cmdname)
+validate_format (struct format_data fmt, const char *cmdname)
 {
   if (fmt.size != 0)
     error (_("Size letters are meaningless in \"%s\" command."), cmdname);
@@ -1496,7 +1496,7 @@ display_command (char *arg, int from_tty)
 {
   struct format_data fmt;
   struct expression *expr;
-  struct display *new;
+  struct display *newobj;
   int display_it = 1;
   const char *exp = arg;
 
@@ -1535,20 +1535,20 @@ display_command (char *arg, int from_tty)
       innermost_block = NULL;
       expr = parse_expression (exp);
 
-      new = (struct display *) xmalloc (sizeof (struct display));
+      newobj = (struct display *) xmalloc (sizeof (struct display));
 
-      new->exp_string = xstrdup (exp);
-      new->exp = expr;
-      new->block = innermost_block;
-      new->pspace = current_program_space;
-      new->next = display_chain;
-      new->number = ++display_number;
-      new->format = fmt;
-      new->enabled_p = 1;
-      display_chain = new;
+      newobj->exp_string = xstrdup (exp);
+      newobj->exp = expr;
+      newobj->block = innermost_block;
+      newobj->pspace = current_program_space;
+      newobj->next = display_chain;
+      newobj->number = ++display_number;
+      newobj->format = fmt;
+      newobj->enabled_p = 1;
+      display_chain = newobj;
 
       if (from_tty)
-	do_one_display (new);
+	do_one_display (newobj);
 
       dont_repeat ();
     }
@@ -1692,15 +1692,14 @@ do_one_display (struct display *d)
 
   if (d->exp == NULL)
     {
-      volatile struct gdb_exception ex;
 
-      TRY_CATCH (ex, RETURN_MASK_ALL)
+      TRY
 	{
 	  innermost_block = NULL;
 	  d->exp = parse_expression (d->exp_string);
 	  d->block = innermost_block;
 	}
-      if (ex.reason < 0)
+      CATCH (ex, RETURN_MASK_ALL)
 	{
 	  /* Can't re-parse the expression.  Disable this display item.  */
 	  d->enabled_p = 0;
@@ -1708,6 +1707,7 @@ do_one_display (struct display *d)
 		   d->exp_string, ex.message);
 	  return;
 	}
+      END_CATCH
     }
 
   if (d->block)
@@ -1731,7 +1731,6 @@ do_one_display (struct display *d)
   printf_filtered (": ");
   if (d->format.size)
     {
-      volatile struct gdb_exception ex;
 
       annotate_display_format ();
 
@@ -1755,7 +1754,7 @@ do_one_display (struct display *d)
 
       annotate_display_value ();
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
         {
 	  struct value *val;
 	  CORE_ADDR addr;
@@ -1766,13 +1765,15 @@ do_one_display (struct display *d)
 	    addr = gdbarch_addr_bits_remove (d->exp->gdbarch, addr);
 	  do_examine (d->format, d->exp->gdbarch, addr);
 	}
-      if (ex.reason < 0)
-	fprintf_filtered (gdb_stdout, _("<error: %s>\n"), ex.message);
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  fprintf_filtered (gdb_stdout, _("<error: %s>\n"), ex.message);
+	}
+      END_CATCH
     }
   else
     {
       struct value_print_options opts;
-      volatile struct gdb_exception ex;
 
       annotate_display_format ();
 
@@ -1791,15 +1792,19 @@ do_one_display (struct display *d)
       get_formatted_print_options (&opts, d->format.format);
       opts.raw = d->format.raw;
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
         {
 	  struct value *val;
 
 	  val = evaluate_expression (d->exp);
 	  print_formatted (val, d->format.size, &opts, gdb_stdout);
 	}
-      if (ex.reason < 0)
-	fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	}
+      END_CATCH
+
       printf_filtered ("\n");
     }
 
@@ -1975,13 +1980,12 @@ print_variable_and_value (const char *name, struct symbol *var,
 			  struct frame_info *frame,
 			  struct ui_file *stream, int indent)
 {
-  volatile struct gdb_exception except;
 
   if (!name)
     name = SYMBOL_PRINT_NAME (var);
 
   fprintf_filtered (stream, "%s%s = ", n_spaces (2 * indent), name);
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  TRY
     {
       struct value *val;
       struct value_print_options opts;
@@ -1995,9 +1999,13 @@ print_variable_and_value (const char *name, struct symbol *var,
 	 function.  */
       frame = NULL;
     }
-  if (except.reason < 0)
-    fprintf_filtered(stream, "<error reading variable %s (%s)>", name,
-		     except.message);
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      fprintf_filtered(stream, "<error reading variable %s (%s)>", name,
+		       except.message);
+    }
+  END_CATCH
+
   fprintf_filtered (stream, "\n");
 }
 

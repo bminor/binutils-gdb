@@ -1,5 +1,5 @@
 /* Output generating routines for GDB CLI.
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
    This file is part of GDB.
@@ -47,5 +47,7 @@ extern void cli_out_data_ctor (struct cli_ui_out_data *data,
 
 extern struct ui_file *cli_out_set_stream (struct ui_out *uiout,
 					   struct ui_file *stream);
+
+extern void cli_display_match_list (char **matches, int len, int max);
 
 #endif

@@ -1,3 +1,4 @@
+. ${srcdir}/emulparams/extern_protected_data.sh
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-i386"
 NO_RELA_RELOCS=yes

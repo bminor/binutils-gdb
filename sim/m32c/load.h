@@ -1,6 +1,6 @@
 /* load.h --- interface to loading object files into the M32C simulator.
 
-Copyright (C) 2005-2014 Free Software Foundation, Inc.
+Copyright (C) 2005-2015 Free Software Foundation, Inc.
 Contributed by Red Hat, Inc.
 
 This file is part of the GNU simulators.
@@ -23,5 +23,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 extern int default_machine;
 
-void m32c_set_mach (int mach);
+void m32c_set_mach (unsigned long mach);
 void m32c_load (bfd *);

@@ -1,3 +1,48 @@
+2015-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* mkstemps.c: #include <time.h> if HAVE_TIME_H is defined
+	but not HAVE_SYS_TIME_H.
+
+2015-04-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* setenv.c <environ>: Declare only if not a macro.
+
+2015-01-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* strerror.c <sys_nerr, sys_errlist>: Declare only if they aren't
+	macros.
+
+2014-12-24  Uros Bizjak  <ubizjak@gmail.com>
+	    Ben Elliston  <bje@au.ibm.com>
+	    Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+
+	* xasprintf.c: New file.
+	* Makefile.in (CFILES): Add xasprintf.c.
+	(REQUIRED_OFILES): Add xasprintf.$(objext).
+	(xasprintf.$(objext)): New target.
+	* functions.texi: Regenerate.
+
+2014-12-11  Uros Bizjak  <ubizjak@gmail.com>
+            Ben Elliston  <bje@au.ibm.com>
+            Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+
+	* xvasprintf.c: New file.
+	* vprintf-support.h: Likewise.
+	* vprintf-support.c: Likewise.
+	* Makefile.in (CFILES): Add vprintf-support.c, xvasprintf.c.
+	(REQUIRED_OFILES): Add vprintf-support.$(objext), xvasprintf.$(objext).
+	(vprintf-support.$(objext), xvasprintf.$(objext)): New targets.
+	(vasprintf.$(objext)): Depend on $(srcdir)/vprintf-support.h.
+	* functions.texi: Regenerate.
+	* vasprintf.c (int_vasprintf): Use libiberty_vprintf_buffer_size.
+
+2014-11-22  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR other/63694
+	* configure.ac: Check for strtol, strtoul, strtoll and strtoull
+	declarations.
+	* configure: Regenerated.
+
 2014-11-12  Kirill Yukhin  <kirill.yukhin@intel.com>
 
 	* testsuite/test-strtol.c (run_tests): Cast strtol return to

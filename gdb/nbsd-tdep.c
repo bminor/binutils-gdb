@@ -1,6 +1,6 @@
 /* Common target-dependent code for NetBSD systems.
 
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
   
@@ -45,5 +45,5 @@ nbsd_pc_in_sigtramp (CORE_ADDR pc, const char *func_name)
      have function names which begin with "__sigtramp".  */
 
   return (func_name != NULL
-	  && strncmp (func_name, "__sigtramp", 10) == 0);
+	  && startswith (func_name, "__sigtramp"));
 }

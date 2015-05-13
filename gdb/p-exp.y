@@ -1,5 +1,5 @@
 /* YACC parser for Pascal expressions, for GDB.
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1103,7 +1103,7 @@ pop_current_type (void)
 
 struct token
 {
-  char *operator;
+  char *oper;
   int token;
   enum exp_opcode opcode;
 };
@@ -1173,8 +1173,8 @@ yylex (void)
   /* See if it is a special token of length 3.  */
   if (explen > 2)
     for (i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
-      if (strncasecmp (tokstart, tokentab3[i].operator, 3) == 0
-          && (!isalpha (tokentab3[i].operator[0]) || explen == 3
+      if (strncasecmp (tokstart, tokentab3[i].oper, 3) == 0
+          && (!isalpha (tokentab3[i].oper[0]) || explen == 3
               || (!isalpha (tokstart[3])
 		  && !isdigit (tokstart[3]) && tokstart[3] != '_')))
         {
@@ -1186,8 +1186,8 @@ yylex (void)
   /* See if it is a special token of length 2.  */
   if (explen > 1)
   for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
-      if (strncasecmp (tokstart, tokentab2[i].operator, 2) == 0
-          && (!isalpha (tokentab2[i].operator[0]) || explen == 2
+      if (strncasecmp (tokstart, tokentab2[i].oper, 2) == 0
+          && (!isalpha (tokentab2[i].oper[0]) || explen == 2
               || (!isalpha (tokstart[2])
 		  && !isdigit (tokstart[2]) && tokstart[2] != '_')))
         {
@@ -1551,7 +1551,7 @@ yylex (void)
     int is_a_field = 0;
     int hextype;
 
-
+    is_a_field_of_this.type = NULL;
     if (search_field && current_type)
       is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
     if (is_a_field)
@@ -1598,15 +1598,20 @@ yylex (void)
 			      VAR_DOMAIN, &is_a_field_of_this);
       }
 
-    if (is_a_field)
+    if (is_a_field || (is_a_field_of_this.type != NULL))
       {
 	tempbuf = (char *) realloc (tempbuf, namelen + 1);
 	strncpy (tempbuf, tmp, namelen);
 	tempbuf [namelen] = 0;
 	yylval.sval.ptr = tempbuf;
 	yylval.sval.length = namelen;
+	yylval.ssym.sym = NULL;
 	free (uptokstart);
-	return FIELDNAME;
+        yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
+	if (is_a_field)
+	  return FIELDNAME;
+	else
+	  return NAME;
       }
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
@@ -1739,7 +1744,6 @@ yylex (void)
     free(uptokstart);
     /* Any other kind of symbol.  */
     yylval.ssym.sym = sym;
-    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
     return NAME;
   }
 }

@@ -55,6 +55,4 @@ Disassembly of section .text:
  .*:	f7ff ffc. 	bl	.* <lib_func2@plt>
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
+#...

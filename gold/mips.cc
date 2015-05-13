@@ -1,6 +1,6 @@
 // mips.cc -- mips target support for gold.
 
-// Copyright (C) 2011-2014 Free Software Foundation, Inc.
+// Copyright (C) 2011-2015 Free Software Foundation, Inc.
 // Written by Sasa Stankovic <sasa.stankovic@imgtec.com>
 //        and Aleksandar Simeonov <aleksandar.simeonov@rt-rk.com>.
 // This file contains borrowed and adapted code from bfd/elfxx-mips.c.
@@ -3761,11 +3761,11 @@ struct reloc_high
 
   reloc_high(unsigned char* _view, const Mips_relobj<size, big_endian>* _object,
              const Symbol_value<size>* _psymval, Mips_address _addend,
-             unsigned int _r_type, bool _extract_addend,
+             unsigned int _r_type, unsigned int _r_sym, bool _extract_addend,
              Mips_address _address = 0, bool _gp_disp = false)
     : view(_view), object(_object), psymval(_psymval), addend(_addend),
-      r_type(_r_type), extract_addend(_extract_addend), address(_address),
-      gp_disp(_gp_disp)
+      r_type(_r_type), r_sym(_r_sym), extract_addend(_extract_addend),
+      address(_address), gp_disp(_gp_disp)
   { }
 
   unsigned char* view;
@@ -3773,6 +3773,7 @@ struct reloc_high
   const Symbol_value<size>* psymval;
   Mips_address addend;
   unsigned int r_type;
+  unsigned int r_sym;
   bool extract_addend;
   Mips_address address;
   bool gp_disp;
@@ -4266,11 +4267,12 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
   relhi16(unsigned char* view, const Mips_relobj<size, big_endian>* object,
           const Symbol_value<size>* psymval, Mips_address addend,
           Mips_address address, bool gp_disp, unsigned int r_type,
-          bool extract_addend)
+          unsigned int r_sym, bool extract_addend)
   {
     // Record the relocation.  It will be resolved when we find lo16 part.
     hi16_relocs.push_back(reloc_high<size, big_endian>(view, object, psymval,
-                          addend, r_type, extract_addend, address, gp_disp));
+                          addend, r_type, r_sym, extract_addend, address,
+                          gp_disp));
     return This::STATUS_OKAY;
   }
 
@@ -4331,11 +4333,11 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
   relgot16_local(unsigned char* view,
                  const Mips_relobj<size, big_endian>* object,
                  const Symbol_value<size>* psymval, Mips_address addend_a,
-                 bool extract_addend, unsigned int r_type)
+                 bool extract_addend, unsigned int r_type, unsigned int r_sym)
   {
     // Record the relocation.  It will be resolved when we find lo16 part.
     got16_relocs.push_back(reloc_high<size, big_endian>(view, object, psymval,
-                           addend_a, r_type, extract_addend));
+                           addend_a, r_type, r_sym, extract_addend));
     return This::STATUS_OKAY;
   }
 
@@ -4377,7 +4379,7 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
           const Mips_relobj<size, big_endian>* object,
           const Symbol_value<size>* psymval, Mips_address addend_a,
           bool extract_addend, Mips_address address, bool is_gp_disp,
-          unsigned int r_type)
+          unsigned int r_type, unsigned int r_sym)
   {
     mips_reloc_unshuffle(view, r_type, false);
     Valtype32* wv = reinterpret_cast<Valtype32*>(view);
@@ -4392,7 +4394,8 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
     while (it != hi16_relocs.end())
       {
         reloc_high<size, big_endian> hi16 = *it;
-        if (hi16.psymval->value(hi16.object, 0) == psymval->value(object, 0))
+        if (hi16.r_sym == r_sym
+            && is_matching_lo16_reloc(hi16.r_type, r_type))
           {
             if (do_relhi16(hi16.view, hi16.object, hi16.psymval, hi16.addend,
                            hi16.address, hi16.gp_disp, hi16.r_type,
@@ -4411,7 +4414,8 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
     while (it2 != got16_relocs.end())
       {
         reloc_high<size, big_endian> got16 = *it2;
-        if (got16.psymval->value(got16.object, 0) == psymval->value(object, 0))
+        if (got16.r_sym == r_sym
+            && is_matching_lo16_reloc(got16.r_type, r_type))
           {
             if (do_relgot16_local(got16.view, got16.object, got16.psymval,
                                   got16.addend, got16.r_type,
@@ -9908,7 +9912,7 @@ Target_mips<size, big_endian>::Relocate::relocate(
     case elfcpp::R_MIPS16_HI16:
     case elfcpp::R_MICROMIPS_HI16:
       reloc_status = Reloc_funcs::relhi16(view, object, psymval, r_addend,
-                                          address, gp_disp, r_type,
+                                          address, gp_disp, r_type, r_sym,
                                           extract_addend);
       break;
 
@@ -9918,7 +9922,7 @@ Target_mips<size, big_endian>::Relocate::relocate(
     case elfcpp::R_MICROMIPS_HI0_LO16:
       reloc_status = Reloc_funcs::rello16(target, view, object, psymval,
                                           r_addend, extract_addend, address,
-                                          gp_disp, r_type);
+                                          gp_disp, r_type, r_sym);
       break;
 
     case elfcpp::R_MIPS_LITERAL:
@@ -10033,7 +10037,7 @@ Target_mips<size, big_endian>::Relocate::relocate(
       else
         reloc_status = Reloc_funcs::relgot16_local(view, object, psymval,
                                                    r_addend, extract_addend,
-                                                   r_type);
+                                                   r_type, r_sym);
       update_got_entry = changed_symbol_value;
       break;
 

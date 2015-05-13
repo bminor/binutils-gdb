@@ -1,5 +1,5 @@
 /* This module handles expression trees.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    This file is part of the GNU Binutils.
@@ -575,7 +575,6 @@ fold_binary (etree_type *tree)
 		  else if (expld.dataseg.phase == exp_dataseg_none)
 		    {
 		      expld.dataseg.phase = exp_dataseg_align_seen;
-		      expld.dataseg.min_base = expld.dot;
 		      expld.dataseg.base = expld.result.value;
 		      expld.dataseg.pagesize = commonpage;
 		      expld.dataseg.maxpagesize = maxpage;
@@ -588,7 +587,10 @@ fold_binary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_RELRO_END:
+	  /* Operands swapped!  DATA_SEGMENT_RELRO_END(offset,exp)
+	     has offset in expld.result and exp in lhs.  */
 	  expld.dataseg.relro = exp_dataseg_relro_end;
+	  expld.dataseg.relro_offset = expld.result.value;
 	  if (expld.phase == lang_first_phase_enum
 	      || expld.section != bfd_abs_section_ptr)
 	    expld.result.valid_p = FALSE;
@@ -828,15 +830,18 @@ fold_name (etree_type *tree)
 
     case LENGTH:
       {
-        lang_memory_region_type *mem;
+      if (expld.phase != lang_first_phase_enum)
+        {
+          lang_memory_region_type *mem;
 
-        mem = lang_memory_region_lookup (tree->name.name, FALSE);
-        if (mem != NULL)
-          new_number (mem->length);
-        else
-          einfo (_("%F%S: undefined MEMORY region `%s'"
-		   " referenced in expression\n"),
-		 tree, tree->name.name);
+          mem = lang_memory_region_lookup (tree->name.name, FALSE);
+          if (mem != NULL)
+            new_number (mem->length);
+          else
+            einfo (_("%F%S: undefined MEMORY region `%s'"
+             " referenced in expression\n"),
+           tree, tree->name.name);
+        }
       }
       break;
 

@@ -1,4 +1,4 @@
-#   Copyright (C) 1994-2014 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -954,12 +954,20 @@ if [is_elf_format] {
     run_dump_test "strip-8"
     run_dump_test "strip-9"
     # Non-EABI ARM targets will set OSABI to ARM
+    # The V850 sets the OSABI to UNIX - System V
     if { ![istarget "*-*-hpux*"]
 	 && ![istarget "msp*-*-*"]
 	 && ![istarget "visium-*-*"]
+	 && ![istarget "v850*-*-*"]
          && !([istarget "arm*-*-*"] && ![istarget "arm-*-*eabi*"])} {
 	run_dump_test "strip-10"
     }
+    set extra_strip11 ""
+    if { [istarget "sh64*-*"] } {
+	# pr17755 testcase
+	set extra_strip11 { { "as" "--isa=SHmedia --abi=64" } }
+    }
+    run_dump_test "strip-11" $extra_strip11
 
     if { [istarget "i*86-*"] || [istarget "x86_64-*-*"] } {
 	# Check to make sure we don't strip a symbol named in relocations.

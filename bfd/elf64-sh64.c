@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -105,7 +105,7 @@ static reloc_howto_type sh_elf64_howto_table[] = {
   /* No relocation.  */
   HOWTO (R_SH_NONE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2259,30 +2259,9 @@ sh_elf64_set_private_flags (bfd *abfd, flagword flags)
 static bfd_boolean
 sh_elf64_copy_private_data_internal (bfd *ibfd, bfd *obfd)
 {
-  Elf_Internal_Shdr **o_shdrp;
-  asection *isec;
-  asection *osec;
-
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
-
-  o_shdrp = elf_elfsections (obfd);
-  for (osec = obfd->sections; osec; osec = osec->next)
-    {
-      int oIndex = ((struct bfd_elf_section_data *) elf_section_data (osec))->this_idx;
-      for (isec = ibfd->sections; isec; isec = isec->next)
-	{
-	  if (strcmp (osec->name, isec->name) == 0)
-	    {
-	      /* Note that we're not disallowing mixing data and code.  */
-	      if ((elf_section_data (isec)->this_hdr.sh_flags
-		   & SHF_SH5_ISA32) != 0)
-		o_shdrp[oIndex]->sh_flags |= SHF_SH5_ISA32;
-	      break;
-	    }
-	}
-    }
 
   /* Copy object attributes.  */
   _bfd_elf_copy_private_bfd_data (ibfd, obfd);

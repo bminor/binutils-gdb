@@ -1,6 +1,6 @@
 /* Native debugging support for GNU/Linux (LWP layer).
 
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "nat/linux-nat.h"
 #include "target.h"
-
 #include <signal.h>
 
 struct arch_lwp_info;
@@ -32,6 +32,10 @@ struct lwp_info
   /* The process id of the LWP.  This is a combination of the LWP id
      and overall process id.  */
   ptid_t ptid;
+
+  /* If this flag is set, we need to set the event request flags the
+     next time we see this LWP stop.  */
+  int must_set_ptrace_flags;
 
   /* Non-zero if this LWP is cloned.  In this context "cloned" means
      that the LWP is reporting to its parent using a signal other than
@@ -59,12 +63,19 @@ struct lwp_info
   /* If non-zero, a pending wait status.  */
   int status;
 
+  /* When 'stopped' is set, this is where the lwp last stopped, with
+     decr_pc_after_break already accounted for.  If the LWP is
+     running, and stepping, this is the address at which the lwp was
+     resumed (that is, it's the previous stop PC).  If the LWP is
+     running and not stepping, this is 0.  */
+  CORE_ADDR stop_pc;
+
   /* Non-zero if we were stepping this LWP.  */
   int step;
 
-  /* STOPPED_BY_WATCHPOINT is non-zero if this LWP stopped with a data
-     watchpoint trap.  */
-  int stopped_by_watchpoint;
+  /* The reason the LWP last stopped, if we need to track it
+     (breakpoint, watchpoint, etc.)  */
+  enum target_stop_reason stop_reason;
 
   /* On architectures where it is possible to know the data address of
      a triggered watchpoint, STOPPED_DATA_ADDRESS_P is non-zero, and
@@ -113,7 +124,12 @@ extern struct lwp_info *lwp_list;
 /* Attempt to initialize libthread_db.  */
 void check_for_thread_db (void);
 
-int thread_db_attach_lwp (ptid_t ptid);
+/* Called from the LWP layer to inform the thread_db layer that PARENT
+   spawned CHILD.  Both LWPs are currently stopped.  This function
+   does whatever is required to have the child LWP under the
+   thread_db's control --- e.g., enabling event reporting.  Returns
+   true on success, false if the process isn't using libpthread.  */
+extern int thread_db_notice_clone (ptid_t parent, ptid_t child);
 
 /* Return the set of signals used by the threads library.  */
 extern void lin_thread_get_thread_signals (sigset_t *mask);
@@ -124,13 +140,16 @@ void linux_proc_pending_signals (int pid, sigset_t *pending,
 
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
-extern void linux_stop_lwp (struct lwp_info *lwp);
+/* For linux_stop_lwp see nat/linux-nat.h.  */
 
-/* Iterator function for lin-lwp's lwp list.  */
-struct lwp_info *iterate_over_lwps (ptid_t filter,
-				    int (*callback) (struct lwp_info *,
-						     void *), 
-				    void *data);
+/* Stop all LWPs, synchronously.  (Any events that trigger while LWPs
+   are being stopped are left pending.)  */
+extern void linux_stop_and_wait_all_lwps (void);
+
+/* Set resumed LWPs running again, as they were before being stopped
+   with linux_stop_and_wait_all_lwps.  (LWPS with pending events are
+   left stopped.)  */
+extern void linux_unstop_all_lwps (void);
 
 /* Create a prototype generic GNU/Linux target.  The client can
    override it with local methods.  */

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2014 Free Software Foundation, Inc.
+# Copyright (C) 2013-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -145,7 +145,12 @@ class ErrorFilter():
         gdb.frame_filters [self.name] = self
 
     def filter(self, frame_iter):
-        return itertools.imap(ErrorInName, frame_iter)
+        # Python 3.x moved the itertools.imap functionality to map(),
+        # so check if it is available.
+        if hasattr(itertools, "imap"):
+            return itertools.imap (ErrorInName, frame_iter)
+        else:
+            return map(ErrorInName, frame_iter)
 
 FrameFilter()
 FrameElider()

@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/mips.
 
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
 
@@ -103,7 +103,9 @@ mipsnbsd_supply_gregset (const struct regset *regset,
 static const struct regset mipsnbsd_gregset =
 {
   NULL,
-  mipsnbsd_supply_gregset
+  mipsnbsd_supply_gregset,
+  NULL,
+  REGSET_VARIABLE_SIZE
 };
 
 static const struct regset mipsnbsd_fpregset =

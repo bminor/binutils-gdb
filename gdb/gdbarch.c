@@ -3,7 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2014 Free Software Foundation, Inc.
+   Copyright (C) 1998-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -303,6 +303,10 @@ struct gdbarch
   const char * stap_gdb_register_suffix;
   gdbarch_stap_is_single_operand_ftype *stap_is_single_operand;
   gdbarch_stap_parse_special_token_ftype *stap_parse_special_token;
+  gdbarch_dtrace_parse_probe_argument_ftype *dtrace_parse_probe_argument;
+  gdbarch_dtrace_probe_is_enabled_ftype *dtrace_probe_is_enabled;
+  gdbarch_dtrace_enable_probe_ftype *dtrace_enable_probe;
+  gdbarch_dtrace_disable_probe_ftype *dtrace_disable_probe;
   int has_global_solist;
   int has_global_breakpoints;
   gdbarch_has_shared_address_space_ftype *has_shared_address_space;
@@ -632,6 +636,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of stap_gdb_register_suffix, invalid_p == 0 */
   /* Skip verify of stap_is_single_operand, has predicate.  */
   /* Skip verify of stap_parse_special_token, has predicate.  */
+  /* Skip verify of dtrace_parse_probe_argument, has predicate.  */
+  /* Skip verify of dtrace_probe_is_enabled, has predicate.  */
+  /* Skip verify of dtrace_enable_probe, has predicate.  */
+  /* Skip verify of dtrace_disable_probe, has predicate.  */
   /* Skip verify of has_global_solist, invalid_p == 0 */
   /* Skip verify of has_global_breakpoints, invalid_p == 0 */
   /* Skip verify of has_shared_address_space, invalid_p == 0 */
@@ -846,6 +854,30 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: double_format = %s\n",
                       pformat (gdbarch->double_format));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_dtrace_disable_probe_p() = %d\n",
+                      gdbarch_dtrace_disable_probe_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: dtrace_disable_probe = <%s>\n",
+                      host_address_to_string (gdbarch->dtrace_disable_probe));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_dtrace_enable_probe_p() = %d\n",
+                      gdbarch_dtrace_enable_probe_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: dtrace_enable_probe = <%s>\n",
+                      host_address_to_string (gdbarch->dtrace_enable_probe));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_dtrace_parse_probe_argument_p() = %d\n",
+                      gdbarch_dtrace_parse_probe_argument_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: dtrace_parse_probe_argument = <%s>\n",
+                      host_address_to_string (gdbarch->dtrace_parse_probe_argument));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_dtrace_probe_is_enabled_p() = %d\n",
+                      gdbarch_dtrace_probe_is_enabled_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: dtrace_probe_is_enabled = <%s>\n",
+                      host_address_to_string (gdbarch->dtrace_probe_is_enabled));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_dummy_id_p() = %d\n",
                       gdbarch_dummy_id_p (gdbarch));
@@ -4203,6 +4235,102 @@ set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_dtrace_parse_probe_argument_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->dtrace_parse_probe_argument != NULL;
+}
+
+void
+gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, struct parser_state *pstate, int narg)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->dtrace_parse_probe_argument != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dtrace_parse_probe_argument called\n");
+  gdbarch->dtrace_parse_probe_argument (gdbarch, pstate, narg);
+}
+
+void
+set_gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
+                                         gdbarch_dtrace_parse_probe_argument_ftype dtrace_parse_probe_argument)
+{
+  gdbarch->dtrace_parse_probe_argument = dtrace_parse_probe_argument;
+}
+
+int
+gdbarch_dtrace_probe_is_enabled_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->dtrace_probe_is_enabled != NULL;
+}
+
+int
+gdbarch_dtrace_probe_is_enabled (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->dtrace_probe_is_enabled != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dtrace_probe_is_enabled called\n");
+  return gdbarch->dtrace_probe_is_enabled (gdbarch, addr);
+}
+
+void
+set_gdbarch_dtrace_probe_is_enabled (struct gdbarch *gdbarch,
+                                     gdbarch_dtrace_probe_is_enabled_ftype dtrace_probe_is_enabled)
+{
+  gdbarch->dtrace_probe_is_enabled = dtrace_probe_is_enabled;
+}
+
+int
+gdbarch_dtrace_enable_probe_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->dtrace_enable_probe != NULL;
+}
+
+void
+gdbarch_dtrace_enable_probe (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->dtrace_enable_probe != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dtrace_enable_probe called\n");
+  gdbarch->dtrace_enable_probe (gdbarch, addr);
+}
+
+void
+set_gdbarch_dtrace_enable_probe (struct gdbarch *gdbarch,
+                                 gdbarch_dtrace_enable_probe_ftype dtrace_enable_probe)
+{
+  gdbarch->dtrace_enable_probe = dtrace_enable_probe;
+}
+
+int
+gdbarch_dtrace_disable_probe_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->dtrace_disable_probe != NULL;
+}
+
+void
+gdbarch_dtrace_disable_probe (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->dtrace_disable_probe != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dtrace_disable_probe called\n");
+  gdbarch->dtrace_disable_probe (gdbarch, addr);
+}
+
+void
+set_gdbarch_dtrace_disable_probe (struct gdbarch *gdbarch,
+                                  gdbarch_dtrace_disable_probe_ftype dtrace_disable_probe)
+{
+  gdbarch->dtrace_disable_probe = dtrace_disable_probe;
+}
+
+int
 gdbarch_has_global_solist (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -4901,7 +5029,7 @@ gdbarch_find_by_info (struct gdbarch_info info)
   if (new_gdbarch->initialized_p)
     {
       struct gdbarch_list **list;
-      struct gdbarch_list *this;
+      struct gdbarch_list *self;
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
 			    "Previous architecture %s (%s) selected\n",
@@ -4913,12 +5041,12 @@ gdbarch_find_by_info (struct gdbarch_info info)
 	   list = &(*list)->next);
       /* It had better be in the list of architectures.  */
       gdb_assert ((*list) != NULL && (*list)->gdbarch == new_gdbarch);
-      /* Unlink THIS.  */
-      this = (*list);
-      (*list) = this->next;
-      /* Insert THIS at the front.  */
-      this->next = rego->arches;
-      rego->arches = this;
+      /* Unlink SELF.  */
+      self = (*list);
+      (*list) = self->next;
+      /* Insert SELF at the front.  */
+      self->next = rego->arches;
+      rego->arches = self;
       /* Return it.  */
       return new_gdbarch;
     }
@@ -4933,10 +5061,10 @@ gdbarch_find_by_info (struct gdbarch_info info)
   /* Insert the new architecture into the front of the architecture
      list (keep the list sorted Most Recently Used).  */
   {
-    struct gdbarch_list *this = XNEW (struct gdbarch_list);
-    this->next = rego->arches;
-    this->gdbarch = new_gdbarch;
-    rego->arches = this;
+    struct gdbarch_list *self = XNEW (struct gdbarch_list);
+    self->next = rego->arches;
+    self->gdbarch = new_gdbarch;
+    rego->arches = self;
   }    
 
   /* Check that the newly installed architecture is valid.  Plug in

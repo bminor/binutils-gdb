@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2014 Free Software Foundation, Inc.
+   Copyright 2014-2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -76,12 +76,13 @@ main (void)
   signal (SIGUSR1, handler_sigusr1);
   signal (SIGUSR2, handler_sigusr2);
 
-  pthread_barrier_init (&barrier, NULL, 3);
-
   for (i = 0; i < 2; i++)
-    pthread_create (&child_thread[i], NULL, thread_function, NULL);
-
-  pthread_barrier_wait (&barrier);
+    {
+      pthread_barrier_init (&barrier, NULL, 2);
+      pthread_create (&child_thread[i], NULL, thread_function, NULL);
+      pthread_barrier_wait (&barrier);
+      pthread_barrier_destroy (&barrier);
+    }
 
   all_threads_started ();
 

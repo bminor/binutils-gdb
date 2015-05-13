@@ -1,5 +1,5 @@
 /* cond.c - conditional assembly pseudo-ops, and .include
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -128,7 +128,7 @@ s_if (int arg)
   struct conditional_frame cframe;
   int t;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -261,7 +261,7 @@ void
 s_ifc (int arg)
 {
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
   char *s1, *s2;
   int len1, len2;
   int res;

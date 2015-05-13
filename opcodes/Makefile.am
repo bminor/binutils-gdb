@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2015 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -135,6 +135,8 @@ TARGET_LIBOPCODES_CFILES = \
 	frv-dis.c \
 	frv-ibld.c \
 	frv-opc.c \
+	ft32-dis.c \
+	ft32-opc.c \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \

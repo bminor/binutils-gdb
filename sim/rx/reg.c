@@ -1,6 +1,6 @@
 /* reg.c --- register set model for RX simulator.
 
-   Copyright (C) 2005-2014 Free Software Foundation, Inc.
+   Copyright (C) 2005-2015 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -253,7 +253,7 @@ put_reg (int id, unsigned int v)
       }
 
     default:
-      if (id >= 1 || id <= 15)
+      if (id >= 1 && id <= 15)
 	regs.r[id] = v;
       else
 	abort ();

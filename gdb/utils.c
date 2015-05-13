@@ -1,6 +1,6 @@
 /* General utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1198,12 +1198,11 @@ compile_rx_or_error (regex_t *pattern, const char *rx, const char *message)
 static int ATTRIBUTE_PRINTF (1, 0)
 defaulted_query (const char *ctlstr, const char defchar, va_list args)
 {
-  int answer;
   int ans2;
   int retval;
   int def_value;
   char def_answer, not_def_answer;
-  char *y_string, *n_string, *question;
+  char *y_string, *n_string, *question, *prompt;
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
   struct timeval prompt_started, prompt_ended, prompt_delta;
@@ -1263,62 +1262,31 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   /* Format the question outside of the loop, to avoid reusing args.  */
   question = xstrvprintf (ctlstr, args);
+  prompt = xstrprintf (_("%s%s(%s or %s) %s"),
+		      annotation_level > 1 ? "\n\032\032pre-query\n" : "",
+		      question, y_string, n_string,
+		      annotation_level > 1 ? "\n\032\032query\n" : "");
+  xfree (question);
 
   /* Used for calculating time spend waiting for user.  */
   gettimeofday (&prompt_started, NULL);
 
   while (1)
     {
-      wrap_here ("");		/* Flush any buffered output.  */
+      char *response, answer;
+
       gdb_flush (gdb_stdout);
+      response = gdb_readline_wrapper (prompt);
 
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032pre-query\n"));
-
-      fputs_filtered (question, gdb_stdout);
-      printf_filtered (_("(%s or %s) "), y_string, n_string);
-
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032query\n"));
-
-      wrap_here ("");
-      gdb_flush (gdb_stdout);
-
-      answer = fgetc (stdin);
-
-      /* We expect fgetc to block until a character is read.  But
-         this may not be the case if the terminal was opened with
-         the NONBLOCK flag.  In that case, if there is nothing to
-         read on stdin, fgetc returns EOF, but also sets the error
-         condition flag on stdin and errno to EAGAIN.  With a true
-         EOF, stdin's error condition flag is not set.
-
-         A situation where this behavior was observed is a pseudo
-         terminal on AIX.  */
-      while (answer == EOF && ferror (stdin) && errno == EAGAIN)
-        {
-          /* Not a real EOF.  Wait a little while and try again until
-             we read something.  */
-          clearerr (stdin);
-          gdb_usleep (10000);
-          answer = fgetc (stdin);
-        }
-
-      clearerr (stdin);		/* in case of C-d */
-      if (answer == EOF)	/* C-d */
+      if (response == NULL)	/* C-d  */
 	{
 	  printf_filtered ("EOF [assumed %c]\n", def_answer);
 	  retval = def_value;
 	  break;
 	}
-      /* Eat rest of input line, to EOF or newline.  */
-      if (answer != '\n')
-	do
-	  {
-	    ans2 = fgetc (stdin);
-	    clearerr (stdin);
-	  }
-	while (ans2 != EOF && ans2 != '\n' && ans2 != '\r');
+
+      answer = response[0];
+      xfree (response);
 
       if (answer >= 'a')
 	answer -= 040;
@@ -1333,8 +1301,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
          specify the required input or have it default by entering
          nothing.  */
       if (answer == def_answer
-	  || (defchar != '\0' &&
-	      (answer == '\n' || answer == '\r' || answer == EOF)))
+	  || (defchar != '\0' && answer == '\0'))
 	{
 	  retval = def_value;
 	  break;
@@ -1350,7 +1317,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   timeval_add (&prompt_for_continue_wait_time,
                &prompt_for_continue_wait_time, &prompt_delta);
 
-  xfree (question);
+  xfree (prompt);
   if (annotation_level > 1)
     printf_filtered (("\n\032\032post-query\n"));
   return retval;
@@ -1729,6 +1696,9 @@ init_page_info (void)
 #endif
     }
 
+  /* We handle SIGWINCH ourselves.  */
+  rl_catch_sigwinch = 0;
+
   set_screen_size ();
   set_width ();
 }
@@ -1826,6 +1796,18 @@ static void
 set_height_command (char *args, int from_tty, struct cmd_list_element *c)
 {
   set_screen_size ();
+}
+
+/* See utils.h.  */
+
+void
+set_screen_width_and_height (int width, int height)
+{
+  lines_per_page = height;
+  chars_per_line = width;
+
+  set_screen_size ();
+  set_width ();
 }
 
 /* Wait, so the user can read what's on the screen.  Prompt the user
@@ -2696,23 +2678,10 @@ subset_compare (char *string_to_compare, char *template_string)
   if (template_string != (char *) NULL && string_to_compare != (char *) NULL
       && strlen (string_to_compare) <= strlen (template_string))
     match =
-      (strncmp
-       (template_string, string_to_compare, strlen (string_to_compare)) == 0);
+      (startswith (template_string, string_to_compare));
   else
     match = 0;
   return match;
-}
-
-static void
-pagination_on_command (char *arg, int from_tty)
-{
-  pagination_enabled = 1;
-}
-
-static void
-pagination_off_command (char *arg, int from_tty)
-{
-  pagination_enabled = 0;
 }
 
 static void
@@ -2746,8 +2715,6 @@ Setting this to \"unlimited\" or zero causes GDB never pause during output."),
 			    show_lines_per_page,
 			    &setlist, &showlist);
 
-  init_page_info ();
-
   add_setshow_boolean_cmd ("pagination", class_support,
 			   &pagination_enabled, _("\
 Set state of GDB output pagination."), _("\
@@ -2758,14 +2725,6 @@ Turning pagination off is an alternative to \"set height unlimited\"."),
 			   NULL,
 			   show_pagination_enabled,
 			   &setlist, &showlist);
-
-  if (xdb_commands)
-    {
-      add_com ("am", class_support, pagination_on_command,
-	       _("Enable pagination"));
-      add_com ("sm", class_support, pagination_off_command,
-	       _("Disable pagination"));
-    }
 
   add_setshow_boolean_cmd ("sevenbit-strings", class_support,
 			   &sevenbit_strings, _("\
@@ -3019,23 +2978,6 @@ align_down (ULONGEST v, int n)
   /* Check that N is really a power of two.  */
   gdb_assert (n && (n & (n-1)) == 0);
   return (v & -n);
-}
-
-/* See utils.h.  */
-
-LONGEST
-gdb_sign_extend (LONGEST value, int bit)
-{
-  gdb_assert (bit >= 1 && bit <= 8 * sizeof (LONGEST));
-
-  if (((value >> (bit - 1)) & 1) != 0)
-    {
-      LONGEST signbit = ((LONGEST) 1) << (bit - 1);
-
-      value = (value ^ signbit) - signbit;
-    }
-
-  return value;
 }
 
 /* Allocation function for the libiberty hash table which uses an
@@ -3308,41 +3250,52 @@ make_bpstat_clear_actions_cleanup (void)
 int
 producer_is_gcc_ge_4 (const char *producer)
 {
-  const char *cs;
   int major, minor;
 
-  if (producer == NULL)
-    {
-      /* For unknown compilers expect their behavior is not compliant.  For GCC
-	 this case can also happen for -gdwarf-4 type units supported since
-	 gcc-4.5.  */
-
-      return -1;
-    }
-
-  /* Skip any identifier after "GNU " - such as "C++" or "Java".  */
-
-  if (strncmp (producer, "GNU ", strlen ("GNU ")) != 0)
-    {
-      /* For non-GCC compilers expect their behavior is not compliant.  */
-
-      return -1;
-    }
-  cs = &producer[strlen ("GNU ")];
-  while (*cs && !isdigit (*cs))
-    cs++;
-  if (sscanf (cs, "%d.%d", &major, &minor) != 2)
-    {
-      /* Not recognized as GCC.  */
-
-      return -1;
-    }
-
+  if (! producer_is_gcc (producer, &major, &minor))
+    return -1;
   if (major < 4)
     return -1;
   if (major > 4)
     return INT_MAX;
   return minor;
+}
+
+/* Returns nonzero if the given PRODUCER string is GCC and sets the MAJOR
+   and MINOR versions when not NULL.  Returns zero if the given PRODUCER
+   is NULL or it isn't GCC.  */
+
+int
+producer_is_gcc (const char *producer, int *major, int *minor)
+{
+  const char *cs;
+
+  if (producer != NULL && startswith (producer, "GNU "))
+    {
+      int maj, min;
+
+      if (major == NULL)
+	major = &maj;
+      if (minor == NULL)
+	minor = &min;
+
+      /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
+	 A full producer string might look like:
+	 "GNU C 4.7.2"
+	 "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."
+	 "GNU C++14 5.0.0 20150123 (experimental)"
+      */
+      cs = &producer[strlen ("GNU ")];
+      while (*cs && !isspace (*cs))
+        cs++;
+      if (*cs && isspace (*cs))
+        cs++;
+      if (sscanf (cs, "%d.%d", major, minor) == 2)
+	return 1;
+    }
+
+  /* Not recognized as GCC.  */
+  return 0;
 }
 
 /* Helper for make_cleanup_free_char_ptr_vec.  */

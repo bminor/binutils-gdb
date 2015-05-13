@@ -1,6 +1,6 @@
 /* Portable <curses.h>.
 
-   Copyright (C) 2004-2014 Free Software Foundation, Inc.
+   Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,10 +48,10 @@
 #include <term.h>
 #else
 /* On MinGW, a real termcap library is usually not present.  Stub versions
-   of the termcap functions will be built from windows-termcap.c.  Readline
+   of the termcap functions will be built from stub-termcap.c.  Readline
    provides its own extern declarations when there's no termcap.h; do the
    same here for the termcap functions used in GDB.  */
-extern int tgetnum (const char *);
+EXTERN_C int tgetnum (const char *);
 #endif
 
 /* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun.  */

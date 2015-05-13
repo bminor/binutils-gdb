@@ -1,5 +1,5 @@
 /* Support code for various pieces of CGEN simulators.
-   Copyright (C) 1996-2014 Free Software Foundation, Inc.
+   Copyright (C) 1996-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -434,5 +434,5 @@ cgen_rtx_error (SIM_CPU *cpu, const char * msg)
   sim_io_printf (sd, msg);
   sim_io_printf (sd, "\n");
 
-  sim_engine_halt (sd, cpu, NULL, CIA_GET (cpu), sim_stopped, SIM_SIGTRAP);
+  sim_engine_halt (sd, cpu, NULL, CPU_PC_GET (cpu), sim_stopped, SIM_SIGTRAP);
 }

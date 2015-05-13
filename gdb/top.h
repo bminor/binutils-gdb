@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -78,6 +78,8 @@ extern const char *source_file_name;
 extern int history_expansion_p;
 extern int server_command;
 extern char *lim_at_start;
+
+extern void gdb_add_history (const char *);
 
 extern void show_commands (char *args, int from_tty);
 

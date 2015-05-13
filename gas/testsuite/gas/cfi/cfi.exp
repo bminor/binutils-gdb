@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2014 Free Software Foundation, Inc.
+# Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,6 +49,10 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
 	set ASFLAGS "$ASFLAGS --32"
 	run_dump_test "cfi-i386"
 	set ASFLAGS "$old_ASFLAGS"
+    }
+
+    if { [is_elf_format] } then {
+	run_dump_test "cfi-label"
     }
 
     if { [is_pecoff_format] } then {

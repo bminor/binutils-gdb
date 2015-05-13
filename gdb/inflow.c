@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -79,6 +79,10 @@ struct terminal_info
    unimportant.  */
 static struct terminal_info our_terminal_info;
 
+/* Snapshot of our own tty state taken during initialization of GDB.
+   This is used as the initial tty state given to each new inferior.  */
+static serial_ttystate initial_gdb_ttystate;
+
 static struct terminal_info *get_inflow_inferior_data (struct inferior *);
 
 #ifdef PROCESS_GROUP_TYPE
@@ -156,6 +160,14 @@ show_interactive_mode (struct ui_file *file, int from_tty,
     fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
 }
 
+/* Set the initial tty state that is to be inherited by new inferiors.  */
+
+void
+set_initial_gdb_ttystate (void)
+{
+  initial_gdb_ttystate = serial_get_tty_state (stdin_serial);
+}
+
 /* Does GDB have a terminal (on stdin)?  */
 int
 gdb_has_a_terminal (void)
@@ -227,7 +239,7 @@ child_terminal_init_with_pgrp (int pgrp)
     {
       xfree (tinfo->ttystate);
       tinfo->ttystate = serial_copy_tty_state (stdin_serial,
-					       our_terminal_info.ttystate);
+					       initial_gdb_ttystate);
 
       /* Make sure that next time we call terminal_inferior (which will be
          before the program runs, as it needs to be), we install the new

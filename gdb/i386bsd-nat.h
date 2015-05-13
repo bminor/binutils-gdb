@@ -1,6 +1,6 @@
 /* Native-dependent code for modern i386 BSD's.
 
-   Copyright (C) 2004-2014 Free Software Foundation, Inc.
+   Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,9 @@
    with local methods.  */
 
 extern struct target_ops *i386bsd_target (void);
+
+/* Low level i386 XSAVE info.  */
+extern size_t i386bsd_xsave_len;
 
 /* low level i386 debug register functions used in i386fbsd-nat.c.  */
 

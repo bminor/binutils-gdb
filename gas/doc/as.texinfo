@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (C) 1991-2014 Free Software Foundation, Inc.
+@c  Copyright (C) 1991-2015 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -100,7 +100,7 @@
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2014 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2015 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -149,7 +149,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991-2014 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2015 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -627,7 +627,24 @@ Begin in alternate macro mode.
 @item --compress-debug-sections
 Compress DWARF debug sections using zlib.  The debug sections are renamed
 to begin with @samp{.zdebug}, and the resulting object file may not be
-compatible with older linkers and object file utilities.
+compatible with older linkers and object file utilities.  Note if compression
+would make a given section @emph{larger} then it is not compressed or renamed.
+
+@ifset ELF
+@cindex @samp{--compress-debug-sections=} option
+@item --compress-debug-sections=none
+@itemx --compress-debug-sections=zlib
+@itemx --compress-debug-sections=zlib-gnu
+@itemx --compress-debug-sections=zlib-gabi
+These options control how DWARF debug sections are compressed.
+@option{--compress-debug-sections=none} is equivalent to
+@option{--nocompress-debug-sections}.
+@option{--compress-debug-sections=zlib} and
+@option{--compress-debug-sections=zlib-gnu} are equivalent to
+@option{--compress-debug-sections}.
+@option{--compress-debug-sections=zlib-gabi} compresses
+DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+@end ifset
 
 @item --nocompress-debug-sections
 Do not compress DWARF debug sections.  This is the default.
@@ -1591,7 +1608,7 @@ Architecture (esa) or the z/Architecture mode (zarch).
 @item -march=@var{processor}
 Specify which s390 processor variant is the target, @samp{g6}, @samp{g6},
 @samp{z900}, @samp{z990}, @samp{z9-109}, @samp{z9-ec}, @samp{z10},
-@samp{z196}, or @samp{zEC12}.
+@samp{z196}, @samp{zEC12}, or @samp{z13}.
 @item -mregnames
 @itemx -mno-regnames
 Allow or disallow symbolic names for registers.
@@ -3637,6 +3654,9 @@ on the H8/300), and underscores.
 Case of letters is significant: @code{foo} is a different symbol name
 than @code{Foo}.
 
+Symbol names do not start with a digit.  An exception to this rule is made for
+Local Labels.  See below.
+
 Multibyte characters are supported.  To generate a symbol name containing
 multibyte characters enclose it within double quotes and use escape codes. cf
 @xref{Strings}.  Generating a multibyte symbol name from a label is not
@@ -3660,23 +3680,23 @@ On the HPPA local symbols begin with @samp{L$}.
 
 Local symbols are defined and used within the assembler, but they are
 normally not saved in object files.  Thus, they are not visible when debugging.
-You may use the @samp{-L} option (@pxref{L, ,Include Local Symbols:
-@option{-L}}) to retain the local symbols in the object files.
+You may use the @samp{-L} option (@pxref{L, ,Include Local Symbols})
+to retain the local symbols in the object files.
 
 @subheading Local Labels
 
 @cindex local labels
 @cindex temporary symbol names
 @cindex symbol names, temporary
-Local labels help compilers and programmers use names temporarily.
-They create symbols which are guaranteed to be unique over the entire scope of
-the input source code and which can be referred to by a simple notation.
-To define a local label, write a label of the form @samp{@b{N}:} (where @b{N}
-represents any positive integer).  To refer to the most recent previous
-definition of that label write @samp{@b{N}b}, using the same number as when
-you defined the label.  To refer to the next definition of a local label, write
-@samp{@b{N}f}---the @samp{b} stands for ``backwards'' and the @samp{f} stands
-for ``forwards''.
+Local labels are different from local symbols.  Local labels help compilers and
+programmers use names temporarily.  They create symbols which are guaranteed to
+be unique over the entire scope of the input source code and which can be
+referred to by a simple notation.  To define a local label, write a label of
+the form @samp{@b{N}:} (where @b{N} represents any positive integer).  To refer
+to the most recent previous definition of that label write @samp{@b{N}b}, using
+the same number as when you defined the label.  To refer to the next definition
+of a local label, write @samp{@b{N}f}---the @samp{b} stands for ``backwards''
+and the @samp{f} stands for ``forwards''.
 
 There is no restriction on how you can use these labels, and you can reuse them
 too.  So that it is possible to repeatedly define the same local label (using
@@ -3741,12 +3761,12 @@ the 44th @code{3:} may be named @code{.L3@kbd{C-B}44}.
 @subheading Dollar Local Labels
 @cindex dollar local symbols
 
-@code{@value{AS}} also supports an even more local form of local labels called
-dollar labels.  These labels go out of scope (i.e., they become undefined) as
-soon as a non-local label is defined.  Thus they remain valid for only a small
-region of the input source code.  Normal local labels, by contrast, remain in
-scope for the entire file, or until they are redefined by another occurrence of
-the same local label.
+On some targets @code{@value{AS}} also supports an even more local form of
+local labels called dollar labels.  These labels go out of scope (i.e., they
+become undefined) as soon as a non-local label is defined.  Thus they remain
+valid for only a small region of the input source code.  Normal local labels,
+by contrast, remain in scope for the entire file, or until they are redefined
+by another occurrence of the same local label.
 
 Dollar labels are defined in exactly the same way as ordinary local labels,
 except that they have a dollar sign suffix to their numeric value, e.g.,
@@ -4202,7 +4222,7 @@ Some machine configurations provide additional directives.
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Balign::                      @code{.balign @var{abs-expr} , @var{abs-expr}}
-* Bundle directives::           @code{.bundle_align_mode @var{abs-expr}}, @code{.bundle_lock}, @code{.bundle_unlock}
+* Bundle directives::           @code{.bundle_align_mode @var{abs-expr}}, etc
 * Byte::                        @code{.byte @var{expressions}}
 * CFI directives::		@code{.cfi_startproc [simple]}, @code{.cfi_endproc}, etc.
 * Comm::                        @code{.comm @var{symbol} , @var{length} }
@@ -4364,6 +4384,9 @@ Some machine configurations provide additional directives.
 * Weak::                        @code{.weak @var{names}}
 * Weakref::                     @code{.weakref @var{alias}, @var{symbol}}
 * Word::                        @code{.word @var{expressions}}
+@ifclear no-space-dir
+* Zero::                        @code{.zero @var{size}}
+@end ifclear
 * Deprecated::                  Deprecated Directives
 @end menu
 
@@ -4527,7 +4550,8 @@ the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
 
 @node Bundle directives
-@section @code{.bundle_align_mode @var{abs-expr}}
+@section Bundle directives
+@subsection @code{.bundle_align_mode @var{abs-expr}}
 @cindex @code{bundle_align_mode} directive
 @cindex bundle
 @cindex instruction bundle
@@ -4551,7 +4575,7 @@ end of that bundle is filled with no-op instructions so the instruction
 starts in the next bundle.  As a corollary, it's an error if any single
 instruction's encoding is longer than the bundle size.
 
-@section @code{.bundle_lock} and @code{.bundle_unlock}
+@subsection @code{.bundle_lock} and @code{.bundle_unlock}
 @cindex @code{bundle_lock} directive
 @cindex @code{bundle_unlock} directive
 The @code{.bundle_lock} and directive @code{.bundle_unlock} directives
@@ -4591,7 +4615,8 @@ same number of @code{.bundle_lock} and @code{.bundle_unlock} directives.
 Each expression is assembled into the next byte.
 
 @node CFI directives
-@section @code{.cfi_sections @var{section_list}}
+@section CFI directives
+@subsection @code{.cfi_sections @var{section_list}}
 @cindex @code{cfi_sections} directive
 @code{.cfi_sections} may be used to specify whether CFI directives
 should emit @code{.eh_frame} section and/or @code{.debug_frame} section.
@@ -4600,7 +4625,7 @@ if @var{section_list} is @code{.debug_frame}, @code{.debug_frame} is emitted.
 To emit both use @code{.eh_frame, .debug_frame}.  The default if this
 directive is not used is @code{.cfi_sections .eh_frame}.
 
-@section @code{.cfi_startproc [simple]}
+@subsection @code{.cfi_startproc [simple]}
 @cindex @code{cfi_startproc} directive
 @code{.cfi_startproc} is used at the beginning of each function that
 should have an entry in @code{.eh_frame}. It initializes some internal
@@ -4610,13 +4635,13 @@ data structures. Don't forget to close the function by
 Unless @code{.cfi_startproc} is used along with parameter @code{simple}
 it also emits some architecture dependent initial CFI instructions.
 
-@section @code{.cfi_endproc}
+@subsection @code{.cfi_endproc}
 @cindex @code{cfi_endproc} directive
 @code{.cfi_endproc} is used at the end of a function where it closes its
 unwind entry previously opened by
 @code{.cfi_startproc}, and emits it to @code{.eh_frame}.
 
-@section @code{.cfi_personality @var{encoding} [, @var{exp}]}
+@subsection @code{.cfi_personality @var{encoding} [, @var{exp}]}
 @code{.cfi_personality} defines personality routine and its encoding.
 @var{encoding} must be a constant determining how the personality
 should be encoded.  If it is 255 (@code{DW_EH_PE_omit}), second
@@ -4627,7 +4652,7 @@ can be loaded from, not the personality routine itself.
 The default after @code{.cfi_startproc} is @code{.cfi_personality 0xff},
 no personality routine.
 
-@section @code{.cfi_lsda @var{encoding} [, @var{exp}]}
+@subsection @code{.cfi_lsda @var{encoding} [, @var{exp}]}
 @code{.cfi_lsda} defines LSDA and its encoding.
 @var{encoding} must be a constant determining how the LSDA
 should be encoded.  If it is 255 (@code{DW_EH_PE_omit}), second
@@ -4635,73 +4660,73 @@ argument is not present, otherwise second argument should be a constant
 or a symbol name.  The default after @code{.cfi_startproc} is @code{.cfi_lsda 0xff},
 no LSDA.
 
-@section @code{.cfi_def_cfa @var{register}, @var{offset}}
+@subsection @code{.cfi_def_cfa @var{register}, @var{offset}}
 @code{.cfi_def_cfa} defines a rule for computing CFA as: @i{take
 address from @var{register} and add @var{offset} to it}.
 
-@section @code{.cfi_def_cfa_register @var{register}}
+@subsection @code{.cfi_def_cfa_register @var{register}}
 @code{.cfi_def_cfa_register} modifies a rule for computing CFA. From
 now on @var{register} will be used instead of the old one. Offset
 remains the same.
 
-@section @code{.cfi_def_cfa_offset @var{offset}}
+@subsection @code{.cfi_def_cfa_offset @var{offset}}
 @code{.cfi_def_cfa_offset} modifies a rule for computing CFA. Register
 remains the same, but @var{offset} is new. Note that it is the
 absolute offset that will be added to a defined register to compute
 CFA address.
 
-@section @code{.cfi_adjust_cfa_offset @var{offset}}
+@subsection @code{.cfi_adjust_cfa_offset @var{offset}}
 Same as @code{.cfi_def_cfa_offset} but @var{offset} is a relative
 value that is added/substracted from the previous offset.
 
-@section @code{.cfi_offset @var{register}, @var{offset}}
+@subsection @code{.cfi_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
 CFA.
 
-@section @code{.cfi_rel_offset @var{register}, @var{offset}}
+@subsection @code{.cfi_rel_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
 the current CFA register.  This is transformed to @code{.cfi_offset}
 using the known displacement of the CFA register from the CFA.
 This is often easier to use, because the number will match the
 code it's annotating.
 
-@section @code{.cfi_register @var{register1}, @var{register2}}
+@subsection @code{.cfi_register @var{register1}, @var{register2}}
 Previous value of @var{register1} is saved in register @var{register2}.
 
-@section @code{.cfi_restore @var{register}}
+@subsection @code{.cfi_restore @var{register}}
 @code{.cfi_restore} says that the rule for @var{register} is now the
 same as it was at the beginning of the function, after all initial
 instruction added by @code{.cfi_startproc} were executed.
 
-@section @code{.cfi_undefined @var{register}}
+@subsection @code{.cfi_undefined @var{register}}
 From now on the previous value of @var{register} can't be restored anymore.
 
-@section @code{.cfi_same_value @var{register}}
+@subsection @code{.cfi_same_value @var{register}}
 Current value of @var{register} is the same like in the previous frame,
 i.e. no restoration needed.
 
-@section @code{.cfi_remember_state},
+@subsection @code{.cfi_remember_state},
 First save all current rules for all registers by @code{.cfi_remember_state},
 then totally screw them up by subsequent @code{.cfi_*} directives and when
 everything is hopelessly bad, use @code{.cfi_restore_state} to restore
 the previous saved state.
 
-@section @code{.cfi_return_column @var{register}}
+@subsection @code{.cfi_return_column @var{register}}
 Change return column @var{register}, i.e. the return address is either
 directly in @var{register} or can be accessed by rules for @var{register}.
 
-@section @code{.cfi_signal_frame}
+@subsection @code{.cfi_signal_frame}
 Mark current function as signal trampoline.
 
-@section @code{.cfi_window_save}
+@subsection @code{.cfi_window_save}
 SPARC register window has been saved.
 
-@section @code{.cfi_escape} @var{expression}[, @dots{}]
+@subsection @code{.cfi_escape} @var{expression}[, @dots{}]
 Allows the user to add arbitrary bytes to the unwind info.  One
 might use this to add OS-specific CFI opcodes, or generic CFI
 opcodes that GAS does not yet support.
 
-@section @code{.cfi_val_encoded_addr @var{register}, @var{encoding}, @var{label}}
+@subsection @code{.cfi_val_encoded_addr @var{register}, @var{encoding}, @var{label}}
 The current value of @var{register} is @var{label}.  The value of @var{label}
 will be encoded in the output file according to @var{encoding}; see the
 description of @code{.cfi_personality} for details on this encoding.
@@ -6341,7 +6366,14 @@ changes @var{symbol}'s value and type to conform to
 @var{expression}.  If @var{symbol} was flagged as external, it remains
 flagged (@pxref{Symbol Attributes}).
 
-You may @code{.set} a symbol many times in the same assembly.
+You may @code{.set} a symbol many times in the same assembly provided that the
+values given to the symbol are constants.  Values that are based on expressions
+involving other symbols are allowed, but some targets may restrict this to only
+being done once per assembly.  This is because those targets do not set the
+addresses of symbols at assembly time, but rather delay the assignment until a
+final link is performed.  This allows the linker a chance to change the code in
+the files, changing the location of, and the relative distance between, various
+different symbols.
 
 If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
@@ -6978,6 +7010,18 @@ assembly language programmers.
 @end ifset
 @c end     DIFF-TBL-KLUGE
 
+@ifclear no-space-dir
+@node Zero
+@section @code{.zero @var{size}}
+
+@cindex @code{zero} directive
+@cindex filling memory with zero bytes
+This directive emits @var{size} 0-valued bytes.  @var{size} must be an absolute
+expression.  This directive is actually an alias for the @samp{.skip} directive
+so in can take an optional second argument of the value to store in the bytes
+instead of zero.  Using @samp{.zero} in this way would be confusing however.
+@end ifclear
+
 @node Deprecated
 @section Deprecated Directives
 
@@ -7113,6 +7157,22 @@ The vector ABI used by this object file.  The value will be:
 2 for files using AltiVec registers to pass vectors.
 @item
 3 for files using SPE registers to pass vectors.
+@end itemize
+@end table
+
+@subsection IBM z Systems Attributes
+
+@table @r
+@item Tag_GNU_S390_ABI_Vector (8)
+The vector ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not affected by the vector ABI.
+@item
+1 for files using software vector ABI.
+@item
+2 for files using hardware vector ABI.
 @end itemize
 @end table
 
@@ -7255,10 +7315,6 @@ subject, see the hardware manufacturer's manual.
 @ifset NS32K
 * NS32K-Dependent::		NS32K Dependent Features
 @end ifset
-@ifset SH
-* SH-Dependent::                Renesas / SuperH SH Dependent Features
-* SH64-Dependent::              SuperH SH64 Dependent Features
-@end ifset
 @ifset PDP11
 * PDP-11-Dependent::            PDP-11 Dependent Features
 @end ifset
@@ -7279,6 +7335,10 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset SCORE
 * SCORE-Dependent::             SCORE Dependent Features
+@end ifset
+@ifset SH
+* SH-Dependent::                Renesas / SuperH SH Dependent Features
+* SH64-Dependent::              SuperH SH64 Dependent Features
 @end ifset
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features

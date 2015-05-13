@@ -1,5 +1,5 @@
 /* BFD back-end for Intel i860 COFF files.
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
    Created mostly by substituting "860" for "386" in coff-i386.c
    Harry Dolan <dolan@ssd.intel.com>, October 1995
 
@@ -467,7 +467,10 @@ static reloc_howto_type howto_table[] =
    FIXME: This macro refers to symbols and asect; these are from the
    calling function, not the macro arguments.  */
 
-#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)
+/* PR 17512: file: 0a38fb7c
+   Set an addend value, even if it is not going to be used.  A tool
+   like coffdump might be used to print out the contents of the reloc.  */
+#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr) (cache_ptr)->addend = 0
 
 /* We use the special COFF backend linker.  */
 #define coff_relocate_section _bfd_coff_generic_relocate_section

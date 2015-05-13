@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -92,6 +92,7 @@ static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
 static void lang_finalize_version_expr_head
   (struct bfd_elf_version_expr_head *);
+static void lang_do_memory_regions (void);
 static void cmdline_lists_init (void);
 static void cmdline_get_object_only_input_files (void);
 static void print_cmdline_list (cmdline_union_type *);
@@ -1319,7 +1320,9 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
   new_region->name_list.name = xstrdup (name);
   new_region->name_list.next = NULL;
   new_region->next = NULL;
+  new_region->origin_exp = NULL;
   new_region->origin = 0;
+  new_region->length_exp = NULL;
   new_region->length = ~(bfd_size_type) 0;
   new_region->current = 0;
   new_region->last_os = NULL;
@@ -4003,7 +4006,12 @@ print_assignment (lang_assignment_statement_type *assignment,
   osec = output_section->bfd_section;
   if (osec == NULL)
     osec = bfd_abs_section_ptr;
-  exp_fold_tree (tree, osec, &print_dot);
+
+  if (assignment->exp->type.node_class != etree_provide)
+    exp_fold_tree (tree, osec, &print_dot);
+  else
+    expld.result.valid_p = FALSE;
+
   if (expld.result.valid_p)
     {
       bfd_vma value;
@@ -4041,7 +4049,10 @@ print_assignment (lang_assignment_statement_type *assignment,
     }
   else
     {
-      minfo ("*undef*   ");
+      if (assignment->exp->type.node_class == etree_provide)
+        minfo ("[!provide]");
+      else
+        minfo ("*undef*   ");
 #ifdef BFD64
       minfo ("        ");
 #endif
@@ -5391,55 +5402,51 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
   if (expld.dataseg.phase == exp_dataseg_end_seen
       && link_info.relro && expld.dataseg.relro_end)
     {
-      /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END pair was seen, try
-	 to put expld.dataseg.relro_end on a (common) page boundary.  */
-      bfd_vma min_base, relro_end, maxpage;
+      bfd_vma initial_base, relro_end, desired_end;
+      asection *sec;
 
-      expld.dataseg.phase = exp_dataseg_relro_adjust;
-      maxpage = expld.dataseg.maxpagesize;
-      /* MIN_BASE is the absolute minimum address we are allowed to start the
-	 read-write segment (byte before will be mapped read-only).  */
-      min_base = (expld.dataseg.min_base + maxpage - 1) & ~(maxpage - 1);
-      expld.dataseg.base += (-expld.dataseg.relro_end
-			     & (expld.dataseg.pagesize - 1));
       /* Compute the expected PT_GNU_RELRO segment end.  */
       relro_end = ((expld.dataseg.relro_end + expld.dataseg.pagesize - 1)
 		   & ~(expld.dataseg.pagesize - 1));
-      if (min_base + maxpage < expld.dataseg.base)
-	{
-	  expld.dataseg.base -= maxpage;
-	  relro_end -= maxpage;
-	}
+
+      /* Adjust by the offset arg of DATA_SEGMENT_RELRO_END.  */
+      desired_end = relro_end - expld.dataseg.relro_offset;
+
+      /* For sections in the relro segment..  */
+      for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
+	if (!IGNORE_SECTION (sec)
+	    && sec->vma >= expld.dataseg.base
+	    && sec->vma < expld.dataseg.relro_end - expld.dataseg.relro_offset)
+	  {
+	    /* Where do we want to put this section so that it ends as
+	       desired?  */
+	    bfd_vma start = sec->vma;
+	    bfd_vma end = start + sec->size;
+	    bfd_vma bump = desired_end - end;
+	    /* We'd like to increase START by BUMP, but we must heed
+	       alignment so the increase might be less than optimum.  */
+	    start += bump & ~(((bfd_vma) 1 << sec->alignment_power) - 1);
+	    /* This is now the desired end for the previous section.  */
+	    desired_end = start;
+	  }
+
+      expld.dataseg.phase = exp_dataseg_relro_adjust;
+      ASSERT (desired_end >= expld.dataseg.base);
+      initial_base = expld.dataseg.base;
+      expld.dataseg.base = desired_end;
       lang_reset_memory_regions ();
       one_lang_size_sections_pass (relax, check_regions);
+
       if (expld.dataseg.relro_end > relro_end)
 	{
-	  /* The alignment of sections between DATA_SEGMENT_ALIGN
-	     and DATA_SEGMENT_RELRO_END can cause excessive padding to
-	     be inserted at DATA_SEGMENT_RELRO_END.  Try to start a
-	     bit lower so that the section alignments will fit in.  */
-	  asection *sec;
-	  unsigned int max_alignment_power = 0;
-
-	  /* Find maximum alignment power of sections between
-	     DATA_SEGMENT_ALIGN and DATA_SEGMENT_RELRO_END.  */
-	  for (sec = link_info.output_bfd->sections; sec; sec = sec->next)
-	    if (sec->vma >= expld.dataseg.base
-		&& sec->vma < expld.dataseg.relro_end
-		&& sec->alignment_power > max_alignment_power)
-	      max_alignment_power = sec->alignment_power;
-
-	  if (((bfd_vma) 1 << max_alignment_power) < expld.dataseg.pagesize)
-	    {
-	      /* Aligning the adjusted base guarantees the padding
-		 between sections won't change.  This is better than
-		 simply subtracting 1 << max_alignment_power which is
-		 what we used to do here.  */
-	      expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
-	      lang_reset_memory_regions ();
-	      one_lang_size_sections_pass (relax, check_regions);
-	    }
+	  /* Assignments to dot, or to output section address in a
+	     user script have increased padding over the original.
+	     Revert.  */
+	  expld.dataseg.base = initial_base;
+	  lang_reset_memory_regions ();
+	  one_lang_size_sections_pass (relax, check_regions);
 	}
+
       link_info.relro_start = expld.dataseg.base;
       link_info.relro_end = expld.dataseg.relro_end;
     }
@@ -6134,10 +6141,18 @@ lang_set_flags (lang_memory_region_type *ptr, const char *flags, int invert)
   flagword *ptr_flags;
 
   ptr_flags = invert ? &ptr->not_flags : &ptr->flags;
+
   while (*flags)
     {
       switch (*flags)
 	{
+	  /* PR 17900: An exclamation mark in the attributes reverses
+	     the sense of any of the attributes that follow.  */
+	case '!':
+	  invert = ! invert;
+	  ptr_flags = invert ? &ptr->not_flags : &ptr->flags;
+	  break;
+
 	case 'A': case 'a':
 	  *ptr_flags |= SEC_ALLOC;
 	  break;
@@ -6160,7 +6175,7 @@ lang_set_flags (lang_memory_region_type *ptr, const char *flags, int invert)
 	  break;
 
 	default:
-	  einfo (_("%P%F: invalid syntax in flags\n"));
+	  einfo (_("%P%F: invalid character %c (%d) in flags\n"), * flags, * flags);
 	  break;
 	}
       flags++;
@@ -6304,7 +6319,6 @@ lang_final (void)
 
   new_stmt = new_stat (lang_output_statement, stat_ptr);
   new_stmt->name = output_filename;
-
 }
 
 /* Reset the current counters in the regions.  */
@@ -6634,7 +6648,7 @@ lang_process (void)
   open_input_bfds (statement_list.head, OPEN_BFD_NORMAL);
 
 #ifdef ENABLE_PLUGINS
-  if (plugin_active_plugins_p ())
+  if (link_info.lto_plugin_active)
     {
       lang_statement_list_type added;
       lang_statement_list_type files, inputfiles;
@@ -6653,7 +6667,6 @@ lang_process (void)
 	einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
       /* Open any newly added files, updating the file chains.  */
-      link_info.loading_lto_outputs = TRUE;
       open_input_bfds (*added.tail, OPEN_BFD_NORMAL);
       /* Restore the global list pointer now they have all been added.  */
       lang_list_remove_tail (stat_ptr, &added);
@@ -6725,6 +6738,22 @@ lang_process (void)
   link_info.gc_sym_list = &entry_symbol;
   if (entry_symbol.name == NULL)
     link_info.gc_sym_list = ldlang_undef_chain_list_head;
+  if (link_info.init_function != NULL)
+    {
+      struct bfd_sym_chain *sym
+	= (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
+      sym->next = link_info.gc_sym_list;
+      sym->name = link_info.init_function;
+      link_info.gc_sym_list = sym;
+    }
+  if (link_info.fini_function != NULL)
+    {
+      struct bfd_sym_chain *sym
+	= (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
+      sym->next = link_info.gc_sym_list;
+      sym->name = link_info.fini_function;
+      link_info.gc_sym_list = sym;
+    }
 
   ldemul_after_open ();
   if (config.map_file != NULL)
@@ -6750,13 +6779,15 @@ lang_process (void)
   /* PR 13683: We must rerun the assignments prior to running garbage
      collection in order to make sure that all symbol aliases are resolved.  */
   lang_do_assignments (lang_mark_phase_enum);
-  expld.phase = lang_first_phase_enum;
 
-  /* Remove unreferenced sections if asked to.  */
-  lang_gc_sections ();
+  lang_do_memory_regions();
+  expld.phase = lang_first_phase_enum;
 
   /* Size up the common data.  */
   lang_common ();
+
+  /* Remove unreferenced sections if asked to.  */
+  lang_gc_sections ();
 
   /* Update wild statements.  */
   update_wild_statements (statement_list.head);
@@ -8011,6 +8042,37 @@ lang_do_version_exports_section (void)
   lreg = lang_new_vers_pattern (NULL, "*", NULL, FALSE);
   lang_register_vers_node (command_line.version_exports_section,
 			   lang_new_vers_node (greg, lreg), NULL);
+}
+
+/* Evaluate LENGTH and ORIGIN parts of MEMORY spec */
+
+static void
+lang_do_memory_regions (void)
+{
+  lang_memory_region_type *r = lang_memory_region_list;
+
+  for (; r != NULL; r = r->next)
+    {
+      if (r->origin_exp)
+      {
+        exp_fold_tree_no_dot (r->origin_exp);
+        if (expld.result.valid_p)
+          {
+            r->origin = expld.result.value;
+            r->current = r->origin;
+          }
+        else
+          einfo (_("%F%P: invalid origin for memory region %s\n"), r->name_list.name);
+      }
+      if (r->length_exp)
+      {
+        exp_fold_tree_no_dot (r->length_exp);
+        if (expld.result.valid_p)
+          r->length = expld.result.value;
+        else
+          einfo (_("%F%P: invalid length for memory region %s\n"), r->name_list.name);
+      }
+    }
 }
 
 void

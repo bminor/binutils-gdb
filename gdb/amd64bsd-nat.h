@@ -1,6 +1,6 @@
 /* Native-dependent code for AMD64 BSD's.
 
-   Copyright (C) 2011-2014 Free Software Foundation, Inc.
+   Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,9 @@
 
 #ifndef AMD64BSD_NAT_H
 #define AMD64BSD_NAT_H
+
+/* Low level amd64 XSAVE info.  */
+extern size_t amd64bsd_xsave_len;
 
 /* Low level amd64 debug register functions.  */
 

@@ -1,5 +1,5 @@
 /* SPU target-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+   Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
    Based on a port by Sid Manning <sid@us.ibm.com>.
@@ -2698,7 +2698,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      This assumes the filename convention employed by solib-spu.c.  */
   else if (info.abfd)
     {
-      char *name = strrchr (info.abfd->filename, '@');
+      const char *name = strrchr (info.abfd->filename, '@');
       if (name)
 	sscanf (name, "@0x%*x <%d>", &id);
     }
@@ -2794,7 +2794,6 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
   set_gdbarch_breakpoint_from_pc (gdbarch, spu_breakpoint_from_pc);
   set_gdbarch_memory_remove_breakpoint (gdbarch, spu_memory_remove_breakpoint);
-  set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
   set_gdbarch_software_single_step (gdbarch, spu_software_single_step);
   set_gdbarch_get_longjmp_target (gdbarch, spu_get_longjmp_target);
 

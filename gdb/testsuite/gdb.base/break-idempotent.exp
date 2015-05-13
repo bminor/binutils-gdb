@@ -1,4 +1,4 @@
-# Copyright 2014 Free Software Foundation, Inc.
+# Copyright 2014-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -174,7 +174,8 @@ foreach always_inserted { "off" "on" } {
 	test_break $always_inserted "watch"
     }
 
-    if {![skip_hw_watchpoint_access_tests]} {
+    if {![skip_hw_watchpoint_access_tests]
+	&& ![skip_hw_watchpoint_multi_tests]} {
 	test_break $always_inserted "rwatch"
 	test_break $always_inserted "awatch"
     }

@@ -86,7 +86,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +9 *
  +[0-9]+: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +10 *
  +[0-9]+: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +11 *
-.* FILE +LOCAL +DEFAULT +ABS .*
+.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbindesc.o
  +[0-9]+: 0+20 +0 +TLS +LOCAL +DEFAULT +7 sl1
  +[0-9]+: 0+24 +0 +TLS +LOCAL +DEFAULT +7 sl2
  +[0-9]+: 0+28 +0 +TLS +LOCAL +DEFAULT +7 sl3
@@ -95,7 +95,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+34 +0 +TLS +LOCAL +DEFAULT +7 sl6
  +[0-9]+: 0+38 +0 +TLS +LOCAL +DEFAULT +7 sl7
  +[0-9]+: 0+3c +0 +TLS +LOCAL +DEFAULT +7 sl8
-.* FILE +LOCAL +DEFAULT +ABS .*
+.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbin.o
  +[0-9]+: 0+80 +0 +TLS +LOCAL +DEFAULT +8 bl1
  +[0-9]+: 0+84 +0 +TLS +LOCAL +DEFAULT +8 bl2
  +[0-9]+: 0+88 +0 +TLS +LOCAL +DEFAULT +8 bl3
@@ -104,7 +104,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+94 +0 +TLS +LOCAL +DEFAULT +8 bl6
  +[0-9]+: 0+98 +0 +TLS +LOCAL +DEFAULT +8 bl7
  +[0-9]+: 0+9c +0 +TLS +LOCAL +DEFAULT +8 bl8
-.* FILE +LOCAL +DEFAULT +ABS .*
+.* FILE +LOCAL +DEFAULT +ABS 
  +[0-9]+: 0+a0 +0 +TLS +LOCAL +DEFAULT +7 _TLS_MODULE_BASE_
  +[0-9]+: 0+100303d0 +0 +OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
  +[0-9]+: 0+100304f0 +0 +OBJECT +LOCAL +DEFAULT +11 _GLOBAL_OFFSET_TABLE_

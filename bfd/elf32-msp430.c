@@ -1,5 +1,5 @@
 /*  MSP430-specific support for 32-bit ELF
-    Copyright (C) 2002-2014 Free Software Foundation, Inc.
+    Copyright (C) 2002-2015 Free Software Foundation, Inc.
     Contributed by Dmitry Diky <diwil@mail.ru>
 
     This file is part of BFD, the Binary File Descriptor library.
@@ -30,11 +30,11 @@ static reloc_howto_type elf_msp430_howto_table[] =
 {
   HOWTO (R_MSP430_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MSP430_NONE",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -197,11 +197,11 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 {
   HOWTO (R_MSP430_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MSP430_NONE",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -619,7 +619,7 @@ msp430_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
     {
       if (r_type >= (unsigned int) R_MSP430x_max)
 	{
-	  _bfd_error_handler (_("%A: invalid MSP430X reloc number: %d"), abfd, r_type);
+	  _bfd_error_handler (_("%B: invalid MSP430X reloc number: %d"), abfd, r_type);
 	  r_type = 0;
 	}
       cache_ptr->howto = elf_msp430x_howto_table + r_type;
@@ -628,7 +628,7 @@ msp430_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
 
   if (r_type >= (unsigned int) R_MSP430_max)
     {
-      _bfd_error_handler (_("%A: invalid MSP430 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid MSP430 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_msp430_howto_table[r_type];
@@ -1656,9 +1656,38 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
   for (isymend = isym + symtab_hdr->sh_info; isym < isymend; isym++)
-    if (isym->st_shndx == sec_shndx
-	&& isym->st_value > addr && isym->st_value < toaddr)
-      isym->st_value -= count;
+    {
+      const char * name;
+
+      name = bfd_elf_string_from_elf_section
+	(abfd, symtab_hdr->sh_link, isym->st_name);
+      name = (name == NULL || * name == 0) ? bfd_section_name (abfd, sec) : name;
+
+      if (isym->st_shndx != sec_shndx)
+	continue;
+      
+      if (isym->st_value > addr
+	  && (isym->st_value < toaddr
+	      /* We also adjust a symbol at the end of the section if its name is
+		 on the list below.  These symbols are used for debug info
+		 generation and they refer to the end of the current section, not
+		 the start of the next section.  */
+	      || (isym->st_value == toaddr
+		  && name != NULL
+		  && (CONST_STRNEQ (name, ".Letext")
+		      || CONST_STRNEQ (name, ".LFE")))))
+	{
+	  if (isym->st_value < addr + count)
+	    isym->st_value = addr;
+	  else
+	    isym->st_value -= count;
+	}
+      /* Adjust the function symbol's size as well.  */
+      else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC
+	       && isym->st_value + isym->st_size > addr
+	       && isym->st_value + isym->st_size < toaddr)
+	isym->st_size -= count;
+    }
 
   /* Now adjust the global symbols defined in this section.  */
   symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
@@ -1674,7 +1703,19 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value > addr
 	  && sym_hash->root.u.def.value < toaddr)
-	sym_hash->root.u.def.value -= count;
+	{
+	  if (sym_hash->root.u.def.value < addr + count)
+	    sym_hash->root.u.def.value = addr;
+	  else
+	    sym_hash->root.u.def.value -= count;
+	}
+      /* Adjust the function symbol's size as well.  */
+      else if (sym_hash->root.type == bfd_link_hash_defined
+	       && sym_hash->root.u.def.section == sec
+	       && sym_hash->type == STT_FUNC
+	       && sym_hash->root.u.def.value + sym_hash->size > addr
+	       && sym_hash->root.u.def.value + sym_hash->size < toaddr)
+	sym_hash->size -= count;
     }
 
   return TRUE;
@@ -1767,7 +1808,6 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
   Elf_Internal_Rela * irelend;
   bfd_byte *          contents = NULL;
   Elf_Internal_Sym *  isymbuf = NULL;
-
 
   /* Assume nothing changes.  */
   *again = FALSE;
@@ -1922,7 +1962,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	default:
 	  /* Not a conditional branch instruction.  */
 	  /* fprintf (stderr, "unrecog: %x\n", opcode); */
-	  goto error_return;
+	  continue;
 	}
 
       /* Note that we've changed the relocs, section contents, etc.  */
@@ -1966,10 +2006,6 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
       *again = TRUE;
     }
 
-  if (! uses_msp430x_relocs (abfd))
-    /* Now perform the relocations that shrink the code size.
-       We only do this for non msp430x as gas only generates the RL
-       reloc for the msp430.  */
     for (irel = internal_relocs; irel < irelend; irel++)
       {
 	bfd_vma symval;
@@ -2048,7 +2084,8 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	/* Try to turn a 16bit pc-relative branch into a 10bit pc-relative
 	   branch.  */
 	/* Paranoia? paranoia...  */      
-	if (ELF32_R_TYPE (irel->r_info) == (int) R_MSP430_RL_PCREL)
+	if (! uses_msp430x_relocs (abfd)
+	    && ELF32_R_TYPE (irel->r_info) == (int) R_MSP430_RL_PCREL)
 	  {
 	    bfd_vma value = symval;
 
@@ -2152,6 +2189,63 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		/* Handle unconditional jumps.  */
 		if (rx->cdx == 0)
 		  irel->r_offset -= 2;
+
+		/* That will change things, so, we should relax again.
+		   Note that this is not required, and it may be slow.  */
+		*again = TRUE;
+	      }
+	  }
+
+	/* Try to turn a 16-bit absolute branch into a 10-bit pc-relative
+	   branch.  */
+	if (uses_msp430x_relocs (abfd)
+	    && ELF32_R_TYPE (irel->r_info) == R_MSP430X_ABS16)
+	  {
+	    bfd_vma value = symval;
+
+	    value -= (sec->output_section->vma + sec->output_offset);
+	    value -= irel->r_offset;
+	    value += irel->r_addend;
+	   
+	    /* See if the value will fit in 10 bits, note the high value is
+	       1016 as the target will be two bytes closer if we are
+	       able to relax.  */
+	    if ((long) value < 1016 && (long) value > -1016)
+	      {
+		int code2;
+
+		/* Get the opcode.  */
+		code2 = bfd_get_16 (abfd, contents + irel->r_offset - 2);
+		if (code2 != 0x4030)
+		  continue;
+		/* FIXME: check r4 and r3 ? */
+		/* FIXME: Handle 0x4010 as well ?  */
+
+		/* Note that we've changed the relocs, section contents, etc.  */
+		elf_section_data (sec)->relocs = internal_relocs;
+		elf_section_data (sec)->this_hdr.contents = contents;
+		symtab_hdr->contents = (unsigned char *) isymbuf;
+
+		/* Fix the relocation's type.  */
+		if (uses_msp430x_relocs (abfd))
+		  {
+		    irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						 R_MSP430X_10_PCREL);
+		  }
+		else
+		  {
+		    irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						 R_MSP430_10_PCREL);
+		  }
+
+		/* Fix the opcode right way.  */
+		bfd_put_16 (abfd, 0x3c00, contents + irel->r_offset - 2);
+		irel->r_offset -= 2;
+
+		/* Delete bytes.  */
+		if (!msp430_elf_relax_delete_bytes (abfd, sec,
+						    irel->r_offset + 2, 2))
+		  goto error_return;
 
 		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */

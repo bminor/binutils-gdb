@@ -1,6 +1,6 @@
 /* Interface between GDB and target environments, including files and processes
 
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -38,6 +38,8 @@ struct static_tracepoint_marker;
 struct traceframe_info;
 struct expression;
 struct dcache_struct;
+
+#include "infrun.h" /* For enum exec_direction_kind.  */
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -200,7 +202,14 @@ enum target_object
   /* OpenVMS Unwind Information Block.  */
   TARGET_OBJECT_OPENVMS_UIB,
   /* Branch trace data, in XML format.  */
-  TARGET_OBJECT_BTRACE
+  TARGET_OBJECT_BTRACE,
+  /* Branch trace configuration, in XML format.  */
+  TARGET_OBJECT_BTRACE_CONF,
+  /* The pathname of the executable file that was run to create
+     a specified process.  ANNEX should be a string representation
+     of the process ID of the process in question, in hexadecimal
+     format.  */
+  TARGET_OBJECT_EXEC_FILE,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
@@ -450,6 +459,35 @@ struct target_ops
     int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
 				 struct bp_target_info *)
       TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
+
+    /* Returns true if the target stopped because it executed a
+       software breakpoint.  This is necessary for correct background
+       execution / non-stop mode operation, and for correct PC
+       adjustment on targets where the PC needs to be adjusted when a
+       software breakpoint triggers.  In these modes, by the time GDB
+       processes a breakpoint event, the breakpoint may already be
+       done from the target, so GDB needs to be able to tell whether
+       it should ignore the event and whether it should adjust the PC.
+       See adjust_pc_after_break.  */
+    int (*to_stopped_by_sw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Returns true if the above method is supported.  */
+    int (*to_supports_stopped_by_sw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+
+    /* Returns true if the target stopped for a hardware breakpoint.
+       Likewise, if the target supports hardware breakpoints, this
+       method is necessary for correct background execution / non-stop
+       mode operation.  Even though hardware breakpoints do not
+       require PC adjustment, GDB needs to be able to tell whether the
+       hardware breakpoint event is a delayed event for a breakpoint
+       that is already gone and should thus be ignored.  */
+    int (*to_stopped_by_hw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Returns true if the above method is supported.  */
+    int (*to_supports_stopped_by_hw_breakpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+
     int (*to_can_use_hw_breakpoint) (struct target_ops *, int, int, int)
       TARGET_DEFAULT_RETURN (0);
     int (*to_ranged_break_num_registers) (struct target_ops *)
@@ -596,7 +634,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     int (*to_is_async_p) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
-    void (*to_async) (struct target_ops *, async_callback_ftype *, void *)
+    void (*to_async) (struct target_ops *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* This method must be implemented in some situations.  See the
        comment on 'to_can_run'.  */
@@ -792,6 +830,12 @@ struct target_ops
 
     /* Target file operations.  */
 
+    /* Return nonzero if the filesystem accessed by the
+       target_fileio_* methods is the local filesystem,
+       zero otherwise.  */
+    int (*to_filesystem_is_local) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (1);
+
     /* Open FILENAME on the target, using FLAGS and MODE.  Return a
        target file descriptor, or -1 if an error occurs (and set
        *TARGET_ERRNO).  */
@@ -812,6 +856,12 @@ struct target_ops
     int (*to_fileio_pread) (struct target_ops *,
 			    int fd, gdb_byte *read_buf, int len,
 			    ULONGEST offset, int *target_errno);
+
+    /* Get information about the file opened as FD and put it in
+       SB.  Return 0 on success, or -1 if an error occurs (and set
+       *TARGET_ERRNO).  */
+    int (*to_fileio_fstat) (struct target_ops *,
+			    int fd, struct stat *sb, int *target_errno);
 
     /* Close FD on the target.  Return 0, or -1 if an error occurs
        (and set *TARGET_ERRNO).  */
@@ -999,13 +1049,15 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
 
     /* Check whether the target supports branch tracing.  */
-    int (*to_supports_btrace) (struct target_ops *)
+    int (*to_supports_btrace) (struct target_ops *, enum btrace_format)
       TARGET_DEFAULT_RETURN (0);
 
-    /* Enable branch tracing for PTID and allocate a branch trace target
-       information struct for reading and for disabling branch trace.  */
+    /* Enable branch tracing for PTID using CONF configuration.
+       Return a branch trace target information struct for reading and for
+       disabling branch trace.  */
     struct btrace_target_info *(*to_enable_btrace) (struct target_ops *,
-						    ptid_t ptid)
+						    ptid_t ptid,
+						    const struct btrace_config *conf)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disable branch tracing and deallocate TINFO.  */
@@ -1022,14 +1074,17 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Read branch trace data for the thread indicated by BTINFO into DATA.
-       DATA is cleared before new trace is added.
-       The branch trace will start with the most recent block and continue
-       towards older blocks.  */
+       DATA is cleared before new trace is added.  */
     enum btrace_error (*to_read_btrace) (struct target_ops *self,
-					 VEC (btrace_block_s) **data,
+					 struct btrace_data *data,
 					 struct btrace_target_info *btinfo,
 					 enum btrace_read_type type)
       TARGET_DEFAULT_NORETURN (tcomplain ());
+
+    /* Get the branch trace configuration.  */
+    const struct btrace_config *(*to_btrace_conf) (struct target_ops *self,
+						   const struct btrace_target_info *)
+      TARGET_DEFAULT_RETURN (NULL);
 
     /* Stop trace recording.  */
     void (*to_stop_recording) (struct target_ops *)
@@ -1118,13 +1173,6 @@ struct target_ops
 
     const struct frame_unwind *(*to_get_tailcall_unwinder) (struct target_ops *self)
       TARGET_DEFAULT_RETURN (NULL);
-
-    /* Return the number of bytes by which the PC needs to be decremented
-       after executing a breakpoint instruction.
-       Defaults to gdbarch_decr_pc_after_break (GDBARCH).  */
-    CORE_ADDR (*to_decr_pc_after_break) (struct target_ops *ops,
-					 struct gdbarch *gdbarch)
-      TARGET_DEFAULT_FUNC (default_target_decr_pc_after_break);
 
     /* Prepare to generate a core file.  */
     void (*to_prepare_to_generate_core) (struct target_ops *)
@@ -1655,9 +1703,9 @@ extern int target_async_permitted;
 /* Is the target in asynchronous execution mode?  */
 #define target_is_async_p() (current_target.to_is_async_p (&current_target))
 
-/* Put the target in async mode with the specified callback function.  */
-#define target_async(CALLBACK,CONTEXT) \
-     (current_target.to_async (&current_target, (CALLBACK), (CONTEXT)))
+/* Enables/disabled async target events.  */
+#define target_async(ENABLE) \
+     (current_target.to_async (&current_target, (ENABLE)))
 
 #define target_execution_direction() \
   (current_target.to_execution_direction (&current_target))
@@ -1734,6 +1782,21 @@ extern char *target_thread_name (struct thread_info *);
 #define target_stopped_by_watchpoint()		\
   ((*current_target.to_stopped_by_watchpoint) (&current_target))
 
+/* Returns non-zero if the target stopped because it executed a
+   software breakpoint instruction.  */
+
+#define target_stopped_by_sw_breakpoint()		\
+  ((*current_target.to_stopped_by_sw_breakpoint) (&current_target))
+
+#define target_supports_stopped_by_sw_breakpoint() \
+  ((*current_target.to_supports_stopped_by_sw_breakpoint) (&current_target))
+
+#define target_stopped_by_hw_breakpoint()				\
+  ((*current_target.to_stopped_by_hw_breakpoint) (&current_target))
+
+#define target_supports_stopped_by_hw_breakpoint() \
+  ((*current_target.to_supports_stopped_by_hw_breakpoint) (&current_target))
+
 /* Non-zero if we have steppable watchpoints  */
 
 #define target_have_steppable_watchpoint \
@@ -1749,14 +1812,17 @@ extern char *target_thread_name (struct thread_info *);
 /* If the *_hw_beakpoint functions have not been defined
    elsewhere use the definitions in the target vector.  */
 
-/* Returns non-zero if we can set a hardware watchpoint of type TYPE.  TYPE is
-   one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint, or
-   bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
-   (including this one?).  OTHERTYPE is who knows what...  */
+/* Returns positive if we can set a hardware watchpoint of type TYPE.
+   Returns negative if the target doesn't have enough hardware debug
+   registers available.  Return zero if hardware watchpoint of type
+   TYPE isn't supported.  TYPE is one of bp_hardware_watchpoint,
+   bp_read_watchpoint, bp_write_watchpoint, or bp_hardware_breakpoint.
+   CNT is the number of such watchpoints used so far, including this
+   one.  OTHERTYPE is who knows what...  */
 
 #define target_can_use_hardware_watchpoint(TYPE,CNT,OTHERTYPE) \
  (*current_target.to_can_use_hw_breakpoint) (&current_target,  \
-					     TYPE, CNT, OTHERTYPE);
+					     TYPE, CNT, OTHERTYPE)
 
 /* Returns the number of debug registers needed to watch the given
    memory region, or zero if not supported.  */
@@ -1869,6 +1935,11 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 /* Target file operations.  */
 
+/* Return nonzero if the filesystem accessed by the target_fileio_*
+   methods is the local filesystem, zero otherwise.  */
+#define target_filesystem_is_local() \
+  current_target.to_filesystem_is_local (&current_target)
+
 /* Open FILENAME on the target, using FLAGS and MODE.  Return a
    target file descriptor, or -1 if an error occurs (and set
    *TARGET_ERRNO).  */
@@ -1886,6 +1957,12 @@ extern int target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
    (and set *TARGET_ERRNO).  */
 extern int target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 				ULONGEST offset, int *target_errno);
+
+/* Get information about the file opened as FD on the target
+   and put it in SB.  Return 0 on success, or -1 if an error
+   occurs (and set *TARGET_ERRNO).  */
+extern int target_fileio_fstat (int fd, struct stat *sb,
+				int *target_errno);
 
 /* Close FD on the target.  Return 0, or -1 if an error occurs
    (and set *TARGET_ERRNO).  */
@@ -2166,11 +2243,6 @@ extern void noprocess (void) ATTRIBUTE_NORETURN;
 
 extern void target_require_runnable (void);
 
-extern void find_default_attach (struct target_ops *, const char *, int);
-
-extern void find_default_create_inferior (struct target_ops *,
-					  char *, char *, char **, int);
-
 extern struct target_ops *find_target_beneath (struct target_ops *);
 
 /* Find the target at STRATUM.  If no target is at that stratum,
@@ -2195,6 +2267,10 @@ extern int remote_debug;
 
 /* Speed in bits per second, or -1 which means don't mess with the speed.  */
 extern int baud_rate;
+
+/* Parity for serial port  */
+extern int serial_parity;
+
 /* Timeout limit for response from target.  */
 extern int remote_timeout;
 
@@ -2217,11 +2293,11 @@ extern void update_target_permissions (void);
 /* Imported from machine dependent code.  */
 
 /* See to_supports_btrace in struct target_ops.  */
-#define target_supports_btrace() \
-  (current_target.to_supports_btrace (&current_target))
+extern int target_supports_btrace (enum btrace_format);
 
 /* See to_enable_btrace in struct target_ops.  */
-extern struct btrace_target_info *target_enable_btrace (ptid_t ptid);
+extern struct btrace_target_info *
+  target_enable_btrace (ptid_t ptid, const struct btrace_config *);
 
 /* See to_disable_btrace in struct target_ops.  */
 extern void target_disable_btrace (struct btrace_target_info *btinfo);
@@ -2230,9 +2306,13 @@ extern void target_disable_btrace (struct btrace_target_info *btinfo);
 extern void target_teardown_btrace (struct btrace_target_info *btinfo);
 
 /* See to_read_btrace in struct target_ops.  */
-extern enum btrace_error target_read_btrace (VEC (btrace_block_s) **,
+extern enum btrace_error target_read_btrace (struct btrace_data *,
 					     struct btrace_target_info *,
 					     enum btrace_read_type);
+
+/* See to_btrace_conf in struct target_ops.  */
+extern const struct btrace_config *
+  target_btrace_conf (const struct btrace_target_info *);
 
 /* See to_stop_recording in struct target_ops.  */
 extern void target_stop_recording (void);
@@ -2275,13 +2355,6 @@ extern void target_call_history_from (ULONGEST begin, int size, int flags);
 
 /* See to_call_history_range.  */
 extern void target_call_history_range (ULONGEST begin, ULONGEST end, int flags);
-
-/* See to_decr_pc_after_break.  Start searching for the target at OPS.  */
-extern CORE_ADDR forward_target_decr_pc_after_break (struct target_ops *ops,
-						     struct gdbarch *gdbarch);
-
-/* See to_decr_pc_after_break.  */
-extern CORE_ADDR target_decr_pc_after_break (struct gdbarch *gdbarch);
 
 /* See to_prepare_to_generate_core.  */
 extern void target_prepare_to_generate_core (void);

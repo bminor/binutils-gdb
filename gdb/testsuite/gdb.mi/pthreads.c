@@ -1,5 +1,5 @@
 /* Pthreads test program.
-   Copyright 1996-2014 Free Software Foundation, Inc.
+   Copyright 1996-2015 Free Software Foundation, Inc.
 
    Written by Keith Seitz of Red Hat.
    Copied from gdb.threads/pthreads.c.
@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h>
 
 /* Under HPUX 10, the second arg of pthread_create
    is prototyped to be just a "pthread_attr_t", while under Solaris it

@@ -1,5 +1,5 @@
 /* C preprocessor macro expansion commands for GDB.
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GDB.
@@ -325,7 +325,7 @@ extract_identifier (char **expp, int is_parameter)
   char *p = *expp;
   unsigned int len;
 
-  if (is_parameter && !strncmp (p, "...", 3))
+  if (is_parameter && startswith (p, "..."))
     {
       /* Ok.  */
     }
@@ -339,7 +339,7 @@ extract_identifier (char **expp, int is_parameter)
 	;
     }
 
-  if (is_parameter && !strncmp (p, "...", 3))      
+  if (is_parameter && startswith (p, "..."))      
     p += 3;
 
   len = p - *expp;

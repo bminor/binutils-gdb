@@ -1,6 +1,6 @@
 /* Multi-process control for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2014 Free Software Foundation, Inc.
+   Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -101,7 +101,7 @@ free_inferior (struct inferior *inf)
   xfree (inf->terminal);
   free_environ (inf->environment);
   target_desc_info_free (inf->tdesc_info);
-  xfree (inf->private);
+  xfree (inf->priv);
   xfree (inf);
 }
 

@@ -1,5 +1,5 @@
 /* tc-i386.h -- Header file for tc-i386.c
-   Copyright (C) 1989-2014 Free Software Foundation, Inc.
+   Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -90,6 +90,10 @@ extern unsigned long i386_mach (void);
 #define ELF_TARGET_K1OM_FORMAT	"elf64-k1om"
 #endif
 
+#ifndef ELF_TARGET_IAMCU_FORMAT
+#define ELF_TARGET_IAMCU_FORMAT	"elf32-iamcu"
+#endif
+
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
      || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
      || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
@@ -102,11 +106,6 @@ extern const char *i386_target_format (void);
 #ifdef OBJ_AOUT
 #define TARGET_FORMAT		AOUT_TARGET_FORMAT
 #endif
-#endif
-
-#if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF))
-#define md_end i386_elf_emit_arch_note
-extern void i386_elf_emit_arch_note (void);
 #endif
 
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
@@ -238,6 +237,7 @@ enum processor_type
   PROCESSOR_COREI7,
   PROCESSOR_L1OM,
   PROCESSOR_K1OM,
+  PROCESSOR_IAMCU,
   PROCESSOR_K6,
   PROCESSOR_ATHLON,
   PROCESSOR_K8,
@@ -245,6 +245,7 @@ enum processor_type
   PROCESSOR_GENERIC64,
   PROCESSOR_AMDFAM10,
   PROCESSOR_BD,
+  PROCESSOR_ZNVER,
   PROCESSOR_BT
 };
 

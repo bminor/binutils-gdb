@@ -1,5 +1,5 @@
 /* Generic simulator halt/resume.
-   Copyright (C) 1997-2014 Free Software Foundation, Inc.
+   Copyright (C) 1997-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -69,7 +69,7 @@ extern void sim_engine_halt
 
 #if !defined (SIM_ENGINE_HALT_HOOK)
 #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) \
-if ((LAST_CPU) != NULL) CIA_SET (LAST_CPU, CIA)
+if ((LAST_CPU) != NULL) CPU_PC_SET (LAST_CPU, CIA)
 #endif
 
 /* NB: If a port uses the SIM_CPU_EXCEPTION_* hooks, the default

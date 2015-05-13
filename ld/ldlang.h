@@ -1,5 +1,5 @@
 /* ldlang.h - linker command language support
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -55,8 +55,10 @@ typedef struct memory_region_struct
 {
   lang_memory_region_name name_list;
   struct memory_region_struct *next;
+  union etree_union *origin_exp;
   bfd_vma origin;
   bfd_size_type length;
+  union etree_union *length_exp;
   bfd_vma current;
   union lang_statement_union *last_os;
   flagword flags;
@@ -281,6 +283,9 @@ struct lang_input_statement_flags
 
   /* Set if the file was claimed from an archive.  */
   unsigned int claim_archive : 1;
+
+  /* Set if added by the lto plugin add_input_file callback.  */
+  unsigned int lto_output : 1;
 #endif /* ENABLE_PLUGINS */
 
   /* Head of list of pushed flags.  */

@@ -1,3 +1,17 @@
+2015-03-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* sim-ft32.h: New file.
+
+2015-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.h (struct host_callback_struct): Define.
+
+2015-01-31  Doug Evans  <xdje42@gmail.com>
+
+	* section-scripts.h: Remove "future extension" comment.
+	(SECTION_SCRIPT_ID_PYTHON_TEXT): New macro.
+	(SECTION_SCRIPT_ID_SCHEME_TEXT): New macro.
+
 2014-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* callback.h (struct host_callback_struct) <to_stat>: Renamed
@@ -281,7 +295,7 @@ Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* signals.h: New file, from gdb/defs.h.
 
 
-Copyright (C) 2002-2014 Free Software Foundation, Inc.
+Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

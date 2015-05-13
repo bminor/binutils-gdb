@@ -1,6 +1,6 @@
 /* microblaze-opcm.h -- Header used in microblaze-opc.h
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -29,7 +29,9 @@ enum microblaze_instr
   addi, rsubi, addic, rsubic, addik, rsubik, addikc, rsubikc, mul, 
   mulh, mulhu, mulhsu,swapb,swaph,
   idiv, idivu, bsll, bsra, bsrl, get, put, nget, nput, cget, cput,
-  ncget, ncput, muli, bslli, bsrai, bsrli, mului, or, and, xor,
+  ncget, ncput, muli, bslli, bsrai, bsrli, mului,
+  /* 'or/and/xor' are C++ keywords.  */
+  microblaze_or, microblaze_and, microblaze_xor,
   andn, pcmpbf, pcmpbc, pcmpeq, pcmpne, sra, src, srl, sext8, sext16, 
   wic, wdc, wdcclear, wdcflush, mts, mfs, mbar, br, brd,
   brld, bra, brad, brald, microblaze_brk, beq, beqd, bne, bned, blt,

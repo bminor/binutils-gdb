@@ -1,6 +1,6 @@
 // object.cc -- support for an object file for linking in gold
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -41,6 +41,7 @@
 #include "plugin.h"
 #include "compressed_output.h"
 #include "incremental.h"
+#include "merge.h"
 
 namespace gold
 {
@@ -268,6 +269,43 @@ Object::handle_split_stack_section(const char* name)
 
 // Class Relobj
 
+template<int size>
+void
+Relobj::initialize_input_to_output_map(unsigned int shndx,
+	  typename elfcpp::Elf_types<size>::Elf_Addr starting_address,
+	  Unordered_map<section_offset_type,
+	  typename elfcpp::Elf_types<size>::Elf_Addr>* output_addresses) const {
+  Object_merge_map *map = this->object_merge_map_;
+  map->initialize_input_to_output_map<size>(shndx, starting_address,
+					    output_addresses);
+}
+
+void
+Relobj::add_merge_mapping(Output_section_data *output_data,
+                          unsigned int shndx, section_offset_type offset,
+                          section_size_type length,
+                          section_offset_type output_offset) {
+  Object_merge_map* object_merge_map = this->get_or_create_merge_map();
+  object_merge_map->add_mapping(output_data, shndx, offset, length, output_offset);
+}
+
+bool
+Relobj::merge_output_offset(unsigned int shndx, section_offset_type offset,
+                            section_offset_type *poutput) const {
+  Object_merge_map* object_merge_map = this->object_merge_map_;
+  if (object_merge_map == NULL)
+    return false;
+  return object_merge_map->get_output_offset(shndx, offset, poutput);
+}
+
+const Output_section_data*
+Relobj::find_merge_section(unsigned int shndx) const {
+  Object_merge_map* object_merge_map = this->object_merge_map_;
+  if (object_merge_map == NULL)
+    return NULL;
+  return object_merge_map->find_merge_section(shndx);
+}
+
 // To copy the symbols data read from the file to a local data structure.
 // This function is called from do_layout only while doing garbage
 // collection.
@@ -368,6 +406,14 @@ Relobj::finalize_incremental_relocs(Layout* layout, bool clear_counts)
   layout->incremental_inputs()->set_reloc_count(rindex);
 }
 
+Object_merge_map*
+Relobj::get_or_create_merge_map()
+{
+  if (!this->object_merge_map_)
+    this->object_merge_map_ = new Object_merge_map();
+  return this->object_merge_map_;
+}
+
 // Class Sized_relobj.
 
 // Iterate over local symbols, calling a visitor class V for each GOT offset
@@ -432,8 +478,7 @@ Sized_relobj_file<size, big_endian>::Sized_relobj_file(
     discarded_eh_frame_shndx_(-1U),
     is_deferred_layout_(false),
     deferred_layout_(),
-    deferred_layout_relocs_(),
-    compressed_sections_()
+    deferred_layout_relocs_()
 {
   this->e_type_ = ehdr.get_e_type();
 }
@@ -675,7 +720,8 @@ build_compressed_section_map(
     unsigned int shnum,
     const char* names,
     section_size_type names_size,
-    Sized_relobj_file<size, big_endian>* obj)
+    Object* obj,
+    bool decompress_if_needed)
 {
   Compressed_section_map* uncompressed_map = new Compressed_section_map();
   const unsigned int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
@@ -694,23 +740,56 @@ build_compressed_section_map(
 	      continue;
 	    }
 
-	  const char* name = names + shdr.get_sh_name();
-	  if (is_compressed_debug_section(name))
+	  bool is_zcompressed = false;
+	  bool is_compressed
+	    = (shdr.get_sh_flags() & elfcpp::SHF_COMPRESSED) != 0;
+	  const char* name;
+
+	  if (is_compressed)
+	    name = NULL;
+	  else
 	    {
+	      name = names + shdr.get_sh_name();
+	      if (is_compressed_debug_section(name))
+		is_zcompressed = true;
+	    }
+	  if (is_zcompressed || is_compressed)
+	    {
+	      int compression_header_size;
 	      section_size_type len;
 	      const unsigned char* contents =
-		  obj->section_contents(i, &len, false);
-	      uint64_t uncompressed_size = get_uncompressed_size(contents, len);
+		obj->section_contents(i, &len, false);
+	      if (is_zcompressed)
+		compression_header_size = 0;
+	      else
+		compression_header_size
+		  = elfcpp::Elf_sizes<size>::chdr_size;
+	      uint64_t uncompressed_size
+		= get_uncompressed_size(contents + compression_header_size,
+					len - compression_header_size);
 	      Compressed_section_info info;
 	      info.size = convert_to_section_size_type(uncompressed_size);
+	      info.flag = convert_to_section_size_type(shdr.get_sh_flags());
 	      info.contents = NULL;
 	      if (uncompressed_size != -1ULL)
 		{
+		  if (is_compressed)
+		    {
+		      typename elfcpp::Chdr<size, big_endian> chdr(contents);
+		      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB
+			  || chdr.get_ch_size() != uncompressed_size
+			  || (chdr.get_ch_addralign()
+			      != shdr.get_sh_addralign()))
+			return uncompressed_map;
+		    }
 		  unsigned char* uncompressed_data = NULL;
-		  if (need_decompressed_section(name))
+		  if (decompress_if_needed
+		      && (is_compressed
+			  || need_decompressed_section(name)))
 		    {
 		      uncompressed_data = new unsigned char[uncompressed_size];
-		      if (decompress_input_section(contents, len,
+		      if (decompress_input_section(contents + compression_header_size,
+						   len - compression_header_size,
 						   uncompressed_data,
 						   uncompressed_size))
 			info.contents = uncompressed_data;
@@ -740,10 +819,16 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
   if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
     this->has_eh_frame_ = true;
 
-  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL)
-    this->compressed_sections_
-      = build_compressed_section_map(pshdrs, this->shnum(), names,
-				     sd->section_names_size, this);
+  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL
+      || memmem(names, sd->section_names_size, ".debug_", 7) != NULL)
+    {
+      Compressed_section_map* compressed_sections =
+	  build_compressed_section_map<size, big_endian>(
+	      pshdrs, this->shnum(), names, sd->section_names_size, this, true);
+      if (compressed_sections != NULL)
+        this->set_compressed_sections(compressed_sections);
+    }
+
   return (this->has_eh_frame_
 	  || (!parameters->options().relocatable()
 	      && parameters->options().gdb_index()
@@ -1551,7 +1636,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	      || shdr.get_sh_type() == elfcpp::SHT_INIT_ARRAY
 	      || shdr.get_sh_type() == elfcpp::SHT_FINI_ARRAY)
 	    {
-	      symtab->gc()->worklist().push(Section_id(this, i));
+	      symtab->gc()->worklist().push_back(Section_id(this, i));
 	    }
 	  // If the section name XXX can be represented as a C identifier
 	  // it cannot be discarded if there are references to
@@ -2589,7 +2674,7 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
     dyn_oview = of->get_output_view(this->local_dynsym_offset_,
 				    dyn_output_size);
 
-  const Output_sections out_sections(this->output_sections());
+  const Output_sections& out_sections(this->output_sections());
 
   gold_assert(this->local_values_.size() == loccount);
 
@@ -2804,9 +2889,8 @@ Sized_relobj_file<size, big_endian>::do_get_global_symbol_counts(
 // to the size.  Set *IS_NEW to true if the contents need to be freed
 // by the caller.
 
-template<int size, bool big_endian>
 const unsigned char*
-Sized_relobj_file<size, big_endian>::do_decompressed_section_contents(
+Object::decompressed_section_contents(
     unsigned int shndx,
     section_size_type* plen,
     bool* is_new)
@@ -2839,9 +2923,22 @@ Sized_relobj_file<size, big_endian>::do_decompressed_section_contents(
       return p->second.contents;
     }
 
+  int compression_header_size;
+  if ((p->second.flag & elfcpp::SHF_COMPRESSED) != 0)
+    {
+      const int size = parameters->target().get_size();
+      if (size == 32)
+	compression_header_size = elfcpp::Elf_sizes<32>::chdr_size;
+      else if (size == 64)
+	compression_header_size = elfcpp::Elf_sizes<64>::chdr_size;
+      else
+	gold_unreachable();
+    }
+  else
+    compression_header_size = 0;
   unsigned char* uncompressed_data = new unsigned char[uncompressed_size];
-  if (!decompress_input_section(buffer,
-				buffer_size,
+  if (!decompress_input_section(buffer + compression_header_size,
+				buffer_size - compression_header_size,
 				uncompressed_data,
 				uncompressed_size))
     this->error(_("could not decompress section %s"),
@@ -2860,9 +2957,8 @@ Sized_relobj_file<size, big_endian>::do_decompressed_section_contents(
 // Discard any buffers of uncompressed sections.  This is done
 // at the end of the Add_symbols task.
 
-template<int size, bool big_endian>
 void
-Sized_relobj_file<size, big_endian>::do_discard_decompressed_sections()
+Object::discard_decompressed_sections()
 {
   if (this->compressed_sections_ == NULL)
     return;
@@ -3208,6 +3304,24 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 }
 
 // Instantiate the templates we need.
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+void
+Relobj::initialize_input_to_output_map<64>(unsigned int shndx,
+      elfcpp::Elf_types<64>::Elf_Addr starting_address,
+      Unordered_map<section_offset_type,
+      elfcpp::Elf_types<64>::Elf_Addr>* output_addresses) const;
+#endif
+
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+void
+Relobj::initialize_input_to_output_map<32>(unsigned int shndx,
+      elfcpp::Elf_types<32>::Elf_Addr starting_address,
+      Unordered_map<section_offset_type,
+      elfcpp::Elf_types<32>::Elf_Addr>* output_addresses) const;
+#endif
 
 #ifdef HAVE_TARGET_32_LITTLE
 template

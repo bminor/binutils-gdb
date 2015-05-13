@@ -1,5 +1,5 @@
 /* <proc_service.h> replacement for systems that don't have it.
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,7 +22,14 @@
 #include <sys/types.h>
 
 #ifdef HAVE_PROC_SERVICE_H
+
+/* glibc's proc_service.h doesn't wrap itself with extern "C".  Need
+   to do it ourselves.  */
+EXTERN_C_PUSH
+
 #include <proc_service.h>
+
+EXTERN_C_POP
 
 #else /* HAVE_PROC_SERVICE_H */
 
@@ -54,6 +61,8 @@
 #endif
 
 #include "gregset.h"
+
+EXTERN_C_PUSH
 
 /* Functions in this interface return one of these status codes.  */
 typedef enum
@@ -149,6 +158,8 @@ extern ps_err_e ps_lsetxregs (struct ps_prochandle *ph, lwpid_t lwpid,
 
 /* Log a message (sends to gdb_stderr).  */
 extern void ps_plog (const char *fmt, ...);
+
+EXTERN_C_POP
 
 #endif /* HAVE_PROC_SERVICE_H */
 

@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 1993-2014 Free Software Foundation, Inc.
+   Copyright 1993-2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -433,6 +433,24 @@ Foo::operator int() { return x; }
 
 ByAnyOtherName foo(10, 11);
 Bar bar(20, 21, 22);
+
+/* Use a typedef for the baseclass to exercise gnu-v3-abi.c:gnuv3_dynamic_class
+   recursion.  It's important that the class itself have no name to make sure
+   the typedef makes it through to the recursive call.  */
+typedef class {
+ public:
+  int x;
+  virtual int get_x () { return x; }
+} DynamicBase2;
+
+class DynamicBar : public DynamicBase2
+{
+ public:
+  DynamicBar (int i, int j) { x = i; y = j; }
+  int y;
+};
+
+DynamicBar dynbar (23, 24);
 
 class ClassWithEnum {
 public:

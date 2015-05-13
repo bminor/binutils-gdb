@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/alpha.
 
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
 
@@ -145,7 +145,9 @@ alphanbsd_supply_gregset (const struct regset *regset,
 static const struct regset alphanbsd_gregset =
 {
   NULL,
-  alphanbsd_supply_gregset
+  alphanbsd_supply_gregset,
+  NULL,
+  REGSET_VARIABLE_SIZE
 };
 
 static const struct regset alphanbsd_fpregset =

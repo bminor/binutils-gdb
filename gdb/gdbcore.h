@@ -1,6 +1,6 @@
 /* Machine independent variables that describe the core file under GDB.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -149,6 +149,13 @@ extern int write_files;
 extern void core_file_command (char *filename, int from_tty);
 
 extern void exec_file_attach (const char *filename, int from_tty);
+
+/* If the filename of the main executable is unknown, attempt to
+   determine it.  If a filename is determined, proceed as though
+   it was just specified with the "file" command.  Do nothing if
+   the filename of the main executable is already known.  */
+
+extern void exec_file_locate_attach (int pid, int from_tty);
 
 extern void exec_file_clear (int from_tty);
 

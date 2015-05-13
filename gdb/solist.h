@@ -1,5 +1,5 @@
 /* Shared library declarations for GDB, the GNU Debugger.
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -175,6 +175,9 @@ void free_so (struct so_list *so);
 
 /* Return address of first so_list entry in master shared object list.  */
 struct so_list *master_so_list (void);
+
+/* Find main executable binary file.  */
+extern char *exec_file_find (char *in_pathname, int *fd);
 
 /* Find shared library binary file.  */
 extern char *solib_find (char *in_pathname, int *fd);

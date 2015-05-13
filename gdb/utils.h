@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* I/O, string, cleanup, and other random utilities for GDB.
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,9 +41,6 @@ ULONGEST strtoulst (const char *num, const char **trailer, int base);
 
 int compare_positive_ints (const void *ap, const void *bp);
 int compare_strings (const void *ap, const void *bp);
-
-/* This is defined in *-hdep.c, e.g., posix-hdep.c.  */
-extern char *safe_strerror (int);
 
 /* A wrapper for bfd_errmsg to produce a more helpful error message
    in the case of bfd_error_file_ambiguously recognized.
@@ -177,6 +174,10 @@ extern struct ui_file *gdb_stdtarg;
 extern struct ui_file *gdb_stdtargerr;
 extern struct ui_file *gdb_stdtargin;
 
+/* Set the screen dimensions to WIDTH and HEIGHT.  */
+
+extern void set_screen_width_and_height (int width, int height);
+
 /* More generic printf like operations.  Filtered versions may return
    non-locally on error.  */
 
@@ -305,6 +306,7 @@ extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
 #endif
 
 extern int producer_is_gcc_ge_4 (const char *producer);
+extern int producer_is_gcc (const char *producer, int *major, int *minor);
 
 extern int myread (int, char *, int);
 
@@ -339,11 +341,6 @@ extern int myread (int, char *, int);
 
 extern ULONGEST align_up (ULONGEST v, int n);
 extern ULONGEST align_down (ULONGEST v, int n);
-
-/* Sign extend VALUE.  BIT is the (1-based) index of the bit in VALUE
-   to sign-extend.  */
-
-extern LONGEST gdb_sign_extend (LONGEST value, int bit);
 
 /* Resource limits used by getrlimit and setrlimit.  */
 

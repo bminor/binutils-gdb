@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2014 Free Software Foundation, Inc.
+# Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,6 +47,9 @@ gdb_test "gu (print (->bool (or-map (lambda (o) (string-contains (objfile-filena
 
 gdb_test "gu (print (objfile-pretty-printers objfile))" \
     "= \\(\\)"
+
+gdb_test "gu (print (eq? (current-progspace) (objfile-progspace objfile)))" \
+    "= #t"
 
 gdb_test "guile (set-objfile-pretty-printers! objfile 0)" \
     "ERROR: .*: Wrong type argument in position 2 \\(expecting list\\): 0.*"

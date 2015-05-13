@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2014 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -77,5 +77,4 @@ GDBPY_NEW_EVENT_TYPE (thread,
                       "gdb.ThreadEvent",
                       "ThreadEvent",
                       "GDB thread event object",
-                      event_object_type,
-                      /*no qual*/);
+                      event_object_type);

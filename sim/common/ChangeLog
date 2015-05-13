@@ -1,3 +1,178 @@
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 18273
+	* sim-fpu.c (INLINE_SIM_FPU): Fix static analysis warning by
+	increasing parenthesis around casts to signed values.
+	
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.sh: Add mcore support.
+	* nltvals.def: Regenerate.
+
+2015-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen.sh: Add +x permissions.
+	* genmloop.sh: Likewise.
+	* gentvals.sh: Likewise.
+	* gennltvals.sh (newlibroot): New variable to hold the path to newlib.
+	Change all uses of srcroot for newlib to newlibroot.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-base.h (SIM_CPU): New typedef.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-engine.h (CIA_ADDR): Delete.
+	* sim-base.h: Update sim_cia example.
+	[!CIA_ADDR] (sim_cia): New typedef.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-utils.c (cgen_rtx_error): Change CIA_GET to CPU_PC_GET.
+	* sim-core.c (sim_core_read_buffer, sim_core_write_buffer): Likewise.
+	* sim-engine.h (SIM_ENGINE_HALT_HOOK): Change CIA_SET to CPU_PC_SET.
+	* sim-run.c (sim_engine_run): Change CIA_GET to CPU_PC_GET and
+	CIA_SET to CPU_PC_SET.
+
+2015-04-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_NEW_COMMON_OBJS): Add sim-cpu.o.
+	* sim-main.h (STATE_CPU): Remove from comment and define.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (ACX_PKGVERSION): Change GDB to SIM.
+	* configure: Regenerate.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c: Include version.h.
+	(OPTIONS_VERSION): New enum.
+	(standard_options): Add "version".
+	(standard_option_handler): Handle OPTIONS_VERSION.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (version.o): Change to using create-version.sh from gdb.
+	(create-version.sh): Delete.
+
+2015-04-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-engine.o and sim-hrw.o.
+
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* run-sim.h, run.c: Delete.
+	* tconfig.h (SIM_HAVE_PROFILE, SIM_HAVE_BIENDIAN): Delete.
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* Make-common.in (CSEARCH): Add $(ZLIBINC).
+	(ZLIB, ZLIBINC): Define.
+	(BFD_LIB): Add $(ZLIB).
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-mem.h (MEMOPS_INLINE): Change to EXTERN_INLINE.
+	* cgen-ops.h (SEMOPS_INLINE): Likewise.
+
+2015-03-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-arange.h (SIM_ARANGE_INLINE): Move above sim_addr_range_hit_p.
+	(sim_addr_range_hit_p): Change INLINE to SIM_ARANGE_INLINE.
+	* sim-inline.h (INLINE2): Define to gnu_inline when available.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-profile.c (profile_pc_event): Get pc via sim_pc_get.  Delete
+	usage of STATE_WATCHPOINTS.
+	(profile_pc_init): Delete STATE_WATCHPOINTS (sd)->pc check.  Change
+	STATE_WATCHPOINTS (sd)->sizeof_pc to sizeof (sim_cia).
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h: Note SIM_HAVE_PROFILE is deprecated.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h: Note SIM_HAVE_BIENDIAN is deprecated.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Move default option setting
+	of enable_sim_hardware to AC_ARG_ENABLE.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Delete SIM_DV_SOCKSER_O.
+	Add dv-sockser.o to sim_hw_objs.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-sockser.c: Include config.h.
+	* dv-sockser.h: Include sim-inline.h.
+	[HAVE_DV_SOCKSER]: Move all prototypes here.
+	[!HAVE_DV_SOCKSER] (dv_sockser_status, dv_sockser_write,
+	dv_sockser_write_buffer, dv_sockser_read): New stub functions.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* gentmap.c, run.c: Convert old style prototypes.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_COMMON): Call AH_BOTTOM.  Delete logic for
+	symlinking tconfig.h to tconfig.in.
+	* config.in, configure: Regenerate.
+	* nrun.c, run.c, sim-basics.h: Delete tconfig.h include.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-socker.h (dv_sockser_install): Declare.
+	* sim-module.c: Include config.h.
+	[HAVE_DV_SOCKSER]: Include dv-sockser.h.
+	(modules) [HAVE_DV_SOCKSER]: Add dv_sockser_install.
+	* sim-module.h: Include gdb/remote-sim.h.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (BUILT_SRC_FROM_COMMON): Delete.
+	(sim-inline.c): Delete rule.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_RUN_OBJS): Change to nrun.o.
+	* run.c [SIM_USE_DEPRECATED_RUN_FRONTEND]: Issue a warning.
+	[!SIM_USE_DEPRECATED_RUN_FRONTEND]: Throw an error.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-assert.h [!SIM_ASSERT, WITH_ASSERT]: Include sim-io.h.
+	[!ASSERT, WITH_ASSERT]: Likewise.
+	* sim-endian.c: Delete sim-io.h include.
+
+2015-02-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* run-sim.h (sim_kill): Delete unused prototype.
+
+2015-02-13  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* gentmap.c: Include "string.h".
+
+2015-02-02  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* sim-options.c (sim_args_command): Call freeargv() when failure
+	occurs.
+
+2015-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* aclocal.m4, configure: Regenerate using automake 1.11.1.
+
 2014-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* sim-io.c (sim_io_stat, sim_io_fstat): Adjust calls to "stat"

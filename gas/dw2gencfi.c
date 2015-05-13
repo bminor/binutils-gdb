@@ -1,5 +1,5 @@
 /* dw2gencfi.c - Support for generating Dwarf2 CFI information.
-   Copyright (C) 2003-2014 Free Software Foundation, Inc.
+   Copyright (C) 2003-2015 Free Software Foundation, Inc.
    Contributed by Michal Ludvig <mludvig@suse.cz>
 
    This file is part of GAS, the GNU Assembler.
@@ -440,6 +440,19 @@ cfi_add_advance_loc (symbolS *label)
   frchain_now->frch_cfi_data->last_address = label;
 }
 
+/* Add a CFI insn to label the current position in the CFI segment.  */
+
+void
+cfi_add_label (const char *name)
+{
+  unsigned int len = strlen (name) + 1;
+  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
+
+  insn->insn = CFI_label;
+  obstack_grow (&notes, name, len);
+  insn->u.sym_name = (char *) obstack_finish (&notes);
+}
+
 /* Add a DW_CFA_offset record to the CFI data.  */
 
 void
@@ -550,6 +563,7 @@ static void dot_cfi_endproc (int);
 static void dot_cfi_personality (int);
 static void dot_cfi_lsda (int);
 static void dot_cfi_val_encoded_addr (int);
+static void dot_cfi_label (int);
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
@@ -575,6 +589,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_personality", dot_cfi_personality, 0 },
     { "cfi_lsda", dot_cfi_lsda, 0 },
     { "cfi_val_encoded_addr", dot_cfi_val_encoded_addr, 0 },
+    { "cfi_label", dot_cfi_label, 0 },
     { NULL, NULL, 0 }
   };
 
@@ -1016,6 +1031,25 @@ dot_cfi_val_encoded_addr (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+static void
+dot_cfi_label (int ignored ATTRIBUTE_UNUSED)
+{
+  char *name = read_symbol_name ();
+
+  if (name == NULL)
+    return;
+
+  /* If the last address was not at the current PC, advance to current.  */
+  if (symbol_get_frag (frchain_now->frch_cfi_data->last_address) != frag_now
+      || S_GET_VALUE (frchain_now->frch_cfi_data->last_address)
+	 != frag_now_fix ())
+    cfi_add_advance_loc (symbol_temp_new_now ());
+
+  cfi_add_label (name);
+
+  demand_empty_rest_of_line ();
+}
+
 /* By default emit .eh_frame only, not .debug_frame.  */
 #define CFI_EMIT_eh_frame	(1 << 0)
 #define CFI_EMIT_debug_frame	(1 << 1)
@@ -1386,6 +1420,10 @@ output_cfi_insn (struct cfi_insn_data *insn)
       }
       break;
 
+    case CFI_label:
+      colon (insn->u.sym_name);
+      break;
+
     default:
       abort ();
     }
@@ -1721,6 +1759,7 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
 
 	    case CFI_escape:
 	    case CFI_val_encoded_addr:
+	    case CFI_label:
 	      /* Don't bother matching these for now.  */
 	      goto fail;
 
@@ -1737,7 +1776,8 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
 	      || j->insn == DW_CFA_advance_loc
 	      || j->insn == DW_CFA_remember_state
 	      || j->insn == CFI_escape
-	      || j->insn == CFI_val_encoded_addr))
+	      || j->insn == CFI_val_encoded_addr
+	      || j->insn == CFI_label))
 	{
 	  *pfirst = j;
 	  return cie;
@@ -1761,7 +1801,8 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
     if (i->insn == DW_CFA_advance_loc
 	|| i->insn == DW_CFA_remember_state
 	|| i->insn == CFI_escape
-	|| i->insn == CFI_val_encoded_addr)
+	|| i->insn == CFI_val_encoded_addr
+	|| i->insn == CFI_label)
       break;
 
   cie->last = i;
@@ -1788,6 +1829,7 @@ cfi_change_reg_numbers (struct cfi_insn_data *insn, segT ccseg)
 	case DW_CFA_restore_state:
 	case DW_CFA_GNU_window_save:
 	case CFI_escape:
+	case CFI_label:
 	  break;
 
 	case DW_CFA_def_cfa:
@@ -2033,6 +2075,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_personality", dot_cfi_dummy, 0 },
     { "cfi_lsda", dot_cfi_dummy, 0 },
     { "cfi_val_encoded_addr", dot_cfi_dummy, 0 },
+    { "cfi_label", dot_cfi_dummy, 0 },
     { NULL, NULL, 0 }
   };
 

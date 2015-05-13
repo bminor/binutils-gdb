@@ -1,6 +1,6 @@
 // x86_64.cc -- x86_64 target support for gold.
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -864,6 +864,25 @@ class Target_x86_64 : public Sized_target<size, false>
     unsigned int
     get_size_for_reloc(unsigned int, Relobj*);
   };
+
+  // Check if relocation against this symbol is a candidate for
+  // conversion from
+  // mov foo@GOTPCREL(%rip), %reg
+  // to lea foo(%rip), %reg.
+  static bool
+  can_convert_mov_to_lea(const Symbol* gsym)
+  {
+    gold_assert(gsym != NULL);
+    return (gsym->type() != elfcpp::STT_GNU_IFUNC
+	    && !gsym->is_undefined ()
+	    && !gsym->is_from_dynobj()
+	    && !gsym->is_preemptible()
+	    && (!parameters->options().shared()
+		|| (gsym->visibility() != elfcpp::STV_DEFAULT
+		    && gsym->visibility() != elfcpp::STV_PROTECTED)
+		|| parameters->options().Bsymbolic())
+	    && strcmp(gsym->name(), "_DYNAMIC") != 0);
+  }
 
   // Adjust TLS relocation type based on the options and whether this
   // is a local symbol.
@@ -2458,8 +2477,27 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPLT64:
       {
-	// The symbol requires a GOT entry.
+	// The symbol requires a GOT section.
 	Output_data_got<64, false>* got = target->got_section(symtab, layout);
+
+	// If the relocation symbol isn't IFUNC,
+	// and is local, then we will convert
+	// mov foo@GOTPCREL(%rip), %reg
+	// to lea foo(%rip), %reg.
+	// in Relocate::relocate.
+	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	    && reloc.get_r_offset() >= 2
+	    && !is_ifunc)
+	  {
+	    section_size_type stype;
+	    const unsigned char* view = object->section_contents(data_shndx,
+								 &stype, true);
+	    if (view[reloc.get_r_offset() - 2] == 0x8b)
+	      break;
+	  }
+
+
+	// The symbol requires a GOT entry.
 	unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 
 	// For a STT_GNU_IFUNC symbol we want the PLT offset.  That
@@ -2867,6 +2905,22 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
       {
 	// The symbol requires a GOT entry.
 	Output_data_got<64, false>* got = target->got_section(symtab, layout);
+
+	// If we convert this from
+	// mov foo@GOTPCREL(%rip), %reg
+	// to lea foo(%rip), %reg.
+	// in Relocate::relocate, then there is nothing to do here.
+	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	    && reloc.get_r_offset() >= 2
+	    && Target_x86_64<size>::can_convert_mov_to_lea(gsym))
+	  {
+	    section_size_type stype;
+	    const unsigned char* view = object->section_contents(data_shndx,
+								 &stype, true);
+	    if (view[reloc.get_r_offset() - 2] == 0x8b)
+	      break;
+	  }
+
 	if (gsym->final_value_is_known())
 	  {
 	    // For a STT_GNU_IFUNC symbol we want the PLT address.
@@ -2983,7 +3037,12 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
       {
-	const bool is_final = gsym->final_value_is_known();
+	// For the Initial-Exec model, we can treat undef symbols as final
+	// when building an executable.
+	const bool is_final = (gsym->final_value_is_known() ||
+			       (r_type == elfcpp::R_X86_64_GOTTPOFF &&
+			        gsym->is_undefined() &&
+				parameters->options().output_is_executable()));
 	const tls::Tls_optimization optimized_type
 	    = Target_x86_64<size>::optimize_tls_reloc(is_final, r_type);
 	switch (r_type)
@@ -3335,7 +3394,6 @@ Target_x86_64<size>::Relocate::relocate(
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOT64:
     case elfcpp::R_X86_64_GOTPLT64:
-    case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPCREL64:
       if (gsym != NULL)
 	{
@@ -3481,10 +3539,38 @@ Target_x86_64<size>::Relocate::relocate(
 
     case elfcpp::R_X86_64_GOTPCREL:
       {
-	gold_assert(have_got_offset);
-	typename elfcpp::Elf_types<size>::Elf_Addr value;
-	value = target->got_plt_section()->address() + got_offset;
-	Relocate_functions<size, false>::pcrela32(view, value, addend, address);
+      // Convert
+      // mov foo@GOTPCREL(%rip), %reg
+      // to lea foo(%rip), %reg.
+      // if possible.
+      if (rela.get_r_offset() >= 2
+	  && view[-2] == 0x8b
+	  && ((gsym == NULL && !psymval->is_ifunc_symbol())
+	      || (gsym != NULL
+		  && Target_x86_64<size>::can_convert_mov_to_lea(gsym))))
+	{
+	  view[-2] = 0x8d;
+	  Relocate_functions<size, false>::pcrela32(view, object, psymval, addend,
+						    address);
+	}
+      else
+	{
+	  if (gsym != NULL)
+	    {
+	      gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+	      got_offset = gsym->got_offset(GOT_TYPE_STANDARD) - target->got_size();
+	    }
+	  else
+	    {
+	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	      gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
+	      got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
+			    - target->got_size());
+	    }
+	  typename elfcpp::Elf_types<size>::Elf_Addr value;
+	  value = target->got_plt_section()->address() + got_offset;
+	  Relocate_functions<size, false>::pcrela32(view, value, addend, address);
+	}
       }
       break;
 
@@ -3779,7 +3865,17 @@ Target_x86_64<size>::Relocate::relocate_tls(
       break;
 
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
-      if (optimized_type == tls::TLSOPT_TO_LE)
+      if (gsym != NULL
+	  && gsym->is_undefined()
+	  && parameters->options().output_is_executable())
+	{
+	  Target_x86_64<size>::Relocate::tls_ie_to_le(relinfo, relnum,
+						      NULL, rela,
+						      r_type, value, view,
+						      view_size);
+	  break;
+	}
+      else if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  if (tls_segment == NULL)
 	    {
@@ -4100,6 +4196,8 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       // movq
       if (op1 == 0x4c)
 	view[-3] = 0x49;
+      else if (size == 32 && op1 == 0x44)
+	view[-3] = 0x41;
       view[-2] = 0xc7;
       view[-1] = 0xc0 | reg;
     }
@@ -4108,6 +4206,8 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       // Special handling for %rsp.
       if (op1 == 0x4c)
 	view[-3] = 0x49;
+      else if (size == 32 && op1 == 0x44)
+	view[-3] = 0x41;
       view[-2] = 0x81;
       view[-1] = 0xc0 | reg;
     }
@@ -4116,11 +4216,14 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       // addq
       if (op1 == 0x4c)
 	view[-3] = 0x4d;
+      else if (size == 32 && op1 == 0x44)
+	view[-3] = 0x45;
       view[-2] = 0x8d;
       view[-1] = 0x80 | reg | (reg << 3);
     }
 
-  value -= tls_segment->memsz();
+  if (tls_segment != NULL)
+    value -= tls_segment->memsz();
   Relocate_functions<size, false>::rela32(view, value, 0);
 }
 
@@ -4457,6 +4560,14 @@ Target_x86_64<size>::do_ehframe_datarel_base() const
 // code.  We have to change the function so that it always ensures
 // that it has enough stack space to run some random function.
 
+static const unsigned char cmp_insn_32[] = { 0x64, 0x3b, 0x24, 0x25 };
+static const unsigned char lea_r10_insn_32[] = { 0x44, 0x8d, 0x94, 0x24 };
+static const unsigned char lea_r11_insn_32[] = { 0x44, 0x8d, 0x9c, 0x24 };
+
+static const unsigned char cmp_insn_64[] = { 0x64, 0x48, 0x3b, 0x24, 0x25 };
+static const unsigned char lea_r10_insn_64[] = { 0x4c, 0x8d, 0x94, 0x24 };
+static const unsigned char lea_r11_insn_64[] = { 0x4c, 0x8d, 0x9c, 0x24 };
+
 template<int size>
 void
 Target_x86_64<size>::do_calls_non_split(Relobj* object, unsigned int shndx,
@@ -4467,49 +4578,40 @@ Target_x86_64<size>::do_calls_non_split(Relobj* object, unsigned int shndx,
 					std::string* from,
 					std::string* to) const
 {
+  const char* const cmp_insn = reinterpret_cast<const char*>
+      (size == 32 ? cmp_insn_32 : cmp_insn_64);
+  const char* const lea_r10_insn = reinterpret_cast<const char*>
+      (size == 32 ? lea_r10_insn_32 : lea_r10_insn_64);
+  const char* const lea_r11_insn = reinterpret_cast<const char*>
+      (size == 32 ? lea_r11_insn_32 : lea_r11_insn_64);
+
+  const size_t cmp_insn_len =
+      (size == 32 ? sizeof(cmp_insn_32) : sizeof(cmp_insn_64));
+  const size_t lea_r10_insn_len =
+      (size == 32 ? sizeof(lea_r10_insn_32) : sizeof(lea_r10_insn_64));
+  const size_t lea_r11_insn_len =
+      (size == 32 ? sizeof(lea_r11_insn_32) : sizeof(lea_r11_insn_64));
+  const size_t nop_len = (size == 32 ? 7 : 8);
+
   // The function starts with a comparison of the stack pointer and a
   // field in the TCB.  This is followed by a jump.
 
-  const char *cmp_insn, *lea_r10_insn, *lea_r11_insn;
-  size_t cmp_insn_len, nop_insn_len;
-
-  if (size == 32)
-    {
-      // For X32
-      // cmp %fs:NN,%esp
-      cmp_insn = "\x64\x3b\x24\x25";
-      cmp_insn_len = 4;
-      // lea NN(%rsp),%r10d
-      // lea NN(%rsp),%r11d
-      lea_r10_insn = "\x44\x8d\x94\x24";
-      lea_r11_insn = "\x44\x8d\x9c\x24";
-      nop_insn_len = 7;
-    }
-  else
-    {
-      // cmp %fs:NN,%rsp
-      cmp_insn = "\x64\x48\x3b\x24\x25";
-      cmp_insn_len = 5;
-      // lea NN(%rsp),%r10
-      // lea NN(%rsp),%r11
-      lea_r10_insn = "\x4c\x8d\x94\x24";
-      lea_r11_insn = "\x4c\x8d\x9c\x24";
-      nop_insn_len = 8;
-    }
-
+  // cmp %fs:NN,%rsp
   if (this->match_view(view, view_size, fnoffset, cmp_insn, cmp_insn_len)
-      && fnsize > (nop_insn_len + 1))
+      && fnsize > nop_len + 1)
     {
       // We will call __morestack if the carry flag is set after this
       // comparison.  We turn the comparison into an stc instruction
       // and some nops.
       view[fnoffset] = '\xf9';
-      this->set_view_to_nop(view, view_size, fnoffset + 1, nop_insn_len);
+      this->set_view_to_nop(view, view_size, fnoffset + 1, nop_len);
     }
+  // lea NN(%rsp),%r10
+  // lea NN(%rsp),%r11
   else if ((this->match_view(view, view_size, fnoffset,
-			     lea_r10_insn, 4)
+			     lea_r10_insn, lea_r10_insn_len)
 	    || this->match_view(view, view_size, fnoffset,
-				lea_r11_insn, 4))
+				lea_r11_insn, lea_r11_insn_len))
 	   && fnsize > 8)
     {
       // This is loading an offset from the stack pointer for a

@@ -1,6 +1,6 @@
 /* Interface between gdb and its extension languages.
 
-   Copyright (C) 2014 Free Software Foundation, Inc.
+   Copyright (C) 2014-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -61,6 +61,7 @@ static const struct extension_language_script_ops
 {
   source_gdb_script,
   source_gdb_objfile_script,
+  NULL, /* objfile_script_executor */
   auto_load_gdb_scripts_enabled
 };
 
@@ -284,6 +285,21 @@ ext_lang_objfile_script_sourcer (const struct extension_language_defn *extlang)
   gdb_assert (extlang->script_ops->objfile_script_sourcer != NULL);
 
   return extlang->script_ops->objfile_script_sourcer;
+}
+
+/* Return the objfile script "executor" function for EXTLANG.
+   This is the function that executes a script for a particular objfile.
+   If support for this language isn't compiled in, NULL is returned.
+   The extension language is not required to implement this function.  */
+
+objfile_script_executor_func *
+ext_lang_objfile_script_executor
+  (const struct extension_language_defn *extlang)
+{
+  if (extlang->script_ops == NULL)
+    return NULL;
+
+  return extlang->script_ops->objfile_script_executor;
 }
 
 /* Return non-zero if auto-loading of EXTLANG scripts is enabled.
@@ -946,6 +962,31 @@ get_xmethod_arg_types (struct xmethod_worker *worker, int *nargs)
     }
 
   return type_array;
+}
+
+/* Return the type of the result of the xmethod encapsulated in WORKER.
+   OBJECT, ARGS, NARGS are the same as for invoke_xmethod.  */
+
+struct type *
+get_xmethod_result_type (struct xmethod_worker *worker,
+			 struct value *object, struct value **args, int nargs)
+{
+  enum ext_lang_rc rc;
+  struct type *result_type;
+  const struct extension_language_defn *extlang = worker->extlang;
+
+  gdb_assert (extlang->ops->get_xmethod_arg_types != NULL);
+
+  rc = extlang->ops->get_xmethod_result_type (extlang, worker,
+					      object, args, nargs,
+					      &result_type);
+  if (rc == EXT_LANG_RC_ERROR)
+    {
+      error (_("Error while fetching result type of an xmethod worker "
+	       "defined in %s."), extlang->capitalized_name);
+    }
+
+  return result_type;
 }
 
 /* Invokes the xmethod encapsulated in WORKER and returns the result.

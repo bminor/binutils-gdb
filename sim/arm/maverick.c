@@ -1,5 +1,5 @@
 /*  maverick.c -- Cirrus/DSP co-processor interface.
-    Copyright (C) 2003-2014 Free Software Foundation, Inc.
+    Copyright (C) 2003-2015 Free Software Foundation, Inc.
     Contributed by Aldy Hernandez (aldyh@redhat.com).
  
     This program is free software; you can redistribute it and/or modify
@@ -1229,53 +1229,4 @@ mv_setReg64int (int regnum, long long val)
   reg_conv.ll = val;
   DSPregs[regnum].lower.i = reg_conv.ints[lsw_int_index];
   DSPregs[regnum].upper.i = reg_conv.ints[msw_int_index];
-}
-
-/* Compute LSW in a double and a long long.  */
-
-void
-mv_compute_host_endianness (ARMul_State * state)
-{
-  static union
-  {
-    long long ll;
-    long ints[2];
-    long i;
-    double d;
-    float floats[2];
-    float f;
-  } conv;
-
-  /* Calculate where's the LSW in a 64bit int.  */
-  conv.ll = 45;
-  
-  if (conv.ints[0] == 0)
-    {
-      msw_int_index = 0;
-      lsw_int_index = 1;
-    }
-  else
-    {
-      assert (conv.ints[1] == 0);
-      msw_int_index = 1;
-      lsw_int_index = 0;
-    }
-
-  /* Calculate where's the LSW in a double.  */
-  conv.d = 3.0;
-  
-  if (conv.ints[0] == 0)
-    {
-      msw_float_index = 0;
-      lsw_float_index = 1;
-    }
-  else
-    {
-      assert (conv.ints[1] == 0);
-      msw_float_index = 1;
-      lsw_float_index = 0;
-    }
-
-  printfdbg ("lsw_int_index   %d\n", lsw_int_index);
-  printfdbg ("lsw_float_index %d\n", lsw_float_index);
 }

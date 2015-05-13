@@ -1,5 +1,6 @@
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
+#failif
 #...
  +[0-9]+: +0+ +0+ +[A-Z]+ +WEAK +DEFAULT +UND +_?foo
 #...

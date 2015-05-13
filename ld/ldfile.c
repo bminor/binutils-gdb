@@ -1,5 +1,5 @@
 /* Linker file opening and searching.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -141,6 +141,14 @@ ldfile_try_open_bfd (const char *attempt,
 
   /* Linker needs to decompress sections.  */
   entry->the_bfd->flags |= BFD_DECOMPRESS;
+
+  /* This is a linker input BFD.  */
+  entry->the_bfd->is_linker_input = 1;
+
+#ifdef ENABLE_PLUGINS
+  if (entry->flags.lto_output)
+    entry->the_bfd->lto_output = 1;
+#endif
 
   /* If we are searching for this file, see if the architecture is
      compatible with the output file.  If it isn't, keep searching.
@@ -301,22 +309,10 @@ success:
      bfd_object that it sets the bfd's arch and mach, which
      will be needed when and if we want to bfd_create a new
      one using this one as a template.  */
-  if (bfd_check_format (entry->the_bfd, bfd_object)
-      && plugin_active_plugins_p ()
-      && !no_more_claiming)
-    {
-      int fd = open (attempt, O_RDONLY | O_BINARY);
-      if (fd >= 0)
-	{
-	  struct ld_plugin_input_file file;
-
-	  file.name = attempt;
-	  file.offset = 0;
-	  file.filesize = lseek (fd, 0, SEEK_END);
-	  file.fd = fd;
-	  plugin_maybe_claim (&file, entry);
-	}
-    }
+  if (link_info.lto_plugin_active
+      && !no_more_claiming
+      && bfd_check_format (entry->the_bfd, bfd_object))
+    plugin_maybe_claim (entry);
   else
 #endif /* ENABLE_PLUGINS */
     cmdline_check_object_only_section (entry->the_bfd, FALSE);

@@ -1,5 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -539,12 +539,12 @@ dbx_symfile_read (struct objfile *objfile, int symfile_flags)
      differently from Solaris), and false for SunOS4 and other a.out
      file formats.  */
   block_address_function_relative =
-    ((0 == strncmp (bfd_get_target (sym_bfd), "elf", 3))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "som", 3))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "coff", 4))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "pe", 2))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "epoc-pe", 7))
-     || (0 == strncmp (bfd_get_target (sym_bfd), "nlm", 3)));
+    ((startswith (bfd_get_target (sym_bfd), "elf"))
+     || (startswith (bfd_get_target (sym_bfd), "som"))
+     || (startswith (bfd_get_target (sym_bfd), "coff"))
+     || (startswith (bfd_get_target (sym_bfd), "pe"))
+     || (startswith (bfd_get_target (sym_bfd), "epoc-pe"))
+     || (startswith (bfd_get_target (sym_bfd), "nlm")));
 
   val = bfd_seek (sym_bfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
   if (val < 0)
@@ -2547,7 +2547,7 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	    processing_gcc_compilation = 2;
 	  if (tempstring[0] == bfd_get_symbol_leading_char (symfile_bfd))
 	    ++tempstring;
-	  if (strncmp (tempstring, "__gnu_compiled", 14) == 0)
+	  if (startswith (tempstring, "__gnu_compiled"))
 	    processing_gcc_compilation = 2;
 	}
     }
@@ -2702,7 +2702,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		    struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct context_stack *new;
+  struct context_stack *newobj;
   /* This remembers the address of the start of a function.  It is
      used because in Solaris 2, N_LBRAC, N_RBRAC, and N_SLINE entries
      are relative to the current function's start address.  On systems
@@ -2779,15 +2779,16 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	    }
 
 	  within_function = 0;
-	  new = pop_context ();
+	  newobj = pop_context ();
 
 	  /* Make a block for the local symbols within.  */
-	  block = finish_block (new->name, &local_symbols, new->old_blocks,
-				new->start_addr, new->start_addr + valu);
+	  block = finish_block (newobj->name, &local_symbols,
+				newobj->old_blocks,
+				newobj->start_addr, newobj->start_addr + valu);
 
 	  /* For C++, set the block's scope.  */
-	  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
-	    cp_set_block_scope (new->name, block, &objfile->objfile_obstack);
+	  if (SYMBOL_LANGUAGE (newobj->name) == language_cplus)
+	    cp_set_block_scope (newobj->name, block, &objfile->objfile_obstack);
 
 	  /* May be switching to an assembler file which may not be using
 	     block relative stabs, so reset the offset.  */
@@ -2847,8 +2848,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	  break;
 	}
 
-      new = pop_context ();
-      if (desc != new->depth)
+      newobj = pop_context ();
+      if (desc != newobj->depth)
 	lbrac_mismatch_complaint (symnum);
 
       if (local_symbols != NULL)
@@ -2861,7 +2862,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		     _("misplaced N_LBRAC entry; discarding local "
 		       "symbols which have no enclosing block"));
 	}
-      local_symbols = new->locals;
+      local_symbols = newobj->locals;
 
       if (context_stack_depth > 1)
 	{
@@ -2876,15 +2877,15 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	      /* Muzzle a compiler bug that makes end < start.
 
 		 ??? Which compilers?  Is this ever harmful?.  */
-	      if (new->start_addr > valu)
+	      if (newobj->start_addr > valu)
 		{
 		  complaint (&symfile_complaints,
 			     _("block start larger than block end"));
-		  new->start_addr = valu;
+		  newobj->start_addr = valu;
 		}
 	      /* Make a block for the local symbols within.  */
-	      finish_block (0, &local_symbols, new->old_blocks,
-			    new->start_addr, valu);
+	      finish_block (0, &local_symbols, newobj->old_blocks,
+			    newobj->start_addr, valu);
 	    }
 	}
       else
@@ -3183,20 +3184,20 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		{
 		  struct block *block;
 
-		  new = pop_context ();
+		  newobj = pop_context ();
 		  /* Make a block for the local symbols within.  */
-		  block = finish_block (new->name, &local_symbols,
-					new->old_blocks, new->start_addr,
+		  block = finish_block (newobj->name, &local_symbols,
+					newobj->old_blocks, newobj->start_addr,
 					valu);
 
 		  /* For C++, set the block's scope.  */
-		  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
-		    cp_set_block_scope (new->name, block,
+		  if (SYMBOL_LANGUAGE (newobj->name) == language_cplus)
+		    cp_set_block_scope (newobj->name, block,
 					&objfile->objfile_obstack);
 		}
 
-	      new = push_context (0, valu);
-	      new->name = define_symbol (valu, name, desc, type, objfile);
+	      newobj = push_context (0, valu);
+	      newobj->name = define_symbol (valu, name, desc, type, objfile);
 	      break;
 
 	    default:

@@ -2,7 +2,7 @@
    of the floating point routines in libgcc1.c for targets without
    hardware floating point.  */
 
-/* Copyright 1994-2014 Free Software Foundation, Inc.
+/* Copyright 1994-2015 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1107,7 +1107,7 @@ sim_fpu_add (sim_fpu *f,
 
     /* sign? */
     f->class = sim_fpu_class_number;
-    if ((signed64) f->fraction >= 0)
+    if (((signed64) f->fraction) >= 0)
       f->sign = 0;
     else
       {
@@ -1261,7 +1261,7 @@ sim_fpu_sub (sim_fpu *f,
 
     /* sign? */
     f->class = sim_fpu_class_number;
-    if ((signed64) f->fraction >= 0)
+    if (((signed64) f->fraction) >= 0)
       f->sign = 0;
     else
       {

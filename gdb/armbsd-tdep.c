@@ -1,6 +1,6 @@
 /* Target-dependent code for ARM BSD's.
 
-   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+   Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -98,7 +98,9 @@ armbsd_supply_gregset (const struct regset *regset,
 static const struct regset armbsd_gregset =
 {
   NULL,
-  armbsd_supply_gregset
+  armbsd_supply_gregset,
+  NULL,
+  REGSET_VARIABLE_SIZE
 };
 
 static const struct regset armbsd_fpregset =

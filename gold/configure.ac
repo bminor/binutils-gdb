@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+dnl   Copyright (C) 2006-2015 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -210,6 +210,7 @@ for targ in $target $canon_targets; do
 	  case "$target" in
 	  x86_64*-linux-gnux32)
 	    target_x32=yes
+	    default_size=32
 	    ;;
 	  *)
 	    target_x86_64=yes
@@ -527,7 +528,6 @@ fi
 
 # Link in zlib if we can.  This allows us to write compressed sections.
 AM_ZLIB
-AM_CONDITIONAL(HAVE_ZLIB, test "$ac_cv_header_zlib_h" = "yes")
 
 dnl We have to check these in C, not C++, because autoconf generates
 dnl tests which have no type information, and current glibc provides

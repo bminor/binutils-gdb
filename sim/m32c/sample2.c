@@ -1,6 +1,6 @@
 /* sample2.c --- main source for sample2.x test program for M32C simulator
 
-Copyright (C) 2005-2014 Free Software Foundation, Inc.
+Copyright (C) 2005-2015 Free Software Foundation, Inc.
 Contributed by Red Hat, Inc.
 
 This file is part of the GNU simulators.
@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* See the 'sample2.x' target in Makefile.in.  */
 void exit (int);
 
-start ()
+void
+start (void)
 {
   foo (1, 2, 3, 4);
   exit (5);

@@ -1,6 +1,6 @@
 /* Shared utility routines for GDB to interact with agent.
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,9 +23,10 @@ int agent_look_up_symbols (void *);
 
 #define STRINGIZE_1(STR) #STR
 #define STRINGIZE(STR) STRINGIZE_1(STR)
+#define IPA_SYM_EXPORTED_NAME(SYM) gdb_agent_ ## SYM
 #define IPA_SYM(SYM)                                   \
   {                                                    \
-    STRINGIZE (gdb_agent_ ## SYM),			\
+    STRINGIZE (IPA_SYM_EXPORTED_NAME (SYM)),		\
     offsetof (struct ipa_sym_addresses, addr_ ## SYM)	\
   }
 

@@ -1,5 +1,5 @@
 /* BFD COFF object file private structure.
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -21,6 +21,10 @@
 
 #include "bfdlink.h"
 #include "coff-bfd.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Object file tdata; access macros.  */
 

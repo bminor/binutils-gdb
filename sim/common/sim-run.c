@@ -1,5 +1,5 @@
 /* Generic simulator run.
-   Copyright (C) 1997-2014 Free Software Foundation, Inc.
+   Copyright (C) 1997-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -35,7 +35,7 @@ sim_engine_run (SIM_DESC sd,
   sim_cpu *cpu;
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   cpu = STATE_CPU (sd, 0);
-  cia = CIA_GET (cpu);
+  cia = CPU_PC_GET (cpu);
   while (1)
     {
       instruction_word insn = IMEM32 (cia);
@@ -43,7 +43,7 @@ sim_engine_run (SIM_DESC sd,
       /* process any events */
       if (sim_events_tick (sd))
 	{
-	  CIA_SET (cpu, cia);
+	  CPU_PC_SET (cpu, cia);
 	  sim_events_process (sd);
 	}
     }

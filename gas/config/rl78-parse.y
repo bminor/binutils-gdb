@@ -1,5 +1,5 @@
 /* rl78-parse.y  Renesas RL78 parser
-   Copyright (C) 2011-2014 Free Software Foundation, Inc.
+   Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -104,6 +104,10 @@ static int    rl78_bit_insn = 0;
 #define NOT_ES if (rl78_has_prefix()) rl78_error ("ES: prefix not allowed here");
 
 #define WA(x) if (!expr_is_word_aligned (x)) rl78_error ("Expression not word-aligned");
+
+#define ISA_G10(s) if (!rl78_isa_g10()) rl78_error (s " is only supported on the G10")
+#define ISA_G13(s) if (!rl78_isa_g13()) rl78_error (s " is only supported on the G13")
+#define ISA_G14(s) if (!rl78_isa_g14()) rl78_error (s " is only supported on the G14")
 
 static void check_expr_is_bit_index (expressionS);
 #define Bit(e) check_expr_is_bit_index (e);
@@ -259,7 +263,7 @@ statement :
 	  { B2 (0x61, 0x09|$1); O1 ($8); }
 
 	| addsubw AX ',' opt_es '[' HL ']'
-	  { B4 (0x61, 0x09|$1, 0, 0); }
+	  { B3 (0x61, 0x09|$1, 0); }
 
 	| addsubw SP ',' '#' EXPR
 	  { B1 ($1 ? 0x20 : 0x10); O1 ($5);
@@ -500,16 +504,16 @@ statement :
 
 /* ---------------------------------------------------------------------- */
 
-	| MULHU
+	| MULHU { ISA_G14 ("MULHU"); }
 	  { B3 (0xce, 0xfb, 0x01); }
 
-	| MULH
+	| MULH { ISA_G14 ("MULH"); }
 	  { B3 (0xce, 0xfb, 0x02); }
 
 	| MULU X
 	  { B1 (0xd6); }
 
-	| DIVHU
+	| DIVHU { ISA_G14 ("DIVHU"); }
 	  { B3 (0xce, 0xfb, 0x03); }
 
 /* Note that the DIVWU encoding was changed from [0xce,0xfb,0x04] to
@@ -517,13 +521,13 @@ statement :
    with the same version number, but varying encodings.  The version
    here matches the hardware.  */
 
-	| DIVWU
+	| DIVWU { ISA_G14 ("DIVWU"); }
 	  { B3 (0xce, 0xfb, 0x0b); }
 
-	| MACHU
+	| MACHU { ISA_G14 ("MACHU"); }
 	  { B3 (0xce, 0xfb, 0x05); }
 
-	| MACH
+	| MACH { ISA_G14 ("MACH"); }
 	  { B3 (0xce, 0xfb, 0x06); }
 
 /* ---------------------------------------------------------------------- */

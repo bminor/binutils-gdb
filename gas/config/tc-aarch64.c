@@ -1,6 +1,6 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -54,9 +54,6 @@ static const aarch64_feature_set *march_cpu_opt = NULL;
 
 /* Constants for known architecture features.  */
 static const aarch64_feature_set cpu_default = CPU_DEFAULT;
-
-static const aarch64_feature_set aarch64_arch_any = AARCH64_ANY;
-static const aarch64_feature_set aarch64_arch_none = AARCH64_ARCH_NONE;
 
 #ifdef OBJ_ELF
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_"	*/
@@ -174,22 +171,10 @@ get_error_message (void)
   return inst.parsing_error.error;
 }
 
-static inline void
-set_error_message (const char *error)
-{
-  inst.parsing_error.error = error;
-}
-
 static inline enum aarch64_operand_error_kind
 get_error_kind (void)
 {
   return inst.parsing_error.kind;
-}
-
-static inline void
-set_error_kind (enum aarch64_operand_error_kind kind)
-{
-  inst.parsing_error.kind = kind;
 }
 
 static inline void
@@ -1475,21 +1460,28 @@ mapping_state (enum mstate state)
 {
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
 
-#define TRANSITION(from, to) (mapstate == (from) && state == (to))
+  if (state == MAP_INSN)
+    /* AArch64 instructions require 4-byte alignment.  When emitting
+       instructions into any section, record the appropriate section
+       alignment.  */
+    record_alignment (now_seg, 2);
 
   if (mapstate == state)
     /* The mapping symbol has already been emitted.
        There is nothing else to do.  */
     return;
-  else if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
-    /* This case will be evaluated later in the next else.  */
+
+#define TRANSITION(from, to) (mapstate == (from) && state == (to))
+  if (TRANSITION (MAP_UNDEFINED, MAP_DATA) && !subseg_text_p (now_seg))
+    /* Emit MAP_DATA within executable section in order.  Otherwise, it will be
+       evaluated later in the next else.  */
     return;
   else if (TRANSITION (MAP_UNDEFINED, MAP_INSN))
     {
       /* Only add the symbol if the offset is > 0:
-         if we're at the first frag, check it's size > 0;
-         if we're not at the first frag, then for sure
-         the offset is > 0.  */
+	 if we're at the first frag, check it's size > 0;
+	 if we're not at the first frag, then for sure
+	 the offset is > 0.  */
       struct frag *const frag_first = seg_info (now_seg)->frchainP->frch_root;
       const int add_symbol = (frag_now != frag_first)
 	|| (frag_now_fix () > 0);
@@ -1497,9 +1489,9 @@ mapping_state (enum mstate state)
       if (add_symbol)
 	make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
     }
+#undef TRANSITION
 
   mapping_state_2 (state, 0);
-#undef TRANSITION
 }
 
 /* Same as mapping_state, but MAX_CHARS bytes have already been
@@ -1863,8 +1855,14 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  if (!need_pass_2)
+  /* Sections are assumed to start aligned. In executable section, there is no
+     MAP_DATA symbol pending. So we only align the address during
+     MAP_DATA --> MAP_INSN transition.
+     For other sections, this is not guaranteed.  */
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+  if (!need_pass_2 && subseg_text_p (now_seg) && mapstate == MAP_DATA)
     frag_align_code (2, 0);
+
 #ifdef OBJ_ELF
   mapping_state (MAP_INSN);
 #endif
@@ -2313,220 +2311,282 @@ struct reloc_table_entry
 {
   const char *name;
   int pc_rel;
+  bfd_reloc_code_real_type adr_type;
   bfd_reloc_code_real_type adrp_type;
   bfd_reloc_code_real_type movw_type;
   bfd_reloc_code_real_type add_type;
   bfd_reloc_code_real_type ldst_type;
+  bfd_reloc_code_real_type ld_literal_type;
 };
 
 static struct reloc_table_entry reloc_table[] = {
   /* Low 12 bits of absolute address: ADD/i and LDR/STR */
   {"lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_ADD_LO12,
-   BFD_RELOC_AARCH64_LDST_LO12},
+   BFD_RELOC_AARCH64_LDST_LO12,
+   0},
 
   /* Higher 21 bits of pc-relative page offset: ADRP */
   {"pg_hi21", 1,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_ADR_HI21_PCREL,
+   0,
    0,
    0,
    0},
 
   /* Higher 21 bits of pc-relative page offset: ADRP, no check */
   {"pg_hi21_nc", 1,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL,
+   0,
    0,
    0,
    0},
 
   /* Most significant bits 0-15 of unsigned address/value: MOVZ */
   {"abs_g0", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G0,
+   0,
    0,
    0},
 
   /* Most significant bits 0-15 of signed address/value: MOVN/Z */
   {"abs_g0_s", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G0_S,
+   0,
    0,
    0},
 
   /* Less significant bits 0-15 of address/value: MOVK, no check */
   {"abs_g0_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G0_NC,
+   0,
    0,
    0},
 
   /* Most significant bits 16-31 of unsigned address/value: MOVZ */
   {"abs_g1", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G1,
+   0,
    0,
    0},
 
   /* Most significant bits 16-31 of signed address/value: MOVN/Z */
   {"abs_g1_s", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G1_S,
+   0,
    0,
    0},
 
   /* Less significant bits 16-31 of address/value: MOVK, no check */
   {"abs_g1_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G1_NC,
+   0,
    0,
    0},
 
   /* Most significant bits 32-47 of unsigned address/value: MOVZ */
   {"abs_g2", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G2,
+   0,
    0,
    0},
 
   /* Most significant bits 32-47 of signed address/value: MOVN/Z */
   {"abs_g2_s", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G2_S,
+   0,
    0,
    0},
 
   /* Less significant bits 32-47 of address/value: MOVK, no check */
   {"abs_g2_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G2_NC,
+   0,
    0,
    0},
 
   /* Most significant bits 48-63 of signed/unsigned address/value: MOVZ */
   {"abs_g3", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_MOVW_G3,
+   0,
    0,
    0},
 
   /* Get to the page containing GOT entry for a symbol.  */
   {"got", 1,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_ADR_GOT_PAGE,
+   0,
    0,
    0,
    BFD_RELOC_AARCH64_GOT_LD_PREL19},
 
   /* 12 bit offset into the page containing GOT entry for that symbol.  */
   {"got_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    0,
-   BFD_RELOC_AARCH64_LD_GOT_LO12_NC},
+   BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
+   0},
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsgd", 0,
+   BFD_RELOC_AARCH64_TLSGD_ADR_PREL21, /* adr_type */
    BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21,
+   0,
    0,
    0,
    0},
 
   /* 12 bit offset into the page containing GOT TLS entry for a symbol */
   {"tlsgd_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC,
+   0,
    0},
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsdesc", 0,
+   BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21, /* adr_type */
    BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21,
    0,
    0,
-   0},
+   0,
+   BFD_RELOC_AARCH64_TLSDESC_LD_PREL19},
 
   /* 12 bit offset into the page containing GOT TLS entry for a symbol */
   {"tlsdesc_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
-   BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC},
+   BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
+   0},
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"gottprel", 0,
+   0,				/* adr_type */
    BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21,
    0,
    0,
-   0},
+   0,
+   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19},
 
   /* 12 bit offset into the page containing GOT TLS entry for a symbol */
   {"gottprel_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    0,
-   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC},
+   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC,
+   0},
 
   /* Get tp offset for a symbol.  */
   {"tprel", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12,
+   0,
    0},
 
   /* Get tp offset for a symbol.  */
   {"tprel_lo12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12,
+   0,
    0},
 
   /* Get tp offset for a symbol.  */
   {"tprel_hi12", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12,
+   0,
    0},
 
   /* Get tp offset for a symbol.  */
   {"tprel_lo12_nc", 0,
+   0,				/* adr_type */
    0,
    0,
    BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC,
+   0,
    0},
 
   /* Most significant bits 32-47 of address/value: MOVZ.  */
   {"tprel_g2", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2,
+   0,
    0,
    0},
 
   /* Most significant bits 16-31 of address/value: MOVZ.  */
   {"tprel_g1", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1,
+   0,
    0,
    0},
 
   /* Most significant bits 16-31 of address/value: MOVZ, no check.  */
   {"tprel_g1_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC,
+   0,
    0,
    0},
 
   /* Most significant bits 0-15 of address/value: MOVZ.  */
   {"tprel_g0", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0,
+   0,
    0,
    0},
 
   /* Most significant bits 0-15 of address/value: MOVZ, no check.  */
   {"tprel_g0_nc", 0,
+   0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC,
+   0,
    0,
    0},
 };
@@ -2934,6 +2994,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
       skip_past_char (&p, '#');
       if (reloc && skip_past_char (&p, ':'))
 	{
+	  bfd_reloc_code_real_type ty;
 	  struct reloc_table_entry *entry;
 
 	  /* Try to parse a relocation modifier.  Anything else is
@@ -2945,7 +3006,19 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	      return FALSE;
 	    }
 
-	  if (entry->ldst_type == 0)
+	  switch (operand->type)
+	    {
+	    case AARCH64_OPND_ADDR_PCREL21:
+	      /* adr */
+	      ty = entry->adr_type;
+	      break;
+
+	    default:
+	      ty = entry->ld_literal_type;
+	      break;
+	    }
+
+	  if (ty == 0)
 	    {
 	      set_syntax_error
 		(_("this relocation modifier is not allowed on this "
@@ -2961,8 +3034,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	    }
 
 	  /* #:<reloc_op>:<expr>  */
-	  /* Record the load/store relocation type.  */
-	  inst.reloc.type = entry->ldst_type;
+	  /* Record the relocation type.  */
+	  inst.reloc.type = ty;
 	  inst.reloc.pc_rel = entry->pc_rel;
 	}
       else
@@ -4448,9 +4521,7 @@ process_movw_reloc_info (void)
       case BFD_RELOC_AARCH64_MOVW_G1_S:
       case BFD_RELOC_AARCH64_MOVW_G2_S:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
-      case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
-      case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
 	set_syntax_error
 	  (_("the specified relocation type is not allowed for MOVK"));
@@ -5508,6 +5579,7 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
       if ((aarch64_get_operand_class (opnds[0].type)
 	   == AARCH64_OPND_CLASS_INT_REG)
 	  && opnds[0].reg.regno == opnds[1].addr.base_regno
+	  && opnds[1].addr.base_regno != REG_SP
 	  && opnds[1].addr.writeback)
 	as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
       break;
@@ -5519,6 +5591,7 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 	   == AARCH64_OPND_CLASS_INT_REG)
 	  && (opnds[0].reg.regno == opnds[2].addr.base_regno
 	    || opnds[1].reg.regno == opnds[2].addr.base_regno)
+	  && opnds[2].addr.base_regno != REG_SP
 	  && opnds[2].addr.writeback)
 	    as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
       /* Load operations must load different registers.  */
@@ -5615,6 +5688,14 @@ md_assemble (char *str)
     }
 
   init_operand_error_report ();
+
+  /* Sections are assumed to start aligned. In executable section, there is no
+     MAP_DATA symbol pending. So we only align the address during
+     MAP_DATA --> MAP_INSN transition.
+     For other sections, this is not guaranteed.  */
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+  if (!need_pass_2 && subseg_text_p (now_seg) && mapstate == MAP_DATA)
+    frag_align_code (2, 0);
 
   saved_cond = inst.cond;
   reset_aarch64_instruction (&inst);
@@ -5947,21 +6028,20 @@ aarch64_init_frag (fragS * fragP, int max_chars)
   /* Record a mapping symbol for alignment frags.  We will delete this
      later if the alignment ends up empty.  */
   if (!fragP->tc_frag_data.recorded)
+    fragP->tc_frag_data.recorded = 1;
+
+  switch (fragP->fr_type)
     {
-      fragP->tc_frag_data.recorded = 1;
-      switch (fragP->fr_type)
-	{
-	case rs_align:
-	case rs_align_test:
-	case rs_fill:
-	  mapping_state_2 (MAP_DATA, max_chars);
-	  break;
-	case rs_align_code:
-	  mapping_state_2 (MAP_INSN, max_chars);
-	  break;
-	default:
-	  break;
-	}
+    case rs_align:
+    case rs_align_test:
+    case rs_fill:
+      mapping_state_2 (MAP_DATA, max_chars);
+      break;
+    case rs_align_code:
+      mapping_state_2 (MAP_INSN, max_chars);
+      break;
+    default:
+      break;
     }
 }
 
@@ -6636,13 +6716,17 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6835,13 +6919,17 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_LDST8_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -7227,18 +7315,25 @@ struct aarch64_cpu_option_table
    recognized by GCC.  */
 static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"all", AARCH64_ANY, NULL},
-  {"cortex-a53", AARCH64_FEATURE(AARCH64_ARCH_V8,
-				 AARCH64_FEATURE_CRC), "Cortex-A53"},
-  {"cortex-a57", AARCH64_FEATURE(AARCH64_ARCH_V8,
-				 AARCH64_FEATURE_CRC), "Cortex-A57"},
-  {"thunderx", AARCH64_ARCH_V8, "Cavium ThunderX"},
+  {"cortex-a53", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				  AARCH64_FEATURE_CRC), "Cortex-A53"},
+  {"cortex-a57", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				  AARCH64_FEATURE_CRC), "Cortex-A57"},
+  {"cortex-a72", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				  AARCH64_FEATURE_CRC), "Cortex-A72"},
+  {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+				"Samsung Exynos M1"},
+  {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+   "Cavium ThunderX"},
   /* The 'xgene-1' name is an older name for 'xgene1', which was used
      in earlier releases and is superseded by 'xgene1' in all
      tools.  */
   {"xgene-1", AARCH64_ARCH_V8, "APM X-Gene 1"},
   {"xgene1", AARCH64_ARCH_V8, "APM X-Gene 1"},
-  {"xgene2", AARCH64_FEATURE(AARCH64_ARCH_V8,
-			     AARCH64_FEATURE_CRC), "APM X-Gene 2"},
+  {"xgene2", AARCH64_FEATURE (AARCH64_ARCH_V8,
+			      AARCH64_FEATURE_CRC), "APM X-Gene 2"},
   {"generic", AARCH64_ARCH_V8, NULL},
 
   {NULL, AARCH64_ARCH_NONE, NULL}

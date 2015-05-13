@@ -1,6 +1,6 @@
 /* Parser definitions for GDB.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo.
@@ -114,7 +114,7 @@ struct objc_class_str
   {
     struct stoken stoken;
     struct type *type;
-    int class;
+    int theclass;
   };
 
 typedef struct type *type_ptr;

@@ -1923,6 +1923,15 @@ if an error occurred while writing to FILE.
 
 @end deftypefn
 
+@c xasprintf.c:31
+@deftypefn Replacement char* xasprintf (const char *@var{format}, ...)
+
+Print to allocated string without fail.  If @code{xasprintf} fails,
+this will print a message to @code{stderr} (using the name set by
+@code{xmalloc_set_program_name}, if any) and then call @code{xexit}.
+
+@end deftypefn
+
 @c xatexit.c:11
 @deftypefun int xatexit (void (*@var{fn}) (void))
 
@@ -2019,6 +2028,15 @@ will never return a @code{NULL} pointer.
 Returns a pointer to a copy of @var{s} with at most @var{n} characters
 without fail, using @code{xmalloc} to obtain memory.  The result is
 always NUL terminated.
+
+@end deftypefn
+
+@c xvasprintf.c:38
+@deftypefn Replacement char* xvasprintf (const char *@var{format}, va_list @var{args})
+
+Print to allocated string without fail.  If @code{xvasprintf} fails,
+this will print a message to @code{stderr} (using the name set by
+@code{xmalloc_set_program_name}, if any) and then call @code{xexit}.
 
 @end deftypefn
 

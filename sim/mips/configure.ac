@@ -234,7 +234,7 @@ if test ${sim_gen} = MULTI; then
 
   cat << __EOF__ > multi-run.c
 /* Main entry point for MULTI simulators.
-   Copyright (C) 2003-2014 Free Software Foundation, Inc.
+   Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -419,17 +419,6 @@ case "${target}" in
 	;;
 esac
 SIM_AC_OPTION_HARDWARE($hw_enabled,$hw_devices,$hw_extra_devices)
-mips_extra_objs="$SIM_DV_SOCKSER_O"
-AC_SUBST(mips_extra_objs)
-
-if test "$sim_hw_p" = yes -a -z "$SIM_DV_SOCKSER_O"; then
-	case " $sim_hw " in
-	*" tx3904sio "*)
-		AC_MSG_ERROR([Sorry, but tx3904sio hardware support is
-unavailable for your target.  Please use --disable-sim-hardware, or pass a
-list of devices to enable that does not include that.])
-	esac
-fi
 
 
 # Choose simulator engine
@@ -444,7 +433,6 @@ AC_PATH_X
 mips_extra_libs=""
 AC_SUBST(mips_extra_libs)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_FUNCS(aint anint sqrt)
 

@@ -1,5 +1,5 @@
 /* Common code for PA ELF implementations.
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -47,7 +47,7 @@
 
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 {
-  { R_PARISC_NONE, 0, 0, 0, FALSE, 0, complain_overflow_bitfield,
+  { R_PARISC_NONE, 0, 3, 0, FALSE, 0, complain_overflow_dont,
     bfd_elf_generic_reloc, "R_PARISC_NONE", FALSE, 0, 0, FALSE },
 
   /* The values in DIR32 are to placate the check in

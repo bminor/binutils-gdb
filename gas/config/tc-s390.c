@@ -1,5 +1,5 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -109,138 +109,35 @@ const pseudo_typeS md_pseudo_table[] =
   { NULL,	    NULL,		0 }
 };
 
-
-/* Structure to hold information about predefined registers.  */
-struct pd_reg
-  {
-    char *name;
-    int value;
-  };
-
-/* List of registers that are pre-defined:
-
-   Each access register has a predefined name of the form:
-     a<reg_num> which has the value <reg_num>.
-
-   Each control register has a predefined name of the form:
-     c<reg_num> which has the value <reg_num>.
-
-   Each general register has a predefined name of the form:
-     r<reg_num> which has the value <reg_num>.
-
-   Each floating point register a has predefined name of the form:
-     f<reg_num> which has the value <reg_num>.
-
-   There are individual registers as well:
-     sp     has the value 15
-     lit    has the value 12
-
-   The table is sorted. Suitable for searching by a binary search.  */
-
-static const struct pd_reg pre_defined_registers[] =
-{
-  { "a0", 0 },     /* Access registers */
-  { "a1", 1 },
-  { "a10", 10 },
-  { "a11", 11 },
-  { "a12", 12 },
-  { "a13", 13 },
-  { "a14", 14 },
-  { "a15", 15 },
-  { "a2", 2 },
-  { "a3", 3 },
-  { "a4", 4 },
-  { "a5", 5 },
-  { "a6", 6 },
-  { "a7", 7 },
-  { "a8", 8 },
-  { "a9", 9 },
-
-  { "c0", 0 },     /* Control registers */
-  { "c1", 1 },
-  { "c10", 10 },
-  { "c11", 11 },
-  { "c12", 12 },
-  { "c13", 13 },
-  { "c14", 14 },
-  { "c15", 15 },
-  { "c2", 2 },
-  { "c3", 3 },
-  { "c4", 4 },
-  { "c5", 5 },
-  { "c6", 6 },
-  { "c7", 7 },
-  { "c8", 8 },
-  { "c9", 9 },
-
-  { "f0", 0 },     /* Floating point registers */
-  { "f1", 1 },
-  { "f10", 10 },
-  { "f11", 11 },
-  { "f12", 12 },
-  { "f13", 13 },
-  { "f14", 14 },
-  { "f15", 15 },
-  { "f2", 2 },
-  { "f3", 3 },
-  { "f4", 4 },
-  { "f5", 5 },
-  { "f6", 6 },
-  { "f7", 7 },
-  { "f8", 8 },
-  { "f9", 9 },
-
-  { "lit", 13 },   /* Pointer to literal pool */
-
-  { "r0", 0 },     /* General purpose registers */
-  { "r1", 1 },
-  { "r10", 10 },
-  { "r11", 11 },
-  { "r12", 12 },
-  { "r13", 13 },
-  { "r14", 14 },
-  { "r15", 15 },
-  { "r2", 2 },
-  { "r3", 3 },
-  { "r4", 4 },
-  { "r5", 5 },
-  { "r6", 6 },
-  { "r7", 7 },
-  { "r8", 8 },
-  { "r9", 9 },
-
-  { "sp", 15 },   /* Stack pointer */
-
-};
-
-#define REG_NAME_CNT (sizeof (pre_defined_registers) / sizeof (struct pd_reg))
-
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
 
 static int
-reg_name_search (const struct pd_reg *regs, int regcount, const char *name)
+reg_name_search (const char *name)
 {
-  int middle, low, high;
-  int cmp;
+  int val = -1;
 
-  low = 0;
-  high = regcount - 1;
+  if (strcasecmp (name, "lit") == 0)
+    return 13;
 
-  do
+  if (strcasecmp (name, "sp") == 0)
+    return 15;
+
+  if (name[0] != 'a' && name[0] != 'c' && name[0] != 'f'
+      && name[0] != 'r' && name[0] != 'v')
+    return -1;
+
+  if (ISDIGIT (name[1]))
     {
-      middle = (low + high) / 2;
-      cmp = strcasecmp (name, regs[middle].name);
-      if (cmp < 0)
-	high = middle - 1;
-      else if (cmp > 0)
-	low = middle + 1;
-      else
-	return regs[middle].value;
+      val = name[1] - '0';
+      if (ISDIGIT (name[2]))
+	val = val * 10 + name[2] - '0';
     }
-  while (low <= high);
 
-  return -1;
+  if ((name[0] != 'v' && val > 15) || val > 31)
+    val = -1;
+
+  return val;
 }
 
 
@@ -272,7 +169,7 @@ register_name (expressionS *expressionP)
     return FALSE;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
+  reg_number = reg_name_search (name);
 
   /* Put back the delimiting char.  */
   *input_line_pointer = c;
@@ -382,6 +279,8 @@ s390_parse_cpu (char *arg)
     return S390_OPCODE_Z196;
   else if (strcmp (arg, "zEC12") == 0)
     return S390_OPCODE_ZEC12;
+  else if (strcmp (arg, "z13") == 0)
+    return S390_OPCODE_Z13;
   else if (strcmp (arg, "all") == 0)
     return S390_OPCODE_MAXCPU - 1;
   else
@@ -633,6 +532,12 @@ s390_insert_operand (unsigned char *insn,
       max = (((addressT) 1 << (operand->bits - 1)) << 1) - 1;
       min = (offsetT) 0;
       uval = (addressT) val;
+
+      /* Vector register operands have an additional bit in the RXB
+	 field.  */
+      if (operand->flags & S390_OPERAND_VR)
+	max = (max << 1) | 1;
+
       /* Length x in an instructions has real length x+1.  */
       if (operand->flags & S390_OPERAND_LENGTH)
 	uval--;
@@ -650,6 +555,43 @@ s390_insert_operand (unsigned char *insn,
 
 	  return;
 	}
+    }
+
+  if (operand->flags & S390_OPERAND_VR)
+    {
+      /* Insert the extra bit into the RXB field.  */
+      switch (operand->shift)
+	{
+	case 8:
+	  insn[4] |= (uval & 0x10) >> 1;
+	  break;
+	case 12:
+	  insn[4] |= (uval & 0x10) >> 2;
+	  break;
+	case 16:
+	  insn[4] |= (uval & 0x10) >> 3;
+	  break;
+	case 32:
+	  insn[4] |= (uval & 0x10) >> 4;
+	  break;
+	}
+      uval &= 0xf;
+    }
+
+  if (operand->flags & S390_OPERAND_OR1)
+    uval |= 1;
+  if (operand->flags & S390_OPERAND_OR2)
+    uval |= 2;
+  if (operand->flags & S390_OPERAND_OR8)
+    uval |= 8;
+
+  /* Duplicate the operand at bit pos 12 to 16.  */
+  if (operand->flags & S390_OPERAND_CP16)
+    {
+      /* Copy VR operand at bit pos 12 to bit pos 16.  */
+      insn[2] |= uval << 4;
+      /* Copy the flag in the RXB field.  */
+      insn[4] |= (insn[4] & 4) >> 1;
     }
 
   /* Insert fragments of the operand byte for byte.  */
@@ -1206,6 +1148,14 @@ md_gather_operands (char *str,
 
       operand = s390_operands + *opindex_ptr;
 
+      if ((opcode->flags & S390_INSTR_FLAG_OPTPARM) && *str == '\0')
+	{
+	  /* Optional parameters might need to be ORed with a
+	     value so calling s390_insert_operand is needed.  */
+	  s390_insert_operand (insn, operand, 0, NULL, 0);
+	  break;
+	}
+
       if (skip_optional && (operand->flags & S390_OPERAND_INDEX))
 	{
 	  /* We do an early skip. For D(X,B) constructions the index
@@ -1266,6 +1216,9 @@ md_gather_operands (char *str,
 	    }
 	  else
 	    {
+	      if ((operand->flags & S390_OPERAND_LENGTH)
+		  && ex.X_op != O_constant)
+		as_fatal (_("invalid length field specified"));
 	      if ((operand->flags & S390_OPERAND_INDEX)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
@@ -1477,6 +1430,10 @@ md_gather_operands (char *str,
 		as_bad (_("syntax error; ')' not allowed here"));
 	      str++;
 	    }
+
+	  if ((opcode->flags & S390_INSTR_FLAG_OPTPARM) && *str == '\0')
+	    continue;
+
 	  /* If there is a next operand it must be separated by a comma.  */
 	  if (opindex_ptr[1] != '\0')
 	    {
@@ -2499,7 +2456,7 @@ tc_s390_regname_to_dw2regnum (char *regname)
 
   if (regname[0] != 'c' && regname[0] != 'a')
     {
-      regnum = reg_name_search (pre_defined_registers, REG_NAME_CNT, regname);
+      regnum = reg_name_search (regname);
       if (regname[0] == 'f' && regnum != -1)
         regnum += 16;
     }

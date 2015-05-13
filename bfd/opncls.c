@@ -1,5 +1,5 @@
 /* opncls.c -- open and close a BFD.
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -109,6 +109,8 @@ _bfd_new_bfd_contained_in (bfd *obfd)
   nbfd->my_archive = obfd;
   nbfd->direction = read_direction;
   nbfd->target_defaulted = obfd->target_defaulted;
+  nbfd->lto_output = obfd->lto_output;
+  nbfd->no_export = obfd->no_export;
   return nbfd;
 }
 

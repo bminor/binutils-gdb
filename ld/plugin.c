@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright (C) 2010-2014 Free Software Foundation, Inc.
+   Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -21,6 +21,7 @@
 #include "sysdep.h"
 #include "libiberty.h"
 #include "bfd.h"
+#include "libbfd.h"
 #include "bfdlink.h"
 #include "bfdver.h"
 #include "ld.h"
@@ -29,9 +30,26 @@
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "../bfd/plugin.h"
 #include "plugin.h"
 #include "plugin-api.h"
 #include "elf-bfd.h"
+#if HAVE_MMAP
+# include <sys/mman.h>
+# ifndef MAP_FAILED
+#  define MAP_FAILED ((void *) -1)
+# endif
+# ifndef PROT_READ
+#  define PROT_READ 0
+# endif
+# ifndef MAP_PRIVATE
+#  define MAP_PRIVATE 0
+# endif
+#endif
+#include <errno.h>
+#if !(defined(errno) || defined(_MSC_VER) && defined(_INC_ERRNO))
+extern int errno;
+#endif
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 #include <windows.h>
 #endif
@@ -75,6 +93,26 @@ typedef struct plugin
   bfd_boolean cleanup_done;
 } plugin_t;
 
+typedef struct view_buffer
+{
+  char *addr;
+  size_t filesize;
+  off_t offset;
+} view_buffer_t;
+
+/* The internal version of struct ld_plugin_input_file with a BFD
+   pointer.  */
+typedef struct plugin_input_file
+{
+  bfd *abfd;
+  view_buffer_t view_buffer;
+  char *name;
+  int fd;
+  bfd_boolean use_mmap;
+  off_t offset;
+  off_t filesize;
+} plugin_input_file_t;
+
 /* The master list of all plugins.  */
 static plugin_t *plugins_list = NULL;
 
@@ -104,6 +142,11 @@ static struct bfd_link_callbacks plugin_callbacks;
    its own newly-added input files and libs to claim.  */
 bfd_boolean no_more_claiming = FALSE;
 
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+/* Page size used by mmap.  */
+static off_t plugin_pagesize;
+#endif
+
 /* List of tags to set in the constant leading part of the tv array. */
 static const enum ld_plugin_tag tv_header_tags[] =
 {
@@ -117,6 +160,7 @@ static const enum ld_plugin_tag tv_header_tags[] =
   LDPT_REGISTER_CLEANUP_HOOK,
   LDPT_ADD_SYMBOLS,
   LDPT_GET_INPUT_FILE,
+  LDPT_GET_VIEW,
   LDPT_RELEASE_INPUT_FILE,
   LDPT_GET_SYMBOLS,
   LDPT_GET_SYMBOLS_V2,
@@ -133,6 +177,8 @@ static bfd_boolean plugin_notice (struct bfd_link_info *,
 				  struct bfd_link_hash_entry *,
 				  struct bfd_link_hash_entry *,
 				  bfd *, asection *, bfd_vma, flagword);
+
+static const bfd_target * plugin_object_p (bfd *);
 
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 
@@ -243,22 +289,31 @@ plugin_opt_plugin_arg (const char *arg)
   return 0;
 }
 
-/* Create a dummy BFD.  */
-bfd *
+/* Generate a dummy BFD to represent an IR file, for any callers of
+   plugin_call_claim_file to use as the handle in the ld_plugin_input_file
+   struct that they build to pass in.  The BFD is initially writable, so
+   that symbols can be added to it; it must be made readable after the
+   add_symbols hook has been called so that it can be read when linking.  */
+static bfd *
 plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 {
   bfd *abfd;
 
   bfd_use_reserved_id = 1;
   abfd = bfd_create (concat (name, IRONLY_SUFFIX, (const char *) NULL),
-		     srctemplate);
+		     link_info.output_bfd);
   if (abfd != NULL)
     {
       abfd->flags |= BFD_LINKER_CREATED | BFD_PLUGIN;
-      bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
-      bfd_set_gp_size (abfd, bfd_get_gp_size (srctemplate));
-      if (bfd_make_writable (abfd)
-	  && bfd_copy_private_bfd_data (srctemplate, abfd))
+      if (!bfd_make_writable (abfd))
+	goto report_error;
+      if (! bfd_plugin_target_p (srctemplate->xvec))
+	{
+	  bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
+	  bfd_set_gp_size (abfd, bfd_get_gp_size (srctemplate));
+	  if (!bfd_copy_private_bfd_data (srctemplate, abfd))
+	    goto report_error;
+	}
 	{
 	  flagword flags;
 
@@ -269,6 +324,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 	    return abfd;
 	}
     }
+report_error:
   einfo (_("could not create dummy IR bfd: %F%E\n"));
   return NULL;
 }
@@ -416,7 +472,8 @@ static enum ld_plugin_status
 add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 {
   asymbol **symptrs;
-  bfd *abfd = handle;
+  plugin_input_file_t *input = handle;
+  bfd *abfd = input->abfd;
   int n;
 
   ASSERT (called_plugin);
@@ -439,19 +496,114 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 /* Get the input file information with an open (possibly re-opened)
    file descriptor.  */
 static enum ld_plugin_status
-get_input_file (const void *handle ATTRIBUTE_UNUSED,
-                struct ld_plugin_input_file *file ATTRIBUTE_UNUSED)
+get_input_file (const void *handle, struct ld_plugin_input_file *file)
 {
+  const plugin_input_file_t *input = handle;
+
   ASSERT (called_plugin);
-  return LDPS_ERR;
+
+  file->name = input->name;
+  file->offset = input->offset;
+  file->filesize = input->filesize;
+  file->handle = (void *) handle;
+
+  return LDPS_OK;
+}
+
+/* Get view of the input file.  */
+static enum ld_plugin_status
+get_view (const void *handle, const void **viewp)
+{
+  plugin_input_file_t *input = (plugin_input_file_t *) handle;
+  char *buffer;
+  size_t size = input->filesize;
+  off_t offset = input->offset;
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+  off_t bias;
+#endif
+
+  ASSERT (called_plugin);
+
+  /* FIXME: einfo should support %lld.  */
+  if ((off_t) size != input->filesize)
+    einfo (_("%P%F: unsupported input file size: %s (%ld bytes)\n"),
+	   input->name, (long) input->filesize);
+
+  /* Check the cached view buffer.  */
+  if (input->view_buffer.addr != NULL
+      && input->view_buffer.filesize == size
+      && input->view_buffer.offset == offset)
+    {
+      *viewp = input->view_buffer.addr;
+      return LDPS_OK;
+    }
+
+  input->view_buffer.filesize = size;
+  input->view_buffer.offset = offset;
+
+#if HAVE_MMAP
+# if HAVE_GETPAGESIZE
+  bias = offset % plugin_pagesize;
+  offset -= bias;
+  size += bias;
+# endif
+  buffer = mmap (NULL, size, PROT_READ, MAP_PRIVATE, input->fd, offset);
+  if (buffer != MAP_FAILED)
+    {
+      input->use_mmap = TRUE;
+# if HAVE_GETPAGESIZE
+      buffer += bias;
+# endif
+    }
+  else
+#endif
+    {
+      char *p;
+
+      input->use_mmap = FALSE;
+
+      if (lseek (input->fd, offset, SEEK_SET) < 0)
+	return LDPS_ERR;
+
+      buffer = bfd_alloc (input->abfd, size);
+      if (buffer == NULL)
+	return LDPS_ERR;
+
+      p = buffer;
+      do
+	{
+	  ssize_t got = read (input->fd, p, size);
+	  if (got == 0)
+	    break;
+	  else if (got > 0)
+	    {
+	      p += got;
+	      size -= got;
+	    }
+	  else if (errno != EINTR)
+	    return LDPS_ERR;
+	}
+      while (size > 0);
+    }
+
+  input->view_buffer.addr = buffer;
+  *viewp = buffer;
+
+  return LDPS_OK;
 }
 
 /* Release the input file.  */
 static enum ld_plugin_status
-release_input_file (const void *handle ATTRIBUTE_UNUSED)
+release_input_file (const void *handle)
 {
+  plugin_input_file_t *input = (plugin_input_file_t *) handle;
   ASSERT (called_plugin);
-  return LDPS_ERR;
+  if (input->fd != -1)
+    {
+      close (input->fd);
+      input->fd = -1;
+    }
+  return LDPS_OK;
 }
 
 /* Return TRUE if a defined symbol might be reachable from outside the
@@ -504,7 +656,8 @@ static enum ld_plugin_status
 get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	     int def_ironly_exp)
 {
-  const bfd *abfd = handle;
+  const plugin_input_file_t *input = handle;
+  const bfd *abfd = (const bfd *) input->abfd;
   int n;
 
   ASSERT (called_plugin);
@@ -622,10 +775,14 @@ get_symbols_v2 (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 static enum ld_plugin_status
 add_input_file (const char *pathname)
 {
+  lang_input_statement_type *is;
+
   ASSERT (called_plugin);
-  if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_file_enum,
-			    NULL))
+  is = lang_add_input_file (xstrdup (pathname), lang_input_file_is_file_enum,
+			    NULL);
+  if (!is)
     return LDPS_ERR;
+  is->flags.lto_output = 1;
   return LDPS_OK;
 }
 
@@ -633,10 +790,14 @@ add_input_file (const char *pathname)
 static enum ld_plugin_status
 add_input_library (const char *pathname)
 {
+  lang_input_statement_type *is;
+
   ASSERT (called_plugin);
-  if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_l_enum,
-			    NULL))
+  is = lang_add_input_file (xstrdup (pathname), lang_input_file_is_l_enum,
+			    NULL);
+  if (!is)
     return LDPS_ERR;
+  is->flags.lto_output = 1;
   return LDPS_OK;
 }
 
@@ -664,15 +825,19 @@ message (int level, const char *format, ...)
       putchar ('\n');
       break;
     case LDPL_WARNING:
-      vfinfo (stdout, format, args, TRUE);
-      putchar ('\n');
+      {
+	char *newfmt = ACONCAT (("%P: warning: ", format, "\n",
+				 (const char *) NULL));
+	vfinfo (stdout, newfmt, args, TRUE);
+      }
       break;
     case LDPL_FATAL:
     case LDPL_ERROR:
     default:
       {
-	char *newfmt = ACONCAT ((level == LDPL_FATAL ? "%P%F: " : "%P%X: ",
-				 format, "\n", (const char *) NULL));
+	char *newfmt = ACONCAT ((level == LDPL_FATAL ? "%P%F" : "%P%X",
+				 ": error: ", format, "\n",
+				 (const char *) NULL));
 	fflush (stdout);
 	vfinfo (stderr, newfmt, args, TRUE);
 	fflush (stderr);
@@ -734,6 +899,9 @@ set_tv_header (struct ld_plugin_tv *tv)
 	case LDPT_GET_INPUT_FILE:
 	  TVU(get_input_file) = get_input_file;
 	  break;
+	case LDPT_GET_VIEW:
+	  TVU(get_view) = get_view;
+	  break;
 	case LDPT_RELEASE_INPUT_FILE:
 	  TVU(release_input_file) = release_input_file;
 	  break;
@@ -775,14 +943,6 @@ set_tv_plugin_args (plugin_t *plugin, struct ld_plugin_tv *tv)
     }
   tv->tv_tag = LDPT_NULL;
   tv->tv_u.tv_val = 0;
-}
-
-/* Return true if any plugins are active this run.  Only valid
-   after options have been processed.  */
-bfd_boolean
-plugin_active_plugins_p (void)
-{
-  return plugins_list != NULL;
 }
 
 /* Load up and initialise all plugins after argument parsing.  */
@@ -842,6 +1002,12 @@ plugin_load_plugins (void)
   link_info.notice_all = TRUE;
   link_info.lto_plugin_active = TRUE;
   link_info.callbacks = &plugin_callbacks;
+
+  register_ld_plugin_object_p (plugin_object_p);
+
+#if HAVE_MMAP && HAVE_GETPAGESIZE
+  plugin_pagesize = getpagesize ();
+#endif
 }
 
 /* Call 'claim file' hook for all plugins.  */
@@ -868,23 +1034,156 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
   return plugin_error_p () ? -1 : 0;
 }
 
-void
-plugin_maybe_claim (struct ld_plugin_input_file *file,
-		    lang_input_statement_type *entry)
+/* Duplicates a character string with memory attached to ABFD.  */
+
+static char *
+plugin_strdup (bfd *abfd, const char *str)
 {
-  int claimed = 0;
+  size_t strlength;
+  char *copy;
+  strlength = strlen (str) + 1;
+  copy = bfd_alloc (abfd, strlength);
+  if (copy == NULL)
+    einfo (_("%P%F: plugin_strdup failed to allocate memory: %s\n"),
+	   bfd_get_error ());
+  memcpy (copy, str, strlength);
+  return copy;
+}
+
+static const bfd_target *
+plugin_object_p (bfd *ibfd)
+{
+  int claimed;
+  plugin_input_file_t *input;
+  off_t offset, filesize;
+  struct ld_plugin_input_file file;
+  bfd *abfd;
+  bfd_boolean inarchive;
+  const char *name;
+  int fd;
+
+  /* Don't try the dummy object file.  */
+  if ((ibfd->flags & BFD_PLUGIN) != 0)
+    return NULL;
+
+  if (ibfd->plugin_format != bfd_plugin_uknown)
+    {
+      if (ibfd->plugin_format == bfd_plugin_yes)
+	return ibfd->plugin_dummy_bfd->xvec;
+      else
+	return NULL;
+    }
+
+  inarchive = bfd_my_archive (ibfd) != NULL;
+  name = inarchive ? bfd_my_archive (ibfd)->filename : ibfd->filename;
+  fd = open (name, O_RDONLY | O_BINARY);
+
+  if (fd < 0)
+    return NULL;
 
   /* We create a dummy BFD, initially empty, to house whatever symbols
      the plugin may want to add.  */
-  file->handle = plugin_get_ir_dummy_bfd (entry->the_bfd->filename,
-					  entry->the_bfd);
-  if (plugin_call_claim_file (file, &claimed))
+  abfd = plugin_get_ir_dummy_bfd (ibfd->filename, ibfd);
+
+  input = bfd_alloc (abfd, sizeof (*input));
+  if (input == NULL)
+    einfo (_("%P%F: plugin failed to allocate memory for input: %s\n"),
+	   bfd_get_error ());
+
+  if (inarchive)
+    {
+      /* Offset and filesize must refer to the individual archive
+	 member, not the whole file, and must exclude the header.
+	 Fortunately for us, that is how the data is stored in the
+	 origin field of the bfd and in the arelt_data.  */
+      offset = ibfd->origin;
+      filesize = arelt_size (ibfd);
+    }
+  else
+    {
+      offset = 0;
+      filesize = lseek (fd, 0, SEEK_END);
+
+      /* We must copy filename attached to ibfd if it is not an archive
+	 member since it may be freed by bfd_close below.  */
+      name = plugin_strdup (abfd, name);
+    }
+
+  file.name = name;
+  file.offset = offset;
+  file.filesize = filesize;
+  file.fd = fd;
+  file.handle = input;
+
+  input->abfd = abfd;
+  input->view_buffer.addr = NULL;
+  input->view_buffer.filesize = 0;
+  input->view_buffer.offset = 0;
+  input->fd = fd;
+  input->use_mmap = FALSE;
+  input->offset = offset;
+  input->filesize = filesize;
+  input->name = plugin_strdup (abfd, ibfd->filename);
+
+  claimed = 0;
+
+  if (plugin_call_claim_file (&file, &claimed))
     einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
-  /* fd belongs to us, not the plugin; but we don't need it.  */
-  close (file->fd);
+
+  if (input->fd != -1 && ! bfd_plugin_target_p (ibfd->xvec))
+    {
+      /* FIXME: fd belongs to us, not the plugin.  GCC plugin, which
+	 doesn't need fd after plugin_call_claim_file, doesn't use
+	 BFD plugin target vector.  Since GCC plugin doesn't call
+	 release_input_file, we close it here.  LLVM plugin, which
+	 needs fd after plugin_call_claim_file and calls
+	 release_input_file after it is done, uses BFD plugin target
+	 vector.  This scheme doesn't work when a plugin needs fd and
+	 doesn't use BFD plugin target vector neither.  */
+      close (fd);
+      input->fd = -1;
+    }
+
   if (claimed)
     {
+      ibfd->plugin_format = bfd_plugin_yes;
+      ibfd->plugin_dummy_bfd = abfd;
+      bfd_make_readable (abfd);
+      return abfd->xvec;
+    }
+  else
+    {
+#if HAVE_MMAP
+      if (input->use_mmap)
+	{
+	  /* If plugin didn't claim the file, unmap the buffer.  */
+	  char *addr = input->view_buffer.addr;
+	  off_t size = input->view_buffer.filesize;
+# if HAVE_GETPAGESIZE
+	  off_t bias = input->view_buffer.offset % plugin_pagesize;
+	  size += bias;
+	  addr -= bias;
+# endif
+	  munmap (addr, size);
+	}
+#endif
+
+      /* If plugin didn't claim the file, we don't need the dummy bfd.
+	 Can't avoid speculatively creating it, alas.  */
+      ibfd->plugin_format = bfd_plugin_no;
+      bfd_close_all_done (abfd);
+      return NULL;
+    }
+}
+
+void
+plugin_maybe_claim (lang_input_statement_type *entry)
+{
+  if (plugin_object_p (entry->the_bfd))
+    {
+      bfd *abfd = entry->the_bfd->plugin_dummy_bfd;
+
       /* Check object only section.  */
       cmdline_check_object_only_section (entry->the_bfd, TRUE);
 
@@ -894,16 +1193,8 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
 	 bfd_close for archives.  */
       if (entry->the_bfd->my_archive == NULL)
 	bfd_close (entry->the_bfd);
-      entry->the_bfd = file->handle;
-      entry->flags.claimed = TRUE;
-      bfd_make_readable (entry->the_bfd);
-    }
-  else
-    {
-      /* If plugin didn't claim the file, we don't need the dummy bfd.
-	 Can't avoid speculatively creating it, alas.  */
-      bfd_close_all_done (file->handle);
-      entry->flags.claimed = FALSE;
+      entry->the_bfd = abfd;
+      entry->flags.claimed = 1;
     }
 }
 

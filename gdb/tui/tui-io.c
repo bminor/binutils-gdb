@@ -1,6 +1,6 @@
 /* TUI support I/O functions.
 
-   Copyright (C) 1998-2014 Free Software Foundation, Inc.
+   Copyright (C) 1998-2015 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -37,7 +37,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include "filestuff.h"
-
+#include "completer.h"
 #include "gdb_curses.h"
 
 /* This redefines CTRL if it is not already defined, so it must come
@@ -61,17 +61,6 @@ int
 key_is_backspace (int ch)
 {
   return (ch == 8);
-}
-
-int
-key_is_command_char (int ch)
-{
-  return ((ch == KEY_NPAGE) || (ch == KEY_PPAGE)
-	  || (ch == KEY_LEFT) || (ch == KEY_RIGHT)
-	  || (ch == KEY_UP) || (ch == KEY_DOWN)
-	  || (ch == KEY_SF) || (ch == KEY_SR)
-	  || (ch == (int)'\f') 
-	  || key_is_start_sequence (ch));
 }
 
 /* Use definition from readline 4.3.  */
@@ -132,6 +121,7 @@ static rl_getc_func_t *tui_old_rl_getc_function;
 static rl_voidfunc_t *tui_old_rl_redisplay_function;
 static rl_vintfunc_t *tui_old_rl_prep_terminal;
 static rl_voidfunc_t *tui_old_rl_deprep_terminal;
+static rl_compdisp_func_t *tui_old_rl_display_matches_hook;
 static int tui_old_rl_echoing_p;
 
 /* Readline output stream.
@@ -146,8 +136,6 @@ static int tui_readline_pipe[2];
    This may be the main gdb prompt or a secondary prompt.  */
 static char *tui_rl_saved_prompt;
 
-static unsigned int tui_handle_resize_during_io (unsigned int);
-
 static void
 tui_putc (char c)
 {
@@ -158,7 +146,10 @@ tui_putc (char c)
   tui_puts (buf);
 }
 
-/* Print the string in the curses command window.  */
+/* Print the string in the curses command window.
+   The output is buffered.  It is up to the caller to refresh the screen
+   if necessary.  */
+
 void
 tui_puts (const char *string)
 {
@@ -178,7 +169,20 @@ tui_puts (const char *string)
       else if (tui_skip_line != 1)
         {
           tui_skip_line = -1;
-          waddch (w, c);
+	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
+	  if (c == '\t')
+	    {
+	      int line, col;
+
+	      getyx (w, line, col);
+	      do
+		{
+		  waddch (w, ' ');
+		  col++;
+		} while ((col % 8) != 0);
+	    }
+	  else
+	    waddch (w, c);
         }
       else if (c == '\n')
         tui_skip_line = -1;
@@ -187,10 +191,6 @@ tui_puts (const char *string)
          TUI_CMD_WIN->detail.command_info.curch);
   TUI_CMD_WIN->detail.command_info.start_line
     = TUI_CMD_WIN->detail.command_info.cur_line;
-
-  /* We could defer the following.  */
-  wrefresh (w);
-  fflush (stdout);
 }
 
 /* Readline callback.
@@ -234,24 +234,37 @@ tui_redisplay_readline (void)
     {
       waddch (w, prompt[in]);
       getyx (w, line, col);
-      if (col < prev_col)
+      if (col <= prev_col)
         height++;
       prev_col = col;
     }
-  for (in = 0; in < rl_end; in++)
+  for (in = 0; in <= rl_end; in++)
     {
       unsigned char c;
       
-      c = (unsigned char) rl_line_buffer[in];
       if (in == rl_point)
 	{
           getyx (w, c_line, c_pos);
 	}
 
+      if (in == rl_end)
+        break;
+
+      c = (unsigned char) rl_line_buffer[in];
       if (CTRL_CHAR (c) || c == RUBOUT)
 	{
           waddch (w, '^');
           waddch (w, CTRL_CHAR (c) ? UNCTRL (c) : '?');
+	}
+      else if (c == '\t')
+	{
+	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
+	  getyx (w, line, col);
+	  do
+	    {
+	      waddch (w, ' ');
+	      col++;
+	    } while ((col % 8) != 0);
 	}
       else
 	{
@@ -320,182 +333,104 @@ tui_readline_output (int error, gdb_client_data data)
 }
 #endif
 
-/* Return the portion of PATHNAME that should be output when listing
-   possible completions.  If we are hacking filename completion, we
-   are only interested in the basename, the portion following the
-   final slash.  Otherwise, we return what we were passed.
+/* TUI version of displayer.crlf.  */
 
-   Comes from readline/complete.c.  */
-static const char *
-printable_part (const char *pathname)
+static void
+tui_mld_crlf (const struct match_list_displayer *displayer)
 {
-  return rl_filename_completion_desired ? lbasename (pathname) : pathname;
+  tui_putc ('\n');
 }
 
-/* Output TO_PRINT to rl_outstream.  If VISIBLE_STATS is defined and
-   we are using it, check for and output a single character for
-   `special' filenames.  Return the number of characters we
-   output.  */
+/* TUI version of displayer.putch.  */
 
-#define PUTX(c) \
-    do { \
-      if (CTRL_CHAR (c)) \
-        { \
-          tui_puts ("^"); \
-          tui_putc (UNCTRL (c)); \
-          printed_len += 2; \
-        } \
-      else if (c == RUBOUT) \
-	{ \
-	  tui_puts ("^?"); \
-	  printed_len += 2; \
-	} \
-      else \
-	{ \
-	  tui_putc (c); \
-	  printed_len++; \
-	} \
-    } while (0)
-
-static int
-print_filename (const char *to_print, const char *full_pathname)
+static void
+tui_mld_putch (const struct match_list_displayer *displayer, int ch)
 {
-  int printed_len = 0;
-  const char *s;
-
-  for (s = to_print; *s; s++)
-    {
-      PUTX (*s);
-    }
-  return printed_len;
+  tui_putc (ch);
 }
 
-/* The user must press "y" or "n".  Non-zero return means "y" pressed.
-   Comes from readline/complete.c.  */
-static int
-get_y_or_n (void)
+/* TUI version of displayer.puts.  */
+
+static void
+tui_mld_puts (const struct match_list_displayer *displayer, const char *s)
 {
-  extern int _rl_abort_internal ();
+  tui_puts (s);
+}
+
+/* TUI version of displayer.flush.  */
+
+static void
+tui_mld_flush (const struct match_list_displayer *displayer)
+{
+  wrefresh (TUI_CMD_WIN->generic.handle);
+}
+
+/* TUI version of displayer.erase_entire_line.  */
+
+static void
+tui_mld_erase_entire_line (const struct match_list_displayer *displayer)
+{
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
+
+  wmove (w, TUI_CMD_WIN->detail.command_info.cur_line, 0);
+  wclrtoeol (w);
+  wmove (w, TUI_CMD_WIN->detail.command_info.cur_line, 0);
+}
+
+/* TUI version of displayer.beep.  */
+
+static void
+tui_mld_beep (const struct match_list_displayer *displayer)
+{
+  beep ();
+}
+
+/* Helper function for tui_mld_read_key.
+   This temporarily replaces tui_getc for use during tab-completion
+   match list display.  */
+
+static int
+tui_mld_getc (FILE *fp)
+{
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  int c = wgetch (w);
+
+  return c;
+}
+
+/* TUI version of displayer.read_key.  */
+
+static int
+tui_mld_read_key (const struct match_list_displayer *displayer)
+{
+  rl_getc_func_t *prev = rl_getc_function;
   int c;
 
-  for (;;)
-    {
-      c = rl_read_key ();
-      if (c == 'y' || c == 'Y' || c == ' ')
-	return (1);
-      if (c == 'n' || c == 'N' || c == RUBOUT)
-	return (0);
-      if (c == ABORT_CHAR)
-	_rl_abort_internal ();
-      beep ();
-    }
+  /* We can't use tui_getc as we need NEWLINE to not get emitted.  */
+  rl_getc_function = tui_mld_getc;
+  c = rl_read_key ();
+  rl_getc_function = prev;
+  return c;
 }
 
-/* A convenience function for displaying a list of strings in
-   columnar format on readline's output stream.  MATCHES is the list
-   of strings, in argv format, LEN is the number of strings in MATCHES,
-   and MAX is the length of the longest string in MATCHES.
+/* TUI version of rl_completion_display_matches_hook.
+   See gdb_display_match_list for a description of the arguments.  */
 
-   Comes from readline/complete.c and modified to write in
-   the TUI command window using tui_putc/tui_puts.  */
 static void
 tui_rl_display_match_list (char **matches, int len, int max)
 {
-  typedef int QSFUNC (const void *, const void *);
-  extern int _rl_qsort_string_compare (const void *, 
-				       const void *);
-  extern int _rl_print_completions_horizontally;
-  
-  int count, limit, printed_len;
-  int i, j, k, l;
-  const char *temp;
+  struct match_list_displayer displayer;
 
-  /* Screen dimension correspond to the TUI command window.  */
-  int screenwidth = TUI_CMD_WIN->generic.width;
+  rl_get_screen_size (&displayer.height, &displayer.width);
+  displayer.crlf = tui_mld_crlf;
+  displayer.putch = tui_mld_putch;
+  displayer.puts = tui_mld_puts;
+  displayer.flush = tui_mld_flush;
+  displayer.erase_entire_line = tui_mld_erase_entire_line;
+  displayer.beep = tui_mld_beep;
+  displayer.read_key = tui_mld_read_key;
 
-  /* If there are many items, then ask the user if she really wants to
-     see them all.  */
-  if (len >= rl_completion_query_items)
-    {
-      char msg[256];
-
-      xsnprintf (msg, sizeof (msg),
-		 "\nDisplay all %d possibilities? (y or n)", len);
-      tui_puts (msg);
-      if (get_y_or_n () == 0)
-	{
-	  tui_puts ("\n");
-	  return;
-	}
-    }
-
-  /* How many items of MAX length can we fit in the screen window?  */
-  max += 2;
-  limit = screenwidth / max;
-  if (limit != 1 && (limit * max == screenwidth))
-    limit--;
-
-  /* Avoid a possible floating exception.  If max > screenwidth, limit
-     will be 0 and a divide-by-zero fault will result.  */
-  if (limit == 0)
-    limit = 1;
-
-  /* How many iterations of the printing loop?  */
-  count = (len + (limit - 1)) / limit;
-
-  /* Watch out for special case.  If LEN is less than LIMIT, then
-     just do the inner printing loop.
-	   0 < len <= limit  implies  count = 1.  */
-
-  /* Sort the items if they are not already sorted.  */
-  if (rl_ignore_completion_duplicates == 0)
-    qsort (matches + 1, len, sizeof (char *),
-           (QSFUNC *)_rl_qsort_string_compare);
-
-  tui_putc ('\n');
-
-  if (_rl_print_completions_horizontally == 0)
-    {
-      /* Print the sorted items, up-and-down alphabetically, like ls.  */
-      for (i = 1; i <= count; i++)
-	{
-	  for (j = 0, l = i; j < limit; j++)
-	    {
-	      if (l > len || matches[l] == 0)
-		break;
-	      else
-		{
-		  temp = printable_part (matches[l]);
-		  printed_len = print_filename (temp, matches[l]);
-
-		  if (j + 1 < limit)
-		    for (k = 0; k < max - printed_len; k++)
-		      tui_putc (' ');
-		}
-	      l += count;
-	    }
-	  tui_putc ('\n');
-	}
-    }
-  else
-    {
-      /* Print the sorted items, across alphabetically, like ls -x.  */
-      for (i = 1; matches[i]; i++)
-	{
-	  temp = printable_part (matches[i]);
-	  printed_len = print_filename (temp, matches[i]);
-	  /* Have we reached the end of this line?  */
-	  if (matches[i+1])
-	    {
-	      if (i && (limit > 1) && (i % limit) == 0)
-		tui_putc ('\n');
-	      else
-		for (k = 0; k < max - printed_len; k++)
-		  tui_putc (' ');
-	    }
-	}
-      tui_putc ('\n');
-    }
+  gdb_display_match_list (matches, len, max, &displayer);
 }
 
 /* Setup the IO for curses or non-curses mode.
@@ -518,6 +453,7 @@ tui_setup_io (int mode)
       tui_old_rl_deprep_terminal = rl_deprep_term_function;
       tui_old_rl_prep_terminal = rl_prep_term_function;
       tui_old_rl_getc_function = rl_getc_function;
+      tui_old_rl_display_matches_hook = rl_completion_display_matches_hook;
       tui_old_rl_outstream = rl_outstream;
       tui_old_rl_echoing_p = _rl_echoing_p;
       rl_redisplay_function = tui_redisplay_readline;
@@ -561,8 +497,8 @@ tui_setup_io (int mode)
       rl_deprep_term_function = tui_old_rl_deprep_terminal;
       rl_prep_term_function = tui_old_rl_prep_terminal;
       rl_getc_function = tui_old_rl_getc_function;
+      rl_completion_display_matches_hook = tui_old_rl_display_matches_hook;
       rl_outstream = tui_old_rl_outstream;
-      rl_completion_display_matches_hook = 0;
       _rl_echoing_p = tui_old_rl_echoing_p;
       rl_already_prompted = 0;
 
@@ -653,7 +589,6 @@ tui_getc (FILE *fp)
 #endif
 
   ch = wgetch (w);
-  ch = tui_handle_resize_during_io (ch);
 
   /* The \n must be echoed because it will not be printed by
      readline.  */
@@ -676,16 +611,21 @@ tui_getc (FILE *fp)
         }
       else
         {
-          wmove (w, TUI_CMD_WIN->detail.command_info.cur_line,
-                 TUI_CMD_WIN->detail.command_info.curch);
-          waddch (w, ch);
+	  /* Move cursor to the end of the command line before emitting the
+	     newline.  We need to do so because when ncurses outputs a newline
+	     it truncates any text that appears past the end of the cursor.  */
+	  int px = TUI_CMD_WIN->detail.command_info.curch;
+	  int py = TUI_CMD_WIN->detail.command_info.cur_line;
+	  px += rl_end - rl_point;
+	  py += px / TUI_CMD_WIN->generic.width;
+	  px %= TUI_CMD_WIN->generic.width;
+	  wmove (w, py, px);
+	  waddch (w, ch);
         }
     }
   
-  if (key_is_command_char (ch))
-    {				/* Handle prev/next/up/down here.  */
-      ch = tui_dispatch_ctrl_char (ch);
-    }
+  /* Handle prev/next/up/down here.  */
+  ch = tui_dispatch_ctrl_char (ch);
   
   if (ch == '\n' || ch == '\r' || ch == '\f')
     TUI_CMD_WIN->detail.command_info.curch = 0;
@@ -721,20 +661,56 @@ tui_getc (FILE *fp)
   return ch;
 }
 
+/* Utility function to expand TABs in a STRING into spaces.  STRING
+   will be displayed starting at column COL, and is assumed to include
+   no newlines.  The returned expanded string is malloc'ed.  */
 
-/* Cleanup when a resize has occured.
-   Returns the character that must be processed.  */
-static unsigned int
-tui_handle_resize_during_io (unsigned int original_ch)
+char *
+tui_expand_tabs (const char *string, int col)
 {
-  if (tui_win_resized ())
+  int n_adjust, ncol;
+  const char *s;
+  char *ret, *q;
+
+  /* 1. How many additional characters do we need?  */
+  for (ncol = col, n_adjust = 0, s = string; s; )
     {
-      tui_resize_all ();
-      tui_refresh_all_win ();
-      dont_repeat ();
-      tui_set_win_resized_to (FALSE);
-      return '\n';
+      s = strpbrk (s, "\t");
+      if (s)
+	{
+	  ncol += (s - string) + n_adjust;
+	  /* Adjustment for the next tab stop, minus one for the TAB
+	     we replace with spaces.  */
+	  n_adjust += 8 - (ncol % 8) - 1;
+	  s++;
+	}
     }
-  else
-    return original_ch;
+
+  /* Allocate the copy.  */
+  ret = q = xmalloc (strlen (string) + n_adjust + 1);
+
+  /* 2. Copy the original string while replacing TABs with spaces.  */
+  for (ncol = col, s = string; s; )
+    {
+      const char *s1 = strpbrk (s, "\t");
+      if (s1)
+	{
+	  if (s1 > s)
+	    {
+	      strncpy (q, s, s1 - s);
+	      q += s1 - s;
+	      ncol += s1 - s;
+	    }
+	  do {
+	    *q++ = ' ';
+	    ncol++;
+	  } while ((ncol % 8) != 0);
+	  s1++;
+	}
+      else
+	strcpy (q, s);
+      s = s1;
+    }
+
+  return ret;
 }

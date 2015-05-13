@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993-2014 Free Software Foundation, Inc.
+   Copyright (C) 1993-2015 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -10331,10 +10331,12 @@ macro (struct mips_cl_insn *ip, char *str)
 
       breg = op[2];
       if (dbl && GPR_SIZE == 32)
-	as_warn (_("dla used to load 32-bit register"));
+	as_warn (_("dla used to load 32-bit register; recommend using la "
+		   "instead"));
 
       if (!dbl && HAVE_64BIT_OBJECTS)
-	as_warn (_("la used to load 64-bit address"));
+	as_warn (_("la used to load 64-bit address; recommend using dla "
+		   "instead"));
 
       if (small_offset_p (0, align, 16))
 	{
@@ -18685,6 +18687,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
      XLP is mostly like XLR, with the prominent exception that it is
      MIPS64R2 rather than MIPS64.  */
   { "xlp",	      0, 0,			ISA_MIPS64R2, CPU_XLR },
+
+  /* i6400.  */
+  { "i6400",	      0, ASE_MSA,		ISA_MIPS64R6, CPU_MIPS64R6},
 
   /* End marker */
   { NULL, 0, 0, 0, 0 }

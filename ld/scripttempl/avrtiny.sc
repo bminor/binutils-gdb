@@ -1,11 +1,11 @@
-# Copyright (C) 2014 Free Software Foundation, Inc.
+# Copyright (C) 2014-2015 Free Software Foundation, Inc.
 # 
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
 
 cat <<EOF
-/* Copyright (C) 2014 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2015 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -14,17 +14,23 @@ cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}","${OUTPUT_FORMAT}","${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
+__TEXT_REGION_LENGTH__ = DEFINED(__TEXT_REGION_LENGTH__) ? __TEXT_REGION_LENGTH__ : $TEXT_LENGTH;
+__DATA_REGION_LENGTH__ = DEFINED(__DATA_REGION_LENGTH__) ? __DATA_REGION_LENGTH__ : $DATA_LENGTH;
+__FUSE_REGION_LENGTH__ = DEFINED(__FUSE_REGION_LENGTH__) ? __FUSE_REGION_LENGTH__ : 2;
+__LOCK_REGION_LENGTH__ = DEFINED(__LOCK_REGION_LENGTH__) ? __LOCK_REGION_LENGTH__ : 2;
+__SIGNATURE_REGION_LENGTH__ = DEFINED(__SIGNATURE_REGION_LENGTH__) ? __SIGNATURE_REGION_LENGTH__ : 4;
+
 MEMORY
 {
-  text   (rx)   : ORIGIN = $TEXT_ORIGIN, LENGTH = $TEXT_LENGTH
-  data   (rw!x) : ORIGIN = $DATA_ORIGIN, LENGTH = $DATA_LENGTH
+  text   (rx)   : ORIGIN = $TEXT_ORIGIN, LENGTH = __TEXT_REGION_LENGTH__
+  data   (rw!x) : ORIGIN = $DATA_ORIGIN, LENGTH = __DATA_REGION_LENGTH__
 
   /* Provide offsets for config, lock and signature to match
      production file format. Ignore offsets in datasheet.  */
 
-  config    (rw!x) : ORIGIN = 0x820000, LENGTH = 2
-  lock      (rw!x) : ORIGIN = 0x830000, LENGTH = 2
-  signature (rw!x) : ORIGIN = 0x840000, LENGTH = 4
+  config    (rw!x) : ORIGIN = 0x820000, LENGTH = __FUSE_REGION_LENGTH__
+  lock      (rw!x) : ORIGIN = 0x830000, LENGTH = __LOCK_REGION_LENGTH__
+  signature (rw!x) : ORIGIN = 0x840000, LENGTH = __SIGNATURE_REGION_LENGTH__
 }
 
 SECTIONS

@@ -1,6 +1,6 @@
 // icf.cc -- Identical Code Folding.
 //
-// Copyright (C) 2009-2014 Free Software Foundation, Inc.
+// Copyright (C) 2009-2015 Free Software Foundation, Inc.
 // Written by Sriraman Tallam <tmsriram@google.com>.
 
 // This file is part of gold.
@@ -787,7 +787,7 @@ Icf::find_identical_sections(const Input_objects* input_objects,
       else if (sym->source() == Symbol::FROM_OBJECT 
                && !sym->object()->is_dynamic())
         {
-          Object* obj = sym->object();
+          Relobj* obj = static_cast<Relobj*>(sym->object());
           bool is_ordinary;
           unsigned int shndx = sym->shndx(&is_ordinary);
           if (is_ordinary)
@@ -804,7 +804,7 @@ Icf::find_identical_sections(const Input_objects* input_objects,
 // Unfolds the section denoted by OBJ and SHNDX if folded.
 
 void
-Icf::unfold_section(Object* obj, unsigned int shndx)
+Icf::unfold_section(Relobj* obj, unsigned int shndx)
 {
   Section_id secn(obj, shndx);
   Uniq_secn_id_map::iterator it = this->section_id_.find(secn);
@@ -821,7 +821,7 @@ Icf::unfold_section(Object* obj, unsigned int shndx)
 // is different from this section.
 
 bool
-Icf::is_section_folded(Object* obj, unsigned int shndx)
+Icf::is_section_folded(Relobj* obj, unsigned int shndx)
 {
   Section_id secn(obj, shndx);
   Uniq_secn_id_map::iterator it = this->section_id_.find(secn);
@@ -835,7 +835,7 @@ Icf::is_section_folded(Object* obj, unsigned int shndx)
 // This function returns the folded section for the given section.
 
 Section_id
-Icf::get_folded_section(Object* dup_obj, unsigned int dup_shndx)
+Icf::get_folded_section(Relobj* dup_obj, unsigned int dup_shndx)
 {
   Section_id dup_secn(dup_obj, dup_shndx);
   Uniq_secn_id_map::iterator it = this->section_id_.find(dup_secn);

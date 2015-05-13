@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
    Namespace support contributed by David Carlton.
@@ -198,7 +198,7 @@ extern struct symbol *cp_lookup_symbol_nonlocal
       const struct block *block,
       const domain_enum domain);
 
-extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
+extern struct symbol *cp_lookup_symbol_namespace (const char *the_namespace,
 						  const char *name,
 						  const struct block *block,
 						  const domain_enum domain);

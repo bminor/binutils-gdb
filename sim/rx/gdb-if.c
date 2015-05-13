@@ -1,6 +1,6 @@
 /* gdb-if.c -- sim interface to GDB.
 
-Copyright (C) 2008-2014 Free Software Foundation, Inc.
+Copyright (C) 2008-2015 Free Software Foundation, Inc.
 Contributed by Red Hat, Inc.
 
 This file is part of the GNU simulators.
@@ -54,14 +54,14 @@ static struct sim_state the_minisim = {
   "This is the sole rx minisim instance.  See libsim.a's global variables."
 };
 
-static int open;
+static int rx_sim_is_open;
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  struct host_callback_struct *callback,
 	  struct bfd *abfd, char **argv)
 {
-  if (open)
+  if (rx_sim_is_open)
     fprintf (stderr, "rx minisim: re-opened sim\n");
 
   /* The 'run' interface doesn't use this function, so we don't care
@@ -79,7 +79,7 @@ sim_open (SIM_OPEN_KIND kind,
   execution_error_init_debugger ();
 
   sim_disasm_init (abfd);
-  open = 1;
+  rx_sim_is_open = 1;
   return &the_minisim;
 }
 
@@ -98,7 +98,7 @@ sim_close (SIM_DESC sd, int quitting)
   /* Not much to do.  At least free up our memory.  */
   init_mem ();
 
-  open = 0;
+  rx_sim_is_open = 0;
 }
 
 static bfd *

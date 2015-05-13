@@ -1,5 +1,5 @@
 # Xmethod commands.
-# Copyright 2013-2014 Free Software Foundation, Inc.
+# Copyright 2013-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ def get_method_matchers_in_loci(loci, locus_re, matcher_re):
 
 def print_xm_info(xm_dict, name_re):
     """Print a dictionary of xmethods."""
-    def get_status_string(method):
+    def get_status_string(m):
         if not m.enabled:
             return " [disabled]"
         else:
@@ -130,7 +130,7 @@ def print_xm_info(xm_dict, name_re):
             continue
         print ("Xmethods in %s:" % locus_str)
         for matcher in xm_dict[locus_str]:
-            print ("  %s" % matcher.name)
+            print ("  %s%s" % (matcher.name, get_status_string(matcher)))
             if not matcher.methods:
                 continue
             for m in matcher.methods:

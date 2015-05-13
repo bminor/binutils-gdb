@@ -1,6 +1,6 @@
 /* Abstraction of GNU v2 abi.
 
-   Copyright (C) 2001-2014 Free Software Foundation, Inc.
+   Copyright (C) 2001-2015 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
@@ -37,7 +37,7 @@ static enum dtor_kinds
 gnuv2_is_destructor_name (const char *name)
 {
   if ((name[0] == '_' && is_cplus_marker (name[1]) && name[2] == '_')
-      || strncmp (name, "__dt__", 6) == 0)
+      || startswith (name, "__dt__"))
     return complete_object_dtor;
   else
     return 0;
@@ -48,7 +48,7 @@ gnuv2_is_constructor_name (const char *name)
 {
   if ((name[0] == '_' && name[1] == '_'
        && (isdigit (name[2]) || strchr ("Qt", name[2])))
-      || strncmp (name, "__ct__", 6) == 0)
+      || startswith (name, "__ct__"))
     return complete_object_ctor;
   else
     return 0;
@@ -68,7 +68,7 @@ gnuv2_is_vtable_name (const char *name)
 static int
 gnuv2_is_operator_name (const char *name)
 {
-  return strncmp (name, "operator", 8) == 0;
+  return startswith (name, "operator");
 }
 
 

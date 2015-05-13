@@ -1,5 +1,5 @@
 /* rx-parse.y  Renesas RX parser
-   Copyright (C) 2008-2014 Free Software Foundation, Inc.
+   Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -500,27 +500,27 @@ statement :
 /* ---------------------------------------------------------------------- */
 
 	| SCMPU
-	  { B2 (0x7f, 0x83); }
+	  { B2 (0x7f, 0x83); rx_note_string_insn_use (); }
 	| SMOVU
-	  { B2 (0x7f, 0x87); }
+	  { B2 (0x7f, 0x87); rx_note_string_insn_use (); }
 	| SMOVB
-	  { B2 (0x7f, 0x8b); }
+	  { B2 (0x7f, 0x8b); rx_note_string_insn_use (); }
 	| SMOVF
-	  { B2 (0x7f, 0x8f); }
+	  { B2 (0x7f, 0x8f); rx_note_string_insn_use (); }
 
 /* ---------------------------------------------------------------------- */
 
 	| SUNTIL bwl
-	  { B2 (0x7f, 0x80); F ($2, 14, 2); }
+	  { B2 (0x7f, 0x80); F ($2, 14, 2); rx_note_string_insn_use (); }
 	| SWHILE bwl
-	  { B2 (0x7f, 0x84); F ($2, 14, 2); }
+	  { B2 (0x7f, 0x84); F ($2, 14, 2); rx_note_string_insn_use (); }
 	| SSTR bwl
 	  { B2 (0x7f, 0x88); F ($2, 14, 2); }
 
 /* ---------------------------------------------------------------------- */
 
 	| RMPA bwl
-	  { B2 (0x7f, 0x8c); F ($2, 14, 2); }
+	  { B2 (0x7f, 0x8c); F ($2, 14, 2); rx_note_string_insn_use (); }
 
 /* ---------------------------------------------------------------------- */
 

@@ -1,5 +1,5 @@
 /* Common definitions for remote server for GDB.
-   Copyright (C) 1993-2014 Free Software Foundation, Inc.
+   Copyright (C) 1993-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -84,7 +84,20 @@ extern int disable_packet_qfThreadInfo;
 
 extern int run_once;
 extern int multi_process;
+extern int report_fork_events;
+extern int report_vfork_events;
 extern int non_stop;
+
+/* True if the "swbreak+" feature is active.  In that case, GDB wants
+   us to report whether a trap is explained by a software breakpoint
+   and for the server to handle PC adjustment if necessary on this
+   target.  Only enabled if the target supports it.  */
+extern int swbreak_feature;
+
+/* True if the "hwbreak+" feature is active.  In that case, GDB wants
+   us to report whether a trap is explained by a hardware breakpoint.
+   Only enabled if the target supports it.  */
+extern int hwbreak_feature;
 
 extern int disable_randomization;
 

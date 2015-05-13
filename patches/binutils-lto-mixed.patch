@@ -86,45 +86,22 @@ for Linux kernel build with LTO.
 
 diff --git a/ChangeLog.lto-mixed b/ChangeLog.lto-mixed
 new file mode 100644
-index 0000000..3dd69fe
+index 0000000..5088e37
 --- /dev/null
 +++ b/ChangeLog.lto-mixed
-@@ -0,0 +1,335 @@
+@@ -0,0 +1,303 @@
 +bfd/
++
++2015-02-08  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* format.c: Include "plugin.h"
++	(bfd_check_format_matches): Don't check the plugin target twice
++	if the plugin target is explicitly specified.
 +
 +2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 +
 +	* format.c (bfd_check_format_matches): Don't check the plugin
 +	target twice.
-+
-+2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
-+	object-only output.
-+	(cmdline_emit_object_only_section): Pass TRUE to lang_finish.
-+
-+	* ldlang.h (lang_finish): Updated.
-+
-+	* ldmain.c (main): Pass FALSE to lang_finish.
-+
-+2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14747
-+	* elflink.c (_bfd_elf_fix_symbol_flags): Check symbol for linker
-+	created section instead.
-+
-+2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14747
-+	* elflink.c (_bfd_elf_fix_symbol_flags): Never mark
-+	_GLOBAL_OFFSET_TABLE_, _PROCEDURE_LINKAGE_TABLE_ nor _DYNAMIC
-+	undefined.
-+
-+2012-06-28  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14272
-+	* elflink.c (_bfd_elf_fix_symbol_flags): Mark the plugin symbol
-+	undefined if it is referenced from a non-IR file.
 +
 +2012-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -240,6 +217,16 @@ index 0000000..3dd69fe
 +
 +	* ldlang.c (cmdline_add_object_only_section): Save BFD filename
 +	to be used after bfd_close ().
++
++2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
++	object-only output.
++	(cmdline_emit_object_only_section): Pass TRUE to lang_finish.
++
++	* ldlang.h (lang_finish): Updated.
++
++	* ldmain.c (main): Pass FALSE to lang_finish.
 +
 +2012-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -378,25 +365,6 @@ index 0000000..3dd69fe
 +
 +	* ld-plugin/lto.exp: Add test for nm on mixed LTO/non-LTO object.
 +
-+2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/14918
-+	* ld-plugin/lto.exp (lto_link_elf_tests): Add PR ld/14918 test.
-+
-+	* ld-plugin/pr14918.c: New file.
-+	* ld-plugin/pr14918.d: Likewise.
-+
-+2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/12365
-+	* ld-plugin/pr12365a.c: New file.
-+	* ld-plugin/pr12365b.c: Likewise.
-+	* ld-plugin/pr12365c.c: Likewise.
-+
-+	* ld-plugin/lto.exp (lto_link_tests): Prepare for the PR ld/12365
-+	test.
-+	Run the PR ld/12365 test.
-+
 +2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 +
 +	PR ld/12430
@@ -426,10 +394,10 @@ index 0000000..3dd69fe
 +	(lto_run_tests): Add "LTO 4[acd]" tests.
 +	Build liblto-4.a.  Run "lto-4r-[abcd]" tests.
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 7f45316..25a4ed9 100644
+index 678eaed..6df7519 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
-@@ -1057,6 +1057,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
+@@ -1060,6 +1060,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
  bfd_boolean bfd_fill_in_gnu_debuglink_section
     (bfd *abfd, struct bfd_section *sect, const char *filename);
  
@@ -439,7 +407,7 @@ index 7f45316..25a4ed9 100644
  /* Extracted from libbfd.c.  */
  
  /* Byte swapping macros for user section data.  */
-@@ -1610,6 +1613,9 @@ extern asection _bfd_std_section[4];
+@@ -1613,6 +1616,9 @@ extern asection _bfd_std_section[4];
  #define BFD_COM_SECTION_NAME "*COM*"
  #define BFD_IND_SECTION_NAME "*IND*"
  
@@ -449,8 +417,8 @@ index 7f45316..25a4ed9 100644
  /* Pointer to the common section.  */
  #define bfd_com_section_ptr (&_bfd_std_section[0])
  /* Pointer to the undefined section.  */
-@@ -6260,6 +6266,14 @@ enum bfd_direction
-     both_direction = 3
+@@ -6279,6 +6285,14 @@ enum bfd_plugin_format
+     bfd_plugin_no = 2
    };
  
 +enum bfd_lto_object_type
@@ -464,17 +432,17 @@ index 7f45316..25a4ed9 100644
  struct bfd
  {
    /* The filename the application opened the BFD with.  */
-@@ -6416,6 +6430,9 @@ struct bfd
-   /* Set if this is the linker output BFD.  */
-   unsigned int is_linker_output : 1;
+@@ -6438,6 +6452,9 @@ struct bfd
+   /* If this is an input for a compiler plug-in library.  */
+   ENUM_BITFIELD (bfd_plugin_format) plugin_format : 2;
  
 +  /* LTO object type.  */
-+  unsigned int lto_type : 2;
++  ENUM_BITFIELD (bfd_lto_object_type) lto_type : 2;
 +
-   /* Currently my_archive is tested before adding origin to
-      anything. I believe that this can become always an add of
-      origin, with origin set to 0 for non archive files.  */
-@@ -6437,6 +6454,9 @@ struct bfd
+   /* Set to dummy BFD created when claimed by a compiler plug-in
+      library.  */
+   bfd *plugin_dummy_bfd;
+@@ -6463,6 +6480,9 @@ struct bfd
    /* The last section on the section list.  */
    struct bfd_section *section_last;
  
@@ -484,7 +452,7 @@ index 7f45316..25a4ed9 100644
    /* The number of sections.  */
    unsigned int section_count;
  
-@@ -6738,6 +6758,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
+@@ -6764,6 +6784,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
  
  char *bfd_demangle (bfd *, const char *, int);
  
@@ -494,11 +462,11 @@ index 7f45316..25a4ed9 100644
  symindex bfd_get_next_mapent
     (bfd *abfd, symindex previous, carsym **sym);
 diff --git a/bfd/bfd.c b/bfd/bfd.c
-index 2d9397b..c5b1f0f 100644
+index 69c6bde..ed8d28f 100644
 --- a/bfd/bfd.c
 +++ b/bfd/bfd.c
-@@ -44,6 +44,14 @@ CODE_FRAGMENT
- .    both_direction = 3
+@@ -51,6 +51,14 @@ CODE_FRAGMENT
+ .    bfd_plugin_no = 2
  .  };
  .
 +.enum bfd_lto_object_type
@@ -512,17 +480,17 @@ index 2d9397b..c5b1f0f 100644
  .struct bfd
  .{
  .  {* The filename the application opened the BFD with.  *}
-@@ -200,6 +208,9 @@ CODE_FRAGMENT
- .  {* Set if this is the linker output BFD.  *}
- .  unsigned int is_linker_output : 1;
+@@ -210,6 +218,9 @@ CODE_FRAGMENT
+ .  {* If this is an input for a compiler plug-in library.  *}
+ .  ENUM_BITFIELD (bfd_plugin_format) plugin_format : 2;
  .
 +.  {* LTO object type.  *}
-+.  unsigned int lto_type : 2;
++.  ENUM_BITFIELD (bfd_lto_object_type) lto_type : 2;
 +.
- .  {* Currently my_archive is tested before adding origin to
- .     anything. I believe that this can become always an add of
- .     origin, with origin set to 0 for non archive files.  *}
-@@ -221,6 +232,9 @@ CODE_FRAGMENT
+ .  {* Set to dummy BFD created when claimed by a compiler plug-in
+ .     library.  *}
+ .  bfd *plugin_dummy_bfd;
+@@ -235,6 +246,9 @@ CODE_FRAGMENT
  .  {* The last section on the section list.  *}
  .  struct bfd_section *section_last;
  .
@@ -532,7 +500,7 @@ index 2d9397b..c5b1f0f 100644
  .  {* The number of sections.  *}
  .  unsigned int section_count;
  .
-@@ -1923,3 +1937,36 @@ bfd_demangle (bfd *abfd, const char *name, int options)
+@@ -1937,3 +1951,36 @@ bfd_demangle (bfd *abfd, const char *name, int options)
  
    return res;
  }
@@ -570,7 +538,7 @@ index 2d9397b..c5b1f0f 100644
 +  return NULL;
 +}
 diff --git a/bfd/elf.c b/bfd/elf.c
-index c8238ba..c646ccf 100644
+index 0aa5f8e..79992c1 100644
 --- a/bfd/elf.c
 +++ b/bfd/elf.c
 @@ -2238,6 +2238,7 @@ static const struct bfd_elf_special_section special_sections_g[] =
@@ -581,36 +549,21 @@ index c8238ba..c646ccf 100644
    { STRING_COMMA_LEN (".gnu.version"),     0, SHT_GNU_versym,  0 },
    { STRING_COMMA_LEN (".gnu.version_d"),   0, SHT_GNU_verdef,  0 },
    { STRING_COMMA_LEN (".gnu.version_r"),   0, SHT_GNU_verneed, 0 },
-diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 16421cf..b7f4f91 100644
---- a/bfd/elflink.c
-+++ b/bfd/elflink.c
-@@ -2431,6 +2431,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
-     }
-   else
-     {
-+      /* If a plugin symbol is referenced from a non-IR file, mark
-+         the symbol as undefined, except for symbol for linker
-+	 created section.  */
-+      if (h->root.non_ir_ref
-+	  && (h->root.type == bfd_link_hash_defined
-+	      || h->root.type == bfd_link_hash_defweak)
-+	  && (h->root.u.def.section->flags & SEC_LINKER_CREATED) == 0
-+	  && h->root.u.def.section->owner != NULL
-+	  && (h->root.u.def.section->owner->flags & BFD_PLUGIN) != 0)
-+	{
-+	  h->root.type = bfd_link_hash_undefined;
-+	  h->root.u.undef.abfd = h->root.u.def.section->owner;
-+	}
-+
-       /* Unfortunately, NON_ELF is only correct if the symbol
- 	 was first seen in a non-ELF file.  Fortunately, if the symbol
- 	 was first seen in an ELF file, we're probably OK unless the
 diff --git a/bfd/format.c b/bfd/format.c
-index f0d1e66..87e5687 100644
+index dd6dc8a..11c3d9a 100644
 --- a/bfd/format.c
 +++ b/bfd/format.c
-@@ -179,6 +179,33 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
+@@ -46,6 +46,9 @@ SUBSECTION
+ #include "sysdep.h"
+ #include "bfd.h"
+ #include "libbfd.h"
++#if BFD_SUPPORTS_PLUGINS
++#include "plugin.h"
++#endif
+ 
+ /* IMPORT from targets.c.  */
+ extern const size_t _bfd_target_vector_entries;
+@@ -179,6 +182,33 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
    preserve->marker = NULL;
  }
  
@@ -644,16 +597,6 @@ index f0d1e66..87e5687 100644
  /*
  FUNCTION
  	bfd_check_format_matches
-@@ -203,6 +230,9 @@ bfd_boolean
- bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
- {
-   extern const bfd_target binary_vec;
-+#if BFD_SUPPORTS_PLUGINS
-+  extern const bfd_target plugin_vec;
-+#endif
-   const bfd_target * const *target;
-   const bfd_target **matching_vector = NULL;
-   const bfd_target *save_targ, *right_targ, *ar_right_targ, *match_targ;
 @@ -221,7 +251,10 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
      }
  
@@ -671,9 +614,9 @@ index f0d1e66..87e5687 100644
  	continue;
  
 +#if BFD_SUPPORTS_PLUGINS
-+      /* Since the plugin target is explicitly specified when a BFD file
-+	 is opened,  don't check it twice.  */
-+      if (*target == &plugin_vec)
++      /* If the plugin target is explicitly specified when a BFD file
++	 is opened, don't check it twice.  */
++      if (bfd_plugin_specified_p () && bfd_plugin_target_p (*target))
 +	continue;
 +#endif
 +
@@ -690,7 +633,7 @@ index f0d1e66..87e5687 100644
        return TRUE;
      }
 diff --git a/bfd/opncls.c b/bfd/opncls.c
-index 404b944..c6e9919 100644
+index 1320ee1..538feb5 100644
 --- a/bfd/opncls.c
 +++ b/bfd/opncls.c
 @@ -1693,3 +1693,69 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
@@ -764,10 +707,10 @@ index 404b944..c6e9919 100644
 +  return name;
 +}
 diff --git a/bfd/plugin.c b/bfd/plugin.c
-index 7f8f8b5..47689c6 100644
+index b41e092..4d77af1 100644
 --- a/bfd/plugin.c
 +++ b/bfd/plugin.c
-@@ -130,6 +130,139 @@ register_claim_file (ld_plugin_claim_file_handler handler)
+@@ -130,6 +130,146 @@ register_claim_file (ld_plugin_claim_file_handler handler)
    return LDPS_OK;
  }
  
@@ -795,11 +738,18 @@ index 7f8f8b5..47689c6 100644
 +  if (abfd->sections == NULL && abfd->my_archive == NULL)
 +    {
 +      nbfd = bfd_openr (abfd->filename, NULL);
-+      if (nbfd == NULL || !bfd_check_format (nbfd, bfd_object))
++      if (nbfd == NULL)
 +	{
 +	  (*_bfd_error_handler)
 +	    (_("%s: failed to open to extract object only section: %s"),
 +	     abfd->filename, bfd_errmsg (bfd_get_error ()));
++	  goto error_return;
++	}
++      else if (!bfd_check_format (nbfd, bfd_object))
++	{
++	  /* There is no object only section if it isn't a bfd_object
++	     file.  */
++error_return:
 +	  bfd_close (nbfd);
 +	  return;
 +	}
@@ -907,7 +857,7 @@ index 7f8f8b5..47689c6 100644
  static enum ld_plugin_status
  add_symbols (void * handle,
  	     int nsyms,
-@@ -142,10 +275,13 @@ add_symbols (void * handle,
+@@ -142,10 +282,13 @@ add_symbols (void * handle,
    plugin_data->nsyms = nsyms;
    plugin_data->syms = syms;
  
@@ -923,7 +873,7 @@ index 7f8f8b5..47689c6 100644
    return LDPS_OK;
  }
  
-@@ -391,7 +527,8 @@ static long
+@@ -440,7 +583,8 @@ static long
  bfd_plugin_get_symtab_upper_bound (bfd *abfd)
  {
    struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
@@ -933,7 +883,7 @@ index 7f8f8b5..47689c6 100644
  
    BFD_ASSERT (nsyms >= 0);
  
-@@ -425,12 +562,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -474,12 +618,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
    struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
    long nsyms = plugin_data->nsyms;
    const struct ld_plugin_symbol *syms = plugin_data->syms;
@@ -947,7 +897,7 @@ index 7f8f8b5..47689c6 100644
  
    for (i = 0; i < nsyms; i++)
      {
-@@ -443,10 +575,11 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -492,10 +631,11 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
        s->name = syms[i].name;
        s->value = 0;
        s->flags = convert_flags (&syms[i]);
@@ -960,7 +910,7 @@ index 7f8f8b5..47689c6 100644
  	  break;
  	case LDPK_UNDEF:
  	case LDPK_WEAKUNDEF:
-@@ -454,15 +587,18 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
+@@ -503,15 +643,18 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
  	  break;
  	case LDPK_DEF:
  	case LDPK_WEAKDEF:
@@ -983,10 +933,10 @@ index 7f8f8b5..47689c6 100644
  }
  
 diff --git a/bfd/plugin.h b/bfd/plugin.h
-index 4f1d18b..0ec54bf 100644
+index 1a66e6e..5dbcba4 100644
 --- a/bfd/plugin.h
 +++ b/bfd/plugin.h
-@@ -30,6 +30,8 @@ typedef struct plugin_data_struct
+@@ -33,6 +33,8 @@ typedef struct plugin_data_struct
  {
    int nsyms;
    const struct ld_plugin_symbol *syms;
@@ -996,7 +946,7 @@ index 4f1d18b..0ec54bf 100644
  plugin_data_struct;
  
 diff --git a/bfd/section.c b/bfd/section.c
-index b27539a..b3e0c3d 100644
+index 4a6f2e4..296500a 100644
 --- a/bfd/section.c
 +++ b/bfd/section.c
 @@ -576,6 +576,9 @@ CODE_FRAGMENT
@@ -1010,7 +960,7 @@ index b27539a..b3e0c3d 100644
  .#define bfd_com_section_ptr (&_bfd_std_section[0])
  .{* Pointer to the undefined section.  *}
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
-index cac4089..5a83c52 100644
+index 8320793..8579f73 100644
 --- a/binutils/objcopy.c
 +++ b/binutils/objcopy.c
 @@ -1009,30 +1009,6 @@ is_specified_symbol (const char *name, htab_t htab)
@@ -1053,7 +1003,7 @@ index cac4089..5a83c52 100644
        if (gsym != NULL)
  	gname = gsym->name;
        else
-@@ -2823,7 +2799,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
+@@ -2835,7 +2811,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
  
    if ((isection->flags & SEC_GROUP) != 0)
      {
@@ -1063,10 +1013,10 @@ index cac4089..5a83c52 100644
        if (gsym != NULL)
  	{
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index d9ddb35..e66a675 100644
+index 00bcb1d..5fb12fc 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -3756,6 +3756,7 @@ get_section_type_name (unsigned int sh_type)
+@@ -3785,6 +3785,7 @@ get_section_type_name (unsigned int sh_type)
      case 0x7ffffffd:		return "AUXILIARY";
      case 0x7fffffff:		return "FILTER";
      case SHT_GNU_LIBLIST:	return "GNU_LIBLIST";
@@ -1095,7 +1045,7 @@ index 6b8b107..abcdea1 100644
 +	.section .gnu_object_only
 +	.byte 0,0,0,0
 diff --git a/include/bfdlink.h b/include/bfdlink.h
-index 48c91da..fa5cca8 100644
+index add4971..22eab57 100644
 --- a/include/bfdlink.h
 +++ b/include/bfdlink.h
 @@ -395,6 +395,12 @@ struct bfd_link_info
@@ -1112,10 +1062,10 @@ index 48c91da..fa5cca8 100644
    unsigned int allow_undefined_version: 1;
  
 diff --git a/include/elf/common.h b/include/elf/common.h
-index 1d68f80..e9214bf 100644
+index ae7b5f8..37dd300 100644
 --- a/include/elf/common.h
 +++ b/include/elf/common.h
-@@ -473,6 +473,7 @@
+@@ -476,6 +476,7 @@
  #define SHT_GNU_ATTRIBUTES 0x6ffffff5	/* Object attributes */
  #define SHT_GNU_HASH	0x6ffffff6	/* GNU style symbol hash table */
  #define SHT_GNU_LIBLIST	0x6ffffff7	/* List of prelink dependencies */
@@ -1124,7 +1074,7 @@ index 1d68f80..e9214bf 100644
  /* The next three section types are defined by Solaris, and are named
     SHT_SUNW*.  We use them in GNU code, so we also define SHT_GNU*
 diff --git a/ld/emultempl/aarch64elf.em b/ld/emultempl/aarch64elf.em
-index 42e8056..31aeb9d 100644
+index 9e243e1..71e2cc2 100644
 --- a/ld/emultempl/aarch64elf.em
 +++ b/ld/emultempl/aarch64elf.em
 @@ -270,7 +270,7 @@ gld${EMULATION_NAME}_after_allocation (void)
@@ -1152,7 +1102,7 @@ index 42e8056..31aeb9d 100644
 -LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 +LDEMUL_FINISH=aarch64_finish
 diff --git a/ld/emultempl/alphaelf.em b/ld/emultempl/alphaelf.em
-index a36fc7d..2d4a9f6 100644
+index 06ea6c1..bed9a77 100644
 --- a/ld/emultempl/alphaelf.em
 +++ b/ld/emultempl/alphaelf.em
 @@ -100,7 +100,7 @@ alpha_finish (void)
@@ -1165,7 +1115,7 @@ index a36fc7d..2d4a9f6 100644
  EOF
  
 diff --git a/ld/emultempl/armelf.em b/ld/emultempl/armelf.em
-index 1dde019..4388fdb 100644
+index f1da1bc..55f2679 100644
 --- a/ld/emultempl/armelf.em
 +++ b/ld/emultempl/armelf.em
 @@ -370,7 +370,7 @@ gld${EMULATION_NAME}_after_allocation (void)
@@ -1193,7 +1143,7 @@ index 1dde019..4388fdb 100644
 -LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 +LDEMUL_FINISH=arm_finish
 diff --git a/ld/emultempl/avrelf.em b/ld/emultempl/avrelf.em
-index f4e2654..048ad43 100644
+index f7a3acb..10ab41e 100644
 --- a/ld/emultempl/avrelf.em
 +++ b/ld/emultempl/avrelf.em
 @@ -209,7 +209,7 @@ avr_finish (void)
@@ -1206,7 +1156,7 @@ index f4e2654..048ad43 100644
  EOF
  
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 36dee8e..f4968ec 100644
+index 618e20a..d7645c5 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
 @@ -65,6 +65,7 @@ static void gld${EMULATION_NAME}_before_allocation (void);
@@ -1303,7 +1253,7 @@ index 36dee8e..f4968ec 100644
  if test x"$LDEMUL_AFTER_ALLOCATION" != xgld"$EMULATION_NAME"_after_allocation; then
  fragment <<EOF
  
-@@ -2507,7 +2538,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+@@ -2513,7 +2544,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
    ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
    "${EMULATION_NAME}",
    "${OUTPUT_FORMAT}",
@@ -1313,7 +1263,7 @@ index 36dee8e..f4968ec 100644
    ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
    ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
 diff --git a/ld/emultempl/ppc32elf.em b/ld/emultempl/ppc32elf.em
-index 0e2af12..5287b6f 100644
+index 719e57f..8e3a5a4 100644
 --- a/ld/emultempl/ppc32elf.em
 +++ b/ld/emultempl/ppc32elf.em
 @@ -212,7 +212,7 @@ ppc_finish (void)
@@ -1326,10 +1276,10 @@ index 0e2af12..5287b6f 100644
  
  EOF
 diff --git a/ld/emultempl/ppc64elf.em b/ld/emultempl/ppc64elf.em
-index 9646903..f67b08b 100644
+index fd9a3ce..dc069a5 100644
 --- a/ld/emultempl/ppc64elf.em
 +++ b/ld/emultempl/ppc64elf.em
-@@ -522,7 +522,7 @@ gld${EMULATION_NAME}_after_allocation (void)
+@@ -559,7 +559,7 @@ gld${EMULATION_NAME}_after_allocation (void)
  /* Final emulation specific call.  */
  
  static void
@@ -1338,7 +1288,7 @@ index 9646903..f67b08b 100644
  {
    char *msg = NULL;
    char *line, *endline;
-@@ -554,7 +554,7 @@ gld${EMULATION_NAME}_finish (void)
+@@ -591,7 +591,7 @@ gld${EMULATION_NAME}_finish (void)
      free (msg);
  
    ppc64_elf_restore_symbols (&link_info);
@@ -1347,16 +1297,14 @@ index 9646903..f67b08b 100644
  }
  
  
-@@ -876,6 +876,6 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
- #
+@@ -916,4 +916,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
+ LDEMUL_AFTER_OPEN=ppc_after_open
  LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
  LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 -LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 +LDEMUL_FINISH=ppc_finish
- LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
- LDEMUL_NEW_VERS_PATTERN=gld${EMULATION_NAME}_new_vers_pattern
 diff --git a/ld/emultempl/spuelf.em b/ld/emultempl/spuelf.em
-index 1b4d72f..8c8090c 100644
+index cc9ef2c..179c952 100644
 --- a/ld/emultempl/spuelf.em
 +++ b/ld/emultempl/spuelf.em
 @@ -416,7 +416,7 @@ spu_elf_relink (void)
@@ -1385,10 +1333,10 @@ index 1b4d72f..8c8090c 100644
 +LDEMUL_FINISH=spu_finish
  LDEMUL_CHOOSE_TARGET=gld${EMULATION_NAME}_choose_target
 diff --git a/ld/ldexp.c b/ld/ldexp.c
-index bd2266b..e9c0f48 100644
+index ac66cc0..80b2274 100644
 --- a/ld/ldexp.c
 +++ b/ld/ldexp.c
-@@ -1559,19 +1559,21 @@ align_n (bfd_vma value, bfd_vma align)
+@@ -1562,19 +1562,21 @@ align_n (bfd_vma value, bfd_vma align)
  }
  
  void
@@ -1418,7 +1366,7 @@ index bd2266b..e9c0f48 100644
 +    bfd_hash_table_free (&definedness_table);
  }
 diff --git a/ld/ldexp.h b/ld/ldexp.h
-index fa0dada..b422fa6 100644
+index 10fcf3d..4eec185 100644
 --- a/ld/ldexp.h
 +++ b/ld/ldexp.h
 @@ -221,7 +221,7 @@ fill_type *exp_get_fill
@@ -1432,13 +1380,13 @@ index fa0dada..b422fa6 100644
  
  #endif
 diff --git a/ld/ldfile.c b/ld/ldfile.c
-index 782ed7f..ead7345 100644
+index e19f55e..7aaf3b9 100644
 --- a/ld/ldfile.c
 +++ b/ld/ldfile.c
-@@ -317,7 +317,9 @@ success:
- 	  plugin_maybe_claim (&file, entry);
- 	}
-     }
+@@ -305,7 +305,9 @@ success:
+       && !no_more_claiming
+       && bfd_check_format (entry->the_bfd, bfd_object))
+     plugin_maybe_claim (entry);
 +  else
  #endif /* ENABLE_PLUGINS */
 +    cmdline_check_object_only_section (entry->the_bfd, FALSE);
@@ -1446,7 +1394,7 @@ index 782ed7f..ead7345 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index d65e01a..cdb3cfa 100644
+index 5c4581f..a9b2888 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1477,10 +1425,10 @@ index d65e01a..cdb3cfa 100644
  
  /* Forward declarations.  */
  static void exp_init_os (etree_type *);
-@@ -85,6 +92,10 @@ static void lang_record_phdrs (void);
- static void lang_do_version_exports_section (void);
+@@ -86,6 +93,10 @@ static void lang_do_version_exports_section (void);
  static void lang_finalize_version_expr_head
    (struct bfd_elf_version_expr_head *);
+ static void lang_do_memory_regions (void);
 +static void cmdline_lists_init (void);
 +static void cmdline_get_object_only_input_files (void);
 +static void print_cmdline_list (cmdline_union_type *);
@@ -1488,7 +1436,7 @@ index d65e01a..cdb3cfa 100644
  
  /* Exported variables.  */
  const char *output_target;
-@@ -1218,14 +1229,17 @@ output_section_statement_table_free (void)
+@@ -1219,14 +1230,17 @@ output_section_statement_table_free (void)
  /* Build enough state so that the parser can build its tree.  */
  
  void
@@ -1508,7 +1456,7 @@ index d65e01a..cdb3cfa 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -2827,6 +2841,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2830,6 +2844,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1521,7 +1469,7 @@ index d65e01a..cdb3cfa 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6669,7 +6689,38 @@ lang_process (void)
+@@ -6679,7 +6699,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1560,7 +1508,7 @@ index d65e01a..cdb3cfa 100644
  
    link_info.gc_sym_list = &entry_symbol;
    if (entry_symbol.name == NULL)
-@@ -8071,3 +8122,965 @@ lang_ld_feature (char *str)
+@@ -8114,3 +8165,965 @@ lang_ld_feature (char *str)
        p = q;
      }
  }
@@ -2527,10 +2475,10 @@ index d65e01a..cdb3cfa 100644
 +      }
 +}
 diff --git a/ld/ldlang.h b/ld/ldlang.h
-index 87409cf..2bcf7ea 100644
+index 69d21a7..5dd6d13 100644
 --- a/ld/ldlang.h
 +++ b/ld/ldlang.h
-@@ -512,7 +512,7 @@ extern struct asneeded_minfo **asneeded_list_tail;
+@@ -514,7 +514,7 @@ extern struct asneeded_minfo **asneeded_list_tail;
  extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
  
  extern void lang_init
@@ -2539,7 +2487,7 @@ index 87409cf..2bcf7ea 100644
  extern void lang_finish
    (void);
  extern lang_memory_region_type * lang_memory_region_lookup
-@@ -683,4 +683,45 @@ ldlang_override_segment_assignment
+@@ -685,4 +685,45 @@ ldlang_override_segment_assignment
  extern void
  lang_ld_feature (char *);
  
@@ -2586,7 +2534,7 @@ index 87409cf..2bcf7ea 100644
 +
  #endif
 diff --git a/ld/ldlex.h b/ld/ldlex.h
-index e3e9b24..efd656f 100644
+index be7f653..725175d 100644
 --- a/ld/ldlex.h
 +++ b/ld/ldlex.h
 @@ -133,6 +133,7 @@ enum option_values
@@ -2598,10 +2546,10 @@ index e3e9b24..efd656f 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 818d108..fdbd0ee 100644
+index 4b41288..1d91dae 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
-@@ -220,6 +220,9 @@ main (int argc, char **argv)
+@@ -219,6 +219,9 @@ main (int argc, char **argv)
  
    xatexit (ld_cleanup);
  
@@ -2611,7 +2559,7 @@ index 818d108..fdbd0ee 100644
    /* Set up the sysroot directory.  */
    ld_sysroot = get_sysroot (argc, argv);
    if (*ld_sysroot)
-@@ -296,8 +299,8 @@ main (int argc, char **argv)
+@@ -295,8 +298,8 @@ main (int argc, char **argv)
    default_target = ldemul_choose_target (argc, argv);
    config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
    config.commonpagesize = bfd_emul_get_commonpagesize (default_target);
@@ -2622,7 +2570,7 @@ index 818d108..fdbd0ee 100644
    ldemul_before_parse ();
    lang_has_input_file = FALSE;
    parse_args (argc, argv);
-@@ -312,34 +315,7 @@ main (int argc, char **argv)
+@@ -311,34 +314,7 @@ main (int argc, char **argv)
  
    ldemul_set_symbols ();
  
@@ -2658,7 +2606,7 @@ index 818d108..fdbd0ee 100644
  
    if (verbose)
      {
-@@ -441,7 +417,7 @@ main (int argc, char **argv)
+@@ -440,7 +416,7 @@ main (int argc, char **argv)
      fprintf (stderr, "lookup = %p val %lx\n", h, h ? h->u.def.value : 1);
    }
  #endif
@@ -2667,7 +2615,7 @@ index 818d108..fdbd0ee 100644
    lang_finish ();
  
    /* Even if we're producing relocatable output, some non-fatal errors should
-@@ -461,6 +437,8 @@ main (int argc, char **argv)
+@@ -460,6 +436,8 @@ main (int argc, char **argv)
        if (! bfd_close (link_info.output_bfd))
  	einfo (_("%F%B: final close failed: %E\n"), link_info.output_bfd);
  
@@ -2676,7 +2624,7 @@ index 818d108..fdbd0ee 100644
        /* If the --force-exe-suffix is enabled, and we're making an
  	 executable file and it doesn't end in .exe, copy it to one
  	 which does.  */
-@@ -507,6 +485,9 @@ main (int argc, char **argv)
+@@ -506,6 +484,9 @@ main (int argc, char **argv)
  	}
      }
  
@@ -2686,8 +2634,8 @@ index 818d108..fdbd0ee 100644
    END_PROGRESS (program_name);
  
    if (config.stats)
-@@ -816,7 +797,9 @@ add_archive_element (struct bfd_link_info *info,
- 	    }
+@@ -799,7 +780,9 @@ add_archive_element (struct bfd_link_info *info,
+ 	  *subsbfd = input->the_bfd;
  	}
      }
 +  else
@@ -2696,7 +2644,7 @@ index 818d108..fdbd0ee 100644
  
    ldlang_add_file (input);
  
-@@ -1495,3 +1478,38 @@ notice (struct bfd_link_info *info,
+@@ -1478,3 +1461,38 @@ notice (struct bfd_link_info *info,
  
    return TRUE;
  }
@@ -2736,7 +2684,7 @@ index 818d108..fdbd0ee 100644
 +    }
 +}
 diff --git a/ld/ldmain.h b/ld/ldmain.h
-index dce9650..5c1efc3 100644
+index 6c13494..c7dd6a5 100644
 --- a/ld/ldmain.h
 +++ b/ld/ldmain.h
 @@ -59,4 +59,6 @@ extern void add_wrap (const char *);
@@ -2747,7 +2695,7 @@ index dce9650..5c1efc3 100644
 +
  #endif
 diff --git a/ld/lexsup.c b/ld/lexsup.c
-index 4812c97..8724974 100644
+index e23f1e7..40c796a 100644
 --- a/ld/lexsup.c
 +++ b/ld/lexsup.c
 @@ -166,6 +166,9 @@ static const struct ld_option ld_options[] =
@@ -2771,10 +2719,10 @@ index 4812c97..8724974 100644
  	case 'q':
  	  link_info.emitrelocations = TRUE;
 diff --git a/ld/plugin.c b/ld/plugin.c
-index f02a97f..0a16644 100644
+index a4d38f3..9f79483 100644
 --- a/ld/plugin.c
 +++ b/ld/plugin.c
-@@ -39,6 +39,9 @@
+@@ -57,6 +57,9 @@ extern int errno;
  /* Report plugin symbols.  */
  bfd_boolean report_plugin_symbols;
  
@@ -2784,17 +2732,17 @@ index f02a97f..0a16644 100644
  /* The suffix to append to the name of the real (claimed) object file
     when generating a dummy BFD to hold the IR symbols sent from the
     plugin.  For cosmetic use only; appears in maps, crefs etc.  */
-@@ -882,6 +885,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
-   close (file->fd);
-   if (claimed)
+@@ -1122,6 +1125,9 @@ plugin_maybe_claim (lang_input_statement_type *entry)
      {
+       bfd *abfd = entry->the_bfd->plugin_dummy_bfd;
+ 
 +      /* Check object only section.  */
 +      cmdline_check_object_only_section (entry->the_bfd, TRUE);
 +
        /* Discard the real file's BFD and substitute the dummy one.  */
  
        /* BFD archive handling caches elements so we can't call
-@@ -935,14 +941,17 @@ plugin_call_cleanup (void)
+@@ -1167,14 +1173,17 @@ plugin_call_cleanup (void)
      {
        if (curplug->cleanup_handler && !curplug->cleanup_done)
  	{
@@ -2821,7 +2769,7 @@ index f02a97f..0a16644 100644
  	}
        curplug = curplug->next;
 diff --git a/ld/plugin.h b/ld/plugin.h
-index bccbee3..483519e 100644
+index 59c0df7..bf92dd9 100644
 --- a/ld/plugin.h
 +++ b/ld/plugin.h
 @@ -24,6 +24,9 @@
@@ -2835,7 +2783,7 @@ index bccbee3..483519e 100644
     its own newly-added input files and libs to claim.  */
  extern bfd_boolean no_more_claiming;
 diff --git a/ld/scripttempl/armbpabi.sc b/ld/scripttempl/armbpabi.sc
-index b910847..693f4cf 100644
+index d36d973..a430a3e 100644
 --- a/ld/scripttempl/armbpabi.sc
 +++ b/ld/scripttempl/armbpabi.sc
 @@ -36,7 +36,7 @@ INTERP=".interp       0 : { *(.interp) }"
@@ -2848,10 +2796,10 @@ index b910847..693f4cf 100644
    SBSS=".sbss         ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/elf.sc b/ld/scripttempl/elf.sc
-index 4368fd9..055405b 100644
+index c9c80b0..0a5ef87 100644
 --- a/ld/scripttempl/elf.sc
 +++ b/ld/scripttempl/elf.sc
-@@ -165,7 +165,7 @@ RELA_IPLT=".rela.iplt    ${RELOCATING-0} :
+@@ -166,7 +166,7 @@ RELA_IPLT=".rela.iplt    ${RELOCATING-0} :
  DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
  RODATA=".${RODATA_NAME}       ${RELOCATING-0} : { *(.${RODATA_NAME}${RELOCATING+ .${RODATA_NAME}.* .gnu.linkonce.r.*}) }"
  DATARELRO=".data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }"
@@ -2861,7 +2809,7 @@ index 4368fd9..055405b 100644
    SBSS=".${SBSS_NAME}         ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/elf32sh-symbian.sc b/ld/scripttempl/elf32sh-symbian.sc
-index 8e66e69..6d83d6e 100644
+index a5f668cb..24f068e 100644
 --- a/ld/scripttempl/elf32sh-symbian.sc
 +++ b/ld/scripttempl/elf32sh-symbian.sc
 @@ -88,7 +88,7 @@ fi
@@ -2874,7 +2822,7 @@ index 8e66e69..6d83d6e 100644
  INIT_ARRAY=".init_array   ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/elf64hppa.sc b/ld/scripttempl/elf64hppa.sc
-index 59bcb05..8e18b43 100644
+index 663b073..91e3db5 100644
 --- a/ld/scripttempl/elf64hppa.sc
 +++ b/ld/scripttempl/elf64hppa.sc
 @@ -132,7 +132,7 @@ fi
@@ -2887,7 +2835,7 @@ index 59bcb05..8e18b43 100644
    SBSS=".sbss         ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/elfxtensa.sc b/ld/scripttempl/elfxtensa.sc
-index 5c577ce..7e045a0 100644
+index 91e7c22..13a31cf 100644
 --- a/ld/scripttempl/elfxtensa.sc
 +++ b/ld/scripttempl/elfxtensa.sc
 @@ -145,7 +145,7 @@ fi
@@ -2900,7 +2848,7 @@ index 5c577ce..7e045a0 100644
  INIT=".init         0 : { *(.init)		}"
  FINI_LIT=".fini.literal 0 : { *(.fini.literal)	}"
 diff --git a/ld/scripttempl/mep.sc b/ld/scripttempl/mep.sc
-index ac4d88d..6bf84aa 100644
+index a744b5b..f0de094 100644
 --- a/ld/scripttempl/mep.sc
 +++ b/ld/scripttempl/mep.sc
 @@ -119,7 +119,7 @@ fi
@@ -2913,7 +2861,7 @@ index ac4d88d..6bf84aa 100644
    SBSS=".sbss         ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/pe.sc b/ld/scripttempl/pe.sc
-index 7c9fc88..66d80eb 100644
+index fbc38e8..69900e1 100644
 --- a/ld/scripttempl/pe.sc
 +++ b/ld/scripttempl/pe.sc
 @@ -165,6 +165,7 @@ SECTIONS
@@ -2925,7 +2873,7 @@ index 7c9fc88..66d80eb 100644
  
    .idata ${RELOCATING+BLOCK(__section_alignment__)} :
 diff --git a/ld/scripttempl/pep.sc b/ld/scripttempl/pep.sc
-index 71f9b48..a78fb8f 100644
+index 50b4104..6f6c314 100644
 --- a/ld/scripttempl/pep.sc
 +++ b/ld/scripttempl/pep.sc
 @@ -170,6 +170,7 @@ SECTIONS
@@ -3082,7 +3030,7 @@ index 0000000..d4c5852
 +.* .gnu_object_only.*
 +#pass
 diff --git a/ld/testsuite/ld-plugin/lto.exp b/ld/testsuite/ld-plugin/lto.exp
-index 031752d..e6b768c 100644
+index 6d9500b..8052131 100644
 --- a/ld/testsuite/ld-plugin/lto.exp
 +++ b/ld/testsuite/ld-plugin/lto.exp
 @@ -79,6 +79,15 @@ set lto_link_tests [list \
@@ -3101,13 +3049,7 @@ index 031752d..e6b768c 100644
    [list "Compile 5a" \
     "" "-flto $lto_fat" \
     {lto-5a.c} {} ""] \
-@@ -88,9 +97,18 @@ set lto_link_tests [list \
-   [list "LTO 6" \
-    "-O2 -flto -fuse-linker-plugin" "" \
-    {lto-6.c} {} "lto-6.exe" "c"] \
-+  [list "Compile PR ld/12365" \
-+   "" "-flto -O2 $lto_fat" \
-+   {pr12365a.c pr12365b.c pr12365c.c} {} ""] \
+@@ -94,6 +103,12 @@ set lto_link_tests [list \
    [list "Compile 9" \
     "" "-O2 -finline -flto" \
     {lto-9.cc} {} "" "c++"] \
@@ -3120,17 +3062,7 @@ index 031752d..e6b768c 100644
    [list "Compile 11a" \
     "" "-O -flto" \
     {lto-11a.c} {} ""] \
-@@ -247,6 +265,9 @@ set lto_link_elf_tests [list \
-   [list "PR ld/16746 (2)" \
-    "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto" \
-    {dummy.c} {} "pr16746b.exe"] \
-+  [list "PR ld/14918" \
-+   "-flto" "-flto" \
-+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
- ]
- 
- # Check final symbols in executables.
-@@ -282,9 +303,21 @@ set lto_run_tests [list \
+@@ -288,9 +303,21 @@ set lto_run_tests [list \
    [list "LTO 3c" \
     "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" "" \
     {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"] \
@@ -3152,7 +3084,7 @@ index 031752d..e6b768c 100644
    [list "LTO 11" \
     "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" "" \
     {dummy.c} "lto-11.exe" "lto-11.out" "" "c"] \
-@@ -366,6 +399,15 @@ if { [is_elf_format] && [check_lto_shared_available] } {
+@@ -372,6 +399,15 @@ if { [is_elf_format] && [check_lto_shared_available] } {
      }
  }
  
@@ -3168,21 +3100,7 @@ index 031752d..e6b768c 100644
  set testname "Build liblto-11.a"
  remote_file host delete "tmpdir/liblto-11.a"
  set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
-@@ -377,6 +419,13 @@ if {![string match "" $catch_output]} {
- 
- if { [at_least_gcc_version 4 7] } {
-     # Check expected LTO linker errors.
-+    set testname "PR ld/12365"
-+    set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
-+    if { [ regexp "undefined reference to `my_bcopy'" $exec_output ] } {
-+	pass $testname
-+    } {
-+	fail $testname
-+    }
-     set testname "PR ld/12942 (3)"
-     set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
-     if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
-@@ -389,8 +438,30 @@ if { [at_least_gcc_version 4 7] } {
+@@ -413,8 +449,30 @@ if { [at_least_gcc_version 4 7] } {
  # Run "ld -r" to generate inputs for complex LTO tests.
  run_dump_test "lto-3r"
  remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
@@ -3213,193 +3131,3 @@ index 031752d..e6b768c 100644
  
  run_cc_link_tests $lto_link_symbol_tests
  
-diff --git a/ld/testsuite/ld-plugin/pr12365a.c b/ld/testsuite/ld-plugin/pr12365a.c
-new file mode 100644
-index 0000000..a9bb6c6
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr12365a.c
-@@ -0,0 +1,25 @@
-+extern void abort(void);
-+extern void main_test (void);
-+extern void abort (void);
-+int inside_main;
-+
-+int
-+main ()
-+{
-+  inside_main = 1;
-+  main_test ();
-+  inside_main = 0;
-+  return 0;
-+}
-+
-+/* When optimizing, all the constant cases should have been
-+   constant folded, so no calls to link_error should remain.
-+   In any case, link_error should not be called.  */
-+
-+#ifndef __OPTIMIZE__
-+void
-+link_error (void)
-+{
-+  abort ();
-+}
-+#endif
-diff --git a/ld/testsuite/ld-plugin/pr12365b.c b/ld/testsuite/ld-plugin/pr12365b.c
-new file mode 100644
-index 0000000..a5a80e0
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr12365b.c
-@@ -0,0 +1,47 @@
-+#define ASMNAME(cname)  ASMNAME2 (__USER_LABEL_PREFIX__, cname)
-+#define ASMNAME2(prefix, cname) STRING (prefix) cname
-+#define STRING(x)    #x
-+
-+typedef __SIZE_TYPE__ size_t;
-+extern void abort (void);
-+extern void *memcpy (void *, const void *, size_t)
-+  __asm (ASMNAME ("my_memcpy"));
-+extern void bcopy (const void *, void *, size_t)
-+  __asm (ASMNAME ("my_bcopy"));
-+extern void *memset (void *, int, size_t)
-+  __asm (ASMNAME ("my_memset"));
-+extern void bzero (void *, size_t)
-+  __asm (ASMNAME ("my_bzero"));
-+extern int memcmp (const void *, const void *, size_t);
-+
-+struct A { char c[32]; } a = { "foobar" };
-+char x[64] = "foobar", y[64];
-+int i = 39, j = 6, k = 4;
-+
-+extern int inside_main;
-+
-+void
-+main_test (void)
-+{
-+  struct A b = a;
-+  struct A c = { { 'x' } };
-+
-+  inside_main = 1;
-+
-+  if (memcmp (b.c, x, 32) || c.c[0] != 'x' || memcmp (c.c + 1, x + 32, 31))
-+    abort ();
-+  if (__builtin_memcpy (y, x, i) != y || memcmp (x, y, 64))
-+    abort ();
-+  if (memcpy (y + 6, x, j) != y + 6
-+      || memcmp (x, y, 6) || memcmp (x, y + 6, 58))
-+    abort ();
-+  if (__builtin_memset (y + 2, 'X', k) != y + 2
-+      || memcmp (y, "foXXXXfoobar", 13))
-+    abort ();
-+  bcopy (y + 1, y + 2, 6);
-+  if (memcmp (y, "fooXXXXfobar", 13))
-+    abort ();
-+  __builtin_bzero (y + 4, 2);
-+  if (memcmp (y, "fooX\0\0Xfobar", 13))
-+    abort ();
-+}
-diff --git a/ld/testsuite/ld-plugin/pr12365c.c b/ld/testsuite/ld-plugin/pr12365c.c
-new file mode 100644
-index 0000000..2edd0ff
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr12365c.c
-@@ -0,0 +1,79 @@
-+extern void abort (void);
-+extern int inside_main;
-+typedef __SIZE_TYPE__ size_t;
-+
-+#define TEST_ABORT if (inside_main) abort()
-+
-+void *
-+my_memcpy (void *d, const void *s, size_t n)
-+{
-+  char *dst = (char *) d;
-+  const char *src = (const char *) s;
-+  while (n--)
-+    *dst++ = *src++;
-+  return (char *) d;
-+}
-+
-+void
-+my_bcopy (const void *s, void *d, size_t n)
-+{
-+  char *dst = (char *) d;
-+  const char *src = (const char *) s;
-+  if (src >= dst)
-+    while (n--)
-+      *dst++ = *src++;
-+  else
-+    {
-+      dst += n;
-+      src += n;
-+      while (n--)
-+        *--dst = *--src;
-+    }
-+}
-+
-+void *
-+my_memset (void *d, int c, size_t n)
-+{
-+  char *dst = (char *) d;
-+  while (n--)
-+    *dst++ = c;
-+  return (char *) d;
-+}
-+
-+void
-+my_bzero (void *d, size_t n)
-+{
-+  char *dst = (char *) d;
-+  while (n--)
-+    *dst++ = '\0';
-+}
-+
-+void *
-+memcpy (void *d, const void *s, size_t n)
-+{
-+  void *result = my_memcpy (d, s, n);
-+  TEST_ABORT;
-+  return result;
-+}
-+
-+void
-+bcopy (const void *s, void *d, size_t n)
-+{
-+  my_bcopy (s, d, n);
-+  TEST_ABORT;
-+}
-+
-+void *
-+memset (void *d, int c, size_t n)
-+{
-+  void *result = my_memset (d, c, n);
-+  TEST_ABORT;
-+  return result;
-+}
-+
-+void
-+bzero (void *d, size_t n)
-+{
-+  my_bzero (d, n);
-+  TEST_ABORT;
-+}
-diff --git a/ld/testsuite/ld-plugin/pr14918.c b/ld/testsuite/ld-plugin/pr14918.c
-new file mode 100644
-index 0000000..a9bce4a
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr14918.c
-@@ -0,0 +1,5 @@
-+int
-+main ()
-+{
-+  return 0;
-+}
-diff --git a/ld/testsuite/ld-plugin/pr14918.d b/ld/testsuite/ld-plugin/pr14918.d
-new file mode 100644
-index 0000000..0b14948
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr14918.d
-@@ -0,0 +1,4 @@
-+#failif
-+#...
-+ 0x0+1 \(NEEDED\) +Shared library: \[libgcc_s.so.[0-9]+\]
-+#...

@@ -1,6 +1,6 @@
 /* trace.h --- interface to tracing output for the MSP430 simulator.
 
-   Copyright (C) 2005-2014 Free Software Foundation, Inc.
+   Copyright (C) 2005-2015 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -23,6 +23,6 @@
 
 extern void  msp430_trace_init (bfd *);
 extern void  msp430_trace_one (int pc);
-extern int   msp430_get_current_source_location (const char **, const char **, unsigned int *);
+extern int   msp430_get_current_source_location (int, const char **, const char **, unsigned int *);
 
 #endif

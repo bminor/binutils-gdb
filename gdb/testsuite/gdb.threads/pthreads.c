@@ -1,5 +1,5 @@
 /* Pthreads test program.
-   Copyright 1996-2014 Free Software Foundation, Inc.
+   Copyright 1996-2015 Free Software Foundation, Inc.
 
    Written by Fred Fish of Cygnus Support
    Contributed by Cygnus Support
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h>
 
 /* Under HPUX 10, the second arg of pthread_create
    is prototyped to be just a "pthread_attr_t", while under Solaris it
@@ -110,6 +111,7 @@ foo (a, b, c)
   if (verbose) printf("a=%d\n", a);
 }
 
+int
 main(argc, argv)
      int argc;
      char **argv;

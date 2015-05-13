@@ -1,5 +1,5 @@
 /* Support for the generic parts of COFF, for BFD.
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -178,18 +178,21 @@ make_a_section_from_file (bfd *abfd,
 		 abfd, name);
 	      return FALSE;
 	    }
-	  if (name[1] != 'z')
+	  if (return_section->compress_status == COMPRESS_SECTION_DONE)
 	    {
-	      unsigned int len = strlen (name);
+	      if (name[1] != 'z')
+		{
+		  unsigned int len = strlen (name);
 
-	      new_name = bfd_alloc (abfd, len + 2);
-	      if (new_name == NULL)
-		return FALSE;
-	      new_name[0] = '.';
-	      new_name[1] = 'z';
-	      memcpy (new_name + 2, name + 1, len);
+		  new_name = bfd_alloc (abfd, len + 2);
+		  if (new_name == NULL)
+		    return FALSE;
+		  new_name[0] = '.';
+		  new_name[1] = 'z';
+		  memcpy (new_name + 2, name + 1, len);
+		}
 	    }
-	  break;
+         break;
 	case decompress:
 	  if (!bfd_init_section_decompress_status (abfd, return_section))
 	    {
@@ -468,7 +471,10 @@ _bfd_coff_internal_syment_name (bfd *abfd,
 	  if (strings == NULL)
 	    return NULL;
 	}
-      if (sym->_n._n_n._n_offset >= obj_coff_strings_len (abfd))
+      /* PR 17910: Only check for string overflow if the length has been set.
+	 Some DLLs, eg those produced by Visual Studio, may not set the length field.  */
+      if (obj_coff_strings_len (abfd) > 0
+	  && sym->_n._n_n._n_offset >= obj_coff_strings_len (abfd))
 	return NULL;
       return strings + sym->_n._n_n._n_offset;
     }
@@ -1802,7 +1808,7 @@ coff_get_normalized_symtab (bfd *abfd)
       if (symbol_ptr->u.syment.n_sclass == C_FILE
 	  && symbol_ptr->u.syment.n_numaux > 0
 	  && raw_src + symesz + symbol_ptr->u.syment.n_numaux
-	  * sizeof (union internal_auxent) >= raw_end)
+	  * symesz > raw_end)
 	{
 	  bfd_release (abfd, internal);
 	  return NULL;
@@ -1821,7 +1827,6 @@ coff_get_normalized_symtab (bfd *abfd)
 	    }
 
 	  raw_src += symesz;
-
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,
 				symbol_ptr->u.syment.n_sclass,
@@ -2241,6 +2246,26 @@ coff_find_nearest_line_with_names (bfd *abfd,
 				     line_ptr, NULL, debug_sections, 0,
 				     &coff_data(abfd)->dwarf2_find_line_info))
     return TRUE;
+
+  /* If the DWARF lookup failed, but there is DWARF information available
+     then the problem might be that the file has been rebased.  This tool
+     changes the VMAs of all the sections, but it does not update the DWARF
+     information.  So try again, using a bias against the address sought.  */
+  if (coff_data (abfd)->dwarf2_find_line_info != NULL)
+    {
+      bfd_signed_vma bias;
+
+      bias = _bfd_dwarf2_find_symbol_bias (symbols,
+					   & coff_data (abfd)->dwarf2_find_line_info);
+      
+      if (bias
+	  && _bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section,
+					    offset + bias,
+					    filename_ptr, functionname_ptr,
+					    line_ptr, NULL, debug_sections, 0,
+					    &coff_data(abfd)->dwarf2_find_line_info))
+	return TRUE;
+    }
 
   *filename_ptr = 0;
   *functionname_ptr = 0;

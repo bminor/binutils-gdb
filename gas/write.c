@@ -1,5 +1,5 @@
 /* write.c - emit .o file
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1184,6 +1184,11 @@ get_frag_for_reloc (fragS *last_frag,
 	&& r->u.b.r.address < f->fr_address + f->fr_fix)
       return f;
 
+  for (f = seginfo->frchainP->frch_root; f != NULL; f = f->fr_next)
+    if (f->fr_address <= r->u.b.r.address
+	&& r->u.b.r.address <= f->fr_address + f->fr_fix)
+      return f;
+
   as_bad_where (r->file, r->line,
 		_("reloc not within (fixed part of) section"));
   return NULL;
@@ -1408,6 +1413,9 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   struct z_stream_s *strm;
   int x;
   flagword flags = bfd_get_section_flags (abfd, sec);
+  unsigned int header_size, compression_header_size;
+  /* Maximimum compression header is 24 bytes.  */
+  bfd_byte compression_header[24];
 
   if (seginfo == NULL
       || sec->size < 32
@@ -1422,27 +1430,26 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (strm == NULL)
     return;
 
+  if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
+    stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+  else
+    stdoutput->flags |= BFD_COMPRESS;
+  compression_header_size
+    = bfd_get_compression_header_size (stdoutput, NULL);
+
   /* Create a new frag to contain the "ZLIB" header.  */
+  header_size = 12 + compression_header_size;
   first_newf = frag_alloc (ob);
-  if (obstack_room (ob) < 12)
+  if (obstack_room (ob) < header_size)
     first_newf = frag_alloc (ob);
-  if (obstack_room (ob) < 12)
-    as_fatal (_("can't extend frag %u chars"), 12);
+  if (obstack_room (ob) < header_size)
+    as_fatal (_("can't extend frag %u chars"), header_size);
   last_newf = first_newf;
-  obstack_blank_fast (ob, 12);
+  obstack_blank_fast (ob, header_size);
   last_newf->fr_type = rs_fill;
-  last_newf->fr_fix = 12;
+  last_newf->fr_fix = header_size;
   header = last_newf->fr_literal;
-  memcpy (header, "ZLIB", 4);
-  header[11] = uncompressed_size; uncompressed_size >>= 8;
-  header[10] = uncompressed_size; uncompressed_size >>= 8;
-  header[9] = uncompressed_size; uncompressed_size >>= 8;
-  header[8] = uncompressed_size; uncompressed_size >>= 8;
-  header[7] = uncompressed_size; uncompressed_size >>= 8;
-  header[6] = uncompressed_size; uncompressed_size >>= 8;
-  header[5] = uncompressed_size; uncompressed_size >>= 8;
-  header[4] = uncompressed_size;
-  compressed_size = 12;
+  compressed_size = header_size;
 
   /* Stream the frags through the compression engine, adding new frags
      as necessary to accomodate the compressed output.  */
@@ -1521,18 +1528,32 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	break;
     }
 
+  /* PR binutils/18087: If compression didn't make the section smaller,
+     just keep it uncompressed.  */
+  if (compressed_size >= uncompressed_size)
+    return;
+
+  if (compression_header_size)
+    memcpy (header, compression_header, compression_header_size);
+  memcpy (header + compression_header_size, "ZLIB", 4);
+  bfd_putb64 (uncompressed_size, header + compression_header_size + 4);
+
   /* Replace the uncompressed frag list with the compressed frag list.  */
   seginfo->frchainP->frch_root = first_newf;
   seginfo->frchainP->frch_last = last_newf;
 
   /* Update the section size and its name.  */
+  bfd_update_compression_header (abfd, (bfd_byte *) header, sec);
   x = bfd_set_section_size (abfd, sec, compressed_size);
   gas_assert (x);
-  compressed_name = (char *) xmalloc (strlen (section_name) + 2);
-  compressed_name[0] = '.';
-  compressed_name[1] = 'z';
-  strcpy (compressed_name + 2, section_name + 1);
-  bfd_section_name (stdoutput, sec) = compressed_name;
+  if (!compression_header_size)
+    {
+      compressed_name = (char *) xmalloc (strlen (section_name) + 2);
+      compressed_name[0] = '.';
+      compressed_name[1] = 'z';
+      strcpy (compressed_name + 2, section_name + 1);
+      bfd_section_name (stdoutput, sec) = compressed_name;
+    }
 }
 
 static void
@@ -1687,7 +1708,9 @@ set_symtab (void)
    of the section.  This allows proper nop-filling at the end of
    code-bearing sections.  */
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)					\
-  (!(FRCHAIN)->frch_next ? get_recorded_alignment (SEG) : 0)
+  (!(FRCHAIN)->frch_next && subseg_text_p (SEG)				\
+   ? get_recorded_alignment (SEG)					\
+   : 0)
 #else
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 #endif

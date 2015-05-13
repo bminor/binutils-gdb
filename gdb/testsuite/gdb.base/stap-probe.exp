@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2014 Free Software Foundation, Inc.
+# Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ proc stap_test {exec_name {arg ""}} {
 	return -1
     }
 
-    gdb_test "print \$_probe_argc" "No SystemTap probe at PC $hex" \
+    gdb_test "print \$_probe_argc" "No probe at PC $hex" \
 	"check argument not at probe point"
 
     gdb_test "info probes stap" \

@@ -1,6 +1,6 @@
 /* Continuations for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,13 +39,13 @@ make_continuation (struct continuation **pmy_chain,
 		   continuation_ftype *function,
 		   void *arg,  void (*free_arg) (void *))
 {
-  struct continuation *new = XNEW (struct continuation);
+  struct continuation *newobj = XNEW (struct continuation);
 
-  new->next = *pmy_chain;
-  new->function = function;
-  new->free_arg = free_arg;
-  new->arg = arg;
-  *pmy_chain = new;
+  newobj->next = *pmy_chain;
+  newobj->function = function;
+  newobj->free_arg = free_arg;
+  newobj->arg = arg;
+  *pmy_chain = newobj;
 }
 
 static void

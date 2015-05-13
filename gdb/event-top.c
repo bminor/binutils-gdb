@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
@@ -667,7 +667,7 @@ command_line_handler (char *rl)
 
   /* Add line to history if appropriate.  */
   if (*linebuffer && input_from_terminal_p ())
-    add_history (linebuffer);
+    gdb_add_history (linebuffer);
 
   /* Note: lines consisting solely of comments are added to the command
      history.  This is useful when you type a command, and then
@@ -935,24 +935,28 @@ handle_sighup (int sig)
 static void
 async_disconnect (gdb_client_data arg)
 {
-  volatile struct gdb_exception exception;
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
+  TRY
     {
       quit_cover ();
     }
 
-  if (exception.reason < 0)
+  CATCH (exception, RETURN_MASK_ALL)
     {
       fputs_filtered ("Could not kill the program being debugged",
 		      gdb_stderr);
       exception_print (gdb_stderr, exception);
     }
+  END_CATCH
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
+  TRY
     {
       pop_all_targets ();
     }
+  CATCH (exception, RETURN_MASK_ALL)
+    {
+    }
+  END_CATCH
 
   signal (SIGHUP, SIG_DFL);	/*FIXME: ???????????  */
   raise (SIGHUP);

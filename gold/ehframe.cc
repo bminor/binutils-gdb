@@ -1,6 +1,6 @@
 // ehframe.cc -- handle exception frame sections for gold
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -412,7 +412,7 @@ Cie::~Cie()
 section_offset_type
 Cie::set_output_offset(section_offset_type output_offset,
 		       unsigned int addralign,
-		       Merge_map* merge_map)
+		       Output_section_data *output_data)
 {
   size_t length = this->contents_.length();
 
@@ -422,8 +422,9 @@ Cie::set_output_offset(section_offset_type output_offset,
   if (this->object_ != NULL)
     {
       // Add a mapping so that relocations are applied correctly.
-      merge_map->add_mapping(this->object_, this->shndx_, this->input_offset_,
-			     length, output_offset);
+      this->object_->add_merge_mapping(output_data, this->shndx_,
+                                       this->input_offset_, length,
+                                       output_offset);
     }
 
   length = align_address(length, addralign);
@@ -432,7 +433,7 @@ Cie::set_output_offset(section_offset_type output_offset,
        p != this->fdes_.end();
        ++p)
     {
-      (*p)->add_mapping(output_offset + length, merge_map);
+      (*p)->add_mapping(output_offset + length, output_data);
 
       size_t fde_length = (*p)->length();
       fde_length = align_address(fde_length, addralign);
@@ -531,7 +532,6 @@ Eh_frame::Eh_frame()
     eh_frame_hdr_(NULL),
     cie_offsets_(),
     unmergeable_cie_offsets_(),
-    merge_map_(),
     mappings_are_done_(false),
     final_data_size_(0)
 {
@@ -567,7 +567,7 @@ Eh_frame::skip_leb128(const unsigned char** pp, const unsigned char* pend)
 // section.
 
 template<int size, bool big_endian>
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section(
     Sized_relobj_file<size, big_endian>* object,
     const unsigned char* symbols,
@@ -576,8 +576,7 @@ Eh_frame::add_ehframe_input_section(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type,
-    bool optimize_ehframe)
+    unsigned int reloc_type)
 {
   // Get the section contents.
   section_size_type contents_len;
@@ -585,7 +584,7 @@ Eh_frame::add_ehframe_input_section(
 							    &contents_len,
 							    false);
   if (contents_len == 0)
-    return false;
+    return EH_EMPTY_SECTION;
 
   // If this is the marker section for the end of the data, then
   // return false to force it to be handled as an ordinary input
@@ -593,30 +592,24 @@ Eh_frame::add_ehframe_input_section(
   // of unrecognized .eh_frame sections.
   if (contents_len == 4
       && elfcpp::Swap<32, big_endian>::readval(pcontents) == 0)
-    return false;
+    return EH_END_MARKER_SECTION;
 
   New_cies new_cies;
-  bool recognized_eh_frame_section
-    = this->do_add_ehframe_input_section(object, symbols, symbols_size,
+  if (!this->do_add_ehframe_input_section(object, symbols, symbols_size,
 					  symbol_names, symbol_names_size,
 					  shndx, reloc_shndx,
 					  reloc_type, pcontents,
-					  contents_len, &new_cies);
-  if (!recognized_eh_frame_section && this->eh_frame_hdr_ != NULL)
-    this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
-
-  // If we don't unrecognize the exception frame section or it can't
-  // be optimized, then return false to force it to be handled as an
-  // ordinary input section.
-  if (!recognized_eh_frame_section
-      || (this->eh_frame_hdr_ == NULL && !optimize_ehframe))
+					  contents_len, &new_cies))
     {
+      if (this->eh_frame_hdr_ != NULL)
+	this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
+
       for (New_cies::iterator p = new_cies.begin();
 	   p != new_cies.end();
 	   ++p)
 	delete p->first;
 
-      return false;
+      return EH_UNRECOGNIZED_SECTION;
     }
 
   // Now that we know we are using this section, record any new CIEs
@@ -631,7 +624,7 @@ Eh_frame::add_ehframe_input_section(
 	this->unmergeable_cie_offsets_.push_back(p->first);
     }
 
-  return true;
+  return EH_OPTIMIZABLE_SECTION;
 }
 
 // The bulk of the implementation of add_ehframe_input_section.
@@ -965,8 +958,8 @@ Eh_frame::read_cie(Sized_relobj_file<size, big_endian>* object,
       // know for sure that we are doing a special mapping for this
       // input section, but that's OK--if we don't do a special
       // mapping, nobody will ever ask for the mapping we add here.
-      this->merge_map_.add_mapping(object, shndx, (pcie - 8) - pcontents,
-				   pcieend - (pcie - 8), -1);
+      object->add_merge_mapping(this, shndx, (pcie - 8) - pcontents,
+                                pcieend - (pcie - 8), -1);
     }
 
   // Record this CIE plus the offset in the input section.
@@ -1033,8 +1026,8 @@ Eh_frame::read_fde(Sized_relobj_file<size, big_endian>* object,
     {
       // This FDE applies to a section which we are discarding.  We
       // can discard this FDE.
-      this->merge_map_.add_mapping(object, shndx, (pfde - 8) - pcontents,
-				   pfdeend - (pfde - 8), -1);
+      object->add_merge_mapping(this, shndx, (pfde - 8) - pcontents,
+                                pfdeend - (pfde - 8), -1);
       return true;
     }
 
@@ -1114,14 +1107,14 @@ Eh_frame::set_final_data_size()
        ++p)
     output_offset = (*p)->set_output_offset(output_offset,
 					    this->addralign(),
-					    &this->merge_map_);
+					    this);
 
   for (Cie_offsets::iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
     output_offset = (*p)->set_output_offset(output_offset,
 					    this->addralign(),
-					    &this->merge_map_);
+					    this);
 
   this->mappings_are_done_ = true;
   this->final_data_size_ = output_offset - output_start;
@@ -1137,16 +1130,7 @@ Eh_frame::do_output_offset(const Relobj* object, unsigned int shndx,
 			   section_offset_type offset,
 			   section_offset_type* poutput) const
 {
-  return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
-}
-
-// Return whether this is the merge section for an input section.
-
-bool
-Eh_frame::do_is_merge_section_for(const Relobj* object,
-				  unsigned int shndx) const
-{
-  return this->merge_map_.is_merge_section_for(object, shndx);
+  return object->merge_output_offset(shndx, offset, poutput);
 }
 
 // Write the data to the output file.
@@ -1222,7 +1206,7 @@ Eh_frame::do_sized_write(unsigned char* oview)
 
 #ifdef HAVE_TARGET_32_LITTLE
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<32, false>(
     Sized_relobj_file<32, false>* object,
     const unsigned char* symbols,
@@ -1231,13 +1215,12 @@ Eh_frame::add_ehframe_input_section<32, false>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type,
-    bool optimize_ehframe);
+    unsigned int reloc_type);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<32, true>(
     Sized_relobj_file<32, true>* object,
     const unsigned char* symbols,
@@ -1246,13 +1229,12 @@ Eh_frame::add_ehframe_input_section<32, true>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type,
-    bool optimize_ehframe);
+    unsigned int reloc_type);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<64, false>(
     Sized_relobj_file<64, false>* object,
     const unsigned char* symbols,
@@ -1261,13 +1243,12 @@ Eh_frame::add_ehframe_input_section<64, false>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type,
-    bool optimize_ehframe);
+    unsigned int reloc_type);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
 template
-bool
+Eh_frame::Eh_frame_section_disposition
 Eh_frame::add_ehframe_input_section<64, true>(
     Sized_relobj_file<64, true>* object,
     const unsigned char* symbols,
@@ -1276,8 +1257,7 @@ Eh_frame::add_ehframe_input_section<64, true>(
     section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
-    unsigned int reloc_type,
-    bool optimize_ehframe);
+    unsigned int reloc_type);
 #endif
 
 } // End namespace gold.

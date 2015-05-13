@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux AArch64.
 
-   Copyright (C) 2011-2014 Free Software Foundation, Inc.
+   Copyright (C) 2011-2015 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -36,8 +36,6 @@
 #include <asm/ptrace.h>
 
 #include "gregset.h"
-
-#include "features/aarch64.c"
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
@@ -830,7 +828,6 @@ aarch64_linux_child_post_startup_inferior (struct target_ops *self,
 static const struct target_desc *
 aarch64_linux_read_description (struct target_ops *ops)
 {
-  initialize_tdesc_aarch64 ();
   return tdesc_aarch64;
 }
 

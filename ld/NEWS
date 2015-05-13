@@ -1,5 +1,12 @@
 -*- text -*-
 
+* New command line option for ELF targets to compress DWARF debug
+  sections, --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi].
+
+* Add --warn-orphan option to report orphan sections.
+
+* Add support for LLVM plugin.
+
 Changes in 2.25:
 
 * PE binaries now once again contain real timestamps by default.  To disable
@@ -592,7 +599,7 @@ Changes in version 2.1:
   other utilities should work on Risc/Ultrix and Irix.
 
 
-Copyright (C) 2012-2014 Free Software Foundation, Inc.
+Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

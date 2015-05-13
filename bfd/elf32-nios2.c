@@ -1,5 +1,5 @@
 /* 32-bit ELF support for Nios II.
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -80,7 +80,7 @@ static reloc_howto_type elf_nios2_howto_table_rel[] = {
   /* No relocation.  */
   HOWTO (R_NIOS2_NONE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
@@ -764,6 +764,7 @@ struct elf_reloc_map
 };
 
 static const struct elf_reloc_map nios2_reloc_map[] = {
+  {BFD_RELOC_NONE, R_NIOS2_NONE},
   {BFD_RELOC_NIOS2_S16, R_NIOS2_S16},
   {BFD_RELOC_NIOS2_U16, R_NIOS2_U16},
   {BFD_RELOC_16_PCREL, R_NIOS2_PCREL16},
@@ -5307,5 +5308,6 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define TARGET_BIG_NAME			"elf32-bignios2"
 
 #define elf_backend_got_header_size	12
+#define elf_backend_default_execstack	0
 
 #include "elf32-target.h"

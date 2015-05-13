@@ -1,6 +1,6 @@
 /* GDB routines for supporting auto-loaded scripts.
 
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,7 +45,8 @@ extern struct cmd_list_element **auto_load_show_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_info_cmdlist_get (void);
 
 extern int file_is_auto_load_safe (const char *filename,
-				   const char *debug_fmt, ...);
+				   const char *debug_fmt, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 extern int auto_load_gdb_scripts_enabled
   (const struct extension_language_defn *extlang);

@@ -1,6 +1,6 @@
 /* Native support code for PPC AIX, for GDB the GNU debugger.
 
-   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+   Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
    Free Software Foundation, Inc.
 
@@ -572,19 +572,20 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
     {
       CORE_ADDR pc = 0;
       struct obj_section *pc_section;
-      volatile struct gdb_exception e;
 
-      TRY_CATCH (e, RETURN_MASK_ERROR)
+      TRY
         {
           pc = read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
         }
-      if (e.reason < 0)
+      CATCH (e, RETURN_MASK_ERROR)
         {
           /* An error occured during reading.  Probably a memory error
              due to the section not being loaded yet.  This address
              cannot be a function descriptor.  */
           return addr;
         }
+      END_CATCH
+
       pc_section = find_pc_section (pc);
 
       if (pc_section && (pc_section->the_bfd_section->flags & SEC_CODE))

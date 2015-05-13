@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on AArch64 systems.
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -89,5 +89,7 @@ struct gdbarch_tdep
   struct type *vnh_type;
   struct type *vnb_type;
 };
+
+extern struct target_desc *tdesc_aarch64;
 
 #endif /* aarch64-tdep.h */

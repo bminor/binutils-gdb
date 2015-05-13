@@ -1,5 +1,5 @@
 /* tc-nds32.h -- Header file for tc-nds32.c.
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
    Contributed by Andes Technology Corporation.
 
    This file is part of GAS.
@@ -151,10 +151,16 @@ extern void nds32_do_align (int);
 
 /* frags.c.  */
 
-#define NDS32_FRAG_RELAXABLE 0x1
-#define NDS32_FRAG_RELAXED 0x2
-#define NDS32_FRAG_BRANCH 0x4
-#define NDS32_FRAG_LABEL 0x8
+enum FRAG_ATTR
+{
+  NDS32_FRAG_RELAXABLE  = 0x1,
+  NDS32_FRAG_RELAXED = 0x2,
+  NDS32_FRAG_BRANCH = 0x4,
+  NDS32_FRAG_LABEL = 0x8,
+  NDS32_FRAG_FINAL = 0x10,
+  NDS32_FRAG_RELAXABLE_BRANCH = 0x20,
+  NDS32_FRAG_ALIGN = 0x40
+};
 
 struct nds32_frag_type
 {
@@ -222,7 +228,8 @@ enum nds32_ramp
   NDS32_HINT = (1 << 6),
   NDS32_FIX = (1 << 7),
   NDS32_ADDEND = (1 << 8),
-  NDS32_SYM = (1 << 9)
+  NDS32_SYM = (1 << 9),
+  NDS32_PCREL = (1 << 10)
 };
 
 typedef struct nds32_relax_fixup_info

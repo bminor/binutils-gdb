@@ -2,7 +2,7 @@
 
 # Architecture commands for GDB, the GNU debugger.
 #
-# Copyright (C) 1998-2014 Free Software Foundation, Inc.
+# Copyright (C) 1998-2015 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -985,6 +985,21 @@ M:int:stap_is_single_operand:const char *s:s
 # parser), and should advance the buffer pointer (p->arg).
 M:int:stap_parse_special_token:struct stap_parse_info *p:p
 
+# DTrace related functions.
+
+# The expression to compute the NARTGth+1 argument to a DTrace USDT probe.
+# NARG must be >= 0.
+M:void:dtrace_parse_probe_argument:struct parser_state *pstate, int narg:pstate, narg
+
+# True if the given ADDR does not contain the instruction sequence
+# corresponding to a disabled DTrace is-enabled probe.
+M:int:dtrace_probe_is_enabled:CORE_ADDR addr:addr
+
+# Enable a DTrace is-enabled probe at ADDR.
+M:void:dtrace_enable_probe:CORE_ADDR addr:addr
+
+# Disable a DTrace is-enabled probe at ADDR.
+M:void:dtrace_disable_probe:CORE_ADDR addr:addr
 
 # True if the list of shared libraries is one and only for all
 # processes, as opposed to a list of shared libraries per inferior.
@@ -1147,7 +1162,7 @@ cat <<EOF
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2014 Free Software Foundation, Inc.
+   Copyright (C) 1998-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1213,10 +1228,13 @@ struct syscall;
 struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
+struct parser_state;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
 struct mem_range;
 struct syscalls_info;
+
+#include "regcache.h"
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -1238,6 +1256,12 @@ extern struct gdbarch *target_gdbarch (void);
 
 typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
   (struct objfile *objfile, void *cb_data);
+
+/* Callback type for regset section iterators.  The callback usually
+   invokes the REGSET's supply or collect method, to which it must
+   pass a buffer with at least the given SIZE.  SECT_NAME is a BFD
+   section name, and HUMAN_NAME is used for diagnostic messages.
+   CB_DATA should have been passed unchanged through the iterator.  */
 
 typedef void (iterate_over_regset_sections_cb)
   (const char *sect_name, int size, const struct regset *regset,
@@ -2344,7 +2368,7 @@ gdbarch_find_by_info (struct gdbarch_info info)
   if (new_gdbarch->initialized_p)
     {
       struct gdbarch_list **list;
-      struct gdbarch_list *this;
+      struct gdbarch_list *self;
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
 			    "Previous architecture %s (%s) selected\n",
@@ -2356,12 +2380,12 @@ gdbarch_find_by_info (struct gdbarch_info info)
 	   list = &(*list)->next);
       /* It had better be in the list of architectures.  */
       gdb_assert ((*list) != NULL && (*list)->gdbarch == new_gdbarch);
-      /* Unlink THIS.  */
-      this = (*list);
-      (*list) = this->next;
-      /* Insert THIS at the front.  */
-      this->next = rego->arches;
-      rego->arches = this;
+      /* Unlink SELF.  */
+      self = (*list);
+      (*list) = self->next;
+      /* Insert SELF at the front.  */
+      self->next = rego->arches;
+      rego->arches = self;
       /* Return it.  */
       return new_gdbarch;
     }
@@ -2376,10 +2400,10 @@ gdbarch_find_by_info (struct gdbarch_info info)
   /* Insert the new architecture into the front of the architecture
      list (keep the list sorted Most Recently Used).  */
   {
-    struct gdbarch_list *this = XNEW (struct gdbarch_list);
-    this->next = rego->arches;
-    this->gdbarch = new_gdbarch;
-    rego->arches = this;
+    struct gdbarch_list *self = XNEW (struct gdbarch_list);
+    self->next = rego->arches;
+    self->gdbarch = new_gdbarch;
+    rego->arches = self;
   }    
 
   /* Check that the newly installed architecture is valid.  Plug in

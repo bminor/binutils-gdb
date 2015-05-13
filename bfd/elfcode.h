@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -712,7 +712,7 @@ elf_object_p (bfd *abfd)
 	      switch (ebd->elf_machine_code)
 		{
 		case EM_386:
-		case EM_486:
+		case EM_IAMCU:
 		case EM_X86_64:
 		case EM_OLD_SPARCV9:
 		case EM_SPARC32PLUS:
@@ -1220,10 +1220,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
       for (isym = isymbuf + 1, sym = symbase; isym < isymend; isym++, sym++)
 	{
 	  memcpy (&sym->internal_elf_sym, isym, sizeof (Elf_Internal_Sym));
+
 	  sym->symbol.the_bfd = abfd;
-
 	  sym->symbol.name = bfd_elf_sym_name (abfd, hdr, isym, NULL);
-
 	  sym->symbol.value = isym->st_value;
 
 	  if (isym->st_shndx == SHN_UNDEF)

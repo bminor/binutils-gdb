@@ -1,5 +1,5 @@
 dnl
-dnl   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2015 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
 dnl
-
-sinclude([../config/zlib.m4])
 
 dnl See whether we need to use fopen-bin.h rather than fopen-same.h.
 AC_DEFUN([BFD_BINARY_FOPEN],

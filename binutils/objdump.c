@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -2449,6 +2449,10 @@ dump_dwarf (bfd *abfd)
 	}
       break;
 
+    case bfd_arch_iamcu:
+      init_dwarf_regnames_iamcu ();
+      break;
+
     case bfd_arch_aarch64:
       init_dwarf_regnames_aarch64();
       break;
@@ -2800,7 +2804,8 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 
   if (!bfd_get_full_section_contents (abfd, section, &data))
     {
-      non_fatal (_("Reading section failed"));
+      non_fatal (_("Reading section %s failed because: %s"),
+		 section->name, bfd_errmsg (bfd_get_error ()));
       return;
     }
 
@@ -3406,9 +3411,16 @@ display_any_bfd (bfd *file, int level)
     {
       bfd *arfile = NULL;
       bfd *last_arfile = NULL;
-
+      
       if (level == 0)
         printf (_("In archive %s:\n"), bfd_get_filename (file));
+      else if (level > 100)
+	{
+	  /* Prevent corrupted files from spinning us into an
+	     infinite loop.  100 is an arbitrary heuristic.  */
+	  fatal (_("Archive nesting is too deep"));
+	  return;
+	}
       else
         printf (_("In nested archive %s:\n"), bfd_get_filename (file));
 
@@ -3488,6 +3500,7 @@ main (int argc, char **argv)
 
   program_name = *argv;
   xmalloc_set_program_name (program_name);
+  bfd_set_error_program_name (program_name);
 
   START_PROGRESS (program_name, 0);
 

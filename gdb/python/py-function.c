@@ -1,6 +1,6 @@
 /* Convenience functions implemented in Python.
 
-   Copyright (C) 2008-2014 Free Software Foundation, Inc.
+   Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@
 #include "expression.h"
 #include "language.h"
 
-static PyTypeObject fnpy_object_type
+extern PyTypeObject fnpy_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
 
 
@@ -212,7 +212,7 @@ gdbpy_initialize_functions (void)
 
 
 
-static PyTypeObject fnpy_object_type =
+PyTypeObject fnpy_object_type =
 {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Function",		  /*tp_name*/

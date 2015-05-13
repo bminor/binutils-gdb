@@ -1,5 +1,5 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
    This file is part of the GNU Binutils.
@@ -817,7 +817,7 @@ memory_spec: 	NAME
 origin_spec:
 	ORIGIN '=' mustbe_exp
 		{
-		  region->origin = exp_get_vma ($3, 0, "origin");
+		  region->origin_exp = $3;
 		  region->current = region->origin;
 		}
 	;
@@ -825,7 +825,7 @@ origin_spec:
 length_spec:
              LENGTH '=' mustbe_exp
 		{
-		  region->length = exp_get_vma ($3, -1, "length");
+		  region->length_exp = $3;
 		}
 	;
 

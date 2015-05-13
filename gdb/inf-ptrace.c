@@ -1,6 +1,6 @@
 /* Low-level child interface to ptrace.
 
-   Copyright (C) 1988-2014 Free Software Foundation, Inc.
+   Copyright (C) 1988-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,7 +45,8 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child,
 {
   if (!follow_child)
     {
-      pid_t child_pid = inferior_thread->pending_follow.value.related_pid;
+      struct thread_info *tp = inferior_thread ();
+      pid_t child_pid = ptid_get_pid (tp->pending_follow.value.related_pid);
 
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
@@ -54,6 +55,18 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child,
 	perror_with_name (("ptrace"));
     }
 
+  return 0;
+}
+
+static int
+inf_ptrace_insert_fork_catchpoint (struct target_ops *self, int pid)
+{
+  return 0;
+}
+
+static int
+inf_ptrace_remove_fork_catchpoint (struct target_ops *self, int pid)
+{
   return 0;
 }
 
@@ -288,6 +301,22 @@ inf_ptrace_stop (struct target_ops *self, ptid_t ptid)
   kill (-inferior_process_group (), SIGINT);
 }
 
+/* Return which PID to pass to ptrace in order to observe/control the
+   tracee identified by PTID.  */
+
+static pid_t
+get_ptrace_pid (ptid_t ptid)
+{
+  pid_t pid;
+
+  /* If we have an LWPID to work with, use it.  Otherwise, we're
+     dealing with a non-threaded program/target.  */
+  pid = ptid_get_lwp (ptid);
+  if (pid == 0)
+    pid = ptid_get_pid (ptid);
+  return pid;
+}
+
 /* Resume execution of thread PTID, or all threads if PTID is -1.  If
    STEP is nonzero, single-step it.  If SIGNAL is nonzero, give it
    that signal.  */
@@ -296,13 +325,15 @@ static void
 inf_ptrace_resume (struct target_ops *ops,
 		   ptid_t ptid, int step, enum gdb_signal signal)
 {
-  pid_t pid = ptid_get_pid (ptid);
+  pid_t pid;
   int request;
 
-  if (pid == -1)
+  if (ptid_equal (minus_one_ptid, ptid))
     /* Resume all threads.  Traditionally ptrace() only supports
        single-threaded processes, so simply resume the inferior.  */
     pid = ptid_get_pid (inferior_ptid);
+  else
+    pid = get_ptrace_pid (ptid);
 
   if (catch_syscall_enabled () > 0)
     request = PT_SYSCALL;
@@ -647,6 +678,8 @@ inf_ptrace_target (void)
   t->to_create_inferior = inf_ptrace_create_inferior;
 #ifdef PT_GET_PROCESS_STATE
   t->to_follow_fork = inf_ptrace_follow_fork;
+  t->to_insert_fork_catchpoint = inf_ptrace_insert_fork_catchpoint;
+  t->to_remove_fork_catchpoint = inf_ptrace_remove_fork_catchpoint;
   t->to_post_startup_inferior = inf_ptrace_post_startup_inferior;
   t->to_post_attach = inf_ptrace_post_attach;
 #endif

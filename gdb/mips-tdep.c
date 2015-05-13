@@ -1,6 +1,6 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 1988-2014 Free Software Foundation, Inc.
+   Copyright (C) 1988-2015 Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -1345,14 +1345,13 @@ mips_in_frame_stub (CORE_ADDR pc)
     return 0;
 
   /* If the PC is in __mips16_call_stub_*, this is a call/return stub.  */
-  if (strncmp (name, mips_str_mips16_call_stub,
-	       strlen (mips_str_mips16_call_stub)) == 0)
+  if (startswith (name, mips_str_mips16_call_stub))
     return 1;
   /* If the PC is in __call_stub_*, this is a call/return or a call stub.  */
-  if (strncmp (name, mips_str_call_stub, strlen (mips_str_call_stub)) == 0)
+  if (startswith (name, mips_str_call_stub))
     return 1;
   /* If the PC is in __fn_stub_*, this is a call stub.  */
-  if (strncmp (name, mips_str_fn_stub, strlen (mips_str_fn_stub)) == 0)
+  if (startswith (name, mips_str_fn_stub))
     return 1;
 
   return 0;			/* Not a stub.  */
@@ -3438,7 +3437,8 @@ restart:
   frame_offset = 0;
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSN32_SIZE)
     {
-      unsigned long inst, high_word, low_word;
+      unsigned long inst, high_word;
+      long offset;
       int reg;
 
       this_non_prologue_insn = 0;
@@ -3450,15 +3450,15 @@ restart:
 
       /* Save some code by pre-extracting some useful fields.  */
       high_word = (inst >> 16) & 0xffff;
-      low_word = inst & 0xffff;
+      offset = ((inst & 0xffff) ^ 0x8000) - 0x8000;
       reg = high_word & 0x1f;
 
       if (high_word == 0x27bd		/* addiu $sp,$sp,-i */
 	  || high_word == 0x23bd	/* addi $sp,$sp,-i */
 	  || high_word == 0x67bd)	/* daddiu $sp,$sp,-i */
 	{
-	  if (low_word & 0x8000)	/* Negative stack adjustment?  */
-            frame_offset += 0x10000 - low_word;
+	  if (offset < 0)		/* Negative stack adjustment?  */
+            frame_offset -= offset;
 	  else
 	    /* Exit loop if a positive stack adjustment is found, which
 	       usually means that the stack cleanup code in the function
@@ -3469,19 +3469,19 @@ restart:
       else if (((high_word & 0xFFE0) == 0xafa0) /* sw reg,offset($sp) */
                && !regsize_is_64_bits)
 	{
-	  set_reg_offset (gdbarch, this_cache, reg, sp + low_word);
+	  set_reg_offset (gdbarch, this_cache, reg, sp + offset);
 	}
       else if (((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
                && regsize_is_64_bits)
 	{
 	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra.  */
-	  set_reg_offset (gdbarch, this_cache, reg, sp + low_word);
+	  set_reg_offset (gdbarch, this_cache, reg, sp + offset);
 	}
       else if (high_word == 0x27be)	/* addiu $30,$sp,size */
 	{
 	  /* Old gcc frame, r30 is virtual frame pointer.  */
-	  if ((long) low_word != frame_offset)
-	    frame_addr = sp + low_word;
+	  if (offset != frame_offset)
+	    frame_addr = sp + offset;
 	  else if (this_frame && frame_reg == MIPS_SP_REGNUM)
 	    {
 	      unsigned alloca_adjust;
@@ -3491,7 +3491,7 @@ restart:
 		(this_frame, gdbarch_num_regs (gdbarch) + 30);
 	      frame_offset = 0;
 
-	      alloca_adjust = (unsigned) (frame_addr - (sp + low_word));
+	      alloca_adjust = (unsigned) (frame_addr - (sp + offset));
 	      if (alloca_adjust > 0)
 		{
                   /* FP > SP + frame_size.  This may be because of
@@ -3540,7 +3540,7 @@ restart:
       else if ((high_word & 0xFFE0) == 0xafc0 	/* sw reg,offset($30) */
                && !regsize_is_64_bits)
 	{
-	  set_reg_offset (gdbarch, this_cache, reg, frame_addr + low_word);
+	  set_reg_offset (gdbarch, this_cache, reg, frame_addr + offset);
 	}
       else if ((high_word & 0xFFE0) == 0xE7A0 /* swc1 freg,n($sp) */
                || (high_word & 0xF3E0) == 0xA3C0 /* sx reg,n($s8) */
@@ -3812,7 +3812,7 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
   msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym != NULL
       && MSYMBOL_LINKAGE_NAME (msym.minsym) != NULL
-      && strncmp (MSYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) == 0)
+      && startswith (MSYMBOL_LINKAGE_NAME (msym.minsym), ".pic."))
     return 1;
 
   return 0;
@@ -7845,8 +7845,8 @@ mips_skip_mips16_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
   /* If the PC is in __call_stub_* or __fn_stub*, this is one of the
      compiler-generated call or call/return stubs.  */
-  if (strncmp (name, mips_str_fn_stub, strlen (mips_str_fn_stub)) == 0
-      || strncmp (name, mips_str_call_stub, strlen (mips_str_call_stub)) == 0)
+  if (startswith (name, mips_str_fn_stub)
+      || startswith (name, mips_str_call_stub))
     {
       if (pc == start_addr)
 	/* This is the 'call' part of a call stub.  Call this helper
@@ -7933,7 +7933,7 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   if (msym.minsym == NULL
       || BMSYMBOL_VALUE_ADDRESS (msym) != pc
       || MSYMBOL_LINKAGE_NAME (msym.minsym) == NULL
-      || strncmp (MSYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) != 0)
+      || !startswith (MSYMBOL_LINKAGE_NAME (msym.minsym), ".pic."))
     return 0;
 
   /* A two-instruction header.  */
@@ -8098,7 +8098,7 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
   if (*abip != MIPS_ABI_UNKNOWN)
     return;
 
-  if (strncmp (name, ".mdebug.", 8) != 0)
+  if (!startswith (name, ".mdebug."))
     return;
 
   if (strcmp (name, ".mdebug.abi32") == 0)
@@ -8123,11 +8123,11 @@ mips_find_long_section (bfd *abfd, asection *sect, void *obj)
   int *lbp = (int *) obj;
   const char *name = bfd_get_section_name (abfd, sect);
 
-  if (strncmp (name, ".gcc_compiled_long32", 20) == 0)
+  if (startswith (name, ".gcc_compiled_long32"))
     *lbp = 32;
-  else if (strncmp (name, ".gcc_compiled_long64", 20) == 0)
+  else if (startswith (name, ".gcc_compiled_long64"))
     *lbp = 64;
-  else if (strncmp (name, ".gcc_compiled_long", 18) == 0)
+  else if (startswith (name, ".gcc_compiled_long"))
     warning (_("unrecognized .gcc_compiled_longXX"));
 }
 

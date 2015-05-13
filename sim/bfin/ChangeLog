@@ -1,3 +1,98 @@
+2015-04-24  David Binderman  <dcb314@hotmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 18273
+	* bfin-sim.c (decode_dsp32alu_0): Remove spurious check for
+	s == 1.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_CPU): Add note to clean this up.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
+2015-04-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.
+	* sim-main.h (STATE_CPU): Delete.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-04-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-engine.o and sim-hrw.o.
+
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete $(SIM_EXTRA_OBJS).
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* configure.ac (BFIN_SIM_EXTRA_OBJS): Delete.
+	* Makefile.in (SIM_OBJS): Delete @BFIN_SIM_EXTRA_OBJS@.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_uart.c [!HAVE_DV_SOCKSER] (dv_sockser_status,
+	dv_sockser_write, dv_sockser_read): Delete.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h: Delete run-sim.h include.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+	* tconfig.in: Rename file ...
+	* tconfig.h: ... here.
+
+2015-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.in: Delete includes.
+	[HAVE_DV_SOCKSER]: Delete.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c (decode_dsp32alu_0): Change v to bu32.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+
+2015-03-10  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/13160
+	* Makefile.in ($(srcdir)/linux-fixed-code.h): Put a ; after the
+	print sed command for BSD compatibility.
+
+2015-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/13160
+	* Makefile.in ($(srcdir)/linux-fixed-code.h): Specify the asm input
+	directly rather than use $<.  Move the file name to the end of the
+	sed command to be POSIX compliant.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

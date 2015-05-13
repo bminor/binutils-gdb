@@ -48,17 +48,6 @@ static void     Handle_Store_Double (ARMul_State *, ARMword);
 #define LDEFAULT  (0)		/* default : do nothing */
 #define LSCC      (1)		/* set condition codes on result */
 
-#ifdef NEED_UI_LOOP_HOOK
-/* How often to run the ui_loop update, when in use.  */
-#define UI_LOOP_POLL_INTERVAL 0x32000
-
-/* Counter for the ui_loop_hook update.  */
-static long ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
-
-/* Actual hook to call to run through gdb's gui event loop.  */
-extern int (*deprecated_ui_loop_hook) (int);
-#endif /* NEED_UI_LOOP_HOOK */
-
 extern int stop_simulator;
 
 /* Short-hand macros for LDR/STR.  */
@@ -272,6 +261,7 @@ extern int stop_simulator;
 /* Attempt to emulate an ARMv6 instruction.
    Returns non-zero upon success.  */
 
+#ifdef MODE32
 static int
 handle_v6_insn (ARMul_State * state, ARMword instr)
 {
@@ -473,6 +463,7 @@ handle_v6_insn (ARMul_State * state, ARMword instr)
   printf ("Unhandled v6 insn: UNKNOWN: %08x\n", instr);
   return 0;
 }
+#endif
 
 /* EMULATION of ARM6.  */
 
@@ -817,10 +808,11 @@ ARMul_Emulate26 (ARMul_State * state)
 	      else
 		{
 		  ARMword cp14r1;
-		  int do_int = 0;
+		  int do_int;
 
 		  state->CP14R0_CCD = -1;
 check_PMUintr:
+		  do_int = 0;
 		  cp14r0 |= ARMul_CP14_R0_FLAG2;
 		  (void) state->CPWrite[14] (state, 0, cp14r0);
 
@@ -3878,14 +3870,6 @@ check_PMUintr:
 #ifdef MODET
     donext:
 #endif
-
-#ifdef NEED_UI_LOOP_HOOK
-      if (deprecated_ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
-	{
-	  ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
-	  deprecated_ui_loop_hook (0);
-	}
-#endif /* NEED_UI_LOOP_HOOK */
 
       if (state->Emulate == ONCE)
 	state->Emulate = STOP;

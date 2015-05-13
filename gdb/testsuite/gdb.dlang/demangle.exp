@@ -1,4 +1,4 @@
-# Copyright (C) 2014 Free Software Foundation, Inc.
+# Copyright (C) 2014-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ if { [skip_d_tests] } { continue }
 
 ### Utility function for test_demangling and test_demangling_exact.
 proc test_demangling {test result} {
-    gdb_test_exact "maintenance demangle $test" $result $test
+    gdb_test_exact "demangle $test" $result $test
 }
 
 proc test_d_demangling {} {
@@ -201,6 +201,9 @@ if [set_lang_d] {
     gdb_test_no_output "set width 0"
 
     test_d_demangling
+
+    # Verify we can specify the d language to demangle.
+    gdb_test_exact "demangle -l d -- _Dmain" "D main"
 } else {
     warning "D demangling tests suppressed."
 }

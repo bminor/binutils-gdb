@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003-2014 Free Software Foundation, Inc.
+   Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
 
@@ -41,7 +41,7 @@
 
 extern int dwarf2_always_disassemble;
 
-static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
+extern const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
 
 static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
 						    struct frame_info *frame,
@@ -983,14 +983,13 @@ struct call_site_chain *
 call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 		      CORE_ADDR callee_pc)
 {
-  volatile struct gdb_exception e;
   struct call_site_chain *retval = NULL;
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  TRY
     {
       retval = call_site_find_chain_1 (gdbarch, caller_pc, callee_pc);
     }
-  if (e.reason < 0)
+  CATCH (e, RETURN_MASK_ERROR)
     {
       if (e.error == NO_ENTRY_VALUE_ERROR)
 	{
@@ -1002,6 +1001,8 @@ call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
       else
 	throw_exception (e);
     }
+  END_CATCH
+
   return retval;
 }
 
@@ -2012,6 +2013,7 @@ indirect_pieced_value (struct value *value)
   int i, bit_offset, bit_length;
   struct dwarf_expr_piece *piece = NULL;
   LONGEST byte_offset;
+  enum bfd_endian byte_order;
 
   type = check_typedef (value_type (value));
   if (TYPE_CODE (type) != TYPE_CODE_PTR)
@@ -2056,11 +2058,16 @@ indirect_pieced_value (struct value *value)
   /* This is an offset requested by GDB, such as value subscripts.
      However, due to how synthetic pointers are implemented, this is
      always presented to us as a pointer type.  This means we have to
-     sign-extend it manually as appropriate.  */
-  byte_offset = value_as_address (value);
-  if (TYPE_LENGTH (value_type (value)) < sizeof (LONGEST))
-    byte_offset = gdb_sign_extend (byte_offset,
-				   8 * TYPE_LENGTH (value_type (value)));
+     sign-extend it manually as appropriate.  Use raw
+     extract_signed_integer directly rather than value_as_address and
+     sign extend afterwards on architectures that would need it
+     (mostly everywhere except MIPS, which has signed addresses) as
+     the later would go through gdbarch_pointer_to_address and thus
+     return a CORE_ADDR with high bits set on architectures that
+     encode address spaces and other things in CORE_ADDR.  */
+  byte_order = gdbarch_byte_order (get_frame_arch (frame));
+  byte_offset = extract_signed_integer (value_contents (value),
+					TYPE_LENGTH (type), byte_order);
   byte_offset += piece->v.ptr.offset;
 
   gdb_assert (piece);
@@ -2145,7 +2152,7 @@ static const struct lval_funcs pieced_value_funcs = {
 
 /* Virtual method table for dwarf2_evaluate_loc_desc_full below.  */
 
-static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
+const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
 {
   dwarf_expr_read_addr_from_reg,
   dwarf_expr_get_reg_value,
@@ -2177,7 +2184,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   struct dwarf_expr_context *ctx;
   struct cleanup *old_chain, *value_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
-  volatile struct gdb_exception ex;
 
   if (byte_offset < 0)
     invalid_synthetic_pointer ();
@@ -2200,11 +2206,11 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   ctx->baton = &baton;
   ctx->funcs = &dwarf_expr_ctx_funcs;
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       dwarf_expr_eval (ctx, data, size);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
@@ -2223,6 +2229,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
       else
 	throw_exception (ex);
     }
+  END_CATCH
 
   if (ctx->num_pieces > 0)
     {
@@ -2455,7 +2462,8 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
 int
 dwarf2_evaluate_property (const struct dynamic_prop *prop,
-			  CORE_ADDR address, CORE_ADDR *value)
+			  struct property_addr_info *addr_stack,
+			  CORE_ADDR *value)
 {
   if (prop == NULL)
     return 0;
@@ -2466,7 +2474,8 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
       {
 	const struct dwarf2_property_baton *baton = prop->data.baton;
 
-	if (dwarf2_locexpr_baton_eval (&baton->locexpr, address, value))
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, addr_stack->addr,
+				       value))
 	  {
 	    if (baton->referenced_type)
 	      {
@@ -2505,6 +2514,28 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
     case PROP_CONST:
       *value = prop->data.const_val;
       return 1;
+
+    case PROP_ADDR_OFFSET:
+      {
+	struct dwarf2_property_baton *baton = prop->data.baton;
+	struct property_addr_info *pinfo;
+	struct value *val;
+
+	for (pinfo = addr_stack; pinfo != NULL; pinfo = pinfo->next)
+	  if (pinfo->type == baton->referenced_type)
+	    break;
+	if (pinfo == NULL)
+	  error (_("cannot find reference address for offset property"));
+	if (pinfo->valaddr != NULL)
+	  val = value_from_contents
+		  (baton->offset_info.type,
+		   pinfo->valaddr + baton->offset_info.offset);
+	else
+	  val = value_at (baton->offset_info.type,
+			  pinfo->addr + baton->offset_info.offset);
+	*value = value_as_address (val);
+	return 1;
+      }
     }
 
   return 0;

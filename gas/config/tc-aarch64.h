@@ -1,5 +1,5 @@
 /* tc-aarch64.h -- Header file for tc-aarch64.c.
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -145,6 +145,8 @@ struct aarch64_frag_type
       frag_align_code (N, MAX);							\
       goto LABEL;								\
     }
+
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 	4
 

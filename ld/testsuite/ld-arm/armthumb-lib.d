@@ -31,15 +31,9 @@ Disassembly of section .text:
 .* <__real_lib_func2>:
  .*:	4770      	bx	lr
  .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
- .*:	46c0      	nop			; \(mov r8, r8\)
 
 .* <lib_func2>:
  .*:	e59fc004 	ldr	ip, \[pc, #4\]	; .* <lib_func2\+0xc>
  .*:	e08cc00f 	add	ip, ip, pc
  .*:	e12fff1c 	bx	ip
- .*:	ffffffe5 	.*
+ .*:	fffffff1 	.*

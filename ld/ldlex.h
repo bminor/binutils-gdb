@@ -1,5 +1,5 @@
 /* ldlex.h -
-   Copyright (C) 1991-2014 Free Software Foundation, Inc.
+   Copyright (C) 1991-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -85,6 +85,8 @@ enum option_values
   OPTION_NO_WARN_FATAL,
   OPTION_WARN_MULTIPLE_GP,
   OPTION_WARN_ONCE,
+  OPTION_WARN_ORPHAN,
+  OPTION_NO_WARN_ORPHAN,
   OPTION_WARN_SECTION_ALIGN,
   OPTION_SPLIT_BY_RELOC,
   OPTION_SPLIT_BY_FILE ,

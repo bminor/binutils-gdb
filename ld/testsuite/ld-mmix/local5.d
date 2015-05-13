@@ -20,7 +20,7 @@ Section Headers:
  +0+c +0+ +AX +0 +0 +4
  +\[ 2\] \.MMIX\.reg_content PROGBITS +0+7e8 +0+84
  +0+10 +0+ +W +0 +0 +1
- +\[ 3\] \.shstrtab +STRTAB +0+ +0+94
+ +\[ 3\] \.shstrtab +STRTAB +0+ +[0-9a-f]+
  +0+34 +0+ +0 +0 +1
  +\[ 4\] \.symtab +SYMTAB +0+ +[0-9a-f]+
  +[0-9a-f]+ +0+18 +5 +[0-9] +8

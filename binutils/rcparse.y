@@ -1,5 +1,5 @@
 %{ /* rcparse.y -- parser for Windows rc files
-   Copyright (C) 1997-2014 Free Software Foundation, Inc.
+   Copyright (C) 1997-2015 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Extended by Kai Tietz, Onevision.
 
@@ -1887,12 +1887,12 @@ sizednumexpr:
 	  }
 	| sizednumexpr '/' sizednumexpr
 	  {
-	    $$.val = $1.val / $3.val;
+	    $$.val = $1.val / ($3.val ? $3.val : 1);
 	    $$.dword = $1.dword || $3.dword;
 	  }
 	| sizednumexpr '%' sizednumexpr
 	  {
-	    $$.val = $1.val % $3.val;
+	    $$.val = $1.val % ($3.val ? $3.val : 1);
 	    $$.dword = $1.dword || $3.dword;
 	  }
 	| sizednumexpr '+' sizednumexpr
@@ -1966,12 +1966,13 @@ sizedposnumexpr:
 	  }
 	| sizedposnumexpr '/' sizednumexpr
 	  {
-	    $$.val = $1.val / $3.val;
+	    $$.val = $1.val / ($3.val ? $3.val : 1);
 	    $$.dword = $1.dword || $3.dword;
 	  }
 	| sizedposnumexpr '%' sizednumexpr
 	  {
-	    $$.val = $1.val % $3.val;
+	    /* PR 17512: file: 89105a25.  */
+	    $$.val = $1.val % ($3.val ? $3.val : 1);
 	    $$.dword = $1.dword || $3.dword;
 	  }
 	| sizedposnumexpr '+' sizednumexpr

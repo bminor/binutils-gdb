@@ -1,6 +1,6 @@
 // inremental.cc -- incremental linking support for gold
 
-// Copyright (C) 2009-2014 Free Software Foundation, Inc.
+// Copyright (C) 2009-2015 Free Software Foundation, Inc.
 // Written by Mikolaj Zalewski <mikolajz@google.com>.
 
 // This file is part of gold.
@@ -33,7 +33,6 @@
 #include "incremental.h"
 #include "archive.h"
 #include "object.h"
-#include "output.h"
 #include "target-select.h"
 #include "target.h"
 #include "fileread.h"

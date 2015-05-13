@@ -1,4 +1,4 @@
-# Copyright (C) 2014 Free Software Foundation, Inc.
+# Copyright (C) 2014-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,6 +46,13 @@ proc test { schedlock } {
 	gdb_test "handle SIGUSR2 stop print pass"
 
 	gdb_test "break all_threads_started" "Breakpoint .* at .*$srcfile.*"
+
+	# Create threads one at a time, to insure stable thread
+	# numbers between runs and targets.
+	gdb_test "break thread_function" "Breakpoint .* at .*$srcfile.*"
+	gdb_test "continue" "thread_function.*" "thread 2 created"
+	gdb_test "continue" "thread_function.*" "thread 3 created"
+
 	gdb_test "continue" "all_threads_started.*"
 
 	# Using schedlock, let the main thread queue a signal for each

@@ -1,6 +1,6 @@
 // aarch64.cc -- aarch64 target support for gold.
 
-// Copyright (C) 2014 Free Software Foundation, Inc.
+// Copyright (C) 2014-2015 Free Software Foundation, Inc.
 // Written by Jing Yu <jingyu@google.com> and Han Shen <shenhan@google.com>.
 
 // This file is part of gold.
@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cstring>
+#include <map>
 
 #include "elfcpp.h"
 #include "dwarf.h"
@@ -64,6 +65,273 @@ class Target_aarch64;
 
 template<int size, bool big_endian>
 class AArch64_relocate_functions;
+
+// Utility class dealing with insns. This is ported from macros in
+// bfd/elfnn-aarch64.cc, but wrapped inside a class as static members. This
+// class is used in erratum sequence scanning.
+
+template<bool big_endian>
+class AArch64_insn_utilities
+{
+public:
+  typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
+
+  static const int BYTES_PER_INSN = 4;
+
+  static unsigned int
+  aarch64_bit(Insntype insn, int pos)
+  { return ((1 << pos)  & insn) >> pos; }
+
+  static unsigned int
+  aarch64_bits(Insntype insn, int pos, int l)
+  { return (insn >> pos) & ((1 << l) - 1); }
+
+  static bool
+  is_adrp(const Insntype insn)
+  { return (insn & 0x9F000000) == 0x90000000; }
+
+  static unsigned int
+  aarch64_rm(const Insntype insn)
+  { return aarch64_bits(insn, 16, 5); }
+
+  static unsigned int
+  aarch64_rn(const Insntype insn)
+  { return aarch64_bits(insn, 5, 5); }
+
+  static unsigned int
+  aarch64_rd(const Insntype insn)
+  { return aarch64_bits(insn, 0, 5); }
+
+  static unsigned int
+  aarch64_rt(const Insntype insn)
+  { return aarch64_bits(insn, 0, 5); }
+
+  static unsigned int
+  aarch64_rt2(const Insntype insn)
+  { return aarch64_bits(insn, 10, 5); }
+
+  static bool
+  aarch64_b(const Insntype insn)
+  { return (insn & 0xFC000000) == 0x14000000; }
+
+  static bool
+  aarch64_bl(const Insntype insn)
+  { return (insn & 0xFC000000) == 0x94000000; }
+
+  static bool
+  aarch64_blr(const Insntype insn)
+  { return (insn & 0xFFFFFC1F) == 0xD63F0000; }
+
+  static bool
+  aarch64_br(const Insntype insn)
+  { return (insn & 0xFFFFFC1F) == 0xD61F0000; }
+
+  // All ld/st ops.  See C4-182 of the ARM ARM.  The encoding space for
+  // LD_PCREL, LDST_RO, LDST_UI and LDST_UIMM cover prefetch ops.
+  static bool
+  aarch64_ld(Insntype insn) { return aarch64_bit(insn, 22) == 1; }
+
+  static bool
+  aarch64_ldst(Insntype insn)
+  { return (insn & 0x0a000000) == 0x08000000; }
+
+  static bool
+  aarch64_ldst_ex(Insntype insn)
+  { return (insn & 0x3f000000) == 0x08000000; }
+
+  static bool
+  aarch64_ldst_pcrel(Insntype insn)
+  { return (insn & 0x3b000000) == 0x18000000; }
+
+  static bool
+  aarch64_ldst_nap(Insntype insn)
+  { return (insn & 0x3b800000) == 0x28000000; }
+
+  static bool
+  aarch64_ldstp_pi(Insntype insn)
+  { return (insn & 0x3b800000) == 0x28800000; }
+
+  static bool
+  aarch64_ldstp_o(Insntype insn)
+  { return (insn & 0x3b800000) == 0x29000000; }
+
+  static bool
+  aarch64_ldstp_pre(Insntype insn)
+  { return (insn & 0x3b800000) == 0x29800000; }
+
+  static bool
+  aarch64_ldst_ui(Insntype insn)
+  { return (insn & 0x3b200c00) == 0x38000000; }
+
+  static bool
+  aarch64_ldst_piimm(Insntype insn)
+  { return (insn & 0x3b200c00) == 0x38000400; }
+
+  static bool
+  aarch64_ldst_u(Insntype insn)
+  { return (insn & 0x3b200c00) == 0x38000800; }
+
+  static bool
+  aarch64_ldst_preimm(Insntype insn)
+  { return (insn & 0x3b200c00) == 0x38000c00; }
+
+  static bool
+  aarch64_ldst_ro(Insntype insn)
+  { return (insn & 0x3b200c00) == 0x38200800; }
+
+  static bool
+  aarch64_ldst_uimm(Insntype insn)
+  { return (insn & 0x3b000000) == 0x39000000; }
+
+  static bool
+  aarch64_ldst_simd_m(Insntype insn)
+  { return (insn & 0xbfbf0000) == 0x0c000000; }
+
+  static bool
+  aarch64_ldst_simd_m_pi(Insntype insn)
+  { return (insn & 0xbfa00000) == 0x0c800000; }
+
+  static bool
+  aarch64_ldst_simd_s(Insntype insn)
+  { return (insn & 0xbf9f0000) == 0x0d000000; }
+
+  static bool
+  aarch64_ldst_simd_s_pi(Insntype insn)
+  { return (insn & 0xbf800000) == 0x0d800000; }
+
+  // Classify an INSN if it is indeed a load/store. Return true if INSN is a
+  // LD/ST instruction otherwise return false. For scalar LD/ST instructions
+  // PAIR is FALSE, RT is returned and RT2 is set equal to RT. For LD/ST pair
+  // instructions PAIR is TRUE, RT and RT2 are returned.
+  static bool
+  aarch64_mem_op_p(Insntype insn, unsigned int *rt, unsigned int *rt2,
+		   bool *pair, bool *load)
+  {
+    uint32_t opcode;
+    unsigned int r;
+    uint32_t opc = 0;
+    uint32_t v = 0;
+    uint32_t opc_v = 0;
+
+    /* Bail out quickly if INSN doesn't fall into the the load-store
+       encoding space.  */
+    if (!aarch64_ldst (insn))
+      return false;
+
+    *pair = false;
+    *load = false;
+    if (aarch64_ldst_ex (insn))
+      {
+	*rt = aarch64_rt (insn);
+	*rt2 = *rt;
+	if (aarch64_bit (insn, 21) == 1)
+	  {
+	    *pair = true;
+	    *rt2 = aarch64_rt2 (insn);
+	  }
+	*load = aarch64_ld (insn);
+	return true;
+      }
+    else if (aarch64_ldst_nap (insn)
+	     || aarch64_ldstp_pi (insn)
+	     || aarch64_ldstp_o (insn)
+	     || aarch64_ldstp_pre (insn))
+      {
+	*pair = true;
+	*rt = aarch64_rt (insn);
+	*rt2 = aarch64_rt2 (insn);
+	*load = aarch64_ld (insn);
+	return true;
+      }
+    else if (aarch64_ldst_pcrel (insn)
+	     || aarch64_ldst_ui (insn)
+	     || aarch64_ldst_piimm (insn)
+	     || aarch64_ldst_u (insn)
+	     || aarch64_ldst_preimm (insn)
+	     || aarch64_ldst_ro (insn)
+	     || aarch64_ldst_uimm (insn))
+      {
+	*rt = aarch64_rt (insn);
+	*rt2 = *rt;
+	if (aarch64_ldst_pcrel (insn))
+	  *load = true;
+	opc = aarch64_bits (insn, 22, 2);
+	v = aarch64_bit (insn, 26);
+	opc_v = opc | (v << 2);
+	*load =  (opc_v == 1 || opc_v == 2 || opc_v == 3
+		  || opc_v == 5 || opc_v == 7);
+	return true;
+      }
+    else if (aarch64_ldst_simd_m (insn)
+	     || aarch64_ldst_simd_m_pi (insn))
+      {
+	*rt = aarch64_rt (insn);
+	*load = aarch64_bit (insn, 22);
+	opcode = (insn >> 12) & 0xf;
+	switch (opcode)
+	  {
+	  case 0:
+	  case 2:
+	    *rt2 = *rt + 3;
+	    break;
+
+	  case 4:
+	  case 6:
+	    *rt2 = *rt + 2;
+	    break;
+
+	  case 7:
+	    *rt2 = *rt;
+	    break;
+
+	  case 8:
+	  case 10:
+	    *rt2 = *rt + 1;
+	    break;
+
+	  default:
+	    return false;
+	  }
+	return true;
+      }
+    else if (aarch64_ldst_simd_s (insn)
+	     || aarch64_ldst_simd_s_pi (insn))
+      {
+	*rt = aarch64_rt (insn);
+	r = (insn >> 21) & 1;
+	*load = aarch64_bit (insn, 22);
+	opcode = (insn >> 13) & 0x7;
+	switch (opcode)
+	  {
+	  case 0:
+	  case 2:
+	  case 4:
+	    *rt2 = *rt + r;
+	    break;
+
+	  case 1:
+	  case 3:
+	  case 5:
+	    *rt2 = *rt + (r == 0 ? 2 : 3);
+	    break;
+
+	  case 6:
+	    *rt2 = *rt + r;
+	    break;
+
+	  case 7:
+	    *rt2 = *rt + (r == 0 ? 2 : 3);
+	    break;
+
+	  default:
+	    return false;
+	  }
+	return true;
+      }
+    return false;
+  }
+};
+
 
 // Output_data_got_aarch64 class.
 
@@ -916,7 +1184,14 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
     this->stub_tables_[shndx] = stub_table;
   }
 
- // Scan all relocation sections for stub generation.
+  // Entrance to erratum_843419 scanning.
+  void
+  scan_erratum_843419(unsigned int shndx,
+		      const elfcpp::Shdr<size, big_endian>&,
+		      Output_section*, const Symbol_table*,
+		      The_target_aarch64*);
+
+  // Scan all relocation sections for stub generation.
   void
   scan_sections_for_stubs(The_target_aarch64*, const Symbol_table*,
 			  const Layout*);
@@ -934,6 +1209,30 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
     // out the stubs.  So relocation now must follow section write.
     this->set_relocs_must_follow_section_writes();
   }
+
+  // Structure for mapping symbol position.
+  struct Mapping_symbol_position
+  {
+    Mapping_symbol_position(unsigned int shndx, AArch64_address offset):
+      shndx_(shndx), offset_(offset)
+    {}
+
+    // "<" comparator used in ordered_map container.
+    bool
+    operator<(const Mapping_symbol_position& p) const
+    {
+      return (this->shndx_ < p.shndx_
+	      || (this->shndx_ == p.shndx_ && this->offset_ < p.offset_));
+    }
+
+    // Section index.
+    unsigned int shndx_;
+
+    // Section offset.
+    AArch64_address offset_;
+  };
+
+  typedef std::map<Mapping_symbol_position, char> Mapping_symbol_info;
 
  protected:
   // Post constructor setup.
@@ -953,6 +1252,11 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
       const unsigned char* pshdrs, Output_file* of,
       typename Sized_relobj_file<size, big_endian>::Views* pviews);
 
+  // Count local symbols and (optionally) record mapping info.
+  virtual void
+  do_count_local_symbols(Stringpool_template<char>*,
+			 Stringpool_template<char>*);
+
  private:
   // Whether a section needs to be scanned for relocation stubs.
   bool
@@ -962,7 +1266,91 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
 
   // List of stub tables.
   Stub_table_list stub_tables_;
+
+  // Mapping symbol information sorted by (section index, section_offset).
+  Mapping_symbol_info mapping_symbol_info_;
 };  // End of AArch64_relobj
+
+
+// Override to record mapping symbol information.
+template<int size, bool big_endian>
+void
+AArch64_relobj<size, big_endian>::do_count_local_symbols(
+    Stringpool_template<char>* pool, Stringpool_template<char>* dynpool)
+{
+  Sized_relobj_file<size, big_endian>::do_count_local_symbols(pool, dynpool);
+
+  // Only erratum-fixing work needs mapping symbols, so skip this time consuming
+  // processing if not fixing erratum.
+  if (!parameters->options().fix_cortex_a53_843419())
+    return;
+
+  const unsigned int loccount = this->local_symbol_count();
+  if (loccount == 0)
+    return;
+
+  // Read the symbol table section header.
+  const unsigned int symtab_shndx = this->symtab_shndx();
+  elfcpp::Shdr<size, big_endian>
+      symtabshdr(this, this->elf_file()->section_header(symtab_shndx));
+  gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+
+  // Read the local symbols.
+  const int sym_size =elfcpp::Elf_sizes<size>::sym_size;
+  gold_assert(loccount == symtabshdr.get_sh_info());
+  off_t locsize = loccount * sym_size;
+  const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
+					      locsize, true, true);
+
+  // For mapping symbol processing, we need to read the symbol names.
+  unsigned int strtab_shndx = this->adjust_shndx(symtabshdr.get_sh_link());
+  if (strtab_shndx >= this->shnum())
+    {
+      this->error(_("invalid symbol table name index: %u"), strtab_shndx);
+      return;
+    }
+
+  elfcpp::Shdr<size, big_endian>
+    strtabshdr(this, this->elf_file()->section_header(strtab_shndx));
+  if (strtabshdr.get_sh_type() != elfcpp::SHT_STRTAB)
+    {
+      this->error(_("symbol table name section has wrong type: %u"),
+		  static_cast<unsigned int>(strtabshdr.get_sh_type()));
+      return;
+    }
+
+  const char* pnames =
+    reinterpret_cast<const char*>(this->get_view(strtabshdr.get_sh_offset(),
+						 strtabshdr.get_sh_size(),
+						 false, false));
+
+  // Skip the first dummy symbol.
+  psyms += sym_size;
+  typename Sized_relobj_file<size, big_endian>::Local_values*
+    plocal_values = this->local_values();
+  for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
+    {
+      elfcpp::Sym<size, big_endian> sym(psyms);
+      Symbol_value<size>& lv((*plocal_values)[i]);
+      AArch64_address input_value = lv.input_value();
+
+      // Check to see if this is a mapping symbol.
+      const char* sym_name = pnames + sym.get_st_name();
+      if (sym_name[0] == '$' && (sym_name[1] == 'x' || sym_name[1] == 'd')
+	  && sym_name[2] == '\0')
+	{
+	  bool is_ordinary;
+	  unsigned int input_shndx =
+	    this->adjust_sym_shndx(i, sym.get_st_shndx(), &is_ordinary);
+	  gold_assert(is_ordinary);
+
+	  Mapping_symbol_position msp(input_shndx, input_value);
+	  // Insert mapping_symbol_info into map whose ordering is defined by
+	  // (shndx, offset_within_section).
+	  this->mapping_symbol_info_[msp] = sym_name[1];
+	}
+   }
+}
 
 
 // Relocate sections.
@@ -1105,6 +1493,70 @@ AArch64_relobj<size, big_endian>::section_needs_reloc_stub_scanning(
 }
 
 
+// Scan section SHNDX for erratum 843419.
+
+template<int size, bool big_endian>
+void
+AArch64_relobj<size, big_endian>::scan_erratum_843419(
+    unsigned int shndx, const elfcpp::Shdr<size, big_endian>& shdr,
+    Output_section* os, const Symbol_table* symtab,
+    The_target_aarch64* target)
+{
+  if (shdr.get_sh_size() == 0
+      || (shdr.get_sh_flags() &
+	  (elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR)) == 0
+      || shdr.get_sh_type() != elfcpp::SHT_PROGBITS)
+    return;
+
+  if (!os || symtab->is_section_folded(this, shndx)) return;
+
+  AArch64_address output_offset = this->get_output_section_offset(shndx);
+  AArch64_address output_address;
+  if (output_offset != invalid_address)
+    output_address = os->address() + output_offset;
+  else
+    {
+      const Output_relaxed_input_section* poris =
+	os->find_relaxed_input_section(this, shndx);
+      if (!poris) return;
+      output_address = poris->address();
+    }
+
+  section_size_type input_view_size = 0;
+  const unsigned char* input_view =
+    this->section_contents(shndx, &input_view_size, false);
+
+  Mapping_symbol_position section_start(shndx, 0);
+  // Find the first mapping symbol record within section shndx.
+  typename Mapping_symbol_info::const_iterator p =
+    this->mapping_symbol_info_.lower_bound(section_start);
+  if (p == this->mapping_symbol_info_.end() || p->first.shndx_ != shndx)
+    gold_warning(_("cannot scan executable section %u of %s for Cortex-A53 "
+		   "erratum because it has no mapping symbols."),
+		 shndx, this->name().c_str());
+  while (p != this->mapping_symbol_info_.end() &&
+	 p->first.shndx_ == shndx)
+    {
+      typename Mapping_symbol_info::const_iterator prev = p;
+      ++p;
+      if (prev->second == 'x')
+	{
+	  section_size_type span_start =
+	    convert_to_section_size_type(prev->first.offset_);
+	  section_size_type span_end;
+	  if (p != this->mapping_symbol_info_.end()
+	      && p->first.shndx_ == shndx)
+	    span_end = convert_to_section_size_type(p->first.offset_);
+	  else
+	    span_end = convert_to_section_size_type(shdr.get_sh_size());
+	  target->scan_erratum_843419_span(
+	      this, shndx, span_start, span_end,
+	      const_cast<unsigned char*>(input_view), output_address);
+	}
+    }
+}
+
+
 // Scan relocations for stub generation.
 
 template<int size, bool big_endian>
@@ -1138,6 +1590,8 @@ AArch64_relobj<size, big_endian>::scan_sections_for_stubs(
   for (unsigned int i = 1; i < shnum; ++i, p += shdr_size)
     {
       const elfcpp::Shdr<size, big_endian> shdr(p);
+      if (parameters->options().fix_cortex_a53_843419())
+	scan_erratum_843419(i, shdr, out_sections[i], symtab, target);
       if (this->section_needs_reloc_stub_scanning(shdr, out_sections, symtab,
 						  pshdrs))
 	{
@@ -1644,6 +2098,7 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   typedef Unordered_map<Section_id,
 			AArch64_input_section<size, big_endian>*,
 			Section_id_hash> AArch64_input_section_map;
+  typedef AArch64_insn_utilities<big_endian> Insn_utilities;
   const static int TCB_SIZE = size / 8 * 2;
 
   Target_aarch64(const Target::Target_info* info = &aarch64_info)
@@ -1749,9 +2204,8 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   }
 
   // Return the addend to use for a target specific relocation.
-  typename elfcpp::Elf_types<size>::Elf_Addr
-  do_reloc_addend(void* arg, unsigned int r_type,
-		  typename elfcpp::Elf_types<size>::Elf_Addr addend) const;
+  uint64_t
+  do_reloc_addend(void* arg, unsigned int r_type, uint64_t addend) const;
 
   // Return the PLT section.
   uint64_t
@@ -1835,6 +2289,17 @@ class Target_aarch64 : public Sized_target<size, big_endian>
 		&& parameters->target().is_big_endian() == big_endian);
     return static_cast<This*>(parameters->sized_target<size, big_endian>());
   }
+
+
+  // Scan erratum for a part of a section.
+  void
+  scan_erratum_843419_span(
+    AArch64_relobj<size, big_endian>*,
+    unsigned int shndx,
+    const section_size_type,
+    const section_size_type,
+    unsigned char*,
+    Address);
 
  protected:
   void
@@ -2128,6 +2593,12 @@ class Target_aarch64 : public Sized_target<size, big_endian>
     gold_assert(this->plt_ != NULL);
     return this->plt_;
   }
+
+  // Return whether this is a 3-insn erratum sequence.
+  bool is_erratum_843419_sequence(
+      typename elfcpp::Swap<32,big_endian>::Valtype insn1,
+      typename elfcpp::Swap<32,big_endian>::Valtype insn2,
+      typename elfcpp::Swap<32,big_endian>::Valtype insn3);
 
   // Get the dynamic reloc section, creating it if necessary.
   Reloc_section*
@@ -2560,7 +3031,7 @@ Target_aarch64<size, big_endian>::scan_reloc_for_stub(
   typename The_reloc_stub::Stub_type stub_type = The_reloc_stub::
       stub_type_for_reloc(r_type, address, destination);
   if (stub_type == The_reloc_stub::ST_NONE)
-    return ;
+    return;
 
   The_stub_table* stub_table = aarch64_relobj->stub_table(relinfo->data_shndx);
   gold_assert(stub_table != NULL);
@@ -3082,7 +3553,7 @@ class Output_data_plt_aarch64 : public Output_section_data
   // The number of PLT entries.
   unsigned int count_;
 
-  // Number of PLT entries with R_X86_64_IRELATIVE relocs.  These
+  // Number of PLT entries with R_AARCH64_IRELATIVE relocs.  These
   // follow the regular PLT entries.
   unsigned int irelative_count_;
 
@@ -4389,10 +4860,9 @@ Target_aarch64<size, big_endian>::new_stub_table(
 
 
 template<int size, bool big_endian>
-typename elfcpp::Elf_types<size>::Elf_Addr
+uint64_t
 Target_aarch64<size, big_endian>::do_reloc_addend(
-    void* arg, unsigned int r_type,
-    typename elfcpp::Elf_types<size>::Elf_Addr) const
+    void* arg, unsigned int r_type, uint64_t) const
 {
   gold_assert(r_type == elfcpp::R_AARCH64_TLSDESC);
   uintptr_t intarg = reinterpret_cast<uintptr_t>(arg);
@@ -4446,16 +4916,14 @@ Target_aarch64<size, big_endian>::define_tls_base_symbol(
   Output_segment* tls_segment = layout->tls_segment();
   if (tls_segment != NULL)
     {
-      bool is_exec = parameters->options().output_is_executable();
+      // _TLS_MODULE_BASE_ always points to the beginning of tls segment.
       symtab->define_in_output_segment("_TLS_MODULE_BASE_", NULL,
 				       Symbol_table::PREDEFINED,
 				       tls_segment, 0, 0,
 				       elfcpp::STT_TLS,
 				       elfcpp::STB_LOCAL,
 				       elfcpp::STV_HIDDEN, 0,
-				       (is_exec
-					? Symbol::SEGMENT_END
-					: Symbol::SEGMENT_START),
+				       Symbol::SEGMENT_START,
 				       true);
     }
   this->tls_base_symbol_defined_ = true;
@@ -4546,6 +5014,8 @@ Target_aarch64<size, big_endian>::optimize_tls_reloc(bool is_final,
     case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
       // These are Local-Dynamic, which refer to local symbols in the
       // dynamic TLS block. Since we know that we generating an
       // executable, we can switch to Local-Exec.
@@ -4860,6 +5330,11 @@ Target_aarch64<size, big_endian>::Scan::local(
       }
       break;
 
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -4889,6 +5364,8 @@ Target_aarch64<size, big_endian>::Scan::local(
 
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
       break;
 
     case elfcpp::R_AARCH64_TLSDESC_ADR_PAGE21:
@@ -5213,7 +5690,9 @@ Target_aarch64<size, big_endian>::Scan::global(
       break;
 
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
-    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:  // Other local dynamic
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:  // Other local dynamic
       break;
 
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
@@ -5248,6 +5727,11 @@ Target_aarch64<size, big_endian>::Scan::global(
       }
       break;
 
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:  // Local executable
@@ -5774,8 +6258,15 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -5966,7 +6457,9 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
       break;
 
     case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
-    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:  // Other local-dynamic
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:  // Other local-dynamic
       {
 	AArch64_address value = psymval->value(object, 0);
 	if (tlsopt == tls::TLSOPT_TO_LE)
@@ -5977,9 +6470,6 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 			    || issue_undefined_symbol_error(gsym));
 		return aarch64_reloc_funcs::STATUS_BAD_RELOC;
 	      }
-	  // If building executable, _TLS_MODULE_BASE_ points to segment
-	  // end. Thus we must subtract it from value.
-	  value -= tls_segment->memsz();
 	  }
 	switch (r_type)
 	  {
@@ -5989,6 +6479,8 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 	    break;
 
 	  case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+	  case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_HI12:
+	  case elfcpp::R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
 	    return aarch64_reloc_funcs::template rela_general<32>(
 		view, value, addend, reloc_property);
 	    break;
@@ -6049,6 +6541,11 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
       // We shall never reach here.
       break;
 
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6061,11 +6558,21 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 	    AArch64_address aligned_tcb_size =
 		align_address(target->tcb_size(),
 			      tls_segment->maximum_alignment());
-	    return aarch64_reloc_funcs::template
-		rela_general<32>(view,
-				 value + aligned_tcb_size,
-				 addend,
-				 reloc_property);
+	    value += aligned_tcb_size;
+	    switch (r_type)
+	      {
+	      case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G2:
+	      case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G1:
+	      case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0:
+		return aarch64_reloc_funcs::movnz(view, value + addend,
+						  reloc_property);
+	      default:
+		return aarch64_reloc_funcs::template
+		  rela_general<32>(view,
+				   value,
+				   addend,
+				   reloc_property);
+	      }
 	  }
 	else
 	  gold_error(_("%s: unsupported reloc %u "
@@ -6681,6 +7188,115 @@ Target_aarch64<size, big_endian>::relocate_relocs(
     view_size,
     reloc_view,
     reloc_view_size);
+}
+
+
+// Return whether this is a 3-insn erratum sequence.
+
+template<int size, bool big_endian>
+bool
+Target_aarch64<size, big_endian>::is_erratum_843419_sequence(
+    typename elfcpp::Swap<32,big_endian>::Valtype insn1,
+    typename elfcpp::Swap<32,big_endian>::Valtype insn2,
+    typename elfcpp::Swap<32,big_endian>::Valtype insn3)
+{
+  unsigned rt1, rt2;
+  bool load, pair;
+
+  // The 2nd insn is a single register load or store; or register pair
+  // store.
+  if (Insn_utilities::aarch64_mem_op_p(insn2, &rt1, &rt2, &pair, &load)
+      && (!pair || (pair && !load)))
+    {
+      // The 3rd insn is a load or store instruction from the "Load/store
+      // register (unsigned immediate)" encoding class, using Rn as the
+      // base address register.
+      if (Insn_utilities::aarch64_ldst_uimm(insn3)
+	  && (Insn_utilities::aarch64_rn(insn3)
+	      == Insn_utilities::aarch64_rd(insn1)))
+	return true;
+    }
+  return false;
+}
+
+
+// Scan erratum for section SHNDX range
+// [output_address + span_start, output_address + span_end).
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::scan_erratum_843419_span(
+    AArch64_relobj<size, big_endian>*  relobj,
+    unsigned int shndx,
+    const section_size_type span_start,
+    const section_size_type span_end,
+    unsigned char* input_view,
+    Address output_address)
+{
+  typedef typename Insn_utilities::Insntype Insntype;
+
+  // Adjust output_address and view to the start of span.
+  output_address += span_start;
+  input_view += span_start;
+
+  if ((output_address & 0x03) != 0)
+    return;
+
+  section_size_type offset = 0;
+  section_size_type span_length = span_end - span_start;
+  // The first instruction must be ending at 0xFF8 or 0xFFC.
+  unsigned int page_offset = output_address & 0xFFF;
+  // Make sure starting position, that is "output_address+offset",
+  // starts at page position 0xff8 or 0xffc.
+  if (page_offset < 0xff8)
+    offset = 0xff8 - page_offset;
+  while (offset + 3 * Insn_utilities::BYTES_PER_INSN <= span_length)
+    {
+      Insntype* ip = reinterpret_cast<Insntype*>(input_view + offset);
+      Insntype insn1 = ip[0];
+      if (Insn_utilities::is_adrp(insn1))
+	{
+	  Insntype insn2 = ip[1];
+	  Insntype insn3 = ip[2];
+	  bool do_report = false;
+	  if (is_erratum_843419_sequence(insn1, insn2, insn3))
+	    do_report = true;
+	  else if (offset + 4 * Insn_utilities::BYTES_PER_INSN <= span_length)
+	    {
+	      // Optionally we can have an insn between ins2 and ins3
+	      Insntype insn_opt = ip[2];
+	      // And insn_opt must not be a branch.
+	      if (!Insn_utilities::aarch64_b(insn_opt)
+		  && !Insn_utilities::aarch64_bl(insn_opt)
+		  && !Insn_utilities::aarch64_blr(insn_opt)
+		  && !Insn_utilities::aarch64_br(insn_opt))
+		{
+		  // And insn_opt must not write to dest reg in insn1. However
+		  // we do a conservative scan, which means we may fix/report
+		  // more than necessary, but it doesn't hurt.
+
+		  Insntype insn4 = ip[3];
+		  if (is_erratum_843419_sequence(insn1, insn2, insn4))
+		    do_report = true;
+		}
+	    }
+	  if (do_report)
+	    {
+	      gold_error(_("Erratum 943419 found at \"%s\", section %d, "
+			   "offset 0x%08x."),
+			 relobj->name().c_str(), shndx,
+			 (unsigned int)(span_start + offset));
+	    }
+	}
+
+      // Advance to next candidate instruction. We only consider instruction
+      // sequences starting at a page offset of 0xff8 or 0xffc.
+      page_offset = (output_address + offset) & 0xfff;
+      if (page_offset == 0xff8)
+	offset += 4;
+      else  // (page_offset == 0xffc), we move to next page's 0xff8.
+	offset += 0xffc;
+    }
 }
 
 

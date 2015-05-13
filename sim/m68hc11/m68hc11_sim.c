@@ -1,5 +1,5 @@
 /* m6811_cpu.c -- 68HC11&68HC12 CPU Emulation
-   Copyright 1999-2014 Free Software Foundation, Inc.
+   Copyright 1999-2015 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -240,7 +240,7 @@ cpu_set_reg (sim_cpu* cpu, uint8 reg, uint16 val)
 /* Returns the address of a 68HC12 indexed operand.
    Pre and post modifications are handled on the source register.  */
 uint16
-cpu_get_indexed_operand_addr (sim_cpu* cpu, int restrict)
+cpu_get_indexed_operand_addr (sim_cpu* cpu, int restricted)
 {
   uint8 reg;
   uint16 sval;
@@ -285,7 +285,7 @@ cpu_get_indexed_operand_addr (sim_cpu* cpu, int restrict)
   /* [n,r] 16-bits offset indexed indirect.  */
   else if ((code & 0x07) == 3)
     {
-      if (restrict)
+      if (restricted)
 	{
 	  return 0;
 	}
@@ -297,7 +297,7 @@ cpu_get_indexed_operand_addr (sim_cpu* cpu, int restrict)
     }
   else if ((code & 0x4) == 0)
     {
-      if (restrict)
+      if (restricted)
 	{
 	  return 0;
 	}
@@ -345,20 +345,20 @@ cpu_get_indexed_operand_addr (sim_cpu* cpu, int restrict)
 }
 
 uint8
-cpu_get_indexed_operand8 (sim_cpu* cpu, int restrict)
+cpu_get_indexed_operand8 (sim_cpu* cpu, int restricted)
 {
   uint16 addr;
 
-  addr = cpu_get_indexed_operand_addr (cpu, restrict);
+  addr = cpu_get_indexed_operand_addr (cpu, restricted);
   return memory_read8 (cpu, addr);
 }
 
 uint16
-cpu_get_indexed_operand16 (sim_cpu* cpu, int restrict)
+cpu_get_indexed_operand16 (sim_cpu* cpu, int restricted)
 {
   uint16 addr;
 
-  addr = cpu_get_indexed_operand_addr (cpu, restrict);
+  addr = cpu_get_indexed_operand_addr (cpu, restricted);
   return memory_read16 (cpu, addr);
 }
 

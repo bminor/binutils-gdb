@@ -1,6 +1,6 @@
 /* Target-dependent code for Motorola 68000 BSD's.
 
-   Copyright (C) 2004-2014 Free Software Foundation, Inc.
+   Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -105,7 +105,9 @@ m68kbsd_supply_gregset (const struct regset *regset,
 static const struct regset m68kbsd_gregset =
 {
   NULL,
-  m68kbsd_supply_gregset
+  m68kbsd_supply_gregset,
+  NULL,
+  REGSET_VARIABLE_SIZE
 };
 
 static const struct regset m68kbsd_fpregset =

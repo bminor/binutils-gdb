@@ -52,7 +52,7 @@ Disassembly of section .text:
 .*:	ed 0f 8f a0 6d a8 [	 ]*czdt	%f6,4000\(16,%r8\),13
 .*:	ed 21 8f a0 4d a9 [	 ]*czxt	%f4,4000\(34,%r8\),13
 .*:	b2 e8 c0 56 [	 ]*ppa	%r5,%r6,12
-.*:	b9 8f 60 59 [	 ]*crdte	%r5,%r6,%r9,0
+.*:	b9 8f 60 59 [	 ]*crdte	%r5,%r6,%r9
 .*:	b9 8f 61 59 [	 ]*crdte	%r5,%r6,%r9,1
 .*:	c5 a0 06 00 00 06 [	 ]*bprp	10,11e <bar>,11e <bar>
 .*:	c5 a0 00 00 00 00 [	 ]*bprp	10,118 <foo\+0x118>,118 <foo\+0x118>

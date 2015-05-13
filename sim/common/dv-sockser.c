@@ -1,5 +1,5 @@
 /* Serial port emulation using sockets.
-   Copyright (C) 1998-2014 Free Software Foundation, Inc.
+   Copyright (C) 1998-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This program is free software; you can redistribute it and/or modify
@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* FIXME: will obviously need to evolve.
    - connectionless sockets might be more appropriate.  */
 
+#include "config.h"
 #include "sim-main.h"
 
 #ifdef HAVE_STRING_H

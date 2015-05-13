@@ -1,6 +1,6 @@
 /* Manages interpreters for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 
@@ -362,7 +362,6 @@ interp_exec (struct interp *interp, const char *command_str)
 void
 clear_interpreter_hooks (void)
 {
-  deprecated_init_ui_hook = 0;
   deprecated_print_frame_info_listing_hook = 0;
   /*print_frame_more_info_hook = 0; */
   deprecated_query_hook = 0;

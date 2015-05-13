@@ -1,5 +1,5 @@
 /* Opcode decoder for the TI MSP430
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@redhat.com>
 
    This file is part of GDB, the GNU Debugger.
@@ -18,6 +18,10 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum
 {
@@ -128,3 +132,7 @@ typedef struct
 } MSP430_Opcode_Decoded;
 
 int msp430_decode_opcode (unsigned long, MSP430_Opcode_Decoded *, int (*)(void *), void *);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,5 @@
 /* Remote serial interface for local (hardwired) serial ports for GO32.
-   Copyright (C) 1992-2014 Free Software Foundation, Inc.
+   Copyright (C) 1992-2015 Free Software Foundation, Inc.
 
    Contributed by Nigel Stephens, Algorithmics Ltd. (nigel@algor.co.uk).
 
@@ -864,6 +864,7 @@ static const struct serial_ops dos_ops =
   dos_noflush_set_tty_state,
   dos_setbaudrate,
   dos_setstopbits,
+  dos_noop,
   dos_noop,			/* Wait for output to drain.  */
   (void (*)(struct serial *, int))NULL	/* Change into async mode.  */
 };

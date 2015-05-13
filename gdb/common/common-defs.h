@@ -1,6 +1,6 @@
 /* Common definitions.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <alloca.h>
@@ -48,5 +49,15 @@
 #include "common-debug.h"
 #include "cleanups.h"
 #include "common-exceptions.h"
+
+#ifdef __cplusplus
+# define EXTERN_C extern "C"
+# define EXTERN_C_PUSH extern "C" {
+# define EXTERN_C_POP }
+#else
+# define EXTERN_C extern
+# define EXTERN_C_PUSH
+# define EXTERN_C_POP
+#endif
 
 #endif /* COMMON_DEFS_H */

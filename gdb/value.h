@@ -1,6 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1040,6 +1040,8 @@ extern struct value *value_non_lval (struct value *);
 
 extern void value_force_lval (struct value *, CORE_ADDR);
 
+extern struct value *make_cv_value (int, int, struct value *);
+
 extern void preserve_one_value (struct value *, struct objfile *, htab_t);
 
 /* From valops.c */
@@ -1080,7 +1082,10 @@ char *value_internal_function_name (struct value *);
 
 extern struct value *value_of_xmethod (struct xmethod_worker *);
 
-struct value *call_xmethod (struct value *function,
-			    int argc, struct value **argv);
+extern struct type *result_type_of_xmethod (struct value *method,
+					    int argc, struct value **argv);
+
+extern struct value *call_xmethod (struct value *method,
+				   int argc, struct value **argv);
 
 #endif /* !defined (VALUE_H) */

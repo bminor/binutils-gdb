@@ -1,3 +1,26 @@
+2015-04-24  Nick Clifton  <nickc@redhat.com>
+
+	PR sim/18273
+	* reg.c (put_reg): Fix check for valid register number.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2015-12-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb-if.c (open): Rename to...
+	(rx_sim_is_open): This. Replace all uses of "open" by uses of
+	"rx_sim_is_open" throughout.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

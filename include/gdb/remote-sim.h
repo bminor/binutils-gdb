@@ -1,6 +1,6 @@
 /* This file defines the interface between the simulator and gdb.
 
-   Copyright (C) 1993-2014 Free Software Foundation, Inc.
+   Copyright (C) 1993-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,9 +60,10 @@ typedef enum {
 } SIM_RC;
 
 
-/* The bfd struct, as an opaque type.  */
+/* Some structs, as opaque types.  */
 
 struct bfd;
+struct host_callback_struct;
 
 
 /* Main simulator entry points.  */

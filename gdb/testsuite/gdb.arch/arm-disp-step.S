@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Free Software Foundation, Inc.
+/* Copyright 2010-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -77,6 +77,11 @@ test_ret_end:
 	/* Test str in ARM mode and Thumb-2 */
 #if !defined(__thumb__)
 	bl test_str_pc
+#endif
+
+	/* Test add with pc in Thumb and Thumb-2 */
+#if defined(__thumb__)
+	bl test_add_rn_pc
 #endif
 	/* Return */
 	mov     sp, r7
@@ -371,4 +376,18 @@ pc_offset_wrong:
 	.global test_str_pc_end
 test_str_pc_end:
 	bx lr
+#endif
+
+#if defined(__thumb__)
+	.global test_add_rn_pc
+	.code   16
+	.thumb_func
+test_add_rn_pc:
+	mov	r3, 4
+test_add_rn_pc_start:
+	add	r3, pc
+	.global test_add_rn_pc_end
+test_add_rn_pc_end:
+	bx lr
+	.size test_add_rn_pc, .-test_add_rn_pc
 #endif

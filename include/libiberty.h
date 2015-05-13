@@ -1,7 +1,6 @@
 /* Function declarations for libiberty.
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010, 2011, 2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2015 Free Software Foundation, Inc.
    
    Note - certain prototypes declared in this header file are for
    functions whoes implementation copyright does not belong to the
@@ -226,6 +225,11 @@ extern char *make_relative_prefix (const char *, const char *,
 
 extern char *make_relative_prefix_ignore_links (const char *, const char *,
 						const char *) ATTRIBUTE_MALLOC;
+
+/* Returns a pointer to a directory path suitable for creating temporary
+   files in.  */
+
+extern const char *choose_tmpdir (void) ATTRIBUTE_RETURNS_NONNULL;
 
 /* Choose a temporary directory to use for scratch files.  */
 
@@ -624,12 +628,22 @@ extern int pwait (int, int *, int);
 extern int asprintf (char **, const char *, ...) ATTRIBUTE_PRINTF_2;
 #endif
 
+/* Like asprintf but allocates memory without fail. This works like
+   xmalloc.  */
+
+extern char *xasprintf (const char *, ...) ATTRIBUTE_MALLOC ATTRIBUTE_PRINTF_1;
+
 #if !HAVE_DECL_VASPRINTF
 /* Like vsprintf but provides a pointer to malloc'd storage, which
    must be freed by the caller.  */
 
 extern int vasprintf (char **, const char *, va_list) ATTRIBUTE_PRINTF(2,0);
 #endif
+
+/* Like vasprintf but allocates memory without fail. This works like
+   xmalloc.  */
+
+extern char *xvasprintf (const char *, va_list) ATTRIBUTE_MALLOC ATTRIBUTE_PRINTF(1,0);
 
 #if defined(HAVE_DECL_SNPRINTF) && !HAVE_DECL_SNPRINTF
 /* Like sprintf but prints at most N characters.  */
@@ -643,6 +657,33 @@ extern int vsnprintf (char *, size_t, const char *, va_list) ATTRIBUTE_PRINTF(3,
 
 #if defined (HAVE_DECL_STRNLEN) && !HAVE_DECL_STRNLEN
 extern size_t strnlen (const char *, size_t);
+#endif
+
+#if defined(HAVE_DECL_STRVERSCMP) && !HAVE_DECL_STRVERSCMP
+/* Compare version strings.  */
+extern int strverscmp (const char *, const char *);
+#endif
+
+#if defined(HAVE_DECL_STRTOL) && !HAVE_DECL_STRTOL
+extern long int strtol (const char *nptr,
+                        char **endptr, int base);
+#endif
+
+#if defined(HAVE_DECL_STRTOUL) && !HAVE_DECL_STRTOUL
+extern unsigned long int strtoul (const char *nptr,
+                                  char **endptr, int base);
+#endif
+
+#if defined(HAVE_LONG_LONG) && defined(HAVE_DECL_STRTOLL) && !HAVE_DECL_STRTOLL
+__extension__
+extern long long int strtoll (const char *nptr,
+                              char **endptr, int base);
+#endif
+
+#if defined(HAVE_LONG_LONG) && defined(HAVE_DECL_STRTOULL) && !HAVE_DECL_STRTOULL
+__extension__
+extern unsigned long long int strtoull (const char *nptr,
+                                        char **endptr, int base);
 #endif
 
 #if defined(HAVE_DECL_STRVERSCMP) && !HAVE_DECL_STRVERSCMP

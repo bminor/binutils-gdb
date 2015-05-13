@@ -1,5 +1,5 @@
 # Makefile for regression testing the GNU debugger.
-# Copyright 1992-2014 Free Software Foundation, Inc.
+# Copyright 1992-2015 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -33,7 +33,7 @@ EXEEXT = @EXEEXT@
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 ALL_SUBDIRS = gdb.ada gdb.arch gdb.asm gdb.base gdb.btrace gdb.cell gdb.cp \
-	gdb.disasm gdb.dlang gdb.dwarf2 gdb.fortran gdb.gdb gdb.go gdb.hp \
+	gdb.disasm gdb.dlang gdb.dwarf2 gdb.fortran gdb.gdb gdb.go \
 	gdb.java gdb.linespec gdb.mi gdb.modula2 gdb.multi \
 	gdb.objc gdb.opencl gdb.opt gdb.pascal gdb.python gdb.server \
 	gdb.stabs gdb.reverse gdb.threads gdb.trace gdb.xml \
@@ -242,7 +242,7 @@ force:;
 
 clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x *.grt bigcore.corefile .gdb_history
-	-rm -f core.* *.tf *.cl *.py tracecommandsscript copy1.txt zzz-gdbscript
+	-rm -f core.* *.tf *.cl tracecommandsscript copy1.txt zzz-gdbscript
 	-rm -f *.dwo *.dwp
 	-rm -rf outputs temp cache
 	-rm -f read1.so expect-read1

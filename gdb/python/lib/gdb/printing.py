@@ -1,5 +1,5 @@
 # Pretty-printer utilities.
-# Copyright (C) 2010-2014 Free Software Foundation, Inc.
+# Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -114,15 +114,21 @@ def register_pretty_printer(obj, printer, replace=False):
     if not hasattr(printer, "__call__"):
         raise TypeError("printer missing attribute: __call__")
 
-    if obj is None:
+    if hasattr(printer, "name"):
+      name = printer.name
+    else:
+      name = printer.__name__
+    if obj is None or obj is gdb:
         if gdb.parameter("verbose"):
             gdb.write("Registering global %s pretty-printer ...\n" % name)
         obj = gdb
     else:
         if gdb.parameter("verbose"):
-            gdb.write("Registering %s pretty-printer for %s ...\n" %
-                      (printer.name, obj.filename))
+            gdb.write("Registering %s pretty-printer for %s ...\n" % (
+                name, obj.filename))
 
+    # Printers implemented as functions are old-style.  In order to not risk
+    # breaking anything we do not check __name__ here.
     if hasattr(printer, "name"):
         if not isinstance(printer.name, basestring):
             raise TypeError("printer name is not a string")

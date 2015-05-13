@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/sparc64.
 
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
    Based on code contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -216,7 +216,7 @@ sparc64nbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (sparc64nbsd_pc_in_sigtramp (pc, name))
     {
-      if (name == NULL || strncmp (name, "__sigtramp_sigcontext", 21))
+      if (name == NULL || !startswith (name, "__sigtramp_sigcontext"))
 	return 1;
     }
 

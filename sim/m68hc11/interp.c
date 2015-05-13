@@ -1,5 +1,5 @@
 /* interp.c -- Simulator for Motorola 68HC11/68HC12
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, the GNU debugger.
@@ -417,17 +417,38 @@ sim_prepare_for_program (SIM_DESC sd, bfd* abfd)
   return SIM_RC_OK;
 }
 
+static sim_cia
+m68hc11_pc_get (sim_cpu *cpu)
+{
+  return cpu_get_pc (cpu);
+}
+
+static void
+m68hc11_pc_set (sim_cpu *cpu, sim_cia pc)
+{
+  cpu_set_pc (cpu, pc);
+}
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
           bfd *abfd, char **argv)
 {
+  int i;
   SIM_DESC sd;
   sim_cpu *cpu;
 
   sd = sim_state_alloc (kind, callback);
-  cpu = STATE_CPU (sd, 0);
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* The cpu data is kept in a separately allocated chunk of memory.  */
+  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  cpu = STATE_CPU (sd, 0);
 
   /* for compatibility */
   current_alignment = NONSTRICT_ALIGNMENT;
@@ -482,7 +503,15 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
       return 0;
     }      
 
-  /* Fudge our descriptor.  */
+  /* CPU specific initialization.  */
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
+
+      CPU_PC_FETCH (cpu) = m68hc11_pc_get;
+      CPU_PC_STORE (cpu) = m68hc11_pc_set;
+    }
+
   return sd;
 }
 
@@ -500,16 +529,6 @@ sim_close (SIM_DESC sd, int quitting)
   /* FIXME - free SD */
   sim_state_free (sd);
   return;
-}
-
-void
-sim_set_profile (int n)
-{
-}
-
-void
-sim_set_profile_size (int n)
-{
 }
 
 /* Generic implementation of sim_engine_run that works within the
@@ -535,13 +554,6 @@ sim_engine_run (SIM_DESC sd,
 	  sim_events_process (sd);
 	}
     }
-}
-
-int
-sim_trace (SIM_DESC sd)
-{
-  sim_resume (sd, 0, 0);
-  return 1;
 }
 
 void
@@ -572,14 +584,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   return sim_prepare_for_program (sd, abfd);
 }
-
-
-void
-sim_set_callbacks (host_callback *p)
-{
-  /*  m6811_callback = p; */
-}
-
 
 int
 sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
@@ -702,12 +706,6 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
 
   return 2;
-}
-
-void
-sim_size (int s)
-{
-  ;
 }
 
 /* Halt the simulator after just one instruction */

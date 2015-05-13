@@ -1,6 +1,6 @@
 // reloc.cc -- relocate input files for gold.
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -866,7 +866,14 @@ Sized_relobj_file<size, big_endian>::write_sections(const Layout* layout,
 	  // Read and decompress the section.
           section_size_type len;
 	  const unsigned char* p = this->section_contents(i, &len, false);
-	  if (!decompress_input_section(p, len, view, view_size))
+	  int compression_header_size;
+	  if ((shdr.get_sh_flags() & elfcpp::SHF_COMPRESSED) != 0)
+	     compression_header_size = elfcpp::Elf_sizes<size>::chdr_size;
+	  else
+	    compression_header_size = 0;
+	  if (!decompress_input_section(p + compression_header_size,
+					len - compression_header_size,
+					view, view_size))
 	    this->error(_("could not decompress section %s"),
 			this->section_name(i).c_str());
         }
@@ -1457,10 +1464,9 @@ Merged_symbol_value<size>::initialize_input_to_output_map(
     const Relobj* object,
     unsigned int input_shndx)
 {
-  Object_merge_map* map = object->merge_map();
-  map->initialize_input_to_output_map<size>(input_shndx,
-					    this->output_start_address_,
-					    &this->output_addresses_);
+  object->initialize_input_to_output_map<size>(input_shndx,
+					       this->output_start_address_,
+					       &this->output_addresses_);
 }
 
 // Get the output value corresponding to an input offset if we
@@ -1474,9 +1480,8 @@ Merged_symbol_value<size>::value_from_output_section(
     typename elfcpp::Elf_types<size>::Elf_Addr input_offset) const
 {
   section_offset_type output_offset;
-  bool found = object->merge_map()->get_output_offset(NULL, input_shndx,
-						      input_offset,
-						      &output_offset);
+  bool found = object->merge_output_offset(input_shndx, input_offset,
+					   &output_offset);
 
   // If this assertion fails, it means that some relocation was
   // against a portion of an input merge section which we didn't map

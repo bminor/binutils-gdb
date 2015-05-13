@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on AArch64 systems.
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
+   Copyright (C) 2009-2015 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -2698,7 +2698,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, aarch64_breakpoint_from_pc);
-  set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
   set_gdbarch_software_single_step (gdbarch, aarch64_software_single_step);
 

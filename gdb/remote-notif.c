@@ -1,6 +1,6 @@
 /* Remote notification in GDB protocol
 
-   Copyright (C) 1988-2014 Free Software Foundation, Inc.
+   Copyright (C) 1988-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -133,7 +133,7 @@ handle_notification (struct remote_notif_state *state, char *buf)
     {
       const char *name = notifs[i]->name;
 
-      if (strncmp (buf, name, strlen (name)) == 0
+      if (startswith (buf, name)
 	  && buf[strlen (name)] == ':')
 	break;
     }

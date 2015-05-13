@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the M32R.
-   Copyright (C) 1996-2014 Free Software Foundation, Inc.
+   Copyright (C) 1996-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB, the GNU debugger.
@@ -85,14 +85,6 @@ sim_open (kind, callback, abfd, argv)
       free_state (sd);
       return 0;
     }
-
-#ifdef HAVE_DV_SOCKSER /* FIXME: was done differently before */
-  if (dv_sockser_install (sd) != SIM_RC_OK)
-    {
-      free_state (sd);
-      return 0;
-    }
-#endif
 
 #if 0 /* FIXME: 'twould be nice if we could do this */
   /* These options override any module options.

@@ -1,6 +1,6 @@
 // symtab.h -- the gold symbol table   -*- C++ -*-
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -526,7 +526,8 @@ class Symbol
   {
     return (this->is_undefined()
 	    && (this->binding() == elfcpp::STB_WEAK
-		|| this->is_undef_binding_weak()));
+		|| this->is_undef_binding_weak()
+		|| parameters->options().weak_unresolved_symbols()));
   }
 
   // Return whether this is a strong undefined symbol.
@@ -535,7 +536,8 @@ class Symbol
   {
     return (this->is_undefined()
 	    && this->binding() != elfcpp::STB_WEAK
-	    && !this->is_undef_binding_weak());
+	    && !this->is_undef_binding_weak()
+	    && !parameters->options().weak_unresolved_symbols());
   }
 
   // Return whether this is an absolute symbol.
@@ -604,10 +606,8 @@ class Symbol
     if (parameters->options().in_dynamic_list(this->name()))
       return true;
 
-    // If the user used -Bsymbolic or provided a --dynamic-list script,
-    // then nothing (else) is preemptible.
-    if (parameters->options().Bsymbolic()
-        || parameters->options().have_dynamic_list())
+    // If the user used -Bsymbolic, then nothing (else) is preemptible.
+    if (parameters->options().Bsymbolic())
       return false;
 
     // If the user used -Bsymbolic-functions, then functions are not
@@ -1372,7 +1372,7 @@ class Symbol_table
  
   // Returns true if ICF determined that this is a duplicate section. 
   bool
-  is_section_folded(Object* obj, unsigned int shndx) const;
+  is_section_folded(Relobj* obj, unsigned int shndx) const;
 
   void
   set_gc(Garbage_collection* gc)

@@ -1,7 +1,178 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.8
+*** Changes since GDB 7.9
+
+* GDB now honors the content of the file /proc/PID/coredump_filter
+  (PID is the process ID) on GNU/Linux systems.  This file can be used
+  to specify the types of memory mappings that will be included in a
+  corefile.  For more information, please refer to the manual page of
+  "core(5)".  GDB also has a new command: "set use-coredump-filter
+  on|off".  It allows to set whether GDB will read the content of the
+  /proc/PID/coredump_filter file when generating a corefile.
+
+* The "info os" command on GNU/Linux can now display information on
+  cpu information :
+    "info os cpus" Listing of all cpus/cores on the system
+
+* GDB has two new commands: "set serial parity odd|even|none" and
+  "show serial parity".  These allows to set or show parity for the
+  remote serial I/O.
+
+* The "info source" command now displays the producer string if it was
+  present in the debug info.  This typically includes the compiler version
+  and may include things like its command line arguments.
+
+* The "info dll", an alias of the "info sharedlibrary" command,
+  is now available on all platforms.
+
+* Directory names supplied to the "set sysroot" commands may be
+  prefixed with "target:" to tell GDB to access shared libraries from
+  the target system, be it local or remote.  This replaces the prefix
+  "remote:".  The default sysroot has been changed from "" to
+  "target:".  "remote:" is automatically converted to "target:" for
+  backward compatibility.
+
+* The system root specified by "set sysroot" will be prepended to the
+  filename of the main executable (if reported to GDB as absolute by
+  the operating system) when starting processes remotely, and when
+  attaching to already-running local or remote processes.
+
+* GDB now supports automatic location and retrieval of executable
+  files from remote targets.  Remote debugging can now be initiated
+  using only a "target remote" or "target extended-remote" command
+  (no "set sysroot" or "file" commands are required).  See "New remote
+  packets" below.
+
+* The "dump" command now supports verilog hex format.
+
+* GDB now supports the vector ABI on S/390 GNU/Linux targets.
+
+* Python Scripting
+
+  ** gdb.Objfile objects have a new attribute "username",
+     which is the name of the objfile as specified by the user,
+     without, for example, resolving symlinks.
+  ** You can now write frame unwinders in Python.
+  ** gdb.Type objects have a new method "optimized_out",
+     returning optimized out gdb.Value instance of this type.
+  ** Xmethods can now specify a result type.
+  ** gdb.Value objects have new methods "reference_value" and
+     "const_value" which return a reference to the value and a
+     "const" version of the value respectively.
+
+* New commands
+
+maint print symbol-cache
+  Print the contents of the symbol cache.
+
+maint print symbol-cache-statistics
+  Print statistics of symbol cache usage.
+
+maint flush-symbol-cache
+  Flush the contents of the symbol cache.
+
+record btrace bts
+record bts
+  Start branch trace recording using Branch Trace Store (BTS) format.
+
+* New options
+
+set max-completions
+show max-completions
+  Set the maximum number of candidates to be considered during
+  completion.  The default value is 200.  This limit allows GDB
+  to avoid generating large completion lists, the computation of
+  which can cause the debugger to become temporarily unresponsive.
+
+maint set symbol-cache-size
+maint show symbol-cache-size
+  Control the size of the symbol cache.
+
+set|show record btrace bts buffer-size
+  Set and show the size of the ring buffer used for branch tracing in
+  BTS format.
+  The obtained size may differ from the requested size.  Use "info
+  record" to see the obtained buffer size.
+
+* The command 'thread apply all' can now support new option '-ascending'
+  to call its specified command for all threads in ascending order.
+
+* Python/Guile scripting
+
+  ** GDB now supports auto-loading of Python/Guile scripts contained in the
+     special section named `.debug_gdb_scripts'.
+
+* New remote packets
+
+qXfer:btrace-conf:read
+  Return the branch trace configuration for the current thread.
+
+Qbtrace-conf:bts:size
+  Set the requested ring buffer size for branch tracing in BTS format.
+
+swbreak stop reason
+  Indicates a memory breakpoint instruction was executed, irrespective
+  of whether it was GDB that planted the breakpoint or the breakpoint
+  is hardcoded in the program.  This is required for correct non-stop
+  mode operation.
+
+hwbreak stop reason
+  Indicates the target stopped for a hardware breakpoint.  This is
+  required for correct non-stop mode operation.
+
+vFile:fstat:
+  Return information about files on the remote system.
+
+qXfer:exec-file:read
+  Return the full absolute name of the file that was executed to
+  create a process running on the remote system.
+
+fork stop reason
+  Indicates that a fork system call was executed.
+
+vfork stop reason
+  Indicates that a vfork system call was executed.
+
+vforkdone stop reason
+  Indicates that a vfork child of the specified process has executed
+  an exec or exit, allowing the vfork parent to resume execution.
+
+fork-events and vfork-events features in qSupported
+  The qSupported packet allows GDB to request support for fork and 
+  vfork events using new 'gdbfeatures' fork-events and vfork-events,
+  and the qSupported response can contain the corresponding
+  'stubfeatures'.  Set and show commands can be used to display
+  whether these features are enabled.
+
+* Extended-remote fork events
+
+  ** GDB now has support for fork events on extended-remote Linux
+     targets.  For targets with Linux kernels 2.5.60 and later, this
+     enables follow-fork-mode and detach-on-fork for both fork and
+     vfork, as well as fork and vfork catchpoints.
+
+* The info record command now shows the recording format and the
+  branch tracing configuration for the current thread when using
+  the btrace record target.
+  For the BTS format, it shows the ring buffer size.
+
+* GDB now has support for DTrace USDT (Userland Static Defined
+  Tracing) probes.  The supported targets are x86_64-*-linux-gnu.
+
+* GDB now supports access to vector registers on S/390 GNU/Linux
+  targets.
+
+* Removed command line options
+
+-xdb  HP-UX XDB compatibility mode.
+
+* Removed targets and native configurations
+
+HP/PA running HP-UX           hppa*-*-hpux*
+Itanium running HP-UX         ia64-*-hpux*
+
+*** Changes in GDB 7.9
 
 * GDB now supports hardware watchpoints on x86 GNU Hurd.
 
@@ -46,6 +217,12 @@
      compile file [-raw|-r] filename
 
 * New commands
+
+demangle [-l language] [--] name
+  Demangle "name" in the specified language, or the current language
+  if elided.  This command is renamed from the "maint demangle" command.
+  The latter is kept as a no-op to avoid "maint demangle" being interpreted
+  as "maint demangler-warning".
 
 queue-signal signal-name-or-number
   Queue a signal to be delivered to the thread when it is resumed.
@@ -108,6 +285,10 @@ SGI Irix-5.x				mips-*-irix5*
 SGI Irix-6.x				mips-*-irix6*
 VAX running (4.2 - 4.3 Reno) BSD 	vax-*-bsd*
 VAX running Ultrix 			vax-*-ultrix*
+
+* The "dll-symbols" command, and its two aliases ("add-shared-symbol-files"
+  and "assf"), have been removed.  Use the "sharedlibrary" command, or
+  its alias "share", instead.
 
 *** Changes in GDB 7.8
 

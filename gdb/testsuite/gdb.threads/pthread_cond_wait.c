@@ -1,6 +1,6 @@
 /* A small multi-threaded test case.
 
-   Copyright 2004-2014 Free Software Foundation, Inc.
+   Copyright 2004-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 void
 cond_wait (pthread_cond_t *cond, pthread_mutex_t *mut)

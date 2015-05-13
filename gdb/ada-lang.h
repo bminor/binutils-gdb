@@ -1,6 +1,6 @@
 /* Ada language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2014 Free Software Foundation, Inc.
+   Copyright (C) 1992-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -244,7 +244,7 @@ extern struct symbol *ada_lookup_symbol (const char *, const struct block *,
                                          domain_enum, int *);
 
 extern void ada_lookup_encoded_symbol
-  (const char *name, const struct block *block, domain_enum namespace,
+  (const char *name, const struct block *block, domain_enum domain,
    struct ada_symbol_info *symbol_info);
 
 extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *);

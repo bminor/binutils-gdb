@@ -1,6 +1,6 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
 
-   Copyright (C) 1988-2014 Free Software Foundation, Inc.
+   Copyright (C) 1988-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -104,13 +104,15 @@ static void remote_open_1 (const char *, int, struct target_ops *,
 
 static void remote_close (struct target_ops *self);
 
+struct remote_state;
+
+static int remote_vkill (int pid, struct remote_state *rs);
+
 static void remote_mourn (struct target_ops *ops);
 
 static void extended_remote_restart (void);
 
 static void extended_remote_mourn (struct target_ops *);
-
-static void remote_mourn_1 (struct target_ops *);
 
 static void remote_send (char **buf, long *sizeof_buf_p);
 
@@ -124,10 +126,7 @@ static int remote_can_async_p (struct target_ops *);
 
 static int remote_is_async_p (struct target_ops *);
 
-static void remote_async (struct target_ops *ops,
-			  void (*callback) (enum inferior_event_type event_type,
-					    void *context),
-			  void *context);
+static void remote_async (struct target_ops *ops, int enable);
 
 static void sync_remote_interrupt_twice (int signo);
 
@@ -186,7 +185,6 @@ static ptid_t read_ptid (char *buf, char **obuf);
 
 static void remote_set_permissions (struct target_ops *self);
 
-struct remote_state;
 static int remote_get_trace_status (struct target_ops *self,
 				    struct trace_status *ts);
 
@@ -209,6 +207,9 @@ static void push_stop_reply (struct stop_reply *);
 static void discard_pending_stop_replies_in_queue (struct remote_state *);
 static int peek_stop_reply (ptid_t ptid);
 
+struct threads_listing_context;
+static void remove_new_fork_children (struct threads_listing_context *);
+
 static void remote_async_inferior_event_handler (gdb_client_data);
 
 static void remote_terminal_ours (struct target_ops *self);
@@ -220,6 +221,8 @@ static void remote_console_output (char *msg);
 static int remote_supports_cond_breakpoints (struct target_ops *self);
 
 static int remote_can_run_breakpoint_commands (struct target_ops *self);
+
+static void remote_btrace_reset (void);
 
 /* For "remote".  */
 
@@ -354,16 +357,12 @@ struct remote_state
   int use_threadinfo_query;
   int use_threadextra_query;
 
-  void (*async_client_callback) (enum inferior_event_type event_type,
-				 void *context);
-  void *async_client_context;
-
   /* This is set to the data address of the access causing the target
      to stop for a watchpoint.  */
   CORE_ADDR remote_watch_data_address;
 
-  /* This is non-zero if target stopped for a watchpoint.  */
-  int remote_stopped_by_watchpoint_p;
+  /* Whether the target stopped for a breakpoint/watchpoint.  */
+  enum target_stop_reason stop_reason;
 
   threadref echo_nextthread;
   threadref nextthread;
@@ -371,6 +370,9 @@ struct remote_state
 
   /* The state of remote notification.  */
   struct remote_notif_state *notif_state;
+
+  /* The branch trace configuration.  */
+  struct btrace_config btrace_config;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -486,13 +488,13 @@ remote_get_noisy_reply (char **buf_p,
       buf = *buf_p;
       if (buf[0] == 'E')
 	trace_error (buf);
-      else if (strncmp (buf, "qRelocInsn:", strlen ("qRelocInsn:")) == 0)
+      else if (startswith (buf, "qRelocInsn:"))
 	{
 	  ULONGEST ul;
 	  CORE_ADDR from, to, org_to;
 	  char *p, *pp;
 	  int adjusted_size = 0;
-	  volatile struct gdb_exception ex;
+	  int relocated = 0;
 
 	  p = buf + strlen ("qRelocInsn:");
 	  pp = unpack_varlen_hex (p, &ul);
@@ -506,33 +508,38 @@ remote_get_noisy_reply (char **buf_p,
 
 	  org_to = to;
 
-	  TRY_CATCH (ex, RETURN_MASK_ALL)
+	  TRY
 	    {
 	      gdbarch_relocate_instruction (target_gdbarch (), &to, from);
+	      relocated = 1;
 	    }
-	  if (ex.reason >= 0)
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      if (ex.error == MEMORY_ERROR)
+		{
+		  /* Propagate memory errors silently back to the
+		     target.  The stub may have limited the range of
+		     addresses we can write to, for example.  */
+		}
+	      else
+		{
+		  /* Something unexpectedly bad happened.  Be verbose
+		     so we can tell what, and propagate the error back
+		     to the stub, so it doesn't get stuck waiting for
+		     a response.  */
+		  exception_fprintf (gdb_stderr, ex,
+				     _("warning: relocating instruction: "));
+		}
+	      putpkt ("E01");
+	    }
+	  END_CATCH
+
+	  if (relocated)
 	    {
 	      adjusted_size = to - org_to;
 
 	      xsnprintf (buf, *sizeof_buf, "qRelocInsn:%x", adjusted_size);
 	      putpkt (buf);
-	    }
-	  else if (ex.reason < 0 && ex.error == MEMORY_ERROR)
-	    {
-	      /* Propagate memory errors silently back to the target.
-		 The stub may have limited the range of addresses we
-		 can write to, for example.  */
-	      putpkt ("E01");
-	    }
-	  else
-	    {
-	      /* Something unexpectedly bad happened.  Be verbose so
-		 we can tell what, and propagate the error back to the
-		 stub, so it doesn't get stuck waiting for a
-		 response.  */
-	      exception_fprintf (gdb_stderr, ex,
-				 _("warning: relocating instruction: "));
-	      putpkt ("E01");
 	    }
 	}
       else if (buf[0] == 'O' && buf[1] != 'K')
@@ -1248,8 +1255,10 @@ enum {
   PACKET_vFile_close,
   PACKET_vFile_unlink,
   PACKET_vFile_readlink,
+  PACKET_vFile_fstat,
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
+  PACKET_qXfer_exec_file,
   PACKET_qXfer_libraries,
   PACKET_qXfer_libraries_svr4,
   PACKET_qXfer_memory_map,
@@ -1327,10 +1336,37 @@ enum {
   /* Support for qXfer:libraries-svr4:read with a non-empty annex.  */
   PACKET_augmented_libraries_svr4_read_feature,
 
+  /* Support for the qXfer:btrace-conf:read packet.  */
+  PACKET_qXfer_btrace_conf,
+
+  /* Support for the Qbtrace-conf:bts:size packet.  */
+  PACKET_Qbtrace_conf_bts_size,
+
+  /* Support for swbreak+ feature.  */
+  PACKET_swbreak_feature,
+
+  /* Support for hwbreak+ feature.  */
+  PACKET_hwbreak_feature,
+
+  /* Support for fork events.  */
+  PACKET_fork_event_feature,
+
+  /* Support for vfork events.  */
+  PACKET_vfork_event_feature,
+
   PACKET_MAX
 };
 
 static struct packet_config remote_protocol_packets[PACKET_MAX];
+
+/* Returns the packet's corresponding "set remote foo-packet" command
+   state.  See struct packet_config for more details.  */
+
+static enum auto_boolean
+packet_set_cmd_state (int packet)
+{
+  return remote_protocol_packets[packet].detect;
+}
 
 /* Returns whether a given packet or feature is supported.  This takes
    into account the state of the corresponding "set remote foo-packet"
@@ -1432,6 +1468,62 @@ remote_multi_process_p (struct remote_state *rs)
   return packet_support (PACKET_multiprocess_feature) == PACKET_ENABLE;
 }
 
+/* Returns true if fork events are supported.  */
+
+static int
+remote_fork_event_p (struct remote_state *rs)
+{
+  return packet_support (PACKET_fork_event_feature) == PACKET_ENABLE;
+}
+
+/* Returns true if vfork events are supported.  */
+
+static int
+remote_vfork_event_p (struct remote_state *rs)
+{
+  return packet_support (PACKET_vfork_event_feature) == PACKET_ENABLE;
+}
+
+/* Insert fork catchpoint target routine.  If fork events are enabled
+   then return success, nothing more to do.  */
+
+static int
+remote_insert_fork_catchpoint (struct target_ops *ops, int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return !remote_fork_event_p (rs);
+}
+
+/* Remove fork catchpoint target routine.  Nothing to do, just
+   return success.  */
+
+static int
+remote_remove_fork_catchpoint (struct target_ops *ops, int pid)
+{
+  return 0;
+}
+
+/* Insert vfork catchpoint target routine.  If vfork events are enabled
+   then return success, nothing more to do.  */
+
+static int
+remote_insert_vfork_catchpoint (struct target_ops *ops, int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return !remote_vfork_event_p (rs);
+}
+
+/* Remove vfork catchpoint target routine.  Nothing to do, just
+   return success.  */
+
+static int
+remote_remove_vfork_catchpoint (struct target_ops *ops, int pid)
+{
+  return 0;
+}
+
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
 static struct async_signal_handler *async_sigint_remote_twice_token;
 static struct async_signal_handler *async_sigint_remote_token;
@@ -1492,10 +1584,13 @@ remote_query_attached (int pid)
    inferior.  If ATTACHED is 1, then we had just attached to this
    inferior.  If it is 0, then we just created this inferior.  If it
    is -1, then try querying the remote stub to find out if it had
-   attached to the inferior or not.  */
+   attached to the inferior or not.  If TRY_OPEN_EXEC is true then
+   attempt to open this inferior's executable as the main executable
+   if no main executable is open already.  */
 
 static struct inferior *
-remote_add_inferior (int fake_pid_p, int pid, int attached)
+remote_add_inferior (int fake_pid_p, int pid, int attached,
+		     int try_open_exec)
 {
   struct inferior *inf;
 
@@ -1528,6 +1623,11 @@ remote_add_inferior (int fake_pid_p, int pid, int attached)
 
   inf->attach_flag = attached;
   inf->fake_pid_p = fake_pid_p;
+
+  /* If no main executable is currently open then attempt to
+     open the file that was executed to create this inferior.  */
+  if (try_open_exec && get_exec_file (0) == NULL)
+    exec_file_locate_attach (pid, 1);
 
   return inf;
 }
@@ -1619,7 +1719,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	  int fake_pid_p = !remote_multi_process_p (rs);
 
 	  inf = remote_add_inferior (fake_pid_p,
-				     ptid_get_pid (currthread), -1);
+				     ptid_get_pid (currthread), -1, 1);
 	}
 
       /* This is really a new thread.  Add it.  */
@@ -1648,15 +1748,15 @@ demand_private_info (ptid_t ptid)
 
   gdb_assert (info);
 
-  if (!info->private)
+  if (!info->priv)
     {
-      info->private = xmalloc (sizeof (*(info->private)));
+      info->priv = xmalloc (sizeof (*(info->priv)));
       info->private_dtor = free_private_thread_info;
-      info->private->core = -1;
-      info->private->extra = 0;
+      info->priv->core = -1;
+      info->priv->extra = 0;
     }
 
-  return info->private;
+  return info->priv;
 }
 
 /* Call this function as a result of
@@ -2591,6 +2691,27 @@ clear_threads_listing_context (void *p)
   VEC_free (thread_item_t, context->items);
 }
 
+/* Remove the thread specified as the related_pid field of WS
+   from the CONTEXT list.  */
+
+static void
+threads_listing_context_remove (struct target_waitstatus *ws,
+				struct threads_listing_context *context)
+{
+  struct thread_item *item;
+  int i;
+  ptid_t child_ptid = ws->value.related_pid;
+
+  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
+    {
+      if (ptid_equal (item->ptid, child_ptid))
+	{
+	  VEC_ordered_remove (thread_item_t, context->items, i);
+	  break;
+	}
+    }
+}
+
 static int
 remote_newthread_step (threadref *ref, void *data)
 {
@@ -2812,8 +2933,8 @@ remote_update_thread_list (struct target_ops *ops)
       /* CONTEXT now holds the current thread list on the remote
 	 target end.  Delete GDB-side threads no longer found on the
 	 target.  */
-      ALL_NON_EXITED_THREADS_SAFE (tp, tmp)
-        {
+      ALL_THREADS_SAFE (tp, tmp)
+	{
 	  for (i = 0;
 	       VEC_iterate (thread_item_t, context.items, i, item);
 	       ++i)
@@ -2827,7 +2948,12 @@ remote_update_thread_list (struct target_ops *ops)
 	      /* Not found.  */
 	      delete_thread (tp->ptid);
 	    }
-        }
+	}
+
+      /* Remove any unreported fork child threads from CONTEXT so
+	 that we don't interfere with follow fork, which is where
+	 creation of such threads is handled.  */
+      remove_new_fork_children (&context);
 
       /* And now add threads we don't know about yet to our list.  */
       for (i = 0;
@@ -2899,8 +3025,8 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
     {
       struct thread_info *info = find_thread_ptid (tp->ptid);
 
-      if (info && info->private)
-	return info->private->extra;
+      if (info && info->priv)
+	return info->priv->extra;
       else
 	return NULL;
     }
@@ -3131,14 +3257,14 @@ get_offsets (void)
   ptr = buf;
   lose = 0;
 
-  if (strncmp (ptr, "Text=", 5) == 0)
+  if (startswith (ptr, "Text="))
     {
       ptr += 5;
       /* Don't use strtol, could lose on big values.  */
       while (*ptr && *ptr != ';')
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
 
-      if (strncmp (ptr, ";Data=", 6) == 0)
+      if (startswith (ptr, ";Data="))
 	{
 	  ptr += 6;
 	  while (*ptr && *ptr != ';')
@@ -3147,7 +3273,7 @@ get_offsets (void)
       else
 	lose = 1;
 
-      if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
+      if (!lose && startswith (ptr, ";Bss="))
 	{
 	  ptr += 5;
 	  while (*ptr && *ptr != ';')
@@ -3159,7 +3285,7 @@ get_offsets (void)
       else
 	lose = 1;
     }
-  else if (strncmp (ptr, "TextSeg=", 8) == 0)
+  else if (startswith (ptr, "TextSeg="))
     {
       ptr += 8;
       /* Don't use strtol, could lose on big values.  */
@@ -3167,7 +3293,7 @@ get_offsets (void)
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
       num_segments = 1;
 
-      if (strncmp (ptr, ";DataSeg=", 9) == 0)
+      if (startswith (ptr, ";DataSeg="))
 	{
 	  ptr += 9;
 	  while (*ptr && *ptr != ';')
@@ -3389,7 +3515,7 @@ add_current_inferior_and_thread (char *wait_status)
       fake_pid_p = 1;
     }
 
-  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1);
+  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1, 1);
 
   /* Add the main thread.  */
   add_thread_silent (inferior_ptid);
@@ -3629,7 +3755,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	}
 
       if (target_can_async_p ())
-	target_async (inferior_event_handler, 0);
+	target_async (1);
 
       if (thread_count () == 0)
 	{
@@ -3774,7 +3900,7 @@ remote_check_symbols (void)
   packet_ok (rs->buf, &remote_protocol_packets[PACKET_qSymbol]);
   reply = rs->buf;
 
-  while (strncmp (reply, "qSymbol:", 8) == 0)
+  while (startswith (reply, "qSymbol:"))
     {
       struct bound_minimal_symbol sym;
 
@@ -3814,7 +3940,7 @@ remote_serial_open (const char *name)
      of in ser-tcp.c, because it is the remote protocol assuming that the
      serial connection is reliable and not the serial connection promising
      to be.  */
-  if (!udp_warning && strncmp (name, "udp:", 4) == 0)
+  if (!udp_warning && startswith (name, "udp:"))
     {
       warning (_("The remote protocol may be unreliable over UDP.\n"
 		 "Some events may be lost, rendering further debugging "
@@ -3940,6 +4066,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_auxv },
+  { "qXfer:exec-file:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_exec_file },
   { "qXfer:features:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_features },
   { "qXfer:libraries:read", PACKET_DISABLE, remote_supported_packet,
@@ -4010,7 +4138,17 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "Qbtrace:off", PACKET_DISABLE, remote_supported_packet, PACKET_Qbtrace_off },
   { "Qbtrace:bts", PACKET_DISABLE, remote_supported_packet, PACKET_Qbtrace_bts },
   { "qXfer:btrace:read", PACKET_DISABLE, remote_supported_packet,
-    PACKET_qXfer_btrace }
+    PACKET_qXfer_btrace },
+  { "qXfer:btrace-conf:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_btrace_conf },
+  { "Qbtrace-conf:bts:size", PACKET_DISABLE, remote_supported_packet,
+    PACKET_Qbtrace_conf_bts_size },
+  { "swbreak", PACKET_DISABLE, remote_supported_packet, PACKET_swbreak_feature },
+  { "hwbreak", PACKET_DISABLE, remote_supported_packet, PACKET_hwbreak_feature },
+  { "fork-events", PACKET_DISABLE, remote_supported_packet,
+    PACKET_fork_event_feature },
+  { "vfork-events", PACKET_DISABLE, remote_supported_packet,
+    PACKET_vfork_event_feature },
 };
 
 static char *remote_support_xml;
@@ -4079,10 +4217,25 @@ remote_query_supported (void)
 
       q = remote_query_supported_append (q, "multiprocess+");
 
+      if (packet_set_cmd_state (PACKET_swbreak_feature) != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "swbreak+");
+      if (packet_set_cmd_state (PACKET_hwbreak_feature) != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "hwbreak+");
+
       if (remote_support_xml)
 	q = remote_query_supported_append (q, remote_support_xml);
 
       q = remote_query_supported_append (q, "qRelocInsn+");
+
+      if (rs->extended)
+	{
+	  if (packet_set_cmd_state (PACKET_fork_event_feature)
+	      != AUTO_BOOLEAN_FALSE)
+	    q = remote_query_supported_append (q, "fork-events+");
+	  if (packet_set_cmd_state (PACKET_vfork_event_feature)
+	      != AUTO_BOOLEAN_FALSE)
+	    q = remote_query_supported_append (q, "vfork-events+");
+	}
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
       putpkt (q);
@@ -4265,6 +4418,7 @@ remote_open_1 (const char *name, int from_tty,
 	}
     }
 
+  serial_setparity (rs->remote_desc, serial_parity);
   serial_raw (rs->remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a
@@ -4340,13 +4494,12 @@ remote_open_1 (const char *name, int from_tty,
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
   {
-    volatile struct gdb_exception ex;
 
-    TRY_CATCH (ex, RETURN_MASK_ALL)
+    TRY
       {
 	remote_start_remote (from_tty, target, extended_p);
       }
-    if (ex.reason < 0)
+    CATCH (ex, RETURN_MASK_ALL)
       {
 	/* Pop the partially set up target - unless something else did
 	   already before throwing the exception.  */
@@ -4356,22 +4509,51 @@ remote_open_1 (const char *name, int from_tty,
 	  wait_forever_enabled_p = 1;
 	throw_exception (ex);
       }
+    END_CATCH
   }
+
+  remote_btrace_reset ();
 
   if (target_async_permitted)
     wait_forever_enabled_p = 1;
 }
 
-/* This takes a program previously attached to and detaches it.  After
-   this is done, GDB can be used to debug some other program.  We
-   better not have left any breakpoints in the target program or it'll
-   die when it hits one.  */
+/* Detach the specified process.  */
 
 static void
-remote_detach_1 (const char *args, int from_tty, int extended)
+remote_detach_pid (int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (remote_multi_process_p (rs))
+    xsnprintf (rs->buf, get_remote_packet_size (), "D;%x", pid);
+  else
+    strcpy (rs->buf, "D");
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0] == 'O' && rs->buf[1] == 'K')
+    ;
+  else if (rs->buf[0] == '\0')
+    error (_("Remote doesn't know how to detach"));
+  else
+    error (_("Can't detach process."));
+}
+
+/* This detaches a program to which we previously attached, using
+   inferior_ptid to identify the process.  After this is done, GDB
+   can be used to debug some other program.  We better not have left
+   any breakpoints in the target program or it'll die when it hits
+   one.  */
+
+static void
+remote_detach_1 (const char *args, int from_tty)
 {
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
+  struct thread_info *tp = find_thread_ptid (inferior_ptid);
+  int is_fork_parent;
 
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
@@ -4390,37 +4572,76 @@ remote_detach_1 (const char *args, int from_tty, int extended)
     }
 
   /* Tell the remote target to detach.  */
-  if (remote_multi_process_p (rs))
-    xsnprintf (rs->buf, get_remote_packet_size (), "D;%x", pid);
-  else
-    strcpy (rs->buf, "D");
+  remote_detach_pid (pid);
 
-  putpkt (rs->buf);
-  getpkt (&rs->buf, &rs->buf_size, 0);
-
-  if (rs->buf[0] == 'O' && rs->buf[1] == 'K')
-    ;
-  else if (rs->buf[0] == '\0')
-    error (_("Remote doesn't know how to detach"));
-  else
-    error (_("Can't detach process."));
-
-  if (from_tty && !extended)
+  if (from_tty && !rs->extended)
     puts_filtered (_("Ending remote debugging.\n"));
 
-  target_mourn_inferior ();
+  /* Check to see if we are detaching a fork parent.  Note that if we
+     are detaching a fork child, tp == NULL.  */
+  is_fork_parent = (tp != NULL
+		    && tp->pending_follow.kind == TARGET_WAITKIND_FORKED);
+
+  /* If doing detach-on-fork, we don't mourn, because that will delete
+     breakpoints that should be available for the followed inferior.  */
+  if (!is_fork_parent)
+    target_mourn_inferior ();
+  else
+    {
+      inferior_ptid = null_ptid;
+      detach_inferior (pid);
+    }
 }
 
 static void
 remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
-  remote_detach_1 (args, from_tty, 0);
+  remote_detach_1 (args, from_tty);
 }
 
 static void
 extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
-  remote_detach_1 (args, from_tty, 1);
+  remote_detach_1 (args, from_tty);
+}
+
+/* Target follow-fork function for remote targets.  On entry, and
+   at return, the current inferior is the fork parent.
+
+   Note that although this is currently only used for extended-remote,
+   it is named remote_follow_fork in anticipation of using it for the
+   remote target as well.  */
+
+static int
+remote_follow_fork (struct target_ops *ops, int follow_child,
+		    int detach_fork)
+{
+  struct remote_state *rs = get_remote_state ();
+  enum target_waitkind kind = inferior_thread ()->pending_follow.kind;
+
+  if ((kind == TARGET_WAITKIND_FORKED && remote_fork_event_p (rs))
+      || (kind == TARGET_WAITKIND_VFORKED && remote_vfork_event_p (rs)))
+    {
+      /* When following the parent and detaching the child, we detach
+	 the child here.  For the case of following the child and
+	 detaching the parent, the detach is done in the target-
+	 independent follow fork code in infrun.c.  We can't use
+	 target_detach when detaching an unfollowed child because
+	 the client side doesn't know anything about the child.  */
+      if (detach_fork && !follow_child)
+	{
+	  /* Detach the fork child.  */
+	  ptid_t child_ptid;
+	  pid_t child_pid;
+
+	  child_ptid = inferior_thread ()->pending_follow.value.related_pid;
+	  child_pid = ptid_get_pid (child_ptid);
+
+	  remote_detach_pid (child_pid);
+	  detach_inferior (child_pid);
+	}
+    }
+  return 0;
 }
 
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
@@ -4432,9 +4653,9 @@ remote_disconnect (struct target_ops *target, const char *args, int from_tty)
     error (_("Argument given to \"disconnect\" when remotely debugging."));
 
   /* Make sure we unpush even the extended remote targets; mourn
-     won't do it.  So call remote_mourn_1 directly instead of
+     won't do it.  So call remote_mourn directly instead of
      target_mourn_inferior.  */
-  remote_mourn_1 (target);
+  remote_mourn (target);
 
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
@@ -4444,8 +4665,8 @@ remote_disconnect (struct target_ops *target, const char *args, int from_tty)
    be chatty about it.  */
 
 static void
-extended_remote_attach_1 (struct target_ops *target, const char *args,
-			  int from_tty)
+extended_remote_attach (struct target_ops *target, const char *args,
+			int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
   int pid;
@@ -4499,7 +4720,7 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
 	     target_pid_to_str (pid_to_ptid (pid)));
     }
 
-  set_current_inferior (remote_add_inferior (0, pid, 1));
+  set_current_inferior (remote_add_inferior (0, pid, 1, 0));
 
   inferior_ptid = pid_to_ptid (pid);
 
@@ -4544,7 +4765,7 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
 
 	  push_stop_reply ((struct stop_reply *) reply);
 
-	  target_async (inferior_event_handler, 0);
+	  target_async (1);
 	}
       else
 	{
@@ -4555,12 +4776,6 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
     }
   else
     gdb_assert (wait_status == NULL);
-}
-
-static void
-extended_remote_attach (struct target_ops *ops, const char *args, int from_tty)
-{
-  extended_remote_attach_1 (ops, args, from_tty);
 }
 
 /* Implementation of the to_post_attach method.  */
@@ -4592,7 +4807,7 @@ remote_vcont_probe (struct remote_state *rs)
   buf = rs->buf;
 
   /* Make sure that the features we assume are supported.  */
-  if (strncmp (buf, "vCont", 5) == 0)
+  if (startswith (buf, "vCont"))
     {
       char *p = &buf[5];
       int support_s, support_S, support_c, support_C;
@@ -4883,7 +5098,7 @@ remote_resume (struct target_ops *ops,
      into infcmd.c in order to allow inferior function calls to work
      NOT asynchronously.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 
   /* We've just told the target to resume.  The remote server will
      wait for the inferior to stop, and then send a stop reply.  In
@@ -5079,7 +5294,7 @@ interrupt_query (void)
 {
   target_terminal_ours ();
 
-  if (target_can_async_p ())
+  if (target_is_async_p ())
     {
       signal (SIGINT, handle_sigint);
       quit ();
@@ -5185,7 +5400,8 @@ typedef struct stop_reply
      fetch them is avoided).  */
   VEC(cached_reg_t) *regcache;
 
-  int stopped_by_watchpoint_p;
+  enum target_stop_reason stop_reason;
+
   CORE_ADDR watch_data_address;
 
   int core;
@@ -5282,6 +5498,81 @@ struct queue_iter_param
   void *input;
   struct stop_reply *output;
 };
+
+/* Determine if THREAD is a pending fork parent thread.  ARG contains
+   the pid of the process that owns the threads we want to check, or
+   -1 if we want to check all threads.  */
+
+static int
+is_pending_fork_parent (struct target_waitstatus *ws, int event_pid,
+			ptid_t thread_ptid)
+{
+  if (ws->kind == TARGET_WAITKIND_FORKED
+      || ws->kind == TARGET_WAITKIND_VFORKED)
+    {
+      if (event_pid == -1 || event_pid == ptid_get_pid (thread_ptid))
+	return 1;
+    }
+
+  return 0;
+}
+
+/* Check whether EVENT is a fork event, and if it is, remove the
+   fork child from the context list passed in DATA.  */
+
+static int
+remove_child_of_pending_fork (QUEUE (stop_reply_p) *q,
+			      QUEUE_ITER (stop_reply_p) *iter,
+			      stop_reply_p event,
+			      void *data)
+{
+  struct queue_iter_param *param = data;
+  struct threads_listing_context *context = param->input;
+
+  if (event->ws.kind == TARGET_WAITKIND_FORKED
+      || event->ws.kind == TARGET_WAITKIND_VFORKED)
+    {
+      threads_listing_context_remove (&event->ws, context);
+    }
+
+  return 1;
+}
+
+/* If CONTEXT contains any fork child threads that have not been
+   reported yet, remove them from the CONTEXT list.  If such a
+   thread exists it is because we are stopped at a fork catchpoint
+   and have not yet called follow_fork, which will set up the
+   host-side data structures for the new process.  */
+
+static void
+remove_new_fork_children (struct threads_listing_context *context)
+{
+  struct thread_info * thread;
+  int pid = -1;
+  struct notif_client *notif = &notif_client_stop;
+  struct queue_iter_param param;
+
+  /* For any threads stopped at a fork event, remove the corresponding
+     fork child threads from the CONTEXT list.  */
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      struct target_waitstatus *ws = &thread->pending_follow;
+
+      if (is_pending_fork_parent (ws, pid, thread->ptid))
+	{
+	  threads_listing_context_remove (ws, context);
+	}
+    }
+
+  /* Check for any pending fork events (not reported or processed yet)
+     in process PID and remove those fork child threads from the
+     CONTEXT list as well.  */
+  remote_notif_get_pending_events (notif);
+  param.input = context;
+  param.output = NULL;
+  QUEUE_iterate (stop_reply_p, stop_reply_queue,
+		 remove_child_of_pending_fork, &param);
+}
 
 /* Remove stop replies in the queue if its pid is equal to the given
    inferior's pid.  */
@@ -5472,6 +5763,16 @@ peek_stop_reply (ptid_t ptid)
 			 stop_reply_match_ptid_and_ws, &ptid);
 }
 
+/* Skip PACKET until the next semi-colon (or end of string).  */
+
+static char *
+skip_to_semicolon (char *p)
+{
+  while (*p != '\0' && *p != ';')
+    p++;
+  return p;
+}
+
 /* Parse the stop reply in BUF.  Either the function succeeds, and the
    result is stored in EVENT, or throws an error.  */
 
@@ -5486,7 +5787,7 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
   event->rs = get_remote_state ();
   event->ws.kind = TARGET_WAITKIND_IGNORE;
   event->ws.value.integer = 0;
-  event->stopped_by_watchpoint_p = 0;
+  event->stop_reason = TARGET_STOPPED_BY_NO_REASON;
   event->regcache = NULL;
   event->core = -1;
 
@@ -5504,107 +5805,134 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
       while (*p)
 	{
 	  char *p1;
-	  char *p_temp;
 	  int fieldsize;
-	  LONGEST pnum = 0;
 
-	  /* If the packet contains a register number, save it in
-	     pnum and set p1 to point to the character following it.
-	     Otherwise p1 points to p.  */
+	  p1 = strchr (p, ':');
+	  if (p1 == NULL)
+	    error (_("Malformed packet(a) (missing colon): %s\n\
+Packet: '%s'\n"),
+		   p, buf);
+	  if (p == p1)
+	    error (_("Malformed packet(a) (missing register number): %s\n\
+Packet: '%s'\n"),
+		   p, buf);
 
-	  /* If this packet is an awatch packet, don't parse the 'a'
-	     as a register number.  */
+	  /* Some "registers" are actually extended stop information.
+	     Note if you're adding a new entry here: GDB 7.9 and
+	     earlier assume that all register "numbers" that start
+	     with an hex digit are real register numbers.  Make sure
+	     the server only sends such a packet if it knows the
+	     client understands it.  */
 
-	  if (strncmp (p, "awatch", strlen("awatch")) != 0
-	      && strncmp (p, "core", strlen ("core") != 0))
+	  if (strncmp (p, "thread", p1 - p) == 0)
+	    event->ptid = read_ptid (++p1, &p);
+	  else if ((strncmp (p, "watch", p1 - p) == 0)
+		   || (strncmp (p, "rwatch", p1 - p) == 0)
+		   || (strncmp (p, "awatch", p1 - p) == 0))
 	    {
-	      /* Read the ``P'' register number.  */
-	      pnum = strtol (p, &p_temp, 16);
-	      p1 = p_temp;
+	      event->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
+	      p = unpack_varlen_hex (++p1, &addr);
+	      event->watch_data_address = (CORE_ADDR) addr;
+	    }
+	  else if (strncmp (p, "swbreak", p1 - p) == 0)
+	    {
+	      event->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
+
+	      /* Make sure the stub doesn't forget to indicate support
+		 with qSupported.  */
+	      if (packet_support (PACKET_swbreak_feature) != PACKET_ENABLE)
+		error (_("Unexpected swbreak stop reason"));
+
+	      /* The value part is documented as "must be empty",
+		 though we ignore it, in case we ever decide to make
+		 use of it in a backward compatible way.  */
+	      p = skip_to_semicolon (p1 + 1);
+	    }
+	  else if (strncmp (p, "hwbreak", p1 - p) == 0)
+	    {
+	      event->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
+
+	      /* Make sure the stub doesn't forget to indicate support
+		 with qSupported.  */
+	      if (packet_support (PACKET_hwbreak_feature) != PACKET_ENABLE)
+		error (_("Unexpected hwbreak stop reason"));
+
+	      /* See above.  */
+	      p = skip_to_semicolon (p1 + 1);
+	    }
+	  else if (strncmp (p, "library", p1 - p) == 0)
+	    {
+	      event->ws.kind = TARGET_WAITKIND_LOADED;
+	      p = skip_to_semicolon (p1 + 1);
+	    }
+	  else if (strncmp (p, "replaylog", p1 - p) == 0)
+	    {
+	      event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
+	      /* p1 will indicate "begin" or "end", but it makes
+		 no difference for now, so ignore it.  */
+	      p = skip_to_semicolon (p1 + 1);
+	    }
+	  else if (strncmp (p, "core", p1 - p) == 0)
+	    {
+	      ULONGEST c;
+
+	      p = unpack_varlen_hex (++p1, &c);
+	      event->core = c;
+	    }
+	  else if (strncmp (p, "fork", p1 - p) == 0)
+	    {
+	      event->ws.value.related_pid = read_ptid (++p1, &p);
+	      event->ws.kind = TARGET_WAITKIND_FORKED;
+	    }
+	  else if (strncmp (p, "vfork", p1 - p) == 0)
+	    {
+	      event->ws.value.related_pid = read_ptid (++p1, &p);
+	      event->ws.kind = TARGET_WAITKIND_VFORKED;
+	    }
+	  else if (strncmp (p, "vforkdone", p1 - p) == 0)
+	    {
+	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
+	      p = skip_to_semicolon (p1 + 1);
 	    }
 	  else
-	    p1 = p;
-
-	  if (p1 == p)	/* No register number present here.  */
 	    {
-	      p1 = strchr (p, ':');
-	      if (p1 == NULL)
-		error (_("Malformed packet(a) (missing colon): %s\n\
+	      ULONGEST pnum;
+	      char *p_temp;
+
+	      /* Maybe a real ``P'' register number.  */
+	      p_temp = unpack_varlen_hex (p, &pnum);
+	      /* If the first invalid character is the colon, we got a
+		 register number.  Otherwise, it's an unknown stop
+		 reason.  */
+	      if (p_temp == p1)
+		{
+		  struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
+		  cached_reg_t cached_reg;
+
+		  if (reg == NULL)
+		    error (_("Remote sent bad register number %s: %s\n\
 Packet: '%s'\n"),
-		       p, buf);
-	      if (strncmp (p, "thread", p1 - p) == 0)
-		event->ptid = read_ptid (++p1, &p);
-	      else if ((strncmp (p, "watch", p1 - p) == 0)
-		       || (strncmp (p, "rwatch", p1 - p) == 0)
-		       || (strncmp (p, "awatch", p1 - p) == 0))
-		{
-		  event->stopped_by_watchpoint_p = 1;
-		  p = unpack_varlen_hex (++p1, &addr);
-		  event->watch_data_address = (CORE_ADDR) addr;
-		}
-	      else if (strncmp (p, "library", p1 - p) == 0)
-		{
-		  p1++;
-		  p_temp = p1;
-		  while (*p_temp && *p_temp != ';')
-		    p_temp++;
+			   hex_string (pnum), p, buf);
 
-		  event->ws.kind = TARGET_WAITKIND_LOADED;
-		  p = p_temp;
-		}
-	      else if (strncmp (p, "replaylog", p1 - p) == 0)
-		{
-		  event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
-		  /* p1 will indicate "begin" or "end", but it makes
-		     no difference for now, so ignore it.  */
-		  p_temp = strchr (p1 + 1, ';');
-		  if (p_temp)
-		    p = p_temp;
-		}
-	      else if (strncmp (p, "core", p1 - p) == 0)
-		{
-		  ULONGEST c;
+		  cached_reg.num = reg->regnum;
 
-		  p = unpack_varlen_hex (++p1, &c);
-		  event->core = c;
+		  p = p1 + 1;
+		  fieldsize = hex2bin (p, cached_reg.data,
+				       register_size (target_gdbarch (),
+						      reg->regnum));
+		  p += 2 * fieldsize;
+		  if (fieldsize < register_size (target_gdbarch (),
+						 reg->regnum))
+		    warning (_("Remote reply is too short: %s"), buf);
+
+		  VEC_safe_push (cached_reg_t, event->regcache, &cached_reg);
 		}
 	      else
 		{
-		  /* Silently skip unknown optional info.  */
-		  p_temp = strchr (p1 + 1, ';');
-		  if (p_temp)
-		    p = p_temp;
+		  /* Not a number.  Silently skip unknown optional
+		     info.  */
+		  p = skip_to_semicolon (p1 + 1);
 		}
-	    }
-	  else
-	    {
-	      struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
-	      cached_reg_t cached_reg;
-
-	      p = p1;
-
-	      if (*p != ':')
-		error (_("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n"),
-		       p, buf);
-	      ++p;
-
-	      if (reg == NULL)
-		error (_("Remote sent bad register number %s: %s\n\
-Packet: '%s'\n"),
-		       hex_string (pnum), p, buf);
-
-	      cached_reg.num = reg->regnum;
-
-	      fieldsize = hex2bin (p, cached_reg.data,
-				   register_size (target_gdbarch (),
-						  reg->regnum));
-	      p += 2 * fieldsize;
-	      if (fieldsize < register_size (target_gdbarch (),
-					     reg->regnum))
-		warning (_("Remote reply is too short: %s"), buf);
-
-	      VEC_safe_push (cached_reg_t, event->regcache, &cached_reg);
 	    }
 
 	  if (*p != ';')
@@ -5665,10 +5993,9 @@ Packet: '%s'\n"),
 	  {
 	    p++;
 
-	    if (p == '\0')
+	    if (*p == '\0')
 	      ;
-	    else if (strncmp (p,
-			      "process:", sizeof ("process:") - 1) == 0)
+	    else if (startswith (p, "process:"))
 	      {
 		ULONGEST upid;
 
@@ -5804,7 +6131,7 @@ process_stop_reply (struct stop_reply *stop_reply,
 	  VEC_free (cached_reg_t, stop_reply->regcache);
 	}
 
-      rs->remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
+      rs->stop_reason = stop_reply->stop_reason;
       rs->remote_watch_data_address = stop_reply->watch_data_address;
 
       remote_notice_new_inferior (ptid, 0);
@@ -5931,7 +6258,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
   buf = rs->buf;
 
-  rs->remote_stopped_by_watchpoint_p = 0;
+  rs->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* We got something.  */
   rs->waiting_for_stop_reply = 0;
@@ -6036,7 +6363,7 @@ remote_wait (struct target_ops *ops,
   else
     event_ptid = remote_wait_as (ptid, status, options);
 
-  if (target_can_async_p ())
+  if (target_is_async_p ())
     {
       /* If there are are events left in the queue tell the event loop
 	 to return here.  */
@@ -6973,6 +7300,9 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
    FORMAT and the remaining arguments, then gets the reply.  Returns
    whether the packet was a success, a failure, or unknown.  */
 
+static enum packet_result remote_send_printf (const char *format, ...)
+  ATTRIBUTE_PRINTF (1, 2);
+
 static enum packet_result
 remote_send_printf (const char *format, ...)
 {
@@ -7226,7 +7556,7 @@ putpkt_binary (const char *buf, int cnt)
      case it's not possible to issue a command while the target is
      running.  This is not a problem in non-stop mode, because in that
      case, the stub is always ready to process serial input.  */
-  if (!non_stop && target_can_async_p () && rs->waiting_for_stop_reply)
+  if (!non_stop && target_is_async_p () && rs->waiting_for_stop_reply)
     {
       error (_("Cannot execute this command while the target is running.\n"
 	       "Use the \"interrupt\" command to stop the target\n"
@@ -7762,19 +8092,81 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 				 is_notif);
 }
 
+/* Check whether EVENT is a fork event for the process specified
+   by the pid passed in DATA, and if it is, kill the fork child.  */
+
+static int
+kill_child_of_pending_fork (QUEUE (stop_reply_p) *q,
+			    QUEUE_ITER (stop_reply_p) *iter,
+			    stop_reply_p event,
+			    void *data)
+{
+  struct queue_iter_param *param = data;
+  int parent_pid = *(int *) param->input;
+
+  if (is_pending_fork_parent (&event->ws, parent_pid, event->ptid))
+    {
+      struct remote_state *rs = get_remote_state ();
+      int child_pid = ptid_get_pid (event->ws.value.related_pid);
+      int res;
+
+      res = remote_vkill (child_pid, rs);
+      if (res != 0)
+	error (_("Can't kill fork child process %d"), child_pid);
+    }
+
+  return 1;
+}
+
+/* Kill any new fork children of process PID that haven't been
+   processed by follow_fork.  */
+
+static void
+kill_new_fork_children (int pid, struct remote_state *rs)
+{
+  struct thread_info *thread;
+  struct notif_client *notif = &notif_client_stop;
+  struct queue_iter_param param;
+
+  /* Kill the fork child threads of any threads in process PID
+     that are stopped at a fork event.  */
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      struct target_waitstatus *ws = &thread->pending_follow;
+
+      if (is_pending_fork_parent (ws, pid, thread->ptid))
+	{
+	  struct remote_state *rs = get_remote_state ();
+	  int child_pid = ptid_get_pid (ws->value.related_pid);
+	  int res;
+
+	  res = remote_vkill (child_pid, rs);
+	  if (res != 0)
+	    error (_("Can't kill fork child process %d"), child_pid);
+	}
+    }
+
+  /* Check for any pending fork events (not reported or processed yet)
+     in process PID and kill those fork child threads as well.  */
+  remote_notif_get_pending_events (notif);
+  param.input = &pid;
+  param.output = NULL;
+  QUEUE_iterate (stop_reply_p, stop_reply_queue,
+		 kill_child_of_pending_fork, &param);
+}
+
 
 static void
 remote_kill (struct target_ops *ops)
 {
-  volatile struct gdb_exception ex;
 
   /* Catch errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       putpkt ("k");
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error == TARGET_CLOSE_ERROR)
 	{
@@ -7792,6 +8184,7 @@ remote_kill (struct target_ops *ops)
 	   user or higher layers decide what to do.  */
 	throw_exception (ex);
     }
+  END_CATCH
 
   /* We've killed the remote end, we get to mourn it.  Since this is
      target remote, single-process, mourning the inferior also
@@ -7831,6 +8224,11 @@ extended_remote_kill (struct target_ops *ops)
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
 
+  /* If we're stopped while forking and we haven't followed yet, kill the
+     child task.  We need to do this before killing the parent task
+     because if this is a vfork then the parent will be sleeping.  */
+  kill_new_fork_children (pid, rs);
+
   res = remote_vkill (pid, rs);
   if (res == -1 && !(rs->extended && remote_multi_process_p (rs)))
     {
@@ -7856,14 +8254,7 @@ extended_remote_kill (struct target_ops *ops)
 }
 
 static void
-remote_mourn (struct target_ops *ops)
-{
-  remote_mourn_1 (ops);
-}
-
-/* Worker function for remote_mourn.  */
-static void
-remote_mourn_1 (struct target_ops *target)
+remote_mourn (struct target_ops *target)
 {
   unpush_target (target);
 
@@ -7872,7 +8263,7 @@ remote_mourn_1 (struct target_ops *target)
 }
 
 static void
-extended_remote_mourn_1 (struct target_ops *target)
+extended_remote_mourn (struct target_ops *target)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -7930,12 +8321,6 @@ extended_remote_mourn_1 (struct target_ops *target)
 	    }
 	}
     }
-}
-
-static void
-extended_remote_mourn (struct target_ops *ops)
-{
-  extended_remote_mourn_1 (ops);
 }
 
 static int
@@ -8041,7 +8426,7 @@ extended_remote_create_inferior (struct target_ops *ops,
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
   if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
+    target_async (1);
 
   /* Disable address space randomization if requested (and supported).  */
   if (extended_remote_supports_disable_randomization (ops))
@@ -8405,12 +8790,54 @@ remote_check_watch_resources (struct target_ops *self,
   return -1;
 }
 
+/* The to_stopped_by_sw_breakpoint method of target remote.  */
+
+static int
+remote_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT;
+}
+
+/* The to_supports_stopped_by_sw_breakpoint method of target
+   remote.  */
+
+static int
+remote_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return (packet_support (PACKET_swbreak_feature) == PACKET_ENABLE);
+}
+
+/* The to_stopped_by_hw_breakpoint method of target remote.  */
+
+static int
+remote_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT;
+}
+
+/* The to_supports_stopped_by_hw_breakpoint method of target
+   remote.  */
+
+static int
+remote_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return (packet_support (PACKET_hwbreak_feature) == PACKET_ENABLE);
+}
+
 static int
 remote_stopped_by_watchpoint (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
 
-  return rs->remote_stopped_by_watchpoint_p;
+  return rs->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
 static int
@@ -8945,6 +9372,16 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 				xfered_len,
         &remote_protocol_packets[PACKET_qXfer_btrace]);
 
+    case TARGET_OBJECT_BTRACE_CONF:
+      return remote_read_qxfer (ops, "btrace-conf", annex, readbuf, offset,
+				len, xfered_len,
+	&remote_protocol_packets[PACKET_qXfer_btrace_conf]);
+
+    case TARGET_OBJECT_EXEC_FILE:
+      return remote_read_qxfer (ops, "exec-file", annex, readbuf, offset,
+				len, xfered_len,
+	&remote_protocol_packets[PACKET_qXfer_exec_file]);
+
     default:
       return TARGET_XFER_E_IO;
     }
@@ -9379,8 +9816,11 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
       if (ptid_equal (magic_null_ptid, ptid))
 	xsnprintf (buf, sizeof buf, "Thread <main>");
       else if (rs->extended && remote_multi_process_p (rs))
-	xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		   ptid_get_pid (ptid), ptid_get_lwp (ptid));
+	if (ptid_get_lwp (ptid) == 0)
+	  return normal_pid_to_str (ptid);
+	else
+	  xsnprintf (buf, sizeof buf, "Thread %d.%ld",
+		     ptid_get_pid (ptid), ptid_get_lwp (ptid));
       else
 	xsnprintf (buf, sizeof buf, "Thread %ld",
 		   ptid_get_lwp (ptid));
@@ -9773,6 +10213,15 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   return ret;
 }
 
+/* Return nonzero if the filesystem accessed by the target_fileio_*
+   methods is the local filesystem, zero otherwise.  */
+
+static int
+remote_filesystem_is_local (struct target_ops *self)
+{
+  return 0;
+}
+
 /* Open FILENAME on the remote target, using FLAGS and MODE.  Return a
    remote file descriptor, or -1 if an error occurs (and set
    *REMOTE_ERRNO).  */
@@ -9948,6 +10397,68 @@ remote_hostio_readlink (struct target_ops *self,
   return ret;
 }
 
+/* Read information about the open file FD on the remote target
+   into ST.  Return 0 on success, or -1 if an error occurs (and
+   set *REMOTE_ERRNO).  */
+
+static int
+remote_hostio_fstat (struct target_ops *self,
+		     int fd, struct stat *st,
+		     int *remote_errno)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  int left = get_remote_packet_size ();
+  int attachment_len, ret;
+  char *attachment;
+  struct fio_stat fst;
+  int read_len;
+
+  remote_buffer_add_string (&p, &left, "vFile:fstat:");
+
+  remote_buffer_add_int (&p, &left, fd);
+
+  ret = remote_hostio_send_command (p - rs->buf, PACKET_vFile_fstat,
+				    remote_errno, &attachment,
+				    &attachment_len);
+  if (ret < 0)
+    {
+      if (*remote_errno != FILEIO_ENOSYS)
+	return ret;
+
+      /* Strictly we should return -1, ENOSYS here, but when
+	 "set sysroot remote:" was implemented in August 2008
+	 BFD's need for a stat function was sidestepped with
+	 this hack.  This was not remedied until March 2015
+	 so we retain the previous behavior to avoid breaking
+	 compatibility.
+
+	 Note that the memset is a March 2015 addition; older
+	 GDBs set st_size *and nothing else* so the structure
+	 would have garbage in all other fields.  This might
+	 break something but retaining the previous behavior
+	 here would be just too wrong.  */
+
+      memset (st, 0, sizeof (struct stat));
+      st->st_size = INT_MAX;
+      return 0;
+    }
+
+  read_len = remote_unescape_input ((gdb_byte *) attachment, attachment_len,
+				    (gdb_byte *) &fst, sizeof (fst));
+
+  if (read_len != ret)
+    error (_("vFile:fstat returned %d, but %d bytes."), ret, read_len);
+
+  if (read_len != sizeof (fst))
+    error (_("vFile:fstat returned %d bytes, but expecting %d."),
+	   read_len, (int) sizeof (fst));
+
+  remote_fileio_to_host_stat (&fst, st);
+
+  return 0;
+}
+
 static int
 remote_fileio_errno_to_host (int errnum)
 {
@@ -10017,104 +10528,6 @@ remote_hostio_close_cleanup (void *opaque)
   int remote_errno;
 
   remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno);
-}
-
-
-static void *
-remote_bfd_iovec_open (struct bfd *abfd, void *open_closure)
-{
-  const char *filename = bfd_get_filename (abfd);
-  int fd, remote_errno;
-  int *stream;
-
-  gdb_assert (remote_filename_p (filename));
-
-  fd = remote_hostio_open (find_target_at (process_stratum),
-			   filename + 7, FILEIO_O_RDONLY, 0, &remote_errno);
-  if (fd == -1)
-    {
-      errno = remote_fileio_errno_to_host (remote_errno);
-      bfd_set_error (bfd_error_system_call);
-      return NULL;
-    }
-
-  stream = xmalloc (sizeof (int));
-  *stream = fd;
-  return stream;
-}
-
-static int
-remote_bfd_iovec_close (struct bfd *abfd, void *stream)
-{
-  int fd = *(int *)stream;
-  int remote_errno;
-
-  xfree (stream);
-
-  /* Ignore errors on close; these may happen if the remote
-     connection was already torn down.  */
-  remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno);
-
-  /* Zero means success.  */
-  return 0;
-}
-
-static file_ptr
-remote_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
-			file_ptr nbytes, file_ptr offset)
-{
-  int fd = *(int *)stream;
-  int remote_errno;
-  file_ptr pos, bytes;
-
-  pos = 0;
-  while (nbytes > pos)
-    {
-      bytes = remote_hostio_pread (find_target_at (process_stratum),
-				   fd, (gdb_byte *) buf + pos, nbytes - pos,
-				   offset + pos, &remote_errno);
-      if (bytes == 0)
-        /* Success, but no bytes, means end-of-file.  */
-        break;
-      if (bytes == -1)
-	{
-	  errno = remote_fileio_errno_to_host (remote_errno);
-	  bfd_set_error (bfd_error_system_call);
-	  return -1;
-	}
-
-      pos += bytes;
-    }
-
-  return pos;
-}
-
-static int
-remote_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
-{
-  /* FIXME: We should probably implement remote_hostio_stat.  */
-  sb->st_size = INT_MAX;
-  return 0;
-}
-
-int
-remote_filename_p (const char *filename)
-{
-  return strncmp (filename,
-		  REMOTE_SYSROOT_PREFIX,
-		  sizeof (REMOTE_SYSROOT_PREFIX) - 1) == 0;
-}
-
-bfd *
-remote_bfd_open (const char *remote_file, const char *target)
-{
-  bfd *abfd = gdb_bfd_openr_iovec (remote_file, target,
-				   remote_bfd_iovec_open, NULL,
-				   remote_bfd_iovec_pread,
-				   remote_bfd_iovec_close,
-				   remote_bfd_iovec_stat);
-
-  return abfd;
 }
 
 void
@@ -10834,7 +11247,6 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
   char *p = NULL;
   /* FIXME we need to get register block size some other way.  */
   extern int trace_regblock_size;
-  volatile struct gdb_exception ex;
   enum packet_result result;
 
   if (packet_support (PACKET_qTStatus) == PACKET_DISABLE)
@@ -10844,11 +11256,11 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 
   putpkt ("qTStatus");
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  TRY
     {
       p = remote_get_noisy_reply (&target_buf, &target_buf_size);
     }
-  if (ex.reason < 0)
+  CATCH (ex, RETURN_MASK_ERROR)
     {
       if (ex.error != TARGET_CLOSE_ERROR)
 	{
@@ -10857,6 +11269,7 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 	}
       throw_exception (ex);
     }
+  END_CATCH
 
   result = packet_ok (p, &remote_protocol_packets[PACKET_qTStatus]);
 
@@ -11135,8 +11548,8 @@ remote_core_of_thread (struct target_ops *ops, ptid_t ptid)
 {
   struct thread_info *info = find_thread_ptid (ptid);
 
-  if (info && info->private)
-    return info->private->core;
+  if (info && info->priv)
+    return info->priv->core;
   return -1;
 }
 
@@ -11319,27 +11732,104 @@ struct btrace_target_info
 {
   /* The ptid of the traced thread.  */
   ptid_t ptid;
+
+  /* The obtained branch trace configuration.  */
+  struct btrace_config conf;
 };
+
+/* Reset our idea of our target's btrace configuration.  */
+
+static void
+remote_btrace_reset (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  memset (&rs->btrace_config, 0, sizeof (rs->btrace_config));
+}
 
 /* Check whether the target supports branch tracing.  */
 
 static int
-remote_supports_btrace (struct target_ops *self)
+remote_supports_btrace (struct target_ops *self, enum btrace_format format)
 {
   if (packet_support (PACKET_Qbtrace_off) != PACKET_ENABLE)
-    return 0;
-  if (packet_support (PACKET_Qbtrace_bts) != PACKET_ENABLE)
     return 0;
   if (packet_support (PACKET_qXfer_btrace) != PACKET_ENABLE)
     return 0;
 
-  return 1;
+  switch (format)
+    {
+      case BTRACE_FORMAT_NONE:
+	return 0;
+
+      case BTRACE_FORMAT_BTS:
+	return (packet_support (PACKET_Qbtrace_bts) == PACKET_ENABLE);
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
+}
+
+/* Synchronize the configuration with the target.  */
+
+static void
+btrace_sync_conf (const struct btrace_config *conf)
+{
+  struct packet_config *packet;
+  struct remote_state *rs;
+  char *buf, *pos, *endbuf;
+
+  rs = get_remote_state ();
+  buf = rs->buf;
+  endbuf = buf + get_remote_packet_size ();
+
+  packet = &remote_protocol_packets[PACKET_Qbtrace_conf_bts_size];
+  if (packet_config_support (packet) == PACKET_ENABLE
+      && conf->bts.size != rs->btrace_config.bts.size)
+    {
+      pos = buf;
+      pos += xsnprintf (pos, endbuf - pos, "%s=0x%x", packet->name,
+                        conf->bts.size);
+
+      putpkt (buf);
+      getpkt (&buf, &rs->buf_size, 0);
+
+      if (packet_ok (buf, packet) == PACKET_ERROR)
+	{
+	  if (buf[0] == 'E' && buf[1] == '.')
+	    error (_("Failed to configure the BTS buffer size: %s"), buf + 2);
+	  else
+	    error (_("Failed to configure the BTS buffer size."));
+	}
+
+      rs->btrace_config.bts.size = conf->bts.size;
+    }
+}
+
+/* Read the current thread's btrace configuration from the target and
+   store it into CONF.  */
+
+static void
+btrace_read_config (struct btrace_config *conf)
+{
+  char *xml;
+
+  xml = target_read_stralloc (&current_target,
+                              TARGET_OBJECT_BTRACE_CONF, "");
+  if (xml != NULL)
+    {
+      struct cleanup *cleanup;
+
+      cleanup = make_cleanup (xfree, xml);
+      parse_xml_btrace_conf (conf, xml);
+      do_cleanups (cleanup);
+    }
 }
 
 /* Enable branch tracing.  */
 
 static struct btrace_target_info *
-remote_enable_btrace (struct target_ops *self, ptid_t ptid)
+remote_enable_btrace (struct target_ops *self, ptid_t ptid,
+		      const struct btrace_config *conf)
 {
   struct btrace_target_info *tinfo = NULL;
   struct packet_config *packet = &remote_protocol_packets[PACKET_Qbtrace_bts];
@@ -11349,6 +11839,8 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid)
 
   if (packet_config_support (packet) != PACKET_ENABLE)
     error (_("Target does not support branch tracing."));
+
+  btrace_sync_conf (conf);
 
   set_general_thread (ptid);
 
@@ -11368,6 +11860,19 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid)
 
   tinfo = xzalloc (sizeof (*tinfo));
   tinfo->ptid = ptid;
+
+  /* If we fail to read the configuration, we lose some information, but the
+     tracing itself is not impacted.  */
+  TRY
+    {
+      btrace_read_config (&tinfo->conf);
+    }
+  CATCH (err, RETURN_MASK_ERROR)
+    {
+      if (err.message != NULL)
+	warning ("%s", err.message);
+    }
+  END_CATCH
 
   return tinfo;
 }
@@ -11419,7 +11924,7 @@ remote_teardown_btrace (struct target_ops *self,
 
 static enum btrace_error
 remote_read_btrace (struct target_ops *self,
-		    VEC (btrace_block_s) **btrace,
+		    struct btrace_data *btrace,
 		    struct btrace_target_info *tinfo,
 		    enum btrace_read_type type)
 {
@@ -11459,10 +11964,17 @@ remote_read_btrace (struct target_ops *self,
     return BTRACE_ERR_UNKNOWN;
 
   cleanup = make_cleanup (xfree, xml);
-  *btrace = parse_xml_btrace (xml);
+  parse_xml_btrace (btrace, xml);
   do_cleanups (cleanup);
 
   return BTRACE_ERR_NONE;
+}
+
+static const struct btrace_config *
+remote_btrace_conf (struct target_ops *self,
+		    const struct btrace_target_info *tinfo)
+{
+  return &tinfo->conf;
 }
 
 static int
@@ -11478,6 +11990,42 @@ static void
 remote_load (struct target_ops *self, const char *name, int from_tty)
 {
   generic_load (name, from_tty);
+}
+
+/* Accepts an integer PID; returns a string representing a file that
+   can be opened on the remote side to get the symbols for the child
+   process.  Returns NULL if the operation is not supported.  */
+
+static char *
+remote_pid_to_exec_file (struct target_ops *self, int pid)
+{
+  static char *filename = NULL;
+  struct inferior *inf;
+  char *annex = NULL;
+
+  if (packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)
+    return NULL;
+
+  if (filename != NULL)
+    xfree (filename);
+
+  inf = find_inferior_pid (pid);
+  if (inf == NULL)
+    internal_error (__FILE__, __LINE__,
+		    _("not currently attached to process %d"), pid);
+
+  if (!inf->fake_pid_p)
+    {
+      const int annex_size = 9;
+
+      annex = alloca (annex_size);
+      xsnprintf (annex, annex_size, "%x", pid);
+    }
+
+  filename = target_read_stralloc (&current_target,
+				   TARGET_OBJECT_EXEC_FILE, annex);
+
+  return filename;
 }
 
 static void
@@ -11501,6 +12049,10 @@ Specify the serial device it is connected to\n\
   remote_ops.to_files_info = remote_files_info;
   remote_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_ops.to_stopped_by_sw_breakpoint = remote_stopped_by_sw_breakpoint;
+  remote_ops.to_supports_stopped_by_sw_breakpoint = remote_supports_stopped_by_sw_breakpoint;
+  remote_ops.to_stopped_by_hw_breakpoint = remote_stopped_by_hw_breakpoint;
+  remote_ops.to_supports_stopped_by_hw_breakpoint = remote_supports_stopped_by_hw_breakpoint;
   remote_ops.to_stopped_by_watchpoint = remote_stopped_by_watchpoint;
   remote_ops.to_stopped_data_address = remote_stopped_data_address;
   remote_ops.to_watchpoint_addr_within_range =
@@ -11525,6 +12077,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_stop = remote_stop;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
+  remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
   remote_ops.to_log_command = serial_log_command;
   remote_ops.to_get_thread_local_address = remote_get_thread_local_address;
   remote_ops.to_stratum = process_stratum;
@@ -11550,9 +12103,11 @@ Specify the serial device it is connected to\n\
   remote_ops.to_supports_multi_process = remote_supports_multi_process;
   remote_ops.to_supports_disable_randomization
     = remote_supports_disable_randomization;
+  remote_ops.to_filesystem_is_local = remote_filesystem_is_local;
   remote_ops.to_fileio_open = remote_hostio_open;
   remote_ops.to_fileio_pwrite = remote_hostio_pwrite;
   remote_ops.to_fileio_pread = remote_hostio_pread;
+  remote_ops.to_fileio_fstat = remote_hostio_fstat;
   remote_ops.to_fileio_close = remote_hostio_close;
   remote_ops.to_fileio_unlink = remote_hostio_unlink;
   remote_ops.to_fileio_readlink = remote_hostio_readlink;
@@ -11601,6 +12156,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_disable_btrace = remote_disable_btrace;
   remote_ops.to_teardown_btrace = remote_teardown_btrace;
   remote_ops.to_read_btrace = remote_read_btrace;
+  remote_ops.to_btrace_conf = remote_btrace_conf;
   remote_ops.to_augmented_libraries_svr4_read =
     remote_augmented_libraries_svr4_read;
 }
@@ -11628,6 +12184,15 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_kill = extended_remote_kill;
   extended_remote_ops.to_supports_disable_randomization
     = extended_remote_supports_disable_randomization;
+  extended_remote_ops.to_follow_fork = remote_follow_fork;
+  extended_remote_ops.to_insert_fork_catchpoint
+    = remote_insert_fork_catchpoint;
+  extended_remote_ops.to_remove_fork_catchpoint
+    = remote_remove_fork_catchpoint;
+  extended_remote_ops.to_insert_vfork_catchpoint
+    = remote_insert_vfork_catchpoint;
+  extended_remote_ops.to_remove_vfork_catchpoint
+    = remote_remove_vfork_catchpoint;
 }
 
 static int
@@ -11669,7 +12234,7 @@ remote_async_serial_handler (struct serial *scb, void *context)
 
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
-  rs->async_client_callback (INF_REG_EVENT, rs->async_client_context);
+  inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
 static void
@@ -11679,21 +12244,24 @@ remote_async_inferior_event_handler (gdb_client_data data)
 }
 
 static void
-remote_async (struct target_ops *ops,
-	      void (*callback) (enum inferior_event_type event_type,
-				void *context),
-	      void *context)
+remote_async (struct target_ops *ops, int enable)
 {
   struct remote_state *rs = get_remote_state ();
 
-  if (callback != NULL)
+  if (enable)
     {
       serial_async (rs->remote_desc, remote_async_serial_handler, rs);
-      rs->async_client_callback = callback;
-      rs->async_client_context = context;
+
+      /* If there are pending events in the stop reply queue tell the
+	 event loop to process them.  */
+      if (!QUEUE_is_empty (stop_reply_p, stop_reply_queue))
+	mark_async_event_handler (remote_async_inferior_event_token);
     }
   else
-    serial_async (rs->remote_desc, NULL, NULL);
+    {
+      serial_async (rs->remote_desc, NULL, NULL);
+      clear_async_event_handler (remote_async_inferior_event_token);
+    }
 }
 
 static void
@@ -12047,6 +12615,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_auxv],
 			 "qXfer:auxv:read", "read-aux-vector", 0);
 
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_exec_file],
+			 "qXfer:exec-file:read", "pid-to-exec-file", 0);
+
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_features],
 			 "qXfer:features:read", "target-features", 0);
 
@@ -12125,6 +12696,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_readlink],
 			 "vFile:readlink", "hostio-readlink", 0);
 
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_fstat],
+			 "vFile:fstat", "hostio-fstat", 0);
+
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vAttach],
 			 "vAttach", "attach", 0);
 
@@ -12191,7 +12765,26 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_btrace],
        "qXfer:btrace", "read-btrace", 0);
 
-  /* Assert that we've registered commands for all packet configs.  */
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_btrace_conf],
+       "qXfer:btrace-conf", "read-btrace-conf", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_conf_bts_size],
+       "Qbtrace-conf:bts:size", "btrace-conf-bts-size", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_swbreak_feature],
+                         "swbreak-feature", "swbreak-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_hwbreak_feature],
+                         "hwbreak-feature", "hwbreak-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_fork_event_feature],
+			 "fork-event-feature", "fork-event-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vfork_event_feature],
+			 "vfork-event-feature", "vfork-event-feature", 0);
+
+  /* Assert that we've registered "set remote foo-packet" commands
+     for all packet configs.  */
   {
     int i;
 

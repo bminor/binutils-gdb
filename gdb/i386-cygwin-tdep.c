@@ -1,6 +1,6 @@
 /* Target-dependent code for Cygwin running on i386's, for GDB.
 
-   Copyright (C) 2003-2014 Free Software Foundation, Inc.
+   Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -107,7 +107,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
 
   gdb_byte *buf = NULL;
 
-  if (strncmp (sect->name, ".module", 7) != 0)
+  if (!startswith (sect->name, ".module"))
     return;
 
   buf = xmalloc (bfd_get_section_size (sect) + 1);

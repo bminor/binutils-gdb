@@ -1,3 +1,131 @@
+2015-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-1.d: Also skip x86_64-*-nacl*.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-1.d: Skip x86_64-*-gnux32.
+	* lib/utils-lib.exp (run_dump_test): Allow mixing target and
+	not-target directives.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Append iamcu.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-5.d: New file.
+	* binutils-all/elfedit.exp: Run elfedit-5.
+
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Add MeP CPU names.
+
+2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18209
+	* binutils-all/compress.exp: Replace dw2-3.W with dw2-3gabi.W
+	on zlib-gabi output.
+	* binutils-all/dw2-1.W: Convert section names to .zdebug_*.
+	* binutils-all/dw2-3.W: Likewise.
+	* binutils-all/objdump.W: Likewise.
+	* binutils-all/dw2-3gabi.W: New file.
+
+2015-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/i386/compressed-1b.d: Don't hardcode offset of
+	.shstrtab section.
+	* binutils-all/i386/compressed-1c.d: Likewise.
+	* binutils-all/readelf.s-64: Likewise.
+	* binutils-all/x86-64/compressed-1b.d: Likewise.
+	* binutils-all/x86-64/compressed-1c.d: Likewise.
+
+2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* compress.exp: Add tests for
+	--compress-debug-sections={none|zlib|zlib-gnu|zlib-gabi}.
+	* binutils-all/dw2-3.rS: New file.
+	* binutils-all/dw2-3.rt: Likewise.
+	* binutils-all/libdw2-compressedgabi.out: Likewise.
+
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp: Remove is_zlib_supported check.
+	* binutils-all/objdump.exp: Likewise.
+	* binutils-all/readelf.exp (readelf_compressed_wa_test): Likewise.
+	* lib/utils-lib.exp (run_dump_test): Likewise.
+	* lib/binutils-common.exp (is_zlib_supported): Removed.
+
+2015-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp (compression_used): Remove "/dev/null"
+	from remote_exec.
+
+2015-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp (compression_used): New.
+	Xfail test if compression didn't make the section smaller.
+
+2015-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp (testfile): Remove suffix.
+	(compressedfile): Likewise.
+	(compressedfile2): Likewise.
+	(libfile): Likewise.
+	(testfile3): New.
+	(compressedfile3): Likewise.
+	Updated.
+	Add a dw2-3.S test.
+	(${libfile}.a): Add ${compressedfile3}.o.
+	* binutils-all/dw2-3.S: New file.
+	* binutils-all/dw2-3.W: Likewise.
+	* binutils-all/libdw2-compressed.out: Updated.
+	* binutils-all/libdw2.out: Likewise.
+
+2015-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/binutils-common.exp (is_zlib_supported): Always return 1.
+
+2015-04-02  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/readelf.ss-64: Move possible location of the $d
+	mapping symbol.
+
+2015-03-26  Renlin Li  <renlin.li@arm.com>
+
+	* binutils-all/readelf.s-64: Support aarch64 case.
+	* binutils-all/readelf.ss-64: Likewise.
+
+2015-03-11  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/update-section.exp: Only run on ELF targets.
+
+2015-03-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* binutils-all/arm/rvct_symbol.s: New testcase.
+	* binutils-all/arm/objdump.exp: Run it.
+
+2015-02-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* binutils-all/update-1.s: New file.
+	* binutils-all/update-2.s: New file.
+	* binutils-all/update-3.s: New file.
+	* binutils-all/update-4.s: New file.
+	* binutils-all/update-section.exp: New file.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objcopy.exp: Skip the strip-10 test for the V850.
+
+2015-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
+2014-12-26  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/strip-11.d: New test.
+	* binutils-all/objcopy.exp: Run it.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* binutils-all/objcopy.exp: Skip strip-10 for Visium.
@@ -364,7 +492,7 @@
 
 For older changes see ChangeLog-0411
 
-Copyright (C) 2012-2014 Free Software Foundation, Inc.
+Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

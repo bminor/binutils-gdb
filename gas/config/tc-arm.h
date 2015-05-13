@@ -1,5 +1,5 @@
 /* This file is tc-arm.h
-   Copyright (C) 1994-2014 Free Software Foundation, Inc.
+   Copyright (C) 1994-2015 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -236,10 +236,19 @@ struct arm_frag_type
 #endif
 };
 
+static inline int
+arm_min (int am_p1, int am_p2)
+{
+  return am_p1 < am_p2 ? am_p1 : am_p2;
+}
+
 #define TC_FRAG_TYPE		struct arm_frag_type
 /* NOTE: max_chars is a local variable from frag_var / frag_variant.  */
 #define TC_FRAG_INIT(fragp)	arm_init_frag (fragp, max_chars)
 #define HANDLE_ALIGN(fragp)	arm_handle_align (fragp)
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)			\
+  ((!(FRCHAIN)->frch_next && subseg_text_p (SEG))		\
+   ? arm_min (2, get_recorded_alignment (SEG)) : 0)
 
 #define md_do_align(N, FILL, LEN, MAX, LABEL)					\
   if (FILL == NULL && (N) != 0 && ! need_pass_2 && subseg_text_p (now_seg))	\
@@ -327,7 +336,7 @@ struct arm_segment_info_type
 
 #ifdef OBJ_ELF
 /* Values passed to md_apply_fix don't include the symbol value.  */
-# define MD_APPLY_SYM_VALUE(FIX) 		arm_apply_sym_value (FIX)
+# define MD_APPLY_SYM_VALUE(FIX) 		arm_apply_sym_value (FIX, this_segment)
 #endif
 
 #ifdef OBJ_COFF
@@ -372,7 +381,7 @@ void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 #ifdef OBJ_ELF
 #define CONVERT_SYMBOLIC_ATTRIBUTE(name) arm_convert_symbolic_attribute (name)
 extern int arm_convert_symbolic_attribute (const char *);
-extern int arm_apply_sym_value (struct fix *);
+extern int arm_apply_sym_value (struct fix *, segT);
 #endif
 
 #define tc_comment_chars arm_comment_chars
@@ -380,3 +389,6 @@ extern char arm_comment_chars[];
 
 #define tc_line_separator_chars arm_line_separator_chars
 extern char arm_line_separator_chars[];
+
+#define TC_EQUAL_IN_INSN(c, s) arm_tc_equal_in_insn ((c), (s))
+extern bfd_boolean arm_tc_equal_in_insn (int, char *);

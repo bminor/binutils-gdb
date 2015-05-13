@@ -1,5 +1,5 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright (C) 2000-2014 Free Software Foundation, Inc.
+   Copyright (C) 2000-2015 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -40,11 +40,11 @@ static reloc_howto_type cris_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_CRIS_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_CRIS_NONE",		/* name */
 	 FALSE,			/* partial_inplace */
@@ -463,7 +463,7 @@ cris_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_CRIS_max)
     {
-      _bfd_error_handler (_("%A: invalid CRIS reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid CRIS reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & cris_elf_howto_table [r_type];

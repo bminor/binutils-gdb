@@ -1,6 +1,6 @@
 // main.cc -- gold main function.
 
-// Copyright (C) 2006-2014 Free Software Foundation, Inc.
+// Copyright (C) 2006-2015 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -227,8 +227,7 @@ main(int argc, char** argv)
 
   // The layout object.
   Layout layout(command_line.number_of_input_files(),
-		&command_line.script_options(),
-		command_line.has_crtbeginT());
+		&command_line.script_options());
 
   if (layout.incremental_inputs() != NULL)
     layout.incremental_inputs()->report_command_line(argc, argv);

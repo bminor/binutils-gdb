@@ -1,5 +1,5 @@
 # Expect script for ld-i386 tests
-#   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -191,6 +191,10 @@ set i386tests {
      "--32" {pr17306b.s} {} ""}
     {"PR ld/17306 (2)" "-melf_i386 -shared -Bsymbolic --just-symbols=tmpdir/pr17306b.o" ""
      "--32" {pr17306a.s} {} "libpr17306.so"}
+    {"PR ld/17709 (1)" "-melf_i386 -shared" ""
+     "--32" {pr17709a.s} {} "libpr17709.so"}
+    {"PR ld/17709 (2)" "-melf_i386 tmpdir/libpr17709.so" ""
+     "--32" {pr17709b.s} {{readelf -r pr17709.rd}} "pr17709"}
 }
 
 # So as to avoid rewriting every last test case here in a nacl variant,
@@ -200,7 +204,7 @@ if [istarget "*-*-nacl*"] {
     regsub -all elf_i386 $i386tests elf_i386_nacl i386tests
 
     # Same, applied to all the run_dump_test cases.
-    set options_regsub(ld) {-melf_i386 -melf_i386_nacl}
+    set options_regsub(ld) {elf_i386 elf_i386_nacl}
 
     # The section/segment layout differs too much for the vanilla
     # readelf output files to match.  So massage the cases so that
@@ -210,6 +214,44 @@ if [istarget "*-*-nacl*"] {
     # Likewise for PLTs.
     regsub -all -- {([a-z0-9]+)\.pd} $i386tests {\1-nacl.pd} i386tests
 }
+
+proc iamcu_tests {} {
+    if {[istarget "*-*-nacl*"]} then {
+	return
+    }
+
+    global as
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as "--32 -march=iamcu $srcdir/$subdir/start.s" tmpdir/startiamcu.o] {
+	unresolved "Build Intel MCU start.o"
+	return
+    }
+
+    if ![ld_assemble $as "--32 $srcdir/$subdir/start.s" tmpdir/start32.o] {
+	unresolved "Build ia32 start.o"
+	return
+     }
+
+    if ![ld_assemble $as "--32 -march=iamcu $srcdir/$subdir/foo.s" tmpdir/fooiamcu.o] {
+	unresolved "Build Intel MCU foo.o"
+	return
+    }
+
+    if ![ld_assemble $as "--32 $srcdir/$subdir/foo.s" tmpdir/foo32.o] {
+	unresolved "Build ia32 foo.o"
+	return
+    }
+
+    run_dump_test "abs-iamcu"
+    run_dump_test "iamcu-1"
+    run_dump_test "iamcu-2"
+    run_dump_test "iamcu-3"
+    run_dump_test "iamcu-4"
+}
+
+iamcu_tests
 
 run_ld_link_tests $i386tests
 
@@ -232,6 +274,8 @@ run_dump_test "protected2"
 run_dump_test "protected3"
 run_dump_test "protected4"
 run_dump_test "protected5"
+run_dump_test "protected6a"
+run_dump_test "protected6b"
 run_dump_test "tlspie1"
 run_dump_test "tlspie2"
 run_dump_test "nogot1"
@@ -263,6 +307,8 @@ run_dump_test "pr12627"
 run_dump_test "pr13302"
 run_dump_test "pr14215"
 run_dump_test "pr17057"
+run_dump_test "pr17935-1"
+run_dump_test "pr17935-2"
 
 # Must be Linux native with the C compiler
 if { [isnative]
@@ -327,6 +373,78 @@ if { [isnative]
 	    {{readelf {-Wr} plt-main.rd}} \
 	    "plt-main" \
 	] \
+	[list \
+	    "Build copyreloc-lib.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { copyreloc-lib.c } \
+	    {} \
+	    "copyreloc-lib.so" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE and GOTOFF (1)" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.S } \
+	    {{readelf {-Wr} copyreloc-main1.rd}} \
+	    "copyreloc-main" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE and GOTOFF (2)" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.S } \
+	    {{readelf {-Wr} copyreloc-main2.rd}} \
+	    "copyreloc-main" \
+	] \
+	[list \
+	    "Build pr17689.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr17689a.c } \
+	    {} \
+	    "pr17689.so" \
+	] \
+	[list \
+	    "Build pr17689ver.so" \
+	    "-shared -Wl,--version-script,pr17689a.t" \
+	    "-fPIC" \
+	    { pr17689a.c } \
+	    {} \
+	    "pr17689ver.so" \
+	] \
+	[list \
+	    "Build pr17689.a" \
+	    "" \
+	    "" \
+	    { pr17689b.S } \
+	    {} \
+	    "pr17689.a" \
+	] \
+	[list \
+	    "Build pr17689 with PIE and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie" \
+	    "" \
+	    { dummy.c } \
+	    {{readelf {-Wr} pr17689.rd}} \
+	    "pr17689" \
+	] \
+	[list \
+	    "Build pr17689ver with PIE and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689ver.so -pie" \
+	    "" \
+	    { dummy.c } \
+	    {{readelf {-Wr} pr17689ver.rd}} \
+	    "pr17689ver" \
+	] \
+	[list \
+	    "Build pr17827 with PIE and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie" \
+	    "" \
+	    { dummy.c } \
+	    {{readelf {-Wr} pr17827.rd}} \
+	    "pr17827" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -349,5 +467,37 @@ if { [isnative]
 	    "plt-main.out" \
 	    "-fPIC" \
 	] \
+	[list \
+	    "Run copyreloc-main with PIE and GOTOFF" \
+	    "tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { copyreloc-main.S } \
+	    "copyreloc-main" \
+	    "copyreloc-main.out" \
+	] \
+	[list \
+	    "Run pr17689 with PIE and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie" \
+	    "" \
+	    { dummy.c } \
+	    "pr17689" \
+	    "pr17689.out" \
+	] \
+	[list \
+	    "Run pr17689ver with PIE and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689ver.so -pie" \
+	    "" \
+	    { dummy.c } \
+	    "pr17689ver" \
+	    "pr17689.out" \
+	] \
     ]
 }
+
+if { !([istarget "i?86-*-linux*"]
+       || [istarget "x86_64-*-linux*"]) } {
+    return
+}
+
+# Linux only tests
+run_dump_test "pltgot-1"

@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2014 Free Software Foundation, Inc.
+# Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -430,6 +430,9 @@ gas_test_error "weakref3.s" "" "a: would close weakref loop: a => b => c => d =>
 gas_test_error "weakref4.s" "" "is already defined"
 
 run_dump_test string
+if [is_elf_format] {
+    run_dump_test none
+}
 
 load_lib gas-dg.exp
 dg-init

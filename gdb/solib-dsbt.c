@@ -1,5 +1,5 @@
 /* Handle TIC6X (DSBT) shared libraries for GDB, the GNU Debugger.
-   Copyright (C) 2010-2014 Free Software Foundation, Inc.
+   Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -820,7 +820,6 @@ enable_break (void)
       CORE_ADDR addr;
       gdb_byte addr_buf[TIC6X_PTR_SIZE];
       struct int_elf32_dsbt_loadmap *ldm;
-      volatile struct gdb_exception ex;
       int ret;
 
       /* Read the contents of the .interp section into a local buffer;
@@ -834,10 +833,15 @@ enable_break (void)
 	 loaded so that we can load its symbols and place a breakpoint
 	 in the dynamic linker itself.  */
 
-      TRY_CATCH (ex, RETURN_MASK_ALL)
+      TRY
 	{
 	  tmp_bfd = solib_bfd_open (buf);
 	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	}
+      END_CATCH
+
       if (tmp_bfd == NULL)
 	{
 	  enable_break_failure_warning ();

@@ -1,5 +1,5 @@
 /* frv trap support
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -65,7 +65,7 @@ frv_sim_engine_halt_hook (SIM_DESC sd, SIM_CPU *current_cpu, sim_cia cia)
 {
   int i;
   if (current_cpu != NULL)
-    CIA_SET (current_cpu, cia);
+    CPU_PC_SET (current_cpu, cia);
 
   /* Invalidate the insn and data caches of all cpus.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)

@@ -7,6 +7,11 @@
 # Ignore warning about AM_PROG_CC_C_O due to large_CFLAGS
 AUTOMAKE_OPTIONS = foreign -Wno-portability
 
+# This is where we get zlib from.  zlib is in ../../zlib unless we were
+# configured with --with-system-zlib, in which case ../../zlib either
+# doesn't exist or not configured.
+ZLIB = -L../../zlib -lz
+
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  For compilers that do not support the command-line option,
 # we assume they just always emit SHF_MERGE sections unconditionally.
@@ -102,7 +107,7 @@ libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 DEPENDENCIES = \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADSLIB) $(LIBDL)
+	$(THREADSLIB) $(LIBDL) $(ZLIB)
 
 
 # The unittests themselves
@@ -164,7 +169,7 @@ incremental_test_1.o: incremental_test_1.c
 incremental_test_2.o: incremental_test_2.c
 	$(COMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 incremental_test: incremental_test_1.o incremental_test_2.o gcctestdir/ld
-	$(LINK) -Bgcctestdir/ -Wl,--incremental-full incremental_test_1.o incremental_test_2.o -Wl,-debug 2> incremental_test.cmdline
+	$(LINK) -Bgcctestdir/ -Wl,--incremental-full -Wl,-z,norelro incremental_test_1.o incremental_test_2.o -Wl,-debug 2> incremental_test.cmdline
 incremental_test.stdout: incremental_test ../incremental-dump
 	../incremental-dump incremental_test > $@
 
@@ -370,6 +375,14 @@ basic_test.o: basic_test.cc
 basic_test: basic_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ basic_test.o
 
+check_PROGRAMS += eh_test
+eh_test_a.o: eh_test_a.cc
+	$(CXXCOMPILE) -O0 -c -o $@ $<
+eh_test_b.o: eh_test_b.cc
+	$(CXXCOMPILE) -O0 -c -o $@ $<
+eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
+	$(CXXLINK_S) -Bgcctestdir/ eh_test_a.o eh_test_b.o
+
 if HAVE_STATIC
 check_PROGRAMS += basic_static_test
 basic_static_test: basic_test.o gcctestdir/ld
@@ -472,7 +485,7 @@ two_file_shared_1_pic_2_test_LDADD = two_file_test_1_pic.o two_file_test_1b_pic.
 
 two_file_shared_2_pic_1_test_SOURCES = two_file_test_main.cc
 two_file_shared_2_pic_1_test_DEPENDENCIES = \
-	gcctestdir/ld two_file_shared_2.so two_file_test_2_pic.o
+	gcctestdir/ld two_file_shared_1.so two_file_test_2_pic.o
 two_file_shared_2_pic_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_shared_2_pic_1_test_LDADD = two_file_test_2_pic.o two_file_shared_1.so
 
@@ -527,6 +540,11 @@ pie_copyrelocs_shared_test.o: pie_copyrelocs_shared_test.cc
 	$(CXXCOMPILE) -O2 -fpic -c -o $@ $<
 pie_copyrelocs_shared_test.so: pie_copyrelocs_shared_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared pie_copyrelocs_shared_test.o
+
+check_PROGRAMS += weak_unresolved_symbols_test
+weak_unresolved_symbols_test_SOURCES = weak_unresolved_symbols_test.cc
+weak_unresolved_symbols_test_CXXFLAGS = -fPIE
+weak_unresolved_symbols_test_LDFLAGS = -Bgcctestdir/ -pie -Wl,--weak-unresolved-symbols
 
 check_SCRIPTS += two_file_shared.sh
 check_DATA += two_file_shared.dbg
@@ -733,6 +751,7 @@ weak_undef_test_2_SOURCES = weak_undef_test_2.cc
 weak_undef_test_2_DEPENDENCIES = gcctestdir/ld libweak_undef_2.a
 weak_undef_test_2_LDFLAGS = -Bgcctestdir/ -u weak_undef_2
 weak_undef_test_2_LDADD = -L . -lweak_undef_2
+MOSTLYCLEANFILES += libweak_undef_2.a
 libweak_undef_2.a: weak_undef_file3.o weak_undef_file4.o
 	$(TEST_AR) rc $@ $^
 weak_undef_file3.o: weak_undef_file3.cc
@@ -869,6 +888,11 @@ tls_pie_test: tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o \
 		tls_test_c_pie.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o tls_test_c_pie.o -lpthread
 
+check_SCRIPTS += tls_pie_test.sh
+check_DATA += tls_pie_test.stdout
+tls_pie_test.stdout: tls_pie_test
+	$(TEST_READELF) -rW $< > $@ 2>/dev/null
+
 tls_pie_pic_test: tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o \
 		tls_test_c_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -lpthread
@@ -955,6 +979,153 @@ tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
 endif FN_PTRS_IN_SO_WITHOUT_PIC
 
 endif TLS
+
+if DEFAULT_TARGET_X86_64
+
+check_SCRIPTS += x86_64_mov_to_lea.sh
+check_DATA += x86_64_mov_to_lea1.stdout x86_64_mov_to_lea2.stdout \
+	x86_64_mov_to_lea3.stdout x86_64_mov_to_lea4.stdout \
+	x86_64_mov_to_lea5.stdout x86_64_mov_to_lea6.stdout \
+	x86_64_mov_to_lea7.stdout x86_64_mov_to_lea8.stdout \
+	x86_64_mov_to_lea9.stdout x86_64_mov_to_lea10.stdout \
+	x86_64_mov_to_lea11.stdout x86_64_mov_to_lea12.stdout \
+	x86_64_mov_to_lea13.stdout x86_64_mov_to_lea14.stdout
+MOSTLYCLEANFILES += x86_64_mov_to_lea1 x86_64_mov_to_lea2 \
+	x86_64_mov_to_lea3 x86_64_mov_to_lea4 x86_64_mov_to_lea5 \
+	x86_64_mov_to_lea6 x86_64_mov_to_lea7 x86_64_mov_to_lea8 \
+	x86_64_mov_to_lea9 x86_64_mov_to_lea10 x86_64_mov_to_lea11 \
+	x86_64_mov_to_lea12 x86_64_mov_to_lea13 x86_64_mov_to_lea14
+
+x86_64_mov_to_lea1.o: x86_64_mov_to_lea1.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea2.o: x86_64_mov_to_lea1.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea3.o: x86_64_mov_to_lea2.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea4.o: x86_64_mov_to_lea2.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea5.o: x86_64_mov_to_lea3.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea6.o: x86_64_mov_to_lea3.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea7.o: x86_64_mov_to_lea4.s
+	$(TEST_AS) --x32 -o $@ $<
+x86_64_mov_to_lea8.o: x86_64_mov_to_lea4.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea1: x86_64_mov_to_lea1.o
+	../ld-new -Bsymbolic -shared  -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea2: x86_64_mov_to_lea1.o
+	../ld-new -pie -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea3: x86_64_mov_to_lea1.o
+	../ld-new -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea4: x86_64_mov_to_lea2.o
+	../ld-new -Bsymbolic -shared  -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea5: x86_64_mov_to_lea2.o
+	../ld-new -pie -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea6: x86_64_mov_to_lea2.o
+	../ld-new -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea7: x86_64_mov_to_lea3.o
+	../ld-new -melf32_x86_64 -pie -o $@ $<
+x86_64_mov_to_lea8: x86_64_mov_to_lea4.o
+	../ld-new -melf_x86_64 -pie -o $@ $<
+x86_64_mov_to_lea9: x86_64_mov_to_lea5.o
+	../ld-new -melf32_x86_64  -o $@ $<
+x86_64_mov_to_lea10: x86_64_mov_to_lea6.o
+	../ld-new -melf_x86_64  -o $@ $<
+x86_64_mov_to_lea11: x86_64_mov_to_lea1.o
+	../ld-new -melf32_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea12: x86_64_mov_to_lea2.o
+	../ld-new -melf_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea13: x86_64_mov_to_lea7.o
+	../ld-new -melf32_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea14: x86_64_mov_to_lea8.o
+	../ld-new -melf_x86_64 -shared  -o $@ $<
+x86_64_mov_to_lea1.stdout: x86_64_mov_to_lea1
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea2.stdout: x86_64_mov_to_lea2
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea3.stdout: x86_64_mov_to_lea3
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea4.stdout: x86_64_mov_to_lea4
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea5.stdout: x86_64_mov_to_lea5
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea6.stdout: x86_64_mov_to_lea6
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea7.stdout: x86_64_mov_to_lea7
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea8.stdout: x86_64_mov_to_lea8
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea9.stdout: x86_64_mov_to_lea9
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea10.stdout: x86_64_mov_to_lea10
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea11.stdout: x86_64_mov_to_lea11
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea12.stdout: x86_64_mov_to_lea12
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
+	$(TEST_OBJDUMP) -dw $< > $@
+
+endif DEFAULT_TARGET_X86_64
+
+if DEFAULT_TARGET_I386
+
+check_SCRIPTS += i386_mov_to_lea.sh
+check_DATA += i386_mov_to_lea1.stdout  i386_mov_to_lea2.stdout \
+	i386_mov_to_lea3.stdout  i386_mov_to_lea4.stdout \
+	i386_mov_to_lea5.stdout i386_mov_to_lea6.stdout \
+	i386_mov_to_lea7.stdout i386_mov_to_lea8.stdout
+MOSTLYCLEANFILES += i386_mov_to_lea1 i386_mov_to_lea2 i386_mov_to_lea3 \
+	i386_mov_to_lea4 i386_mov_to_lea5 i386_mov_to_lea6 \
+	i386_mov_to_lea7 i386_mov_to_lea8
+
+i386_mov_to_lea1.o: i386_mov_to_lea1.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea2.o: i386_mov_to_lea2.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea3.o: i386_mov_to_lea3.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea4.o: i386_mov_to_lea4.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea5.o: i386_mov_to_lea5.s
+	$(TEST_AS) --32 -o $@ $<
+i386_mov_to_lea1: i386_mov_to_lea1.o
+	../ld-new -Bsymbolic -shared -melf_i386  -o $@ $<
+i386_mov_to_lea2: i386_mov_to_lea1.o
+	../ld-new  -pie -melf_i386  -o $@ $<
+i386_mov_to_lea3: i386_mov_to_lea1.o
+	../ld-new -melf_i386  -o $@ $<
+i386_mov_to_lea4: i386_mov_to_lea1.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea5: i386_mov_to_lea2.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea6: i386_mov_to_lea3.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea7: i386_mov_to_lea4.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea8: i386_mov_to_lea5.o
+	../ld-new -melf_i386 -shared  -o $@ $<
+i386_mov_to_lea1.stdout: i386_mov_to_lea1
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea2.stdout: i386_mov_to_lea2
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea3.stdout: i386_mov_to_lea3
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea4.stdout: i386_mov_to_lea4
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea5.stdout: i386_mov_to_lea5
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea6.stdout: i386_mov_to_lea6
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea7.stdout: i386_mov_to_lea7
+	$(TEST_OBJDUMP) -dw $< > $@
+i386_mov_to_lea8.stdout: i386_mov_to_lea8
+	$(TEST_OBJDUMP) -dw $< > $@
+
+endif DEFAULT_TARGET_I386
 
 check_PROGRAMS += many_sections_test
 many_sections_test_SOURCES = many_sections_test.cc
@@ -1051,8 +1222,6 @@ missing_key_func.err: missing_key_func.o gcctestdir/ld
 	  exit 1; \
 	fi
 
-if HAVE_ZLIB
-
 # Check that --detect-odr-violations works with compressed debug sections.
 check_DATA += debug_msg_cdebug.err
 MOSTLYCLEANFILES += debug_msg_cdebug.err
@@ -1070,8 +1239,22 @@ debug_msg_cdebug.err: debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_
 	  rm -f $@; \
 	  exit 1; \
 	fi
-
-endif HAVE_ZLIB
+check_DATA += debug_msg_cdebug_gabi.err
+MOSTLYCLEANFILES += debug_msg_cdebug_gabi.err
+debug_msg_cdebug_gabi.o: debug_msg.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1_cdebug_gabi.o: odr_violation1.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2_cdebug_gabi.o: odr_violation2.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_cdebug_gabi.err: debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug_gabi debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_cdebug_gabi should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
 
 # See if we can also detect problems when we're linking .so's, not .o's.
 check_DATA += debug_msg_so.err
@@ -1136,14 +1319,92 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 	chmod a+x $@
 	test -s $@
 
-if HAVE_ZLIB
+# Test --compress-debug-sections.
+check_PROGRAMS += flagstest_compress_debug_sections_none
+check_DATA += flagstest_compress_debug_sections_none.stdout
+flagstest_compress_debug_sections_none: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=none
+	test -s $@
 
-# Test --compress-debug-sections.  FIXME: check we actually compress.
+# Dump DWARF debug sections.
+flagstest_compress_debug_sections_none.stdout: flagstest_compress_debug_sections_none
+	$(TEST_READELF) -w $< > $@.tmp
+	mv -f $@.tmp $@
+
 check_PROGRAMS += flagstest_compress_debug_sections
+check_DATA += flagstest_compress_debug_sections.stdout \
+	      flagstest_compress_debug_sections.cmp \
+	      flagstest_compress_debug_sections.check
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
 
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections.stdout: flagstest_compress_debug_sections
+	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .zdebug_* sections.
+flagstest_compress_debug_sections.check: flagstest_compress_debug_sections
+	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections.cmp: flagstest_compress_debug_sections.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
+
+check_PROGRAMS += flagstest_compress_debug_sections_gnu
+check_DATA += flagstest_compress_debug_sections_gnu.stdout \
+	      flagstest_compress_debug_sections_gnu.cmp \
+	      flagstest_compress_debug_sections_gnu.check
+flagstest_compress_debug_sections_gnu: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gnu
+	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections_gnu.stdout: flagstest_compress_debug_sections_gnu
+	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .zdebug_* sections.
+flagstest_compress_debug_sections_gnu.check: flagstest_compress_debug_sections_gnu
+	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections_gnu.cmp: flagstest_compress_debug_sections_gnu.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections_gnu.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
+
+check_PROGRAMS += flagstest_compress_debug_sections_gabi
+check_DATA += flagstest_compress_debug_sections_gabi.stdout \
+	      flagstest_compress_debug_sections_gabi.cmp \
+	      flagstest_compress_debug_sections_gabi.check
+flagstest_compress_debug_sections_gabi: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gabi
+	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections_gabi.stdout: flagstest_compress_debug_sections_gabi
+	$(TEST_READELF) -w $< > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .debug_* sections.
+flagstest_compress_debug_sections_gabi.check: flagstest_compress_debug_sections_gabi
+	$(TEST_READELF) -tW $< | grep "COMPRESSED" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections_gabi.cmp: flagstest_compress_debug_sections_gabi.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections_gabi.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
@@ -1153,8 +1414,6 @@ flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 	chmod a+x $@
 	test -s $@
-
-endif HAVE_ZLIB
 
 # Test -TText and -Tdata.
 check_PROGRAMS += flagstest_o_ttext_1
@@ -1517,7 +1776,7 @@ dynamic_list_lib1.o: dynamic_list_lib1.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
 dynamic_list_lib2.so: gcctestdir/ld dynamic_list_lib2.o $(srcdir)/dynamic_list_2.t
-	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--dynamic-list,$(srcdir)/dynamic_list_2.t dynamic_list_lib2.o
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-Bsymbolic-functions -Wl,--dynamic-list,$(srcdir)/dynamic_list_2.t dynamic_list_lib2.o
 dynamic_list_lib2.o: dynamic_list_lib2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
@@ -1564,8 +1823,8 @@ check_PROGRAMS += plugin_test_1
 check_SCRIPTS += plugin_test_1.sh
 check_DATA += plugin_test_1.err
 MOSTLYCLEANFILES += plugin_test_1.err
-plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_1.err
+plugin_test_1: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms 2>plugin_test_1.err
 plugin_test_1.err: plugin_test_1
 	@touch plugin_test_1.err
 
@@ -1573,8 +1832,8 @@ check_PROGRAMS += plugin_test_2
 check_SCRIPTS += plugin_test_2.sh
 check_DATA += plugin_test_2.err
 MOSTLYCLEANFILES += plugin_test_2.err
-plugin_test_2: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so 2>plugin_test_2.err
+plugin_test_2: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_shared_2.so 2>plugin_test_2.err
 plugin_test_2.err: plugin_test_2
 	@touch plugin_test_2.err
 
@@ -1582,8 +1841,8 @@ check_PROGRAMS += plugin_test_3
 check_SCRIPTS += plugin_test_3.sh
 check_DATA += plugin_test_3.err
 MOSTLYCLEANFILES += plugin_test_3.err
-plugin_test_3: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--export-dynamic -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_3.err
+plugin_test_3: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--export-dynamic -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms empty.o.syms 2>plugin_test_3.err
 plugin_test_3.err: plugin_test_3
 	@touch plugin_test_3.err
 
@@ -1596,35 +1855,35 @@ plugin_test_4: two_file_test_main.o plugin_test_4.a gcctestdir/ld plugin_test.so
 plugin_test_4.err: plugin_test_4
 	@touch plugin_test_4.err
 
-plugin_test_4.a: two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms
+plugin_test_4.a: two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms
 	$(TEST_AR) cr $@ $^
 
 check_PROGRAMS += plugin_test_5
-plugin_test_5: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms
+plugin_test_5: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms unused.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms unused.o.syms
 
 check_PROGRAMS += plugin_test_6
 check_SCRIPTS += plugin_test_6.sh
 check_DATA += plugin_test_6.err
 MOSTLYCLEANFILES += plugin_test_6.err
-plugin_test_6: plugin_common_test_1.syms plugin_common_test_2.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.syms 2>plugin_test_6.err
+plugin_test_6: plugin_common_test_1.o.syms plugin_common_test_2.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.o.syms plugin_common_test_2.o.syms 2>plugin_test_6.err
 plugin_test_6.err: plugin_test_6
 	@touch plugin_test_6.err
 
 check_PROGRAMS += plugin_test_7
 check_SCRIPTS += plugin_test_7.sh
-check_DATA += plugin_test_7.err plugin_test_7.syms
+check_DATA += plugin_test_7.err plugin_test_7.o.syms
 MOSTLYCLEANFILES += plugin_test_7.err
-plugin_test_7: plugin_test_7_1.o plugin_test_7_1.syms plugin_test_7_2.o gcctestdir/ld plugin_test.so
-	$(LINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--gc-sections,--print-gc-sections plugin_test_7_1.syms plugin_test_7_2.o 2>plugin_test_7.err
-plugin_test_7.syms: plugin_test_7
+plugin_test_7: plugin_test_7_1.o plugin_test_7_1.o.syms plugin_test_7_2.o gcctestdir/ld plugin_test.so
+	$(LINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--gc-sections,--print-gc-sections plugin_test_7_1.o.syms plugin_test_7_2.o 2>plugin_test_7.err
+plugin_test_7.o.syms: plugin_test_7
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 plugin_test_7_1.o: plugin_test_7_1.c
 	$(COMPILE) -DLTO -O0 -c -ffunction-sections -fdata-sections -o $@ $<
 plugin_test_7_1_orig.o: plugin_test_7_1.c
 	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
-plugin_test_7_1.syms: plugin_test_7_1_orig.o
+plugin_test_7_1.o.syms: plugin_test_7_1_orig.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 plugin_test_7_2.o: plugin_test_7_2.c
 	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
@@ -1632,8 +1891,8 @@ plugin_test_7.err: plugin_test_7
 
 # Test plugins with -r.
 check_PROGRAMS += plugin_test_8
-plugin_test_8.o: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o ../ld-new plugin_test.so
-	../ld-new -r -o $@ --no-demangle --plugin "./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o
+plugin_test_8.o: two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o ../ld-new plugin_test.so
+	../ld-new -r -o $@ --no-demangle --plugin "./plugin_test.so" two_file_test_main.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o
 plugin_test_8: plugin_test_8.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle plugin_test_8.o
 
@@ -1641,17 +1900,17 @@ plugin_test_8: plugin_test_8.o gcctestdir/ld
 # produce an unresolved symbol error.
 check_DATA += plugin_test_9.err
 MOSTLYCLEANFILES += plugin_test_9.err
-plugin_test_9.err: two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
-	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms 2>$@; then \
+plugin_test_9.err: two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms gcctestdir/ld plugin_test.so
+	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.o.syms two_file_test_2.o.syms 2>$@; then \
 	  echo 1>&2 "Link of plugin_test_9 should have failed"; \
 	  rm -f $@; \
 	  exit 1; \
 	fi
 # Make a .syms file that claims to define the symbol _Z4t16av.
-two_file_test_1c.syms: two_file_test_1.syms two_file_test_1c.o
-	cp two_file_test_1.syms $@.tmp
-	grep "_Z4t16av" two_file_test_1b.syms >> $@.tmp
+two_file_test_1c.o.syms: two_file_test_1.o.syms two_file_test_1c.o
+	cp two_file_test_1.o.syms $@.tmp
+	grep "_Z4t16av" two_file_test_1b.o.syms >> $@.tmp
 	mv -f $@.tmp $@
 # Make a copy of two_file_test_1.o, which does not define the symbol _Z4t16av.
 MOSTLYCLEANFILES += two_file_test_1c.o
@@ -1662,32 +1921,43 @@ check_PROGRAMS += plugin_test_10
 check_SCRIPTS += plugin_test_10.sh
 check_DATA += plugin_test_10.sections
 MOSTLYCLEANFILES += plugin_test_10.sections
-plugin_test_10: plugin_common_test_1.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.o
+plugin_test_10: plugin_common_test_1.o.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.o.syms plugin_common_test_2.o
 plugin_test_10.sections: plugin_test_10
 	$(TEST_READELF) -SW $< >$@ 2>/dev/null
 
-
+check_PROGRAMS += plugin_test_11
+check_SCRIPTS += plugin_test_11.sh
+check_DATA += plugin_test_11.err
+MOSTLYCLEANFILES += plugin_test_11.err plugin_test_thin.a
+PLUGIN_TEST_11_SYMS = two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2.o.syms
+plugin_test_11: two_file_test_main.o plugin_test_thin.a gcctestdir/ld plugin_test.so $(PLUGIN_TEST_11_SYMS)
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o plugin_test_thin.a 2>plugin_test_11.err
+plugin_test_11.err: plugin_test_11
+	@touch plugin_test_11.err
+plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
 
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
 
-two_file_test_main.syms: two_file_test_main.o
+two_file_test_main.o.syms: two_file_test_main.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-two_file_test_1.syms: two_file_test_1.o
+two_file_test_1.o.syms: two_file_test_1.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-two_file_test_1b.syms: two_file_test_1b.o
+two_file_test_1b.o.syms: two_file_test_1b.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-two_file_test_2.syms: two_file_test_2.o
+two_file_test_2.o.syms: two_file_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-plugin_common_test_1.syms: plugin_common_test_1.o
+plugin_common_test_1.o.syms: plugin_common_test_1.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-plugin_common_test_2.syms: plugin_common_test_2.o
+plugin_common_test_2.o.syms: plugin_common_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
-empty.syms:
+empty.o.syms:
 	@echo "" >$@
 	@echo "Symbol table" >>$@
 
@@ -1697,18 +1967,18 @@ check_PROGRAMS += plugin_test_tls
 check_SCRIPTS += plugin_test_tls.sh
 check_DATA += plugin_test_tls.err
 MOSTLYCLEANFILES += plugin_test_tls.err
-plugin_test_tls: two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms 2>plugin_test_tls.err
+plugin_test_tls: two_file_test_tls.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2_tls.o.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.o.syms two_file_test_1b.o.syms two_file_test_2_tls.o.syms 2>plugin_test_tls.err
 plugin_test_tls.err: plugin_test_tls
 	@touch plugin_test_tls.err
 
-two_file_test_2_tls.syms: two_file_test_2_tls.o
+two_file_test_2_tls.o.syms: two_file_test_2_tls.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
 endif TLS
 
 MOSTLYCLEANFILES += unused.c
-unused.syms: unused.o
+unused.o.syms: unused.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 	@echo "     1: 00000000     4 FUNC    GLOBAL DEFAULT    1 UNUSED" >>$@
 unused.o: unused.c
@@ -2169,6 +2439,19 @@ memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 
+# Test INCLUDE directives in linker scripts.
+# The binary isn't runnable, so we just check that we can build it without errors.
+check_DATA += memory_test_2
+MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+memory_test_inc_1.t: $(srcdir)/memory_test_inc_1.t.src
+	cp $< $@
+memory_test_inc_2.t: $(srcdir)/memory_test_inc_2.t.src
+	cp $< $@
+memory_test_inc_3.t: $(srcdir)/memory_test_inc_3.t.src
+	cp $< $@
+memory_test_2: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
+
 if HAVE_PUBNAMES
 
 # Test that --gdb-index functions correctly without gcc-generated pubnames.
@@ -2182,8 +2465,6 @@ gdb_index_test_1: gdb_index_test.o gcctestdir/ld
 gdb_index_test_1.stdout: gdb_index_test_1
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
-if HAVE_ZLIB
-
 # Test that --gdb-index functions correctly with compressed debug sections.
 check_SCRIPTS += gdb_index_test_2.sh
 check_DATA += gdb_index_test_2.stdout
@@ -2194,8 +2475,15 @@ gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
 gdb_index_test_2.stdout: gdb_index_test_2
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
-
-endif HAVE_ZLIB
+check_SCRIPTS += gdb_index_test_2_gabi.sh
+check_DATA += gdb_index_test_2_gabi.stdout
+MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
+gdb_index_test_cdebug_gabi.o: gdb_index_test.cc
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -o $@ $<
+gdb_index_test_2_gabi: gdb_index_test_cdebug_gabi.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+gdb_index_test_2_gabi.stdout: gdb_index_test_2_gabi
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
 # Another simple C test (DW_AT_high_pc encoding) for --gdb-index.
 check_SCRIPTS += gdb_index_test_3.sh
@@ -2268,7 +2556,7 @@ ehdr_start_test_5_LDADD =
 # Test that the --defsym option copies the symbol type and visibility.
 check_SCRIPTS += defsym_test.sh
 check_DATA += defsym_test.syms
-MOSTLYCLEANFILES += defsym_test.syms
+MOSTLYCLEANFILES += defsym_test defsym_test.syms
 defsym_test.syms: defsym_test
 	$(TEST_READELF) -sW $< > $@
 defsym_test: defsym_test.o gcctestdir/ld
@@ -2297,31 +2585,31 @@ MOSTLYCLEANFILES += two_file_test_tmp_2.o
 incremental_test_2: two_file_test_1_v1_ndebug.o two_file_test_1_ndebug.o two_file_test_1b_ndebug.o \
 		    two_file_test_2_ndebug.o two_file_test_main_ndebug.o gcctestdir/ld
 	cp -f two_file_test_1_v1_ndebug.o two_file_test_tmp_2.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
 	@sleep 1
 	cp -f two_file_test_1_ndebug.o two_file_test_tmp_2.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
 
 check_PROGRAMS += incremental_test_3
 MOSTLYCLEANFILES += two_file_test_tmp_3.o
 incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_1b_v1.o two_file_test_tmp_3.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 	@sleep 1
 	cp -f two_file_test_1b.o two_file_test_tmp_3.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 
 check_PROGRAMS += incremental_test_4
 MOSTLYCLEANFILES += incremental_test_4.base two_file_test_tmp_4.o
 incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_2_v1.o two_file_test_tmp_4.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 	mv -f incremental_test_4 incremental_test_4.base
 	@sleep 1
 	cp -f two_file_test_2.o two_file_test_tmp_4.o
-	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 
 check_PROGRAMS += incremental_test_5
 MOSTLYCLEANFILES += two_file_test_5.a
@@ -2329,11 +2617,11 @@ incremental_test_5: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_1b_v1.o two_file_test_tmp_5.o
 	$(TEST_AR) rc two_file_test_5.a two_file_test_1.o two_file_test_tmp_5.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
 	@sleep 1
 	cp -f two_file_test_1b.o two_file_test_tmp_5.o
 	$(TEST_AR) rc two_file_test_5.a two_file_test_1.o two_file_test_tmp_5.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
 
 # Test the --incremental-unchanged flag with an archive library.
 # The second link should not update the library.
@@ -2343,38 +2631,38 @@ incremental_test_6: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_1b.o two_file_test_tmp_6.o
 	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ two_file_test_main.o two_file_test_6.a
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o two_file_test_6.a
 	@sleep 1
 	cp -f two_file_test_1b_v1.o two_file_test_tmp_6.o
 	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
 
 check_PROGRAMS += incremental_copy_test
 incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test_v1.o copy_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 	@sleep 1
 	cp -f copy_test.o copy_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 
 check_PROGRAMS += incremental_common_test_1
 incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
 	cp -f common_test_1_v1.o common_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ common_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ common_test_1_tmp.o
 	@sleep 1
 	cp -f common_test_1_v2.o common_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ common_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ common_test_1_tmp.o
 
 check_PROGRAMS += incremental_comdat_test_1
 incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
 	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
 	@sleep 1
 	cp -f incr_comdat_test_2_v2.o incr_comdat_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
 	@sleep 1
 	cp -f incr_comdat_test_2_v3.o incr_comdat_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
 
 endif DEFAULT_TARGET_X86_64
 

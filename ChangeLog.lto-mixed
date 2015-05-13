@@ -1,38 +1,15 @@
 bfd/
 
+2015-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* format.c: Include "plugin.h"
+	(bfd_check_format_matches): Don't check the plugin target twice
+	if the plugin target is explicitly specified.
+
 2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* format.c (bfd_check_format_matches): Don't check the plugin
 	target twice.
-
-2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
-	object-only output.
-	(cmdline_emit_object_only_section): Pass TRUE to lang_finish.
-
-	* ldlang.h (lang_finish): Updated.
-
-	* ldmain.c (main): Pass FALSE to lang_finish.
-
-2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/14747
-	* elflink.c (_bfd_elf_fix_symbol_flags): Check symbol for linker
-	created section instead.
-
-2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/14747
-	* elflink.c (_bfd_elf_fix_symbol_flags): Never mark
-	_GLOBAL_OFFSET_TABLE_, _PROCEDURE_LINKAGE_TABLE_ nor _DYNAMIC
-	undefined.
-
-2012-06-28  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/14272
-	* elflink.c (_bfd_elf_fix_symbol_flags): Mark the plugin symbol
-	undefined if it is referenced from a non-IR file.
 
 2012-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -148,6 +125,16 @@ ld/
 
 	* ldlang.c (cmdline_add_object_only_section): Save BFD filename
 	to be used after bfd_close ().
+
+2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
+	object-only output.
+	(cmdline_emit_object_only_section): Pass TRUE to lang_finish.
+
+	* ldlang.h (lang_finish): Updated.
+
+	* ldmain.c (main): Pass FALSE to lang_finish.
 
 2012-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -285,25 +272,6 @@ ld/testsuite/
 2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-plugin/lto.exp: Add test for nm on mixed LTO/non-LTO object.
-
-2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/14918
-	* ld-plugin/lto.exp (lto_link_elf_tests): Add PR ld/14918 test.
-
-	* ld-plugin/pr14918.c: New file.
-	* ld-plugin/pr14918.d: Likewise.
-
-2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/12365
-	* ld-plugin/pr12365a.c: New file.
-	* ld-plugin/pr12365b.c: Likewise.
-	* ld-plugin/pr12365c.c: Likewise.
-
-	* ld-plugin/lto.exp (lto_link_tests): Prepare for the PR ld/12365
-	test.
-	Run the PR ld/12365 test.
 
 2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 

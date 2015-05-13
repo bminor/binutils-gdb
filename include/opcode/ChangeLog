@@ -1,3 +1,51 @@
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* rl78.h (RL78_Dis_Isa): New.
+	(rl78_decode_opcode): Add ISA parameter.
+
+2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* arm.h (arm_feature_set): Extended to provide more available bits.
+	(ARM_ANY): Updated to follow above new definition.
+	(ARM_CPU_HAS_FEATURE): Likewise.
+	(ARM_CPU_IS_ANY): Likewise.
+	(ARM_MERGE_FEATURE_SETS): Likewise.
+	(ARM_CLEAR_FEATURE): Likewise.
+	(ARM_FEATURE): Likewise.
+	(ARM_FEATURE_COPY): New macro.
+	(ARM_FEATURE_EQUAL): Likewise.
+	(ARM_FEATURE_ZERO): Likewise.
+	(ARM_FEATURE_CORE_EQUAL): Likewise.
+	(ARM_FEATURE_LOW): Likewise.
+	(ARM_FEATURE_CORE_LOW): Likewise.
+	(ARM_FEATURE_CORE_COPROC): Likewise.
+
+2015-02-19  Pedro Alves  <palves@redhat.com>
+
+	* cgen.h [__cplusplus]: Wrap in extern "C".
+	* msp430-decode.h [__cplusplus]: Likewise.
+	* nios2.h [__cplusplus]: Likewise.
+	* rl78.h [__cplusplus]: Likewise.
+	* rx.h [__cplusplus]: Likewise.
+	* tilegx.h [__cplusplus]: Likewise.
+
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32.h: New file.
+
+2015-01-16  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390.h (s390_opcode_cpu_val): Add S390_OPCODE_Z13.
+
+2015-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
+2014-12-27  Anthony Green  <green@moxielogic.com>
+
+	* moxie.h (MOXIE_F1_AiB2, MOXIE_F1_ABi2): Renamed from
+	MOXIE_F1_AiB4 and MOXIE_F1_ABi2.
+
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* visium.h: New file.
@@ -2137,7 +2185,7 @@
 
 For older changes see ChangeLog-9103
 
-Copyright (C) 2004-2014 Free Software Foundation, Inc.
+Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

@@ -1,5 +1,5 @@
 /* rescoff.c -- read and write resources in Windows COFF files.
-   Copyright (C) 1997-2014 Free Software Foundation, Inc.
+   Copyright (C) 1997-2015 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
 
@@ -142,8 +142,14 @@ read_coff_rsrc (const char *filename, const char *target)
 
   set_windres_bfd (&wrbfd, abfd, sec, WR_KIND_BFD);
   size = bfd_section_size (abfd, sec);
-  data = (bfd_byte *) res_alloc (size);
+  /* PR 17512: file: 1b25ba5d
+     The call to get_file_size here may be expensive
+     but there is no other way to determine if the section size
+     is reasonable.  */
+  if (size > (bfd_size_type) get_file_size (filename))
+    fatal (_("%s: .rsrc section is bigger than the file!"), filename);
 
+  data = (bfd_byte *) res_alloc (size);
   get_windres_bfd_content (&wrbfd, data, 0, size);
 
   flaginfo.filename = filename;
@@ -184,6 +190,13 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
   int name_count, id_count, i;
   rc_res_entry **pp;
   const struct extern_res_entry *ere;
+
+  /* PR 17512: file: 09d80f53.
+     Whilst in theory resources can nest to any level, in practice
+     Microsoft only defines 3 levels.  Corrupt files however might
+     claim to use more.  */
+  if (level > 4)
+    overrun (flaginfo, _("Resources nest too deep"));
 
   if ((size_t) (flaginfo->data_end - data) < sizeof (struct extern_res_directory))
     overrun (flaginfo, _("directory"));
@@ -234,7 +247,12 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       re->id.u.n.length = length;
       re->id.u.n.name = (unichar *) res_alloc (length * sizeof (unichar));
       for (j = 0; j < length; j++)
-	re->id.u.n.name[j] = windres_get_16 (wrbfd, ers + j * 2 + 2, 2);
+	{
+	  /* PR 17512: file: 05dc4a16.  */
+	  if (length < 0 || ers >= (bfd_byte *) ere || ers + j * 2 + 4 >= (bfd_byte *) ere)
+	    overrun (flaginfo, _("resource name"));
+	  re->id.u.n.name[j] = windres_get_16 (wrbfd, ers + j * 2 + 2, 2);
+	}
 
       if (level == 0)
 	type = &re->id;

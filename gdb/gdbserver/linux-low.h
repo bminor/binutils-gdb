@@ -1,5 +1,5 @@
 /* Internal interfaces for the GNU/Linux specific target code for gdbserver.
-   Copyright (C) 2002-2014 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -16,6 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "nat/linux-nat.h"
 #include "nat/gdb_thread_db.h"
 #include <signal.h>
 
@@ -24,6 +25,7 @@
 
 /* Included for ptrace type definitions.  */
 #include "nat/linux-ptrace.h"
+#include "target/waitstatus.h" /* For enum target_stop_reason.  */
 
 #define PTRACE_XFER_TYPE long
 
@@ -183,7 +185,10 @@ struct linux_target_ops
   /* Hook to call when a new thread is detected.
      If extra per-thread architecture-specific data is needed,
      allocate it here.  */
-  struct arch_lwp_info * (*new_thread) (void);
+  void (*new_thread) (struct lwp_info *);
+
+  /* Hook to call, if any, when a new fork is attached.  */
+  void (*new_fork) (struct process_info *parent, struct process_info *child);
 
   /* Hook to call prior to resuming a thread.  */
   void (*prepare_to_resume) (struct lwp_info *);
@@ -269,8 +274,13 @@ struct lwp_info
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
 
-  /* When stopped is set, this is where the lwp stopped, with
-     decr_pc_after_break already accounted for.  */
+  /* This is used to store extended ptrace event information until
+     it is reported to GDB.  */
+  struct target_waitstatus waitstatus;
+
+  /* When stopped is set, this is where the lwp last stopped, with
+     decr_pc_after_break already accounted for.  If the LWP is
+     running, this is the address at which the lwp was resumed.  */
   CORE_ADDR stop_pc;
 
   /* If this flag is set, STATUS_PENDING is a waitstatus that has not yet
@@ -278,9 +288,9 @@ struct lwp_info
   int status_pending_p;
   int status_pending;
 
-  /* STOPPED_BY_WATCHPOINT is non-zero if this LWP stopped with a data
-     watchpoint trap.  */
-  int stopped_by_watchpoint;
+  /* The reason the LWP last stopped, if we need to track it
+     (breakpoint, watchpoint, etc.)  */
+  enum target_stop_reason stop_reason;
 
   /* On architectures where it is possible to know the data address of
      a triggered watchpoint, STOPPED_DATA_ADDRESS is non-zero, and
@@ -351,14 +361,8 @@ int linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine);
    errno).  */
 int linux_attach_lwp (ptid_t ptid);
 
-/* Return the reason an attach failed, in string form.  ERR is the
-   error returned by linux_attach_lwp (an errno).  This string should
-   be copied into a buffer by the client if the string will not be
-   immediately used, or if it must persist.  */
-char *linux_attach_fail_reason_string (ptid_t ptid, int err);
-
 struct lwp_info *find_lwp_pid (ptid_t ptid);
-void linux_stop_lwp (struct lwp_info *lwp);
+/* For linux_stop_lwp see nat/linux-nat.h.  */
 
 #ifdef HAVE_LINUX_REGSETS
 void initialize_regsets_info (struct regsets_info *regsets_info);

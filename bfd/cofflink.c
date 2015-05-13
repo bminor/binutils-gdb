@@ -1,5 +1,5 @@
 /* COFF specific linker code.
-   Copyright (C) 1994-2014 Free Software Foundation, Inc.
+   Copyright (C) 1994-2015 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2789,7 +2789,7 @@ _bfd_coff_reloc_link_order (bfd *output_bfd,
 
       size = bfd_get_reloc_size (howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
-      if (buf == NULL)
+      if (buf == NULL && size != 0)
 	return FALSE;
 
       rstat = _bfd_relocate_contents (howto, output_bfd,

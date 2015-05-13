@@ -209,7 +209,7 @@ _start:
 	vfpclasspd	$123, %zmm30, %k5	 # AVX512DQ
 	vfpclasspdz	$123, (%rcx), %k5	 # AVX512DQ
 	vfpclasspdz	$123, 0x123(%rax,%r14,8), %k5	 # AVX512DQ
-	vfpclasspdz	$123, (%rcx){1to8}, %k5	 # AVX512DQ
+	vfpclasspd	$123, (%rcx){1to8}, %k5	 # AVX512DQ
 	vfpclasspdz	$123, 8128(%rdx), %k5	 # AVX512DQ Disp8
 	vfpclasspdz	$123, 8192(%rdx), %k5	 # AVX512DQ
 	vfpclasspdz	$123, -8192(%rdx), %k5	 # AVX512DQ Disp8
@@ -223,7 +223,7 @@ _start:
 	vfpclassps	$123, %zmm30, %k5	 # AVX512DQ
 	vfpclasspsz	$123, (%rcx), %k5	 # AVX512DQ
 	vfpclasspsz	$123, 0x123(%rax,%r14,8), %k5	 # AVX512DQ
-	vfpclasspsz	$123, (%rcx){1to16}, %k5	 # AVX512DQ
+	vfpclassps	$123, (%rcx){1to16}, %k5	 # AVX512DQ
 	vfpclasspsz	$123, 8128(%rdx), %k5	 # AVX512DQ Disp8
 	vfpclasspsz	$123, 8192(%rdx), %k5	 # AVX512DQ
 	vfpclasspsz	$123, -8192(%rdx), %k5	 # AVX512DQ Disp8
@@ -909,29 +909,29 @@ _start:
 	vfpclasspd	k5, zmm30, 123	 # AVX512DQ
 	vfpclasspd	k5, ZMMWORD PTR [rcx], 123	 # AVX512DQ
 	vfpclasspd	k5, ZMMWORD PTR [rax+r14*8+0x1234], 123	 # AVX512DQ
-	vfpclasspdz	k5, [rcx]{1to8}, 123	 # AVX512DQ
+	vfpclasspd	k5, [rcx]{1to8}, 123	 # AVX512DQ
 	vfpclasspd	k5, ZMMWORD PTR [rdx+8128], 123	 # AVX512DQ Disp8
 	vfpclasspd	k5, ZMMWORD PTR [rdx+8192], 123	 # AVX512DQ
 	vfpclasspd	k5, ZMMWORD PTR [rdx-8192], 123	 # AVX512DQ Disp8
 	vfpclasspd	k5, ZMMWORD PTR [rdx-8256], 123	 # AVX512DQ
-	vfpclasspdz	k5, [rdx+1016]{1to8}, 123	 # AVX512DQ Disp8
-	vfpclasspdz	k5, [rdx+1024]{1to8}, 123	 # AVX512DQ
-	vfpclasspdz	k5, [rdx-1024]{1to8}, 123	 # AVX512DQ Disp8
-	vfpclasspdz	k5, [rdx-1032]{1to8}, 123	 # AVX512DQ
+	vfpclasspd	k5, QWORD PTR [rdx+1016]{1to8}, 123	 # AVX512DQ Disp8
+	vfpclasspd	k5, QWORD PTR [rdx+1024]{1to8}, 123	 # AVX512DQ
+	vfpclasspd	k5, QWORD PTR [rdx-1024]{1to8}, 123	 # AVX512DQ Disp8
+	vfpclasspd	k5, QWORD PTR [rdx-1032]{1to8}, 123	 # AVX512DQ
 	vfpclassps	k5, zmm30, 0xab	 # AVX512DQ
 	vfpclassps	k5{k7}, zmm30, 0xab	 # AVX512DQ
 	vfpclassps	k5, zmm30, 123	 # AVX512DQ
 	vfpclassps	k5, ZMMWORD PTR [rcx], 123	 # AVX512DQ
 	vfpclassps	k5, ZMMWORD PTR [rax+r14*8+0x1234], 123	 # AVX512DQ
-	vfpclasspsz	k5, [rcx]{1to16}, 123	 # AVX512DQ
+	vfpclassps	k5, [rcx]{1to16}, 123	 # AVX512DQ
 	vfpclassps	k5, ZMMWORD PTR [rdx+8128], 123	 # AVX512DQ Disp8
 	vfpclassps	k5, ZMMWORD PTR [rdx+8192], 123	 # AVX512DQ
 	vfpclassps	k5, ZMMWORD PTR [rdx-8192], 123	 # AVX512DQ Disp8
 	vfpclassps	k5, ZMMWORD PTR [rdx-8256], 123	 # AVX512DQ
-	vfpclasspsz	k5, [rdx+508]{1to16}, 123	 # AVX512DQ Disp8
-	vfpclasspsz	k5, [rdx+512]{1to16}, 123	 # AVX512DQ
-	vfpclasspsz	k5, [rdx-512]{1to16}, 123	 # AVX512DQ Disp8
-	vfpclasspsz	k5, [rdx-516]{1to16}, 123	 # AVX512DQ
+	vfpclassps	k5, DWORD PTR [rdx+508]{1to16}, 123	 # AVX512DQ Disp8
+	vfpclassps	k5, DWORD PTR [rdx+512]{1to16}, 123	 # AVX512DQ
+	vfpclassps	k5, DWORD PTR [rdx-512]{1to16}, 123	 # AVX512DQ Disp8
+	vfpclassps	k5, DWORD PTR [rdx-516]{1to16}, 123	 # AVX512DQ
 	vfpclasssd	k5, xmm30, 0xab	 # AVX512DQ
 	vfpclasssd	k5{k7}, xmm30, 0xab	 # AVX512DQ
 	vfpclasssd	k5, xmm30, 123	 # AVX512DQ

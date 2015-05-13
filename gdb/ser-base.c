@@ -1,6 +1,6 @@
 /* Generic serial interface functions.
 
-   Copyright (C) 1992-2014 Free Software Foundation, Inc.
+   Copyright (C) 1992-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -537,6 +537,14 @@ ser_base_setbaudrate (struct serial *scb, int rate)
 
 int
 ser_base_setstopbits (struct serial *scb, int num)
+{
+  return 0;			/* Never fails!  */
+}
+
+/* Implement the "setparity" serial_ops callback.  */
+
+int
+ser_base_setparity (struct serial *scb, int parity)
 {
   return 0;			/* Never fails!  */
 }

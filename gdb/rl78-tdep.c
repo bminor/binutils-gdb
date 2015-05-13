@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RL78 for GDB, the GNU debugger.
 
-   Copyright (C) 2011-2014 Free Software Foundation, Inc.
+   Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -204,6 +204,8 @@ enum
   RL78_NUM_TOTAL_REGS,
   RL78_NUM_PSEUDO_REGS = RL78_NUM_TOTAL_REGS - RL78_NUM_REGS
 };
+
+#define RL78_SP_ADDR 0xffff8 
 
 /* Architecture specific data.  */
 
@@ -786,6 +788,57 @@ struct rl78_get_opcode_byte_handle
   CORE_ADDR pc;
 };
 
+static int
+opc_reg_to_gdb_regnum (int opcreg)
+{
+  switch (opcreg)
+    {
+      case RL78_Reg_X:
+        return RL78_X_REGNUM;
+      case RL78_Reg_A:
+	return RL78_A_REGNUM;
+      case RL78_Reg_C:
+	return RL78_C_REGNUM;
+      case RL78_Reg_B:
+	return RL78_B_REGNUM;
+      case RL78_Reg_E:
+	return RL78_E_REGNUM;
+      case RL78_Reg_D:
+	return RL78_D_REGNUM;
+      case RL78_Reg_L:
+	return RL78_L_REGNUM;
+      case RL78_Reg_H:
+	return RL78_H_REGNUM;
+      case RL78_Reg_AX:
+	return RL78_AX_REGNUM;
+      case RL78_Reg_BC:
+	return RL78_BC_REGNUM;
+      case RL78_Reg_DE:
+	return RL78_DE_REGNUM;
+      case RL78_Reg_HL:
+	return RL78_HL_REGNUM;
+      case RL78_Reg_SP:
+	return RL78_SP_REGNUM;
+      case RL78_Reg_PSW:
+	return RL78_PSW_REGNUM;
+      case RL78_Reg_CS:
+	return RL78_CS_REGNUM;
+      case RL78_Reg_ES:
+	return RL78_ES_REGNUM;
+      case RL78_Reg_PMC:
+	return RL78_PMC_REGNUM;
+      case RL78_Reg_MEM:
+	return RL78_MEM_REGNUM;
+      default:
+	internal_error (__FILE__, __LINE__,
+			_("Undefined mapping for opc reg %d"),
+			opcreg);
+    }
+
+  /* Not reached.  */
+  return 0;
+}
+
 /* Fetch a byte on behalf of the opcode decoder.  HANDLE contains
    the memory address of the next byte to fetch.  If successful,
    the address in the handle is updated and the byte fetched is
@@ -868,7 +921,7 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
 
       opcode_handle.pc = pc;
       bytes_read = rl78_decode_opcode (pc, &opc, rl78_get_opcode_byte,
-				     &opcode_handle);
+				       &opcode_handle, RL78_ISA_DEFAULT);
       next_pc = pc + bytes_read;
 
       if (opc.id == RLO_sel)
@@ -898,6 +951,35 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
 
 	  reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM],
 	                                         -addend);
+	  after_last_frame_setup_insn = next_pc;
+	}
+      else if (opc.id == RLO_mov
+               && opc.size == RL78_Word
+	       && opc.op[0].type == RL78_Operand_Register
+	       && opc.op[1].type == RL78_Operand_Indirect
+	       && opc.op[1].addend == RL78_SP_ADDR)
+	{
+	  reg[opc_reg_to_gdb_regnum (opc.op[0].reg)]
+	    = reg[RL78_SP_REGNUM];
+	}
+      else if (opc.id == RLO_sub
+               && opc.size == RL78_Word
+	       && opc.op[0].type == RL78_Operand_Register
+	       && opc.op[1].type == RL78_Operand_Immediate)
+	{
+	  int addend = opc.op[1].addend;
+	  int regnum = opc_reg_to_gdb_regnum (opc.op[0].reg);
+
+	  reg[regnum] = pv_add_constant (reg[regnum], -addend);
+	}
+      else if (opc.id == RLO_mov
+               && opc.size == RL78_Word
+	       && opc.op[0].type == RL78_Operand_Indirect
+	       && opc.op[0].addend == RL78_SP_ADDR
+	       && opc.op[1].type == RL78_Operand_Register)
+	{
+	  reg[RL78_SP_REGNUM]
+	    = reg[opc_reg_to_gdb_regnum (opc.op[1].reg)];
 	  after_last_frame_setup_insn = next_pc;
 	}
       else

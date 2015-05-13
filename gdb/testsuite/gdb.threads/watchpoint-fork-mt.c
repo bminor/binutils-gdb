@@ -1,6 +1,6 @@
 /* Test case for forgotten hw-watchpoints after fork()-off of a process.
 
-   Copyright 2012-2014 Free Software Foundation, Inc.
+   Copyright 2012-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,9 @@
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+/* pthread_yield is a GNU extension.  */
+#define _GNU_SOURCE
 #include <pthread.h>
 
 #include <asm/unistd.h>

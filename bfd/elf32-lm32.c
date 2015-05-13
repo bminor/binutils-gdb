@@ -1,5 +1,5 @@
 /* Lattice Mico32-specific support for 32-bit ELF
-   Copyright (C) 2008-2014 Free Software Foundation, Inc.
+   Copyright (C) 2008-2015 Free Software Foundation, Inc.
    Contributed by Jon Beniston <jon@beniston.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -262,11 +262,11 @@ static reloc_howto_type lm32_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_LM32_NONE,               /* type */
          0,                         /* rightshift */
-         2,                         /* size (0 = byte, 1 = short, 2 = long) */
-         32,                        /* bitsize */
+         3,                         /* size (0 = byte, 1 = short, 2 = long) */
+         0,                         /* bitsize */
          FALSE,                     /* pc_relative */
          0,                         /* bitpos */
-         complain_overflow_bitfield,/* complain_on_overflow */
+         complain_overflow_dont,    /* complain_on_overflow */
          bfd_elf_generic_reloc,     /* special_function */
          "R_LM32_NONE",             /* name */
          FALSE,                     /* partial_inplace */
@@ -590,7 +590,7 @@ lm32_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_LM32_max)
     {
-      _bfd_error_handler (_("%A: invalid LM32 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid LM32 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &lm32_elf_howto_table[r_type];

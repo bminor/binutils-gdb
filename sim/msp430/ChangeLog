@@ -1,3 +1,70 @@
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_CPU): Delete.
+
+2015-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_cia): Delete.
+
+2015-04-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (CIA_GET, CIA_SET): Delete.
+
+2015-04-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-cpu.o.
+	* sim-main.h (STATE_CPU): Delete.
+
+2015-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-04-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-engine.o and sim-hrw.o.
+
+2015-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete $(SIM_EXTRA_OBJS).
+
+2015-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h: Delete run-sim.h include.
+
+2015-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+	* configure.ac: Call the common inline & warning macros.
+	* msp430-sim.c: Include unistd.h & trace.h.
+	* trace.c: Include trace.h.
+	(load_file_and_line): Move FILE* decl to top of scope.
+	* trace.h (msp430_get_current_source_location): Adjust prototype to
+	match the function definition.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_RUN_OBJS): Delete.
+
+2015-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-sim.c (sim_open): Allocate memory regions matching those
+	declared in the libgloss/msp430 linker scripts.
+	Allow sim_load_file to fail.
+	(get_op): Test the correct address bit when checking for out of
+	range addresses.
+	Include the address in the error message when an illegal access to
+	the hardware multiplier is detected.
+	(put_op): Test the correct address bit when checking for out of
+	range addresses.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

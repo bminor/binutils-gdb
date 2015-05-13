@@ -1,5 +1,5 @@
 /* SPU native-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+   Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -313,6 +313,7 @@ spu_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
      table to find the extent of the last section but that seems
      pointless when the size is needed only for checks of other
      parsed values in dbxread.c.  */
+  memset (sb, 0, sizeof (struct stat));
   sb->st_size = INT_MAX;
   return 0;
 }

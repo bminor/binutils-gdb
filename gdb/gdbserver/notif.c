@@ -1,5 +1,5 @@
 /* Notification to GDB.
-   Copyright (C) 1989-2014 Free Software Foundation, Inc.
+   Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,7 +86,7 @@ handle_notif_ack (char *own_buf, int packet_len)
     {
       const char *ack_name = notifs[i]->ack_name;
 
-      if (strncmp (own_buf, ack_name, strlen (ack_name)) == 0
+      if (startswith (own_buf, ack_name)
 	  && packet_len == strlen (ack_name))
 	break;
     }

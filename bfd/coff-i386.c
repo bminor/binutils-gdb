@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files.
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -509,7 +509,12 @@ coff_i386_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
     }
 
-  BFD_ASSERT (sym != NULL);
+  /* PR 17099 - Absolute R_PCRLONG relocations do not need a symbol.  */
+  if (rel->r_type == R_PCRLONG && sym == NULL)
+    *addendp -= rel->r_vaddr;
+  else
+    BFD_ASSERT (sym != NULL);
+
   if (rel->r_type == R_SECREL32 && sym != NULL)
     {
       bfd_vma osect_vma;

@@ -1,6 +1,6 @@
 /*  This file is part of the program GDB.
 
-    Copyright (C) 1997-2014 Free Software Foundation, Inc.
+    Copyright (C) 1997-2015 Free Software Foundation, Inc.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ while (0)
 
 #if !defined (SIM_ASSERT)
 #if defined (WITH_ASSERT)
+#include "sim-io.h"
 #define SIM_ASSERT(EXPRESSION) \
 do \
   { \
@@ -65,6 +66,7 @@ while (0)
 
 #if !defined (ASSERT)
 #if defined (WITH_ASSERT)
+#include "sim-io.h"
 #define ASSERT(EXPRESSION) \
 do \
   { \

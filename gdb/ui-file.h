@@ -1,5 +1,5 @@
 /* UI_FILE - a generic STDIO like output stream.
-   Copyright (C) 1999-2014 Free Software Foundation, Inc.
+   Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -77,7 +77,7 @@ extern void set_ui_file_put (struct ui_file *stream, ui_file_put_ftype *put);
 
 typedef void (ui_file_delete_ftype) (struct ui_file * stream);
 extern void set_ui_file_data (struct ui_file *stream, void *data,
-			      ui_file_delete_ftype *delete);
+			      ui_file_delete_ftype *to_delete);
 
 typedef int (ui_file_fseek_ftype) (struct ui_file *stream, long offset,
 				   int whence);

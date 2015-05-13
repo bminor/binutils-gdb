@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CR16C ELF
-   Copyright (C) 2004-2014 Free Software Foundation, Inc.
+   Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -182,7 +182,7 @@ elf_cr16c_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (r_type >= RINDEX_16C_MAX)
     {
-      _bfd_error_handler (_("%A; invalid CR16C reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%B: invalid CR16C reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_howto_table[r_type];

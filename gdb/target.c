@@ -1,6 +1,6 @@
 /* Select target systems and architectures at runtime for GDB.
 
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -104,9 +104,6 @@ static char *default_pid_to_str (struct target_ops *ops, ptid_t ptid);
 
 static enum exec_direction_kind default_execution_direction
     (struct target_ops *self);
-
-static CORE_ADDR default_target_decr_pc_after_break (struct target_ops *ops,
-						     struct gdbarch *gdbarch);
 
 static struct target_ops debug_target;
 
@@ -817,9 +814,8 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
   if (gdbarch_fetch_tls_load_module_address_p (target_gdbarch ()))
     {
       ptid_t ptid = inferior_ptid;
-      volatile struct gdb_exception ex;
 
-      TRY_CATCH (ex, RETURN_MASK_ALL)
+      TRY
 	{
 	  CORE_ADDR lm_addr;
 	  
@@ -832,7 +828,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	}
       /* If an error occurred, print TLS related messages here.  Otherwise,
          throw the error to some higher catcher.  */
-      if (ex.reason < 0)
+      CATCH (ex, RETURN_MASK_ALL)
 	{
 	  int objfile_is_library = (objfile->flags & OBJF_SHARED);
 
@@ -881,6 +877,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	      break;
 	    }
 	}
+      END_CATCH
     }
   /* It wouldn't be wrong here to try a gdbarch method, too; finding
      TLS is an ABI-specific thing.  But we don't do that yet.  */
@@ -2687,6 +2684,78 @@ default_fileio_target (void)
     return find_default_run_target ("file I/O");
 }
 
+/* File handle for target file operations.  */
+
+typedef struct
+{
+  /* The target on which this file is open.  */
+  struct target_ops *t;
+
+  /* The file descriptor on the target.  */
+  int fd;
+} fileio_fh_t;
+
+DEF_VEC_O (fileio_fh_t);
+
+/* Vector of currently open file handles.  The value returned by
+   target_fileio_open and passed as the FD argument to other
+   target_fileio_* functions is an index into this vector.  This
+   vector's entries are never freed; instead, files are marked as
+   closed, and the handle becomes available for reuse.  */
+static VEC (fileio_fh_t) *fileio_fhandles;
+
+/* Macro to check whether a fileio_fh_t represents a closed file.  */
+#define is_closed_fileio_fh(fd) ((fd) < 0)
+
+/* Index into fileio_fhandles of the lowest handle that might be
+   closed.  This permits handle reuse without searching the whole
+   list each time a new file is opened.  */
+static int lowest_closed_fd;
+
+/* Acquire a target fileio file descriptor.  */
+
+static int
+acquire_fileio_fd (struct target_ops *t, int fd)
+{
+  fileio_fh_t *fh, buf;
+
+  gdb_assert (!is_closed_fileio_fh (fd));
+
+  /* Search for closed handles to reuse.  */
+  for (;
+       VEC_iterate (fileio_fh_t, fileio_fhandles,
+                    lowest_closed_fd, fh);
+       lowest_closed_fd++)
+    if (is_closed_fileio_fh (fh->fd))
+      break;
+
+  /* Push a new handle if no closed handles were found.  */
+  if (lowest_closed_fd == VEC_length (fileio_fh_t, fileio_fhandles))
+    fh = VEC_safe_push (fileio_fh_t, fileio_fhandles, NULL);
+
+  /* Fill in the handle.  */
+  fh->t = t;
+  fh->fd = fd;
+
+  /* Return its index, and start the next lookup at
+     the next index.  */
+  return lowest_closed_fd++;
+}
+
+/* Release a target fileio file descriptor.  */
+
+static void
+release_fileio_fd (int fd, fileio_fh_t *fh)
+{
+  fh->fd = -1;
+  lowest_closed_fd = min (lowest_closed_fd, fd);
+}
+
+/* Return a pointer to the fileio_fhandle_t corresponding to FD.  */
+
+#define fileio_fd_to_fh(fd) \
+  VEC_index (fileio_fh_t, fileio_fhandles, (fd))
+
 /* Open FILENAME on the target, using FLAGS and MODE.  Return a
    target file descriptor, or -1 if an error occurs (and set
    *TARGET_ERRNO).  */
@@ -2701,6 +2770,11 @@ target_fileio_open (const char *filename, int flags, int mode,
       if (t->to_fileio_open != NULL)
 	{
 	  int fd = t->to_fileio_open (t, filename, flags, mode, target_errno);
+
+	  if (fd < 0)
+	    fd = -1;
+	  else
+	    fd = acquire_fileio_fd (t, fd);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -2722,27 +2796,22 @@ int
 target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
 		      ULONGEST offset, int *target_errno)
 {
-  struct target_ops *t;
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
 
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
-    {
-      if (t->to_fileio_pwrite != NULL)
-	{
-	  int ret = t->to_fileio_pwrite (t, fd, write_buf, len, offset,
-					 target_errno);
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
+    ret = fh->t->to_fileio_pwrite (fh->t, fh->fd, write_buf,
+				   len, offset, target_errno);
 
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_pwrite (%d,...,%d,%s) "
-				"= %d (%d)\n",
-				fd, len, pulongest (offset),
-				ret, ret != -1 ? 0 : *target_errno);
-	  return ret;
-	}
-    }
-
-  *target_errno = FILEIO_ENOSYS;
-  return -1;
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_pwrite (%d,...,%d,%s) "
+			"= %d (%d)\n",
+			fd, len, pulongest (offset),
+			ret, ret != -1 ? 0 : *target_errno);
+  return ret;
 }
 
 /* Read up to LEN bytes FD on the target into READ_BUF.
@@ -2752,27 +2821,41 @@ int
 target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 		     ULONGEST offset, int *target_errno)
 {
-  struct target_ops *t;
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
 
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
-    {
-      if (t->to_fileio_pread != NULL)
-	{
-	  int ret = t->to_fileio_pread (t, fd, read_buf, len, offset,
-					target_errno);
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
+    ret = fh->t->to_fileio_pread (fh->t, fh->fd, read_buf,
+				  len, offset, target_errno);
 
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_pread (%d,...,%d,%s) "
-				"= %d (%d)\n",
-				fd, len, pulongest (offset),
-				ret, ret != -1 ? 0 : *target_errno);
-	  return ret;
-	}
-    }
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_pread (%d,...,%d,%s) "
+			"= %d (%d)\n",
+			fd, len, pulongest (offset),
+			ret, ret != -1 ? 0 : *target_errno);
+  return ret;
+}
 
-  *target_errno = FILEIO_ENOSYS;
-  return -1;
+/* See target.h.  */
+int
+target_fileio_fstat (int fd, struct stat *sb, int *target_errno)
+{
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
+
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
+    ret = fh->t->to_fileio_fstat (fh->t, fh->fd, sb, target_errno);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_fstat (%d) = %d (%d)\n",
+			fd, ret, ret != -1 ? 0 : *target_errno);
+  return ret;
 }
 
 /* Close FD on the target.  Return 0, or -1 if an error occurs
@@ -2780,24 +2863,22 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 int
 target_fileio_close (int fd, int *target_errno)
 {
-  struct target_ops *t;
+  fileio_fh_t *fh = fileio_fd_to_fh (fd);
+  int ret = -1;
 
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
+  if (is_closed_fileio_fh (fh->fd))
+    *target_errno = EBADF;
+  else
     {
-      if (t->to_fileio_close != NULL)
-	{
-	  int ret = t->to_fileio_close (t, fd, target_errno);
-
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_close (%d) = %d (%d)\n",
-				fd, ret, ret != -1 ? 0 : *target_errno);
-	  return ret;
-	}
+      ret = fh->t->to_fileio_close (fh->t, fh->fd, target_errno);
+      release_fileio_fd (fd, fh);
     }
 
-  *target_errno = FILEIO_ENOSYS;
-  return -1;
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_fileio_close (%d) = %d (%d)\n",
+			fd, ret, ret != -1 ? 0 : *target_errno);
+  return ret;
 }
 
 /* Unlink FILENAME on the target.  Return 0, or -1 if an error
@@ -3389,10 +3470,18 @@ target_ranged_break_num_registers (void)
 
 /* See target.h.  */
 
-struct btrace_target_info *
-target_enable_btrace (ptid_t ptid)
+int
+target_supports_btrace (enum btrace_format format)
 {
-  return current_target.to_enable_btrace (&current_target, ptid);
+  return current_target.to_supports_btrace (&current_target, format);
+}
+
+/* See target.h.  */
+
+struct btrace_target_info *
+target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
+{
+  return current_target.to_enable_btrace (&current_target, ptid, conf);
 }
 
 /* See target.h.  */
@@ -3414,11 +3503,19 @@ target_teardown_btrace (struct btrace_target_info *btinfo)
 /* See target.h.  */
 
 enum btrace_error
-target_read_btrace (VEC (btrace_block_s) **btrace,
+target_read_btrace (struct btrace_data *btrace,
 		    struct btrace_target_info *btinfo,
 		    enum btrace_read_type type)
 {
   return current_target.to_read_btrace (&current_target, btrace, btinfo, type);
+}
+
+/* See target.h.  */
+
+const struct btrace_config *
+target_btrace_conf (const struct btrace_target_info *btinfo)
+{
+  return current_target.to_btrace_conf (&current_target, btinfo);
 }
 
 /* See target.h.  */
@@ -3554,23 +3651,6 @@ const struct frame_unwind *
 target_get_tailcall_unwinder (void)
 {
   return current_target.to_get_tailcall_unwinder (&current_target);
-}
-
-/* Default implementation of to_decr_pc_after_break.  */
-
-static CORE_ADDR
-default_target_decr_pc_after_break (struct target_ops *ops,
-				    struct gdbarch *gdbarch)
-{
-  return gdbarch_decr_pc_after_break (gdbarch);
-}
-
-/* See target.h.  */
-
-CORE_ADDR
-target_decr_pc_after_break (struct gdbarch *gdbarch)
-{
-  return current_target.to_decr_pc_after_break (&current_target, gdbarch);
 }
 
 /* See target.h.  */

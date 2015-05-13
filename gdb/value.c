@@ -1,6 +1,6 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 1986-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1704,6 +1704,27 @@ value_copy (struct value *arg)
   return val;
 }
 
+/* Return a "const" and/or "volatile" qualified version of the value V.
+   If CNST is true, then the returned value will be qualified with
+   "const".
+   if VOLTL is true, then the returned value will be qualified with
+   "volatile".  */
+
+struct value *
+make_cv_value (int cnst, int voltl, struct value *v)
+{
+  struct type *val_type = value_type (v);
+  struct type *enclosing_type = value_enclosing_type (v);
+  struct value *cv_val = value_copy (v);
+
+  deprecated_set_value_type (cv_val,
+			     make_cv_type (cnst, voltl, val_type, NULL));
+  set_value_enclosing_type (cv_val,
+			    make_cv_type (cnst, voltl, enclosing_type, NULL));
+
+  return cv_val;
+}
+
 /* Return a version of ARG that is non-lvalue.  */
 
 struct value *
@@ -1790,13 +1811,13 @@ record_latest_value (struct value *val)
   i = value_history_count % VALUE_HISTORY_CHUNK;
   if (i == 0)
     {
-      struct value_history_chunk *new
+      struct value_history_chunk *newobj
 	= (struct value_history_chunk *)
 
       xmalloc (sizeof (struct value_history_chunk));
-      memset (new->values, 0, sizeof new->values);
-      new->next = value_history_chain;
-      value_history_chain = new;
+      memset (newobj->values, 0, sizeof newobj->values);
+      newobj->next = value_history_chain;
+      value_history_chain = newobj;
     }
 
   value_history_chain->values[i] = val;
@@ -1891,6 +1912,66 @@ show_values (char *num_exp, int from_tty)
     }
 }
 
+enum internalvar_kind
+{
+  /* The internal variable is empty.  */
+  INTERNALVAR_VOID,
+
+  /* The value of the internal variable is provided directly as
+     a GDB value object.  */
+  INTERNALVAR_VALUE,
+
+  /* A fresh value is computed via a call-back routine on every
+     access to the internal variable.  */
+  INTERNALVAR_MAKE_VALUE,
+
+  /* The internal variable holds a GDB internal convenience function.  */
+  INTERNALVAR_FUNCTION,
+
+  /* The variable holds an integer value.  */
+  INTERNALVAR_INTEGER,
+
+  /* The variable holds a GDB-provided string.  */
+  INTERNALVAR_STRING,
+};
+
+union internalvar_data
+{
+  /* A value object used with INTERNALVAR_VALUE.  */
+  struct value *value;
+
+  /* The call-back routine used with INTERNALVAR_MAKE_VALUE.  */
+  struct
+  {
+    /* The functions to call.  */
+    const struct internalvar_funcs *functions;
+
+    /* The function's user-data.  */
+    void *data;
+  } make_value;
+
+  /* The internal function used with INTERNALVAR_FUNCTION.  */
+  struct
+  {
+    struct internal_function *function;
+    /* True if this is the canonical name for the function.  */
+    int canonical;
+  } fn;
+
+  /* An integer value used with INTERNALVAR_INTEGER.  */
+  struct
+  {
+    /* If type is non-NULL, it will be used as the type to generate
+       a value for this internal variable.  If type is NULL, a default
+       integer type for the architecture is used.  */
+    struct type *type;
+    LONGEST val;
+  } integer;
+
+  /* A string value used with INTERNALVAR_STRING.  */
+  char *string;
+};
+
 /* Internal variables.  These are variables within the debugger
    that hold values assigned by debugger commands.
    The user refers to them with a '$' prefix
@@ -1905,66 +1986,9 @@ struct internalvar
      enum internalvar_kind specifies the kind, and union internalvar_data
      provides the data associated with this particular kind.  */
 
-  enum internalvar_kind
-    {
-      /* The internal variable is empty.  */
-      INTERNALVAR_VOID,
+  enum internalvar_kind kind;
 
-      /* The value of the internal variable is provided directly as
-	 a GDB value object.  */
-      INTERNALVAR_VALUE,
-
-      /* A fresh value is computed via a call-back routine on every
-	 access to the internal variable.  */
-      INTERNALVAR_MAKE_VALUE,
-
-      /* The internal variable holds a GDB internal convenience function.  */
-      INTERNALVAR_FUNCTION,
-
-      /* The variable holds an integer value.  */
-      INTERNALVAR_INTEGER,
-
-      /* The variable holds a GDB-provided string.  */
-      INTERNALVAR_STRING,
-
-    } kind;
-
-  union internalvar_data
-    {
-      /* A value object used with INTERNALVAR_VALUE.  */
-      struct value *value;
-
-      /* The call-back routine used with INTERNALVAR_MAKE_VALUE.  */
-      struct
-        {
-	  /* The functions to call.  */
-	  const struct internalvar_funcs *functions;
-
-	  /* The function's user-data.  */
-	  void *data;
-        } make_value;
-
-      /* The internal function used with INTERNALVAR_FUNCTION.  */
-      struct
-	{
-	  struct internal_function *function;
-	  /* True if this is the canonical name for the function.  */
-	  int canonical;
-	} fn;
-
-      /* An integer value used with INTERNALVAR_INTEGER.  */
-      struct
-        {
-	  /* If type is non-NULL, it will be used as the type to generate
-	     a value for this internal variable.  If type is NULL, a default
-	     integer type for the architecture is used.  */
-	  struct type *type;
-	  LONGEST val;
-        } integer;
-
-      /* A string value used with INTERNALVAR_STRING.  */
-      char *string;
-    } u;
+  union internalvar_data u;
 };
 
 static struct internalvar *internalvars;
@@ -2542,7 +2566,6 @@ show_convenience (char *ignore, int from_tty)
   get_user_print_options (&opts);
   for (var = internalvars; var; var = var->next)
     {
-      volatile struct gdb_exception ex;
 
       if (!varseen)
 	{
@@ -2550,15 +2573,19 @@ show_convenience (char *ignore, int from_tty)
 	}
       printf_filtered (("$%s = "), var->name);
 
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
+      TRY
 	{
 	  struct value *val;
 
 	  val = value_of_internalvar (gdbarch, var);
 	  value_print (val, gdb_stdout, &opts);
 	}
-      if (ex.reason < 0)
-	fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	}
+      END_CATCH
+
       printf_filtered (("\n"));
     }
   if (!varseen)
@@ -2592,6 +2619,18 @@ value_of_xmethod (struct xmethod_worker *worker)
     }
 
   return worker->value;
+}
+
+/* Return the type of the result of TYPE_CODE_XMETHOD value METHOD.  */
+
+struct type *
+result_type_of_xmethod (struct value *method, int argc, struct value **argv)
+{
+  gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
+	      && method->lval == lval_xcallable && argc > 0);
+
+  return get_xmethod_result_type (method->location.xm_worker,
+				  argv[0], argv + 1, argc - 1);
 }
 
 /* Call the xmethod corresponding to the TYPE_CODE_XMETHOD value METHOD.  */
@@ -3491,7 +3530,7 @@ value_from_contents_and_address (struct type *type,
 				 const gdb_byte *valaddr,
 				 CORE_ADDR address)
 {
-  struct type *resolved_type = resolve_dynamic_type (type, address);
+  struct type *resolved_type = resolve_dynamic_type (type, valaddr, address);
   struct type *resolved_type_no_typedef = check_typedef (resolved_type);
   struct value *v;
 

@@ -1,5 +1,5 @@
 /* New version of run front end support for simulators.
-   Copyright (C) 1997-2014 Free Software Foundation, Inc.
+   Copyright (C) 1997-2015 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Need to be before general includes, to pick up e.g. _GNU_SOURCE.  */
 #ifdef HAVE_CONFIG_H
 #include "cconfig.h"
-#include "tconfig.h"
 #endif
 
 #include <signal.h>

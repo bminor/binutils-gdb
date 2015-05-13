@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 PE IMAGE COFF files.
-   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+   Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -601,11 +601,12 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
      section name, replacing .pdata by .xdata prefix.  */
   if (strcmp (pdata_section->name, ".pdata") != 0)
     {
-      char *xdata_name = alloca (strlen (pdata_section->name + 1));
+      size_t len = strlen (pdata_section->name);
+      char *xdata_name = alloca (len + 1);
 
-      xdata_name = strcpy (xdata_name, pdata_section->name);
+      xdata_name = memcpy (xdata_name, pdata_section->name, len + 1);
       /* Transform .pdata prefix into .xdata prefix.  */
-      if (strlen (xdata_name) > 1)
+      if (len > 1)
 	xdata_name [1] = 'x';
       xdata_section = pex64_get_section_by_rva (abfd, xdata_base,
 						xdata_name);

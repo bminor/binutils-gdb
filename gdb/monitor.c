@@ -1,6 +1,6 @@
 /* Remote debugging interface for boot monitors, for GDB.
 
-   Copyright (C) 1990-2014 Free Software Foundation, Inc.
+   Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
    Resurrected from the ashes by Stu Grossman.
@@ -767,6 +767,7 @@ monitor_open (const char *args, struct monitor_ops *mon_ops, int from_tty)
 	}
     }
 
+  serial_setparity (monitor_desc, serial_parity);
   serial_raw (monitor_desc);
 
   serial_flush_input (monitor_desc);

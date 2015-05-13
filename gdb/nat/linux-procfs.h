@@ -1,5 +1,5 @@
 /* Linux-specific PROCFS manipulation routines.
-   Copyright (C) 2011-2014 Free Software Foundation, Inc.
+   Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,28 +22,61 @@
 #include <unistd.h>
 
 /* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
-   found.  */
+   found.  Failure to open the /proc file results in a warning.  */
 
 extern int linux_proc_get_tgid (pid_t lwpid);
 
-/* Return the TracerPid of LWPID from /proc/pid/status.  Returns -1 if not
-   found.  */
+/* Return the TracerPid of LWPID from /proc/pid/status.  Returns -1 if
+   not found.  Does not warn on failure to open the /proc file.  */
 
-extern pid_t linux_proc_get_tracerpid (pid_t lwpid);
+extern pid_t linux_proc_get_tracerpid_nowarn (pid_t lwpid);
 
 /* Detect `T (stopped)' in `/proc/PID/status'.
    Other states including `T (tracing stop)' are reported as false.  */
 
 extern int linux_proc_pid_is_stopped (pid_t pid);
 
-/* Return non-zero if PID is a zombie.  */
+extern int linux_proc_pid_is_trace_stopped_nowarn (pid_t pid);
+
+/* Return non-zero if PID is a zombie.  Failure to open the
+   /proc/pid/status file results in a warning.  */
 
 extern int linux_proc_pid_is_zombie (pid_t pid);
+
+/* Return non-zero if PID is a zombie.  Does not warn on failure to
+   open the /proc file.  */
+
+extern int linux_proc_pid_is_zombie_nowarn (pid_t pid);
+
+/* Return non-zero if /proc/PID/status indicates that PID is gone
+   (i.e., in Z/Zombie or X/Dead state).  Failure to open the /proc
+   file is assumed to indicate the thread is gone.  */
+
+extern int linux_proc_pid_is_gone (pid_t pid);
 
 /* Return an opaque string identifying PID's NS namespace or NULL if
  * the information is unavailable.  The returned string must be
  * released with xfree.  */
 
 extern char *linux_proc_pid_get_ns (pid_t pid, const char *ns);
+
+/* Callback function for linux_proc_attach_tgid_threads.  If the PTID
+   thread is not yet known, try to attach to it and return true,
+   otherwise return false.  */
+typedef int (*linux_proc_attach_lwp_func) (ptid_t ptid);
+
+/* If PID is a tgid, scan the /proc/PID/task/ directory for existing
+   threads, and call FUNC for each thread found.  */
+extern void linux_proc_attach_tgid_threads (pid_t pid,
+					    linux_proc_attach_lwp_func func);
+
+/* Return true if the /proc/PID/task/ directory exists.  */
+extern int linux_proc_task_list_dir_exists (pid_t pid);
+
+/* Return the full absolute name of the executable file that was run
+   to create the process PID.  The returned value persists until this
+   function is next called.  */
+
+extern char *linux_proc_pid_to_exec_file (int pid);
 
 #endif /* COMMON_LINUX_PROCFS_H */

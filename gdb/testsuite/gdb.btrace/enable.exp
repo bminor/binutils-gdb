@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 #
-# Copyright 2013-2014 Free Software Foundation, Inc.
+# Copyright 2013-2015 Free Software Foundation, Inc.
 #
 # Contributed by Intel Corp. <christian.himpel@intel.com>
 #
@@ -56,7 +56,9 @@ gdb_test "record btrace" "The process is already being recorded\\.  Use \"record
 gdb_test "record full" "The process is already being recorded\\.  Use \"record stop\" to stop recording first\\." "record full cannot be enabled"
 
 # no trace recorded yet
-gdb_test "info record" "Active record target: record-btrace\r\nRecorded 0 instructions in 0 functions for thread 1.*\\." "info record without trace"
+gdb_test "info record" "Active record target: record-btrace\r
+.*\r
+Recorded 0 instructions in 0 functions \\\(0 gaps\\\) for thread 1.*\\." "info record without trace"
 
 # stop btrace record
 gdb_test "record stop" "Process record is stopped and all execution logs are deleted\\." "record stop"

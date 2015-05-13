@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/hppa
 
-   Copyright (C) 2004-2014 Free Software Foundation, Inc.
+   Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -131,7 +131,9 @@ hppaobsd_supply_fpregset (const struct regset *regset,
 static const struct regset hppaobsd_gregset =
 {
   NULL,
-  hppaobsd_supply_gregset
+  hppaobsd_supply_gregset,
+  NULL,
+  REGSET_VARIABLE_SIZE
 };
 
 static const struct regset hppaobsd_fpregset =

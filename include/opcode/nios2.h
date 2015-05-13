@@ -1,5 +1,5 @@
 /* Nios II opcode list for GAS, the GNU assembler.
-   Copyright (C) 2012-2014 Free Software Foundation, Inc.
+   Copyright (C) 2012-2015 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -24,6 +24,10 @@
 #define _NIOS2_H_
 
 #include "bfd.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /****************************************************************************
  * This file contains structures, bit masks and shift counts used
@@ -152,5 +156,9 @@ extern int nios2_num_regs;
 /* Return the opcode descriptor for a single instruction.  */
 extern const struct nios2_opcode *
 nios2_find_opcode_hash (unsigned long, unsigned long);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _NIOS2_H */

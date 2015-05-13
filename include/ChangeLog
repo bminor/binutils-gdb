@@ -1,3 +1,84 @@
+2015-05-12  Jiong Wang  <jiong.wang@arm.com>
+
+	* elf/aarch64.h (R_AARCH64_P32_LD32_GOTPAGE_LO14): New enumeration.
+
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Merge with gcc:
+	2014-11-11  Anthony Brandon  <anthony.brandon@gmail.com>
+		    Manuel López-Ibáñez  <manu@gcc.gnu.org>
+
+	PR driver/36312
+	* filenames.h: Add prototype for canonical_filename_eq.
+
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* dis-asm.h (print_insn_rl78_g10): New.
+	(print_insn_rl78_g13): New.
+	(print_insn_rl78_g14): New.
+	(rl78_get_disassembler): New.
+
+2015-04-17  Richard Earnshaw  <rearnsha@arm.com>
+
+	Merge from gcc:
+	2015-03-19  Richard Biener  <rguenther@suse.de>
+
+		* partition.h (struct partition_elem): Re-order elements to
+		avoid padding.
+
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add compress_debug.
+
+2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/pr17709
+	* bfdlink.h (bfd_link_info): Add extern_protected_data.
+
+2015-03-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR ld/16572
+	* elf/arm.h (EF_ARM_HASENTRY): Remove.
+
+2015-02-19  Pedro Alves  <palves@redhat.com>
+
+	* floatformat.h [__cplusplus]: Wrap in extern "C".
+
+2015-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17973
+	* bfdlink.h (struct bfd_link_info): Delete loading_lto_outputs.
+
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2.h: Add DW_LANG_Fortran03 and DW_LANG_Fortran08.
+
+2015-02-09  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2.def: Add DW_TAG_atomic_type.
+
+2015-01-28  James Bowman  <james.bowman@ftdichip.com>
+
+	* dis-asm.h (print_insn_ft32): Declare.
+
+2015-01-15  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2.def (DW_AT_noreturn): New DWARF5 attribute.
+
+2015-01-14  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* libiberty.h: Merge from GCC.
+
+2015-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
+2014-12-24  Uros Bizjak  <ubizjak@gmail.com>
+	    Ben Elliston  <bje@au.ibm.com>
+	    Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+
+	* libiberty.h (xasprintf): Declare.
+
 2014-12-23  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_hash_entry): Comment non_ir_ref.  Add
@@ -10,6 +91,12 @@
 	* gcc-c-fe.def: New file.
 	* gcc-c-interface.h: New file.
 	* gcc-interface.h: New file.
+
+2014-12-11  Uros Bizjak  <ubizjak@gmail.com>
+            Ben Elliston  <bje@au.ibm.com>
+            Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+
+	* libiberty.h (xvasprintf): Declare.
 
 2014-12-06  Eric Botcazou  <ebotcazou@adacore.com>
 
@@ -52,9 +139,17 @@
 	* elf/mips.h (AFL_EXT_OCTEON3): Define.
 	INSN_OCTEON3, CPU_OCTEON3): Define.
 
+2014-10-28  Yury Gribov  <y.gribov@samsung.com>
+
+	* libiberty.h (strtol, strtoul, strtoll, strtoull): New prototypes.
+
 2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elf/mips.h (AFL_ASE_MASK): Define.
+
+2014-10-15  David Malcolm  <dmalcolm@redhat.com>
+
+	* libiberty.h (choose_tmpdir): New prototype.
 
 2014-09-26  Max Ostapenko  <m.ostapenko@partner.samsung.com>
 
@@ -2147,7 +2242,7 @@
 
 For older changes see ChangeLog-9103
 
-Copyright (C) 2004-2012 Free Software Foundation, Inc.
+Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
