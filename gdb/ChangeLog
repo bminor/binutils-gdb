@@ -1,5 +1,9 @@
 2015-05-13  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.9.1 released.
+
+2015-05-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Create "Changes in GDB 7.9.1" section.  Move news about
 	Xmethods now being able to specify a result type to that new
 	sectioin.
