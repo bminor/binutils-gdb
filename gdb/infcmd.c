@@ -1519,7 +1519,7 @@ get_return_value (struct value *function, struct type *value_type,
   struct value *value;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
-  /* If stop_registers were not saved, use the current registers.  */
+  /* If registers were not saved, use the current registers.  */
   if (ctx_saver != NULL)
     stop_regs = dummy_frame_context_saver_get_regs (ctx_saver);
   else
@@ -1786,7 +1786,7 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   set_longjmp_breakpoint (tp, frame_id);
   make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
-  /* We want stop_registers, please...  */
+  /* We want to print return value, please...  */
   tp->control.proceed_to_finish = 1;
   cargs = xmalloc (sizeof (*cargs));
 

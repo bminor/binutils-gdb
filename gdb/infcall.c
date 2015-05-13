@@ -398,7 +398,7 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 
   disable_watchpoints_before_interactive_call_start ();
 
-  /* We want stop_registers, please...  */
+  /* We want to print return value, please...  */
   call_thread->control.proceed_to_finish = 1;
 
   TRY

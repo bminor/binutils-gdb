@@ -1,5 +1,17 @@
 2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdbthread.h (struct thread_control_state): Update comment for
+	proceed_to_finish.
+	* infcall.c (run_inferior_call): Update comment about
+	proceed_to_finish.
+	* infcmd.c (get_return_value): Update comment about stop_registers.
+	(finish_forward): Update comment about proceed_to_finish.
+	* infrun.c (stop_registers): Remove.
+	(clear_proceed_status, normal_stop): Remove stop_registers handling.
+	* infrun.h (stop_registers): Remove.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* infcall.c (struct dummy_frame_context_saver)
 	(dummy_frame_context_saver_data_free, dummy_frame_context_saver_dtor)
 	(dummy_frame_context_saver_drop, dummy_frame_context_saver_cleanup)
