@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.25.51.0.1 for Linux, which is
-based on binutils 2014 1224 master branch on sourceware.org plus
+This is the beta release of binutils 2.25.51.0.2 for Linux, which is
+based on binutils 2015 0515 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -39,6 +39,28 @@ default, ld.bfd will be installed as ld.  You can use the configure
 option, --enable-gold=both/gold to choose gold as the default linker,
 ld.  IA-32 binary and X64_64 binary tar balls are configured with
 --enable-gold=both/ld --enable-plugins --enable-threads.
+
+Starting from the 2.25.51.0.2 release, the x86 assembler will optimize
+out relocations against defined non-weak global branch targets with
+default visibility by default.  This Linux kernel patch is needed to
+create a working x86 Linux kernel if it hasn't been applied:
+
+diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+index ae6588b..b91a00c 100644
+--- a/arch/x86/kernel/head_64.S
++++ b/arch/x86/kernel/head_64.S
+@@ -339,8 +339,8 @@ early_idt_handlers:
+ 	i = i + 1
+ 	.endr
+ 
+-/* This is global to keep gas from relaxing the jumps */
+-ENTRY(early_idt_handler)
++/* This is weak to keep gas from relaxing the jumps */
++WEAK(early_idt_handler)
+ 	cld
+ 
+ 	cmpl $2,(%rsp)		# X86_TRAP_NMI
+-- 
 
 Starting from the 2.18.50.0.4 release, the x86 assembler no longer
 accepts
@@ -120,12 +142,83 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.25.51.0.1 to
+Please report any bugs related to binutils 2.25.51.0.2 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.25.51.0.1:
+
+1. Update from binutils 2015 0515.
+2. Add support for Intel MCU psABI.
+3. Add supporr for AMD znver1 processor.
+4. Enable gABI compressed debug section support to as and binutils.
+5. Add --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi] support
+to ld and gold.
+6. Don't create .plt section if not needed.
+7. Add branch optimization to x86 assembler.
+8. Change x86 assembler to limit multi-byte nop instructions to 10 bytes.
+9. Remove .note section for -march= in x86 assembler.
+10. Don't change compressed input debug section names.  PR binutils/18209.
+11. Support copy relocation in PIE for i386.  PR ld/18289.
+12. Support copy relocation on protected symbols for i386 and x86-64.
+PRs ld/15228/17709.
+13. Don't remove _init/_fini functions with --gc-sections.  PR ld/18223.
+14. Don't remove .bss section with --gc-sections.  PR ld/17615.
+15. Don't create large padding for PT_GNU_RELRO segment.  PR ld/18176.
+16. Add llvm plugin support to ld.  PRs ld/17878/18250.
+17. Generate correct sh_info for .rel.plt/.rela.plt sections.  PR ld/18169.
+18. Fix PIE copy relocations with pointers on x86-64.  PR ld/17827.
+19. Change ld not to print newlines in INPUT statements.  PRs ld/18344.
+20. Support both AMD64 and Intel64 in x86-64 assembler and
+disassembler.  PR binutis/18386.
+21. Fix x86 disassembler for rdrand/rdseed.  PR binutils/17898.
+22. Add -z/--decompress option to readelf.
+23. Add --update-section option to objcopy.
+24. Properly dump .debug_loc section.  PR binutils/18374.
+25. Properly dump .debug_str_offsets section.  PR binutils/18218.
+26. Change readelf -s --wide to issue an error.  PR binutils/18101.
+27. Change objcopy not to leave temporary directory in case of error.
+PR binutils/17636.
+28. Avoid gaps between sections and section headers when ld -s is used.
+PRs ld/17773/17842.
+29. Issue a warning for relocation in readonly section for -z text.
+PR ld/17935.
+30. Don't complain about -fPIC for undefined symbol.  PR ld/17847.
+31. Don't ignore undefined references produced by linker plugin.
+PRs ld/12365/14272.
+32. Removed undefined symbols in static executables.  PR ld/4317.
+33. Remove useless symbols.  PRs ld/17973/17975.
+34. Avoid seg fault when input relocation is incompatible with output.
+PR ld/18160.
+35. Fix more memory access issues.  PRs ld/17512/17531.
+36. Add Nuxi CloudABI support.
+37. Add ft32 support.
+38. Add Linux/h8300 support.
+39. Improve gold support.
+40. Improve COFF support.
+41. Improve PE support.
+42. Improve aarch64 support.
+43. Improve arm support.
+44. Improve avr support.
+45. Improve m32c support.
+46. Improve mep support.
+47. Improve microblaze support.
+48. Improve mips support.
+49. Improve moxie support.
+50. Improve msp430 support.
+51. Improve nds32 support.
+52. Improve pdp11 support.
+53. Improve ppc support.
+54. Improve rl78 support.
+55. Improve rx support.
+56. Improve s390 support.
+57. Improve sh support.
+58. Improve sh64 support.
+59. Improve v850 support.
+60. Improve xtensa support.
 
 Changes from binutils 2.24.51.0.4:
 
@@ -1002,7 +1095,7 @@ already been defined.  PR 12001.
 16. Improve ppc support.
 17. Improve tic6x support.
 
-It is available as hjl/linux/release/2.25.51.0.1 tag at
+It is available as users/hjl/linux/release/2.25.51.0.2 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -1011,4 +1104,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-12/24/2014
+05/18/2015
