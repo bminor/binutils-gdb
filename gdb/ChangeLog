@@ -1,5 +1,16 @@
 2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dummy-frame.c (struct dummy_frame_dtor_list): New.
+	(struct dummy_frame): Replace dtor and dtor_data by dtor_list.
+	(remove_dummy_frame): Process dtor_list.
+	(pop_dummy_frame): Process dtor_list.
+	(register_dummy_frame_dtor): Maintain dtor_list.
+	(find_dummy_frame_dtor): Handle dtor_list.
+	* dummy-frame.h (register_dummy_frame_dtor, find_dummy_frame_dtor):
+	Update comments.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* compile/compile-object-run.c (do_module_cleanup): Add parameter
 	registers_valid.
 	(compile_object_run): Update do_module_cleanup caller.
