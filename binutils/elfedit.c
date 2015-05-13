@@ -82,8 +82,7 @@ elf_class (int mach)
     case EM_NONE:
       return ELF_CLASS_BOTH;
     default:
-      error (_("Unknown machine type: %d\n"), mach);
-      return ELF_CLASS_UNKNOWN;
+      return ELF_CLASS_BOTH;
     }
 }
 
