@@ -1,3 +1,8 @@
+2015-05-14  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Remove overflow
+	check restrictions.
+
 2015-05-14  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (elf_xtensa_gc_sweep_hook): Treat PLT reference
