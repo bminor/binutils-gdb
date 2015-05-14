@@ -1,3 +1,8 @@
+2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (compress_debug): Don't write the zlib header, which
+	is handled by bfd_update_compression_header.
+
 2015-05-13  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (xtensa_relax_frag): Allow trampoline to be

@@ -12074,30 +12074,14 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 
 static int
 uncompress_section_contents (unsigned char **buffer,
+			     dwarf_size_type uncompressed_size,
 			     dwarf_size_type *size)
 {
   dwarf_size_type compressed_size = *size;
   unsigned char * compressed_buffer = *buffer;
-  dwarf_size_type uncompressed_size;
   unsigned char * uncompressed_buffer;
   z_stream strm;
   int rc;
-  dwarf_size_type header_size = 12;
-
-  /* Read the zlib header.  In this case, it should be "ZLIB" followed
-     by the uncompressed section size, 8 bytes in big-endian order.  */
-  if (compressed_size < header_size
-      || ! streq ((char *) compressed_buffer, "ZLIB"))
-    return 0;
-
-  uncompressed_size = compressed_buffer[4]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[5]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[6]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[7]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[8]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[9]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[10]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[11];
 
   /* It is possible the section consists of several compressed
      buffers concatenated together, so we uncompress in a loop.  */
@@ -12107,8 +12091,8 @@ uncompress_section_contents (unsigned char **buffer,
      we first zero the entire z_stream structure and then set the fields
      that we need.  */
   memset (& strm, 0, sizeof strm);
-  strm.avail_in = compressed_size - header_size;
-  strm.next_in = (Bytef *) compressed_buffer + header_size;
+  strm.avail_in = compressed_size;
+  strm.next_in = (Bytef *) compressed_buffer;
   strm.avail_out = uncompressed_size;
   uncompressed_buffer = (unsigned char *) xmalloc (uncompressed_size);
 
@@ -12163,6 +12147,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     {
       unsigned char *start = section->start;
       dwarf_size_type size = sec->sh_size;
+      dwarf_size_type uncompressed_size = 0;
 
       if ((sec->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -12172,11 +12157,30 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB
 	      || chdr.ch_addralign != sec->sh_addralign)
 	    return 0;
+	  uncompressed_size = chdr.ch_size;
 	  start += compression_header_size;
 	  size -= compression_header_size;
 	}
+      else if (size > 12 && streq ((char *) start, "ZLIB"))
+	{
+	  /* Read the zlib header.  In this case, it should be "ZLIB"
+	     followed by the uncompressed section size, 8 bytes in
+	     big-endian order.  */
+	  uncompressed_size = start[4]; uncompressed_size <<= 8;
+	  uncompressed_size += start[5]; uncompressed_size <<= 8;
+	  uncompressed_size += start[6]; uncompressed_size <<= 8;
+	  uncompressed_size += start[7]; uncompressed_size <<= 8;
+	  uncompressed_size += start[8]; uncompressed_size <<= 8;
+	  uncompressed_size += start[9]; uncompressed_size <<= 8;
+	  uncompressed_size += start[10]; uncompressed_size <<= 8;
+	  uncompressed_size += start[11];
+	  start += 12;
+	  size -= 12;
+	}
 
-      if (uncompress_section_contents (&start, &size))
+      if (uncompressed_size
+	  && uncompress_section_contents (&start, uncompressed_size,
+					  &size))
 	{
 	  /* Free the compressed buffer, update the section buffer
 	     and the section size if uncompress is successful.  */
