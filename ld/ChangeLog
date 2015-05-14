@@ -1,3 +1,11 @@
+2015-05-17  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* configure.ac (AC_PROG_GREP): Check for grep program.
+	(elf_list_options,elf_shlib_list_options,elf_plt_unwind_list_options):
+	Enable ELF option printing for emulations containing
+	'TEMPLATE_NAME=elf32'.
+	* configure: Regenerate.
+
 2015-05-14  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (ASSERT): Describe the interaction with PROVIDEd
