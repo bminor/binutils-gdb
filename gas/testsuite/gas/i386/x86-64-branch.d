@@ -1,5 +1,5 @@
 #as: -J
-#objdump: -dw
+#objdump: -dw -MIntel64
 #name: x86-64 branch
 
 .*: +file format .*

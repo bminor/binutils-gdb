@@ -9550,6 +9550,8 @@ const char *md_shortopts = "qn";
 #define OPTION_OMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
 #define OPTION_MEVEXRCIG (OPTION_MD_BASE + 20)
 #define OPTION_MSHARED (OPTION_MD_BASE + 21)
+#define OPTION_MAMD64 (OPTION_MD_BASE + 22)
+#define OPTION_MINTEL64 (OPTION_MD_BASE + 23)
 
 struct option md_longopts[] =
 {
@@ -9582,6 +9584,8 @@ struct option md_longopts[] =
 #endif
   {"momit-lock-prefix", required_argument, NULL, OPTION_OMIT_LOCK_PREFIX},
   {"mevexrcig", required_argument, NULL, OPTION_MEVEXRCIG},
+  {"mamd64", no_argument, NULL, OPTION_MAMD64},
+  {"mintel64", no_argument, NULL, OPTION_MINTEL64},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -9896,6 +9900,20 @@ md_parse_option (int c, char *arg)
         omit_lock_prefix = 0;
       else
         as_fatal (_("invalid -momit-lock-prefix= option: `%s'"), arg);
+      break;
+
+    case OPTION_MAMD64:
+      cpu_arch_flags.bitfield.cpuamd64 = 1;
+      cpu_arch_flags.bitfield.cpuintel64 = 0;
+      cpu_arch_isa_flags.bitfield.cpuamd64 = 1;
+      cpu_arch_isa_flags.bitfield.cpuintel64 = 0;
+      break;
+
+    case OPTION_MINTEL64:
+      cpu_arch_flags.bitfield.cpuamd64 = 0;
+      cpu_arch_flags.bitfield.cpuintel64 = 1;
+      cpu_arch_isa_flags.bitfield.cpuamd64 = 0;
+      cpu_arch_isa_flags.bitfield.cpuintel64 = 1;
       break;
 
     default:

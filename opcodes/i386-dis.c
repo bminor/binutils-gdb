@@ -12346,11 +12346,11 @@ static char scale_char;
 
 enum x86_64_isa
 {
-  amd64,
+  amd64 = 0,
   intel64
 };
 
-static enum x86_64_isa isa64 = amd64;
+static enum x86_64_isa isa64;
 
 /* Here for backwards compatibility.  When gdb stops using
    print_insn_i386_att and print_insn_i386_intel these functions can
@@ -12401,8 +12401,8 @@ with the -M switch (multiple options should be separated by commas):\n"));
   fprintf (stream, _("  data32      Assume 32bit data size\n"));
   fprintf (stream, _("  data16      Assume 16bit data size\n"));
   fprintf (stream, _("  suffix      Always display instruction suffix in AT&T syntax\n"));
-  fprintf (stream, _("  AMD64       Display instruction in AMD64 ISA\n"));
-  fprintf (stream, _("  Intel64     Display instruction in Intel64 ISA\n"));
+  fprintf (stream, _("  amd64       Display instruction in AMD64 ISA\n"));
+  fprintf (stream, _("  intel64     Display instruction in Intel64 ISA\n"));
 }
 
 /* Bad opcode.  */
@@ -12886,9 +12886,9 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   for (p = info->disassembler_options; p != NULL; )
     {
-      if (!strncasecmp (p, "amd64", sizeof "amd64"))
+      if (CONST_STRNEQ (p, "amd64"))
 	isa64 = amd64;
-      else if (!strncasecmp (p, "intel64", sizeof "intel64"))
+      else if (CONST_STRNEQ (p, "intel64"))
 	isa64 = intel64;
       else if (CONST_STRNEQ (p, "x86-64"))
 	{
