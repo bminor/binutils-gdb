@@ -1,4 +1,15 @@
 2015-05-15  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* event-loop.c (gdb_notifier) <next_file_handler,
+	next_poll_fds_index>: New fields.
+	(get_next_file_handler_to_handle_and_advance): New function.
+	(delete_file_handler): If deleting the next file handler to
+	handle, advance to the next file handler.
+	(gdb_wait_for_event): Bail early if no event fired.  Poll file
+	handlers in round-robin fashion.
+
+2015-05-15  Pedro Alves  <palves@redhat.com>
 
 	* linux-tdep.c (linux_find_memory_regions_full): Rename local
 	'private' to 'priv'.
