@@ -356,3 +356,19 @@ if ![is_remote host] {
 }
 
 readelf_test -n $tempfile readelf.n  {}
+
+# PR 18374 - Check that relocations against the .debug_loc section
+# do not prevent readelf from displaying all the location lists.
+if {![binutils_assemble $srcdir/$subdir/pr18374.s tmpdir/pr18374.o]} then {
+    perror "could not assemble PR18374 test file"
+    unresolved "readelf - failed to assemble"
+    return
+}
+
+if ![is_remote host] {
+    set tempfile tmpdir/pr18374.o
+} else {
+    set tempfile [remote_download host tmpdir/pr18374.o]
+}
+
+readelf_test --debug-dump=loc $tempfile readelf.pr18374  {}

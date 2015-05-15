@@ -11302,7 +11302,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_H8_300H:
       return reloc_type == 1; /* R_H8_DIR32.  */
     case EM_IA_64:
-      return reloc_type == 0x65; /* R_IA64_SECREL32LSB.  */
+      return reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
+	|| reloc_type == 0x25;  /* R_IA64_DIR32LSB.  */
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 2; /* R_IP2K_32.  */
@@ -11696,18 +11697,50 @@ is_none_reloc (unsigned int reloc_type)
   return FALSE;
 }
 
+/* Returns TRUE if there is a relocation against
+   section NAME at OFFSET bytes.  */
+
+bfd_boolean
+reloc_at (struct dwarf_section * dsec, dwarf_vma offset)
+{
+  Elf_Internal_Rela * relocs;
+  Elf_Internal_Rela * rp;
+
+  if (dsec == NULL || dsec->reloc_info == NULL)
+    return FALSE;
+
+  relocs = (Elf_Internal_Rela *) dsec->reloc_info;
+
+  for (rp = relocs; rp < relocs + dsec->num_relocs; ++rp)
+    if (rp->r_offset == offset)
+      return TRUE;
+
+   return FALSE;
+}
+
 /* Apply relocations to a section.
    Note: So far support has been added only for those relocations
    which can be found in debug sections.
+   If RELOCS_RETURN is non-NULL then returns in it a pointer to the
+   loaded relocs.  It is then the caller's responsibility to free them.
    FIXME: Add support for more relocations ?  */
 
 static void
-apply_relocations (void * file,
-		   const Elf_Internal_Shdr * section,
-		   unsigned char * start, bfd_size_type size)
+apply_relocations (void *                     file,
+		   const Elf_Internal_Shdr *  section,
+		   unsigned char *            start,
+		   bfd_size_type              size,
+		   void **                     relocs_return,
+		   unsigned long *            num_relocs_return)
 {
   Elf_Internal_Shdr * relsec;
   unsigned char * end = start + size;
+
+  if (relocs_return != NULL)
+    {
+      * (Elf_Internal_Rela **) relocs_return = NULL;
+      * num_relocs_return = 0;
+    }
 
   if (elf_header.e_type != ET_REL)
     return;
@@ -11860,7 +11893,15 @@ apply_relocations (void * file,
 	}
 
       free (symtab);
-      free (relocs);
+
+      if (relocs_return)
+	{
+	  * (Elf_Internal_Rela **) relocs_return = relocs;
+	  * num_relocs_return = num_relocs;
+	}
+      else
+	free (relocs);
+
       break;
     }
 }
@@ -11999,7 +12040,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 
   if (relocate)
     {
-      apply_relocations (file, section, start, section->sh_size);
+      apply_relocations (file, section, start, section->sh_size, NULL, NULL);
     }
   else
     {
@@ -12194,7 +12235,13 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     return 0;
 
   if (debug_displays [debug].relocate)
-    apply_relocations ((FILE *) file, sec, section->start, section->size);
+    apply_relocations ((FILE *) file, sec, section->start, section->size,
+		       & section->reloc_info, & section->num_relocs);
+  else
+    {
+      section->reloc_info = NULL;
+      section->num_relocs = 0;
+    }
 
   return 1;
 }

@@ -8,6 +8,30 @@
 	uncompressed size.  Don't check the zlib header.
 	(load_specific_debug_section): Updated.
 
+2015-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18374
+	* dwarf.h (struct dwarf_section): Add reloc_info and num_relocs
+	fields.
+	(struct dwarf_section_display): Change bitfield to boolean.
+	(reloc_at): Add prototype.
+	* dwarf.c (display_loc_list): Ignore list terminators if there are
+	relocs against them.
+	(display_debug_loc): Issue a warning if there are relocs against
+	the .debug_loc section.
+	(display_displays): Initialise reloc_info and num_relocs fields.
+	* objdump.c (load_specific_debug_section): Initialise reloc_info
+	and num_relocs fields.
+	(reloc_at): New function.
+	* readelf.c (is_32bit_abs_reloc): Add IA64's R_IA64_DIS32LSB
+	reloc.
+	(reloc_at): New function.
+	(apply_relocations): Add relocs_return and num_relocs_return
+	parameters.  Fill them in with the loaded relocs if non-NULL.
+	(dump_section_as_bytes): Update call to apply_relocations.
+	(load_specific_debug_section): Initialise reloc_info and
+	num_relocs fields.
+
 2015-05-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfedit.c (elf_class): Return ELF_CLASS_BOTH by default.

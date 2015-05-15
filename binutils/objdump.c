@@ -2278,6 +2278,8 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   if (section->start != NULL)
     return 1;
 
+  section->reloc_info = NULL;
+  section->num_relocs = 0;  
   section->address = bfd_get_section_vma (abfd, sec);
   section->size = bfd_get_section_size (sec);
   section->start = NULL;
@@ -2308,9 +2310,47 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	          section->name);
           return 0;
         }
-    }
+
+      long reloc_size;
+
+      reloc_size = bfd_get_reloc_upper_bound (abfd, sec);
+      if (reloc_size > 0)
+	{
+	  unsigned long reloc_count;
+	  arelent **relocs;
+
+	  relocs = (arelent **) xmalloc (reloc_size);
+
+	  reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, NULL);
+	  if (reloc_count == 0)
+	    free (relocs);
+	  else
+	    {
+	      section->reloc_info = relocs;
+	      section->num_relocs = reloc_count;
+	    }
+	}
+    }	
 
   return 1;
+}
+
+bfd_boolean
+reloc_at (struct dwarf_section * dsec, dwarf_vma offset)
+{
+  arelent ** relocs;
+  arelent * rp;
+
+  if (dsec == NULL || dsec->reloc_info == NULL)
+    return FALSE;
+
+  relocs = (arelent **) dsec->reloc_info;
+
+  for (; (rp = * relocs) != NULL; ++ relocs)
+    if (rp->address == offset)
+      return TRUE;
+
+  return FALSE;
 }
 
 int
