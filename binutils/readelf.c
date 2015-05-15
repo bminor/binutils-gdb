@@ -12004,13 +12004,14 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 {
   Elf_Internal_Shdr *  relsec;
   bfd_size_type        num_bytes;
-  char *               data;
-  char *               end;
-  char *               real_start;
-  char *               start;
+  unsigned char *      data;
+  unsigned char *      end;
+  unsigned char *      real_start;
+  unsigned char *      start;
   bfd_boolean          some_strings_shown;
 
-  real_start = start = get_section_contents (section, file);
+  real_start = start = (unsigned char *) get_section_contents (section,
+							       file);
   if (start == NULL)
     return;
   num_bytes = section->sh_size;
@@ -12054,11 +12055,11 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 	}
 
       if (uncompressed_size
-	  && uncompress_section_contents ((unsigned char **) & start,
+	  && uncompress_section_contents (& start,
 					  uncompressed_size, & new_size))
 	num_bytes = new_size;
     }
-  
+
   /* If the section being dumped has relocations against it the user might
      be expecting these relocations to have been applied.  Check for this
      case and issue a warning message in order to avoid confusion.
@@ -12102,9 +12103,9 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 #endif
 	  if (maxlen > 0)
 	    {
-	      print_symbol ((int) maxlen, data);
+	      print_symbol ((int) maxlen, (const char *) data);
 	      putchar ('\n');
-	      data += strnlen (data, maxlen);
+	      data += strnlen ((const char *) data, maxlen);
 	    }
 	  else
 	    {
