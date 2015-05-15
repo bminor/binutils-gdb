@@ -1,5 +1,10 @@
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c (dump_section_as_strings): Change pointers from
+	char * to unsigned char *.
+
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutis/18386
 	* doc/binutils.texi: Document -Mamd64 and -Mintel64.
 
