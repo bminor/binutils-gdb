@@ -524,6 +524,11 @@ static enum x86_elf_abi x86_elf_abi = I386_ABI;
 static int use_big_obj = 0;
 #endif
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+/* 1 if generating code for a shared library.  */
+static int shared = 0;
+#endif
+
 /* 1 for intel syntax,
    0 if att syntax.  */
 static int intel_syntax = 0;
@@ -8818,7 +8823,7 @@ i386_frag_max_var (fragS *frag)
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 static int
-elf_symbol_resolved_in_segment_p (symbolS *fr_symbol)
+elf_symbol_resolved_in_segment_p (symbolS *fr_symbol, offsetT fr_var)
 {
   /* STT_GNU_IFUNC symbol must go through PLT.  */
   if ((symbol_get_bfdsym (fr_symbol)->flags
@@ -8829,9 +8834,24 @@ elf_symbol_resolved_in_segment_p (symbolS *fr_symbol)
     /* Symbol may be weak or local.  */
     return !S_IS_WEAK (fr_symbol);
 
+  /* Global symbols with non-default visibility can't be preempted. */
+  if (ELF_ST_VISIBILITY (S_GET_OTHER (fr_symbol)) != STV_DEFAULT)
+    return 1;
+
+  if (fr_var != NO_RELOC)
+    switch ((enum bfd_reloc_code_real) fr_var)
+      {
+      case BFD_RELOC_386_PLT32:
+      case BFD_RELOC_X86_64_PLT32:
+	/* Symbol with PLT relocatin may be preempted. */
+	return 0;
+      default:
+	abort ();
+      }
+
   /* Global symbols with default visibility in a shared library may be
      preempted by another definition.  */
-  return ELF_ST_VISIBILITY (S_GET_OTHER (fr_symbol)) != STV_DEFAULT;
+  return !shared;
 }
 #endif
 
@@ -8858,7 +8878,8 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       || (IS_ELF
-	  && !elf_symbol_resolved_in_segment_p (fragP->fr_symbol))
+	  && !elf_symbol_resolved_in_segment_p (fragP->fr_symbol,
+						fragP->fr_var))
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
       || (OUTPUT_FLAVOR == bfd_target_coff_flavour
@@ -9528,6 +9549,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MBIG_OBJ (OPTION_MD_BASE + 18)
 #define OPTION_OMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
 #define OPTION_MEVEXRCIG (OPTION_MD_BASE + 20)
+#define OPTION_MSHARED (OPTION_MD_BASE + 21)
 
 struct option md_longopts[] =
 {
@@ -9538,6 +9560,7 @@ struct option md_longopts[] =
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"x32", no_argument, NULL, OPTION_X32},
+  {"mshared", no_argument, NULL, OPTION_MSHARED},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
   {"march", required_argument, NULL, OPTION_MARCH},
@@ -9597,6 +9620,10 @@ md_parse_option (int c, char *arg)
     case 's':
       /* -s: On i386 Solaris, this tells the native assembler to use
 	 .stab instead of .stab.excl.  We always use .stab anyhow.  */
+      break;
+
+    case OPTION_MSHARED:
+      shared = 1;
       break;
 #endif
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
@@ -10027,6 +10054,8 @@ md_show_usage (FILE *stream)
   -mold-gcc               support old (<= 2.8.1) versions of gcc\n"));
   fprintf (stream, _("\
   -madd-bnd-prefix        add BND prefix for all valid branches\n"));
+  fprintf (stream, _("\
+  -mshared                disable branch optimization for shared code\n"));
 # if defined (TE_PE) || defined (TE_PEP)
   fprintf (stream, _("\
   -mbig-obj               generate big object files\n"));

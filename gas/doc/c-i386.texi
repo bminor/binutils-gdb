@@ -298,6 +298,17 @@ The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
 This option forces the assembler to add BND prefix to all branches, even
 if such prefix was not explicitly specified in the source code.
 
+@cindex @samp{-mshared} option, i386
+@cindex @samp{-mshared} option, x86-64
+@item -mno-shared
+On ELF target, the assembler normally optimizes out non-PLT relocations
+against defined non-weak global branch targets with default visibility.
+The @samp{-mshared} option tells the assembler to generate code which
+may go into a shared library where all non-weak global branch targets
+with default visibility can be preempted.  The resulting code is
+slightly bigger.  This option only affects the handling of branch
+instructions.
+
 @cindex @samp{-mbig-obj} option, x86-64
 @item -mbig-obj
 On x86-64 PE/COFF target this option forces the use of big object file
