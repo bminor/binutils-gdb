@@ -1,3 +1,14 @@
+2015-05-15  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (options): Add "decompress".
+	(usage): Mention -z/--decompress.
+	(parse_args): Handle -z.
+	(uncompress_section_contents): Move to earlier in the file.
+	(dump_section_as_strings): If requested, decompress the section
+	before dumping.
+	(dump_section_as_bytes): Likewise.
+	* doc/binutils.texi: Document the new option.
+
 2015-05-14  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* MAINTAINERS: Add myself as PPC maintainer.

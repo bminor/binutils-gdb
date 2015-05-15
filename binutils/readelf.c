@@ -209,6 +209,7 @@ static int do_arch;
 static int do_notes;
 static int do_archive_index;
 static int is_32bit_elf;
+static int decompress_dumps;
 
 struct group_list
 {
@@ -3960,6 +3961,7 @@ static struct option options[] =
   {"hex-dump",	       required_argument, 0, 'x'},
   {"relocated-dump",   required_argument, 0, 'R'},
   {"string-dump",      required_argument, 0, 'p'},
+  {"decompress",       no_argument, 0, 'z'},
 #ifdef SUPPORT_DISASSEMBLY
   {"instruction-dump", required_argument, 0, 'i'},
 #endif
@@ -4007,6 +4009,7 @@ usage (FILE * stream)
                          Dump the contents of section <number|name> as strings\n\
   -R --relocated-dump=<number|name>\n\
                          Dump the contents of section <number|name> as relocated bytes\n\
+  -z --decompress        Decompress section before dumping it\n\
   -w[lLiaprmfFsoRt] or\n\
   --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
                =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
@@ -4117,7 +4120,7 @@ parse_args (int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ADHINR:SVWacdeghi:lnp:rstuvw::x:", options, NULL)) != EOF)
+	  (argc, argv, "ADHINR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -4199,6 +4202,9 @@ parse_args (int argc, char ** argv)
 	  break;
 	case 'R':
 	  request_dump (RELOC_DUMP);
+	  break;
+	case 'z':
+	  decompress_dumps++;
 	  break;
 	case 'w':
 	  do_dump++;
@@ -11939,181 +11945,9 @@ get_section_contents (Elf_Internal_Shdr * section, FILE * file)
                              _("section contents"));
 }
 
-
-static void
-dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
-{
-  Elf_Internal_Shdr * relsec;
-  bfd_size_type num_bytes;
-  char * data;
-  char * end;
-  char * start;
-  bfd_boolean some_strings_shown;
-
-  start = get_section_contents (section, file);
-  if (start == NULL)
-    return;
-
-  printf (_("\nString dump of section '%s':\n"), printable_section_name (section));
-
-  /* If the section being dumped has relocations against it the user might
-     be expecting these relocations to have been applied.  Check for this
-     case and issue a warning message in order to avoid confusion.
-     FIXME: Maybe we ought to have an option that dumps a section with
-     relocs applied ?  */
-  for (relsec = section_headers;
-       relsec < section_headers + elf_header.e_shnum;
-       ++relsec)
-    {
-      if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
-	  || relsec->sh_info >= elf_header.e_shnum
-	  || section_headers + relsec->sh_info != section
-	  || relsec->sh_size == 0
-	  || relsec->sh_link >= elf_header.e_shnum)
-	continue;
-
-      printf (_("  Note: This section has relocations against it, but these have NOT been applied to this dump.\n"));
-      break;
-    }
-
-  num_bytes = section->sh_size;
-  data = start;
-  end  = start + num_bytes;
-  some_strings_shown = FALSE;
-
-  while (data < end)
-    {
-      while (!ISPRINT (* data))
-	if (++ data >= end)
-	  break;
-
-      if (data < end)
-	{
-	  size_t maxlen = end - data;
-
-#ifndef __MSVCRT__
-	  /* PR 11128: Use two separate invocations in order to work
-             around bugs in the Solaris 8 implementation of printf.  */
-	  printf ("  [%6tx]  ", data - start);
-#else
-	  printf ("  [%6Ix]  ", (size_t) (data - start));
-#endif
-	  if (maxlen > 0)
-	    {
-	      print_symbol ((int) maxlen, data);
-	      putchar ('\n');
-	      data += strnlen (data, maxlen);
-	    }
-	  else
-	    {
-	      printf (_("<corrupt>\n"));
-	      data = end;
-	    }
-	  some_strings_shown = TRUE;
-	}
-    }
-
-  if (! some_strings_shown)
-    printf (_("  No strings found in this section."));
-
-  free (start);
-
-  putchar ('\n');
-}
-
-static void
-dump_section_as_bytes (Elf_Internal_Shdr * section,
-		       FILE * file,
-		       bfd_boolean relocate)
-{
-  Elf_Internal_Shdr * relsec;
-  bfd_size_type bytes;
-  bfd_vma addr;
-  unsigned char * data;
-  unsigned char * start;
-
-  start = (unsigned char *) get_section_contents (section, file);
-  if (start == NULL)
-    return;
-
-  printf (_("\nHex dump of section '%s':\n"), printable_section_name (section));
-
-  if (relocate)
-    {
-      apply_relocations (file, section, start, section->sh_size, NULL, NULL);
-    }
-  else
-    {
-      /* If the section being dumped has relocations against it the user might
-	 be expecting these relocations to have been applied.  Check for this
-	 case and issue a warning message in order to avoid confusion.
-	 FIXME: Maybe we ought to have an option that dumps a section with
-	 relocs applied ?  */
-      for (relsec = section_headers;
-	   relsec < section_headers + elf_header.e_shnum;
-	   ++relsec)
-	{
-	  if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
-	      || relsec->sh_info >= elf_header.e_shnum
-	      || section_headers + relsec->sh_info != section
-	      || relsec->sh_size == 0
-	      || relsec->sh_link >= elf_header.e_shnum)
-	    continue;
-
-	  printf (_(" NOTE: This section has relocations against it, but these have NOT been applied to this dump.\n"));
-	  break;
-	}
-    }
-
-  addr = section->sh_addr;
-  bytes = section->sh_size;
-  data = start;
-
-  while (bytes)
-    {
-      int j;
-      int k;
-      int lbytes;
-
-      lbytes = (bytes > 16 ? 16 : bytes);
-
-      printf ("  0x%8.8lx ", (unsigned long) addr);
-
-      for (j = 0; j < 16; j++)
-	{
-	  if (j < lbytes)
-	    printf ("%2.2x", data[j]);
-	  else
-	    printf ("  ");
-
-	  if ((j & 3) == 3)
-	    printf (" ");
-	}
-
-      for (j = 0; j < lbytes; j++)
-	{
-	  k = data[j];
-	  if (k >= ' ' && k < 0x7f)
-	    printf ("%c", k);
-	  else
-	    printf (".");
-	}
-
-      putchar ('\n');
-
-      data  += lbytes;
-      addr  += lbytes;
-      bytes -= lbytes;
-    }
-
-  free (start);
-
-  putchar ('\n');
-}
-
 /* Uncompresses a section that was compressed using zlib, in place.  */
 
-static int
+static bfd_boolean
 uncompress_section_contents (unsigned char **buffer,
 			     dwarf_size_type uncompressed_size,
 			     dwarf_size_type *size)
@@ -12156,13 +11990,272 @@ uncompress_section_contents (unsigned char **buffer,
 
   *buffer = uncompressed_buffer;
   *size = uncompressed_size;
-  return 1;
+  return TRUE;
 
  fail:
   free (uncompressed_buffer);
   /* Indicate decompression failure.  */
   *buffer = NULL;
-  return 0;
+  return FALSE;
+}
+
+static void
+dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
+{
+  Elf_Internal_Shdr *  relsec;
+  bfd_size_type        num_bytes;
+  char *               data;
+  char *               end;
+  char *               real_start;
+  char *               start;
+  bfd_boolean          some_strings_shown;
+
+  real_start = start = get_section_contents (section, file);
+  if (start == NULL)
+    return;
+  num_bytes = section->sh_size;
+
+  printf (_("\nString dump of section '%s':\n"), printable_section_name (section));
+
+  if (decompress_dumps)
+    {
+      dwarf_size_type new_size = num_bytes;
+      dwarf_size_type uncompressed_size = 0;
+
+      if ((section->sh_flags & SHF_COMPRESSED) != 0)
+	{
+	  Elf_Internal_Chdr chdr;
+	  unsigned int compression_header_size
+	    = get_compression_header (& chdr, (unsigned char *) start);
+
+	  if (chdr.ch_type == ELFCOMPRESS_ZLIB
+	      && chdr.ch_addralign == section->sh_addralign)
+	    {
+	      uncompressed_size = chdr.ch_size;
+	      start += compression_header_size;
+	      new_size -= compression_header_size;
+	    }
+	}
+      else if (new_size > 12 && streq ((char *) start, "ZLIB"))
+	{
+	  /* Read the zlib header.  In this case, it should be "ZLIB"
+	     followed by the uncompressed section size, 8 bytes in
+	     big-endian order.  */
+	  uncompressed_size = start[4]; uncompressed_size <<= 8;
+	  uncompressed_size += start[5]; uncompressed_size <<= 8;
+	  uncompressed_size += start[6]; uncompressed_size <<= 8;
+	  uncompressed_size += start[7]; uncompressed_size <<= 8;
+	  uncompressed_size += start[8]; uncompressed_size <<= 8;
+	  uncompressed_size += start[9]; uncompressed_size <<= 8;
+	  uncompressed_size += start[10]; uncompressed_size <<= 8;
+	  uncompressed_size += start[11];
+	  start += 12;
+	  new_size -= 12;
+	}
+
+      if (uncompressed_size
+	  && uncompress_section_contents ((unsigned char **) & start,
+					  uncompressed_size, & new_size))
+	num_bytes = new_size;
+    }
+  
+  /* If the section being dumped has relocations against it the user might
+     be expecting these relocations to have been applied.  Check for this
+     case and issue a warning message in order to avoid confusion.
+     FIXME: Maybe we ought to have an option that dumps a section with
+     relocs applied ?  */
+  for (relsec = section_headers;
+       relsec < section_headers + elf_header.e_shnum;
+       ++relsec)
+    {
+      if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
+	  || relsec->sh_info >= elf_header.e_shnum
+	  || section_headers + relsec->sh_info != section
+	  || relsec->sh_size == 0
+	  || relsec->sh_link >= elf_header.e_shnum)
+	continue;
+
+      printf (_("  Note: This section has relocations against it, but these have NOT been applied to this dump.\n"));
+      break;
+    }
+
+  data = start;
+  end  = start + num_bytes;
+  some_strings_shown = FALSE;
+
+  while (data < end)
+    {
+      while (!ISPRINT (* data))
+	if (++ data >= end)
+	  break;
+
+      if (data < end)
+	{
+	  size_t maxlen = end - data;
+
+#ifndef __MSVCRT__
+	  /* PR 11128: Use two separate invocations in order to work
+             around bugs in the Solaris 8 implementation of printf.  */
+	  printf ("  [%6tx]  ", data - start);
+#else
+	  printf ("  [%6Ix]  ", (size_t) (data - start));
+#endif
+	  if (maxlen > 0)
+	    {
+	      print_symbol ((int) maxlen, data);
+	      putchar ('\n');
+	      data += strnlen (data, maxlen);
+	    }
+	  else
+	    {
+	      printf (_("<corrupt>\n"));
+	      data = end;
+	    }
+	  some_strings_shown = TRUE;
+	}
+    }
+
+  if (! some_strings_shown)
+    printf (_("  No strings found in this section."));
+
+  free (real_start);
+
+  putchar ('\n');
+}
+
+static void
+dump_section_as_bytes (Elf_Internal_Shdr * section,
+		       FILE * file,
+		       bfd_boolean relocate)
+{
+  Elf_Internal_Shdr * relsec;
+  bfd_size_type       bytes;
+  bfd_size_type       section_size;
+  bfd_vma             addr;
+  unsigned char *     data;
+  unsigned char *     real_start;
+  unsigned char *     start;
+
+  real_start = start = (unsigned char *) get_section_contents (section, file);
+  if (start == NULL)
+    return;
+  section_size = section->sh_size;
+
+  printf (_("\nHex dump of section '%s':\n"), printable_section_name (section));
+
+  if (decompress_dumps)
+    {
+      dwarf_size_type new_size = section_size;
+      dwarf_size_type uncompressed_size = 0;
+
+      if ((section->sh_flags & SHF_COMPRESSED) != 0)
+	{
+	  Elf_Internal_Chdr chdr;
+	  unsigned int compression_header_size
+	    = get_compression_header (& chdr, start);
+
+	  if (chdr.ch_type == ELFCOMPRESS_ZLIB
+	      && chdr.ch_addralign == section->sh_addralign)
+	    {
+	      uncompressed_size = chdr.ch_size;
+	      start += compression_header_size;
+	      new_size -= compression_header_size;
+	    }
+	}
+      else if (new_size > 12 && streq ((char *) start, "ZLIB"))
+	{
+	  /* Read the zlib header.  In this case, it should be "ZLIB"
+	     followed by the uncompressed section size, 8 bytes in
+	     big-endian order.  */
+	  uncompressed_size = start[4]; uncompressed_size <<= 8;
+	  uncompressed_size += start[5]; uncompressed_size <<= 8;
+	  uncompressed_size += start[6]; uncompressed_size <<= 8;
+	  uncompressed_size += start[7]; uncompressed_size <<= 8;
+	  uncompressed_size += start[8]; uncompressed_size <<= 8;
+	  uncompressed_size += start[9]; uncompressed_size <<= 8;
+	  uncompressed_size += start[10]; uncompressed_size <<= 8;
+	  uncompressed_size += start[11];
+	  start += 12;
+	  new_size -= 12;
+	}
+
+      if (uncompressed_size
+	  && uncompress_section_contents (& start, uncompressed_size,
+					  & new_size))
+	section_size = new_size;
+    }
+  
+  if (relocate)
+    {
+      apply_relocations (file, section, start, section_size, NULL, NULL);
+    }
+  else
+    {
+      /* If the section being dumped has relocations against it the user might
+	 be expecting these relocations to have been applied.  Check for this
+	 case and issue a warning message in order to avoid confusion.
+	 FIXME: Maybe we ought to have an option that dumps a section with
+	 relocs applied ?  */
+      for (relsec = section_headers;
+	   relsec < section_headers + elf_header.e_shnum;
+	   ++relsec)
+	{
+	  if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
+	      || relsec->sh_info >= elf_header.e_shnum
+	      || section_headers + relsec->sh_info != section
+	      || relsec->sh_size == 0
+	      || relsec->sh_link >= elf_header.e_shnum)
+	    continue;
+
+	  printf (_(" NOTE: This section has relocations against it, but these have NOT been applied to this dump.\n"));
+	  break;
+	}
+    }
+
+  addr = section->sh_addr;
+  bytes = section_size;
+  data = start;
+
+  while (bytes)
+    {
+      int j;
+      int k;
+      int lbytes;
+
+      lbytes = (bytes > 16 ? 16 : bytes);
+
+      printf ("  0x%8.8lx ", (unsigned long) addr);
+
+      for (j = 0; j < 16; j++)
+	{
+	  if (j < lbytes)
+	    printf ("%2.2x", data[j]);
+	  else
+	    printf ("  ");
+
+	  if ((j & 3) == 3)
+	    printf (" ");
+	}
+
+      for (j = 0; j < lbytes; j++)
+	{
+	  k = data[j];
+	  if (k >= ' ' && k < 0x7f)
+	    printf ("%c", k);
+	  else
+	    printf (".");
+	}
+
+      putchar ('\n');
+
+      data  += lbytes;
+      addr  += lbytes;
+      bytes -= lbytes;
+    }
+
+  free (real_start);
+
+  putchar ('\n');
 }
 
 static int

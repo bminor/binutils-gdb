@@ -1,3 +1,10 @@
+2015-05-15  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/z.s: New test.  Checks the --decompress option to
+	readelf.
+	* binutils-all/readelf.exp: Run the test.
+	* binutils-all/readelf.z: Expected output from readelf.
+
 2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/compress.exp: Replace "$OBJDUMP -s -j .debug_info"
