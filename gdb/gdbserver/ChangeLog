@@ -1,3 +1,8 @@
+2015-05-15  Pedro Alves  <palves@redhat.com>
+
+	* target.h (target_handle_new_gdb_connection): Rewrite using if
+	wrapped in do/while.
+
 2015-05-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Add prfpregset_t BFD_HAVE_SYS_PROCFS_TYPE check.

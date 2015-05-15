@@ -437,9 +437,12 @@ int kill_inferior (int);
   (the_target->supports_vfork_events ? \
    (*the_target->supports_vfork_events) () : 0)
 
-#define target_handle_new_gdb_connection() \
-  (the_target->handle_new_gdb_connection ? \
-   (*the_target->handle_new_gdb_connection) () : 0)
+#define target_handle_new_gdb_connection()		 \
+  do							 \
+    {							 \
+      if (the_target->handle_new_gdb_connection != NULL) \
+	(*the_target->handle_new_gdb_connection) ();	 \
+    } while (0)
 
 #define detach_inferior(pid) \
   (*the_target->detach) (pid)
