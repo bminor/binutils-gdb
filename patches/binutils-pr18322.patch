@@ -1,18 +1,20 @@
-From 97345be30f7160d264003bc3165520ad034b273a Mon Sep 17 00:00:00 2001
+From 27c2a5e2304878c50c4b7b0458123ca3c464ead5 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sun, 22 Mar 2015 11:59:53 -0700
-Subject: [PATCH] Extend --compress-debug-sections in gold
+Subject: [PATCH 2/2] Extend --compress-debug-sections in gold
 
 This patch extends --compress-debug-sections= with [zlib-gnu|zlib-gabi]
 in gold.
 
 	PR gold/18322
-	* object.h (Compressed_section_info): Add flag to store sh_flags.
 	* compressed_output.cc (zlib_compress): Add argument for
-	compression header size.  Add compression header size to
-	header size.
+	compression header size.  Set header size to compression header
+	size if it isn't 0.  Don't write out the zlib header here.
 	(Output_compressed_section::set_final_data_size): Support
-	zlib-gnu and zlib-gabi compressions.
+	zlib-gnu and zlib-gabi compressions.  Pass compression header
+	size to zlib_compress and write out compression header.  Set
+	the SHF_COMPRESSED bit for zlib-gabi compression.  Otherwise
+	clear the SHF_COMPRESSED bit
 	* options.h (compress_debug_sections): Add zlib-gnu and
 	zlib-gabi.
 	* output.h (Output_section::set_flags): New.
@@ -45,51 +47,48 @@ in gold.
 	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
 	* testsuite/Makefile.in: Regenerated.
 ---
- gold/compressed_output.cc  |  90 +++++++++++++++++++++++++---
+ gold/compressed_output.cc  |  91 +++++++++++++++++++++++++----
  gold/options.h             |   4 +-
  gold/output.h              |   5 ++
  gold/testsuite/Makefile.am |  82 +++++++++++++++++++++++++-
  gold/testsuite/Makefile.in | 143 ++++++++++++++++++++++++++++++++++++++++++++-
- 5 files changed, 310 insertions(+), 14 deletions(-)
+ 5 files changed, 310 insertions(+), 15 deletions(-)
 
 diff --git a/gold/compressed_output.cc b/gold/compressed_output.cc
-index 8c9fc1e..db9749a 100644
+index 02d7821..4a89318 100644
 --- a/gold/compressed_output.cc
 +++ b/gold/compressed_output.cc
-@@ -39,12 +39,13 @@ namespace gold
+@@ -39,12 +39,12 @@ namespace gold
  // order.
  
  static bool
 -zlib_compress(const unsigned char* uncompressed_data,
-+zlib_compress(int compression_header_size,
++zlib_compress(int header_size,
 +              const unsigned char* uncompressed_data,
                unsigned long uncompressed_size,
                unsigned char** compressed_data,
                unsigned long* compressed_size)
  {
 -  const int header_size = 12;
-+  int header_size = compression_header_size + 12;
    *compressed_size = uncompressed_size + uncompressed_size / 1000 + 128;
    *compressed_data = new unsigned char[*compressed_size + header_size];
  
-@@ -61,8 +62,9 @@ zlib_compress(const unsigned char* uncompressed_data,
+@@ -61,9 +61,6 @@ zlib_compress(const unsigned char* uncompressed_data,
                       compress_level);
    if (rc == Z_OK)
      {
 -      memcpy(*compressed_data, "ZLIB", 4);
 -      elfcpp::Swap_unaligned<64, true>::writeval(*compressed_data + 4,
-+      memcpy(*compressed_data + compression_header_size, "ZLIB", 4);
-+      elfcpp::Swap_unaligned<64, true>::writeval(*compressed_data + 4
-+						 + compression_header_size,
- 						 uncompressed_size);
+-						 uncompressed_size);
        *compressed_size += header_size;
        return true;
-@@ -186,14 +188,84 @@ Output_compressed_section::set_final_data_size()
+     }
+@@ -233,14 +230,88 @@ Output_compressed_section::set_final_data_size()
    this->write_to_postprocessing_buffer();
  
    bool success = false;
 +  enum { none, zlib, gnu_zlib, gabi_zlib } compress;
-+  int compression_header_size = 0;
++  int compression_header_size = 12;
 +  const int size = parameters->target().get_size();
    if (strcmp(this->options_->compress_debug_sections(), "zlib") == 0)
 -    success = zlib_compress(uncompressed_data, uncompressed_size,
@@ -164,6 +163,10 @@ index 8c9fc1e..db9749a 100644
 +	}
 +      else
 +	{
++	  // Write out the zlib header.
++	  memcpy(this->data_, "ZLIB", 4);
++	  elfcpp::Swap_unaligned<64, true>::writeval(this->data_ + 4,
++						     uncompressed_size);
 +	  // This converts .debug_foo to .zdebug_foo
 +	  this->new_section_name_ = std::string(".z") + (this->name() + 1);
 +	  this->set_name(this->new_section_name_.c_str());
@@ -175,7 +178,7 @@ index 8c9fc1e..db9749a 100644
      }
    else
 diff --git a/gold/options.h b/gold/options.h
-index bb3bee6..a27aea8 100644
+index 67eb1b2..d2d1b4b 100644
 --- a/gold/options.h
 +++ b/gold/options.h
 @@ -697,8 +697,8 @@ class General_options
@@ -190,7 +193,7 @@ index bb3bee6..a27aea8 100644
    DEFINE_bool(copy_dt_needed_entries, options::TWO_DASHES, '\0', false,
  	      N_("Not supported"),
 diff --git a/gold/output.h b/gold/output.h
-index 318af36..e463a23 100644
+index be72965..c7ad54e 100644
 --- a/gold/output.h
 +++ b/gold/output.h
 @@ -3100,6 +3100,11 @@ class Output_section : public Output_data
@@ -206,10 +209,10 @@ index 318af36..e463a23 100644
    uint64_t
    entsize() const
 diff --git a/gold/testsuite/Makefile.am b/gold/testsuite/Makefile.am
-index 7599acd..225257a 100644
+index 0f00f2b..a5266b3 100644
 --- a/gold/testsuite/Makefile.am
 +++ b/gold/testsuite/Makefile.am
-@@ -1311,12 +1311,92 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
+@@ -1319,12 +1319,92 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
  	chmod a+x $@
  	test -s $@
  
@@ -304,10 +307,10 @@ index 7599acd..225257a 100644
  # The specialfile output has a tricky case when we also compress debug
  # sections, because it requires output-file resizing.
 diff --git a/gold/testsuite/Makefile.in b/gold/testsuite/Makefile.in
-index 7aec3d8..3d39ab8 100644
+index 85d478e..bcfa3af 100644
 --- a/gold/testsuite/Makefile.in
 +++ b/gold/testsuite/Makefile.in
-@@ -225,7 +225,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+@@ -226,7 +226,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  
  # Test -o when emitting to a special file (such as something in /dev).
  
@@ -316,7 +319,7 @@ index 7aec3d8..3d39ab8 100644
  
  # The specialfile output has a tricky case when we also compress debug
  # sections, because it requires output-file resizing.
-@@ -241,7 +241,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+@@ -242,7 +242,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test initpri1 \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2 initpri3a \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
@@ -327,7 +330,7 @@ index 7aec3d8..3d39ab8 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_1 ver_test \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2 ver_test_6 ver_test_8 \
-@@ -345,6 +348,16 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+@@ -346,6 +349,16 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
@@ -344,7 +347,7 @@ index 7aec3d8..3d39ab8 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.syms ver_test_2.syms \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
-@@ -899,7 +912,10 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
+@@ -901,7 +914,10 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri3a$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
@@ -355,7 +358,7 @@ index 7aec3d8..3d39ab8 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_1$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
-@@ -1172,6 +1188,33 @@ flagstest_compress_debug_sections_DEPENDENCIES = libgoldtest.a \
+@@ -1181,6 +1197,33 @@ flagstest_compress_debug_sections_DEPENDENCIES = libgoldtest.a \
  	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
  	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
  	$(am__DEPENDENCIES_1)
@@ -389,7 +392,7 @@ index 7aec3d8..3d39ab8 100644
  flagstest_o_specialfile_SOURCES = flagstest_o_specialfile.c
  flagstest_o_specialfile_OBJECTS = flagstest_o_specialfile.$(OBJEXT)
  flagstest_o_specialfile_LDADD = $(LDADD)
-@@ -2008,7 +2051,11 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
+@@ -2017,7 +2060,11 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
  	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
  	$(exception_x86_64_bnd_test_SOURCES) \
  	$(exclude_libs_test_SOURCES) \
@@ -402,7 +405,7 @@ index 7aec3d8..3d39ab8 100644
  	flagstest_o_specialfile_and_compress_debug_sections.c \
  	flagstest_o_ttext_1.c icf_virtual_function_folding_test.c \
  	$(ifuncmain1_SOURCES) ifuncmain1pic.c ifuncmain1picstatic.c \
-@@ -3040,6 +3087,24 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
+@@ -3055,6 +3102,24 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
  @NATIVE_LINKER_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
  @NATIVE_LINKER_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
  @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
@@ -427,7 +430,7 @@ index 7aec3d8..3d39ab8 100644
  @GCC_FALSE@flagstest_o_specialfile$(EXEEXT): $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_DEPENDENCIES) 
  @GCC_FALSE@	@rm -f flagstest_o_specialfile$(EXEEXT)
  @GCC_FALSE@	$(LINK) $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_LDADD) $(LIBS)
-@@ -3777,6 +3842,9 @@ distclean-compile:
+@@ -3793,6 +3858,9 @@ distclean-compile:
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exclude_libs_test.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
@@ -437,7 +440,7 @@ index 7aec3d8..3d39ab8 100644
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_ttext_1.Po@am__quote@
-@@ -4536,8 +4604,14 @@ initpri3a.log: initpri3a$(EXEEXT)
+@@ -4554,8 +4622,14 @@ initpri3a.log: initpri3a$(EXEEXT)
  	@p='initpri3a$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
  flagstest_o_specialfile.log: flagstest_o_specialfile$(EXEEXT)
  	@p='flagstest_o_specialfile$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
@@ -452,7 +455,7 @@ index 7aec3d8..3d39ab8 100644
  flagstest_o_specialfile_and_compress_debug_sections.log: flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
  	@p='flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
  flagstest_o_ttext_1.log: flagstest_o_ttext_1$(EXEEXT)
-@@ -5436,9 +5510,74 @@ uninstall-am:
+@@ -5460,9 +5534,74 @@ uninstall-am:
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
