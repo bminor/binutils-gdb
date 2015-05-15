@@ -1,3 +1,13 @@
+2015-05-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Applied from master.
+	2015-05-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (IH) New define.
+	(powerpc_opcodes) <wait>: Do not enable for POWER7.
+	<tlbie>: Add RS operand for POWER7.
+	<slbia>: Add IH operand for POWER6.
+
 2015-05-07  Renlin Li  <renlin.li@arm.com>
 
 	Applied from master.
