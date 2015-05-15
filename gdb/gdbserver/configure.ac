@@ -343,6 +343,7 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(prfpregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(elf_fpregset_t)
 fi
 

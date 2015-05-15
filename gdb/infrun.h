@@ -73,13 +73,6 @@ enum exec_direction_kind
    compatible with make_cleanup_restore_integer.  */
 extern int execution_direction;
 
-/* Save register contents here when executing a "finish" command or
-   are about to pop a stack dummy frame, if-and-only-if
-   proceed_to_finish is set.  Thus this contains the return value from
-   the called function (assuming values are returned in a
-   register).  */
-extern struct regcache *stop_registers;
-
 extern void start_remote (int from_tty);
 
 /* Clear out all variables saying what to do when inferior is

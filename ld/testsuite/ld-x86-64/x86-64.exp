@@ -52,7 +52,7 @@ set x86_64tests {
     {"TLS -fpic -shared transitions"
      "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
      "--64" {tlspic1.s tlspic2.s}
-     {{readelf -WSsrl tlspic.rd} {objdump -drj.text tlspic.dd}
+     {{readelf -WSsrl tlspic.rd} {objdump -drj.text\ -Mintel64 tlspic.dd}
       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
       "libtlspic.so"}
     {"TLS descriptor -fpic -shared transitions"
@@ -78,7 +78,7 @@ set x86_64tests {
     {"TLS with global dynamic and descriptors"
      "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
      "--64" {tlsgdesc.s}
-     {{readelf -WSsrl tlsgdesc.rd} {objdump -drj.text tlsgdesc.dd}}
+     {{readelf -WSsrl tlsgdesc.rd} {objdump -drj.text\ -Mintel64 tlsgdesc.dd}}
       "libtlsgdesc.so"}
     {"TLS in debug sections" "-melf_x86_64" ""
      "--64" {tlsg.s}

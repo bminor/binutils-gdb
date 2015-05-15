@@ -209,6 +209,7 @@ static int do_arch;
 static int do_notes;
 static int do_archive_index;
 static int is_32bit_elf;
+static int decompress_dumps;
 
 struct group_list
 {
@@ -3960,6 +3961,7 @@ static struct option options[] =
   {"hex-dump",	       required_argument, 0, 'x'},
   {"relocated-dump",   required_argument, 0, 'R'},
   {"string-dump",      required_argument, 0, 'p'},
+  {"decompress",       no_argument, 0, 'z'},
 #ifdef SUPPORT_DISASSEMBLY
   {"instruction-dump", required_argument, 0, 'i'},
 #endif
@@ -4007,6 +4009,7 @@ usage (FILE * stream)
                          Dump the contents of section <number|name> as strings\n\
   -R --relocated-dump=<number|name>\n\
                          Dump the contents of section <number|name> as relocated bytes\n\
+  -z --decompress        Decompress section before dumping it\n\
   -w[lLiaprmfFsoRt] or\n\
   --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
                =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
@@ -4117,7 +4120,7 @@ parse_args (int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ADHINR:SVWacdeghi:lnp:rstuvw::x:", options, NULL)) != EOF)
+	  (argc, argv, "ADHINR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -4199,6 +4202,9 @@ parse_args (int argc, char ** argv)
 	  break;
 	case 'R':
 	  request_dump (RELOC_DUMP);
+	  break;
+	case 'z':
+	  decompress_dumps++;
 	  break;
 	case 'w':
 	  do_dump++;
@@ -11302,7 +11308,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_H8_300H:
       return reloc_type == 1; /* R_H8_DIR32.  */
     case EM_IA_64:
-      return reloc_type == 0x65; /* R_IA64_SECREL32LSB.  */
+      return reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
+	|| reloc_type == 0x25;  /* R_IA64_DIR32LSB.  */
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 2; /* R_IP2K_32.  */
@@ -11696,18 +11703,50 @@ is_none_reloc (unsigned int reloc_type)
   return FALSE;
 }
 
+/* Returns TRUE if there is a relocation against
+   section NAME at OFFSET bytes.  */
+
+bfd_boolean
+reloc_at (struct dwarf_section * dsec, dwarf_vma offset)
+{
+  Elf_Internal_Rela * relocs;
+  Elf_Internal_Rela * rp;
+
+  if (dsec == NULL || dsec->reloc_info == NULL)
+    return FALSE;
+
+  relocs = (Elf_Internal_Rela *) dsec->reloc_info;
+
+  for (rp = relocs; rp < relocs + dsec->num_relocs; ++rp)
+    if (rp->r_offset == offset)
+      return TRUE;
+
+   return FALSE;
+}
+
 /* Apply relocations to a section.
    Note: So far support has been added only for those relocations
    which can be found in debug sections.
+   If RELOCS_RETURN is non-NULL then returns in it a pointer to the
+   loaded relocs.  It is then the caller's responsibility to free them.
    FIXME: Add support for more relocations ?  */
 
 static void
-apply_relocations (void * file,
-		   const Elf_Internal_Shdr * section,
-		   unsigned char * start, bfd_size_type size)
+apply_relocations (void *                     file,
+		   const Elf_Internal_Shdr *  section,
+		   unsigned char *            start,
+		   bfd_size_type              size,
+		   void **                     relocs_return,
+		   unsigned long *            num_relocs_return)
 {
   Elf_Internal_Shdr * relsec;
   unsigned char * end = start + size;
+
+  if (relocs_return != NULL)
+    {
+      * (Elf_Internal_Rela **) relocs_return = NULL;
+      * num_relocs_return = 0;
+    }
 
   if (elf_header.e_type != ET_REL)
     return;
@@ -11860,7 +11899,15 @@ apply_relocations (void * file,
 	}
 
       free (symtab);
-      free (relocs);
+
+      if (relocs_return)
+	{
+	  * (Elf_Internal_Rela **) relocs_return = relocs;
+	  * num_relocs_return = num_relocs;
+	}
+      else
+	free (relocs);
+
       break;
     }
 }
@@ -11898,23 +11945,120 @@ get_section_contents (Elf_Internal_Shdr * section, FILE * file)
                              _("section contents"));
 }
 
+/* Uncompresses a section that was compressed using zlib, in place.  */
+
+static bfd_boolean
+uncompress_section_contents (unsigned char **buffer,
+			     dwarf_size_type uncompressed_size,
+			     dwarf_size_type *size)
+{
+  dwarf_size_type compressed_size = *size;
+  unsigned char * compressed_buffer = *buffer;
+  unsigned char * uncompressed_buffer;
+  z_stream strm;
+  int rc;
+
+  /* It is possible the section consists of several compressed
+     buffers concatenated together, so we uncompress in a loop.  */
+  /* PR 18313: The state field in the z_stream structure is supposed
+     to be invisible to the user (ie us), but some compilers will
+     still complain about it being used without initialisation.  So
+     we first zero the entire z_stream structure and then set the fields
+     that we need.  */
+  memset (& strm, 0, sizeof strm);
+  strm.avail_in = compressed_size;
+  strm.next_in = (Bytef *) compressed_buffer;
+  strm.avail_out = uncompressed_size;
+  uncompressed_buffer = (unsigned char *) xmalloc (uncompressed_size);
+
+  rc = inflateInit (& strm);
+  while (strm.avail_in > 0)
+    {
+      if (rc != Z_OK)
+        goto fail;
+      strm.next_out = ((Bytef *) uncompressed_buffer
+                       + (uncompressed_size - strm.avail_out));
+      rc = inflate (&strm, Z_FINISH);
+      if (rc != Z_STREAM_END)
+        goto fail;
+      rc = inflateReset (& strm);
+    }
+  rc = inflateEnd (& strm);
+  if (rc != Z_OK
+      || strm.avail_out != 0)
+    goto fail;
+
+  *buffer = uncompressed_buffer;
+  *size = uncompressed_size;
+  return TRUE;
+
+ fail:
+  free (uncompressed_buffer);
+  /* Indicate decompression failure.  */
+  *buffer = NULL;
+  return FALSE;
+}
 
 static void
 dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 {
-  Elf_Internal_Shdr * relsec;
-  bfd_size_type num_bytes;
-  char * data;
-  char * end;
-  char * start;
-  bfd_boolean some_strings_shown;
+  Elf_Internal_Shdr *  relsec;
+  bfd_size_type        num_bytes;
+  char *               data;
+  char *               end;
+  char *               real_start;
+  char *               start;
+  bfd_boolean          some_strings_shown;
 
-  start = get_section_contents (section, file);
+  real_start = start = get_section_contents (section, file);
   if (start == NULL)
     return;
+  num_bytes = section->sh_size;
 
   printf (_("\nString dump of section '%s':\n"), printable_section_name (section));
 
+  if (decompress_dumps)
+    {
+      dwarf_size_type new_size = num_bytes;
+      dwarf_size_type uncompressed_size = 0;
+
+      if ((section->sh_flags & SHF_COMPRESSED) != 0)
+	{
+	  Elf_Internal_Chdr chdr;
+	  unsigned int compression_header_size
+	    = get_compression_header (& chdr, (unsigned char *) start);
+
+	  if (chdr.ch_type == ELFCOMPRESS_ZLIB
+	      && chdr.ch_addralign == section->sh_addralign)
+	    {
+	      uncompressed_size = chdr.ch_size;
+	      start += compression_header_size;
+	      new_size -= compression_header_size;
+	    }
+	}
+      else if (new_size > 12 && streq ((char *) start, "ZLIB"))
+	{
+	  /* Read the zlib header.  In this case, it should be "ZLIB"
+	     followed by the uncompressed section size, 8 bytes in
+	     big-endian order.  */
+	  uncompressed_size = start[4]; uncompressed_size <<= 8;
+	  uncompressed_size += start[5]; uncompressed_size <<= 8;
+	  uncompressed_size += start[6]; uncompressed_size <<= 8;
+	  uncompressed_size += start[7]; uncompressed_size <<= 8;
+	  uncompressed_size += start[8]; uncompressed_size <<= 8;
+	  uncompressed_size += start[9]; uncompressed_size <<= 8;
+	  uncompressed_size += start[10]; uncompressed_size <<= 8;
+	  uncompressed_size += start[11];
+	  start += 12;
+	  new_size -= 12;
+	}
+
+      if (uncompressed_size
+	  && uncompress_section_contents ((unsigned char **) & start,
+					  uncompressed_size, & new_size))
+	num_bytes = new_size;
+    }
+  
   /* If the section being dumped has relocations against it the user might
      be expecting these relocations to have been applied.  Check for this
      case and issue a warning message in order to avoid confusion.
@@ -11935,7 +12079,6 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
       break;
     }
 
-  num_bytes = section->sh_size;
   data = start;
   end  = start + num_bytes;
   some_strings_shown = FALSE;
@@ -11975,7 +12118,7 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
   if (! some_strings_shown)
     printf (_("  No strings found in this section."));
 
-  free (start);
+  free (real_start);
 
   putchar ('\n');
 }
@@ -11986,20 +12129,65 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 		       bfd_boolean relocate)
 {
   Elf_Internal_Shdr * relsec;
-  bfd_size_type bytes;
-  bfd_vma addr;
-  unsigned char * data;
-  unsigned char * start;
+  bfd_size_type       bytes;
+  bfd_size_type       section_size;
+  bfd_vma             addr;
+  unsigned char *     data;
+  unsigned char *     real_start;
+  unsigned char *     start;
 
-  start = (unsigned char *) get_section_contents (section, file);
+  real_start = start = (unsigned char *) get_section_contents (section, file);
   if (start == NULL)
     return;
+  section_size = section->sh_size;
 
   printf (_("\nHex dump of section '%s':\n"), printable_section_name (section));
 
+  if (decompress_dumps)
+    {
+      dwarf_size_type new_size = section_size;
+      dwarf_size_type uncompressed_size = 0;
+
+      if ((section->sh_flags & SHF_COMPRESSED) != 0)
+	{
+	  Elf_Internal_Chdr chdr;
+	  unsigned int compression_header_size
+	    = get_compression_header (& chdr, start);
+
+	  if (chdr.ch_type == ELFCOMPRESS_ZLIB
+	      && chdr.ch_addralign == section->sh_addralign)
+	    {
+	      uncompressed_size = chdr.ch_size;
+	      start += compression_header_size;
+	      new_size -= compression_header_size;
+	    }
+	}
+      else if (new_size > 12 && streq ((char *) start, "ZLIB"))
+	{
+	  /* Read the zlib header.  In this case, it should be "ZLIB"
+	     followed by the uncompressed section size, 8 bytes in
+	     big-endian order.  */
+	  uncompressed_size = start[4]; uncompressed_size <<= 8;
+	  uncompressed_size += start[5]; uncompressed_size <<= 8;
+	  uncompressed_size += start[6]; uncompressed_size <<= 8;
+	  uncompressed_size += start[7]; uncompressed_size <<= 8;
+	  uncompressed_size += start[8]; uncompressed_size <<= 8;
+	  uncompressed_size += start[9]; uncompressed_size <<= 8;
+	  uncompressed_size += start[10]; uncompressed_size <<= 8;
+	  uncompressed_size += start[11];
+	  start += 12;
+	  new_size -= 12;
+	}
+
+      if (uncompressed_size
+	  && uncompress_section_contents (& start, uncompressed_size,
+					  & new_size))
+	section_size = new_size;
+    }
+  
   if (relocate)
     {
-      apply_relocations (file, section, start, section->sh_size);
+      apply_relocations (file, section, start, section_size, NULL, NULL);
     }
   else
     {
@@ -12025,7 +12213,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
     }
 
   addr = section->sh_addr;
-  bytes = section->sh_size;
+  bytes = section_size;
   data = start;
 
   while (bytes)
@@ -12065,79 +12253,9 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
       bytes -= lbytes;
     }
 
-  free (start);
+  free (real_start);
 
   putchar ('\n');
-}
-
-/* Uncompresses a section that was compressed using zlib, in place.  */
-
-static int
-uncompress_section_contents (unsigned char **buffer,
-			     dwarf_size_type *size)
-{
-  dwarf_size_type compressed_size = *size;
-  unsigned char * compressed_buffer = *buffer;
-  dwarf_size_type uncompressed_size;
-  unsigned char * uncompressed_buffer;
-  z_stream strm;
-  int rc;
-  dwarf_size_type header_size = 12;
-
-  /* Read the zlib header.  In this case, it should be "ZLIB" followed
-     by the uncompressed section size, 8 bytes in big-endian order.  */
-  if (compressed_size < header_size
-      || ! streq ((char *) compressed_buffer, "ZLIB"))
-    return 0;
-
-  uncompressed_size = compressed_buffer[4]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[5]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[6]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[7]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[8]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[9]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[10]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[11];
-
-  /* It is possible the section consists of several compressed
-     buffers concatenated together, so we uncompress in a loop.  */
-  /* PR 18313: The state field in the z_stream structure is supposed
-     to be invisible to the user (ie us), but some compilers will
-     still complain about it being used without initialisation.  So
-     we first zero the entire z_stream structure and then set the fields
-     that we need.  */
-  memset (& strm, 0, sizeof strm);
-  strm.avail_in = compressed_size - header_size;
-  strm.next_in = (Bytef *) compressed_buffer + header_size;
-  strm.avail_out = uncompressed_size;
-  uncompressed_buffer = (unsigned char *) xmalloc (uncompressed_size);
-
-  rc = inflateInit (& strm);
-  while (strm.avail_in > 0)
-    {
-      if (rc != Z_OK)
-        goto fail;
-      strm.next_out = ((Bytef *) uncompressed_buffer
-                       + (uncompressed_size - strm.avail_out));
-      rc = inflate (&strm, Z_FINISH);
-      if (rc != Z_STREAM_END)
-        goto fail;
-      rc = inflateReset (& strm);
-    }
-  rc = inflateEnd (& strm);
-  if (rc != Z_OK
-      || strm.avail_out != 0)
-    goto fail;
-
-  *buffer = uncompressed_buffer;
-  *size = uncompressed_size;
-  return 1;
-
- fail:
-  free (uncompressed_buffer);
-  /* Indicate decompression failure.  */
-  *buffer = NULL;
-  return 0;
 }
 
 static int
@@ -12163,6 +12281,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     {
       unsigned char *start = section->start;
       dwarf_size_type size = sec->sh_size;
+      dwarf_size_type uncompressed_size = 0;
 
       if ((sec->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -12172,11 +12291,30 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB
 	      || chdr.ch_addralign != sec->sh_addralign)
 	    return 0;
+	  uncompressed_size = chdr.ch_size;
 	  start += compression_header_size;
 	  size -= compression_header_size;
 	}
+      else if (size > 12 && streq ((char *) start, "ZLIB"))
+	{
+	  /* Read the zlib header.  In this case, it should be "ZLIB"
+	     followed by the uncompressed section size, 8 bytes in
+	     big-endian order.  */
+	  uncompressed_size = start[4]; uncompressed_size <<= 8;
+	  uncompressed_size += start[5]; uncompressed_size <<= 8;
+	  uncompressed_size += start[6]; uncompressed_size <<= 8;
+	  uncompressed_size += start[7]; uncompressed_size <<= 8;
+	  uncompressed_size += start[8]; uncompressed_size <<= 8;
+	  uncompressed_size += start[9]; uncompressed_size <<= 8;
+	  uncompressed_size += start[10]; uncompressed_size <<= 8;
+	  uncompressed_size += start[11];
+	  start += 12;
+	  size -= 12;
+	}
 
-      if (uncompress_section_contents (&start, &size))
+      if (uncompressed_size
+	  && uncompress_section_contents (&start, uncompressed_size,
+					  &size))
 	{
 	  /* Free the compressed buffer, update the section buffer
 	     and the section size if uncompress is successful.  */
@@ -12190,7 +12328,13 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     return 0;
 
   if (debug_displays [debug].relocate)
-    apply_relocations ((FILE *) file, sec, section->start, section->size);
+    apply_relocations ((FILE *) file, sec, section->start, section->size,
+		       & section->reloc_info, & section->num_relocs);
+  else
+    {
+      section->reloc_info = NULL;
+      section->num_relocs = 0;
+    }
 
   return 1;
 }

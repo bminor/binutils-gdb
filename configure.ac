@@ -1116,6 +1116,12 @@ case "${target}" in
     ;;
   hppa1.1-*-osf* | hppa1.1-*-bsd* )
     ;;
+  hppa*64*-*-hpux*)
+    noconfigdirs="$noconfigdirs gdb"
+    ;;
+  hppa*-*-hpux11*)
+    noconfigdirs="$noconfigdirs gdb ld"
+    ;;
   hppa*64*-*-linux*)
     ;;
   hppa*-*-linux*)
@@ -1124,9 +1130,6 @@ case "${target}" in
   hppa*-*-lites* | \
   hppa*-*-openbsd* | \
   hppa*64*-*-*)
-    ;;
-  hppa*-hp-hpux11*)
-    noconfigdirs="$noconfigdirs ld"
     ;;
   hppa*-*-pro*)
     ;;
@@ -1142,7 +1145,7 @@ case "${target}" in
     ;;
   ia64*-**-hpux*)
     # No ld support yet.
-    noconfigdirs="$noconfigdirs libgui itcl ld"
+    noconfigdirs="$noconfigdirs gdb libgui itcl ld"
     ;;
   ia64*-*-*vms*)
     # No ld support yet.

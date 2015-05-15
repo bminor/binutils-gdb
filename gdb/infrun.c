@@ -353,13 +353,6 @@ show_stop_on_solib_events (struct ui_file *file, int from_tty,
 
 int stop_after_trap;
 
-/* Save register contents here when executing a "finish" command or are
-   about to pop a stack dummy frame, if-and-only-if proceed_to_finish is set.
-   Thus this contains the return value from the called function (assuming
-   values are returned in a register).  */
-
-struct regcache *stop_registers;
-
 /* Nonzero after stop if current stack frame should be printed.  */
 
 static int stop_print_frame;
@@ -2505,12 +2498,6 @@ clear_proceed_status (int step)
   clear_step_over_info ();
 
   observer_notify_about_to_proceed ();
-
-  if (stop_registers)
-    {
-      regcache_xfree (stop_registers);
-      stop_registers = NULL;
-    }
 }
 
 /* Returns true if TP is still stopped at a breakpoint that needs
@@ -6695,20 +6682,6 @@ normal_stop (void)
 	 missing source files.  */
       if (stop_print_frame && !batch_silent)
 	print_stop_event (&last);
-    }
-
-  /* Save the function value return registers, if we care.
-     We might be about to restore their previous contents.  */
-  if (inferior_thread ()->control.proceed_to_finish
-      && execution_direction != EXEC_REVERSE)
-    {
-      /* This should not be necessary.  */
-      if (stop_registers)
-	regcache_xfree (stop_registers);
-
-      /* NB: The copy goes through to the target picking up the value of
-	 all the registers.  */
-      stop_registers = regcache_dup (get_current_regcache ());
     }
 
   if (stop_stack_dummy == STOP_STACK_DUMMY)

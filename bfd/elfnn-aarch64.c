@@ -5635,15 +5635,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      /* If the overflowing reloc was to an undefined symbol,
-		 we have already printed one error message and there
-		 is no point complaining again.  */
-	      if ((!h ||
-		   h->root.type != bfd_link_hash_undefined)
-		  && (!((*info->callbacks->reloc_overflow)
-			(info, (h ? &h->root : NULL), name, howto->name,
-			 (bfd_vma) 0, input_bfd, input_section,
-			 rel->r_offset))))
+	      if (!(*info->callbacks->reloc_overflow)
+		  (info, (h ? &h->root : NULL), name, howto->name, (bfd_vma) 0,
+		   input_bfd, input_section, rel->r_offset))
 		return FALSE;
 	      break;
 

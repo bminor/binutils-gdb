@@ -1,3 +1,29 @@
+2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_update_compression_header): Also write the zlib
+	header if the SHF_COMPRESSED bit cleared..
+	(bfd_check_compression_header): Return the uncompressed size.
+	* compress.c (decompress_contents): Don't skip the zlib header.
+	(bfd_compress_section_contents): Properly handle ELFCOMPRESS_ZLIB,
+	which doesn't have the zlib header.
+	(bfd_init_section_decompress_status): Likewise.
+	(bfd_get_full_section_contents): Updated.
+	(bfd_is_section_compressed): Likewise.
+	(bfd_is_section_compressed_with_header): Return the uncompressed
+	size.
+	* elf.c (_bfd_elf_make_section_from_shdr): Updated.
+	* bfd-in2.h: Regenerated.
+
+2015-05-14  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Remove overflow
+	check restrictions.
+
+2015-05-14  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (elf_xtensa_gc_sweep_hook): Treat PLT reference
+	as GOT reference when plt.refcount is not positive.
+
 2015-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Allocate space

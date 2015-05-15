@@ -9071,8 +9071,7 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
 
 	      trampaddr = fragP->fr_address + fragP->fr_fix;
 
-	      if ((addr + J_RANGE < trampaddr) ||
-		  abs (addr - trampaddr) < J_RANGE / 2)
+	      if (addr + J_RANGE < trampaddr)
 		continue;
 	      if (addr > trampaddr + J_RANGE)
 		break;

@@ -6816,7 +6816,7 @@ void bfd_update_compression_header
 
 bfd_boolean bfd_check_compression_header
    (bfd *abfd, bfd_byte *contents, asection *sec,
-    bfd_size_type uncompressed_size);
+    bfd_size_type *uncompressed_size);
 
 int bfd_get_compression_header_size (bfd *abfd, asection *sec);
 
@@ -7334,7 +7334,8 @@ void bfd_cache_section_contents
 
 bfd_boolean bfd_is_section_compressed_with_header
    (bfd *abfd, asection *section,
-    int *compression_header_size_p);
+    int *compression_header_size_p,
+    bfd_size_type *uncompressed_size_p);
 
 bfd_boolean bfd_is_section_compressed
    (bfd *abfd, asection *section);

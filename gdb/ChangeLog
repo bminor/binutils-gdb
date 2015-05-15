@@ -1,3 +1,155 @@
+2015-05-15  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* event-loop.c (gdb_notifier) <next_file_handler,
+	next_poll_fds_index>: New fields.
+	(get_next_file_handler_to_handle_and_advance): New function.
+	(delete_file_handler): If deleting the next file handler to
+	handle, advance to the next file handler.
+	(gdb_wait_for_event): Bail early if no event fired.  Poll file
+	handlers in round-robin fashion.
+
+2015-05-15  Pedro Alves  <palves@redhat.com>
+
+	* linux-tdep.c (linux_find_memory_regions_full): Rename local
+	'private' to 'priv'.
+
+2015-05-15  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-nat.h: Include "target/waitstatus.h".
+
+2015-05-15  Yuanhui Zhang  <asmwarrior@gmail.com>
+
+	* python/py-unwind.c (struct reg_info): Move out of ...
+	(struct cached_frame_info): ... this scope.
+	(pending_frame_object_type, unwind_info_object_type): Make extern.
+
+2015-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Make sure
+	accumSize is never negative.
+
+2015-05-14  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-command.c: Remove include of <ctype.h>.
+	(tui_dispatch_ctrl_char): Remove workaround for xterm terminals.
+
+2015-05-13  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* dwarf2read.c (die_needs_namespace): Return 1 for
+	DW_TAG_inlined_subroutine.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* regcache.c (regcache_cpy_no_passthrough): New declaration.
+	(regcache_cpy_no_passthrough): Make it static, add function comment.
+	* regcache.h (regcache_dup, regcache_cpy): Reduce/update their comment.
+	(regcache_cpy_no_passthrough): Remove declaration.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbthread.h (struct thread_control_state): Update comment for
+	proceed_to_finish.
+	* infcall.c (run_inferior_call): Update comment about
+	proceed_to_finish.
+	* infcmd.c (get_return_value): Update comment about stop_registers.
+	(finish_forward): Update comment about proceed_to_finish.
+	* infrun.c (stop_registers): Remove.
+	(clear_proceed_status, normal_stop): Remove stop_registers handling.
+	* infrun.h (stop_registers): Remove.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* infcall.c (struct dummy_frame_context_saver)
+	(dummy_frame_context_saver_data_free, dummy_frame_context_saver_dtor)
+	(dummy_frame_context_saver_drop, dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs, dummy_frame_context_saver_setup):
+	New.
+	(call_function_by_hand_dummy): Move discard_cleanups of
+	inf_status_cleanup before dummy_frame_push.  Call
+	dummy_frame_context_saver_setup and prepare context_saver_cleanup.
+	Use dummy_frame_context_saver_get_regs instead of stop_registers.
+	* infcall.h (struct dummy_frame_context_saver)
+	(dummy_frame_context_saver_drop, dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs, dummy_frame_context_saver_setup):
+	New declarations.
+	* infcmd.c: Include infcall.h.
+	(get_return_value): Add parameter ctx_saver, use it instead of
+	stop_registers.
+	(print_return_value): Add parameter ctx_saver, pass it.
+	(struct finish_command_continuation_args): Add field ctx_saver.
+	(finish_command_continuation): Update print_return_value caller.
+	(finish_command_continuation_free_arg): Free also ctx_saver.
+	(finish_forward): Call dummy_frame_context_saver_setup.
+	* inferior.h (struct dummy_frame_context_saver): New declaration.
+	(get_return_value): Add parameter ctx_saver.
+	* python/py-finishbreakpoint.c (bpfinishpy_pre_stop_hook): Update
+	get_return_value caller.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dummy-frame.c (struct dummy_frame_dtor_list): New.
+	(struct dummy_frame): Replace dtor and dtor_data by dtor_list.
+	(remove_dummy_frame): Process dtor_list.
+	(pop_dummy_frame): Process dtor_list.
+	(register_dummy_frame_dtor): Maintain dtor_list.
+	(find_dummy_frame_dtor): Handle dtor_list.
+	* dummy-frame.h (register_dummy_frame_dtor, find_dummy_frame_dtor):
+	Update comments.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile-object-run.c (do_module_cleanup): Add parameter
+	registers_valid.
+	(compile_object_run): Update do_module_cleanup caller.
+	* dummy-frame.c: Include infcall.h.
+	(struct dummy_frame): Update dtor comment.
+	(remove_dummy_frame): Call dtor.
+	(pop_dummy_frame): Update dtor caller.
+	* dummy-frame.h (dummy_frame_dtor_ftype): Add parameter
+	registers_valid.
+
+2015-05-13  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.9.1 released.
+
+2015-05-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create "Changes in GDB 7.9.1" section.  Move news about
+	Xmethods now being able to specify a result type to that new
+	sectioin.
+
+2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (tui_async_resize_screen): Clear win_resized
+	first before resizing the window.
+	* tui/tui.c (tui_enable): Likewise.
+
+2015-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dummy-frame.c (struct dummy_frame): Use proper typedef for dtor.
+	* dummy-frame.h (dummy_frame_dtor_ftype): Add its comment.
+	* infcall.c (call_function_by_hand_dummy): Use proper typedef for
+	dummy_dtor parameter.
+	* infcall.h: Include dummy-frame.h.
+	(call_function_by_hand_dummy_dtor_ftype): Remove.
+	(call_function_by_hand_dummy): Use proper typedef for dummy_dtor
+	parameter.
+
+2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/17820
+	* top.c (history_size_setshow_var): Change type to signed.
+	Initialize to -2.  Update documentation.
+	(set_readline_history_size): Define.
+	(set_history_size_command): Use it.  Remove logic for handling
+	out-of-range sizes.
+	(init_history): Use set_readline_history_size().  Test for a
+	value of -2 instead of 0 when determining whether to set a
+	default history size.
+	(init_main): Decode the argument of the "size" command as a
+	zuinteger_unlimited.
+
 2015-05-12  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct file_entry): Tweak comments.

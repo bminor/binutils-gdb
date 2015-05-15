@@ -72,6 +72,15 @@ typedef struct
 /* The data we keep for a frame we can unwind: frame ID and an array of
    (register_number, register_value) pairs.  */
 
+struct reg_info
+{
+  /* Register number.  */
+  int number;
+
+  /* Register data bytes pointer.  */
+  gdb_byte data[MAX_REGISTER_SIZE];
+};
+
 typedef struct
 {
   /* Frame ID.  */
@@ -83,20 +92,13 @@ typedef struct
   /* Length of the `reg' array below.  */
   int reg_count;
 
-  struct reg_info
-  {
-    /* Register number.  */
-    int number;
-
-    /* Register data bytes pointer.  */
-    gdb_byte data[MAX_REGISTER_SIZE];
-  } reg[];
+  struct reg_info reg[];
 } cached_frame_info;
 
-static PyTypeObject pending_frame_object_type
+extern PyTypeObject pending_frame_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pending_frame_object");
 
-static PyTypeObject unwind_info_object_type
+extern PyTypeObject unwind_info_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
 
 static unsigned int pyuw_debug = 0;
@@ -696,7 +698,7 @@ static PyMethodDef pending_frame_object_methods[] =
   {NULL}  /* Sentinel */
 };
 
-static PyTypeObject pending_frame_object_type =
+PyTypeObject pending_frame_object_type =
 {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.PendingFrame",             /* tp_name */
@@ -746,7 +748,7 @@ static PyMethodDef unwind_info_object_methods[] =
   { NULL }  /* Sentinel */
 };
 
-static PyTypeObject unwind_info_object_type =
+PyTypeObject unwind_info_object_type =
 {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.UnwindInfo",               /* tp_name */

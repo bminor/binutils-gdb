@@ -2418,6 +2418,8 @@ struct dis386 {
    '%' => add 1 upper case letter to the macro.
    '^' => print 'w' or 'l' depending on operand size prefix or
 	  suffix_always is true (lcall/ljmp).
+   '@' => print 'q' for Intel64 ISA, 'w' or 'q' for AMD64 ISA depending
+	  on operand size prefix.
 
    2 upper case letter macros:
    "XY" => print 'x' or 'y' if suffix_always is true or no register
@@ -6844,13 +6846,13 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_E8 */
   {
     { "callP",		{ Jv, BND }, 0 },
-    { "callq",		{ Jv, BND }, 0 }
+    { "call@",		{ Jv, BND }, 0 }
   },
 
   /* X86_64_E9 */
   {
     { "jmpP",		{ Jv, BND }, 0 },
-    { "jmpq",		{ Jv, BND }, 0 }
+    { "jmp@",		{ Jv, BND }, 0 }
   },
 
   /* X86_64_EA */
@@ -12342,6 +12344,14 @@ static char close_char;
 static char separator_char;
 static char scale_char;
 
+enum x86_64_isa
+{
+  amd64 = 0,
+  intel64
+};
+
+static enum x86_64_isa isa64;
+
 /* Here for backwards compatibility.  When gdb stops using
    print_insn_i386_att and print_insn_i386_intel these functions can
    disappear, and print_insn_i386 be merged into print_insn.  */
@@ -12391,6 +12401,8 @@ with the -M switch (multiple options should be separated by commas):\n"));
   fprintf (stream, _("  data32      Assume 32bit data size\n"));
   fprintf (stream, _("  data16      Assume 16bit data size\n"));
   fprintf (stream, _("  suffix      Always display instruction suffix in AT&T syntax\n"));
+  fprintf (stream, _("  amd64       Display instruction in AMD64 ISA\n"));
+  fprintf (stream, _("  intel64     Display instruction in Intel64 ISA\n"));
 }
 
 /* Bad opcode.  */
@@ -12874,7 +12886,11 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   for (p = info->disassembler_options; p != NULL; )
     {
-      if (CONST_STRNEQ (p, "x86-64"))
+      if (CONST_STRNEQ (p, "amd64"))
+	isa64 = amd64;
+      else if (CONST_STRNEQ (p, "intel64"))
+	isa64 = intel64;
+      else if (CONST_STRNEQ (p, "x86-64"))
 	{
 	  address_mode = mode_64bit;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
@@ -14204,6 +14220,20 @@ case_S:
 	      if (sizeflag & DFLAG)
 		*obufp++ = 'l';
 	      else
+		*obufp++ = 'w';
+	      used_prefixes |= (prefixes & PREFIX_DATA);
+	    }
+	  break;
+	case '@':
+	  if (intel_syntax)
+	    break;
+	  if (address_mode == mode_64bit
+	      && (isa64 == intel64
+		  || ((sizeflag & DFLAG) || (rex & REX_W))))
+	      *obufp++ = 'q';
+	  else if ((prefixes & PREFIX_DATA))
+	    {
+	      if (!(sizeflag & DFLAG))
 		*obufp++ = 'w';
 	      used_prefixes |= (prefixes & PREFIX_DATA);
 	    }
@@ -15724,7 +15754,11 @@ OP_J (int bytemode, int sizeflag)
 	disp -= 0x100;
       break;
     case v_mode:
-      if (address_mode == mode_64bit || (sizeflag & DFLAG))
+      if (isa64 == amd64)
+	USED_REX (REX_W);
+      if ((sizeflag & DFLAG)
+	  || (address_mode == mode_64bit
+	      && (isa64 != amd64 || (rex & REX_W))))
 	disp = get32s ();
       else
 	{
@@ -15740,7 +15774,8 @@ OP_J (int bytemode, int sizeflag)
 	    segment = ((start_pc + codep - start_codep)
 		       & ~((bfd_vma) 0xffff));
 	}
-      if (address_mode != mode_64bit)
+      if (address_mode != mode_64bit
+	  || (isa64 == amd64 && !(rex & REX_W)))
 	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:

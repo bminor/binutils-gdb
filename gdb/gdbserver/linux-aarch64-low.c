@@ -1140,10 +1140,10 @@ aarch64_linux_new_fork (struct process_info *parent,
 			struct process_info *child)
 {
   /* These are allocated by linux_add_process.  */
-  gdb_assert (parent->private != NULL
-	      && parent->private->arch_private != NULL);
-  gdb_assert (child->private != NULL
-	      && child->private->arch_private != NULL);
+  gdb_assert (parent->priv != NULL
+	      && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL
+	      && child->priv->arch_private != NULL);
 
   /* Linux kernel before 2.6.33 commit
      72f674d203cd230426437cdcf7dd6f681dad8b0d
@@ -1159,7 +1159,7 @@ aarch64_linux_new_fork (struct process_info *parent,
      in the end before detaching the forked off process, thus making
      this compatible with older Linux kernels too.  */
 
-  *child->private->arch_private = *parent->private->arch_private;
+  *child->priv->arch_private = *parent->priv->arch_private;
 }
 
 /* Called when resuming a thread.

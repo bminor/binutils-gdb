@@ -4,6 +4,7 @@ foo:
 	jmp local
 	jmp hidden_def
 	jmp global_def
+	jmp global_def@PLT
 	jmp weak_def
 	jmp weak_hidden_undef
 	jmp weak_hidden_def

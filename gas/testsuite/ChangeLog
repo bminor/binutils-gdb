@@ -1,3 +1,38 @@
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* gas/i386/i386.exp: Run x86-64-branch-2 and x86-64-branch-3.
+	* gas/i386/x86-64-branch.d: Also pass -Mintel64 to objdump.
+	* gas/i386/ilp32/x86-64-branch.d: Likewise.
+	* gas/i386/x86-64-branch-2.d: New file.
+	* gas/i386/x86-64-branch-2.s: Likewise.
+	* gas/i386/x86-64-branch-3.l: Likewise.
+	* gas/i386/x86-64-branch-3.s: Likewise.
+
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Don't run pcrel for ELF targets.  Run
+	pcrel-elf, relax-4 and x86-64-relax-3 for ELF targets.
+	* gas/i386/pcrel-elf.d: New file.
+	* gas/i386/relax-4.d: Likewise.
+	* gas/i386/x86-64-relax-3.d: Likewise.
+	* gas/i386/relax-3.d: Pass -mshared to assembler.  Updated.
+	* gas/i386/x86-64-relax-2.d: Likewise.
+	* gas/i386/relax-3.s: Add test for PLT relocation.
+
+2015-05-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/power4.d: Add a slbia test.
+	* gas/ppc/power4.s: Likewise.
+	* gas/ppc/power6.d: Add slbia and tlbie tests.
+	* gas/ppc/power6.s: Likewise.
+	* gas/ppc/power7.d: Remove wait tests. Add a tlbie test.
+	* gas/ppc/power7.s: Likewise.
+
+2015-05-13  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* gas/xtensa/trampoline.s: Add regression testcase.
+
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run iamcu-1, iamcu-2, iamcu-3, iamcu-inval-1,

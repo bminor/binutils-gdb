@@ -376,10 +376,10 @@ mips_linux_new_fork (struct process_info *parent,
   struct mips_watchpoint *wp;
 
   /* These are allocated by linux_add_process.  */
-  gdb_assert (parent->private != NULL
-	      && parent->private->arch_private != NULL);
-  gdb_assert (child->private != NULL
-	      && child->private->arch_private != NULL);
+  gdb_assert (parent->priv != NULL
+	      && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL
+	      && child->priv->arch_private != NULL);
 
   /* Linux kernel before 2.6.33 commit
      72f674d203cd230426437cdcf7dd6f681dad8b0d
@@ -395,8 +395,8 @@ mips_linux_new_fork (struct process_info *parent,
      in the end before detaching the forked off process, thus making
      this compatible with older Linux kernels too.  */
 
-  parent_private = parent->private->arch_private;
-  child_private = child->private->arch_private;
+  parent_private = parent->priv->arch_private;
+  child_private = child->priv->arch_private;
 
   child_private->watch_readback_valid = parent_private->watch_readback_valid;
   child_private->watch_readback = parent_private->watch_readback;

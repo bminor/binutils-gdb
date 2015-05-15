@@ -1,6 +1,6 @@
 #source: ../x86-64-branch.s
 #as: -J
-#objdump: -drw
+#objdump: -drw -Mintel64
 #name: x86-64 (ILP32) branch
 
 .*: +file format .*

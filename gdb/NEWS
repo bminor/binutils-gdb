@@ -56,7 +56,6 @@
   ** You can now write frame unwinders in Python.
   ** gdb.Type objects have a new method "optimized_out",
      returning optimized out gdb.Value instance of this type.
-  ** Xmethods can now specify a result type.
   ** gdb.Value objects have new methods "reference_value" and
      "const_value" which return a reference to the value and a
      "const" version of the value respectively.
@@ -171,6 +170,12 @@ fork-events and vfork-events features in qSupported
 
 HP/PA running HP-UX           hppa*-*-hpux*
 Itanium running HP-UX         ia64-*-hpux*
+
+*** Changes in GDB 7.9.1
+
+* Python Scripting
+
+  ** Xmethods can now specify a result type.
 
 *** Changes in GDB 7.9
 

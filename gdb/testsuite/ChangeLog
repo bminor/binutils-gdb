@@ -1,3 +1,14 @@
+2015-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/pckd_neg: New testcase.
+
+2015-05-13  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/17820
+	* gdb.base/gdbinit-history.exp: New test.
+	* gdb.base/gdbinit-history/unlimited/.gdbinit: New file.
+	* gdb.base/gdbinit-history/zero/.gdbinit: New file.
+
 2015-05-09  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-xmethods.cc: Enhance test case.

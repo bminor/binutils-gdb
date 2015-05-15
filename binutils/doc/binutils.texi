@@ -2175,6 +2175,10 @@ Select disassembly for the given architecture.
 @itemx att
 Select between intel syntax mode and AT&T syntax mode.
 
+@item amd64
+@itemx intel64
+Select between AMD64 ISA and Intel64 ISA.
+
 @item intel-mnemonic
 @itemx att-mnemonic
 Select between intel mnemonic mode and AT&T mnemonic mode.
@@ -4344,6 +4348,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
+        [@option{-z}|@option{--decompress}]
         [@option{-c}|@option{--archive-index}]
         [@option{-w[lLiaprmfFsoRt]}|
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]]
@@ -4491,6 +4496,12 @@ before they are displayed.
 Displays the contents of the indicated section as printable strings.
 A number identifies a particular section by index in the section table;
 any other string identifies all sections with that name in the object file.
+
+@item -z
+@itemx --decompress
+Requests that the section(s) being dumped by @option{x}, @option{R} or
+@option{p} options are decompressed before being displayed.  If the
+section(s) are not compressed then they are displayed as is.
 
 @item -c
 @itemx --archive-index
