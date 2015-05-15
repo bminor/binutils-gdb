@@ -1,3 +1,9 @@
+2015-05-15  Yuanhui Zhang  <asmwarrior@gmail.com>
+
+	* python/py-unwind.c (struct reg_info): Move out of ...
+	(struct cached_frame_info): ... this scope.
+	(pending_frame_object_type, unwind_info_object_type): Make extern.
+
 2015-05-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_value_primitive_packed_val): Make sure
