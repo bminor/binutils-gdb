@@ -866,6 +866,9 @@ const struct powerpc_operand powerpc_operands[] =
 
 #define ERAT_T UIM + 1
   { 0x7, 21, NULL, NULL, 0 },
+
+#define IH ERAT_T + 1
+  { 0x7, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
@@ -4486,7 +4489,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"waitrsv",	X(31,62)|(1<<21), 0xffffffff, E500MC|PPCA2, PPCNONE,	{0}},
 {"waitimpl",	X(31,62)|(2<<21), 0xffffffff, E500MC|PPCA2, PPCNONE,	{0}},
-{"wait",	X(31,62),	XWC_MASK,    POWER7|E500MC|PPCA2|PPCVLE, PPCNONE, {WC}},
+{"wait",	X(31,62),	XWC_MASK,    E500MC|PPCA2|PPCVLE, PPCNONE, {WC}},
  
 {"dcbstep",	XRT(31,63,0),	XRT_MASK,    E500MC|PPCA2|PPCVLE, PPCNONE, {RA0, RB}},
 
@@ -4780,7 +4783,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mfbhrbe",	X(31,302),	X_MASK,      POWER8,	PPCNONE,	{RT, BHRBE}},
 
-{"tlbie",	X(31,306),	XRTLRA_MASK, PPC,	TITAN,  	{RB, L}},
+{"tlbie",	X(31,306),	XRA_MASK,    POWER7,	TITAN,  	{RB, RS}},
+{"tlbie",	X(31,306),	XRTLRA_MASK, PPC,	POWER7|TITAN,  	{RB, L}},
 {"tlbi",	X(31,306),	XRT_MASK,    POWER,	PPCNONE,	{RA0, RB}},
 
 {"eciwx",	X(31,310),	X_MASK,      PPC,	TITAN,  	{RT, RA0, RB}},
@@ -5372,7 +5376,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"icbtlse",	X(31,494),	X_MASK,      PPCCHLK,	E500MC,		{CT, RA, RB}},
 
-{"slbia",	X(31,498),	0xffffffff,  PPC64,	PPCNONE,	{0}},
+{"slbia",	X(31,498),	0xff1fffff,  POWER6,	PPCNONE,	{IH}},
+{"slbia",	X(31,498),	0xffffffff,  PPC64,	POWER6,		{0}},
 
 {"cli",		X(31,502),	XRB_MASK,    POWER,	PPCNONE,	{RT, RA}},
 
