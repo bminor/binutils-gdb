@@ -1,5 +1,10 @@
 2015-05-15  Pedro Alves  <palves@redhat.com>
 
+	* linux-tdep.c (linux_find_memory_regions_full): Rename local
+	'private' to 'priv'.
+
+2015-05-15  Pedro Alves  <palves@redhat.com>
+
 	* nat/linux-nat.h: Include "target/waitstatus.h".
 
 2015-05-15  Yuanhui Zhang  <asmwarrior@gmail.com>

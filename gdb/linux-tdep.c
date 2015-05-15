@@ -1163,7 +1163,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	  const char *permissions, *device, *filename;
 	  struct smaps_vmflags v;
 	  size_t permissions_len, device_len;
-	  int read, write, exec, private;
+	  int read, write, exec, priv;
 	  int has_anonymous = 0;
 	  int should_dump_p = 0;
 	  int mapping_anon_p;
@@ -1197,7 +1197,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	     not have the VmFlags there.  In this case, there is
 	     really no way to know if we are dealing with VM_SHARED,
 	     so we just assume that VM_MAYSHARE is enough.  */
-	  private = memchr (permissions, 'p', permissions_len) != 0;
+	  priv = memchr (permissions, 'p', permissions_len) != 0;
 
 	  /* Try to detect if region should be dumped by parsing smaps
 	     counters.  */
@@ -1257,7 +1257,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	    }
 
 	  if (has_anonymous)
-	    should_dump_p = dump_mapping_p (filterflags, &v, private,
+	    should_dump_p = dump_mapping_p (filterflags, &v, priv,
 					    mapping_anon_p, mapping_file_p,
 					    filename);
 	  else
