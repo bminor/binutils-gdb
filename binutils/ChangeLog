@@ -1,3 +1,7 @@
+2015-05-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* MAINTAINERS: Add myself as PPC maintainer.
+
 2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (uncompress_section_contents): Add a parameter for

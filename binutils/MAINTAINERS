@@ -119,6 +119,7 @@ responsibility among the other maintainers.
   OR1K		   Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>
   PPC		   Geoff Keating <geoffk@geoffk.org>
   PPC		   Alan Modra <amodra@gmail.com>
+  PPC		   Peter Bergner <bergner@vnet.ibm.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   RL78             DJ Delorie <dj@redhat.com>
   RX               DJ Delorie <dj@redhat.com>
