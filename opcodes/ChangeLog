@@ -1,3 +1,23 @@
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* i386-dis.c: Add comments for '@'.
+	(x86_64_table): Use '@' on call/jmp for X86_64_E8/X86_64_E9.
+	(enum x86_64_isa): New.
+	(isa64): Likewise.
+	(print_i386_disassembler_options): Add amd64 and intel64.
+	(print_insn): Handle amd64 and intel64.
+	(putop): Handle '@'.
+	(OP_J): Don't ignore the operand size prefix for AMD64 in 64-bit.
+	* i386-gen.c (cpu_flags): Add CpuAMD64 and CpuIntel64.
+	* i386-opc.h (AMD64): New.
+	(CpuIntel64): Likewise.
+	(i386_cpu_flags): Add cpuamd64 and cpuintel64.
+	* i386-opc.tbl: Add direct call/jmp with Disp16|Disp32 for AMD64.
+	Mark direct call/jmp without Disp16|Disp32 as Intel64.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2015-05-14  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (IH) New define.

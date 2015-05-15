@@ -458,6 +458,8 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuAVX512IFMA),
   BITFIELD (CpuAVX512VBMI),
   BITFIELD (CpuCLZERO),
+  BITFIELD (CpuAMD64),
+  BITFIELD (CpuIntel64),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif

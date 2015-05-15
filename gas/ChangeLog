@@ -1,5 +1,15 @@
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutis/18386
+	* config/tc-i386.c (OPTION_MAMD64): New.
+	(OPTION_MINTEL64): Likewise.
+	(md_longopts): Add -mamd64 and -mintel64.
+	(md_parse_option): Handle OPTION_MAMD64 and OPTION_MINTEL64.
+	(md_show_usage): Add -mamd64 and -mintel64.
+	* doc/c-i386.texi: Document -mamd64 and -mintel64.
+
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (shared): New.
 	(OPTION_MSHARED): Likewise.
 	(elf_symbol_resolved_in_segment_p): Add relocation argument.

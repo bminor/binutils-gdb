@@ -1,3 +1,8 @@
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* doc/binutils.texi: Document -Mamd64 and -Mintel64.
+
 2015-05-15  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (options): Add "decompress".

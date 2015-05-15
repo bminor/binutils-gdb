@@ -1,3 +1,11 @@
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* ld-x86-64/tlsgdesc.dd: Also pass -Mintel64 to objdump.
+	* ld-x86-64/tlspic.dd: Likewise.
+	* ld-x86-64/x86-64.exp (x86_64tests): Also pass -Mintel64 to
+	objdump for tlspic.dd and tlsgdesc.dd.
+
 2015-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp: Run pltgot-1 for Linux targets.

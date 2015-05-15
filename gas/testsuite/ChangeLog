@@ -1,5 +1,16 @@
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutis/18386
+	* gas/i386/i386.exp: Run x86-64-branch-2 and x86-64-branch-3.
+	* gas/i386/x86-64-branch.d: Also pass -Mintel64 to objdump.
+	* gas/i386/ilp32/x86-64-branch.d: Likewise.
+	* gas/i386/x86-64-branch-2.d: New file.
+	* gas/i386/x86-64-branch-2.s: Likewise.
+	* gas/i386/x86-64-branch-3.l: Likewise.
+	* gas/i386/x86-64-branch-3.s: Likewise.
+
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/i386.exp: Don't run pcrel for ELF targets.  Run
 	pcrel-elf, relax-4 and x86-64-relax-3 for ELF targets.
 	* gas/i386/pcrel-elf.d: New file.
