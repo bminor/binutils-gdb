@@ -1,3 +1,8 @@
+2015-05-16  Doug Evans  <xdje42@gmail.com>
+
+	* guile.texi (Memory Ports in Guile): Document support for unbuffered
+	memory ports.
+
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Compiling and Injecting Code): Add compile print.

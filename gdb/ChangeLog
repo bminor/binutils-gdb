@@ -1,3 +1,19 @@
+2015-05-16  Doug Evans  <xdje42@gmail.com>
+
+	* NEWS: Mention support for unbuffered Guile memory ports.
+	* scm-ports.c (ioscm_memory_port): Update comments on end, size.
+	(ioscm_lseek_address): Improve overflow calculation.
+	(gdbscm_memory_port_fill_input): Add assert.
+	(gdbscm_memory_port_write): Handle unbuffered ports.
+	Handle large writes identical to Guile's fport_write.
+	(gdbscm_memory_port_seek): Fix seeking past end check.
+	(gdbscm_memory_port_close): Handle closing unbuffered port.
+	(ioscm_parse_mode_bits): Recognize "0" for unbuffered ports.
+	(ioscm_init_memory_port): Handle unbuffered ports.
+	(ioscm_reinit_memory_port): Ditto.
+	(ioscm_init_memory_port): Update size calculation.
+	(gdbscm_open_memory): Support zero sized ports.
+
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* compile/compile-object-load.c (get_out_value_type): Fix uninitialized

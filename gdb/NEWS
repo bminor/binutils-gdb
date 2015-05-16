@@ -48,6 +48,10 @@
 
 * GDB now supports the vector ABI on S/390 GNU/Linux targets.
 
+* Guile Scripting
+
+  ** Memory ports can now be unbuffered.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",

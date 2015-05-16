@@ -1,3 +1,8 @@
+2015-05-16  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-ports.c: New file.
+	* gdb.guile/scm-ports.exp: Add memory port tests.
+
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.compile/compile-print.c: New file.
