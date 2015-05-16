@@ -1,4 +1,8 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile-object-load.c (get_out_value_type): Fix returned type.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>
 
 	* NEWS (Changes since GDB 7.9): Add compile print.

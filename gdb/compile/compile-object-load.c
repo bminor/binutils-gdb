@@ -372,7 +372,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 		    enum compile_i_scope_types scope)
 {
   struct symbol *gdb_ptr_type_sym, *gdb_val_sym;
-  struct type *gdb_ptr_type, *gdb_type_from_ptr, *gdb_type;
+  struct type *gdb_ptr_type, *gdb_type_from_ptr, *gdb_type, *retval;
   const struct block *block;
   const struct blockvector *bv;
   int nblocks = 0;
@@ -440,6 +440,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	   TYPE_CODE (gdb_type_from_ptr), COMPILE_I_EXPR_VAL,
 	   objfile_name (objfile));
   
+  retval = gdb_type_from_ptr;
   switch (TYPE_CODE (gdb_type_from_ptr))
     {
     case TYPE_CODE_ARRAY:
@@ -461,7 +462,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	   objfile_name (objfile));
   if (scope == COMPILE_I_PRINT_ADDRESS_SCOPE)
     return NULL;
-  return gdb_type_from_ptr;
+  return retval;
 }
 
 /* Fetch the type of first parameter of FUNC_SYM.
