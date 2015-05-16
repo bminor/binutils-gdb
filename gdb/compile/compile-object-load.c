@@ -371,9 +371,12 @@ static struct type *
 get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 		    enum compile_i_scope_types scope)
 {
-  struct symbol *gdb_ptr_type_sym, *gdb_val_sym;
+  struct symbol *gdb_ptr_type_sym;
+  /* Initialize it just to avoid a GCC false warning.  */
+  struct symbol *gdb_val_sym = NULL;
   struct type *gdb_ptr_type, *gdb_type_from_ptr, *gdb_type, *retval;
-  const struct block *block;
+  /* Initialize it just to avoid a GCC false warning.  */
+  const struct block *block = NULL;
   const struct blockvector *bv;
   int nblocks = 0;
   int block_loop = 0;
@@ -384,7 +387,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   gdb_ptr_type_sym = NULL;
   for (block_loop = 0; block_loop < nblocks; block_loop++)
     {
-      struct symbol *function;
+      struct symbol *function = NULL;
       const struct block *function_block;
 
       block = BLOCKVECTOR_BLOCK (bv, block_loop);

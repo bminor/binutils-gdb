@@ -1,5 +1,10 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* compile/compile-object-load.c (get_out_value_type): Fix uninitialized
+	variable compiler warnings.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* compile/compile-object-load.c (get_out_value_type): Fix returned type.
 
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
