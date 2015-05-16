@@ -25,6 +25,8 @@
 #include "compile-internal.h"
 #include "dummy-frame.h"
 #include "block.h"
+#include "valprint.h"
+#include "compile.h"
 
 /* Helper for do_module_cleanup.  */
 
@@ -41,6 +43,10 @@ struct do_module_cleanup
   enum compile_i_scope_types scope;
   void *scope_data;
 
+  /* Copy from struct compile_module.  */
+  struct type *out_value_type;
+  CORE_ADDR out_value_addr;
+
   /* objfile_name of our objfile.  */
   char objfile_name_string[1];
 };
@@ -56,7 +62,23 @@ do_module_cleanup (void *arg, int registers_valid)
   struct objfile *objfile;
 
   if (data->executedp != NULL)
-    *data->executedp = 1;
+    {
+      *data->executedp = 1;
+
+      /* This code cannot be in compile_object_run as OUT_VALUE_TYPE
+	 no longer exists there.  */
+      if (data->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+	  || data->scope == COMPILE_I_PRINT_VALUE_SCOPE)
+	{
+	  struct value *addr_value;
+	  struct type *ptr_type = lookup_pointer_type (data->out_value_type);
+
+	  addr_value = value_from_pointer (ptr_type, data->out_value_addr);
+
+	  /* SCOPE_DATA would be stale unlesse EXECUTEDP != NULL.  */
+	  compile_print_value (value_ind (addr_value), data->scope_data);
+	}
+    }
 
   ALL_OBJFILES (objfile)
     if ((objfile->flags & OBJF_USERLOADED) == 0
@@ -104,6 +126,8 @@ compile_object_run (struct compile_module *module)
   strcpy (data->objfile_name_string, objfile_name_s);
   data->scope = module->scope;
   data->scope_data = module->scope_data;
+  data->out_value_type = module->out_value_type;
+  data->out_value_addr = module->out_value_addr;
 
   xfree (module->source_file);
   xfree (module);
@@ -131,6 +155,13 @@ compile_object_run (struct compile_module *module)
 	  gdb_assert (regs_addr != 0);
 	  vargs[current_arg] = value_from_pointer
 			  (TYPE_FIELD_TYPE (func_type, current_arg), regs_addr);
+	  ++current_arg;
+	}
+      if (TYPE_NFIELDS (func_type) >= 2)
+	{
+	  gdb_assert (data->out_value_addr != 0);
+	  vargs[current_arg] = value_from_pointer
+	       (TYPE_FIELD_TYPE (func_type, current_arg), data->out_value_addr);
 	  ++current_arg;
 	}
       gdb_assert (current_arg == TYPE_NFIELDS (func_type));

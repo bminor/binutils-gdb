@@ -101,4 +101,6 @@ extern void compile_dwarf_bounds_to_c (struct ui_file *stream,
 				       const gdb_byte *op_end,
 				       struct dwarf2_per_cu_data *per_cu);
 
+extern void compile_print_value (struct value *val, void *data_voidp);
+
 #endif /* GDB_COMPILE_H */

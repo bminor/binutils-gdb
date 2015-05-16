@@ -38,6 +38,7 @@
 #include "target.h"
 #include "osabi.h"
 #include "gdb_wait.h"
+#include "valprint.h"
 
 
 
@@ -157,6 +158,51 @@ compile_code_command (char *arg, int from_tty)
 
       make_cleanup_free_command_lines (&l);
       l->control_u.compile.scope = scope;
+      execute_control_command_untraced (l);
+    }
+
+  do_cleanups (cleanup);
+}
+
+/* Callback for compile_print_command.  */
+
+void
+compile_print_value (struct value *val, void *data_voidp)
+{
+  const struct format_data *fmtp = data_voidp;
+
+  print_value (val, fmtp);
+}
+
+/* Handle the input from the 'compile print' command.  The "compile
+   print" command is used to evaluate and print an expression that may
+   contain calls to the GCC compiler.  The language expected in this
+   compile command is the language currently set in GDB.  */
+
+static void
+compile_print_command (char *arg_param, int from_tty)
+{
+  const char *arg = arg_param;
+  struct cleanup *cleanup;
+  enum compile_i_scope_types scope = COMPILE_I_PRINT_ADDRESS_SCOPE;
+  struct format_data fmt;
+
+  cleanup = make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
+
+  /* Passing &FMT as SCOPE_DATA is safe as do_module_cleanup will not
+     touch the stale pointer if compile_object_run has already quit.  */
+  print_command_parse_format (&arg, "compile print", &fmt);
+
+  if (arg && *arg)
+    eval_compile_command (NULL, arg, scope, &fmt);
+  else
+    {
+      struct command_line *l = get_command_line (compile_control, "");
+
+      make_cleanup_free_command_lines (&l);
+      l->control_u.compile.scope = scope;
+      l->control_u.compile.scope_data = &fmt;
       execute_control_command_untraced (l);
     }
 
@@ -576,6 +622,14 @@ eval_compile_command (struct command_line *cmd, const char *cmd_string,
       make_cleanup (cleanup_unlink_file, source_file);
       compile_module = compile_object_load (object_file, source_file,
 					    scope, scope_data);
+      if (compile_module == NULL)
+	{
+	  gdb_assert (scope == COMPILE_I_PRINT_ADDRESS_SCOPE);
+	  do_cleanups (cleanup_xfree);
+	  eval_compile_command (cmd, cmd_string,
+				COMPILE_I_PRINT_VALUE_SCOPE, scope_data);
+	  return;
+	}
       discard_cleanups (cleanup_unlink);
       do_cleanups (cleanup_xfree);
       compile_object_run (compile_module);
@@ -637,12 +691,10 @@ The source code may be specified as a simple one line expression, e.g.:\n\
 \n\
     compile code printf(\"Hello world\\n\");\n\
 \n\
-Alternatively, you can type the source code interactively.\n\
-You can invoke this mode when no argument is given to the command\n\
-(i.e.,\"compile code\" is typed with nothing after it).  An\n\
-interactive prompt will be shown allowing you to enter multiple\n\
-lines of source code.  Type a line containing \"end\" to indicate\n\
-the end of the source code."),
+Alternatively, you can type a multiline expression by invoking\n\
+this command with no argument.  GDB will then prompt for the\n\
+expression interactively; type a line containing \"end\" to\n\
+indicate the end of the expression."),
 	   &compile_command_list);
 
   c = add_cmd ("file", class_obscure, compile_file_command,
@@ -653,6 +705,25 @@ Usage: compile file [-r|-raw] [filename]\n\
 -r|-raw: Suppress automatic 'void _gdb_expr () { CODE }' wrapping."),
 	       &compile_command_list);
   set_cmd_completer (c, filename_completer);
+
+  add_cmd ("print", class_obscure, compile_print_command,
+	   _("\
+Evaluate EXPR by using the compiler and print result.\n\
+\n\
+Usage: compile print[/FMT] [EXPR]\n\
+\n\
+The expression may be specified on the same line as the command, e.g.:\n\
+\n\
+    compile print i\n\
+\n\
+Alternatively, you can type a multiline expression by invoking\n\
+this command with no argument.  GDB will then prompt for the\n\
+expression interactively; type a line containing \"end\" to\n\
+indicate the end of the expression.\n\
+\n\
+EXPR may be preceded with /FMT, where FMT is a format letter\n\
+but no count or size letter (see \"x\" command)."),
+	   &compile_command_list);
 
   add_setshow_boolean_cmd ("compile", class_maintenance, &compile_debug, _("\
 Set compile command debugging."), _("\

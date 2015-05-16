@@ -1,4 +1,37 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
+
+	* NEWS (Changes since GDB 7.9): Add compile print.
+	* compile/compile-c-support.c (add_code_header, add_code_footer)
+	(c_compute_program): Add COMPILE_I_PRINT_ADDRESS_SCOPE and
+	COMPILE_I_PRINT_VALUE_SCOPE.
+	* compile/compile-internal.h (COMPILE_I_PRINT_OUT_ARG_TYPE)
+	(COMPILE_I_PRINT_OUT_ARG, COMPILE_I_EXPR_VAL, COMPILE_I_EXPR_PTR_TYPE):
+	New.
+	* compile/compile-object-load.c: Include block.h.
+	(get_out_value_type): New function.
+	(compile_object_load): Handle COMPILE_I_PRINT_ADDRESS_SCOPE and
+	COMPILE_I_PRINT_VALUE_SCOPE.  Set compile_module's OUT_VALUE_ADDR and
+	OUT_VALUE_TYPE.
+	* compile/compile-object-load.h (struct compile_module): Add fields
+	out_value_addr and out_value_type.
+	* compile/compile-object-run.c: Include valprint.h and compile.h.
+	(struct do_module_cleanup): Add fields out_value_addr and
+	out_value_type.
+	(do_module_cleanup): Handle COMPILE_I_PRINT_ADDRESS_SCOPE and
+	COMPILE_I_PRINT_VALUE_SCOPE.
+	(compile_object_run): Propagate out_value_addr and out_value_type.
+	Pass OUT_VALUE_ADDR.
+	* compile/compile.c: Include valprint.h.
+	(compile_print_value, compile_print_command): New functions.
+	(eval_compile_command): Handle failed COMPILE_I_PRINT_ADDRESS_SCOPE.
+	(_initialize_compile): Update compile code help text.  Install
+	compile_print_command.
+	* compile/compile.h (compile_print_value): New prototype.
+	* defs.h (enum compile_i_scope_types): Add
+	COMPILE_I_PRINT_ADDRESS_SCOPE and COMPILE_I_PRINT_VALUE_SCOPE.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* compile/compile-object-load.c (get_regs_type): Add parameter func_sym.
 	Rely on its parameter count.

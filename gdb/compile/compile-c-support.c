@@ -190,6 +190,24 @@ add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
 			") {\n",
 			buf);
       break;
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
+      /* <string.h> is needed for a memcpy call below.  */
+      fputs_unfiltered ("#include <string.h>\n"
+			"void "
+			GCC_FE_WRAPPER_FUNCTION
+			" (struct "
+			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			" *"
+			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			", "
+			COMPILE_I_PRINT_OUT_ARG_TYPE
+			" "
+			COMPILE_I_PRINT_OUT_ARG
+			") {\n",
+			buf);
+      break;
+
     case COMPILE_I_RAW_SCOPE:
       break;
     default:
@@ -207,6 +225,8 @@ add_code_footer (enum compile_i_scope_types type, struct ui_file *buf)
   switch (type)
     {
     case COMPILE_I_SIMPLE_SCOPE:
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
       fputs_unfiltered ("}\n", buf);
       break;
     case COMPILE_I_RAW_SCOPE:
@@ -369,7 +389,9 @@ c_compute_program (struct compile_instance *inst,
 
   add_code_header (inst->scope, buf);
 
-  if (inst->scope == COMPILE_I_SIMPLE_SCOPE)
+  if (inst->scope == COMPILE_I_SIMPLE_SCOPE
+      || inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+      || inst->scope == COMPILE_I_PRINT_VALUE_SCOPE)
     {
       ui_file_put (var_stream, ui_file_write_for_put, buf);
       fputs_unfiltered ("#pragma GCC user_expression\n", buf);
@@ -383,7 +405,25 @@ c_compute_program (struct compile_instance *inst,
     fputs_unfiltered ("{\n", buf);
 
   fputs_unfiltered ("#line 1 \"gdb command line\"\n", buf);
-  fputs_unfiltered (input, buf);
+
+  switch (inst->scope)
+    {
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
+      fprintf_unfiltered (buf,
+"__auto_type " COMPILE_I_EXPR_VAL " = %s;\n"
+"typeof (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+"memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s" COMPILE_I_EXPR_VAL ",\n"
+	 "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
+			  , input, input,
+			  (inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+			   ? "&" : ""));
+      break;
+    default:
+      fputs_unfiltered (input, buf);
+      break;
+    }
+
   fputs_unfiltered ("\n", buf);
 
   /* For larger user expressions the automatic semicolons may be

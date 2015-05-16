@@ -1,3 +1,7 @@
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Compiling and Injecting Code): Add compile print.
+
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.texinfo (Forks): Note that fork debugging is

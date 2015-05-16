@@ -17221,6 +17221,25 @@ compile file /home/user/example.c
 @end smallexample
 @end table
 
+@table @code
+@item compile print @var{expr}
+@itemx compile print /@var{f} @var{expr}
+Compile and execute @var{expr} with the compiler language found as the
+current language in @value{GDBN} (@pxref{Languages}).  By default the
+value of @var{expr} is printed in a format appropriate to its data type;
+you can choose a different format by specifying @samp{/@var{f}}, where
+@var{f} is a letter specifying the format; see @ref{Output Formats,,Output
+Formats}.
+
+@item compile print
+@itemx compile print /@var{f}
+@cindex reprint the last value
+Alternatively you can enter the expression (source code producing it) as
+multiple lines of text.  To enter this mode, invoke the @samp{compile print}
+command without any text following the command.  This will start the
+multiple-line editor.
+@end table
+
 @noindent
 The process of compiling and injecting the code can be inspected using:
 

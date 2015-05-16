@@ -75,6 +75,9 @@ record btrace bts
 record bts
   Start branch trace recording using Branch Trace Store (BTS) format.
 
+compile print
+  Evaluate expression by using the compiler and print result.
+
 * New options
 
 set max-completions

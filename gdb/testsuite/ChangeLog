@@ -1,5 +1,10 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.compile/compile-print.c: New file.
+	* gdb.compile/compile-print.exp: New file.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.compile/compile-ops.exp: Cast param to void.
 	* gdb.compile/compile.exp: Complete type for _gdb_expr.
 	(compile code struct_object.selffield = &struct_object): Add xfail.

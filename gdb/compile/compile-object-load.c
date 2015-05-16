@@ -29,6 +29,7 @@
 #include "regcache.h"
 #include "inferior.h"
 #include "compile.h"
+#include "block.h"
 #include "arch-utils.h"
 
 /* Helper data for setup_sections.  */
@@ -354,6 +355,115 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   do_cleanups (cleanups);
 }
 
+/* Fetch the type of COMPILE_I_EXPR_PTR_TYPE and COMPILE_I_EXPR_VAL
+   symbols in OBJFILE so we can calculate how much memory to allocate
+   for the out parameter.  This avoids needing a malloc in the generated
+   code.  Throw an error if anything fails.
+   GDB first tries to compile the code with COMPILE_I_PRINT_ADDRESS_SCOPE.
+   If it finds user tries to print an array type this function returns
+   NULL.  Caller will then regenerate the code with
+   COMPILE_I_PRINT_VALUE_SCOPE, recompiles it again and finally runs it.
+   This is because __auto_type array-to-pointer type conversion of
+   COMPILE_I_EXPR_VAL which gets detected by COMPILE_I_EXPR_PTR_TYPE
+   preserving the array type.  */
+
+static struct type *
+get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
+		    enum compile_i_scope_types scope)
+{
+  struct symbol *gdb_ptr_type_sym, *gdb_val_sym;
+  struct type *gdb_ptr_type, *gdb_type_from_ptr, *gdb_type;
+  const struct block *block;
+  const struct blockvector *bv;
+  int nblocks = 0;
+  int block_loop = 0;
+
+  bv = SYMTAB_BLOCKVECTOR (func_sym->owner.symtab);
+  nblocks = BLOCKVECTOR_NBLOCKS (bv);
+
+  gdb_ptr_type_sym = NULL;
+  for (block_loop = 0; block_loop < nblocks; block_loop++)
+    {
+      struct symbol *function;
+      const struct block *function_block;
+
+      block = BLOCKVECTOR_BLOCK (bv, block_loop);
+      if (BLOCK_FUNCTION (block) != NULL)
+	continue;
+      gdb_val_sym = block_lookup_symbol (block, COMPILE_I_EXPR_VAL, VAR_DOMAIN);
+      if (gdb_val_sym == NULL)
+	continue;
+
+      function_block = block;
+      while (function_block != BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)
+	     && function_block != BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
+	{
+	  function_block = BLOCK_SUPERBLOCK (function_block);
+	  function = BLOCK_FUNCTION (function_block);
+	  if (function != NULL)
+	    break;
+	}
+      if (function != NULL
+	  && (BLOCK_SUPERBLOCK (function_block)
+	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
+	  && (strcmp (SYMBOL_LINKAGE_NAME (function), GCC_FE_WRAPPER_FUNCTION)
+	      == 0))
+	break;
+    }
+  if (block_loop == nblocks)
+    error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
+
+  gdb_type = SYMBOL_TYPE (gdb_val_sym);
+  CHECK_TYPEDEF (gdb_type);
+
+  gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
+					  VAR_DOMAIN);
+  if (gdb_ptr_type_sym == NULL)
+    error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
+  gdb_ptr_type = SYMBOL_TYPE (gdb_ptr_type_sym);
+  CHECK_TYPEDEF (gdb_ptr_type);
+  if (TYPE_CODE (gdb_ptr_type) != TYPE_CODE_PTR)
+    error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
+  gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_ptr_type);
+
+  if (types_deeply_equal (gdb_type, gdb_type_from_ptr))
+    {
+      if (scope != COMPILE_I_PRINT_ADDRESS_SCOPE)
+	error (_("Expected address scope in compiled module \"%s\"."),
+	       objfile_name (objfile));
+      return gdb_type;
+    }
+
+  if (TYPE_CODE (gdb_type) != TYPE_CODE_PTR)
+    error (_("Invalid type code %d of symbol \"%s\" "
+	     "in compiled module \"%s\"."),
+	   TYPE_CODE (gdb_type_from_ptr), COMPILE_I_EXPR_VAL,
+	   objfile_name (objfile));
+  
+  switch (TYPE_CODE (gdb_type_from_ptr))
+    {
+    case TYPE_CODE_ARRAY:
+      gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_type_from_ptr);
+      break;
+    case TYPE_CODE_FUNC:
+      break;
+    default:
+      error (_("Invalid type code %d of symbol \"%s\" "
+	       "in compiled module \"%s\"."),
+	     TYPE_CODE (gdb_type_from_ptr), COMPILE_I_EXPR_PTR_TYPE,
+	     objfile_name (objfile));
+    }
+  if (!types_deeply_equal (gdb_type_from_ptr,
+			   TYPE_TARGET_TYPE (gdb_type)))
+    error (_("Referenced types do not match for symbols \"%s\" and \"%s\" "
+	     "in compiled module \"%s\"."),
+	   COMPILE_I_EXPR_PTR_TYPE, COMPILE_I_EXPR_VAL,
+	   objfile_name (objfile));
+  if (scope == COMPILE_I_PRINT_ADDRESS_SCOPE)
+    return NULL;
+  return gdb_type_from_ptr;
+}
+
 /* Fetch the type of first parameter of FUNC_SYM.
    Return NULL if FUNC_SYM has no parameters.  Throw an error otherwise.  */
 
@@ -440,7 +550,9 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
    Caller must fully dispose the return value by calling compile_object_run.
    SOURCE_FILE's copy is stored into the returned object.
    Caller should free both OBJECT_FILE and SOURCE_FILE immediatelly after this
-   function returns.  */
+   function returns.
+   Function returns NULL only for COMPILE_I_PRINT_ADDRESS_SCOPE when
+   COMPILE_I_PRINT_VALUE_SCOPE should have been used instead.  */
 
 struct compile_module *
 compile_object_load (const char *object_file, const char *source_file,
@@ -449,7 +561,7 @@ compile_object_load (const char *object_file, const char *source_file,
   struct cleanup *cleanups, *cleanups_free_objfile;
   bfd *abfd;
   struct setup_sections_data setup_sections_data;
-  CORE_ADDR addr, regs_addr;
+  CORE_ADDR addr, regs_addr, out_value_addr = 0;
   struct symbol *func_sym;
   struct type *func_type;
   struct bound_minimal_symbol bmsym;
@@ -459,7 +571,7 @@ compile_object_load (const char *object_file, const char *source_file,
   struct type *dptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   unsigned dptr_type_len = TYPE_LENGTH (dptr_type);
   struct compile_module *retval;
-  struct type *regs_type;
+  struct type *regs_type, *out_value_type = NULL;
   char *filename, **matching;
   struct objfile *objfile;
   int expect_parameters;
@@ -519,6 +631,11 @@ compile_object_load (const char *object_file, const char *source_file,
       break;
     case COMPILE_I_RAW_SCOPE:
       expect_parameters = 0;
+      expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
+      break;
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
+      expect_parameters = 2;
       expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
       break;
     default:
@@ -603,6 +720,29 @@ compile_object_load (const char *object_file, const char *source_file,
       store_regs (regs_type, regs_addr);
     }
 
+  if (scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+      || scope == COMPILE_I_PRINT_VALUE_SCOPE)
+    {
+      out_value_type = get_out_value_type (func_sym, objfile, scope);
+      if (out_value_type == NULL)
+	{
+	  do_cleanups (cleanups);
+	  return NULL;
+	}
+      check_typedef (out_value_type);
+      out_value_addr = gdbarch_infcall_mmap (target_gdbarch (),
+					     TYPE_LENGTH (out_value_type),
+					     (GDB_MMAP_PROT_READ
+					      | GDB_MMAP_PROT_WRITE));
+      gdb_assert (out_value_addr != 0);
+      if (compile_debug)
+	fprintf_unfiltered (gdb_stdout,
+			    "allocated %s bytes at %s for printed value\n",
+			    paddress (target_gdbarch (),
+				      TYPE_LENGTH (out_value_type)),
+			    paddress (target_gdbarch (), out_value_addr));
+    }
+
   discard_cleanups (cleanups_free_objfile);
   do_cleanups (cleanups);
 
@@ -613,5 +753,7 @@ compile_object_load (const char *object_file, const char *source_file,
   retval->regs_addr = regs_addr;
   retval->scope = scope;
   retval->scope_data = scope_data;
+  retval->out_value_type = out_value_type;
+  retval->out_value_addr = out_value_addr;
   return retval;
 }
