@@ -1,5 +1,13 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* printcmd.c (struct format_data): Move it to valprint.h.
+	(print_command_parse_format, print_value): New functions from ...
+	(print_command_1): ... here.  Call them.
+	* valprint.h (struct format_data): Move it here from printcmd.c.
+	(print_command_parse_format, print_value): New declarations.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* compile/compile-object-load.c (compile_object_load): Add
 	COMPILE_DEBUG message.
 
