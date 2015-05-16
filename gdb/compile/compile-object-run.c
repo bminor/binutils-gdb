@@ -24,6 +24,7 @@
 #include "objfiles.h"
 #include "compile-internal.h"
 #include "dummy-frame.h"
+#include "block.h"
 
 /* Helper for do_module_cleanup.  */
 
@@ -93,8 +94,9 @@ compile_object_run (struct compile_module *module)
   struct do_module_cleanup *data;
   const char *objfile_name_s = objfile_name (module->objfile);
   int dtor_found, executed = 0;
-  CORE_ADDR func_addr = module->func_addr;
+  struct symbol *func_sym = module->func_sym;
   CORE_ADDR regs_addr = module->regs_addr;
+  struct objfile *objfile = module->objfile;
 
   data = xmalloc (sizeof (*data) + strlen (objfile_name_s));
   data->executedp = &executed;
@@ -105,26 +107,35 @@ compile_object_run (struct compile_module *module)
 
   xfree (module->source_file);
   xfree (module);
+  module = NULL;
 
   TRY
     {
-      func_val = value_from_pointer
-		 (builtin_type (target_gdbarch ())->builtin_func_ptr,
-		  func_addr);
+      struct type *func_type = SYMBOL_TYPE (func_sym);
+      htab_t copied_types;
+      int current_arg = 0;
+      struct value **vargs;
 
-      if (regs_addr == 0)
-	call_function_by_hand_dummy (func_val, 0, NULL,
-				     do_module_cleanup, data);
-      else
+      /* OBJFILE may disappear while FUNC_TYPE still will be in use.  */
+      copied_types = create_copied_types_hash (objfile);
+      func_type = copy_type_recursive (objfile, func_type, copied_types);
+      htab_delete (copied_types);
+
+      gdb_assert (TYPE_CODE (func_type) == TYPE_CODE_FUNC);
+      func_val = value_from_pointer (lookup_pointer_type (func_type),
+				   BLOCK_START (SYMBOL_BLOCK_VALUE (func_sym)));
+
+      vargs = alloca (sizeof (*vargs) * TYPE_NFIELDS (func_type));
+      if (TYPE_NFIELDS (func_type) >= 1)
 	{
-	  struct value *arg_val;
-
-	  arg_val = value_from_pointer
-		    (builtin_type (target_gdbarch ())->builtin_func_ptr,
-		     regs_addr);
-	  call_function_by_hand_dummy (func_val, 1, &arg_val,
-				       do_module_cleanup, data);
+	  gdb_assert (regs_addr != 0);
+	  vargs[current_arg] = value_from_pointer
+			  (TYPE_FIELD_TYPE (func_type, current_arg), regs_addr);
+	  ++current_arg;
 	}
+      gdb_assert (current_arg == TYPE_NFIELDS (func_type));
+      call_function_by_hand_dummy (func_val, TYPE_NFIELDS (func_type), vargs,
+				   do_module_cleanup, data);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {

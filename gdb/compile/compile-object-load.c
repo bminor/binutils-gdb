@@ -354,39 +354,18 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   do_cleanups (cleanups);
 }
 
-/* Fetch the type of first parameter of GCC_FE_WRAPPER_FUNCTION.
-   Return NULL if GCC_FE_WRAPPER_FUNCTION has no parameters.
-   Throw an error otherwise.  */
+/* Fetch the type of first parameter of FUNC_SYM.
+   Return NULL if FUNC_SYM has no parameters.  Throw an error otherwise.  */
 
 static struct type *
-get_regs_type (struct objfile *objfile)
+get_regs_type (struct symbol *func_sym, struct objfile *objfile)
 {
-  struct symbol *func_sym;
-  struct type *func_type, *regsp_type, *regs_type;
-
-  func_sym = lookup_global_symbol_from_objfile (objfile,
-						GCC_FE_WRAPPER_FUNCTION,
-						VAR_DOMAIN);
-  if (func_sym == NULL)
-    error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
-	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
-
-  func_type = SYMBOL_TYPE (func_sym);
-  if (TYPE_CODE (func_type) != TYPE_CODE_FUNC)
-    error (_("Invalid type code %d of function \"%s\" in compiled "
-	     "module \"%s\"."),
-	   TYPE_CODE (func_type), GCC_FE_WRAPPER_FUNCTION,
-	   objfile_name (objfile));
+  struct type *func_type = SYMBOL_TYPE (func_sym);
+  struct type *regsp_type, *regs_type;
 
   /* No register parameter present.  */
   if (TYPE_NFIELDS (func_type) == 0)
     return NULL;
-
-  if (TYPE_NFIELDS (func_type) != 1)
-    error (_("Invalid %d parameters of function \"%s\" in compiled "
-	     "module \"%s\"."),
-	   TYPE_NFIELDS (func_type), GCC_FE_WRAPPER_FUNCTION,
-	   objfile_name (objfile));
 
   regsp_type = check_typedef (TYPE_FIELD_TYPE (func_type, 0));
   if (TYPE_CODE (regsp_type) != TYPE_CODE_PTR)
@@ -470,7 +449,9 @@ compile_object_load (const char *object_file, const char *source_file,
   struct cleanup *cleanups, *cleanups_free_objfile;
   bfd *abfd;
   struct setup_sections_data setup_sections_data;
-  CORE_ADDR addr, func_addr, regs_addr;
+  CORE_ADDR addr, regs_addr;
+  struct symbol *func_sym;
+  struct type *func_type;
   struct bound_minimal_symbol bmsym;
   long storage_needed;
   asymbol **symbol_table, **symp;
@@ -481,6 +462,8 @@ compile_object_load (const char *object_file, const char *source_file,
   struct type *regs_type;
   char *filename, **matching;
   struct objfile *objfile;
+  int expect_parameters;
+  struct type *expect_return_type;
 
   filename = tilde_expand (object_file);
   cleanups = make_cleanup (xfree, filename);
@@ -515,11 +498,41 @@ compile_object_load (const char *object_file, const char *source_file,
   objfile = symbol_file_add_from_bfd (abfd, filename, 0, NULL, 0, NULL);
   cleanups_free_objfile = make_cleanup_free_objfile (objfile);
 
-  bmsym = lookup_minimal_symbol_text (GCC_FE_WRAPPER_FUNCTION, objfile);
-  if (bmsym.minsym == NULL || MSYMBOL_TYPE (bmsym.minsym) == mst_file_text)
-    error (_("Could not find symbol \"%s\" of compiled module \"%s\"."),
-	   GCC_FE_WRAPPER_FUNCTION, filename);
-  func_addr = BMSYMBOL_VALUE_ADDRESS (bmsym);
+  func_sym = lookup_global_symbol_from_objfile (objfile,
+						GCC_FE_WRAPPER_FUNCTION,
+						VAR_DOMAIN);
+  if (func_sym == NULL)
+    error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
+	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
+  func_type = SYMBOL_TYPE (func_sym);
+  if (TYPE_CODE (func_type) != TYPE_CODE_FUNC)
+    error (_("Invalid type code %d of function \"%s\" in compiled "
+	     "module \"%s\"."),
+	   TYPE_CODE (func_type), GCC_FE_WRAPPER_FUNCTION,
+	   objfile_name (objfile));
+
+  switch (scope)
+    {
+    case COMPILE_I_SIMPLE_SCOPE:
+      expect_parameters = 1;
+      expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
+      break;
+    case COMPILE_I_RAW_SCOPE:
+      expect_parameters = 0;
+      expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, _("invalid scope %d"), scope);
+    }
+  if (TYPE_NFIELDS (func_type) != expect_parameters)
+    error (_("Invalid %d parameters of function \"%s\" in compiled "
+	     "module \"%s\"."),
+	   TYPE_NFIELDS (func_type), GCC_FE_WRAPPER_FUNCTION,
+	   objfile_name (objfile));
+  if (!types_deeply_equal (expect_return_type, TYPE_TARGET_TYPE (func_type)))
+    error (_("Invalid return type of function \"%s\" in compiled "
+	    "module \"%s\"."),
+	  GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
 
   /* The memory may be later needed
      by bfd_generic_get_relocated_section_contents
@@ -571,7 +584,7 @@ compile_object_load (const char *object_file, const char *source_file,
 
   bfd_map_over_sections (abfd, copy_sections, symbol_table);
 
-  regs_type = get_regs_type (objfile);
+  regs_type = get_regs_type (func_sym, objfile);
   if (regs_type == NULL)
     regs_addr = 0;
   else
@@ -596,7 +609,7 @@ compile_object_load (const char *object_file, const char *source_file,
   retval = xmalloc (sizeof (*retval));
   retval->objfile = objfile;
   retval->source_file = xstrdup (source_file);
-  retval->func_addr = func_addr;
+  retval->func_sym = func_sym;
   retval->regs_addr = regs_addr;
   retval->scope = scope;
   retval->scope_data = scope_data;

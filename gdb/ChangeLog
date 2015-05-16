@@ -1,5 +1,18 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* compile/compile-object-load.c (get_regs_type): Add parameter func_sym.
+	Rely on its parameter count.
+	(compile_object_load): Replace lookup_minimal_symbol_text by
+	lookup_global_symbol_from_objfile.  Verify FUNC_SYM.  Set it in the
+	return value.
+	* compile/compile-object-load.h (struct compile_module): Replace
+	func_addr by func_sym.
+	* compile/compile-object-run.c: Include block.h.
+	(compile_object_run): Reset module variable after it is freed.  Use
+	FUNC_SYM instead of FUNC_ADDR.  Rely on it.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* compile/compile-c-support.c (print_one_macro): Use #ifndef.
 	(generate_register_struct): Use __gdb_uintptr for TYPE_CODE_PTR.
 	(c_compute_program): Call generate_register_struct after typedefs.

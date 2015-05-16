@@ -25,8 +25,8 @@ struct compile_module
   /* .c file OBJFILE was built from.  It needs to be xfree-d.  */
   char *source_file;
 
-  /* Inferior function address.  */
-  CORE_ADDR func_addr;
+  /* Inferior function GCC_FE_WRAPPER_FUNCTION.  */
+  struct symbol *func_sym;
 
   /* Inferior registers address or NULL if the inferior function does not
      require any.  */
