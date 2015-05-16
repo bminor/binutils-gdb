@@ -580,6 +580,12 @@ compile_object_load (const char *object_file, const char *source_file)
 					TYPE_LENGTH (regs_type),
 					GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
+      if (compile_debug)
+	fprintf_unfiltered (gdb_stdout,
+			    "allocated %s bytes at %s for registers\n",
+			    paddress (target_gdbarch (),
+				      TYPE_LENGTH (regs_type)),
+			    paddress (target_gdbarch (), regs_addr));
       store_regs (regs_type, regs_addr);
     }
 
