@@ -1,5 +1,18 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* compile/compile-c-support.c (print_one_macro): Use #ifndef.
+	(generate_register_struct): Use __gdb_uintptr for TYPE_CODE_PTR.
+	(c_compute_program): Call generate_register_struct after typedefs.
+	* compile/compile-loc2c.c (push, pushf_register_address)
+	(pushf_register): Cast to GCC_UINTPTR.
+	(do_compile_dwarf_expr_to_c): Use unused attribute.  Add space after
+	type.  Use GCC_UINTPTR instead of void *.  Remove excessive cast.
+	(compile_dwarf_expr_to_c): Use GCC_UINTPTR instead of void *.
+	* compile/compile.c (_initialize_compile): Enable warnings for
+	COMPILE_ARGS.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* cli/cli-script.c (execute_control_command): Update
 	eval_compile_command caller.
 	* compile/compile-object-load.c (compile_object_load): Add parameters

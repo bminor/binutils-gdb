@@ -680,8 +680,11 @@ String quoting is parsed like in shell, for example:\n\
      absolute target address.
      -fPIC is not used at is would require from GDB to generate .got.  */
 			 " -fPIE"
-  /* We don't want warnings.  */
-			 " -w"
+  /* We want warnings, except for some commonly happening for GDB commands.  */
+			 " -Wall "
+			 " -Wno-implicit-function-declaration"
+			 " -Wno-unused-but-set-variable"
+			 " -Wno-unused-variable"
   /* Override CU's possible -fstack-protector-strong.  */
 			 " -fno-stack-protector"
   );
