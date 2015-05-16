@@ -397,6 +397,7 @@ struct command_line
 	struct
 	  {
 	    enum compile_i_scope_types scope;
+	    void *scope_data;
 	  }
 	compile;
       }

@@ -30,7 +30,8 @@ struct dynamic_prop;
 
 extern void eval_compile_command (struct command_line *cmd,
 				  const char *cmd_string,
-				  enum compile_i_scope_types scope);
+				  enum compile_i_scope_types scope,
+				  void *scope_data);
 
 /* Compile a DWARF location expression to C, suitable for use by the
    compiler.

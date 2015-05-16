@@ -31,9 +31,16 @@ struct compile_module
   /* Inferior registers address or NULL if the inferior function does not
      require any.  */
   CORE_ADDR regs_addr;
+
+  /* The "scope" of this compilation.  */
+  enum compile_i_scope_types scope;
+
+  /* User data for SCOPE in use.  */
+  void *scope_data;
 };
 
-extern struct compile_module *compile_object_load (const char *object_file,
-						   const char *source_file);
+extern struct compile_module *compile_object_load
+  (const char *object_file, const char *source_file,
+   enum compile_i_scope_types scope, void *scope_data);
 
 #endif /* GDB_COMPILE_OBJECT_LOAD_H */

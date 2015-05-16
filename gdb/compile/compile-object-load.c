@@ -464,7 +464,8 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
    function returns.  */
 
 struct compile_module *
-compile_object_load (const char *object_file, const char *source_file)
+compile_object_load (const char *object_file, const char *source_file,
+		     enum compile_i_scope_types scope, void *scope_data)
 {
   struct cleanup *cleanups, *cleanups_free_objfile;
   bfd *abfd;
@@ -597,5 +598,7 @@ compile_object_load (const char *object_file, const char *source_file)
   retval->source_file = xstrdup (source_file);
   retval->func_addr = func_addr;
   retval->regs_addr = regs_addr;
+  retval->scope = scope;
+  retval->scope_data = scope_data;
   return retval;
 }

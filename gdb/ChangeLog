@@ -1,5 +1,23 @@
 2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* cli/cli-script.c (execute_control_command): Update
+	eval_compile_command caller.
+	* compile/compile-object-load.c (compile_object_load): Add parameters
+	scope and scope_data.  Set them.
+	* compile/compile-object-load.h (struct compile_module): Add fields
+	scope and scope_data.
+	(compile_object_load): Add parameters scope and scope_data.
+	* compile/compile-object-run.c (struct do_module_cleanup): Add fields
+	scope and scope_data.
+	(compile_object_run): Propagate the fields scope and scope_data.
+	* compile/compile.c (compile_file_command, compile_code_command):
+	Update eval_compile_command callers.
+	(eval_compile_command): Add parameter scope_data.  Pass it plus scope.
+	* compile/compile.h (eval_compile_command): Add parameter scope_data.
+	* defs.h (struct command_line): Add field scope_data.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* printcmd.c (struct format_data): Move it to valprint.h.
 	(print_command_parse_format, print_value): New functions from ...
 	(print_command_1): ... here.  Call them.

@@ -117,7 +117,7 @@ compile_file_command (char *arg, int from_tty)
   make_cleanup (xfree, arg);
   buffer = xstrprintf ("#include \"%s\"\n", arg);
   make_cleanup (xfree, buffer);
-  eval_compile_command (NULL, buffer, scope);
+  eval_compile_command (NULL, buffer, scope, NULL);
   do_cleanups (cleanup);
 }
 
@@ -150,7 +150,7 @@ compile_code_command (char *arg, int from_tty)
     }
 
   if (arg && *arg)
-      eval_compile_command (NULL, arg, scope);
+    eval_compile_command (NULL, arg, scope, NULL);
   else
     {
       struct command_line *l = get_command_line (compile_control, "");
@@ -560,7 +560,7 @@ compile_command (char *args, int from_tty)
 
 void
 eval_compile_command (struct command_line *cmd, const char *cmd_string,
-		      enum compile_i_scope_types scope)
+		      enum compile_i_scope_types scope, void *scope_data)
 {
   char *object_file, *source_file;
 
@@ -574,7 +574,8 @@ eval_compile_command (struct command_line *cmd, const char *cmd_string,
       make_cleanup (xfree, source_file);
       cleanup_unlink = make_cleanup (cleanup_unlink_file, object_file);
       make_cleanup (cleanup_unlink_file, source_file);
-      compile_module = compile_object_load (object_file, source_file);
+      compile_module = compile_object_load (object_file, source_file,
+					    scope, scope_data);
       discard_cleanups (cleanup_unlink);
       do_cleanups (cleanup_xfree);
       compile_object_run (compile_module);

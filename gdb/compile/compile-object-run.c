@@ -36,6 +36,10 @@ struct do_module_cleanup
   /* .c file OBJFILE was built from.  It needs to be xfree-d.  */
   char *source_file;
 
+  /* Copy from struct compile_module.  */
+  enum compile_i_scope_types scope;
+  void *scope_data;
+
   /* objfile_name of our objfile.  */
   char objfile_name_string[1];
 };
@@ -96,6 +100,8 @@ compile_object_run (struct compile_module *module)
   data->executedp = &executed;
   data->source_file = xstrdup (module->source_file);
   strcpy (data->objfile_name_string, objfile_name_s);
+  data->scope = module->scope;
+  data->scope_data = module->scope_data;
 
   xfree (module->source_file);
   xfree (module);
