@@ -1,3 +1,8 @@
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile-object-load.c (compile_object_load): Add
+	COMPILE_DEBUG message.
+
 2015-05-15  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_value_ptr_subscript): Use enum position of
