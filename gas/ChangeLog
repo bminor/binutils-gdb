@@ -1,3 +1,9 @@
+2015-05-26  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_move_literals): Check that
+	search_frag is non-NULL. Report error if literal frag is not
+	found.
+
 2015-05-22  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/18446
