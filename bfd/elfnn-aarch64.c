@@ -6020,11 +6020,7 @@ elfNN_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
   else
-    /* It's possible that we incorrectly decided a .plt reloc was
-       needed for an R_X86_64_PC32 reloc to a non-function sym in
-       check_relocs.  We can't decide accurately between function and
-       non-function syms in check-relocs;  Objects loaded later in
-       the link may change h->type.  So fix it now.  */
+    /* Otherwise, reset to -1.  */
     h->plt.offset = (bfd_vma) - 1;
 
 

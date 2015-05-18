@@ -1,3 +1,8 @@
+2015-05-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Rewrite
+	comments.
+
 2015-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Create .plt.got section
