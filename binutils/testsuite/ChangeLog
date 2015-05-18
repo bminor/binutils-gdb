@@ -1,3 +1,7 @@
+2015-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/dw2-3.S: Replace .int with .4byte.
+
 2015-05-15  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/z.s: New test.  Checks the --decompress option to
