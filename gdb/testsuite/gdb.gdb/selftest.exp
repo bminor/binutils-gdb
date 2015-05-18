@@ -444,9 +444,26 @@ proc test_with_self { executable } {
     }
     
     set description "send SIGINT signal to child process"
-    gdb_test "signal SIGINT" \
-	"Continuing with signal SIGINT.*" \
-	"$description"
+    gdb_test_multiple "signal SIGINT" "$description" {
+        -re "^signal SIGINT\r\nContinuing with signal SIGINT.\r\nQuit" {
+            pass "$description"
+        }
+    }
+
+    set description "send ^C to child process again"
+    send_gdb "\003"
+    gdb_expect {
+	-re "Program received signal SIGINT.*$gdb_prompt $" {
+	    pass "$description"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "$description"
+	}
+	timeout {
+	    fail "$description (timeout)"
+	}
+    }
+
     
     # get a stack trace
     #
