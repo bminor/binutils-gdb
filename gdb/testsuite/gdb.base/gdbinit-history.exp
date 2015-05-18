@@ -1,0 +1,51 @@
+# Copyright 2015 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the gdb testsuite.
+
+# Test the setting of "history size" via $HOME/.gdbinit
+
+
+# Check that the history size is properly set to SIZE when reading the .gdbinit
+# file located in HOME.
+
+proc test_gdbinit_history_setting { home size } {
+    global env
+    global INTERNAL_GDBFLAGS
+    global srcdir
+    global subdir
+
+    set old_home $env(HOME)
+    set env(HOME) "$srcdir/$subdir/$home"
+    set saved_internal_gdbflags $INTERNAL_GDBFLAGS
+    set INTERNAL_GDBFLAGS [string map {"-nx" ""} $INTERNAL_GDBFLAGS]
+
+    gdb_exit
+    gdb_start
+
+    gdb_test "show history size" "The size of the command history is $size."
+
+    if { $size == "0" } {
+        gdb_test_no_output "show commands"
+    } elseif { $size != "1" } {
+        gdb_test "show commands" "    .  show history size\r\n    .  show commands"
+    }
+
+    set INTERNAL_GDBFLAGS $saved_internal_gdbflags
+    set $env(HOME) $old_home
+}
+
+test_gdbinit_history_setting "gdbinit-history/unlimited" "unlimited"
+test_gdbinit_history_setting "gdbinit-history/zero" "0"

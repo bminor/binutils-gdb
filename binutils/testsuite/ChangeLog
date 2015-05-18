@@ -1,3 +1,23 @@
+2015-05-15  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/z.s: New test.  Checks the --decompress option to
+	readelf.
+	* binutils-all/readelf.exp: Run the test.
+	* binutils-all/readelf.z: Expected output from readelf.
+
+2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp: Replace "$OBJDUMP -s -j .debug_info"
+	with "$OBJDUMP -W".
+	* binutils-all/libdw2-compressedgabi.out: Updated.
+
+2015-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18374
+	* binutils-all/pr18374.s: New test file.
+	* binutils-all/readelf.exp: Assemble and run the new test.
+	* binutils-all/readelf.pr18374: Expected output from readelf.
+
 2015-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/elfedit-1.d: Also skip x86_64-*-nacl*.

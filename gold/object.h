@@ -320,7 +320,7 @@ class Got_offset_list
 struct Compressed_section_info
 {
   section_size_type size;
-  section_size_type flag;
+  elfcpp::Elf_Xword flag;
   const unsigned char* contents;
 };
 typedef std::map<unsigned int, Compressed_section_info> Compressed_section_map;

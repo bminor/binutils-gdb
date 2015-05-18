@@ -22,8 +22,6 @@ power7:
 	xvcpsgndp 43,44,44
 	xvcpsgndp 3,4,5
 	xvcpsgndp 43,44,45
-	wait
-	wait 0
 	doze
 	nap
 	sleep
@@ -88,10 +86,10 @@ power7:
 	frsqrtes  14,15
 	frsqrtes. 14,15
 	isel	  2,3,4,28
-	ori	  2,2,0
-	.p2align 4,,15
 	yield
 	or	  27,27,27
+	ori	  2,2,0
+	.p2align 4,,15
 	mdoio
 	or	  29,29,29
 	mdoom
@@ -100,3 +98,4 @@ power7:
 	mfppr32	  11
 	mtppr	  12
 	mtppr32	  13
+	tlbie     10,11

@@ -1,3 +1,15 @@
+2015-05-15  Pedro Alves  <palves@redhat.com>
+
+	* target.h (target_handle_new_gdb_connection): Rewrite using if
+	wrapped in do/while.
+
+2015-05-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add prfpregset_t BFD_HAVE_SYS_PROCFS_TYPE check.
+	* configure, config.in: Regenerate.
+	* gdb_proc_service.h [HAVE_PRFPREGSET_T] (prfpregset_t):
+	Declare typedef.
+
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
 	* linux-low.c (handle_extended_wait): Handle PTRACE_EVENT_FORK and

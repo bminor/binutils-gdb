@@ -2012,8 +2012,16 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 		}
 	    }
 	  else
-	    /* Clear the SHF_COMPRESSED bit.  */
-	    elf_section_flags (sec) &= ~SHF_COMPRESSED;
+	    {
+	      /* Clear the SHF_COMPRESSED bit.  */
+	      elf_section_flags (sec) &= ~SHF_COMPRESSED;
+
+	      /* Write the zlib header.  It should be "ZLIB" followed by
+		 the uncompressed section size, 8 bytes in big-endian
+		 order.  */
+	      memcpy (contents, "ZLIB", 4);
+	      bfd_putb64 (sec->size, contents + 4);
+	    }
 	}
     }
   else
@@ -2027,11 +2035,12 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
    SYNOPSIS
 	bfd_boolean bfd_check_compression_header
 	  (bfd *abfd, bfd_byte *contents, asection *sec,
-	   bfd_size_type uncompressed_size);
+	  bfd_size_type *uncompressed_size);
 
 DESCRIPTION
-	Check the compression header at CONTENTS of SEC in ABFD with
-	the uncompressed size UNCOMPRESSED_SIZE.
+	Check the compression header at CONTENTS of SEC in ABFD and
+	store the uncompressed size in UNCOMPRESSED_SIZE if the
+	compression header is valid.
 
 RETURNS
 	Return TRUE if the compression header is valid.
@@ -2040,7 +2049,7 @@ RETURNS
 bfd_boolean
 bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 			      asection *sec,
-			      bfd_size_type uncompressed_size)
+			      bfd_size_type *uncompressed_size)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && (elf_section_flags (sec) & SHF_COMPRESSED) != 0)
@@ -2061,9 +2070,12 @@ bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 	  chdr.ch_size = bfd_get_64 (abfd, &echdr->ch_size);
 	  chdr.ch_addralign = bfd_get_64 (abfd, &echdr->ch_addralign);
 	}
-      return (chdr.ch_type == ELFCOMPRESS_ZLIB
-	      && chdr.ch_size == uncompressed_size
-	      && chdr.ch_addralign == 1U << sec->alignment_power);
+      if (chdr.ch_type == ELFCOMPRESS_ZLIB
+	  && chdr.ch_addralign == 1U << sec->alignment_power)
+	{
+	  *uncompressed_size = chdr.ch_size;
+	  return TRUE;
+	}
     }
 
   return FALSE;

@@ -1360,10 +1360,14 @@ elf_xtensa_gc_sweep_hook (bfd *abfd,
 	{
 	  if (is_plt)
 	    {
+	      /* If the symbol has been localized its plt.refcount got moved
+	         to got.refcount.  Handle it as GOT.  */
 	      if (h->plt.refcount > 0)
 		h->plt.refcount--;
+	      else
+		is_got = TRUE;
 	    }
-	  else if (is_got)
+	  if (is_got)
 	    {
 	      if (h->got.refcount > 0)
 		h->got.refcount--;

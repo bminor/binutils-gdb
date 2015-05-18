@@ -47,7 +47,7 @@ get_uncompressed_size(const unsigned char*, section_size_type);
 
 extern bool
 decompress_input_section(const unsigned char*, unsigned long, unsigned char*,
-			 unsigned long);
+			 unsigned long, int, bool, elfcpp::Elf_Xword);
 
 // This is used for a section whose data should be compressed.  It is
 // a regular Output_section which computes its contents into a buffer

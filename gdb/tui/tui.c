@@ -492,8 +492,8 @@ tui_enable (void)
      window.  */
   if (tui_win_resized ())
     {
-      tui_resize_all ();
       tui_set_win_resized_to (FALSE);
+      tui_resize_all ();
     }
 
   if (deprecated_safe_get_selected_frame ())

@@ -71,6 +71,7 @@ dsym1:
 	stq 2,16(0)
 	stq 0,16(5)
 	stq 2,16(5)
+	slbia
 
 	.section	".data"
 usym0:	.llong	0xcafebabe

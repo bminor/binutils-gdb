@@ -1,5 +1,4 @@
 #objdump: -drw
-#as: -mshared
 #name: i386 pcrel reloc
 
 .*: +file format .*i386.*

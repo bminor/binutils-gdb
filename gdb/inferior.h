@@ -165,8 +165,10 @@ extern void detach_command (char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);
 
-extern struct value *get_return_value (struct value *function,
-                                       struct type *value_type);
+struct dummy_frame_context_saver;
+extern struct value *get_return_value
+  (struct value *function, struct type *value_type,
+   struct dummy_frame_context_saver *ctx_saver);
 
 /* Prepare for execution command.  TARGET is the target that will run
    the command.  BACKGROUND determines whether this is a foreground

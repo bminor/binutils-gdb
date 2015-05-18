@@ -45,7 +45,7 @@ struct do_module_cleanup
 
 static dummy_frame_dtor_ftype do_module_cleanup;
 static void
-do_module_cleanup (void *arg)
+do_module_cleanup (void *arg, int registers_valid)
 {
   struct do_module_cleanup *data = arg;
   struct objfile *objfile;
@@ -129,7 +129,7 @@ compile_object_run (struct compile_module *module)
 	data->executedp = NULL;
       gdb_assert (!(dtor_found && executed));
       if (!dtor_found && !executed)
-	do_module_cleanup (data);
+	do_module_cleanup (data, 0);
       throw_exception (ex);
     }
   END_CATCH

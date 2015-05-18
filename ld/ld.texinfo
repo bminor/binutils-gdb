@@ -3477,6 +3477,36 @@ There are a few other linker scripts commands.
 Ensure that @var{exp} is non-zero.  If it is zero, then exit the linker
 with an error code, and print @var{message}.
 
+Note that assertions are checked before the final stages of linking
+take place.  This means that expressions involving symbols PROVIDEd
+inside section definitions will fail if the user has not set values
+for those symbols.  The only exception to this rule is PROVIDEd
+symbols that just reference dot.  Thus an assertion like this:
+
+@smallexample
+  .stack :
+  @{
+    PROVIDE (__stack = .);
+    PROVIDE (__stack_size = 0x100);
+    ASSERT ((__stack > (_end + __stack_size)), "Error: No room left for the stack");
+  @}
+@end smallexample
+
+will fail if @code{__stack_size} is not defined elsewhere.  Symbols
+PROVIDEd outside of section definitions are evaluated earlier, so they
+can be used inside ASSERTions.  Thus:
+
+@smallexample
+  PROVIDE (__stack_size = 0x100);
+  .stack :
+  @{
+    PROVIDE (__stack = .);
+    ASSERT ((__stack > (_end + __stack_size)), "Error: No room left for the stack");
+  @}
+@end smallexample
+
+will work.
+
 @item EXTERN(@var{symbol} @var{symbol} @dots{})
 @kindex EXTERN
 @cindex undefined symbol in linker script

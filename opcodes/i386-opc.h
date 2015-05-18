@@ -200,6 +200,10 @@ enum
   Cpu64,
   /* Not supported in the 64bit mode  */
   CpuNo64,
+  /* AMD64 support required  */
+  CpuAMD64,
+  /* Intel64 support required  */
+  CpuIntel64,
   /* The last bitfield in i386_cpu_flags.  */
   CpuMax = CpuNo64
 };
@@ -303,6 +307,8 @@ typedef union i386_cpu_flags
       unsigned int cpuclzero:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
+      unsigned int cpuamd64:1;
+      unsigned int cpuintel64:1;
 #ifdef CpuUnused
       unsigned int unused:(CpuNumOfBits - CpuUnused);
 #endif

@@ -544,8 +544,7 @@ set got [binutils_run $OBJCOPY "--compress-debug-sections=zlib-gabi ${copyfile}g
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
 } else {
-    set got [remote_exec host "$OBJDUMP -s -j .debug_info
-    ${compressedcopyfile}gabi.a" "" "/dev/null" "tmpdir/libdw2-compressedgabi.out"]
+    set got [remote_exec host "$OBJDUMP -W ${compressedcopyfile}gabi.a" "" "/dev/null" "tmpdir/libdw2-compressedgabi.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "$testname (reason: unexpected output)"

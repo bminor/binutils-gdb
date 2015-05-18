@@ -741,8 +741,8 @@ build_compressed_section_map(
 	    }
 
 	  bool is_zcompressed = false;
-	  bool is_compressed
-	    = (shdr.get_sh_flags() & elfcpp::SHF_COMPRESSED) != 0;
+	  bool is_compressed =
+	      (shdr.get_sh_flags() & elfcpp::SHF_COMPRESSED) != 0;
 	  const char* name;
 
 	  if (is_compressed)
@@ -755,43 +755,34 @@ build_compressed_section_map(
 	    }
 	  if (is_zcompressed || is_compressed)
 	    {
-	      int compression_header_size;
 	      section_size_type len;
 	      const unsigned char* contents =
-		obj->section_contents(i, &len, false);
+		  obj->section_contents(i, &len, false);
+	      uint64_t uncompressed_size;
 	      if (is_zcompressed)
-		compression_header_size = 0;
+		uncompressed_size = get_uncompressed_size(contents, len);
 	      else
-		compression_header_size
-		  = elfcpp::Elf_sizes<size>::chdr_size;
-	      uint64_t uncompressed_size
-		= get_uncompressed_size(contents + compression_header_size,
-					len - compression_header_size);
+		{
+		  elfcpp::Chdr<size, big_endian> chdr(contents);
+		  uncompressed_size = chdr.get_ch_size();
+		}
 	      Compressed_section_info info;
 	      info.size = convert_to_section_size_type(uncompressed_size);
-	      info.flag = convert_to_section_size_type(shdr.get_sh_flags());
+	      info.flag = shdr.get_sh_flags();
 	      info.contents = NULL;
 	      if (uncompressed_size != -1ULL)
 		{
-		  if (is_compressed)
-		    {
-		      typename elfcpp::Chdr<size, big_endian> chdr(contents);
-		      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB
-			  || chdr.get_ch_size() != uncompressed_size
-			  || (chdr.get_ch_addralign()
-			      != shdr.get_sh_addralign()))
-			return uncompressed_map;
-		    }
 		  unsigned char* uncompressed_data = NULL;
 		  if (decompress_if_needed
 		      && (is_compressed
 			  || need_decompressed_section(name)))
 		    {
 		      uncompressed_data = new unsigned char[uncompressed_size];
-		      if (decompress_input_section(contents + compression_header_size,
-						   len - compression_header_size,
+		      if (decompress_input_section(contents, len,
 						   uncompressed_data,
-						   uncompressed_size))
+						   uncompressed_size,
+						   size, big_endian,
+						   shdr.get_sh_flags()))
 			info.contents = uncompressed_data;
 		      else
 			delete[] uncompressed_data;
@@ -819,15 +810,11 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
   if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
     this->has_eh_frame_ = true;
 
-  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL
-      || memmem(names, sd->section_names_size, ".debug_", 7) != NULL)
-    {
-      Compressed_section_map* compressed_sections =
-	  build_compressed_section_map<size, big_endian>(
-	      pshdrs, this->shnum(), names, sd->section_names_size, this, true);
-      if (compressed_sections != NULL)
-        this->set_compressed_sections(compressed_sections);
-    }
+  Compressed_section_map* compressed_sections =
+    build_compressed_section_map<size, big_endian>(
+						   pshdrs, this->shnum(), names, sd->section_names_size, this, true);
+  if (compressed_sections != NULL)
+    this->set_compressed_sections(compressed_sections);
 
   return (this->has_eh_frame_
 	  || (!parameters->options().relocatable()
@@ -2923,24 +2910,15 @@ Object::decompressed_section_contents(
       return p->second.contents;
     }
 
-  int compression_header_size;
-  if ((p->second.flag & elfcpp::SHF_COMPRESSED) != 0)
-    {
-      const int size = parameters->target().get_size();
-      if (size == 32)
-	compression_header_size = elfcpp::Elf_sizes<32>::chdr_size;
-      else if (size == 64)
-	compression_header_size = elfcpp::Elf_sizes<64>::chdr_size;
-      else
-	gold_unreachable();
-    }
-  else
-    compression_header_size = 0;
   unsigned char* uncompressed_data = new unsigned char[uncompressed_size];
-  if (!decompress_input_section(buffer + compression_header_size,
-				buffer_size - compression_header_size,
+  Relobj *relobj = static_cast<Relobj*>(this);
+  if (!decompress_input_section(buffer,
+				buffer_size,
 				uncompressed_data,
-				uncompressed_size))
+				uncompressed_size,
+				relobj->elfsize(),
+				relobj->is_big_endian(),
+				p->second.flag))
     this->error(_("could not decompress section %s"),
 		this->do_section_name(shndx).c_str());
 

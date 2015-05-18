@@ -1067,9 +1067,11 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
     {
       enum { nothing, compress, decompress } action = nothing;
       int compression_header_size;
+      bfd_size_type uncompressed_size;
       bfd_boolean compressed
 	= bfd_is_section_compressed_with_header (abfd, newsect,
-						 &compression_header_size);
+						 &compression_header_size,
+						 &uncompressed_size);
 
       if (compressed)
 	{
@@ -1085,6 +1087,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  if (newsect->size != 0
 	      && (abfd->flags & BFD_COMPRESS)
 	      && compression_header_size >= 0
+	      && uncompressed_size > 0
 	      && (!compressed
 		  || ((compression_header_size > 0)
 		      != ((abfd->flags & BFD_COMPRESS_GABI) != 0))))

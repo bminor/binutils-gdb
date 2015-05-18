@@ -118,7 +118,7 @@ struct thread_control_state
   int trap_expected;
 
   /* Nonzero if the thread is being proceeded for a "finish" command
-     or a similar situation when stop_registers should be saved.  */
+     or a similar situation when return value should be printed.  */
   int proceed_to_finish;
 
   /* Nonzero if the thread is being proceeded for an inferior function
