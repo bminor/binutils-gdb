@@ -528,7 +528,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 					       expr_block, expr_pc);
   make_cleanup (xfree, code);
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdout, "debug output:\n\n%s", code);
+    fprintf_unfiltered (gdb_stdlog, "debug output:\n\n%s", code);
 
   os_rx = osabi_triplet_regexp (gdbarch_osabi (gdbarch));
   arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
@@ -553,9 +553,9 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     {
       int argi;
 
-      fprintf_unfiltered (gdb_stdout, "Passing %d compiler options:\n", argc);
+      fprintf_unfiltered (gdb_stdlog, "Passing %d compiler options:\n", argc);
       for (argi = 0; argi < argc; argi++)
-	fprintf_unfiltered (gdb_stdout, "Compiler option %d: <%s>\n",
+	fprintf_unfiltered (gdb_stdlog, "Compiler option %d: <%s>\n",
 			    argi, argv[argi]);
     }
 
@@ -572,7 +572,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   fclose (src);
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdout, "source file produced: %s\n\n",
+    fprintf_unfiltered (gdb_stdlog, "source file produced: %s\n\n",
 			source_file);
 
   /* Call the compiler and start the compilation process.  */
@@ -583,7 +583,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     error (_("Compilation failed."));
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdout, "object file produced: %s\n\n",
+    fprintf_unfiltered (gdb_stdlog, "object file produced: %s\n\n",
 			object_file);
 
   discard_cleanups (inner_cleanup);

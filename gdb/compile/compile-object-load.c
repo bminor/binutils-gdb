@@ -76,7 +76,7 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 	prot |= GDB_MMAP_PROT_EXEC;
 
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdout,
+	fprintf_unfiltered (gdb_stdlog,
 			    "module \"%s\" section \"%s\" size %s prot %u\n",
 			    bfd_get_filename (abfd),
 			    bfd_get_section_name (abfd, sect),
@@ -98,7 +98,7 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 	  addr = gdbarch_infcall_mmap (target_gdbarch (), data->last_size,
 				       data->last_prot);
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdout,
+	    fprintf_unfiltered (gdb_stdlog,
 				"allocated %s bytes at %s prot %u\n",
 				paddress (target_gdbarch (), data->last_size),
 				paddress (target_gdbarch (), addr),
@@ -672,7 +672,7 @@ compile_object_load (const char *object_file, const char *source_file,
       if (sym->flags != 0)
 	continue;
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdout,
+	fprintf_unfiltered (gdb_stdlog,
 			    "lookup undefined ELF symbol \"%s\"\n",
 			    sym->name);
       sym->flags = BSF_GLOBAL;
@@ -716,7 +716,7 @@ compile_object_load (const char *object_file, const char *source_file,
 					GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdout,
+	fprintf_unfiltered (gdb_stdlog,
 			    "allocated %s bytes at %s for registers\n",
 			    paddress (target_gdbarch (),
 				      TYPE_LENGTH (regs_type)),
@@ -740,7 +740,7 @@ compile_object_load (const char *object_file, const char *source_file,
 					      | GDB_MMAP_PROT_WRITE));
       gdb_assert (out_value_addr != 0);
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdout,
+	fprintf_unfiltered (gdb_stdlog,
 			    "allocated %s bytes at %s for printed value\n",
 			    paddress (target_gdbarch (),
 				      TYPE_LENGTH (out_value_type)),
