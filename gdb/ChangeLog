@@ -1,5 +1,10 @@
 2015-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix ASAN crash for gdb.compile/compile.exp.
+	* infcall.c (call_function_by_hand_dummy): Use xstrdup for NAME.
+
+2015-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* compile/compile-c-symbols.c (convert_symbol_sym, gcc_convert_symbol)
 	(gcc_symbol_address): Change gdb_stdout to gdb_stdlog.
 	* compile/compile-object-load.c (setup_sections, compile_object_load):
