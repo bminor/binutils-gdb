@@ -1,4 +1,10 @@
 2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/aarch64.c: New.
+	* gdb.reverse/aarch64.exp: New.
+
+2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
 
 	* lib/gdb.exp (supports_process_record): Return true for aarch64*-linux*.
 	(supports_reverse): Likewise.
