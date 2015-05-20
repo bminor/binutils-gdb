@@ -1,3 +1,15 @@
+2015-05-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_tls_transition_without_check): Sort
+	relocation case labels alphabetically.
+	(elfNN_aarch64_final_link_relocate): Ditto.
+	(elfNN_aarch64_tls_relax): Ditto.
+	(elfNN_aarch64_relocate_section): Ditto.
+	(elfNN_aarch64_gc_sweep_hook): Ditto.
+	(elfNN_aarch64_check_relocs): Ditto.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Ditto.
+	(_bfd_aarch64_elf_resolve_relocation): Ditto.
+
 2015-05-18  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Rewrite
