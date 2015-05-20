@@ -1,5 +1,13 @@
 2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-layout.c (tui_layout_command): Move call to tui_enable
+	into ...
+	(tui_set_layout_for_display_command): ...here, before calling
+	tui_set_layout.  Only set the layout if gdb has not already
+	entered the TUI_FAILURE state.
+
+2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-layout.c (layout_completer): New function.
 	(_initialize_tui_layout): Set completer on layout command.
 

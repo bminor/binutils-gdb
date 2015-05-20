@@ -443,7 +443,12 @@ tui_set_layout_by_name (const char *layout_name)
 	  else
 	    status = TUI_FAILURE;
 
-	  tui_set_layout (new_layout);
+	  if (status == TUI_SUCCESS)
+	    {
+	      /* Make sure the curses mode is enabled.  */
+	      tui_enable ();
+	      tui_set_layout (new_layout);
+	    }
 	}
       xfree (buf_ptr);
     }
@@ -492,9 +497,6 @@ extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 static void
 tui_layout_command (char *arg, int from_tty)
 {
-  /* Make sure the curses mode is enabled.  */
-  tui_enable ();
-
   /* Switch to the selected layout.  */
   if (tui_set_layout_by_name (arg) != TUI_SUCCESS)
     warning (_("Invalid layout specified.\n%s"), LAYOUT_USAGE);
