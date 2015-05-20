@@ -139,7 +139,7 @@ tui_show_registers (struct reggroup *group)
   /* Make sure the register window is visible.  If not, select an
      appropriate layout.  */
   if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->generic.is_visible)
-    tui_set_layout_for_display_command (DATA_NAME);
+    tui_set_layout_by_name (DATA_NAME);
 
   display_info = &TUI_DATA_WIN->detail.data_display_info;
   if (group == 0)

@@ -44,9 +44,7 @@ static int default_tab_len = DEFAULT_TAB_LEN;
 static struct tui_win_info *win_with_focus = (struct tui_win_info *) NULL;
 static struct tui_layout_def layout_def = {
   SRC_WIN,			/* DISPLAY_MODE */
-  FALSE,			/* SPLIT */
-  TUI_UNDEFINED_REGS,		/* REGS_DISPLAY_TYPE */
-  TUI_SFLOAT_REGS};		/* FLOAT_REGS_DISPLAY_TYPE */
+  FALSE};			/* SPLIT */
 
 static int win_resized = FALSE;
 
@@ -224,8 +222,6 @@ tui_clear_win_detail (struct tui_win_info *win_info)
 	  win_info->detail.data_display_info.regs_content =
 	    (tui_win_content) NULL;
 	  win_info->detail.data_display_info.regs_content_count = 0;
-	  win_info->detail.data_display_info.regs_display_type =
-	    TUI_UNDEFINED_REGS;
 	  win_info->detail.data_display_info.regs_column_count = 1;
 	  win_info->detail.data_display_info.display_regs = FALSE;
 	  break;
@@ -544,8 +540,6 @@ init_win_info (struct tui_win_info *win_info)
       win_info->detail.data_display_info.data_content_count = 0;
       win_info->detail.data_display_info.regs_content = (tui_win_content) NULL;
       win_info->detail.data_display_info.regs_content_count = 0;
-      win_info->detail.data_display_info.regs_display_type =
-	TUI_UNDEFINED_REGS;
       win_info->detail.data_display_info.regs_column_count = 1;
       win_info->detail.data_display_info.display_regs = FALSE;
       win_info->detail.data_display_info.current_group = 0;
@@ -745,8 +739,6 @@ tui_free_window (struct tui_win_info *win_info)
 	  win_info->detail.data_display_info.data_content =
 	    (tui_win_content) NULL;
 	  win_info->detail.data_display_info.data_content_count = 0;
-	  win_info->detail.data_display_info.regs_display_type =
-	    TUI_UNDEFINED_REGS;
 	  win_info->detail.data_display_info.regs_column_count = 1;
 	  win_info->detail.data_display_info.display_regs = FALSE;
 	  win_info->generic.content = NULL;

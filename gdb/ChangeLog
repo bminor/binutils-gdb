@@ -1,3 +1,44 @@
+2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-layout.c (tui_set_layout): Remove
+	tui_register_display_type parameter.  Remove all checking of this
+	parameter, and reindent function.  Update header comment.
+	(tui_set_layout_for_display_command): Rename to...
+	(tui_set_layout_by_name): ...this, and don't check for different
+	register class types, don't pass a tui_register_display_type to
+	tui_set_layout.  Update header comment.
+	(layout_names): Remove register set specific names.
+	* tui/tui-layout.h (tui_set_layout): Remove
+	tui_register_display_type parameter.
+	* tui/tui.c (tui_rl_change_windows): Don't pass a
+	tui_register_display_type to tui_set_layout.
+	(tui_rl_delete_other_windows): Likewise.
+	(tui_enable): Likewise.
+	* tui/tui-data.h (TUI_FLOAT_REGS_NAME): Remove.
+	(TUI_FLOAT_REGS_NAME_LOWER): Remove.
+	(TUI_GENERAL_REGS_NAME): Remove.
+	(TUI_GENERAL_REGS_NAME_LOWER): Remove.
+	(TUI_SPECIAL_REGS_NAME): Remove.
+	(TUI_SPECIAL_REGS_NAME_LOWER): Remove.
+	(TUI_GENERAL_SPECIAL_REGS_NAME): Remove.
+	(TUI_GENERAL_SPECIAL_REGS_NAME_LOWER): Remove.
+	(enum tui_register_display_type): Remove.
+	(struct tui_layout_def): Remove regs_display_type and
+	float_regs_display_type fields.
+	(struct tui_data_info): Remove regs_display_type field.
+	(tui_layout_command): Use new name for
+	tui_set_layout_for_display_command.
+	* tui/tui-data.c (layout_def): Don't initialise removed fields.
+	(tui_clear_win_detail): Don't initialise removed fields of
+	win_info.
+	* tui/tui-regs.c (tui_show_registers): Use new name for
+	tui_set_layout_for_display_command.
+	* tui/tui.h (tui_set_layout_for_display_command): Rename
+	declaration to...
+	(tui_set_layout_by_name): ...this.
+	* printcmd.c (display_command): Remove tui related layout call,
+	and reindent.
+
 2015-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* infrun.c (handle_inferior_event_1): Renames handle_inferior_event.

@@ -150,7 +150,6 @@ tui_rl_change_windows (int notused1, int notused2)
   if (tui_active)
     {
       enum tui_layout_type new_layout;
-      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
       new_layout = tui_current_layout ();
 
@@ -182,7 +181,7 @@ tui_rl_change_windows (int notused1, int notused2)
 	  new_layout = SRC_COMMAND;
 	  break;
 	}
-      tui_set_layout (new_layout, regs_type);
+      tui_set_layout (new_layout);
     }
   return 0;
 }
@@ -198,7 +197,6 @@ tui_rl_delete_other_windows (int notused1, int notused2)
   if (tui_active)
     {
       enum tui_layout_type new_layout;
-      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
       new_layout = tui_current_layout ();
 
@@ -217,7 +215,7 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 	  new_layout = DISASSEM_COMMAND;
 	  break;
 	}
-      tui_set_layout (new_layout, regs_type);
+      tui_set_layout (new_layout);
     }
   return 0;
 }
@@ -464,7 +462,7 @@ tui_enable (void)
       def_prog_mode ();
 
       tui_show_frame_info (0);
-      tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
+      tui_set_layout (SRC_COMMAND);
       tui_set_win_focus_to (TUI_SRC_WIN);
       keypad (TUI_CMD_WIN->generic.handle, TRUE);
       wrefresh (TUI_CMD_WIN->generic.handle);

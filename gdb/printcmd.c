@@ -1506,61 +1506,50 @@ display_command (char *arg, int from_tty)
   struct format_data fmt;
   struct expression *expr;
   struct display *newobj;
-  int display_it = 1;
   const char *exp = arg;
 
-#if defined(TUI)
-  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
-     `tui_version'.  */
-  if (tui_active && exp != NULL && *exp == '$')
-    display_it = (tui_set_layout_for_display_command (exp) == TUI_FAILURE);
-#endif
-
-  if (display_it)
+  if (exp == 0)
     {
-      if (exp == 0)
-	{
-	  do_displays ();
-	  return;
-	}
-
-      if (*exp == '/')
-	{
-	  exp++;
-	  fmt = decode_format (&exp, 0, 0);
-	  if (fmt.size && fmt.format == 0)
-	    fmt.format = 'x';
-	  if (fmt.format == 'i' || fmt.format == 's')
-	    fmt.size = 'b';
-	}
-      else
-	{
-	  fmt.format = 0;
-	  fmt.size = 0;
-	  fmt.count = 0;
-	  fmt.raw = 0;
-	}
-
-      innermost_block = NULL;
-      expr = parse_expression (exp);
-
-      newobj = (struct display *) xmalloc (sizeof (struct display));
-
-      newobj->exp_string = xstrdup (exp);
-      newobj->exp = expr;
-      newobj->block = innermost_block;
-      newobj->pspace = current_program_space;
-      newobj->next = display_chain;
-      newobj->number = ++display_number;
-      newobj->format = fmt;
-      newobj->enabled_p = 1;
-      display_chain = newobj;
-
-      if (from_tty)
-	do_one_display (newobj);
-
-      dont_repeat ();
+      do_displays ();
+      return;
     }
+
+  if (*exp == '/')
+    {
+      exp++;
+      fmt = decode_format (&exp, 0, 0);
+      if (fmt.size && fmt.format == 0)
+	fmt.format = 'x';
+      if (fmt.format == 'i' || fmt.format == 's')
+	fmt.size = 'b';
+    }
+  else
+    {
+      fmt.format = 0;
+      fmt.size = 0;
+      fmt.count = 0;
+      fmt.raw = 0;
+    }
+
+  innermost_block = NULL;
+  expr = parse_expression (exp);
+
+  newobj = (struct display *) xmalloc (sizeof (struct display));
+
+  newobj->exp_string = xstrdup (exp);
+  newobj->exp = expr;
+  newobj->block = innermost_block;
+  newobj->pspace = current_program_space;
+  newobj->next = display_chain;
+  newobj->number = ++display_number;
+  newobj->format = fmt;
+  newobj->enabled_p = 1;
+  display_chain = newobj;
+
+  if (from_tty)
+    do_one_display (newobj);
+
+  dont_repeat ();
 }
 
 static void
