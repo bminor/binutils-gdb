@@ -5649,6 +5649,11 @@ bad_return:
       else
 	plt_sym_val[reloc_index] = plt->vma + plt_offset;
       plt_offset += bed->plt_entry_size;
+
+      /* PR binutils/18437: Skip extra relocations in the .rela.plt
+	 section.  */
+      if (plt_offset >= plt->size)
+	break;
     }
 
   free (plt_contents);
