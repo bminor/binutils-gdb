@@ -1,3 +1,10 @@
+2015-05-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (process_movw_reloc_info): Sort relocation case
+	labels alphabetically.
+	(md_apply_fix): Ditto.
+	(aarch64_force_relocation): Ditto.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386
