@@ -8582,16 +8582,16 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 
   if (index_type_desc == NULL)
     {
-      const char *typename = ada_type_name (type0);
+      const char *type_name = ada_type_name (type0);
 
-      if (typename != NULL)
+      if (type_name != NULL)
 	{
-	  const int len = strlen (typename);
+	  const int len = strlen (type_name);
 	  char *name = (char *) alloca (len + strlen (xa_suffix));
 
-	  if (typename[len - 1] == 'P')
+	  if (type_name[len - 1] == 'P')
 	    {
-	      strcpy (name, typename);
+	      strcpy (name, type_name);
 	      strcpy (name + len - 1, xa_suffix);
 	      index_type_desc = ada_find_parallel_type_with_name (type0, name);
 	    }

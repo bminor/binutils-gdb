@@ -1,3 +1,8 @@
+2015-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (to_fixed_array_type): Rename local variable
+	typename into type_name.
+
 2015-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix ASAN crash for gdb.compile/compile.exp.
