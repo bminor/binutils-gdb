@@ -1,5 +1,10 @@
 2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-layout.c (tui_set_layout_for_display_command): Ensure
+	buf_ptr is freed.
+
+2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-layout.c (tui_layout_command): Move call to tui_enable
 	into ...
 	(tui_set_layout_for_display_command): ...here, before calling

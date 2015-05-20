@@ -409,10 +409,12 @@ tui_set_layout_by_name (const char *layout_name)
       char *buf_ptr;
       enum tui_layout_type new_layout = UNDEFINED_LAYOUT;
       enum tui_layout_type cur_layout = tui_current_layout ();
+      struct cleanup *old_chain;
 
       buf_ptr = (char *) xstrdup (layout_name);
       for (i = 0; (i < strlen (layout_name)); i++)
 	buf_ptr[i] = toupper (buf_ptr[i]);
+      old_chain = make_cleanup (xfree, buf_ptr);
 
       /* First check for ambiguous input.  */
       if (strlen (buf_ptr) <= 1 && *buf_ptr == 'S')
@@ -450,7 +452,7 @@ tui_set_layout_by_name (const char *layout_name)
 	      tui_set_layout (new_layout);
 	    }
 	}
-      xfree (buf_ptr);
+      do_cleanups (old_chain);
     }
   else
     status = TUI_FAILURE;
