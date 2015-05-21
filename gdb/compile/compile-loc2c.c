@@ -451,11 +451,12 @@ pushf (int indent, struct ui_file *stream, const char *format, ...)
 {
   va_list args;
 
-  fprintfi_filtered (indent, stream, "__gdb_stack[__gdb_tos + 1] = ");
+  fprintfi_filtered (indent, stream,
+		     "__gdb_stack[__gdb_tos + 1] = (" GCC_UINTPTR ")(");
   va_start (args, format);
   vfprintf_filtered (stream, format, args);
   va_end (args);
-  fprintf_filtered (stream, ";\n");
+  fprintf_filtered (stream, ");\n");
 
   fprintfi_filtered (indent, stream, "++__gdb_tos;\n");
 }
@@ -471,11 +472,12 @@ unary (int indent, struct ui_file *stream, const char *format, ...)
 {
   va_list args;
 
-  fprintfi_filtered (indent, stream, "__gdb_stack[__gdb_tos] = ");
+  fprintfi_filtered (indent, stream,
+		     "__gdb_stack[__gdb_tos] = (" GCC_UINTPTR ")(");
   va_start (args, format);
   vfprintf_filtered (stream, format, args);
   va_end (args);
-  fprintf_filtered (stream, ";\n");
+  fprintf_filtered (stream, ");\n");
 }
 
 /* Emit code for a unary expression -- one which uses the top two
@@ -488,11 +490,12 @@ binary (int indent, struct ui_file *stream, const char *format, ...)
 {
   va_list args;
 
-  fprintfi_filtered (indent, stream, "__gdb_stack[__gdb_tos - 1] = ");
+  fprintfi_filtered (indent, stream,
+		     "__gdb_stack[__gdb_tos - 1] = (" GCC_UINTPTR ")(");
   va_start (args, format);
   vfprintf_filtered (stream, format, args);
   va_end (args);
-  fprintf_filtered (stream, ";\n");
+  fprintf_filtered (stream, ");\n");
   fprintfi_filtered (indent, stream, "--__gdb_tos;\n");
 }
 

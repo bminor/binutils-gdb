@@ -418,8 +418,8 @@ convert_symbol_bmsym (struct compile_c_instance *context,
 
 void
 gcc_cplus_convert_symbol (void *datum,
-			  struct gcc_c_context *gcc_context,
-			  enum gcc_c_oracle_request request,
+			  struct gcc_cp_context *gcc_context,
+			  enum gcc_cp_oracle_request request,
 			  const char *identifier)
 {
   struct compile_c_instance *context = datum;
@@ -482,7 +482,7 @@ gcc_cplus_convert_symbol (void *datum,
 /* See compile-internal.h.  */
 
 gcc_address
-gcc_cplus_symbol_address (void *datum, struct gcc_c_context *gcc_context,
+gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			  const char *identifier)
 {
   struct compile_c_instance *context = datum;

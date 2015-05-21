@@ -71,22 +71,22 @@ cplus_get_range_decl_name (const struct dynamic_prop *prop)
    shared library and return the symbol specified by the current
    GCC_C_FE_CONTEXT.  */
 
-static gcc_c_fe_context_function *
+static gcc_cp_fe_context_function *
 load_libcc (void)
 {
   void *handle;
-  gcc_c_fe_context_function *func;
+  gcc_cp_fe_context_function *func;
 
    /* gdb_dlopen will call error () on an error, so no need to check
       value.  */
-  handle = gdb_dlopen (STRINGIFY (GCC_C_FE_LIBCC));
-  func = (gcc_c_fe_context_function *) gdb_dlsym (handle,
-						  STRINGIFY (GCC_C_FE_CONTEXT));
+  handle = gdb_dlopen (STRINGIFY (GCC_CP_FE_LIBCC));
+  func = (gcc_cp_fe_context_function *) gdb_dlsym (handle,
+						   STRINGIFY (GCC_CP_FE_CONTEXT));
 
   if (func == NULL)
     error (_("could not find symbol %s in library %s"),
-	   STRINGIFY (GCC_C_FE_CONTEXT),
-	   STRINGIFY (GCC_C_FE_LIBCC));
+	   STRINGIFY (GCC_CP_FE_CONTEXT),
+	   STRINGIFY (GCC_CP_FE_LIBCC));
   return func;
 }
 
@@ -97,9 +97,9 @@ load_libcc (void)
 struct compile_instance *
 cplus_get_compile_context (void)
 {
-  static gcc_c_fe_context_function *func;
+  static gcc_cp_fe_context_function *func;
 
-  struct gcc_c_context *context;
+  struct gcc_cp_context *context;
 
   if (func == NULL)
     {
@@ -107,7 +107,7 @@ cplus_get_compile_context (void)
       gdb_assert (func != NULL);
     }
 
-  context = (*func) (GCC_FE_VERSION_0, GCC_C_FE_VERSION_0);
+  context = (*func) (GCC_FE_VERSION_0, GCC_CP_FE_VERSION_0);
   if (context == NULL)
     error (_("The loaded version of GCC does not support the required version "
 	     "of the API."));
@@ -179,7 +179,7 @@ add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
   switch (type)
     {
     case COMPILE_I_SIMPLE_SCOPE:
-      fputs_unfiltered ("void "
+      fputs_unfiltered ("extern \"C\" void "
 			GCC_FE_WRAPPER_FUNCTION
 			" (struct "
 			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG

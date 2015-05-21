@@ -415,13 +415,14 @@ delete_instance (struct compile_instance *c)
 /* See compile-internal.h.  */
 
 struct compile_instance *
-new_cplus_compile_instance (struct gcc_c_context *fe)
+new_cplus_compile_instance (struct gcc_cp_context *fe)
 {
   struct compile_c_instance *result = XCNEW (struct compile_c_instance);
 
   result->base.fe = &fe->base;
   result->base.destroy = delete_instance;
   result->base.gcc_target_options = ("-std=gnu++11"
+				     " -fno-access-control"
 				     /* Otherwise the .o file may need
 					"_Unwind_Resume" and
 					"__gcc_personality_v0".  */
@@ -431,8 +432,8 @@ new_cplus_compile_instance (struct gcc_c_context *fe)
 					eq_type_map_instance,
 					xfree, xcalloc, xfree);
 
-  fe->c_ops->set_callbacks (fe, gcc_cplus_convert_symbol,
-			    gcc_cplus_symbol_address, result);
+  fe->cp_ops->set_callbacks (fe, gcc_cplus_convert_symbol,
+			     gcc_cplus_symbol_address, result);
 
   return &result->base;
 }

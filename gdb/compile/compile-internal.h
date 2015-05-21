@@ -19,6 +19,7 @@
 
 #include "hashtab.h"
 #include "gcc-c-interface.h"
+#include "gcc-cp-interface.h"
 
 /* Debugging flag for the "compile" family of commands.  */
 
@@ -119,11 +120,11 @@ extern gcc_c_symbol_address_function gcc_symbol_address;
 
 /* A callback suitable for use as the GCC C++ symbol oracle.  */
 
-extern gcc_c_oracle_function gcc_cplus_convert_symbol;
+extern gcc_cp_oracle_function gcc_cplus_convert_symbol;
 
 /* A callback suitable for use as the GCC C++ address oracle.  */
 
-extern gcc_c_symbol_address_function gcc_cplus_symbol_address;
+extern gcc_cp_symbol_address_function gcc_cplus_symbol_address;
 
 /* Instantiate a GDB object holding state for the GCC context FE.  The
    new object is returned.  */
@@ -133,7 +134,7 @@ extern struct compile_instance *new_compile_instance (struct gcc_c_context *fe);
 /* Instantiate a GDB object holding state for the GCC context FE.  The
    new object is returned.  */
 
-extern struct compile_instance *new_cplus_compile_instance (struct gcc_c_context *fe);
+extern struct compile_instance *new_cplus_compile_instance (struct gcc_cp_context *fe);
 
 /* Emit code to compute the address for all the local variables in
    scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb
