@@ -50,6 +50,7 @@ TARGET_DIRS = {
     'd10v': 'newlib/libc/sys/d10v/sys',
     'i960': 'libgloss/i960',
     'mcore': 'libgloss/mcore',
+    'riscv': 'libgloss/riscv/machine',
     'v850': 'libgloss/v850/sys',
 }
 TARGETS = {
@@ -66,6 +67,7 @@ TARGETS = {
     'mn10300',
     'msp430',
     'pru',
+    'riscv',
     'sparc',
     'v850',
 }

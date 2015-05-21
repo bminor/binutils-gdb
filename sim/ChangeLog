@@ -1,3 +1,8 @@
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (sim_arch): Add entry for riscv*-*-*.
+	* configure: Regenerate.
+
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (nltvals): Change to gennltvals.py.

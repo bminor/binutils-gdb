@@ -1,0 +1,3 @@
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp, pass.s, testutils.inc: New files.

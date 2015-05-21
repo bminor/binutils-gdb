@@ -546,6 +546,54 @@
 /* end pru sys target macros */
 #endif
 #endif
+#ifdef NL_TARGET_riscv
+#ifdef sys_defs
+/* from syscall.h */
+/* begin riscv sys target macros */
+ { "SYS_access", 1033 },
+ { "SYS_brk", 214 },
+ { "SYS_chdir", 49 },
+ { "SYS_close", 57 },
+ { "SYS_dup", 23 },
+ { "SYS_exit", 93 },
+ { "SYS_exit_group", 94 },
+ { "SYS_faccessat", 48 },
+ { "SYS_fcntl", 25 },
+ { "SYS_fstat", 80 },
+ { "SYS_fstatat", 79 },
+ { "SYS_getcwd", 17 },
+ { "SYS_getdents", 61 },
+ { "SYS_getegid", 177 },
+ { "SYS_geteuid", 175 },
+ { "SYS_getgid", 176 },
+ { "SYS_getmainvars", 2011 },
+ { "SYS_getpid", 172 },
+ { "SYS_gettimeofday", 169 },
+ { "SYS_getuid", 174 },
+ { "SYS_kill", 129 },
+ { "SYS_link", 1025 },
+ { "SYS_lseek", 62 },
+ { "SYS_lstat", 1039 },
+ { "SYS_mkdir", 1030 },
+ { "SYS_mmap", 222 },
+ { "SYS_mremap", 216 },
+ { "SYS_munmap", 215 },
+ { "SYS_open", 1024 },
+ { "SYS_openat", 56 },
+ { "SYS_pread", 67 },
+ { "SYS_pwrite", 68 },
+ { "SYS_read", 63 },
+ { "SYS_rt_sigaction", 134 },
+ { "SYS_stat", 1038 },
+ { "SYS_time", 1062 },
+ { "SYS_times", 153 },
+ { "SYS_uname", 160 },
+ { "SYS_unlink", 1026 },
+ { "SYS_write", 64 },
+ { "SYS_writev", 66 },
+/* end riscv sys target macros */
+#endif
+#endif
 #ifdef NL_TARGET_sparc
 #ifdef sys_defs
 /* from syscall.h */

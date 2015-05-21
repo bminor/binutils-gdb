@@ -690,6 +690,7 @@ moxie
 msp430
 or1k
 pru
+riscv
 rl78
 rx
 sh
@@ -4026,6 +4027,13 @@ subdirs="$subdirs aarch64"
 
   sim_arch=pru
   subdirs="$subdirs pru"
+
+
+       ;;
+   riscv*-*-*)
+
+  sim_arch=riscv
+  subdirs="$subdirs riscv"
 
 
        ;;

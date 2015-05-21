@@ -1,3 +1,7 @@
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* riscv/: New directory.
+
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (site.exp): Delete tool setting.
