@@ -25014,6 +25014,12 @@ their order is target specific.  The predefined register groups are the
 following: @code{general}, @code{float}, @code{system}, @code{vector},
 @code{all}, @code{save}, @code{restore}.
 
+@item tui reg prev
+Show the previous register group.  The list of register groups as well
+as their order is target specific.  The predefined register groups are
+the following: @code{general}, @code{float}, @code{system},
+@code{vector}, @code{all}, @code{save}, @code{restore}.
+
 @item tui reg system
 Show the system registers in the register window.
 

@@ -1,3 +1,7 @@
+2015-05-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI Commands): Add 'tui reg prev' details.
+
 2015-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (TUI): Include 'tui enable' in the introduction.

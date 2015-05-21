@@ -575,6 +575,29 @@ tui_reg_next_command (char *arg, int from_tty)
     }
 }
 
+/* Implementation of the "tui reg prev" command.  Cycle the register group
+   displayed in the tui REG window, moving backwards through the list of
+   available register groups.  */
+
+static void
+tui_reg_prev_command (char *arg, int from_tty)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+
+  if (TUI_DATA_WIN != NULL)
+    {
+      struct reggroup *group
+        = TUI_DATA_WIN->detail.data_display_info.current_group;
+
+      group = reggroup_prev (gdbarch, group);
+      if (group == NULL)
+	group = reggroup_prev (gdbarch, NULL);
+
+      if (group != NULL)
+	tui_show_registers (group);
+    }
+}
+
 static void
 tui_reg_float_command (char *arg, int from_tty)
 {
@@ -629,6 +652,9 @@ _initialize_tui_regs (void)
            &tuireglist);
   add_cmd ("next", class_tui, tui_reg_next_command,
            _("Display next register group."),
+           &tuireglist);
+  add_cmd ("prev", class_tui, tui_reg_prev_command,
+           _("Display previous register group."),
            &tuireglist);
 }
 
