@@ -1,3 +1,8 @@
+2015-05-22  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp (test_gdbinit_history_setting):
+	Use with_test_prefix.
+
 2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/completion.exp: Add test for completion of layout

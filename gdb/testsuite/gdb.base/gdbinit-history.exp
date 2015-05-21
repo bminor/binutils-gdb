@@ -39,15 +39,17 @@ proc test_gdbinit_history_setting { home size } {
     set saved_internal_gdbflags $INTERNAL_GDBFLAGS
     set INTERNAL_GDBFLAGS [string map {"-nx" ""} $INTERNAL_GDBFLAGS]
 
-    gdb_exit
-    gdb_start
+    with_test_prefix "home=$home" {
+	gdb_exit
+	gdb_start
 
-    gdb_test "show history size" "The size of the command history is $size."
+	gdb_test "show history size" "The size of the command history is $size."
 
-    if { $size == "0" } {
-        gdb_test_no_output "show commands"
-    } elseif { $size != "1" } {
-        gdb_test "show commands" "    .  show history size\r\n    .  show commands"
+	if { $size == "0" } {
+	    gdb_test_no_output "show commands"
+	} elseif { $size != "1" } {
+	    gdb_test "show commands" "    .  show history size\r\n    .  show commands"
+	}
     }
 
     set INTERNAL_GDBFLAGS $saved_internal_gdbflags
