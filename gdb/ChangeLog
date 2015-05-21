@@ -1,5 +1,9 @@
 2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-regs.c (tui_reg_next_command): Use NULL not 0.
+
+2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-layout.c (tui_set_layout_for_display_command): Ensure
 	buf_ptr is freed.
 
