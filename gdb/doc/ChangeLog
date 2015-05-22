@@ -1,3 +1,8 @@
+2015-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI): Include 'tui enable' in the introduction.
+	(TUI Commands): Add 'tui enable' and 'tui disable' details.
+
 2015-05-16  Doug Evans  <xdje42@gmail.com>
 
 	* guile.texi (Memory Ports in Guile): Document support for unbuffered

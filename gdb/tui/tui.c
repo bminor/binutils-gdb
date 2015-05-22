@@ -540,6 +540,22 @@ tui_disable (void)
   tui_update_gdb_sizes ();
 }
 
+/* Command wrapper for enabling tui mode.  */
+
+static void
+tui_enable_command (char *args, int from_tty)
+{
+  tui_enable ();
+}
+
+/* Command wrapper for leaving tui mode.  */
+
+static void
+tui_disable_command (char *args, int from_tty)
+{
+  tui_disable ();
+}
+
 void
 strcat_to_buf (char *buf, int buflen, 
 	       const char *item_to_add)
@@ -651,4 +667,22 @@ tui_get_command_dimension (unsigned int *width,
   *width = TUI_CMD_WIN->generic.width;
   *height = TUI_CMD_WIN->generic.height;
   return 1;
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_tui;
+
+void
+_initialize_tui (void)
+{
+  struct cmd_list_element **tuicmd;
+
+  tuicmd = tui_get_cmd_list ();
+
+  add_cmd ("enable", class_tui, tui_enable_command,
+	   _("Enable TUI display mode."),
+	   tuicmd);
+  add_cmd ("disable", class_tui, tui_disable_command,
+	   _("Disable TUI display mode."),
+	   tuicmd);
 }

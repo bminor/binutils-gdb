@@ -82,6 +82,10 @@ record bts
 compile print
   Evaluate expression by using the compiler and print result.
 
+tui enable
+tui disable
+  Explicit commands for enabling and disabling tui mode.
+
 * New options
 
 set max-completions

@@ -1,3 +1,10 @@
+2015-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention 'tui enable' and 'tui disable'.
+	* tui/tui.c (tui_enable_command): New function.
+	(tui_disable_command): New function.
+	(_initialize_tui): New function.
+
 2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-regs.c (tui_reg_next_command): Use NULL not 0.

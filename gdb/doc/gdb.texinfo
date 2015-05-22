@@ -24669,8 +24669,9 @@ is available.
 The TUI mode is enabled by default when you invoke @value{GDBN} as
 @samp{@value{GDBP} -tui}.
 You can also switch in and out of TUI mode while @value{GDBN} runs by
-using various TUI commands and key bindings, such as @kbd{C-x C-a}. 
-@xref{TUI Keys, ,TUI Key Bindings}.
+using various TUI commands and key bindings, such as @command{tui
+enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands} and
+@ref{TUI Keys, ,TUI Key Bindings}.
 
 @node TUI Overview
 @section TUI Overview
@@ -24944,6 +24945,16 @@ these commands will fail with an error, because it would not be
 possible or desirable to enable curses window management.
 
 @table @code
+@item tui enable
+@kindex tui enable
+Activate TUI mode.  The last active TUI window layout will be used if
+TUI mode has prevsiouly been used in the current debugging session,
+otherwise a default layout is used.
+
+@item tui disable
+@kindex tui disable
+Disable TUI mode, returning to the console interpreter.
+
 @item info win
 @kindex info win
 List and give the size of all displayed windows.
