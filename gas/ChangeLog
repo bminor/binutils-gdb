@@ -1,3 +1,9 @@
+2015-05-22  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18446
+	* read.c (output_big_sleb128): Use U suffix to prevent compile
+	time warning.
+
 2015-05-19  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (process_movw_reloc_info): Sort relocation case
