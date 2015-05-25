@@ -17,6 +17,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* Define to warn for use of native system library directories */
+#undef ENABLE_POISON_SYSTEM_DIRECTORIES
+
 /* Additional extension a shared object might have. */
 #undef EXTRA_SHLIB_EXTENSION
 

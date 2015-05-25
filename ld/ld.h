@@ -172,6 +172,13 @@ typedef struct
   /* If set, display the target memory usage (per memory region).  */
   bfd_boolean print_memory_usage;
 
+  /* If TRUE warn for uses of system directories when cross linking.  */
+  bfd_boolean warn_poison_system_directories;
+
+  /* If TRUE (default FALSE) give an error for uses of system
+     directories when cross linking instead of a warning.  */
+  bfd_boolean error_poison_system_directories;
+
   /* Big or little endian as set on command line.  */
   enum endian_enum endian;
 

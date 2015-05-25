@@ -270,6 +270,13 @@ main (int argc, char **argv)
   command_line.warn_mismatch = TRUE;
   command_line.warn_search_mismatch = TRUE;
   command_line.check_section_addresses = -1;
+  command_line.warn_poison_system_directories =
+#ifdef ENABLE_POISON_SYSTEM_DIRECTORIES
+    TRUE;
+#else
+    FALSE;
+#endif
+  command_line.error_poison_system_directories = FALSE;
 
   /* We initialize DEMANGLING based on the environment variable
      COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the

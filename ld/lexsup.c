@@ -524,6 +524,18 @@ static const struct ld_option ld_options[] =
     OPTION_IGNORE_UNRESOLVED_SYMBOL},
     '\0', N_("SYMBOL"),
     N_("Unresolved SYMBOL will not cause an error or warning"), TWO_DASHES },
+  { {"warn-poison-system-directories", no_argument, NULL,
+     OPTION_WARN_POISON_SYSTEM_DIRECTORIES},
+    '\0', NULL, N_("Warn for -L options using system directories"),
+    TWO_DASHES },
+  { {"no-warn-poison-system-directories", no_argument, NULL,
+     OPTION_NO_WARN_POISON_SYSTEM_DIRECTORIES},
+    '\0', NULL, N_("Do not warn for -L options using system directories"),
+    TWO_DASHES },
+  { {"error-poison-system-directories", no_argument, NULL,
+     OPTION_ERROR_POISON_SYSTEM_DIRECTORIES},
+    '\0', NULL, N_("Give an error for -L options using system directories"),
+    TWO_DASHES },
   { {"push-state", no_argument, NULL, OPTION_PUSH_STATE},
     '\0', NULL, N_("Push state of flags governing input file handling"),
     TWO_DASHES },
@@ -1527,6 +1539,18 @@ parse_args (unsigned argc, char **argv)
               einfo (_("%P%X: --hash-size needs a numeric argument\n"));
           }
           break;
+
+   case OPTION_WARN_POISON_SYSTEM_DIRECTORIES:
+     command_line.warn_poison_system_directories = TRUE;
+     break;
+
+   case OPTION_NO_WARN_POISON_SYSTEM_DIRECTORIES:
+     command_line.warn_poison_system_directories = FALSE;
+     break;
+
+   case OPTION_ERROR_POISON_SYSTEM_DIRECTORIES:
+     command_line.error_poison_system_directories = TRUE;
+     break;
 
 	case OPTION_PUSH_STATE:
 	  input_flags.pushed = xmemdup (&input_flags,
