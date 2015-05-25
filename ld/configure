@@ -788,6 +788,7 @@ with_lib_path
 enable_targets
 enable_64_bit_bfd
 with_sysroot
+enable_poison_system_directories
 enable_gold
 enable_got
 enable_compressed_debug_sections
@@ -1445,6 +1446,8 @@ Optional Features:
   --disable-largefile     omit support for large files
   --enable-targets        alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
+  --enable-poison-system-directories
+                          warn for use of native system library directories
   --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
   --enable-got=<type>     GOT handling scheme (target, single, negative,
                           multigot)
@@ -15498,7 +15501,18 @@ else
 fi
 
 
+# Check whether --enable-poison-system-directories was given.
+if test "${enable_poison_system_directories+set}" = set; then :
+  enableval=$enable_poison_system_directories;
+else
+  enable_poison_system_directories=no
+fi
 
+if test "x${enable_poison_system_directories}" = "xyes"; then
+
+$as_echo "#define ENABLE_POISON_SYSTEM_DIRECTORIES 1" >>confdefs.h
+
+fi
 
 # Check whether --enable-got was given.
 if test "${enable_got+set}" = set; then :

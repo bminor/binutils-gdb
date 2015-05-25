@@ -1223,6 +1223,13 @@ class General_options
   DEFINE_bool(warn_multiple_gp, options::TWO_DASHES, '\0', false,
 	      N_("Ignored"), NULL);
 
+  DEFINE_bool(warn_poison_system_directories, options::TWO_DASHES, '\0', false,
+	      N_("Warn for -L options using system directories"),
+	      N_("Do not warn for -L options using system directories"));
+  DEFINE_bool(error_poison_system_directories, options::TWO_DASHES, '\0', false,
+	      N_("Give an error for -L options using system directories"),
+	      NULL);
+
   DEFINE_bool(warn_search_mismatch, options::TWO_DASHES, '\0', true,
 	      N_("Warn when skipping an incompatible library"),
 	      N_("Don't warn when skipping an incompatible library"));

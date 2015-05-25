@@ -114,6 +114,26 @@ ldfile_add_library_path (const char *name, bfd_boolean cmdline)
     new_dirs->name = concat (ld_sysroot, name + 1, (const char *) NULL);
   else
     new_dirs->name = xstrdup (name);
+
+  if (command_line.warn_poison_system_directories
+      && (!strncmp (name, "/lib", 4)
+      /* TODO: This check is disabled for now due to a bunch of packages that
+       * use libtool and relink with -L/usr/lib paths (albeit after the right
+       * sysroot path).  Once those are fixed we can enable.
+       * We also need to adjust it so it only rejects one or two levels deep.
+       * Gcc's internal paths also live below /usr/lib.
+       * http://crbug.com/488360  */
+	  /* || !strncmp (name, "/usr/lib", 8) */
+	  || !strncmp (name, "/usr/local/lib", 14)
+	  || !strncmp (name, "/usr/X11R6/lib", 14)))
+    {
+      if (command_line.error_poison_system_directories)
+	einfo (_("%X%P: error: library search path \"%s\" is unsafe for "
+	         "cross-compilation\n"), name);
+      else
+	einfo (_("%P: warning: library search path \"%s\" is unsafe for "
+	         "cross-compilation\n"), name);
+    }
 }
 
 /* Try to open a BFD for a lang_input_statement.  */
