@@ -25038,27 +25038,34 @@ Make the command window active for scrolling.
 @kindex refresh
 Refresh the screen.  This is similar to typing @kbd{C-L}.
 
-@item tui reg float
+@item tui reg @var{group}
 @kindex tui reg
-Show the floating point registers in the register window.
+Changes the register group displayed in the tui register window to
+@var{group}.  If the register window is not currently displayed this
+command will cause the register window to be displayed.  The list of
+register groups, as well as their order is target specific. The
+following groups are available on most targets:
+@table @code
+@item next
+Repeatedly selecting this group will cause the display to cycle
+through all of the available register groups.
 
-@item tui reg general
-Show the general registers in the register window.
+@item prev
+Repeatedly selecting this group will cause the display to cycle
+through all of the available register groups in the reverse order to
+@var{next}.
 
-@item tui reg next
-Show the next register group.  The list of register groups as well as
-their order is target specific.  The predefined register groups are the
-following: @code{general}, @code{float}, @code{system}, @code{vector},
-@code{all}, @code{save}, @code{restore}.
-
-@item tui reg prev
-Show the previous register group.  The list of register groups as well
-as their order is target specific.  The predefined register groups are
-the following: @code{general}, @code{float}, @code{system},
-@code{vector}, @code{all}, @code{save}, @code{restore}.
-
-@item tui reg system
-Show the system registers in the register window.
+@item general
+Display the general registers.
+@item float
+Display the floating point registers.
+@item system
+Display the system registers.
+@item vector
+Display the vector registers.
+@item all
+Display all registers.
+@end table
 
 @item update
 @kindex update

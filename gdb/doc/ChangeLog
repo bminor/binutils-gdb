@@ -1,3 +1,8 @@
+2015-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI Commands): Bring all 'tui reg' commands into a
+	single table entry.
+
 2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.textinfo (i386): Fix "@end table" end and "@table" placement.

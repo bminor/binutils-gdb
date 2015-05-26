@@ -26,6 +26,7 @@
 #include "target.h"
 #include "reggroups.h"
 #include "user-regs.h"
+#include "arch-utils.h"
 
 #include "cli/cli-decode.h"
 
@@ -969,44 +970,82 @@ signal_completer (struct cmd_list_element *ignore,
   return return_val;
 }
 
-/* Complete on a register or reggroup.  */
+/* Bit-flags for selecting what the register and/or register-group
+   completer should complete on.  */
 
-VEC (char_ptr) *
-reg_or_group_completer (struct cmd_list_element *ignore,
-			const char *text, const char *word)
+enum reg_completer_targets
+  {
+    complete_register_names = 0x1,
+    complete_reggroup_names = 0x2
+  };
+
+/* Complete register names and/or reggroup names based on the value passed
+   in TARGETS.  At least one bit in TARGETS must be set.  */
+
+static VEC (char_ptr) *
+reg_or_group_completer_1 (struct cmd_list_element *ignore,
+			  const char *text, const char *word,
+			  enum reg_completer_targets targets)
 {
   VEC (char_ptr) *result = NULL;
   size_t len = strlen (word);
   struct gdbarch *gdbarch;
-  struct reggroup *group;
   const char *name;
-  int i;
 
-  if (!target_has_registers)
-    return result;
+  gdb_assert ((targets & (complete_register_names
+			  | complete_reggroup_names)) != 0);
+  gdbarch = get_current_arch ();
 
-  gdbarch = get_frame_arch (get_selected_frame (NULL));
-
-  for (i = 0;
-       (name = user_reg_map_regnum_to_name (gdbarch, i)) != NULL;
-       i++)
+  if ((targets & complete_register_names) != 0)
     {
-      if (*name != '\0' && strncmp (word, name, len) == 0)
-	VEC_safe_push (char_ptr, result, xstrdup (name));
+      int i;
+
+      for (i = 0;
+	   (name = user_reg_map_regnum_to_name (gdbarch, i)) != NULL;
+	   i++)
+	{
+	  if (*name != '\0' && strncmp (word, name, len) == 0)
+	    VEC_safe_push (char_ptr, result, xstrdup (name));
+	}
     }
 
-  for (group = reggroup_next (gdbarch, NULL);
-       group != NULL;
-       group = reggroup_next (gdbarch, group))
+  if ((targets & complete_reggroup_names) != 0)
     {
-      name = reggroup_name (group);
-      if (strncmp (word, name, len) == 0)
-	VEC_safe_push (char_ptr, result, xstrdup (name));
+      struct reggroup *group;
+
+      for (group = reggroup_next (gdbarch, NULL);
+	   group != NULL;
+	   group = reggroup_next (gdbarch, group))
+	{
+	  name = reggroup_name (group);
+	  if (strncmp (word, name, len) == 0)
+	    VEC_safe_push (char_ptr, result, xstrdup (name));
+	}
     }
 
   return result;
 }
 
+/* Perform completion on register and reggroup names.  */
+
+VEC (char_ptr) *
+reg_or_group_completer (struct cmd_list_element *ignore,
+			const char *text, const char *word)
+{
+  return reg_or_group_completer_1 (ignore, text, word,
+				   (complete_register_names
+				    | complete_reggroup_names));
+}
+
+/* Perform completion on reggroup names.  */
+
+VEC (char_ptr) *
+reggroup_completer (struct cmd_list_element *ignore,
+		    const char *text, const char *word)
+{
+  return reg_or_group_completer_1 (ignore, text, word,
+				   complete_reggroup_names);
+}
 
 /* Get the list of chars that are considered as word breaks
    for the current command.  */

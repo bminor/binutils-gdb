@@ -1,3 +1,32 @@
+2015-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* completer.c: Add arch-utils.h include.
+	(enum reg_completer_targets): New enum.
+	(reg_or_group_completer_1): New function containing old
+	reg_or_group_completer, add and use new parameter to control what
+	is completed on.  Use get_current_arch rather than architecture of
+	currently selected frame.
+	(reg_or_group_completer): Call new reg_or_group_completer_1.
+	(reggroup_completer): Call new reg_or_group_completer_1.
+	* completer.h (reggroup_completer): Add declaration.
+	* tui/tui-regs.c: Add 'completer.h' include.
+	(tui_reg_next_command): Renamed to...
+	(tui_reg_next): ...this.  Adjust parameters and return rather than
+	display new group.
+	(tui_reg_prev_command): Renamed to...
+	(tui_reg_prev): ...this.  Adjust parameters and return rather than
+	display new group.
+	(tui_reg_float_command): Delete.
+	(tui_reg_general_command): Delete.
+	(tui_reg_system_command): Delete.
+	(tui_reg_command): Rewrite to perform switching of register group.
+	Add header comment.
+	(tuireglist): Remove.
+	(tui_reggroup_completer): New function.
+	(_initialize_tui_regs): Remove 'tui reg' sub-commands, update
+	creation of 'tui reg' command.
+	* NEWS: Add comment about 'tui reg' changes.
+
 2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target.c (target_read): Consider addressable unit size when

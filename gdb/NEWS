@@ -59,6 +59,9 @@
   containers as simply as "gdb -p PID" or "gdbserver --attach PID".
   See "New remote packets" below.
 
+* The "tui reg" command now provides completion for all of the
+  available register groups, including target specific groups.
+
 * Guile Scripting
 
   ** Memory ports can now be unbuffered.
