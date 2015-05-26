@@ -39,7 +39,7 @@
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
 
-extern int dwarf2_always_disassemble;
+extern int dwarf_always_disassemble;
 
 extern const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
 
@@ -4137,7 +4137,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
       else
 	fprintf_filtered (stream, _(", and "));
 
-      if (!dwarf2_always_disassemble)
+      if (!dwarf_always_disassemble)
 	{
 	  data = locexpr_describe_location_piece (symbol, stream,
 						  addr, objfile, per_cu,
@@ -4156,7 +4156,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 					       get_objfile_arch (objfile),
 					       addr_size, offset_size, data,
 					       data, end, 0,
-					       dwarf2_always_disassemble,
+					       dwarf_always_disassemble,
 					       per_cu);
 	}
 

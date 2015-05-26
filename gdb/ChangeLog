@@ -1,5 +1,33 @@
 2015-05-26  Doug Evans  <dje@google.com>
 
+	* NEWS: Add entries for command renamings.
+	* dwarf2read.c (dwarf_read_debug): Renamed from dwarf2_read_debug.
+	All uses updated.
+	(dwarf_die_debug): Renamed from dwarf2_die_debug.  All uses updated.
+	(dwarf_max_cache_age): Renamed from dwarf2_max_cache_age.
+	All uses updated.
+	(show_dwarf_max_cache_age): Renamed from show_dwarf2_max_cache_age.
+	All callers updated.  Fix spelling of DWARF in help text.
+	(set_dwarf_cmdlist): Renamed from set_dwarf2_cmdlist.
+	All uses updated.
+	(show_dwarf_cmdlist): Renamed from show_dwarf2_cmdlist.
+	All uses updated.
+	(set_dwarf_cmd): Renamed from set_dwarf2_cmd.  All callers updated.
+	(show_dwarf_cmd): Renamed from show_dwarf2_cmd.  All callers updated.
+	(dwarf_always_disassemble): Renamed from dwarf_always_disassemble.
+	All uses updated.
+	(show_dwarf_always_disassemble): Renamed from
+	show_dwarf2_always_disassemble.  All callers updated.
+	(_initialize_dwarf2_read): Rename "set/show dwarf2" prefix to
+	"set/show dwarf".  Rename "set/show dwarf2 max-cache-age" to
+	"set/show dwarf max-cache-age".  Rename
+	"set/show dwarf2 always-disassemble" to
+	"set/show dwarf always-disassemble".  Rename
+	"set/show debug dwarf2-read" to "set/show debug dwarf-read".  Rename
+	"set/show debug dwarf2-die" to "set/show debug dwarf-die".
+
+2015-05-26  Doug Evans  <dje@google.com>
+
 	PR python/18438
 	* python/py-lazy-string.c (stpy_convert_to_value): Use
 	gdbpy_gdb_memory_error not PyExc_MemoryError.

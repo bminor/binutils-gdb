@@ -78,11 +78,11 @@ DEF_VEC_P (symbolp);
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
-   This is in contrast to the low level DIE reading of dwarf2_die_debug.  */
-static unsigned int dwarf2_read_debug = 0;
+   This is in contrast to the low level DIE reading of dwarf_die_debug.  */
+static unsigned int dwarf_read_debug = 0;
 
 /* When non-zero, dump DIEs after they are read in.  */
-static unsigned int dwarf2_die_debug = 0;
+static unsigned int dwarf_die_debug = 0;
 
 /* When non-zero, cross-check physname against demangler.  */
 static int check_physname = 0;
@@ -1373,13 +1373,13 @@ static struct dwarf2_queue_item *dwarf2_queue, *dwarf2_queue_tail;
    compilation units.  Set this to zero to disable caching.  Cache
    sizes of up to at least twenty will improve startup time for
    typical inter-CU-reference binaries, at an obvious memory cost.  */
-static int dwarf2_max_cache_age = 5;
+static int dwarf_max_cache_age = 5;
 static void
-show_dwarf2_max_cache_age (struct ui_file *file, int from_tty,
-			   struct cmd_list_element *c, const char *value)
+show_dwarf_max_cache_age (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("The upper bound on the age of cached "
-			    "dwarf2 compilation units is %s.\n"),
+			    "DWARF compilation units is %s.\n"),
 		    value);
 }
 
@@ -4604,7 +4604,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 		    ? &dwo_file->sections.abbrev
 		    : &dwarf2_per_objfile->abbrev);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading .debug_types%s for %s:\n",
 			dwo_file ? ".dwo" : "",
 			get_section_file_name (abbrev_section));
@@ -4727,7 +4727,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	    }
 	  *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
 
-	  if (dwarf2_read_debug > 1)
+	  if (dwarf_read_debug > 1)
 	    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature %s\n",
 				offset.sect_off,
 				hex_string (signature));
@@ -5216,14 +5216,14 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
     comp_unit_die->attrs[i++] = *comp_dir;
   comp_unit_die->num_attrs += num_extra_attrs;
 
-  if (dwarf2_die_debug)
+  if (dwarf_die_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Read die from %s@0x%x of %s:\n",
 			  get_section_name (section),
 			  (unsigned) (begin_info_ptr - section->buffer),
 			  bfd_get_filename (abfd));
-      dump_die (comp_unit_die, dwarf2_die_debug);
+      dump_die (comp_unit_die, dwarf_die_debug);
     }
 
   /* Save the comp_dir attribute.  If there is no DWP file then we'll read
@@ -5428,7 +5428,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
      before we can reread the DWO file (this only applies to CUs, not TUs).  */
   int rereading_dwo_cu = 0;
 
-  if (dwarf2_die_debug)
+  if (dwarf_die_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading %s unit at offset 0x%x\n",
 			this_cu->is_debug_types ? "type" : "comp",
 			this_cu->offset.sect_off);
@@ -5661,7 +5661,7 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
   struct die_info *comp_unit_die;
   int has_children;
 
-  if (dwarf2_die_debug)
+  if (dwarf_die_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading %s unit at offset 0x%x\n",
 			this_cu->is_debug_types ? "type" : "comp",
 			this_cu->offset.sect_off);
@@ -6039,7 +6039,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
      and build a psymtab for each of them.  */
   dwarf2_build_include_psymtabs (cu, comp_unit_die, pst);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
@@ -6208,7 +6208,7 @@ build_type_psymtabs_1 (void)
 	  [IWBN if DWO skeletons had DW_AT_stmt_list]
 	call FUNC  */
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Building type unit groups ...\n");
 
   /* Sort in a separate table to maintain the order of all_type_units
@@ -6445,7 +6445,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
   struct obstack temp_obstack;
   int i;
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "Building psymtabs of objfile %s ...\n",
 			  objfile_name (objfile));
@@ -6487,7 +6487,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
 			      build_type_psymtab_dependencies, NULL);
     }
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     print_tu_stats ();
 
   set_partial_user (objfile);
@@ -6498,7 +6498,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
 
   do_cleanups (back_to);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Done building psymtabs of %s\n",
 			objfile_name (objfile));
 }
@@ -6544,7 +6544,7 @@ read_comp_units_from_section (struct objfile *objfile,
   const gdb_byte *info_ptr;
   bfd *abfd = get_section_bfd_owner (section);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading %s for %s\n",
 			get_section_name (section),
 			get_section_file_name (section));
@@ -7529,7 +7529,7 @@ process_queue (void)
 {
   struct dwarf2_queue_item *item, *next_item;
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Expanding one or more symtabs of objfile %s ...\n",
@@ -7566,7 +7566,7 @@ process_queue (void)
 	      debug_print_threshold = 1;
 	    }
 
-	  if (dwarf2_read_debug >= debug_print_threshold)
+	  if (dwarf_read_debug >= debug_print_threshold)
 	    fprintf_unfiltered (gdb_stdlog, "Expanding symtab of %s\n", buf);
 
 	  if (per_cu->is_debug_types)
@@ -7574,7 +7574,7 @@ process_queue (void)
 	  else
 	    process_full_comp_unit (per_cu, item->pretend_language);
 
-	  if (dwarf2_read_debug >= debug_print_threshold)
+	  if (dwarf_read_debug >= debug_print_threshold)
 	    fprintf_unfiltered (gdb_stdlog, "Done expanding %s\n", buf);
 	}
 
@@ -7585,7 +7585,7 @@ process_queue (void)
 
   dwarf2_queue_tail = NULL;
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "Done expanding symtabs of %s.\n",
 			  objfile_name (dwarf2_per_objfile->objfile));
@@ -9538,7 +9538,7 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
   dwo_unit->offset = offset;
   dwo_unit->length = cu->per_cu->length;
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, dwo_id %s\n",
 			offset.sect_off, hex_string (dwo_unit->signature));
 }
@@ -9567,7 +9567,7 @@ create_dwo_cu (struct dwo_file *dwo_file)
      not present, in which case section->asection will be NULL.  */
   abfd = get_section_bfd_owner (section);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "Reading %s for %s:\n",
 			  get_section_name (section),
@@ -10013,7 +10013,7 @@ create_dwo_unit_in_dwp_v1 (struct dwp_file *dwp_file,
 
   gdb_assert (dwp_file->version == 1);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "Reading %s %s/%s in DWP V1 file: %s\n",
 			  kind,
@@ -10099,7 +10099,7 @@ create_dwo_unit_in_dwp_v1 (struct dwp_file *dwp_file,
   /* Create one if necessary.  */
   if (*dwo_file_slot == NULL)
     {
-      if (dwarf2_read_debug)
+      if (dwarf_read_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "Creating virtual DWO: %s\n",
 			      virtual_dwo_name);
@@ -10128,7 +10128,7 @@ create_dwo_unit_in_dwp_v1 (struct dwp_file *dwp_file,
     }
   else
     {
-      if (dwarf2_read_debug)
+      if (dwarf_read_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "Using existing virtual DWO: %s\n",
 			      virtual_dwo_name);
@@ -10218,7 +10218,7 @@ create_dwo_unit_in_dwp_v2 (struct dwp_file *dwp_file,
 
   gdb_assert (dwp_file->version == 2);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "Reading %s %s/%s in DWP V2 file: %s\n",
 			  kind,
@@ -10300,7 +10300,7 @@ create_dwo_unit_in_dwp_v2 (struct dwp_file *dwp_file,
   /* Create one if necessary.  */
   if (*dwo_file_slot == NULL)
     {
-      if (dwarf2_read_debug)
+      if (dwarf_read_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "Creating virtual DWO: %s\n",
 			      virtual_dwo_name);
@@ -10342,7 +10342,7 @@ create_dwo_unit_in_dwp_v2 (struct dwp_file *dwp_file,
     }
   else
     {
-      if (dwarf2_read_debug)
+      if (dwarf_read_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "Using existing virtual DWO: %s\n",
 			      virtual_dwo_name);
@@ -10610,7 +10610,7 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
   dbfd = open_dwo_file (dwo_name, comp_dir);
   if (dbfd == NULL)
     {
-      if (dwarf2_read_debug)
+      if (dwarf_read_debug)
 	fprintf_unfiltered (gdb_stdlog, "DWO file not found: %s\n", dwo_name);
       return NULL;
     }
@@ -10630,7 +10630,7 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
 
   discard_cleanups (cleanups);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "DWO file found: %s\n", dwo_name);
 
   return dwo_file;
@@ -10832,7 +10832,7 @@ open_and_init_dwp_file (void)
 
   if (dbfd == NULL)
     {
-      if (dwarf2_read_debug)
+      if (dwarf_read_debug)
 	fprintf_unfiltered (gdb_stdlog, "DWP file not found: %s\n", dwp_name);
       do_cleanups (cleanups);
       return NULL;
@@ -10873,7 +10873,7 @@ open_and_init_dwp_file (void)
   dwp_file->loaded_cus = allocate_dwp_loaded_cutus_table (objfile);
   dwp_file->loaded_tus = allocate_dwp_loaded_cutus_table (objfile);
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "DWP file found: %s\n", dwp_file->name);
       fprintf_unfiltered (gdb_stdlog,
@@ -10944,7 +10944,7 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 
 	  if (dwo_cutu != NULL)
 	    {
-	      if (dwarf2_read_debug)
+	      if (dwarf_read_debug)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
 				      "Virtual DWO %s %s found: @%s\n",
@@ -10988,7 +10988,7 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 
 	  if (dwo_cutu != NULL)
 	    {
-	      if (dwarf2_read_debug)
+	      if (dwarf_read_debug)
 		{
 		  fprintf_unfiltered (gdb_stdlog, "DWO %s %s(%s) found: @%s\n",
 				      kind, dwo_name, hex_string (signature),
@@ -11003,7 +11003,7 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
      someone deleted the DWO/DWP file, or the search path isn't set up
      correctly to find the file.  */
 
-  if (dwarf2_read_debug)
+  if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "DWO %s %s(%s) not found\n",
 			  kind, dwo_name, hex_string (signature));
@@ -15141,14 +15141,14 @@ read_die_and_siblings (const struct die_reader_specs *reader,
   struct die_info *die = read_die_and_siblings_1 (reader, info_ptr,
 						  new_info_ptr, parent);
 
-  if (dwarf2_die_debug)
+  if (dwarf_die_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Read die from %s@0x%x of %s:\n",
 			  get_section_name (reader->die_section),
 			  (unsigned) (info_ptr - reader->die_section->buffer),
 			  bfd_get_filename (reader->abfd));
-      dump_die (die, dwarf2_die_debug);
+      dump_die (die, dwarf_die_debug);
     }
 
   return die;
@@ -15223,14 +15223,14 @@ read_full_die (const struct die_reader_specs *reader,
 
   result = read_full_die_1 (reader, diep, info_ptr, has_children, 0);
 
-  if (dwarf2_die_debug)
+  if (dwarf_die_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Read die from %s@0x%x of %s:\n",
 			  get_section_name (reader->die_section),
 			  (unsigned) (info_ptr - reader->die_section->buffer),
 			  bfd_get_filename (reader->abfd));
-      dump_die (*diep, dwarf2_die_debug);
+      dump_die (*diep, dwarf_die_debug);
     }
 
   return result;
@@ -21967,7 +21967,7 @@ age_cached_comp_units (void)
   while (per_cu != NULL)
     {
       per_cu->cu->last_used ++;
-      if (per_cu->cu->last_used <= dwarf2_max_cache_age)
+      if (per_cu->cu->last_used <= dwarf_max_cache_age)
 	dwarf2_mark (per_cu->cu);
       per_cu = per_cu->cu->read_in_chain;
     }
@@ -22282,20 +22282,20 @@ partial_die_eq (const void *item_lhs, const void *item_rhs)
   return part_die_lhs->offset.sect_off == part_die_rhs->offset.sect_off;
 }
 
-static struct cmd_list_element *set_dwarf2_cmdlist;
-static struct cmd_list_element *show_dwarf2_cmdlist;
+static struct cmd_list_element *set_dwarf_cmdlist;
+static struct cmd_list_element *show_dwarf_cmdlist;
 
 static void
-set_dwarf2_cmd (char *args, int from_tty)
+set_dwarf_cmd (char *args, int from_tty)
 {
-  help_list (set_dwarf2_cmdlist, "maintenance set dwarf2 ", all_commands,
+  help_list (set_dwarf_cmdlist, "maintenance set dwarf ", all_commands,
 	     gdb_stdout);
 }
 
 static void
-show_dwarf2_cmd (char *args, int from_tty)
+show_dwarf_cmd (char *args, int from_tty)
 {
-  cmd_show_list (show_dwarf2_cmdlist, from_tty, "");
+  cmd_show_list (show_dwarf_cmdlist, from_tty, "");
 }
 
 /* Free data associated with OBJFILE, if necessary.  */
@@ -23233,11 +23233,11 @@ save_gdb_index_command (char *arg, int from_tty)
 
 
 
-int dwarf2_always_disassemble;
+int dwarf_always_disassemble;
 
 static void
-show_dwarf2_always_disassemble (struct ui_file *file, int from_tty,
-				struct cmd_list_element *c, const char *value)
+show_dwarf_always_disassemble (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file,
 		    _("Whether to always disassemble "
@@ -23264,55 +23264,55 @@ _initialize_dwarf2_read (void)
   dwarf2_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, dwarf2_per_objfile_free);
 
-  add_prefix_cmd ("dwarf2", class_maintenance, set_dwarf2_cmd, _("\
-Set DWARF 2 specific variables.\n\
-Configure DWARF 2 variables such as the cache size"),
-                  &set_dwarf2_cmdlist, "maintenance set dwarf2 ",
+  add_prefix_cmd ("dwarf", class_maintenance, set_dwarf_cmd, _("\
+Set DWARF specific variables.\n\
+Configure DWARF variables such as the cache size"),
+                  &set_dwarf_cmdlist, "maintenance set dwarf ",
                   0/*allow-unknown*/, &maintenance_set_cmdlist);
 
-  add_prefix_cmd ("dwarf2", class_maintenance, show_dwarf2_cmd, _("\
-Show DWARF 2 specific variables\n\
-Show DWARF 2 variables such as the cache size"),
-                  &show_dwarf2_cmdlist, "maintenance show dwarf2 ",
+  add_prefix_cmd ("dwarf", class_maintenance, show_dwarf_cmd, _("\
+Show DWARF specific variables\n\
+Show DWARF variables such as the cache size"),
+                  &show_dwarf_cmdlist, "maintenance show dwarf ",
                   0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   add_setshow_zinteger_cmd ("max-cache-age", class_obscure,
-			    &dwarf2_max_cache_age, _("\
-Set the upper bound on the age of cached dwarf2 compilation units."), _("\
-Show the upper bound on the age of cached dwarf2 compilation units."), _("\
+			    &dwarf_max_cache_age, _("\
+Set the upper bound on the age of cached DWARF compilation units."), _("\
+Show the upper bound on the age of cached DWARF compilation units."), _("\
 A higher limit means that cached compilation units will be stored\n\
 in memory longer, and more total memory will be used.  Zero disables\n\
 caching, which can slow down startup."),
 			    NULL,
-			    show_dwarf2_max_cache_age,
-			    &set_dwarf2_cmdlist,
-			    &show_dwarf2_cmdlist);
+			    show_dwarf_max_cache_age,
+			    &set_dwarf_cmdlist,
+			    &show_dwarf_cmdlist);
 
   add_setshow_boolean_cmd ("always-disassemble", class_obscure,
-			   &dwarf2_always_disassemble, _("\
+			   &dwarf_always_disassemble, _("\
 Set whether `info address' always disassembles DWARF expressions."), _("\
 Show whether `info address' always disassembles DWARF expressions."), _("\
 When enabled, DWARF expressions are always printed in an assembly-like\n\
 syntax.  When disabled, expressions will be printed in a more\n\
 conversational style, when possible."),
 			   NULL,
-			   show_dwarf2_always_disassemble,
-			   &set_dwarf2_cmdlist,
-			   &show_dwarf2_cmdlist);
+			   show_dwarf_always_disassemble,
+			   &set_dwarf_cmdlist,
+			   &show_dwarf_cmdlist);
 
-  add_setshow_zuinteger_cmd ("dwarf2-read", no_class, &dwarf2_read_debug, _("\
-Set debugging of the dwarf2 reader."), _("\
-Show debugging of the dwarf2 reader."), _("\
-When enabled (non-zero), debugging messages are printed during dwarf2\n\
+  add_setshow_zuinteger_cmd ("dwarf-read", no_class, &dwarf_read_debug, _("\
+Set debugging of the DWARF reader."), _("\
+Show debugging of the DWARF reader."), _("\
+When enabled (non-zero), debugging messages are printed during DWARF\n\
 reading and symtab expansion.  A value of 1 (one) provides basic\n\
 information.  A value greater than 1 provides more verbose information."),
 			    NULL,
 			    NULL,
 			    &setdebuglist, &showdebuglist);
 
-  add_setshow_zuinteger_cmd ("dwarf2-die", no_class, &dwarf2_die_debug, _("\
-Set debugging of the dwarf2 DIE reader."), _("\
-Show debugging of the dwarf2 DIE reader."), _("\
+  add_setshow_zuinteger_cmd ("dwarf-die", no_class, &dwarf_die_debug, _("\
+Set debugging of the DWARF DIE reader."), _("\
+Show debugging of the DWARF DIE reader."), _("\
 When enabled (non-zero), DIEs are dumped after they are read in.\n\
 The value is the maximum depth to print."),
 			     NULL,

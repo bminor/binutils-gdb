@@ -92,6 +92,26 @@ tui disable
 
 * New options
 
+set debug dwarf-die
+  Renamed from "set debug dwarf2-die".
+show debug dwarf-die
+  Renamed from "show debug dwarf2-die".
+
+set debug dwarf-read
+  Renamed from "set debug dwarf2-read".
+show debug dwarf-read
+  Renamed from "show debug dwarf2-read".
+
+maint set dwarf always-disassemble
+  Renamed from "maint set dwarf2 always-disassemble".
+maint show dwarf always-disassemble
+  Renamed from "maint show dwarf2 always-disassemble".
+
+maint set dwarf max-cache-age
+  Renamed from "maint set dwarf2 max-cache-age".
+maint show dwarf max-cache-age
+  Renamed from "maint show dwarf2 max-cache-age".
+
 set max-completions
 show max-completions
   Set the maximum number of candidates to be considered during

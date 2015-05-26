@@ -1,5 +1,12 @@
 2015-05-26  Doug Evans  <dje@google.com>
 
+	* gdb.dwarf2/dw2-op-call.exp: Update.
+	* gdb.dwarf2/dw4-sig-types.exp: Update.
+	* gdb.dwarf2/implptr.exp: Update.
+	* gdb.mi/mi-cmd-param-changed.exp: Update.
+
+2015-05-26  Doug Evans  <dje@google.com>
+
 	* gdb.python/py-lazy-string.c: New file.
 	* gdb.python/py-lazy-string.exp: New file.
 	* gdb.python/py-prettyprint.c (lazystring) <len>: New member.
