@@ -570,7 +570,7 @@ tui_reg_next_command (char *arg, int from_tty)
       if (group == NULL)
         group = reggroup_next (gdbarch, NULL);
 
-      if (group)
+      if (group != NULL)
         tui_show_registers (group);
     }
 }
