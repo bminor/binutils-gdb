@@ -3223,11 +3223,10 @@ arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     }
 }
 
-/* Return true if we are in the function's epilogue, i.e. after the
-   instruction that destroyed the function's stack frame.  */
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
 
 static int
-thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+thumb_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn, insn2;
@@ -3334,11 +3333,10 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return found_stack_adjust;
 }
 
-/* Return true if we are in the function's epilogue, i.e. after the
-   instruction that destroyed the function's stack frame.  */
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
 
 static int
-arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+arm_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn;
@@ -3346,7 +3344,7 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   CORE_ADDR func_start, func_end;
 
   if (arm_pc_is_thumb (gdbarch, pc))
-    return thumb_in_function_epilogue_p (gdbarch, pc);
+    return thumb_stack_frame_destroyed_p (gdbarch, pc);
 
   if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
     return 0;
@@ -10356,8 +10354,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
 
-  /* Detect whether PC is in function epilogue.  */
-  set_gdbarch_in_function_epilogue_p (gdbarch, arm_in_function_epilogue_p);
+  /* Detect whether PC is at a point where the stack has been destroyed.  */
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, arm_stack_frame_destroyed_p);
 
   /* Skip trampolines.  */
   set_gdbarch_skip_trampoline_code (gdbarch, arm_skip_stub);

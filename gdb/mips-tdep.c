@@ -6693,10 +6693,11 @@ mips_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     return mips32_scan_prologue (gdbarch, pc, limit_pc, NULL, NULL);
 }
 
-/* Check whether the PC is in a function epilogue (32-bit version).
-   This is a helper function for mips_in_function_epilogue_p.  */
+/* Implement the stack_frame_destroyed_p gdbarch method (32-bit version).
+   This is a helper function for mips_stack_frame_destroyed_p.  */
+
 static int
-mips32_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+mips32_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0, func_end = 0;
 
@@ -6731,11 +6732,11 @@ mips32_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-/* Check whether the PC is in a function epilogue (microMIPS version).
-   This is a helper function for mips_in_function_epilogue_p.  */
+/* Implement the stack_frame_destroyed_p gdbarch method (microMIPS version).
+   This is a helper function for mips_stack_frame_destroyed_p.  */
 
 static int
-micromips_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+micromips_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0;
   CORE_ADDR func_end = 0;
@@ -6832,10 +6833,11 @@ micromips_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 1;
 }
 
-/* Check whether the PC is in a function epilogue (16-bit version).
-   This is a helper function for mips_in_function_epilogue_p.  */
+/* Implement the stack_frame_destroyed_p gdbarch method (16-bit version).
+   This is a helper function for mips_stack_frame_destroyed_p.  */
+
 static int
-mips16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+mips16_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0, func_end = 0;
 
@@ -6872,17 +6874,20 @@ mips16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-/* The epilogue is defined here as the area at the end of a function,
+/* Implement the stack_frame_destroyed_p gdbarch method.
+
+   The epilogue is defined here as the area at the end of a function,
    after an instruction which destroys the function's stack frame.  */
+
 static int
-mips_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+mips_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   if (mips_pc_is_mips16 (gdbarch, pc))
-    return mips16_in_function_epilogue_p (gdbarch, pc);
+    return mips16_stack_frame_destroyed_p (gdbarch, pc);
   else if (mips_pc_is_micromips (gdbarch, pc))
-    return micromips_in_function_epilogue_p (gdbarch, pc);
+    return micromips_stack_frame_destroyed_p (gdbarch, pc);
   else
-    return mips32_in_function_epilogue_p (gdbarch, pc);
+    return mips32_stack_frame_destroyed_p (gdbarch, pc);
 }
 
 /* Root of all "set mips "/"show mips " commands.  This will eventually be
@@ -8843,7 +8848,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
 
-  set_gdbarch_in_function_epilogue_p (gdbarch, mips_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, mips_stack_frame_destroyed_p);
 
   set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);

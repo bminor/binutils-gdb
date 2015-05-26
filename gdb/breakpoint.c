@@ -1837,10 +1837,11 @@ update_watchpoint (struct watchpoint *b, int reparse)
       struct gdbarch *frame_arch = get_frame_arch (fi);
       CORE_ADDR frame_pc = get_frame_pc (fi);
 
-      /* If we're in a function epilogue, unwinding may not work
-	 properly, so do not attempt to recreate locations at this
+      /* If we're at a point where the stack has been destroyed
+	 (e.g. in a function epilogue), unwinding may not work
+	 properly. Do not attempt to recreate locations at this
 	 point.  See similar comments in watchpoint_check.  */
-      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+      if (gdbarch_stack_frame_destroyed_p (frame_arch, frame_pc))
 	return;
 
       /* Save the current frame's ID so we can restore it after
@@ -5037,7 +5038,7 @@ watchpoint_check (void *p)
       struct gdbarch *frame_arch = get_frame_arch (frame);
       CORE_ADDR frame_pc = get_frame_pc (frame);
 
-      /* in_function_epilogue_p() returns a non-zero value if we're
+      /* stack_frame_destroyed_p() returns a non-zero value if we're
 	 still in the function but the stack frame has already been
 	 invalidated.  Since we can't rely on the values of local
 	 variables after the stack has been destroyed, we are treating
@@ -5046,7 +5047,7 @@ watchpoint_check (void *p)
 	 frame is in an epilogue - even if they are in some other
 	 frame, our view of the stack is likely to be wrong and
 	 frame_find_by_id could error out.  */
-      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+      if (gdbarch_stack_frame_destroyed_p (frame_arch, frame_pc))
 	return WP_IGNORE;
 
       fr = frame_find_by_id (b->watchpoint_frame);

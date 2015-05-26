@@ -658,10 +658,10 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
   return 0;
 }
 
-/* Implement the in_function_epilogue_p gdbarch method.  */
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
 
 static int
-nios2_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+nios2_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr;
 
@@ -1775,7 +1775,7 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, nios2_return_value);
 
   set_gdbarch_skip_prologue (gdbarch, nios2_skip_prologue);
-  set_gdbarch_in_function_epilogue_p (gdbarch, nios2_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, nios2_stack_frame_destroyed_p);
   set_gdbarch_breakpoint_from_pc (gdbarch, nios2_breakpoint_from_pc);
 
   set_gdbarch_dummy_id (gdbarch, nios2_dummy_id);

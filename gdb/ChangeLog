@@ -1,3 +1,29 @@
+2015-05-26  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* amd64-tdep.c: Replace in_function_epilogue_p with
+	stack_frame_destroyed_p throughout.
+	* arch-utils.c: Ditto.
+	* arch-utils.h: Ditto.
+	* arm-tdep.c: Ditto.
+	* breakpoint.c: Ditto.
+	* gdbarch.sh: Ditto.
+	* hppa-tdep.c: Ditto.
+	* i386-tdep.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* nios2-tdep.c: Ditto.
+	* rs6000-tdep.c: Ditto.
+	* s390-linux-tdep.c: Ditto.
+	* score-tdep.c: Ditto.
+	* sh-tdep.c: Ditto.
+	* sparc-tdep.c: Ditto.
+	* sparc-tdep.h: Ditto.
+	* sparc64-tdep.c: Ditto.
+	* spu-tdep.c: Ditto.
+	* tic6x-tdep.c: Ditto.
+	* tilegx-tdep.c: Ditto.
+	* xstormy16-tdep.c: Ditto.
+	* gdbarch.c, gdbarch.h: Re-generated.
+
 2015-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention 'tui enable' and 'tui disable'.
