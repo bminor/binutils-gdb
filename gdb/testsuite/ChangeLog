@@ -1,3 +1,12 @@
+2015-05-26  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-lazy-string.c: New file.
+	* gdb.python/py-lazy-string.exp: New file.
+	* gdb.python/py-prettyprint.c (lazystring) <len>: New member.
+	(main): Update.  Add estring3.
+	* gdb.python/py-prettyprint.exp: Add tests for strings at address 0.
+	* gdb.python/py-prettyprint.py (pp_ls): Handle length.
+
 2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
 	    Yao Qi  <yao.qi@linaro.org>
 

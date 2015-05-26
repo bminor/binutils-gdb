@@ -1,3 +1,10 @@
+2015-05-26  Doug Evans  <dje@google.com>
+
+	PR python/18438
+	* python/py-lazy-string.c (stpy_convert_to_value): Use
+	gdbpy_gdb_memory_error not PyExc_MemoryError.
+	(gdbpy_create_lazy_string_object): Ditto.
+
 2015-05-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-regs.c (tui_reg_next_command): Compare against NULL.
