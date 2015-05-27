@@ -1,5 +1,11 @@
 2015-05-26  Doug Evans  <dje@google.com>
 
+	PR c++/18141, c++/18417.
+	* cp-support.c (cp_lookup_rtti_type): Handle the case of NAME being
+	a typedef.
+
+2015-05-26  Doug Evans  <dje@google.com>
+
 	* NEWS: Add entries for command renamings.
 	* dwarf2read.c (dwarf_read_debug): Renamed from dwarf2_read_debug.
 	All uses updated.
