@@ -1,5 +1,10 @@
 2015-05-27  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_record_data_proc_simd_fp): Return
+	AARCH64_RECORD_UNKNOWN for unknown instruction encoding.
+
+2015-05-27  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_record_branch_except_sys): Split lines
 	before operator &&.
 	(aarch64_record_load_store): Likewise.
