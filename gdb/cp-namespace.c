@@ -37,6 +37,7 @@ static struct symbol *
 			     const char *nested_name,
 			     const char *concatenated_name,
 			     const struct block *block,
+			     const domain_enum domain,
 			     int basic_lookup, int is_in_anonymous);
 
 static struct type *cp_lookup_transparent_type_loop (const char *name,
@@ -308,7 +309,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 	return NULL;
 
       /* Look for symbol NAME in this class.  */
-      sym = cp_lookup_nested_symbol (type, name, block);
+      sym = cp_lookup_nested_symbol (type, name, block, domain);
     }
 
   return sym;
@@ -370,8 +371,8 @@ cp_search_static_and_baseclasses (const char *name,
   /* Look for a symbol named NESTED in this class.
      The caller is assumed to have already have done a basic lookup of NAME.
      So we pass zero for BASIC_LOOKUP to cp_lookup_nested_symbol_1 here.  */
-  sym = cp_lookup_nested_symbol_1 (klass_type, nested, name, block, 0,
-				   is_in_anonymous);
+  sym = cp_lookup_nested_symbol_1 (klass_type, nested, name, block, domain,
+				   0, is_in_anonymous);
 
   do_cleanups (cleanup);
   return sym;
@@ -906,7 +907,8 @@ cp_find_type_baseclass_by_name (struct type *parent_type, const char *name)
 
 static struct symbol *
 find_symbol_in_baseclass (struct type *parent_type, const char *name,
-			  const struct block *block, int is_in_anonymous)
+			  const struct block *block, const domain_enum domain,
+			  int is_in_anonymous)
 {
   int i;
   struct symbol *sym;
@@ -931,7 +933,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
       xsnprintf (concatenated_name, len, "%s::%s", base_name, name);
 
       sym = cp_lookup_nested_symbol_1 (base_type, name, concatenated_name,
-				       block, 1, is_in_anonymous);
+				       block, domain, 1, is_in_anonymous);
       if (sym != NULL)
 	break;
     }
@@ -940,8 +942,8 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
   return sym;
 }
 
-/* Helper function to look up NESTED_NAME in CONTAINER_TYPE within the
-   context of BLOCK.
+/* Helper function to look up NESTED_NAME in CONTAINER_TYPE and in DOMAIN
+   and within the context of BLOCK.
    NESTED_NAME may have scope ("::").
    CONTAINER_TYPE needn't have been "check_typedef'd" yet.
    CONCATENATED_NAME is the fully scoped spelling of NESTED_NAME, it is
@@ -957,6 +959,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
 			   const char *nested_name,
 			   const char *concatenated_name,
 			   const struct block *block,
+			   const domain_enum domain,
 			   int basic_lookup, int is_in_anonymous)
 {
   struct symbol *sym;
@@ -970,7 +973,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
 
   if (basic_lookup)
     {
-      sym = cp_basic_lookup_symbol (concatenated_name, block, VAR_DOMAIN,
+      sym = cp_basic_lookup_symbol (concatenated_name, block, domain,
 				    is_in_anonymous);
       if (sym != NULL)
 	return sym;
@@ -982,7 +985,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
      C++ compliant and more assumptions could make it too magic.  */
 
   /* First search in this symtab, what we want is possibly there.  */
-  sym = lookup_symbol_in_static_block (concatenated_name, block, VAR_DOMAIN);
+  sym = lookup_symbol_in_static_block (concatenated_name, block, domain);
   if (sym != NULL)
     return sym;
 
@@ -993,7 +996,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
      which we just searched.  */
   if (!is_in_anonymous)
     {
-      sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
+      sym = lookup_static_symbol (concatenated_name, domain);
       if (sym != NULL)
 	return sym;
     }
@@ -1003,7 +1006,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
   if (TYPE_N_BASECLASSES (container_type) > 0)
     {
       sym = find_symbol_in_baseclass (container_type, nested_name, block,
-				      is_in_anonymous);
+				      domain, is_in_anonymous);
       if (sym != NULL)
 	return sym;
     }
@@ -1013,12 +1016,14 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
 
 /* Look up a symbol named NESTED_NAME that is nested inside the C++
    class or namespace given by PARENT_TYPE, from within the context
-   given by BLOCK.  Return NULL if there is no such nested symbol.  */
+   given by BLOCK, and in DOMAIN.
+   Return NULL if there is no such nested symbol.  */
 
 struct symbol *
 cp_lookup_nested_symbol (struct type *parent_type,
 			 const char *nested_name,
-			 const struct block *block)
+			 const struct block *block,
+			 const domain_enum domain)
 {
   /* type_name_no_tag_or_error provides better error reporting using the
      original type.  */
@@ -1031,9 +1036,10 @@ cp_lookup_nested_symbol (struct type *parent_type,
       const char *type_name = type_name_no_tag (saved_parent_type);
 
       fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_nested_symbol (%s, %s, %s)\n",
+			  "cp_lookup_nested_symbol (%s, %s, %s, %s)\n",
 			  type_name != NULL ? type_name : "unnamed",
-			  nested_name, host_address_to_string (block));
+			  nested_name, host_address_to_string (block),
+			  domain_name (domain));
     }
 
   switch (TYPE_CODE (parent_type))
@@ -1060,8 +1066,8 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	is_in_anonymous = cp_is_in_anonymous (concatenated_name);
 
 	sym = cp_lookup_nested_symbol_1 (parent_type, nested_name,
-					 concatenated_name, block, 1,
-					 is_in_anonymous);
+					 concatenated_name, block, domain,
+					 1, is_in_anonymous);
 
 	if (symbol_lookup_debug)
 	  {

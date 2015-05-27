@@ -1,5 +1,12 @@
 2015-05-27  Doug Evans  <dje@google.com>
 
+	* cp-namespace.c (cp_lookup_nested_symbol): New arg "domain".
+	All callers updated.
+	(cp_lookup_nested_symbol_1, find_symbol_in_baseclass): Ditto.
+	* cp-support.h (cp_lookup_nested_symbol): Update.
+
+2015-05-27  Doug Evans  <dje@google.com>
+
 	PR symtab/18258
 	* block.c (block_find_symbol): New function.
 	(block_find_non_opaque_type): Ditto.
