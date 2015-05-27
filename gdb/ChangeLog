@@ -1,5 +1,11 @@
 2015-05-27  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (record_line_ftype): New typedef.
+	(check_line_address): New function.
+	(dwarf_decode_lines_1): Call it.
+
+2015-05-27  Doug Evans  <dje@google.com>
+
 	* NEWS: Mention "set debug dwarf-line".
 	* dwarf2read.c (dwarf_line_debug): New static global.
 	(add_include_dir): Add debug dwarf-line support.
