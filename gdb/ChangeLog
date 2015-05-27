@@ -1,5 +1,18 @@
 2015-05-27  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (lnp_state_machine): New typedef.
+	(lnp_reader_state): New typedef.
+	(dwarf_record_line_1): Renamed from dwarf_record_line.
+	All callers updated.
+	(dwarf_record_line): New function.
+	(init_lnp_state_machine): New function.
+	(check_line_address): Replace p_record_line parameter with state.
+	All callers updated.
+	(dwarf_decode_lines_1): Call dwarf_record_line, init_lnp_state_machine.
+	Update to record state in lnp_state_machine.
+
+2015-05-27  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (record_line_ftype): New typedef.
 	(check_line_address): New function.
 	(dwarf_decode_lines_1): Call it.
