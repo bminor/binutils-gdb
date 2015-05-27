@@ -1885,7 +1885,8 @@ do_size:
       if (use_plt_got
 	  && h != NULL
 	  && h->plt.refcount > 0
-	  && ((info->flags & DF_BIND_NOW) || h->got.refcount > 0)
+	  && (((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
+	      || h->got.refcount > 0)
 	  && htab->plt_got == NULL)
 	{
 	  /* Create the GOT procedure linkage table.  */
@@ -2323,7 +2324,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       bfd_boolean use_plt_got;
 
-      if ((info->flags & DF_BIND_NOW))
+      if ((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
 	{
 	  /* Don't use the regular PLT for DF_BIND_NOW. */
 	  h->plt.offset = (bfd_vma) -1;
