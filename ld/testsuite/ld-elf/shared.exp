@@ -267,6 +267,12 @@ set build_tests {
   {"Build pr16457"
    "tmpdir/libpr16452b.so -Wl,-rpath=tmpdir" ""
    {pr16452b.c} {{objdump {-p} pr16457.od}} "pr16457"}
+  {"Build libpr18458a.so"
+   "-shared -Wl,-z,now" "-fPIC"
+   {pr18458a.c} {} "libpr18458a.so"}
+  {"Build libpr18458b.so"
+   "-shared -Wl,-z,now tmpdir/libpr18458a.so" "-fPIC"
+   {pr18458b.c} {} "libpr18458b.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -417,6 +423,9 @@ set run_tests {
     {"Run pr2404"
      "tmpdir/pr2404b.o tmpdir/libpr2404a.so" ""
      {dummy.c} "pr2404" "pr2404.out"}
+    {"Run pr18458"
+     "tmpdir/libpr18458a.so tmpdir/libpr18458b.so -z now" ""
+     {pr18458c.c} "pr18458" "pass.out"}
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.

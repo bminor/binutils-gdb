@@ -3004,7 +3004,8 @@ classify_inner_name (struct parser_state *par_state,
     return ERROR;
 
   copy = copy_name (yylval.ssym.stoken);
-  yylval.ssym.sym = cp_lookup_nested_symbol (type, copy, block);
+  /* N.B. We assume the symbol can only be in VAR_DOMAIN.  */
+  yylval.ssym.sym = cp_lookup_nested_symbol (type, copy, block, VAR_DOMAIN);
 
   /* If no symbol was found, search for a matching base class named
      COPY.  This will allow users to enter qualified names of class members

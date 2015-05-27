@@ -3592,7 +3592,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
 	      record_buf[0] = AARCH64_CPSR_REGNUM;
 	    }
 	  /* Floating point - integer conversions instructions.  */
-	  if (insn_bits12_15 == 0x00)
+	  else if (insn_bits12_15 == 0x00)
 	    {
 	      /* Convert float to integer instruction.  */
 	      if (!(opcode >> 1) || ((opcode >> 1) == 0x02 && !rmode))
@@ -3621,8 +3621,14 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
 		  else
 		    record_buf[0] = reg_rd + AARCH64_V0_REGNUM;
 		}
+	      else
+		return AARCH64_RECORD_UNKNOWN;
             }
+	  else
+	    return AARCH64_RECORD_UNKNOWN;
         }
+      else
+	return AARCH64_RECORD_UNKNOWN;
     }
   else if ((insn_bits28_31 & 0x09) == 0x00 && insn_bits24_27 == 0x0e)
     {

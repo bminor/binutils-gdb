@@ -1,3 +1,9 @@
+2015-05-27  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/opaque-type-lookup-2.c: New file.
+	* gdb.dwarf2/opaque-type-lookup.c: New file.
+	* gdb.dwarf2/opaque-type-lookup.exp: New file.
+
 2015-05-26  Doug Evans  <dje@google.com>
 
 	* gdb.cp/iostream.cc: New file.

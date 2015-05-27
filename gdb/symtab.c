@@ -2804,12 +2804,39 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
 
   bv = COMPUNIT_BLOCKVECTOR (cust);
   block = BLOCKVECTOR_BLOCK (bv, block_index);
-  sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
-  if (!sym)
+  sym = block_find_symbol (block, name, STRUCT_DOMAIN,
+			   block_find_non_opaque_type, NULL);
+  if (sym == NULL)
     error_in_psymtab_expansion (block_index, name, cust);
+  gdb_assert (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)));
+  return SYMBOL_TYPE (sym);
+}
 
-  if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-    return SYMBOL_TYPE (sym);
+/* Subroutine of basic_lookup_transparent_type to simplify it.
+   Look up the non-opaque definition of NAME in BLOCK_INDEX of OBJFILE.
+   BLOCK_INDEX is either GLOBAL_BLOCK or STATIC_BLOCK.  */
+
+static struct type *
+basic_lookup_transparent_type_1 (struct objfile *objfile, int block_index,
+				 const char *name)
+{
+  const struct compunit_symtab *cust;
+  const struct blockvector *bv;
+  const struct block *block;
+  const struct symbol *sym;
+
+  ALL_OBJFILE_COMPUNITS (objfile, cust)
+    {
+      bv = COMPUNIT_BLOCKVECTOR (cust);
+      block = BLOCKVECTOR_BLOCK (bv, block_index);
+      sym = block_find_symbol (block, name, STRUCT_DOMAIN,
+			       block_find_non_opaque_type, NULL);
+      if (sym != NULL)
+	{
+	  gdb_assert (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)));
+	  return SYMBOL_TYPE (sym);
+	}
+    }
 
   return NULL;
 }
@@ -2837,16 +2864,9 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
-    ALL_OBJFILE_COMPUNITS (objfile, cust)
-      {
-	bv = COMPUNIT_BLOCKVECTOR (cust);
-	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
-	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-	  {
-	    return SYMBOL_TYPE (sym);
-	  }
-      }
+    t = basic_lookup_transparent_type_1 (objfile, GLOBAL_BLOCK, name);
+    if (t)
+      return t;
   }
 
   ALL_OBJFILES (objfile)
@@ -2865,16 +2885,9 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
-    ALL_OBJFILE_COMPUNITS (objfile, cust)
-      {
-	bv = COMPUNIT_BLOCKVECTOR (cust);
-	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
-	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-	  {
-	    return SYMBOL_TYPE (sym);
-	  }
-      }
+    t = basic_lookup_transparent_type_1 (objfile, STATIC_BLOCK, name);
+    if (t)
+      return t;
   }
 
   ALL_OBJFILES (objfile)

@@ -1,3 +1,57 @@
+2015-05-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (lnp_state_machine): New typedef.
+	(lnp_reader_state): New typedef.
+	(dwarf_record_line_1): Renamed from dwarf_record_line.
+	All callers updated.
+	(dwarf_record_line): New function.
+	(init_lnp_state_machine): New function.
+	(check_line_address): Replace p_record_line parameter with state.
+	All callers updated.
+	(dwarf_decode_lines_1): Call dwarf_record_line, init_lnp_state_machine.
+	Update to record state in lnp_state_machine.
+
+2015-05-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (record_line_ftype): New typedef.
+	(check_line_address): New function.
+	(dwarf_decode_lines_1): Call it.
+
+2015-05-27  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention "set debug dwarf-line".
+	* dwarf2read.c (dwarf_line_debug): New static global.
+	(add_include_dir): Add debug dwarf-line support.
+	(add_file_name, dwarf_record_line, dwarf_finish_line): Ditto.
+	(_initialize_dwarf2_read): New parameter "debug dwarf-line".
+
+2015-05-27  Doug Evans  <dje@google.com>
+
+	* cp-namespace.c (cp_lookup_nested_symbol): New arg "domain".
+	All callers updated.
+	(cp_lookup_nested_symbol_1, find_symbol_in_baseclass): Ditto.
+	* cp-support.h (cp_lookup_nested_symbol): Update.
+
+2015-05-27  Doug Evans  <dje@google.com>
+
+	PR symtab/18258
+	* block.c (block_find_symbol): New function.
+	(block_find_non_opaque_type): Ditto.
+	(block_find_non_opaque_type_preferred): Ditto.
+	* block.h (block_symbol_matcher_ftype): New typedef.
+	(block_find_symbol): Declare.
+	(block_find_non_opaque_type): Ditto.
+	(block_find_non_opaque_type_preferred): Ditto.
+	* dwarf2read.c (dw2_lookup_symbol): Call block_find_symbol.
+	* psymtab.c (psym_lookup_symbol): Ditto.
+	* symtab.c (basic_lookup_transparent_type_1): New function.
+	(basic_lookup_transparent_type): Call it.
+
+2015-05-27  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_record_data_proc_simd_fp): Return
+	AARCH64_RECORD_UNKNOWN for unknown instruction encoding.
+
 2015-05-27  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_record_branch_except_sys): Split lines

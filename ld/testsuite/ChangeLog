@@ -1,3 +1,13 @@
+2015-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18458
+	* ld-elf/shared.exp (build_tests): Build libpr18458a.so and
+	libpr18458b.so.
+	(run_tests): Run pr18458 test.
+	* ld-elf/pr18458a.c: New file.
+	* ld-elf/pr18458b.c: Likewise.
+	* ld-elf/pr18458c.c: Likewise.
+
 2015-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp: Run PR ld/17689 tests with -z now.
