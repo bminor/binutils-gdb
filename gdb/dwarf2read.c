@@ -3665,23 +3665,25 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 
       while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
 	{
-	  struct symbol *sym = NULL;
+	  struct symbol *sym, *with_opaque = NULL;
 	  struct compunit_symtab *stab = dw2_instantiate_symtab (per_cu);
 	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
 	  struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
+	  sym = block_find_symbol (block, name, domain,
+				   block_find_non_opaque_type_preferred,
+				   &with_opaque);
+
 	  /* Some caution must be observed with overloaded functions
 	     and methods, since the index will not contain any overload
 	     information (but NAME might contain it).  */
-	  sym = block_lookup_symbol (block, name, domain);
 
-	  if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
-	    {
-	      if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-		return stab;
-
-	      stab_best = stab;
-	    }
+	  if (sym != NULL
+	      && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	    return stab;
+	  if (with_opaque != NULL
+	      && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	    stab_best = stab;
 
 	  /* Keep looking through other CUs.  */
 	}

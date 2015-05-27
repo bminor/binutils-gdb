@@ -1,3 +1,18 @@
+2015-05-27  Doug Evans  <dje@google.com>
+
+	PR symtab/18258
+	* block.c (block_find_symbol): New function.
+	(block_find_non_opaque_type): Ditto.
+	(block_find_non_opaque_type_preferred): Ditto.
+	* block.h (block_symbol_matcher_ftype): New typedef.
+	(block_find_symbol): Declare.
+	(block_find_non_opaque_type): Ditto.
+	(block_find_non_opaque_type_preferred): Ditto.
+	* dwarf2read.c (dw2_lookup_symbol): Call block_find_symbol.
+	* psymtab.c (psym_lookup_symbol): Ditto.
+	* symtab.c (basic_lookup_transparent_type_1): New function.
+	(basic_lookup_transparent_type): Call it.
+
 2015-05-27  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_record_data_proc_simd_fp): Return

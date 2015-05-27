@@ -516,7 +516,7 @@ psym_lookup_symbol (struct objfile *objfile,
     if (!ps->readin && lookup_partial_symbol (objfile, ps, name,
 					      psymtab_index, domain))
       {
-	struct symbol *sym = NULL;
+	struct symbol *sym, *with_opaque = NULL;
 	struct compunit_symtab *stab = psymtab_to_symtab (objfile, ps);
 	/* Note: While psymtab_to_symtab can return NULL if the partial symtab
 	   is empty, we can assume it won't here because lookup_partial_symbol
@@ -524,18 +524,20 @@ psym_lookup_symbol (struct objfile *objfile,
 	const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
 	struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
+	sym = block_find_symbol (block, name, domain,
+				 block_find_non_opaque_type_preferred,
+				 &with_opaque);
+
 	/* Some caution must be observed with overloaded functions
-	   and methods, since the psymtab will not contain any overload
+	   and methods, since the index will not contain any overload
 	   information (but NAME might contain it).  */
-	sym = block_lookup_symbol (block, name, domain);
 
-	if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
-	  {
-	    if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-	      return stab;
-
-	    stab_best = stab;
-	  }
+	if (sym != NULL
+	    && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	  return stab;
+	if (with_opaque != NULL
+	    && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	  stab_best = stab;
 
 	/* Keep looking through other psymtabs.  */
       }

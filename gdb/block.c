@@ -797,3 +797,50 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 
   return NULL;
 }
+
+/* See block.h.  */
+
+struct symbol *
+block_find_symbol (const struct block *block, const char *name,
+		   const domain_enum domain,
+		   block_symbol_matcher_ftype *matcher, void *data)
+{
+  struct block_iterator iter;
+  struct symbol *sym;
+
+  /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
+  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL
+	      || BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL);
+
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+    {
+      /* MATCHER is deliberately called second here so that it never sees
+	 a non-domain-matching symbol.  */
+      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				 SYMBOL_DOMAIN (sym), domain)
+	  && matcher (sym, data))
+	return sym;
+    }
+  return NULL;
+}
+
+/* See block.h.  */
+
+int
+block_find_non_opaque_type (struct symbol *sym, void *data)
+{
+  return !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym));
+}
+
+/* See block.h.  */
+
+int
+block_find_non_opaque_type_preferred (struct symbol *sym, void *data)
+{
+  struct symbol **best = data;
+
+  if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
+    return 1;
+  *best = sym;
+  return 0;
+}
