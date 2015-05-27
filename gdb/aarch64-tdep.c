@@ -3006,9 +3006,9 @@ aarch64_record_branch_except_sys (insn_decode_record *aarch64_insn_r)
       /* Exception generation instructions. */
       if (insn_bits24_27 == 0x04)
 	{
-	  if (!bits (aarch64_insn_r->aarch64_insn, 2, 4) &&
-	      !bits (aarch64_insn_r->aarch64_insn, 21, 23) &&
-	      bits (aarch64_insn_r->aarch64_insn, 0, 1) == 0x01)
+	  if (!bits (aarch64_insn_r->aarch64_insn, 2, 4)
+	      && !bits (aarch64_insn_r->aarch64_insn, 21, 23)
+	      && bits (aarch64_insn_r->aarch64_insn, 0, 1) == 0x01)
 	    {
 	      ULONGEST svc_number;
 
@@ -3410,8 +3410,8 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
         }
     }
   /* Load/store register (register offset) instructions.  */
-  else if ((insn_bits24_27 & 0x0b) == 0x08 && insn_bits28_29 == 0x03 &&
-	   insn_bits10_11 == 0x02 && insn_bit21)
+  else if ((insn_bits24_27 & 0x0b) == 0x08 && insn_bits28_29 == 0x03
+	   && insn_bits10_11 == 0x02 && insn_bit21)
     {
       if (record_debug)
 	{
@@ -3457,8 +3457,8 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
         }
     }
   /* Load/store register (immediate and unprivileged) instructions.  */
-  else if ((insn_bits24_27 & 0x0b) == 0x08 && insn_bits28_29 == 0x03 &&
-          !insn_bit21)
+  else if ((insn_bits24_27 & 0x0b) == 0x08 && insn_bits28_29 == 0x03
+	   && !insn_bit21)
     {
       if (record_debug)
 	{
