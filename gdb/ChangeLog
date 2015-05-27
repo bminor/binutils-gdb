@@ -1,5 +1,13 @@
 2015-05-27  Doug Evans  <dje@google.com>
 
+	* NEWS: Mention "set debug dwarf-line".
+	* dwarf2read.c (dwarf_line_debug): New static global.
+	(add_include_dir): Add debug dwarf-line support.
+	(add_file_name, dwarf_record_line, dwarf_finish_line): Ditto.
+	(_initialize_dwarf2_read): New parameter "debug dwarf-line".
+
+2015-05-27  Doug Evans  <dje@google.com>
+
 	* cp-namespace.c (cp_lookup_nested_symbol): New arg "domain".
 	All callers updated.
 	(cp_lookup_nested_symbol_1, find_symbol_in_baseclass): Ditto.

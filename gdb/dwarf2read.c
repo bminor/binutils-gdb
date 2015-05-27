@@ -84,6 +84,9 @@ static unsigned int dwarf_read_debug = 0;
 /* When non-zero, dump DIEs after they are read in.  */
 static unsigned int dwarf_die_debug = 0;
 
+/* When non-zero, dump line number entries as they are read in.  */
+static unsigned int dwarf_line_debug = 0;
+
 /* When non-zero, cross-check physname against demangler.  */
 static int check_physname = 0;
 
@@ -17152,6 +17155,10 @@ free_line_header_voidp (void *arg)
 static void
 add_include_dir (struct line_header *lh, const char *include_dir)
 {
+  if (dwarf_line_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "Adding dir %u: %s\n",
+			lh->num_include_dirs + 1, include_dir);
+
   /* Grow the array if necessary.  */
   if (lh->include_dirs_size == 0)
     {
@@ -17180,6 +17187,10 @@ add_file_name (struct line_header *lh,
                unsigned int length)
 {
   struct file_entry *fe;
+
+  if (dwarf_line_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "Adding file %u: %s\n",
+			lh->num_file_names + 1, name);
 
   /* Grow the array if necessary.  */
   if (lh->file_names_size == 0)
@@ -17529,6 +17540,14 @@ dwarf_record_line (struct gdbarch *gdbarch, struct subfile *subfile,
 {
   CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
 
+  if (dwarf_line_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Recording line %u, file %s, address %s\n",
+			  line, lbasename (subfile->name),
+			  paddress (gdbarch, address));
+    }
+
   (*p_record_line) (subfile, line, addr);
 }
 
@@ -17541,8 +17560,18 @@ static void
 dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
 		   CORE_ADDR address, record_line_ftype p_record_line)
 {
-  if (subfile != NULL)
-    dwarf_record_line (gdbarch, subfile, 0, address, p_record_line);
+  if (subfile == NULL)
+    return;
+
+  if (dwarf_line_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Finishing current line, file %s, address %s\n",
+			  lbasename (subfile->name),
+			  paddress (gdbarch, address));
+    }
+
+  dwarf_record_line (gdbarch, subfile, 0, address, p_record_line);
 }
 
 /* Subroutine of dwarf_decode_lines to simplify it.
@@ -23317,6 +23346,16 @@ Set debugging of the DWARF DIE reader."), _("\
 Show debugging of the DWARF DIE reader."), _("\
 When enabled (non-zero), DIEs are dumped after they are read in.\n\
 The value is the maximum depth to print."),
+			     NULL,
+			     NULL,
+			     &setdebuglist, &showdebuglist);
+
+  add_setshow_zuinteger_cmd ("dwarf-line", no_class, &dwarf_line_debug, _("\
+Set debugging of the dwarf line reader."), _("\
+Show debugging of the dwarf line reader."), _("\
+When enabled (non-zero), line number entries are dumped as they are read in.\n\
+A value of 1 (one) provides basic information.\n\
+A value greater than 1 provides more verbose information."),
 			     NULL,
 			     NULL,
 			     &setdebuglist, &showdebuglist);

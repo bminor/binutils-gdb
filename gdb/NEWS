@@ -112,6 +112,10 @@ maint set dwarf max-cache-age
 maint show dwarf max-cache-age
   Renamed from "maint show dwarf2 max-cache-age".
 
+set debug dwarf-line
+show debug dwarf-line
+  Control display of debugging info regarding DWARF line processing.
+
 set max-completions
 show max-completions
   Set the maximum number of candidates to be considered during

@@ -1,3 +1,7 @@
+2015-05-27  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Debugging Output): Mention set/show debug dwarf-line.
+
 2015-05-26  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Debugging Output): Update for DWARF "set debug"

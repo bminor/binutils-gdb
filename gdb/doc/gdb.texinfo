@@ -23417,6 +23417,14 @@ The value is the number of nesting levels to print.
 A value of zero turns off the display.
 @item show debug dwarf-die
 Show the current state of DWARF DIE debugging.
+@item set debug dwarf-line
+@cindex DWARF Line Tables
+Turns on or off display of debugging messages related to reading
+DWARF line tables.  The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
+@item show debug dwarf-line
+Show the current state of DWARF line table debugging.
 @item set debug dwarf-read
 @cindex DWARF Reading
 Turns on or off display of debugging messages related to reading
