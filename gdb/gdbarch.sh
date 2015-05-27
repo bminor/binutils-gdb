@@ -627,14 +627,14 @@ m:int:in_solib_return_trampoline:CORE_ADDR pc, const char *name:pc, name::generi
 
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
-# as the first action in a funtion's epilogue.  in_function_epilogue_p()
+# as the first action in a function's epilogue.  stack_frame_destroyed_p()
 # is defined to return a non-zero value if either the given addr is one
 # instruction after the stack destroying instruction up to the trailing
 # return instruction or if we can figure out that the stack frame has
 # already been invalidated regardless of the value of addr.  Targets
 # which don't suffer from that problem could just let this functionality
 # untouched.
-m:int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue_p::0
+m:int:stack_frame_destroyed_p:CORE_ADDR addr:addr:0:generic_stack_frame_destroyed_p::0
 # Process an ELF symbol in the minimal symbol table in a backend-specific
 # way.  Normally this hook is supposed to do nothing, however if required,
 # then this hook can be used to apply tranformations to symbols that are

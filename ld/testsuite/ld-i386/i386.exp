@@ -406,6 +406,14 @@ if { [isnative]
 	    "pr17689.so" \
 	] \
 	[list \
+	    "Build pr17689.so with -z now" \
+	    "-shared -Wl,-z,now" \
+	    "-fPIC" \
+	    { pr17689a.c } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now.so" \
+	] \
+	[list \
 	    "Build pr17689ver.so" \
 	    "-shared -Wl,--version-script,pr17689a.t" \
 	    "-fPIC" \
@@ -428,6 +436,14 @@ if { [isnative]
 	    { dummy.c } \
 	    {{readelf {-Wr} pr17689.rd}} \
 	    "pr17689" \
+	] \
+	[list \
+	    "Build pr17689 with PIE, -z now and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie -Wl,-z,now" \
+	    "" \
+	    { dummy.c } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now" \
 	] \
 	[list \
 	    "Build pr17689ver with PIE and GOTOFF" \
@@ -481,6 +497,14 @@ if { [isnative]
 	    "" \
 	    { dummy.c } \
 	    "pr17689" \
+	    "pr17689.out" \
+	] \
+	[list \
+	    "Run pr17689 with PIE, -z now and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie -z now" \
+	    "" \
+	    { dummy.c } \
+	    "pr17689now" \
 	    "pr17689.out" \
 	] \
 	[list \

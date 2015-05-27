@@ -70,6 +70,15 @@ enum compile_i_scope_types
     /* Do not wrap the expression,
        it has to provide function "_gdb_expr" on its own.  */
     COMPILE_I_RAW_SCOPE,
+
+    /* A printable expression scope.  Wrap an expression into a scope
+       suitable for the "compile print" command.  It uses the generic
+       function name "_gdb_expr".  COMPILE_I_PRINT_ADDRESS_SCOPE variant
+       is the usual one, taking address of the object.
+       COMPILE_I_PRINT_VALUE_SCOPE is needed for arrays where the array
+       name already specifies its address.  See get_out_value_type.  */
+    COMPILE_I_PRINT_ADDRESS_SCOPE,
+    COMPILE_I_PRINT_VALUE_SCOPE,
   };
 
 /* Just in case they're not defined in stdio.h.  */
@@ -397,6 +406,7 @@ struct command_line
 	struct
 	  {
 	    enum compile_i_scope_types scope;
+	    void *scope_data;
 	  }
 	compile;
       }

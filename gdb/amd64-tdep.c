@@ -2719,12 +2719,14 @@ static const struct frame_base amd64_frame_base =
 
 /* Normal frames, but in a function epilogue.  */
 
-/* The epilogue is defined here as the 'ret' instruction, which will
+/* Implement the stack_frame_destroyed_p gdbarch method.
+
+   The epilogue is defined here as the 'ret' instruction, which will
    follow any instruction such as 'leave' or 'pop %ebp' that destroys
    the function's stack frame.  */
 
 static int
-amd64_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+amd64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
   struct compunit_symtab *cust;
@@ -2748,8 +2750,8 @@ amd64_epilogue_frame_sniffer (const struct frame_unwind *self,
 			      void **this_prologue_cache)
 {
   if (frame_relative_level (this_frame) == 0)
-    return amd64_in_function_epilogue_p (get_frame_arch (this_frame),
-					 get_frame_pc (this_frame));
+    return amd64_stack_frame_destroyed_p (get_frame_arch (this_frame),
+					  get_frame_pc (this_frame));
   else
     return 0;
 }

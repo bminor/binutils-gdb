@@ -1,3 +1,8 @@
+2015-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Remove Disp32 from AMD64 direct call/jmp.
+	* i386-init.h: Regenerated.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386

@@ -881,8 +881,7 @@ spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
     }
 }
 
-/* Return true if we are in the function's epilogue, i.e. after the
-   instruction that destroyed the function's stack frame.
+/* Implement the stack_frame_destroyed_p gdbarch method.
 
    1) scan forward from the point of execution:
        a) If you find an instruction that modifies the stack pointer
@@ -899,7 +898,7 @@ spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
            limit for the size of an epilogue.  */
 
 static int
-spu_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+spu_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
@@ -2785,7 +2784,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_virtual_frame_pointer (gdbarch, spu_virtual_frame_pointer);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, spu_skip_prologue);
-  set_gdbarch_in_function_epilogue_p (gdbarch, spu_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, spu_stack_frame_destroyed_p);
 
   /* Cell/B.E. cross-architecture unwinder support.  */
   frame_unwind_prepend_unwinder (gdbarch, &spu2ppu_unwind);

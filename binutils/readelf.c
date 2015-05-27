@@ -6735,7 +6735,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
       if (end > aux->info + aux->info_size)
 	end = aux->info + aux->info_size;
       for (dp = head + 8; dp < end;)
-	dp = unw_decode (dp, in_body, & in_body);
+	dp = unw_decode (dp, in_body, & in_body, end);
     }
 
   free (aux->funtab);

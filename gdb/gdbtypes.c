@@ -1004,6 +1004,45 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
   return 1;
 }
 
+/* Assuming that TYPE is a discrete type and VAL is a valid integer
+   representation of a value of this type, save the corresponding
+   position number in POS.
+
+   Its differs from VAL only in the case of enumeration types.  In
+   this case, the position number of the value of the first listed
+   enumeration literal is zero; the position number of the value of
+   each subsequent enumeration literal is one more than that of its
+   predecessor in the list.
+
+   Return 1 if the operation was successful.  Return zero otherwise,
+   in which case the value of POS is unmodified.
+*/
+
+int
+discrete_position (struct type *type, LONGEST val, LONGEST *pos)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_ENUM)
+    {
+      int i;
+
+      for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+        {
+          if (val == TYPE_FIELD_ENUMVAL (type, i))
+	    {
+	      *pos = i;
+	      return 1;
+	    }
+        }
+      /* Invalid enumeration value.  */
+      return 0;
+    }
+  else
+    {
+      *pos = val;
+      return 1;
+    }
+}
+
 /* Create an array type using either a blank type supplied in
    RESULT_TYPE, or creating a new type, inheriting the objfile from
    RANGE_TYPE.

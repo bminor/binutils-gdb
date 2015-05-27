@@ -436,7 +436,8 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 static void
 push (int indent, struct ui_file *stream, ULONGEST l)
 {
-  fprintfi_filtered (indent, stream, "__gdb_stack[++__gdb_tos] = %s;\n",
+  fprintfi_filtered (indent, stream,
+		     "__gdb_stack[++__gdb_tos] = (" GCC_UINTPTR ") %s;\n",
 		     hex_string (l));
 }
 
@@ -520,7 +521,8 @@ pushf_register_address (int indent, struct ui_file *stream,
   struct cleanup *cleanups = make_cleanup (xfree, regname);
 
   registers_used[regnum] = 1;
-  pushf (indent, stream, "&" COMPILE_I_SIMPLE_REGISTER_ARG_NAME	 "->%s",
+  pushf (indent, stream,
+	 "(" GCC_UINTPTR ") &" COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
 	 regname);
 
   do_cleanups (cleanups);
@@ -544,7 +546,8 @@ pushf_register (int indent, struct ui_file *stream,
     pushf (indent, stream, COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
 	   regname);
   else
-    pushf (indent, stream, COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s + %s",
+    pushf (indent, stream,
+	   COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s + (" GCC_UINTPTR ") %s",
 	   regname, hex_string (offset));
 
   do_cleanups (cleanups);
@@ -605,7 +608,8 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 
   ++scope;
 
-  fprintfi_filtered (indent, stream, "%s%s;\n", type_name, result_name);
+  fprintfi_filtered (indent, stream, "__attribute__ ((unused)) %s %s;\n",
+		     type_name, result_name);
   fprintfi_filtered (indent, stream, "{\n");
   indent += 2;
 
@@ -899,7 +903,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 		       (long) (op_ptr - base));
 
 	    do_compile_dwarf_expr_to_c (indent, stream,
-					"void *", fb_name,
+					GCC_UINTPTR, fb_name,
 					sym, pc,
 					arch, registers_used, addr_size,
 					datastart, datastart + datalen,
@@ -1080,7 +1084,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 			   "__cfa_%ld", (long) (op_ptr - base));
 
 		do_compile_dwarf_expr_to_c (indent, stream,
-					    "void *", cfa_name,
+					    GCC_UINTPTR, cfa_name,
 					    sym, pc, arch, registers_used,
 					    addr_size,
 					    cfa_start, cfa_end,
@@ -1117,8 +1121,8 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 	}
     }
 
-  fprintfi_filtered (indent, stream, "%s = (%s) __gdb_stack[__gdb_tos];\n",
-		     result_name, type_name);
+  fprintfi_filtered (indent, stream, "%s = __gdb_stack[__gdb_tos];\n",
+		     result_name);
   fprintfi_filtered (indent - 2, stream, "}\n");
 
   do_cleanups (cleanup);
@@ -1134,7 +1138,7 @@ compile_dwarf_expr_to_c (struct ui_file *stream, const char *result_name,
 			 const gdb_byte *op_ptr, const gdb_byte *op_end,
 			 struct dwarf2_per_cu_data *per_cu)
 {
-  do_compile_dwarf_expr_to_c (2, stream, "void *", result_name, sym, pc,
+  do_compile_dwarf_expr_to_c (2, stream, GCC_UINTPTR, result_name, sym, pc,
 			      arch, registers_used, addr_size, op_ptr, op_end,
 			      NULL, per_cu);
 }

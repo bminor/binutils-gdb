@@ -440,12 +440,28 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr17689.so" \
 	] \
 	[list \
+	    "Build pr17689now.so with -z now" \
+	    "-shared -Wl,-z,now" \
+	    "-fPIC" \
+	    { pr17689a.c } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now.so" \
+	] \
+	[list \
 	    "Build pr17689 with PIE without -fPIE" \
 	    "tmpdir/pr17689.so -pie" \
 	    "" \
 	    { pr17689b.S } \
 	    {{readelf {-Wr} pr17689.rd}} \
 	    "pr17689" \
+	] \
+	[list \
+	    "Build pr17689 with PIE -z now without -fPIE" \
+	    "tmpdir/pr17689.so -pie -Wl,-z,now" \
+	    "" \
+	    { pr17689b.S } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now" \
 	] \
 	[list \
 	    "Build pr17827 with PIE without -fPIE" \
@@ -491,6 +507,14 @@ if { [isnative] && [which $CC] != 0 } {
 	    "" \
 	    { pr17689b.S } \
 	    "pr17689" \
+	    "pr17689.out" \
+	] \
+	[list \
+	    "Run pr17689 with PIE -z now without -fPIE" \
+	    "tmpdir/pr17689.so -pie -z now" \
+	    "" \
+	    { pr17689b.S } \
+	    "pr17689now" \
 	    "pr17689.out" \
 	] \
     ]

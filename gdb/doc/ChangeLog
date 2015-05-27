@@ -1,3 +1,27 @@
+2015-05-26  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Debugging Output): Update for DWARF "set debug"
+	command renamings.
+	(Maintenance Commands): Update for DWARF "set debug" command renamings.
+
+2015-05-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI Commands): Add 'tui reg prev' details.
+
+2015-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI): Include 'tui enable' in the introduction.
+	(TUI Commands): Add 'tui enable' and 'tui disable' details.
+
+2015-05-16  Doug Evans  <xdje42@gmail.com>
+
+	* guile.texi (Memory Ports in Guile): Document support for unbuffered
+	memory ports.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Compiling and Injecting Code): Add compile print.
+
 2015-05-12  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.texinfo (Forks): Note that fork debugging is

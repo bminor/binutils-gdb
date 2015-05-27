@@ -17221,6 +17221,25 @@ compile file /home/user/example.c
 @end smallexample
 @end table
 
+@table @code
+@item compile print @var{expr}
+@itemx compile print /@var{f} @var{expr}
+Compile and execute @var{expr} with the compiler language found as the
+current language in @value{GDBN} (@pxref{Languages}).  By default the
+value of @var{expr} is printed in a format appropriate to its data type;
+you can choose a different format by specifying @samp{/@var{f}}, where
+@var{f} is a letter specifying the format; see @ref{Output Formats,,Output
+Formats}.
+
+@item compile print
+@itemx compile print /@var{f}
+@cindex reprint the last value
+Alternatively you can enter the expression (source code producing it) as
+multiple lines of text.  To enter this mode, invoke the @samp{compile print}
+command without any text following the command.  This will start the
+multiple-line editor.
+@end table
+
 @noindent
 The process of compiling and injecting the code can be inspected using:
 
@@ -23391,21 +23410,21 @@ exported symbols.  The default is off.
 @item show debug coff-pe-read
 Displays the current state of displaying debugging messages related to
 reading of COFF/PE exported symbols.
-@item set debug dwarf2-die
-@cindex DWARF2 DIEs
-Dump DWARF2 DIEs after they are read in.
+@item set debug dwarf-die
+@cindex DWARF DIEs
+Dump DWARF DIEs after they are read in.
 The value is the number of nesting levels to print.
 A value of zero turns off the display.
-@item show debug dwarf2-die
-Show the current state of DWARF2 DIE debugging.
-@item set debug dwarf2-read
-@cindex DWARF2 Reading
+@item show debug dwarf-die
+Show the current state of DWARF DIE debugging.
+@item set debug dwarf-read
+@cindex DWARF Reading
 Turns on or off display of debugging messages related to reading
 DWARF debug info.  The default is 0 (off).
 A value of 1 provides basic information.
 A value greater than 1 provides more verbose information.
-@item show debug dwarf2-read
-Show the current state of DWARF2 reader debugging.
+@item show debug dwarf-read
+Show the current state of DWARF reader debugging.
 @item set debug displaced
 @cindex displaced stepping debugging info
 Turns on or off display of @value{GDBN} debugging info for the
@@ -24650,8 +24669,9 @@ is available.
 The TUI mode is enabled by default when you invoke @value{GDBN} as
 @samp{@value{GDBP} -tui}.
 You can also switch in and out of TUI mode while @value{GDBN} runs by
-using various TUI commands and key bindings, such as @kbd{C-x C-a}. 
-@xref{TUI Keys, ,TUI Key Bindings}.
+using various TUI commands and key bindings, such as @command{tui
+enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands} and
+@ref{TUI Keys, ,TUI Key Bindings}.
 
 @node TUI Overview
 @section TUI Overview
@@ -24925,6 +24945,16 @@ these commands will fail with an error, because it would not be
 possible or desirable to enable curses window management.
 
 @table @code
+@item tui enable
+@kindex tui enable
+Activate TUI mode.  The last active TUI window layout will be used if
+TUI mode has prevsiouly been used in the current debugging session,
+otherwise a default layout is used.
+
+@item tui disable
+@kindex tui disable
+Disable TUI mode, returning to the console interpreter.
+
 @item info win
 @kindex info win
 List and give the size of all displayed windows.
@@ -24983,6 +25013,12 @@ Show the next register group.  The list of register groups as well as
 their order is target specific.  The predefined register groups are the
 following: @code{general}, @code{float}, @code{system}, @code{vector},
 @code{all}, @code{save}, @code{restore}.
+
+@item tui reg prev
+Show the previous register group.  The list of register groups as well
+as their order is target specific.  The predefined register groups are
+the following: @code{general}, @code{float}, @code{system},
+@code{vector}, @code{all}, @code{save}, @code{restore}.
 
 @item tui reg system
 Show the system registers in the register window.
@@ -34118,10 +34154,10 @@ that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
 
-@kindex maint set dwarf2 always-disassemble
-@kindex maint show dwarf2 always-disassemble
-@item maint set dwarf2 always-disassemble
-@item maint show dwarf2 always-disassemble
+@kindex maint set dwarf always-disassemble
+@kindex maint show dwarf always-disassemble
+@item maint set dwarf always-disassemble
+@item maint show dwarf always-disassemble
 Control the behavior of @code{info address} when using DWARF debugging
 information.
 
@@ -34143,15 +34179,15 @@ Symbol "argc" is a complex DWARF expression:
 For more information on these expressions, see
 @uref{http://www.dwarfstd.org/, the DWARF standard}.
 
-@kindex maint set dwarf2 max-cache-age
-@kindex maint show dwarf2 max-cache-age
-@item maint set dwarf2 max-cache-age
-@itemx maint show dwarf2 max-cache-age
-Control the DWARF 2 compilation unit cache.
+@kindex maint set dwarf max-cache-age
+@kindex maint show dwarf max-cache-age
+@item maint set dwarf max-cache-age
+@itemx maint show dwarf max-cache-age
+Control the DWARF compilation unit cache.
 
-@cindex DWARF 2 compilation units cache
+@cindex DWARF compilation units cache
 In object files with inter-compilation-unit references, such as those
-produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF 2
+produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF
 reader needs to frequently refer to previously read compilation units.
 This setting controls how long a compilation unit will remain in the
 cache if it is not referenced.  A higher limit means that cached

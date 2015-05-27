@@ -1104,8 +1104,11 @@ When the function is done executing, GDB will silently stop."),
 
   if (stopped_by_random_signal || stop_stack_dummy != STOP_STACK_DUMMY)
     {
-      const char *name = get_function_name (funaddr,
-					    name_buf, sizeof (name_buf));
+      /* Make a copy as NAME may be in an objfile freed by dummy_frame_pop.  */
+      char *name = xstrdup (get_function_name (funaddr,
+					       name_buf, sizeof (name_buf)));
+      make_cleanup (xfree, name);
+
 
       if (stopped_by_random_signal)
 	{

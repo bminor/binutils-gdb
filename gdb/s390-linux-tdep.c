@@ -1487,10 +1487,9 @@ s390_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return skip_pc ? skip_pc : pc;
 }
 
-/* Return true if we are in the functin's epilogue, i.e. after the
-   instruction that destroyed the function's stack frame.  */
+/* Implmement the stack_frame_destroyed_p gdbarch method.  */
 static int
-s390_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+s390_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
 
@@ -1838,9 +1837,9 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
       && (next_frame == NULL
 	  || get_frame_type (get_next_frame (this_frame)) != NORMAL_FRAME))
     {
-      /* See the comment in s390_in_function_epilogue_p on why this is
+      /* See the comment in s390_stack_frame_destroyed_p on why this is
 	 not completely reliable ...  */
-      if (s390_in_function_epilogue_p (gdbarch, get_frame_pc (this_frame)))
+      if (s390_stack_frame_destroyed_p (gdbarch, get_frame_pc (this_frame)))
 	{
 	  memset (&data, 0, sizeof (data));
 	  size = 0;
@@ -3220,7 +3219,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, s390_breakpoint_from_pc);
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
-  set_gdbarch_in_function_epilogue_p (gdbarch, s390_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, s390_stack_frame_destroyed_p);
 
   set_gdbarch_num_regs (gdbarch, S390_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);

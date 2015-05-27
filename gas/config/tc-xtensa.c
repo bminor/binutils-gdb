@@ -10808,11 +10808,19 @@ xtensa_move_literals (void)
       frchain_to = NULL;
       frag_splice = &(frchain_from->frch_root);
 
-      while (!search_frag->tc_frag_data.literal_frag)
+      while (search_frag && !search_frag->tc_frag_data.literal_frag)
 	{
 	  gas_assert (search_frag->fr_fix == 0
 		  || search_frag->fr_type == rs_align);
 	  search_frag = search_frag->fr_next;
+	}
+
+      if (!search_frag)
+	{
+	  search_frag = frchain_from->frch_root;
+	  as_bad_where (search_frag->fr_file, search_frag->fr_line,
+			_("literal pool location required for text-section-literals; specify with .literal_position"));
+	  continue;
 	}
 
       gas_assert (search_frag->tc_frag_data.literal_frag->fr_subtype

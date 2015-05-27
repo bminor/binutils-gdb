@@ -1,3 +1,14 @@
+2015-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18420
+	* ia64-unwind.c (unw_decode): Add end parameter.  Pass parameter
+	on to decode functions.
+	(unw_devode_p2_p5): Pass end paraemter to UNW_DEC_SPILL_MASK.
+	(UNW_DEC_SPILL_MASK): Add end parameter.  Check that unw_rlen does
+	not take us beyond the end of the buffer.
+	* ia64-unwind.h (unw_decode): Update prototype.
+	* readelf.c (dump_ia64_unwind): Pass end pointer to unw_decode.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (dump_section_as_strings): Change pointers from

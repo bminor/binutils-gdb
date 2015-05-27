@@ -1727,6 +1727,22 @@ proc skip_shlib_tests {} {
     return 1
 }
 
+# Return 1 if we should skip tui related tests.
+
+proc skip_tui_tests {} {
+    global gdb_prompt
+
+    gdb_test_multiple "help layout" "verify tui support" {
+	-re "Undefined command: \"layout\".*$gdb_prompt $" {
+	    return 1
+	}
+	-re "$gdb_prompt $" {
+	}
+    }
+
+    return 0
+}
+
 # Test files shall make sure all the test result lines in gdb.sum are
 # unique in a test run, so that comparing the gdb.sum files of two
 # test runs gives correct results.  Test files that exercise
@@ -2008,6 +2024,7 @@ proc supports_process_record {} {
 
     if { [istarget "arm*-*-linux*"] || [istarget "x86_64-*-linux*"]
          || [istarget "i\[34567\]86-*-linux*"]
+         || [istarget "aarch64*-*-linux*"]
          || [istarget "powerpc*-*-linux*"] } {
 	return 1
     }
@@ -2025,6 +2042,7 @@ proc supports_reverse {} {
 
     if { [istarget "arm*-*-linux*"] || [istarget "x86_64-*-linux*"]
          || [istarget "i\[34567\]86-*-linux*"]
+         || [istarget "aarch64*-*-linux*"]
          || [istarget "powerpc*-*-linux*"] } {
 	return 1
     }

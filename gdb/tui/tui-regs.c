@@ -139,7 +139,7 @@ tui_show_registers (struct reggroup *group)
   /* Make sure the register window is visible.  If not, select an
      appropriate layout.  */
   if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->generic.is_visible)
-    tui_set_layout_for_display_command (DATA_NAME);
+    tui_set_layout_by_name (DATA_NAME);
 
   display_info = &TUI_DATA_WIN->detail.data_display_info;
   if (group == 0)
@@ -561,17 +561,40 @@ tui_reg_next_command (char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
-  if (TUI_DATA_WIN != 0)
+  if (TUI_DATA_WIN != NULL)
     {
       struct reggroup *group
         = TUI_DATA_WIN->detail.data_display_info.current_group;
 
       group = reggroup_next (gdbarch, group);
-      if (group == 0)
-        group = reggroup_next (gdbarch, 0);
+      if (group == NULL)
+        group = reggroup_next (gdbarch, NULL);
 
-      if (group)
+      if (group != NULL)
         tui_show_registers (group);
+    }
+}
+
+/* Implementation of the "tui reg prev" command.  Cycle the register group
+   displayed in the tui REG window, moving backwards through the list of
+   available register groups.  */
+
+static void
+tui_reg_prev_command (char *arg, int from_tty)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+
+  if (TUI_DATA_WIN != NULL)
+    {
+      struct reggroup *group
+        = TUI_DATA_WIN->detail.data_display_info.current_group;
+
+      group = reggroup_prev (gdbarch, group);
+      if (group == NULL)
+	group = reggroup_prev (gdbarch, NULL);
+
+      if (group != NULL)
+	tui_show_registers (group);
     }
 }
 
@@ -629,6 +652,9 @@ _initialize_tui_regs (void)
            &tuireglist);
   add_cmd ("next", class_tui, tui_reg_next_command,
            _("Display next register group."),
+           &tuireglist);
+  add_cmd ("prev", class_tui, tui_reg_prev_command,
+           _("Display previous register group."),
            &tuireglist);
 }
 

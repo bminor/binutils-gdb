@@ -52,17 +52,6 @@
 #include "tui/tui.h"		/* For tui_active et al.   */
 #endif
 
-struct format_data
-  {
-    int count;
-    char format;
-    char size;
-
-    /* True if the value should be printed raw -- that is, bypassing
-       python-based formatters.  */
-    unsigned char raw;
-  };
-
 /* Last specified output format.  */
 
 static char last_format = 0;
@@ -939,6 +928,57 @@ validate_format (struct format_data fmt, const char *cmdname)
 	   fmt.format, cmdname);
 }
 
+/* Parse print command format string into *FMTP and update *EXPP.
+   CMDNAME should name the current command.  */
+
+void
+print_command_parse_format (const char **expp, const char *cmdname,
+			    struct format_data *fmtp)
+{
+  const char *exp = *expp;
+
+  if (exp && *exp == '/')
+    {
+      exp++;
+      *fmtp = decode_format (&exp, last_format, 0);
+      validate_format (*fmtp, cmdname);
+      last_format = fmtp->format;
+    }
+  else
+    {
+      fmtp->count = 1;
+      fmtp->format = 0;
+      fmtp->size = 0;
+      fmtp->raw = 0;
+    }
+
+  *expp = exp;
+}
+
+/* Print VAL to console according to *FMTP, including recording it to
+   the history.  */
+
+void
+print_value (struct value *val, const struct format_data *fmtp)
+{
+  struct value_print_options opts;
+  int histindex = record_latest_value (val);
+
+  annotate_value_history_begin (histindex, value_type (val));
+
+  printf_filtered ("$%d = ", histindex);
+
+  annotate_value_history_value ();
+
+  get_formatted_print_options (&opts, fmtp->format);
+  opts.raw = fmtp->raw;
+
+  print_formatted (val, fmtp->size, &opts, gdb_stdout);
+  printf_filtered ("\n");
+
+  annotate_value_history_end ();
+}
+
 /* Evaluate string EXP as an expression in the current language and
    print the resulting value.  EXP may contain a format specifier as the
    first argument ("/x myvar" for example, to print myvar in hex).  */
@@ -948,24 +988,10 @@ print_command_1 (const char *exp, int voidprint)
 {
   struct expression *expr;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  char format = 0;
   struct value *val;
   struct format_data fmt;
 
-  if (exp && *exp == '/')
-    {
-      exp++;
-      fmt = decode_format (&exp, last_format, 0);
-      validate_format (fmt, "print");
-      last_format = format = fmt.format;
-    }
-  else
-    {
-      fmt.count = 1;
-      fmt.format = 0;
-      fmt.size = 0;
-      fmt.raw = 0;
-    }
+  print_command_parse_format (&exp, "print", &fmt);
 
   if (exp && *exp)
     {
@@ -978,24 +1004,7 @@ print_command_1 (const char *exp, int voidprint)
 
   if (voidprint || (val && value_type (val) &&
 		    TYPE_CODE (value_type (val)) != TYPE_CODE_VOID))
-    {
-      struct value_print_options opts;
-      int histindex = record_latest_value (val);
-
-      annotate_value_history_begin (histindex, value_type (val));
-
-      printf_filtered ("$%d = ", histindex);
-
-      annotate_value_history_value ();
-
-      get_formatted_print_options (&opts, format);
-      opts.raw = fmt.raw;
-
-      print_formatted (val, fmt.size, &opts, gdb_stdout);
-      printf_filtered ("\n");
-
-      annotate_value_history_end ();
-    }
+    print_value (val, &fmt);
 
   do_cleanups (old_chain);
 }
@@ -1497,61 +1506,50 @@ display_command (char *arg, int from_tty)
   struct format_data fmt;
   struct expression *expr;
   struct display *newobj;
-  int display_it = 1;
   const char *exp = arg;
 
-#if defined(TUI)
-  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
-     `tui_version'.  */
-  if (tui_active && exp != NULL && *exp == '$')
-    display_it = (tui_set_layout_for_display_command (exp) == TUI_FAILURE);
-#endif
-
-  if (display_it)
+  if (exp == 0)
     {
-      if (exp == 0)
-	{
-	  do_displays ();
-	  return;
-	}
-
-      if (*exp == '/')
-	{
-	  exp++;
-	  fmt = decode_format (&exp, 0, 0);
-	  if (fmt.size && fmt.format == 0)
-	    fmt.format = 'x';
-	  if (fmt.format == 'i' || fmt.format == 's')
-	    fmt.size = 'b';
-	}
-      else
-	{
-	  fmt.format = 0;
-	  fmt.size = 0;
-	  fmt.count = 0;
-	  fmt.raw = 0;
-	}
-
-      innermost_block = NULL;
-      expr = parse_expression (exp);
-
-      newobj = (struct display *) xmalloc (sizeof (struct display));
-
-      newobj->exp_string = xstrdup (exp);
-      newobj->exp = expr;
-      newobj->block = innermost_block;
-      newobj->pspace = current_program_space;
-      newobj->next = display_chain;
-      newobj->number = ++display_number;
-      newobj->format = fmt;
-      newobj->enabled_p = 1;
-      display_chain = newobj;
-
-      if (from_tty)
-	do_one_display (newobj);
-
-      dont_repeat ();
+      do_displays ();
+      return;
     }
+
+  if (*exp == '/')
+    {
+      exp++;
+      fmt = decode_format (&exp, 0, 0);
+      if (fmt.size && fmt.format == 0)
+	fmt.format = 'x';
+      if (fmt.format == 'i' || fmt.format == 's')
+	fmt.size = 'b';
+    }
+  else
+    {
+      fmt.format = 0;
+      fmt.size = 0;
+      fmt.count = 0;
+      fmt.raw = 0;
+    }
+
+  innermost_block = NULL;
+  expr = parse_expression (exp);
+
+  newobj = (struct display *) xmalloc (sizeof (struct display));
+
+  newobj->exp_string = xstrdup (exp);
+  newobj->exp = expr;
+  newobj->block = innermost_block;
+  newobj->pspace = current_program_space;
+  newobj->next = display_chain;
+  newobj->number = ++display_number;
+  newobj->format = fmt;
+  newobj->enabled_p = 1;
+  display_chain = newobj;
+
+  if (from_tty)
+    do_one_display (newobj);
+
+  dont_repeat ();
 }
 
 static void

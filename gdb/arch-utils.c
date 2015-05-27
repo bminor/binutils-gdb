@@ -127,7 +127,7 @@ generic_in_solib_return_trampoline (struct gdbarch *gdbarch,
 }
 
 int
-generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+generic_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return 0;
 }

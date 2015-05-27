@@ -1,3 +1,22 @@
+2015-05-26  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_move_literals): Check that
+	search_frag is non-NULL. Report error if literal frag is not
+	found.
+
+2015-05-22  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18446
+	* read.c (output_big_sleb128): Use U suffix to prevent compile
+	time warning.
+
+2015-05-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (process_movw_reloc_info): Sort relocation case
+	labels alphabetically.
+	(md_apply_fix): Ditto.
+	(aarch64_force_relocation): Ditto.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386

@@ -1,3 +1,38 @@
+2015-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18437
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Skip extra relocations
+	in .rel.plt/.rela.plt.
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Likewise.
+
+2015-05-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_tls_transition_without_check): Sort
+	relocation case labels alphabetically.
+	(elfNN_aarch64_final_link_relocate): Ditto.
+	(elfNN_aarch64_tls_relax): Ditto.
+	(elfNN_aarch64_relocate_section): Ditto.
+	(elfNN_aarch64_gc_sweep_hook): Ditto.
+	(elfNN_aarch64_check_relocs): Ditto.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Ditto.
+	(_bfd_aarch64_elf_resolve_relocation): Ditto.
+
+2015-05-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Rewrite
+	comments.
+
+2015-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Create .plt.got section
+	for now binding.
+	(elf_i386_allocate_dynrelocs): Use .plt.got section for now
+	binding.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Create .plt.got
+	section for now binding.
+	(elf_x86_64_allocate_dynrelocs): Use .plt.got section for now
+	binding.
+
 2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_update_compression_header): Also write the zlib

@@ -249,7 +249,7 @@ struct gdbarch
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
-  gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
+  gdbarch_stack_frame_destroyed_p_ftype *stack_frame_destroyed_p;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
   gdbarch_make_symbol_special_ftype *make_symbol_special;
@@ -402,7 +402,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
-  gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
+  gdbarch->stack_frame_destroyed_p = generic_stack_frame_destroyed_p;
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   gdbarch->make_symbol_special = default_make_symbol_special;
   gdbarch->adjust_dwarf2_addr = default_adjust_dwarf2_addr;
@@ -580,7 +580,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
-  /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
+  /* Skip verify of stack_frame_destroyed_p, invalid_p == 0 */
   /* Skip verify of elf_make_msymbol_special, has predicate.  */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of make_symbol_special, invalid_p == 0 */
@@ -1020,8 +1020,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       plongest (gdbarch->have_nonsteppable_watchpoint));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: in_function_epilogue_p = <%s>\n",
-                      host_address_to_string (gdbarch->in_function_epilogue_p));
+                      "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
+                      host_address_to_string (gdbarch->stack_frame_destroyed_p));
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
                       host_address_to_string (gdbarch->in_solib_return_trampoline));
@@ -3110,20 +3110,20 @@ set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr)
+gdbarch_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->in_function_epilogue_p != NULL);
+  gdb_assert (gdbarch->stack_frame_destroyed_p != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_in_function_epilogue_p called\n");
-  return gdbarch->in_function_epilogue_p (gdbarch, addr);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stack_frame_destroyed_p called\n");
+  return gdbarch->stack_frame_destroyed_p (gdbarch, addr);
 }
 
 void
-set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch,
-                                    gdbarch_in_function_epilogue_p_ftype in_function_epilogue_p)
+set_gdbarch_stack_frame_destroyed_p (struct gdbarch *gdbarch,
+                                     gdbarch_stack_frame_destroyed_p_ftype stack_frame_destroyed_p)
 {
-  gdbarch->in_function_epilogue_p = in_function_epilogue_p;
+  gdbarch->stack_frame_destroyed_p = stack_frame_destroyed_p;
 }
 
 int

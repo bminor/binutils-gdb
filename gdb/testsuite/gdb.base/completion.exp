@@ -859,3 +859,22 @@ gdb_test_multiple "" "$test" {
 	pass "$test"
     }
 }
+
+gdb_test_no_output "set max-completions unlimited"
+
+if {![skip_tui_tests]} {
+    set test "test completion of layout names"
+    send_gdb "layout\t\t\t"
+    gdb_test_multiple "" "$test" {
+	-re "asm *next *prev *regs *split *src *\r\n$gdb_prompt layout $" {
+	    pass "$test"
+	}
+    }
+    send_gdb "\003"
+    set test "quit command input after testing layout completion"
+    gdb_test_multiple "" "$test" {
+	-re "$gdb_prompt $" {
+	    pass "$test"
+	}
+    }
+}

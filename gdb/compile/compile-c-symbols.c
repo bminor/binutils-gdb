@@ -338,7 +338,7 @@ convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
 	  && block_found != block_static_block (block_found))
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdout,
+	    fprintf_unfiltered (gdb_stdlog,
 				"gcc_convert_symbol \"%s\": global symbol\n",
 				identifier);
 	  convert_one_symbol (context, global_sym, 1, 0);
@@ -346,7 +346,7 @@ convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
     }
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdout,
+    fprintf_unfiltered (gdb_stdlog,
 			"gcc_convert_symbol \"%s\": local symbol\n",
 			identifier);
   convert_one_symbol (context, sym, 0, is_local_symbol);
@@ -473,7 +473,7 @@ gcc_convert_symbol (void *datum,
   END_CATCH
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdout,
+    fprintf_unfiltered (gdb_stdlog,
 			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
 			identifier);
   return;
@@ -500,7 +500,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
       if (sym != NULL && SYMBOL_CLASS (sym) == LOC_BLOCK)
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdout,
+	    fprintf_unfiltered (gdb_stdlog,
 				"gcc_symbol_address \"%s\": full symbol\n",
 				identifier);
 	  result = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
@@ -516,7 +516,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	  if (msym.minsym != NULL)
 	    {
 	      if (compile_debug)
-		fprintf_unfiltered (gdb_stdout,
+		fprintf_unfiltered (gdb_stdlog,
 				    "gcc_symbol_address \"%s\": minimal "
 				    "symbol\n",
 				    identifier);
@@ -535,7 +535,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
   END_CATCH
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdout,
+    fprintf_unfiltered (gdb_stdlog,
 			"gcc_symbol_address \"%s\": failed\n",
 			identifier);
   return result;

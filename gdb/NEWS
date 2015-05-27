@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.9
 
+* Support for process record-replay and reverse debugging on aarch64*-linux*
+  targets has been added.  GDB now supports recording of A64 instruction set
+  including advance SIMD instructions.
+
 * GDB now honors the content of the file /proc/PID/coredump_filter
   (PID is the process ID) on GNU/Linux systems.  This file can be used
   to specify the types of memory mappings that will be included in a
@@ -48,6 +52,10 @@
 
 * GDB now supports the vector ABI on S/390 GNU/Linux targets.
 
+* Guile Scripting
+
+  ** Memory ports can now be unbuffered.
+
 * Python Scripting
 
   ** gdb.Objfile objects have a new attribute "username",
@@ -75,7 +83,34 @@ record btrace bts
 record bts
   Start branch trace recording using Branch Trace Store (BTS) format.
 
+compile print
+  Evaluate expression by using the compiler and print result.
+
+tui enable
+tui disable
+  Explicit commands for enabling and disabling tui mode.
+
 * New options
+
+set debug dwarf-die
+  Renamed from "set debug dwarf2-die".
+show debug dwarf-die
+  Renamed from "show debug dwarf2-die".
+
+set debug dwarf-read
+  Renamed from "set debug dwarf2-read".
+show debug dwarf-read
+  Renamed from "show debug dwarf2-read".
+
+maint set dwarf always-disassemble
+  Renamed from "maint set dwarf2 always-disassemble".
+maint show dwarf always-disassemble
+  Renamed from "maint show dwarf2 always-disassemble".
+
+maint set dwarf max-cache-age
+  Renamed from "maint set dwarf2 max-cache-age".
+maint show dwarf max-cache-age
+  Renamed from "maint show dwarf2 max-cache-age".
 
 set max-completions
 show max-completions
