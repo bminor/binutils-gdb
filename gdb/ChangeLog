@@ -1,3 +1,8 @@
+2015-05-28  Kyle Huey  <me@kylehuey.com>  (tiny patch)
+
+	* gdb/arm-tdep.c (arm_gdbarch_init): Perform arm_abi detection on
+	ELFOSABI_GNU binaries.
+
 2015-05-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lnp_state_machine): New typedef.
