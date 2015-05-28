@@ -445,11 +445,14 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  if (info_verbose || debug_infrun)
 	    {
+	      /* Ensure that we have a process ptid.  */
+	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after %s from child %s.\n"),
 				has_vforked ? "vfork" : "fork",
-				target_pid_to_str (child_ptid));
+				target_pid_to_str (process_ptid));
 	    }
 	}
       else
@@ -578,11 +581,14 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	{
 	  if (info_verbose || debug_infrun)
 	    {
+	      /* Ensure that we have a process ptid.  */
+	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after fork from "
 				  "child %s.\n"),
-				target_pid_to_str (child_ptid));
+				target_pid_to_str (process_ptid));
 	    }
 
 	  target_detach (NULL, 0);

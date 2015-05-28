@@ -1,3 +1,9 @@
+2015-05-28  Don Breazeal  <donb@codesourcery.com>
+
+	* infrun.c (follow_fork_inferior): Ensure the use of
+	process-style ptids (pid,0,0) in verbose/debug "Detaching"
+	messages.
+
 2015-05-28  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (record_line_ftype): Remove, duplicate.
