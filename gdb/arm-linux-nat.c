@@ -61,9 +61,6 @@
 #define PTRACE_SETHBPREGS 30
 #endif
 
-/* A flag for whether the WMMX registers are available.  */
-static int arm_linux_has_wmmx_registers;
-
 extern int arm_apcs_32;
 
 /* On GNU/Linux, threads are implemented as pseudo-processes, in which
@@ -526,7 +523,7 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
     {
       fetch_regs (regcache);
       fetch_fpregs (regcache);
-      if (arm_linux_has_wmmx_registers)
+      if (tdep->have_wmmx_registers)
 	fetch_wmmx_regs (regcache);
       if (tdep->vfp_register_count > 0)
 	fetch_vfp_regs (regcache);
@@ -537,7 +534,7 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
         fetch_register (regcache, regno);
       else if (regno >= ARM_F0_REGNUM && regno <= ARM_FPS_REGNUM)
         fetch_fpregister (regcache, regno);
-      else if (arm_linux_has_wmmx_registers
+      else if (tdep->have_wmmx_registers
 	       && regno >= ARM_WR0_REGNUM && regno <= ARM_WCGR7_REGNUM)
 	fetch_wmmx_regs (regcache);
       else if (tdep->vfp_register_count > 0
@@ -562,7 +559,7 @@ arm_linux_store_inferior_registers (struct target_ops *ops,
     {
       store_regs (regcache);
       store_fpregs (regcache);
-      if (arm_linux_has_wmmx_registers)
+      if (tdep->have_wmmx_registers)
 	store_wmmx_regs (regcache);
       if (tdep->vfp_register_count > 0)
 	store_vfp_regs (regcache);
@@ -573,7 +570,7 @@ arm_linux_store_inferior_registers (struct target_ops *ops,
         store_register (regcache, regno);
       else if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
         store_fpregister (regcache, regno);
-      else if (arm_linux_has_wmmx_registers
+      else if (tdep->have_wmmx_registers
 	       && regno >= ARM_WR0_REGNUM && regno <= ARM_WCGR7_REGNUM)
 	store_wmmx_regs (regcache);
       else if (tdep->vfp_register_count > 0
@@ -636,7 +633,6 @@ static const struct target_desc *
 arm_linux_read_description (struct target_ops *ops)
 {
   CORE_ADDR arm_hwcap = 0;
-  arm_linux_has_wmmx_registers = 0;
 
   if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
     {
@@ -644,10 +640,7 @@ arm_linux_read_description (struct target_ops *ops)
     }
 
   if (arm_hwcap & HWCAP_IWMMXT)
-    {
-      arm_linux_has_wmmx_registers = 1;
-      return tdesc_arm_with_iwmmxt;
-    }
+    return tdesc_arm_with_iwmmxt;
 
   if (arm_hwcap & HWCAP_VFP)
     {

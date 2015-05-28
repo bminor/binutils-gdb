@@ -1,5 +1,18 @@
 2015-05-28  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-nat.c (arm_linux_has_wmmx_registers): Remove.
+	(arm_linux_fetch_inferior_registers): Use
+	tdep->have_wmmx_registers instead of arm_linux_has_wmmx_registers.
+	(arm_linux_store_inferior_registers): Likewise.
+	(arm_linux_read_description): Don't set
+	arm_linux_has_wmmx_registers.
+	* arm-tdep.c (arm_gdbarch_init): Set
+	tdep->have_wmmx_registers according target descriptions.
+	* arm-tdep.h (struct gdbarch_tdep) <have_wmmx_registers>: New
+	field.
+
+2015-05-28  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-nat.c (arm_linux_vfp_register_count): Remove.
 	(fetch_vfp_regs): Use vfp_register_count from gdbarch_tdep
 	instead of arm_linux_vfp_register_count.

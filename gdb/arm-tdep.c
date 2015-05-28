@@ -9915,6 +9915,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct tdesc_arch_data *tdesc_data = NULL;
   int i, is_m = 0;
   int vfp_register_count = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
+  int have_wmmx_registers = 0;
   int have_neon = 0;
   int have_fpa_registers = 1;
   const struct target_desc *tdesc = info.target_desc;
@@ -10178,6 +10179,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      tdesc_data_cleanup (tdesc_data);
 	      return NULL;
 	    }
+
+	  have_wmmx_registers = 1;
 	}
 
       /* If we have a VFP unit, check whether the single precision registers
@@ -10289,6 +10292,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->fp_model = fp_model;
   tdep->is_m = is_m;
   tdep->have_fpa_registers = have_fpa_registers;
+  tdep->have_wmmx_registers = have_wmmx_registers;
   gdb_assert (vfp_register_count == 0
 	      || vfp_register_count == 16
 	      || vfp_register_count == 32);

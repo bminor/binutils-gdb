@@ -161,6 +161,7 @@ struct gdbarch_tdep
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
 
   int have_fpa_registers;	/* Does the target report the FPA registers?  */
+  int have_wmmx_registers;	/* Does the target report the WMMX registers?  */
   /* The number of VFP registers reported by the target.  It is zero
      if VFP registers are not supported.  */
   int vfp_register_count;
