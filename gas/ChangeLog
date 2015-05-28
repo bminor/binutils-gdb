@@ -1,3 +1,56 @@
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+            Bernd Schmidt <bernds@codesourcery.com>
+            Paul Brook <paul@codesourcery.com>
+
+	gas/
+	* config/tc-alpha.c (all_cfi_sections): Declare.
+	(s_alpha_ent): Initialize all_cfi_sections.
+	(alpha_elf_md_end): Invoke cfi_set_sections.
+	* config/tc-mips.c (md_apply_fix):  Handle BFD_RELOC_NONE.
+	(s_ehword): Use BFD_RELOC_32_PCREL.
+	(mips_fix_adjustable): Handle BFD_RELOC_32_PCREL.
+	(mips_cfi_reloc_for_encoding): New function.
+	* tc-mips.h (DWARF2_FDE_RELOC_SIZE): Redefine.
+	(DWARF2_FDE_RELOC_ENCODING): Define.
+	(tc_cfi_reloc_for_encoding): Define.
+	(mips_cfi_reloc_for_encoding): Define.
+	(tc_compact_eh_opcode_stop): Define.
+	(tc_compact_eh_opcode_pad): Define.
+	* doc/as.texinfo: Document Compact EH extensions.
+	* doc/internals.texi: Likewise.
+	* dw2gencfi.c (EH_FRAME_LINKONCE): Redefine.
+	(tc_cfi_reloc_for_encoding): Provide default.
+	(compact_eh): Declare.
+	(emit_expr_encoded): New function.
+	(get_debugseg_name): Add Compact EH support.
+	(alloc_debugseg_item): Likewise.
+	(cfi_set_sections): New function.
+	(dot_cfi_fde_data): New function.
+	(dot_cfi_personality_id): New function.
+	(dot_cfi_inline_lsda): New function.
+	(cfi_pseudo_table): Add cfi_fde_data, cfi_personality_id,
+	and cfi_inline_lsda.
+	(dot_cfi_personality): Add Compact EH support.
+	(dot_cfi_lsda): Likewise.
+	(dot_cfi_sections): Likewise.
+	(dot_cfi_startproc): Likewise.
+	(get_cfi_seg): Likewise.
+	(output_compact_unwind_data): New function.
+	(output_cfi_insn): Add Compact EH support.
+	(output_cie): Likewise.
+	(output_fde): Likewise.
+	(cfi_finish): Likewise.
+	(cfi_emit_eh_header): New function.
+	(output_eh_header): New function.
+	* dw2gencfi.h (cfi_set_sections): Declare.
+	(SUPPORT_COMPACT_EH): Define.
+	(MULTIPLE_FRAME_SECTIONS): Define.
+	New enumeration to describe the Compact EH header format.
+	(fde_entry): Add new fields personality_id, eh_header_type, eh_data_size,
+	eh_data, eh_loc and sections.
+	(CFI_EMIT_eh_frame, CFI_EMIT_debug_frame, CFI_EMIT_target,
+	CFI_EMIT_eh_frame_compact): Define.
+
 2015-05-26  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (xtensa_move_literals): Check that

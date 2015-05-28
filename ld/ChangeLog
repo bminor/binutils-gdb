@@ -1,3 +1,12 @@
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
+
+	ld/
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open):
+	Add Compact EH support.
+	* scripttempl/elf.sc: Handle .eh_frame_entry and .gnu_extab
+	sections.
+
 2015-05-17  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* configure.ac (AC_PROG_GREP): Check for grep program.

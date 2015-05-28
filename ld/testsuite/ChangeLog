@@ -1,3 +1,21 @@
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+
+	ld/testsuite/
+	* ld-mips-elf/compact-eh.ld: New linker script.
+	* ld-mips-elf/compact-eh1.d: New.
+	* ld-mips-elf/compact-eh1.s: New.
+	* ld-mips-elf/compact-eh1a.s: New.
+	* ld-mips-elf/compact-eh1b.s: New.
+	* ld-mips-elf/compact-eh2.d: New.
+	* ld-mips-elf/compact-eh2.s: New.
+	* ld-mips-elf/compact-eh3.d: New.
+	* ld-mips-elf/compact-eh3.s: New.
+	* ld-mips-elf/compact-eh3a.s: New.
+	* ld-mips-elf/compact-eh4.d: New.
+	* ld-mips-elf/compact-eh5.d: New.
+	* ld-mips-elf/compact-eh6.d: New.
+	* ld-mips-elf/mips-elf.exp: Run new tests.
+
 2015-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18458

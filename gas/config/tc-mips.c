@@ -14840,7 +14840,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      || fixP->fx_r_type == BFD_RELOC_MICROMIPS_SUB
 	      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
 	      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-	      || fixP->fx_r_type == BFD_RELOC_MIPS_TLS_DTPREL64);
+	      || fixP->fx_r_type == BFD_RELOC_MIPS_TLS_DTPREL64
+	      || fixP->fx_r_type == BFD_RELOC_NONE);
 
   buf = fixP->fx_frag->fr_literal + fixP->fx_where;
 
@@ -15110,6 +15111,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
         S_SET_WEAK (fixP->fx_addsy);
       break;
 
+    case BFD_RELOC_NONE:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = 0;
       break;
@@ -16304,7 +16306,7 @@ s_ehword (int ignore ATTRIBUTE_UNUSED)
   p = frag_more (4);
   md_number_to_chars (p, 0, 4);
   fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, FALSE,
-	       BFD_RELOC_MIPS_EH);
+	       BFD_RELOC_32_PCREL);
 
   demand_empty_rest_of_line ();
 }
@@ -17054,6 +17056,10 @@ mips_fix_adjustable (fixS *fixp)
     return 0;
 
   if (fixp->fx_addsy == NULL)
+    return 1;
+
+  /* Allow relocs used for EH tables.  */
+  if (fixp->fx_r_type == BFD_RELOC_32_PCREL)
     return 1;
 
   /* If symbol SYM is in a mergeable section, relocations of the form
@@ -19116,4 +19122,14 @@ md_mips_end (void)
       bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
 				Tag_GNU_MIPS_ABI_FP, fpabi);
     }
+}
+
+/*  Returns the relocation type required for a particular CFI encoding.  */
+
+bfd_reloc_code_real_type
+mips_cfi_reloc_for_encoding (int encoding)
+{
+  if (encoding == (DW_EH_PE_sdata4 | DW_EH_PE_pcrel))
+    return BFD_RELOC_32_PCREL;
+  else return BFD_RELOC_NONE;
 }

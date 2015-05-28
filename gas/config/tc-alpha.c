@@ -3691,6 +3691,8 @@ static struct alpha_elf_frame_data *all_frame_data;
 static struct alpha_elf_frame_data **plast_frame_data = &all_frame_data;
 static struct alpha_elf_frame_data *cur_frame_data;
 
+extern int all_cfi_sections;
+
 /* Handle the .section pseudo-op.  This is like the usual one, but it
    clears alpha_insn_label and restores auto alignment.  */
 
@@ -3714,6 +3716,8 @@ s_alpha_ent (int dummy ATTRIBUTE_UNUSED)
       char *name, name_end;
       name = input_line_pointer;
       name_end = get_symbol_end ();
+      /* CFI_EMIT_eh_frame is the default.  */
+      all_cfi_sections = CFI_EMIT_eh_frame;
 
       if (! is_name_beginner (*name))
 	{
@@ -4061,6 +4065,7 @@ alpha_elf_md_end (void)
 				      S_GET_VALUE (p->func_sym),
 				      symbol_get_frag (p->func_sym)));
 
+	cfi_set_sections ();
 	cfi_set_return_column (p->ra_regno);
 	cfi_add_CFA_def_cfa_register (30);
 	if (p->fp_regno != 30 || p->mask || p->fmask || p->frame_size)

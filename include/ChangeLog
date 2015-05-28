@@ -1,3 +1,8 @@
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+
+	include/
+	* bfdlink.h: Rename eh_frame_hdr to eh_frame_hdr_type.
+
 2015-05-12  Jiong Wang  <jiong.wang@arm.com>
 
 	* elf/aarch64.h (R_AARCH64_P32_LD32_GOTPAGE_LO14): New enumeration.

@@ -1,3 +1,64 @@
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
+
+	bfd/
+	* bfd-in2.h: Regenerated.
+	* elf-bfd.h (DWARF2_EH_HDR, COMPACT_EH_HDR): Define.
+	(COMPACT_EH_CANT_UNWIND_OPCODE): Define.
+	(dwarf_eh_frame_hdr_info): Move dwarf-specific fields from
+	eh_frame_hdr_info.
+	(compact_eh_frame_hdr_info): Declare.
+	(eh_frame_hdr_info):  Redeclare with union for dwarf-specific
+	fields and compact-eh fields.
+	(elf_backend_data): Add cant_unwind_opcode and compact_eh_encoding.
+	(bfd_elf_section_data): Add eh_frame_entry_field.
+	(elf_section_eh_frame_entry): Define.
+	(bfd_elf_parse_eh_frame_entries): Declare.
+	(_bfd_elf_parse_eh_frame_entry): Declare.
+	(_bfd_elf_end_eh_frame_parsing): Declare.
+	(_bfd_elf_write_section_eh_frame_entry): Declare.
+	(_bfd_elf_eh_frame_entry_present): Declare.
+	(_bfd_elf_section_for_symbol): Declare.
+	* elf-eh-frame.c (bfd_elf_discard_eh_frame_entry): New function.
+	(bfd_elf_record_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame): Update hdr_info field references.
+	(cmp_eh_frame_hdr): New function.
+	(add_eh_frame_hdr_terminator): New function.
+	(_bfd_elf_end_eh_frame_parsing): New function.
+	(find_merged_cie): Update hdr_info field references.
+	(_bfd_elf_discard_section_eh_frame): Likewise.
+	(_bfd_elf_discard_section_eh_frame_hdr): Add Compact EH support.
+	(_bfd_elf_eh_frame_entry_present): New function.
+	(_bfd_elf_maybe_strip_eh_frame_hdr): Add Compact EH support.
+	(_bfd_elf_write_section_eh_frame_entry): New function.
+	(_bfd_elf_write_section_eh_frame): Update hdr_info field references.
+	(_bfd_elf_fixup_eh_frame_hdr): New function.
+	(write_compact_eh_frame_hdr): New function.
+	(write_dwarf_eh_frame_hdr): New function.
+	(_bfd_elf_write_section_eh_frame_hdr): Add Compact EH support.
+	* elflink.c (_bfd_elf_section_for_symbol): New function.
+	(elf_section_ignore_discarded_relocs): Add Compact EH support.
+	(elf_link_input_bfd): Likewise.
+	(bfd_elf_final_link): Likewise.
+	(_bfd_elf_gc_mark): Likewise.
+	(bfd_elf_parse_eh_frame_entries): New function.
+	(bfd_elf_gc_sections): Add Compact EH support.
+	(bfd_elf_discard_info): Likewise.
+	* elfxx-mips.c: Include dwarf2.h.
+	(_bfd_mips_elf_compact_eh_encoding): New function.
+	(_bfd_mips_elf_cant_unwind_opcode): New function.
+	* elfxx-mips.h (_bfd_mips_elf_compact_eh_encoding): Declare.
+	(_bfd_mips_elf_cant_unwind_opcode): Declare.
+	(elf_backend_compact_eh_encoding): Define.
+	(elf_backend_cant_unwind_opcode): Define.
+	* elfxx-target.h (elf_backend_compact_eh_encoding): Provide default.
+	(elf_backend_cant_unwind_opcode): Provide default.
+	(elf_backend_data elfNN_bed): Add elf_backend_compact_eh_encoding and
+	elf_backend_cant_unwind_opcode.
+	* section.c (SEC_INFO_TYPE_EH_FRAME_ENTRY): Add definition.
+
 2015-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18458
@@ -229,6 +290,77 @@
 	* elf64-ppc.c (TOC_BASE_ALIGN): Define.
 	(ppc64_elf_next_toc_section): Align multi-got toc base.
 	(ppc64_elf_set_toc): Likewise initial toc base and .TOC. symbol.
+=======
+2015-05-04  Catherine Moore  <clm@codesourcery.com>
+
+	* elfxx-target.h: Add missing #endif.
+
+2015-04-22  Catherine Moore  <clm@codesourcery.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_entry):  Don't write
+	the .eh_frame_entry section if the corresponding text section is marked
+	with SEC_EXCLUDE.
+
+2015-04-22  Catherine Moore  <clm@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
+
+	* bfd-in2.h (SEC_INFO_TYPE_EH_FRAME_ENTRY): Define.
+	* elf-bfd.h (DWARF2_EH_HDR, COMPACT_EH_HDR): Define.
+	(COMPACT_EH_CANT_UNWIND_OPCODE): Define.
+	(dwarf_eh_frame_hdr_info): New struct.
+	(compact_eh_frame_hdr_info): New struct.
+	(eh_frame_hdr_info): Separate dwarf and compact fields.
+	(elf_backend_data): Add compact_eh_encoding and cant_unwind_opcode
+	fields.
+	(bfd_elf_section_data): Add eh_frame_entry field.
+	(elf_section_eh_frame_entry): Define.
+	(bfd_elf_parse_eh_frame_entries): Declare.
+	(_bfd_elf_parse_eh_frame_entry): Declare.
+	(_bfd_elf_end_eh_frame_parsing): Declare.
+	(_bfd_elf_write_section_eh_frame_entry): Declare.
+	(_bfd_elf_fixup_eh_frame_hdr): Declare.
+	(_bfd_elf_eh_frame_entry_present): Declare.
+	(_bfd_elf_section_for_symbol): Declare.
+	* elf-eh-frame.c (bfd_elf_discard_eh_frame_entry): New function.
+	(bfd_elf_record_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame): Update hdr_info field references.
+	(cmp_eh_frame_hdr): New function.
+	(add_eh_frame_hdr_terminator): New function.
+	(_bfd_elf_end_eh_frame_parsing): New function.
+	(find_merged_cie): Update hdr_info field references.
+	(_bfd_elf_discard_section_eh_frame): Likewise.
+	(_bfd_elf_discard_section_eh_frame_hdr): Likewise.
+	Add Compact EH support.
+	(_bfd_elf_eh_frame_entry_present): New function.
+	(_bfd_elf_maybe_strip_eh_frame_hdr): Add Compact EH support.
+	(_bfd_elf_write_section_eh_frame_entry): New function.
+	(_bfd_elf_write_section_eh_frame): Update hdr_info field references.
+	(_bfd_elf_write_section_eh_frame): Likewise.
+	(_bfd_elf_fixup_eh_frame_hdr): New function.
+	(write_compact_eh_frame_hdr): New function.
+	(_bfd_elf_write_section_eh_frame_hdr): Compact EH support.  Update
+	hdr_info field references.
+	* elflink.c (_bfd_elf_section_for_symbol): New function.
+	(elf_section_ignore_discarded_relocs, elf_link_input_bfd):
+	Handle SEC_INFO_TYPE_EH_FRAME_ENTRY.
+	(bfd_elf_final_link): Call _bfd_elf_fixup_eh_frame_hdr.
+	(_bfd_elf_gc_mark):  Support Compact EH.
+	(bfd_elf_parse_eh_frame_entries): New function.
+	(bfd_elf_gc_sections): Support Compact EH.
+	(bfd_elf_discard_info): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_compact_eh_encoding): New function.
+	(_bfd_mips_elf_cant_unwind_opcode): New function.
+	* elfxx-mips.h (_bfd_mips_elf_compact_eh_encoding): Declare.
+	(_bfd_mips_elf_cant_unwind_opcode): Declare.
+	(elf_backend_compact_eh_encoding): Define.
+	(elf_backend_cant_unwind_opcode): Define.
+	* elfxx-target.h (elf_backend_compact_eh_encoding):
+	Provide default definition.
+	(elf_backend_cant_unwind_opcode): Provide default definition.
+	* section.c (SEC_INFO_TYPE_EH_FRAME_ENTRY): Define.
+>>>>>>> 2015-05-04  Catherine Moore  <clm@codesourcery.com>
 
 2015-04-22  H.J. Lu  <hongjiu.lu@intel.com>
 

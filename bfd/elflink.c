@@ -54,6 +54,47 @@ struct elf_find_verdep_info
 static bfd_boolean _bfd_elf_fix_symbol_flags
   (struct elf_link_hash_entry *, struct elf_info_failed *);
 
+asection *
+_bfd_elf_section_for_symbol (struct elf_reloc_cookie *cookie,
+			     unsigned long r_symndx,
+			     bfd_boolean discard)
+{
+  if (r_symndx >= cookie->locsymcount
+      || ELF_ST_BIND (cookie->locsyms[r_symndx].st_info) != STB_LOCAL)
+    {
+      struct elf_link_hash_entry *h;
+
+      h = cookie->sym_hashes[r_symndx - cookie->extsymoff];
+
+      while (h->root.type == bfd_link_hash_indirect
+	     || h->root.type == bfd_link_hash_warning)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+      if ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	   && discarded_section (h->root.u.def.section))
+        return h->root.u.def.section;
+      else
+	return NULL;
+    }
+  else
+    {
+      /* It's not a relocation against a global symbol,
+	 but it could be a relocation against a local
+	 symbol for a discarded section.  */
+      asection *isec;
+      Elf_Internal_Sym *isym;
+
+      /* Need to: get the symbol; get the section.  */
+      isym = &cookie->locsyms[r_symndx];
+      isec = bfd_section_from_elf_index (cookie->abfd, isym->st_shndx);
+      if (isec != NULL
+	  && discard ? discarded_section (isec) : 1)
+	return isec;
+     }
+  return NULL;
+}
+
 /* Define a symbol in a dynamic linkage section.  */
 
 struct elf_link_hash_entry *
@@ -9284,6 +9325,7 @@ elf_section_ignore_discarded_relocs (asection *sec)
     {
     case SEC_INFO_TYPE_STABS:
     case SEC_INFO_TYPE_EH_FRAME:
+    case SEC_INFO_TYPE_EH_FRAME_ENTRY:
       return TRUE;
     default:
       break;
@@ -10215,6 +10257,14 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	      return FALSE;
 	  }
 	  break;
+	case SEC_INFO_TYPE_EH_FRAME_ENTRY:
+	  {
+	    if (! _bfd_elf_write_section_eh_frame_entry (output_bfd,
+							 flinfo->info,
+							 o, contents))
+	      return FALSE;
+	  }
+	  break;
 	default:
 	  {
 	    /* FIXME: octets_per_byte.  */
@@ -11084,6 +11134,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       if (!elf_fixup_link_order (abfd, o))
 	return FALSE;
     }
+
+  if (!_bfd_elf_fixup_eh_frame_hdr (info))
+    return FALSE;
 
   /* Since ELF permits relocations to be against local symbols, we
      must have the local symbols available when we do the relocations.
@@ -11994,6 +12047,11 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
 	}
     }
 
+  eh_frame = elf_section_eh_frame_entry (sec);
+  if (ret && eh_frame && !eh_frame->gc_mark)
+    if (!_bfd_elf_gc_mark (info, eh_frame, gc_mark_hook))
+      ret = FALSE;
+
   return ret;
 }
 
@@ -12409,6 +12467,36 @@ _bfd_elf_gc_keep (struct bfd_link_info *info)
     }
 }
 
+bfd_boolean
+bfd_elf_parse_eh_frame_entries (bfd *abfd ATTRIBUTE_UNUSED,
+				struct bfd_link_info *info)
+{
+  bfd *ibfd = info->input_bfds;
+
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
+    {
+      asection *sec;
+      struct elf_reloc_cookie cookie;
+
+      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+	continue;
+
+      if (!init_reloc_cookie (&cookie, info, ibfd))
+	return FALSE;
+
+      for (sec = ibfd->sections; sec; sec = sec->next)
+	{
+	  if (CONST_STRNEQ (bfd_section_name (ibfd, sec), ".eh_frame_entry")
+	      && init_reloc_cookie_rels (&cookie, info, ibfd, sec))
+	    {
+	      _bfd_elf_parse_eh_frame_entry (info, sec, &cookie);
+	      fini_reloc_cookie_rels (&cookie, sec);
+	    }
+	}
+    }
+  return TRUE;
+}
+
 /* Do mark and sweep of unused sections.  */
 
 bfd_boolean
@@ -12432,7 +12520,9 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* Try to parse each bfd's .eh_frame section.  Point elf_eh_frame_section
      at the .eh_frame section if we can mark the FDEs individually.  */
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
+  for (sub = info->input_bfds;
+       info->eh_frame_hdr_type != COMPACT_EH_HDR && sub != NULL;
+       sub = sub->link.next)
     {
       asection *sec;
       struct elf_reloc_cookie cookie;
@@ -12936,7 +13026,9 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	}
     }
 
-  o = bfd_get_section_by_name (output_bfd, ".eh_frame");
+  o = NULL;
+  if (info->eh_frame_hdr_type != COMPACT_EH_HDR)
+    o = bfd_get_section_by_name (output_bfd, ".eh_frame");
   if (o != NULL)
     {
       asection *i;
@@ -12984,7 +13076,10 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	}
     }
 
-  if (info->eh_frame_hdr
+  if (info->eh_frame_hdr_type == COMPACT_EH_HDR)
+    _bfd_elf_end_eh_frame_parsing (info);
+
+  if (info->eh_frame_hdr_type
       && !info->relocatable
       && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
     changed = 1;

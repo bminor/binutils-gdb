@@ -1,3 +1,35 @@
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+
+	gas/testsuite/
+	* gas/mips/mips.exp: Run new tests.
+
+	* gas/mips/compact-eh-1.s: New file.
+	* gas/mips/compact-eh-2.s: New file.
+	* gas/mips/compact-eh-3.s: New file.
+	* gas/mips/compact-eh-4.s: New file.
+	* gas/mips/compact-eh-5.s: New file.
+	* gas/mips/compact-eh-6.s: New file.
+	* gas/mips/compact-eh-7.s: New file.
+	* gas/mips/compact-eh-eb-1.d: New file.
+	* gas/mips/compact-eh-eb-2.d: New file.
+	* gas/mips/compact-eh-eb-3.d: New file.
+	* gas/mips/compact-eh-eb-4.d: New file.
+	* gas/mips/compact-eh-eb-5.d: New file.
+	* gas/mips/compact-eh-eb-6.d: New file.
+	* gas/mips/compact-eh-eb-7.d: New file.
+	* gas/mips/compact-eh-el-1.d: New file.
+	* gas/mips/compact-eh-el-2.d: New file.
+	* gas/mips/compact-eh-el-3.d: New file.
+	* gas/mips/compact-eh-el-4.d: New file.
+	* gas/mips/compact-eh-el-5.d: New file.
+	* gas/mips/compact-eh-el-6.d: New file.
+	* gas/mips/compact-eh-el-7.d: New file.
+	* gas/mips/compact-eh-err1.l: New file.
+	* gas/mips/compact-eh-err1.s: New file.
+	* gas/mips/compact-eh-err2.l: New file.
+	* gas/mips/compact-eh-err2.s: New file.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386
