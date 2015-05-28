@@ -457,6 +457,7 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 	  struct process_info *parent_proc;
 	  struct process_info *child_proc;
 	  struct lwp_info *child_lwp;
+	  struct thread_info *child_thr;
 	  struct target_desc *tdesc;
 
 	  ptid = ptid_build (new_pid, new_pid, 0);
@@ -479,6 +480,10 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 	  child_lwp = add_lwp (ptid);
 	  gdb_assert (child_lwp != NULL);
 	  child_lwp->stopped = 1;
+	  child_lwp->must_set_ptrace_flags = 1;
+	  child_lwp->status_pending_p = 0;
+	  child_thr = get_lwp_thread (child_lwp);
+	  child_thr->last_resume_kind = resume_stop;
 	  parent_proc = get_thread_process (event_thr);
 	  child_proc->attached = parent_proc->attached;
 	  clone_all_breakpoints (&child_proc->breakpoints,
@@ -488,7 +493,6 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 	  tdesc = xmalloc (sizeof (struct target_desc));
 	  copy_target_description (tdesc, parent_proc->tdesc);
 	  child_proc->tdesc = tdesc;
-	  child_lwp->must_set_ptrace_flags = 1;
 
 	  /* Clone arch-specific process data.  */
 	  if (the_low_target.new_fork != NULL)
