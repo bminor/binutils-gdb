@@ -1,3 +1,8 @@
+2015-05-28  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-vfork.exp (main): Disable exec-dependent
+	tests for remote targets by checking is_target_gdbserver.
+
 2015-05-27  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/opaque-type-lookup-2.c: New file.
