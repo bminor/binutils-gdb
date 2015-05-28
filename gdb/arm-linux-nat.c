@@ -64,10 +64,6 @@
 /* A flag for whether the WMMX registers are available.  */
 static int arm_linux_has_wmmx_registers;
 
-/* The number of 64-bit VFP registers we have (expect this to be 0,
-   16, or 32).  */
-static int arm_linux_vfp_register_count;
-
 extern int arm_apcs_32;
 
 /* On GNU/Linux, threads are implemented as pseudo-processes, in which
@@ -460,6 +456,8 @@ fetch_vfp_regs (struct regcache *regcache)
 {
   char regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
@@ -471,7 +469,7 @@ fetch_vfp_regs (struct regcache *regcache)
       return;
     }
 
-  for (regno = 0; regno < arm_linux_vfp_register_count; regno++)
+  for (regno = 0; regno < tdep->vfp_register_count; regno++)
     regcache_raw_supply (regcache, regno + ARM_D0_REGNUM,
 			 (char *) regbuf + regno * 8);
 
@@ -484,6 +482,8 @@ store_vfp_regs (const struct regcache *regcache)
 {
   char regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
@@ -495,7 +495,7 @@ store_vfp_regs (const struct regcache *regcache)
       return;
     }
 
-  for (regno = 0; regno < arm_linux_vfp_register_count; regno++)
+  for (regno = 0; regno < tdep->vfp_register_count; regno++)
     regcache_raw_collect (regcache, regno + ARM_D0_REGNUM,
 			  (char *) regbuf + regno * 8);
 
@@ -519,13 +519,16 @@ static void
 arm_linux_fetch_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   if (-1 == regno)
     {
       fetch_regs (regcache);
       fetch_fpregs (regcache);
       if (arm_linux_has_wmmx_registers)
 	fetch_wmmx_regs (regcache);
-      if (arm_linux_vfp_register_count > 0)
+      if (tdep->vfp_register_count > 0)
 	fetch_vfp_regs (regcache);
     }
   else 
@@ -537,9 +540,9 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
       else if (arm_linux_has_wmmx_registers
 	       && regno >= ARM_WR0_REGNUM && regno <= ARM_WCGR7_REGNUM)
 	fetch_wmmx_regs (regcache);
-      else if (arm_linux_vfp_register_count > 0
+      else if (tdep->vfp_register_count > 0
 	       && regno >= ARM_D0_REGNUM
-	       && regno <= ARM_D0_REGNUM + arm_linux_vfp_register_count)
+	       && regno <= ARM_D0_REGNUM + tdep->vfp_register_count)
 	fetch_vfp_regs (regcache);
     }
 }
@@ -552,13 +555,16 @@ static void
 arm_linux_store_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   if (-1 == regno)
     {
       store_regs (regcache);
       store_fpregs (regcache);
       if (arm_linux_has_wmmx_registers)
 	store_wmmx_regs (regcache);
-      if (arm_linux_vfp_register_count > 0)
+      if (tdep->vfp_register_count > 0)
 	store_vfp_regs (regcache);
     }
   else
@@ -570,9 +576,9 @@ arm_linux_store_inferior_registers (struct target_ops *ops,
       else if (arm_linux_has_wmmx_registers
 	       && regno >= ARM_WR0_REGNUM && regno <= ARM_WCGR7_REGNUM)
 	store_wmmx_regs (regcache);
-      else if (arm_linux_vfp_register_count > 0
+      else if (tdep->vfp_register_count > 0
 	       && regno >= ARM_D0_REGNUM
-	       && regno <= ARM_D0_REGNUM + arm_linux_vfp_register_count)
+	       && regno <= ARM_D0_REGNUM + tdep->vfp_register_count)
 	store_vfp_regs (regcache);
     }
 }
@@ -631,7 +637,6 @@ arm_linux_read_description (struct target_ops *ops)
 {
   CORE_ADDR arm_hwcap = 0;
   arm_linux_has_wmmx_registers = 0;
-  arm_linux_vfp_register_count = 0;
 
   if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
     {
@@ -653,20 +658,11 @@ arm_linux_read_description (struct target_ops *ops)
       /* NEON implies VFPv3-D32 or no-VFP unit.  Say that we only support
 	 Neon with VFPv3-D32.  */
       if (arm_hwcap & HWCAP_NEON)
-	{
-	  arm_linux_vfp_register_count = 32;
-	  result = tdesc_arm_with_neon;
-	}
+	result = tdesc_arm_with_neon;
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-	{
-	  arm_linux_vfp_register_count = 32;
-	  result = tdesc_arm_with_vfpv3;
-	}
+	result = tdesc_arm_with_vfpv3;
       else
-	{
-	  arm_linux_vfp_register_count = 16;
-	  result = tdesc_arm_with_vfpv2;
-	}
+	result = tdesc_arm_with_vfpv2;
 
       /* Now make sure that the kernel supports reading these
 	 registers.  Support was added in 2.6.30.  */

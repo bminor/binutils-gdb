@@ -743,7 +743,7 @@ arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
   cb (".reg", ARM_LINUX_SIZEOF_GREGSET, &arm_linux_gregset, NULL, cb_data);
 
-  if (tdep->have_vfp_registers)
+  if (tdep->vfp_register_count > 0)
     cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, &arm_linux_vfpregset,
 	"VFP floating-point", cb_data);
   else if (tdep->have_fpa_registers)

@@ -1,3 +1,20 @@
+2015-05-28  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_vfp_register_count): Remove.
+	(fetch_vfp_regs): Use vfp_register_count from gdbarch_tdep
+	instead of arm_linux_vfp_register_count.
+	(store_vfp_regs): Likewise.
+	(arm_linux_fetch_inferior_registers): Likewise.
+	(arm_linux_store_inferior_registers): Likewise.
+	(arm_linux_read_description): Don't set
+	arm_linux_vfp_register_count.
+	* arm-linux-tdep.c (arm_linux_iterate_over_regset_sections):
+	Adjust.
+	* arm-tdep.c (arm_gdbarch_init): Add assert on
+	vfp_register_count.
+	* arm-tdep.h (struct gdbarch_tdep) <have_vfp_registers>: Rename
+	field to vfp_register_count.  All users updated.
+
 2015-05-28  Kyle Huey  <me@kylehuey.com>  (tiny patch)
 
 	* gdb/arm-tdep.c (arm_gdbarch_init): Perform arm_abi detection on

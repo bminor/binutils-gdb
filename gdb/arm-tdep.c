@@ -9914,7 +9914,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
   int i, is_m = 0;
-  int have_vfp_registers = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
+  int vfp_register_count = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
   int have_neon = 0;
   int have_fpa_registers = 1;
   const struct target_desc *tdesc = info.target_desc;
@@ -10220,7 +10220,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  if (tdesc_unnumbered_register (feature, "s0") == 0)
 	    have_vfp_pseudos = 1;
 
-	  have_vfp_registers = 1;
+	  vfp_register_count = i;
 
 	  /* If we have VFP, also check for NEON.  The architecture allows
 	     NEON without VFP (integer vector operations only), but GDB
@@ -10289,7 +10289,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->fp_model = fp_model;
   tdep->is_m = is_m;
   tdep->have_fpa_registers = have_fpa_registers;
-  tdep->have_vfp_registers = have_vfp_registers;
+  gdb_assert (vfp_register_count == 0
+	      || vfp_register_count == 16
+	      || vfp_register_count == 32);
+  tdep->vfp_register_count = vfp_register_count;
   tdep->have_vfp_pseudos = have_vfp_pseudos;
   tdep->have_neon_pseudos = have_neon_pseudos;
   tdep->have_neon = have_neon;
