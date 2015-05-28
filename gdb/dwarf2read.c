@@ -17475,11 +17475,6 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
   return include_name;
 }
 
-/* Function to record a line number.  */
-
-typedef void (record_line_ftype) (struct subfile *subfile, int line,
-				  CORE_ADDR pc);
-
 /* State machine to track the state of the line number program.  */
 
 typedef struct

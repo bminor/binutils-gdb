@@ -1,3 +1,7 @@
+2015-05-28  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (record_line_ftype): Remove, duplicate.
+
 2015-05-28  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-nat.c (arm_linux_has_wmmx_registers): Remove.
