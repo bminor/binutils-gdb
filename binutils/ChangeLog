@@ -1,3 +1,8 @@
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	* readelf.c (print_gnu_note: NT_GNU_ABI_TAG): Recognize
+	GNU_ABI_TAG_SYLLABLE and GNU_ABI_TAG_NACL.
+
 2015-05-29  Stephen Kitt  <steve@sk2.org>
 
 	* dlltool.c (make_one_lib_file): Clear .idata$6 before use.

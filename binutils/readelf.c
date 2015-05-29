@@ -12185,7 +12185,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 					  & new_size))
 	section_size = new_size;
     }
-  
+
   if (relocate)
     {
       apply_relocations (file, section, start, section_size, NULL, NULL);
@@ -14297,7 +14297,7 @@ process_mips_specific (FILE * file)
 		  return 0;
 		}
 	      offset += option->size;
-		
+
 	      ++option;
 	      ++cnt;
 	    }
@@ -15125,6 +15125,12 @@ print_gnu_note (Elf_Internal_Note *pnote)
 	  case GNU_ABI_TAG_NETBSD:
 	    osname = "NetBSD";
 	    break;
+	  case GNU_ABI_TAG_SYLLABLE:
+	    osname = "Syllable";
+	    break;
+	  case GNU_ABI_TAG_NACL:
+	    osname = "NaCl";
+	    break;
 	  default:
 	    osname = "Unknown";
 	    break;
@@ -15193,7 +15199,7 @@ print_v850_note (Elf_Internal_Note * pnote)
 	case EF_RH850_DATA_ALIGN8: printf (_("8-byte\n")); return 1;
 	}
       break;
-	
+
     case V850_NOTE_DATA_SIZE:
       switch (val)
 	{
@@ -15201,7 +15207,7 @@ print_v850_note (Elf_Internal_Note * pnote)
 	case EF_RH850_DOUBLE64: printf (_("8-bytes\n")); return 1;
 	}
       break;
-	
+
     case V850_NOTE_FPU_INFO:
       switch (val)
 	{
@@ -15209,7 +15215,7 @@ print_v850_note (Elf_Internal_Note * pnote)
 	case EF_RH850_FPU30: printf (_("FPU-3.0\n")); return 1;
 	}
       break;
-	
+
     case V850_NOTE_MMU_INFO:
     case V850_NOTE_CACHE_INFO:
     case V850_NOTE_SIMD_INFO:
@@ -15570,7 +15576,7 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 	      inote.descdata = inote.namedata;
 	      inote.namesz   = 0;
 	    }
- 
+
 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 	  next = inote.descdata + align_power (inote.descsz, 2);
 	}
