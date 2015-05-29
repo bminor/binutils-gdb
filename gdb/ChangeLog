@@ -1,3 +1,9 @@
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	PR gdb/18464
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Use warning
+	rather than internal_error for an unrecognized value.
+
 2015-05-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 7.9.1.DATE-cvs.
