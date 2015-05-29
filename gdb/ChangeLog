@@ -1,5 +1,12 @@
 2015-05-29  Roland McGrath  <mcgrathr@google.com>
 
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_SYLLABLE and GDB_OSABI_NACL.
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Recognize
+	GNU_ABI_TAG_SYLLABLE and GNU_ABI_TAG_NACL.
+	* configure.tgt (*-*-nacl*): Set gdb_osabi=GDB_OSABI_NACL.
+
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
 	PR gdb/18464
 	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Use warning
 	rather than internal_error for an unrecognized value.

@@ -702,6 +702,7 @@ case "${targ}" in
 		gdb_osabi=GDB_OSABI_FREEBSD_ELF ;;
 *-*-linux* | *-*-uclinux*)
 		gdb_osabi=GDB_OSABI_LINUX ;;
+*-*-nacl*)	gdb_osabi=GDB_OSABI_NACL ;;
 *-*-nto*)	gdb_osabi=GDB_OSABI_QNXNTO ;;
 m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-openbsd*)	gdb_osabi=GDB_OSABI_OPENBSD_ELF ;;

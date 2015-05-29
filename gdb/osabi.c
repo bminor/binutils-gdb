@@ -492,6 +492,14 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      *osabi = GDB_OSABI_NETBSD_ELF;
 	      break;
 
+	    case GNU_ABI_TAG_SYLLABLE:
+	      *osabi = GDB_OSABI_SYLLABLE;
+	      break;
+
+	    case GNU_ABI_TAG_NACL:
+	      *osabi = GDB_OSABI_NACL;
+	      break;
+
 	    default:
 	      warning (_("GNU ABI tag value %u unrecognized."), abi_tag);
 	      break;
