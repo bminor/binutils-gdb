@@ -1,3 +1,9 @@
+2015-05-29  Stephen Kitt  <steve@sk2.org>
+
+	* dlltool.c (make_one_lib_file): Clear .idata$6 before use.
+	(main): Fail if the output file specified by the -z option cannot
+	be opened.
+
 2015-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18420
