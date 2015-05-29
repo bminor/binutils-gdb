@@ -1,3 +1,9 @@
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	PR gdb/18464
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Use warning
+	rather than internal_error for an unrecognized value.
+
 2015-05-29  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* xtensa-tdep.c (xtensa_pseudo_register_read)
@@ -646,7 +652,7 @@
 	linux_enable_event_reporting.
 	(_initialize_linux_nat): Delete call to
 	linux_ptrace_set_additional_flags.
-	* nat/linux-ptrace.c (current_ptrace_options): Rename to 
+	* nat/linux-ptrace.c (current_ptrace_options): Rename to
 	supported_ptrace_options.
 	(additional_flags): Delete variable.
 	(linux_check_ptrace_features): Use supported_ptrace_options.
@@ -654,7 +660,7 @@
 	Likewise, and remove additional_flags check.
 	(linux_enable_event_reporting): Change 'attached' argument to
 	'options'.  Use supported_ptrace_options.
-	(ptrace_supports_feature): Change comment.  Use 
+	(ptrace_supports_feature): Change comment.  Use
 	supported_ptrace_options.
 	(linux_ptrace_set_additional_flags): Delete function.
 	* nat/linux-ptrace.h (linux_ptrace_set_additional_flags):
