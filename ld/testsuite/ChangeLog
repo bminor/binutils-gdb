@@ -1,3 +1,8 @@
+2015-05-29  Stephen Kitt  <steve@sk2.org>
+
+	* ld-pe/pe-run2.exp (test_direct2_link_dll): Add $CFLAGS to the
+	compiler command line.
+
 2015-05-28  Catherine Moore  <clm@codesourcery.com>
 
 	ld/testsuite/
