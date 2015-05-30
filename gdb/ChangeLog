@@ -1,3 +1,9 @@
+2015-05-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* go32-nat.c (go32_xfer_memory): Fix the return value to be
+	compatible to what read_child and write_child return.  This
+	unbreaks that DJGPP build of GDB which was broken since v7.7.
+
 2015-05-29  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* MAINTAINERS (Write After Approval): Add Martin Galvan.
