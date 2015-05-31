@@ -1,3 +1,7 @@
+2015-06-11  Davide Italiano  <dccitaliano@gmail.com>
+
+	* gold.h (is_cident): Correct typo.
+
 2015-06-10  Han Shen  <shenhan@google.com>
 	Patch for erratum-843419 (2 of 2 - fix erratum occurrences).
 
