@@ -13224,6 +13224,13 @@ print_insn (bfd_vma pc, disassemble_info *info)
       for (i = 0; i < MAX_OPERANDS; ++i)
 	op_txt[i] = op_out[i];
 
+      if (intel_syntax && dp && dp->op[2].rtn == OP_Rounding
+          && dp->op[3].rtn == OP_E && dp->op[4].rtn == NULL)
+	{
+	  op_txt[2] = op_out[3];
+	  op_txt[3] = op_out[2];
+	}
+
       for (i = 0; i < (MAX_OPERANDS >> 1); ++i)
 	{
 	  op_ad = op_index[i];

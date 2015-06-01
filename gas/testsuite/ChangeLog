@@ -1,5 +1,12 @@
 2015-06-01  Jan Beulich  <jbeulich@suse.com>
 
+	* gas/i386/avx512f.s: Adjust operand order for Intel syntax
+	vcvt{,u}si2ss.
+	* gas/i386/x86-64-avx512f.s: Adjust operand order for Intel
+	syntax vcvt{,u}si2s{d,s}.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
 	* gas/i386/avx512f-intel.d: Adjust expectations on operand order.
 	* gas/i386/evex-lig256-intel.d: Likewise.
 	* gas/i386/evex-lig512-intel.d: Likewise.

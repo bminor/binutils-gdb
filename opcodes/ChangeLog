@@ -1,5 +1,10 @@
 2015-06-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (print_insn): Swap rounding mode specifier and
+	general purpose register in Intel mode.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: New IntelSyntax entries for vcvt{,u}si2s{d,s}.
 	* i386-tbl.h: Regenerate.
 
