@@ -88,12 +88,23 @@ fetch_fpregister (struct regcache *regcache, int regno)
 {
   int ret, tid;
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
-  
+
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
 
   /* Read the floating point state.  */
-  ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &fp;
+      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iov);
+    }
+  else
+    ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch floating point register."));
@@ -121,9 +132,20 @@ fetch_fpregs (struct regcache *regcache)
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
-  
+
   /* Read the floating point state.  */
-  ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &fp;
+      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iov);
+    }
+  else
+    ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch the floating point registers."));
@@ -150,9 +172,20 @@ store_fpregister (const struct regcache *regcache, int regno)
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
-  
+
   /* Read the floating point state.  */
-  ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &fp;
+      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iov);
+    }
+  else
+    ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch the floating point registers."));
@@ -168,7 +201,18 @@ store_fpregister (const struct regcache *regcache, int regno)
   if (regno >= ARM_F0_REGNUM && regno <= ARM_F7_REGNUM)
     collect_nwfpe_register (regcache, regno, fp);
 
-  ret = ptrace (PTRACE_SETFPREGS, tid, 0, fp);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &fp;
+      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
+
+      ret = ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_SETFPREGS, tid, 0, fp);
+
   if (ret < 0)
     {
       warning (_("Unable to store floating point register."));
@@ -187,9 +231,21 @@ store_fpregs (const struct regcache *regcache)
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
-  
+
   /* Read the floating point state.  */
-  ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+  if (have_ptrace_getregset)
+    {
+      elf_fpregset_t fpregs;
+      struct iovec iov;
+
+      iov.iov_base = &fpregs;
+      iov.iov_len = sizeof (fpregs);
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iov);
+    }
+  else
+    ret = ptrace (PT_GETFPREGS, tid, 0, fp);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch the floating point registers."));
@@ -205,7 +261,18 @@ store_fpregs (const struct regcache *regcache)
     if (REG_VALID == regcache_register_status (regcache, regno))
       collect_nwfpe_register (regcache, regno, fp);
 
-  ret = ptrace (PTRACE_SETFPREGS, tid, 0, fp);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &fp;
+      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
+
+      ret = ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_SETFPREGS, tid, 0, fp);
+
   if (ret < 0)
     {
       warning (_("Unable to store floating point registers."));
