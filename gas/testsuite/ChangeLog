@@ -1,3 +1,8 @@
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/reloc-insn.s: New testcase.
+	* gas/aarch64/reloc-insn.d: Ditto.
+
 2015-06-01  Jan Beulich  <jbeulich@suse.com>
 
 	* gas/i386/avx512f.s: Adjust operand order for Intel syntax

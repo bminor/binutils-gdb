@@ -183,6 +183,9 @@ func:
 	
 	ret
 	
+	// BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+	ldr	x28, [x13, #:gotpage_lo15:dummy]
+
 llit:	.word	0xdeadf00d
 	
 lab:	

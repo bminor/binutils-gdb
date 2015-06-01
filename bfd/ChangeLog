@@ -1,3 +1,11 @@
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15.
+
 2015-05-28  Catherine Moore  <clm@codesourcery.com>
 	    Bernd Schmidt <bernds@codesourcery.com>
 	    Paul Brook <paul@codesourcery.com>

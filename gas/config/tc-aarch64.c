@@ -2589,6 +2589,15 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    0},
+
+  /* 15bit offset from got entry to base address of GOT table.  */
+  {"gotpage_lo15", 0,
+   0,
+   0,
+   0,
+   0,
+   BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15,
+   0},
 };
 
 /* Given the address of a pointer pointing to the textual name of a
@@ -6758,6 +6767,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LDST128_LO12:
     case BFD_RELOC_AARCH64_LDST16_LO12:
@@ -6911,6 +6921,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LDST128_LO12:
     case BFD_RELOC_AARCH64_LDST16_LO12:
