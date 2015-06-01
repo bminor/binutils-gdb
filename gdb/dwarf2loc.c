@@ -825,9 +825,8 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 
   /* See call_site_find_chain_1 why there is no way to reach the bottom callee
      PC again.  In such case there must be two different code paths to reach
-     it, therefore some of the former determined intermediate PCs must differ
-     and the unambiguous chain gets shortened.  */
-  gdb_assert (result->callers + result->callees < result->length);
+     it.  CALLERS + CALLEES equal to LENGTH in the case of self tail-call.  */
+  gdb_assert (result->callers + result->callees <= result->length);
 }
 
 /* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All the

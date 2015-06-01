@@ -1,3 +1,10 @@
+2015-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/18392
+	* gdb.arch/amd64-tailcall-self.S: New file.
+	* gdb.arch/amd64-tailcall-self.c: New file.
+	* gdb.arch/amd64-tailcall-self.exp: New file.
+
 2015-05-28  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.base/foll-vfork.exp (main): Disable exec-dependent
