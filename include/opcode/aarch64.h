@@ -39,6 +39,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SIMD	0x00040000	/* SIMD instructions.  */
 #define AARCH64_FEATURE_CRC	0x00080000	/* CRC instructions.  */
 #define AARCH64_FEATURE_LSE	0x00100000	/* LSE instructions.  */
+#define AARCH64_FEATURE_PAN	0x00200000	/* PAN instructions.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -629,6 +630,10 @@ typedef struct
 extern const aarch64_sys_reg aarch64_sys_regs [];
 extern const aarch64_sys_reg aarch64_pstatefields [];
 extern bfd_boolean aarch64_sys_reg_deprecated_p (const aarch64_sys_reg *);
+extern bfd_boolean aarch64_sys_reg_supported_p (const aarch64_feature_set,
+						const aarch64_sys_reg *);
+extern bfd_boolean aarch64_pstatefield_supported_p (const aarch64_feature_set,
+						    const aarch64_sys_reg *);
 
 typedef struct
 {

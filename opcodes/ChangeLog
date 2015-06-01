@@ -1,3 +1,11 @@
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (F_ARCHEXT): New.
+	(aarch64_sys_regs): Add "pan".
+	(aarch64_sys_reg_supported_p): New.
+	(aarch64_pstatefields): Add "pan".
+	(aarch64_pstatefield_supported_p): New.
+
 2015-06-01  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-tbl.h: Regenerate.

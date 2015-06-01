@@ -1,3 +1,9 @@
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_PAN): New.
+	(aarch64_sys_reg_supported_p): Declare.
+	(aarch64_pstatefield_supported_p): Declare.
+
 2015-04-30  DJ Delorie  <dj@redhat.com>
 
 	* rl78.h (RL78_Dis_Isa): New.
