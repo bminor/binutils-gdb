@@ -20,8 +20,6 @@
 #ifndef X86_LINUX_NAT_H
 #define X86_LINUX_NAT_H 1
 
-/* Does the current host support PTRACE_GETREGSET?  */
-extern int have_ptrace_getregset;
 
 
 /* Helper for ps_get_thread_area.  Sets BASE_ADDR to a pointer to

@@ -115,6 +115,9 @@ struct lwp_info
    native target is active.  */
 extern struct lwp_info *lwp_list;
 
+/* Does the current host support PTRACE_GETREGSET?  */
+extern int have_ptrace_getregset;
+
 /* Iterate over each active thread (light-weight process).  */
 #define ALL_LWPS(LP)							\
   for ((LP) = lwp_list;							\

@@ -163,6 +163,9 @@ blocked.  */
 #define O_LARGEFILE 0
 #endif
 
+/* Does the current host support PTRACE_GETREGSET?  */
+int have_ptrace_getregset = -1;
+
 /* The single-threaded native GNU/Linux target_ops.  We save a pointer for
    the use of the multi-threaded target.  */
 static struct target_ops *linux_ops;

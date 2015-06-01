@@ -1,5 +1,13 @@
 2015-06-01  Yao Qi  <yao.qi@linaro.org>
 
+	* x86-linux-nat.c (have_ptrace_getregset): Move it to ...
+	* linux-nat.c: ... here.
+	* x86-linux-nat.h (have_ptrace_getregset): Move the declaration
+	to ...
+	* linux-nat.h: ... here.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-linux-nat.c: Include "nat/linux-ptrace.h".
 	* i386-linux-nat.c: Likewise.
 	* nat/linux-ptrace.h (PTRACE_GETREGSET, PTRACE_SETREGSET): Define.

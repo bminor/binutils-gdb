@@ -51,8 +51,6 @@ struct arch_lwp_info
   int debug_registers_changed;
 };
 
-/* Does the current host support PTRACE_GETREGSET?  */
-int have_ptrace_getregset = -1;
 
 
 /* linux_nat_new_fork hook.   */
