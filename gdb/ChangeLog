@@ -1,5 +1,12 @@
 2015-06-01  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-nat.c (fetch_register): Use PTRACE_GETREGSET.
+	(fetch_regs): Likewise.
+	(store_regs): Use PTRACE_SETREGSET.
+	(store_register): Likewise.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-nat.c (arm_linux_read_description): Check whether
 	kernel supports PTRACE_GETREGSET.
 

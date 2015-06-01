@@ -224,8 +224,19 @@ fetch_register (struct regcache *regcache, int regno)
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
-  
-  ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &regs;
+      iov.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch general register."));
@@ -266,8 +277,19 @@ fetch_regs (struct regcache *regcache)
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
-  
-  ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &regs;
+      iov.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch general registers."));
@@ -304,9 +326,20 @@ store_register (const struct regcache *regcache, int regno)
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
-  
+
   /* Get the general registers from the process.  */
-  ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &regs;
+      iov.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch general registers."));
@@ -322,7 +355,18 @@ store_register (const struct regcache *regcache, int regno)
     regcache_raw_collect (regcache, ARM_PC_REGNUM,
 			 (char *) &regs[ARM_PC_REGNUM]);
 
-  ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &regs;
+      iov.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
+
   if (ret < 0)
     {
       warning (_("Unable to store general register."));
@@ -338,9 +382,20 @@ store_regs (const struct regcache *regcache)
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
-  
+
   /* Fetch the general registers.  */
-  ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &regs;
+      iov.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch general registers."));
@@ -357,7 +412,17 @@ store_regs (const struct regcache *regcache)
     regcache_raw_collect (regcache, ARM_PS_REGNUM,
 			 (char *) &regs[ARM_CPSR_GREGNUM]);
 
-  ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = &regs;
+      iov.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
 
   if (ret < 0)
     {
