@@ -258,6 +258,7 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
       break;
 
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LDST128_LO12:
     case BFD_RELOC_AARCH64_LDST16_LO12:
@@ -411,6 +412,11 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
       value = PG (value + addend) - PG (place);
+      break;
+
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+      /* Caller must make sure addend is the base address of .got section.  */
+      value = value - PG (addend);
       break;
 
     case BFD_RELOC_AARCH64_ADD_LO12:
