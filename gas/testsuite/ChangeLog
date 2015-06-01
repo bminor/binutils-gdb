@@ -1,3 +1,12 @@
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/i386/avx512f-intel.d: Adjust expectations on operand order.
+	* gas/i386/evex-lig256-intel.d: Likewise.
+	* gas/i386/evex-lig512-intel.d: Likewise.
+	* gas/i386/x86-64-avx512f-intel.d: Likewise.
+	* gas/i386/x86-64-evex-lig256-intel.d: Likewise.
+	* gas/i386/x86-64-evex-lig512-intel.d: Likewise.
+
 2015-05-28  Catherine Moore  <clm@codesourcery.com>
 	    Bernd Schmidt <bernds@codesourcery.com>
 

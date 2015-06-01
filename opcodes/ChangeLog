@@ -1,3 +1,8 @@
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl: New IntelSyntax entries for vcvt{,u}si2s{d,s}.
+	* i386-tbl.h: Regenerate.
+
 2015-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Remove Disp32 from AMD64 direct call/jmp.
