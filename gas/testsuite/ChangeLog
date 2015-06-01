@@ -1,3 +1,9 @@
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* pan-directive.d: New.
+	* pan.d: New.
+	* pan.s: New
+
 2015-06-01  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/aarch64/ilp32-basic.s: New testcase.
