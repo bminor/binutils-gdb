@@ -1,5 +1,12 @@
 2015-06-01  Jiong Wang  <jiong.wang@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Set overflow type to
+	complain_overflow_unsigned for BFD_RELOC_AARCH64_TLSLE_ADD_LO12.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Don't use
+	PGOFF for BFD_RELOC_AARCH64_TLSLE_ADD_LO12.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
 	* elfnn-aarch64.c (aarch64_reloc_got_type): Support
 	BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15.
 	(elfNN_aarch64_final_link_relocate): Ditto.

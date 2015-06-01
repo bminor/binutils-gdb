@@ -435,9 +435,12 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
       value = PG_OFFSET (value + addend);
+      break;
+
+    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
+      value = value + addend;
       break;
 
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
