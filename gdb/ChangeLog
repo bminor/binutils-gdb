@@ -1,5 +1,10 @@
 2015-06-01  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-nat.c (arm_linux_read_description): Check whether
+	kernel supports PTRACE_GETREGSET.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
 	* x86-linux-nat.c (have_ptrace_getregset): Move it to ...
 	* linux-nat.c: ... here.
 	* x86-linux-nat.h (have_ptrace_getregset): Move the declaration

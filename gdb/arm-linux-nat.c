@@ -634,6 +634,22 @@ arm_linux_read_description (struct target_ops *ops)
 {
   CORE_ADDR arm_hwcap = 0;
 
+  if (have_ptrace_getregset == -1)
+    {
+      elf_gregset_t gpregs;
+      struct iovec iov;
+      int tid = GET_THREAD_ID (inferior_ptid);
+
+      iov.iov_base = &gpregs;
+      iov.iov_len = sizeof (gpregs);
+
+      /* Check if PTRACE_GETREGSET works.  */
+      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov) < 0)
+	have_ptrace_getregset = 0;
+      else
+	have_ptrace_getregset = 1;
+    }
+
   if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
     {
       return ops->beneath->to_read_description (ops->beneath);
