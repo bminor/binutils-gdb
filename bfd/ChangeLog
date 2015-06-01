@@ -1,5 +1,14 @@
 2015-06-01  Jiong Wang  <jiong.wang@arm.com>
 
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Support
+	BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14.
+	(elfNN_aarch64_final_link_relocate): Ditto.
+	(elfNN_aarch64_gc_swap_hook): Ditto.
+	(elfNN_aarch64_check_relocs): Ditto.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Ditto.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
 	* reloc.c (BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14): New entry.
 	* bfd-in2.h: Regenerate.
 	* libbfd.h: Regenerate.

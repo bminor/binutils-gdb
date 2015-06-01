@@ -4067,6 +4067,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     {
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
@@ -4621,6 +4622,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 					      howto, value);
 	case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
 	case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
@@ -4682,7 +4684,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    value = aarch64_calculate_got_entry_vma (h, globals, info,
 						     value, output_bfd,
 						     unresolved_reloc_p);
-	  if (bfd_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15)
+	  if (bfd_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+	      || bfd_r_type == BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14)
 	    addend = (globals->root.sgot->output_section->vma
 		      + globals->root.sgot->output_offset);
 	  value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
@@ -4890,6 +4893,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
@@ -4902,7 +4906,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  value = aarch64_calculate_got_entry_vma (h, globals, info, value,
 						   output_bfd,
 						   unresolved_reloc_p);
-	  if (bfd_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15)
+	  if (bfd_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+	      || bfd_r_type == BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14)
 	    addend = (globals->root.sgot->output_section->vma
 		      + globals->root.sgot->output_offset);
 	  value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
@@ -4960,7 +4965,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	   the direct data access into indirect data access through GOT.  */
 	value = got_entry_addr;
 
-	if (bfd_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15)
+	if (bfd_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+	    || bfd_r_type == BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14)
 	  addend = base_got->output_section->vma + base_got->output_offset;
 
 	value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
@@ -5959,6 +5965,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	{
 	case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
 	case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
@@ -6317,6 +6324,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case BFD_RELOC_AARCH64_CALL26:
 	    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
 	    case BFD_RELOC_AARCH64_JUMP26:
+	    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
 	    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
@@ -6429,6 +6437,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     there are no dangling GOT_PAGE relocs.  */
 	case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
 	case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:

@@ -50,6 +50,7 @@ run_dump_test "erratum843419"
 
 # Relocation Tests
 run_dump_test "weak-undefined"
+run_dump_test "emit-relocs-28"
 run_dump_test "emit-relocs-257"
 run_dump_test "emit-relocs-257-be"
 # 258 is tested in 257

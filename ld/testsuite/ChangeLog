@@ -1,5 +1,11 @@
 2015-06-01  Jiong Wang  <jiong.wang@arm.com>
 
+	* ld-aarch64/emit-relocs-28.s: New test file.
+	* ld-aarch64/emit-relocs-28.d: Ditto.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
 	* ld-aarch64/tprel_add_lo12_overflow.s: New testcase.
 	* ld-aarch64/tprel_add_lo12_overflow.d: Nex expectation file.
 	* ld-aarch64/aarch64-elf.exp: Run new testcase.
