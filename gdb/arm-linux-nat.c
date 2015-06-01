@@ -591,7 +591,17 @@ fetch_vfp_regs (struct regcache *regcache)
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
 
-  ret = ptrace (PTRACE_GETVFPREGS, tid, 0, regbuf);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = regbuf;
+      iov.iov_len = VFP_REGS_SIZE;
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_GETVFPREGS, tid, 0, regbuf);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch VFP registers."));
@@ -617,7 +627,17 @@ store_vfp_regs (const struct regcache *regcache)
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
 
-  ret = ptrace (PTRACE_GETVFPREGS, tid, 0, regbuf);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = regbuf;
+      iov.iov_len = VFP_REGS_SIZE;
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_GETVFPREGS, tid, 0, regbuf);
+
   if (ret < 0)
     {
       warning (_("Unable to fetch VFP registers (for update)."));
@@ -631,7 +651,16 @@ store_vfp_regs (const struct regcache *regcache)
   regcache_raw_collect (regcache, ARM_FPSCR_REGNUM,
 			(char *) regbuf + 32 * 8);
 
-  ret = ptrace (PTRACE_SETVFPREGS, tid, 0, regbuf);
+  if (have_ptrace_getregset)
+    {
+      struct iovec iov;
+
+      iov.iov_base = regbuf;
+      iov.iov_len = VFP_REGS_SIZE;
+      ret = ptrace (PTRACE_SETREGSET, tid, NT_ARM_VFP, &iov);
+    }
+  else
+    ret = ptrace (PTRACE_SETVFPREGS, tid, 0, regbuf);
 
   if (ret < 0)
     {
