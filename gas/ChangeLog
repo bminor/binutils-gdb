@@ -1,6 +1,12 @@
 2015-06-01  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
+	(md_apply_fix): Support BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14.
+	(aarch64_force_relocation): Ditto.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
 	(md_apply_fix): Support BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15.
 	(aarch64_force_relocation): Ditto.
 

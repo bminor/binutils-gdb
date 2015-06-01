@@ -6762,6 +6762,10 @@ ENUMDOC
   the GOT entry for this symbol.  Used in conjunction with
   BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.
 ENUM
+  BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14
+ENUMDOC
+  Scaled 14 bit byte offset to the page base of the global offset table.
+ENUM
   BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
 ENUMDOC
   Scaled 15 bit byte offset to the page base of the global offset table.
