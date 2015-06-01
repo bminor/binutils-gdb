@@ -20,14 +20,6 @@
 #ifndef X86_LINUX_NAT_H
 #define X86_LINUX_NAT_H 1
 
-#ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET	0x4204
-#endif
-
-#ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET	0x4205
-#endif
-
 /* Does the current host support PTRACE_GETREGSET?  */
 extern int have_ptrace_getregset;
 

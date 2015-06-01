@@ -1,3 +1,8 @@
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-s390-low.c (PTRACE_GETREGSET, PTRACE_SETREGSET): Remove.
+	* linux-x86-low.c: Likewise.
+
 2015-05-28  Don Breazeal  <donb@codesourcery.com>
 
 	* linux-low.c (handle_extended_wait): Initialize

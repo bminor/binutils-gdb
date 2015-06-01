@@ -41,6 +41,7 @@
 #include "nat/linux-nat.h"
 #include "nat/x86-linux.h"
 #include "nat/x86-linux-dregs.h"
+#include "nat/linux-ptrace.h"
 
 /* Per-thread arch-specific data we want to keep.  */
 

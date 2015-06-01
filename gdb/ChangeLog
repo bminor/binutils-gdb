@@ -1,3 +1,13 @@
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-nat.c: Include "nat/linux-ptrace.h".
+	* i386-linux-nat.c: Likewise.
+	* nat/linux-ptrace.h (PTRACE_GETREGSET, PTRACE_SETREGSET): Define.
+	* s390-linux-nat.c: Include "nat/linux-ptrace.h".
+	(PTRACE_GETREGSET, PTRACE_SETREGSET): Remove.
+	* x86-linux-nat.c: Include "nat/linux-ptrace.h".
+	* x86-linux-nat.h (PTRACE_GETREGSET, PTRACE_SETREGSET): Remove.
+
 2015-05-30  Eli Zaretskii  <eliz@gnu.org>
 
 	* go32-nat.c (go32_xfer_memory): Fix the return value to be

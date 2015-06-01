@@ -120,15 +120,6 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 #include <sys/ptrace.h>
 #include <sys/uio.h>
 
-#ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET	0x4204
-#endif
-
-#ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET	0x4205
-#endif
-
-
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
 #endif

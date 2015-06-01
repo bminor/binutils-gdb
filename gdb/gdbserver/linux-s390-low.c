@@ -40,14 +40,6 @@
 #define HWCAP_S390_VX 2048
 #endif
 
-#ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET 0x4204
-#endif
-
-#ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET 0x4205
-#endif
-
 /* Defined in auto-generated file s390-linux32.c.  */
 void init_registers_s390_linux32 (void);
 extern const struct target_desc *tdesc_s390_linux32;

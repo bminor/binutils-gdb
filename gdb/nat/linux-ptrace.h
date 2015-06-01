@@ -43,6 +43,14 @@ struct buffer;
 # define PTRACE_SETSIGINFO 0x4203
 #endif /* PTRACE_GETSIGINF */
 
+#ifndef PTRACE_GETREGSET
+#define PTRACE_GETREGSET	0x4204
+#endif
+
+#ifndef PTRACE_SETREGSET
+#define PTRACE_SETREGSET	0x4205
+#endif
+
 /* If the system headers did not provide the constants, hard-code the normal
    values.  */
 #ifndef PTRACE_EVENT_FORK

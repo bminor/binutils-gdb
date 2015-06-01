@@ -37,6 +37,7 @@
 #include "x86-xstate.h"
 
 #include "x86-linux-nat.h"
+#include "nat/linux-ptrace.h"
 
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout for GNU/Linux
