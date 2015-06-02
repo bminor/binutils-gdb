@@ -1,5 +1,10 @@
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* arm.h (ARM_EXT2_PAN): New.
+	(ARM_FEATURE_CORE_HIGH): New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* arm.h (ARM_FEATURE_ALL): New.
 
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
