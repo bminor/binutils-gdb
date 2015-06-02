@@ -1,5 +1,11 @@
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* rdma-directive.d: New.
+	* rdma.d: New.
+	* rdma.s: New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* lor-directive.d: New.
 	* lor.d: New.
 	* lor.s: New

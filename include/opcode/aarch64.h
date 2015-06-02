@@ -41,6 +41,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_LSE	0x00100000	/* LSE instructions.  */
 #define AARCH64_FEATURE_PAN	0x00200000	/* PAN instructions.  */
 #define AARCH64_FEATURE_LOR	0x00400000	/* LOR instructions.  */
+#define AARCH64_FEATURE_RDMA	0x00800000	/* v8.1 SIMD instructions.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \

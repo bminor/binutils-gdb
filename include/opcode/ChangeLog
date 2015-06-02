@@ -1,5 +1,9 @@
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64.h (AARCH64_FEATURE_RDMA): New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64.h (AARCH64_FEATURE_LOR): New.
 
 2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>

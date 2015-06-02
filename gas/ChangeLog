@@ -1,5 +1,10 @@
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-aarch64.c (aarch64_features): Add "rdma".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "rdma".
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* config/tc-aarch64.c (aarch64_features): Add "lor".
 	* doc/c-aarch64.c (Aarch64 Extensions): Add "lor" to list of
 	architecture extensions.
