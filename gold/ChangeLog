@@ -1,3 +1,10 @@
+2015-06-01  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* merge.cc (get_input_merge_map): Update for data structure change.
+	(get_or_make_input_merge_map): Update for data structure change.
+	* merge.h (Object_merge_map): Use a std::vector<std::pair>> instead of
+	a std::map. Remove first_shnum_, first_map_, second_shnum_, second_map_.
+
 2015-05-16  Alan Modra  <amodra@gmail.com>
 
 	* reloc.cc (Sized_relobj_file::find_functions): Use function_location.
