@@ -1,3 +1,8 @@
+2015-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/15564
+	* inferior.c (detach_inferior): Call exit_inferior_1 with silent = 0.
+
 2015-06-02  Yao Qi  <yao.qi@linaro.org>
 
 	* i386-linux-nat.c: Include linux-nat.h.
