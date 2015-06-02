@@ -1222,6 +1222,8 @@ static const aarch64_feature_set aarch64_feature_crc =
   AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0);
 static const aarch64_feature_set aarch64_feature_lse =
   AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0);
+static const aarch64_feature_set aarch64_feature_lor =
+  AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0);
 
 #define CORE	&aarch64_feature_v8
 #define FP	&aarch64_feature_fp
@@ -1229,6 +1231,7 @@ static const aarch64_feature_set aarch64_feature_lse =
 #define CRYPTO	&aarch64_feature_crypto
 #define CRC	&aarch64_feature_crc
 #define LSE	&aarch64_feature_lse
+#define LOR	&aarch64_feature_lor
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -2017,6 +2020,13 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"ldaxp", 0x887f8000, 0xbfe08000, ldstexcl, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMPLE), QL_R2NIL, F_GPRSIZE_IN_Q},
   {"stlr", 0x889ffc00, 0xbfe08000, ldstexcl, 0, CORE, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q},
   {"ldar", 0x88dffc00, 0xbfeffc00, ldstexcl, 0, CORE, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q},
+  /* Limited Ordering Regions load/store instructions.  */
+  {"ldlar", 0x88df7c00, 0xbfe08000, ldstexcl, 0, LOR, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q},
+  {"ldlarb", 0x08df7c00, 0xffe08000, ldstexcl, 0, LOR, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0},
+  {"ldlarh", 0x48df7c00, 0xffe08000, ldstexcl, 0, LOR, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0},
+  {"stllr", 0x889f7c00, 0xbfe08000, ldstexcl, 0, LOR, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q},
+  {"stllrb", 0x089f7c00, 0xffe08000, ldstexcl, 0, LOR, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0},
+  {"stllrh", 0x489f7c00, 0xbfe08000, ldstexcl, 0, LOR, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0},
   /* Load/store no-allocate pair (offset).  */
   {"stnp", 0x28000000, 0x7fc00000, ldstnapair_offs, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF},
   {"ldnp", 0x28400000, 0x7fc00000, ldstnapair_offs, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF},

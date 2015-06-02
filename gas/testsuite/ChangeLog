@@ -1,3 +1,9 @@
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* lor-directive.d: New.
+	* lor.d: New.
+	* lor.s: New
+
 2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* pan-directive.d: New.

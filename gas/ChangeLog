@@ -1,3 +1,9 @@
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "lor".
+	* doc/c-aarch64.c (Aarch64 Extensions): Add "lor" to list of
+	architecture extensions.
+
 2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (parse_sys_reg): New parameter.  Check target
