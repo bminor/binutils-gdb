@@ -1,3 +1,7 @@
+2015-06-02  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-linux-nat.c: Include linux-nat.h.
+
 2015-06-01  Andreas Schwab  <schwab@linux-m68k.org>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

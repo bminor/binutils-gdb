@@ -33,6 +33,7 @@
 #include "i386-linux-tdep.h"
 #include "x86-xstate.h"
 
+#include "linux-nat.h"
 #include "x86-linux-nat.h"
 #include "nat/linux-ptrace.h"
 
