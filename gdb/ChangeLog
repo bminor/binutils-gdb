@@ -1,3 +1,10 @@
+2015-06-16  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Call
+	target_terminal_ours_for_output() before calling
+	tui_show_frame_info(), and restore the original terminal
+	settings afterwards.
+
 2015-06-16  Martin Simmons  <martin@lispworks.com>  (tiny patch)
 
 	* arm-linux-nat.c: Include nat/linux-ptrace.h.

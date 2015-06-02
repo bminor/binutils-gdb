@@ -127,10 +127,14 @@ tui_selected_frame_level_changed_hook (int level)
 {
   struct frame_info *fi;
   CORE_ADDR pc;
+  struct cleanup *old_chain;
 
   /* Negative level means that the selected frame was cleared.  */
   if (level < 0)
     return;
+
+  old_chain = make_cleanup_restore_target_terminal ();
+  target_terminal_ours_for_output ();
 
   fi = get_selected_frame (NULL);
   /* Ensure that symbols for this frame are read in.  Also, determine
@@ -160,6 +164,8 @@ tui_selected_frame_level_changed_hook (int level)
       tui_check_data_values (fi);
       tui_refreshing_registers = 0;
     }
+
+  do_cleanups (old_chain);
 }
 
 /* Called from print_frame_info to list the line we stopped in.  */
