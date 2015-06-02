@@ -13,6 +13,11 @@
 
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* arm-dis.c (select_arm_features): Rework to avoid used of redefined
+	macros.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_rdma): New.
 	(RDMA): New.
 	(aarch64_opcode_table): Add "sqrmlah" and "sqrdmlsh" instructions.
