@@ -84,6 +84,8 @@
 #define FPU_NEON_EXT_ARMV8 0x00010000	/* Neon for ARMv8.  */
 #define FPU_CRYPTO_EXT_ARMV8 0x00008000	/* Crypto for ARMv8.  */
 #define CRC_EXT_ARMV8	 0x00004000	/* CRC32 for ARMv8.  */
+#define FPU_VFP_EXT_ARMV8xD 0x00002000	/* Single-precision FP for ARMv8.  */
+#define FPU_NEON_EXT_RDMA 0x00001000     /* v8.1 Adv.SIMD extensions.  */
 
 /* Architectures are the sum of the base and extensions.  The ARM ARM (rev E)
    defines the following: ARMv3, ARMv3M, ARMv4xM, ARMv4, ARMv4TxM, ARMv4T,
@@ -200,6 +202,11 @@
 #define FPU_ARCH_CRYPTO_NEON_VFP_ARMV8 \
   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8 | FPU_NEON_ARMV8 | FPU_VFP_ARMV8)
 #define ARCH_CRC_ARMV8 ARM_FEATURE_COPROC (CRC_EXT_ARMV8)
+#define FPU_ARCH_NEON_VFP_ARMV8_1 \
+  ARM_FEATURE_COPROC (FPU_NEON_ARMV8				 \
+		      | FPU_VFP_ARMV8				 \
+		      | FPU_NEON_EXT_RDMA)
+
 
 #define FPU_ARCH_ENDIAN_PURE ARM_FEATURE_COPROC (FPU_ENDIAN_PURE)
 

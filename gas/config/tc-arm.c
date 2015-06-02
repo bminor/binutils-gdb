@@ -259,6 +259,8 @@ static const arm_feature_set fpu_crypto_ext_armv8 =
   ARM_FEATURE_COPROC (FPU_CRYPTO_EXT_ARMV8);
 static const arm_feature_set crc_ext_armv8 =
   ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
+static const arm_feature_set fpu_neon_ext_v8_1 =
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8 | FPU_NEON_EXT_RDMA);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -12903,6 +12905,8 @@ struct neon_tab_entry
   X(vqdmull,	0x0800d00, N_INV,     0x0800b40),	\
   X(vqdmulh,    0x0000b00, N_INV,     0x0800c40),	\
   X(vqrdmulh,   0x1000b00, N_INV,     0x0800d40),	\
+  X(vqrdmlah,   0x3000b10, N_INV,     0x0800e40),	\
+  X(vqrdmlsh,   0x3000c10, N_INV,     0x0800f40),	\
   X(vshl,	0x0000400, N_INV,     0x0800510),	\
   X(vqshl,	0x0000410, N_INV,     0x0800710),	\
   X(vand,	0x0000110, N_INV,     0x0800030),	\
@@ -19767,6 +19771,11 @@ static const struct asm_opcode insns[] =
  NUF(vrecpsq,   0000f10,  3, (RNQ,  oRNQ,  RNQ),  neon_step),
  NUF(vrsqrts,   0200f10,  3, (RNDQ, oRNDQ, RNDQ), neon_step),
  NUF(vrsqrtsq,  0200f10,  3, (RNQ,  oRNQ,  RNQ),  neon_step),
+ /* ARM v8.1 extension.  */
+ nUF(vqrdmlah,  _vqrdmlah, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmlahq, _vqrdmlah, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmlsh,  _vqrdmlsh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmlshq, _vqrdmlsh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
 
   /* Two address, int/float. Types S8 S16 S32 F32.  */
  NUF(vabsq,     1b10300, 2, (RNQ,  RNQ),      neon_abs_neg),
@@ -24581,6 +24590,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 				     | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
+  ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8,
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
 			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
@@ -24636,6 +24648,7 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"neon-fp-armv8",	FPU_ARCH_NEON_VFP_ARMV8},
   {"crypto-neon-fp-armv8",
 			FPU_ARCH_CRYPTO_NEON_VFP_ARMV8},
+  {"neon-fp-armv8.1",	FPU_ARCH_NEON_VFP_ARMV8_1},
   {NULL,		ARM_ARCH_NONE}
 };
 

@@ -1194,6 +1194,12 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0xf2000a10, 0xfe800f10,
     "vpmin%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3000b10, 0xff800f10,
+    "vqrdmlah%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3000c10, 0xff800f10,
+    "vqrdmlsh%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
 
   /* One register and an immediate value.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -1447,6 +1453,19 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0xf2800a40, 0xfe800f50,
     "vmull%c.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf2800e40, 0xff800f50,
+   "vqrdmlah%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf2800f40, 0xff800f50,
+   "vqrdmlsh%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3800e40, 0xff800f50,
+   "vqrdmlah%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3800f40, 0xff800f50,
+   "vqrdmlsh%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"
+  },
 
   /* Element and structure load/store.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
