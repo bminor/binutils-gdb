@@ -1,3 +1,33 @@
+2015-06-03  Cary Coutant  <ccoutant@gmail.com>
+
+        PR gold/17819
+        * gold.cc (queue_final_tasks): When --build-id=tree, queue a
+        separate task to schedule the build id computation.
+        * layout.cc (Hash_task::Hash_task): Remove build_id_blocker,
+        add Output_file and offset.
+        (Hash_task::run): Get and release the input views.
+        (Hash_task::is_runnable): Always return NULL (always runnable).
+        (Layout::queue_build_id_tasks): Remove.
+        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
+        parameters; use them instead of class members.
+        (Build_id_task_runner::run): New function.
+        (Close_task_runner::run): Pass array_of_hashes and size_of_hashes
+        to write_build_id.
+        * layout.h (Layout::queue_build_id_tasks): Remove.
+        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
+        parameters.
+        (Layout::array_of_hashes_): Remove.
+        (Layout::size_of_array_of_hashes_): Remove.
+        (Layout::input_view_): Remove.
+        (Build_id_task_runner): New class.
+        (Close_task_runner::Close_task_runner): Add array_of_hashes and
+        size_of_hashes parameters.
+        (Close_task_runner::array_of_hashes_): New data member.
+        (Close_task_runner::size_of_hashes_): New data member.
+        * testsuite/Makefile.am
+        (flagstest_compress_debug_sections_and_build_id_tree): New test.
+        * testsuite/Makefile.in: Regenerate.
+
 2015-06-01  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* merge.cc (get_input_merge_map): Update for data structure change.

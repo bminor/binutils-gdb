@@ -1309,6 +1309,14 @@ flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
 
+# Test --compress-debug-sections with --build-id=tree.
+check_PROGRAMS += flagstest_compress_debug_sections_and_build_id_tree
+flagstest_compress_debug_sections_and_build_id_tree: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib \
+		-Wl,--build-id=tree \
+		-Wl,--build-id-chunk-size-for-treehash=4096 \
+		-Wl,--build-id-min-file-size-for-treehash=0
+	test -s $@
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
