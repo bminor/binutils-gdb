@@ -1602,6 +1602,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
     0xe1400240, 0xfff00ff0, "crc32cw\t%12-15R, %16-19R, %0-3R"},
 
+  /* Privileged Access Never extension instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
+    0xf1100000, 0xfffffdff, "setpan\t#%9-9d"},
+
   /* Virtualization Extension instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT), 0x0160006e, 0x0fffffff, "eret%c"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT), 0x01400070, 0x0ff000f0, "hvc%c\t%e"},
@@ -2293,6 +2297,7 @@ static const struct opcode16 thumb_opcodes[] =
   /* ARM V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xbf50, 0xffff, "sevl%c"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xba80, 0xffc0, "hlt\t%0-5x"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),  0xb610, 0xfff7, "setpan\t#%3-3d"},
 
   /* ARM V6K no-argument instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6K), 0xbf00, 0xffff, "nop%c"},

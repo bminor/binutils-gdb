@@ -207,6 +207,7 @@ static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
 static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
 static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
 static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
+static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
@@ -9166,6 +9167,24 @@ do_swi (void)
 {
   inst.reloc.type = BFD_RELOC_ARM_SWI;
   inst.reloc.pc_rel = 0;
+}
+
+static void
+do_setpan (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_pan),
+	      _("selected processor does not support SETPAN instruction"));
+
+  inst.instruction |= ((inst.operands[0].imm & 1) << 9);
+}
+
+static void
+do_t_setpan (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_pan),
+	      _("selected processor does not support SETPAN instruction"));
+
+  inst.instruction |= (inst.operands[0].imm << 3);
 }
 
 /* ARM V5E (El Segundo) signed-multiply-accumulate (argument parse)
@@ -18836,6 +18855,13 @@ static const struct asm_opcode insns[] =
  TCE("hvc",	1400070, f7e08000, 1, (EXPi), hvc, t_hvc),
  TCE("eret",	160006e, f3de8f00, 0, (), noargs, noargs),
 
+#undef	ARM_VARIANT
+#define	ARM_VARIANT    & arm_ext_pan
+#undef	THUMB_VARIANT
+#define	THUMB_VARIANT  & arm_ext_pan
+
+ TUF("setpan",	1100000, b610, 1, (I7), setpan, t_setpan),
+
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_v6t2
 #undef  THUMB_VARIANT
@@ -24545,6 +24571,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("os",	ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
+  ARM_EXT_OPT ("pan",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
+			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_PAN, 0),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),

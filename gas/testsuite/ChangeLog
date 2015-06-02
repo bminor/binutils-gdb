@@ -1,20 +1,25 @@
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
-	* rdma-directive.d: New.
-	* rdma.d: New.
-	* rdma.s: New.
+	* gas/arm/armv8-a+pan.d: New.
+	* gas/arm/armv8-a+pan.s: New.
 
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
-	* lor-directive.d: New.
-	* lor.d: New.
-	* lor.s: New
+	* gas/aarch64/rdma-directive.d: New.
+	* gas/aarch64/rdma.d: New.
+	* gas/aarch64/rdma.s: New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/lor-directive.d: New.
+	* gas/aarch64/lor.d: New.
+	* gas/aarch64/lor.s: New
 
 2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
 
-	* pan-directive.d: New.
-	* pan.d: New.
-	* pan.s: New
+	* gas/aarch64/pan-directive.d: New.
+	* gas/aarch64/pan.d: New.
+	* gas/aarch64/pan.s: New
 
 2014-11-18  Jan Beulich  <jbeulich@suse.com>
 

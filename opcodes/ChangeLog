@@ -13,6 +13,11 @@
 
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* arm-dis.c (arm_opcodes): Add "setpan".
+	(thumb_opcodes): Add "setpan".
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* arm-dis.c (select_arm_features): Rework to avoid used of redefined
 	macros.
 

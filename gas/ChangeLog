@@ -17,6 +17,16 @@
 
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-arm.c (arm_ext_pan): New.
+	(do_setpan): New, encode an ARM SETPAN instruction.
+	(do_t_setpan): New, encode a Thumb SETPAN instruction.
+	(insns): Add "setpan".
+	(arm_extensions): Add "pan".
+	* doc/c-arm.texi (ARM Options): Add "pan" to list of -mcpu processor
+	extensions.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* config/tc-aarch64.c (aarch64_features): Add "rdma".
 	* doc/c-aarch64.texi (AArch64 Extensions): Add "rdma".
 

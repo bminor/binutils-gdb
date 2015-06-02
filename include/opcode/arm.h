@@ -57,6 +57,8 @@
 					   state.  */
 #define ARM_EXT_VIRT	 0x80000000	/* Virtualization extensions.  */
 
+#define ARM_EXT2_PAN	 0x00000001     /* PAN extension.  */
+
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
 #define ARM_CEXT_MAVERICK 0x00000002	/* Use Cirrus/DSP coprocessor.  */
@@ -318,5 +320,6 @@ typedef struct
 
 #define ARM_FEATURE_LOW(core, coproc) {{(core), 0}, (coproc)}
 #define ARM_FEATURE_CORE_LOW(core) {{(core), 0}, 0}
+#define ARM_FEATURE_CORE_HIGH(core) {{0, (core)}, 0}
 #define ARM_FEATURE_COPROC(coproc) {{0, 0}, (coproc)}
 #define ARM_FEATURE(core1, core2, coproc) {{(core1), (core2)}, (coproc)}

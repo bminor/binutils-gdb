@@ -167,6 +167,7 @@ The following extensions are currently supported:
 @code{simd} (Advanced SIMD Extensions for v8-A architecture, implies @code{fp}),
 @code{virt} (Virtualization Extensions for v7-A architecture, implies
 @code{idiv}),
+@code{pan} (Priviliged Access Never Extensions for v8-A architecture)
 and
 @code{xscale}.
 
