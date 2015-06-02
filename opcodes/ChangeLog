@@ -1,5 +1,14 @@
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-tbl.h (aarch64_feature_rdma): New.
+	(RDMA): New.
+	(aarch64_opcode_table): Add "sqrmlah" and "sqrdmlsh" instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_lor): New.
 	(LOR): New.
 	(aarch64_opdocde_table): Add "ldlar", "ldlarb", "ldlarh", "stllr",

@@ -134,6 +134,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Privileged Access Never support.
 @item @code{lor} @tab ARMv8-A @tab ARMv8-A or later
  @tab Enable Limited Ordering Regions extensions.
+@item @code{rdma} @tab ARMv8-A @tab ARMv8-A or later
+ @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
 @end multitable
 
 @node AArch64 Syntax
