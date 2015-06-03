@@ -1,3 +1,8 @@
+2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (handle_output_debug_string): Trim trailing '\n'
+	from OutputDebugString.
+
 2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 			Mircea Gherzan  <mircea.gherzan@intel.com>
 

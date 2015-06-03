@@ -818,7 +818,13 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 #ifdef __CYGWIN__
       if (!startswith (s, "cYg"))
 #endif
-	warning (("%s"), s);
+	{
+	  char *p = strchr (s, '\0');
+
+	  if (p > s && *--p == '\n')
+	    *p = '\0';
+	  warning (("%s"), s);
+	}
     }
 #ifdef __COPY_CONTEXT_SIZE
   else
