@@ -1,5 +1,9 @@
 2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* gdb.base/history-duplicates.exp: New test.
+
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* gdb.base/completion.exp: Test the completion of the "focus"
 	command.
 

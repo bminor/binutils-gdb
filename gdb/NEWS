@@ -145,6 +145,10 @@ show max-completions
   to avoid generating large completion lists, the computation of
   which can cause the debugger to become temporarily unresponsive.
 
+set history remove-duplicates
+show history remove-duplicates
+  Control the removal of duplicate history entries.
+
 maint set symbol-cache-size
 maint show symbol-cache-size
   Control the size of the symbol cache.

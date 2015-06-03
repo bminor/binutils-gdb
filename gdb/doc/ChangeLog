@@ -1,3 +1,8 @@
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.texinfo (Command History): Document the new option
+	"history remove-duplicates".
+
 2015-06-19  Doug Evans  <dje@google.com>
 
 	* stabs.texinfo (ELF Linker Relocation): Mention Sun stabs is no
