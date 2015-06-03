@@ -2,6 +2,10 @@
 
 Changes in 2.25:
 
+* Support for the ARMv8.1 architecture has been added to the ARM port.  Support
+  for the individual ARMv8.1 Adv.SIMD and PAN architecture extensions has also
+  been added to the ARM port.
+
 * Add support for the AVR Tiny microcontrollers.
 
 * Replace support for openrisc and or32 with support for or1k.

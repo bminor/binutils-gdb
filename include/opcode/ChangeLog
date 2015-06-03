@@ -1,3 +1,12 @@
+2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1): New.
+	(ARM_ARCH_V8_1A): New.
+	(ARM_ARCH_V8_1A_FP): New.
+	(ARM_ARCH_V8_1A_SIMD): New.
+	(ARM_ARCH_V8_1A_CRYPTOV1): New.
+	(ARM_FEATURE_CORE): New.
+
 2015-03-24  Terry Guo  <terry.guo@arm.com>
 
 	* arm.h (arm_feature_set): Extended to provide more available bits.

@@ -208,6 +208,7 @@ names are recognized:
 @code{armv7-m},
 @code{armv7e-m},
 @code{armv8-a},
+@code{armv8.1-a},
 @code{iwmmxt}
 and
 @code{xscale}.
