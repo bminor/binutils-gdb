@@ -435,7 +435,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
 
   if (current_thread->reload_context)
     {
-#ifdef __COPY_CONTEXT_SIZE
+#ifdef __CYGWIN__
       if (have_saved_context)
 	{
 	  /* Lie about where the program actually is stopped since
@@ -829,7 +829,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	  warning (("%s"), s);
 	}
     }
-#ifdef __COPY_CONTEXT_SIZE
+#ifdef __CYGWIN__
   else
     {
       /* Got a cygwin signal marker.  A cygwin signal is followed by

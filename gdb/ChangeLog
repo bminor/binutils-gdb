@@ -1,3 +1,9 @@
+2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (do_windows_fetch_inferior_registers)
+	(handle_output_debug_string): Replace __COPY_CONTEXT_SIZE
+	conditional with __CYGWIN__.
+
 2015-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* completer.c: Add arch-utils.h include.
