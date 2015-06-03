@@ -1,3 +1,8 @@
+2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/arm/armv8-a+rdma.d: New.
+	* gas/arm/armv8-a+rdma.s: New.
+
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/arm/armv8-a+pan.d: New.
