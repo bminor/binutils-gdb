@@ -1,5 +1,10 @@
 2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* windows-nat.c (thread_rec): Also ignore ERROR_INVALID_HANDLE
+	from SuspendThread().
+
+2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
 	* windows-nat.c (handle_output_debug_string): Trim trailing '\n'
 	from OutputDebugString.
 
