@@ -1,3 +1,26 @@
+2015-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* arch-utils.c (default_infcall_munmap): New.
+	* arch-utils.h (default_infcall_munmap): New declaration.
+	* compile/compile-object-load.c (struct munmap_list, munmap_list_add)
+	(munmap_list_free, munmap_listp_free_cleanup): New.
+	(struct setup_sections_data): Add field munmap_list_headp.
+	(setup_sections): Call munmap_list_add.
+	(compile_object_load): New variable munmap_list_head, initialize
+	setup_sections_data.munmap_list_headp, return munmap_list_head.
+	* compile/compile-object-load.h (struct munmap_list): New declaration.
+	(struct compile_module): Add field munmap_list_head.
+	(munmap_list_free): New declaration.
+	* compile/compile-object-run.c (struct do_module_cleanup): Add field
+	munmap_list_head.
+	(do_module_cleanup): Call munmap_list_free.
+	(compile_object_run): Pass munmap_list_head to do_module_cleanup.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (infcall_munmap): New.
+	* linux-tdep.c (linux_infcall_munmap): New.
+	(linux_init_abi): Install it.
+
 2015-06-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/15564

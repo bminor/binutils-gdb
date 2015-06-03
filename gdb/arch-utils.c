@@ -864,6 +864,12 @@ default_infcall_mmap (CORE_ADDR size, unsigned prot)
   error (_("This target does not support inferior memory allocation by mmap."));
 }
 
+void
+default_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
+{
+  /* Memory reserved by inferior mmap is kept leaked.  */
+}
+
 /* -mcmodel=large is used so that no GOT (Global Offset Table) is needed to be
    created in inferior memory by GDB (normally it is set by ld.so).  */
 

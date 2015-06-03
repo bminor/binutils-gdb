@@ -200,6 +200,7 @@ extern void default_skip_permanent_breakpoint (struct regcache *regcache);
 #define GDB_MMAP_PROT_EXEC	0x4	/* Page can be executed.  */
 
 extern CORE_ADDR default_infcall_mmap (CORE_ADDR size, unsigned prot);
+extern void default_infcall_munmap (CORE_ADDR addr, CORE_ADDR size);
 extern char *default_gcc_target_options (struct gdbarch *gdbarch);
 extern const char *default_gnu_triplet_regexp (struct gdbarch *gdbarch);
 

@@ -131,8 +131,8 @@ gdb_test_no_output "compile code globalvar = static_local"
 gdb_test "p globalvar" " = 77000" "check static_local"
 
 gdb_test_no_output "compile code static int staticvar = 5; intptr = &staticvar" \
-    "keep jit in memory"
-gdb_test "p *intptr" " = 5" "expect 5"
+    "do not keep jit in memory"
+gdb_test "p *intptr" "Cannot access memory at address 0x\[0-9a-f\]+" "expect no 5"
 
 gdb_test "compile code func_doesnotexist ();" "warning: Could not find symbol \"func_doesnotexist\" for .*"
 

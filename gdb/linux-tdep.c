@@ -2348,6 +2348,35 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
   return retval;
 }
 
+/* See gdbarch.sh 'infcall_munmap'.  */
+
+static void
+linux_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
+{
+  struct objfile *objf;
+  struct value *munmap_val = find_function_in_inferior ("munmap", &objf);
+  struct value *retval_val;
+  struct gdbarch *gdbarch = get_objfile_arch (objf);
+  LONGEST retval;
+  enum
+    {
+      ARG_ADDR, ARG_LENGTH, ARG_LAST
+    };
+  struct value *arg[ARG_LAST];
+
+  arg[ARG_ADDR] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr,
+				      addr);
+  /* Assuming sizeof (unsigned long) == sizeof (size_t).  */
+  arg[ARG_LENGTH] = value_from_ulongest
+		    (builtin_type (gdbarch)->builtin_unsigned_long, size);
+  retval_val = call_function_by_hand (munmap_val, ARG_LAST, arg);
+  retval = value_as_long (retval_val);
+  if (retval != 0)
+    warning (_("Failed inferior munmap call at %s for %s bytes, "
+	       "errno is changed."),
+	     hex_string (addr), pulongest (size));
+}
+
 /* See linux-tdep.h.  */
 
 CORE_ADDR
@@ -2409,6 +2438,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				    linux_gdb_signal_to_target);
   set_gdbarch_vsyscall_range (gdbarch, linux_vsyscall_range);
   set_gdbarch_infcall_mmap (gdbarch, linux_infcall_mmap);
+  set_gdbarch_infcall_munmap (gdbarch, linux_infcall_munmap);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

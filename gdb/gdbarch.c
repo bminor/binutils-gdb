@@ -326,6 +326,7 @@ struct gdbarch
   gdbarch_auxv_parse_ftype *auxv_parse;
   gdbarch_vsyscall_range_ftype *vsyscall_range;
   gdbarch_infcall_mmap_ftype *infcall_mmap;
+  gdbarch_infcall_munmap_ftype *infcall_munmap;
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
 };
@@ -426,6 +427,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->insn_is_jump = default_insn_is_jump;
   gdbarch->vsyscall_range = default_vsyscall_range;
   gdbarch->infcall_mmap = default_infcall_mmap;
+  gdbarch->infcall_munmap = default_infcall_munmap;
   gdbarch->gcc_target_options = default_gcc_target_options;
   gdbarch->gnu_triplet_regexp = default_gnu_triplet_regexp;
   /* gdbarch_alloc() */
@@ -658,6 +660,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of auxv_parse, has predicate.  */
   /* Skip verify of vsyscall_range, invalid_p == 0 */
   /* Skip verify of infcall_mmap, invalid_p == 0 */
+  /* Skip verify of infcall_munmap, invalid_p == 0 */
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
@@ -1028,6 +1031,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: infcall_mmap = <%s>\n",
                       host_address_to_string (gdbarch->infcall_mmap));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: infcall_munmap = <%s>\n",
+                      host_address_to_string (gdbarch->infcall_munmap));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_info_proc_p() = %d\n",
                       gdbarch_info_proc_p (gdbarch));
@@ -4671,6 +4677,23 @@ set_gdbarch_infcall_mmap (struct gdbarch *gdbarch,
                           gdbarch_infcall_mmap_ftype infcall_mmap)
 {
   gdbarch->infcall_mmap = infcall_mmap;
+}
+
+void
+gdbarch_infcall_munmap (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR size)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->infcall_munmap != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_infcall_munmap called\n");
+  gdbarch->infcall_munmap (addr, size);
+}
+
+void
+set_gdbarch_infcall_munmap (struct gdbarch *gdbarch,
+                            gdbarch_infcall_munmap_ftype infcall_munmap)
+{
+  gdbarch->infcall_munmap = infcall_munmap;
 }
 
 char *

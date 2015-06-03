@@ -1,3 +1,10 @@
+2015-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile.exp (keep jit in memory): Rename to ...
+	(do not keep jit in memory): ... this.
+	(expect 5): Change it to ...
+	(expect no 5): ... this.
+
 2015-06-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/15564

@@ -1440,6 +1440,13 @@ typedef CORE_ADDR (gdbarch_infcall_mmap_ftype) (CORE_ADDR size, unsigned prot);
 extern CORE_ADDR gdbarch_infcall_mmap (struct gdbarch *gdbarch, CORE_ADDR size, unsigned prot);
 extern void set_gdbarch_infcall_mmap (struct gdbarch *gdbarch, gdbarch_infcall_mmap_ftype *infcall_mmap);
 
+/* Deallocate SIZE bytes of memory at ADDR in inferior from gdbarch_infcall_mmap.
+   Print a warning if it is not possible. */
+
+typedef void (gdbarch_infcall_munmap_ftype) (CORE_ADDR addr, CORE_ADDR size);
+extern void gdbarch_infcall_munmap (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR size);
+extern void set_gdbarch_infcall_munmap (struct gdbarch *gdbarch, gdbarch_infcall_munmap_ftype *infcall_munmap);
+
 /* Return string (caller has to use xfree for it) with options for GCC
    to produce code for this target, typically "-m64", "-m32" or "-m31".
    These options are put before CU's DW_AT_producer compilation options so that
