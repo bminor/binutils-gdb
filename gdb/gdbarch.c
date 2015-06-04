@@ -1023,9 +1023,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       plongest (gdbarch->have_nonsteppable_watchpoint));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
-                      host_address_to_string (gdbarch->stack_frame_destroyed_p));
-  fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
                       host_address_to_string (gdbarch->in_solib_return_trampoline));
   fprintf_unfiltered (file,
@@ -1301,6 +1298,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: stabs_argument_has_addr = <%s>\n",
                       host_address_to_string (gdbarch->stabs_argument_has_addr));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
+                      host_address_to_string (gdbarch->stack_frame_destroyed_p));
   fprintf_unfiltered (file,
                       "gdbarch_dump: stap_gdb_register_prefix = %s\n",
                       pstring (gdbarch->stap_gdb_register_prefix));
