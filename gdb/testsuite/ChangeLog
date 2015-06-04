@@ -1,3 +1,8 @@
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Add test case to check that
+	an unlimited history file does not get truncated on exit.
+
 2015-06-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/gnu_vector.c: Include stdarg.h and stdio.h.

@@ -1,3 +1,8 @@
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.c (gdb_safe_append_history): Do not call
+	history_truncate_file if the history is not stifled.
+
 2015-06-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* syscalls/s390-linux.xml: Add syscalls 344 through 354.

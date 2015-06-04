@@ -57,5 +57,63 @@ proc test_gdbinit_history_setting { home size } {
     array set env [array get old_env]
 }
 
+# Check that the history file does not get truncated to zero when a gdbinit
+# file sets the history size to unlimited.
+
+proc test_no_truncation_of_unlimited_history_file { } {
+    global env
+    global INTERNAL_GDBFLAGS
+
+    array set old_env [array get env]
+
+    # The HISTSIZE environment variable takes precedence over whatever
+    # history size is set in .gdbinit.  Make sure the former is not
+    # set.
+    unset -nocomplain env(HISTSIZE)
+
+    set saved_internal_gdbflags $INTERNAL_GDBFLAGS
+
+    set temp_gdbinit [standard_output_file "gdbinit-history.gdbinit"]
+    set temp_histfile [standard_output_file "gdbinit-history.gdb_history"]
+    file delete $temp_gdbinit
+    file delete $temp_histfile
+
+    set fd [open $temp_gdbinit "w"]
+    puts $fd "set history size unlimited\n"
+    puts $fd "set history filename $temp_histfile\n"
+    puts $fd "set history save\n"
+    close $fd
+
+    append INTERNAL_GDBFLAGS " -x $temp_gdbinit"
+
+    # We have to start then exit GDB twice: the first time to test the creation
+    # of the initial history file, and the second time to test appending to it.
+    # In either case the initial "print 1" command should persist through the
+    # history file.
+    with_test_prefix "truncation" {
+	gdb_exit
+	gdb_start
+	gdb_test "print 1"
+
+	with_test_prefix "creating" {
+		gdb_exit
+		gdb_start
+		gdb_test "server show commands" "    .  print 1.*"
+	}
+
+	with_test_prefix "appending" {
+		gdb_exit
+		gdb_start
+		gdb_test "server show commands" "    .  print 1.*"
+	}
+    }
+
+    set INTERNAL_GDBFLAGS $saved_internal_gdbflags
+
+    array set env [array get old_env]
+}
+
 test_gdbinit_history_setting "gdbinit-history/unlimited" "unlimited"
 test_gdbinit_history_setting "gdbinit-history/zero" "0"
+
+test_no_truncation_of_unlimited_history_file

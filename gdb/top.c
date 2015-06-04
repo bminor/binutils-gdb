@@ -941,7 +941,8 @@ gdb_safe_append_history (void)
       else
 	{
 	  append_history (command_count, local_history_filename);
-	  history_truncate_file (local_history_filename, history_max_entries);
+	  if (history_is_stifled ())
+	    history_truncate_file (local_history_filename, history_max_entries);
 	}
 
       ret = rename (local_history_filename, history_filename);
