@@ -3200,7 +3200,8 @@ Script_sections::Script_sections()
     data_segment_align_start_(),
     saw_data_segment_align_(false),
     saw_relro_end_(false),
-    saw_segment_start_expression_(false)
+    saw_segment_start_expression_(false),
+    segments_created_(false)
 {
 }
 
@@ -4007,8 +4008,8 @@ Script_sections::create_note_and_tls_segments(
 	  saw_tls = true;
 	}
 
-      // If we are making a shared library, and we see a section named
-      // .interp then put the .interp section in a PT_INTERP segment.
+      // If we see a section named .interp then put the .interp section
+      // in a PT_INTERP segment.
       // This is for GNU ld compatibility.
       if (strcmp((*p)->name(), ".interp") == 0)
 	{
@@ -4019,6 +4020,8 @@ Script_sections::create_note_and_tls_segments(
 	  oseg->add_output_section_to_nonload(*p, seg_flags);
 	}
     }
+
+    this->segments_created_ = true;
 }
 
 // Add a program header.  The PHDRS clause is syntactically distinct
@@ -4046,6 +4049,10 @@ Script_sections::add_phdr(const char* name, size_t namelen, unsigned int type,
 size_t
 Script_sections::expected_segment_count(const Layout* layout) const
 {
+  // If we've already created the segments, we won't be adding any more.
+  if (this->segments_created_)
+    return 0;
+
   if (this->saw_phdrs_clause())
     return this->phdrs_elements_->size();
 
@@ -4057,6 +4064,7 @@ Script_sections::expected_segment_count(const Layout* layout) const
 
   bool saw_note = false;
   bool saw_tls = false;
+  bool saw_interp = false;
   for (Layout::Section_list::const_iterator p = sections.begin();
        p != sections.end();
        ++p)
@@ -4078,6 +4086,15 @@ Script_sections::expected_segment_count(const Layout* layout) const
 	    {
 	      ++ret;
 	      saw_tls = true;
+	    }
+	}
+      else if (strcmp((*p)->name(), ".interp") == 0)
+	{
+	  // There can only be one PT_INTERP segment.
+	  if (!saw_interp)
+	    {
+	      ++ret;
+	      saw_interp = true;
 	    }
 	}
     }
@@ -4108,6 +4125,7 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
        p != this->phdrs_elements_->end();
        ++p)
     name_to_segment[(*p)->name()] = (*p)->create_segment(layout);
+  this->segments_created_ = true;
 
   // Walk through the output sections and attach them to segments.
   // Output sections in the script which do not list segments are

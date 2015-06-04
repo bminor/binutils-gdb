@@ -1,3 +1,15 @@
+2015-06-03  Cary Coutant  <cary@google.com>
+
+	* script-sections.cc (Script_sections::Script_sections): Initialize
+	segments_created_.
+	(Script_sections::create_note_and_tls_segments): Set flag when
+	segments are created.
+	(Script_sections::expected_segment_count): Count PT_INTERP.
+	(Script_sections::attach_sections_using_phdrs_clause): Set flag when
+	segments are created.
+	* script-sections.h (Script_sections::segments_created_): New data
+	member.
+
 2015-06-03  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/15370
