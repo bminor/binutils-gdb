@@ -1,3 +1,8 @@
+2015-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* build-id.c (build_id_to_debug_bfd): Add cleanup to free
+	return value from lrealpath.
+
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.c (gdbsim_open): Move sysroot update to the top.
