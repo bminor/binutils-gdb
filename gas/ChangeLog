@@ -9,6 +9,11 @@
 	* config/tc-arm.c (arm_init_frag): Use frag's thumb_mode information
 	when available.
 
+2015-06-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-h8300.c (md_section_align): Fix compile time warning
+	about left shifting a negative value.
+
 2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (arm_archs): Add "armv8.1-a".
