@@ -1,3 +1,8 @@
+2015-06-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 18474
+	* msp430-dis.c (msp430_nooperands): Fix check for emulated insns.
+
 2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm-dis.c (arm_opcodes): Add "setpan".
