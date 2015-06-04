@@ -1,3 +1,8 @@
+2015-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile-print.exp (compile print *vararray@3)
+	(compile print *vararrayp@3): Change xfail to kfail compile/18489.
+
 2015-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.compile/compile.exp (keep jit in memory): Rename to ...
