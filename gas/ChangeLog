@@ -1,3 +1,9 @@
+2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* NEWS: Mention ARMv8.1 support in the Aarch64 port.
+	* config/tc-aarch64.c (aarch64_arch_option_table): Add "armv8.1-a".
+	* doc/c-aarch64.texi (-march): Add "armv8.1-a".
+
 2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (arm_archs): Add "armv8.1-a".
