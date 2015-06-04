@@ -1,3 +1,18 @@
+2015-06-03  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/15370
+	* script-sections.cc
+	(Output_section_element_input::set_section_addresses): When there
+	are several patterns with no sort spec, put all sections in the same
+	bin.
+	* testsuite/Makefile.am (script_test_12): New testcase.
+	(script_test_12i): New testcase.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_12.t: New test linker script.
+	* testsuite/script_test_12i.t: New test linker script.
+	* testsuite/script_test_12a.c: New test source file.
+	* testsuite/script_test_12b.c: New test source file.
+
 2015-06-02  Cary Coutant  <ccoutant@gmail.com>
 
 	* nacl.h (Sniff_file): Switch parameters to get_view to get an

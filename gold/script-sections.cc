@@ -1555,9 +1555,33 @@ Output_section_element_input::set_section_addresses(
   // We build a list of sections which match each
   // Input_section_pattern.
 
+  // If none of the patterns specify a sort option, we throw all
+  // matching input sections into a single bin, in the order we
+  // find them.  Otherwise, we put matching input sections into
+  // a separate bin for each pattern, and sort each one as
+  // specified.  Thus, an input section spec like this:
+  //   *(.foo .bar)
+  // will group all .foo and .bar sections in the order seen,
+  // whereas this:
+  //   *(.foo) *(.bar)
+  // will group all .foo sections followed by all .bar sections.
+  // This matches Gnu ld behavior.
+
+  // Things get really weird, though, when you add a sort spec
+  // on some, but not all, of the patterns, like this:
+  //   *(SORT_BY_NAME(.foo) .bar)
+  // We do not attempt to match Gnu ld behavior in this case.
+
   typedef std::vector<std::vector<Input_section_info> > Matching_sections;
   size_t input_pattern_count = this->input_section_patterns_.size();
-  if (input_pattern_count == 0)
+  bool any_patterns_with_sort = false;
+  for (size_t i = 0; i < input_pattern_count; ++i)
+    {
+      const Input_section_pattern& isp(this->input_section_patterns_[i]);
+      if (isp.sort != SORT_WILDCARD_NONE)
+	any_patterns_with_sort = true;
+    }
+  if (input_pattern_count == 0 || !any_patterns_with_sort)
     input_pattern_count = 1;
   Matching_sections matching_sections(input_pattern_count);
 
@@ -1620,6 +1644,8 @@ Output_section_element_input::set_section_addresses(
 	    ++p;
 	  else
 	    {
+	      if (!any_patterns_with_sort)
+		i = 0;
 	      matching_sections[i].push_back(isi);
 	      p = input_sections->erase(p);
 	    }
