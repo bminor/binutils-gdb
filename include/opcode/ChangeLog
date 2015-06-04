@@ -1,3 +1,7 @@
+2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_V8_1): New.
+
 2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm.h (FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1): New.
