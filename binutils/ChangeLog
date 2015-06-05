@@ -1,3 +1,8 @@
+2015-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_debug_line_header): Use reloc_at to detect
+	incomplete .debug_line headers
+
 2015-05-29  Roland McGrath  <mcgrathr@google.com>
 
 	* readelf.c (print_gnu_note: NT_GNU_ABI_TAG): Recognize
