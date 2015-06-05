@@ -1,3 +1,9 @@
+2015-06-05  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc_elf_relocate_section): Move dynamic text
+	relocs with insns moved by --ppc476-workaround.  Correct
+	output of REL16 relocs.
+
 2015-06-01  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (aarch64_reloc_got_type): Support
