@@ -1,3 +1,7 @@
+2015-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/compressed1d.d: Fix typo: iq200 -> iq2000.
+
 2015-06-05  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/ppc476-shared.s,
