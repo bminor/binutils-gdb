@@ -1,6 +1,13 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-06-05  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/ppc476-shared.s,
+	* ld-powerpc/ppc476-shared.lnk,
+	* ld-powerpc/ppc476-shared.d,
+	* ld-powerpc/ppc476-shared2.d: New tests.
+	* ld-powerpc/powerpc.exp: Run them.
+
 	2015-04-23  Alan Modra  <amodra@gmail.com>
 	* ld-powerpc/ambiguousv1.d: Update for aligned .got.
 	* ld-powerpc/ambiguousv1b.d: Likewise.

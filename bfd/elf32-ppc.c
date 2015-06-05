@@ -9428,6 +9428,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      && rel->r_offset >= offset
 	      && rel->r_offset < offset + 4)
 	    {
+	      asection *sreloc;
+
 	      /* If the insn we are patching had a reloc, adjust the
 		 reloc r_offset so that the reloc applies to the moved
 		 location.  This matters for -r and --emit-relocs.  */
@@ -9440,6 +9442,56 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  relend[-1] = tmp;
 		}
 	      relend[-1].r_offset += patch_off - offset;
+
+	      /* Adjust REL16 addends too.  */
+	      switch (ELF32_R_TYPE (relend[-1].r_info))
+		{
+		case R_PPC_REL16:
+		case R_PPC_REL16_LO:
+		case R_PPC_REL16_HI:
+		case R_PPC_REL16_HA:
+		  relend[-1].r_addend += patch_off - offset;
+		  break;
+		default:
+		  break;
+		}
+
+	      /* If we are building a PIE or shared library with
+		 non-PIC objects, perhaps we had a dynamic reloc too?
+		 If so, the dynamic reloc must move with the insn.  */
+	      sreloc = elf_section_data (input_section)->sreloc;
+	      if (sreloc != NULL)
+		{
+		  bfd_byte *slo, *shi, *srelend;
+		  bfd_vma soffset;
+
+		  slo = sreloc->contents;
+		  shi = srelend
+		    = slo + sreloc->reloc_count * sizeof (Elf32_External_Rela);
+		  soffset = (offset + input_section->output_section->vma
+			     + input_section->output_offset);
+		  while (slo < shi)
+		    {
+		      bfd_byte *srel = slo + (shi - slo) / 2;
+		      bfd_elf32_swap_reloca_in (output_bfd, srel, &outrel);
+		      if (outrel.r_offset < soffset)
+			slo = srel + 1;
+		      else if (outrel.r_offset > soffset + 3)
+			shi = srel;
+		      else
+			{
+			  bfd_byte *nextr = srel + sizeof (Elf32_External_Rela);
+			  if (nextr != srelend)
+			    {
+			      memmove (srel, nextr, srelend - nextr);
+			      srel = srelend - sizeof (Elf32_External_Rela);
+			    }
+			  outrel.r_offset += patch_off - offset;
+			  bfd_elf32_swap_reloca_out (output_bfd, &outrel, srel);
+			  break;
+			}
+		    }
+		}
 	    }
 	  else
 	    rel = NULL;

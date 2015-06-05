@@ -1,6 +1,11 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-06-05  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc_elf_relocate_section): Move dynamic text
+	relocs with insns moved by --ppc476-workaround.  Correct
+	output of REL16 relocs.
+
 	2015-04-23  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (TOC_BASE_ALIGN): Define.
 	(ppc64_elf_next_toc_section): Align multi-got toc base.
