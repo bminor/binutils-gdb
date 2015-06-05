@@ -1,5 +1,11 @@
 2015-06-04  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/18200
+	* Makefile.am (diststuff): Add target.
+	* Makefile.in: Regenerate.
+
+2015-06-04  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/17498
 	* object.cc (Sized_relobj_file::do_count_local_symbols): Discard
 	temporary locals in merge sections.
