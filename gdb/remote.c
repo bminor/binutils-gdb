@@ -10213,15 +10213,6 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   return ret;
 }
 
-/* Return nonzero if the filesystem accessed by the target_fileio_*
-   methods is the local filesystem, zero otherwise.  */
-
-static int
-remote_filesystem_is_local (struct target_ops *self)
-{
-  return 0;
-}
-
 /* Open FILENAME on the remote target, using FLAGS and MODE.  Return a
    remote file descriptor, or -1 if an error occurs (and set
    *REMOTE_ERRNO).  */
@@ -10455,6 +10446,59 @@ remote_hostio_fstat (struct target_ops *self,
 	   read_len, (int) sizeof (fst));
 
   remote_fileio_to_host_stat (&fst, st);
+
+  return 0;
+}
+
+/* Return nonzero if the filesystem accessed by the target_fileio_*
+   methods is the local filesystem, zero otherwise.  */
+
+static int
+remote_filesystem_is_local (struct target_ops *self)
+{
+  /* Valgrind GDB presents itself as a remote target but works
+     on the local filesystem: it does not implement remote get
+     and users are not expected to set a sysroot.  To handle
+     this case we treat the remote filesystem as local if the
+     sysroot is exactly TARGET_SYSROOT_PREFIX and if the stub
+     does not support vFile:open.  */
+  if (gdb_sysroot != NULL
+      && strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) == 0)
+    {
+      enum packet_support ps = packet_support (PACKET_vFile_open);
+
+      if (ps == PACKET_SUPPORT_UNKNOWN)
+	{
+	  int fd, remote_errno;
+
+	  /* Try opening a file to probe support.  The supplied
+	     filename is irrelevant, we only care about whether
+	     the stub recognizes the packet or not.  */
+	  fd = remote_hostio_open (self, "just probing",
+				   FILEIO_O_RDONLY, 0700,
+				   &remote_errno);
+
+	  if (fd >= 0)
+	    remote_hostio_close (self, fd, &remote_errno);
+
+	  ps = packet_support (PACKET_vFile_open);
+	}
+
+      if (ps == PACKET_DISABLE)
+	{
+	  static int warning_issued = 0;
+
+	  if (!warning_issued)
+	    {
+	      warning (_("remote target does not support file"
+			 " transfer, attempting to access files"
+			 " from local filesystem."));
+	      warning_issued = 1;
+	    }
+
+	  return 1;
+	}
+    }
 
   return 0;
 }

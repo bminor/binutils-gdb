@@ -326,25 +326,11 @@ gdb_bfd_open (const char *name, const char *target, int fd)
 	{
 	  gdb_assert (fd == -1);
 
-	  abfd = gdb_bfd_openr_iovec (name, target,
+	  return gdb_bfd_openr_iovec (name, target,
 				      gdb_bfd_iovec_fileio_open, NULL,
 				      gdb_bfd_iovec_fileio_pread,
 				      gdb_bfd_iovec_fileio_close,
 				      gdb_bfd_iovec_fileio_fstat);
-
-	  if (abfd != NULL || errno != ENOSYS)
-	    return abfd;
-
-	  /* gdb_bfd_iovec_fileio_open failed with ENOSYS.  This can
-	     happen, for example, with vgdb (Valgrind GDB), which
-	     presents itself as a remote target but works on the local
-	     filesystem: it does not implement remote get and users
-	     are not expected to set gdb_sysroot.  To handle this case
-	     we fall back to trying the local filesystem iff
-	     gdb_sysroot is exactly TARGET_SYSROOT_PREFIX.  */
-	  if (gdb_sysroot == NULL
-	      || strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) != 0)
-	    return NULL;
 	}
 
       name += strlen (TARGET_SYSROOT_PREFIX);

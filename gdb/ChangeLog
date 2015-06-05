@@ -1,3 +1,8 @@
+2015-06-05  Gary Benson <gbenson@redhat.com>
+
+	* gdb_bfd.c (gdb_bfd_open): Move vgdb special case to...
+	* remote.c (remote_filesystem_is_local): ...here.
+
 2015-06-04  Yao Qi  <yao.qi@linaro.org>
 
 	* gdbarch.c: Regenerate it.
