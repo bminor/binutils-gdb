@@ -26,6 +26,31 @@
 #include "elf-bfd.h"
 #include "elf/msp430.h"
 
+static bfd_reloc_status_type
+rl78_sym_diff_handler (bfd * abfd,
+		       arelent * reloc,
+		       asymbol * sym ATTRIBUTE_UNUSED,
+		       void * addr ATTRIBUTE_UNUSED,
+		       asection * input_sec,
+		       bfd * out_bfd ATTRIBUTE_UNUSED,
+		       char ** error_message ATTRIBUTE_UNUSED)
+{
+  bfd_size_type octets;
+  octets = reloc->address * bfd_octets_per_byte (abfd);
+
+  /* Catch the case where bfd_install_relocation would return
+     bfd_reloc_outofrange because the SYM_DIFF reloc is being used in a very
+     small section.  It does not actually matter if this happens because all
+     that SYM_DIFF does is compute a (4-byte) value.  A second reloc then uses
+     this value, and it is that reloc that must fit into the section.
+
+     This happens in eg, gcc/testsuite/gcc.c-torture/compile/labels-3.c.  */
+  if ((octets + bfd_get_reloc_size (reloc->howto))
+      > bfd_get_section_limit_octets (abfd, input_sec))
+    return bfd_reloc_ok;
+  return bfd_reloc_continue;
+}
+
 static reloc_howto_type elf_msp430_howto_table[] =
 {
   HOWTO (R_MSP430_NONE,		/* type */
@@ -185,7 +210,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
-	 NULL, 			/* special handler.  */
+	 rl78_sym_diff_handler,	/* special handler.  */
 	 "R_MSP430_SYM_DIFF",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -488,7 +513,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
-	 NULL, 			/* special handler.  */
+	 rl78_sym_diff_handler,	/* special handler.  */
 	 "R_MSP430X_SYM_DIFF",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -1596,7 +1621,7 @@ msp430_elf_relax_adjust_locals (bfd * abfd, asection * sec, bfd_vma addr,
       unsigned int sidx = ELF32_R_SYM(irel->r_info);
       Elf_Internal_Sym *lsym = isym + sidx;
 
-      /* Adjust symbols referenced by .sec+0xXX */
+      /* Adjust symbols referenced by .sec+0xXX.  */
       if (irel->r_addend > addr && irel->r_addend < toaddr
 	  && sidx < symtab_hdr->sh_info
 	  && lsym->st_shndx == sec_shndx)
