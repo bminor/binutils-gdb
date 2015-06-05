@@ -72,6 +72,13 @@ dsym1:
 	stq 0,16(5)
 	stq 2,16(5)
 	slbia
+	hwsync
+	sync
+	sync    0
+	lwsync
+	sync    1
+	ptesync
+	sync    2
 
 	.section	".data"
 usym0:	.llong	0xcafebabe

@@ -10,7 +10,7 @@ start address 0x0+
 
 Sections:
 Idx Name +Size +VMA +LMA +File off +Algn
- +0 \.text +0+cc +0+ +0+ +.*
+ +0 \.text +0+e8 +0+ +0+ +.*
  +CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  +1 \.data +0+20 +0+ +0+ +.*
  +CONTENTS, ALLOC, LOAD, DATA
@@ -99,3 +99,10 @@ Disassembly of section \.text:
 .*:	(f8 05 00 12|12 00 05 f8) 	stq     r0,16\(r5\)
 .*:	(f8 45 00 12|12 00 45 f8) 	stq     r2,16\(r5\)
 .*:	(7c 00 03 e4|e4 03 00 7c) 	slbia
+.*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
+.*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
+.*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
+.*:	(7c 20 04 ac|ac 04 20 7c) 	lwsync
+.*:	(7c 20 04 ac|ac 04 20 7c) 	lwsync
+.*:	(7c 40 04 ac|ac 04 40 7c) 	ptesync
+.*:	(7c 40 04 ac|ac 04 40 7c) 	ptesync
