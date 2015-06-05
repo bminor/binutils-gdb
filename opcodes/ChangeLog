@@ -1,6 +1,9 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-06-04  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c: (powerpc_opcodes) <hwsync>: New extended mnemonic.
+
 	2015-03-25  Anton Blanchard  <anton@samba.org>
 	* ppc-dis.c (disassemble_init_powerpc): Only initialise
 	powerpc_opcd_indices and vle_opcd_indices once.
