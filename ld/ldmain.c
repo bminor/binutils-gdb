@@ -440,6 +440,8 @@ main (int argc, char **argv)
     output_cref (config.map_file != NULL ? config.map_file : stdout);
   if (nocrossref_list != NULL)
     check_nocrossrefs ();
+  if (command_line.print_memory_usage)
+    lang_print_memory_usage ();
 #if 0
   {
     struct bfd_link_hash_entry * h;

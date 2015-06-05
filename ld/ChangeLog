@@ -1,3 +1,16 @@
+2015-06-12  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Mention new option.
+	* lexsup.c (parse_args): Handle --print-memory-usage.
+	(ld_options): Add --print-memory-usage.
+	* ldmain.c (main): Call lang_print_memory_usage.
+	* ldlex.h (enum option_values): Add OPTION_PRINT_MEMORY_USAGE.
+	* ldlang.h: Add prototype of lang_print_memory_usage.
+	* ldlang.c (lang_print_memory_size, lang_print_memory_usage): New
+	functions.
+	* ld.texinfo (Options): Document --print-memory-usage.
+	* ld.h (args_type): Add print_memory_usage field.
+
 2015-06-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French Translation.

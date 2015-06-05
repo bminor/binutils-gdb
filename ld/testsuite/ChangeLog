@@ -1,3 +1,16 @@
+2015-06-12  Tristan Gingold  <gingold@adacore.com>
+
+	* ld-scripts/print-memory-usage-1.t,
+	* ld-scripts/print-memory-usage-1.s,
+	* ld-scripts/print-memory-usage-1.l,
+	* ld-scripts/print-memory-usage-2.t,
+	* ld-scripts/print-memory-usage-2.l,
+	* ld-scripts/print-memory-usage-3.s,
+	* ld-scripts/print-memory-usage-3.t,
+	* ld-scripts/print-memory-usage-3.l,
+	* ld-scripts/print-memory-usage.t: New tests.
+	* ld-scripts/print-memory-usage.exp: Run them.
+
 2015-06-05  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/compressed1d.d: Fix typo: iq200 -> iq2000.

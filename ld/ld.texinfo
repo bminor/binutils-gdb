@@ -1472,6 +1472,21 @@ Print the name of the default output format (perhaps influenced by
 other command-line options).  This is the string that would appear
 in an @code{OUTPUT_FORMAT} linker script command (@pxref{File Commands}).
 
+@kindex --print-memory-usage
+@cindex memory usage
+@item --print-memory-usage
+Print used size, total size and used size of memory regions created with
+the @ref{MEMORY} command.  This is useful on embedded targets to have a
+quick view of amount of free memory.  The format of the output has one
+headline and one line per region.  It is both human readable and easily
+parsable by tools.  Here is an example of an output:
+
+@smallexample
+Memory region         Used Size  Region Size  %age Used
+             ROM:        256 KB         1 MB     25.00%
+             RAM:          32 B         2 GB      0.00%
+@end smallexample
+
 @cindex help
 @cindex usage
 @kindex --help

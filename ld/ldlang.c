@@ -8133,3 +8133,41 @@ lang_ld_feature (char *str)
       p = q;
     }
 }
+
+/* Pretty print memory amount.  */
+
+static void
+lang_print_memory_size (bfd_vma sz)
+{
+  if ((sz & 0x3fffffff) == 0)
+    printf ("%10" BFD_VMA_FMT "u GB", sz >> 30);
+  else if ((sz & 0xfffff) == 0)
+    printf ("%10" BFD_VMA_FMT "u MB", sz >> 20);
+  else if ((sz & 0x3ff) == 0)
+    printf ("%10" BFD_VMA_FMT "u KB", sz >> 10);
+  else
+    printf (" %10" BFD_VMA_FMT "u B", sz);
+}
+
+/* Implement --print-memory-usage: disply per region memory usage.  */
+
+void
+lang_print_memory_usage (void)
+{
+  lang_memory_region_type *r;
+
+  printf ("Memory region         Used Size  Region Size  %%age Used\n");
+  for (r = lang_memory_region_list; r->next != NULL; r = r->next)
+    {
+      bfd_vma used_length = r->current - r->origin;
+      double percent;
+
+      printf ("%16s: ",r->name_list.name);
+      lang_print_memory_size (used_length);
+      lang_print_memory_size ((bfd_vma) r->length);
+
+      percent = used_length * 100.0 / r->length;
+
+      printf ("    %6.2f%%\n", percent);
+    }
+}

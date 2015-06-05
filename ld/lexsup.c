@@ -523,6 +523,8 @@ static const struct ld_option ld_options[] =
   { {"pop-state", no_argument, NULL, OPTION_POP_STATE},
     '\0', NULL, N_("Pop state of flags governing input file handling"),
     TWO_DASHES },
+  { {"print-memory-usage", no_argument, NULL, OPTION_PRINT_MEMORY_USAGE},
+    '\0', NULL, N_("Report target memory usage"), TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1489,6 +1491,10 @@ parse_args (unsigned argc, char **argv)
 	      memcpy (&input_flags, oldp, sizeof (input_flags));
 	      free (oldp);
 	    }
+	  break;
+
+	case OPTION_PRINT_MEMORY_USAGE:
+	  command_line.print_memory_usage = TRUE;
 	  break;
 	}
     }
