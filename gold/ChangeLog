@@ -1,3 +1,13 @@
+2015-06-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18288
+	* resolve.cc (symbol_to_bits): Remove type parameter; adjust all
+	callers. Don't use STT_COMMON to check for common symbols.
+	(Symbol_table::resolve): Warn if relocatable object has STT_COMMON
+	symbol that's not in a common section.
+	* symtab.h (Symbol::is_common): Don't use STT_COMMON to check for
+	common symbols.
+
 2015-06-04  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/18200

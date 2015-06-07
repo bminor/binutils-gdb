@@ -173,7 +173,7 @@ static const unsigned int common_flag = 2 << def_undef_or_common_shift;
 
 static unsigned int
 symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
-	       unsigned int shndx, bool is_ordinary, elfcpp::STT type)
+	       unsigned int shndx, bool is_ordinary)
 {
   unsigned int bits;
 
@@ -218,9 +218,7 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
       break;
 
     default:
-      if (type == elfcpp::STT_COMMON)
-	bits |= common_flag;
-      else if (!is_ordinary && Symbol::is_common_shndx(shndx))
+      if (!is_ordinary && Symbol::is_common_shndx(shndx))
 	bits |= common_flag;
       else
         bits |= def_flag;
@@ -272,6 +270,15 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 
   if (!object->is_dynamic())
     {
+      if (sym.get_st_type() == elfcpp::STT_COMMON
+	  && (is_ordinary || !Symbol::is_common_shndx(st_shndx)))
+	{
+	  gold_warning(_("STT_COMMON symbol '%s' in %s "
+			 "is not in a common section"),
+		       to->demangled_name().c_str(),
+		       to->object()->name().c_str());
+	  return;
+	}
       // Record that we've seen this symbol in a regular object.
       to->set_in_reg();
     }
@@ -314,7 +321,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 	  bool adjust_common = false;
 	  typename Sized_symbol<size>::Size_type tosize = 0;
 	  typename Sized_symbol<size>::Value_type tovalue = 0;
-	  if (to->is_common() && !is_ordinary && st_shndx == elfcpp::SHN_COMMON)
+	  if (to->is_common()
+	      && !is_ordinary && Symbol::is_common_shndx(st_shndx))
 	    {
 	      adjust_common = true;
 	      tosize = to->symsize();
@@ -370,8 +378,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 			  : sym.get_st_type());
   unsigned int frombits = symbol_to_bits(sym.get_st_bind(),
                                          object->is_dynamic(),
-					 st_shndx, is_ordinary,
-                                         fromtype);
+					 st_shndx, is_ordinary);
 
   bool adjust_common_sizes;
   bool adjust_dyndef;
@@ -454,11 +461,9 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 
   unsigned int tobits;
   if (to->source() == Symbol::IS_UNDEFINED)
-    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_UNDEF, true,
-			    to->type());
+    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_UNDEF, true);
   else if (to->source() != Symbol::FROM_OBJECT)
-    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_ABS, false,
-			    to->type());
+    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_ABS, false);
   else
     {
       bool is_ordinary;
@@ -466,8 +471,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
       tobits = symbol_to_bits(to->binding(),
 			      to->object()->is_dynamic(),
 			      shndx,
-			      is_ordinary,
-			      to->type());
+			      is_ordinary);
     }
 
   if ((to->type() == elfcpp::STT_TLS) ^ (fromtype == elfcpp::STT_TLS)
