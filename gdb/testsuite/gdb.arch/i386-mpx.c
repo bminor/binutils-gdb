@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdio.h>
-#include "nat/x86-cpuid.h"
+#include "x86-cpuid.h"
 
 #ifndef NOINLINE
 #define NOINLINE __attribute__ ((noinline))
