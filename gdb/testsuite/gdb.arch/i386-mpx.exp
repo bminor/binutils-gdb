@@ -30,7 +30,7 @@ if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
 set comp_flags "-fmpx -I${srcdir}/../nat/"
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
- [list debug nowarnings additional_flags=${comp_flags}]] } {
+     [list debug nowarnings additional_flags=${comp_flags}]] } {
     return -1
 }
 
