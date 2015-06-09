@@ -629,7 +629,7 @@ reg2val_64 (const void *reg, sim_fpu *val)
 /* Round the given sim_fpu value to double precision, following the
    target platform rounding and denormalization conventions.  On
    AM33/2.0, round_near is the only rounding mode.  */
-int
+static int
 round_64 (sim_fpu *val)
 {
   return sim_fpu_round_64 (val, sim_fpu_round_near, sim_fpu_denorm_zero);
@@ -657,7 +657,7 @@ fp_double_prec = {
 
 /* Check whether overflow, underflow or inexact exceptions should be
    raised.  */
-int
+static int
 fpu_status_ok (sim_fpu_status stat)
 {
   if ((stat & sim_fpu_status_overflow)

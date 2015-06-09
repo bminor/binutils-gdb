@@ -1,5 +1,9 @@
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (round_64, fpu_status_ok): Add static.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (mn10300_debug): Delete.
 	* mn10300_sim.h (DEBUG_TRACE, DEBUG_VALUES, mn10300_debug): Delete.
 	(struct _state): Delete exception and exited members.
