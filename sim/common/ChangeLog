@@ -2,7 +2,6 @@
 
 	* sim-events.c (sim_events_schedule_after_signal): Fix spelling
 	mistake in call to sim_engine_abort.
-	(sim_events_schedule_after_signal): Likewise.
 
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
