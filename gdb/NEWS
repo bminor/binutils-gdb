@@ -90,6 +90,10 @@ tui enable
 tui disable
   Explicit commands for enabling and disabling tui mode.
 
+show mpx bound
+set mpx bound on i386 and amd64
+   Support for bound table investigation on Intel(R) MPX enabled applications.
+
 * New options
 
 set debug dwarf-die
