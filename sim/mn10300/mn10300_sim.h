@@ -47,7 +47,6 @@ struct _state
     reg_t fs[32]; /* FS0-31 */
     dword fd[16]; /* FD0,2,...,30 */
   } fpregs;
-  uint8 *mem;			/* main memory */
 
   /* All internal state modified by signal_exception() that may need to be
      rolled back for passing moment-of-exception image back to gdb. */
@@ -61,8 +60,6 @@ struct _state
 };
 
 extern struct _state State;
-extern uint32 OP[4];
-extern struct simops Simops[];
 
 #define PC	(State.regs[REG_PC])
 #define SP	(State.regs[REG_SP])
@@ -196,15 +193,6 @@ dw2u64 (dword data)
 }
 
 /* Function declarations.  */
-
-uint32 get_word (uint8 *);
-uint16 get_half (uint8 *);
-uint8 get_byte (uint8 *);
-void put_word (uint8 *, uint32);
-void put_half (uint8 *, uint16);
-void put_byte (uint8 *, uint8);
-
-extern uint8 *map (SIM_ADDR addr);
 
 INLINE_SIM_MAIN (void) genericAdd (unsigned32 source, unsigned32 destReg);
 INLINE_SIM_MAIN (void) genericSub (unsigned32 source, unsigned32 destReg);

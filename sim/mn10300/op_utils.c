@@ -188,9 +188,6 @@ do_syscall (void)
 #define RETVAL State.regs[0]	/* return value */
 #define RETERR State.regs[1]	/* return error code */
 
-/* Turn a pointer in a register into a pointer into real memory. */
-#define MEMPTR(x) (State.mem + x)
-
   if ( FUNC == TARGET_SYS_exit )
     {
       /* EXIT - caller can look in PARM1 to work out the reason */

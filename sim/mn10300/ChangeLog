@@ -1,5 +1,16 @@
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (get_byte, get_half, get_word, put_byte, put_half,
+	put_word): Delete.
+	(sim_fetch_register): Inline put_word call.
+	(sim_store_register): Inline get_word call.
+	* mn10300_sim.h (struct _state): Delete mem member.
+	(OP, Simops, get_byte, get_half, get_word, put_byte, put_half,
+	put_word, map): Delete.
+	* op_utils.c (MEMPTR): Delete.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (round_64, fpu_status_ok): Add static.
 
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
