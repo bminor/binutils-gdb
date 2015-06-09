@@ -25,7 +25,6 @@
 
 
 host_callback *mn10300_callback;
-int mn10300_debug;
 struct _state State;
 
 

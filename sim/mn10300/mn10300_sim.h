@@ -11,11 +11,6 @@
 extern host_callback *mn10300_callback;
 extern SIM_DESC simulator;
 
-#define DEBUG_TRACE		0x00000001
-#define DEBUG_VALUES		0x00000002
-
-extern int mn10300_debug;
-
 typedef unsigned8 uint8;
 typedef signed8 int8;
 typedef unsigned16 uint16;
@@ -53,8 +48,6 @@ struct _state
     dword fd[16]; /* FD0,2,...,30 */
   } fpregs;
   uint8 *mem;			/* main memory */
-  int exception;
-  int exited;
 
   /* All internal state modified by signal_exception() that may need to be
      rolled back for passing moment-of-exception image back to gdb. */
@@ -147,11 +140,6 @@ extern struct simops Simops[];
 #define FD2FPU(FD,F) sim_fpu_232to (&(F), ((FD).high), ((FD).low))
 #define FPU2FS(F,FS) sim_fpu_to32 (&(FS), &(F))
 #define FPU2FD(F,FD) sim_fpu_to232 (&((FD).high), &((FD).low), &(F))
-
-#ifdef _WIN32
-#define SIGTRAP 5
-#define SIGQUIT 3
-#endif
 
 #define FETCH32(a,b,c,d) \
  ((a)+((b)<<8)+((c)<<16)+((d)<<24))

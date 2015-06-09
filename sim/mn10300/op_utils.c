@@ -194,15 +194,8 @@ do_syscall (void)
   if ( FUNC == TARGET_SYS_exit )
     {
       /* EXIT - caller can look in PARM1 to work out the reason */
-      if (PARM1 == 0xdead)
-	State.exception = SIGABRT;
-      else
-	{
-	  sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
-			   sim_exited, PARM1);
-	  State.exception = SIGQUIT;
-	}
-      State.exited = 1;
+      sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
+		       (PARM1 == 0xdead ? SIM_SIGABRT : sim_exited), PARM1);
     }
   else
     {

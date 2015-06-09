@@ -1,5 +1,14 @@
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (mn10300_debug): Delete.
+	* mn10300_sim.h (DEBUG_TRACE, DEBUG_VALUES, mn10300_debug): Delete.
+	(struct _state): Delete exception and exited members.
+	[_WIN32] (SIGTRAP, SIGQUIT): Delete.
+	* op_utils.c (do_syscall): Call sim_engine_halt instead of setting
+	State.exception.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* mn10300_sim.h (uint8, int8, uint16, int16, uint32, int32): Typedef
 	in terms of unsigned8, signed8, unsigned16, signed16, unsigned32,
 	and signed32 respectively.
