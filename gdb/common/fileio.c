@@ -132,7 +132,7 @@ fileio_mode_pack (mode_t mode)
   if (mode & S_IRGRP)
     tmode |= FILEIO_S_IRGRP;
 #endif
-#ifdef S_IWRGRP
+#ifdef S_IWGRP
   if (mode & S_IWGRP)
     tmode |= FILEIO_S_IWGRP;
 #endif
