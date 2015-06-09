@@ -22,6 +22,7 @@ SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-hload.o \
 	sim-reason.o \
+	sim-resume.o \
 	sim-stop.o
 
 ## COMMON_POST_CONFIG_FRAG

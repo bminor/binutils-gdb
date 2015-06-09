@@ -39,7 +39,6 @@
   word	          spregs[2];		/* pc + msr */
   int		  cycles;
   int		  insts;
-  int		  exception;
   ubyte           imm_enable;
   half            imm_high;
 };
