@@ -8,14 +8,6 @@
 #include "bfd.h"
 #include "sim-fpu.h"
 
-#ifndef INLINE
-#ifdef __GNUC__
-#define INLINE inline
-#else
-#define INLINE
-#endif
-#endif
-
 extern host_callback *mn10300_callback;
 extern SIM_DESC simulator;
 

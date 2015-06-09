@@ -23,14 +23,6 @@
 
 #include "bfd.h"
 
-#ifndef INLINE
-#ifdef __GNUC__
-#define INLINE inline
-#else
-#define INLINE
-#endif
-#endif
-
 
 host_callback *mn10300_callback;
 int mn10300_debug;

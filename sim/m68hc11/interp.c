@@ -41,14 +41,6 @@ char *interrupt_names[] = {
   NULL
 };
 
-#ifndef INLINE
-#if defined(__GNUC__) && defined(__OPTIMIZE__)
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-#endif
-
 struct sim_info_list
 {
   const char *name;
