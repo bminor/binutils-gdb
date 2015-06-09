@@ -1,3 +1,8 @@
+2015-06-09  Gary Benson <gbenson@redhat.com>
+
+	* hostio.c (handle_open): Process mode argument with
+	fileio_to_host_mode.
+
 2015-06-01  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-s390-low.c (PTRACE_GETREGSET, PTRACE_SETREGSET): Remove.

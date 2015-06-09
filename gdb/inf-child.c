@@ -213,17 +213,17 @@ inf_child_fileio_open (struct target_ops *self,
 		       int *target_errno)
 {
   int nat_flags;
+  mode_t nat_mode;
   int fd;
 
-  if (fileio_to_host_openflags (flags, &nat_flags) == -1)
+  if (fileio_to_host_openflags (flags, &nat_flags) == -1
+      || fileio_to_host_mode (mode, &nat_mode) == -1)
     {
       *target_errno = FILEIO_EINVAL;
       return -1;
     }
 
-  /* We do not need to convert MODE, since the fileio protocol uses
-     the standard values.  */
-  fd = gdb_open_cloexec (filename, nat_flags, mode);
+  fd = gdb_open_cloexec (filename, nat_flags, nat_mode);
   if (fd == -1)
     *target_errno = host_to_fileio_error (errno);
 

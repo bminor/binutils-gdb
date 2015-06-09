@@ -1,5 +1,12 @@
 2015-06-09  Gary Benson <gbenson@redhat.com>
 
+	* common/fileio.h (fileio_to_host_mode): New declaration.
+	* common/fileio.c (fileio_to_host_mode): New Function.
+	* inf-child.c (inf_child_fileio_open): Process mode argument
+	with fileio_to_host_mode.
+
+2015-06-09  Gary Benson <gbenson@redhat.com>
+
 	* common/fileio.c (fileio_mode_pack): Fix preprocessor
 	conditional.
 

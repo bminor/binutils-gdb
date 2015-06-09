@@ -248,7 +248,8 @@ handle_open (char *own_buf)
 {
   char filename[HOSTIO_PATH_MAX];
   char *p;
-  int fileio_flags, mode, flags, fd;
+  int fileio_flags, fileio_mode, flags, fd;
+  mode_t mode;
   struct fd_list *new_fd;
 
   p = own_buf + strlen ("vFile:open:");
@@ -257,9 +258,10 @@ handle_open (char *own_buf)
       || require_comma (&p)
       || require_int (&p, &fileio_flags)
       || require_comma (&p)
-      || require_int (&p, &mode)
+      || require_int (&p, &fileio_mode)
       || require_end (p)
-      || fileio_to_host_openflags (fileio_flags, &flags))
+      || fileio_to_host_openflags (fileio_flags, &flags)
+      || fileio_to_host_mode (fileio_mode, &mode))
     {
       hostio_packet_error (own_buf);
       return;
