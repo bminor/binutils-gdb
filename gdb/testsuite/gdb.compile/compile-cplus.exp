@@ -77,14 +77,14 @@ gdb_test_no_output "compile -- f = 10" \
 gdb_test "compile f = 10;" ".*= 10;: No such file.*" \
     "Test abbreviations and code collision"
 
-gdb_test_no_output "compile -r -- _gdb_expr(){int i = 5;}" \
+gdb_test_no_output "compile -r -- extern \"C\" void _gdb_expr(){int i = 5;}" \
     "Test delimiter with -r"
 
-gdb_test_no_output "compile -raw -- _gdb_expr(){int i = 5;}" \
+gdb_test_no_output "compile -raw -- extern \"C\" void _gdb_expr(){int i = 5;}" \
     "Test delimiter with -raw"
 
-gdb_test "compile -- -r  _gdb_expr(){int i = 5;}" \
-    ".* error: 'r' undeclared \\(first use in this function\\).*" \
+gdb_test "compile -- -r  extern \"C\" void _gdb_expr(){int i = 5;}" \
+    ".* error: 'r' was not declared in this scope.*" \
     "Test delimiter with -r after it"
 
 gdb_test "p globalvar" " = 10" "expect 10"
@@ -140,7 +140,7 @@ gdb_test_no_output "compile code static int staticvar = 5; intptr = &staticvar" 
     "keep jit in memory"
 gdb_test "p *intptr" " = 5" "expect 5"
 
-gdb_test "compile code func_doesnotexist ();" "warning: Could not find symbol \"func_doesnotexist\" for .*"
+gdb_test "compile code func_doesnotexist ();" "error: \'func_doesnotexist\' was not declared in this scope.*"
 
 gdb_test "compile code *(volatile int *) 0 = 0;" \
     "The program being debugged was signaled while in a function called from GDB\\.\r\nGDB remains in the frame where the signal was received\\.\r\n.*" \
@@ -159,7 +159,7 @@ gdb_test_multiple $test $test {
 
 gdb_test "info sym $infcall_pc" "\r\n_gdb_expr .*" "info sym found"
 gdb_test "return" "\r\n#0  main .*" "return" \
-	 "Make _gdb_expr return now\\? \\(y or n\\) " "y"
+	 "Make _gdb_expr\\(__gdb_regs\\*\\) return now\\? \\(y or n\\) " "y"
 gdb_test "info sym $infcall_pc" "\r\nNo symbol matches .*" "info sym not found"
 
 gdb_test_no_output "set unwindonsignal on"
@@ -195,8 +195,8 @@ gdb_test "p localvar" " = 1"
 # Test setting fields and also many different types.
 #
 
-gdb_test_no_output "compile code struct_object.selffield = &struct_object"
-gdb_test "print struct_object.selffield == &struct_object" " = 1"
+gdb_test_no_output "compile code struct_object.selffield = (struct_type*)&struct_object"
+gdb_test "print struct_object.selffield == &struct_object" " = true"
 
 gdb_test_no_output "compile code struct_object.charfield = 1"
 gdb_test "print struct_object.charfield" " = 1 '\\\\001'"
@@ -260,14 +260,14 @@ gdb_test "print staticshadow" " = 202"
 # For #pragma we need multiline input.
 gdb_test_multiple "compile code -r" "compile code -r multiline 1" { -re "\r\n>$" {} }
 gdb_test_multiple "#pragma GCC user_expression" "compile code -r multiline 2" { -re "\r\n>$" {} }
-gdb_test_multiple "void _gdb_expr(void) { globalshadow = 77000; }" "compile code -r multiline 3" { -re "\r\n>$" {} }
+gdb_test_multiple "extern \"C\" void _gdb_expr(void) { globalshadow = 77000; }" "compile code -r multiline 3" { -re "\r\n>$" {} }
 gdb_test_no_output "end" "compile code -r multiline 4"
 gdb_test "print 'compile-cplus.c'::globalshadow" " = 77000" \
     "check globalshadow with -r"
 
 # Test GOT vs. resolving jit function pointers.
 
-gdb_test_no_output "compile -raw -- int func(){return 21;} _gdb_expr(){int (*funcp)()=func; if (funcp()!=21) abort();}" \
+gdb_test_no_output "compile -raw -- int func(){return 21;} extern \"C\" void _gdb_expr(){int (*funcp)()=func; if (funcp()!=21) abort();}" \
     "pointer to jit function"
 
 #
@@ -288,7 +288,7 @@ gdb_test_no_output "compile code globalvar = func_nodebug (75);" \
     "call func_nodebug"
 gdb_test "p globalvar" " = -75" "expect -75"
 gdb_test_no_output \
-  "compile code int (*funcp) (int) = func_nodebug; globalvar = funcp (76);" \
+  "compile code int (*funcp) (int) = (int(*)(int))func_nodebug; globalvar = funcp (76);" \
   "call func_nodebug indirectly"
 gdb_test "p globalvar" " = -76" "expect -76"
 

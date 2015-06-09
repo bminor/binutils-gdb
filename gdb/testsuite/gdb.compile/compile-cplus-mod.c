@@ -18,7 +18,7 @@
 // Make 'globalvar' lookup working.
 #pragma GCC user_expression
 
-void
+extern "C" void
 _gdb_expr (void)
 {
   globalvar = 3;
