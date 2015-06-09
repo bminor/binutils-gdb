@@ -16,35 +16,12 @@ extern SIM_DESC simulator;
 
 extern int mn10300_debug;
 
-#if UCHAR_MAX == 255
-typedef unsigned char uint8;
-typedef signed char int8;
-#else
-#error "Char is not an 8-bit type"
-#endif
-
-#if SHRT_MAX == 32767
-typedef unsigned short uint16;
-typedef signed short int16;
-#else
-#error "Short is not a 16-bit type"
-#endif
-
-#if INT_MAX == 2147483647
-
-typedef unsigned int uint32;
-typedef signed int int32;
-
-#else
-#  if LONG_MAX == 2147483647
-
-typedef unsigned long uint32;
-typedef signed long int32;
-
-#  else
-#  error "Neither int nor long is a 32-bit type"
-#  endif
-#endif
+typedef unsigned8 uint8;
+typedef signed8 int8;
+typedef unsigned16 uint16;
+typedef signed16 int16;
+typedef unsigned32 uint32;
+typedef signed32 int32;
 
 typedef struct
 {
