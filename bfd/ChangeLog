@@ -1,3 +1,9 @@
+2015-06-15  Alan Modra  <amodra@gmail.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Revert
+	2014-03-26 change.  Call _bfd_clear_contents for relocs against
+	local and global symbols defined in discarded input sections.
+
 2015-06-05  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-msp430.c (rl78_sym_diff_handler): New function.
