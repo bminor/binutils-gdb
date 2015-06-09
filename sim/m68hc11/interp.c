@@ -33,14 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 static void sim_get_info (SIM_DESC sd, char *cmd);
 
-
-char *interrupt_names[] = {
-  "reset",
-  "nmi",
-  "int",
-  NULL
-};
-
 struct sim_info_list
 {
   const char *name;

@@ -1,5 +1,9 @@
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (interrupt_names): Delete.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Add sim-resume.o
 	* interp.c (has_stepped, sim_resume): Delete.
 
