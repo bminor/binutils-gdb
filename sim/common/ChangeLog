@@ -1,5 +1,9 @@
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.h (TRACE_USEFUL_MASK): Change to TRACE_xxx defines.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.h (WITH_TRACE_P): New define.
 	(WITH_TRACE_INSN_P, WITH_TRACE_DECODE_P, WITH_TRACE_EXTRACT_P,
 	WITH_TRACE_LINENUM_P, WITH_TRACE_MEMORY_P, WITH_TRACE_MODEL_P,

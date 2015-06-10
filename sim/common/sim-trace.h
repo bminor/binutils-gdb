@@ -87,10 +87,7 @@ enum {
    splat on the screen everything under the sun making nothing easy to
    find.  */
 #define TRACE_USEFUL_MASK \
-((1 << TRACE_INSN_IDX) \
- | (1 << TRACE_LINENUM_IDX) \
- | (1 << TRACE_MEMORY_IDX) \
- | (1 << TRACE_MODEL_IDX))
+  (TRACE_insn | TRACE_linenum | TRACE_memory | TRACE_model)
 
 /* Masks so WITH_TRACE can have symbolic values.
    The case choice here is on purpose.  The lowercase parts are args to
