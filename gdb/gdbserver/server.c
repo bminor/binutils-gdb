@@ -1291,7 +1291,7 @@ handle_qxfer_libraries (const char *annex,
   if (document == NULL)
     return -1;
 
-  strcpy (document, "<library-list>\n");
+  strcpy (document, "<library-list version=\"1.0\">\n");
   p = document + strlen (document);
 
   for_each_inferior_with_data (&all_dlls, emit_dll_description, &p);
