@@ -1,4 +1,14 @@
-2015-06-09  Mike Stump  <mrs@mrs.kithrup.com> (obvious patch)
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-trace.h (WITH_TRACE_P): New define.
+	(WITH_TRACE_INSN_P, WITH_TRACE_DECODE_P, WITH_TRACE_EXTRACT_P,
+	WITH_TRACE_LINENUM_P, WITH_TRACE_MEMORY_P, WITH_TRACE_MODEL_P,
+	WITH_TRACE_ALU_P, WITH_TRACE_CORE_P, WITH_TRACE_EVENTS_P,
+	WITH_TRACE_FPU_P, WITH_TRACE_VPU_P, WITH_TRACE_BRANCH_P,
+	WITH_TRACE_SYSCALL_P, WITH_TRACE_DEBUG_P, STRACE_P, TRACE_P):
+	Redefine to use WITH_TRACE_P.
+
+2015-06-09  Mike Stump  <mrs@mrs.kithrup.com>
 
 	* sim-events.c (sim_events_schedule_after_signal): Fix spelling
 	mistake in call to sim_engine_abort.

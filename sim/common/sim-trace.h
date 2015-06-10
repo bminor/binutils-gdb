@@ -111,20 +111,21 @@ enum {
 #define TRACE_debug    (1 << TRACE_DEBUG_IDX)
 
 /* Preprocessor macros to simplify tests of WITH_TRACE.  */
-#define WITH_TRACE_INSN_P	(WITH_TRACE & TRACE_insn)
-#define WITH_TRACE_DECODE_P	(WITH_TRACE & TRACE_decode)
-#define WITH_TRACE_EXTRACT_P	(WITH_TRACE & TRACE_extract)
-#define WITH_TRACE_LINENUM_P	(WITH_TRACE & TRACE_linenum)
-#define WITH_TRACE_MEMORY_P	(WITH_TRACE & TRACE_memory)
-#define WITH_TRACE_MODEL_P	(WITH_TRACE & TRACE_model)
-#define WITH_TRACE_ALU_P	(WITH_TRACE & TRACE_alu)
-#define WITH_TRACE_CORE_P	(WITH_TRACE & TRACE_core)
-#define WITH_TRACE_EVENTS_P	(WITH_TRACE & TRACE_events)
-#define WITH_TRACE_FPU_P	(WITH_TRACE & TRACE_fpu)
-#define WITH_TRACE_VPU_P	(WITH_TRACE & TRACE_vpu)
-#define WITH_TRACE_BRANCH_P	(WITH_TRACE & TRACE_branch)
-#define WITH_TRACE_SYSCALL_P	(WITH_TRACE & TRACE_syscall)
-#define WITH_TRACE_DEBUG_P	(WITH_TRACE & TRACE_debug)
+#define WITH_TRACE_P(idx)	(WITH_TRACE & (1 << idx))
+#define WITH_TRACE_INSN_P	WITH_TRACE_P (TRACE_INSN_IDX)
+#define WITH_TRACE_DECODE_P	WITH_TRACE_P (TRACE_DECODE_IDX)
+#define WITH_TRACE_EXTRACT_P	WITH_TRACE_P (TRACE_EXTRACT_IDX)
+#define WITH_TRACE_LINENUM_P	WITH_TRACE_P (TRACE_LINENUM_IDX)
+#define WITH_TRACE_MEMORY_P	WITH_TRACE_P (TRACE_MEMORY_IDX)
+#define WITH_TRACE_MODEL_P	WITH_TRACE_P (TRACE_MODEL_IDX)
+#define WITH_TRACE_ALU_P	WITH_TRACE_P (TRACE_ALU_IDX)
+#define WITH_TRACE_CORE_P	WITH_TRACE_P (TRACE_CORE_IDX)
+#define WITH_TRACE_EVENTS_P	WITH_TRACE_P (TRACE_EVENTS_IDX)
+#define WITH_TRACE_FPU_P	WITH_TRACE_P (TRACE_FPU_IDX)
+#define WITH_TRACE_VPU_P	WITH_TRACE_P (TRACE_VPU_IDX)
+#define WITH_TRACE_BRANCH_P	WITH_TRACE_P (TRACE_BRANCH_IDX)
+#define WITH_TRACE_SYSCALL_P	WITH_TRACE_P (TRACE_SYSCALL_IDX)
+#define WITH_TRACE_DEBUG_P	WITH_TRACE_P (TRACE_DEBUG_IDX)
 
 /* Tracing install handler.  */
 MODULE_INSTALL_FN trace_install;
@@ -192,8 +193,7 @@ typedef struct _trace_data {
 /* Return non-zero if tracing of IDX is enabled for non-cpu specific
    components.  The "S" in "STRACE" refers to "System".  */
 #define STRACE_P(sd,idx) \
-((WITH_TRACE & (1 << (idx))) != 0 \
- && STATE_TRACE_FLAGS (sd)[idx] != 0)
+  (WITH_TRACE_P (idx) && STATE_TRACE_FLAGS (sd)[idx] != 0)
 
 /* Non-zero if --trace-<xxxx> was specified for SD.  */
 #define STRACE_DEBUG_P(sd)	STRACE_P (sd, TRACE_DEBUG_IDX)
@@ -204,8 +204,7 @@ typedef struct _trace_data {
 
 /* Return non-zero if tracing of IDX is enabled for CPU.  */
 #define TRACE_P(cpu,idx) \
-((WITH_TRACE & (1 << (idx))) != 0 \
- && CPU_TRACE_FLAGS (cpu)[idx] != 0)
+  (WITH_TRACE_P (idx) && CPU_TRACE_FLAGS (cpu)[idx] != 0)
 
 /* Non-zero if --trace-<xxxx> was specified for CPU.  */
 #define TRACE_ANY_P(cpu)	((WITH_TRACE) && (CPU_TRACE_DATA (cpu)->trace_any_p))
