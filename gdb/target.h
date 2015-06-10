@@ -38,6 +38,7 @@ struct static_tracepoint_marker;
 struct traceframe_info;
 struct expression;
 struct dcache_struct;
+struct inferior;
 
 #include "infrun.h" /* For enum exec_direction_kind.  */
 
@@ -830,18 +831,19 @@ struct target_ops
 
     /* Target file operations.  */
 
-    /* Return nonzero if the filesystem accessed by the
-       target_fileio_* methods is the local filesystem,
-       zero otherwise.  */
+    /* Return nonzero if the filesystem seen by the current inferior
+       is the local filesystem, zero otherwise.  */
     int (*to_filesystem_is_local) (struct target_ops *)
       TARGET_DEFAULT_RETURN (1);
 
-    /* Open FILENAME on the target, using FLAGS and MODE.  Return a
-       target file descriptor, or -1 if an error occurs (and set
-       *TARGET_ERRNO).  */
+    /* Open FILENAME on the target, in the filesystem as seen by INF,
+       using FLAGS and MODE.  If INF is NULL, use the filesystem seen
+       by the debugger (GDB or, for remote targets, the remote stub).
+       Return a target file descriptor, or -1 if an error occurs (and
+       set *TARGET_ERRNO).  */
     int (*to_fileio_open) (struct target_ops *,
-			   const char *filename, int flags, int mode,
-			   int *target_errno);
+			   struct inferior *inf, const char *filename,
+			   int flags, int mode, int *target_errno);
 
     /* Write up to LEN bytes from WRITE_BUF to FD on the target.
        Return the number of bytes written, or -1 if an error occurs
@@ -867,16 +869,24 @@ struct target_ops
        (and set *TARGET_ERRNO).  */
     int (*to_fileio_close) (struct target_ops *, int fd, int *target_errno);
 
-    /* Unlink FILENAME on the target.  Return 0, or -1 if an error
-       occurs (and set *TARGET_ERRNO).  */
+    /* Unlink FILENAME on the target, in the filesystem as seen by
+       INF.  If INF is NULL, use the filesystem seen by the debugger
+       (GDB or, for remote targets, the remote stub).  Return 0, or
+       -1 if an error occurs (and set *TARGET_ERRNO).  */
     int (*to_fileio_unlink) (struct target_ops *,
-			     const char *filename, int *target_errno);
+			     struct inferior *inf,
+			     const char *filename,
+			     int *target_errno);
 
-    /* Read value of symbolic link FILENAME on the target.  Return a
-       null-terminated string allocated via xmalloc, or NULL if an error
-       occurs (and set *TARGET_ERRNO).  */
+    /* Read value of symbolic link FILENAME on the target, in the
+       filesystem as seen by INF.  If INF is NULL, use the filesystem
+       seen by the debugger (GDB or, for remote targets, the remote
+       stub).  Return a null-terminated string allocated via xmalloc,
+       or NULL if an error occurs (and set *TARGET_ERRNO).  */
     char *(*to_fileio_readlink) (struct target_ops *,
-				 const char *filename, int *target_errno);
+				 struct inferior *inf,
+				 const char *filename,
+				 int *target_errno);
 
 
     /* Implement the "info proc" command.  */
@@ -1935,16 +1945,19 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 /* Target file operations.  */
 
-/* Return nonzero if the filesystem accessed by the target_fileio_*
-   methods is the local filesystem, zero otherwise.  */
+/* Return nonzero if the filesystem seen by the current inferior
+   is the local filesystem, zero otherwise.  */
 #define target_filesystem_is_local() \
   current_target.to_filesystem_is_local (&current_target)
 
-/* Open FILENAME on the target, using FLAGS and MODE.  Return a
-   target file descriptor, or -1 if an error occurs (and set
-   *TARGET_ERRNO).  */
-extern int target_fileio_open (const char *filename, int flags, int mode,
-			       int *target_errno);
+/* Open FILENAME on the target, in the filesystem as seen by INF,
+   using FLAGS and MODE.  If INF is NULL, use the filesystem seen
+   by the debugger (GDB or, for remote targets, the remote stub).
+   Return a target file descriptor, or -1 if an error occurs (and
+   set *TARGET_ERRNO).  */
+extern int target_fileio_open (struct inferior *inf,
+			       const char *filename, int flags,
+			       int mode, int *target_errno);
 
 /* Write up to LEN bytes from WRITE_BUF to FD on the target.
    Return the number of bytes written, or -1 if an error occurs
@@ -1968,33 +1981,48 @@ extern int target_fileio_fstat (int fd, struct stat *sb,
    (and set *TARGET_ERRNO).  */
 extern int target_fileio_close (int fd, int *target_errno);
 
-/* Unlink FILENAME on the target.  Return 0, or -1 if an error
+/* Unlink FILENAME on the target, in the filesystem as seen by INF.
+   If INF is NULL, use the filesystem seen by the debugger (GDB or,
+   for remote targets, the remote stub).  Return 0, or -1 if an error
    occurs (and set *TARGET_ERRNO).  */
-extern int target_fileio_unlink (const char *filename, int *target_errno);
+extern int target_fileio_unlink (struct inferior *inf,
+				 const char *filename,
+				 int *target_errno);
 
-/* Read value of symbolic link FILENAME on the target.  Return a
-   null-terminated string allocated via xmalloc, or NULL if an error
-   occurs (and set *TARGET_ERRNO).  */
-extern char *target_fileio_readlink (const char *filename, int *target_errno);
+/* Read value of symbolic link FILENAME on the target, in the
+   filesystem as seen by INF.  If INF is NULL, use the filesystem seen
+   by the debugger (GDB or, for remote targets, the remote stub).
+   Return a null-terminated string allocated via xmalloc, or NULL if
+   an error occurs (and set *TARGET_ERRNO).  */
+extern char *target_fileio_readlink (struct inferior *inf,
+				     const char *filename,
+				     int *target_errno);
 
-/* Read target file FILENAME.  The return value will be -1 if the transfer
-   fails or is not supported; 0 if the object is empty; or the length
-   of the object otherwise.  If a positive value is returned, a
-   sufficiently large buffer will be allocated using xmalloc and
-   returned in *BUF_P containing the contents of the object.
+/* Read target file FILENAME, in the filesystem as seen by INF.  If
+   INF is NULL, use the filesystem seen by the debugger (GDB or, for
+   remote targets, the remote stub).  The return value will be -1 if
+   the transfer fails or is not supported; 0 if the object is empty;
+   or the length of the object otherwise.  If a positive value is
+   returned, a sufficiently large buffer will be allocated using
+   xmalloc and returned in *BUF_P containing the contents of the
+   object.
 
    This method should be used for objects sufficiently small to store
    in a single xmalloc'd buffer, when no fixed bound on the object's
    size is known in advance.  */
-extern LONGEST target_fileio_read_alloc (const char *filename,
+extern LONGEST target_fileio_read_alloc (struct inferior *inf,
+					 const char *filename,
 					 gdb_byte **buf_p);
 
-/* Read target file FILENAME.  The result is NUL-terminated and
+/* Read target file FILENAME, in the filesystem as seen by INF.  If
+   INF is NULL, use the filesystem seen by the debugger (GDB or, for
+   remote targets, the remote stub).  The result is NUL-terminated and
    returned as a string, allocated using xmalloc.  If an error occurs
    or the transfer is unsupported, NULL is returned.  Empty objects
    are returned as allocated but empty strings.  A warning is issued
    if the result contains any embedded NUL bytes.  */
-extern char *target_fileio_read_stralloc (const char *filename);
+extern char *target_fileio_read_stralloc (struct inferior *inf,
+					  const char *filename);
 
 
 /* Tracepoint-related operations.  */

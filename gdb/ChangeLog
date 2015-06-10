@@ -1,5 +1,45 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* target.h (struct inferior): New forward declaration.
+	(struct target_ops) <to_filesystem_is_local>: Update comment.
+	(struct target_ops) <to_fileio_open>: New argument inf.
+	Update comment.  All implementations updated.
+	(struct target_ops) <to_fileio_unlink>: Likewise.
+	(struct target_ops) <to_fileio_readlink>: Likewise.
+	(target_filesystem_is_local): Update comment.
+	(target_fileio_open): New argument inf.  Update comment.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_readlink): Likewise.
+	(target_fileio_read_alloc): Likewise.
+	(target_fileio_read_stralloc): Likewise.
+	* target.c (target_fileio_open): New argument inf.
+	Pass inf to implementation.  Update debug printing.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_readlink): Likewise.
+	(target_fileio_read_alloc_1): New argument inf. Pass inf
+	to target_fileio_open.
+	(target_fileio_read_alloc): New argument inf. Pass inf to
+	target_fileio_read_alloc_1.
+	(target_fileio_read_stralloc): Likewise.
+	* gdb_bfd.c (inferior.h): New include.
+	(gdb_bfd_iovec_fileio_open): Replace unused "open_closure"
+	argument with new argument "inferior".  Pass inferior to
+	target_fileio_open.
+	(gdb_bfd_open): Supply inferior argument to
+	gdb_bfd_iovec_fileio_open.
+	* linux-tdep.c (linux_info_proc): Supply inf argument to
+	relevant target_fileio calls.
+	(linux_find_memory_regions_full): Likewise.
+	(linux_fill_prpsinfo): Likewise.
+	* remote.c (remote_filesystem_is_local): Supply inf
+	argument to remote_hostio_open.
+	(remote_file_put): Likewise.
+	(remote_file_get): Likewise.
+	(remote_file_delete): Supply inf argument to
+	remote_hostio_unlink.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* inf-child.c (inf_child_fileio_open): Replace comment.
 	(inf_child_fileio_pwrite): Likewise.
 	(inf_child_fileio_pread): Likewise.

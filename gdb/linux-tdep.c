@@ -719,7 +719,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (cmdline_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cmdline", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -732,7 +732,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (cwd_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cwd", pid);
-      data = target_fileio_readlink (filename, &target_errno);
+      data = target_fileio_readlink (NULL, filename, &target_errno);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -745,7 +745,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (exe_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/exe", pid);
-      data = target_fileio_readlink (filename, &target_errno);
+      data = target_fileio_readlink (NULL, filename, &target_errno);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -758,7 +758,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (mappings_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/maps", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -819,7 +819,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (status_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/status", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -832,7 +832,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (stat_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/stat", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -1134,7 +1134,8 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
     {
       xsnprintf (coredumpfilter_name, sizeof (coredumpfilter_name),
 		 "/proc/%d/coredump_filter", pid);
-      coredumpfilterdata = target_fileio_read_stralloc (coredumpfilter_name);
+      coredumpfilterdata = target_fileio_read_stralloc (NULL,
+							coredumpfilter_name);
       if (coredumpfilterdata != NULL)
 	{
 	  sscanf (coredumpfilterdata, "%x", &filterflags);
@@ -1143,12 +1144,12 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
     }
 
   xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/smaps", pid);
-  data = target_fileio_read_stralloc (mapsfilename);
+  data = target_fileio_read_stralloc (NULL, mapsfilename);
   if (data == NULL)
     {
       /* Older Linux kernels did not support /proc/PID/smaps.  */
       xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/maps", pid);
-      data = target_fileio_read_stralloc (mapsfilename);
+      data = target_fileio_read_stralloc (NULL, mapsfilename);
     }
 
   if (data != NULL)
@@ -1755,7 +1756,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   /* Obtaining PID and filename.  */
   pid = ptid_get_pid (inferior_ptid);
   xsnprintf (filename, sizeof (filename), "/proc/%d/cmdline", (int) pid);
-  fname = target_fileio_read_stralloc (filename);
+  fname = target_fileio_read_stralloc (NULL, filename);
 
   if (fname == NULL || *fname == '\0')
     {
@@ -1788,7 +1789,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   p->pr_psargs[sizeof (p->pr_psargs) - 1] = '\0';
 
   xsnprintf (filename, sizeof (filename), "/proc/%d/stat", (int) pid);
-  proc_stat = target_fileio_read_stralloc (filename);
+  proc_stat = target_fileio_read_stralloc (NULL, filename);
   make_cleanup (xfree, proc_stat);
 
   if (proc_stat == NULL || *proc_stat == '\0')
@@ -1869,7 +1870,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   /* Finally, obtaining the UID and GID.  For that, we read and parse the
      contents of the `/proc/PID/status' file.  */
   xsnprintf (filename, sizeof (filename), "/proc/%d/status", (int) pid);
-  proc_status = target_fileio_read_stralloc (filename);
+  proc_status = target_fileio_read_stralloc (NULL, filename);
   make_cleanup (xfree, proc_status);
 
   if (proc_status == NULL || *proc_status == '\0')

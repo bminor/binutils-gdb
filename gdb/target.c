@@ -2759,8 +2759,8 @@ release_fileio_fd (int fd, fileio_fh_t *fh)
 /* See target.h.  */
 
 int
-target_fileio_open (const char *filename, int flags, int mode,
-		    int *target_errno)
+target_fileio_open (struct inferior *inf, const char *filename,
+		    int flags, int mode, int *target_errno)
 {
   struct target_ops *t;
 
@@ -2768,7 +2768,8 @@ target_fileio_open (const char *filename, int flags, int mode,
     {
       if (t->to_fileio_open != NULL)
 	{
-	  int fd = t->to_fileio_open (t, filename, flags, mode, target_errno);
+	  int fd = t->to_fileio_open (t, inf, filename, flags, mode,
+				      target_errno);
 
 	  if (fd < 0)
 	    fd = -1;
@@ -2777,7 +2778,9 @@ target_fileio_open (const char *filename, int flags, int mode,
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_open (%s,0x%x,0%o) = %d (%d)\n",
+				"target_fileio_open (%d,%s,0x%x,0%o)"
+				" = %d (%d)\n",
+				inf == NULL ? 0 : inf->num,
 				filename, flags, mode,
 				fd, fd != -1 ? 0 : *target_errno);
 	  return fd;
@@ -2882,7 +2885,8 @@ target_fileio_close (int fd, int *target_errno)
 /* See target.h.  */
 
 int
-target_fileio_unlink (const char *filename, int *target_errno)
+target_fileio_unlink (struct inferior *inf, const char *filename,
+		      int *target_errno)
 {
   struct target_ops *t;
 
@@ -2890,12 +2894,15 @@ target_fileio_unlink (const char *filename, int *target_errno)
     {
       if (t->to_fileio_unlink != NULL)
 	{
-	  int ret = t->to_fileio_unlink (t, filename, target_errno);
+	  int ret = t->to_fileio_unlink (t, inf, filename,
+					 target_errno);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_unlink (%s) = %d (%d)\n",
-				filename, ret, ret != -1 ? 0 : *target_errno);
+				"target_fileio_unlink (%d,%s)"
+				" = %d (%d)\n",
+				inf == NULL ? 0 : inf->num, filename,
+				ret, ret != -1 ? 0 : *target_errno);
 	  return ret;
 	}
     }
@@ -2907,7 +2914,8 @@ target_fileio_unlink (const char *filename, int *target_errno)
 /* See target.h.  */
 
 char *
-target_fileio_readlink (const char *filename, int *target_errno)
+target_fileio_readlink (struct inferior *inf, const char *filename,
+			int *target_errno)
 {
   struct target_ops *t;
 
@@ -2915,11 +2923,14 @@ target_fileio_readlink (const char *filename, int *target_errno)
     {
       if (t->to_fileio_readlink != NULL)
 	{
-	  char *ret = t->to_fileio_readlink (t, filename, target_errno);
+	  char *ret = t->to_fileio_readlink (t, inf, filename,
+					     target_errno);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_readlink (%s) = %s (%d)\n",
+				"target_fileio_readlink (%d,%s)"
+				" = %s (%d)\n",
+				inf == NULL ? 0 : inf->num,
 				filename, ret? ret : "(nil)",
 				ret? 0 : *target_errno);
 	  return ret;
@@ -2939,14 +2950,16 @@ target_fileio_close_cleanup (void *opaque)
   target_fileio_close (fd, &target_errno);
 }
 
-/* Read target file FILENAME.  Store the result in *BUF_P and
-   return the size of the transferred data.  PADDING additional bytes are
-   available in *BUF_P.  This is a helper function for
-   target_fileio_read_alloc; see the declaration of that function for more
-   information.  */
+/* Read target file FILENAME, in the filesystem as seen by INF.  If
+   INF is NULL, use the filesystem seen by the debugger (GDB or, for
+   remote targets, the remote stub).  Store the result in *BUF_P and
+   return the size of the transferred data.  PADDING additional bytes
+   are available in *BUF_P.  This is a helper function for
+   target_fileio_read_alloc; see the declaration of that function for
+   more information.  */
 
 static LONGEST
-target_fileio_read_alloc_1 (const char *filename,
+target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
 			    gdb_byte **buf_p, int padding)
 {
   struct cleanup *close_cleanup;
@@ -2956,7 +2969,8 @@ target_fileio_read_alloc_1 (const char *filename,
   int fd;
   int target_errno;
 
-  fd = target_fileio_open (filename, FILEIO_O_RDONLY, 0700, &target_errno);
+  fd = target_fileio_open (inf, filename, FILEIO_O_RDONLY, 0700,
+			   &target_errno);
   if (fd == -1)
     return -1;
 
@@ -3006,21 +3020,22 @@ target_fileio_read_alloc_1 (const char *filename,
 /* See target.h.  */
 
 LONGEST
-target_fileio_read_alloc (const char *filename, gdb_byte **buf_p)
+target_fileio_read_alloc (struct inferior *inf, const char *filename,
+			  gdb_byte **buf_p)
 {
-  return target_fileio_read_alloc_1 (filename, buf_p, 0);
+  return target_fileio_read_alloc_1 (inf, filename, buf_p, 0);
 }
 
 /* See target.h.  */
 
 char *
-target_fileio_read_stralloc (const char *filename)
+target_fileio_read_stralloc (struct inferior *inf, const char *filename)
 {
   gdb_byte *buffer;
   char *bufstr;
   LONGEST i, transferred;
 
-  transferred = target_fileio_read_alloc_1 (filename, &buffer, 1);
+  transferred = target_fileio_read_alloc_1 (inf, filename, &buffer, 1);
   bufstr = (char *) buffer;
 
   if (transferred < 0)

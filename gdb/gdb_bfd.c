@@ -32,6 +32,7 @@
 #endif
 #include "target.h"
 #include "gdb/fileio.h"
+#include "inferior.h"
 
 typedef bfd *bfdp;
 DEF_VEC_P (bfdp);
@@ -213,7 +214,7 @@ fileio_errno_to_host (int errnum)
    OPEN_CLOSURE is unused.  */
 
 static void *
-gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *open_closure)
+gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *inferior)
 {
   const char *filename = bfd_get_filename (abfd);
   int fd, target_errno;
@@ -221,7 +222,8 @@ gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *open_closure)
 
   gdb_assert (is_target_filename (filename));
 
-  fd = target_fileio_open (filename + strlen (TARGET_SYSROOT_PREFIX),
+  fd = target_fileio_open ((struct inferior *) inferior,
+			   filename + strlen (TARGET_SYSROOT_PREFIX),
 			   FILEIO_O_RDONLY, 0,
 			   &target_errno);
   if (fd == -1)
@@ -327,7 +329,8 @@ gdb_bfd_open (const char *name, const char *target, int fd)
 	  gdb_assert (fd == -1);
 
 	  return gdb_bfd_openr_iovec (name, target,
-				      gdb_bfd_iovec_fileio_open, NULL,
+				      gdb_bfd_iovec_fileio_open,
+				      current_inferior (),
 				      gdb_bfd_iovec_fileio_pread,
 				      gdb_bfd_iovec_fileio_close,
 				      gdb_bfd_iovec_fileio_fstat);

@@ -10217,8 +10217,8 @@ remote_hostio_send_command (int command_bytes, int which_packet,
 
 static int
 remote_hostio_open (struct target_ops *self,
-		    const char *filename, int flags, int mode,
-		    int *remote_errno)
+		    struct inferior *inf, const char *filename,
+		    int flags, int mode, int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
@@ -10326,7 +10326,8 @@ remote_hostio_close (struct target_ops *self, int fd, int *remote_errno)
 
 static int
 remote_hostio_unlink (struct target_ops *self,
-		      const char *filename, int *remote_errno)
+		      struct inferior *inf, const char *filename,
+		      int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
@@ -10345,7 +10346,8 @@ remote_hostio_unlink (struct target_ops *self,
 
 static char *
 remote_hostio_readlink (struct target_ops *self,
-			const char *filename, int *remote_errno)
+			struct inferior *inf, const char *filename,
+			int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
@@ -10461,7 +10463,7 @@ remote_filesystem_is_local (struct target_ops *self)
 	  /* Try opening a file to probe support.  The supplied
 	     filename is irrelevant, we only care about whether
 	     the stub recognizes the packet or not.  */
-	  fd = remote_hostio_open (self, "just probing",
+	  fd = remote_hostio_open (self, NULL, "just probing",
 				   FILEIO_O_RDONLY, 0700,
 				   &remote_errno);
 
@@ -10581,7 +10583,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
     perror_with_name (local_file);
   back_to = make_cleanup_fclose (file);
 
-  fd = remote_hostio_open (find_target_at (process_stratum),
+  fd = remote_hostio_open (find_target_at (process_stratum), NULL,
 			   remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
 					 | FILEIO_O_TRUNC),
 			   0700, &remote_errno);
@@ -10667,7 +10669,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
-  fd = remote_hostio_open (find_target_at (process_stratum),
+  fd = remote_hostio_open (find_target_at (process_stratum), NULL,
 			   remote_file, FILEIO_O_RDONLY, 0, &remote_errno);
   if (fd == -1)
     remote_hostio_error (remote_errno);
@@ -10722,7 +10724,7 @@ remote_file_delete (const char *remote_file, int from_tty)
     error (_("command can only be used with remote target"));
 
   retcode = remote_hostio_unlink (find_target_at (process_stratum),
-				  remote_file, &remote_errno);
+				  NULL, remote_file, &remote_errno);
   if (retcode == -1)
     remote_hostio_error (remote_errno);
 
