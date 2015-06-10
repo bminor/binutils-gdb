@@ -1,5 +1,13 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* linux-thread-db.c (nat/linux-namespaces.h): New include.
+	(check_pid_namespace_match): Use linux_ns_same rather than
+	linux_proc_pid_get_ns to spot PID namespace mismatches.
+	* nat/linux-procfs.h (linux_proc_pid_get_ns): Remove.
+	* nat/linux-procfs.c (linux_proc_pid_get_ns): Likewise.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* configure.ac (AC_CHECK_FUNCS): Add setns.
 	* config.in: Regenerate.
 	* configure: Likewise.

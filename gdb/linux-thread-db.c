@@ -42,9 +42,9 @@
 #include "nat/linux-osdata.h"
 #include "auto-load.h"
 #include "cli/cli-utils.h"
-
 #include <signal.h>
 #include <ctype.h>
+#include "nat/linux-namespaces.h"
 
 /* GNU/Linux libthread_db support.
 
@@ -1200,20 +1200,12 @@ check_pid_namespace_match (void)
 	 child's thread list, we'll mistakenly think it has no threads
 	 since the thread PID fields won't match the PID we give to
 	 libthread_db.  */
-      char *our_pid_ns = linux_proc_pid_get_ns (getpid (), "pid");
-      char *inferior_pid_ns = linux_proc_pid_get_ns (
-	ptid_get_pid (inferior_ptid), "pid");
-
-      if (our_pid_ns != NULL && inferior_pid_ns != NULL
-	  && strcmp (our_pid_ns, inferior_pid_ns) != 0)
+      if (!linux_ns_same (ptid_get_pid (inferior_ptid), LINUX_NS_PID))
 	{
 	  warning (_ ("Target and debugger are in different PID "
 		      "namespaces; thread lists and other data are "
 		      "likely unreliable"));
 	}
-
-      xfree (our_pid_ns);
-      xfree (inferior_pid_ns);
     }
 }
 

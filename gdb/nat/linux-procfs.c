@@ -185,25 +185,6 @@ linux_proc_pid_is_zombie (pid_t pid)
   return linux_proc_pid_is_zombie_maybe_warn (pid, 1);
 }
 
-/* See linux-procfs.h declaration.  */
-
-char *
-linux_proc_pid_get_ns (pid_t pid, const char *ns)
-{
-  char buf[100];
-  char nsval[64];
-  int ret;
-  xsnprintf (buf, sizeof (buf), "/proc/%d/ns/%s", (int) pid, ns);
-  ret = readlink (buf, nsval, sizeof (nsval));
-  if (0 < ret && ret < sizeof (nsval))
-    {
-      nsval[ret] = '\0';
-      return xstrdup (nsval);
-    }
-
-  return NULL;
-}
-
 /* See linux-procfs.h.  */
 
 void
