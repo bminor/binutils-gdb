@@ -1,3 +1,11 @@
+2015-06-17  Nicolas Pitre <nico@linaro.org>
+
+	* as.c (show_usage): Document --sectname-subst.
+	(parse_args): Add --sectname-subst.
+	* as.h (flag_sectname_subst): New.
+	* config/obj-elf.c (obj_elf_section_name): Add %S substitution.
+	* doc/as.texinfo: Document it.
+
 2015-06-15  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): New relocation modifier.
