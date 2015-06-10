@@ -77,7 +77,10 @@ class AArch64_insn_utilities
 public:
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
 
-  static const int BYTES_PER_INSN = 4;
+  static const int BYTES_PER_INSN;
+
+  // Zero register encoding - 31.
+  static const unsigned int AARCH64_ZR;
 
   static unsigned int
   aarch64_bit(Insntype insn, int pos)
@@ -86,6 +89,18 @@ public:
   static unsigned int
   aarch64_bits(Insntype insn, int pos, int l)
   { return (insn >> pos) & ((1 << l) - 1); }
+
+  // Get the encoding field "op31" of 3-source data processing insns. "op31" is
+  // the name defined in armv8 insn manual C3.5.9.
+  static unsigned int
+  aarch64_op31(Insntype insn)
+  { return aarch64_bits(insn, 21, 3); }
+
+  // Get the encoding field "ra" of 3-source data processing insns. "ra" is the
+  // third source register. See armv8 insn manual C3.5.9.
+  static unsigned int
+  aarch64_ra(Insntype insn)
+  { return aarch64_bits(insn, 10, 5); }
 
   static bool
   is_adrp(const Insntype insn)
@@ -330,8 +345,42 @@ public:
 	return true;
       }
     return false;
+  }  // End of "aarch64_mem_op_p".
+
+  // Return true if INSN is mac insn.
+  static bool
+  aarch64_mac(Insntype insn)
+  { return (insn & 0xff000000) == 0x9b000000; }
+
+  // Return true if INSN is multiply-accumulate.
+  // (This is similar to implementaton in elfnn-aarch64.c.)
+  static bool
+  aarch64_mlxl(Insntype insn)
+  {
+    uint32_t op31 = aarch64_op31(insn);
+    if (aarch64_mac(insn)
+	&& (op31 == 0 || op31 == 1 || op31 == 5)
+	/* Exclude MUL instructions which are encoded as a multiple-accumulate
+	   with RA = XZR.  */
+	&& aarch64_ra(insn) != AARCH64_ZR)
+      {
+	return true;
+      }
+    return false;
   }
-};
+};  // End of "AArch64_insn_utilities".
+
+
+// Insn length in byte.
+
+template<bool big_endian>
+const int AArch64_insn_utilities<big_endian>::BYTES_PER_INSN = 4;
+
+
+// Zero register encoding - 31.
+
+template<bool big_endian>
+const unsigned int AArch64_insn_utilities<big_endian>::AARCH64_ZR = 0x1f;
 
 
 // Output_data_got_aarch64 class.
@@ -603,8 +652,11 @@ enum
   // Stub for erratum 843419 handling.
   ST_E_843419 = 4,
 
+  // Stub for erratum 835769 handling.
+  ST_E_835769 = 5,
+
   // Number of total stub types.
-  ST_NUMBER = 5
+  ST_NUMBER = 6
 };
 
 
@@ -695,6 +747,9 @@ Stub_template_repertoire<big_endian>::Stub_template_repertoire()
       0x14000000,    /* b <label> */
     };
 
+  // ST_E_835769 has the same stub template as ST_E_843419.
+  const static Insntype* ST_E_835769_INSNS = ST_E_843419_INSNS;
+
 #define install_insn_template(T) \
   const static Stub_template<big_endian> template_##T = {  \
     T##_INSNS, sizeof(T##_INSNS) / sizeof(T##_INSNS[0]) }; \
@@ -705,6 +760,7 @@ Stub_template_repertoire<big_endian>::Stub_template_repertoire()
   install_insn_template(ST_LONG_BRANCH_ABS);
   install_insn_template(ST_LONG_BRANCH_PCREL);
   install_insn_template(ST_E_843419);
+  install_insn_template(ST_E_835769);
 
 #undef install_insn_template
 }
@@ -953,9 +1009,9 @@ Erratum_stub<size, big_endian>::do_write(unsigned char* view, section_size_type)
   const Insntype* insns = this->insns();
   uint32_t num_insns = this->insn_num();
   Insntype* ip = reinterpret_cast<Insntype*>(view);
-  // For current implemnted erratum 843419, (and 835769 which is to be
-  // implemented soon), the first insn in the stub is always a copy of the
-  // problematic insn (in 843419, the mem access insn), followed by a jump-back.
+  // For current implemented erratum 843419 and 835769, the first insn in the
+  // stub is always a copy of the problematic insn (in 843419, the mem access
+  // insn, in 835769, the mac insn), followed by a jump-back.
   elfcpp::Swap<32, big_endian>::writeval(ip, this->erratum_insn());
   for (uint32_t i = 1; i < num_insns; ++i)
     elfcpp::Swap<32, big_endian>::writeval(ip + i, insns[i]);
@@ -1461,6 +1517,7 @@ relocate_stubs(const The_relocate_info* relinfo,
       switch ((*i)->type())
 	{
 	case ST_E_843419:
+	case ST_E_835769:
 	  // For the erratum, the 2nd insn is a b-insn to be patched
 	  // (relocated).
 	  stub_b_insn_address = stub_address + 1 * BPI;
@@ -1580,12 +1637,12 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
     this->stub_tables_[shndx] = stub_table;
   }
 
-  // Entrance to erratum_843419 scanning.
+  // Entrance to errata scanning.
   void
-  scan_erratum_843419(unsigned int shndx,
-		      const elfcpp::Shdr<size, big_endian>&,
-		      Output_section*, const Symbol_table*,
-		      The_target_aarch64*);
+  scan_errata(unsigned int shndx,
+	      const elfcpp::Shdr<size, big_endian>&,
+	      Output_section*, const Symbol_table*,
+	      The_target_aarch64*);
 
   // Scan all relocation sections for stub generation.
   void
@@ -1682,7 +1739,8 @@ AArch64_relobj<size, big_endian>::do_count_local_symbols(
 
   // Only erratum-fixing work needs mapping symbols, so skip this time consuming
   // processing if not fixing erratum.
-  if (!parameters->options().fix_cortex_a53_843419())
+  if (!parameters->options().fix_cortex_a53_843419()
+      && !parameters->options().fix_cortex_a53_835769())
     return;
 
   const unsigned int loccount = this->local_symbol_count();
@@ -1812,7 +1870,8 @@ AArch64_relobj<size, big_endian>::do_relocate_sections(
   if (parameters->options().relocatable())
     return;
 
-  if (parameters->options().fix_cortex_a53_843419())
+  if (parameters->options().fix_cortex_a53_843419()
+      || parameters->options().fix_cortex_a53_835769())
     this->fix_errata(pviews);
 
   Relocate_info<size, big_endian> relinfo;
@@ -1938,11 +1997,11 @@ AArch64_relobj<size, big_endian>::section_needs_reloc_stub_scanning(
 }
 
 
-// Scan section SHNDX for erratum 843419.
+// Scan section SHNDX for erratum 843419 and 835769.
 
 template<int size, bool big_endian>
 void
-AArch64_relobj<size, big_endian>::scan_erratum_843419(
+AArch64_relobj<size, big_endian>::scan_errata(
     unsigned int shndx, const elfcpp::Shdr<size, big_endian>& shdr,
     Output_section* os, const Symbol_table* symtab,
     The_target_aarch64* target)
@@ -1994,7 +2053,18 @@ AArch64_relobj<size, big_endian>::scan_erratum_843419(
 	    span_end = convert_to_section_size_type(p->first.offset_);
 	  else
 	    span_end = convert_to_section_size_type(shdr.get_sh_size());
-	  target->scan_erratum_843419_span(
+
+	  // Here we do not share the scanning code of both errata. For 843419,
+	  // only the last few insns of each page are examined, which is fast,
+	  // whereas, for 835769, every insn pair needs to be checked.
+
+	  if (parameters->options().fix_cortex_a53_843419())
+	    target->scan_erratum_843419_span(
+	      this, shndx, span_start, span_end,
+	      const_cast<unsigned char*>(input_view), output_address);
+
+	  if (parameters->options().fix_cortex_a53_835769())
+	    target->scan_erratum_835769_span(
 	      this, shndx, span_start, span_end,
 	      const_cast<unsigned char*>(input_view), output_address);
 	}
@@ -2035,8 +2105,9 @@ AArch64_relobj<size, big_endian>::scan_sections_for_stubs(
   for (unsigned int i = 1; i < shnum; ++i, p += shdr_size)
     {
       const elfcpp::Shdr<size, big_endian> shdr(p);
-      if (parameters->options().fix_cortex_a53_843419())
-	scan_erratum_843419(i, shdr, out_sections[i], symtab, target);
+      if (parameters->options().fix_cortex_a53_843419()
+	  || parameters->options().fix_cortex_a53_835769())
+	scan_errata(i, shdr, out_sections[i], symtab, target);
       if (this->section_needs_reloc_stub_scanning(shdr, out_sections, symtab,
 						  pshdrs))
 	{
@@ -2736,11 +2807,21 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   }
 
 
-  // Scan erratum for a part of a section.
+  // Scan erratum 843419 for a part of a section.
   void
   scan_erratum_843419_span(
     AArch64_relobj<size, big_endian>*,
-    unsigned int shndx,
+    unsigned int,
+    const section_size_type,
+    const section_size_type,
+    unsigned char*,
+    Address);
+
+  // Scan erratum 835769 for a part of a section.
+  void
+  scan_erratum_835769_span(
+    AArch64_relobj<size, big_endian>*,
+    unsigned int,
     const section_size_type,
     const section_size_type,
     unsigned char*,
@@ -3039,11 +3120,26 @@ class Target_aarch64 : public Sized_target<size, big_endian>
     return this->plt_;
   }
 
+  // Helper method to create erratum stubs for ST_E_843419 and ST_E_835769.
+  void create_erratum_stub(
+    AArch64_relobj<size, big_endian>* relobj,
+    unsigned int shndx,
+    section_size_type erratum_insn_offset,
+    Address erratum_address,
+    typename Insn_utilities::Insntype erratum_insn,
+    int erratum_type);
+
   // Return whether this is a 3-insn erratum sequence.
   bool is_erratum_843419_sequence(
       typename elfcpp::Swap<32,big_endian>::Valtype insn1,
       typename elfcpp::Swap<32,big_endian>::Valtype insn2,
       typename elfcpp::Swap<32,big_endian>::Valtype insn3);
+
+  // Return whether this is a 835769 sequence.
+  // (Similarly implemented as in elfnn-aarch64.c.)
+  bool is_erratum_835769_sequence(
+      typename elfcpp::Swap<32,big_endian>::Valtype,
+      typename elfcpp::Swap<32,big_endian>::Valtype);
 
   // Get the dynamic reloc section, creating it if necessary.
   Reloc_section*
@@ -7673,6 +7769,136 @@ Target_aarch64<size, big_endian>::is_erratum_843419_sequence(
 }
 
 
+// Return whether this is a 835769 sequence.
+// (Similarly implemented as in elfnn-aarch64.c.)
+
+template<int size, bool big_endian>
+bool
+Target_aarch64<size, big_endian>::is_erratum_835769_sequence(
+    typename elfcpp::Swap<32,big_endian>::Valtype insn1,
+    typename elfcpp::Swap<32,big_endian>::Valtype insn2)
+{
+  uint32_t rt;
+  uint32_t rt2;
+  uint32_t rn;
+  uint32_t rm;
+  uint32_t ra;
+  bool pair;
+  bool load;
+
+  if (Insn_utilities::aarch64_mlxl(insn2)
+      && Insn_utilities::aarch64_mem_op_p (insn1, &rt, &rt2, &pair, &load))
+    {
+      /* Any SIMD memory op is independent of the subsequent MLA
+	 by definition of the erratum.  */
+      if (Insn_utilities::aarch64_bit(insn1, 26))
+	return true;
+
+      /* If not SIMD, check for integer memory ops and MLA relationship.  */
+      rn = Insn_utilities::aarch64_rn(insn2);
+      ra = Insn_utilities::aarch64_ra(insn2);
+      rm = Insn_utilities::aarch64_rm(insn2);
+
+      /* If this is a load and there's a true(RAW) dependency, we are safe
+	 and this is not an erratum sequence.  */
+      if (load &&
+	  (rt == rn || rt == rm || rt == ra
+	   || (pair && (rt2 == rn || rt2 == rm || rt2 == ra))))
+	return false;
+
+      /* We conservatively put out stubs for all other cases (including
+	 writebacks).  */
+      return true;
+    }
+
+  return false;
+}
+
+
+// Helper method to create erratum stub for ST_E_843419 and ST_E_835769.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::create_erratum_stub(
+    AArch64_relobj<size, big_endian>* relobj,
+    unsigned int shndx,
+    section_size_type erratum_insn_offset,
+    Address erratum_address,
+    typename Insn_utilities::Insntype erratum_insn,
+    int erratum_type)
+{
+  gold_assert(erratum_type == ST_E_843419 || erratum_type == ST_E_835769);
+  The_stub_table* stub_table = relobj->stub_table(shndx);
+  gold_assert(stub_table != NULL);
+  if (stub_table->find_erratum_stub(relobj,
+				    shndx,
+				    erratum_insn_offset) == NULL)
+    {
+      const int BPI = AArch64_insn_utilities<big_endian>::BYTES_PER_INSN;
+      The_erratum_stub* stub = new The_erratum_stub(
+	relobj, erratum_type, shndx, erratum_insn_offset);
+      stub->set_erratum_insn(erratum_insn);
+      stub->set_erratum_address(erratum_address);
+      // For erratum ST_E_843419 and ST_E_835769, the destination address is
+      // always the next insn after erratum insn.
+      stub->set_destination_address(erratum_address + BPI);
+      stub_table->add_erratum_stub(stub);
+    }
+}
+
+
+// Scan erratum for section SHNDX range [output_address + span_start,
+// output_address + span_end). Note here we do not share the code with
+// scan_erratum_843419_span function, because for 843419 we optimize by only
+// scanning the last few insns of a page, whereas for 835769, we need to scan
+// every insn.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::scan_erratum_835769_span(
+    AArch64_relobj<size, big_endian>*  relobj,
+    unsigned int shndx,
+    const section_size_type span_start,
+    const section_size_type span_end,
+    unsigned char* input_view,
+    Address output_address)
+{
+  typedef typename Insn_utilities::Insntype Insntype;
+
+  const int BPI = AArch64_insn_utilities<big_endian>::BYTES_PER_INSN;
+
+  // Adjust output_address and view to the start of span.
+  output_address += span_start;
+  input_view += span_start;
+
+  section_size_type span_length = span_end - span_start;
+  section_size_type offset = 0;
+  for (offset = 0; offset + BPI < span_length; offset += BPI)
+    {
+      Insntype* ip = reinterpret_cast<Insntype*>(input_view + offset);
+      Insntype insn1 = ip[0];
+      Insntype insn2 = ip[1];
+      if (is_erratum_835769_sequence(insn1, insn2))
+	{
+	  Insntype erratum_insn = insn2;
+	  // "span_start + offset" is the offset for insn1. So for insn2, it is
+	  // "span_start + offset + BPI".
+	  section_size_type erratum_insn_offset = span_start + offset + BPI;
+	  Address erratum_address = output_address + offset + BPI;
+	  gold_warning(_("Erratum 835769 found and fixed at \"%s\", "
+			 "section %d, offset 0x%08x."),
+		       relobj->name().c_str(), shndx,
+		       (unsigned int)(span_start + offset));
+
+	  this->create_erratum_stub(relobj, shndx,
+				    erratum_insn_offset, erratum_address,
+				    erratum_insn, ST_E_835769);
+	  offset += BPI;  // Skip mac insn.
+	}
+    }
+}  // End of "Target_aarch64::scan_erratum_835769_span".
+
+
 // Scan erratum for section SHNDX range
 // [output_address + span_start, output_address + span_end).
 
@@ -7749,28 +7975,13 @@ Target_aarch64<size, big_endian>::scan_erratum_843419_span(
 			     "section %d, offset 0x%08x."),
 			   relobj->name().c_str(), shndx,
 			   (unsigned int)(span_start + offset));
-	      unsigned int errata_insn_offset =
+	      unsigned int erratum_insn_offset =
 		span_start + offset + insn_offset;
-	      The_stub_table* stub_table = relobj->stub_table(shndx);
-	      gold_assert(stub_table != NULL);
-	      if (stub_table->find_erratum_stub(relobj,
-						shndx,
-						errata_insn_offset) == NULL)
-		{
-		  The_erratum_stub* stub = new The_erratum_stub(
-		      relobj, ST_E_843419, shndx,
-		      errata_insn_offset);
-		  Address erratum_address =
-		    output_address + offset + insn_offset;
-		  // Stub destination address is the next insn after the
-		  // erratum.
-		  Address dest_address = erratum_address
-		    + Insn_utilities::BYTES_PER_INSN;
-		  stub->set_erratum_insn(erratum_insn);
-		  stub->set_erratum_address(erratum_address);
-		  stub->set_destination_address(dest_address);
-		  stub_table->add_erratum_stub(stub);
-		}
+	      Address erratum_address =
+		output_address + offset + insn_offset;
+	      create_erratum_stub(relobj, shndx,
+				  erratum_insn_offset, erratum_address,
+				  erratum_insn, ST_E_843419);
 	    }
 	}
 

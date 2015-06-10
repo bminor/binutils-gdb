@@ -1,3 +1,30 @@
+2015-06-12  Han Shen  <shenhan@google.com>
+
+	Fix erratum 835769.
+
+        * aarch64.cc (AArch64_insn_utilities::BYTES_PER_INSN): Move
+        defintion outside class definition.
+        (AArch64_insn_utilities::AARCH64_ZR): New static constant.
+        (AArch64_insn_utilities::aarch64_op31): New member.
+        (AArch64_insn_utilities::aarch64_ra): New member.
+        (AArch64_insn_utilities::aarch64_mac): New member.
+        (AArch64_insn_utilities::aarch64_mlxl): New member.
+        (ST_E_835769): New global enum member.
+        (Stub_table::relocate_stubs): Add 835769 handler.
+        (Stub_template_repertoire::Stub_template_repertoire): Install new
+        stub type.
+        (AArch64_relobj::scan_errata): This func is renamed from
+        scan_erratum_843419.
+        (AArch64_relobj::do_count_local_symbols): Add 835769 handler.
+        (AArch64_relobj::do_relocate_sections): Add 835769 handler.
+        (AArch64_relobj::scan_sections_for_stubs): Add 835769 handler.
+        (Target_aarch64::scan_erratum_835769_span): New method.
+        (Target_aarch64::create_erratum_stub): New method.
+        (Target_aarch64::is_erratum_835769_sequence): New method.
+        (Target_aarch64::scan_erratum_843419_sequence): Move part of the
+        code into create_erratum_stub.
+        * options.h (fix_cortex_a53_835769): New option.
+
 2015-06-11  Cary Coutant  <ccoutant@gmail.com>
 
 	* aarch64.cc (Erratum_stub::STUB_ADDR_ALIGN): Move initialization
