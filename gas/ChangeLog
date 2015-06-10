@@ -1,3 +1,11 @@
+2015-06-17  Nicolas Pitre <nico@linaro.org>
+
+	* as.c (show_usage): Document --sectname-subst.
+	(parse_args): Add --sectname-subst.
+	* as.h (flag_sectname_subst): New.
+	* config/obj-elf.c (obj_elf_section_name): Add %S substitution.
+	* doc/as.texinfo: Document it.
+
 2014-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

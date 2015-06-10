@@ -238,7 +238,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  @var{objfile}] [@b{-R}] [@b{--reduce-memory-overheads}] [@b{--statistics}]
  [@b{-v}] [@b{-version}] [@b{--version}] [@b{-W}] [@b{--warn}]
  [@b{--fatal-warnings}] [@b{-w}] [@b{-x}] [@b{-Z}] [@b{@@@var{FILE}}]
- [@b{--size-check=[error|warning]}]
+ [@b{--sectname-subst}] [@b{--size-check=[error|warning]}]
  [@b{--target-help}] [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
 @c
@@ -746,6 +746,14 @@ requirements at the expense of speed.
 This option reduces GAS's memory requirements, at the expense of making the
 assembly processes slower.  Currently this switch is a synonym for
 @samp{--hash-size=4051}, but in the future it may have other effects as well.
+
+@ifset ELF
+@item --sectname-subst
+Honor substitution sequences in section names.
+@ifclear man
+@xref{Section Name Substitutions,,@code{.section @var{name}}}.
+@end ifclear
+@end ifset
 
 @item --statistics
 Print the maximum space (in bytes) and total time (in seconds) used by
@@ -6174,6 +6182,38 @@ For ELF targets, the @code{.section} directive is used like this:
 @smallexample
 .section @var{name} [, "@var{flags}"[, @@@var{type}[,@var{flag_specific_arguments}]]]
 @end smallexample
+
+@anchor{Section Name Substitutions}
+@kindex --sectname-subst
+@cindex section name substitution
+If the @samp{--sectname-subst} command-line option is provided, the @var{name}
+argument may contain a substitution sequence. Only @code{%S} is supported
+at the moment, and substitutes the current section name. For example:
+
+@smallexample
+.macro exception_code
+.section %S.exception
+[exception code here]
+.previous
+.endm
+
+.text
+[code]
+exception_code
+[...]
+
+.section .init
+[init code]
+exception_code
+[...]
+@end smallexample
+
+The two @code{exception_code} invocations above would create the
+@code{.text.exception} and @code{.init.exception} sections respectively.
+This is useful e.g. to discriminate between anciliary sections that are
+tied to setup code to be discarded after use from anciliary sections that
+need to stay resident without having to define multiple @code{exception_code}
+macros just for that purpose.
 
 The optional @var{flags} argument is a quoted string which may contain any
 combination of the following characters:

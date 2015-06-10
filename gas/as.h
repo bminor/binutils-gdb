@@ -589,6 +589,9 @@ COMMON enum
     size_check_warning
   }
 flag_size_check;
+
+/* If section name substitution sequences should be honored */
+COMMON int flag_sectname_subst;
 #endif
 
 #ifndef DOLLAR_AMBIGU

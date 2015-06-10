@@ -917,6 +917,27 @@ obj_elf_section_name (void)
       name = (char *) xmalloc (end - input_line_pointer + 1);
       memcpy (name, input_line_pointer, end - input_line_pointer);
       name[end - input_line_pointer] = '\0';
+
+      while (flag_sectname_subst)
+        {
+	  char *subst = strchr (name, '%');
+	  if (subst && subst[1] == 'S')
+	    {
+	      int oldlen = strlen (name);
+	      int substlen = strlen (now_seg->name);
+	      int newlen = oldlen - 2 + substlen;
+	      char *newname = (char *) xmalloc (newlen + 1);
+	      int headlen = subst - name;
+	      memcpy (newname, name, headlen);
+	      strcpy (newname + headlen, now_seg->name);
+	      strcat (newname + headlen, subst + 2);
+	      xfree (name);
+	      name = newname;
+	    }
+	  else
+	    break;
+	}
+
 #ifdef tc_canonicalize_section_name
       name = tc_canonicalize_section_name (name);
 #endif
