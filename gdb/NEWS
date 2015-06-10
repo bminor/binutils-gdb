@@ -137,6 +137,10 @@ set|show record btrace bts buffer-size
   The obtained size may differ from the requested size.  Use "info
   record" to see the obtained buffer size.
 
+set debug linux-namespaces
+show debug linux-namespaces
+  Control display of debugging info regarding Linux namespaces.
+
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.
 

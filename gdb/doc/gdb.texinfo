@@ -23502,6 +23502,11 @@ Displays the current state of @value{GDBN} JIT debugging.
 Turns on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
+@item set debug linux-namespaces
+@cindex @sc{gnu}/Linux namespaces debug messages
+Turns on or off debugging messages from the Linux namespaces debug support.
+@item show debug linux-namespaces
+Show the current state of Linux namespaces debugging messages.
 @item set debug mach-o
 @cindex Mach-O symbols processing
 Control display of debugging messages related to Mach-O symbols

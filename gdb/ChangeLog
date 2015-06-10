@@ -1,5 +1,20 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* linux-nat.c (nat/linux-namespaces.h): New include.
+	(fileio.h): Likewise.
+	(linux_nat_filesystem_is_local): New function.
+	(linux_nat_fileio_pid_of): Likewise.
+	(linux_nat_fileio_open): Likewise.
+	(linux_nat_fileio_readlink): Likewise.
+	(linux_nat_fileio_unlink): Likewise.
+	(linux_nat_add_target): Initialize to_filesystem_is_local,
+	to_fileio_open, to_fileio_readlink and to_fileio_unlink.
+	(_initialize_linux_nat): New "set/show debug linux-namespaces"
+	commands.
+	* NEWS: Mention new "set/show debug linux-namespaces" commands.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* target.h (struct inferior): New forward declaration.
 	(struct target_ops) <to_filesystem_is_local>: Update comment.
 	(struct target_ops) <to_fileio_open>: New argument inf.
