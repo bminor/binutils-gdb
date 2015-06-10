@@ -979,7 +979,8 @@ i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
-common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h
+common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h \
+nat/linux-namespaces.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -2317,6 +2318,10 @@ x86-linux.o: ${srcdir}/nat/x86-linux.c
 
 x86-linux-dregs.o: ${srcdir}/nat/x86-linux-dregs.c
 	$(COMPILE) $(srcdir)/nat/x86-linux-dregs.c
+	$(POSTCOMPILE)
+
+linux-namespaces.o: ${srcdir}/nat/linux-namespaces.c
+	$(COMPILE) $(srcdir)/nat/linux-namespaces.c
 	$(POSTCOMPILE)
 
 #

@@ -1,5 +1,33 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* configure.ac (AC_CHECK_FUNCS): Add setns.
+	* config.in: Regenerate.
+	* configure: Likewise.
+	* nat/linux-namespaces.h: New file.
+	* nat/linux-namespaces.c: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/linux-namespaces.h.
+	(linux-namespaces.o): New rule.
+	* config/aarch64/linux.mh (NATDEPFILES): Add linux-namespaces.o.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Likewise.
+	* config/arm/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m32r/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/pa/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/spu-linux.mh (NATDEPFILES): Likewise.
+	* config/s390/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux64.mh (NATDEPFILES): Likewise.
+	* config/tilegx/linux.mh (NATDEPFILES): Likewise.
+	* config/xtensa/linux.mh (NATDEPFILES): Likewise.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* utils.h (make_cleanup_close): Moved to common/filestuff.h.
 	* utils.c (do_close_cleanup): Moved to common/filestuff.c.
 	(make_cleanup_close): Likewise.
