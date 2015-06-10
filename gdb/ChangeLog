@@ -1,3 +1,24 @@
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+			Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* i386-tdep.c (MPX_BASE_MASK, MPX_BD_MASK, MPX_BT_MASK, MPX_BD_MASK_32,
+	MPX_BT_MASK_32): New macros.
+	(i386_mpx_set_bounds): New function that implements
+	the command "set-mpx-bound".
+	(i386_mpx_enabled): Helper function to test MPX availability.
+	(i386_mpx_bd_base): Helper function to calculate the base directory
+	address.
+	(i386_mpx_get_bt_entry): Helper function to access a bound
+	table entry.
+	(i386_mpx_print_bounds): Effectively display bound information.
+	(_initialize_i386_tdep): Add new commands to commands "set mpx" and
+	"show mpx".
+	(_initialize_i386_tdep):
+	Add "bound" to the commands "show mpx" and "set mpx" commands.
+	(mpx_set_cmdlist and mpx_show_cmdlist): List for the new prefixed "set mpx"
+	and "show mpx" commands.
+	* NEWS: List new commands for MPX support.
+
 2015-06-09  Gary Benson <gbenson@redhat.com>
 
 	* common/fileio.h (fileio_to_host_mode): New declaration.

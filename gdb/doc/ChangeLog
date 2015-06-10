@@ -1,3 +1,9 @@
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+            Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* gdb.texinfo (i386): Add documentation about "show mpx bound"
+	and "set mpx bound".
+
 2015-05-27  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Debugging Output): Mention set/show debug dwarf-line.

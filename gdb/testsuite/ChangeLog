@@ -1,3 +1,30 @@
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+            Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* gdb.arch/i386-mpx-map.c: New file.
+	* gdb.arch/i386-mpx-map.exp: New File.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c (have_mpx): Indentation fixed.
+	* gdb.arch/i386-mpx.exp: Indentation fixed.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c: Added final return to the have_mpx
+	function and improved indentation.
+	* gdb.arch/i386-mpx.exp: Exchanging gdb_send and gdb_expect for
+	gdb_test_multiple. Added additional tests to skip the test.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-avx512.c: Change path in include file.
+	* gdb.arch/i386-avx512.exp: Change include dir path
+	compilation flag.
+	* gdb.arch/i386-mpx.c: Change path in include file.
+	* gdb.arch/i386-mpx.exp: Change include dir path compilation
+	flag.
+
 2015-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.compile/compile-print.exp (compile print *vararray@3)
