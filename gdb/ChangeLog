@@ -1,3 +1,8 @@
+2015-06-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (dwarf_record_line): Call dwarf_record_line if
+	end_sequence is true.
+
 2015-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

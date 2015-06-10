@@ -17658,7 +17658,7 @@ dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
       lh->file_names[file - 1].included_p = 1;
       if (reader->record_lines_p && is_stmt)
 	{
-	  if (state->last_subfile != current_subfile)
+	  if (state->last_subfile != current_subfile || end_sequence)
 	    {
 	      dwarf_finish_line (reader->gdbarch, state->last_subfile,
 				 state->address, state->record_line);
