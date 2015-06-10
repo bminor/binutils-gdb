@@ -1,3 +1,56 @@
+2015-06-10  Han Shen  <shenhan@google.com>
+	Patch for erratum-843419 (2 of 2 - fix erratum occurrences).
+
+	Now fixing for 843419 is fully functional.
+
+	The first part of the erratum fix CL is here -
+	https://sourceware.org/ml/binutils/2015-04/msg00229.html
+
+	* aarch64.cc(global enum): New constants representing stub types.
+	(Stub_template): New POD struct.
+	(Stub_template_repertoire): New class.
+	(Stub_base): New class.
+	(Erratum_stub): New class.
+	(Reloc_stub): Refactored to be a subclass of Stub_base.
+	(Reloc_stub::Stub_type): Removed.
+	(Reloc_stub::offset): Moved to Stub_base.
+	(Reloc_stub::set_offset): Moved to Stub_base.
+	(Reloc_stub::destination_address): Moved to Stub_base.
+	(Reloc_stub::set_destination_address): Moved to Stub_base.
+	(Reloc_stub::reset_destination_address): Moved to Stub_base.
+	(Reloc_stub::stub_type): Renamed and moved to Stub_base.
+	(Reloc_stub::stub_size): Renamed and moved to Stub_base.
+	(Reloc_stub::stub_insns): Renamed and moved to Stub_base.
+	(Reloc_stub::write): Moved to Stub_base.
+	(Reloc_stub::invalid_offset): Moved to Stub_base.
+	(Reloc_stub::invalid_address): Moved to Stub_base.
+	(Reloc_stub::stub_type_): Renamed and moved to Stub_base.
+	(Reloc_stub::stub_insns_): Moved to Stub_base.
+	(Reloc_stub::offset_): Moved to Stub_base.
+	(Reloc_stub::destination_address_): Moved to Stub_base.
+	(Stub_table::The_aarch64_relobj): New typedef.
+	(Stub_table::The_erratum_stub): New typedef.
+	(Stub_table::The_erratum_stub_less): New typedef.
+	(Stub_table::The_erratum_stub_set): New typedef.
+	(Stub_table::The_erratum_stub_set_iter): New typedef.
+	(Stub_table::empty): Added emptiness testing for erratum stubs.
+	(Stub_table::add_erratum_stub): New method to add an erratum stub.
+	(Stub_table::find_erratum_stub): New method.
+	(Stub_table::find_erratum_stubs_for_input_section): New method.
+	(Stub_table::erratum_stub_address): New method.
+	(Stub_table::update_date_size_changed_p): Modified to handle erratum stubs.
+	(Stub_table::do_addralign): Modified to handle erratum stubs.
+	(Stub_table::erratum_stubs_): New member.
+	(Stub_table::erratum_stub_size_): New member.
+	(Stub_table::relocate_stubs): Modified to handle erratum stubs.
+	(Stub_table::do_write): Modified to handle erratum stubs.
+	(AArch64_relobj::The_erratum_stub): New typedef.
+	(AArch64_relobj::Erratum_stub_set_iter): New typedef.
+	(AArch64_relobj::fix_errata): New method.
+	(Target_aarch64::The_reloc_stub_type): Removed.
+	(Target_aarch64::The_erratum_stub): New typede.
+	(AArch64_relocate_functions::construct_b): New method.
+
 2015-06-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: New French Translation.
