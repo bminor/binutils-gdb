@@ -243,6 +243,55 @@ hostio_reply_with_data (char *own_buf, char *buffer, int len,
   return input_index;
 }
 
+/* Process ID of inferior whose filesystem hostio functions
+   that take FILENAME arguments will use.  Zero means to use
+   our own filesystem.  */
+
+static int hostio_fs_pid;
+
+/* See hostio.h.  */
+
+void
+hostio_handle_new_gdb_connection (void)
+{
+  hostio_fs_pid = 0;
+}
+
+/* Handle a "vFile:setfs:" packet.  */
+
+static void
+handle_setfs (char *own_buf)
+{
+  char *p;
+  int pid;
+
+  /* If the target doesn't have any of the in-filesystem-of methods
+     then there's no point in GDB sending "vFile:setfs:" packets.  We
+     reply with an empty packet (i.e. we pretend we don't understand
+     "vFile:setfs:") and that should stop GDB sending any more.  */
+  if (the_target->multifs_open == NULL
+      && the_target->multifs_unlink == NULL
+      && the_target->multifs_readlink == NULL)
+    {
+      own_buf[0] = '\0';
+      return;
+    }
+
+  p = own_buf + strlen ("vFile:setfs:");
+
+  if (require_int (&p, &pid)
+      || pid < 0
+      || require_end (p))
+    {
+      hostio_packet_error (own_buf);
+      return;
+    }
+
+  hostio_fs_pid = pid;
+
+  hostio_reply (own_buf, 0);
+}
+
 static void
 handle_open (char *own_buf)
 {
@@ -269,7 +318,11 @@ handle_open (char *own_buf)
 
   /* We do not need to convert MODE, since the fileio protocol
      uses the standard values.  */
-  fd = open (filename, flags, mode);
+  if (hostio_fs_pid != 0 && the_target->multifs_open != NULL)
+    fd = the_target->multifs_open (hostio_fs_pid, filename,
+				   flags, mode);
+  else
+    fd = open (filename, flags, mode);
 
   if (fd == -1)
     {
@@ -473,7 +526,10 @@ handle_unlink (char *own_buf)
       return;
     }
 
-  ret = unlink (filename);
+  if (hostio_fs_pid != 0 && the_target->multifs_unlink != NULL)
+    ret = the_target->multifs_unlink (hostio_fs_pid, filename);
+  else
+    ret = unlink (filename);
 
   if (ret == -1)
     {
@@ -500,7 +556,13 @@ handle_readlink (char *own_buf, int *new_packet_len)
       return;
     }
 
-  ret = readlink (filename, linkname, sizeof (linkname) - 1);
+  if (hostio_fs_pid != 0 && the_target->multifs_readlink != NULL)
+    ret = the_target->multifs_readlink (hostio_fs_pid, filename,
+					linkname,
+					sizeof (linkname) - 1);
+  else
+    ret = readlink (filename, linkname, sizeof (linkname) - 1);
+
   if (ret == -1)
     {
       hostio_error (own_buf);
@@ -534,6 +596,8 @@ handle_vFile (char *own_buf, int packet_len, int *new_packet_len)
     handle_unlink (own_buf);
   else if (startswith (own_buf, "vFile:readlink:"))
     handle_readlink (own_buf, new_packet_len);
+  else if (startswith (own_buf, "vFile:setfs:"))
+    handle_setfs (own_buf);
   else
     return 0;
 

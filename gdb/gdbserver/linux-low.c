@@ -52,6 +52,7 @@
    definition of elf_fpregset_t.  */
 #include <elf.h>
 #endif
+#include "nat/linux-namespaces.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -6644,6 +6645,9 @@ static struct target_ops linux_target_ops = {
 #endif
   linux_supports_range_stepping,
   linux_proc_pid_to_exec_file,
+  linux_mntns_open_cloexec,
+  linux_mntns_unlink,
+  linux_mntns_readlink,
 };
 
 static void
