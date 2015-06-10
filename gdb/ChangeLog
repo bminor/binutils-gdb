@@ -1,5 +1,18 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* remote.c (struct remote_state) <fs_pid>: New field.
+	(new_remote_state): Initialize the above.
+	(PACKET_vFile_setfs): New enum value.
+	(remote_hostio_set_filesystem): New function.
+	(remote_hostio_open): Call the above.
+	(remote_hostio_unlink): Likewise.
+	(remote_hostio_readlink): Likewise.
+	(_initialize_remote): Register new "set/show remote
+	hostio-setfs-packet" command.
+	* NEWS: Announce new vFile:setfs packet.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* linux-nat.c (nat/linux-namespaces.h): New include.
 	(fileio.h): Likewise.
 	(linux_nat_filesystem_is_local): New function.

@@ -1,5 +1,11 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* gdb.texinfo (Remote Configuration): Document the
+	"set/show remote hostio-setfs-packet" command.
+	(Host I/O Packets): Document the vFile:setfs packet.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* gdb.texinfo (Debugging Output): Document the "set/show debug
 	linux-namespaces" command.
 

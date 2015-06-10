@@ -19916,6 +19916,10 @@ are:
 @tab @code{vFile:fstat}
 @tab Host I/O
 
+@item @code{hostio-setfs-packet}
+@tab @code{vFile:setfs}
+@tab Host I/O
+
 @item @code{noack-packet}
 @tab @code{QStartNoAckMode}
 @tab Packet acknowledgment
@@ -37741,6 +37745,20 @@ If zero bytes were read, the response should include an empty binary
 attachment (i.e.@: a trailing semicolon).  The return value is the
 number of target bytes read; the binary attachment may be longer if
 some characters were escaped.
+
+@item vFile:setfs: @var{pid}
+Select the filesystem on which @code{vFile} operations with
+@var{filename} arguments will operate.  This is required for
+@value{GDBN} to be able to access files on remote targets where
+the remote stub does not share a common filesystem with the
+inferior(s).
+
+If @var{pid} is nonzero, select the filesystem as seen by process
+@var{pid}.  If @var{pid} is zero, select the filesystem as seen by
+the remote stub.  Return 0 on success, or -1 if an error occurs.
+If @code{vFile:setfs:} indicates success, the selected filesystem
+remains selected until the next successful @code{vFile:setfs:}
+operation.
 
 @end table
 
