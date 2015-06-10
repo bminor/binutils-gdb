@@ -140,14 +140,11 @@ struct _sim_event {
 
 #define _ETRACE sd, NULL
 
-#undef ETRACE_P
-#define ETRACE_P (WITH_TRACE && STATE_EVENTS (sd)->trace)
-
 #undef ETRACE
 #define ETRACE(ARGS) \
 do \
   { \
-    if (ETRACE_P) \
+    if (STRACE_EVENTS_P (sd)) \
       { \
         if (STRACE_DEBUG_P (sd)) \
 	  { \
@@ -409,7 +406,7 @@ update_time_from_event (SIM_DESC sd)
       events->time_of_event = current_time - 1;
       events->time_from_event = -1;
     }
-  if (ETRACE_P)
+  if (STRACE_EVENTS_P (sd))
     {
       sim_event *event;
       int i;
@@ -521,7 +518,7 @@ sim_events_schedule_vtracef (SIM_DESC sd,
   new_event->data = data;
   new_event->handler = handler;
   new_event->watching = watch_timer;
-  if (fmt == NULL || !ETRACE_P || vasprintf (&new_event->trace, fmt, ap) < 0)
+  if (fmt == NULL || !STRACE_EVENTS_P (sd) || vasprintf (&new_event->trace, fmt, ap) < 0)
     new_event->trace = NULL;
   insert_sim_event (sd, new_event, delta_time);
   ETRACE ((_ETRACE,

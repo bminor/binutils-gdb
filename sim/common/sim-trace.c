@@ -173,22 +173,14 @@ set_trace_option_mask (SIM_DESC sd, const char *name, int mask, const char *arg)
 	}
     }
 
-  /* update applicable trace bits */
+  /* Update applicable trace bits.  */
   for (trace_nr = 0; trace_nr < MAX_TRACE_VALUES; ++trace_nr)
     {
       if ((mask & (1 << trace_nr)) == 0)
 	continue;
 
       /* Set non-cpu specific values.  */
-      switch (trace_nr)
-	{
-	case TRACE_EVENTS_IDX:
-	  STATE_EVENTS (sd)->trace = trace_val;
-	  break;
-	case TRACE_DEBUG_IDX:
-	  STATE_TRACE_FLAGS (sd)[trace_nr] = trace_val;
-	  break;
-	}
+      STATE_TRACE_FLAGS (sd)[trace_nr] = trace_val;
 
       /* Set cpu values.  */
       for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)

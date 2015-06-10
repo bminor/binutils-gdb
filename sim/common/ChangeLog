@@ -1,5 +1,14 @@
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-events.c (ETRACE_P): Delete.
+	(ETRACE): Change ETRACE_P to STRACE_EVENTS_P(sd).
+	(update_time_from_event, sim_events_schedule_vtracef): Likewise.
+	* sim-events.h (struct _sim_events): Delete trace member.
+	* sim-trace.c (set_trace_option_mask): Delete trace_nr check and
+	always set STATE_TRACE_FLAGS(sd)[trace_nr] element.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.h (STRACE_ANY_P, STRACE_INSN_P, STRACE_DECODE_P,
 	STRACE_EXTRACT_P, STRACE_LINENUM_P, STRACE_MEMORY_P, STRACE_MODEL_P,
 	STRACE_ALU_P, STRACE_CORE_P, STRACE_EVENTS_P, STRACE_FPU_P,
