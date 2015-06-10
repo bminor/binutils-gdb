@@ -1,5 +1,11 @@
 2015-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* solib-target.c (library_list_start_list): Use explicit NULL
+	comparison.
+
+2015-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* solib-target.c (library_list_start_list): Do not dereference
 	variable version in its initialization.  Make the VERSION check handle
 	NULL.

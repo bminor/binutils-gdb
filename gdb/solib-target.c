@@ -149,7 +149,7 @@ library_list_start_list (struct gdb_xml_parser *parser,
   struct gdb_xml_value *version = xml_find_attribute (attributes, "version");
 
   /* #FIXED attribute may be omitted, Expat returns NULL in such case.  */
-  if (version)
+  if (version != NULL)
     {
       const char *string = version->value;
 
