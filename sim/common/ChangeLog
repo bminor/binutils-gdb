@@ -1,5 +1,12 @@
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.h (STRACE_ANY_P, STRACE_INSN_P, STRACE_DECODE_P,
+	STRACE_EXTRACT_P, STRACE_LINENUM_P, STRACE_MEMORY_P, STRACE_MODEL_P,
+	STRACE_ALU_P, STRACE_CORE_P, STRACE_EVENTS_P, STRACE_FPU_P,
+	STRACE_VPU_P, STRACE_BRANCH_P, STRACE_SYSCALL_P): Define.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.h (TRACE_USEFUL_MASK): Change to TRACE_xxx defines.
 
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>

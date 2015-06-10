@@ -193,6 +193,20 @@ typedef struct _trace_data {
   (WITH_TRACE_P (idx) && STATE_TRACE_FLAGS (sd)[idx] != 0)
 
 /* Non-zero if --trace-<xxxx> was specified for SD.  */
+#define STRACE_ANY_P(sd)	((WITH_TRACE) && (STATE_TRACE_DATA (sd)->trace_any_p))
+#define STRACE_INSN_P(sd)	STRACE_P (sd, TRACE_INSN_IDX)
+#define STRACE_DECODE_P(sd)	STRACE_P (sd, TRACE_DECODE_IDX)
+#define STRACE_EXTRACT_P(sd)	STRACE_P (sd, TRACE_EXTRACT_IDX)
+#define STRACE_LINENUM_P(sd)	STRACE_P (sd, TRACE_LINENUM_IDX)
+#define STRACE_MEMORY_P(sd)	STRACE_P (sd, TRACE_MEMORY_IDX)
+#define STRACE_MODEL_P(sd)	STRACE_P (sd, TRACE_MODEL_IDX)
+#define STRACE_ALU_P(sd)	STRACE_P (sd, TRACE_ALU_IDX)
+#define STRACE_CORE_P(sd)	STRACE_P (sd, TRACE_CORE_IDX)
+#define STRACE_EVENTS_P(sd)	STRACE_P (sd, TRACE_EVENTS_IDX)
+#define STRACE_FPU_P(sd)	STRACE_P (sd, TRACE_FPU_IDX)
+#define STRACE_VPU_P(sd)	STRACE_P (sd, TRACE_VPU_IDX)
+#define STRACE_BRANCH_P(sd)	STRACE_P (sd, TRACE_BRANCH_IDX)
+#define STRACE_SYSCALL_P(sd)	STRACE_P (sd, TRACE_SYSCALL_IDX)
 #define STRACE_DEBUG_P(sd)	STRACE_P (sd, TRACE_DEBUG_IDX)
 
 /* CPU tracing support.  */
