@@ -52,6 +52,13 @@
 
 * GDB now supports the vector ABI on S/390 GNU/Linux targets.
 
+* On GNU/Linux, GDB and gdbserver are now able to access executable
+  and shared library files without a "set sysroot" command when
+  attaching to processes running in different mount namespaces from
+  the debugger.  This makes it possible to attach to processes in
+  containers as simply as "gdb -p PID" or "gdbserver --attach PID".
+  See "New remote packets" below.
+
 * Guile Scripting
 
   ** Memory ports can now be unbuffered.

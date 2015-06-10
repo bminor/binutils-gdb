@@ -1,5 +1,11 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* NEWS: Announce support for direct access of executable and
+	shared library files when attaching to inferiors in containers
+	on GNU/Linux systems.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* remote.c (struct remote_state) <fs_pid>: New field.
 	(new_remote_state): Initialize the above.
 	(PACKET_vFile_setfs): New enum value.
