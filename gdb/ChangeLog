@@ -1,5 +1,32 @@
 2015-06-10  Gary Benson <gbenson@redhat.com>
 
+	* inf-child.c (inf_child_fileio_open): Replace comment.
+	(inf_child_fileio_pwrite): Likewise.
+	(inf_child_fileio_pread): Likewise.
+	(inf_child_fileio_fstat): Insert blank line before comment.
+	(inf_child_fileio_close): Replace comment.
+	(inf_child_fileio_unlink): Likewise.
+	(inf_child_fileio_readlink): Likewise.
+	* remote.c (remote_hostio_open): Likewise.
+	(remote_hostio_pread): Likewise.
+	(remote_hostio_pwrite): Likewise.
+	(remote_hostio_close): Likewise.
+	(remote_hostio_unlink): Likewise.
+	(remote_hostio_readlink): Likewise.
+	(remote_hostio_fstat): Likewise.
+	(remote_filesystem_is_local): Likewise.
+	* target.c (target_fileio_open): Likewise.
+	(target_fileio_pwrite): Likewise.
+	(target_fileio_pread): Likewise.
+	(target_fileio_fstat): Insert blank line before comment.
+	(target_fileio_close): Replace comment.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_readlink): Likewise.
+	(target_fileio_read_alloc): Likewise.
+	(target_fileio_read_stralloc): Likewise.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
 	* linux-thread-db.c (nat/linux-namespaces.h): New include.
 	(check_pid_namespace_match): Use linux_ns_same rather than
 	linux_proc_pid_get_ns to spot PID namespace mismatches.

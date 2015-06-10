@@ -204,9 +204,8 @@ inf_child_pid_to_exec_file (struct target_ops *self, int pid)
   return NULL;
 }
 
-/* Open FILENAME on the target, using FLAGS and MODE.  Return a
-   target file descriptor, or -1 if an error occurs (and set
-   *TARGET_ERRNO).  */
+/* Implementation of to_fileio_open.  */
+
 static int
 inf_child_fileio_open (struct target_ops *self,
 		       const char *filename, int flags, int mode,
@@ -230,9 +229,8 @@ inf_child_fileio_open (struct target_ops *self,
   return fd;
 }
 
-/* Write up to LEN bytes from WRITE_BUF to FD on the target.
-   Return the number of bytes written, or -1 if an error occurs
-   (and set *TARGET_ERRNO).  */
+/* Implementation of to_fileio_pwrite.  */
+
 static int
 inf_child_fileio_pwrite (struct target_ops *self,
 			 int fd, const gdb_byte *write_buf, int len,
@@ -259,9 +257,8 @@ inf_child_fileio_pwrite (struct target_ops *self,
   return ret;
 }
 
-/* Read up to LEN bytes FD on the target into READ_BUF.
-   Return the number of bytes read, or -1 if an error occurs
-   (and set *TARGET_ERRNO).  */
+/* Implementation of to_fileio_pread.  */
+
 static int
 inf_child_fileio_pread (struct target_ops *self,
 			int fd, gdb_byte *read_buf, int len,
@@ -289,6 +286,7 @@ inf_child_fileio_pread (struct target_ops *self,
 }
 
 /* Implementation of to_fileio_fstat.  */
+
 static int
 inf_child_fileio_fstat (struct target_ops *self, int fd,
 			struct stat *sb, int *target_errno)
@@ -302,8 +300,8 @@ inf_child_fileio_fstat (struct target_ops *self, int fd,
   return ret;
 }
 
-/* Close FD on the target.  Return 0, or -1 if an error occurs
-   (and set *TARGET_ERRNO).  */
+/* Implementation of to_fileio_close.  */
+
 static int
 inf_child_fileio_close (struct target_ops *self, int fd, int *target_errno)
 {
@@ -316,8 +314,8 @@ inf_child_fileio_close (struct target_ops *self, int fd, int *target_errno)
   return ret;
 }
 
-/* Unlink FILENAME on the target.  Return 0, or -1 if an error
-   occurs (and set *TARGET_ERRNO).  */
+/* Implementation of to_fileio_unlink.  */
+
 static int
 inf_child_fileio_unlink (struct target_ops *self,
 			 const char *filename, int *target_errno)
@@ -331,9 +329,8 @@ inf_child_fileio_unlink (struct target_ops *self,
   return ret;
 }
 
-/* Read value of symbolic link FILENAME on the target.  Return a
-   null-terminated string allocated via xmalloc, or NULL if an error
-   occurs (and set *TARGET_ERRNO).  */
+/* Implementation of to_fileio_readlink.  */
+
 static char *
 inf_child_fileio_readlink (struct target_ops *self,
 			   const char *filename, int *target_errno)

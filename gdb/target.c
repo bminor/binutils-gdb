@@ -2756,9 +2756,8 @@ release_fileio_fd (int fd, fileio_fh_t *fh)
 #define fileio_fd_to_fh(fd) \
   VEC_index (fileio_fh_t, fileio_fhandles, (fd))
 
-/* Open FILENAME on the target, using FLAGS and MODE.  Return a
-   target file descriptor, or -1 if an error occurs (and set
-   *TARGET_ERRNO).  */
+/* See target.h.  */
+
 int
 target_fileio_open (const char *filename, int flags, int mode,
 		    int *target_errno)
@@ -2789,9 +2788,8 @@ target_fileio_open (const char *filename, int flags, int mode,
   return -1;
 }
 
-/* Write up to LEN bytes from WRITE_BUF to FD on the target.
-   Return the number of bytes written, or -1 if an error occurs
-   (and set *TARGET_ERRNO).  */
+/* See target.h.  */
+
 int
 target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
 		      ULONGEST offset, int *target_errno)
@@ -2814,9 +2812,8 @@ target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
   return ret;
 }
 
-/* Read up to LEN bytes FD on the target into READ_BUF.
-   Return the number of bytes read, or -1 if an error occurs
-   (and set *TARGET_ERRNO).  */
+/* See target.h.  */
+
 int
 target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 		     ULONGEST offset, int *target_errno)
@@ -2840,6 +2837,7 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 }
 
 /* See target.h.  */
+
 int
 target_fileio_fstat (int fd, struct stat *sb, int *target_errno)
 {
@@ -2858,8 +2856,8 @@ target_fileio_fstat (int fd, struct stat *sb, int *target_errno)
   return ret;
 }
 
-/* Close FD on the target.  Return 0, or -1 if an error occurs
-   (and set *TARGET_ERRNO).  */
+/* See target.h.  */
+
 int
 target_fileio_close (int fd, int *target_errno)
 {
@@ -2881,8 +2879,8 @@ target_fileio_close (int fd, int *target_errno)
   return ret;
 }
 
-/* Unlink FILENAME on the target.  Return 0, or -1 if an error
-   occurs (and set *TARGET_ERRNO).  */
+/* See target.h.  */
+
 int
 target_fileio_unlink (const char *filename, int *target_errno)
 {
@@ -2906,9 +2904,8 @@ target_fileio_unlink (const char *filename, int *target_errno)
   return -1;
 }
 
-/* Read value of symbolic link FILENAME on the target.  Return a
-   null-terminated string allocated via xmalloc, or NULL if an error
-   occurs (and set *TARGET_ERRNO).  */
+/* See target.h.  */
+
 char *
 target_fileio_readlink (const char *filename, int *target_errno)
 {
@@ -3006,9 +3003,7 @@ target_fileio_read_alloc_1 (const char *filename,
     }
 }
 
-/* Read target file FILENAME.  Store the result in *BUF_P and return
-   the size of the transferred data.  See the declaration in "target.h"
-   function for more information about the return value.  */
+/* See target.h.  */
 
 LONGEST
 target_fileio_read_alloc (const char *filename, gdb_byte **buf_p)
@@ -3016,11 +3011,7 @@ target_fileio_read_alloc (const char *filename, gdb_byte **buf_p)
   return target_fileio_read_alloc_1 (filename, buf_p, 0);
 }
 
-/* Read target file FILENAME.  The result is NUL-terminated and
-   returned as a string, allocated using xmalloc.  If an error occurs
-   or the transfer is unsupported, NULL is returned.  Empty objects
-   are returned as allocated but empty strings.  A warning is issued
-   if the result contains any embedded NUL bytes.  */
+/* See target.h.  */
 
 char *
 target_fileio_read_stralloc (const char *filename)
