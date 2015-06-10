@@ -67,4 +67,8 @@ extern int gdb_socket_cloexec (int domain, int style, int protocol);
 
 extern int gdb_pipe_cloexec (int filedes[2]);
 
+/* Return a new cleanup that closes FD.  */
+
+extern struct cleanup *make_cleanup_close (int fd);
+
 #endif /* FILESTUFF_H */

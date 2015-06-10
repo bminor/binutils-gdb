@@ -80,7 +80,7 @@ struct section_addr_info;
 extern struct cleanup *(make_cleanup_free_section_addr_info 
                         (struct section_addr_info *));
 
-extern struct cleanup *make_cleanup_close (int fd);
+/* For make_cleanup_close see common/filestuff.h.  */
 
 extern struct cleanup *make_cleanup_fclose (FILE *file);
 

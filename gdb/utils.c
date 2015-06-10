@@ -191,23 +191,6 @@ make_cleanup_bfd_unref (bfd *abfd)
   return make_cleanup (do_bfd_close_cleanup, abfd);
 }
 
-static void
-do_close_cleanup (void *arg)
-{
-  int *fd = arg;
-
-  close (*fd);
-}
-
-struct cleanup *
-make_cleanup_close (int fd)
-{
-  int *saved_fd = xmalloc (sizeof (fd));
-
-  *saved_fd = fd;
-  return make_cleanup_dtor (do_close_cleanup, saved_fd, xfree);
-}
-
 /* Helper function which does the work for make_cleanup_fclose.  */
 
 static void
