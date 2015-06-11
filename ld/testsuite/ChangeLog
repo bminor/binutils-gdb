@@ -1,3 +1,25 @@
+2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/pic-and-nonpic-3b.ad: Adjust for extra dynamic tag.
+	* ld-mips-elf/pic-and-nonpic-4b.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-5b.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n32.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n64.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-o32.ad: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32.got: Likewise.
+	* ld-mips-elf/pie-n32.d: New file.
+	* ld-mips-elf/pie-n64.d: Likewise.
+	* ld-mips-elf/pie-o32.d: Likewise.
+	* ld-mips-elf/pie.s: Likewise.
+	* ld-mips-elf/mips-elf.exp: Add new tests.
+
 2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/strtab.d: Only run on *-*-linux* and *-*-gnu* targets.

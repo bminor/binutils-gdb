@@ -1,3 +1,7 @@
+2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_mips_dynamic_type): Handle DT_MIPS_RLD_MAP_REL.
+
 2015-06-22  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (disassemble_bytes): Set the stop_vma field in the
