@@ -6324,14 +6324,15 @@ get_r_debug (const int pid, const int is_elf64)
       if (is_elf64)
 	{
 	  Elf64_Dyn *const dyn = (Elf64_Dyn *) buf;
-#ifdef DT_MIPS_RLD_MAP
+#if defined DT_MIPS_RLD_MAP || defined DT_MIPS_RLD_MAP_REL
 	  union
 	    {
 	      Elf64_Xword map;
 	      unsigned char buf[sizeof (Elf64_Xword)];
 	    }
 	  rld_map;
-
+#endif
+#ifdef DT_MIPS_RLD_MAP
 	  if (dyn->d_tag == DT_MIPS_RLD_MAP)
 	    {
 	      if (linux_read_memory (dyn->d_un.d_val,
@@ -6341,6 +6342,16 @@ get_r_debug (const int pid, const int is_elf64)
 		break;
 	    }
 #endif	/* DT_MIPS_RLD_MAP */
+#ifdef DT_MIPS_RLD_MAP_REL
+	  if (dyn->d_tag == DT_MIPS_RLD_MAP_REL)
+	    {
+	      if (linux_read_memory (dyn->d_un.d_val + dynamic_memaddr,
+				     rld_map.buf, sizeof (rld_map.buf)) == 0)
+		return rld_map.map;
+	      else
+		break;
+	    }
+#endif	/* DT_MIPS_RLD_MAP_REL */
 
 	  if (dyn->d_tag == DT_DEBUG && map == -1)
 	    map = dyn->d_un.d_val;
@@ -6351,14 +6362,15 @@ get_r_debug (const int pid, const int is_elf64)
       else
 	{
 	  Elf32_Dyn *const dyn = (Elf32_Dyn *) buf;
-#ifdef DT_MIPS_RLD_MAP
+#if defined DT_MIPS_RLD_MAP || defined DT_MIPS_RLD_MAP_REL
 	  union
 	    {
 	      Elf32_Word map;
 	      unsigned char buf[sizeof (Elf32_Word)];
 	    }
 	  rld_map;
-
+#endif
+#ifdef DT_MIPS_RLD_MAP
 	  if (dyn->d_tag == DT_MIPS_RLD_MAP)
 	    {
 	      if (linux_read_memory (dyn->d_un.d_val,
@@ -6368,6 +6380,16 @@ get_r_debug (const int pid, const int is_elf64)
 		break;
 	    }
 #endif	/* DT_MIPS_RLD_MAP */
+#ifdef DT_MIPS_RLD_MAP_REL
+	  if (dyn->d_tag == DT_MIPS_RLD_MAP_REL)
+	    {
+	      if (linux_read_memory (dyn->d_un.d_val + dynamic_memaddr,
+				     rld_map.buf, sizeof (rld_map.buf)) == 0)
+		return rld_map.map;
+	      else
+		break;
+	    }
+#endif	/* DT_MIPS_RLD_MAP_REL */
 
 	  if (dyn->d_tag == DT_DEBUG && map == -1)
 	    map = dyn->d_un.d_val;

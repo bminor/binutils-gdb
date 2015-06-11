@@ -1,3 +1,7 @@
+2015-08-14  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* linux-low.c (get_r_debug): Handle DT_MIPS_RLD_MAP_REL.
+
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (expr_eval_result): Now an int.

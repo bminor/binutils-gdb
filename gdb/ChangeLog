@@ -1,5 +1,19 @@
 2015-08-14  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* solib-svr4.c (read_program_header): Add base_addr argument to
+	report the runtime address of the segment.
+	(find_program_interpreter): Update read_program_header call to pass
+	a NULL pointer for the new argument.
+	(scan_dyntag): Add ptr_addr argument to report the runtime address
+	of the tag payload.
+	(scan_dyntag_auxv): Likewise and use thew new base_addr argument of
+	read_program_header to get the base address of the dynamic segment.
+	(elf_locate_base): Update uses of scan_dyntag, scan_dyntag_auxv and
+	read_program_header.
+	(elf_locate_base): Scan for and handle DT_MIPS_RLD_MAP_REL.
+
+2015-08-14  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* MAINTAINERS (Write After Approval): Add Matthew Fortune.
 
 2015-08-13  Iain Buclaw  <ibuclaw@gdcproject.org>
