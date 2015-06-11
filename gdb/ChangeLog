@@ -1,3 +1,8 @@
+2015-06-11  Gary Benson <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (mnsh_send_message): Use pulongest.
+	(mnsh_recv_message): Likewise.
+
 2015-06-11  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* i386-tdep.c (i386_mpx_print_bounds): use of LONGEST instead of

@@ -374,7 +374,7 @@ mnsh_send_message (int sock, enum mnsh_msg_type type,
     {
       debug_printf ("mnsh: send: ");
       mnsh_debug_print_message (type, fd, int1, int2, buf, bufsiz);
-      debug_printf (" -> %ld\n", size);
+      debug_printf (" -> %s\n", pulongest (size));
     }
 
   return size;
@@ -426,7 +426,8 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
   if (size < 0)
     {
       if (debug_linux_namespaces)
-	debug_printf ("namespace-helper: recv failed (%ld)\n", size);
+	debug_printf ("namespace-helper: recv failed (%s)\n",
+		      pulongest (size));
 
       mnsh_maybe_mourn_peer ();
 
@@ -437,8 +438,8 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
   if (size < fixed_size || (msg.msg_flags & (MSG_TRUNC | MSG_CTRUNC)))
     {
       if (debug_linux_namespaces)
-	debug_printf ("namespace-helper: recv truncated (%ld 0x%x)\n",
-		      size, msg.msg_flags);
+	debug_printf ("namespace-helper: recv truncated (%s 0x%x)\n",
+		      pulongest (size), msg.msg_flags);
 
       mnsh_maybe_mourn_peer ();
 
