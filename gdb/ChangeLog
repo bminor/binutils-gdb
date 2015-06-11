@@ -1,3 +1,8 @@
+2015-06-11  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i386-tdep.c (i386_mpx_print_bounds): use of LONGEST instead of
+	long long int and plongest instead of %ll.
+
 2015-06-11  Gary Benson <gbenson@redhat.com>
 
 	* nat/linux-namespaces.c (gdb_wait.h): New include.

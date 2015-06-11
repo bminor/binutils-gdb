@@ -8717,7 +8717,7 @@ static void
 i386_mpx_print_bounds (const CORE_ADDR bt_entry[4])
 {
   struct ui_out *uiout = current_uiout;
-  long long int size;
+  LONGEST size;
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR onecompl = ~((CORE_ADDR) 0);
   int bounds_in_map = ((~bt_entry[1] == 0 && bt_entry[0] == onecompl) ? 1 : 0);
@@ -8752,7 +8752,7 @@ i386_mpx_print_bounds (const CORE_ADDR bt_entry[4])
 
       size = (size > -1 ? size + 1 : size);
       ui_out_text (uiout, ", size = ");
-      ui_out_field_fmt (uiout, "size", "%lld", size);
+      ui_out_field_fmt (uiout, "size", "%s", plongest (size));
 
       ui_out_text (uiout, ", metadata = ");
       ui_out_field_core_addr (uiout, "metadata", gdbarch, bt_entry[3]);
