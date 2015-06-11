@@ -1,5 +1,11 @@
 2015-06-11  Cary Coutant  <ccoutant@gmail.com>
 
+	* aarch64.cc (Erratum_stub::STUB_ADDR_ALIGN): Move initialization
+	outside class body.
+	(Reloc_stub::STUB_ADDR_ALIGN): Likewise.
+
+2015-06-11  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/17731
 	* layout.cc (corresponding_uncompressed_section_name): New function.
 	(Layout::choose_output_section): Call it.
