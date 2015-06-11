@@ -15,6 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <stdbool.h>
+
 #define SOME_MACRO 23
 #define ARG_MACRO(X, Y) ((X) + (Y) - 1)
 
@@ -100,6 +102,35 @@ int globalshadow = 10;
 static int staticshadow = 20;
 int externed = 7;
 
+class Foo
+{
+  int var;
+
+ private:
+  int private_var = 0;
+  int private_method (void);
+
+ public:
+  int public_var = 0;
+  int public_method (void);
+  void set_private_var (int);
+};
+
+void Foo::set_private_var (int i)
+{
+  private_var = i;
+}
+
+int Foo::private_method (void)
+{
+  return private_var;
+}
+
+int Foo::public_method (void)
+{
+  return public_var;
+}
+
 int
 main (void)
 {
@@ -111,8 +142,11 @@ main (void)
   int staticshadow = 200;
   int externed = 9;
   int f = 0;
-
+  Foo foovar;
   static int static_local = 77000;
+
+  foovar.public_var = 42;
+  foovar.set_private_var (42);
 
   {
     int another_local = 7;
