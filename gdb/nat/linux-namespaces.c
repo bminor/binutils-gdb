@@ -25,7 +25,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <signal.h>
 #include <sched.h>
 

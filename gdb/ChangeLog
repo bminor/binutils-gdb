@@ -1,3 +1,8 @@
+2015-06-11  Gary Benson <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (gdb_wait.h): New include.
+	(sys/wait.h): Do not include.
+
 2015-06-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (dwarf_record_line): Call dwarf_record_line if
