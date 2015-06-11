@@ -1,5 +1,12 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.h (TRACE, TRACE_INSN, TRACE_DECODE, TRACE_EXTRACT,
+	TRACE_LINENUM, TRACE_MEMORY, TRACE_MODEL, TRACE_ALU, TRACE_CORE,
+	TRACE_EVENTS, TRACE_FPU, TRACE_VPU, TRACE_BRANCH, TRACE_SYSCALL,
+	TRACE_DEBUG): Define.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-module.c (modules): Change WITH_TRACE to WITH_TRACE_ANY_P.
 	* sim-trace.c (trace_option_handler): Likewise.
 	* sim-trace.h (WITH_TRACE_ANY_P): Define.

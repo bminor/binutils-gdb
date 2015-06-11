@@ -236,6 +236,27 @@ typedef struct _trace_data {
 #define TRACE_BRANCH_P(cpu)	TRACE_P (cpu, TRACE_BRANCH_IDX)
 #define TRACE_SYSCALL_P(cpu)	TRACE_P (cpu, TRACE_SYSCALL_IDX)
 #define TRACE_DEBUG_P(cpu)	TRACE_P (cpu, TRACE_DEBUG_IDX)
+
+/* Helper functions for printing messages.  */
+#define TRACE(cpu, idx, fmt, args...) \
+  do { \
+    if (TRACE_P (cpu, idx)) \
+      trace_generic (CPU_STATE (cpu), cpu, idx, fmt, ## args); \
+  } while (0)
+#define TRACE_INSN(cpu, fmt, args...)		TRACE (cpu, TRACE_INSN_IDX, fmt, ## args)
+#define TRACE_DECODE(cpu, fmt, args...)		TRACE (cpu, TRACE_DECODE_IDX, fmt, ## args)
+#define TRACE_EXTRACT(cpu, fmt, args...)	TRACE (cpu, TRACE_EXTRACT_IDX, fmt, ## args)
+#define TRACE_LINENUM(cpu, fmt, args...)	TRACE (cpu, TRACE_LINENUM_IDX, fmt, ## args)
+#define TRACE_MEMORY(cpu, fmt, args...)		TRACE (cpu, TRACE_MEMORY_IDX, fmt, ## args)
+#define TRACE_MODEL(cpu, fmt, args...)		TRACE (cpu, TRACE_MODEL_IDX, fmt, ## args)
+#define TRACE_ALU(cpu, fmt, args...)		TRACE (cpu, TRACE_ALU_IDX, fmt, ## args)
+#define TRACE_CORE(cpu, fmt, args...)		TRACE (cpu, TRACE_CORE_IDX, fmt, ## args)
+#define TRACE_EVENTS(cpu, fmt, args...)		TRACE (cpu, TRACE_EVENTS_IDX, fmt, ## args)
+#define TRACE_FPU(cpu, fmt, args...)		TRACE (cpu, TRACE_FPU_IDX, fmt, ## args)
+#define TRACE_VPU(cpu, fmt, args...)		TRACE (cpu, TRACE_VPU_IDX, fmt, ## args)
+#define TRACE_BRANCH(cpu, fmt, args...)		TRACE (cpu, TRACE_BRANCH_IDX, fmt, ## args)
+#define TRACE_SYSCALL(cpu, fmt, args...)	TRACE (cpu, TRACE_SYSCALL_IDX, fmt, ## args)
+#define TRACE_DEBUG(cpu, fmt, args...)		TRACE (cpu, TRACE_DEBUG_IDX, fmt, ## args)
 
 /* Tracing functions.  */
 

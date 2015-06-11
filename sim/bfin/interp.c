@@ -132,7 +132,7 @@ syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
   SIM_DESC sd = (SIM_DESC) sc->p1;
   SIM_CPU *cpu = (SIM_CPU *) sc->p2;
 
-  MAYBE_TRACE (CORE, cpu, "DBUS FETCH (syscall) %i bytes @ 0x%08lx", bytes, taddr);
+  TRACE_CORE (cpu, "DBUS FETCH (syscall) %i bytes @ 0x%08lx", bytes, taddr);
 
   return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
 }
@@ -144,7 +144,7 @@ syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
   SIM_DESC sd = (SIM_DESC) sc->p1;
   SIM_CPU *cpu = (SIM_CPU *) sc->p2;
 
-  MAYBE_TRACE (CORE, cpu, "DBUS STORE (syscall) %i bytes @ 0x%08lx", bytes, taddr);
+  TRACE_CORE (cpu, "DBUS STORE (syscall) %i bytes @ 0x%08lx", bytes, taddr);
 
   return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
 }

@@ -65,28 +65,18 @@ struct sim_state {
 #define CLAMP(a, b, c) MIN (MAX (a, b), c)
 #define ALIGN(addr, size) (((addr) + ((size)-1)) & ~((size)-1))
 
-#define MAYBE_TRACE(type, cpu, fmt, ...) \
+/* TODO: Move all this trace logic to the common code.  */
+#define BFIN_TRACE_CORE(cpu, addr, size, map, val) \
   do { \
-    if (TRACE_##type##_P (cpu)) \
-      trace_generic (CPU_STATE (cpu), cpu, TRACE_##type##_IDX, \
-		     fmt, ## __VA_ARGS__); \
-  } while (0)
-#define TRACE_INSN(cpu, fmt, ...) MAYBE_TRACE (INSN, cpu, fmt, ## __VA_ARGS__)
-#define TRACE_DECODE(cpu, fmt, ...) MAYBE_TRACE (DECODE, cpu, fmt, ## __VA_ARGS__)
-#define TRACE_EXTRACT(cpu, fmt, ...) MAYBE_TRACE (EXTRACT, cpu, fmt, ## __VA_ARGS__)
-#define TRACE_SYSCALL(cpu, fmt, ...) MAYBE_TRACE (SYSCALL, cpu, fmt, ## __VA_ARGS__)
-#define TRACE_CORE(cpu, addr, size, map, val) \
-  do { \
-    MAYBE_TRACE (CORE, cpu, "%cBUS %s %i bytes @ 0x%08x: 0x%0*x", \
-		 map == exec_map ? 'I' : 'D', \
-		 map == write_map ? "STORE" : "FETCH", \
-		 size, addr, size * 2, val); \
+    TRACE_CORE (cpu, "%cBUS %s %i bytes @ 0x%08x: 0x%0*x", \
+		map == exec_map ? 'I' : 'D', \
+		map == write_map ? "STORE" : "FETCH", \
+		size, addr, size * 2, val); \
     PROFILE_COUNT_CORE (cpu, addr, size, map); \
   } while (0)
-#define TRACE_EVENTS(cpu, fmt, ...) MAYBE_TRACE (EVENTS, cpu, fmt, ## __VA_ARGS__)
-#define TRACE_BRANCH(cpu, oldpc, newpc, hwloop, fmt, ...) \
+#define BFIN_TRACE_BRANCH(cpu, oldpc, newpc, hwloop, fmt, ...) \
   do { \
-    MAYBE_TRACE (BRANCH, cpu, fmt " to %#x", ## __VA_ARGS__, newpc); \
+    TRACE_BRANCH (cpu, fmt " to %#x", ## __VA_ARGS__, newpc); \
     if (STATE_ENVIRONMENT (CPU_STATE (cpu)) == OPERATING_ENVIRONMENT) \
       bfin_trace_queue (cpu, oldpc, newpc, hwloop); \
   } while (0)
