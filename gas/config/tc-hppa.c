@@ -606,6 +606,9 @@ static int within_procedure;
    seen in each subspace.  */
 static label_symbol_struct *label_symbols_rootp = NULL;
 
+/* Last label symbol */
+static label_symbol_struct last_label_symbol;
+
 /* Nonzero when strict matching is enabled.  Zero otherwise.
 
    Each opcode in the table has a flag which indicates whether or
@@ -1114,19 +1117,17 @@ pa_check_eof (void)
 static label_symbol_struct *
 pa_get_label (void)
 {
-  label_symbol_struct *label_chain;
+  label_symbol_struct *label_chain = label_symbols_rootp;
 
-  for (label_chain = label_symbols_rootp;
-       label_chain;
-       label_chain = label_chain->lss_next)
+  if (label_chain)
     {
 #ifdef OBJ_SOM
-    if (current_space == label_chain->lss_space && label_chain->lss_label)
-      return label_chain;
+      if (current_space == label_chain->lss_space && label_chain->lss_label)
+	return label_chain;
 #endif
 #ifdef OBJ_ELF
-    if (now_seg == label_chain->lss_segment && label_chain->lss_label)
-      return label_chain;
+      if (now_seg == label_chain->lss_segment && label_chain->lss_label)
+	return label_chain;
 #endif
     }
 
@@ -1139,28 +1140,23 @@ pa_get_label (void)
 void
 pa_define_label (symbolS *symbol)
 {
-  label_symbol_struct *label_chain = pa_get_label ();
+  label_symbol_struct *label_chain = label_symbols_rootp;
 
-  if (label_chain)
-    label_chain->lss_label = symbol;
-  else
-    {
-      /* Create a new label entry and add it to the head of the chain.  */
-      label_chain = xmalloc (sizeof (label_symbol_struct));
-      label_chain->lss_label = symbol;
+  if (!label_chain)
+    label_chain = &last_label_symbol;
+
+  label_chain->lss_label = symbol;
 #ifdef OBJ_SOM
-      label_chain->lss_space = current_space;
+  label_chain->lss_space = current_space;
 #endif
 #ifdef OBJ_ELF
-      label_chain->lss_segment = now_seg;
+  label_chain->lss_segment = now_seg;
 #endif
-      label_chain->lss_next = NULL;
 
-      if (label_symbols_rootp)
-	label_chain->lss_next = label_symbols_rootp;
+  /* Not used.  */
+  label_chain->lss_next = NULL;
 
-      label_symbols_rootp = label_chain;
-    }
+  label_symbols_rootp = label_chain;
 
 #ifdef OBJ_ELF
   dwarf2_emit_label (symbol);
@@ -1173,33 +1169,7 @@ pa_define_label (symbolS *symbol)
 static void
 pa_undefine_label (void)
 {
-  label_symbol_struct *label_chain;
-  label_symbol_struct *prev_label_chain = NULL;
-
-  for (label_chain = label_symbols_rootp;
-       label_chain;
-       label_chain = label_chain->lss_next)
-    {
-      if (1
-#ifdef OBJ_SOM
-	  && current_space == label_chain->lss_space && label_chain->lss_label
-#endif
-#ifdef OBJ_ELF
-	  && now_seg == label_chain->lss_segment && label_chain->lss_label
-#endif
-	  )
-	{
-	  /* Remove the label from the chain and free its memory.  */
-	  if (prev_label_chain)
-	    prev_label_chain->lss_next = label_chain->lss_next;
-	  else
-	    label_symbols_rootp = label_chain->lss_next;
-
-	  free (label_chain);
-	  break;
-	}
-      prev_label_chain = label_chain;
-    }
+  label_symbols_rootp = NULL;
 }
 
 /* An HPPA-specific version of fix_new.  This is required because the HPPA

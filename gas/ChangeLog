@@ -1,3 +1,11 @@
+2015-06-11  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR gas/18427
+	* gas/config/tc-hppa.c (last_label_symbol): Declare.
+	(pa_get_label): Return last label in current space/segment or NULL.
+	(pa_define_label): Record last label and add to root.
+	(pa_undefine_label): Remove last label from root.
+
 2015-06-08  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rx.c (rx_op): Correct handling of integer bignums.
