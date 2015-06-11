@@ -5659,6 +5659,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12i: gcctestdir/ld $(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12a.o: script_test_12a.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12b.o: script_test_12b.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \

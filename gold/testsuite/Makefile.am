@@ -1669,6 +1669,10 @@ script_test_12: gcctestdir/ld $(srcdir)/script_test_12.t script_test_12a.o scrip
 check_PROGRAMS += script_test_12i
 script_test_12i: gcctestdir/ld $(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
 	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
+script_test_12a.o: script_test_12a.c
+	$(COMPILE) -O0 -c -o $@ $<
+script_test_12b.o: script_test_12b.c
+	$(COMPILE) -O0 -c -o $@ $<
 
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo

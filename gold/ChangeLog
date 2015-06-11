@@ -1,3 +1,8 @@
+2015-06-11  Jing Yu  <jingyu@google.com>
+
+	* testsuite/Makefile.am: Add -O0 for script_test_12 test.
+	* testsuite/Makefile.in: Regenerate.
+
 2015-06-11  Davide Italiano  <dccitaliano@gmail.com>
 
 	* gold.h (is_cident): Correct typo.
