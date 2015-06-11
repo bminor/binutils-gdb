@@ -636,6 +636,15 @@ is_compressed_debug_section(const char* secname)
   return (is_prefix_of(".zdebug", secname));
 }
 
+std::string
+corresponding_uncompressed_section_name(std::string secname)
+{
+  gold_assert(secname[0] == '.' && secname[1] == 'z');
+  std::string ret(".");
+  ret.append(secname, 2, std::string::npos);
+  return ret;
+}
+
 // Whether to include this section in the link.
 
 template<int size, bool big_endian>
@@ -1021,19 +1030,16 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   // FIXME: Handle SHF_OS_NONCONFORMING somewhere.
 
   size_t len = strlen(name);
-  char* uncompressed_name = NULL;
+  std::string uncompressed_name;
 
   // Compressed debug sections should be mapped to the corresponding
   // uncompressed section.
   if (is_compressed_debug_section(name))
     {
-      uncompressed_name = new char[len];
-      uncompressed_name[0] = '.';
-      gold_assert(name[0] == '.' && name[1] == 'z');
-      strncpy(&uncompressed_name[1], &name[2], len - 2);
-      uncompressed_name[len - 1] = '\0';
-      len -= 1;
-      name = uncompressed_name;
+      uncompressed_name =
+	  corresponding_uncompressed_section_name(std::string(name, len));
+      name = uncompressed_name.c_str();
+      len = uncompressed_name.length();
     }
 
   // Turn NAME from the name of the input section into the name of the
@@ -1050,9 +1056,6 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
 
   Stringpool::Key name_key;
   name = this->namepool_.add_with_length(name, len, true, &name_key);
-
-  if (uncompressed_name != NULL)
-    delete[] uncompressed_name;
 
   // Find or make the output section.  The output section is selected
   // based on the section name, type, and flags.

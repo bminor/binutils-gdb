@@ -66,6 +66,10 @@ struct Timespec;
 extern bool
 is_compressed_debug_section(const char* secname);
 
+// Return the name of the corresponding uncompressed debug section.
+extern std::string
+corresponding_uncompressed_section_name(std::string secname);
+
 // Maintain a list of free space within a section, segment, or file.
 // Used for incremental update links.
 

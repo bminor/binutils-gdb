@@ -1457,7 +1457,12 @@ class Input_section_info
   // Set the section name.
   void
   set_section_name(const std::string name)
-  { this->section_name_ = name; }
+  {
+    if (is_compressed_debug_section(name.c_str()))
+      this->section_name_ = corresponding_uncompressed_section_name(name);
+    else
+      this->section_name_ = name;
+  }
 
   // Return the section size.
   uint64_t
