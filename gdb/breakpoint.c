@@ -9773,7 +9773,10 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       b->addr_string = copy_arg;
       if (parse_arg)
-	b->cond_string = NULL;
+	{
+	  b->cond_string = NULL;
+	  b->extra_string = NULL;
+	}
       else
 	{
 	  /* Create a private copy of condition string.  */
@@ -9782,10 +9785,16 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      cond_string = xstrdup (cond_string);
 	      make_cleanup (xfree, cond_string);
 	    }
+	  /* Create a private copy of any extra string.  */
+	  if (extra_string != NULL)
+	    {
+	      extra_string = xstrdup (extra_string);
+	      make_cleanup (xfree, extra_string);
+	    }
 	  b->cond_string = cond_string;
+	  b->extra_string = extra_string;
 	  b->thread = thread;
 	}
-      b->extra_string = NULL;
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;

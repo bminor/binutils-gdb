@@ -1,3 +1,10 @@
+2015-06-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16465
+	* gdb.mi/mi-dprintf-pending.c: New file.
+	* gdb.mi/mi-dprintf-pending.exp: New test.
+	* gdb.mi/mi-dprintf-pendshr.c: New file.
+
 2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
             Mircea Gherzan  <mircea.gherzan@intel.com>
 
