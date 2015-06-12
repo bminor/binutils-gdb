@@ -1,3 +1,44 @@
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-run.c (sim_resume): Rename TRACE_INSN_FINI to
+	CGEN_TRACE_INSN_FINI.
+	* cgen-trace.c: Rename trace_insn to cgen_trace_insn,
+	trace_result to cgen_trace_result, trace_insn_fini to
+	cgen_trace_insn_fini, trace_insn_init to cgen_trace_insn_init,
+	and trace_extract to cgen_trace_extract.
+	* cgen-trace.h (trace_insn_init): Rename to ...
+	(cgen_trace_insn_init): ... this.
+	(trace_insn_fini): Rename to ...
+	(cgen_trace_insn_fini): ... this.
+	(trace_insn): Rename to ...
+	(cgen_trace_insn): ... this.
+	(trace_extract): Rename to ...
+	(cgen_trace_extract): ... this.
+	(trace_result): Rename to ...
+	(cgen_trace_result): ... this.
+	(TRACE_RESULT_P): Rename to ...
+	(CGEN_TRACE_RESULT_P): ... this.
+	(TRACE_INSN_INIT): Rename to ...
+	(CGEN_TRACE_INSN_INIT): ... this.  Change trace_insn_init to
+	cgen_trace_insn_init.
+	(TRACE_INSN_FINI): Rename to ...
+	(CGEN_TRACE_INSN_FINI): ... this.  Change trace_insn_fini to
+	cgen_trace_insn_fini.
+	(TRACE_PRINTF): Rename to ...
+	(CGEN_TRACE_PRINTF): ... this.
+	(TRACE_INSN): Rename to ...
+	(CGEN_TRACE_INSN): ... this.  Change trace_insn to cgen_trace_insn.
+	(TRACE_EXTRACT): Rename to ...
+	(CGEN_TRACE_EXTRACT): ... this.  Change trace_extract to
+	cgen_trace_extract.
+	(TRACE_RESULT): Rename to ...
+	(CGEN_TRACE_RESULT): ... this.  Change TRACE_RESULT_P to
+	CGEN_TRACE_RESULT_P and trace_result to cgen_trace_result.
+	* genmloop.sh (@prefix@_pbb_before): Change TRACE_INSN_FINI to
+	CGEN_TRACE_INSN_FINI, TRACE_INSN_INIT to CGEN_TRACE_INSN_INIT, and
+	TRACE_INSN to CGEN_TRACE_INSN.
+	(@prefix@_pbb_after): Change TRACE_INSN_FINI to CGEN_TRACE_INSN_FINI.
+
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-events.c (ETRACE_P): Delete.
