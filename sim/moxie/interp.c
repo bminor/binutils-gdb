@@ -229,10 +229,15 @@ convert_target_flags (unsigned int tflags)
   return hflags;
 }
 
-/* TODO: Move to sim-trace.h.  */
-static FILE *tracefile;
-static const int tracing = 0;
-#define MOXIE_TRACE_INSN(str) if (tracing) fprintf(tracefile,"0x%08x, %s, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", opc, str, cpu.asregs.regs[0], cpu.asregs.regs[1], cpu.asregs.regs[2], cpu.asregs.regs[3], cpu.asregs.regs[4], cpu.asregs.regs[5], cpu.asregs.regs[6], cpu.asregs.regs[7], cpu.asregs.regs[8], cpu.asregs.regs[9], cpu.asregs.regs[10], cpu.asregs.regs[11], cpu.asregs.regs[12], cpu.asregs.regs[13], cpu.asregs.regs[14], cpu.asregs.regs[15]);
+/* TODO: Split this up into finger trace levels than just insn.  */
+#define MOXIE_TRACE_INSN(str) \
+  TRACE_INSN (scpu, "0x%08x, %s, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x", \
+	      opc, str, cpu.asregs.regs[0], cpu.asregs.regs[1], \
+	      cpu.asregs.regs[2], cpu.asregs.regs[3], cpu.asregs.regs[4], \
+	      cpu.asregs.regs[5], cpu.asregs.regs[6], cpu.asregs.regs[7], \
+	      cpu.asregs.regs[8], cpu.asregs.regs[9], cpu.asregs.regs[10], \
+	      cpu.asregs.regs[11], cpu.asregs.regs[12], cpu.asregs.regs[13], \
+	      cpu.asregs.regs[14], cpu.asregs.regs[15])
 
 void
 sim_engine_run (SIM_DESC sd,

@@ -1,5 +1,10 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (tracefile, tracing): Delete.
+	(MOXIE_TRACE_INSN): Call TRACE_INSN directly.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (TRACE): Rename to ...
 	(MOXIE_TRACE_INSN): ... this.
 	(sim_engine_run): Change TRACE to MOXIE_TRACE_INSN.
