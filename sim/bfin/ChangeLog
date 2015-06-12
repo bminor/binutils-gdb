@@ -1,5 +1,9 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c: Expand comment on CB_SYS_xxx defines.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>

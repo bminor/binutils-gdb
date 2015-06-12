@@ -36,7 +36,9 @@
 
 #include "targ-vals.h"
 
-/* The numbers here do not matter.  They just need to be unique.  */
+/* The numbers here do not matter.  They just need to be unique.  They also
+   need not be static across releases -- they're used internally only.  The
+   mapping from the Linux ABI to the CB values is in linux-targ-map.h.  */
 #define CB_SYS_ioctl        201
 #define CB_SYS_mmap2        202
 #define CB_SYS_munmap       203
