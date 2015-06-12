@@ -265,13 +265,17 @@ typedef enum target_xfer_status
 			     ULONGEST len,
 			     ULONGEST *xfered_len);
 
-/* Request that OPS transfer up to LEN 8-bit bytes of the target's
-   OBJECT.  The OFFSET, for a seekable object, specifies the
-   starting point.  The ANNEX can be used to provide additional
-   data-specific information to the target.
+/* Request that OPS transfer up to LEN addressable units of the target's
+   OBJECT.  When reading from a memory object, the size of an addressable unit
+   is architecture dependent and can be found using
+   gdbarch_addressable_memory_unit_size.  Otherwise, an addressable unit is 1
+   byte long.  BUF should point to a buffer large enough to hold the read data,
+   taking into account the addressable unit size.  The OFFSET, for a seekable
+   object, specifies the starting point.  The ANNEX can be used to provide
+   additional data-specific information to the target.
 
-   Return the number of bytes actually transfered, or a negative error
-   code (an 'enum target_xfer_error' value) if the transfer is not
+   Return the number of addressable units actually transferred, or a negative
+   error code (an 'enum target_xfer_error' value) if the transfer is not
    supported or otherwise fails.  Return of a positive value less than
    LEN indicates that no further transfer is possible.  Unlike the raw
    to_xfer_partial interface, callers of these functions do not need
@@ -299,6 +303,21 @@ extern void free_memory_read_result_vector (void *);
 extern VEC(memory_read_result_s)* read_memory_robust (struct target_ops *ops,
 						      const ULONGEST offset,
 						      const LONGEST len);
+
+/* Request that OPS transfer up to LEN addressable units from BUF to the
+   target's OBJECT.  When writing to a memory object, the addressable unit
+   size is architecture dependent and can be found using
+   gdbarch_addressable_memory_unit_size.  Otherwise, an addressable unit is 1
+   byte long.  The OFFSET, for a seekable object, specifies the starting point.
+   The ANNEX can be used to provide additional data-specific information to
+   the target.
+
+   Return the number of addressable units actually transferred, or a negative
+   error code (an 'enum target_xfer_status' value) if the transfer is not
+   supported or otherwise fails.  Return of a positive value less than
+   LEN indicates that no further transfer is possible.  Unlike the raw
+   to_xfer_partial interface, callers of these functions do not need to
+   retry partial transfers.  */
 
 extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,

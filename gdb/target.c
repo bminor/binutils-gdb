@@ -1593,6 +1593,15 @@ target_read (struct target_ops *ops,
 	     ULONGEST offset, LONGEST len)
 {
   LONGEST xfered_total = 0;
+  int unit_size = 1;
+
+  /* If we are reading from a memory object, find the length of an addressable
+     unit for that architecture.  */
+  if (object == TARGET_OBJECT_MEMORY
+      || object == TARGET_OBJECT_STACK_MEMORY
+      || object == TARGET_OBJECT_CODE_MEMORY
+      || object == TARGET_OBJECT_RAW_MEMORY)
+    unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
 
   while (xfered_total < len)
     {
@@ -1600,7 +1609,7 @@ target_read (struct target_ops *ops,
       enum target_xfer_status status;
 
       status = target_read_partial (ops, object, annex,
-				    buf + xfered_total,
+				    buf + xfered_total * unit_size,
 				    offset + xfered_total, len - xfered_total,
 				    &xfered_partial);
 
@@ -1643,6 +1652,7 @@ target_read (struct target_ops *ops,
 static void
 read_whatever_is_readable (struct target_ops *ops,
 			   const ULONGEST begin, const ULONGEST end,
+			   int unit_size,
 			   VEC(memory_read_result_s) **result)
 {
   gdb_byte *buf = xmalloc (end - begin);
@@ -1709,7 +1719,7 @@ read_whatever_is_readable (struct target_ops *ops,
 	}
 
       xfer = target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-			  buf + (first_half_begin - begin),
+			  buf + (first_half_begin - begin) * unit_size,
 			  first_half_begin,
 			  first_half_end - first_half_begin);
 
@@ -1745,8 +1755,9 @@ read_whatever_is_readable (struct target_ops *ops,
       /* The [current_end, end) range has been read.  */
       LONGEST region_len = end - current_end;
 
-      r.data = xmalloc (region_len);
-      memcpy (r.data, buf + current_end - begin, region_len);
+      r.data = xmalloc (region_len * unit_size);
+      memcpy (r.data, buf + (current_end - begin) * unit_size,
+	      region_len * unit_size);
       r.begin = current_end;
       r.end = end;
       xfree (buf);
@@ -1773,6 +1784,7 @@ read_memory_robust (struct target_ops *ops,
 		    const ULONGEST offset, const LONGEST len)
 {
   VEC(memory_read_result_s) *result = 0;
+  int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
 
   LONGEST xfered_total = 0;
   while (xfered_total < len)
@@ -1798,7 +1810,7 @@ read_memory_robust (struct target_ops *ops,
       else
 	{
 	  LONGEST to_read = min (len - xfered_total, region_len);
-	  gdb_byte *buffer = (gdb_byte *)xmalloc (to_read);
+	  gdb_byte *buffer = (gdb_byte *) xmalloc (to_read * unit_size);
 
 	  LONGEST xfered_partial =
 	      target_read (ops, TARGET_OBJECT_MEMORY, NULL,
@@ -1810,7 +1822,7 @@ read_memory_robust (struct target_ops *ops,
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
 	      xfree (buffer);
-	      read_whatever_is_readable (ops, offset + xfered_total,
+	      read_whatever_is_readable (ops, offset + xfered_total, unit_size,
 					 offset + xfered_total + to_read, &result);
 	      xfered_total += to_read;
 	    }
@@ -1840,6 +1852,15 @@ target_write_with_progress (struct target_ops *ops,
 			    void (*progress) (ULONGEST, void *), void *baton)
 {
   LONGEST xfered_total = 0;
+  int unit_size = 1;
+
+  /* If we are writing to a memory object, find the length of an addressable
+     unit for that architecture.  */
+  if (object == TARGET_OBJECT_MEMORY
+      || object == TARGET_OBJECT_STACK_MEMORY
+      || object == TARGET_OBJECT_CODE_MEMORY
+      || object == TARGET_OBJECT_RAW_MEMORY)
+    unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
 
   /* Give the progress callback a chance to set up.  */
   if (progress)
@@ -1851,7 +1872,7 @@ target_write_with_progress (struct target_ops *ops,
       enum target_xfer_status status;
 
       status = target_write_partial (ops, object, annex,
-				     (gdb_byte *) buf + xfered_total,
+				     buf + xfered_total * unit_size,
 				     offset + xfered_total, len - xfered_total,
 				     &xfered_partial);
 

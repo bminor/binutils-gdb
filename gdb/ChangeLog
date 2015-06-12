@@ -1,5 +1,16 @@
 2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* target.c (target_read): Consider addressable unit size when
+	reading from a memory object.
+	(read_memory_robust): Same.
+	(read_whatever_is_readable): Same.
+	(target_write_with_progress): Consider addressable unit size
+	when writing to a memory object.
+	* target.h (target_read): Update documentation.
+	(target_write): Add documentation.
+
+2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* arch-utils.h (default_addressable_memory_unit_size): New.
 	* arch-utils.c (default_addressable_memory_unit_size): New.
 	* gdbarch.sh (addressable_memory_unit_size): New.
