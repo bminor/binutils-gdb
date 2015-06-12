@@ -1,5 +1,13 @@
 2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* arch-utils.h (default_addressable_memory_unit_size): New.
+	* arch-utils.c (default_addressable_memory_unit_size): New.
+	* gdbarch.sh (addressable_memory_unit_size): New.
+	* gdbarch.h: Re-generate.
+	* gdbarch.c: Re-generate.
+
+2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* target.c (target_read): Rename variables and use
 	TARGET_XFER_E_IO.
 	(target_read_with_progress): Same.

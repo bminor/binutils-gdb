@@ -888,6 +888,15 @@ default_gnu_triplet_regexp (struct gdbarch *gdbarch)
   return gdbarch_bfd_arch_info (gdbarch)->arch_name;
 }
 
+/* Default method for gdbarch_addressable_memory_unit_size.  By default, a memory byte has
+   a size of 1 octet.  */
+
+int
+default_addressable_memory_unit_size (struct gdbarch *gdbarch)
+{
+  return 1;
+}
+
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_gdbarch_utils;
 

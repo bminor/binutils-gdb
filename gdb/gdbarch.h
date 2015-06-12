@@ -1466,6 +1466,14 @@ typedef const char * (gdbarch_gnu_triplet_regexp_ftype) (struct gdbarch *gdbarch
 extern const char * gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch);
 extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp);
 
+/* Return the size in 8-bit bytes of an addressable memory unit on this
+   architecture.  This corresponds to the number of 8-bit bytes associated to
+   each address in memory. */
+
+typedef int (gdbarch_addressable_memory_unit_size_ftype) (struct gdbarch *gdbarch);
+extern int gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch, gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

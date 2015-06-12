@@ -329,6 +329,7 @@ struct gdbarch
   gdbarch_infcall_munmap_ftype *infcall_munmap;
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
+  gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -430,6 +431,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->infcall_munmap = default_infcall_munmap;
   gdbarch->gcc_target_options = default_gcc_target_options;
   gdbarch->gnu_triplet_regexp = default_gnu_triplet_regexp;
+  gdbarch->addressable_memory_unit_size = default_addressable_memory_unit_size;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -663,6 +665,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of infcall_munmap, invalid_p == 0 */
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
+  /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -713,6 +716,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: address_to_pointer = <%s>\n",
                       host_address_to_string (gdbarch->address_to_pointer));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: addressable_memory_unit_size = <%s>\n",
+                      host_address_to_string (gdbarch->addressable_memory_unit_size));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
                       gdbarch_adjust_breakpoint_address_p (gdbarch));
@@ -4728,6 +4734,23 @@ set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch,
                                 gdbarch_gnu_triplet_regexp_ftype gnu_triplet_regexp)
 {
   gdbarch->gnu_triplet_regexp = gnu_triplet_regexp;
+}
+
+int
+gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->addressable_memory_unit_size != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_addressable_memory_unit_size called\n");
+  return gdbarch->addressable_memory_unit_size (gdbarch);
+}
+
+void
+set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch,
+                                          gdbarch_addressable_memory_unit_size_ftype addressable_memory_unit_size)
+{
+  gdbarch->addressable_memory_unit_size = addressable_memory_unit_size;
 }
 
 
