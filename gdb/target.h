@@ -297,9 +297,9 @@ DEF_VEC_O(memory_read_result_s);
 extern void free_memory_read_result_vector (void *);
 
 extern VEC(memory_read_result_s)* read_memory_robust (struct target_ops *ops,
-						      ULONGEST offset,
-						      LONGEST len);
-  
+						      const ULONGEST offset,
+						      const LONGEST len);
+
 extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex, const gdb_byte *buf,

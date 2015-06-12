@@ -1592,28 +1592,28 @@ target_read (struct target_ops *ops,
 	     const char *annex, gdb_byte *buf,
 	     ULONGEST offset, LONGEST len)
 {
-  LONGEST xfered = 0;
+  LONGEST xfered_total = 0;
 
-  while (xfered < len)
+  while (xfered_total < len)
     {
-      ULONGEST xfered_len;
+      ULONGEST xfered_partial;
       enum target_xfer_status status;
 
       status = target_read_partial (ops, object, annex,
-				    (gdb_byte *) buf + xfered,
-				    offset + xfered, len - xfered,
-				    &xfered_len);
+				    buf + xfered_total,
+				    offset + xfered_total, len - xfered_total,
+				    &xfered_partial);
 
       /* Call an observer, notifying them of the xfer progress?  */
       if (status == TARGET_XFER_EOF)
-	return xfered;
+	return xfered_total;
       else if (status == TARGET_XFER_OK)
 	{
-	  xfered += xfered_len;
+	  xfered_total += xfered_partial;
 	  QUIT;
 	}
       else
-	return -1;
+	return TARGET_XFER_E_IO;
 
     }
   return len;
@@ -1642,7 +1642,7 @@ target_read (struct target_ops *ops,
 
 static void
 read_whatever_is_readable (struct target_ops *ops,
-			   ULONGEST begin, ULONGEST end,
+			   const ULONGEST begin, const ULONGEST end,
 			   VEC(memory_read_result_s) **result)
 {
   gdb_byte *buf = xmalloc (end - begin);
@@ -1669,7 +1669,7 @@ read_whatever_is_readable (struct target_ops *ops,
       ++current_begin;
     }
   else if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-				buf + (end-begin) - 1, end - 1, 1,
+				buf + (end - begin) - 1, end - 1, 1,
 				&xfered_len) == TARGET_XFER_OK)
     {
       forward = 0;
@@ -1691,7 +1691,7 @@ read_whatever_is_readable (struct target_ops *ops,
       ULONGEST first_half_begin, first_half_end;
       ULONGEST second_half_begin, second_half_end;
       LONGEST xfer;
-      ULONGEST middle = current_begin + (current_end - current_begin)/2;
+      ULONGEST middle = current_begin + (current_end - current_begin) / 2;
 
       if (forward)
 	{
@@ -1723,7 +1723,7 @@ read_whatever_is_readable (struct target_ops *ops,
       else
 	{
 	  /* This half is not readable.  Because we've tried one byte, we
-	     know some part of this half if actually redable.  Go to the next
+	     know some part of this half if actually readable.  Go to the next
 	     iteration to divide again and try to read.
 
 	     We don't handle the other half, because this function only tries
@@ -1743,10 +1743,10 @@ read_whatever_is_readable (struct target_ops *ops,
   else
     {
       /* The [current_end, end) range has been read.  */
-      LONGEST rlen = end - current_end;
+      LONGEST region_len = end - current_end;
 
-      r.data = xmalloc (rlen);
-      memcpy (r.data, buf + current_end - begin, rlen);
+      r.data = xmalloc (region_len);
+      memcpy (r.data, buf + current_end - begin, region_len);
       r.begin = current_end;
       r.end = end;
       xfree (buf);
@@ -1769,57 +1769,59 @@ free_memory_read_result_vector (void *x)
 }
 
 VEC(memory_read_result_s) *
-read_memory_robust (struct target_ops *ops, ULONGEST offset, LONGEST len)
+read_memory_robust (struct target_ops *ops,
+		    const ULONGEST offset, const LONGEST len)
 {
   VEC(memory_read_result_s) *result = 0;
 
-  LONGEST xfered = 0;
-  while (xfered < len)
+  LONGEST xfered_total = 0;
+  while (xfered_total < len)
     {
-      struct mem_region *region = lookup_mem_region (offset + xfered);
-      LONGEST rlen;
+      struct mem_region *region = lookup_mem_region (offset + xfered_total);
+      LONGEST region_len;
 
       /* If there is no explicit region, a fake one should be created.  */
       gdb_assert (region);
 
       if (region->hi == 0)
-	rlen = len - xfered;
+	region_len = len - xfered_total;
       else
-	rlen = region->hi - offset;
+	region_len = region->hi - offset;
 
       if (region->attrib.mode == MEM_NONE || region->attrib.mode == MEM_WO)
 	{
 	  /* Cannot read this region.  Note that we can end up here only
 	     if the region is explicitly marked inaccessible, or
 	     'inaccessible-by-default' is in effect.  */
-	  xfered += rlen;
+	  xfered_total += region_len;
 	}
       else
 	{
-	  LONGEST to_read = min (len - xfered, rlen);
+	  LONGEST to_read = min (len - xfered_total, region_len);
 	  gdb_byte *buffer = (gdb_byte *)xmalloc (to_read);
 
-	  LONGEST xfer = target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-				      (gdb_byte *) buffer,
-				      offset + xfered, to_read);
+	  LONGEST xfered_partial =
+	      target_read (ops, TARGET_OBJECT_MEMORY, NULL,
+			   (gdb_byte *) buffer,
+			   offset + xfered_total, to_read);
 	  /* Call an observer, notifying them of the xfer progress?  */
-	  if (xfer <= 0)
+	  if (xfered_partial <= 0)
 	    {
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
 	      xfree (buffer);
-	      read_whatever_is_readable (ops, offset + xfered,
-					 offset + xfered + to_read, &result);
-	      xfered += to_read;
+	      read_whatever_is_readable (ops, offset + xfered_total,
+					 offset + xfered_total + to_read, &result);
+	      xfered_total += to_read;
 	    }
 	  else
 	    {
 	      struct memory_read_result r;
 	      r.data = buffer;
-	      r.begin = offset + xfered;
-	      r.end = r.begin + xfer;
+	      r.begin = offset + xfered_total;
+	      r.end = r.begin + xfered_partial;
 	      VEC_safe_push (memory_read_result_s, result, &r);
-	      xfered += xfer;
+	      xfered_total += xfered_partial;
 	    }
 	  QUIT;
 	}
@@ -1837,29 +1839,29 @@ target_write_with_progress (struct target_ops *ops,
 			    ULONGEST offset, LONGEST len,
 			    void (*progress) (ULONGEST, void *), void *baton)
 {
-  LONGEST xfered = 0;
+  LONGEST xfered_total = 0;
 
   /* Give the progress callback a chance to set up.  */
   if (progress)
     (*progress) (0, baton);
 
-  while (xfered < len)
+  while (xfered_total < len)
     {
-      ULONGEST xfered_len;
+      ULONGEST xfered_partial;
       enum target_xfer_status status;
 
       status = target_write_partial (ops, object, annex,
-				     (gdb_byte *) buf + xfered,
-				     offset + xfered, len - xfered,
-				     &xfered_len);
+				     (gdb_byte *) buf + xfered_total,
+				     offset + xfered_total, len - xfered_total,
+				     &xfered_partial);
 
       if (status != TARGET_XFER_OK)
-	return status == TARGET_XFER_EOF ? xfered : -1;
+	return status == TARGET_XFER_EOF ? xfered_total : TARGET_XFER_E_IO;
 
       if (progress)
-	(*progress) (xfered_len, baton);
+	(*progress) (xfered_partial, baton);
 
-      xfered += xfered_len;
+      xfered_total += xfered_partial;
       QUIT;
     }
   return len;
