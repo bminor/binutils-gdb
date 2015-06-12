@@ -747,12 +747,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define PSD PSQM + 1
   {  0xfff, 0, 0, 0,  PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
 
+  /* The L field in an mtmsrd or A form instruction or W in an X form.  */
 #define A_L PSD + 1
 #define W A_L
-#define MTMSRD_L W
   { 0x1, 16, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-#define RMC MTMSRD_L + 1
+#define RMC A_L + 1
   { 0x3, 9, NULL, NULL, 0 },
 
 #define R RMC + 1
