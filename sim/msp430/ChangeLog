@@ -1,3 +1,17 @@
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* msp430-sim.c (trace_reg_put): Replace TRACE_VPU_P/trace_generic
+	with TRACE_VPU.
+	(trace_reg_get): Likewise.
+	(get_op): Replace TRACE_MEMORY_P/trace_generic with TRACE_MEMORY.
+	(put_op): Likewise.
+	(msp430_dis_read): Replace TRACE_ALU_P/trace_generic with TRACE_ALU.
+	(do_flags): Likewise.
+	(maybe_perform_syscall): Replace TRACE_SYSCALL_P/trace_generic with
+	TRACE_SYSCALL.
+	(msp430_step_once): Replace TRACE_ALU_P/trace_generic with TRACE_ALU.
+	Replace TRACE_BRANCH_P/trace_generic with TRACE_BRANCH.
+
 2015-06-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (MAYBE_TRACE, TRACE_INSN, TRACE_DECODE, TRACE_EXTRACT,

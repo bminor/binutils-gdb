@@ -302,18 +302,14 @@ register_names[] =
 static void
 trace_reg_put (SIM_DESC sd, int n, unsigned int v)
 {
-  if (TRACE_VPU_P (MSP430_CPU (sd)))
-    trace_generic (sd, MSP430_CPU (sd), TRACE_VPU_IDX,
-		   "PUT: %#x -> %s", v, register_names [n]);
+  TRACE_VPU (MSP430_CPU (sd), "PUT: %#x -> %s", v, register_names[n]);
   REG (n) = v;
 }
 
 static unsigned int
 trace_reg_get (SIM_DESC sd, int n)
 {
-  if (TRACE_VPU_P (MSP430_CPU (sd)))
-    trace_generic (sd, MSP430_CPU (sd), TRACE_VPU_IDX,
-		   "GET: %s -> %#x", register_names [n], REG (n));
+  TRACE_VPU (MSP430_CPU (sd), "GET: %s -> %#x", register_names[n], REG (n));
   return REG (n);
 }
 
@@ -486,9 +482,8 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 	    }
 	}
 
-      if (TRACE_MEMORY_P (MSP430_CPU (sd)))
-	trace_generic (sd, MSP430_CPU (sd), TRACE_MEMORY_IDX,
-		       "GET: [%#x].%d -> %#x", addr, opc->size, rv);
+      TRACE_MEMORY (MSP430_CPU (sd), "GET: [%#x].%d -> %#x", addr, opc->size,
+		    rv);
       break;
 
     default:
@@ -580,9 +575,8 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 	}
       addr &= 0xfffff;
 
-      if (TRACE_MEMORY_P (MSP430_CPU (sd)))
-	trace_generic (sd, MSP430_CPU (sd), TRACE_MEMORY_IDX,
-		       "PUT: [%#x].%d <- %#x", addr, opc->size, val);
+      TRACE_MEMORY (MSP430_CPU (sd), "PUT: [%#x].%d <- %#x", addr, opc->size,
+		    val);
 #if 0
       /* Hack - MSP430X5438 serial port transmit register.  */
       if (addr == 0x5ce)
@@ -858,9 +852,8 @@ msp430_dis_read (bfd_vma memaddr,
     int s1 = DSRC;							\
     int s2 = SRC;							\
     int result = s1 OP s2 MORE;						\
-    if (TRACE_ALU_P (MSP430_CPU (sd)))					\
-      trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,		\
-		     "ALU: %#x %s %#x %s = %#x", s1, SOP, s2, #MORE, result); \
+    TRACE_ALU (MSP430_CPU (sd), "ALU: %#x %s %#x %s = %#x", s1, SOP,	\
+	       s2, #MORE, result); \
     DEST (result);							\
   }
 
@@ -922,16 +915,11 @@ do_flags (SIM_DESC sd,
     new_f |= MSP430_FLAG_C;
 
   new_f = f | (new_f & opcode->flags_set);
-  if (TRACE_ALU_P (MSP430_CPU (sd)))
-    {
-      if (SR != new_f)
-	trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-		       "FLAGS: %s -> %s", flags2string (SR),
-		       flags2string (new_f));
-      else
-	trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-		       "FLAGS: %s", flags2string (new_f));
-    }
+  if (SR != new_f)
+    TRACE_ALU (MSP430_CPU (sd), "FLAGS: %s -> %s", flags2string (SR),
+	       flags2string (new_f));
+  else
+    TRACE_ALU (MSP430_CPU (sd), "FLAGS: %s", flags2string (new_f));
   SR = new_f;
 }
 
@@ -1106,9 +1094,7 @@ maybe_perform_syscall (SIM_DESC sd, int call_addr)
 
       cb_syscall (cb, &sc);
 
-      if (TRACE_SYSCALL_P (MSP430_CPU (sd)))
-	trace_generic (sd, MSP430_CPU (sd), TRACE_SYSCALL_IDX,
-		       "returns %ld", sc.result);
+      TRACE_SYSCALL (MSP430_CPU (sd), "returns %ld", sc.result);
 
       MSP430_CPU (sd)->state.regs[12] = sc.result;
       return 1;
@@ -1211,7 +1197,7 @@ msp430_step_once (SIM_DESC sd)
 
   if (TRACE_ANY_P (MSP430_CPU (sd)))
     trace_prefix (sd, MSP430_CPU (sd), NULL_CIA, opcode_pc,
-    TRACE_LINENUM_P (MSP430_CPU (sd)), NULL, 0, "");
+		  TRACE_LINENUM_P (MSP430_CPU (sd)), NULL, 0, "");
 
   carry_to_use = 0;
   switch (opcode->id)
@@ -1256,10 +1242,8 @@ msp430_step_once (SIM_DESC sd)
 	  s2 = SX (u2);
 	  uresult = u1 + u2 + carry_to_use;
 	  result = s1 + s2 + carry_to_use;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "ADDC: %#x + %#x + %d = %#x",
-			   u1, u2, carry_to_use, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "ADDC: %#x + %#x + %d = %#x",
+		     u1, u2, carry_to_use, uresult);
 	  DEST (result);
 	  FLAGS (result, uresult != ZX (uresult));
 	}
@@ -1274,10 +1258,8 @@ msp430_step_once (SIM_DESC sd)
 	  s2 = SX (u2);
 	  uresult = u1 + u2;
 	  result = s1 + s2;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "ADD: %#x + %#x = %#x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "ADD: %#x + %#x = %#x",
+		     u1, u2, uresult);
 	  DEST (result);
 	  FLAGS (result, uresult != ZX (uresult));
 	}
@@ -1293,10 +1275,8 @@ msp430_step_once (SIM_DESC sd)
 	  s2 = SX (u2);
 	  uresult = ZX (~u2) + u1 + carry_to_use;
 	  result = s1 - s2 + (carry_to_use - 1);
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "SUBC: %#x - %#x + %d = %#x",
-			   u1, u2, carry_to_use, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "SUBC: %#x - %#x + %d = %#x",
+		     u1, u2, carry_to_use, uresult);
 	  DEST (result);
 	  FLAGS (result, uresult != ZX (uresult));
 	}
@@ -1311,10 +1291,8 @@ msp430_step_once (SIM_DESC sd)
 	  s2 = SX (u2);
 	  uresult = ZX (~u2) + u1 + 1;
 	  result = SX (uresult);
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "SUB: %#x - %#x = %#x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "SUB: %#x - %#x = %#x",
+		     u1, u2, uresult);
 	  DEST (result);
 	  FLAGS (result, uresult != ZX (uresult));
 	}
@@ -1329,10 +1307,8 @@ msp430_step_once (SIM_DESC sd)
 	  s2 = SX (u2);
 	  uresult = ZX (~u2) + u1 + 1;
 	  result = s1 - s2;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "CMP: %#x - %#x = %x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "CMP: %#x - %#x = %x",
+		     u1, u2, uresult);
 	  FLAGS (result, uresult != ZX (uresult));
 	}
       break;
@@ -1345,10 +1321,8 @@ msp430_step_once (SIM_DESC sd)
 	  u2 = SRC;
 	  uresult = bcd_to_binary (u1) + bcd_to_binary (u2) + carry_to_use;
 	  result = binary_to_bcd (uresult);
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "DADD: %#x + %#x + %d = %#x",
-			   u1, u2, carry_to_use, result);
+	  TRACE_ALU (MSP430_CPU (sd), "DADD: %#x + %#x + %d = %#x",
+		     u1, u2, carry_to_use, result);
 	  DEST (result);
 	  FLAGS (result, uresult > ((opcode->size == 8) ? 99 : 9999));
 	}
@@ -1360,10 +1334,8 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = DSRC;
 	  u2 = SRC;
 	  uresult = u1 & u2;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "AND: %#x & %#x = %#x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "AND: %#x & %#x = %#x",
+		     u1, u2, uresult);
 	  DEST (uresult);
 	  FLAGS (uresult, uresult != 0);
 	}
@@ -1375,10 +1347,8 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = DSRC;
 	  u2 = SRC;
 	  uresult = u1 & u2;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "BIT: %#x & %#x -> %#x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "BIT: %#x & %#x -> %#x",
+		     u1, u2, uresult);
 	  FLAGS (uresult, uresult != 0);
 	}
       break;
@@ -1389,10 +1359,8 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = DSRC;
 	  u2 = SRC;
 	  uresult = u1 & ~ u2;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "BIC: %#x & ~ %#x = %#x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "BIC: %#x & ~ %#x = %#x",
+		     u1, u2, uresult);
 	  DEST (uresult);
 	}
       break;
@@ -1403,10 +1371,8 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = DSRC;
 	  u2 = SRC;
 	  uresult = u1 | u2;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "BIS: %#x | %#x = %#x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "BIS: %#x | %#x = %#x",
+		     u1, u2, uresult);
 	  DEST (uresult);
 	}
       break;
@@ -1418,10 +1384,8 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = DSRC;
 	  u2 = SRC;
 	  uresult = u1 ^ u2;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "XOR: %#x & %#x = %#x",
-			   u1, u2, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "XOR: %#x & %#x = %#x",
+		     u1, u2, uresult);
 	  DEST (uresult);
 	  FLAGSV (uresult, uresult != 0, (u1 & s1) && (u2 & s1));
 	}
@@ -1438,10 +1402,8 @@ msp430_step_once (SIM_DESC sd)
 	  uresult = u1 >> 1;
 	  if (SR & MSP430_FLAG_C)
 	  uresult |= (1 << (opcode->size - 1));
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "RRC: %#x >>= %#x",
-			   u1, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "RRC: %#x >>= %#x",
+		     u1, uresult);
 	  DEST (uresult);
 	  FLAGS (uresult, carry_to_use);
 	}
@@ -1452,10 +1414,8 @@ msp430_step_once (SIM_DESC sd)
 	{
 	  u1 = SRC;
 	  uresult = ((u1 >> 8) & 0x00ff) | ((u1 << 8) & 0xff00);
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "SWPB: %#x -> %#x",
-			   u1, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "SWPB: %#x -> %#x",
+		     u1, uresult);
 	  DEST (uresult);
 	}
       break;
@@ -1467,10 +1427,8 @@ msp430_step_once (SIM_DESC sd)
 	  c = u1 & 1;
 	  s1 = 1 << (opcode->size - 1);
 	  uresult = (u1 >> 1) | (u1 & s1);
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "RRA: %#x >>= %#x",
-			   u1, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "RRA: %#x >>= %#x",
+		     u1, uresult);
 	  DEST (uresult);
 	  FLAGS (uresult, c);
 	}
@@ -1482,10 +1440,8 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = SRC;
 	  c = u1 & 1;
 	  uresult = (u1 >> 1);
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "RRU: %#x >>= %#x",
-			   u1, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "RRU: %#x >>= %#x",
+		     u1, uresult);
 	  DEST (uresult);
 	  FLAGS (uresult, c);
 	}
@@ -1499,10 +1455,8 @@ msp430_step_once (SIM_DESC sd)
 	    uresult = u1 | 0xfff00;
 	  else
 	    uresult = u1 & 0x000ff;
-	  if (TRACE_ALU_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-			   "SXT: %#x -> %#x",
-			   u1, uresult);
+	  TRACE_ALU (MSP430_CPU (sd), "SXT: %#x -> %#x",
+		     u1, uresult);
 	  DEST (uresult);
 	  FLAGS (uresult, c);
 	}
@@ -1550,10 +1504,8 @@ msp430_step_once (SIM_DESC sd)
 
       REG_PUT (MSR_SP, REG_GET (MSR_SP) - op_bytes);
       mem_put_val (sd, SP, PC, op_bits);
-      if (TRACE_ALU_P (MSP430_CPU (sd)))
-	trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-		       "CALL: func %#x ret %#x, sp %#x",
-		       u1, PC, SP);
+      TRACE_ALU (MSP430_CPU (sd), "CALL: func %#x ret %#x, sp %#x",
+	         u1, PC, SP);
       REG_PUT (MSR_PC, u1);
       break;
 
@@ -1568,10 +1520,8 @@ msp430_step_once (SIM_DESC sd)
 	 8-bits of SR will have been written to the stack here, and will
 	 have been read as 0.  */
       PC |= (u1 & 0xF000) << 4;
-      if (TRACE_ALU_P (MSP430_CPU (sd)))
-	trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
-		       "RETI: pc %#x sr %#x",
-		       PC, SR);
+      TRACE_ALU (MSP430_CPU (sd), "RETI: pc %#x sr %#x",
+	         PC, SR);
       break;
 
       /* Jumps.  */
@@ -1608,19 +1558,15 @@ msp430_step_once (SIM_DESC sd)
 
       if (u1)
 	{
-	  if (TRACE_BRANCH_P (MSP430_CPU (sd)))
-	    trace_generic (sd, MSP430_CPU (sd), TRACE_BRANCH_IDX,
-			   "J%s: pc %#x -> %#x sr %#x, taken",
-			   cond_string (opcode->cond), PC, i, SR);
+	  TRACE_BRANCH (MSP430_CPU (sd), "J%s: pc %#x -> %#x sr %#x, taken",
+			cond_string (opcode->cond), PC, i, SR);
 	  PC = i;
 	  if (PC == opcode_pc)
 	    exit (0);
 	}
       else
-	if (TRACE_BRANCH_P (MSP430_CPU (sd)))
-	  trace_generic (sd, MSP430_CPU (sd), TRACE_BRANCH_IDX,
-			 "J%s: pc %#x to %#x sr %#x, not taken",
-			 cond_string (opcode->cond), PC, i, SR);
+	TRACE_BRANCH (MSP430_CPU (sd), "J%s: pc %#x to %#x sr %#x, not taken",
+		      cond_string (opcode->cond), PC, i, SR);
       break;
 
     default:
