@@ -1,5 +1,9 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* decode-compact.c (sh64_compact_decode): Change TRACE_EXTRACT to
 	CGEN_TRACE_EXTRACT.
 	* decode-media.c: Likewise.

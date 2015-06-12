@@ -1,3 +1,7 @@
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-04-30  DJ Delorie  <dj@redhat.com>
 
 	* cpu.c (g14_multiply): New.

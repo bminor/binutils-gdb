@@ -1,5 +1,10 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (sim-trace): Delete -DTRACE flags.
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.h (TRACE, TRACE_INSN, TRACE_DECODE, TRACE_EXTRACT,
 	TRACE_LINENUM, TRACE_MEMORY, TRACE_MODEL, TRACE_ALU, TRACE_CORE,
 	TRACE_EVENTS, TRACE_FPU, TRACE_VPU, TRACE_BRANCH, TRACE_SYSCALL,

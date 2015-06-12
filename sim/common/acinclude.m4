@@ -186,10 +186,10 @@ dnl use WITH_TRACE.
 AC_ARG_ENABLE(sim-trace,
 [  --enable-sim-trace=opts		Enable tracing flags],
 [case "${enableval}" in
-  yes)	sim_trace="-DTRACE=1 -DWITH_TRACE=-1";;
-  no)	sim_trace="-DTRACE=0 -DWITH_TRACE=0";;
+  yes)	sim_trace="-DWITH_TRACE=-1";;
+  no)	sim_trace="-DWITH_TRACE=0";;
   [[-0-9]]*)
-	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
+	sim_trace="-DWITH_TRACE='(${enableval})'";;
   [[[:lower:]]]*)
 	sim_trace=""
 	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do

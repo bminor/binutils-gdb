@@ -1,5 +1,9 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* decodev10.c (crisv10f_decode): Change TRACE_EXTRACT to
 	CGEN_TRACE_EXTRACT.
 	* decodev32.c (crisv32f_decode): Likewise.

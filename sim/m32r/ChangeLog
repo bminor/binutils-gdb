@@ -1,5 +1,9 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* decode.c (m32rbf_decode): Change TRACE_EXTRACT to CGEN_TRACE_EXTRACT.
 	* decode2.c (m32r2f_decode): Likewise.
 	* decodex.c (m32rxf_decode): Likewise.

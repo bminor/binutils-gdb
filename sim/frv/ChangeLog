@@ -1,5 +1,9 @@
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* decode.c (frvbf_decode): Change TRACE_EXTRACT to CGEN_TRACE_EXTRACT.
 	* mloop.in (execute): Change TRACE_INSN_INIT to CGEN_TRACE_INSN_INIT,
 	TRACE_INSN to CGEN_TRACE_INSN, and TRACE_INSN_FINI to CGEN_TRACE_INSN_FINI.
