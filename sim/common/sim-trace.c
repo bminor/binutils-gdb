@@ -232,7 +232,7 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
   switch (opt)
     {
     case 't' :
-      if (! WITH_TRACE)
+      if (!WITH_TRACE_ANY_P)
 	sim_io_eprintf (sd, "Tracing not compiled in, `-t' ignored\n");
       else
 	return set_trace_option_mask (sd, "trace", TRACE_USEFUL_MASK, arg);
@@ -352,7 +352,7 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 
 #ifdef SIM_HAVE_ADDR_RANGE
     case OPTION_TRACE_RANGE :
-      if (WITH_TRACE)
+      if (WITH_TRACE_ANY_P)
 	{
 	  int cpu_nr;
 	  char *chp = arg;
@@ -378,7 +378,7 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       break;
 
     case OPTION_TRACE_FUNCTION :
-      if (WITH_TRACE)
+      if (WITH_TRACE_ANY_P)
 	{
 	  /*wip: need to compute function range given name*/
 	}
@@ -395,7 +395,7 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       break;
 
     case OPTION_TRACE_FILE :
-      if (! WITH_TRACE)
+      if (!WITH_TRACE_ANY_P)
 	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-file' ignored\n");
       else
 	{
