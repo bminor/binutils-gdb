@@ -4,6 +4,10 @@
 
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* msp430-sim.c (trace_reg_put): Replace TRACE_VPU_P/trace_generic
 	with TRACE_VPU.
 	(trace_reg_get): Likewise.

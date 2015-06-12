@@ -2255,7 +2255,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # SIM_AC_OUTPUT is a cover function to AC_OUTPUT to generate the Makefile.
 # It is intended to be invoked last.
 #
-# The simulator's configure.in should look like:
+# The simulator's configure.ac should look like:
 #
 # dnl Process this file with autoconf to produce a configure script.
 # AC_PREREQ(2.64)dnl
@@ -13743,7 +13743,7 @@ if test ${sim_gen} = MULTI; then
 
   # Simple sanity check.
   if test -z "${sim_multi_configs}" || test -z "${sim_multi_default}"; then
-    as_fn_error "Error in configure.in: MULTI simulator not set up correctly" "$LINENO" 5
+    as_fn_error "Error in configure.ac: MULTI simulator not set up correctly" "$LINENO" 5
   fi
 
   # Start in a known state.
@@ -13868,7 +13868,7 @@ __EOF__
 
   # Check whether we added a 'default:' label.
   if test ${sim_seen_default} = no; then
-    as_fn_error "Error in configure.in: \${sim_multi_configs} doesn't have an entry for \${sim_multi_default}" "$LINENO" 5
+    as_fn_error "Error in configure.ac: \${sim_multi_configs} doesn't have an entry for \${sim_multi_default}" "$LINENO" 5
   fi
 
   cat << __EOF__ >> multi-run.c
@@ -13912,7 +13912,7 @@ else
   sim_multi_src=doesnt-exist.c
 
   if test x"${sim_mach_default}" = x""; then
-    as_fn_error "Error in configure.in: \${sim_mach_default} not defined" "$LINENO" 5
+    as_fn_error "Error in configure.ac: \${sim_mach_default} not defined" "$LINENO" 5
   fi
   SIM_SUBTARGET="$SIM_SUBTARGET -DMIPS_MACH_DEFAULT=bfd_mach_${sim_mach_default}"
 fi

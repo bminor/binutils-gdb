@@ -4,6 +4,10 @@
 
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-sim.c (hwloop_get_next_pc): Change TRACE_BRANCH to
 	BFIN_TRACE_BRANCH.
 	(decode_ProgCtrl_0, decode_BRCC_0, decode_UJUMP_0, decode_CALLa_0):
