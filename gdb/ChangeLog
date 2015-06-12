@@ -1,3 +1,8 @@
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i386-tdep.c (i386_mpx_get_bt_entry): Add a cast for mpx_bd_mask
+	and bt_mask to CORE_ADDR.
+
 2015-06-11  Gary Benson <gbenson@redhat.com>
 
 	* nat/linux-namespaces.c (mnsh_send_message): Use pulongest.

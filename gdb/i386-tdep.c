@@ -8678,12 +8678,15 @@ i386_mpx_get_bt_entry (CORE_ADDR ptr, CORE_ADDR bd_base)
 
   if (gdbarch_ptr_bit (gdbarch) == 64)
     {
-      mpx_bd_mask = MPX_BD_MASK;
+      mpx_bd_mask = (CORE_ADDR) MPX_BD_MASK;
       bd_ptr_r_shift = 20;
       bd_ptr_l_shift = 3;
       bt_select_r_shift = 3;
       bt_select_l_shift = 5;
-      bt_mask = MPX_BT_MASK;
+      bt_mask = (CORE_ADDR) MPX_BT_MASK;
+
+      if ( sizeof (CORE_ADDR) == 4)
+	error (_("operation not supported"));
     }
   else
     {

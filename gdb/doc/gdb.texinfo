@@ -22131,6 +22131,7 @@ be returned in a register.
 @kindex show struct-convention
 Show the current setting of the convention to return @code{struct}s
 from functions.
+@end table
 
 
 @subsubsection Intel(R) @dfn{Memory Protection Extensions} (MPX).
@@ -22172,6 +22173,7 @@ the bounds pointer's value along with its bounds.  Evaluating and changing
 bounds located in bound tables is therefore interesting while investigating
 bugs on MPX context.  @value{GDBN} provides commands for this purpose:
 
+@table @code
 @item show mpx bound @var{pointer}
 @kindex show mpx bound
 Display bounds of the given @var{pointer}.
