@@ -1,3 +1,8 @@
+2015-06-13  Mark Wielaard  <mjw@redhat.com>
+
+	* gas/aarch64/dwarf.d: New.
+	* gas/aarch64/dwarf.s: New.
+
 2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/arm/armv8-a+rdma.d: New.

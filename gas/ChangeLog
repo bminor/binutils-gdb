@@ -1,3 +1,10 @@
+2015-06-13  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2dbg.c (out_header): Document EXPR->X_add_number value,
+	out_debug_aranges depends on it.
+	(out_debug_aranges): Track size of header to properly pad header
+	for address alignment.
+
 2015-06-11  John David Anglin  <danglin@gcc.gnu.org>
 
 	PR gas/18427
