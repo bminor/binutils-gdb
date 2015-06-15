@@ -1,3 +1,11 @@
+2015-06-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Clarify usage of
+	bytes and memory units for -data-{read,write}-memory-bytes.
+	(Packets): Same for m, M and X packets.
+	* python.texi (Inferiors In Python): Same for read_memory and
+	write_memory.
+
 2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* gdb.texinfo (Separate Debug Files): Document that PE is also

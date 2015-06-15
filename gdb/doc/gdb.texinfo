@@ -9009,6 +9009,18 @@ If the @code{x} command has a repeat count, the address and contents saved
 are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
 
+@anchor{addressable memory unit}
+@cindex addressable memory unit
+Most targets have an addressable memory unit size of 8 bits.  This means
+that to each memory address are associated 8 bits of data.  Some
+targets, however, have other addressable memory unit sizes.
+Within @value{GDBN} and this document, the term
+@dfn{addressable memory unit} (or @dfn{memory unit} for short) is used
+when explicitly referring to a chunk of data of that size.  The word
+@dfn{byte} is used to refer to a chunk of data of 8 bits, regardless of
+the addressable memory unit size of the target.  For most systems,
+addressable memory unit is a synonym of byte.
+
 @cindex remote memory comparison
 @cindex target memory comparison
 @cindex verify remote memory image
@@ -29579,6 +29591,9 @@ can be used to instantiate this class for a varobj:
 This section describes the @sc{gdb/mi} commands that manipulate data:
 examine memory and registers, evaluate expressions, etc.
 
+For details about what an addressable memory unit is,
+@pxref{addressable memory unit}.
+
 @c REMOVED FROM THE INTERFACE.
 @c @subheading -data-assign
 @c Change the value of a program variable. Plenty of side effects.
@@ -30103,7 +30118,7 @@ next-page="0x000013c0",prev-page="0x00001380",memory=[
 @subsubheading Synopsis
 
 @smallexample
- -data-read-memory-bytes [ -o @var{byte-offset} ]
+ -data-read-memory-bytes [ -o @var{offset} ]
    @var{address} @var{count}
 @end smallexample
 
@@ -30112,18 +30127,19 @@ where:
 
 @table @samp
 @item @var{address}
-An expression specifying the address of the first memory word to be
-read.  Complex expressions containing embedded white space should be
+An expression specifying the address of the first addressable memory unit
+to be read.  Complex expressions containing embedded white space should be
 quoted using the C convention.
 
 @item @var{count}
-The number of bytes to read.  This should be an integer literal.
+The number of addressable memory units to read.  This should be an integer
+literal.
 
-@item @var{byte-offset}
-The offsets in bytes relative to @var{address} at which to start
-reading.  This should be an integer literal.  This option is provided
-so that a frontend is not required to first evaluate address and then
-perform address arithmetics itself.
+@item @var{offset}
+The offset relative to @var{address} at which to start reading.  This
+should be an integer literal.  This option is provided so that a frontend
+is not required to first evaluate address and then perform address
+arithmetics itself.
 
 @end table
 
@@ -30134,10 +30150,10 @@ Attributes}.  Second, @value{GDBN} will attempt to read the remaining
 regions.  For each one, if reading full region results in an errors,
 @value{GDBN} will try to read a subset of the region.
 
-In general, every single byte in the region may be readable or not,
-and the only way to read every readable byte is to try a read at
+In general, every single memory unit in the region may be readable or not,
+and the only way to read every readable unit is to try a read at
 every address, which is not practical.   Therefore, @value{GDBN} will
-attempt to read all accessible bytes at either beginning or the end
+attempt to read all accessible memory units at either beginning or the end
 of the region, using a binary division scheme.  This heuristic works
 well for reading accross a memory map boundary.  Note that if a region
 has a readable range that is neither at the beginning or the end,
@@ -30197,17 +30213,19 @@ where:
 
 @table @samp
 @item @var{address}
-An expression specifying the address of the first memory word to be
-written.  Complex expressions containing embedded white space should be
-quoted using the C convention.
+An expression specifying the address of the first addressable memory unit
+to be written.  Complex expressions containing embedded white space should
+be quoted using the C convention.
 
 @item @var{contents}
-The hex-encoded bytes to write.
+The hex-encoded data to write.  It is an error if @var{contents} does
+not represent an integral number of addressable memory units.
 
 @item @var{count}
-Optional argument indicating the number of bytes to be written.  If @var{count} 
-is greater than @var{contents}' length, @value{GDBN} will repeatedly 
-write @var{contents} until it fills @var{count} bytes.
+Optional argument indicating the number of addressable memory units to be
+written.  If @var{count} is greater than @var{contents}' length,
+@value{GDBN} will repeatedly write @var{contents} until it fills
+@var{count} memory units.
 
 @end table
 
@@ -34842,8 +34860,9 @@ probes the target state as if a new connection was opened
 
 @item m @var{addr},@var{length}
 @cindex @samp{m} packet
-Read @var{length} bytes of memory starting at address @var{addr}.
-Note that @var{addr} may not be aligned to any particular boundary.
+Read @var{length} addressable memory units starting at address @var{addr}
+(@pxref{addressable memory unit}).  Note that @var{addr} may not be aligned to
+any particular boundary.
 
 The stub need not use any particular size or alignment when gathering
 data from memory for the response; even if @var{addr} is word-aligned
@@ -34857,8 +34876,8 @@ suitable for accessing memory-mapped I/O devices.
 Reply:
 @table @samp
 @item @var{XX@dots{}}
-Memory contents; each byte is transmitted as a two-digit hexadecimal
-number.  The reply may contain fewer bytes than requested if the
+Memory contents; each byte is transmitted as a two-digit hexadecimal number.
+The reply may contain fewer addressable memory units than requested if the
 server was able to read only part of the region of memory.
 @item E @var{NN}
 @var{NN} is errno
@@ -34866,9 +34885,9 @@ server was able to read only part of the region of memory.
 
 @item M @var{addr},@var{length}:@var{XX@dots{}}
 @cindex @samp{M} packet
-Write @var{length} bytes of memory starting at address @var{addr}.
-The data is given by @var{XX@dots{}}; each byte is transmitted as a two-digit
-hexadecimal number.
+Write @var{length} addressable memory units starting at address @var{addr}
+(@pxref{addressable memory unit}).  The data is given by @var{XX@dots{}}; each
+byte is transmitted as a two-digit hexadecimal number.
 
 Reply:
 @table @samp
@@ -35182,7 +35201,8 @@ for success (@pxref{Stop Reply Packets})
 @anchor{X packet}
 @cindex @samp{X} packet
 Write data to memory, where the data is transmitted in binary.
-Memory is specified by its address @var{addr} and number of bytes @var{length};
+Memory is specified by its address @var{addr} and number of addressable memory
+units @var{length} (@pxref{addressable memory unit});
 @samp{@var{XX}@dots{}} is binary data (@pxref{Binary Data}).
 
 Reply:
