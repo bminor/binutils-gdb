@@ -591,25 +591,6 @@ extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 
 enum { MAX_REGISTER_SIZE = 64 };
 
-/* Static target-system-dependent parameters for GDB.  */
-
-/* * Number of bits in a char or unsigned char for the target machine.
-   Just like CHAR_BIT in <limits.h> but describes the target machine.  */
-#if !defined (TARGET_CHAR_BIT)
-#define TARGET_CHAR_BIT 8
-#endif
-
-/* * If we picked up a copy of CHAR_BIT from a configuration file
-   (which may get it by including <limits.h>) then use it to set
-   the number of bits in a host char.  If not, use the same size
-   as the target.  */
-
-#if defined (CHAR_BIT)
-#define HOST_CHAR_BIT CHAR_BIT
-#else
-#define HOST_CHAR_BIT TARGET_CHAR_BIT
-#endif
-
 /* In findvar.c.  */
 
 extern LONGEST extract_signed_integer (const gdb_byte *, int,

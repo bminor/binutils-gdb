@@ -1,3 +1,30 @@
+2015-06-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Move utility functions to common/.
+	* cli/cli-utils.c (skip_spaces, skip_spaces_const, skip_to_space_const):
+	Move defs to common/common-utils.c.
+	* cli/cli-utils.h (skip_spaces, skip_spaces_const, skip_to_space)
+	(skip_to_space_const): Move decls to common/common-utils.h.
+	* common/common-defs.h: Move include of common-types.h before
+	common-utils.h.
+	* common/common-utils.c: Include host-defs.h and ctype.h.
+	(HIGH_BYTE_POSN, is_digit_in_base, digit_to_int, strtoulst): Move
+	from utils.c.
+	(skip_spaces, skip_spaces_const, skip_to_space_const): Move from
+	cli/cli-utils.c.
+	* common/common-utils.h (strtoulst): Move decl from utils.h.
+	(skip_spaces, skip_spaces_const, skip_to_space, skip_to_space_const):
+	Move from cli/cli-utils.h.
+	* common/host-defs.h: Include limits.h.
+	(TARGET_CHAR_BIT, HOST_CHAR_BIT): Moved from defs.h.
+	(skip_spaces, skip_spaces_const): Move decls from cli/cli-utils.h.
+	* defs.h (TARGET_CHAR_BIT, HOST_CHAR_BIT): Move to
+	common/common-utils.h.
+	* utils.c (HIGH_BYTE_POSN, is_digit_in_base, digit_to_int)
+	(strtoulst): Move to common/common-utils.c.
+	* utils.h (strtoulst): Moved decl to common/common-utils.h.
+
 2015-06-15  Yao Qi  <yao.qi@linaro.org>
 
 	* data-directory/Makefile.in (SYSCALLS_FILES): Add aarch64-linux.xml.

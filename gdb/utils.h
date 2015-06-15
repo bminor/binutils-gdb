@@ -37,8 +37,6 @@ extern int streq (const char *, const char *);
 
 extern int subset_compare (char *, char *);
 
-ULONGEST strtoulst (const char *num, const char **trailer, int base);
-
 int compare_positive_ints (const void *ap, const void *bp);
 int compare_strings (const void *ap, const void *bp);
 
