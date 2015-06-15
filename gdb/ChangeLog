@@ -76,7 +76,7 @@
 	rename variables, adjust formatting.
 	* target.h (read_memory_robust): Constify parameters.
 
-2015-05-12 Ulrich Weigand  <uweigand@de.ibm.com>
+2015-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value_base): Handle short
 	synthetic (non-AltiVec) vector types.
