@@ -1,3 +1,7 @@
+2015-06-15  Yao Qi  <yao.qi@linaro.org>
+
+	* data-directory/Makefile.in (SYSCALLS_FILES): Add aarch64-linux.xml.
+
 2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* build-id.c: Don't include elf-bfd.h.
