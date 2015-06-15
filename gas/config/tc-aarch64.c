@@ -2455,6 +2455,15 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
    0},
 
+  /* 15 bit offset into the page containing GOT entry for that symbol.  */
+  {"gotoff_lo15", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   0,
+   BFD_RELOC_AARCH64_LD64_GOTOFF_LO15,
+   0},
+
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsgd", 0,
    BFD_RELOC_AARCH64_TLSGD_ADR_PREL21, /* adr_type */
@@ -6788,6 +6797,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LDST128_LO12:
@@ -6943,6 +6953,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LDST128_LO12:

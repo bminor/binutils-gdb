@@ -1,3 +1,9 @@
+2015-06-15  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifier.
+	(md_apply_fix): Support BFD_RELOC_AARCH64_LD64_GOTOFF_LO15.
+	(aarch64_force_relocation): Ditto
+
 2015-06-13  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2dbg.c (out_header): Document EXPR->X_add_number value,

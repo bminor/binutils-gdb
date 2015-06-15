@@ -1,3 +1,8 @@
+2015-06-15  Renlin Li  <renlin.li@arm.com>
+
+	* gas/aarch64/reloc-insn.s: Update test
+	* gas/aarch64/reloc-insn.d: Update expected result.
+
 2015-06-13  Mark Wielaard  <mjw@redhat.com>
 
 	* gas/aarch64/dwarf.d: New.

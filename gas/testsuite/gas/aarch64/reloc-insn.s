@@ -185,6 +185,8 @@ func:
 	
 	// BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
 	ldr	x28, [x13, #:gotpage_lo15:dummy]
+	// BFD_RELOC_AARCH64_LD64_GOTOFF_LO15
+	ldr	x0, [x0, #:gotoff_lo15:dummy]
 
 llit:	.word	0xdeadf00d
 	

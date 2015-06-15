@@ -848,6 +848,21 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0xffc,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* LD64: GOT offset for the symbol.  */
+  HOWTO64 (AARCH64_R (LD64_GOTOFF_LO15),	/* type */
+	 3,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (LD64_GOTOFF_LO15),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x7ff8,			/* src_mask */
+	 0x7ff8,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   /* LD32: GOT offset to the page address of GOT table.
      (G(S) - PAGE (_GLOBAL_OFFSET_TABLE_)) & 0x5ffc.  */
   HOWTO32 (AARCH64_R (LD32_GOTPAGE_LO14),	/* type */
