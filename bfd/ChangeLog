@@ -1,3 +1,8 @@
+2015-06-15  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* bfd.c: Change struct bfd_build_id to use bfd_size_type.
+	* bfd-in2.h : Regenerate.
+
 2015-06-16  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Correct binary search of

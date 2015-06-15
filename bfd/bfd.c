@@ -53,7 +53,7 @@ CODE_FRAGMENT
 .
 .struct bfd_build_id
 .  {
-.    size_t size;
+.    bfd_size_type size;
 .    bfd_byte data[1];
 .  };
 .
