@@ -1,5 +1,11 @@
 2015-06-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* mi/mi-main.c (mi_cmd_data_read_memory_bytes): Consider addressable
+	memory unit size.
+	(mi_cmd_data_write_memory_bytes): Same.
+
+2015-06-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* corefile.c (write_memory): Update doc.
 	* gdbcore.h (write_memory): Same.
 
