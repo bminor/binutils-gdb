@@ -1,3 +1,10 @@
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* linux-targ-map.h: Update example comments.
+	(cb_linux_syscall_map): Fill out name field.
+	(cb_linux_errno_map, cb_linux_open_map, cb_linux_signal_map):
+	Likewise.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c: Expand comment on CB_SYS_xxx defines.

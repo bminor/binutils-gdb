@@ -1,3 +1,13 @@
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.c (cb_target_map_entry, cb_host_map_entry): Define.
+	(cb_target_to_host_syscall): Rewrite to use cb_target_map_entry.
+	(cb_host_to_target_errno): Rewrite to use cb_host_map_entry.
+	(cb_host_str_syscall, cb_host_str_errno, cb_host_str_signal,
+	cb_target_str_syscall, cb_target_str_errno, cb_target_str_signal):
+	Define.
+	* gentmap.c (gen_targ_map_c): Output name field.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Change configure.in to configure.ac.
