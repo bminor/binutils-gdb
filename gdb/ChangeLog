@@ -1,6 +1,13 @@
 2015-06-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Merge multiple hex conversions.
+	* monitor.c: Include rsp-low.h.
+	(fromhex): Remove definition.
+
+2015-06-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Move utility functions to common/.
 	* cli/cli-utils.c (skip_spaces, skip_spaces_const, skip_to_space_const):
 	Move defs to common/common-utils.c.

@@ -1,3 +1,10 @@
+2015-06-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Merge multiple hex conversions.
+	* gdbreplay.c (tohex): Rename to 'fromhex'.
+	(logchar): Use fromhex.
+
 2015-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* server.c (handle_qxfer_libraries): Set `version' attribute for
