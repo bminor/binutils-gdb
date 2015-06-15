@@ -1,3 +1,9 @@
+2015-06-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-tdep.c (enum filterflags): Make it from anonymous enum.
+	(dump_mapping_p): Use it for parameter filterflags.
+	(linux_find_memory_regions_full): Use it for variable filterflags.
+
 2015-06-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

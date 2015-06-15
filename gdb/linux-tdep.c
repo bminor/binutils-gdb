@@ -46,7 +46,7 @@
    Documentation/filesystems/proc.txt, inside the Linux kernel
    tree.  */
 
-enum
+enum filterflags
   {
     COREFILTER_ANON_PRIVATE = 1 << 0,
     COREFILTER_ANON_SHARED = 1 << 1,
@@ -598,7 +598,7 @@ mapping_is_anonymous_p (const char *filename)
      This should work OK enough, however.  */
 
 static int
-dump_mapping_p (unsigned int filterflags, const struct smaps_vmflags *v,
+dump_mapping_p (enum filterflags filterflags, const struct smaps_vmflags *v,
 		int maybe_private_p, int mapping_anon_p, int mapping_file_p,
 		const char *filename)
 {
@@ -1119,10 +1119,10 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
   /* Default dump behavior of coredump_filter (0x33), according to
      Documentation/filesystems/proc.txt from the Linux kernel
      tree.  */
-  unsigned int filterflags = (COREFILTER_ANON_PRIVATE
-			      | COREFILTER_ANON_SHARED
-			      | COREFILTER_ELF_HEADERS
-			      | COREFILTER_HUGETLB_PRIVATE);
+  enum filterflags filterflags = (COREFILTER_ANON_PRIVATE
+				  | COREFILTER_ANON_SHARED
+				  | COREFILTER_ELF_HEADERS
+				  | COREFILTER_HUGETLB_PRIVATE);
 
   /* We need to know the real target PID to access /proc.  */
   if (current_inferior ()->fake_pid_p)
