@@ -200,16 +200,6 @@ INLINE_SIM_MAIN (void) genericCmp (unsigned32 leftOpnd, unsigned32 rightOpnd);
 INLINE_SIM_MAIN (void) genericOr (unsigned32 source, unsigned32 destReg);
 INLINE_SIM_MAIN (void) genericXor (unsigned32 source, unsigned32 destReg);
 INLINE_SIM_MAIN (void) genericBtst (unsigned32 leftOpnd, unsigned32 rightOpnd);
-INLINE_SIM_MAIN (int) syscall_read_mem (host_callback *cb,
-					struct cb_syscall *sc,
-					unsigned long taddr,
-					char *buf,
-					int bytes);
-INLINE_SIM_MAIN (int) syscall_write_mem (host_callback *cb,
-					 struct cb_syscall *sc,
-					 unsigned long taddr,
-					 const char *buf,
-					 int bytes); 
 INLINE_SIM_MAIN (void) do_syscall (void);
 void program_interrupt (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, SIM_SIGNAL sig);
 

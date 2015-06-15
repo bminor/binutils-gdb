@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
 #include "sim-base.h"
+#include "sim-syscall.h"
 #include "sim-options.h"
 
 #define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
@@ -197,28 +198,6 @@ set_initial_gprs (SIM_CPU *scpu)
   cpu.gr[PARM4] = cpu.gr[0];
 }
 
-/* Read/write functions for system call interface.  */
-
-static int
-syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
-		  unsigned long taddr, char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
-}
-
-static int
-syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
-		  unsigned long taddr, const char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
-
 /* Simulate a monitor trap.  */
 
 static void
@@ -237,8 +216,8 @@ handle_trap1 (SIM_DESC sd)
 
   sc.p1 = (PTR) sd;
   sc.p2 = (PTR) STATE_CPU (sd, 0);
-  sc.read_mem = syscall_read_mem;
-  sc.write_mem = syscall_write_mem;
+  sc.read_mem = sim_syscall_read_mem;
+  sc.write_mem = sim_syscall_write_mem;
 
   cb_syscall (cb, &sc);
 

@@ -1,3 +1,10 @@
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include sim-syscall.h.
+	(syscall_read_mem, syscall_write_mem): Delete.
+	(m32r_trap): Change syscall_read_mem/syscall_write_mem
+	to sim_syscall_read_mem/sim_syscall_write_mem.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

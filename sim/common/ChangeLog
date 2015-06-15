@@ -1,5 +1,11 @@
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-syscall.o.
+	* sim-syscall.c: New file.
+	* sim-syscall.h: New file.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c (cb_target_map_entry, cb_host_map_entry): Define.
 	(cb_target_to_host_syscall): Rewrite to use cb_target_map_entry.
 	(cb_host_to_target_errno): Rewrite to use cb_host_map_entry.

@@ -1,3 +1,11 @@
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* mn10300_sim.h (syscall_read_mem, syscall_write_mem): Delete.
+	* op_utils.c: Include sim-syscall.h.
+	(syscall_read_mem, syscall_write_mem): Delete.
+	(do_syscall): Change syscall_read_mem/syscall_write_mem
+	to sim_syscall_read_mem/sim_syscall_write_mem.  Set syscall.p2.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

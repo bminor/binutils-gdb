@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
+#include "sim-syscall.h"
 #include "sim-options.h"
 #include "bfd.h"
 /* FIXME: get rid of targ-vals.h usage everywhere else.  */
@@ -763,10 +764,6 @@ static const CB_TARGET_DEFS_MAP open_map[] = {
 /* Needed for the cris_pipe_nonempty and cris_pipe_empty syscalls.  */
 static SIM_CPU *current_cpu_for_cb_callback;
 
-static int syscall_read_mem (host_callback *, struct cb_syscall *,
-			     unsigned long, char *, int);
-static int syscall_write_mem (host_callback *, struct cb_syscall *,
-			      unsigned long, const char *, int);
 static USI create_map (SIM_DESC, struct cris_sim_mmapped_page **,
 		       USI addr, USI len);
 static USI unmap_pages (SIM_DESC, struct cris_sim_mmapped_page **,
@@ -775,30 +772,6 @@ static USI is_mapped (SIM_DESC, struct cris_sim_mmapped_page **,
 		       USI addr, USI len);
 static void dump_statistics (SIM_CPU *current_cpu);
 static void make_first_thread (SIM_CPU *current_cpu);
-
-/* Read/write functions for system call interface.  */
-
-static int
-syscall_read_mem (host_callback *cb ATTRIBUTE_UNUSED,
-		  struct cb_syscall *sc,
-		  unsigned long taddr, char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
-}
-
-static int
-syscall_write_mem (host_callback *cb ATTRIBUTE_UNUSED,
-		   struct cb_syscall *sc,
-		   unsigned long taddr, const char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
 
 /* When we risk running self-modified code (as in trampolines), this is
    called from special-case insns.  The silicon CRIS CPU:s have enough
@@ -1496,8 +1469,8 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
   s.p1 = (PTR) sd;
   s.p2 = (PTR) current_cpu;
-  s.read_mem = syscall_read_mem;
-  s.write_mem = syscall_write_mem;
+  s.read_mem = sim_syscall_read_mem;
+  s.write_mem = sim_syscall_write_mem;
 
   current_cpu_for_cb_callback = current_cpu;
 

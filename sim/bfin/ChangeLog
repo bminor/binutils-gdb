@@ -1,5 +1,12 @@
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c: Include sim-syscall.h.
+	(syscall_read_mem, syscall_write_mem): Delete.
+	(bfin_syscall): Change syscall_read_mem/syscall_write_mem to
+	sim_syscall_read_mem/sim_syscall_write_mem.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* linux-targ-map.h: Update example comments.
 	(cb_linux_syscall_map): Fill out name field.
 	(cb_linux_errno_map, cb_linux_open_map, cb_linux_signal_map):

@@ -22,32 +22,9 @@
 #define WANT_CPU_LM32BF
 
 #include "sim-main.h"
+#include "sim-syscall.h"
 #include "lm32-sim.h"
 #include "targ-vals.h"
-
-/* Read memory function for system call interface.  */
-
-static int
-syscall_read_mem (host_callback * cb, struct cb_syscall *sc,
-		  unsigned long taddr, char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
-}
-
-/* Write memory function for system call interface.  */
-
-static int
-syscall_write_mem (host_callback * cb, struct cb_syscall *sc,
-		   unsigned long taddr, const char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
 
 /* Handle invalid instructions.  */
 
@@ -159,8 +136,8 @@ lm32bf_scall_insn (SIM_CPU * current_cpu, IADDR pc)
       CB_SYSCALL_INIT (&s);
       s.p1 = (PTR) sd;
       s.p2 = (PTR) current_cpu;
-      s.read_mem = syscall_read_mem;
-      s.write_mem = syscall_write_mem;
+      s.read_mem = sim_syscall_read_mem;
+      s.write_mem = sim_syscall_write_mem;
       /* Extract parameters.  */
       s.func = GET_H_GR (8);
       s.arg1 = GET_H_GR (1);

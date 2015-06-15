@@ -29,6 +29,7 @@
 #include "bfd.h"
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
+#include "sim-syscall.h"
 #include "dis-asm.h"
 #include "targ-vals.h"
 #include "trace.h"
@@ -949,26 +950,6 @@ binary_to_bcd (int v)
   return r;
 }
 
-static int
-syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
-		  unsigned long taddr, char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
-}
-
-static int
-syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
-		  unsigned long taddr, const char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
-
 static const char *
 cond_string (int cond)
 {
@@ -1089,8 +1070,8 @@ maybe_perform_syscall (SIM_DESC sd, int call_addr)
 
       sc.p1 = sd;
       sc.p2 = MSP430_CPU (sd);
-      sc.read_mem = syscall_read_mem;
-      sc.write_mem = syscall_write_mem;
+      sc.read_mem = sim_syscall_read_mem;
+      sc.write_mem = sim_syscall_write_mem;
 
       cb_syscall (cb, &sc);
 

@@ -1,4 +1,5 @@
 #include "sim-main.h"
+#include "sim-syscall.h"
 #include "targ-vals.h"
 
 #ifdef HAVE_UTIME_H
@@ -140,28 +141,6 @@ genericBtst(unsigned32 leftOpnd, unsigned32 rightOpnd)
   PSW |= (z ? PSW_Z : 0) | (n ? PSW_N : 0);
 }
 
-/* Read/write functions for system call interface.  */
-INLINE_SIM_MAIN (int)
-syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
-		  unsigned long taddr, char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  sim_cpu *cpu = STATE_CPU(sd, 0);
-
-  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
-}
-
-INLINE_SIM_MAIN (int)
-syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
-		   unsigned long taddr, const char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  sim_cpu *cpu = STATE_CPU(sd, 0);
-
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
-
-
 /* syscall */
 INLINE_SIM_MAIN (void)
 do_syscall (void)
@@ -204,8 +183,9 @@ do_syscall (void)
       syscall.arg3 = PARM3;
       syscall.func = FUNC;
       syscall.p1 = (PTR) simulator;
-      syscall.read_mem = syscall_read_mem;
-      syscall.write_mem = syscall_write_mem;
+      syscall.p2 = (PTR) STATE_CPU (simulator, 0);
+      syscall.read_mem = sim_syscall_read_mem;
+      syscall.write_mem = sim_syscall_write_mem;
       cb_syscall (STATE_CALLBACK (simulator), &syscall);
       RETERR = syscall.errcode;
       RETVAL = syscall.result;

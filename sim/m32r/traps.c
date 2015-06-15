@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
+#include "sim-syscall.h"
 #include "targ-vals.h"
 
 #define TRAP_FLUSH_CACHE 12
@@ -92,28 +93,6 @@ m32r_core_signal (SIM_DESC sd, SIM_CPU *current_cpu, sim_cia cia,
 		     transfer, sig);
 }
 
-/* Read/write functions for system call interface.  */
-
-static int
-syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
-		  unsigned long taddr, char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
-}
-
-static int
-syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
-		   unsigned long taddr, const char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
-
 /* Trap support.
    The result is the pc address to continue at.
    Preprocessing like saving the various registers has already been done.  */
@@ -165,8 +144,8 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 
 	s.p1 = (PTR) sd;
 	s.p2 = (PTR) current_cpu;
-	s.read_mem = syscall_read_mem;
-	s.write_mem = syscall_write_mem;
+	s.read_mem = sim_syscall_read_mem;
+	s.write_mem = sim_syscall_write_mem;
 	cb_syscall (cb, &s);
 	m32rbf_h_gr_set (current_cpu, 2, s.errcode);
 	m32rbf_h_gr_set (current_cpu, 0, s.result);
