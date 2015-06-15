@@ -213,28 +213,21 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
     {
     case TRAP_ELF_SYSCALL :
       {
-        CB_SYSCALL s;
- 
-        CB_SYSCALL_INIT (&s);
-        s.func = m32rbf_h_gr_get (current_cpu, 0);
-        s.arg1 = m32rbf_h_gr_get (current_cpu, 1);
-        s.arg2 = m32rbf_h_gr_get (current_cpu, 2);
-        s.arg3 = m32rbf_h_gr_get (current_cpu, 3);
- 
-        if (s.func == TARGET_SYS_exit)
-          {
-            sim_engine_halt (sd, current_cpu, NULL, pc, sim_exited, s.arg1);
-          }
- 
-        s.p1 = (PTR) sd;
-        s.p2 = (PTR) current_cpu;
-        s.read_mem = sim_syscall_read_mem;
-        s.write_mem = sim_syscall_write_mem;
-        cb_syscall (cb, &s);
-        m32rbf_h_gr_set (current_cpu, 2, s.errcode);
-        m32rbf_h_gr_set (current_cpu, 0, s.result);
-        m32rbf_h_gr_set (current_cpu, 1, s.result2);
-        break;
+	long result, result2;
+	int errcode;
+
+	sim_syscall_multi (current_cpu,
+			   m32rbf_h_gr_get (current_cpu, 0),
+			   m32rbf_h_gr_get (current_cpu, 1),
+			   m32rbf_h_gr_get (current_cpu, 2),
+			   m32rbf_h_gr_get (current_cpu, 3),
+			   m32rbf_h_gr_get (current_cpu, 4),
+			   &result, &result2, &errcode);
+
+	m32rbf_h_gr_set (current_cpu, 2, errcode);
+	m32rbf_h_gr_set (current_cpu, 0, result);
+	m32rbf_h_gr_set (current_cpu, 1, result2);
+	break;
       }
 
     case TRAP_LINUX_SYSCALL :

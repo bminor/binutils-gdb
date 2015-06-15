@@ -1022,62 +1022,14 @@ maybe_perform_syscall (SIM_DESC sd, int call_addr)
     {
       /* Syscall!  */
       int syscall_num = call_addr & 0x3f;
-      host_callback *cb = STATE_CALLBACK (sd);
-      CB_SYSCALL sc;
+      int arg1 = MSP430_CPU (sd)->state.regs[12];
+      int arg2 = MSP430_CPU (sd)->state.regs[13];
+      int arg3 = MSP430_CPU (sd)->state.regs[14];
+      int arg4 = MSP430_CPU (sd)->state.regs[15];
 
-      CB_SYSCALL_INIT (&sc);
-
-      sc.func = syscall_num;
-      sc.arg1 = MSP430_CPU (sd)->state.regs[12];
-      sc.arg2 = MSP430_CPU (sd)->state.regs[13];
-      sc.arg3 = MSP430_CPU (sd)->state.regs[14];
-      sc.arg4 = MSP430_CPU (sd)->state.regs[15];
-
-      if (TRACE_SYSCALL_P (MSP430_CPU (sd)))
-	{
-	  const char *syscall_name = "*unknown*";
-
-	  switch (syscall_num)
-	    {
-	    case TARGET_SYS_exit:
-	      syscall_name = "exit(%d)";
-	      break;
-	    case TARGET_SYS_open:
-	      syscall_name = "open(%#x,%#x)";
-	      break;
-	    case TARGET_SYS_close:
-	      syscall_name = "close(%d)";
-	      break;
-	    case TARGET_SYS_read:
-	      syscall_name = "read(%d,%#x,%d)";
-	      break;
-	    case TARGET_SYS_write:
-	      syscall_name = "write(%d,%#x,%d)";
-	      break;
-	    }
-	  trace_generic (sd, MSP430_CPU (sd), TRACE_SYSCALL_IDX,
-			 syscall_name, sc.arg1, sc.arg2, sc.arg3, sc.arg4);
-	}
-
-      /* Handle SYS_exit here.  */
-      if (syscall_num == 1)
-	{
-	  sim_engine_halt (sd, MSP430_CPU (sd), NULL,
-			   MSP430_CPU (sd)->state.regs[0],
-			   sim_exited, sc.arg1);
-	  return 1;
-	}
-
-      sc.p1 = sd;
-      sc.p2 = MSP430_CPU (sd);
-      sc.read_mem = sim_syscall_read_mem;
-      sc.write_mem = sim_syscall_write_mem;
-
-      cb_syscall (cb, &sc);
-
-      TRACE_SYSCALL (MSP430_CPU (sd), "returns %ld", sc.result);
-
-      MSP430_CPU (sd)->state.regs[12] = sc.result;
+      MSP430_CPU (sd)->state.regs[12] = sim_syscall (MSP430_CPU (sd),
+						     syscall_num, arg1, arg2,
+						     arg3, arg4);
       return 1;
     }
 

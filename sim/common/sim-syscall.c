@@ -19,8 +19,11 @@
 
 #include "config.h"
 
+#include <errno.h>
+
 #include "sim-main.h"
 #include "sim-syscall.h"
+#include "targ-vals.h"
 
 /* Read/write functions for system call interface.  */
 
@@ -46,4 +49,78 @@ sim_syscall_write_mem (host_callback *cb ATTRIBUTE_UNUSED, struct cb_syscall *sc
   TRACE_MEMORY (cpu, "WRITE (syscall) %i bytes @ 0x%08lx", bytes, taddr);
 
   return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
+}
+
+/* Main syscall callback for simulators.  */
+
+void
+sim_syscall_multi (SIM_CPU *cpu, int func, long arg1, long arg2, long arg3,
+		   long arg4, long *result, long *result2, int *errcode)
+{
+  SIM_DESC sd = CPU_STATE (cpu);
+  host_callback *cb = STATE_CALLBACK (sd);
+  CB_SYSCALL sc;
+  char unknown_syscall[30];
+  const char *syscall;
+
+  CB_SYSCALL_INIT (&sc);
+
+  sc.func = func;
+  sc.arg1 = arg1;
+  sc.arg2 = arg2;
+  sc.arg3 = arg3;
+  sc.arg4 = arg4;
+
+  sc.p1 = (PTR) sd;
+  sc.p2 = (PTR) cpu;
+  sc.read_mem = sim_syscall_read_mem;
+  sc.write_mem = sim_syscall_write_mem;
+
+  if (cb_syscall (cb, &sc) != CB_RC_OK)
+    {
+      /* The cb_syscall func never returns an error, so this is more of a
+	 sanity check.  */
+      sim_engine_abort (sd, cpu, sim_pc_get (cpu), "cb_syscall failed");
+    }
+
+  syscall = cb_target_str_syscall (cb, func);
+  if (!syscall)
+    {
+      sprintf (unknown_syscall, "syscall_%i", func);
+      syscall = unknown_syscall;
+    }
+
+  if (sc.result == -1)
+    TRACE_SYSCALL (cpu, "%s[%i](%#lx, %#lx, %#lx) = %li (error = %s[%i])",
+		   syscall, func, arg1, arg2, arg3, sc.result,
+		   cb_target_str_errno (cb, sc.errcode), sc.errcode);
+  else
+    TRACE_SYSCALL (cpu, "%s[%i](%#lx, %#lx, %#lx) = %li",
+		   syscall, func, arg1, arg2, arg3, sc.result);
+
+  if (cb_target_to_host_syscall (cb, func) == CB_SYS_exit)
+    sim_engine_halt (sd, cpu, NULL, sim_pc_get (cpu), sim_exited, arg1);
+  else if (sc.result == -1)
+    {
+      cb->last_errno = errno;
+      sc.errcode = cb->get_errno (cb);
+    }
+
+  *result = sc.result;
+  *result2 = sc.result2;
+  *errcode = sc.errcode;
+}
+
+long
+sim_syscall (SIM_CPU *cpu, int func, long arg1, long arg2, long arg3, long arg4)
+{
+  long result, result2;
+  int errcode;
+
+  sim_syscall_multi (cpu, func, arg1, arg2, arg3, arg4, &result, &result2,
+		     &errcode);
+  if (result == -1)
+    return -errcode;
+  else
+    return result;
 }

@@ -20,6 +20,21 @@
 #ifndef SIM_SYSCALL_H
 #define SIM_SYSCALL_H
 
+/* Perform a syscall on the behalf of the target program.  The error/result are
+   normalized into a single value (like a lot of operating systems do).  If you
+   want the split values, see the other function below.
+
+   Note: While cb_syscall requires you handle the exit syscall yourself, that is
+   not the case with these helpers.
+
+   Note: Types here match the gdb callback interface.  */
+long sim_syscall (SIM_CPU *, int func, long arg1, long arg2, long arg3,
+		  long arg4);
+
+/* Same as sim_syscall, but return the split values by referenced.  */
+void sim_syscall_multi (SIM_CPU *, int func, long arg1, long arg2, long arg3,
+			long arg4, long *result, long *result2, int *errcode);
+
 /* Simple memory callbacks for cb_syscall's read_mem/write_mem that assume
    cb_syscall's p1 and p2 are set to the SIM_DESC and SIM_CPU respectively.  */
 int sim_syscall_read_mem (host_callback *, struct cb_syscall *, unsigned long,

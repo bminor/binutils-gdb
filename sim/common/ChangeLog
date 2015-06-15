@@ -1,5 +1,12 @@
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-syscall.c: Include errno.h and targ-vals.h.
+	(sim_syscall_multi, sim_syscall): Define.
+	* sim-syscall.h (sim_syscall_multi, sim_syscall): Declare.
+	* syscall.c (cb_syscall): Extend comment.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-syscall.o.
 	* sim-syscall.c: New file.
 	* sim-syscall.h: New file.

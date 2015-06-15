@@ -1,5 +1,10 @@
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* op_utils.c (do_syscall): Replace call to cb_syscall with
+	sim_syscall_multi.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* mn10300_sim.h (syscall_read_mem, syscall_write_mem): Delete.
 	* op_utils.c: Include sim-syscall.h.
 	(syscall_read_mem, syscall_write_mem): Delete.

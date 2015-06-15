@@ -145,6 +145,15 @@ genericBtst(unsigned32 leftOpnd, unsigned32 rightOpnd)
 INLINE_SIM_MAIN (void)
 do_syscall (void)
 {
+  /* Registers passed to trap 0.  */
+
+  /* Function number.  */
+  reg_t func = State.regs[0];
+  /* Parameters.  */
+  reg_t parm1 = State.regs[1];
+  reg_t parm2 = load_word (State.regs[REG_SP] + 12);
+  reg_t parm3 = load_word (State.regs[REG_SP] + 16);
+  reg_t parm4 = load_word (State.regs[REG_SP] + 20);
 
   /* We use this for simulated system calls; we may need to change
      it to a reserved instruction if we conflict with uses at
@@ -152,46 +161,24 @@ do_syscall (void)
   int save_errno = errno;	
   errno = 0;
 
-/* Registers passed to trap 0 */
-
-/* Function number.  */
-#define FUNC   (State.regs[0])
-
-/* Parameters.  */
-#define PARM1   (State.regs[1])
-#define PARM2   (load_word (State.regs[REG_SP] + 12))
-#define PARM3   (load_word (State.regs[REG_SP] + 16))
-
-/* Registers set by trap 0 */
-
-#define RETVAL State.regs[0]	/* return value */
-#define RETERR State.regs[1]	/* return error code */
-
-  if ( FUNC == TARGET_SYS_exit )
+  if (func == TARGET_SYS_exit)
     {
-      /* EXIT - caller can look in PARM1 to work out the reason */
+      /* EXIT - caller can look in parm1 to work out the reason */
       sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
-		       (PARM1 == 0xdead ? SIM_SIGABRT : sim_exited), PARM1);
+		       (parm1 == 0xdead ? SIM_SIGABRT : sim_exited), parm1);
     }
   else
     {
-      CB_SYSCALL syscall;
+      long result, result2;
+      int errcode;
 
-      CB_SYSCALL_INIT (&syscall);
-      syscall.arg1 = PARM1;
-      syscall.arg2 = PARM2;
-      syscall.arg3 = PARM3;
-      syscall.func = FUNC;
-      syscall.p1 = (PTR) simulator;
-      syscall.p2 = (PTR) STATE_CPU (simulator, 0);
-      syscall.read_mem = sim_syscall_read_mem;
-      syscall.write_mem = sim_syscall_write_mem;
-      cb_syscall (STATE_CALLBACK (simulator), &syscall);
-      RETERR = syscall.errcode;
-      RETVAL = syscall.result;
+      sim_syscall_multi (STATE_CPU (simulator, 0), func, parm1, parm2,
+			 parm3, parm4, &result, &result2, &errcode);
+
+      /* Registers set by trap 0.  */
+      State.regs[0] = errcode;
+      State.regs[1] = result;
     }
-
 
   errno = save_errno;
 }
-

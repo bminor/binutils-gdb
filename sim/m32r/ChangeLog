@@ -1,5 +1,11 @@
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* traps.c (m32r_trap): Replace call to cb_syscall with
+	sim_syscall_multi.
+	* traps-linux.c (m32r_trap): Likewise.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* traps-linux.c: Include sim-syscall.h.
 	(syscall_read_mem, syscall_write_mem): Delete.
 	(m32r_trap): Change syscall_read_mem/syscall_write_mem

@@ -132,26 +132,18 @@ lm32bf_scall_insn (SIM_CPU * current_cpu, IADDR pc)
       || (GET_H_GR (8) == TARGET_SYS_exit))
     {
       /* Delegate system call to host O/S.  */
-      CB_SYSCALL s;
-      CB_SYSCALL_INIT (&s);
-      s.p1 = (PTR) sd;
-      s.p2 = (PTR) current_cpu;
-      s.read_mem = sim_syscall_read_mem;
-      s.write_mem = sim_syscall_write_mem;
-      /* Extract parameters.  */
-      s.func = GET_H_GR (8);
-      s.arg1 = GET_H_GR (1);
-      s.arg2 = GET_H_GR (2);
-      s.arg3 = GET_H_GR (3);
-      /* Halt the simulator if the requested system call is _exit.  */
-      if (s.func == TARGET_SYS_exit)
-	sim_engine_halt (sd, current_cpu, NULL, pc, sim_exited, s.arg1);
+      long result, result2;
+      int errcode;
+
       /* Perform the system call.  */
-      cb_syscall (cb, &s);
+      sim_syscall_multi (current_cpu, GET_H_GR (8), GET_H_GR (1), GET_H_GR (2),
+			 GET_H_GR (3), GET_H_GR (4), &result, &result2,
+			 &errcode);
       /* Store the return value in the CPU's registers.  */
-      SET_H_GR (1, s.result);
-      SET_H_GR (2, s.result2);
-      SET_H_GR (3, s.errcode);
+      SET_H_GR (1, result);
+      SET_H_GR (2, result2);
+      SET_H_GR (3, errcode);
+
       /* Skip over scall instruction.  */
       return pc + 4;
     }

@@ -203,26 +203,10 @@ set_initial_gprs (SIM_CPU *scpu)
 static void
 handle_trap1 (SIM_DESC sd)
 {
-  host_callback *cb = STATE_CALLBACK (sd);
-  CB_SYSCALL sc;
-
-  CB_SYSCALL_INIT (&sc);
-
-  sc.func = cpu.gr[TRAPCODE];
-  sc.arg1 = cpu.gr[PARM1];
-  sc.arg2 = cpu.gr[PARM2];
-  sc.arg3 = cpu.gr[PARM3];
-  sc.arg4 = cpu.gr[PARM4];
-
-  sc.p1 = (PTR) sd;
-  sc.p2 = (PTR) STATE_CPU (sd, 0);
-  sc.read_mem = sim_syscall_read_mem;
-  sc.write_mem = sim_syscall_write_mem;
-
-  cb_syscall (cb, &sc);
-
   /* XXX: We don't pass back the actual errno value.  */
-  cpu.gr[RET1] = sc.result;
+  cpu.gr[RET1] = sim_syscall (STATE_CPU (sd, 0), cpu.gr[TRAPCODE],
+			      cpu.gr[PARM1], cpu.gr[PARM2], cpu.gr[PARM3],
+			      cpu.gr[PARM4]);
 }
 
 static void
