@@ -1,3 +1,8 @@
+2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* sysreg.d: Add id_mmfr4_el1, update expected output.
+	* sysreg.s: Add id_mmfr4_el1.
+
 2015-06-15  Renlin Li  <renlin.li@arm.com>
 
 	* gas/aarch64/reloc-insn.s: Update test

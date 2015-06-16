@@ -1,3 +1,7 @@
+2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arch64-opc.c (aarch64_sys_regs): Add "id_mmfr4_el1".
+
 2015-06-16  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* arm-dis.c (print_insn_coprocessor): Avoid negative shift.
