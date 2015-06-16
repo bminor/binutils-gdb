@@ -1,8 +1,14 @@
  .text
  lis 3,x@ha
  addi 3,3,x@l
+ .org 0x10000
+ lis 3,x@ha
+ addi 3,3,x@l
+ .org 0x20000
+ lis 3,x@ha
+ addi 3,3,x@l
 
- .org 0xfff4
+ .org 0x2fff4
  bcl 20,31,.+4
 0:
  mflr 9
