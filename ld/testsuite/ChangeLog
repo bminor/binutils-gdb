@@ -1,6 +1,11 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-06-16  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/ppc476-shared.s: Repeat dynamic reloc generating insns.
+	* ld-powerpc/ppc476-shared.d: Update.
+	* ld-powerpc/ppc476-shared2.d: Update.
+
 	2015-06-05  Alan Modra  <amodra@gmail.com>
 	* ld-powerpc/ppc476-shared.s,
 	* ld-powerpc/ppc476-shared.lnk,
