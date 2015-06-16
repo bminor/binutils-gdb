@@ -1,3 +1,7 @@
+2015-06-16  Michael Eager  <eager@eagercon.com>
+
+	* nat/linux-namespaces.c (MSG_CMSG_CLOEXEC): Define if not defined.
+
 2015-06-16  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Call

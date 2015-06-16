@@ -47,6 +47,12 @@ setns (int fd, int nstype)
 }
 #endif
 
+/* Handle systems without MSG_CMSG_CLOEXEC.  */
+
+#ifndef MSG_CMSG_CLOEXEC
+#define MSG_CMSG_CLOEXEC 0
+#endif
+
 /* A Linux namespace.  */
 
 struct linux_ns
