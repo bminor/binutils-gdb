@@ -1,3 +1,8 @@
+2015-06-16  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Correct binary search of
+	dynamic relocs.
+
 2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* elf-bfd.h : Remove struct elf_build_id.
