@@ -894,6 +894,7 @@ class Erratum_stub : public Stub_base<size, big_endian>
 public:
   typedef AArch64_relobj<size, big_endian> The_aarch64_relobj;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
+  typedef AArch64_insn_utilities<big_endian> Insn_utilities;
   typedef typename AArch64_insn_utilities<big_endian>::Insntype Insntype;
 
   static const int STUB_ADDR_ALIGN;
@@ -937,6 +938,38 @@ public:
   void
   set_erratum_insn(Insntype insn)
   { this->erratum_insn_ = insn; }
+
+  // For 843419, the erratum insn is ld/st xt, [xn, #uimm], which may be a
+  // relocation spot, in this case, the erratum_insn_ recorded at scanning phase
+  // is no longer the one we want to write out to the stub, update erratum_insn_
+  // with relocated version. Also note that in this case xn must not be "PC", so
+  // it is safe to move the erratum insn from the origin place to the stub. For
+  // 835769, the erratum insn is multiply-accumulate insn, which could not be a
+  // relocation spot (assertion added though).
+  void
+  update_erratum_insn(Insntype insn)
+  {
+    gold_assert(this->erratum_insn_ != this->invalid_insn);
+    switch (this->type())
+      {
+      case ST_E_843419:
+	gold_assert(Insn_utilities::aarch64_ldst_uimm(insn));
+	gold_assert(Insn_utilities::aarch64_ldst_uimm(this->erratum_insn()));
+	gold_assert(Insn_utilities::aarch64_rd(insn) ==
+		    Insn_utilities::aarch64_rd(this->erratum_insn()));
+	gold_assert(Insn_utilities::aarch64_rn(insn) ==
+		    Insn_utilities::aarch64_rn(this->erratum_insn()));
+	// Update plain ld/st insn with relocated insn.
+	this->erratum_insn_ = insn;
+	break;
+      case ST_E_835769:
+	gold_assert(insn == this->erratum_insn());
+	break;
+      default:
+	gold_unreachable();
+      }
+  }
+
 
   // Return the address where an erratum must be done.
   AArch64_address
@@ -1417,7 +1450,7 @@ Stub_table<size, big_endian>::add_erratum_stub(The_erratum_stub* stub)
 }
 
 
-// Find if such erratum exists for givein (obj, shndx, sh_offset).
+// Find if such erratum exists for given (obj, shndx, sh_offset).
 
 template<int size, bool big_endian>
 Erratum_stub<size, big_endian>*
@@ -1518,6 +1551,12 @@ relocate_stubs(const The_relocate_info* relinfo,
 	{
 	case ST_E_843419:
 	case ST_E_835769:
+	  // The 1st insn of the erratum could be a relocation spot,
+	  // in this case we need to fix it with
+	  // "(*i)->erratum_insn()".
+	  elfcpp::Swap<32, big_endian>::writeval(
+	      view + (stub_address - this->address()),
+	      (*i)->erratum_insn());
 	  // For the erratum, the 2nd insn is a b-insn to be patched
 	  // (relocated).
 	  stub_b_insn_address = stub_address + 1 * BPI;
@@ -1835,13 +1874,17 @@ AArch64_relobj<size, big_endian>::fix_errata(
 	    pview((*pviews)[i]);
 
 	  // Double check data before fix.
-	  Insntype* ip =
-	    reinterpret_cast<Insntype*>(pview.view + stub->sh_offset());
-	  Insntype insn_to_fix = ip[0];
-	  gold_assert(insn_to_fix == stub->erratum_insn());
 	  gold_assert(pview.address + stub->sh_offset()
 		      == stub->erratum_address());
 
+	  // Update previously recorded erratum insn with relocated
+	  // version.
+	  Insntype* ip =
+	    reinterpret_cast<Insntype*>(pview.view + stub->sh_offset());
+	  Insntype insn_to_fix = ip[0];
+	  stub->update_erratum_insn(insn_to_fix);
+
+	  // Replace the erratum insn with a branch-to-stub.
 	  AArch64_address stub_address =
 	    stub_table->erratum_stub_address(stub);
 	  unsigned int b_offset = stub_address - stub->erratum_address();

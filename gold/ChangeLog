@@ -1,3 +1,12 @@
+2015-06-29  Han Shen  <shenhan@google.com>
+
+	Patch for erratum 843419 internal error.
+
+        * AArch64.cc (Erratum_stub::Insn_utilities): New typedef.
+        (Erratum_stub::update_erratum_insn): New method.
+        (Stub_table::relocate_stubs): Modified to place relocated insn.
+        (AArch64_relobj::fix_errata): Modified gold_assert.
+
 2015-06-12  Han Shen  <shenhan@google.com>
 
 	Fix erratum 835769.
