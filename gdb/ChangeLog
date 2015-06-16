@@ -1,3 +1,7 @@
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (riscv*-*-*): Set gdb_sim.
+
 2021-02-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target.c (target_is_non_stop_p): Return bool.
