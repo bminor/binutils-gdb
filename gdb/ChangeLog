@@ -1,3 +1,7 @@
+2015-06-16  Martin Simmons  <martin@lispworks.com>  (tiny patch)
+
+	* arm-linux-nat.c: Include nat/linux-ptrace.h.
+
 2015-06-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_data_read_memory_bytes): Consider addressable
