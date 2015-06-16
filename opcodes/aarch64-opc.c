@@ -2820,6 +2820,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "id_mmfr1_el1",     CPENC(3,0,C0,C1,5),	0 }, /* RO */
   { "id_mmfr2_el1",     CPENC(3,0,C0,C1,6),	0 }, /* RO */
   { "id_mmfr3_el1",     CPENC(3,0,C0,C1,7),	0 }, /* RO */
+  { "id_mmfr4_el1",     CPENC(3,0,C0,C2,6),	0 }, /* RO */
   { "id_isar0_el1",     CPENC(3,0,C0,C2,0),	0 }, /* RO */
   { "id_isar1_el1",     CPENC(3,0,C0,C2,1),	0 }, /* RO */
   { "id_isar2_el1",     CPENC(3,0,C0,C2,2),	0 }, /* RO */
