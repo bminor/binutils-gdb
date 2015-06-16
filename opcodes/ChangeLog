@@ -1,3 +1,7 @@
+2015-06-16  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* arm-dis.c (print_insn_coprocessor): Avoid negative shift.
+
 2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm.c (aarch64_ins_hint): New.
