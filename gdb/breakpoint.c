@@ -7431,26 +7431,6 @@ set_raw_breakpoint (struct gdbarch *gdbarch,
   return b;
 }
 
-
-/* Note that the breakpoint object B describes a permanent breakpoint
-   instruction, hard-wired into the inferior's code.  */
-void
-make_breakpoint_permanent (struct breakpoint *b)
-{
-  struct bp_location *bl;
-
-  /* By definition, permanent breakpoints are already present in the
-     code.  Mark all locations as inserted.  For now,
-     make_breakpoint_permanent is called in just one place, so it's
-     hard to say if it's reasonable to have permanent breakpoint with
-     multiple locations or not, but it's easy to implement.  */
-  for (bl = b->loc; bl; bl = bl->next)
-    {
-      bl->permanent = 1;
-      bl->inserted = 1;
-    }
-}
-
 /* Call this routine when stepping and nexting to enable a breakpoint
    if we do a longjmp() or 'throw' in TP.  FRAME is the frame which
    initiated the operation.  */

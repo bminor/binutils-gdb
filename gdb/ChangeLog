@@ -1,3 +1,9 @@
+2015-06-17  Luis Machado  <lgustavo@codesourcery.com>
+
+	* breakpoint.c (make_breakpoint_permanent): Remove unused
+	function.
+	* breakpoint.h (make_breakpoint_permanent): Remove declaration.
+
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
 	PR gdb/16999
