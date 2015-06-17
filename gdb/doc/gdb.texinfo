@@ -22641,9 +22641,9 @@ Stop recording command history in a file.
 Set the number of commands which @value{GDBN} keeps in its history list.
 This defaults to the value of the environment variable @env{GDBHISTSIZE}, or
 to 256 if this variable is not set.  Non-numeric values of @env{GDBHISTSIZE}
-are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is a
-negative number, the number of commands @value{GDBN} keeps in the history list
-is unlimited.
+are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is
+either a negative number or the empty string, then the number of commands
+@value{GDBN} keeps in the history list is unlimited.
 @end table
 
 History expansion assigns special meaning to the character @kbd{!}.

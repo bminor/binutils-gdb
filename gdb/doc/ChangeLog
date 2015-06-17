@@ -1,5 +1,10 @@
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* gdb.texinfo (Command History): Mention that setting
+	GDBHISTSIZE to the empty string disables history truncation.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
 	PR gdb/16999
 	* gdb.texinfo (Command History): Mention new GDBHISTSIZE
 	behavior.
