@@ -3,7 +3,11 @@
 	PR gas/18500
 	* config/tc-arm.c (is_double_a_single): New function.
 	(double_to_single): New function.
-	(move_or_literal_pool): Add support for	converting VLDR to VMOV.
+	(move_or_literal_pool): Add support for converting VLDR to VMOV.
+
+	PR gas/18499
+	* config/tc-arm.c (move_or_literal_pool): Add support for LDR Rx,=
+	to MOV.w or MVN.w for Thumb2.
 
 2015-06-17  Nicolas Pitre <nico@linaro.org>
 

@@ -7869,19 +7869,71 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 
       if (!inst.operands[i].issingle)
 	{
-	  if (thumb_p && inst.reloc.exp.X_op == O_constant)
+	  if (thumb_p)
 	    {
-	      if (!unified_syntax && (v & ~0xFF) == 0)
+	      if ((v & ~0xFF) == 0)
 		{
 		  /* This can be done with a mov(1) instruction.  */
 		  inst.instruction = T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
 		  inst.instruction |= v;
 		  return TRUE;
 		}
+
+	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)
+		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
+		{
+		  /* Check if on thumb2 it can be done with a mov.w or mvn.w instruction.  */
+		  unsigned int newimm;
+		  bfd_boolean isNegated;
+
+		  newimm = encode_thumb32_immediate (v);
+		  if (newimm != (unsigned int) FAIL)
+		    isNegated = FALSE;
+		  else
+		    {
+		      newimm = encode_thumb32_immediate (~ v);
+		      if (newimm != (unsigned int) FAIL)
+			isNegated = TRUE;
+		    }
+
+		  if (newimm != (unsigned int) FAIL)
+		    {
+		      inst.instruction = 0xf04f0000 | (inst.operands[i].reg << 8);
+		      inst.instruction |= (isNegated?0x200000:0);
+		      inst.instruction |= (newimm & 0x800) << 15;
+		      inst.instruction |= (newimm & 0x700) << 4;
+		      inst.instruction |= (newimm & 0x0ff);
+		      return TRUE;
+		    }
+		  else if ((v & ~0xFFFF) == 0 || (v & ~0xFFFF0000) == 0)
+		    { 
+		      /* The number may be loaded with a movw/movt instruction.  */
+		      int imm;
+
+		      if ((inst.reloc.exp.X_add_number & ~0xFFFF) == 0)
+			{
+			  inst.instruction= 0xf2400000;
+			  imm = v;
+			}
+		      else
+			{
+			  inst.instruction = 0xf2c00000;
+			  imm = v >> 16;
+			}
+
+		      inst.instruction |= (inst.operands[i].reg << 8);
+		      inst.instruction |= (imm & 0xf000) << 4;
+		      inst.instruction |= (imm & 0x0800) << 15;
+		      inst.instruction |= (imm & 0x0700) << 4;
+		      inst.instruction |= (imm & 0x00ff);
+		      return TRUE;
+		    }
+		}
 	    }
-	  else if (arm_p && inst.reloc.exp.X_op == O_constant)
+	  else if (arm_p)
 	    {
 	      int value = encode_arm_immediate (v);
+
 	      if (value != FAIL)
 		{
 		  /* This can be done with a mov instruction.  */

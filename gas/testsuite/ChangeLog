@@ -8,6 +8,12 @@
 	* gas/arm/vfpv3xd-ldr_immediate.s: New test case.
 	* gas/arm/vfpv3xd-ldr_immediate.d: Expected disassembly.
 
+	PR gas/18499
+	* gas/arm/thumb2_ldr_immediate_armv6.s: New test case.
+	* gas/arm/thumb2_ldr_immediate_armv6.d: Expected disassembly.
+	* gas/arm/thumb2_ldr_immediate_armv6t2.s: New test case.
+	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Expected disassembly.
+
 2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* sysreg.d: Add id_mmfr4_el1, update expected output.
