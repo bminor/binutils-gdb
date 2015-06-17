@@ -7752,14 +7752,15 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
   return FAIL;
 }
 
+#if defined BFD_HOST_64_BIT
 /* Returns TRUE if double precision value V may be cast
    to single precision without loss of accuracy.  */
 
 static bfd_boolean
-is_double_a_single (long int v)
+is_double_a_single (bfd_int64_t v)
 {
-  int exp = (int) (v >> 52) & 0x7FF;
-  long int mantissa = (v & 0xFFFFFFFFFFFFFl);
+  int exp = (int)((v >> 52) & 0x7FF);
+  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFF);
 
   return (exp == 0 || exp == 0x7FF
 	  || (exp >= 1023 - 126 && exp <= 1023 + 127))
@@ -7770,11 +7771,11 @@ is_double_a_single (long int v)
    (ignoring the least significant bits in exponent and mantissa).  */
 
 static int
-double_to_single (long int v)
+double_to_single (bfd_int64_t v)
 {
   int sign = (int) ((v >> 63) & 1l);
-  int exp = (int) (v >> 52) & 0x7FF;
-  long int mantissa = (v & 0xFFFFFFFFFFFFFl);
+  int exp = (int) ((v >> 52) & 0x7FF);
+  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFF);
 
   if (exp == 0x7FF)
     exp = 0xFF;
@@ -7797,6 +7798,7 @@ double_to_single (long int v)
   mantissa >>= 29;
   return (sign << 31) | (exp << 23) | mantissa;
 }
+#endif /* BFD_HOST_64_BIT */
 
 enum lit_type
 {
@@ -7845,8 +7847,11 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
   if (inst.reloc.exp.X_op == O_constant
       || inst.reloc.exp.X_op == O_big)
     {
+#if defined BFD_HOST_64_BIT
+      bfd_int64_t v;
+#else
       offsetT v;
-
+#endif
       if (inst.reloc.exp.X_op == O_big)
 	{
 	  LITTLENUM_TYPE w[X_PRECISION];
@@ -7861,8 +7866,19 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	  else
 	    l = generic_bignum;
 	  
+#if defined BFD_HOST_64_BIT
+	  v =
+	    ((((((((bfd_int64_t) l[3] & LITTLENUM_MASK)
+		  << LITTLENUM_NUMBER_OF_BITS)
+		 | ((bfd_int64_t) l[2] & LITTLENUM_MASK))
+		<< LITTLENUM_NUMBER_OF_BITS)
+	       | ((bfd_int64_t) l[1] & LITTLENUM_MASK))
+	      << LITTLENUM_NUMBER_OF_BITS)
+	     | ((bfd_int64_t) l[0] & LITTLENUM_MASK));
+#else
 	  v = ((l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
 	    |  (l[0] & LITTLENUM_MASK);
+#endif
 	}
       else
 	v = inst.reloc.exp.X_add_number;
@@ -8005,6 +8021,13 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	      do_vfp_nsyn_opcode ("fconsts");
 	      return TRUE;
 	    }
+
+	  /* If our host does not support a 64-bit type then we cannot perform
+	     the following optimization.  This mean that there will be a
+	     discrepancy between the output produced by an assembler built for
+	     a 32-bit-only host and the output produced from a 64-bit host, but
+	     this cannot be helped.  */
+#if defined BFD_HOST_64_BIT
 	  else if (!inst.operands[1].issingle
 		   && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
 	    {
@@ -8017,6 +8040,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		  return TRUE;
 		}
 	    }
+#endif
 	}
     }
 
@@ -23137,7 +23161,7 @@ md_apply_fix (fixS *	fixP,
 	    if (subtract || value & ~0x3fc)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("invalid immediate for address calculation (value = 0x%08lX)"),
-			    (unsigned long) value);
+			    (unsigned long) (subtract ? - value : value));
 	    newval = (rs == REG_PC ? T_OPCODE_ADD_PC : T_OPCODE_ADD_SP);
 	    newval |= rd << 8;
 	    newval |= value >> 2;

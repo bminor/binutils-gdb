@@ -1,3 +1,14 @@
+2015-06-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (is_double_a_single): Make conditional upon the
+	availablity of a 64-bit type.  Use this type for the argument and
+	mantissa.
+	(double_to_single): Likewise.
+	* config/tc-arm.c (move_or_literal_pool): Use a 64-bit type for
+	the constant value, if available.  Generate a 64-bit value from a
+	bignum if supported.  Only perform the second optimization for
+	PR 18500 if the 64-bit type is available.
+
 2015-06-17  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
 
 	PR gas/18500
