@@ -1,3 +1,8 @@
+2015-06-18  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Test the interaction between
+	setting GDBHISTSIZE and setting the history size via .gdbinit.
+
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
 	PR gdb/16999

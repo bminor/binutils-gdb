@@ -19,9 +19,10 @@
 
 
 # Check that the history size is properly set to SIZE when reading the .gdbinit
-# file located in HOME.
+# file located in HOME with the environment variable GDBHISTSIZE optionally
+# set to GDBHISTSIZE_VAL.
 
-proc test_gdbinit_history_setting { home size } {
+proc test_gdbinit_history_setting { home size { gdbhistsize_val "-" } } {
     global env
     global INTERNAL_GDBFLAGS
     global srcdir
@@ -36,10 +37,19 @@ proc test_gdbinit_history_setting { home size } {
     # set.
     unset -nocomplain env(GDBHISTSIZE)
 
+    if { $gdbhistsize_val != "-" } {
+	set env(GDBHISTSIZE) $gdbhistsize_val
+    }
+
     set saved_internal_gdbflags $INTERNAL_GDBFLAGS
     set INTERNAL_GDBFLAGS [string map {"-nx" ""} $INTERNAL_GDBFLAGS]
 
-    with_test_prefix "home=$home" {
+    set prefix "home=$home"
+    if { $gdbhistsize_val != "-" } {
+	append prefix " gdbhistsize=$gdbhistsize_val"
+    }
+
+    with_test_prefix $prefix {
 	gdb_exit
 	gdb_start
 
@@ -54,6 +64,7 @@ proc test_gdbinit_history_setting { home size } {
 
     set INTERNAL_GDBFLAGS $saved_internal_gdbflags
 
+    unset -nocomplain env(GDBHISTSIZE)
     array set env [array get old_env]
 }
 
@@ -117,3 +128,9 @@ test_gdbinit_history_setting "gdbinit-history/unlimited" "unlimited"
 test_gdbinit_history_setting "gdbinit-history/zero" "0"
 
 test_no_truncation_of_unlimited_history_file
+
+# A valid GDBHISTSIZE value overrides the setting inside the .gdbinit file; an
+# invalid GDBHISTSIZE value is ignored, falling back on the setting inside the
+# .gdbinit file.
+test_gdbinit_history_setting "gdbinit-history/unlimited" "1000" "1000"
+test_gdbinit_history_setting "gdbinit-history/unlimited" "unlimited" "foo"
