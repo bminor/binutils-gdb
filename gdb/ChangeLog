@@ -1,3 +1,8 @@
+2015-06-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* syscalls/s390-linux.xml: Add syscalls 344 through 354.
+	* syscalls/s390x-linux.xml: Likewise.
+
 2015-06-16  Michael Eager  <eager@eagercon.com>
 
 	* nat/linux-namespaces.c (MSG_CMSG_CLOEXEC): Define if not defined.
