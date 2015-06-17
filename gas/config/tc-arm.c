@@ -4924,7 +4924,9 @@ parse_fpa_immediate (char ** str)
     {
       /* FIXME: 5 = X_PRECISION, should be #define'd where we can use it.
 	 Ditto for 15.	*/
-      if (gen_to_words (words, 5, (long) 15) == 0)
+#define X_PRECISION 5
+#define E_PRECISION 15L
+      if (gen_to_words (words, X_PRECISION, E_PRECISION) == 0)
 	{
 	  for (i = 0; i < NUM_FLOAT_VALS; i++)
 	    {
@@ -7750,12 +7752,60 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
   return FAIL;
 }
 
+/* Returns TRUE if double precision value V may be cast
+   to single precision without loss of accuracy.  */
+
+static bfd_boolean
+is_double_a_single (long int v)
+{
+  int exp = (int) (v >> 52) & 0x7FF;
+  long int mantissa = (v & 0xFFFFFFFFFFFFFl);
+
+  return (exp == 0 || exp == 0x7FF
+	  || (exp >= 1023 - 126 && exp <= 1023 + 127))
+    && (mantissa & 0x1FFFFFFFl) == 0;
+}
+
+/* Returns a double precision value casted to single precision 
+   (ignoring the least significant bits in exponent and mantissa).  */
+
+static int
+double_to_single (long int v)
+{
+  int sign = (int) ((v >> 63) & 1l);
+  int exp = (int) (v >> 52) & 0x7FF;
+  long int mantissa = (v & 0xFFFFFFFFFFFFFl);
+
+  if (exp == 0x7FF)
+    exp = 0xFF;
+  else
+    {
+      exp = exp - 1023 + 127;
+      if (exp >= 0xFF)
+	{
+	  /* Infinity.  */
+	  exp = 0x7F;
+	  mantissa = 0;
+	}
+      else if (exp < 0)
+	{
+	  /* No denormalized numbers.  */
+	  exp = 0;
+	  mantissa = 0;
+	}
+    }
+  mantissa >>= 29;
+  return (sign << 31) | (exp << 23) | mantissa;
+}
+
 enum lit_type
 {
   CONST_THUMB,
   CONST_ARM,
   CONST_VEC
 };
+
+static void do_vfp_nsyn_opcode (const char *);
 
 /* inst.reloc.exp describes an "=expr" load pseudo-operation.
    Determine whether it can be performed with a move instruction; if
@@ -7772,7 +7822,6 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
   unsigned long tbit;
   bfd_boolean thumb_p = (t == CONST_THUMB);
   bfd_boolean arm_p   = (t == CONST_ARM);
-  bfd_boolean vec64_p = (t == CONST_VEC) && !inst.operands[i].issingle;
 
   if (thumb_p)
     tbit = (inst.instruction > 0xffff) ? THUMB2_LOAD_BIT : THUMB_LOAD_BIT;
@@ -7784,6 +7833,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
       inst.error = _("invalid pseudo operation");
       return TRUE;
     }
+
   if (inst.reloc.exp.X_op != O_constant
       && inst.reloc.exp.X_op != O_symbol
       && inst.reloc.exp.X_op != O_big)
@@ -7791,76 +7841,129 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
       inst.error = _("constant expression expected");
       return TRUE;
     }
-  if ((inst.reloc.exp.X_op == O_constant
-       || inst.reloc.exp.X_op == O_big)
-      && !inst.operands[i].issingle)
+
+  if (inst.reloc.exp.X_op == O_constant
+      || inst.reloc.exp.X_op == O_big)
     {
-      if (thumb_p && inst.reloc.exp.X_op == O_constant)
+      offsetT v;
+
+      if (inst.reloc.exp.X_op == O_big)
 	{
-	  if (!unified_syntax && (inst.reloc.exp.X_add_number & ~0xFF) == 0)
+	  LITTLENUM_TYPE w[X_PRECISION];
+	  LITTLENUM_TYPE * l;
+
+	  if (inst.reloc.exp.X_add_number == -1)
 	    {
-	      /* This can be done with a mov(1) instruction.  */
-	      inst.instruction	= T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
-	      inst.instruction |= inst.reloc.exp.X_add_number;
-	      return TRUE;
+	      gen_to_words (w, X_PRECISION, E_PRECISION);
+	      l = w;
+	      /* FIXME: Should we check words w[2..5] ?  */
+	    }
+	  else
+	    l = generic_bignum;
+	  
+	  v = ((l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
+	    |  (l[0] & LITTLENUM_MASK);
+	}
+      else
+	v = inst.reloc.exp.X_add_number;
+
+      if (!inst.operands[i].issingle)
+	{
+	  if (thumb_p && inst.reloc.exp.X_op == O_constant)
+	    {
+	      if (!unified_syntax && (v & ~0xFF) == 0)
+		{
+		  /* This can be done with a mov(1) instruction.  */
+		  inst.instruction = T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
+		  inst.instruction |= v;
+		  return TRUE;
+		}
+	    }
+	  else if (arm_p && inst.reloc.exp.X_op == O_constant)
+	    {
+	      int value = encode_arm_immediate (v);
+	      if (value != FAIL)
+		{
+		  /* This can be done with a mov instruction.  */
+		  inst.instruction &= LITERAL_MASK;
+		  inst.instruction |= INST_IMMEDIATE | (OPCODE_MOV << DATA_OP_SHIFT);
+		  inst.instruction |= value & 0xfff;
+		  return TRUE;
+		}
+
+	      value = encode_arm_immediate (~ v);
+	      if (value != FAIL)
+		{
+		  /* This can be done with a mvn instruction.  */
+		  inst.instruction &= LITERAL_MASK;
+		  inst.instruction |= INST_IMMEDIATE | (OPCODE_MVN << DATA_OP_SHIFT);
+		  inst.instruction |= value & 0xfff;
+		  return TRUE;
+		}
+	    }
+	  else if (t == CONST_VEC)
+	    {
+	      int op = 0;
+	      unsigned immbits = 0;
+	      unsigned immlo = inst.operands[1].imm;
+	      unsigned immhi = inst.operands[1].regisimm
+		? inst.operands[1].reg
+		: inst.reloc.exp.X_unsigned
+		? 0
+		: ((bfd_int64_t)((int) immlo)) >> 32;
+	      int cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
+						   &op, 64, NT_invtype);
+
+	      if (cmode == FAIL)
+		{
+		  neon_invert_size (&immlo, &immhi, 64);
+		  op = !op;
+		  cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
+						   &op, 64, NT_invtype);
+		}
+
+	      if (cmode != FAIL)
+		{
+		  inst.instruction = (inst.instruction & VLDR_VMOV_SAME)
+		    | (1 << 23)
+		    | (cmode << 8)
+		    | (op << 5)
+		    | (1 << 4);
+
+		  /* Fill other bits in vmov encoding for both thumb and arm.  */
+		  if (thumb_mode)
+		    inst.instruction |= (0x7 << 29) | (0xF << 24);
+		  else
+		    inst.instruction |= (0xF << 28) | (0x1 << 25);
+		  neon_write_immbits (immbits);
+		  return TRUE;
+		}
 	    }
 	}
-      else if (arm_p && inst.reloc.exp.X_op == O_constant)
-	{
-	  int value = encode_arm_immediate (inst.reloc.exp.X_add_number);
-	  if (value != FAIL)
-	    {
-	      /* This can be done with a mov instruction.  */
-	      inst.instruction &= LITERAL_MASK;
-	      inst.instruction |= INST_IMMEDIATE | (OPCODE_MOV << DATA_OP_SHIFT);
-	      inst.instruction |= value & 0xfff;
-	      return TRUE;
-	    }
 
-	  value = encode_arm_immediate (~inst.reloc.exp.X_add_number);
-	  if (value != FAIL)
-	    {
-	      /* This can be done with a mvn instruction.  */
-	      inst.instruction &= LITERAL_MASK;
-	      inst.instruction |= INST_IMMEDIATE | (OPCODE_MVN << DATA_OP_SHIFT);
-	      inst.instruction |= value & 0xfff;
-	      return TRUE;
-	    }
-	}
-      else if (vec64_p)
+      if (t == CONST_VEC)
 	{
-	  int op = 0;
-	  unsigned immbits = 0;
-	  unsigned immlo = inst.operands[1].imm;
-	  unsigned immhi = inst.operands[1].regisimm
-			   ? inst.operands[1].reg
-			   : inst.reloc.exp.X_unsigned
-			     ? 0
-			     : ((bfd_int64_t)((int) immlo)) >> 32;
-	  int cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
-					       &op, 64, NT_invtype);
-
-	  if (cmode == FAIL)
+	  /* Check if vldr Rx, =constant could be optimized to vmov Rx, #constant.  */
+	  if (inst.operands[i].issingle
+	      && is_quarter_float (inst.operands[1].imm)
+	      && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3xd))
 	    {
-	      neon_invert_size (&immlo, &immhi, 64);
-	      op = !op;
-	      cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
-					       &op, 64, NT_invtype);
-	    }
-	  if (cmode != FAIL)
-	    {
-	      inst.instruction = (inst.instruction & VLDR_VMOV_SAME)
-				  | (1 << 23)
-				  | (cmode << 8)
-				  | (op << 5)
-				  | (1 << 4);
-	      /* Fill other bits in vmov encoding for both thumb and arm.  */
-	      if (thumb_mode)
-		inst.instruction |= (0x7 << 29) | (0xF << 24);
-	      else
-		inst.instruction |= (0xF << 28) | (0x1 << 25);
-	      neon_write_immbits (immbits);
+	      inst.operands[1].imm =
+		neon_qfloat_bits (v);
+	      do_vfp_nsyn_opcode ("fconsts");
 	      return TRUE;
+	    }
+	  else if (!inst.operands[1].issingle
+		   && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
+	    {
+	      if (is_double_a_single (v)
+		  && is_quarter_float (double_to_single (v)))
+		{
+		  inst.operands[1].imm =
+		    neon_qfloat_bits (double_to_single (v));
+		  do_vfp_nsyn_opcode ("fconstd");
+		  return TRUE;
+		}
 	    }
 	}
     }
@@ -8798,8 +8901,6 @@ do_mov16 (void)
       inst.instruction |= (imm & 0x0000f000) << 4;
     }
 }
-
-static void do_vfp_nsyn_opcode (const char *);
 
 static int
 do_vfp_nsyn_mrs (void)

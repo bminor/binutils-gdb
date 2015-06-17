@@ -1,3 +1,13 @@
+2015-06-17  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
+
+	PR gas/18500
+	* gas/arm/vfpv2-ldr_immediate.s: New test case.
+	* gas/arm/vfpv2-ldr_immediate.d: Expected disassembly.
+	* gas/arm/vfpv3-ldr_immediate.s: New test case.
+	* gas/arm/vfpv3-ldr_immediate.d: Expected disassembly.
+	* gas/arm/vfpv3xd-ldr_immediate.s: New test case.
+	* gas/arm/vfpv3xd-ldr_immediate.d: Expected disassembly.
+
 2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* sysreg.d: Add id_mmfr4_el1, update expected output.
