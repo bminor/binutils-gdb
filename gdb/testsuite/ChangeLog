@@ -1,3 +1,19 @@
+2015-06-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.c: Include stdarg.h and stdio.h.
+	(VECTOR): New macro.  Use it...
+	(int4, uint4, char4, float4, int2, longlong2, float2, double2):
+	...for these typedefs.
+	(int8, char1, int1, double1): New typedefs.
+	(struct just_int2, struct two_int2): New structures.
+	(add_some_intvecs, add_many_charvecs, add_various_floatvecs)
+	(add_structvecs, add_singlevecs): New functions.
+	(main): Call add_some_intvecs twice.
+	* gdb.base/gnu_vector.exp: Drop GCC version check; just attempt
+	the compile and exit upon failure.  Try compiling for the "native"
+	architecture.  Test inferior function calls with vector arguments
+	and vector return value handling with "finish" and "return".
+
 2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* gdb.base/sepdebug.exp: Add EXEEXT where needed.
