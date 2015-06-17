@@ -1681,7 +1681,7 @@ init_history (void)
 {
   char *tmpenv;
 
-  tmpenv = getenv ("HISTSIZE");
+  tmpenv = getenv ("GDBHISTSIZE");
   if (tmpenv)
     {
       int var;
@@ -1857,7 +1857,7 @@ Show the size of the command history,"), _("\
 ie. the number of previous commands to keep a record of.\n\
 If set to \"unlimited\", the number of commands kept in the history\n\
 list is unlimited.  This defaults to the value of the environment\n\
-variable \"HISTSIZE\", or to 256 if this variable is not set."),
+variable \"GDBHISTSIZE\", or to 256 if this variable is not set."),
 			    set_history_size_command,
 			    show_history_size,
 			    &sethistlist, &showhistlist);

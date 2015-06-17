@@ -1,5 +1,12 @@
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* NEWS: Mention that GDBHISTSIZE is read instead of HISTSIZE.
+	* top.c (init_history): Read from GDBHISTSIZE instead of
+	HISTSIZE.
+	(init_main): Refer to GDBHISTSIZE instead of HISTSIZE.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* top.c (gdb_safe_append_history): Do not call
 	history_truncate_file if the history is not stifled.
 

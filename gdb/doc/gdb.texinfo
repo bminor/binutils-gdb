@@ -22635,12 +22635,12 @@ Stop recording command history in a file.
 
 @cindex history size
 @kindex set history size
-@cindex @env{HISTSIZE}, environment variable
+@cindex @env{GDBHISTSIZE}, environment variable
 @item set history size @var{size}
 @itemx set history size unlimited
 Set the number of commands which @value{GDBN} keeps in its history list.
 This defaults to the value of the environment variable
-@code{HISTSIZE}, or to 256 if this variable is not set.  If @var{size}
+@code{GDBHISTSIZE}, or to 256 if this variable is not set.  If @var{size}
 is @code{unlimited}, the number of commands @value{GDBN} keeps in the
 history list is unlimited.
 @end table

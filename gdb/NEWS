@@ -62,6 +62,10 @@
 * The "tui reg" command now provides completion for all of the
   available register groups, including target specific groups.
 
+* The HISTSIZE environment variable is no longer read when determining
+  the size of GDB's command history.  GDB now instead reads the dedicated
+  GDBHISTSIZE environment variable.
+
 * Guile Scripting
 
   ** Memory ports can now be unbuffered.
