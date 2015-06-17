@@ -1,3 +1,8 @@
+2015-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (get_build_id): Move braces and "else" to the same
+	line.
+
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.base/gdbinit-history.exp: Add test case to check that

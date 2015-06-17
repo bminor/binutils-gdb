@@ -4549,9 +4549,7 @@ proc get_build_id { filename } {
 	    return ""
 	}
 	return $data
-    }
-    else
-    {
+    } else {
 	set tmp [standard_output_file "${filename}-tmp"]
 	set objcopy_program [gdb_find_objcopy]
 	set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $filename $tmp" output]
