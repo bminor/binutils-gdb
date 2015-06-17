@@ -1,5 +1,17 @@
 2015-06-17  Luis Machado  <lgustavo@codesourcery.com>
 
+	* breakpoint.c (add_location_to_breakpoint): Don't mark permanent
+	locations as inserted.
+	Update and expand comment about permanent locations.
+	(bp_loc_is_permanent): Don't return 0 for bp_call_dummy.
+	Move comment to add_location_to_breakpoint.
+	(update_global_location_list): Don't error out if a permanent
+	breakpoint is not marked inserted.
+	Don't error out if a non-permanent breakpoint location is inserted on
+	top of a permanent breakpoint.
+
+2015-06-17  Luis Machado  <lgustavo@codesourcery.com>
+
 	* breakpoint.c (make_breakpoint_permanent): Remove unused
 	function.
 	* breakpoint.h (make_breakpoint_permanent): Remove declaration.
