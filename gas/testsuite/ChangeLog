@@ -1,3 +1,13 @@
+2015-06-17  Renlin Li  <renlin.li@arm.com>
+
+	Applied from master.
+	2015-05-05  Renlin Li  <renlin.li@arm.com>
+
+	* gas/aarch64/mapping_5.d: New.
+	* gas/aarch64/mapping_5.s: New.
+	* gas/aarch64/mapping_6.d: New.
+	* gas/aarch64/mapping_6.s: New.
+
 2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
 
 	Applied from master.
