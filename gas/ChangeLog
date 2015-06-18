@@ -1,3 +1,9 @@
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18481
+	* config/tc-arm.c (tc_gen_reloc): Include BFD_RELOC_ARM_TLS_LE32
+	in the same case as BFD_RELOC_ARM_TLS_IS32.
+
 2015-06-17  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (is_double_a_single): Make conditional upon the

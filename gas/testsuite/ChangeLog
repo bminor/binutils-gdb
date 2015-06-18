@@ -1,3 +1,10 @@
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18481
+	* gas/arm/tls.s: Add tests of the tpoff pseudo with a local
+	symbol.
+	* gas/arm/tls.d: Update expected output.
+
 2015-06-17  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
 
 	PR gas/18500
