@@ -1,3 +1,24 @@
+2015-06-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/rsp-low.c (needs_escaping): New.
+	(remote_escape_output): Add unit_size parameter. Refactor to
+	support multi-byte addressable units.  Rename parameters.
+	* common/rsp-low.h (remote_escape_output): Add unit_size
+	parameter and rename others. Update doc.
+	* remote.c (align_for_efficient_write): New.
+	(remote_write_bytes_aux): Add unit_size parameter and use it.
+	Rename some variables.  Update doc.
+	(remote_xfer_partial): Get unit size and use it.
+	(remote_read_bytes_1): Add unit_size parameter and use it.
+	Rename some variables. Update doc.
+	(remote_write_bytes): Same.
+	(remote_xfer_live_readonly_partial): Same.
+	(remote_read_bytes): Same.
+	(remote_flash_write): Update call to remote_write_bytes_aux.
+	(remote_write_qxfer): Update call to remote_escape_output.
+	(remote_search_memory): Same.
+	(remote_hostio_pwrite): Same.
+
 2015-06-17  Luis Machado  <lgustavo@codesourcery.com>
 
 	* breakpoint.c (add_location_to_breakpoint): Don't mark permanent

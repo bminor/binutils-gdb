@@ -6921,51 +6921,74 @@ check_binary_download (CORE_ADDR addr)
     }
 }
 
+/* Helper function to resize the payload in order to try to get a good
+   alignment.  We try to write an amount of data such that the next write will
+   start on an address aligned on REMOTE_ALIGN_WRITES.  */
+
+static int
+align_for_efficient_write (int todo, CORE_ADDR memaddr)
+{
+  return ((memaddr + todo) & ~(REMOTE_ALIGN_WRITES - 1)) - memaddr;
+}
+
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
    HEADER is the starting part of the packet.
    MEMADDR is the address in the remote memory space.
    MYADDR is the address of the buffer in our space.
-   LEN is the number of bytes.
+   LEN_UNITS is the number of addressable units to write.
+   UNIT_SIZE is the length in bytes of an addressable unit.
    PACKET_FORMAT should be either 'X' or 'M', and indicates if we
    should send data as binary ('X'), or hex-encoded ('M').
 
    The function creates packet of the form
        <HEADER><ADDRESS>,<LENGTH>:<DATA>
 
-   where encoding of <DATA> is termined by PACKET_FORMAT.
+   where encoding of <DATA> is terminated by PACKET_FORMAT.
 
    If USE_LENGTH is 0, then the <LENGTH> field and the preceding comma
    are omitted.
 
    Return the transferred status, error or OK (an
-   'enum target_xfer_status' value).  Save the number of bytes
-   transferred in *XFERED_LEN.  Only transfer a single packet.  */
+   'enum target_xfer_status' value).  Save the number of addressable units
+   transferred in *XFERED_LEN_UNITS.  Only transfer a single packet.
+
+   On a platform with an addressable memory size of 2 bytes (UNIT_SIZE == 2), an
+   exchange between gdb and the stub could look like (?? in place of the
+   checksum):
+
+   -> $m1000,4#??
+   <- aaaabbbbccccdddd
+
+   -> $M1000,3:eeeeffffeeee#??
+   <- OK
+
+   -> $m1000,4#??
+   <- eeeeffffeeeedddd  */
 
 static enum target_xfer_status
 remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
-			const gdb_byte *myaddr, ULONGEST len,
-			ULONGEST *xfered_len, char packet_format,
-			int use_length)
+			const gdb_byte *myaddr, ULONGEST len_units,
+			int unit_size, ULONGEST *xfered_len_units,
+			char packet_format, int use_length)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
   char *plen = NULL;
   int plenlen = 0;
-  int todo;
-  int nr_bytes;
-  int payload_size;
-  int payload_length;
-  int header_length;
+  int todo_units;
+  int units_written;
+  int payload_capacity_bytes;
+  int payload_length_bytes;
 
   if (packet_format != 'X' && packet_format != 'M')
     internal_error (__FILE__, __LINE__,
 		    _("remote_write_bytes_aux: bad packet format"));
 
-  if (len == 0)
+  if (len_units == 0)
     return TARGET_XFER_EOF;
 
-  payload_size = get_memory_write_packet_size ();
+  payload_capacity_bytes = get_memory_write_packet_size ();
 
   /* The packet buffer will be large enough for the payload;
      get_memory_packet_size ensures this.  */
@@ -6974,13 +6997,12 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   /* Compute the size of the actual payload by subtracting out the
      packet header and footer overhead: "$M<memaddr>,<len>:...#nn".  */
 
-  payload_size -= strlen ("$,:#NN");
+  payload_capacity_bytes -= strlen ("$,:#NN");
   if (!use_length)
     /* The comma won't be used.  */
-    payload_size += 1;
-  header_length = strlen (header);
-  payload_size -= header_length;
-  payload_size -= hexnumlen (memaddr);
+    payload_capacity_bytes += 1;
+  payload_capacity_bytes -= strlen (header);
+  payload_capacity_bytes -= hexnumlen (memaddr);
 
   /* Construct the packet excluding the data: "<header><memaddr>,<len>:".  */
 
@@ -6991,28 +7013,28 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   if (packet_format == 'X')
     {
       /* Best guess at number of bytes that will fit.  */
-      todo = min (len, payload_size);
+      todo_units = min (len_units, payload_capacity_bytes / unit_size);
       if (use_length)
-	payload_size -= hexnumlen (todo);
-      todo = min (todo, payload_size);
+	payload_capacity_bytes -= hexnumlen (todo_units);
+      todo_units = min (todo_units, payload_capacity_bytes / unit_size);
     }
   else
     {
-      /* Num bytes that will fit.  */
-      todo = min (len, payload_size / 2);
+      /* Number of bytes that will fit.  */
+      todo_units = min (len_units, (payload_capacity_bytes / unit_size) / 2);
       if (use_length)
-	payload_size -= hexnumlen (todo);
-      todo = min (todo, payload_size / 2);
+	payload_capacity_bytes -= hexnumlen (todo_units);
+      todo_units = min (todo_units, (payload_capacity_bytes / unit_size) / 2);
     }
 
-  if (todo <= 0)
+  if (todo_units <= 0)
     internal_error (__FILE__, __LINE__,
 		    _("minimum packet size too small to write data"));
 
   /* If we already need another packet, then try to align the end
      of this packet to a useful boundary.  */
-  if (todo > 2 * REMOTE_ALIGN_WRITES && todo < len)
-    todo = ((memaddr + todo) & ~(REMOTE_ALIGN_WRITES - 1)) - memaddr;
+  if (todo_units > 2 * REMOTE_ALIGN_WRITES && todo_units < len_units)
+    todo_units = align_for_efficient_write (todo_units, memaddr);
 
   /* Append "<memaddr>".  */
   memaddr = remote_address_masked (memaddr);
@@ -7023,10 +7045,10 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
       /* Append ",".  */
       *p++ = ',';
 
-      /* Append <len>.  Retain the location/size of <len>.  It may need to
-	 be adjusted once the packet body has been created.  */
+      /* Append the length and retain its location and size.  It may need to be
+         adjusted once the packet body has been created.  */
       plen = p;
-      plenlen = hexnumstr (p, (ULONGEST) todo);
+      plenlen = hexnumstr (p, (ULONGEST) todo_units);
       p += plenlen;
     }
 
@@ -7040,32 +7062,35 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
       /* Binary mode.  Send target system values byte by byte, in
 	 increasing byte addresses.  Only escape certain critical
 	 characters.  */
-      payload_length = remote_escape_output (myaddr, todo, (gdb_byte *) p,
-					     &nr_bytes, payload_size);
+      payload_length_bytes =
+	  remote_escape_output (myaddr, todo_units, unit_size, (gdb_byte *) p,
+				&units_written, payload_capacity_bytes);
 
-      /* If not all TODO bytes fit, then we'll need another packet.  Make
+      /* If not all TODO units fit, then we'll need another packet.  Make
 	 a second try to keep the end of the packet aligned.  Don't do
 	 this if the packet is tiny.  */
-      if (nr_bytes < todo && nr_bytes > 2 * REMOTE_ALIGN_WRITES)
+      if (units_written < todo_units && units_written > 2 * REMOTE_ALIGN_WRITES)
 	{
-	  int new_nr_bytes;
+	  int new_todo_units;
 
-	  new_nr_bytes = (((memaddr + nr_bytes) & ~(REMOTE_ALIGN_WRITES - 1))
-			  - memaddr);
-	  if (new_nr_bytes != nr_bytes)
-	    payload_length = remote_escape_output (myaddr, new_nr_bytes,
-						   (gdb_byte *) p, &nr_bytes,
-						   payload_size);
+	  new_todo_units = align_for_efficient_write (units_written, memaddr);
+
+	  if (new_todo_units != units_written)
+	    payload_length_bytes =
+		remote_escape_output (myaddr, new_todo_units, unit_size,
+				      (gdb_byte *) p, &units_written,
+				      payload_capacity_bytes);
 	}
 
-      p += payload_length;
-      if (use_length && nr_bytes < todo)
+      p += payload_length_bytes;
+      if (use_length && units_written < todo_units)
 	{
 	  /* Escape chars have filled up the buffer prematurely,
-	     and we have actually sent fewer bytes than planned.
+	     and we have actually sent fewer units than planned.
 	     Fix-up the length field of the packet.  Use the same
 	     number of characters as before.  */
-	  plen += hexnumnstr (plen, (ULONGEST) nr_bytes, plenlen);
+	  plen += hexnumnstr (plen, (ULONGEST) units_written,
+			      plenlen);
 	  *plen = ':';  /* overwrite \0 from hexnumnstr() */
 	}
     }
@@ -7074,8 +7099,8 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
       /* Normal mode: Send target system values byte by byte, in
 	 increasing byte addresses.  Each byte is encoded as a two hex
 	 value.  */
-      nr_bytes = bin2hex (myaddr, p, todo);
-      p += 2 * nr_bytes;
+      p += 2 * bin2hex (myaddr, p, todo_units * unit_size);
+      units_written = todo_units;
     }
 
   putpkt_binary (rs->buf, (int) (p - rs->buf));
@@ -7084,9 +7109,9 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   if (rs->buf[0] == 'E')
     return TARGET_XFER_E_IO;
 
-  /* Return NR_BYTES, not TODO, in case escape chars caused us to send
-     fewer bytes than we'd planned.  */
-  *xfered_len = (ULONGEST) nr_bytes;
+  /* Return UNITS_WRITTEN, not TODO_UNITS, in case escape chars caused us to
+     send fewer units than we'd planned.  */
+  *xfered_len_units = (ULONGEST) units_written;
   return TARGET_XFER_OK;
 }
 
@@ -7102,7 +7127,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 
 static enum target_xfer_status
 remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
-		    ULONGEST *xfered_len)
+		    int unit_size, ULONGEST *xfered_len)
 {
   char *packet_format = 0;
 
@@ -7125,7 +7150,7 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
     }
 
   return remote_write_bytes_aux (packet_format,
-				 memaddr, myaddr, len, xfered_len,
+				 memaddr, myaddr, len, unit_size, xfered_len,
 				 packet_format[0], 1);
 }
 
@@ -7133,28 +7158,32 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
    This does not use the data cache; the data cache uses this.
    MEMADDR is the address in the remote memory space.
    MYADDR is the address of the buffer in our space.
-   LEN is the number of bytes.
+   LEN_UNITS is the number of addressable memory units to read..
+   UNIT_SIZE is the length in bytes of an addressable unit.
 
    Return the transferred status, error or OK (an
    'enum target_xfer_status' value).  Save the number of bytes
-   transferred in *XFERED_LEN.  */
+   transferred in *XFERED_LEN_UNITS.
+
+   See the comment of remote_write_bytes_aux for an example of
+   memory read/write exchange between gdb and the stub.  */
 
 static enum target_xfer_status
-remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
-		     ULONGEST *xfered_len)
+remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len_units,
+		     int unit_size, ULONGEST *xfered_len_units)
 {
   struct remote_state *rs = get_remote_state ();
-  int max_buf_size;		/* Max size of packet output buffer.  */
+  int buf_size_bytes;		/* Max size of packet output buffer.  */
   char *p;
-  int todo;
-  int i;
+  int todo_units;
+  int decoded_bytes;
 
-  max_buf_size = get_memory_read_packet_size ();
+  buf_size_bytes = get_memory_read_packet_size ();
   /* The packet buffer will be large enough for the payload;
      get_memory_packet_size ensures this.  */
 
-  /* Number if bytes that will fit.  */
-  todo = min (len, max_buf_size / 2);
+  /* Number of units that will fit.  */
+  todo_units = min (len_units, (buf_size_bytes / unit_size) / 2);
 
   /* Construct "m"<memaddr>","<len>".  */
   memaddr = remote_address_masked (memaddr);
@@ -7162,7 +7191,7 @@ remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
   *p++ = 'm';
   p += hexnumstr (p, (ULONGEST) memaddr);
   *p++ = ',';
-  p += hexnumstr (p, (ULONGEST) todo);
+  p += hexnumstr (p, (ULONGEST) todo_units);
   *p = '\0';
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -7173,9 +7202,9 @@ remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
   /* Reply describes memory byte by byte, each byte encoded as two hex
      characters.  */
   p = rs->buf;
-  i = hex2bin (p, myaddr, todo);
+  decoded_bytes = hex2bin (p, myaddr, todo_units * unit_size);
   /* Return what we have.  Let higher layers handle partial reads.  */
-  *xfered_len = (ULONGEST) i;
+  *xfered_len_units = (ULONGEST) (decoded_bytes / unit_size);
   return TARGET_XFER_OK;
 }
 
@@ -7188,7 +7217,7 @@ remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
 static enum target_xfer_status
 remote_xfer_live_readonly_partial (struct target_ops *ops, gdb_byte *readbuf,
 				   ULONGEST memaddr, ULONGEST len,
-				   ULONGEST *xfered_len)
+				   int unit_size, ULONGEST *xfered_len)
 {
   struct target_section *secp;
   struct target_section_table *table;
@@ -7211,7 +7240,7 @@ remote_xfer_live_readonly_partial (struct target_ops *ops, gdb_byte *readbuf,
 	      if (memend <= p->endaddr)
 		{
 		  /* Entire transfer is within this section.  */
-		  return remote_read_bytes_1 (memaddr, readbuf, len,
+		  return remote_read_bytes_1 (memaddr, readbuf, len, unit_size,
 					      xfered_len);
 		}
 	      else if (memaddr >= p->endaddr)
@@ -7223,7 +7252,7 @@ remote_xfer_live_readonly_partial (struct target_ops *ops, gdb_byte *readbuf,
 		{
 		  /* This section overlaps the transfer.  Just do half.  */
 		  len = p->endaddr - memaddr;
-		  return remote_read_bytes_1 (memaddr, readbuf, len,
+		  return remote_read_bytes_1 (memaddr, readbuf, len, unit_size,
 					      xfered_len);
 		}
 	    }
@@ -7239,7 +7268,8 @@ remote_xfer_live_readonly_partial (struct target_ops *ops, gdb_byte *readbuf,
 
 static enum target_xfer_status
 remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
-		   gdb_byte *myaddr, ULONGEST len, ULONGEST *xfered_len)
+		   gdb_byte *myaddr, ULONGEST len, int unit_size,
+		   ULONGEST *xfered_len)
 {
   if (len == 0)
     return TARGET_XFER_EOF;
@@ -7277,7 +7307,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 
 	      /* This goes through the topmost target again.  */
 	      res = remote_xfer_live_readonly_partial (ops, myaddr, memaddr,
-						       len, xfered_len);
+						       len, unit_size, xfered_len);
 	      if (res == TARGET_XFER_OK)
 		return TARGET_XFER_OK;
 	      else
@@ -7299,7 +7329,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 	}
     }
 
-  return remote_read_bytes_1 (memaddr, myaddr, len, xfered_len);
+  return remote_read_bytes_1 (memaddr, myaddr, len, unit_size, xfered_len);
 }
 
 
@@ -7385,7 +7415,7 @@ remote_flash_write (struct target_ops *ops, ULONGEST address,
 					  &saved_remote_timeout);
 
   remote_timeout = remote_flash_timeout;
-  ret = remote_write_bytes_aux ("vFlashWrite:", address, data, length,
+  ret = remote_write_bytes_aux ("vFlashWrite:", address, data, length, 1,
 				xfered_len,'X', 0);
   do_cleanups (back_to);
 
@@ -9125,7 +9155,7 @@ remote_write_qxfer (struct target_ops *ops, const char *object_name,
 
   /* Escape as much data as fits into rs->buf.  */
   buf_len = remote_escape_output 
-    (writebuf, len, (gdb_byte *) rs->buf + i, &max_size, max_size);
+    (writebuf, len, 1, (gdb_byte *) rs->buf + i, &max_size, max_size);
 
   if (putpkt_binary (rs->buf, i + buf_len) < 0
       || getpkt_sane (&rs->buf, &rs->buf_size, 0) < 0
@@ -9236,6 +9266,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   int i;
   char *p2;
   char query_type;
+  int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
 
   set_remote_traceframe ();
   set_general_thread (inferior_ptid);
@@ -9252,9 +9283,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 	return TARGET_XFER_EOF;
 
       if (writebuf != NULL)
-	return remote_write_bytes (offset, writebuf, len, xfered_len);
+	return remote_write_bytes (offset, writebuf, len, unit_size,
+				   xfered_len);
       else
-	return remote_read_bytes (ops, offset, readbuf, len, xfered_len);
+	return remote_read_bytes (ops, offset, readbuf, len, unit_size,
+				  xfered_len);
     }
 
   /* Handle SPU memory using qxfer packets.  */
@@ -9492,7 +9525,7 @@ remote_search_memory (struct target_ops* ops,
 
   /* Escape as much data as fits into rs->buf.  */
   escaped_pattern_len =
-    remote_escape_output (pattern, pattern_len, (gdb_byte *) rs->buf + i,
+    remote_escape_output (pattern, pattern_len, 1, (gdb_byte *) rs->buf + i,
 			  &used_pattern_len, max_size);
 
   /* Bail if the pattern is too large.  */
@@ -10307,7 +10340,7 @@ remote_hostio_pwrite (struct target_ops *self,
   remote_buffer_add_int (&p, &left, offset);
   remote_buffer_add_string (&p, &left, ",");
 
-  p += remote_escape_output (write_buf, len, (gdb_byte *) p, &out_len,
+  p += remote_escape_output (write_buf, len, 1, (gdb_byte *) p, &out_len,
 			     get_remote_packet_size () - (p - rs->buf));
 
   return remote_hostio_send_command (p - rs->buf, PACKET_vFile_pwrite,
