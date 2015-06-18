@@ -21031,27 +21031,29 @@ arm_init_frag (fragS * fragP, int max_chars ATTRIBUTE_UNUSED)
 void
 arm_init_frag (fragS * fragP, int max_chars)
 {
+  int frag_thumb_mode;
   /* If the current ARM vs THUMB mode has not already
      been recorded into this frag then do so now.  */
   if ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) == 0)
-    {
-      fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
+    fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
 
-      /* Record a mapping symbol for alignment frags.  We will delete this
-	 later if the alignment ends up empty.  */
-      switch (fragP->fr_type)
-	{
-	  case rs_align:
-	  case rs_align_test:
-	  case rs_fill:
-	    mapping_state_2 (MAP_DATA, max_chars);
-	    break;
-	  case rs_align_code:
-	    mapping_state_2 (thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
-	    break;
-	  default:
-	    break;
-	}
+  frag_thumb_mode = fragP->tc_frag_data.thumb_mode ^ MODE_RECORDED;
+
+
+  /* Record a mapping symbol for alignment frags.  We will delete this
+     later if the alignment ends up empty.  */
+  switch (fragP->fr_type)
+    {
+    case rs_align:
+    case rs_align_test:
+    case rs_fill:
+      mapping_state_2 (MAP_DATA, max_chars);
+      break;
+    case rs_align_code:
+      mapping_state_2 (frag_thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
+      break;
+    default:
+      break;
     }
 }
 

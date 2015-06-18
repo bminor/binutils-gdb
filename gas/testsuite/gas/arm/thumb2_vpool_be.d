@@ -125,8 +125,7 @@ Disassembly of section .text:
 000001c8 <thumb2_ldr\+0x1c8> 0ff00fff 	.word	0x0ff00fff
 000001cc <thumb2_ldr\+0x1cc> f0000000 	.word	0xf0000000
 000001d0 <thumb2_ldr\+0x1d0> ed9f 1b01 	vldr	d1, \[pc, #4\]	; 000001d8 <thumb2_ldr\+0x1d8>
-000001d4 <thumb2_ldr\+0x1d4> 0000      	movs	r0, r0
-000001d6 <thumb2_ldr\+0x1d6> 0000      	movs	r0, r0
+000001d4 <thumb2_ldr\+0x1d4> 00000000 	.word	0x00000000
 000001d8 <thumb2_ldr\+0x1d8> 0000fff0 	.word	0x0000fff0
 000001dc <thumb2_ldr\+0x1dc> 00000000 	.word	0x00000000
 000001e0 <thumb2_ldr\+0x1e0> f101 0000 	add.w	r0, r1, #0
@@ -150,8 +149,7 @@ Disassembly of section .text:
 00000228 <thumb2_ldr\+0x228> eddf 7a03 	vldr	s15, \[pc, #12\]	; 00000238 <thumb2_ldr\+0x238>
 0000022c <thumb2_ldr\+0x22c> eddf 0b14 	vldr	d16, \[pc, #80\]	; 00000280 <thumb2_ldr\+0x280>
 00000230 <thumb2_ldr\+0x230> eddf 1b15 	vldr	d17, \[pc, #84\]	; 00000288 <thumb2_ldr\+0x288>
-00000234 <thumb2_ldr\+0x234> 0000      	movs	r0, r0
-00000236 <thumb2_ldr\+0x236> 0000      	movs	r0, r0
+00000234 <thumb2_ldr\+0x234> 00000000 	.word	0x00000000
 00000238 <thumb2_ldr\+0x238> 0000fff0 	.word	0x0000fff0
 0000023c <thumb2_ldr\+0x23c> 00000000 	.word	0x00000000
 00000240 <thumb2_ldr\+0x240> ff000000 	.word	0xff000000

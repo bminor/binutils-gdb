@@ -1,3 +1,11 @@
+2015-06-17  Renlin Li  <renlin.li@arm.com>
+
+	Applied from master.
+	2015-04-29  Renlin Li  <renlin.li@arm.com>
+
+	* ld-arm/ifunc-10.dd: Adjust the desired output.
+	* ld-arm/ifunc-2.dd: Likewise.
+
 2015-05-05  Jiong Wang  <jiong.wang@arm.com>
 
 	Apply from master:

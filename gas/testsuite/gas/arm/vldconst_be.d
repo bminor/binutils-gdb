@@ -236,7 +236,7 @@ Disassembly of section .text:
 00000388 <foo\+0x388> 0000fff0 	.word	0x0000fff0
 0000038c <foo\+0x38c> 00000000 	.word	0x00000000
 00000390 <foo\+0x390> ed9f1b00 	vldr	d1, \[pc\]	; 00000398 <foo\+0x398>
-00000394 <foo\+0x394> 00000000 	andeq	r0, r0, r0
+00000394 <foo\+0x394> 00000000 	.word	0x00000000
 00000398 <foo\+0x398> 0000fff0 	.word	0x0000fff0
 0000039c <foo\+0x39c> 00000000 	.word	0x00000000
 000003a0 <foo\+0x3a0> e2810000 	add	r0, r1, #0
@@ -260,7 +260,7 @@ Disassembly of section .text:
 000003e8 <foo\+0x3e8> eddf7a02 	vldr	s15, \[pc, #8\]	; 000003f8 <foo\+0x3f8>
 000003ec <foo\+0x3ec> eddf0b13 	vldr	d16, \[pc, #76\]	; 00000440 <foo\+0x440>
 000003f0 <foo\+0x3f0> eddf1b14 	vldr	d17, \[pc, #80\]	; 00000448 <foo\+0x448>
-000003f4 <foo\+0x3f4> 00000000 	andeq	r0, r0, r0
+000003f4 <foo\+0x3f4> 00000000 	.word	0x00000000
 000003f8 <foo\+0x3f8> 0000fff0 	.word	0x0000fff0
 000003fc <foo\+0x3fc> 00000000 	.word	0x00000000
 00000400 <foo\+0x400> ff000000 	.word	0xff000000
