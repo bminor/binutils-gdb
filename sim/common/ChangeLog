@@ -1,5 +1,10 @@
 2015-06-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-syscall.c (sim_syscall_multi): Change unknown_syscall to a
+	constant string.
+
+2015-06-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c (cb_target_map_entry, cb_host_map_entry): Change map to
 	m for sentinel testing.
 

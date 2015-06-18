@@ -60,7 +60,7 @@ sim_syscall_multi (SIM_CPU *cpu, int func, long arg1, long arg2, long arg3,
   SIM_DESC sd = CPU_STATE (cpu);
   host_callback *cb = STATE_CALLBACK (sd);
   CB_SYSCALL sc;
-  char unknown_syscall[30];
+  const char unknown_syscall[] = "<UNKNOWN SYSCALL>";
   const char *syscall;
 
   CB_SYSCALL_INIT (&sc);
@@ -85,10 +85,7 @@ sim_syscall_multi (SIM_CPU *cpu, int func, long arg1, long arg2, long arg3,
 
   syscall = cb_target_str_syscall (cb, func);
   if (!syscall)
-    {
-      sprintf (unknown_syscall, "syscall_%i", func);
-      syscall = unknown_syscall;
-    }
+    syscall = unknown_syscall;
 
   if (sc.result == -1)
     TRACE_SYSCALL (cpu, "%s[%i](%#lx, %#lx, %#lx) = %li (error = %s[%i])",
