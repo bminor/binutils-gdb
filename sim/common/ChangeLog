@@ -1,3 +1,8 @@
+2015-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.c (cb_target_map_entry, cb_host_map_entry): Change map to
+	m for sentinel testing.
+
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-syscall.c: Include errno.h and targ-vals.h.

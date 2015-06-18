@@ -803,7 +803,7 @@ cb_target_map_entry (const CB_TARGET_DEFS_MAP map[], int target_val)
 {
   const CB_TARGET_DEFS_MAP *m;
 
-  for (m = &map[0]; map->target_val != -1; ++m)
+  for (m = &map[0]; m->target_val != -1; ++m)
     if (m->target_val == target_val)
       return m;
 
@@ -815,7 +815,7 @@ cb_host_map_entry (const CB_TARGET_DEFS_MAP map[], int host_val)
 {
   const CB_TARGET_DEFS_MAP *m;
 
-  for (m = &map[0]; map->host_val != -1; ++m)
+  for (m = &map[0]; m->host_val != -1; ++m)
     if (m->host_val == host_val)
       return m;
 
