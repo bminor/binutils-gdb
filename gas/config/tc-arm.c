@@ -23158,6 +23158,45 @@ md_apply_fix (fixS *	fixP,
 	  }
 	else if (rs == REG_PC || rs == REG_SP)
 	  {
+	    /* PR gas/18541.  If the addition is for a defined symbol
+	       within range of an ADR instruction then accept it.  */
+	    if (subtract
+		&& value == 4
+		&& fixP->fx_addsy != NULL)
+	      {
+		subtract = 0;
+
+		if (! S_IS_DEFINED (fixP->fx_addsy)
+		    || S_GET_SEGMENT (fixP->fx_addsy) != seg
+		    || S_IS_WEAK (fixP->fx_addsy))
+		  {
+		    as_bad_where (fixP->fx_file, fixP->fx_line,
+				  _("address calculation needs a strongly defined nearby symbol"));
+		  }
+		else
+		  {
+		    offsetT v = fixP->fx_where + fixP->fx_frag->fr_address;
+
+		    /* Round up to the next 4-byte boundary.  */
+		    if (v & 3)
+		      v = (v + 3) & ~ 3;
+		    else
+		      v += 4;
+		    v = S_GET_VALUE (fixP->fx_addsy) - v;
+
+		    if (v & ~0x3fc)
+		      {
+			as_bad_where (fixP->fx_file, fixP->fx_line,
+				      _("symbol too far away"));
+		      }
+		    else
+		      {
+			fixP->fx_done = 1;
+			value = v;
+		      }
+		  }
+	      }
+
 	    if (subtract || value & ~0x3fc)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("invalid immediate for address calculation (value = 0x%08lX)"),

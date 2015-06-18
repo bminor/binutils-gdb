@@ -1,5 +1,12 @@
 2015-06-18  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/18541
+	* gas/arm/thumb.s: Add test of ADR against a nearby symbol.
+	* gas/arm/thumb.d: Update expected output.
+	* gas/arm/thumb-eabi.d: Likewise.
+
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
 	PR gas/18481
 	* gas/arm/tls.s: Add tests of the tpoff pseudo with a local
 	symbol.

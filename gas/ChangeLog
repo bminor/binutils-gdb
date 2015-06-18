@@ -1,5 +1,11 @@
 2015-06-18  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/18541
+	* config/tc-arm.c (md_apply_fix): Add support for ADR in thumb
+	mode against a nearby symbol.
+
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
 	PR gas/18481
 	* config/tc-arm.c (tc_gen_reloc): Include BFD_RELOC_ARM_TLS_LE32
 	in the same case as BFD_RELOC_ARM_TLS_IS32.
