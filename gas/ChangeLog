@@ -1,6 +1,14 @@
 2015-06-17  Renlin Li  <renlin.li@arm.com>
 
 	Applied from master.
+	2015-04-28  Renlin Li  <renlin.li@arm.com>
+	2015-06-03  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (arm_init_frag): Always emit mapping symbols.
+
+2015-06-17  Renlin Li  <renlin.li@arm.com>
+
+	Applied from master.
 	2015-05-05  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (aarch64_init_frag): Always generate mapping
