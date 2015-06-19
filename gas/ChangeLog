@@ -1,3 +1,9 @@
+2015-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18541
+	* config/tc-arm.c (md_apply_fix): Add support for ADR in thumb
+	mode against a nearby symbol.
+
 2015-06-17  Renlin Li  <renlin.li@arm.com>
 
 	Applied from master.
@@ -12,7 +18,7 @@
 	2015-05-05  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (aarch64_init_frag): Always generate mapping
-	symbols. 
+	symbols.
 
 2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
 
