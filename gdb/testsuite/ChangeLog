@@ -1,5 +1,14 @@
 2015-08-12  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* gdb.base/gdbhistsize-history.exp
+	(test_histsize_history_setting): Use save_vars.
+	* gdb.base/gdbinit-history.exp (test_gdbinit_history_setting):
+	Use save_vars.
+	(test_no_truncation_of_unlimited_history_file): Use save_vars.
+	* gdb.base/readline.exp: Use save_vars.
+
+2015-08-12  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* lib/gdb.exp (save_vars): New proc.
 
 2015-08-11  Keith Seitz  <keiths@redhat.com>
