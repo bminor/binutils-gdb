@@ -510,7 +510,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
 
-      total_len += (TYPE_LENGTH (value_type) + 3) & ~3;
+      total_len += align_up (TYPE_LENGTH (value_type), 4);
     }
 
   /* At least twelve bytes of stack space must be allocated for the function's
@@ -526,7 +526,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
       struct type *arg_type = check_typedef (value_type);
-      int container_len = (TYPE_LENGTH (arg_type) + 3) & ~3;
+      int container_len = align_up (TYPE_LENGTH (arg_type), 4);
 
       sp -= container_len;
       write_memory (sp, value_contents (args[i]), container_len);
@@ -759,7 +759,7 @@ static const struct frame_base bfin_frame_base =
 static CORE_ADDR
 bfin_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
 {
-  return (address & ~0x3);
+  return align_down (address, 4);
 }
 
 enum bfin_abi

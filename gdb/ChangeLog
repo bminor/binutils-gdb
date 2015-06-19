@@ -1,3 +1,8 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-tdep.c (bfin_push_dummy_call): Use align_up.
+	(bfin_frame_align): Use align_down.
+
 2021-01-04  Tom de Vries  <tdevries@suse.de>
 
 	* buildsym.c (buildsym_compunit::record_line): Filter out end-of-seq
