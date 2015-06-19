@@ -1,3 +1,8 @@
+2015-06-19  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc.h (PPC_OPERAND_OPTIONAL_VALUE): New.
+	(ppc_optional_operand_value): New inline function.
+
 2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64.h (AARCH64_V8_1): New.

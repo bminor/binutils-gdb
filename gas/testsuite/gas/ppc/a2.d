@@ -347,7 +347,7 @@ Disassembly of section \.text:
  4fc:	(7c 00 04 00|00 04 00 7c) 	mcrxr   cr0
  500:	(7d 80 04 00|00 04 80 7d) 	mcrxr   cr3
  504:	(7c 60 00 26|26 00 60 7c) 	mfcr    r3
- 508:	(7c 60 00 26|26 00 60 7c) 	mfcr    r3
+ 508:	(7c 70 20 26|26 20 70 7c) 	mfocrf  r3,2
  50c:	(7c 70 10 26|26 10 70 7c) 	mfocrf  r3,1
  510:	(7c 78 00 26|26 00 78 7c) 	mfocrf  r3,128
  514:	(7d 4a 3a 87|87 3a 4a 7d) 	mfdcr\.  r10,234

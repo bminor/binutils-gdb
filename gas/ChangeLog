@@ -1,3 +1,8 @@
+2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (md_assemble): Use ppc_optional_operand_value.
+	Allow for optional operands without insert functions.
+
 2015-06-18  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/18541
