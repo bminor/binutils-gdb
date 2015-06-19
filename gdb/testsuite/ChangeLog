@@ -1,3 +1,7 @@
+2015-08-12  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* lib/gdb.exp (save_vars): New proc.
+
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.base/help.exp: Update help_breakpoint_text.

@@ -1897,6 +1897,73 @@ proc with_test_prefix { prefix body } {
   }
 }
 
+# Run BODY in the context of the caller.  After BODY is run, the variables
+# listed in VARS will be reset to the values they had before BODY was run.
+#
+# This is useful for providing a scope in which it is safe to temporarily
+# modify global variables, e.g.
+#
+#   global INTERNAL_GDBFLAGS
+#   global env
+#
+#   set foo GDBHISTSIZE
+#
+#   save_vars { INTERNAL_GDBFLAGS env($foo) env(HOME) } {
+#       append INTERNAL_GDBFLAGS " -nx"
+#       unset -nocomplain env(GDBHISTSIZE)
+#       gdb_start
+#       gdb_test ...
+#   }
+#
+# Here, although INTERNAL_GDBFLAGS, env(GDBHISTSIZE) and env(HOME) may be
+# modified inside BODY, this proc guarantees that the modifications will be
+# undone after BODY finishes executing.
+
+proc save_vars { vars body } {
+    array set saved_scalars { }
+    array set saved_arrays { }
+    set unset_vars { }
+
+    foreach var $vars {
+	# First evaluate VAR in the context of the caller in case the variable
+	# name may be a not-yet-interpolated string like env($foo)
+	set var [uplevel 1 list $var]
+
+	if [uplevel 1 [list info exists $var]] {
+	    if [uplevel 1 [list array exists $var]] {
+		set saved_arrays($var) [uplevel 1 [list array get $var]]
+	    } else {
+		set saved_scalars($var) [uplevel 1 [list set $var]]
+	    }
+	} else {
+	    lappend unset_vars $var
+	}
+    }
+
+    set code [catch {uplevel 1 $body} result]
+
+    foreach {var value} [array get saved_scalars] {
+	uplevel 1 [list set $var $value]
+    }
+
+    foreach {var value} [array get saved_arrays] {
+	uplevel 1 [list unset $var]
+	uplevel 1 [list array set $var $value]
+    }
+
+    foreach var $unset_vars {
+	uplevel 1 [list unset -nocomplain $var]
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
+
 # Run tests in BODY with GDB prompt and variable $gdb_prompt set to
 # PROMPT.  When BODY is finished, restore GDB prompt and variable
 # $gdb_prompt.
