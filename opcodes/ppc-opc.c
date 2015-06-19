@@ -382,10 +382,12 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* Power4 version for mfcr.  */
 #define FXM4 FXM + 1
-  { 0xff, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL },
+  { 0xff, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
+  /* If the FXM4 operand is ommitted, use the sentinel value -1.  */
+  { -1, -1, NULL, NULL, 0},
 
   /* The IMM20 field in an LI instruction.  */
-#define IMM20 FXM4 + 1
+#define IMM20 FXM4 + 2
   { 0xfffff, PPC_OPSHIFT_INV, insert_li20, extract_li20, PPC_OPERAND_SIGNED},
 
   /* The L field in a D or X form instruction.  */
@@ -642,10 +644,12 @@ const struct powerpc_operand powerpc_operands[] =
   /* The TBR field in an XFX form instruction.  This is like the SPR
      field, but it is optional.  */
 #define TBR SV + 1
-  { 0x3ff, 11, insert_tbr, extract_tbr, PPC_OPERAND_OPTIONAL },
+  { 0x3ff, 11, insert_tbr, extract_tbr, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
+  /* If the TBR operand is ommitted, use the value 268.  */
+  { -1, 268, NULL, NULL, 0},
 
   /* The TO field in a D or X form instruction.  */
-#define TO TBR + 1
+#define TO TBR + 2
 #define DUI TO
 #define TO_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, 0 },
@@ -766,10 +770,12 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The S field in a XL form instruction.  */
 #define SXL S + 1
-  { 0x1, 11, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1, 11, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
+  /* If the SXL operand is ommitted, use the value 1.  */
+  { -1, 1, NULL, NULL, 0},
 
   /* SH field starting at bit position 16.  */
-#define SH16 SXL + 1
+#define SH16 SXL + 2
   /* The DCM and DGM fields in a Z form instruction.  */
 #define DCM SH16
 #define DGM DCM
@@ -1284,19 +1290,13 @@ insert_fxm (unsigned long insn,
 	}
     }
 
-  /* If the optional field on mfcr is missing that means we want to use
-     the old form of the instruction that moves the whole cr.  In that
-     case we'll have VALUE zero.  There doesn't seem to be a way to
-     distinguish this from the case where someone writes mfcr %r3,0.  */
-  else if (value == 0)
-    ;
-
   /* If only one bit of the FXM field is set, we can use the new form
      of the instruction, which is faster.  Unlike the Power4 branch hint
      encoding, this is not backward compatible.  Do not generate the
      new form unless -mpower4 has been given, or -many and the two
      operand form of mfcr was used.  */
-  else if ((value & -value) == value
+  else if (value > 0
+	   && (value & -value) == value
 	   && ((dialect & PPC_OPCODE_POWER4) != 0
 	       || ((dialect & PPC_OPCODE_ANY) != 0
 		   && (insn & (0x3ff << 1)) == 19 << 1)))
@@ -1305,7 +1305,10 @@ insert_fxm (unsigned long insn,
   /* Any other value on mfcr is an error.  */
   else if ((insn & (0x3ff << 1)) == 19 << 1)
     {
-      *errmsg = _("ignoring invalid mfcr mask");
+      /* A value of -1 means we used the one operand form of
+	 mfcr which is valid.  */
+      if (value != -1)
+        *errmsg = _("ignoring invalid mfcr mask");
       value = 0;
     }
 
@@ -1332,6 +1335,8 @@ extract_fxm (unsigned long insn,
     {
       if (mask != 0)
 	*invalid = 1;
+      else
+	mask = -1;
     }
 
   return mask;
@@ -1868,12 +1873,7 @@ extract_sprg (unsigned long insn,
 }
 
 /* The TBR field in an XFX instruction.  This is just like SPR, but it
-   is optional.  When TBR is omitted, it must be inserted as 268 (the
-   magic number of the TB register).  These functions treat 0
-   (indicating an omitted optional operand) as 268.  This means that
-   ``mftb 4,0'' is not handled correctly.  This does not matter very
-   much, since the architecture manual does not define mftb as
-   accepting any values other than 268 or 269.  */
+   is optional.  */
 
 static unsigned long
 insert_tbr (unsigned long insn,
@@ -1881,8 +1881,6 @@ insert_tbr (unsigned long insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
-  if (value == 0)
-    value = 268;
   if (value != 268 && value != 269)
     *errmsg = _("invalid tbr number");
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
@@ -1898,8 +1896,6 @@ extract_tbr (unsigned long insn,
   ret = ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
   if (ret != 268 && ret != 269)
     *invalid = 1;
-  if (ret == 268)
-    ret = 0;
   return ret;
 }
 

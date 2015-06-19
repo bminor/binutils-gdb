@@ -1,6 +1,16 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+        * ppc-dis.h (skip_optional_operands): Use ppc_optional_operand_value.
+	* ppc-opc.c (FXM4): Add non-zero optional value.
+	(TBR): Likewise.
+	(SXL): Likewise.
+	(insert_fxm): Handle new default operand value.
+	(extract_fxm): Likewise.
+	(insert_tbr): Likewise.
+	(extract_tbr): Likewise.
+
 	2015-06-12  Peter Bergner  <bergner@vnet.ibm.com>
 	* ppc-opc.c: Add comment accidentally removed by old commit.
 	(MTMSRD_L): Delete.

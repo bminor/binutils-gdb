@@ -380,6 +380,11 @@ extern const unsigned int num_powerpc_operands;
 
 /* This is a CR FIELD that does not use symbolic names.  */
 #define PPC_OPERAND_CR_REG (0x200000)
+
+/* This flag is only used with PPC_OPERAND_OPTIONAL.  If this operand
+   is omitted, then the value it should use for the operand is stored
+   in the SHIFT field of the immediatly following operand field.  */
+#define PPC_OPERAND_OPTIONAL_VALUE (0x400000)
 
 /* The POWER and PowerPC assemblers use a few macros.  We keep them
    with the operands table for simplicity.  The macro table is an
@@ -408,5 +413,13 @@ extern const struct powerpc_macro powerpc_macros[];
 extern const int powerpc_num_macros;
 
 extern ppc_cpu_t ppc_parse_cpu (ppc_cpu_t, ppc_cpu_t *, const char *);
+
+static inline long
+ppc_optional_operand_value (const struct powerpc_operand *operand)
+{
+  if ((operand->flags & PPC_OPERAND_OPTIONAL_VALUE) != 0)
+    return (operand+1)->shift;
+  return 0;
+}
 
 #endif /* PPC_H */
