@@ -23308,7 +23308,6 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_SBREL32:
     case BFD_RELOC_ARM_PREL31:
     case BFD_RELOC_ARM_TARGET2:
-    case BFD_RELOC_ARM_TLS_LE32:
     case BFD_RELOC_ARM_TLS_LDO32:
     case BFD_RELOC_ARM_PCREL_CALL:
     case BFD_RELOC_ARM_PCREL_JUMP:
@@ -23346,6 +23345,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 
     case BFD_RELOC_ARM_TLS_GOTDESC:
     case BFD_RELOC_ARM_TLS_GD32:
+    case BFD_RELOC_ARM_TLS_LE32:
     case BFD_RELOC_ARM_TLS_IE32:
     case BFD_RELOC_ARM_TLS_LDM32:
       /* BFD will include the symbol's address in the addend.

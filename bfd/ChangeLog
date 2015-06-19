@@ -1,3 +1,8 @@
+2015-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 18481
+	* elf32-arm.c (R_ARM_TLS_LE32): Set the special function to NULL.
+
 2015-05-05  Jiong Wang  <jiong.wang@arm.com>
 
 	Apply from master:
