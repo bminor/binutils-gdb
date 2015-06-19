@@ -631,8 +631,6 @@ dbx_symfile_init (struct objfile *objfile)
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES.  */
 
-  DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
-
   text_sect = bfd_get_section_by_name (sym_bfd, ".text");
   if (!text_sect)
     error (_("Can't find .text section in symbol file"));
@@ -2174,8 +2172,8 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
 	       struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
-    start_psymtab_common (objfile, objfile->section_offsets,
-			  filename, textlow, global_syms, static_syms);
+    start_psymtab_common (objfile, filename, textlow,
+			  global_syms, static_syms);
 
   result->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 					       sizeof (struct symloc));
@@ -2185,14 +2183,6 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
   SYMBOL_OFFSET (result) = symbol_table_offset;
   STRING_OFFSET (result) = string_table_offset;
   FILE_STRING_OFFSET (result) = file_string_table_offset;
-
-#ifdef HAVE_ELF
-  /* If we're handling an ELF file, drag some section-relocation info
-     for this source file out of the ELF symbol table, to compensate for
-     Sun brain death.  This replaces the section_offsets in this psymtab,
-     if successful.  */
-  elfstab_offset_sections (objfile, result);
-#endif
 
   /* Deduce the source language from the filename for this psymtab.  */
   psymtab_language = deduce_language_from_filename (filename);
@@ -2321,8 +2311,6 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       struct partial_symtab *subpst =
 	allocate_psymtab (include_list[i], objfile);
 
-      /* Copy the sesction_offsets array from the main psymtab.  */
-      subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private =
 	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symloc));
       LDSYMOFF (subpst) =
@@ -2503,11 +2491,7 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
   sym_size = LDSYMLEN (pst);
   text_offset = pst->textlow;
   text_size = pst->texthigh - pst->textlow;
-  /* This cannot be simply objfile->section_offsets because of
-     elfstab_offset_sections() which initializes the psymtab section
-     offsets information in a special way, and that is different from
-     objfile->section_offsets.  */ 
-  section_offsets = pst->section_offsets;
+  section_offsets = objfile->section_offsets;
 
   dbxread_objfile = objfile;
 
@@ -3042,17 +3026,12 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	    p = strchr (name, ':');
 	    if (p != 0 && p[1] == 'S')
 	      {
-		/* The linker relocated it.  We don't want to add an
-		   elfstab_offset_sections-type offset, but we *do*
+		/* The linker relocated it.  We don't want to add a
+		   Sun-stabs Tfoo.foo-like offset, but we *do*
 		   want to add whatever solib.c passed to
 		   symbol_file_add as addr (this is known to affect
-		   SunOS 4, and I suspect ELF too).  Since
-		   elfstab_offset_sections currently does not muck
-		   with the text offset (there is no Ttext.text
-		   symbol), we can get addr from the text offset.  If
-		   elfstab_offset_sections ever starts dealing with
-		   the text offset, and we still need to do this, we
-		   need to invent a SECT_OFF_ADDR_KLUDGE or something.  */
+		   SunOS 4, and I suspect ELF too).  Since there is no
+		   Ttext.text symbol, we can get addr from the text offset.  */
 		valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 		goto define_a_symbol;
 	      }

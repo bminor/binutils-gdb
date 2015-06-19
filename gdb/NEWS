@@ -7,6 +7,8 @@
   targets has been added.  GDB now supports recording of A64 instruction set
   including advance SIMD instructions.
 
+* Support for Sun's version of the "stabs" debug file format has been removed.
+
 * GDB now honors the content of the file /proc/PID/coredump_filter
   (PID is the process ID) on GNU/Linux systems.  This file can be used
   to specify the types of memory mappings that will be included in a

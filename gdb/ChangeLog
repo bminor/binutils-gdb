@@ -1,3 +1,14 @@
+2015-06-19  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention Sun's version of stabs is no longer supported.
+	* elfread.c (free_elfinfo): Delete.  All uses updated.
+	(elfstab_offset_sections): Delete.  All uses updated.
+	* gdb-stabs.h (stab_section_info): Delete.  All uses updated.
+	* psympriv.h (partial_symtab) <section_offsets>: Delete.
+	All uses updated.
+	* psymtab.c (start_psymtab_common): Delete arg section_offsets.
+	All callers updated.
+
 2015-06-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/rsp-low.c (needs_escaping): New.

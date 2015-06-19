@@ -1014,18 +1014,6 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
       fprintf_filtered (outfile, ")\n");
     }
 
-  fprintf_filtered (outfile, "  Relocate symbols by ");
-  for (i = 0; i < objfile->num_sections; ++i)
-    {
-      if (i != 0)
-	fprintf_filtered (outfile, ", ");
-      wrap_here ("    ");
-      fputs_filtered (paddress (gdbarch,
-				ANOFFSET (psymtab->section_offsets, i)),
-		      outfile);
-    }
-  fprintf_filtered (outfile, "\n");
-
   fprintf_filtered (outfile, "  Symbols cover text addresses ");
   fputs_filtered (paddress (gdbarch, psymtab->textlow), outfile);
   fprintf_filtered (outfile, "-");
@@ -1526,7 +1514,6 @@ sort_pst_symbols (struct objfile *objfile, struct partial_symtab *pst)
 
 struct partial_symtab *
 start_psymtab_common (struct objfile *objfile,
-		      struct section_offsets *section_offsets,
 		      const char *filename,
 		      CORE_ADDR textlow, struct partial_symbol **global_syms,
 		      struct partial_symbol **static_syms)
@@ -1534,7 +1521,6 @@ start_psymtab_common (struct objfile *objfile,
   struct partial_symtab *psymtab;
 
   psymtab = allocate_psymtab (filename, objfile);
-  psymtab->section_offsets = section_offsets;
   psymtab->textlow = textlow;
   psymtab->texthigh = psymtab->textlow;		/* default */
   psymtab->globals_offset = global_syms - objfile->global_psymbols.list;

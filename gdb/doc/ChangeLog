@@ -1,3 +1,8 @@
+2015-06-19  Doug Evans  <dje@google.com>
+
+	* stabs.texinfo (ELF Linker Relocation): Mention Sun stabs is no
+	longer supported.
+
 2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.texinfo (Command History): Mention that setting
