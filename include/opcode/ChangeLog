@@ -1,3 +1,10 @@
+2015-07-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2015-06-19  Peter Bergner <bergner@vnet.ibm.com>
+	* ppc.h (PPC_OPERAND_OPTIONAL_VALUE): New.
+	(ppc_optional_operand_value): New inline function.
+
 2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc.h (sparc_opcode): new field `hwcaps2'.
