@@ -1,3 +1,16 @@
+2015-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-alu.h (_SIM_ALU_H_): Rename to ...
+	(SIM_ALU_H): ... this.
+	* sim-assert.h (_SIM_ASSERT_H_): Rename to ...
+	(SIM_ASSERT_H): ... this.
+	* sim-basics.h (_SIM_BASICS_H_): Rename to ...
+	(SIM_BASICS_H): ... this.
+	* sim-bits.h (_SIM_BITS_H_): Rename to ...
+	(SIM_BITS_H): ... this.
+	* sim-endian.h (_SIM_ENDIAN_H_): Rename to ...
+	(SIM_ENDIAN_H): ... this.
+
 2015-06-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-syscall.c (sim_syscall_multi): Change unknown_syscall to a

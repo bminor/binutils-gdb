@@ -18,8 +18,8 @@
     */
 
 
-#ifndef _SIM_ASSERT_H_
-#define _SIM_ASSERT_H_
+#ifndef SIM_ASSERT_H
+#define SIM_ASSERT_H
 
 #define SIM_FILTER_PATH(FILE, PATH) \
 do \
