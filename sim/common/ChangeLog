@@ -1,5 +1,9 @@
 2015-06-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-model.c (sim_model_init): Assert model is not NULL.
+
+2015-06-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-types.h: Move SIM_TYPES_H define to top of file.  Include
 	stdint.h.  Replace all signed/unsigned typedefs with int#_t and
 	uint#_t.
