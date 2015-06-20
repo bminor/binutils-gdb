@@ -1,5 +1,11 @@
 2015-06-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-types.h: Move SIM_TYPES_H define to top of file.  Include
+	stdint.h.  Replace all signed/unsigned typedefs with int#_t and
+	uint#_t.
+
+2015-06-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-alu.h (_SIM_ALU_H_): Rename to ...
 	(SIM_ALU_H): ... this.
 	* sim-assert.h (_SIM_ASSERT_H_): Rename to ...
