@@ -1,3 +1,11 @@
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-types.h (SIM_PRI_TB): Define.
+	(PRI_TW, PRIiTW, PRIxTW): New PRI target word defines.
+	(PRI_TA, PRIiTA, PRIxTA): New PRI target address defines.
+	(PRI_TC, PRIiTC, PRIxTC): New PRI target cell defines.
+	(PRI_TF, PRIiTF, PRIxTF): New PRI target floating point defines.
+
 2015-11-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (WITH_MODULO_MEMORY): Delete.
