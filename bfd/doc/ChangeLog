@@ -1,3 +1,8 @@
+2015-06-21  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am: Expand $<.
+	* Makefile.in: Regenerate.
+
 2015-02-11  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
