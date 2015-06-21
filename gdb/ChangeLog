@@ -1,3 +1,10 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* microblaze-tdep.c (microblaze_push_dummy_code): Delete.
+	(microblaze_push_dummy_call): Likewise.
+	(microblaze_gdbarch_init): Delete calls to set_gdbarch_push_dummy_code
+	and set_gdbarch_push_dummy_call.
+
 2015-06-23  Yao Qi  <yao.qi@linaro.org>
 
 	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers):
