@@ -1,6 +1,12 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c (insert_ls): Test for invalid LS operands.
+	(insert_esync): New function.
+	(LS, WC): Use insert_ls.
+	(ESYNC): Use insert_esync.
+
 	2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
         * ppc-dis.h (skip_optional_operands): Use ppc_optional_operand_value.
 	* ppc-opc.c (FXM4): Add non-zero optional value.
