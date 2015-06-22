@@ -1,3 +1,11 @@
+2015-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (disassemble_bytes): Set the stop_vma field in the
+	disassemble_info structure when disassembling code sections with
+	-d.
+	* doc/binutils.texi (objdump): Document the discrepancy between -d
+	and -D.
+
 2015-06-05  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (read_debug_line_header): Use reloc_at to detect

@@ -1,3 +1,14 @@
+2015-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/backslash-at.s: Add extra .byte directives so that the
+	foo symbol does not appear to point half way through an
+	instruction.
+	* gas/arm/backslash-at.d: Update expected disassembly.
+	* gas/i386/ilp32/x86-64-opcode-inval-intel.d: Likewise.
+	* gas/i386/ilp32/x86-64-opcode-inval.d: Likewise.
+	* gas/i386/x86-64-opcode-inval-intel.d: Likewise.
+	* gas/i386/x86-64-opcode-inval.d: Likewise.
+
 2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/power8.d: Fixup rfebb test results.
