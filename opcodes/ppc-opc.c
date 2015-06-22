@@ -53,6 +53,7 @@ static unsigned long insert_bo (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_bo (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_boe (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_boe (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_esync (unsigned long, long, ppc_cpu_t, const char **);
 static unsigned long insert_fxm (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_fxm (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_li20 (unsigned long, long, ppc_cpu_t, const char **);
@@ -417,7 +418,7 @@ const struct powerpc_operand powerpc_operands[] =
   /* The LS or WC field in an X (sync or wait) form instruction.  */
 #define LS LIA + 1
 #define WC LS
-  { 0x3, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x3, 21, insert_ls, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The ME field in an M form instruction.  */
 #define ME LS + 1
@@ -635,7 +636,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The ESYNC field in an X (sync) form instruction.  */
 #define ESYNC STRM + 1
-  { 0xf, 16, insert_ls, NULL, PPC_OPERAND_OPTIONAL },
+  { 0xf, 16, insert_esync, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The SV field in a POWER SC form instruction.  */
 #define SV ESYNC + 1
@@ -1365,17 +1366,40 @@ extract_li20 (unsigned long insn,
          | (insn & 0x7ff);
 }
 
-/* The LS field in a sync instruction that accepts 2 operands
-   Values 2 and 3 are reserved,
-     must be treated as 0 for future compatibility
-   Values 0 and 1 can be accepted, if field ESYNC is zero
-   Otherwise L = complement of ESYNC-bit2 (1<<18) */
+/* The 2-bit L field in a SYNC or WC field in a WAIT instruction.
+   For SYNC, some L values are reserved:
+     * Value 3 is reserved on newer server cpus.
+     * Values 2 and 3 are reserved on all other cpus.  */
 
 static unsigned long
 insert_ls (unsigned long insn,
 	   long value,
-	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg ATTRIBUTE_UNUSED)
+	   ppc_cpu_t dialect,
+	   const char **errmsg)
+{
+  /* For SYNC, some L values are illegal.  */
+  if (((insn >> 1) & 0x3ff) == 598)
+    {
+      long max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
+      if (value > max_lvalue)
+	{
+	  *errmsg = _("illegal L operand value");
+	  return insn;
+	}
+    }
+
+  return insn | ((value & 0x3) << 21);
+}
+
+/* The 4-bit E field in a sync instruction that accepts 2 operands.
+   If ESYNC is non-zero, then the L field must be either 0 or 1 and
+   the complement of ESYNC-bit2.  */
+
+static unsigned long
+insert_esync (unsigned long insn,
+	      long value,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      const char **errmsg)
 {
   unsigned long ls;
 
@@ -1383,12 +1407,15 @@ insert_ls (unsigned long insn,
   if (value == 0)
     {
       if (ls > 1)
-	return insn & ~(0x3 << 21);
+	*errmsg = _("illegal L operand value");
       return insn;
     }
-  if ((value & 0x2) != 0)
-    return (insn & ~(0x3 << 21)) | ((value & 0xf) << 16);
-  return (insn & ~(0x3 << 21)) | (0x1 << 21) | ((value & 0xf) << 16);
+
+  if ((ls & ~0x1)
+      || (((value >> 1) & 0x1) ^ ls) == 0)
+        *errmsg = _("incompatible L operand value");
+
+  return insn | ((value & 0xf) << 16);
 }
 
 /* The MB and ME fields in an M form instruction expressed as a single
@@ -2024,6 +2051,7 @@ extract_dm (unsigned long insn,
     *invalid = 1;
   return (value) ? 1 : 0;
 }
+
 /* The VLESIMM field in an I16A form instruction.  This is split.  */
 
 static unsigned long
