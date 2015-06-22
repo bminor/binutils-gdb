@@ -1,3 +1,10 @@
+2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (insert_ls): Test for invalid LS operands.
+	(insert_esync): New function.
+	(LS, WC): Use insert_ls.
+	(ESYNC): Use insert_esync.
+
 2015-06-22  Nick Clifton  <nickc@redhat.com>
 
 	* dis-buf.c (buffer_read_memory): Fail is stop_vma is set and the
