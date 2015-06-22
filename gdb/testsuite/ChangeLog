@@ -1,3 +1,8 @@
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/completion.exp: Test the completion of the "focus"
+	command.
+
 2015-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/amd64-prologue-skip.S: New file.

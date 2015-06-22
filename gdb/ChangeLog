@@ -1,3 +1,9 @@
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (focus_completer): New static function.
+	(_initialize_tui_win): Set the completion function of the
+	"focus" command to focus_completer.
+
 2015-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linespec.c (minsym_found): Reset sal.PC for COMPUNIT_LOCATIONS_VALID
