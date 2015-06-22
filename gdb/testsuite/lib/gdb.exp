@@ -2556,7 +2556,8 @@ proc skip_hw_breakpoint_tests {} {
     if { [istarget "i?86-*-*"] 
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
-	 || [istarget "arm*-*-*"]} {
+	 || [istarget "arm*-*-*"]
+	 || [istarget "aarch64*-*-*"]} {
 	return 0
     }
 
@@ -2576,6 +2577,7 @@ proc skip_hw_watchpoint_tests {} {
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
 	 || [istarget "arm*-*-*"]
+	 || [istarget "aarch64*-*-*"]
 	 || [istarget "powerpc*-*-linux*"]
 	 || [istarget "s390*-*-*"] } {
 	return 0
