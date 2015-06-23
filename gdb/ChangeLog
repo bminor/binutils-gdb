@@ -1,3 +1,8 @@
+2015-06-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.c (init_history): Look at errno after calling strtol to
+	properly map large GDBHISTSIZE values to infinity.
+
 2015-06-23  Doug Evans  <dje@google.com>
 
 	* inferior.h (struct inferior_suspend_state): Delete, unused.

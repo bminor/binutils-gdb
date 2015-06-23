@@ -1685,10 +1685,13 @@ init_history (void)
   if (tmpenv)
     {
       long var;
+      int saved_errno;
       char *endptr;
 
       tmpenv = skip_spaces (tmpenv);
+      errno = 0;
       var = strtol (tmpenv, &endptr, 10);
+      saved_errno = errno;
       endptr = skip_spaces (endptr);
 
       /* If GDBHISTSIZE is non-numeric then ignore it.  If GDBHISTSIZE is the
@@ -1700,7 +1703,12 @@ init_history (void)
 	;
       else if (*tmpenv == '\0'
 	       || var < 0
-	       || var > INT_MAX)
+	       || var > INT_MAX
+	       /* On targets where INT_MAX == LONG_MAX, we have to look at
+		  errno after calling strtol to distinguish between a value that
+		  is exactly INT_MAX and an overflowing value that was clamped
+		  to INT_MAX.  */
+	       || (var == INT_MAX && saved_errno == ERANGE))
 	history_size_setshow_var = -1;
       else
 	history_size_setshow_var = var;
