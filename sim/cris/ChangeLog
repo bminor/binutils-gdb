@@ -1,3 +1,7 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* traps.c: Include sim-syscall.h.

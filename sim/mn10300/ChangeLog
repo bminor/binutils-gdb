@@ -1,3 +1,7 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* op_utils.c (do_syscall): Replace call to cb_syscall with

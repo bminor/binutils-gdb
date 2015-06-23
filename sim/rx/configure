@@ -1399,14 +1399,19 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
-  --enable-sim-bswap			Use Host specific BSWAP instruction.
-  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator
-  --enable-sim-debug=opts		Enable debugging flags
-  --enable-sim-stdio			Specify whether to use stdio for console input/output.
-  --enable-sim-trace=opts		Enable tracing flags
-  --enable-sim-profile=opts		Enable profiling flags
+  --enable-sim-bswap      Use Host specific BSWAP instruction
+  --enable-sim-cflags=opts
+                          Extra CFLAGS for use in building simulator
+  --enable-sim-debug=opts Enable debugging flags (for developers of the sim
+                          itself)
+  --enable-sim-stdio      Specify whether to use stdio for console
+                          input/output
+  --enable-sim-trace=opts Enable tracing of simulated programs
+  --enable-sim-profile=opts
+                          Enable profiling flags
   --disable-cycle-accurate
-  --disable-cycle-stats
+                          Disable cycle accurate simulation (faster runtime)
+  --disable-cycle-stats   Disable cycle statistics (faster runtime)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -12292,7 +12297,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12295 "configure"
+#line 12300 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12398,7 +12403,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12401 "configure"
+#line 12406 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

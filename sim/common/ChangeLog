@@ -1,5 +1,32 @@
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (AC_ARG_ENABLE(sim-bswap)): Call AS_HELP_STRING.
+	(AC_ARG_ENABLE(sim-cflags)): Likewise.
+	(AC_ARG_ENABLE(sim-debug)): Likewise.
+	(AC_ARG_ENABLE(sim-stdio)): Likewise.
+	(AC_ARG_ENABLE(sim-trace)): Likewise.
+	(AC_ARG_ENABLE(sim-profile)): Likewise.
+	(AC_ARG_ENABLE(sim-environment)): Likewise.
+	(AC_ARG_ENABLE(sim-alignment)): Likewise.
+	(AC_ARG_ENABLE(sim-assert)): Likewise.
+	(AC_ARG_ENABLE(sim-bitsize)): Likewise.
+	(AC_ARG_ENABLE(sim-endian)): Likewise.
+	(AC_ARG_ENABLE(sim-hostendian)): Likewise.
+	(AC_ARG_ENABLE(sim-float)): Likewise.
+	(AC_ARG_ENABLE(sim-scache)): Likewise.
+	(AC_ARG_ENABLE(sim-default-model)): Likewise.
+	(AC_ARG_ENABLE(sim-inline)): Likewise.
+	(AC_ARG_ENABLE(sim-packages)): Likewise.
+	(AC_ARG_ENABLE(sim-regparm)): Likewise.
+	(AC_ARG_ENABLE(sim-reserved-bits)): Likewise.
+	(AC_ARG_ENABLE(sim-smp)): Likewise.
+	(AC_ARG_ENABLE(sim-stdcall)): Likewise.
+	(AC_ARG_ENABLE(sim-xor-endian)): Likewise.
+	(AC_ARG_ENABLE(cgen-maint)): Likewise.
+	* configure: Regenerate.
+
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-config.h (WITH_TRACE): Define to ~TRACE_debug.
 
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>

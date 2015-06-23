@@ -1,3 +1,8 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_ARG_ENABLE(sim-trapdump)): Call AS_HELP_STRING.
+	* configure: Regenerate.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

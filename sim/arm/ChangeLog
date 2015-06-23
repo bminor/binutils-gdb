@@ -1,5 +1,9 @@
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* armdefs.h: Always include stdint.h.
 	[!__STDC__]: Delete.
 	[!HAVE_STDINT_H]: Delete.
