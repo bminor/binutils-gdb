@@ -1,5 +1,12 @@
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.h (STRACE, STRACE_INSN, STRACE_DECODE, STRACE_EXTRACT,
+	STRACE_LINENUM, STRACE_MEMORY, STRACE_MODEL, STRACE_ALU, STRACE_CORE,
+	STRACE_EVENTS, STRACE_FPU, STRACE_VPU, STRACE_BRANCH, STRACE_SYSCALL,
+	STRACE_DEBUG): Define.
+
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.c (trace_options): Update help text for trace-alu,
 	trace-fpu, trace-vpu, and trace-semantics.
 	* sim-trace.h (TRACE_ALU_IDX): Update comment text.

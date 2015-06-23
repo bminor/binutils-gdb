@@ -211,6 +211,27 @@ typedef struct _trace_data {
 #define STRACE_BRANCH_P(sd)	STRACE_P (sd, TRACE_BRANCH_IDX)
 #define STRACE_SYSCALL_P(sd)	STRACE_P (sd, TRACE_SYSCALL_IDX)
 #define STRACE_DEBUG_P(sd)	STRACE_P (sd, TRACE_DEBUG_IDX)
+
+/* Helper functions for printing messages.  */
+#define STRACE(sd, idx, fmt, args...) \
+  do { \
+    if (STRACE_P (sd, idx)) \
+      trace_generic (sd, NULL, idx, fmt, ## args); \
+  } while (0)
+#define STRACE_INSN(sd, fmt, args...)		STRACE (sd, TRACE_INSN_IDX, fmt, ## args)
+#define STRACE_DECODE(sd, fmt, args...)		STRACE (sd, TRACE_DECODE_IDX, fmt, ## args)
+#define STRACE_EXTRACT(sd, fmt, args...)	STRACE (sd, TRACE_EXTRACT_IDX, fmt, ## args)
+#define STRACE_LINENUM(sd, fmt, args...)	STRACE (sd, TRACE_LINENUM_IDX, fmt, ## args)
+#define STRACE_MEMORY(sd, fmt, args...)		STRACE (sd, TRACE_MEMORY_IDX, fmt, ## args)
+#define STRACE_MODEL(sd, fmt, args...)		STRACE (sd, TRACE_MODEL_IDX, fmt, ## args)
+#define STRACE_ALU(sd, fmt, args...)		STRACE (sd, TRACE_ALU_IDX, fmt, ## args)
+#define STRACE_CORE(sd, fmt, args...)		STRACE (sd, TRACE_CORE_IDX, fmt, ## args)
+#define STRACE_EVENTS(sd, fmt, args...)		STRACE (sd, TRACE_EVENTS_IDX, fmt, ## args)
+#define STRACE_FPU(sd, fmt, args...)		STRACE (sd, TRACE_FPU_IDX, fmt, ## args)
+#define STRACE_VPU(sd, fmt, args...)		STRACE (sd, TRACE_VPU_IDX, fmt, ## args)
+#define STRACE_BRANCH(sd, fmt, args...)		STRACE (sd, TRACE_BRANCH_IDX, fmt, ## args)
+#define STRACE_SYSCALL(sd, fmt, args...)	STRACE (sd, TRACE_SYSCALL_IDX, fmt, ## args)
+#define STRACE_DEBUG(sd, fmt, args...)		STRACE (sd, TRACE_DEBUG_IDX, fmt, ## args)
 
 /* CPU tracing support.  */
 
