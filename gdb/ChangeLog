@@ -1,3 +1,9 @@
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.c: Include gdb_bfd.h.
+	(gdbsim_open): Declare new local sysroot pointing to gdb_sysroot.
+	Skip TARGET_SYSROOT_PREFIX in gdb_sysroot when it is active.
+
 2015-06-24  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Don't call
