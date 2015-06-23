@@ -1,3 +1,8 @@
+2021-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Change ALIGN to align_up.
+	* sim-main.h (ALIGN): Delete
+
 2020-08-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* configure.ac: Include config/pkg.m4.

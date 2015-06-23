@@ -1,3 +1,9 @@
+2021-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-bits.h (_ALIGNa, _FLOORa, ALIGN_8, ALIGN_16, ALIGN_PAGE,
+	FLOOR_PAGE): Delete unused macros.
+	(align_up, align_down): Define.
+
 2020-08-10  Tom de Vries  <tdevries@suse.de>
 
 	* sim-cpu.c: Include stdlib.h for free.
