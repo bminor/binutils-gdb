@@ -1,3 +1,13 @@
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-assert.h (SIM_FILTER_PATH): Delete.
+	[!SIM_ASSERT, WITH_ASSERT]: Include libiberty.h.
+	(SIM_ASSERT): Replace SIM_FILTER_PATH with lbasename.
+	[!ASSERT, WITH_ASSERT]: Include libiberty.h.
+	(ASSERT): Replace SIM_FILTER_PATH with lbasename.
+	* sim-events.c: Include libiberty.h.
+	(ETRACE): Replace SIM_FILTER_PATH with lbasename.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (AC_ARG_ENABLE(sim-bswap)): Call AS_HELP_STRING.

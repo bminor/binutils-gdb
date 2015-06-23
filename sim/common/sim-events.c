@@ -25,6 +25,7 @@
 
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "libiberty.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -147,11 +148,7 @@ do \
     if (STRACE_EVENTS_P (sd)) \
       { \
         if (STRACE_DEBUG_P (sd)) \
-	  { \
-	    const char *file; \
-	    SIM_FILTER_PATH (file, __FILE__); \
-	    trace_printf (sd, NULL, "%s:%d: ", file, __LINE__); \
-	  } \
+	  trace_printf (sd, NULL, "%s:%d: ", lbasename (__FILE__), __LINE__); \
         trace_printf  ARGS; \
       } \
   } \
