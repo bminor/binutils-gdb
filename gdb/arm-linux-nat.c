@@ -95,7 +95,7 @@ fetch_fpregister (struct regcache *regcache, int regno)
   tid = GET_THREAD_ID (inferior_ptid);
 
   /* Read the floating point state.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -136,7 +136,7 @@ fetch_fpregs (struct regcache *regcache)
   tid = GET_THREAD_ID (inferior_ptid);
 
   /* Read the floating point state.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -176,7 +176,7 @@ store_fpregister (const struct regcache *regcache, int regno)
   tid = GET_THREAD_ID (inferior_ptid);
 
   /* Read the floating point state.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -203,7 +203,7 @@ store_fpregister (const struct regcache *regcache, int regno)
   if (regno >= ARM_F0_REGNUM && regno <= ARM_F7_REGNUM)
     collect_nwfpe_register (regcache, regno, fp);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -235,7 +235,7 @@ store_fpregs (const struct regcache *regcache)
   tid = GET_THREAD_ID (inferior_ptid);
 
   /* Read the floating point state.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       elf_fpregset_t fpregs;
       struct iovec iov;
@@ -263,7 +263,7 @@ store_fpregs (const struct regcache *regcache)
     if (REG_VALID == regcache_register_status (regcache, regno))
       collect_nwfpe_register (regcache, regno, fp);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -294,7 +294,7 @@ fetch_register (struct regcache *regcache, int regno)
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -347,7 +347,7 @@ fetch_regs (struct regcache *regcache)
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -397,7 +397,7 @@ store_register (const struct regcache *regcache, int regno)
   tid = GET_THREAD_ID (inferior_ptid);
 
   /* Get the general registers from the process.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -424,7 +424,7 @@ store_register (const struct regcache *regcache, int regno)
     regcache_raw_collect (regcache, ARM_PC_REGNUM,
 			 (char *) &regs[ARM_PC_REGNUM]);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -453,7 +453,7 @@ store_regs (const struct regcache *regcache)
   tid = GET_THREAD_ID (inferior_ptid);
 
   /* Fetch the general registers.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -481,7 +481,7 @@ store_regs (const struct regcache *regcache)
     regcache_raw_collect (regcache, ARM_PS_REGNUM,
 			 (char *) &regs[ARM_CPSR_GREGNUM]);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -593,7 +593,7 @@ fetch_vfp_regs (struct regcache *regcache)
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -629,7 +629,7 @@ store_vfp_regs (const struct regcache *regcache)
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -653,7 +653,7 @@ store_vfp_regs (const struct regcache *regcache)
   regcache_raw_collect (regcache, ARM_FPSCR_REGNUM,
 			(char *) regbuf + 32 * 8);
 
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
       struct iovec iov;
 
@@ -797,7 +797,7 @@ arm_linux_read_description (struct target_ops *ops)
 {
   CORE_ADDR arm_hwcap = 0;
 
-  if (have_ptrace_getregset == -1)
+  if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     {
       elf_gregset_t gpregs;
       struct iovec iov;
@@ -808,9 +808,9 @@ arm_linux_read_description (struct target_ops *ops)
 
       /* Check if PTRACE_GETREGSET works.  */
       if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov) < 0)
-	have_ptrace_getregset = 0;
+	have_ptrace_getregset = TRIBOOL_FALSE;
       else
-	have_ptrace_getregset = 1;
+	have_ptrace_getregset = TRIBOOL_TRUE;
     }
 
   if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)

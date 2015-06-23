@@ -327,7 +327,7 @@ fetch_xstateregs (struct regcache *regcache, int tid)
   char xstateregs[X86_XSTATE_MAX_SIZE];
   struct iovec iov;
 
-  if (!have_ptrace_getregset)
+  if (have_ptrace_getregset != TRIBOOL_TRUE)
     return 0;
 
   iov.iov_base = xstateregs;
@@ -350,7 +350,7 @@ store_xstateregs (const struct regcache *regcache, int tid, int regno)
   char xstateregs[X86_XSTATE_MAX_SIZE];
   struct iovec iov;
 
-  if (!have_ptrace_getregset)
+  if (have_ptrace_getregset != TRIBOOL_TRUE)
     return 0;
   
   iov.iov_base = xstateregs;

@@ -1,3 +1,26 @@
+2015-06-23  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers):
+	Check whether have_ptrace_getregset is TRIBOOL_TRUE explicitly.
+	(amd64_linux_store_inferior_registers): Likewise.
+	* arm-linux-nat.c (fetch_fpregister): Likewise.
+	(fetch_fpregs, store_fpregister): Likewise.
+	(store_fpregister, store_fpregs): Likewise.
+	(fetch_register, fetch_regs): Likewise.
+	(store_register, store_regs): Likewise.
+	(fetch_vfp_regs, store_vfp_regs): Likewise.
+	(arm_linux_read_description): Check have_ptrace_getregset is
+	TRIBOOL_UNKNOWN.  Set have_ptrace_getregset to TRIBOOL_TRUE
+	or TRIBOOL_FALSE.
+	* i386-linux-nat.c (fetch_xstateregs): Check
+	have_ptrace_getregset is not TRIBOOL_TRUE.
+	(store_xstateregs): Likewise.
+	* linux-nat.c (have_ptrace_getregset): Change its type to
+	enum tribool.
+	* linux-nat.h (tribool): New enum.
+	* x86-linux-nat.c (x86_linux_read_description): Use enum tribool.
+	Check whether have_ptrace_getregset is TRIBOOL_TRUE.
+
 2015-06-19  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention Sun's version of stabs is no longer supported.

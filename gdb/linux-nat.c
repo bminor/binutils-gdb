@@ -166,7 +166,7 @@ blocked.  */
 #endif
 
 /* Does the current host support PTRACE_GETREGSET?  */
-int have_ptrace_getregset = -1;
+enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
 /* The single-threaded native GNU/Linux target_ops.  We save a pointer for
    the use of the multi-threaded target.  */

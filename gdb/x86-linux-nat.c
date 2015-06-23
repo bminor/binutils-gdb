@@ -162,13 +162,13 @@ x86_linux_read_description (struct target_ops *ops)
       if (ptrace (PTRACE_GETFPXREGS, tid, 0, (int) &fpxregs) < 0)
 	{
 	  have_ptrace_getfpxregs = 0;
-	  have_ptrace_getregset = 0;
+	  have_ptrace_getregset = TRIBOOL_FALSE;
 	  return tdesc_i386_mmx_linux;
 	}
     }
 #endif
 
-  if (have_ptrace_getregset == -1)
+  if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     {
       uint64_t xstateregs[(X86_XSTATE_SSE_SIZE / sizeof (uint64_t))];
       struct iovec iov;
@@ -179,10 +179,10 @@ x86_linux_read_description (struct target_ops *ops)
       /* Check if PTRACE_GETREGSET works.  */
       if (ptrace (PTRACE_GETREGSET, tid,
 		  (unsigned int) NT_X86_XSTATE, &iov) < 0)
-	have_ptrace_getregset = 0;
+	have_ptrace_getregset = TRIBOOL_FALSE;
       else
 	{
-	  have_ptrace_getregset = 1;
+	  have_ptrace_getregset = TRIBOOL_TRUE;
 
 	  /* Get XCR0 from XSAVE extended state.  */
 	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
@@ -194,7 +194,7 @@ x86_linux_read_description (struct target_ops *ops)
      PTRACE_GETREGSET is not available then set xcr0_features_bits to
      zero so that the "no-features" descriptions are returned by the
      switches below.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     xcr0_features_bits = xcr0 & X86_XSTATE_ALL_MASK;
   else
     xcr0_features_bits = 0;
