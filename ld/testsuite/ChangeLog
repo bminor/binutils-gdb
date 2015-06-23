@@ -1,3 +1,9 @@
+2015-06-23  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/dt_textrel.s: New testcase.
+	* ld-aarch64/dt_textrel.d: New expectation file.
+	* ld-aarch64/aarch64-elf.exp: Run new testcase.
+
 2015-06-17  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul): New function.

@@ -203,6 +203,8 @@ run_dump_test "ifunc-22"
 run_dump_test "relasz"
 run_dump_test "relocs-257-symbolic-func"
 
+run_dump_test "dt_textrel"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
   {} "copy-reloc-so.so"}

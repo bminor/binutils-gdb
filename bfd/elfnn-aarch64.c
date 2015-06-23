@@ -7545,6 +7545,32 @@ elfNN_aarch64_allocate_local_ifunc_dynrelocs (void **slot, void *inf)
   return elfNN_aarch64_allocate_ifunc_dynrelocs (h, inf);
 }
 
+/* Find any dynamic relocs that apply to read-only sections.  */
+
+static bfd_boolean
+aarch64_readonly_dynrelocs (struct elf_link_hash_entry * h, void * inf)
+{
+  struct elf_aarch64_link_hash_entry * eh;
+  struct elf_dyn_relocs * p;
+
+  eh = (struct elf_aarch64_link_hash_entry *) h;
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *s = p->sec;
+
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	{
+	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+	  info->flags |= DF_TEXTREL;
+
+	  /* Not an error, just cut short the traversal.  */
+	  return FALSE;
+	}
+    }
+  return TRUE;
+}
+
 /* This is the most important function of all . Innocuosly named
    though !  */
 static bfd_boolean
@@ -7832,6 +7858,10 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
+	  if ((info->flags & DF_TEXTREL) == 0)
+	    elf_link_hash_traverse (& htab->root, aarch64_readonly_dynrelocs,
+				    info);
+
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
 	      if (!add_dynamic_entry (DT_TEXTREL, 0))

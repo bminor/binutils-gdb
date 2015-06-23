@@ -1,3 +1,9 @@
+2015-06-23  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_readonly_dynrelocs): New function.
+	(elfNN_aarch64_size_dynamic_sections): Traverse hash table to check
+	relocations against read-only sections.
+
 2015-06-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 18481
