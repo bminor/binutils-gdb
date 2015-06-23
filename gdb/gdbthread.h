@@ -145,9 +145,7 @@ struct thread_control_state
   int stepping_command;
 };
 
-/* Inferior thread specific part of `struct infcall_suspend_state'.
-
-   Inferior process counterpart is `struct inferior_suspend_state'.  */
+/* Inferior thread specific part of `struct infcall_suspend_state'.  */
 
 struct thread_suspend_state
 {

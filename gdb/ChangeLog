@@ -1,3 +1,8 @@
+2015-06-23  Doug Evans  <dje@google.com>
+
+	* inferior.h (struct inferior_suspend_state): Delete, unused.
+	All references deleted.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* microblaze-tdep.c (microblaze_push_dummy_code): Delete.
