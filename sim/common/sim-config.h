@@ -487,10 +487,10 @@ extern int current_floating_point;
 #endif
 
 /* Include the tracing code.  Disabling this eliminates all tracing
-   code */
+   code.  Default to all tracing but internal debug.  */
 
 #ifndef WITH_TRACE
-#define WITH_TRACE                      (-1)
+#define WITH_TRACE			(~TRACE_debug)
 #endif
 
 /* Include the profiling code.  Disabling this eliminates all profiling

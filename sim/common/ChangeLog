@@ -1,5 +1,9 @@
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-config.h (WITH_TRACE): Define to ~TRACE_debug.
+
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-trace.c [!__STDC__]: Delete.
 	* sim-trace.h [!__STDC__]: Likewise.
 
