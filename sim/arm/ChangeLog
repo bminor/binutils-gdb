@@ -1,3 +1,10 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* armdefs.h: Always include stdint.h.
+	[!__STDC__]: Delete.
+	[!HAVE_STDINT_H]: Delete.
+	* dbg_hif.h [!__STDC__]: Delete.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

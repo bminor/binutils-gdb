@@ -302,18 +302,10 @@ cgen_trace_printf (SIM_CPU *cpu, char *fmt, ...)
 int
 sim_disasm_sprintf (SFILE *f, const char *format, ...)
 {
-#ifndef __STDC__
-  SFILE *f;
-  const char *format;
-#endif
   int n;
   va_list args;
 
   va_start (args, format);
-#ifndef __STDC__
-  f = va_arg (args, SFILE *);
-  format = va_arg (args, char *);
-#endif
   vsprintf (f->current, format, args);
   f->current += n = strlen (f->current);
   va_end (args);
