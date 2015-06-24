@@ -10538,8 +10538,7 @@ remote_filesystem_is_local (struct target_ops *self)
      this case we treat the remote filesystem as local if the
      sysroot is exactly TARGET_SYSROOT_PREFIX and if the stub
      does not support vFile:open.  */
-  if (gdb_sysroot != NULL
-      && strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) == 0)
+  if (strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) == 0)
     {
       enum packet_support ps = packet_support (PACKET_vFile_open);
 

@@ -1133,7 +1133,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   breakpoint_init_inferior (inf_execd);
 
-  if (gdb_sysroot != NULL && *gdb_sysroot != '\0')
+  if (*gdb_sysroot != '\0')
     {
       char *name = exec_file_find (execd_pathname, NULL);
 

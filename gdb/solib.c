@@ -159,23 +159,18 @@ solib_find_1 (char *in_pathname, int *fd, int is_solib)
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   char *sysroot = gdb_sysroot;
 
-  if (sysroot != NULL)
-    {
-      /* If the absolute prefix starts with "target:" but the
-	 filesystem accessed by the target_fileio_* methods
-	 is the local filesystem then we strip the "target:"
-	 prefix now and work with the local filesystem.  This
-	 ensures that the same search algorithm is used for
-	 all local files regardless of whether a "target:"
-	 prefix was used.  */
-      if (is_target_filename (sysroot) && target_filesystem_is_local ())
-	sysroot += strlen (TARGET_SYSROOT_PREFIX);
+  /* If the absolute prefix starts with "target:" but the filesystem
+     accessed by the target_fileio_* methods is the local filesystem
+     then we strip the "target:" prefix now and work with the local
+     filesystem.  This ensures that the same search algorithm is used
+     for all local files regardless of whether a "target:" prefix was
+     used.  */
+  if (is_target_filename (sysroot) && target_filesystem_is_local ())
+    sysroot += strlen (TARGET_SYSROOT_PREFIX);
 
-      if (*sysroot == '\0')
-	sysroot = NULL;
-    }
-
-  if (sysroot != NULL)
+  if (*sysroot == '\0')
+    sysroot = NULL;
+  else
     {
       int prefix_len = strlen (sysroot);
 

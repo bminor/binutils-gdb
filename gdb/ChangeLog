@@ -1,3 +1,10 @@
+2015-06-25  Gary Benson  <gbenson@redhat.com>
+
+	* exec.c (exec_file_locate_attach): Remove gdb_sysroot NULL check.
+	* infrun.c (follow_exec): Likewise.
+	* remote.c (remote_filesystem_is_local): Likewise.
+	* solib.c (solib_find_1): Likewise.
+
 2015-06-24  Keith Seitz  <keiths@redhat.com>
 
 	* build-id.c (build_id_to_debug_bfd): Add cleanup to free
