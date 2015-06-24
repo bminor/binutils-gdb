@@ -1,3 +1,23 @@
+2015-06-24  Gary Benson  <gbenson@redhat.com>
+
+	* common/buffer.c (stdint.h): Do not include.
+	* common/print-utils.c (stdint.h): Likewise.
+	* compile/compile-c-symbols.c (gdb_assert.h): Likewise.
+	* compile/compile-c-types.c (gdb_assert.h): Likewise.
+	* ft32-tdep.c (gdb_assert.h): Likewise.
+	* guile/scm-utils.c (stdint.h): Likewise.
+	* i386-linux-tdep.c (stdint.h): Likewise.
+	* i386-tdep.c (stdint.h): Likewise.
+	* nat/linux-btrace.c (stdint.h): Likewise.
+	* nat/linux-btrace.h (stdint.h): Likewise.
+	* nat/linux-ptrace.c (stdint.h): Likewise.
+	* nat/mips-linux-watch.h (stdint.h): Likewise.
+	* ppc-linux-nat.c (stdint.h): Likewise.
+	* python/python-internal.h (stdint.h): Likewise.
+	* stub-termcap.c (stdlib.h): Likewise.
+	* target/target.h (stdint.h): Likewise.
+	* xtensa-linux-nat.c (stdint.h): Likewise.
+
 2015-06-23  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* top.c (init_history): Look at errno after calling strtol to

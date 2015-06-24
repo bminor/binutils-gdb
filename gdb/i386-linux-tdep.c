@@ -44,8 +44,6 @@
 
 #include "record-full.h"
 #include "linux-record.h"
-#include <stdint.h>
-
 #include "features/i386/i386-linux.c"
 #include "features/i386/i386-mmx-linux.c"
 #include "features/i386/i386-mpx-linux.c"

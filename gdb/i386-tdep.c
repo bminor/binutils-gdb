@@ -50,8 +50,6 @@
 
 #include "record.h"
 #include "record-full.h"
-#include <stdint.h>
-
 #include "features/i386/i386.c"
 #include "features/i386/i386-avx.c"
 #include "features/i386/i386-mpx.c"

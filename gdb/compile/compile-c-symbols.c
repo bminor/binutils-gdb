@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "compile-internal.h"
-#include "gdb_assert.h"
 #include "symtab.h"
 #include "parser-defs.h"
 #include "block.h"

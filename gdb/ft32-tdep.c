@@ -37,8 +37,6 @@
 #include "dis-asm.h"
 #include "record.h"
 
-#include "gdb_assert.h"
-
 #include "ft32-tdep.h"
 #include "gdb/sim-ft32.h"
 

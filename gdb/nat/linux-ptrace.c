@@ -23,8 +23,6 @@
 #include "buffer.h"
 #include "gdb_wait.h"
 
-#include <stdint.h>
-
 /* Stores the ptrace options supported by the running kernel.
    A value of -1 means we did not check for features yet.  A value
    of 0 means there are no supported features.  */

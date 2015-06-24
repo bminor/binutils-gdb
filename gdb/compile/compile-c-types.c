@@ -21,8 +21,6 @@
 #include "defs.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
-#include "gdb_assert.h"
-
 /* An object that maps a gdb type to a gcc type.  */
 
 struct type_map_instance

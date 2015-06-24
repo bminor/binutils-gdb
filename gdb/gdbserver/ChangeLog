@@ -1,3 +1,13 @@
+2015-06-24  Gary Benson  <gbenson@redhat.com>
+
+	* linux-i386-ipa.c (stdint.h): Do not include.
+	* lynx-i386-low.c (stdint.h): Likewise.
+	* lynx-ppc-low.c (stdint.h): Likewise.
+	* mem-break.c (stdint.h): Likewise.
+	* thread-db.c (stdint.h): Likewise.
+	* tracepoint.c (stdint.h): Likewise.
+	* win32-low.c (stdint.h): Likewise.
+
 2015-06-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* server.c (write_qxfer_response): Update call to
