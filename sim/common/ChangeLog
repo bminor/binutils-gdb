@@ -1,5 +1,12 @@
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.c (trace_options): Update help text for trace-alu,
+	trace-fpu, trace-vpu, and trace-semantics.
+	* sim-trace.h (TRACE_ALU_IDX): Update comment text.
+	(TRACE_FPU_IDX, TRACE_VPU_IDX): Likewise.
+
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-assert.h (SIM_FILTER_PATH): Delete.
 	[!SIM_ASSERT, WITH_ASSERT]: Include libiberty.h.
 	(SIM_ASSERT): Replace SIM_FILTER_PATH with lbasename.

@@ -50,7 +50,7 @@ enum {
   /* Include model performance data in tracing output.  */
   TRACE_MODEL_IDX,
 
-  /* Trace ALU operations.  */
+  /* Trace ALU (Arithmetic Logic Unit) operations.  */
   TRACE_ALU_IDX,
 
   /* Trace memory core operations.  */
@@ -59,10 +59,10 @@ enum {
   /* Trace events.  */
   TRACE_EVENTS_IDX,
 
-  /* Trace fpu operations.  */
+  /* Trace FPU (Floating Point Unit) operations.  */
   TRACE_FPU_IDX,
 
-  /* Trace vpu operations.  */
+  /* Trace VPU (Vector Processing Unit) operations.  */
   TRACE_VPU_IDX,
 
   /* Trace branching.  */
