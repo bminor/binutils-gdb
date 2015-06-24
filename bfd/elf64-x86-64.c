@@ -2571,14 +2571,16 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  asection *bnd_s = htab->plt_bnd;
 	  asection *got_s = htab->plt_got;
 
+	  /* If this is the first .plt entry, make room for the special
+	     first entry.  The .plt section is used by prelink to undo
+	     prelinking for dynamic relocations.  */
+	  if (s->size == 0)
+	    s->size = plt_entry_size;
+
 	  if (use_plt_got)
 	    eh->plt_got.offset = got_s->size;
 	  else
 	    {
-	      /* If this is the first .plt entry, make room for the
-		 special first entry.  */
-	      if (s->size == 0)
-		s->size = plt_entry_size;
 	      h->plt.offset = s->size;
 	      if (bnd_s)
 		eh->plt_bnd.offset = bnd_s->size;
@@ -3464,11 +3466,18 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
       if (htab->elf.splt->size != 0)
 	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
+	  /* DT_PLTGOT is used by prelink even if there is no PLT
+	     relocation.  */
+	  if (!add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;
+
+	  if (htab->elf.srelplt->size != 0)
+	    {
+	      if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+		  || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+		  || !add_dynamic_entry (DT_JMPREL, 0))
+		return FALSE;
+	    }
 
 	  if (htab->tlsdesc_plt
 	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)

@@ -574,3 +574,4 @@ if { ![istarget "x86_64-*-linux*"]} {
 # Linux only tests
 run_dump_test "pr17618"
 run_dump_test "pltgot-1"
+run_dump_test "pltgot-2"

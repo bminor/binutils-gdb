@@ -2351,16 +2351,16 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  asection *s = htab->elf.splt;
 	  asection *got_s = htab->plt_got;
 
+	  /* If this is the first .plt entry, make room for the special
+	     first entry.  The .plt section is used by prelink to undo
+	     prelinking for dynamic relocations.  */
+	  if (s->size == 0)
+	    s->size = plt_entry_size;
+
 	  if (use_plt_got)
 	    eh->plt_got.offset = got_s->size;
 	  else
-	    {
-	      /* If this is the first .plt entry, make room for the
-		 special first entry.  */
-	      if (s->size == 0)
-		s->size = plt_entry_size;
-	      h->plt.offset = s->size;
-	    }
+	    h->plt.offset = s->size;
 
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
@@ -3119,11 +3119,18 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
       if (htab->elf.splt->size != 0)
 	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_REL)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
+	  /* DT_PLTGOT is used by prelink even if there is no PLT
+	     relocation.  */
+	  if (!add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;
+
+	  if (htab->elf.srelplt->size != 0)
+	    {
+	      if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+		  || !add_dynamic_entry (DT_PLTREL, DT_REL)
+		  || !add_dynamic_entry (DT_JMPREL, 0))
+		return FALSE;
+	    }
 	}
 
       if (relocs)
