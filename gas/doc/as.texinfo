@@ -4680,7 +4680,6 @@ Only valid when generating compact EH frames (i.e.
 with @code{.cfi_sections eh_frame_entry}.
 
 @subsection @code{.cfi_lsda @var{encoding} [, @var{exp}]}
-@section @code{.cfi_lsda @var{encoding} [, @var{exp}]}
 @code{.cfi_lsda} defines LSDA and its encoding.
 @var{encoding} must be a constant determining how the LSDA
 should be encoded.  If it is 255 (@code{DW_EH_PE_omit}), the second
