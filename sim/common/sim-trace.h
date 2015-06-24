@@ -618,19 +618,6 @@ do { \
 } while (0)
 
 
-/* The function trace_one_insn has been replaced by the function pair
-   trace_prefix() + trace_generic() */
-extern void trace_one_insn (SIM_DESC sd,
-			    sim_cpu * cpu,
-			    address_word cia,
-			    int print_linenum_p,
-			    const char *file_name,
-			    int line_nr,
-			    const char *unit,
-			    const char *fmt,
-			    ...)
-     __attribute__((format (printf, 8, 9)));
-
 extern void trace_printf (SIM_DESC, sim_cpu *, const char *, ...)
      __attribute__((format (printf, 3, 4)));
 

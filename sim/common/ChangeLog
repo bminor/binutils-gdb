@@ -1,5 +1,10 @@
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.c (trace_one_insn): Delete.
+	* sim-trace.h (trace_one_insn): Delete.
+
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.c (debug_printf): Rename to ...
 	(sim_debug_printf): ... this.
 	* sim-trace.h (debug_printf): Delete define.
