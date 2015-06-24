@@ -71,6 +71,10 @@ enum {
   /* Trace syscalls.  */
   TRACE_SYSCALL_IDX,
 
+  /* Trace cpu register accesses.  Registers that are part of hardware devices
+     should use the HW_TRACE macros instead.  */
+  TRACE_REGISTER_IDX,
+
   /* Add information useful for debugging the simulator to trace output.  */
   TRACE_DEBUG_IDX,
 
@@ -105,6 +109,7 @@ enum {
 #define TRACE_vpu      (1 << TRACE_VPU_IDX)
 #define TRACE_branch   (1 << TRACE_BRANCH_IDX)
 #define TRACE_syscall  (1 << TRACE_SYSCALL_IDX)
+#define TRACE_register (1 << TRACE_REGISTER_IDX)
 #define TRACE_debug    (1 << TRACE_DEBUG_IDX)
 
 /* Return non-zero if tracing of idx is enabled (compiled in).  */
@@ -125,6 +130,7 @@ enum {
 #define WITH_TRACE_VPU_P	WITH_TRACE_P (TRACE_VPU_IDX)
 #define WITH_TRACE_BRANCH_P	WITH_TRACE_P (TRACE_BRANCH_IDX)
 #define WITH_TRACE_SYSCALL_P	WITH_TRACE_P (TRACE_SYSCALL_IDX)
+#define WITH_TRACE_REGISTER_P	WITH_TRACE_P (TRACE_REGISTER_IDX)
 #define WITH_TRACE_DEBUG_P	WITH_TRACE_P (TRACE_DEBUG_IDX)
 
 /* Tracing install handler.  */
@@ -210,6 +216,7 @@ typedef struct _trace_data {
 #define STRACE_VPU_P(sd)	STRACE_P (sd, TRACE_VPU_IDX)
 #define STRACE_BRANCH_P(sd)	STRACE_P (sd, TRACE_BRANCH_IDX)
 #define STRACE_SYSCALL_P(sd)	STRACE_P (sd, TRACE_SYSCALL_IDX)
+#define STRACE_REGISTER_P(sd)	STRACE_P (sd, TRACE_REGISTER_IDX)
 #define STRACE_DEBUG_P(sd)	STRACE_P (sd, TRACE_DEBUG_IDX)
 
 /* Helper functions for printing messages.  */
@@ -231,6 +238,7 @@ typedef struct _trace_data {
 #define STRACE_VPU(sd, fmt, args...)		STRACE (sd, TRACE_VPU_IDX, fmt, ## args)
 #define STRACE_BRANCH(sd, fmt, args...)		STRACE (sd, TRACE_BRANCH_IDX, fmt, ## args)
 #define STRACE_SYSCALL(sd, fmt, args...)	STRACE (sd, TRACE_SYSCALL_IDX, fmt, ## args)
+#define STRACE_REGISTER(sd, fmt, args...)	STRACE (sd, TRACE_REGISTER_IDX, fmt, ## args)
 #define STRACE_DEBUG(sd, fmt, args...)		STRACE (sd, TRACE_DEBUG_IDX, fmt, ## args)
 
 /* CPU tracing support.  */
@@ -256,6 +264,7 @@ typedef struct _trace_data {
 #define TRACE_VPU_P(cpu)	TRACE_P (cpu, TRACE_VPU_IDX)
 #define TRACE_BRANCH_P(cpu)	TRACE_P (cpu, TRACE_BRANCH_IDX)
 #define TRACE_SYSCALL_P(cpu)	TRACE_P (cpu, TRACE_SYSCALL_IDX)
+#define TRACE_REGISTER_P(cpu)	TRACE_P (cpu, TRACE_REGISTER_IDX)
 #define TRACE_DEBUG_P(cpu)	TRACE_P (cpu, TRACE_DEBUG_IDX)
 
 /* Helper functions for printing messages.  */
@@ -277,6 +286,7 @@ typedef struct _trace_data {
 #define TRACE_VPU(cpu, fmt, args...)		TRACE (cpu, TRACE_VPU_IDX, fmt, ## args)
 #define TRACE_BRANCH(cpu, fmt, args...)		TRACE (cpu, TRACE_BRANCH_IDX, fmt, ## args)
 #define TRACE_SYSCALL(cpu, fmt, args...)	TRACE (cpu, TRACE_SYSCALL_IDX, fmt, ## args)
+#define TRACE_REGISTER(cpu, fmt, args...)	TRACE (cpu, TRACE_REGISTER_IDX, fmt, ## args)
 #define TRACE_DEBUG(cpu, fmt, args...)		TRACE (cpu, TRACE_DEBUG_IDX, fmt, ## args)
 
 /* Tracing functions.  */

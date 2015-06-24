@@ -81,18 +81,6 @@ struct sim_state {
       bfin_trace_queue (cpu, oldpc, newpc, hwloop); \
   } while (0)
 
-extern void trace_register (SIM_DESC sd,
-			    sim_cpu *cpu,
-			    const char *fmt,
-			    ...)
-     __attribute__((format (printf, 3, 4)));
-#define TRACE_REGISTER(cpu, fmt, ...) \
-  do { \
-    if (TRACE_CORE_P (cpu)) \
-      trace_register (CPU_STATE (cpu), cpu, fmt, ## __VA_ARGS__); \
-  } while (0)
-#define TRACE_REG(cpu, reg, val) TRACE_REGISTER (cpu, "wrote "#reg" = %#x", val)
-
 /* Default memory size.  */
 #define BFIN_DEFAULT_MEM_SIZE (128 * 1024 * 1024)
 

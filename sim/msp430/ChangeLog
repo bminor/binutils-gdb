@@ -1,3 +1,8 @@
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* msp430-sim.c (trace_reg_put): Change TRACE_VPU to TRACE_REGISTER.
+	(trace_reg_get): Likewise.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

@@ -606,22 +606,6 @@ bfin_syscall (SIM_CPU *cpu)
   TRACE_SYSCALL (cpu, "%s", _tbuf);
 }
 
-void
-trace_register (SIM_DESC sd,
-		sim_cpu *cpu,
-		const char *fmt,
-		...)
-{
-  va_list ap;
-  trace_printf (sd, cpu, "%s %s",
-		"reg:     ",
-		TRACE_PREFIX (CPU_TRACE_DATA (cpu)));
-  va_start (ap, fmt);
-  trace_vprintf (sd, cpu, fmt, ap);
-  va_end (ap);
-  trace_printf (sd, cpu, "\n");
-}
-
 /* Execute a single instruction.  */
 
 static sim_cia

@@ -303,14 +303,14 @@ register_names[] =
 static void
 trace_reg_put (SIM_DESC sd, int n, unsigned int v)
 {
-  TRACE_VPU (MSP430_CPU (sd), "PUT: %#x -> %s", v, register_names[n]);
+  TRACE_REGISTER (MSP430_CPU (sd), "PUT: %#x -> %s", v, register_names[n]);
   REG (n) = v;
 }
 
 static unsigned int
 trace_reg_get (SIM_DESC sd, int n)
 {
-  TRACE_VPU (MSP430_CPU (sd), "GET: %s -> %#x", register_names[n], REG (n));
+  TRACE_REGISTER (MSP430_CPU (sd), "GET: %s -> %#x", register_names[n], REG (n));
   return REG (n);
 }
 

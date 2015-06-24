@@ -1,5 +1,15 @@
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.c (OPTION_TRACE_REGISTER): New enum.
+	(trace_options): Add trace-register option.
+	(trace_option_handler): Handle OPTION_TRACE_REGISTER case.
+	(trace_idx_to_str): Handle TRACE_REGISTER_IDX case and re-indent.
+	* sim-trace.h (TRACE_REGISTER_IDX): New enum.
+	(TRACE_register, WITH_TRACE_REGISTER_P, STRACE_REGISTER_P,
+	TRACE_REGISTER_P, TRACE_REGISTER): Define.
+
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.h (STRACE, STRACE_INSN, STRACE_DECODE, STRACE_EXTRACT,
 	STRACE_LINENUM, STRACE_MEMORY, STRACE_MODEL, STRACE_ALU, STRACE_CORE,
 	STRACE_EVENTS, STRACE_FPU, STRACE_VPU, STRACE_BRANCH, STRACE_SYSCALL,

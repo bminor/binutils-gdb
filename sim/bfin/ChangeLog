@@ -1,3 +1,8 @@
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (trace_register): Delete.
+	* sim-main.h (trace_register, TRACE_REGISTER, TRACE_REG): Delete.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

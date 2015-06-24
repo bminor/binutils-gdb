@@ -77,7 +77,8 @@ enum {
   OPTION_TRACE_DEBUG,
   OPTION_TRACE_FILE,
   OPTION_TRACE_VPU,
-  OPTION_TRACE_SYSCALL
+  OPTION_TRACE_SYSCALL,
+  OPTION_TRACE_REGISTER
 };
 
 static const OPTION trace_options[] =
@@ -127,6 +128,9 @@ static const OPTION trace_options[] =
       trace_option_handler, NULL },
   { {"trace-syscall", optional_argument, NULL, OPTION_TRACE_SYSCALL},
       '\0', "on|off", "Trace system calls",
+      trace_option_handler, NULL },
+  { {"trace-register", optional_argument, NULL, OPTION_TRACE_REGISTER},
+      '\0', "on|off", "Trace cpu register accesses",
       trace_option_handler, NULL },
 #ifdef SIM_HAVE_ADDR_RANGE
   { {"trace-range", required_argument, NULL, OPTION_TRACE_RANGE},
@@ -331,6 +335,13 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	return set_trace_option (sd, "-syscall", TRACE_SYSCALL_IDX, arg);
       else
 	sim_io_eprintf (sd, "System call tracing not compiled in, `--trace-syscall' ignored\n");
+      break;
+
+    case OPTION_TRACE_REGISTER :
+      if (WITH_TRACE_REGISTER_P)
+	return set_trace_option (sd, "-register", TRACE_REGISTER_IDX, arg);
+      else
+	sim_io_eprintf (sd, "Register tracing not compiled in, `--trace-register' ignored\n");
       break;
 
     case OPTION_TRACE_SEMANTICS :
@@ -603,17 +614,18 @@ trace_idx_to_str (int trace_idx)
   static char num[8];
   switch (trace_idx)
     {
-    case TRACE_ALU_IDX:     return "alu:     ";
-    case TRACE_INSN_IDX:    return "insn:    ";
-    case TRACE_DECODE_IDX:  return "decode:  ";
-    case TRACE_EXTRACT_IDX: return "extract: ";
-    case TRACE_MEMORY_IDX:  return "memory:  ";
-    case TRACE_CORE_IDX:    return "core:    ";
-    case TRACE_EVENTS_IDX:  return "events:  ";
-    case TRACE_FPU_IDX:     return "fpu:     ";
-    case TRACE_BRANCH_IDX:  return "branch:  ";
-    case TRACE_SYSCALL_IDX: return "syscall: ";
-    case TRACE_VPU_IDX:     return "vpu:     ";
+    case TRACE_ALU_IDX:      return "alu:     ";
+    case TRACE_INSN_IDX:     return "insn:    ";
+    case TRACE_DECODE_IDX:   return "decode:  ";
+    case TRACE_EXTRACT_IDX:  return "extract: ";
+    case TRACE_MEMORY_IDX:   return "memory:  ";
+    case TRACE_CORE_IDX:     return "core:    ";
+    case TRACE_EVENTS_IDX:   return "events:  ";
+    case TRACE_FPU_IDX:      return "fpu:     ";
+    case TRACE_BRANCH_IDX:   return "branch:  ";
+    case TRACE_SYSCALL_IDX:  return "syscall: ";
+    case TRACE_REGISTER_IDX: return "reg:     ";
+    case TRACE_VPU_IDX:      return "vpu:     ";
     default:
       sprintf (num, "?%d?", trace_idx);
       return num;
