@@ -1,5 +1,9 @@
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* remote-sim.c (gdbsim_open): Move sysroot update to the top.
+
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* remote-sim.c: Include gdb_bfd.h.
 	(gdbsim_open): Declare new local sysroot pointing to gdb_sysroot.
 	Skip TARGET_SYSROOT_PREFIX in gdb_sysroot when it is active.
