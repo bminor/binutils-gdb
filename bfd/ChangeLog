@@ -1,3 +1,10 @@
+2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18591
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Don't convert
+	R_X86_64_GOTPCREL to R_X86_64_PC32 if it will cause relocation
+	overflow.
+
 2015-06-23  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (aarch64_readonly_dynrelocs): New function.
