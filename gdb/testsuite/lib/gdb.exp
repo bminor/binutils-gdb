@@ -1996,6 +1996,19 @@ gdb_caching_proc support_complex_tests {
     return $result
 }
 
+# Return 1 if GDB can get a type for siginfo from the target, otherwise
+# return 0.
+
+proc supports_get_siginfo_type {} {
+    if { [istarget "i?86-*-linux*"]
+	 || [istarget "x86_64-*-linux*"]
+	 || [istarget "arm*-*-linux*"] } {
+	return 1
+    } else {
+	return 0
+    }
+}
+
 # Return 1 if target hardware or OS supports single stepping to signal
 # handler, otherwise, return 0.
 
