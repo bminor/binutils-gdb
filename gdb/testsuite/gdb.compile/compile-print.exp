@@ -38,7 +38,7 @@ gdb_test_multiple $test $test {
 	pass $test
     }
     -re ": error: stray '@' in program\r\n.*\r\n$gdb_prompt $" {
-	xfail "$test (gcc does not support '@')"
+	kfail compile/18489 "$test"
     }
 }
 
@@ -48,7 +48,7 @@ gdb_test_multiple $test $test {
 	pass $test
     }
     -re ": error: stray '@' in program\r\n.*\r\n$gdb_prompt $" {
-	xfail "$test (gcc does not support '@')"
+	kfail compile/18489 "$test"
     }
 }
 

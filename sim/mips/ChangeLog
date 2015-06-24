@@ -1,3 +1,29 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change configure.in to configure.ac.
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c [TRACE]: Delete.
+	(TRACE): Change to WITH_TRACE_ANY_P.
+	[!WITH_TRACE_ANY_P] (open_trace): Define.
+	(mips_option_handler, open_trace, sim_close, dotrace):
+	Change defined(TRACE) to WITH_TRACE_ANY_P.
+	(sim_open): Delete TRACE ifdef check.
+	* sim-main.c (load_memory): Delete TRACE ifdef check.
+	(store_memory): Likewise.
+	* sim-main.h [WITH_TRACE_ANY_P] (dotrace, tracefh): Protect decls.
+	[!WITH_TRACE_ANY_P] (dotrace): Define.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_ENGINE_HALT_HOOK, SIM_ENGINE_RESTART_HOOK): Delete

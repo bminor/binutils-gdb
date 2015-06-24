@@ -1,3 +1,12 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_ARG_ENABLE(sim)): Call AS_HELP_STRING.
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Change configure.in to configure.ac.
+
 2015-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* arm/configure: Regenerated.

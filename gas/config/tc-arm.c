@@ -207,6 +207,7 @@ static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
 static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
 static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
 static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
+static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
@@ -258,6 +259,8 @@ static const arm_feature_set fpu_crypto_ext_armv8 =
   ARM_FEATURE_COPROC (FPU_CRYPTO_EXT_ARMV8);
 static const arm_feature_set crc_ext_armv8 =
   ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
+static const arm_feature_set fpu_neon_ext_v8_1 =
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8 | FPU_NEON_EXT_RDMA);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -4921,7 +4924,9 @@ parse_fpa_immediate (char ** str)
     {
       /* FIXME: 5 = X_PRECISION, should be #define'd where we can use it.
 	 Ditto for 15.	*/
-      if (gen_to_words (words, 5, (long) 15) == 0)
+#define X_PRECISION 5
+#define E_PRECISION 15L
+      if (gen_to_words (words, X_PRECISION, E_PRECISION) == 0)
 	{
 	  for (i = 0; i < NUM_FLOAT_VALS; i++)
 	    {
@@ -7747,12 +7752,62 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
   return FAIL;
 }
 
+#if defined BFD_HOST_64_BIT
+/* Returns TRUE if double precision value V may be cast
+   to single precision without loss of accuracy.  */
+
+static bfd_boolean
+is_double_a_single (bfd_int64_t v)
+{
+  int exp = (int)((v >> 52) & 0x7FF);
+  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFF);
+
+  return (exp == 0 || exp == 0x7FF
+	  || (exp >= 1023 - 126 && exp <= 1023 + 127))
+    && (mantissa & 0x1FFFFFFFl) == 0;
+}
+
+/* Returns a double precision value casted to single precision 
+   (ignoring the least significant bits in exponent and mantissa).  */
+
+static int
+double_to_single (bfd_int64_t v)
+{
+  int sign = (int) ((v >> 63) & 1l);
+  int exp = (int) ((v >> 52) & 0x7FF);
+  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFF);
+
+  if (exp == 0x7FF)
+    exp = 0xFF;
+  else
+    {
+      exp = exp - 1023 + 127;
+      if (exp >= 0xFF)
+	{
+	  /* Infinity.  */
+	  exp = 0x7F;
+	  mantissa = 0;
+	}
+      else if (exp < 0)
+	{
+	  /* No denormalized numbers.  */
+	  exp = 0;
+	  mantissa = 0;
+	}
+    }
+  mantissa >>= 29;
+  return (sign << 31) | (exp << 23) | mantissa;
+}
+#endif /* BFD_HOST_64_BIT */
+
 enum lit_type
 {
   CONST_THUMB,
   CONST_ARM,
   CONST_VEC
 };
+
+static void do_vfp_nsyn_opcode (const char *);
 
 /* inst.reloc.exp describes an "=expr" load pseudo-operation.
    Determine whether it can be performed with a move instruction; if
@@ -7769,7 +7824,6 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
   unsigned long tbit;
   bfd_boolean thumb_p = (t == CONST_THUMB);
   bfd_boolean arm_p   = (t == CONST_ARM);
-  bfd_boolean vec64_p = (t == CONST_VEC) && !inst.operands[i].issingle;
 
   if (thumb_p)
     tbit = (inst.instruction > 0xffff) ? THUMB2_LOAD_BIT : THUMB_LOAD_BIT;
@@ -7781,6 +7835,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
       inst.error = _("invalid pseudo operation");
       return TRUE;
     }
+
   if (inst.reloc.exp.X_op != O_constant
       && inst.reloc.exp.X_op != O_symbol
       && inst.reloc.exp.X_op != O_big)
@@ -7788,77 +7843,204 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
       inst.error = _("constant expression expected");
       return TRUE;
     }
-  if ((inst.reloc.exp.X_op == O_constant
-       || inst.reloc.exp.X_op == O_big)
-      && !inst.operands[i].issingle)
+
+  if (inst.reloc.exp.X_op == O_constant
+      || inst.reloc.exp.X_op == O_big)
     {
-      if (thumb_p && inst.reloc.exp.X_op == O_constant)
+#if defined BFD_HOST_64_BIT
+      bfd_int64_t v;
+#else
+      offsetT v;
+#endif
+      if (inst.reloc.exp.X_op == O_big)
 	{
-	  if (!unified_syntax && (inst.reloc.exp.X_add_number & ~0xFF) == 0)
+	  LITTLENUM_TYPE w[X_PRECISION];
+	  LITTLENUM_TYPE * l;
+
+	  if (inst.reloc.exp.X_add_number == -1)
 	    {
-	      /* This can be done with a mov(1) instruction.  */
-	      inst.instruction	= T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
-	      inst.instruction |= inst.reloc.exp.X_add_number;
-	      return TRUE;
+	      gen_to_words (w, X_PRECISION, E_PRECISION);
+	      l = w;
+	      /* FIXME: Should we check words w[2..5] ?  */
+	    }
+	  else
+	    l = generic_bignum;
+	  
+#if defined BFD_HOST_64_BIT
+	  v =
+	    ((((((((bfd_int64_t) l[3] & LITTLENUM_MASK)
+		  << LITTLENUM_NUMBER_OF_BITS)
+		 | ((bfd_int64_t) l[2] & LITTLENUM_MASK))
+		<< LITTLENUM_NUMBER_OF_BITS)
+	       | ((bfd_int64_t) l[1] & LITTLENUM_MASK))
+	      << LITTLENUM_NUMBER_OF_BITS)
+	     | ((bfd_int64_t) l[0] & LITTLENUM_MASK));
+#else
+	  v = ((l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
+	    |  (l[0] & LITTLENUM_MASK);
+#endif
+	}
+      else
+	v = inst.reloc.exp.X_add_number;
+
+      if (!inst.operands[i].issingle)
+	{
+	  if (thumb_p)
+	    {
+	      if ((v & ~0xFF) == 0)
+		{
+		  /* This can be done with a mov(1) instruction.  */
+		  inst.instruction = T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
+		  inst.instruction |= v;
+		  return TRUE;
+		}
+
+	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)
+		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
+		{
+		  /* Check if on thumb2 it can be done with a mov.w or mvn.w instruction.  */
+		  unsigned int newimm;
+		  bfd_boolean isNegated;
+
+		  newimm = encode_thumb32_immediate (v);
+		  if (newimm != (unsigned int) FAIL)
+		    isNegated = FALSE;
+		  else
+		    {
+		      newimm = encode_thumb32_immediate (~ v);
+		      if (newimm != (unsigned int) FAIL)
+			isNegated = TRUE;
+		    }
+
+		  if (newimm != (unsigned int) FAIL)
+		    {
+		      inst.instruction = 0xf04f0000 | (inst.operands[i].reg << 8);
+		      inst.instruction |= (isNegated?0x200000:0);
+		      inst.instruction |= (newimm & 0x800) << 15;
+		      inst.instruction |= (newimm & 0x700) << 4;
+		      inst.instruction |= (newimm & 0x0ff);
+		      return TRUE;
+		    }
+		  else if ((v & ~0xFFFF) == 0 || (v & ~0xFFFF0000) == 0)
+		    { 
+		      /* The number may be loaded with a movw/movt instruction.  */
+		      int imm;
+
+		      if ((inst.reloc.exp.X_add_number & ~0xFFFF) == 0)
+			{
+			  inst.instruction= 0xf2400000;
+			  imm = v;
+			}
+		      else
+			{
+			  inst.instruction = 0xf2c00000;
+			  imm = v >> 16;
+			}
+
+		      inst.instruction |= (inst.operands[i].reg << 8);
+		      inst.instruction |= (imm & 0xf000) << 4;
+		      inst.instruction |= (imm & 0x0800) << 15;
+		      inst.instruction |= (imm & 0x0700) << 4;
+		      inst.instruction |= (imm & 0x00ff);
+		      return TRUE;
+		    }
+		}
+	    }
+	  else if (arm_p)
+	    {
+	      int value = encode_arm_immediate (v);
+
+	      if (value != FAIL)
+		{
+		  /* This can be done with a mov instruction.  */
+		  inst.instruction &= LITERAL_MASK;
+		  inst.instruction |= INST_IMMEDIATE | (OPCODE_MOV << DATA_OP_SHIFT);
+		  inst.instruction |= value & 0xfff;
+		  return TRUE;
+		}
+
+	      value = encode_arm_immediate (~ v);
+	      if (value != FAIL)
+		{
+		  /* This can be done with a mvn instruction.  */
+		  inst.instruction &= LITERAL_MASK;
+		  inst.instruction |= INST_IMMEDIATE | (OPCODE_MVN << DATA_OP_SHIFT);
+		  inst.instruction |= value & 0xfff;
+		  return TRUE;
+		}
+	    }
+	  else if (t == CONST_VEC)
+	    {
+	      int op = 0;
+	      unsigned immbits = 0;
+	      unsigned immlo = inst.operands[1].imm;
+	      unsigned immhi = inst.operands[1].regisimm
+		? inst.operands[1].reg
+		: inst.reloc.exp.X_unsigned
+		? 0
+		: ((bfd_int64_t)((int) immlo)) >> 32;
+	      int cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
+						   &op, 64, NT_invtype);
+
+	      if (cmode == FAIL)
+		{
+		  neon_invert_size (&immlo, &immhi, 64);
+		  op = !op;
+		  cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
+						   &op, 64, NT_invtype);
+		}
+
+	      if (cmode != FAIL)
+		{
+		  inst.instruction = (inst.instruction & VLDR_VMOV_SAME)
+		    | (1 << 23)
+		    | (cmode << 8)
+		    | (op << 5)
+		    | (1 << 4);
+
+		  /* Fill other bits in vmov encoding for both thumb and arm.  */
+		  if (thumb_mode)
+		    inst.instruction |= (0x7 << 29) | (0xF << 24);
+		  else
+		    inst.instruction |= (0xF << 28) | (0x1 << 25);
+		  neon_write_immbits (immbits);
+		  return TRUE;
+		}
 	    }
 	}
-      else if (arm_p && inst.reloc.exp.X_op == O_constant)
+
+      if (t == CONST_VEC)
 	{
-	  int value = encode_arm_immediate (inst.reloc.exp.X_add_number);
-	  if (value != FAIL)
+	  /* Check if vldr Rx, =constant could be optimized to vmov Rx, #constant.  */
+	  if (inst.operands[i].issingle
+	      && is_quarter_float (inst.operands[1].imm)
+	      && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3xd))
 	    {
-	      /* This can be done with a mov instruction.  */
-	      inst.instruction &= LITERAL_MASK;
-	      inst.instruction |= INST_IMMEDIATE | (OPCODE_MOV << DATA_OP_SHIFT);
-	      inst.instruction |= value & 0xfff;
+	      inst.operands[1].imm =
+		neon_qfloat_bits (v);
+	      do_vfp_nsyn_opcode ("fconsts");
 	      return TRUE;
 	    }
 
-	  value = encode_arm_immediate (~inst.reloc.exp.X_add_number);
-	  if (value != FAIL)
+	  /* If our host does not support a 64-bit type then we cannot perform
+	     the following optimization.  This mean that there will be a
+	     discrepancy between the output produced by an assembler built for
+	     a 32-bit-only host and the output produced from a 64-bit host, but
+	     this cannot be helped.  */
+#if defined BFD_HOST_64_BIT
+	  else if (!inst.operands[1].issingle
+		   && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
 	    {
-	      /* This can be done with a mvn instruction.  */
-	      inst.instruction &= LITERAL_MASK;
-	      inst.instruction |= INST_IMMEDIATE | (OPCODE_MVN << DATA_OP_SHIFT);
-	      inst.instruction |= value & 0xfff;
-	      return TRUE;
+	      if (is_double_a_single (v)
+		  && is_quarter_float (double_to_single (v)))
+		{
+		  inst.operands[1].imm =
+		    neon_qfloat_bits (double_to_single (v));
+		  do_vfp_nsyn_opcode ("fconstd");
+		  return TRUE;
+		}
 	    }
-	}
-      else if (vec64_p)
-	{
-	  int op = 0;
-	  unsigned immbits = 0;
-	  unsigned immlo = inst.operands[1].imm;
-	  unsigned immhi = inst.operands[1].regisimm
-			   ? inst.operands[1].reg
-			   : inst.reloc.exp.X_unsigned
-			     ? 0
-			     : ((bfd_int64_t)((int) immlo)) >> 32;
-	  int cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
-					       &op, 64, NT_invtype);
-
-	  if (cmode == FAIL)
-	    {
-	      neon_invert_size (&immlo, &immhi, 64);
-	      op = !op;
-	      cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
-					       &op, 64, NT_invtype);
-	    }
-	  if (cmode != FAIL)
-	    {
-	      inst.instruction = (inst.instruction & VLDR_VMOV_SAME)
-				  | (1 << 23)
-				  | (cmode << 8)
-				  | (op << 5)
-				  | (1 << 4);
-	      /* Fill other bits in vmov encoding for both thumb and arm.  */
-	      if (thumb_mode)
-		inst.instruction |= (0x7 << 29) | (0xF << 24);
-	      else
-		inst.instruction |= (0xF << 28) | (0x1 << 25);
-	      neon_write_immbits (immbits);
-	      return TRUE;
-	    }
+#endif
 	}
     }
 
@@ -8796,8 +8978,6 @@ do_mov16 (void)
     }
 }
 
-static void do_vfp_nsyn_opcode (const char *);
-
 static int
 do_vfp_nsyn_mrs (void)
 {
@@ -9179,6 +9359,24 @@ do_swi (void)
 {
   inst.reloc.type = BFD_RELOC_ARM_SWI;
   inst.reloc.pc_rel = 0;
+}
+
+static void
+do_setpan (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_pan),
+	      _("selected processor does not support SETPAN instruction"));
+
+  inst.instruction |= ((inst.operands[0].imm & 1) << 9);
+}
+
+static void
+do_t_setpan (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_pan),
+	      _("selected processor does not support SETPAN instruction"));
+
+  inst.instruction |= (inst.operands[0].imm << 3);
 }
 
 /* ARM V5E (El Segundo) signed-multiply-accumulate (argument parse)
@@ -12897,6 +13095,8 @@ struct neon_tab_entry
   X(vqdmull,	0x0800d00, N_INV,     0x0800b40),	\
   X(vqdmulh,    0x0000b00, N_INV,     0x0800c40),	\
   X(vqrdmulh,   0x1000b00, N_INV,     0x0800d40),	\
+  X(vqrdmlah,   0x3000b10, N_INV,     0x0800e40),	\
+  X(vqrdmlsh,   0x3000c10, N_INV,     0x0800f40),	\
   X(vshl,	0x0000400, N_INV,     0x0800510),	\
   X(vqshl,	0x0000410, N_INV,     0x0800710),	\
   X(vand,	0x0000110, N_INV,     0x0800030),	\
@@ -18884,6 +19084,13 @@ static const struct asm_opcode insns[] =
  TCE("hvc",	1400070, f7e08000, 1, (EXPi), hvc, t_hvc),
  TCE("eret",	160006e, f3de8f00, 0, (), noargs, noargs),
 
+#undef	ARM_VARIANT
+#define	ARM_VARIANT    & arm_ext_pan
+#undef	THUMB_VARIANT
+#define	THUMB_VARIANT  & arm_ext_pan
+
+ TUF("setpan",	1100000, b610, 1, (I7), setpan, t_setpan),
+
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_v6t2
 #undef  THUMB_VARIANT
@@ -19789,6 +19996,11 @@ static const struct asm_opcode insns[] =
  NUF(vrecpsq,   0000f10,  3, (RNQ,  oRNQ,  RNQ),  neon_step),
  NUF(vrsqrts,   0200f10,  3, (RNDQ, oRNDQ, RNDQ), neon_step),
  NUF(vrsqrtsq,  0200f10,  3, (RNQ,  oRNQ,  RNQ),  neon_step),
+ /* ARM v8.1 extension.  */
+ nUF(vqrdmlah,  _vqrdmlah, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmlahq, _vqrdmlah, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmlsh,  _vqrdmlsh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmlshq, _vqrdmlsh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
 
   /* Two address, int/float. Types S8 S16 S32 F32.  */
  NUF(vabsq,     1b10300, 2, (RNQ,  RNQ),      neon_abs_neg),
@@ -21030,10 +21242,14 @@ arm_init_frag (fragS * fragP, int max_chars ATTRIBUTE_UNUSED)
 void
 arm_init_frag (fragS * fragP, int max_chars)
 {
+  int frag_thumb_mode;
+
   /* If the current ARM vs THUMB mode has not already
      been recorded into this frag then do so now.  */
   if ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) == 0)
-      fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
+    fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
+
+  frag_thumb_mode = fragP->tc_frag_data.thumb_mode ^ MODE_RECORDED;
 
   /* Record a mapping symbol for alignment frags.  We will delete this
      later if the alignment ends up empty.  */
@@ -21045,7 +21261,7 @@ arm_init_frag (fragS * fragP, int max_chars)
       mapping_state_2 (MAP_DATA, max_chars);
       break;
     case rs_align_code:
-      mapping_state_2 (thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
+      mapping_state_2 (frag_thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
       break;
     default:
       break;
@@ -22934,7 +23150,7 @@ md_apply_fix (fixS *	fixP,
 
 	if (rd == REG_SP)
 	  {
-	    if (value & ~0x1fc)
+ 	    if (value & ~0x1fc)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("invalid immediate for stack address calculation"));
 	    newval = subtract ? T_OPCODE_SUB_ST : T_OPCODE_ADD_ST;
@@ -22942,10 +23158,49 @@ md_apply_fix (fixS *	fixP,
 	  }
 	else if (rs == REG_PC || rs == REG_SP)
 	  {
+	    /* PR gas/18541.  If the addition is for a defined symbol
+	       within range of an ADR instruction then accept it.  */
+	    if (subtract
+		&& value == 4
+		&& fixP->fx_addsy != NULL)
+	      {
+		subtract = 0;
+
+		if (! S_IS_DEFINED (fixP->fx_addsy)
+		    || S_GET_SEGMENT (fixP->fx_addsy) != seg
+		    || S_IS_WEAK (fixP->fx_addsy))
+		  {
+		    as_bad_where (fixP->fx_file, fixP->fx_line,
+				  _("address calculation needs a strongly defined nearby symbol"));
+		  }
+		else
+		  {
+		    offsetT v = fixP->fx_where + fixP->fx_frag->fr_address;
+
+		    /* Round up to the next 4-byte boundary.  */
+		    if (v & 3)
+		      v = (v + 3) & ~ 3;
+		    else
+		      v += 4;
+		    v = S_GET_VALUE (fixP->fx_addsy) - v;
+
+		    if (v & ~0x3fc)
+		      {
+			as_bad_where (fixP->fx_file, fixP->fx_line,
+				      _("symbol too far away"));
+		      }
+		    else
+		      {
+			fixP->fx_done = 1;
+			value = v;
+		      }
+		  }
+	      }
+
 	    if (subtract || value & ~0x3fc)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("invalid immediate for address calculation (value = 0x%08lX)"),
-			    (unsigned long) value);
+			    (unsigned long) (subtract ? - value : value));
 	    newval = (rs == REG_PC ? T_OPCODE_ADD_PC : T_OPCODE_ADD_SP);
 	    newval |= rd << 8;
 	    newval |= value >> 2;
@@ -23348,7 +23603,6 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_SBREL32:
     case BFD_RELOC_ARM_PREL31:
     case BFD_RELOC_ARM_TARGET2:
-    case BFD_RELOC_ARM_TLS_LE32:
     case BFD_RELOC_ARM_TLS_LDO32:
     case BFD_RELOC_ARM_PCREL_CALL:
     case BFD_RELOC_ARM_PCREL_JUMP:
@@ -23386,6 +23640,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 
     case BFD_RELOC_ARM_TLS_GOTDESC:
     case BFD_RELOC_ARM_TLS_GD32:
+    case BFD_RELOC_ARM_TLS_LE32:
     case BFD_RELOC_ARM_TLS_IE32:
     case BFD_RELOC_ARM_TLS_LDM32:
       /* BFD will include the symbol's address in the addend.
@@ -24615,6 +24870,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv7-m",	ARM_ARCH_V7M,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7e-m",	ARM_ARCH_V7EM,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8-a",	ARM_ARCH_V8A,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv8.1-a",	ARM_ARCH_V8_1A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("xscale",	ARM_ARCH_XSCALE, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	ARM_ARCH_IWMMXT, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	ARM_ARCH_IWMMXT2,FPU_ARCH_VFP),
@@ -24662,6 +24918,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("os",	ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
+  ARM_EXT_OPT ("pan",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
+			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_PAN, 0),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),
@@ -24669,6 +24928,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 				     | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
+  ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8,
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
+				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
 			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
@@ -24726,6 +24988,7 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"neon-fp-armv8",	FPU_ARCH_NEON_VFP_ARMV8},
   {"crypto-neon-fp-armv8",
 			FPU_ARCH_CRYPTO_NEON_VFP_ARMV8},
+  {"neon-fp-armv8.1",	FPU_ARCH_NEON_VFP_ARMV8_1},
   {NULL,		ARM_ARCH_NONE}
 };
 

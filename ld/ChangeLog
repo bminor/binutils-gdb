@@ -1,3 +1,35 @@
+2015-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/18466
+	* emultempl/pe.em (pe_find_data_imports): Generate an error if a
+	symbol name is too long to handle.
+	* emultempl/pep.em (pep_find_data_imports): Likewise.
+
+2015-06-12  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Mention new option.
+	* lexsup.c (parse_args): Handle --print-memory-usage.
+	(ld_options): Add --print-memory-usage.
+	* ldmain.c (main): Call lang_print_memory_usage.
+	* ldlex.h (enum option_values): Add OPTION_PRINT_MEMORY_USAGE.
+	* ldlang.h: Add prototype of lang_print_memory_usage.
+	* ldlang.c (lang_print_memory_size, lang_print_memory_usage): New
+	functions.
+	* ld.texinfo (Options): Document --print-memory-usage.
+	* ld.h (args_type): Add print_memory_usage field.
+
+2015-06-08  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French Translation.
+
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open):
+	Add Compact EH support.
+	* scripttempl/elf.sc: Handle .eh_frame_entry and .gnu_extab
+	sections.
+
 2015-05-17  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* configure.ac (AC_PROG_GREP): Check for grep program.

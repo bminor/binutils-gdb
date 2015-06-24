@@ -415,6 +415,27 @@ struct target_ops
      string should be copied into a buffer by the client if the string
      will not be immediately used, or if it must persist.  */
   char *(*pid_to_exec_file) (int pid);
+
+  /* Multiple-filesystem-aware open.  Like open(2), but operating in
+     the filesystem as it appears to process PID.  Systems where all
+     processes share a common filesystem should set this to NULL.
+     If NULL, the caller should fall back to open(2).  */
+  int (*multifs_open) (int pid, const char *filename,
+		       int flags, mode_t mode);
+
+  /* Multiple-filesystem-aware unlink.  Like unlink(2), but operates
+     in the filesystem as it appears to process PID.  Systems where
+     all processes share a common filesystem should set this to NULL.
+     If NULL, the caller should fall back to unlink(2).  */
+  int (*multifs_unlink) (int pid, const char *filename);
+
+  /* Multiple-filesystem-aware readlink.  Like readlink(2), but
+     operating in the filesystem as it appears to process PID.
+     Systems where all processes share a common filesystem should
+     set this to NULL.  If NULL, the caller should fall back to
+     readlink(2).  */
+  ssize_t (*multifs_readlink) (int pid, const char *filename,
+			       char *buf, size_t bufsiz);
 };
 
 extern struct target_ops *the_target;

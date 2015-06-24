@@ -326,8 +326,10 @@ struct gdbarch
   gdbarch_auxv_parse_ftype *auxv_parse;
   gdbarch_vsyscall_range_ftype *vsyscall_range;
   gdbarch_infcall_mmap_ftype *infcall_mmap;
+  gdbarch_infcall_munmap_ftype *infcall_munmap;
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
+  gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -426,8 +428,10 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->insn_is_jump = default_insn_is_jump;
   gdbarch->vsyscall_range = default_vsyscall_range;
   gdbarch->infcall_mmap = default_infcall_mmap;
+  gdbarch->infcall_munmap = default_infcall_munmap;
   gdbarch->gcc_target_options = default_gcc_target_options;
   gdbarch->gnu_triplet_regexp = default_gnu_triplet_regexp;
+  gdbarch->addressable_memory_unit_size = default_addressable_memory_unit_size;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -658,8 +662,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of auxv_parse, has predicate.  */
   /* Skip verify of vsyscall_range, invalid_p == 0 */
   /* Skip verify of infcall_mmap, invalid_p == 0 */
+  /* Skip verify of infcall_munmap, invalid_p == 0 */
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
+  /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -710,6 +716,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: address_to_pointer = <%s>\n",
                       host_address_to_string (gdbarch->address_to_pointer));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: addressable_memory_unit_size = <%s>\n",
+                      host_address_to_string (gdbarch->addressable_memory_unit_size));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
                       gdbarch_adjust_breakpoint_address_p (gdbarch));
@@ -1020,14 +1029,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       plongest (gdbarch->have_nonsteppable_watchpoint));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
-                      host_address_to_string (gdbarch->stack_frame_destroyed_p));
-  fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
                       host_address_to_string (gdbarch->in_solib_return_trampoline));
   fprintf_unfiltered (file,
                       "gdbarch_dump: infcall_mmap = <%s>\n",
                       host_address_to_string (gdbarch->infcall_mmap));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: infcall_munmap = <%s>\n",
+                      host_address_to_string (gdbarch->infcall_munmap));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_info_proc_p() = %d\n",
                       gdbarch_info_proc_p (gdbarch));
@@ -1295,6 +1304,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: stabs_argument_has_addr = <%s>\n",
                       host_address_to_string (gdbarch->stabs_argument_has_addr));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
+                      host_address_to_string (gdbarch->stack_frame_destroyed_p));
   fprintf_unfiltered (file,
                       "gdbarch_dump: stap_gdb_register_prefix = %s\n",
                       pstring (gdbarch->stap_gdb_register_prefix));
@@ -4673,6 +4685,23 @@ set_gdbarch_infcall_mmap (struct gdbarch *gdbarch,
   gdbarch->infcall_mmap = infcall_mmap;
 }
 
+void
+gdbarch_infcall_munmap (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR size)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->infcall_munmap != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_infcall_munmap called\n");
+  gdbarch->infcall_munmap (addr, size);
+}
+
+void
+set_gdbarch_infcall_munmap (struct gdbarch *gdbarch,
+                            gdbarch_infcall_munmap_ftype infcall_munmap)
+{
+  gdbarch->infcall_munmap = infcall_munmap;
+}
+
 char *
 gdbarch_gcc_target_options (struct gdbarch *gdbarch)
 {
@@ -4705,6 +4734,23 @@ set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch,
                                 gdbarch_gnu_triplet_regexp_ftype gnu_triplet_regexp)
 {
   gdbarch->gnu_triplet_regexp = gnu_triplet_regexp;
+}
+
+int
+gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->addressable_memory_unit_size != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_addressable_memory_unit_size called\n");
+  return gdbarch->addressable_memory_unit_size (gdbarch);
+}
+
+void
+set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch,
+                                          gdbarch_addressable_memory_unit_size_ftype addressable_memory_unit_size)
+{
+  gdbarch->addressable_memory_unit_size = addressable_memory_unit_size;
 }
 
 

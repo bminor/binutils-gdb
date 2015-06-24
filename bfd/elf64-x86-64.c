@@ -2571,14 +2571,16 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  asection *bnd_s = htab->plt_bnd;
 	  asection *got_s = htab->plt_got;
 
+	  /* If this is the first .plt entry, make room for the special
+	     first entry.  The .plt section is used by prelink to undo
+	     prelinking for dynamic relocations.  */
+	  if (s->size == 0)
+	    s->size = plt_entry_size;
+
 	  if (use_plt_got)
 	    eh->plt_got.offset = got_s->size;
 	  else
 	    {
-	      /* If this is the first .plt entry, make room for the
-		 special first entry.  */
-	      if (s->size == 0)
-		s->size = plt_entry_size;
 	      h->plt.offset = s->size;
 	      if (bnd_s)
 		eh->plt_bnd.offset = bnd_s->size;
@@ -2901,6 +2903,7 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
   bfd_boolean changed_contents;
   bfd_boolean changed_relocs;
   bfd_signed_vma *local_got_refcounts;
+  bfd_vma maxpagesize;
 
   /* Don't even try to convert non-ELF outputs.  */
   if (!is_elf_hash_table (link_info->hash))
@@ -2925,6 +2928,7 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
   changed_contents = FALSE;
   changed_relocs = FALSE;
   local_got_refcounts = elf_local_got_refcounts (abfd);
+  maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
 
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
@@ -2942,9 +2946,26 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
       unsigned int r_symndx = htab->r_sym (irel->r_info);
       unsigned int indx;
       struct elf_link_hash_entry *h;
+      asection *tsec;
+      char symtype;
+      bfd_vma toff, roff;
+      enum {
+	none, local, global
+      } convert_mov_to_lea;
 
       if (r_type != R_X86_64_GOTPCREL)
 	continue;
+
+      roff = irel->r_offset;
+
+      /* Don't convert R_X86_64_GOTPCREL relocation if it isn't for mov
+	 instruction.  */
+      if (roff < 2
+	  || bfd_get_8 (abfd, contents + roff - 2) != 0x8b)
+	continue;
+
+      tsec = NULL;
+      convert_mov_to_lea = none;
 
       /* Get the symbol referred to by the reloc.  */
       if (r_symndx < symtab_hdr->sh_info)
@@ -2954,46 +2975,140 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 
-	  /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  */
-	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC
-	      && irel->r_offset >= 2
-	      && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
+	  symtype = ELF_ST_TYPE (isym->st_info);
+
+	  /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation and
+	     skip relocation against undefined symbols.  */
+	  if (symtype != STT_GNU_IFUNC && isym->st_shndx != SHN_UNDEF)
 	    {
-	      bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
-	      irel->r_info = htab->r_info (r_symndx, R_X86_64_PC32);
-	      if (local_got_refcounts != NULL
-		  && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	      changed_contents = TRUE;
-	      changed_relocs = TRUE;
+	      if (isym->st_shndx == SHN_ABS)
+		tsec = bfd_abs_section_ptr;
+	      else if (isym->st_shndx == SHN_COMMON)
+		tsec = bfd_com_section_ptr;
+	      else if (isym->st_shndx == SHN_X86_64_LCOMMON)
+		tsec = &_bfd_elf_large_com_section;
+	      else
+		tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+
+	      toff = isym->st_value;
+	      convert_mov_to_lea = local;
 	    }
-	  continue;
+	}
+      else
+	{
+	  indx = r_symndx - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (abfd)[indx];
+	  BFD_ASSERT (h != NULL);
+
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  We also
+	     avoid optimizing _DYNAMIC since ld.so may use its link-time
+	     address.  */
+	  if (h->def_regular
+	      && h->type != STT_GNU_IFUNC
+	      && h != htab->elf.hdynamic
+	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	    {
+	      tsec = h->root.u.def.section;
+	      toff = h->root.u.def.value;
+	      symtype = h->type;
+	      convert_mov_to_lea = global;
+	    }
 	}
 
-      indx = r_symndx - symtab_hdr->sh_info;
-      h = elf_sym_hashes (abfd)[indx];
-      BFD_ASSERT (h != NULL);
+      if (convert_mov_to_lea == none)
+	continue;
 
-      while (h->root.type == bfd_link_hash_indirect
-	     || h->root.type == bfd_link_hash_warning)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-      /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  We also
-	 avoid optimizing _DYNAMIC since ld.so may use its link-time
-	 address.  */
-      if (h->def_regular
-	  && h->type != STT_GNU_IFUNC
-	  && h != htab->elf.hdynamic
-	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
-	  && irel->r_offset >= 2
-	  && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
+      if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	{
-	  bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
-	  irel->r_info = htab->r_info (r_symndx, R_X86_64_PC32);
+	  /* At this stage in linking, no SEC_MERGE symbol has been
+	     adjusted, so all references to such symbols need to be
+	     passed through _bfd_merged_section_offset.  (Later, in
+	     relocate_section, all SEC_MERGE symbols *except* for
+	     section symbols have been adjusted.)
+
+	     gas may reduce relocations against symbols in SEC_MERGE
+	     sections to a relocation against the section symbol when
+	     the original addend was zero.  When the reloc is against
+	     a section symbol we should include the addend in the
+	     offset passed to _bfd_merged_section_offset, since the
+	     location of interest is the original symbol.  On the
+	     other hand, an access to "sym+addend" where "sym" is not
+	     a section symbol should not include the addend;  Such an
+	     access is presumed to be an offset from "sym";  The
+	     location of interest is just "sym".  */
+	   if (symtype == STT_SECTION)
+	     toff += irel->r_addend;
+
+	   toff = _bfd_merged_section_offset (abfd, &tsec,
+					      elf_section_data (tsec)->sec_info,
+					      toff);
+
+	   if (symtype != STT_SECTION)
+	     toff += irel->r_addend;
+	}
+      else
+	toff += irel->r_addend;
+
+      /* Don't convert if R_X86_64_PC32 relocation overflows.  */
+      if (tsec->output_section == sec->output_section)
+	{
+	  if ((toff - roff + 0x80000000) > 0xffffffff)
+	    continue;
+	}
+      else
+	{
+	  asection *asect;
+	  bfd_size_type size;
+
+	  /* At this point, we don't know the load addresses of TSEC
+	     section nor SEC section.  We estimate the distrance between
+	     SEC and TSEC.  */
+	  size = 0;
+	  for (asect = sec->output_section;
+	       asect != NULL && asect != tsec->output_section;
+	       asect = asect->next)
+	    {
+	      asection *i;
+	      for (i = asect->output_section->map_head.s;
+		   i != NULL;
+		   i = i->map_head.s)
+		{
+		  size = align_power (size, i->alignment_power);
+		  size += i->size;
+		}
+	    }
+
+	  /* Don't convert R_X86_64_GOTPCREL if TSEC isn't placed after
+	     SEC.  */
+	  if (asect == NULL)
+	    continue;
+
+	  /* Take PT_GNU_RELRO segment into account by adding
+	     maxpagesize.  */
+	  if ((toff + size + maxpagesize - roff + 0x80000000)
+	      > 0xffffffff)
+	    continue;
+	}
+
+      bfd_put_8 (abfd, 0x8d, contents + roff - 2);
+      irel->r_info = htab->r_info (r_symndx, R_X86_64_PC32);
+      changed_contents = TRUE;
+      changed_relocs = TRUE;
+
+      if (convert_mov_to_lea == local)
+	{
+	  if (local_got_refcounts != NULL
+	      && local_got_refcounts[r_symndx] > 0)
+	    local_got_refcounts[r_symndx] -= 1;
+	}
+      else
+	{
 	  if (h->got.refcount > 0)
 	    h->got.refcount -= 1;
-	  changed_contents = TRUE;
-	  changed_relocs = TRUE;
 	}
     }
 
@@ -3351,11 +3466,18 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
       if (htab->elf.splt->size != 0)
 	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
+	  /* DT_PLTGOT is used by prelink even if there is no PLT
+	     relocation.  */
+	  if (!add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;
+
+	  if (htab->elf.srelplt->size != 0)
+	    {
+	      if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+		  || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+		  || !add_dynamic_entry (DT_JMPREL, 0))
+		return FALSE;
+	    }
 
 	  if (htab->tlsdesc_plt
 	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)

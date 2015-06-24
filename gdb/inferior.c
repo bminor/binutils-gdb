@@ -310,7 +310,7 @@ detach_inferior (int pid)
 {
   struct inferior *inf = find_inferior_pid (pid);
 
-  exit_inferior_1 (inf, 1);
+  exit_inferior_1 (inf, 0);
 
   if (print_inferior_events)
     printf_unfiltered (_("[Inferior %d detached]\n"), pid);

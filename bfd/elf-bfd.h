@@ -388,16 +388,41 @@ struct eh_frame_array_ent
 
 struct htab;
 
-struct eh_frame_hdr_info
+#define DWARF2_EH_HDR 1
+#define COMPACT_EH_HDR 2
+
+/* Endian-neutral code indicating that a function cannot be unwound.  */
+#define COMPACT_EH_CANT_UNWIND_OPCODE 0x015d5d01
+
+struct dwarf_eh_frame_hdr_info
 {
   struct htab *cies;
-  asection *hdr_sec;
-  unsigned int fde_count, array_count;
-  struct eh_frame_array_ent *array;
+  unsigned int fde_count;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
   bfd_boolean table;
+  struct eh_frame_array_ent *array;
+};
+
+struct compact_eh_frame_hdr_info
+{
+  unsigned int allocated_entries;
+  /* eh_frame_entry fragments.  */
+  asection **entries;
+};
+
+struct eh_frame_hdr_info
+{
+  asection *hdr_sec;
+  unsigned int array_count;
+  bfd_boolean frame_hdr_is_compact;
+  union
+    {
+      struct dwarf_eh_frame_hdr_info dwarf;
+      struct compact_eh_frame_hdr_info compact;
+    }
+  u;
 };
 
 /* Enum used to identify target specific extensions to the elf_obj_tdata
@@ -1291,6 +1316,12 @@ struct elf_backend_data
      or give an error and return FALSE.  */
   bfd_boolean (*obj_attrs_handle_unknown) (bfd *, int);
 
+  /* Encoding used for compact EH tables.  */
+  int (*compact_eh_encoding) (struct bfd_link_info *);
+
+  /* Opcode representing no unwind.  */
+  int (*cant_unwind_opcode) (struct bfd_link_info *);
+
   /* This is non-zero if static TLS segments require a special alignment.  */
   unsigned static_tls_alignment;
 
@@ -1445,6 +1476,9 @@ struct bfd_elf_section_data
      field acts as a chain pointer.  */
   struct eh_cie_fde *fde_list;
 
+  /* Link from a text section to its .eh_frame_entry section.  */
+  asection *eh_frame_entry;
+
   /* A pointer used for various section optimizations.  */
   void *sec_info;
 };
@@ -1458,6 +1492,7 @@ struct bfd_elf_section_data
 #define elf_next_in_group(sec)	(elf_section_data(sec)->next_in_group)
 #define elf_fde_list(sec)	(elf_section_data(sec)->fde_list)
 #define elf_sec_group(sec)	(elf_section_data(sec)->sec_group)
+#define elf_section_eh_frame_entry(sec)	(elf_section_data(sec)->eh_frame_entry)
 
 #define xvec_get_elf_backend_data(xvec) \
   ((const struct elf_backend_data *) (xvec)->backend_data)
@@ -1525,13 +1560,6 @@ struct sdt_note
 {
   struct sdt_note *next;
   bfd_size_type size;
-  bfd_byte data[1];
-};
-
-/* NT_GNU_BUILD_ID note type info for input BFDs.  */
-struct elf_build_id
-{
-  size_t size;
   bfd_byte data[1];
 };
 
@@ -1668,9 +1696,6 @@ struct elf_obj_tdata
 
   obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
   obj_attribute_list *other_obj_attributes[2];
-
-  /* NT_GNU_BUILD_ID note type.  */
-  struct elf_build_id *build_id;
 
   /* Linked-list containing information about every Systemtap section
      found in the object file.  Each section corresponds to one entry
@@ -1983,8 +2008,15 @@ extern bfd_boolean _bfd_elf_strtab_emit
 extern void _bfd_elf_strtab_finalize
   (struct elf_strtab_hash *);
 
+extern bfd_boolean bfd_elf_parse_eh_frame_entries
+  (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_parse_eh_frame_entry
+  (struct bfd_link_info *, asection *, struct elf_reloc_cookie *);
 extern void _bfd_elf_parse_eh_frame
   (bfd *, struct bfd_link_info *, asection *, struct elf_reloc_cookie *);
+extern bfd_boolean _bfd_elf_end_eh_frame_parsing
+  (struct bfd_link_info *info);
+
 extern bfd_boolean _bfd_elf_discard_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *,
    bfd_boolean (*) (bfd_vma, void *), struct elf_reloc_cookie *);
@@ -1994,9 +2026,14 @@ extern bfd_vma _bfd_elf_eh_frame_section_offset
   (bfd *, struct bfd_link_info *, asection *, bfd_vma);
 extern bfd_boolean _bfd_elf_write_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
+bfd_boolean _bfd_elf_write_section_eh_frame_entry
+  (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
+extern bfd_boolean _bfd_elf_fixup_eh_frame_hdr (struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_write_section_eh_frame_hdr
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_eh_frame_present
+  (struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_eh_frame_entry_present
   (struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_maybe_strip_eh_frame_hdr
   (struct bfd_link_info *);
@@ -2021,6 +2058,8 @@ extern bfd_boolean _bfd_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_create_got_section
   (bfd *, struct bfd_link_info *);
+extern asection *_bfd_elf_section_for_symbol
+  (struct elf_reloc_cookie *, unsigned long, bfd_boolean);
 extern struct elf_link_hash_entry *_bfd_elf_define_linkage_sym
   (bfd *, struct bfd_link_info *, asection *, const char *);
 extern void _bfd_elf_init_1_index_section

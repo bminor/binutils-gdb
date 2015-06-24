@@ -34,8 +34,6 @@ static int thread_db_use_events;
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
 #include <dlfcn.h>
 #endif
-
-#include <stdint.h>
 #include <limits.h>
 #include <ctype.h>
 

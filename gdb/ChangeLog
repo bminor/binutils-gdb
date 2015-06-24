@@ -1,3 +1,707 @@
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.c (gdbsim_open): Move sysroot update to the top.
+
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.c: Include gdb_bfd.h.
+	(gdbsim_open): Declare new local sysroot pointing to gdb_sysroot.
+	Skip TARGET_SYSROOT_PREFIX in gdb_sysroot when it is active.
+
+2015-06-24  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Don't call
+	set_gdbarch_get_siginfo_type.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Likewise.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* tilegx-linux-tdep.c (tilegx_linux_init_abi): Likewise.
+	* linux-tdep.c (linux_get_siginfo_type): Change it to static.
+	(linux_init_abi): Call set_gdbarch_get_siginfo_type.
+	* linux-tdep.h (linux_get_siginfo_type): Remove the declaration.
+
+2015-06-24  Gary Benson  <gbenson@redhat.com>
+
+	* common/buffer.c (stdint.h): Do not include.
+	* common/print-utils.c (stdint.h): Likewise.
+	* compile/compile-c-symbols.c (gdb_assert.h): Likewise.
+	* compile/compile-c-types.c (gdb_assert.h): Likewise.
+	* ft32-tdep.c (gdb_assert.h): Likewise.
+	* guile/scm-utils.c (stdint.h): Likewise.
+	* i386-linux-tdep.c (stdint.h): Likewise.
+	* i386-tdep.c (stdint.h): Likewise.
+	* nat/linux-btrace.c (stdint.h): Likewise.
+	* nat/linux-btrace.h (stdint.h): Likewise.
+	* nat/linux-ptrace.c (stdint.h): Likewise.
+	* nat/mips-linux-watch.h (stdint.h): Likewise.
+	* ppc-linux-nat.c (stdint.h): Likewise.
+	* python/python-internal.h (stdint.h): Likewise.
+	* stub-termcap.c (stdlib.h): Likewise.
+	* target/target.h (stdint.h): Likewise.
+	* xtensa-linux-nat.c (stdint.h): Likewise.
+
+2015-06-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.c (init_history): Look at errno after calling strtol to
+	properly map large GDBHISTSIZE values to infinity.
+
+2015-06-23  Doug Evans  <dje@google.com>
+
+	* inferior.h (struct inferior_suspend_state): Delete, unused.
+	All references deleted.
+
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* microblaze-tdep.c (microblaze_push_dummy_code): Delete.
+	(microblaze_push_dummy_call): Likewise.
+	(microblaze_gdbarch_init): Delete calls to set_gdbarch_push_dummy_code
+	and set_gdbarch_push_dummy_call.
+
+2015-06-23  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers):
+	Check whether have_ptrace_getregset is TRIBOOL_TRUE explicitly.
+	(amd64_linux_store_inferior_registers): Likewise.
+	* arm-linux-nat.c (fetch_fpregister): Likewise.
+	(fetch_fpregs, store_fpregister): Likewise.
+	(store_fpregister, store_fpregs): Likewise.
+	(fetch_register, fetch_regs): Likewise.
+	(store_register, store_regs): Likewise.
+	(fetch_vfp_regs, store_vfp_regs): Likewise.
+	(arm_linux_read_description): Check have_ptrace_getregset is
+	TRIBOOL_UNKNOWN.  Set have_ptrace_getregset to TRIBOOL_TRUE
+	or TRIBOOL_FALSE.
+	* i386-linux-nat.c (fetch_xstateregs): Check
+	have_ptrace_getregset is not TRIBOOL_TRUE.
+	(store_xstateregs): Likewise.
+	* linux-nat.c (have_ptrace_getregset): Change its type to
+	enum tribool.
+	* linux-nat.h (tribool): New enum.
+	* x86-linux-nat.c (x86_linux_read_description): Use enum tribool.
+	Check whether have_ptrace_getregset is TRIBOOL_TRUE.
+
+2015-06-19  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention Sun's version of stabs is no longer supported.
+	* elfread.c (free_elfinfo): Delete.  All uses updated.
+	(elfstab_offset_sections): Delete.  All uses updated.
+	* gdb-stabs.h (stab_section_info): Delete.  All uses updated.
+	* psympriv.h (partial_symtab) <section_offsets>: Delete.
+	All uses updated.
+	* psymtab.c (start_psymtab_common): Delete arg section_offsets.
+	All callers updated.
+
+2015-06-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/rsp-low.c (needs_escaping): New.
+	(remote_escape_output): Add unit_size parameter. Refactor to
+	support multi-byte addressable units.  Rename parameters.
+	* common/rsp-low.h (remote_escape_output): Add unit_size
+	parameter and rename others. Update doc.
+	* remote.c (align_for_efficient_write): New.
+	(remote_write_bytes_aux): Add unit_size parameter and use it.
+	Rename some variables.  Update doc.
+	(remote_xfer_partial): Get unit size and use it.
+	(remote_read_bytes_1): Add unit_size parameter and use it.
+	Rename some variables. Update doc.
+	(remote_write_bytes): Same.
+	(remote_xfer_live_readonly_partial): Same.
+	(remote_read_bytes): Same.
+	(remote_flash_write): Update call to remote_write_bytes_aux.
+	(remote_write_qxfer): Update call to remote_escape_output.
+	(remote_search_memory): Same.
+	(remote_hostio_pwrite): Same.
+
+2015-06-17  Luis Machado  <lgustavo@codesourcery.com>
+
+	* breakpoint.c (add_location_to_breakpoint): Don't mark permanent
+	locations as inserted.
+	Update and expand comment about permanent locations.
+	(bp_loc_is_permanent): Don't return 0 for bp_call_dummy.
+	Move comment to add_location_to_breakpoint.
+	(update_global_location_list): Don't error out if a permanent
+	breakpoint is not marked inserted.
+	Don't error out if a non-permanent breakpoint location is inserted on
+	top of a permanent breakpoint.
+
+2015-06-17  Luis Machado  <lgustavo@codesourcery.com>
+
+	* breakpoint.c (make_breakpoint_permanent): Remove unused
+	function.
+	* breakpoint.h (make_breakpoint_permanent): Remove declaration.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/16999
+	* NEWS: Mention new GDBHISTSIZE behavior.
+	* top.c (init_history): For null or out-of-range GDBHISTSIZE,
+	set history size to unlimited.  Ignore non-numeric GDBHISTSIZE.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* NEWS: Mention that GDBHISTSIZE is read instead of HISTSIZE.
+	* top.c (init_history): Read from GDBHISTSIZE instead of
+	HISTSIZE.
+	(init_main): Refer to GDBHISTSIZE instead of HISTSIZE.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.c (gdb_safe_append_history): Do not call
+	history_truncate_file if the history is not stifled.
+
+2015-06-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* syscalls/s390-linux.xml: Add syscalls 344 through 354.
+	* syscalls/s390x-linux.xml: Likewise.
+
+2015-06-16  Michael Eager  <eager@eagercon.com>
+
+	* nat/linux-namespaces.c (MSG_CMSG_CLOEXEC): Define if not defined.
+
+2015-06-16  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Call
+	target_terminal_ours_for_output() before calling
+	tui_show_frame_info(), and restore the original terminal
+	settings afterwards.
+
+2015-06-16  Martin Simmons  <martin@lispworks.com>  (tiny patch)
+
+	* arm-linux-nat.c: Include nat/linux-ptrace.h.
+
+2015-06-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-main.c (mi_cmd_data_read_memory_bytes): Consider addressable
+	memory unit size.
+	(mi_cmd_data_write_memory_bytes): Same.
+
+2015-06-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* corefile.c (write_memory): Update doc.
+	* gdbcore.h (write_memory): Same.
+
+2015-06-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-tdep.c (enum filterflags): Make it from anonymous enum.
+	(dump_mapping_p): Use it for parameter filterflags.
+	(linux_find_memory_regions_full): Use it for variable filterflags.
+
+2015-06-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Merge multiple hex conversions.
+	* monitor.c: Include rsp-low.h.
+	(fromhex): Remove definition.
+
+2015-06-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Move utility functions to common/.
+	* cli/cli-utils.c (skip_spaces, skip_spaces_const, skip_to_space_const):
+	Move defs to common/common-utils.c.
+	* cli/cli-utils.h (skip_spaces, skip_spaces_const, skip_to_space)
+	(skip_to_space_const): Move decls to common/common-utils.h.
+	* common/common-defs.h: Move include of common-types.h before
+	common-utils.h.
+	* common/common-utils.c: Include host-defs.h and ctype.h.
+	(HIGH_BYTE_POSN, is_digit_in_base, digit_to_int, strtoulst): Move
+	from utils.c.
+	(skip_spaces, skip_spaces_const, skip_to_space_const): Move from
+	cli/cli-utils.c.
+	* common/common-utils.h (strtoulst): Move decl from utils.h.
+	(skip_spaces, skip_spaces_const, skip_to_space, skip_to_space_const):
+	Move from cli/cli-utils.h.
+	* common/host-defs.h: Include limits.h.
+	(TARGET_CHAR_BIT, HOST_CHAR_BIT): Moved from defs.h.
+	(skip_spaces, skip_spaces_const): Move decls from cli/cli-utils.h.
+	* defs.h (TARGET_CHAR_BIT, HOST_CHAR_BIT): Move to
+	common/common-utils.h.
+	* utils.c (HIGH_BYTE_POSN, is_digit_in_base, digit_to_int)
+	(strtoulst): Move to common/common-utils.c.
+	* utils.h (strtoulst): Moved decl to common/common-utils.h.
+
+2015-06-15  Yao Qi  <yao.qi@linaro.org>
+
+	* data-directory/Makefile.in (SYSCALLS_FILES): Add aarch64-linux.xml.
+
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* build-id.c: Don't include elf-bfd.h.
+	(build_id_bfd_get): Use bfd_build_id.
+	(build_id_verify): Ditto.
+	* build-id.h: Ditto.
+	(find_separate_debug_file_by_buildid): Ditto.
+	* python/py-objfile.c: Don't include elf-bfd.h.
+	(objfpy_get_build_id) Use bfd_build_id.
+	(objfpy_build_id_matches, objfpy_lookup_objfile_by_build_id): Ditto.
+	* coffread.c: Include build-id.h.
+	(coff_symfile_read): Try find_separate_debug_file_by_buildid.
+
+2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (do_windows_fetch_inferior_registers)
+	(handle_output_debug_string): Replace __COPY_CONTEXT_SIZE
+	conditional with __CYGWIN__.
+
+2015-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* completer.c: Add arch-utils.h include.
+	(enum reg_completer_targets): New enum.
+	(reg_or_group_completer_1): New function containing old
+	reg_or_group_completer, add and use new parameter to control what
+	is completed on.  Use get_current_arch rather than architecture of
+	currently selected frame.
+	(reg_or_group_completer): Call new reg_or_group_completer_1.
+	(reggroup_completer): Call new reg_or_group_completer_1.
+	* completer.h (reggroup_completer): Add declaration.
+	* tui/tui-regs.c: Add 'completer.h' include.
+	(tui_reg_next_command): Renamed to...
+	(tui_reg_next): ...this.  Adjust parameters and return rather than
+	display new group.
+	(tui_reg_prev_command): Renamed to...
+	(tui_reg_prev): ...this.  Adjust parameters and return rather than
+	display new group.
+	(tui_reg_float_command): Delete.
+	(tui_reg_general_command): Delete.
+	(tui_reg_system_command): Delete.
+	(tui_reg_command): Rewrite to perform switching of register group.
+	Add header comment.
+	(tuireglist): Remove.
+	(tui_reggroup_completer): New function.
+	(_initialize_tui_regs): Remove 'tui reg' sub-commands, update
+	creation of 'tui reg' command.
+	* NEWS: Add comment about 'tui reg' changes.
+
+2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.c (target_read): Consider addressable unit size when
+	reading from a memory object.
+	(read_memory_robust): Same.
+	(read_whatever_is_readable): Same.
+	(target_write_with_progress): Consider addressable unit size
+	when writing to a memory object.
+	* target.h (target_read): Update documentation.
+	(target_write): Add documentation.
+
+2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arch-utils.h (default_addressable_memory_unit_size): New.
+	* arch-utils.c (default_addressable_memory_unit_size): New.
+	* gdbarch.sh (addressable_memory_unit_size): New.
+	* gdbarch.h: Re-generate.
+	* gdbarch.c: Re-generate.
+
+2015-06-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.c (target_read): Rename variables and use
+	TARGET_XFER_E_IO.
+	(target_read_with_progress): Same.
+	(read_memory_robust): Constify parameters and rename
+	variables.
+	(read_whatever_is_readable): Constify parameters,
+	rename variables, adjust formatting.
+	* target.h (read_memory_robust): Constify parameters.
+
+2015-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value_base): Handle short
+	synthetic (non-AltiVec) vector types.
+	(ppc64_sysv_abi_return_value): Likewise.
+
+2015-06-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16465
+	* breakpoint.c (create_breakpoint): Save extra_string for
+	pending breakpoints.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i386-tdep.c (i386_mpx_get_bt_entry): Add a cast for mpx_bd_mask
+	and bt_mask to CORE_ADDR.
+
+2015-06-11  Gary Benson <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (mnsh_send_message): Use pulongest.
+	(mnsh_recv_message): Likewise.
+
+2015-06-11  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i386-tdep.c (i386_mpx_print_bounds): use of LONGEST instead of
+	long long int and plongest instead of %ll.
+
+2015-06-11  Gary Benson <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (gdb_wait.h): New include.
+	(sys/wait.h): Do not include.
+
+2015-06-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (dwarf_record_line): Call dwarf_record_line if
+	end_sequence is true.
+
+2015-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* solib-target.c (library_list_start_list): Use explicit NULL
+	comparison.
+
+2015-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-target.c (library_list_start_list): Do not dereference
+	variable version in its initialization.  Make the VERSION check handle
+	NULL.
+	(library_list_attributes): Make "version" GDB_XML_AF_OPTIONAL.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* NEWS: Announce support for direct access of executable and
+	shared library files when attaching to inferiors in containers
+	on GNU/Linux systems.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* remote.c (struct remote_state) <fs_pid>: New field.
+	(new_remote_state): Initialize the above.
+	(PACKET_vFile_setfs): New enum value.
+	(remote_hostio_set_filesystem): New function.
+	(remote_hostio_open): Call the above.
+	(remote_hostio_unlink): Likewise.
+	(remote_hostio_readlink): Likewise.
+	(_initialize_remote): Register new "set/show remote
+	hostio-setfs-packet" command.
+	* NEWS: Announce new vFile:setfs packet.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* linux-nat.c (nat/linux-namespaces.h): New include.
+	(fileio.h): Likewise.
+	(linux_nat_filesystem_is_local): New function.
+	(linux_nat_fileio_pid_of): Likewise.
+	(linux_nat_fileio_open): Likewise.
+	(linux_nat_fileio_readlink): Likewise.
+	(linux_nat_fileio_unlink): Likewise.
+	(linux_nat_add_target): Initialize to_filesystem_is_local,
+	to_fileio_open, to_fileio_readlink and to_fileio_unlink.
+	(_initialize_linux_nat): New "set/show debug linux-namespaces"
+	commands.
+	* NEWS: Mention new "set/show debug linux-namespaces" commands.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* target.h (struct inferior): New forward declaration.
+	(struct target_ops) <to_filesystem_is_local>: Update comment.
+	(struct target_ops) <to_fileio_open>: New argument inf.
+	Update comment.  All implementations updated.
+	(struct target_ops) <to_fileio_unlink>: Likewise.
+	(struct target_ops) <to_fileio_readlink>: Likewise.
+	(target_filesystem_is_local): Update comment.
+	(target_fileio_open): New argument inf.  Update comment.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_readlink): Likewise.
+	(target_fileio_read_alloc): Likewise.
+	(target_fileio_read_stralloc): Likewise.
+	* target.c (target_fileio_open): New argument inf.
+	Pass inf to implementation.  Update debug printing.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_readlink): Likewise.
+	(target_fileio_read_alloc_1): New argument inf. Pass inf
+	to target_fileio_open.
+	(target_fileio_read_alloc): New argument inf. Pass inf to
+	target_fileio_read_alloc_1.
+	(target_fileio_read_stralloc): Likewise.
+	* gdb_bfd.c (inferior.h): New include.
+	(gdb_bfd_iovec_fileio_open): Replace unused "open_closure"
+	argument with new argument "inferior".  Pass inferior to
+	target_fileio_open.
+	(gdb_bfd_open): Supply inferior argument to
+	gdb_bfd_iovec_fileio_open.
+	* linux-tdep.c (linux_info_proc): Supply inf argument to
+	relevant target_fileio calls.
+	(linux_find_memory_regions_full): Likewise.
+	(linux_fill_prpsinfo): Likewise.
+	* remote.c (remote_filesystem_is_local): Supply inf
+	argument to remote_hostio_open.
+	(remote_file_put): Likewise.
+	(remote_file_get): Likewise.
+	(remote_file_delete): Supply inf argument to
+	remote_hostio_unlink.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* inf-child.c (inf_child_fileio_open): Replace comment.
+	(inf_child_fileio_pwrite): Likewise.
+	(inf_child_fileio_pread): Likewise.
+	(inf_child_fileio_fstat): Insert blank line before comment.
+	(inf_child_fileio_close): Replace comment.
+	(inf_child_fileio_unlink): Likewise.
+	(inf_child_fileio_readlink): Likewise.
+	* remote.c (remote_hostio_open): Likewise.
+	(remote_hostio_pread): Likewise.
+	(remote_hostio_pwrite): Likewise.
+	(remote_hostio_close): Likewise.
+	(remote_hostio_unlink): Likewise.
+	(remote_hostio_readlink): Likewise.
+	(remote_hostio_fstat): Likewise.
+	(remote_filesystem_is_local): Likewise.
+	* target.c (target_fileio_open): Likewise.
+	(target_fileio_pwrite): Likewise.
+	(target_fileio_pread): Likewise.
+	(target_fileio_fstat): Insert blank line before comment.
+	(target_fileio_close): Replace comment.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_readlink): Likewise.
+	(target_fileio_read_alloc): Likewise.
+	(target_fileio_read_stralloc): Likewise.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* linux-thread-db.c (nat/linux-namespaces.h): New include.
+	(check_pid_namespace_match): Use linux_ns_same rather than
+	linux_proc_pid_get_ns to spot PID namespace mismatches.
+	* nat/linux-procfs.h (linux_proc_pid_get_ns): Remove.
+	* nat/linux-procfs.c (linux_proc_pid_get_ns): Likewise.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Add setns.
+	* config.in: Regenerate.
+	* configure: Likewise.
+	* nat/linux-namespaces.h: New file.
+	* nat/linux-namespaces.c: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/linux-namespaces.h.
+	(linux-namespaces.o): New rule.
+	* config/aarch64/linux.mh (NATDEPFILES): Add linux-namespaces.o.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Likewise.
+	* config/arm/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m32r/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/pa/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/spu-linux.mh (NATDEPFILES): Likewise.
+	* config/s390/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux64.mh (NATDEPFILES): Likewise.
+	* config/tilegx/linux.mh (NATDEPFILES): Likewise.
+	* config/xtensa/linux.mh (NATDEPFILES): Likewise.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* utils.h (make_cleanup_close): Moved to common/filestuff.h.
+	* utils.c (do_close_cleanup): Moved to common/filestuff.c.
+	(make_cleanup_close): Likewise.
+	* common/filestuff.h (make_cleanup_close): Moved from utils.h.
+	* common/filestuff.c (do_close_cleanup): Moved from utils.c.
+	(make_cleanup_close): Likewise.
+
+2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (thread_rec): Also ignore ERROR_INVALID_HANDLE
+	from SuspendThread().
+
+2015-06-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (handle_output_debug_string): Trim trailing '\n'
+	from OutputDebugString.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+			Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* i386-tdep.c (MPX_BASE_MASK, MPX_BD_MASK, MPX_BT_MASK, MPX_BD_MASK_32,
+	MPX_BT_MASK_32): New macros.
+	(i386_mpx_set_bounds): New function that implements
+	the command "set-mpx-bound".
+	(i386_mpx_enabled): Helper function to test MPX availability.
+	(i386_mpx_bd_base): Helper function to calculate the base directory
+	address.
+	(i386_mpx_get_bt_entry): Helper function to access a bound
+	table entry.
+	(i386_mpx_print_bounds): Effectively display bound information.
+	(_initialize_i386_tdep): Add new commands to commands "set mpx" and
+	"show mpx".
+	(_initialize_i386_tdep):
+	Add "bound" to the commands "show mpx" and "set mpx" commands.
+	(mpx_set_cmdlist and mpx_show_cmdlist): List for the new prefixed "set mpx"
+	and "show mpx" commands.
+	* NEWS: List new commands for MPX support.
+
+2015-06-09  Gary Benson <gbenson@redhat.com>
+
+	* common/fileio.h (fileio_to_host_mode): New declaration.
+	* common/fileio.c (fileio_to_host_mode): New Function.
+	* inf-child.c (inf_child_fileio_open): Process mode argument
+	with fileio_to_host_mode.
+
+2015-06-09  Gary Benson <gbenson@redhat.com>
+
+	* common/fileio.c (fileio_mode_pack): Fix preprocessor
+	conditional.
+
+2015-06-05  Gary Benson <gbenson@redhat.com>
+
+	* gdb_bfd.c (gdb_bfd_open): Move vgdb special case to...
+	* remote.c (remote_filesystem_is_local): ...here.
+
+2015-06-04  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbarch.c: Regenerate it.
+
+2015-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* arch-utils.c (default_infcall_munmap): New.
+	* arch-utils.h (default_infcall_munmap): New declaration.
+	* compile/compile-object-load.c (struct munmap_list, munmap_list_add)
+	(munmap_list_free, munmap_listp_free_cleanup): New.
+	(struct setup_sections_data): Add field munmap_list_headp.
+	(setup_sections): Call munmap_list_add.
+	(compile_object_load): New variable munmap_list_head, initialize
+	setup_sections_data.munmap_list_headp, return munmap_list_head.
+	* compile/compile-object-load.h (struct munmap_list): New declaration.
+	(struct compile_module): Add field munmap_list_head.
+	(munmap_list_free): New declaration.
+	* compile/compile-object-run.c (struct do_module_cleanup): Add field
+	munmap_list_head.
+	(do_module_cleanup): Call munmap_list_free.
+	(compile_object_run): Pass munmap_list_head to do_module_cleanup.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (infcall_munmap): New.
+	* linux-tdep.c (linux_infcall_munmap): New.
+	(linux_init_abi): Install it.
+
+2015-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/15564
+	* inferior.c (detach_inferior): Call exit_inferior_1 with silent = 0.
+
+2015-06-02  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-linux-nat.c: Include linux-nat.h.
+
+2015-06-01  Andreas Schwab  <schwab@linux-m68k.org>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/18392
+	* dwarf2-frame-tailcall.c (pretended_chain_levels): Correct
+	assertion.
+	* dwarf2loc.c (chain_candidate): Likewise.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (fetch_vfp_regs): Use PTRACE_GETREGSET.
+	(store_vfp_regs): Use PTRACE_SETREGSET.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (fetch_fpregister): Use PTRACE_GETREGSET.
+	(fetch_fpregs): Likewise.
+	* arm-linux-nat.c (store_fpregister): Use PTRACE_SETREGSET.
+	(store_fpregs): Likewise.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (fetch_register): Use PTRACE_GETREGSET.
+	(fetch_regs): Likewise.
+	(store_regs): Use PTRACE_SETREGSET.
+	(store_register): Likewise.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_read_description): Check whether
+	kernel supports PTRACE_GETREGSET.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* x86-linux-nat.c (have_ptrace_getregset): Move it to ...
+	* linux-nat.c: ... here.
+	* x86-linux-nat.h (have_ptrace_getregset): Move the declaration
+	to ...
+	* linux-nat.h: ... here.
+
+2015-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-nat.c: Include "nat/linux-ptrace.h".
+	* i386-linux-nat.c: Likewise.
+	* nat/linux-ptrace.h (PTRACE_GETREGSET, PTRACE_SETREGSET): Define.
+	* s390-linux-nat.c: Include "nat/linux-ptrace.h".
+	(PTRACE_GETREGSET, PTRACE_SETREGSET): Remove.
+	* x86-linux-nat.c: Include "nat/linux-ptrace.h".
+	* x86-linux-nat.h (PTRACE_GETREGSET, PTRACE_SETREGSET): Remove.
+
+2015-05-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* go32-nat.c (go32_xfer_memory): Fix the return value to be
+	compatible to what read_child and write_child return.  This
+	unbreaks that DJGPP build of GDB which was broken since v7.7.
+
+2015-05-29  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* MAINTAINERS (Write After Approval): Add Martin Galvan.
+
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	PR gdb/18464
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Use warning
+	rather than internal_error for an unrecognized value.
+
+2015-05-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_pseudo_register_read)
+	(xtensa_pseudo_register_write): Don't alias last pseudo register
+	to a1.
+
+2015-05-28  Don Breazeal  <donb@codesourcery.com>
+
+	* infrun.c (follow_fork_inferior): Ensure the use of
+	process-style ptids (pid,0,0) in verbose/debug "Detaching"
+	messages.
+
+2015-05-28  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (record_line_ftype): Remove, duplicate.
+
+2015-05-28  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_has_wmmx_registers): Remove.
+	(arm_linux_fetch_inferior_registers): Use
+	tdep->have_wmmx_registers instead of arm_linux_has_wmmx_registers.
+	(arm_linux_store_inferior_registers): Likewise.
+	(arm_linux_read_description): Don't set
+	arm_linux_has_wmmx_registers.
+	* arm-tdep.c (arm_gdbarch_init): Set
+	tdep->have_wmmx_registers according target descriptions.
+	* arm-tdep.h (struct gdbarch_tdep) <have_wmmx_registers>: New
+	field.
+
+2015-05-28  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_vfp_register_count): Remove.
+	(fetch_vfp_regs): Use vfp_register_count from gdbarch_tdep
+	instead of arm_linux_vfp_register_count.
+	(store_vfp_regs): Likewise.
+	(arm_linux_fetch_inferior_registers): Likewise.
+	(arm_linux_store_inferior_registers): Likewise.
+	(arm_linux_read_description): Don't set
+	arm_linux_vfp_register_count.
+	* arm-linux-tdep.c (arm_linux_iterate_over_regset_sections):
+	Adjust.
+	* arm-tdep.c (arm_gdbarch_init): Add assert on
+	vfp_register_count.
+	* arm-tdep.h (struct gdbarch_tdep) <have_vfp_registers>: Rename
+	field to vfp_register_count.  All users updated.
+
+2015-05-28  Kyle Huey  <me@kylehuey.com>  (tiny patch)
+
+	* gdb/arm-tdep.c (arm_gdbarch_init): Perform arm_abi detection on
+	ELFOSABI_GNU binaries.
+
 2015-05-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lnp_state_machine): New typedef.
@@ -595,7 +1299,7 @@
 	linux_enable_event_reporting.
 	(_initialize_linux_nat): Delete call to
 	linux_ptrace_set_additional_flags.
-	* nat/linux-ptrace.c (current_ptrace_options): Rename to 
+	* nat/linux-ptrace.c (current_ptrace_options): Rename to
 	supported_ptrace_options.
 	(additional_flags): Delete variable.
 	(linux_check_ptrace_features): Use supported_ptrace_options.
@@ -603,7 +1307,7 @@
 	Likewise, and remove additional_flags check.
 	(linux_enable_event_reporting): Change 'attached' argument to
 	'options'.  Use supported_ptrace_options.
-	(ptrace_supports_feature): Change comment.  Use 
+	(ptrace_supports_feature): Change comment.  Use
 	supported_ptrace_options.
 	(linux_ptrace_set_additional_flags): Delete function.
 	* nat/linux-ptrace.h (linux_ptrace_set_additional_flags):

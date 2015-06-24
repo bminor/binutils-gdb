@@ -1,3 +1,64 @@
+2015-06-19  Doug Evans  <dje@google.com>
+
+	* stabs.texinfo (ELF Linker Relocation): Mention Sun stabs is no
+	longer supported.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.texinfo (Command History): Mention that setting
+	GDBHISTSIZE to the empty string disables history truncation.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/16999
+	* gdb.texinfo (Command History): Mention new GDBHISTSIZE
+	behavior.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.texinfo (Command History): Replace occurrences of HISTSIZE
+	with GDBHISTSIZE.
+
+2015-06-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Clarify usage of
+	bytes and memory units for -data-{read,write}-memory-bytes.
+	(Packets): Same for m, M and X packets.
+	* python.texi (Inferiors In Python): Same for read_memory and
+	write_memory.
+
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* gdb.texinfo (Separate Debug Files): Document that PE is also
+	supported.
+
+2015-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI Commands): Bring all 'tui reg' commands into a
+	single table entry.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.textinfo (i386): Fix "@end table" end and "@table" placement.
+
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): Document the
+	"set/show remote hostio-setfs-packet" command.
+	(Host I/O Packets): Document the vFile:setfs packet.
+
+2015-06-10  Gary Benson <gbenson@redhat.com>
+
+	* gdb.texinfo (Debugging Output): Document the "set/show debug
+	linux-namespaces" command.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+            Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* gdb.texinfo (i386): Add documentation about "show mpx bound"
+	and "set mpx bound".
+
 2015-05-27  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Debugging Output): Mention set/show debug dwarf-line.

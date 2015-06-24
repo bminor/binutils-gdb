@@ -1,3 +1,191 @@
+2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (md_assemble): Use ppc_optional_operand_value.
+	Allow for optional operands without insert functions.
+
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18541
+	* config/tc-arm.c (md_apply_fix): Add support for ADR in thumb
+	mode against a nearby symbol.
+
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18481
+	* config/tc-arm.c (tc_gen_reloc): Include BFD_RELOC_ARM_TLS_LE32
+	in the same case as BFD_RELOC_ARM_TLS_IS32.
+
+2015-06-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (is_double_a_single): Make conditional upon the
+	availablity of a 64-bit type.  Use this type for the argument and
+	mantissa.
+	(double_to_single): Likewise.
+	* config/tc-arm.c (move_or_literal_pool): Use a 64-bit type for
+	the constant value, if available.  Generate a 64-bit value from a
+	bignum if supported.  Only perform the second optimization for
+	PR 18500 if the 64-bit type is available.
+
+2015-06-17  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
+
+	PR gas/18500
+	* config/tc-arm.c (is_double_a_single): New function.
+	(double_to_single): New function.
+	(move_or_literal_pool): Add support for converting VLDR to VMOV.
+
+	PR gas/18499
+	* config/tc-arm.c (move_or_literal_pool): Add support for LDR Rx,=
+	to MOV.w or MVN.w for Thumb2.
+
+2015-06-17  Nicolas Pitre <nico@linaro.org>
+
+	* as.c (show_usage): Document --sectname-subst.
+	(parse_args): Add --sectname-subst.
+	* as.h (flag_sectname_subst): New.
+	* config/obj-elf.c (obj_elf_section_name): Add %S substitution.
+	* doc/as.texinfo: Document it.
+
+2015-06-15  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifier.
+	(md_apply_fix): Support BFD_RELOC_AARCH64_LD64_GOTOFF_LO15.
+	(aarch64_force_relocation): Ditto
+
+2015-06-13  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2dbg.c (out_header): Document EXPR->X_add_number value,
+	out_debug_aranges depends on it.
+	(out_debug_aranges): Track size of header to properly pad header
+	for address alignment.
+
+2015-06-11  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR gas/18427
+	* gas/config/tc-hppa.c (last_label_symbol): Declare.
+	(pa_get_label): Return last label in current space/segment or NULL.
+	(pa_define_label): Record last label and add to root.
+	(pa_undefine_label): Remove last label from root.
+
+2015-06-08  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (rx_op): Correct handling of integer bignums.
+
+2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* NEWS: Mention ARMv8.1 support in the Aarch64 port.
+	* config/tc-aarch64.c (aarch64_arch_option_table): Add "armv8.1-a".
+	* doc/c-aarch64.texi (-march): Add "armv8.1-a".
+
+2015-06-04  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (arm_init_frag): Use frag's thumb_mode information
+	when available.
+
+2015-06-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-h8300.c (md_section_align): Fix compile time warning
+	about left shifting a negative value.
+
+2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_archs): Add "armv8.1-a".
+	* doc/c-arm.texi (ARM Options, -march): Add "armv8.1-a".
+	* NEWS: Mention ARMv8.1 support.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_ext_pan): New.
+	(do_setpan): New, encode an ARM SETPAN instruction.
+	(do_t_setpan): New, encode a Thumb SETPAN instruction.
+	(insns): Add "setpan".
+	(arm_extensions): Add "pan".
+	* doc/c-arm.texi (ARM Options): Add "pan" to list of -mcpu processor
+	extensions.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "rdma".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "rdma".
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "lor".
+	* doc/c-aarch64.c (Aarch64 Extensions): Add "lor" to list of
+	architecture extensions.
+
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): New parameter.  Check target
+	support.  Fix whitespace.
+	(parse_operands): Update for parse_sys_reg changes.
+	(aarch64_features): Add "pan".
+	* doc/c-aarch64.texi (Aarch64 Extensions): Add "pan".
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
+	(md_apply_fix): Support BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14.
+	(aarch64_force_relocation): Ditto.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
+	(md_apply_fix): Support BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15.
+	(aarch64_force_relocation): Ditto.
+
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+            Bernd Schmidt <bernds@codesourcery.com>
+            Paul Brook <paul@codesourcery.com>
+
+	gas/
+	* config/tc-alpha.c (all_cfi_sections): Declare.
+	(s_alpha_ent): Initialize all_cfi_sections.
+	(alpha_elf_md_end): Invoke cfi_set_sections.
+	* config/tc-mips.c (md_apply_fix):  Handle BFD_RELOC_NONE.
+	(s_ehword): Use BFD_RELOC_32_PCREL.
+	(mips_fix_adjustable): Handle BFD_RELOC_32_PCREL.
+	(mips_cfi_reloc_for_encoding): New function.
+	* tc-mips.h (DWARF2_FDE_RELOC_SIZE): Redefine.
+	(DWARF2_FDE_RELOC_ENCODING): Define.
+	(tc_cfi_reloc_for_encoding): Define.
+	(mips_cfi_reloc_for_encoding): Define.
+	(tc_compact_eh_opcode_stop): Define.
+	(tc_compact_eh_opcode_pad): Define.
+	* doc/as.texinfo: Document Compact EH extensions.
+	* doc/internals.texi: Likewise.
+	* dw2gencfi.c (EH_FRAME_LINKONCE): Redefine.
+	(tc_cfi_reloc_for_encoding): Provide default.
+	(compact_eh): Declare.
+	(emit_expr_encoded): New function.
+	(get_debugseg_name): Add Compact EH support.
+	(alloc_debugseg_item): Likewise.
+	(cfi_set_sections): New function.
+	(dot_cfi_fde_data): New function.
+	(dot_cfi_personality_id): New function.
+	(dot_cfi_inline_lsda): New function.
+	(cfi_pseudo_table): Add cfi_fde_data, cfi_personality_id,
+	and cfi_inline_lsda.
+	(dot_cfi_personality): Add Compact EH support.
+	(dot_cfi_lsda): Likewise.
+	(dot_cfi_sections): Likewise.
+	(dot_cfi_startproc): Likewise.
+	(get_cfi_seg): Likewise.
+	(output_compact_unwind_data): New function.
+	(output_cfi_insn): Add Compact EH support.
+	(output_cie): Likewise.
+	(output_fde): Likewise.
+	(cfi_finish): Likewise.
+	(cfi_emit_eh_header): New function.
+	(output_eh_header): New function.
+	* dw2gencfi.h (cfi_set_sections): Declare.
+	(SUPPORT_COMPACT_EH): Define.
+	(MULTIPLE_FRAME_SECTIONS): Define.
+	New enumeration to describe the Compact EH header format.
+	(fde_entry): Add new fields personality_id, eh_header_type, eh_data_size,
+	eh_data, eh_loc and sections.
+	(CFI_EMIT_eh_frame, CFI_EMIT_debug_frame, CFI_EMIT_target,
+	CFI_EMIT_eh_frame_compact): Define.
+
 2015-05-26  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (xtensa_move_literals): Check that

@@ -41,6 +41,7 @@
 #include "coff-pe-read.h"
 
 #include "psymtab.h"
+#include "build-id.h"
 
 extern void _initialize_coffread (void);
 
@@ -738,7 +739,10 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
     {
       char *debugfile;
 
-      debugfile = find_separate_debug_file_by_debuglink (objfile);
+      debugfile = find_separate_debug_file_by_buildid (objfile);
+
+      if (debugfile == NULL)
+	debugfile = find_separate_debug_file_by_debuglink (objfile);
       make_cleanup (xfree, debugfile);
 
       if (debugfile)

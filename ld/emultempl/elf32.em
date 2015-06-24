@@ -1045,30 +1045,57 @@ gld${EMULATION_NAME}_after_open (void)
       return;
     }
 
-  if (link_info.eh_frame_hdr
-      && !link_info.traditional_format)
+  if (!link_info.traditional_format)
     {
       bfd *abfd, *elfbfd = NULL;
       bfd_boolean warn_eh_frame = FALSE;
       asection *s;
+      int seen_type = 0;
 
       for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
 	{
+	  int type = 0;
+	  for (s = abfd->sections; s && type < COMPACT_EH_HDR; s = s->next)
+	    {
+	      const char *name = bfd_get_section_name (abfd, s);
+
+	      if (bfd_is_abs_section (s->output_section))
+		continue;
+	      if (CONST_STRNEQ (name, ".eh_frame_entry"))
+		type = COMPACT_EH_HDR;
+	      else if (strcmp (name, ".eh_frame") == 0 && s->size > 8)
+		type = DWARF2_EH_HDR;
+	    }
+
+	  if (type != 0)
+	    {
+	      if (seen_type == 0)
+		{
+		  seen_type = type;
+		}
+	      else if (seen_type != type)
+		{
+		  einfo (_("%P%F: compact frame descriptions incompatible with"
+			 " DWARF2 .eh_frame from %B\n"),
+			 type == DWARF2_EH_HDR ? abfd : elfbfd);
+		  break;
+		}
+
+	      if (!elfbfd
+		  && (type == COMPACT_EH_HDR || link_info.eh_frame_hdr_type != 0))
+		{
+		  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+		    elfbfd = abfd;
+
+		  warn_eh_frame = TRUE;
+		}
+	    }
+
+	  if (seen_type == COMPACT_EH_HDR)
+	    link_info.eh_frame_hdr_type = COMPACT_EH_HDR;
+
 	  if (bfd_count_sections (abfd) == 0)
 	    continue;
-	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-	    elfbfd = abfd;
-	  if (!warn_eh_frame)
-	    {
-	      s = bfd_get_section_by_name (abfd, ".eh_frame");
-	      while (s != NULL
-		     && (s->size <= 8
-			 || bfd_is_abs_section (s->output_section)))
-		s = bfd_get_next_section_by_name (s);
-	      warn_eh_frame = s != NULL;
-	    }
-	  if (elfbfd && warn_eh_frame)
-	    break;
 	}
       if (elfbfd)
 	{
@@ -1272,6 +1299,10 @@ fragment <<EOF
       einfo ("%P: warning: %s, needed by %B, not found (try using -rpath or -rpath-link)\n",
 	     l->name, l->by);
     }
+
+  if (link_info.eh_frame_hdr_type == COMPACT_EH_HDR)
+    if (bfd_elf_parse_eh_frame_entries (NULL, &link_info) == FALSE)
+      einfo (_("%P%F: Failed to parse EH frame entries.\n"));
 }
 
 EOF
@@ -2222,7 +2253,7 @@ fragment <<EOF
       break;
 
     case OPTION_EH_FRAME_HDR:
-      link_info.eh_frame_hdr = TRUE;
+      link_info.eh_frame_hdr_type = DWARF2_EH_HDR;
       break;
 
     case OPTION_GROUP:

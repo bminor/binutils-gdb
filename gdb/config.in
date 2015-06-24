@@ -390,6 +390,9 @@
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
 
+/* Define to 1 if you have the `setns' function. */
+#undef HAVE_SETNS
+
 /* Define to 1 if you have the `setpgid' function. */
 #undef HAVE_SETPGID
 

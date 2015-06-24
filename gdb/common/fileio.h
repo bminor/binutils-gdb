@@ -32,6 +32,11 @@ extern int host_to_fileio_error (int error);
 
 extern int fileio_to_host_openflags (int fflags, int *flags);
 
+/* Convert File-I/O mode FMODE to host format, storing
+   the result in *MODE.  Return 0 on success, -1 on error.  */
+
+extern int fileio_to_host_mode (int fmode, mode_t *mode);
+
 /* Pack a host-format integer into a byte buffer in big-endian
    format.  BYTES specifies the size of the integer to pack in
    bytes.  */

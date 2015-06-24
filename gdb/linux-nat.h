@@ -115,6 +115,10 @@ struct lwp_info
    native target is active.  */
 extern struct lwp_info *lwp_list;
 
+/* Does the current host support PTRACE_GETREGSET?  */
+enum tribool { TRIBOOL_UNKNOWN = -1, TRIBOOL_FALSE = 0, TRIBOOL_TRUE = 1 };
+extern enum tribool have_ptrace_getregset;
+
 /* Iterate over each active thread (light-weight process).  */
 #define ALL_LWPS(LP)							\
   for ((LP) = lwp_list;							\

@@ -2041,6 +2041,15 @@ expected to contain instructions.
 Like @option{-d}, but disassemble the contents of all sections, not just
 those expected to contain instructions.
 
+This option also has a subtle effect on the disassembly of
+instructions in code sections.  When option @option{-d} is in effect
+objdump will assume that any symbols present in a code section occur
+on the boundary between instructions and it will refuse to disassemble
+across such a boundary.  When option @option{-D} is in effect however
+this assumption is supressed.  This means that it is possible for the
+output of @option{-d} and @option{-D} to differ if, for example, data
+is stored in code sections.
+
 If the target is an ARM architecture this switch also has the effect
 of forcing the disassembler to decode pieces of data found in code
 sections as if they were instructions.

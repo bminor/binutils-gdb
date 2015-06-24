@@ -23,17 +23,8 @@
 
 #include "bfd.h"
 
-#ifndef INLINE
-#ifdef __GNUC__
-#define INLINE inline
-#else
-#define INLINE
-#endif
-#endif
-
 
 host_callback *mn10300_callback;
-int mn10300_debug;
 struct _state State;
 
 
@@ -357,58 +348,18 @@ sim_create_inferior (SIM_DESC sd,
 /* FIXME These would more efficient to use than load_mem/store_mem,
    but need to be changed to use the memory map.  */
 
-uint8
-get_byte (uint8 *x)
-{
-  return *x;
-}
-
-uint16
-get_half (uint8 *x)
-{
-  uint8 *a = x;
-  return (a[1] << 8) + (a[0]);
-}
-
-uint32
-get_word (uint8 *x)
-{
-  uint8 *a = x;
-  return (a[3]<<24) + (a[2]<<16) + (a[1]<<8) + (a[0]);
-}
-
-void
-put_byte (uint8 *addr, uint8 data)
-{
-  uint8 *a = addr;
-  a[0] = data;
-}
-
-void
-put_half (uint8 *addr, uint16 data)
-{
-  uint8 *a = addr;
-  a[0] = data & 0xff;
-  a[1] = (data >> 8) & 0xff;
-}
-
-void
-put_word (uint8 *addr, uint32 data)
-{
-  uint8 *a = addr;
-  a[0] = data & 0xff;
-  a[1] = (data >> 8) & 0xff;
-  a[2] = (data >> 16) & 0xff;
-  a[3] = (data >> 24) & 0xff;
-}
-
 int
 sim_fetch_register (SIM_DESC sd,
 		    int rn,
 		    unsigned char *memory,
 		    int length)
 {
-  put_word (memory, State.regs[rn]);
+  reg_t reg = State.regs[rn];
+  uint8 *a = memory;
+  a[0] = reg;
+  a[1] = reg >> 8;
+  a[2] = reg >> 16;
+  a[3] = reg >> 24;
   return length;
 }
  
@@ -418,7 +369,8 @@ sim_store_register (SIM_DESC sd,
 		    unsigned char *memory,
 		    int length)
 {
-  State.regs[rn] = get_word (memory);
+  uint8 *a = memory;
+  State.regs[rn] = (a[3] << 24) + (a[2] << 16) + (a[1] << 8) + a[0];
   return length;
 }
 
@@ -638,7 +590,7 @@ reg2val_64 (const void *reg, sim_fpu *val)
 /* Round the given sim_fpu value to double precision, following the
    target platform rounding and denormalization conventions.  On
    AM33/2.0, round_near is the only rounding mode.  */
-int
+static int
 round_64 (sim_fpu *val)
 {
   return sim_fpu_round_64 (val, sim_fpu_round_near, sim_fpu_denorm_zero);
@@ -666,7 +618,7 @@ fp_double_prec = {
 
 /* Check whether overflow, underflow or inexact exceptions should be
    raised.  */
-int
+static int
 fpu_status_ok (sim_fpu_status stat)
 {
   if ((stat & sim_fpu_status_overflow)

@@ -432,6 +432,18 @@ if {$linux_gnu} {
     run_ld_link_tests $eh_frame5_test
 }
 
+if {$embedded_elf} {
+    run_dump_test "compact-eh1"
+    run_dump_test "compact-eh2"
+    run_dump_test "compact-eh3"
+}
+
+if {$linux_gnu} {
+    run_dump_test "compact-eh4"
+    run_dump_test "compact-eh5"
+    run_dump_test "compact-eh6"
+}
+
 run_dump_test "jaloverflow"
 run_dump_test "jaloverflow-2"
 run_dump_test "undefweak-overflow" [list [list as $abi_asflags(o32)] \

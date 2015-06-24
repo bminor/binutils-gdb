@@ -1097,6 +1097,10 @@ m:int:vsyscall_range:struct mem_range *range:range::default_vsyscall_range::0
 # Throw an error if it is not possible.  Returned address is always valid.
 f:CORE_ADDR:infcall_mmap:CORE_ADDR size, unsigned prot:size, prot::default_infcall_mmap::0
 
+# Deallocate SIZE bytes of memory at ADDR in inferior from gdbarch_infcall_mmap.
+# Print a warning if it is not possible.
+f:void:infcall_munmap:CORE_ADDR addr, CORE_ADDR size:addr, size::default_infcall_munmap::0
+
 # Return string (caller has to use xfree for it) with options for GCC
 # to produce code for this target, typically "-m64", "-m32" or "-m31".
 # These options are put before CU's DW_AT_producer compilation options so that
@@ -1109,6 +1113,12 @@ m:char *:gcc_target_options:void:::default_gcc_target_options::0
 # returns the BFD architecture name, which is correct in nearly every
 # case.
 m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
+
+# Return the size in 8-bit bytes of an addressable memory unit on this
+# architecture.  This corresponds to the number of 8-bit bytes associated to
+# each address in memory.
+m:int:addressable_memory_unit_size:void:::default_addressable_memory_unit_size::0
+
 EOF
 }
 

@@ -212,6 +212,14 @@ typedef struct disassemble_info
   /* Command line options specific to the target disassembler.  */
   char * disassembler_options;
 
+  /* If non-zero then try not disassemble beyond this address, even if
+     there are values left in the buffer.  This address is the address
+     of the nearest symbol forwards from the start of the disassembly,
+     and it is assumed that it lies on the boundary between instructions.
+     If an instruction spans this address then this is an error in the
+     file being disassembled.  */
+  bfd_vma stop_vma;
+
 } disassemble_info;
 
 

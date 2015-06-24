@@ -445,11 +445,14 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  if (info_verbose || debug_infrun)
 	    {
+	      /* Ensure that we have a process ptid.  */
+	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after %s from child %s.\n"),
 				has_vforked ? "vfork" : "fork",
-				target_pid_to_str (child_ptid));
+				target_pid_to_str (process_ptid));
 	    }
 	}
       else
@@ -578,11 +581,14 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	{
 	  if (info_verbose || debug_infrun)
 	    {
+	      /* Ensure that we have a process ptid.  */
+	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after fork from "
 				  "child %s.\n"),
-				target_pid_to_str (child_ptid));
+				target_pid_to_str (process_ptid));
 	    }
 
 	  target_detach (NULL, 0);
@@ -7250,9 +7256,6 @@ siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var,
 struct infcall_suspend_state
 {
   struct thread_suspend_state thread_suspend;
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  struct inferior_suspend_state inferior_suspend;
-#endif
 
   /* Other fields:  */
   CORE_ADDR stop_pc;
@@ -7272,9 +7275,6 @@ save_infcall_suspend_state (void)
 {
   struct infcall_suspend_state *inf_state;
   struct thread_info *tp = inferior_thread ();
-#if 0
-  struct inferior *inf = current_inferior ();
-#endif
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   gdb_byte *siginfo_data = NULL;
@@ -7308,9 +7308,6 @@ save_infcall_suspend_state (void)
     }
 
   inf_state->thread_suspend = tp->suspend;
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  inf_state->inferior_suspend = inf->suspend;
-#endif
 
   /* run_inferior_call will not use the signal due to its `proceed' call with
      GDB_SIGNAL_0 anyway.  */
@@ -7329,16 +7326,10 @@ void
 restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
   struct thread_info *tp = inferior_thread ();
-#if 0
-  struct inferior *inf = current_inferior ();
-#endif
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   tp->suspend = inf_state->thread_suspend;
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  inf->suspend = inf_state->inferior_suspend;
-#endif
 
   stop_pc = inf_state->stop_pc;
 

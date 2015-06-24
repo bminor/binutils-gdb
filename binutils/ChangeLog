@@ -1,3 +1,27 @@
+2015-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (disassemble_bytes): Set the stop_vma field in the
+	disassemble_info structure when disassembling code sections with
+	-d.
+	* doc/binutils.texi (objdump): Document the discrepancy between -d
+	and -D.
+
+2015-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_debug_line_header): Use reloc_at to detect
+	incomplete .debug_line headers
+
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	* readelf.c (print_gnu_note: NT_GNU_ABI_TAG): Recognize
+	GNU_ABI_TAG_SYLLABLE and GNU_ABI_TAG_NACL.
+
+2015-05-29  Stephen Kitt  <steve@sk2.org>
+
+	* dlltool.c (make_one_lib_file): Clear .idata$6 before use.
+	(main): Fail if the output file specified by the -z option cannot
+	be opened.
+
 2015-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18420

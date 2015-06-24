@@ -36,6 +36,7 @@
 #include "elfxx-mips.h"
 #include "elf/mips.h"
 #include "elf-vxworks.h"
+#include "dwarf2.h"
 
 /* Get the ECOFF swapping routines.  */
 #include "coff/sym.h"
@@ -16108,4 +16109,18 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
   if (mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64
       || mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64A)
     i_ehdrp->e_ident[EI_ABIVERSION] = 3;
+}
+
+int
+_bfd_mips_elf_compact_eh_encoding (struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
+{
+  return DW_EH_PE_pcrel | DW_EH_PE_sdata4;
+}
+
+/* Return the opcode for can't unwind.  */
+
+int
+_bfd_mips_elf_cant_unwind_opcode (struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
+{
+  return COMPACT_EH_CANT_UNWIND_OPCODE;
 }

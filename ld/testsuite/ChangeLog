@@ -1,3 +1,100 @@
+2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Run pltgot-2 for Linux targets.
+	* ld-x86-64/x86-64.exp: Likewise.
+	* ld-i386/pltgot-1.d: Updated.
+	* ld-x86-64/pltgot-1.d: Likewise.
+	* ld-i386/pltgot-2.d: New file.
+	* ld-x86-64/pltgot-2.d: Likewise.
+
+2015-06-23  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/dt_textrel.s: New testcase.
+	* ld-aarch64/dt_textrel.d: New expectation file.
+	* ld-aarch64/aarch64-elf.exp: Run new testcase.
+
+2015-06-17  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul): New function.
+	* ld-aarch64/emit-relocs-28.d: Use aarch64_choose_ilp32_emul to choose
+	emulation mode.
+
+2015-06-16  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/ppc476-shared.s: Repeat dynamic reloc generating insns.
+	* ld-powerpc/ppc476-shared.d: Update.
+	* ld-powerpc/ppc476-shared2.d: Update.
+
+2015-06-12  Tristan Gingold  <gingold@adacore.com>
+
+	* ld-scripts/print-memory-usage-1.t,
+	* ld-scripts/print-memory-usage-1.s,
+	* ld-scripts/print-memory-usage-1.l,
+	* ld-scripts/print-memory-usage-2.t,
+	* ld-scripts/print-memory-usage-2.l,
+	* ld-scripts/print-memory-usage-3.s,
+	* ld-scripts/print-memory-usage-3.t,
+	* ld-scripts/print-memory-usage-3.l,
+	* ld-scripts/print-memory-usage.t: New tests.
+	* ld-scripts/print-memory-usage.exp: Run them.
+
+2015-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/compressed1d.d: Fix typo: iq200 -> iq2000.
+
+2015-06-05  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/ppc476-shared.s,
+	* ld-powerpc/ppc476-shared.lnk,
+	* ld-powerpc/ppc476-shared.d,
+	* ld-powerpc/ppc476-shared2.d: New tests.
+	* ld-powerpc/powerpc.exp: Run them.
+
+2015-06-02  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/emit-relocs-313.s: Use gotpage_lo15.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/emit-relocs-28.s: New test file.
+	* ld-aarch64/emit-relocs-28.d: Ditto.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/tprel_add_lo12_overflow.s: New testcase.
+	* ld-aarch64/tprel_add_lo12_overflow.d: Nex expectation file.
+	* ld-aarch64/aarch64-elf.exp: Run new testcase.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/emit-relocs-313.s: New test file.
+	* ld-aarch64/emit-relocs-313.d: Ditto.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-05-29  Stephen Kitt  <steve@sk2.org>
+
+	* ld-pe/pe-run2.exp (test_direct2_link_dll): Add $CFLAGS to the
+	compiler command line.
+
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+
+	ld/testsuite/
+	* ld-mips-elf/compact-eh.ld: New linker script.
+	* ld-mips-elf/compact-eh1.d: New.
+	* ld-mips-elf/compact-eh1.s: New.
+	* ld-mips-elf/compact-eh1a.s: New.
+	* ld-mips-elf/compact-eh1b.s: New.
+	* ld-mips-elf/compact-eh2.d: New.
+	* ld-mips-elf/compact-eh2.s: New.
+	* ld-mips-elf/compact-eh3.d: New.
+	* ld-mips-elf/compact-eh3.s: New.
+	* ld-mips-elf/compact-eh3a.s: New.
+	* ld-mips-elf/compact-eh4.d: New.
+	* ld-mips-elf/compact-eh5.d: New.
+	* ld-mips-elf/compact-eh6.d: New.
+	* ld-mips-elf/mips-elf.exp: Run new tests.
+
 2015-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18458

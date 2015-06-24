@@ -3329,8 +3329,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
 
-  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
-
   /* SystemTap functions.  */
   set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
   set_gdbarch_stap_register_indirection_prefixes (gdbarch,

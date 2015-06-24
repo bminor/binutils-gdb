@@ -452,7 +452,8 @@ skip_optional_operands (const unsigned char *opindex,
       operand = &powerpc_operands[*opindex];
       if ((operand->flags & PPC_OPERAND_NEXT) != 0
 	  || ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
-	      && operand_value_powerpc (operand, insn, dialect) != 0))
+	      && operand_value_powerpc (operand, insn, dialect) !=
+		 ppc_optional_operand_value (operand)))
 	return 0;
     }
 

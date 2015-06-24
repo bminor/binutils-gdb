@@ -27,6 +27,7 @@
 #include "auxv.h"
 #include "gregset.h"
 #include "regset.h"
+#include "nat/linux-ptrace.h"
 
 #include "s390-linux-tdep.h"
 #include "elf/common.h"
@@ -37,14 +38,6 @@
 #include <sys/procfs.h>
 #include <sys/ucontext.h>
 #include <elf.h>
-
-#ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET 0x4204
-#endif
-
-#ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET 0x4205
-#endif
 
 /* Per-thread arch-specific data.  */
 

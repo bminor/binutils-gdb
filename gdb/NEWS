@@ -7,6 +7,8 @@
   targets has been added.  GDB now supports recording of A64 instruction set
   including advance SIMD instructions.
 
+* Support for Sun's version of the "stabs" debug file format has been removed.
+
 * GDB now honors the content of the file /proc/PID/coredump_filter
   (PID is the process ID) on GNU/Linux systems.  This file can be used
   to specify the types of memory mappings that will be included in a
@@ -52,6 +54,22 @@
 
 * GDB now supports the vector ABI on S/390 GNU/Linux targets.
 
+* On GNU/Linux, GDB and gdbserver are now able to access executable
+  and shared library files without a "set sysroot" command when
+  attaching to processes running in different mount namespaces from
+  the debugger.  This makes it possible to attach to processes in
+  containers as simply as "gdb -p PID" or "gdbserver --attach PID".
+  See "New remote packets" below.
+
+* The "tui reg" command now provides completion for all of the
+  available register groups, including target specific groups.
+
+* The HISTSIZE environment variable is no longer read when determining
+  the size of GDB's command history.  GDB now instead reads the dedicated
+  GDBHISTSIZE environment variable.  Setting GDBHISTSIZE to "-1" or to "" now
+  disables truncation of command history.  Non-numeric values of GDBHISTSIZE
+  are ignored.
+
 * Guile Scripting
 
   ** Memory ports can now be unbuffered.
@@ -89,6 +107,10 @@ compile print
 tui enable
 tui disable
   Explicit commands for enabling and disabling tui mode.
+
+show mpx bound
+set mpx bound on i386 and amd64
+   Support for bound table investigation on Intel(R) MPX enabled applications.
 
 * New options
 
@@ -133,6 +155,10 @@ set|show record btrace bts buffer-size
   The obtained size may differ from the requested size.  Use "info
   record" to see the obtained buffer size.
 
+set debug linux-namespaces
+show debug linux-namespaces
+  Control display of debugging info regarding Linux namespaces.
+
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.
 
@@ -165,6 +191,12 @@ vFile:fstat:
 qXfer:exec-file:read
   Return the full absolute name of the file that was executed to
   create a process running on the remote system.
+
+vFile:setfs:
+  Select the filesystem on which vFile: operations with filename
+  arguments will operate.  This is required for GDB to be able to
+  access files on remote targets where the remote stub does not
+  share a common filesystem with the inferior(s).
 
 fork stop reason
   Indicates that a fork system call was executed.

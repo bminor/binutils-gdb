@@ -10339,15 +10339,15 @@ _start:
 	vcvtsi2sd	xmm30, xmm29, DWORD PTR [rdx-516]	 # AVX512F
 
 	vcvtsi2sd	xmm30, xmm29, rax	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {rn-sae}, rax	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {ru-sae}, rax	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {rd-sae}, rax	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {rz-sae}, rax	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, rax, {rn-sae}	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, rax, {ru-sae}	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, rax, {rd-sae}	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, rax, {rz-sae}	 # AVX512F
 	vcvtsi2sd	xmm30, xmm29, r8	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {rn-sae}, r8	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {ru-sae}, r8	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {rd-sae}, r8	 # AVX512F
-	vcvtsi2sd	xmm30, xmm29, {rz-sae}, r8	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, r8, {rn-sae}	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, r8, {ru-sae}	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, r8, {rd-sae}	 # AVX512F
+	vcvtsi2sd	xmm30, xmm29, r8, {rz-sae}	 # AVX512F
 	vcvtsi2sd	xmm30, xmm29, QWORD PTR [rcx]	 # AVX512F
 	vcvtsi2sd	xmm30, xmm29, QWORD PTR [rax+r14*8+0x1234]	 # AVX512F
 	vcvtsi2sd	xmm30, xmm29, QWORD PTR [rdx+1016]	 # AVX512F Disp8
@@ -10356,20 +10356,20 @@ _start:
 	vcvtsi2sd	xmm30, xmm29, QWORD PTR [rdx-1032]	 # AVX512F
 
 	vcvtsi2ss	xmm30, xmm29, eax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rn-sae}, eax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {ru-sae}, eax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rd-sae}, eax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rz-sae}, eax	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, eax, {rn-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, eax, {ru-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, eax, {rd-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, eax, {rz-sae}	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, ebp	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rn-sae}, ebp	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {ru-sae}, ebp	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rd-sae}, ebp	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rz-sae}, ebp	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, ebp, {rn-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, ebp, {ru-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, ebp, {rd-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, ebp, {rz-sae}	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, r13d	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rn-sae}, r13d	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {ru-sae}, r13d	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rd-sae}, r13d	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rz-sae}, r13d	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r13d, {rn-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r13d, {ru-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r13d, {rd-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r13d, {rz-sae}	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, DWORD PTR [rcx]	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, DWORD PTR [rax+r14*8+0x1234]	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, DWORD PTR [rdx+508]	 # AVX512F Disp8
@@ -10378,15 +10378,15 @@ _start:
 	vcvtsi2ss	xmm30, xmm29, DWORD PTR [rdx-516]	 # AVX512F
 
 	vcvtsi2ss	xmm30, xmm29, rax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rn-sae}, rax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {ru-sae}, rax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rd-sae}, rax	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rz-sae}, rax	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, rax, {rn-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, rax, {ru-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, rax, {rd-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, rax, {rz-sae}	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, r8	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rn-sae}, r8	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {ru-sae}, r8	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rd-sae}, r8	 # AVX512F
-	vcvtsi2ss	xmm30, xmm29, {rz-sae}, r8	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r8, {rn-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r8, {ru-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r8, {rd-sae}	 # AVX512F
+	vcvtsi2ss	xmm30, xmm29, r8, {rz-sae}	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, QWORD PTR [rcx]	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, QWORD PTR [rax+r14*8+0x1234]	 # AVX512F
 	vcvtsi2ss	xmm30, xmm29, QWORD PTR [rdx+1016]	 # AVX512F Disp8
@@ -14409,15 +14409,15 @@ _start:
 	vcvtusi2sd	xmm30, xmm29, DWORD PTR [rdx-516]	 # AVX512F
 
 	vcvtusi2sd	xmm30, xmm29, rax	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {rn-sae}, rax	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {ru-sae}, rax	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {rd-sae}, rax	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {rz-sae}, rax	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, rax, {rn-sae}	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, rax, {ru-sae}	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, rax, {rd-sae}	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, rax, {rz-sae}	 # AVX512F
 	vcvtusi2sd	xmm30, xmm29, r8	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {rn-sae}, r8	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {ru-sae}, r8	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {rd-sae}, r8	 # AVX512F
-	vcvtusi2sd	xmm30, xmm29, {rz-sae}, r8	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, r8, {rn-sae}	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, r8, {ru-sae}	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, r8, {rd-sae}	 # AVX512F
+	vcvtusi2sd	xmm30, xmm29, r8, {rz-sae}	 # AVX512F
 	vcvtusi2sd	xmm30, xmm29, QWORD PTR [rcx]	 # AVX512F
 	vcvtusi2sd	xmm30, xmm29, QWORD PTR [rax+r14*8+0x1234]	 # AVX512F
 	vcvtusi2sd	xmm30, xmm29, QWORD PTR [rdx+1016]	 # AVX512F Disp8
@@ -14426,20 +14426,20 @@ _start:
 	vcvtusi2sd	xmm30, xmm29, QWORD PTR [rdx-1032]	 # AVX512F
 
 	vcvtusi2ss	xmm30, xmm29, eax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rn-sae}, eax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {ru-sae}, eax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rd-sae}, eax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rz-sae}, eax	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, eax, {rn-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, eax, {ru-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, eax, {rd-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, eax, {rz-sae}	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, ebp	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rn-sae}, ebp	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {ru-sae}, ebp	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rd-sae}, ebp	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rz-sae}, ebp	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, ebp, {rn-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, ebp, {ru-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, ebp, {rd-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, ebp, {rz-sae}	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, r13d	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rn-sae}, r13d	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {ru-sae}, r13d	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rd-sae}, r13d	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rz-sae}, r13d	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r13d, {rn-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r13d, {ru-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r13d, {rd-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r13d, {rz-sae}	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, DWORD PTR [rcx]	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, DWORD PTR [rax+r14*8+0x1234]	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, DWORD PTR [rdx+508]	 # AVX512F Disp8
@@ -14448,15 +14448,15 @@ _start:
 	vcvtusi2ss	xmm30, xmm29, DWORD PTR [rdx-516]	 # AVX512F
 
 	vcvtusi2ss	xmm30, xmm29, rax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rn-sae}, rax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {ru-sae}, rax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rd-sae}, rax	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rz-sae}, rax	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, rax, {rn-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, rax, {ru-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, rax, {rd-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, rax, {rz-sae}	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, r8	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rn-sae}, r8	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {ru-sae}, r8	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rd-sae}, r8	 # AVX512F
-	vcvtusi2ss	xmm30, xmm29, {rz-sae}, r8	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r8, {rn-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r8, {ru-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r8, {rd-sae}	 # AVX512F
+	vcvtusi2ss	xmm30, xmm29, r8, {rz-sae}	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, QWORD PTR [rcx]	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, QWORD PTR [rax+r14*8+0x1234]	 # AVX512F
 	vcvtusi2ss	xmm30, xmm29, QWORD PTR [rdx+1016]	 # AVX512F Disp8

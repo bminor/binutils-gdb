@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "bfd.h"
-#include "elf-bfd.h"
 #include "gdb_bfd.h"
 #include "build-id.h"
 #include "gdb_vecs.h"
@@ -30,19 +29,17 @@
 
 /* See build-id.h.  */
 
-const struct elf_build_id *
+const struct bfd_build_id *
 build_id_bfd_get (bfd *abfd)
 {
-  if (!bfd_check_format (abfd, bfd_object)
-      || bfd_get_flavour (abfd) != bfd_target_elf_flavour
-      /* Although this is ELF_specific, it is safe to do in generic
-	 code because it does not rely on any ELF-specific symbols at
-	 link time, and if the ELF code is not available in BFD, then
-	 ABFD will not have the ELF flavour.  */
-      || elf_tdata (abfd)->build_id == NULL)
+  if (!bfd_check_format (abfd, bfd_object))
     return NULL;
 
-  return elf_tdata (abfd)->build_id;
+  if (abfd->build_id != NULL)
+    return abfd->build_id;
+
+  /* No build-id */
+  return NULL;
 }
 
 /* See build-id.h.  */
@@ -50,7 +47,7 @@ build_id_bfd_get (bfd *abfd)
 int
 build_id_verify (bfd *abfd, size_t check_len, const bfd_byte *check)
 {
-  const struct elf_build_id *found;
+  const struct bfd_build_id *found;
   int retval = 0;
 
   found = build_id_bfd_get (abfd);
@@ -139,7 +136,7 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 char *
 find_separate_debug_file_by_buildid (struct objfile *objfile)
 {
-  const struct elf_build_id *build_id;
+  const struct bfd_build_id *build_id;
 
   build_id = build_id_bfd_get (objfile->obfd);
   if (build_id != NULL)

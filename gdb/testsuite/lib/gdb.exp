@@ -1996,6 +1996,17 @@ gdb_caching_proc support_complex_tests {
     return $result
 }
 
+# Return 1 if GDB can get a type for siginfo from the target, otherwise
+# return 0.
+
+proc supports_get_siginfo_type {} {
+    if { [istarget "*-*-linux*"] } {
+	return 1
+    } else {
+	return 0
+    }
+}
+
 # Return 1 if target hardware or OS supports single stepping to signal
 # handler, otherwise, return 0.
 
@@ -2556,7 +2567,8 @@ proc skip_hw_breakpoint_tests {} {
     if { [istarget "i?86-*-*"] 
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
-	 || [istarget "arm*-*-*"]} {
+	 || [istarget "arm*-*-*"]
+	 || [istarget "aarch64*-*-*"]} {
 	return 0
     }
 
@@ -2576,6 +2588,7 @@ proc skip_hw_watchpoint_tests {} {
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
 	 || [istarget "arm*-*-*"]
+	 || [istarget "aarch64*-*-*"]
 	 || [istarget "powerpc*-*-linux*"]
 	 || [istarget "s390*-*-*"] } {
 	return 0
@@ -4539,28 +4552,39 @@ gdb_caching_proc gdb_has_argv0 {
 # Returns "" if there is none.
 
 proc get_build_id { filename } {
-    set tmp [standard_output_file "${filename}-tmp"]
-    set objcopy_program [gdb_find_objcopy]
-
-    set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $filename $tmp" output]
-    verbose "result is $result"
-    verbose "output is $output"
-    if {$result == 1} {
-	return ""
+    if { ([istarget "*-*-mingw*"]
+	  || [istarget *-*-cygwin*]) } {
+	set objdump_program [gdb_find_objdump]
+	set result [catch {set data [exec $objdump_program -p $filename | grep signature | cut "-d " -f4]} output]
+	verbose "result is $result"
+	verbose "output is $output"
+	if {$result == 1} {
+	    return ""
+	}
+	return $data
+    } else {
+	set tmp [standard_output_file "${filename}-tmp"]
+	set objcopy_program [gdb_find_objcopy]
+	set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $filename $tmp" output]
+	verbose "result is $result"
+	verbose "output is $output"
+	if {$result == 1} {
+	    return ""
+	}
+	set fi [open $tmp]
+	fconfigure $fi -translation binary
+	# Skip the NOTE header.
+	read $fi 16
+	set data [read $fi]
+	close $fi
+	file delete $tmp
+	if ![string compare $data ""] then {
+	    return ""
+	}
+	# Convert it to hex.
+	binary scan $data H* data
+	return $data
     }
-    set fi [open $tmp]
-    fconfigure $fi -translation binary
-    # Skip the NOTE header.
-    read $fi 16
-    set data [read $fi]
-    close $fi
-    file delete $tmp
-    if ![string compare $data ""] then {
-	return ""
-    }
-    # Convert it to hex.
-    binary scan $data H* data
-    return $data
 }
 
 # Return the build-id hex string (usually 160 bits as 40 hex characters)

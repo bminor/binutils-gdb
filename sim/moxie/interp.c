@@ -229,10 +229,15 @@ convert_target_flags (unsigned int tflags)
   return hflags;
 }
 
-/* TODO: Move to sim-trace.h.  */
-static FILE *tracefile;
-static const int tracing = 0;
-#define TRACE(str) if (tracing) fprintf(tracefile,"0x%08x, %s, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", opc, str, cpu.asregs.regs[0], cpu.asregs.regs[1], cpu.asregs.regs[2], cpu.asregs.regs[3], cpu.asregs.regs[4], cpu.asregs.regs[5], cpu.asregs.regs[6], cpu.asregs.regs[7], cpu.asregs.regs[8], cpu.asregs.regs[9], cpu.asregs.regs[10], cpu.asregs.regs[11], cpu.asregs.regs[12], cpu.asregs.regs[13], cpu.asregs.regs[14], cpu.asregs.regs[15]);
+/* TODO: Split this up into finger trace levels than just insn.  */
+#define MOXIE_TRACE_INSN(str) \
+  TRACE_INSN (scpu, "0x%08x, %s, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x", \
+	      opc, str, cpu.asregs.regs[0], cpu.asregs.regs[1], \
+	      cpu.asregs.regs[2], cpu.asregs.regs[3], cpu.asregs.regs[4], \
+	      cpu.asregs.regs[5], cpu.asregs.regs[6], cpu.asregs.regs[7], \
+	      cpu.asregs.regs[8], cpu.asregs.regs[9], cpu.asregs.regs[10], \
+	      cpu.asregs.regs[11], cpu.asregs.regs[12], cpu.asregs.regs[13], \
+	      cpu.asregs.regs[14], cpu.asregs.regs[15])
 
 void
 sim_engine_run (SIM_DESC sd,
@@ -268,76 +273,76 @@ sim_engine_run (SIM_DESC sd,
 		{
 		case 0x00: /* beq */
 		  {
-		    TRACE("beq");
+		    MOXIE_TRACE_INSN ("beq");
 		    if (cpu.asregs.cc & CC_EQ)
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x01: /* bne */
 		  {
-		    TRACE("bne");
+		    MOXIE_TRACE_INSN ("bne");
 		    if (! (cpu.asregs.cc & CC_EQ))
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x02: /* blt */
 		  {
-		    TRACE("blt");
+		    MOXIE_TRACE_INSN ("blt");
 		    if (cpu.asregs.cc & CC_LT)
 		      pc += INST2OFFSET(inst);
 		  }		  break;
 		case 0x03: /* bgt */
 		  {
-		    TRACE("bgt");
+		    MOXIE_TRACE_INSN ("bgt");
 		    if (cpu.asregs.cc & CC_GT)
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x04: /* bltu */
 		  {
-		    TRACE("bltu");
+		    MOXIE_TRACE_INSN ("bltu");
 		    if (cpu.asregs.cc & CC_LTU)
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x05: /* bgtu */
 		  {
-		    TRACE("bgtu");
+		    MOXIE_TRACE_INSN ("bgtu");
 		    if (cpu.asregs.cc & CC_GTU)
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x06: /* bge */
 		  {
-		    TRACE("bge");
+		    MOXIE_TRACE_INSN ("bge");
 		    if (cpu.asregs.cc & (CC_GT | CC_EQ))
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x07: /* ble */
 		  {
-		    TRACE("ble");
+		    MOXIE_TRACE_INSN ("ble");
 		    if (cpu.asregs.cc & (CC_LT | CC_EQ))
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x08: /* bgeu */
 		  {
-		    TRACE("bgeu");
+		    MOXIE_TRACE_INSN ("bgeu");
 		    if (cpu.asregs.cc & (CC_GTU | CC_EQ))
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		case 0x09: /* bleu */
 		  {
-		    TRACE("bleu");
+		    MOXIE_TRACE_INSN ("bleu");
 		    if (cpu.asregs.cc & (CC_LTU | CC_EQ))
 		      pc += INST2OFFSET(inst);
 		  }
 		  break;
 		default:
 		  {
-		    TRACE("SIGILL3");
+		    MOXIE_TRACE_INSN ("SIGILL3");
 		    sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 		    break;
 		  }
@@ -355,7 +360,7 @@ sim_engine_run (SIM_DESC sd,
 		    unsigned av = cpu.asregs.regs[a];
 		    unsigned v = (inst & 0xff);
 
-		    TRACE("inc");
+		    MOXIE_TRACE_INSN ("inc");
 		    cpu.asregs.regs[a] = av + v;
 		  }
 		  break;
@@ -365,7 +370,7 @@ sim_engine_run (SIM_DESC sd,
 		    unsigned av = cpu.asregs.regs[a];
 		    unsigned v = (inst & 0xff);
 
-		    TRACE("dec");
+		    MOXIE_TRACE_INSN ("dec");
 		    cpu.asregs.regs[a] = av - v;
 		  }
 		  break;
@@ -374,7 +379,7 @@ sim_engine_run (SIM_DESC sd,
 		    int a = (inst >> 8) & 0xf;
 		    unsigned v = (inst & 0xff);
 
-		    TRACE("gsr");
+		    MOXIE_TRACE_INSN ("gsr");
 		    cpu.asregs.regs[a] = cpu.asregs.sregs[v];
 		  }
 		  break;
@@ -383,12 +388,12 @@ sim_engine_run (SIM_DESC sd,
 		    int a = (inst >> 8) & 0xf;
 		    unsigned v = (inst & 0xff);
 
-		    TRACE("ssr");
+		    MOXIE_TRACE_INSN ("ssr");
 		    cpu.asregs.sregs[v] = cpu.asregs.regs[a];
 		  }
 		  break;
 		default:
-		  TRACE("SIGILL2");
+		  MOXIE_TRACE_INSN ("SIGILL2");
 		  sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 		  break;
 		}
@@ -402,7 +407,7 @@ sim_engine_run (SIM_DESC sd,
 	    {
 	    case 0x00: /* bad */
 	      opc = opcode;
-	      TRACE("SIGILL0");
+	      MOXIE_TRACE_INSN ("SIGILL0");
 	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 	      break;
 	    case 0x01: /* ldi.l (immediate) */
@@ -410,7 +415,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int val = EXTRACT_WORD(pc+2);
 
-		TRACE("ldi.l");
+		MOXIE_TRACE_INSN ("ldi.l");
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
 	      }
@@ -420,7 +425,7 @@ sim_engine_run (SIM_DESC sd,
 		int dest  = (inst >> 4) & 0xf;
 		int src = (inst ) & 0xf;
 
-		TRACE("mov");
+		MOXIE_TRACE_INSN ("mov");
 		cpu.asregs.regs[dest] = cpu.asregs.regs[src];
 	      }
 	      break;
@@ -429,7 +434,7 @@ sim_engine_run (SIM_DESC sd,
  		unsigned int fn = EXTRACT_WORD(pc+2);
  		unsigned int sp = cpu.asregs.regs[1];
 
-		TRACE("jsra");
+		MOXIE_TRACE_INSN ("jsra");
  		/* Save a slot for the static chain.  */
 		sp -= 4;
 
@@ -451,7 +456,7 @@ sim_engine_run (SIM_DESC sd,
  	      {
  		unsigned int sp = cpu.asregs.regs[0];
 
-		TRACE("ret");
+		MOXIE_TRACE_INSN ("ret");
  
  		/* Pop the frame pointer.  */
  		cpu.asregs.regs[0] = rlat (scpu, opc, sp);
@@ -475,7 +480,7 @@ sim_engine_run (SIM_DESC sd,
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
 
-		TRACE("add.l");
+		MOXIE_TRACE_INSN ("add.l");
 		cpu.asregs.regs[a] = av + bv;
 	      }
 	      break;
@@ -485,7 +490,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		int sp = cpu.asregs.regs[a] - 4;
 
-		TRACE("push");
+		MOXIE_TRACE_INSN ("push");
 		wlat (scpu, opc, sp, cpu.asregs.regs[b]);
 		cpu.asregs.regs[a] = sp;
 	      }
@@ -496,7 +501,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		int sp = cpu.asregs.regs[a];
 
-		TRACE("pop");
+		MOXIE_TRACE_INSN ("pop");
 		cpu.asregs.regs[b] = rlat (scpu, opc, sp);
 		cpu.asregs.regs[a] = sp + 4;
 	      }
@@ -506,7 +511,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
 
-		TRACE("lda.l");
+		MOXIE_TRACE_INSN ("lda.l");
 		cpu.asregs.regs[reg] = rlat (scpu, opc, addr);
 		pc += 4;
 	      }
@@ -516,7 +521,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
 
-		TRACE("sta.l");
+		MOXIE_TRACE_INSN ("sta.l");
 		wlat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
 	      }
@@ -527,7 +532,7 @@ sim_engine_run (SIM_DESC sd,
 		int dest = (inst >> 4) & 0xf;
 		int xv;
 
-		TRACE("ld.l");
+		MOXIE_TRACE_INSN ("ld.l");
 		xv = cpu.asregs.regs[src];
 		cpu.asregs.regs[dest] = rlat (scpu, opc, xv);
 	      }
@@ -537,7 +542,7 @@ sim_engine_run (SIM_DESC sd,
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
 
-		TRACE("st.l");
+		MOXIE_TRACE_INSN ("st.l");
 		wlat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
 	      break;
@@ -547,7 +552,7 @@ sim_engine_run (SIM_DESC sd,
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
-		TRACE("ldo.l");
+		MOXIE_TRACE_INSN ("ldo.l");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rlat (scpu, opc, addr);
 		pc += 2;
@@ -559,7 +564,7 @@ sim_engine_run (SIM_DESC sd,
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
-		TRACE("sto.l");
+		MOXIE_TRACE_INSN ("sto.l");
 		addr += cpu.asregs.regs[a];
 		wlat (scpu, opc, addr, cpu.asregs.regs[b]);
 		pc += 2;
@@ -573,7 +578,7 @@ sim_engine_run (SIM_DESC sd,
 		int va = cpu.asregs.regs[a];
 		int vb = cpu.asregs.regs[b]; 
 
-		TRACE("cmp");
+		MOXIE_TRACE_INSN ("cmp");
 		if (va == vb)
 		  cc = CC_EQ;
 		else
@@ -595,7 +600,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		signed char bv = cpu.asregs.regs[b];
 
-		TRACE("sex.b");
+		MOXIE_TRACE_INSN ("sex.b");
 		cpu.asregs.regs[a] = (int) bv;
 	      }
 	      break;
@@ -605,7 +610,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		signed short bv = cpu.asregs.regs[b];
 
-		TRACE("sex.s");
+		MOXIE_TRACE_INSN ("sex.s");
 		cpu.asregs.regs[a] = (int) bv;
 	      }
 	      break;
@@ -615,7 +620,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		signed char bv = cpu.asregs.regs[b];
 
-		TRACE("zex.b");
+		MOXIE_TRACE_INSN ("zex.b");
 		cpu.asregs.regs[a] = (int) bv & 0xff;
 	      }
 	      break;
@@ -625,7 +630,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		signed short bv = cpu.asregs.regs[b];
 
-		TRACE("zex.s");
+		MOXIE_TRACE_INSN ("zex.s");
 		cpu.asregs.regs[a] = (int) bv & 0xffff;
 	      }
 	      break;
@@ -638,7 +643,7 @@ sim_engine_run (SIM_DESC sd,
 		unsigned long long r = 
 		  (unsigned long long) av * (unsigned long long) bv;
 
-		TRACE("umul.x");
+		MOXIE_TRACE_INSN ("umul.x");
 		cpu.asregs.regs[a] = r >> 32;
 	      }
 	      break;
@@ -651,7 +656,7 @@ sim_engine_run (SIM_DESC sd,
 		signed long long r = 
 		  (signed long long) av * (signed long long) bv;
 
-		TRACE("mul.x");
+		MOXIE_TRACE_INSN ("mul.x");
 		cpu.asregs.regs[a] = r >> 32;
 	      }
 	      break;
@@ -660,7 +665,7 @@ sim_engine_run (SIM_DESC sd,
 	    case 0x18: /* bad */
 	      {
 		opc = opcode;
-		TRACE("SIGILL0");
+		MOXIE_TRACE_INSN ("SIGILL0");
 		sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 		break;
 	      }
@@ -669,7 +674,7 @@ sim_engine_run (SIM_DESC sd,
 		unsigned int fn = cpu.asregs.regs[(inst >> 4) & 0xf];
 		unsigned int sp = cpu.asregs.regs[1];
 
-		TRACE("jsr");
+		MOXIE_TRACE_INSN ("jsr");
 
  		/* Save a slot for the static chain.  */
 		sp -= 4;
@@ -692,7 +697,7 @@ sim_engine_run (SIM_DESC sd,
 	      {
 		unsigned int tgt = EXTRACT_WORD(pc+2);
 
-		TRACE("jmpa");
+		MOXIE_TRACE_INSN ("jmpa");
 		pc = tgt - 2;
 	      }
 	      break;
@@ -701,7 +706,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int val = EXTRACT_WORD(pc+2);
 
-		TRACE("ldi.b");
+		MOXIE_TRACE_INSN ("ldi.b");
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
 	      }
@@ -712,7 +717,7 @@ sim_engine_run (SIM_DESC sd,
 		int dest = (inst >> 4) & 0xf;
 		int xv;
 
-		TRACE("ld.b");
+		MOXIE_TRACE_INSN ("ld.b");
 		xv = cpu.asregs.regs[src];
 		cpu.asregs.regs[dest] = rbat (scpu, opc, xv);
 	      }
@@ -722,7 +727,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
 
-		TRACE("lda.b");
+		MOXIE_TRACE_INSN ("lda.b");
 		cpu.asregs.regs[reg] = rbat (scpu, opc, addr);
 		pc += 4;
 	      }
@@ -732,7 +737,7 @@ sim_engine_run (SIM_DESC sd,
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
 
-		TRACE("st.b");
+		MOXIE_TRACE_INSN ("st.b");
 		wbat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
 	      break;
@@ -741,7 +746,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
 
-		TRACE("sta.b");
+		MOXIE_TRACE_INSN ("sta.b");
 		wbat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
 	      }
@@ -752,7 +757,7 @@ sim_engine_run (SIM_DESC sd,
 
 		unsigned int val = EXTRACT_WORD(pc+2);
 
-		TRACE("ldi.s");
+		MOXIE_TRACE_INSN ("ldi.s");
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
 	      }
@@ -763,7 +768,7 @@ sim_engine_run (SIM_DESC sd,
 		int dest = (inst >> 4) & 0xf;
 		int xv;
 
-		TRACE("ld.s");
+		MOXIE_TRACE_INSN ("ld.s");
 		xv = cpu.asregs.regs[src];
 		cpu.asregs.regs[dest] = rsat (scpu, opc, xv);
 	      }
@@ -773,7 +778,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
 
-		TRACE("lda.s");
+		MOXIE_TRACE_INSN ("lda.s");
 		cpu.asregs.regs[reg] = rsat (scpu, opc, addr);
 		pc += 4;
 	      }
@@ -783,7 +788,7 @@ sim_engine_run (SIM_DESC sd,
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
 
-		TRACE("st.s");
+		MOXIE_TRACE_INSN ("st.s");
 		wsat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
 	      break;
@@ -792,7 +797,7 @@ sim_engine_run (SIM_DESC sd,
 		int reg = (inst >> 4) & 0xf;
 		unsigned int addr = EXTRACT_WORD(pc+2);
 
-		TRACE("sta.s");
+		MOXIE_TRACE_INSN ("sta.s");
 		wsat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
 	      }
@@ -801,7 +806,7 @@ sim_engine_run (SIM_DESC sd,
 	      {
 		int reg = (inst >> 4) & 0xf;
 
-		TRACE("jmp");
+		MOXIE_TRACE_INSN ("jmp");
 		pc = cpu.asregs.regs[reg] - 2;
 	      }
 	      break;
@@ -811,7 +816,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		int av, bv;
 
-		TRACE("and");
+		MOXIE_TRACE_INSN ("and");
 		av = cpu.asregs.regs[a];
 		bv = cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = av & bv;
@@ -824,7 +829,7 @@ sim_engine_run (SIM_DESC sd,
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
 
-		TRACE("lshr");
+		MOXIE_TRACE_INSN ("lshr");
 		cpu.asregs.regs[a] = (unsigned) ((unsigned) av >> bv);
 	      }
 	      break;
@@ -835,7 +840,7 @@ sim_engine_run (SIM_DESC sd,
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
 
-		TRACE("ashl");
+		MOXIE_TRACE_INSN ("ashl");
 		cpu.asregs.regs[a] = av << bv;
 	      }
 	      break;
@@ -846,7 +851,7 @@ sim_engine_run (SIM_DESC sd,
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
 
-		TRACE("sub.l");
+		MOXIE_TRACE_INSN ("sub.l");
 		cpu.asregs.regs[a] = av - bv;
 	      }
 	      break;
@@ -856,7 +861,7 @@ sim_engine_run (SIM_DESC sd,
 		int b  = inst & 0xf;
 		int bv = cpu.asregs.regs[b];
 
-		TRACE("neg");
+		MOXIE_TRACE_INSN ("neg");
 		cpu.asregs.regs[a] = - bv;
 	      }
 	      break;
@@ -866,7 +871,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		int av, bv;
 
-		TRACE("or");
+		MOXIE_TRACE_INSN ("or");
 		av = cpu.asregs.regs[a];
 		bv = cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = av | bv;
@@ -878,7 +883,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		int bv = cpu.asregs.regs[b];
 
-		TRACE("not");
+		MOXIE_TRACE_INSN ("not");
 		cpu.asregs.regs[a] = 0xffffffff ^ bv;
 	      }
 	      break;
@@ -889,7 +894,7 @@ sim_engine_run (SIM_DESC sd,
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
 
-		TRACE("ashr");
+		MOXIE_TRACE_INSN ("ashr");
 		cpu.asregs.regs[a] = av >> bv;
 	      }
 	      break;
@@ -899,7 +904,7 @@ sim_engine_run (SIM_DESC sd,
 		int b = inst & 0xf;
 		int av, bv;
 
-		TRACE("xor");
+		MOXIE_TRACE_INSN ("xor");
 		av = cpu.asregs.regs[a];
 		bv = cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = av ^ bv;
@@ -912,7 +917,7 @@ sim_engine_run (SIM_DESC sd,
 		unsigned av = cpu.asregs.regs[a];
 		unsigned bv = cpu.asregs.regs[b];
 
-		TRACE("mul.l");
+		MOXIE_TRACE_INSN ("mul.l");
 		cpu.asregs.regs[a] = av * bv;
 	      }
 	      break;
@@ -920,7 +925,7 @@ sim_engine_run (SIM_DESC sd,
 	      {
 		unsigned int inum = EXTRACT_WORD(pc+2);
 
-		TRACE("swi");
+		MOXIE_TRACE_INSN ("swi");
 		/* Set the special registers appropriately.  */
 		cpu.asregs.sregs[2] = 3; /* MOXIE_EX_SWI */
 	        cpu.asregs.sregs[3] = inum;
@@ -1002,7 +1007,7 @@ sim_engine_run (SIM_DESC sd,
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
 
-		TRACE("div.l");
+		MOXIE_TRACE_INSN ("div.l");
 		cpu.asregs.regs[a] = av / bv;
 	      }
 	      break;
@@ -1013,7 +1018,7 @@ sim_engine_run (SIM_DESC sd,
 		unsigned int av = cpu.asregs.regs[a];
 		unsigned int bv = cpu.asregs.regs[b];
 
-		TRACE("udiv.l");
+		MOXIE_TRACE_INSN ("udiv.l");
 		cpu.asregs.regs[a] = (av / bv);
 	      }
 	      break;
@@ -1024,7 +1029,7 @@ sim_engine_run (SIM_DESC sd,
 		int av = cpu.asregs.regs[a];
 		int bv = cpu.asregs.regs[b];
 
-		TRACE("mod.l");
+		MOXIE_TRACE_INSN ("mod.l");
 		cpu.asregs.regs[a] = av % bv;
 	      }
 	      break;
@@ -1035,12 +1040,12 @@ sim_engine_run (SIM_DESC sd,
 		unsigned int av = cpu.asregs.regs[a];
 		unsigned int bv = cpu.asregs.regs[b];
 
-		TRACE("umod.l");
+		MOXIE_TRACE_INSN ("umod.l");
 		cpu.asregs.regs[a] = (av % bv);
 	      }
 	      break;
 	    case 0x35: /* brk */
-	      TRACE("brk");
+	      MOXIE_TRACE_INSN ("brk");
 	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGTRAP);
 	      pc -= 2; /* Adjust pc */
 	      break;
@@ -1050,7 +1055,7 @@ sim_engine_run (SIM_DESC sd,
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
-		TRACE("ldo.b");
+		MOXIE_TRACE_INSN ("ldo.b");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rbat (scpu, opc, addr);
 		pc += 2;
@@ -1062,7 +1067,7 @@ sim_engine_run (SIM_DESC sd,
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
-		TRACE("sto.b");
+		MOXIE_TRACE_INSN ("sto.b");
 		addr += cpu.asregs.regs[a];
 		wbat (scpu, opc, addr, cpu.asregs.regs[b]);
 		pc += 2;
@@ -1074,7 +1079,7 @@ sim_engine_run (SIM_DESC sd,
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
-		TRACE("ldo.s");
+		MOXIE_TRACE_INSN ("ldo.s");
 		addr += cpu.asregs.regs[b];
 		cpu.asregs.regs[a] = rsat (scpu, opc, addr);
 		pc += 2;
@@ -1086,7 +1091,7 @@ sim_engine_run (SIM_DESC sd,
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 
-		TRACE("sto.s");
+		MOXIE_TRACE_INSN ("sto.s");
 		addr += cpu.asregs.regs[a];
 		wsat (scpu, opc, addr, cpu.asregs.regs[b]);
 		pc += 2;
@@ -1094,7 +1099,7 @@ sim_engine_run (SIM_DESC sd,
 	      break;
 	    default:
 	      opc = opcode;
-	      TRACE("SIGILL1");
+	      MOXIE_TRACE_INSN ("SIGILL1");
 	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
 	      break;
 	    }

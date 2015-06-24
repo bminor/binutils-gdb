@@ -21,8 +21,6 @@
 #include "server.h"
 #include "regcache.h"
 #include "ax.h"
-#include <stdint.h>
-
 const unsigned char *breakpoint_data;
 int breakpoint_len;
 

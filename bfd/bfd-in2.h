@@ -1452,6 +1452,7 @@ typedef struct bfd_section
 #define SEC_INFO_TYPE_EH_FRAME  3
 #define SEC_INFO_TYPE_JUST_SYMS 4
 #define SEC_INFO_TYPE_TARGET    5
+#define SEC_INFO_TYPE_EH_FRAME_ENTRY 6
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;
@@ -5736,6 +5737,16 @@ the GOT entry for this symbol.  Used in conjunction with
 BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.  */
   BFD_RELOC_AARCH64_LD32_GOT_LO12_NC,
 
+/* Unsigned 15 bit byte offset for 64 bit load/store from the page of
+the GOT entry for this symbol. Valid in ILP64 ABI only.  */
+  BFD_RELOC_AARCH64_LD64_GOTOFF_LO15,
+
+/* Scaled 14 bit byte offset to the page base of the global offset table.  */
+  BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14,
+
+/* Scaled 15 bit byte offset to the page base of the global offset table.  */
+  BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15,
+
 /* Get to the page base of the global offset table entry for a symbols
 tls_index structure as part of an adrp instruction using a 21 bit PC
 relative value.  Used in conjunction with
@@ -6315,6 +6326,12 @@ enum bfd_plugin_format
     bfd_plugin_no = 2
   };
 
+struct bfd_build_id
+  {
+    bfd_size_type size;
+    bfd_byte data[1];
+  };
+
 struct bfd
 {
   /* The filename the application opened the BFD with.  */
@@ -6599,6 +6616,9 @@ struct bfd
      struct objalloc *, but we use void * to avoid requiring the inclusion
      of objalloc.h.  */
   void *memory;
+
+  /* For input BFDs, the build ID, if the object has one. */
+  const struct bfd_build_id *build_id;
 };
 
 /* See note beside bfd_set_section_userdata.  */

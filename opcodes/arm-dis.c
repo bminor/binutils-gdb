@@ -1194,6 +1194,12 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0xf2000a10, 0xfe800f10,
     "vpmin%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3000b10, 0xff800f10,
+    "vqrdmlah%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3000c10, 0xff800f10,
+    "vqrdmlsh%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
 
   /* One register and an immediate value.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -1447,6 +1453,19 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0xf2800a40, 0xfe800f50,
     "vmull%c.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf2800e40, 0xff800f50,
+   "vqrdmlah%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf2800f40, 0xff800f50,
+   "vqrdmlsh%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3800e40, 0xff800f50,
+   "vqrdmlah%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3800f40, 0xff800f50,
+   "vqrdmlsh%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"
+  },
 
   /* Element and structure load/store.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -1601,6 +1620,10 @@ static const struct opcode32 arm_opcodes[] =
     0xe1200240, 0xfff00ff0, "crc32ch\t%12-15R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
     0xe1400240, 0xfff00ff0, "crc32cw\t%12-15R, %16-19R, %0-3R"},
+
+  /* Privileged Access Never extension instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
+    0xf1100000, 0xfffffdff, "setpan\t#%9-9d"},
 
   /* Virtualization Extension instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT), 0x0160006e, 0x0fffffff, "eret%c"},
@@ -2293,6 +2316,7 @@ static const struct opcode16 thumb_opcodes[] =
   /* ARM V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xbf50, 0xffff, "sevl%c"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xba80, 0xffc0, "hlt\t%0-5x"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),  0xb610, 0xfff7, "setpan\t#%3-3d"},
 
   /* ARM V6K no-argument instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6K), 0xbf00, 0xffff, "nop%c"},
@@ -3328,7 +3352,7 @@ print_insn_coprocessor (bfd_vma pc,
 
 		    /* Is ``imm'' a negative number?  */
 		    if (imm & 0x40)
-		      imm |= (-1 << 7);
+		      imm -= 0x80;
 
 		    func (stream, "%d", imm);
 		  }
@@ -6026,43 +6050,40 @@ static void
 select_arm_features (unsigned long mach,
 		     arm_feature_set * features)
 {
-#undef  ARM_FEATURE_LOW
-#define ARM_FEATURE_LOW(ARCH1,CEXT) \
-  features->core[0] = (ARCH1); \
-  features->core[1] = 0; \
-  features->coproc = (CEXT) | FPU_FPA; \
-  return
-
-#undef  ARM_FEATURE_CORE_LOW
-#define ARM_FEATURE_CORE_LOW(ARCH1) \
-  features->core[0] = (ARCH1); \
-  features->core[1] = 0; \
-  features->coproc = FPU_FPA; \
-  return
+#undef ARM_SET_FEATURES
+#define ARM_SET_FEATURES(FSET) \
+  {							\
+    const arm_feature_set fset = FSET;			\
+    arm_feature_set tmp = ARM_FEATURE (0, 0, FPU_FPA) ;	\
+    ARM_MERGE_FEATURE_SETS (*features, tmp, fset);	\
+  }
 
   switch (mach)
     {
-    case bfd_mach_arm_2:       ARM_ARCH_V2;
-    case bfd_mach_arm_2a:      ARM_ARCH_V2S;
-    case bfd_mach_arm_3:       ARM_ARCH_V3;
-    case bfd_mach_arm_3M:      ARM_ARCH_V3M;
-    case bfd_mach_arm_4:       ARM_ARCH_V4;
-    case bfd_mach_arm_4T:      ARM_ARCH_V4T;
-    case bfd_mach_arm_5:       ARM_ARCH_V5;
-    case bfd_mach_arm_5T:      ARM_ARCH_V5T;
-    case bfd_mach_arm_5TE:     ARM_ARCH_V5TE;
-    case bfd_mach_arm_XScale:  ARM_ARCH_XSCALE;
-    case bfd_mach_arm_ep9312:  ARM_FEATURE_LOW (ARM_AEXT_V4T, \
-						ARM_CEXT_MAVERICK \
-						| FPU_MAVERICK);
-    case bfd_mach_arm_iWMMXt:  ARM_ARCH_IWMMXT;
-    case bfd_mach_arm_iWMMXt2: ARM_ARCH_IWMMXT2;
+    case bfd_mach_arm_2:       ARM_SET_FEATURES (ARM_ARCH_V2); break;
+    case bfd_mach_arm_2a:      ARM_SET_FEATURES (ARM_ARCH_V2S); break;
+    case bfd_mach_arm_3:       ARM_SET_FEATURES (ARM_ARCH_V3); break;
+    case bfd_mach_arm_3M:      ARM_SET_FEATURES (ARM_ARCH_V3M); break;
+    case bfd_mach_arm_4:       ARM_SET_FEATURES (ARM_ARCH_V4); break;
+    case bfd_mach_arm_4T:      ARM_SET_FEATURES (ARM_ARCH_V4T); break;
+    case bfd_mach_arm_5:       ARM_SET_FEATURES (ARM_ARCH_V5); break;
+    case bfd_mach_arm_5T:      ARM_SET_FEATURES (ARM_ARCH_V5T); break;
+    case bfd_mach_arm_5TE:     ARM_SET_FEATURES (ARM_ARCH_V5TE); break;
+    case bfd_mach_arm_XScale:  ARM_SET_FEATURES (ARM_ARCH_XSCALE); break;
+    case bfd_mach_arm_ep9312:
+      ARM_SET_FEATURES (ARM_FEATURE_LOW (ARM_AEXT_V4T,
+					 ARM_CEXT_MAVERICK | FPU_MAVERICK));
+       break;
+    case bfd_mach_arm_iWMMXt:  ARM_SET_FEATURES (ARM_ARCH_IWMMXT); break;
+    case bfd_mach_arm_iWMMXt2: ARM_SET_FEATURES (ARM_ARCH_IWMMXT2); break;
       /* If the machine type is unknown allow all
 	 architecture types and all extensions.  */
-    case bfd_mach_arm_unknown: ARM_FEATURE_LOW (-1UL, -1UL);
+    case bfd_mach_arm_unknown: ARM_SET_FEATURES (ARM_FEATURE_ALL); break;
     default:
       abort ();
     }
+
+#undef ARM_SET_FEATURES
 }
 
 

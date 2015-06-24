@@ -1442,8 +1442,6 @@ extern void breakpoint_set_task (struct breakpoint *b, int task);
 /* Clear the "inserted" flag in all breakpoints.  */
 extern void mark_breakpoints_out (void);
 
-extern void make_breakpoint_permanent (struct breakpoint *);
-
 extern struct breakpoint *create_jit_event_breakpoint (struct gdbarch *,
                                                        CORE_ADDR);
 

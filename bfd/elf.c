@@ -9116,18 +9116,18 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 static bfd_boolean
 elfobj_grok_gnu_build_id (bfd *abfd, Elf_Internal_Note *note)
 {
-  struct elf_obj_tdata *t;
+  struct bfd_build_id* build_id;
 
   if (note->descsz == 0)
     return FALSE;
 
-  t = elf_tdata (abfd);
-  t->build_id = bfd_alloc (abfd, sizeof (*t->build_id) - 1 + note->descsz);
-  if (t->build_id == NULL)
+  build_id = bfd_alloc (abfd, sizeof (struct bfd_build_id) - 1 + note->descsz);
+  if (build_id == NULL)
     return FALSE;
 
-  t->build_id->size = note->descsz;
-  memcpy (t->build_id->data, note->descdata, note->descsz);
+  build_id->size = note->descsz;
+  memcpy (build_id->data, note->descdata, note->descsz);
+  abfd->build_id = build_id;
 
   return TRUE;
 }

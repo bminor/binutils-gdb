@@ -228,6 +228,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 
+# Test --compress-debug-sections with --build-id=tree.
+
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
 
@@ -238,11 +240,14 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test scripts with a relocatable link.
 # The -g option is necessary to trigger a bug where a section
 # declared in a script file is assigned a non-zero starting address.
+
+# Test difference between "*(a b)" and "*(a) *(b)" in input section spec.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_32 = many_sections_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test initpri1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2 initpri3a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_and_build_id_tree \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_1 ver_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2 ver_test_6 ver_test_8 \
@@ -256,6 +261,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test script_test_11 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_12 script_test_12i \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2
@@ -896,6 +902,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri3a$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
@@ -920,6 +927,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_11$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_12$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_12i$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2$(EXEEXT)
@@ -1175,6 +1184,15 @@ flagstest_compress_debug_sections_DEPENDENCIES = libgoldtest.a \
 	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+flagstest_compress_debug_sections_and_build_id_tree_SOURCES =  \
+	flagstest_compress_debug_sections_and_build_id_tree.c
+flagstest_compress_debug_sections_and_build_id_tree_OBJECTS =  \
+	flagstest_compress_debug_sections_and_build_id_tree.$(OBJEXT)
+flagstest_compress_debug_sections_and_build_id_tree_LDADD = $(LDADD)
+flagstest_compress_debug_sections_and_build_id_tree_DEPENDENCIES =  \
+	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 flagstest_o_specialfile_SOURCES = flagstest_o_specialfile.c
 flagstest_o_specialfile_OBJECTS = flagstest_o_specialfile.$(OBJEXT)
 flagstest_o_specialfile_LDADD = $(LDADD)
@@ -1647,6 +1665,20 @@ script_test_11_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+script_test_12_SOURCES = script_test_12.c
+script_test_12_OBJECTS = script_test_12.$(OBJEXT)
+script_test_12_LDADD = $(LDADD)
+script_test_12_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
+script_test_12i_SOURCES = script_test_12i.c
+script_test_12i_OBJECTS = script_test_12i.$(OBJEXT)
+script_test_12i_LDADD = $(LDADD)
+script_test_12i_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_2_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2a.$(OBJEXT) \
@@ -2011,7 +2043,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
 	$(exception_x86_64_bnd_test_SOURCES) \
 	$(exclude_libs_test_SOURCES) \
-	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
+	flagstest_compress_debug_sections.c \
+	flagstest_compress_debug_sections_and_build_id_tree.c \
+	flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	flagstest_o_ttext_1.c icf_virtual_function_folding_test.c \
 	$(ifuncmain1_SOURCES) ifuncmain1pic.c ifuncmain1picstatic.c \
@@ -2044,7 +2078,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(protected_2_SOURCES) $(relro_now_test_SOURCES) \
 	$(relro_script_test_SOURCES) $(relro_strip_test_SOURCES) \
 	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
-	script_test_11.c $(script_test_2_SOURCES) script_test_3.c \
+	script_test_11.c script_test_12.c script_test_12i.c \
+	$(script_test_2_SOURCES) script_test_3.c \
 	$(searched_file_test_SOURCES) start_lib_test.c \
 	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
 	$(tls_phdrs_script_test_SOURCES) $(tls_pic_test_SOURCES) \
@@ -3049,6 +3084,12 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
 @NATIVE_LINKER_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
+@GCC_FALSE@flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT): $(flagstest_compress_debug_sections_and_build_id_tree_OBJECTS) $(flagstest_compress_debug_sections_and_build_id_tree_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(flagstest_compress_debug_sections_and_build_id_tree_OBJECTS) $(flagstest_compress_debug_sections_and_build_id_tree_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT): $(flagstest_compress_debug_sections_and_build_id_tree_OBJECTS) $(flagstest_compress_debug_sections_and_build_id_tree_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_compress_debug_sections_and_build_id_tree_OBJECTS) $(flagstest_compress_debug_sections_and_build_id_tree_LDADD) $(LIBS)
 @GCC_FALSE@flagstest_o_specialfile$(EXEEXT): $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f flagstest_o_specialfile$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_LDADD) $(LIBS)
@@ -3556,6 +3597,18 @@ script_test_1$(EXEEXT): $(script_test_1_OBJECTS) $(script_test_1_DEPENDENCIES)
 @NATIVE_LINKER_FALSE@script_test_11$(EXEEXT): $(script_test_11_OBJECTS) $(script_test_11_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f script_test_11$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(script_test_11_OBJECTS) $(script_test_11_LDADD) $(LIBS)
+@GCC_FALSE@script_test_12$(EXEEXT): $(script_test_12_OBJECTS) $(script_test_12_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f script_test_12$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(script_test_12_OBJECTS) $(script_test_12_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@script_test_12$(EXEEXT): $(script_test_12_OBJECTS) $(script_test_12_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f script_test_12$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(script_test_12_OBJECTS) $(script_test_12_LDADD) $(LIBS)
+@GCC_FALSE@script_test_12i$(EXEEXT): $(script_test_12i_OBJECTS) $(script_test_12i_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f script_test_12i$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(script_test_12i_OBJECTS) $(script_test_12i_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@script_test_12i$(EXEEXT): $(script_test_12i_OBJECTS) $(script_test_12i_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f script_test_12i$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(script_test_12i_OBJECTS) $(script_test_12i_LDADD) $(LIBS)
 script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES) 
 	@rm -f script_test_2$(EXEEXT)
 	$(script_test_2_LINK) $(script_test_2_OBJECTS) $(script_test_2_LDADD) $(LIBS)
@@ -3787,6 +3840,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exclude_libs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections_and_build_id_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_ttext_1.Po@am__quote@
@@ -3858,6 +3912,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relro_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_11.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_12.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_12i.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2b.Po@am__quote@
@@ -4548,6 +4604,8 @@ flagstest_o_specialfile.log: flagstest_o_specialfile$(EXEEXT)
 	@p='flagstest_o_specialfile$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 flagstest_compress_debug_sections.log: flagstest_compress_debug_sections$(EXEEXT)
 	@p='flagstest_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+flagstest_compress_debug_sections_and_build_id_tree.log: flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT)
+	@p='flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 flagstest_o_specialfile_and_compress_debug_sections.log: flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
 	@p='flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 flagstest_o_ttext_1.log: flagstest_o_ttext_1$(EXEEXT)
@@ -4596,6 +4654,10 @@ tls_script_test.log: tls_script_test$(EXEEXT)
 	@p='tls_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_11.log: script_test_11$(EXEEXT)
 	@p='script_test_11$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_12.log: script_test_12$(EXEEXT)
+	@p='script_test_12$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_12i.log: script_test_12i$(EXEEXT)
+	@p='script_test_12i$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 dynamic_list_2.log: dynamic_list_2$(EXEEXT)
 	@p='dynamic_list_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 thin_archive_test_1.log: thin_archive_test_1$(EXEEXT)
@@ -5441,6 +5503,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections_and_build_id_tree: flagstest_debug.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--build-id=tree \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--build-id-chunk-size-for-treehash=4096 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--build-id-min-file-size-for-treehash=0
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@		gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
@@ -5587,6 +5655,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11.o: script_test_11.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12: gcctestdir/ld $(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12i: gcctestdir/ld $(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12a.o: script_test_12a.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12b.o: script_test_12b.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \

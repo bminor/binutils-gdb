@@ -49,13 +49,13 @@ const Object_merge_map::Input_merge_map*
 Object_merge_map::get_input_merge_map(unsigned int shndx) const
 {
   gold_assert(shndx != -1U);
-  if (shndx == this->first_shnum_)
-    return &this->first_map_;
-  if (shndx == this->second_shnum_)
-    return &this->second_map_;
-  Section_merge_maps::const_iterator p = this->section_merge_maps_.find(shndx);
-  if (p != this->section_merge_maps_.end())
-    return p->second;
+  const Section_merge_maps &maps = this->section_merge_maps_;
+  for (Section_merge_maps::const_iterator i = maps.begin(), e = maps.end();
+       i != e; ++i)
+    {
+      if (i->first == shndx)
+	return i->second;
+    }
   return NULL;
 }
 
@@ -73,23 +73,10 @@ Object_merge_map::get_or_make_input_merge_map(
       return map;
     }
 
-  // We need to create a new entry.
-  if (this->first_shnum_ == -1U)
-    {
-      this->first_shnum_ = shndx;
-      this->first_map_.output_data = output_data;
-      return &this->first_map_;
-    }
-  if (this->second_shnum_ == -1U)
-    {
-      this->second_shnum_ = shndx;
-      this->second_map_.output_data = output_data;
-      return &this->second_map_;
-    }
-
   Input_merge_map* new_map = new Input_merge_map;
   new_map->output_data = output_data;
-  this->section_merge_maps_[shndx] = new_map;
+  Section_merge_maps &maps = this->section_merge_maps_;
+  maps.push_back(std::make_pair(shndx, new_map));
   return new_map;
 }
 

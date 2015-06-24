@@ -179,6 +179,9 @@ architectures),
 @code{simd} (Advanced SIMD Extensions for v8-A architecture, implies @code{fp}),
 @code{virt} (Virtualization Extensions for v7-A architecture, implies
 @code{idiv}),
+@code{pan} (Priviliged Access Never Extensions for v8-A architecture),
+@code{rdma} (ARMv8.1 Advanced SIMD extensions for v8-A architecture, implies
+@code{simd})
 and
 @code{xscale}.
 
@@ -217,6 +220,7 @@ names are recognized:
 @code{armv7-m},
 @code{armv7e-m},
 @code{armv8-a},
+@code{armv8.1-a},
 @code{iwmmxt}
 @code{iwmmxt2}
 and
@@ -270,8 +274,9 @@ The following format options are recognized:
 @code{neon},
 @code{neon-vfpv4},
 @code{neon-fp-armv8},
-and
 @code{crypto-neon-fp-armv8}.
+and
+@code{neon-fp-armv8-1},
 
 In addition to determining which instructions are assembled, this option
 also affects the way in which the @code{.double} assembler directive behaves

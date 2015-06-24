@@ -4489,7 +4489,6 @@ dwarf2_create_include_psymtab (const char *name, struct partial_symtab *pst,
       subpst->dirname = pst->dirname;
     }
 
-  subpst->section_offsets = pst->section_offsets;
   subpst->textlow = 0;
   subpst->texthigh = 0;
 
@@ -5890,8 +5889,7 @@ create_partial_symtab (struct dwarf2_per_cu_data *per_cu, const char *name)
   struct objfile *objfile = per_cu->objfile;
   struct partial_symtab *pst;
 
-  pst = start_psymtab_common (objfile, objfile->section_offsets,
-			      name, 0,
+  pst = start_psymtab_common (objfile, name, 0,
 			      objfile->global_psymbols.next,
 			      objfile->static_psymbols.next);
 
@@ -17475,11 +17473,6 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
   return include_name;
 }
 
-/* Function to record a line number.  */
-
-typedef void (record_line_ftype) (struct subfile *subfile, int line,
-				  CORE_ADDR pc);
-
 /* State machine to track the state of the line number program.  */
 
 typedef struct
@@ -17663,7 +17656,7 @@ dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
       lh->file_names[file - 1].included_p = 1;
       if (reader->record_lines_p && is_stmt)
 	{
-	  if (state->last_subfile != current_subfile)
+	  if (state->last_subfile != current_subfile || end_sequence)
 	    {
 	      dwarf_finish_line (reader->gdbarch, state->last_subfile,
 				 state->address, state->record_line);

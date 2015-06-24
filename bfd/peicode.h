@@ -1255,6 +1255,87 @@ pe_ILF_object_p (bfd * abfd)
   return abfd->xvec;
 }
 
+static void
+pe_bfd_read_buildid(bfd *abfd)
+{
+  pe_data_type *pe = pe_data (abfd);
+  struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
+  asection *section;
+  bfd_byte *data = 0;
+  bfd_size_type dataoff;
+  unsigned int i;
+
+  bfd_vma addr = extra->DataDirectory[PE_DEBUG_DATA].VirtualAddress;
+  bfd_size_type size = extra->DataDirectory[PE_DEBUG_DATA].Size;
+
+  if (size == 0)
+    return;
+
+  addr += extra->ImageBase;
+
+  /* Search for the section containing the DebugDirectory */
+  for (section = abfd->sections; section != NULL; section = section->next)
+    {
+      if ((addr >= section->vma) && (addr < (section->vma + section->size)))
+        break;
+    }
+
+  if (section == NULL)
+    {
+      return;
+    }
+  else if (!(section->flags & SEC_HAS_CONTENTS))
+    {
+      return;
+    }
+
+  dataoff = addr - section->vma;
+
+  /* Read the whole section. */
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
+    {
+      if (data != NULL)
+	free (data);
+      return;
+    }
+
+  /* Search for a CodeView entry in the DebugDirectory */
+  for (i = 0; i < size / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
+    {
+      struct external_IMAGE_DEBUG_DIRECTORY *ext
+	= &((struct external_IMAGE_DEBUG_DIRECTORY *)(data + dataoff))[i];
+      struct internal_IMAGE_DEBUG_DIRECTORY idd;
+
+      _bfd_XXi_swap_debugdir_in (abfd, ext, &idd);
+
+      if (idd.Type == PE_IMAGE_DEBUG_TYPE_CODEVIEW)
+        {
+          char buffer[256 + 1];
+          CODEVIEW_INFO *cvinfo = (CODEVIEW_INFO *) buffer;
+
+          /*
+            The debug entry doesn't have to have to be in a section, in which
+            case AddressOfRawData is 0, so always use PointerToRawData.
+          */
+          if (_bfd_XXi_slurp_codeview_record (abfd,
+                                              (file_ptr) idd.PointerToRawData,
+                                              idd.SizeOfData, cvinfo))
+            {
+              struct bfd_build_id* build_id = bfd_alloc(abfd,
+                         sizeof(struct bfd_build_id) + cvinfo->SignatureLength);
+              if (build_id)
+                {
+                  build_id->size = cvinfo->SignatureLength;
+                  memcpy(build_id->data,  cvinfo->Signature,
+                         cvinfo->SignatureLength);
+                  abfd->build_id = build_id;
+                }
+            }
+          break;
+        }
+    }
+}
+
 static const bfd_target *
 pe_bfd_object_p (bfd * abfd)
 {
@@ -1265,6 +1346,7 @@ pe_bfd_object_p (bfd * abfd)
   struct internal_aouthdr internal_a;
   file_ptr opt_hdr_size;
   file_ptr offset;
+  const bfd_target *result;
 
   /* Detect if this a Microsoft Import Library Format element.  */
   /* First read the beginning of the header.  */
@@ -1358,10 +1440,20 @@ pe_bfd_object_p (bfd * abfd)
 	return NULL;
     }
 
-  return coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
-                            (opt_hdr_size != 0
-                             ? &internal_a
-                             : (struct internal_aouthdr *) NULL));
+
+  result = coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
+                               (opt_hdr_size != 0
+                                ? &internal_a
+                                : (struct internal_aouthdr *) NULL));
+
+
+  if (result)
+    {
+      /* Now the whole header has been processed, see if there is a build-id */
+      pe_bfd_read_buildid(abfd);
+    }
+
+  return result;
 }
 
 #define coff_object_p pe_bfd_object_p

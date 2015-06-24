@@ -276,16 +276,6 @@ struct inferior_control_state
   enum stop_kind stop_soon;
 };
 
-/* Inferior process specific part of `struct infcall_suspend_state'.
-
-   Inferior thread counterpart is `struct thread_suspend_state'.  */
-
-#if 0 /* Currently unused and empty structures are not valid C.  */
-struct inferior_suspend_state
-{
-};
-#endif
-
 /* GDB represents the state of each program execution with an object
    called an inferior.  An inferior typically corresponds to a process
    but is more general and applies also to targets that do not have a
@@ -313,12 +303,6 @@ struct inferior
   /* State of GDB control of inferior process execution.
      See `struct inferior_control_state'.  */
   struct inferior_control_state control;
-
-  /* State of inferior process to restore after GDB is done with an inferior
-     call.  See `struct inferior_suspend_state'.  */
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  struct inferior_suspend_state suspend;
-#endif
 
   /* True if this was an auto-created inferior, e.g. created from
      following a fork; false, if this inferior was manually added by

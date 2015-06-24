@@ -570,6 +570,23 @@ if { [istarget mips*-*-vxworks*] } {
 	    "MIPS branch swapping ($count)"
     }
 
+    run_dump_test "compact-eh-eb-1"
+    run_dump_test "compact-eh-eb-2"
+    run_dump_test "compact-eh-eb-3"
+    run_dump_test "compact-eh-eb-4"
+    run_dump_test "compact-eh-eb-5"
+    run_dump_test "compact-eh-eb-6"
+    run_dump_test "compact-eh-eb-7"
+    run_dump_test "compact-eh-el-1"
+    run_dump_test "compact-eh-el-2"
+    run_dump_test "compact-eh-el-3"
+    run_dump_test "compact-eh-el-4"
+    run_dump_test "compact-eh-el-5"
+    run_dump_test "compact-eh-el-6"
+    run_dump_test "compact-eh-el-7"
+    run_list_test "compact-eh-err1"
+    run_list_test "compact-eh-err2"
+
     run_dump_test "div"
 
     if { !$addr32 } {
@@ -1139,7 +1156,6 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "align2-el"
     run_dump_test "align3"
     run_dump_test "odd-float"
-    run_dump_test "ehword"
     run_dump_test "insn-opts"
 
     run_list_test_arches "mips-macro-ill-sfp" "-32 -msingle-float" \

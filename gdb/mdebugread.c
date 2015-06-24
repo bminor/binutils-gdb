@@ -2646,7 +2646,7 @@ parse_partial_symbols (struct objfile *objfile)
 	}
       else
 	textlow = 0;
-      pst = start_psymtab_common (objfile, objfile->section_offsets,
+      pst = start_psymtab_common (objfile,
 				  fdr_name (fh),
 				  textlow,
 				  objfile->global_psymbols.next,
@@ -3935,6 +3935,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
   struct linetable *lines;
   CORE_ADDR lowest_pdr_addr = 0;
   int last_symtab_ended = 0;
+  struct section_offsets *section_offsets = objfile->section_offsets;
 
   if (pst->readin)
     return;
@@ -4051,7 +4052,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		      && previous_stab_code != (unsigned char) N_SO
 		      && *name == '\000')
 		    {
-		      valu += ANOFFSET (pst->section_offsets,
+		      valu += ANOFFSET (section_offsets,
 					SECT_OFF_TEXT (objfile));
 		      previous_stab_code = N_SO;
 		      cust = end_symtab (valu, SECT_OFF_TEXT (objfile));
@@ -4062,14 +4063,14 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		    {
 		      last_symtab_ended = 0;
 		      process_one_symbol (type_code, 0, valu, name,
-					  pst->section_offsets, objfile);
+					  section_offsets, objfile);
 		    }
 		}
 	      /* Similarly a hack.  */
 	      else if (name[0] == '#')
 		{
 		  process_one_symbol (N_SLINE, 0, valu, name,
-				      pst->section_offsets, objfile);
+				      section_offsets, objfile);
 		}
 	      if (type_code == N_FUN)
 		{
@@ -4101,7 +4102,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	      else
 		{
 		  /* Handle encoded stab line number.  */
-		  valu += ANOFFSET (pst->section_offsets,
+		  valu += ANOFFSET (section_offsets,
 				    SECT_OFF_TEXT (objfile));
 		  record_line (current_subfile, sh.index,
 			       gdbarch_addr_bits_remove (gdbarch, valu));
@@ -4225,7 +4226,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	      c = parse_symbol (&sh,
 				debug_info->external_aux + fh->iauxBase,
 				sym_ptr, fh->fBigendian,
-				pst->section_offsets, objfile);
+				section_offsets, objfile);
 	      sym_ptr += c * external_sym_size;
 	    }
 
@@ -4300,7 +4301,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
 	parse_external (ext_ptr, fh->fBigendian,
-			pst->section_offsets, objfile);
+			section_offsets, objfile);
 
       /* If there are undefined symbols, tell the user.
          The alpha has an undefined symbol for every symbol that is
@@ -4758,7 +4759,6 @@ new_psymtab (char *name, struct objfile *objfile)
   struct partial_symtab *psymtab;
 
   psymtab = allocate_psymtab (name, objfile);
-  psymtab->section_offsets = objfile->section_offsets;
 
   /* Keep a backpointer to the file's symbols.  */
 

@@ -110,7 +110,10 @@ set_initial_gprs (SIM_CPU *cpu)
 static int tracing = 0;
 
 void
-sim_resume (SIM_DESC sd, int step, int siggnal)
+sim_engine_run (SIM_DESC sd,
+		int next_cpu_nr, /* ignore  */
+		int nr_cpus, /* ignore  */
+		int siggnal) /* ignore  */
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   int needfetch;
@@ -132,13 +135,11 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   short num_delay_slot; /* UNUSED except as reqd parameter */
   enum microblaze_instr_type insn_type;
 
-  CPU.exception = step ? SIGTRAP : 0;
-
   memops = 0;
   bonus_cycles = 0;
   insts = 0;
 
-  do
+  while (1)
     {
       /* Fetch the initial instructions that we'll decode. */
       inst = MEM_RD_WORD (PC & 0xFFFFFFFC);
@@ -161,12 +162,12 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
       delay_slot_enable = 0;
       branch_taken = 0;
       if (op == microblaze_brk)
-	CPU.exception = SIGTRAP;
+	sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_stopped, SIM_SIGTRAP);
       else if (inst == MICROBLAZE_HALT_INST)
 	{
-	  CPU.exception = SIGQUIT;
 	  insts += 1;
 	  bonus_cycles++;
+	  sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_exited, RETREG);
 	}
       else
 	{
@@ -180,7 +181,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 #undef INSTRUCTION
 
 	    default:
-	      CPU.exception = SIGILL;
+	      sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_signalled,
+			       SIM_SIGILL);
 	      fprintf (stderr, "ERROR: Unknown opcode\n");
 	    }
 	  /* Make R0 consistent */
@@ -238,7 +240,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		      if (STATE_VERBOSE_P (sd))
 		        fprintf (stderr, "Cannot have branch or return instructions "
 			         "in delay slot (at address 0x%x)\n", PC);
-		      CPU.exception = SIGILL;
+		      sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_signalled,
+				       SIM_SIGILL);
 		    }
 	          else
 		    {
@@ -252,7 +255,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 #undef INSTRUCTION
 
 		        default:
-		          CPU.exception = SIGILL;
+		          sim_engine_halt (sd, NULL, NULL, NULL_CIA,
+					   sim_signalled, SIM_SIGILL);
 		          fprintf (stderr, "ERROR: Unknown opcode at 0x%x\n", PC);
 		        }
 		      /* Update cycle counts */
@@ -287,8 +291,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
       if (tracing)
 	fprintf (stderr, "\n");
+
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
     }
-  while (!CPU.exception);
 
   /* Hide away the things we've cached while executing.  */
   /*  CPU.pc = pc; */
@@ -346,23 +352,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
   else
     return 0;
-}
-
-void
-sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
-
-  if (CPU.exception == SIGQUIT)
-    {
-      *reason = sim_exited;
-      *sigrc = RETREG;
-    }
-  else
-    {
-      *reason = sim_stopped;
-      *sigrc = CPU.exception;
-    }
 }
 
 void

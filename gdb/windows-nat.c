@@ -310,8 +310,11 @@ thread_rec (DWORD id, int get_context)
 		    /* We get Access Denied (5) when trying to suspend
 		       threads that Windows started on behalf of the
 		       debuggee, usually when those threads are just
-		       about to exit.  */
-		    if (err != ERROR_ACCESS_DENIED)
+		       about to exit.
+		       We can get Invalid Handle (6) if the main thread
+		       has exited.  */
+		    if (err != ERROR_INVALID_HANDLE
+			&& err != ERROR_ACCESS_DENIED)
 		      warning (_("SuspendThread (tid=0x%x) failed."
 				 " (winerr %u)"),
 			       (unsigned) id, (unsigned) err);
@@ -432,7 +435,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
 
   if (current_thread->reload_context)
     {
-#ifdef __COPY_CONTEXT_SIZE
+#ifdef __CYGWIN__
       if (have_saved_context)
 	{
 	  /* Lie about where the program actually is stopped since
@@ -818,9 +821,15 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 #ifdef __CYGWIN__
       if (!startswith (s, "cYg"))
 #endif
-	warning (("%s"), s);
+	{
+	  char *p = strchr (s, '\0');
+
+	  if (p > s && *--p == '\n')
+	    *p = '\0';
+	  warning (("%s"), s);
+	}
     }
-#ifdef __COPY_CONTEXT_SIZE
+#ifdef __CYGWIN__
   else
     {
       /* Got a cygwin signal marker.  A cygwin signal is followed by

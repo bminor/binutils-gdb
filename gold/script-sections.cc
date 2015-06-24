@@ -1457,7 +1457,12 @@ class Input_section_info
   // Set the section name.
   void
   set_section_name(const std::string name)
-  { this->section_name_ = name; }
+  {
+    if (is_compressed_debug_section(name.c_str()))
+      this->section_name_ = corresponding_uncompressed_section_name(name);
+    else
+      this->section_name_ = name;
+  }
 
   // Return the section size.
   uint64_t
@@ -1555,9 +1560,33 @@ Output_section_element_input::set_section_addresses(
   // We build a list of sections which match each
   // Input_section_pattern.
 
+  // If none of the patterns specify a sort option, we throw all
+  // matching input sections into a single bin, in the order we
+  // find them.  Otherwise, we put matching input sections into
+  // a separate bin for each pattern, and sort each one as
+  // specified.  Thus, an input section spec like this:
+  //   *(.foo .bar)
+  // will group all .foo and .bar sections in the order seen,
+  // whereas this:
+  //   *(.foo) *(.bar)
+  // will group all .foo sections followed by all .bar sections.
+  // This matches Gnu ld behavior.
+
+  // Things get really weird, though, when you add a sort spec
+  // on some, but not all, of the patterns, like this:
+  //   *(SORT_BY_NAME(.foo) .bar)
+  // We do not attempt to match Gnu ld behavior in this case.
+
   typedef std::vector<std::vector<Input_section_info> > Matching_sections;
   size_t input_pattern_count = this->input_section_patterns_.size();
-  if (input_pattern_count == 0)
+  bool any_patterns_with_sort = false;
+  for (size_t i = 0; i < input_pattern_count; ++i)
+    {
+      const Input_section_pattern& isp(this->input_section_patterns_[i]);
+      if (isp.sort != SORT_WILDCARD_NONE)
+	any_patterns_with_sort = true;
+    }
+  if (input_pattern_count == 0 || !any_patterns_with_sort)
     input_pattern_count = 1;
   Matching_sections matching_sections(input_pattern_count);
 
@@ -1620,6 +1649,8 @@ Output_section_element_input::set_section_addresses(
 	    ++p;
 	  else
 	    {
+	      if (!any_patterns_with_sort)
+		i = 0;
 	      matching_sections[i].push_back(isi);
 	      p = input_sections->erase(p);
 	    }
@@ -3174,7 +3205,8 @@ Script_sections::Script_sections()
     data_segment_align_start_(),
     saw_data_segment_align_(false),
     saw_relro_end_(false),
-    saw_segment_start_expression_(false)
+    saw_segment_start_expression_(false),
+    segments_created_(false)
 {
 }
 
@@ -3981,8 +4013,8 @@ Script_sections::create_note_and_tls_segments(
 	  saw_tls = true;
 	}
 
-      // If we are making a shared library, and we see a section named
-      // .interp then put the .interp section in a PT_INTERP segment.
+      // If we see a section named .interp then put the .interp section
+      // in a PT_INTERP segment.
       // This is for GNU ld compatibility.
       if (strcmp((*p)->name(), ".interp") == 0)
 	{
@@ -3993,6 +4025,8 @@ Script_sections::create_note_and_tls_segments(
 	  oseg->add_output_section_to_nonload(*p, seg_flags);
 	}
     }
+
+    this->segments_created_ = true;
 }
 
 // Add a program header.  The PHDRS clause is syntactically distinct
@@ -4020,6 +4054,10 @@ Script_sections::add_phdr(const char* name, size_t namelen, unsigned int type,
 size_t
 Script_sections::expected_segment_count(const Layout* layout) const
 {
+  // If we've already created the segments, we won't be adding any more.
+  if (this->segments_created_)
+    return 0;
+
   if (this->saw_phdrs_clause())
     return this->phdrs_elements_->size();
 
@@ -4031,6 +4069,7 @@ Script_sections::expected_segment_count(const Layout* layout) const
 
   bool saw_note = false;
   bool saw_tls = false;
+  bool saw_interp = false;
   for (Layout::Section_list::const_iterator p = sections.begin();
        p != sections.end();
        ++p)
@@ -4052,6 +4091,15 @@ Script_sections::expected_segment_count(const Layout* layout) const
 	    {
 	      ++ret;
 	      saw_tls = true;
+	    }
+	}
+      else if (strcmp((*p)->name(), ".interp") == 0)
+	{
+	  // There can only be one PT_INTERP segment.
+	  if (!saw_interp)
+	    {
+	      ++ret;
+	      saw_interp = true;
 	    }
 	}
     }
@@ -4082,6 +4130,7 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
        p != this->phdrs_elements_->end();
        ++p)
     name_to_segment[(*p)->name()] = (*p)->create_segment(layout);
+  this->segments_created_ = true;
 
   // Walk through the output sections and attach them to segments.
   // Output sections in the script which do not list segments are

@@ -743,7 +743,7 @@ arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
   cb (".reg", ARM_LINUX_SIZEOF_GREGSET, &arm_linux_gregset, NULL, cb_data);
 
-  if (tdep->have_vfp_registers)
+  if (tdep->vfp_register_count > 0)
     cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, &arm_linux_vfpregset,
 	"VFP floating-point", cb_data);
   else if (tdep->have_fpa_registers)
@@ -1439,8 +1439,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, arm_linux_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_linux_core_read_description);
-
-  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,

@@ -32,6 +32,58 @@
 #include "block.h"
 #include "arch-utils.h"
 
+/* Track inferior memory reserved by inferior mmap.  */
+
+struct munmap_list
+{
+  struct munmap_list *next;
+  CORE_ADDR addr, size;
+};
+
+/* Add inferior mmap memory range ADDR..ADDR+SIZE (exclusive) to list
+   HEADP.  *HEADP needs to be initialized to NULL.  */
+
+static void
+munmap_list_add (struct munmap_list **headp, CORE_ADDR addr, CORE_ADDR size)
+{
+  struct munmap_list *head_new = xmalloc (sizeof (*head_new));
+
+  head_new->next = *headp;
+  *headp = head_new;
+  head_new->addr = addr;
+  head_new->size = size;
+}
+
+/* Free list of inferior mmap memory ranges HEAD.  HEAD is the first
+   element of the list, it can be NULL.  After calling this function
+   HEAD pointer is invalid and the possible list needs to be
+   reinitialized by caller to NULL.  */
+
+void
+munmap_list_free (struct munmap_list *head)
+{
+  while (head)
+    {
+      struct munmap_list *todo = head;
+
+      head = todo->next;
+      gdbarch_infcall_munmap (target_gdbarch (), todo->addr, todo->size);
+      xfree (todo);
+    }
+}
+
+/* Stub for munmap_list_free suitable for make_cleanup.  Contrary to
+   munmap_list_free this function's parameter is a pointer to the first
+   list element pointer.  */
+
+static void
+munmap_listp_free_cleanup (void *headp_voidp)
+{
+  struct munmap_list **headp = headp_voidp;
+
+  munmap_list_free (*headp);
+}
+
 /* Helper data for setup_sections.  */
 
 struct setup_sections_data
@@ -48,6 +100,10 @@ struct setup_sections_data
   /* Maximum of alignments of all sections matching LAST_PROT.
      This value is always at least 1.  This value is always a power of 2.  */
   CORE_ADDR last_max_alignment;
+
+  /* List of inferior mmap ranges where setup_sections should add its
+     next range.  */
+  struct munmap_list **munmap_list_headp;
 };
 
 /* Place all ABFD sections next to each other obeying all constraints.  */
@@ -97,6 +153,7 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 	{
 	  addr = gdbarch_infcall_mmap (target_gdbarch (), data->last_size,
 				       data->last_prot);
+	  munmap_list_add (data->munmap_list_headp, addr, data->last_size);
 	  if (compile_debug)
 	    fprintf_unfiltered (gdb_stdlog,
 				"allocated %s bytes at %s prot %u\n",
@@ -580,6 +637,7 @@ compile_object_load (const char *object_file, const char *source_file,
   struct objfile *objfile;
   int expect_parameters;
   struct type *expect_return_type;
+  struct munmap_list *munmap_list_head = NULL;
 
   filename = tilde_expand (object_file);
   cleanups = make_cleanup (xfree, filename);
@@ -601,6 +659,8 @@ compile_object_load (const char *object_file, const char *source_file,
   setup_sections_data.last_section_first = abfd->sections;
   setup_sections_data.last_prot = -1;
   setup_sections_data.last_max_alignment = 1;
+  setup_sections_data.munmap_list_headp = &munmap_list_head;
+  make_cleanup (munmap_listp_free_cleanup, &munmap_list_head);
   bfd_map_over_sections (abfd, setup_sections, &setup_sections_data);
   setup_sections (abfd, NULL, &setup_sections_data);
 
@@ -715,6 +775,7 @@ compile_object_load (const char *object_file, const char *source_file,
 					TYPE_LENGTH (regs_type),
 					GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
+      munmap_list_add (&munmap_list_head, regs_addr, TYPE_LENGTH (regs_type));
       if (compile_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "allocated %s bytes at %s for registers\n",
@@ -739,6 +800,8 @@ compile_object_load (const char *object_file, const char *source_file,
 					     (GDB_MMAP_PROT_READ
 					      | GDB_MMAP_PROT_WRITE));
       gdb_assert (out_value_addr != 0);
+      munmap_list_add (&munmap_list_head, out_value_addr,
+		       TYPE_LENGTH (out_value_type));
       if (compile_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "allocated %s bytes at %s for printed value\n",
@@ -748,7 +811,6 @@ compile_object_load (const char *object_file, const char *source_file,
     }
 
   discard_cleanups (cleanups_free_objfile);
-  do_cleanups (cleanups);
 
   retval = xmalloc (sizeof (*retval));
   retval->objfile = objfile;
@@ -759,5 +821,12 @@ compile_object_load (const char *object_file, const char *source_file,
   retval->scope_data = scope_data;
   retval->out_value_type = out_value_type;
   retval->out_value_addr = out_value_addr;
+
+  /* CLEANUPS will free MUNMAP_LIST_HEAD.  */
+  retval->munmap_list_head = munmap_list_head;
+  munmap_list_head = NULL;
+
+  do_cleanups (cleanups);
+
   return retval;
 }

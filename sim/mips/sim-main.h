@@ -957,8 +957,12 @@ INLINE_SIM_MAIN (unsigned16) ifetch16 (SIM_DESC sd, sim_cpu *cpu, address_word c
 #define IMEM16(CIA) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1))
 #define IMEM16_IMMED(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
 
+#if WITH_TRACE_ANY_P
 void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...);
 extern FILE *tracefh;
+#else
+#define dotrace(sd, cpu, tracefh, type, address, width, comment, ...)
+#endif
 
 extern int DSPLO_REGNUM[4];
 extern int DSPHI_REGNUM[4];

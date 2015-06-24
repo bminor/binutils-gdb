@@ -1,3 +1,7 @@
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 18273

@@ -1,3 +1,141 @@
+2015-06-24  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp <rfebb>: Fixup test results.
+	* gdb.arch/powerpc-power.s <rfebb>: Likewise.
+
+2015-06-24  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (supports_get_siginfo_type): Return 1 for all
+	linux targets.
+
+2015-06-24  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (supports_get_siginfo_type): New proc.
+	* gdb.base/siginfo-obj.exp: Invoke supports_get_siginfo_type.
+	* gdb.base/siginfo-thread.exp: Likewise.
+
+2015-06-22  Yao Qi  <yao.qi@linaro.org>
+
+	* boards/remote-gdbserver-on-localhost.exp: Add comments.
+
+2015-06-22  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (skip_hw_breakpoint_tests): Return 0 for target
+	aarch64*-*-*.
+	(skip_hw_watchpoint_tests): Likewise.
+
+2015-06-18  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Test the interaction between
+	setting GDBHISTSIZE and setting the history size via .gdbinit.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/16999
+	* gdb.base/gdbhistsize-history.exp: New test.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Replace occurrences of HISTSIZE
+	with GDBHISTSIZE.
+	* gdb.base/readline.exp: Likewise.
+
+2015-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (get_build_id): Move braces and "else" to the same
+	line.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Add test case to check that
+	an unlimited history file does not get truncated on exit.
+
+2015-06-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.c: Include stdarg.h and stdio.h.
+	(VECTOR): New macro.  Use it...
+	(int4, uint4, char4, float4, int2, longlong2, float2, double2):
+	...for these typedefs.
+	(int8, char1, int1, double1): New typedefs.
+	(struct just_int2, struct two_int2): New structures.
+	(add_some_intvecs, add_many_charvecs, add_various_floatvecs)
+	(add_structvecs, add_singlevecs): New functions.
+	(main): Call add_some_intvecs twice.
+	* gdb.base/gnu_vector.exp: Drop GCC version check; just attempt
+	the compile and exit upon failure.  Try compiling for the "native"
+	architecture.  Test inferior function calls with vector arguments
+	and vector return value handling with "finish" and "return".
+
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* gdb.base/sepdebug.exp: Add EXEEXT where needed.
+	* lib/gdb.exp (get_build_id): Teach how to extract build-id from a
+	PE file.
+	* lib/future.exp (gdb_find_objdump): Add gdb_find_objdump.
+
+2015-06-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16465
+	* gdb.mi/mi-dprintf-pending.c: New file.
+	* gdb.mi/mi-dprintf-pending.exp: New test.
+	* gdb.mi/mi-dprintf-pendshr.c: New file.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+            Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* gdb.arch/i386-mpx-map.c: New file.
+	* gdb.arch/i386-mpx-map.exp: New File.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c (have_mpx): Indentation fixed.
+	* gdb.arch/i386-mpx.exp: Indentation fixed.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c: Added final return to the have_mpx
+	function and improved indentation.
+	* gdb.arch/i386-mpx.exp: Exchanging gdb_send and gdb_expect for
+	gdb_test_multiple. Added additional tests to skip the test.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-avx512.c: Change path in include file.
+	* gdb.arch/i386-avx512.exp: Change include dir path
+	compilation flag.
+	* gdb.arch/i386-mpx.c: Change path in include file.
+	* gdb.arch/i386-mpx.exp: Change include dir path compilation
+	flag.
+
+2015-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile-print.exp (compile print *vararray@3)
+	(compile print *vararrayp@3): Change xfail to kfail compile/18489.
+
+2015-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile.exp (keep jit in memory): Rename to ...
+	(do not keep jit in memory): ... this.
+	(expect 5): Change it to ...
+	(expect no 5): ... this.
+
+2015-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/15564
+	* gdb.mi/mi-detach.exp: New file.
+
+2015-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/18392
+	* gdb.arch/amd64-tailcall-self.S: New file.
+	* gdb.arch/amd64-tailcall-self.c: New file.
+	* gdb.arch/amd64-tailcall-self.exp: New file.
+
+2015-05-28  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-vfork.exp (main): Disable exec-dependent
+	tests for remote targets by checking is_target_gdbserver.
+
 2015-05-27  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/opaque-type-lookup-2.c: New file.

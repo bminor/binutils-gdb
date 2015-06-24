@@ -322,7 +322,7 @@ start:
 	mcrxr	0
 	mcrxr	3
 	mfcr	3
-	mfcr	3,0
+	mfcr	3,0x02
 	mfcr	3,0x01
 	mfcr	3,0x80
 	mfdcr.	10,234

@@ -688,4 +688,7 @@ ldlang_override_segment_assignment
 extern void
 lang_ld_feature (char *);
 
+extern void
+lang_print_memory_usage (void);
+
 #endif

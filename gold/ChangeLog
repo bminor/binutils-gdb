@@ -1,3 +1,214 @@
+2015-06-12  Han Shen  <shenhan@google.com>
+
+	Fix erratum 835769.
+
+        * aarch64.cc (AArch64_insn_utilities::BYTES_PER_INSN): Move
+        defintion outside class definition.
+        (AArch64_insn_utilities::AARCH64_ZR): New static constant.
+        (AArch64_insn_utilities::aarch64_op31): New member.
+        (AArch64_insn_utilities::aarch64_ra): New member.
+        (AArch64_insn_utilities::aarch64_mac): New member.
+        (AArch64_insn_utilities::aarch64_mlxl): New member.
+        (ST_E_835769): New global enum member.
+        (Stub_table::relocate_stubs): Add 835769 handler.
+        (Stub_template_repertoire::Stub_template_repertoire): Install new
+        stub type.
+        (AArch64_relobj::scan_errata): This func is renamed from
+        scan_erratum_843419.
+        (AArch64_relobj::do_count_local_symbols): Add 835769 handler.
+        (AArch64_relobj::do_relocate_sections): Add 835769 handler.
+        (AArch64_relobj::scan_sections_for_stubs): Add 835769 handler.
+        (Target_aarch64::scan_erratum_835769_span): New method.
+        (Target_aarch64::create_erratum_stub): New method.
+        (Target_aarch64::is_erratum_835769_sequence): New method.
+        (Target_aarch64::scan_erratum_843419_sequence): Move part of the
+        code into create_erratum_stub.
+        * options.h (fix_cortex_a53_835769): New option.
+
+2015-06-11  Cary Coutant  <ccoutant@gmail.com>
+
+	* aarch64.cc (Erratum_stub::STUB_ADDR_ALIGN): Move initialization
+	outside class body.
+	(Reloc_stub::STUB_ADDR_ALIGN): Likewise.
+
+2015-06-11  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/17731
+	* layout.cc (corresponding_uncompressed_section_name): New function.
+	(Layout::choose_output_section): Call it.
+	* layout.h (corresponding_uncompressed_section_name): New function.
+	* script-sections.cc (Input_section_info::set_section_name): Check
+	for compressed debug section (.zdebug style).
+
+2015-06-11  Jing Yu  <jingyu@google.com>
+
+	* testsuite/Makefile.am: Add -O0 for script_test_12 test.
+	* testsuite/Makefile.in: Regenerate.
+
+2015-06-11  Davide Italiano  <dccitaliano@gmail.com>
+
+	* gold.h (is_cident): Correct typo.
+
+2015-06-10  Han Shen  <shenhan@google.com>
+	Patch for erratum-843419 (2 of 2 - fix erratum occurrences).
+
+	Now fixing for 843419 is fully functional.
+
+	The first part of the erratum fix CL is here -
+	https://sourceware.org/ml/binutils/2015-04/msg00229.html
+
+	* aarch64.cc(global enum): New constants representing stub types.
+	(Stub_template): New POD struct.
+	(Stub_template_repertoire): New class.
+	(Stub_base): New class.
+	(Erratum_stub): New class.
+	(Reloc_stub): Refactored to be a subclass of Stub_base.
+	(Reloc_stub::Stub_type): Removed.
+	(Reloc_stub::offset): Moved to Stub_base.
+	(Reloc_stub::set_offset): Moved to Stub_base.
+	(Reloc_stub::destination_address): Moved to Stub_base.
+	(Reloc_stub::set_destination_address): Moved to Stub_base.
+	(Reloc_stub::reset_destination_address): Moved to Stub_base.
+	(Reloc_stub::stub_type): Renamed and moved to Stub_base.
+	(Reloc_stub::stub_size): Renamed and moved to Stub_base.
+	(Reloc_stub::stub_insns): Renamed and moved to Stub_base.
+	(Reloc_stub::write): Moved to Stub_base.
+	(Reloc_stub::invalid_offset): Moved to Stub_base.
+	(Reloc_stub::invalid_address): Moved to Stub_base.
+	(Reloc_stub::stub_type_): Renamed and moved to Stub_base.
+	(Reloc_stub::stub_insns_): Moved to Stub_base.
+	(Reloc_stub::offset_): Moved to Stub_base.
+	(Reloc_stub::destination_address_): Moved to Stub_base.
+	(Stub_table::The_aarch64_relobj): New typedef.
+	(Stub_table::The_erratum_stub): New typedef.
+	(Stub_table::The_erratum_stub_less): New typedef.
+	(Stub_table::The_erratum_stub_set): New typedef.
+	(Stub_table::The_erratum_stub_set_iter): New typedef.
+	(Stub_table::empty): Added emptiness testing for erratum stubs.
+	(Stub_table::add_erratum_stub): New method to add an erratum stub.
+	(Stub_table::find_erratum_stub): New method.
+	(Stub_table::find_erratum_stubs_for_input_section): New method.
+	(Stub_table::erratum_stub_address): New method.
+	(Stub_table::update_date_size_changed_p): Modified to handle erratum stubs.
+	(Stub_table::do_addralign): Modified to handle erratum stubs.
+	(Stub_table::erratum_stubs_): New member.
+	(Stub_table::erratum_stub_size_): New member.
+	(Stub_table::relocate_stubs): Modified to handle erratum stubs.
+	(Stub_table::do_write): Modified to handle erratum stubs.
+	(AArch64_relobj::The_erratum_stub): New typedef.
+	(AArch64_relobj::Erratum_stub_set_iter): New typedef.
+	(AArch64_relobj::fix_errata): New method.
+	(Target_aarch64::The_reloc_stub_type): Removed.
+	(Target_aarch64::The_erratum_stub): New typede.
+	(AArch64_relocate_functions::construct_b): New method.
+
+2015-06-08  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: New French Translation.
+
+2015-06-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18288
+	* resolve.cc (symbol_to_bits): Remove type parameter; adjust all
+	callers. Don't use STT_COMMON to check for common symbols.
+	(Symbol_table::resolve): Warn if relocatable object has STT_COMMON
+	symbol that's not in a common section.
+	* symtab.h (Symbol::is_common): Don't use STT_COMMON to check for
+	common symbols.
+
+2015-06-04  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18200
+	* Makefile.am (diststuff): Add target.
+	* Makefile.in: Regenerate.
+
+2015-06-04  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/17498
+	* object.cc (Sized_relobj_file::do_count_local_symbols): Discard
+	temporary locals in merge sections.
+	* options.cc (General_options::parse_discard_all): New method.
+	(General_options::parse_discard_locals): New method.
+	(General_options::parse_discard_none): New method.
+	(General_options::General_options): Initialize discard_locals_.
+	* options.h (--discard-all): Convert to special option.
+	(--discard-locals): Likewise.
+	(--discard-none): New option.
+	(General_options::discard_all): New method.
+	(General_options::discard_locals): New method.
+	(General_options::discard_sec_merge): New method.
+	(General_options::Discard_locals): New enum.
+	(General_options::discard_locals_): New data member.
+
+2015-06-03  Cary Coutant  <cary@google.com>
+
+	* script-sections.cc (Script_sections::Script_sections): Initialize
+	segments_created_.
+	(Script_sections::create_note_and_tls_segments): Set flag when
+	segments are created.
+	(Script_sections::expected_segment_count): Count PT_INTERP.
+	(Script_sections::attach_sections_using_phdrs_clause): Set flag when
+	segments are created.
+	* script-sections.h (Script_sections::segments_created_): New data
+	member.
+
+2015-06-03  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/15370
+	* script-sections.cc
+	(Output_section_element_input::set_section_addresses): When there
+	are several patterns with no sort spec, put all sections in the same
+	bin.
+	* testsuite/Makefile.am (script_test_12): New testcase.
+	(script_test_12i): New testcase.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_12.t: New test linker script.
+	* testsuite/script_test_12i.t: New test linker script.
+	* testsuite/script_test_12a.c: New test source file.
+	* testsuite/script_test_12b.c: New test source file.
+
+2015-06-02  Cary Coutant  <ccoutant@gmail.com>
+
+	* nacl.h (Sniff_file): Switch parameters to get_view to get an
+	aligned view.
+
+2015-06-03  Cary Coutant  <ccoutant@gmail.com>
+
+        PR gold/17819
+        * gold.cc (queue_final_tasks): When --build-id=tree, queue a
+        separate task to schedule the build id computation.
+        * layout.cc (Hash_task::Hash_task): Remove build_id_blocker,
+        add Output_file and offset.
+        (Hash_task::run): Get and release the input views.
+        (Hash_task::is_runnable): Always return NULL (always runnable).
+        (Layout::queue_build_id_tasks): Remove.
+        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
+        parameters; use them instead of class members.
+        (Build_id_task_runner::run): New function.
+        (Close_task_runner::run): Pass array_of_hashes and size_of_hashes
+        to write_build_id.
+        * layout.h (Layout::queue_build_id_tasks): Remove.
+        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
+        parameters.
+        (Layout::array_of_hashes_): Remove.
+        (Layout::size_of_array_of_hashes_): Remove.
+        (Layout::input_view_): Remove.
+        (Build_id_task_runner): New class.
+        (Close_task_runner::Close_task_runner): Add array_of_hashes and
+        size_of_hashes parameters.
+        (Close_task_runner::array_of_hashes_): New data member.
+        (Close_task_runner::size_of_hashes_): New data member.
+        * testsuite/Makefile.am
+        (flagstest_compress_debug_sections_and_build_id_tree): New test.
+        * testsuite/Makefile.in: Regenerate.
+
+2015-06-01  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* merge.cc (get_input_merge_map): Update for data structure change.
+	(get_or_make_input_merge_map): Update for data structure change.
+	* merge.h (Object_merge_map): Use a std::vector<std::pair>> instead of
+	a std::map. Remove first_shnum_, first_map_, second_shnum_, second_map_.
+
 2015-05-16  Alan Modra  <amodra@gmail.com>
 
 	* reloc.cc (Sized_relobj_file::find_functions): Use function_location.

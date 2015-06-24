@@ -17,6 +17,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #define FALSE 0
 #define TRUE 1
@@ -25,22 +26,10 @@
 #define LOWHIGH 1
 #define HIGHLOW 2
 
-#ifndef __STDC__
-typedef char *VoidStar;
-#endif
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
 typedef uint32_t ARMword;
 typedef int32_t ARMsword;
 typedef uint64_t ARMdword;
 typedef int64_t ARMsdword;
-#else
-typedef unsigned int ARMword;	/* must be 32 bits wide */
-typedef signed int ARMsword;
-typedef unsigned long long ARMdword;	/* Must be at least 64 bits wide.  */
-typedef signed long long ARMsdword;
-#endif
 typedef struct ARMul_State ARMul_State;
 
 typedef unsigned ARMul_CPInits (ARMul_State * state);

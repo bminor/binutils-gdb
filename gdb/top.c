@@ -941,7 +941,8 @@ gdb_safe_append_history (void)
       else
 	{
 	  append_history (command_count, local_history_filename);
-	  history_truncate_file (local_history_filename, history_max_entries);
+	  if (history_is_stifled ())
+	    history_truncate_file (local_history_filename, history_max_entries);
 	}
 
       ret = rename (local_history_filename, history_filename);
@@ -1680,24 +1681,42 @@ init_history (void)
 {
   char *tmpenv;
 
-  tmpenv = getenv ("HISTSIZE");
+  tmpenv = getenv ("GDBHISTSIZE");
   if (tmpenv)
     {
-      int var;
+      long var;
+      int saved_errno;
+      char *endptr;
 
-      var = atoi (tmpenv);
-      if (var < 0)
-	{
-	  /* Prefer ending up with no history rather than overflowing
-	     readline's history interface, which uses signed 'int'
-	     everywhere.  */
-	  var = 0;
-	}
+      tmpenv = skip_spaces (tmpenv);
+      errno = 0;
+      var = strtol (tmpenv, &endptr, 10);
+      saved_errno = errno;
+      endptr = skip_spaces (endptr);
 
-      history_size_setshow_var = var;
+      /* If GDBHISTSIZE is non-numeric then ignore it.  If GDBHISTSIZE is the
+	 empty string, a negative number or a huge positive number (larger than
+	 INT_MAX) then set the history size to unlimited.  Otherwise set our
+	 history size to the number we have read.  This behavior is consistent
+	 with how bash handles HISTSIZE.  */
+      if (*endptr != '\0')
+	;
+      else if (*tmpenv == '\0'
+	       || var < 0
+	       || var > INT_MAX
+	       /* On targets where INT_MAX == LONG_MAX, we have to look at
+		  errno after calling strtol to distinguish between a value that
+		  is exactly INT_MAX and an overflowing value that was clamped
+		  to INT_MAX.  */
+	       || (var == INT_MAX && saved_errno == ERANGE))
+	history_size_setshow_var = -1;
+      else
+	history_size_setshow_var = var;
     }
-  /* If the init file hasn't set a size yet, pick the default.  */
-  else if (history_size_setshow_var == -2)
+
+  /* If neither the init file nor GDBHISTSIZE has set a size yet, pick the
+     default.  */
+  if (history_size_setshow_var == -2)
     history_size_setshow_var = 256;
 
   set_readline_history_size (history_size_setshow_var);
@@ -1856,7 +1875,7 @@ Show the size of the command history,"), _("\
 ie. the number of previous commands to keep a record of.\n\
 If set to \"unlimited\", the number of commands kept in the history\n\
 list is unlimited.  This defaults to the value of the environment\n\
-variable \"HISTSIZE\", or to 256 if this variable is not set."),
+variable \"GDBHISTSIZE\", or to 256 if this variable is not set."),
 			    set_history_size_command,
 			    show_history_size,
 			    &sethistlist, &showhistlist);
