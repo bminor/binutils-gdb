@@ -1,4 +1,4 @@
-From 27c2a5e2304878c50c4b7b0458123ca3c464ead5 Mon Sep 17 00:00:00 2001
+From baede3ac6a283384143c7109d9235ca97116076c Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sun, 22 Mar 2015 11:59:53 -0700
 Subject: [PATCH 2/2] Extend --compress-debug-sections in gold
@@ -50,9 +50,9 @@ in gold.
  gold/compressed_output.cc  |  91 +++++++++++++++++++++++++----
  gold/options.h             |   4 +-
  gold/output.h              |   5 ++
- gold/testsuite/Makefile.am |  82 +++++++++++++++++++++++++-
- gold/testsuite/Makefile.in | 143 ++++++++++++++++++++++++++++++++++++++++++++-
- 5 files changed, 310 insertions(+), 15 deletions(-)
+ gold/testsuite/Makefile.am |  83 ++++++++++++++++++++++++++-
+ gold/testsuite/Makefile.in | 140 ++++++++++++++++++++++++++++++++++++++++++++-
+ 5 files changed, 309 insertions(+), 14 deletions(-)
 
 diff --git a/gold/compressed_output.cc b/gold/compressed_output.cc
 index 02d7821..4a89318 100644
@@ -178,7 +178,7 @@ index 02d7821..4a89318 100644
      }
    else
 diff --git a/gold/options.h b/gold/options.h
-index 67eb1b2..d2d1b4b 100644
+index 455a09d..f4da128 100644
 --- a/gold/options.h
 +++ b/gold/options.h
 @@ -697,8 +697,8 @@ class General_options
@@ -209,10 +209,10 @@ index be72965..c7ad54e 100644
    uint64_t
    entsize() const
 diff --git a/gold/testsuite/Makefile.am b/gold/testsuite/Makefile.am
-index 0f00f2b..a5266b3 100644
+index 9c28c9a..d2f4668 100644
 --- a/gold/testsuite/Makefile.am
 +++ b/gold/testsuite/Makefile.am
-@@ -1319,12 +1319,92 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
+@@ -1319,8 +1319,22 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
  	chmod a+x $@
  	test -s $@
  
@@ -235,6 +235,9 @@ index 0f00f2b..a5266b3 100644
 +	      flagstest_compress_debug_sections.check
  flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
  	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
+ 	test -s $@
+@@ -1334,6 +1348,73 @@ flagstest_compress_debug_sections_and_build_id_tree: flagstest_debug.o gcctestdi
+ 		-Wl,--build-id-min-file-size-for-treehash=0
  	test -s $@
  
 +# Dump compressed DWARF debug sections.
@@ -303,11 +306,12 @@ index 0f00f2b..a5266b3 100644
 +	cmp flagstest_compress_debug_sections_gabi.stdout \
 +		flagstest_compress_debug_sections_none.stdout > $@.tmp
 +	mv -f $@.tmp $@
- 
++
  # The specialfile output has a tricky case when we also compress debug
  # sections, because it requires output-file resizing.
+ check_PROGRAMS += flagstest_o_specialfile_and_compress_debug_sections
 diff --git a/gold/testsuite/Makefile.in b/gold/testsuite/Makefile.in
-index 85d478e..bcfa3af 100644
+index 1131512..1c336c6 100644
 --- a/gold/testsuite/Makefile.in
 +++ b/gold/testsuite/Makefile.in
 @@ -226,7 +226,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
@@ -317,20 +321,21 @@ index 85d478e..bcfa3af 100644
 -# Test --compress-debug-sections.  FIXME: check we actually compress.
 +# Test --compress-debug-sections.
  
- # The specialfile output has a tricky case when we also compress debug
- # sections, because it requires output-file resizing.
-@@ -242,7 +242,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+ # Test --compress-debug-sections with --build-id=tree.
+ 
+@@ -246,8 +246,11 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test initpri1 \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2 initpri3a \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
 +@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_none \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_and_build_id_tree \
 +@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gnu \
 +@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_1 ver_test \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2 ver_test_6 ver_test_8 \
-@@ -346,6 +349,16 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+@@ -352,6 +355,16 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
@@ -347,21 +352,22 @@ index 85d478e..bcfa3af 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.syms ver_test_2.syms \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
-@@ -901,7 +914,10 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
+@@ -907,8 +920,11 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri3a$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
 +@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_none$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections$(EXEEXT) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT) \
 +@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gnu$(EXEEXT) \
 +@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_1$(EXEEXT) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
-@@ -1181,6 +1197,33 @@ flagstest_compress_debug_sections_DEPENDENCIES = libgoldtest.a \
- 	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@@ -1199,6 +1215,33 @@ flagstest_compress_debug_sections_and_build_id_tree_DEPENDENCIES =  \
+ 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
  	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
- 	$(am__DEPENDENCIES_1)
+ 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 +flagstest_compress_debug_sections_gabi_SOURCES =  \
 +	flagstest_compress_debug_sections_gabi.c
 +flagstest_compress_debug_sections_gabi_OBJECTS =  \
@@ -392,23 +398,20 @@ index 85d478e..bcfa3af 100644
  flagstest_o_specialfile_SOURCES = flagstest_o_specialfile.c
  flagstest_o_specialfile_OBJECTS = flagstest_o_specialfile.$(OBJEXT)
  flagstest_o_specialfile_LDADD = $(LDADD)
-@@ -2017,7 +2060,11 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
- 	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
- 	$(exception_x86_64_bnd_test_SOURCES) \
+@@ -2051,6 +2094,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
  	$(exclude_libs_test_SOURCES) \
--	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
-+	flagstest_compress_debug_sections.c \
+ 	flagstest_compress_debug_sections.c \
+ 	flagstest_compress_debug_sections_and_build_id_tree.c \
 +	flagstest_compress_debug_sections_gabi.c \
 +	flagstest_compress_debug_sections_gnu.c \
 +	flagstest_compress_debug_sections_none.c \
-+	flagstest_o_specialfile.c \
+ 	flagstest_o_specialfile.c \
  	flagstest_o_specialfile_and_compress_debug_sections.c \
  	flagstest_o_ttext_1.c icf_virtual_function_folding_test.c \
- 	$(ifuncmain1_SOURCES) ifuncmain1pic.c ifuncmain1picstatic.c \
-@@ -3055,6 +3102,24 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
- @NATIVE_LINKER_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
- @NATIVE_LINKER_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
- @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
+@@ -3096,6 +3142,24 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
+ @NATIVE_LINKER_FALSE@flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT): $(flagstest_compress_debug_sections_and_build_id_tree_OBJECTS) $(flagstest_compress_debug_sections_and_build_id_tree_DEPENDENCIES) 
+ @NATIVE_LINKER_FALSE@	@rm -f flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT)
+ @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_compress_debug_sections_and_build_id_tree_OBJECTS) $(flagstest_compress_debug_sections_and_build_id_tree_LDADD) $(LIBS)
 +@GCC_FALSE@flagstest_compress_debug_sections_gabi$(EXEEXT): $(flagstest_compress_debug_sections_gabi_OBJECTS) $(flagstest_compress_debug_sections_gabi_DEPENDENCIES) 
 +@GCC_FALSE@	@rm -f flagstest_compress_debug_sections_gabi$(EXEEXT)
 +@GCC_FALSE@	$(LINK) $(flagstest_compress_debug_sections_gabi_OBJECTS) $(flagstest_compress_debug_sections_gabi_LDADD) $(LIBS)
@@ -430,17 +433,17 @@ index 85d478e..bcfa3af 100644
  @GCC_FALSE@flagstest_o_specialfile$(EXEEXT): $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_DEPENDENCIES) 
  @GCC_FALSE@	@rm -f flagstest_o_specialfile$(EXEEXT)
  @GCC_FALSE@	$(LINK) $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_LDADD) $(LIBS)
-@@ -3793,6 +3858,9 @@ distclean-compile:
- @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
+@@ -3847,6 +3911,9 @@ distclean-compile:
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exclude_libs_test.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections_and_build_id_tree.Po@am__quote@
 +@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections_gabi.Po@am__quote@
 +@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections_gnu.Po@am__quote@
 +@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections_none.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_ttext_1.Po@am__quote@
-@@ -4554,8 +4622,14 @@ initpri3a.log: initpri3a$(EXEEXT)
+@@ -4610,10 +4677,16 @@ initpri3a.log: initpri3a$(EXEEXT)
  	@p='initpri3a$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
  flagstest_o_specialfile.log: flagstest_o_specialfile$(EXEEXT)
  	@p='flagstest_o_specialfile$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
@@ -448,6 +451,8 @@ index 85d478e..bcfa3af 100644
 +	@p='flagstest_compress_debug_sections_none$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
  flagstest_compress_debug_sections.log: flagstest_compress_debug_sections$(EXEEXT)
  	@p='flagstest_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ flagstest_compress_debug_sections_and_build_id_tree.log: flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT)
+ 	@p='flagstest_compress_debug_sections_and_build_id_tree$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 +flagstest_compress_debug_sections_gnu.log: flagstest_compress_debug_sections_gnu$(EXEEXT)
 +	@p='flagstest_compress_debug_sections_gnu$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 +flagstest_compress_debug_sections_gabi.log: flagstest_compress_debug_sections_gabi$(EXEEXT)
@@ -455,7 +460,7 @@ index 85d478e..bcfa3af 100644
  flagstest_o_specialfile_and_compress_debug_sections.log: flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
  	@p='flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
  flagstest_o_ttext_1.log: flagstest_o_ttext_1$(EXEEXT)
-@@ -5460,9 +5534,74 @@ uninstall-am:
+@@ -5522,6 +5595,14 @@ uninstall-am:
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
@@ -469,6 +474,10 @@ index 85d478e..bcfa3af 100644
 +@GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
  @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+@@ -5531,6 +5612,63 @@ uninstall-am:
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--build-id-chunk-size-for-treehash=4096 \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--build-id-min-file-size-for-treehash=0
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 +
 +# Dump compressed DWARF debug sections.
