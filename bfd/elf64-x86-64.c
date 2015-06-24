@@ -2972,6 +2972,9 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	{
 	  Elf_Internal_Sym *isym;
 
+	  /* Silence older GCC warning.  */
+	  h = NULL;
+
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 
