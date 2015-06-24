@@ -314,7 +314,7 @@ cplus_compute_program (struct compile_instance *inst,
   struct ui_file *buf, *var_stream = NULL;
   char *code;
   struct cleanup *cleanup;
-  struct compile_c_instance *context = (struct compile_c_instance *) inst;
+  struct compile_cplus_instance *context = (struct compile_cplus_instance *) inst;
 
   buf = mem_fileopen ();
   cleanup = make_cleanup_ui_file_delete (buf);

@@ -103,7 +103,7 @@ insert_symbol_error (htab_t hash, const struct symbol *sym, const char *text)
    arrange for it not to be emitted again.  */
 
 static void
-error_symbol_once (struct compile_c_instance *context,
+error_symbol_once (struct compile_cplus_instance *context,
 		   const struct symbol *sym)
 {
   struct symbol_error search;
@@ -143,7 +143,7 @@ symbol_substitution_name (struct symbol *sym)
    scope.)  */
 
 static void
-convert_one_symbol (struct compile_c_instance *context,
+convert_one_symbol (struct compile_cplus_instance *context,
 		    struct symbol *sym,
 		    int is_global,
 		    int is_local)
@@ -157,19 +157,19 @@ convert_one_symbol (struct compile_c_instance *context,
   if (SYMBOL_CLASS (sym) == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = convert_type (context, SYMBOL_TYPE (sym));
+    sym_type = convert_cplus_type (context, SYMBOL_TYPE (sym));
 
   if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
-      C_CTX (context)->c_ops->tagbind (C_CTX (context),
-				       SYMBOL_NATURAL_NAME (sym),
-				       sym_type, filename, line);
+      CP_CTX (context)->cp_ops->tagbind (CP_CTX (context),
+					 SYMBOL_NATURAL_NAME (sym),
+					 sym_type, filename, line);
     }
   else
     {
       gcc_decl decl;
-      enum gcc_c_symbol_kind kind;
+      enum gcc_cp_symbol_kind kind;
       CORE_ADDR addr = 0;
       char *symbol_name = NULL;
 
@@ -197,10 +197,10 @@ convert_one_symbol (struct compile_c_instance *context,
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  C_CTX (context)->c_ops->build_constant (C_CTX (context), sym_type,
-						  SYMBOL_NATURAL_NAME (sym),
-						  SYMBOL_VALUE (sym),
-						  filename, line);
+	  CP_CTX (context)->cp_ops->build_constant (CP_CTX (context), sym_type,
+						    SYMBOL_NATURAL_NAME (sym),
+						    SYMBOL_VALUE (sym),
+						    filename, line);
 	  return;
 
 	case LOC_CONST_BYTES:
@@ -285,14 +285,14 @@ convert_one_symbol (struct compile_c_instance *context,
       if (context->base.scope != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  decl = C_CTX (context)->c_ops->build_decl (C_CTX (context),
-						     SYMBOL_NATURAL_NAME (sym),
-						     kind,
-						     sym_type,
-						     symbol_name, addr,
-						     filename, line);
+	  decl = CP_CTX (context)->cp_ops->build_decl (CP_CTX (context),
+						       SYMBOL_NATURAL_NAME (sym),
+						       kind,
+						       sym_type,
+						       symbol_name, addr,
+						       filename, line);
 
-	  C_CTX (context)->c_ops->bind (C_CTX (context), decl, is_global);
+	  CP_CTX (context)->cp_ops->bind (CP_CTX (context), decl, is_global);
 	}
 
       xfree (symbol_name);
@@ -304,7 +304,7 @@ convert_one_symbol (struct compile_c_instance *context,
    itself, and DOMAIN is the domain which was searched.  */
 
 static void
-convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
+convert_symbol_sym (struct compile_cplus_instance *context, const char *identifier,
 		    struct symbol *sym, domain_enum domain)
 {
   const struct block *static_block, *found_block;
@@ -356,13 +356,13 @@ convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
    to use and BMSYM is the minimal symbol to convert.  */
 
 static void
-convert_symbol_bmsym (struct compile_c_instance *context,
+convert_symbol_bmsym (struct compile_cplus_instance *context,
 		      struct bound_minimal_symbol bmsym)
 {
   struct minimal_symbol *msym = bmsym.minsym;
   struct objfile *objfile = bmsym.objfile;
   struct type *type;
-  enum gcc_c_symbol_kind kind;
+  enum gcc_cp_symbol_kind kind;
   gcc_type sym_type;
   gcc_decl decl;
   CORE_ADDR addr;
@@ -406,12 +406,12 @@ convert_symbol_bmsym (struct compile_c_instance *context,
       break;
     }
 
-  sym_type = convert_type (context, type);
-  decl = C_CTX (context)->c_ops->build_decl (C_CTX (context),
-					     MSYMBOL_NATURAL_NAME (msym),
-					     kind, sym_type, NULL, addr,
-					     NULL, 0);
-  C_CTX (context)->c_ops->bind (C_CTX (context), decl, 1 /* is_global */);
+  sym_type = convert_cplus_type (context, type);
+  decl = CP_CTX (context)->cp_ops->build_decl (CP_CTX (context),
+					      MSYMBOL_NATURAL_NAME (msym),
+					      kind, sym_type, NULL, addr,
+					      NULL, 0);
+  CP_CTX (context)->cp_ops->bind (CP_CTX (context), decl, 1 /* is_global */);
 }
 
 /* See compile-internal.h.  */
@@ -422,7 +422,7 @@ gcc_cplus_convert_symbol (void *datum,
 			  enum gcc_cp_oracle_request request,
 			  const char *identifier)
 {
-  struct compile_c_instance *context = datum;
+  struct compile_cplus_instance *context = datum;
   domain_enum domain;
   int found = 0;
 
@@ -468,7 +468,7 @@ gcc_cplus_convert_symbol (void *datum,
 
   CATCH (e, RETURN_MASK_ALL)
     {
-      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+      CP_CTX (context)->cp_ops->error (CP_CTX (context), e.message);
     }
   END_CATCH
 
@@ -485,7 +485,7 @@ gcc_address
 gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			  const char *identifier)
 {
-  struct compile_c_instance *context = datum;
+  struct compile_cplus_instance *context = datum;
   gcc_address result = 0;
   int found = 0;
 
@@ -530,7 +530,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+      CP_CTX (context)->cp_ops->error (CP_CTX (context), e.message);
     }
   END_CATCH
 
@@ -584,7 +584,7 @@ symbol_seen (htab_t hashtab, struct symbol *sym)
 /* Generate C code to compute the length of a VLA.  */
 
 static void
-generate_vla_size (struct compile_c_instance *compiler,
+generate_vla_size (struct compile_cplus_instance *compiler,
 		   struct ui_file *stream,
 		   struct gdbarch *gdbarch,
 		   unsigned char *registers_used,
@@ -640,7 +640,7 @@ generate_vla_size (struct compile_c_instance *compiler,
 /* Generate C code to compute the address of SYM.  */
 
 static void
-generate_cplus_for_for_one_variable (struct compile_c_instance *compiler,
+generate_cplus_for_for_one_variable (struct compile_cplus_instance *compiler,
 				 struct ui_file *stream,
 				 struct gdbarch *gdbarch,
 				 unsigned char *registers_used,
@@ -719,7 +719,7 @@ generate_cplus_for_for_one_variable (struct compile_c_instance *compiler,
 /* See compile-internal.h.  */
 
 unsigned char *
-generate_cplus_for_variable_locations (struct compile_c_instance *compiler,
+generate_cplus_for_variable_locations (struct compile_cplus_instance *compiler,
 				       struct ui_file *stream,
 				       struct gdbarch *gdbarch,
 				       const struct block *block,

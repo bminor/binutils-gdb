@@ -72,11 +72,29 @@ struct compile_c_instance
   htab_t symbol_err_map;
 };
 
+/* A subclass of compile_instance that is specific to the C++ front
+   end.  */
+struct compile_cplus_instance
+{
+  /* Base class.  Note that the base class vtable actually points to a
+     gcc_c_fe_vtable.  */
+
+  struct compile_instance base;
+
+  /* Map from gdb types to gcc types.  */
+
+  htab_t type_map;
+
+  /* Map from gdb symbols to gcc error messages to emit.  */
+
+  htab_t symbol_err_map;
+};
+
 /* A helper macro that takes a compile_c_instance and returns its
    corresponding gcc_c_context.  */
 
-#define C_CTX(I) ((struct gcc_c_context *) ((I)->base.fe))
-
+ #define C_CTX(I) ((struct gcc_c_context *) ((I)->base.fe))
+ #define CP_CTX(I) ((struct gcc_cp_context *) ((I)->base.fe))
 /* Define header and footers for different scopes.  */
 
 /* A simple scope just declares a function named "_gdb_expr", takes no
@@ -107,7 +125,7 @@ extern int compile_register_name_demangle (struct gdbarch *gdbarch,
 struct type;
 extern gcc_type convert_type (struct compile_c_instance *context,
 			      struct type *type);
-extern gcc_type convert_cplus_type (struct compile_c_instance *context,
+extern gcc_type convert_cplus_type (struct compile_cplus_instance *context,
 				    struct type *type);
 
 /* A callback suitable for use as the GCC C symbol oracle.  */
@@ -154,7 +172,7 @@ extern unsigned char *generate_c_for_variable_locations
    register is needed to compute a local variable.  */
 
 extern unsigned char *generate_cplus_for_variable_locations
-     (struct compile_c_instance *compiler,
+     (struct compile_cplus_instance *compiler,
       struct ui_file *stream,
       struct gdbarch *gdbarch,
       const struct block *block,

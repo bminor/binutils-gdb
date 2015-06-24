@@ -67,7 +67,7 @@ eq_type_map_instance (const void *a, const void *b)
    is handled.  */
 
 static void
-insert_type (struct compile_c_instance *context, struct type *type,
+insert_type (struct compile_cplus_instance *context, struct type *type,
 	     gcc_type gcc_type)
 {
   struct type_map_instance inst, *add;
@@ -93,18 +93,18 @@ insert_type (struct compile_c_instance *context, struct type *type,
 /* Convert a pointer type to its gcc representation.  */
 
 static gcc_type
-convert_pointer (struct compile_c_instance *context, struct type *type)
+convert_pointer (struct compile_cplus_instance *context, struct type *type)
 {
   gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
 
-  return C_CTX (context)->c_ops->build_pointer_type (C_CTX (context),
-						     target);
+  return CP_CTX (context)->cp_ops->build_pointer_type (CP_CTX (context),
+						      target);
 }
 
 /* Convert an array type to its gcc representation.  */
 
 static gcc_type
-convert_array (struct compile_c_instance *context, struct type *type)
+convert_array (struct compile_cplus_instance *context, struct type *type)
 {
   gcc_type element_type;
   struct type *range = TYPE_INDEX_TYPE (type);
@@ -112,13 +112,13 @@ convert_array (struct compile_c_instance *context, struct type *type)
   element_type = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
 
   if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
-    return C_CTX (context)->c_ops->error (C_CTX (context),
-					  _("array type with non-constant"
-					    " lower bound is not supported"));
+    return CP_CTX (context)->cp_ops->error (CP_CTX (context),
+					    _("array type with non-constant"
+					      " lower bound is not supported"));
   if (TYPE_LOW_BOUND (range) != 0)
-    return C_CTX (context)->c_ops->error (C_CTX (context),
-					  _("cannot convert array type with "
-					    "non-zero lower bound to C"));
+    return CP_CTX (context)->cp_ops->error (CP_CTX (context),
+					    _("cannot convert array type with "
+					      "non-zero lower bound to C"));
 
   if (TYPE_HIGH_BOUND_KIND (range) == PROP_LOCEXPR
       || TYPE_HIGH_BOUND_KIND (range) == PROP_LOCLIST)
@@ -127,14 +127,14 @@ convert_array (struct compile_c_instance *context, struct type *type)
       char *upper_bound;
 
       if (TYPE_VECTOR (type))
-	return C_CTX (context)->c_ops->error (C_CTX (context),
-					      _("variably-sized vector type"
-						" is not supported"));
+	return CP_CTX (context)->cp_ops->error (CP_CTX (context),
+						_("variably-sized vector type"
+						  " is not supported"));
 
       upper_bound = c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
-      result = C_CTX (context)->c_ops->build_vla_array_type (C_CTX (context),
-							     element_type,
-							     upper_bound);
+      result = CP_CTX (context)->cp_ops->build_vla_array_type (CP_CTX (context),
+							       element_type,
+							       upper_bound);
       xfree (upper_bound);
       return result;
     }
@@ -151,18 +151,18 @@ convert_array (struct compile_c_instance *context, struct type *type)
 	}
 
       if (TYPE_VECTOR (type))
-	return C_CTX (context)->c_ops->build_vector_type (C_CTX (context),
-							  element_type,
-							  count);
-      return C_CTX (context)->c_ops->build_array_type (C_CTX (context),
-						       element_type, count);
+	return CP_CTX (context)->cp_ops->build_vector_type (CP_CTX (context),
+							    element_type,
+							    count);
+      return CP_CTX (context)->cp_ops->build_array_type (CP_CTX (context),
+							 element_type, count);
     }
 }
 
 /* Convert a struct or union type to its gcc representation.  */
 
 static gcc_type
-convert_struct_or_union (struct compile_c_instance *context, struct type *type)
+convert_struct_or_union (struct compile_cplus_instance *context, struct type *type)
 {
   int i;
   gcc_type result;
@@ -170,11 +170,11 @@ convert_struct_or_union (struct compile_c_instance *context, struct type *type)
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-    result = C_CTX (context)->c_ops->build_record_type (C_CTX (context));
+    result = CP_CTX (context)->cp_ops->build_record_type (CP_CTX (context));
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
-      result = C_CTX (context)->c_ops->build_union_type (C_CTX (context));
+      result = CP_CTX (context)->cp_ops->build_union_type (CP_CTX (context));
     }
   insert_type (context, type, result);
 
@@ -186,41 +186,41 @@ convert_struct_or_union (struct compile_c_instance *context, struct type *type)
       field_type = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i));
       if (bitsize == 0)
 	bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
-      C_CTX (context)->c_ops->build_add_field (C_CTX (context), result,
-					       TYPE_FIELD_NAME (type, i),
-					       field_type,
-					       bitsize,
-					       TYPE_FIELD_BITPOS (type, i));
+      CP_CTX (context)->cp_ops->build_add_field (CP_CTX (context), result,
+						 TYPE_FIELD_NAME (type, i),
+						 field_type,
+						 bitsize,
+						 TYPE_FIELD_BITPOS (type, i));
     }
 
-  C_CTX (context)->c_ops->finish_record_or_union (C_CTX (context), result,
-						  TYPE_LENGTH (type));
+  CP_CTX (context)->cp_ops->finish_record_or_union (CP_CTX (context), result,
+						    TYPE_LENGTH (type));
   return result;
 }
 
 /* Convert an enum type to its gcc representation.  */
 
 static gcc_type
-convert_enum (struct compile_c_instance *context, struct type *type)
+convert_enum (struct compile_cplus_instance *context, struct type *type)
 {
   gcc_type int_type, result;
   int i;
-  struct gcc_c_context *ctx = C_CTX (context);
+  struct gcc_cp_context *ctx = CP_CTX (context);
 
-  int_type = ctx->c_ops->int_type (ctx,
+  int_type = ctx->cp_ops->int_type (ctx,
 				   TYPE_UNSIGNED (type),
 				   TYPE_LENGTH (type));
 
-  result = ctx->c_ops->build_enum_type (ctx, int_type);
+  result = ctx->cp_ops->build_enum_type (ctx, int_type);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
-      ctx->c_ops->build_add_enum_constant (ctx,
+      ctx->cp_ops->build_add_enum_constant (ctx,
 					   result,
 					   TYPE_FIELD_NAME (type, i),
 					   TYPE_FIELD_ENUMVAL (type, i));
     }
 
-  ctx->c_ops->finish_enum_type (ctx, result);
+  ctx->cp_ops->finish_enum_type (ctx, result);
 
   return result;
 }
@@ -228,7 +228,7 @@ convert_enum (struct compile_c_instance *context, struct type *type)
 /* Convert a function type to its gcc representation.  */
 
 static gcc_type
-convert_func (struct compile_c_instance *context, struct type *type)
+convert_func (struct compile_cplus_instance *context, struct type *type)
 {
   int i;
   gcc_type result, return_type;
@@ -244,9 +244,9 @@ convert_func (struct compile_c_instance *context, struct type *type)
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     array.elements[i] = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i));
 
-  result = C_CTX (context)->c_ops->build_function_type (C_CTX (context),
-							return_type,
-							&array, is_varargs);
+  result = CP_CTX (context)->cp_ops->build_function_type (CP_CTX (context),
+							  return_type,
+							  &array, is_varargs);
   xfree (array.elements);
 
   return result;
@@ -255,42 +255,42 @@ convert_func (struct compile_c_instance *context, struct type *type)
 /* Convert an integer type to its gcc representation.  */
 
 static gcc_type
-convert_int (struct compile_c_instance *context, struct type *type)
+convert_int (struct compile_cplus_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->int_type (C_CTX (context),
-					   TYPE_UNSIGNED (type),
-					   TYPE_LENGTH (type));
+  return CP_CTX (context)->cp_ops->int_type (CP_CTX (context),
+					     TYPE_UNSIGNED (type),
+					     TYPE_LENGTH (type));
 }
 
 /* Convert a floating-point type to its gcc representation.  */
 
 static gcc_type
-convert_float (struct compile_c_instance *context, struct type *type)
+convert_float (struct compile_cplus_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->float_type (C_CTX (context),
-					     TYPE_LENGTH (type));
+  return CP_CTX (context)->cp_ops->float_type (CP_CTX (context),
+					       TYPE_LENGTH (type));
 }
 
 /* Convert the 'void' type to its gcc representation.  */
 
 static gcc_type
-convert_void (struct compile_c_instance *context, struct type *type)
+convert_void (struct compile_cplus_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->void_type (C_CTX (context));
+  return CP_CTX (context)->cp_ops->void_type (CP_CTX (context));
 }
 
 /* Convert a boolean type to its gcc representation.  */
 
 static gcc_type
-convert_bool (struct compile_c_instance *context, struct type *type)
+convert_bool (struct compile_cplus_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->bool_type (C_CTX (context));
+  return CP_CTX (context)->cp_ops->bool_type (CP_CTX (context));
 }
 
 /* Convert a qualified type to its gcc representation.  */
 
 static gcc_type
-convert_qualified (struct compile_c_instance *context, struct type *type)
+convert_qualified (struct compile_cplus_instance *context, struct type *type)
 {
   struct type *unqual = make_unqualified_type (type);
   gcc_type unqual_converted;
@@ -305,19 +305,19 @@ convert_qualified (struct compile_c_instance *context, struct type *type)
   if (TYPE_RESTRICT (type))
     quals |= GCC_QUALIFIER_RESTRICT;
 
-  return C_CTX (context)->c_ops->build_qualified_type (C_CTX (context),
-						       unqual_converted,
-						       quals);
+  return CP_CTX (context)->cp_ops->build_qualified_type (CP_CTX (context),
+							 unqual_converted,
+							 quals);
 }
 
 /* Convert a complex type to its gcc representation.  */
 
 static gcc_type
-convert_complex (struct compile_c_instance *context, struct type *type)
+convert_complex (struct compile_cplus_instance *context, struct type *type)
 {
   gcc_type base = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
 
-  return C_CTX (context)->c_ops->build_complex_type (C_CTX (context), base);
+  return CP_CTX (context)->cp_ops->build_complex_type (CP_CTX (context), base);
 }
 
 /* A helper function which knows how to convert most types from their
@@ -326,7 +326,7 @@ convert_complex (struct compile_c_instance *context, struct type *type)
    returns the gcc type.  */
 
 static gcc_type
-convert_type_basic (struct compile_c_instance *context, struct type *type)
+convert_type_cplus_basic (struct compile_cplus_instance *context, struct type *type)
 {
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
@@ -369,15 +369,15 @@ convert_type_basic (struct compile_c_instance *context, struct type *type)
       return convert_complex (context, type);
     }
 
-  return C_CTX (context)->c_ops->error (C_CTX (context),
-					_("cannot convert gdb type "
-					  "to gcc type"));
+  return CP_CTX (context)->cp_ops->error (CP_CTX (context),
+					  _("cannot convert gdb type "
+					    "to gcc type"));
 }
 
 /* See compile-internal.h.  */
 
 gcc_type
-convert_cplus_type (struct compile_c_instance *context, struct type *type)
+convert_cplus_type (struct compile_cplus_instance *context, struct type *type)
 {
   struct type_map_instance inst, *found;
   gcc_type result;
@@ -391,7 +391,7 @@ convert_cplus_type (struct compile_c_instance *context, struct type *type)
   if (found != NULL)
     return found->gcc_type;
 
-  result = convert_type_basic (context, type);
+  result = convert_type_cplus_basic (context, type);
   insert_type (context, type, result);
   return result;
 }
@@ -403,7 +403,7 @@ convert_cplus_type (struct compile_c_instance *context, struct type *type)
 static void
 delete_instance (struct compile_instance *c)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) c;
+  struct compile_cplus_instance *context = (struct compile_cplus_instance *) c;
 
   context->base.fe->ops->destroy (context->base.fe);
   htab_delete (context->type_map);
@@ -417,7 +417,7 @@ delete_instance (struct compile_instance *c)
 struct compile_instance *
 new_cplus_compile_instance (struct gcc_cp_context *fe)
 {
-  struct compile_c_instance *result = XCNEW (struct compile_c_instance);
+  struct compile_cplus_instance *result = XCNEW (struct compile_cplus_instance);
 
   result->base.fe = &fe->base;
   result->base.destroy = delete_instance;
