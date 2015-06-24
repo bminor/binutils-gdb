@@ -1316,7 +1316,7 @@ trace_printf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...)
 }
 
 void
-debug_printf (sim_cpu *cpu, const char *fmt, ...)
+sim_debug_printf (sim_cpu *cpu, const char *fmt, ...)
 {
   va_list ap;
 

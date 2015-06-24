@@ -1,5 +1,13 @@
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.c (debug_printf): Rename to ...
+	(sim_debug_printf): ... this.
+	* sim-trace.h (debug_printf): Delete define.
+	(debug_printf): Rename to ...
+	(sim_debug_printf): ... this.
+
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-trace.c (OPTION_TRACE_REGISTER): New enum.
 	(trace_options): Add trace-register option.
 	(trace_option_handler): Handle OPTION_TRACE_REGISTER case.
