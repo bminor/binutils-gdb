@@ -2000,9 +2000,7 @@ gdb_caching_proc support_complex_tests {
 # return 0.
 
 proc supports_get_siginfo_type {} {
-    if { [istarget "i?86-*-linux*"]
-	 || [istarget "x86_64-*-linux*"]
-	 || [istarget "arm*-*-linux*"] } {
+    if { [istarget "*-*-linux*"] } {
 	return 1
     } else {
 	return 0

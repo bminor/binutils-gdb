@@ -243,7 +243,7 @@ get_linux_inferior_data (void)
 /* This function is suitable for architectures that don't
    extend/override the standard siginfo structure.  */
 
-struct type *
+static struct type *
 linux_get_siginfo_type (struct gdbarch *gdbarch)
 {
   struct linux_gdbarch_data *linux_gdbarch_data;
@@ -2440,6 +2440,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_vsyscall_range (gdbarch, linux_vsyscall_range);
   set_gdbarch_infcall_mmap (gdbarch, linux_infcall_mmap);
   set_gdbarch_infcall_munmap (gdbarch, linux_infcall_munmap);
+  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

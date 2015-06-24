@@ -1440,8 +1440,6 @@ arm_linux_init_abi (struct gdbarch_info info,
     (gdbarch, arm_linux_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_linux_core_read_description);
 
-  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
-
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					arm_linux_displaced_step_copy_insn);

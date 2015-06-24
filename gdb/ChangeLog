@@ -1,3 +1,18 @@
+2015-06-24  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Don't call
+	set_gdbarch_get_siginfo_type.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Likewise.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* tilegx-linux-tdep.c (tilegx_linux_init_abi): Likewise.
+	* linux-tdep.c (linux_get_siginfo_type): Change it to static.
+	(linux_init_abi): Call set_gdbarch_get_siginfo_type.
+	* linux-tdep.h (linux_get_siginfo_type): Remove the declaration.
+
 2015-06-24  Gary Benson  <gbenson@redhat.com>
 
 	* common/buffer.c (stdint.h): Do not include.

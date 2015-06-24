@@ -1,5 +1,10 @@
 2015-06-24  Yao Qi  <yao.qi@linaro.org>
 
+	* lib/gdb.exp (supports_get_siginfo_type): Return 1 for all
+	linux targets.
+
+2015-06-24  Yao Qi  <yao.qi@linaro.org>
+
 	* lib/gdb.exp (supports_get_siginfo_type): New proc.
 	* gdb.base/siginfo-obj.exp: Invoke supports_get_siginfo_type.
 	* gdb.base/siginfo-thread.exp: Likewise.

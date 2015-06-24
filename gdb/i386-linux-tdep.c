@@ -994,8 +994,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_I386);
   set_gdbarch_get_syscall_number (gdbarch,
                                   i386_linux_get_syscall_number);
-
-  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
