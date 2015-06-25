@@ -1,3 +1,8 @@
+2015-06-25  DJ Delorie  <dj@redhat.com>
+
+	* elf32-msp430.c (msp430_final_link_relocate): Fix comments.  Fix
+	REL loads to match RELA stores.
+
 2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_compute_section_file_positions): Don't
