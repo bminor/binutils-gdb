@@ -1,5 +1,11 @@
 2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-mmix/bspec1.d: Updated.
+	* ld-mmix/bspec2.d: Likewise.
+	* ld-mmix/undef-3.d: Likewise.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/18451
 	* ld-elf/strtab.d: New file.
 	* ld-elf/strtab.s: Likewise.
