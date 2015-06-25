@@ -1,3 +1,44 @@
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18451
+	* elf-bfd.h (elf_sym_strtab): New.
+	(elf_link_hash_table): Add strtabcount, strtabsize and
+	strtab.
+	(_bfd_elf_stringtab_init): Removed.
+	* elf.c (_bfd_elf_stringtab_init): Removed.
+	(_bfd_elf_compute_section_file_positions): Replace
+	bfd_strtab_hash/_bfd_elf_stringtab_init/_bfd_stringtab_free/
+	_bfd_stringtab_size with
+	elf_strtab_hash/_bfd_elf_strtab_init/_bfd_elf_strtab_free/
+	_bfd_elf_strtab_size.  Use _bfd_elf_strtab_add,
+	_bfd_elf_strtab_finalize and _bfd_elf_strtab_offset to get
+	st_name.
+	(swap_out_syms): Likewise.
+	* elflink.c (elf_final_link_info): Replace bfd_strtab_hash
+	with elf_strtab_hash.  Remove symbuf, symbuf_count,
+	symbuf_size and shndxbuf_size.
+	(elf_link_flush_output_syms): Removed.
+	(elf_link_output_sym): Renamed to ...
+	(elf_link_output_symstrtab): This.  Replace _bfd_stringtab_add
+	with _bfd_elf_strtab_add.  Don't flush symbols to the file nor
+	swap out symbols.
+	(elf_link_swap_symbols_out): New.
+	(elf_link_output_extsym): Replace elf_link_output_sym with
+	elf_link_output_symstrtab.
+	(elf_link_input_bfd): Likewise.
+	(elf_final_link_free): Replace _bfd_stringtab_free with
+	_bfd_elf_strtab_free.  Remove symbuf.
+	(bfd_elf_final_link): Replace _bfd_elf_stringtab_init with
+	_bfd_elf_strtab_init.  Don't set symbuf, symbuf_count,
+	symbuf_size nor shndxbuf_size.  Initialize strtabsize and
+	strtab.  Initialize symshndxbuf to -1 when number of sections
+	>= 64K.  Replace elf_link_output_sym/elf_link_output_sym with
+	elf_link_output_symstrtab/elf_link_output_symstrtab. Don't
+	call elf_link_flush_output_syms.  Call _bfd_elf_strtab_finalize
+	and elf_link_swap_symbols_out.  Replace _bfd_stringtab_size
+	and _bfd_stringtab_emit with _bfd_elf_strtab_size and
+	_bfd_elf_strtab_emit.
+
 2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Silence older

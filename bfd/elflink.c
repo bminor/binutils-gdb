@@ -7444,7 +7444,7 @@ struct elf_final_link_info
   /* Output BFD.  */
   bfd *output_bfd;
   /* Symbol string table.  */
-  struct bfd_strtab_hash *symstrtab;
+  struct elf_strtab_hash *symstrtab;
   /* .dynsym section.  */
   asection *dynsym_sec;
   /* .hash section.  */
@@ -7471,16 +7471,8 @@ struct elf_final_link_info
   /* Array large enough to hold a section pointer for each local
      symbol of any input BFD.  */
   asection **sections;
-  /* Buffer to hold swapped out symbols.  */
-  bfd_byte *symbuf;
-  /* And one for symbol section indices.  */
+  /* Buffer for SHT_SYMTAB_SHNDX section.  */
   Elf_External_Sym_Shndx *symshndxbuf;
-  /* Number of swapped out symbols in buffer.  */
-  size_t symbuf_count;
-  /* Number of symbols which fit in symbuf.  */
-  size_t symbuf_size;
-  /* And same for symshndxbuf.  */
-  size_t shndxbuf_size;
   /* Number of STT_FILE syms seen.  */
   size_t filesym_count;
 };
@@ -8570,47 +8562,21 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   return ret;
 }
 
-/* Flush the output symbols to the file.  */
-
-static bfd_boolean
-elf_link_flush_output_syms (struct elf_final_link_info *flinfo,
-			    const struct elf_backend_data *bed)
-{
-  if (flinfo->symbuf_count > 0)
-    {
-      Elf_Internal_Shdr *hdr;
-      file_ptr pos;
-      bfd_size_type amt;
-
-      hdr = &elf_tdata (flinfo->output_bfd)->symtab_hdr;
-      pos = hdr->sh_offset + hdr->sh_size;
-      amt = flinfo->symbuf_count * bed->s->sizeof_sym;
-      if (bfd_seek (flinfo->output_bfd, pos, SEEK_SET) != 0
-	  || bfd_bwrite (flinfo->symbuf, amt, flinfo->output_bfd) != amt)
-	return FALSE;
-
-      hdr->sh_size += amt;
-      flinfo->symbuf_count = 0;
-    }
-
-  return TRUE;
-}
-
-/* Add a symbol to the output symbol table.  */
+/* Add a symbol to the output symbol string table.  */
 
 static int
-elf_link_output_sym (struct elf_final_link_info *flinfo,
-		     const char *name,
-		     Elf_Internal_Sym *elfsym,
-		     asection *input_sec,
-		     struct elf_link_hash_entry *h)
+elf_link_output_symstrtab (struct elf_final_link_info *flinfo,
+			   const char *name,
+			   Elf_Internal_Sym *elfsym,
+			   asection *input_sec,
+			   struct elf_link_hash_entry *h)
 {
-  bfd_byte *dest;
-  Elf_External_Sym_Shndx *destshndx;
   int (*output_symbol_hook)
     (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
      struct elf_link_hash_entry *);
+  struct elf_link_hash_table *hash_table;
   const struct elf_backend_data *bed;
+  bfd_size_type strtabsize;
 
   BFD_ASSERT (elf_onesymtab (flinfo->output_bfd));
 
@@ -8623,49 +8589,119 @@ elf_link_output_sym (struct elf_final_link_info *flinfo,
 	return ret;
     }
 
-  if (name == NULL || *name == '\0')
-    elfsym->st_name = 0;
-  else if (input_sec->flags & SEC_EXCLUDE)
-    elfsym->st_name = 0;
+  if (name == NULL
+      || *name == '\0'
+      || (input_sec->flags & SEC_EXCLUDE))
+    elfsym->st_name = (unsigned long) -1;
   else
     {
-      elfsym->st_name = (unsigned long) _bfd_stringtab_add (flinfo->symstrtab,
-							    name, TRUE, FALSE);
+      /* Call _bfd_elf_strtab_offset after _bfd_elf_strtab_finalize
+	 to get the final offset for st_name.  */
+      elfsym->st_name
+	= (unsigned long) _bfd_elf_strtab_add (flinfo->symstrtab,
+					       name, FALSE);
       if (elfsym->st_name == (unsigned long) -1)
 	return 0;
     }
 
-  if (flinfo->symbuf_count >= flinfo->symbuf_size)
+  hash_table = elf_hash_table (flinfo->info);
+  strtabsize = hash_table->strtabsize;
+  if (strtabsize <= hash_table->strtabcount)
     {
-      if (! elf_link_flush_output_syms (flinfo, bed))
+      strtabsize += strtabsize;
+      hash_table->strtabsize = strtabsize;
+      strtabsize *= sizeof (*hash_table->strtab);
+      hash_table->strtab
+	= (struct elf_sym_strtab *) bfd_realloc (hash_table->strtab,
+						 strtabsize);
+      if (hash_table->strtab == NULL)
 	return 0;
     }
+  hash_table->strtab[hash_table->strtabcount].sym = *elfsym;
+  hash_table->strtab[hash_table->strtabcount].dest_index
+    = hash_table->strtabcount;
+  hash_table->strtab[hash_table->strtabcount].destshndx_index
+    = flinfo->symshndxbuf ? bfd_get_symcount (flinfo->output_bfd) : 0;
 
-  dest = flinfo->symbuf + flinfo->symbuf_count * bed->s->sizeof_sym;
-  destshndx = flinfo->symshndxbuf;
-  if (destshndx != NULL)
-    {
-      if (bfd_get_symcount (flinfo->output_bfd) >= flinfo->shndxbuf_size)
-	{
-	  bfd_size_type amt;
-
-	  amt = flinfo->shndxbuf_size * sizeof (Elf_External_Sym_Shndx);
-	  destshndx = (Elf_External_Sym_Shndx *) bfd_realloc (destshndx,
-							      amt * 2);
-	  if (destshndx == NULL)
-	    return 0;
-	  flinfo->symshndxbuf = destshndx;
-	  memset ((char *) destshndx + amt, 0, amt);
-	  flinfo->shndxbuf_size *= 2;
-	}
-      destshndx += bfd_get_symcount (flinfo->output_bfd);
-    }
-
-  bed->s->swap_symbol_out (flinfo->output_bfd, elfsym, dest, destshndx);
-  flinfo->symbuf_count += 1;
   bfd_get_symcount (flinfo->output_bfd) += 1;
+  hash_table->strtabcount += 1;
 
   return 1;
+}
+
+/* Swap symbols out to the symbol table and flush the output symbols to
+   the file.  */
+
+static bfd_boolean
+elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
+{
+  struct elf_link_hash_table *hash_table = elf_hash_table (flinfo->info);
+  bfd_size_type amt, i;
+  const struct elf_backend_data *bed;
+  bfd_byte *symbuf;
+  Elf_Internal_Shdr *hdr;
+  file_ptr pos;
+  bfd_boolean ret;
+
+  if (!hash_table->strtabcount)
+    return TRUE;
+
+  BFD_ASSERT (elf_onesymtab (flinfo->output_bfd));
+
+  bed = get_elf_backend_data (flinfo->output_bfd);
+
+  amt = bed->s->sizeof_sym * hash_table->strtabcount;
+  symbuf = (bfd_byte *) bfd_malloc (amt);
+  if (symbuf == NULL)
+    return FALSE;
+  
+  if (flinfo->symshndxbuf)
+    {
+      amt = (sizeof (Elf_External_Sym_Shndx)
+	     * (bfd_get_symcount (flinfo->output_bfd)));
+      flinfo->symshndxbuf = (Elf_External_Sym_Shndx *) bfd_zmalloc (amt);
+      if (flinfo->symshndxbuf == NULL)
+	{
+	  free (symbuf);
+	  return FALSE;
+	}
+    }
+
+  for (i = 0; i < hash_table->strtabcount; i++)
+    {
+      struct elf_sym_strtab *elfsym = &hash_table->strtab[i];
+      if (elfsym->sym.st_name == (unsigned long) -1)
+	elfsym->sym.st_name = 0;
+      else
+	elfsym->sym.st_name
+	  = (unsigned long) _bfd_elf_strtab_offset (flinfo->symstrtab,
+						    elfsym->sym.st_name);
+      bed->s->swap_symbol_out (flinfo->output_bfd, &elfsym->sym,
+			       ((bfd_byte *) symbuf
+				+ (elfsym->dest_index
+				   * bed->s->sizeof_sym)),
+			       (flinfo->symshndxbuf
+				+ elfsym->destshndx_index));
+    }
+
+  hdr = &elf_tdata (flinfo->output_bfd)->symtab_hdr;
+  pos = hdr->sh_offset + hdr->sh_size;
+  amt = hash_table->strtabcount * bed->s->sizeof_sym;
+  if (bfd_seek (flinfo->output_bfd, pos, SEEK_SET) == 0
+      && bfd_bwrite (symbuf, amt, flinfo->output_bfd) == amt)
+    {
+      hdr->sh_size += amt;
+      ret = TRUE;
+    }
+  else
+    ret = FALSE;
+
+  free (symbuf);
+
+  free (hash_table->strtab);
+  hash_table->strtab = NULL;
+
+  return ret;
 }
 
 /* Return TRUE if the dynamic symbol SYM in ABFD is supported.  */
@@ -9291,15 +9327,16 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       memset (&fsym, 0, sizeof (fsym));
       fsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
       fsym.st_shndx = SHN_ABS;
-      if (!elf_link_output_sym (eoinfo->flinfo, NULL, &fsym,
-				bfd_und_section_ptr, NULL))
+      if (!elf_link_output_symstrtab (eoinfo->flinfo, NULL, &fsym,
+				      bfd_und_section_ptr, NULL))
 	return FALSE;
 
       eoinfo->file_sym_done = TRUE;
     }
 
   indx = bfd_get_symcount (flinfo->output_bfd);
-  ret = elf_link_output_sym (flinfo, h->root.root.string, &sym, input_sec, h);
+  ret = elf_link_output_symstrtab (flinfo, h->root.root.string, &sym,
+				   input_sec, h);
   if (ret == 0)
     {
       eoinfo->failed = TRUE;
@@ -9593,10 +9630,11 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  memset (&osym, 0, sizeof (osym));
 	  osym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
 	  osym.st_shndx = SHN_ABS;
-	  if (!elf_link_output_sym (flinfo,
-				    (input_bfd->lto_output ? NULL
-				     : input_bfd->filename),
-				    &osym, bfd_abs_section_ptr, NULL))
+	  if (!elf_link_output_symstrtab (flinfo,
+					  (input_bfd->lto_output ? NULL
+					   : input_bfd->filename),
+					  &osym, bfd_abs_section_ptr,
+					  NULL))
 	    return FALSE;
 	}
 
@@ -9628,7 +9666,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	}
 
       indx = bfd_get_symcount (output_bfd);
-      ret = elf_link_output_sym (flinfo, name, &osym, isec, NULL);
+      ret = elf_link_output_symstrtab (flinfo, name, &osym, isec, NULL);
       if (ret == 0)
 	return FALSE;
       else if (ret == 1)
@@ -9711,7 +9749,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		  sym.st_value += o->output_offset;
 
 		  indx = bfd_get_symcount (output_bfd);
-		  ret = elf_link_output_sym (flinfo, name, &sym, o, NULL);
+		  ret = elf_link_output_symstrtab (flinfo, name, &sym, o,
+						   NULL);
 		  if (ret == 0)
 		    return FALSE;
 		  else if (ret == 1)
@@ -10186,8 +10225,9 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			    }
 
 			  indx = bfd_get_symcount (output_bfd);
-			  ret = elf_link_output_sym (flinfo, name, &sym, sec,
-						     NULL);
+			  ret = elf_link_output_symstrtab (flinfo, name,
+							   &sym, sec,
+							   NULL);
 			  if (ret == 0)
 			    return FALSE;
 			  else if (ret == 1)
@@ -10634,7 +10674,7 @@ elf_final_link_free (bfd *obfd, struct elf_final_link_info *flinfo)
   asection *o;
 
   if (flinfo->symstrtab != NULL)
-    _bfd_stringtab_free (flinfo->symstrtab);
+    _bfd_elf_strtab_free (flinfo->symstrtab);
   if (flinfo->contents != NULL)
     free (flinfo->contents);
   if (flinfo->external_relocs != NULL)
@@ -10651,8 +10691,6 @@ elf_final_link_free (bfd *obfd, struct elf_final_link_info *flinfo)
     free (flinfo->indices);
   if (flinfo->sections != NULL)
     free (flinfo->sections);
-  if (flinfo->symbuf != NULL)
-    free (flinfo->symbuf);
   if (flinfo->symshndxbuf != NULL)
     free (flinfo->symshndxbuf);
   for (o = obfd->sections; o != NULL; o = o->next)
@@ -10710,7 +10748,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   flinfo.info = info;
   flinfo.output_bfd = abfd;
-  flinfo.symstrtab = _bfd_elf_stringtab_init ();
+  flinfo.symstrtab = _bfd_elf_strtab_init ();
   if (flinfo.symstrtab == NULL)
     return FALSE;
 
@@ -10737,10 +10775,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   flinfo.internal_syms = NULL;
   flinfo.indices = NULL;
   flinfo.sections = NULL;
-  flinfo.symbuf = NULL;
   flinfo.symshndxbuf = NULL;
-  flinfo.symbuf_count = 0;
-  flinfo.shndxbuf_size = 0;
   flinfo.filesym_count = 0;
 
   /* The object attributes have been merged.  Remove the input
@@ -10972,27 +11007,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* sh_offset is set just below.  */
   symtab_hdr->sh_addralign = (bfd_vma) 1 << bed->s->log_file_align;
 
-  /* Allocate a buffer to hold swapped out symbols.  This is to avoid
-     continuously seeking to the right position in the file.  */
-  if (! info->keep_memory || max_sym_count < 20)
-    flinfo.symbuf_size = 20;
-  else
-    flinfo.symbuf_size = max_sym_count;
-  amt = flinfo.symbuf_size;
-  amt *= bed->s->sizeof_sym;
-  flinfo.symbuf = (bfd_byte *) bfd_malloc (amt);
-  if (flinfo.symbuf == NULL)
+  if (max_sym_count < 20)
+    max_sym_count = 20;
+  elf_hash_table (info)->strtabsize = max_sym_count;
+  amt = max_sym_count * sizeof (struct elf_sym_strtab);
+  elf_hash_table (info)->strtab
+    = (struct elf_sym_strtab *) bfd_malloc (amt);
+  if (elf_hash_table (info)->strtab == NULL)
     goto error_return;
-  if (elf_numsections (abfd) > (SHN_LORESERVE & 0xFFFF))
-    {
-      /* Wild guess at number of output symbols.  realloc'd as needed.  */
-      amt = 2 * max_sym_count + elf_numsections (abfd) + 1000;
-      flinfo.shndxbuf_size = amt;
-      amt *= sizeof (Elf_External_Sym_Shndx);
-      flinfo.symshndxbuf = (Elf_External_Sym_Shndx *) bfd_zmalloc (amt);
-      if (flinfo.symshndxbuf == NULL)
-	goto error_return;
-    }
+  /* The real buffer will be allocated in elf_link_swap_symbols_out.  */
+  flinfo.symshndxbuf
+    = (elf_numsections (abfd) > (SHN_LORESERVE & 0xFFFF)
+       ? (Elf_External_Sym_Shndx *) -1 : NULL);
 
   if (info->strip != strip_all || emit_relocs)
     {
@@ -11012,8 +11038,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       elfsym.st_other = 0;
       elfsym.st_shndx = SHN_UNDEF;
       elfsym.st_target_internal = 0;
-      if (elf_link_output_sym (&flinfo, NULL, &elfsym, bfd_und_section_ptr,
-			       NULL) != 1)
+      if (elf_link_output_symstrtab (&flinfo, NULL, &elfsym,
+				     bfd_und_section_ptr, NULL) != 1)
 	goto error_return;
 
       /* Output a symbol for each section.  We output these even if we are
@@ -11036,7 +11062,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      elfsym.st_shndx = i;
 	      if (!info->relocatable)
 		elfsym.st_value = o->vma;
-	      if (elf_link_output_sym (&flinfo, NULL, &elfsym, o, NULL) != 1)
+	      if (elf_link_output_symstrtab (&flinfo, NULL, &elfsym, o,
+					     NULL) != 1)
 		goto error_return;
 	    }
 	}
@@ -11253,7 +11280,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	 struct elf_link_hash_entry *);
 
       if (! ((*bed->elf_backend_output_arch_local_syms)
-	     (abfd, info, &flinfo, (out_sym_func) elf_link_output_sym)))
+	     (abfd, info, &flinfo,
+	      (out_sym_func) elf_link_output_symstrtab)))
 	return FALSE;
     }
 
@@ -11364,12 +11392,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	 struct elf_link_hash_entry *);
 
       if (! ((*bed->elf_backend_output_arch_syms)
-	     (abfd, info, &flinfo, (out_sym_func) elf_link_output_sym)))
+	     (abfd, info, &flinfo,
+	      (out_sym_func) elf_link_output_symstrtab)))
 	return FALSE;
     }
 
-  /* Flush all symbols to the file.  */
-  if (! elf_link_flush_output_syms (&flinfo, bed))
+  /* Finalize the .strtab section.  */
+  _bfd_elf_strtab_finalize (flinfo.symstrtab);
+
+  /* Swap out the .strtab section. */
+  if (!elf_link_swap_symbols_out (&flinfo))
     return FALSE;
 
   /* Now we know the size of the symtab section.  */
@@ -11402,7 +11434,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       symstrtab_hdr->sh_type = SHT_STRTAB;
       symstrtab_hdr->sh_flags = 0;
       symstrtab_hdr->sh_addr = 0;
-      symstrtab_hdr->sh_size = _bfd_stringtab_size (flinfo.symstrtab);
+      symstrtab_hdr->sh_size = _bfd_elf_strtab_size (flinfo.symstrtab);
       symstrtab_hdr->sh_entsize = 0;
       symstrtab_hdr->sh_link = 0;
       symstrtab_hdr->sh_info = 0;
@@ -11414,7 +11446,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       elf_next_file_pos (abfd) = off;
 
       if (bfd_seek (abfd, symstrtab_hdr->sh_offset, SEEK_SET) != 0
-	  || ! _bfd_stringtab_emit (abfd, flinfo.symstrtab))
+	  || ! _bfd_elf_strtab_emit (abfd, flinfo.symstrtab))
 	return FALSE;
     }
 
