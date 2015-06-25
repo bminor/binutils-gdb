@@ -1,5 +1,9 @@
 2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/strtab.d: Only run on *-*-linux* and *-*-gnu* targets.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-mmix/bspec1.d: Updated.
 	* ld-mmix/bspec2.d: Likewise.
 	* ld-mmix/undef-3.d: Likewise.

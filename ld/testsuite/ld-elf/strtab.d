@@ -1,5 +1,6 @@
 #ld: -shared
 #readelf: -W -x .strtab
+#target: *-*-linux* *-*-gnu*
 
 #failif
 #...
