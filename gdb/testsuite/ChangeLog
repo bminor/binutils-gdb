@@ -1,3 +1,8 @@
+2015-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add
+	is_address_zero_readable check.
+
 2015-06-24  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gdb.arch/powerpc-power.exp <rfebb>: Fixup test results.
