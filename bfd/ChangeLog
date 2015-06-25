@@ -1,5 +1,10 @@
 2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (_bfd_elf_compute_section_file_positions): Don't
+	initialize sh_size for .shstrtab here.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/18451
 	* elf-bfd.h (elf_sym_strtab): New.
 	(elf_link_hash_table): Add strtabcount, strtabsize and

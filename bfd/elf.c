@@ -3772,7 +3772,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   shstrtab_hdr->sh_type = SHT_STRTAB;
   shstrtab_hdr->sh_flags = 0;
   shstrtab_hdr->sh_addr = 0;
-  shstrtab_hdr->sh_size = _bfd_elf_strtab_size (elf_shstrtab (abfd));
+  /* sh_size is set in _bfd_elf_assign_file_positions_for_non_load.  */
   shstrtab_hdr->sh_entsize = 0;
   shstrtab_hdr->sh_link = 0;
   shstrtab_hdr->sh_info = 0;
