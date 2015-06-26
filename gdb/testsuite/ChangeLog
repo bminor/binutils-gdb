@@ -1,3 +1,8 @@
+2015-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-prologue-skip.S: New file.
+	* gdb.arch/amd64-prologue-skip.exp: New file.
+
 2015-06-25  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-prettyprint.exp (run_lang_tests): Add

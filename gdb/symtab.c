@@ -3605,7 +3605,9 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 /* Given a function symbol SYM, find the symtab and line for the start
    of the function.
    If the argument FUNFIRSTLINE is nonzero, we want the first line
-   of real code inside the function.  */
+   of real code inside the function.
+   This function should return SALs matching those from minsym_found,
+   otherwise false multiple-locations breakpoints could be placed.  */
 
 struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
@@ -3616,6 +3618,14 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   fixup_symbol_section (sym, NULL);
   section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
   sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
+
+  if (funfirstline && sal.symtab != NULL
+      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
+	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+    {
+      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      return sal;
+    }
 
   /* We always should have a line for the function start address.
      If we don't, something is odd.  Create a plain SAL refering
