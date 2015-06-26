@@ -1,3 +1,7 @@
+2015-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf_iamcu.sh (COMPILE_IN): New.
+
 2015-06-15  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/18466
