@@ -1,3 +1,12 @@
+2015-06-26  Keith Seitz  <keiths@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	PR 16253
+	* block.c (block_lookup_symbol): For non-function blocks,
+	continue to search for a symbol with an exact domain match
+	Otherwise, return any previously found "best domain" symbol.
+	(block_lookup_symbol_primary): Likewise.
+
 2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* NEWS: Mention the new option "history remove-duplicates".

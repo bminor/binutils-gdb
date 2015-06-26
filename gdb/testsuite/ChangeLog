@@ -1,3 +1,13 @@
+2015-06-26  Keith Seitz  <keiths@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	PR 16253
+	* gdb.cp/var-tag-2.cc: New file.
+	* gdb.cp/var-tag-3.cc: New file.
+	* gdb.cp/var-tag-4.cc: New file.
+	* gdb.cp/var-tag.cc: New file.
+	* gdb.cp/var-tag.exp: New file.
+
 2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.base/history-duplicates.exp: New test.
