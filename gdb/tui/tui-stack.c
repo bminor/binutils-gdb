@@ -306,7 +306,7 @@ tui_set_locator_info (struct gdbarch *gdbarch,
   /* Allocate the locator content if necessary.  */
   if (locator->content_size <= 0)
     {
-      locator->content = tui_alloc_content (1, locator->type);
+      locator->content = tui_alloc_content (1, LOCATOR_WIN);
       locator->content_size = 1;
     }
 

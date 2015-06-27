@@ -1,3 +1,8 @@
+2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-stack.c (tui_set_locator_info): Explicitly pass
+	LOCATOR_WIN to tui_alloc_content.
+
 2015-06-30  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/18605
