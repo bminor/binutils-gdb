@@ -1,5 +1,14 @@
 2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
 
+	PR tui/13378
+	* tui/tui-stack.c (tui_set_locator_info): Change prototype to
+	return an int instead of void.  Return whether the locator
+	window has changed.
+	(tui_show_frame_info): If the locator info has not changed, then
+	bail out early to avoid refreshing the windows.
+
+2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* tui/tui-stack.c (tui_set_locator_info): Explicitly pass
 	LOCATOR_WIN to tui_alloc_content.
 
