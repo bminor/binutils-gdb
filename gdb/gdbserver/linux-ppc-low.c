@@ -423,6 +423,69 @@ ppc_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
+/* Implement supports_z_point_type target-ops.
+   Returns true if type Z_TYPE breakpoint is supported.
+
+   Handling software breakpoint at server side, so tracepoints
+   and breakpoints can be inserted at the same location.  */
+
+static int
+ppc_supports_z_point_type (char z_type)
+{
+  switch (z_type)
+    {
+    case Z_PACKET_SW_BP:
+      return 1;
+    case Z_PACKET_HW_BP:
+    case Z_PACKET_WRITE_WP:
+    case Z_PACKET_ACCESS_WP:
+    default:
+      return 0;
+    }
+}
+
+/* Implement insert_point target-ops.
+   Returns 0 on success, -1 on failure and 1 on unsupported.  */
+
+static int
+ppc_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		  int size, struct raw_breakpoint *bp)
+{
+  switch (type)
+    {
+    case raw_bkpt_type_sw:
+      return insert_memory_breakpoint (bp);
+
+    case raw_bkpt_type_hw:
+    case raw_bkpt_type_write_wp:
+    case raw_bkpt_type_access_wp:
+    default:
+      /* Unsupported.  */
+      return 1;
+    }
+}
+
+/* Implement remove_point target-ops.
+   Returns 0 on success, -1 on failure and 1 on unsupported.  */
+
+static int
+ppc_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		  int size, struct raw_breakpoint *bp)
+{
+  switch (type)
+    {
+    case raw_bkpt_type_sw:
+      return remove_memory_breakpoint (bp);
+
+    case raw_bkpt_type_hw:
+    case raw_bkpt_type_write_wp:
+    case raw_bkpt_type_access_wp:
+    default:
+      /* Unsupported.  */
+      return 1;
+    }
+}
+
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
@@ -706,9 +769,9 @@ struct linux_target_ops the_low_target = {
   NULL,
   0,
   ppc_breakpoint_at,
-  NULL, /* supports_z_point_type */
-  NULL,
-  NULL,
+  ppc_supports_z_point_type,
+  ppc_insert_point,
+  ppc_remove_point,
   NULL,
   NULL,
   ppc_collect_ptrace_register,

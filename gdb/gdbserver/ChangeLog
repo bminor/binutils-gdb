@@ -1,3 +1,10 @@
+2016-02-24  Wei-cheng Wang  <cole945@gmail.com>
+
+	* linux-ppc-low.c (ppc_supports_z_point_type): New function:
+	(ppc_insert_point, ppc_remove_point): Insert/remove z-packet breakpoints.
+	(ppc64_emit_ops_vector): Add target ops - ppc_supports_z_point_type,
+	ppc_insert_point, ppc_remove_point.
+
 2016-02-17  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* linux-s390-low.c (s390_supports_z_point_type): New function.
