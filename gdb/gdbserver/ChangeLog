@@ -1,3 +1,18 @@
+2016-02-11  Wei-cheng Wang  <cole945@gmail.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (struct tracepoint_action_ops): Remove.
+	(struct tracepoint_action): Remove ops.
+	(m_tracepoint_action_download, r_tracepoint_action_download)
+	(x_tracepoint_action_download, l_tracepoint_action_download): Adjust
+	size and offset accordingly.
+	(m_tracepoint_action_ops, r_tracepoint_action_ops)
+	(x_tracepoint_action_ops, l_tracepoint_action_ops): Remove.
+	(tracepoint_action_send, tracepoint_action_download): New functions.
+	Helpers for trace action handlers.
+	(add_tracepoint_action): Remove setup actions ops.
+	(download_tracepoint_1, tracepoint_send_agent): Call helper functions.
+
 2016-02-10  Yao Qi  <yao.qi@linaro.org>
 
 	* regcache.c (regcache_raw_read_unsigned): Clear *VAL.
