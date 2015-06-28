@@ -665,7 +665,7 @@ This program has absolutely no warranty.\n"));
 	      if (strcasecmp (optarg, "none") == 0)
 		flag_compress_debug = COMPRESS_DEBUG_NONE;
 	      else if (strcasecmp (optarg, "zlib") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_ZLIB;
+		flag_compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
 	      else if (strcasecmp (optarg, "zlib-gnu") == 0)
 		flag_compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
 	      else if (strcasecmp (optarg, "zlib-gabi") == 0)

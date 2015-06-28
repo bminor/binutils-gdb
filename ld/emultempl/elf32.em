@@ -2223,7 +2223,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if (strcasecmp (optarg, "none") == 0)
 	link_info.compress_debug = COMPRESS_DEBUG_NONE;
       else if (strcasecmp (optarg, "zlib") == 0)
-	link_info.compress_debug = COMPRESS_DEBUG_ZLIB;
+	link_info.compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
       else if (strcasecmp (optarg, "zlib-gnu") == 0)
 	link_info.compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
       else if (strcasecmp (optarg, "zlib-gabi") == 0)

@@ -1,3 +1,8 @@
+2015-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em  (gld${EMULATION_NAME}_handle_option):
+	Replace COMPRESS_DEBUG_ZLIB with COMPRESS_DEBUG_GNU_ZLIB.
+
 2015-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/elf_iamcu.sh (COMPILE_IN): New.

@@ -1,3 +1,9 @@
+2015-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (compressed_debug_section_type): Remove
+	COMPRESS_DEBUG_ZLIB.
+	* bfd-in2.h : Regenerated.
+
 2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_create_dynamic_sections): Use executable
