@@ -1,3 +1,32 @@
+2015-06-26  Keith Seitz  <keiths@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	PR 16253
+	* gdb.cp/var-tag-2.cc: New file.
+	* gdb.cp/var-tag-3.cc: New file.
+	* gdb.cp/var-tag-4.cc: New file.
+	* gdb.cp/var-tag.cc: New file.
+	* gdb.cp/var-tag.exp: New file.
+
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/history-duplicates.exp: New test.
+
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/completion.exp: Test the completion of the "focus"
+	command.
+
+2015-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-prologue-skip.S: New file.
+	* gdb.arch/amd64-prologue-skip.exp: New file.
+
+2015-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add
+	is_address_zero_readable check.
+
 2015-06-24  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gdb.arch/powerpc-power.exp <rfebb>: Fixup test results.

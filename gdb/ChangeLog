@@ -1,3 +1,50 @@
+2015-06-26  Keith Seitz  <keiths@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	PR 16253
+	* block.c (block_lookup_symbol): For non-function blocks,
+	continue to search for a symbol with an exact domain match
+	Otherwise, return any previously found "best domain" symbol.
+	(block_lookup_symbol_primary): Likewise.
+
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* NEWS: Mention the new option "history remove-duplicates".
+	* top.c (history_remove_duplicates): New static variable.
+	(show_history_remove_duplicates): New static function.
+	(gdb_add_history): Conditionally remove duplicate history
+	entries.
+	(init_main): Add "history remove-duplicates" option.
+
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-win.c (focus_completer): New static function.
+	(_initialize_tui_win): Set the completion function of the
+	"focus" command to focus_completer.
+
+2015-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linespec.c (minsym_found): Reset sal.PC for COMPUNIT_LOCATIONS_VALID
+	and language_asm..
+	* symtab.c (find_function_start_sal): Likewise.
+
+2015-06-25  Gary Benson  <gbenson@redhat.com>
+
+	* solib.c (solib_find_1): Set local variable sysroot to NULL if
+	it is the empty string after trailing slashes have been stripped.
+
+2015-06-25  Gary Benson  <gbenson@redhat.com>
+
+	* exec.c (exec_file_locate_attach): Remove gdb_sysroot NULL check.
+	* infrun.c (follow_exec): Likewise.
+	* remote.c (remote_filesystem_is_local): Likewise.
+	* solib.c (solib_find_1): Likewise.
+
+2015-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* build-id.c (build_id_to_debug_bfd): Add cleanup to free
+	return value from lrealpath.
+
 2015-06-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.c (gdbsim_open): Move sysroot update to the top.

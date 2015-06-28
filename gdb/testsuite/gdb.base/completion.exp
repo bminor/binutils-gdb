@@ -878,3 +878,21 @@ if {![skip_tui_tests]} {
 	}
     }
 }
+if {![skip_tui_tests]} {
+    with_test_prefix "focus command" {
+	set test "test completion"
+	send_gdb "focus \t\t"
+	gdb_test_multiple "" "$test" {
+	    -re "cmd *next *prev *src *\r\n$gdb_prompt focus $" {
+		pass "$test"
+	    }
+	}
+	send_gdb "\003"
+	set test "quit command input after testing completion"
+	gdb_test_multiple "" "$test" {
+	    -re "$gdb_prompt $" {
+		pass "$test"
+	    }
+	}
+    }
+}

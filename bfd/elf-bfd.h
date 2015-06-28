@@ -469,6 +469,13 @@ enum elf_target_id
   GENERIC_ELF_DATA
 };
 
+struct elf_sym_strtab
+{
+  Elf_Internal_Sym sym;
+  unsigned long dest_index;
+  unsigned long destshndx_index;
+};
+
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -511,6 +518,17 @@ struct elf_link_hash_table
   /* The string table of dynamic symbols, which becomes the .dynstr
      section.  */
   struct elf_strtab_hash *dynstr;
+
+  /* The number of symbol strings found in the link which must be put
+     into the .strtab section.  */
+  bfd_size_type strtabcount;
+
+  /* The array size of the symbol string table, which becomes the
+     .strtab section.  */
+  bfd_size_type strtabsize;
+
+  /* The array of strings, which becomes the .strtab section.  */
+  struct elf_sym_strtab *strtab;
 
   /* The number of buckets in the hash table in the .hash section.
      This is based on the number of dynamic symbols.  */
@@ -1980,8 +1998,6 @@ extern Elf_Internal_Sym *bfd_sym_from_r_symndx
   (struct sym_cache *, bfd *, unsigned long);
 extern asection *bfd_section_from_elf_index
   (bfd *, unsigned int);
-extern struct bfd_strtab_hash *_bfd_elf_stringtab_init
-  (void);
 
 extern struct elf_strtab_hash * _bfd_elf_strtab_init
   (void);

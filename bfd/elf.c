@@ -51,7 +51,7 @@ SECTION
 static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bfd_boolean prep_headers (bfd *);
-static bfd_boolean swap_out_syms (bfd *, struct bfd_strtab_hash **, int) ;
+static bfd_boolean swap_out_syms (bfd *, struct elf_strtab_hash **, int) ;
 static bfd_boolean elf_read_notes (bfd *, file_ptr, bfd_size_type) ;
 static bfd_boolean elf_parse_notes (bfd *abfd, char *buf, size_t size,
 				    file_ptr offset);
@@ -1609,29 +1609,6 @@ bfd_elf_print_symbol (bfd *abfd,
       }
       break;
     }
-}
-
-/* Allocate an ELF string table--force the first byte to be zero.  */
-
-struct bfd_strtab_hash *
-_bfd_elf_stringtab_init (void)
-{
-  struct bfd_strtab_hash *ret;
-
-  ret = _bfd_stringtab_init ();
-  if (ret != NULL)
-    {
-      bfd_size_type loc;
-
-      loc = _bfd_stringtab_add (ret, "", TRUE, FALSE);
-      BFD_ASSERT (loc == 0 || loc == (bfd_size_type) -1);
-      if (loc == (bfd_size_type) -1)
-	{
-	  _bfd_stringtab_free (ret);
-	  ret = NULL;
-	}
-    }
-  return ret;
 }
 
 /* ELF .o/exec file reading */
@@ -3742,7 +3719,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct fake_section_arg fsargs;
   bfd_boolean failed;
-  struct bfd_strtab_hash *strtab = NULL;
+  struct elf_strtab_hash *strtab = NULL;
   Elf_Internal_Shdr *shstrtab_hdr;
   bfd_boolean need_symtab;
 
@@ -3795,7 +3772,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   shstrtab_hdr->sh_type = SHT_STRTAB;
   shstrtab_hdr->sh_flags = 0;
   shstrtab_hdr->sh_addr = 0;
-  shstrtab_hdr->sh_size = _bfd_elf_strtab_size (elf_shstrtab (abfd));
+  /* sh_size is set in _bfd_elf_assign_file_positions_for_non_load.  */
   shstrtab_hdr->sh_entsize = 0;
   shstrtab_hdr->sh_link = 0;
   shstrtab_hdr->sh_info = 0;
@@ -3827,9 +3804,9 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
       /* Now that we know where the .strtab section goes, write it
 	 out.  */
       if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
-	  || ! _bfd_stringtab_emit (abfd, strtab))
+	  || ! _bfd_elf_strtab_emit (abfd, strtab))
 	return FALSE;
-      _bfd_stringtab_free (strtab);
+      _bfd_elf_strtab_free (strtab);
     }
 
   abfd->output_has_begun = TRUE;
@@ -7065,18 +7042,21 @@ _bfd_elf_copy_private_symbol_data (bfd *ibfd,
 
 static bfd_boolean
 swap_out_syms (bfd *abfd,
-	       struct bfd_strtab_hash **sttp,
+	       struct elf_strtab_hash **sttp,
 	       int relocatable_p)
 {
   const struct elf_backend_data *bed;
   int symcount;
   asymbol **syms;
-  struct bfd_strtab_hash *stt;
+  struct elf_strtab_hash *stt;
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Shdr *symtab_shndx_hdr;
   Elf_Internal_Shdr *symstrtab_hdr;
+  struct elf_sym_strtab *symstrtab;
   bfd_byte *outbound_syms;
   bfd_byte *outbound_shndx;
+  unsigned long outbound_syms_index;
+  unsigned long outbound_shndx_index;
   int idx;
   unsigned int num_locals;
   bfd_size_type amt;
@@ -7086,7 +7066,7 @@ swap_out_syms (bfd *abfd,
     return FALSE;
 
   /* Dump out the symtabs.  */
-  stt = _bfd_elf_stringtab_init ();
+  stt = _bfd_elf_strtab_init ();
   if (stt == NULL)
     return FALSE;
 
@@ -7102,16 +7082,29 @@ swap_out_syms (bfd *abfd,
   symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
   symstrtab_hdr->sh_type = SHT_STRTAB;
 
+  /* Allocate buffer to swap out the .strtab section.  */
+  symstrtab = (struct elf_sym_strtab *) bfd_malloc ((symcount + 1)
+						    * sizeof (*symstrtab));
+  if (symstrtab == NULL)
+    {
+      _bfd_elf_strtab_free (stt);
+      return FALSE;
+    }
+
   outbound_syms = (bfd_byte *) bfd_alloc2 (abfd, 1 + symcount,
                                            bed->s->sizeof_sym);
   if (outbound_syms == NULL)
     {
-      _bfd_stringtab_free (stt);
+error_return:
+      _bfd_elf_strtab_free (stt);
+      free (symstrtab);
       return FALSE;
     }
   symtab_hdr->contents = outbound_syms;
+  outbound_syms_index = 0;
 
   outbound_shndx = NULL;
+  outbound_shndx_index = 0;
   symtab_shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
   if (symtab_shndx_hdr->sh_name != 0)
     {
@@ -7119,10 +7112,7 @@ swap_out_syms (bfd *abfd,
       outbound_shndx =  (bfd_byte *)
           bfd_zalloc2 (abfd, 1 + symcount, sizeof (Elf_External_Sym_Shndx));
       if (outbound_shndx == NULL)
-	{
-	  _bfd_stringtab_free (stt);
-	  return FALSE;
-	}
+	goto error_return;
 
       symtab_shndx_hdr->contents = outbound_shndx;
       symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
@@ -7142,10 +7132,12 @@ swap_out_syms (bfd *abfd,
     sym.st_other = 0;
     sym.st_shndx = SHN_UNDEF;
     sym.st_target_internal = 0;
-    bed->s->swap_symbol_out (abfd, &sym, outbound_syms, outbound_shndx);
-    outbound_syms += bed->s->sizeof_sym;
+    symstrtab[0].sym = sym;
+    symstrtab[0].dest_index = outbound_syms_index;
+    symstrtab[0].destshndx_index = outbound_shndx_index;
+    outbound_syms_index++;
     if (outbound_shndx != NULL)
-      outbound_shndx += sizeof (Elf_External_Sym_Shndx);
+      outbound_shndx_index++;
   }
 
   name_local_sections
@@ -7153,7 +7145,7 @@ swap_out_syms (bfd *abfd,
        && bed->elf_backend_name_local_section_symbols (abfd));
 
   syms = bfd_get_outsymbols (abfd);
-  for (idx = 0; idx < symcount; idx++)
+  for (idx = 0; idx < symcount;)
     {
       Elf_Internal_Sym sym;
       bfd_vma value = syms[idx]->value;
@@ -7165,18 +7157,17 @@ swap_out_syms (bfd *abfd,
 	  && (flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
 	{
 	  /* Local section symbols have no name.  */
-	  sym.st_name = 0;
+	  sym.st_name = (unsigned long) -1;
 	}
       else
 	{
-	  sym.st_name = (unsigned long) _bfd_stringtab_add (stt,
-							    syms[idx]->name,
-							    TRUE, FALSE);
+	  /* Call _bfd_elf_strtab_offset after _bfd_elf_strtab_finalize
+	     to get the final offset for st_name.  */
+	  sym.st_name
+	    = (unsigned long) _bfd_elf_strtab_add (stt, syms[idx]->name,
+						   FALSE);
 	  if (sym.st_name == (unsigned long) -1)
-	    {
-	      _bfd_stringtab_free (stt);
-	      return FALSE;
-	    }
+	    goto error_return;
 	}
 
       type_ptr = elf_symbol_from (abfd, syms[idx]);
@@ -7266,8 +7257,7 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
 					  sec->name);
 		      bfd_set_error (bfd_error_invalid_operation);
-		      _bfd_stringtab_free (stt);
-		      return FALSE;
+		      goto error_return;
 		    }
 
 		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
@@ -7353,14 +7343,40 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	  sym.st_target_internal = 0;
 	}
 
-      bed->s->swap_symbol_out (abfd, &sym, outbound_syms, outbound_shndx);
-      outbound_syms += bed->s->sizeof_sym;
+      idx++;
+      symstrtab[idx].sym = sym;
+      symstrtab[idx].dest_index = outbound_syms_index;
+      symstrtab[idx].destshndx_index = outbound_shndx_index;
+
+      outbound_syms_index++;
       if (outbound_shndx != NULL)
-	outbound_shndx += sizeof (Elf_External_Sym_Shndx);
+	outbound_shndx_index++;
     }
 
+  /* Finalize the .strtab section.  */
+  _bfd_elf_strtab_finalize (stt);
+
+  /* Swap out the .strtab section.  */
+  for (idx = 0; idx <= symcount; idx++)
+    {
+      struct elf_sym_strtab *elfsym = &symstrtab[idx];
+      if (elfsym->sym.st_name == (unsigned long) -1)
+	elfsym->sym.st_name = 0;
+      else
+	elfsym->sym.st_name = _bfd_elf_strtab_offset (stt,
+						      elfsym->sym.st_name);
+      bed->s->swap_symbol_out (abfd, &elfsym->sym,
+			       (outbound_syms
+				+ (elfsym->dest_index
+				   * bed->s->sizeof_sym)),
+			       (outbound_shndx
+				+ (elfsym->destshndx_index
+				   * sizeof (Elf_External_Sym_Shndx))));
+    }
+  free (symstrtab);
+
   *sttp = stt;
-  symstrtab_hdr->sh_size = _bfd_stringtab_size (stt);
+  symstrtab_hdr->sh_size = _bfd_elf_strtab_size (stt);
   symstrtab_hdr->sh_type = SHT_STRTAB;
 
   symstrtab_hdr->sh_flags = 0;

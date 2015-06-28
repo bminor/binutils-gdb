@@ -1,3 +1,20 @@
+2015-06-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/psn.d: Updated.
+	* gas/ia64/xdata-ilp32.d: Likewise.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/mmix/loc-3.d: Updated.
+	* gas/mmix/loc-5.d: Likewise.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18451
+	* gas/elf/elf.exp: Run strtab.
+	* gas/elf/strtab.d: New file.
+	* gas/elf/strtab.s: Likewise.
+
 2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/e6500.s <sync>: Fix invalid test.

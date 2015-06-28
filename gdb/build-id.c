@@ -93,6 +93,7 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
       size_t size = build_id_len;
       char *s;
       char *filename = NULL;
+      struct cleanup *inner;
 
       memcpy (link, debugdir, debugdir_len);
       s = &link[debugdir_len];
@@ -116,7 +117,10 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 	continue;
 
       /* We expect to be silent on the non-existing files.  */
+      inner = make_cleanup (xfree, filename);
       abfd = gdb_bfd_open (filename, gnutarget, -1);
+      do_cleanups (inner);
+
       if (abfd == NULL)
 	continue;
 

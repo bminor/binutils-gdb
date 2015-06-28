@@ -22644,6 +22644,21 @@ to 256 if this variable is not set.  Non-numeric values of @env{GDBHISTSIZE}
 are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is
 either a negative number or the empty string, then the number of commands
 @value{GDBN} keeps in the history list is unlimited.
+
+@cindex remove duplicate history
+@kindex set history remove-duplicates
+@item set history remove-duplicates @var{count}
+@itemx set history remove-duplicates unlimited
+Control the removal of duplicate history entries in the command history list.
+If @var{count} is non-zero, @value{GDBN} will look back at the last @var{count}
+history entries and remove the first entry that is a duplicate of the current
+entry being added to the command history list.  If @var{count} is
+@code{unlimited} then this lookbehind is unbounded.  If @var{count} is 0, then
+removal of duplicate history entries is disabled.
+
+Only history entries added during the current session are considered for
+removal.  This option is set to 0 by default.
+
 @end table
 
 History expansion assigns special meaning to the character @kbd{!}.

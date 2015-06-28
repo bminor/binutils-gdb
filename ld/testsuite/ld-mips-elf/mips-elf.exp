@@ -186,6 +186,15 @@ if { $linux_gnu } {
     }
 }
 
+# Test PIE debug dynamic tags
+if { $linux_gnu } {
+    run_dump_test "pie-o32"
+    if { $has_newabi } {
+	run_dump_test "pie-n32"
+	run_dump_test "pie-n64"
+    }
+}
+
 if $has_newabi {
     if { $embedded_elf } {
 	run_dump_test "elf-rel-got-n32-embed" \

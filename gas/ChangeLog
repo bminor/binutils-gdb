@@ -1,3 +1,13 @@
+2015-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.c (parse_args): Replace COMPRESS_DEBUG_ZLIB with
+	COMPRESS_DEBUG_GNU_ZLIB.
+	* config/tc-i386.c (flag_compress_debug): Likewise.
+
+2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/as.texinfo (.cfi_lsda): Remove the extra @section.
+
 2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (md_assemble): Use ppc_optional_operand_value.

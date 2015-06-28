@@ -698,6 +698,20 @@ show_history_size (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* Variable associated with the "history remove-duplicates" option.
+   The value -1 means unlimited.  */
+static int history_remove_duplicates = 0;
+
+static void
+show_history_remove_duplicates (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("The number of history entries to look back at for "
+		      "duplicates is %s.\n"),
+		    value);
+}
+
 static char *history_filename;
 static void
 show_history_filename (struct ui_file *file, int from_tty,
@@ -897,8 +911,43 @@ static int command_count = 0;
 void
 gdb_add_history (const char *command)
 {
-  add_history (command);
   command_count++;
+
+  if (history_remove_duplicates != 0)
+    {
+      int lookbehind;
+      int lookbehind_threshold;
+
+      /* The lookbehind threshold for finding a duplicate history entry is
+	 bounded by command_count because we can't meaningfully delete
+	 history entries that are already stored in the history file since
+	 the history file is appended to.  */
+      if (history_remove_duplicates == -1
+	  || history_remove_duplicates > command_count)
+	lookbehind_threshold = command_count;
+      else
+	lookbehind_threshold = history_remove_duplicates;
+
+      using_history ();
+      for (lookbehind = 0; lookbehind < lookbehind_threshold; lookbehind++)
+	{
+	  HIST_ENTRY *temp = previous_history ();
+
+	  if (temp == NULL)
+	    break;
+
+	  if (strcmp (temp->line, command) == 0)
+	    {
+	      HIST_ENTRY *prev = remove_history (where_history ());
+	      command_count--;
+	      free_history_entry (prev);
+	      break;
+	    }
+	}
+      using_history ();
+    }
+
+  add_history (command);
 }
 
 /* Safely append new history entries to the history file in a corruption-free
@@ -1879,6 +1928,21 @@ variable \"GDBHISTSIZE\", or to 256 if this variable is not set."),
 			    set_history_size_command,
 			    show_history_size,
 			    &sethistlist, &showhistlist);
+
+  add_setshow_zuinteger_unlimited_cmd ("remove-duplicates", no_class,
+				       &history_remove_duplicates, _("\
+Set how far back in history to look for and remove duplicate entries."), _("\
+Show how far back in history to look for and remove duplicate entries."), _("\
+If set to a nonzero value N, GDB will look back at the last N history entries\n\
+and remove the first history entry that is a duplicate of the most recent\n\
+entry, each time a new history entry is added.\n\
+If set to \"unlimited\", this lookbehind is unbounded.\n\
+Only history entries added during this session are considered for removal.\n\
+If set to 0, removal of duplicate history entries is disabled.\n\
+By default this option is set to 0."),
+			   NULL,
+			   show_history_remove_duplicates,
+			   &sethistlist, &showhistlist);
 
   add_setshow_filename_cmd ("filename", no_class, &history_filename, _("\
 Set the filename in which to record the command history"), _("\
