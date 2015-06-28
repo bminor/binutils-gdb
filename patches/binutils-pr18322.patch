@@ -1,4 +1,4 @@
-From baede3ac6a283384143c7109d9235ca97116076c Mon Sep 17 00:00:00 2001
+From abf939b601c7316f48524d9558170fff5494f902 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sun, 22 Mar 2015 11:59:53 -0700
 Subject: [PATCH 2/2] Extend --compress-debug-sections in gold
@@ -47,15 +47,15 @@ in gold.
 	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
 	* testsuite/Makefile.in: Regenerated.
 ---
- gold/compressed_output.cc  |  91 +++++++++++++++++++++++++----
+ gold/compressed_output.cc  |  89 ++++++++++++++++++++++++----
  gold/options.h             |   4 +-
  gold/output.h              |   5 ++
  gold/testsuite/Makefile.am |  83 ++++++++++++++++++++++++++-
  gold/testsuite/Makefile.in | 140 ++++++++++++++++++++++++++++++++++++++++++++-
- 5 files changed, 309 insertions(+), 14 deletions(-)
+ 5 files changed, 307 insertions(+), 14 deletions(-)
 
 diff --git a/gold/compressed_output.cc b/gold/compressed_output.cc
-index 02d7821..4a89318 100644
+index 02d7821..2630330 100644
 --- a/gold/compressed_output.cc
 +++ b/gold/compressed_output.cc
 @@ -39,12 +39,12 @@ namespace gold
@@ -83,17 +83,17 @@ index 02d7821..4a89318 100644
        *compressed_size += header_size;
        return true;
      }
-@@ -233,14 +230,88 @@ Output_compressed_section::set_final_data_size()
+@@ -233,14 +230,86 @@ Output_compressed_section::set_final_data_size()
    this->write_to_postprocessing_buffer();
  
    bool success = false;
-+  enum { none, zlib, gnu_zlib, gabi_zlib } compress;
++  enum { none, gnu_zlib, gabi_zlib } compress;
 +  int compression_header_size = 12;
 +  const int size = parameters->target().get_size();
    if (strcmp(this->options_->compress_debug_sections(), "zlib") == 0)
 -    success = zlib_compress(uncompressed_data, uncompressed_size,
 -                            &this->data_, &compressed_size);
-+    compress = zlib;
++    compress = gnu_zlib;
 +  else if (strcmp(this->options_->compress_debug_sections(), "zlib-gnu") == 0)
 +    compress = gnu_zlib;
 +  else if (strcmp(this->options_->compress_debug_sections(), "zlib-gabi") == 0)
@@ -170,8 +170,6 @@ index 02d7821..4a89318 100644
 +	  // This converts .debug_foo to .zdebug_foo
 +	  this->new_section_name_ = std::string(".z") + (this->name() + 1);
 +	  this->set_name(this->new_section_name_.c_str());
-+	  // Clear the SHF_COMPRESSED bit.
-+	  flags &= ~elfcpp::SHF_COMPRESSED;
 +	}
 +      this->set_flags(flags);
        this->set_data_size(compressed_size);
@@ -540,5 +538,5 @@ index 1131512..1c336c6 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@		gcctestdir/ld
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 -- 
-1.9.3
+2.1.0
 
