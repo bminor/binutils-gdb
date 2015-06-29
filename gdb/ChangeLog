@@ -1,3 +1,13 @@
+2015-06-29  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18127
+	* infcall.c (run_inferior_call): On infcall success, if the thread
+	was marked stopped before, reset it back to stopped.
+	* infrun.c (resume): Don't suppress the set_running calls when
+	doing an infcall.
+	(normal_stop): Only discard the finish_thread_state cleanup if the
+	infcall succeeded.
+
 2015-06-29  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* MAINTAINERS (Write After Approval): Update my email address.

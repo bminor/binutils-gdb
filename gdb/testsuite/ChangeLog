@@ -1,3 +1,9 @@
+2015-06-29  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18127
+	* gdb.threads/hand-call-new-thread.c: New file.
+	* gdb.threads/hand-call-new-thread.c: New file.
+
 2015-06-26  Keith Seitz  <keiths@redhat.com>
 	    Doug Evans  <dje@google.com>
 
