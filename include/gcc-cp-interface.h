@@ -34,14 +34,14 @@ extern "C" {
 struct gcc_cp_context;
 
 /*
- * Definitions and declarations for the C front end.
+ * Definitions and declarations for the C++ front end.
  */
 
-/* Defined versions of the C front-end API.  */
+/* Defined versions of the C++ front-end API.  */
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 1
+  GCC_CP_FE_VERSION_0 = 0xffffffff-1
 };
 
 /* Qualifiers.  */
@@ -51,6 +51,32 @@ enum gcc_cp_qualifiers
   GCC_CP_QUALIFIER_CONST = 1,
   GCC_CP_QUALIFIER_VOLATILE = 2,
   GCC_CP_QUALIFIER_RESTRICT = 4
+};
+
+/* Ref qualifiers.  */
+
+enum gcc_cp_ref_qualifiers {
+  GCC_CP_REF_QUAL_NONE = 0,
+  GCC_CP_REF_QUAL_LVALUE = 1,
+  GCC_CP_REF_QUAL_RVALUE = 2
+};
+
+/* An array of types used for creating lists of base classes.  */
+
+struct gcc_vbase_array
+{
+  /* Number of elements.  */
+
+  int n_elements;
+
+  /* The base classes.  */
+
+  gcc_type *elements;
+
+  /* Indicate virtual base classes.
+     Take elements[i] as a virtual base class iff virtualp[i].  */
+
+  char /* bool */ *virtualp;
 };
 
 /* This enumerates the kinds of decls that GDB can create.  */
@@ -71,7 +97,14 @@ enum gcc_cp_symbol_kind
 
   /* A label.  */
 
-  GCC_CP_SYMBOL_LABEL
+  GCC_CP_SYMBOL_LABEL,
+
+  /* A virtual member function.  */
+
+  GCC_CP_SYMBOL_VIRTUAL_FUNCTION
+
+  // FIXME: should we have separate symbol kinds for operator
+  // functions, ctors, dtors, vtables, rtti, etc?
 };
 
 /* This enumerates the types of symbols that GCC might request from
@@ -80,11 +113,13 @@ enum gcc_cp_symbol_kind
 enum gcc_cp_oracle_request
 {
   /* An ordinary symbol -- a variable, function, typedef, or enum
-     constant.  */
+     constant.  All namespace-scoped symbols with the requested name
+     should be defined in response to this request.  */
 
   GCC_CP_ORACLE_SYMBOL,
 
-  /* A struct, union, or enum tag.  */
+  /* A struct, union, or enum tag.  All members of the tagged type
+     should be defined in response to this request.  */
 
   GCC_CP_ORACLE_TAG,
 
@@ -100,16 +135,16 @@ enum gcc_cp_oracle_request
    being requested, and IDENTIFIER is the name of the symbol.  */
 
 typedef void gcc_cp_oracle_function (void *datum,
-				      struct gcc_cp_context *context,
-				      enum gcc_cp_oracle_request request,
-				      const char *identifier);
+				     struct gcc_cp_context *context,
+				     enum gcc_cp_oracle_request request,
+				     const char *identifier);
 
 /* The type of the function called by GCC to ask GDB for a symbol's
    address.  This should return 0 if the address is not known.  */
 
 typedef gcc_address gcc_cp_symbol_address_function (void *datum,
-						     struct gcc_cp_context *ctxt,
-						     const char *identifier);
+						    struct gcc_cp_context *ctxt,
+						    const char *identifier);
 
 /* The vtable used by the C front end.  */
 

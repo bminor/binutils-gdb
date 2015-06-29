@@ -19,8 +19,29 @@
 
 
 
-/* Create a new "decl" in GCC.  A decl is a declaration, basically a
-   kind of symbol.
+/* Push namespace NAME as the current binding level, to which
+   newly-introduced decls will be bound.  An empty string identifies
+   the global namespace, whereas NULL identifies an anonymous
+   namespace.  A namespace named NAME is created in the current scope,
+   if needed.  */
+
+GCC_METHOD1 (int, push_namespace,
+	     const char *)	      /* Argument NAME.  */
+
+// FIXME: inline namespaces, anyone?
+
+/* Pop the namespace last entered with push_namespace, restoring the
+   binding level in effect before the matching push_namespace.  */
+
+GCC_METHOD0 (int, pop_namespace)
+
+/* Return the NAMESPACE_DECL, TYPE_DECL or FUNCTION_DECL of the
+   current binding level.  */
+
+GCC_METHOD0 (gcc_decl, get_current_binding_level)
+
+/* Create a new "decl" in GCC, and bind it in the current binding
+   level.  A decl is a declaration, basically a kind of symbol.
 
    NAME is the name of the new symbol.  SYM_KIND is the kind of
    symbol being requested.  SYM_TYPE is the new symbol's C++ type;
@@ -31,36 +52,31 @@
    an address (e.g., functions), ADDRESS is the address.  FILENAME
    and LINE_NUMBER refer to the symbol's source location.  If this
    is not known, FILENAME can be NULL and LINE_NUMBER can be 0.
-   This function returns the new decl.  */
+   This function returns the new decl.
 
-GCC_METHOD7 (gcc_decl, build_decl,
+   Use this function to register typedefs, functions and variables to
+   namespace and local binding levels, and typedefs, member functions
+   (static or not), and static data members to class binding levels.
+   Note that, since access controls are disabled, we have no means to
+   express private, protected and public.
+
+   FIXME: we would benefit from a gcc_decl argument, to be able to
+   introduce friend declarations (what for?  we disable access
+   control), using declarations, using directives and namespace
+   aliases.
+
+   FIXME: How about override and final virtual functions; =delete and
+   =default ctor, dtor and copy-assignment declarations; explicit
+   ctors and conversion operators; thread_local variables; other
+   attributes?  Do we need an extra flags parameter, or just
+   additional gcc_cp_symbol_kinds?  */
+
+GCC_METHOD7 (gcc_decl, new_decl,
 	     const char *,	      /* Argument NAME.  */
-	     enum gcc_cp_symbol_kind,/* Argument SYM_KIND.  */
+	     enum gcc_cp_symbol_kind, /* Argument SYM_KIND.  */
 	     gcc_type,		      /* Argument SYM_TYPE.  */
 	     const char *,	      /* Argument SUBSTITUTION_NAME.  */
 	     gcc_address,	      /* Argument ADDRESS.  */
-	     const char *,	      /* Argument FILENAME.  */
-	     unsigned int)	      /* Argument LINE_NUMBER.  */
-
-/* Insert a GCC decl into the symbol table.  DECL is the decl to
-   insert.  IS_GLOBAL is true if this is an outermost binding, and
-   false if it is a possibly-shadowing binding.  */
-
-GCC_METHOD2 (int /* bool */, bind,
-	     gcc_decl,		   /* Argument DECL.  */
-	     int /* bool */)       /* Argument IS_GLOBAL.  */
-/* FIXME: do we want a namespace instead of IS_GLOBAL?  */
-
-/* Insert a tagged type into the symbol table.  NAME is the tag name
-   of the type and TAGGED_TYPE is the type itself.  TAGGED_TYPE must
-   be either a struct, union, or enum type, as these are the only
-   types that have tags.  FILENAME and LINE_NUMBER refer to the type's
-   source location.  If this is not known, FILENAME can be NULL and
-   LINE_NUMBER can be 0.  */
-
-GCC_METHOD4 (int /* bool */, tagbind,
-	     const char *,	      /* Argument NAME.  */
-	     gcc_type,		      /* Argument TAGGED_TYPE.  */
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
@@ -69,44 +85,70 @@ GCC_METHOD4 (int /* bool */, tagbind,
 GCC_METHOD1 (gcc_type, build_pointer_type,
 	     gcc_type)			/* Argument BASE_TYPE.  */
 
-/* Create a new 'struct' type.  Initially it has no fields.  */
+// FIXME: we need reference types and pointer-to-member types.
 
-GCC_METHOD0 (gcc_type, build_record_type)
+/* Create a new 'class' (or 'struct') type, record it in the current
+   binding level, and enter its own binding level.  Initially it has
+   no fields.
 
-/* Create a new 'union' type.  Initially it has no fields.  */
+   NAME is the class name.  BASE_CLASSES indicate the base classes of
+   class NAME.  FILENAME and LINE_NUMBER specify the source location
+   associated with the class.  */
 
-GCC_METHOD0 (gcc_type, build_union_type)
+GCC_METHOD4 (gcc_type, start_new_class_type,
+	     const char *,	      /* Argument NAME.  */
+	     const struct gcc_vbase_array *,/* Argument BASE_CLASSES.  */
+	     const char *,	      /* Argument FILENAME.  */
+	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
-/* Add a field to a struct or union type.  FIELD_NAME is the field's
-   name.  FIELD_TYPE is the type of the field.  BITSIZE and BITPOS
-   indicate where in the struct the field occurs.  */
+// FIXME: do we need a flag to distinguish structs and classes?  This
+// would be beneficial at least for error messages.
 
-GCC_METHOD5 (int /* bool */, build_add_field,
+/* Create a new 'union' type, record it in the current binding level,
+   and enter its own binding level.  Initially it has no fields.
+
+   NAME is the union name.  FILENAME and LINE_NUMBER specify its
+   source location.  */
+
+GCC_METHOD3 (gcc_type, start_new_union_type,
+	     const char *,	      /* Argument NAME.  */
+	     const char *,	      /* Argument FILENAME.  */
+	     unsigned int)	      /* Argument LINE_NUMBER.  */
+
+/* Add a non-static data member to a struct or union type.  FIELD_NAME
+   is the field's name.  FIELD_TYPE is the type of the field.  BITSIZE
+   and BITPOS indicate where in the struct the field occurs.
+
+   FIXME: how about mutable data members?  */
+
+GCC_METHOD5 (int /* bool */, new_field,
 	     gcc_type,			   /* Argument RECORD_OR_UNION_TYPE. */
 	     const char *,		   /* Argument FIELD_NAME.  */
 	     gcc_type,			   /* Argument FIELD_TYPE.  */
 	     unsigned long,		   /* Argument BITSIZE.  */
 	     unsigned long)		   /* Argument BITPOS.  */
-/* FIXME: can we use the above for member functions, particularly
-   virtual ones?  */
 
-/* FIXME: we need some means to add base classes.  */
-
-/* FIXME: we need some means to introduce namespaces.  */
-
-/* After all the fields have been added to a struct or union, the
-   struct or union type must be "finished".  This does some final
-   cleanups in GCC.  */
+/* After all the fields have been added to a struct, class or union,
+   the struct or union type must be "finished".  This does some final
+   cleanups in GCC, and pops to the binding level that was in effect
+   before the matching build_class_type or build_union_type.  */
 
 GCC_METHOD2 (int /* bool */, finish_record_or_union,
 	     gcc_type,			   /* Argument RECORD_OR_UNION_TYPE. */
 	     unsigned long)		   /* Argument SIZE_IN_BYTES.  */
 
-/* Create a new 'enum' type.  The new type initially has no
-   associated constants.  */
+/* Create a new 'enum' type, and record it in the current binding
+   level.  The new type initially has no associated constants.
 
-GCC_METHOD1 (gcc_type, build_enum_type,
-	     gcc_type)			    /* Argument UNDERLYING_INT_TYPE. */
+   NAME is the enum name.  FILENAME and LINE_NUMBER specify its source
+   location.  */
+
+GCC_METHOD5 (gcc_type, start_new_enum_type,
+	     const char *,	      /* Argument NAME.  */
+	     gcc_type,		      /* Argument UNDERLYING_INT_TYPE. */
+	     int /* bool */,	      /* Argument SCOPED_ENUM_P.  */
+	     const char *,	      /* Argument FILENAME.  */
+	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
 /* Add a new constant to an enum type.  NAME is the constant's
    name and VALUE is its value.  */
@@ -129,13 +171,25 @@ GCC_METHOD1 (int /* bool */, finish_enum_type,
 
 GCC_METHOD3 (gcc_type, build_function_type,
 	     gcc_type,			   /* Argument RETURN_TYPE.  */
-	     const struct gcc_type_array *, /* Argument ARGUMENT_TYPES.  */
-	     int /* bool */)               /* Argument IS_VARARGS.  */
+	     const struct gcc_type_array *,/* Argument ARGUMENT_TYPES.  */
+	     int /* bool */)		   /* Argument IS_VARARGS.  */
+
+/* Create a new non-static member function type.  FUNC_TYPE is the
+   method prototype, without the implicit THIS pointer, added as a
+   pointer to the QUALS-qualified CLASS_TYPE.  */
+
+GCC_METHOD4 (gcc_type, build_method_type,
+	     gcc_type,			   /* Argument CLASS_TYPE.  */
+	     gcc_type, 			   /* Argument FUNC_TYPE.  */
+	     enum gcc_cp_qualifiers,	   /* Argument QUALS.  */
+	     enum gcc_cp_ref_qualifiers)   /* Argument RQUALS.  */
+
+// FIXME: add a type-variant builder to add exception type specifiers.
 
 /* Return an integer type with the given properties.  */
 
 GCC_METHOD2 (gcc_type, int_type,
-	     int /* bool */,               /* Argument IS_UNSIGNED.  */
+	     int /* bool */,		   /* Argument IS_UNSIGNED.  */
 	     unsigned long)                /* Argument SIZE_IN_BYTES.  */
 
 /* Return a floating point type with the given properties.  */

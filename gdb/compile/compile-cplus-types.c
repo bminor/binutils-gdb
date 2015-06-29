@@ -167,14 +167,33 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
   int i;
   gcc_type result;
 
+  // FIXME: drop any namespaces and enclosing class names, if any. -lxo
+  const char *name = type->main_type->name;
+
+  // FIXME: how do we get these? -lxo
+  const char *filename = NULL;
+  unsigned short line = 0;
+
+  CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
+  // FIXME: push (and, after the call, pop) any other namespaces, if
+  // any, and drop the above when defining a nested or local class.
+  // drop any namespace and class names from before the symbol name,
+  // and any function signatures from after it.  -lxo
+
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-    result = CP_CTX (context)->cp_ops->build_record_type (CP_CTX (context));
+    {
+      struct gcc_vbase_array *bases = NULL;
+      // FIXME: build base classes array.  -lxo
+      result = CP_CTX (context)->cp_ops->start_new_class_type
+	(CP_CTX (context), name, bases, filename, line);
+    }
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
-      result = CP_CTX (context)->cp_ops->build_union_type (CP_CTX (context));
+      result = CP_CTX (context)->cp_ops->start_new_union_type
+	(CP_CTX (context), name, filename, line);
     }
   insert_type (context, type, result);
 
@@ -186,15 +205,18 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
       field_type = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i));
       if (bitsize == 0)
 	bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
-      CP_CTX (context)->cp_ops->build_add_field (CP_CTX (context), result,
-						 TYPE_FIELD_NAME (type, i),
-						 field_type,
-						 bitsize,
-						 TYPE_FIELD_BITPOS (type, i));
+      CP_CTX (context)->cp_ops->new_field (CP_CTX (context), result,
+					   TYPE_FIELD_NAME (type, i),
+					   field_type,
+					   bitsize,
+					   TYPE_FIELD_BITPOS (type, i));
     }
+
+  // FIXME: define member functions and static data members.  -lxo
 
   CP_CTX (context)->cp_ops->finish_record_or_union (CP_CTX (context), result,
 						    TYPE_LENGTH (type));
+  CP_CTX (context)->cp_ops->pop_namespace (CP_CTX (context));
   return result;
 }
 
@@ -207,11 +229,26 @@ convert_enum (struct compile_cplus_instance *context, struct type *type)
   int i;
   struct gcc_cp_context *ctx = CP_CTX (context);
 
+  // FIXME: drop any namespaces and enclosing class names, if any. -lxo
+  const char *name = type->main_type->name;
+
+  // FIXME: how do we get these? -lxo
+  _Bool scoped_enum_p = FALSE;
+  const char *filename = NULL;
+  unsigned short line = 0;
+
   int_type = ctx->cp_ops->int_type (ctx,
 				   TYPE_UNSIGNED (type),
 				   TYPE_LENGTH (type));
 
-  result = ctx->cp_ops->build_enum_type (ctx, int_type);
+  CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
+  // FIXME: push (and, after the call, pop) any other namespaces, if
+  // any, and drop the above when defining a nested or local class.
+  // drop any namespace and class names from before the symbol name,
+  // and any function signatures from after it.  -lxo
+
+  result = ctx->cp_ops->start_new_enum_type (ctx, name, int_type,
+					     scoped_enum_p, filename, line);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
       ctx->cp_ops->build_add_enum_constant (ctx,
@@ -221,6 +258,8 @@ convert_enum (struct compile_cplus_instance *context, struct type *type)
     }
 
   ctx->cp_ops->finish_enum_type (ctx, result);
+
+  CP_CTX (context)->cp_ops->pop_namespace (CP_CTX (context));
 
   return result;
 }

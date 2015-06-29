@@ -161,10 +161,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 
   if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN)
     {
-      /* Binding a tag, so we don't need to build a decl.  */
-      CP_CTX (context)->cp_ops->tagbind (CP_CTX (context),
-					 SYMBOL_NATURAL_NAME (sym),
-					 sym_type, filename, line);
+      /* Nothing to do.  */
     }
   else
     {
@@ -285,14 +282,27 @@ convert_one_symbol (struct compile_cplus_instance *context,
       if (context->base.scope != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  decl = CP_CTX (context)->cp_ops->build_decl (CP_CTX (context),
-						       SYMBOL_NATURAL_NAME (sym),
-						       kind,
-						       sym_type,
-						       symbol_name, addr,
-						       filename, line);
-
-	  CP_CTX (context)->cp_ops->bind (CP_CTX (context), decl, is_global);
+	  if (is_global)
+	    {
+	      CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
+	      // FIXME: push (and, after the call, pop) any other
+	      // namespaces, if any, and drop the above when defining
+	      // a class member.
+	    }
+	  // FIXME: drop any namespace and class names from before
+	  // the symbol name, and any function signatures from
+	  // after it.  -lxo
+	  decl = CP_CTX (context)->cp_ops->new_decl (CP_CTX (context),
+						     SYMBOL_NATURAL_NAME (sym),
+						     kind,
+						     sym_type,
+						     symbol_name, addr,
+						     filename, line);
+	  if (is_global)
+	    {
+	      // FIXME: pop other namespaces, if any.
+	      CP_CTX (context)->cp_ops->pop_namespace (CP_CTX (context));
+	    }
 	}
 
       xfree (symbol_name);
@@ -407,11 +417,16 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
     }
 
   sym_type = convert_cplus_type (context, type);
-  decl = CP_CTX (context)->cp_ops->build_decl (CP_CTX (context),
-					      MSYMBOL_NATURAL_NAME (msym),
-					      kind, sym_type, NULL, addr,
-					      NULL, 0);
-  CP_CTX (context)->cp_ops->bind (CP_CTX (context), decl, 1 /* is_global */);
+  CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
+  // FIXME: push (and, after the call, pop) any other namespaces, if
+  // any, and drop the above when defining a class member.  drop any
+  // namespace and class names from before the symbol name, and any
+  // function signatures from after it.  -lxo
+  decl = CP_CTX (context)->cp_ops->new_decl (CP_CTX (context),
+					     MSYMBOL_NATURAL_NAME (msym),
+					     kind, sym_type, NULL, addr,
+					     NULL, 0);
+  CP_CTX (context)->cp_ops->pop_namespace (CP_CTX (context));
 }
 
 /* See compile-internal.h.  */
