@@ -187,7 +187,7 @@ alloc_type (struct objfile *objfile)
 
 /* Allocate a new GDBARCH-associated type structure and fill it
    with some defaults.  Space for the type structure is allocated
-   on the heap.  */
+   on the obstack associated with GDBARCH.  */
 
 struct type *
 alloc_type_arch (struct gdbarch *gdbarch)
@@ -198,8 +198,8 @@ alloc_type_arch (struct gdbarch *gdbarch)
 
   /* Alloc the structure and start off with all fields zeroed.  */
 
-  type = XCNEW (struct type);
-  TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
+  type = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct type);
+  TYPE_MAIN_TYPE (type) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct main_type);
 
   TYPE_OBJFILE_OWNED (type) = 0;
   TYPE_OWNER (type).gdbarch = gdbarch;

@@ -1,3 +1,9 @@
+2015-08-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdbtypes.c (alloc_type_arch): Allocate the type on the given
+	gdbarch obstack instead of on the heap.  Update commentary
+	accordingly.
+
 2015-08-28  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.10 released.
