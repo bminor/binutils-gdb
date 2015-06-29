@@ -952,13 +952,13 @@ aarch64_supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
+    case Z_PACKET_SW_BP:
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
       return 1;
     default:
-      /* Leave the handling of sw breakpoints with the gdb client.  */
       return 0;
     }
 }
