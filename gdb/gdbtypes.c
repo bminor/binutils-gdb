@@ -4549,7 +4549,7 @@ arch_type (struct gdbarch *gdbarch,
   TYPE_LENGTH (type) = length;
 
   if (name)
-    TYPE_NAME (type) = xstrdup (name);
+    TYPE_NAME (type) = gdbarch_obstack_strdup (gdbarch, name);
 
   return type;
 }
