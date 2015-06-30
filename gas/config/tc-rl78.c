@@ -1024,12 +1024,12 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
   /* We used a new frag for this opcode, so the opcode address should
      be the frag address.  */
   mypc = fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal);
-  tprintf("\033[32mmypc: 0x%x\033[0m\n", (int)mypc);
+  tprintf ("\033[32mmypc: 0x%x\033[0m\n", (int)mypc);
 
   /* Try to get the target address.  If we fail here, we just use the
      largest format.  */
   if (rl78_frag_fix_value (fragP, segment, 0, & addr0,
-			 fragP->tc_frag_data->relax[ri].type != RL78_RELAX_BRANCH, 0))
+			   fragP->tc_frag_data->relax[ri].type != RL78_RELAX_BRANCH, 0))
     {
       /* We don't know the target address.  */
       keep_reloc = 1;
@@ -1387,6 +1387,7 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
 		      val);
       /* Fall through.  */
     case BFD_RELOC_8:
+    case BFD_RELOC_RL78_SADDR: /* We need to store the 8 LSB, but this works.  */
       op[0] = val;
       break;
 
