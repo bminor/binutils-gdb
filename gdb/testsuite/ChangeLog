@@ -1,3 +1,8 @@
+2015-06-30  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* lib/gdb.exp (test_class_help): Remove the unneeded escaping of
+	'[' and ']' characters.
+
 2015-06-30  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/demangle.exp: Sync tests from libiberty testsuite.
