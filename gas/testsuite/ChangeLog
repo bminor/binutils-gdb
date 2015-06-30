@@ -1,3 +1,21 @@
+2015-06-30  Amit Pawar  <Amit.Pawar@amd.com>
+
+	* gas/i386/i386.exp: Add new mwaitx test cases.
+	* gas/i386/mwaitx.s: New.
+	* gas/i386/mwaitx-bdver4.d: New.
+	* gas/i386/x86-64-mwaitx.s: New.
+	* gas/i386/x86-64-mwaitx-bdver4.d: New.
+	* gas/i386/mwaitx-reg.s: New.
+	* gas/i386/mwaitx-reg.l: New.
+	* gas/i386/x86-64-mwaitx-reg.l: New.
+	* gas/i386/x86-64-mwaitx-reg.s: New.
+	* gas/i386/arch-13.s: Updated.
+	* gas/i386/arch-13.d: Updated.
+	* gas/i386/arch-13-znver1.d: Updated.
+	* gas/i386/x86-64-arch-3.s: Updated.
+	* gas/i386/x86-64-arch-3.d: Updated.
+	* gas/i386/x86-64-arch-3-znver1.d: Updated.
+
 2015-06-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/psn.d: Updated.

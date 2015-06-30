@@ -1,3 +1,16 @@
+2015-06-30  Amit Pawar  <Amit.Pawar@amd.com>
+
+	* i386-dis.c (OP_Mwaitx): New.
+	(rm_table): Add monitorx/mwaitx.
+	* i386-gen.c (cpu_flag_init): Add CpuMWAITX to CPU_BDVER4_FLAGS
+	and CPU_ZNVER1_FLAGS.  Add CPU_MWAITX_FLAGS.
+	(operand_type_init): Add CpuMWAITX.
+	* i386-opc.h (CpuMWAITX): New.
+	(i386_cpu_flags): Add cpumwaitx.
+	* i386-opc.tbl: Add monitorx and mwaitx.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (insert_ls): Test for invalid LS operands.

@@ -102,6 +102,7 @@ static void VPCMP_Fixup (int, int);
 static void OP_0f07 (int, int);
 static void OP_Monitor (int, int);
 static void OP_Mwait (int, int);
+static void OP_Mwaitx (int, int);
 static void NOP_Fixup1 (int, int);
 static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
@@ -12072,8 +12073,8 @@ static const struct dis386 rm_table[][8] = {
     /* RM_0F01_REG_7 */
     { "swapgs",		{ Skip_MODRM }, 0  },
     { "rdtscp",		{ Skip_MODRM }, 0  },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
+    { "mwaitx",		{ { OP_Mwaitx,  0 } }, 0  },
     { "clzero",		{ Skip_MODRM }, 0  },
   },
   {
@@ -16449,6 +16450,25 @@ CMP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       oappend_maybe_intel (scratchbuf);
       scratchbuf[0] = '\0';
     }
+}
+
+static void
+OP_Mwaitx (int bytemode ATTRIBUTE_UNUSED,
+	  int sizeflag ATTRIBUTE_UNUSED)
+{
+  /* mwaitx %eax,%ecx,%ebx */
+  if (!intel_syntax)
+    {
+      const char **names = (address_mode == mode_64bit
+			    ? names64 : names32);
+      strcpy (op_out[0], names[0]);
+      strcpy (op_out[1], names[1]);
+      strcpy (op_out[2], names[3]);
+      two_source_ops = 1;
+    }
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
 }
 
 static void
