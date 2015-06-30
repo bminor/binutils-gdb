@@ -1,3 +1,20 @@
+2015-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18570
+	* elf-attrs.c (obj_attr_size): Use an unsigned int type for the tag.
+	(write_obj_attribute): Likewise.
+	(elf_new_obj_attr): Likewise.
+	(bfd_elf_get_obj_attr_int): Likewise.
+	(bfd_elf_add_obj_attr_int): Likewise.
+	(bfd_elf_add_obj_attr_string): Likewise.
+	(bfd_elf_add_obj_attr_int_string): Likewise.
+	(gnu_obj_attrs_arg_type): Likewise.
+	(_bfd_elf_obj_attrs_arg_type): Likewise.
+	(_bfd_elf_parse_attributes): Likewise.
+	(_bfd_elf_merge_unknown_attribute_list): Likewise.
+	* elf-bfd.h (struct obj_attribute_list): Likewise.
+	Update prototypes.
+
 2015-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in.h (compressed_debug_section_type): Remove
