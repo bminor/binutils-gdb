@@ -387,6 +387,7 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
   int saved_sync_execution = sync_execution;
+  int was_running = call_thread->state == THREAD_RUNNING;
 
   /* Infcalls run synchronously, in the foreground.  */
   if (target_can_async_p ())
@@ -432,6 +433,26 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   /* At this point the current thread may have changed.  Refresh
      CALL_THREAD as it could be invalid if its thread has exited.  */
   call_thread = find_thread_ptid (call_thread_ptid);
+
+  /* If the infcall does NOT succeed, normal_stop will have already
+     finished the thread states.  However, on success, normal_stop
+     defers here, so that we can set back the thread states to what
+     they were before the call.  Note that we must also finish the
+     state of new threads that might have spawned while the call was
+     running.  The main cases to handle are:
+
+     - "(gdb) print foo ()", or any other command that evaluates an
+     expression at the prompt.  (The thread was marked stopped before.)
+
+     - "(gdb) break foo if return_false()" or similar cases where we
+     do an infcall while handling an event (while the thread is still
+     marked running).  In this example, whether the condition
+     evaluates true and thus we'll present a user-visible stop is
+     decided elsewhere.  */
+  if (!was_running
+      && ptid_equal (call_thread_ptid, inferior_ptid)
+      && stop_stack_dummy == STOP_STACK_DUMMY)
+    finish_thread_state (user_visible_resume_ptid (0));
 
   enable_watchpoints_after_interactive_call_stop ();
 

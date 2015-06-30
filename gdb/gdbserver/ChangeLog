@@ -1,3 +1,15 @@
+2015-06-29  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* linux-aarch64-low.c (aarch64_supports_z_point_type): Enable for
+	Z_PACKET_SW_BP.
+
+2015-06-29  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* linux-aarch64-low.c: Remove comment about endianness.
+	(aarch64_breakpoint): Change type to gdb_byte[].  Set to "brk #0".
+	(aarch64_breakpoint_at): Change type of insn to gdb_byte[].  Use
+	memcmp.
+
 2015-06-24  Gary Benson  <gbenson@redhat.com>
 
 	* linux-i386-ipa.c (stdint.h): Do not include.

@@ -2264,11 +2264,8 @@ resume (enum gdb_signal sig)
 	     requests finish.  The thread is not executing at this
 	     point, and the call to set_executing will be made later.
 	     But we need to call set_running here, since from the
-	     user/frontend's point of view, threads were set running.
-	     Unless we're calling an inferior function, as in that
-	     case we pretend the inferior doesn't run at all.  */
-	  if (!tp->control.in_infcall)
-	    set_running (user_visible_resume_ptid (user_step), 1);
+	     user/frontend's point of view, threads were set running.  */
+	  set_running (user_visible_resume_ptid (user_step), 1);
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
@@ -2346,10 +2343,8 @@ resume (enum gdb_signal sig)
   /* Even if RESUME_PTID is a wildcard, and we end up resuming less
      (e.g., we might need to step over a breakpoint), from the
      user/frontend's point of view, all threads in RESUME_PTID are now
-     running.  Unless we're calling an inferior function, as in that
-     case pretend we inferior doesn't run at all.  */
-  if (!tp->control.in_infcall)
-    set_running (resume_ptid, 1);
+     running.  */
+  set_running (resume_ptid, 1);
 
   /* Maybe resume a single thread after all.  */
   if ((step || thread_has_single_step_breakpoints_set (tp))
@@ -6664,15 +6659,15 @@ normal_stop (void)
   if (has_stack_frames () && !stop_stack_dummy)
     set_current_sal_from_frame (get_current_frame ());
 
-  /* Let the user/frontend see the threads as stopped, but do nothing
-     if the thread was running an infcall.  We may be e.g., evaluating
-     a breakpoint condition.  In that case, the thread had state
-     THREAD_RUNNING before the infcall, and shall remain set to
-     running, all without informing the user/frontend about state
-     transition changes.  If this is actually a call command, then the
-     thread was originally already stopped, so there's no state to
-     finish either.  */
-  if (target_has_execution && inferior_thread ()->control.in_infcall)
+  /* Let the user/frontend see the threads as stopped, but defer to
+     call_function_by_hand if the thread finished an infcall
+     successfully.  We may be e.g., evaluating a breakpoint condition.
+     In that case, the thread had state THREAD_RUNNING before the
+     infcall, and shall remain marked running, all without informing
+     the user/frontend about state transition changes.  */
+  if (target_has_execution
+      && inferior_thread ()->control.in_infcall
+      && stop_stack_dummy == STOP_STACK_DUMMY)
     discard_cleanups (old_chain);
   else
     do_cleanups (old_chain);

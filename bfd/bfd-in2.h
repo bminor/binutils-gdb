@@ -4584,6 +4584,7 @@ number for the SBIC, SBIS, SBI and CBI instructions  */
   BFD_RELOC_RL78_HI8,
   BFD_RELOC_RL78_LO16,
   BFD_RELOC_RL78_CODE,
+  BFD_RELOC_RL78_SADDR,
 
 /* Renesas RX Relocations.  */
   BFD_RELOC_RX_NEG8,

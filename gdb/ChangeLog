@@ -1,3 +1,30 @@
+2015-06-30  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/18605
+	* arm-tdep.c (arm_get_next_pc_raw): Break for media
+	instructions.
+
+2015-06-29  Kevin Buettner  <kevinb@redhat.com>
+
+        * rx-tdep.c (RX_PSW_REGNUM): New enum constant.
+        (rx_dwarf_reg_to_regnum): New function.
+        (rx_gdbarch_init): Register rx_dwarf_reg_to_regnum.  Use dwarf2
+        unwinding.
+
+2015-06-29  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18127
+	* infcall.c (run_inferior_call): On infcall success, if the thread
+	was marked stopped before, reset it back to stopped.
+	* infrun.c (resume): Don't suppress the set_running calls when
+	doing an infcall.
+	(normal_stop): Only discard the finish_thread_state cleanup if the
+	infcall succeeded.
+
+2015-06-29  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* MAINTAINERS (Write After Approval): Update my email address.
+
 2015-06-26  Keith Seitz  <keiths@redhat.com>
 	    Doug Evans  <dje@google.com>
 

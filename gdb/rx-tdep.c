@@ -45,6 +45,7 @@ enum
   RX_R4_REGNUM = 4,
   RX_FP_REGNUM = 6,
   RX_R15_REGNUM = 15,
+  RX_PSW_REGNUM = 18,
   RX_PC_REGNUM = 19,
   RX_ACC_REGNUM = 25,
   RX_NUM_REGS = 26
@@ -764,6 +765,23 @@ rx_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
   return breakpoint;
 }
 
+/* Implement the dwarf_reg_to_regnum" gdbarch method.  */
+
+static int
+rx_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+{
+  if (0 <= reg && reg <= 15)
+    return reg;
+  else if (reg == 16)
+    return RX_PSW_REGNUM;
+  else if (reg == 17)
+    return RX_PC_REGNUM;
+  else
+    internal_error (__FILE__, __LINE__,
+                    _("Undefined dwarf2 register mapping of reg %d"),
+		    reg);
+}
+
 /* Allocate and initialize a gdbarch object.  */
 static struct gdbarch *
 rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -838,12 +856,11 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_double_format (gdbarch, floatformats_ieee_single);
     }
 
+  /* DWARF register mapping.  */
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rx_dwarf_reg_to_regnum);
+
   /* Frame unwinding.  */
-#if 0
-  /* Note: The test results are better with the dwarf2 unwinder disabled,
-     so it's turned off for now.  */
   dwarf2_append_unwinders (gdbarch);
-#endif
   frame_unwind_append_unwinder (gdbarch, &rx_frame_unwind);
 
   /* Methods for saving / extracting a dummy frame's ID.

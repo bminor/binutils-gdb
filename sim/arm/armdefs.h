@@ -49,6 +49,25 @@ typedef unsigned ARMul_CPReads (ARMul_State * state, unsigned reg,
 typedef unsigned ARMul_CPWrites (ARMul_State * state, unsigned reg,
 				 ARMword value);
 
+typedef double ARMdval;	/* FIXME: Must be a 64-bit floating point type.  */
+typedef float  ARMfval;	/* FIXME: Must be a 32-bit floating point type.  */
+
+typedef union
+{
+  ARMword  uword[2];
+  ARMsword sword[2];
+  ARMfval  fval[2];
+  ARMdword dword;
+  ARMdval  dval;
+} ARM_VFP_reg;
+
+#define VFP_fval(N)  (state->VFP_Reg[(N)>> 1].fval[(N) & 1])
+#define VFP_uword(N) (state->VFP_Reg[(N)>> 1].uword[(N) & 1])
+#define VFP_sword(N) (state->VFP_Reg[(N)>> 1].sword[(N) & 1])
+
+#define VFP_dval(N)  (state->VFP_Reg[(N)].dval)
+#define VFP_dword(N) (state->VFP_Reg[(N)].dword)
+
 struct ARMul_State
 {
   ARMword Emulate;		/* to start and stop emulation */
@@ -138,6 +157,9 @@ struct ARMul_State
   unsigned is_iWMMXt;		/* Are we emulating an iWMMXt co-processor ?  */
   unsigned is_ep9312;		/* Are we emulating a Cirrus Maverick co-processor ?  */
   unsigned verbose;		/* Print various messages like the banner */
+
+  ARM_VFP_reg  VFP_Reg[32];     /* Advanced SIMD registers.  */
+  ARMword      FPSCR;		/* Floating Point Status Register.  */
 };
 
 #define ResetPin NresetSig
