@@ -1,3 +1,7 @@
+2015-06-30  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: Sync tests from libiberty testsuite.
+
 2015-06-29  Pedro Alves  <palves@redhat.com>
 
 	PR threads/18127
