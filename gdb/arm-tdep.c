@@ -4927,6 +4927,13 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	case 0x5:		/* data transfer */
 	case 0x6:
 	case 0x7:
+	  if (bits (this_instr, 25, 27) == 0x3 && bit (this_instr, 4) == 1)
+	    {
+	      /* Media instructions and architecturally undefined
+		 instructions.  */
+	      break;
+	    }
+
 	  if (bit (this_instr, 20))
 	    {
 	      /* load */

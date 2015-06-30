@@ -1,3 +1,9 @@
+2015-06-30  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/18605
+	* arm-tdep.c (arm_get_next_pc_raw): Break for media
+	instructions.
+
 2015-06-29  Kevin Buettner  <kevinb@redhat.com>
 
         * rx-tdep.c (RX_PSW_REGNUM): New enum constant.
