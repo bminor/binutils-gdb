@@ -1,6 +1,36 @@
 2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
 
 	PR tui/13378
+	* frame.c (select_frame): Remove reference to
+	deprecated_selected_frame_level_changed_hook.
+	* frame.h (deprecated_selected_frame_level_changed_hook): Remove
+	declaration.
+	* stack.c (deprecated_selected_frame_level_changed_hook):
+	Likewise.
+	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook):
+	Rename to ...
+	(tui_refresh_frame_and_register_information): ... this.  Bail
+	out if there is no stack.  Don't update register information
+	unless registers_too_p is true.
+	(tui_print_frame_info_listing_hook): Rename to ...
+	(tui_dummy_print_frame_info_listing_hook): ... this.
+	(tui_before_prompt): New function.
+	(tui_normal_stop): New function.
+	(tui_before_prompt_observer): New observer.
+	(tui_normal_stop_observer): New observer.
+	(tui_install_hooks): Set
+	deprecated_print_frame_info_listing_hook to
+	tui_dummy_print_frame_info_listing_hook.  Register
+	tui_before_prompt_observer to call tui_before_prompt and
+	tui_normal_stop_observer to call tui_normal_stop.  Remove
+	reference to deprecated_selected_frame_level_changed_hook.
+	(tui_remove_hooks): Detach and unset tui_before_prompt_observer
+	and tui_normal_stop_observer.  Remove reference to
+	deprecated_selected_frame_level_changed_hook.
+
+2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR tui/13378
 	* tui/tui-stack.c (tui_set_locator_info): Change prototype to
 	return an int instead of void.  Return whether the locator
 	window has changed.

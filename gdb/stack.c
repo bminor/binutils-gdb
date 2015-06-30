@@ -52,8 +52,6 @@
 #include "symfile.h"
 #include "extension.h"
 
-void (*deprecated_selected_frame_level_changed_hook) (int);
-
 /* The possible choices of "set print frame-arguments", and the value
    of this setting.  */
 
