@@ -1,3 +1,19 @@
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* config/tc-nios2.c: Adjust includes.
+	(OPTION_MARCH): Define.
+	(md_longopts): Add -march option.
+	(nios2_architecture): New.
+	(nios2_use_arch): New.
+	(md_parse_option): Handle OPTION_MARCH.
+	(md_show_usage): Document -march.
+	(md_begin): Set arch in BFD.
+	(nios2_elf_final_processing): New.
+	* config/tc-nios2.h (elf_tc_final_processing): Define.
+	(nios2_elf_final_processing): New.
+	* doc/c-nios2.texi (-march): Add documentation.
+
 2015-06-30  Amit Pawar  <Amit.Pawar@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add .mwaitx.

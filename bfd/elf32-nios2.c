@@ -2038,6 +2038,72 @@ nios2_elf32_build_stubs (struct bfd_link_info *info)
 }
 
 
+#define is_nios2_elf(bfd) \
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
+   && elf_object_id (bfd) == NIOS2_ELF_DATA)
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+static bfd_boolean
+nios2_elf32_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  flagword old_flags;
+  flagword new_flags;
+
+  if (!is_nios2_elf (ibfd) || !is_nios2_elf (obfd))
+    return TRUE;
+
+  /* Check if we have the same endianness.  */
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+    return FALSE;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
+  if (!elf_flags_init (obfd))
+    {
+      /* First call, no flags set.  */
+      elf_flags_init (obfd) = TRUE;
+      elf_elfheader (obfd)->e_flags = new_flags;
+
+      switch (new_flags)
+	{
+	default:
+	case EF_NIOS2_ARCH_R1:
+	  bfd_default_set_arch_mach (obfd, bfd_arch_nios2, bfd_mach_nios2r1);
+	  break;
+	case EF_NIOS2_ARCH_R2:
+	  if (bfd_big_endian (ibfd))
+	    {
+	      (*_bfd_error_handler)
+		(_("error: %B: Big-endian R2 is not supported."), ibfd);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	  bfd_default_set_arch_mach (obfd, bfd_arch_nios2, bfd_mach_nios2r2);
+	  break;
+	}
+    }
+
+  /* Incompatible flags.  */
+  else if (new_flags != old_flags)
+    {
+      /* So far, the only incompatible flags denote incompatible
+	 architectures.  */
+      (*_bfd_error_handler)
+	(_("error: %B: Conflicting CPU architectures %d/%d"),
+	 ibfd, new_flags, old_flags);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  /* Merge Tag_compatibility attributes and any common GNU ones.  */
+  _bfd_elf_merge_object_attributes (ibfd, obfd);
+
+  return TRUE;
+}
+
+
 /* Implement bfd_elf32_bfd_reloc_type_lookup:
    Given a BFD reloc type, return a howto structure.  */
 static reloc_howto_type *
@@ -3707,6 +3773,29 @@ nios2_elf32_copy_indirect_symbol (struct bfd_link_info *info,
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
+/* Set the right machine number for a NIOS2 ELF file.  */
+
+static bfd_boolean
+nios2_elf32_object_p (bfd *abfd)
+{
+  unsigned long mach;
+
+  mach = elf_elfheader (abfd)->e_flags;
+
+  switch (mach)
+    {
+    default:
+    case EF_NIOS2_ARCH_R1:
+      bfd_default_set_arch_mach (abfd, bfd_arch_nios2, bfd_mach_nios2r1);
+      break;
+    case EF_NIOS2_ARCH_R2:
+      bfd_default_set_arch_mach (abfd, bfd_arch_nios2, bfd_mach_nios2r2);
+      break;
+    }
+
+  return TRUE;
+}
+
 /* Implement elf_backend_check_relocs:
    Look through the relocs for a section during the first phase.  */
 static bfd_boolean
@@ -5256,6 +5345,9 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define bfd_elf32_bfd_link_hash_table_create \
 					  nios2_elf32_link_hash_table_create
 
+#define bfd_elf32_bfd_merge_private_bfd_data \
+					  nios2_elf32_merge_private_bfd_data
+
 /* Relocation table lookup macros.  */
 
 #define bfd_elf32_bfd_reloc_type_lookup	  nios2_elf32_bfd_reloc_type_lookup
@@ -5292,6 +5384,7 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define elf_backend_size_dynamic_sections nios2_elf32_size_dynamic_sections
 #define elf_backend_add_symbol_hook	  nios2_elf_add_symbol_hook
 #define elf_backend_copy_indirect_symbol  nios2_elf32_copy_indirect_symbol
+#define elf_backend_object_p		  nios2_elf32_object_p
 
 #define elf_backend_grok_prstatus	  nios2_grok_prstatus
 #define elf_backend_grok_psinfo		  nios2_grok_psinfo

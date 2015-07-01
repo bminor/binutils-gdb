@@ -93,4 +93,9 @@ END_RELOC_NUMBERS (R_NIOS2_maxext)
 /* Address of _gp.  */
 #define DT_NIOS2_GP 0x70000002
 
+/* Processor specific flags for the Elf header e_flags field.  */
+
+#define EF_NIOS2_ARCH_R1 0x00000000
+#define EF_NIOS2_ARCH_R2 0x00000001
+
 #endif /* _ELF_NIOS2_H */

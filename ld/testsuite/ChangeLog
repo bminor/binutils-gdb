@@ -1,3 +1,12 @@
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* ld-nios2/mixed1a.d: New.
+	* ld-nios2/mixed1a.s: New.
+	* ld-nios2/mixed1b.d: New.
+	* ld-nios2/mixed1b.s: New.
+	* ld-nios2/nios2.exp: Build the new compatibility tests.
+
 2015-06-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-xtensa/tlsbin.rd: Updated.

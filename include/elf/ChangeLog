@@ -1,3 +1,8 @@
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* nios2.h (EF_NIOS2_ARCH_R1, EF_NIOS2_ARCH_R2): Define.
+
 2015-05-29  Roland McGrath  <mcgrathr@google.com>
 
 	* common.h (GNU_ABI_TAG_SYLLABLE): New macro.

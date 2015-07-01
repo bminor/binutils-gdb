@@ -25,6 +25,7 @@
 #include "elf/nios2.h"
 #include "tc-nios2.h"
 #include "bfd.h"
+#include "libbfd.h"
 #include "dwarf2dbg.h"
 #include "subsegs.h"
 #include "safe-ctype.h"
@@ -80,7 +81,9 @@ struct option md_longopts[] = {
 #define OPTION_EB (OPTION_MD_BASE + 3)
   {"EB", no_argument, NULL, OPTION_EB},
 #define OPTION_EL (OPTION_MD_BASE + 4)
-  {"EL", no_argument, NULL, OPTION_EL}
+  {"EL", no_argument, NULL, OPTION_EL},
+#define OPTION_MARCH (OPTION_MD_BASE + 5)
+  {"march", required_argument, NULL, OPTION_MARCH}
 };
 
 size_t md_longopts_size = sizeof (md_longopts);
@@ -211,6 +214,9 @@ static symbolS *nios2_last_label;
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_"	*/
 symbolS *GOT_symbol;
 #endif
+
+/* The processor architecture value, EF_NIOS2_ARCH_R1 by default.  */
+static int nios2_architecture = EF_NIOS2_ARCH_R1;
 
 
 /** Utility routines.  */
@@ -2209,6 +2215,34 @@ output_movia (nios2_insn_infoS *insn)
 
 /** External interfaces.  */
 
+/* Update the selected architecture based on ARCH, giving an error if
+   ARCH is an invalid value.  */
+
+static void
+nios2_use_arch (const char *arch)
+{
+  if (strcmp (arch, "nios2") == 0 || strcmp (arch, "r1") == 0)
+    {
+      nios2_architecture |= EF_NIOS2_ARCH_R1;
+      nios2_opcodes = (struct nios2_opcode *) nios2_r1_opcodes;
+      nios2_num_opcodes = nios2_num_r1_opcodes;
+      nop32 = nop_r1;
+      nop16 = NULL;
+      return;
+    }
+  else if (strcmp (arch, "r2") == 0)
+    {
+      nios2_architecture |= EF_NIOS2_ARCH_R2;
+      nios2_opcodes = (struct nios2_opcode *) nios2_r2_opcodes;
+      nios2_num_opcodes = nios2_num_r2_opcodes;
+      nop32 = nop_r2;
+      nop16 = nop_r2_cdx;
+      return;
+    }
+
+  as_bad (_("unknown architecture '%s'"), arch);
+}
+
 /* The following functions are called by machine-independent parts of
    the assembler. */
 int
@@ -2234,6 +2268,9 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       break;
     case OPTION_EL:
       target_big_endian = 0;
+      break;
+    case OPTION_MARCH:
+      nios2_use_arch (arg);
       break;
     default:
       return 0;
@@ -2262,8 +2299,10 @@ md_show_usage (FILE *stream)
 	   "branches with jmp sequences (default)\n"
 	   "  -no-relax		    do not replace any branches or calls\n"
 	   "  -EB		    force big-endian byte ordering\n"
-	   "  -EL		    force little-endian byte ordering\n");
+	   "  -EL		    force little-endian byte ordering\n"
+	   "  -march=ARCH	    enable instructions from architecture ARCH\n");
 }
+
 
 /* This function is called once, at assembler startup time.
    It should set up all the tables, etc. that the MD part of the
@@ -2273,6 +2312,19 @@ md_begin (void)
 {
   int i;
   const char *inserted;
+
+  switch (nios2_architecture)
+    {
+    default:
+    case EF_NIOS2_ARCH_R1:
+      bfd_default_set_arch_mach (stdoutput, bfd_arch_nios2, bfd_mach_nios2r1);
+      break;
+    case EF_NIOS2_ARCH_R2:
+      if (target_big_endian)
+	as_fatal (_("Big-endian R2 is not supported."));
+      bfd_default_set_arch_mach (stdoutput, bfd_arch_nios2, bfd_mach_nios2r2);
+      break;
+    }
 
   /* Create and fill a hashtable for the Nios II opcodes, registers and 
      arguments.  */
@@ -2747,3 +2799,13 @@ nios2_frame_initial_instructions (void)
 {
   cfi_add_CFA_def_cfa (27, 0);
 }
+
+#ifdef OBJ_ELF
+/* Some special processing for a Nios II ELF file.  */
+
+void
+nios2_elf_final_processing (void)
+{
+  elf_elfheader (stdoutput)->e_flags = nios2_architecture;
+}
+#endif

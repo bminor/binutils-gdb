@@ -1,3 +1,19 @@
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* archures.c (bfd_mach_nios2r1, bfd_mach_nios2r2): New.
+	* bfd-in2.h: Regenerated.
+	* cpu-nios2.c (nios2_compatible): New.
+	(N): Use nios2_compatible instead of bfd_default_compatible.
+	(NIOS2R1_NEXT, NIOS2R2_NEXT): Define.
+	(arch_info_struct): New.
+	(bfd_nios2_arch): Chain to NIOS2R1_NEXT.
+	* elf32-nios2.c (is_nios2_elf): New.
+	(nios2_elf32_merge_private_bfd_data): New.
+	(nios2_elf32_object_p): New.
+	(bfd_elf32_bfd_merge_private_bfd_data): Define.
+	(elf_backend_object_p): Define.
+
 2015-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Refactor.
