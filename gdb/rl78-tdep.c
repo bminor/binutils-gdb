@@ -222,7 +222,8 @@ struct gdbarch_tdep
 	      *rl78_uint32,
 	      *rl78_int32,
 	      *rl78_data_pointer,
-	      *rl78_code_pointer;
+	      *rl78_code_pointer,
+	      *rl78_psw_type;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -271,6 +272,8 @@ rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
     return tdep->rl78_code_pointer;
   else if (reg_nr == RL78_RAW_PC_REGNUM)
     return tdep->rl78_uint32;
+  else if (reg_nr == RL78_PSW_REGNUM)
+    return (tdep->rl78_psw_type);
   else if (reg_nr <= RL78_MEM_REGNUM
            || (RL78_X_REGNUM <= reg_nr && reg_nr <= RL78_H_REGNUM)
 	   || (RL78_BANK0_R0_REGNUM <= reg_nr
@@ -1417,6 +1420,16 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                  xstrdup ("rl78_code_addr_t"));
   TYPE_TARGET_TYPE (tdep->rl78_code_pointer) = tdep->rl78_void;
   TYPE_UNSIGNED (tdep->rl78_code_pointer) = 1;
+
+  tdep->rl78_psw_type = arch_flags_type (gdbarch, "builtin_type_rl78_psw", 1);
+  append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");
+  append_flags_type_flag (tdep->rl78_psw_type, 1, "ISP0");
+  append_flags_type_flag (tdep->rl78_psw_type, 2, "ISP1");
+  append_flags_type_flag (tdep->rl78_psw_type, 3, "RBS0");
+  append_flags_type_flag (tdep->rl78_psw_type, 4, "AC");
+  append_flags_type_flag (tdep->rl78_psw_type, 5, "RBS1");
+  append_flags_type_flag (tdep->rl78_psw_type, 6, "Z");
+  append_flags_type_flag (tdep->rl78_psw_type, 7, "IE");
 
   /* Registers.  */
   set_gdbarch_num_regs (gdbarch, RL78_NUM_REGS);

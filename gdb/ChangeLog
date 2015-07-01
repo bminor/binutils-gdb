@@ -1,3 +1,9 @@
+2015-07-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (struct gdbarch_tdep): Add new field, rl78_psw_type.
+	(rl78_register_type): Add case for RL78_PSW_REGNUM.
+	(rl78_gdbarch_init): Initialize rl78_psw_type.
+
 2015-07-01  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-hooks.c (tui_refresh_frame_and_register_information):
