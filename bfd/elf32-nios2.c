@@ -75,8 +75,9 @@ extern const bfd_target nios2_elf32_be_vec;
 #define TP_OFFSET	0x7000
 #define DTP_OFFSET	0x8000
 
-/* The relocation table used for SHT_REL sections.  */
-static reloc_howto_type elf_nios2_howto_table_rel[] = {
+/* The relocation tables used for SHT_REL sections.  There are separate
+   tables for R1 and R2 encodings.  */
+static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
   /* No relocation.  */
   HOWTO (R_NIOS2_NONE,		/* type */
 	 0,			/* rightshift */
@@ -729,31 +730,887 @@ static reloc_howto_type elf_nios2_howto_table_rel[] = {
 /* Add other relocations here.  */
 };
 
+static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
+  /* No relocation.  */
+  HOWTO (R_NIOS2_NONE,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_NIOS2_NONE",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* 16-bit signed immediate relocation.  */
+  HOWTO (R_NIOS2_S16,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 16,			/* bitpos */
+	 complain_overflow_signed,	/* complain on overflow */
+	 bfd_elf_generic_reloc,	/* special function */
+	 "R_NIOS2_S16",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff0000,		/* src_mask */
+	 0xffff0000,		/* dest_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* 16-bit unsigned immediate relocation.  */
+  HOWTO (R_NIOS2_U16,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 16,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain on overflow */
+	 bfd_elf_generic_reloc,	/* special function */
+	 "R_NIOS2_U16",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff0000,		/* src_mask */
+	 0xffff0000,		/* dest_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_NIOS2_PCREL16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 16,			/* bitpos */
+	 complain_overflow_signed,	/* complain on overflow */
+	 nios2_elf32_pcrel16_relocate,	/* special function */
+	 "R_NIOS2_PCREL16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff0000,		/* src_mask */
+	 0xffff0000,		/* dest_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_NIOS2_CALL26,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 26,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 6,			/* bitpos */
+	 complain_overflow_dont,	/* complain on overflow */
+	 nios2_elf32_call26_relocate,	/* special function */
+	 "R_NIOS2_CALL26",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffc0,		/* src_mask */
+	 0xffffffc0,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_NIOS2_IMM5,
+	 0,
+	 2,
+	 5,
+	 FALSE,
+	 21,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_IMM5",
+	 FALSE,
+	 0x03e00000,
+	 0x03e00000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CACHE_OPX,
+	 0,
+	 2,
+	 5,
+	 FALSE,
+	 11,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_CACHE_OPX",
+	 FALSE,
+	 0x0000f800,
+	 0x0000f800,
+	 FALSE),
+
+  HOWTO (R_NIOS2_IMM6,
+	 0,
+	 2,
+	 6,
+	 FALSE,
+	 26,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_IMM6",
+	 FALSE,
+	 0xfc000000,
+	 0xfc000000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_IMM8,
+	 0,
+	 2,
+	 8,
+	 FALSE,
+	 24,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_IMM8",
+	 FALSE,
+	 0xff000000,
+	 0xff000000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_HI16,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_hi16_relocate,
+	 "R_NIOS2_HI16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_LO16,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_lo16_relocate,
+	 "R_NIOS2_LO16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_HIADJ16,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_hiadj16_relocate,
+	 "R_NIOS2_HIADJ16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_BFD_RELOC_32,
+	 0,
+	 2,			/* long */
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_BFD_RELOC32",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_BFD_RELOC_16,
+	 0,
+	 1,			/* short */
+	 16,
+	 FALSE,
+	 0,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_BFD_RELOC16",
+	 FALSE,
+	 0x0000ffff,
+	 0x0000ffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_BFD_RELOC_8,
+	 0,
+	 0,			/* byte */
+	 8,
+	 FALSE,
+	 0,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_BFD_RELOC8",
+	 FALSE,
+	 0x000000ff,
+	 0x000000ff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GPREL,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_gprel_relocate,
+	 "R_NIOS2_GPREL",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GNU_VTINHERIT,
+	 0,
+	 2,			/* short */
+	 0,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 NULL,
+	 "R_NIOS2_GNU_VTINHERIT",
+	 FALSE,
+	 0,
+	 0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GNU_VTENTRY,
+	 0,
+	 2,			/* byte */
+	 0,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 _bfd_elf_rel_vtable_reloc_fn,
+	 "R_NIOS2_GNU_VTENTRY",
+	 FALSE,
+	 0,
+	 0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_UJMP,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_ujmp_relocate,
+	 "R_NIOS2_UJMP",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CJMP,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_cjmp_relocate,
+	 "R_NIOS2_CJMP",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CALLR,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_callr_relocate,
+	 "R_NIOS2_CALLR",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_ALIGN,
+	 0,
+	 2,
+	 0,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 nios2_elf32_ignore_reloc,
+	 "R_NIOS2_ALIGN",
+	 FALSE,
+	 0,
+	 0,
+	 TRUE),
+
+  HOWTO (R_NIOS2_GOT16,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOT16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CALL16,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_CALL16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GOTOFF_LO,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOTOFF_LO",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GOTOFF_HA,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOTOFF_HA",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_PCREL_LO,
+	 0,
+	 2,
+	 16,
+	 TRUE,
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_pcrel_lo16_relocate,
+	 "R_NIOS2_PCREL_LO",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 TRUE),
+
+  HOWTO (R_NIOS2_PCREL_HA,
+	 0,
+	 2,
+	 16,
+	 FALSE, /* This is a PC-relative relocation, but we need to subtract
+		   PC ourselves before the HIADJ.  */
+	 16,
+	 complain_overflow_dont,
+	 nios2_elf32_pcrel_hiadj16_relocate,
+	 "R_NIOS2_PCREL_HA",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 TRUE),
+
+  HOWTO (R_NIOS2_TLS_GD16,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_GD16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_TLS_LDM16,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_LDM16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_TLS_LDO16,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_LDO16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_TLS_IE16,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_IE16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_TLS_LE16,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_LE16",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_TLS_DTPMOD,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_DTPMOD",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_TLS_DTPREL,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_DTPREL",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_TLS_TPREL,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_TLS_TPREL",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_COPY,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_COPY",
+	 FALSE,
+	 0,
+	 0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GLOB_DAT,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GLOB_DAT",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_JUMP_SLOT,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_JUMP_SLOT",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_RELATIVE,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_RELATIVE",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GOTOFF,
+	 0,
+	 2,
+	 32,
+	 FALSE,
+	 0,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOTOFF",
+	 FALSE,
+	 0xffffffff,
+	 0xffffffff,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CALL26_NOAT,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 26,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 6,			/* bitpos */
+	 complain_overflow_dont,	/* complain on overflow */
+	 nios2_elf32_call26_relocate,	/* special function */
+	 "R_NIOS2_CALL26_NOAT",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffc0,		/* src_mask */
+	 0xffffffc0,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_NIOS2_GOT_LO,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOT_LO",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GOT_HA,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOT_HA",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CALL_LO,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_CALL_LO",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CALL_HA,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 16,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_CALL_HA",
+	 FALSE,
+	 0xffff0000,
+	 0xffff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_R2_S12,
+	 0,
+	 2,
+	 12,
+	 FALSE,
+	 16,
+	 complain_overflow_signed,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_S12",
+	 FALSE,
+	 0x0fff0000,
+	 0x0fff0000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_R2_I10_1_PCREL,
+	 1,
+	 1,
+	 10,
+	 TRUE,
+	 6,
+	 complain_overflow_signed,
+	 bfd_elf_generic_reloc, 	/* FIXME? */
+	 "R_NIOS2_R2_I10_1_PCREL",
+	 FALSE,
+	 0xffc0,
+	 0xffc0,
+	 TRUE),
+
+  HOWTO (R_NIOS2_R2_T1I7_1_PCREL,
+	 1,
+	 1,
+	 7,
+	 TRUE,
+	 9,
+	 complain_overflow_signed,
+	 bfd_elf_generic_reloc,		/* FIXME? */
+	 "R_NIOS2_R2_T1I7_1_PCREL",
+	 FALSE,
+	 0xfe00,
+	 0xfe00,
+	 TRUE),
+	 
+  HOWTO (R_NIOS2_R2_T1I7_2,
+	 2,
+	 1,
+	 7,
+	 FALSE,
+	 9,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_T1I7_2",
+	 FALSE,
+	 0xfe00,
+	 0xfe00,
+	 FALSE),
+	 
+  HOWTO (R_NIOS2_R2_T2I4,
+	 0,
+	 1,
+	 4,
+	 FALSE,
+	 12,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_T2I4",
+	 FALSE,
+	 0xf000,
+	 0xf000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_R2_T2I4_1,
+	 1,
+	 1,
+	 4,
+	 FALSE,
+	 12,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_T2I4_1",
+	 FALSE,
+	 0xf000,
+	 0xf000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_R2_T2I4_2,
+	 2,
+	 1,
+	 4,
+	 FALSE,
+	 12,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_T2I4_2",
+	 FALSE,
+	 0xf000,
+	 0xf000,
+	 FALSE),
+
+  HOWTO (R_NIOS2_R2_X1I7_2,
+	 2,
+	 1,
+	 7,
+	 FALSE,
+	 6,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_X1I7_2",
+	 FALSE,
+	 0x1fc0,
+	 0x1fc0,
+	 FALSE),
+	 
+  HOWTO (R_NIOS2_R2_X2L5,
+	 0,
+	 1,
+	 5,
+	 FALSE,
+	 6,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_X2L5",
+	 FALSE,
+	 0x07c0,
+	 0x07c0,
+	 FALSE),
+	 
+  HOWTO (R_NIOS2_R2_F1I5_2,
+	 2,
+	 1,
+	 5,
+	 FALSE,
+	 6,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_F1L5_2",
+	 FALSE,
+	 0x07c0,
+	 0x07c0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_R2_L5I4X1,
+	 2,
+	 1,
+	 4,
+	 FALSE,
+	 6,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_L5I4X1",
+	 FALSE,
+	 0x03c0,
+	 0x03c0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_R2_T1X1I6,
+	 0,
+	 1,
+	 6,
+	 FALSE,
+	 9,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_T1X1I6",
+	 FALSE,
+	 0x7e00,
+	 0x7e00,
+	 FALSE),
+  
+  HOWTO (R_NIOS2_R2_T1X1I6_2,
+	 2,
+	 2,
+	 6,
+	 FALSE,
+	 9,
+	 complain_overflow_unsigned,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_R2_T1I1X6_2",
+	 FALSE,
+	 0x7e00,
+	 0x7e00,
+	 FALSE),
+  
+/* Add other relocations here.  */
+};
+
 static unsigned char elf_code_to_howto_index[R_NIOS2_ILLEGAL + 1];
+
+
+/* Return true if producing output for a R2 BFD.  */
+#define BFD_IS_R2(abfd) (bfd_get_mach (abfd) == bfd_mach_nios2r2)
 
 /* Return the howto for relocation RTYPE.  */
 static reloc_howto_type *
-lookup_howto (unsigned int rtype)
+lookup_howto (unsigned int rtype, bfd *abfd)
 {
   static int initialized = 0;
   int i;
-  int howto_tbl_size = (int) (sizeof (elf_nios2_howto_table_rel)
-			      / sizeof (elf_nios2_howto_table_rel[0]));
+  /* R2 relocations are a superset of R1, so use that for the lookup
+     table.  */
+  int r1_howto_tbl_size = (int) (sizeof (elf_nios2_r1_howto_table_rel)
+				 / sizeof (elf_nios2_r1_howto_table_rel[0]));
+  int r2_howto_tbl_size = (int) (sizeof (elf_nios2_r2_howto_table_rel)
+				 / sizeof (elf_nios2_r2_howto_table_rel[0]));
 
   if (!initialized)
     {
       initialized = 1;
       memset (elf_code_to_howto_index, 0xff,
 	      sizeof (elf_code_to_howto_index));
-      for (i = 0; i < howto_tbl_size; i++)
-	elf_code_to_howto_index[elf_nios2_howto_table_rel[i].type] = i;
+      for (i = 0; i < r2_howto_tbl_size; i++)
+	{
+	  elf_code_to_howto_index[elf_nios2_r2_howto_table_rel[i].type] = i;
+	  if (i < r1_howto_tbl_size)
+	    BFD_ASSERT (elf_nios2_r2_howto_table_rel[i].type
+			== elf_nios2_r1_howto_table_rel[i].type);
+	}
     }
 
   BFD_ASSERT (rtype <= R_NIOS2_ILLEGAL);
   i = elf_code_to_howto_index[rtype];
-  if (i >= howto_tbl_size)
-    return 0;
-  return elf_nios2_howto_table_rel + i;
+  if (BFD_IS_R2 (abfd))
+    {
+      if (i >= r2_howto_tbl_size)
+	return 0;
+      return elf_nios2_r2_howto_table_rel + i;
+    }
+  else
+    {
+      if (i >= r1_howto_tbl_size)
+	return 0;
+      return elf_nios2_r1_howto_table_rel + i;
+    }
 }
 
 /* Map for converting BFD reloc types to Nios II reloc types.  */
@@ -810,6 +1667,19 @@ static const struct elf_reloc_map nios2_reloc_map[] = {
   {BFD_RELOC_NIOS2_GOT_HA, R_NIOS2_GOT_HA},
   {BFD_RELOC_NIOS2_CALL_LO, R_NIOS2_CALL_LO},
   {BFD_RELOC_NIOS2_CALL_HA, R_NIOS2_CALL_HA},
+  {BFD_RELOC_NIOS2_R2_S12, R_NIOS2_R2_S12},
+  {BFD_RELOC_NIOS2_R2_I10_1_PCREL, R_NIOS2_R2_I10_1_PCREL},
+  {BFD_RELOC_NIOS2_R2_T1I7_1_PCREL, R_NIOS2_R2_T1I7_1_PCREL},
+  {BFD_RELOC_NIOS2_R2_T1I7_2, R_NIOS2_R2_T1I7_2},
+  {BFD_RELOC_NIOS2_R2_T2I4, R_NIOS2_R2_T2I4},
+  {BFD_RELOC_NIOS2_R2_T2I4_1, R_NIOS2_R2_T2I4_1},
+  {BFD_RELOC_NIOS2_R2_T2I4_2, R_NIOS2_R2_T2I4_2},
+  {BFD_RELOC_NIOS2_R2_X1I7_2, R_NIOS2_R2_X1I7_2},
+  {BFD_RELOC_NIOS2_R2_X2L5, R_NIOS2_R2_X2L5},
+  {BFD_RELOC_NIOS2_R2_F1I5_2, R_NIOS2_R2_F1I5_2},
+  {BFD_RELOC_NIOS2_R2_L5I4X1, R_NIOS2_R2_L5I4X1},
+  {BFD_RELOC_NIOS2_R2_T1X1I6, R_NIOS2_R2_T1X1I6},
+  {BFD_RELOC_NIOS2_R2_T1X1I6_2, R_NIOS2_R2_T1X1I6_2},
 };
 
 enum elf32_nios2_stub_type
@@ -2107,47 +2977,58 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 /* Implement bfd_elf32_bfd_reloc_type_lookup:
    Given a BFD reloc type, return a howto structure.  */
 static reloc_howto_type *
-nios2_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+nios2_elf32_bfd_reloc_type_lookup (bfd *abfd,
 				   bfd_reloc_code_real_type code)
 {
   int i;
+  
   for (i = 0;
        i < (int) (sizeof (nios2_reloc_map) / sizeof (struct elf_reloc_map));
        ++i)
     if (nios2_reloc_map[i].bfd_val == code)
-      return &elf_nios2_howto_table_rel[(int) nios2_reloc_map[i].elf_val];
+      return lookup_howto (nios2_reloc_map[i].elf_val, abfd);
   return NULL;
 }
 
 /* Implement bfd_elf32_bfd_reloc_name_lookup:
    Given a reloc name, return a howto structure.  */
 static reloc_howto_type *
-nios2_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+nios2_elf32_bfd_reloc_name_lookup (bfd *abfd,
 				   const char *r_name)
 {
-  unsigned int i;
-  for (i = 0;
-       i < (sizeof (elf_nios2_howto_table_rel)
-	    / sizeof (elf_nios2_howto_table_rel[0]));
-       i++)
-    if (elf_nios2_howto_table_rel[i].name
-	&& strcasecmp (elf_nios2_howto_table_rel[i].name, r_name) == 0)
-      return &elf_nios2_howto_table_rel[i];
+  int i;
+  reloc_howto_type *howto_tbl;
+  int howto_tbl_size;
 
+  if (BFD_IS_R2 (abfd))
+    {
+      howto_tbl = elf_nios2_r2_howto_table_rel;
+      howto_tbl_size = (int) (sizeof (elf_nios2_r2_howto_table_rel)
+			      / sizeof (elf_nios2_r2_howto_table_rel[0]));
+    }
+  else
+    {
+      howto_tbl = elf_nios2_r1_howto_table_rel;
+      howto_tbl_size = (int) (sizeof (elf_nios2_r1_howto_table_rel)
+			      / sizeof (elf_nios2_r1_howto_table_rel[0]));
+    }
+    
+  for (i = 0; i < howto_tbl_size; i++)
+    if (howto_tbl[i].name && strcasecmp (howto_tbl[i].name, r_name) == 0)
+      return howto_tbl + i;
   return NULL;	
 }
 
 /* Implement elf_info_to_howto:
    Given a ELF32 relocation, fill in a arelent structure.  */
 static void
-nios2_elf32_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+nios2_elf32_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			   Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < R_NIOS2_ILLEGAL);
-  cache_ptr->howto = &elf_nios2_howto_table_rel[r_type];
+  cache_ptr->howto = lookup_howto (r_type, abfd);
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
@@ -2362,6 +3243,11 @@ nios2_elf32_do_call26_relocate (bfd *abfd, reloc_howto_type *howto,
       != CALL26_SEGMENT (input_section->output_section->vma
 			 + input_section->output_offset
 			 + offset))
+    return bfd_reloc_overflow;
+
+  /* Check that the target address is correctly aligned on a 4-byte
+     boundary.  */
+  if ((symbol_value + addend) & 0x3)
     return bfd_reloc_overflow;
 
   return _bfd_final_link_relocate (howto, abfd, input_section,
@@ -2847,7 +3733,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      howto = lookup_howto ((unsigned) ELF32_R_TYPE (rel->r_info));
+      howto = lookup_howto ((unsigned) ELF32_R_TYPE (rel->r_info), output_bfd);
       h = NULL;
       sym = NULL;
       sec = NULL;
