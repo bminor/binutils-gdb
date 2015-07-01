@@ -1,3 +1,25 @@
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* nios2-dis.c (nios2_extract_opcode): New.
+	(nios2_disassembler_state): New.
+	(nios2_find_opcode_hash): Use mach parameter to select correct
+	disassembler state.
+	(nios2_print_insn_arg): Extend to support new R2 argument letters
+	and formats.
+	(print_insn_nios2): Check for 16-bit instruction at end of memory.
+	* nios2-opc.c (nios2_builtin_regs): Add R2 register attributes.
+	(NIOS2_NUM_OPCODES): Rename to...
+	(NIOS2_NUM_R1_OPCODES): This.
+	(nios2_r2_opcodes): New.
+	(NIOS2_NUM_R2_OPCODES): New.
+	(nios2_num_r2_opcodes): New.
+	(nios2_r2_asi_n_mappings, nios2_num_r2_asi_n_mappings): New.
+	(nios2_r2_shi_n_mappings, nios2_num_r2_shi_n_mappings): New.
+	(nios2_r2_andi_n_mappings, nios2_num_r2_andi_n_mappings): New.
+	(nios2_r2_reg3_mappings, nios2_num_r2_reg3_mappings): New.
+	(nios2_r2_reg_range_mappings, nios2_num_r2_reg_range_mappings):	New.
+
 2015-06-30  Amit Pawar  <Amit.Pawar@amd.com>
 
 	* i386-dis.c (OP_Mwaitx): New.

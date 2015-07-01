@@ -1,6 +1,77 @@
 2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
 	    Cesar Philippidis  <cesar@codesourcery.com>
 
+	* config/tc-nios2.c (nios2_min_align): New.
+	(nop): Replace with....
+	(nop_r1, nop_r2, nop_r2_cdx, nop32, nop16): New.
+	(nios2_align): Handle alignment on 2-byte boundaries when CDX
+	instructions may be present.
+	(s_nios2_align): Adjust reference to nop.
+	(CDXBRANCH, IS_CDXBRANCH): New.
+	(CDX_UBRANCH_SUBTYPE, CDX_CBRANCH_SUBTYPE): New.
+	(nios2_relax_subtype_size): Handle 2-byte CDX branches.
+	(nios2_relax_frag): Likewise.
+	(md_convert_frag): Handle R2 encodings.
+	(nios2_check_overflow): Check that low-order bits are zero
+	before applying rightshift from howto.
+	(nios2_check_overflow): Correct negative overflow calculation.
+	(nios2_diagnose_overflow): Handle signed_immed12_overflow.  Issue
+	generic overflow messages for miscellaneous instruction formats.
+	(md_apply_fix): Recognize new R2 relocations.  For pc_relative
+	relocations, store fixup in *valP.
+	(nios2_reglist_mask, nios2_reglist_dir): New.
+	(nios2_parse_reglist): New.
+	(nios2_parse_base_register): New.
+	(nios2_assemble_expression): Handle constant expressions designated
+	by BFD_RELOC_NONE.
+	(nios2_assemble_reg3): New.
+	(nios2_assemble_arg_c): Handle R2 instruction formats.
+	(nios2_assemble_arg_d): Likewise.
+	(nios2_assemble_arg_s): Likewise.
+	(nios2_assemble_arg_t): Likewise.
+	(nios2_assemble_arg_D): New.
+	(nios2_assemble_arg_S): New.
+	(nios2_assemble_arg_T): New.
+	(nios2_assemble_arg_i): Handle R2 instruction formats.
+	(nios2_assemble_arg_I): New.
+	(nios2_assemble_arg_u): Handle R2 instruction formats.
+	(nios2_assemble_arg_U): New.
+	(nios2_assemble_arg_V): New.
+	(nios2_assemble_arg_W): New.
+	(nios2_assemble_arg_X): New.
+	(nios2_assemble_arg_Y): New.
+	(nios2_assemble_arg_o): Handle R2 instruction formats.
+	(nios2_assemble_arg_O): New.
+	(nios2_assemble_arg_P): New.
+	(nios2_assemble_arg_j): Handle R2 instruction formats.
+	(nios2_assemble_arg_k): New.
+	(nios2_assemble_arg_l): Handle R2 instruction formats.
+	(nios2_assemble_arg_m): Likewise.
+	(nios2_assemble_arg_M): New.
+	(nios2_assemble_arg_N): New.
+	(nios2_assemble_arg_e): New.
+	(nios2_assemble_arg_f): New.
+	(nios2_assemble_arg_g): New.
+	(nios2_assemble_arg_h): New.
+	(nios2_assemble_arg_R): New.
+	(nios2_assemble_arg_B): New.
+	(nios2_assemble_args): Handle new argument letters.
+	(nios2_consume_arg): Likewise.
+	(nios2_translate_pseudo_insn): Avoid dereferencing null pointer
+	in error message.
+	(nios2_ps_insn_info_structs): Add nop.n.
+	(output_ubranch): Handle CDX branches.
+	(output_cbranch): Likewise.
+	(output_call): Handle R2 encodings.
+	(output_movia): Likewise.
+	(md_begin): Initialize nios2_min_align.
+	(md_assemble): Align to nios2_min_align.  Adjust nios2_min_align
+	if a 16-bit instruction is seen.
+	(nios2_cons_align): Use appropriate nop pattern.
+
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
 	* config/tc-nios2.c: Adjust includes.
 	(OPTION_MARCH): Define.
 	(md_longopts): Add -march option.
