@@ -1,3 +1,15 @@
+2015-07-01  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-hooks.c (tui_refresh_frame_and_register_information):
+	Update commentary.  Always refresh the registers when frame
+	information has changed.
+	* tui/tui-stack.c (tui_show_frame_info): Update commentary.
+	Change return type to int.  Return 1 if frame information has
+	changed, 0 otherwise.
+	(tui_before_prompt): Update commentary.
+	* tui/tui-stack.h (tui_show_frame_info): Change return type to
+	int.
+
 2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
 
 	PR tui/13378

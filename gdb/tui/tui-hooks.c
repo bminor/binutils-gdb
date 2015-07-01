@@ -122,7 +122,8 @@ tui_about_to_proceed (void)
 /* Refresh TUI's frame and register information.  This is a hook intended to be
    used to update the screen after potential frame and register changes.
 
-   REGISTERS_TOO_P controls whether to refresh our register information.  */
+   REGISTERS_TOO_P controls whether to refresh our register information even
+   if frame information hasn't changed.  */
 
 static void
 tui_refresh_frame_and_register_information (int registers_too_p)
@@ -130,6 +131,7 @@ tui_refresh_frame_and_register_information (int registers_too_p)
   struct frame_info *fi;
   CORE_ADDR pc;
   struct cleanup *old_chain;
+  int frame_info_changed_p;
 
   if (!has_stack_frames ())
     return;
@@ -156,10 +158,11 @@ tui_refresh_frame_and_register_information (int registers_too_p)
 
   /* Display the frame position (even if there is no symbols or the PC
      is not known).  */
-  tui_show_frame_info (fi);
+  frame_info_changed_p = tui_show_frame_info (fi);
 
   /* Refresh the register window if it's visible.  */
-  if (tui_is_window_visible (DATA_WIN) && registers_too_p)
+  if (tui_is_window_visible (DATA_WIN)
+      && (frame_info_changed_p || registers_too_p))
     {
       tui_refreshing_registers = 1;
       tui_check_data_values (fi);
@@ -199,8 +202,9 @@ tui_before_prompt (const char *current_gdb_prompt)
 {
   /* This refresh is intended to catch changes to the selected frame following
      a call to "up", "down" or "frame".  As such we don't necessarily want to
-     refresh registers here as they could not have changed.  Registers will be
-     refreshed after a normal stop or by our tui_register_changed_hook.  */
+     refresh registers here unless the frame actually changed by one of these
+     commands.  Registers will otherwise be refreshed after a normal stop or by
+     our tui_register_changed_hook.  */
   tui_refresh_frame_and_register_information (/*registers_too_p=*/0);
 }
 

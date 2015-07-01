@@ -351,9 +351,12 @@ tui_update_locator_fullname (const char *fullname)
 }
 
 /* Function to print the frame information for the TUI.  The windows are
-   refreshed only if frame information has changed since the last refresh.  */
+   refreshed only if frame information has changed since the last refresh.
 
-void
+   Return 1 if frame information has changed (and windows subsequently
+   refreshed), 0 otherwise.  */
+
+int
 tui_show_frame_info (struct frame_info *fi)
 {
   struct tui_win_info *win_info;
@@ -391,7 +394,7 @@ tui_show_frame_info (struct frame_info *fi)
 	 not changed.  If frame information has not changed, then the windows'
 	 contents will not change.  So don't bother refreshing the windows.  */
       if (!locator_changed_p)
-	return;
+	return 0;
 
       tui_show_locator_content ();
       start_line = 0;
@@ -462,6 +465,8 @@ tui_show_frame_info (struct frame_info *fi)
 	    }
 	  tui_update_exec_info (win_info);
 	}
+
+      return 1;
     }
   else
     {
@@ -469,7 +474,7 @@ tui_show_frame_info (struct frame_info *fi)
 	= tui_set_locator_info (NULL, NULL, NULL, 0, (CORE_ADDR) 0);
 
       if (!locator_changed_p)
-	return;
+	return 0;
 
       tui_show_locator_content ();
       for (i = 0; i < (tui_source_windows ())->count; i++)
@@ -478,6 +483,8 @@ tui_show_frame_info (struct frame_info *fi)
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
 	  tui_update_exec_info (win_info);
 	}
+
+      return 1;
     }
 }
 
