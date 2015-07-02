@@ -1,3 +1,8 @@
+2015-07-02  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint): Fix
+	typo in the debugging message.
+
 2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c: Include gdbcmd.h, cli/cli-utils.h, and ctype.h.
