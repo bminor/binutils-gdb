@@ -1,3 +1,8 @@
+2015-07-02  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Revert previous delta.
+	(SIM_EXTRA_LIBS): Add -lm.
+
 2015-06-28  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.in (SIM_EXTRA_CFLAGS): Add -lm.
