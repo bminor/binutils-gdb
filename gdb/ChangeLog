@@ -1,3 +1,8 @@
+2015-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix GCC false warning.
+	* s390-linux-tdep.c (s390_handle_arg): Initialize VAL.
+
 2015-07-02  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint): Fix

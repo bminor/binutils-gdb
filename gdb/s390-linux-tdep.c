@@ -2572,7 +2572,8 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
     }
   else if (s390_function_arg_integer (type) && length <= word_size)
     {
-      ULONGEST val;
+      /* Initialize it just to avoid a GCC false warning.  */
+      ULONGEST val = 0;
 
       if (write_mode)
 	{
