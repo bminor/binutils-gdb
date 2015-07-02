@@ -1,5 +1,29 @@
 2015-07-02  Kevin Buettner  <kevinb@redhat.com>
 
+	* rx-tdep.c (RX_USP_REGNUM, RX_BPC_REGNUM): New constants.
+	(enum rx_frame_type): New.
+	(struct rx_prologue): Add new field `frame_type'.
+	(rx_analyze_prologue): Add `frame_type' parameter. Cache this
+	parameter in the prologue struct.  Add code for recording
+	locations of PC and PSW for fast interrupt and exception frames.
+	(rx_skip_prologue): Adjust call to rx_analyze_prologue.
+	(rx_analyze_frame_prologue): Add `frame_type' parameter.
+	(rx_frame_type): New function.
+	(rx_frame_base): Fetch frame type and pass it to rx_analyze_prologue.
+	(rx_frame_this_id): Rename parameter `this_prologue_cache' to
+	`this_cache'.
+	(rx_frame_prev_register): Rename parameter `this_prologue_cache' to
+	`this_cache'.  Add cases for RX_FRAME_TYPE_EXCEPTION and 
+	RX_FRAME_TYPE_FAST_INTERRUPT.
+	(normal_frame_p, exception_frame_p, rx_frame_sniffer_common)
+	(rx_frame_sniffer, rx_exception_sniffer): New functions.
+	(rx_frame_unwind): Use rx_frame_sniffer instead of
+	default_frame_sniffer.
+	(rx_frame_unwind): New unwinder.
+	(rx_gdbarch_init): Register new unwinder.
+
+2015-07-02  Kevin Buettner  <kevinb@redhat.com>
+
 	* rx-tdep.c (RX_BPSW_REGNUM, RX_FPSW_REGNUM): New constants.
 	(struct gdbarch_tdep): Add fields rx_psw_type and rx_fpsw_type.
 	(rx_register_type): Add cases for RX_PSW_REGNUM, RX_BPSW_REGNUM,
