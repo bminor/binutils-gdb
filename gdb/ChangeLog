@@ -1,5 +1,10 @@
 2015-07-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (pt_print_packet): Print stop, vmcs, tma, mtc, cyc, and
+	mnt packets.
+
+2015-07-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (btrace_pt_readmem_callback): Change type of PC argument.
 
 2015-07-08  Simon Marchi  <simon.marchi@ericsson.com>

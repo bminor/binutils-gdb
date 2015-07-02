@@ -2309,7 +2309,8 @@ pt_print_packet (const struct pt_packet *packet)
       break;
 
     case ppt_pip:
-      printf_unfiltered (("pip %" PRIx64 ""), packet->payload.pip.cr3);
+      printf_unfiltered (("pip %" PRIx64 "%s"), packet->payload.pip.cr3,
+			 packet->payload.pip.nr ? (" nr") : (""));
       break;
 
     case ppt_tsc:
@@ -2349,6 +2350,30 @@ pt_print_packet (const struct pt_packet *packet)
       printf_unfiltered (("ovf"));
       break;
 
+    case ppt_stop:
+      printf_unfiltered (("stop"));
+      break;
+
+    case ppt_vmcs:
+      printf_unfiltered (("vmcs %" PRIx64 ""), packet->payload.vmcs.base);
+      break;
+
+    case ppt_tma:
+      printf_unfiltered (("tma %x %x"), packet->payload.tma.ctc,
+			 packet->payload.tma.fc);
+      break;
+
+    case ppt_mtc:
+      printf_unfiltered (("mtc %x"), packet->payload.mtc.ctc);
+      break;
+
+    case ppt_cyc:
+      printf_unfiltered (("cyc %" PRIx64 ""), packet->payload.cyc.value);
+      break;
+
+    case ppt_mnt:
+      printf_unfiltered (("mnt %" PRIx64 ""), packet->payload.mnt.payload);
+      break;
     }
 }
 
