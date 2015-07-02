@@ -26,6 +26,8 @@ extern const struct target_desc *tdesc_xtensa;
 
 #include <asm/ptrace.h>
 #include <xtensa-config.h>
+#include "arch/xtensa.h"
+#include "gdb_proc_service.h"
 
 #include "xtensa-xtregs.c"
 
@@ -177,6 +179,25 @@ xtensa_breakpoint_at (CORE_ADDR where)
 				xtensa_breakpoint_len);
     return memcmp((char *) &insn,
 		  xtensa_breakpoint, xtensa_breakpoint_len) == 0;
+}
+
+/* Called by libthread_db.  */
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
+{
+  xtensa_elf_gregset_t regs;
+
+  if (ptrace (PTRACE_GETREGS, lwpid, NULL, &regs) != 0)
+    return PS_ERR;
+
+  /* IDX is the bias from the thread pointer to the beginning of the
+     thread descriptor.  It has to be subtracted due to implementation
+     quirks in libthread_db.  */
+  *base = (void *) ((char *) regs.threadptr - idx);
+
+  return PS_OK;
 }
 
 static struct regsets_info xtensa_regsets_info =

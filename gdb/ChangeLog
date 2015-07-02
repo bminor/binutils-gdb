@@ -1,3 +1,16 @@
+2015-08-20  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* arch/xtensa.h: New file.
+	* xtensa-linux-nat.c (gdb_proc_service.h): New #include.
+	(ps_get_thread_area): New function.
+	* xtensa-linux-tdep.c (xtensa_linux_init_abi): Add call to
+	set_gdbarch_fetch_tls_load_module_address to enable TLS support.
+	* xtensa-tdep.c (osabi.h): New #include.
+	(xtensa_gdbarch_init): Call gdbarch_init_osabi to register
+	xtensa-specific hooks.
+	* xtensa-tdep.h (struct xtensa_elf_gregset_t): Add threadptr
+	member and move the structure to arch/xtensa.h.
+
 2015-08-21  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (struct readahead_cache): New.

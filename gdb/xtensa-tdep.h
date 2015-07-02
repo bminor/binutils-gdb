@@ -18,6 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "arch/xtensa.h"
+
 /* XTENSA_TDEP_VERSION can/should be changed along with XTENSA_CONFIG_VERSION
    whenever the "tdep" structure changes in an incompatible way.  */
 
@@ -80,28 +82,6 @@ typedef enum
   xtTargetFlagsUseFetchStore	= 0x0002,
 } xtensa_target_flags_t;
 
-
-/* Xtensa ELF core file register set representation ('.reg' section).
-   Copied from target-side ELF header <xtensa/elf.h>.  */
-
-typedef uint32_t xtensa_elf_greg_t;
-
-typedef struct
-{
-  xtensa_elf_greg_t pc;
-  xtensa_elf_greg_t ps;
-  xtensa_elf_greg_t lbeg;
-  xtensa_elf_greg_t lend;
-  xtensa_elf_greg_t lcount;
-  xtensa_elf_greg_t sar;
-  xtensa_elf_greg_t windowstart;
-  xtensa_elf_greg_t windowbase;
-  xtensa_elf_greg_t reserved[8+48];
-  xtensa_elf_greg_t ar[64];
-} xtensa_elf_gregset_t;
-
-#define XTENSA_ELF_NGREG (sizeof (xtensa_elf_gregset_t) \
-			  / sizeof (xtensa_elf_greg_t))
 
 /*  Mask.  */
 

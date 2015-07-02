@@ -1,3 +1,10 @@
+2015-08-20  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* configure.srv (xtensa*-*-linux*): Add srv_linux_thread_db=yes.
+	* linux-xtensa-low.c (arch/xtensa.h gdb_proc_service.h): New
+	#includes.
+	(ps_get_thread_area): New function.
+
 2015-08-19  Gary Benson  <gbenson@redhat.com>
 
 	* hostio.c (handle_pread): Do not attempt to read more data
