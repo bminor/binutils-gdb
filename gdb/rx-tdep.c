@@ -47,6 +47,8 @@ enum
   RX_R15_REGNUM = 15,
   RX_PSW_REGNUM = 18,
   RX_PC_REGNUM = 19,
+  RX_BPSW_REGNUM = 21,
+  RX_FPSW_REGNUM = 24,
   RX_ACC_REGNUM = 25,
   RX_NUM_REGS = 26
 };
@@ -56,6 +58,12 @@ struct gdbarch_tdep
 {
   /* The ELF header flags specify the multilib used.  */
   int elf_flags;
+
+  /* Type of PSW and BPSW.  */
+  struct type *rx_psw_type;
+
+  /* Type of FPSW.  */
+  struct type *rx_fpsw_type;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -132,8 +140,14 @@ rx_register_name (struct gdbarch *gdbarch, int regnr)
 static struct type *
 rx_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   if (reg_nr == RX_PC_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
+  else if (reg_nr == RX_PSW_REGNUM || reg_nr == RX_BPSW_REGNUM)
+    return tdep->rx_psw_type;
+  else if (reg_nr == RX_FPSW_REGNUM)
+    return tdep->rx_fpsw_type;
   else if (reg_nr == RX_ACC_REGNUM)
     return builtin_type (gdbarch)->builtin_unsigned_long_long;
   else
@@ -815,6 +829,45 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
+
+  /* Initialize the flags type for PSW and BPSW.  */
+
+  tdep->rx_psw_type = arch_flags_type (gdbarch, "rx_psw_type", 4);
+  append_flags_type_flag (tdep->rx_psw_type, 0, "C");
+  append_flags_type_flag (tdep->rx_psw_type, 1, "Z");
+  append_flags_type_flag (tdep->rx_psw_type, 2, "S");
+  append_flags_type_flag (tdep->rx_psw_type, 3, "O");
+  append_flags_type_flag (tdep->rx_psw_type, 16, "I");
+  append_flags_type_flag (tdep->rx_psw_type, 17, "U");
+  append_flags_type_flag (tdep->rx_psw_type, 20, "PM");
+  append_flags_type_flag (tdep->rx_psw_type, 24, "IPL0");
+  append_flags_type_flag (tdep->rx_psw_type, 25, "IPL1");
+  append_flags_type_flag (tdep->rx_psw_type, 26, "IPL2");
+  append_flags_type_flag (tdep->rx_psw_type, 27, "IPL3");
+
+  /* Initialize flags type for FPSW.  */
+
+  tdep->rx_fpsw_type = arch_flags_type (gdbarch, "rx_fpsw_type", 4);
+  append_flags_type_flag (tdep->rx_fpsw_type, 0, "RM0");
+  append_flags_type_flag (tdep->rx_fpsw_type, 1, "RM1");
+  append_flags_type_flag (tdep->rx_fpsw_type, 2, "CV");
+  append_flags_type_flag (tdep->rx_fpsw_type, 3, "CO");
+  append_flags_type_flag (tdep->rx_fpsw_type, 4, "CZ");
+  append_flags_type_flag (tdep->rx_fpsw_type, 5, "CU");
+  append_flags_type_flag (tdep->rx_fpsw_type, 6, "CX");
+  append_flags_type_flag (tdep->rx_fpsw_type, 7, "CE");
+  append_flags_type_flag (tdep->rx_fpsw_type, 8, "DN");
+  append_flags_type_flag (tdep->rx_fpsw_type, 10, "EV");
+  append_flags_type_flag (tdep->rx_fpsw_type, 11, "EO");
+  append_flags_type_flag (tdep->rx_fpsw_type, 12, "EZ");
+  append_flags_type_flag (tdep->rx_fpsw_type, 13, "EU");
+  append_flags_type_flag (tdep->rx_fpsw_type, 14, "EX");
+  append_flags_type_flag (tdep->rx_fpsw_type, 26, "FV");
+  append_flags_type_flag (tdep->rx_fpsw_type, 27, "FO");
+  append_flags_type_flag (tdep->rx_fpsw_type, 28, "FZ");
+  append_flags_type_flag (tdep->rx_fpsw_type, 29, "FU");
+  append_flags_type_flag (tdep->rx_fpsw_type, 30, "FX");
+  append_flags_type_flag (tdep->rx_fpsw_type, 31, "FS");
 
   set_gdbarch_num_regs (gdbarch, RX_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);

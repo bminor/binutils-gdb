@@ -1,3 +1,11 @@
+2015-07-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (RX_BPSW_REGNUM, RX_FPSW_REGNUM): New constants.
+	(struct gdbarch_tdep): Add fields rx_psw_type and rx_fpsw_type.
+	(rx_register_type): Add cases for RX_PSW_REGNUM, RX_BPSW_REGNUM,
+	and RX_FPSW_REGNUM.
+	(rx_gdbarch_init): Initialize PSW, BPSW, and FPSW flags types.
+
 2015-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix GCC false warning.
