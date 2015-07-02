@@ -1,3 +1,12 @@
+2015-07-06  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* i386-tdep.c (i386_mpx_info_bounds): Don't call error, instead
+	use printf_unfiltered.
+	(set_mpx_cmd): Add missing trailing space to command string
+	literal.
+	(_initialize_i386_tdep): Give the "mpx" prefix command its
+	correct name.
+
 2015-07-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* rx-tdep.c (RX_USP_REGNUM, RX_BPC_REGNUM): New constants.

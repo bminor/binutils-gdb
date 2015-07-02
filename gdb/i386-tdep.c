@@ -8775,11 +8775,17 @@ i386_mpx_info_bounds (char *args, int from_tty)
   struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
   if (!i386_mpx_enabled ())
-    error (_("Intel(R) Memory Protection Extensions not\
- supported on this target."));
+    {
+      printf_unfiltered (_("Intel(R) Memory Protection Extensions not "
+			   "supported on this target.\n"));
+      return;
+    }
 
   if (args == NULL)
-    error (_("Address of pointer variable expected."));
+    {
+      printf_unfiltered (_("Address of pointer variable expected.\n"));
+      return;
+    }
 
   addr = parse_and_eval_address (args);
 
@@ -8854,7 +8860,7 @@ static struct cmd_list_element *mpx_set_cmdlist, *mpx_show_cmdlist;
 static void
 set_mpx_cmd (char *args, int from_tty)
 {
-  help_list (mpx_set_cmdlist, "set mpx", all_commands, gdb_stdout);
+  help_list (mpx_set_cmdlist, "set mpx ", all_commands, gdb_stdout);
 }
 
 /* Helper function for the CLI commands.  */
@@ -8899,7 +8905,7 @@ is \"default\"."),
 
   add_prefix_cmd ("mpx", class_support, set_mpx_cmd, _("\
 Set Intel(R) Memory Protection Extensions specific variables."),
-		  &mpx_set_cmdlist, "set tdesc ",
+		  &mpx_set_cmdlist, "set mpx ",
 		  0 /* allow-unknown */, &setlist);
 
   /* Add "mpx" prefix for the show commands.  */
