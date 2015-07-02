@@ -189,11 +189,15 @@ struct arch_lwp_info
 static int aarch64_num_bp_regs;
 static int aarch64_num_wp_regs;
 
+/* Implementation of linux_target_ops method "cannot_store_register".  */
+
 static int
 aarch64_cannot_store_register (int regno)
 {
   return regno >= AARCH64_NUM_REGS;
 }
+
+/* Implementation of linux_target_ops method "cannot_fetch_register".  */
 
 static int
 aarch64_cannot_fetch_register (int regno)
@@ -255,6 +259,8 @@ aarch64_store_fpregset (struct regcache *regcache, const void *buf)
    was originally used to debug LinuxThreads support.  */
 extern int debug_threads;
 
+/* Implementation of linux_target_ops method "get_pc".  */
+
 static CORE_ADDR
 aarch64_get_pc (struct regcache *regcache)
 {
@@ -265,6 +271,8 @@ aarch64_get_pc (struct regcache *regcache)
     debug_printf ("stop pc is %08lx\n", pc);
   return pc;
 }
+
+/* Implementation of linux_target_ops method "set_pc".  */
 
 static void
 aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
@@ -279,6 +287,8 @@ aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
    This instruction needs to match gdb/aarch64-tdep.c
    (aarch64_default_breakpoint).  */
 static const gdb_byte aarch64_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
+
+/* Implementation of linux_target_ops method "breakpoint_at".  */
 
 static int
 aarch64_breakpoint_at (CORE_ADDR where)
@@ -925,6 +935,8 @@ aarch64_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
     return aarch64_handle_unaligned_watchpoint (type, addr, len, is_insert);
 }
 
+/* Implementation of linux_target_ops method "supports_z_point_type".  */
+
 static int
 aarch64_supports_z_point_type (char z_type)
 {
@@ -941,13 +953,10 @@ aarch64_supports_z_point_type (char z_type)
     }
 }
 
-/* Insert a hardware breakpoint/watchpoint.
-   It actually only records the info of the to-be-inserted bp/wp;
-   the actual insertion will happen when threads are resumed.
+/* Implementation of linux_target_ops method "insert_point".
 
-   Return 0 if succeed;
-   Return 1 if TYPE is unsupported type;
-   Return -1 if an error occurs.  */
+   It actually only records the info of the to-be-inserted bp/wp;
+   the actual insertion will happen when threads are resumed.  */
 
 static int
 aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
@@ -977,13 +986,10 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Remove a hardware breakpoint/watchpoint.
-   It actually only records the info of the to-be-removed bp/wp,
-   the actual removal will be done when threads are resumed.
+/* Implementation of linux_target_ops method "remove_point".
 
-   Return 0 if succeed;
-   Return 1 if TYPE is an unsupported type;
-   Return -1 if an error occurs.  */
+   It actually only records the info of the to-be-removed bp/wp,
+   the actual removal will be done when threads are resumed.  */
 
 static int
 aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
@@ -1014,8 +1020,7 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Returns the address associated with the watchpoint that hit, if
-   any; returns 0 otherwise.  */
+/* Implementation of linux_target_ops method "stopped_data_address".  */
 
 static CORE_ADDR
 aarch64_stopped_data_address (void)
@@ -1052,8 +1057,7 @@ aarch64_stopped_data_address (void)
   return (CORE_ADDR) 0;
 }
 
-/* Returns 1 if target was stopped due to a watchpoint hit, 0
-   otherwise.  */
+/* Implementation of linux_target_ops method "stopped_by_watchpoint".  */
 
 static int
 aarch64_stopped_by_watchpoint (void)
@@ -1087,7 +1091,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
   return PS_OK;
 }
 
-/* Called when a new process is created.  */
+/* Implementation of linux_target_ops method "linux_new_process".  */
 
 static struct arch_process_info *
 aarch64_linux_new_process (void)
@@ -1099,7 +1103,7 @@ aarch64_linux_new_process (void)
   return info;
 }
 
-/* Called when a new thread is detected.  */
+/* Implementation of linux_target_ops method "linux_new_thread".  */
 
 static void
 aarch64_linux_new_thread (struct lwp_info *lwp)
@@ -1114,6 +1118,8 @@ aarch64_linux_new_thread (struct lwp_info *lwp)
 
   lwp->arch_private = info;
 }
+
+/* Implementation of linux_target_ops method "linux_new_fork".  */
 
 static void
 aarch64_linux_new_fork (struct process_info *parent,
@@ -1142,7 +1148,8 @@ aarch64_linux_new_fork (struct process_info *parent,
   *child->priv->arch_private = *parent->priv->arch_private;
 }
 
-/* Called when resuming a thread.
+/* Implementation of linux_target_ops method "linux_prepare_to_resume".
+
    If the debug regs have changed, update the thread's copies.  */
 
 static void
@@ -1189,6 +1196,8 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 #define AARCH64_DEBUG_NUM_SLOTS(x) ((x) & 0xff)
 #define AARCH64_DEBUG_ARCH(x) (((x) >> 8) & 0xff)
 #define AARCH64_DEBUG_ARCH_V8 0x6
+
+/* Implementation of linux_target_ops method "arch_setup".  */
 
 static void
 aarch64_arch_setup (void)
@@ -1270,6 +1279,8 @@ static struct regs_info regs_info =
     &aarch64_regsets_info,
   };
 
+/* Implementation of linux_target_ops method "regs_info".  */
+
 static const struct regs_info *
 aarch64_regs_info (void)
 {
@@ -1290,27 +1301,27 @@ struct linux_target_ops the_low_target =
   aarch64_regs_info,
   aarch64_cannot_fetch_register,
   aarch64_cannot_store_register,
-  NULL,
+  NULL, /* fetch_register */
   aarch64_get_pc,
   aarch64_set_pc,
   (const unsigned char *) &aarch64_breakpoint,
   aarch64_breakpoint_len,
-  NULL,
-  0,
+  NULL, /* breakpoint_reinsert_addr */
+  0,    /* decr_pc_after_break */
   aarch64_breakpoint_at,
   aarch64_supports_z_point_type,
   aarch64_insert_point,
   aarch64_remove_point,
   aarch64_stopped_by_watchpoint,
   aarch64_stopped_data_address,
-  NULL,
-  NULL,
-  NULL,
+  NULL, /* collect_ptrace_register */
+  NULL, /* supply_ptrace_register */
+  NULL, /* siginfo_fixup */
   aarch64_linux_new_process,
   aarch64_linux_new_thread,
   aarch64_linux_new_fork,
   aarch64_linux_prepare_to_resume,
-  NULL,
+  NULL, /* process_qsupported */
   aarch64_supports_tracepoints,
 };
 
