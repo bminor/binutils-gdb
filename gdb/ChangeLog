@@ -68,10 +68,10 @@
 
 2015-06-29  Kevin Buettner  <kevinb@redhat.com>
 
-        * rx-tdep.c (RX_PSW_REGNUM): New enum constant.
-        (rx_dwarf_reg_to_regnum): New function.
-        (rx_gdbarch_init): Register rx_dwarf_reg_to_regnum.  Use dwarf2
-        unwinding.
+	* rx-tdep.c (RX_PSW_REGNUM): New enum constant.
+	(rx_dwarf_reg_to_regnum): New function.
+	(rx_gdbarch_init): Register rx_dwarf_reg_to_regnum.  Use dwarf2
+	unwinding.
 
 2015-06-29  Pedro Alves  <palves@redhat.com>
 
