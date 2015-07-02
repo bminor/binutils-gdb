@@ -1,3 +1,21 @@
+2015-07-08  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* defs.h (deprecated_register_changed_hook): Remove prototype.
+	* interps.c (clear_iterpreter_hooks): Remove reference to
+	deprecated_register_changed_hook.
+	* top.c (deprecated_register_changed_hook): Remove prototype.
+	* valops.c (value_assign): Remove reference to
+	deprecated_register_changed_hook.
+	* tui/tui-hooks.c (tui_register_changed): Add parameter "frame".
+	Add comment documenting the function.
+	(tui_register_changed_observer): Define.
+	(tui_install_hooks): Remove reference to
+	deprecated_register_changed_hook.  Set
+	tui_register_changed_observer.
+	(tui_remove_hooks): Remove reference to
+	deprecated_register_changed_hook.  Unset
+	tui_register_changed_observer.
+
 2015-07-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR compile/18484

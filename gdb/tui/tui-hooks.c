@@ -66,11 +66,18 @@ tui_new_objfile_hook (struct objfile* objfile)
 /* Prevent recursion of deprecated_register_changed_hook().  */
 static int tui_refreshing_registers = 0;
 
+/* Observer for the register_changed notification.  */
+
 static void
-tui_register_changed_hook (int regno)
+tui_register_changed (struct frame_info *frame, int regno)
 {
   struct frame_info *fi;
 
+  /* The frame of the register that was changed may differ from the selected
+     frame, but we only want to show the register values of the selected frame.
+     And even if the frames differ a register change made in one can still show
+     up in the other.  So we always use the selected frame here, and ignore
+     FRAME.  */
   fi = get_selected_frame (NULL);
   if (tui_refreshing_registers == 0)
     {
@@ -226,6 +233,7 @@ static struct observer *tui_inferior_exit_observer;
 static struct observer *tui_about_to_proceed_observer;
 static struct observer *tui_before_prompt_observer;
 static struct observer *tui_normal_stop_observer;
+static struct observer *tui_register_changed_observer;
 
 /* Install the TUI specific hooks.  */
 void
@@ -253,8 +261,8 @@ tui_install_hooks (void)
     = observer_attach_before_prompt (tui_before_prompt);
   tui_normal_stop_observer
     = observer_attach_normal_stop (tui_normal_stop);
-
-  deprecated_register_changed_hook = tui_register_changed_hook;
+  tui_register_changed_observer
+    = observer_attach_register_changed (tui_register_changed);
 }
 
 /* Remove the TUI specific hooks.  */
@@ -263,8 +271,6 @@ tui_remove_hooks (void)
 {
   deprecated_print_frame_info_listing_hook = 0;
   deprecated_query_hook = 0;
-  deprecated_register_changed_hook = 0;
-
   /* Remove our observers.  */
   observer_detach_breakpoint_created (tui_bp_created_observer);
   tui_bp_created_observer = NULL;
@@ -280,6 +286,8 @@ tui_remove_hooks (void)
   tui_before_prompt_observer = NULL;
   observer_detach_normal_stop (tui_normal_stop_observer);
   tui_normal_stop_observer = NULL;
+  observer_detach_register_changed (tui_register_changed_observer);
+  tui_register_changed_observer = NULL;
 }
 
 void _initialize_tui_hooks (void);
