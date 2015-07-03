@@ -67,9 +67,9 @@ cplus_get_range_decl_name (const struct dynamic_prop *prop)
 #define STR(x) #x
 #define STRINGIFY(x) STR(x)
 
-/* Helper function for c_get_compile_context.  Open the GCC front-end
-   shared library and return the symbol specified by the current
-   GCC_C_FE_CONTEXT.  */
+/* Helper function for cplus_get_compile_context.  Open the GCC
+   front-end shared library and return the symbol specified by the
+   current GCC_CP_FE_CONTEXT.  */
 
 static gcc_cp_fe_context_function *
 load_libcc (void)

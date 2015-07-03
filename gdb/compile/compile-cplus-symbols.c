@@ -173,16 +173,16 @@ convert_one_symbol (struct compile_cplus_instance *context,
       switch (SYMBOL_CLASS (sym))
 	{
 	case LOC_TYPEDEF:
-	  kind = GCC_C_SYMBOL_TYPEDEF;
+	  kind = GCC_CP_SYMBOL_TYPEDEF;
 	  break;
 
 	case LOC_LABEL:
-	  kind = GCC_C_SYMBOL_LABEL;
+	  kind = GCC_CP_SYMBOL_LABEL;
 	  addr = SYMBOL_VALUE_ADDRESS (sym);
 	  break;
 
 	case LOC_BLOCK:
-	  kind = GCC_C_SYMBOL_FUNCTION;
+	  kind = GCC_CP_SYMBOL_FUNCTION;
 	  addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
 	  if (is_global && TYPE_GNU_IFUNC (SYMBOL_TYPE (sym)))
 	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
@@ -251,7 +251,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 		       "evaluation as its address has not been found."),
 		     SYMBOL_PRINT_NAME (sym));
 
-	    kind = GCC_C_SYMBOL_VARIABLE;
+	    kind = GCC_CP_SYMBOL_VARIABLE;
 	    addr = value_address (val);
 	  }
 	  break;
@@ -263,12 +263,12 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	case LOC_REGPARM_ADDR:
 	case LOC_LOCAL:
 	substitution:
-	  kind = GCC_C_SYMBOL_VARIABLE;
+	  kind = GCC_CP_SYMBOL_VARIABLE;
 	  symbol_name = symbol_substitution_name (sym);
 	  break;
 
 	case LOC_STATIC:
-	  kind = GCC_C_SYMBOL_VARIABLE;
+	  kind = GCC_CP_SYMBOL_VARIABLE;
 	  addr = SYMBOL_VALUE_ADDRESS (sym);
 	  break;
 
@@ -386,14 +386,14 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
     case mst_file_text:
     case mst_solib_trampoline:
       type = objfile_type (objfile)->nodebug_text_symbol;
-      kind = GCC_C_SYMBOL_FUNCTION;
+      kind = GCC_CP_SYMBOL_FUNCTION;
       break;
 
     case mst_text_gnu_ifunc:
       /* nodebug_text_gnu_ifunc_symbol would cause:
 	 function return type cannot be function  */
       type = objfile_type (objfile)->nodebug_text_symbol;
-      kind = GCC_C_SYMBOL_FUNCTION;
+      kind = GCC_CP_SYMBOL_FUNCTION;
       addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
       break;
 
@@ -402,17 +402,17 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
     case mst_bss:
     case mst_file_bss:
       type = objfile_type (objfile)->nodebug_data_symbol;
-      kind = GCC_C_SYMBOL_VARIABLE;
+      kind = GCC_CP_SYMBOL_VARIABLE;
       break;
 
     case mst_slot_got_plt:
       type = objfile_type (objfile)->nodebug_got_plt_symbol;
-      kind = GCC_C_SYMBOL_FUNCTION;
+      kind = GCC_CP_SYMBOL_FUNCTION;
       break;
 
     default:
       type = objfile_type (objfile)->nodebug_unknown_symbol;
-      kind = GCC_C_SYMBOL_VARIABLE;
+      kind = GCC_CP_SYMBOL_VARIABLE;
       break;
     }
 
@@ -443,13 +443,13 @@ gcc_cplus_convert_symbol (void *datum,
 
   switch (request)
     {
-    case GCC_C_ORACLE_SYMBOL:
+    case GCC_CP_ORACLE_SYMBOL:
       domain = VAR_DOMAIN;
       break;
-    case GCC_C_ORACLE_TAG:
+    case GCC_CP_ORACLE_TAG:
       domain = STRUCT_DOMAIN;
       break;
-    case GCC_C_ORACLE_LABEL:
+    case GCC_CP_ORACLE_LABEL:
       domain = LABEL_DOMAIN;
       break;
     default:
@@ -462,6 +462,9 @@ gcc_cplus_convert_symbol (void *datum,
     {
       struct symbol *sym;
 
+      // FIXME: In response to oracle requests, we have to look up the
+      // identifier in every namespace, and introduce definitions for
+      // all symbols we find.  -lxo
       sym = lookup_symbol (identifier, context->base.block, domain, NULL);
       if (sym != NULL)
 	{
