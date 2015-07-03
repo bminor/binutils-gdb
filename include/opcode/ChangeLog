@@ -1,6 +1,9 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-07-03  Alan Modra  <amodra@gmail.com>
+	* ppc.h (PPC_OPCODE_750, PPC_OPCODE_7450, PPC_OPCODE_860): Define.
+
 	2015-06-19  Peter Bergner <bergner@vnet.ibm.com>
 	* ppc.h (PPC_OPERAND_OPTIONAL_VALUE): New.
 	(ppc_optional_operand_value): New inline function.
