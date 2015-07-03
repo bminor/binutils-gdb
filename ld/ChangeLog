@@ -1,3 +1,8 @@
+2015-07-03  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (eelf32or1k.c, eelf32or1k_linux.c): Depend on ELF_DEPS.
+	* Makefile.in: Regenerate.
+
 2015-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em  (gld${EMULATION_NAME}_handle_option):
