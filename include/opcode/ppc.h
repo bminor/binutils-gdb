@@ -195,6 +195,15 @@ extern const int vle_num_opcodes;
    that isn't a superset of POWER8, we can define this to its own mask.  */
 #define PPC_OPCODE_HTM        PPC_OPCODE_POWER8
 
+/* Opcode is supported by ppc750cl.  */
+#define PPC_OPCODE_750	      0x4000000000ull
+
+/* Opcode is supported by ppc7450.  */
+#define PPC_OPCODE_7450	      0x8000000000ull
+
+/* Opcode is supported by ppc821/850/860.  */
+#define PPC_OPCODE_860	      0x10000000000ull
+
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
 

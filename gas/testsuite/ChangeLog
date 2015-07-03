@@ -1,3 +1,7 @@
+2015-07-03  Alan Modra  <alan@squeak.grove.modra.org>
+
+	* gas/ppc/titan.d: Correct mfmcsrr0 disassembly.
+
 2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
 	    Cesar Philippidis  <cesar@codesourcery.com>
 

@@ -1,3 +1,9 @@
+2015-07-03  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (PPC750, PPC7450, PPC860): Define using PPC_OPCODE_*.
+	* ppc-dis.c (ppc_opts): Add 821, 850 and 860 entries.  Add
+	PPC_OPCODE_7450 to 7450 entry.  Add PPC_OPCODE_750 to 750cl entry.
+
 2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
 	    Cesar Philippidis  <cesar@codesourcery.com>
 
