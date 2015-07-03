@@ -1,6 +1,9 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-07-03  Alan Modra  <amodra@gmail.com>
+	* gas/ppc/titan.d: Correct mfmcsrr0 disassembly.
+
 	2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
 	* gas/ppc/e6500.s <sync>: Fix invalid test.
 	* gas/ppc/e6500.d: Likewise.

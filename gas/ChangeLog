@@ -1,6 +1,10 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-07-03  Alan Modra  <amodra@gmail.com>
+	* config/tc-ppc.c (md_show_usage): Add -m821, -m850, -m860.
+	* doc/c-ppc.texi (PowerPC-Opts): Likewise.
+
 	2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
 	* config/tc-ppc.c (md_assemble): Use ppc_optional_operand_value.
 	Allow for optional operands without insert functions.

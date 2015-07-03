@@ -1,6 +1,11 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-07-03  Alan Modra  <amodra@gmail.com>
+	* ppc-opc.c (PPC750, PPC7450, PPC860): Define using PPC_OPCODE_*.
+	* ppc-dis.c (ppc_opts): Add 821, 850 and 860 entries.  Add
+	PPC_OPCODE_7450 to 7450 entry.  Add PPC_OPCODE_750 to 750cl entry.
+
 	2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
 	* ppc-opc.c (insert_ls): Test for invalid LS operands.
 	(insert_esync): New function.
