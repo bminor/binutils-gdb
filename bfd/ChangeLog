@@ -1,3 +1,32 @@
+2015-07-03   Kai Tietz  <ktietz@redhat.com>
+	     Nick Clifton  <nickc@redhat.com>
+
+	PR ld/11539
+	* coffcode.h (coff_bfd_gc_sections): Define default
+	to bfd_coff_gc_sections function.
+	(coff_gc_mark_hook_fn): New type.
+	* coffgen.c (init_reloc_cookie): Copy and adjust coff
+	related code about gc-sections from elflink.c to here.
+	(fini_reloc_cookie): Likewise.
+	(init_reloc_cookie_rels): Likewise.
+	(fini_reloc_cookie_rels): Likewise.
+	(init_reloc_cookie_for_section): Likewise.
+	(fini_reloc_cookie_for_section): Likewise.
+	(_bfd_coff_gc_mark_hook): Likewise.
+	(_bfd_coff_gc_mark_rsec): Likewise.
+	(_bfd_coff_gc_mark_reloc): Likewise.
+	(_bfd_coff_gc_mark): Likewise.
+	(_bfd_coff_gc_mark_extra_sections): Likewise.
+	(coff_gc_sweep_symbol_info): Likewise.
+	(coff_gc_sweep_symbol): Likewise.
+	(gc_sweep_hook_fn): Likewise.
+	(coff_gc_sweep): Likewise.
+	(bfd_coff_gc_sections): Likewise.
+	(_bfd_coff_gc_keep): Likewise.
+	* libcoff-in.h (coff_reloc_cookie): New struct.
+	(bfd_coff_gc_sections): New prototype.
+	* libcoff.h: Regenerate.
+
 2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
 	    Cesar Philippidis  <cesar@codesourcery.com>
 

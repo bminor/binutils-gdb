@@ -1,3 +1,10 @@
+2015-07-03   Kai Tietz  <ktietz@redhat.com>
+	     Nick Clifton  <nickc@redhat.com>
+
+	PR ld/11539
+	* lib/ld-lib.exp (check_gc_sections_available): Do not
+	automatically fail for cygwin and mingw targets.
+
 2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
 	    Cesar Philippidis  <cesar@codesourcery.com>
 

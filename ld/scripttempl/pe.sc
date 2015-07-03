@@ -30,29 +30,29 @@ if test "${RELOCATING}"; then
              *(SORT(.rdata$*))'
   fi
   R_IDATA234='
-    SORT(*)(.idata$2)
-    SORT(*)(.idata$3)
+    KEEP (SORT(*)(.idata$2))
+    KEEP (SORT(*)(.idata$3))
     /* These zeroes mark the end of the import list.  */
     LONG (0); LONG (0); LONG (0); LONG (0); LONG (0);
-    SORT(*)(.idata$4)'
-  R_IDATA5='SORT(*)(.idata$5)'
+    KEEP (SORT(*)(.idata$4))'
+  R_IDATA5='KEEP (SORT(*)(.idata$5))'
   R_IDATA67='
-    SORT(*)(.idata$6)
-    SORT(*)(.idata$7)'
-  R_CRT_XC='*(SORT(.CRT$XC*))  /* C initialization */'
-  R_CRT_XI='*(SORT(.CRT$XI*))  /* C++ initialization */'
-  R_CRT_XL='*(SORT(.CRT$XL*))  /* TLS callbacks */'
-  R_CRT_XP='*(SORT(.CRT$XP*))  /* Pre-termination */'
-  R_CRT_XT='*(SORT(.CRT$XT*))  /* Termination */'
+    KEEP (SORT(*)(.idata$6))
+    KEEP (SORT(*)(.idata$7))'
+  R_CRT_XC='KEEP (*(SORT(.CRT$XC*)))  /* C initialization */'
+  R_CRT_XI='KEEP (*(SORT(.CRT$XI*)))  /* C++ initialization */'
+  R_CRT_XL='KEEP (*(SORT(.CRT$XL*)))  /* TLS callbacks */'
+  R_CRT_XP='KEEP (*(SORT(.CRT$XP*)))  /* Pre-termination */'
+  R_CRT_XT='KEEP (*(SORT(.CRT$XT*)))  /* Termination */'
   R_TLS='
-    *(.tls$AAA)
-    *(.tls)
-    *(.tls$)
-    *(SORT(.tls$*))
-    *(.tls$ZZZ)'
+    KEEP (*(.tls$AAA))
+    KEEP (*(.tls))
+    KEEP (*(.tls$))
+    KEEP (*(SORT(.tls$*)))
+    KEEP (*(.tls$ZZZ))'
   R_RSRC='
-    *(.rsrc)
-    *(.rsrc$*)'
+    KEEP (*(.rsrc))
+    KEEP (*(.rsrc$*))'
 else
   R_TEXT=
   R_DATA=
@@ -85,7 +85,7 @@ SECTIONS
   ${RELOCATING+. = ALIGN(__section_alignment__);}
   .text ${RELOCATING+ __image_base__ + ( __section_alignment__ < ${TARGET_PAGE_SIZE} ? . : __section_alignment__ )} :
   {
-    ${RELOCATING+ *(.init)}
+    ${RELOCATING+ KEEP(*(.init))}
     *(.text)
     ${R_TEXT}
     ${RELOCATING+ *(.text.*)}
@@ -116,7 +116,7 @@ SECTIONS
     *(.data)
     *(.data2)
     ${R_DATA}
-    *(.jcr)
+    KEEP(*(.jcr))
     ${RELOCATING+__data_end__ = . ;}
     ${RELOCATING+*(.data_cygwin_nocopy)}
   }
@@ -136,12 +136,12 @@ SECTIONS
 
   .eh_frame ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    *(.eh_frame*)
+    KEEP(*(.eh_frame*))
   }
 
   .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    *(.pdata)
+    KEEP(*(.pdata))
   }
 
   .bss ${RELOCATING+BLOCK(__section_alignment__)} :

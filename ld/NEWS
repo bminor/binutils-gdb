@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Experimental support for linker garbage collection (--gc-sections)
+  has been enabled for COFF and PE based targets.
+
 * New command line option for ELF targets to compress DWARF debug
   sections, --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi].
 

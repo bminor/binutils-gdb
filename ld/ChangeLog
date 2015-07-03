@@ -1,3 +1,15 @@
+2015-07-03   Kai Tietz  <ktietz@redhat.com>
+
+	PR ld/11539
+	* scripttempl/pep.sc: Mark .idata*, .CRT*, .tls*,
+	.rsrc*, .init, .ctor*, .dtor*, .fini, .jcr,
+	.eh_frame, .pdata. .xdata, and .gcc_except_table sections
+	as KEEP.
+	* scripttempl/pe.sc: Likewise.
+	* ld.texinfo: Document that --gc-sections has experimental support
+	for COFF and PE targets.
+	* NEWS: Mention experimental support.
+
 2015-07-03  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (eelf32or1k.c, eelf32or1k_linux.c): Depend on ELF_DEPS.
