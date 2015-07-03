@@ -205,14 +205,30 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
       field_type = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i));
       if (bitsize == 0)
 	bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
-      CP_CTX (context)->cp_ops->new_field (CP_CTX (context), result,
-					   TYPE_FIELD_NAME (type, i),
-					   field_type,
-					   bitsize,
-					   TYPE_FIELD_BITPOS (type, i));
+
+      if (field_is_static (&TYPE_FIELD (type, i)))
+	CP_CTX (context)->cp_ops->new_decl (CP_CTX (context),
+					    TYPE_FIELD_NAME (type, i),
+					    GCC_CP_SYMBOL_VARIABLE,
+					    field_type, NULL,
+					    // FIXME: compute the
+					    // static var address.
+					    // -lxo
+					    0,
+					    // FIXME: do we have
+					    // location info for
+					    // static data members?
+					    // -lxo
+					    filename, line);
+      else
+	CP_CTX (context)->cp_ops->new_field (CP_CTX (context), result,
+					     TYPE_FIELD_NAME (type, i),
+					     field_type,
+					     bitsize,
+					     TYPE_FIELD_BITPOS (type, i));
     }
 
-  // FIXME: define member functions and static data members.  -lxo
+  // FIXME: define member functions, typedefs and classes.  -lxo
 
   CP_CTX (context)->cp_ops->finish_record_or_union (CP_CTX (context), result,
 						    TYPE_LENGTH (type));
