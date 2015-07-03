@@ -167,7 +167,12 @@ GCC_METHOD1 (int /* bool */, finish_enum_type,
 /* Create a new function type.  RETURN_TYPE is the type returned by
    the function, and ARGUMENT_TYPES is a vector, of length NARGS, of
    the argument types.  IS_VARARGS is true if the function is
-   varargs.  */
+   varargs.
+
+   FIXME: C++ allows such stuff as "typedef int f() const;" to create
+   a cv-qualified (member) function type not associated with any
+   specific class, which can then be used to declare member functions
+   and pointers to member functions.  Our API doesn't support this.  */
 
 GCC_METHOD3 (gcc_type, build_function_type,
 	     gcc_type,			   /* Argument RETURN_TYPE.  */
