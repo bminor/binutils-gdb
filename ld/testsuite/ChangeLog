@@ -1,3 +1,10 @@
+2015-07-05  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* ld-powerpc/tocopt6-inc.s, ld-powerpc/tocopt6a.s,
+	ld-powerpc/tocopt6b.s, ld-powerpc/tocopt6c.s,
+	ld-powerpc/tocopt6.d: New test.
+	* ld-powerpc/powerpc.exp (ppc64elftests): Add it.
+
 2015-07-03   Kai Tietz  <ktietz@redhat.com>
 	     Nick Clifton  <nickc@redhat.com>
 
