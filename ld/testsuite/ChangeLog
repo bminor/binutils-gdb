@@ -1,6 +1,12 @@
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-07-05  Richard Sandiford  <richard.sandiford@arm.com>
+	* ld-powerpc/tocopt6-inc.s, ld-powerpc/tocopt6a.s,
+	ld-powerpc/tocopt6b.s, ld-powerpc/tocopt6c.s,
+	ld-powerpc/tocopt6.d: New test.
+	* ld-powerpc/powerpc.exp (ppc64elftests): Add it.
+
 	2015-06-16  Alan Modra  <amodra@gmail.com>
 	* ld-powerpc/ppc476-shared.s: Repeat dynamic reloc generating insns.
 	* ld-powerpc/ppc476-shared.d: Update.

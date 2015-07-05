@@ -215,6 +215,8 @@ set ppc64elftests {
         {tocopt4a.s tocopt4b.s} {{objdump -s tocopt4.d}} "tocopt4"}
     {"TOC opt5" "-melf64ppc" "" "-a64"  {tocopt5.s}
 	{{objdump -s tocopt5.d}} "tocopt5"}
+    {"TOC opt6" "-melf64ppc" "" "-a64"  {tocopt6a.s tocopt6b.s tocopt6c.s}
+	{{objdump -d tocopt6.d}} "tocopt6"}
     {"ambig shared v1" "-shared -melf64ppc" "" "-a64" {funv1.s} {} "funv1.so"}
     {"ambig shared v2" "-shared -melf64ppc" "" "-a64" {funv2.s} {} "funv2.so"}
 }
