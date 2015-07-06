@@ -1,3 +1,13 @@
+2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-data.h (SRC_NAME): Convert to lower case.
+	(CMD_NAME): Likewise.
+	(DATA_NAME): Likewise.
+	(DISASSEM_NAME): Likewise.
+	* tui/tui-win.c (tui_set_focus): Window names are now lower case.
+	(tui_set_win_height): Likewise.
+	(parse_scrolling_args): Likewise.
+
 2015-07-10  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_goto_begin)

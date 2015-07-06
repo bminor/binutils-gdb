@@ -60,10 +60,10 @@ struct tui_gen_win_info
 #define NO_REGS_STRING          "[ Register Values Unavailable ]"
 #define NO_DATA_STRING          "[ No Data Values Displayed ]"
 #define MAX_CONTENT_COUNT       100
-#define SRC_NAME                "SRC"
-#define CMD_NAME                "CMD"
-#define DATA_NAME               "REGS"
-#define DISASSEM_NAME           "ASM"
+#define SRC_NAME                "src"
+#define CMD_NAME                "cmd"
+#define DATA_NAME               "regs"
+#define DISASSEM_NAME           "asm"
 #define TUI_NULL_STR            ""
 #define DEFAULT_HISTORY_COUNT	25
 #define BOX_WINDOW              TRUE
