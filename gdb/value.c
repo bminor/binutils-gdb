@@ -3781,21 +3781,15 @@ value_initialized (struct value *val)
   return val->initialized;
 }
 
-/* Called only from the value_contents and value_contents_all()
-   macros, if the current data for a variable needs to be loaded into
-   value_contents(VAL).  Fetches the data from the user's process, and
-   clears the lazy flag to indicate that the data in the buffer is
-   valid.
+/* Load the actual content of a lazy value.  Fetch the data from the
+   user's process and clear the lazy flag to indicate that the data in
+   the buffer is valid.
 
    If the value is zero-length, we avoid calling read_memory, which
    would abort.  We mark the value as fetched anyway -- all 0 bytes of
-   it.
+   it.  */
 
-   This function returns a value because it is used in the
-   value_contents macro as part of an expression, where a void would
-   not work.  The value is ignored.  */
-
-int
+void
 value_fetch_lazy (struct value *val)
 {
   gdb_assert (value_lazy (val));
@@ -3947,7 +3941,6 @@ value_fetch_lazy (struct value *val)
     internal_error (__FILE__, __LINE__, _("Unexpected lazy value type."));
 
   set_value_lazy (val, 0);
-  return 0;
 }
 
 /* Implementation of the convenience function $_isvoid.  */

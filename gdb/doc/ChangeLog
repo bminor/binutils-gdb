@@ -1,3 +1,19 @@
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+        * gdb.texinfo (Maintenance Commands): Document "maint btrace"
+	commands.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Spell out that variables
+	and registers are not available during btrace replay.
+	Describe the new "record btrace pt" command.
+	Describe the new "set|show record btrace pt buffer-size" options.
+	(General Query Packets): Describe the new Qbtrace:pt and
+	Qbtrace-conf:pt:size packets.
+	Expand "bts" to "Branch Trace Store".
+	Update the branch trace DTD.
+
 2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.texinfo (Command History): Document the new option

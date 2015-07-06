@@ -408,6 +408,23 @@ handle_btrace_enable_bts (struct thread_info *thread)
   return NULL;
 }
 
+/* Handle btrace enabling in Intel(R) Processor Trace format.  */
+
+static const char *
+handle_btrace_enable_pt (struct thread_info *thread)
+{
+  if (thread->btrace != NULL)
+    return "E.Btrace already enabled.";
+
+  current_btrace_conf.format = BTRACE_FORMAT_PT;
+  thread->btrace = target_enable_btrace (thread->entry.id,
+					 &current_btrace_conf);
+  if (thread->btrace == NULL)
+    return "E.Could not enable btrace.";
+
+  return NULL;
+}
+
 /* Handle btrace disabling.  */
 
 static const char *
@@ -456,10 +473,12 @@ handle_btrace_general_set (char *own_buf)
 
   if (strcmp (op, "bts") == 0)
     err = handle_btrace_enable_bts (thread);
+  else if (strcmp (op, "pt") == 0)
+    err = handle_btrace_enable_pt (thread);
   else if (strcmp (op, "off") == 0)
     err = handle_btrace_disable (thread);
   else
-    err = "E.Bad Qbtrace operation. Use bts or off.";
+    err = "E.Bad Qbtrace operation. Use bts, pt, or off.";
 
   if (err != 0)
     strcpy (own_buf, err);
@@ -510,6 +529,21 @@ handle_btrace_conf_general_set (char *own_buf)
 	}
 
       current_btrace_conf.bts.size = (unsigned int) size;
+    }
+  else if (strncmp (op, "pt:size=", strlen ("pt:size=")) == 0)
+    {
+      unsigned long size;
+      char *endp = NULL;
+
+      errno = 0;
+      size = strtoul (op + strlen ("pt:size="), &endp, 16);
+      if (endp == NULL || *endp != 0 || errno != 0 || size > UINT_MAX)
+	{
+	  strcpy (own_buf, "E.Bad size value.");
+	  return -1;
+	}
+
+      current_btrace_conf.pt.size = (unsigned int) size;
     }
   else
     {
@@ -1871,12 +1905,25 @@ crc32 (CORE_ADDR base, int len, unsigned int crc)
 static void
 supported_btrace_packets (char *buf)
 {
+  int btrace_supported = 0;
+
   if (target_supports_btrace (BTRACE_FORMAT_BTS))
     {
       strcat (buf, ";Qbtrace:bts+");
       strcat (buf, ";Qbtrace-conf:bts:size+");
+
+      btrace_supported = 1;
     }
-  else
+
+  if (target_supports_btrace (BTRACE_FORMAT_PT))
+    {
+      strcat (buf, ";Qbtrace:pt+");
+      strcat (buf, ";Qbtrace-conf:pt:size+");
+
+      btrace_supported = 1;
+    }
+
+  if (!btrace_supported)
     return;
 
   strcat (buf, ";Qbtrace:off+");

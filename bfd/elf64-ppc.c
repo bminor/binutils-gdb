@@ -11640,7 +11640,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 		{
 		  long adjust;
 
-		  adjust = opd->adjust[OPD_NDX (sym->st_value)];
+		  adjust = opd->adjust[OPD_NDX (sym_value)];
 		  if (adjust == -1)
 		    /* Assume deleted functions won't ever be called.  */
 		    continue;

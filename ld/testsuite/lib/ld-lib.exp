@@ -1610,9 +1610,7 @@ proc check_gc_sections_available { } {
 	    || [istarget i860-*-*]
 	    || [istarget ia64-*-*]
 	    || [istarget mep-*-*]
-	    || [istarget mn10200-*-*]
-	    || [istarget *-*-cygwin]
-	    || [istarget *-*-mingw*] } {
+	    || [istarget mn10200-*-*] } {
 	    set gc_sections_available_saved 0
 	    return 0
 	}

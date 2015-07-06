@@ -2294,8 +2294,10 @@ enum bfd_architecture
   bfd_arch_aarch64,   /* AArch64  */
 #define bfd_mach_aarch64 0
 #define bfd_mach_aarch64_ilp32 32
-  bfd_arch_nios2,
-#define bfd_mach_nios2 0
+  bfd_arch_nios2,      /* Nios II */
+#define bfd_mach_nios2         0
+#define bfd_mach_nios2r1       1
+#define bfd_mach_nios2r2       2
   bfd_arch_visium,     /* Visium */
 #define bfd_mach_visium        1
   bfd_arch_last
@@ -5351,6 +5353,19 @@ a matching LO8XG part.  */
   BFD_RELOC_NIOS2_GOT_HA,
   BFD_RELOC_NIOS2_CALL_LO,
   BFD_RELOC_NIOS2_CALL_HA,
+  BFD_RELOC_NIOS2_R2_S12,
+  BFD_RELOC_NIOS2_R2_I10_1_PCREL,
+  BFD_RELOC_NIOS2_R2_T1I7_1_PCREL,
+  BFD_RELOC_NIOS2_R2_T1I7_2,
+  BFD_RELOC_NIOS2_R2_T2I4,
+  BFD_RELOC_NIOS2_R2_T2I4_1,
+  BFD_RELOC_NIOS2_R2_T2I4_2,
+  BFD_RELOC_NIOS2_R2_X1I7_2,
+  BFD_RELOC_NIOS2_R2_X2L5,
+  BFD_RELOC_NIOS2_R2_F1I5_2,
+  BFD_RELOC_NIOS2_R2_L5I4X1,
+  BFD_RELOC_NIOS2_R2_T1X1I6,
+  BFD_RELOC_NIOS2_R2_T1X1I6_2,
 
 /* IQ2000 Relocations.  */
   BFD_RELOC_IQ2000_OFFSET_16,

@@ -1352,6 +1352,10 @@ CODE_FRAGMENT
 .  COFF_SYMBOL_PE_SECTION
 .};
 .
+.typedef asection * (*coff_gc_mark_hook_fn)
+.  (asection *, struct bfd_link_info *, struct internal_reloc *,
+.   struct coff_link_hash_entry *, struct internal_syment *);
+.
 Special entry points for gdb to swap in coff symbol table parts:
 .typedef struct
 .{
@@ -5993,7 +5997,7 @@ static bfd_coff_backend_data bigobj_swap_table =
 #endif
 
 #ifndef coff_bfd_gc_sections
-#define coff_bfd_gc_sections		    bfd_generic_gc_sections
+#define coff_bfd_gc_sections		    bfd_coff_gc_sections
 #endif
 
 #ifndef coff_bfd_lookup_section_flags

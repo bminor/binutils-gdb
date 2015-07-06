@@ -1,3 +1,110 @@
+2015-07-05  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* elf64-ppc.c (toc_adjusting_stub_needed): Use the symbol value
+	plus addend rather than the original st_value when looking up
+	entries in opd->adjust.
+
+2015-07-03   Kai Tietz  <ktietz@redhat.com>
+	     Nick Clifton  <nickc@redhat.com>
+
+	PR ld/11539
+	* coffcode.h (coff_bfd_gc_sections): Define default
+	to bfd_coff_gc_sections function.
+	(coff_gc_mark_hook_fn): New type.
+	* coffgen.c (init_reloc_cookie): Copy and adjust coff
+	related code about gc-sections from elflink.c to here.
+	(fini_reloc_cookie): Likewise.
+	(init_reloc_cookie_rels): Likewise.
+	(fini_reloc_cookie_rels): Likewise.
+	(init_reloc_cookie_for_section): Likewise.
+	(fini_reloc_cookie_for_section): Likewise.
+	(_bfd_coff_gc_mark_hook): Likewise.
+	(_bfd_coff_gc_mark_rsec): Likewise.
+	(_bfd_coff_gc_mark_reloc): Likewise.
+	(_bfd_coff_gc_mark): Likewise.
+	(_bfd_coff_gc_mark_extra_sections): Likewise.
+	(coff_gc_sweep_symbol_info): Likewise.
+	(coff_gc_sweep_symbol): Likewise.
+	(gc_sweep_hook_fn): Likewise.
+	(coff_gc_sweep): Likewise.
+	(bfd_coff_gc_sections): Likewise.
+	(_bfd_coff_gc_keep): Likewise.
+	* libcoff-in.h (coff_reloc_cookie): New struct.
+	(bfd_coff_gc_sections): New prototype.
+	* libcoff.h: Regenerate.
+
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* bfd-in2.h: Regenerated.
+	* elf32-nios2.c (elf_nios2_howto_table_rel): Rename to...
+	(elf_nios2_r1_howto_table_rel): This.
+	(elf_nios2_r2_howto_table_rel): New.
+	(BFD_IS_R2): New.
+	(lookup_howto): Add ABFD parameter.  Adjust to look up in either
+	the R1 or R2 relocation table, as determined by ABFD.
+	(nios2_reloc_map): Add R2 relocations.
+	(nios2_elf32_bfd_reloc_type_lookup): Do lookup using lookup_howto.
+	Pass it the ABFD parameter.
+	(nios2_elf32_bfd_reloc_name_lookup): Use ABFD to decide whether to
+	return an R1 or R2 relocation.
+	(nios2_elf32_info_to_howto): Do lookup using lookup_howto.
+	Pass it the ABFD parameter.
+	(nios2_elf32_do_call26_relocate): Check for alignment on a 4-byte
+	boundary.
+	(nios2_elf32_relocate_section): Adjust call to lookup_howto.
+	* libbfd.h: Regenerated.
+	* reloc.c (BFD_RELOC_NIOS2_R2_S12): New.
+	(BFD_RELOC_NIOS2_R2_I10_1_PCREL): New.
+	(BFD_RELOC_NIOS2_R2_T1I7_1_PCREL): New.
+	(BFD_RELOC_NIOS2_R2_T1I7_2): New.
+	(BFD_RELOC_NIOS2_R2_T2I4): New.
+	(BFD_RELOC_NIOS2_R2_T2I4_1): New.
+	(BFD_RELOC_NIOS2_R2_T2I4_2): New.
+	(BFD_RELOC_NIOS2_R2_X1I7_2): New.
+	(BFD_RELOC_NIOS2_R2_X2L5): New.
+	(BFD_RELOC_NIOS2_R2_F1I5_2): New.
+	(BFD_RELOC_NIOS2_R2_L5I4X1): New.
+	(BFD_RELOC_NIOS2_R2_T1X1I6): New.
+	(BFD_RELOC_NIOS2_R2_T1X1I6_2): New.
+
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* archures.c (bfd_mach_nios2r1, bfd_mach_nios2r2): New.
+	* bfd-in2.h: Regenerated.
+	* cpu-nios2.c (nios2_compatible): New.
+	(N): Use nios2_compatible instead of bfd_default_compatible.
+	(NIOS2R1_NEXT, NIOS2R2_NEXT): Define.
+	(arch_info_struct): New.
+	(bfd_nios2_arch): Chain to NIOS2R1_NEXT.
+	* elf32-nios2.c (is_nios2_elf): New.
+	(nios2_elf32_merge_private_bfd_data): New.
+	(nios2_elf32_object_p): New.
+	(bfd_elf32_bfd_merge_private_bfd_data): Define.
+	(elf_backend_object_p): Define.
+
+2015-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Refactor.
+
+2015-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18570
+	* elf-attrs.c (obj_attr_size): Use an unsigned int type for the tag.
+	(write_obj_attribute): Likewise.
+	(elf_new_obj_attr): Likewise.
+	(bfd_elf_get_obj_attr_int): Likewise.
+	(bfd_elf_add_obj_attr_int): Likewise.
+	(bfd_elf_add_obj_attr_string): Likewise.
+	(bfd_elf_add_obj_attr_int_string): Likewise.
+	(gnu_obj_attrs_arg_type): Likewise.
+	(_bfd_elf_obj_attrs_arg_type): Likewise.
+	(_bfd_elf_parse_attributes): Likewise.
+	(_bfd_elf_merge_unknown_attribute_list): Likewise.
+	* elf-bfd.h (struct obj_attribute_list): Likewise.
+	Update prototypes.
+
 2015-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in.h (compressed_debug_section_type): Remove
@@ -485,77 +592,6 @@
 	* elf64-ppc.c (TOC_BASE_ALIGN): Define.
 	(ppc64_elf_next_toc_section): Align multi-got toc base.
 	(ppc64_elf_set_toc): Likewise initial toc base and .TOC. symbol.
-=======
-2015-05-04  Catherine Moore  <clm@codesourcery.com>
-
-	* elfxx-target.h: Add missing #endif.
-
-2015-04-22  Catherine Moore  <clm@codesourcery.com>
-
-	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_entry):  Don't write
-	the .eh_frame_entry section if the corresponding text section is marked
-	with SEC_EXCLUDE.
-
-2015-04-22  Catherine Moore  <clm@codesourcery.com>
-	    Bernd Schmidt <bernds@codesourcery.com>
-	    Paul Brook <paul@codesourcery.com>
-
-	* bfd-in2.h (SEC_INFO_TYPE_EH_FRAME_ENTRY): Define.
-	* elf-bfd.h (DWARF2_EH_HDR, COMPACT_EH_HDR): Define.
-	(COMPACT_EH_CANT_UNWIND_OPCODE): Define.
-	(dwarf_eh_frame_hdr_info): New struct.
-	(compact_eh_frame_hdr_info): New struct.
-	(eh_frame_hdr_info): Separate dwarf and compact fields.
-	(elf_backend_data): Add compact_eh_encoding and cant_unwind_opcode
-	fields.
-	(bfd_elf_section_data): Add eh_frame_entry field.
-	(elf_section_eh_frame_entry): Define.
-	(bfd_elf_parse_eh_frame_entries): Declare.
-	(_bfd_elf_parse_eh_frame_entry): Declare.
-	(_bfd_elf_end_eh_frame_parsing): Declare.
-	(_bfd_elf_write_section_eh_frame_entry): Declare.
-	(_bfd_elf_fixup_eh_frame_hdr): Declare.
-	(_bfd_elf_eh_frame_entry_present): Declare.
-	(_bfd_elf_section_for_symbol): Declare.
-	* elf-eh-frame.c (bfd_elf_discard_eh_frame_entry): New function.
-	(bfd_elf_record_eh_frame_entry): New function.
-	(_bfd_elf_parse_eh_frame_entry): New function.
-	(_bfd_elf_parse_eh_frame): Update hdr_info field references.
-	(cmp_eh_frame_hdr): New function.
-	(add_eh_frame_hdr_terminator): New function.
-	(_bfd_elf_end_eh_frame_parsing): New function.
-	(find_merged_cie): Update hdr_info field references.
-	(_bfd_elf_discard_section_eh_frame): Likewise.
-	(_bfd_elf_discard_section_eh_frame_hdr): Likewise.
-	Add Compact EH support.
-	(_bfd_elf_eh_frame_entry_present): New function.
-	(_bfd_elf_maybe_strip_eh_frame_hdr): Add Compact EH support.
-	(_bfd_elf_write_section_eh_frame_entry): New function.
-	(_bfd_elf_write_section_eh_frame): Update hdr_info field references.
-	(_bfd_elf_write_section_eh_frame): Likewise.
-	(_bfd_elf_fixup_eh_frame_hdr): New function.
-	(write_compact_eh_frame_hdr): New function.
-	(_bfd_elf_write_section_eh_frame_hdr): Compact EH support.  Update
-	hdr_info field references.
-	* elflink.c (_bfd_elf_section_for_symbol): New function.
-	(elf_section_ignore_discarded_relocs, elf_link_input_bfd):
-	Handle SEC_INFO_TYPE_EH_FRAME_ENTRY.
-	(bfd_elf_final_link): Call _bfd_elf_fixup_eh_frame_hdr.
-	(_bfd_elf_gc_mark):  Support Compact EH.
-	(bfd_elf_parse_eh_frame_entries): New function.
-	(bfd_elf_gc_sections): Support Compact EH.
-	(bfd_elf_discard_info): Likewise.
-	* elfxx-mips.c (_bfd_mips_elf_compact_eh_encoding): New function.
-	(_bfd_mips_elf_cant_unwind_opcode): New function.
-	* elfxx-mips.h (_bfd_mips_elf_compact_eh_encoding): Declare.
-	(_bfd_mips_elf_cant_unwind_opcode): Declare.
-	(elf_backend_compact_eh_encoding): Define.
-	(elf_backend_cant_unwind_opcode): Define.
-	* elfxx-target.h (elf_backend_compact_eh_encoding):
-	Provide default definition.
-	(elf_backend_cant_unwind_opcode): Provide default definition.
-	* section.c (SEC_INFO_TYPE_EH_FRAME_ENTRY): Define.
->>>>>>> 2015-05-04  Catherine Moore  <clm@codesourcery.com>
 
 2015-04-22  H.J. Lu  <hongjiu.lu@intel.com>
 

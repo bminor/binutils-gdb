@@ -1059,8 +1059,7 @@ The window name specified must be valid and visible.\n"));
 	tui_refresh_data_win ();
       xfree (buf_ptr);
       printf_filtered (_("Focus set to %s window.\n"),
-		       tui_win_name ((struct tui_gen_win_info *)
-				     tui_win_with_focus ()));
+		       tui_win_name (&tui_win_with_focus ()->generic));
     }
   else
     warning (_("Incorrect Number of Arguments.\n%s"), FOCUS_USAGE);

@@ -2952,16 +2952,21 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
       enum {
 	none, local, global
       } convert_mov_to_lea;
+      unsigned int opcode;
 
       if (r_type != R_X86_64_GOTPCREL)
 	continue;
 
       roff = irel->r_offset;
 
-      /* Don't convert R_X86_64_GOTPCREL relocation if it isn't for mov
-	 instruction.  */
-      if (roff < 2
-	  || bfd_get_8 (abfd, contents + roff - 2) != 0x8b)
+      if (roff < 2)
+	continue;
+
+      opcode = bfd_get_8 (abfd, contents + roff - 2);
+
+      /* PR ld/18591: Don't convert R_X86_64_GOTPCREL relocation if it
+         isn't for mov instruction.  */
+      if (opcode != 0x8b)
 	continue;
 
       tsec = NULL;

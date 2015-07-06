@@ -1322,6 +1322,7 @@ enum {
   PACKET_QTBuffer_size,
   PACKET_Qbtrace_off,
   PACKET_Qbtrace_bts,
+  PACKET_Qbtrace_pt,
   PACKET_qXfer_btrace,
 
   /* Support for the QNonStop packet.  */
@@ -1361,6 +1362,9 @@ enum {
 
   /* Support for vfork events.  */
   PACKET_vfork_event_feature,
+
+  /* Support for the Qbtrace-conf:pt:size packet.  */
+  PACKET_Qbtrace_conf_pt_size,
 
   PACKET_MAX
 };
@@ -4145,6 +4149,7 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "tracenz", PACKET_DISABLE, remote_supported_packet, PACKET_tracenz_feature },
   { "Qbtrace:off", PACKET_DISABLE, remote_supported_packet, PACKET_Qbtrace_off },
   { "Qbtrace:bts", PACKET_DISABLE, remote_supported_packet, PACKET_Qbtrace_bts },
+  { "Qbtrace:pt", PACKET_DISABLE, remote_supported_packet, PACKET_Qbtrace_pt },
   { "qXfer:btrace:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_btrace },
   { "qXfer:btrace-conf:read", PACKET_DISABLE, remote_supported_packet,
@@ -4157,6 +4162,8 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_fork_event_feature },
   { "vfork-events", PACKET_DISABLE, remote_supported_packet,
     PACKET_vfork_event_feature },
+  { "Qbtrace-conf:pt:size", PACKET_DISABLE, remote_supported_packet,
+    PACKET_Qbtrace_conf_pt_size }
 };
 
 static char *remote_support_xml;
@@ -11883,6 +11890,15 @@ remote_supports_btrace (struct target_ops *self, enum btrace_format format)
 
       case BTRACE_FORMAT_BTS:
 	return (packet_support (PACKET_Qbtrace_bts) == PACKET_ENABLE);
+
+      case BTRACE_FORMAT_PT:
+	/* The trace is decoded on the host.  Even if our target supports it,
+	   we still need to have libipt to decode the trace.  */
+#if defined (HAVE_LIBIPT)
+	return (packet_support (PACKET_Qbtrace_pt) == PACKET_ENABLE);
+#else /* !defined (HAVE_LIBIPT)  */
+	return 0;
+#endif /* !defined (HAVE_LIBIPT)  */
     }
 
   internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
@@ -11922,6 +11938,28 @@ btrace_sync_conf (const struct btrace_config *conf)
 
       rs->btrace_config.bts.size = conf->bts.size;
     }
+
+  packet = &remote_protocol_packets[PACKET_Qbtrace_conf_pt_size];
+  if (packet_config_support (packet) == PACKET_ENABLE
+      && conf->pt.size != rs->btrace_config.pt.size)
+    {
+      pos = buf;
+      pos += xsnprintf (pos, endbuf - pos, "%s=0x%x", packet->name,
+                        conf->pt.size);
+
+      putpkt (buf);
+      getpkt (&buf, &rs->buf_size, 0);
+
+      if (packet_ok (buf, packet) == PACKET_ERROR)
+	{
+	  if (buf[0] == 'E' && buf[1] == '.')
+	    error (_("Failed to configure the trace buffer size: %s"), buf + 2);
+	  else
+	    error (_("Failed to configure the trace buffer size."));
+	}
+
+      rs->btrace_config.pt.size = conf->pt.size;
+    }
 }
 
 /* Read the current thread's btrace configuration from the target and
@@ -11933,7 +11971,7 @@ btrace_read_config (struct btrace_config *conf)
   char *xml;
 
   xml = target_read_stralloc (&current_target,
-                              TARGET_OBJECT_BTRACE_CONF, "");
+			      TARGET_OBJECT_BTRACE_CONF, "");
   if (xml != NULL)
     {
       struct cleanup *cleanup;
@@ -11951,12 +11989,23 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid,
 		      const struct btrace_config *conf)
 {
   struct btrace_target_info *tinfo = NULL;
-  struct packet_config *packet = &remote_protocol_packets[PACKET_Qbtrace_bts];
+  struct packet_config *packet = NULL;
   struct remote_state *rs = get_remote_state ();
   char *buf = rs->buf;
   char *endbuf = rs->buf + get_remote_packet_size ();
 
-  if (packet_config_support (packet) != PACKET_ENABLE)
+  switch (conf->format)
+    {
+      case BTRACE_FORMAT_BTS:
+	packet = &remote_protocol_packets[PACKET_Qbtrace_bts];
+	break;
+
+      case BTRACE_FORMAT_PT:
+	packet = &remote_protocol_packets[PACKET_Qbtrace_pt];
+	break;
+    }
+
+  if (packet == NULL || packet_config_support (packet) != PACKET_ENABLE)
     error (_("Target does not support branch tracing."));
 
   btrace_sync_conf (conf);
@@ -12078,7 +12127,7 @@ remote_read_btrace (struct target_ops *self,
     }
 
   xml = target_read_stralloc (&current_target,
-                              TARGET_OBJECT_BTRACE, annex);
+			      TARGET_OBJECT_BTRACE, annex);
   if (xml == NULL)
     return BTRACE_ERR_UNKNOWN;
 
@@ -12882,7 +12931,10 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
        "Qbtrace:off", "disable-btrace", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_bts],
-       "Qbtrace:bts", "enable-btrace", 0);
+       "Qbtrace:bts", "enable-btrace-bts", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_pt],
+       "Qbtrace:pt", "enable-btrace-pt", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_btrace],
        "qXfer:btrace", "read-btrace", 0);
@@ -12904,6 +12956,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vfork_event_feature],
 			 "vfork-event-feature", "vfork-event-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_conf_pt_size],
+       "Qbtrace-conf:pt:size", "btrace-conf-pt-size", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */

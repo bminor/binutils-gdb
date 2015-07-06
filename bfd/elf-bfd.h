@@ -1549,7 +1549,7 @@ typedef struct obj_attribute
 typedef struct obj_attribute_list
 {
   struct obj_attribute_list *next;
-  int tag;
+  unsigned int tag;
   obj_attribute attr;
 } obj_attribute_list;
 
@@ -2412,22 +2412,22 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
 
 extern bfd_vma bfd_elf_obj_attr_size (bfd *);
 extern void bfd_elf_set_obj_attr_contents (bfd *, bfd_byte *, bfd_vma);
-extern int bfd_elf_get_obj_attr_int (bfd *, int, int);
-extern void bfd_elf_add_obj_attr_int (bfd *, int, int, unsigned int);
+extern int bfd_elf_get_obj_attr_int (bfd *, int, unsigned int);
+extern void bfd_elf_add_obj_attr_int (bfd *, int, unsigned int, unsigned int);
 #define bfd_elf_add_proc_attr_int(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_int ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
-extern void bfd_elf_add_obj_attr_string (bfd *, int, int, const char *);
+extern void bfd_elf_add_obj_attr_string (bfd *, int, unsigned int, const char *);
 #define bfd_elf_add_proc_attr_string(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_string ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
-extern void bfd_elf_add_obj_attr_int_string (bfd *, int, int, unsigned int,
-					     const char *);
+extern void bfd_elf_add_obj_attr_int_string (bfd *, int, unsigned int,
+					     unsigned int, const char *);
 #define bfd_elf_add_proc_attr_int_string(BFD, TAG, INTVAL, STRVAL) \
   bfd_elf_add_obj_attr_int_string ((BFD), OBJ_ATTR_PROC, (TAG), \
 				   (INTVAL), (STRVAL))
 
 extern char *_bfd_elf_attr_strdup (bfd *, const char *);
 extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
-extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, int);
+extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, unsigned int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_low (bfd *, bfd *, int);

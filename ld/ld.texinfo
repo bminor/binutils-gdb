@@ -1436,7 +1436,9 @@ it ends in a @code{.exe} suffix.
 Enable garbage collection of unused input sections.  It is ignored on
 targets that do not support this option.  The default behaviour (of not
 performing this garbage collection) can be restored by specifying
-@samp{--no-gc-sections} on the command line.
+@samp{--no-gc-sections} on the command line.  Note that garbage
+collection for COFF and PE format targets is supported, but the
+implementation is currently considered to be experimental.
 
 @samp{--gc-sections} decides which input sections are used by
 examining symbols and relocations.  The section containing the entry

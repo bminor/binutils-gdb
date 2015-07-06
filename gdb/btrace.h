@@ -29,6 +29,10 @@
 #include "btrace-common.h"
 #include "target/waitstatus.h" /* For enum target_stop_reason.  */
 
+#if defined (HAVE_LIBIPT)
+#  include <intel-pt.h>
+#endif
+
 struct thread_info;
 struct btrace_function;
 
@@ -95,6 +99,21 @@ enum btrace_bts_error
 
   /* The instruction size could not be determined.  */
   BDE_BTS_INSN_SIZE
+};
+
+/* Decode errors for the Intel(R) Processor Trace recording format.  */
+enum btrace_pt_error
+{
+  /* The user cancelled trace processing.  */
+  BDE_PT_USER_QUIT = 1,
+
+  /* Tracing was temporarily disabled.  */
+  BDE_PT_DISABLED,
+
+  /* Trace recording overflowed.  */
+  BDE_PT_OVERFLOW
+
+  /* Negative numbers are used by the decoder library.  */
 };
 
 /* A branch trace function segment.
@@ -214,6 +233,66 @@ enum btrace_thread_flag
   BTHR_MOVE = (BTHR_STEP | BTHR_RSTEP | BTHR_CONT | BTHR_RCONT)
 };
 
+#if defined (HAVE_LIBIPT)
+/* A packet.  */
+struct btrace_pt_packet
+{
+  /* The offset in the trace stream.  */
+  uint64_t offset;
+
+  /* The decode error code.  */
+  enum pt_error_code errcode;
+
+  /* The decoded packet.  Only valid if ERRCODE == pte_ok.  */
+  struct pt_packet packet;
+};
+
+/* Define functions operating on a vector of packets.  */
+typedef struct btrace_pt_packet btrace_pt_packet_s;
+DEF_VEC_O (btrace_pt_packet_s);
+#endif /* defined (HAVE_LIBIPT)  */
+
+/* Branch trace iteration state for "maintenance btrace packet-history".  */
+struct btrace_maint_packet_history
+{
+  /* The branch trace packet range from BEGIN (inclusive) to
+     END (exclusive) that has been covered last time.  */
+  unsigned int begin;
+  unsigned int end;
+};
+
+/* Branch trace maintenance information per thread.
+
+   This information is used by "maintenance btrace" commands.  */
+struct btrace_maint_info
+{
+  /* Most information is format-specific.
+     The format can be found in the BTRACE.DATA.FORMAT field of each thread.  */
+  union
+  {
+    /* BTRACE.DATA.FORMAT == BTRACE_FORMAT_BTS  */
+    struct
+    {
+      /* The packet history iterator.
+	 We are iterating over BTRACE.DATA.FORMAT.VARIANT.BTS.BLOCKS.  */
+      struct btrace_maint_packet_history packet_history;
+    } bts;
+
+#if defined (HAVE_LIBIPT)
+    /* BTRACE.DATA.FORMAT == BTRACE_FORMAT_PT  */
+    struct
+    {
+      /* A vector of decoded packets.  */
+      VEC (btrace_pt_packet_s) *packets;
+
+      /* The packet history iterator.
+	 We are iterating over the above PACKETS vector.  */
+      struct btrace_maint_packet_history packet_history;
+    } pt;
+#endif /* defined (HAVE_LIBIPT)  */
+  } variant;
+};
+
 /* Branch trace information per thread.
 
    This represents the branch trace configuration as well as the entry point
@@ -228,6 +307,9 @@ struct btrace_thread_info
      target-specific information necessary for implementing branch tracing on
      the underlying architecture.  */
   struct btrace_target_info *target;
+
+  /* The raw branch trace data for the below branch trace.  */
+  struct btrace_data data;
 
   /* The current branch trace for this thread (both inclusive).
 
@@ -262,6 +344,9 @@ struct btrace_thread_info
 
   /* Why the thread stopped, if we need to track it.  */
   enum target_stop_reason stop_reason;
+
+  /* Maintenance information.  */
+  struct btrace_maint_info maint;
 };
 
 /* Enable branch tracing for a thread.  */

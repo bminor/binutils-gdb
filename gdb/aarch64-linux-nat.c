@@ -1207,7 +1207,7 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
 	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
       aarch64_show_debug_reg_state (state,
-				    "insert_hw_watchpoint", addr, len, type);
+				    "insert_hw_breakpoint", addr, len, type);
     }
 
   return ret;

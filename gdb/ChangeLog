@@ -1,3 +1,275 @@
+2015-07-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2015-07-06  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.10 branch created (66c4b3e8a628a207bc6aafef6af0c4128195f56e):
+	* version.in: Bump version to 7.10.50.DATE-cvs.
+
+2015-07-06  Luis Machado  <lgustavo@codesourcery.com>
+
+	* breakpoint.c (remove_breakpoint_1): Don't handle permanent
+	breakpoints in a special way.
+	(remove_breakpoint): Likewise.
+	(mark_breakpoints_out): Likewise.
+
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (TUI): Add comma after @xref.
+
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-win.c (tui_set_focus): Use structure member 'generic'
+	instead of casting the structure type.
+
+2015-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valops.c (search_struct_field): Remove OFFSET parameter.
+	(value_cast_structs): Adjust calls to search_struct_field.
+	(value_struct_elt): Same.
+	(find_overload_match): Same.
+
+2015-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* value.c (value_fetch_lazy): Update comment, change return
+	value to void.
+	* value.h (value_fetch_lazy): Change return value to void.
+
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-data.c (tui_partial_win_by_name): Window name is const.
+	(tui_win_name): Make parameter and result const.
+	* tui/tui-data.h (tui_win_name): Make parameter and result const.
+
+2015-07-06  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* i386-tdep.c (i386_mpx_info_bounds): Don't call error, instead
+	use printf_unfiltered.
+	(set_mpx_cmd): Add missing trailing space to command string
+	literal.
+	(_initialize_i386_tdep): Give the "mpx" prefix command its
+	correct name.
+
+2015-07-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (RX_USP_REGNUM, RX_BPC_REGNUM): New constants.
+	(enum rx_frame_type): New.
+	(struct rx_prologue): Add new field `frame_type'.
+	(rx_analyze_prologue): Add `frame_type' parameter. Cache this
+	parameter in the prologue struct.  Add code for recording
+	locations of PC and PSW for fast interrupt and exception frames.
+	(rx_skip_prologue): Adjust call to rx_analyze_prologue.
+	(rx_analyze_frame_prologue): Add `frame_type' parameter.
+	(rx_frame_type): New function.
+	(rx_frame_base): Fetch frame type and pass it to rx_analyze_prologue.
+	(rx_frame_this_id): Rename parameter `this_prologue_cache' to
+	`this_cache'.
+	(rx_frame_prev_register): Rename parameter `this_prologue_cache' to
+	`this_cache'.  Add cases for RX_FRAME_TYPE_EXCEPTION and 
+	RX_FRAME_TYPE_FAST_INTERRUPT.
+	(normal_frame_p, exception_frame_p, rx_frame_sniffer_common)
+	(rx_frame_sniffer, rx_exception_sniffer): New functions.
+	(rx_frame_unwind): Use rx_frame_sniffer instead of
+	default_frame_sniffer.
+	(rx_frame_unwind): New unwinder.
+	(rx_gdbarch_init): Register new unwinder.
+
+2015-07-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (RX_BPSW_REGNUM, RX_FPSW_REGNUM): New constants.
+	(struct gdbarch_tdep): Add fields rx_psw_type and rx_fpsw_type.
+	(rx_register_type): Add cases for RX_PSW_REGNUM, RX_BPSW_REGNUM,
+	and RX_FPSW_REGNUM.
+	(rx_gdbarch_init): Initialize PSW, BPSW, and FPSW flags types.
+
+2015-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix GCC false warning.
+	* s390-linux-tdep.c (s390_handle_arg): Initialize VAL.
+
+2015-07-02  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint): Fix
+	typo in the debugging message.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c: Include gdbcmd.h, cli/cli-utils.h, and ctype.h.
+	(maint_btrace_cmdlist, maint_btrace_set_cmdlist)
+	(maint_btrace_show_cmdlist, maint_btrace_pt_set_cmdlist)
+	(maint_btrace_pt_show_cmdlist, maint_btrace_pt_skip_pad)
+	(btrace_maint_clear): New.
+	(btrace_fetch, btrace_clear): Call btrace_maint_clear.
+	(pt_print_packet, btrace_maint_decode_pt)
+	(btrace_maint_update_pt_packets, btrace_maint_update_packets)
+	(btrace_maint_print_packets, get_uint, get_context_size, no_chunk)
+	(maint_btrace_packet_history_cmd)
+	(maint_btrace_clear_packet_history_cmd, maint_btrace_clear_cmd)
+	(maint_btrace_cmd, maint_btrace_set_cmd, maint_btrace_show_cmd)
+	(maint_btrace_pt_set_cmd, maint_btrace_pt_show_cmd)
+	(maint_info_btrace_cmd, _initialize_btrace): New.
+	* btrace.h (btrace_pt_packet, btrace_pt_packet_s)
+	(btrace_maint_packet_history, btrace_maint_info): New.
+	(btrace_thread_info) <maint>: New.
+	* NEWS: Announce it.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_fetch): Append the new trace data.
+	(btrace_clear): Clear the stored trace data.
+	* btrace.h (btrace_thread_info) <data>: New.
+	* common/btrace-common.h (btrace_data_clear)
+	(btrace_data_append): New.
+	* common/btrace-common.c (btrace_data_clear)
+	(btrace_data_append): New.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.c (linux_enable_bts): Check for
+	PERF_ATTR_SIZE_VER5.
+	Check for data_offset and data_size fields.  Use them.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* NEWS: Announce new commands "record btrace pt" and "record pt".
+	Announce new options "set|show record btrace pt buffer-size".
+	* btrace.c: Include "rsp-low.h".
+	Include "inttypes.h".
+	(btrace_add_pc): Add forward declaration.
+	(pt_reclassify_insn, ftrace_add_pt, btrace_pt_readmem_callback)
+	(pt_translate_cpu_vendor, btrace_finalize_ftrace_pt)
+	(btrace_compute_ftrace_pt): New.
+	(btrace_compute_ftrace): Support BTRACE_FORMAT_PT.
+	(check_xml_btrace_version): Update version check.
+	(parse_xml_raw, parse_xml_btrace_pt_config_cpu)
+	(parse_xml_btrace_pt_raw, parse_xml_btrace_pt)
+	(btrace_pt_config_cpu_attributes, btrace_pt_config_children)
+	(btrace_pt_children): New.
+	(btrace_children): Add support for "pt".
+	(parse_xml_btrace_conf_pt, btrace_conf_pt_attributes): New.
+	(btrace_conf_children): Add support for "pt".
+	* btrace.h: Include "intel-pt.h".
+	(btrace_pt_error): New.
+	* common/btrace-common.c (btrace_format_string, btrace_data_fini)
+	(btrace_data_empty): Support BTRACE_FORMAT_PT.
+	* common/btrace-common.h (btrace_format): Add BTRACE_FORMAT_PT.
+	(struct btrace_config_pt): New.
+	(struct btrace_config)<pt>: New.
+	(struct btrace_data_pt_config, struct btrace_data_pt): New.
+	(struct btrace_data)<pt>: New.
+	* features/btrace-conf.dtd (btrace-conf)<pt>: New.
+	(pt): New.
+	* features/btrace.dtd (btrace)<pt>: New.
+	(pt, pt-config, cpu): New.
+	* nat/linux-btrace.c (perf_event_read, perf_event_read_all)
+	(perf_event_pt_event_type, kernel_supports_pt)
+	(linux_supports_pt): New.
+	(linux_supports_btrace): Support BTRACE_FORMAT_PT.
+	(linux_enable_bts): Free tinfo on error.
+	(linux_enable_pt): New.
+	(linux_enable_btrace): Support BTRACE_FORMAT_PT.
+	(linux_disable_pt): New.
+	(linux_disable_btrace): Support BTRACE_FORMAT_PT.
+	(linux_fill_btrace_pt_config, linux_read_pt): New.
+	(linux_read_btrace): Support BTRACE_FORMAT_PT.
+	* nat/linux-btrace.h (struct btrace_tinfo_pt): New.
+	(struct btrace_target_info)<pt>: New.
+	* record-btrace.c (set_record_btrace_pt_cmdlist)
+	(show_record_btrace_pt_cmdlist): New.
+	(record_btrace_print_pt_conf): New.
+	(record_btrace_print_conf): Support BTRACE_FORMAT_PT.
+	(btrace_ui_out_decode_error): Support BTRACE_FORMAT_PT.
+	(cmd_record_btrace_pt_start): New.
+	(cmd_record_btrace_start): Support BTRACE_FORMAT_PT.
+	(cmd_set_record_btrace_pt, cmd_show_record_btrace_pt): New.
+	(_initialize_record_btrace): Add new commands.
+	* remote.c (PACKET_Qbtrace_pt, PACKET_Qbtrace_conf_pt_size): New.
+	(remote_protocol_features): Add "Qbtrace:pt".
+	Add "Qbtrace-conf:pt:size".
+	(remote_supports_btrace): Support BTRACE_FORMAT_PT.
+	(btrace_sync_conf): Support PACKET_Qbtrace_conf_pt_size.
+	(remote_enable_btrace): Support BTRACE_FORMAT_PT.
+	(_initialize_remote): Add new commands.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* configure.ac: check for libipt
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in (LIBIPT): New.
+	(CLIBS): Add $LIBIPT.
+	* NEWS: document new configure options
+
+2015-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile-object-load.c (compile_object_load): Replace debug
+	message "lookup undefined ELF symbol" by 3 more specific messages.
+
+2015-07-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (struct gdbarch_tdep): Add new field, rl78_psw_type.
+	(rl78_register_type): Add case for RL78_PSW_REGNUM.
+	(rl78_gdbarch_init): Initialize rl78_psw_type.
+
+2015-07-01  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-hooks.c (tui_refresh_frame_and_register_information):
+	Update commentary.  Always refresh the registers when frame
+	information has changed.
+	* tui/tui-stack.c (tui_show_frame_info): Update commentary.
+	Change return type to int.  Return 1 if frame information has
+	changed, 0 otherwise.
+	(tui_before_prompt): Update commentary.
+	* tui/tui-stack.h (tui_show_frame_info): Change return type to
+	int.
+
+2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR tui/13378
+	* frame.c (select_frame): Remove reference to
+	deprecated_selected_frame_level_changed_hook.
+	* frame.h (deprecated_selected_frame_level_changed_hook): Remove
+	declaration.
+	* stack.c (deprecated_selected_frame_level_changed_hook):
+	Likewise.
+	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook):
+	Rename to ...
+	(tui_refresh_frame_and_register_information): ... this.  Bail
+	out if there is no stack.  Don't update register information
+	unless registers_too_p is true.
+	(tui_print_frame_info_listing_hook): Rename to ...
+	(tui_dummy_print_frame_info_listing_hook): ... this.
+	(tui_before_prompt): New function.
+	(tui_normal_stop): New function.
+	(tui_before_prompt_observer): New observer.
+	(tui_normal_stop_observer): New observer.
+	(tui_install_hooks): Set
+	deprecated_print_frame_info_listing_hook to
+	tui_dummy_print_frame_info_listing_hook.  Register
+	tui_before_prompt_observer to call tui_before_prompt and
+	tui_normal_stop_observer to call tui_normal_stop.  Remove
+	reference to deprecated_selected_frame_level_changed_hook.
+	(tui_remove_hooks): Detach and unset tui_before_prompt_observer
+	and tui_normal_stop_observer.  Remove reference to
+	deprecated_selected_frame_level_changed_hook.
+
+2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR tui/13378
+	* tui/tui-stack.c (tui_set_locator_info): Change prototype to
+	return an int instead of void.  Return whether the locator
+	window has changed.
+	(tui_show_frame_info): If the locator info has not changed, then
+	bail out early to avoid refreshing the windows.
+
+2015-06-30  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-stack.c (tui_set_locator_info): Explicitly pass
+	LOCATOR_WIN to tui_alloc_content.
+
 2015-06-30  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/18605
@@ -6,10 +278,10 @@
 
 2015-06-29  Kevin Buettner  <kevinb@redhat.com>
 
-        * rx-tdep.c (RX_PSW_REGNUM): New enum constant.
-        (rx_dwarf_reg_to_regnum): New function.
-        (rx_gdbarch_init): Register rx_dwarf_reg_to_regnum.  Use dwarf2
-        unwinding.
+	* rx-tdep.c (RX_PSW_REGNUM): New enum constant.
+	(rx_dwarf_reg_to_regnum): New function.
+	(rx_gdbarch_init): Register rx_dwarf_reg_to_regnum.  Use dwarf2
+	unwinding.
 
 2015-06-29  Pedro Alves  <palves@redhat.com>
 

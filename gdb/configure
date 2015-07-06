@@ -658,6 +658,9 @@ TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
 RDYNAMIC
 ALLOCA
+LTLIBIPT
+LIBIPT
+HAVE_LIBIPT
 HAVE_GUILE_FALSE
 HAVE_GUILE_TRUE
 GUILE_LIBS
@@ -831,6 +834,8 @@ with_libexpat_prefix
 with_python
 with_guile
 enable_libmcheck
+with_intel_pt
+with_libipt_prefix
 with_included_regex
 with_sysroot
 with_system_gdbinit
@@ -1553,6 +1558,9 @@ Optional Packages:
                           (auto/yes/no/<python-program>)
   --with-guile[=GUILE]    include guile support
                           (auto/yes/no/<guile-version>/<pkg-config-program>)
+  --with-intel-pt         include Intel(R) Processor Trace support (auto/yes/no)
+  --with-libipt-prefix[=DIR]  search for libipt in DIR/include and DIR/lib
+  --without-libipt-prefix     don't search for libipt in includedir and libdir
   --without-included-regex
                           don't use included regex; this is the default on
                           systems with version 2 of the GNU C library (use
@@ -9659,6 +9667,496 @@ if test "$ENABLE_LIBMCHECK" = "yes" \
 	-a "${python_has_threads}" = "yes" ; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&5
 $as_echo "$as_me: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&2;}
+fi
+
+
+# Check whether --with-intel_pt was given.
+if test "${with_intel_pt+set}" = set; then :
+  withval=$with_intel_pt;
+else
+  with_intel_pt=auto
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use intel pt" >&5
+$as_echo_n "checking whether to use intel pt... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_intel_pt" >&5
+$as_echo "$with_intel_pt" >&6; }
+
+if test "${with_intel_pt}" = no; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Intel(R) Processor Trace support disabled; some features may be unavailable." >&5
+$as_echo "$as_me: WARNING: Intel(R) Processor Trace support disabled; some features may be unavailable." >&2;}
+  HAVE_LIBIPT=no
+else
+
+
+
+
+
+
+
+
+    use_additional=yes
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+
+    eval additional_includedir=\"$includedir\"
+    eval additional_libdir=\"$libdir\"
+
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+
+# Check whether --with-libipt-prefix was given.
+if test "${with_libipt_prefix+set}" = set; then :
+  withval=$with_libipt_prefix;
+    if test "X$withval" = "Xno"; then
+      use_additional=no
+    else
+      if test "X$withval" = "X"; then
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+
+          eval additional_includedir=\"$includedir\"
+          eval additional_libdir=\"$libdir\"
+
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+      else
+        additional_includedir="$withval/include"
+        additional_libdir="$withval/lib"
+      fi
+    fi
+
+fi
+
+      LIBIPT=
+  LTLIBIPT=
+  INCIPT=
+  rpathdirs=
+  ltrpathdirs=
+  names_already_handled=
+  names_next_round='ipt '
+  while test -n "$names_next_round"; do
+    names_this_round="$names_next_round"
+    names_next_round=
+    for name in $names_this_round; do
+      already_handled=
+      for n in $names_already_handled; do
+        if test "$n" = "$name"; then
+          already_handled=yes
+          break
+        fi
+      done
+      if test -z "$already_handled"; then
+        names_already_handled="$names_already_handled $name"
+                        uppername=`echo "$name" | sed -e 'y|abcdefghijklmnopqrstuvwxyz./-|ABCDEFGHIJKLMNOPQRSTUVWXYZ___|'`
+        eval value=\"\$HAVE_LIB$uppername\"
+        if test -n "$value"; then
+          if test "$value" = yes; then
+            eval value=\"\$LIB$uppername\"
+            test -z "$value" || LIBIPT="${LIBIPT}${LIBIPT:+ }$value"
+            eval value=\"\$LTLIB$uppername\"
+            test -z "$value" || LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }$value"
+          else
+                                    :
+          fi
+        else
+                              found_dir=
+          found_la=
+          found_so=
+          found_a=
+          if test $use_additional = yes; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+              found_dir="$additional_libdir"
+              found_so="$additional_libdir/lib$name.$shlibext"
+              if test -f "$additional_libdir/lib$name.la"; then
+                found_la="$additional_libdir/lib$name.la"
+              fi
+            else
+              if test -f "$additional_libdir/lib$name.$libext"; then
+                found_dir="$additional_libdir"
+                found_a="$additional_libdir/lib$name.$libext"
+                if test -f "$additional_libdir/lib$name.la"; then
+                  found_la="$additional_libdir/lib$name.la"
+                fi
+              fi
+            fi
+          fi
+          if test "X$found_dir" = "X"; then
+            for x in $LDFLAGS $LTLIBIPT; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+              case "$x" in
+                -L*)
+                  dir=`echo "X$x" | sed -e 's/^X-L//'`
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                    found_dir="$dir"
+                    found_so="$dir/lib$name.$shlibext"
+                    if test -f "$dir/lib$name.la"; then
+                      found_la="$dir/lib$name.la"
+                    fi
+                  else
+                    if test -f "$dir/lib$name.$libext"; then
+                      found_dir="$dir"
+                      found_a="$dir/lib$name.$libext"
+                      if test -f "$dir/lib$name.la"; then
+                        found_la="$dir/lib$name.la"
+                      fi
+                    fi
+                  fi
+                  ;;
+              esac
+              if test "X$found_dir" != "X"; then
+                break
+              fi
+            done
+          fi
+          if test "X$found_dir" != "X"; then
+                        LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-L$found_dir -l$name"
+            if test "X$found_so" != "X"; then
+                                                        if test "$enable_rpath" = no || test "X$found_dir" = "X/usr/lib"; then
+                                LIBIPT="${LIBIPT}${LIBIPT:+ }$found_so"
+              else
+                                                                                haveit=
+                for x in $ltrpathdirs; do
+                  if test "X$x" = "X$found_dir"; then
+                    haveit=yes
+                    break
+                  fi
+                done
+                if test -z "$haveit"; then
+                  ltrpathdirs="$ltrpathdirs $found_dir"
+                fi
+                                if test "$hardcode_direct" = yes; then
+                                                      LIBIPT="${LIBIPT}${LIBIPT:+ }$found_so"
+                else
+                  if test -n "$hardcode_libdir_flag_spec" && test "$hardcode_minus_L" = no; then
+                                                            LIBIPT="${LIBIPT}${LIBIPT:+ }$found_so"
+                                                            haveit=
+                    for x in $rpathdirs; do
+                      if test "X$x" = "X$found_dir"; then
+                        haveit=yes
+                        break
+                      fi
+                    done
+                    if test -z "$haveit"; then
+                      rpathdirs="$rpathdirs $found_dir"
+                    fi
+                  else
+                                                                                haveit=
+                    for x in $LDFLAGS $LIBIPT; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                      if test "X$x" = "X-L$found_dir"; then
+                        haveit=yes
+                        break
+                      fi
+                    done
+                    if test -z "$haveit"; then
+                      LIBIPT="${LIBIPT}${LIBIPT:+ }-L$found_dir"
+                    fi
+                    if test "$hardcode_minus_L" != no; then
+                                                                                        LIBIPT="${LIBIPT}${LIBIPT:+ }$found_so"
+                    else
+                                                                                                                                                                                LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
+                    fi
+                  fi
+                fi
+              fi
+            else
+              if test "X$found_a" != "X"; then
+                                LIBIPT="${LIBIPT}${LIBIPT:+ }$found_a"
+              else
+                                                LIBIPT="${LIBIPT}${LIBIPT:+ }-L$found_dir -l$name"
+              fi
+            fi
+                        additional_includedir=
+            case "$found_dir" in
+              */lib | */lib/)
+                basedir=`echo "X$found_dir" | sed -e 's,^X,,' -e 's,/lib/*$,,'`
+                additional_includedir="$basedir/include"
+                ;;
+            esac
+            if test "X$additional_includedir" != "X"; then
+                                                                                                                if test "X$additional_includedir" != "X/usr/include"; then
+                haveit=
+                if test "X$additional_includedir" = "X/usr/local/include"; then
+                  if test -n "$GCC"; then
+                    case $host_os in
+                      linux*) haveit=yes;;
+                    esac
+                  fi
+                fi
+                if test -z "$haveit"; then
+                  for x in $CPPFLAGS $INCIPT; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                    if test "X$x" = "X-I$additional_includedir"; then
+                      haveit=yes
+                      break
+                    fi
+                  done
+                  if test -z "$haveit"; then
+                    if test -d "$additional_includedir"; then
+                                            INCIPT="${INCIPT}${INCIPT:+ }-I$additional_includedir"
+                    fi
+                  fi
+                fi
+              fi
+            fi
+                        if test -n "$found_la"; then
+                                                        save_libdir="$libdir"
+              case "$found_la" in
+                */* | *\\*) . "$found_la" ;;
+                *) . "./$found_la" ;;
+              esac
+              libdir="$save_libdir"
+                            for dep in $dependency_libs; do
+                case "$dep" in
+                  -L*)
+                    additional_libdir=`echo "X$dep" | sed -e 's/^X-L//'`
+                                                                                                                                                                if test "X$additional_libdir" != "X/usr/lib"; then
+                      haveit=
+                      if test "X$additional_libdir" = "X/usr/local/lib"; then
+                        if test -n "$GCC"; then
+                          case $host_os in
+                            linux*) haveit=yes;;
+                          esac
+                        fi
+                      fi
+                      if test -z "$haveit"; then
+                        haveit=
+                        for x in $LDFLAGS $LIBIPT; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                          if test "X$x" = "X-L$additional_libdir"; then
+                            haveit=yes
+                            break
+                          fi
+                        done
+                        if test -z "$haveit"; then
+                          if test -d "$additional_libdir"; then
+                                                        LIBIPT="${LIBIPT}${LIBIPT:+ }-L$additional_libdir"
+                          fi
+                        fi
+                        haveit=
+                        for x in $LDFLAGS $LTLIBIPT; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                          if test "X$x" = "X-L$additional_libdir"; then
+                            haveit=yes
+                            break
+                          fi
+                        done
+                        if test -z "$haveit"; then
+                          if test -d "$additional_libdir"; then
+                                                        LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-L$additional_libdir"
+                          fi
+                        fi
+                      fi
+                    fi
+                    ;;
+                  -R*)
+                    dir=`echo "X$dep" | sed -e 's/^X-R//'`
+                    if test "$enable_rpath" != no; then
+                                                                  haveit=
+                      for x in $rpathdirs; do
+                        if test "X$x" = "X$dir"; then
+                          haveit=yes
+                          break
+                        fi
+                      done
+                      if test -z "$haveit"; then
+                        rpathdirs="$rpathdirs $dir"
+                      fi
+                                                                  haveit=
+                      for x in $ltrpathdirs; do
+                        if test "X$x" = "X$dir"; then
+                          haveit=yes
+                          break
+                        fi
+                      done
+                      if test -z "$haveit"; then
+                        ltrpathdirs="$ltrpathdirs $dir"
+                      fi
+                    fi
+                    ;;
+                  -l*)
+                                        names_next_round="$names_next_round "`echo "X$dep" | sed -e 's/^X-l//'`
+                    ;;
+                  *.la)
+                                                                                names_next_round="$names_next_round "`echo "X$dep" | sed -e 's,^X.*/,,' -e 's,^lib,,' -e 's,\.la$,,'`
+                    ;;
+                  *)
+                                        LIBIPT="${LIBIPT}${LIBIPT:+ }$dep"
+                    LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }$dep"
+                    ;;
+                esac
+              done
+            fi
+          else
+                                                            LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
+            LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l$name"
+          fi
+        fi
+      fi
+    done
+  done
+  if test "X$rpathdirs" != "X"; then
+    if test -n "$hardcode_libdir_separator"; then
+                        alldirs=
+      for found_dir in $rpathdirs; do
+        alldirs="${alldirs}${alldirs:+$hardcode_libdir_separator}$found_dir"
+      done
+            acl_save_libdir="$libdir"
+      libdir="$alldirs"
+      eval flag=\"$hardcode_libdir_flag_spec\"
+      libdir="$acl_save_libdir"
+      LIBIPT="${LIBIPT}${LIBIPT:+ }$flag"
+    else
+            for found_dir in $rpathdirs; do
+        acl_save_libdir="$libdir"
+        libdir="$found_dir"
+        eval flag=\"$hardcode_libdir_flag_spec\"
+        libdir="$acl_save_libdir"
+        LIBIPT="${LIBIPT}${LIBIPT:+ }$flag"
+      done
+    fi
+  fi
+  if test "X$ltrpathdirs" != "X"; then
+            for found_dir in $ltrpathdirs; do
+      LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-R$found_dir"
+    done
+  fi
+
+
+        ac_save_CPPFLAGS="$CPPFLAGS"
+
+  for element in $INCIPT; do
+    haveit=
+    for x in $CPPFLAGS; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+      if test "X$x" = "X$element"; then
+        haveit=yes
+        break
+      fi
+    done
+    if test -z "$haveit"; then
+      CPPFLAGS="${CPPFLAGS}${CPPFLAGS:+ }$element"
+    fi
+  done
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libipt" >&5
+$as_echo_n "checking for libipt... " >&6; }
+if test "${ac_cv_libipt+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_save_LIBS="$LIBS"
+    LIBS="$LIBS $LIBIPT"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include "intel-pt.h"
+int
+main ()
+{
+pt_insn_alloc_decoder (0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_libipt=yes
+else
+  ac_cv_libipt=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+    LIBS="$ac_save_LIBS"
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_libipt" >&5
+$as_echo "$ac_cv_libipt" >&6; }
+  if test "$ac_cv_libipt" = yes; then
+    HAVE_LIBIPT=yes
+
+$as_echo "#define HAVE_LIBIPT 1" >>confdefs.h
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to link with libipt" >&5
+$as_echo_n "checking how to link with libipt... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LIBIPT" >&5
+$as_echo "$LIBIPT" >&6; }
+  else
+    HAVE_LIBIPT=no
+            CPPFLAGS="$ac_save_CPPFLAGS"
+    LIBIPT=
+    LTLIBIPT=
+  fi
+
+
+
+
+
+
+  if test "$HAVE_LIBIPT" != yes; then
+    if test "$with_intel_pt" = yes; then
+      as_fn_error "libipt is missing or unusable" "$LINENO" 5
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: libipt is missing or unusable; some features may be unavailable." >&5
+$as_echo "$as_me: WARNING: libipt is missing or unusable; some features may be unavailable." >&2;}
+    fi
+  fi
 fi
 
 # ------------------------- #

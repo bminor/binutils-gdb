@@ -1,3 +1,26 @@
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* nios2.h (R_NIOS2_R2_S12): New.
+	(R_NIOS2_R2_I10_1_PCREL): New.
+	(R_NIOS2_R2_T1I7_1_PCREL): New.
+	(R_NIOS2_R2_T1I7_2): New.
+	(R_NIOS2_R2_T2I4): New.
+	(R_NIOS2_R2_T2I4_1): New.
+	(R_NIOS2_R2_T2I4_2): New.
+	(R_NIOS2_R2_X1I7_2): New.
+	(R_NIOS2_R2_X2L5): New.
+	(R_NIOS2_R2_F1I5_2): New.
+	(R_NIOS2_R2_L5I4X1): New.
+	(R_NIOS2_R2_T1X1I6): New.
+	(R_NIOS2_R2_T1X1I6_2): New.
+	(R_NIOS2_ILLEGAL): Renumber.
+
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* nios2.h (EF_NIOS2_ARCH_R1, EF_NIOS2_ARCH_R2): Define.
+
 2015-05-29  Roland McGrath  <mcgrathr@google.com>
 
 	* common.h (GNU_ABI_TAG_SYLLABLE): New macro.

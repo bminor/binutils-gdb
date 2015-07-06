@@ -1242,6 +1242,26 @@ if test "$ENABLE_LIBMCHECK" = "yes" \
   AC_MSG_WARN(--enable-libmcheck may lead to spurious crashes if threads are used in python)
 fi
 
+AC_ARG_WITH(intel_pt,
+  AS_HELP_STRING([--with-intel-pt], [include Intel(R) Processor Trace support (auto/yes/no)]),
+  [], [with_intel_pt=auto])
+AC_MSG_CHECKING([whether to use intel pt])
+AC_MSG_RESULT([$with_intel_pt])
+
+if test "${with_intel_pt}" = no; then
+  AC_MSG_WARN([Intel(R) Processor Trace support disabled; some features may be unavailable.])
+  HAVE_LIBIPT=no
+else
+  AC_LIB_HAVE_LINKFLAGS([ipt], [], [#include "intel-pt.h"], [pt_insn_alloc_decoder (0);])
+  if test "$HAVE_LIBIPT" != yes; then
+    if test "$with_intel_pt" = yes; then
+      AC_MSG_ERROR([libipt is missing or unusable])
+    else
+      AC_MSG_WARN([libipt is missing or unusable; some features may be unavailable.])
+    fi
+  fi
+fi
+
 # ------------------------- #
 # Checks for header files.  #
 # ------------------------- #

@@ -384,7 +384,8 @@ tui_partial_win_by_name (char *name)
 	{
           if (tui_win_list[i] != 0)
             {
-              char *cur_name = tui_win_name (&tui_win_list[i]->generic);
+              const char *cur_name =
+		tui_win_name (&tui_win_list[i]->generic);
 
               if (strlen (name) <= strlen (cur_name)
 		  && startswith (cur_name, name))
@@ -399,8 +400,8 @@ tui_partial_win_by_name (char *name)
 
 
 /* Answer the name of the window.  */
-char *
-tui_win_name (struct tui_gen_win_info *win_info)
+const char *
+tui_win_name (const struct tui_gen_win_info *win_info)
 {
   char *name = (char *) NULL;
 

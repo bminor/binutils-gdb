@@ -501,8 +501,10 @@ DESCRIPTION
 .  bfd_arch_aarch64,   {* AArch64  *}
 .#define bfd_mach_aarch64 0
 .#define bfd_mach_aarch64_ilp32	32
-.  bfd_arch_nios2,
-.#define bfd_mach_nios2	0
+.  bfd_arch_nios2,	{* Nios II *}
+.#define bfd_mach_nios2		0
+.#define bfd_mach_nios2r1	1
+.#define bfd_mach_nios2r2	2
 .  bfd_arch_visium,	{* Visium *}
 .#define bfd_mach_visium	1
 .  bfd_arch_last

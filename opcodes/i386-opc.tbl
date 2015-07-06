@@ -5938,3 +5938,16 @@ clzero, 0, 0xf01fc, None, 3, CpuCLZERO, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|
 
 // CLZERO instructions end
 
+// MONITORX/MWAITX instructions
+monitorx, 0, 0xf01, 0xfa, 2, CpuMWAITX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+// Need to ensure only "monitorx %eax/%ax,%ecx,%edx" is accepted.
+monitorx, 3, 0xf01, 0xfa, 2, CpuMWAITX|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOp0, { Reg16|Reg32, Reg32, Reg32 }
+// Need to ensure only "monitorx %rax/%eax,%rcx,%rdx" is accepted.
+monitorx, 3, 0xf01, 0xfa, 2, CpuMWAITX|Cpu64,   No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64, Reg64, Reg64 }
+
+mwaitx, 0, 0xf01, 0xfb, 2, CpuMWAITX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+// Need to ensure only "mwaitx %eax,%ecx,%ebx" is accepted.
+mwaitx, 3, 0xf01, 0xfb, 2, CpuMWAITX|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { Reg32, Reg32, Reg32 }
+// Need to ensure only "mwaitx %rax,%rcx,%rbx" is accepted.
+mwaitx, 3, 0xf01, 0xfb, 2, CpuMWAITX|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoRex64|NoAVX, { Reg64, Reg64, Reg64 }
+// MONITORX/MWAITX instructions end

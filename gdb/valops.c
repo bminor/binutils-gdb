@@ -47,7 +47,7 @@ static int typecmp (int staticp, int varargs, int nargs,
 		    struct field t1[], struct value *t2[]);
 
 static struct value *search_struct_field (const char *, struct value *, 
-					  int, struct type *, int);
+					  struct type *, int);
 
 static struct value *search_struct_method (const char *, struct value **,
 					   struct value **,
@@ -245,7 +245,7 @@ value_cast_structs (struct type *type, struct value *v2)
   if (TYPE_NAME (t1) != NULL)
     {
       v = search_struct_field (type_name_no_tag (t1),
-			       v2, 0, t2, 1);
+			       v2, t2, 1);
       if (v)
 	return v;
     }
@@ -272,7 +272,7 @@ value_cast_structs (struct type *type, struct value *v2)
 	      && !strcmp (TYPE_NAME (real_type), TYPE_NAME (t1)))
 	    return v;
 
-	  v = search_struct_field (type_name_no_tag (t2), v, 0, real_type, 1);
+	  v = search_struct_field (type_name_no_tag (t2), v, real_type, 1);
 	  if (v)
 	    return v;
 	}
@@ -281,7 +281,7 @@ value_cast_structs (struct type *type, struct value *v2)
 	 T2.  This wouldn't work properly for classes with virtual
 	 bases, but those were handled above.  */
       v = search_struct_field (type_name_no_tag (t2),
-			       value_zero (t1, not_lval), 0, t1, 1);
+			       value_zero (t1, not_lval), t1, 1);
       if (v)
 	{
 	  /* Downcasting is possible (t1 is superclass of v2).  */
@@ -1949,21 +1949,20 @@ do_search_struct_field (const char *name, struct value *arg1, int offset,
 }
 
 /* Helper function used by value_struct_elt to recurse through
-   baseclasses.  Look for a field NAME in ARG1.  Adjust the address of
-   ARG1 by OFFSET bytes, and search in it assuming it has (class) type
-   TYPE.  If found, return value, else return NULL.
+   baseclasses.  Look for a field NAME in ARG1.  Search in it assuming
+   it has (class) type TYPE.  If found, return value, else return NULL.
 
    If LOOKING_FOR_BASECLASS, then instead of looking for struct
    fields, look for a baseclass named NAME.  */
 
 static struct value *
-search_struct_field (const char *name, struct value *arg1, int offset,
+search_struct_field (const char *name, struct value *arg1,
 		     struct type *type, int looking_for_baseclass)
 {
   struct value *result = NULL;
   int boffset = 0;
 
-  do_search_struct_field (name, arg1, offset, type, looking_for_baseclass,
+  do_search_struct_field (name, arg1, 0, type, looking_for_baseclass,
 			  &result, &boffset, type);
   return result;
 }
@@ -2162,7 +2161,7 @@ value_struct_elt (struct value **argp, struct value **args,
 
       /* Try as a field first, because if we succeed, there is less
          work to be done.  */
-      v = search_struct_field (name, *argp, 0, t, 0);
+      v = search_struct_field (name, *argp, t, 0);
       if (v)
 	return v;
 
@@ -2196,7 +2195,7 @@ value_struct_elt (struct value **argp, struct value **args,
       /* See if user tried to invoke data as function.  If so, hand it
          back.  If it's not callable (i.e., a pointer to function),
          gdb should give an error.  */
-      v = search_struct_field (name, *argp, 0, t, 0);
+      v = search_struct_field (name, *argp, t, 0);
       /* If we found an ordinary field, then it is not a method call.
 	 So, treat it as if it were a static member function.  */
       if (v && static_memfuncp)
@@ -2519,7 +2518,7 @@ find_overload_match (struct value **args, int nargs,
 	 a function.  */
       if (TYPE_CODE (check_typedef (value_type (obj))) == TYPE_CODE_STRUCT)
 	{
-	  *valp = search_struct_field (name, obj, 0,
+	  *valp = search_struct_field (name, obj,
 				       check_typedef (value_type (obj)), 0);
 	  if (*valp)
 	    {

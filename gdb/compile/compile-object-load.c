@@ -731,14 +731,18 @@ compile_object_load (const char *object_file, const char *source_file,
 
       if (sym->flags != 0)
 	continue;
-      if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "lookup undefined ELF symbol \"%s\"\n",
-			    sym->name);
       sym->flags = BSF_GLOBAL;
       sym->section = bfd_abs_section_ptr;
       if (strcmp (sym->name, "_GLOBAL_OFFSET_TABLE_") == 0)
 	{
+	  if (compile_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"ELF symbol \"%s\" relocated to zero\n",
+				sym->name);
+
+	  /* It seems to be a GCC bug, with -mcmodel=large there should be no
+	     need for _GLOBAL_OFFSET_TABLE_.  Together with -fPIE the data
+	     remain PC-relative even with _GLOBAL_OFFSET_TABLE_ as zero.  */
 	  sym->value = 0;
 	  continue;
 	}
@@ -748,10 +752,21 @@ compile_object_load (const char *object_file, const char *source_file,
 	{
 	case mst_text:
 	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
+	  if (compile_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"ELF mst_text symbol \"%s\" relocated to %s\n",
+				sym->name,
+				paddress (target_gdbarch (), sym->value));
 	  break;
 	case mst_text_gnu_ifunc:
 	  sym->value = gnu_ifunc_resolve_addr (target_gdbarch (),
 					       BMSYMBOL_VALUE_ADDRESS (bmsym));
+	  if (compile_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"ELF mst_text_gnu_ifunc symbol \"%s\" "
+				"relocated to %s\n",
+				sym->name,
+				paddress (target_gdbarch (), sym->value));
 	  break;
 	default:
 	  warning (_("Could not find symbol \"%s\" "

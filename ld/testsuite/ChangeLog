@@ -1,3 +1,26 @@
+2015-07-05  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* ld-powerpc/tocopt6-inc.s, ld-powerpc/tocopt6a.s,
+	ld-powerpc/tocopt6b.s, ld-powerpc/tocopt6c.s,
+	ld-powerpc/tocopt6.d: New test.
+	* ld-powerpc/powerpc.exp (ppc64elftests): Add it.
+
+2015-07-03   Kai Tietz  <ktietz@redhat.com>
+	     Nick Clifton  <nickc@redhat.com>
+
+	PR ld/11539
+	* lib/ld-lib.exp (check_gc_sections_available): Do not
+	automatically fail for cygwin and mingw targets.
+
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* ld-nios2/mixed1a.d: New.
+	* ld-nios2/mixed1a.s: New.
+	* ld-nios2/mixed1b.d: New.
+	* ld-nios2/mixed1b.s: New.
+	* ld-nios2/nios2.exp: Build the new compatibility tests.
+
 2015-06-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-xtensa/tlsbin.rd: Updated.
