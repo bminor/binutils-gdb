@@ -1,3 +1,7 @@
+2015-07-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* development.sh (development): Set to false.
+
 2015-07-05  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Use the symbol value
