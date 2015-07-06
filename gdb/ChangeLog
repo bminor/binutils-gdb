@@ -1,5 +1,9 @@
 2015-07-08  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* MAINTAINERS (Write After Approval): Add Markus T. Metzger.
+
+2015-07-08  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* nat/linux-btrace.c (kernel_supports_bts, kernel_supports_pt):
 	Use safe_strerror() instead of strerror().
 
