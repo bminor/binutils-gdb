@@ -344,7 +344,7 @@ add_struct_fields (struct type *type, VEC (char_ptr) **output,
   int computed_type_name = 0;
   const char *type_name = NULL;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
       if (i < TYPE_N_BASECLASSES (type))
@@ -415,7 +415,7 @@ expression_completer (struct cmd_list_element *ignore,
     {
       for (;;)
 	{
-	  CHECK_TYPEDEF (type);
+	  type = check_typedef (type);
 	  if (TYPE_CODE (type) != TYPE_CODE_PTR
 	      && TYPE_CODE (type) != TYPE_CODE_REF)
 	    break;

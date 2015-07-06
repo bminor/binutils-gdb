@@ -381,7 +381,7 @@ value_cast (struct type *type, struct value *arg2)
     /* We deref the value and then do the cast.  */
     return value_cast (type, coerce_ref (arg2)); 
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   code1 = TYPE_CODE (type);
   arg2 = coerce_ref (arg2);
   type2 = check_typedef (value_type (arg2));
@@ -1012,7 +1012,7 @@ value_assign (struct value *toval, struct value *fromval)
 	fromval = coerce_array (fromval);
     }
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   /* Since modifying a register can trash the frame chain, and
      modifying memory can trash the frame cache, we save the old frame
@@ -1802,7 +1802,7 @@ do_search_struct_field (const char *name, struct value *arg1, int offset,
   int i;
   int nbases;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   nbases = TYPE_N_BASECLASSES (type);
 
   if (!looking_for_baseclass)
@@ -1983,7 +1983,7 @@ search_struct_method (const char *name, struct value **arg1p,
   int name_matched = 0;
   char dem_opname[64];
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
@@ -2285,7 +2285,7 @@ find_method_list (struct value **argp, const char *method,
   VEC (xmethod_worker_ptr) *worker_vec = NULL, *new_vec = NULL;
 
   gdb_assert (fn_list != NULL && xm_worker_vec != NULL);
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   /* First check in object itself.
      This function is called recursively to search through base classes.

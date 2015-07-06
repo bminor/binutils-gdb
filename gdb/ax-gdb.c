@@ -322,7 +322,7 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
   int i, nbases = TYPE_N_BASECLASSES (type);
   struct axs_value value;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
     {
@@ -1438,7 +1438,7 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
   int i, rslt;
   int nbases = TYPE_N_BASECLASSES (type);
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
     {

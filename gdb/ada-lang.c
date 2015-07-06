@@ -2238,7 +2238,7 @@ decode_constrained_packed_array_type (struct type *type)
       lim_warning (_("could not find bounds information on packed array"));
       return NULL;
     }
-  CHECK_TYPEDEF (shadow_type);
+  shadow_type = check_typedef (shadow_type);
 
   if (TYPE_CODE (shadow_type) != TYPE_CODE_ARRAY)
     {
@@ -3056,7 +3056,7 @@ ada_array_length (struct value *arr, int n)
       high = value_as_long (desc_one_bound (desc_bounds (arr), n, 1));
     }
 
-  CHECK_TYPEDEF (arr_type);
+  arr_type = check_typedef (arr_type);
   index_type = TYPE_INDEX_TYPE (arr_type);
   if (index_type != NULL)
     {
@@ -7841,7 +7841,7 @@ find_parallel_type_by_descriptive_type (struct type *type, const char *name)
 	result = tmp;
       else
 	{
-	  CHECK_TYPEDEF (result);
+	  result = check_typedef (result);
 	  if (HAVE_GNAT_AUX_INFO (result))
 	    result = TYPE_DESCRIPTIVE_TYPE (result);
 	  else
@@ -8943,7 +8943,7 @@ ada_check_typedef (struct type *type)
       && is_thick_pntr (ada_typedef_target_type (type)))
     return type;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM
       || !TYPE_STUB (type)
       || TYPE_TAG_NAME (type) == NULL)

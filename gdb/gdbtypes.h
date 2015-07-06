@@ -1814,11 +1814,6 @@ extern void add_dyn_prop
 
 extern struct type *check_typedef (struct type *);
 
-#define CHECK_TYPEDEF(TYPE)			\
-  do {						\
-    (TYPE) = check_typedef (TYPE);		\
-  } while (0)
-
 extern void check_stub_method_group (struct type *, int);
 
 extern char *gdb_mangle_name (struct type *, int, int);

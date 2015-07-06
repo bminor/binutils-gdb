@@ -2852,7 +2852,7 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
   int nosign;
 
   *invp = 0;			/* Assume valid.  */
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   code = TYPE_CODE (type);
   len = TYPE_LENGTH (type);
   nosign = TYPE_UNSIGNED (type);
@@ -2993,7 +2993,7 @@ value_primitive_field (struct value *arg1, int offset,
   struct value *v;
   struct type *type;
 
-  CHECK_TYPEDEF (arg_type);
+  arg_type = check_typedef (arg_type);
   type = TYPE_FIELD_TYPE (arg_type, fieldno);
 
   /* Call check_typedef on our type to make sure that, if TYPE
@@ -3195,7 +3195,7 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
 
   /* Read the minimum number of bytes required; there may not be
      enough bytes to read an entire ULONGEST.  */
-  CHECK_TYPEDEF (field_type);
+  field_type = check_typedef (field_type);
   if (bitsize)
     bytes_read = ((bitpos % 8) + bitsize + 7) / 8;
   else

@@ -2030,7 +2030,7 @@ check_field (struct type *type, const char *name,
   int i;
 
   /* The type may be a stub.  */
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
@@ -2133,7 +2133,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 
 	  /* I'm not really sure that type of this can ever
 	     be typedefed; just be safe.  */
-	  CHECK_TYPEDEF (t);
+	  t = check_typedef (t);
 	  if (TYPE_CODE (t) == TYPE_CODE_PTR
 	      || TYPE_CODE (t) == TYPE_CODE_REF)
 	    t = TYPE_TARGET_TYPE (t);

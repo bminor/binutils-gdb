@@ -882,7 +882,7 @@ cp_find_type_baseclass_by_name (struct type *parent_type, const char *name)
 {
   int i;
 
-  CHECK_TYPEDEF (parent_type);
+  parent_type = check_typedef (parent_type);
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
       struct type *type = check_typedef (TYPE_BASECLASS (parent_type, i));
@@ -1002,7 +1002,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
     }
 
   /* If this is a class with baseclasses, search them next.  */
-  CHECK_TYPEDEF (container_type);
+  container_type = check_typedef (container_type);
   if (TYPE_N_BASECLASSES (container_type) > 0)
     {
       sym = find_symbol_in_baseclass (container_type, nested_name, block,
@@ -1029,7 +1029,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
      original type.  */
   struct type *saved_parent_type = parent_type;
 
-  CHECK_TYPEDEF (parent_type);
+  parent_type = check_typedef (parent_type);
 
   if (symbol_lookup_debug)
     {

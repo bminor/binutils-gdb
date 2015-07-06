@@ -273,7 +273,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 {
   int i, len, n_baseclasses;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   fprintf_filtered (stream, "{");
   len = TYPE_NFIELDS (type);
@@ -462,7 +462,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
   struct type *target_type;
   CORE_ADDR addr;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:

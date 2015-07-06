@@ -80,7 +80,7 @@ d_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 {
   int ret;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
       case TYPE_CODE_STRUCT:

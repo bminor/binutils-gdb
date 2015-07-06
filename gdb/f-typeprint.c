@@ -273,7 +273,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
     }
 
   if (TYPE_CODE (type) != TYPE_CODE_TYPEDEF)
-    CHECK_TYPEDEF (type);
+    type = check_typedef (type);
 
   switch (TYPE_CODE (type))
     {

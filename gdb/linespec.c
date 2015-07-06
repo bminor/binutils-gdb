@@ -1129,7 +1129,7 @@ find_methods (struct type *t, const char *name,
     {
       int method_counter;
 
-      CHECK_TYPEDEF (t);
+      t = check_typedef (t);
 
       /* Loop over each method name.  At this level, all overloads of a name
          are counted as a single name.  There is an inner loop which loops over
@@ -2717,7 +2717,7 @@ collect_one_symbol (struct symbol *sym, void *d)
     return 1; /* Continue iterating.  */
 
   t = SYMBOL_TYPE (sym);
-  CHECK_TYPEDEF (t);
+  t = check_typedef (t);
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION
       && TYPE_CODE (t) != TYPE_CODE_NAMESPACE)

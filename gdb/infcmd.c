@@ -1530,7 +1530,7 @@ get_return_value (struct value *function, struct type *value_type,
 
   gdbarch = get_regcache_arch (stop_regs);
 
-  CHECK_TYPEDEF (value_type);
+  value_type = check_typedef (value_type);
   gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
 
   /* FIXME: 2003-09-27: When returning from a nested inferior function

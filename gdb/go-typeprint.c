@@ -48,7 +48,7 @@ go_print_type (struct type *type, const char *varstring,
 {
   /* Borrowed from c-typeprint.c.  */
   if (show > 0)
-    CHECK_TYPEDEF (type);
+    type = check_typedef (type);
 
   /* Print the type of "abc" as "string", not char[4].  */
   if (TYPE_CODE (type) == TYPE_CODE_ARRAY

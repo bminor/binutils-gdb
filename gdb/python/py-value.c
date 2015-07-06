@@ -356,7 +356,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
       struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
 
       type = value_type (val);
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
 
       if (((TYPE_CODE (type) == TYPE_CODE_PTR)
 	   || (TYPE_CODE (type) == TYPE_CODE_REF))
@@ -1059,9 +1059,9 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    struct type *ltype = value_type (arg1);
 	    struct type *rtype = value_type (arg2);
 
-	    CHECK_TYPEDEF (ltype);
+	    ltype = check_typedef (ltype);
 	    ltype = STRIP_REFERENCE (ltype);
-	    CHECK_TYPEDEF (rtype);
+	    rtype = check_typedef (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
 	    handled = 1;
@@ -1083,9 +1083,9 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    struct type *ltype = value_type (arg1);
 	    struct type *rtype = value_type (arg2);
 
-	    CHECK_TYPEDEF (ltype);
+	    ltype = check_typedef (ltype);
 	    ltype = STRIP_REFERENCE (ltype);
-	    CHECK_TYPEDEF (rtype);
+	    rtype = check_typedef (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
 	    handled = 1;
@@ -1474,7 +1474,7 @@ valpy_long (PyObject *self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
 
       if (!is_integral_type (type)
 	  && TYPE_CODE (type) != TYPE_CODE_PTR)
@@ -1501,7 +1501,7 @@ valpy_float (PyObject *self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
 
       if (TYPE_CODE (type) != TYPE_CODE_FLT)
 	error (_("Cannot convert value to float."));

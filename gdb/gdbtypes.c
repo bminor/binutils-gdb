@@ -898,7 +898,7 @@ has_static_range (const struct range_bounds *bounds)
 int
 get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -1074,7 +1074,7 @@ create_array_type_with_stride (struct type *result_type,
 
       if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
 	low_bound = high_bound = 0;
-      CHECK_TYPEDEF (element_type);
+      element_type = check_typedef (element_type);
       /* Be careful when setting the array length.  Ada arrays can be
 	 empty arrays with the high_bound being smaller than the low_bound.
 	 In such cases, the array length should be zero.  */
@@ -1383,7 +1383,7 @@ type_name_no_tag_or_error (struct type *type)
   const char *name;
   struct objfile *objfile;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   name = type_name_no_tag (type);
   if (name != NULL)
@@ -1562,7 +1562,7 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
 
   for (;;)
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
       if (TYPE_CODE (type) != TYPE_CODE_PTR
 	  && TYPE_CODE (type) != TYPE_CODE_REF)
 	break;
@@ -1639,7 +1639,7 @@ get_unsigned_type_max (struct type *type, ULONGEST *max)
 {
   unsigned int n;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_INT && TYPE_UNSIGNED (type));
   gdb_assert (TYPE_LENGTH (type) <= sizeof (ULONGEST));
 
@@ -1656,7 +1656,7 @@ get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
 {
   unsigned int n;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_INT && !TYPE_UNSIGNED (type));
   gdb_assert (TYPE_LENGTH (type) <= sizeof (LONGEST));
 
@@ -1675,7 +1675,7 @@ get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
 int
 internal_type_vptr_fieldno (struct type *type)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   if (!HAVE_CPLUS_STRUCT (type))
@@ -1688,7 +1688,7 @@ internal_type_vptr_fieldno (struct type *type)
 void
 set_type_vptr_fieldno (struct type *type, int fieldno)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   if (!HAVE_CPLUS_STRUCT (type))
@@ -1702,7 +1702,7 @@ set_type_vptr_fieldno (struct type *type, int fieldno)
 struct type *
 internal_type_vptr_basetype (struct type *type)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_CPLUS_STUFF);
@@ -1714,7 +1714,7 @@ internal_type_vptr_basetype (struct type *type)
 void
 set_type_vptr_basetype (struct type *type, struct type *basetype)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   if (!HAVE_CPLUS_STRUCT (type))
@@ -1737,7 +1737,7 @@ set_type_vptr_basetype (struct type *type, struct type *basetype)
 int
 get_vptr_fieldno (struct type *type, struct type **basetypep)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   if (TYPE_VPTR_FIELDNO (type) < 0)
     {
@@ -2679,7 +2679,7 @@ can_dereference (struct type *t)
 {
   /* FIXME: Should we return true for references as well as
      pointers?  */
-  CHECK_TYPEDEF (t);
+  t = check_typedef (t);
   return
     (t != NULL
      && TYPE_CODE (t) == TYPE_CODE_PTR
@@ -2689,7 +2689,7 @@ can_dereference (struct type *t)
 int
 is_integral_type (struct type *t)
 {
-  CHECK_TYPEDEF (t);
+  t = check_typedef (t);
   return
     ((t != NULL)
      && ((TYPE_CODE (t) == TYPE_CODE_INT)
@@ -2705,7 +2705,7 @@ is_integral_type (struct type *t)
 static int
 is_scalar_type (struct type *type)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   switch (TYPE_CODE (type))
     {
@@ -2727,7 +2727,7 @@ is_scalar_type (struct type *type)
 int
 is_scalar_type_recursive (struct type *t)
 {
-  CHECK_TYPEDEF (t);
+  t = check_typedef (t);
 
   if (is_scalar_type (t))
     return 1;
@@ -2809,8 +2809,8 @@ distance_to_ancestor (struct type *base, struct type *dclass, int is_public)
   int i;
   int d;
 
-  CHECK_TYPEDEF (base);
-  CHECK_TYPEDEF (dclass);
+  base = check_typedef (base);
+  dclass = check_typedef (dclass);
 
   if (class_types_same_p (base, dclass))
     return 0;
@@ -2859,8 +2859,8 @@ is_unique_ancestor_worker (struct type *base, struct type *dclass,
 {
   int i, count = 0;
 
-  CHECK_TYPEDEF (base);
-  CHECK_TYPEDEF (dclass);
+  base = check_typedef (base);
+  dclass = check_typedef (dclass);
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass) && count < 2; ++i)
     {
@@ -3179,8 +3179,8 @@ static int
 check_types_equal (struct type *type1, struct type *type2,
 		   VEC (type_equality_entry_d) **worklist)
 {
-  CHECK_TYPEDEF (type1);
-  CHECK_TYPEDEF (type2);
+  type1 = check_typedef (type1);
+  type2 = check_typedef (type2);
 
   if (type1 == type2)
     return 1;

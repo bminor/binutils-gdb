@@ -2104,7 +2104,7 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
   int nRc;
   enum type_code code;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   /* In the AArch64 ABI, "integer" like aggregate types are returned
      in registers.  For an aggregate type to be integer like, its size

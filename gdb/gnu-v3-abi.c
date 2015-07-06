@@ -202,7 +202,7 @@ gnuv3_dynamic_class (struct type *type)
 {
   int fieldnum, fieldelem;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
 
@@ -253,7 +253,7 @@ gnuv3_get_vtable (struct gdbarch *gdbarch,
   struct value *vtable_pointer;
   CORE_ADDR vtable_address;
 
-  CHECK_TYPEDEF (container_type);
+  container_type = check_typedef (container_type);
   gdb_assert (TYPE_CODE (container_type) == TYPE_CODE_STRUCT);
 
   /* If this type does not have a virtual table, don't read the first
@@ -1293,7 +1293,7 @@ gnuv3_pass_by_reference (struct type *type)
 {
   int fieldnum, fieldelem;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   /* We're only interested in things that can have methods.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
