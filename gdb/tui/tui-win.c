@@ -1141,7 +1141,9 @@ tui_set_win_height (char *arg, int from_tty)
       char *wname = (char *) NULL;
       int new_height, i;
       struct tui_win_info *win_info;
+      struct cleanup *old_chain;
 
+      old_chain = make_cleanup (xfree, buf);
       wname = buf_ptr;
       buf_ptr = strchr (buf_ptr, ' ');
       if (buf_ptr != (char *) NULL)
@@ -1204,8 +1206,7 @@ The window name specified must be valid and visible.\n"));
       else
 	printf_filtered (WIN_HEIGHT_USAGE);
 
-      if (buf != (char *) NULL)
-	xfree (buf);
+      do_cleanups (old_chain);
     }
   else
     printf_filtered (WIN_HEIGHT_USAGE);
@@ -1636,9 +1637,11 @@ parse_scrolling_args (char *arg,
   if (arg != (char *) NULL)
     {
       char *buf, *buf_ptr;
+      struct cleanup *old_chain;
 
       /* Process the number of lines to scroll.  */
       buf = buf_ptr = xstrdup (arg);
+      old_chain = make_cleanup (xfree, buf);
       if (isdigit (*buf_ptr))
 	{
 	  char *num_str;
@@ -1686,6 +1689,6 @@ The window name specified must be valid and visible.\n"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
 	    *win_to_scroll = (tui_source_windows ())->list[0];
 	}
-      xfree (buf);
+      do_cleanups (old_chain);
     }
 }

@@ -1,5 +1,11 @@
 2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-win.c (tui_set_win_height): Use a cleanup to free the
+	string copy.
+	(parse_scrolling_args): Likewise.
+
+2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-win.c (focus_completer): Don't duplicate the tui window
 	names in this function.
 
