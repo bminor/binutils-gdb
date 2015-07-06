@@ -2212,6 +2212,9 @@ record_btrace_set_replay (struct thread_info *tp,
 
   /* Start anew from the new replay position.  */
   record_btrace_clear_histories (btinfo);
+
+  stop_pc = regcache_read_pc (get_current_regcache ());
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* The to_goto_record_begin method of target record-btrace.  */
@@ -2226,8 +2229,6 @@ record_btrace_goto_begin (struct target_ops *self)
 
   btrace_insn_begin (&begin, &tp->btrace);
   record_btrace_set_replay (tp, &begin);
-
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* The to_goto_record_end method of target record-btrace.  */
@@ -2240,8 +2241,6 @@ record_btrace_goto_end (struct target_ops *ops)
   tp = require_btrace_thread ();
 
   record_btrace_set_replay (tp, NULL);
-
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* The to_goto_record method of target record-btrace.  */
@@ -2267,8 +2266,6 @@ record_btrace_goto (struct target_ops *self, ULONGEST insn)
     error (_("No such instruction."));
 
   record_btrace_set_replay (tp, &it);
-
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* The to_execution_direction target method.  */
