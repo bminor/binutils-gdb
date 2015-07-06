@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.25.51.0.2 for Linux, which is
-based on binutils 2015 0515 master branch on sourceware.org plus
+This is the beta release of binutils 2.25.51.0.3 for Linux, which is
+based on binutils 2015 0630 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -43,7 +43,8 @@ ld.  IA-32 binary and X64_64 binary tar balls are configured with
 Starting from the 2.25.51.0.2 release, the x86 assembler will optimize
 out relocations against defined non-weak global branch targets with
 default visibility by default.  This Linux kernel patch is needed to
-create a working x86 Linux kernel if it hasn't been applied:
+create a working x86 Linux kernel if it hasn't been updated to support
+the newer assembler:
 
 diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
 index ae6588b..b91a00c 100644
@@ -142,12 +143,39 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.25.51.0.2 to
+Please report any bugs related to binutils 2.25.51.0.3 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.25.51.0.2:
+
+1. Update from binutils 2015 0630.
+2. Fix the i386/x86-64 linker regression with prelink support.  Prelink
+may corrupt glibc binaries created by the 2.25.51.0.2 i386/x86-64 linker:
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1235068
+
+3. Skip extra relocations in .rel.plt/.rela.plt added by the third-party
+tool.  PR binutils/18437.
+4. Fix invalid R_X86_64_GOTPCREL -> R_X86_64_PC32 conversions.
+PR ld/18591.
+5. Reduce the size of ELF .strtab section with GC and suffix merging.
+PR gas/18451.
+6. Improve Intel syntax support in x86 assembler.
+7. Add compact EH support.
+8. Add --sectname-subst option to assembler.
+9. Add --print-memory-usage option to bfd linker.
+10. Improve gold support.
+11. Improve PE support.
+12. Improve aarch64 support.
+13. Improve arm support.
+14. Improve hppa support.
+15. Improve mips support.
+16. Improve msp430 support.
+17. Improve ppc support.
 
 Changes from binutils 2.25.51.0.1:
 
@@ -1095,7 +1123,7 @@ already been defined.  PR 12001.
 16. Improve ppc support.
 17. Improve tic6x support.
 
-It is available as users/hjl/linux/release/2.25.51.0.2 tag at
+It is available as users/hjl/linux/release/2.25.51.0.3 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -1104,4 +1132,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-05/18/2015
+07/06/2015
