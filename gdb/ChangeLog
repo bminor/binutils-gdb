@@ -1,5 +1,12 @@
 2015-07-06  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* valops.c (search_struct_field): Remove OFFSET parameter.
+	(value_cast_structs): Adjust calls to search_struct_field.
+	(value_struct_elt): Same.
+	(find_overload_match): Same.
+
+2015-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* value.c (value_fetch_lazy): Update comment, change return
 	value to void.
 	* value.h (value_fetch_lazy): Change return value to void.
