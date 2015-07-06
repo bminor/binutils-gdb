@@ -1,3 +1,10 @@
+2015-07-07  Han Shen  <shenhan@google.com>
+
+	Make gold aarch64 accept long form of mapping symbols.
+
+	* aarch64.cc (AArch64_relobj::do_count_local_symbols): Make legal
+	of mapping symbols.
+
 2015-06-29  Doug Kwan  <dougkwan@google.com>
 
 	* testsuite/arm_bl_out_of_range.s: Align stub table so that it appears
@@ -12,12 +19,12 @@
 	* testsuite/thumb_bl_out_of_range.s: Ditto.
 	* testsuite/thumb_bl_out_of_range_local.s: Ditto.
 	* testsuite/thumb_blx_out_of_range.s: Ditto.
-	
+
 2015-06-29  Han Shen  <shenhan@google.com>
 
 	Patch for erratum 843419 internal error.
 
-        * AArch64.cc (Erratum_stub::Insn_utilities): New typedef.
+        * aarch64.cc (Erratum_stub::Insn_utilities): New typedef.
         (Erratum_stub::update_erratum_insn): New method.
         (Stub_table::relocate_stubs): Modified to place relocated insn.
         (AArch64_relobj::fix_errata): Modified gold_assert.

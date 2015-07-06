@@ -1831,10 +1831,17 @@ AArch64_relobj<size, big_endian>::do_count_local_symbols(
       Symbol_value<size>& lv((*plocal_values)[i]);
       AArch64_address input_value = lv.input_value();
 
-      // Check to see if this is a mapping symbol.
+      // Check to see if this is a mapping symbol. AArch64 mapping symbols are
+      // defined in "ELF for the ARM 64-bit Architecture", Table 4-4, Mapping
+      // symbols.
+      // Mapping symbols could be one of the following 4 forms -
+      //   a) $x
+      //   b) $x.<any...>
+      //   c) $d
+      //   d) $d.<any...>
       const char* sym_name = pnames + sym.get_st_name();
       if (sym_name[0] == '$' && (sym_name[1] == 'x' || sym_name[1] == 'd')
-	  && sym_name[2] == '\0')
+	  && (sym_name[2] == '\0' || sym_name[2] == '.'))
 	{
 	  bool is_ordinary;
 	  unsigned int input_shndx =
