@@ -9009,6 +9009,18 @@ If the @code{x} command has a repeat count, the address and contents saved
 are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
 
+@anchor{addressable memory unit}
+@cindex addressable memory unit
+Most targets have an addressable memory unit size of 8 bits.  This means
+that to each memory address are associated 8 bits of data.  Some
+targets, however, have other addressable memory unit sizes.
+Within @value{GDBN} and this document, the term
+@dfn{addressable memory unit} (or @dfn{memory unit} for short) is used
+when explicitly referring to a chunk of data of that size.  The word
+@dfn{byte} is used to refer to a chunk of data of 8 bits, regardless of
+the addressable memory unit size of the target.  For most systems,
+addressable memory unit is a synonym of byte.
+
 @cindex remote memory comparison
 @cindex target memory comparison
 @cindex verify remote memory image
@@ -17221,6 +17233,25 @@ compile file /home/user/example.c
 @end smallexample
 @end table
 
+@table @code
+@item compile print @var{expr}
+@itemx compile print /@var{f} @var{expr}
+Compile and execute @var{expr} with the compiler language found as the
+current language in @value{GDBN} (@pxref{Languages}).  By default the
+value of @var{expr} is printed in a format appropriate to its data type;
+you can choose a different format by specifying @samp{/@var{f}}, where
+@var{f} is a letter specifying the format; see @ref{Output Formats,,Output
+Formats}.
+
+@item compile print
+@itemx compile print /@var{f}
+@cindex reprint the last value
+Alternatively you can enter the expression (source code producing it) as
+multiple lines of text.  To enter this mode, invoke the @samp{compile print}
+command without any text following the command.  This will start the
+multiple-line editor.
+@end table
+
 @noindent
 The process of compiling and injecting the code can be inspected using:
 
@@ -18151,7 +18182,7 @@ the executable and the debug file came from the same build.
 @item
 The executable contains a @dfn{build ID}, a unique bit string that is
 also present in the corresponding debug info file.  (This is supported
-only on some operating systems, notably those which use the ELF format
+only on some operating systems, when using the ELF or PE file formats
 for binary files and the @sc{gnu} Binutils.)  For more details about
 this feature, see the description of the @option{--build-id}
 command-line option in @ref{Options, , Command Line Options, ld.info,
@@ -19895,6 +19926,10 @@ are:
 
 @item @code{hostio-fstat-packet}
 @tab @code{vFile:fstat}
+@tab Host I/O
+
+@item @code{hostio-setfs-packet}
+@tab @code{vFile:setfs}
 @tab Host I/O
 
 @item @code{noack-packet}
@@ -22110,6 +22145,7 @@ Show the current setting of the convention to return @code{struct}s
 from functions.
 @end table
 
+
 @subsubsection Intel(R) @dfn{Memory Protection Extensions} (MPX).
 @cindex Intel(R) Memory Protection Extensions (MPX).
 
@@ -22142,6 +22178,25 @@ change on bnd0@dots{}bnd3 or bnd0raw@dots{}bnd3raw is reflect on its
 counterpart.  When the bnd0@dots{}bnd3 registers are displayed via
 Python, the display includes the memory size, in bits, accessible to
 the pointer.
+
+Bounds can also be stored in bounds tables, which are stored in
+application memory.  These tables store bounds for pointers by specifying
+the bounds pointer's value along with its bounds.  Evaluating and changing
+bounds located in bound tables is therefore interesting while investigating
+bugs on MPX context.  @value{GDBN} provides commands for this purpose:
+
+@table @code
+@item show mpx bound @var{pointer}
+@kindex show mpx bound
+Display bounds of the given @var{pointer}.
+
+@item set mpx bound @var{pointer}, @var{lbound}, @var{ubound}
+@kindex  set mpx bound
+Set the bounds of a pointer in the bound table.
+This command takes three parameters: @var{pointer} is the pointers
+whose bounds are to be changed, @var{lbound} and @var{ubound} are new values
+for lower and upper bounds respectively.
+@end table
 
 @node Alpha
 @subsection Alpha
@@ -22580,14 +22635,30 @@ Stop recording command history in a file.
 
 @cindex history size
 @kindex set history size
-@cindex @env{HISTSIZE}, environment variable
+@cindex @env{GDBHISTSIZE}, environment variable
 @item set history size @var{size}
 @itemx set history size unlimited
 Set the number of commands which @value{GDBN} keeps in its history list.
-This defaults to the value of the environment variable
-@code{HISTSIZE}, or to 256 if this variable is not set.  If @var{size}
-is @code{unlimited}, the number of commands @value{GDBN} keeps in the
-history list is unlimited.
+This defaults to the value of the environment variable @env{GDBHISTSIZE}, or
+to 256 if this variable is not set.  Non-numeric values of @env{GDBHISTSIZE}
+are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is
+either a negative number or the empty string, then the number of commands
+@value{GDBN} keeps in the history list is unlimited.
+
+@cindex remove duplicate history
+@kindex set history remove-duplicates
+@item set history remove-duplicates @var{count}
+@itemx set history remove-duplicates unlimited
+Control the removal of duplicate history entries in the command history list.
+If @var{count} is non-zero, @value{GDBN} will look back at the last @var{count}
+history entries and remove the first entry that is a duplicate of the current
+entry being added to the command history list.  If @var{count} is
+@code{unlimited} then this lookbehind is unbounded.  If @var{count} is 0, then
+removal of duplicate history entries is disabled.
+
+Only history entries added during the current session are considered for
+removal.  This option is set to 0 by default.
+
 @end table
 
 History expansion assigns special meaning to the character @kbd{!}.
@@ -23391,21 +23462,29 @@ exported symbols.  The default is off.
 @item show debug coff-pe-read
 Displays the current state of displaying debugging messages related to
 reading of COFF/PE exported symbols.
-@item set debug dwarf2-die
-@cindex DWARF2 DIEs
-Dump DWARF2 DIEs after they are read in.
+@item set debug dwarf-die
+@cindex DWARF DIEs
+Dump DWARF DIEs after they are read in.
 The value is the number of nesting levels to print.
 A value of zero turns off the display.
-@item show debug dwarf2-die
-Show the current state of DWARF2 DIE debugging.
-@item set debug dwarf2-read
-@cindex DWARF2 Reading
+@item show debug dwarf-die
+Show the current state of DWARF DIE debugging.
+@item set debug dwarf-line
+@cindex DWARF Line Tables
+Turns on or off display of debugging messages related to reading
+DWARF line tables.  The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
+@item show debug dwarf-line
+Show the current state of DWARF line table debugging.
+@item set debug dwarf-read
+@cindex DWARF Reading
 Turns on or off display of debugging messages related to reading
 DWARF debug info.  The default is 0 (off).
 A value of 1 provides basic information.
 A value greater than 1 provides more verbose information.
-@item show debug dwarf2-read
-Show the current state of DWARF2 reader debugging.
+@item show debug dwarf-read
+Show the current state of DWARF reader debugging.
 @item set debug displaced
 @cindex displaced stepping debugging info
 Turns on or off display of @value{GDBN} debugging info for the
@@ -23457,6 +23536,11 @@ Displays the current state of @value{GDBN} JIT debugging.
 Turns on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
+@item set debug linux-namespaces
+@cindex @sc{gnu}/Linux namespaces debug messages
+Turns on or off debugging messages from the Linux namespaces debug support.
+@item show debug linux-namespaces
+Show the current state of Linux namespaces debugging messages.
 @item set debug mach-o
 @cindex Mach-O symbols processing
 Control display of debugging messages related to Mach-O symbols
@@ -24650,8 +24734,9 @@ is available.
 The TUI mode is enabled by default when you invoke @value{GDBN} as
 @samp{@value{GDBP} -tui}.
 You can also switch in and out of TUI mode while @value{GDBN} runs by
-using various TUI commands and key bindings, such as @kbd{C-x C-a}. 
-@xref{TUI Keys, ,TUI Key Bindings}.
+using various TUI commands and key bindings, such as @command{tui
+enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands} and
+@ref{TUI Keys, ,TUI Key Bindings}.
 
 @node TUI Overview
 @section TUI Overview
@@ -24925,6 +25010,16 @@ these commands will fail with an error, because it would not be
 possible or desirable to enable curses window management.
 
 @table @code
+@item tui enable
+@kindex tui enable
+Activate TUI mode.  The last active TUI window layout will be used if
+TUI mode has prevsiouly been used in the current debugging session,
+otherwise a default layout is used.
+
+@item tui disable
+@kindex tui disable
+Disable TUI mode, returning to the console interpreter.
+
 @item info win
 @kindex info win
 List and give the size of all displayed windows.
@@ -24971,21 +25066,34 @@ Make the command window active for scrolling.
 @kindex refresh
 Refresh the screen.  This is similar to typing @kbd{C-L}.
 
-@item tui reg float
+@item tui reg @var{group}
 @kindex tui reg
-Show the floating point registers in the register window.
+Changes the register group displayed in the tui register window to
+@var{group}.  If the register window is not currently displayed this
+command will cause the register window to be displayed.  The list of
+register groups, as well as their order is target specific. The
+following groups are available on most targets:
+@table @code
+@item next
+Repeatedly selecting this group will cause the display to cycle
+through all of the available register groups.
 
-@item tui reg general
-Show the general registers in the register window.
+@item prev
+Repeatedly selecting this group will cause the display to cycle
+through all of the available register groups in the reverse order to
+@var{next}.
 
-@item tui reg next
-Show the next register group.  The list of register groups as well as
-their order is target specific.  The predefined register groups are the
-following: @code{general}, @code{float}, @code{system}, @code{vector},
-@code{all}, @code{save}, @code{restore}.
-
-@item tui reg system
-Show the system registers in the register window.
+@item general
+Display the general registers.
+@item float
+Display the floating point registers.
+@item system
+Display the system registers.
+@item vector
+Display the vector registers.
+@item all
+Display all registers.
+@end table
 
 @item update
 @kindex update
@@ -29499,6 +29607,9 @@ can be used to instantiate this class for a varobj:
 This section describes the @sc{gdb/mi} commands that manipulate data:
 examine memory and registers, evaluate expressions, etc.
 
+For details about what an addressable memory unit is,
+@pxref{addressable memory unit}.
+
 @c REMOVED FROM THE INTERFACE.
 @c @subheading -data-assign
 @c Change the value of a program variable. Plenty of side effects.
@@ -30023,7 +30134,7 @@ next-page="0x000013c0",prev-page="0x00001380",memory=[
 @subsubheading Synopsis
 
 @smallexample
- -data-read-memory-bytes [ -o @var{byte-offset} ]
+ -data-read-memory-bytes [ -o @var{offset} ]
    @var{address} @var{count}
 @end smallexample
 
@@ -30032,18 +30143,19 @@ where:
 
 @table @samp
 @item @var{address}
-An expression specifying the address of the first memory word to be
-read.  Complex expressions containing embedded white space should be
+An expression specifying the address of the first addressable memory unit
+to be read.  Complex expressions containing embedded white space should be
 quoted using the C convention.
 
 @item @var{count}
-The number of bytes to read.  This should be an integer literal.
+The number of addressable memory units to read.  This should be an integer
+literal.
 
-@item @var{byte-offset}
-The offsets in bytes relative to @var{address} at which to start
-reading.  This should be an integer literal.  This option is provided
-so that a frontend is not required to first evaluate address and then
-perform address arithmetics itself.
+@item @var{offset}
+The offset relative to @var{address} at which to start reading.  This
+should be an integer literal.  This option is provided so that a frontend
+is not required to first evaluate address and then perform address
+arithmetics itself.
 
 @end table
 
@@ -30054,10 +30166,10 @@ Attributes}.  Second, @value{GDBN} will attempt to read the remaining
 regions.  For each one, if reading full region results in an errors,
 @value{GDBN} will try to read a subset of the region.
 
-In general, every single byte in the region may be readable or not,
-and the only way to read every readable byte is to try a read at
+In general, every single memory unit in the region may be readable or not,
+and the only way to read every readable unit is to try a read at
 every address, which is not practical.   Therefore, @value{GDBN} will
-attempt to read all accessible bytes at either beginning or the end
+attempt to read all accessible memory units at either beginning or the end
 of the region, using a binary division scheme.  This heuristic works
 well for reading accross a memory map boundary.  Note that if a region
 has a readable range that is neither at the beginning or the end,
@@ -30117,17 +30229,19 @@ where:
 
 @table @samp
 @item @var{address}
-An expression specifying the address of the first memory word to be
-written.  Complex expressions containing embedded white space should be
-quoted using the C convention.
+An expression specifying the address of the first addressable memory unit
+to be written.  Complex expressions containing embedded white space should
+be quoted using the C convention.
 
 @item @var{contents}
-The hex-encoded bytes to write.
+The hex-encoded data to write.  It is an error if @var{contents} does
+not represent an integral number of addressable memory units.
 
 @item @var{count}
-Optional argument indicating the number of bytes to be written.  If @var{count} 
-is greater than @var{contents}' length, @value{GDBN} will repeatedly 
-write @var{contents} until it fills @var{count} bytes.
+Optional argument indicating the number of addressable memory units to be
+written.  If @var{count} is greater than @var{contents}' length,
+@value{GDBN} will repeatedly write @var{contents} until it fills
+@var{count} memory units.
 
 @end table
 
@@ -34118,10 +34232,10 @@ that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
 
-@kindex maint set dwarf2 always-disassemble
-@kindex maint show dwarf2 always-disassemble
-@item maint set dwarf2 always-disassemble
-@item maint show dwarf2 always-disassemble
+@kindex maint set dwarf always-disassemble
+@kindex maint show dwarf always-disassemble
+@item maint set dwarf always-disassemble
+@item maint show dwarf always-disassemble
 Control the behavior of @code{info address} when using DWARF debugging
 information.
 
@@ -34143,15 +34257,15 @@ Symbol "argc" is a complex DWARF expression:
 For more information on these expressions, see
 @uref{http://www.dwarfstd.org/, the DWARF standard}.
 
-@kindex maint set dwarf2 max-cache-age
-@kindex maint show dwarf2 max-cache-age
-@item maint set dwarf2 max-cache-age
-@itemx maint show dwarf2 max-cache-age
-Control the DWARF 2 compilation unit cache.
+@kindex maint set dwarf max-cache-age
+@kindex maint show dwarf max-cache-age
+@item maint set dwarf max-cache-age
+@itemx maint show dwarf max-cache-age
+Control the DWARF compilation unit cache.
 
-@cindex DWARF 2 compilation units cache
+@cindex DWARF compilation units cache
 In object files with inter-compilation-unit references, such as those
-produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF 2
+produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF
 reader needs to frequently refer to previously read compilation units.
 This setting controls how long a compilation unit will remain in the
 cache if it is not referenced.  A higher limit means that cached
@@ -34762,8 +34876,9 @@ probes the target state as if a new connection was opened
 
 @item m @var{addr},@var{length}
 @cindex @samp{m} packet
-Read @var{length} bytes of memory starting at address @var{addr}.
-Note that @var{addr} may not be aligned to any particular boundary.
+Read @var{length} addressable memory units starting at address @var{addr}
+(@pxref{addressable memory unit}).  Note that @var{addr} may not be aligned to
+any particular boundary.
 
 The stub need not use any particular size or alignment when gathering
 data from memory for the response; even if @var{addr} is word-aligned
@@ -34777,8 +34892,8 @@ suitable for accessing memory-mapped I/O devices.
 Reply:
 @table @samp
 @item @var{XX@dots{}}
-Memory contents; each byte is transmitted as a two-digit hexadecimal
-number.  The reply may contain fewer bytes than requested if the
+Memory contents; each byte is transmitted as a two-digit hexadecimal number.
+The reply may contain fewer addressable memory units than requested if the
 server was able to read only part of the region of memory.
 @item E @var{NN}
 @var{NN} is errno
@@ -34786,9 +34901,9 @@ server was able to read only part of the region of memory.
 
 @item M @var{addr},@var{length}:@var{XX@dots{}}
 @cindex @samp{M} packet
-Write @var{length} bytes of memory starting at address @var{addr}.
-The data is given by @var{XX@dots{}}; each byte is transmitted as a two-digit
-hexadecimal number.
+Write @var{length} addressable memory units starting at address @var{addr}
+(@pxref{addressable memory unit}).  The data is given by @var{XX@dots{}}; each
+byte is transmitted as a two-digit hexadecimal number.
 
 Reply:
 @table @samp
@@ -35102,7 +35217,8 @@ for success (@pxref{Stop Reply Packets})
 @anchor{X packet}
 @cindex @samp{X} packet
 Write data to memory, where the data is transmitted in binary.
-Memory is specified by its address @var{addr} and number of bytes @var{length};
+Memory is specified by its address @var{addr} and number of addressable memory
+units @var{length} (@pxref{addressable memory unit});
 @samp{@var{XX}@dots{}} is binary data (@pxref{Binary Data}).
 
 Reply:
@@ -37674,6 +37790,20 @@ If zero bytes were read, the response should include an empty binary
 attachment (i.e.@: a trailing semicolon).  The return value is the
 number of target bytes read; the binary attachment may be longer if
 some characters were escaped.
+
+@item vFile:setfs: @var{pid}
+Select the filesystem on which @code{vFile} operations with
+@var{filename} arguments will operate.  This is required for
+@value{GDBN} to be able to access files on remote targets where
+the remote stub does not share a common filesystem with the
+inferior(s).
+
+If @var{pid} is nonzero, select the filesystem as seen by process
+@var{pid}.  If @var{pid} is zero, select the filesystem as seen by
+the remote stub.  Return 0 on success, or -1 if an error occurs.
+If @code{vFile:setfs:} indicates success, the selected filesystem
+remains selected until the next successful @code{vFile:setfs:}
+operation.
 
 @end table
 

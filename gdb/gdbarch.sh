@@ -627,14 +627,14 @@ m:int:in_solib_return_trampoline:CORE_ADDR pc, const char *name:pc, name::generi
 
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
-# as the first action in a funtion's epilogue.  in_function_epilogue_p()
+# as the first action in a function's epilogue.  stack_frame_destroyed_p()
 # is defined to return a non-zero value if either the given addr is one
 # instruction after the stack destroying instruction up to the trailing
 # return instruction or if we can figure out that the stack frame has
 # already been invalidated regardless of the value of addr.  Targets
 # which don't suffer from that problem could just let this functionality
 # untouched.
-m:int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue_p::0
+m:int:stack_frame_destroyed_p:CORE_ADDR addr:addr:0:generic_stack_frame_destroyed_p::0
 # Process an ELF symbol in the minimal symbol table in a backend-specific
 # way.  Normally this hook is supposed to do nothing, however if required,
 # then this hook can be used to apply tranformations to symbols that are
@@ -1097,6 +1097,10 @@ m:int:vsyscall_range:struct mem_range *range:range::default_vsyscall_range::0
 # Throw an error if it is not possible.  Returned address is always valid.
 f:CORE_ADDR:infcall_mmap:CORE_ADDR size, unsigned prot:size, prot::default_infcall_mmap::0
 
+# Deallocate SIZE bytes of memory at ADDR in inferior from gdbarch_infcall_mmap.
+# Print a warning if it is not possible.
+f:void:infcall_munmap:CORE_ADDR addr, CORE_ADDR size:addr, size::default_infcall_munmap::0
+
 # Return string (caller has to use xfree for it) with options for GCC
 # to produce code for this target, typically "-m64", "-m32" or "-m31".
 # These options are put before CU's DW_AT_producer compilation options so that
@@ -1109,6 +1113,12 @@ m:char *:gcc_target_options:void:::default_gcc_target_options::0
 # returns the BFD architecture name, which is correct in nearly every
 # case.
 m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
+
+# Return the size in 8-bit bytes of an addressable memory unit on this
+# architecture.  This corresponds to the number of 8-bit bytes associated to
+# each address in memory.
+m:int:addressable_memory_unit_size:void:::default_addressable_memory_unit_size::0
+
 EOF
 }
 

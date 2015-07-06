@@ -143,6 +143,7 @@ enum option_values
   OPTION_IGNORE_UNRESOLVED_SYMBOL,
   OPTION_PUSH_STATE,
   OPTION_POP_STATE,
+  OPTION_PRINT_MEMORY_USAGE,
 };
 
 /* The initial parser states.  */

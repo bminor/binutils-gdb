@@ -624,6 +624,13 @@ class Target_powerpc : public Sized_target<size, big_endian>
   do_can_check_for_function_pointers() const
   { return true; }
 
+  // Adjust -fsplit-stack code which calls non-split-stack code.
+  void
+  do_calls_non_split(Relobj* object, unsigned int shndx,
+		     section_offset_type fnoffset, section_size_type fnsize,
+		     unsigned char* view, section_size_type view_size,
+		     std::string* from, std::string* to) const;
+
   // Relocate a section.
   void
   relocate_section(const Relocate_info<size, big_endian>*,
@@ -3175,12 +3182,15 @@ static const uint32_t addi_0_12		= 0x380c0000;
 static const uint32_t addi_2_2		= 0x38420000;
 static const uint32_t addi_3_3		= 0x38630000;
 static const uint32_t addi_11_11	= 0x396b0000;
+static const uint32_t addi_12_1		= 0x39810000;
 static const uint32_t addi_12_12	= 0x398c0000;
 static const uint32_t addis_0_2		= 0x3c020000;
 static const uint32_t addis_0_13	= 0x3c0d0000;
+static const uint32_t addis_2_12	= 0x3c4c0000;
 static const uint32_t addis_11_2	= 0x3d620000;
 static const uint32_t addis_11_11	= 0x3d6b0000;
 static const uint32_t addis_11_30	= 0x3d7e0000;
+static const uint32_t addis_12_1	= 0x3d810000;
 static const uint32_t addis_12_2	= 0x3d820000;
 static const uint32_t addis_12_12	= 0x3d8c0000;
 static const uint32_t b			= 0x48000000;
@@ -3188,6 +3198,7 @@ static const uint32_t bcl_20_31		= 0x429f0005;
 static const uint32_t bctr		= 0x4e800420;
 static const uint32_t blr		= 0x4e800020;
 static const uint32_t bnectr_p4		= 0x4ce20420;
+static const uint32_t cmpld_7_12_0	= 0x7fac0040;
 static const uint32_t cmpldi_2_0	= 0x28220000;
 static const uint32_t cror_15_15_15	= 0x4def7b82;
 static const uint32_t cror_31_31_31	= 0x4ffffb82;
@@ -3204,7 +3215,7 @@ static const uint32_t ld_12_12		= 0xe98c0000;
 static const uint32_t lfd_0_1		= 0xc8010000;
 static const uint32_t li_0_0		= 0x38000000;
 static const uint32_t li_12_0		= 0x39800000;
-static const uint32_t lis_0_0		= 0x3c000000;
+static const uint32_t lis_0		= 0x3c000000;
 static const uint32_t lis_11		= 0x3d600000;
 static const uint32_t lis_12		= 0x3d800000;
 static const uint32_t lvx_0_12_0	= 0x7c0c00ce;
@@ -4619,7 +4630,7 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 		    }
 		  else
 		    {
-		      write_insn<big_endian>(p, lis_0_0 + hi(indx)),	p += 4;
+		      write_insn<big_endian>(p, lis_0 + hi(indx)),	p += 4;
 		      write_insn<big_endian>(p, ori_0_0_0 + l(indx)),	p += 4;
 		    }
 		}
@@ -6476,6 +6487,113 @@ Target_powerpc<size, big_endian>::do_function_location(
 	      loc->offset = dest_off;
 	    }
 	}
+    }
+}
+
+// FNOFFSET in section SHNDX in OBJECT is the start of a function
+// compiled with -fsplit-stack.  The function calls non-split-stack
+// code.  Change the function to ensure it has enough stack space to
+// call some random function.
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::do_calls_non_split(
+    Relobj* object,
+    unsigned int shndx,
+    section_offset_type fnoffset,
+    section_size_type fnsize,
+    unsigned char* view,
+    section_size_type view_size,
+    std::string* from,
+    std::string* to) const
+{
+  // 32-bit not supported.
+  if (size == 32)
+    {
+      // warn
+      Target::do_calls_non_split(object, shndx, fnoffset, fnsize,
+				 view, view_size, from, to);
+      return;
+    }
+
+  // The function always starts with
+  //	ld %r0,-0x7000-64(%r13)  # tcbhead_t.__private_ss
+  //	addis %r12,%r1,-allocate@ha
+  //	addi %r12,%r12,-allocate@l
+  //	cmpld %r12,%r0
+  // but note that the addis or addi may be replaced with a nop
+
+  unsigned char *entry = view + fnoffset;
+  uint32_t insn = elfcpp::Swap<32, big_endian>::readval(entry);
+
+  if ((insn & 0xffff0000) == addis_2_12)
+    {
+      /* Skip ELFv2 global entry code.  */
+      entry += 8;
+      insn = elfcpp::Swap<32, big_endian>::readval(entry);
+    }
+
+  unsigned char *pinsn = entry;
+  bool ok = false;
+  const uint32_t ld_private_ss = 0xe80d8fc0;
+  if (insn == ld_private_ss)
+    {
+      int32_t allocate = 0;
+      while (1)
+	{
+	  pinsn += 4;
+	  insn = elfcpp::Swap<32, big_endian>::readval(pinsn);
+	  if ((insn & 0xffff0000) == addis_12_1)
+	    allocate += (insn & 0xffff) << 16;
+	  else if ((insn & 0xffff0000) == addi_12_1
+		   || (insn & 0xffff0000) == addi_12_12)
+	    allocate += ((insn & 0xffff) ^ 0x8000) - 0x8000;
+	  else if (insn != nop)
+	    break;
+	}
+      if (insn == cmpld_7_12_0 && pinsn == entry + 12)
+	{
+	  int extra = parameters->options().split_stack_adjust_size();
+	  allocate -= extra;
+	  if (allocate >= 0 || extra < 0)
+	    {
+	      object->error(_("split-stack stack size overflow at "
+			      "section %u offset %0zx"),
+			    shndx, static_cast<size_t>(fnoffset));
+	      return;
+	    }
+	  pinsn = entry + 4;
+	  insn = addis_12_1 | (((allocate + 0x8000) >> 16) & 0xffff);
+	  if (insn != addis_12_1)
+	    {
+	      elfcpp::Swap<32, big_endian>::writeval(pinsn, insn);
+	      pinsn += 4;
+	      insn = addi_12_12 | (allocate & 0xffff);
+	      if (insn != addi_12_12)
+		{
+		  elfcpp::Swap<32, big_endian>::writeval(pinsn, insn);
+		  pinsn += 4;
+		}
+	    }
+	  else
+	    {
+	      insn = addi_12_1 | (allocate & 0xffff);
+	      elfcpp::Swap<32, big_endian>::writeval(pinsn, insn);
+	      pinsn += 4;
+	    }
+	  if (pinsn != entry + 12)
+	    elfcpp::Swap<32, big_endian>::writeval(pinsn, nop);
+
+	  ok = true;
+	}
+    }
+
+  if (!ok)
+    {
+      if (!object->has_no_split_stack())
+	object->error(_("failed to match split-stack sequence at "
+			"section %u offset %0zx"),
+		      shndx, static_cast<size_t>(fnoffset));
     }
 }
 

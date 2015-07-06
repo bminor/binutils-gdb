@@ -1,3 +1,13 @@
+2015-05-20  Ed Maste  <emaste@freebsd.org>
+
+	* lib/binutils-common.exp (is_elf_format): Include *-*-freebsd* except
+	i?86-*-freebsd\[12\].*.
+	* (is_aout_format): Update FreeBSD to i?86-*-freebsd\[12\].*.
+
+2015-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/dw2-3.S: Replace .int with .4byte.
+
 2015-05-15  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/z.s: New test.  Checks the --decompress option to

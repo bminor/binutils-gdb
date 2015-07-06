@@ -161,6 +161,9 @@ typedef struct {
   /* If TRUE we'll just print the default output on stdout.  */
   bfd_boolean print_output_format;
 
+  /* If set, display the target memory usage (per memory region).  */
+  bfd_boolean print_memory_usage;
+
   /* Big or little endian as set on command line.  */
   enum endian_enum endian;
 

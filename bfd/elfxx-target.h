@@ -676,6 +676,14 @@
 #define elf_backend_get_reloc_section _bfd_elf_get_reloc_section
 #endif
 
+#ifndef elf_backend_compact_eh_encoding
+#define elf_backend_compact_eh_encoding NULL
+#endif
+
+#ifndef elf_backend_cant_unwind_opcode
+#define elf_backend_cant_unwind_opcode 0
+#endif
+
 #ifndef elf_match_priority
 #define elf_match_priority \
   (ELF_ARCH == bfd_arch_unknown ? 2 : ELF_OSABI == ELFOSABI_NONE ? 1 : 0)
@@ -788,6 +796,8 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_obj_attrs_section_type,
   elf_backend_obj_attrs_order,
   elf_backend_obj_attrs_handle_unknown,
+  elf_backend_compact_eh_encoding,
+  elf_backend_cant_unwind_opcode,
   elf_backend_static_tls_alignment,
   elf_backend_stack_align,
   elf_backend_collect,

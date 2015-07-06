@@ -1585,7 +1585,9 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 					f->fr_literal, (file_ptr) offset,
 					(bfd_size_type) f->fr_fix);
 	  if (!x)
-	    as_fatal (_("can't write %s: %s"), stdoutput->filename,
+	    as_fatal (_("can't write %ld bytes to section %s of %s because: '%s'"),
+		      (long) f->fr_fix, sec->name,
+		      stdoutput->filename,
 		      bfd_errmsg (bfd_get_error ()));
 	  offset += f->fr_fix;
 	}
@@ -1606,7 +1608,9 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 						(file_ptr) offset,
 						(bfd_size_type) fill_size);
 		  if (!x)
-		    as_fatal (_("can't write %s: %s"), stdoutput->filename,
+		    as_fatal (_("can't fill %ld bytes in section %s of %s because '%s'"),
+			      (long) fill_size, sec->name,
+			      stdoutput->filename,
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += fill_size;
 		}
@@ -1636,7 +1640,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 		    (stdoutput, sec, buf, (file_ptr) offset,
 		     (bfd_size_type) n_per_buf * fill_size);
 		  if (!x)
-		    as_fatal (_("cannot write to output file '%s': %s"),
+		    as_fatal (_("cannot fill %ld bytes in section %s of %s because: '%s'"),
+			      (long)(n_per_buf * fill_size), sec->name,
 			      stdoutput->filename,
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += n_per_buf * fill_size;

@@ -2783,6 +2783,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	      else
 	        si->size = strlen (xlate (exp->import_name)) + 3;
 	      si->data = xmalloc (si->size);
+	      memset (si->data, 0, si->size);
 	      si->data[0] = idx & 0xff;
 	      si->data[1] = idx >> 8;
 	      if (exp->its_name)
@@ -4151,6 +4152,9 @@ main (int ac, char **av)
 	  break;
 	case 'z':
 	  output_def = fopen (optarg, FOPEN_WT);
+	  if (!output_def)
+	    /* xgettext:c-format */
+	    fatal (_("Unable to open def-file: %s"), optarg);
 	  break;
 	case 'D':
 	  dll_name = (char*) lbasename (optarg);

@@ -404,3 +404,24 @@ gdb_pipe_cloexec (int filedes[2])
 
   return result;
 }
+
+/* Helper function which does the work for make_cleanup_close.  */
+
+static void
+do_close_cleanup (void *arg)
+{
+  int *fd = arg;
+
+  close (*fd);
+}
+
+/* See cleanup-utils.h.  */
+
+struct cleanup *
+make_cleanup_close (int fd)
+{
+  int *saved_fd = xmalloc (sizeof (fd));
+
+  *saved_fd = fd;
+  return make_cleanup_dtor (do_close_cleanup, saved_fd, xfree);
+}

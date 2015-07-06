@@ -33,22 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 static void sim_get_info (SIM_DESC sd, char *cmd);
 
-
-char *interrupt_names[] = {
-  "reset",
-  "nmi",
-  "int",
-  NULL
-};
-
-#ifndef INLINE
-#if defined(__GNUC__) && defined(__OPTIMIZE__)
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-#endif
-
 struct sim_info_list
 {
   const char *name;
@@ -706,80 +690,4 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
 
   return 2;
-}
-
-/* Halt the simulator after just one instruction */
-
-static void
-has_stepped (SIM_DESC sd,
-	     void *data)
-{
-  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_stopped, SIM_SIGTRAP);
-}
-
-
-/* Generic resume - assumes the existance of sim_engine_run */
-
-void
-sim_resume (SIM_DESC sd,
-	    int step,
-	    int siggnal)
-{
-  sim_engine *engine = STATE_ENGINE (sd);
-  jmp_buf buf;
-  int jmpval;
-
-  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-
-  /* we only want to be single stepping the simulator once */
-  if (engine->stepper != NULL)
-    {
-      sim_events_deschedule (sd, engine->stepper);
-      engine->stepper = NULL;
-    }
-  sim_module_resume (sd);
-
-  /* run/resume the simulator */
-  engine->jmpbuf = &buf;
-  jmpval = setjmp (buf);
-  if (jmpval == sim_engine_start_jmpval
-      || jmpval == sim_engine_restart_jmpval)
-    {
-      int last_cpu_nr = sim_engine_last_cpu_nr (sd);
-      int next_cpu_nr = sim_engine_next_cpu_nr (sd);
-      int nr_cpus = sim_engine_nr_cpus (sd);
-
-      sim_events_preprocess (sd, last_cpu_nr >= nr_cpus, next_cpu_nr >= nr_cpus);
-      if (next_cpu_nr >= nr_cpus)
-	next_cpu_nr = 0;
-
-      /* Only deliver the siggnal ]sic] the first time through - don't
-         re-deliver any siggnal during a restart. */
-      if (jmpval == sim_engine_restart_jmpval)
-	siggnal = 0;
-
-      /* Install the stepping event after having processed some
-         pending events.  This is necessary for HC11/HC12 simulator
-         because the tick counter is incremented by the number of cycles
-         the instruction took.  Some pending ticks to process can still
-         be recorded internally by the simulator and sim_events_preprocess
-         will handle them.  If the stepping event is inserted before,
-         these pending ticks will raise the event and the simulator will
-         stop without having executed any instruction.  */
-      if (step)
-        engine->stepper = sim_events_schedule (sd, 0, has_stepped, sd);
-
-#ifdef SIM_CPU_EXCEPTION_RESUME
-      {
-	sim_cpu* cpu = STATE_CPU (sd, next_cpu_nr);
-	SIM_CPU_EXCEPTION_RESUME(sd, cpu, siggnal);
-      }
-#endif
-
-      sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal);
-    }
-  engine->jmpbuf = NULL;
-
-  sim_module_suspend (sd);
 }

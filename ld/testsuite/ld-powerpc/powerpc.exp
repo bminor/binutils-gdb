@@ -325,3 +325,6 @@ run_dump_test "attr-gnu-12-11"
 run_dump_test "attr-gnu-12-21"
 
 run_dump_test "vle-multiseg-6"
+
+run_dump_test "ppc476-shared"
+run_dump_test "ppc476-shared2"

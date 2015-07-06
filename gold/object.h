@@ -381,6 +381,12 @@ class Object
   is_dynamic() const
   { return this->is_dynamic_; }
 
+  // Return the word size of the object file.
+  virtual int elfsize() const = 0;
+
+  // Return TRUE if this is a big-endian object file.
+  virtual bool is_big_endian() const = 0;
+
   // Return whether this object is needed--true if it is a dynamic
   // object which defines some symbol referenced by a regular object.
   // We keep the flag here rather than in Dynobj for convenience when

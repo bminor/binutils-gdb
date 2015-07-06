@@ -1,3 +1,260 @@
+2015-06-29  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18127
+	* gdb.threads/hand-call-new-thread.c: New file.
+	* gdb.threads/hand-call-new-thread.c: New file.
+
+2015-06-26  Keith Seitz  <keiths@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	PR 16253
+	* gdb.cp/var-tag-2.cc: New file.
+	* gdb.cp/var-tag-3.cc: New file.
+	* gdb.cp/var-tag-4.cc: New file.
+	* gdb.cp/var-tag.cc: New file.
+	* gdb.cp/var-tag.exp: New file.
+
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/history-duplicates.exp: New test.
+
+2015-06-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/completion.exp: Test the completion of the "focus"
+	command.
+
+2015-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-prologue-skip.S: New file.
+	* gdb.arch/amd64-prologue-skip.exp: New file.
+
+2015-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add
+	is_address_zero_readable check.
+
+2015-06-24  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp <rfebb>: Fixup test results.
+	* gdb.arch/powerpc-power.s <rfebb>: Likewise.
+
+2015-06-24  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (supports_get_siginfo_type): Return 1 for all
+	linux targets.
+
+2015-06-24  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (supports_get_siginfo_type): New proc.
+	* gdb.base/siginfo-obj.exp: Invoke supports_get_siginfo_type.
+	* gdb.base/siginfo-thread.exp: Likewise.
+
+2015-06-22  Yao Qi  <yao.qi@linaro.org>
+
+	* boards/remote-gdbserver-on-localhost.exp: Add comments.
+
+2015-06-22  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (skip_hw_breakpoint_tests): Return 0 for target
+	aarch64*-*-*.
+	(skip_hw_watchpoint_tests): Likewise.
+
+2015-06-18  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Test the interaction between
+	setting GDBHISTSIZE and setting the history size via .gdbinit.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR gdb/16999
+	* gdb.base/gdbhistsize-history.exp: New test.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Replace occurrences of HISTSIZE
+	with GDBHISTSIZE.
+	* gdb.base/readline.exp: Likewise.
+
+2015-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (get_build_id): Move braces and "else" to the same
+	line.
+
+2015-06-17  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp: Add test case to check that
+	an unlimited history file does not get truncated on exit.
+
+2015-06-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.c: Include stdarg.h and stdio.h.
+	(VECTOR): New macro.  Use it...
+	(int4, uint4, char4, float4, int2, longlong2, float2, double2):
+	...for these typedefs.
+	(int8, char1, int1, double1): New typedefs.
+	(struct just_int2, struct two_int2): New structures.
+	(add_some_intvecs, add_many_charvecs, add_various_floatvecs)
+	(add_structvecs, add_singlevecs): New functions.
+	(main): Call add_some_intvecs twice.
+	* gdb.base/gnu_vector.exp: Drop GCC version check; just attempt
+	the compile and exit upon failure.  Try compiling for the "native"
+	architecture.  Test inferior function calls with vector arguments
+	and vector return value handling with "finish" and "return".
+
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* gdb.base/sepdebug.exp: Add EXEEXT where needed.
+	* lib/gdb.exp (get_build_id): Teach how to extract build-id from a
+	PE file.
+	* lib/future.exp (gdb_find_objdump): Add gdb_find_objdump.
+
+2015-06-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	PR breakpoints/16465
+	* gdb.mi/mi-dprintf-pending.c: New file.
+	* gdb.mi/mi-dprintf-pending.exp: New test.
+	* gdb.mi/mi-dprintf-pendshr.c: New file.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+            Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* gdb.arch/i386-mpx-map.c: New file.
+	* gdb.arch/i386-mpx-map.exp: New File.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c (have_mpx): Indentation fixed.
+	* gdb.arch/i386-mpx.exp: Indentation fixed.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c: Added final return to the have_mpx
+	function and improved indentation.
+	* gdb.arch/i386-mpx.exp: Exchanging gdb_send and gdb_expect for
+	gdb_test_multiple. Added additional tests to skip the test.
+
+2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-avx512.c: Change path in include file.
+	* gdb.arch/i386-avx512.exp: Change include dir path
+	compilation flag.
+	* gdb.arch/i386-mpx.c: Change path in include file.
+	* gdb.arch/i386-mpx.exp: Change include dir path compilation
+	flag.
+
+2015-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile-print.exp (compile print *vararray@3)
+	(compile print *vararrayp@3): Change xfail to kfail compile/18489.
+
+2015-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile.exp (keep jit in memory): Rename to ...
+	(do not keep jit in memory): ... this.
+	(expect 5): Change it to ...
+	(expect no 5): ... this.
+
+2015-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/15564
+	* gdb.mi/mi-detach.exp: New file.
+
+2015-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/18392
+	* gdb.arch/amd64-tailcall-self.S: New file.
+	* gdb.arch/amd64-tailcall-self.c: New file.
+	* gdb.arch/amd64-tailcall-self.exp: New file.
+
+2015-05-28  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-vfork.exp (main): Disable exec-dependent
+	tests for remote targets by checking is_target_gdbserver.
+
+2015-05-27  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/opaque-type-lookup-2.c: New file.
+	* gdb.dwarf2/opaque-type-lookup.c: New file.
+	* gdb.dwarf2/opaque-type-lookup.exp: New file.
+
+2015-05-26  Doug Evans  <dje@google.com>
+
+	* gdb.cp/iostream.cc: New file.
+	* gdb.cp/iostream.exp: New file.
+
+2015-05-26  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-op-call.exp: Update.
+	* gdb.dwarf2/dw4-sig-types.exp: Update.
+	* gdb.dwarf2/implptr.exp: Update.
+	* gdb.mi/mi-cmd-param-changed.exp: Update.
+
+2015-05-26  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-lazy-string.c: New file.
+	* gdb.python/py-lazy-string.exp: New file.
+	* gdb.python/py-prettyprint.c (lazystring) <len>: New member.
+	(main): Update.  Add estring3.
+	* gdb.python/py-prettyprint.exp: Add tests for strings at address 0.
+	* gdb.python/py-prettyprint.py (pp_ls): Handle length.
+
+2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/aarch64.c: New.
+	* gdb.reverse/aarch64.exp: New.
+
+2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
+
+	* lib/gdb.exp (supports_process_record): Return true for aarch64*-linux*.
+	(supports_reverse): Likewise.
+
+2015-05-22  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbinit-history.exp (test_gdbinit_history_setting):
+	Use with_test_prefix.
+
+2015-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/completion.exp: Add test for completion of layout
+	names.
+
+2015-05-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/gdb.exp (skip_tui_tests): New proc.
+	* gdb.base/tui-layout.exp: Check skip_tui_tests.
+
+2015-05-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/gdbinit-history.exp (test_gdbinit_history_setting):
+	Save the whole env array instead of just HOME.  Unset HISTSIZE in
+	the environment while testing.  Restore whole environment
+	afterwards.
+
+2015-05-16  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-ports.c: New file.
+	* gdb.guile/scm-ports.exp: Add memory port tests.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile-print.c: New file.
+	* gdb.compile/compile-print.exp: New file.
+
+2015-05-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile-ops.exp: Cast param to void.
+	* gdb.compile/compile.exp: Complete type for _gdb_expr.
+	(compile code struct_object.selffield = &struct_object): Add xfail.
+
+2015-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/arr_enum_with_gap: New testcase.
+
+2015-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/byte_packed_arr: New testcase.
+
 2015-05-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/pckd_neg: New testcase.

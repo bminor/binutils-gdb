@@ -36,7 +36,7 @@
 #ifdef TE_LINUX
 /* Default to compress debug sections for Linux.  */
 enum compressed_debug_section_type flag_compress_debug
-  = COMPRESS_DEBUG_ZLIB;
+  = COMPRESS_DEBUG_GNU_ZLIB;
 #endif
 
 #ifndef REGISTER_WARNINGS

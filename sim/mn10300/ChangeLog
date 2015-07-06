@@ -1,3 +1,63 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* op_utils.c (do_syscall): Replace call to cb_syscall with
+	sim_syscall_multi.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* mn10300_sim.h (syscall_read_mem, syscall_write_mem): Delete.
+	* op_utils.c: Include sim-syscall.h.
+	(syscall_read_mem, syscall_write_mem): Delete.
+	(do_syscall): Change syscall_read_mem/syscall_write_mem
+	to sim_syscall_read_mem/sim_syscall_write_mem.  Set syscall.p2.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (get_byte, get_half, get_word, put_byte, put_half,
+	put_word): Delete.
+	(sim_fetch_register): Inline put_word call.
+	(sim_store_register): Inline get_word call.
+	* mn10300_sim.h (struct _state): Delete mem member.
+	(OP, Simops, get_byte, get_half, get_word, put_byte, put_half,
+	put_word, map): Delete.
+	* op_utils.c (MEMPTR): Delete.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (round_64, fpu_status_ok): Add static.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (mn10300_debug): Delete.
+	* mn10300_sim.h (DEBUG_TRACE, DEBUG_VALUES, mn10300_debug): Delete.
+	(struct _state): Delete exception and exited members.
+	[_WIN32] (SIGTRAP, SIGQUIT): Delete.
+	* op_utils.c (do_syscall): Call sim_engine_halt instead of setting
+	State.exception.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* mn10300_sim.h (uint8, int8, uint16, int16, uint32, int32): Typedef
+	in terms of unsigned8, signed8, unsigned16, signed16, unsigned32,
+	and signed32 respectively.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (INLINE): Delete define.
+	* mn10300_sim.h (INLINE): Likewise.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_CPU): Delete.

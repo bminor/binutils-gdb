@@ -42,7 +42,7 @@ srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/amd
 
 # Linux object files.  This is so we don't have to repeat
 # these files over and over again.
-srv_linux_obj="linux-low.o linux-osdata.o linux-procfs.o linux-ptrace.o linux-waitpid.o linux-personality.o"
+srv_linux_obj="linux-low.o linux-osdata.o linux-procfs.o linux-ptrace.o linux-waitpid.o linux-personality.o linux-namespaces.o"
 
 # Input is taken from the "${target}" variable.
 

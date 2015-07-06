@@ -197,7 +197,7 @@ pretended_chain_levels (struct call_site_chain *chain)
     return chain->length;
 
   chain_levels = chain->callers + chain->callees;
-  gdb_assert (chain_levels < chain->length);
+  gdb_assert (chain_levels <= chain->length);
 
   return chain_levels;
 }

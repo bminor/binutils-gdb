@@ -45,11 +45,20 @@ set aarch64elftests {
      "erratum835769"}
 }
 
+proc aarch64_choose_ilp32_emul {} {
+    if [istarget aarch64_be*-*-*] then {
+        return "aarch64elf32b"
+    } else {
+        return "aarch64linux32"
+    }
+}
+
 run_ld_link_tests $aarch64elftests
 run_dump_test "erratum843419"
 
 # Relocation Tests
 run_dump_test "weak-undefined"
+run_dump_test "emit-relocs-28"
 run_dump_test "emit-relocs-257"
 run_dump_test "emit-relocs-257-be"
 # 258 is tested in 257
@@ -99,6 +108,7 @@ run_dump_test "emit-relocs-309-low-bad"
 # 310 not done yet
 run_dump_test "emit-relocs-311"
 run_dump_test "emit-relocs-312"
+run_dump_test "emit-relocs-313"
 
 # test addend correctness when --emit-relocs specified for non-relocatable obj.
 run_dump_test "emit-relocs-local-addend"
@@ -145,6 +155,7 @@ run_dump_test "gc-relocs-257-dyn"
 run_dump_test "gc-relocs-257"
 run_dump_test "pr17415"
 run_dump_test "tprel_g2_overflow"
+run_dump_test "tprel_add_lo12_overflow"
 
 # ifunc tests
 run_dump_test "ifunc-1"
@@ -191,6 +202,8 @@ run_dump_test "ifunc-22"
 
 run_dump_test "relasz"
 run_dump_test "relocs-257-symbolic-func"
+
+run_dump_test "dt_textrel"
 
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}

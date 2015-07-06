@@ -934,10 +934,10 @@ rs6000_in_function_epilogue_frame_p (struct frame_info *curfrm,
   return 0;
 }
 
-/* Implementation of gdbarch_in_function_epilogue_p.  */
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
 
 static int
-rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+rs6000_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return rs6000_in_function_epilogue_frame_p (get_current_frame (),
 					      gdbarch, pc);
@@ -5890,7 +5890,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_push_dummy_call (gdbarch, ppc64_sysv_abi_push_dummy_call);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
-  set_gdbarch_in_function_epilogue_p (gdbarch, rs6000_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, rs6000_stack_frame_destroyed_p);
   set_gdbarch_skip_main_prologue (gdbarch, rs6000_skip_main_prologue);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

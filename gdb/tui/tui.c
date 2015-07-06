@@ -150,7 +150,6 @@ tui_rl_change_windows (int notused1, int notused2)
   if (tui_active)
     {
       enum tui_layout_type new_layout;
-      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
       new_layout = tui_current_layout ();
 
@@ -182,7 +181,7 @@ tui_rl_change_windows (int notused1, int notused2)
 	  new_layout = SRC_COMMAND;
 	  break;
 	}
-      tui_set_layout (new_layout, regs_type);
+      tui_set_layout (new_layout);
     }
   return 0;
 }
@@ -198,7 +197,6 @@ tui_rl_delete_other_windows (int notused1, int notused2)
   if (tui_active)
     {
       enum tui_layout_type new_layout;
-      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
       new_layout = tui_current_layout ();
 
@@ -217,7 +215,7 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 	  new_layout = DISASSEM_COMMAND;
 	  break;
 	}
-      tui_set_layout (new_layout, regs_type);
+      tui_set_layout (new_layout);
     }
   return 0;
 }
@@ -464,7 +462,7 @@ tui_enable (void)
       def_prog_mode ();
 
       tui_show_frame_info (0);
-      tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
+      tui_set_layout (SRC_COMMAND);
       tui_set_win_focus_to (TUI_SRC_WIN);
       keypad (TUI_CMD_WIN->generic.handle, TRUE);
       wrefresh (TUI_CMD_WIN->generic.handle);
@@ -540,6 +538,22 @@ tui_disable (void)
 
   tui_active = 0;
   tui_update_gdb_sizes ();
+}
+
+/* Command wrapper for enabling tui mode.  */
+
+static void
+tui_enable_command (char *args, int from_tty)
+{
+  tui_enable ();
+}
+
+/* Command wrapper for leaving tui mode.  */
+
+static void
+tui_disable_command (char *args, int from_tty)
+{
+  tui_disable ();
 }
 
 void
@@ -653,4 +667,22 @@ tui_get_command_dimension (unsigned int *width,
   *width = TUI_CMD_WIN->generic.width;
   *height = TUI_CMD_WIN->generic.height;
   return 1;
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_tui;
+
+void
+_initialize_tui (void)
+{
+  struct cmd_list_element **tuicmd;
+
+  tuicmd = tui_get_cmd_list ();
+
+  add_cmd ("enable", class_tui, tui_enable_command,
+	   _("Enable TUI display mode."),
+	   tuicmd);
+  add_cmd ("disable", class_tui, tui_disable_command,
+	   _("Disable TUI display mode."),
+	   tuicmd);
 }

@@ -1,3 +1,42 @@
+2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_mips_dynamic_type): Handle DT_MIPS_RLD_MAP_REL.
+
+2015-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (disassemble_bytes): Set the stop_vma field in the
+	disassemble_info structure when disassembling code sections with
+	-d.
+	* doc/binutils.texi (objdump): Document the discrepancy between -d
+	and -D.
+
+2015-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_debug_line_header): Use reloc_at to detect
+	incomplete .debug_line headers
+
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	* readelf.c (print_gnu_note: NT_GNU_ABI_TAG): Recognize
+	GNU_ABI_TAG_SYLLABLE and GNU_ABI_TAG_NACL.
+
+2015-05-29  Stephen Kitt  <steve@sk2.org>
+
+	* dlltool.c (make_one_lib_file): Clear .idata$6 before use.
+	(main): Fail if the output file specified by the -z option cannot
+	be opened.
+
+2015-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18420
+	* ia64-unwind.c (unw_decode): Add end parameter.  Pass parameter
+	on to decode functions.
+	(unw_devode_p2_p5): Pass end paraemter to UNW_DEC_SPILL_MASK.
+	(UNW_DEC_SPILL_MASK): Add end parameter.  Check that unw_rlen does
+	not take us beyond the end of the buffer.
+	* ia64-unwind.h (unw_decode): Update prototype.
+	* readelf.c (dump_ia64_unwind): Pass end pointer to unw_decode.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (dump_section_as_strings): Change pointers from

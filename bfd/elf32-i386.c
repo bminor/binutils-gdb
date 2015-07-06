@@ -1914,7 +1914,8 @@ do_size:
       if (use_plt_got
 	  && h != NULL
 	  && h->plt.refcount > 0
-	  && h->got.refcount > 0
+	  && (((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
+	      || h->got.refcount > 0)
 	  && htab->plt_got == NULL)
 	{
 	  /* Create the GOT procedure linkage table.  */
@@ -2356,7 +2357,19 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   else if (htab->elf.dynamic_sections_created
 	   && (h->plt.refcount > 0 || eh->plt_got.refcount > 0))
     {
-      bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
+      bfd_boolean use_plt_got;
+
+      if ((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
+	{
+	  /* Don't use the regular PLT for DF_BIND_NOW. */
+	  h->plt.offset = (bfd_vma) -1;
+
+	  /* Use the GOT PLT.  */
+	  h->got.refcount = 1;
+	  eh->plt_got.refcount = 1;
+	}
+
+      use_plt_got = eh->plt_got.refcount > 0;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -2373,16 +2386,16 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  asection *s = htab->elf.splt;
 	  asection *got_s = htab->plt_got;
 
+	  /* If this is the first .plt entry, make room for the special
+	     first entry.  The .plt section is used by prelink to undo
+	     prelinking for dynamic relocations.  */
+	  if (s->size == 0)
+	    s->size = plt_entry_size;
+
 	  if (use_plt_got)
 	    eh->plt_got.offset = got_s->size;
 	  else
-	    {
-	      /* If this is the first .plt entry, make room for the
-		 special first entry.  */
-	      if (s->size == 0)
-		s->size = plt_entry_size;
-	      h->plt.offset = s->size;
-	    }
+	    h->plt.offset = s->size;
 
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
@@ -3142,11 +3155,18 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
       if (htab->elf.splt->size != 0)
 	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_REL)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
+	  /* DT_PLTGOT is used by prelink even if there is no PLT
+	     relocation.  */
+	  if (!add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;
+
+	  if (htab->elf.srelplt->size != 0)
+	    {
+	      if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+		  || !add_dynamic_entry (DT_PLTREL, DT_REL)
+		  || !add_dynamic_entry (DT_JMPREL, 0))
+		return FALSE;
+	    }
 	}
 
       if (relocs)
@@ -5290,6 +5310,11 @@ bad_return:
 	abort ();
       plt_sym_val[reloc_index] = plt->vma + plt_offset;
       plt_offset += bed->plt->plt_entry_size;
+
+      /* PR binutils/18437: Skip extra relocations in the .rel.plt
+	 section.  */
+      if (plt_offset >= plt->size)
+	break;
     }
 
   free (plt_contents);

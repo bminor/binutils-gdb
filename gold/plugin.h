@@ -433,6 +433,16 @@ class Pluginobj : public Object
   filesize()
   { return this->filesize_; }
 
+  // Return the word size of the object file.
+  int
+  elfsize() const
+  { gold_unreachable(); }
+
+  // Return TRUE if this is a big-endian object file.
+  bool
+  is_big_endian() const
+  { gold_unreachable(); }
+
  protected:
   // Return TRUE if this is an object claimed by a plugin.
   virtual Pluginobj*

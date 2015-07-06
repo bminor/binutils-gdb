@@ -30,8 +30,6 @@
 #endif
 
 #if HAVE_LINUX_PERF_EVENT_H && defined(SYS_perf_event_open)
-
-#include <stdint.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/user.h>

@@ -4956,6 +4956,8 @@ ENUMX
   BFD_RELOC_RL78_LO16
 ENUMX
   BFD_RELOC_RL78_CODE
+ENUMX
+  BFD_RELOC_RL78_SADDR
 ENUMDOC
   Renesas RL78 Relocations.
 
@@ -6761,6 +6763,19 @@ ENUMDOC
   Unsigned 12 bit byte offset for 32 bit load/store from the page of
   the GOT entry for this symbol.  Used in conjunction with
   BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.
+ENUM
+  BFD_RELOC_AARCH64_LD64_GOTOFF_LO15
+ENUMDOC
+  Unsigned 15 bit byte offset for 64 bit load/store from the page of
+  the GOT entry for this symbol. Valid in ILP64 ABI only.
+ENUM
+  BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14
+ENUMDOC
+  Scaled 14 bit byte offset to the page base of the global offset table.
+ENUM
+  BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+ENUMDOC
+  Scaled 15 bit byte offset to the page base of the global offset table.
 ENUM
   BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21
 ENUMDOC

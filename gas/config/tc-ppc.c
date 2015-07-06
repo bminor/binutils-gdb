@@ -2752,12 +2752,18 @@ md_assemble (char *str)
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
 	  && skip_optional)
 	{
+	  long val = ppc_optional_operand_value (operand);
 	  if (operand->insert)
 	    {
-	      insn = (*operand->insert) (insn, 0L, ppc_cpu, &errmsg);
+	      insn = (*operand->insert) (insn, val, ppc_cpu, &errmsg);
 	      if (errmsg != (const char *) NULL)
 		as_bad ("%s", errmsg);
 	    }
+	  else if (operand->shift >= 0)
+	    insn |= ((long) val & operand->bitm) << operand->shift;
+	  else
+	    insn |= ((long) val & operand->bitm) >> -operand->shift;
+
 	  if ((operand->flags & PPC_OPERAND_NEXT) != 0)
 	    next_opindex = *opindex_ptr + 1;
 	  continue;

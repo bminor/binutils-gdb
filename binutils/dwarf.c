@@ -2761,18 +2761,20 @@ read_debug_line_header (struct dwarf_section * section,
 
   if (linfo->li_length + initial_length_size > section->size)
     {
-      /* If the length is just a bias against the initial_length_size then
-	 this means that the field has a relocation against it which has not
-	 been applied.  (Ie we are dealing with an object file, not a linked
-	 binary).  Do not complain but instead assume that the rest of the
-	 section applies to this particular header.  */
-      if (linfo->li_length == - initial_length_size)
+      /* If the length field has a relocation against it, then we should
+	 not complain if it is inaccurate (and probably negative).  This
+	 happens in object files when the .debug_line section is actually
+	 comprised of several different .debug_line.* sections, (some of
+	 which may be removed by linker garbage collection), and a relocation
+	 is used to compute the correct length once that is done.  */
+      if (reloc_at (section, (hdrptr - section->start) - offset_size))
 	{
-	  linfo->li_length = section->size - initial_length_size;
+	  linfo->li_length = (end - data) - initial_length_size;
 	}
       else
 	{
-	  warn (_("The line info appears to be corrupt - the section is too small\n"));
+	  warn (_("The length field (0x%lx) in the debug_line header is wrong - the section is too small\n"),
+		(long) linfo->li_length);
 	  return NULL;
 	}
     }

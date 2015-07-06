@@ -190,6 +190,7 @@ SIM_NEW_COMMON_OBJS = \
 	sim-options.o \
 	sim-profile.o \
 	sim-signal.o \
+	sim-syscall.o \
 	sim-trace.o \
 	sim-utils.o \
 	sim-watch.o \

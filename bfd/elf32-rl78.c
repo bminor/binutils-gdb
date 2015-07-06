@@ -95,7 +95,7 @@ static reloc_howto_type rl78_elf_howto_table [] =
   RL78REL (RH_RELAX, 0,  0, 0, dont,     FALSE),
 
   EMPTY_HOWTO (0x2e),
-  EMPTY_HOWTO (0x2f),
+  RL78REL (RH_SADDR, 0,  0, 0, dont,     FALSE),
   EMPTY_HOWTO (0x30),
   EMPTY_HOWTO (0x31),
   EMPTY_HOWTO (0x32),
@@ -242,6 +242,7 @@ static const struct rl78_reloc_map rl78_reloc_map [] =
   { BFD_RELOC_RL78_ABS16UL,	R_RL78_ABS16UL },
   { BFD_RELOC_RL78_ABS16UW,	R_RL78_ABS16UW },
   { BFD_RELOC_RL78_ABS16U,	R_RL78_ABS16U },
+  { BFD_RELOC_RL78_SADDR,	R_RL78_RH_SADDR },
   { BFD_RELOC_RL78_RELAX,	R_RL78_RH_RELAX }
 };
 

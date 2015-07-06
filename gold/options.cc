@@ -346,6 +346,27 @@ General_options::parse_defsym(const char*, const char* arg,
 }
 
 void
+General_options::parse_discard_all(const char*, const char*,
+				   Command_line*)
+{
+  this->discard_locals_ = DISCARD_ALL;
+}
+
+void
+General_options::parse_discard_locals(const char*, const char*,
+				      Command_line*)
+{
+  this->discard_locals_ = DISCARD_LOCALS;
+}
+
+void
+General_options::parse_discard_none(const char*, const char*,
+				    Command_line*)
+{
+  this->discard_locals_ = DISCARD_NONE;
+}
+
+void
 General_options::parse_incremental(const char*, const char*,
 				   Command_line*)
 {
@@ -927,7 +948,8 @@ General_options::General_options()
     symbols_to_retain_(),
     section_starts_(),
     fix_v4bx_(FIX_V4BX_NONE),
-    endianness_(ENDIANNESS_NOT_SET)
+    endianness_(ENDIANNESS_NOT_SET),
+    discard_locals_(DISCARD_SEC_MERGE)
 {
   // Turn off option registration once construction is complete.
   gold::options::ready_to_register = false;

@@ -1801,8 +1801,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_displaced_step_location (gdbarch,
 				       linux_displaced_step_location);
 
-  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
-
   /* Support reverse debugging.  */
   set_gdbarch_process_record (gdbarch, ppc_process_record);
   set_gdbarch_process_record_signal (gdbarch, ppc_linux_record_signal);

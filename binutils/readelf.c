@@ -1697,6 +1697,7 @@ get_mips_dynamic_type (unsigned long type)
     case DT_MIPS_GOTSYM: return "MIPS_GOTSYM";
     case DT_MIPS_HIPAGENO: return "MIPS_HIPAGENO";
     case DT_MIPS_RLD_MAP: return "MIPS_RLD_MAP";
+    case DT_MIPS_RLD_MAP_REL: return "MIPS_RLD_MAP_REL";
     case DT_MIPS_DELTA_CLASS: return "MIPS_DELTA_CLASS";
     case DT_MIPS_DELTA_CLASS_NO: return "MIPS_DELTA_CLASS_NO";
     case DT_MIPS_DELTA_INSTANCE: return "MIPS_DELTA_INSTANCE";
@@ -6739,7 +6740,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
       if (end > aux->info + aux->info_size)
 	end = aux->info + aux->info_size;
       for (dp = head + 8; dp < end;)
-	dp = unw_decode (dp, in_body, & in_body);
+	dp = unw_decode (dp, in_body, & in_body, end);
     }
 
   free (aux->funtab);
@@ -12203,7 +12204,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 					  & new_size))
 	section_size = new_size;
     }
-  
+
   if (relocate)
     {
       apply_relocations (file, section, start, section_size, NULL, NULL);
@@ -14315,7 +14316,7 @@ process_mips_specific (FILE * file)
 		  return 0;
 		}
 	      offset += option->size;
-		
+
 	      ++option;
 	      ++cnt;
 	    }
@@ -15143,6 +15144,12 @@ print_gnu_note (Elf_Internal_Note *pnote)
 	  case GNU_ABI_TAG_NETBSD:
 	    osname = "NetBSD";
 	    break;
+	  case GNU_ABI_TAG_SYLLABLE:
+	    osname = "Syllable";
+	    break;
+	  case GNU_ABI_TAG_NACL:
+	    osname = "NaCl";
+	    break;
 	  default:
 	    osname = "Unknown";
 	    break;
@@ -15211,7 +15218,7 @@ print_v850_note (Elf_Internal_Note * pnote)
 	case EF_RH850_DATA_ALIGN8: printf (_("8-byte\n")); return 1;
 	}
       break;
-	
+
     case V850_NOTE_DATA_SIZE:
       switch (val)
 	{
@@ -15219,7 +15226,7 @@ print_v850_note (Elf_Internal_Note * pnote)
 	case EF_RH850_DOUBLE64: printf (_("8-bytes\n")); return 1;
 	}
       break;
-	
+
     case V850_NOTE_FPU_INFO:
       switch (val)
 	{
@@ -15227,7 +15234,7 @@ print_v850_note (Elf_Internal_Note * pnote)
 	case EF_RH850_FPU30: printf (_("FPU-3.0\n")); return 1;
 	}
       break;
-	
+
     case V850_NOTE_MMU_INFO:
     case V850_NOTE_CACHE_INFO:
     case V850_NOTE_SIMD_INFO:
@@ -15588,7 +15595,7 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 	      inote.descdata = inote.namedata;
 	      inote.namesz   = 0;
 	    }
- 
+
 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 	  next = inote.descdata + align_power (inote.descsz, 2);
 	}

@@ -1171,10 +1171,19 @@ pe_find_data_imports (void)
       if (undef->type == bfd_link_hash_undefined)
 	{
 	  /* C++ symbols are *long*.  */
-	  char buf[4096];
+#define BUF_SIZE 4096
+	  char buf[BUF_SIZE];
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s:%s\n", __FUNCTION__, undef->root.string);
+
+	  if (strlen (undef->root.string) > (BUF_SIZE - 6))
+	    {
+	      /* PR linker/18466.  */
+	      einfo (_("%P: internal error: symbol too long: %s\n"),
+		     undef->root.string);
+	      return;
+	    }
 
 	  sprintf (buf, "__imp_%s", undef->root.string);
 

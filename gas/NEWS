@@ -2,6 +2,14 @@
 
 Changes in 2.26:
 
+* Support for the ARMv8.1 architecture has been added to the Aarch64 port.
+  Support for the individual ARMv8.1 Adv.SIMD, LOR and PAN architecture
+  extensions has also been added to the Aarch64 port.
+
+* Support for the ARMv8.1 architecture has been added to the ARM port.  Support
+  for the individual ARMv8.1 Adv.SIMD and PAN architecture extensions has also
+  been added to the ARM port.
+
 * Extend --compress-debug-sections option to support
   --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi] for ELF
   targets.

@@ -295,19 +295,21 @@ aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
   supply_register_by_name (regcache, "pc", &newpc);
 }
 
-/* Correct in either endianness.  */
-
 #define aarch64_breakpoint_len 4
 
-static const unsigned long aarch64_breakpoint = 0x00800011;
+/* AArch64 BRK software debug mode instruction.
+   This instruction needs to match gdb/aarch64-tdep.c
+   (aarch64_default_breakpoint).  */
+static const gdb_byte aarch64_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
 
 static int
 aarch64_breakpoint_at (CORE_ADDR where)
 {
-  unsigned long insn;
+  gdb_byte insn[aarch64_breakpoint_len];
 
-  (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
-  if (insn == aarch64_breakpoint)
+  (*the_target->read_memory) (where, (unsigned char *) &insn,
+			      aarch64_breakpoint_len);
+  if (memcmp (insn, aarch64_breakpoint, aarch64_breakpoint_len) == 0)
     return 1;
 
   return 0;
@@ -950,13 +952,13 @@ aarch64_supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
+    case Z_PACKET_SW_BP:
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
       return 1;
     default:
-      /* Leave the handling of sw breakpoints with the gdb client.  */
       return 0;
     }
 }

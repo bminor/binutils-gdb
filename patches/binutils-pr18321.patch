@@ -1,4 +1,4 @@
-From 7655ba4413f1f5895575cb05d9f2b698434c617d Mon Sep 17 00:00:00 2001
+From 223d6ac4831ab29a65022b837caf05942ef25d71 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Wed, 18 Mar 2015 06:50:18 -0700
 Subject: [PATCH 1/2] Add SHF_COMPRESSED section decompression to gold
@@ -10,10 +10,19 @@ This patch adds SHF_COMPRESSED section decompression to gold.
 	for ELF class, big endian and sh_flags.
 	* compressed_output.cc (decompress_input_section): Likewise.
 	Support the SHF_COMPRESSED section.
+	* dynobj.h (Dynobj): Add elfsize and is_big_endian member
+	functions.
+	* plugin.h (Pluginobj): Likewise.
 	* object.h (Compressed_section_info): Add flag to store sh_flags.
-	* object.cc (build_compressed_section_map): Check SHF_COMPRESSED
-	for uncompressed size.  Store sh_flags in Compressed_section_info.
+	(Object): Add pure virtual elfsize and is_big_endian member
+	functions.
+	* object.cc (need_decompressed_section): Don't skip the ".zdebug"
+	prefix here.
+	(build_compressed_section_map): Check SHF_COMPRESSED for
+	uncompressed size.  Store sh_flags in Compressed_section_info.
 	Pass size, big_endian and sh_flags to decompress_input_section.
+	Skip the ".debug"/".zdebug" prefix when passing section name to
+	need_decompressed_section.
 	(Sized_relobj_file<size, big_endian>::do_find_special_section):
 	Don't check ".zdebug_*" sections.
 	(Object::decompressed_section_contents): Pass ELF class, big
@@ -37,16 +46,18 @@ This patch adds SHF_COMPRESSED section decompression to gold.
 	* testsuite/gdb_index_test_2_gabi.sh: New file.
 	* testsuite/Makefile.in: Regenerated.
 ---
- gold/compressed_output.cc               | 49 +++++++++++++++++++++++++++++-
+ gold/compressed_output.cc               | 49 ++++++++++++++++++++++++++++++-
  gold/compressed_output.h                |  2 +-
- gold/object.cc                          | 53 ++++++++++++++++++++++++---------
- gold/object.h                           |  1 +
+ gold/dynobj.h                           | 10 +++++++
+ gold/object.cc                          | 51 ++++++++++++++++++++++-----------
+ gold/object.h                           |  7 +++++
  gold/output.cc                          |  4 ++-
+ gold/plugin.h                           | 10 +++++++
  gold/reloc.cc                           |  4 ++-
  gold/testsuite/Makefile.am              | 25 ++++++++++++++++
- gold/testsuite/Makefile.in              | 28 +++++++++++++++++
- gold/testsuite/gdb_index_test_2_gabi.sh | 26 ++++++++++++++++
- 9 files changed, 174 insertions(+), 18 deletions(-)
+ gold/testsuite/Makefile.in              | 28 ++++++++++++++++++
+ gold/testsuite/gdb_index_test_2_gabi.sh | 26 +++++++++++++++++
+ 11 files changed, 196 insertions(+), 20 deletions(-)
  create mode 100755 gold/testsuite/gdb_index_test_2_gabi.sh
 
 diff --git a/gold/compressed_output.cc b/gold/compressed_output.cc
@@ -123,29 +134,58 @@ index b5fdbeb..616c80a 100644
  
  // This is used for a section whose data should be compressed.  It is
  // a regular Output_section which computes its contents into a buffer
+diff --git a/gold/dynobj.h b/gold/dynobj.h
+index b7c60f8..c08c1de 100644
+--- a/gold/dynobj.h
++++ b/gold/dynobj.h
+@@ -72,6 +72,16 @@ class Dynobj : public Object
+     this->unknown_needed_ = set ? UNKNOWN_NEEDED_TRUE : UNKNOWN_NEEDED_FALSE;
+   }
+ 
++  // Return the word size of the object file.
++  int
++  elfsize() const
++  { gold_unreachable(); }
++
++  // Return TRUE if this is a big-endian object file.
++  bool
++  is_big_endian() const
++  { gold_unreachable(); }
++
+   // Compute the ELF hash code for a string.
+   static uint32_t
+   elf_hash(const char*);
 diff --git a/gold/object.cc b/gold/object.cc
-index 18c6670..7d377a3 100644
+index 4e94f7e..316f8d4 100644
 --- a/gold/object.cc
 +++ b/gold/object.cc
-@@ -740,25 +740,49 @@ build_compressed_section_map(
- 	      continue;
+@@ -663,14 +663,12 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
+ 
+ // Return TRUE if this is a section whose contents will be needed in the
+ // Add_symbols task.  This function is only called for sections that have
+-// already passed the test in is_compressed_debug_section(), so we know
+-// that the section name begins with ".zdebug".
++// already passed the test in is_compressed_debug_section() and the debug
++// section name prefix, ".debug"/".zdebug", has been skipped.
+ 
+ static bool
+ need_decompressed_section(const char* name)
+ {
+-  // Skip over the ".zdebug" and a quick check for the "_".
+-  name += 7;
+   if (*name++ != '_')
+     return false;
+ 
+@@ -741,14 +739,33 @@ build_compressed_section_map(
  	    }
  
--	  const char* name = names + shdr.get_sh_name();
+ 	  const char* name = names + shdr.get_sh_name();
 -	  if (is_compressed_debug_section(name))
-+	  bool is_zcompressed = false;
-+	  bool is_compressed =
-+	      (shdr.get_sh_flags() & elfcpp::SHF_COMPRESSED) != 0;
-+	  const char* name;
++	  bool is_compressed = ((shdr.get_sh_flags()
++				 & elfcpp::SHF_COMPRESSED) != 0);
++	  bool is_zcompressed = (!is_compressed
++				 && is_compressed_debug_section(name));
 +
-+	  if (is_compressed)
-+	    name = NULL;
-+	  else
-+	    {
-+	      name = names + shdr.get_sh_name();
-+	      if (is_compressed_debug_section(name))
-+		is_zcompressed = true;
-+	    }
 +	  if (is_zcompressed || is_compressed)
  	    {
  	      section_size_type len;
@@ -154,9 +194,15 @@ index 18c6670..7d377a3 100644
 -	      uint64_t uncompressed_size = get_uncompressed_size(contents, len);
 +	      uint64_t uncompressed_size;
 +	      if (is_zcompressed)
-+		uncompressed_size = get_uncompressed_size(contents, len);
++		{
++		  // Skip over the ".zdebug" prefix.
++		  name += 7;
++		  uncompressed_size = get_uncompressed_size(contents, len);
++		}
 +	      else
 +		{
++		  // Skip over the ".debug" prefix.
++		  name += 6;
 +		  elfcpp::Chdr<size, big_endian> chdr(contents);
 +		  uncompressed_size = chdr.get_ch_size();
 +		}
@@ -166,12 +212,7 @@ index 18c6670..7d377a3 100644
  	      info.contents = NULL;
  	      if (uncompressed_size != -1ULL)
  		{
- 		  unsigned char* uncompressed_data = NULL;
--		  if (decompress_if_needed && need_decompressed_section(name))
-+		  if (decompress_if_needed
-+		      && (is_compressed
-+			  || need_decompressed_section(name)))
- 		    {
+@@ -758,7 +775,9 @@ build_compressed_section_map(
  		      uncompressed_data = new unsigned char[uncompressed_size];
  		      if (decompress_input_section(contents, len,
  						   uncompressed_data,
@@ -182,7 +223,7 @@ index 18c6670..7d377a3 100644
  			info.contents = uncompressed_data;
  		      else
  			delete[] uncompressed_data;
-@@ -786,14 +810,11 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
+@@ -786,14 +805,11 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
    if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
      this->has_eh_frame_ = true;
  
@@ -196,30 +237,26 @@ index 18c6670..7d377a3 100644
 -    }
 +  Compressed_section_map* compressed_sections =
 +    build_compressed_section_map<size, big_endian>(
-+						   pshdrs, this->shnum(), names, sd->section_names_size, this, true);
++      pshdrs, this->shnum(), names, sd->section_names_size, this, true);
 +  if (compressed_sections != NULL)
 +    this->set_compressed_sections(compressed_sections);
  
    return (this->has_eh_frame_
  	  || (!parameters->options().relocatable()
-@@ -2890,10 +2911,14 @@ Object::decompressed_section_contents(
-     }
- 
-   unsigned char* uncompressed_data = new unsigned char[uncompressed_size];
-+  Relobj *relobj = static_cast<Relobj*>(this);
+@@ -2899,7 +2915,10 @@ Object::decompressed_section_contents(
    if (!decompress_input_section(buffer,
  				buffer_size,
  				uncompressed_data,
 -				uncompressed_size))
 +				uncompressed_size,
-+				relobj->elfsize(),
-+				relobj->is_big_endian(),
++				elfsize(),
++				is_big_endian(),
 +				p->second.flag))
      this->error(_("could not decompress section %s"),
  		this->do_section_name(shndx).c_str());
  
 diff --git a/gold/object.h b/gold/object.h
-index a3d5d0e..b30925d 100644
+index a3d5d0e..e8f74ac 100644
 --- a/gold/object.h
 +++ b/gold/object.h
 @@ -320,6 +320,7 @@ class Got_offset_list
@@ -230,6 +267,19 @@ index a3d5d0e..b30925d 100644
    const unsigned char* contents;
  };
  typedef std::map<unsigned int, Compressed_section_info> Compressed_section_map;
+@@ -380,6 +381,12 @@ class Object
+   is_dynamic() const
+   { return this->is_dynamic_; }
+ 
++  // Return the word size of the object file.
++  virtual int elfsize() const = 0;
++
++  // Return TRUE if this is a big-endian object file.
++  virtual bool is_big_endian() const = 0;
++
+   // Return whether this object is needed--true if it is a dynamic
+   // object which defines some symbol referenced by a regular object.
+   // We keep the flag here rather than in Dynobj for convenience when
 diff --git a/gold/output.cc b/gold/output.cc
 index 5cc3629..5d8b8b5 100644
 --- a/gold/output.cc
@@ -245,8 +295,29 @@ index 5cc3629..5d8b8b5 100644
      order_(ORDER_INVALID),
      out_shndx_(-1U),
      symtab_index_(0),
+diff --git a/gold/plugin.h b/gold/plugin.h
+index f926879..3e094d7 100644
+--- a/gold/plugin.h
++++ b/gold/plugin.h
+@@ -433,6 +433,16 @@ class Pluginobj : public Object
+   filesize()
+   { return this->filesize_; }
+ 
++  // Return the word size of the object file.
++  int
++  elfsize() const
++  { gold_unreachable(); }
++
++  // Return TRUE if this is a big-endian object file.
++  bool
++  is_big_endian() const
++  { gold_unreachable(); }
++
+  protected:
+   // Return TRUE if this is an object claimed by a plugin.
+   virtual Pluginobj*
 diff --git a/gold/reloc.cc b/gold/reloc.cc
-index 910c4ee..df897d3 100644
+index 3c9f7a9..b0f9b1c 100644
 --- a/gold/reloc.cc
 +++ b/gold/reloc.cc
 @@ -866,7 +866,9 @@ Sized_relobj_file<size, big_endian>::write_sections(const Layout* layout,
@@ -261,7 +332,7 @@ index 910c4ee..df897d3 100644
  			this->section_name(i).c_str());
          }
 diff --git a/gold/testsuite/Makefile.am b/gold/testsuite/Makefile.am
-index e2390eb..0f00f2b 100644
+index 7669f27..9c28c9a 100644
 --- a/gold/testsuite/Makefile.am
 +++ b/gold/testsuite/Makefile.am
 @@ -1239,6 +1239,22 @@ debug_msg_cdebug.err: debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_
@@ -287,7 +358,7 @@ index e2390eb..0f00f2b 100644
  
  # See if we can also detect problems when we're linking .so's, not .o's.
  check_DATA += debug_msg_so.err
-@@ -2379,6 +2395,15 @@ gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
+@@ -2400,6 +2416,15 @@ gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
  	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
  gdb_index_test_2.stdout: gdb_index_test_2
  	$(TEST_READELF) --debug-dump=gdb_index $< > $@
@@ -304,10 +375,10 @@ index e2390eb..0f00f2b 100644
  # Another simple C test (DW_AT_high_pc encoding) for --gdb-index.
  check_SCRIPTS += gdb_index_test_3.sh
 diff --git a/gold/testsuite/Makefile.in b/gold/testsuite/Makefile.in
-index fe8da13..85d478e 100644
+index 3f8818d..1131512 100644
 --- a/gold/testsuite/Makefile.in
 +++ b/gold/testsuite/Makefile.in
-@@ -268,6 +268,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+@@ -274,6 +274,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug.err \
@@ -315,7 +386,7 @@ index fe8da13..85d478e 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
-@@ -341,6 +342,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+@@ -347,6 +348,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_36 = debug_msg.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug.err \
@@ -323,7 +394,7 @@ index fe8da13..85d478e 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
-@@ -593,16 +595,20 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+@@ -599,16 +601,20 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
  # Test that --gdb-index functions correctly with gcc-generated pubnames.
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@am__append_65 = gdb_index_test_1.sh \
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2.sh \
@@ -344,7 +415,7 @@ index fe8da13..85d478e 100644
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_3.stdout \
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_3 \
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_4.stdout \
-@@ -4356,6 +4362,8 @@ gdb_index_test_1.sh.log: gdb_index_test_1.sh
+@@ -4412,6 +4418,8 @@ gdb_index_test_1.sh.log: gdb_index_test_1.sh
  	@p='gdb_index_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
  gdb_index_test_2.sh.log: gdb_index_test_2.sh
  	@p='gdb_index_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
@@ -353,7 +424,7 @@ index fe8da13..85d478e 100644
  gdb_index_test_3.sh.log: gdb_index_test_3.sh
  	@p='gdb_index_test_3.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
  gdb_index_test_4.sh.log: gdb_index_test_4.sh
-@@ -5394,6 +5402,20 @@ uninstall-am:
+@@ -5456,6 +5464,20 @@ uninstall-am:
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
@@ -374,7 +445,7 @@ index fe8da13..85d478e 100644
  @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.so: debug_msg.cc gcctestdir/ld
  @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
  @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1.so: odr_violation1.cc gcctestdir/ld
-@@ -5967,6 +5989,12 @@ uninstall-am:
+@@ -6043,6 +6065,12 @@ uninstall-am:
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_2.stdout: gdb_index_test_2
  @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --debug-dump=gdb_index $< > $@
@@ -420,5 +491,5 @@ index 0000000..def9bea
 +
 +exec ${srcdir}/gdb_index_test_comm.sh gdb_index_test_2_gabi.stdout
 -- 
-1.9.3
+2.1.0
 

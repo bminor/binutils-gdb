@@ -2016,7 +2016,7 @@ xcoff_start_psymtab (struct objfile *objfile,
 		     struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
-    start_psymtab_common (objfile, objfile->section_offsets,
+    start_psymtab_common (objfile,
 			  filename,
 			  /* We fill in textlow later.  */
 			  0,
@@ -2079,7 +2079,6 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       struct partial_symtab *subpst =
 	allocate_psymtab (include_list[i], objfile);
 
-      subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 						   sizeof (struct symloc));
       ((struct symloc *) subpst->read_symtab_private)->first_symnum = 0;

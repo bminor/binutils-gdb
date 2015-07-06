@@ -1,3 +1,109 @@
+2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (insert_ls): Test for invalid LS operands.
+	(insert_esync): New function.
+	(LS, WC): Use insert_ls.
+	(ESYNC): Use insert_esync.
+
+2015-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* dis-buf.c (buffer_read_memory): Fail is stop_vma is set and the
+	requested region lies beyond it.
+	* bfin-dis.c (print_insn_bfin): Ignore sysop instructions when
+	looking for 32-bit insns.
+	* mcore-dis.c (print_insn_mcore): Disable stop_vma when reading
+	data.
+	* sh-dis.c (print_insn_sh): Likewise.
+	* tic6x-dis.c (print_insn_tic6x): Disable stop_vma when reading
+	blocks of instructions.
+	* vax-dis.c (print_insn_vax): Check that the requested address
+	does not clash with the stop_vma.
+
+2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+        * ppc-dis.h (skip_optional_operands): Use ppc_optional_operand_value.
+	* ppc-opc.c (FXM4): Add non-zero optional value.
+	(TBR): Likewise.
+	(SXL): Likewise.
+	(insert_fxm): Handle new default operand value.
+	(extract_fxm): Likewise.
+	(insert_tbr): Likewise.
+	(extract_tbr): Likewise.
+
+2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arch64-opc.c (aarch64_sys_regs): Add "id_mmfr4_el1".
+
+2015-06-16  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* arm-dis.c (print_insn_coprocessor): Avoid negative shift.
+
+2015-06-12  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c: Add comment accidentally removed by old commit.
+	(MTMSRD_L): Delete.
+
+2015-06-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 18474
+	* msp430-dis.c (msp430_nooperands): Fix check for emulated insns.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add "setpan".
+	(thumb_opcodes): Add "setpan".
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (select_arm_features): Rework to avoid used of redefined
+	macros.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_rdma): New.
+	(RDMA): New.
+	(aarch64_opcode_table): Add "sqrmlah" and "sqrdmlsh" instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_lor): New.
+	(LOR): New.
+	(aarch64_opdocde_table): Add "ldlar", "ldlarb", "ldlarh", "stllr",
+	"stllrb", "stllrh".
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (F_ARCHEXT): New.
+	(aarch64_sys_regs): Add "pan".
+	(aarch64_sys_reg_supported_p): New.
+	(aarch64_pstatefields): Add "pan".
+	(aarch64_pstatefield_supported_p): New.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-tbl.h: Regenerate.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (print_insn): Swap rounding mode specifier and
+	general purpose register in Intel mode.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl: New IntelSyntax entries for vcvt{,u}si2s{d,s}.
+	* i386-tbl.h: Regenerate.
+
+2015-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Remove Disp32 from AMD64 direct call/jmp.
+	* i386-init.h: Regenerated.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386

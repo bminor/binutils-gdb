@@ -1,3 +1,173 @@
+2015-06-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/psn.d: Updated.
+	* gas/ia64/xdata-ilp32.d: Likewise.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/mmix/loc-3.d: Updated.
+	* gas/mmix/loc-5.d: Likewise.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18451
+	* gas/elf/elf.exp: Run strtab.
+	* gas/elf/strtab.d: New file.
+	* gas/elf/strtab.s: Likewise.
+
+2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/e6500.s <sync>: Fix invalid test.
+	* gas/ppc/e6500.d: Likewise.
+
+2015-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/backslash-at.s: Add extra .byte directives so that the
+	foo symbol does not appear to point half way through an
+	instruction.
+	* gas/arm/backslash-at.d: Update expected disassembly.
+	* gas/i386/ilp32/x86-64-opcode-inval-intel.d: Likewise.
+	* gas/i386/ilp32/x86-64-opcode-inval.d: Likewise.
+	* gas/i386/x86-64-opcode-inval-intel.d: Likewise.
+	* gas/i386/x86-64-opcode-inval.d: Likewise.
+
+2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/power8.d: Fixup rfebb test results.
+	* gas/ppc/a2.s: Fix invalid mfcr test.
+	* gas/ppc/a2.d: Likewise.
+
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18541
+	* gas/arm/thumb.s: Add test of ADR against a nearby symbol.
+	* gas/arm/thumb.d: Update expected output.
+	* gas/arm/thumb-eabi.d: Likewise.
+
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18481
+	* gas/arm/tls.s: Add tests of the tpoff pseudo with a local
+	symbol.
+	* gas/arm/tls.d: Update expected output.
+
+2015-06-17  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
+
+	PR gas/18500
+	* gas/arm/vfpv2-ldr_immediate.s: New test case.
+	* gas/arm/vfpv2-ldr_immediate.d: Expected disassembly.
+	* gas/arm/vfpv3-ldr_immediate.s: New test case.
+	* gas/arm/vfpv3-ldr_immediate.d: Expected disassembly.
+	* gas/arm/vfpv3xd-ldr_immediate.s: New test case.
+	* gas/arm/vfpv3xd-ldr_immediate.d: Expected disassembly.
+
+	PR gas/18499
+	* gas/arm/thumb2_ldr_immediate_armv6.s: New test case.
+	* gas/arm/thumb2_ldr_immediate_armv6.d: Expected disassembly.
+	* gas/arm/thumb2_ldr_immediate_armv6t2.s: New test case.
+	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Expected disassembly.
+
+2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* sysreg.d: Add id_mmfr4_el1, update expected output.
+	* sysreg.s: Add id_mmfr4_el1.
+
+2015-06-15  Renlin Li  <renlin.li@arm.com>
+
+	* gas/aarch64/reloc-insn.s: Update test
+	* gas/aarch64/reloc-insn.d: Update expected result.
+
+2015-06-13  Mark Wielaard  <mjw@redhat.com>
+
+	* gas/aarch64/dwarf.d: New.
+	* gas/aarch64/dwarf.s: New.
+
+2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/arm/armv8-a+rdma.d: New.
+	* gas/arm/armv8-a+rdma.s: New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/arm/armv8-a+pan.d: New.
+	* gas/arm/armv8-a+pan.s: New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/rdma-directive.d: New.
+	* gas/aarch64/rdma.d: New.
+	* gas/aarch64/rdma.s: New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/lor-directive.d: New.
+	* gas/aarch64/lor.d: New.
+	* gas/aarch64/lor.s: New
+
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/pan-directive.d: New.
+	* gas/aarch64/pan.d: New.
+	* gas/aarch64/pan.s: New
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/ilp32-basic.s: New testcase.
+	* gas/aarch64/ilp32-basic.d: Ditto.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/reloc-insn.s: New testcase.
+	* gas/aarch64/reloc-insn.d: Ditto.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/i386/avx512f.s: Adjust operand order for Intel syntax
+	vcvt{,u}si2ss.
+	* gas/i386/x86-64-avx512f.s: Adjust operand order for Intel
+	syntax vcvt{,u}si2s{d,s}.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/i386/avx512f-intel.d: Adjust expectations on operand order.
+	* gas/i386/evex-lig256-intel.d: Likewise.
+	* gas/i386/evex-lig512-intel.d: Likewise.
+	* gas/i386/x86-64-avx512f-intel.d: Likewise.
+	* gas/i386/x86-64-evex-lig256-intel.d: Likewise.
+	* gas/i386/x86-64-evex-lig512-intel.d: Likewise.
+
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+
+	gas/testsuite/
+	* gas/mips/mips.exp: Run new tests.
+
+	* gas/mips/compact-eh-1.s: New file.
+	* gas/mips/compact-eh-2.s: New file.
+	* gas/mips/compact-eh-3.s: New file.
+	* gas/mips/compact-eh-4.s: New file.
+	* gas/mips/compact-eh-5.s: New file.
+	* gas/mips/compact-eh-6.s: New file.
+	* gas/mips/compact-eh-7.s: New file.
+	* gas/mips/compact-eh-eb-1.d: New file.
+	* gas/mips/compact-eh-eb-2.d: New file.
+	* gas/mips/compact-eh-eb-3.d: New file.
+	* gas/mips/compact-eh-eb-4.d: New file.
+	* gas/mips/compact-eh-eb-5.d: New file.
+	* gas/mips/compact-eh-eb-6.d: New file.
+	* gas/mips/compact-eh-eb-7.d: New file.
+	* gas/mips/compact-eh-el-1.d: New file.
+	* gas/mips/compact-eh-el-2.d: New file.
+	* gas/mips/compact-eh-el-3.d: New file.
+	* gas/mips/compact-eh-el-4.d: New file.
+	* gas/mips/compact-eh-el-5.d: New file.
+	* gas/mips/compact-eh-el-6.d: New file.
+	* gas/mips/compact-eh-el-7.d: New file.
+	* gas/mips/compact-eh-err1.l: New file.
+	* gas/mips/compact-eh-err1.s: New file.
+	* gas/mips/compact-eh-err2.l: New file.
+	* gas/mips/compact-eh-err2.s: New file.
+
 2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386

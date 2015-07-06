@@ -2455,6 +2455,15 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
    0},
 
+  /* 15 bit offset into the page containing GOT entry for that symbol.  */
+  {"gotoff_lo15", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   0,
+   BFD_RELOC_AARCH64_LD64_GOTOFF_LO15,
+   0},
+
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsgd", 0,
    BFD_RELOC_AARCH64_TLSGD_ADR_PREL21, /* adr_type */
@@ -2588,6 +2597,24 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC,
    0,
    0,
+   0},
+
+  /* 15bit offset from got entry to base address of GOT table.  */
+  {"gotpage_lo15", 0,
+   0,
+   0,
+   0,
+   0,
+   BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15,
+   0},
+
+  /* 14bit offset from got entry to base address of GOT table.  */
+  {"gotpage_lo14", 0,
+   0,
+   0,
+   0,
+   0,
+   BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14,
    0},
 };
 
@@ -3383,10 +3410,15 @@ parse_barrier (char **str)
    Returns the encoding for the option, or PARSE_FAIL.
 
    If IMPLE_DEFINED_P is non-zero, the function will also try to parse the
-   implementation defined system register name S<op0>_<op1>_<Cn>_<Cm>_<op2>.  */
+   implementation defined system register name S<op0>_<op1>_<Cn>_<Cm>_<op2>.
+
+   If PSTATEFIELD_P is non-zero, the function will parse the name as a PSTATE
+   field, otherwise as a system register.
+*/
 
 static int
-parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
+parse_sys_reg (char **str, struct hash_control *sys_regs,
+	       int imple_defined_p, int pstatefield_p)
 {
   char *p, *q;
   char buf[32];
@@ -3421,9 +3453,15 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
     }
   else
     {
+      if (pstatefield_p && !aarch64_pstatefield_supported_p (cpu_variant, o))
+	as_bad (_("selected processor does not support PSTATE field "
+		  "name '%s'"), buf);
+      if (!pstatefield_p && !aarch64_sys_reg_supported_p (cpu_variant, o))
+	as_bad (_("selected processor does not support system register "
+		  "name '%s'"), buf);
       if (aarch64_sys_reg_deprecated_p (o))
 	as_warn (_("system register name '%s' is deprecated and may be "
-"removed in a future release"), buf);
+		   "removed in a future release"), buf);
       value = o->value;
     }
 
@@ -4533,22 +4571,22 @@ process_movw_reloc_info (void)
   switch (inst.reloc.type)
     {
     case BFD_RELOC_AARCH64_MOVW_G0:
-    case BFD_RELOC_AARCH64_MOVW_G0_S:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_MOVW_G0_S:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
       shift = 0;
       break;
     case BFD_RELOC_AARCH64_MOVW_G1:
-    case BFD_RELOC_AARCH64_MOVW_G1_S:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
+    case BFD_RELOC_AARCH64_MOVW_G1_S:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
       shift = 16;
       break;
     case BFD_RELOC_AARCH64_MOVW_G2:
-    case BFD_RELOC_AARCH64_MOVW_G2_S:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
+    case BFD_RELOC_AARCH64_MOVW_G2_S:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
       if (is32)
 	{
@@ -5288,7 +5326,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_SYSREG:
-	  if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1))
+	  if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1, 0))
 	      == PARSE_FAIL)
 	    {
 	      set_syntax_error (_("unknown or missing system register name"));
@@ -5298,7 +5336,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_PSTATEFIELD:
-	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0))
+	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, 1))
 	      == PARSE_FAIL)
 	    {
 	      set_syntax_error (_("unknown or missing PSTATE field name"));
@@ -6601,8 +6639,8 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 	}
       break;
 
-    case BFD_RELOC_AARCH64_JUMP26:
     case BFD_RELOC_AARCH64_CALL26:
+    case BFD_RELOC_AARCH64_JUMP26:
       if (fixP->fx_done || !seg->use_rela_p)
 	{
 	  if (value & 3)
@@ -6618,18 +6656,18 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       break;
 
     case BFD_RELOC_AARCH64_MOVW_G0:
-    case BFD_RELOC_AARCH64_MOVW_G0_S:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_MOVW_G0_S:
       scale = 0;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G1:
-    case BFD_RELOC_AARCH64_MOVW_G1_S:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
+    case BFD_RELOC_AARCH64_MOVW_G1_S:
       scale = 16;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G2:
-    case BFD_RELOC_AARCH64_MOVW_G2_S:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
+    case BFD_RELOC_AARCH64_MOVW_G2_S:
       scale = 32;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G3:
@@ -6752,18 +6790,21 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       gas_assert (seg->use_rela_p);
       break;
 
-    case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
-    case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
     case BFD_RELOC_AARCH64_ADD_LO12:
-    case BFD_RELOC_AARCH64_LDST8_LO12:
+    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
+    case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
+    case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
+    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LDST128_LO12:
     case BFD_RELOC_AARCH64_LDST16_LO12:
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
-    case BFD_RELOC_AARCH64_LDST128_LO12:
-    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
-    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
-    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
-    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LDST8_LO12:
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
       gas_assert (!fixP->fx_done);
@@ -6771,8 +6812,8 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       break;
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD:
-    case BFD_RELOC_AARCH64_TLSDESC_LDR:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
+    case BFD_RELOC_AARCH64_TLSDESC_LDR:
       break;
 
     case BFD_RELOC_UNUSED:
@@ -6898,9 +6939,9 @@ aarch64_force_relocation (struct fix *fixp)
          even if the symbol is extern or weak.  */
       return 0;
 
-    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
     case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
       /* Pseudo relocs that need to be fixed up according to
 	 ilp32_p.  */
       return 0;
@@ -6911,6 +6952,9 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LDST128_LO12:
     case BFD_RELOC_AARCH64_LDST16_LO12:
@@ -7350,6 +7394,7 @@ struct aarch64_arch_option_table
 static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"all", AARCH64_ANY},
   {"armv8-a", AARCH64_ARCH_V8},
+  {"armv8.1-a", AARCH64_ARCH_V8_1},
   {NULL, AARCH64_ARCH_NONE}
 };
 
@@ -7366,6 +7411,10 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
   {"lse",		AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0)},
   {"simd",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
+  {"pan",		AARCH64_FEATURE (AARCH64_FEATURE_PAN, 0)},
+  {"lor",		AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0)},
+  {"rdma",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD
+					 | AARCH64_FEATURE_RDMA, 0)},
   {NULL,		AARCH64_ARCH_NONE}
 };
 

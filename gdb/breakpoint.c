@@ -1837,10 +1837,11 @@ update_watchpoint (struct watchpoint *b, int reparse)
       struct gdbarch *frame_arch = get_frame_arch (fi);
       CORE_ADDR frame_pc = get_frame_pc (fi);
 
-      /* If we're in a function epilogue, unwinding may not work
-	 properly, so do not attempt to recreate locations at this
+      /* If we're at a point where the stack has been destroyed
+	 (e.g. in a function epilogue), unwinding may not work
+	 properly. Do not attempt to recreate locations at this
 	 point.  See similar comments in watchpoint_check.  */
-      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+      if (gdbarch_stack_frame_destroyed_p (frame_arch, frame_pc))
 	return;
 
       /* Save the current frame's ID so we can restore it after
@@ -5037,7 +5038,7 @@ watchpoint_check (void *p)
       struct gdbarch *frame_arch = get_frame_arch (frame);
       CORE_ADDR frame_pc = get_frame_pc (frame);
 
-      /* in_function_epilogue_p() returns a non-zero value if we're
+      /* stack_frame_destroyed_p() returns a non-zero value if we're
 	 still in the function but the stack frame has already been
 	 invalidated.  Since we can't rely on the values of local
 	 variables after the stack has been destroyed, we are treating
@@ -5046,7 +5047,7 @@ watchpoint_check (void *p)
 	 frame is in an epilogue - even if they are in some other
 	 frame, our view of the stack is likely to be wrong and
 	 frame_find_by_id could error out.  */
-      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+      if (gdbarch_stack_frame_destroyed_p (frame_arch, frame_pc))
 	return WP_IGNORE;
 
       fr = frame_find_by_id (b->watchpoint_frame);
@@ -7430,26 +7431,6 @@ set_raw_breakpoint (struct gdbarch *gdbarch,
   return b;
 }
 
-
-/* Note that the breakpoint object B describes a permanent breakpoint
-   instruction, hard-wired into the inferior's code.  */
-void
-make_breakpoint_permanent (struct breakpoint *b)
-{
-  struct bp_location *bl;
-
-  /* By definition, permanent breakpoints are already present in the
-     code.  Mark all locations as inserted.  For now,
-     make_breakpoint_permanent is called in just one place, so it's
-     hard to say if it's reasonable to have permanent breakpoint with
-     multiple locations or not, but it's easy to implement.  */
-  for (bl = b->loc; bl; bl = bl->next)
-    {
-      bl->permanent = 1;
-      bl->inserted = 1;
-    }
-}
-
 /* Call this routine when stepping and nexting to enable a breakpoint
    if we do a longjmp() or 'throw' in TP.  FRAME is the frame which
    initiated the operation.  */
@@ -8917,11 +8898,21 @@ add_location_to_breakpoint (struct breakpoint *b,
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);
 
+  /* While by definition, permanent breakpoints are already present in the
+     code, we don't mark the location as inserted.  Normally one would expect
+     that GDB could rely on that breakpoint instruction to stop the program,
+     thus removing the need to insert its own breakpoint, except that executing
+     the breakpoint instruction can kill the target instead of reporting a
+     SIGTRAP.  E.g., on SPARC, when interrupts are disabled, executing the
+     instruction resets the CPU, so QEMU 2.0.0 for SPARC correspondingly dies
+     with "Trap 0x02 while interrupts disabled, Error state".  Letting the
+     breakpoint be inserted normally results in QEMU knowing about the GDB
+     breakpoint, and thus trap before the breakpoint instruction is executed.
+     (If GDB later needs to continue execution past the permanent breakpoint,
+     it manually increments the PC, thus avoiding executing the breakpoint
+     instruction.)  */
   if (bp_loc_is_permanent (loc))
-    {
-      loc->inserted = 1;
-      loc->permanent = 1;
-    }
+    loc->permanent = 1;
 
   return loc;
 }
@@ -8972,20 +8963,6 @@ bp_loc_is_permanent (struct bp_location *loc)
   int retval;
 
   gdb_assert (loc != NULL);
-
-  /* bp_call_dummy breakpoint locations are usually memory locations
-     where GDB just wrote a breakpoint instruction, making it look
-     as if there is a permanent breakpoint at that location.  Considering
-     it permanent makes GDB rely on that breakpoint instruction to stop
-     the program, thus removing the need to insert its own breakpoint
-     there.  This is normally expected to work, except that some versions
-     of QEMU (Eg: QEMU 2.0.0 for SPARC) just report a fatal problem (Trap
-     0x02 while interrupts disabled, Error state) instead of reporting
-     a SIGTRAP.  QEMU should probably be fixed, but in the interest of
-     compatibility with versions that behave this way, we always consider
-     bp_call_dummy breakpoint locations as non-permanent.  */
-  if (loc->owner->type == bp_call_dummy)
-    return 0;
 
   cleanup = save_current_space_and_thread ();
   switch_to_program_space_and_thread (loc->pspace);
@@ -9772,7 +9749,10 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       b->addr_string = copy_arg;
       if (parse_arg)
-	b->cond_string = NULL;
+	{
+	  b->cond_string = NULL;
+	  b->extra_string = NULL;
+	}
       else
 	{
 	  /* Create a private copy of condition string.  */
@@ -9781,10 +9761,16 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      cond_string = xstrdup (cond_string);
 	      make_cleanup (xfree, cond_string);
 	    }
+	  /* Create a private copy of any extra string.  */
+	  if (extra_string != NULL)
+	    {
+	      extra_string = xstrdup (extra_string);
+	      make_cleanup (xfree, extra_string);
+	    }
 	  b->cond_string = cond_string;
+	  b->extra_string = extra_string;
 	  b->thread = thread;
 	}
-      b->extra_string = NULL;
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
@@ -12429,12 +12415,6 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 	  continue;
 	}
 
-      /* Permanent breakpoint should always be inserted.  */
-      if (loc->permanent && ! loc->inserted)
-	internal_error (__FILE__, __LINE__,
-			_("allegedly permanent breakpoint is not "
-			"actually inserted"));
-
       if (b->type == bp_hardware_watchpoint)
 	loc_first_p = &wp_loc_first;
       else if (b->type == bp_read_watchpoint)
@@ -12470,12 +12450,6 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
       /* Clear the condition modification flag.  */
       loc->condition_changed = condition_unchanged;
-
-      if (loc->inserted && !loc->permanent
-	  && (*loc_first_p)->permanent)
-	internal_error (__FILE__, __LINE__,
-			_("another breakpoint was inserted on top of "
-			"a permanent breakpoint"));
     }
 
   if (insert_mode == UGLL_INSERT || breakpoints_should_be_inserted_now ())

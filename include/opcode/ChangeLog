@@ -1,3 +1,44 @@
+2015-06-19  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc.h (PPC_OPERAND_OPTIONAL_VALUE): New.
+	(ppc_optional_operand_value): New inline function.
+
+2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_V8_1): New.
+
+2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1): New.
+	(ARM_ARCH_V8_1A): New.
+	(ARM_ARCH_V8_1A_FP): New.
+	(ARM_ARCH_V8_1A_SIMD): New.
+	(ARM_ARCH_V8_1A_CRYPTOV1): New.
+	(ARM_FEATURE_CORE): New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_EXT2_PAN): New.
+	(ARM_FEATURE_CORE_HIGH): New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_FEATURE_ALL): New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_RDMA): New.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_LOR): New.
+
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_PAN): New.
+	(aarch64_sys_reg_supported_p): Declare.
+	(aarch64_pstatefield_supported_p): Declare.
+
 2015-04-30  DJ Delorie  <dj@redhat.com>
 
 	* rl78.h (RL78_Dis_Isa): New.

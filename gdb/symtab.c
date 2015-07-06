@@ -2804,12 +2804,39 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
 
   bv = COMPUNIT_BLOCKVECTOR (cust);
   block = BLOCKVECTOR_BLOCK (bv, block_index);
-  sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
-  if (!sym)
+  sym = block_find_symbol (block, name, STRUCT_DOMAIN,
+			   block_find_non_opaque_type, NULL);
+  if (sym == NULL)
     error_in_psymtab_expansion (block_index, name, cust);
+  gdb_assert (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)));
+  return SYMBOL_TYPE (sym);
+}
 
-  if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-    return SYMBOL_TYPE (sym);
+/* Subroutine of basic_lookup_transparent_type to simplify it.
+   Look up the non-opaque definition of NAME in BLOCK_INDEX of OBJFILE.
+   BLOCK_INDEX is either GLOBAL_BLOCK or STATIC_BLOCK.  */
+
+static struct type *
+basic_lookup_transparent_type_1 (struct objfile *objfile, int block_index,
+				 const char *name)
+{
+  const struct compunit_symtab *cust;
+  const struct blockvector *bv;
+  const struct block *block;
+  const struct symbol *sym;
+
+  ALL_OBJFILE_COMPUNITS (objfile, cust)
+    {
+      bv = COMPUNIT_BLOCKVECTOR (cust);
+      block = BLOCKVECTOR_BLOCK (bv, block_index);
+      sym = block_find_symbol (block, name, STRUCT_DOMAIN,
+			       block_find_non_opaque_type, NULL);
+      if (sym != NULL)
+	{
+	  gdb_assert (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)));
+	  return SYMBOL_TYPE (sym);
+	}
+    }
 
   return NULL;
 }
@@ -2837,16 +2864,9 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
-    ALL_OBJFILE_COMPUNITS (objfile, cust)
-      {
-	bv = COMPUNIT_BLOCKVECTOR (cust);
-	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
-	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-	  {
-	    return SYMBOL_TYPE (sym);
-	  }
-      }
+    t = basic_lookup_transparent_type_1 (objfile, GLOBAL_BLOCK, name);
+    if (t)
+      return t;
   }
 
   ALL_OBJFILES (objfile)
@@ -2865,16 +2885,9 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
-    ALL_OBJFILE_COMPUNITS (objfile, cust)
-      {
-	bv = COMPUNIT_BLOCKVECTOR (cust);
-	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
-	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-	  {
-	    return SYMBOL_TYPE (sym);
-	  }
-      }
+    t = basic_lookup_transparent_type_1 (objfile, STATIC_BLOCK, name);
+    if (t)
+      return t;
   }
 
   ALL_OBJFILES (objfile)
@@ -3592,7 +3605,9 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 /* Given a function symbol SYM, find the symtab and line for the start
    of the function.
    If the argument FUNFIRSTLINE is nonzero, we want the first line
-   of real code inside the function.  */
+   of real code inside the function.
+   This function should return SALs matching those from minsym_found,
+   otherwise false multiple-locations breakpoints could be placed.  */
 
 struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
@@ -3603,6 +3618,14 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   fixup_symbol_section (sym, NULL);
   section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
   sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
+
+  if (funfirstline && sal.symtab != NULL
+      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
+	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+    {
+      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      return sal;
+    }
 
   /* We always should have a line for the function start address.
      If we don't, something is odd.  Create a plain SAL refering

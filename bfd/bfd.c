@@ -51,6 +51,12 @@ CODE_FRAGMENT
 .    bfd_plugin_no = 2
 .  };
 .
+.struct bfd_build_id
+.  {
+.    bfd_size_type size;
+.    bfd_byte data[1];
+.  };
+.
 .enum bfd_lto_object_type
 .  {
 .    lto_non_object,
@@ -349,6 +355,9 @@ CODE_FRAGMENT
 .     struct objalloc *, but we use void * to avoid requiring the inclusion
 .     of objalloc.h.  *}
 .  void *memory;
+.
+.  {* For input BFDs, the build ID, if the object has one. *}
+.  const struct bfd_build_id *build_id;
 .};
 .
 .{* See note beside bfd_set_section_userdata.  *}

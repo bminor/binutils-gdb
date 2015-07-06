@@ -1,3 +1,306 @@
+2015-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (compressed_debug_section_type): Remove
+	COMPRESS_DEBUG_ZLIB.
+	* bfd-in2.h : Regenerated.
+
+2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_create_dynamic_sections): Use executable
+	instead of !shared to indicate an application vs shared library.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Handle DT_MIPS_RLD_MAP_REL.
+	(_bfd_mips_elf_get_target_dtag): Likewise.
+
+2015-06-25  DJ Delorie  <dj@redhat.com>
+
+	* elf32-msp430.c (msp430_final_link_relocate): Fix comments.  Fix
+	REL loads to match RELA stores.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_compute_section_file_positions): Don't
+	initialize sh_size for .shstrtab here.
+
+2015-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/18451
+	* elf-bfd.h (elf_sym_strtab): New.
+	(elf_link_hash_table): Add strtabcount, strtabsize and
+	strtab.
+	(_bfd_elf_stringtab_init): Removed.
+	* elf.c (_bfd_elf_stringtab_init): Removed.
+	(_bfd_elf_compute_section_file_positions): Replace
+	bfd_strtab_hash/_bfd_elf_stringtab_init/_bfd_stringtab_free/
+	_bfd_stringtab_size with
+	elf_strtab_hash/_bfd_elf_strtab_init/_bfd_elf_strtab_free/
+	_bfd_elf_strtab_size.  Use _bfd_elf_strtab_add,
+	_bfd_elf_strtab_finalize and _bfd_elf_strtab_offset to get
+	st_name.
+	(swap_out_syms): Likewise.
+	* elflink.c (elf_final_link_info): Replace bfd_strtab_hash
+	with elf_strtab_hash.  Remove symbuf, symbuf_count,
+	symbuf_size and shndxbuf_size.
+	(elf_link_flush_output_syms): Removed.
+	(elf_link_output_sym): Renamed to ...
+	(elf_link_output_symstrtab): This.  Replace _bfd_stringtab_add
+	with _bfd_elf_strtab_add.  Don't flush symbols to the file nor
+	swap out symbols.
+	(elf_link_swap_symbols_out): New.
+	(elf_link_output_extsym): Replace elf_link_output_sym with
+	elf_link_output_symstrtab.
+	(elf_link_input_bfd): Likewise.
+	(elf_final_link_free): Replace _bfd_stringtab_free with
+	_bfd_elf_strtab_free.  Remove symbuf.
+	(bfd_elf_final_link): Replace _bfd_elf_stringtab_init with
+	_bfd_elf_strtab_init.  Don't set symbuf, symbuf_count,
+	symbuf_size nor shndxbuf_size.  Initialize strtabsize and
+	strtab.  Initialize symshndxbuf to -1 when number of sections
+	>= 64K.  Replace elf_link_output_sym/elf_link_output_sym with
+	elf_link_output_symstrtab/elf_link_output_symstrtab. Don't
+	call elf_link_flush_output_syms.  Call _bfd_elf_strtab_finalize
+	and elf_link_swap_symbols_out.  Replace _bfd_stringtab_size
+	and _bfd_stringtab_emit with _bfd_elf_strtab_size and
+	_bfd_elf_strtab_emit.
+
+2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Silence older
+	GCC warning.
+
+2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Silence older
+	GCC warning.
+
+2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Always allocate
+	space for the first .plt entry.
+	(elf_i386_size_dynamic_sections): Always add DT_PLTGOT for .plt
+	section.  Add DT_PLTRELSZ, DT_PLTREL and DT_JMPREL only if
+	there are PLT relocations.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Always
+	allocate space for the first .plt entry.
+	(elf_x86_64_size_dynamic_sections): Always add DT_PLTGOT for
+	.plt section.  Add DT_PLTRELSZ, DT_PLTREL and DT_JMPREL only if
+	there are PLT relocations.
+
+2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18591
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Don't convert
+	R_X86_64_GOTPCREL to R_X86_64_PC32 if it will cause relocation
+	overflow.
+
+2015-06-23  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_readonly_dynrelocs): New function.
+	(elfNN_aarch64_size_dynamic_sections): Traverse hash table to check
+	relocations against read-only sections.
+
+2015-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 18481
+	* elf32-arm.c (R_ARM_TLS_LE32): Set the special function to NULL.
+
+2015-06-15  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* bfd.c: Change struct bfd_build_id to use bfd_size_type.
+	* bfd-in2.h : Regenerate.
+
+2015-06-16  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Correct binary search of
+	dynamic relocs.
+
+2015-06-10  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf-bfd.h : Remove struct elf_build_id.
+	* bfd.c : Add struct bfd_build_id.
+	* bfd-in2.h: Regenerate.
+	* elf.c (elfobj_grok_gnu_build_id): Update to use bfd_build_id.
+	* libpei.h: Add protoype and macros for
+	bfd_XXi_slurp_codeview_record.
+	* peXXigen.c (_bfd_XXi_slurp_codeview_record): Make public
+	* peicode.h (pe_bfd_read_buildid): Add.
+	(pe_bfd_object_p): Use pe_bfd_read_buildid().
+
+2015-06-15  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTOFF_LO15): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_LD64_GOTOFF_LO15.
+
+2015-06-15  Alan Modra  <amodra@gmail.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Revert
+	2014-03-26 change.  Call _bfd_clear_contents for relocs against
+	local and global symbols defined in discarded input sections.
+
+2015-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-msp430.c (rl78_sym_diff_handler): New function.
+	(msp430_howto_table): Use the new function for the SYM_DIFF reloc.
+	(msp430x_howto_table): Likewise.
+
+2015-06-05  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc_elf_relocate_section): Move dynamic text
+	relocs with insns moved by --ppc476-workaround.  Correct
+	output of REL16 relocs.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Support
+	BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14.
+	(elfNN_aarch64_final_link_relocate): Ditto.
+	(elfNN_aarch64_gc_swap_hook): Ditto.
+	(elfNN_aarch64_check_relocs): Ditto.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Ditto.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Set overflow type to
+	complain_overflow_unsigned for BFD_RELOC_AARCH64_TLSLE_ADD_LO12.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Don't use
+	PGOFF for BFD_RELOC_AARCH64_TLSLE_ADD_LO12.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Support
+	BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15.
+	(elfNN_aarch64_final_link_relocate): Ditto.
+	(elfNN_aarch64_gc_swap_hook): Ditto.
+	(elfNN_aarch64_check_relocs): Ditto.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Ditto.
+
+2015-06-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15.
+
+2015-05-28  Catherine Moore  <clm@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
+
+	bfd/
+	* bfd-in2.h: Regenerated.
+	* elf-bfd.h (DWARF2_EH_HDR, COMPACT_EH_HDR): Define.
+	(COMPACT_EH_CANT_UNWIND_OPCODE): Define.
+	(dwarf_eh_frame_hdr_info): Move dwarf-specific fields from
+	eh_frame_hdr_info.
+	(compact_eh_frame_hdr_info): Declare.
+	(eh_frame_hdr_info):  Redeclare with union for dwarf-specific
+	fields and compact-eh fields.
+	(elf_backend_data): Add cant_unwind_opcode and compact_eh_encoding.
+	(bfd_elf_section_data): Add eh_frame_entry_field.
+	(elf_section_eh_frame_entry): Define.
+	(bfd_elf_parse_eh_frame_entries): Declare.
+	(_bfd_elf_parse_eh_frame_entry): Declare.
+	(_bfd_elf_end_eh_frame_parsing): Declare.
+	(_bfd_elf_write_section_eh_frame_entry): Declare.
+	(_bfd_elf_eh_frame_entry_present): Declare.
+	(_bfd_elf_section_for_symbol): Declare.
+	* elf-eh-frame.c (bfd_elf_discard_eh_frame_entry): New function.
+	(bfd_elf_record_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame): Update hdr_info field references.
+	(cmp_eh_frame_hdr): New function.
+	(add_eh_frame_hdr_terminator): New function.
+	(_bfd_elf_end_eh_frame_parsing): New function.
+	(find_merged_cie): Update hdr_info field references.
+	(_bfd_elf_discard_section_eh_frame): Likewise.
+	(_bfd_elf_discard_section_eh_frame_hdr): Add Compact EH support.
+	(_bfd_elf_eh_frame_entry_present): New function.
+	(_bfd_elf_maybe_strip_eh_frame_hdr): Add Compact EH support.
+	(_bfd_elf_write_section_eh_frame_entry): New function.
+	(_bfd_elf_write_section_eh_frame): Update hdr_info field references.
+	(_bfd_elf_fixup_eh_frame_hdr): New function.
+	(write_compact_eh_frame_hdr): New function.
+	(write_dwarf_eh_frame_hdr): New function.
+	(_bfd_elf_write_section_eh_frame_hdr): Add Compact EH support.
+	* elflink.c (_bfd_elf_section_for_symbol): New function.
+	(elf_section_ignore_discarded_relocs): Add Compact EH support.
+	(elf_link_input_bfd): Likewise.
+	(bfd_elf_final_link): Likewise.
+	(_bfd_elf_gc_mark): Likewise.
+	(bfd_elf_parse_eh_frame_entries): New function.
+	(bfd_elf_gc_sections): Add Compact EH support.
+	(bfd_elf_discard_info): Likewise.
+	* elfxx-mips.c: Include dwarf2.h.
+	(_bfd_mips_elf_compact_eh_encoding): New function.
+	(_bfd_mips_elf_cant_unwind_opcode): New function.
+	* elfxx-mips.h (_bfd_mips_elf_compact_eh_encoding): Declare.
+	(_bfd_mips_elf_cant_unwind_opcode): Declare.
+	(elf_backend_compact_eh_encoding): Define.
+	(elf_backend_cant_unwind_opcode): Define.
+	* elfxx-target.h (elf_backend_compact_eh_encoding): Provide default.
+	(elf_backend_cant_unwind_opcode): Provide default.
+	(elf_backend_data elfNN_bed): Add elf_backend_compact_eh_encoding and
+	elf_backend_cant_unwind_opcode.
+	* section.c (SEC_INFO_TYPE_EH_FRAME_ENTRY): Add definition.
+
+2015-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18458
+	* elf32-i386.c (elf_i386_check_relocs): Create .plt.got section
+	for now binding only if pointer equality isn't needed.
+	(elf_i386_allocate_dynrelocs): Use .plt.got section for now
+	binding only if pointer equality isn't needed.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Create .plt.got
+	section for now binding only if pointer equality isn't needed.
+	(elf_x86_64_allocate_dynrelocs): Use .plt.got section for now
+	binding only if pointer equality isn't needed.
+
+2015-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18437
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Skip extra relocations
+	in .rel.plt/.rela.plt.
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Likewise.
+
+2015-05-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_tls_transition_without_check): Sort
+	relocation case labels alphabetically.
+	(elfNN_aarch64_final_link_relocate): Ditto.
+	(elfNN_aarch64_tls_relax): Ditto.
+	(elfNN_aarch64_relocate_section): Ditto.
+	(elfNN_aarch64_gc_sweep_hook): Ditto.
+	(elfNN_aarch64_check_relocs): Ditto.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Ditto.
+	(_bfd_aarch64_elf_resolve_relocation): Ditto.
+
+2015-05-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Rewrite
+	comments.
+
+2015-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Create .plt.got section
+	for now binding.
+	(elf_i386_allocate_dynrelocs): Use .plt.got section for now
+	binding.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Create .plt.got
+	section for now binding.
+	(elf_x86_64_allocate_dynrelocs): Use .plt.got section for now
+	binding.
+
 2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_update_compression_header): Also write the zlib
@@ -182,6 +485,77 @@
 	* elf64-ppc.c (TOC_BASE_ALIGN): Define.
 	(ppc64_elf_next_toc_section): Align multi-got toc base.
 	(ppc64_elf_set_toc): Likewise initial toc base and .TOC. symbol.
+=======
+2015-05-04  Catherine Moore  <clm@codesourcery.com>
+
+	* elfxx-target.h: Add missing #endif.
+
+2015-04-22  Catherine Moore  <clm@codesourcery.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_entry):  Don't write
+	the .eh_frame_entry section if the corresponding text section is marked
+	with SEC_EXCLUDE.
+
+2015-04-22  Catherine Moore  <clm@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
+
+	* bfd-in2.h (SEC_INFO_TYPE_EH_FRAME_ENTRY): Define.
+	* elf-bfd.h (DWARF2_EH_HDR, COMPACT_EH_HDR): Define.
+	(COMPACT_EH_CANT_UNWIND_OPCODE): Define.
+	(dwarf_eh_frame_hdr_info): New struct.
+	(compact_eh_frame_hdr_info): New struct.
+	(eh_frame_hdr_info): Separate dwarf and compact fields.
+	(elf_backend_data): Add compact_eh_encoding and cant_unwind_opcode
+	fields.
+	(bfd_elf_section_data): Add eh_frame_entry field.
+	(elf_section_eh_frame_entry): Define.
+	(bfd_elf_parse_eh_frame_entries): Declare.
+	(_bfd_elf_parse_eh_frame_entry): Declare.
+	(_bfd_elf_end_eh_frame_parsing): Declare.
+	(_bfd_elf_write_section_eh_frame_entry): Declare.
+	(_bfd_elf_fixup_eh_frame_hdr): Declare.
+	(_bfd_elf_eh_frame_entry_present): Declare.
+	(_bfd_elf_section_for_symbol): Declare.
+	* elf-eh-frame.c (bfd_elf_discard_eh_frame_entry): New function.
+	(bfd_elf_record_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame_entry): New function.
+	(_bfd_elf_parse_eh_frame): Update hdr_info field references.
+	(cmp_eh_frame_hdr): New function.
+	(add_eh_frame_hdr_terminator): New function.
+	(_bfd_elf_end_eh_frame_parsing): New function.
+	(find_merged_cie): Update hdr_info field references.
+	(_bfd_elf_discard_section_eh_frame): Likewise.
+	(_bfd_elf_discard_section_eh_frame_hdr): Likewise.
+	Add Compact EH support.
+	(_bfd_elf_eh_frame_entry_present): New function.
+	(_bfd_elf_maybe_strip_eh_frame_hdr): Add Compact EH support.
+	(_bfd_elf_write_section_eh_frame_entry): New function.
+	(_bfd_elf_write_section_eh_frame): Update hdr_info field references.
+	(_bfd_elf_write_section_eh_frame): Likewise.
+	(_bfd_elf_fixup_eh_frame_hdr): New function.
+	(write_compact_eh_frame_hdr): New function.
+	(_bfd_elf_write_section_eh_frame_hdr): Compact EH support.  Update
+	hdr_info field references.
+	* elflink.c (_bfd_elf_section_for_symbol): New function.
+	(elf_section_ignore_discarded_relocs, elf_link_input_bfd):
+	Handle SEC_INFO_TYPE_EH_FRAME_ENTRY.
+	(bfd_elf_final_link): Call _bfd_elf_fixup_eh_frame_hdr.
+	(_bfd_elf_gc_mark):  Support Compact EH.
+	(bfd_elf_parse_eh_frame_entries): New function.
+	(bfd_elf_gc_sections): Support Compact EH.
+	(bfd_elf_discard_info): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_compact_eh_encoding): New function.
+	(_bfd_mips_elf_cant_unwind_opcode): New function.
+	* elfxx-mips.h (_bfd_mips_elf_compact_eh_encoding): Declare.
+	(_bfd_mips_elf_cant_unwind_opcode): Declare.
+	(elf_backend_compact_eh_encoding): Define.
+	(elf_backend_cant_unwind_opcode): Define.
+	* elfxx-target.h (elf_backend_compact_eh_encoding):
+	Provide default definition.
+	(elf_backend_cant_unwind_opcode): Provide default definition.
+	* section.c (SEC_INFO_TYPE_EH_FRAME_ENTRY): Define.
+>>>>>>> 2015-05-04  Catherine Moore  <clm@codesourcery.com>
 
 2015-04-22  H.J. Lu  <hongjiu.lu@intel.com>
 

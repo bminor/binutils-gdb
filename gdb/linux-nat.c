@@ -66,6 +66,8 @@
 #include "target-descriptions.h"
 #include "filestuff.h"
 #include "objfiles.h"
+#include "nat/linux-namespaces.h"
+#include "fileio.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -162,6 +164,9 @@ blocked.  */
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
+
+/* Does the current host support PTRACE_GETREGSET?  */
+enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
 /* The single-threaded native GNU/Linux target_ops.  We save a pointer for
    the use of the multi-threaded target.  */
@@ -4865,6 +4870,104 @@ linux_nat_core_of_thread (struct target_ops *ops, ptid_t ptid)
   return -1;
 }
 
+/* Implementation of to_filesystem_is_local.  */
+
+static int
+linux_nat_filesystem_is_local (struct target_ops *ops)
+{
+  struct inferior *inf = current_inferior ();
+
+  if (inf->fake_pid_p || inf->pid == 0)
+    return 1;
+
+  return linux_ns_same (inf->pid, LINUX_NS_MNT);
+}
+
+/* Convert the INF argument passed to a to_fileio_* method
+   to a process ID suitable for passing to its corresponding
+   linux_mntns_* function.  If INF is non-NULL then the
+   caller is requesting the filesystem seen by INF.  If INF
+   is NULL then the caller is requesting the filesystem seen
+   by the GDB.  We fall back to GDB's filesystem in the case
+   that INF is non-NULL but its PID is unknown.  */
+
+static pid_t
+linux_nat_fileio_pid_of (struct inferior *inf)
+{
+  if (inf == NULL || inf->fake_pid_p || inf->pid == 0)
+    return getpid ();
+  else
+    return inf->pid;
+}
+
+/* Implementation of to_fileio_open.  */
+
+static int
+linux_nat_fileio_open (struct target_ops *self,
+		       struct inferior *inf, const char *filename,
+		       int flags, int mode, int *target_errno)
+{
+  int nat_flags;
+  mode_t nat_mode;
+  int fd;
+
+  if (fileio_to_host_openflags (flags, &nat_flags) == -1
+      || fileio_to_host_mode (mode, &nat_mode) == -1)
+    {
+      *target_errno = FILEIO_EINVAL;
+      return -1;
+    }
+
+  fd = linux_mntns_open_cloexec (linux_nat_fileio_pid_of (inf),
+				 filename, nat_flags, nat_mode);
+  if (fd == -1)
+    *target_errno = host_to_fileio_error (errno);
+
+  return fd;
+}
+
+/* Implementation of to_fileio_readlink.  */
+
+static char *
+linux_nat_fileio_readlink (struct target_ops *self,
+			   struct inferior *inf, const char *filename,
+			   int *target_errno)
+{
+  char buf[PATH_MAX];
+  int len;
+  char *ret;
+
+  len = linux_mntns_readlink (linux_nat_fileio_pid_of (inf),
+			      filename, buf, sizeof (buf));
+  if (len < 0)
+    {
+      *target_errno = host_to_fileio_error (errno);
+      return NULL;
+    }
+
+  ret = xmalloc (len + 1);
+  memcpy (ret, buf, len);
+  ret[len] = '\0';
+  return ret;
+}
+
+/* Implementation of to_fileio_unlink.  */
+
+static int
+linux_nat_fileio_unlink (struct target_ops *self,
+			 struct inferior *inf, const char *filename,
+			 int *target_errno)
+{
+  int ret;
+
+  ret = linux_mntns_unlink (linux_nat_fileio_pid_of (inf),
+			    filename);
+  if (ret == -1)
+    *target_errno = host_to_fileio_error (errno);
+
+  return ret;
+}
+
 void
 linux_nat_add_target (struct target_ops *t)
 {
@@ -4917,6 +5020,11 @@ linux_nat_add_target (struct target_ops *t)
     = linux_nat_supports_disable_randomization;
 
   t->to_core_of_thread = linux_nat_core_of_thread;
+
+  t->to_filesystem_is_local = linux_nat_filesystem_is_local;
+  t->to_fileio_open = linux_nat_fileio_open;
+  t->to_fileio_readlink = linux_nat_fileio_readlink;
+  t->to_fileio_unlink = linux_nat_fileio_unlink;
 
   /* We don't change the stratum; this target will sit at
      process_stratum and thread_db will set at thread_stratum.  This
@@ -5034,6 +5142,15 @@ Enables printf debugging output."),
 			     NULL,
 			     show_debug_linux_nat,
 			     &setdebuglist, &showdebuglist);
+
+  add_setshow_boolean_cmd ("linux-namespaces", class_maintenance,
+			   &debug_linux_namespaces, _("\
+Set debugging of GNU/Linux namespaces module."), _("\
+Show debugging of GNU/Linux namespaces module."), _("\
+Enables printf debugging output."),
+			   NULL,
+			   NULL,
+			   &setdebuglist, &showdebuglist);
 
   /* Save this mask as the default.  */
   sigprocmask (SIG_SETMASK, NULL, &normal_mask);

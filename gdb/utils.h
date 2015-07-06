@@ -37,8 +37,6 @@ extern int streq (const char *, const char *);
 
 extern int subset_compare (char *, char *);
 
-ULONGEST strtoulst (const char *num, const char **trailer, int base);
-
 int compare_positive_ints (const void *ap, const void *bp);
 int compare_strings (const void *ap, const void *bp);
 
@@ -80,7 +78,7 @@ struct section_addr_info;
 extern struct cleanup *(make_cleanup_free_section_addr_info 
                         (struct section_addr_info *));
 
-extern struct cleanup *make_cleanup_close (int fd);
+/* For make_cleanup_close see common/filestuff.h.  */
 
 extern struct cleanup *make_cleanup_fclose (FILE *file);
 

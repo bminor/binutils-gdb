@@ -1140,7 +1140,7 @@ _bfd_XXi_swap_debugdir_out (bfd * abfd, void * inp, void * extp)
   return sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
 }
 
-static CODEVIEW_INFO *
+CODEVIEW_INFO *
 _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo)
 {
   char buffer[256+1];

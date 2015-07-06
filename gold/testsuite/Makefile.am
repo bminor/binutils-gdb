@@ -1339,6 +1339,15 @@ flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
 
+# Test --compress-debug-sections with --build-id=tree.
+check_PROGRAMS += flagstest_compress_debug_sections_and_build_id_tree
+flagstest_compress_debug_sections_and_build_id_tree: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib \
+		-Wl,--build-id=tree \
+		-Wl,--build-id-chunk-size-for-treehash=4096 \
+		-Wl,--build-id-min-file-size-for-treehash=0
+	test -s $@
+
 # Dump compressed DWARF debug sections.
 flagstest_compress_debug_sections.stdout: flagstest_compress_debug_sections
 	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
@@ -1748,6 +1757,19 @@ script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
 	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
 script_test_11.o: script_test_11.c
 	$(COMPILE) -c -g -o $@ $<
+
+# Test difference between "*(a b)" and "*(a) *(b)" in input section spec.
+check_PROGRAMS += script_test_12
+script_test_12: gcctestdir/ld $(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
+	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
+
+check_PROGRAMS += script_test_12i
+script_test_12i: gcctestdir/ld $(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
+	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12i.t script_test_12a.o script_test_12b.o
+script_test_12a.o: script_test_12a.c
+	$(COMPILE) -O0 -c -o $@ $<
+script_test_12b.o: script_test_12b.c
+	$(COMPILE) -O0 -c -o $@ $<
 
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo

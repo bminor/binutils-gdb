@@ -1,3 +1,8 @@
+2015-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	* common.h (GNU_ABI_TAG_SYLLABLE): New macro.
+	(GNU_ABI_TAG_NACL): New macro.
+
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* common.h (EM_486): Renamed to ...

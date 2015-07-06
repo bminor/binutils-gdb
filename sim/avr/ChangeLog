@@ -1,3 +1,15 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-04-27  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* Makefile.in (SIM_OBJS): Move interp.o

@@ -685,7 +685,7 @@ extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdb
 
 /* A target might have problems with watchpoints as soon as the stack
    frame of the current function has been destroyed.  This mostly happens
-   as the first action in a funtion's epilogue.  in_function_epilogue_p()
+   as the first action in a function's epilogue.  stack_frame_destroyed_p()
    is defined to return a non-zero value if either the given addr is one
    instruction after the stack destroying instruction up to the trailing
    return instruction or if we can figure out that the stack frame has
@@ -693,9 +693,9 @@ extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdb
    which don't suffer from that problem could just let this functionality
    untouched. */
 
-typedef int (gdbarch_in_function_epilogue_p_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
-extern int gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr);
-extern void set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p);
+typedef int (gdbarch_stack_frame_destroyed_p_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_stack_frame_destroyed_p (struct gdbarch *gdbarch, gdbarch_stack_frame_destroyed_p_ftype *stack_frame_destroyed_p);
 
 /* Process an ELF symbol in the minimal symbol table in a backend-specific
    way.  Normally this hook is supposed to do nothing, however if required,
@@ -1440,6 +1440,13 @@ typedef CORE_ADDR (gdbarch_infcall_mmap_ftype) (CORE_ADDR size, unsigned prot);
 extern CORE_ADDR gdbarch_infcall_mmap (struct gdbarch *gdbarch, CORE_ADDR size, unsigned prot);
 extern void set_gdbarch_infcall_mmap (struct gdbarch *gdbarch, gdbarch_infcall_mmap_ftype *infcall_mmap);
 
+/* Deallocate SIZE bytes of memory at ADDR in inferior from gdbarch_infcall_mmap.
+   Print a warning if it is not possible. */
+
+typedef void (gdbarch_infcall_munmap_ftype) (CORE_ADDR addr, CORE_ADDR size);
+extern void gdbarch_infcall_munmap (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR size);
+extern void set_gdbarch_infcall_munmap (struct gdbarch *gdbarch, gdbarch_infcall_munmap_ftype *infcall_munmap);
+
 /* Return string (caller has to use xfree for it) with options for GCC
    to produce code for this target, typically "-m64", "-m32" or "-m31".
    These options are put before CU's DW_AT_producer compilation options so that
@@ -1458,6 +1465,14 @@ extern void set_gdbarch_gcc_target_options (struct gdbarch *gdbarch, gdbarch_gcc
 typedef const char * (gdbarch_gnu_triplet_regexp_ftype) (struct gdbarch *gdbarch);
 extern const char * gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch);
 extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp);
+
+/* Return the size in 8-bit bytes of an addressable memory unit on this
+   architecture.  This corresponds to the number of 8-bit bytes associated to
+   each address in memory. */
+
+typedef int (gdbarch_addressable_memory_unit_size_ftype) (struct gdbarch *gdbarch);
+extern int gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch, gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

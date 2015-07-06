@@ -1,3 +1,27 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_ARG_ENABLE(sim-trapdump)): Call AS_HELP_STRING.
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* decode.c (frvbf_decode): Change TRACE_EXTRACT to CGEN_TRACE_EXTRACT.
+	* mloop.in (execute): Change TRACE_INSN_INIT to CGEN_TRACE_INSN_INIT,
+	TRACE_INSN to CGEN_TRACE_INSN, and TRACE_INSN_FINI to CGEN_TRACE_INSN_FINI.
+	* sem.c: Rename TRACE_RESULT to CGEN_TRACE_RESULT.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_TRACE): Delete.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (USING_SIM_BASE_H): Delete.

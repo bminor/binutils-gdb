@@ -230,11 +230,11 @@ Output_compressed_section::set_final_data_size()
   this->write_to_postprocessing_buffer();
 
   bool success = false;
-  enum { none, zlib, gnu_zlib, gabi_zlib } compress;
+  enum { none, gnu_zlib, gabi_zlib } compress;
   int compression_header_size = 12;
   const int size = parameters->target().get_size();
   if (strcmp(this->options_->compress_debug_sections(), "zlib") == 0)
-    compress = zlib;
+    compress = gnu_zlib;
   else if (strcmp(this->options_->compress_debug_sections(), "zlib-gnu") == 0)
     compress = gnu_zlib;
   else if (strcmp(this->options_->compress_debug_sections(), "zlib-gabi") == 0)
@@ -308,8 +308,6 @@ Output_compressed_section::set_final_data_size()
 	  // This converts .debug_foo to .zdebug_foo
 	  this->new_section_name_ = std::string(".z") + (this->name() + 1);
 	  this->set_name(this->new_section_name_.c_str());
-	  // Clear the SHF_COMPRESSED bit.
-	  flags &= ~elfcpp::SHF_COMPRESSED;
 	}
       this->set_flags(flags);
       this->set_data_size(compressed_size);

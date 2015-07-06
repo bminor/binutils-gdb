@@ -387,8 +387,8 @@ write_qxfer_response (char *buf, const void *data, int len, int is_more)
   else
     buf[0] = 'l';
 
-  return remote_escape_output (data, len, (unsigned char *) buf + 1, &out_len,
-			       PBUFSIZ - 2) + 1;
+  return remote_escape_output (data, len, 1, (unsigned char *) buf + 1,
+			       &out_len, PBUFSIZ - 2) + 1;
 }
 
 /* Handle btrace enabling in BTS format.  */
@@ -1291,7 +1291,7 @@ handle_qxfer_libraries (const char *annex,
   if (document == NULL)
     return -1;
 
-  strcpy (document, "<library-list>\n");
+  strcpy (document, "<library-list version=\"1.0\">\n");
   p = document + strlen (document);
 
   for_each_inferior_with_data (&all_dlls, emit_dll_description, &p);
@@ -2160,7 +2160,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (the_target->pid_to_exec_file != NULL)
 	strcat (own_buf, ";qXfer:exec-file:read+");
 
-      /* Reinitialize the target as needed for the new connection.  */
+      /* Reinitialize components as needed for the new connection.  */
+      hostio_handle_new_gdb_connection ();
       target_handle_new_gdb_connection ();
 
       return;

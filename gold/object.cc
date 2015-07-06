@@ -663,14 +663,12 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
 
 // Return TRUE if this is a section whose contents will be needed in the
 // Add_symbols task.  This function is only called for sections that have
-// already passed the test in is_compressed_debug_section(), so we know
-// that the section name begins with ".zdebug".
+// already passed the test in is_compressed_debug_section() and the debug
+// section name prefix, ".debug"/".zdebug", has been skipped.
 
 static bool
 need_decompressed_section(const char* name)
 {
-  // Skip over the ".zdebug" and a quick check for the "_".
-  name += 7;
   if (*name++ != '_')
     return false;
 
@@ -740,19 +738,12 @@ build_compressed_section_map(
 	      continue;
 	    }
 
-	  bool is_zcompressed = false;
-	  bool is_compressed =
-	      (shdr.get_sh_flags() & elfcpp::SHF_COMPRESSED) != 0;
-	  const char* name;
+	  const char* name = names + shdr.get_sh_name();
+	  bool is_compressed = ((shdr.get_sh_flags()
+				 & elfcpp::SHF_COMPRESSED) != 0);
+	  bool is_zcompressed = (!is_compressed
+				 && is_compressed_debug_section(name));
 
-	  if (is_compressed)
-	    name = NULL;
-	  else
-	    {
-	      name = names + shdr.get_sh_name();
-	      if (is_compressed_debug_section(name))
-		is_zcompressed = true;
-	    }
 	  if (is_zcompressed || is_compressed)
 	    {
 	      section_size_type len;
@@ -760,9 +751,15 @@ build_compressed_section_map(
 		  obj->section_contents(i, &len, false);
 	      uint64_t uncompressed_size;
 	      if (is_zcompressed)
-		uncompressed_size = get_uncompressed_size(contents, len);
+		{
+		  // Skip over the ".zdebug" prefix.
+		  name += 7;
+		  uncompressed_size = get_uncompressed_size(contents, len);
+		}
 	      else
 		{
+		  // Skip over the ".debug" prefix.
+		  name += 6;
 		  elfcpp::Chdr<size, big_endian> chdr(contents);
 		  uncompressed_size = chdr.get_ch_size();
 		}
@@ -773,9 +770,7 @@ build_compressed_section_map(
 	      if (uncompressed_size != -1ULL)
 		{
 		  unsigned char* uncompressed_data = NULL;
-		  if (decompress_if_needed
-		      && (is_compressed
-			  || need_decompressed_section(name)))
+		  if (decompress_if_needed && need_decompressed_section(name))
 		    {
 		      uncompressed_data = new unsigned char[uncompressed_size];
 		      if (decompress_input_section(contents, len,
@@ -812,7 +807,7 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
 
   Compressed_section_map* compressed_sections =
     build_compressed_section_map<size, big_endian>(
-						   pshdrs, this->shnum(), names, sd->section_names_size, this, true);
+      pshdrs, this->shnum(), names, sd->section_names_size, this, true);
   if (compressed_sections != NULL)
     this->set_compressed_sections(compressed_sections);
 
@@ -2195,6 +2190,7 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
   // Loop over the local symbols.
 
   const Output_sections& out_sections(this->output_sections());
+  std::vector<Address>& out_section_offsets(this->section_offsets());
   unsigned int shnum = this->shnum();
   unsigned int count = 0;
   unsigned int dyncount = 0;
@@ -2203,6 +2199,7 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
   bool strip_all = parameters->options().strip_all();
   bool discard_all = parameters->options().discard_all();
   bool discard_locals = parameters->options().discard_locals();
+  bool discard_sec_merge = parameters->options().discard_sec_merge();
   for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
     {
       elfcpp::Sym<size, big_endian> sym(psyms);
@@ -2267,6 +2264,7 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 	  continue;
 	}
 
+      // By default, discard temporary local symbols in merge sections.
       // If --discard-locals option is used, discard all temporary local
       // symbols.  These symbols start with system-specific local label
       // prefixes, typically .L for ELF system.  We want to be compatible
@@ -2279,7 +2277,10 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
       //   - the symbol has a name.
       //
       // We do not discard a symbol if it needs a dynamic symbol entry.
-      if (discard_locals
+      if ((discard_locals
+	   || (discard_sec_merge
+	       && is_ordinary
+	       && out_section_offsets[shndx] == invalid_address))
 	  && sym.get_st_type() != elfcpp::STT_FILE
 	  && !lv.needs_output_dynsym_entry()
 	  && lv.may_be_discarded_from_output_symtab()
@@ -2911,13 +2912,12 @@ Object::decompressed_section_contents(
     }
 
   unsigned char* uncompressed_data = new unsigned char[uncompressed_size];
-  Relobj *relobj = static_cast<Relobj*>(this);
   if (!decompress_input_section(buffer,
 				buffer_size,
 				uncompressed_data,
 				uncompressed_size,
-				relobj->elfsize(),
-				relobj->is_big_endian(),
+				elfsize(),
+				is_big_endian(),
 				p->second.flag))
     this->error(_("could not decompress section %s"),
 		this->do_section_name(shndx).c_str());

@@ -66,6 +66,10 @@ struct Timespec;
 extern bool
 is_compressed_debug_section(const char* secname);
 
+// Return the name of the corresponding uncompressed debug section.
+extern std::string
+corresponding_uncompressed_section_name(std::string secname);
+
 // Maintain a list of free space within a section, segment, or file.
 // Used for incremental update links.
 
@@ -897,16 +901,9 @@ class Layout
 			  const Output_data_reloc_generic* dyn_rel,
 			  bool add_debug, bool dynrel_includes_plt);
 
-  // If a treehash is necessary to compute the build ID, then queue
-  // the necessary tasks and return a blocker that will unblock when
-  // they finish.  Otherwise return BUILD_ID_BLOCKER.
-  Task_token*
-  queue_build_id_tasks(Workqueue* workqueue, Task_token* build_id_blocker,
-		       Output_file* of);
-
   // Compute and write out the build ID if needed.
   void
-  write_build_id(Output_file*) const;
+  write_build_id(Output_file*, unsigned char*, size_t) const;
 
   // Rewrite output file in binary format.
   void
@@ -1380,12 +1377,6 @@ class Layout
   Gdb_index* gdb_index_data_;
   // The space for the build ID checksum if there is one.
   Output_section_data* build_id_note_;
-  // Temporary storage for tree hash of build ID.
-  unsigned char* array_of_hashes_;
-  // Size of array_of_hashes_ (in bytes).
-  size_t size_of_array_of_hashes_;
-  // Input view for computing tree hash of build ID.  Freed in write_build_id().
-  const unsigned char* input_view_;
   // The output section containing dwarf abbreviations
   Output_reduced_debug_abbrev_section* debug_abbrev_;
   // The output section containing the dwarf debug info tree
@@ -1602,13 +1593,17 @@ class Write_after_input_sections_task : public Task
   Task_token* final_blocker_;
 };
 
-// This task function handles closing the file.
+// This task function handles computation of the build id.
+// When using --build-id=tree, it schedules the tasks that
+// compute the hashes for each chunk of the file. This task
+// cannot run until we have finalized the size of the output
+// file, after the completion of Write_after_input_sections_task.
 
-class Close_task_runner : public Task_function_runner
+class Build_id_task_runner : public Task_function_runner
 {
  public:
-  Close_task_runner(const General_options* options, const Layout* layout,
-		    Output_file* of)
+  Build_id_task_runner(const General_options* options, const Layout* layout,
+		       Output_file* of)
     : options_(options), layout_(layout), of_(of)
   { }
 
@@ -1620,6 +1615,30 @@ class Close_task_runner : public Task_function_runner
   const General_options* options_;
   const Layout* layout_;
   Output_file* of_;
+};
+
+// This task function handles closing the file.
+
+class Close_task_runner : public Task_function_runner
+{
+ public:
+  Close_task_runner(const General_options* options, const Layout* layout,
+		    Output_file* of, unsigned char* array_of_hashes,
+		    size_t size_of_hashes)
+    : options_(options), layout_(layout), of_(of),
+      array_of_hashes_(array_of_hashes), size_of_hashes_(size_of_hashes)
+  { }
+
+  // Run the operation.
+  void
+  run(Workqueue*, const Task*);
+
+ private:
+  const General_options* options_;
+  const Layout* layout_;
+  Output_file* of_;
+  unsigned char* const array_of_hashes_;
+  const size_t size_of_hashes_;
 };
 
 // A small helper function to align an address.

@@ -257,6 +257,11 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
       mach = 0;
     }
 
+#ifdef MODET
+  if (abfd != NULL && (bfd_get_start_address (abfd) & 1))
+    SETT;
+#endif
+
   switch (mach)
     {
     default:
@@ -341,17 +346,6 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
       break;
     }
 
-  if (   mach != bfd_mach_arm_3
-      && mach != bfd_mach_arm_3M
-      && mach != bfd_mach_arm_2
-      && mach != bfd_mach_arm_2a)
-    {
-      /* Reset mode to ARM.  A gdb user may rerun a program that had entered
-	 THUMB mode from the start and cause the ARM-mode startup code to be
-	 executed in THUMB mode.  */
-      ARMul_SetCPSR (state, SVC32MODE);
-    }
-  
   memset (& info, 0, sizeof (info));
   INIT_DISASSEMBLE_INFO (info, stdout, op_printf);
   info.read_memory_func = sim_dis_read;

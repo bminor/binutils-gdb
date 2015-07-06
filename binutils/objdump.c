@@ -1685,7 +1685,18 @@ disassemble_bytes (struct disassemble_info * inf,
 		    }
 		}
 
+	      if (! disassemble_all
+		  && (section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
+		  == (SEC_CODE | SEC_HAS_CONTENTS))
+		/* Set a stop_vma so that the disassembler will not read
+		   beyond the next symbol.  We assume that symbols appear on
+		   the boundaries between instructions.  We only do this when
+		   disassembling code of course, and when -D is in effect.  */
+		inf->stop_vma = section->vma + stop_offset;
+	      
 	      octets = (*disassemble_fn) (section->vma + addr_offset, inf);
+
+	      inf->stop_vma = 0;
 	      inf->fprintf_func = (fprintf_ftype) fprintf;
 	      inf->stream = stdout;
 	      if (insn_width == 0 && inf->bytes_per_line != 0)
@@ -1911,7 +1922,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   arelent **                   rel_pp = NULL;
   arelent **                   rel_ppstart = NULL;
   arelent **                   rel_ppend;
-  unsigned long                stop_offset;
+  bfd_vma                      stop_offset;
   asymbol *                    sym = NULL;
   long                         place = 0;
   long                         rel_count;
@@ -2035,7 +2046,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     {
       bfd_vma addr;
       asymbol *nextsym;
-      unsigned long nextstop_offset;
+      bfd_vma nextstop_offset;
       bfd_boolean insns;
 
       addr = section->vma + addr_offset;
@@ -2330,7 +2341,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	      section->num_relocs = reloc_count;
 	    }
 	}
-    }	
+    }
 
   return 1;
 }
@@ -2794,9 +2805,9 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 {
   bfd_byte *data = 0;
   bfd_size_type datasize;
-  bfd_size_type addr_offset;
-  bfd_size_type start_offset;
-  bfd_size_type stop_offset;
+  bfd_vma addr_offset;
+  bfd_vma start_offset;
+  bfd_vma stop_offset;
   unsigned int opb = bfd_octets_per_byte (abfd);
   /* Bytes per line.  */
   const int onaline = 16;
@@ -3451,7 +3462,7 @@ display_any_bfd (bfd *file, int level)
     {
       bfd *arfile = NULL;
       bfd *last_arfile = NULL;
-      
+
       if (level == 0)
         printf (_("In archive %s:\n"), bfd_get_filename (file));
       else if (level > 100)

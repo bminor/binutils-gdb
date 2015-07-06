@@ -70,6 +70,15 @@ enum compile_i_scope_types
     /* Do not wrap the expression,
        it has to provide function "_gdb_expr" on its own.  */
     COMPILE_I_RAW_SCOPE,
+
+    /* A printable expression scope.  Wrap an expression into a scope
+       suitable for the "compile print" command.  It uses the generic
+       function name "_gdb_expr".  COMPILE_I_PRINT_ADDRESS_SCOPE variant
+       is the usual one, taking address of the object.
+       COMPILE_I_PRINT_VALUE_SCOPE is needed for arrays where the array
+       name already specifies its address.  See get_out_value_type.  */
+    COMPILE_I_PRINT_ADDRESS_SCOPE,
+    COMPILE_I_PRINT_VALUE_SCOPE,
   };
 
 /* Just in case they're not defined in stdio.h.  */
@@ -397,6 +406,7 @@ struct command_line
 	struct
 	  {
 	    enum compile_i_scope_types scope;
+	    void *scope_data;
 	  }
 	compile;
       }
@@ -580,25 +590,6 @@ extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
    all known ISAs.  If it turns out to be too small, make it bigger.  */
 
 enum { MAX_REGISTER_SIZE = 64 };
-
-/* Static target-system-dependent parameters for GDB.  */
-
-/* * Number of bits in a char or unsigned char for the target machine.
-   Just like CHAR_BIT in <limits.h> but describes the target machine.  */
-#if !defined (TARGET_CHAR_BIT)
-#define TARGET_CHAR_BIT 8
-#endif
-
-/* * If we picked up a copy of CHAR_BIT from a configuration file
-   (which may get it by including <limits.h>) then use it to set
-   the number of bits in a host char.  If not, use the same size
-   as the target.  */
-
-#if defined (CHAR_BIT)
-#define HOST_CHAR_BIT CHAR_BIT
-#else
-#define HOST_CHAR_BIT TARGET_CHAR_BIT
-#endif
 
 /* In findvar.c.  */
 

@@ -445,11 +445,14 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  if (info_verbose || debug_infrun)
 	    {
+	      /* Ensure that we have a process ptid.  */
+	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after %s from child %s.\n"),
 				has_vforked ? "vfork" : "fork",
-				target_pid_to_str (child_ptid));
+				target_pid_to_str (process_ptid));
 	    }
 	}
       else
@@ -578,11 +581,14 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	{
 	  if (info_verbose || debug_infrun)
 	    {
+	      /* Ensure that we have a process ptid.  */
+	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+
 	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after fork from "
 				  "child %s.\n"),
-				target_pid_to_str (child_ptid));
+				target_pid_to_str (process_ptid));
 	    }
 
 	  target_detach (NULL, 0);
@@ -1127,7 +1133,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   breakpoint_init_inferior (inf_execd);
 
-  if (gdb_sysroot != NULL && *gdb_sysroot != '\0')
+  if (*gdb_sysroot != '\0')
     {
       char *name = exec_file_find (execd_pathname, NULL);
 
@@ -2258,11 +2264,8 @@ resume (enum gdb_signal sig)
 	     requests finish.  The thread is not executing at this
 	     point, and the call to set_executing will be made later.
 	     But we need to call set_running here, since from the
-	     user/frontend's point of view, threads were set running.
-	     Unless we're calling an inferior function, as in that
-	     case we pretend the inferior doesn't run at all.  */
-	  if (!tp->control.in_infcall)
-	    set_running (user_visible_resume_ptid (user_step), 1);
+	     user/frontend's point of view, threads were set running.  */
+	  set_running (user_visible_resume_ptid (user_step), 1);
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
@@ -2340,10 +2343,8 @@ resume (enum gdb_signal sig)
   /* Even if RESUME_PTID is a wildcard, and we end up resuming less
      (e.g., we might need to step over a breakpoint), from the
      user/frontend's point of view, all threads in RESUME_PTID are now
-     running.  Unless we're calling an inferior function, as in that
-     case pretend we inferior doesn't run at all.  */
-  if (!tp->control.in_infcall)
-    set_running (resume_ptid, 1);
+     running.  */
+  set_running (resume_ptid, 1);
 
   /* Maybe resume a single thread after all.  */
   if ((step || thread_has_single_step_breakpoints_set (tp))
@@ -3680,7 +3681,7 @@ get_inferior_stop_soon (ptid_t ptid)
    once).  */
 
 static void
-handle_inferior_event (struct execution_control_state *ecs)
+handle_inferior_event_1 (struct execution_control_state *ecs)
 {
   enum stop_kind stop_soon;
 
@@ -4200,6 +4201,22 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       stop_waiting (ecs);
       return;
     }
+}
+
+/* A wrapper around handle_inferior_event_1, which also makes sure
+   that all temporary struct value objects that were created during
+   the handling of the event get deleted at the end.  */
+
+static void
+handle_inferior_event (struct execution_control_state *ecs)
+{
+  struct value *mark = value_mark ();
+
+  handle_inferior_event_1 (ecs);
+  /* Purge all temporary values created during the event handling,
+     as it could be a long time before we return to the command level
+     where such values would otherwise be purged.  */
+  value_free_to_mark (mark);
 }
 
 /* Come here when the program has stopped with a signal.  */
@@ -6642,15 +6659,15 @@ normal_stop (void)
   if (has_stack_frames () && !stop_stack_dummy)
     set_current_sal_from_frame (get_current_frame ());
 
-  /* Let the user/frontend see the threads as stopped, but do nothing
-     if the thread was running an infcall.  We may be e.g., evaluating
-     a breakpoint condition.  In that case, the thread had state
-     THREAD_RUNNING before the infcall, and shall remain set to
-     running, all without informing the user/frontend about state
-     transition changes.  If this is actually a call command, then the
-     thread was originally already stopped, so there's no state to
-     finish either.  */
-  if (target_has_execution && inferior_thread ()->control.in_infcall)
+  /* Let the user/frontend see the threads as stopped, but defer to
+     call_function_by_hand if the thread finished an infcall
+     successfully.  We may be e.g., evaluating a breakpoint condition.
+     In that case, the thread had state THREAD_RUNNING before the
+     infcall, and shall remain marked running, all without informing
+     the user/frontend about state transition changes.  */
+  if (target_has_execution
+      && inferior_thread ()->control.in_infcall
+      && stop_stack_dummy == STOP_STACK_DUMMY)
     discard_cleanups (old_chain);
   else
     do_cleanups (old_chain);
@@ -7234,9 +7251,6 @@ siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var,
 struct infcall_suspend_state
 {
   struct thread_suspend_state thread_suspend;
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  struct inferior_suspend_state inferior_suspend;
-#endif
 
   /* Other fields:  */
   CORE_ADDR stop_pc;
@@ -7256,9 +7270,6 @@ save_infcall_suspend_state (void)
 {
   struct infcall_suspend_state *inf_state;
   struct thread_info *tp = inferior_thread ();
-#if 0
-  struct inferior *inf = current_inferior ();
-#endif
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   gdb_byte *siginfo_data = NULL;
@@ -7292,9 +7303,6 @@ save_infcall_suspend_state (void)
     }
 
   inf_state->thread_suspend = tp->suspend;
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  inf_state->inferior_suspend = inf->suspend;
-#endif
 
   /* run_inferior_call will not use the signal due to its `proceed' call with
      GDB_SIGNAL_0 anyway.  */
@@ -7313,16 +7321,10 @@ void
 restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
   struct thread_info *tp = inferior_thread ();
-#if 0
-  struct inferior *inf = current_inferior ();
-#endif
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   tp->suspend = inf_state->thread_suspend;
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  inf->suspend = inf_state->inferior_suspend;
-#endif
 
   stop_pc = inf_state->stop_pc;
 

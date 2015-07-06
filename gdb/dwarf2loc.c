@@ -39,7 +39,7 @@
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
 
-extern int dwarf2_always_disassemble;
+extern int dwarf_always_disassemble;
 
 extern const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
 
@@ -825,9 +825,8 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 
   /* See call_site_find_chain_1 why there is no way to reach the bottom callee
      PC again.  In such case there must be two different code paths to reach
-     it, therefore some of the former determined intermediate PCs must differ
-     and the unambiguous chain gets shortened.  */
-  gdb_assert (result->callers + result->callees < result->length);
+     it.  CALLERS + CALLEES equal to LENGTH in the case of self tail-call.  */
+  gdb_assert (result->callers + result->callees <= result->length);
 }
 
 /* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All the
@@ -4137,7 +4136,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
       else
 	fprintf_filtered (stream, _(", and "));
 
-      if (!dwarf2_always_disassemble)
+      if (!dwarf_always_disassemble)
 	{
 	  data = locexpr_describe_location_piece (symbol, stream,
 						  addr, objfile, per_cu,
@@ -4156,7 +4155,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 					       get_objfile_arch (objfile),
 					       addr_size, offset_size, data,
 					       data, end, 0,
-					       dwarf2_always_disassemble,
+					       dwarf_always_disassemble,
 					       per_cu);
 	}
 

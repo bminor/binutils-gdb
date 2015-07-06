@@ -236,27 +236,31 @@ Free_list::print_stats()
 }
 
 // A Hash_task computes the MD5 checksum of an array of char.
-// It has a blocker on either side (i.e., the task cannot run until
-// the first is unblocked, and it unblocks the second after running).
 
 class Hash_task : public Task
 {
  public:
-  Hash_task(const unsigned char* src,
+  Hash_task(Output_file* of,
+	    size_t offset,
 	    size_t size,
 	    unsigned char* dst,
-	    Task_token* build_id_blocker,
 	    Task_token* final_blocker)
-    : src_(src), size_(size), dst_(dst), build_id_blocker_(build_id_blocker),
+    : of_(of), offset_(offset), size_(size), dst_(dst),
       final_blocker_(final_blocker)
   { }
 
   void
   run(Workqueue*)
-  { md5_buffer(reinterpret_cast<const char*>(src_), size_, dst_); }
+  {
+    const unsigned char* iv =
+	this->of_->get_input_view(this->offset_, this->size_);
+    md5_buffer(reinterpret_cast<const char*>(iv), this->size_, this->dst_);
+    this->of_->free_input_view(this->offset_, this->size_, iv);
+  }
 
   Task_token*
-  is_runnable();
+  is_runnable()
+  { return NULL; }
 
   // Unblock FINAL_BLOCKER_ when done.
   void
@@ -268,20 +272,12 @@ class Hash_task : public Task
   { return "Hash_task"; }
 
  private:
-  const unsigned char* const src_;
+  Output_file* of_;
+  const size_t offset_;
   const size_t size_;
   unsigned char* const dst_;
-  Task_token* const build_id_blocker_;
   Task_token* const final_blocker_;
 };
-
-Task_token*
-Hash_task::is_runnable()
-{
-  if (this->build_id_blocker_->is_blocked())
-    return this->build_id_blocker_;
-  return NULL;
-}
 
 // Layout::Relaxation_debug_check methods.
 
@@ -449,9 +445,6 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     eh_frame_hdr_section_(NULL),
     gdb_index_data_(NULL),
     build_id_note_(NULL),
-    array_of_hashes_(NULL),
-    size_of_array_of_hashes_(0),
-    input_view_(NULL),
     debug_abbrev_(NULL),
     debug_info_(NULL),
     group_signatures_(),
@@ -641,6 +634,15 @@ bool
 is_compressed_debug_section(const char* secname)
 {
   return (is_prefix_of(".zdebug", secname));
+}
+
+std::string
+corresponding_uncompressed_section_name(std::string secname)
+{
+  gold_assert(secname[0] == '.' && secname[1] == 'z');
+  std::string ret(".");
+  ret.append(secname, 2, std::string::npos);
+  return ret;
 }
 
 // Whether to include this section in the link.
@@ -1028,19 +1030,16 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   // FIXME: Handle SHF_OS_NONCONFORMING somewhere.
 
   size_t len = strlen(name);
-  char* uncompressed_name = NULL;
+  std::string uncompressed_name;
 
   // Compressed debug sections should be mapped to the corresponding
   // uncompressed section.
   if (is_compressed_debug_section(name))
     {
-      uncompressed_name = new char[len];
-      uncompressed_name[0] = '.';
-      gold_assert(name[0] == '.' && name[1] == 'z');
-      strncpy(&uncompressed_name[1], &name[2], len - 2);
-      uncompressed_name[len - 1] = '\0';
-      len -= 1;
-      name = uncompressed_name;
+      uncompressed_name =
+	  corresponding_uncompressed_section_name(std::string(name, len));
+      name = uncompressed_name.c_str();
+      len = uncompressed_name.length();
     }
 
   // Turn NAME from the name of the input section into the name of the
@@ -1057,9 +1056,6 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
 
   Stringpool::Key name_key;
   name = this->namepool_.add_with_length(name, len, true, &name_key);
-
-  if (uncompressed_name != NULL)
-    delete[] uncompressed_name;
 
   // Find or make the output section.  The output section is selected
   // based on the section name, type, and flags.
@@ -5388,56 +5384,13 @@ Layout::write_sections_after_input_sections(Output_file* of)
   this->section_headers_->write(of);
 }
 
-// Build IDs can be computed as a "flat" sha1 or md5 of a string of bytes,
-// or as a "tree" where each chunk of the string is hashed and then those
-// hashes are put into a (much smaller) string which is hashed with sha1.
-// We compute a checksum over the entire file because that is simplest.
-
-Task_token*
-Layout::queue_build_id_tasks(Workqueue* workqueue, Task_token* build_id_blocker,
-			     Output_file* of)
-{
-  const size_t filesize = (this->output_file_size() <= 0 ? 0
-			   : static_cast<size_t>(this->output_file_size()));
-  if (this->build_id_note_ != NULL
-      && strcmp(parameters->options().build_id(), "tree") == 0
-      && parameters->options().build_id_chunk_size_for_treehash() > 0
-      && filesize > 0
-      && (filesize >=
-	  parameters->options().build_id_min_file_size_for_treehash()))
-    {
-      static const size_t MD5_OUTPUT_SIZE_IN_BYTES = 16;
-      const size_t chunk_size =
-	  parameters->options().build_id_chunk_size_for_treehash();
-      const size_t num_hashes = ((filesize - 1) / chunk_size) + 1;
-      Task_token* post_hash_tasks_blocker = new Task_token(true);
-      post_hash_tasks_blocker->add_blockers(num_hashes);
-      this->size_of_array_of_hashes_ = num_hashes * MD5_OUTPUT_SIZE_IN_BYTES;
-      const unsigned char* src = of->get_input_view(0, filesize);
-      this->input_view_ = src;
-      unsigned char *dst = new unsigned char[this->size_of_array_of_hashes_];
-      this->array_of_hashes_ = dst;
-      for (size_t i = 0, src_offset = 0; i < num_hashes;
-	   i++, dst += MD5_OUTPUT_SIZE_IN_BYTES, src_offset += chunk_size)
-	{
-	  size_t size = std::min(chunk_size, filesize - src_offset);
-	  workqueue->queue(new Hash_task(src + src_offset,
-					 size,
-					 dst,
-					 build_id_blocker,
-					 post_hash_tasks_blocker));
-	}
-      return post_hash_tasks_blocker;
-    }
-  return build_id_blocker;
-}
-
 // If a tree-style build ID was requested, the parallel part of that computation
 // is already done, and the final hash-of-hashes is computed here.  For other
 // types of build IDs, all the work is done here.
 
 void
-Layout::write_build_id(Output_file* of) const
+Layout::write_build_id(Output_file* of, unsigned char* array_of_hashes,
+		       size_t size_of_hashes) const
 {
   if (this->build_id_note_ == NULL)
     return;
@@ -5445,7 +5398,7 @@ Layout::write_build_id(Output_file* of) const
   unsigned char* ov = of->get_output_view(this->build_id_note_->offset(),
 					  this->build_id_note_->data_size());
 
-  if (this->array_of_hashes_ == NULL)
+  if (array_of_hashes == NULL)
     {
       const size_t output_file_size = this->output_file_size();
       const unsigned char* iv = of->get_input_view(0, output_file_size);
@@ -5466,10 +5419,9 @@ Layout::write_build_id(Output_file* of) const
     {
       // Non-overlapping substrings of the output file have been hashed.
       // Compute SHA-1 hash of the hashes.
-      sha1_buffer(reinterpret_cast<const char*>(this->array_of_hashes_),
-		  this->size_of_array_of_hashes_, ov);
-      delete[] this->array_of_hashes_;
-      of->free_input_view(0, this->output_file_size(), this->input_view_);
+      sha1_buffer(reinterpret_cast<const char*>(array_of_hashes),
+		  size_of_hashes, ov);
+      delete[] array_of_hashes;
     }
 
   of->write_output_view(this->build_id_note_->offset(),
@@ -5668,6 +5620,57 @@ Write_after_input_sections_task::run(Workqueue*)
   this->layout_->write_sections_after_input_sections(this->of_);
 }
 
+// Build IDs can be computed as a "flat" sha1 or md5 of a string of bytes,
+// or as a "tree" where each chunk of the string is hashed and then those
+// hashes are put into a (much smaller) string which is hashed with sha1.
+// We compute a checksum over the entire file because that is simplest.
+
+void
+Build_id_task_runner::run(Workqueue* workqueue, const Task*)
+{
+  Task_token* post_hash_tasks_blocker = new Task_token(true);
+  const Layout* layout = this->layout_;
+  Output_file* of = this->of_;
+  const size_t filesize = (layout->output_file_size() <= 0 ? 0
+			   : static_cast<size_t>(layout->output_file_size()));
+  unsigned char* array_of_hashes = NULL;
+  size_t size_of_hashes = 0;
+
+  if (strcmp(this->options_->build_id(), "tree") == 0
+      && this->options_->build_id_chunk_size_for_treehash() > 0
+      && filesize > 0
+      && (filesize >= this->options_->build_id_min_file_size_for_treehash()))
+    {
+      static const size_t MD5_OUTPUT_SIZE_IN_BYTES = 16;
+      const size_t chunk_size =
+	  this->options_->build_id_chunk_size_for_treehash();
+      const size_t num_hashes = ((filesize - 1) / chunk_size) + 1;
+      post_hash_tasks_blocker->add_blockers(num_hashes);
+      size_of_hashes = num_hashes * MD5_OUTPUT_SIZE_IN_BYTES;
+      array_of_hashes = new unsigned char[size_of_hashes];
+      unsigned char *dst = array_of_hashes;
+      for (size_t i = 0, src_offset = 0; i < num_hashes;
+	   i++, dst += MD5_OUTPUT_SIZE_IN_BYTES, src_offset += chunk_size)
+	{
+	  size_t size = std::min(chunk_size, filesize - src_offset);
+	  workqueue->queue(new Hash_task(of,
+					 src_offset,
+					 size,
+					 dst,
+					 post_hash_tasks_blocker));
+	}
+    }
+
+  // Queue the final task to write the build id and close the output file.
+  workqueue->queue(new Task_function(new Close_task_runner(this->options_,
+							   layout,
+							   of,
+							   array_of_hashes,
+							   size_of_hashes),
+				     post_hash_tasks_blocker,
+				     "Task_function Close_task_runner"));
+}
+
 // Close_task_runner methods.
 
 // Finish up the build ID computation, if necessary, and write a binary file,
@@ -5677,8 +5680,9 @@ void
 Close_task_runner::run(Workqueue*, const Task*)
 {
   // At this point the multi-threaded part of the build ID computation,
-  // if any, is done.  See queue_build_id_tasks().
-  this->layout_->write_build_id(this->of_);
+  // if any, is done.  See Build_id_task_runner.
+  this->layout_->write_build_id(this->of_, this->array_of_hashes_,
+				this->size_of_hashes_);
 
   // If we've been asked to create a binary file, we do so here.
   if (this->options_->oformat_enum() != General_options::OBJECT_FORMAT_ELF)

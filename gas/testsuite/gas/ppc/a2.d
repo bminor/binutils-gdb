@@ -347,7 +347,7 @@ Disassembly of section \.text:
  4fc:	(7c 00 04 00|00 04 00 7c) 	mcrxr   cr0
  500:	(7d 80 04 00|00 04 80 7d) 	mcrxr   cr3
  504:	(7c 60 00 26|26 00 60 7c) 	mfcr    r3
- 508:	(7c 60 00 26|26 00 60 7c) 	mfcr    r3
+ 508:	(7c 70 20 26|26 20 70 7c) 	mfocrf  r3,2
  50c:	(7c 70 10 26|26 10 70 7c) 	mfocrf  r3,1
  510:	(7c 78 00 26|26 00 78 7c) 	mfocrf  r3,128
  514:	(7d 4a 3a 87|87 3a 4a 7d) 	mfdcr\.  r10,234
@@ -544,9 +544,9 @@ Disassembly of section \.text:
  810:	(7e 95 01 90|90 01 95 7e) 	subfze  r20,r21
  814:	(7e 95 05 91|91 05 95 7e) 	subfzeo\. r20,r21
  818:	(7e 95 05 90|90 05 95 7e) 	subfzeo r20,r21
- 81c:	(7c 00 04 ac|ac 04 00 7c) 	sync    
- 820:	(7c 00 04 ac|ac 04 00 7c) 	sync    
- 824:	(7c 00 04 ac|ac 04 00 7c) 	sync    
+ 81c:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
+ 820:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
+ 824:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
  828:	(7c 20 04 ac|ac 04 20 7c) 	lwsync
  82c:	(7c aa 58 88|88 58 aa 7c) 	tdlge   r10,r11
  830:	(08 aa 00 64|64 00 aa 08) 	tdlgei  r10,100

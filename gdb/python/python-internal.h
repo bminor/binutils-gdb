@@ -65,8 +65,6 @@
 
 /* Python 2.4 doesn't include stdint.h soon enough to get {u,}intptr_t
    needed by pyport.h.  */
-#include <stdint.h>
-
 /* /usr/include/features.h on linux systems will define _POSIX_C_SOURCE
    if it sees _GNU_SOURCE (which config.h will define).
    pyconfig.h defines _POSIX_C_SOURCE to a different value than

@@ -1,3 +1,31 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* decode-compact.c (sh64_compact_decode): Change TRACE_EXTRACT to
+	CGEN_TRACE_EXTRACT.
+	* decode-media.c: Likewise.
+	* mloop-compact.in (execute): Change TRACE_INSN_INIT to
+	CGEN_TRACE_INSN_INIT, TRACE_INSN to CGEN_TRACE_INSN, and TRACE_INSN_FINI
+	to CGEN_TRACE_INSN_FINI.
+	(sh64_compact_pbb_before): Likewise.
+	(sh64_compact_pbb_after): Change TRACE_INSN_FINI to CGEN_TRACE_INSN_FINI.
+	* mloop-media.in: Likewise.
+	* sem-compact.c: Rename TRACE_RESULT to CGEN_TRACE_RESULT.
+	* sem-compact-switch.c: Likewise.
+	* sem-media.c: Likewise.
+	* sem-media-switch.c: Likewise.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (USING_SIM_BASE_H): Delete.
