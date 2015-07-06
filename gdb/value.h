@@ -361,7 +361,7 @@ extern const gdb_byte *value_contents_for_printing (struct value *value);
 extern const gdb_byte *
   value_contents_for_printing_const (const struct value *value);
 
-extern int value_fetch_lazy (struct value *val);
+extern void value_fetch_lazy (struct value *val);
 
 /* If nonzero, this is the value of a variable which does not actually
    exist in the program, at least partially.  If the value is lazy,

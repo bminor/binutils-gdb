@@ -1,3 +1,9 @@
+2015-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* value.c (value_fetch_lazy): Update comment, change return
+	value to void.
+	* value.h (value_fetch_lazy): Change return value to void.
+
 2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-data.c (tui_partial_win_by_name): Window name is const.
