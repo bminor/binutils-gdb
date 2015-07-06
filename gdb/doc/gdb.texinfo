@@ -24781,7 +24781,7 @@ The TUI mode is enabled by default when you invoke @value{GDBN} as
 @samp{@value{GDBP} -tui}.
 You can also switch in and out of TUI mode while @value{GDBN} runs by
 using various TUI commands and key bindings, such as @command{tui
-enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands} and
+enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands}, and
 @ref{TUI Keys, ,TUI Key Bindings}.
 
 @node TUI Overview

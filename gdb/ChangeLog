@@ -1,5 +1,9 @@
 2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* doc/gdb.texinfo (TUI): Add comma after @xref.
+
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-win.c (tui_set_focus): Use structure member 'generic'
 	instead of casting the structure type.
 
