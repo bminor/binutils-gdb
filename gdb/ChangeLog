@@ -1,5 +1,11 @@
 2015-07-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2015-07-06  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.10 branch created (66c4b3e8a628a207bc6aafef6af0c4128195f56e):
 	* version.in: Bump version to 7.10.50.DATE-cvs.
 
