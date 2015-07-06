@@ -1,5 +1,10 @@
 2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-win.c (focus_completer): Don't duplicate the tui window
+	names in this function.
+
+2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-data.h (SRC_NAME): Convert to lower case.
 	(CMD_NAME): Likewise.
 	(DATA_NAME): Likewise.

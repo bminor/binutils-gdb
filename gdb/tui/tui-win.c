@@ -374,26 +374,9 @@ focus_completer (struct cmd_list_element *ignore,
 	  || !tui_win_list[win_type]->generic.is_visible)
 	continue;
 
-      switch (win_type)
-	{
-	case SRC_WIN:
-	  completion_name = "src";
-	  break;
-	case DISASSEM_WIN:
-	  completion_name = "asm";
-	  break;
-	case DATA_WIN:
-	  completion_name = "regs";
-	  break;
-	case CMD_WIN:
-	  completion_name = "cmd";
-	  break;
-	default:
-	  break;
-	}
-
-      if (completion_name != NULL)
-	VEC_safe_push (const_char_ptr, completion_name_vec, completion_name);
+      completion_name = tui_win_name (&tui_win_list [win_type]->generic);
+      gdb_assert (completion_name != NULL);
+      VEC_safe_push (const_char_ptr, completion_name_vec, completion_name);
     }
 
   /* If no windows are considered visible then the TUI has not yet been
@@ -402,8 +385,8 @@ focus_completer (struct cmd_list_element *ignore,
      default layout to SRC_COMMAND.  */
   if (VEC_length (const_char_ptr, completion_name_vec) == 0)
     {
-      VEC_safe_push (const_char_ptr, completion_name_vec, "src");
-      VEC_safe_push (const_char_ptr, completion_name_vec, "cmd");
+      VEC_safe_push (const_char_ptr, completion_name_vec, SRC_NAME);
+      VEC_safe_push (const_char_ptr, completion_name_vec, CMD_NAME);
     }
 
   VEC_safe_push (const_char_ptr, completion_name_vec, "next");
