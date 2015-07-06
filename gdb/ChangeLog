@@ -1,3 +1,8 @@
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (TUI): Restructure documentation on TUI layout
+	and focus commands.
+
 2015-07-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

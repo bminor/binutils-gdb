@@ -25070,43 +25070,58 @@ Disable TUI mode, returning to the console interpreter.
 @kindex info win
 List and give the size of all displayed windows.
 
-@item layout next
+@item layout @var{name}
 @kindex layout
+Changes which TUI windows are displayed.  In each layout the command
+window is always displayed, the @var{name} parameter controls which
+additional windows are displayed, and can be any of the following:
+
+@table @code
+@item next
 Display the next layout.
 
-@item layout prev
+@item prev
 Display the previous layout.
 
-@item layout src
-Display the source window only.
+@item src
+Display the source and command windows.
 
-@item layout asm
-Display the assembly window only.
+@item asm
+Display the assembly and command windows.
 
-@item layout split
-Display the source and assembly window.
+@item split
+Display the source, assembly, and command windows.
 
-@item layout regs
-Display the register window together with the source or assembly window.
+@item regs
+When in @code{src} layout display the register, source, and command
+windows.  When in @code{asm} or @code{split} layout display the
+register, assembler, and command windows.
+@end table
 
-@item focus next
+@item focus @var{name}
 @kindex focus
+Changes which TUI window is currently active for scrolling.  The
+@var{name} parameter can be any of the following:
+
+@table @code
+@item next
 Make the next window active for scrolling.
 
-@item focus prev
+@item prev
 Make the previous window active for scrolling.
 
-@item focus src
+@item src
 Make the source window active for scrolling.
 
-@item focus asm
+@item asm
 Make the assembly window active for scrolling.
 
-@item focus regs
+@item regs
 Make the register window active for scrolling.
 
-@item focus cmd
+@item cmd
 Make the command window active for scrolling.
+@end table
 
 @item refresh
 @kindex refresh
