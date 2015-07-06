@@ -3892,10 +3892,6 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
   /* BL is never in moribund_locations by our callers.  */
   gdb_assert (bl->owner != NULL);
 
-  if (bl->permanent)
-    /* Permanent breakpoints cannot be inserted or removed.  */
-    return 0;
-
   /* The type of none suggests that owner is actually deleted.
      This should not ever happen.  */
   gdb_assert (bl->owner->type != bp_none);
@@ -4042,10 +4038,6 @@ remove_breakpoint (struct bp_location *bl, insertion_state_t is)
   /* BL is never in moribund_locations by our callers.  */
   gdb_assert (bl->owner != NULL);
 
-  if (bl->permanent)
-    /* Permanent breakpoints cannot be inserted or removed.  */
-    return 0;
-
   /* The type of none suggests that owner is actually deleted.
      This should not ever happen.  */
   gdb_assert (bl->owner->type != bp_none);
@@ -4068,8 +4060,7 @@ mark_breakpoints_out (void)
   struct bp_location *bl, **blp_tmp;
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
-    if (bl->pspace == current_program_space
-	&& !bl->permanent)
+    if (bl->pspace == current_program_space)
       bl->inserted = 0;
 }
 
