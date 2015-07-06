@@ -1,3 +1,8 @@
+2015-07-06  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.10 branch created (66c4b3e8a628a207bc6aafef6af0c4128195f56e):
+	* version.in: Bump version to 7.9.90.DATE-cvs.
+
 2015-07-06  Luis Machado  <lgustavo@codesourcery.com>
 
 	* breakpoint.c (remove_breakpoint_1): Don't handle permanent
