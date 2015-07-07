@@ -1,5 +1,20 @@
 2015-07-07  Yao Qi  <yao.qi@linaro.org>
 
+	* features/arm-with-m-fpa-layout.xml: Set architecture to arm.
+	* features/arm-with-m-fpa-layout.c: Regenerated.
+	* features/arm-with-m-vfp-d16.xml: Likewise.
+	* features/arm-with-m-vfp-d16.c: Regenerated.
+	* features/arm-with-m.xml: Likewise.
+	* features/arm-with-m.c: Regenerated.
+	* features/arm-with-neon.xml: Likewise.
+	* features/arm-with-neon.c: Regenerated.
+	* features/arm-with-vfpv2.xml: Likewise.
+	* features/arm-with-vfpv2.c: Regenerated.
+	* features/arm-with-vfpv3.xml: Likewise.
+	* features/arm-with-vfpv3.c: Regenerated.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch32-linux-nat.h (VFP_REGS_SIZE): New macro, moved from
 	arm-linux-nat.c.
 	* aarch64-linux-nat.c: Include aarch32-linux-nat.h and

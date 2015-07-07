@@ -10,6 +10,7 @@
 
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>
+<architecture>arm</architecture>
 <feature name="org.gnu.gdb.arm.m-profile">
   <reg name="r0" bitsize="32"/>
   <reg name="r1" bitsize="32"/>
