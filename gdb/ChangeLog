@@ -1,3 +1,14 @@
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (store_fpregister): Remove.
+	(store_register): Likewise.
+	(fetch_fpregister): Likewise.
+	(fetch_register): Likewise.
+	(arm_linux_store_inferior_registers): Call store_regs and
+	store_fpregs instead.
+	(arm_linux_fetch_inferior_registers): Call fetch_fpregs and
+	fetch_regs instead.
+
 2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* doc/gdb.texinfo (TUI): Restructure documentation on TUI layout
