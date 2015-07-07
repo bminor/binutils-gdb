@@ -342,11 +342,6 @@ store_wmmx_regs (const struct regcache *regcache)
     }
 }
 
-/* Fetch and store VFP Registers.  The kernel object has space for 32
-   64-bit registers, and the FPSCR.  This is even when on a VFPv2 or
-   VFPv3D16 target.  */
-#define VFP_REGS_SIZE (32 * 8 + 4)
-
 static void
 fetch_vfp_regs (struct regcache *regcache)
 {

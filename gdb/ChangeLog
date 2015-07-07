@@ -1,5 +1,27 @@
 2015-07-07  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch32-linux-nat.h (VFP_REGS_SIZE): New macro, moved from
+	arm-linux-nat.c.
+	* aarch64-linux-nat.c: Include aarch32-linux-nat.h and
+	elf/external.h.
+	(fetch_gregs_from_thread): Call aarch32_gp_regcache_supply
+	if target is 32-bit.
+	(store_gregs_to_thread): Call aarch32_gp_regcache_collect
+	if target is 32-bit.
+	(fetch_fpregs_from_thread): Call aarch32_vfp_regcache_supply
+	if target is 32-bit.
+	(store_fpregs_to_thread): Call aarch32_vfp_regcache_collect
+	if target is 32-bit.
+	(tdesc_arm_with_vfpv3, tdesc_arm_with_neon): Declare.
+	(aarch64_linux_read_description): Return the right target
+	description.
+	* arm-linux-nat.c (VFP_REGS_SIZE): Moved to aarch32-linux-nat.h.
+	* config/aarch64/linux.mh (NATDEPFILES): Add aarch32-linux-nat.o.
+	* configure.tgt (aarch64*-*-linux*): Add arm-tdep.o and
+	arm-linux-tdep.o.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch32-linux-nat.c: New file.
 	* aarch32-linux-nat.h: New file.
 	* arm-linux-nat.c: Include aarch32-linux-nat.h.
