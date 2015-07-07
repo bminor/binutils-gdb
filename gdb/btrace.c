@@ -824,14 +824,14 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 
 static int
 btrace_pt_readmem_callback (gdb_byte *buffer, size_t size,
-			    const struct pt_asid *asid, CORE_ADDR pc,
+			    const struct pt_asid *asid, uint64_t pc,
 			    void *context)
 {
   int errcode;
 
   TRY
     {
-      errcode = target_read_code (pc, buffer, size);
+      errcode = target_read_code ((CORE_ADDR) pc, buffer, size);
       if (errcode != 0)
 	return -pte_nomap;
     }
