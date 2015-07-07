@@ -2271,6 +2271,43 @@ proc is_x86_like_target {} {
     return [expr [is_ilp32_target] && ![is_amd64_regs_target]]
 }
 
+# Return 1 if this target is an arm or aarch32 on aarch64.
+
+gdb_caching_proc is_aarch32_target {
+    if { [istarget "arm*-*-*"] } {
+	return 1
+    }
+
+    if { ![istarget "aarch64*-*-*"] } {
+	return 0
+    }
+
+    set me "is_aarch32_target"
+
+    set src [standard_temp_file aarch32[pid].s]
+    set obj [standard_temp_file aarch32[pid].o]
+
+    set list {}
+    foreach reg \
+	{r0 r1 r2 r3} {
+	    lappend list "\tmov $reg, $reg"
+	}
+    gdb_produce_source $src [join $list \n]
+
+    verbose "$me:  compiling testfile $src" 2
+    set lines [gdb_compile $src $obj object {quiet}]
+    file delete $src
+    file delete $obj
+
+    if ![string match "" $lines] then {
+	verbose "$me:  testfile compilation failed, returning 0" 2
+	return 0
+    }
+
+    verbose "$me:  returning 1" 2
+    return 1
+}
+
 # Return 1 if displaced stepping is supported on target, otherwise, return 0.
 proc support_displaced_stepping {} {
 

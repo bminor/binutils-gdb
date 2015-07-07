@@ -1,5 +1,17 @@
 2015-07-07  Yao Qi  <yao.qi@linaro.org>
 
+	* lib/gdb.exp (is_aarch32_target): New proc.
+	* gdb.arch/arm-bl-branch-dest.exp: Check is_aarch32_target
+	instead of "istarget "arm*-*-*"".
+	* gdb.arch/arm-disp-step.exp: Likewise.
+	* gdb.arch/thumb-bx-pc.exp: Likewise.
+	* gdb.arch/thumb-prologue.exp: Likewise.
+	* gdb.arch/thumb-singlestep.exp: Likewise.
+	* gdb.base/disp-step-syscall.exp: Likewise.
+	* gdb.base/float.exp: Likewise.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/catch-syscall.exp (test_catch_syscall_multi_arch):
 	Set arch1, arch2, syscall1_name, syscall2_name and syscall_number.
 
