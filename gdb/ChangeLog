@@ -1,3 +1,7 @@
+2015-07-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_pt_readmem_callback): Change type of PC argument.
+
 2015-07-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* progspace.c (delete_program_space): Add missing spaces.
