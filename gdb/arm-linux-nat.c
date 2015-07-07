@@ -29,6 +29,7 @@
 
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
+#include "aarch32-linux-nat.h"
 
 #include <elf/common.h>
 #include <sys/user.h>
@@ -212,20 +213,7 @@ fetch_regs (struct regcache *regcache)
       return;
     }
 
-  for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno, (char *) &regs[regno]);
-
-  if (arm_apcs_32)
-    regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_CPSR_GREGNUM]);
-  else
-    regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_PC_REGNUM]);
-
-  regs[ARM_PC_REGNUM] = gdbarch_addr_bits_remove
-			  (get_regcache_arch (regcache), regs[ARM_PC_REGNUM]);
-  regcache_raw_supply (regcache, ARM_PC_REGNUM,
-		       (char *) &regs[ARM_PC_REGNUM]);
+  aarch32_gp_regcache_supply (regcache, (uint32_t *) regs, arm_apcs_32);
 }
 
 static void
@@ -256,15 +244,7 @@ store_regs (const struct regcache *regcache)
       return;
     }
 
-  for (regno = ARM_A1_REGNUM; regno <= ARM_PC_REGNUM; regno++)
-    {
-      if (REG_VALID == regcache_register_status (regcache, regno))
-	regcache_raw_collect (regcache, regno, (char *) &regs[regno]);
-    }
-
-  if (arm_apcs_32 && REG_VALID == regcache_register_status (regcache, ARM_PS_REGNUM))
-    regcache_raw_collect (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_CPSR_GREGNUM]);
+  aarch32_gp_regcache_collect (regcache, (uint32_t *) regs, arm_apcs_32);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -370,7 +350,7 @@ store_wmmx_regs (const struct regcache *regcache)
 static void
 fetch_vfp_regs (struct regcache *regcache)
 {
-  char regbuf[VFP_REGS_SIZE];
+  gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -395,18 +375,14 @@ fetch_vfp_regs (struct regcache *regcache)
       return;
     }
 
-  for (regno = 0; regno < tdep->vfp_register_count; regno++)
-    regcache_raw_supply (regcache, regno + ARM_D0_REGNUM,
-			 (char *) regbuf + regno * 8);
-
-  regcache_raw_supply (regcache, ARM_FPSCR_REGNUM,
-		       (char *) regbuf + 32 * 8);
+  aarch32_vfp_regcache_supply (regcache, regbuf,
+			       tdep->vfp_register_count);
 }
 
 static void
 store_vfp_regs (const struct regcache *regcache)
 {
-  char regbuf[VFP_REGS_SIZE];
+  gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -431,12 +407,8 @@ store_vfp_regs (const struct regcache *regcache)
       return;
     }
 
-  for (regno = 0; regno < tdep->vfp_register_count; regno++)
-    regcache_raw_collect (regcache, regno + ARM_D0_REGNUM,
-			  (char *) regbuf + regno * 8);
-
-  regcache_raw_collect (regcache, ARM_FPSCR_REGNUM,
-			(char *) regbuf + 32 * 8);
+  aarch32_vfp_regcache_collect (regcache, regbuf,
+				tdep->vfp_register_count);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {

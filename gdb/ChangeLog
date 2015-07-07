@@ -1,5 +1,20 @@
 2015-07-07  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch32-linux-nat.c: New file.
+	* aarch32-linux-nat.h: New file.
+	* arm-linux-nat.c: Include aarch32-linux-nat.h.
+	(fetch_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_gp_regcache_supply.
+	(store_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_gp_regcache_collect.
+	(fetch_vfp_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_vfp_regcache_supply.
+	(store_vfp_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_vfp_regcache_collect.
+	* config/arm/linux.mh (NATDEPFILES): Add aarch32-linux-nat.o.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-nat.c (store_fpregister): Remove.
 	(store_register): Likewise.
 	(fetch_fpregister): Likewise.
