@@ -1,3 +1,21 @@
+2015-07-06  Doug Kwan  <dougkwan@google.com>
+
+	Apply from master
+	2015-06-29  Doug Kwan  <dougkwan@google.com>
+
+	* testsuite/arm_bl_out_of_range.s: Align stub table so that it appears
+	  at address expected by test.
+	* testsuite/arm_cortex_a8_b.s: Ditto.
+	* testsuite/arm_cortex_a8_b_cond.s: Ditto.
+	* testsuite/arm_cortex_a8_bl.s: Ditto.
+	* testsuite/arm_cortex_a8_blx.s: Ditto.
+	* testsuite/arm_cortex_a8_local.s: Ditto.
+	* testsuite/arm_fix_v4bx.s: Ditto.
+	* testsuite/arm_unaligned_reloc.s: Ditto.
+	* testsuite/thumb_bl_out_of_range.s: Ditto.
+	* testsuite/thumb_bl_out_of_range_local.s: Ditto.
+	* testsuite/thumb_blx_out_of_range.s: Ditto.
+
 2015-06-05  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
