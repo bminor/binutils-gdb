@@ -403,8 +403,11 @@ proc test_catch_syscall_multi_arch {} {
 	verbose "Not testing ARM for multi-arch syscall support"
 	return
     } elseif { [istarget "aarch64*-linux*"] } {
-	verbose "Not testing AARCH64 for multi-arch syscall support"
-	return
+	set arch1 "aarch64"
+	set arch2 "arm"
+	set syscall1_name "reboot"
+	set syscall2_name "_newselect"
+	set syscall_number 142
     } elseif { [istarget "s390*-linux*"] } {
 	set arch1 "s390:31-bit"
 	set arch2 "s390:64-bit"

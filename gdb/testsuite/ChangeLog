@@ -1,5 +1,10 @@
 2015-07-07  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/catch-syscall.exp (test_catch_syscall_multi_arch):
+	Set arch1, arch2, syscall1_name, syscall2_name and syscall_number.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.multi/multi-arch-exec.exp: Set march1 and march2 to "" if target
 	is aarch64.  If target is aarch64, set compiler=${ARM_CC_FOR_TARGET}
 	if it exists.
