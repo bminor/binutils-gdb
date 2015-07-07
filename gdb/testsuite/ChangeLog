@@ -1,3 +1,10 @@
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.multi/multi-arch-exec.exp: Set march1 and march2 to "" if target
+	is aarch64.  If target is aarch64, set compiler=${ARM_CC_FOR_TARGET}
+	if it exists.
+	* gdb.multi/multi-arch.exp: Likewise.
+
 2015-07-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-lazy-string.exp: Add missing parentheses to
