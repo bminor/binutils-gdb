@@ -1,5 +1,14 @@
 2015-07-07  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.arch/aarch64-atomic-inst.exp: Check is_aarch64_target
+	instead of istarget "aarch64*-*-*".
+	* gdb.arch/aarch64-fp.exp: Likewise.
+	* gdb.base/float.exp: Likewise.
+	* gdb.reverse/aarch64.exp: Likewise.
+	* lib/gdb.exp (is_aarch64_target): New proc.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
 	* lib/gdb.exp (is_aarch32_target): New proc.
 	* gdb.arch/arm-bl-branch-dest.exp: Check is_aarch32_target
 	instead of "istarget "arm*-*-*"".

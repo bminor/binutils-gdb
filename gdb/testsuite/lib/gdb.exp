@@ -2308,6 +2308,16 @@ gdb_caching_proc is_aarch32_target {
     return 1
 }
 
+# Return 1 if this target is an aarch64, either lp64 or ilp32.
+
+proc is_aarch64_target {} {
+    if { ![istarget "aarch64*-*-*"] } {
+	return 0
+    }
+
+    return [expr ![is_aarch32_target]]
+}
+
 # Return 1 if displaced stepping is supported on target, otherwise, return 0.
 proc support_displaced_stepping {} {
 
