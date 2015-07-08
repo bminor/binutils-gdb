@@ -1,3 +1,8 @@
+2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
+
+	* gas/avr/pc-relative-reloc.d: New test for 32 bit pc relative reloc.
+	* gas/avr/per-function-debugline.s: New test source.
+
 2015-07-03  Alan Modra  <alan@squeak.grove.modra.org>
 
 	* gas/ppc/titan.d: Correct mfmcsrr0 disassembly.

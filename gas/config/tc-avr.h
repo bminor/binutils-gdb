@@ -45,6 +45,8 @@
    nonstandard escape sequences in a string.  */
 #define ONLY_STANDARD_ESCAPES
 
+#define DIFF_EXPR_OK    /* .-foo gets turned into PC relative relocs */
+
 /* GAS will call this function for any expression that can not be
    recognized.  When the function is called, `input_line_pointer'
    will point to the start of the expression.  */

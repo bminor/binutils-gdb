@@ -641,7 +641,22 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
-	 FALSE) 		/* pcrel_offset */
+	 FALSE), 		/* pcrel_offset */
+
+  /* A 32 bit PC relative relocation.  */
+  HOWTO (R_AVR_32_PCREL,	/* type */
+	 0,				/* rightshift */
+	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_AVR_32_PCREL",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,	/* src_mask */
+	 0xffffffff,	/* dst_mask */
+	 TRUE),			/* pcrel_offset */
 };
 
 /* Map BFD reloc types to AVR ELF reloc types.  */
@@ -689,7 +704,8 @@ static const struct avr_reloc_map avr_reloc_map[] =
   { BFD_RELOC_AVR_DIFF32,           R_AVR_DIFF32 },
   { BFD_RELOC_AVR_LDS_STS_16,       R_AVR_LDS_STS_16},
   { BFD_RELOC_AVR_PORT6,            R_AVR_PORT6},
-  { BFD_RELOC_AVR_PORT5,            R_AVR_PORT5}
+  { BFD_RELOC_AVR_PORT5,            R_AVR_PORT5},
+  { BFD_RELOC_32_PCREL,             R_AVR_32_PCREL}
 };
 
 /* Meant to be filled one day with the wrap around address for the

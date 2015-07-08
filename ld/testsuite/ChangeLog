@@ -1,3 +1,8 @@
+2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
+
+	* ld-avr/gc-section-debugline.d: New test.
+	* ld-avr/per-function-debugline.s: Source for new test.
+
 2015-07-05  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* ld-powerpc/tocopt6-inc.s, ld-powerpc/tocopt6a.s,
