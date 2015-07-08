@@ -1,3 +1,8 @@
+2015-07-08  Robert O'Callahan  <robert@ocallahan.org>
+
+	PR exp/18617
+	* gdb.trace/ax.exp: Add test.
+
 2015-06-30  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* lib/gdb.exp (test_class_help): Remove the unneeded escaping of
