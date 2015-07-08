@@ -189,51 +189,61 @@ gdb_test "p localvar" " = 1"
 # Test setting fields and also many different types.
 #
 
+set skip_struct_object 0
 set test "compile code struct_object.selffield = &struct_object"
 gdb_test_multiple $test $test {
     -re "^$test\r\n$gdb_prompt $" {
 	pass "$test"
     }
-    -re "gdb command line:1:25: warning: assignment discards 'volatile' qualifier from pointer target type \\\[-Wdiscarded-qualifiers\\\]\r\n$gdb_prompt $" {
+    -re " error: Unexpected type id from GCC, check you use recent enough GCC\\.\r\n.*\r\n$gdb_prompt $" {
 	xfail "$test (PR compile/18202)"
+
+	# All following tests will break with the same error message.
+	set skip_struct_object 1
     }
 }
-gdb_test "print struct_object.selffield == &struct_object" " = 1"
 
-gdb_test_no_output "compile code struct_object.charfield = 1"
-gdb_test "print struct_object.charfield" " = 1 '\\\\001'"
-gdb_test_no_output "compile code struct_object.ucharfield = 1"
-gdb_test "print struct_object.ucharfield" " = 1 '\\\\001'"
+if {$skip_struct_object} {
+    untested "all struct_object tests"
+} else {
+    gdb_test "print struct_object.selffield == &struct_object" " = 1"
 
-foreach {field value} {
-    shortfield -5
-    ushortfield 5
-    intfield -7
-    uintfield 7
-    bitfield 2
-    longfield -9
-    ulongfield 9
-    enumfield ONE
-    floatfield 1
-    doublefield 2
-} {
-    gdb_test_no_output "compile code struct_object.$field = $value"
-    gdb_test "print struct_object.$field" " = $value"
+    gdb_test_no_output "compile code struct_object.charfield = 1"
+    gdb_test "print struct_object.charfield" " = 1 '\\\\001'"
+    gdb_test_no_output "compile code struct_object.ucharfield = 1"
+    gdb_test "print struct_object.ucharfield" " = 1 '\\\\001'"
+
+    foreach {field value} {
+	shortfield -5
+	ushortfield 5
+	intfield -7
+	uintfield 7
+	bitfield 2
+	longfield -9
+	ulongfield 9
+	enumfield ONE
+	floatfield 1
+	doublefield 2
+    } {
+	gdb_test_no_output "compile code struct_object.$field = $value"
+	gdb_test "print struct_object.$field" " = $value"
+    }
+
+    gdb_test_no_output "compile code struct_object.arrayfield\[2\] = 7"
+    gdb_test "print struct_object.arrayfield" \
+	" = \\{0, 0, 7, 0, 0\\}"
+
+    gdb_test_no_output "compile code struct_object.complexfield = 7 + 5i"
+    gdb_test "print struct_object.complexfield" " = 7 \\+ 5 \\* I"
+
+    gdb_test_no_output "compile code struct_object.boolfield = 1"
+    gdb_test "print struct_object.boolfield" " = true"
+
+    gdb_test_no_output "compile code struct_object.vectorfield\[2\] = 7"
+    gdb_test "print struct_object.vectorfield" \
+	" = \\{0, 0, 7, 0\\}"
+
 }
-
-gdb_test_no_output "compile code struct_object.arrayfield\[2\] = 7"
-gdb_test "print struct_object.arrayfield" \
-    " = \\{0, 0, 7, 0, 0\\}"
-
-gdb_test_no_output "compile code struct_object.complexfield = 7 + 5i"
-gdb_test "print struct_object.complexfield" " = 7 \\+ 5 \\* I"
-
-gdb_test_no_output "compile code struct_object.boolfield = 1"
-gdb_test "print struct_object.boolfield" " = true"
-
-gdb_test_no_output "compile code struct_object.vectorfield\[2\] = 7"
-gdb_test "print struct_object.vectorfield" \
-    " = \\{0, 0, 7, 0\\}"
 
 gdb_test_no_output "compile code union_object.typedeffield = 7"
 gdb_test "print union_object.typedeffield" " = 7"

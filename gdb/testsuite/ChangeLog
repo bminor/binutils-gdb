@@ -1,3 +1,12 @@
+2015-07-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR compile/18484
+	* gdb.compile/compile.c (struct struct_type): Add volatile to
+	selffield's type.
+	* gdb.compile/compile.exp
+	(compile code struct_object.selffield = &struct_object): Skip further
+	struct_object tests if this one xfails.
+
 2015-07-08  Robert O'Callahan  <robert@ocallahan.org>
 
 	PR exp/18617

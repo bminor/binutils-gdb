@@ -1,3 +1,8 @@
+2015-07-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR compile/18484
+	* compile/compile-c-types.c (insert_type): Change gdb_assert to error.
+
 2015-07-08  Robert O'Callahan  <robert@ocallahan.org>
 
 	PR exp/18617
