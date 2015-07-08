@@ -1,5 +1,9 @@
 2015-07-08  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* progspace.c (delete_program_space): Add missing spaces.
+
+2015-07-08  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* inferior.c (delete_inferior_1): Rename to ...
 	(delete_inferior): ..., remove 'silent' parameter, delete
 	program space when unused and remove call to prune_program_spaces.

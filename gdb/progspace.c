@@ -251,8 +251,8 @@ void
 delete_program_space (struct program_space *pspace)
 {
   struct program_space *ss, **ss_link;
-  gdb_assert(pspace != NULL);
-  gdb_assert(pspace != current_program_space);
+  gdb_assert (pspace != NULL);
+  gdb_assert (pspace != current_program_space);
 
   ss = program_spaces;
   ss_link = &program_spaces;
