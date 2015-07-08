@@ -7320,22 +7320,14 @@ Select frame number @var{n}.  Recall that frame zero is the innermost
 innermost one, and so on.  The highest-numbered frame is the one for
 @code{main}.
 
-@item frame @var{addr}
-@itemx f @var{addr}
-Select the frame at address @var{addr}.  This is useful mainly if the
+@item frame @var{stack-addr} [ @var{pc-addr} ]
+@itemx f @var{stack-addr} [ @var{pc-addr} ]
+Select the frame at address @var{stack-addr}.  This is useful mainly if the
 chaining of stack frames has been damaged by a bug, making it
 impossible for @value{GDBN} to assign numbers properly to all frames.  In
 addition, this can be useful when your program has multiple stacks and
-switches between them.
-
-On the SPARC architecture, @code{frame} needs two addresses to
-select an arbitrary frame: a frame pointer and a stack pointer.
-
-On the @acronym{MIPS} and Alpha architecture, it needs two addresses: a stack
-pointer and a program counter.
-
-On the 29k architecture, it needs three addresses: a register stack
-pointer, a program counter, and a memory stack pointer.
+switches between them.  The optional @var{pc-addr} can also be given to
+specify the value of PC for the stack frame.
 
 @kindex up
 @item up @var{n}
