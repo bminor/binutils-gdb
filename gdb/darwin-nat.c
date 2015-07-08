@@ -245,12 +245,12 @@ unparse_exception_type (unsigned int i)
 
 static int
 darwin_ptrace (const char *name,
-	       int request, int pid, PTRACE_TYPE_ARG3 arg3, int arg4)
+	       int request, int pid, caddr_t arg3, int arg4)
 {
   int ret;
 
   errno = 0;
-  ret = ptrace (request, pid, (caddr_t) arg3, arg4);
+  ret = ptrace (request, pid, arg3, arg4);
   if (ret == -1 && errno == 0)
     ret = 0;
 
@@ -728,7 +728,7 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 	{
 	  /* Either deliver a new signal or cancel the signal received.  */
 	  res = PTRACE (PT_THUPDATE, inf->pid,
-			(void *)(uintptr_t)thread->gdb_port, nsignal);
+			(caddr_t)thread->gdb_port, nsignal);
 	  if (res < 0)
 	    inferior_debug (1, _("ptrace THUP: res=%d\n"), res);
 	}
@@ -743,13 +743,10 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 	}
 
       /* Set or reset single step.  */
-      if (step != thread->single_step)
-	{
-	  inferior_debug (4, _("darwin_set_sstep (thread=0x%x, enable=%d)\n"),
-			  thread->gdb_port, step);
-	  darwin_set_sstep (thread->gdb_port, step);
-	  thread->single_step = step;
-	}
+      inferior_debug (4, _("darwin_set_sstep (thread=0x%x, enable=%d)\n"),
+		      thread->gdb_port, step);
+      darwin_set_sstep (thread->gdb_port, step);
+      thread->single_step = step;
 
       darwin_send_reply (inf, thread);
       thread->msg_state = DARWIN_RUNNING;

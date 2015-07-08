@@ -1,5 +1,11 @@
 2015-11-23  Tristan Gingold  <gingold@adacore.com>
 
+	* darwin-nat.c (darwin_ptrace): Avoid a cast.
+	(darwin_resume_thread): Ditto.  And always set or reset
+	single step.
+
+2015-11-23  Tristan Gingold  <gingold@adacore.com>
+
 	* darwin-nat.c (darwin_read_dyld_info): Write address in
 	big-endian order.
 	* solib-darwin.c (darwin_validate_exec_header): New function,
