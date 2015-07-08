@@ -184,8 +184,11 @@ delete_thread_of_inferior (struct thread_info *tp, void *data)
   return 0;
 }
 
+/* If SILENT then be quiet -- don't announce a inferior death, or the
+   exit of its threads.  */
+
 void
-delete_inferior (struct inferior *todel)
+delete_inferior_1 (struct inferior *todel, int silent)
 {
   struct inferior *inf, *infprev;
   struct delete_thread_of_inferior_arg arg;
@@ -200,7 +203,7 @@ delete_inferior (struct inferior *todel)
     return;
 
   arg.pid = inf->pid;
-  arg.silent = 1;
+  arg.silent = silent;
 
   iterate_over_threads (delete_thread_of_inferior, &arg);
 
@@ -211,12 +214,28 @@ delete_inferior (struct inferior *todel)
 
   observer_notify_inferior_removed (inf);
 
-  /* If this program space is rendered useless, remove it. */
-  if (program_space_empty_p (inf->pspace))
-    delete_program_space (inf->pspace);
-
   free_inferior (inf);
 }
+
+void
+delete_inferior (int pid)
+{
+  struct inferior *inf = find_inferior_pid (pid);
+
+  delete_inferior_1 (inf, 0);
+
+  if (print_inferior_events)
+    printf_unfiltered (_("[Inferior %d exited]\n"), pid);
+}
+
+void
+delete_inferior_silent (int pid)
+{
+  struct inferior *inf = find_inferior_pid (pid);
+
+  delete_inferior_1 (inf, 1);
+}
+
 
 /* If SILENT then be quiet -- don't announce a inferior exit, or the
    exit of its threads.  */
@@ -490,9 +509,11 @@ prune_inferiors (void)
 	}
 
       *ss_link = ss->next;
-      delete_inferior (ss);
+      delete_inferior_1 (ss, 1);
       ss = *ss_link;
     }
+
+  prune_program_spaces ();
 }
 
 /* Simply returns the count of inferiors.  */
@@ -776,8 +797,10 @@ remove_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      delete_inferior (inf);
+      delete_inferior_1 (inf, 1);
     }
+
+  prune_program_spaces ();
 }
 
 struct inferior *
