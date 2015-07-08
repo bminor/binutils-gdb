@@ -1,3 +1,8 @@
+2015-07-10  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (align_dot_val): New function.
+	(fold_unary <ALIGN_K, NEXT>): Use it.
+
 2015-07-03   Kai Tietz  <ktietz@redhat.com>
 
 	PR ld/11539
