@@ -38,13 +38,13 @@ struct perf_event_buffer
   const uint8_t *mem;
 
   /* The size of the mapped memory in bytes.  */
-  unsigned long long size;
+  size_t size;
 
   /* A pointer to the data_head field for this buffer. */
-  volatile unsigned long long *data_head;
+  volatile __u64 *data_head;
 
   /* The data_head value from the last read.  */
-  unsigned long long last_head;
+  __u64 last_head;
 };
 
 /* Branch trace target information for BTS tracing.  */

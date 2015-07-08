@@ -1414,18 +1414,17 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
 
 static void
 parse_xml_raw (struct gdb_xml_parser *parser, const char *body_text,
-	       gdb_byte **pdata, unsigned long *psize)
+	       gdb_byte **pdata, size_t *psize)
 {
   struct cleanup *cleanup;
   gdb_byte *data, *bin;
-  unsigned long size;
-  size_t len;
+  size_t len, size;
 
   len = strlen (body_text);
-  size = len / 2;
-
-  if ((size_t) size * 2 != len)
+  if (len % 2 != 0)
     gdb_xml_error (parser, _("Bad raw data size."));
+
+  size = len / 2;
 
   bin = data = xmalloc (size);
   cleanup = make_cleanup (xfree, data);

@@ -1,3 +1,25 @@
+2015-07-15  Markus Metzger  <markus.t.metzger@intel.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* nat/linux-btrace.c (perf_event_read): Change the type of DATA_HEAD.
+	(perf_event_read_all): Change the type of SIZE and DATA_HEAD.
+	(perf_event_read_bts): Change the type of SIZE and READ.
+	(linux_enable_bts): Change the type of SIZE, PAGES, DATA_SIZE,
+	and DATA_OFFSET.  Move DATA_SIZE declaration.  Restrict the buffer size
+	to UINT_MAX.  Check for overflows when using DATA_HEAD from the perf
+	mmap page.
+	(linux_enable_pt): Change the type of PAGES and SIZE.  Restrict the
+	buffer size to UINT_MAX.
+	(linux_read_bts): Change the type of BUFFER_SIZE, SIZE, DATA_HEAD, and
+	DATA_TAIL.
+	* nat/linux-btrace.h (struct perf_event_buffer)<size, data_head>
+	<last_head>: Change type.
+	* common/btrace-common.h (struct btrace_dat_pt) <size>: Change type.
+	* common/btrace-common.c (btrace_data_append): Change the type of
+	SIZE.
+	* btrace.c (parse_xml_raw): Change the type of SIZE.  Change oddness
+	check.
+
 2015-07-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbtypes.h (CHECK_TYPEDEF): Remove.
