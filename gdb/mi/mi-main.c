@@ -1964,7 +1964,7 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
       set_current_program_space (new_inferior->pspace);
     }
 
-  delete_inferior_1 (inf, 1 /* silent */);
+  delete_inferior (inf);
 }
 
 

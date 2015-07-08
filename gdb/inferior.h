@@ -418,14 +418,7 @@ extern struct inferior *add_inferior (int pid);
    the CLI.  */
 extern struct inferior *add_inferior_silent (int pid);
 
-/* Delete an existing inferior list entry, due to inferior exit.  */
-extern void delete_inferior (int pid);
-
-extern void delete_inferior_1 (struct inferior *todel, int silent);
-
-/* Same as delete_inferior, but don't print new inferior notifications
-   to the CLI.  */
-extern void delete_inferior_silent (int pid);
+extern void delete_inferior (struct inferior *todel);
 
 /* Delete an existing inferior list entry, due to inferior detaching.  */
 extern void detach_inferior (int pid);
