@@ -1,3 +1,8 @@
+2015-07-08  Robert O'Callahan  <robert@ocallahan.org>
+
+	PR exp/18617
+	* ax-gdb.c (gen_conversion): Extend to 'to' bits, not 'from'.
+
 2015-07-08  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* MAINTAINERS (Write After Approval): Add Markus T. Metzger.
