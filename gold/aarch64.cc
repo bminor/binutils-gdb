@@ -2084,10 +2084,6 @@ AArch64_relobj<size, big_endian>::scan_errata(
   // Find the first mapping symbol record within section shndx.
   typename Mapping_symbol_info::const_iterator p =
     this->mapping_symbol_info_.lower_bound(section_start);
-  if (p == this->mapping_symbol_info_.end() || p->first.shndx_ != shndx)
-    gold_warning(_("cannot scan executable section %u of %s for Cortex-A53 "
-		   "erratum because it has no mapping symbols."),
-		 shndx, this->name().c_str());
   while (p != this->mapping_symbol_info_.end() &&
 	 p->first.shndx_ == shndx)
     {

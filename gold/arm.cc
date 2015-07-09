@@ -6255,16 +6255,9 @@ Arm_relobj<big_endian>::scan_section_for_cortex_a8_erratum(
     this->mapping_symbols_info_.lower_bound(section_start);
 
   // There are no mapping symbols for this section.  Treat it as a data-only
-  // section.  Issue a warning if section is marked as containing
-  // instructions.
+  // section.
   if (p == this->mapping_symbols_info_.end() || p->first.first != shndx)
-    {
-      if ((this->section_flags(shndx) & elfcpp::SHF_EXECINSTR) != 0)
-	gold_warning(_("cannot scan executable section %u of %s for Cortex-A8 "
-		       "erratum because it has no mapping symbols."),
-		     shndx, this->name().c_str());
-      return;
-    }
+    return;
 
   Arm_address output_address =
     this->simple_input_section_output_address(shndx, os);

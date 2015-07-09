@@ -1,3 +1,11 @@
+2015-07-09  Han Shen  <shenhan@google.com>
+
+	Drop missing symbol warning for arm/aarch64.
+
+	* aarch64.cc (AArch64_relobj::scan_errata): Drop missing symbol warning.
+	* arm.cc (Arm_relobj::scan_section_for_cortex_a8_erratum): Drop missing
+	symbol warning.
+
 2015-07-07  Han Shen  <shenhan@google.com>
 
 	Make gold aarch64 accept long form of mapping symbols.
