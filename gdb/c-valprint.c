@@ -456,6 +456,26 @@ c_val_print_int (struct type *type, struct type *unresolved_type,
     }
 }
 
+/* c_val_print helper for TYPE_CODE_MEMBERPTR.  */
+
+static void
+c_val_print_memberptr (struct type *type, const gdb_byte *valaddr,
+		       int embedded_offset, CORE_ADDR address,
+		       struct ui_file *stream, int recurse,
+		       const struct value *original_value,
+		       const struct value_print_options *options)
+{
+  if (!options->format)
+    {
+      cp_print_class_member (valaddr + embedded_offset, type, stream, "&");
+    }
+  else
+    {
+      generic_val_print (type, valaddr, embedded_offset, address, stream,
+			 recurse, original_value, options, &c_decorations);
+    }
+}
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -501,12 +521,9 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_MEMBERPTR:
-      if (!options->format)
-	{
-	  cp_print_class_member (valaddr + embedded_offset, type, stream, "&");
-	  break;
-	}
-      /* FALLTHROUGH */
+      c_val_print_memberptr (type, valaddr, embedded_offset, address, stream,
+			     recurse, original_value, options);
+      break;
 
     case TYPE_CODE_REF:
     case TYPE_CODE_ENUM:
