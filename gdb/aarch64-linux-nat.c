@@ -29,6 +29,9 @@
 #include "gdbcmd.h"
 #include "aarch64-tdep.h"
 #include "aarch64-linux-tdep.h"
+#include "aarch32-linux-nat.h"
+
+#include "elf/external.h"
 #include "elf/common.h"
 
 #include <sys/ptrace.h>
@@ -458,22 +461,36 @@ aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
 static void
 fetch_gregs_from_thread (struct regcache *regcache)
 {
-  int ret, regno, tid;
+  int ret, tid;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   elf_gregset_t regs;
   struct iovec iovec;
+
+  /* Make sure REGS can hold all registers contents on both aarch64
+     and arm.  */
+  gdb_static_assert (sizeof (regs) >= 18 * 4);
 
   tid = get_thread_id (inferior_ptid);
 
   iovec.iov_base = &regs;
-  iovec.iov_len = sizeof (regs);
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    iovec.iov_len = 18 * 4;
+  else
+    iovec.iov_len = sizeof (regs);
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iovec);
   if (ret < 0)
     perror_with_name (_("Unable to fetch general registers."));
 
-  for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno,
-			 (char *) &regs[regno - AARCH64_X0_REGNUM]);
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    aarch32_gp_regcache_supply (regcache, (uint32_t *) regs, 1);
+  else
+    {
+      int regno;
+
+      for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
+	regcache_raw_supply (regcache, regno, &regs[regno - AARCH64_X0_REGNUM]);
+    }
 }
 
 /* Store to the current thread the valid general-purpose register
@@ -482,23 +499,37 @@ fetch_gregs_from_thread (struct regcache *regcache)
 static void
 store_gregs_to_thread (const struct regcache *regcache)
 {
-  int ret, regno, tid;
+  int ret, tid;
   elf_gregset_t regs;
   struct iovec iovec;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
+  /* Make sure REGS can hold all registers contents on both aarch64
+     and arm.  */
+  gdb_static_assert (sizeof (regs) >= 18 * 4);
   tid = get_thread_id (inferior_ptid);
 
   iovec.iov_base = &regs;
-  iovec.iov_len = sizeof (regs);
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    iovec.iov_len = 18 * 4;
+  else
+    iovec.iov_len = sizeof (regs);
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iovec);
   if (ret < 0)
     perror_with_name (_("Unable to fetch general registers."));
 
-  for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
-    if (REG_VALID == regcache_register_status (regcache, regno))
-      regcache_raw_collect (regcache, regno,
-			    (char *) &regs[regno - AARCH64_X0_REGNUM]);
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    aarch32_gp_regcache_collect (regcache, (uint32_t *) regs, 1);
+  else
+    {
+      int regno;
+
+      for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
+	if (REG_VALID == regcache_register_status (regcache, regno))
+	  regcache_raw_collect (regcache, regno,
+				&regs[regno - AARCH64_X0_REGNUM]);
+    }
 
   ret = ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS, &iovec);
   if (ret < 0)
@@ -511,25 +542,46 @@ store_gregs_to_thread (const struct regcache *regcache)
 static void
 fetch_fpregs_from_thread (struct regcache *regcache)
 {
-  int ret, regno, tid;
+  int ret, tid;
   elf_fpregset_t regs;
   struct iovec iovec;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  /* Make sure REGS can hold all VFP registers contents on both aarch64
+     and arm.  */
+  gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
 
   tid = get_thread_id (inferior_ptid);
 
   iovec.iov_base = &regs;
-  iovec.iov_len = sizeof (regs);
 
-  ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec);
-  if (ret < 0)
-    perror_with_name (_("Unable to fetch FP/SIMD registers."));
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    {
+      iovec.iov_len = VFP_REGS_SIZE;
 
-  for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno,
-			 (char *) &regs.vregs[regno - AARCH64_V0_REGNUM]);
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
+      if (ret < 0)
+	perror_with_name (_("Unable to fetch VFP registers."));
 
-  regcache_raw_supply (regcache, AARCH64_FPSR_REGNUM, (char *) &regs.fpsr);
-  regcache_raw_supply (regcache, AARCH64_FPCR_REGNUM, (char *) &regs.fpcr);
+      aarch32_vfp_regcache_supply (regcache, (gdb_byte *) &regs, 32);
+    }
+  else
+    {
+      int regno;
+
+      iovec.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec);
+      if (ret < 0)
+	perror_with_name (_("Unable to fetch vFP/SIMD registers."));
+
+      for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
+	regcache_raw_supply (regcache, regno,
+			     &regs.vregs[regno - AARCH64_V0_REGNUM]);
+
+      regcache_raw_supply (regcache, AARCH64_FPSR_REGNUM, &regs.fpsr);
+      regcache_raw_supply (regcache, AARCH64_FPCR_REGNUM, &regs.fpcr);
+    }
 }
 
 /* Store to the current thread the valid fp/simd register
@@ -538,32 +590,63 @@ fetch_fpregs_from_thread (struct regcache *regcache)
 static void
 store_fpregs_to_thread (const struct regcache *regcache)
 {
-  int ret, regno, tid;
+  int ret, tid;
   elf_fpregset_t regs;
   struct iovec iovec;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
+  /* Make sure REGS can hold all VFP registers contents on both aarch64
+     and arm.  */
+  gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
   tid = get_thread_id (inferior_ptid);
 
   iovec.iov_base = &regs;
-  iovec.iov_len = sizeof (regs);
 
-  ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec);
-  if (ret < 0)
-    perror_with_name (_("Unable to fetch FP/SIMD registers."));
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    {
+      iovec.iov_len = VFP_REGS_SIZE;
 
-  for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
-    if (REG_VALID == regcache_register_status (regcache, regno))
-      regcache_raw_collect (regcache, regno,
-			    (char *) &regs.vregs[regno - AARCH64_V0_REGNUM]);
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
+      if (ret < 0)
+	perror_with_name (_("Unable to fetch VFP registers."));
 
-  if (REG_VALID == regcache_register_status (regcache, AARCH64_FPSR_REGNUM))
-    regcache_raw_collect (regcache, AARCH64_FPSR_REGNUM, (char *) &regs.fpsr);
-  if (REG_VALID == regcache_register_status (regcache, AARCH64_FPCR_REGNUM))
-    regcache_raw_collect (regcache, AARCH64_FPCR_REGNUM, (char *) &regs.fpcr);
+      aarch32_vfp_regcache_collect (regcache, (gdb_byte *) &regs, 32);
+    }
+  else
+    {
+      int regno;
 
-  ret = ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, &iovec);
-  if (ret < 0)
-    perror_with_name (_("Unable to store FP/SIMD registers."));
+      iovec.iov_len = sizeof (regs);
+
+      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec);
+      if (ret < 0)
+	perror_with_name (_("Unable to fetch FP/SIMD registers."));
+
+      for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
+	if (REG_VALID == regcache_register_status (regcache, regno))
+	  regcache_raw_collect (regcache, regno,
+				(char *) &regs.vregs[regno - AARCH64_V0_REGNUM]);
+
+      if (REG_VALID == regcache_register_status (regcache, AARCH64_FPSR_REGNUM))
+	regcache_raw_collect (regcache, AARCH64_FPSR_REGNUM,
+			      (char *) &regs.fpsr);
+      if (REG_VALID == regcache_register_status (regcache, AARCH64_FPCR_REGNUM))
+	regcache_raw_collect (regcache, AARCH64_FPCR_REGNUM,
+			      (char *) &regs.fpcr);
+    }
+
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    {
+      ret = ptrace (PTRACE_SETREGSET, tid, NT_ARM_VFP, &iovec);
+      if (ret < 0)
+	perror_with_name (_("Unable to store VFP registers."));
+    }
+  else
+    {
+      ret = ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, &iovec);
+      if (ret < 0)
+	perror_with_name (_("Unable to store FP/SIMD registers."));
+    }
 }
 
 /* Implement the "to_fetch_register" target_ops method.  */
@@ -755,16 +838,17 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Get the hardware debug register capacity information.  */
+/* Get the hardware debug register capacity information from the
+   inferior represented by PTID.  */
 
 static void
-aarch64_linux_get_debug_reg_capacity (void)
+aarch64_linux_get_debug_reg_capacity (ptid_t ptid)
 {
   int tid;
   struct iovec iov;
   struct user_hwdebug_state dreg_state;
 
-  tid = get_thread_id (inferior_ptid);
+  tid = get_thread_id (ptid);
   iov.iov_base = &dreg_state;
   iov.iov_len = sizeof (dreg_state);
 
@@ -819,15 +903,58 @@ aarch64_linux_child_post_startup_inferior (struct target_ops *self,
 					   ptid_t ptid)
 {
   aarch64_forget_process (ptid_get_pid (ptid));
-  aarch64_linux_get_debug_reg_capacity ();
+  aarch64_linux_get_debug_reg_capacity (ptid);
   super_post_startup_inferior (self, ptid);
 }
+
+extern struct target_desc *tdesc_arm_with_vfpv3;
+extern struct target_desc *tdesc_arm_with_neon;
 
 /* Implement the "to_read_description" target_ops method.  */
 
 static const struct target_desc *
 aarch64_linux_read_description (struct target_ops *ops)
 {
+  CORE_ADDR at_phent;
+
+  if (target_auxv_search (ops, AT_PHENT, &at_phent) == 1)
+    {
+      if (at_phent == sizeof (Elf64_External_Phdr))
+	return tdesc_aarch64;
+      else
+	{
+	  CORE_ADDR arm_hwcap = 0;
+
+	  if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
+	    return ops->beneath->to_read_description (ops->beneath);
+
+#ifndef COMPAT_HWCAP_VFP
+#define COMPAT_HWCAP_VFP        (1 << 6)
+#endif
+#ifndef COMPAT_HWCAP_NEON
+#define COMPAT_HWCAP_NEON       (1 << 12)
+#endif
+#ifndef COMPAT_HWCAP_VFPv3
+#define COMPAT_HWCAP_VFPv3      (1 << 13)
+#endif
+
+	  if (arm_hwcap & COMPAT_HWCAP_VFP)
+	    {
+	      char *buf;
+	      const struct target_desc *result = NULL;
+
+	      if (arm_hwcap & COMPAT_HWCAP_NEON)
+		result = tdesc_arm_with_neon;
+	      else if (arm_hwcap & COMPAT_HWCAP_VFPv3)
+		result = tdesc_arm_with_vfpv3;
+
+	      return result;
+	    }
+
+	  return NULL;
+	}
+    }
+
   return tdesc_aarch64;
 }
 

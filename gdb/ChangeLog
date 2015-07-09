@@ -1,3 +1,278 @@
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* NEWS: Mention support for tracepoints on aarch64-linux.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* linux-aarch64-low.c (aarch64_supports_tracepoints): New
+	function.  Return 1.
+	(the_low_target): Install it.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* gdb.trace/backtrace.exp: Set registers for aarch64 target.
+	* gdb.trace/collection.exp: Likewise.
+	* gdb.trace/mi-trace-frame-collected.exp: Likewise.
+	* gdb.trace/mi-trace-unavailable.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/unavailable.exp: Likewise.
+	* gdb.trace/while-dyn.exp: Likewise.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c: Add ax.h and ax-gdb.h includes.
+	(aarch64_gen_return_address): New function.
+	(aarch64_gdbarch_init): Hook it.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_make_stub_cache): Set available_p and
+	swallow NOT_AVAILABLE_ERROR.
+	(aarch64_stub_this_id): Call frame_id_build_unavailable_stack if
+	available_p is not set.
+	(aarch64_stub_frame_unwind_stop_reason): New function.
+	(aarch64_stub_unwind): Install it.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_prologue_cache) <available_p>: New
+	field.
+	(aarch64_make_prologue_cache_1): New function, factored out from
+	aarch64_make_prologue_cache.  Do not allocate cache.  Set
+	available_p.
+	(aarch64_make_prologue_cache): Reimplement wrapping
+	aarch64_make_prologue_cache_1, and swallowing
+	NOT_AVAILABLE_ERROR.
+	(aarch64_prologue_frame_unwind_stop_reason): New function.
+	Return UNWIND_UNAVAILABLE if available_p is not set.
+	(aarch64_prologue_unwind): Install it.
+	(aarch64_prologue_this_id): Move prev_pc and prev_sp limit
+	checks into aarch64_prologue_frame_unwind_stop_reason.  Call
+	frame_id_build_unavailable_stack if available_p is not set.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_prologue_cache) <func, prev_pc>: New
+	fields.
+	(aarch64_scan_prologue): Set prev_pc.
+	(aarch64_make_prologue_cache): Set func.
+	(aarch64_make_stub_cache): Set prev_pc.
+	(aarch64_prologue_this_id): Remove local variables id, pc and
+	func.  Read prev_pc and func from cache.
+	(aarch64_stub_this_id): Read prev_pc from cache.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_make_stub_cache): Update comment.  New
+	argument this_cache.  Remove unused local variables reg and
+	unwound_fp.  Return early if this_cache is already set.  Set
+	this_cache.
+	(aarch64_stub_this_id): Update call to aarch64_make_stub_cache.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_make_prologue_cache): Update comment.
+	New argument this_cache.  Return early if this_cache is already
+	set.  Set this_cache.
+	(aarch64_prologue_this_id): Update call to
+	aarch64_make_prologue_cache.
+	(aarch64_prologue_prev_register): Likewise.
+	(aarch64_normal_frame_base): Likewise.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_val_print): Factor out memberptr printing code
+	from c_val_print to ...
+	(c_val_print_memberptr): ... this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_val_print): Factor out int printing code to ...
+	(c_val_print_int): ... this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_val_print): Factor out struct and union
+	printing code to ...
+	(c_val_print_struct): ... this new function ...
+	(c_val_print_union): ... and this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_val_print): Factor out pointer printing code
+	to ...
+	(c_val_print_ptr): ... this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_valprint): Factor our array printing code from
+	c_val_print to ...
+	(c_val_print_array): ... this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_val_print): Factor out pointer printing code
+	to ...
+	(print_unpacked_pointer): ... this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_val_print): Remove an assignment to i and move
+	its declaration.
+
+2015-07-09  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_get_debug_reg_capacity): Add
+	argument ptid.  Update comments.  Caller update.
+
+2015-07-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (pt_print_packet): Print stop, vmcs, tma, mtc, cyc, and
+	mnt packets.
+
+2015-07-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_pt_readmem_callback): Change type of PC argument.
+
+2015-07-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* progspace.c (delete_program_space): Add missing spaces.
+
+2015-07-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.c (delete_inferior_1): Rename to ...
+	(delete_inferior): ..., remove 'silent' parameter, delete
+	program space when unused and remove call to prune_program_spaces.
+	Remove the old, unused, delete_inferior.
+	(delete_inferior_silent): Remove.
+	(prune_inferiors): Change call from delete_inferior_1 to
+	delete_inferior and remove 'silent' parameter. Remove call to
+	prune_program_spaces.
+	(remove_inferior_command): Idem.
+	* inferior.h (delete_inferior_1): Rename to...
+	(delete_inferior): ..., remove 'silent' parameter and remove the
+	original delete_inferior.
+	(delete_inferior_silent): Remove.
+	* mi/mi-main.c (mi_cmd_remove_inferior): Change call from
+	delete_inferior_1 to delete_inferior and remove 'silent'
+	parameter.
+	* progspace.c (prune_program_spaces): Remove.
+	(pspace_empty_p): Rename to...
+	(program_space_empty_p): ... and make non-static.
+	(delete_program_space): New.
+	* progspace.h (prune_program_spaces): Remove declaration.
+	(program_space_empty_p): New declaration.
+	(delete_program_space): New declaration.
+	* monitor.c (monitor_close): Replace call to
+	delete_thread_silent and delete_inferior_silent with
+	discard_all_inferiors.
+
+2015-07-08  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* defs.h (deprecated_register_changed_hook): Remove prototype.
+	* interps.c (clear_iterpreter_hooks): Remove reference to
+	deprecated_register_changed_hook.
+	* top.c (deprecated_register_changed_hook): Remove prototype.
+	* valops.c (value_assign): Remove reference to
+	deprecated_register_changed_hook.
+	* tui/tui-hooks.c (tui_register_changed): Add parameter "frame".
+	Add comment documenting the function.
+	(tui_register_changed_observer): Define.
+	(tui_install_hooks): Remove reference to
+	deprecated_register_changed_hook.  Set
+	tui_register_changed_observer.
+	(tui_remove_hooks): Remove reference to
+	deprecated_register_changed_hook.  Unset
+	tui_register_changed_observer.
+
+2015-07-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR compile/18484
+	* compile/compile-c-types.c (insert_type): Change gdb_assert to error.
+
+2015-07-08  Robert O'Callahan  <robert@ocallahan.org>
+
+	PR exp/18617
+	* ax-gdb.c (gen_conversion): Extend to 'to' bits, not 'from'.
+
+2015-07-08  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add Markus T. Metzger.
+
+2015-07-08  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.c (kernel_supports_bts, kernel_supports_pt):
+	Use safe_strerror() instead of strerror().
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* features/arm-with-m-fpa-layout.xml: Set architecture to arm.
+	* features/arm-with-m-fpa-layout.c: Regenerated.
+	* features/arm-with-m-vfp-d16.xml: Likewise.
+	* features/arm-with-m-vfp-d16.c: Regenerated.
+	* features/arm-with-m.xml: Likewise.
+	* features/arm-with-m.c: Regenerated.
+	* features/arm-with-neon.xml: Likewise.
+	* features/arm-with-neon.c: Regenerated.
+	* features/arm-with-vfpv2.xml: Likewise.
+	* features/arm-with-vfpv2.c: Regenerated.
+	* features/arm-with-vfpv3.xml: Likewise.
+	* features/arm-with-vfpv3.c: Regenerated.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.h (VFP_REGS_SIZE): New macro, moved from
+	arm-linux-nat.c.
+	* aarch64-linux-nat.c: Include aarch32-linux-nat.h and
+	elf/external.h.
+	(fetch_gregs_from_thread): Call aarch32_gp_regcache_supply
+	if target is 32-bit.
+	(store_gregs_to_thread): Call aarch32_gp_regcache_collect
+	if target is 32-bit.
+	(fetch_fpregs_from_thread): Call aarch32_vfp_regcache_supply
+	if target is 32-bit.
+	(store_fpregs_to_thread): Call aarch32_vfp_regcache_collect
+	if target is 32-bit.
+	(tdesc_arm_with_vfpv3, tdesc_arm_with_neon): Declare.
+	(aarch64_linux_read_description): Return the right target
+	description.
+	* arm-linux-nat.c (VFP_REGS_SIZE): Moved to aarch32-linux-nat.h.
+	* config/aarch64/linux.mh (NATDEPFILES): Add aarch32-linux-nat.o.
+	* configure.tgt (aarch64*-*-linux*): Add arm-tdep.o and
+	arm-linux-tdep.o.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c: New file.
+	* aarch32-linux-nat.h: New file.
+	* arm-linux-nat.c: Include aarch32-linux-nat.h.
+	(fetch_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_gp_regcache_supply.
+	(store_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_gp_regcache_collect.
+	(fetch_vfp_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_vfp_regcache_supply.
+	(store_vfp_regs): Move code to aarch32-linux-nat.c.  Call
+	aarch32_vfp_regcache_collect.
+	* config/arm/linux.mh (NATDEPFILES): Add aarch32-linux-nat.o.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (store_fpregister): Remove.
+	(store_register): Likewise.
+	(fetch_fpregister): Likewise.
+	(fetch_register): Likewise.
+	(arm_linux_store_inferior_registers): Call store_regs and
+	store_fpregs instead.
+	(arm_linux_fetch_inferior_registers): Call fetch_fpregs and
+	fetch_regs instead.
+
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (TUI): Restructure documentation on TUI layout
+	and focus commands.
+
 2015-07-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

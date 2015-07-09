@@ -15,7 +15,7 @@
 
 # Test PC adjustment from Thumb-mode "bx pc" instruction.
 
-if {![istarget arm*-*]} then {
+if {![is_aarch32_target]} then {
     verbose "Skipping ARM tests."
     return
 }

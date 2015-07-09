@@ -674,12 +674,12 @@ foreach firstfpabi [list 0 1 2 3 4 5 6 7 ] {
   }
 }
 foreach firstfpabi [list 4 5 6 7 ] {
-  foreach secondfpabi [list 0 1 2 3 8] {
+  foreach secondfpabi [list 0 1 2 3 8 9] {
     run_dump_test "attr-gnu-4-${firstfpabi}${secondfpabi}" $o32flagslist
   }
 }
 foreach firstfpabi [list 0 1 2 3 ] {
-  foreach secondfpabi [list 0 1 2 3 8] {
+  foreach secondfpabi [list 0 1 2 3 8 9] {
     run_dump_test "attr-gnu-4-${firstfpabi}${secondfpabi}"
   }
 }

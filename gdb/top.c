@@ -221,11 +221,6 @@ void (*deprecated_detach_hook) (void);
 
 void (*deprecated_interactive_hook) (void);
 
-/* Tell the GUI someone changed the register REGNO.  -1 means
-   that the caller does not know which register changed or
-   that several registers have changed (see value_assign).  */
-void (*deprecated_register_changed_hook) (int regno);
-
 /* Called when going to wait for the target.  Usually allows the GUI
    to run while waiting for target events.  */
 

@@ -1,3 +1,9 @@
+2015-07-09  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_regmap): Remove.
+	(aarch64_usrregs_info): Remove.
+	(regs_info): Set field usrregs to NULL.
+
 2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* linux-low.c: Include "rsp-low.h"

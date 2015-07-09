@@ -1,3 +1,19 @@
+2015-07-09  Catherine Moore  <clm@codesourcery.com>
+
+        * config/tc-mips.c (check_fpabi):  Handle
+        VAL_GNU_MIPS_ABI_FP_NAN2008.
+
+2015-07-08  Ciro Santilli  <ciro.santilli@gmail.com>
+
+	* doc/as.texinfo: Clarify case requirements for pseudo ops.
+
+2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
+
+	* config/tc-avr.c (tc_gen_reloc): Change 32 bit relocation to
+	32 bit PC relative and update offset if the fixup is pc-relative.
+	* config/tc-avr.h (DIFF_EXPR_OK): Define to enable PC relative diff
+	relocs.
+
 2015-07-03  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_show_usage): Add -m821, -m850, -m860.

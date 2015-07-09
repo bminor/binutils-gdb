@@ -29,6 +29,7 @@
 
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
+#include "aarch32-linux-nat.h"
 
 #include <elf/common.h>
 #include <sys/user.h>
@@ -82,47 +83,6 @@ get_thread_id (ptid_t ptid)
 
 #define GET_THREAD_ID(PTID)	get_thread_id (PTID)
 
-/* Get the value of a particular register from the floating point
-   state of the process and store it into regcache.  */
-
-static void
-fetch_fpregister (struct regcache *regcache, int regno)
-{
-  int ret, tid;
-  gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
-
-  /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
-
-  /* Read the floating point state.  */
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    {
-      struct iovec iov;
-
-      iov.iov_base = &fp;
-      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
-
-      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iov);
-    }
-  else
-    ret = ptrace (PT_GETFPREGS, tid, 0, fp);
-
-  if (ret < 0)
-    {
-      warning (_("Unable to fetch floating point register."));
-      return;
-    }
-
-  /* Fetch fpsr.  */
-  if (ARM_FPS_REGNUM == regno)
-    regcache_raw_supply (regcache, ARM_FPS_REGNUM,
-			 fp + NWFPE_FPSR_OFFSET);
-
-  /* Fetch the floating point register.  */
-  if (regno >= ARM_F0_REGNUM && regno <= ARM_F7_REGNUM)
-    supply_nwfpe_register (regcache, regno, fp);
-}
-
 /* Get the whole floating point state of the process and store it
    into regcache.  */
 
@@ -161,65 +121,6 @@ fetch_fpregs (struct regcache *regcache)
   /* Fetch the floating point registers.  */
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
     supply_nwfpe_register (regcache, regno, fp);
-}
-
-/* Save a particular register into the floating point state of the
-   process using the contents from regcache.  */
-
-static void
-store_fpregister (const struct regcache *regcache, int regno)
-{
-  int ret, tid;
-  gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
-
-  /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
-
-  /* Read the floating point state.  */
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    {
-      struct iovec iov;
-
-      iov.iov_base = &fp;
-      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
-
-      ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iov);
-    }
-  else
-    ret = ptrace (PT_GETFPREGS, tid, 0, fp);
-
-  if (ret < 0)
-    {
-      warning (_("Unable to fetch the floating point registers."));
-      return;
-    }
-
-  /* Store fpsr.  */
-  if (ARM_FPS_REGNUM == regno
-      && REG_VALID == regcache_register_status (regcache, ARM_FPS_REGNUM))
-    regcache_raw_collect (regcache, ARM_FPS_REGNUM, fp + NWFPE_FPSR_OFFSET);
-
-  /* Store the floating point register.  */
-  if (regno >= ARM_F0_REGNUM && regno <= ARM_F7_REGNUM)
-    collect_nwfpe_register (regcache, regno, fp);
-
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    {
-      struct iovec iov;
-
-      iov.iov_base = &fp;
-      iov.iov_len = ARM_LINUX_SIZEOF_NWFPE;
-
-      ret = ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, &iov);
-    }
-  else
-    ret = ptrace (PTRACE_SETFPREGS, tid, 0, fp);
-
-  if (ret < 0)
-    {
-      warning (_("Unable to store floating point register."));
-      return;
-    }
 }
 
 /* Save the whole floating point state of the process using
@@ -282,59 +183,6 @@ store_fpregs (const struct regcache *regcache)
     }
 }
 
-/* Fetch a general register of the process and store into
-   regcache.  */
-
-static void
-fetch_register (struct regcache *regcache, int regno)
-{
-  int ret, tid;
-  elf_gregset_t regs;
-
-  /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
-
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    {
-      struct iovec iov;
-
-      iov.iov_base = &regs;
-      iov.iov_len = sizeof (regs);
-
-      ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov);
-    }
-  else
-    ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
-
-  if (ret < 0)
-    {
-      warning (_("Unable to fetch general register."));
-      return;
-    }
-
-  if (regno >= ARM_A1_REGNUM && regno < ARM_PC_REGNUM)
-    regcache_raw_supply (regcache, regno, (char *) &regs[regno]);
-
-  if (ARM_PS_REGNUM == regno)
-    {
-      if (arm_apcs_32)
-        regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			     (char *) &regs[ARM_CPSR_GREGNUM]);
-      else
-        regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			     (char *) &regs[ARM_PC_REGNUM]);
-    }
-    
-  if (ARM_PC_REGNUM == regno)
-    { 
-      regs[ARM_PC_REGNUM] = gdbarch_addr_bits_remove
-			      (get_regcache_arch (regcache),
-			       regs[ARM_PC_REGNUM]);
-      regcache_raw_supply (regcache, ARM_PC_REGNUM,
-			   (char *) &regs[ARM_PC_REGNUM]);
-    }
-}
-
 /* Fetch all general registers of the process and store into
    regcache.  */
 
@@ -365,82 +213,7 @@ fetch_regs (struct regcache *regcache)
       return;
     }
 
-  for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno, (char *) &regs[regno]);
-
-  if (arm_apcs_32)
-    regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_CPSR_GREGNUM]);
-  else
-    regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_PC_REGNUM]);
-
-  regs[ARM_PC_REGNUM] = gdbarch_addr_bits_remove
-			  (get_regcache_arch (regcache), regs[ARM_PC_REGNUM]);
-  regcache_raw_supply (regcache, ARM_PC_REGNUM,
-		       (char *) &regs[ARM_PC_REGNUM]);
-}
-
-/* Store all general registers of the process from the values in
-   regcache.  */
-
-static void
-store_register (const struct regcache *regcache, int regno)
-{
-  int ret, tid;
-  elf_gregset_t regs;
-  
-  if (REG_VALID != regcache_register_status (regcache, regno))
-    return;
-
-  /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
-
-  /* Get the general registers from the process.  */
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    {
-      struct iovec iov;
-
-      iov.iov_base = &regs;
-      iov.iov_len = sizeof (regs);
-
-      ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov);
-    }
-  else
-    ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
-
-  if (ret < 0)
-    {
-      warning (_("Unable to fetch general registers."));
-      return;
-    }
-
-  if (regno >= ARM_A1_REGNUM && regno <= ARM_PC_REGNUM)
-    regcache_raw_collect (regcache, regno, (char *) &regs[regno]);
-  else if (arm_apcs_32 && regno == ARM_PS_REGNUM)
-    regcache_raw_collect (regcache, regno,
-			 (char *) &regs[ARM_CPSR_GREGNUM]);
-  else if (!arm_apcs_32 && regno == ARM_PS_REGNUM)
-    regcache_raw_collect (regcache, ARM_PC_REGNUM,
-			 (char *) &regs[ARM_PC_REGNUM]);
-
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    {
-      struct iovec iov;
-
-      iov.iov_base = &regs;
-      iov.iov_len = sizeof (regs);
-
-      ret = ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS, &iov);
-    }
-  else
-    ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
-
-  if (ret < 0)
-    {
-      warning (_("Unable to store general register."));
-      return;
-    }
+  aarch32_gp_regcache_supply (regcache, (uint32_t *) regs, arm_apcs_32);
 }
 
 static void
@@ -471,15 +244,7 @@ store_regs (const struct regcache *regcache)
       return;
     }
 
-  for (regno = ARM_A1_REGNUM; regno <= ARM_PC_REGNUM; regno++)
-    {
-      if (REG_VALID == regcache_register_status (regcache, regno))
-	regcache_raw_collect (regcache, regno, (char *) &regs[regno]);
-    }
-
-  if (arm_apcs_32 && REG_VALID == regcache_register_status (regcache, ARM_PS_REGNUM))
-    regcache_raw_collect (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_CPSR_GREGNUM]);
+  aarch32_gp_regcache_collect (regcache, (uint32_t *) regs, arm_apcs_32);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -577,15 +342,10 @@ store_wmmx_regs (const struct regcache *regcache)
     }
 }
 
-/* Fetch and store VFP Registers.  The kernel object has space for 32
-   64-bit registers, and the FPSCR.  This is even when on a VFPv2 or
-   VFPv3D16 target.  */
-#define VFP_REGS_SIZE (32 * 8 + 4)
-
 static void
 fetch_vfp_regs (struct regcache *regcache)
 {
-  char regbuf[VFP_REGS_SIZE];
+  gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -610,18 +370,14 @@ fetch_vfp_regs (struct regcache *regcache)
       return;
     }
 
-  for (regno = 0; regno < tdep->vfp_register_count; regno++)
-    regcache_raw_supply (regcache, regno + ARM_D0_REGNUM,
-			 (char *) regbuf + regno * 8);
-
-  regcache_raw_supply (regcache, ARM_FPSCR_REGNUM,
-		       (char *) regbuf + 32 * 8);
+  aarch32_vfp_regcache_supply (regcache, regbuf,
+			       tdep->vfp_register_count);
 }
 
 static void
 store_vfp_regs (const struct regcache *regcache)
 {
-  char regbuf[VFP_REGS_SIZE];
+  gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -646,12 +402,8 @@ store_vfp_regs (const struct regcache *regcache)
       return;
     }
 
-  for (regno = 0; regno < tdep->vfp_register_count; regno++)
-    regcache_raw_collect (regcache, regno + ARM_D0_REGNUM,
-			  (char *) regbuf + regno * 8);
-
-  regcache_raw_collect (regcache, ARM_FPSCR_REGNUM,
-			(char *) regbuf + 32 * 8);
+  aarch32_vfp_regcache_collect (regcache, regbuf,
+				tdep->vfp_register_count);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -694,9 +446,9 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
   else 
     {
       if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
-        fetch_register (regcache, regno);
+	fetch_regs (regcache);
       else if (regno >= ARM_F0_REGNUM && regno <= ARM_FPS_REGNUM)
-        fetch_fpregister (regcache, regno);
+	fetch_fpregs (regcache);
       else if (tdep->have_wmmx_registers
 	       && regno >= ARM_WR0_REGNUM && regno <= ARM_WCGR7_REGNUM)
 	fetch_wmmx_regs (regcache);
@@ -730,9 +482,9 @@ arm_linux_store_inferior_registers (struct target_ops *ops,
   else
     {
       if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
-        store_register (regcache, regno);
+	store_regs (regcache);
       else if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
-        store_fpregister (regcache, regno);
+	store_fpregs (regcache);
       else if (tdep->have_wmmx_registers
 	       && regno >= ARM_WR0_REGNUM && regno <= ARM_WCGR7_REGNUM)
 	store_wmmx_regs (regcache);

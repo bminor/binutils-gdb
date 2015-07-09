@@ -7320,22 +7320,14 @@ Select frame number @var{n}.  Recall that frame zero is the innermost
 innermost one, and so on.  The highest-numbered frame is the one for
 @code{main}.
 
-@item frame @var{addr}
-@itemx f @var{addr}
-Select the frame at address @var{addr}.  This is useful mainly if the
+@item frame @var{stack-addr} [ @var{pc-addr} ]
+@itemx f @var{stack-addr} [ @var{pc-addr} ]
+Select the frame at address @var{stack-addr}.  This is useful mainly if the
 chaining of stack frames has been damaged by a bug, making it
 impossible for @value{GDBN} to assign numbers properly to all frames.  In
 addition, this can be useful when your program has multiple stacks and
-switches between them.
-
-On the SPARC architecture, @code{frame} needs two addresses to
-select an arbitrary frame: a frame pointer and a stack pointer.
-
-On the @acronym{MIPS} and Alpha architecture, it needs two addresses: a stack
-pointer and a program counter.
-
-On the 29k architecture, it needs three addresses: a register stack
-pointer, a program counter, and a memory stack pointer.
+switches between them.  The optional @var{pc-addr} can also be given to
+specify the value of PC for the stack frame.
 
 @kindex up
 @item up @var{n}
@@ -25070,43 +25062,58 @@ Disable TUI mode, returning to the console interpreter.
 @kindex info win
 List and give the size of all displayed windows.
 
-@item layout next
+@item layout @var{name}
 @kindex layout
+Changes which TUI windows are displayed.  In each layout the command
+window is always displayed, the @var{name} parameter controls which
+additional windows are displayed, and can be any of the following:
+
+@table @code
+@item next
 Display the next layout.
 
-@item layout prev
+@item prev
 Display the previous layout.
 
-@item layout src
-Display the source window only.
+@item src
+Display the source and command windows.
 
-@item layout asm
-Display the assembly window only.
+@item asm
+Display the assembly and command windows.
 
-@item layout split
-Display the source and assembly window.
+@item split
+Display the source, assembly, and command windows.
 
-@item layout regs
-Display the register window together with the source or assembly window.
+@item regs
+When in @code{src} layout display the register, source, and command
+windows.  When in @code{asm} or @code{split} layout display the
+register, assembler, and command windows.
+@end table
 
-@item focus next
+@item focus @var{name}
 @kindex focus
+Changes which TUI window is currently active for scrolling.  The
+@var{name} parameter can be any of the following:
+
+@table @code
+@item next
 Make the next window active for scrolling.
 
-@item focus prev
+@item prev
 Make the previous window active for scrolling.
 
-@item focus src
+@item src
 Make the source window active for scrolling.
 
-@item focus asm
+@item asm
 Make the assembly window active for scrolling.
 
-@item focus regs
+@item regs
 Make the register window active for scrolling.
 
-@item focus cmd
+@item cmd
 Make the command window active for scrolling.
+@end table
 
 @item refresh
 @kindex refresh

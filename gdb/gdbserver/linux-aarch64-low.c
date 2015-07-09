@@ -51,28 +51,6 @@ extern const struct target_desc *tdesc_aarch64;
 
 #define AARCH64_NUM_REGS (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM + 2)
 
-static int
-aarch64_regmap [] =
-{
-  /* These offsets correspond to GET/SETREGSET */
-  /* x0...  */
-   0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
-   8*8,  9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8,
-  16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
-  24*8, 25*8, 26*8, 27*8, 28*8,
-  29*8,
-  30*8,				/* x30 lr */
-  31*8,				/* x31 sp */
-  32*8,				/*     pc */
-  33*8,				/*     cpsr    4 bytes!*/
-
-  /* FP register offsets correspond to GET/SETFPREGSET */
-   0*16,  1*16,  2*16,  3*16,  4*16,  5*16,  6*16,  7*16,
-   8*16,  9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
-  16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
-  24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16
-};
-
 /* Here starts the macro definitions, data structures, and code for
    the hardware breakpoint and hardware watchpoint support.  The
    following is the abbreviations that are used frequently in the code
@@ -1285,16 +1263,10 @@ static struct regsets_info aarch64_regsets_info =
     NULL, /* disabled_regsets */
   };
 
-static struct usrregs_info aarch64_usrregs_info =
-  {
-    AARCH64_NUM_REGS,
-    aarch64_regmap,
-  };
-
 static struct regs_info regs_info =
   {
     NULL, /* regset_bitmap */
-    &aarch64_usrregs_info,
+    NULL, /* usrregs */
     &aarch64_regsets_info,
   };
 
@@ -1302,6 +1274,14 @@ static const struct regs_info *
 aarch64_regs_info (void)
 {
   return &regs_info;
+}
+
+/* Implementation of linux_target_ops method "supports_tracepoints".  */
+
+static int
+aarch64_supports_tracepoints (void)
+{
+  return 1;
 }
 
 struct linux_target_ops the_low_target =
@@ -1330,6 +1310,8 @@ struct linux_target_ops the_low_target =
   aarch64_linux_new_thread,
   aarch64_linux_new_fork,
   aarch64_linux_prepare_to_resume,
+  NULL,
+  aarch64_supports_tracepoints,
 };
 
 void

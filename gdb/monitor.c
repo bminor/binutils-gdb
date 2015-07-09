@@ -853,8 +853,7 @@ monitor_close (struct target_ops *self)
 
   monitor_desc = NULL;
 
-  delete_thread_silent (monitor_ptid);
-  delete_inferior_silent (ptid_get_pid (monitor_ptid));
+  discard_all_inferiors ();
 }
 
 /* Terminate the open connection to the remote debugger.  Use this

@@ -1,3 +1,59 @@
+2015-07-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR compile/18484
+	* gdb.compile/compile.c (struct struct_type): Add volatile to
+	selffield's type.
+	* gdb.compile/compile.exp
+	(compile code struct_object.selffield = &struct_object): Skip further
+	struct_object tests if this one xfails.
+
+2015-07-08  Robert O'Callahan  <robert@ocallahan.org>
+
+	PR exp/18617
+	* gdb.trace/ax.exp: Add test.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/aarch64-atomic-inst.exp: Check is_aarch64_target
+	instead of istarget "aarch64*-*-*".
+	* gdb.arch/aarch64-fp.exp: Likewise.
+	* gdb.base/float.exp: Likewise.
+	* gdb.reverse/aarch64.exp: Likewise.
+	* lib/gdb.exp (is_aarch64_target): New proc.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (is_aarch32_target): New proc.
+	* gdb.arch/arm-bl-branch-dest.exp: Check is_aarch32_target
+	instead of "istarget "arm*-*-*"".
+	* gdb.arch/arm-disp-step.exp: Likewise.
+	* gdb.arch/thumb-bx-pc.exp: Likewise.
+	* gdb.arch/thumb-prologue.exp: Likewise.
+	* gdb.arch/thumb-singlestep.exp: Likewise.
+	* gdb.base/disp-step-syscall.exp: Likewise.
+	* gdb.base/float.exp: Likewise.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.exp (test_catch_syscall_multi_arch):
+	Set arch1, arch2, syscall1_name, syscall2_name and syscall_number.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.multi/multi-arch-exec.exp: Set march1 and march2 to "" if target
+	is aarch64.  If target is aarch64, set compiler=${ARM_CC_FOR_TARGET}
+	if it exists.
+	* gdb.multi/multi-arch.exp: Likewise.
+
+2015-07-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-lazy-string.exp: Add missing parentheses to
+	print.
+
+2015-07-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/thumb-singlestep.exp: Do one more single step.
+
 2015-06-30  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* lib/gdb.exp (test_class_help): Remove the unneeded escaping of

@@ -370,7 +370,7 @@ kernel_supports_bts (void)
   switch (child)
     {
     case -1:
-      warning (_("test bts: cannot fork: %s."), strerror (errno));
+      warning (_("test bts: cannot fork: %s."), safe_strerror (errno));
       return 0;
 
     case 0:
@@ -378,7 +378,7 @@ kernel_supports_bts (void)
       if (status != 0)
 	{
 	  warning (_("test bts: cannot PTRACE_TRACEME: %s."),
-		   strerror (errno));
+		   safe_strerror (errno));
 	  _exit (1);
 	}
 
@@ -386,7 +386,7 @@ kernel_supports_bts (void)
       if (status != 0)
 	{
 	  warning (_("test bts: cannot raise SIGTRAP: %s."),
-		   strerror (errno));
+		   safe_strerror (errno));
 	  _exit (1);
 	}
 
@@ -397,7 +397,7 @@ kernel_supports_bts (void)
       if (pid != child)
 	{
 	  warning (_("test bts: bad pid %ld, error: %s."),
-		   (long) pid, strerror (errno));
+		   (long) pid, safe_strerror (errno));
 	  return 0;
 	}
 
@@ -429,7 +429,7 @@ kernel_supports_bts (void)
       if (pid != child)
 	{
 	  warning (_("test bts: bad pid %ld, error: %s."),
-		   (long) pid, strerror (errno));
+		   (long) pid, safe_strerror (errno));
 	  if (!WIFSIGNALED (status))
 	    warning (_("test bts: expected killed. status: %d."),
 		     status);
@@ -453,7 +453,7 @@ kernel_supports_pt (void)
   switch (child)
     {
     case -1:
-      warning (_("test pt: cannot fork: %s."), strerror (errno));
+      warning (_("test pt: cannot fork: %s."), safe_strerror (errno));
       return 0;
 
     case 0:
@@ -461,7 +461,7 @@ kernel_supports_pt (void)
       if (status != 0)
 	{
 	  warning (_("test pt: cannot PTRACE_TRACEME: %s."),
-		   strerror (errno));
+		   safe_strerror (errno));
 	  _exit (1);
 	}
 
@@ -469,7 +469,7 @@ kernel_supports_pt (void)
       if (status != 0)
 	{
 	  warning (_("test pt: cannot raise SIGTRAP: %s."),
-		   strerror (errno));
+		   safe_strerror (errno));
 	  _exit (1);
 	}
 
@@ -480,7 +480,7 @@ kernel_supports_pt (void)
       if (pid != child)
 	{
 	  warning (_("test pt: bad pid %ld, error: %s."),
-		   (long) pid, strerror (errno));
+		   (long) pid, safe_strerror (errno));
 	  return 0;
 	}
 
@@ -516,7 +516,7 @@ kernel_supports_pt (void)
       if (pid != child)
 	{
 	  warning (_("test pt: bad pid %ld, error: %s."),
-		   (long) pid, strerror (errno));
+		   (long) pid, safe_strerror (errno));
 	  if (!WIFSIGNALED (status))
 	    warning (_("test pt: expected killed. status: %d."),
 		     status);

@@ -13197,6 +13197,9 @@ print_mips_fp_abi_value (int val)
     case Val_GNU_MIPS_ABI_FP_64A:
       printf (_("Hard float compat (32-bit CPU, 64-bit FPU)\n"));
       break;
+    case Val_GNU_MIPS_ABI_FP_NAN2008:
+      printf (_("NaN 2008 compatibility\n"));
+      break;
     default:
       printf ("??? (%d)\n", val);
       break;

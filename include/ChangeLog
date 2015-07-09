@@ -1,3 +1,11 @@
+2015-07-09  Catherine Moore  <clm@codesourcery.com>
+
+        * elf/mips/mips.h (Val_GNU_MIPS_ABI_FP_NAN2008): New.
+
+2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
+
+	* elf/avr.h: Add new 32 bit PC relative relocation.
+
 2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elf/mips.h (DT_MIPS_RLD_MAP_REL): New macro.

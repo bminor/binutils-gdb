@@ -19,7 +19,7 @@ if ![supports_reverse] {
 
 # Test aarch64 instruction recording.
 
-if {![istarget "aarch64*-*-*"]} then {
+if {![is_aarch64_target]} then {
     verbose "Skipping aarch64 instruction recording tests."
     return
 }

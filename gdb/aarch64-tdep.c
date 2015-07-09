@@ -42,6 +42,8 @@
 #include "user-regs.h"
 #include "language.h"
 #include "infcall.h"
+#include "ax.h"
+#include "ax-gdb.h"
 
 #include "aarch64-tdep.h"
 
@@ -148,10 +150,22 @@ static const char *const aarch64_v_register_names[] =
 /* AArch64 prologue cache structure.  */
 struct aarch64_prologue_cache
 {
+  /* The program counter at the start of the function.  It is used to
+     identify this frame as a prologue frame.  */
+  CORE_ADDR func;
+
+  /* The program counter at the time this frame was created; i.e. where
+     this function was called from.  It is used to identify this frame as a
+     stub frame.  */
+  CORE_ADDR prev_pc;
+
   /* The stack pointer at the time this frame was created; i.e. the
      caller's stack pointer when this function was called.  It is used
      to identify this frame.  */
   CORE_ADDR prev_sp;
+
+  /* Is the target available to read from?  */
+  int available_p;
 
   /* The frame base for this frame is just prev_sp - frame size.
      FRAMESIZE is the distance from the frame pointer to the
@@ -889,6 +903,8 @@ aarch64_scan_prologue (struct frame_info *this_frame,
   CORE_ADDR prev_pc = get_frame_pc (this_frame);
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
+  cache->prev_pc = prev_pc;
+
   /* Assume we do not find a frame.  */
   cache->framereg = -1;
   cache->framesize = 0;
@@ -930,27 +946,25 @@ aarch64_scan_prologue (struct frame_info *this_frame,
     }
 }
 
-/* Allocate an aarch64_prologue_cache and fill it with information
-   about the prologue of *THIS_FRAME.  */
+/* Fill in *CACHE with information about the prologue of *THIS_FRAME.  This
+   function may throw an exception if the inferior's registers or memory is
+   not available.  */
 
-static struct aarch64_prologue_cache *
-aarch64_make_prologue_cache (struct frame_info *this_frame)
+static void
+aarch64_make_prologue_cache_1 (struct frame_info *this_frame,
+			       struct aarch64_prologue_cache *cache)
 {
-  struct aarch64_prologue_cache *cache;
   CORE_ADDR unwound_fp;
   int reg;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
-  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   aarch64_scan_prologue (this_frame, cache);
 
   if (cache->framereg == -1)
-    return cache;
+    return;
 
   unwound_fp = get_frame_register_unsigned (this_frame, cache->framereg);
   if (unwound_fp == 0)
-    return cache;
+    return;
 
   cache->prev_sp = unwound_fp + cache->framesize;
 
@@ -960,7 +974,63 @@ aarch64_make_prologue_cache (struct frame_info *this_frame)
     if (trad_frame_addr_p (cache->saved_regs, reg))
       cache->saved_regs[reg].addr += cache->prev_sp;
 
+  cache->func = get_frame_func (this_frame);
+
+  cache->available_p = 1;
+}
+
+/* Allocate and fill in *THIS_CACHE with information about the prologue of
+   *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
+   Return a pointer to the current aarch64_prologue_cache in
+   *THIS_CACHE.  */
+
+static struct aarch64_prologue_cache *
+aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
+{
+  struct aarch64_prologue_cache *cache;
+
+  if (*this_cache != NULL)
+    return *this_cache;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+  *this_cache = cache;
+
+  TRY
+    {
+      aarch64_make_prologue_cache_1 (this_frame, cache);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
+
   return cache;
+}
+
+/* Implement the "stop_reason" frame_unwind method.  */
+
+static enum unwind_stop_reason
+aarch64_prologue_frame_unwind_stop_reason (struct frame_info *this_frame,
+					   void **this_cache)
+{
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
+
+  if (!cache->available_p)
+    return UNWIND_UNAVAILABLE;
+
+  /* Halt the backtrace at "_start".  */
+  if (cache->prev_pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
+    return UNWIND_OUTERMOST;
+
+  /* We've hit a wall, stop.  */
+  if (cache->prev_sp == 0)
+    return UNWIND_OUTERMOST;
+
+  return UNWIND_NO_REASON;
 }
 
 /* Our frame ID for a normal frame is the current function's starting
@@ -970,26 +1040,13 @@ static void
 aarch64_prologue_this_id (struct frame_info *this_frame,
 			  void **this_cache, struct frame_id *this_id)
 {
-  struct aarch64_prologue_cache *cache;
-  struct frame_id id;
-  CORE_ADDR pc, func;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
 
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_prologue_cache (this_frame);
-  cache = *this_cache;
-
-  /* This is meant to halt the backtrace at "_start".  */
-  pc = get_frame_pc (this_frame);
-  if (pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
-    return;
-
-  /* If we've hit a wall, stop.  */
-  if (cache->prev_sp == 0)
-    return;
-
-  func = get_frame_func (this_frame);
-  id = frame_id_build (cache->prev_sp, func);
-  *this_id = id;
+  if (!cache->available_p)
+    *this_id = frame_id_build_unavailable_stack (cache->func);
+  else
+    *this_id = frame_id_build (cache->prev_sp, cache->func);
 }
 
 /* Implement the "prev_register" frame_unwind method.  */
@@ -999,11 +1056,8 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 				void **this_cache, int prev_regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct aarch64_prologue_cache *cache;
-
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
 
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
@@ -1043,30 +1097,60 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 struct frame_unwind aarch64_prologue_unwind =
 {
   NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
+  aarch64_prologue_frame_unwind_stop_reason,
   aarch64_prologue_this_id,
   aarch64_prologue_prev_register,
   NULL,
   default_frame_sniffer
 };
 
-/* Allocate an aarch64_prologue_cache and fill it with information
-   about the prologue of *THIS_FRAME.  */
+/* Allocate and fill in *THIS_CACHE with information about the prologue of
+   *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
+   Return a pointer to the current aarch64_prologue_cache in
+   *THIS_CACHE.  */
 
 static struct aarch64_prologue_cache *
-aarch64_make_stub_cache (struct frame_info *this_frame)
+aarch64_make_stub_cache (struct frame_info *this_frame, void **this_cache)
 {
-  int reg;
   struct aarch64_prologue_cache *cache;
-  CORE_ADDR unwound_fp;
+
+  if (*this_cache != NULL)
+    return *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+  *this_cache = cache;
 
-  cache->prev_sp
-    = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
+  TRY
+    {
+      cache->prev_sp = get_frame_register_unsigned (this_frame,
+						    AARCH64_SP_REGNUM);
+      cache->prev_pc = get_frame_pc (this_frame);
+      cache->available_p = 1;
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
 
   return cache;
+}
+
+/* Implement the "stop_reason" frame_unwind method.  */
+
+static enum unwind_stop_reason
+aarch64_stub_frame_unwind_stop_reason (struct frame_info *this_frame,
+				       void **this_cache)
+{
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_stub_cache (this_frame, this_cache);
+
+  if (!cache->available_p)
+    return UNWIND_UNAVAILABLE;
+
+  return UNWIND_NO_REASON;
 }
 
 /* Our frame ID for a stub frame is the current SP and LR.  */
@@ -1075,13 +1159,13 @@ static void
 aarch64_stub_this_id (struct frame_info *this_frame,
 		      void **this_cache, struct frame_id *this_id)
 {
-  struct aarch64_prologue_cache *cache;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_stub_cache (this_frame, this_cache);
 
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_stub_cache (this_frame);
-  cache = *this_cache;
-
-  *this_id = frame_id_build (cache->prev_sp, get_frame_pc (this_frame));
+  if (cache->available_p)
+    *this_id = frame_id_build (cache->prev_sp, cache->prev_pc);
+  else
+    *this_id = frame_id_build_unavailable_stack (cache->prev_pc);
 }
 
 /* Implement the "sniffer" frame_unwind method.  */
@@ -1108,7 +1192,7 @@ aarch64_stub_unwind_sniffer (const struct frame_unwind *self,
 struct frame_unwind aarch64_stub_unwind =
 {
   NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
+  aarch64_stub_frame_unwind_stop_reason,
   aarch64_stub_this_id,
   aarch64_prologue_prev_register,
   NULL,
@@ -1120,11 +1204,8 @@ struct frame_unwind aarch64_stub_unwind =
 static CORE_ADDR
 aarch64_normal_frame_base (struct frame_info *this_frame, void **this_cache)
 {
-  struct aarch64_prologue_cache *cache;
-
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
 
   return cache->prev_sp - cache->framesize;
 }
@@ -2194,6 +2275,18 @@ aarch64_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   *pc = extract_unsigned_integer (buf, X_REGISTER_SIZE, byte_order);
   return 1;
 }
+
+/* Implement the "gen_return_address" gdbarch method.  */
+
+static void
+aarch64_gen_return_address (struct gdbarch *gdbarch,
+			    struct agent_expr *ax, struct axs_value *value,
+			    CORE_ADDR scope)
+{
+  value->type = register_type (gdbarch, AARCH64_LR_REGNUM);
+  value->kind = axs_lvalue_register;
+  value->u.reg = AARCH64_LR_REGNUM;
+}
 
 
 /* Return the pseudo register name corresponding to register regnum.  */
@@ -2762,6 +2855,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, aarch64_get_longjmp_target);
+
+  set_gdbarch_gen_return_address (gdbarch, aarch64_gen_return_address);
 
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 

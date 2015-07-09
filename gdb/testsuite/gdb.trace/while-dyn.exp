@@ -47,6 +47,8 @@ if [is_amd64_regs_target] {
     set fpreg "\$rbp"
 } elseif [is_x86_like_target] {
     set fpreg "\$ebp"
+} elseif [is_aarch64_target] {
+    set fpreg "\$x29"
 } else {
     set fpreg "\$fp"
 }

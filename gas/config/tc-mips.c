@@ -3797,6 +3797,10 @@ check_fpabi (int fpabi)
 	       Tag_GNU_MIPS_ABI_FP, fpabi);
       break;
 
+    case Val_GNU_MIPS_ABI_FP_NAN2008:
+      /* Silently ignore compatibility value.  */
+      break;
+
     default:
       as_warn (_(".gnu_attribute %d,%d is not a recognized"
 	         " floating-point ABI"), Tag_GNU_MIPS_ABI_FP, fpabi);

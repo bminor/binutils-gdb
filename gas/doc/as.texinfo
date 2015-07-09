@@ -4205,7 +4205,8 @@ address; you can only have a defined section in one of the two arguments.
 @cindex pseudo-ops, machine independent
 @cindex machine independent directives
 All assembler directives have names that begin with a period (@samp{.}).
-The rest of the name is letters, usually in lower case.
+The names are case insensitive for most targets, and usually written
+in lower case.
 
 This chapter discusses directives that are available regardless of the
 target machine configuration for the @sc{gnu} assembler.
