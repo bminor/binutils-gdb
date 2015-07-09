@@ -1,3 +1,8 @@
+2015-07-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (rx_get_opcode_byte): Use target_read_code instead
+	of target_read_memory.
+
 2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-win.c (tui_set_win_height): Use a cleanup to free the
