@@ -5957,14 +5957,14 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	}
     }
 
+  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
+    return FALSE;
+
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
   if (dynobj != NULL
       && bed->elf_backend_size_dynamic_sections != NULL
       && ! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
-    return FALSE;
-
-  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
     return FALSE;
 
   if (dynobj != NULL && elf_hash_table (info)->dynamic_sections_created)

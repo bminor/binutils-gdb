@@ -1,3 +1,9 @@
+2015-07-09  Catherine Moore  <clm@codesourcery.com>
+
+	* elflink.c (bfd_elf_size_dynamic_sections): Call to
+	_bfd_elf_maybe_strip_eh_frame_hdr should be before
+	bed->elf_backend_size_dynamic_sections.
+
 2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
 
 	* elf32-avr.c: Add 32 bit PC relative relocation for AVR target.
