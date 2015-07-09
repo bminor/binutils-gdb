@@ -838,16 +838,17 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Get the hardware debug register capacity information.  */
+/* Get the hardware debug register capacity information from the
+   inferior represented by PTID.  */
 
 static void
-aarch64_linux_get_debug_reg_capacity (void)
+aarch64_linux_get_debug_reg_capacity (ptid_t ptid)
 {
   int tid;
   struct iovec iov;
   struct user_hwdebug_state dreg_state;
 
-  tid = get_thread_id (inferior_ptid);
+  tid = get_thread_id (ptid);
   iov.iov_base = &dreg_state;
   iov.iov_len = sizeof (dreg_state);
 
@@ -902,7 +903,7 @@ aarch64_linux_child_post_startup_inferior (struct target_ops *self,
 					   ptid_t ptid)
 {
   aarch64_forget_process (ptid_get_pid (ptid));
-  aarch64_linux_get_debug_reg_capacity ();
+  aarch64_linux_get_debug_reg_capacity (ptid);
   super_post_startup_inferior (self, ptid);
 }
 
