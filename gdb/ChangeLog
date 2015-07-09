@@ -1,5 +1,11 @@
 2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* c-valprint.c (c_val_print): Factor out pointer printing code
+	to ...
+	(c_val_print_ptr): ... this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* c-valprint.c (c_valprint): Factor our array printing code from
 	c_val_print to ...
 	(c_val_print_array): ... this new function.

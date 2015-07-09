@@ -334,6 +334,42 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* c_val_print helper for TYPE_CODE_PTR.  */
+
+static void
+c_val_print_ptr (struct type *type, const gdb_byte *valaddr,
+		 int embedded_offset, struct ui_file *stream, int recurse,
+		 const struct value *original_value,
+		 const struct value_print_options *options)
+{
+  if (options->format && options->format != 's')
+    {
+      val_print_scalar_formatted (type, valaddr, embedded_offset,
+				  original_value, options, 0, stream);
+    }
+  else if (options->vtblprint && cp_is_vtbl_ptr_type (type))
+    {
+      /* Print the unmangled name if desired.  */
+      /* Print vtable entry - we only get here if we ARE using
+	 -fvtable_thunks.  (Otherwise, look under
+	 TYPE_CODE_STRUCT.)  */
+      CORE_ADDR addr
+	= extract_typed_address (valaddr + embedded_offset, type);
+      struct gdbarch *gdbarch = get_type_arch (type);
+
+      print_function_pointer_address (options, gdbarch, addr, stream);
+    }
+  else
+    {
+      struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+      struct type *elttype = check_typedef (unresolved_elttype);
+      CORE_ADDR addr = unpack_pointer (type, valaddr + embedded_offset);
+
+      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
+			      embedded_offset, addr, stream, recurse, options);
+    }
+}
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -345,9 +381,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	     const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  struct type *elttype, *unresolved_elttype;
   struct type *unresolved_type = type;
-  CORE_ADDR addr;
 
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -362,29 +396,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_PTR:
-      if (options->format && options->format != 's')
-	{
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, options, 0, stream);
-	  break;
-	}
-      if (options->vtblprint && cp_is_vtbl_ptr_type (type))
-	{
-	  /* Print the unmangled name if desired.  */
-	  /* Print vtable entry - we only get here if we ARE using
-	     -fvtable_thunks.  (Otherwise, look under
-	     TYPE_CODE_STRUCT.)  */
-	  CORE_ADDR addr
-	    = extract_typed_address (valaddr + embedded_offset, type);
-
-	  print_function_pointer_address (options, gdbarch, addr, stream);
-	  break;
-	}
-      unresolved_elttype = TYPE_TARGET_TYPE (type);
-      elttype = check_typedef (unresolved_elttype);
-      addr = unpack_pointer (type, valaddr + embedded_offset);
-      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
-			      embedded_offset, addr, stream, recurse, options);
+      c_val_print_ptr (type, valaddr, embedded_offset, stream, recurse,
+		       original_value, options);
       break;
 
     case TYPE_CODE_UNION:
