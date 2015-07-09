@@ -1119,11 +1119,36 @@ aarch64_make_stub_cache (struct frame_info *this_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 
-  cache->prev_sp
-    = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
-  cache->prev_pc = get_frame_pc (this_frame);
+  TRY
+    {
+      cache->prev_sp = get_frame_register_unsigned (this_frame,
+						    AARCH64_SP_REGNUM);
+      cache->prev_pc = get_frame_pc (this_frame);
+      cache->available_p = 1;
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
 
   return cache;
+}
+
+/* Implement the "stop_reason" frame_unwind method.  */
+
+static enum unwind_stop_reason
+aarch64_stub_frame_unwind_stop_reason (struct frame_info *this_frame,
+				       void **this_cache)
+{
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_stub_cache (this_frame, this_cache);
+
+  if (!cache->available_p)
+    return UNWIND_UNAVAILABLE;
+
+  return UNWIND_NO_REASON;
 }
 
 /* Our frame ID for a stub frame is the current SP and LR.  */
@@ -1135,7 +1160,10 @@ aarch64_stub_this_id (struct frame_info *this_frame,
   struct aarch64_prologue_cache *cache
     = aarch64_make_stub_cache (this_frame, this_cache);
 
-  *this_id = frame_id_build (cache->prev_sp, cache->prev_pc);
+  if (cache->available_p)
+    *this_id = frame_id_build (cache->prev_sp, cache->prev_pc);
+  else
+    *this_id = frame_id_build_unavailable_stack (cache->prev_pc);
 }
 
 /* Implement the "sniffer" frame_unwind method.  */
@@ -1162,7 +1190,7 @@ aarch64_stub_unwind_sniffer (const struct frame_unwind *self,
 struct frame_unwind aarch64_stub_unwind =
 {
   NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
+  aarch64_stub_frame_unwind_stop_reason,
   aarch64_stub_this_id,
   aarch64_prologue_prev_register,
   NULL,

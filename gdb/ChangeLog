@@ -1,5 +1,14 @@
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* aarch64-tdep.c (aarch64_make_stub_cache): Set available_p and
+	swallow NOT_AVAILABLE_ERROR.
+	(aarch64_stub_this_id): Call frame_id_build_unavailable_stack if
+	available_p is not set.
+	(aarch64_stub_frame_unwind_stop_reason): New function.
+	(aarch64_stub_unwind): Install it.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* aarch64-tdep.c (aarch64_prologue_cache) <available_p>: New
 	field.
 	(aarch64_make_prologue_cache_1): New function, factored out from
