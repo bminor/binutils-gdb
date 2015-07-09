@@ -139,7 +139,6 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  unsigned int i = 0;	/* Number of characters printed.  */
   unsigned len;
   struct type *elttype, *unresolved_elttype;
   struct type *unresolved_type = type;
@@ -149,6 +148,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
+    unsigned int i = 0;	/* Number of characters printed.  */
     case TYPE_CODE_ARRAY:
       unresolved_elttype = TYPE_TARGET_TYPE (type);
       elttype = check_typedef (unresolved_elttype);
@@ -300,9 +300,9 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	    {
 	      if (want_space)
 		fputs_filtered (" ", stream);
-	      i = val_print_string (unresolved_elttype, NULL,
-				    addr, -1,
-				    stream, options);
+	      val_print_string (unresolved_elttype, NULL,
+				addr, -1,
+				stream, options);
 	    }
 	  else if (cp_is_vtbl_member (type))
 	    {
