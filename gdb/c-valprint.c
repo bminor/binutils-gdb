@@ -127,6 +127,104 @@ static const struct generic_val_print_decorations c_decorations =
   "void"
 };
 
+/* Print a pointer based on the type of its target.
+
+   Arguments to this functions are roughly the same as those in c_val_print.
+   A difference is that ADDRESS is the address to print, with embedded_offset
+   already added.  UNRESOLVED_ELTTYPE and ELTTYPE represent the pointed type,
+   respectively before and after check_typedef.  */
+
+static void
+print_unpacked_pointer (struct type *type, struct type *elttype,
+			struct type *unresolved_elttype,
+			const gdb_byte *valaddr, int embedded_offset,
+			CORE_ADDR address, struct ui_file *stream, int recurse,
+			const struct value_print_options *options)
+{
+  int want_space = 0;
+  struct gdbarch *gdbarch = get_type_arch (type);
+
+  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+    {
+      /* Try to print what function it points to.  */
+      print_function_pointer_address (options, gdbarch, address, stream);
+      return;
+    }
+
+  if (options->symbol_print)
+    want_space = print_address_demangle (options, gdbarch, address, stream,
+					 demangle);
+  else if (options->addressprint)
+    {
+      fputs_filtered (paddress (gdbarch, address), stream);
+      want_space = 1;
+    }
+
+  /* For a pointer to a textual type, also print the string
+     pointed to, unless pointer is null.  */
+
+  if (c_textual_element_type (unresolved_elttype, options->format)
+      && address != 0)
+    {
+      if (want_space)
+	fputs_filtered (" ", stream);
+      val_print_string (unresolved_elttype, NULL, address, -1, stream, options);
+    }
+  else if (cp_is_vtbl_member (type))
+    {
+      /* Print vtbl's nicely.  */
+      CORE_ADDR vt_address = unpack_pointer (type, valaddr + embedded_offset);
+      struct bound_minimal_symbol msymbol =
+	lookup_minimal_symbol_by_pc (vt_address);
+
+      /* If 'symbol_print' is set, we did the work above.  */
+      if (!options->symbol_print
+	  && (msymbol.minsym != NULL)
+	  && (vt_address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
+	{
+	  if (want_space)
+	    fputs_filtered (" ", stream);
+	  fputs_filtered (" <", stream);
+	  fputs_filtered (MSYMBOL_PRINT_NAME (msymbol.minsym), stream);
+	  fputs_filtered (">", stream);
+	  want_space = 1;
+	}
+
+      if (vt_address && options->vtblprint)
+	{
+	  struct value *vt_val;
+	  struct symbol *wsym = (struct symbol *) NULL;
+	  struct type *wtype;
+	  struct block *block = (struct block *) NULL;
+	  struct field_of_this_result is_this_fld;
+
+	  if (want_space)
+	    fputs_filtered (" ", stream);
+
+	  if (msymbol.minsym != NULL)
+	    wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME(msymbol.minsym), block,
+				  VAR_DOMAIN, &is_this_fld);
+
+	  if (wsym)
+	    {
+	      wtype = SYMBOL_TYPE (wsym);
+	    }
+	  else
+	    {
+	      wtype = unresolved_elttype;
+	    }
+	  vt_val = value_at (wtype, vt_address);
+	  common_val_print (vt_val, stream, recurse + 1, options,
+			    current_language);
+	  if (options->prettyformat)
+	    {
+	      fprintf_filtered (stream, "\n");
+	      print_spaces_filtered (2 + 2 * recurse, stream);
+	    }
+	}
+    }
+}
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -237,10 +335,11 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	    }
 	  break;
 	}
-      /* Array of unspecified length: treat like pointer to first
-	 elt.  */
-      addr = address + embedded_offset;
-      goto print_unpacked_pointer;
+      /* Array of unspecified length: treat like pointer to first elt.  */
+      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
+			      embedded_offset, address + embedded_offset,
+			      stream, recurse, options);
+      break;
 
     case TYPE_CODE_METHODPTR:
       cplus_print_method_ptr (valaddr + embedded_offset, type, stream);
@@ -267,101 +366,9 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	}
       unresolved_elttype = TYPE_TARGET_TYPE (type);
       elttype = check_typedef (unresolved_elttype);
-	{
-	  int want_space;
-
-	  addr = unpack_pointer (type, valaddr + embedded_offset);
-	print_unpacked_pointer:
-
-	  want_space = 0;
-
-	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
-	    {
-	      /* Try to print what function it points to.  */
-	      print_function_pointer_address (options, gdbarch, addr, stream);
-	      return;
-	    }
-
-	  if (options->symbol_print)
-	    want_space = print_address_demangle (options, gdbarch, addr,
-						 stream, demangle);
-	  else if (options->addressprint)
-	    {
-	      fputs_filtered (paddress (gdbarch, addr), stream);
-	      want_space = 1;
-	    }
-
-	  /* For a pointer to a textual type, also print the string
-	     pointed to, unless pointer is null.  */
-
-	  if (c_textual_element_type (unresolved_elttype,
-				      options->format)
-	      && addr != 0)
-	    {
-	      if (want_space)
-		fputs_filtered (" ", stream);
-	      val_print_string (unresolved_elttype, NULL,
-				addr, -1,
-				stream, options);
-	    }
-	  else if (cp_is_vtbl_member (type))
-	    {
-	      /* Print vtbl's nicely.  */
-	      CORE_ADDR vt_address = unpack_pointer (type,
-						     valaddr
-						     + embedded_offset);
-	      struct bound_minimal_symbol msymbol =
-		lookup_minimal_symbol_by_pc (vt_address);
-
-	      /* If 'symbol_print' is set, we did the work above.  */
-	      if (!options->symbol_print
-		  && (msymbol.minsym != NULL)
-		  && (vt_address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
-		{
-		  if (want_space)
-		    fputs_filtered (" ", stream);
-		  fputs_filtered (" <", stream);
-		  fputs_filtered (MSYMBOL_PRINT_NAME (msymbol.minsym), stream);
-		  fputs_filtered (">", stream);
-		  want_space = 1;
-		}
-
-	      if (vt_address && options->vtblprint)
-		{
-		  struct value *vt_val;
-		  struct symbol *wsym = (struct symbol *) NULL;
-		  struct type *wtype;
-		  struct block *block = (struct block *) NULL;
-		  struct field_of_this_result is_this_fld;
-
-		  if (want_space)
-		    fputs_filtered (" ", stream);
-
-		  if (msymbol.minsym != NULL)
-		    wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
-					  block, VAR_DOMAIN,
-					  &is_this_fld);
-
-		  if (wsym)
-		    {
-		      wtype = SYMBOL_TYPE (wsym);
-		    }
-		  else
-		    {
-		      wtype = unresolved_elttype;
-		    }
-		  vt_val = value_at (wtype, vt_address);
-		  common_val_print (vt_val, stream, recurse + 1,
-				    options, current_language);
-		  if (options->prettyformat)
-		    {
-		      fprintf_filtered (stream, "\n");
-		      print_spaces_filtered (2 + 2 * recurse, stream);
-		    }
-		}
-	    }
-	  return;
-	}
+      addr = unpack_pointer (type, valaddr + embedded_offset);
+      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
+			      embedded_offset, addr, stream, recurse, options);
       break;
 
     case TYPE_CODE_UNION:
