@@ -370,6 +370,58 @@ c_val_print_ptr (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* c_val_print helper for TYPE_CODE_STRUCT.  */
+
+static void
+c_val_print_struct (struct type *type, const gdb_byte *valaddr,
+		    int embedded_offset, CORE_ADDR address,
+		    struct ui_file *stream, int recurse,
+		    const struct value *original_value,
+		    const struct value_print_options *options)
+{
+  if (options->vtblprint && cp_is_vtbl_ptr_type (type))
+    {
+      /* Print the unmangled name if desired.  */
+      /* Print vtable entry - we only get here if NOT using
+	 -fvtable_thunks.  (Otherwise, look under
+	 TYPE_CODE_PTR.)  */
+      struct gdbarch *gdbarch = get_type_arch (type);
+      int offset = (embedded_offset
+		    + TYPE_FIELD_BITPOS (type,
+					 VTBL_FNADDR_OFFSET) / 8);
+      struct type *field_type = TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET);
+      CORE_ADDR addr = extract_typed_address (valaddr + offset, field_type);
+
+      print_function_pointer_address (options, gdbarch, addr, stream);
+    }
+  else
+    cp_print_value_fields_rtti (type, valaddr,
+				embedded_offset, address,
+				stream, recurse,
+				original_value, options,
+				NULL, 0);
+}
+
+/* c_val_print helper for TYPE_CODE_UNION.  */
+
+static void
+c_val_print_union (struct type *type, const gdb_byte *valaddr,
+		   int embedded_offset, CORE_ADDR address,
+		   struct ui_file *stream, int recurse,
+		   const struct value *original_value,
+		   const struct value_print_options *options)
+{
+  if (recurse && !options->unionprint)
+    {
+      fprintf_filtered (stream, "{...}");
+     }
+  else
+    {
+      c_val_print_struct (type, valaddr, embedded_offset, address, stream,
+			  recurse, original_value, options);
+    }
+}
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -380,7 +432,6 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	     const struct value *original_value,
 	     const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
   struct type *unresolved_type = type;
 
   CHECK_TYPEDEF (type);
@@ -401,36 +452,13 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_UNION:
-      if (recurse && !options->unionprint)
-	{
-	  fprintf_filtered (stream, "{...}");
-	  break;
-	}
-      /* Fall through.  */
-    case TYPE_CODE_STRUCT:
-      /*FIXME: Abstract this away.  */
-      if (options->vtblprint && cp_is_vtbl_ptr_type (type))
-	{
-	  /* Print the unmangled name if desired.  */
-	  /* Print vtable entry - we only get here if NOT using
-	     -fvtable_thunks.  (Otherwise, look under
-	     TYPE_CODE_PTR.)  */
-	  int offset = (embedded_offset
-			+ TYPE_FIELD_BITPOS (type,
-					     VTBL_FNADDR_OFFSET) / 8);
-	  struct type *field_type = TYPE_FIELD_TYPE (type,
-						     VTBL_FNADDR_OFFSET);
-	  CORE_ADDR addr
-	    = extract_typed_address (valaddr + offset, field_type);
+      c_val_print_union (type, valaddr, embedded_offset, address, stream,
+			 recurse, original_value, options);
+      break;
 
-	  print_function_pointer_address (options, gdbarch, addr, stream);
-	}
-      else
-	cp_print_value_fields_rtti (type, valaddr,
-				    embedded_offset, address,
-				    stream, recurse,
-				    original_value, options,
-				    NULL, 0);
+    case TYPE_CODE_STRUCT:
+      c_val_print_struct (type, valaddr, embedded_offset, address, stream,
+			  recurse, original_value, options);
       break;
 
     case TYPE_CODE_INT:
