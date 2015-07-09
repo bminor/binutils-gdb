@@ -42,6 +42,8 @@
 #include "user-regs.h"
 #include "language.h"
 #include "infcall.h"
+#include "ax.h"
+#include "ax-gdb.h"
 
 #include "aarch64-tdep.h"
 
@@ -2273,6 +2275,18 @@ aarch64_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   *pc = extract_unsigned_integer (buf, X_REGISTER_SIZE, byte_order);
   return 1;
 }
+
+/* Implement the "gen_return_address" gdbarch method.  */
+
+static void
+aarch64_gen_return_address (struct gdbarch *gdbarch,
+			    struct agent_expr *ax, struct axs_value *value,
+			    CORE_ADDR scope)
+{
+  value->type = register_type (gdbarch, AARCH64_LR_REGNUM);
+  value->kind = axs_lvalue_register;
+  value->u.reg = AARCH64_LR_REGNUM;
+}
 
 
 /* Return the pseudo register name corresponding to register regnum.  */
@@ -2841,6 +2855,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, aarch64_get_longjmp_target);
+
+  set_gdbarch_gen_return_address (gdbarch, aarch64_gen_return_address);
 
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 

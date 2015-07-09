@@ -1,5 +1,11 @@
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* aarch64-tdep.c: Add ax.h and ax-gdb.h includes.
+	(aarch64_gen_return_address): New function.
+	(aarch64_gdbarch_init): Hook it.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* aarch64-tdep.c (aarch64_make_stub_cache): Set available_p and
 	swallow NOT_AVAILABLE_ERROR.
 	(aarch64_stub_this_id): Call frame_id_build_unavailable_stack if
