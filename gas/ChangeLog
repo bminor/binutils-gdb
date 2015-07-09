@@ -1,3 +1,8 @@
+2015-07-09  Catherine Moore  <clm@codesourcery.com>
+
+        * config/tc-mips.c (check_fpabi):  Handle
+        VAL_GNU_MIPS_ABI_FP_NAN2008.
+
 2015-07-08  Ciro Santilli  <ciro.santilli@gmail.com>
 
 	* doc/as.texinfo: Clarify case requirements for pseudo ops.
