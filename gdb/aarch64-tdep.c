@@ -148,6 +148,15 @@ static const char *const aarch64_v_register_names[] =
 /* AArch64 prologue cache structure.  */
 struct aarch64_prologue_cache
 {
+  /* The program counter at the start of the function.  It is used to
+     identify this frame as a prologue frame.  */
+  CORE_ADDR func;
+
+  /* The program counter at the time this frame was created; i.e. where
+     this function was called from.  It is used to identify this frame as a
+     stub frame.  */
+  CORE_ADDR prev_pc;
+
   /* The stack pointer at the time this frame was created; i.e. the
      caller's stack pointer when this function was called.  It is used
      to identify this frame.  */
@@ -889,6 +898,8 @@ aarch64_scan_prologue (struct frame_info *this_frame,
   CORE_ADDR prev_pc = get_frame_pc (this_frame);
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
+  cache->prev_pc = prev_pc;
+
   /* Assume we do not find a frame.  */
   cache->framereg = -1;
   cache->framesize = 0;
@@ -966,6 +977,8 @@ aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
     if (trad_frame_addr_p (cache->saved_regs, reg))
       cache->saved_regs[reg].addr += cache->prev_sp;
 
+  cache->func = get_frame_func (this_frame);
+
   return cache;
 }
 
@@ -978,21 +991,16 @@ aarch64_prologue_this_id (struct frame_info *this_frame,
 {
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
-  struct frame_id id;
-  CORE_ADDR pc, func;
 
   /* This is meant to halt the backtrace at "_start".  */
-  pc = get_frame_pc (this_frame);
-  if (pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
+  if (cache->prev_pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
     return;
 
   /* If we've hit a wall, stop.  */
   if (cache->prev_sp == 0)
     return;
 
-  func = get_frame_func (this_frame);
-  id = frame_id_build (cache->prev_sp, func);
-  *this_id = id;
+  *this_id = frame_id_build (cache->prev_sp, cache->func);
 }
 
 /* Implement the "prev_register" frame_unwind method.  */
@@ -1069,6 +1077,7 @@ aarch64_make_stub_cache (struct frame_info *this_frame, void **this_cache)
 
   cache->prev_sp
     = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
+  cache->prev_pc = get_frame_pc (this_frame);
 
   return cache;
 }
@@ -1082,7 +1091,7 @@ aarch64_stub_this_id (struct frame_info *this_frame,
   struct aarch64_prologue_cache *cache
     = aarch64_make_stub_cache (this_frame, this_cache);
 
-  *this_id = frame_id_build (cache->prev_sp, get_frame_pc (this_frame));
+  *this_id = frame_id_build (cache->prev_sp, cache->prev_pc);
 }
 
 /* Implement the "sniffer" frame_unwind method.  */

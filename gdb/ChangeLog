@@ -1,5 +1,16 @@
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* aarch64-tdep.c (aarch64_prologue_cache) <func, prev_pc>: New
+	fields.
+	(aarch64_scan_prologue): Set prev_pc.
+	(aarch64_make_prologue_cache): Set func.
+	(aarch64_make_stub_cache): Set prev_pc.
+	(aarch64_prologue_this_id): Remove local variables id, pc and
+	func.  Read prev_pc and func from cache.
+	(aarch64_stub_this_id): Read prev_pc from cache.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* aarch64-tdep.c (aarch64_make_stub_cache): Update comment.  New
 	argument this_cache.  Remove unused local variables reg and
 	unwound_fp.  Return early if this_cache is already set.  Set
