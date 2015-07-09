@@ -930,18 +930,24 @@ aarch64_scan_prologue (struct frame_info *this_frame,
     }
 }
 
-/* Allocate an aarch64_prologue_cache and fill it with information
-   about the prologue of *THIS_FRAME.  */
+/* Allocate and fill in *THIS_CACHE with information about the prologue of
+   *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
+   Return a pointer to the current aarch64_prologue_cache in
+   *THIS_CACHE.  */
 
 static struct aarch64_prologue_cache *
-aarch64_make_prologue_cache (struct frame_info *this_frame)
+aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct aarch64_prologue_cache *cache;
   CORE_ADDR unwound_fp;
   int reg;
 
+  if (*this_cache != NULL)
+    return *this_cache;
+
   cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+  *this_cache = cache;
 
   aarch64_scan_prologue (this_frame, cache);
 
@@ -970,13 +976,10 @@ static void
 aarch64_prologue_this_id (struct frame_info *this_frame,
 			  void **this_cache, struct frame_id *this_id)
 {
-  struct aarch64_prologue_cache *cache;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
   struct frame_id id;
   CORE_ADDR pc, func;
-
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_prologue_cache (this_frame);
-  cache = *this_cache;
 
   /* This is meant to halt the backtrace at "_start".  */
   pc = get_frame_pc (this_frame);
@@ -999,11 +1002,8 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 				void **this_cache, int prev_regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct aarch64_prologue_cache *cache;
-
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
 
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
@@ -1120,11 +1120,8 @@ struct frame_unwind aarch64_stub_unwind =
 static CORE_ADDR
 aarch64_normal_frame_base (struct frame_info *this_frame, void **this_cache)
 {
-  struct aarch64_prologue_cache *cache;
-
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
 
   return cache->prev_sp - cache->framesize;
 }
