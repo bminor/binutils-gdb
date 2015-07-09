@@ -7931,7 +7931,7 @@ Target_aarch64<size, big_endian>::scan_erratum_835769_span(
 	  // "span_start + offset + BPI".
 	  section_size_type erratum_insn_offset = span_start + offset + BPI;
 	  Address erratum_address = output_address + offset + BPI;
-	  gold_warning(_("Erratum 835769 found and fixed at \"%s\", "
+	  gold_info(_("Erratum 835769 found and fixed at \"%s\", "
 			 "section %d, offset 0x%08x."),
 		       relobj->name().c_str(), shndx,
 		       (unsigned int)(span_start + offset));
@@ -8017,7 +8017,7 @@ Target_aarch64<size, big_endian>::scan_erratum_843419_span(
 	    }
 	  if (do_report)
 	    {
-	      gold_warning(_("Erratum 843419 found and fixed at \"%s\", "
+	      gold_info(_("Erratum 843419 found and fixed at \"%s\", "
 			     "section %d, offset 0x%08x."),
 			   relobj->name().c_str(), shndx,
 			   (unsigned int)(span_start + offset));

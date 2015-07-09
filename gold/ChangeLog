@@ -1,5 +1,13 @@
 2015-07-09  Han Shen  <shenhan@google.com>
 
+	Use "gold_info" instead of "gold_warning" for erratum fix.
+
+	* aarch64.cc (Target_aarch64::scan_erratum_843419_span): Use
+	'gold_info'.
+	(Target_aarch64::scan_erratum_835769_span): USe 'gold_info'.
+
+2015-07-09  Han Shen  <shenhan@google.com>
+
 	Drop missing symbol warning for arm/aarch64.
 
 	* aarch64.cc (AArch64_relobj::scan_errata): Drop missing symbol warning.
