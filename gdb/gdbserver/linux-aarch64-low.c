@@ -1276,6 +1276,14 @@ aarch64_regs_info (void)
   return &regs_info;
 }
 
+/* Implementation of linux_target_ops method "supports_tracepoints".  */
+
+static int
+aarch64_supports_tracepoints (void)
+{
+  return 1;
+}
+
 struct linux_target_ops the_low_target =
 {
   aarch64_arch_setup,
@@ -1302,6 +1310,8 @@ struct linux_target_ops the_low_target =
   aarch64_linux_new_thread,
   aarch64_linux_new_fork,
   aarch64_linux_prepare_to_resume,
+  NULL,
+  aarch64_supports_tracepoints,
 };
 
 void

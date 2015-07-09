@@ -1,5 +1,11 @@
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* linux-aarch64-low.c (aarch64_supports_tracepoints): New
+	function.  Return 1.
+	(the_low_target): Install it.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* gdb.trace/backtrace.exp: Set registers for aarch64 target.
 	* gdb.trace/collection.exp: Likewise.
 	* gdb.trace/mi-trace-frame-collected.exp: Likewise.
