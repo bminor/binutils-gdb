@@ -1,5 +1,16 @@
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* gdb.trace/backtrace.exp: Set registers for aarch64 target.
+	* gdb.trace/collection.exp: Likewise.
+	* gdb.trace/mi-trace-frame-collected.exp: Likewise.
+	* gdb.trace/mi-trace-unavailable.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/unavailable.exp: Likewise.
+	* gdb.trace/while-dyn.exp: Likewise.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* aarch64-tdep.c: Add ax.h and ax-gdb.h includes.
 	(aarch64_gen_return_address): New function.
 	(aarch64_gdbarch_init): Hook it.
