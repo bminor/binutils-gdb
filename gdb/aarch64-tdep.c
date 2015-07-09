@@ -1050,18 +1050,22 @@ struct frame_unwind aarch64_prologue_unwind =
   default_frame_sniffer
 };
 
-/* Allocate an aarch64_prologue_cache and fill it with information
-   about the prologue of *THIS_FRAME.  */
+/* Allocate and fill in *THIS_CACHE with information about the prologue of
+   *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
+   Return a pointer to the current aarch64_prologue_cache in
+   *THIS_CACHE.  */
 
 static struct aarch64_prologue_cache *
-aarch64_make_stub_cache (struct frame_info *this_frame)
+aarch64_make_stub_cache (struct frame_info *this_frame, void **this_cache)
 {
-  int reg;
   struct aarch64_prologue_cache *cache;
-  CORE_ADDR unwound_fp;
+
+  if (*this_cache != NULL)
+    return *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+  *this_cache = cache;
 
   cache->prev_sp
     = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
@@ -1075,11 +1079,8 @@ static void
 aarch64_stub_this_id (struct frame_info *this_frame,
 		      void **this_cache, struct frame_id *this_id)
 {
-  struct aarch64_prologue_cache *cache;
-
-  if (*this_cache == NULL)
-    *this_cache = aarch64_make_stub_cache (this_frame);
-  cache = *this_cache;
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_stub_cache (this_frame, this_cache);
 
   *this_id = frame_id_build (cache->prev_sp, get_frame_pc (this_frame));
 }

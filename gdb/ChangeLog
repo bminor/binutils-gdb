@@ -1,5 +1,13 @@
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* aarch64-tdep.c (aarch64_make_stub_cache): Update comment.  New
+	argument this_cache.  Remove unused local variables reg and
+	unwound_fp.  Return early if this_cache is already set.  Set
+	this_cache.
+	(aarch64_stub_this_id): Update call to aarch64_make_stub_cache.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* aarch64-tdep.c (aarch64_make_prologue_cache): Update comment.
 	New argument this_cache.  Return early if this_cache is already
 	set.  Set this_cache.
