@@ -422,6 +422,40 @@ c_val_print_union (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* c_val_print helper for TYPE_CODE_INT.  */
+
+static void
+c_val_print_int (struct type *type, struct type *unresolved_type,
+		 const gdb_byte *valaddr, int embedded_offset,
+		 struct ui_file *stream, const struct value *original_value,
+		 const struct value_print_options *options)
+{
+  if (options->format || options->output_format)
+    {
+      struct value_print_options opts = *options;
+
+      opts.format = (options->format ? options->format
+		     : options->output_format);
+      val_print_scalar_formatted (type, valaddr, embedded_offset,
+				  original_value, &opts, 0, stream);
+    }
+  else
+    {
+      val_print_type_code_int (type, valaddr + embedded_offset,
+			       stream);
+      /* C and C++ has no single byte int type, char is used
+	 instead.  Since we don't know whether the value is really
+	 intended to be used as an integer or a character, print
+	 the character equivalent as well.  */
+      if (c_textual_element_type (unresolved_type, options->format))
+	{
+	  fputs_filtered (" ", stream);
+	  LA_PRINT_CHAR (unpack_long (type, valaddr + embedded_offset),
+			 unresolved_type, stream);
+	}
+    }
+}
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -462,30 +496,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_INT:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, &opts, 0, stream);
-	}
-      else
-	{
-	  val_print_type_code_int (type, valaddr + embedded_offset,
-				   stream);
-	  /* C and C++ has no single byte int type, char is used
-	     instead.  Since we don't know whether the value is really
-	     intended to be used as an integer or a character, print
-	     the character equivalent as well.  */
-	  if (c_textual_element_type (unresolved_type, options->format))
-	    {
-	      fputs_filtered (" ", stream);
-	      LA_PRINT_CHAR (unpack_long (type, valaddr + embedded_offset),
-			     unresolved_type, stream);
-	    }
-	}
+      c_val_print_int (type, unresolved_type, valaddr, embedded_offset, stream,
+		       original_value, options);
       break;
 
     case TYPE_CODE_MEMBERPTR:

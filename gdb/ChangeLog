@@ -1,5 +1,10 @@
 2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* c-valprint.c (c_val_print): Factor out int printing code to ...
+	(c_val_print_int): ... this new function.
+
+2015-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* c-valprint.c (c_val_print): Factor out struct and union
 	printing code to ...
 	(c_val_print_struct): ... this new function ...
