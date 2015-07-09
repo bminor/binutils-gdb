@@ -1,5 +1,22 @@
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* aarch64-tdep.c (aarch64_prologue_cache) <available_p>: New
+	field.
+	(aarch64_make_prologue_cache_1): New function, factored out from
+	aarch64_make_prologue_cache.  Do not allocate cache.  Set
+	available_p.
+	(aarch64_make_prologue_cache): Reimplement wrapping
+	aarch64_make_prologue_cache_1, and swallowing
+	NOT_AVAILABLE_ERROR.
+	(aarch64_prologue_frame_unwind_stop_reason): New function.
+	Return UNWIND_UNAVAILABLE if available_p is not set.
+	(aarch64_prologue_unwind): Install it.
+	(aarch64_prologue_this_id): Move prev_pc and prev_sp limit
+	checks into aarch64_prologue_frame_unwind_stop_reason.  Call
+	frame_id_build_unavailable_stack if available_p is not set.
+
+2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* aarch64-tdep.c (aarch64_prologue_cache) <func, prev_pc>: New
 	fields.
 	(aarch64_scan_prologue): Set prev_pc.

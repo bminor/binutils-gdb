@@ -162,6 +162,9 @@ struct aarch64_prologue_cache
      to identify this frame.  */
   CORE_ADDR prev_sp;
 
+  /* Is the target available to read from?  */
+  int available_p;
+
   /* The frame base for this frame is just prev_sp - frame size.
      FRAMESIZE is the distance from the frame pointer to the
      initial stack pointer.  */
@@ -941,33 +944,25 @@ aarch64_scan_prologue (struct frame_info *this_frame,
     }
 }
 
-/* Allocate and fill in *THIS_CACHE with information about the prologue of
-   *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
-   Return a pointer to the current aarch64_prologue_cache in
-   *THIS_CACHE.  */
+/* Fill in *CACHE with information about the prologue of *THIS_FRAME.  This
+   function may throw an exception if the inferior's registers or memory is
+   not available.  */
 
-static struct aarch64_prologue_cache *
-aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
+static void
+aarch64_make_prologue_cache_1 (struct frame_info *this_frame,
+			       struct aarch64_prologue_cache *cache)
 {
-  struct aarch64_prologue_cache *cache;
   CORE_ADDR unwound_fp;
   int reg;
-
-  if (*this_cache != NULL)
-    return *this_cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
-  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
-  *this_cache = cache;
 
   aarch64_scan_prologue (this_frame, cache);
 
   if (cache->framereg == -1)
-    return cache;
+    return;
 
   unwound_fp = get_frame_register_unsigned (this_frame, cache->framereg);
   if (unwound_fp == 0)
-    return cache;
+    return;
 
   cache->prev_sp = unwound_fp + cache->framesize;
 
@@ -979,7 +974,61 @@ aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
 
   cache->func = get_frame_func (this_frame);
 
+  cache->available_p = 1;
+}
+
+/* Allocate and fill in *THIS_CACHE with information about the prologue of
+   *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
+   Return a pointer to the current aarch64_prologue_cache in
+   *THIS_CACHE.  */
+
+static struct aarch64_prologue_cache *
+aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
+{
+  struct aarch64_prologue_cache *cache;
+
+  if (*this_cache != NULL)
+    return *this_cache;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+  *this_cache = cache;
+
+  TRY
+    {
+      aarch64_make_prologue_cache_1 (this_frame, cache);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
+
   return cache;
+}
+
+/* Implement the "stop_reason" frame_unwind method.  */
+
+static enum unwind_stop_reason
+aarch64_prologue_frame_unwind_stop_reason (struct frame_info *this_frame,
+					   void **this_cache)
+{
+  struct aarch64_prologue_cache *cache
+    = aarch64_make_prologue_cache (this_frame, this_cache);
+
+  if (!cache->available_p)
+    return UNWIND_UNAVAILABLE;
+
+  /* Halt the backtrace at "_start".  */
+  if (cache->prev_pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
+    return UNWIND_OUTERMOST;
+
+  /* We've hit a wall, stop.  */
+  if (cache->prev_sp == 0)
+    return UNWIND_OUTERMOST;
+
+  return UNWIND_NO_REASON;
 }
 
 /* Our frame ID for a normal frame is the current function's starting
@@ -992,15 +1041,10 @@ aarch64_prologue_this_id (struct frame_info *this_frame,
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
 
-  /* This is meant to halt the backtrace at "_start".  */
-  if (cache->prev_pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
-    return;
-
-  /* If we've hit a wall, stop.  */
-  if (cache->prev_sp == 0)
-    return;
-
-  *this_id = frame_id_build (cache->prev_sp, cache->func);
+  if (!cache->available_p)
+    *this_id = frame_id_build_unavailable_stack (cache->func);
+  else
+    *this_id = frame_id_build (cache->prev_sp, cache->func);
 }
 
 /* Implement the "prev_register" frame_unwind method.  */
@@ -1051,7 +1095,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 struct frame_unwind aarch64_prologue_unwind =
 {
   NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
+  aarch64_prologue_frame_unwind_stop_reason,
   aarch64_prologue_this_id,
   aarch64_prologue_prev_register,
   NULL,
