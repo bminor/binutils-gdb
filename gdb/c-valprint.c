@@ -225,6 +225,115 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
     }
 }
 
+/* c_val_print helper for TYPE_CODE_ARRAY.  */
+
+static void
+c_val_print_array (struct type *type, const gdb_byte *valaddr,
+		   int embedded_offset, CORE_ADDR address,
+		   struct ui_file *stream, int recurse,
+		   const struct value *original_value,
+		   const struct value_print_options *options)
+{
+  struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+  struct type *elttype = check_typedef (unresolved_elttype);
+
+  if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
+    {
+      LONGEST low_bound, high_bound;
+      int eltlen, len;
+      struct gdbarch *gdbarch = get_type_arch (type);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      unsigned int i = 0;	/* Number of characters printed.  */
+
+      if (!get_array_bounds (type, &low_bound, &high_bound))
+	error (_("Could not determine the array high bound"));
+
+      eltlen = TYPE_LENGTH (elttype);
+      len = high_bound - low_bound + 1;
+      if (options->prettyformat_arrays)
+	{
+	  print_spaces_filtered (2 + 2 * recurse, stream);
+	}
+
+      /* Print arrays of textual chars with a string syntax, as
+	 long as the entire array is valid.  */
+      if (c_textual_element_type (unresolved_elttype,
+				  options->format)
+	  && value_bytes_available (original_value, embedded_offset,
+				    TYPE_LENGTH (type))
+	  && !value_bits_any_optimized_out (original_value,
+					    TARGET_CHAR_BIT * embedded_offset,
+					    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+	{
+	  int force_ellipses = 0;
+
+	  /* If requested, look for the first null char and only
+	     print elements up to it.  */
+	  if (options->stop_print_at_null)
+	    {
+	      unsigned int temp_len;
+
+	      for (temp_len = 0;
+		   (temp_len < len
+		    && temp_len < options->print_max
+		    && extract_unsigned_integer (valaddr + embedded_offset
+						 + temp_len * eltlen,
+						 eltlen, byte_order) != 0);
+		   ++temp_len)
+		;
+
+	      /* Force LA_PRINT_STRING to print ellipses if
+		 we've printed the maximum characters and
+		 the next character is not \000.  */
+	      if (temp_len == options->print_max && temp_len < len)
+		{
+		  ULONGEST val
+		    = extract_unsigned_integer (valaddr + embedded_offset
+						+ temp_len * eltlen,
+						eltlen, byte_order);
+		  if (val != 0)
+		    force_ellipses = 1;
+		}
+
+	      len = temp_len;
+	    }
+
+	  LA_PRINT_STRING (stream, unresolved_elttype,
+			   valaddr + embedded_offset, len,
+			   NULL, force_ellipses, options);
+	  i = len;
+	}
+      else
+	{
+	  fprintf_filtered (stream, "{");
+	  /* If this is a virtual function table, print the 0th
+	     entry specially, and the rest of the members
+	     normally.  */
+	  if (cp_is_vtbl_ptr_type (elttype))
+	    {
+	      i = 1;
+	      fprintf_filtered (stream, _("%d vtable entries"),
+				len - 1);
+	    }
+	  else
+	    {
+	      i = 0;
+	    }
+	  val_print_array_elements (type, valaddr, embedded_offset,
+				    address, stream,
+				    recurse, original_value, options, i);
+	  fprintf_filtered (stream, "}");
+	}
+    }
+  else
+    {
+      /* Array of unspecified length: treat like pointer to first elt.  */
+      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
+			      embedded_offset, address + embedded_offset,
+			      stream, recurse, options);
+    }
+}
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -236,109 +345,16 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	     const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  unsigned len;
   struct type *elttype, *unresolved_elttype;
   struct type *unresolved_type = type;
-  unsigned eltlen;
   CORE_ADDR addr;
 
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
-    unsigned int i = 0;	/* Number of characters printed.  */
     case TYPE_CODE_ARRAY:
-      unresolved_elttype = TYPE_TARGET_TYPE (type);
-      elttype = check_typedef (unresolved_elttype);
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
-	{
-          LONGEST low_bound, high_bound;
-
-          if (!get_array_bounds (type, &low_bound, &high_bound))
-            error (_("Could not determine the array high bound"));
-
-	  eltlen = TYPE_LENGTH (elttype);
-	  len = high_bound - low_bound + 1;
-	  if (options->prettyformat_arrays)
-	    {
-	      print_spaces_filtered (2 + 2 * recurse, stream);
-	    }
-
-	  /* Print arrays of textual chars with a string syntax, as
-	     long as the entire array is valid.  */
-          if (c_textual_element_type (unresolved_elttype,
-				      options->format)
-	      && value_bytes_available (original_value, embedded_offset,
-					TYPE_LENGTH (type))
-	      && !value_bits_any_optimized_out (original_value,
-						TARGET_CHAR_BIT * embedded_offset,
-						TARGET_CHAR_BIT * TYPE_LENGTH (type)))
-	    {
-	      int force_ellipses = 0;
-
-	      /* If requested, look for the first null char and only
-	         print elements up to it.  */
-	      if (options->stop_print_at_null)
-		{
-		  unsigned int temp_len;
-
-		  for (temp_len = 0;
-		       (temp_len < len
-			&& temp_len < options->print_max
-			&& extract_unsigned_integer (valaddr + embedded_offset
-						     + temp_len * eltlen,
-						     eltlen, byte_order) != 0);
-		       ++temp_len)
-		    ;
-
-		  /* Force LA_PRINT_STRING to print ellipses if
-		     we've printed the maximum characters and
-		     the next character is not \000.  */
-		  if (temp_len == options->print_max && temp_len < len)
-		    {
-		      ULONGEST val
-			= extract_unsigned_integer (valaddr + embedded_offset
-						    + temp_len * eltlen,
-						    eltlen, byte_order);
-		      if (val != 0)
-			force_ellipses = 1;
-		    }
-
-		  len = temp_len;
-		}
-
-	      LA_PRINT_STRING (stream, unresolved_elttype,
-			       valaddr + embedded_offset, len,
-			       NULL, force_ellipses, options);
-	      i = len;
-	    }
-	  else
-	    {
-	      fprintf_filtered (stream, "{");
-	      /* If this is a virtual function table, print the 0th
-	         entry specially, and the rest of the members
-	         normally.  */
-	      if (cp_is_vtbl_ptr_type (elttype))
-		{
-		  i = 1;
-		  fprintf_filtered (stream, _("%d vtable entries"),
-				    len - 1);
-		}
-	      else
-		{
-		  i = 0;
-		}
-	      val_print_array_elements (type, valaddr, embedded_offset,
-					address, stream,
-					recurse, original_value, options, i);
-	      fprintf_filtered (stream, "}");
-	    }
-	  break;
-	}
-      /* Array of unspecified length: treat like pointer to first elt.  */
-      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
-			      embedded_offset, address + embedded_offset,
-			      stream, recurse, options);
+      c_val_print_array (type, valaddr, embedded_offset, address, stream,
+			 recurse, original_value, options);
       break;
 
     case TYPE_CODE_METHODPTR:
