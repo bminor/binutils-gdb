@@ -2,7 +2,7 @@
 #readelf: -w
 #name: DWARF2 debugging information 1
 
-Contents of the .*debug_info section:
+Contents of the .z?debug_info section:
 
   Compilation Unit @ offset 0x0:
    Length:        0x4e \(32-bit\)
@@ -58,7 +58,7 @@ Contents of the .debug_abbrev section:
     DW_AT_encoding     DW_FORM_data1
     DW_AT value: 0     DW_FORM value: 0
 
-Raw dump of debug contents of section .zdebug_line:
+Raw dump of debug contents of section .z?debug_line:
 
   Offset:                      0x0
   Length:                      62

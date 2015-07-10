@@ -1,3 +1,7 @@
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/dw2-compress-1.d: Updated to accept .debug_* sections.
+
 2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
 
 	* gas/avr/pc-relative-reloc.d: New test for 32 bit pc relative reloc.
