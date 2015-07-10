@@ -1,3 +1,8 @@
+2015-07-10  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.exp: On x86 and x86_64 targets, skip the
+	infcall tests instead of setting up for KFAIL.
+
 2015-07-10  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/record_goto-step.exp: New.
