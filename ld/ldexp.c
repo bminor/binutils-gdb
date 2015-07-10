@@ -257,6 +257,14 @@ new_rel_from_abs (bfd_vma value)
   expld.result.section = s;
 }
 
+static void
+align_dot_val (bfd_vma align)
+{
+  bfd_vma base = expld.section->vma;
+
+  new_rel_from_abs (base + align_n (expld.dot - base, align));
+}
+
 /* New-function for the definedness hash table.  */
 
 static struct bfd_hash_entry *
@@ -335,7 +343,7 @@ fold_unary (etree_type *tree)
 	{
 	case ALIGN_K:
 	  if (expld.phase != lang_first_phase_enum)
-	    new_rel_from_abs (align_n (expld.dot, expld.result.value));
+	    align_dot_val (expld.result.value);
 	  else
 	    expld.result.valid_p = FALSE;
 	  break;
@@ -365,7 +373,7 @@ fold_unary (etree_type *tree)
 	  if (expld.phase != lang_first_phase_enum)
 	    {
 	      make_abs ();
-	      expld.result.value = align_n (expld.dot, expld.result.value);
+	      align_dot_val (expld.result.value);
 	    }
 	  else
 	    expld.result.valid_p = FALSE;

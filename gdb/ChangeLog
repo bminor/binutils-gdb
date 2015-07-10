@@ -1,3 +1,37 @@
+2015-07-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (rx_get_opcode_byte): Use target_read_code instead
+	of target_read_memory.
+
+2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-win.c (tui_set_win_height): Use a cleanup to free the
+	string copy.
+	(parse_scrolling_args): Likewise.
+
+2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-win.c (focus_completer): Don't duplicate the tui window
+	names in this function.
+
+2015-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-data.h (SRC_NAME): Convert to lower case.
+	(CMD_NAME): Likewise.
+	(DATA_NAME): Likewise.
+	(DISASSEM_NAME): Likewise.
+	* tui/tui-win.c (tui_set_focus): Window names are now lower case.
+	(tui_set_win_height): Likewise.
+	(parse_scrolling_args): Likewise.
+
+2015-07-10  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_goto_begin)
+	(record_btrace_goto_end, record_btrace_goto): Move call to
+	print_stack_frame ...
+	(record_btrace_set_replay): ... here.  Set stop_pc.
+	* record-full.c (record_full_goto_entry): Set stop_pc.
+
 2015-07-09  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* NEWS: Mention support for tracepoints on aarch64-linux.

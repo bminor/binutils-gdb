@@ -12030,13 +12030,21 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 	  unsigned int compression_header_size
 	    = get_compression_header (& chdr, (unsigned char *) start);
 
-	  if (chdr.ch_type == ELFCOMPRESS_ZLIB
-	      && chdr.ch_addralign == section->sh_addralign)
+	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
-	      uncompressed_size = chdr.ch_size;
-	      start += compression_header_size;
-	      new_size -= compression_header_size;
+	      warn (_("section '%s' has unsupported compress type: %d\n"),
+		    printable_section_name (section), chdr.ch_type);
+	      return;
 	    }
+	  else if (chdr.ch_addralign != section->sh_addralign)
+	    {
+	      warn (_("compressed section '%s' is corrupted\n"),
+		    printable_section_name (section));
+	      return;
+	    }
+	  uncompressed_size = chdr.ch_size;
+	  start += compression_header_size;
+	  new_size -= compression_header_size;
 	}
       else if (new_size > 12 && streq ((char *) start, "ZLIB"))
 	{
@@ -12156,13 +12164,21 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 	  unsigned int compression_header_size
 	    = get_compression_header (& chdr, start);
 
-	  if (chdr.ch_type == ELFCOMPRESS_ZLIB
-	      && chdr.ch_addralign == section->sh_addralign)
+	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
-	      uncompressed_size = chdr.ch_size;
-	      start += compression_header_size;
-	      new_size -= compression_header_size;
+	      warn (_("section '%s' has unsupported compress type: %d\n"),
+		    printable_section_name (section), chdr.ch_type);
+	      return;
 	    }
+	  else if (chdr.ch_addralign != section->sh_addralign)
+	    {
+	      warn (_("compressed section '%s' is corrupted\n"),
+		    printable_section_name (section));
+	      return;
+	    }
+	  uncompressed_size = chdr.ch_size;
+	  start += compression_header_size;
+	  new_size -= compression_header_size;
 	}
       else if (new_size > 12 && streq ((char *) start, "ZLIB"))
 	{
@@ -12290,9 +12306,18 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	  Elf_Internal_Chdr chdr;
 	  unsigned int compression_header_size
 	    = get_compression_header (&chdr, start);
-	  if (chdr.ch_type != ELFCOMPRESS_ZLIB
-	      || chdr.ch_addralign != sec->sh_addralign)
-	    return 0;
+	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
+	    {
+	      warn (_("section '%s' has unsupported compress type: %d\n"),
+		    section->name, chdr.ch_type);
+	      return 0;
+	    }
+	  else if (chdr.ch_addralign != sec->sh_addralign)
+	    {
+	      warn (_("compressed section '%s' is corrupted\n"),
+		    section->name);
+	      return 0;
+	    }
 	  uncompressed_size = chdr.ch_size;
 	  start += compression_header_size;
 	  size -= compression_header_size;

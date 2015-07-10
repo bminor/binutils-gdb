@@ -84,6 +84,10 @@
 	* ppc-opc.c: Add comment accidentally removed by old commit.
 	(MTMSRD_L): Delete.
 
+2015-06-04  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c: (powerpc_opcodes) <hwsync>: New extended mnemonic.
+
 2015-06-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 18474

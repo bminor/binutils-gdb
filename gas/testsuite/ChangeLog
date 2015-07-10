@@ -1,3 +1,7 @@
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/dw2-compress-1.d: Updated to accept .debug_* sections.
+
 2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
 
 	* gas/avr/pc-relative-reloc.d: New test for 32 bit pc relative reloc.
@@ -234,6 +238,12 @@
 
 	* gas/aarch64/dwarf.d: New.
 	* gas/aarch64/dwarf.s: New.
+
+2015-06-04  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/a2.d: Fixup test case due to new extended mnemonic.
+	* gas/ppc/power4.s <hwsync, lwsync, ptesync, sync>: Add tests.
+	* gas/ppc/power4.d: Likewise.
 
 2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
 

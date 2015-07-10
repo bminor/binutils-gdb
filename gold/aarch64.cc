@@ -2084,10 +2084,6 @@ AArch64_relobj<size, big_endian>::scan_errata(
   // Find the first mapping symbol record within section shndx.
   typename Mapping_symbol_info::const_iterator p =
     this->mapping_symbol_info_.lower_bound(section_start);
-  if (p == this->mapping_symbol_info_.end() || p->first.shndx_ != shndx)
-    gold_warning(_("cannot scan executable section %u of %s for Cortex-A53 "
-		   "erratum because it has no mapping symbols."),
-		 shndx, this->name().c_str());
   while (p != this->mapping_symbol_info_.end() &&
 	 p->first.shndx_ == shndx)
     {
@@ -7935,7 +7931,7 @@ Target_aarch64<size, big_endian>::scan_erratum_835769_span(
 	  // "span_start + offset + BPI".
 	  section_size_type erratum_insn_offset = span_start + offset + BPI;
 	  Address erratum_address = output_address + offset + BPI;
-	  gold_warning(_("Erratum 835769 found and fixed at \"%s\", "
+	  gold_info(_("Erratum 835769 found and fixed at \"%s\", "
 			 "section %d, offset 0x%08x."),
 		       relobj->name().c_str(), shndx,
 		       (unsigned int)(span_start + offset));
@@ -8021,7 +8017,7 @@ Target_aarch64<size, big_endian>::scan_erratum_843419_span(
 	    }
 	  if (do_report)
 	    {
-	      gold_warning(_("Erratum 843419 found and fixed at \"%s\", "
+	      gold_info(_("Erratum 843419 found and fixed at \"%s\", "
 			     "section %d, offset 0x%08x."),
 			   relobj->name().c_str(), shndx,
 			   (unsigned int)(span_start + offset));

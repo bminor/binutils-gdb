@@ -1,3 +1,13 @@
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	 PR binutils/18656
+	 * binutils-all/compress.exp (convert_test): New proc.
+	 Run conversion tests between x86-64 and x32.
+
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/dw2-3.W: Updated to accept .debug_* sections.
+
 2015-05-20  Ed Maste  <emaste@freebsd.org>
 
 	* lib/binutils-common.exp (is_elf_format): Include *-*-freebsd* except

@@ -204,7 +204,7 @@ rx_get_opcode_byte (void *handle)
   int status;
   gdb_byte byte;
 
-  status = target_read_memory (opcdata->pc, &byte, 1);
+  status = target_read_code (opcdata->pc, &byte, 1);
   if (status == 0)
     {
       opcdata->pc += 1;

@@ -570,3 +570,96 @@ if { [regexp_diff objdump.out $srcdir/$subdir/dw2-3gabi.W] } then {
 } else {
     pass "$testname"
 }
+
+proc convert_test { testname  as_flags  objcop_flags } {
+    global srcdir
+    global subdir
+    global testfile3
+    global copyfile
+    global OBJCOPY
+    global OBJDUMP
+
+    if { ![binutils_assemble_flags $srcdir/$subdir/dw2-3.S ${testfile3}.o "$as_flags"] } then {
+       unresolved "$testname"
+       return
+    }
+
+    set got [binutils_run $OBJCOPY "$objcop_flags ${testfile3}.o ${copyfile}.o"]
+    if ![string match "" $got] then {
+	fail "objcopy ($testname)"
+	return
+    }
+
+    set got [remote_exec host "$OBJDUMP -W ${copyfile}.o" "" "/dev/null" "objdump.out"]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "$testname (reason: unexpected output)"
+	send_log $got
+	send_log "\n"
+	return
+    }
+
+    if { [regexp_diff objdump.out $srcdir/$subdir/dw2-3.W] } then {
+	fail "$testname"
+    } else {
+	pass "$testname"
+    }
+}
+
+if { ([istarget "x86_64-*-elf*"]
+       || [istarget "x86_64-*-linux*"]) } {
+    set testname "Convert x86-64 object with zlib-gabi to x32 (1)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gabi --64" "-O elf32-x86-64"
+
+    set testname "Convert x86-64 object with zlib-gabi to x32 (2)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gabi --64" "-O elf32-x86-64 --compress-debug-sections=zlib-gnu"
+
+    set testname "Convert x86-64 object with zlib-gabi to x32 (3)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gabi --64" "-O elf32-x86-64 --decompress-debug-sections"
+
+    set testname "Convert x86-64 object with zlib-gnu to x32 (1)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gnu --64" "-O elf32-x86-64"
+
+    set testname "Convert x86-64 object with zlib-gnu to x32 (2)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gnu --64" "-O elf32-x86-64 --compress-debug-sections=zlib-gabi"
+
+    set testname "Convert x86-64 object with zlib-gnu to x32 (3)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gnu --64" "-O elf32-x86-64 --decompress-debug-sections"
+
+    set testname "Convert x86-64 object to x32 (1)"
+    convert_test "$testname" "--nocompress-debug-sections --64" "-O elf32-x86-64"
+
+    set testname "Convert x86-64 object to x32 (2)"
+    convert_test "$testname" "--nocompress-debug-sections --64" "-O elf32-x86-64 --compress-debug-sections=zlib-gabi"
+
+    set testname "Convert x86-64 object to x32 (3)"
+    convert_test "$testname" "--nocompress-debug-sections --64" "-O elf32-x86-64 --compress-debug-sections=zlib-gnu"
+
+
+    set testname "Convert x32 object with zlib-gabi to x86-64 (1)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gabi --x32" "-O elf64-x86-64"
+
+    set testname "Convert x32 object with zlib-gabi to x86-64 (2)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gabi --x32" "-O elf64-x86-64 --compress-debug-sections=zlib-gnu"
+
+    set testname "Convert x32 object with zlib-gabi to x86-64 (3)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gabi --x32" "-O elf64-x86-64 --decompress-debug-sections"
+
+    set testname "Convert x32 object with zlib-gnu to x86-64 (1)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gnu --x32" "-O elf64-x86-64"
+
+    set testname "Convert x32 object with zlib-gnu to x86-64 (2)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gnu --x32" "-O elf64-x86-64 --compress-debug-sections=zlib-gabi"
+
+    set testname "Convert x32 object with zlib-gnu to x86-64 (3)"
+    convert_test "$testname" "--compress-debug-sections=zlib-gnu --x32" "-O elf64-x86-64 --decompress-debug-sections"
+
+    set testname "Convert x32 object to x86-64 (1)"
+    convert_test "$testname" "--nocompress-debug-sections --x32" "-O elf64-x86-64"
+
+    set testname "Convert x32 object to x86-64 (2)"
+    convert_test "$testname" "--nocompress-debug-sections --x32" "-O elf64-x86-64 --compress-debug-sections=zlib-gabi"
+
+    set testname "Convert x32 object to x86-64 (3)"
+    convert_test "$testname" "--nocompress-debug-sections --x32" "-O elf64-x86-64 --compress-debug-sections=zlib-gnu"
+ }
