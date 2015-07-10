@@ -1,3 +1,9 @@
+2015-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.asm/asm-source.exp (f at main): Stop at gdbasm_enter.
+	(n at main): New.
+	* gdb.asm/asmsrc1.s: Add comment "mark: main enter".
+
 2015-07-10  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/gnu_vector.exp: On x86 and x86_64 targets, skip the
