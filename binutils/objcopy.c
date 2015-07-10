@@ -2872,6 +2872,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     elf_section_type (osection) = SHT_NOBITS;
 
   size = bfd_section_size (ibfd, isection);
+  size = bfd_convert_section_size (ibfd, isection, obfd, size);
   if (copy_byte >= 0)
     size = (size + interleave - 1) / interleave * copy_width;
   else if (extract_symbol)
@@ -3109,14 +3110,20 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     return;
 
   osection = isection->output_section;
-  size = bfd_get_section_size (isection);
+  /* The output SHF_COMPRESSED section size is different from input if
+     ELF classes of input and output aren't the same.  We must use the
+     output section size here, which has been updated in setup_section
+     via bfd_convert_section_size.  */
+  size = bfd_get_section_size (osection);
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
     {
       bfd_byte *memhunk = NULL;
 
-      if (!bfd_get_full_section_contents (ibfd, isection, &memhunk))
+      if (!bfd_get_full_section_contents (ibfd, isection, &memhunk)
+	  || !bfd_convert_section_contents (ibfd, isection, obfd,
+					    &memhunk))
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);

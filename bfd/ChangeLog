@@ -1,3 +1,10 @@
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	 PR binutils/18656
+	 * bfd.c (bfd_convert_section_size): New function.
+	 (bfd_convert_section_contents): Likewise.
+	 * bfd-in2.h: Regenerated.
+
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
 	* elflink.c (bfd_elf_size_dynamic_sections): Call to

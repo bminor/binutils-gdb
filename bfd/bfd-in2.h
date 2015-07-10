@@ -6855,6 +6855,12 @@ bfd_boolean bfd_check_compression_header
 
 int bfd_get_compression_header_size (bfd *abfd, asection *sec);
 
+bfd_size_type bfd_convert_section_size
+   (bfd *ibfd, asection *isec, bfd *obfd, bfd_size_type size);
+
+bfd_boolean bfd_convert_section_contents
+   (bfd *ibfd, asection *isec, bfd *obfd, bfd_byte **ptr);
+
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
    (bfd *abfd, symindex previous, carsym **sym);
