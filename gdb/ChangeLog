@@ -1,3 +1,12 @@
+2015-07-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote.c (read_ptid): Return null_ptid when no thread id
+	is found.
+	(remote_current_thread): Add log warning for malformed
+	qC reply.
+	(remote_start_remote): Add log warning when current thread
+	not found.
+
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
 	* s390-linux-nat.c (fetch_regs, store_regs, fetch_fpregs)

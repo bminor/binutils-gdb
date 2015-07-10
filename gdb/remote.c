@@ -2158,6 +2158,14 @@ read_ptid (char *buf, char **obuf)
   /* No multi-process.  Just a tid.  */
   pp = unpack_varlen_hex (p, &tid);
 
+  /* Return null_ptid when no thread id is found.  */
+  if (p == pp)
+    {
+      if (obuf)
+	*obuf = pp;
+      return null_ptid;
+    }
+
   /* Since the stub is not sending a process id, then default to
      what's in inferior_ptid, unless it's null at this point.  If so,
      then since there's no way to know the pid of the reported
@@ -2750,7 +2758,17 @@ remote_current_thread (ptid_t oldpid)
   putpkt ("qC");
   getpkt (&rs->buf, &rs->buf_size, 0);
   if (rs->buf[0] == 'Q' && rs->buf[1] == 'C')
-    return read_ptid (&rs->buf[2], NULL);
+    {
+      char *obuf;
+      ptid_t result;
+
+      result = read_ptid (&rs->buf[2], &obuf);
+      if (*obuf != '\0' && remote_debug)
+        fprintf_unfiltered (gdb_stdlog,
+	                    "warning: garbage in qC reply\n");
+
+      return result;
+    }
   else
     return oldpid;
 }
@@ -3701,6 +3719,12 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 		 tell us which thread was current (no "thread"
 		 register in T stop reply?).  Just pick the first
 		 thread in the thread list then.  */
+	      
+	      if (remote_debug)
+		fprintf_unfiltered (gdb_stdlog,
+		                    "warning: couldn't determine remote "
+				    "current thread; picking first in list.\n");
+
 	      inferior_ptid = thread_list->ptid;
 	    }
 	}
