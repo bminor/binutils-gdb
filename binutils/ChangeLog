@@ -1,3 +1,10 @@
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (dump_section_as_strings): Warn unsupported compress
+	type and corrupted compressed section.
+	(dump_section_as_bytes): Likewise.
+	(load_specific_debug_section): Likewise.
+
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
         * readelf.c (print_mips_fp_abi_value): Handle
