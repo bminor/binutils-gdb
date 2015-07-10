@@ -1,3 +1,12 @@
+2015-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-win.c (window_name_completer): New function.
+	(focus_completer): Call window_name_completer.  All old content
+	moved into window_name_completer.
+	(winheight_completer): New function.
+	(_initialize_tui_win): Rename variable.  Add completer to
+	winheight command.  Update doc string on winheight.
+
 2015-07-12  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-linux-tdep.c (_initialize_nios2_linux_tdep): Register
