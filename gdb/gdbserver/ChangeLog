@@ -1,3 +1,9 @@
+2015-07-10  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c (struct callback_event) <data>: Change type to
+	gdb_client_data instance instead of gdb_client_data pointer.
+	(append_callback_event): Adjust.
+
 2015-07-10  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* linux-aarch64-low.c: Add comments for each linux_target_ops

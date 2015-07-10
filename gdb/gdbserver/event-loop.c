@@ -130,7 +130,7 @@ struct callback_event
   {
     int id;
     callback_handler_func *proc;
-    gdb_client_data *data;
+    gdb_client_data data;
     struct callback_event *next;
   };
 
@@ -249,7 +249,7 @@ process_callback (void)
   if (event_ptr != NULL)
     {
       callback_handler_func *proc = event_ptr->proc;
-      gdb_client_data *data = event_ptr->data;
+      gdb_client_data data = event_ptr->data;
 
       /* Remove the event before calling PROC,
 	 more events may get added by PROC.  */
