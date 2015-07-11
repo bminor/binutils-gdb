@@ -1,3 +1,8 @@
+2015-07-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_locate_sections): Allow has_section_at_zero
+	to be set for SEC_ALLOC sections too.
+
 2015-07-17  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add
