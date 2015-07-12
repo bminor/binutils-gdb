@@ -274,6 +274,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug_gabi.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
@@ -347,6 +348,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_36 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug_gabi.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
@@ -599,14 +601,18 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test that --gdb-index functions correctly with gcc-generated pubnames.
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@am__append_65 = gdb_index_test_1.sh \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2.sh \
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2_gabi.sh \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_3.sh \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_4.sh
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@am__append_66 = gdb_index_test_1.stdout \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2.stdout \
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2_gabi.stdout \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_3.stdout \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_4.stdout
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@am__append_67 = gdb_index_test_1.stdout \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_1 \
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2.stdout \
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2 \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2.stdout \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2 \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_3.stdout \
@@ -4412,6 +4418,8 @@ gdb_index_test_1.sh.log: gdb_index_test_1.sh
 	@p='gdb_index_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 gdb_index_test_2.sh.log: gdb_index_test_2.sh
 	@p='gdb_index_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+gdb_index_test_2_gabi.sh.log: gdb_index_test_2_gabi.sh
+	@p='gdb_index_test_2_gabi.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 gdb_index_test_3.sh.log: gdb_index_test_3.sh
 	@p='gdb_index_test_3.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 gdb_index_test_4.sh.log: gdb_index_test_4.sh
@@ -5456,6 +5464,20 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
+@GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg_cdebug_gabi.o: debug_msg.cc gcctestdir/as
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/debug_msg.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1_cdebug_gabi.o: odr_violation1.cc gcctestdir/as
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation2_cdebug_gabi.o: odr_violation2.cc gcctestdir/as
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg_cdebug_gabi.err: debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug_gabi debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o 2>$@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of debug_msg_cdebug_gabi should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.so: debug_msg.cc gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1.so: odr_violation1.cc gcctestdir/ld
@@ -6042,6 +6064,12 @@ uninstall-am:
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_2.stdout: gdb_index_test_2
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_cdebug_gabi.o: gdb_index_test.cc
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -o $@ $<
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_2_gabi: gdb_index_test_cdebug_gabi.o gcctestdir/ld
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_2_gabi.stdout: gdb_index_test_2_gabi
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_3.o: gdb_index_test_3.c
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -g -c -o $@ $<

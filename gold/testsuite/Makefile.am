@@ -1239,6 +1239,22 @@ debug_msg_cdebug.err: debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_
 	  rm -f $@; \
 	  exit 1; \
 	fi
+check_DATA += debug_msg_cdebug_gabi.err
+MOSTLYCLEANFILES += debug_msg_cdebug_gabi.err
+debug_msg_cdebug_gabi.o: debug_msg.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1_cdebug_gabi.o: odr_violation1.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2_cdebug_gabi.o: odr_violation2.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_cdebug_gabi.err: debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug_gabi debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_cdebug_gabi should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
 
 # See if we can also detect problems when we're linking .so's, not .o's.
 check_DATA += debug_msg_so.err
@@ -2399,6 +2415,15 @@ gdb_index_test_cdebug.o: gdb_index_test.cc
 gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
 gdb_index_test_2.stdout: gdb_index_test_2
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+check_SCRIPTS += gdb_index_test_2_gabi.sh
+check_DATA += gdb_index_test_2_gabi.stdout
+MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
+gdb_index_test_cdebug_gabi.o: gdb_index_test.cc
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -o $@ $<
+gdb_index_test_2_gabi: gdb_index_test_cdebug_gabi.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+gdb_index_test_2_gabi.stdout: gdb_index_test_2_gabi
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
 # Another simple C test (DW_AT_high_pc encoding) for --gdb-index.

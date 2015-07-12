@@ -143,8 +143,55 @@ bool
 decompress_input_section(const unsigned char* compressed_data,
 			 unsigned long compressed_size,
 			 unsigned char* uncompressed_data,
-			 unsigned long uncompressed_size)
+			 unsigned long uncompressed_size,
+			 int size,
+			 bool big_endian,
+			 elfcpp::Elf_Xword sh_flags)
 {
+  if ((sh_flags & elfcpp::SHF_COMPRESSED) != 0)
+    {
+      unsigned int compression_header_size;
+      if (size == 32)
+	{
+	  compression_header_size = elfcpp::Elf_sizes<32>::chdr_size;
+	  if (big_endian)
+	    {
+	      elfcpp::Chdr<32, true> chdr(compressed_data);
+	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
+		return false;
+	    }
+	  else
+	    {
+	      elfcpp::Chdr<32, false> chdr(compressed_data);
+	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
+		return false;
+	    }
+	}
+      else if (size == 64)
+	{
+	  compression_header_size = elfcpp::Elf_sizes<64>::chdr_size;
+	  if (big_endian)
+	    {
+	      elfcpp::Chdr<64, true> chdr(compressed_data);
+	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
+		return false;
+	    }
+	  else
+	    {
+	      elfcpp::Chdr<64, false> chdr(compressed_data);
+	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
+		return false;
+	    }
+	}
+      else
+	gold_unreachable();
+
+      return zlib_decompress(compressed_data + compression_header_size,
+			     compressed_size - compression_header_size,
+			     uncompressed_data,
+			     uncompressed_size);
+    }
+
   const unsigned int zlib_header_size = 12;
 
   /* Verify the compression header.  Currently, we support only zlib

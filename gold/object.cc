@@ -663,14 +663,12 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
 
 // Return TRUE if this is a section whose contents will be needed in the
 // Add_symbols task.  This function is only called for sections that have
-// already passed the test in is_compressed_debug_section(), so we know
-// that the section name begins with ".zdebug".
+// already passed the test in is_compressed_debug_section() and the debug
+// section name prefix, ".debug"/".zdebug", has been skipped.
 
 static bool
 need_decompressed_section(const char* name)
 {
-  // Skip over the ".zdebug" and a quick check for the "_".
-  name += 7;
   if (*name++ != '_')
     return false;
 
@@ -741,14 +739,33 @@ build_compressed_section_map(
 	    }
 
 	  const char* name = names + shdr.get_sh_name();
-	  if (is_compressed_debug_section(name))
+	  bool is_compressed = ((shdr.get_sh_flags()
+				 & elfcpp::SHF_COMPRESSED) != 0);
+	  bool is_zcompressed = (!is_compressed
+				 && is_compressed_debug_section(name));
+
+	  if (is_zcompressed || is_compressed)
 	    {
 	      section_size_type len;
 	      const unsigned char* contents =
 		  obj->section_contents(i, &len, false);
-	      uint64_t uncompressed_size = get_uncompressed_size(contents, len);
+	      uint64_t uncompressed_size;
+	      if (is_zcompressed)
+		{
+		  // Skip over the ".zdebug" prefix.
+		  name += 7;
+		  uncompressed_size = get_uncompressed_size(contents, len);
+		}
+	      else
+		{
+		  // Skip over the ".debug" prefix.
+		  name += 6;
+		  elfcpp::Chdr<size, big_endian> chdr(contents);
+		  uncompressed_size = chdr.get_ch_size();
+		}
 	      Compressed_section_info info;
 	      info.size = convert_to_section_size_type(uncompressed_size);
+	      info.flag = shdr.get_sh_flags();
 	      info.contents = NULL;
 	      if (uncompressed_size != -1ULL)
 		{
@@ -758,7 +775,9 @@ build_compressed_section_map(
 		      uncompressed_data = new unsigned char[uncompressed_size];
 		      if (decompress_input_section(contents, len,
 						   uncompressed_data,
-						   uncompressed_size))
+						   uncompressed_size,
+						   size, big_endian,
+						   shdr.get_sh_flags()))
 			info.contents = uncompressed_data;
 		      else
 			delete[] uncompressed_data;
@@ -786,14 +805,11 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
   if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
     this->has_eh_frame_ = true;
 
-  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL)
-    {
-      Compressed_section_map* compressed_sections =
-	  build_compressed_section_map<size, big_endian>(
-	      pshdrs, this->shnum(), names, sd->section_names_size, this, true);
-      if (compressed_sections != NULL)
-        this->set_compressed_sections(compressed_sections);
-    }
+  Compressed_section_map* compressed_sections =
+    build_compressed_section_map<size, big_endian>(
+      pshdrs, this->shnum(), names, sd->section_names_size, this, true);
+  if (compressed_sections != NULL)
+    this->set_compressed_sections(compressed_sections);
 
   return (this->has_eh_frame_
 	  || (!parameters->options().relocatable()
@@ -2899,7 +2915,10 @@ Object::decompressed_section_contents(
   if (!decompress_input_section(buffer,
 				buffer_size,
 				uncompressed_data,
-				uncompressed_size))
+				uncompressed_size,
+				elfsize(),
+				is_big_endian(),
+				p->second.flag))
     this->error(_("could not decompress section %s"),
 		this->do_section_name(shndx).c_str());
 
