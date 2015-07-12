@@ -1,0 +1,156 @@
+# Copyright 2015 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+standard_testfile
+set executable $testfile
+
+if ![is_remote target] {
+  untested "only gdbserver supports build-id reporting"
+  return -1
+}
+if [is_remote host] {
+  untested "only local host is currently supported"
+  return -1
+}
+
+# Test overview:
+#  generate two shared objects. One that will be used by the process
+#  and another, modified, that will be found by gdb. Gdb should
+#  detect the mismatch and refuse to use mismatched shared object.
+
+if { [get_compiler_info] } {
+  untested "get_compiler_info failed."
+  return -1
+}
+
+# First version of the object, to be loaded by ld.
+set srclibfilerun ${testfile}-lib.c
+
+# Modified version of the object to be loaded by gdb
+# Code in -libmod.c is tuned so it gives a mismatch but
+# leaves .dynamic at the same point.
+set srclibfilegdb ${testfile}-libmod.c
+
+# So file name:
+set binlibfilebase lib${testfile}.so
+
+# Setup run directory (where program is run from)
+#   It contains executable and '-lib' version of the library.
+set binlibfiledirrun [standard_output_file ${testfile}_wd]
+set binlibfilerun ${binlibfiledirrun}/${binlibfilebase}
+
+# Second solib version is in current directory, '-libmod' version.
+set binlibfiledirgdb [standard_output_file ""]
+set binlibfilegdb ${binlibfiledirgdb}/${binlibfilebase}
+
+# Executable
+set srcfile ${testfile}.c
+set executable ${testfile}
+
+file delete -force -- "${binlibfiledirrun}"
+file mkdir "${binlibfiledirrun}"
+
+set exec_opts {}
+
+if { ![istarget "*-*-nto-*"] } {
+  lappend exec_opts "shlib_load"
+}
+
+lappend exec_opts "additional_flags=-DDIRNAME\=\"${binlibfiledirrun}\" -DLIB\=\"./${binlibfilebase}\""
+lappend exec_opts "debug"
+
+if { [build_executable $testfile.exp $executable $srcfile $exec_opts] != 0 } {
+  return -1
+}
+
+if { [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfilerun}" "${binlibfilerun}" [list debug ldflags=-Wl,--build-id]] != ""
+     || [gdb_gnu_strip_debug "${binlibfilerun}"]
+     || [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfilegdb}" "${binlibfilegdb}" [list debug ldflags=-Wl,--build-id]] != "" } {
+  untested "compilation failed."
+  return -1
+}
+
+proc solib_matching_test { solibfile symsloaded } {
+  global gdb_prompt
+  global testfile
+  global executable
+  global srcdir
+  global subdir
+  global binlibfiledirrun
+  global binlibfiledirgdb
+  global srcfile
+
+  clean_restart ${binlibfiledirrun}/${executable}
+
+  gdb_test_no_output "set solib-search-path \"${binlibfiledirgdb}\"" ""
+  if { [gdb_test "cd ${binlibfiledirgdb}" "" ""] != 0 } {
+    untested "cd ${binlibfiledirgdb}"
+    return -1
+  }
+
+  # Do not auto load shared libraries, the test needs to have control
+  # over when the relevant output gets printed.
+  gdb_test_no_output "set auto-solib-add off" ""
+
+  if ![runto "${srcfile}:[gdb_get_line_number "set breakpoint 1 here"]"] {
+    return -1
+  }
+
+  gdb_test "sharedlibrary" "" ""
+
+  set nocrlf "\[^\r\n\]*"
+  set expected_header "From${nocrlf}To${nocrlf}Syms${nocrlf}Read${nocrlf}Shared${nocrlf}"
+  set expected_line "${symsloaded}${nocrlf}${solibfile}"
+
+  gdb_test "info sharedlibrary ${solibfile}" \
+    "${expected_header}\r\n.*${expected_line}.*" \
+    "Symbols for ${solibfile} loaded: expected '${symsloaded}'"
+
+  return 0
+}
+
+# Copy binary to working dir so it pulls in the library from that dir
+# (by the virtue of $ORIGIN).
+file copy -force "${binlibfiledirgdb}/${executable}" \
+		 "${binlibfiledirrun}/${executable}"
+
+# Test unstripped, .dynamic matching
+with_test_prefix "test unstripped, .dynamic matching" {
+  solib_matching_test "${binlibfilebase}" "No"
+}
+
+# Keep original so for debugging purposes
+file copy -force "${binlibfilegdb}" "${binlibfilegdb}-orig"
+set objcopy_program [transform objcopy]
+set result [catch "exec $objcopy_program --only-keep-debug ${binlibfilegdb}"]
+if {$result != 0} {
+  untested "test --only-keep-debug (objcopy)"
+}
+
+# Test --only-keep-debug, .dynamic matching so
+with_test_prefix "test --only-keep-debug" {
+  solib_matching_test "${binlibfilebase}" "No"
+}
+
+# Keep previous so for debugging puroses
+file copy -force "${binlibfilegdb}" "${binlibfilegdb}-orig1"
+
+# Copy loaded so over the one gdb will find
+file copy -force "${binlibfilerun}" "${binlibfilegdb}"
+
+# Now test it does not mis-invalidate matching libraries
+with_test_prefix "test matching libraries" {
+  solib_matching_test "${binlibfilebase}" "Yes"
+}

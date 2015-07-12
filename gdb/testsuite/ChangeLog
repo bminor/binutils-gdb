@@ -1,3 +1,11 @@
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+
+	Tests for validate symbol file using build-id.
+	* gdb.base/solib-mismatch-lib.c: New file.
+	* gdb.base/solib-mismatch-libmod.c: New file.
+	* gdb.base/solib-mismatch.c: New file.
+	* gdb.base/solib-mismatch.exp: New file.
+
 2015-07-15  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/sigaltstack.exp (finish_test): Add kfail for
