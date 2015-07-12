@@ -1319,8 +1319,22 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 	chmod a+x $@
 	test -s $@
 
-# Test --compress-debug-sections.  FIXME: check we actually compress.
+# Test --compress-debug-sections.
+check_PROGRAMS += flagstest_compress_debug_sections_none
+check_DATA += flagstest_compress_debug_sections_none.stdout
+flagstest_compress_debug_sections_none: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=none
+	test -s $@
+
+# Dump DWARF debug sections.
+flagstest_compress_debug_sections_none.stdout: flagstest_compress_debug_sections_none
+	$(TEST_READELF) -w $< > $@.tmp
+	mv -f $@.tmp $@
+
 check_PROGRAMS += flagstest_compress_debug_sections
+check_DATA += flagstest_compress_debug_sections.stdout \
+	      flagstest_compress_debug_sections.cmp \
+	      flagstest_compress_debug_sections.check
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
@@ -1333,6 +1347,73 @@ flagstest_compress_debug_sections_and_build_id_tree: flagstest_debug.o gcctestdi
 		-Wl,--build-id-chunk-size-for-treehash=4096 \
 		-Wl,--build-id-min-file-size-for-treehash=0
 	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections.stdout: flagstest_compress_debug_sections
+	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .zdebug_* sections.
+flagstest_compress_debug_sections.check: flagstest_compress_debug_sections
+	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections.cmp: flagstest_compress_debug_sections.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
+
+check_PROGRAMS += flagstest_compress_debug_sections_gnu
+check_DATA += flagstest_compress_debug_sections_gnu.stdout \
+	      flagstest_compress_debug_sections_gnu.cmp \
+	      flagstest_compress_debug_sections_gnu.check
+flagstest_compress_debug_sections_gnu: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gnu
+	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections_gnu.stdout: flagstest_compress_debug_sections_gnu
+	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .zdebug_* sections.
+flagstest_compress_debug_sections_gnu.check: flagstest_compress_debug_sections_gnu
+	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections_gnu.cmp: flagstest_compress_debug_sections_gnu.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections_gnu.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
+
+check_PROGRAMS += flagstest_compress_debug_sections_gabi
+check_DATA += flagstest_compress_debug_sections_gabi.stdout \
+	      flagstest_compress_debug_sections_gabi.cmp \
+	      flagstest_compress_debug_sections_gabi.check
+flagstest_compress_debug_sections_gabi: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gabi
+	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections_gabi.stdout: flagstest_compress_debug_sections_gabi
+	$(TEST_READELF) -w $< > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .debug_* sections.
+flagstest_compress_debug_sections_gabi.check: flagstest_compress_debug_sections_gabi
+	$(TEST_READELF) -tW $< | grep "COMPRESSED" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections_gabi.cmp: flagstest_compress_debug_sections_gabi.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections_gabi.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.

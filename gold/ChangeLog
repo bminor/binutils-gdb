@@ -1,5 +1,48 @@
 2015-07-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/18322
+	* compressed_output.cc (zlib_compress): Add argument for
+	compression header size.  Set header size to compression header
+	size if it isn't 0.  Don't write out the zlib header here.
+	(Output_compressed_section::set_final_data_size): Support
+	zlib-gnu and zlib-gabi compressions.  Pass compression header
+	size to zlib_compress and write out compression header.  Set
+	the SHF_COMPRESSED bit for zlib-gabi compression.  Otherwise
+	clear the SHF_COMPRESSED bit
+	* options.h (compress_debug_sections): Add zlib-gnu and
+	zlib-gabi.
+	* output.h (Output_section::set_flags): New.
+	* testsuite/Makefile.am (check_PROGRAMS): Add
+	flagstest_compress_debug_sections_none,
+	flagstest_compress_debug_sections_gnu and
+	flagstest_compress_debug_sections_gabi.
+	(check_DATA): Add flagstest_compress_debug_sections_none.stdout.
+	flagstest_compress_debug_sections.stdout,
+	flagstest_compress_debug_sections.cmp,
+	flagstest_compress_debug_sections.check,
+	flagstest_compress_debug_sections_gnu.stdout,
+	flagstest_compress_debug_sections_gnu.cmp,
+	flagstest_compress_debug_sections_gnu.check,
+	flagstest_compress_debug_sections_gabi.stdout,
+	flagstest_compress_debug_sections_gabi.cmp and
+	flagstest_compress_debug_sections_gabi.check.
+	(flagstest_compress_debug_sections_none): New.
+	(flagstest_compress_debug_sections_none.stdout): Likewise.
+	(flagstest_compress_debug_sections.stdout): Likewise.
+	(flagstest_compress_debug_sections.check): Likewise.
+	(flagstest_compress_debug_sections.cmp): Likewise.
+	(flagstest_compress_debug_sections_gnu): Likewise.
+	(flagstest_compress_debug_sections_gnu.stdout): Likewise.
+	(flagstest_compress_debug_sections_gnu.check): Likewise.
+	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
+	(flagstest_compress_debug_sections_gabi): Likewise.
+	(flagstest_compress_debug_sections_gabi.stdout): Likewise.
+	(flagstest_compress_debug_sections_gnu.check): Likewise.
+	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
+2015-07-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/18321
 	* compressed_output.h (decompress_input_section): Add arguments
 	for ELF class, big endian and sh_flags.
