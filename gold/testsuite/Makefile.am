@@ -1239,6 +1239,22 @@ debug_msg_cdebug.err: debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_
 	  rm -f $@; \
 	  exit 1; \
 	fi
+check_DATA += debug_msg_cdebug_gabi.err
+MOSTLYCLEANFILES += debug_msg_cdebug_gabi.err
+debug_msg_cdebug_gabi.o: debug_msg.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1_cdebug_gabi.o: odr_violation1.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2_cdebug_gabi.o: odr_violation2.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_cdebug_gabi.err: debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug_gabi debug_msg_cdebug_gabi.o odr_violation1_cdebug_gabi.o odr_violation2_cdebug_gabi.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_cdebug_gabi should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
 
 # See if we can also detect problems when we're linking .so's, not .o's.
 check_DATA += debug_msg_so.err
@@ -1303,8 +1319,22 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 	chmod a+x $@
 	test -s $@
 
-# Test --compress-debug-sections.  FIXME: check we actually compress.
+# Test --compress-debug-sections.
+check_PROGRAMS += flagstest_compress_debug_sections_none
+check_DATA += flagstest_compress_debug_sections_none.stdout
+flagstest_compress_debug_sections_none: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=none
+	test -s $@
+
+# Dump DWARF debug sections.
+flagstest_compress_debug_sections_none.stdout: flagstest_compress_debug_sections_none
+	$(TEST_READELF) -w $< > $@.tmp
+	mv -f $@.tmp $@
+
 check_PROGRAMS += flagstest_compress_debug_sections
+check_DATA += flagstest_compress_debug_sections.stdout \
+	      flagstest_compress_debug_sections.cmp \
+	      flagstest_compress_debug_sections.check
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
@@ -1317,6 +1347,73 @@ flagstest_compress_debug_sections_and_build_id_tree: flagstest_debug.o gcctestdi
 		-Wl,--build-id-chunk-size-for-treehash=4096 \
 		-Wl,--build-id-min-file-size-for-treehash=0
 	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections.stdout: flagstest_compress_debug_sections
+	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .zdebug_* sections.
+flagstest_compress_debug_sections.check: flagstest_compress_debug_sections
+	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections.cmp: flagstest_compress_debug_sections.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
+
+check_PROGRAMS += flagstest_compress_debug_sections_gnu
+check_DATA += flagstest_compress_debug_sections_gnu.stdout \
+	      flagstest_compress_debug_sections_gnu.cmp \
+	      flagstest_compress_debug_sections_gnu.check
+flagstest_compress_debug_sections_gnu: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gnu
+	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections_gnu.stdout: flagstest_compress_debug_sections_gnu
+	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .zdebug_* sections.
+flagstest_compress_debug_sections_gnu.check: flagstest_compress_debug_sections_gnu
+	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections_gnu.cmp: flagstest_compress_debug_sections_gnu.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections_gnu.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
+
+check_PROGRAMS += flagstest_compress_debug_sections_gabi
+check_DATA += flagstest_compress_debug_sections_gabi.stdout \
+	      flagstest_compress_debug_sections_gabi.cmp \
+	      flagstest_compress_debug_sections_gabi.check
+flagstest_compress_debug_sections_gabi: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gabi
+	test -s $@
+
+# Dump compressed DWARF debug sections.
+flagstest_compress_debug_sections_gabi.stdout: flagstest_compress_debug_sections_gabi
+	$(TEST_READELF) -w $< > $@.tmp
+	mv -f $@.tmp $@
+
+# Check there are compressed DWARF .debug_* sections.
+flagstest_compress_debug_sections_gabi.check: flagstest_compress_debug_sections_gabi
+	$(TEST_READELF) -tW $< | grep "COMPRESSED" > $@.tmp
+	mv -f $@.tmp $@
+
+# Compare DWARF debug info.
+flagstest_compress_debug_sections_gabi.cmp: flagstest_compress_debug_sections_gabi.stdout \
+	flagstest_compress_debug_sections_none.stdout
+	cmp flagstest_compress_debug_sections_gabi.stdout \
+		flagstest_compress_debug_sections_none.stdout > $@.tmp
+	mv -f $@.tmp $@
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
@@ -2399,6 +2496,15 @@ gdb_index_test_cdebug.o: gdb_index_test.cc
 gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
 gdb_index_test_2.stdout: gdb_index_test_2
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+check_SCRIPTS += gdb_index_test_2_gabi.sh
+check_DATA += gdb_index_test_2_gabi.stdout
+MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
+gdb_index_test_cdebug_gabi.o: gdb_index_test.cc
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections=zlib-gabi -c -o $@ $<
+gdb_index_test_2_gabi: gdb_index_test_cdebug_gabi.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+gdb_index_test_2_gabi.stdout: gdb_index_test_2_gabi
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
 # Another simple C test (DW_AT_high_pc encoding) for --gdb-index.

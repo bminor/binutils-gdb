@@ -223,8 +223,14 @@ extern initialize_file_ftype _initialize_nios2_linux_tdep;
 void
 _initialize_nios2_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_nios2, 0, GDB_OSABI_LINUX,
-                          nios2_linux_init_abi);
+
+  const struct bfd_arch_info *arch_info;
+
+  for (arch_info = bfd_lookup_arch (bfd_arch_nios2, 0);
+       arch_info != NULL;
+       arch_info = arch_info->next)
+    gdbarch_register_osabi (bfd_arch_nios2, arch_info->mach,
+			    GDB_OSABI_LINUX, nios2_linux_init_abi);
 
   initialize_tdesc_nios2_linux ();
 }

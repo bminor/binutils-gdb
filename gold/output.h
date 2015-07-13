@@ -3100,6 +3100,11 @@ class Output_section : public Output_data
   void
   update_flags_for_input_section(elfcpp::Elf_Xword flags);
 
+  // Set the output section flags.
+  void
+  set_flags(elfcpp::Elf_Xword flags)
+  { this->flags_ = flags; }
+
   // Return the entsize field.
   uint64_t
   entsize() const

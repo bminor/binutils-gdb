@@ -866,7 +866,9 @@ Sized_relobj_file<size, big_endian>::write_sections(const Layout* layout,
 	  // Read and decompress the section.
           section_size_type len;
 	  const unsigned char* p = this->section_contents(i, &len, false);
-	  if (!decompress_input_section(p, len, view, view_size))
+	  if (!decompress_input_section(p, len, view, view_size,
+					size, big_endian,
+					shdr.get_sh_flags()))
 	    this->error(_("could not decompress section %s"),
 			this->section_name(i).c_str());
         }

@@ -1,3 +1,8 @@
+2015-07-12  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-linux-tdep.c (_initialize_nios2_linux_tdep): Register
+	all nios2 mach variants.
+
 2015-07-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* rx-tdep.c (rx_get_opcode_byte): Use target_read_code instead

@@ -1,3 +1,89 @@
+2015-07-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18322
+	* compressed_output.cc (zlib_compress): Add argument for
+	compression header size.  Set header size to compression header
+	size if it isn't 0.  Don't write out the zlib header here.
+	(Output_compressed_section::set_final_data_size): Support
+	zlib-gnu and zlib-gabi compressions.  Pass compression header
+	size to zlib_compress and write out compression header.  Set
+	the SHF_COMPRESSED bit for zlib-gabi compression.  Otherwise
+	clear the SHF_COMPRESSED bit
+	* options.h (compress_debug_sections): Add zlib-gnu and
+	zlib-gabi.
+	* output.h (Output_section::set_flags): New.
+	* testsuite/Makefile.am (check_PROGRAMS): Add
+	flagstest_compress_debug_sections_none,
+	flagstest_compress_debug_sections_gnu and
+	flagstest_compress_debug_sections_gabi.
+	(check_DATA): Add flagstest_compress_debug_sections_none.stdout.
+	flagstest_compress_debug_sections.stdout,
+	flagstest_compress_debug_sections.cmp,
+	flagstest_compress_debug_sections.check,
+	flagstest_compress_debug_sections_gnu.stdout,
+	flagstest_compress_debug_sections_gnu.cmp,
+	flagstest_compress_debug_sections_gnu.check,
+	flagstest_compress_debug_sections_gabi.stdout,
+	flagstest_compress_debug_sections_gabi.cmp and
+	flagstest_compress_debug_sections_gabi.check.
+	(flagstest_compress_debug_sections_none): New.
+	(flagstest_compress_debug_sections_none.stdout): Likewise.
+	(flagstest_compress_debug_sections.stdout): Likewise.
+	(flagstest_compress_debug_sections.check): Likewise.
+	(flagstest_compress_debug_sections.cmp): Likewise.
+	(flagstest_compress_debug_sections_gnu): Likewise.
+	(flagstest_compress_debug_sections_gnu.stdout): Likewise.
+	(flagstest_compress_debug_sections_gnu.check): Likewise.
+	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
+	(flagstest_compress_debug_sections_gabi): Likewise.
+	(flagstest_compress_debug_sections_gabi.stdout): Likewise.
+	(flagstest_compress_debug_sections_gnu.check): Likewise.
+	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
+2015-07-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18321
+	* compressed_output.h (decompress_input_section): Add arguments
+	for ELF class, big endian and sh_flags.
+	* compressed_output.cc (decompress_input_section): Likewise.
+	Support the SHF_COMPRESSED section.
+	* dynobj.h (Dynobj): Add elfsize and is_big_endian member
+	functions.
+	* plugin.h (Pluginobj): Likewise.
+	* layout.cc (Layout::get_output_section_flags): Also clear the
+	SHF_COMPRESSED bit.
+	* object.h (Compressed_section_info): Add flag to store sh_flags.
+	(Object): Add pure virtual elfsize and is_big_endian member
+	functions.
+	* object.cc (need_decompressed_section): Don't skip the ".zdebug"
+	prefix here.
+	(build_compressed_section_map): Check SHF_COMPRESSED for
+	uncompressed size.  Store sh_flags in Compressed_section_info.
+	Pass size, big_endian and sh_flags to decompress_input_section.
+	Skip the ".debug"/".zdebug" prefix when passing section name to
+	need_decompressed_section.
+	(Sized_relobj_file<size, big_endian>::do_find_special_section):
+	Don't check ".zdebug_*" sections.
+	(Object::decompressed_section_contents): Pass ELF class, big
+	endian and sh_flags to decompress_input_section.
+	* reloc.cc (Sized_relobj_file<size, big_endian>::write_sections):
+	Likewise.
+	* testsuite/Makefile.am (check_DATA): Add
+	debug_msg_cdebug_gabi.err and gdb_index_test_2_gabi.stdout.
+	(MOSTLYCLEANFILES): Add debug_msg_cdebug_gabi.err and
+	gdb_index_test_2_gabi.stdout.
+	(debug_msg_cdebug_gabi.o): New.
+	(odr_violation1_cdebug_gabi.o): Likewise.
+	(odr_violation2_cdebug_gabi.o): Likewise.
+	(debug_msg_cdebug_gabi.err): Likewise.
+	(check_SCRIPTS): Add gdb_index_test_2_gabi.sh.
+	(gdb_index_test_cdebug_gabi.o): Likewise.
+	(gdb_index_test_2_gabi): Likewise.
+	(gdb_index_test_2_gabi.stdout): Likewise.
+	* testsuite/gdb_index_test_2_gabi.sh: New file.
+	* testsuite/Makefile.in: Regenerated.
+
 2015-07-09  Han Shen  <shenhan@google.com>
 
 	Use "gold_info" instead of "gold_warning" for erratum fix.

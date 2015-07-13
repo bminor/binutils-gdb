@@ -320,6 +320,7 @@ class Got_offset_list
 struct Compressed_section_info
 {
   section_size_type size;
+  elfcpp::Elf_Xword flag;
   const unsigned char* contents;
 };
 typedef std::map<unsigned int, Compressed_section_info> Compressed_section_map;
@@ -379,6 +380,12 @@ class Object
   bool
   is_dynamic() const
   { return this->is_dynamic_; }
+
+  // Return the word size of the object file.
+  virtual int elfsize() const = 0;
+
+  // Return TRUE if this is a big-endian object file.
+  virtual bool is_big_endian() const = 0;
 
   // Return whether this object is needed--true if it is a dynamic
   // object which defines some symbol referenced by a regular object.

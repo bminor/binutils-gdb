@@ -913,6 +913,7 @@ Layout::get_output_section_flags(elfcpp::Elf_Xword input_section_flags)
   // copied to the output section.
   input_section_flags &= ~ (elfcpp::SHF_INFO_LINK
 			    | elfcpp::SHF_GROUP
+			    | elfcpp::SHF_COMPRESSED
 			    | elfcpp::SHF_MERGE
 			    | elfcpp::SHF_STRINGS);
 
