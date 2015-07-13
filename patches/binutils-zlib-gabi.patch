@@ -1,21 +1,104 @@
-From da77b73ec19ab5d694ab3510538bb1e575254ccc Mon Sep 17 00:00:00 2001
+From 98eb5a71895aad09c980b2524f7c4df12fd5bb71 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Fri, 10 Jul 2015 14:49:09 -0700
-Subject: [PATCH] Enable gABI compression by default on x86
+Subject: [PATCH 1/2] Make default compression gABI compliant
 
+All programs in binutils+gdb git repo now support gABI compression
+with the SHF_COMPRESSED bit.  This patch makes the zlib-gabi option
+as compression default for gas, gold, ld and objcopy, instead of the
+zlib-gnu option whose outputs are incompatible with gABI.
+
+binutils/
+
+	* objcopy.c (copy_file): Set BFD_COMPRESS_GABI if not
+	zlib-gnu.
+	* doc/binutils.texi: Change --compress-debug-sections and
+	--compress-debug-sections=zlib to zlib-gabi.
+
+binutils/testsuite/
+
+	* binutils-all/compress.exp: Update.
+
+gas/
+
+	* as.c (parse_args): Make --compress-debug-sections and
+	--compress-debug-sections=zlib the same as
+	--compress-debug-sections=zlib-gabi.
+	* doc/as.texinfo: Change --compress-debug-sections and
+	--compress-debug-sections=zlib to zlib-gabi.
+
+gold/
+
+	* compressed_output.cc (Output_compressed_section::set_final_data_size):
+	Make --compress-debug-sections=zlib the same as
+	--compress-debug-sections=zlib-gabi.
+	* testsuite/Makefile.am (flagstest_compress_debug_sections.check):
+	Expect ".debug_.*" with the SHF_COMPRESSED bit, instead of
+	".zdebug_".
+	* testsuite/Makefile.in: Regenerated.
+
+ld/
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Make
+	--compress-debug-sections=zlib the same as
+	--compress-debug-sections=zlib-gabi.
+	* ld.texinfo: Change --compress-debug-sections=zlib to zlib-gabi.
+
+ld/testsuite/
+
+	* ld-elf/zlibbegin.rS: Updated to .debug_.* with the
+	SHF_COMPRESSED bit.
+	* ld-elf/zlibnormal.rS: Likewise.
 ---
+ binutils/doc/binutils.texi                   | 16 +++++++++-------
  binutils/objcopy.c                           |  2 +-
  binutils/testsuite/binutils-all/compress.exp | 23 ++++++++++++++---------
  gas/as.c                                     |  4 ++--
- gas/config/tc-i386.c                         |  2 +-
+ gas/doc/as.texinfo                           | 17 ++++++++++-------
  gold/compressed_output.cc                    |  7 +++----
  gold/testsuite/Makefile.am                   |  4 ++--
  gold/testsuite/Makefile.in                   |  4 ++--
  ld/emultempl/elf32.em                        |  2 +-
+ ld/ld.texinfo                                |  9 +++++----
  ld/testsuite/ld-elf/zlibbegin.rS             |  2 +-
  ld/testsuite/ld-elf/zlibnormal.rS            |  2 +-
- 10 files changed, 28 insertions(+), 24 deletions(-)
+ 12 files changed, 51 insertions(+), 41 deletions(-)
 
+diff --git a/binutils/doc/binutils.texi b/binutils/doc/binutils.texi
+index 0781036..466f125 100644
+--- a/binutils/doc/binutils.texi
++++ b/binutils/doc/binutils.texi
+@@ -1844,10 +1844,9 @@ It can also be a useful way of reducing the size of a @option{--just-symbols}
+ linker input file.
+ 
+ @item --compress-debug-sections
+-Compress DWARF debug sections using zlib.  The debug sections are
+-renamed to begin with @samp{.zdebug} instead of @samp{.debug}.  Note -
+-if compression would actually make a section @emph{larger} then it is
+-not compressed or renamed.
++Compress DWARF debug sections using zlib with SHF_COMPRESSED from the
++ELF ABI.  Note - if compression would actually make a section
++@emph{larger}, then it is not compressed.
+ 
+ @item --compress-debug-sections=none
+ @itemx --compress-debug-sections=zlib
+@@ -1857,10 +1856,13 @@ For ELF files, these options control how DWARF debug sections are
+ compressed.  @option{--compress-debug-sections=none} is equivalent
+ to @option{--nocompress-debug-sections}.
+ @option{--compress-debug-sections=zlib} and
+-@option{--compress-debug-sections=zlib-gnu} are equivalent to
++@option{--compress-debug-sections=zlib-gabi} are equivalent to
+ @option{--compress-debug-sections}.
+-@option{--compress-debug-sections=zlib-gabi} compresses
+-DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
++@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
++sections using zlib.  The debug sections are renamed to begin with
++@samp{.zdebug} instead of @samp{.debug}.  Note - if compression would
++actually make a section @emph{larger}, then it is not compressed nor
++renamed.
+ 
+ @item --decompress-debug-sections
+ Decompress DWARF debug sections using zlib.  The original section
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
 index d6516e0..bb6ca44 100644
 --- a/binutils/objcopy.c
@@ -128,19 +211,42 @@ index b8a5be4..6fb28e9 100644
  	  break;
  
  	case OPTION_NOCOMPRESS_DEBUG:
-diff --git a/gas/config/tc-i386.c b/gas/config/tc-i386.c
-index 5a1e2b3..2bdb769 100644
---- a/gas/config/tc-i386.c
-+++ b/gas/config/tc-i386.c
-@@ -36,7 +36,7 @@
- #ifdef TE_LINUX
- /* Default to compress debug sections for Linux.  */
- enum compressed_debug_section_type flag_compress_debug
--  = COMPRESS_DEBUG_GNU_ZLIB;
-+  = COMPRESS_DEBUG_GABI_ZLIB;
- #endif
+diff --git a/gas/doc/as.texinfo b/gas/doc/as.texinfo
+index 950bf28..70f1b96 100644
+--- a/gas/doc/as.texinfo
++++ b/gas/doc/as.texinfo
+@@ -625,10 +625,10 @@ Begin in alternate macro mode.
+ @end ifclear
  
- #ifndef REGISTER_WARNINGS
+ @item --compress-debug-sections
+-Compress DWARF debug sections using zlib.  The debug sections are renamed
+-to begin with @samp{.zdebug}, and the resulting object file may not be
+-compatible with older linkers and object file utilities.  Note if compression
+-would make a given section @emph{larger} then it is not compressed or renamed.
++Compress DWARF debug sections using zlib with SHF_COMPRESSED from the
++ELF ABI.  The resulting object file may not be compatible with older
++linkers and object file utilities.  Note if compression would make a
++given section @emph{larger} then it is not compressed.
+ 
+ @ifset ELF
+ @cindex @samp{--compress-debug-sections=} option
+@@ -640,10 +640,13 @@ These options control how DWARF debug sections are compressed.
+ @option{--compress-debug-sections=none} is equivalent to
+ @option{--nocompress-debug-sections}.
+ @option{--compress-debug-sections=zlib} and
+-@option{--compress-debug-sections=zlib-gnu} are equivalent to
++@option{--compress-debug-sections=zlib-gabi} are equivalent to
+ @option{--compress-debug-sections}.
+-@option{--compress-debug-sections=zlib-gabi} compresses
+-DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
++@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
++sections using zlib.  The debug sections are renamed to begin with
++@samp{.zdebug}.  Note if compression would make a given section
++@emph{larger} then it is not compressed nor renamed.
++
+ @end ifset
+ 
+ @item --nocompress-debug-sections
 diff --git a/gold/compressed_output.cc b/gold/compressed_output.cc
 index 2630330..77679fe 100644
 --- a/gold/compressed_output.cc
@@ -205,6 +311,27 @@ index 14f7963..8a41347 100644
        else if (strcasecmp (optarg, "zlib-gnu") == 0)
  	link_info.compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
        else if (strcasecmp (optarg, "zlib-gabi") == 0)
+diff --git a/ld/ld.texinfo b/ld/ld.texinfo
+index 246f545..0503f99 100644
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
+@@ -2228,11 +2228,12 @@ hash tables.  The default is @code{sysv}.
+ @itemx --compress-debug-sections=zlib-gabi
+ On ELF platforms , these options control how DWARF debug sections are
+ compressed using zlib.  @option{--compress-debug-sections=none} doesn't
+-compress DWARF debug sections.  @option{--compress-debug-sections=zlib}
+-and @option{--compress-debug-sections=zlib-gnu} compress DWARF debug
++compress DWARF debug sections.
++@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
+ sections and rename debug section names to begin with @samp{.zdebug}
+-instead of @samp{.debug}.  @option{--compress-debug-sections=zlib-gabi}
+-compresses DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
++instead of @samp{.debug}.  @option{--compress-debug-sections=zlib}
++and @option{--compress-debug-sections=zlib-gabi}
++compress DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+ 
+ @kindex --reduce-memory-overheads
+ @item --reduce-memory-overheads
 diff --git a/ld/testsuite/ld-elf/zlibbegin.rS b/ld/testsuite/ld-elf/zlibbegin.rS
 index 54de24c..294fdb4 100644
 --- a/ld/testsuite/ld-elf/zlibbegin.rS
