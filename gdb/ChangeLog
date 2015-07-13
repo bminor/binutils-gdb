@@ -1,3 +1,8 @@
+2015-07-13  Yao Qi  <yao.qi@linaro.org>
+
+	* exec.c (exec_file_attach): Add period at the end of error
+	message.
+
 2015-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-win.c (window_name_completer): New function.
