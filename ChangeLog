@@ -1,6 +1,14 @@
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
+	2015-05-16  James Bowman  <james.bowman@ftdichip.com>
+
+	* configure.ac: FT32 target added.
+	* configure: Regenerate.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
 	2015-06-02  Jason Merrill  <jason@redhat.com>
 
 	PR bootstrap/66319
