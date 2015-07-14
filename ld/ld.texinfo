@@ -2096,7 +2096,7 @@ which refers to it.
 @item --warn-orphan
 The @option{--warn-orphan} option tells the linker to generate a
 warning message whenever it has to place an orphan section into the
-output file.  @xref{Orphan Sections}  The @option{--no-warn-orphan}
+output file.  @xref{Orphan Sections}.  The @option{--no-warn-orphan}
 option restores the default behaviour of just silently placing these
 sections.
 
