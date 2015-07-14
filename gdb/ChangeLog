@@ -1,3 +1,9 @@
+2015-07-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* nat/linux-namespaces.c (setns): Rename from this ...
+	(do_setns): ... to this.  Support calling setns if it exists.
+	(mnsh_handle_setns): Call do_setns.
+
 2015-07-13  Yao Qi  <yao.qi@linaro.org>
 
 	* exec.c (exec_file_attach): Add period at the end of error
