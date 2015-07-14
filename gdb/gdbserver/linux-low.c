@@ -1103,7 +1103,10 @@ kill_wait_lwp (struct lwp_info *lwp)
 	res = my_waitpid (lwpid, &wstat, __WCLONE);
     } while (res > 0 && WIFSTOPPED (wstat));
 
-  gdb_assert (res > 0);
+  /* Even if it was stopped, the child may have already disappeared.
+     E.g., if it was killed by SIGKILL.  */
+  if (res < 0 && errno != ECHILD)
+    perror_with_name ("kill_wait_lwp");
 }
 
 /* Callback for `find_inferior'.  Kills an lwp of a given process,
