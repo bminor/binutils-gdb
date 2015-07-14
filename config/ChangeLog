@@ -1,6 +1,39 @@
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
+	2015-05-13  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* sjlj.m4: New file.
+
+	2015-05-04  Trevor Saunders  <tbsaunde+gcc@tbsaunde.org>
+
+	* bitfields.m4: Change int to long long, and use bitfields of
+	width 1 instead of 0.
+
+	2015-05-01  Trevor Saunders  <tbsaunde+gcc@tbsaunde.org>
+
+	* bitfields.m4: New file.
+
+	2015-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bootstrap-mpx.mk: New file.
+
+	2015-03-25  Uros Bizjak  <ubizjak@gmail.com>
+
+	PR bootstrap/65537
+	* bootstrap-lto-noplugin.mk: New build configuration.
+
+	2014-11-13  Kirill Yukhin  <kirill.yukhin@intel.com>
+
+	* target-posix: New file.
+
+	2014-10-27  Tom Tromey  <tromey@redhat.com>
+
+	* gcc-plugin.m4: New file.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
 	2015-05-27  Jason Merrill  <jason@redhat.com>
 
 	PR bootstrap/66304
