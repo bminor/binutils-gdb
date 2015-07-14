@@ -544,7 +544,7 @@ extern const char *language_str (enum language);
 
 extern void add_language (const struct language_defn *);
 
-extern enum language get_frame_language (void);	/* In stack.c */
+extern enum language get_frame_language (struct frame_info *frame);	/* In stack.c */
 
 /* Check for a language-specific trampoline.  */
 

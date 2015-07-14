@@ -1,3 +1,14 @@
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* language.c (show_language_command): Find selected frame before
+	asking for the language of that frame.
+	(set_language_command): Likewise.
+	* language.h (get_frame_language): Add frame parameter.
+	* stack.c (get_frame_language): Add frame parameter, assert
+	parameter is not NULL, update comment and reindent.
+	* top.c (check_frame_language_change): Pass the selected frame
+	into get_frame_language.
+
 2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (btrace_compute_ftrace_bts): Clear insn flags.

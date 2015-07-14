@@ -118,7 +118,7 @@ static void
 show_language_command (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  enum language flang;		/* The language of the current frame.  */
+  enum language flang;		/* The language of the frame.  */
 
   if (language_mode == language_mode_auto)
     fprintf_filtered (gdb_stdout,
@@ -130,11 +130,17 @@ show_language_command (struct ui_file *file, int from_tty,
 		      _("The current source language is \"%s\".\n"),
 		      current_language->la_name);
 
-  flang = get_frame_language ();
-  if (flang != language_unknown &&
-      language_mode == language_mode_manual &&
-      current_language->la_language != flang)
-    printf_filtered ("%s\n", lang_frame_mismatch_warn);
+  if (has_stack_frames ())
+    {
+      struct frame_info *frame;
+
+      frame = get_selected_frame (NULL);
+      flang = get_frame_language (frame);
+      if (flang != language_unknown
+	  && language_mode == language_mode_manual
+	  && current_language->la_language != flang)
+	printf_filtered ("%s\n", lang_frame_mismatch_warn);
+    }
 }
 
 /* Set command.  Change the current working language.  */
@@ -142,7 +148,7 @@ static void
 set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   int i;
-  enum language flang;
+  enum language flang = language_unknown;
 
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++)
@@ -155,7 +161,19 @@ set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	      /* Enter auto mode.  Set to the current frame's language, if
                  known, or fallback to the initial language.  */
 	      language_mode = language_mode_auto;
-	      flang = get_frame_language ();
+	      TRY
+		{
+		  struct frame_info *frame;
+
+		  frame = get_selected_frame (NULL);
+		  flang = get_frame_language (frame);
+		}
+	      CATCH (ex, RETURN_MASK_ERROR)
+		{
+		  flang = language_unknown;
+		}
+	      END_CATCH
+
 	      if (flang != language_unknown)
 		set_language (flang);
 	      else
