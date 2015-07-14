@@ -1,3 +1,8 @@
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	* mh-alpha-linux: Restored.
+
 2015-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dfp.m4 (enable_decimal_float): Also set to yes for

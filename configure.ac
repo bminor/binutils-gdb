@@ -1308,6 +1308,9 @@ case "${host}" in
   *-mingw*)
     host_makefile_frag="config/mh-mingw"
     ;;
+  alpha*-linux*)
+    host_makefile_frag="config/mh-alpha-linux"
+    ;;
   hppa*-hp-hpux10*)
     host_makefile_frag="config/mh-pa-hpux10"
     ;;
@@ -1446,6 +1449,12 @@ case "$have_compiler:$host:$target:$enable_bootstrap" in
     AC_MSG_ERROR([invalid option for --enable-bootstrap])
     ;;
 esac
+
+# When bootstrapping with GCC, build stage 1 in C++98 mode to ensure that a
+# C++98 compiler can still start the bootstrap.
+if test "$enable_bootstrap:$GXX" = "yes:yes"; then
+  CXX="$CXX -std=gnu++98"
+fi
 
 # Used for setting $lt_cv_objdir
 _LT_CHECK_OBJDIR
@@ -2694,7 +2703,8 @@ AC_SUBST(BUILD_CONFIG)
 # Use same top-level configure hooks in libgcc/libstdc++/libvtv.
 AC_MSG_CHECKING([for --enable-vtable-verify])
 AC_ARG_ENABLE(vtable-verify,
-[  --enable-vtable-verify    Enable vtable verification feature ],
+[AS_HELP_STRING([--enable-vtable-verify],
+		[Enable vtable verification feature])],
 [case "$enableval" in
  yes) enable_vtable_verify=yes ;;
  no)  enable_vtable_verify=no ;;
@@ -3089,7 +3099,7 @@ fi
 # multilib is not explicitly enabled.
 case "$target:$have_compiler:$host:$target:$enable_multilib" in
   x86_64-*linux*:yes:$build:$build:)
-    # Make sure we have a developement environment that handles 32-bit
+    # Make sure we have a development environment that handles 32-bit
     dev64=no
     echo "int main () { return 0; }" > conftest.c
     ${CC} -m32 -o conftest ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} conftest.c
@@ -3100,7 +3110,7 @@ case "$target:$have_compiler:$host:$target:$enable_multilib" in
     fi 
     rm -f conftest*
     if test x${dev64} != xyes ; then
-      AC_MSG_ERROR([I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.])
+      AC_MSG_ERROR([I suspect your system does not have 32-bit development libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.])
     fi
     ;;
 esac
@@ -3508,7 +3518,19 @@ AC_ARG_ENABLE(stage1-checking,
 		[choose additional checking for stage1 of the compiler])],
 [stage1_checking=--enable-checking=${enable_stage1_checking}],
 [if test "x$enable_checking" = xno || test "x$enable_checking" = x; then
-  stage1_checking=--enable-checking=yes,types
+  # For --disable-checking or implicit --enable-checking=release, avoid
+  # setting --enable-checking=gc in the default stage1 checking for LTO
+  # bootstraps.  See PR62077.
+  stage1_checking=--enable-checking=release,misc,gimple,rtlflag,tree,types
+  case $BUILD_CONFIG in
+    *lto*)
+      if test "x$enable_checking" = x && \
+	 test -d ${srcdir}/gcc && \
+	 test x"`cat ${srcdir}/gcc/DEV-PHASE`" = xexperimental; then
+	stage1_checking=--enable-checking=yes,types
+      fi;;
+    *) stage1_checking=--enable-checking=yes,types;;
+  esac
 else
   stage1_checking=--enable-checking=$enable_checking,types
 fi])
