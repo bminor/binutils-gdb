@@ -1,3 +1,7 @@
+2015-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-biarch-core.exp: Fix comment typo.
+
 2015-07-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/killed-outside.exp: New file.
