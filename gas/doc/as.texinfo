@@ -625,10 +625,10 @@ Begin in alternate macro mode.
 @end ifclear
 
 @item --compress-debug-sections
-Compress DWARF debug sections using zlib.  The debug sections are renamed
-to begin with @samp{.zdebug}, and the resulting object file may not be
-compatible with older linkers and object file utilities.  Note if compression
-would make a given section @emph{larger} then it is not compressed or renamed.
+Compress DWARF debug sections using zlib with SHF_COMPRESSED from the
+ELF ABI.  The resulting object file may not be compatible with older
+linkers and object file utilities.  Note if compression would make a
+given section @emph{larger} then it is not compressed.
 
 @ifset ELF
 @cindex @samp{--compress-debug-sections=} option
@@ -640,10 +640,13 @@ These options control how DWARF debug sections are compressed.
 @option{--compress-debug-sections=none} is equivalent to
 @option{--nocompress-debug-sections}.
 @option{--compress-debug-sections=zlib} and
-@option{--compress-debug-sections=zlib-gnu} are equivalent to
+@option{--compress-debug-sections=zlib-gabi} are equivalent to
 @option{--compress-debug-sections}.
-@option{--compress-debug-sections=zlib-gabi} compresses
-DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
+sections using zlib.  The debug sections are renamed to begin with
+@samp{.zdebug}.  Note if compression would make a given section
+@emph{larger} then it is not compressed nor renamed.
+
 @end ifset
 
 @item --nocompress-debug-sections

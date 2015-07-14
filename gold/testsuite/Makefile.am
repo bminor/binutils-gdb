@@ -1353,9 +1353,9 @@ flagstest_compress_debug_sections.stdout: flagstest_compress_debug_sections
 	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
 	mv -f $@.tmp $@
 
-# Check there are compressed DWARF .zdebug_* sections.
+# Check there are compressed DWARF .debug_* sections.
 flagstest_compress_debug_sections.check: flagstest_compress_debug_sections
-	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	$(TEST_READELF) -SW $< | egrep ".debug_.* C *" > $@.tmp
 	mv -f $@.tmp $@
 
 # Compare DWARF debug info.

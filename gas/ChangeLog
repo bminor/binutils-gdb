@@ -1,3 +1,11 @@
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.c (parse_args): Make --compress-debug-sections and
+	--compress-debug-sections=zlib the same as
+	--compress-debug-sections=zlib-gabi.
+	* doc/as.texinfo: Change --compress-debug-sections and
+	--compress-debug-sections=zlib to zlib-gabi.
+
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
         * config/tc-mips.c (check_fpabi):  Handle

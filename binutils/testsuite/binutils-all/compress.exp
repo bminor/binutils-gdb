@@ -39,7 +39,12 @@ if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S ${compressedfile}.o --com
     return
 }
 
-set got [remote_exec host "cmp ${testfile}.o ${compressedfile}.o"]
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S ${compressedfile}gnu.o --compress-debug-sections=zlib-gnu] } then {
+    unsupported "compressed debug sections with zlib-gnu"
+    return
+}
+
+set got [remote_exec host "cmp ${testfile}.o ${compressedfile}gnu.o"]
 # Use it to set up xfail.
 set exec_output [lindex $got 1]
 if [string match "" $exec_output] then {
@@ -136,8 +141,8 @@ if ![string match "" $got] then {
 
 # Xfail this test if there are no compressed sections.
 setup_xfail "$compression_used$target_triplet"
-set testname "objcopy compress debug sections in archive"
-set got [binutils_run $OBJCOPY "--compress-debug-sections ${copyfile}.a ${compressedcopyfile}.a"]
+set testname "objcopy compress debug sections in archive with zlib-gnu"
+set got [binutils_run $OBJCOPY "--compress-debug-sections=zlib-gnu ${copyfile}.a ${compressedcopyfile}.a"]
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
 } else {
@@ -228,13 +233,13 @@ if { ![binutils_assemble_flags $srcdir/$subdir/dw2-1.S ${compressedfile}gnu.o --
     return
 }
 
-set src1 ${compressedfile}gnu.o
+set src1 ${compressedfile}gabi.o
 set src2 ${compressedfile}.o
 set status [remote_exec build cmp "${src1} ${src2}"]
 set exec_output [lindex $status 1]
 set exec_output [prune_warnings $exec_output]
 if ![string match "" $exec_output] then {
-    fail "compressed debug sections with zlib-gnu"
+    fail "compressed debug sections with zlib-gabi"
     return
 }
 
@@ -248,13 +253,13 @@ if { ![binutils_assemble_flags $srcdir/$subdir/dw2-2.S ${compressedfile2}gnu.o -
     return
 }
 
-set src1 ${compressedfile2}gnu.o
+set src1 ${compressedfile2}gabi.o
 set src2 ${compressedfile2}.o
 set status [remote_exec build cmp "${src1} ${src2}"]
 set exec_output [lindex $status 1]
 set exec_output [prune_warnings $exec_output]
 if ![string match "" $exec_output] then {
-    fail "compressed debug sections with zlib-gnu"
+    fail "compressed debug sections with zlib-gabi"
     return
 }
 
@@ -292,13 +297,13 @@ if { ![binutils_assemble_flags $srcdir/$subdir/dw2-3.S ${compressedfile3}gnu.o -
     return
 }
 
-set src1 ${compressedfile3}gnu.o
+set src1 ${compressedfile3}gabi.o
 set src2 ${compressedfile3}.o
 set status [remote_exec build cmp "${src1} ${src2}"]
 set exec_output [lindex $status 1]
 set exec_output [prune_warnings $exec_output]
 if ![string match "" $exec_output] then {
-    fail "compressed debug sections with zlib-gnu"
+    fail "compressed debug sections with zlib-gabi"
     return
 }
 
