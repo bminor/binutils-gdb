@@ -1,6 +1,18 @@
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
+	2015-05-27  Jason Merrill  <jason@redhat.com>
+
+	PR bootstrap/66304
+	* warnings.m4 (ACX_PROG_CXX_WARNING_OPTS)
+	(ACX_PROG_CXX_WARNINGS_ARE_ERRORS)
+	(ACX_PROG_CXX_WARNING_ALMOST_PEDANTIC): New.
+	(ACX_PROG_CC_WARNING_OPTS, ACX_PROG_CC_WARNING_ALMOST_PEDANTIC)
+	(ACX_PROG_CC_WARNINGS_ARE_ERRORS): Push into C language context.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
 	* mh-alpha-linux: Restored.
 
 2015-06-30  H.J. Lu  <hongjiu.lu@intel.com>
