@@ -1,3 +1,8 @@
+2015-07-14  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (kill_wait_lwp): Don't assert if waitpid fails.
+	Instead, ignore ECHILD, and throw an error for other errnos.
+
 2015-07-10  Pedro Alves  <palves@redhat.com>
 
 	* event-loop.c (struct callback_event) <data>: Change type to
