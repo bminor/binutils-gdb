@@ -1,6 +1,13 @@
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
+	2014-10-28  Richard Henderson  <rth@redhat.com>
+
+	* longlong.h [__alpha] (umul_ppmm): Disable for c++.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
 	2014-12-09  Trevor Saunders  <tsaunders@mozilla.com>
 
 	* hashtab.h, splay-tree.h: Remove GTY markers.
