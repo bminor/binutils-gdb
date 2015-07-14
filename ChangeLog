@@ -1,5 +1,23 @@
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.in: Regenerated.
+
+	Sync with GCC
+	2015-05-21  Jason Merrill  <jason@redhat.com>
+
+	* Makefile.tpl: Update comments.
+
+	2015-04-22  Bernhard Reutner-Fischer  <aldot@gcc.gnu.org>
+
+	* Makefile.tpl: Remove surplus whitespace throughout.
+
+	2015-03-25  Martin Liska  <mliska@suse.cz>
+		    Yury Gribov  <y.gribov@samsung.com>
+
+	* Makefile.tpl: Fix ln source location for vimrc file.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	Sync with GCC
 	2015-05-16  James Bowman  <james.bowman@ftdichip.com>
 
