@@ -1,3 +1,8 @@
+2015-08-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.texinfo (MEMORY): Explain that multiple MEMORY commands are
+	acceptable.
+
 2015-07-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lexsup.c (parse_args): Don't set link_info.executable to

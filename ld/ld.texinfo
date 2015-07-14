@@ -4970,9 +4970,10 @@ set section addresses based on the memory regions, and will warn about
 regions that become too full.  The linker will not shuffle sections
 around to fit into the available regions.
 
-A linker script may contain at most one use of the @code{MEMORY}
-command.  However, you can define as many blocks of memory within it as
-you wish.  The syntax is:
+A linker script may contain many uses of the @code{MEMORY} command,
+however, all memory blocks defined are treated as if they were
+specified inside a single @code{MEMORY} command.  The syntax for
+@code{MEMORY} is:
 @smallexample
 @group
 MEMORY
