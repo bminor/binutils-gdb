@@ -1,3 +1,34 @@
+2015-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* armcopro.c: Remove extraneous whitespace.
+	* armdefs.h: Likewise.
+	* armfpe.h: Likewise.
+	* arminit.c: Likewise.
+	* armopts.h: Likewise.
+	* armos.c: Likewise.
+	* armos.h: Likewise.
+	* armrdi.c: Likewise.
+	* armsupp.c: Likewise.
+	* armvirt.c: Likewise.
+	* bag.c: Likewise.
+	* bag.h: Likewise.
+	* communicate.c: Likewise.
+	* communicate.h: Likewise.
+	* dbg_conf.h: Likewise.
+	* dbg_cp.h: Likewise.
+	* dbg_hif.h: Likewise.
+	* dbg_rdi.h: Likewise.
+	* gdbhost.c: Likewise.
+	* gdbhost.h: Likewise.
+	* iwmmxt.c: Likewise.
+	* iwmmxt.h: Likewise.
+	* kid.c: Likewise.
+	* main.c: Likewise.
+	* maverick.c: Likewise.
+	* parent.c: Likewise.
+	* thumbemu.c: Likewise.
+	* wrapper.c: Likewise.
+
 2015-07-02  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.in (SIM_EXTRA_CFLAGS): Revert previous delta.
