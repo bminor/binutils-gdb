@@ -1,3 +1,15 @@
+2015-07-14  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* dwarf2read.c (find_slot_in_mapped_hash): Extend language support to
+	also test for language_d.
+	(dwarf2_compute_name): Likewise.
+	(read_func_scope): Likewise.
+	(read_structure_type): Likewise.
+	(new_symbol_full): Likewise.
+	(determine_prefix): Likewise.
+	(read_import_statement): Use dot as the separator for language_d.
+	(typename_concat): Likewise, but don't prefix the D main function.
+
 2015-07-14  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* nat/linux-namespaces.c (setns): Rename from this ...
