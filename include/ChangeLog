@@ -1,6 +1,13 @@
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
+	2014-12-09  Trevor Saunders  <tsaunders@mozilla.com>
+
+	* hashtab.h, splay-tree.h: Remove GTY markers.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
 	2015-03-02  Markus Trippelsdorf  <markus@trippelsdorf.de>
 
 	PR target/65261
