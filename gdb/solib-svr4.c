@@ -45,6 +45,9 @@
 #include "auxv.h"
 #include "gdb_bfd.h"
 #include "probe.h"
+#include "rsp-low.h"
+
+#define NOTE_GNU_BUILD_ID_NAME  ".note.gnu.build-id"
 
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
@@ -970,6 +973,64 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   return (name_lm >= vaddr && name_lm < vaddr + size);
 }
 
+/* Validate SO by comparing build-id from the associated bfd and
+   corresponding build-id from target memory.  Return NULL for success
+   or a string for error.  Caller must call xfree for the error string.  */
+
+static char *
+svr4_validate (const struct so_list *const so)
+{
+  const bfd_byte *local_id;
+  size_t local_idsz;
+
+  gdb_assert (so != NULL);
+
+  /* Target doesn't support reporting the build ID or the remote shared library
+     does not have build ID.  */
+  if (so->build_id == NULL)
+    return NULL;
+
+  /* Build ID may be present in the local file, just GDB is unable to retrieve
+     it.  As it has been reported by gdbserver it is not FSF gdbserver.  */
+  if (so->abfd == NULL
+      || !bfd_check_format (so->abfd, bfd_object))
+    return NULL;
+
+  /* GDB has verified the local file really does not contain the build ID.  */
+  if (so->abfd->build_id == NULL)
+    {
+      char *remote_hex;
+
+      remote_hex = alloca (so->build_idsz * 2 + 1);
+      bin2hex (so->build_id, remote_hex, so->build_idsz);
+
+      return xstrprintf (_("remote build ID is %s "
+			   "but local file does not have build ID"),
+			 remote_hex);
+    }
+
+  local_id = so->abfd->build_id->data;
+  local_idsz = so->abfd->build_id->size;
+
+  if (so->build_idsz != local_idsz
+      || memcmp (so->build_id, local_id, so->build_idsz) != 0)
+    {
+      char *remote_hex, *local_hex;
+
+      remote_hex = alloca (so->build_idsz * 2 + 1);
+      bin2hex (so->build_id, remote_hex, so->build_idsz);
+      local_hex = alloca (local_idsz * 2 + 1);
+      bin2hex (local_id, local_hex, local_idsz);
+
+      return xstrprintf (_("remote build ID %s "
+			   "does not match local build ID %s"),
+			 remote_hex, local_hex);
+    }
+
+  /* Both build IDs are present and they match.  */
+  return NULL;
+}
+
 /* Implement the "open_symbol_file_object" target_so_ops method.
 
    If no open symbol file, attempt to locate and open the main symbol
@@ -1108,6 +1169,12 @@ svr4_copy_library_list (struct so_list *src)
       newobj->lm_info = xmalloc (sizeof (struct lm_info));
       memcpy (newobj->lm_info, src->lm_info, sizeof (struct lm_info));
 
+      if (newobj->build_id != NULL)
+	{
+	  newobj->build_id = xmalloc (src->build_idsz);
+	  memcpy (newobj->build_id, src->build_id, src->build_idsz);
+	}
+
       newobj->next = NULL;
       *link = newobj;
       link = &newobj->next;
@@ -1135,6 +1202,9 @@ library_list_start_library (struct gdb_xml_parser *parser,
   ULONGEST *lmp = xml_find_attribute (attributes, "lm")->value;
   ULONGEST *l_addrp = xml_find_attribute (attributes, "l_addr")->value;
   ULONGEST *l_ldp = xml_find_attribute (attributes, "l_ld")->value;
+  const struct gdb_xml_value *const att_build_id
+    = xml_find_attribute (attributes, "build-id");
+  const char *const hex_build_id = att_build_id ? att_build_id->value : NULL;
   struct so_list *new_elem;
 
   new_elem = XCNEW (struct so_list);
@@ -1146,6 +1216,37 @@ library_list_start_library (struct gdb_xml_parser *parser,
   strncpy (new_elem->so_name, name, sizeof (new_elem->so_name) - 1);
   new_elem->so_name[sizeof (new_elem->so_name) - 1] = 0;
   strcpy (new_elem->so_original_name, new_elem->so_name);
+  if (hex_build_id != NULL)
+    {
+      const size_t hex_build_id_len = strlen (hex_build_id);
+
+      if (hex_build_id_len == 0)
+	warning (_("Shared library \"%s\" received empty build-id "
+	           "from gdbserver"), new_elem->so_original_name);
+      else if ((hex_build_id_len & 1U) != 0)
+	warning (_("Shared library \"%s\" received odd number "
+		   "of build-id \"%s\" hex characters from gdbserver"),
+		 new_elem->so_original_name, hex_build_id);
+      else
+	{
+	  const size_t build_idsz = hex_build_id_len / 2;
+
+	  new_elem->build_id = xmalloc (build_idsz);
+	  new_elem->build_idsz = hex2bin (hex_build_id, new_elem->build_id,
+					  build_idsz);
+	  if (new_elem->build_idsz != build_idsz)
+	    {
+	      warning (_("Shared library \"%s\" received invalid "
+			 "build-id \"%s\" hex character at encoded byte "
+			 "position %s (first as 0) from gdbserver"),
+		       new_elem->so_original_name, hex_build_id,
+		       pulongest (new_elem->build_idsz));
+	      xfree (new_elem->build_id);
+	      new_elem->build_id = NULL;
+	      new_elem->build_idsz = 0;
+	    }
+	}
+    }
 
   *list->tailp = new_elem;
   list->tailp = &new_elem->next;
@@ -1180,6 +1281,7 @@ static const struct gdb_xml_attribute svr4_library_attributes[] =
   { "lm", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "l_addr", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "l_ld", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "build-id", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
@@ -3258,4 +3360,5 @@ _initialize_svr4_solib (void)
   svr4_so_ops.keep_data_in_core = svr4_keep_data_in_core;
   svr4_so_ops.update_breakpoints = svr4_update_solib_event_breakpoints;
   svr4_so_ops.handle_event = svr4_handle_solib_event;
+  svr4_so_ops.validate = svr4_validate;
 }

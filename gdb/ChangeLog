@@ -1,6 +1,34 @@
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Validate symbol file using build-id.
+	* NEWS (Changes since GDB 7.10): Add 'set validate-build-id'
+	and 'show validate-build-id'.  Add build-id attribute.
+	* solib-darwin.c (_initialize_darwin_solib): Assign validate value.
+	* solib-dsbt.c (_initialize_dsbt_solib): Ditto.
+	* solib-frv.c (_initialize_frv_solib): Ditto.
+	* solib-spu.c (set_spu_solib_ops): Ditto.
+	* solib-svr4.c: Include rsp-low.h.
+	(NOTE_GNU_BUILD_ID_NAME): New define.
+	(svr4_validate): New function.
+	(svr4_copy_library_list): Duplicate field build_id.
+	(library_list_start_library): Parse 'build-id' attribute.
+	(svr4_library_attributes): Add 'build-id' attribute.
+	(_initialize_svr4_solib): Assign validate value.
+	* solib-target.c (solib.h): Include.
+	(_initialize_solib_target): Assign validate value.
+	* solib.c (validate_build_id, show_validate_build_id): New.
+	(solib_map_sections): Use ops->validate.
+	(clear_so): Free build_id.
+	(default_solib_validate): New function.
+	(_initialize_solib): Add "validate-build-id".
+	* solib.h (default_solib_validate): New declaration.
+	* solist.h (struct so_list): New fields 'build_idsz' and 'build_id'.
+	(target_so_ops): New field 'validate'.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	gdbserver build-id attribute generator.
 	* features/library-list-svr4.dtd (library-list-svr4): New
 	'build-id' attribute.

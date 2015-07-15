@@ -519,6 +519,7 @@ set_spu_solib_ops (struct gdbarch *gdbarch)
       spu_so_ops.current_sos = spu_current_sos;
       spu_so_ops.bfd_open = spu_bfd_open;
       spu_so_ops.lookup_lib_global_symbol = spu_lookup_lib_symbol;
+      spu_so_ops.validate = default_solib_validate;
     }
 
   set_solib_ops (gdbarch, &spu_so_ops);

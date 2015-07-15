@@ -1183,6 +1183,7 @@ _initialize_frv_solib (void)
   frv_so_ops.open_symbol_file_object = open_symbol_file_object;
   frv_so_ops.in_dynsym_resolve_code = frv_in_dynsym_resolve_code;
   frv_so_ops.bfd_open = solib_bfd_open;
+  frv_so_ops.validate = default_solib_validate;
 
   /* Debug this file's internals.  */
   add_setshow_zuinteger_cmd ("solib-frv", class_maintenance,

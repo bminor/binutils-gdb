@@ -5,6 +5,20 @@
 
 * Support for tracepoints on aarch64-linux was added in GDBserver.
 
+* New options
+
+set validate-build-id (on|off)
+show validate-build-id
+  Inferior shared library and symbol file may contain unique build-id.
+  If both build-ids are present but they do not match then this setting
+  enables (off) or disables (on) loading of such symbol file.
+
+* New features in the GDB remote stub, GDBserver
+
+  ** library-list-svr4 contains also optional attribute 'build-id' for
+     each library.  GDB does not load library with build-id that
+     does not match such attribute.
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*
