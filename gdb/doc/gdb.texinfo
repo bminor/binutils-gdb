@@ -17950,44 +17950,6 @@ libraries that were loaded by explicit user requests are not
 discarded.
 @end table
 
-@table @code
-@kindex set validate-build-id
-@cindex override @value{GDBN} build-id check
-@item set validate-build-id @var{mode}
-Setting to override @value{GDBN} build-id check.
-
-Inferior shared libraries and symbol files may contain unique build-id.
-By default @value{GDBN} will ignore symbol files with non-matching build-id
-while printing:
-
-@smallexample
-  warning: Shared object "libfoo.so.1" could not be validated (remote
-  build ID 2bc1745e does not match local build ID a08f8767) and will be
-  ignored; or use 'set validate-build-id off'.
-@end smallexample
-
-Turning off this setting would load such symbol file while still printing:
-
-@smallexample
-  warning: Shared object "libfoo.so.1" could not be validated (remote
-  build ID 2bc1745e does not match local build ID a08f8767) but it is
-  being loaded due to 'set validate-build-id off'.
-@end smallexample
-
-If remote build-id is present but it does not match local build-id (or local
-build-id is not present) then this setting enables (@var{mode} is @code{off}) or
-disables (@var{mode} is @code{on}) loading of such symbol file.  On systems
-where build-id is not present in the remote system this setting has no effect.
-The default value is @code{on}.
-
-Loading non-matching symbol file may confuse debugging including breakage
-of backtrace output.
-
-@kindex show validate-build-id
-@item show validate-build-id
-Display the current mode of build-id check override.
-@end table
-
 Sometimes you may wish that @value{GDBN} stops and gives you control
 when any of shared library events happen.  The best way to do this is
 to use @code{catch load} and @code{catch unload} (@pxref{Set
@@ -39551,8 +39513,6 @@ memory address.  It is a displacement of absolute memory address against
 address the file was prelinked to during the library load.
 @item
 @code{l_ld}, which is memory address of the @code{PT_DYNAMIC} segment
-@item
-@code{build-id}, hex encoded @code{NT_GNU_BUILD_ID} note, if it exists.
 @end itemize
 
 Additionally the single @code{main-lm} attribute specifies address of
@@ -39570,7 +39530,7 @@ looks like this:
   <library name="/lib/ld-linux.so.2" lm="0xe4f51c" l_addr="0xe2d000"
            l_ld="0xe4eefc"/>
   <library name="/lib/libc.so.6" lm="0xe4fbe8" l_addr="0x154000"
-           l_ld="0x152350" build-id="9afccf7cc41e6293476223fe72480854"/>
+           l_ld="0x152350"/>
 </library-list-svr>
 @end smallexample
 
@@ -39579,14 +39539,13 @@ The format of an SVR4 library list is described by this DTD:
 @smallexample
 <!-- library-list-svr4: Root element with versioning -->
 <!ELEMENT library-list-svr4  (library)*>
-<!ATTLIST library-list-svr4  version  CDATA   #FIXED  "1.0">
-<!ATTLIST library-list-svr4  main-lm  CDATA   #IMPLIED>
+<!ATTLIST library-list-svr4  version CDATA   #FIXED  "1.0">
+<!ATTLIST library-list-svr4  main-lm CDATA   #IMPLIED>
 <!ELEMENT library            EMPTY>
-<!ATTLIST library            name     CDATA   #REQUIRED>
-<!ATTLIST library            lm       CDATA   #REQUIRED>
-<!ATTLIST library            l_addr   CDATA   #REQUIRED>
-<!ATTLIST library            l_ld     CDATA   #REQUIRED>
-<!ATTLIST library            build-id CDATA   #IMPLIED>
+<!ATTLIST library            name    CDATA   #REQUIRED>
+<!ATTLIST library            lm      CDATA   #REQUIRED>
+<!ATTLIST library            l_addr  CDATA   #REQUIRED>
+<!ATTLIST library            l_ld    CDATA   #REQUIRED>
 @end smallexample
 
 @node Memory Map Format

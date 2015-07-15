@@ -194,8 +194,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
       tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
-      common-exceptions.o symbol.o btrace-common.o fileio.o target-utils.o \
-      gdb_regex.o \
+      common-exceptions.o symbol.o btrace-common.o fileio.o \
       $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -520,9 +519,6 @@ ax.o: ax.c
 signals.o: ../common/signals.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
-linux-maps.o: ../nat/linux-maps.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
 print-utils.o: ../common/print-utils.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
@@ -533,9 +529,6 @@ common-utils.o: ../common/common-utils.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 posix-strerror.o: ../common/posix-strerror.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-target-utils.o: ../target/target-utils.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 mingw-strerror.o: ../common/mingw-strerror.c
@@ -581,9 +574,6 @@ waitstatus.o: ../target/waitstatus.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 fileio.o: ../common/fileio.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-gdb_regex.o: ../common/gdb_regex.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

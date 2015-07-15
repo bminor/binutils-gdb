@@ -634,5 +634,4 @@ _initialize_darwin_solib (void)
   darwin_so_ops.in_dynsym_resolve_code = darwin_in_dynsym_resolve_code;
   darwin_so_ops.lookup_lib_global_symbol = darwin_lookup_lib_symbol;
   darwin_so_ops.bfd_open = darwin_bfd_open;
-  darwin_so_ops.validate = default_solib_validate;
 }

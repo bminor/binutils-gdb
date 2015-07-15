@@ -903,7 +903,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 # right, it is probably easiest just to list .h files here directly.
 
 HFILES_NO_SRCDIR = \
-common/gdb_signals.h nat/gdb_thread_db.h common/gdb_vecs.h nat/linux-maps.h \
+common/gdb_signals.h nat/gdb_thread_db.h common/gdb_vecs.h \
 common/x86-xstate.h nat/linux-ptrace.h nat/mips-linux-watch.h \
 proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
 ppcnbsd-tdep.h cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
@@ -937,7 +937,7 @@ extension.h extension-priv.h \
 build-id.h buildsym.h valprint.h \
 typeprint.h mi/mi-getopt.h mi/mi-parse.h mi/mi-console.h \
 mi/mi-out.h mi/mi-main.h mi/mi-common.h mi/mi-cmds.h linux-nat.h \
-complaints.h gdb_proc_service.h common/gdb_regex.h xtensa-tdep.h inf-loop.h \
+complaints.h gdb_proc_service.h gdb_regex.h xtensa-tdep.h inf-loop.h \
 common/gdb_wait.h common/gdb_assert.h solib.h ppc-tdep.h cp-support.h glibc-tdep.h \
 interps.h auxv.h gdbcmd.h tramp-frame.h mipsnbsd-tdep.h	\
 amd64-linux-tdep.h linespec.h i387-tdep.h mn10300-tdep.h \
@@ -983,7 +983,7 @@ common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
 common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h \
-nat/linux-namespaces.h target/target-utils.h
+nat/linux-namespaces.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1083,8 +1083,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
-	common-exceptions.o btrace-common.o fileio.o target-utils.o \
-	gdb_regex.o \
+	common-exceptions.o btrace-common.o fileio.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -2222,10 +2221,6 @@ common-agent.o: $(srcdir)/common/agent.c
 	$(COMPILE) $(srcdir)/common/agent.c
 	$(POSTCOMPILE)
 
-linux-maps.o: ${srcdir}/nat/linux-maps.c
-	$(COMPILE) $(srcdir)/nat/linux-maps.c
-	$(POSTCOMPILE)
-
 vec.o: ${srcdir}/common/vec.c
 	$(COMPILE) $(srcdir)/common/vec.c
 	$(POSTCOMPILE)
@@ -2240,10 +2235,6 @@ rsp-low.o: ${srcdir}/common/rsp-low.c
 
 errors.o: ${srcdir}/common/errors.c
 	$(COMPILE) $(srcdir)/common/errors.c
-	$(POSTCOMPILE)
-
-target-utils.o: ${srcdir}/target/target-utils.c
-	$(COMPILE) $(srcdir)/target/target-utils.c
 	$(POSTCOMPILE)
 
 common-debug.o: ${srcdir}/common/common-debug.c
@@ -2272,10 +2263,6 @@ btrace-common.o: ${srcdir}/common/btrace-common.c
 
 fileio.o: ${srcdir}/common/fileio.c
 	$(COMPILE) $(srcdir)/common/fileio.c
-	$(POSTCOMPILE)
-
-gdb_regex.o: ${srcdir}/common/gdb_regex.c
-	$(COMPILE) $(srcdir)/common/gdb_regex.c
 	$(POSTCOMPILE)
 #
 # gdb/target/ dependencies

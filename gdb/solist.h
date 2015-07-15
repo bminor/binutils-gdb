@@ -75,19 +75,6 @@ struct so_list
        There may not be just one (e.g. if two segments are relocated
        differently); but this is only used for "info sharedlibrary".  */
     CORE_ADDR addr_low, addr_high;
-
-    /* Build id decoded from .note.gnu.build-id without note header.  This is
-       actual BUILD_ID which comes either from the remote target via qXfer
-       packet or via reading target memory.  Note that if there's a
-       mismatch with the associated bfd then so->abfd will be cleared.
-       Reading target memory should be done by following execution view
-       of the binary (following program headers in the case of ELF).
-       Computing address from the linking view (following ELF section
-       headers) may give incorrect build-id memory address despite the
-       symbols still match.
-       Such an example is a prelinked vs. unprelinked i386 ELF file.  */
-    size_t build_idsz;
-    gdb_byte *build_id;
   };
 
 struct target_so_ops
@@ -181,11 +168,6 @@ struct target_so_ops
        NULL, in which case no specific preprocessing is necessary
        for this target.  */
     void (*handle_event) (void);
-
-    /* Return NULL if SO does match target SO it is supposed to
-       represent.  Otherwise return string describing why it does not match.
-       Caller has to free the string.  */
-    char *(*validate) (const struct so_list *so);
   };
 
 /* Free the memory associated with a (so_list *).  */

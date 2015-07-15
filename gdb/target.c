@@ -43,7 +43,6 @@
 #include "agent.h"
 #include "auxv.h"
 #include "target-debug.h"
-#include "target/target-utils.h"
 
 static void target_info (char *, int);
 
@@ -2974,17 +2973,6 @@ target_fileio_close_cleanup (void *opaque)
   target_fileio_close (fd, &target_errno);
 }
 
-/* Helper for target_fileio_read_alloc_1 to make it interruptible.  */
-
-static int
-target_fileio_read_alloc_1_pread (int handle, gdb_byte *read_buf, int len,
-				  ULONGEST offset, int *target_errno)
-{
-  QUIT;
-
-  return target_fileio_pread (handle, read_buf, len, offset, target_errno);
-}
-
 /* Read target file FILENAME, in the filesystem as seen by INF.  If
    INF is NULL, use the filesystem seen by the debugger (GDB or, for
    remote targets, the remote stub).  Store the result in *BUF_P and
@@ -2998,17 +2986,58 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
 			    gdb_byte **buf_p, int padding)
 {
   struct cleanup *close_cleanup;
-  int fd, target_errno;
-  LONGEST retval;
+  size_t buf_alloc, buf_pos;
+  gdb_byte *buf;
+  LONGEST n;
+  int fd;
+  int target_errno;
 
-  fd = target_fileio_open (inf, filename, FILEIO_O_RDONLY, 0700, &target_errno);
+  fd = target_fileio_open (inf, filename, FILEIO_O_RDONLY, 0700,
+			   &target_errno);
   if (fd == -1)
     return -1;
 
   close_cleanup = make_cleanup (target_fileio_close_cleanup, &fd);
-  retval = read_alloc (buf_p, fd, target_fileio_read_alloc_1_pread, padding);
-  do_cleanups (close_cleanup);
-  return retval;
+
+  /* Start by reading up to 4K at a time.  The target will throttle
+     this number down if necessary.  */
+  buf_alloc = 4096;
+  buf = xmalloc (buf_alloc);
+  buf_pos = 0;
+  while (1)
+    {
+      n = target_fileio_pread (fd, &buf[buf_pos],
+			       buf_alloc - buf_pos - padding, buf_pos,
+			       &target_errno);
+      if (n < 0)
+	{
+	  /* An error occurred.  */
+	  do_cleanups (close_cleanup);
+	  xfree (buf);
+	  return -1;
+	}
+      else if (n == 0)
+	{
+	  /* Read all there was.  */
+	  do_cleanups (close_cleanup);
+	  if (buf_pos == 0)
+	    xfree (buf);
+	  else
+	    *buf_p = buf;
+	  return buf_pos;
+	}
+
+      buf_pos += n;
+
+      /* If the buffer is filling up, expand it.  */
+      if (buf_alloc < buf_pos * 2)
+	{
+	  buf_alloc *= 2;
+	  buf = xrealloc (buf, buf_alloc);
+	}
+
+      QUIT;
+    }
 }
 
 /* See target.h.  */
@@ -3020,13 +3049,39 @@ target_fileio_read_alloc (struct inferior *inf, const char *filename,
   return target_fileio_read_alloc_1 (inf, filename, buf_p, 0);
 }
 
-/* See target/target.h.  */
+/* See target.h.  */
 
 char *
 target_fileio_read_stralloc (struct inferior *inf, const char *filename)
 {
-  return read_stralloc (inf, filename, target_fileio_read_alloc_1);
+  gdb_byte *buffer;
+  char *bufstr;
+  LONGEST i, transferred;
+
+  transferred = target_fileio_read_alloc_1 (inf, filename, &buffer, 1);
+  bufstr = (char *) buffer;
+
+  if (transferred < 0)
+    return NULL;
+
+  if (transferred == 0)
+    return xstrdup ("");
+
+  bufstr[transferred] = 0;
+
+  /* Check for embedded NUL bytes; but allow trailing NULs.  */
+  for (i = strlen (bufstr); i < transferred; i++)
+    if (bufstr[i] != 0)
+      {
+	warning (_("target file %s "
+		   "contained unexpected null characters"),
+		 filename);
+	break;
+      }
+
+  return bufstr;
 }
+
 
 static int
 default_region_ok_for_hw_watchpoint (struct target_ops *self,

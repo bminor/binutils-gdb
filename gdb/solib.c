@@ -518,20 +518,6 @@ solib_bfd_open (char *pathname)
   return abfd;
 }
 
-/* Boolean for command 'set validate-build-id'.  */
-static int validate_build_id = 1;
-
-/* Implement 'show validate-build-id'.  */
-
-static void
-show_validate_build_id (struct ui_file *file, int from_tty,
-			struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("Validation a build-id matches to load a shared "
-			    "library is %s.\n"),
-		    value);
-}
-
 /* Given a pointer to one of the shared objects in our list of mapped
    objects, use the recorded name to open a bfd descriptor for the
    object, build a section table, relocate all the section addresses
@@ -548,7 +534,7 @@ static int
 solib_map_sections (struct so_list *so)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
-  char *filename, *validate_error;
+  char *filename;
   struct target_section *p;
   struct cleanup *old_chain;
   bfd *abfd;
@@ -563,29 +549,6 @@ solib_map_sections (struct so_list *so)
 
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so->abfd = abfd;
-
-  gdb_assert (ops->validate != NULL);
-
-  validate_error = ops->validate (so);
-  if (validate_error != NULL)
-    {
-      if (validate_build_id)
-	{
-	  warning (_("Shared object \"%s\" could not be validated (%s) and "
-	             "will be ignored; "
-		     "or use 'set validate-build-id off'."),
-		   so->so_name, validate_error);
-	  xfree (validate_error);
-	  gdb_bfd_unref (so->abfd);
-	  so->abfd = NULL;
-	  return 0;
-	}
-      warning (_("Shared object \"%s\" could not be validated (%s) "
-		 "but it is being loaded due to "
-		 "'set validate-build-id off'."),
-	       so->so_name, validate_error);
-      xfree (validate_error);
-    }
 
   /* Copy the full path name into so_name, allowing symbol_file_add
      to find it later.  This also affects the =library-loaded GDB/MI
@@ -662,9 +625,6 @@ clear_so (struct so_list *so)
   /* Restore the target-supplied file name.  SO_NAME may be the path
      of the symbol file.  */
   strcpy (so->so_name, so->so_original_name);
-
-  xfree (so->build_id);
-  so->build_id = NULL;
 
   /* Do the same for target-specific data.  */
   if (ops->clear_so != NULL)
@@ -1697,14 +1657,6 @@ remove_user_added_objfile (struct objfile *objfile)
     }
 }
 
-/* Default implementation does not perform any validation.  */
-
-char *
-default_solib_validate (const struct so_list *const so)
-{
-  return NULL; /* No validation.  */
-}
-
 extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 
 void
@@ -1762,18 +1714,4 @@ PATH and LD_LIBRARY_PATH."),
 				     reload_shared_libraries,
 				     show_solib_search_path,
 				     &setlist, &showlist);
-
-  add_setshow_boolean_cmd ("validate-build-id", class_support,
-			   &validate_build_id, _("\
-Set validation a build-id matches to load a shared library."), _("\
-SHow validation a build-id matches to load a shared library."), _("\
-Inferior shared library and symbol file may contain unique build-id.\n\
-If both build-ids are present but they do not match then this setting\n\
-enables (off) or disables (on) loading of such symbol file.\n\
-Loading non-matching symbol file may confuse debugging including breakage\n\
-of backtrace output."),
-			   NULL,
-			   show_validate_build_id,
-			   &setlist, &showlist);
-
 }

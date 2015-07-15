@@ -1,5 +1,11 @@
 2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Revert the previous 2 commits:
+	gdbserver build-id attribute generator
+	Validate symbol file using build-id
+
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.texinfo (Files): Add 'set validate-build-id'
 	and 'show validate-build-id'.
 

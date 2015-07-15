@@ -1,3 +1,10 @@
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous 3 commits:
+	Move gdb_regex* to common/
+	Move linux_find_memory_regions_full & co.
+	gdbserver build-id attribute generator
+
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

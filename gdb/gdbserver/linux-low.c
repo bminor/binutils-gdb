@@ -22,7 +22,6 @@
 #include "agent.h"
 #include "tdesc.h"
 #include "rsp-low.h"
-#include "nat/linux-maps.h"
 
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
@@ -44,11 +43,9 @@
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/uio.h>
-#include <search.h>
 #include "filestuff.h"
 #include "tracepoint.h"
 #include "hostio.h"
-#include "rsp-low.h"
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
@@ -184,31 +181,6 @@ lwp_stop_reason (struct lwp_info *lwp)
 {
   return lwp->stop_reason;
 }
-
-typedef union ElfXX_Ehdr
-{
-  Elf32_Ehdr _32;
-  Elf64_Ehdr _64;
-} ElfXX_Ehdr;
-
-typedef union ElfXX_Phdr
-{
-  Elf32_Phdr _32;
-  Elf64_Phdr _64;
-} ElfXX_Phdr;
-
-typedef union ElfXX_Nhdr
-{
-  Elf32_Nhdr _32;
-  Elf64_Nhdr _64;
-} ElfXX_Nhdr;
-
-#define ELFXX_FLD(elf64, hdr, fld) ((elf64) ? (hdr)._64.fld : (hdr)._32.fld)
-#define ELFXX_SIZEOF(elf64, hdr) ((elf64) ? sizeof ((hdr)._64) \
-					  : sizeof ((hdr)._32))
-/* Round up to next 4 byte boundary.  */
-#define ELFXX_ROUNDUP_4(elf64, what) (((what) + 3) & ~(ULONGEST) 3)
-#define BUILD_ID_INVALID "?"
 
 /* A list of all unknown processes which receive stop signals.  Some
    other process will presumably claim each of these as forked
@@ -6038,38 +6010,15 @@ get_phdr_phnum_from_proc_auxv (const int pid, const int is_elf64,
   return 0;
 }
 
-/* Linearly traverse pheaders and look for P_TYPE pheader.  */
-
-static const void *
-find_phdr (const int is_elf64, const void *const phdr_begin,
-	   const void *const phdr_end, const ULONGEST p_type)
-{
-#define PHDR_NEXT(hdrp) ((const void *) ((const gdb_byte *) (hdrp) + \
-			 ELFXX_SIZEOF (is_elf64, *hdrp)))
-
-  const ElfXX_Phdr *phdr = phdr_begin;
-
-  while (PHDR_NEXT (phdr) <= phdr_end)
-    {
-      if (ELFXX_FLD (is_elf64, *phdr, p_type) == p_type)
-	return phdr;
-      phdr = PHDR_NEXT (phdr);
-    }
-
-  return NULL;
-#undef PHDR_NEXT
-}
-
 /* Return &_DYNAMIC (via PT_DYNAMIC) in the inferior, or 0 if not present.  */
 
 static CORE_ADDR
 get_dynamic (const int pid, const int is_elf64)
 {
   CORE_ADDR phdr_memaddr, relocation;
-  int num_phdr;
+  int num_phdr, i;
   unsigned char *phdr_buf;
-  const ElfXX_Phdr *phdr;
-  const int phdr_size = ELFXX_SIZEOF (is_elf64, *phdr);
+  const int phdr_size = is_elf64 ? sizeof (Elf64_Phdr) : sizeof (Elf32_Phdr);
 
   if (get_phdr_phnum_from_proc_auxv (pid, is_elf64, &phdr_memaddr, &num_phdr))
     return 0;
@@ -6083,10 +6032,22 @@ get_dynamic (const int pid, const int is_elf64)
   /* Compute relocation: it is expected to be 0 for "regular" executables,
      non-zero for PIE ones.  */
   relocation = -1;
-  phdr = find_phdr (is_elf64, phdr_buf, phdr_buf + num_phdr * phdr_size,
-		    PT_PHDR);
-  if (phdr != NULL)
-    relocation = phdr_memaddr - ELFXX_FLD (is_elf64, *phdr, p_vaddr);
+  for (i = 0; relocation == -1 && i < num_phdr; i++)
+    if (is_elf64)
+      {
+	Elf64_Phdr *const p = (Elf64_Phdr *) (phdr_buf + i * phdr_size);
+
+	if (p->p_type == PT_PHDR)
+	  relocation = phdr_memaddr - p->p_vaddr;
+      }
+    else
+      {
+	Elf32_Phdr *const p = (Elf32_Phdr *) (phdr_buf + i * phdr_size);
+
+	if (p->p_type == PT_PHDR)
+	  relocation = phdr_memaddr - p->p_vaddr;
+      }
+
   if (relocation == -1)
     {
       /* PT_PHDR is optional, but necessary for PIE in general.  Fortunately
@@ -6102,11 +6063,23 @@ get_dynamic (const int pid, const int is_elf64)
       return 0;
     }
 
-  phdr = find_phdr (is_elf64, phdr_buf, phdr_buf + num_phdr * phdr_size,
-		    PT_DYNAMIC);
+  for (i = 0; i < num_phdr; i++)
+    {
+      if (is_elf64)
+	{
+	  Elf64_Phdr *const p = (Elf64_Phdr *) (phdr_buf + i * phdr_size);
 
-  if (phdr != NULL)
-    return ELFXX_FLD (is_elf64, *phdr, p_vaddr) + relocation;
+	  if (p->p_type == PT_DYNAMIC)
+	    return p->p_vaddr + relocation;
+	}
+      else
+	{
+	  Elf32_Phdr *const p = (Elf32_Phdr *) (phdr_buf + i * phdr_size);
+
+	  if (p->p_type == PT_DYNAMIC)
+	    return p->p_vaddr + relocation;
+	}
+    }
 
   return 0;
 }
@@ -6246,278 +6219,6 @@ struct link_map_offsets
     int l_prev_offset;
   };
 
-
-/* Structure for holding a mapping.  Only mapping
-   containing l_ld can have hex_build_id set.  */
-
-struct mapping_entry
-{
-  /* Fields are populated from linux_find_memory_region parameters.  */
-
-  ULONGEST vaddr;
-  ULONGEST size;
-  ULONGEST offset;
-  ULONGEST inode;
-
-  /* Hex encoded string allocated using xmalloc, and
-     needs to be freed.  It can be NULL.  */
-
-  char *hex_build_id;
-};
-
-typedef struct mapping_entry mapping_entry_s;
-
-DEF_VEC_O(mapping_entry_s);
-
-/* Free vector of mapping_entry_s objects.  */
-
-static void
-free_mapping_entry_vec (VEC (mapping_entry_s) *lst)
-{
-  int ix;
-  mapping_entry_s *p;
-
-  for (ix = 0; VEC_iterate (mapping_entry_s, lst, ix, p); ++ix)
-    xfree (p->hex_build_id);
-
-  VEC_free (mapping_entry_s, lst);
-}
-
-/* Used for finding a mapping containing the given
-   l_ld passed in K.  */
-
-static int
-compare_mapping_entry_range (const void *const k, const void *const b)
-{
-  const ULONGEST key = *(const CORE_ADDR *) k;
-  const mapping_entry_s *const p = b;
-
-  if (key < p->vaddr)
-    return -1;
-
-  if (key < p->vaddr + p->size)
-    return 0;
-
-  return 1;
-}
-
-struct find_memory_region_callback_data
-{
-  unsigned is_elf64;
-
-  /* Return.  Must be freed with free_mapping_entry_vec.  */
-  VEC (mapping_entry_s) *list;
-};
-
-/* Read build-id from PT_NOTE.
-   Argument LOAD_ADDR represents run time virtual address corresponding to
-   the beginning of the first loadable segment.  L_ADDR is displacement
-   as supplied by the dynamic linker.  */
-
-static void
-read_build_id (struct find_memory_region_callback_data *const p,
-	       mapping_entry_s *const bil, const CORE_ADDR load_addr,
-	       const CORE_ADDR l_addr)
-{
-  const int is_elf64 = p->is_elf64;
-  ElfXX_Ehdr ehdr;
-
-  if (linux_read_memory (load_addr, (unsigned char *) &ehdr,
-			 ELFXX_SIZEOF (is_elf64, ehdr)) == 0
-      && ELFXX_FLD (is_elf64, ehdr, e_ident[EI_MAG0]) == ELFMAG0
-      && ELFXX_FLD (is_elf64, ehdr, e_ident[EI_MAG1]) == ELFMAG1
-      && ELFXX_FLD (is_elf64, ehdr, e_ident[EI_MAG2]) == ELFMAG2
-      && ELFXX_FLD (is_elf64, ehdr, e_ident[EI_MAG3]) == ELFMAG3)
-    {
-      const ElfXX_Phdr *phdr;
-      void *phdr_buf;
-      const unsigned e_phentsize = ELFXX_FLD (is_elf64, ehdr, e_phentsize);
-
-      if (ELFXX_FLD (is_elf64, ehdr, e_phnum) >= 100
-	  || e_phentsize != ELFXX_SIZEOF (is_elf64, *phdr))
-	{
-	  /* Basic sanity check failed.  */
-	  warning (_("Could not identify program header at %s."),
-		   paddress (load_addr));
-	  return;
-	}
-
-      phdr_buf = alloca (ELFXX_FLD (is_elf64, ehdr, e_phnum) * e_phentsize);
-
-      if (linux_read_memory (load_addr + ELFXX_FLD (is_elf64, ehdr, e_phoff),
-			     phdr_buf,
-			     ELFXX_FLD (is_elf64, ehdr, e_phnum) * e_phentsize)
-	  != 0)
-	{
-	  warning (_("Could not read program header at %s."),
-		   paddress (load_addr));
-	  return;
-	}
-
-      phdr = phdr_buf;
-
-      for (;;)
-	{
-	  gdb_byte *pt_note;
-	  const gdb_byte *pt_end;
-	  const ElfXX_Nhdr *nhdr;
-	  CORE_ADDR note_addr;
-
-	  phdr = find_phdr (p->is_elf64, phdr, (gdb_byte *) phdr_buf
-			    + ELFXX_FLD (is_elf64, ehdr, e_phnum) * e_phentsize,
-			    PT_NOTE);
-	  if (phdr == NULL)
-	    break;
-	  pt_note = xmalloc (ELFXX_FLD (is_elf64, *phdr, p_memsz));
-	  note_addr = ELFXX_FLD (is_elf64, *phdr, p_vaddr) + l_addr;
-	  if (linux_read_memory (note_addr, pt_note,
-				 ELFXX_FLD (is_elf64, *phdr, p_memsz)) != 0)
-	    {
-	      xfree (pt_note);
-	      warning (_("Could not read note at address 0x%s"),
-		       paddress (note_addr));
-	      break;
-	    }
-
-	  pt_end = pt_note + ELFXX_FLD (is_elf64, *phdr, p_memsz);
-	  nhdr = (void *) pt_note;
-	  while ((const gdb_byte *) nhdr < pt_end)
-	    {
-	      const size_t namesz
-		= ELFXX_ROUNDUP_4 (is_elf64, ELFXX_FLD (is_elf64, *nhdr,
-							n_namesz));
-	      const size_t descsz
-		= ELFXX_ROUNDUP_4 (is_elf64, ELFXX_FLD (is_elf64, *nhdr,
-							n_descsz));
-	      const size_t note_sz = (ELFXX_SIZEOF (is_elf64, *nhdr) + namesz
-				      + descsz);
-
-	      if (((const gdb_byte *) nhdr + note_sz) > pt_end || note_sz == 0
-		  || descsz == 0)
-		{
-		  warning (_("Malformed PT_NOTE at address 0x%s\n"),
-			   paddress (note_addr + (gdb_byte *) nhdr - pt_note));
-		  break;
-		}
-	      if (ELFXX_FLD (is_elf64, *nhdr, n_type) == NT_GNU_BUILD_ID
-		  && ELFXX_FLD (is_elf64, *nhdr, n_namesz) == 4)
-		{
-		  const char gnu[4] = "GNU\0";
-		  const char *const pname
-		    = (char *) nhdr + ELFXX_SIZEOF (is_elf64, *nhdr);
-
-		  if (memcmp (pname, gnu, 4) == 0)
-		    {
-		      const size_t n_descsz = ELFXX_FLD (is_elf64, *nhdr,
-							 n_descsz);
-
-		      bil->hex_build_id = xmalloc (n_descsz * 2 + 1);
-		      bin2hex ((const gdb_byte *) pname + namesz,
-			       bil->hex_build_id, n_descsz);
-		      xfree (pt_note);
-		      return;
-		    }
-		}
-	      nhdr = (void *) ((gdb_byte *) nhdr + note_sz);
-	    }
-	  xfree (pt_note);
-	}
-    }
-}
-
-static linux_find_memory_region_ftype find_memory_region_callback;
-
-/* Add mapping_entry.  See linux_find_memory_ftype for the parameters
-   description.  */
-
-static int
-find_memory_region_callback (ULONGEST vaddr, ULONGEST size, ULONGEST offset,
-			     ULONGEST inode, int read, int write, int exec,
-			     int modified, const char *filename, void *data)
-{
-  if (inode != 0)
-    {
-      struct find_memory_region_callback_data *const p = data;
-      mapping_entry_s bil;
-
-      bil.vaddr = vaddr;
-      bil.size = size;
-      bil.offset = offset;
-      bil.inode = inode;
-      bil.hex_build_id = NULL;
-
-      VEC_safe_push (mapping_entry_s, p->list, &bil);
-    }
-
-  /* Continue the traversal.  */
-  return 0;
-}
-
-/* Linear reverse find starting from RBEGIN towards REND looking for
-   the lowest vaddr mapping of the same inode and zero offset.  */
-
-static mapping_entry_s *
-lrfind_mapping_entry (mapping_entry_s *const rbegin,
-		      const mapping_entry_s *const rend)
-{
-  mapping_entry_s *p;
-
-  for (p = rbegin - 1; p >= rend; --p)
-    if (p->offset == 0 && p->inode == rbegin->inode)
-      return p;
-
-  return NULL;
-}
-
-/* Get build-id for the given L_LD, where L_LD corresponds to
-   link_map.l_ld as specified by the dynamic linker.
-   DATA must point to already filled list of mapping_entry elements.
-
-   If build-id had not been read, read it and cache in corresponding
-   list element.
-
-   Return build_id as stored in the list element corresponding
-   to L_LD.
-
-   NULL may be returned if build-id could not be fetched.
-
-   Returned string must not be freed explicitly.  */
-
-static const char *
-get_hex_build_id (const CORE_ADDR l_addr, const CORE_ADDR l_ld,
-		  struct find_memory_region_callback_data *const data)
-{
-  mapping_entry_s *bil;
-
-  bil = bsearch (&l_ld, VEC_address (mapping_entry_s, data->list),
-		 VEC_length (mapping_entry_s, data->list),
-		 sizeof (mapping_entry_s), compare_mapping_entry_range);
-
-  if (bil == NULL)
-    return NULL;
-
-  if (bil->hex_build_id == NULL)
-    {
-      mapping_entry_s *bil_min;
-
-      bil_min = lrfind_mapping_entry (bil, VEC_address (mapping_entry_s,
-							data->list));
-      if (bil_min != NULL)
-	read_build_id (data, bil, bil_min->vaddr, l_addr);
-      else
-	{
-	  /* Do not try to find hex_build_id again.  */
-	  bil->hex_build_id = xstrdup (BUILD_ID_INVALID);
-	  warning (_("Could not determine load address; mapping entry with "
-		     "offset 0 corresponding to l_ld = 0x%s could not be "
-		     "found; build-id can not be used."),
-		   paddress (l_ld));
-	}
-    }
-
-  return bil->hex_build_id;
-}
-
 /* Construct qXfer:libraries-svr4:read reply.  */
 
 static int
@@ -6530,15 +6231,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   struct process_info_private *const priv = current_process ()->priv;
   char filename[PATH_MAX];
   int pid, is_elf64;
-  struct find_memory_region_callback_data data;
-  
-  /* COREFILTER_ANON_PRIVATE and COREFILTER_ANON_SHARED do not have an
-     associated file so it is not expected it could have an ELF header.  */ 
-  const enum filterflags filterflags = (COREFILTER_MAPPED_PRIVATE
-					| COREFILTER_MAPPED_SHARED
-					| COREFILTER_ELF_HEADERS
-					| COREFILTER_HUGETLB_PRIVATE
-					| COREFILTER_HUGETLB_SHARED);
 
   static const struct link_map_offsets lmo_32bit_offsets =
     {
@@ -6580,14 +6272,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   is_elf64 = elf_64_file_p (filename, &machine);
   lmo = is_elf64 ? &lmo_64bit_offsets : &lmo_32bit_offsets;
   ptr_size = is_elf64 ? 8 : 4;
-
-  data.is_elf64 = is_elf64;
-  data.list = NULL;
-  VEC_reserve (mapping_entry_s, data.list, 16);
-  if (linux_find_memory_regions_full (pid, filterflags,
-				      find_memory_region_callback, &data)
-      < 0)
-    warning (_("Finding memory regions failed"));
 
   while (annex[0] != '\0')
     {
@@ -6695,7 +6379,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	      /* 6x the size for xml_escape_text below.  */
 	      size_t len = 6 * strlen ((char *) libname);
 	      char *name;
-	      const char *hex_enc_build_id = NULL;
 
 	      if (!header_done)
 		{
@@ -6704,11 +6387,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 		  header_done = 1;
 		}
 
-	      hex_enc_build_id = get_hex_build_id (l_addr, l_ld, &data);
-
-	      while (allocated < (p - document + len + 200
-				  + (hex_enc_build_id != NULL
-				     ? strlen (hex_enc_build_id) : 0)))
+	      while (allocated < p - document + len + 200)
 		{
 		  /* Expand to guarantee sufficient storage.  */
 		  uintptr_t document_len = p - document;
@@ -6720,13 +6399,9 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 
 	      name = xml_escape_text ((char *) libname);
 	      p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
-			    "l_addr=\"0x%lx\" l_ld=\"0x%lx\"",
+			    "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
 			    name, (unsigned long) lm_addr,
 			    (unsigned long) l_addr, (unsigned long) l_ld);
-	      if (hex_enc_build_id != NULL
-		  && strcmp (hex_enc_build_id, BUILD_ID_INVALID) != 0)
-		p += sprintf (p, " build-id=\"%s\"", hex_enc_build_id);
-	      p += sprintf (p, "/>");
 	      free (name);
 	    }
 	}
@@ -6753,7 +6428,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 
   memcpy (readbuf, document + offset, len);
   xfree (document);
-  free_mapping_entry_vec (data.list);
 
   return len;
 }

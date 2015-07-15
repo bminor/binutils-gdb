@@ -1,3 +1,13 @@
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous 6 commits:
+	Create empty nat/linux-maps.[ch] and common/target-utils.[ch].
+	Move gdb_regex* to common/
+	Prepare linux_find_memory_regions_full & co. for move
+	Move linux_find_memory_regions_full & co.
+	gdbserver build-id attribute generator
+	Validate symbol file using build-id
+
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

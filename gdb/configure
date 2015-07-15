@@ -11925,57 +11925,6 @@ $as_echo "#define HAVE_SIGSETJMP 1" >>confdefs.h
 
 fi
 
-  # Assume we'll default to using the included libiberty regex.
-  gdb_use_included_regex=yes
-
-  # However, if the system regex is GNU regex, then default to *not*
-  # using the included regex.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GNU regex" >&5
-$as_echo_n "checking for GNU regex... " >&6; }
-if test "${gdb_cv_have_gnu_regex+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <gnu-versions.h>
-int
-main ()
-{
-#define REGEX_INTERFACE_VERSION 1
-  #if _GNU_REGEX_INTERFACE_VERSION != REGEX_INTERFACE_VERSION
-  # error "Version mismatch"
-  #endif
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gdb_cv_have_gnu_regex=yes
-else
-  gdb_cv_have_gnu_regex=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_gnu_regex" >&5
-$as_echo "$gdb_cv_have_gnu_regex" >&6; }
-  if test $gdb_cv_have_gnu_regex = yes; then
-    gdb_use_included_regex=no
-  fi
-
-
-# Check whether --with-included-regex was given.
-if test "${with_included_regex+set}" = set; then :
-  withval=$with_included_regex; gdb_with_regex=$withval
-else
-  gdb_with_regex=$gdb_use_included_regex
-fi
-
-  if test "$gdb_with_regex" = yes; then
-
-$as_echo "#define USE_INCLUDED_REGEX 1" >>confdefs.h
-
-  fi
-
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
@@ -12236,6 +12185,57 @@ if test $ac_cv_func_setpgrp_void = yes; then
   $as_echo "#define SETPGRP_VOID 1" >>confdefs.h
 
 fi
+fi
+
+# Assume we'll default to using the included libiberty regex.
+gdb_use_included_regex=yes
+
+# However, if the system regex is GNU regex, then default to *not*
+# using the included regex.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GNU regex" >&5
+$as_echo_n "checking for GNU regex... " >&6; }
+if test "${gdb_cv_have_gnu_regex+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <gnu-versions.h>
+int
+main ()
+{
+#define REGEX_INTERFACE_VERSION 1
+#if _GNU_REGEX_INTERFACE_VERSION != REGEX_INTERFACE_VERSION
+# error "Version mismatch"
+#endif
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_have_gnu_regex=yes
+else
+  gdb_cv_have_gnu_regex=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_gnu_regex" >&5
+$as_echo "$gdb_cv_have_gnu_regex" >&6; }
+if test $gdb_cv_have_gnu_regex = yes; then
+  gdb_use_included_regex=no
+fi
+
+
+# Check whether --with-included-regex was given.
+if test "${with_included_regex+set}" = set; then :
+  withval=$with_included_regex; gdb_with_regex=$withval
+else
+  gdb_with_regex=$gdb_use_included_regex
+fi
+
+if test "$gdb_with_regex" = yes; then
+
+$as_echo "#define USE_INCLUDED_REGEX 1" >>confdefs.h
+
 fi
 
 # Check if <sys/proc.h> defines `struct thread' with a td_pcb member.

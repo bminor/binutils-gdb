@@ -1,3 +1,8 @@
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous commit:
+	Tests for validate symbol file using build-id.
+
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 
 	Tests for validate symbol file using build-id.
