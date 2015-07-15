@@ -19,4 +19,46 @@
 #ifndef NAT_LINUX_MAPS_H
 #define NAT_LINUX_MAPS_H
 
+extern void
+  read_mapping (const char *line,
+		ULONGEST *addr, ULONGEST *endaddr,
+		const char **permissions, size_t *permissions_len,
+		ULONGEST *offset,
+		const char **device, size_t *device_len,
+		ULONGEST *inode,
+		const char **filename);
+
+/* Callback function for linux_find_memory_regions_full.  If it returns
+   non-zero linux_find_memory_regions_full returns immediately with that
+   value.  */
+
+typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
+					    ULONGEST offset, ULONGEST inode,
+					    int read, int write,
+					    int exec, int modified,
+					    const char *filename,
+					    void *data);
+
+/* This enum represents the values that the user can choose when
+   informing the Linux kernel about which memory mappings will be
+   dumped in a corefile.  They are described in the file
+   Documentation/filesystems/proc.txt, inside the Linux kernel
+   tree.  */
+
+enum filterflags
+  {
+    COREFILTER_ANON_PRIVATE = 1 << 0,
+    COREFILTER_ANON_SHARED = 1 << 1,
+    COREFILTER_MAPPED_PRIVATE = 1 << 2,
+    COREFILTER_MAPPED_SHARED = 1 << 3,
+    COREFILTER_ELF_HEADERS = 1 << 4,
+    COREFILTER_HUGETLB_PRIVATE = 1 << 5,
+    COREFILTER_HUGETLB_SHARED = 1 << 6,
+  };
+
+extern int
+  linux_find_memory_regions_full (pid_t pid, enum filterflags filterflags,
+				  linux_find_memory_region_ftype *func,
+				  void *func_data);
+
 #endif /* NAT_LINUX_MAPS_H */

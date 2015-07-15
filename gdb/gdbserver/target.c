@@ -20,6 +20,8 @@
 
 #include "server.h"
 #include "tracepoint.h"
+#include "target/target-utils.h"
+#include <fcntl.h>
 
 struct target_ops *the_target;
 
@@ -217,4 +219,38 @@ kill_inferior (int pid)
   gdb_agent_about_to_close (pid);
 
   return (*the_target->kill) (pid);
+}
+
+static int
+target_fileio_read_stralloc_1_pread (int handle, gdb_byte *read_buf, int len,
+				     ULONGEST offset, int *target_errno)
+{
+  int retval = pread (handle, read_buf, len, offset);
+
+  *target_errno = errno;
+  return retval;
+}
+
+static LONGEST
+target_fileio_read_stralloc_1 (struct inferior *inf, const char *filename,
+			       gdb_byte **buf_p, int padding)
+{
+  int fd;
+  LONGEST retval;
+
+  fd = open (filename, O_RDONLY);
+  if (fd == -1)
+    return -1;
+
+  retval = read_alloc (buf_p, fd, target_fileio_read_stralloc_1_pread, padding);
+
+  close (fd);
+
+  return retval;
+}
+
+char *
+target_fileio_read_stralloc (struct inferior *inf, const char *filename)
+{
+  return read_stralloc (inf, filename, target_fileio_read_stralloc_1);
 }

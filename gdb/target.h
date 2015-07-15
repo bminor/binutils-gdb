@@ -2033,16 +2033,6 @@ extern LONGEST target_fileio_read_alloc (struct inferior *inf,
 					 const char *filename,
 					 gdb_byte **buf_p);
 
-/* Read target file FILENAME, in the filesystem as seen by INF.  If
-   INF is NULL, use the filesystem seen by the debugger (GDB or, for
-   remote targets, the remote stub).  The result is NUL-terminated and
-   returned as a string, allocated using xmalloc.  If an error occurs
-   or the transfer is unsupported, NULL is returned.  Empty objects
-   are returned as allocated but empty strings.  A warning is issued
-   if the result contains any embedded NUL bytes.  */
-extern char *target_fileio_read_stralloc (struct inferior *inf,
-					  const char *filename);
-
 
 /* Tracepoint-related operations.  */
 

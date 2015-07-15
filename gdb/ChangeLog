@@ -1,6 +1,38 @@
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Move linux_find_memory_regions_full & co.
+	* linux-tdep.c (nat/linux-maps.h): Include.
+	(gdb_regex.h): Remove the include.
+	(enum filterflags, struct smaps_vmflags, read_mapping, decode_vmflags)
+	(mapping_is_anonymous_p, dump_mapping_p): Moved to nat/linux-maps.c.
+	(linux_find_memory_region_ftype): Moved typedef to nat/linux-maps.h.
+	(linux_find_memory_regions_full): Moved definition to nat/linux-maps.c.
+	* nat/linux-maps.c: Include ctype.h, target/target-utils.h, gdb_regex.h
+	and target/target.h.
+	(struct smaps_vmflags, read_mapping, decode_vmflags)
+	(mapping_is_anonymous_p, dump_mapping_p): Move from linux-tdep.c.
+	(linux_find_memory_regions_full): Move from linux-tdep.c.
+	* nat/linux-maps.h (read_mapping): New declaration.
+	(linux_find_memory_region_ftype, enum filterflags): Moved from
+	linux-tdep.c.
+	(linux_find_memory_regions_full): New declaration.
+	* target.c (target/target-utils.h): Include.
+	(read_alloc_pread_ftype): Moved typedef to target/target-utils.h.
+	(read_alloc, read_stralloc_func_ftype, read_stralloc): Moved
+	definitions to target/target-utils.c.
+	* target.h (target_fileio_read_stralloc): Move it to target/target.h.
+	* target/target-utils.c (read_alloc, read_stralloc): Move definitions
+	from target.c.
+	* target/target-utils.h (read_alloc_pread_ftype): New typedef.
+	(read_alloc): New declaration.
+	(read_stralloc_func_ftype): New typedef.
+	(read_stralloc): New declaration.
+	* target/target.h (target_fileio_read_stralloc): Move it from target.h.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Prepare linux_find_memory_regions_full & co. for move.
 	* linux-tdep.c (linux_find_memory_region_ftype): Comment.
 	(linux_find_memory_regions_full): Change signature and prepare

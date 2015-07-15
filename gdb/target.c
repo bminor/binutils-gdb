@@ -43,6 +43,7 @@
 #include "agent.h"
 #include "auxv.h"
 #include "target-debug.h"
+#include "target/target-utils.h"
 
 static void target_info (char *, int);
 
@@ -2973,9 +2974,6 @@ target_fileio_close_cleanup (void *opaque)
   target_fileio_close (fd, &target_errno);
 }
 
-typedef int (read_alloc_pread_ftype) (int handle, gdb_byte *read_buf, int len,
-				      ULONGEST offset, int *target_errno);
-
 /* Helper for target_fileio_read_alloc_1 to make it interruptible.  */
 
 static int
@@ -2994,57 +2992,6 @@ target_fileio_read_alloc_1_pread (int handle, gdb_byte *read_buf, int len,
    are available in *BUF_P.  This is a helper function for
    target_fileio_read_alloc; see the declaration of that function for
    more information.  */
-
-static LONGEST
-read_alloc (gdb_byte **buf_p, int handle, read_alloc_pread_ftype *pread_func,
-	    int padding)
-{
-  size_t buf_alloc, buf_pos;
-  gdb_byte *buf;
-  LONGEST n;
-  int target_errno;
-
-  /* Start by reading up to 4K at a time.  The target will throttle
-     this number down if necessary.  */
-  buf_alloc = 4096;
-  buf = xmalloc (buf_alloc);
-  buf_pos = 0;
-  while (1)
-    {
-      n = pread_func (handle, &buf[buf_pos], buf_alloc - buf_pos - padding,
-		      buf_pos, &target_errno);
-      if (n <= 0)
-	{
-	  if (n < 0 || (n == 0 && buf_pos == 0))
-	    xfree (buf);
-	  else
-	    *buf_p = buf;
-	  if (n < 0)
-	    {
-	      /* An error occurred.  */
-	      return -1;
-	    }
-	  else
-	    {
-	      /* Read all there was.  */
-	      return buf_pos;
-	    }
-	}
-
-      buf_pos += n;
-
-      /* If the buffer is filling up, expand it.  */
-      if (buf_alloc < buf_pos * 2)
-	{
-	  buf_alloc *= 2;
-	  buf = xrealloc (buf, buf_alloc);
-	}
-    }
-}
-
-typedef LONGEST (read_stralloc_func_ftype) (struct inferior *inf,
-					    const char *filename,
-					    gdb_byte **buf_p, int padding);
 
 static LONGEST
 target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
@@ -3073,41 +3020,7 @@ target_fileio_read_alloc (struct inferior *inf, const char *filename,
   return target_fileio_read_alloc_1 (inf, filename, buf_p, 0);
 }
 
-/* Helper for target_fileio_read_stralloc.  */
-
-static char *
-read_stralloc (struct inferior *inf, const char *filename,
-	       read_stralloc_func_ftype *func)
-{
-  gdb_byte *buffer;
-  char *bufstr;
-  LONGEST i, transferred;
-
-  transferred = func (inf, filename, &buffer, 1);
-  bufstr = (char *) buffer;
-
-  if (transferred < 0)
-    return NULL;
-
-  if (transferred == 0)
-    return xstrdup ("");
-
-  bufstr[transferred] = 0;
-
-  /* Check for embedded NUL bytes; but allow trailing NULs.  */
-  for (i = strlen (bufstr); i < transferred; i++)
-    if (bufstr[i] != 0)
-      {
-	warning (_("target file %s "
-		   "contained unexpected null characters"),
-		 filename);
-	break;
-      }
-
-  return bufstr;
-}
-
-/* See target.h.  */
+/* See target/target.h.  */
 
 char *
 target_fileio_read_stralloc (struct inferior *inf, const char *filename)

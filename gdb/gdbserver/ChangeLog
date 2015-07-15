@@ -1,3 +1,10 @@
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* target.c: Include target/target-utils.h and fcntl.h.
+	(target_fileio_read_stralloc_1_pread, target_fileio_read_stralloc_1)
+	(target_fileio_read_stralloc): New functions.
+
 2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (OBS): Add gdb_regex.o.
