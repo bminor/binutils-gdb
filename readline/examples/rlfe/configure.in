@@ -1,7 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
 
-m4_include([../../../config/override.m4])
-
 AC_INIT(rlfe.c)
 AC_CONFIG_HEADER(config.h)
 VERSION=0.4
@@ -225,6 +223,7 @@ AC_TRY_LINK(,tgetent((char *)0, (char *)0);,,
 AC_MSG_ERROR(!!! no tgetent - no screen))))))
 
 AC_TRY_RUN([
+extern char *tgoto();
 main()
 {
  exit(strcmp(tgoto("%p1%d", 0, 1), "1") ? 0 : 1);
@@ -437,6 +436,7 @@ main()
 
 fi
 
-AC_CHECK_HEADERS(sys/stropts.h sys/wait.h)
+AC_CHECK_HEADERS(sys/stropts.h sys/wait.h sgtty.h sys/select.h)
+AC_CHECK_HEADERS(term.h)
 
 AC_OUTPUT(Makefile)

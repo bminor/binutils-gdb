@@ -1,3 +1,9 @@
+2015-07-25  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.gdb/selftest.exp (test_with_self): Update test to now
+	expect the GDB inferior to no longer immediately stop after
+	being resumed with "signal SIGINT".
+
 2015-07-24  Doug Evans  <dje@google.com>
 
 	* gdb.perf/README: New file.

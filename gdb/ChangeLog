@@ -1,3 +1,8 @@
+2015-07-25  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* completer.c (gdb_printable_part): Sync with readline function
+	it is based off of.
+
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
 	* s390-linux-nat.c (fetch_regs, store_regs, fetch_fpregs)

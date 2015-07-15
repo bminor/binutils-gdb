@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -55,6 +55,7 @@
 
 #include "rlprivate.h"
 #include "xmalloc.h"
+#include "rlshell.h"
 
 /* **************************************************************** */
 /*								    */
@@ -107,8 +108,11 @@ _rl_abort_internal ()
   while (rl_executing_macro)
     _rl_pop_executing_macro ();
 
+  RL_UNSETSTATE (RL_STATE_MULTIKEY);	/* XXX */
+
   rl_last_func = (rl_command_func_t *)NULL;
-  longjmp (_rl_top_level, 1);
+
+  _rl_longjmp (_rl_top_level, 1);
   return (0);
 }
 
@@ -369,11 +373,13 @@ _rl_strpbrk (string1, string2)
    doesn't matter (strncasecmp). */
 int
 _rl_strnicmp (string1, string2, count)
-     char *string1, *string2;
+     const char *string1;
+     const char *string2;
      int count;
 {
-  register char *s1, *s2;
-  int d;
+  register const char *s1;
+  register const char *s2;
+  register int d;
 
   if (count <= 0 || (string1 == string2))
     return 0;
@@ -397,10 +403,12 @@ _rl_strnicmp (string1, string2, count)
 /* strcmp (), but caseless (strcasecmp). */
 int
 _rl_stricmp (string1, string2)
-     char *string1, *string2;
+     const char *string1;
+     const char *string2;
 {
-  register char *s1, *s2;
-  int d;
+  register const char *s1;
+  register const char *s2;
+  register int d;
 
   s1 = string1;
   s2 = string2;
@@ -468,6 +476,7 @@ _rl_savestring (s)
   return (strcpy ((char *)xmalloc (1 + (int)strlen (s)), (s)));
 }
 
+#if defined (DEBUG)
 #if defined (USE_VARARGS)
 static FILE *_rl_tracefp;
 
@@ -503,11 +512,18 @@ _rl_trace (va_alist)
 int
 _rl_tropen ()
 {
-  char fnbuf[128];
+  char fnbuf[128], *x;
 
   if (_rl_tracefp)
     fclose (_rl_tracefp);
-  sprintf (fnbuf, "/var/tmp/rltrace.%ld", getpid());
+#if defined (_WIN32) && !defined (__CYGWIN__)
+  x = sh_get_env_value ("TEMP");
+  if (x == 0)
+    x = ".";
+#else
+  x = "/var/tmp";
+#endif
+  sprintf (fnbuf, "%s/rltrace.%ld", x, (long)getpid());
   unlink(fnbuf);
   _rl_tracefp = fopen (fnbuf, "w+");
   return _rl_tracefp != 0;
@@ -523,4 +539,62 @@ _rl_trclose ()
   return r;
 }
 
+void
+_rl_settracefp (fp)
+     FILE *fp;
+{
+  _rl_tracefp = fp;
+}
+#endif
+#endif /* DEBUG */
+
+
+#if HAVE_DECL_AUDIT_USER_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+#include <sys/socket.h>
+#include <linux/audit.h>
+#include <linux/netlink.h>
+
+/* Report STRING to the audit system. */
+void
+_rl_audit_tty (string)
+     char *string;
+{
+  struct sockaddr_nl addr;
+  struct msghdr msg;
+  struct nlmsghdr nlm;
+  struct iovec iov[2];
+  size_t size;
+  int fd;
+
+  fd = socket (AF_NETLINK, SOCK_RAW, NETLINK_AUDIT);
+  if (fd < 0)
+    return;
+  size = strlen (string) + 1;
+
+  nlm.nlmsg_len = NLMSG_LENGTH (size);
+  nlm.nlmsg_type = AUDIT_USER_TTY;
+  nlm.nlmsg_flags = NLM_F_REQUEST;
+  nlm.nlmsg_seq = 0;
+  nlm.nlmsg_pid = 0;
+
+  iov[0].iov_base = &nlm;
+  iov[0].iov_len = sizeof (nlm);
+  iov[1].iov_base = string;
+  iov[1].iov_len = size;
+
+  addr.nl_family = AF_NETLINK;
+  addr.nl_pid = 0;
+  addr.nl_groups = 0;
+
+  msg.msg_name = &addr;
+  msg.msg_namelen = sizeof (addr);
+  msg.msg_iov = iov;
+  msg.msg_iovlen = 2;
+  msg.msg_control = NULL;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
+
+  (void)sendmsg (fd, &msg, 0);
+  close (fd);
+}
 #endif
