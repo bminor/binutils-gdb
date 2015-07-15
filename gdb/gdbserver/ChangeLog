@@ -1,3 +1,11 @@
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Create empty nat/linux-maps.[ch] and common/target-utils.[ch].
+	* Makefile.in (OBS): Add target-utils.o.
+	(linux-maps.o, target-utils.o): New.
+	* configure.srv (srv_linux_obj): Add linux-maps.o.
+
 2015-07-15  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* linux-aarch64-low.c (aarch64_supports_range_stepping): New

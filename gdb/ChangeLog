@@ -1,3 +1,18 @@
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Create empty nat/linux-maps.[ch] and common/target-utils.[ch].
+	* Makefile.in (HFILES_NO_SRCDIR); Add nat/linux-maps.h,
+	common/target-utils.h.
+	(COMMON_OBS): Add target-utils.o.
+	(linux-maps.o, target-utils.o): New.
+	* target/target-utils.c: New file.
+	* target/target-utils.h: New file.
+	* config/i386/linux.mh (NATDEPFILES): Add linux-maps.o.
+	* config/i386/linux64.mh (NATDEPFILES): Ditto.
+	* nat/linux-maps.c: New file.
+	* nat/linux-maps.h: New file.
+
 2015-07-15  Markus Metzger  <markus.t.metzger@intel.com>
 	    Pedro Alves <palves@redhat.com>
 
