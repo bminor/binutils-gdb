@@ -1,6 +1,13 @@
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	gdbserver build-id attribute generator.
+	* features/library-list-svr4.dtd (library-list-svr4): New
+	'build-id' attribute.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Move linux_find_memory_regions_full & co.
 	* linux-tdep.c (nat/linux-maps.h): Include.
 	(gdb_regex.h): Remove the include.

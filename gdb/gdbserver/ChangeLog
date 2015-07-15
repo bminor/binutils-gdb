@@ -1,6 +1,22 @@
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	gdbserver build-id attribute generator.
+	* linux-low.c (nat/linux-maps.h, search.h, rsp-low.h): Include.
+	(ElfXX_Ehdr, ElfXX_Phdr, ElfXX_Nhdr): New.
+	(ELFXX_FLD, ELFXX_SIZEOF, ELFXX_ROUNDUP, BUILD_ID_INVALID): New.
+	(find_phdr): New.
+	(get_dynamic): Use find_pdhr to traverse program headers.
+	(struct mapping_entry, mapping_entry_s, free_mapping_entry_vec)
+	(compare_mapping_entry_range, struct find_memory_region_callback_data)
+	(read_build_id, find_memory_region_callback, lrfind_mapping_entry)
+	(get_hex_build_id): New.
+	(linux_qxfer_libraries_svr4): Add optional build-id attribute
+	to reply XML document.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* target.c: Include target/target-utils.h and fcntl.h.
 	(target_fileio_read_stralloc_1_pread, target_fileio_read_stralloc_1)
 	(target_fileio_read_stralloc): New functions.

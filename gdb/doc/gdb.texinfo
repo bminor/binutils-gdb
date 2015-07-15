@@ -39513,6 +39513,8 @@ memory address.  It is a displacement of absolute memory address against
 address the file was prelinked to during the library load.
 @item
 @code{l_ld}, which is memory address of the @code{PT_DYNAMIC} segment
+@item
+@code{build-id}, hex encoded @code{NT_GNU_BUILD_ID} note, if it exists.
 @end itemize
 
 Additionally the single @code{main-lm} attribute specifies address of
@@ -39530,7 +39532,7 @@ looks like this:
   <library name="/lib/ld-linux.so.2" lm="0xe4f51c" l_addr="0xe2d000"
            l_ld="0xe4eefc"/>
   <library name="/lib/libc.so.6" lm="0xe4fbe8" l_addr="0x154000"
-           l_ld="0x152350"/>
+           l_ld="0x152350" build-id="9afccf7cc41e6293476223fe72480854"/>
 </library-list-svr>
 @end smallexample
 
@@ -39539,13 +39541,14 @@ The format of an SVR4 library list is described by this DTD:
 @smallexample
 <!-- library-list-svr4: Root element with versioning -->
 <!ELEMENT library-list-svr4  (library)*>
-<!ATTLIST library-list-svr4  version CDATA   #FIXED  "1.0">
-<!ATTLIST library-list-svr4  main-lm CDATA   #IMPLIED>
+<!ATTLIST library-list-svr4  version  CDATA   #FIXED  "1.0">
+<!ATTLIST library-list-svr4  main-lm  CDATA   #IMPLIED>
 <!ELEMENT library            EMPTY>
-<!ATTLIST library            name    CDATA   #REQUIRED>
-<!ATTLIST library            lm      CDATA   #REQUIRED>
-<!ATTLIST library            l_addr  CDATA   #REQUIRED>
-<!ATTLIST library            l_ld    CDATA   #REQUIRED>
+<!ATTLIST library            name     CDATA   #REQUIRED>
+<!ATTLIST library            lm       CDATA   #REQUIRED>
+<!ATTLIST library            l_addr   CDATA   #REQUIRED>
+<!ATTLIST library            l_ld     CDATA   #REQUIRED>
+<!ATTLIST library            build-id CDATA   #IMPLIED>
 @end smallexample
 
 @node Memory Map Format

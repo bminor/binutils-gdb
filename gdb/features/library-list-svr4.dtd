@@ -6,11 +6,12 @@
 
 <!-- library-list-svr4: Root element with versioning -->
 <!ELEMENT library-list-svr4  (library)*>
-<!ATTLIST library-list-svr4  version CDATA   #FIXED  "1.0">
-<!ATTLIST library-list-svr4  main-lm CDATA   #IMPLIED>
+<!ATTLIST library-list-svr4  version  CDATA   #FIXED  "1.0">
+<!ATTLIST library-list-svr4  main-lm  CDATA   #IMPLIED>
 
 <!ELEMENT library            EMPTY>
-<!ATTLIST library            name    CDATA   #REQUIRED>
-<!ATTLIST library            lm      CDATA   #REQUIRED>
-<!ATTLIST library            l_addr  CDATA   #REQUIRED>
-<!ATTLIST library            l_ld    CDATA   #REQUIRED>
+<!ATTLIST library            name     CDATA   #REQUIRED>
+<!ATTLIST library            lm       CDATA   #REQUIRED>
+<!ATTLIST library            l_addr   CDATA   #REQUIRED>
+<!ATTLIST library            l_ld     CDATA   #REQUIRED>
+<!ATTLIST library            build-id CDATA   #IMPLIED>
