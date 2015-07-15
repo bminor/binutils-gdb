@@ -2973,6 +2973,20 @@ target_fileio_close_cleanup (void *opaque)
   target_fileio_close (fd, &target_errno);
 }
 
+typedef int (read_alloc_pread_ftype) (int handle, gdb_byte *read_buf, int len,
+				      ULONGEST offset, int *target_errno);
+
+/* Helper for target_fileio_read_alloc_1 to make it interruptible.  */
+
+static int
+target_fileio_read_alloc_1_pread (int handle, gdb_byte *read_buf, int len,
+				  ULONGEST offset, int *target_errno)
+{
+  QUIT;
+
+  return target_fileio_pread (handle, read_buf, len, offset, target_errno);
+}
+
 /* Read target file FILENAME, in the filesystem as seen by INF.  If
    INF is NULL, use the filesystem seen by the debugger (GDB or, for
    remote targets, the remote stub).  Store the result in *BUF_P and
@@ -2982,22 +2996,13 @@ target_fileio_close_cleanup (void *opaque)
    more information.  */
 
 static LONGEST
-target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
-			    gdb_byte **buf_p, int padding)
+read_alloc (gdb_byte **buf_p, int handle, read_alloc_pread_ftype *pread_func,
+	    int padding)
 {
-  struct cleanup *close_cleanup;
   size_t buf_alloc, buf_pos;
   gdb_byte *buf;
   LONGEST n;
-  int fd;
   int target_errno;
-
-  fd = target_fileio_open (inf, filename, FILEIO_O_RDONLY, 0700,
-			   &target_errno);
-  if (fd == -1)
-    return -1;
-
-  close_cleanup = make_cleanup (target_fileio_close_cleanup, &fd);
 
   /* Start by reading up to 4K at a time.  The target will throttle
      this number down if necessary.  */
@@ -3006,25 +3011,24 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
   buf_pos = 0;
   while (1)
     {
-      n = target_fileio_pread (fd, &buf[buf_pos],
-			       buf_alloc - buf_pos - padding, buf_pos,
-			       &target_errno);
-      if (n < 0)
+      n = pread_func (handle, &buf[buf_pos], buf_alloc - buf_pos - padding,
+		      buf_pos, &target_errno);
+      if (n <= 0)
 	{
-	  /* An error occurred.  */
-	  do_cleanups (close_cleanup);
-	  xfree (buf);
-	  return -1;
-	}
-      else if (n == 0)
-	{
-	  /* Read all there was.  */
-	  do_cleanups (close_cleanup);
-	  if (buf_pos == 0)
+	  if (n < 0 || (n == 0 && buf_pos == 0))
 	    xfree (buf);
 	  else
 	    *buf_p = buf;
-	  return buf_pos;
+	  if (n < 0)
+	    {
+	      /* An error occurred.  */
+	      return -1;
+	    }
+	  else
+	    {
+	      /* Read all there was.  */
+	      return buf_pos;
+	    }
 	}
 
       buf_pos += n;
@@ -3035,9 +3039,29 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
 	  buf_alloc *= 2;
 	  buf = xrealloc (buf, buf_alloc);
 	}
-
-      QUIT;
     }
+}
+
+typedef LONGEST (read_stralloc_func_ftype) (struct inferior *inf,
+					    const char *filename,
+					    gdb_byte **buf_p, int padding);
+
+static LONGEST
+target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
+			    gdb_byte **buf_p, int padding)
+{
+  struct cleanup *close_cleanup;
+  int fd, target_errno;
+  LONGEST retval;
+
+  fd = target_fileio_open (inf, filename, FILEIO_O_RDONLY, 0700, &target_errno);
+  if (fd == -1)
+    return -1;
+
+  close_cleanup = make_cleanup (target_fileio_close_cleanup, &fd);
+  retval = read_alloc (buf_p, fd, target_fileio_read_alloc_1_pread, padding);
+  do_cleanups (close_cleanup);
+  return retval;
 }
 
 /* See target.h.  */
@@ -3049,16 +3073,17 @@ target_fileio_read_alloc (struct inferior *inf, const char *filename,
   return target_fileio_read_alloc_1 (inf, filename, buf_p, 0);
 }
 
-/* See target.h.  */
+/* Helper for target_fileio_read_stralloc.  */
 
-char *
-target_fileio_read_stralloc (struct inferior *inf, const char *filename)
+static char *
+read_stralloc (struct inferior *inf, const char *filename,
+	       read_stralloc_func_ftype *func)
 {
   gdb_byte *buffer;
   char *bufstr;
   LONGEST i, transferred;
 
-  transferred = target_fileio_read_alloc_1 (inf, filename, &buffer, 1);
+  transferred = func (inf, filename, &buffer, 1);
   bufstr = (char *) buffer;
 
   if (transferred < 0)
@@ -3082,6 +3107,13 @@ target_fileio_read_stralloc (struct inferior *inf, const char *filename)
   return bufstr;
 }
 
+/* See target.h.  */
+
+char *
+target_fileio_read_stralloc (struct inferior *inf, const char *filename)
+{
+  return read_stralloc (inf, filename, target_fileio_read_alloc_1);
+}
 
 static int
 default_region_ok_for_hw_watchpoint (struct target_ops *self,

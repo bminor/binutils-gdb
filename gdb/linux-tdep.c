@@ -1098,6 +1098,10 @@ linux_core_info_proc (struct gdbarch *gdbarch, const char *args,
     error (_("unable to handle request"));
 }
 
+/* Callback function for linux_find_memory_regions_full.  If it returns
+   non-zero linux_find_memory_regions_full returns immediately with that
+   value.  */
+
 typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    ULONGEST offset, ULONGEST inode,
 					    int read, int write,
@@ -1105,43 +1109,22 @@ typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    const char *filename,
 					    void *data);
 
-/* List memory regions in the inferior for a corefile.  */
+/* List memory regions in the inferior PID matched to FILTERFLAGS for
+   a corefile.  Call FUNC with FUNC_DATA for each such region.  Return
+   immediately with the value returned by FUNC if it is non-zero.
+   *MEMORY_TO_FREE_PTR should be registered to be freed automatically if
+   called FUNC throws an exception.  MEMORY_TO_FREE_PTR can be also
+   passed as NULL if it is not used.  Return -1 if error occurs, 0 if
+   all memory regions have been processed or return the value from FUNC
+   if FUNC returns non-zero.  */
 
 static int
-linux_find_memory_regions_full (struct gdbarch *gdbarch,
+linux_find_memory_regions_full (pid_t pid, enum filterflags filterflags,
 				linux_find_memory_region_ftype *func,
-				void *obfd)
+				void *func_data)
 {
   char mapsfilename[100];
-  char coredumpfilter_name[100];
-  char *data, *coredumpfilterdata;
-  pid_t pid;
-  /* Default dump behavior of coredump_filter (0x33), according to
-     Documentation/filesystems/proc.txt from the Linux kernel
-     tree.  */
-  enum filterflags filterflags = (COREFILTER_ANON_PRIVATE
-				  | COREFILTER_ANON_SHARED
-				  | COREFILTER_ELF_HEADERS
-				  | COREFILTER_HUGETLB_PRIVATE);
-
-  /* We need to know the real target PID to access /proc.  */
-  if (current_inferior ()->fake_pid_p)
-    return 1;
-
-  pid = current_inferior ()->pid;
-
-  if (use_coredump_filter)
-    {
-      xsnprintf (coredumpfilter_name, sizeof (coredumpfilter_name),
-		 "/proc/%d/coredump_filter", pid);
-      coredumpfilterdata = target_fileio_read_stralloc (NULL,
-							coredumpfilter_name);
-      if (coredumpfilterdata != NULL)
-	{
-	  sscanf (coredumpfilterdata, "%x", &filterflags);
-	  xfree (coredumpfilterdata);
-	}
-    }
+  char *data;
 
   xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/smaps", pid);
   data = target_fileio_read_stralloc (NULL, mapsfilename);
@@ -1156,6 +1139,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
     {
       struct cleanup *cleanup = make_cleanup (xfree, data);
       char *line, *t;
+      int retval = 0;
 
       line = strtok_r (data, "\n", &t);
       while (line != NULL)
@@ -1270,17 +1254,20 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
 	  /* Invoke the callback function to create the corefile segment.  */
 	  if (should_dump_p)
-	    func (addr, endaddr - addr, offset, inode,
-		  read, write, exec, 1, /* MODIFIED is true because we
-					   want to dump the mapping.  */
-		  filename, obfd);
+	    retval = func (addr, endaddr - addr, offset, inode,
+			   read, write, exec,
+			   1, /* MODIFIED is true because we want to dump the
+				 mapping.  */
+			   filename, func_data);
+	  if (retval != 0)
+	    break;
 	}
 
       do_cleanups (cleanup);
-      return 0;
+      return retval;
     }
 
-  return 1;
+  return -1;
 }
 
 /* A structure for passing information through
@@ -1294,7 +1281,7 @@ struct linux_find_memory_regions_data
 
   /* The original datum.  */
 
-  void *obfd;
+  void *data;
 };
 
 /* A callback for linux_find_memory_regions that converts between the
@@ -1308,7 +1295,48 @@ linux_find_memory_regions_thunk (ULONGEST vaddr, ULONGEST size,
 {
   struct linux_find_memory_regions_data *data = arg;
 
-  return data->func (vaddr, size, read, write, exec, modified, data->obfd);
+  return data->func (vaddr, size, read, write, exec, modified, data->data);
+}
+
+/* Wrapper of linux_find_memory_regions_full handling FAKE_PID_P in GDB.  */
+
+static int
+linux_find_memory_regions_gdb (struct gdbarch *gdbarch,
+			       linux_find_memory_region_ftype *func,
+			       void *func_data)
+{
+  pid_t pid;
+  /* Default dump behavior of coredump_filter (0x33), according to
+     Documentation/filesystems/proc.txt from the Linux kernel
+     tree.  */
+  enum filterflags filterflags = (COREFILTER_ANON_PRIVATE
+				  | COREFILTER_ANON_SHARED
+				  | COREFILTER_ELF_HEADERS
+				  | COREFILTER_HUGETLB_PRIVATE);
+
+  /* We need to know the real target PID so
+     linux_find_memory_regions_full can access /proc.  */
+  if (current_inferior ()->fake_pid_p)
+    return -1;
+
+  pid = current_inferior ()->pid;
+
+  if (use_coredump_filter)
+    {
+      char coredumpfilter_name[100], *coredumpfilterdata;
+
+      xsnprintf (coredumpfilter_name, sizeof (coredumpfilter_name),
+		 "/proc/%d/coredump_filter", pid);
+      coredumpfilterdata = target_fileio_read_stralloc (NULL,
+							coredumpfilter_name);
+      if (coredumpfilterdata != NULL)
+	{
+	  sscanf (coredumpfilterdata, "%x", &filterflags);
+	  xfree (coredumpfilterdata);
+	}
+    }
+
+  return linux_find_memory_regions_full (pid, filterflags, func, func_data);
 }
 
 /* A variant of linux_find_memory_regions_full that is suitable as the
@@ -1316,16 +1344,15 @@ linux_find_memory_regions_thunk (ULONGEST vaddr, ULONGEST size,
 
 static int
 linux_find_memory_regions (struct gdbarch *gdbarch,
-			   find_memory_region_ftype func, void *obfd)
+			   find_memory_region_ftype func, void *func_data)
 {
   struct linux_find_memory_regions_data data;
 
   data.func = func;
-  data.obfd = obfd;
+  data.data = func_data;
 
-  return linux_find_memory_regions_full (gdbarch,
-					 linux_find_memory_regions_thunk,
-					 &data);
+  return linux_find_memory_regions_gdb (gdbarch,
+					linux_find_memory_regions_thunk, &data);
 }
 
 /* Determine which signal stopped execution.  */
@@ -1507,8 +1534,8 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
   pack_long (buf, long_type, 1);
   obstack_grow (&data_obstack, buf, TYPE_LENGTH (long_type));
 
-  linux_find_memory_regions_full (gdbarch, linux_make_mappings_callback,
-				  &mapping_data);
+  linux_find_memory_regions_gdb (gdbarch, linux_make_mappings_callback,
+				 &mapping_data);
 
   if (mapping_data.file_count != 0)
     {

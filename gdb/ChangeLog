@@ -1,3 +1,25 @@
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Prepare linux_find_memory_regions_full & co. for move.
+	* linux-tdep.c (linux_find_memory_region_ftype): Comment.
+	(linux_find_memory_regions_full): Change signature and prepare
+	for moving to linux-maps.
+	(linux_find_memory_regions_data): Rename field 'obfd' to 'data'.
+	(linux_find_memory_regions_thunk): New.
+	(linux_find_memory_regions_thunk): Use 'data' field instead of 'obfd'.
+	(linux_find_memory_regions_gdb): New.
+	(linux_find_memory_regions): Rename argument 'obfd' to 'func_data'.
+	(linux_make_mappings_corefile_notes): Use
+	linux_find_memory_regions_gdb.
+	* target.c (read_alloc_pread_ftype): New typedef.
+	(target_fileio_read_alloc_1_pread): New function.
+	(read_alloc): Refactor from target_fileio_read_alloc_1.
+	(read_stralloc_func_ftype): New typedef.
+	(target_fileio_read_alloc_1): New implementation. Use read_alloc.
+	(read_stralloc): Refactored from target_fileio_read_stralloc.
+	(target_fileio_read_stralloc): New implementation, use read_stralloc.
+
 2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Change gdb_regex.h to
