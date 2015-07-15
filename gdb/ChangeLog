@@ -1,3 +1,22 @@
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Change gdb_regex.h to
+	common/gdb_regex.h.
+	(COMMON_OBS): Add gdb_regex.o.
+	(gdb_regex.o): New.
+	* common/common.m4 (GDB_AC_COMMON): Add gdb_use_included_regex,
+	--without-included-regex and USE_INCLUDED_REGEX.
+	* common/gdb_regex.c: New file from utils.c functions.
+	* common/gdb_regex.h: Move it here from gdb_regex.h, update include
+	file wrapping define name.
+	* configure: Rebuilt.
+	* configure.ac (gdb_use_included_regex, --without-included-regex)
+	(USE_INCLUDED_REGEX): Move them to common/common.m4.
+	* gdb_regex.h: Move it to common/gdb_regex.h.
+	* utils.c: Remove include gdb_regex.h.
+	(do_regfree_cleanup, make_regfree_cleanup, get_regcomp_error)
+	(compile_rx_or_error): Move them to common/gdb_regex.c.
+
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

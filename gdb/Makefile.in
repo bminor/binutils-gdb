@@ -937,7 +937,7 @@ extension.h extension-priv.h \
 build-id.h buildsym.h valprint.h \
 typeprint.h mi/mi-getopt.h mi/mi-parse.h mi/mi-console.h \
 mi/mi-out.h mi/mi-main.h mi/mi-common.h mi/mi-cmds.h linux-nat.h \
-complaints.h gdb_proc_service.h gdb_regex.h xtensa-tdep.h inf-loop.h \
+complaints.h gdb_proc_service.h common/gdb_regex.h xtensa-tdep.h inf-loop.h \
 common/gdb_wait.h common/gdb_assert.h solib.h ppc-tdep.h cp-support.h glibc-tdep.h \
 interps.h auxv.h gdbcmd.h tramp-frame.h mipsnbsd-tdep.h	\
 amd64-linux-tdep.h linespec.h i387-tdep.h mn10300-tdep.h \
@@ -1084,6 +1084,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
 	common-exceptions.o btrace-common.o fileio.o target-utils.o \
+	gdb_regex.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -2271,6 +2272,10 @@ btrace-common.o: ${srcdir}/common/btrace-common.c
 
 fileio.o: ${srcdir}/common/fileio.c
 	$(COMPILE) $(srcdir)/common/fileio.c
+	$(POSTCOMPILE)
+
+gdb_regex.o: ${srcdir}/common/gdb_regex.c
+	$(COMPILE) $(srcdir)/common/gdb_regex.c
 	$(POSTCOMPILE)
 #
 # gdb/target/ dependencies

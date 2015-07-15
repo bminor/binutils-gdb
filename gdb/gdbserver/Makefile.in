@@ -195,6 +195,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
       tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
       common-exceptions.o symbol.o btrace-common.o fileio.o target-utils.o \
+      gdb_regex.o \
       $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -580,6 +581,9 @@ waitstatus.o: ../target/waitstatus.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 fileio.o: ../common/fileio.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+gdb_regex.o: ../common/gdb_regex.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

@@ -67,7 +67,6 @@
 
 #include "gdb_usleep.h"
 #include "interps.h"
-#include "gdb_regex.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -1110,60 +1109,6 @@ make_hex_string (const gdb_byte *data, size_t length)
     p += xsnprintf (p, 3, "%02x", data[i]);
   *p = '\0';
   return result;
-}
-
-
-
-/* A cleanup function that calls regfree.  */
-
-static void
-do_regfree_cleanup (void *r)
-{
-  regfree (r);
-}
-
-/* Create a new cleanup that frees the compiled regular expression R.  */
-
-struct cleanup *
-make_regfree_cleanup (regex_t *r)
-{
-  return make_cleanup (do_regfree_cleanup, r);
-}
-
-/* Return an xmalloc'd error message resulting from a regular
-   expression compilation failure.  */
-
-char *
-get_regcomp_error (int code, regex_t *rx)
-{
-  size_t length = regerror (code, rx, NULL, 0);
-  char *result = xmalloc (length);
-
-  regerror (code, rx, result, length);
-  return result;
-}
-
-/* Compile a regexp and throw an exception on error.  This returns a
-   cleanup to free the resulting pattern on success.  RX must not be
-   NULL.  */
-
-struct cleanup *
-compile_rx_or_error (regex_t *pattern, const char *rx, const char *message)
-{
-  int code;
-
-  gdb_assert (rx != NULL);
-
-  code = regcomp (pattern, rx, REG_NOSUB);
-  if (code != 0)
-    {
-      char *err = get_regcomp_error (code, pattern);
-
-      make_cleanup (xfree, err);
-      error (("%s: %s"), message, err);
-    }
-
-  return make_regfree_cleanup (pattern);
 }
 
 

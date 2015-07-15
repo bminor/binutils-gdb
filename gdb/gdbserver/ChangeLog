@@ -1,3 +1,10 @@
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (OBS): Add gdb_regex.o.
+	(gdb_regex.o): New.
+	* config.in: Rebuilt.
+	* configure: Rebuilt.
+
 2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

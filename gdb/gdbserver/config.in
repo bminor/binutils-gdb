@@ -317,6 +317,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define to 1 if the regex included in libiberty should be used. */
+#undef USE_INCLUDED_REGEX
+
 /* Define if we should use libthread_db directly. */
 #undef USE_LIBTHREAD_DB_DIRECTLY
 

@@ -44,4 +44,33 @@ gdb_cv_func_sigsetjmp=yes, gdb_cv_func_sigsetjmp=no)])
 if test $gdb_cv_func_sigsetjmp = yes; then
   AC_DEFINE(HAVE_SIGSETJMP, 1, [Define if sigsetjmp is available. ])
 fi
+
+  # Assume we'll default to using the included libiberty regex.
+  gdb_use_included_regex=yes
+
+  # However, if the system regex is GNU regex, then default to *not*
+  # using the included regex.
+  AC_CACHE_CHECK(
+    [for GNU regex],
+    [gdb_cv_have_gnu_regex],
+    [AC_TRY_COMPILE(
+      [#include <gnu-versions.h>],
+      [#define REGEX_INTERFACE_VERSION 1
+  #if _GNU_REGEX_INTERFACE_VERSION != REGEX_INTERFACE_VERSION
+  # error "Version mismatch"
+  #endif],
+      gdb_cv_have_gnu_regex=yes,
+      gdb_cv_have_gnu_regex=no)])
+  if test $gdb_cv_have_gnu_regex = yes; then
+    gdb_use_included_regex=no
+  fi
+
+  AC_ARG_WITH(included-regex,
+    AS_HELP_STRING([--without-included-regex], [don't use included regex; this is the default on systems with version 2 of the GNU C library (use with caution on other system)]),
+    gdb_with_regex=$withval,
+    gdb_with_regex=$gdb_use_included_regex)
+  if test "$gdb_with_regex" = yes; then
+    AC_DEFINE(USE_INCLUDED_REGEX, 1,
+      [Define to 1 if the regex included in libiberty should be used.])
+  fi
 ])
