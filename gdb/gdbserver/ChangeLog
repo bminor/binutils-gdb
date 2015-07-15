@@ -1,3 +1,9 @@
+2015-07-15  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* linux-aarch64-low.c (aarch64_supports_range_stepping): New
+	function, return 1.
+	(the_low_target): Install it.
+
 2015-07-14  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (kill_wait_lwp): Don't assert if waitpid fails.
