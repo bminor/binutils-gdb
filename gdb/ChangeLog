@@ -1,3 +1,7 @@
+2015-07-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* common/btrace-common.c (btrace_data_append): Change case label.
+
 2015-07-20  Yao Qi  <yao.qi@linaro.org>
 
 	* nat/aarch64-linux-hw-point.c (aarch64_handle_unaligned_watchpoint):
