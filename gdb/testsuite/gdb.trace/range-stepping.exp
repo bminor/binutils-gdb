@@ -34,6 +34,11 @@ if ![gdb_target_supports_trace] {
     return -1
 }
 
+if ![gdb_range_stepping_enabled] {
+    unsupported "range stepping not supported by the target"
+    return -1
+}
+
 # Check that range stepping works well with tracepoints.
 
 proc range_stepping_with_tracepoint { type } {

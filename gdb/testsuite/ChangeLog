@@ -1,3 +1,12 @@
+2015-07-15  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* gdb.base/range-stepping.exp (gdb_range_stepping_enabled):
+	Move it to ...
+	* lib/range-stepping-support.exp (gdb_range_stepping_enabled):
+	... here.
+	* gdb.trace/range-stepping.exp: Check that the target supports
+	range stepping.
+
 2015-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/i386-biarch-core.exp: Fix comment typo.
