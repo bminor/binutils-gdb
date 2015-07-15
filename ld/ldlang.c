@@ -3413,6 +3413,55 @@ lang_place_undefineds (void)
     insert_undefined (ptr->name);
 }
 
+/* Structure used to build the list of symbols that the user has required
+   be defined.  */
+
+struct require_defined_symbol
+{
+  const char *name;
+  struct require_defined_symbol *next;
+};
+
+/* The list of symbols that the user has required be defined.  */
+
+static struct require_defined_symbol *require_defined_symbol_list;
+
+/* Add a new symbol NAME to the list of symbols that are required to be
+   defined.  */
+
+void
+ldlang_add_require_defined (const char * const name)
+{
+  struct require_defined_symbol *ptr;
+
+  ldlang_add_undef (name, TRUE);
+  ptr = (struct require_defined_symbol *) stat_alloc (sizeof (*ptr));
+  ptr->next = require_defined_symbol_list;
+  ptr->name = strdup (name);
+  require_defined_symbol_list = ptr;
+}
+
+/* Check that all symbols the user required to be defined, are defined,
+   raise an error if we find a symbol that is not defined.  */
+
+static void
+ldlang_check_require_defined_symbols (void)
+{
+  struct require_defined_symbol *ptr;
+
+  for (ptr = require_defined_symbol_list; ptr != NULL; ptr = ptr->next)
+    {
+      struct bfd_link_hash_entry *h;
+
+      h = bfd_link_hash_lookup (link_info.hash, ptr->name,
+                                FALSE, FALSE, TRUE);
+      if (h == NULL
+          || (h->type != bfd_link_hash_defined
+              && h->type != bfd_link_hash_defweak))
+        einfo(_("%P%X: required symbol `%s' not defined\n"), ptr->name);
+    }
+}
+
 /* Check for all readonly or some readwrite sections.  */
 
 static void
@@ -6804,6 +6853,9 @@ lang_process (void)
   /* Make sure that the section addresses make sense.  */
   if (command_line.check_section_addresses)
     lang_check_section_addresses ();
+
+  /* Check any required symbols are known.  */
+  ldlang_check_require_defined_symbols ();
 
   lang_end ();
 }

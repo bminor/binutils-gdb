@@ -12,6 +12,9 @@
 
 * Add --print-memory-usage option to report memory blocks usage.
 
+* Add --require-defined option, it's like --undefined except the new symbol
+  must be defined by the end of the link.
+
 Changes in 2.25:
 
 * PE binaries now once again contain real timestamps by default.  To disable

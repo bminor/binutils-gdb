@@ -1,3 +1,13 @@
+2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-undefined/require-defined-1.d: New file.
+	* ld-undefined/require-defined-2.d: New file.
+	* ld-undefined/require-defined-3.d: New file.
+	* ld-undefined/require-defined-4.d: New file.
+	* ld-undefined/require-defined-5.d: New file.
+	* ld-undefined/require-defined.exp: New file.
+	* ld-undefined/require-defined.s: New file.
+
 2015-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18735

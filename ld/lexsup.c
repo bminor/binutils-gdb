@@ -212,6 +212,9 @@ static const struct ld_option ld_options[] =
   { {"undefined", required_argument, NULL, 'u'},
     'u', N_("SYMBOL"), N_("Start with undefined reference to SYMBOL"),
     TWO_DASHES },
+  { {"require-defined", required_argument, NULL, OPTION_REQUIRE_DEFINED_SYMBOL},
+    '\0', N_("SYMBOL"), N_("Require SYMBOL be defined in the final output"),
+    TWO_DASHES },
   { {"unique", optional_argument, NULL, OPTION_UNIQUE},
     '\0', N_("[=SECTION]"),
     N_("Don't merge input [SECTION | orphan] sections"), TWO_DASHES },
@@ -1246,6 +1249,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case 'u':
 	  ldlang_add_undef (optarg, TRUE);
+	  break;
+        case OPTION_REQUIRE_DEFINED_SYMBOL:
+          ldlang_add_require_defined (optarg);
 	  break;
 	case OPTION_UNIQUE:
 	  if (optarg != NULL)

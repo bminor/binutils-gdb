@@ -1,3 +1,17 @@
+2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.texinfo (Options): Document --require-defined option.
+	* ldlang.c (struct require_defined_symbol): New structure.
+	(require_defined_symbol_list): New variable.
+	(ldlang_add_require_defined): New function.
+	(ldlang_check_require_defined_symbols): New function.
+	(lang_process): Check required symbols are defined.
+	* ldlang.h (ldlang_add_require_defined): Declare.
+	* ldlex.h (enum option_values): Add OPTION_REQUIRE_DEFINED_SYMBOL.
+	* lexsup.c (ld_options): Add '--require-defined' entry.
+	(parse_args): Handle '--requre-defined' entry.
+	* NEWS: Mention new '--require-defined' option.
+
 2015-08-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld.texinfo (MEMORY): Explain that multiple MEMORY commands are

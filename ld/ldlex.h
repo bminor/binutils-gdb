@@ -143,6 +143,7 @@ enum option_values
   OPTION_PUSH_STATE,
   OPTION_POP_STATE,
   OPTION_PRINT_MEMORY_USAGE,
+  OPTION_REQUIRE_DEFINED_SYMBOL,
 };
 
 /* The initial parser states.  */
