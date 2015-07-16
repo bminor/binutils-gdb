@@ -1,3 +1,7 @@
+2015-07-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* elf/aarch64.h (R_AARCH64_P32_TLSLD_ADR_PREL21): New enumeration.
+
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
