@@ -1,3 +1,11 @@
+2015-07-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSLD_ADR_PREL21): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_TLSLD_ADR_PREL21.
+
 2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	 PR binutils/18656

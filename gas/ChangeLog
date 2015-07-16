@@ -1,3 +1,9 @@
+2015-07-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
+	(md_apply_fix): Support BFD_RELOC_AARCH64_TLSLD_ADR_PREL21.
+	(aarch64_force_relocation): Ditto.
+
 2015-07-16  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (arm_fpus): Add crypto-neon-fp-armv8.1.

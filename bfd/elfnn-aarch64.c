@@ -1024,6 +1024,20 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0x1ffffc,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  HOWTO (AARCH64_R (TLSLD_ADR_PREL21),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 21,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_ADR_PREL21),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x1fffff,		/* src_mask */
+	 0x1fffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
   HOWTO64 (AARCH64_R (TLSLE_MOVW_TPREL_G2),	/* type */
 	 32,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
