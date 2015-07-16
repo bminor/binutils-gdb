@@ -1,3 +1,10 @@
+2015-07-16  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
+
+	* arm-dis.c (print_insn_coprocessor): Added support for quarter
+	float bitfield format.
+	(coprocessor_opcodes): Changed VFP vmov reg,immediate to use new
+	quarter float bitfield format.
+
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
