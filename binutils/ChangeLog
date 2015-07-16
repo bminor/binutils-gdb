@@ -1,3 +1,9 @@
+2015-07-16  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/18672
+	* readelf.c (get_32bit_dynamic_section): Correct buffer limit test.
+	(get_64bit_dynamic_section): Likewise.
+
 2015-03-25  Nick Clifton  <nickc@redhat.com>
 
 	* coffgrok.c: Remove redundant prototypes.

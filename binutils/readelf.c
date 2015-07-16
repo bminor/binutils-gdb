@@ -8365,7 +8365,7 @@ get_32bit_dynamic_section (FILE * file)
      might not have the luxury of section headers.  Look for the DT_NULL
      terminator to determine the number of entries.  */
   for (ext = edyn, dynamic_nent = 0;
-       (char *) ext < (char *) edyn + dynamic_size - sizeof (* entry);
+       (char *) (ext + 1) <= (char *) edyn + dynamic_size;
        ext++)
     {
       dynamic_nent++;
@@ -8413,8 +8413,8 @@ get_64bit_dynamic_section (FILE * file)
      might not have the luxury of section headers.  Look for the DT_NULL
      terminator to determine the number of entries.  */
   for (ext = edyn, dynamic_nent = 0;
-       /* PR 17533 file: 033-67080-0.004 - do not read off the end of the buffer.  */
-       (char *) ext < ((char *) edyn) + dynamic_size - sizeof (* ext);
+       /* PR 17533 file: 033-67080-0.004 - do not read past end of buffer.  */
+       (char *) (ext + 1) <= (char *) edyn + dynamic_size;
        ext++)
     {
       dynamic_nent++;
