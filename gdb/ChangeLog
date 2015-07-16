@@ -1,3 +1,8 @@
+2015-07-16  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_pseudo_read_value): Mark S register as
+	unavailable if invalid.
+
 2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert the previous 6 commits:
