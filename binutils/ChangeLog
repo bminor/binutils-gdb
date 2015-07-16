@@ -1,3 +1,9 @@
+2015-07-16  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/18672
+	* readelf.c (get_32bit_dynamic_section): Correct buffer limit test.
+	(get_64bit_dynamic_section): Likewise.
+
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (copy_file): Set BFD_COMPRESS_GABI if not
