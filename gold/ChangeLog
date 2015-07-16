@@ -1,3 +1,9 @@
+2015-07-20  Han Shen  <shenhan@google.com>
+
+	Fix arm elf header flags wrt hardfp bit.
+
+	* arm.cc (Target_arm::do_adjust_elf_header): Set flags into view.
+
 2015-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/18689
