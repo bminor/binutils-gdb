@@ -24650,6 +24650,8 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"crypto-neon-fp-armv8",
 			FPU_ARCH_CRYPTO_NEON_VFP_ARMV8},
   {"neon-fp-armv8.1",	FPU_ARCH_NEON_VFP_ARMV8_1},
+  {"crypto-neon-fp-armv8.1",
+			FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1},
   {NULL,		ARM_ARCH_NONE}
 };
 

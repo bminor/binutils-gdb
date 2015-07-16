@@ -1,3 +1,9 @@
+2015-07-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Add crypto-neon-fp-armv8.1.
+	* doc/c-arm.texi (-mfpu=): Likewise.  Correct the entry for
+	neon-fp-armv8.1.
+
 2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* NEWS: Mention ARMv8.1 support in the Aarch64 port.
