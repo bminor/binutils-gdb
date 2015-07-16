@@ -1,3 +1,8 @@
+2015-07-16  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-arm.c (md_assemble): Rephrase the "selected processor does
+	not support ARM mode" error messages.
+
 2015-07-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (flag_compress_debug): Replace

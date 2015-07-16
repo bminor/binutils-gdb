@@ -17873,7 +17873,7 @@ md_assemble (char *str)
 	  || (thumb_mode == 1
 	      && !ARM_CPU_HAS_FEATURE (variant, *opcode->tvariant)))
 	{
-	  as_bad (_("selected processor does not support Thumb mode `%s'"), str);
+	  as_bad (_("selected processor does not support `%s' in Thumb mode"), str);
 	  return;
 	}
       if (inst.cond != COND_ALWAYS && !unified_syntax
@@ -17898,7 +17898,7 @@ md_assemble (char *str)
 		inst.size_req = 2;
 	      else if (inst.size_req == 4)
 		{
-		  as_bad (_("selected processor does not support Thumb-2 mode `%s'"), str);
+		  as_bad (_("selected processor does not support `%s' in Thumb-2 mode"), str);
 		  return;
 		}
 	    }
@@ -17964,7 +17964,7 @@ md_assemble (char *str)
 	  && !(opcode->avariant &&
 	       ARM_CPU_HAS_FEATURE (cpu_variant, *opcode->avariant)))
 	{
-	  as_bad (_("selected processor does not support ARM mode `%s'"), str);
+	  as_bad (_("selected processor does not support `%s' in ARM mode"), str);
 	  return;
 	}
       if (inst.size_req)

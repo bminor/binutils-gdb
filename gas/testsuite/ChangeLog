@@ -1,3 +1,12 @@
+2015-07-16  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* gas/arm/arch7em-bad.l: Update expected errors.
+	* gas/arm/arch7m-bad.l: Likewise.
+	* gas/arm/arm-idiv-bad.l: Likewise.
+	* gas/arm/arm7-bad.l: Likewise.
+	* gas/arm/armv1-bad.l: Likewise.
+	* gas/arm/thumb-w-bad.l: Likewise.
+
 2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/dw2-compress-1.d: Updated to accept .debug_* sections.
