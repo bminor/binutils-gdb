@@ -1,3 +1,7 @@
+2015-07-16  Doug Evans  <dje@google.com>
+
+	* stabs.texinfo: @include gdb-cfg.texi.
+
 2015-07-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Selection): Update documentation for 'frame'
