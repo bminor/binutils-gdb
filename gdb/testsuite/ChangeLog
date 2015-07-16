@@ -1,3 +1,9 @@
+2015-07-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-biarch-core.exp: Replace istarget
+	by "complete set gnutarget". Remove expectation for the "core-file"
+	command.
+
 2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert the previous commit:
