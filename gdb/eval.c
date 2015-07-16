@@ -1226,7 +1226,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	    block_for_pc (funaddr);
 
-	    CHECK_TYPEDEF (val_type);
+	    val_type = check_typedef (val_type);
 	  
 	    if ((val_type == NULL) 
 		|| (TYPE_CODE(val_type) == TYPE_CODE_ERROR))
@@ -3089,7 +3089,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
   /* $5.3.3/2 of the C++ Standard (n3290 draft) says of sizeof:
      "When applied to a reference or a reference type, the result is
      the size of the referenced type."  */
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   if (exp->language_defn->la_language == language_cplus
       && TYPE_CODE (type) == TYPE_CODE_REF)
     type = check_typedef (TYPE_TARGET_TYPE (type));

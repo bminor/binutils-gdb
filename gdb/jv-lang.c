@@ -610,7 +610,7 @@ get_java_object_header_size (struct gdbarch *gdbarch)
 int
 is_object_type (struct type *type)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
       struct type *ttype = check_typedef (TYPE_TARGET_TYPE (type));

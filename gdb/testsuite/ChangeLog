@@ -1,3 +1,42 @@
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous commit:
+	Tests for validate symbol file using build-id.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+
+	Tests for validate symbol file using build-id.
+	* gdb.base/solib-mismatch-lib.c: New file.
+	* gdb.base/solib-mismatch-libmod.c: New file.
+	* gdb.base/solib-mismatch.c: New file.
+	* gdb.base/solib-mismatch.exp: New file.
+
+2015-07-15  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/sigaltstack.exp (finish_test): Add kfail for
+	nios2-*-linux*.
+	* gdb.base/sigbpt.exp (stepi_out): Likewise.
+	* gdb.base/siginfo.exp: Likewise.
+	* gdb.base/sigstep.exp (advance, advancei): Likewise.
+
+2015-07-15  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* gdb.base/range-stepping.exp (gdb_range_stepping_enabled):
+	Move it to ...
+	* lib/range-stepping-support.exp (gdb_range_stepping_enabled):
+	... here.
+	* gdb.trace/range-stepping.exp: Check that the target supports
+	range stepping.
+
+2015-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-biarch-core.exp: Fix comment typo.
+
+2015-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/killed-outside.exp: New file.
+	* gdb.base/killed-outside.c: New file.
+
 2015-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.asm/asm-source.exp (f at main): Stop at gdbasm_enter.

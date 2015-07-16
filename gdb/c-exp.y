@@ -793,7 +793,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 					      (parse_language (pstate),
 					       parse_gdbarch (pstate),
 					       "int"));
-			  CHECK_TYPEDEF (type);
+			  type = check_typedef (type);
 
 			    /* $5.3.3/2 of the C++ Standard (n3290 draft)
 			       says of sizeof:  "When applied to a reference
@@ -985,7 +985,7 @@ variable:	block COLONCOLON name
 qualified_name:	TYPENAME COLONCOLON name
 			{
 			  struct type *type = $1.type;
-			  CHECK_TYPEDEF (type);
+			  type = check_typedef (type);
 			  if (!type_aggregate_p (type))
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
@@ -1001,7 +1001,7 @@ qualified_name:	TYPENAME COLONCOLON name
 			  struct stoken tmp_token;
 			  char *buf;
 
-			  CHECK_TYPEDEF (type);
+			  type = check_typedef (type);
 			  if (!type_aggregate_p (type))
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));

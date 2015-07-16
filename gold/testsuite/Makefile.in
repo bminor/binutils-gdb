@@ -5618,9 +5618,9 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
 
-# Check there are compressed DWARF .zdebug_* sections.
+# Check there are compressed DWARF .debug_* sections.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections.check: flagstest_compress_debug_sections
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< | egrep ".debug_.* C *" > $@.tmp
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
 
 # Compare DWARF debug info.

@@ -2415,7 +2415,7 @@ return_command (char *retval_exp, int from_tty)
 	  return_type = value_type (return_value);
 	}
       do_cleanups (old_chain);
-      CHECK_TYPEDEF (return_type);
+      return_type = check_typedef (return_type);
       return_value = value_cast (return_type, return_value);
 
       /* Make sure the value is fully evaluated.  It may live in the

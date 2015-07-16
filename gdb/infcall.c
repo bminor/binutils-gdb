@@ -757,7 +757,7 @@ call_function_by_hand_dummy (struct value *function,
   if (!values_type)
     values_type = builtin_type (gdbarch)->builtin_int;
 
-  CHECK_TYPEDEF (values_type);
+  values_type = check_typedef (values_type);
 
   /* Are we returning a value using a structure return (passing a
      hidden argument pointing to storage) or a normal value return?

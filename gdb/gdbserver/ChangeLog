@@ -1,3 +1,59 @@
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous 3 commits:
+	Move gdb_regex* to common/
+	Move linux_find_memory_regions_full & co.
+	gdbserver build-id attribute generator
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	gdbserver build-id attribute generator.
+	* linux-low.c (nat/linux-maps.h, search.h, rsp-low.h): Include.
+	(ElfXX_Ehdr, ElfXX_Phdr, ElfXX_Nhdr): New.
+	(ELFXX_FLD, ELFXX_SIZEOF, ELFXX_ROUNDUP, BUILD_ID_INVALID): New.
+	(find_phdr): New.
+	(get_dynamic): Use find_pdhr to traverse program headers.
+	(struct mapping_entry, mapping_entry_s, free_mapping_entry_vec)
+	(compare_mapping_entry_range, struct find_memory_region_callback_data)
+	(read_build_id, find_memory_region_callback, lrfind_mapping_entry)
+	(get_hex_build_id): New.
+	(linux_qxfer_libraries_svr4): Add optional build-id attribute
+	to reply XML document.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* target.c: Include target/target-utils.h and fcntl.h.
+	(target_fileio_read_stralloc_1_pread, target_fileio_read_stralloc_1)
+	(target_fileio_read_stralloc): New functions.
+
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (OBS): Add gdb_regex.o.
+	(gdb_regex.o): New.
+	* config.in: Rebuilt.
+	* configure: Rebuilt.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Create empty nat/linux-maps.[ch] and common/target-utils.[ch].
+	* Makefile.in (OBS): Add target-utils.o.
+	(linux-maps.o, target-utils.o): New.
+	* configure.srv (srv_linux_obj): Add linux-maps.o.
+
+2015-07-15  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* linux-aarch64-low.c (aarch64_supports_range_stepping): New
+	function, return 1.
+	(the_low_target): Install it.
+
+2015-07-14  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (kill_wait_lwp): Don't assert if waitpid fails.
+	Instead, ignore ECHILD, and throw an error for other errnos.
+
 2015-07-10  Pedro Alves  <palves@redhat.com>
 
 	* event-loop.c (struct callback_event) <data>: Change type to

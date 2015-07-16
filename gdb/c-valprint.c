@@ -488,7 +488,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 {
   struct type *unresolved_type = type;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:

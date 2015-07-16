@@ -1391,7 +1391,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
   LONGEST low_bound, high_bound;
   int i;
 
-  CHECK_TYPEDEF (vector_type);
+  vector_type = check_typedef (vector_type);
 
   gdb_assert (TYPE_CODE (vector_type) == TYPE_CODE_ARRAY
 	      && TYPE_VECTOR (vector_type));

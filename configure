@@ -1502,7 +1502,7 @@ Optional Features:
                           Mostly useful for compiler development
   --enable-objc-gc        enable use of Boehm's garbage collector with the GNU
                           Objective-C runtime
-  --enable-vtable-verify    Enable vtable verification feature
+  --enable-vtable-verify  Enable vtable verification feature
   --enable-serial-[{host,target,build}-]configure
                           force sequential configuration of sub-packages for
                           the host, target or build machine, or all
@@ -3372,6 +3372,9 @@ if test "${ENABLE_LIBSTDCXX}" = "default" ; then
     avr-*-*)
       noconfigdirs="$noconfigdirs target-libstdc++-v3"
       ;;
+    ft32-*-*)
+      noconfigdirs="$noconfigdirs target-libstdc++-v3"
+      ;;
   esac
 fi
 
@@ -3986,6 +3989,9 @@ fi
     ;;
   *-mingw*)
     host_makefile_frag="config/mh-mingw"
+    ;;
+  alpha*-linux*)
+    host_makefile_frag="config/mh-alpha-linux"
     ;;
   hppa*-hp-hpux10*)
     host_makefile_frag="config/mh-pa-hpux10"
@@ -5418,6 +5424,12 @@ $as_echo "$as_me: WARNING: trying to bootstrap a cross compiler" >&2;}
     as_fn_error "invalid option for --enable-bootstrap" "$LINENO" 5
     ;;
 esac
+
+# When bootstrapping with GCC, build stage 1 in C++98 mode to ensure that a
+# C++98 compiler can still start the bootstrap.
+if test "$enable_bootstrap:$GXX" = "yes:yes"; then
+  CXX="$CXX -std=gnu++98"
+fi
 
 # Used for setting $lt_cv_objdir
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for objdir" >&5
@@ -7456,7 +7468,7 @@ fi
 # multilib is not explicitly enabled.
 case "$target:$have_compiler:$host:$target:$enable_multilib" in
   x86_64-*linux*:yes:$build:$build:)
-    # Make sure we have a developement environment that handles 32-bit
+    # Make sure we have a development environment that handles 32-bit
     dev64=no
     echo "int main () { return 0; }" > conftest.c
     ${CC} -m32 -o conftest ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} conftest.c
@@ -7467,7 +7479,7 @@ case "$target:$have_compiler:$host:$target:$enable_multilib" in
     fi
     rm -f conftest*
     if test x${dev64} != xyes ; then
-      as_fn_error "I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib." "$LINENO" 5
+      as_fn_error "I suspect your system does not have 32-bit development libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib." "$LINENO" 5
     fi
     ;;
 esac
@@ -14794,7 +14806,19 @@ if test "${enable_stage1_checking+set}" = set; then :
   enableval=$enable_stage1_checking; stage1_checking=--enable-checking=${enable_stage1_checking}
 else
   if test "x$enable_checking" = xno || test "x$enable_checking" = x; then
-  stage1_checking=--enable-checking=yes,types
+  # For --disable-checking or implicit --enable-checking=release, avoid
+  # setting --enable-checking=gc in the default stage1 checking for LTO
+  # bootstraps.  See PR62077.
+  stage1_checking=--enable-checking=release,misc,gimple,rtlflag,tree,types
+  case $BUILD_CONFIG in
+    *lto*)
+      if test "x$enable_checking" = x && \
+	 test -d ${srcdir}/gcc && \
+	 test x"`cat ${srcdir}/gcc/DEV-PHASE`" = xexperimental; then
+	stage1_checking=--enable-checking=yes,types
+      fi;;
+    *) stage1_checking=--enable-checking=yes,types;;
+  esac
 else
   stage1_checking=--enable-checking=$enable_checking,types
 fi

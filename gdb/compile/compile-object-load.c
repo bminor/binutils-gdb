@@ -474,14 +474,14 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
 
   gdb_type = SYMBOL_TYPE (gdb_val_sym);
-  CHECK_TYPEDEF (gdb_type);
+  gdb_type = check_typedef (gdb_type);
 
   gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
 					  VAR_DOMAIN);
   if (gdb_ptr_type_sym == NULL)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_ptr_type = SYMBOL_TYPE (gdb_ptr_type_sym);
-  CHECK_TYPEDEF (gdb_ptr_type);
+  gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (TYPE_CODE (gdb_ptr_type) != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_ptr_type);

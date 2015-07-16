@@ -508,7 +508,7 @@ exp	:	SIZEOF_KEYWORD '(' type ')'  %prec UNARY
 			  write_exp_elt_type
 			    (pstate,
 			     parse_type (pstate)->builtin_unsigned_int);
-			  CHECK_TYPEDEF ($3);
+			  $3 = check_typedef ($3);
 			  write_exp_elt_longcst (pstate,
 						 (LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (pstate, OP_LONG);

@@ -1,3 +1,7 @@
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-07-03  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (PPC750, PPC7450, PPC860): Define using PPC_OPCODE_*.

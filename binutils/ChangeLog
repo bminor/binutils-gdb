@@ -1,3 +1,10 @@
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (copy_file): Set BFD_COMPRESS_GABI if not
+	zlib-gnu.
+	* doc/binutils.texi: Change --compress-debug-sections and
+	--compress-debug-sections=zlib to zlib-gabi.
+
 2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	 PR binutils/18656

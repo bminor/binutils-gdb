@@ -283,7 +283,7 @@ exec_file_attach (const char *filename, int from_tty)
 
       if (!exec_bfd)
 	{
-	  error (_("\"%s\": could not open as an executable file: %s"),
+	  error (_("\"%s\": could not open as an executable file: %s."),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 

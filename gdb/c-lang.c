@@ -124,7 +124,7 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
 	  /* Perhaps check_typedef did not update the target type.  In
 	     this case, force the lookup again and hope it works out.
 	     It never will for C, but it might for C++.  */
-	  CHECK_TYPEDEF (elttype);
+	  elttype = check_typedef (elttype);
 	}
     }
 

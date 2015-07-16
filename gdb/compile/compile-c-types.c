@@ -383,7 +383,7 @@ convert_type (struct compile_c_instance *context, struct type *type)
 
   /* We don't ever have to deal with typedefs in this code, because
      those are only needed as symbols by the C compiler.  */
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   inst.type = type;
   found = htab_find (context->type_map, &inst);

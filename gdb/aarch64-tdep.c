@@ -2104,7 +2104,7 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
   int nRc;
   enum type_code code;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   /* In the AArch64 ABI, "integer" like aggregate types are returned
      in registers.  For an aggregate type to be integer like, its size
@@ -2482,7 +2482,11 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch,
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_S0_REGNUM;
       status = regcache_raw_read (regcache, v_regnum, reg_buf);
-      memcpy (buf, reg_buf, S_REGISTER_SIZE);
+      if (status != REG_VALID)
+	mark_value_bytes_unavailable (result_value, 0,
+				      TYPE_LENGTH (value_type (result_value)));
+      else
+	memcpy (buf, reg_buf, S_REGISTER_SIZE);
       return result_value;
     }
 

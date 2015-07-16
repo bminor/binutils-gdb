@@ -1,3 +1,14 @@
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Make
+	--compress-debug-sections=zlib the same as
+	--compress-debug-sections=zlib-gabi.
+	* ld.texinfo: Change --compress-debug-sections=zlib to zlib-gabi.
+
+2015-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Options): Add missing period after @xref.
+
 2015-07-10  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (align_dot_val): New function.

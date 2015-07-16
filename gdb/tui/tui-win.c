@@ -354,12 +354,14 @@ tui_set_var_cmd (char *null_args, int from_tty, struct cmd_list_element *c)
     tui_rehighlight_all ();
 }
 
-/* Complete possible window names to focus on.  TEXT is the complete text
-   entered so far, WORD is the word currently being completed.  */
+/* Generic window name completion function.  Complete window name pointed
+   to by TEXT and WORD.  If INCLUDE_NEXT_PREV_P is true then the special
+   window names 'next' and 'prev' will also be considered as possible
+   completions of the window name.  */
 
 static VEC (char_ptr) *
-focus_completer (struct cmd_list_element *ignore,
-		  const char *text, const char *word)
+window_name_completer (int include_next_prev_p,
+		       const char *text, const char *word)
 {
   VEC (const_char_ptr) *completion_name_vec = NULL;
   VEC (char_ptr) *matches_vec;
@@ -389,10 +391,13 @@ focus_completer (struct cmd_list_element *ignore,
       VEC_safe_push (const_char_ptr, completion_name_vec, CMD_NAME);
     }
 
-  VEC_safe_push (const_char_ptr, completion_name_vec, "next");
-  VEC_safe_push (const_char_ptr, completion_name_vec, "prev");
-  VEC_safe_push (const_char_ptr, completion_name_vec, NULL);
+  if (include_next_prev_p)
+    {
+      VEC_safe_push (const_char_ptr, completion_name_vec, "next");
+      VEC_safe_push (const_char_ptr, completion_name_vec, "prev");
+    }
 
+  VEC_safe_push (const_char_ptr, completion_name_vec, NULL);
   matches_vec
     = complete_on_enum (VEC_address (const_char_ptr, completion_name_vec),
 			text, word);
@@ -400,6 +405,32 @@ focus_completer (struct cmd_list_element *ignore,
   VEC_free (const_char_ptr, completion_name_vec);
 
   return matches_vec;
+}
+
+/* Complete possible window names to focus on.  TEXT is the complete text
+   entered so far, WORD is the word currently being completed.  */
+
+static VEC (char_ptr) *
+focus_completer (struct cmd_list_element *ignore,
+		  const char *text, const char *word)
+{
+  return window_name_completer (1, text, word);
+}
+
+/* Complete possible window names for winheight command.  TEXT is the
+   complete text entered so far, WORD is the word currently being
+   completed.  */
+
+static VEC (char_ptr) *
+winheight_completer (struct cmd_list_element *ignore,
+		     const char *text, const char *word)
+{
+  /* The first word is the window name.  That we can complete.  Subsequent
+     words can't be completed.  */
+  if (word != text)
+    return NULL;
+
+  return window_name_completer (0, text, word);
 }
 
 /* Function to initialize gdb commands, for tui window
@@ -413,7 +444,7 @@ _initialize_tui_win (void)
 {
   static struct cmd_list_element *tui_setlist;
   static struct cmd_list_element *tui_showlist;
-  struct cmd_list_element *focus_cmd;
+  struct cmd_list_element *cmd;
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
@@ -431,8 +462,8 @@ _initialize_tui_win (void)
   add_com ("tabset", class_tui, tui_set_tab_width_command, _("\
 Set the width (in characters) of tab stops.\n\
 Usage: tabset <n>\n"));
-  add_com ("winheight", class_tui, tui_set_win_height_command, _("\
-Set the height of a specified window.\n\
+  cmd = add_com ("winheight", class_tui, tui_set_win_height_command, _("\
+Set or modify the height of a specified window.\n\
 Usage: winheight <win_name> [+ | -] <#lines>\n\
 Window names are:\n\
 src  : the source window\n\
@@ -440,9 +471,10 @@ cmd  : the command window\n\
 asm  : the disassembly window\n\
 regs : the register display\n"));
   add_com_alias ("wh", "winheight", class_tui, 0);
+  set_cmd_completer (cmd, winheight_completer);
   add_info ("win", tui_all_windows_info,
 	    _("List of all displayed windows.\n"));
-  focus_cmd = add_com ("focus", class_tui, tui_set_focus_command, _("\
+  cmd = add_com ("focus", class_tui, tui_set_focus_command, _("\
 Set focus to named window or next/prev window.\n\
 Usage: focus {<win> | next | prev}\n\
 Valid Window names are:\n\
@@ -451,7 +483,7 @@ asm  : the disassembly window\n\
 regs : the register display\n\
 cmd  : the command window\n"));
   add_com_alias ("fs", "focus", class_tui, 0);
-  set_cmd_completer (focus_cmd, focus_completer);
+  set_cmd_completer (cmd, focus_completer);
   add_com ("+", class_tui, tui_scroll_forward_command, _("\
 Scroll window forward.\n\
 Usage: + [win] [n]\n"));

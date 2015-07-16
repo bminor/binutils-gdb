@@ -1,3 +1,248 @@
+2015-07-16  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_pseudo_read_value): Mark S register as
+	unavailable if invalid.
+
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous 6 commits:
+	Create empty nat/linux-maps.[ch] and common/target-utils.[ch].
+	Move gdb_regex* to common/
+	Prepare linux_find_memory_regions_full & co. for move
+	Move linux_find_memory_regions_full & co.
+	gdbserver build-id attribute generator
+	Validate symbol file using build-id
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Validate symbol file using build-id.
+	* NEWS (Changes since GDB 7.10): Add 'set validate-build-id'
+	and 'show validate-build-id'.  Add build-id attribute.
+	* solib-darwin.c (_initialize_darwin_solib): Assign validate value.
+	* solib-dsbt.c (_initialize_dsbt_solib): Ditto.
+	* solib-frv.c (_initialize_frv_solib): Ditto.
+	* solib-spu.c (set_spu_solib_ops): Ditto.
+	* solib-svr4.c: Include rsp-low.h.
+	(NOTE_GNU_BUILD_ID_NAME): New define.
+	(svr4_validate): New function.
+	(svr4_copy_library_list): Duplicate field build_id.
+	(library_list_start_library): Parse 'build-id' attribute.
+	(svr4_library_attributes): Add 'build-id' attribute.
+	(_initialize_svr4_solib): Assign validate value.
+	* solib-target.c (solib.h): Include.
+	(_initialize_solib_target): Assign validate value.
+	* solib.c (validate_build_id, show_validate_build_id): New.
+	(solib_map_sections): Use ops->validate.
+	(clear_so): Free build_id.
+	(default_solib_validate): New function.
+	(_initialize_solib): Add "validate-build-id".
+	* solib.h (default_solib_validate): New declaration.
+	* solist.h (struct so_list): New fields 'build_idsz' and 'build_id'.
+	(target_so_ops): New field 'validate'.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	gdbserver build-id attribute generator.
+	* features/library-list-svr4.dtd (library-list-svr4): New
+	'build-id' attribute.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Move linux_find_memory_regions_full & co.
+	* linux-tdep.c (nat/linux-maps.h): Include.
+	(gdb_regex.h): Remove the include.
+	(enum filterflags, struct smaps_vmflags, read_mapping, decode_vmflags)
+	(mapping_is_anonymous_p, dump_mapping_p): Moved to nat/linux-maps.c.
+	(linux_find_memory_region_ftype): Moved typedef to nat/linux-maps.h.
+	(linux_find_memory_regions_full): Moved definition to nat/linux-maps.c.
+	* nat/linux-maps.c: Include ctype.h, target/target-utils.h, gdb_regex.h
+	and target/target.h.
+	(struct smaps_vmflags, read_mapping, decode_vmflags)
+	(mapping_is_anonymous_p, dump_mapping_p): Move from linux-tdep.c.
+	(linux_find_memory_regions_full): Move from linux-tdep.c.
+	* nat/linux-maps.h (read_mapping): New declaration.
+	(linux_find_memory_region_ftype, enum filterflags): Moved from
+	linux-tdep.c.
+	(linux_find_memory_regions_full): New declaration.
+	* target.c (target/target-utils.h): Include.
+	(read_alloc_pread_ftype): Moved typedef to target/target-utils.h.
+	(read_alloc, read_stralloc_func_ftype, read_stralloc): Moved
+	definitions to target/target-utils.c.
+	* target.h (target_fileio_read_stralloc): Move it to target/target.h.
+	* target/target-utils.c (read_alloc, read_stralloc): Move definitions
+	from target.c.
+	* target/target-utils.h (read_alloc_pread_ftype): New typedef.
+	(read_alloc): New declaration.
+	(read_stralloc_func_ftype): New typedef.
+	(read_stralloc): New declaration.
+	* target/target.h (target_fileio_read_stralloc): Move it from target.h.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Prepare linux_find_memory_regions_full & co. for move.
+	* linux-tdep.c (linux_find_memory_region_ftype): Comment.
+	(linux_find_memory_regions_full): Change signature and prepare
+	for moving to linux-maps.
+	(linux_find_memory_regions_data): Rename field 'obfd' to 'data'.
+	(linux_find_memory_regions_thunk): New.
+	(linux_find_memory_regions_thunk): Use 'data' field instead of 'obfd'.
+	(linux_find_memory_regions_gdb): New.
+	(linux_find_memory_regions): Rename argument 'obfd' to 'func_data'.
+	(linux_make_mappings_corefile_notes): Use
+	linux_find_memory_regions_gdb.
+	* target.c (read_alloc_pread_ftype): New typedef.
+	(target_fileio_read_alloc_1_pread): New function.
+	(read_alloc): Refactor from target_fileio_read_alloc_1.
+	(read_stralloc_func_ftype): New typedef.
+	(target_fileio_read_alloc_1): New implementation. Use read_alloc.
+	(read_stralloc): Refactored from target_fileio_read_stralloc.
+	(target_fileio_read_stralloc): New implementation, use read_stralloc.
+
+2015-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Change gdb_regex.h to
+	common/gdb_regex.h.
+	(COMMON_OBS): Add gdb_regex.o.
+	(gdb_regex.o): New.
+	* common/common.m4 (GDB_AC_COMMON): Add gdb_use_included_regex,
+	--without-included-regex and USE_INCLUDED_REGEX.
+	* common/gdb_regex.c: New file from utils.c functions.
+	* common/gdb_regex.h: Move it here from gdb_regex.h, update include
+	file wrapping define name.
+	* configure: Rebuilt.
+	* configure.ac (gdb_use_included_regex, --without-included-regex)
+	(USE_INCLUDED_REGEX): Move them to common/common.m4.
+	* gdb_regex.h: Move it to common/gdb_regex.h.
+	* utils.c: Remove include gdb_regex.h.
+	(do_regfree_cleanup, make_regfree_cleanup, get_regcomp_error)
+	(compile_rx_or_error): Move them to common/gdb_regex.c.
+
+2015-07-15  Aleksandar Ristovski  <aristovski@qnx.com
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Create empty nat/linux-maps.[ch] and common/target-utils.[ch].
+	* Makefile.in (HFILES_NO_SRCDIR); Add nat/linux-maps.h,
+	common/target-utils.h.
+	(COMMON_OBS): Add target-utils.o.
+	(linux-maps.o, target-utils.o): New.
+	* target/target-utils.c: New file.
+	* target/target-utils.h: New file.
+	* config/i386/linux.mh (NATDEPFILES): Add linux-maps.o.
+	* config/i386/linux64.mh (NATDEPFILES): Ditto.
+	* nat/linux-maps.c: New file.
+	* nat/linux-maps.h: New file.
+
+2015-07-15  Markus Metzger  <markus.t.metzger@intel.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* nat/linux-btrace.c (perf_event_read): Change the type of DATA_HEAD.
+	(perf_event_read_all): Change the type of SIZE and DATA_HEAD.
+	(perf_event_read_bts): Change the type of SIZE and READ.
+	(linux_enable_bts): Change the type of SIZE, PAGES, DATA_SIZE,
+	and DATA_OFFSET.  Move DATA_SIZE declaration.  Restrict the buffer size
+	to UINT_MAX.  Check for overflows when using DATA_HEAD from the perf
+	mmap page.
+	(linux_enable_pt): Change the type of PAGES and SIZE.  Restrict the
+	buffer size to UINT_MAX.
+	(linux_read_bts): Change the type of BUFFER_SIZE, SIZE, DATA_HEAD, and
+	DATA_TAIL.
+	* nat/linux-btrace.h (struct perf_event_buffer)<size, data_head>
+	<last_head>: Change type.
+	* common/btrace-common.h (struct btrace_dat_pt) <size>: Change type.
+	* common/btrace-common.c (btrace_data_append): Change the type of
+	SIZE.
+	* btrace.c (parse_xml_raw): Change the type of SIZE.  Change oddness
+	check.
+
+2015-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbtypes.h (CHECK_TYPEDEF): Remove.
+	* aarch64-tdep.c (aarch64_return_in_memory): Replace CHECK_TYPEDEF
+	with check_typedef.
+	* ada-lang.c (decode_constrained_packed_array_type): Likewise.
+	(ada_array_length): Likewise.
+	(find_parallel_type_by_descriptive_type): Likewise.
+	(ada_check_typedef): Likewise.
+	* arm-tdep.c (arm_return_in_memory): Likewise.
+	* ax-gdb.c (gen_trace_static_fields): Likewise.
+	(gen_struct_ref_recursive): Likewise.
+	* c-exp.y (exp : SIZEOF '(' type ')' %prec UNARY): Likewise.
+	(variable: block COLONCOLON name): Likewise.
+	(qualified_name: TYPENAME COLONCOLON name): Likewise.
+	* c-lang.c (classify_type): Likewise.
+	* c-typeprint.c (c_print_type): Likewise.
+	(c_print_typedef): Likewise.
+	(c_type_print_base): Likewise.
+	* c-valprint.c (c_val_print): Likewise.
+	* compile/compile-c-types.c (convert_type): Likewise.
+	* compile/compile-object-load.c (get_out_value_type): Likewise.
+	* completer.c (add_struct_fields): Likewise.
+	(expression_completer): Likewise.
+	* cp-namespace.c (cp_find_type_baseclass_by_name): Likewise.
+	(cp_lookup_nested_symbol_1): Likewise.
+	(cp_lookup_nested_symbol): Likewise.
+	* cp-valprint.c (cp_print_value_fields): Likewise.
+	(cp_print_static_field): Likewise.
+	* d-valprint.c (d_val_print): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	(evaluate_subexp_for_sizeof): Likewise.
+	* f-exp.y (exp : SIZEOF '(' type ')' %prec UNARY): Likewise.
+	* f-typeprint.c (f_type_print_base): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	* gdbtypes.c (get_discrete_bounds): Likewise.
+	(create_array_type_with_stride): Likewise.
+	(type_name_no_tag_or_error): Likewise.
+	(lookup_struct_elt_type): Likewise.
+	(get_unsigned_type_max): Likewise.
+	(internal_type_vptr_fieldno): Likewise.
+	(set_type_vptr_fieldno): Likewise.
+	(internal_type_vptr_basetype): Likewise.
+	(set_type_vptr_basetype): Likewise.
+	(get_vptr_fieldno): Likewise.
+	(is_integral_type): Likewise.
+	(is_scalar_type): Likewise.
+	(is_scalar_type_recursive): Likewise.
+	(distance_to_ancestor): Likewise.
+	(is_unique_ancestor_worker): Likewise.
+	(check_types_equal): Likewise.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Likewise.
+
+2015-07-14  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* dwarf2read.c (find_slot_in_mapped_hash): Extend language support to
+	also test for language_d.
+	(dwarf2_compute_name): Likewise.
+	(read_func_scope): Likewise.
+	(read_structure_type): Likewise.
+	(new_symbol_full): Likewise.
+	(determine_prefix): Likewise.
+	(read_import_statement): Use dot as the separator for language_d.
+	(typename_concat): Likewise, but don't prefix the D main function.
+
+2015-07-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* nat/linux-namespaces.c (setns): Rename from this ...
+	(do_setns): ... to this.  Support calling setns if it exists.
+	(mnsh_handle_setns): Call do_setns.
+
+2015-07-13  Yao Qi  <yao.qi@linaro.org>
+
+	* exec.c (exec_file_attach): Add period at the end of error
+	message.
+
+2015-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-win.c (window_name_completer): New function.
+	(focus_completer): Call window_name_completer.  All old content
+	moved into window_name_completer.
+	(winheight_completer): New function.
+	(_initialize_tui_win): Rename variable.  Add completer to
+	winheight command.  Update doc string on winheight.
+
 2015-07-12  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-linux-tdep.c (_initialize_nios2_linux_tdep): Register

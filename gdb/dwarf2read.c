@@ -2974,7 +2974,8 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 
   if (current_language->la_language == language_cplus
       || current_language->la_language == language_java
-      || current_language->la_language == language_fortran)
+      || current_language->la_language == language_fortran
+      || current_language->la_language == language_d)
     {
       /* NAME is already canonical.  Drop any qualifiers as .gdb_index does
 	 not contain any.  */
@@ -8463,7 +8464,7 @@ dwarf2_compute_name (const char *name,
   /* These are the only languages we know how to qualify names in.  */
   if (name != NULL
       && (cu->language == language_cplus || cu->language == language_java
-	  || cu->language == language_fortran))
+	  || cu->language == language_fortran || cu->language == language_d))
     {
       if (die_needs_namespace (die, cu))
 	{
@@ -8941,8 +8942,9 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
     }
   else if (strlen (imported_name_prefix) > 0)
     canonical_name = obconcat (&objfile->objfile_obstack,
-			       imported_name_prefix, "::", imported_name,
-			       (char *) NULL);
+			       imported_name_prefix,
+			       (cu->language == language_d ? "." : "::"),
+			       imported_name, (char *) NULL);
   else
     canonical_name = imported_name;
 
@@ -11445,7 +11447,9 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
                         lowpc, highpc);
 
   /* For C++, set the block's scope.  */
-  if ((cu->language == language_cplus || cu->language == language_fortran)
+  if ((cu->language == language_cplus
+       || cu->language == language_fortran
+       || cu->language == language_d)
       && cu->processing_has_namespace_info)
     block_set_scope (block, determine_prefix (die, cu),
 		     &objfile->objfile_obstack);
@@ -13140,7 +13144,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name != NULL)
     {
       if (cu->language == language_cplus
-	  || cu->language == language_java)
+	  || cu->language == language_java
+	  || cu->language == language_d)
 	{
 	  const char *full_name = dwarf2_full_name (name, die, cu);
 
@@ -18554,7 +18559,8 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		   class.  */
 		if (cu->language == language_cplus
 		    || cu->language == language_java
-		    || cu->language == language_ada)
+		    || cu->language == language_ada
+		    || cu->language == language_d)
 		  {
 		    /* The symbol's name is already allocated along
 		       with this objfile, so we don't need to
@@ -19228,7 +19234,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
   char *retval;
 
   if (cu->language != language_cplus && cu->language != language_java
-      && cu->language != language_fortran)
+      && cu->language != language_fortran && cu->language != language_d)
     return "";
 
   retval = anonymous_struct_prefix (die, cu);
@@ -19384,6 +19390,18 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
     sep = "";
   else if (cu->language == language_java)
     sep = ".";
+  else if (cu->language == language_d)
+    {
+      /* For D, the 'main' function could be defined in any module, but it
+	 should never be prefixed.  */
+      if (strcmp (suffix, "D main") == 0)
+	{
+	  prefix = "";
+	  sep = "";
+	}
+      else
+	sep = ".";
+    }
   else if (cu->language == language_fortran && physname)
     {
       /* This is gfortran specific mangling.  Normally DW_AT_linkage_name or

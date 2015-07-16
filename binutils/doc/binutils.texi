@@ -1844,10 +1844,9 @@ It can also be a useful way of reducing the size of a @option{--just-symbols}
 linker input file.
 
 @item --compress-debug-sections
-Compress DWARF debug sections using zlib.  The debug sections are
-renamed to begin with @samp{.zdebug} instead of @samp{.debug}.  Note -
-if compression would actually make a section @emph{larger} then it is
-not compressed or renamed.
+Compress DWARF debug sections using zlib with SHF_COMPRESSED from the
+ELF ABI.  Note - if compression would actually make a section
+@emph{larger}, then it is not compressed.
 
 @item --compress-debug-sections=none
 @itemx --compress-debug-sections=zlib
@@ -1857,10 +1856,13 @@ For ELF files, these options control how DWARF debug sections are
 compressed.  @option{--compress-debug-sections=none} is equivalent
 to @option{--nocompress-debug-sections}.
 @option{--compress-debug-sections=zlib} and
-@option{--compress-debug-sections=zlib-gnu} are equivalent to
+@option{--compress-debug-sections=zlib-gabi} are equivalent to
 @option{--compress-debug-sections}.
-@option{--compress-debug-sections=zlib-gabi} compresses
-DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
+sections using zlib.  The debug sections are renamed to begin with
+@samp{.zdebug} instead of @samp{.debug}.  Note - if compression would
+actually make a section @emph{larger}, then it is not compressed nor
+renamed.
 
 @item --decompress-debug-sections
 Decompress DWARF debug sections using zlib.  The original section

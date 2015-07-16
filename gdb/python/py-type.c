@@ -346,7 +346,7 @@ typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
 
   TRY
     {
-      CHECK_TYPEDEF (checked_type);
+      checked_type = check_typedef (checked_type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -477,7 +477,7 @@ typy_get_composite (struct type *type)
     {
       TRY
 	{
-	  CHECK_TYPEDEF (type);
+	  type = check_typedef (type);
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{

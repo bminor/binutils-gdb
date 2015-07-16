@@ -96,7 +96,10 @@ struct btrace_cpu
 
 struct btrace_config_bts
 {
-  /* The size of the branch trace buffer in bytes.  */
+  /* The size of the branch trace buffer in bytes.
+
+     This is unsigned int and not size_t since it is registered as
+     control variable for "set record btrace bts buffer-size".  */
   unsigned int size;
 };
 
@@ -104,7 +107,10 @@ struct btrace_config_bts
 
 struct btrace_config_pt
 {
-  /* The size of the branch trace buffer in bytes.  */
+  /* The size of the branch trace buffer in bytes.
+
+     This is unsigned int and not size_t since it is registered as
+     control variable for "set record btrace pt buffer-size".  */
   unsigned int size;
 };
 
@@ -152,7 +158,7 @@ struct btrace_data_pt
   gdb_byte *data;
 
   /* The size of DATA in bytes.  */
-  unsigned long size;
+  size_t size;
 };
 
 /* The branch trace data.  */

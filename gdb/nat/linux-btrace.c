@@ -111,12 +111,13 @@ perf_event_new_data (const struct perf_event_buffer *pev)
    The caller is responsible for freeing the memory.  */
 
 static gdb_byte *
-perf_event_read (const struct perf_event_buffer *pev, unsigned long data_head,
-		 unsigned long size)
+perf_event_read (const struct perf_event_buffer *pev, __u64 data_head,
+		 size_t size)
 {
   const gdb_byte *begin, *end, *start, *stop;
   gdb_byte *buffer;
-  unsigned long data_tail, buffer_size;
+  size_t buffer_size;
+  __u64 data_tail;
 
   if (size == 0)
     return NULL;
@@ -149,15 +150,16 @@ perf_event_read (const struct perf_event_buffer *pev, unsigned long data_head,
 
 static void
 perf_event_read_all (struct perf_event_buffer *pev, gdb_byte **data,
-		     unsigned long *psize)
+		     size_t *psize)
 {
-  unsigned long data_head, size;
+  size_t size;
+  __u64 data_head;
 
   data_head = *pev->data_head;
 
   size = pev->size;
   if (data_head < size)
-    size = data_head;
+    size = (size_t) data_head;
 
   *data = perf_event_read (pev, data_head, size);
   *psize = size;
@@ -269,12 +271,11 @@ perf_event_sample_ok (const struct perf_event_sample *sample)
 
 static VEC (btrace_block_s) *
 perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
-		     const uint8_t *end, const uint8_t *start,
-		     unsigned long long size)
+		     const uint8_t *end, const uint8_t *start, size_t size)
 {
   VEC (btrace_block_s) *btrace = NULL;
   struct perf_event_sample sample;
-  unsigned long long read = 0;
+  size_t read = 0;
   struct btrace_block block = { 0, 0 };
   struct regcache *regcache;
 
@@ -642,7 +643,8 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   struct perf_event_mmap_page *header;
   struct btrace_target_info *tinfo;
   struct btrace_tinfo_bts *bts;
-  unsigned long long size, pages, data_offset, data_size;
+  size_t size, pages;
+  __u64 data_offset;
   int pid, pg;
 
   tinfo = xzalloc (sizeof (*tinfo));
@@ -674,28 +676,36 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
     goto err_out;
 
   /* Convert the requested size in bytes to pages (rounding up).  */
-  pages = (((unsigned long long) conf->size) + PAGE_SIZE - 1) / PAGE_SIZE;
+  pages = ((size_t) conf->size / PAGE_SIZE
+	   + ((conf->size % PAGE_SIZE) == 0 ? 0 : 1));
   /* We need at least one page.  */
   if (pages == 0)
     pages = 1;
 
   /* The buffer size can be requested in powers of two pages.  Adjust PAGES
      to the next power of two.  */
-  for (pg = 0; pages != (1u << pg); ++pg)
-    if ((pages & (1u << pg)) != 0)
-      pages += (1u << pg);
+  for (pg = 0; pages != ((size_t) 1 << pg); ++pg)
+    if ((pages & ((size_t) 1 << pg)) != 0)
+      pages += ((size_t) 1 << pg);
 
   /* We try to allocate the requested size.
      If that fails, try to get as much as we can.  */
   for (; pages > 0; pages >>= 1)
     {
       size_t length;
+      __u64 data_size;
 
-      size = pages * PAGE_SIZE;
+      data_size = (__u64) pages * PAGE_SIZE;
+
+      /* Don't ask for more than we can represent in the configuration.  */
+      if ((__u64) UINT_MAX < data_size)
+	continue;
+
+      size = (size_t) data_size;
       length = size + PAGE_SIZE;
 
       /* Check for overflows.  */
-      if ((unsigned long long) length < size)
+      if ((__u64) length != data_size + PAGE_SIZE)
 	continue;
 
       /* The number of pages we request needs to be a power of two.  */
@@ -708,23 +718,33 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
     goto err_file;
 
   data_offset = PAGE_SIZE;
-  data_size = size;
 
 #if defined (PERF_ATTR_SIZE_VER5)
   if (offsetof (struct perf_event_mmap_page, data_size) <= header->size)
     {
+      __u64 data_size;
+
       data_offset = header->data_offset;
       data_size = header->data_size;
+
+      size = (unsigned int) data_size;
+
+      /* Check for overflows.  */
+      if ((__u64) size != data_size)
+	{
+	  munmap ((void *) header, size + PAGE_SIZE);
+	  goto err_file;
+	}
     }
 #endif /* defined (PERF_ATTR_SIZE_VER5) */
 
   bts->header = header;
   bts->bts.mem = ((const uint8_t *) header) + data_offset;
-  bts->bts.size = data_size;
+  bts->bts.size = size;
   bts->bts.data_head = &header->data_head;
-  bts->bts.last_head = 0;
+  bts->bts.last_head = 0ull;
 
-  tinfo->conf.bts.size = data_size;
+  tinfo->conf.bts.size = (unsigned int) size;
   return tinfo;
 
  err_file:
@@ -746,7 +766,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   struct perf_event_mmap_page *header;
   struct btrace_target_info *tinfo;
   struct btrace_tinfo_pt *pt;
-  unsigned long long pages, size;
+  size_t pages, size;
   int pid, pg, errcode, type;
 
   if (conf->size == 0)
@@ -788,31 +808,39 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   header->aux_offset = header->data_offset + header->data_size;
 
   /* Convert the requested size in bytes to pages (rounding up).  */
-  pages = (((unsigned long long) conf->size) + PAGE_SIZE - 1) / PAGE_SIZE;
+  pages = ((size_t) conf->size / PAGE_SIZE
+	   + ((conf->size % PAGE_SIZE) == 0 ? 0 : 1));
   /* We need at least one page.  */
   if (pages == 0)
     pages = 1;
 
   /* The buffer size can be requested in powers of two pages.  Adjust PAGES
      to the next power of two.  */
-  for (pg = 0; pages != (1u << pg); ++pg)
-    if ((pages & (1u << pg)) != 0)
-      pages += (1u << pg);
+  for (pg = 0; pages != ((size_t) 1 << pg); ++pg)
+    if ((pages & ((size_t) 1 << pg)) != 0)
+      pages += ((size_t) 1 << pg);
 
   /* We try to allocate the requested size.
      If that fails, try to get as much as we can.  */
   for (; pages > 0; pages >>= 1)
     {
       size_t length;
+      __u64 data_size;
 
-      size = pages * PAGE_SIZE;
-      length = size;
+      data_size = (__u64) pages * PAGE_SIZE;
 
-      /* Check for overflows.  */
-      if ((unsigned long long) length < size)
+      /* Don't ask for more than we can represent in the configuration.  */
+      if ((__u64) UINT_MAX < data_size)
 	continue;
 
-      header->aux_size = size;
+      size = (size_t) data_size;
+
+      /* Check for overflows.  */
+      if ((__u64) size != data_size)
+	continue;
+
+      header->aux_size = data_size;
+      length = size;
 
       pt->pt.mem = mmap (NULL, length, PROT_READ, MAP_SHARED, pt->file,
 			 header->aux_offset);
@@ -827,7 +855,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   pt->pt.size = size;
   pt->pt.data_head = &header->aux_head;
 
-  tinfo->conf.pt.size = size;
+  tinfo->conf.pt.size = (unsigned int) size;
   return tinfo;
 
  err_conf:
@@ -938,7 +966,8 @@ linux_read_bts (struct btrace_data_bts *btrace,
 {
   struct perf_event_buffer *pevent;
   const uint8_t *begin, *end, *start;
-  unsigned long long data_head, data_tail, buffer_size, size;
+  size_t buffer_size, size;
+  __u64 data_head, data_tail;
   unsigned int retries = 5;
 
   pevent = &tinfo->variant.bts.bts;
@@ -961,6 +990,8 @@ linux_read_bts (struct btrace_data_bts *btrace,
 
       if (type == BTRACE_READ_DELTA)
 	{
+	  __u64 data_size;
+
 	  /* Determine the number of bytes to read and check for buffer
 	     overflows.  */
 
@@ -971,9 +1002,12 @@ linux_read_bts (struct btrace_data_bts *btrace,
 	    return BTRACE_ERR_OVERFLOW;
 
 	  /* If the buffer is smaller than the trace delta, we overflowed.  */
-	  size = data_head - data_tail;
-	  if (buffer_size < size)
+	  data_size = data_head - data_tail;
+	  if (buffer_size < data_size)
 	    return BTRACE_ERR_OVERFLOW;
+
+	  /* DATA_SIZE <= BUFFER_SIZE and therefore fits into a size_t.  */
+	  size = (size_t) data_size;
 	}
       else
 	{
@@ -982,7 +1016,7 @@ linux_read_bts (struct btrace_data_bts *btrace,
 
 	  /* Adjust the size if the buffer has not overflowed, yet.  */
 	  if (data_head < size)
-	    size = data_head;
+	    size = (size_t) data_head;
 	}
 
       /* Data_head keeps growing; the buffer itself is circular.  */

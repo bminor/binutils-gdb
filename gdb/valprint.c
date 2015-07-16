@@ -274,11 +274,11 @@ show_symbol_print (struct ui_file *file, int from_tty,
 int
 val_print_scalar_type_p (struct type *type)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   while (TYPE_CODE (type) == TYPE_CODE_REF)
     {
       type = TYPE_TARGET_TYPE (type);
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
     }
   switch (TYPE_CODE (type))
     {
@@ -301,7 +301,7 @@ valprint_check_validity (struct ui_file *stream,
 			 int embedded_offset,
 			 const struct value *val)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   if (TYPE_CODE (type) != TYPE_CODE_UNION
       && TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -386,7 +386,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
   LONGEST val;
   CORE_ADDR addr;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:

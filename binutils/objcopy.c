@@ -2607,7 +2607,7 @@ copy_file (const char *input_filename, const char *output_filename,
       ibfd->flags |= BFD_COMPRESS;
       /* Don't check if input is ELF here since this information is
 	 only available after bfd_check_format_matches is called.  */
-      if (do_debug_sections == compress_gabi_zlib)
+      if (do_debug_sections != compress_gnu_zlib)
 	ibfd->flags |= BFD_COMPRESS_GABI;
       break;
     case decompress:
