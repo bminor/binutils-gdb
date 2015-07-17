@@ -429,30 +429,28 @@ aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
 {
   int i;
 
-  fprintf_unfiltered (gdb_stdlog, "%s", func);
+  debug_printf ("%s", func);
   if (addr || len)
-    fprintf_unfiltered (gdb_stdlog, " (addr=0x%08lx, len=%d, type=%s)",
-			(unsigned long) addr, len,
-			type == hw_write ? "hw-write-watchpoint"
-			: (type == hw_read ? "hw-read-watchpoint"
-			   : (type == hw_access ? "hw-access-watchpoint"
-			      : (type == hw_execute ? "hw-breakpoint"
-				 : "??unknown??"))));
-  fprintf_unfiltered (gdb_stdlog, ":\n");
+    debug_printf (" (addr=0x%08lx, len=%d, type=%s)",
+		  (unsigned long) addr, len,
+		  type == hw_write ? "hw-write-watchpoint"
+		  : (type == hw_read ? "hw-read-watchpoint"
+		     : (type == hw_access ? "hw-access-watchpoint"
+			: (type == hw_execute ? "hw-breakpoint"
+			   : "??unknown??"))));
+  debug_printf (":\n");
 
-  fprintf_unfiltered (gdb_stdlog, "\tBREAKPOINTs:\n");
+  debug_printf ("\tBREAKPOINTs:\n");
   for (i = 0; i < aarch64_num_bp_regs; i++)
-    fprintf_unfiltered (gdb_stdlog,
-			"\tBP%d: addr=0x%08lx, ctrl=0x%08x, ref.count=%d\n",
-			i, state->dr_addr_bp[i],
-			state->dr_ctrl_bp[i], state->dr_ref_count_bp[i]);
+    debug_printf ("\tBP%d: addr=0x%08lx, ctrl=0x%08x, ref.count=%d\n",
+		  i, state->dr_addr_bp[i],
+		  state->dr_ctrl_bp[i], state->dr_ref_count_bp[i]);
 
-  fprintf_unfiltered (gdb_stdlog, "\tWATCHPOINTs:\n");
+  debug_printf ("\tWATCHPOINTs:\n");
   for (i = 0; i < aarch64_num_wp_regs; i++)
-    fprintf_unfiltered (gdb_stdlog,
-			"\tWP%d: addr=0x%08lx, ctrl=0x%08x, ref.count=%d\n",
-			i, state->dr_addr_wp[i],
-			state->dr_ctrl_wp[i], state->dr_ref_count_wp[i]);
+    debug_printf ("\tWP%d: addr=0x%08lx, ctrl=0x%08x, ref.count=%d\n",
+		  i, state->dr_addr_wp[i],
+		  state->dr_ctrl_wp[i], state->dr_ref_count_wp[i]);
 }
 
 /* Fill GDB's register array with the general-purpose register values
@@ -1421,7 +1419,7 @@ aarch64_handle_unaligned_watchpoint (int type, CORE_ADDR addr, int len,
 						 aligned_len);
 
       if (show_debug_regs)
-	fprintf_unfiltered (gdb_stdlog,
+	debug_printf (
 "handle_unaligned_watchpoint: is_insert: %d\n"
 "                             aligned_addr: 0x%08lx, aligned_len: %d\n"
 "                                next_addr: 0x%08lx,    next_len: %d\n",
