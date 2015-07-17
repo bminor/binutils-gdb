@@ -1163,7 +1163,8 @@ aarch64_point_is_aligned (int is_watchpoint, CORE_ADDR addr, int len)
 
 static int
 aarch64_dr_state_insert_one_point (struct aarch64_debug_reg_state *state,
-				   int type, CORE_ADDR addr, int len)
+				   enum target_hw_bp_type type, CORE_ADDR addr,
+				   int len)
 {
   int i, idx, num_regs, is_watchpoint;
   unsigned int ctrl, *dr_ctrl_p, *dr_ref_count;
@@ -1235,7 +1236,8 @@ aarch64_dr_state_insert_one_point (struct aarch64_debug_reg_state *state,
 
 static int
 aarch64_dr_state_remove_one_point (struct aarch64_debug_reg_state *state,
-				   int type, CORE_ADDR addr, int len)
+				   enum target_hw_bp_type type, CORE_ADDR addr,
+				   int len)
 {
   int i, num_regs, is_watchpoint;
   unsigned int ctrl, *dr_ctrl_p, *dr_ref_count;
@@ -1290,7 +1292,8 @@ aarch64_dr_state_remove_one_point (struct aarch64_debug_reg_state *state,
 /* Implement insertion and removal of a single breakpoint.  */
 
 static int
-aarch64_handle_breakpoint (int type, CORE_ADDR addr, int len, int is_insert)
+aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
+			   int len, int is_insert)
 {
   struct aarch64_debug_reg_state *state;
 
@@ -1318,7 +1321,7 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
   const int len = 4;
-  const int type = hw_execute;
+  const enum target_hw_bp_type type = hw_execute;
 
   if (show_debug_regs)
     fprintf_unfiltered
@@ -1351,7 +1354,7 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address;
   const int len = 4;
-  const int type = hw_execute;
+  const enum target_hw_bp_type type = hw_execute;
 
   if (show_debug_regs)
     fprintf_unfiltered
@@ -1376,8 +1379,8 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
    from that it is an aligned watchpoint to be handled.  */
 
 static int
-aarch64_handle_aligned_watchpoint (int type, CORE_ADDR addr, int len,
-				   int is_insert)
+aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
+				   int len, int is_insert)
 {
   struct aarch64_debug_reg_state *state
     = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
