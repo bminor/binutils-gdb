@@ -1,3 +1,8 @@
+2015-07-17  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (get_current_thread): Initialise ptid to null_ptid.
+	(add_current_inferior_and_thread): Don't initialise ptid.
+
 2015-07-16  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* aarch64-tdep.c (aarch64_pseudo_read_value): Mark S register as
