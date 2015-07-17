@@ -1,3 +1,8 @@
+2015-07-17  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Sort alphabetically.
+	(IS_AARCH64_TLSDESC_RELOC): Sort alphabetically.
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize
