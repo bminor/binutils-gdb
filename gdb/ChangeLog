@@ -1,5 +1,10 @@
 2015-07-17  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-linux-nat.c (aarch64_linux_get_debug_reg_capacity): Call
+	ptid_get_pid instead of get_thread_id.
+
+2015-07-17  Yao Qi  <yao.qi@linaro.org>
+
 	* remote.c (get_current_thread): Initialise ptid to null_ptid.
 	(add_current_inferior_and_thread): Don't initialise ptid.
 

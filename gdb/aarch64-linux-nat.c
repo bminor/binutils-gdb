@@ -848,7 +848,7 @@ aarch64_linux_get_debug_reg_capacity (ptid_t ptid)
   struct iovec iov;
   struct user_hwdebug_state dreg_state;
 
-  tid = get_thread_id (ptid);
+  tid = ptid_get_pid (ptid);
   iov.iov_base = &dreg_state;
   iov.iov_len = sizeof (dreg_state);
 
