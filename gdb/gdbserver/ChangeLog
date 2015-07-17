@@ -1,5 +1,35 @@
 2015-07-17  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (aarch64-linux-hw-point.o): New rule.
+	* configure.srv (srv_tgtobj): Append aarch64-linux-hw-point.o.
+	* linux-aarch64-low.c: Include nat/aarch64-linux-hw-point.h.
+	(AARCH64_HBP_MAX_NUM): Move to nat/aarch64-linux-hw-point.h.
+	(AARCH64_HWP_MAX_NUM, AARCH64_HBP_ALIGNMENT): Likewise.
+	(AARCH64_HWP_ALIGNMENT): Likewise.
+	(AARCH64_HWP_MAX_LEN_PER_REG): Likewise.
+	(AARCH64_DEBUG_NUM_SLOTS, AARCH64_DEBUG_ARCH): Likewise.
+	(aarch64_num_bp_regs, aarch64_num_wp_regs): Likewise.
+	(AARCH64_DEBUG_ARCH_V8, DR_MARK_ALL_CHANGED): Likewise.
+	(DR_MARK_N_CHANGED, DR_CLEAR_CHANGED): Likewise.
+	(DR_HAS_CHANGED, DR_N_HAS_CHANGE): Likewise.
+	(struct aarch64_debug_reg_state): Likewise.
+	(struct arch_lwp_info):	Likewise.
+	(aarch64_align_watchpoint): Likewise.
+	(DR_CONTROL_ENABLED, DR_CONTROL_LENGTH): Likewise.
+	(aarch64_watchpoint_length): Likewise.
+	(aarch64_point_encode_ctrl_reg): Likewise
+	(aarch64_point_is_aligned): Likewise.
+	(aarch64_align_watchpoint): Likewise.
+	(aarch64_linux_set_debug_regs):
+	(aarch64_dr_state_insert_one_point): Likewise.
+	(aarch64_dr_state_remove_one_point): Likewise.
+	(aarch64_handle_breakpoint): Likewise.
+	(aarch64_handle_aligned_watchpoint): Likewise.
+	(aarch64_handle_unaligned_watchpoint): Likewise.
+	(aarch64_handle_watchpoint): Likewise.
+
+2015-07-17  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_handle_breakpoint): Add argument state
 	and don't aarch64_get_debug_reg_state.  All callers update.
 	(aarch64_handle_aligned_watchpoint): Likewise.

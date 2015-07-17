@@ -49,7 +49,7 @@ srv_linux_obj="linux-low.o linux-osdata.o linux-procfs.o linux-ptrace.o linux-wa
 case "${target}" in
   aarch64*-*-linux*)
 			srv_regobj="aarch64.o"
-			srv_tgtobj="linux-aarch64-low.o"
+			srv_tgtobj="linux-aarch64-low.o aarch64-linux-hw-point.o"
 			srv_tgtobj="${srv_tgtobj} $srv_linux_obj"
 			srv_xmlfiles="aarch64.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-core.xml"
