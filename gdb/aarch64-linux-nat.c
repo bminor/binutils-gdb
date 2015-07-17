@@ -1291,16 +1291,13 @@ aarch64_dr_state_remove_one_point (struct aarch64_debug_reg_state *state,
 
 static int
 aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
-			   int len, int is_insert)
+			   int len, int is_insert,
+			   struct aarch64_debug_reg_state *state)
 {
-  struct aarch64_debug_reg_state *state;
-
   /* The hardware breakpoint on AArch64 should always be 4-byte
      aligned.  */
   if (!aarch64_point_is_aligned (0 /* is_watchpoint */ , addr, len))
     return -1;
-
-  state = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   if (is_insert)
     return aarch64_dr_state_insert_one_point (state, type, addr, len);
@@ -1320,6 +1317,8 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
   CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
   const int len = 4;
   const enum target_hw_bp_type type = hw_execute;
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   if (show_debug_regs)
     fprintf_unfiltered
@@ -1327,13 +1326,10 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
        "insert_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
        (unsigned long) addr, len);
 
-  ret = aarch64_handle_breakpoint (type, addr, len, 1 /* is_insert */);
+  ret = aarch64_handle_breakpoint (type, addr, len, 1 /* is_insert */, state);
 
   if (show_debug_regs)
     {
-      struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
-
       aarch64_show_debug_reg_state (state,
 				    "insert_hw_breakpoint", addr, len, type);
     }
@@ -1353,19 +1349,18 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
   CORE_ADDR addr = bp_tgt->placed_address;
   const int len = 4;
   const enum target_hw_bp_type type = hw_execute;
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   if (show_debug_regs)
     fprintf_unfiltered
       (gdb_stdlog, "remove_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
        (unsigned long) addr, len);
 
-  ret = aarch64_handle_breakpoint (type, addr, len, 0 /* is_insert */);
+  ret = aarch64_handle_breakpoint (type, addr, len, 0 /* is_insert */, state);
 
   if (show_debug_regs)
     {
-      struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
-
       aarch64_show_debug_reg_state (state,
 				    "remove_hw_watchpoint", addr, len, type);
     }
@@ -1378,11 +1373,9 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
 
 static int
 aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
-				   int len, int is_insert)
+				   int len, int is_insert,
+				   struct aarch64_debug_reg_state *state)
 {
-  struct aarch64_debug_reg_state *state
-    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
-
   if (is_insert)
     return aarch64_dr_state_insert_one_point (state, type, addr, len);
   else
@@ -1398,11 +1391,9 @@ aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 
 static int
 aarch64_handle_unaligned_watchpoint (int type, CORE_ADDR addr, int len,
-				     int is_insert)
+				     int is_insert,
+				     struct aarch64_debug_reg_state *state)
 {
-  struct aarch64_debug_reg_state *state
-    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
-
   while (len > 0)
     {
       CORE_ADDR aligned_addr;
@@ -1435,12 +1426,15 @@ aarch64_handle_unaligned_watchpoint (int type, CORE_ADDR addr, int len,
 /* Implements insertion and removal of a single watchpoint.  */
 
 static int
-aarch64_handle_watchpoint (int type, CORE_ADDR addr, int len, int is_insert)
+aarch64_handle_watchpoint (int type, CORE_ADDR addr, int len, int is_insert,
+			   struct aarch64_debug_reg_state *state)
 {
   if (aarch64_point_is_aligned (1 /* is_watchpoint */ , addr, len))
-    return aarch64_handle_aligned_watchpoint (type, addr, len, is_insert);
+    return aarch64_handle_aligned_watchpoint (type, addr, len, is_insert,
+					      state);
   else
-    return aarch64_handle_unaligned_watchpoint (type, addr, len, is_insert);
+    return aarch64_handle_unaligned_watchpoint (type, addr, len, is_insert,
+						state);
 }
 
 /* Implement the "to_insert_watchpoint" target_ops method.
@@ -1455,6 +1449,8 @@ aarch64_linux_insert_watchpoint (struct target_ops *self,
 				 struct expression *cond)
 {
   int ret;
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   if (show_debug_regs)
     fprintf_unfiltered (gdb_stdlog,
@@ -1463,13 +1459,10 @@ aarch64_linux_insert_watchpoint (struct target_ops *self,
 
   gdb_assert (type != hw_execute);
 
-  ret = aarch64_handle_watchpoint (type, addr, len, 1 /* is_insert */);
+  ret = aarch64_handle_watchpoint (type, addr, len, 1 /* is_insert */, state);
 
   if (show_debug_regs)
     {
-      struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
-
       aarch64_show_debug_reg_state (state,
 				    "insert_watchpoint", addr, len, type);
     }
@@ -1488,6 +1481,8 @@ aarch64_linux_remove_watchpoint (struct target_ops *self,
 				 struct expression *cond)
 {
   int ret;
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   if (show_debug_regs)
     fprintf_unfiltered (gdb_stdlog,
@@ -1496,13 +1491,10 @@ aarch64_linux_remove_watchpoint (struct target_ops *self,
 
   gdb_assert (type != hw_execute);
 
-  ret = aarch64_handle_watchpoint (type, addr, len, 0 /* is_insert */);
+  ret = aarch64_handle_watchpoint (type, addr, len, 0 /* is_insert */, state);
 
   if (show_debug_regs)
     {
-      struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
-
       aarch64_show_debug_reg_state (state,
 				    "remove_watchpoint", addr, len, type);
     }

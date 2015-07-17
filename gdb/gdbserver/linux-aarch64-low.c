@@ -847,16 +847,13 @@ aarch64_dr_state_remove_one_point (struct aarch64_debug_reg_state *state,
 
 static int
 aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
-			   int len, int is_insert)
+			   int len, int is_insert,
+			   struct aarch64_debug_reg_state *state)
 {
-  struct aarch64_debug_reg_state *state;
-
   /* The hardware breakpoint on AArch64 should always be 4-byte
      aligned.  */
   if (!aarch64_point_is_aligned (0 /* is_watchpoint */ , addr, len))
     return -1;
-
-  state = aarch64_get_debug_reg_state ();
 
   if (is_insert)
     return aarch64_dr_state_insert_one_point (state, type, addr, len);
@@ -869,12 +866,9 @@ aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 
 static int
 aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type,
-				   CORE_ADDR addr, int len, int is_insert)
+				   CORE_ADDR addr, int len, int is_insert,
+				   struct aarch64_debug_reg_state *state)
 {
-  struct aarch64_debug_reg_state *state;
-
-  state = aarch64_get_debug_reg_state ();
-
   if (is_insert)
     return aarch64_dr_state_insert_one_point (state, type, addr, len);
   else
@@ -890,11 +884,9 @@ aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type,
 
 static int
 aarch64_handle_unaligned_watchpoint (enum target_hw_bp_type type,
-				     CORE_ADDR addr, int len, int is_insert)
+				     CORE_ADDR addr, int len, int is_insert,
+				     struct aarch64_debug_reg_state *state)
 {
-  struct aarch64_debug_reg_state *state
-    = aarch64_get_debug_reg_state ();
-
   while (len > 0)
     {
       CORE_ADDR aligned_addr;
@@ -927,12 +919,15 @@ aarch64_handle_unaligned_watchpoint (enum target_hw_bp_type type,
 
 static int
 aarch64_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
-			   int len, int is_insert)
+			   int len, int is_insert,
+			   struct aarch64_debug_reg_state *state)
 {
   if (aarch64_point_is_aligned (1 /* is_watchpoint */ , addr, len))
-    return aarch64_handle_aligned_watchpoint (type, addr, len, is_insert);
+    return aarch64_handle_aligned_watchpoint (type, addr, len, is_insert,
+					      state);
   else
-    return aarch64_handle_unaligned_watchpoint (type, addr, len, is_insert);
+    return aarch64_handle_unaligned_watchpoint (type, addr, len, is_insert,
+						state);
 }
 
 /* Implementation of linux_target_ops method "supports_z_point_type".  */
@@ -964,6 +959,7 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int ret;
   enum target_hw_bp_type targ_type;
+  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
 
   if (show_debug_regs)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
@@ -974,10 +970,12 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 
   if (targ_type != hw_execute)
     ret =
-      aarch64_handle_watchpoint (targ_type, addr, len, 1 /* is_insert */);
+      aarch64_handle_watchpoint (targ_type, addr, len, 1 /* is_insert */,
+				 state);
   else
     ret =
-      aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */);
+      aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */,
+				 state);
 
   if (show_debug_regs)
     aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
@@ -997,6 +995,7 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int ret;
   enum target_hw_bp_type targ_type;
+  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
 
   if (show_debug_regs)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
@@ -1008,10 +1007,12 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
   /* Set up state pointers.  */
   if (targ_type != hw_execute)
     ret =
-      aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */);
+      aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */,
+				 state);
   else
     ret =
-      aarch64_handle_breakpoint (targ_type, addr, len, 0 /* is_insert */);
+      aarch64_handle_breakpoint (targ_type, addr, len, 0 /* is_insert */,
+				 state);
 
   if (show_debug_regs)
     aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),

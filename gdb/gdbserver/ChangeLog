@@ -1,5 +1,15 @@
 2015-07-17  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_handle_breakpoint): Add argument state
+	and don't aarch64_get_debug_reg_state.  All callers update.
+	(aarch64_handle_aligned_watchpoint): Likewise.
+	(aarch64_handle_unaligned_watchpoint): Likewise.
+	(aarch64_handle_watchpoint): Likewise.
+	(aarch64_insert_point): Call aarch64_get_debug_reg_state earlier.
+	(aarch64_remove_point): Likewise.
+
+2015-07-17  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_show_debug_reg_state): Use
 	debug_printf.
 	(aarch64_handle_unaligned_watchpoint): Likewise.
