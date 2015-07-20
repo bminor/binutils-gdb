@@ -1,3 +1,7 @@
+2015-07-20  Alan Modra  <amodra@gmail.com>
+
+	* doc/Makefile.in: Regenerate.
+
 2015-07-16  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/18672

@@ -1,3 +1,7 @@
+2015-07-20  Alan Modra  <amodra@gmail.com>
+
+	* po/SRC-POTFILES.in: Regenerate.
+
 2015-07-17  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Sort alphabetically.
