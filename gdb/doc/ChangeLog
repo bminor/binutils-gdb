@@ -1,3 +1,7 @@
+2015-07-20  Doug Evans  <dje@google.com>
+
+	* Makefile.in (STABS_DOC_BUILD_INCLUDES): Add gdb-cfg.texi, GDBvn.texi.
+
 2015-07-16  Doug Evans  <dje@google.com>
 
 	* stabs.texinfo: @include gdb-cfg.texi.
