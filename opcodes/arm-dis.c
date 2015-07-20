@@ -115,6 +115,7 @@ struct opcode16
    %<bitfield>G         print as an iWMMXt general purpose or control register
    %<bitfield>D		print as a NEON D register
    %<bitfield>Q		print as a NEON Q register
+   %<bitfield>E		print a quarter-float immediate value
 
    %y<code>		print a single precision VFP reg.
 			  Codes: 0=>Sm, 1=>Sd, 2=>Sn, 3=>multi-list, 4=>Sm pair
@@ -578,9 +579,9 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1),
     0x0c500b10, 0x0fb00ff0, "vmov%c\t%12-15r, %16-19r, %z0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V3xD),
-    0x0eb00a00, 0x0fb00ff0, "vmov%c.f32\t%y1, #%0-3,16-19d"},
+    0x0eb00a00, 0x0fb00ff0, "vmov%c.f32\t%y1, #%0-3,16-19E"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V3),
-    0x0eb00b00, 0x0fb00ff0, "vmov%c.f64\t%z1, #%0-3,16-19d"},
+    0x0eb00b00, 0x0fb00ff0, "vmov%c.f64\t%z1, #%0-3,16-19E"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V2),
     0x0c400a10, 0x0ff00fd0, "vmov%c\t%y4, %12-15r, %16-19r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V2),
@@ -3467,6 +3468,36 @@ print_insn_coprocessor (bfd_vma pc,
 			func (stream, "%ld", value);
 			value_in_comment = value;
 			break;
+		      case 'E':
+                        {
+			  /* Converts immediate 8 bit back to float value.  */
+			  unsigned floatVal = (value & 0x80) << 24
+			    | (value & 0x3F) << 19
+			    | ((value & 0x40) ? (0xF8 << 22) : (1 << 30));
+
+			  /* Quarter float have a maximum value of 31.0.
+			     Get floating point value multiplied by 1e7.
+			     The maximum value stays in limit of a 32-bit int.  */
+			  unsigned decVal =
+			    (78125 << (((floatVal >> 23) & 0xFF) - 124)) *
+			    (16 + (value & 0xF));
+
+			  if (!(decVal % 1000000))
+			    func (stream, "%ld\t; 0x%08x %c%u.%01u", value,
+				  floatVal, value & 0x80 ? '-' : ' ',
+				  decVal / 10000000,
+				  decVal % 10000000 / 1000000);
+			  else if (!(decVal % 10000))
+			    func (stream, "%ld\t; 0x%08x %c%u.%03u", value,
+				  floatVal, value & 0x80 ? '-' : ' ',
+				  decVal / 10000000,
+				  decVal % 10000000 / 10000);
+			  else
+			    func (stream, "%ld\t; 0x%08x %c%u.%07u", value,
+				  floatVal, value & 0x80 ? '-' : ' ',
+				  decVal / 10000000, decVal % 10000000);
+			  break;
+			}
 		      case 'k':
 			{
 			  int from = (given & (1 << 7)) ? 32 : 16;

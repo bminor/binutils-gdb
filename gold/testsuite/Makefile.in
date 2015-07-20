@@ -280,8 +280,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug_gabi.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err pr18689a.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr18689b.o flagstest_o_ttext_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11.a protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_lib binary.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
@@ -323,10 +323,11 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # and --dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_35 = debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_1.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.sh ver_test_4.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.sh ver_test_7.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh relro_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh pr18689.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.sh ver_test_2.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_10.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
@@ -365,6 +366,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.cmp \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.check \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr18689.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.syms ver_test_2.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
@@ -498,6 +500,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test1.out \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test2.out \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.in \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout \
@@ -4413,6 +4416,8 @@ missing_key_func.sh.log: missing_key_func.sh
 	@p='missing_key_func.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 undef_symbol.sh.log: undef_symbol.sh
 	@p='undef_symbol.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+pr18689.sh.log: pr18689.sh
+	@p='pr18689.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test_1.sh.log: ver_test_1.sh
 	@p='ver_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test_2.sh.log: ver_test_2.sh
@@ -5674,6 +5679,18 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689.stdout: pr18689b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< > $@
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689a.o: pr18689.o ../ld-new
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -r -o $@ $<
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689b.o: pr18689a.o ../ld-new
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -r -o $@ $<
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689.o: pr18689.c gcctestdir/as
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -Bgcctestdir/ -ggdb3 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/pr18689.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_ttext_1: flagstest_debug.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,-Ttext,0x400000 -Wl,-Tdata,0x800000
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_ttext_2: flagstest_debug.o gcctestdir/ld
@@ -6013,6 +6030,8 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -Bgcctestdir/ -g -shared -fPIC -w -o $@ $(srcdir)/hidden_test_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.syms: hidden_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -D hidden_test > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.err: hidden_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch hidden_test.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld

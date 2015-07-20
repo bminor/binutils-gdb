@@ -2500,6 +2500,19 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
    0},
 
+  /* Get to the page containing GOT TLS entry for a symbol.
+     The same as GD, we allocate two consecutive GOT slots
+     for module index and module offset, the only difference
+     with GD is the module offset should be intialized to
+     zero without any outstanding runtime relocation. */
+  {"tlsldm", 0,
+   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21, /* adr_type */
+   0,
+   0,
+   0,
+   0,
+   0},
+
   /* Get to the page containing GOT TLS entry for a symbol */
   {"gottprel", 0,
    0,				/* adr_type */
@@ -6765,6 +6778,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6974,6 +6988,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:

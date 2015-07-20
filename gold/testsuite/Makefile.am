@@ -1424,6 +1424,22 @@ flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 	chmod a+x $@
 	test -s $@
 
+check_SCRIPTS += pr18689.sh
+check_DATA += pr18689.stdout
+MOSTLYCLEANFILES += pr18689a.o pr18689b.o
+
+pr18689.stdout: pr18689b.o
+	$(TEST_READELF) -SW $< > $@
+
+pr18689a.o: pr18689.o ../ld-new
+	../ld-new -r -o $@ $<
+
+pr18689b.o: pr18689a.o ../ld-new
+	../ld-new -r -o $@ $<
+
+pr18689.o: pr18689.c gcctestdir/as
+	$(COMPILE) -Bgcctestdir/ -ggdb3 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/pr18689.c
+
 # Test -TText and -Tdata.
 check_PROGRAMS += flagstest_o_ttext_1
 flagstest_o_ttext_1: flagstest_debug.o gcctestdir/ld
@@ -2099,11 +2115,13 @@ endif MCMODEL_MEDIUM
 # referenced by a shared library.
 check_SCRIPTS += hidden_test.sh
 check_DATA += hidden_test.err
-MOSTLYCLEANFILES += hidden_test hidden_test.err
+MOSTLYCLEANFILES += hidden_test hidden_test.err hidden_test.syms
 libhidden.so: hidden_test_1.c gcctestdir/ld
 	$(COMPILE) -Bgcctestdir/ -g -shared -fPIC -w -o $@ $(srcdir)/hidden_test_1.c
 hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
+hidden_test.syms: hidden_test
+	$(TEST_NM) -D hidden_test > $@
 hidden_test.err: hidden_test
 	@touch hidden_test.err
 

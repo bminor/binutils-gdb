@@ -1160,8 +1160,12 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
   if (parameters->options().relocatable()
       && (shdr.get_sh_flags() & elfcpp::SHF_GROUP) != 0)
     {
+      // Some flags in the input section should not be automatically
+      // copied to the output section.
+      elfcpp::Elf_Xword flags = (shdr.get_sh_flags()
+				 & ~ elfcpp::SHF_COMPRESSED);
       name = this->namepool_.add(name, true, NULL);
-      os = this->make_output_section(name, sh_type, shdr.get_sh_flags(),
+      os = this->make_output_section(name, sh_type, flags,
 				     ORDER_INVALID, false);
     }
   else

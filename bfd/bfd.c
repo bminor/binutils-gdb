@@ -1090,11 +1090,11 @@ _bfd_abort (const char *file, int line, const char *fn)
 {
   if (fn != NULL)
     (*_bfd_error_handler)
-      (_("BFD %s internal error, aborting at %s line %d in %s\n"),
+      (_("BFD %s internal error, aborting at %s:%d in %s\n"),
        BFD_VERSION_STRING, file, line, fn);
   else
     (*_bfd_error_handler)
-      (_("BFD %s internal error, aborting at %s line %d\n"),
+      (_("BFD %s internal error, aborting at %s:%d\n"),
        BFD_VERSION_STRING, file, line);
   (*_bfd_error_handler) (_("Please report this bug.\n"));
   _exit (EXIT_FAILURE);

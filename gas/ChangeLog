@@ -1,3 +1,20 @@
+2015-07-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
+	(md_apply_fix): Support BFD_RELOC_AARCH64_TLSLD_ADR_PREL21.
+	(aarch64_force_relocation): Ditto.
+
+2015-07-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Add crypto-neon-fp-armv8.1.
+	* doc/c-arm.texi (-mfpu=): Likewise.  Correct the entry for
+	neon-fp-armv8.1.
+
+2015-07-16  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-arm.c (md_assemble): Rephrase the "selected processor does
+	not support ARM mode" error messages.
+
 2015-07-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (flag_compress_debug): Replace

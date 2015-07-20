@@ -951,20 +951,28 @@ is_dot_plus_0 (const etree_type *tree)
 	      || is_sym_value (tree->binary.rhs, 0)));
 }
 
-/* Return true if TREE is "ALIGN (. != 0 ? some_expression : 1)".  */
+/* Return true if TREE is "ALIGN (. != 0 ? some_expression : 1)",
+   or equivalent binary ALIGN expressions.  */
 
 static bfd_boolean
 is_align_conditional (const etree_type *tree)
 {
-  if (tree->type.node_class == etree_unary
-      && tree->type.node_code == ALIGN_K)
-    {
-      tree = tree->unary.child;
-      return (tree->type.node_class == etree_trinary
-	      && is_dot_ne_0 (tree->trinary.cond)
-	      && is_value (tree->trinary.rhs, 1));
-    }
-  return 0;
+  if (tree->type.node_code != ALIGN_K)
+    return 0;
+  else if (tree->type.node_class == etree_unary)
+    tree = tree->unary.child;
+  else if (tree->type.node_class == etree_binary
+	   && (is_dot (tree->binary.lhs)
+	       || (tree->binary.lhs->type.node_class == etree_unary
+		   && tree->binary.lhs->type.node_code == ABSOLUTE
+		   && is_dot (tree->binary.lhs->unary.child))))
+    tree = tree->binary.rhs;
+  else
+    return 0;
+
+  return (tree->type.node_class == etree_trinary
+	  && is_dot_ne_0 (tree->trinary.cond)
+	  && is_value (tree->trinary.rhs, 1));
 }
 
 static void
@@ -1031,25 +1039,13 @@ exp_fold_tree_1 (etree_type *tree)
 	      exp_fold_tree_1 (tree->assign.src);
 	      expld.assigning_to_dot = FALSE;
 
-	      /* If we are assigning to dot inside an output section
-		 arrange to keep the section, except for certain
-		 expressions that evaluate to zero.  We ignore . = 0,
-		 . = . + 0, and . = ALIGN (. != 0 ? expr : 1).  */
-	      if (expld.phase == lang_mark_phase_enum
-		  && expld.section != bfd_abs_section_ptr
-		  && !(expld.result.valid_p
-		       && expld.result.value == 0
-		       && (is_value (tree->assign.src, 0)
-			   || is_sym_value (tree->assign.src, 0)
-			   || is_dot_plus_0 (tree->assign.src)
-			   || is_align_conditional (tree->assign.src))))
-		expld.section->flags |= SEC_KEEP;
-
 	      if (!expld.result.valid_p)
 		{
 		  if (expld.phase != lang_mark_phase_enum)
 		    einfo (_("%F%S invalid assignment to"
 			     " location counter\n"), tree);
+		  else if (expld.section != bfd_abs_section_ptr)
+		    expld.section->flags |= SEC_KEEP;
 		}
 	      else if (expld.dotp == NULL)
 		einfo (_("%F%S assignment to location counter"
@@ -1069,6 +1065,25 @@ exp_fold_tree_1 (etree_type *tree)
 		    nextdot += expld.result.section->vma;
 		  else
 		    nextdot += expld.section->vma;
+
+		  /* If we are assigning to dot inside an output
+		     section arrange to keep the section, except for
+		     certain expressions that evaluate to zero.  We
+		     can't ignore all expressions that evaluate to
+		     zero because an otherwise empty section might
+		     have padding added by an alignment expression
+		     that changes with relaxation.  Such a section
+		     might have zero size before relaxation and so be
+		     stripped incorrectly.  */
+		  if (expld.phase == lang_mark_phase_enum
+		      && expld.section != bfd_abs_section_ptr
+		      && !(nextdot == expld.section->vma
+			   && (is_value (tree->assign.src, 0)
+			       || is_sym_value (tree->assign.src, 0)
+			       || is_dot_plus_0 (tree->assign.src)
+			       || is_align_conditional (tree->assign.src))))
+		    expld.section->flags |= SEC_KEEP;
+
 		  if (nextdot < expld.dot
 		      && expld.section != bfd_abs_section_ptr)
 		    einfo (_("%F%S cannot move location counter backwards"

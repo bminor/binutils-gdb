@@ -286,15 +286,10 @@ Symbol_table::resolve(Sized_symbol<size>* to,
            && (to->visibility() == elfcpp::STV_HIDDEN
                || to->visibility() == elfcpp::STV_INTERNAL))
     {
-      // A dynamic object cannot reference a hidden or internal symbol
-      // defined in another object.
-      gold_warning(_("%s symbol '%s' in %s is referenced by DSO %s"),
-                   (to->visibility() == elfcpp::STV_HIDDEN
-                    ? "hidden"
-                    : "internal"),
-                   to->demangled_name().c_str(),
-                   to->object()->name().c_str(),
-                   object->name().c_str());
+      // The symbol is hidden, so a reference from a shared object
+      // cannot bind to it.  We tried issuing a warning in this case,
+      // but that produces false positives when the symbol is
+      // actually resolved in a different shared object (PR 15574).
       return;
     }
   else

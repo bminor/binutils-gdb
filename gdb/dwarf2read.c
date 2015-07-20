@@ -2241,7 +2241,7 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
       dwarf2_per_objfile->gdb_index.size = bfd_get_section_size (sectp);
     }
 
-  if ((bfd_get_section_flags (abfd, sectp) & SEC_LOAD)
+  if ((bfd_get_section_flags (abfd, sectp) & (SEC_LOAD | SEC_ALLOC))
       && bfd_section_vma (abfd, sectp) == 0)
     dwarf2_per_objfile->has_section_at_zero = 1;
 }

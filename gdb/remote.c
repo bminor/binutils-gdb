@@ -3474,7 +3474,7 @@ stop_reply_extract_thread (char *stop_reply)
 static ptid_t
 get_current_thread (char *wait_status)
 {
-  ptid_t ptid;
+  ptid_t ptid = null_ptid;
 
   /* Note we don't use remote_parse_stop_reply as that makes use of
      the target architecture, which we haven't yet fully determined at
@@ -3503,7 +3503,7 @@ add_current_inferior_and_thread (char *wait_status)
 {
   struct remote_state *rs = get_remote_state ();
   int fake_pid_p = 0;
-  ptid_t ptid = null_ptid;
+  ptid_t ptid;
 
   inferior_ptid = null_ptid;
 
