@@ -1,5 +1,18 @@
 2015-07-20  Han Shen  <shenhan@google.com>
 
+	Optimize erratum 843419 fix.
+
+	* aarch64.cc (AArch64_insn_utilities::is_adr): New method.
+	(AArch64_insn_utilities::aarch64_adr_encode_imm): New method.
+	(AArch64_insn_utilities::aarch64_adrp_decode_imm): New method.
+	(E843419_stub): New sub-class of Erratum_stub.
+	(AArch64_relobj::try_fix_erratum_843419_optimized): New method.
+	(AArch64_relobj::section_needs_reloc_stub_scanning): Try optimized fix.
+	(AArch64_relobj::create_erratum_stub): Add 1 argument.
+	(Target_aarch64::scan_erratum_843419_span): Pass in adrp insn offset.
+
+2015-07-20  Han Shen  <shenhan@google.com>
+
 	Fix arm elf header flags wrt hardfp bit.
 
 	* arm.cc (Target_arm::do_adjust_elf_header): Set flags into view.
