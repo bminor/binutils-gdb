@@ -474,7 +474,7 @@ emit_dyn()
 test -n "${NON_ALLOC_DYN}${SEPARATE_CODE}" || emit_dyn
 
 cat <<EOF
-  .init         ${RELOCATING-0} :
+  .init         ${RELOCATING-0}${RELOCATING+${INIT_ADDR}} :
   {
     ${RELOCATING+${INIT_START}}
     KEEP (*(SORT_NONE(.init)))
@@ -495,7 +495,7 @@ cat <<EOF
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } ${FILL}
-  .fini         ${RELOCATING-0} :
+  .fini         ${RELOCATING-0}${RELOCATING+${FINI_ADDR}} :
   {
     ${RELOCATING+${FINI_START}}
     KEEP (*(SORT_NONE(.fini)))
