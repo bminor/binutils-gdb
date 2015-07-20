@@ -10556,6 +10556,7 @@ Target_arm<big_endian>::do_adjust_elf_header(
   }
   elfcpp::Ehdr_write<32, big_endian> oehdr(view);
   oehdr.put_e_ident(e_ident);
+  oehdr.put_e_flags(this->processor_specific_flags());
 }
 
 // do_make_elf_object to override the same function in the base class.
