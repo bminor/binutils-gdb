@@ -1,3 +1,10 @@
+2015-07-20  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/aarch64-linux-hw-point.c (aarch64_handle_unaligned_watchpoint):
+	Re-indent the code.
+	* nat/aarch64-linux-hw-point.h: Use ULONGEST rather than
+	"unsigned long long".
+
 2015-07-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (dwarf2_locate_sections): Allow has_section_at_zero

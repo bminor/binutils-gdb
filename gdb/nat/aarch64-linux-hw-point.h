@@ -102,7 +102,7 @@
    ptrace calls to the kernel, i.e. avoid asking the kernel to write
    to the debug registers with unchanged values.  */
 
-typedef unsigned long long dr_changed_t;
+typedef ULONGEST dr_changed_t;
 
 /* Set each of the lower M bits of X to 1; assert X is wide enough.  */
 

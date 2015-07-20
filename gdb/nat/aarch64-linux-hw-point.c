@@ -409,12 +409,13 @@ aarch64_handle_unaligned_watchpoint (enum target_hw_bp_type type,
 						 aligned_len);
 
       if (show_debug_regs)
-	debug_printf (
-"handle_unaligned_watchpoint: is_insert: %d\n"
-"                             aligned_addr: %s, aligned_len: %d\n"
-"                                next_addr: %s,    next_len: %d\n",
-is_insert, core_addr_to_string_nz (aligned_addr), aligned_len,
-core_addr_to_string_nz (addr), len);
+	debug_printf ("handle_unaligned_watchpoint: is_insert: %d\n"
+		      "                             "
+		      "aligned_addr: %s, aligned_len: %d\n"
+		      "                                "
+		      "next_addr: %s,    next_len: %d\n",
+		      is_insert, core_addr_to_string_nz (aligned_addr),
+		      aligned_len, core_addr_to_string_nz (addr), len);
 
       if (ret != 0)
 	return ret;
