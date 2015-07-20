@@ -1,3 +1,10 @@
+2015-07-20  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/elf.sc (.ldata, .bss): Align absolute value of dot.
+	* ldexp.c (is_align_conditional): Handle binary ALIGN.
+	(exp_fold_tree_1): Move code setting SEC_KEEP for assignments to
+	dot inside output sections.  Handle absolute expressions.
+
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Make
