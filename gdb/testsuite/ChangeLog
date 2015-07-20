@@ -1,3 +1,7 @@
+2015-07-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc.exp: Adjust "info exceptions" expected output.
+
 2015-07-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/i386-biarch-core.exp: Replace istarget
