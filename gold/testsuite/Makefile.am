@@ -2099,11 +2099,13 @@ endif MCMODEL_MEDIUM
 # referenced by a shared library.
 check_SCRIPTS += hidden_test.sh
 check_DATA += hidden_test.err
-MOSTLYCLEANFILES += hidden_test hidden_test.err
+MOSTLYCLEANFILES += hidden_test hidden_test.err hidden_test.syms
 libhidden.so: hidden_test_1.c gcctestdir/ld
 	$(COMPILE) -Bgcctestdir/ -g -shared -fPIC -w -o $@ $(srcdir)/hidden_test_1.c
 hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
+hidden_test.syms: hidden_test
+	$(TEST_NM) -D hidden_test > $@
 hidden_test.err: hidden_test
 	@touch hidden_test.err
 

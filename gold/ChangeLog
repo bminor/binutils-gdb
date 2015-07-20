@@ -1,3 +1,14 @@
+2015-07-20  Yiran Wang  <yiran@google.com>
+	Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/15574
+	* resolve.cc (Symbol_table): Remove warning about references
+	from shared objects to hidden symbols.
+	* testsuite/Makefile.am (hidden_test): Add hidden_test.syms.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/hidden_test.sh: Check dynamic symbol table; update
+	expected error messages.
+
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* compressed_output.cc (Output_compressed_section::set_final_data_size):

@@ -498,6 +498,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test1.out \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test2.out \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.in \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout \
@@ -6013,6 +6014,8 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -Bgcctestdir/ -g -shared -fPIC -w -o $@ $(srcdir)/hidden_test_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.syms: hidden_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -D hidden_test > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.err: hidden_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch hidden_test.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
