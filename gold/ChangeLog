@@ -1,3 +1,19 @@
+2015-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18689
+	* layout.cc (Layout::layout): Clear the SHF_COMPRESSED flag bit
+	from input group section for relocatable link.
+	* testsuite/Makefile.am (check_SCRIPTS): Add pr18689.sh.
+	(check_DATA): Add pr18689.stdout.
+	(MOSTLYCLEANFILES): Add pr18689a.o pr18689b.o.
+	(pr18689.stdout): New rule.
+	(pr18689a.o): Likewise.
+	(pr18689b.o): Likewise.
+	(pr18689.o): Likewise.
+	* testsuite/pr18689.c: New file.
+	* testsuite/pr18689.sh: Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
 2015-07-20  Yiran Wang  <yiran@google.com>
 	Cary Coutant  <ccoutant@gmail.com>
 
