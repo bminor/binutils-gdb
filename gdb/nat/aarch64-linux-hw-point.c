@@ -504,3 +504,56 @@ aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
 		  i, core_addr_to_string_nz (state->dr_addr_wp[i]),
 		  state->dr_ctrl_wp[i], state->dr_ref_count_wp[i]);
 }
+
+/* Get the hardware debug register capacity information from the
+   process represented by TID.  */
+
+void
+aarch64_linux_get_debug_reg_capacity (int tid)
+{
+  struct iovec iov;
+  struct user_hwdebug_state dreg_state;
+
+  iov.iov_base = &dreg_state;
+  iov.iov_len = sizeof (dreg_state);
+
+  /* Get hardware watchpoint register info.  */
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_HW_WATCH, &iov) == 0
+      && AARCH64_DEBUG_ARCH (dreg_state.dbg_info) == AARCH64_DEBUG_ARCH_V8)
+    {
+      aarch64_num_wp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
+      if (aarch64_num_wp_regs > AARCH64_HWP_MAX_NUM)
+	{
+	  warning (_("Unexpected number of hardware watchpoint registers"
+		     " reported by ptrace, got %d, expected %d."),
+		   aarch64_num_wp_regs, AARCH64_HWP_MAX_NUM);
+	  aarch64_num_wp_regs = AARCH64_HWP_MAX_NUM;
+	}
+    }
+  else
+    {
+      warning (_("Unable to determine the number of hardware watchpoints"
+		 " available."));
+      aarch64_num_wp_regs = 0;
+    }
+
+  /* Get hardware breakpoint register info.  */
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_HW_BREAK, &iov) == 0
+      && AARCH64_DEBUG_ARCH (dreg_state.dbg_info) == AARCH64_DEBUG_ARCH_V8)
+    {
+      aarch64_num_bp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
+      if (aarch64_num_bp_regs > AARCH64_HBP_MAX_NUM)
+	{
+	  warning (_("Unexpected number of hardware breakpoint registers"
+		     " reported by ptrace, got %d, expected %d."),
+		   aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
+	  aarch64_num_bp_regs = AARCH64_HBP_MAX_NUM;
+	}
+    }
+  else
+    {
+      warning (_("Unable to determine the number of hardware breakpoints"
+		 " available."));
+      aarch64_num_bp_regs = 0;
+    }
+}

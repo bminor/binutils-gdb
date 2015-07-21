@@ -1,3 +1,13 @@
+2015-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_get_debug_reg_capacity):
+	Move it to nat/aarch64-linux-hw-point.c.
+	(aarch64_linux_child_post_startup_inferior): Update.
+	* nat/aarch64-linux-hw-point.c (aarch64_linux_get_debug_reg_capacity):
+	New function.
+	* nat/aarch64-linux-hw-point.h (aarch64_linux_get_debug_reg_capacity):
+	Declare it.
+
 2015-07-21  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* common/btrace-common.c (btrace_data_append): Change case label.

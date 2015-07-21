@@ -181,4 +181,6 @@ void aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
 				   const char *func, CORE_ADDR addr,
 				   int len, enum target_hw_bp_type type);
 
+void aarch64_linux_get_debug_reg_capacity (int tid);
+
 #endif /* AARCH64_LINUX_HW_POINT_H */
