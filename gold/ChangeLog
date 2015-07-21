@@ -1,3 +1,7 @@
+2015-07-22  Alan Modra  <amodra@gmail.com>
+
+	* aarch64.cc (try_fix_erratum_843419_optimized): Warning fix.
+
 2015-07-21  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/18548

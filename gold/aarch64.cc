@@ -2023,7 +2023,7 @@ AArch64_relobj<size, big_endian>::try_fix_erratum_843419_optimized(
   if (-(1 << 20) <= adr_imm && adr_imm < (1 << 20))
     {
       // Convert 'adrp' into 'adr'.
-      Insntype adr_insn = adrp_insn & ((1 << 31) - 1);
+      Insntype adr_insn = adrp_insn & ((1u << 31) - 1);
       adr_insn = Insn_utilities::
 	aarch64_adr_encode_imm(adr_insn, adr_imm);
       elfcpp::Swap<32, big_endian>::writeval(adrp_view, adr_insn);
