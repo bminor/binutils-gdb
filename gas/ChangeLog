@@ -1,3 +1,11 @@
+2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* NEWS: Mention corrected spelling of armv6kz.
+	* config/tc-arm.c (arm_cpus): Replace ARM_ARCH_V6ZK with
+	ARM_ARCH_V6KZ.
+	(arm_archs): Likewise. Also add "armv6kz" and "armv6kzt2".
+	* doc/c-arm.texi: Replace "armv6zk" with "armv6kz".
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): New relocation modifiers.

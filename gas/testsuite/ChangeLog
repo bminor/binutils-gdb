@@ -1,3 +1,8 @@
+2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/arm/attr-march-armv6kz.d: New.
+	* gas/arm/attr-march-armv6kzt2.d: New.
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/aarch64/reloc-tlsldm-1.s: New testcase.
