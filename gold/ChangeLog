@@ -1,6 +1,6 @@
 2015-07-21  Cary Coutant  <ccoutant@gmail.com>
 
-	PR gold/18696
+	PR gold/18698
 	* archive.cc (Library_base::should_include_member): Don't use entry
 	point for relocatable links, or if target is not yet valid.
 	* parameters.cc (Parameters::entry): Check target_valid().
