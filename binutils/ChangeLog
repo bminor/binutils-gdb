@@ -1,3 +1,7 @@
+2015-07-21  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2015-07-16  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/18672
