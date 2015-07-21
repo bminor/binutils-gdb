@@ -3211,7 +3211,7 @@ struct target_so_ops svr4_so_ops;
    different rule for symbol lookup.  The lookup begins here in the DSO, not in
    the main executable.  */
 
-static struct symbol *
+static struct block_symbol
 elf_lookup_lib_symbol (struct objfile *objfile,
 		       const char *name,
 		       const domain_enum domain)
@@ -3229,7 +3229,7 @@ elf_lookup_lib_symbol (struct objfile *objfile,
     }
 
   if (abfd == NULL || scan_dyntag (DT_SYMBOLIC, abfd, NULL) != 1)
-    return NULL;
+    return (struct block_symbol) {NULL, NULL};
 
   return lookup_global_symbol_from_objfile (objfile, name, domain);
 }

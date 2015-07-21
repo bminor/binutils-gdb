@@ -6087,7 +6087,8 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
       CORE_ADDR handler;
       struct breakpoint *bp;
 
-      vsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym), b, VAR_DOMAIN, NULL);
+      vsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym), b, VAR_DOMAIN,
+			    NULL).symbol;
       value = read_var_value (vsym, frame);
       /* If the value was optimized out, revert to the old behavior.  */
       if (! value_optimized_out (value))

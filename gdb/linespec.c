@@ -3254,7 +3254,7 @@ find_label_symbols (struct linespec_state *self,
 	return NULL;
       fn_sym = BLOCK_FUNCTION (block);
 
-      sym = lookup_symbol (name, block, LABEL_DOMAIN, 0);
+      sym = lookup_symbol (name, block, LABEL_DOMAIN, 0).symbol;
 
       if (sym != NULL)
 	{
@@ -3269,7 +3269,7 @@ find_label_symbols (struct linespec_state *self,
 	{
 	  set_current_program_space (SYMTAB_PSPACE (symbol_symtab (fn_sym)));
 	  block = SYMBOL_BLOCK_VALUE (fn_sym);
-	  sym = lookup_symbol (name, block, LABEL_DOMAIN, 0);
+	  sym = lookup_symbol (name, block, LABEL_DOMAIN, 0).symbol;
 
 	  if (sym != NULL)
 	    {

@@ -389,7 +389,7 @@ spu_bfd_open (char *pathname)
 }
 
 /* Lookup global symbol in a SPE executable.  */
-static struct symbol *
+static struct block_symbol
 spu_lookup_lib_symbol (struct objfile *objfile,
 		       const char *name,
 		       const domain_enum domain)
@@ -399,7 +399,7 @@ spu_lookup_lib_symbol (struct objfile *objfile,
 
   if (svr4_so_ops.lookup_lib_global_symbol != NULL)
     return svr4_so_ops.lookup_lib_global_symbol (objfile, name, domain);
-  return NULL;
+  return (struct block_symbol) {NULL, NULL};
 }
 
 /* Enable shared library breakpoint.  */

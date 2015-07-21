@@ -127,21 +127,21 @@ show_overload_resolution (struct ui_file *file, int from_tty,
 struct value *
 find_function_in_inferior (const char *name, struct objfile **objf_p)
 {
-  struct symbol *sym;
+  struct block_symbol sym;
 
   sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
-  if (sym != NULL)
+  if (sym.symbol != NULL)
     {
-      if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+      if (SYMBOL_CLASS (sym.symbol) != LOC_BLOCK)
 	{
 	  error (_("\"%s\" exists in this program but is not a function."),
 		 name);
 	}
 
       if (objf_p)
-	*objf_p = symbol_objfile (sym);
+	*objf_p = symbol_objfile (sym.symbol);
 
-      return value_of_variable (sym, NULL);
+      return value_of_variable (sym.symbol, sym.block);
     }
   else
     {
@@ -3457,7 +3457,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-			       0, VAR_DOMAIN, 0);
+			       0, VAR_DOMAIN, 0).symbol;
 
 	      if (s == NULL)
 		return NULL;
@@ -3488,7 +3488,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-			       0, VAR_DOMAIN, 0);
+			       0, VAR_DOMAIN, 0).symbol;
 
 	      if (s == NULL)
 		return NULL;
@@ -3564,19 +3564,19 @@ value_maybe_namespace_elt (const struct type *curtype,
 			   enum noside noside)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);
-  struct symbol *sym;
+  struct block_symbol sym;
   struct value *result;
 
   sym = cp_lookup_symbol_namespace (namespace_name, name,
 				    get_selected_block (0), VAR_DOMAIN);
 
-  if (sym == NULL)
+  if (sym.symbol == NULL)
     return NULL;
   else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
-	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
-    result = allocate_value (SYMBOL_TYPE (sym));
+	   && (SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF))
+    result = allocate_value (SYMBOL_TYPE (sym.symbol));
   else
-    result = value_of_variable (sym, get_selected_block (0));
+    result = value_of_variable (sym.symbol, sym.block);
 
   if (want_address)
     result = value_addr (result);
@@ -3740,7 +3740,7 @@ value_of_this (const struct language_defn *lang)
 
   b = get_frame_block (frame, NULL);
 
-  sym = lookup_language_this (lang, b);
+  sym = lookup_language_this (lang, b).symbol;
   if (sym == NULL)
     error (_("current stack frame does not contain a variable named `%s'"),
 	   lang->la_name_of_this);

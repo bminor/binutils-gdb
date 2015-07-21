@@ -911,7 +911,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
 	{
 	  if (block == NULL)
 	    block = get_frame_block (frame, NULL);
-	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
+	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL).symbol;
 	}
       CATCH (ex, RETURN_MASK_ALL)
 	{

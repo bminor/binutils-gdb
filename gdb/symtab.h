@@ -782,6 +782,19 @@ struct symbol
   struct symbol *hash_next;
 };
 
+/* Several lookup functions return both a symbol and the block in which the
+   symbol is found.  This structure is used in these cases.  */
+
+struct block_symbol
+{
+  /* The symbol that was found, or NULL if no symbol was found.  */
+  struct symbol *symbol;
+
+  /* If SYMBOL is not NULL, then this is the block in which the symbol is
+     defined.  */
+  const struct block *block;
+};
+
 extern const struct symbol_impl *symbol_impls;
 
 /* Note: There is no accessor macro for symbol.owner because it is
@@ -1141,10 +1154,6 @@ DEF_VEC_P (compunit_symtab_ptr);
 
 extern int currently_reading_symtab;
 
-/* The block in which the most recently looked up symbol was found.  */
-
-extern const struct block *block_found;
-
 /* symtab.c lookup functions */
 
 extern const char multiple_symbols_ask[];
@@ -1190,27 +1199,27 @@ struct field_of_this_result
    C++: if IS_A_FIELD_OF_THIS is non-NULL on entry, check to see if
    NAME is a field of the current implied argument `this'.  If so fill in the
    fields of IS_A_FIELD_OF_THIS, otherwise the fields are set to NULL.
-   BLOCK_FOUND is set to the block in which NAME is found (in the case of
-   a field of `this', value_of_this sets BLOCK_FOUND to the proper value).
    The symbol's section is fixed up if necessary.  */
 
-extern struct symbol *lookup_symbol_in_language (const char *,
-						 const struct block *,
-						 const domain_enum,
-						 enum language,
-						 struct field_of_this_result *);
+extern struct block_symbol
+  lookup_symbol_in_language (const char *,
+			     const struct block *,
+			     const domain_enum,
+			     enum language,
+			     struct field_of_this_result *);
 
 /* Same as lookup_symbol_in_language, but using the current language.  */
 
-extern struct symbol *lookup_symbol (const char *, const struct block *,
-				     const domain_enum,
-				     struct field_of_this_result *);
+extern struct block_symbol lookup_symbol (const char *,
+					  const struct block *,
+					  const domain_enum,
+					  struct field_of_this_result *);
 
 /* A default version of lookup_symbol_nonlocal for use by languages
    that can't think of anything better to do.
    This implements the C lookup rules.  */
 
-extern struct symbol *
+extern struct block_symbol
   basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
 				const char *,
 				const struct block *,
@@ -1221,19 +1230,18 @@ extern struct symbol *
 
 /* Lookup a symbol in the static block associated to BLOCK, if there
    is one; do nothing if BLOCK is NULL or a global block.
-   Upon success sets BLOCK_FOUND and fixes up the symbol's section
-   if necessary.  */
+   Upon success fixes up the symbol's section if necessary.  */
 
-extern struct symbol *lookup_symbol_in_static_block (const char *name,
-						     const struct block *block,
-						     const domain_enum domain);
+extern struct block_symbol
+  lookup_symbol_in_static_block (const char *name,
+				 const struct block *block,
+				 const domain_enum domain);
 
 /* Search all static file-level symbols for NAME from DOMAIN.
-   Upon success sets BLOCK_FOUND and fixes up the symbol's section
-   if necessary.  */
+   Upon success fixes up the symbol's section if necessary.  */
 
-extern struct symbol *lookup_static_symbol (const char *name,
-					    const domain_enum domain);
+extern struct block_symbol lookup_static_symbol (const char *name,
+						 const domain_enum domain);
 
 /* Lookup a symbol in all files' global blocks.
 
@@ -1244,26 +1252,27 @@ extern struct symbol *lookup_static_symbol (const char *name,
       if the target requires it.
       See gdbarch_iterate_over_objfiles_in_search_order.
 
-   Upon success sets BLOCK_FOUND and fixes up the symbol's section
-   if necessary.  */
+   Upon success fixes up the symbol's section if necessary.  */
 
-extern struct symbol *lookup_global_symbol (const char *name,
-					    const struct block *block,
-					    const domain_enum domain);
+extern struct block_symbol
+  lookup_global_symbol (const char *name,
+			const struct block *block,
+			const domain_enum domain);
 
 /* Lookup a symbol in block BLOCK.
-   Upon success sets BLOCK_FOUND and fixes up the symbol's section
-   if necessary.  */
+   Upon success fixes up the symbol's section if necessary.  */
 
-extern struct symbol *lookup_symbol_in_block (const char *name,
-					      const struct block *block,
-					      const domain_enum domain);
+extern struct symbol *
+  lookup_symbol_in_block (const char *name,
+			  const struct block *block,
+			  const domain_enum domain);
 
 /* Look up the `this' symbol for LANG in BLOCK.  Return the symbol if
    found, or NULL if not found.  */
 
-extern struct symbol *lookup_language_this (const struct language_defn *lang,
-					    const struct block *block);
+extern struct block_symbol
+  lookup_language_this (const struct language_defn *lang,
+			const struct block *block);
 
 /* Lookup a [struct, union, enum] by name, within a specified block.  */
 
@@ -1524,10 +1533,9 @@ extern enum language main_language (void);
 /* Lookup symbol NAME from DOMAIN in MAIN_OBJFILE's global blocks.
    This searches MAIN_OBJFILE as well as any associated separate debug info
    objfiles of MAIN_OBJFILE.
-   Upon success sets BLOCK_FOUND and fixes up the symbol's section
-   if necessary.  */
+   Upon success fixes up the symbol's section if necessary.  */
 
-extern struct symbol *
+extern struct block_symbol
   lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				     const char *name,
 				     const domain_enum domain);

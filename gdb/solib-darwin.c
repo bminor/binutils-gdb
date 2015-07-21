@@ -569,12 +569,12 @@ darwin_relocate_section_addresses (struct so_list *so,
     so->addr_low = sec->addr;
 }
 
-static struct symbol *
+static struct block_symbol
 darwin_lookup_lib_symbol (struct objfile *objfile,
 			  const char *name,
 			  const domain_enum domain)
 {
-  return NULL;
+  return (struct block_symbol) {NULL, NULL};
 }
 
 static bfd *

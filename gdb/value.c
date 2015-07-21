@@ -2953,9 +2953,9 @@ value_static_field (struct type *type, int fieldno)
     {
       const char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
       /* TYPE_FIELD_NAME (type, fieldno); */
-      struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
+      struct block_symbol sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
 
-      if (sym == NULL)
+      if (sym.symbol == NULL)
 	{
 	  /* With some compilers, e.g. HP aCC, static data members are
 	     reported as non-debuggable symbols.  */
@@ -2971,7 +2971,7 @@ value_static_field (struct type *type, int fieldno)
 	    }
 	}
       else
-	retval = value_of_variable (sym, NULL);
+	retval = value_of_variable (sym.symbol, sym.block);
       break;
     }
     default:
@@ -3141,7 +3141,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   struct symbol *sym;
   struct bound_minimal_symbol msym;
 
-  sym = lookup_symbol (physname, 0, VAR_DOMAIN, 0);
+  sym = lookup_symbol (physname, 0, VAR_DOMAIN, 0).symbol;
   if (sym != NULL)
     {
       memset (&msym, 0, sizeof (msym));

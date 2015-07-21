@@ -202,7 +202,8 @@ java_lookup_class (char *name)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol (name, expression_context_block, STRUCT_DOMAIN, NULL);
+  sym = lookup_symbol (name, expression_context_block, STRUCT_DOMAIN,
+		       NULL).symbol;
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
   /* FIXME - should search inferior's symbol table.  */
@@ -590,7 +591,7 @@ get_java_object_type (void)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN, NULL);
+  sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN, NULL).symbol;
   if (sym == NULL)
     error (_("cannot find java.lang.Object"));
   return SYMBOL_TYPE (sym);

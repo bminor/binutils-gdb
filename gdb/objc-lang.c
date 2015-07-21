@@ -85,7 +85,7 @@ lookup_struct_typedef (char *name, const struct block *block, int noerr)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0).symbol;
 
   if (sym == NULL)
     {
@@ -1144,7 +1144,8 @@ find_imps (const char *method, VEC (const_char_ptr) **symbol_names)
      add the selector itself as a symbol, if it exists.  */
   if (selector_case && !VEC_empty (const_char_ptr, *symbol_names))
     {
-      struct symbol *sym = lookup_symbol (selector, NULL, VAR_DOMAIN, 0);
+      struct symbol *sym = lookup_symbol (selector, NULL, VAR_DOMAIN,
+					  0).symbol;
 
       if (sym != NULL) 
 	VEC_safe_push (const_char_ptr, *symbol_names,

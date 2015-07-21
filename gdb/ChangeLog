@@ -1,3 +1,177 @@
+2015-08-01  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-exp.y (write_object_renaming): Replace struct
+	ada_symbol_info with struct block_symbol.  Update field
+	references accordingly.
+	(block_lookup, select_possible_type_sym): Likewise.
+	(find_primitive_type): Likewise.  Also update call to
+	ada_lookup_symbol to extract the symbol itself.
+	(write_var_or_type, write_name_assoc): Likewise.
+	* ada-lang.h (struct ada_symbol_info): Remove.
+	(ada_lookup_symbol_list): Replace struct ada_symbol_info with
+	struct block_symbol.
+	(ada_lookup_encoded_symbol, user_select_syms): Likewise.
+	(ada_lookup_symbol): Return struct block_symbol instead of a
+	mere symbol.
+	* ada-lang.c (defns_collected): Replace struct ada_symbol_info
+	with struct block_symbol.
+	(resolve_subexp, ada_resolve_function, sort_choices,
+	user_select_syms, is_nonfunction, add_defn_to_vec,
+	num_defns_collected, defns_collected,
+	symbols_are_identical_enums, remove_extra_symbols,
+	remove_irrelevant_renamings, add_lookup_symbol_list_worker,
+	ada_lookup_symbol_list, ada_iterate_over_symbols,
+	ada_lookup_encoded_symbol, get_var_value): Likewise.
+	(ada_lookup_symbol): Return a block_symbol instead of a mere
+	symbol.  Replace struct ada_symbol_info with struct
+	block_symbol.
+	(ada_lookup_symbol_nonlocal): Likewise.
+	(standard_lookup): Make block passing explicit through
+	lookup_symbol_in_language.
+	* ada-tasks.c (get_tcb_types_info): Update the calls to
+	lookup_symbol_in_language to extract the mere symbol out of the
+	returned value.
+	(ada_tasks_inferior_data_sniffer): Likewise.
+	* ax-gdb.c (gen_static_field): Likewise for the call to
+	lookup_symbol.
+	(gen_maybe_namespace_elt): Deal with struct symbol_in_block from
+	lookup functions.
+	(gen_expr): Likewise.
+	* c-exp.y: Likewise.  Remove uses of block_found.
+	(lex_one_token, classify_inner_name, c_print_token): Likewise.
+	(classify_name): Likewise.  Rename the "sym" local variable to
+	"bsym".
+	* c-valprint.c (print_unpacked_pointer): Likewise.
+	* compile/compile-c-symbols.c (convert_symbol_sym): Promote the
+	"sym" parameter from struct symbol * to struct block_symbol.
+	Use it to remove uses of block_found.  Deal with struct
+	symbol_in_block from lookup functions.
+	(gcc_convert_symbol): Likewise.  Update the call to
+	convert_symbol_sym.
+	* compile/compile-object-load.c (compile_object_load): Deal with
+	struct symbol_in_block from lookup functions.
+	* cp-namespace.c (cp_lookup_nested_symbol_1,
+	cp_lookup_nested_symbol, cp_lookup_bare_symbol,
+	cp_search_static_and_baseclasses,
+	cp_lookup_symbol_in_namespace, cp_lookup_symbol_via_imports,
+	cp_lookup_symbol_imports_or_template,
+	cp_lookup_symbol_via_all_imports, cp_lookup_symbol_namespace,
+	lookup_namespace_scope, cp_lookup_nonlocal,
+	find_symbol_in_baseclass): Return struct symbol_in_block instead
+	of mere symbols and deal with struct symbol_in_block from lookup
+	functions.
+	* cp-support.c (inspect_type, replace_typedefs,
+	cp_lookup_rtti_type): Deal with struct symbol_in_block from
+	lookup functions.
+	* cp-support.h (cp_lookup_symbol_nonlocal,
+	cp_lookup_symbol_from_namespace,
+	cp_lookup_symbol_imports_or_template, cp_lookup_nested_symbol):
+	Return struct symbol_in_block instead of mere symbols.
+	* d-exp.y (d_type_from_name, d_module_from_name, push_variable,
+	push_module_name):
+	Deal with struct symbol_in_block from lookup functions.  Remove
+	uses of block_found.
+	* eval.c (evaluate_subexp_standard): Update call to
+	cp_lookup_symbol_namespace.
+	* f-exp.y: Deal with struct symbol_in_block from lookup
+	functions.  Remove uses of block_found.
+	(yylex): Likewise.
+	* gdbtypes.c (lookup_typename, lookup_struct, lookup_union,
+	lookup_enum, lookup_template_type, check_typedef): Deal with
+	struct symbol_in_block from lookup functions.
+	* guile/scm-frame.c (gdbscm_frame_read_var): Likewise.
+	* guile/scm-symbol.c (gdbscm_lookup_symbol): Likewise.
+	(gdbscm_lookup_global_symbol): Likewise.
+	* gnu-v3-abi.c (gnuv3_get_typeid_type): Likewise.
+	* go-exp.y: Likewise.  Remove uses of block_found.
+	(package_name_p, classify_packaged_name, classify_name):
+	Likewise.
+	* infrun.c (insert_exception_resume_breakpoint): Likewise.
+	* jv-exp.y (push_variable): Likewise.
+	* jv-lang.c (java_lookup_class, get_java_object_type): Likewise.
+	* language.c (language_bool_type): Likewise.
+	* language.h (struct language_defn): Update
+	la_lookup_symbol_nonlocal to return a struct symbol_in_block
+	rather than a mere symbol.
+	* linespec.c (find_label_symbols): Deal with struct
+	symbol_in_block from lookup functions.
+	* m2-exp.y: Likewise.  Remove uses of block_found.
+	(yylex): Likewise.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Likewise.
+	* objc-lang.c (lookup_struct_typedef, find_imps): Likewise.
+	* p-exp.y: Likewise.  Remove uses of block_found.
+	(yylex): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	* parse.c (write_dollar_variable): Likewise.  Remove uses of
+	block_found.
+	* parser-defs.h (struct symtoken): Turn the SYM field into a
+	struct symbol_in_block.
+	* printcmd.c (address_info): Deal with struct symbol_in_block
+	from lookup functions.
+	* python/py-frame.c (frapy_read_var): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol,
+	gdbpy_lookup_global_symbol): Likewise.
+	* skip.c (skip_function_command): Likewise.
+	* solib-darwin.c (darwin_lookup_lib_symbol): Return a struct
+	symbol_in_block instead of a mere symbol.
+	* solib-spu.c (spu_lookup_lib_symbol): Likewise.
+	* solib-svr4.c (elf_lookup_lib_symbol): Likewise.
+	* solib.c (solib_global_lookup): Likewise.
+	* solist.h (solib_global_lookup): Likewise.
+	(struct target_so_ops): Update lookup_lib_global_symbol to
+	return a struct symbol_in_block rather than a mere symbol.
+	* source.c (select_source_symtab): Deal with struct
+	symbol_in_block from lookup functions.
+	* stack.c (print_frame_args, iterate_over_block_arg_vars):
+	Likewise.
+	* symfile.c (set_initial_language): Likewise.
+	* symtab.c (SYMBOL_LOOKUP_FAILED): Turn into a struct
+	symbol_in_block.
+	(SYMBOL_LOOKUP_FAILED_P): New predicate as a macro.
+	(struct symbol_cache_slot): Turn the FOUND field into a struct
+	symbol_in_block.
+	(block_found): Remove.
+	(eq_symbol_entry): Update to deal with struct symbol_in_block in
+	cache slots.
+	(symbol_cache_lookup): Return a struct symbol_in_block rather
+	than a mere symbol.
+	(symbol_cache_mark_found): Add a BLOCK parameter to fill
+	appropriately the cache slots.  Update callers.
+	(symbol_cache_dump): Update cache slots handling to the type
+	change.
+	(lookup_symbol_in_language, lookup_symbol, lookup_language_this,
+	lookup_symbol_aux, lookup_local_symbol,
+	lookup_symbol_in_objfile, lookup_global_symbol_from_objfile,
+	lookup_symbol_in_objfile_symtabs,
+	lookup_symbol_in_objfile_from_linkage_name,
+	lookup_symbol_via_quick_fns, basic_lookup_symbol_nonlocal,
+	lookup_symbol_in_static_block, lookup_static_symbol,
+	lookup_global_symbol):
+	Return a struct symbol_in_block rather than a mere symbol.  Deal
+	with struct symbol_in_block from other lookup functions.  Remove
+	uses of block_found.
+	(lookup_symbol_in_block): Remove uses of block_found.
+	(struct global_sym_lookup_data): Turn the RESULT field into a
+	struct symbol_in_block.
+	(lookup_symbol_global_iterator_cb): Update references to the
+	RESULT field.
+	(search_symbols): Deal with struct symbol_in_block from lookup
+	functions.
+	* symtab.h (struct symbol_in_block): New structure.
+	(block_found): Remove.
+	(lookup_symbol_in_language, lookup_symbol,
+	basic_lookup_symbol_nonlocal, lookup_symbol_in_static_block,
+	looku_static_symbol, lookup_global_symbol,
+	lookup_symbol_in_block, lookup_language_this,
+	lookup_global_symbol_from_objfile): Return a struct
+	symbol_in_block rather than just a mere symbol.  Update comments
+	to remove mentions of block_found.
+	* valops.c (find_function_in_inferior,
+	value_struct_elt_for_reference, value_maybe_namespace_elt,
+	value_of_this):  Deal with struct symbol_in_block from lookup
+	functions.
+	* value.c (value_static_field, value_fn_field): Likewise.
+
 2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote-m32r-sdi.c (m32r_remove_watchpoint): Use enum type

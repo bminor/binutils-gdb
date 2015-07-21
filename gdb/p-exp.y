@@ -668,8 +668,8 @@ exp	:	THIS
 
 block	:	BLOCKNAME
 			{
-			  if ($1.sym != 0)
-			      $$ = SYMBOL_BLOCK_VALUE ($1.sym);
+			  if ($1.sym.symbol != 0)
+			      $$ = SYMBOL_BLOCK_VALUE ($1.sym.symbol);
 			  else
 			    {
 			      struct symtab *tem =
@@ -687,7 +687,8 @@ block	:	BLOCKNAME
 block	:	block COLONCOLON name
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_DOMAIN, NULL);
+					     VAR_DOMAIN, NULL).symbol;
+
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
@@ -695,23 +696,24 @@ block	:	block COLONCOLON name
 	;
 
 variable:	block COLONCOLON name
-			{ struct symbol *sym;
+			{ struct block_symbol sym;
+
 			  sym = lookup_symbol (copy_name ($3), $1,
 					       VAR_DOMAIN, NULL);
-			  if (sym == 0)
+			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
 
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			  /* block_found is set by lookup_symbol.  */
-			  write_exp_elt_block (pstate, block_found);
-			  write_exp_elt_sym (pstate, sym);
+			  write_exp_elt_block (pstate, sym.block);
+			  write_exp_elt_sym (pstate, sym.symbol);
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE); }
 	;
 
 qualified_name:	typebase COLONCOLON name
 			{
 			  struct type *type = $1;
+
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
 			      && TYPE_CODE (type) != TYPE_CODE_UNION)
 			    error (_("`%s' is not defined as an aggregate type."),
@@ -733,7 +735,7 @@ variable:	qualified_name
 
 			  sym =
 			    lookup_symbol (name, (const struct block *) NULL,
-					   VAR_DOMAIN, NULL);
+					   VAR_DOMAIN, NULL).symbol;
 			  if (sym)
 			    {
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
@@ -757,16 +759,16 @@ variable:	qualified_name
 	;
 
 variable:	name_not_typename
-			{ struct symbol *sym = $1.sym;
+			{ struct block_symbol sym = $1.sym;
 
-			  if (sym)
+			  if (sym.symbol)
 			    {
-			      if (symbol_read_needs_frame (sym))
+			      if (symbol_read_needs_frame (sym.symbol))
 				{
 				  if (innermost_block == 0
-				      || contained_in (block_found,
+				      || contained_in (sym.block,
 						       innermost_block))
-				    innermost_block = block_found;
+				    innermost_block = sym.block;
 				}
 
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
@@ -774,9 +776,9 @@ variable:	name_not_typename
 				 another more inner frame which happens to
 				 be in the same block.  */
 			      write_exp_elt_block (pstate, NULL);
-			      write_exp_elt_sym (pstate, sym);
+			      write_exp_elt_sym (pstate, sym.symbol);
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      current_type = sym->type; }
+			      current_type = sym.symbol->type; }
 			  else if ($1.is_a_field_of_this)
 			    {
 			      struct value * this_val;
@@ -785,9 +787,9 @@ variable:	name_not_typename
 			         not inadvertently convert from a method call
 				 to data ref.  */
 			      if (innermost_block == 0
-				  || contained_in (block_found,
+				  || contained_in (sym.block,
 						   innermost_block))
-				innermost_block = block_found;
+				innermost_block = sym.block;
 			      write_exp_elt_opcode (pstate, OP_THIS);
 			      write_exp_elt_opcode (pstate, OP_THIS);
 			      write_exp_elt_opcode (pstate, STRUCTOP_PTR);
@@ -1508,7 +1510,7 @@ yylex (void)
 	  static const char this_name[] = "this";
 
 	  if (lookup_symbol (this_name, expression_context_block,
-			     VAR_DOMAIN, NULL))
+			     VAR_DOMAIN, NULL).symbol)
 	    {
 	      free (uptokstart);
 	      return THIS;
@@ -1558,7 +1560,7 @@ yylex (void)
       sym = NULL;
     else
       sym = lookup_symbol (tmp, expression_context_block,
-			   VAR_DOMAIN, &is_a_field_of_this);
+			   VAR_DOMAIN, &is_a_field_of_this).symbol;
     /* second chance uppercased (as Free Pascal does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
@@ -1573,7 +1575,7 @@ yylex (void)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
-			      VAR_DOMAIN, &is_a_field_of_this);
+			      VAR_DOMAIN, &is_a_field_of_this).symbol;
       }
     /* Third chance Capitalized (as GPC does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
@@ -1595,7 +1597,7 @@ yylex (void)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
-			      VAR_DOMAIN, &is_a_field_of_this);
+			      VAR_DOMAIN, &is_a_field_of_this).symbol;
       }
 
     if (is_a_field || (is_a_field_of_this.type != NULL))
@@ -1605,7 +1607,8 @@ yylex (void)
 	tempbuf [namelen] = 0;
 	yylval.sval.ptr = tempbuf;
 	yylval.sval.length = namelen;
-	yylval.ssym.sym = NULL;
+	yylval.ssym.sym.symbol = NULL;
+	yylval.ssym.sym.block = NULL;
 	free (uptokstart);
         yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	if (is_a_field)
@@ -1619,7 +1622,8 @@ yylex (void)
     if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
         || lookup_symtab (tmp))
       {
-	yylval.ssym.sym = sym;
+	yylval.ssym.sym.symbol = sym;
+	yylval.ssym.sym.block = NULL;
 	yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	free (uptokstart);
 	return BLOCKNAME;
@@ -1686,7 +1690,7 @@ yylex (void)
 		      memcpy (tmp1, namestart, p - namestart);
 		      tmp1[p - namestart] = '\0';
 		      cur_sym = lookup_symbol (ncopy, expression_context_block,
-					       VAR_DOMAIN, NULL);
+					       VAR_DOMAIN, NULL).symbol;
 		      if (cur_sym)
 			{
 			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
@@ -1734,7 +1738,8 @@ yylex (void)
 	hextype = parse_number (pstate, tokstart, namelen, 0, &newlval);
 	if (hextype == INT)
 	  {
-	    yylval.ssym.sym = sym;
+	    yylval.ssym.sym.symbol = sym;
+	    yylval.ssym.sym.block = NULL;
 	    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	    free (uptokstart);
 	    return NAME_OR_INT;
@@ -1743,7 +1748,8 @@ yylex (void)
 
     free(uptokstart);
     /* Any other kind of symbol.  */
-    yylval.ssym.sym = sym;
+    yylval.ssym.sym.symbol = sym;
+    yylval.ssym.sym.block = NULL;
     return NAME;
   }
 }

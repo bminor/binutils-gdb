@@ -676,7 +676,7 @@ compile_object_load (const char *object_file, const char *source_file,
 
   func_sym = lookup_global_symbol_from_objfile (objfile,
 						GCC_FE_WRAPPER_FUNCTION,
-						VAR_DOMAIN);
+						VAR_DOMAIN).symbol;
   if (func_sym == NULL)
     error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));

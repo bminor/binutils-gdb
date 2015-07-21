@@ -540,7 +540,7 @@ frapy_read_var (PyObject *self, PyObject *args)
 
 	  if (!block)
 	    block = get_frame_block (frame, NULL);
-	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
+	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL).symbol;
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
