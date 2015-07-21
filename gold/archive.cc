@@ -138,11 +138,15 @@ Library_base::should_include_member(Symbol_table* symtab, Layout* layout,
       return Library_base::SHOULD_INCLUDE_YES;
     }
 
-  if (strcmp(sym_name, parameters->entry()) == 0)
+  if (!parameters->options().relocatable())
     {
-      *why = "entry symbol ";
-      *why += sym_name;
-      return Library_base::SHOULD_INCLUDE_YES;
+      const char* entry_sym = parameters->entry();
+      if (entry_sym != NULL && strcmp(sym_name, entry_sym) == 0)
+	{
+	  *why = "entry symbol ";
+	  *why += sym_name;
+	  return Library_base::SHOULD_INCLUDE_YES;
+	}
     }
 
   return Library_base::SHOULD_INCLUDE_UNKNOWN;
