@@ -1,5 +1,13 @@
 2015-07-21  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/18548
+	* symtab.cc (Symbol_table::do_define_in_output_data): Check for
+	forced local symbol even when oldsym != NULL.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+
+2015-07-21  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/18698
 	* archive.cc (Library_base::should_include_member): Don't use entry
 	point for relocatable links, or if target is not yet valid.
