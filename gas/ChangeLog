@@ -1,3 +1,12 @@
+2015-07-22  Alan Modra  <amodra@gmail.com>
+
+	PR gas/18687
+	* input-scrub.c (input_scrub_next_buffer): Rearrange and simplify
+	loop.  Don't drop lines at end of file lacking a newline, add a
+	newline instead.  Ensure partial_size is zero whenever
+	partial_where is NULL.  Adjust buffer size for extra char.
+	(input_scrub_push, input_scrub_begin): Adjust buffer size here too.
+
 2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* NEWS: Mention corrected spelling of armv6kz.
