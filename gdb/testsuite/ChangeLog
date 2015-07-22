@@ -1,3 +1,9 @@
+2015-07-30  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18600
+	* gdb.threads/fork-plus-threads.exp: Test that "info inferiors"
+	only shows inferior 1.
+
 2015-07-30  Simon Marchi  <simon.marchi@ericsson.com>
 	    Pedro Alves  <palves@redhat.com>
 
