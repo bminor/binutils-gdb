@@ -102,6 +102,35 @@ int globalshadow = 10;
 static int staticshadow = 20;
 int externed = 7;
 
+class Base
+{
+  virtual int pure_virt () = 0;
+ public:
+  int return_value () {return a;}
+ private:
+  int a = 1;
+  int b = 2;
+};
+
+class Base2
+{
+  virtual int non_pure () {return 84;}
+ public:
+  int return_value () {return b;}
+ private:
+  int a = 3;
+  int b = 4;
+};
+
+class Multiple : public Base, public Base2
+{
+  int pure_virt ()
+  {
+    int a = Base::return_value ();
+    return a + 42;
+  }
+};
+
 class Foo
 {
   int var;
@@ -143,11 +172,12 @@ main (void)
   int externed = 9;
   int f = 0;
   Foo foovar;
+  Multiple *multivar = new Multiple;
   static int static_local = 77000;
 
   foovar.public_var = 42;
   foovar.set_private_var (42);
-
+  multivar->Base2::return_value();
   {
     int another_local = 7;
     int shadowed = 52;

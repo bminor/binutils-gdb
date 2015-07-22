@@ -198,6 +198,14 @@ gdb_test "print foovar.private_var" "85" \
 gdb_test "compile code class Baz: public Foo {public: int z = 12;}; Baz bazvar; bazvar.z = 12; printf(\"%d\\n\", bazvar.z);" \
     "12" "Test simple inheritance"
 
+## Multiple inheritance
+gdb_test "compile code class MI: public Base, public Base2 {int pure_virt () {return 42;}}; MI MIVar; printf(\"%d\\n\", MIVar.pure_virt());" \
+    "42" "Test basic multiple inheritance"
+gdb_test "compile code class MI: public Base, public Base2 {int pure_virt () {return Base::return_value() + 42;}}; MI MIVar; printf(\"%d\\n\", MIVar.pure_virt());" \
+    "43" "Test basic multiple inheritance with Base class access"
+gdb_test "compile code class Base3 {public: int z = 99;}; class MI:public Base, public Base3 {int pure_virt () {return Base3::z + 42;}}; MI MIVar; printf(\"%d\\n\", MIVar.pure_virt());" \
+    "141" "Test basic multiple inheritance with Base class access, one base class local"
+
 gdb_test "p localvar" " = 50" "expect localvar 50"
 
 gdb_test_no_output "compile code localvar = 12;" "set localvar"
