@@ -1,3 +1,10 @@
+2015-07-23  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/var_arr_typedef.exp: New testcase.
+	* gdb.ada/var_arr_typedef/pack.adb: New file.
+	* gdb.ada/var_arr_typedef/pack.ads: New file.
+	* gdb.ada/var_arr_typedef/var_arr_typedef.adb: New file.
+
 2015-07-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/info_exc.exp: Adjust "info exceptions" expected output.

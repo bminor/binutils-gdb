@@ -1,3 +1,9 @@
+2015-07-23  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdbtypes.c (resolve_dynamic_array): Pass the peeled element
+	type to the recursive call instead of the original (maybe
+	TYPE_CODE_TYPEDEF) type.
+
 2015-07-23  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): If
