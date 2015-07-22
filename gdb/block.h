@@ -82,21 +82,10 @@ struct block
 
   struct dictionary *dict;
 
-  /* Used for language-specific info.  */
+  /* Contains information about namespace-related info relevant to this block:
+     using directives and the current namespace scope.  */
 
-  union
-  {
-    struct
-    {
-      /* Contains information about namespace-related info relevant to
-	 this block: using directives and the current namespace
-	 scope.  */
-      
-      struct block_namespace_info *the_namespace;
-    }
-    cplus_specific;
-  }
-  language_specific;
+  struct block_namespace_info *namespace_info;
 };
 
 /* The global block is singled out so that we can provide a back-link
@@ -118,7 +107,7 @@ struct global_block
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_DICT(bl)		(bl)->dict
-#define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.the_namespace
+#define BLOCK_NAMESPACE(bl)	(bl)->namespace_info
 
 struct blockvector
 {

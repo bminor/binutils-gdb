@@ -31,6 +31,7 @@
 #include "frame.h"
 #include "buildsym.h"
 #include "language.h"
+#include "namespace.h"
 
 static struct block_symbol
   cp_lookup_nested_symbol_1 (struct type *container_type,
@@ -91,8 +92,9 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
 		 anonymous namespace.  So add symbols in it to the
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
-	      cp_add_using_directive (dest, src, NULL, NULL, NULL, 1,
-	                              &objfile->objfile_obstack);
+	      add_using_directive (&local_using_directives,
+				   dest, src, NULL, NULL, NULL, 1,
+				   &objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
 	  previous_component = next_component + 2;
@@ -101,102 +103,6 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
 						       + previous_component));
 	}
     }
-}
-
-/* Add a using directive to using_directives.  If the using directive
-   in question has already been added, don't add it twice.
-
-   Create a new struct using_direct which imports the namespace SRC
-   into the scope DEST.  ALIAS is the name of the imported namespace
-   in the current scope.  If ALIAS is NULL then the namespace is known
-   by its original name.  DECLARATION is the name if the imported
-   varable if this is a declaration import (Eg. using A::x), otherwise
-   it is NULL.  EXCLUDES is a list of names not to import from an
-   imported module or NULL.  If COPY_NAMES is non-zero, then the
-   arguments are copied into newly allocated memory so they can be
-   temporaries.  For EXCLUDES the VEC pointers are copied but the
-   pointed to characters are not copied.  */
-
-void
-cp_add_using_directive (const char *dest,
-			const char *src,
-			const char *alias,
-			const char *declaration,
-			VEC (const_char_ptr) *excludes,
-			int copy_names,
-                        struct obstack *obstack)
-{
-  struct using_direct *current;
-  struct using_direct *newobj;
-
-  /* Has it already been added?  */
-
-  for (current = using_directives; current != NULL; current = current->next)
-    {
-      int ix;
-      const char *param;
-
-      if (strcmp (current->import_src, src) != 0)
-	continue;
-      if (strcmp (current->import_dest, dest) != 0)
-	continue;
-      if ((alias == NULL && current->alias != NULL)
-	  || (alias != NULL && current->alias == NULL)
-	  || (alias != NULL && current->alias != NULL
-	      && strcmp (alias, current->alias) != 0))
-	continue;
-      if ((declaration == NULL && current->declaration != NULL)
-	  || (declaration != NULL && current->declaration == NULL)
-	  || (declaration != NULL && current->declaration != NULL
-	      && strcmp (declaration, current->declaration) != 0))
-	continue;
-
-      /* Compare the contents of EXCLUDES.  */
-      for (ix = 0; VEC_iterate (const_char_ptr, excludes, ix, param); ix++)
-	if (current->excludes[ix] == NULL
-	    || strcmp (param, current->excludes[ix]) != 0)
-	  break;
-      if (ix < VEC_length (const_char_ptr, excludes)
-	  || current->excludes[ix] != NULL)
-	continue;
-
-      /* Parameters exactly match CURRENT.  */
-      return;
-    }
-
-  newobj = obstack_alloc (obstack, (sizeof (*newobj)
-				 + (VEC_length (const_char_ptr, excludes)
-				    * sizeof (*newobj->excludes))));
-  memset (newobj, 0, sizeof (*newobj));
-
-  if (copy_names)
-    {
-      newobj->import_src = obstack_copy0 (obstack, src, strlen (src));
-      newobj->import_dest = obstack_copy0 (obstack, dest, strlen (dest));
-    }
-  else
-    {
-      newobj->import_src = src;
-      newobj->import_dest = dest;
-    }
-
-  if (alias != NULL && copy_names)
-    newobj->alias = obstack_copy0 (obstack, alias, strlen (alias));
-  else
-    newobj->alias = alias;
-
-  if (declaration != NULL && copy_names)
-    newobj->declaration = obstack_copy0 (obstack,
-				      declaration, strlen (declaration));
-  else
-    newobj->declaration = declaration;
-
-  memcpy (newobj->excludes, VEC_address (const_char_ptr, excludes),
-	  VEC_length (const_char_ptr, excludes) * sizeof (*newobj->excludes));
-  newobj->excludes[VEC_length (const_char_ptr, excludes)] = NULL;
-
-  newobj->next = using_directives;
-  using_directives = newobj;
 }
 
 /* Test whether or not NAMESPACE looks like it mentions an anonymous

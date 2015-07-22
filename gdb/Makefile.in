@@ -862,6 +862,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c memory-map.c \
 	memrange.c mi/mi-common.c \
+	namespace.c \
 	objc-lang.c \
 	objfiles.c osabi.c observer.c osdata.c \
 	opencl-lang.c \
@@ -1025,7 +1026,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	charset.o continuations.o corelow.o disasm.o dummy-frame.o dfp.o \
 	source.o value.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	block.o symtab.o psymtab.o symfile.o symfile-debug.o symmisc.o \
-	linespec.o dictionary.o \
+	linespec.o dictionary.o namespace.o \
 	location.o infcall.o \
 	infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \

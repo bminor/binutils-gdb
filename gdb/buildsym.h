@@ -118,7 +118,11 @@ EXTERN struct pending *local_symbols;
 
 /* "using" directives local to lexical context.  */
 
-EXTERN struct using_direct *using_directives;
+EXTERN struct using_direct *local_using_directives;
+
+/* global "using" directives.  */
+
+EXTERN struct using_direct *global_using_directives;
 
 /* Stack representing unclosed lexical contexts (that will become
    blocks, eventually).  */
@@ -131,7 +135,7 @@ struct context_stack
 
     /* Pending using directives at the time we entered.  */
 
-    struct using_direct *using_directives;
+    struct using_direct *local_using_directives;
 
     /* Pointer into blocklist as of entry */
 
