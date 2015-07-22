@@ -1706,7 +1706,8 @@ relro_test_OBJECTS = $(am_relro_test_OBJECTS)
 relro_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(relro_test_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_1_OBJECTS =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1.$(OBJEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1a.$(OBJEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1b.$(OBJEXT)
 script_test_1_OBJECTS = $(am_script_test_1_OBJECTS)
 script_test_1_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(script_test_1_LDFLAGS) $(LDFLAGS) -o $@
@@ -2838,7 +2839,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_DEPENDENCIES = gcctestdir/ld relro_script_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_LDADD = relro_script_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1a.cc script_test_1b.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-T,$(srcdir)/script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDADD = 
@@ -3986,10 +3987,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relro_test_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_12.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_12i.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1a.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1b.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2b.Po@am__quote@
@@ -5828,9 +5830,11 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lW script_test_9 > script_test_9.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11: gcctestdir/ld script_test_11_r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ script_test_11_r.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11.o: script_test_11.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11a.o: script_test_11a.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11b.o: script_test_11b.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12: gcctestdir/ld $(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o

@@ -1,5 +1,29 @@
 2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/18663
+	* testsuite/Makefile.am (script_test_1_SOURCES): Set to
+	script_test_1a.cc script_test_1b.cc.
+	(script_test_11_r.o): Replace script_test_11.o with
+	script_test_11a.o script_test_11b.o.
+	(script_test_11.o): Removed.
+	(script_test_11a.o): New.
+	(script_test_11b.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/script_test_1.h: New file.
+	* testsuite/script_test_1b.cc: Likewise.
+	* testsuite/script_test_11.h: Likewise.
+	* testsuite/script_test_11b.c: Likewise.
+	* testsuite/script_test_1.cc: Renamed to ...
+	* testsuite/script_test_1a.cc: This.
+	Include "script_test_1.h".
+	(main): Call check_int and check_ptr.
+	* testsuite/script_test_11.c: Renamed to ...
+	* testsuite/script_test_11a.c: This.
+	Include "script_test_11.h".
+	(main): Call ptr_equal.
+
+2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/18628
 	* testsuite/ifuncdep2.c (global): Change protected to hidden.
 	* testsuite/ifuncmod1.c (global): Likewise.
