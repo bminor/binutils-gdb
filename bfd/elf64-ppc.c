@@ -6034,14 +6034,13 @@ opd_entry_value (asection *opd_sec,
 		  if (rh != NULL)
 		    {
 		      rh = elf_follow_link (rh);
-		      BFD_ASSERT (rh->root.type == bfd_link_hash_defined
-				  || rh->root.type == bfd_link_hash_defweak);
-		      val = rh->root.u.def.value;
-		      sec = rh->root.u.def.section;
-		      if (sec->owner != opd_bfd)
+		      if (rh->root.type != bfd_link_hash_defined
+			  && rh->root.type != bfd_link_hash_defweak)
+			break;
+		      if (rh->root.u.def.section->owner == opd_bfd)
 			{
-			  sec = NULL;
-			  val = (bfd_vma) -1;
+			  val = rh->root.u.def.value;
+			  sec = rh->root.u.def.section;
 			}
 		    }
 		}
