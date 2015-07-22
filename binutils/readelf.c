@@ -1608,12 +1608,9 @@ dump_relocations (FILE * file,
 
 	      if (is_rela)
 		{
-		  bfd_signed_vma off = rels[i].r_addend;
+		  bfd_vma off = rels[i].r_addend;
 
-		  /* PR 17531: file: 2e63226f.  */
-		  if (off == ((bfd_signed_vma) 1) << ((sizeof (bfd_signed_vma) * 8) - 1))
-		    printf (" + %" BFD_VMA_FMT "x", off);
-		  else if (off < 0)
+		  if ((bfd_signed_vma) off < 0)
 		    printf (" - %" BFD_VMA_FMT "x", - off);
 		  else
 		    printf (" + %" BFD_VMA_FMT "x", off);
@@ -1622,13 +1619,10 @@ dump_relocations (FILE * file,
 	}
       else if (is_rela)
 	{
-	  bfd_signed_vma off = rels[i].r_addend;
+	  bfd_vma off = rels[i].r_addend;
 
 	  printf ("%*c", is_32bit_elf ? 12 : 20, ' ');
-	  /* PR 17531: file: 2e63226f.  */
-	  if (off == ((bfd_signed_vma) 1) << ((sizeof (bfd_signed_vma) * 8) - 1))
-	    printf ("%" BFD_VMA_FMT "x", off);
-	  else if (off < 0)
+	  if ((bfd_signed_vma) off < 0)
 	    printf ("-%" BFD_VMA_FMT "x", - off);
 	  else
 	    printf ("%" BFD_VMA_FMT "x", off);
