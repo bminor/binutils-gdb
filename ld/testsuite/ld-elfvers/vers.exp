@@ -105,6 +105,17 @@ case $target_triplet in {
     default { set as_options "" }
 }
 
+global test_gold
+if { [info exists test_gold] && $test_gold == yes } then {
+    if { ![info exists gold] } then {
+	unsupported "gold symbol version tests"
+	return
+    }
+    set linker "$gold"
+} else {
+    set linker "$ld"
+}
+
 proc test_ar { test lib object expect } {
     global ar
     global nm
@@ -502,7 +513,7 @@ proc objdump_versionstuff { objdump object expectfile } {
 }
 
 proc build_binary { shared pic test source libname other mapfile verexp versymexp symexp ldargs } {
-    global ld
+    global linker
     global srcdir
     global subdir
     global exec_output
@@ -538,7 +549,7 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
 	set script_arg "$script $srcdir/$subdir/$mapfile"
     }
 
-    if {![ld_simple_link $ld $tmpdir/$libname.so "$shared $tmpdir/$libname.o $other_lib $script_arg $ldargs"]}     {
+    if {![ld_simple_link $linker $tmpdir/$libname.so "$shared $tmpdir/$libname.o $other_lib $script_arg $ldargs"]}     {
 	fail "$test"
 	return
     }
