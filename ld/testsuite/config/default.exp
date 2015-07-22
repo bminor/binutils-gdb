@@ -278,3 +278,11 @@ if ![info exists LD] then {
 if ![info exists LDFLAGS] then {
     set LDFLAGS {}
 }
+
+if { ![info exists gold] \
+     && [file exists ../gold/ld-new] \
+     && [file exists ../gold/testsuite/gcctestdir/ld] } then {
+    set gold [findfile $base_dir/../gold/ld-new $base_dir/../gold/ld-new [transform gold]]
+    set GOLD "$gold"
+    set gcc_B_opt_gold "-B[pwd]/../gold/testsuite/gcctestdir/ld/ $gcc_B_opt"
+}

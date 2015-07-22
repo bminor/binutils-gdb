@@ -81,6 +81,18 @@ proc run_host_cmd { prog command } {
     global link_output
     global gcc_B_opt
     global ld_L_opt
+    global gcc_B_opt_gold
+    global test_gold
+
+    if { [info exists test_gold] && $test_gold == yes } then {
+	if { ![info exists gcc_B_opt_gold] } then {
+	   perror "gold does not exist"
+	   return 0
+	}
+	set B_opt "$gcc_B_opt_gold"
+    } else {
+	set B_opt "$gcc_B_opt"
+    }
 
     if { ![is_remote host] && [which "$prog"] == 0 } then {
 	perror "$prog does not exist"
@@ -101,7 +113,7 @@ proc run_host_cmd { prog command } {
     }
     set gccexe [string replace $gccexe 0 [string last "/" $gccexe] ""]
     if {[string match "*cc*" $gccexe] || [string match "*++*" $gccexe]} then {
-	set gccflags "$gcc_B_opt $gccflags $ld_L_opt"
+	set gccflags "$B_opt $gccflags $ld_L_opt"
     }
 
     verbose -log "$prog $gccflags $command"
@@ -254,6 +266,18 @@ proc default_ld_compile { cc source object } {
     global subdir
     global host_triplet
     global gcc_B_opt
+    global gcc_B_opt_gold
+    global test_gold
+
+    if { [info exists test_gold] && $test_gold == yes } then {
+	if { ![info exists gcc_B_opt_gold] } then {
+	   perror "gold does not exist"
+	   return 0
+	}
+	set B_opt "$gcc_B_opt_gold"
+    } else {
+	set B_opt "$gcc_B_opt"
+    }
 
     set cc_prog $cc
     if {[llength $cc_prog] > 1} then {
@@ -267,7 +291,7 @@ proc default_ld_compile { cc source object } {
     remote_file build delete "$object"
     remote_file host delete "$object"
 
-    set flags "$gcc_B_opt -I$srcdir/$subdir"
+    set flags "$B_opt -I$srcdir/$subdir"
 
     # If we are compiling with gcc, we want to add gcc_B_opt to flags.
     # However, if $prog already has -B options, which might be the
@@ -576,6 +600,17 @@ proc run_dump_test { name {extra_options {}} } {
     global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS READELFFLAGS LDFLAGS
     global host_triplet runtests
     global env verbose
+    global GOLD test_gold
+
+    if { [info exists test_gold] && $test_gold == yes } then {
+	if { ![info exists GOLD] } then {
+	   perror "gold does not exist"
+	   return 0
+	}
+	set linker "$GOLD"
+    } else {
+	set linker "$LD"
+    }
 
     if [string match "*/*" $name] {
 	set file $name
@@ -860,7 +895,7 @@ proc run_dump_test { name {extra_options {}} } {
 
 	# Add -L$srcdir/$subdir so that the linker command can use
 	# linker scripts in the source directory.
-	set cmd "$LD $LDFLAGS -L$srcdir/$subdir \
+	set cmd "$linker $LDFLAGS -L$srcdir/$subdir \
 		   $opts(ld) -o $objfile $objfiles $opts(ld_after_inputfiles)"
 
         # If needed then check for, or add a -Map option.
