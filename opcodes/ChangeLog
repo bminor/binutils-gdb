@@ -1,3 +1,12 @@
+2015-07-22  Alexander Fomin  <alexander.fomin@intel.com>
+
+	PR binutils/18631
+	* i386-dis-evex.h (EVEX_W_0F78_P_2): Replace "EXxmmq" with
+	"EXEvexHalfBcstXmmq" for the second operand.
+	(EVEX_W_0F79_P_2): Likewise.
+	(EVEX_W_0F7A_P_2): Likewise.
+	(EVEX_W_0F7B_P_2): Likewise.
+
 2015-07-16  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
 
 	* arm-dis.c (print_insn_coprocessor): Added support for quarter

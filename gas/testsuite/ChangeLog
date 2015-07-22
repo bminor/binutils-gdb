@@ -1,3 +1,22 @@
+2015-07-22  Alexander Fomin  <alexander.fomin@intel.com>
+
+	PR binutils/18631
+	* gas/i386avx512dq-intel.d: Replace "QWORD" with "DWORD" in
+	vcvtt?ps2u?qq instructions disassembly regexes.
+	Add disassembly regex for new test.
+	* gas/i386/avx512dq.d: Likewise.
+	* gas/i386/avx512dq_vl-intel.d: Likewise.
+	* gas/i386/avx512dq_vl.d: Likewise.
+	* gas/i386/x86-64-avx512dq-intel.d: Likewise.
+	* gas/i386/x86-64-avx512dq.d: Likewise.
+	* gas/i386/x86-64-avx512dq_vl-intel.d: Likewise.
+	* gas/i386/x86-64-avx512dq_vl.d: Likewise.
+	* gas/i386/avx512dq.s: Add new test for Intel syntax with memory
+	operand and broadcasting enabled.
+	* gas/i386/avx512dq_vl.s: Likewise.
+	* gas/i386/x86-64-avx512dq.s: Likewise.
+	* gas/i386/x86-64-avx512dq_vl.s: Likewise.
+
 2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/arm/attr-march-armv6kz.d: New.
