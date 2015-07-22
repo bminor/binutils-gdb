@@ -1,3 +1,10 @@
+2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18628
+	* testsuite/ifuncdep2.c (global): Change protected to hidden.
+	* testsuite/ifuncmod1.c (global): Likewise.
+	* testsuite/ifuncmod5.c (global): Likewise.
+
 2015-07-22  Alan Modra  <amodra@gmail.com>
 
 	* aarch64.cc (try_fix_erratum_843419_optimized): Warning fix.
