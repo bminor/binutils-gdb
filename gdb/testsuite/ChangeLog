@@ -1,3 +1,7 @@
+2015-07-27  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (REMOTE_EXAMPLES): Remove it.
+
 2015-07-25  Doug Evans  <xdje42@gmail.com>
 
 	Revert:
