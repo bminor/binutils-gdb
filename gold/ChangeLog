@@ -1,3 +1,10 @@
+2015-07-23  Ian Coolidge  <icoolidge@google.com>
+	Plumb --pic-veneer option for gold.
+
+	* arm.cc (Reloc_stub::stub_type_for_reloc): Plumb to stub
+	generation.
+	* options.h (General_options): Add --pic-veneer option.
+
 2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/18663

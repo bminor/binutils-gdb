@@ -982,6 +982,10 @@ class General_options
 		    N_("Do not create a position independent executable"),
 		    false);
 
+  DEFINE_bool(pic_veneer, options::TWO_DASHES, '\0', false,
+	      N_("Force PIC sequences for ARM/Thumb interworking veneers"),
+	      NULL);
+
   DEFINE_bool(pipeline_knowledge, options::ONE_DASH, '\0', false,
 	      NULL, N_("(ARM only) Ignore for backward compatibility"));
 
