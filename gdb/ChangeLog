@@ -1,3 +1,9 @@
+2015-07-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): If
+	TYPE is watchpoint, return zero if aarch64_num_wp_regs is zero.
+	If TYPE is breakpoint, return zero if arch64_num_bp_regs is zero.
+
 2015-07-21  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_get_debug_reg_capacity):

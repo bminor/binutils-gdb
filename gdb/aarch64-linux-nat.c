@@ -707,19 +707,32 @@ aarch64_linux_read_description (struct target_ops *ops)
    bp_read_watchpoint, bp_write_watchpoint, or bp_hardware_breakpoint.
    CNT is the number of such watchpoints used so far (including this
    one).  OTHERTYPE is non-zero if other types of watchpoints are
-   currently enabled.
-
-   We always return 1 here because we don't have enough information
-   about possible overlap of addresses that they want to watch.  As an
-   extreme example, consider the case where all the watchpoints watch
-   the same address and the same region length: then we can handle a
-   virtually unlimited number of watchpoints, due to debug register
-   sharing implemented via reference counts.  */
+   currently enabled.  */
 
 static int
 aarch64_linux_can_use_hw_breakpoint (struct target_ops *self,
 				     int type, int cnt, int othertype)
 {
+  if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
+      || type == bp_access_watchpoint || type == bp_watchpoint)
+    {
+      if (aarch64_num_wp_regs == 0)
+	return 0;
+    }
+  else if (type == bp_hardware_breakpoint)
+    {
+      if (aarch64_num_bp_regs == 0)
+	return 0;
+    }
+  else
+    gdb_assert_not_reached ("unexpected breakpoint type");
+
+  /* We always return 1 here because we don't have enough information
+     about possible overlap of addresses that they want to watch.  As an
+     extreme example, consider the case where all the watchpoints watch
+     the same address and the same region length: then we can handle a
+     virtually unlimited number of watchpoints, due to debug register
+     sharing implemented via reference counts.  */
   return 1;
 }
 
