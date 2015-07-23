@@ -227,8 +227,8 @@ ltpy_has_line (PyObject *self, PyObject *args)
   Py_RETURN_FALSE;
 }
 
-/* Implementation of gdb.LineTable.source_lines (self) -> FrozenSet.
-   Returns a Python FrozenSet that contains source line entries in the
+/* Implementation of gdb.LineTable.source_lines (self) -> List.
+   Returns a Python List that contains source line entries in the
    line table.  This function will just return the source lines
    without corresponding addresses.  */
 
@@ -488,8 +488,8 @@ Return executable locations for a given source line." },
     "has_line (lineno) -> Boolean\n\
 Return TRUE if this line has executable information, FALSE if not." },
   { "source_lines", ltpy_get_all_source_lines, METH_NOARGS,
-    "source_lines () -> FrozenSet\n\
-Return a frozen set of all executable source lines." },
+    "source_lines () -> List\n\
+Return a list of all executable source lines." },
   { "is_valid", ltpy_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return True if this Linetable is valid, False if not." },

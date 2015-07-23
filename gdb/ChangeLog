@@ -1,3 +1,11 @@
+2015-07-23  Ciro Santilli  <ciro.santilli@gmail.com>  (tiny patch)
+
+	* py-linetable.c (ltpy_get_all_source_lines): Adjust function
+	documentation to say that it returns a list rather than
+	a FrozenSet.
+	(linetable_object_methods): Update the docstring of the
+	"source_line" entry.
+
 2015-07-23  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdbtypes.c (resolve_dynamic_array): Pass the peeled element
