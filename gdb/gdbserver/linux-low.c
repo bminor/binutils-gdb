@@ -3664,6 +3664,7 @@ static void
 move_out_of_jump_pad_callback (struct inferior_list_entry *entry)
 {
   struct thread_info *thread = (struct thread_info *) entry;
+  struct thread_info *saved_thread;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int *wstat;
 
@@ -3674,6 +3675,10 @@ move_out_of_jump_pad_callback (struct inferior_list_entry *entry)
 		      lwpid_of (thread), lwp->suspended);
     }
   gdb_assert (lwp->stopped);
+
+  /* For gdb_breakpoint_here.  */
+  saved_thread = current_thread;
+  current_thread = thread;
 
   wstat = lwp->status_pending_p ? &lwp->status_pending : NULL;
 
@@ -3702,6 +3707,8 @@ move_out_of_jump_pad_callback (struct inferior_list_entry *entry)
     }
   else
     lwp_suspended_inc (lwp);
+
+  current_thread = saved_thread;
 }
 
 static int
