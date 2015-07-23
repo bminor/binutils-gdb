@@ -15387,11 +15387,11 @@ get64 (void)
   a = *codep++ & 0xff;
   a |= (*codep++ & 0xff) << 8;
   a |= (*codep++ & 0xff) << 16;
-  a |= (*codep++ & 0xff) << 24;
+  a |= (*codep++ & 0xffu) << 24;
   b = *codep++ & 0xff;
   b |= (*codep++ & 0xff) << 8;
   b |= (*codep++ & 0xff) << 16;
-  b |= (*codep++ & 0xff) << 24;
+  b |= (*codep++ & 0xffu) << 24;
   x = a + ((bfd_vma) b << 32);
 #else
   abort ();

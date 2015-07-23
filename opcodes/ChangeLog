@@ -1,3 +1,8 @@
+2015-07-23  Alan Modra  <amodra@gmail.com>
+
+	PR 18708
+	* i386-dis.c (get64): Avoid signed integer overflow.
+
 2015-07-22  Alexander Fomin  <alexander.fomin@intel.com>
 
 	PR binutils/18631
@@ -82,7 +87,7 @@
 
 2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
 
-        * ppc-dis.h (skip_optional_operands): Use ppc_optional_operand_value.
+	* ppc-dis.h (skip_optional_operands): Use ppc_optional_operand_value.
 	* ppc-opc.c (FXM4): Add non-zero optional value.
 	(TBR): Likewise.
 	(SXL): Likewise.
