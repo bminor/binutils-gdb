@@ -60,9 +60,11 @@ GCC_METHOD0 (gcc_decl, get_current_binding_level)
    Note that, since access controls are disabled, we have no means to
    express private, protected and public.
 
+   We have no means to introduce friend declarations, but since we
+   disable access control, they make no difference whatsoever.
+
    FIXME: we would benefit from a gcc_decl argument, to be able to
-   introduce friend declarations (what for?  we disable access
-   control), using declarations, using directives and namespace
+   introduce using declarations, using directives and namespace
    aliases.
 
    FIXME: How about override and final virtual functions; =delete and
@@ -85,7 +87,21 @@ GCC_METHOD7 (gcc_decl, new_decl,
 GCC_METHOD1 (gcc_type, build_pointer_type,
 	     gcc_type)			/* Argument BASE_TYPE.  */
 
-// FIXME: we need reference types and pointer-to-member types.
+/* Return the type of a reference to a given base type.  */
+
+GCC_METHOD2 (gcc_type, build_reference_type,
+	     gcc_type,			/* Argument BASE_TYPE.  */
+	     enum gcc_cp_ref_qualifiers)   /* Argument RQUALS.  */
+
+/* Create a new pointer-to-member type.  MEMBER_TYPE is the data
+   member type, while CLASS_TYPE is the class type containing the data
+   member.  For pointers to member functions, MEMBER_TYPE must be a
+   method type, and CLASS_TYPE must be specified even though it might
+   be possible to extract it from the method type.  */
+
+GCC_METHOD2 (gcc_type, build_pointer_to_member_type,
+	     gcc_type,			   /* Argument CLASS_TYPE.  */
+	     gcc_type) 			   /* Argument MEMBER_TYPE.  */
 
 /* Create a new 'class' (or 'struct') type, record it in the current
    binding level, and enter its own binding level.  Initially it has
@@ -167,21 +183,32 @@ GCC_METHOD1 (int /* bool */, finish_enum_type,
 /* Create a new function type.  RETURN_TYPE is the type returned by
    the function, and ARGUMENT_TYPES is a vector, of length NARGS, of
    the argument types.  IS_VARARGS is true if the function is
-   varargs.
-
-   FIXME: C++ allows such stuff as "typedef int f() const;" to create
-   a cv-qualified (member) function type not associated with any
-   specific class, which can then be used to declare member functions
-   and pointers to member functions.  Our API doesn't support this.  */
+   varargs.  */
 
 GCC_METHOD3 (gcc_type, build_function_type,
 	     gcc_type,			   /* Argument RETURN_TYPE.  */
 	     const struct gcc_type_array *,/* Argument ARGUMENT_TYPES.  */
 	     int /* bool */)		   /* Argument IS_VARARGS.  */
 
+/* Create a variant of a function type with an exception
+   specification.  FUNCTION_TYPE is a function or method type.
+   EXCEPT_TYPES is an array with the list of exception types.  Zero as
+   the array length implies throw() AKA noexcept(true); NULL as the
+   pointer to gcc_type_array implies noexcept(false), which is almost
+   equivalent (but distinguishable by the compiler) to an unspecified
+   exception list.  */
+
+GCC_METHOD2 (gcc_type, build_exception_spec_variant,
+	     gcc_type,			   /* Argument FUNCTION_TYPE.  */
+	     const struct gcc_type_array *)/* Argument EXCEPT_TYPES.  */
+
 /* Create a new non-static member function type.  FUNC_TYPE is the
    method prototype, without the implicit THIS pointer, added as a
-   pointer to the QUALS-qualified CLASS_TYPE.  */
+   pointer to the QUALS-qualified CLASS_TYPE.  If CLASS_TYPE is NULL,
+   this creates a cv-qualified (member) function type not associated
+   with any specific class, as needed to support "typedef void f(int)
+   const;", which can later be used to declare member functions and
+   pointers to member functions.  */
 
 GCC_METHOD4 (gcc_type, build_method_type,
 	     gcc_type,			   /* Argument CLASS_TYPE.  */
@@ -189,7 +216,7 @@ GCC_METHOD4 (gcc_type, build_method_type,
 	     enum gcc_cp_qualifiers,	   /* Argument QUALS.  */
 	     enum gcc_cp_ref_qualifiers)   /* Argument RQUALS.  */
 
-// FIXME: add a type-variant builder to add exception type specifiers.
+// FIXME: add default expressions for function arguments?
 
 /* Return an integer type with the given properties.  */
 
