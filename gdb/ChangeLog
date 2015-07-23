@@ -1,3 +1,10 @@
+2015-07-23  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_per_cu_data): Add comment.
+	(load_cu): Handle dummy CUs.
+	(dw2_do_instantiate_symtab, process_queuef): Ditto.
+	(dwarf2_fetch_die_loc_sect_off, dwarf2_fetch_constant_bytes): Ditto.
+
 2015-07-23  Ciro Santilli  <ciro.santilli@gmail.com>  (tiny patch)
 
 	* py-linetable.c (ltpy_get_all_source_lines): Adjust function
