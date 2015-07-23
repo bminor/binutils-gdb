@@ -1,3 +1,9 @@
+2015-07-23  Joseph Myers  <joseph@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections)
+	<DT_MIPS_RLD_MAP_REL>: Add target address to host address
+	difference, not to host pointer.
+
 2015-07-22  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (opd_entry_value): Remove assertion.  Instead,
