@@ -876,15 +876,10 @@ handle_sigterm (int sig)
 {
   signal (sig, handle_sigterm);
 
-  /* Call quit_force in a signal safe way.
-     quit_force itself is not signal safe.  */
-  if (target_can_async_p ())
-    mark_async_signal_handler (async_sigterm_token);
-  else
-    {
-      sync_quit_force_run = 1;
-      set_quit_flag ();
-    }
+  sync_quit_force_run = 1;
+  set_quit_flag ();
+
+  mark_async_signal_handler (async_sigterm_token);
 }
 
 /* Do the quit.  All the checks have been done by the caller.  */
