@@ -98,6 +98,9 @@ AC_CHECK_FUNCS(getauxval pread pwrite pread64 setns)
 
 GDB_AC_COMMON
 
+# Check the return and argument types of ptrace.
+GDB_AC_PTRACE
+
 # Check for UST
 ustlibs=""
 ustinc=""

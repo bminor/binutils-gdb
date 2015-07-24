@@ -1,3 +1,9 @@
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* acinclude.m4: Include ptrace.m4.
+	* configure.ac: Call GDB_AC_PTRACE and move ptrace checks ...
+	* ptrace.m4: ... to this new file.
+
 2015-07-23  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_per_cu_data): Add comment.

@@ -1,3 +1,9 @@
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* acinclude.m4: Include ../ptrace.m4.
+	* configure.ac: Call GDB_AC_PTRACE.
+	* config.in, configure: Regenerate.
+
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-low.c (linux_create_inferior): Remove setting to
