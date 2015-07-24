@@ -1,5 +1,17 @@
 2015-07-24  Doug Evans  <dje@google.com>
 
+	* lib/perftest.exp (PerfTest::compile): Unconditionally call body.
+	(PerfTest::startup): New function.
+	(PerfTest::run): Return result of calling body.
+	(PerfTest::assemble): Rewrite.
+	* gdb.perf/backtrace.exp (PerfTest::assemble): Update function result.
+	* gdb.perf/disassemble.exp (PerfTest::assemble): Ditto.
+	* gdb.perf/single-step.exp (PerfTest::assemble): Ditto.
+	* gdb.perf/skip-prologue.exp (PerfTest::assemble): Ditto.
+	* gdb.perf/solib.exp (PerfTest::assemble): Ditto.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
 	* lib/gdb.exp (clean_restart): Make executable optional.
 
 2015-07-24  Doug Evans  <dje@google.com>
