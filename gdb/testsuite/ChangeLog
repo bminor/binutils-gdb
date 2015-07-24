@@ -1,5 +1,20 @@
 2015-07-24  Doug Evans  <dje@google.com>
 
+	* Makefile.in (check/%.exp): Pass directory for GDB_PARALLEL.
+	(workers/%.worker, build-perf): New rule.
+	(GDB_PERFTEST_MODE): New variable.
+	(check-perf): Use it.
+	(clean): Clean up gdb.perf parallel build subdirs.
+	* lib/build-piece.exp: New file.
+	* lib/cache.exp (gdb_do_cache): Include $GDB_PARALLEL in path name.
+	* lib/gdb.exp (standard_output_file): Include $GDB_PARALLEL in path
+	name.
+	(standard_temp_file): Ditto.
+	(GDB_PARALLEL handling): Make outputs,temp,cache directories as subdirs
+	of $GDB_PARALLEL.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
 	* lib/future.exp (gdb_default_target_compile): New option
 	"early_flags".
 	* lib/gdb.exp (gdb_compile): Undo debian's change in default of
