@@ -1,3 +1,10 @@
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* gdb.perf/lib/perftest/measure.py (MeasurementCpuTime::stop): Print
+	result.
+	(MeasurementWallTime::stop): Ditto.
+	(MeasurementVmSizeTime::stop): Ditto.
+
 2015-07-24  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/catch-syscall.exp: Call gdb_exit before

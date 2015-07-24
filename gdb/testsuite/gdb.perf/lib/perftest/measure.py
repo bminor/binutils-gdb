@@ -103,6 +103,8 @@ class MeasurementCpuTime(Measurement):
         else:
             cpu_time = time.clock() - self.start_time
         self.result.record (id, cpu_time)
+        # Log this result for debugging purposes.
+        print ("elapsed cpu time %s" % (cpu_time))
 
 class MeasurementWallTime(Measurement):
     """Measurement on Wall time."""
@@ -117,6 +119,8 @@ class MeasurementWallTime(Measurement):
     def stop(self, id):
         wall_time = time.time() - self.start_time
         self.result.record (id, wall_time)
+        # Log this result for debugging purposes.
+        print ("elapsed wall time %s" % (wall_time))
 
 class MeasurementVmSize(Measurement):
     """Measurement on memory usage represented by VmSize."""
@@ -144,3 +148,5 @@ class MeasurementVmSize(Measurement):
     def stop(self, id):
         memory_used = self._compute_process_memory_usage("VmSize:")
         self.result.record (id, memory_used)
+        # Log this result for debugging purposes.
+        print ("vm used %s" % (memory_used))
