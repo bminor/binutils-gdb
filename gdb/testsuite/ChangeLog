@@ -1,3 +1,9 @@
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18717
+	* gdb.threads/non-ldr-exit.c: New file.
+	* gdb.threads/non-ldr-exit.exp: New file.
+
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.server/ext-wrapper.exp: Test --wrapper option when

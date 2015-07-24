@@ -1,5 +1,11 @@
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18717
+	* linux-nat.c (linux_nat_filter_event): Don't assert that the lwp
+	is resumed, and extend the debug log.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
 	* fork-child.c (fork_inferior): Print argv[0] instead of exec_file.
 
 2015-07-24  Pedro Alves  <palves@redhat.com>
