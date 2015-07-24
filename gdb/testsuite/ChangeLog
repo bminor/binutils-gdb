@@ -1,5 +1,15 @@
 2015-07-24  Doug Evans  <dje@google.com>
 
+	* gdb.base/watchpoint.exp (test_complex_watchpoint): Remove
+	compiler_info references.
+	* gdb.cp/temargs.exp: Ditto.
+	* lib/gdb.exp: Unset compiler_info instead of setting to "unknown".
+	(get_compiler_info): Early exit if already computed.  Set compiler_info
+	to "unknown" if there was a problem.
+	(test_compiler_info): Add function comment.  Call get_compiler_info.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
 	* Makefile.in (check/%.exp): Pass directory for GDB_PARALLEL.
 	(workers/%.worker, build-perf): New rule.
 	(GDB_PERFTEST_MODE): New variable.

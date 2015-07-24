@@ -2788,12 +2788,20 @@ gdb_caching_proc target_is_gdbserver {
     return $is_gdbserver
 }
 
-set compiler_info		"unknown"
+# N.B. compiler_info is intended to be local to this file.
+# Call test_compiler_info with no arguments to fetch its value.
+# Yes, this is counterintuitive when there's get_compiler_info,
+# but that's the current API.
+if [info exists compiler_info] {
+    unset compiler_info
+}
+
 set gcc_compiled		0
 set hp_cc_compiler		0
 set hp_aCC_compiler		0
 
 # Figure out what compiler I am using.
+# The result is cached so only the first invocation runs the compiler.
 #
 # ARG can be empty or "C++".  If empty, "C" is assumed.
 #
@@ -2860,6 +2868,11 @@ proc get_compiler_info {{arg ""}} {
     global hp_cc_compiler
     global hp_aCC_compiler
 
+    if [info exists compiler_info] {
+	# Already computed.
+	return 0
+    }
+
     # Choose which file to preprocess.
     set ifile "${srcdir}/lib/compiler.c"
     if { $arg == "c++" } {
@@ -2901,8 +2914,14 @@ proc get_compiler_info {{arg ""}} {
 	}
     }
 
-    # Reset to unknown compiler if any diagnostics happened.
+    # Set to unknown if for some reason compiler_info didn't get defined.
+    if ![info exists compiler_info] {
+	verbose -log "get_compiler_info: compiler_info not provided"
+	set compiler_info "unknown"
+    }
+    # Also set to unknown compiler if any diagnostics happened.
     if { $unknown } {
+	verbose -log "get_compiler_info: got unexpected diagnostics"
 	set compiler_info "unknown"
     }
 
@@ -2936,18 +2955,18 @@ proc get_compiler_info {{arg ""}} {
     return 0
 }
 
+# Return the compiler_info string if no arg is provided.
+# Otherwise the argument is a glob-style expression to match against
+# compiler_info.
+
 proc test_compiler_info { {compiler ""} } {
     global compiler_info
+    get_compiler_info
 
-     # if no arg, return the compiler_info string
-
-     if [string match "" $compiler] {
-         if [info exists compiler_info] {
-             return $compiler_info
-         } else {
-             perror "No compiler info found."
-         }
-     }
+    # If no arg, return the compiler_info string.
+    if [string match "" $compiler] {
+	return $compiler_info
+    }
 
     return [string match $compiler $compiler_info]
 }
