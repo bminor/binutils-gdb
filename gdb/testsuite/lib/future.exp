@@ -135,14 +135,15 @@ proc gdb_default_target_compile {source destfile type options} {
 	error "Must supply an output filename for the compile to default_target_compile"
     }
 
+    set early_flags ""
     set add_flags ""
     set libs ""
     set compiler_type "c"
     set compiler ""
     set linker ""
     # linker_opts_order is one of "sources-then-flags", "flags-then-sources".
-    # The order shouldn't matter.  It's done this way to preserve
-    # existing behavior.
+    # The order matters for things like -Wl,--as-needed.  The default is to
+    # preserve existing behavior.
     set linker_opts_order "sources-then-flags"
     set ldflags ""
     set dest [target_info name]
@@ -239,6 +240,10 @@ proc gdb_default_target_compile {source destfile type options} {
 	if {[regexp "^compiler=" $i]} {
 	    regsub "^compiler=" $i "" tmp
 	    set compiler $tmp
+	}
+	if {[regexp "^early_flags=" $i]} {
+	    regsub "^early_flags=" $i "" tmp
+	    append early_flags " $tmp"
 	}
 	if {[regexp "^additional_flags=" $i]} {
 	    regsub "^additional_flags=" $i "" tmp
@@ -473,15 +478,15 @@ proc gdb_default_target_compile {source destfile type options} {
     # become confused about the name of the actual source file.
     switch $type {
 	"object" {
-	    set opts "$add_flags $sources"
+	    set opts "$early_flags $add_flags $sources"
 	}
 	"executable" {
 	    switch $linker_opts_order {
 		"flags-then-sources" {
-		    set opts "$add_flags $sources"
+		    set opts "$early_flags $add_flags $sources"
 		}
 		"sources-then-flags" {
-		    set opts "$sources $add_flags"
+		    set opts "$early_flags $sources $add_flags"
 		}
 		default {
 		    error "Invalid value for board_info linker_opts_order"
@@ -489,7 +494,7 @@ proc gdb_default_target_compile {source destfile type options} {
 	    }
 	}
 	default {
-	    set opts "$sources $add_flags"
+	    set opts "$early_flags $sources $add_flags"
 	}
     }
 

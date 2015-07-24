@@ -3026,6 +3026,13 @@ proc gdb_compile {source dest type options} {
 		      || [istarget *-*-cygwin*]) } {
 		    lappend new_options "additional_flags=-Wl,--enable-auto-import"
 		}
+		if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
+		    # Undo debian's change in the default.
+		    # Put it at the front to not override any user-provided
+		    # value, and to make sure it appears in front of all the
+		    # shlibs!
+		    lappend new_options "early_flags=-Wl,--no-as-needed"
+		}
             }
 	} elseif { $opt == "shlib_load" } {
 	    set shlib_load 1
