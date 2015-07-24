@@ -1,5 +1,13 @@
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_create_inferior): Remove setting to
+	proc->priv->new_inferior.
+	(linux_attach): Likewise.
+	(linux_low_filter_event): Likewise.
+	* linux-low.h (struct process_info_private) <new_inferior>: Remove.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (linux_arch_setup): New function.
 	(linux_low_filter_event): If proc->tdesc is NULL and
 	proc->attached is true, call the_low_target.arch_setup.
