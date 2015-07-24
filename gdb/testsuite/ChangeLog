@@ -1,5 +1,11 @@
 2015-07-24  Doug Evans  <dje@google.com>
 
+	* gdb.perf/README: New file.
+	* lib/perftest.exp (tcl_string_list_to_python_list): New function.
+	* lib/gen-perf-test.exp: New file.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
 	* lib/perftest.exp (PerfTest::compile): Unconditionally call body.
 	(PerfTest::startup): New function.
 	(PerfTest::run): Return result of calling body.

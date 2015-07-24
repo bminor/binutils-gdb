@@ -141,3 +141,17 @@ proc skip_perf_tests { } {
 
     return 1
 }
+
+# Given a list of tcl strings, return the same list as the text form of a
+# python list.
+
+proc tcl_string_list_to_python_list { l } {
+    proc quote { text } {
+	return "\"$text\""
+    }
+    set quoted_list ""
+    foreach elm $l {
+	lappend quoted_list [quote $elm]
+    }
+    return "([join $quoted_list {, }])"
+}
