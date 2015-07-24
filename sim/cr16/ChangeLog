@@ -202,7 +202,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
@@ -253,8 +253,8 @@
 	* interp.c (hash): Remove incorrect prototype.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -266,6 +266,6 @@
 
 2008-02-12  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
-	* ChangeLog, Makefile.in, configure, configure.in, cr16_sim.h, 
+	* ChangeLog, Makefile.in, configure, configure.in, cr16_sim.h,
 	gencode.c, interp.c, simops.c, endian.c: Created.
 

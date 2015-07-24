@@ -172,9 +172,9 @@
 	* avr.h: Add R_AVR_PORT5 and R_AVR_PORT6.
 
 2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
-            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
-            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
-            Soundararajan  <Sounderarajan.D@atmel.com>
+	    Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+	    Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+	    Soundararajan  <Sounderarajan.D@atmel.com>
 
 	* avr.h (E_AVR_MACH_AVRTINY): Define avrtiny machine number.
 	(R_AVR_LDS_STS_16): Define 16 bit lds/sts reloc number.
@@ -351,7 +351,7 @@
 	* common.h (NT_S390_TDB): Define.
 
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 
@@ -442,15 +442,15 @@
 	(R_TILEGX_IMM16_X1_HW2_LAST_PLT_PCREL): Ditto.
 
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
-            Laurent Desnogues  <laurent.desnogues@arm.com>
-            Jim MacArthur  <jim.macarthur@arm.com>
-            Marcus Shawcroft  <marcus.shawcroft@arm.com>
-            Nigel Stephens  <nigel.stephens@arm.com>
-            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
-            Richard Earnshaw  <rearnsha@arm.com>
-            Sofiane Naci  <sofiane.naci@arm.com>
-            Tejas Belagod  <tejas.belagod@arm.com>
-            Yufeng Zhang  <yufeng.zhang@arm.com>
+	    Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+	    Sofiane Naci  <sofiane.naci@arm.com>
+	    Tejas Belagod  <tejas.belagod@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64.h: New file.
 	* common.h (EM_res183): Rename to EM_AARCH64.
@@ -624,7 +624,7 @@
 	* x86-64.h (R_X86_64_RELATIVE64): New.
 
 2011-07-24  Chao-ying Fu  <fu@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips.h (R_MICROMIPS_min): New relocations.
 	(R_MICROMIPS_26_S1): Likewise.
@@ -763,7 +763,7 @@
 	* tic6x-attrs.h (Tag_ABI_compatibility): Define.
 
 2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* tic6x-attrs.h (Tag_ABI_DSBT): New.
 
@@ -1725,8 +1725,8 @@
 	* m32c.h: Add relax relocs.
 
 2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
-            Anil Paranjape   <anilp1@kpitcummins.com>
-            Shilin Shakti    <shilins@kpitcummins.com>
+	    Anil Paranjape   <anilp1@kpitcummins.com>
+	    Shilin Shakti    <shilins@kpitcummins.com>
 
 	* common.h (EM_XC16X): New entry for xc16x cpu.
 	Sort other EM_* numbers into numerical order.

@@ -257,7 +257,7 @@
 	* gdb.mi/mi-dprintf-pendshr.c: New file.
 
 2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
-            Mircea Gherzan  <mircea.gherzan@intel.com>
+	    Mircea Gherzan  <mircea.gherzan@intel.com>
 
 	* gdb.arch/i386-mpx-map.c: New file.
 	* gdb.arch/i386-mpx-map.exp: New File.
@@ -776,7 +776,7 @@
 
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
-        * lib/gdb.exp (gdb_test_multiple): When processing an argument,
+	* lib/gdb.exp (gdb_test_multiple): When processing an argument,
 	append the substituted item, not the original item.
 
 2015-04-07  Pedro Alves  <palves@redhat.com>
@@ -3561,7 +3561,7 @@
 	(explicit_fork_child_follow): Deleted procedure.
 	(test_follow_fork): New procedure.
 	(do_fork_tests): Replace calls to deleted procedures with
-	calls to test_follow_fork and reset GDB for subsequent 
+	calls to test_follow_fork and reset GDB for subsequent
 	procedure calls.
 
 2014-06-17  Yao Qi  <yao@codesourcery.com>
@@ -5326,7 +5326,7 @@
 	    Pedro Alves  <palves@redhat.com>
 
 	* gdb.mi/mi-info-os.exp: Connect to the target with
-        mi_gdb_target_load.
+	mi_gdb_target_load.
 
 2014-01-08  Pedro Alves  <palves@redhat.com>
 

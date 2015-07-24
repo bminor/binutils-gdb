@@ -47,8 +47,8 @@
 
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
-        * config/tc-mips.c (check_fpabi):  Handle
-        VAL_GNU_MIPS_ABI_FP_NAN2008.
+	* config/tc-mips.c (check_fpabi):  Handle
+	VAL_GNU_MIPS_ABI_FP_NAN2008.
 
 2015-07-08  Ciro Santilli  <ciro.santilli@gmail.com>
 
@@ -305,8 +305,8 @@
 	(aarch64_force_relocation): Ditto.
 
 2015-05-28  Catherine Moore  <clm@codesourcery.com>
-            Bernd Schmidt <bernds@codesourcery.com>
-            Paul Brook <paul@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
 
 	gas/
 	* config/tc-alpha.c (all_cfi_sections): Declare.

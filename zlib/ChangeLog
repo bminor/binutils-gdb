@@ -1,5 +1,5 @@
 
-                ChangeLog file for zlib
+	        ChangeLog file for zlib
 
 Changes in 1.2.7 (2 May 2012)
 - Replace use of memmove() with a simple copy for portability
@@ -1112,15 +1112,15 @@ Changes in 1.0.6 (19 Jan 1998)
 - added Makefile.nt (thanks to Stephen Williams)
 - added the unsupported "contrib" directory:
    contrib/asm386/ by Gilles Vollant <info@winimage.com>
-        386 asm code replacing longest_match().
+	386 asm code replacing longest_match().
    contrib/iostream/ by Kevin Ruland <kevin@rodin.wustl.edu>
-        A C++ I/O streams interface to the zlib gz* functions
+	A C++ I/O streams interface to the zlib gz* functions
    contrib/iostream2/  by Tyge Løvset <Tyge.Lovset@cmr.no>
-        Another C++ I/O streams interface
+	Another C++ I/O streams interface
    contrib/untgz/  by "Pedro A. Aranda Guti\irrez" <paag@tid.es>
-        A very simple tar.gz file extractor using zlib
+	A very simple tar.gz file extractor using zlib
    contrib/visual-basic.txt by Carlos Rios <c_rios@sonda.cl>
-        How to use compress(), uncompress() and the gz* functions from VB.
+	How to use compress(), uncompress() and the gz* functions from VB.
 - pass params -f (filtered data), -h (huffman only), -1 to -9 (compression
   level) in minigzip (thanks to Tom Lane)
 

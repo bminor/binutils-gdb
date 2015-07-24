@@ -642,20 +642,20 @@
 
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
-        * linux-low.c (check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]:
+	* linux-low.c (check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]:
 	Decide whether a breakpoint triggered based on the SIGTRAP's
 	siginfo.si_code.
-        (thread_still_has_status_pending_p) [USE_SIGTRAP_SIGINFO]: Don't check whether a
-        breakpoint is inserted if relying on SIGTRAP's siginfo.si_code.
+	(thread_still_has_status_pending_p) [USE_SIGTRAP_SIGINFO]: Don't check whether a
+	breakpoint is inserted if relying on SIGTRAP's siginfo.si_code.
 	(linux_low_filter_event): Check for breakpoints before checking
 	watchpoints.
 	(linux_wait_1): Don't re-increment the PC if relying on SIGTRAP's
 	siginfo.si_code.
-        (linux_stopped_by_sw_breakpoint)
-        (linux_supports_stopped_by_sw_breakpoint)
-        (linux_stopped_by_hw_breakpoint)
-        (linux_supports_stopped_by_hw_breakpoint): New functions.
-        (linux_target_ops): Install new target methods.
+	(linux_stopped_by_sw_breakpoint)
+	(linux_supports_stopped_by_sw_breakpoint)
+	(linux_stopped_by_hw_breakpoint)
+	(linux_supports_stopped_by_hw_breakpoint): New functions.
+	(linux_target_ops): Install new target methods.
 
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
@@ -2885,7 +2885,7 @@
 
 	* server.h (struct emit_ops, current_insn_ptr, emit_error):
 	Move ...
-        * ax.h: ... here.
+	* ax.h: ... here.
 
 2013-09-05  Pedro Alves  <palves@redhat.com>
 

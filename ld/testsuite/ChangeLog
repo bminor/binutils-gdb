@@ -12,18 +12,18 @@
 
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
-        * ld-mips-elf/attr-gnu-4-08.d: Update expected output.
-        * ld-mips-elf/attr-gnu-4-09.d: New.
-        * ld-mips-elf/attr-gnu-4-19.d: New.
-        * ld-mips-elf/attr-gnu-4-29.d: New.
-        * ld-mips-elf/attr-gnu-4-39.d: New.
-        * ld-mips-elf/attr-gnu-4-49.d: New.
-        * ld-mips-elf/attr-gnu-4-59.d: New.
-        * ld-mips-elf/attr-gnu-4-69.d: New.
-        * ld-mips-elf/attr-gnu-4-79.d: New.
-        * ld-mips-elf/attr-gnu-4-89.d: New.
-        * ld-mips-elf/attr-gnu-4-9.s: New.
-        * ld-mips-elf/mips-elf.exp: Run new tests.
+	* ld-mips-elf/attr-gnu-4-08.d: Update expected output.
+	* ld-mips-elf/attr-gnu-4-09.d: New.
+	* ld-mips-elf/attr-gnu-4-19.d: New.
+	* ld-mips-elf/attr-gnu-4-29.d: New.
+	* ld-mips-elf/attr-gnu-4-39.d: New.
+	* ld-mips-elf/attr-gnu-4-49.d: New.
+	* ld-mips-elf/attr-gnu-4-59.d: New.
+	* ld-mips-elf/attr-gnu-4-69.d: New.
+	* ld-mips-elf/attr-gnu-4-79.d: New.
+	* ld-mips-elf/attr-gnu-4-89.d: New.
+	* ld-mips-elf/attr-gnu-4-9.s: New.
+	* ld-mips-elf/mips-elf.exp: Run new tests.
 
 2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
 

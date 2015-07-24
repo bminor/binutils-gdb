@@ -123,7 +123,7 @@
 	write return-value; check only that pipemax bytes were
 	successfully written.  For error-case, emit strerror as well.
 	(main): Add a second read.
-	
+
 2006-04-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* hw/rv-n-cris/irq6.ms: New test.

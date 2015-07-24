@@ -207,7 +207,7 @@
 
 2014-09-16  Kuan-Lin Chen <kuanlinchentw@gmail.com>
 
-        * nds32.h: Add new opcode declaration.
+	* nds32.h: Add new opcode declaration.
 
 2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
@@ -250,9 +250,9 @@
 	(INSN_COPROC_MOVE): New define.
 
 2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
-            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
-            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
-            Soundararajan  <Sounderarajan.D@atmel.com>
+	    Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+	    Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+	    Soundararajan  <Sounderarajan.D@atmel.com>
 
 	* avr.h (AVR_ISA_TINY): Define avrtiny specific ISA.
 	(AVR_ISA_2xxxa): Define ISA without LPM.
@@ -619,7 +619,7 @@
 	* aarch64.h (AARCH64_FEATURE_CRC): New macro.
 
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 

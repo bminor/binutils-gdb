@@ -125,8 +125,8 @@
 	* functions.texi: Regenerate.
 
 2014-12-11  Uros Bizjak  <ubizjak@gmail.com>
-            Ben Elliston  <bje@au.ibm.com>
-            Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+	    Ben Elliston  <bje@au.ibm.com>
+	    Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
 
 	* xvasprintf.c: New file.
 	* vprintf-support.h: Likewise.
@@ -351,7 +351,7 @@
 	(d_ctor_dtor_name): Handle unified ctor/dtor.
 
 2013-11-22  Cary Coutant  <ccoutant@google.com>
-    
+
 	PR other/59195
 	* cp-demangle.c (struct d_info_checkpoint): New struct.
 	(struct d_print_info): Add current_template field.

@@ -180,8 +180,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -267,7 +267,7 @@
 
 2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
 
-        * compile.c (set_h8300h): Initialize globals to zero.
+	* compile.c (set_h8300h): Initialize globals to zero.
 
 2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
 
@@ -355,13 +355,13 @@
 
 2003-03-20  D.Venkatasubramanian  <dvenkat@noida.hcltech.com>
 
-	* compile.c (cmdline_location): Added function to 
+	* compile.c (cmdline_location): Added function to
 	return the location of 8-bit (256 locations) where the
 	Command Line arguments would be stored.
-	(decode): Added a TRAP to 0xcc for Commandline 
+	(decode): Added a TRAP to 0xcc for Commandline
 	processing using pseudo opcode O_SYS_CMDLINE.
 	(sim_resume): Added handling of O_SYS_CMDLINE Trap.
-	(sim_create_inferior): Setting a pointer to 
+	(sim_create_inferior): Setting a pointer to
 	Commandline Args array.
 	* inst.h: Added a new variable ptr_command_line for
 	storing pointer to Commandline array.
@@ -423,24 +423,24 @@
 2002-05-17  Andrey Volkov  (avolkov@transas.com)
 
 	* compile.c: Add absented opcodes: LDC, STC, EEPMOV, TAS.
-	
+
 2002-05-17  Andrey Volkov  (avolkov@transas.com)
 
 	* compile.c: Add support of EXR register
 	* inst.h: Ditto.
-	
+
 2002-05-17  Andrey Volkov  (avolkov@transas.com)
 
 	* compile.c: Made h8300s as new target, not h8300h alias.
 	* inst.h: Ditto.
-	     	
-2002-05-17  Andrey Volkov  (avolkov@transas.com)
-
-	* compile.c: Add additional CCR flags (I,UI,H,U) 
 
 2002-05-17  Andrey Volkov  (avolkov@transas.com)
 
-	* compile.c: Change literal regnumbers to REGNUMS. 
+	* compile.c: Add additional CCR flags (I,UI,H,U)
+
+2002-05-17  Andrey Volkov  (avolkov@transas.com)
+
+	* compile.c: Change literal regnumbers to REGNUMS.
 	Fix instruction and cycles counting
 
 2001-12-20  Kazu Hirata  <kazu@hxi.com>
@@ -485,7 +485,7 @@ Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
-	
+
 1999-04-02  Keith Seitz  <keiths@cygnus.com>
 
 	* compile.c (POLL_QUIT_INTERVAL): Define. Used to tweak the
@@ -494,7 +494,7 @@ Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
-        * configure: Regenerated to track ../common/aclocal.m4 changes.
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
@@ -767,18 +767,18 @@ Wed Jun 26 08:58:53 1996  Jeffrey A Law  (law@cygnus.com)
 
 Wed Jun 26 12:20:56 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
-        * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
-        INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set values.
-        (docdir): Removed.
-        * configure.in (AC_PREREQ): autoconf 2.5 or higher.
-        (AC_PROG_INSTALL): Added.
-        * configure: Rebuilt.
+	* Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
+	INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set values.
+	(docdir): Removed.
+	* configure.in (AC_PREREQ): autoconf 2.5 or higher.
+	(AC_PROG_INSTALL): Added.
+	* configure: Rebuilt.
 
 Tue Jun 18 16:31:10 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* compile.c (sim_load): Treat the H8/S like the H8/300H for now.
 	* run.c (main): Treat the H8/S like the H8/300H for now.
-	
+
 Fri May 24 10:35:25 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (SEXTCHAR): Clear upper bits when sign
@@ -1030,7 +1030,7 @@ Fri Jul  9 14:36:48 1993  Doug Evans  (dje@canuck.cygnus.com)
 	(sim_resume): Add support for extu,exts insns.
 	(sim_resume): Fix logical right shifting.
 	(sim_resume, label alu32): Fix setting of carry flag.
-	
+
 Sun Jul  4 00:35:41 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* compile.c (sim_csize): Initialize cpu.cache.
@@ -1081,5 +1081,5 @@ Sun Jan  3 14:15:07 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 Tue Dec 22 13:56:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	* new 
+	* new
 

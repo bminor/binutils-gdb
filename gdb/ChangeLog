@@ -757,7 +757,7 @@
 	(rx_frame_this_id): Rename parameter `this_prologue_cache' to
 	`this_cache'.
 	(rx_frame_prev_register): Rename parameter `this_prologue_cache' to
-	`this_cache'.  Add cases for RX_FRAME_TYPE_EXCEPTION and 
+	`this_cache'.  Add cases for RX_FRAME_TYPE_EXCEPTION and
 	RX_FRAME_TYPE_FAST_INTERRUPT.
 	(normal_frame_p, exception_frame_p, rx_frame_sniffer_common)
 	(rx_frame_sniffer, rx_exception_sniffer): New functions.
@@ -4043,10 +4043,10 @@
 
 2015-03-18  Tristan Gingold  <gingold@adacore.com>
 
-        * amd64-windows-tdep.c (amd64_windows_find_unwind_info): Move
-        redirection code to ...
-        (amd64_windows_frame_decode_insns): ... Here.  Fix in prologue
-        checks.  Fix SAVE_NONVOL operations.  Add debug code and comments.
+	* amd64-windows-tdep.c (amd64_windows_find_unwind_info): Move
+	redirection code to ...
+	(amd64_windows_frame_decode_insns): ... Here.  Fix in prologue
+	checks.  Fix SAVE_NONVOL operations.  Add debug code and comments.
 
 2015-03-18  Gary Benson <gbenson@redhat.com>
 
@@ -4152,7 +4152,7 @@
 	* config.in: Regenerate.
 	* configure: Regenerate.
 	* fbsd-nat.c [!HAVE_KINFO_GETVMMAP] (fbsd_read_mapping): Don't
-        define.
+	define.
 	(fbsd_find_memory_regions): Use kinfo_getvmmap to
 	enumerate memory regions if present.
 

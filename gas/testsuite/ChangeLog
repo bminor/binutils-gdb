@@ -871,7 +871,7 @@
 
 	* gas/arm/neon-addressing-bad.s: Add test for invalid VSHL,
 	VQSHL, and VQSHLU immediates.
-	* gas/arm/neon-addressing-bad.l: Update accordingly. 
+	* gas/arm/neon-addressing-bad.l: Update accordingly.
 
 2015-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 

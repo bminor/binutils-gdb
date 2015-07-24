@@ -37,8 +37,8 @@
 
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
-        * readelf.c (print_mips_fp_abi_value): Handle
-        Val_GNU_MIPS_ABI_FP_NAN2008.
+	* readelf.c (print_mips_fp_abi_value): Handle
+	Val_GNU_MIPS_ABI_FP_NAN2008.
 
 2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
 

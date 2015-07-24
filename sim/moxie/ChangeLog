@@ -210,7 +210,7 @@
 2012-09-07  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_resume): Branches are now relative to the
-          address of the instruction following the branch.
+	  address of the instruction following the branch.
 
 2012-06-17  Mike Frysinger  <vapier@gentoo.org>
 
