@@ -1,3 +1,7 @@
+2015-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* stabs.c (parse_stab_range_type): Use 0xffffffffffffffffLL.
+
 2015-07-22  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (dump_relocations): Show MIN_INT addends as negative.
