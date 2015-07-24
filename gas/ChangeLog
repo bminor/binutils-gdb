@@ -1,3 +1,10 @@
+2015-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.c (rl78_abs_sym): New local variable.
+	(md_begin): Initialise the new symbol.
+	(OPIMM): Define the value to be relative to the new symbol and not
+	the absolute section symbol.
+
 2015-07-22  Alan Modra  <amodra@gmail.com>
 
 	PR gas/18687

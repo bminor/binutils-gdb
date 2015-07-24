@@ -1,3 +1,10 @@
+2015-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/struct.d: Allow for extra symbols in the output.
+	* gas/macros/test1.d: Likewise.
+	* gas/elf/elf.exp: Add an rl78 machine.
+	* gas/elf/sections2e-rl78: New file.
+
 2015-07-22  Alexander Fomin  <alexander.fomin@intel.com>
 
 	PR binutils/18631
