@@ -1,5 +1,9 @@
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
+	* fork-child.c (fork_inferior): Print argv[0] instead of exec_file.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
 	* aarch64-linux-nat.c: Include nat/gdb_ptrace.h instead of
 	sys/ptrace.h.
 	* alpha-linux-nat.c: Likewise.
