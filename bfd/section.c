@@ -994,14 +994,11 @@ bfd_get_section_by_name_if (bfd *abfd, const char *name,
     return NULL;
 
   hash = sh->root.hash;
-  do
-    {
-      if ((*operation) (abfd, &sh->section, user_storage))
-	return &sh->section;
-      sh = (struct section_hash_entry *) sh->root.next;
-    }
-  while (sh != NULL && sh->root.hash == hash
-	 && strcmp (sh->root.string, name) == 0);
+  for (; sh != NULL; sh = (struct section_hash_entry *) sh->root.next)
+    if (sh->root.hash == hash
+	&& strcmp (sh->root.string, name) == 0
+	&& (*operation) (abfd, &sh->section, user_storage))
+      return &sh->section;
 
   return NULL;
 }
