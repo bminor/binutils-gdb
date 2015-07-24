@@ -1,5 +1,11 @@
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
+	* s390-linux-nat.c (fetch_regs, store_regs, fetch_fpregs)
+	(s390_stopped_by_watchpoint, s390_prepare_to_resume): Pass 0 as
+	forth argument to ptrace PTRACE_PEEKUSR_AREA/PTRACE_POKEUSR_AREA.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18717
 	* linux-nat.c (linux_nat_filter_event): Don't assert that the lwp
 	is resumed, and extend the debug log.
