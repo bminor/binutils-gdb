@@ -1,3 +1,9 @@
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp (gdbserver_start_extended): Add
+	argument options.
+	* gdb.server/ext-wrapper.exp: New file.
+
 2015-07-23  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dw2-dummy-cu.S: New file.
