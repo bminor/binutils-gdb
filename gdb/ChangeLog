@@ -1,5 +1,11 @@
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb_ptrace.h: Move ...
+	* nat/gdb_ptrace.h: ... here.
+	* inf-ptrace.c: Adjust.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
 	* acinclude.m4: Include ptrace.m4.
 	* configure.ac: Call GDB_AC_PTRACE and move ptrace checks ...
 	* ptrace.m4: ... to this new file.
