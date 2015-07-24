@@ -1,5 +1,9 @@
 2015-07-24  Doug Evans  <dje@google.com>
 
+	* lib/gdb.exp (clean_restart): Make executable optional.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
 	* gdb.base/watchpoint.exp (test_complex_watchpoint): Remove
 	compiler_info references.
 	* gdb.cp/temargs.exp: Ditto.

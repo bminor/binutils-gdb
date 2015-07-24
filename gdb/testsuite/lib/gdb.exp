@@ -4895,18 +4895,27 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
     return [eval build_executable_from_specs $arglist]
 }
 
-# Starts fresh GDB binary and loads EXECUTABLE into GDB. EXECUTABLE is
-# the basename of the binary.
-# The return value is 0 for success, -1 for failure.
-proc clean_restart { executable } {
+# Starts fresh GDB binary and loads an optional executable into GDB.
+# Usage: clean_restart [executable]
+# EXECUTABLE is the basename of the binary.
+
+proc clean_restart { args } {
     global srcdir
     global subdir
-    set binfile [standard_output_file ${executable}]
+
+    if { [llength $args] > 1 } {
+	error "bad number of args: [llength $args]"
+    }
 
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    return [gdb_load ${binfile}]
+
+    if { [llength $args] >= 1 } {
+	set executable [lindex $args 0]
+	set binfile [standard_output_file ${executable}]
+	gdb_load ${binfile}
+    }
 }
 
 # Prepares for testing by calling build_executable_full, then
