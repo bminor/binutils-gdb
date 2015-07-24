@@ -1,5 +1,12 @@
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_add_process): Don't set
+	proc->priv->new_inferior.
+	(linux_create_inferior): Set proc->priv->new_inferior to 1.
+	(linux_attach): Likewise.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
 	* server.c (start_inferior): Code refactor.
 
 2015-07-24  Yao Qi  <yao.qi@linaro.org>

@@ -405,9 +405,6 @@ linux_add_process (int pid, int attached)
   proc = add_process (pid, attached);
   proc->priv = xcalloc (1, sizeof (*proc->priv));
 
-  /* Set the arch when the first LWP stops.  */
-  proc->priv->new_inferior = 1;
-
   if (the_low_target.new_process != NULL)
     proc->priv->arch_private = the_low_target.new_process ();
 
@@ -766,6 +763,7 @@ linux_create_inferior (char *program, char **allargs)
   ptid_t ptid;
   struct cleanup *restore_personality
     = maybe_disable_address_space_randomization (disable_randomization);
+  struct process_info *proc;
 
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)
   pid = vfork ();
@@ -813,7 +811,9 @@ linux_create_inferior (char *program, char **allargs)
 
   do_cleanups (restore_personality);
 
-  linux_add_process (pid, 0);
+  proc = linux_add_process (pid, 0);
+  /* Set the arch when the first LWP stops.  */
+  proc->priv->new_inferior = 1;
 
   ptid = ptid_build (pid, pid, 0);
   new_lwp = add_lwp (ptid);
@@ -959,6 +959,7 @@ linux_attach (unsigned long pid)
 {
   ptid_t ptid = ptid_build (pid, pid, 0);
   int err;
+  struct process_info *proc;
 
   /* Attach to PID.  We will check for other threads
      soon.  */
@@ -967,7 +968,9 @@ linux_attach (unsigned long pid)
     error ("Cannot attach to process %ld: %s",
 	   pid, linux_ptrace_attach_fail_reason_string (ptid, err));
 
-  linux_add_process (pid, 1);
+  proc = linux_add_process (pid, 1);
+  /* Set the arch when the first LWP stops.  */
+  proc->priv->new_inferior = 1;
 
   if (!non_stop)
     {
