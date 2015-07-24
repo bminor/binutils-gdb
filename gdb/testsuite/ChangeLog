@@ -1,3 +1,8 @@
+2015-07-24  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/catch-syscall.exp: Call gdb_exit before
+	gdb_skip_xml_test.
+
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-events.exp: Accept output between the stop event
