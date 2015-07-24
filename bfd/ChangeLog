@@ -1,5 +1,11 @@
 2015-07-24  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (_bfd_elf_assign_file_positions_for_non_load): Use .rela
+	prefix for reloc section corresponding to rela section associated
+	with renamed debug section.
+
+2015-07-24  Alan Modra  <amodra@gmail.com>
+
 	* section.c (bfd_get_section_by_name_if): Iterate over entire hash
 	chain.
 

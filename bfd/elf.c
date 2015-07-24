@@ -5654,7 +5654,7 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 		  if (d->rela.hdr
 		      && !_bfd_elf_set_reloc_sh_name (abfd,
 						      d->rela.hdr,
-						      name, FALSE))
+						      name, TRUE))
 		    return FALSE;
 
 		  /* Update section size and contents.  */
