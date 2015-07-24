@@ -46,41 +46,41 @@ if { ![ld_assemble $as "--compress-debug-sections=zlib-gabi $srcdir/$subdir/empt
 
 set build_tests {
   {"Build libfoo.so with compressed debug sections"
-   "-shared" "-fPIC -g -Wa,--compress-debug-sections"
+   "-shared" "-fPIC -ggdb3 -Wa,--compress-debug-sections"
    {foo.c} {} "libfoo.so"}
   {"Build libbar.so with compressed debug sections"
    "-shared -Wl,--compress-debug-sections=none"
-   "-fPIC -g -Wa,--compress-debug-sections"
+   "-fPIC -ggdb3 -Wa,--compress-debug-sections"
    {begin.c end.c} {} "libbar.so"}
   {"Build libfoozlib.so with compressed debug sections with zlib-gabi"
-   "-shared" "-fPIC -g -Wa,--compress-debug-sections=zlib-gabi"
+   "-shared" "-fPIC -ggdb3 -Wa,--compress-debug-sections=zlib-gabi"
    {foo.c} {} "libfoozlib.so"}
   {"Build libbarzlib.so with compressed debug sections with zlib-gabi"
-   "-shared" "-fPIC -g -Wa,--compress-debug-sections=zlib-gabi"
+   "-shared" "-fPIC -ggdb3 -Wa,--compress-debug-sections=zlib-gabi"
    {begin.c end.c} {} "libbarzlib.so"}
   {"Build libzlibfoo.so with zlib compressed debug sections"
    "-shared -Wl,--compress-debug-sections=zlib"
-   "-fPIC -g -Wa,--compress-debug-sections=zlib"
+   "-fPIC -ggdb3 -Wa,--compress-debug-sections=zlib"
    {foo.c} {} "libzlibfoo.so"}
   {"Build libgnufoo.so with zlib-gnu compressed debug sections"
    "-shared -Wl,--compress-debug-sections=zlib-gnu"
-   "-fPIC -g -Wa,--compress-debug-sections=zlib-gnu"
+   "-fPIC -ggdb3 -Wa,--compress-debug-sections=zlib-gnu"
    {foo.c} {} "libgnufoo.so"}
   {"Build libgabifoo.so with zlib-gabi compressed debug sections"
    "-shared -Wl,--compress-debug-sections=zlib-gabi"
-   "-fPIC -g -Wa,--compress-debug-sections=zlib-gabi"
+   "-fPIC -ggdb3 -Wa,--compress-debug-sections=zlib-gabi"
    {foo.c} {} "libgabifoo.so"}
   {"Build zlibbegin.o with zlib compressed debug sections"
    "-r -nostdlib -Wl,--compress-debug-sections=zlib"
-   "-g -Wa,--compress-debug-sections=zlib"
+   "-ggdb3 -Wa,--compress-debug-sections=zlib"
    {begin.c} {} "zlibbegin.o"}
   {"Build gnubegin.o with zlib-gnu compressed debug sections"
    "-r -nostdlib -Wl,--compress-debug-sections=zlib-gnu"
-   "-g -Wa,--compress-debug-sections=zlib-gnu"
+   "-ggdb3 -Wa,--compress-debug-sections=zlib-gnu"
    {begin.c} {} "gnubegin.o"}
   {"Build gabiend.o with zlib-gabi compressed debug sections"
    "-r -nostdlib -Wl,--compress-debug-sections=zlib-gabi"
-   "-g -Wa,--compress-debug-sections=zlib-gnu"
+   "-ggdb3 -Wa,--compress-debug-sections=zlib-gnu"
    {end.c} {} "gabiend.o"}
 }
 

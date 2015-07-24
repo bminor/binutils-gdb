@@ -1,3 +1,9 @@
+2015-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp (build_tests): Replace -g with -ggdb3.
+	* ld-elf/zlibbegin.rS: Also expect "GC".
+	* ld-elf/zlibnormal.rS: Likewise.
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/tls-tiny-ld.s: New file.
