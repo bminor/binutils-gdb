@@ -22,7 +22,7 @@
 #include "server.h"
 #include "linux-low.h"
 #include "elf/common.h"
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <endian.h>
 #include "gdb_proc_service.h"
 #include <asm/ptrace.h>

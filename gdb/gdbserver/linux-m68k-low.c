@@ -68,7 +68,7 @@ m68k_cannot_fetch_register (int regno)
 
 #ifdef HAVE_PTRACE_GETREGS
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 static void
 m68k_fill_gregset (struct regcache *regcache, void *buf)

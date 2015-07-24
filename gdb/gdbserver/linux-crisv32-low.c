@@ -18,7 +18,7 @@
 
 #include "server.h"
 #include "linux-low.h"
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 /* Defined in auto-generated file reg-crisv32.c.  */
 void init_registers_crisv32 (void);

@@ -20,7 +20,7 @@
 
 struct buffer;
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))

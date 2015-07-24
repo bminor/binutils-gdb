@@ -21,7 +21,7 @@
 #include "linux-low.h"
 
 #include <arch/abi.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 /* Defined in auto-generated file reg-tilegx.c.  */
 void init_registers_tilegx (void);

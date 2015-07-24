@@ -22,6 +22,7 @@
 #include "linux-waitpid.h"
 #include "buffer.h"
 #include "gdb_wait.h"
+#include "gdb_ptrace.h"
 
 /* Stores the ptrace options supported by the running kernel.
    A value of -1 means we did not check for features yet.  A value

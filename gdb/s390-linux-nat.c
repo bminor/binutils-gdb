@@ -33,7 +33,7 @@
 #include "elf/common.h"
 
 #include <asm/ptrace.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/types.h>
 #include <sys/procfs.h>
 #include <sys/ucontext.h>

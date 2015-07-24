@@ -33,7 +33,7 @@
 
 #include <elf/common.h>
 #include <sys/user.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/utsname.h>
 #include <sys/procfs.h>
 

@@ -1,5 +1,32 @@
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
+	* aarch64-linux-nat.c: Include nat/gdb_ptrace.h instead of
+	sys/ptrace.h.
+	* alpha-linux-nat.c: Likewise.
+	* amd64-linux-nat.c: Likewise.
+	* arm-linux-nat.c: Likewise.
+	* hppa-linux-nat.c: Likewise.
+	* i386-linux-nat.c: Likewise.
+	* ia64-linux-nat.c: Likewise.
+	* linux-fork.c: Likewise.
+	* linux-nat.c: Likewise.
+	* m32r-linux-nat.c: Likewise.
+	* m68klinux-nat.c: Likewise.
+	* mips-linux-nat.c: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/linux-ptrace.h
+	* nat/mips-linux-watch.c: Likewise.
+	* nat/x86-linux-dregs.c: Likewise.
+	* ppc-linux-nat.c: Likewise.
+	* s390-linux-nat.c: Likewise.
+	* spu-linux-nat.c: Likewise.
+	* tilegx-linux-nat.c: Likewise.
+	* x86-linux-nat.c: Likewise.
+	* xtensa-linux-nat.c: Likewise.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
 	* ptrace.m4 (ptrace tests): Test in C++ mode.  Try with 'enum
 	__ptrace_request as first parameter type instead of int.
 	(PTRACE_TYPE_ARG1): Define.

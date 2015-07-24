@@ -1,3 +1,20 @@
+2015-07-24  Pedro Alves  <palves@redhat.c: Likewise.om>
+
+	* linux-aarch64-low.c: Include nat/gdb_ptrace.h instead of
+	sys/ptrace.h.
+	* linux-arm-low.c: Likewise.
+	* linux-cris-low.c: Likewise.
+	* linux-crisv32-low.c: Likewise.
+	* linux-low.c: Likewise.
+	* linux-m68k-low.c: Likewise.
+	* linux-mips-low.c: Likewise.
+	* linux-nios2-low.c: Likewise.
+	* linux-s390-low.c: Likewise.
+	* linux-sparc-low.c: Likewise.
+	* linux-tic6x-low.c: Likewise.
+	* linux-tile-low.c: Likewise.
+	* linux-x86-low.c: Likewise.
+
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
 	* config.in: Regenerate.

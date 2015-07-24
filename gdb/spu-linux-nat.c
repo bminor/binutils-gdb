@@ -30,7 +30,7 @@
 #include "gdbthread.h"
 #include "gdb_bfd.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
 #include <sys/types.h>
 

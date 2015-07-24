@@ -27,7 +27,7 @@
 #include "linux-nat.h"
 
 #include <signal.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include "gdb_wait.h"
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>

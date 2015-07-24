@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #endif
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include "linux-nat.h"
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"

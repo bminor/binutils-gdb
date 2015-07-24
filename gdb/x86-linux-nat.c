@@ -21,7 +21,7 @@
 #include "inferior.h"
 #include "elf/common.h"
 #include "gdb_proc_service.h"
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/user.h>
 #include <sys/procfs.h>
 #include <sys/uio.h>

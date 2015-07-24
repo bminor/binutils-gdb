@@ -30,7 +30,7 @@
 
 #include <sys/dir.h>
 #include <signal.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/user.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>

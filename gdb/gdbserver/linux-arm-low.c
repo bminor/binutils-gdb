@@ -24,7 +24,7 @@
 #ifndef ELFMAG0
 #include <elf.h>
 #endif
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <signal.h>
 
 /* Defined in auto-generated files.  */

@@ -25,7 +25,7 @@
 #include "linux-nat.h"
 
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <linux/version.h>
 
 #include <asm/ptrace.h>

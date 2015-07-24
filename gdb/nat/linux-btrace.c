@@ -33,7 +33,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/user.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/utsname.h>
