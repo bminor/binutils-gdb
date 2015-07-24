@@ -1,5 +1,12 @@
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.python/py-events.exp: Accept output between the stop event
+	and the prompt.
+	* gdb.python/py-evsignal.exp: Likewise.
+	* gdb.python/py-evthreads.exp: Likewise.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18717
 	* gdb.threads/non-ldr-exit.c: New file.
 	* gdb.threads/non-ldr-exit.exp: New file.
