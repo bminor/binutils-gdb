@@ -45,6 +45,26 @@ gdb_test "run" "Breakpoint.* marker .*" "run to marker"
 
 gdb_test "print d" "\\$${decimal} = ${hex} \"1\".*"
 
+# Restart the process.
+with_test_prefix "restart" {
+    # Disable vRun packet and clear remote exec-file, so that GDB will
+    # use R packet to restart the process.
+    gdb_test_no_output "set remote run-packet off"
+    gdb_test_no_output "set remote exec-file"
+    set test "run to marker"
+    gdb_test_multiple "run" $test {
+	-re {Start it from the beginning\? \(y or n\) $} {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	-re "Breakpoint.* marker .*\r\n$gdb_prompt $" {
+	    pass $test
+	}
+    }
+
+    gdb_test "print d" "\\$${decimal} = ${hex} \"1\".*"
+}
+
 gdb_test "kill" "" "kill" "Kill the program being debugged.*" "y"
 
 gdb_test_no_output "monitor exit"

@@ -1,5 +1,10 @@
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.server/ext-wrapper.exp: Test --wrapper option when
+	restarting process.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.server/ext-restart.exp: New file.
 
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
