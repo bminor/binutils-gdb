@@ -74,6 +74,9 @@ struct target_ops
 
   int (*create_inferior) (char *program, char **args);
 
+  /* Architecture-specific setup.  */
+  void (*arch_setup) (void);
+
   /* Attach to a running process.
 
      PID is the process ID to attach to, specified by the user
@@ -444,6 +447,13 @@ void set_target_ops (struct target_ops *);
 
 #define create_inferior(program, args) \
   (*the_target->create_inferior) (program, args)
+
+#define target_arch_setup()			 \
+  do						 \
+    {						 \
+      if (the_target->arch_setup != NULL)	 \
+	(*the_target->arch_setup) ();		 \
+    } while (0)
 
 #define myattach(pid) \
   (*the_target->attach) (pid)

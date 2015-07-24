@@ -822,6 +822,14 @@ linux_create_inferior (char *program, char **allargs)
   return pid;
 }
 
+/* Implement the arch_setup target_ops method.  */
+
+static void
+linux_arch_setup (void)
+{
+  the_low_target.arch_setup ();
+}
+
 /* Attach to an inferior process.  Returns 0 on success, ERRNO on
    error.  */
 
@@ -2105,23 +2113,35 @@ linux_low_filter_event (int lwpid, int wstat)
     {
       struct process_info *proc;
 
-      /* Architecture-specific setup after inferior is running.  This
-	 needs to happen after we have attached to the inferior and it
-	 is stopped for the first time, but before we access any
-	 inferior registers.  */
+      /* Architecture-specific setup after inferior is running.  */
       proc = find_process_pid (pid_of (thread));
-      if (proc->priv->new_inferior)
+      if (proc->tdesc == NULL)
 	{
-	  struct thread_info *saved_thread;
+	  if (proc->attached)
+	    {
+	      struct thread_info *saved_thread;
 
-	  saved_thread = current_thread;
-	  current_thread = thread;
+	      /* This needs to happen after we have attached to the
+		 inferior and it is stopped for the first time, but
+		 before we access any inferior registers.  */
+	      saved_thread = current_thread;
+	      current_thread = thread;
 
-	  the_low_target.arch_setup ();
+	      the_low_target.arch_setup ();
 
-	  current_thread = saved_thread;
+	      current_thread = saved_thread;
 
-	  proc->priv->new_inferior = 0;
+	      proc->priv->new_inferior = 0;
+	    }
+	  else
+	    {
+	      /* The process is started, but GDBserver will do
+		 architecture-specific setup after the program stops at
+		 the first instruction.  */
+	      child->status_pending_p = 1;
+	      child->status_pending = wstat;
+	      return child;
+	    }
 	}
     }
 
@@ -3651,6 +3671,14 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
   struct thread_info *thread = get_lwp_thread (lwp);
   struct thread_info *saved_thread;
   int fast_tp_collecting;
+  struct process_info *proc = get_thread_process (thread);
+
+  /* Note that target description may not be initialised
+     (proc->tdesc == NULL) at this point because the program hasn't
+     stopped at the first instruction yet.  It means GDBserver skips
+     the extra traps from the wrapper program (see option --wrapper).
+     Code in this function that requires register access should be
+     guarded by proc->tdesc == NULL or something else.  */
 
   if (lwp->stopped == 0)
     return;
@@ -3661,7 +3689,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 
   /* Cancel actions that rely on GDB not changing the PC (e.g., the
      user used the "jump" command, or "set $pc = foo").  */
-  if (lwp->stop_pc != get_pc (lwp))
+  if (thread->while_stepping != NULL && lwp->stop_pc != get_pc (lwp))
     {
       /* Collecting 'while-stepping' actions doesn't make sense
 	 anymore.  */
@@ -3787,7 +3815,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
       step = 1;
     }
 
-  if (the_low_target.get_pc != NULL)
+  if (proc->tdesc != NULL && the_low_target.get_pc != NULL)
     {
       struct regcache *regcache = get_thread_regcache (current_thread, 1);
 
@@ -4014,6 +4042,12 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
   struct lwp_info *lwp = get_thread_lwp (thread);
   struct thread_info *saved_thread;
   CORE_ADDR pc;
+  struct process_info *proc = get_thread_process (thread);
+
+  /* GDBserver is skipping the extra traps from the wrapper program,
+     don't have to do step over.  */
+  if (proc->tdesc == NULL)
+    return 0;
 
   /* LWPs which will not be resumed are not interesting, because we
      might not wait for them next time through linux_wait.  */
@@ -6635,6 +6669,7 @@ current_lwp_ptid (void)
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
+  linux_arch_setup,
   linux_attach,
   linux_kill,
   linux_detach,

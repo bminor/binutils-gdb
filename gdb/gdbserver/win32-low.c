@@ -1785,6 +1785,7 @@ win32_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
+  NULL,  /* arch_setup */
   win32_attach,
   win32_kill,
   win32_detach,

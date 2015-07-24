@@ -272,12 +272,15 @@ start_inferior (char **argv)
 	    }
 	  while (last_status.value.sig != GDB_SIGNAL_TRAP);
 	}
+      target_arch_setup ();
       return signal_pid;
     }
 
   /* Wait till we are at 1st instruction in program, return new pid
      (assuming success).  */
   last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+
+  target_arch_setup ();
 
   if (last_status.kind != TARGET_WAITKIND_EXITED
       && last_status.kind != TARGET_WAITKIND_SIGNALLED)

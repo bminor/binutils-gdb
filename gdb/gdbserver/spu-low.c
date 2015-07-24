@@ -638,6 +638,7 @@ spu_request_interrupt (void)
 
 static struct target_ops spu_target_ops = {
   spu_create_inferior,
+  NULL,  /* arch_setup */
   spu_attach,
   spu_kill,
   spu_detach,

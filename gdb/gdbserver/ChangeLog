@@ -1,5 +1,24 @@
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_arch_setup): New function.
+	(linux_low_filter_event): If proc->tdesc is NULL and
+	proc->attached is true, call the_low_target.arch_setup.
+	Otherwise, keep status pending, and return.
+	(linux_resume_one_lwp_throw): Don't call get_pc if
+	thread->while_stepping isn't NULL.  Don't call
+	get_thread_regcache if proc->tdesc is NULL.
+	(need_step_over_p): Return 0 if proc->tdesc is NULL.
+	(linux_target_ops): Install arch_setup.
+	* server.c (start_inferior): Call the_target->arch_setup.
+	* target.h (struct target_ops) <arch_setup>: New field.
+	(target_arch_setup): New marco.
+	* lynx-low.c (lynx_target_ops): Update.
+	* nto-low.c (nto_target_ops): Update.
+	* spu-low.c (spu_target_ops): Update.
+	* win32-low.c (win32_target_ops): Update.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (linux_add_process): Don't set
 	proc->priv->new_inferior.
 	(linux_create_inferior): Set proc->priv->new_inferior to 1.
