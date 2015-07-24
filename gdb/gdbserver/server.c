@@ -257,22 +257,21 @@ start_inferior (char **argv)
 
       last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
-      if (last_status.kind != TARGET_WAITKIND_STOPPED)
-	return signal_pid;
-
-      do
+      if (last_status.kind == TARGET_WAITKIND_STOPPED)
 	{
-	  (*the_target->resume) (&resume_info, 1);
+	  do
+	    {
+	      (*the_target->resume) (&resume_info, 1);
 
- 	  last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-	  if (last_status.kind != TARGET_WAITKIND_STOPPED)
-	    return signal_pid;
+	      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+	      if (last_status.kind != TARGET_WAITKIND_STOPPED)
+		break;
 
-	  current_thread->last_resume_kind = resume_stop;
-	  current_thread->last_status = last_status;
+	      current_thread->last_resume_kind = resume_stop;
+	      current_thread->last_status = last_status;
+	    }
+	  while (last_status.value.sig != GDB_SIGNAL_TRAP);
 	}
-      while (last_status.value.sig != GDB_SIGNAL_TRAP);
-
       return signal_pid;
     }
 

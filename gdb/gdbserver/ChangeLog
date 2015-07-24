@@ -1,5 +1,9 @@
 2015-07-24  Yao Qi  <yao.qi@linaro.org>
 
+	* server.c (start_inferior): Code refactor.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
 	* server.c (process_serial_event): Set general_thread.
 
 2015-07-21  Yao Qi  <yao.qi@linaro.org>
