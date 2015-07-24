@@ -144,6 +144,10 @@ extern PTRACE_TYPE_RET ptrace();
 #  define ptrace(request, pid, addr, data) \
           ptrace (request, pid, addr, data, 0)
 # endif
+#else
+/* Wrapper that avoids adding a pointless cast to all callers.  */
+# define ptrace(request, pid, addr, data) \
+         ptrace ((PTRACE_TYPE_ARG1) request, pid, addr, data)
 #endif
 
 #endif /* gdb_ptrace.h */

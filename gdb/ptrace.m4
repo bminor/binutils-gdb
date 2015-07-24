@@ -22,6 +22,12 @@ AC_DEFUN([GDB_AC_PTRACE],
 
 AC_CHECK_HEADERS([sys/ptrace.h ptrace.h])
 
+# Needs to be tested in C++ mode, to detect whether we need to cast
+# the first argument to enum __ptrace_request.
+if test "$enable_build_with_cxx" = "yes"; then
+    AC_LANG_PUSH([C++])
+fi
+
 gdb_ptrace_headers='
 #include <sys/types.h>
 #if HAVE_SYS_PTRACE_H
@@ -52,7 +58,7 @@ AC_DEFINE_UNQUOTED(PTRACE_TYPE_RET, $gdb_cv_func_ptrace_ret,
 AC_CACHE_CHECK([types of arguments for ptrace], gdb_cv_func_ptrace_args, [
   AC_TRY_COMPILE($gdb_ptrace_headers,
     [extern long ptrace (enum __ptrace_request, ...);],
-    [gdb_cv_func_ptrace_args='int,int,long,long'],[
+    [gdb_cv_func_ptrace_args='enum __ptrace_request,int,long,long'],[
 for gdb_arg1 in 'int' 'long'; do
  for gdb_arg2 in 'pid_t' 'int' 'long'; do
   for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
@@ -81,6 +87,8 @@ ac_save_IFS=$IFS; IFS=','
 set dummy `echo "$gdb_cv_func_ptrace_args" | sed 's/\*/\*/g'`
 IFS=$ac_save_IFS
 shift
+AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG1, $[1],
+  [Define to the type of arg 1 for ptrace.])
 AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG3, $[3],
   [Define to the type of arg 3 for ptrace.])
 AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG4, $[4],
@@ -88,5 +96,9 @@ AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG4, $[4],
 if test -n "$[5]"; then
   AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG5, $[5],
     [Define to the type of arg 5 for ptrace.])
+fi
+
+if test "$enable_build_with_cxx" = "yes"; then
+    AC_LANG_POP([C++])
 fi
 ])

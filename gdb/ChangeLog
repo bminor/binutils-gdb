@@ -1,5 +1,15 @@
 2015-07-24  Pedro Alves  <palves@redhat.com>
 
+	* ptrace.m4 (ptrace tests): Test in C++ mode.  Try with 'enum
+	__ptrace_request as first parameter type instead of int.
+	(PTRACE_TYPE_ARG1): Define.
+	* nat/gdb_ptrace.h [!PTRACE_TYPE_ARG5] (ptrace): Define as wrapper
+	that casts first argument to PTRACE_TYPE_ARG1.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
 	* gdb_ptrace.h: Move ...
 	* nat/gdb_ptrace.h: ... here.
 	* inf-ptrace.c: Adjust.

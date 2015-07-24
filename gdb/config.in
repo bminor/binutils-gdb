@@ -653,6 +653,9 @@
    assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
 
+/* Define to the type of arg 1 for ptrace. */
+#undef PTRACE_TYPE_ARG1
+
 /* Define to the type of arg 3 for ptrace. */
 #undef PTRACE_TYPE_ARG3
 
