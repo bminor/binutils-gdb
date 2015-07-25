@@ -71,8 +71,6 @@ static int _rl_char_search_callback PARAMS((_rl_callback_generic_arg *));
    rl_insert_text.  Text blocks larger than this are divided. */
 #define TEXT_COUNT_MAX	1024
 
-int _rl_optimize_typeahead = 1;	/* rl_insert tries to read typeahead */
-
 /* **************************************************************** */
 /*								    */
 /*			Insert and Delete			    */
@@ -242,7 +240,7 @@ rl_replace_line (text, clear_undo)
    this is the same as rl_end.
 
    Any command that is called interactively receives two arguments.
-   The first is a count: the numeric arg passed to this command.
+   The first is a count: the numeric arg pased to this command.
    The second is the key which invoked this command.
 */
 
@@ -828,7 +826,7 @@ _rl_insert_char (count, c)
 	 pending characters that are bound to rl_insert, and insert
 	 them all.  Don't do this if we're current reading input from
 	 a macro. */
-      if ((RL_ISSTATE (RL_STATE_MACROINPUT) == 0) && _rl_pushed_input_available ())
+      if ((RL_ISSTATE (RL_STATE_MACROINPUT) == 0) && _rl_any_typein ())
 	_rl_insert_typein (c);
       else
 	{
@@ -892,42 +890,8 @@ int
 rl_insert (count, c)
      int count, c;
 {
-  int r, n, x;
-
-  r = (rl_insert_mode == RL_IM_INSERT) ? _rl_insert_char (count, c) : _rl_overwrite_char (count, c);
-
-  /* XXX -- attempt to batch-insert pending input that maps to self-insert */
-  x = 0;
-  n = (unsigned short)-2;
-  while (_rl_optimize_typeahead &&
-	 (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
-	 _rl_pushed_input_available () == 0 &&
-	 _rl_input_queued (0) &&
-	 (n = rl_read_key ()) > 0 &&
-	 _rl_keymap[(unsigned char)n].type == ISFUNC &&
-	 _rl_keymap[(unsigned char)n].function == rl_insert)
-    {
-      r = (rl_insert_mode == RL_IM_INSERT) ? _rl_insert_char (1, n) : _rl_overwrite_char (1, n);
-      /* _rl_insert_char keeps its own set of pending characters to compose a
-	 complete multibyte character, and only returns 1 if it sees a character
-	 that's part of a multibyte character but too short to complete one.  We
-	 can try to read another character in the hopes that we will get the
-	 next one or just punt.  Right now we try to read another character.
-	 We don't want to call rl_insert_next if _rl_insert_char has already
-	 stored the character in the pending_bytes array because that will
-	 result in doubled input. */
-      n = (unsigned short)-2;
-      x++;		/* count of bytes of typeahead read, currently unused */
-      if (r == 1)	/* read partial multibyte character */
-	continue;
-      if (rl_done || r != 0)
-	break;
-    }
-
-  if (n != (unsigned short)-2)		/* -2 = sentinel value for having inserted N */
-    r = rl_execute_next (n);
-
-  return r;
+  return (rl_insert_mode == RL_IM_INSERT ? _rl_insert_char (count, c)
+  					 : _rl_overwrite_char (count, c));
 }
 
 /* Insert the next typed character verbatim. */
@@ -942,10 +906,7 @@ _rl_insert_next (count)
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
   if (c < 0)
-    return 1;
-
-  if (RL_ISSTATE (RL_STATE_MACRODEF))
-    _rl_add_macro_char (c);
+    return -1;
 
 #if defined (HANDLE_SIGNALS)
   if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
@@ -1102,7 +1063,7 @@ rl_rubout (count, key)
   if (!rl_point)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   if (rl_insert_mode == RL_IM_OVERWRITE)
@@ -1125,7 +1086,7 @@ _rl_rubout_char (count, key)
   if (rl_point == 0)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   orig_point = rl_point;
@@ -1139,7 +1100,7 @@ _rl_rubout_char (count, key)
       c = rl_line_buffer[--rl_point];
       rl_delete_text (rl_point, orig_point);
       /* The erase-at-end-of-line hack is of questionable merit now. */
-      if (rl_point == rl_end && ISPRINT ((unsigned char)c) && _rl_last_c_pos)
+      if (rl_point == rl_end && ISPRINT (c) && _rl_last_c_pos)
 	{
 	  int l;
 	  l = rl_character_len (c, rl_point);
@@ -1169,7 +1130,7 @@ rl_delete (count, key)
   if (rl_point == rl_end)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   if (count > 1 || rl_explicit_arg)
@@ -1339,7 +1300,7 @@ rl_change_case (count, op)
   if (op != UpCase && op != DownCase && op != CapCase)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   if (count < 0)
@@ -1373,7 +1334,7 @@ rl_change_case (count, op)
 	}
       else
 	nop = op;
-      if (MB_CUR_MAX == 1 || rl_byte_oriented || isascii ((unsigned char)c))
+      if (MB_CUR_MAX == 1 || rl_byte_oriented || isascii (c))
 	{
 	  nc = (nop == UpCase) ? _rl_to_upper (c) : _rl_to_lower (c);
 	  rl_line_buffer[start] = nc;
@@ -1439,7 +1400,7 @@ rl_transpose_words (count, key)
     {
       rl_ding ();
       rl_point = orig_point;
-      return 1;
+      return -1;
     }
 
   /* Get the text of the words. */
@@ -1492,7 +1453,7 @@ rl_transpose_chars (count, key)
   if (!rl_point || rl_end < 2)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   rl_begin_undo_group ();
@@ -1555,7 +1516,7 @@ _rl_char_search_internal (count, dir, schar)
 #endif
 
   if (dir == 0)
-    return 1;
+    return -1;
 
   pos = rl_point;
   inc = (dir < 0) ? -1 : 1;
@@ -1564,7 +1525,7 @@ _rl_char_search_internal (count, dir, schar)
       if ((dir < 0 && pos <= 0) || (dir > 0 && pos >= rl_end))
 	{
 	  rl_ding ();
-	  return 1;
+	  return -1;
 	}
 
 #if defined (HANDLE_MULTIBYTE)
@@ -1619,7 +1580,7 @@ _rl_char_search (count, fdir, bdir)
   mb_len = _rl_read_mbchar (mbchar, MB_LEN_MAX);
 
   if (mb_len <= 0)
-    return 1;
+    return -1;
 
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, mbchar, mb_len));
@@ -1638,7 +1599,7 @@ _rl_char_search (count, fdir, bdir)
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
   if (c < 0)
-    return 1;
+    return -1;
 
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, c));
@@ -1707,7 +1668,7 @@ _rl_set_mark_at_pos (position)
      int position;
 {
   if (position > rl_end)
-    return 1;
+    return -1;
 
   rl_mark = position;
   return 0;
@@ -1732,7 +1693,7 @@ rl_exchange_point_and_mark (count, key)
   if (rl_mark == -1)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
   else
     SWAP (rl_point, rl_mark);

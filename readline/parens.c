@@ -57,7 +57,11 @@ static int find_matching_open PARAMS((char *, int, int));
 
 /* Non-zero means try to blink the matching open parenthesis when the
    close parenthesis is inserted. */
+#if defined (HAVE_SELECT)
+int rl_blink_matching_paren = 1;
+#else /* !HAVE_SELECT */
 int rl_blink_matching_paren = 0;
+#endif /* !HAVE_SELECT */
 
 static int _paren_blink_usec = 500000;
 
@@ -68,32 +72,16 @@ _rl_enable_paren_matching (on_or_off)
      int on_or_off;
 {
   if (on_or_off)
-    {
-      /* ([{ */
+    {	/* ([{ */
       rl_bind_key_in_map (')', rl_insert_close, emacs_standard_keymap);
       rl_bind_key_in_map (']', rl_insert_close, emacs_standard_keymap);
       rl_bind_key_in_map ('}', rl_insert_close, emacs_standard_keymap);
-
-#if defined (VI_MODE)
-      /* ([{ */
-      rl_bind_key_in_map (')', rl_insert_close, vi_insertion_keymap);
-      rl_bind_key_in_map (']', rl_insert_close, vi_insertion_keymap);
-      rl_bind_key_in_map ('}', rl_insert_close, vi_insertion_keymap);
-#endif
     }
   else
-    {
-      /* ([{ */
+    {	/* ([{ */
       rl_bind_key_in_map (')', rl_insert, emacs_standard_keymap);
       rl_bind_key_in_map (']', rl_insert, emacs_standard_keymap);
       rl_bind_key_in_map ('}', rl_insert, emacs_standard_keymap);
-
-#if defined (VI_MODE)
-      /* ([{ */
-      rl_bind_key_in_map (')', rl_insert, vi_insertion_keymap);
-      rl_bind_key_in_map (']', rl_insert, vi_insertion_keymap);
-      rl_bind_key_in_map ('}', rl_insert, vi_insertion_keymap);
-#endif
     }
 }
 
@@ -129,7 +117,7 @@ rl_insert_close (count, invoking_key)
 
       /* Emacs might message or ring the bell here, but I don't. */
       if (match_point < 0)
-	return 1;
+	return -1;
 
       FD_ZERO (&readfds);
       FD_SET (fileno (rl_instream), &readfds);

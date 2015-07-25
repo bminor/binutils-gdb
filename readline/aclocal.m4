@@ -1692,13 +1692,12 @@ AC_CHECK_HEADERS(wctype.h)
 AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
-AC_CHECK_HEADERS(mbstr.h)
-
 AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
 AC_CHECK_FUNC(mbscasecmp, AC_DEFINE(HAVE_MBSCMP))
 AC_CHECK_FUNC(mbscmp, AC_DEFINE(HAVE_MBSCMP))
 AC_CHECK_FUNC(mbsnrtowcs, AC_DEFINE(HAVE_MBSNRTOWCS))
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
+
 
 AC_REPLACE_FUNCS(mbschr)
 
@@ -1764,36 +1763,9 @@ if test $bash_cv_type_wint_t = yes; then
         AC_DEFINE(HAVE_WINT_T, 1, [systems should define this type here])
 fi
 
-dnl check for broken wcwidth
-AC_CACHE_CHECK([for wcwidth broken with unicode combining characters],
-bash_cv_wcwidth_broken,
-[AC_TRY_RUN([
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <locale.h>
-#include <wchar.h>
-
-main(c, v)
-int     c;
-char    **v;
-{
-        int     w;
-
-        setlocale(LC_ALL, "en_US.UTF-8");
-        w = wcwidth (0x0301);
-        exit (w == 0);  /* exit 0 if wcwidth broken */
-}
-],
-bash_cv_wcwidth_broken=yes, bash_cv_wcwidth_broken=no, bash_cv_wcwidth_broken=no)])
-if test "$bash_cv_wcwidth_broken" = yes; then
-        AC_DEFINE(WCWIDTH_BROKEN, 1, [wcwidth is usually not broken])
-fi
-
 if test "$am_cv_func_iconv" = yes; then
 	OLDLIBS="$LIBS"
-	LIBS="$LIBS $LIBINTL $LIBICONV"
+	LIBS="$LIBS $LIBICONV"
 	AC_CHECK_FUNCS(locale_charset)
 	LIBS="$OLDLIBS"
 fi
@@ -3126,7 +3098,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test "X$prefer_shared" = "Xyes" && test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
@@ -3148,7 +3120,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test "X$prefer_shared" = "Xyes" && test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
@@ -4151,7 +4123,7 @@ main()
 AC_DEFUN(BASH_STRUCT_WEXITSTATUS_OFFSET,
 [AC_MSG_CHECKING(for offset of exit status in return status from wait)
 AC_CACHE_VAL(bash_cv_wexitstatus_offset,
-[AC_TRY_RUN([
+[AC_RUN_IFELSE([
 #include <stdlib.h>
 #include <unistd.h>
 

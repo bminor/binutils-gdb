@@ -1318,7 +1318,7 @@ gdb_printable_part (char *pathname)
     return (pathname);
 
   temp = strrchr (pathname, '/');
-#if defined (__MSDOS__) || defined (_WIN32)
+#if defined (__MSDOS__)
   if (temp == 0 && ISALPHA ((unsigned char)pathname[0]) && pathname[1] == ':')
     temp = pathname + 1;
 #endif

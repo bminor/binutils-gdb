@@ -4,7 +4,7 @@
 /* Copyright (C) 1992-2005 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
-   for reading lines of text with interactive input and history editing.
+   for reading lines of text with interactive input and history editing.      
 
    Readline is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -37,11 +37,11 @@
 
 #include "rldefs.h"
 
-#include "rltty.h"
-#if defined (HAVE_SYS_IOCTL_H)
-#  include <sys/ioctl.h>		/* include for declaration of ioctl */
-#endif
+#if defined (GWINSZ_IN_SYS_IOCTL)
+#  include <sys/ioctl.h>
+#endif /* GWINSZ_IN_SYS_IOCTL */
 
+#include "rltty.h"
 #include "readline.h"
 #include "rlprivate.h"
 
@@ -60,13 +60,7 @@ static void set_winsize PARAMS((int));
 /*								    */
 /* **************************************************************** */
 
-/* Non-zero means that the terminal is in a prepped state.  There are several
-   flags that are OR'd in to denote whether or not we have sent various
-   init strings to the terminal. */
-#define TPX_PREPPED	0x01
-#define TPX_BRACKPASTE	0x02
-#define TPX_METAKEY	0x04
-
+/* Non-zero means that the terminal is in a prepped state. */
 static int terminal_prepped;
 
 static _RL_TTY_CHARS _rl_tty_chars, _rl_last_tty_chars;
@@ -127,7 +121,7 @@ static int set_tty_settings PARAMS((int, TIOTYPE *));
 
 static void prepare_terminal_settings PARAMS((int, TIOTYPE, TIOTYPE *));
 
-static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t *));
+static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t));
 
 static void
 save_tty_chars (tiop)
@@ -347,7 +341,7 @@ static int set_tty_settings PARAMS((int, TIOTYPE *));
 
 static void prepare_terminal_settings PARAMS((int, TIOTYPE, TIOTYPE *));
 
-static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t *));
+static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t));
 static void _rl_bind_tty_special_chars PARAMS((Keymap, TIOTYPE));
 
 #if defined (FLUSHO)
@@ -534,10 +528,10 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
 
 #if defined (USE_XON_XOFF)
 #if defined (IXANY)
-  tiop->c_iflag &= ~(IXON | IXANY);
+  tiop->c_iflag &= ~(IXON | IXOFF | IXANY);
 #else
   /* `strict' Posix systems do not define IXANY. */
-  tiop->c_iflag &= ~IXON;
+  tiop->c_iflag &= ~(IXON | IXOFF);
 #endif /* IXANY */
 #endif /* USE_XON_XOFF */
 
@@ -601,7 +595,7 @@ void
 rl_prep_terminal (meta_flag)
      int meta_flag;
 {
-  int tty, nprep;
+  int tty;
   TIOTYPE tio;
 
   if (terminal_prepped)
@@ -648,7 +642,7 @@ rl_prep_terminal (meta_flag)
       /* If editing in vi mode, make sure we set the bindings in the
 	 insertion keymap no matter what keymap we ended up in. */
       if (rl_editing_mode == vi_mode)
-	_rl_bind_tty_special_chars (vi_insertion_keymap, tio);
+	_rl_bind_tty_special_chars (vi_insertion_keymap, tio);	
       else
 #endif
 	_rl_bind_tty_special_chars (_rl_keymap, tio);
@@ -665,16 +659,8 @@ rl_prep_terminal (meta_flag)
   if (_rl_enable_keypad)
     _rl_control_keypad (1);
 
-  nprep = TPX_PREPPED;
-
-  if (_rl_enable_bracketed_paste)
-    {
-      fprintf (rl_outstream, BRACK_PASTE_INIT);
-      nprep |= TPX_BRACKPASTE;
-    }
-
   fflush (rl_outstream);
-  terminal_prepped = nprep;
+  terminal_prepped = 1;
   RL_SETSTATE(RL_STATE_TERMPREPPED);
 
   _rl_release_sigint ();
@@ -686,16 +672,13 @@ rl_deprep_terminal ()
 {
   int tty;
 
-  if (terminal_prepped == 0)
+  if (!terminal_prepped)
     return;
 
   /* Try to keep this function from being interrupted. */
   _rl_block_sigint ();
 
-  tty = rl_instream ? fileno (rl_instream) : fileno (stdin);
-
-  if (terminal_prepped & TPX_BRACKPASTE)
-    fprintf (rl_outstream, BRACK_PASTE_FINI);
+  tty = rl_instream ? fileno (rl_instream) : fileno (stdout);
 
   if (_rl_enable_keypad)
     _rl_control_keypad (0);

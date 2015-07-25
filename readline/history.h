@@ -216,7 +216,7 @@ extern int history_truncate_file PARAMS((const char *, int));
   -1) If there was an error in expansion.
    2) If the returned line should just be printed.
 
-  If an error occurred in expansion, then OUTPUT contains a descriptive
+  If an error ocurred in expansion, then OUTPUT contains a descriptive
   error message. */
 extern int history_expand PARAMS((char *, char **));
 
@@ -241,10 +241,6 @@ extern char **history_tokenize PARAMS((const char *));
 extern int history_base;
 extern int history_length;
 extern int history_max_entries;
-
-extern int history_lines_read_from_file;
-extern int history_lines_written_to_file;
-
 extern char history_expansion_char;
 extern char history_subst_char;
 extern char *history_word_delimiters;

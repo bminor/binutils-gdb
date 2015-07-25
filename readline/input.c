@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -45,8 +45,6 @@
 #  include "ansi_stdlib.h"
 #endif /* HAVE_STDLIB_H */
 
-#include <signal.h>
-
 #include "posixselect.h"
 
 #if defined (FIONREAD_IN_SYS_IOCTL)
@@ -80,13 +78,6 @@ extern int errno;
    character input. */
 rl_hook_func_t *rl_event_hook = (rl_hook_func_t *)NULL;
 
-/* A function to call if a read(2) is interrupted by a signal. */
-rl_hook_func_t *rl_signal_event_hook = (rl_hook_func_t *)NULL;
-
-/* A function to replace _rl_input_available for applications using the
-   callback interface. */
-rl_hook_func_t *rl_input_available_hook = (rl_hook_func_t *)NULL;
-
 rl_getc_func_t *rl_getc_function = rl_getc;
 
 static int _keyboard_input_timeout = 100000;		/* 0.1 seconds; it's in usec */
@@ -94,22 +85,6 @@ static int _keyboard_input_timeout = 100000;		/* 0.1 seconds; it's in usec */
 static int ibuffer_space PARAMS((void));
 static int rl_get_char PARAMS((int *));
 static int rl_gather_tyi PARAMS((void));
-
-/* Windows isatty returns true for every character device, including the null
-   device, so we need to perform additional checks. */
-#if defined (_WIN32) && !defined (__CYGWIN__)
-#include <io.h>
-#define WIN32_LEAN_AND_MEAN 1
-#include <windows.h>
-
-int
-win32_isatty (int fd)
-{
-  return (_isatty (fd) ? ((((long) (HANDLE) _get_osfhandle (fd)) & 3) == 3) : 0);
-}
-
-#define isatty(x)	win32_isatty(x)
-#endif
 
 /* **************************************************************** */
 /*								    */
@@ -129,12 +104,6 @@ _rl_any_typein ()
   return any_typein;
 }
 
-int
-_rl_pushed_input_available ()
-{
-  return (push_index != pop_index);
-}
-
 /* Return the amount of space available in the buffer for stuffing
    characters. */
 static int
@@ -148,7 +117,7 @@ ibuffer_space ()
 
 /* Get a key from the buffer of characters to be read.
    Return the key in KEY.
-   Result is non-zero if there was a key, or 0 if there wasn't. */
+   Result is KEY if there was a key, or 0 if there wasn't. */
 static int
 rl_get_char (key)
      int *key;
@@ -185,6 +154,12 @@ _rl_unget_char (key)
   return (0);
 }
 
+int
+_rl_pushed_input_available ()
+{
+  return (push_index != pop_index);
+}
+
 /* If a character is available to be read, then read it and stuff it into
    IBUFFER.  Otherwise, just return.  Returns number of characters read
    (0 if none available) and -1 on error (EIO). */
@@ -201,7 +176,6 @@ rl_gather_tyi ()
 #endif
 
   chars_avail = 0;
-  input = 0;
   tty = fileno (rl_instream);
 
 #if defined (HAVE_SELECT)
@@ -221,8 +195,6 @@ rl_gather_tyi ()
   result = ioctl (tty, FIONREAD, &chars_avail);
   if (result == -1 && errno == EIO)
     return -1;
-  if (result == -1)
-    chars_avail = 0;
 #endif
 
 #if defined (O_NDELAY)
@@ -318,9 +290,6 @@ _rl_input_available ()
   int chars_avail;
 #endif
   int tty;
-
-  if (rl_input_available_hook)
-    return (*rl_input_available_hook) ();
 
   tty = fileno (rl_instream);
 
@@ -440,7 +409,9 @@ rl_clear_pending_input ()
 int
 rl_read_key ()
 {
-  int c, r;
+  int c;
+
+  rl_key_sequence_length++;
 
   if (rl_pending_input)
     {
@@ -458,18 +429,14 @@ rl_read_key ()
 	{
 	  while (rl_event_hook)
 	    {
-	      if (rl_get_char (&c) != 0)
-		break;
-		
-	      if ((r = rl_gather_tyi ()) < 0)	/* XXX - EIO */
+	      if (rl_gather_tyi () < 0)	/* XXX - EIO */
 		{
 		  rl_done = 1;
 		  return ('\n');
 		}
-	      else if (r > 0)			/* read something */
-		continue;
-
 	      RL_CHECK_SIGNALS ();
+	      if (rl_get_char (&c) != 0)
+		break;
 	      if (rl_done)		/* XXX - experimental */
 		return ('\n');
 	      (*rl_event_hook) ();
@@ -479,7 +446,6 @@ rl_read_key ()
 	{
 	  if (rl_get_char (&c) == 0)
 	    c = (*rl_getc_function) (rl_instream);
-/* fprintf(stderr, "rl_read_key: calling RL_CHECK_SIGNALS: _rl_caught_signal = %d", _rl_caught_signal); */
 	  RL_CHECK_SIGNALS ();
 	}
     }
@@ -493,30 +459,16 @@ rl_getc (stream)
 {
   int result;
   unsigned char c;
-#if defined (HAVE_PSELECT)
-  sigset_t empty_set;
-  fd_set readfds;
-#endif
 
   while (1)
     {
       RL_CHECK_SIGNALS ();
 
-      /* We know at this point that _rl_caught_signal == 0 */
-
 #if defined (__MINGW32__)
       if (isatty (fileno (stream)))
-	return (_getch ());	/* "There is no error return." */
+	return (getch ());
 #endif
-      result = 0;
-#if defined (HAVE_PSELECT)
-      sigemptyset (&empty_set);
-      FD_ZERO (&readfds);
-      FD_SET (fileno (stream), &readfds);
-      result = pselect (fileno (stream) + 1, &readfds, NULL, NULL, NULL, &empty_set);
-#endif
-      if (result >= 0)
-	result = read (fileno (stream), &c, sizeof (unsigned char));
+      result = read (fileno (stream), &c, sizeof (unsigned char));
 
       if (result == sizeof (unsigned char))
 	return (c);
@@ -553,35 +505,11 @@ rl_getc (stream)
 #undef X_EWOULDBLOCK
 #undef X_EAGAIN
 
-/* fprintf(stderr, "rl_getc: result = %d errno = %d\n", result, errno); */
-
-handle_error:
-      /* If the error that we received was EINTR, then try again,
-	 this is simply an interrupted system call to read ().  We allow
-	 the read to be interrupted if we caught SIGHUP, SIGTERM, or any
-	 of the other signals readline treats specially. If the
-	 application sets an event hook, call it for other signals.
-	 Otherwise (not EINTR), some error occurred, also signifying EOF. */
+      /* If the error that we received was SIGINT, then try again,
+	 this is simply an interrupted system call to read ().
+	 Otherwise, some error ocurred, also signifying EOF. */
       if (errno != EINTR)
 	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
-      /* fatal signals of interest */
-      else if (_rl_caught_signal == SIGHUP || _rl_caught_signal == SIGTERM)
-	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
-      /* keyboard-generated signals of interest */
-      else if (_rl_caught_signal == SIGINT || _rl_caught_signal == SIGQUIT)
-        RL_CHECK_SIGNALS ();
-      /* non-keyboard-generated signals of interest */
-      else if (_rl_caught_signal == SIGWINCH)
-	RL_CHECK_SIGNALS ();
-      else if (_rl_caught_signal == SIGALRM
-#if defined (SIGVTALRM)
-		|| _rl_caught_signal == SIGVTALRM
-#endif
-	      )
-        RL_CHECK_SIGNALS ();
-
-      if (rl_signal_event_hook)
-	(*rl_signal_event_hook) ();
     }
 }
 

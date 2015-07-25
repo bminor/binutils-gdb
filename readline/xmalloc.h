@@ -38,6 +38,9 @@
 
 #endif /* !PTR_T */
 
+/* xmalloc and xrealloc should be also protected from RL_STATE_SIGHANDLER.  */
+#define xfree xfree_readline
+
 extern PTR_T xmalloc PARAMS((size_t));
 extern PTR_T xrealloc PARAMS((void *, size_t));
 extern void xfree PARAMS((void *));

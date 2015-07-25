@@ -547,14 +547,7 @@ main(int argc, char** argv)
 #endif
 
   t.c_lflag &= ~(ICANON | ISIG | ECHO | ECHOCTL | ECHOE | \
-		 ECHOK | ECHONL
-#if defined (ECHOKE)
-		| ECHOKE
-#endif
-#if defined (ECHOPRT)
-		| ECHOPRT
-#endif
-		);
+		 ECHOK | ECHOKE | ECHONL | ECHOPRT );
   t.c_iflag &= ~ICRNL;
   t.c_iflag |= IGNBRK;
   t.c_cc[VMIN] = 1;

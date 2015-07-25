@@ -19,7 +19,7 @@
 
 #include <signal.h>
 
-#if 1	/* LINUX */
+#if 0	/* LINUX */
 #include <pty.h>
 #else
 #include <util.h>
@@ -316,8 +316,6 @@ main()
   if (val == -1)
     return -1;
 
-  signal (SIGINT, sigint);
-
   val = init_readline (slavefd, slavefd);
   if (val == -1)
     return -1;
@@ -325,6 +323,8 @@ main()
   val = tty_cbreak (STDIN_FILENO);
   if (val == -1)
     return -1;
+
+  signal (SIGINT, sigint);
 
   val = main_loop ();
 

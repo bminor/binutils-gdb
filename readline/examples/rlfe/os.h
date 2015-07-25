@@ -19,7 +19,7 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  *
  ****************************************************************
- * $Id: os.h,v 1.10 1994/05/31 12:32:22 mlschroe Exp $ FAU
+ * $Id$ FAU
  */
 
 #include <stdio.h>
@@ -208,9 +208,7 @@ extern int errno;
 #   include <cytermio.h>
 #  endif
 # else /* TERMIO */
-#  if defined (HAVE_SGTTY_H)
-#    include <sgtty.h>
-#  endif
+#  include <sgtty.h>
 # endif /* TERMIO */
 #endif /* POSIX */
 
@@ -492,7 +490,7 @@ extern int errno;
  *    select stuff
  */
 
-#if defined(M_XENIX) || defined(M_UNIX) || defined(_SEQUENT_) || defined (__INTERIX)
+#if defined(M_XENIX) || defined(M_UNIX) || defined(_SEQUENT_)
 #include <sys/select.h>		/* for timeval + FD... */
 #endif
 

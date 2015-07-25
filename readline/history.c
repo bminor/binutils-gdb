@@ -1,6 +1,6 @@
 /* history.c -- standalone history library */
 
-/* Copyright (C) 1989-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -47,9 +47,6 @@
 #include "histlib.h"
 
 #include "xmalloc.h"
-
-/* How big to make the_history when we first allocate it. */
-#define DEFAULT_HISTORY_INITIAL_SIZE	502
 
 /* The number of slots to increase the_history by. */
 #define DEFAULT_HISTORY_GROW_SIZE 50
@@ -239,7 +236,7 @@ history_get_time (hist)
   ts = hist->timestamp;
   if (ts[0] != history_comment_char)
     return 0;
-  t = (time_t) strtol (ts + 1, (char **)NULL, 10);		/* XXX - should use strtol() here */
+  t = (time_t) atol (ts + 1);		/* XXX - should use strtol() here */
   return t;
 }
 
@@ -282,14 +279,9 @@ add_history (string)
       if (the_history[0])
 	(void) free_history_entry (the_history[0]);
 
-      /* Copy the rest of the entries, moving down one slot.  Copy includes
-	 trailing NULL.  */
-#if 0
+      /* Copy the rest of the entries, moving down one slot. */
       for (i = 0; i < history_length; i++)
 	the_history[i] = the_history[i + 1];
-#else
-      memmove (the_history, the_history + 1, history_length * sizeof (HIST_ENTRY *));
-#endif
 
       history_base++;
     }
@@ -297,10 +289,7 @@ add_history (string)
     {
       if (history_size == 0)
 	{
-	  if (history_stifled && history_max_entries > 0)
-	    history_size = history_max_entries + 2;
-	  else
-	    history_size = DEFAULT_HISTORY_INITIAL_SIZE;
+	  history_size = DEFAULT_HISTORY_GROW_SIZE;
 	  the_history = (HIST_ENTRY **)xmalloc (history_size * sizeof (HIST_ENTRY *));
 	  history_length = 1;
 	}
@@ -329,7 +318,7 @@ add_history_time (string)
 {
   HIST_ENTRY *hs;
 
-  if (string == 0 || history_length < 1)
+  if (string == 0)
     return;
   hs = the_history[history_length - 1];
   FREE (hs->timestamp);
@@ -405,7 +394,7 @@ replace_history_entry (which, line, data)
    WHICH >= 0 means to replace that particular history entry's data, as
    long as it matches OLD. */
 void
-replace_history_data (which, old, new)
+replace_history_data (which,old, new)
      int which;
      histdata_t *old, *new;
 {
