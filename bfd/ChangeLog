@@ -1,3 +1,10 @@
+2015-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18718
+	* elflink.c (elf_link_output_extsym): Check symbol version
+	section check only if not linking executable, the symbol is
+	referenced by shared library or not locally defined.
+
 2015-07-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Use SYMBOLIC_BIND to

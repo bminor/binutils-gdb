@@ -1,3 +1,9 @@
+2015-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18718
+	* ld-elf/pr18718.c: New file.
+	* ld-elf/shared.exp: Run tests for PR ld/18718.
+
 2015-07-25  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/symbolic-func.s,
