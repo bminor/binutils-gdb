@@ -3980,7 +3980,7 @@ proc standard_output_file {basename} {
     global objdir subdir gdb_test_file_name GDB_PARALLEL
 
     if {[info exists GDB_PARALLEL]} {
-	set dir [file join $objdir $GDB_PARALLEL outputs $subdir $gdb_test_file_name]
+	set dir [file join $objdir outputs $subdir $gdb_test_file_name]
 	file mkdir $dir
 	return [file join $dir $basename]
     } else {
@@ -3994,7 +3994,7 @@ proc standard_temp_file {basename} {
     global objdir GDB_PARALLEL
 
     if {[info exists GDB_PARALLEL]} {
-	return [file join $objdir $GDB_PARALLEL temp $basename]
+	return [file join $objdir temp $basename]
     } else {
 	return $basename
     }
@@ -5119,10 +5119,7 @@ if {[info exists GDB_PARALLEL]} {
     if {[is_remote host]} {
 	unset GDB_PARALLEL
     } else {
-	file mkdir \
-	    [file join $GDB_PARALLEL outputs] \
-	    [file join $GDB_PARALLEL temp] \
-	    [file join $GDB_PARALLEL cache]
+	file mkdir outputs temp cache
     }
 }
 
