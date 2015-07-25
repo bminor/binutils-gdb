@@ -58,7 +58,7 @@ fi
 dnl option parsing for optional features
 opt_multibyte=yes
 opt_static_libs=yes
-opt_shared_libs=yes
+opt_shared_libs=no
 
 AC_ARG_ENABLE(multibyte, AC_HELP_STRING([--enable-multibyte], [enable multibyte characters if OS supports them]), opt_multibyte=$enableval)
 AC_ARG_ENABLE(shared, AC_HELP_STRING([--enable-shared], [build shared libraries [[default=YES]]]), opt_shared_libs=$enableval)

@@ -1,5 +1,10 @@
 2015-07-25  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* configure.ac: Default opt_shared_libs to no.
+	* configure: Regenerate.
+
+2015-07-25  Patrick Palka  <patrick@parcs.ath.cx>
+
 	Import readline 7.0 alpha
 	* configure: Regenerate.
 	* examples/rlfe/configure: Regenerate.
