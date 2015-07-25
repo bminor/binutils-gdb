@@ -1467,7 +1467,7 @@ elf32_hppa_check_relocs (bfd *abfd,
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (IS_ABSOLUTE_RELOC (r_type)
 		   || (hh != NULL
-		       && (!info->symbolic
+		       && (!SYMBOLIC_BIND (info, &hh->eh)
 			   || hh->eh.root.type == bfd_link_hash_defweak
 			   || !hh->eh.def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -1819,7 +1819,7 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  || (eh->def_regular
 	      && eh->root.type != bfd_link_hash_defweak
 	      && ! hppa_elf_hash_entry (eh)->plabel
-	      && (!info->shared || info->symbolic)))
+	      && (!info->shared || SYMBOLIC_BIND (info, eh))))
 	{
 	  /* The .plt entry is not needed when:
 	     a) Garbage collection has removed all references to the
@@ -4005,7 +4005,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		       && (plabel
 			   || !IS_ABSOLUTE_RELOC (r_type)
 			   || !info->shared
-			   || !info->symbolic
+			   || !SYMBOLIC_BIND (info, &hh->eh)
 			   || !hh->eh.def_regular))
 		{
 		  outrel.r_info = ELF32_R_INFO (hh->eh.dynindx, r_type);
@@ -4389,7 +4389,7 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
 	 global offset table will already have been initialized in the
 	 relocate_section function.  */
       if (info->shared
-	  && (info->symbolic || eh->dynindx == -1)
+	  && (SYMBOLIC_BIND (info, eh) || eh->dynindx == -1)
 	  && eh->def_regular)
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);

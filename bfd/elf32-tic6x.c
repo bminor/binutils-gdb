@@ -1849,7 +1849,7 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
          The entry in the global offset table will already have been
          initialized in the relocate_section function.  */
       if (info->shared
-	  && (info->symbolic
+	  && (SYMBOLIC_BIND (info, h)
 	      || h->dynindx == -1 || h->forced_local) && h->def_regular)
 	{
 	  asection *s = h->root.u.def.section;
@@ -2449,7 +2449,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	      else if (h != NULL
 		       && h->dynindx != -1
 		       && (!info->shared
-			   || !info->symbolic
+			   || !SYMBOLIC_BIND (info, h)
 			   || !h->def_regular))
 		{
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);

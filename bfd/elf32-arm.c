@@ -8449,7 +8449,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  else if (h != NULL
 		   && h->dynindx != -1
 		   && (!info->shared
-		       || !info->symbolic
+		       || !SYMBOLIC_BIND (info, h)
 		       || !h->def_regular))
 	    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	  else

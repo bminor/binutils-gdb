@@ -1,3 +1,17 @@
+2015-07-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use SYMBOLIC_BIND to
+	check if a symbol should be bound symbolically.
+	* elf32-hppa.c (elf32_hppa_check_relocs,
+	elf32_hppa_adjust_dynamic_symbol, elf32_hppa_relocate_section,
+	elf32_hppa_finish_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_check_relocs,
+	elf_m68k_relocate_section): Likewise.
+	* elf32-nios2.c (nios2_elf32_relocate_section,
+	nios2_elf32_check_relocs, allocate_dynrelocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_finish_dynamic_symbol,
+	elf32_tic6x_relocate_section): Likewise.
+
 2015-07-24  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (_bfd_elf_assign_file_positions_for_non_load): Use .rela
