@@ -125,8 +125,12 @@ proc run_host_cmd { prog command } {
 
 proc run_host_cmd_yesno { prog command } {
     global exec_output
+    global errcnt warncnt
 
     set exec_output [prune_warnings [run_host_cmd "$prog" "$command"]]
+    # Ignore error and warning.
+    set errcnt 0
+    set warncnt 0
     if [string match "" $exec_output] then {
 	return 1;
     }
