@@ -1,3 +1,11 @@
+2015-07-26  Doug Kwan  <dougkwan@google.com>
+
+	Apply from master
+	2015-07-26  Doug Kwan  <dougkwan@google.com>
+
+	* testsuite/arm_unaligned_reloc.{s,sh}: Make test less sensitive to
+	  disassembler output format.
+
 2015-07-06  Doug Kwan  <dougkwan@google.com>
 
 	Apply from master
