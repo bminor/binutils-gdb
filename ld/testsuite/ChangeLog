@@ -1,5 +1,10 @@
 2015-07-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/18718
+	* ld-elf/shared.exp: Compile PR ld/18718 tests with -O2.
+
+2015-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* lib/ld-lib.exp (run_host_cmd_yesno): Set errcnt and warncnt
 	to 0.
 

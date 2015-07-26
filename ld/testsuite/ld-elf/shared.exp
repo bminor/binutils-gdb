@@ -536,7 +536,7 @@ if { [istarget *-*-linux*]
 	    { pr18718.c } \
 	    "pr18718" \
 	    "pass.out" \
-	    "-I../bfd" \
+	    "-O2 -I../bfd" \
 	] \
 	[list \
 	    "Run pr18718 with PIE (1)" \
@@ -545,7 +545,7 @@ if { [istarget *-*-linux*]
 	    { pr18718.c } \
 	    "pr18718pie1" \
 	    "pass.out" \
-	    "-fPIE -I../bfd" \
+	    "-O2 -fPIE -I../bfd" \
 	] \
 	[list \
 	    "Run pr18718 with PIE (2)" \
@@ -554,7 +554,7 @@ if { [istarget *-*-linux*]
 	    { pr18718.c } \
 	    "pr18718pie2" \
 	    "pass.out" \
-	    "-fPIE -I../bfd" \
+	    "-O2 -fPIE -I../bfd" \
 	] \
 	[list \
 	    "Run pr18718 with PIC (1)" \
@@ -563,7 +563,7 @@ if { [istarget *-*-linux*]
 	    { pr18718.c } \
 	    "pr18718pic1" \
 	    "pass.out" \
-	    "-fPIC -I../bfd" \
+	    "-O2 -fPIC -I../bfd" \
 	] \
 	[list \
 	    "Run pr18718 with PIC (2)" \
@@ -572,7 +572,7 @@ if { [istarget *-*-linux*]
 	    { pr18718.c } \
 	    "pr18718pic2" \
 	    "pass.out" \
-	    "-fPIC -I../bfd" \
+	    "-O2 -fPIC -I../bfd" \
 	] \
     ]
 }
