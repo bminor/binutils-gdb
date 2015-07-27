@@ -2532,6 +2532,27 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
   return _bfd_elf_is_local_label_name (abfd, sym->name);
 }
 
+static bfd_boolean
+uses_large_model (bfd *abfd)
+{
+  obj_attribute * attr;
+
+  if (abfd->flags & BFD_LINKER_CREATED)
+    return FALSE;
+
+  attr = elf_known_obj_attributes_proc (abfd);
+  if (attr == NULL)
+    return FALSE;
+
+  return attr[OFBA_MSPABI_Tag_Code_Model].i == 2;
+}
+
+static unsigned int
+elf32_msp430_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+{
+  return uses_large_model (abfd) ? 4 : 2;
+}
+
 /* This is gross.  The MSP430 EABI says that (sec 11.5):
 
      "An implementation may choose to use Rel or Rela
@@ -2563,6 +2584,7 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #undef  elf_backend_obj_attrs_arg_type
 #define elf_backend_obj_attrs_arg_type		elf32_msp430_obj_attrs_arg_type
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_msp430_merge_private_bfd_data
+#define elf_backend_eh_frame_address_size	elf32_msp430_eh_frame_address_size
 
 #define ELF_ARCH		bfd_arch_msp430
 #define ELF_MACHINE_CODE	EM_MSP430

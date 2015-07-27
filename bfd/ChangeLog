@@ -1,3 +1,9 @@
+2015-07-27  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-msp430.c (uses_large_model): New function.
+	(msp430_elf_eh_frame_address_size): New function.
+	(elf_backend_eh_frame_address_size): Define.
+
 2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/18705
