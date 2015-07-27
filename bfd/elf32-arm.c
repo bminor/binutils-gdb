@@ -16236,6 +16236,7 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 #define elf_backend_default_use_rela_p 0
 
 #define elf_backend_got_header_size	12
+#define elf_backend_extern_protected_data 1
 
 #undef  elf_backend_obj_attrs_vendor
 #define elf_backend_obj_attrs_vendor		"aeabi"
