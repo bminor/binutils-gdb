@@ -31,11 +31,11 @@ thread_func (void* arg)
 
   h = dlopen (libname, RTLD_LAZY);  /* set breakpoint here */
   if (h == NULL)
-    return;
+    return NULL;
 
   p_func = dlsym (h, "pendfunc3");
   if (p_func == NULL)
-    return;
+    return NULL;
 
   (*p_func) ();
 }

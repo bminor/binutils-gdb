@@ -1,5 +1,9 @@
 2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.mi/mi-pending.c (thread_func): Replace return with return NULL.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.mi/mi-watch.exp (test_watchpoint_triggering): Remove xfail.
 
 2015-07-27  Patrick Palka  <patrick@parcs.ath.cx>
