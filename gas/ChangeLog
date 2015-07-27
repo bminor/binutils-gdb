@@ -1,3 +1,7 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rl78.c (rl78_abs_sym): New local variable.

@@ -1,3 +1,7 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-07-26  Doug Kwan  <dougkwan@google.com>
 
 	* testsuite/arm_unaligned_reloc.{s,sh}: Make test less sensitive to

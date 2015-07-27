@@ -1,3 +1,7 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-07-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* alpha.c (OP_Jxx): Add 'U' suffix to make it unsigned.

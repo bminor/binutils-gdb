@@ -1,3 +1,7 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-07-27  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-msp430.c (uses_large_model): New function.

@@ -1,3 +1,7 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2015-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* emulparams/elf32rl78.sh (OTHER_SECTIONS): Provide a value for
