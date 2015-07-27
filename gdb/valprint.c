@@ -675,6 +675,38 @@ generic_val_print_int (struct type *type, const gdb_byte *valaddr,
     val_print_type_code_int (type, valaddr + embedded_offset, stream);
 }
 
+/* generic_val_print helper for TYPE_CODE_CHAR.  */
+
+static void
+generic_val_print_char (struct type *type, struct type *unresolved_type,
+			const gdb_byte *valaddr, int embedded_offset,
+			struct ui_file *stream,
+			const struct value *original_value,
+			const struct value_print_options *options)
+{
+  LONGEST val;
+
+  if (options->format || options->output_format)
+    {
+      struct value_print_options opts = *options;
+
+      opts.format = (options->format ? options->format
+		     : options->output_format);
+      val_print_scalar_formatted (type, valaddr, embedded_offset,
+				  original_value, &opts, 0, stream);
+    }
+  else
+    {
+      val = unpack_long (type, valaddr + embedded_offset);
+      if (TYPE_UNSIGNED (type))
+	fprintf_filtered (stream, "%u", (unsigned int) val);
+      else
+	fprintf_filtered (stream, "%d", (int) val);
+      fputs_filtered (" ", stream);
+      LA_PRINT_CHAR (val, unresolved_type, stream);
+    }
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -695,7 +727,6 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 		   const struct generic_val_print_decorations *decorations)
 {
   struct type *unresolved_type = type;
-  LONGEST val;
 
   type = check_typedef (type);
   switch (TYPE_CODE (type))
@@ -758,25 +789,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_CHAR:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, &opts, 0, stream);
-	}
-      else
-	{
-	  val = unpack_long (type, valaddr + embedded_offset);
-	  if (TYPE_UNSIGNED (type))
-	    fprintf_filtered (stream, "%u", (unsigned int) val);
-	  else
-	    fprintf_filtered (stream, "%d", (int) val);
-	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR (val, unresolved_type, stream);
-	}
+      generic_val_print_char (type, unresolved_type, valaddr, embedded_offset,
+			      stream, original_value, options);
       break;
 
     case TYPE_CODE_FLT:
