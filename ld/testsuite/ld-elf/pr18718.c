@@ -2,6 +2,7 @@
 #include <bfd_stdint.h>
 
 extern void foo (void);
+extern void check_ptr_eq (void *, void *);
 
 void
 new_foo (void)
@@ -21,6 +22,7 @@ int
 main(void)
 {
   bar ();
+  check_ptr_eq (&foo, &new_foo);
   printf("PASS\n");
   return 0;
 }
