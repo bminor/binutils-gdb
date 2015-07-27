@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# ver_test_4.sh -- test that version symbol is visible.
+# ver_test_13.sh -- a test case for version script matching
 
-# Copyright (C) 2008-2015 Free Software Foundation, Inc.
-# Written by Ian Lance Taylor <iant@google.com>.
+# Copyright (C) 2015 Free Software Foundation, Inc.
+# Written by Cary Coutant <ccoutant@gmail.com>.
 
 # This file is part of gold.
 
@@ -22,24 +22,38 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+# This test verifies that a symbol declared with .symver as a
+# non-default version does not get overridden by the version
+# script and declared as a default version.
+# (See PR gold/18703.)
+
 check()
 {
-    if ! sed '/\.symtab/q' "$1" | grep -q "$2"
+    if ! grep -q "$2" "$1"
     then
 	echo "Did not find expected symbol in $1:"
 	echo "   $2"
 	echo ""
 	echo "Actual output below:"
-	sed '/\.symtab/q' "$1"
+	cat "$1"
 	exit 1
     fi
 }
 
-check ver_test_4.syms "t1_2\$"
-check ver_test_4.syms "t1_2@@VER2"
-check ver_test_4.syms "t2_2@VER1"
-check ver_test_4.syms "t2_2@@VER2"
-check ver_test_4.syms "GLOBAL.*ABS.*VER1"
-check ver_test_4.syms "GLOBAL.*ABS.*VER2"
+check_missing()
+{
+    if grep -q "$2" "$1"
+    then
+	echo "Found unexpected symbol in $1:"
+	echo "   $2"
+	echo ""
+	echo "Actual output below:"
+	cat "$1"
+	exit 1
+    fi
+}
+
+check ver_test_13.syms "foo@VER_0$"
+check_missing ver_test_13.syms "foo@@VER_0"
 
 exit 0

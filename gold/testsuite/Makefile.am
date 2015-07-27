@@ -1563,6 +1563,15 @@ ver_test_12_LDADD = ver_test_12.o
 ver_test_12.o: gcctestdir/ld ver_test_1.o ver_test_2.o ver_test_4.o
 	gcctestdir/ld -r -o $@ ver_test_1.o ver_test_2.o ver_test_4.o
 
+check_SCRIPTS += ver_test_13.sh
+check_DATA += ver_test_13.syms
+ver_test_13.syms: ver_test_13.so
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
+ver_test_13.so: gcctestdir/ld ver_test_13.o ver_test_13.script
+	$(LINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_13.script ver_test_13.o
+ver_test_13.o: ver_test_13.c
+	$(COMPILE) -c -fpic -o $@ $<
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc
