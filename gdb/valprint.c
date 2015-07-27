@@ -425,6 +425,29 @@ generic_val_print_array (struct type *type, const gdb_byte *valaddr,
 
 }
 
+/* generic_val_print helper for TYPE_CODE_PTR.  */
+
+static void
+generic_val_print_ptr (struct type *type, const gdb_byte *valaddr,
+		       int embedded_offset, struct ui_file *stream,
+		       const struct value *original_value,
+		       const struct value_print_options *options)
+{
+  if (options->format && options->format != 's')
+    {
+      val_print_scalar_formatted (type, valaddr, embedded_offset,
+				  original_value, options, 0, stream);
+    }
+  else
+    {
+      struct type *unresolved_elttype = TYPE_TARGET_TYPE(type);
+      struct type *elttype = check_typedef (unresolved_elttype);
+      CORE_ADDR addr = unpack_pointer (type, valaddr + embedded_offset);
+
+      print_unpacked_pointer (type, elttype, addr, stream, options);
+    }
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -447,10 +470,9 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
   struct gdbarch *gdbarch = get_type_arch (type);
   unsigned int i = 0;	/* Number of characters printed.  */
   unsigned len;
-  struct type *elttype, *unresolved_elttype;
+  struct type *elttype;
   struct type *unresolved_type = type;
   LONGEST val;
-  CORE_ADDR addr;
 
   type = check_typedef (type);
   switch (TYPE_CODE (type))
@@ -466,16 +488,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_PTR:
-      if (options->format && options->format != 's')
-	{
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, options, 0, stream);
-	  break;
-	}
-      unresolved_elttype = TYPE_TARGET_TYPE (type);
-      elttype = check_typedef (unresolved_elttype);
-      addr = unpack_pointer (type, valaddr + embedded_offset);
-      print_unpacked_pointer (type, elttype, addr, stream, options);
+      generic_val_print_ptr (type, valaddr, embedded_offset, stream,
+			     original_value, options);
       break;
 
     case TYPE_CODE_REF:

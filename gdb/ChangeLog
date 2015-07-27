@@ -1,5 +1,11 @@
 2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* valprint.c (generic_val_print): Factor out pointer
+	printing code to ...
+	(generic_val_print_ptr): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* valprint.c (generic_val_print): Factor out array
 	printing code to ...
 	(generic_val_print_array): ... this new function.
