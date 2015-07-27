@@ -461,6 +461,54 @@ generic_val_print_memberptr (struct type *type, const gdb_byte *valaddr,
 			      original_value, options, 0, stream);
 }
 
+/* generic_val_print helper for TYPE_CODE_REF.  */
+
+static void
+generic_val_print_ref (struct type *type, const gdb_byte *valaddr,
+		       int embedded_offset, struct ui_file *stream, int recurse,
+		       const struct value *original_value,
+		       const struct value_print_options *options)
+{
+  struct gdbarch *gdbarch = get_type_arch (type);
+  struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+
+  if (options->addressprint)
+    {
+      CORE_ADDR addr
+	= extract_typed_address (valaddr + embedded_offset, type);
+
+      fprintf_filtered (stream, "@");
+      fputs_filtered (paddress (gdbarch, addr), stream);
+      if (options->deref_ref)
+	fputs_filtered (": ", stream);
+    }
+  /* De-reference the reference.  */
+  if (options->deref_ref)
+    {
+      if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
+	{
+	  struct value *deref_val;
+
+	  deref_val = coerce_ref_if_computed (original_value);
+	  if (deref_val != NULL)
+	    {
+	      /* More complicated computed references are not supported.  */
+	      gdb_assert (embedded_offset == 0);
+	    }
+	  else
+	    deref_val = value_at (TYPE_TARGET_TYPE (type),
+				  unpack_pointer (type,
+						  (valaddr
+						   + embedded_offset)));
+
+	  common_val_print (deref_val, stream, recurse, options,
+			    current_language);
+	}
+      else
+	fputs_filtered ("???", stream);
+    }
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -483,7 +531,6 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
   struct gdbarch *gdbarch = get_type_arch (type);
   unsigned int i = 0;	/* Number of characters printed.  */
   unsigned len;
-  struct type *elttype;
   struct type *unresolved_type = type;
   LONGEST val;
 
@@ -506,42 +553,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_REF:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      if (options->addressprint)
-	{
-	  CORE_ADDR addr
-	    = extract_typed_address (valaddr + embedded_offset, type);
-
-	  fprintf_filtered (stream, "@");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
-	  if (options->deref_ref)
-	    fputs_filtered (": ", stream);
-	}
-      /* De-reference the reference.  */
-      if (options->deref_ref)
-	{
-	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
-	    {
-	      struct value *deref_val;
-
-	      deref_val = coerce_ref_if_computed (original_value);
-	      if (deref_val != NULL)
-		{
-		  /* More complicated computed references are not supported.  */
-		  gdb_assert (embedded_offset == 0);
-		}
-	      else
-		deref_val = value_at (TYPE_TARGET_TYPE (type),
-				      unpack_pointer (type,
-						      (valaddr
-						       + embedded_offset)));
-
-	      common_val_print (deref_val, stream, recurse, options,
-				current_language);
-	    }
-	  else
-	    fputs_filtered ("???", stream);
-	}
+      generic_val_print_ref (type, valaddr, embedded_offset, stream, recurse,
+			     original_value, options);
       break;
 
     case TYPE_CODE_ENUM:

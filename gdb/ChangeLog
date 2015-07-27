@@ -1,5 +1,11 @@
 2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* valprint.c (generic_val_print): Factor out reference
+	printing code to ...
+	(generic_val_print_ref): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* valprint.c (generic_val_print): Factor out memberptr
 	printing code to ...
 	(generic_val_print_memberptr): ... this new function.
