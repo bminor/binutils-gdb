@@ -1,5 +1,13 @@
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/default.exp (NOPIE_CFLAGS): New.
+	(NOPIE_LDFLAGS): Likewise.
+	* ld-size/size.exp (run_cc_link_tests): Add $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS if needed.
+	(run_ld_link_exec_tests): Add $NOPIE_CFLAGS if needed.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-srec/srec.exp (CC): Save and restore.  Append $PLT_CFLAGS.
 	(CXX): Likewise.
 
