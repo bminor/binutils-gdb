@@ -1,5 +1,10 @@
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-scripts/crossref.exp (CC): Save and restore.  Append
+	$PLT_CFLAGS.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-i386/i386.exp (run_cc_link_tests): Add $PLT_CFLAGS to
 	-fPIC if needed.
 	* ld-x86-64/mpx.exp (run_cc_link_tests): Likewise.
