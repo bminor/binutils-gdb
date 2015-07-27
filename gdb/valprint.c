@@ -741,6 +741,37 @@ generic_val_print_decfloat (struct type *type, const gdb_byte *valaddr,
     print_decimal_floating (valaddr + embedded_offset, type, stream);
 }
 
+/* generic_val_print helper for TYPE_CODE_COMPLEX.  */
+
+static void
+generic_val_print_complex (struct type *type, const gdb_byte *valaddr,
+			   int embedded_offset, struct ui_file *stream,
+			   const struct value *original_value,
+			   const struct value_print_options *options,
+			   const struct generic_val_print_decorations
+			     *decorations)
+{
+  fprintf_filtered (stream, "%s", decorations->complex_prefix);
+  if (options->format)
+    val_print_scalar_formatted (TYPE_TARGET_TYPE (type), valaddr,
+				embedded_offset, original_value, options, 0,
+				stream);
+  else
+    print_floating (valaddr + embedded_offset, TYPE_TARGET_TYPE (type),
+		    stream);
+  fprintf_filtered (stream, "%s", decorations->complex_infix);
+  if (options->format)
+    val_print_scalar_formatted (TYPE_TARGET_TYPE (type), valaddr,
+				embedded_offset
+				+ TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
+				original_value, options, 0, stream);
+  else
+    print_floating (valaddr + embedded_offset
+		    + TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
+		    TYPE_TARGET_TYPE (type), stream);
+  fprintf_filtered (stream, "%s", decorations->complex_suffix);
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -854,29 +885,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_COMPLEX:
-      fprintf_filtered (stream, "%s", decorations->complex_prefix);
-      if (options->format)
-	val_print_scalar_formatted (TYPE_TARGET_TYPE (type),
-				    valaddr, embedded_offset,
-				    original_value, options, 0, stream);
-      else
-	print_floating (valaddr + embedded_offset,
-			TYPE_TARGET_TYPE (type),
-			stream);
-      fprintf_filtered (stream, "%s", decorations->complex_infix);
-      if (options->format)
-	val_print_scalar_formatted (TYPE_TARGET_TYPE (type),
-				    valaddr,
-				    embedded_offset
-				    + TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
-				    original_value,
-				    options, 0, stream);
-      else
-	print_floating (valaddr + embedded_offset
-			+ TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
-			TYPE_TARGET_TYPE (type),
-			stream);
-      fprintf_filtered (stream, "%s", decorations->complex_suffix);
+      generic_val_print_complex (type, valaddr, embedded_offset, stream,
+				 original_value, options, decorations);
       break;
 
     case TYPE_CODE_UNION:
