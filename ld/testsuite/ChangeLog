@@ -1,5 +1,10 @@
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-srec/srec.exp (CC): Save and restore.  Append $PLT_CFLAGS.
+	(CXX): Likewise.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-shared/shared.exp: Pass $PLT_CFLAGS to ld_compile.
 
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
