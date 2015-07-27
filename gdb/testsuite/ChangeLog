@@ -1,5 +1,10 @@
 2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* gdb.base/batch-preserve-term-settings.exp
+	(test_terminal_settings_preserved_after_cli_exit): New test.
+
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* gdb.base/batch-preserve-term-settings.exp: Remove top-level
 	manipulation of saved_gdbflags.
 	(test_terminal_settings_preserved): Remove global declaration of

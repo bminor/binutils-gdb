@@ -176,4 +176,96 @@ proc test_terminal_settings_preserved {} {
     exit_shell
 }
 
-test_terminal_settings_preserved
+# Check that quitting from the CLI via the "quit" command does not leave the
+# terminal in the wrong state.  The GDB commands CMDS are executed before
+# quitting.
+
+proc test_terminal_settings_preserved_after_cli_exit { cmds } {
+    global file_arg
+    global GDB INTERNAL_GDBFLAGS GDBFLAGS
+    global gdb_prompt
+    global shell_prompt_re
+
+    if ![spawn_shell] {
+	return
+    }
+
+    set saved_gdbflags $GDBFLAGS
+
+    set stty_supported [run_stty "stty before" stty_before]
+
+    set test "start gdb"
+    send_gdb "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts] --args \"$file_arg\"\n"
+    gdb_expect {
+	-re "$gdb_prompt $" {
+	    pass $test
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+	eof {
+	    fail "$test (eof)"
+	}
+    }
+
+    foreach cmd $cmds {
+	set test "run command $cmd"
+	send_gdb "$cmd\n"
+	gdb_expect {
+	    -re "$gdb_prompt $" {
+		pass $test
+	    }
+	    timeout {
+		fail "$test (timeout)"
+	    }
+	    eof {
+		fail "$test (eof)"
+	    }
+	}
+    }
+
+    set test "quit gdb"
+    send_gdb "quit\n"
+    gdb_expect {
+	-re "(y or n)" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	-re ".*$shell_prompt_re$" {
+	    pass $test
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+	eof {
+	    fail "$test (eof)"
+	}
+    }
+
+    set test "terminal settings preserved"
+    if $stty_supported {
+	run_stty "stty after" stty_after
+
+	gdb_assert [string equal $stty_before $stty_after] $test
+    } else {
+	unsupported "$test (no stty)"
+    }
+
+    exit_shell
+}
+
+with_test_prefix "batch run" {
+    test_terminal_settings_preserved
+}
+
+with_test_prefix "cli exit" {
+    test_terminal_settings_preserved_after_cli_exit { }
+}
+
+with_test_prefix "cli exit after start cmd" {
+    test_terminal_settings_preserved_after_cli_exit { "start" }
+}
+
+with_test_prefix "cli exit after run cmd" {
+    test_terminal_settings_preserved_after_cli_exit { "run" }
+}

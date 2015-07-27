@@ -1,5 +1,11 @@
 2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* top.c: Include "tui/tui.h".
+	(undo_terminal_modifications_before_exit): New static function.
+	(quit_force): Use it.
+
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* target.c (terminal_state): Initialize to terminal_is_ours.
 
 2015-07-29  Yao Qi  <yao.qi@linaro.org>

@@ -67,6 +67,10 @@
 #include "tracepoint.h"
 #include "inf-loop.h"
 
+#if defined(TUI)
+# include "tui/tui.h"
+#endif
+
 extern void initialize_all_files (void);
 
 #define PROMPT(X) the_prompts.prompt_stack[the_prompts.top + X].prompt
@@ -1486,6 +1490,21 @@ quit_confirm (void)
   return qr;
 }
 
+/* Prepare to exit GDB cleanly by undoing any changes made to the
+   terminal so that we leave the terminal in the state we acquired it.  */
+
+static void
+undo_terminal_modifications_before_exit (void)
+{
+  target_terminal_ours ();
+#if defined(TUI)
+  tui_disable ();
+#endif
+  if (async_command_editing_p)
+    gdb_disable_readline ();
+}
+
+
 /* Quit without asking for confirmation.  */
 
 void
@@ -1493,6 +1512,8 @@ quit_force (char *args, int from_tty)
 {
   int exit_code = 0;
   struct qt_args qt;
+
+  undo_terminal_modifications_before_exit ();
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression.  */
