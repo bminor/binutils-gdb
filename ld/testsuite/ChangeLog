@@ -1,6 +1,13 @@
 2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/18705
+	* ld-aarch64/protected-data.d: New.
+	* ld-aarch64/protected-data.s: New.
+	* ld-aarch64/aarch64-elf.exp: Add new test.
+
+2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18705
 	* ld-arm/protected-data.d: New.
 	* ld-arm/protected-data.s: New.
 	* ld-arm/arm-elf.exp: Add new test.

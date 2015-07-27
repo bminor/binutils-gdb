@@ -8655,6 +8655,7 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_rela_normal        1
 #define elf_backend_got_header_size (GOT_ENTRY_SIZE * 3)
 #define elf_backend_default_execstack  0
+#define elf_backend_extern_protected_data 1
 
 #undef  elf_backend_obj_attrs_section
 #define elf_backend_obj_attrs_section		".ARM.attributes"

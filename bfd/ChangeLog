@@ -1,6 +1,11 @@
 2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/18705
+	* elfnn-aarch64.c (elf_backend_extern_protected_data): Define.
+
+2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18705
 	* elf32-arm.c (elf_backend_extern_protected_data): Define.
 
 2015-07-25  H.J. Lu  <hongjiu.lu@intel.com>
