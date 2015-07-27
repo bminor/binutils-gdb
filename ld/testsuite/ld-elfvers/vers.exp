@@ -575,7 +575,9 @@ proc build_executable { test source libname other mapfile verexp versymexp symex
 
 proc build_vers_lib_no_pic { test source libname other mapfile verexp versymexp symexp } {
   global shared
-  build_binary $shared "" $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
+  # Make sure that PLT is used since PLT is expected.
+  global PLT_CFLAGS
+  build_binary $shared $PLT_CFLAGS $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
 }
 
 proc build_vers_lib_pic { test source libname other mapfile verexp versymexp symexp } {
