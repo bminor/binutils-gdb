@@ -1,5 +1,10 @@
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elfvsb/elfvsb.exp (visibility_run): Pass $PLT_CFLAGS to
+	ld_compile.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elfvers/vers.exp (build_vers_lib_no_pic): Pass $PLT_CFLAGS
 	to build_binary.
 
