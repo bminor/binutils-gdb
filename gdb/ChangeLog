@@ -1,5 +1,11 @@
 2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* valprint.c (generic_val_print): Factor out float
+	printing code to ...
+	(generic_val_print_float): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* valprint.c (generic_val_print): Factor out char
 	printing code to ...
 	(generic_val_print_char): ... this new function.
