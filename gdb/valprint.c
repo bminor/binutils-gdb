@@ -594,6 +594,35 @@ generic_val_print_flags (struct type *type, const gdb_byte *valaddr,
     val_print_type_code_flags (type, valaddr + embedded_offset, stream);
 }
 
+/* generic_val_print helper for TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
+
+static void
+generic_val_print_func (struct type *type, const gdb_byte *valaddr,
+			int embedded_offset, CORE_ADDR address,
+			struct ui_file *stream,
+			const struct value *original_value,
+			const struct value_print_options *options)
+{
+  struct gdbarch *gdbarch = get_type_arch (type);
+
+  if (options->format)
+    {
+      val_print_scalar_formatted (type, valaddr, embedded_offset,
+				  original_value, options, 0, stream);
+    }
+  else
+    {
+      /* FIXME, we should consider, at least for ANSI C language,
+         eliminating the distinction made between FUNCs and POINTERs
+         to FUNCs.  */
+      fprintf_filtered (stream, "{");
+      type_print (type, "", stream, -1);
+      fprintf_filtered (stream, "} ");
+      /* Try to print what function it points to, and its address.  */
+      print_address_demangle (options, gdbarch, address, stream, demangle);
+    }
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -613,7 +642,6 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 		   const struct value_print_options *options,
 		   const struct generic_val_print_decorations *decorations)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
   struct type *unresolved_type = type;
   LONGEST val;
 
@@ -652,20 +680,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      if (options->format)
-	{
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, options, 0, stream);
-	  break;
-	}
-      /* FIXME, we should consider, at least for ANSI C language,
-         eliminating the distinction made between FUNCs and POINTERs
-         to FUNCs.  */
-      fprintf_filtered (stream, "{");
-      type_print (type, "", stream, -1);
-      fprintf_filtered (stream, "} ");
-      /* Try to print what function it points to, and its address.  */
-      print_address_demangle (options, gdbarch, address, stream, demangle);
+      generic_val_print_func (type, valaddr, embedded_offset, address, stream,
+			      original_value, options);
       break;
 
     case TYPE_CODE_BOOL:
