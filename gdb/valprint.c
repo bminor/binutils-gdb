@@ -726,6 +726,21 @@ generic_val_print_float (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* generic_val_print helper for TYPE_CODE_DECFLOAT.  */
+
+static void
+generic_val_print_decfloat (struct type *type, const gdb_byte *valaddr,
+			    int embedded_offset, struct ui_file *stream,
+			    const struct value *original_value,
+			    const struct value_print_options *options)
+{
+  if (options->format)
+    val_print_scalar_formatted (type, valaddr, embedded_offset, original_value,
+				options, 0, stream);
+  else
+    print_decimal_floating (valaddr + embedded_offset, type, stream);
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -818,12 +833,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_DECFLOAT:
-      if (options->format)
-	val_print_scalar_formatted (type, valaddr, embedded_offset,
-				    original_value, options, 0, stream);
-      else
-	print_decimal_floating (valaddr + embedded_offset,
-				type, stream);
+      generic_val_print_decfloat (type, valaddr, embedded_offset, stream,
+				  original_value, options);
       break;
 
     case TYPE_CODE_VOID:
