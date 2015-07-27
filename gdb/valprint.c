@@ -386,6 +386,45 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
     fputs_filtered (paddress (gdbarch, address), stream);
 }
 
+/* generic_val_print helper for TYPE_CODE_ARRAY.  */
+
+static void
+generic_val_print_array (struct type *type, const gdb_byte *valaddr,
+		   int embedded_offset, CORE_ADDR address,
+		   struct ui_file *stream, int recurse,
+		   const struct value *original_value,
+		   const struct value_print_options *options)
+{
+  struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+  struct type *elttype = check_typedef (unresolved_elttype);
+
+  if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
+    {
+      LONGEST low_bound, high_bound;
+
+      if (!get_array_bounds (type, &low_bound, &high_bound))
+	error (_("Could not determine the array high bound"));
+
+      if (options->prettyformat_arrays)
+	{
+	  print_spaces_filtered (2 + 2 * recurse, stream);
+	}
+
+      fprintf_filtered (stream, "{");
+      val_print_array_elements (type, valaddr, embedded_offset,
+				address, stream,
+				recurse, original_value, options, 0);
+      fprintf_filtered (stream, "}");
+    }
+  else
+    {
+      /* Array of unspecified length: treat like pointer to first elt.  */
+      print_unpacked_pointer (type, elttype, address + embedded_offset, stream,
+			      options);
+    }
+
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -417,31 +456,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      unresolved_elttype = TYPE_TARGET_TYPE (type);
-      elttype = check_typedef (unresolved_elttype);
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
-	{
-          LONGEST low_bound, high_bound;
-
-          if (!get_array_bounds (type, &low_bound, &high_bound))
-            error (_("Could not determine the array high bound"));
-
-	  if (options->prettyformat_arrays)
-	    {
-	      print_spaces_filtered (2 + 2 * recurse, stream);
-	    }
-
-	  fprintf_filtered (stream, "{");
-	  val_print_array_elements (type, valaddr, embedded_offset,
-				    address, stream,
-				    recurse, original_value, options, 0);
-	  fprintf_filtered (stream, "}");
-	  break;
-	}
-      /* Array of unspecified length: treat like pointer to first
-	 elt.  */
-      addr = address + embedded_offset;
-      print_unpacked_pointer (type, elttype, addr, stream, options);
+      generic_val_print_array (type, valaddr, embedded_offset, address, stream,
+			       recurse, original_value, options);
       break;
 
     case TYPE_CODE_MEMBERPTR:
