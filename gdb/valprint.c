@@ -578,6 +578,22 @@ generic_val_print_enum (struct type *type, const gdb_byte *valaddr,
     print_longest (stream, 'd', 0, val);
 }
 
+/* generic_val_print helper for TYPE_CODE_FLAGS.  */
+
+static void
+generic_val_print_flags (struct type *type, const gdb_byte *valaddr,
+			 int embedded_offset, struct ui_file *stream,
+			 const struct value *original_value,
+			 const struct value_print_options *options)
+
+{
+  if (options->format)
+    val_print_scalar_formatted (type, valaddr, embedded_offset, original_value,
+				options, 0, stream);
+  else
+    val_print_type_code_flags (type, valaddr + embedded_offset, stream);
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -630,12 +646,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_FLAGS:
-      if (options->format)
-	val_print_scalar_formatted (type, valaddr, embedded_offset,
-				    original_value, options, 0, stream);
-      else
-	val_print_type_code_flags (type, valaddr + embedded_offset,
-				   stream);
+      generic_val_print_flags (type, valaddr, embedded_offset, stream,
+			       original_value, options);
       break;
 
     case TYPE_CODE_FUNC:
