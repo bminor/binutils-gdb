@@ -359,6 +359,33 @@ val_print_invalid_address (struct ui_file *stream)
   fprintf_filtered (stream, _("<invalid address>"));
 }
 
+/* Print a pointer based on the type of its target.
+
+   Arguments to this functions are roughly the same as those in
+   generic_val_print.  A difference is that ADDRESS is the address to print,
+   with embedded_offset already added.  ELTTYPE represents
+   the pointed type after check_typedef.  */
+
+static void
+print_unpacked_pointer (struct type *type, struct type *elttype,
+			CORE_ADDR address, struct ui_file *stream,
+			const struct value_print_options *options)
+{
+  struct gdbarch *gdbarch = get_type_arch (type);
+
+  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+    {
+      /* Try to print what function it points to.  */
+      print_function_pointer_address (options, gdbarch, address, stream);
+      return;
+    }
+
+  if (options->symbol_print)
+    print_address_demangle (options, gdbarch, address, stream, demangle);
+  else if (options->addressprint)
+    fputs_filtered (paddress (gdbarch, address), stream);
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -414,7 +441,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       /* Array of unspecified length: treat like pointer to first
 	 elt.  */
       addr = address + embedded_offset;
-      goto print_unpacked_pointer;
+      print_unpacked_pointer (type, elttype, addr, stream, options);
+      break;
 
     case TYPE_CODE_MEMBERPTR:
       val_print_scalar_formatted (type, valaddr, embedded_offset,
@@ -430,22 +458,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 	}
       unresolved_elttype = TYPE_TARGET_TYPE (type);
       elttype = check_typedef (unresolved_elttype);
-	{
-	  addr = unpack_pointer (type, valaddr + embedded_offset);
-	print_unpacked_pointer:
-
-	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
-	    {
-	      /* Try to print what function it points to.  */
-	      print_function_pointer_address (options, gdbarch, addr, stream);
-	      return;
-	    }
-
-	  if (options->symbol_print)
-	    print_address_demangle (options, gdbarch, addr, stream, demangle);
-	  else if (options->addressprint)
-	    fputs_filtered (paddress (gdbarch, addr), stream);
-	}
+      addr = unpack_pointer (type, valaddr + embedded_offset);
+      print_unpacked_pointer (type, elttype, addr, stream, options);
       break;
 
     case TYPE_CODE_REF:

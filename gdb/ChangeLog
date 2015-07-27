@@ -1,3 +1,9 @@
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out
+	print_unpacked_pointer code to ...
+	(print_unpacked_pointer): ... this new function.
+
 2015-07-27  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* event-top.c (handle_sigterm): Don't inspect
