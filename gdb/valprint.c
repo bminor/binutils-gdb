@@ -623,6 +623,37 @@ generic_val_print_func (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* generic_val_print helper for TYPE_CODE_BOOL.  */
+
+static void
+generic_val_print_bool (struct type *type, const gdb_byte *valaddr,
+			int embedded_offset, struct ui_file *stream,
+			const struct value *original_value,
+			const struct value_print_options *options,
+			const struct generic_val_print_decorations *decorations)
+{
+  LONGEST val;
+
+  if (options->format || options->output_format)
+    {
+      struct value_print_options opts = *options;
+      opts.format = (options->format ? options->format
+		     : options->output_format);
+      val_print_scalar_formatted (type, valaddr, embedded_offset,
+				  original_value, &opts, 0, stream);
+    }
+  else
+    {
+      val = unpack_long (type, valaddr + embedded_offset);
+      if (val == 0)
+	fputs_filtered (decorations->false_name, stream);
+      else if (val == 1)
+	fputs_filtered (decorations->true_name, stream);
+      else
+	print_longest (stream, 'd', 0, val);
+    }
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -685,24 +716,8 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_BOOL:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, &opts, 0, stream);
-	}
-      else
-	{
-	  val = unpack_long (type, valaddr + embedded_offset);
-	  if (val == 0)
-	    fputs_filtered (decorations->false_name, stream);
-	  else if (val == 1)
-	    fputs_filtered (decorations->true_name, stream);
-	  else
-	    print_longest (stream, 'd', 0, val);
-	}
+      generic_val_print_bool (type, valaddr, embedded_offset, stream,
+			      original_value, options, decorations);
       break;
 
     case TYPE_CODE_RANGE:
