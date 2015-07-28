@@ -761,6 +761,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	}
 	if { $program == "" \
+                 && $opts(map) == "" \
                  && $opts(warning) == "" \
                  && $opts(warning_output) == "" \
                  && $opts(error) == "" \
@@ -994,6 +995,10 @@ proc run_dump_test { name {extra_options {}} } {
                 fail "$testname (map file check)"
             } else {
                 pass "$testname (map file check)"
+            }
+
+            if { $program == "" } then {
+                return
             }
         }
     } else {

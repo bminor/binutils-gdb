@@ -1,5 +1,10 @@
 2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ld/ld-lib.exp (run_dump_test): When using the map option, no
+	program is required.
+
+2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ld/ld-lib.exp (run_dump_test): Add error_output and
 	warning_output options.
 
