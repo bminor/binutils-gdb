@@ -1,3 +1,8 @@
+2015-07-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* configure.in: Add asprintf and vasprintf to AC_CHECK_DECLS.
+	* config.in, configure: Regenerate.
+
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
