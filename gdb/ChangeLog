@@ -1,5 +1,9 @@
 2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* value.c (struct value): Update comments.
+
+2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdbtypes.c (type_length_units): New function.
 	* gdbtypes.h (type_length_units): New declaration.
 	(struct type) <length>: Update comment.

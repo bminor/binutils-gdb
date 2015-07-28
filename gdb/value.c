@@ -234,11 +234,11 @@ struct value
     } computed;
   } location;
 
-  /* Describes offset of a value within lval of a structure in bytes.
-     If lval == lval_memory, this is an offset to the address.  If
-     lval == lval_register, this is a further offset from
-     location.address within the registers structure.  Note also the
-     member embedded_offset below.  */
+  /* Describes offset of a value within lval of a structure in target
+     addressable memory units.  If lval == lval_memory, this is an offset to
+     the address.  If lval == lval_register, this is a further offset from
+     location.address within the registers structure.  Note also the member
+     embedded_offset below.  */
   int offset;
 
   /* Only used for bitfields; number of bits contained in them.  */
@@ -291,19 +291,19 @@ struct value
 
      When we store the entire object, `enclosing_type' is the run-time
      type -- the complete object -- and `embedded_offset' is the
-     offset of `type' within that larger type, in bytes.  The
-     value_contents() macro takes `embedded_offset' into account, so
-     most GDB code continues to see the `type' portion of the value,
-     just as the inferior would.
+     offset of `type' within that larger type, in target addressable memory
+     units.  The value_contents() macro takes `embedded_offset' into account,
+     so most GDB code continues to see the `type' portion of the value, just
+     as the inferior would.
 
      If `type' is a pointer to an object, then `enclosing_type' is a
      pointer to the object's run-time type, and `pointed_to_offset' is
-     the offset in bytes from the full object to the pointed-to object
-     -- that is, the value `embedded_offset' would have if we followed
-     the pointer and fetched the complete object.  (I don't really see
-     the point.  Why not just determine the run-time type when you
-     indirect, and avoid the special case?  The contents don't matter
-     until you indirect anyway.)
+     the offset in target addressable memory units from the full object
+     to the pointed-to object -- that is, the value `embedded_offset' would
+     have if we followed the pointer and fetched the complete object.
+     (I don't really see the point.  Why not just determine the
+     run-time type when you indirect, and avoid the special case?  The
+     contents don't matter until you indirect anyway.)
 
      If we're not doing anything fancy, `enclosing_type' is equal to
      `type', and `embedded_offset' is zero, so everything works
