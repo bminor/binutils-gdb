@@ -1,3 +1,7 @@
+2015-07-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/server-exec-info.exp: Issue a "disconnect".
+
 2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.mi/mi-pending.c (thread_func): Replace return with return NULL.
