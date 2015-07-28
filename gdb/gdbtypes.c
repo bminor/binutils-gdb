@@ -252,6 +252,17 @@ get_target_type (struct type *type)
   return type;
 }
 
+/* See gdbtypes.h.  */
+
+unsigned int
+type_length_units (struct type *type)
+{
+  struct gdbarch *arch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+
+  return TYPE_LENGTH (type) / unit_size;
+}
+
 /* Alloc a new type instance structure, fill it with some defaults,
    and point it at OLDTYPE.  Allocate the new type instance from the
    same place as OLDTYPE.  */
