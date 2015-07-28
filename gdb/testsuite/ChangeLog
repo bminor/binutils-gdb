@@ -1,3 +1,8 @@
+2015-07-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.python/py-objfile.exp: Make some tests have unique names.
+	* gdb.python/py-pp-registration.exp: Likewise.
+
 2015-07-28  Pedro Alves  <palves@redhat.com>
 
 	* gdb.server/server-exec-info.exp: Issue a "disconnect".
