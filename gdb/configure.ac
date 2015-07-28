@@ -1252,6 +1252,20 @@ if test "${with_intel_pt}" = no; then
   AC_MSG_WARN([Intel(R) Processor Trace support disabled; some features may be unavailable.])
   HAVE_LIBIPT=no
 else
+  AC_PREPROC_IFELSE(AC_LANG_SOURCE([[
+#include <linux/perf_event.h>
+#ifndef PERF_ATTR_SIZE_VER5
+# error
+#endif
+  ]]), [perf_event=yes], [perf_event=no])
+  if test "$perf_event" != yes; then
+    if test "$with_intel_pt" = yes; then
+      AC_MSG_ERROR([linux/perf_event.h missing or too old])
+    else
+      AC_MSG_WARN([linux/perf_event.h missing or too old; some features may be unavailable.])
+    fi
+  fi
+
   AC_LIB_HAVE_LINKFLAGS([ipt], [], [#include "intel-pt.h"], [pt_insn_alloc_decoder (0);])
   if test "$HAVE_LIBIPT" != yes; then
     if test "$with_intel_pt" = yes; then
