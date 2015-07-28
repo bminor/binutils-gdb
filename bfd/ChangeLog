@@ -1,3 +1,9 @@
+2015-07-28  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Do not make a new
+	segment for loaded sections after nonloaded sections if the
+	sections are on the same page.
+
 2015-07-28  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* configure.in: Add asprintf and vasprintf to AC_CHECK_DECLS.

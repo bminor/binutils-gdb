@@ -1,3 +1,7 @@
+2015-07-28  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/elfv2so.d: Update.
+
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/default.exp (NOPIE_CFLAGS): New.
