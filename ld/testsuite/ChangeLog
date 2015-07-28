@@ -1,5 +1,10 @@
 2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ld/ld-lib.exp (run_dump_test): Add error_output and
+	warning_output options.
+
+2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ld-undefined/require-defined-1.d: New file.
 	* ld-undefined/require-defined-2.d: New file.
 	* ld-undefined/require-defined-3.d: New file.

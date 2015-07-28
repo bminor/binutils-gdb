@@ -554,10 +554,18 @@ proc ld_simple_link_defsyms {} {
 #	no meaning and need not be supplied if this is present.  Multiple
 #	"error" directives append to the expected linker error message.
 #
+#   error_output: FILE
+#       Means the same as 'error', except the regular expression lines
+#       are contains in FILE.
+#
 #   warning: REGEX
 #	Expect a linker warning matching REGEX.  It is an error to issue
 #	both "error" and "warning".  Multiple "warning" directives
 #	append to the expected linker warning message.
+#
+#   warning_output: FILE
+#       Means the same as 'warning', except the regular expression
+#       lines are contains in FILE.
 #
 #   map: FILE
 #       Adding this option will cause the linker to generate a linker
@@ -617,6 +625,8 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(dump) {}
     set opts(error) {}
     set opts(warning) {}
+    set opts(error_output) {}
+    set opts(warning_output) {}
     set opts(objcopy_linked_file) {}
     set opts(objcopy_objects) {}
     set opts(map) {}
@@ -724,7 +734,7 @@ proc run_dump_test { name {extra_options {}} } {
     set program ""
     # It's meaningless to require an output-testing method when we
     # expect an error.
-    if { $opts(error) == "" } {
+    if { $opts(error) == "" && $opts(error_output) == "" } {
 	if {$opts(PROG) != ""} {
 	    switch -- $opts(PROG) {
 		objdump	{ set program objdump }
@@ -750,7 +760,11 @@ proc run_dump_test { name {extra_options {}} } {
 		}
 	    }
 	}
-	if { $program == "" && $opts(warning) == "" } {
+	if { $program == "" \
+                 && $opts(warning) == "" \
+                 && $opts(warning_output) == "" \
+                 && $opts(error) == "" \
+                 && $opts(error_output) == "" } {
 	    perror "dump program unspecified in $file.d"
 	    unresolved $subdir/$name
 	    return
@@ -848,13 +862,44 @@ proc run_dump_test { name {extra_options {}} } {
 	}
     }
 
-    set expmsg $opts(error)
-    if { $opts(warning) != "" } {
-	if { $expmsg != "" } {
-	    perror "$testname: mixing error and warning test-directives"
-	    return
-	}
-	set expmsg $opts(warning)
+    if { (($opts(warning) != "") && ($opts(error) != "")) \
+	 || (($opts(warning) != "") && ($opts(error_output) != "")) \
+	 || (($opts(warning) != "") && ($opts(warning_output) != "")) \
+	 || (($opts(error) != "") && ($opts(warning_output) != "")) \
+	 || (($opts(error) != "") && ($opts(error_output) != "")) \
+	 || (($opts(warning_output) != "") && ($opts(error_output) != "")) } {
+	perror "$testname: bad mix of warning, error, warning_output, and error_output test-directives"
+	unresolved $testname
+	return
+    }
+
+    set check_ld(source) ""
+    if { $opts(error) != "" \
+         || $opts(warning) != "" \
+         || $opts(error_output) != "" \
+         || $opts(warning_output) != "" } {
+
+        if { $opts(error) != "" || $opts(error_output) != "" } {
+            set check_ld(terminal) 1
+        } else {
+            set check_ld(terminal) 0
+        }
+
+        if { $opts(error) != "" || $opts(warning) != "" } {
+            set check_ld(source) "regex"
+            if { $opts(error) != "" } {
+                set check_ld(regex) $opts(error)
+            } else {
+                set check_ld(regex) $opts(warning)
+            }
+        } else {
+            set check_ld(source) "file"
+            if { $opts(error_output) != "" } {
+                set check_ld(file) $opts(error_output)
+            } else {
+                set check_ld(file) $opts(warning_output)
+            }
+        }
     }
 
     # Perhaps link the file(s).
@@ -908,23 +953,34 @@ proc run_dump_test { name {extra_options {}} } {
 	}
 
 	regsub "\n$" $comp_output "" comp_output
-	if { $cmdret != 0 || $comp_output != "" || $expmsg != "" } then {
+	if { $cmdret != 0 || $comp_output != "" || $check_ld(source) != "" } then {
 	    set exitstat "succeeded"
 	    if { $cmdret != 0 } { set exitstat "failed" }
-	    verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
+
+            if { $check_ld(source) == "regexp" } {
+                verbose -log "$exitstat with: <$comp_output>, expected: <$check_ld(regex)>"
+            } elseif { $check_ld(source) == "file" } {
+                verbose -log "$exitstat with: <$comp_output>, expected in file $check_ld(file)"
+                set_file_contents "tmpdir/ld.messages" "$comp_output"
+            } else {
+                verbose -log "$exitstat with: <$comp_output>, no expected output"
+            }
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
 
-	    if { ($expmsg == "") == ($comp_output == "") \
-		    && [regexp $expmsg $comp_output] \
-		    && (($cmdret == 0) == ($opts(error) == "")) } {
-		# We have the expected output from ld.
-		if { $opts(error) != "" || $program == "" } {
+	    if { (($check_ld(source) == "") == ($comp_output == "")) \
+                 && (($cmdret == 0) == ($check_ld(terminal) == 0)) \
+                 && ((($check_ld(source) == "regex") \
+                      && ($check_ld(regex) == "") == ($comp_output == "") \
+                      && [regexp $check_ld(regex) $comp_output]) \
+                     || (($check_ld(source) == "file") \
+                         && ([regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$check_ld(file)"]))) } {
+                # We have the expected output from ld.
+		if { $check_ld(terminal) || $program == "" } {
 		    pass $testname
 		    return
 		}
 	    } else {
-		verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
 		fail $testname
 		return
 	    }
