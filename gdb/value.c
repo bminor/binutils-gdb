@@ -340,6 +340,14 @@ struct value
   VEC(range_s) *optimized_out;
 };
 
+/* See value.h.  */
+
+struct gdbarch *
+get_value_arch (const struct value *value)
+{
+  return get_type_arch (value_type (value));
+}
+
 int
 value_bits_available (const struct value *value, int offset, int length)
 {

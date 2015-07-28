@@ -99,6 +99,10 @@ struct value *value_next (struct value *);
 
 extern struct type *value_type (const struct value *);
 
+/* Return the gdbarch associated with the value. */
+
+extern struct gdbarch *get_value_arch (const struct value *value);
+
 /* This is being used to change the type of an existing value, that
    code should instead be creating a new value with the changed type
    (but possibly shared content).  */

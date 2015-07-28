@@ -1,5 +1,10 @@
 2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* value.c (get_value_arch): New function.
+	* value.h (get_value_arch): New declaration.
+
+2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* value.c (struct value): Update comments.
 
 2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
