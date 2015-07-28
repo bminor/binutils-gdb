@@ -1,5 +1,10 @@
 2015-07-28  Robert Suchanek  <robert.suchanek@imgtec.com>
 
+	* config/tc-mips.c (mips_cpu_info_table): Add m5100 and m5101 entries.
+	* doc/c-mips.texi: Document m5100 and m5101 for -march=.
+
+2015-07-28  Robert Suchanek  <robert.suchanek@imgtec.com>
+
 	* config/tc-mips.c (mips_cpu_info_table): Add interaptiv entry.
 	* doc/c-mips.text: Document -march=interaptiv.
 
