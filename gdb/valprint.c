@@ -433,6 +433,9 @@ generic_val_print_ptr (struct type *type, const gdb_byte *valaddr,
 		       const struct value *original_value,
 		       const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+
   if (options->format && options->format != 's')
     {
       val_print_scalar_formatted (type, valaddr, embedded_offset,
@@ -442,7 +445,8 @@ generic_val_print_ptr (struct type *type, const gdb_byte *valaddr,
     {
       struct type *unresolved_elttype = TYPE_TARGET_TYPE(type);
       struct type *elttype = check_typedef (unresolved_elttype);
-      CORE_ADDR addr = unpack_pointer (type, valaddr + embedded_offset);
+      CORE_ADDR addr = unpack_pointer (type,
+				       valaddr + embedded_offset * unit_size);
 
       print_unpacked_pointer (type, elttype, addr, stream, options);
     }
@@ -520,6 +524,8 @@ generic_val_print_enum (struct type *type, const gdb_byte *valaddr,
   unsigned int i;
   unsigned int len;
   LONGEST val;
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
   if (options->format)
     {
@@ -528,7 +534,7 @@ generic_val_print_enum (struct type *type, const gdb_byte *valaddr,
       return;
     }
   len = TYPE_NFIELDS (type);
-  val = unpack_long (type, valaddr + embedded_offset);
+  val = unpack_long (type, valaddr + embedded_offset * unit_size);
   for (i = 0; i < len; i++)
     {
       QUIT;
@@ -633,6 +639,8 @@ generic_val_print_bool (struct type *type, const gdb_byte *valaddr,
 			const struct generic_val_print_decorations *decorations)
 {
   LONGEST val;
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
   if (options->format || options->output_format)
     {
@@ -644,7 +652,7 @@ generic_val_print_bool (struct type *type, const gdb_byte *valaddr,
     }
   else
     {
-      val = unpack_long (type, valaddr + embedded_offset);
+      val = unpack_long (type, valaddr + embedded_offset * unit_size);
       if (val == 0)
 	fputs_filtered (decorations->false_name, stream);
       else if (val == 1)
@@ -662,6 +670,9 @@ generic_val_print_int (struct type *type, const gdb_byte *valaddr,
 		       const struct value *original_value,
 		       const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+
   if (options->format || options->output_format)
     {
       struct value_print_options opts = *options;
@@ -672,7 +683,8 @@ generic_val_print_int (struct type *type, const gdb_byte *valaddr,
 				  original_value, &opts, 0, stream);
     }
   else
-    val_print_type_code_int (type, valaddr + embedded_offset, stream);
+    val_print_type_code_int (type, valaddr + embedded_offset * unit_size,
+			     stream);
 }
 
 /* generic_val_print helper for TYPE_CODE_CHAR.  */
@@ -685,6 +697,8 @@ generic_val_print_char (struct type *type, struct type *unresolved_type,
 			const struct value_print_options *options)
 {
   LONGEST val;
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
   if (options->format || options->output_format)
     {
@@ -697,7 +711,7 @@ generic_val_print_char (struct type *type, struct type *unresolved_type,
     }
   else
     {
-      val = unpack_long (type, valaddr + embedded_offset);
+      val = unpack_long (type, valaddr + embedded_offset * unit_size);
       if (TYPE_UNSIGNED (type))
 	fprintf_filtered (stream, "%u", (unsigned int) val);
       else
@@ -715,6 +729,9 @@ generic_val_print_float (struct type *type, const gdb_byte *valaddr,
 			 const struct value *original_value,
 			 const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+
   if (options->format)
     {
       val_print_scalar_formatted (type, valaddr, embedded_offset,
@@ -722,7 +739,7 @@ generic_val_print_float (struct type *type, const gdb_byte *valaddr,
     }
   else
     {
-      print_floating (valaddr + embedded_offset, type, stream);
+      print_floating (valaddr + embedded_offset * unit_size, type, stream);
     }
 }
 
@@ -734,11 +751,15 @@ generic_val_print_decfloat (struct type *type, const gdb_byte *valaddr,
 			    const struct value *original_value,
 			    const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+
   if (options->format)
     val_print_scalar_formatted (type, valaddr, embedded_offset, original_value,
 				options, 0, stream);
   else
-    print_decimal_floating (valaddr + embedded_offset, type, stream);
+    print_decimal_floating (valaddr + embedded_offset * unit_size, type,
+			    stream);
 }
 
 /* generic_val_print helper for TYPE_CODE_COMPLEX.  */
@@ -751,22 +772,25 @@ generic_val_print_complex (struct type *type, const gdb_byte *valaddr,
 			   const struct generic_val_print_decorations
 			     *decorations)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+
   fprintf_filtered (stream, "%s", decorations->complex_prefix);
   if (options->format)
     val_print_scalar_formatted (TYPE_TARGET_TYPE (type), valaddr,
 				embedded_offset, original_value, options, 0,
 				stream);
   else
-    print_floating (valaddr + embedded_offset, TYPE_TARGET_TYPE (type),
-		    stream);
+    print_floating (valaddr + embedded_offset * unit_size,
+		    TYPE_TARGET_TYPE (type), stream);
   fprintf_filtered (stream, "%s", decorations->complex_infix);
   if (options->format)
     val_print_scalar_formatted (TYPE_TARGET_TYPE (type), valaddr,
 				embedded_offset
-				+ TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
+				+ type_length_units (TYPE_TARGET_TYPE (type)),
 				original_value, options, 0, stream);
   else
-    print_floating (valaddr + embedded_offset
+    print_floating (valaddr + embedded_offset * unit_size
 		    + TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
 		    TYPE_TARGET_TYPE (type), stream);
   fprintf_filtered (stream, "%s", decorations->complex_suffix);
@@ -1150,6 +1174,9 @@ val_print_scalar_formatted (struct type *type,
 			    int size,
 			    struct ui_file *stream)
 {
+  struct gdbarch *arch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+
   gdb_assert (val != NULL);
   gdb_assert (valaddr == value_contents_for_printing_const (val));
 
@@ -1175,7 +1202,7 @@ val_print_scalar_formatted (struct type *type,
   else if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
     val_print_unavailable (stream);
   else
-    print_scalar_formatted (valaddr + embedded_offset, type,
+    print_scalar_formatted (valaddr + embedded_offset * unit_size, type,
 			    options, size, stream);
 }
 
@@ -1823,7 +1850,7 @@ val_print_array_elements (struct type *type,
   LONGEST low_pos, high_pos;
 
   elttype = TYPE_TARGET_TYPE (type);
-  eltlen = TYPE_LENGTH (check_typedef (elttype));
+  eltlen = type_length_units (check_typedef (elttype));
   index_type = TYPE_INDEX_TYPE (type);
 
   if (get_array_bounds (type, &low_bound, &high_bound))

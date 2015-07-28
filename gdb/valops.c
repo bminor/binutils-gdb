@@ -958,30 +958,33 @@ read_value_memory (struct value *val, int embedded_offset,
 		   int stack, CORE_ADDR memaddr,
 		   gdb_byte *buffer, size_t length)
 {
-  ULONGEST xfered = 0;
+  ULONGEST xfered_total = 0;
+  struct gdbarch *arch = get_value_arch (val);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
-  while (xfered < length)
+  while (xfered_total < length)
     {
       enum target_xfer_status status;
-      ULONGEST xfered_len;
+      ULONGEST xfered_partial;
 
       status = target_xfer_partial (current_target.beneath,
 				    TARGET_OBJECT_MEMORY, NULL,
-				    buffer + xfered, NULL,
-				    memaddr + xfered, length - xfered,
-				    &xfered_len);
+				    buffer + xfered_total * unit_size, NULL,
+				    memaddr + xfered_total,
+				    length - xfered_total,
+				    &xfered_partial);
 
       if (status == TARGET_XFER_OK)
 	/* nothing */;
       else if (status == TARGET_XFER_UNAVAILABLE)
-	mark_value_bytes_unavailable (val, embedded_offset + xfered,
-				      xfered_len);
+	mark_value_bytes_unavailable (val, embedded_offset + xfered_total,
+				      xfered_partial);
       else if (status == TARGET_XFER_EOF)
-	memory_error (TARGET_XFER_E_IO, memaddr + xfered);
+	memory_error (TARGET_XFER_E_IO, memaddr + xfered_total);
       else
-	memory_error (status, memaddr + xfered);
+	memory_error (status, memaddr + xfered_total);
 
-      xfered += xfered_len;
+      xfered_total += xfered_partial;
       QUIT;
     }
 }
@@ -1089,7 +1092,7 @@ value_assign (struct value *toval, struct value *fromval)
 	else
 	  {
 	    changed_addr = value_address (toval);
-	    changed_len = TYPE_LENGTH (type);
+	    changed_len = type_length_units (type);
 	    dest_buffer = value_contents (fromval);
 	  }
 
@@ -1280,7 +1283,7 @@ value_repeat (struct value *arg1, int count)
 
   read_value_memory (val, 0, value_stack (val), value_address (val),
 		     value_contents_all_raw (val),
-		     TYPE_LENGTH (value_enclosing_type (val)));
+		     type_length_units (value_enclosing_type (val)));
 
   return val;
 }
@@ -1606,10 +1609,11 @@ value_array (int lowbound, int highbound, struct value **elemvec)
     {
       error (_("bad array bounds (%d, %d)"), lowbound, highbound);
     }
-  typelength = TYPE_LENGTH (value_enclosing_type (elemvec[0]));
+  typelength = type_length_units (value_enclosing_type (elemvec[0]));
   for (idx = 1; idx < nelem; idx++)
     {
-      if (TYPE_LENGTH (value_enclosing_type (elemvec[idx])) != typelength)
+      if (type_length_units (value_enclosing_type (elemvec[idx]))
+	  != typelength)
 	{
 	  error (_("array elements must all be the same size"));
 	}
@@ -3812,7 +3816,7 @@ value_slice (struct value *array, int lowbound, int length)
       {
 	slice = allocate_value (slice_type);
 	value_contents_copy (slice, 0, array, offset,
-			     TYPE_LENGTH (slice_type));
+			     type_length_units (slice_type));
       }
 
     set_value_component_location (slice, array);

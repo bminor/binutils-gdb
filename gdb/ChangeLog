@@ -1,5 +1,37 @@
 2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* c-valprint.c (c_val_print_array): Consider addressable memory
+	unit size.
+	(c_val_print_ptr): Likewise.
+	(c_val_print_int): Likewise.
+	* findvar.c (read_frame_register_value): Likewise.
+	* valarith.c (find_size_for_pointer_math): Likewise.
+	(value_ptrdiff): Likewise.
+	(value_subscripted_rvalue): Likewise.
+	* valops.c (read_value_memory): Likewise (and rename variables).
+	(value_assign): Likewise.
+	(value_repeat): Likewise.
+	(value_array): Likewise.
+	(value_slice): Likewise.
+	* valprint.c (generic_val_print_ptr): Likewise.
+	(generic_val_print_enum): Likewise.
+	(generic_val_print_bool): Likewise.
+	(generic_val_print_int): Likewise.
+	(generic_val_print_char): Likewise.
+	(generic_val_print_float): Likewise.
+	(generic_val_print_decfloat): Likewise.
+	(generic_val_print_complex): Likewise.
+	(val_print_scalar_formatted): Likewise.
+	(val_print_array_elements): Likewise.
+	* value.c (set_value_parent): Likewise.
+	(value_contents_copy_raw): Likewise.
+	(set_internalvar_component): Likewise.
+	(value_primitive_field): Likewise.
+	(value_fetch_lazy): Likewise.
+	* value.h (read_value_memory): Update comment.
+
+2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* value.c (get_value_arch): New function.
 	* value.h (get_value_arch): New declaration.
 
