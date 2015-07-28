@@ -444,7 +444,7 @@ enum terminal_state
     terminal_is_ours = 2
   };
 
-static enum terminal_state terminal_state;
+static enum terminal_state terminal_state = terminal_is_ours;
 
 /* See target.h.  */
 

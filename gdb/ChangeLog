@@ -1,3 +1,7 @@
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* target.c (terminal_state): Initialize to terminal_is_ours.
+
 2015-07-29  Yao Qi  <yao.qi@linaro.org>
 
 	PR record/18691
