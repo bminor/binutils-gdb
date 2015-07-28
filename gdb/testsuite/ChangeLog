@@ -1,3 +1,12 @@
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/batch-preserve-term-settings.exp: Remove top-level
+	manipulation of saved_gdbflags.
+	(test_terminal_settings_preserved): Remove global declaration of
+	the unused variable pagination_prompt.  Remove manipulation of
+	saved_gdbflags.  Use a local variable EXTRA_GDBFLAGS instead of
+	GDBFLAGS.
+
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
 	* boards/gdbserver-base.exp: Don't set gdb,noinferiorio.

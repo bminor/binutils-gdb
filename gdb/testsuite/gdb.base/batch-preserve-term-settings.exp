@@ -27,9 +27,6 @@ if [is_remote host] {
   set file_arg [remote_download host $file_arg]
 }
 
-global GDBFLAGS
-set saved_gdbflags $GDBFLAGS
-
 # The shell's prompt.
 set shell_prompt "$ "
 set shell_prompt_re [string_to_regexp $shell_prompt]
@@ -119,8 +116,7 @@ proc run_stty {message result} {
 proc test_terminal_settings_preserved {} {
     global file_arg
     global GDB INTERNAL_GDBFLAGS GDBFLAGS
-    global gdb_prompt pagination_prompt
-    global saved_gdbflags
+    global gdb_prompt
     global shell_prompt_re
 
     if ![spawn_shell] {
@@ -130,12 +126,11 @@ proc test_terminal_settings_preserved {} {
     set stty_supported [run_stty "stty before" stty_before]
 
     set test "gdb -batch -ex run"
-    set GDBFLAGS $saved_gdbflags
-    append GDBFLAGS " -batch"
-    append GDBFLAGS " -ex \"set height unlimited\""
-    append GDBFLAGS " -ex \"start\""
-    append GDBFLAGS " --args \"$file_arg\""
-    send_gdb "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]\n"
+    append EXTRA_GDBFLAGS "-batch"
+    append EXTRA_GDBFLAGS " -ex \"set height unlimited\""
+    append EXTRA_GDBFLAGS " -ex \"start\""
+    append EXTRA_GDBFLAGS " --args \"$file_arg\""
+    send_gdb "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $EXTRA_GDBFLAGS [host_info gdb_opts]\n"
     gdb_expect {
 	-re "Don't know how to run.*$shell_prompt_re$" {
 	    unsupported $test
@@ -182,5 +177,3 @@ proc test_terminal_settings_preserved {} {
 }
 
 test_terminal_settings_preserved
-
-set GDBFLAGS $saved_gdbflags
