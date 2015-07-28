@@ -1,3 +1,8 @@
+2015-08-15  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/kill-detach-inferiors-cmd.exp: New test file.
+	* gdb.base/kill-detach-inferiors-cmd.c: New test file.
+
 2015-08-14  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.perf/lib/perftest/utils.py (select_file): Kill any existing

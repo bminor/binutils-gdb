@@ -1,3 +1,9 @@
+2015-08-15  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* inferior.c (detach_inferior_command): Don't call
+	any_thread_of_process when pid is 0.
+	(kill_inferior_command): Likewise.
+
 2015-08-14  Doug Evans  <xdje42@gmail.com>
 
 	PR gdb/11833
