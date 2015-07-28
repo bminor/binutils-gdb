@@ -492,10 +492,6 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Warn if the multiple GP values are used"), TWO_DASHES },
   { {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
     '\0', NULL, N_("Warn only once per undefined symbol"), TWO_DASHES },
-  { {"warn-orphan", no_argument, NULL, OPTION_WARN_ORPHAN},
-    '\0', NULL, N_("Warn if any orphan sections are encountered"), TWO_DASHES },
-  { {"no-warn-orphan", no_argument, NULL, OPTION_NO_WARN_ORPHAN},
-    '\0', NULL, N_("Do not warn if orphan sections are encountered (default)"), TWO_DASHES },
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
@@ -528,6 +524,9 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"print-memory-usage", no_argument, NULL, OPTION_PRINT_MEMORY_USAGE},
     '\0', NULL, N_("Report target memory usage"), TWO_DASHES },
+  { {"orphan-handling", required_argument, NULL, OPTION_ORPHAN_HANDLING},
+    '\0', N_("=MODE"), N_("Control how orphan sections are handled."),
+    TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1375,12 +1374,6 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_WARN_ONCE:
 	  config.warn_once = TRUE;
 	  break;
-	case OPTION_WARN_ORPHAN:
-	  config.warn_orphan = TRUE;
-	  break;
-	case OPTION_NO_WARN_ORPHAN:
-	  config.warn_orphan = FALSE;
-	  break;
 	case OPTION_WARN_SECTION_ALIGN:
 	  config.warn_section_align = TRUE;
 	  break;
@@ -1514,6 +1507,20 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_PRINT_MEMORY_USAGE:
 	  command_line.print_memory_usage = TRUE;
+	  break;
+
+	case OPTION_ORPHAN_HANDLING:
+	  if (strcasecmp (optarg, "place") == 0)
+	    config.orphan_handling = orphan_handling_place;
+	  else if (strcasecmp (optarg, "warn") == 0)
+	    config.orphan_handling = orphan_handling_warn;
+	  else if (strcasecmp (optarg, "error") == 0)
+	    config.orphan_handling = orphan_handling_error;
+	  else if (strcasecmp (optarg, "discard") == 0)
+	    config.orphan_handling = orphan_handling_discard;
+	  else
+	    einfo (_("%P%F: invalid argument to option"
+		     " \"--orphan-handling\"\n"));
 	  break;
 	}
     }

@@ -6,7 +6,11 @@
 * New command line option for ELF targets to compress DWARF debug
   sections, --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi].
 
-* Add --warn-orphan option to report orphan sections.
+* New command line option, --orphan-handling=[place|warn|error|discard], to
+  adjust how orphan sections are handled.  The default is 'place' which gives
+  the current behaviour, 'warn' and 'error' issue a warning or error
+  respectively when orphan sections are found, and 'discard' will discard all
+  orphan sections.
 
 * Add support for LLVM plugin.
 
