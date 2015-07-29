@@ -1,5 +1,15 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/dprintf.exp: Use standard_testfile.  Change
+	prepare_for_testing call.
+	(srcfile): Don't set.
+	(restart): New procedure.
+	(test_dprintf): New procecure, use to continue over dprintfs.
+	(test_call, test_agent): New procedures, tests moved here.
+	Restart gdb and recreate dprintfs.  Adjust expected output.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/catch-gdb-caused-signals.exp: Use gdb_test_stdio.
 
 2015-07-29  Pedro Alves  <palves@redhat.com>
