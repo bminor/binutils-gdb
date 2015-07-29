@@ -2934,59 +2934,65 @@ mmo_write_symbols_and_terminator (bfd *abfd)
       count++;
     }
 
-  for (i = 0, serno = 1; i < count && table[i] != NULL; i++)
+  /* Don't bother inspecting symbols in plugin dummy objects; their
+     symbols aren't fully inspectable.  */
+  if ((abfd->flags & BFD_PLUGIN) == 0)
     {
-      asymbol *s = table[i];
-
-      /* It's not enough to consult bfd_is_local_label, since it does not
-	 mean "local" in the sense of linkable-and-observable-after-link.
-	 Let's just check the BSF_GLOBAL flag.
-
-	 Also, don't export symbols with characters not in the allowed set.  */
-      if ((s->flags & (BSF_DEBUGGING|BSF_GLOBAL)) == BSF_GLOBAL
-	  && strspn (s->name,
-		     valid_mmo_symbol_character_set) == strlen (s->name))
+      for (i = 0, serno = 1; i < count && table[i] != NULL; i++)
 	{
-	  struct mmo_symbol sym;
-	  memset (&sym, 0, sizeof (sym));
+	  asymbol *s = table[i];
 
-	  /* Need to strip const here; strdup:ing would leak and the
-	     existing string must be safe to reuse.  */
-	  sym.name = (char *) s->name;
-	  sym.value =
-	    s->value
-	    + s->section->output_section->vma
-	    + s->section->output_offset;
+	  /* It's not enough to consult bfd_is_local_label, since it does not
+	     mean "local" in the sense of linkable-and-observable-after-link.
+	     Let's just check the BSF_GLOBAL flag.
 
-	  if (bfd_is_und_section (s->section))
-	    sym.sym_type = mmo_undef_sym;
-	  else if (strcmp (s->section->name, MMO_DATA_SECTION_NAME) == 0
-		   /* The encoding of data symbols require that the "rest"
-		      of the value fits in 6 bytes, so the upper two bytes
-		      must be 0x2000.  All other symbols get to be the
-		      absolute type.  */
-		   && (sym.value >> 48) == 0x2000)
-	    sym.sym_type = mmo_data_sym;
-	  else if (strcmp (s->section->name, MMIX_REG_SECTION_NAME) == 0)
-	    sym.sym_type = mmo_reg_sym;
-	  else if (strcmp (s->section->name,
-			   MMIX_REG_CONTENTS_SECTION_NAME) == 0)
+	     Also, don't export symbols with characters not in the
+	     allowed set.  */
+	  if ((s->flags & (BSF_DEBUGGING|BSF_GLOBAL)) == BSF_GLOBAL
+	      && strspn (s->name,
+			 valid_mmo_symbol_character_set) == strlen (s->name))
 	    {
-	      sym.sym_type = mmo_reg_sym;
-	      sym.value /= 8;
+	      struct mmo_symbol sym;
+	      memset (&sym, 0, sizeof (sym));
+
+	      /* Need to strip const here; strdup:ing would leak and the
+		 existing string must be safe to reuse.  */
+	      sym.name = (char *) s->name;
+	      sym.value =
+		s->value
+		+ s->section->output_section->vma
+		+ s->section->output_offset;
+
+	      if (bfd_is_und_section (s->section))
+		sym.sym_type = mmo_undef_sym;
+	      else if (strcmp (s->section->name, MMO_DATA_SECTION_NAME) == 0
+		       /* The encoding of data symbols require that the "rest"
+			  of the value fits in 6 bytes, so the upper two bytes
+			  must be 0x2000.  All other symbols get to be the
+			  absolute type.  */
+		       && (sym.value >> 48) == 0x2000)
+		sym.sym_type = mmo_data_sym;
+	      else if (strcmp (s->section->name, MMIX_REG_SECTION_NAME) == 0)
+		sym.sym_type = mmo_reg_sym;
+	      else if (strcmp (s->section->name,
+			       MMIX_REG_CONTENTS_SECTION_NAME) == 0)
+		{
+		  sym.sym_type = mmo_reg_sym;
+		  sym.value /= 8;
+		}
+	      else
+		sym.sym_type = mmo_abs_sym;
+
+	      /* FIXME: We assume the order of the received symbols is an
+		 ordered mapping of the serial numbers.  This is not
+		 necessarily true if we e.g. objcopy a mmo file to another and
+		 there are gaps in the numbering.  Not sure if this can
+		 happen.  Not sure what to do.  */
+	      sym.serno = serno++;
+
+	      if (! mmo_internal_add_3_sym (abfd, &root, &sym))
+		return FALSE;
 	    }
-	  else
-	    sym.sym_type = mmo_abs_sym;
-
-	  /* FIXME: We assume the order of the received symbols is an
-	     ordered mapping of the serial numbers.  This is not
-	     necessarily true if we e.g. objcopy a mmo file to another and
-	     there are gaps in the numbering.  Not sure if this can
-	     happen.  Not sure what to do.  */
-	  sym.serno = serno++;
-
-	  if (! mmo_internal_add_3_sym (abfd, &root, &sym))
-	    return FALSE;
 	}
     }
 

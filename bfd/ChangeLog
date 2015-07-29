@@ -1,3 +1,8 @@
+2015-07-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_write_symbols_and_terminator): Skip symbol-type
+	assignment loop for bfd plugin objects.
+
 2015-07-28  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): Do not make a new
