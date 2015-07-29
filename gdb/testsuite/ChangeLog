@@ -1,5 +1,9 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* boards/gdbserver-base.exp: Don't set gdb,noinferiorio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/interrupt.exp: Revert back to checking gdb,noinferiorio
 	at the top.
 
