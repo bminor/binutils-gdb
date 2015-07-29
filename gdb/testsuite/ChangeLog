@@ -1,3 +1,8 @@
+2015-07-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.python/py-objfile.exp: Fix typo that snuck in from my last
+	commit.
+
 2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.base/batch-preserve-term-settings.exp
