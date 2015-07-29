@@ -1,5 +1,13 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/complaints.exp (test_initial_complaints)
+	(test_serial_complaints, test_short_complaints): Use
+	gdb_test_stdio.
+	(test_empty_complaint): Handle $inferior_spawn_id !=
+	$gdb_spawn_id.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/varargs.exp: Use gdb_test_stdio.
 
 2015-07-29  Pedro Alves  <palves@redhat.com>
