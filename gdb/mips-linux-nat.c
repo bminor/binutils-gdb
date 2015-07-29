@@ -614,7 +614,7 @@ write_watchpoint_regs (void)
   ALL_LWPS (lp)
     {
       tid = ptid_get_lwp (lp->ptid);
-      if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror) == -1)
+      if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror, NULL) == -1)
 	perror_with_name (_("Couldn't write debug register"));
     }
   return 0;
@@ -634,7 +634,7 @@ mips_linux_new_thread (struct lwp_info *lp)
     return;
 
   tid = ptid_get_lwp (lp->ptid);
-  if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror) == -1)
+  if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror, NULL) == -1)
     perror_with_name (_("Couldn't write debug register"));
 }
 

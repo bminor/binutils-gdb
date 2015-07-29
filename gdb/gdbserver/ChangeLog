@@ -1,3 +1,8 @@
+2015-07-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-mips-low.c (mips_linux_prepare_to_resume): Add NULL as
+	ptrace's 4th parameter.
+
 2015-07-27  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv (case aarch64*-*-linux*): Don't set

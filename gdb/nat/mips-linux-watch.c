@@ -164,7 +164,7 @@ mips_linux_read_watch_registers (long lwpid,
 {
   if (force || *watch_readback_valid == 0)
     {
-      if (ptrace (PTRACE_GET_WATCH_REGS, lwpid, watch_readback) == -1)
+      if (ptrace (PTRACE_GET_WATCH_REGS, lwpid, watch_readback, NULL) == -1)
 	{
 	  *watch_readback_valid = -1;
 	  return 0;

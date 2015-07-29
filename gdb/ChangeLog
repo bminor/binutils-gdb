@@ -1,3 +1,10 @@
+2015-07-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mips-linux-nat.c (write_watchpoint_regs): Add NULL as ptrace's 4th
+	parameter.
+	(mips_linux_new_thread): Likewise.
+	* nat/mips-linux-watch.c (mips_linux_read_watch_registers): Likewise.
+
 2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* top.c: Include "tui/tui.h".
