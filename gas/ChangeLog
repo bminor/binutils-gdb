@@ -1,3 +1,40 @@
+2015-08-12  David Weatherford  <weath@cadence.com>
+
+	* config/tc-xtensa.c (struct litpool_frag, struct litpool_seg):
+	New structures.
+	(xtensa_maybe_create_literal_pool_frag): New function.
+	(litpool_seg_list, auto_litpools, auto_litpool_limit)
+	(litpool_buf, litpool_slotbuf): New static variables.
+	(option_auto_litpools, option_no_auto_litpools)
+	(option_auto_litpool_limit): New enum identifiers.
+	(md_longopts): Add entries for auto-litpools, no-auto-litpools
+	and auto-litpool-limit.
+	(md_parse_option): Handle option_auto_litpools,
+	option_no_auto_litpools and option_auto_litpool_limit.
+	(md_show_usage): Add help for --[no-]auto-litpools and
+	--auto-litpool-limit.
+	(xtensa_mark_literal_pool_location): Record a place for literal
+	pool with a call to xtensa_maybe_create_literal_pool_frag.
+	(get_literal_pool_location): Find highest priority literal pool
+	or convert candidate to literal pool when auto-litpools are used.
+	(xg_assemble_vliw_tokens): Create literal pool after jump
+	instruction.
+	(xtensa_check_frag_count): Create candidate literal pool every
+	auto_litpool_limit frags.
+	(xtensa_relax_frag): Add jump around literals to non-empty
+	literal pool.
+	(xtensa_move_literals): Estimate literal pool addresses and move
+	unreachable literals closer to their users, converting candidate
+	to literal pool if needed.
+	(xtensa_switch_to_non_abs_literal_fragment): Only emit error
+	about missing .literal_position in case auto-litpools are not
+	used.
+	* config/tc-xtensa.h (xtensa_relax_statesE): New relaxation
+	state: RELAX_LITERAL_POOL_CANDIDATE_BEGIN.
+	* doc/as.texinfo (Xtensa options):  Document --auto-litpools and
+	--no-auto-litpools options.
+	* doc/c-xtensa.texi (Xtensa options): Likewise.
+
 2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
 
 	* config/tc-mips.c (move_register): Change to use 'or' only.

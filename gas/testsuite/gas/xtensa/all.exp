@@ -100,6 +100,7 @@ if [istarget xtensa*-*-*] then {
     run_dump_test "jlong"
     run_dump_test "trampoline"
     run_dump_test "first_frag_align"
+    run_dump_test "auto-litpools"
 }
 
 if [info exists errorInfo] then {

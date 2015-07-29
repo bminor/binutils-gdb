@@ -1,3 +1,11 @@
+2015-08-12  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* gas/xtensa/all.exp: Add auto-litpools to the list of xtensa
+	tests.
+	* gas/xtensa/auto-litpools.s: New file: auto-litpools test.
+	* gas/xtensa/auto-litpools.s: New file: auto-litpools test
+	result pattern.
+
 2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
 
 	* gas/mips/elf-rel23.d: Update test.

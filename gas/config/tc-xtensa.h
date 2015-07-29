@@ -124,6 +124,7 @@ enum xtensa_relax_statesE
 
   RELAX_LITERAL_POOL_BEGIN,
   RELAX_LITERAL_POOL_END,
+  RELAX_LITERAL_POOL_CANDIDATE_BEGIN,
   /* Technically these are not relaxations at all but mark a location
      to store literals later.  Note that fr_var stores the frchain for
      BEGIN frags and fr_var stores now_seg for END frags.  */
