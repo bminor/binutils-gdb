@@ -265,6 +265,11 @@ typedef enum target_xfer_status
 			     ULONGEST len,
 			     ULONGEST *xfered_len);
 
+enum target_xfer_status
+  raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
+			   const gdb_byte *writebuf, ULONGEST memaddr,
+			   LONGEST len, ULONGEST *xfered_len);
+
 /* Request that OPS transfer up to LEN addressable units of the target's
    OBJECT.  When reading from a memory object, the size of an addressable unit
    is architecture dependent and can be found using
