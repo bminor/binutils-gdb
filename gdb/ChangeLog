@@ -1,3 +1,21 @@
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.c: Include "tui/tui.h".
+	(undo_terminal_modifications_before_exit): New static function.
+	(quit_force): Use it.
+
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* target.c (terminal_state): Initialize to terminal_is_ours.
+
+2015-07-29  Yao Qi  <yao.qi@linaro.org>
+
+	PR record/18691
+	* dcache.c (dcache_read_memory_partial): Call
+	raw_memory_xfer_partial.
+	* target.c (raw_memory_xfer_partial): Make it non-static.
+	* target.h (raw_memory_xfer_partial): Declare.
+
 2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* c-valprint.c (c_val_print_array): Consider addressable memory

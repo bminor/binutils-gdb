@@ -106,7 +106,7 @@ if ![runto_main] {
     return 0
 }
 
-gdb_py_test_silent_cmd "python objfile = gdb.s()\[0\]" \
+gdb_py_test_silent_cmd "python objfile = gdb.objfiles()\[0\]" \
     "Get no-debug objfile file" 1
 
 gdb_test "python print (objfile.owner)" "None" \

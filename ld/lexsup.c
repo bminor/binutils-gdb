@@ -1578,7 +1578,7 @@ parse_args (unsigned argc, char **argv)
 	einfo (_("%P%F: -f may not be used without -shared\n"));
     }
 
-  if (! link_info.shared || link_info.pie)
+  if ((! link_info.shared && ! link_info.relocatable) || link_info.pie)
     link_info.executable = TRUE;
 
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I

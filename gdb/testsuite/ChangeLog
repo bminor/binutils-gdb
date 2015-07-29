@@ -1,4 +1,40 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
+	    Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/multi-forks.exp (continue_to_exit_bp_loc): Expect
+	output from both inferior_spawn_id and gdb_spawn_id.
+
+2015-07-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.threads/attach-into-signal.exp (corefunc): Use
+	with_test_prefix on nested loops, uniquefying the test messages.
+
+2015-07-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.python/py-objfile.exp: Fix typo that snuck in from my last
+	commit.
+
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/batch-preserve-term-settings.exp (send_quit_command):
+	New proc.
+	(test_terminal_settings_preserved_after_sigterm): New test.
+
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/batch-preserve-term-settings.exp
+	(test_terminal_settings_preserved_after_cli_exit): New test.
+
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/batch-preserve-term-settings.exp: Remove top-level
+	manipulation of saved_gdbflags.
+	(test_terminal_settings_preserved): Remove global declaration of
+	the unused variable pagination_prompt.  Remove manipulation of
+	saved_gdbflags.  Use a local variable EXTRA_GDBFLAGS instead of
+	GDBFLAGS.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
 
 	* boards/gdbserver-base.exp: Don't set gdb,noinferiorio.
 
