@@ -1,5 +1,10 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/interrupt.exp: Revert back to checking gdb,noinferiorio
+	at the top.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/call-ar-st.c: Include "../lib/unbuffer_output.c".
 	(main): Call gdb_unbuffer_output.
 	* gdb.base/call-rt-st.c: Include "../lib/unbuffer_output.c".
