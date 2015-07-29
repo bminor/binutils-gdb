@@ -1060,7 +1060,7 @@ memory_xfer_check_region (gdb_byte *readbuf, const gdb_byte *writebuf,
    instance, could have some of memory but delegate other bits to
    the target below it.  So, we must manually try all targets.  */
 
-static enum target_xfer_status
+enum target_xfer_status
 raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
 			 const gdb_byte *writebuf, ULONGEST memaddr, LONGEST len,
 			 ULONGEST *xfered_len)
