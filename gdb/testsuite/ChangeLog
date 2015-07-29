@@ -1,5 +1,9 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/varargs.exp: Use gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/shlib-call.exp: Use gdb_test_stdio.
 
 2015-07-29  Pedro Alves  <palves@redhat.com>
