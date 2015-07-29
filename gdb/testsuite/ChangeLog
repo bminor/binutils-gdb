@@ -1,5 +1,9 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (gdb_test_stdio): New procedure.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/restore.exp (restore_tests): Use gdb_continue_to_end.
 
 2015-07-29  Pedro Alves  <palves@redhat.com>

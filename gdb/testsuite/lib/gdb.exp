@@ -1230,6 +1230,73 @@ proc gdb_test_list_exact { cmd name elm_find_regexp elm_extract_regexp result_ma
 	}
     }
 }
+
+# gdb_test_stdio COMMAND INFERIOR_PATTERN GDB_PATTERN MESSAGE
+# Send a command to gdb; expect inferior and gdb output.
+#
+# See gdb_test_multiple for a description of the COMMAND and MESSAGE
+# parameters.
+#
+# INFERIOR_PATTERN is the pattern to match against inferior output.
+#
+# GDB_PATTERN is the pattern to match against gdb output, and must NOT
+# include the \r\n sequence immediately before the gdb prompt, nor the
+# prompt.  The default is empty.
+#
+# Both inferior and gdb patterns must match for a PASS.
+#
+# If MESSAGE is ommitted, then COMMAND will be used as the message.
+#
+# Returns:
+#    1 if the test failed,
+#    0 if the test passes,
+#   -1 if there was an internal error.
+#
+
+proc gdb_test_stdio {command inferior_pattern {gdb_pattern ""} {message ""}} {
+    global inferior_spawn_id gdb_spawn_id
+    global gdb_prompt
+
+    if {$message == ""} {
+	set message $command
+    }
+
+    set inferior_matched 0
+    set gdb_matched 0
+
+    # Use an indirect spawn id list, and remove the inferior spawn id
+    # from the expected output as soon as it matches, in case
+    # $inferior_pattern happens to be a prefix of the resulting full
+    # gdb pattern below (e.g., "\r\n").
+    global gdb_test_stdio_spawn_id_list
+    set gdb_test_stdio_spawn_id_list "$inferior_spawn_id"
+
+    # Note that if $inferior_spawn_id and $gdb_spawn_id are different,
+    # then we may see gdb's output arriving before the inferior's
+    # output.
+    set res [gdb_test_multiple $command $message {
+	-i gdb_test_stdio_spawn_id_list -re "$inferior_pattern" {
+	    set inferior_matched 1
+	    if {!$gdb_matched} {
+		set gdb_test_stdio_spawn_id_list ""
+		exp_continue
+	    }
+	}
+	-i $gdb_spawn_id -re "$gdb_pattern\r\n$gdb_prompt $" {
+	    set gdb_matched 1
+	    if {!$inferior_matched} {
+		exp_continue
+	    }
+	}
+    }]
+    if {$res == 0} {
+	pass $message
+    } else {
+	verbose -log "inferior_matched=$inferior_matched, gdb_matched=$gdb_matched"
+    }
+    return $res
+}
+
 
 
 # Issue a PASS and return true if evaluating CONDITION in the caller's
