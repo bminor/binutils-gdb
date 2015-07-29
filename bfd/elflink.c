@@ -3488,7 +3488,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  FALSE, bed->collect, NULL)))
 	    goto error_return;
 
-	  if (!info->relocatable && info->executable)
+	  if (info->executable)
 	    {
 	      /* Clobber the section size so that the warning does
 		 not get copied into the output file.  */
@@ -4257,7 +4257,7 @@ error_free_dyn:
 	      /* If the indirect symbol has been forced local, don't
 		 make the real symbol dynamic.  */
 	      if ((h == hi || !hi->forced_local)
-		  && (! info->executable
+		  && ((! info->executable && ! info->relocatable)
 		      || h->def_dynamic
 		      || h->ref_dynamic))
 		dynsym = TRUE;
@@ -8957,8 +8957,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 
   /* We should also warn if a forced local symbol is referenced from
      shared libraries.  */
-  if (!flinfo->info->relocatable
-      && flinfo->info->executable
+  if (flinfo->info->executable
       && h->forced_local
       && h->ref_dynamic
       && h->def_regular

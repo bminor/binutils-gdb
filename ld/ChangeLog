@@ -1,3 +1,8 @@
+2015-07-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lexsup.c (parse_args): Don't set link_info.executable to
+	TRUE for link_info.relocatable.
+
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

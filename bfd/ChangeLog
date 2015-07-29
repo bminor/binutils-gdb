@@ -1,3 +1,11 @@
+2015-07-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_add_object_symbols): Remove
+	!info->relocatable check for info->executable.  Add
+	!info->relocatable check for !info->executable.
+	(elf_link_output_extsym): Remove
+	!info->relocatable check for info->executable.
+
 2015-07-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (mmo_write_symbols_and_terminator): Skip symbol-type
