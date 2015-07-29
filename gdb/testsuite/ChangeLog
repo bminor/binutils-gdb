@@ -1,3 +1,10 @@
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/siginfo-addr.c (pass): New function.
+	(handler): Call it iff si_addr is correct.
+	* gdb.base/siginfo-addr.exp: Remove gdb_skip_stdio_test check.
+	Set a breakpoint at "pass" and continue to it.
+
 2015-07-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.python/py-objfile.exp: Make some tests have unique names.
