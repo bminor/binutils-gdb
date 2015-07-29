@@ -1,5 +1,9 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/ending-run.exp: Use gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/call-rt-st.exp (print_struct_call): Split "result"
 	parameter into two new parameters, "inf_result" and "gdb_result".
 	Expect inferior output and gdb output from $inferior_spawn_id and
