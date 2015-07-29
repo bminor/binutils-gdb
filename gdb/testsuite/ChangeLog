@@ -1,5 +1,9 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/restore.exp (restore_tests): Use gdb_continue_to_end.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/call-signal-resume.exp: Remove check for
 	gdb,noinferiorio.  Don't expect "no signal".  Use gdb_test.
 	* gdb.base/unwindonsignal.exp: Likewise.
