@@ -1,5 +1,10 @@
 2015-07-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/pr18718.c (bar): Use noclone attribute only for GCC
+	4.5 or newer.
+
+2015-07-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-size/size.exp: Move run-time support check.
 
 2015-07-28  Alan Modra  <amodra@gmail.com>

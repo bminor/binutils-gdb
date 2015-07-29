@@ -11,7 +11,11 @@ new_foo (void)
 
 __asm__(".symver new_foo, foo@@VERS_2.0");
 
+#if defined(__GNUC__) && (__GNUC__ * 1000 + __GNUC_MINOR__) >= 4005
 __attribute__ ((noinline, noclone))
+#else
+__attribute__ ((noinline))
+#endif
 int
 bar (void)
 {
