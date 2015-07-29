@@ -161,6 +161,20 @@ run_cc_link_tests [list \
     ] \
 ]
 
+# Check if size relocation works at run-time.
+catch "exec tmpdir/size-7.exe > tmpdir/dump.out" exec_output
+if ![string match "" $exec_output] then {
+    send_log "No run-time size relocation support: $exec_output\n"
+    verbose "No run-time size relocation support: $exec_output" 1
+    return
+}
+
+if { [regexp_diff "tmpdir/dump.out" "$srcdir/$subdir/size-7.out" ] } then {
+    verbose "output is [file_contents "tmpdir/dump.out"]" 2
+    fail "Run-time size relocation"
+    return
+}
+
 # Run-time size relocation tests.
 run_ld_link_exec_tests [] [list \
     [list \
@@ -295,17 +309,3 @@ run_ld_link_exec_tests [] [list \
 	"size-10.out" \
     ] \
 ]
-
-# Check if size relocation works at run-time.
-catch "exec tmpdir/size-7.exe > tmpdir/dump.out" exec_output
-if ![string match "" $exec_output] then {
-    send_log "No run-time size relocation support: $exec_output\n"
-    verbose "No run-time size relocation support: $exec_output" 1
-    return
-}
-
-if { [regexp_diff "tmpdir/dump.out" "$srcdir/$subdir/size-7.out" ] } then {
-    verbose "output is [file_contents "tmpdir/dump.out"]" 2
-    fail "Run-time size relocation"
-    return
-}
