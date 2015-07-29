@@ -1,5 +1,9 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/call-strs.exp: Use gdb_test_stdio instead of gdb_test.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/sizeof.exp (check_sizeof, check_valueof): Use
 	gdb_test_stdio.
 
