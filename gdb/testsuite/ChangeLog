@@ -1,5 +1,10 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/selftest.exp (test_with_self): Update comment.  Use
+	send_inferior and $inferior_spawn_id.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.gdb/complaints.exp (test_initial_complaints)
 	(test_serial_complaints, test_short_complaints): Use
 	gdb_test_stdio.
