@@ -1,5 +1,10 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/sizeof.exp (check_sizeof, check_valueof): Use
+	gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (gdb_test_stdio): New procedure.
 
 2015-07-29  Pedro Alves  <palves@redhat.com>
