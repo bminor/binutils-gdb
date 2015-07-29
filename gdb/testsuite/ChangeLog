@@ -1,5 +1,14 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* lib/mi-support.exp (mi_inferior_spawn_id): Delete.
+	(default_mi_gdb_start): Set inferior_spawn_id instead of
+	mi_inferior_spawn_id.  If $inferior_spawn_id is not set, set it to
+	gdb_spawn_id.
+	(mi_gdb_test): Always expect inferior output from both
+	$inferior_spawn_id and $gdb_spawn_id.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.gdb/selftest.exp (test_with_self): Update comment.  Use
 	send_inferior and $inferior_spawn_id.
 
