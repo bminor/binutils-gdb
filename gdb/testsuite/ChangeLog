@@ -1,5 +1,13 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/call-signal-resume.exp: Remove check for
+	gdb,noinferiorio.  Don't expect "no signal".  Use gdb_test.
+	* gdb.base/unwindonsignal.exp: Likewise.
+	* gdb.base/call-signals.c (gen_signal): Remove printf call.
+	* gdb.base/unwindonsignal.c (gen_signal): Likewise.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/siginfo-addr.c (pass): New function.
 	(handler): Call it iff si_addr is correct.
 	* gdb.base/siginfo-addr.exp: Remove gdb_skip_stdio_test check.

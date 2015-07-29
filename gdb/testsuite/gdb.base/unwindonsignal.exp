@@ -13,11 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping unwindonsignal.exp because of no fileio capabilities."
-    continue
-}
-
 if [target_info exists gdb,nosignals] {
     verbose "Skipping unwindonsignal.exp because of nosignals."
     continue
@@ -58,15 +53,10 @@ gdb_test "show unwindonsignal" \
 
 # Call function (causing the program to get a signal), and see if gdb handles
 # it properly.
-gdb_test_multiple "call gen_signal ()" \
-	"unwindonsignal, inferior function call signaled" {
-    -re "\[\r\n\]*no signal\[\r\n\]+$gdb_prompt $" {
-	unsupported "unwindonsignal, inferior function call signaled"
-	return 0
-    }
-    -re "\[\r\n\]*The program being debugged was signaled.*\[\r\n\]+$gdb_prompt $" {
-	pass "unwindonsignal, inferior function call signaled"
-    }
+if {[gdb_test "call gen_signal ()"  \
+	 "\[\r\n\]*The program being debugged was signaled.*" \
+	 "unwindonsignal, inferior function call signaled"] != 0} {
+    return 0
 }
 
 # Verify the stack got unwound.

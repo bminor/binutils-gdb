@@ -17,7 +17,6 @@
 
 /* Support program for testing unwindonsignal.  */
 
-#include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
 
@@ -26,8 +25,6 @@ gen_signal ()
 {
   /* According to sigall.exp, SIGABRT is always supported.  */
   kill (getpid (), SIGABRT);
-  /* If we get here we couldn't generate a signal, tell dejagnu.  */
-  printf ("no signal\n");
 }
 
 /* Easy place to set a breakpoint.  */
