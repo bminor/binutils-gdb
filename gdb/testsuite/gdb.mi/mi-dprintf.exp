@@ -72,45 +72,47 @@ mi_gdb_test "[incr i]-break-info" \
 
 mi_gdb_test "-break-insert $bp_location1" ".*" "mi insert breakpoint bp_location1"
 
+# Helper for mi_continue_dprintf.
+
+proc mi_expect_dprintf {args where msg} {
+    global mi_gdb_prompt
+    global inferior_spawn_id gdb_spawn_id
+
+    if { $args == "call" || $args == "fprintf" } {
+	set foobarbazqux "\"foobarbazqux\""
+	set sid $inferior_spawn_id
+    } else {
+	set foobarbazqux "\\\\\"foobarbazqux\\\\\""
+	set sid $gdb_spawn_id
+    }
+
+    # Don't expect the prompt here to avoid a race with mi_expect_stop
+    # in case $inferior_spawn_id != $gdb_spawn_id.  Otherwise, in that
+    # case, we could see the gdb prompt before the inferior output.
+    gdb_expect {
+	-i $sid
+	-re ".*$foobarbazqux $where" {
+	    pass $msg
+	}
+	eof {
+	    fail "$msg (eof)"
+	}
+	timeout {
+	    fail "$msg (timeout)"
+	}
+    }
+    mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "$msg stop"
+}
+
 proc mi_continue_dprintf {args} {
     with_test_prefix $args {
-	global mi_gdb_prompt
-
-	if { $args == "call" || $args == "fprintf" } {
-	    set foobarbazqux "\"foobarbazqux\""
-	} else {
-	    set foobarbazqux "\\\\\"foobarbazqux\\\\\""
-	}
-
-	mi_run_cmd
 	set msg "mi 1st dprintf"
-	gdb_expect {
-            -re ".*$foobarbazqux At foo entry.*arg=1234, g=1234" {
-		pass $msg
-	    }
-	    -re ".*$mi_gdb_prompt$" {
-		fail $msg
-	    }
-            timeout {
-		fail $msg
-            }
-	}
-	mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "$msg stop"
+	mi_run_cmd
+	mi_expect_dprintf $args "At foo entry.*arg=1234, g=1234" $msg
 
 	set msg "mi 2nd dprintf"
 	mi_send_resuming_command "exec-continue" "$msg continue"
-	gdb_expect {
-            -re ".*$foobarbazqux At foo entry.*arg=1235, g=2222" {
-		pass $msg
-	    }
-	    -re ".*$mi_gdb_prompt$" {
-		fail $msg
-	    }
-            timeout {
-		fail $msg
-            }
-	}
-	mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "$msg 2nd stop"
+	mi_expect_dprintf $args "At foo entry.*arg=1235, g=2222" $msg
     }
 }
 

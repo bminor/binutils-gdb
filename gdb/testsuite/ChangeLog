@@ -1,5 +1,14 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.mi/mi-dprintf.exp (mi_expect_dprintf): New procedure,
+	factore out from mi_continue_dprintf.  For call-style dprintfs,
+	expect dprintf output out of $inferior_spawn_id.
+	(mi_continue_dprintf): Use mi_expect_dprintf.
+	* gdb.mi/mi-dprintf.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* lib/mi-support.exp (mi_inferior_spawn_id): Delete.
 	(default_mi_gdb_start): Set inferior_spawn_id instead of
 	mi_inferior_spawn_id.  If $inferior_spawn_id is not set, set it to
