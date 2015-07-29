@@ -26,7 +26,7 @@
 
 #include <signal.h>
 #include <sys/user.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
 #include <sys/uio.h>
 
@@ -587,55 +587,9 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 static void
 aarch64_arch_setup (void)
 {
-  int pid;
-  struct iovec iov;
-  struct user_hwdebug_state dreg_state;
-
   current_process ()->tdesc = tdesc_aarch64;
 
-  pid = lwpid_of (current_thread);
-  iov.iov_base = &dreg_state;
-  iov.iov_len = sizeof (dreg_state);
-
-  /* Get hardware watchpoint register info.  */
-  if (ptrace (PTRACE_GETREGSET, pid, NT_ARM_HW_WATCH, &iov) == 0
-      && AARCH64_DEBUG_ARCH (dreg_state.dbg_info) == AARCH64_DEBUG_ARCH_V8)
-    {
-      aarch64_num_wp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
-      if (aarch64_num_wp_regs > AARCH64_HWP_MAX_NUM)
-	{
-	  warning ("Unexpected number of hardware watchpoint registers reported"
-		   " by ptrace, got %d, expected %d.",
-		   aarch64_num_wp_regs, AARCH64_HWP_MAX_NUM);
-	  aarch64_num_wp_regs = AARCH64_HWP_MAX_NUM;
-	}
-    }
-  else
-    {
-      warning ("Unable to determine the number of hardware watchpoints"
-	       " available.");
-      aarch64_num_wp_regs = 0;
-    }
-
-  /* Get hardware breakpoint register info.  */
-  if (ptrace (PTRACE_GETREGSET, pid, NT_ARM_HW_BREAK, &iov) == 0
-      && AARCH64_DEBUG_ARCH (dreg_state.dbg_info) == AARCH64_DEBUG_ARCH_V8)
-    {
-      aarch64_num_bp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
-      if (aarch64_num_bp_regs > AARCH64_HBP_MAX_NUM)
-	{
-	  warning ("Unexpected number of hardware breakpoint registers reported"
-		   " by ptrace, got %d, expected %d.",
-		   aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
-	  aarch64_num_bp_regs = AARCH64_HBP_MAX_NUM;
-	}
-    }
-  else
-    {
-      warning ("Unable to determine the number of hardware breakpoints"
-	       " available.");
-      aarch64_num_bp_regs = 0;
-    }
+  aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
 }
 
 static struct regset_info aarch64_regsets[] =

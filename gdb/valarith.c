@@ -54,7 +54,7 @@ find_size_for_pointer_math (struct type *ptr_type)
   gdb_assert (TYPE_CODE (ptr_type) == TYPE_CODE_PTR);
   ptr_target = check_typedef (TYPE_TARGET_TYPE (ptr_type));
 
-  sz = TYPE_LENGTH (ptr_target);
+  sz = type_length_units (ptr_target);
   if (sz == 0)
     {
       if (TYPE_CODE (ptr_type) == TYPE_CODE_VOID)
@@ -121,7 +121,7 @@ value_ptrdiff (struct value *arg1, struct value *arg2)
 	     "second argument is neither\n"
 	     "an integer nor a pointer of the same type."));
 
-  sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
+  sz = type_length_units (check_typedef (TYPE_TARGET_TYPE (type1)));
   if (sz == 0) 
     {
       warning (_("Type size unknown, assuming 1. "
@@ -192,12 +192,12 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
 {
   struct type *array_type = check_typedef (value_type (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
-  unsigned int elt_size = TYPE_LENGTH (elt_type);
+  unsigned int elt_size = type_length_units (elt_type);
   unsigned int elt_offs = elt_size * longest_to_int (index - lowerbound);
   struct value *v;
 
   if (index < lowerbound || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
-			     && elt_offs >= TYPE_LENGTH (array_type)))
+			     && elt_offs >= type_length_units (array_type)))
     error (_("no such vector element"));
 
   if (VALUE_LVAL (array) == lval_memory && value_lazy (array))

@@ -925,6 +925,7 @@ nto_supports_non_stop (void)
 
 static struct target_ops nto_target_ops = {
   nto_create_inferior,
+  NULL,  /* arch_setup */
   nto_attach,
   nto_kill,
   nto_detach,

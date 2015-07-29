@@ -252,6 +252,17 @@ get_target_type (struct type *type)
   return type;
 }
 
+/* See gdbtypes.h.  */
+
+unsigned int
+type_length_units (struct type *type)
+{
+  struct gdbarch *arch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+
+  return TYPE_LENGTH (type) / unit_size;
+}
+
 /* Alloc a new type instance structure, fill it with some defaults,
    and point it at OLDTYPE.  Allocate the new type instance from the
    same place as OLDTYPE.  */
@@ -1933,7 +1944,7 @@ resolve_dynamic_array (struct type *type,
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
   if (ary_dim != NULL && TYPE_CODE (ary_dim) == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type), addr_stack);
+    elt_type = resolve_dynamic_array (ary_dim, addr_stack);
   else
     elt_type = TYPE_TARGET_TYPE (type);
 

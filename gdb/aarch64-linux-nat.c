@@ -35,7 +35,7 @@
 #include "elf/external.h"
 #include "elf/common.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/utsname.h>
 #include <asm/ptrace.h>
 
@@ -634,61 +634,6 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Get the hardware debug register capacity information from the
-   inferior represented by PTID.  */
-
-static void
-aarch64_linux_get_debug_reg_capacity (ptid_t ptid)
-{
-  int tid;
-  struct iovec iov;
-  struct user_hwdebug_state dreg_state;
-
-  tid = ptid_get_pid (ptid);
-  iov.iov_base = &dreg_state;
-  iov.iov_len = sizeof (dreg_state);
-
-  /* Get hardware watchpoint register info.  */
-  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_HW_WATCH, &iov) == 0
-      && AARCH64_DEBUG_ARCH (dreg_state.dbg_info) == AARCH64_DEBUG_ARCH_V8)
-    {
-      aarch64_num_wp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
-      if (aarch64_num_wp_regs > AARCH64_HWP_MAX_NUM)
-	{
-	  warning (_("Unexpected number of hardware watchpoint registers"
-		     " reported by ptrace, got %d, expected %d."),
-		   aarch64_num_wp_regs, AARCH64_HWP_MAX_NUM);
-	  aarch64_num_wp_regs = AARCH64_HWP_MAX_NUM;
-	}
-    }
-  else
-    {
-      warning (_("Unable to determine the number of hardware watchpoints"
-		 " available."));
-      aarch64_num_wp_regs = 0;
-    }
-
-  /* Get hardware breakpoint register info.  */
-  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_HW_BREAK, &iov) == 0
-      && AARCH64_DEBUG_ARCH (dreg_state.dbg_info) == AARCH64_DEBUG_ARCH_V8)
-    {
-      aarch64_num_bp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
-      if (aarch64_num_bp_regs > AARCH64_HBP_MAX_NUM)
-	{
-	  warning (_("Unexpected number of hardware breakpoint registers"
-		     " reported by ptrace, got %d, expected %d."),
-		   aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
-	  aarch64_num_bp_regs = AARCH64_HBP_MAX_NUM;
-	}
-    }
-  else
-    {
-      warning (_("Unable to determine the number of hardware breakpoints"
-		 " available."));
-      aarch64_num_bp_regs = 0;
-    }
-}
-
 static void (*super_post_startup_inferior) (struct target_ops *self,
 					    ptid_t ptid);
 
@@ -699,7 +644,7 @@ aarch64_linux_child_post_startup_inferior (struct target_ops *self,
 					   ptid_t ptid)
 {
   aarch64_forget_process (ptid_get_pid (ptid));
-  aarch64_linux_get_debug_reg_capacity (ptid);
+  aarch64_linux_get_debug_reg_capacity (ptid_get_pid (ptid));
   super_post_startup_inferior (self, ptid);
 }
 
@@ -762,19 +707,32 @@ aarch64_linux_read_description (struct target_ops *ops)
    bp_read_watchpoint, bp_write_watchpoint, or bp_hardware_breakpoint.
    CNT is the number of such watchpoints used so far (including this
    one).  OTHERTYPE is non-zero if other types of watchpoints are
-   currently enabled.
-
-   We always return 1 here because we don't have enough information
-   about possible overlap of addresses that they want to watch.  As an
-   extreme example, consider the case where all the watchpoints watch
-   the same address and the same region length: then we can handle a
-   virtually unlimited number of watchpoints, due to debug register
-   sharing implemented via reference counts.  */
+   currently enabled.  */
 
 static int
 aarch64_linux_can_use_hw_breakpoint (struct target_ops *self,
 				     int type, int cnt, int othertype)
 {
+  if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
+      || type == bp_access_watchpoint || type == bp_watchpoint)
+    {
+      if (aarch64_num_wp_regs == 0)
+	return 0;
+    }
+  else if (type == bp_hardware_breakpoint)
+    {
+      if (aarch64_num_bp_regs == 0)
+	return 0;
+    }
+  else
+    gdb_assert_not_reached ("unexpected breakpoint type");
+
+  /* We always return 1 here because we don't have enough information
+     about possible overlap of addresses that they want to watch.  As an
+     extreme example, consider the case where all the watchpoints watch
+     the same address and the same region length: then we can handle a
+     virtually unlimited number of watchpoints, due to debug register
+     sharing implemented via reference counts.  */
   return 1;
 }
 

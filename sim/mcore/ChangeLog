@@ -286,8 +286,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -366,7 +366,7 @@ Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* interp.c (target_big_endian): New variable.
 	(mcore_extract_unsigned_integer, mcore_store_unsigned_integer,
 	wlat, rlat, sim_resume, sim_load): Add supprot for little
-	endian targets. 
+	endian targets.
 
 2000-01-13  Nick Clifton  <nickc@cygnus.com>
 
@@ -395,7 +395,7 @@ Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
-	
+
 1999-05-10  Nick Clifton  <nickc@cygnus.com>
 
 	* interp.c (sim_resume): Record PC in case it is needed for error

@@ -99,14 +99,18 @@ gdb_test_multiple "i b" "all set to continue" {
 # is output from the program.
 #
 if ![gdb_skip_stdio_test "cont"] {
-    gdb_test "cont" ".*1 2 7 14 23 34 47 62 79.*Breakpoint.*$break2_line.*"
+    gdb_test_stdio "cont" \
+	"1 2 7 14 23 34 47 62 79" \
+	"Breakpoint.*$break2_line.*"
 } else {
     gdb_test "cont" ".*Breakpoint.*$break2_line.*"
 }
 
 if ![gdb_skip_stdio_test "Step to return"] {
-    gdb_test "next" ".*Goodbye!.*[expr {$break2_line + 1}].*" \
-	    "Step to return"
+    gdb_test_stdio "next" \
+	"Goodbye!" \
+	"[expr {$break2_line + 1}].*" \
+	"Step to return"
 } else {
     gdb_test "next" ".*" ""
 }

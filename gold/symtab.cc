@@ -1953,6 +1953,9 @@ Symbol_table::do_define_in_output_data(
     return sym;
   else
     {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(oldsym);
       delete sym;
       return oldsym;
     }
@@ -2067,6 +2070,9 @@ Symbol_table::do_define_in_output_segment(
     return sym;
   else
     {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(oldsym);
       delete sym;
       return oldsym;
     }
@@ -2186,6 +2192,9 @@ Symbol_table::do_define_as_constant(
     return sym;
   else
     {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(oldsym);
       delete sym;
       return oldsym;
     }

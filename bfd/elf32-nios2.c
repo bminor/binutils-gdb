@@ -4398,7 +4398,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		  else if (h != NULL
 			   && h->dynindx != -1
 			   && (!info->shared
-			       || !info->symbolic
+			       || !SYMBOLIC_BIND (info, h)
 			       || !h->def_regular))
 		    {
 		      outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
@@ -4909,7 +4909,7 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (r_type == R_NIOS2_BFD_RELOC_32
 		  || (h != NULL && ! h->needs_plt
-		      && (! info->symbolic || ! h->def_regular))))
+		      && (! SYMBOLIC_BIND (info, h) || ! h->def_regular))))
 	    {
 	      struct elf32_nios2_dyn_relocs *p;
 	      struct elf32_nios2_dyn_relocs **head;
@@ -5752,7 +5752,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
   if (info->shared)
     {
       if (h->def_regular
-	  && (h->forced_local || info->symbolic))
+	  && (h->forced_local || SYMBOLIC_BIND (info, h)))
 	{
 	  struct elf32_nios2_dyn_relocs **pp;
 

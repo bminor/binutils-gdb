@@ -23,7 +23,7 @@
 
 #include "alpha-tdep.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <alpha/ptrace.h>
 
 #include <sys/procfs.h>

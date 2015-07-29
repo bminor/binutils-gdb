@@ -509,6 +509,7 @@ setup_all_syscalls
 fill_all_syscalls_numbers
 
 # Execute the tests, using XML support
+gdb_exit
 if { ![gdb_skip_xml_test] } {
   clean_restart $binfile
   do_syscall_tests

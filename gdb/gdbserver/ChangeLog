@@ -1,3 +1,83 @@
+2015-07-27  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (case aarch64*-*-linux*): Don't set
+	srv_linux_usrregs.
+
+2015-07-24  Pedro Alves  <palves@redhat.c: Likewise.om>
+
+	* linux-aarch64-low.c: Include nat/gdb_ptrace.h instead of
+	sys/ptrace.h.
+	* linux-arm-low.c: Likewise.
+	* linux-cris-low.c: Likewise.
+	* linux-crisv32-low.c: Likewise.
+	* linux-low.c: Likewise.
+	* linux-m68k-low.c: Likewise.
+	* linux-mips-low.c: Likewise.
+	* linux-nios2-low.c: Likewise.
+	* linux-s390-low.c: Likewise.
+	* linux-sparc-low.c: Likewise.
+	* linux-tic6x-low.c: Likewise.
+	* linux-tile-low.c: Likewise.
+	* linux-x86-low.c: Likewise.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* acinclude.m4: Include ../ptrace.m4.
+	* configure.ac: Call GDB_AC_PTRACE.
+	* config.in, configure: Regenerate.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_create_inferior): Remove setting to
+	proc->priv->new_inferior.
+	(linux_attach): Likewise.
+	(linux_low_filter_event): Likewise.
+	* linux-low.h (struct process_info_private) <new_inferior>: Remove.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_arch_setup): New function.
+	(linux_low_filter_event): If proc->tdesc is NULL and
+	proc->attached is true, call the_low_target.arch_setup.
+	Otherwise, keep status pending, and return.
+	(linux_resume_one_lwp_throw): Don't call get_pc if
+	thread->while_stepping isn't NULL.  Don't call
+	get_thread_regcache if proc->tdesc is NULL.
+	(need_step_over_p): Return 0 if proc->tdesc is NULL.
+	(linux_target_ops): Install arch_setup.
+	* server.c (start_inferior): Call the_target->arch_setup.
+	* target.h (struct target_ops) <arch_setup>: New field.
+	(target_arch_setup): New marco.
+	* lynx-low.c (lynx_target_ops): Update.
+	* nto-low.c (nto_target_ops): Update.
+	* spu-low.c (spu_target_ops): Update.
+	* win32-low.c (win32_target_ops): Update.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_add_process): Don't set
+	proc->priv->new_inferior.
+	(linux_create_inferior): Set proc->priv->new_inferior to 1.
+	(linux_attach): Likewise.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* server.c (start_inferior): Code refactor.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* server.c (process_serial_event): Set general_thread.
+
+2015-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_arch_setup): Remove code and call
+	aarch64_linux_get_debug_reg_capacity.
+
 2015-07-17  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (aarch64-linux-hw-point.o): New rule.
@@ -637,20 +717,20 @@
 
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
-        * linux-low.c (check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]:
+	* linux-low.c (check_stopped_by_breakpoint) [USE_SIGTRAP_SIGINFO]:
 	Decide whether a breakpoint triggered based on the SIGTRAP's
 	siginfo.si_code.
-        (thread_still_has_status_pending_p) [USE_SIGTRAP_SIGINFO]: Don't check whether a
-        breakpoint is inserted if relying on SIGTRAP's siginfo.si_code.
+	(thread_still_has_status_pending_p) [USE_SIGTRAP_SIGINFO]: Don't check whether a
+	breakpoint is inserted if relying on SIGTRAP's siginfo.si_code.
 	(linux_low_filter_event): Check for breakpoints before checking
 	watchpoints.
 	(linux_wait_1): Don't re-increment the PC if relying on SIGTRAP's
 	siginfo.si_code.
-        (linux_stopped_by_sw_breakpoint)
-        (linux_supports_stopped_by_sw_breakpoint)
-        (linux_stopped_by_hw_breakpoint)
-        (linux_supports_stopped_by_hw_breakpoint): New functions.
-        (linux_target_ops): Install new target methods.
+	(linux_stopped_by_sw_breakpoint)
+	(linux_supports_stopped_by_sw_breakpoint)
+	(linux_stopped_by_hw_breakpoint)
+	(linux_supports_stopped_by_hw_breakpoint): New functions.
+	(linux_target_ops): Install new target methods.
 
 2015-03-04  Pedro Alves  <palves@redhat.com>
 
@@ -2880,7 +2960,7 @@
 
 	* server.h (struct emit_ops, current_insn_ptr, emit_error):
 	Move ...
-        * ax.h: ... here.
+	* ax.h: ... here.
 
 2013-09-05  Pedro Alves  <palves@redhat.com>
 

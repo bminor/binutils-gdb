@@ -610,7 +610,8 @@ struct dwarf2_per_cu_data
   struct dwarf2_section_info *section;
 
   /* Set to non-NULL iff this CU is currently loaded.  When it gets freed out
-     of the CU cache it gets reset to NULL again.  */
+     of the CU cache it gets reset to NULL again.  This is left as NULL for
+     dummy CUs (a CU header, but nothing else).  */
   struct dwarf2_cu *cu;
 
   /* The corresponding objfile.
@@ -2655,7 +2656,8 @@ load_cu (struct dwarf2_per_cu_data *per_cu)
   else
     load_full_comp_unit (per_cu, language_minimal);
 
-  gdb_assert (per_cu->cu != NULL);
+  if (per_cu->cu == NULL)
+    return;  /* Dummy CU.  */
 
   dwarf2_find_base_address (per_cu->cu->dies, per_cu->cu);
 }
@@ -2685,6 +2687,7 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
 	 that may badly handle TUs, load all the TUs in that DWO as well.
 	 http://sourceware.org/bugzilla/show_bug.cgi?id=15021  */
       if (!per_cu->is_debug_types
+	  && per_cu->cu != NULL
 	  && per_cu->cu->dwo_unit != NULL
 	  && dwarf2_per_objfile->index_table != NULL
 	  && dwarf2_per_objfile->index_table->version <= 7
@@ -7544,9 +7547,11 @@ process_queue (void)
      may load a new CU, adding it to the end of the queue.  */
   for (item = dwarf2_queue; item != NULL; dwarf2_queue = item = next_item)
     {
-      if (dwarf2_per_objfile->using_index
-	  ? !item->per_cu->v.quick->compunit_symtab
-	  : (item->per_cu->v.psymtab && !item->per_cu->v.psymtab->readin))
+      if ((dwarf2_per_objfile->using_index
+	   ? !item->per_cu->v.quick->compunit_symtab
+	   : (item->per_cu->v.psymtab && !item->per_cu->v.psymtab->readin))
+	  /* Skip dummy CUs.  */
+	  && item->per_cu->cu != NULL)
 	{
 	  struct dwarf2_per_cu_data *per_cu = item->per_cu;
 	  unsigned int debug_print_threshold;
@@ -20017,6 +20022,13 @@ dwarf2_fetch_die_loc_sect_off (sect_offset offset,
   if (per_cu->cu == NULL)
     load_cu (per_cu);
   cu = per_cu->cu;
+  if (cu == NULL)
+    {
+      /* We shouldn't get here for a dummy CU, but don't crash on the user.
+	 Instead just throw an error, not much else we can do.  */
+      error (_("Dwarf Error: Dummy CU at 0x%x referenced in module %s"),
+	     offset.sect_off, objfile_name (per_cu->objfile));
+    }
 
   die = follow_die_offset (offset, per_cu->is_dwz, &cu);
   if (!die)
@@ -20118,6 +20130,13 @@ dwarf2_fetch_constant_bytes (sect_offset offset,
   if (per_cu->cu == NULL)
     load_cu (per_cu);
   cu = per_cu->cu;
+  if (cu == NULL)
+    {
+      /* We shouldn't get here for a dummy CU, but don't crash on the user.
+	 Instead just throw an error, not much else we can do.  */
+      error (_("Dwarf Error: Dummy CU at 0x%x referenced in module %s"),
+	     offset.sect_off, objfile_name (per_cu->objfile));
+    }
 
   die = follow_die_offset (offset, per_cu->is_dwz, &cu);
   if (!die)

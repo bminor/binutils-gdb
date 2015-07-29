@@ -434,15 +434,21 @@ proc gdbserver_reconnect { } {
     return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
 }
 
-# Start and connect to a gdbserver in extended mode.  Note this frobs
-# $gdbserver_protocol, so should be used only from a board that
-# usually connects in target remote mode.
-proc gdbserver_start_extended { } {
+# Start gdbserver in extended mode with OPTIONS and connect to it.  Note
+# this frobs $gdbserver_protocol, so should be used only from a board
+# that usually connects in target remote mode.
+proc gdbserver_start_extended { {options ""} } {
     global gdbserver_protocol
     global gdbserver_gdbport
     global use_gdb_stub
 
-    if { [catch { gdbserver_start "--multi" "" } res] == 1 } {
+    set gdbserver_options "--multi"
+
+    if { $options != "" } {
+	append gdbserver_options " $options"
+    }
+
+    if { [catch { gdbserver_start $gdbserver_options "" } res] == 1 } {
 	perror $res
 	return 2
     }

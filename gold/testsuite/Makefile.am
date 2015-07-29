@@ -1636,7 +1636,7 @@ relro_script_test.so: gcctestdir/ld relro_script_test.t relro_test_pic.o
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro -Wl,-T,$(srcdir)/relro_script_test.t relro_test_pic.o
 
 check_PROGRAMS += script_test_1
-script_test_1_SOURCES = script_test_1.cc
+script_test_1_SOURCES = script_test_1a.cc script_test_1b.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-T,$(srcdir)/script_test_1.t
 script_test_1_LDADD =
@@ -1769,9 +1769,11 @@ script_test_9.stdout: script_test_9
 check_PROGRAMS += script_test_11
 script_test_11: gcctestdir/ld script_test_11_r.o
 	$(LINK) -Bgcctestdir/ script_test_11_r.o
-script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
-	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
-script_test_11.o: script_test_11.c
+script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+script_test_11a.o: script_test_11a.c
+	$(COMPILE) -c -g -o $@ $<
+script_test_11b.o: script_test_11b.c
 	$(COMPILE) -c -g -o $@ $<
 
 # Test difference between "*(a b)" and "*(a) *(b)" in input section spec.

@@ -1230,6 +1230,73 @@ proc gdb_test_list_exact { cmd name elm_find_regexp elm_extract_regexp result_ma
 	}
     }
 }
+
+# gdb_test_stdio COMMAND INFERIOR_PATTERN GDB_PATTERN MESSAGE
+# Send a command to gdb; expect inferior and gdb output.
+#
+# See gdb_test_multiple for a description of the COMMAND and MESSAGE
+# parameters.
+#
+# INFERIOR_PATTERN is the pattern to match against inferior output.
+#
+# GDB_PATTERN is the pattern to match against gdb output, and must NOT
+# include the \r\n sequence immediately before the gdb prompt, nor the
+# prompt.  The default is empty.
+#
+# Both inferior and gdb patterns must match for a PASS.
+#
+# If MESSAGE is ommitted, then COMMAND will be used as the message.
+#
+# Returns:
+#    1 if the test failed,
+#    0 if the test passes,
+#   -1 if there was an internal error.
+#
+
+proc gdb_test_stdio {command inferior_pattern {gdb_pattern ""} {message ""}} {
+    global inferior_spawn_id gdb_spawn_id
+    global gdb_prompt
+
+    if {$message == ""} {
+	set message $command
+    }
+
+    set inferior_matched 0
+    set gdb_matched 0
+
+    # Use an indirect spawn id list, and remove the inferior spawn id
+    # from the expected output as soon as it matches, in case
+    # $inferior_pattern happens to be a prefix of the resulting full
+    # gdb pattern below (e.g., "\r\n").
+    global gdb_test_stdio_spawn_id_list
+    set gdb_test_stdio_spawn_id_list "$inferior_spawn_id"
+
+    # Note that if $inferior_spawn_id and $gdb_spawn_id are different,
+    # then we may see gdb's output arriving before the inferior's
+    # output.
+    set res [gdb_test_multiple $command $message {
+	-i gdb_test_stdio_spawn_id_list -re "$inferior_pattern" {
+	    set inferior_matched 1
+	    if {!$gdb_matched} {
+		set gdb_test_stdio_spawn_id_list ""
+		exp_continue
+	    }
+	}
+	-i $gdb_spawn_id -re "$gdb_pattern\r\n$gdb_prompt $" {
+	    set gdb_matched 1
+	    if {!$inferior_matched} {
+		exp_continue
+	    }
+	}
+    }]
+    if {$res == 0} {
+	pass $message
+    } else {
+	verbose -log "inferior_matched=$inferior_matched, gdb_matched=$gdb_matched"
+    }
+    return $res
+}
+
 
 
 # Issue a PASS and return true if evaluating CONDITION in the caller's
@@ -2788,12 +2855,20 @@ gdb_caching_proc target_is_gdbserver {
     return $is_gdbserver
 }
 
-set compiler_info		"unknown"
+# N.B. compiler_info is intended to be local to this file.
+# Call test_compiler_info with no arguments to fetch its value.
+# Yes, this is counterintuitive when there's get_compiler_info,
+# but that's the current API.
+if [info exists compiler_info] {
+    unset compiler_info
+}
+
 set gcc_compiled		0
 set hp_cc_compiler		0
 set hp_aCC_compiler		0
 
 # Figure out what compiler I am using.
+# The result is cached so only the first invocation runs the compiler.
 #
 # ARG can be empty or "C++".  If empty, "C" is assumed.
 #
@@ -2860,6 +2935,11 @@ proc get_compiler_info {{arg ""}} {
     global hp_cc_compiler
     global hp_aCC_compiler
 
+    if [info exists compiler_info] {
+	# Already computed.
+	return 0
+    }
+
     # Choose which file to preprocess.
     set ifile "${srcdir}/lib/compiler.c"
     if { $arg == "c++" } {
@@ -2901,8 +2981,14 @@ proc get_compiler_info {{arg ""}} {
 	}
     }
 
-    # Reset to unknown compiler if any diagnostics happened.
+    # Set to unknown if for some reason compiler_info didn't get defined.
+    if ![info exists compiler_info] {
+	verbose -log "get_compiler_info: compiler_info not provided"
+	set compiler_info "unknown"
+    }
+    # Also set to unknown compiler if any diagnostics happened.
     if { $unknown } {
+	verbose -log "get_compiler_info: got unexpected diagnostics"
 	set compiler_info "unknown"
     }
 
@@ -2936,18 +3022,18 @@ proc get_compiler_info {{arg ""}} {
     return 0
 }
 
+# Return the compiler_info string if no arg is provided.
+# Otherwise the argument is a glob-style expression to match against
+# compiler_info.
+
 proc test_compiler_info { {compiler ""} } {
     global compiler_info
+    get_compiler_info
 
-     # if no arg, return the compiler_info string
-
-     if [string match "" $compiler] {
-         if [info exists compiler_info] {
-             return $compiler_info
-         } else {
-             perror "No compiler info found."
-         }
-     }
+    # If no arg, return the compiler_info string.
+    if [string match "" $compiler] {
+	return $compiler_info
+    }
 
     return [string match $compiler $compiler_info]
 }
@@ -3025,6 +3111,13 @@ proc gdb_compile {source dest type options} {
 		if { ([istarget "*-*-mingw*"]
 		      || [istarget *-*-cygwin*]) } {
 		    lappend new_options "additional_flags=-Wl,--enable-auto-import"
+		}
+		if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
+		    # Undo debian's change in the default.
+		    # Put it at the front to not override any user-provided
+		    # value, and to make sure it appears in front of all the
+		    # shlibs!
+		    lappend new_options "early_flags=-Wl,--no-as-needed"
 		}
             }
 	} elseif { $opt == "shlib_load" } {
@@ -4869,18 +4962,27 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
     return [eval build_executable_from_specs $arglist]
 }
 
-# Starts fresh GDB binary and loads EXECUTABLE into GDB. EXECUTABLE is
-# the basename of the binary.
-# The return value is 0 for success, -1 for failure.
-proc clean_restart { executable } {
+# Starts fresh GDB binary and loads an optional executable into GDB.
+# Usage: clean_restart [executable]
+# EXECUTABLE is the basename of the binary.
+
+proc clean_restart { args } {
     global srcdir
     global subdir
-    set binfile [standard_output_file ${executable}]
+
+    if { [llength $args] > 1 } {
+	error "bad number of args: [llength $args]"
+    }
 
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    return [gdb_load ${binfile}]
+
+    if { [llength $args] >= 1 } {
+	set executable [lindex $args 0]
+	set binfile [standard_output_file ${executable}]
+	gdb_load ${binfile}
+    }
 }
 
 # Prepares for testing by calling build_executable_full, then

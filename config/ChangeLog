@@ -1,3 +1,14 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-07-24  Micahel Darling  <darlingm@gmail.com>
+
+	PR other/66259
+	* gettext.m4: Reflects renaming of configure.in to configure.ac
+	* po.m4: Likewise
+	* stdint.m4: Likewise
+	* tcl.m4: Likewise
+
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
@@ -251,7 +262,7 @@
 2012-07-02  Richard Guenther  <rguenther@suse.de>
 
 	* isl.m4 (_ISL_CHECK_CT_PROG): Omit main function header/footer.
-	Fix version test. 
+	Fix version test.
 
 2012-07-02  Richard Guenther  <rguenther@suse.de>
 	Michael Matz  <matz@suse.de>
@@ -293,7 +304,7 @@
 
 	* config/mh-interix: Remove as unneeded.
 	* config/picflag.m4 (i[[34567]]86-*-interix3*):
-        Change triplet to i[[34567]]86-*-interix[[3-9]]*.
+	Change triplet to i[[34567]]86-*-interix[[3-9]]*.
 
 2012-01-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 

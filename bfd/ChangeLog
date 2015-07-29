@@ -1,3 +1,82 @@
+2015-07-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_write_symbols_and_terminator): Skip symbol-type
+	assignment loop for bfd plugin objects.
+
+2015-07-28  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Do not make a new
+	segment for loaded sections after nonloaded sections if the
+	sections are on the same page.
+
+2015-07-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* configure.in: Add asprintf and vasprintf to AC_CHECK_DECLS.
+	* config.in, configure: Regenerate.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-07-27  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-msp430.c (uses_large_model): New function.
+	(msp430_elf_eh_frame_address_size): New function.
+	(elf_backend_eh_frame_address_size): Define.
+
+2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18705
+	* elfnn-aarch64.c (elf_backend_extern_protected_data): Define.
+
+2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18705
+	* elf32-arm.c (elf_backend_extern_protected_data): Define.
+
+2015-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18718
+	* elflink.c (elf_link_output_extsym): Check symbol version
+	section check only if not linking executable, the symbol is
+	referenced by shared library or not locally defined.
+
+2015-07-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use SYMBOLIC_BIND to
+	check if a symbol should be bound symbolically.
+	* elf32-hppa.c (elf32_hppa_check_relocs,
+	elf32_hppa_adjust_dynamic_symbol, elf32_hppa_relocate_section,
+	elf32_hppa_finish_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_check_relocs,
+	elf_m68k_relocate_section): Likewise.
+	* elf32-nios2.c (nios2_elf32_relocate_section,
+	nios2_elf32_check_relocs, allocate_dynrelocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_finish_dynamic_symbol,
+	elf32_tic6x_relocate_section): Likewise.
+
+2015-07-24  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_assign_file_positions_for_non_load): Use .rela
+	prefix for reloc section corresponding to rela section associated
+	with renamed debug section.
+
+2015-07-24  Alan Modra  <amodra@gmail.com>
+
+	* section.c (bfd_get_section_by_name_if): Iterate over entire hash
+	chain.
+
+2015-07-23  Joseph Myers  <joseph@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections)
+	<DT_MIPS_RLD_MAP_REL>: Add target address to host address
+	difference, not to host pointer.
+
+2015-07-22  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (opd_entry_value): Remove assertion.  Instead,
+	return -1 if symbol referenced is not defined.  Tidy.
+
 2015-07-20  Alan Modra  <amodra@gmail.com>
 
 	* po/SRC-POTFILES.in: Regenerate.

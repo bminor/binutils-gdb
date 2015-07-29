@@ -19,7 +19,7 @@
 #include "server.h"
 #include "linux-low.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <endian.h>
 
 #include "nat/mips-linux-watch.h"

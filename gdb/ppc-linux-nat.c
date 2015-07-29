@@ -33,7 +33,7 @@
 #include "gdb_wait.h"
 #include <fcntl.h>
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"

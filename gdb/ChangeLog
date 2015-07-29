@@ -1,3 +1,259 @@
+2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-valprint.c (c_val_print_array): Consider addressable memory
+	unit size.
+	(c_val_print_ptr): Likewise.
+	(c_val_print_int): Likewise.
+	* findvar.c (read_frame_register_value): Likewise.
+	* valarith.c (find_size_for_pointer_math): Likewise.
+	(value_ptrdiff): Likewise.
+	(value_subscripted_rvalue): Likewise.
+	* valops.c (read_value_memory): Likewise (and rename variables).
+	(value_assign): Likewise.
+	(value_repeat): Likewise.
+	(value_array): Likewise.
+	(value_slice): Likewise.
+	* valprint.c (generic_val_print_ptr): Likewise.
+	(generic_val_print_enum): Likewise.
+	(generic_val_print_bool): Likewise.
+	(generic_val_print_int): Likewise.
+	(generic_val_print_char): Likewise.
+	(generic_val_print_float): Likewise.
+	(generic_val_print_decfloat): Likewise.
+	(generic_val_print_complex): Likewise.
+	(val_print_scalar_formatted): Likewise.
+	(val_print_array_elements): Likewise.
+	* value.c (set_value_parent): Likewise.
+	(value_contents_copy_raw): Likewise.
+	(set_internalvar_component): Likewise.
+	(value_primitive_field): Likewise.
+	(value_fetch_lazy): Likewise.
+	* value.h (read_value_memory): Update comment.
+
+2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* value.c (get_value_arch): New function.
+	* value.h (get_value_arch): New declaration.
+
+2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* value.c (struct value): Update comments.
+
+2015-07-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbtypes.c (type_length_units): New function.
+	* gdbtypes.h (type_length_units): New declaration.
+	(struct type) <length>: Update comment.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out complex
+	printing code to ...
+	(generic_val_print_complex): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out decfloat
+	printing code to ...
+	(generic_val_print_decfloat): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out float
+	printing code to ...
+	(generic_val_print_float): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out char
+	printing code to ...
+	(generic_val_print_char): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out integer
+	printing code to ...
+	(generic_val_print_int): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out bool
+	printing code to ...
+	(generic_val_print_bool): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out function/method
+	printing code to ...
+	(generic_val_print_func): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out flags
+	printing code to ...
+	(generic_val_print_flags): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out enum
+	printing code to ...
+	(generic_val_print_enum): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out reference
+	printing code to ...
+	(generic_val_print_ref): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out memberptr
+	printing code to ...
+	(generic_val_print_memberptr): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out pointer
+	printing code to ...
+	(generic_val_print_ptr): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out array
+	printing code to ...
+	(generic_val_print_array): ... this new function.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (generic_val_print): Factor out
+	print_unpacked_pointer code to ...
+	(print_unpacked_pointer): ... this new function.
+
+2015-07-27  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* event-top.c (handle_sigterm): Don't inspect
+	target_can_async_p.  Always set the quit flag and always mark
+	the async signal handler.
+
+2015-07-27  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (REMOTE_EXAMPLES): Remove it.
+
+2015-07-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote.c (read_ptid): Return null_ptid when no thread id
+	is found.
+	(remote_current_thread): Add log warning for malformed
+	qC reply.
+	(remote_start_remote): Add log warning when current thread
+	not found.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-nat.c (fetch_regs, store_regs, fetch_fpregs)
+	(s390_stopped_by_watchpoint, s390_prepare_to_resume): Pass 0 as
+	forth argument to ptrace PTRACE_PEEKUSR_AREA/PTRACE_POKEUSR_AREA.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18717
+	* linux-nat.c (linux_nat_filter_event): Don't assert that the lwp
+	is resumed, and extend the debug log.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (fork_inferior): Print argv[0] instead of exec_file.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* aarch64-linux-nat.c: Include nat/gdb_ptrace.h instead of
+	sys/ptrace.h.
+	* alpha-linux-nat.c: Likewise.
+	* amd64-linux-nat.c: Likewise.
+	* arm-linux-nat.c: Likewise.
+	* hppa-linux-nat.c: Likewise.
+	* i386-linux-nat.c: Likewise.
+	* ia64-linux-nat.c: Likewise.
+	* linux-fork.c: Likewise.
+	* linux-nat.c: Likewise.
+	* m32r-linux-nat.c: Likewise.
+	* m68klinux-nat.c: Likewise.
+	* mips-linux-nat.c: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/linux-ptrace.h
+	* nat/mips-linux-watch.c: Likewise.
+	* nat/x86-linux-dregs.c: Likewise.
+	* ppc-linux-nat.c: Likewise.
+	* s390-linux-nat.c: Likewise.
+	* spu-linux-nat.c: Likewise.
+	* tilegx-linux-nat.c: Likewise.
+	* x86-linux-nat.c: Likewise.
+	* xtensa-linux-nat.c: Likewise.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* ptrace.m4 (ptrace tests): Test in C++ mode.  Try with 'enum
+	__ptrace_request as first parameter type instead of int.
+	(PTRACE_TYPE_ARG1): Define.
+	* nat/gdb_ptrace.h [!PTRACE_TYPE_ARG5] (ptrace): Define as wrapper
+	that casts first argument to PTRACE_TYPE_ARG1.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb_ptrace.h: Move ...
+	* nat/gdb_ptrace.h: ... here.
+	* inf-ptrace.c: Adjust.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* acinclude.m4: Include ptrace.m4.
+	* configure.ac: Call GDB_AC_PTRACE and move ptrace checks ...
+	* ptrace.m4: ... to this new file.
+
+2015-07-23  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_per_cu_data): Add comment.
+	(load_cu): Handle dummy CUs.
+	(dw2_do_instantiate_symtab, process_queuef): Ditto.
+	(dwarf2_fetch_die_loc_sect_off, dwarf2_fetch_constant_bytes): Ditto.
+
+2015-07-23  Ciro Santilli  <ciro.santilli@gmail.com>  (tiny patch)
+
+	* py-linetable.c (ltpy_get_all_source_lines): Adjust function
+	documentation to say that it returns a list rather than
+	a FrozenSet.
+	(linetable_object_methods): Update the docstring of the
+	"source_line" entry.
+
+2015-07-23  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdbtypes.c (resolve_dynamic_array): Pass the peeled element
+	type to the recursive call instead of the original (maybe
+	TYPE_CODE_TYPEDEF) type.
+
+2015-07-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): If
+	TYPE is watchpoint, return zero if aarch64_num_wp_regs is zero.
+	If TYPE is breakpoint, return zero if arch64_num_bp_regs is zero.
+
+2015-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_get_debug_reg_capacity):
+	Move it to nat/aarch64-linux-hw-point.c.
+	(aarch64_linux_child_post_startup_inferior): Update.
+	* nat/aarch64-linux-hw-point.c (aarch64_linux_get_debug_reg_capacity):
+	New function.
+	* nat/aarch64-linux-hw-point.h (aarch64_linux_get_debug_reg_capacity):
+	Declare it.
+
+2015-07-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* common/btrace-common.c (btrace_data_append): Change case label.
+
 2015-07-20  Yao Qi  <yao.qi@linaro.org>
 
 	* nat/aarch64-linux-hw-point.c (aarch64_handle_unaligned_watchpoint):
@@ -716,7 +972,7 @@
 	(rx_frame_this_id): Rename parameter `this_prologue_cache' to
 	`this_cache'.
 	(rx_frame_prev_register): Rename parameter `this_prologue_cache' to
-	`this_cache'.  Add cases for RX_FRAME_TYPE_EXCEPTION and 
+	`this_cache'.  Add cases for RX_FRAME_TYPE_EXCEPTION and
 	RX_FRAME_TYPE_FAST_INTERRUPT.
 	(normal_frame_p, exception_frame_p, rx_frame_sniffer_common)
 	(rx_frame_sniffer, rx_exception_sniffer): New functions.
@@ -4002,10 +4258,10 @@
 
 2015-03-18  Tristan Gingold  <gingold@adacore.com>
 
-        * amd64-windows-tdep.c (amd64_windows_find_unwind_info): Move
-        redirection code to ...
-        (amd64_windows_frame_decode_insns): ... Here.  Fix in prologue
-        checks.  Fix SAVE_NONVOL operations.  Add debug code and comments.
+	* amd64-windows-tdep.c (amd64_windows_find_unwind_info): Move
+	redirection code to ...
+	(amd64_windows_frame_decode_insns): ... Here.  Fix in prologue
+	checks.  Fix SAVE_NONVOL operations.  Add debug code and comments.
 
 2015-03-18  Gary Benson <gbenson@redhat.com>
 
@@ -4111,7 +4367,7 @@
 	* config.in: Regenerate.
 	* configure: Regenerate.
 	* fbsd-nat.c [!HAVE_KINFO_GETVMMAP] (fbsd_read_mapping): Don't
-        define.
+	define.
 	(fbsd_find_memory_regions): Use kinfo_getvmmap to
 	enumerate memory regions if present.
 

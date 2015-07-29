@@ -1,7 +1,6 @@
-// script_test_1.cc -- linker script test 1 for gold  -*- C++ -*-
+// script_test_1b.cc -- linker script test 1 for gold  -*- C++ -*-
 
-// Copyright (C) 2008-2015 Free Software Foundation, Inc.
-// Written by Ian Lance Taylor <iant@google.com>.
+// Copyright (C) 2015 Free Software Foundation, Inc.
 
 // This file is part of gold.
 
@@ -23,25 +22,17 @@
 // A test for a linker script which sets symbols to values.
 
 #include <cassert>
-#include <cstddef>
-#include <stdint.h>
 
-extern char a, b, c, d, e, f, g;
-int sym = 3;
-int common_sym;
+#include "script_test_1.h"
 
-int
-main(int, char**)
+void
+check_int(intptr_t i, intptr_t j)
 {
-  assert(reinterpret_cast<intptr_t>(&a) == 123);
-  assert(reinterpret_cast<intptr_t>(&b) == reinterpret_cast<intptr_t>(&a) * 2);
-  assert(reinterpret_cast<intptr_t>(&c)
-	 == reinterpret_cast<intptr_t>(&b) + 3 * 6);
-  assert(reinterpret_cast<intptr_t>(&d)
-	 == (reinterpret_cast<intptr_t>(&b) + 3) * 6);
-  assert(reinterpret_cast<int*>(&e) == &sym);
-  assert(reinterpret_cast<intptr_t>(&f)
-	 == reinterpret_cast<intptr_t>(&sym) + 10);
-  assert(reinterpret_cast<int*>(&g) == &common_sym);
-  return 0;
+  assert (i == j);
+}
+
+void
+check_ptr(int *i, int *j)
+{
+  assert (i == j);
 }

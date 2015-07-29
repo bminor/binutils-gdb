@@ -1,3 +1,292 @@
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* boards/gdbserver-base.exp: Don't set gdb,noinferiorio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/interrupt.exp: Revert back to checking gdb,noinferiorio
+	at the top.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/call-ar-st.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/call-rt-st.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/call-strs.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/call-strs.exp: Adjust to step over the
+	gdb_unbuffer_output call.
+	* gdb.base/catch-gdb-caused-signals.c: Include
+	"../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/dprintf.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/ending-run.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/run.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/shlib-call.exp: Adjust to step over the
+	gdb_unbuffer_output call.
+	* gdb.base/shmain.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/sizeof.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/varargs.c: Include "../lib/unbuffer_output.c".
+	(main): Rename to ...
+	(test): ... this.
+	(main): Reimplement.
+	* gdb.base/varargs.exp: Run to test instead of to main.
+	* gdb.mi/mi-dprintf.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-dprintf.exp (mi_expect_dprintf): New procedure,
+	factore out from mi_continue_dprintf.  For call-style dprintfs,
+	expect dprintf output out of $inferior_spawn_id.
+	(mi_continue_dprintf): Use mi_expect_dprintf.
+	* gdb.mi/mi-dprintf.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* lib/mi-support.exp (mi_inferior_spawn_id): Delete.
+	(default_mi_gdb_start): Set inferior_spawn_id instead of
+	mi_inferior_spawn_id.  If $inferior_spawn_id is not set, set it to
+	gdb_spawn_id.
+	(mi_gdb_test): Always expect inferior output from both
+	$inferior_spawn_id and $gdb_spawn_id.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.gdb/selftest.exp (test_with_self): Update comment.  Use
+	send_inferior and $inferior_spawn_id.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.gdb/complaints.exp (test_initial_complaints)
+	(test_serial_complaints, test_short_complaints): Use
+	gdb_test_stdio.
+	(test_empty_complaint): Handle $inferior_spawn_id !=
+	$gdb_spawn_id.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/varargs.exp: Use gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/shlib-call.exp: Use gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/ending-run.exp: Use gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/call-rt-st.exp (print_struct_call): Split "result"
+	parameter into two new parameters, "inf_result" and "gdb_result".
+	Expect inferior output and gdb output from $inferior_spawn_id and
+	$gdb_spawn_id, respectively.  Adjust all callers.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/call-ar-st.exp: Use gdb_test_stdio+multi_line instead
+	of gdb_test_sequence.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/a2-run.exp (saw_usage, saw_exit_wrapper)
+	(saw_spurious_output): Expect inferior output from
+	$inferior_spawn_id.  Use gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dprintf.exp: Use standard_testfile.  Change
+	prepare_for_testing call.
+	(srcfile): Don't set.
+	(restart): New procedure.
+	(test_dprintf): New procecure, use to continue over dprintfs.
+	(test_call, test_agent): New procedures, tests moved here.
+	Restart gdb and recreate dprintfs.  Adjust expected output.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/catch-gdb-caused-signals.exp: Use gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/call-strs.exp: Use gdb_test_stdio instead of gdb_test.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/sizeof.exp (check_sizeof, check_valueof): Use
+	gdb_test_stdio.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_test_stdio): New procedure.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/restore.exp (restore_tests): Use gdb_continue_to_end.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/call-signal-resume.exp: Remove check for
+	gdb,noinferiorio.  Don't expect "no signal".  Use gdb_test.
+	* gdb.base/unwindonsignal.exp: Likewise.
+	* gdb.base/call-signals.c (gen_signal): Remove printf call.
+	* gdb.base/unwindonsignal.c (gen_signal): Likewise.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/siginfo-addr.c (pass): New function.
+	(handler): Call it iff si_addr is correct.
+	* gdb.base/siginfo-addr.exp: Remove gdb_skip_stdio_test check.
+	Set a breakpoint at "pass" and continue to it.
+
+2015-07-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.python/py-objfile.exp: Make some tests have unique names.
+	* gdb.python/py-pp-registration.exp: Likewise.
+
+2015-07-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/server-exec-info.exp: Issue a "disconnect".
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-pending.c (thread_func): Replace return with return NULL.
+
+2015-07-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-watch.exp (test_watchpoint_triggering): Remove xfail.
+
+2015-07-27  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdb-sigterm-2.exp: New test.
+
+2015-07-25  Doug Evans  <xdje42@gmail.com>
+
+	Revert:
+	* Makefile.in (check/%.exp): Pass directory for GDB_PARALLEL.
+	(workers/%.worker, build-perf): New rule.
+	(GDB_PERFTEST_MODE): New variable.
+	(check-perf): Use it.
+	(clean): Clean up gdb.perf parallel build subdirs.
+	* lib/build-piece.exp: New file.
+	* lib/cache.exp (gdb_do_cache): Include $GDB_PARALLEL in path name.
+	* lib/gdb.exp (standard_output_file): Include $GDB_PARALLEL in path
+	name.
+	(standard_temp_file): Ditto.
+	(GDB_PARALLEL handling): Make outputs,temp,cache directories as subdirs
+	of $GDB_PARALLEL.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* gdb.perf/README: New file.
+	* lib/perftest.exp (tcl_string_list_to_python_list): New function.
+	* lib/gen-perf-test.exp: New file.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* lib/perftest.exp (PerfTest::compile): Unconditionally call body.
+	(PerfTest::startup): New function.
+	(PerfTest::run): Return result of calling body.
+	(PerfTest::assemble): Rewrite.
+	* gdb.perf/backtrace.exp (PerfTest::assemble): Update function result.
+	* gdb.perf/disassemble.exp (PerfTest::assemble): Ditto.
+	* gdb.perf/single-step.exp (PerfTest::assemble): Ditto.
+	* gdb.perf/skip-prologue.exp (PerfTest::assemble): Ditto.
+	* gdb.perf/solib.exp (PerfTest::assemble): Ditto.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (clean_restart): Make executable optional.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* gdb.base/watchpoint.exp (test_complex_watchpoint): Remove
+	compiler_info references.
+	* gdb.cp/temargs.exp: Ditto.
+	* lib/gdb.exp: Unset compiler_info instead of setting to "unknown".
+	(get_compiler_info): Early exit if already computed.  Set compiler_info
+	to "unknown" if there was a problem.
+	(test_compiler_info): Add function comment.  Call get_compiler_info.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* Makefile.in (check/%.exp): Pass directory for GDB_PARALLEL.
+	(workers/%.worker, build-perf): New rule.
+	(GDB_PERFTEST_MODE): New variable.
+	(check-perf): Use it.
+	(clean): Clean up gdb.perf parallel build subdirs.
+	* lib/build-piece.exp: New file.
+	* lib/cache.exp (gdb_do_cache): Include $GDB_PARALLEL in path name.
+	* lib/gdb.exp (standard_output_file): Include $GDB_PARALLEL in path
+	name.
+	(standard_temp_file): Ditto.
+	(GDB_PARALLEL handling): Make outputs,temp,cache directories as subdirs
+	of $GDB_PARALLEL.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* lib/future.exp (gdb_default_target_compile): New option
+	"early_flags".
+	* lib/gdb.exp (gdb_compile): Undo debian's change in default of
+	--as-needed.
+
+2015-07-24  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/catch-syscall.exp: Call gdb_exit before
+	gdb_skip_xml_test.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-events.exp: Accept output between the stop event
+	and the prompt.
+	* gdb.python/py-evsignal.exp: Likewise.
+	* gdb.python/py-evthreads.exp: Likewise.
+
+2015-07-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18717
+	* gdb.threads/non-ldr-exit.c: New file.
+	* gdb.threads/non-ldr-exit.exp: New file.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.server/ext-wrapper.exp: Test --wrapper option when
+	restarting process.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.server/ext-restart.exp: New file.
+
+2015-07-24  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp (gdbserver_start_extended): Add
+	argument options.
+	* gdb.server/ext-wrapper.exp: New file.
+
+2015-07-23  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-dummy-cu.S: New file.
+	* gdb.dwarf2/dw2-dummy-cu.exp: New file.
+
+2015-07-23  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/var_arr_typedef.exp: New testcase.
+	* gdb.ada/var_arr_typedef/pack.adb: New file.
+	* gdb.ada/var_arr_typedef/pack.ads: New file.
+	* gdb.ada/var_arr_typedef/var_arr_typedef.adb: New file.
+
+2015-07-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc.exp: Adjust "info exceptions" expected output.
+
 2015-07-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/i386-biarch-core.exp: Replace istarget
@@ -241,7 +530,7 @@
 	* gdb.mi/mi-dprintf-pendshr.c: New file.
 
 2015-06-10  Walfred Tedeschi  <walfred.tedeschi@intel.com>
-            Mircea Gherzan  <mircea.gherzan@intel.com>
+	    Mircea Gherzan  <mircea.gherzan@intel.com>
 
 	* gdb.arch/i386-mpx-map.c: New file.
 	* gdb.arch/i386-mpx-map.exp: New File.
@@ -760,7 +1049,7 @@
 
 2015-04-07  Pedro Alves  <palves@redhat.com>
 
-        * lib/gdb.exp (gdb_test_multiple): When processing an argument,
+	* lib/gdb.exp (gdb_test_multiple): When processing an argument,
 	append the substituted item, not the original item.
 
 2015-04-07  Pedro Alves  <palves@redhat.com>
@@ -3545,7 +3834,7 @@
 	(explicit_fork_child_follow): Deleted procedure.
 	(test_follow_fork): New procedure.
 	(do_fork_tests): Replace calls to deleted procedures with
-	calls to test_follow_fork and reset GDB for subsequent 
+	calls to test_follow_fork and reset GDB for subsequent
 	procedure calls.
 
 2014-06-17  Yao Qi  <yao@codesourcery.com>
@@ -5310,7 +5599,7 @@
 	    Pedro Alves  <palves@redhat.com>
 
 	* gdb.mi/mi-info-os.exp: Connect to the target with
-        mi_gdb_target_load.
+	mi_gdb_target_load.
 
 2014-01-08  Pedro Alves  <palves@redhat.com>
 

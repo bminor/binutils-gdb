@@ -257,28 +257,30 @@ start_inferior (char **argv)
 
       last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
-      if (last_status.kind != TARGET_WAITKIND_STOPPED)
-	return signal_pid;
-
-      do
+      if (last_status.kind == TARGET_WAITKIND_STOPPED)
 	{
-	  (*the_target->resume) (&resume_info, 1);
+	  do
+	    {
+	      (*the_target->resume) (&resume_info, 1);
 
- 	  last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-	  if (last_status.kind != TARGET_WAITKIND_STOPPED)
-	    return signal_pid;
+	      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+	      if (last_status.kind != TARGET_WAITKIND_STOPPED)
+		break;
 
-	  current_thread->last_resume_kind = resume_stop;
-	  current_thread->last_status = last_status;
+	      current_thread->last_resume_kind = resume_stop;
+	      current_thread->last_status = last_status;
+	    }
+	  while (last_status.value.sig != GDB_SIGNAL_TRAP);
 	}
-      while (last_status.value.sig != GDB_SIGNAL_TRAP);
-
+      target_arch_setup ();
       return signal_pid;
     }
 
   /* Wait till we are at 1st instruction in program, return new pid
      (assuming success).  */
   last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+
+  target_arch_setup ();
 
   if (last_status.kind != TARGET_WAITKIND_EXITED
       && last_status.kind != TARGET_WAITKIND_SIGNALLED)
@@ -4112,7 +4114,20 @@ process_serial_event (void)
 
 	  /* Wait till we are at 1st instruction in prog.  */
 	  if (program_argv != NULL)
-	    start_inferior (program_argv);
+	    {
+	      start_inferior (program_argv);
+	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
+		{
+		  /* Stopped at the first instruction of the target
+		     process.  */
+		  general_thread = last_ptid;
+		}
+	      else
+		{
+		  /* Something went wrong.  */
+		  general_thread = null_ptid;
+		}
+	    }
 	  else
 	    {
 	      last_status.kind = TARGET_WAITKIND_EXITED;

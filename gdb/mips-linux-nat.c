@@ -32,7 +32,7 @@
 #include "gregset.h"
 
 #include <sgidefs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
 
 #include "nat/mips-linux-watch.h"

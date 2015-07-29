@@ -179,7 +179,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
@@ -221,8 +221,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -326,7 +326,7 @@
 2002-06-13  Tom Rix  <trix@redhat.com>
 
 	* interp.c (xfer_mem): Fix transfers across multiple segments.
- 
+
 2002-06-09  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (INCLUDE): Update path to callback.h.
@@ -341,9 +341,9 @@
 
 2002-06-02  Elena Zannoni  <ezannoni@redhat.com>
 
-        From Jason Eckhardt <jle@redhat.com>
-        * d10v_sim.h (INC_ADDR): Correctly handle the case where MOD_E is
-        less than MOD_S (post-decrement).
+	From Jason Eckhardt <jle@redhat.com>
+	* d10v_sim.h (INC_ADDR): Correctly handle the case where MOD_E is
+	less than MOD_S (post-decrement).
 
 2002-06-01  Andrew Cagney  <ac131313@redhat.com>
 
@@ -427,7 +427,7 @@ Mon Jan  3 00:14:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	and "st2w" check that the address is aligned.
 
 1999-12-30  Chandra Chavva   <cchavva@cygnus.com>
-	
+
 	* d10v_sim.h (INC_ADDR): Added code to assign
 	proper address for loads with predec operations.
 
@@ -508,7 +508,7 @@ Sat Oct 23 20:06:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v_sim.h (DEBUG_MEMORY): Define.
 	(IMAP0, IMAP1, DMAP, SET_IMAP0, SET_IMAP1, SET_DMAP): Delete.
-	
+
 Sat Oct 23 18:41:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Allow a debug value to be passed to the -t
@@ -552,9 +552,9 @@ Wed Sep  8 19:34:55 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* simops.c (OP_6601): Do not write back decremented address if
 	either of the destination registers was the same as the address
-	register. 
+	register.
 	(OP_6201): Do not write back incremented address if either of the
-	destination registers was the same as the address register. 
+	destination registers was the same as the address register.
 
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -563,7 +563,7 @@ Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
-	
+
 1999-04-02  Keith Seitz  <keiths@cygnus.com>
 
 	* interp.c (ui_loop_hook_counter): New global (when NEED_UI_LOOP_HOOK
@@ -588,14 +588,14 @@ Wed Mar 10 19:32:13 1999  Martin M. Hunt  <hunt@cygnus.com>
 1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* simops.c (OP_5607): Correct saturation comparison/assignment.
-	(OP_1201, OP_1203, OP_17001200, OP_17001202, 
-         OP_2A00, OP_2800, OP_2C00, OP_3200, OP_3201, 
-         OP_1001, OP_1003, OP_17001000, OP_17001002): Ditto.
+	(OP_1201, OP_1203, OP_17001200, OP_17001202,
+	 OP_2A00, OP_2800, OP_2C00, OP_3200, OP_3201,
+	 OP_1001, OP_1003, OP_17001000, OP_17001002): Ditto.
 
 1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* simops.c (OP_5605): Sign extend MIN32 and MAX32 before saturation
-        comparison.
+	comparison.
 	(OP_5607): Ditto.
 	(OP_2A00): Ditto.
 	(OP_2800): Ditto.
@@ -626,7 +626,7 @@ Wed Sep 30 10:14:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
-        * configure: Regenerated to track ../common/aclocal.m4 changes.
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
@@ -652,7 +652,7 @@ Fri Apr 24 11:04:46 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 	* interp.c (struct hash_entry): OPCODE and MASK are unsigned.
 
 	* d10v_sim.h (remote-sim.h, sim-config.h): Include.
-	
+
 Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
@@ -665,7 +665,7 @@ Wed Apr  1 12:59:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(OP_5F00, <*>): Trace input registers before making system call.
 	(OP_5F00, <kill>): Trace R0, R1 not REGn.
 	(OP_5F00, <getpid>): Always return 47.
-	
+
 	* d10v_sim.h (SLOT, SLOT_NR, SLOT_PEND_MASK, SLOT_PEND,
  	SLOT_DISCARD, SLOT_FLUSH): Define.  An implementation of write
  	back slots.
@@ -690,7 +690,7 @@ Wed Apr  1 12:59:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	After scheduling updates to registers using SET_*, flush updates.
 	(sim_resume): Re-order handling of RPT/repeat and IBA/hbreak so
  	that each sets pc using SET_* and last SET_* eventually winds out.
-	
+
 	* simops.c: Use new SET_* et.al. macros to fetch / store
  	registers.
 	(move_to_cr): Add MASK argument for selective update of CREG bits.
@@ -703,7 +703,7 @@ Wed Apr  1 12:59:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(OP_*): Re-write to use new SET_* et.al. macros.
 	(FUNC, PARM[1-4], RETVAL, RETVAL32): Redo definition.
 	(RETVAL_HIGH, RETVAL_LOW): Delete, use RETVAL32.
-	
+
 Wed Apr  1 12:55:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SIM_AC_OPTION_WARNINGS): Add.
@@ -731,7 +731,7 @@ Mon Oct 27 14:43:33 1997  Fred Fish  <fnf@cygnus.com>
 	* (dmem_addr): If address is illegal or in I/O space, signal a bus
  	error.  Allocate unified memory on demand.  Fix DMEM address
  	calculations.
-	
+
 Mon Feb 16 10:27:53 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_5F20): Implement "dbt".
@@ -844,7 +844,7 @@ Tue Dec  9 10:28:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	(BPSW): Ditto for BPSW_CR and not PSW_CR.
 
 	* simops.c (OP_5F40): JMP to BPC instead of assigning PC directly.
-	
+
 Mon Dec  8 12:58:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_5F00): From Martin Hunt <hunt@cygnus.com>. Change
@@ -855,7 +855,7 @@ Mon Dec  8 12:58:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v_sim.h (AE_VECTOR_START, RIE_VECTOR_START,
  	SDBT_VECTOR_START, TRAP_VECTOR_START): Define.
-	
+
 	* simops.c (OP_5F00): For "trap", mask out all but SM bit in PSW,
  	use move_to_cr.
 	(OP_5F00): For "trap", update BPSW with move_to_cr.
@@ -867,7 +867,7 @@ Fri Dec  5 15:31:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	(PSW): Obtain value uing move_from_cr.
 	(MOD_S, MOD_E, BPSW): Make r-values.
 	(move_from_cr, move_to_cr): Declare functions.
-	
+
 	* interp.c (sim_fetch_register, sim_store_register): Use
  	move_from_cr and move_to_cr for CR register transfers.
 
@@ -946,7 +946,7 @@ Mon Nov 10 17:50:18 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* simops.c (OP_4201): "rachi". Sign extend bit 40 of ACC.  Sign
  	extend bit 44 all constants.
 	(OP_4201): Replace GCC specific 0x..LL with SIGNED64 macro.
-	
+
 Fri Oct 24 10:26:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v_sim.h: Include sim-types.h.
@@ -959,7 +959,7 @@ Wed Oct 22 14:43:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_write_phys): New function, write to physical
  	instead of virtual memory.
-	
+
 	* interp.c (sim_load): Pass lma_p and sim_write_phys to
  	sim_load_file.
 
@@ -1075,7 +1075,7 @@ Wed Apr 16 16:12:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_5F00): Only provide system calls SYS_execv,
  	SYS_wait, SYS_wait, SYS_utime, SYS_time if defined by the host.
-	
+
 Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
@@ -1193,7 +1193,7 @@ Fri Nov  8 16:19:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	(JMP): New macro.  Sets the PC and the pc_changed flag.
 
 	* gencode.c (write_opcodes): Add is_long field.
-	
+
 	* interp.c (lookup_hash): If we blindly apply a short opcode's mask
 	to a long opcode we could get a false match.  Check the opcode size.
 	(hash): Add a size field to the hash table.
@@ -1207,7 +1207,7 @@ Fri Nov  8 16:19:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* simops.c: Changed all branch and jump instructions to use new JMP macro.
 	(OP_20000000): Corrected trace information to show this is a ldi.l, not
 	a ldi.s instruction.
-	
+
 Thu Oct 31 19:13:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* interp.c (sim_fetch_register, sim_store_register): Fix bug where
@@ -1252,11 +1252,11 @@ Tue Oct 29 12:13:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* simops.c (MEMPTR): Redefine to use dmem_addr().
 	(OP_5F00): Replace references to STate.imem with dmem_addr().
-	
+
 	* d10v-sim.h (State): Remove mem_min and mem_max. Add umem[128].
 	(RB,SW,RW,SLW,RLW): Redefine to use dmem_addr().
 	(IMAP0,IMAP1,DMAP,SET_IMAP,SET_IMAP1,SET_DMAP): Define.
-	
+
 Tue Oct 22 15:22:33 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* d10v_sim.h (_ins_type): Reorganize, so that we can provide
@@ -1317,7 +1317,7 @@ Wed Oct 16 13:50:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	independent endian functions.  If compiling with GCC and
 	optimizing, include endian.c so the endian functions are inlined.
 
-	* simops.c (OP_5F00): Correct tracing of accumulators.	
+	* simops.c (OP_5F00): Correct tracing of accumulators.
 
 Tue Oct 15 10:57:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
@@ -1363,7 +1363,7 @@ Mon Sep 23 17:55:30 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Fri Sep 20 15:36:45 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* interp.c (sim_create_inferior): Reinitialize State every time 
+	* interp.c (sim_create_inferior): Reinitialize State every time
 	sim_create_inferior() is called.
 
 Thu Sep 19 21:38:20 1996  Michael Meissner  <meissner@wogglebug.ziplink.net>
@@ -1388,7 +1388,7 @@ Wed Sep 18 09:13:25 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* d10v_sim.h (DEBUG_INSTRUCTION): New debug value to include line
 	numbers and function names in debug trace.
 	(DEBUG): If not defined, set to DEBUG_TRACE, DEBUG_VALUES, and
-	DEBUG_LINE_NUMBER. 
+	DEBUG_LINE_NUMBER.
 	(SIG_D10V_{STOP,EXIT}): Values to represent the stop instruction
 	and exit system call trap being executed.
 
@@ -1414,7 +1414,7 @@ Wed Sep 18 09:13:25 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	available and if desired.
 	(OP_4E09): Don't print out DBT message.
 	(OP_5FE0): Set exception field to SIG_D10V_STOP.
-	(OP_5F00): Set exception field to SIG_D10V_EXIT.	
+	(OP_5F00): Set exception field to SIG_D10V_EXIT.
 
 Sat Sep 14 22:18:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
@@ -1539,7 +1539,7 @@ Mon Aug 26 18:30:28 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v_sim.h (SEXT32): Added.
 	* interp.c: Commented out printfs.
-	* simops.c:  Fixed error in sb and st2w. 
+	* simops.c:  Fixed error in sb and st2w.
 
 Thu Aug 15 13:30:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
@@ -1556,6 +1556,6 @@ Fri Aug  2 17:44:24 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 Thu Aug  1 17:05:24 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* ChangeLog, Makefile.in, configure, configure.in, d10v_sim.h, 
+	* ChangeLog, Makefile.in, configure, configure.in, d10v_sim.h,
 	gencode.c, interp.c, simops.c: Created.
 

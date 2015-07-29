@@ -157,6 +157,7 @@ run_dump_test "gc-relocs-257"
 run_dump_test "pr17415"
 run_dump_test "tprel_g2_overflow"
 run_dump_test "tprel_add_lo12_overflow"
+run_dump_test "protected-data"
 
 # ifunc tests
 run_dump_test "ifunc-1"

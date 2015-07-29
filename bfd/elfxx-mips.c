@@ -11515,7 +11515,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 		/* The MIPS_RLD_MAP_REL tag stores the offset to the debug
 		   pointer, relative to the address of the tag.  */
 		dt_addr = (sdyn->output_section->vma + sdyn->output_offset
-			   + b - sdyn->contents);
+			   + (b - sdyn->contents));
 		rld_addr = (s->output_section->vma + s->output_offset
 			    + h->root.u.def.value);
 		dyn.d_un.d_ptr = rld_addr - dt_addr;

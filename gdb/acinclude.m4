@@ -63,6 +63,9 @@ m4_include(libiberty.m4)
 dnl For --enable-build-with-cxx and COMPILER.
 m4_include(build-with-cxx.m4)
 
+dnl For GDB_AC_PTRACE.
+m4_include(ptrace.m4)
+
 ## ----------------------------------------- ##
 ## ANSIfy the C compiler whenever possible.  ##
 ## From Franc,ois Pinard                     ##

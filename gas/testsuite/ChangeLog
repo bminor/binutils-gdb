@@ -1,3 +1,34 @@
+2015-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/struct.d: Allow for extra symbols in the output.
+	* gas/macros/test1.d: Likewise.
+	* gas/elf/elf.exp: Add an rl78 machine.
+	* gas/elf/sections2e-rl78: New file.
+
+2015-07-22  Alexander Fomin  <alexander.fomin@intel.com>
+
+	PR binutils/18631
+	* gas/i386avx512dq-intel.d: Replace "QWORD" with "DWORD" in
+	vcvtt?ps2u?qq instructions disassembly regexes.
+	Add disassembly regex for new test.
+	* gas/i386/avx512dq.d: Likewise.
+	* gas/i386/avx512dq_vl-intel.d: Likewise.
+	* gas/i386/avx512dq_vl.d: Likewise.
+	* gas/i386/x86-64-avx512dq-intel.d: Likewise.
+	* gas/i386/x86-64-avx512dq.d: Likewise.
+	* gas/i386/x86-64-avx512dq_vl-intel.d: Likewise.
+	* gas/i386/x86-64-avx512dq_vl.d: Likewise.
+	* gas/i386/avx512dq.s: Add new test for Intel syntax with memory
+	operand and broadcasting enabled.
+	* gas/i386/avx512dq_vl.s: Likewise.
+	* gas/i386/x86-64-avx512dq.s: Likewise.
+	* gas/i386/x86-64-avx512dq_vl.s: Likewise.
+
+2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/arm/attr-march-armv6kz.d: New.
+	* gas/arm/attr-march-armv6kzt2.d: New.
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/aarch64/reloc-tlsldm-1.s: New testcase.
@@ -847,7 +878,7 @@
 
 	* gas/arm/neon-addressing-bad.s: Add test for invalid VSHL,
 	VQSHL, and VQSHLU immediates.
-	* gas/arm/neon-addressing-bad.l: Update accordingly. 
+	* gas/arm/neon-addressing-bad.l: Update accordingly.
 
 2015-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 

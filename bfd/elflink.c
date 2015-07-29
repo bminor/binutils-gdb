@@ -9217,8 +9217,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 
       /* Since there is no version information in the dynamic string,
 	 if there is no version info in symbol version section, we will
-	 have a run-time problem.  */
-      if (h->verinfo.verdef == NULL)
+	 have a run-time problem if not linking executable, referenced
+	 by shared library, or not locally defined.  */
+      if (h->verinfo.verdef == NULL
+	  && (!flinfo->info->executable
+	      || h->ref_dynamic
+	      || !h->def_regular))
 	{
 	  char *p = strrchr (h->root.root.string, ELF_VER_CHR);
 

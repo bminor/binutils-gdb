@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #endif
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include "linux-nat.h"
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"
@@ -3195,12 +3195,14 @@ linux_nat_filter_event (int lwpid, int status)
 	    }
 	}
 
-      gdb_assert (lp->resumed);
-
+      /* Note that even if the leader was ptrace-stopped, it can still
+	 exit, if e.g., some other thread brings down the whole
+	 process (calls `exit').  So don't assert that the lwp is
+	 resumed.  */
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "Process %ld exited\n",
-			    ptid_get_lwp (lp->ptid));
+			    "Process %ld exited (resumed=%d)\n",
+			    ptid_get_lwp (lp->ptid), lp->resumed);
 
       /* This was the last lwp in the process.  Since events are
 	 serialized to GDB core, we may not be able report this one

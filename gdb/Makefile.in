@@ -993,8 +993,6 @@ HFILES_WITH_SRCDIR = ../bfd/bfd.h jit-reader.h
 # GDB "info" files, which should be included in their entirety
 INFOFILES = gdb.info*
 
-REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
-
 # {X,T,NAT}DEPFILES are something of a pain in that it's hard to
 # default their values the way we do for SER_HARDWIRE; in the future
 # maybe much of the stuff now in {X,T,NAT}DEPFILES will go into other

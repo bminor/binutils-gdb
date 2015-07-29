@@ -1,3 +1,10 @@
+2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_AEXT_V6ZK): Rename to ARM_AEXT_V6KZ.
+	(ARM_AEXT_V6ZKT2): Rename to ARM_AEXT_V6KZT2.
+	(ARM_ARCH_V6ZK): Rename to ARM_ARCH_V6KZ.
+	(ARM_ARCH_V6ZKT2): Rename to ARM_ARCH_V6KZT2.
+
 2015-07-03  Alan Modra  <amodra@gmail.com>
 
 	* ppc.h (PPC_OPCODE_750, PPC_OPCODE_7450, PPC_OPCODE_860): Define.
@@ -200,7 +207,7 @@
 
 2014-09-16  Kuan-Lin Chen <kuanlinchentw@gmail.com>
 
-        * nds32.h: Add new opcode declaration.
+	* nds32.h: Add new opcode declaration.
 
 2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
@@ -243,9 +250,9 @@
 	(INSN_COPROC_MOVE): New define.
 
 2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
-            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
-            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
-            Soundararajan  <Sounderarajan.D@atmel.com>
+	    Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+	    Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+	    Soundararajan  <Sounderarajan.D@atmel.com>
 
 	* avr.h (AVR_ISA_TINY): Define avrtiny specific ISA.
 	(AVR_ISA_2xxxa): Define ISA without LPM.
@@ -612,7 +619,7 @@
 	* aarch64.h (AARCH64_FEATURE_CRC): New macro.
 
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 

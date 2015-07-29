@@ -25,6 +25,7 @@
 #include "i387-fp.h"
 #include "x86-low.h"
 #include "x86-xstate.h"
+#include "nat/gdb_ptrace.h"
 
 #include "gdb_proc_service.h"
 /* Don't include elf/common.h if linux/elf.h got included by
@@ -117,7 +118,7 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 
 #include <sys/reg.h>
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/uio.h>
 
 #ifndef PTRACE_GET_THREAD_AREA

@@ -1,3 +1,9 @@
+2015-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/localize-hidden-1.d: Allow for extra symbols in the
+	output.
+        * binutils-all/strip-11.d: Skip for the RL78.
+
 2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/compress.exp: Update.

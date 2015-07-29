@@ -1,3 +1,15 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* stabs.c (parse_stab_range_type): Use 0xffffffffffffffffLL.
+
+2015-07-22  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (dump_relocations): Show MIN_INT addends as negative.
+
 2015-07-20  Alan Modra  <amodra@gmail.com>
 
 	* doc/Makefile.in: Regenerate.
@@ -33,8 +45,8 @@
 
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
-        * readelf.c (print_mips_fp_abi_value): Handle
-        Val_GNU_MIPS_ABI_FP_NAN2008.
+	* readelf.c (print_mips_fp_abi_value): Handle
+	Val_GNU_MIPS_ABI_FP_NAN2008.
 
 2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
 

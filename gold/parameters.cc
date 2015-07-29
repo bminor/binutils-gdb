@@ -237,7 +237,7 @@ const char*
 Parameters::entry() const
 {
   const char* ret = this->options().entry();
-  if (ret == NULL)
+  if (ret == NULL && parameters->target_valid())
     ret = parameters->target().entry_symbol_name();
   return ret;
 }

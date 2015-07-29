@@ -1,3 +1,82 @@
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-07-26  Doug Kwan  <dougkwan@google.com>
+
+	* testsuite/arm_unaligned_reloc.{s,sh}: Make test less sensitive to
+	  disassembler output format.
+
+2015-07-23  Ian Coolidge  <icoolidge@google.com>
+	Plumb --pic-veneer option for gold.
+
+	* arm.cc (Reloc_stub::stub_type_for_reloc): Plumb to stub
+	generation.
+	* options.h (General_options): Add --pic-veneer option.
+
+2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18663
+	* testsuite/Makefile.am (script_test_1_SOURCES): Set to
+	script_test_1a.cc script_test_1b.cc.
+	(script_test_11_r.o): Replace script_test_11.o with
+	script_test_11a.o script_test_11b.o.
+	(script_test_11.o): Removed.
+	(script_test_11a.o): New.
+	(script_test_11b.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/script_test_1.h: New file.
+	* testsuite/script_test_1b.cc: Likewise.
+	* testsuite/script_test_11.h: Likewise.
+	* testsuite/script_test_11b.c: Likewise.
+	* testsuite/script_test_1.cc: Renamed to ...
+	* testsuite/script_test_1a.cc: This.
+	Include "script_test_1.h".
+	(main): Call check_int and check_ptr.
+	* testsuite/script_test_11.c: Renamed to ...
+	* testsuite/script_test_11a.c: This.
+	Include "script_test_11.h".
+	(main): Call ptr_equal.
+
+2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18628
+	* testsuite/ifuncdep2.c (global): Change protected to hidden.
+	* testsuite/ifuncmod1.c (global): Likewise.
+	* testsuite/ifuncmod5.c (global): Likewise.
+
+2015-07-22  Alan Modra  <amodra@gmail.com>
+
+	* aarch64.cc (try_fix_erratum_843419_optimized): Warning fix.
+
+2015-07-21  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18548
+	* symtab.cc (Symbol_table::do_define_in_output_data): Check for
+	forced local symbol even when oldsym != NULL.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+
+2015-07-21  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18698
+	* archive.cc (Library_base::should_include_member): Don't use entry
+	point for relocatable links, or if target is not yet valid.
+	* parameters.cc (Parameters::entry): Check target_valid().
+
+2015-07-20  Han Shen  <shenhan@google.com>
+
+	Optimize erratum 843419 fix.
+
+	* aarch64.cc (AArch64_insn_utilities::is_adr): New method.
+	(AArch64_insn_utilities::aarch64_adr_encode_imm): New method.
+	(AArch64_insn_utilities::aarch64_adrp_decode_imm): New method.
+	(E843419_stub): New sub-class of Erratum_stub.
+	(AArch64_relobj::try_fix_erratum_843419_optimized): New method.
+	(AArch64_relobj::section_needs_reloc_stub_scanning): Try optimized fix.
+	(AArch64_relobj::create_erratum_stub): Add 1 argument.
+	(Target_aarch64::scan_erratum_843419_span): Pass in adrp insn offset.
+
 2015-07-20  Han Shen  <shenhan@google.com>
 
 	Fix arm elf header flags wrt hardfp bit.
@@ -169,37 +248,37 @@
 
 	Patch for erratum 843419 internal error.
 
-        * aarch64.cc (Erratum_stub::Insn_utilities): New typedef.
-        (Erratum_stub::update_erratum_insn): New method.
-        (Stub_table::relocate_stubs): Modified to place relocated insn.
-        (AArch64_relobj::fix_errata): Modified gold_assert.
+	* aarch64.cc (Erratum_stub::Insn_utilities): New typedef.
+	(Erratum_stub::update_erratum_insn): New method.
+	(Stub_table::relocate_stubs): Modified to place relocated insn.
+	(AArch64_relobj::fix_errata): Modified gold_assert.
 
 2015-06-12  Han Shen  <shenhan@google.com>
 
 	Fix erratum 835769.
 
-        * aarch64.cc (AArch64_insn_utilities::BYTES_PER_INSN): Move
-        defintion outside class definition.
-        (AArch64_insn_utilities::AARCH64_ZR): New static constant.
-        (AArch64_insn_utilities::aarch64_op31): New member.
-        (AArch64_insn_utilities::aarch64_ra): New member.
-        (AArch64_insn_utilities::aarch64_mac): New member.
-        (AArch64_insn_utilities::aarch64_mlxl): New member.
-        (ST_E_835769): New global enum member.
-        (Stub_table::relocate_stubs): Add 835769 handler.
-        (Stub_template_repertoire::Stub_template_repertoire): Install new
-        stub type.
-        (AArch64_relobj::scan_errata): This func is renamed from
-        scan_erratum_843419.
-        (AArch64_relobj::do_count_local_symbols): Add 835769 handler.
-        (AArch64_relobj::do_relocate_sections): Add 835769 handler.
-        (AArch64_relobj::scan_sections_for_stubs): Add 835769 handler.
-        (Target_aarch64::scan_erratum_835769_span): New method.
-        (Target_aarch64::create_erratum_stub): New method.
-        (Target_aarch64::is_erratum_835769_sequence): New method.
-        (Target_aarch64::scan_erratum_843419_sequence): Move part of the
-        code into create_erratum_stub.
-        * options.h (fix_cortex_a53_835769): New option.
+	* aarch64.cc (AArch64_insn_utilities::BYTES_PER_INSN): Move
+	defintion outside class definition.
+	(AArch64_insn_utilities::AARCH64_ZR): New static constant.
+	(AArch64_insn_utilities::aarch64_op31): New member.
+	(AArch64_insn_utilities::aarch64_ra): New member.
+	(AArch64_insn_utilities::aarch64_mac): New member.
+	(AArch64_insn_utilities::aarch64_mlxl): New member.
+	(ST_E_835769): New global enum member.
+	(Stub_table::relocate_stubs): Add 835769 handler.
+	(Stub_template_repertoire::Stub_template_repertoire): Install new
+	stub type.
+	(AArch64_relobj::scan_errata): This func is renamed from
+	scan_erratum_843419.
+	(AArch64_relobj::do_count_local_symbols): Add 835769 handler.
+	(AArch64_relobj::do_relocate_sections): Add 835769 handler.
+	(AArch64_relobj::scan_sections_for_stubs): Add 835769 handler.
+	(Target_aarch64::scan_erratum_835769_span): New method.
+	(Target_aarch64::create_erratum_stub): New method.
+	(Target_aarch64::is_erratum_835769_sequence): New method.
+	(Target_aarch64::scan_erratum_843419_sequence): Move part of the
+	code into create_erratum_stub.
+	* options.h (fix_cortex_a53_835769): New option.
 
 2015-06-11  Cary Coutant  <ccoutant@gmail.com>
 
@@ -350,33 +429,33 @@
 
 2015-06-03  Cary Coutant  <ccoutant@gmail.com>
 
-        PR gold/17819
-        * gold.cc (queue_final_tasks): When --build-id=tree, queue a
-        separate task to schedule the build id computation.
-        * layout.cc (Hash_task::Hash_task): Remove build_id_blocker,
-        add Output_file and offset.
-        (Hash_task::run): Get and release the input views.
-        (Hash_task::is_runnable): Always return NULL (always runnable).
-        (Layout::queue_build_id_tasks): Remove.
-        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
-        parameters; use them instead of class members.
-        (Build_id_task_runner::run): New function.
-        (Close_task_runner::run): Pass array_of_hashes and size_of_hashes
-        to write_build_id.
-        * layout.h (Layout::queue_build_id_tasks): Remove.
-        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
-        parameters.
-        (Layout::array_of_hashes_): Remove.
-        (Layout::size_of_array_of_hashes_): Remove.
-        (Layout::input_view_): Remove.
-        (Build_id_task_runner): New class.
-        (Close_task_runner::Close_task_runner): Add array_of_hashes and
-        size_of_hashes parameters.
-        (Close_task_runner::array_of_hashes_): New data member.
-        (Close_task_runner::size_of_hashes_): New data member.
-        * testsuite/Makefile.am
-        (flagstest_compress_debug_sections_and_build_id_tree): New test.
-        * testsuite/Makefile.in: Regenerate.
+	PR gold/17819
+	* gold.cc (queue_final_tasks): When --build-id=tree, queue a
+	separate task to schedule the build id computation.
+	* layout.cc (Hash_task::Hash_task): Remove build_id_blocker,
+	add Output_file and offset.
+	(Hash_task::run): Get and release the input views.
+	(Hash_task::is_runnable): Always return NULL (always runnable).
+	(Layout::queue_build_id_tasks): Remove.
+	(Layout::write_build_id): Add array_of_hashes and size_of_hashes
+	parameters; use them instead of class members.
+	(Build_id_task_runner::run): New function.
+	(Close_task_runner::run): Pass array_of_hashes and size_of_hashes
+	to write_build_id.
+	* layout.h (Layout::queue_build_id_tasks): Remove.
+	(Layout::write_build_id): Add array_of_hashes and size_of_hashes
+	parameters.
+	(Layout::array_of_hashes_): Remove.
+	(Layout::size_of_array_of_hashes_): Remove.
+	(Layout::input_view_): Remove.
+	(Build_id_task_runner): New class.
+	(Close_task_runner::Close_task_runner): Add array_of_hashes and
+	size_of_hashes parameters.
+	(Close_task_runner::array_of_hashes_): New data member.
+	(Close_task_runner::size_of_hashes_): New data member.
+	* testsuite/Makefile.am
+	(flagstest_compress_debug_sections_and_build_id_tree): New test.
+	* testsuite/Makefile.in: Regenerate.
 
 2015-06-01  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
@@ -860,7 +939,7 @@
 	object->merge_output_offset.
 
 2015-03-02  Peter Collingbourne  <pcc@google.com>
-            Cary Coutant  <ccoutant@google.com>
+	    Cary Coutant  <ccoutant@google.com>
 
 	* output.cc (Output_section::add_merge_input_section): Do not
 	attempt to merge sections with an entsize of 0.
@@ -1411,7 +1490,7 @@ gold/
 	Add "typename" keyword.
 
 2014-10-15  Han Shen  <shenhan@google.com>
-            Jing Yu   <jingyu@google.com>
+	    Jing Yu   <jingyu@google.com>
 
 	Patch for gold aarch64 backend to support relaxation.
 	* aarch64-reloc.def: Change format.
@@ -1471,7 +1550,7 @@ gold/
 	* po/POTFILES.in: Regenerate.
 
 2014-09-23  Taiju Tsuiki  <tzik@google.com>
-            Cary Coutant  <ccoutant@google.com>
+	    Cary Coutant  <ccoutant@google.com>
 
 	PR gold/14860
 	* gold.cc (queue_final_tasks): Add Write_sections_task as a blocker

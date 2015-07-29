@@ -326,6 +326,9 @@ run_dump_test "pr17935-2"
 run_dump_test "pr18160"
 run_dump_test "pr18176"
 
+# Add $PLT_CFLAGS if PLT is expected.
+global PLT_CFLAGS
+
 # Must be native with the C compiler
 if { [isnative] && [which $CC] != 0 } {
     run_cc_link_tests {
@@ -376,7 +379,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main3.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main3.c } \
 	    {{readelf {-Wr} plt-main3.rd}} \
 	    "libplt-main3.a" \
@@ -384,7 +387,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main4.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main4.c } \
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \

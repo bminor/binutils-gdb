@@ -115,11 +115,6 @@ struct process_info_private
 
   /* &_r_debug.  0 if not yet determined.  -1 if no PT_DYNAMIC in Phdrs.  */
   CORE_ADDR r_debug;
-
-  /* This flag is true iff we've just created or attached to the first
-     LWP of this process but it has not stopped yet.  As soon as it
-     does, we need to call the low target's arch_setup callback.  */
-  int new_inferior;
 };
 
 struct lwp_info;

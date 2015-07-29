@@ -103,6 +103,10 @@ public:
   { return aarch64_bits(insn, 10, 5); }
 
   static bool
+  is_adr(const Insntype insn)
+  { return (insn & 0x9F000000) == 0x10000000; }
+
+  static bool
   is_adrp(const Insntype insn)
   { return (insn & 0x9F000000) == 0x90000000; }
 
@@ -125,6 +129,39 @@ public:
   static unsigned int
   aarch64_rt2(const Insntype insn)
   { return aarch64_bits(insn, 10, 5); }
+
+  // Encode imm21 into adr. Signed imm21 is in the range of [-1M, 1M).
+  static Insntype
+  aarch64_adr_encode_imm(Insntype adr, int imm21)
+  {
+    gold_assert(is_adr(adr));
+    gold_assert(-(1 << 20) <= imm21 && imm21 < (1 << 20));
+    const int mask19 = (1 << 19) - 1;
+    const int mask2 = 3;
+    adr &= ~((mask19 << 5) | (mask2 << 29));
+    adr |= ((imm21 & mask2) << 29) | (((imm21 >> 2) & mask19) << 5);
+    return adr;
+  }
+
+  // Retrieve encoded adrp 33-bit signed imm value. This value is obtained by
+  // 21-bit signed imm encoded in the insn multiplied by 4k (page size) and
+  // 64-bit sign-extended, resulting in [-4G, 4G) with 12-lsb being 0.
+  static int64_t
+  aarch64_adrp_decode_imm(const Insntype adrp)
+  {
+    const int mask19 = (1 << 19) - 1;
+    const int mask2 = 3;
+    gold_assert(is_adrp(adrp));
+    // 21-bit imm encoded in adrp.
+    uint64_t imm = ((adrp >> 29) & mask2) | (((adrp >> 5) & mask19) << 2);
+    // Retrieve msb of 21-bit-signed imm for sign extension.
+    uint64_t msbt = (imm >> 20) & 1;
+    // Real value is imm multipled by 4k. Value now has 33-bit information.
+    int64_t value = imm << 12;
+    // Sign extend to 64-bit by repeating msbt 31 (64-33) times and merge it
+    // with value.
+    return ((((uint64_t)(1) << 32) - msbt) << 33) | value;
+  }
 
   static bool
   aarch64_b(const Insntype insn)
@@ -1019,6 +1056,35 @@ private:
   AArch64_address erratum_address_;
 };  // End of "Erratum_stub".
 
+
+// Erratum sub class to wrap additional info needed by 843419.  In fixing this
+// erratum, we may choose to replace 'adrp' with 'adr', in this case, we need
+// adrp's code position (two or three insns before erratum insn itself).
+
+template<int size, bool big_endian>
+class E843419_stub : public Erratum_stub<size, big_endian>
+{
+public:
+  typedef typename AArch64_insn_utilities<big_endian>::Insntype Insntype;
+
+  E843419_stub(AArch64_relobj<size, big_endian>* relobj,
+		      unsigned int shndx, unsigned int sh_offset,
+		      unsigned int adrp_sh_offset)
+    : Erratum_stub<size, big_endian>(relobj, ST_E_843419, shndx, sh_offset),
+      adrp_sh_offset_(adrp_sh_offset)
+  {}
+
+  unsigned int
+  adrp_sh_offset() const
+  { return this->adrp_sh_offset_; }
+
+private:
+  // Section offset of "adrp". (We do not need a "adrp_shndx_" field, because we
+  // can can obtain it from its parent.)
+  const unsigned int adrp_sh_offset_;
+};
+
+
 template<int size, bool big_endian>
 const int Erratum_stub<size, big_endian>::STUB_ADDR_ALIGN = 4;
 
@@ -1754,6 +1820,13 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
   void
   fix_errata(typename Sized_relobj_file<size, big_endian>::Views* pviews);
 
+  // Try to fix erratum 843419 in an optimized way. Return true if patch is
+  // applied.
+  bool
+  try_fix_erratum_843419_optimized(
+      The_erratum_stub*,
+      typename Sized_relobj_file<size, big_endian>::View_size&);
+
   // Whether a section needs to be scanned for relocation stubs.
   bool
   section_needs_reloc_stub_scanning(const elfcpp::Shdr<size, big_endian>&,
@@ -1891,15 +1964,72 @@ AArch64_relobj<size, big_endian>::fix_errata(
 	  Insntype insn_to_fix = ip[0];
 	  stub->update_erratum_insn(insn_to_fix);
 
-	  // Replace the erratum insn with a branch-to-stub.
-	  AArch64_address stub_address =
-	    stub_table->erratum_stub_address(stub);
-	  unsigned int b_offset = stub_address - stub->erratum_address();
-	  AArch64_relocate_functions<size, big_endian>::construct_b(
-	    pview.view + stub->sh_offset(), b_offset & 0xfffffff);
+	  // First try to see if erratum is 843419 and if it can be fixed
+	  // without using branch-to-stub.
+	  if (!try_fix_erratum_843419_optimized(stub, pview))
+	    {
+	      // Replace the erratum insn with a branch-to-stub.
+	      AArch64_address stub_address =
+		stub_table->erratum_stub_address(stub);
+	      unsigned int b_offset = stub_address - stub->erratum_address();
+	      AArch64_relocate_functions<size, big_endian>::construct_b(
+		pview.view + stub->sh_offset(), b_offset & 0xfffffff);
+	    }
 	  ++p;
 	}
     }
+}
+
+
+// This is an optimization for 843419. This erratum requires the sequence begin
+// with 'adrp', when final value calculated by adrp fits in adr, we can just
+// replace 'adrp' with 'adr', so we save 2 jumps per occurrence. (Note, however,
+// in this case, we do not delete the erratum stub (too late to do so), it is
+// merely generated without ever being called.)
+
+template<int size, bool big_endian>
+bool
+AArch64_relobj<size, big_endian>::try_fix_erratum_843419_optimized(
+    The_erratum_stub* stub,
+    typename Sized_relobj_file<size, big_endian>::View_size& pview)
+{
+  if (stub->type() != ST_E_843419)
+    return false;
+
+  typedef AArch64_insn_utilities<big_endian> Insn_utilities;
+  typedef typename elfcpp::Swap<32,big_endian>::Valtype Insntype;
+  E843419_stub<size, big_endian>* e843419_stub =
+    reinterpret_cast<E843419_stub<size, big_endian>*>(stub);
+  AArch64_address pc = pview.address + e843419_stub->adrp_sh_offset();
+  Insntype* adrp_view = reinterpret_cast<Insntype*>(
+    pview.view + e843419_stub->adrp_sh_offset());
+  Insntype adrp_insn = adrp_view[0];
+  gold_assert(Insn_utilities::is_adrp(adrp_insn));
+  // Get adrp 33-bit signed imm value.
+  int64_t adrp_imm = Insn_utilities::
+    aarch64_adrp_decode_imm(adrp_insn);
+  // adrp - final value transferred to target register is calculated as:
+  //     PC[11:0] = Zeros(12)
+  //     adrp_dest_value = PC + adrp_imm;
+  int64_t adrp_dest_value = (pc & ~((1 << 12) - 1)) + adrp_imm;
+  // adr -final value transferred to target register is calucalted as:
+  //     PC + adr_imm
+  // So we have:
+  //     PC + adr_imm = adrp_dest_value
+  //   ==>
+  //     adr_imm = adrp_dest_value - PC
+  int64_t adr_imm = adrp_dest_value - pc;
+  // Check if imm fits in adr (21-bit signed).
+  if (-(1 << 20) <= adr_imm && adr_imm < (1 << 20))
+    {
+      // Convert 'adrp' into 'adr'.
+      Insntype adr_insn = adrp_insn & ((1u << 31) - 1);
+      adr_insn = Insn_utilities::
+	aarch64_adr_encode_imm(adr_insn, adr_imm);
+      elfcpp::Swap<32, big_endian>::writeval(adrp_view, adr_insn);
+      return true;
+    }
+  return false;
 }
 
 
@@ -3166,14 +3296,16 @@ class Target_aarch64 : public Sized_target<size, big_endian>
     return this->plt_;
   }
 
-  // Helper method to create erratum stubs for ST_E_843419 and ST_E_835769.
+  // Helper method to create erratum stubs for ST_E_843419 and ST_E_835769. For
+  // ST_E_843419, we need an additional field for adrp offset.
   void create_erratum_stub(
     AArch64_relobj<size, big_endian>* relobj,
     unsigned int shndx,
     section_size_type erratum_insn_offset,
     Address erratum_address,
     typename Insn_utilities::Insntype erratum_insn,
-    int erratum_type);
+    int erratum_type,
+    unsigned int e843419_adrp_offset=0);
 
   // Return whether this is a 3-insn erratum sequence.
   bool is_erratum_843419_sequence(
@@ -7871,7 +8003,8 @@ Target_aarch64<size, big_endian>::create_erratum_stub(
     section_size_type erratum_insn_offset,
     Address erratum_address,
     typename Insn_utilities::Insntype erratum_insn,
-    int erratum_type)
+    int erratum_type,
+    unsigned int e843419_adrp_offset)
 {
   gold_assert(erratum_type == ST_E_843419 || erratum_type == ST_E_835769);
   The_stub_table* stub_table = relobj->stub_table(shndx);
@@ -7881,8 +8014,15 @@ Target_aarch64<size, big_endian>::create_erratum_stub(
 				    erratum_insn_offset) == NULL)
     {
       const int BPI = AArch64_insn_utilities<big_endian>::BYTES_PER_INSN;
-      The_erratum_stub* stub = new The_erratum_stub(
-	relobj, erratum_type, shndx, erratum_insn_offset);
+      The_erratum_stub* stub;
+      if (erratum_type == ST_E_835769)
+	stub = new The_erratum_stub(relobj, erratum_type, shndx,
+				    erratum_insn_offset);
+      else if (erratum_type == ST_E_843419)
+	stub = new E843419_stub<size, big_endian>(
+	    relobj, shndx, erratum_insn_offset, e843419_adrp_offset);
+      else
+	gold_unreachable();
       stub->set_erratum_insn(erratum_insn);
       stub->set_erratum_address(erratum_address);
       // For erratum ST_E_843419 and ST_E_835769, the destination address is
@@ -8027,7 +8167,8 @@ Target_aarch64<size, big_endian>::scan_erratum_843419_span(
 		output_address + offset + insn_offset;
 	      create_erratum_stub(relobj, shndx,
 				  erratum_insn_offset, erratum_address,
-				  erratum_insn, ST_E_843419);
+				  erratum_insn, ST_E_843419,
+				  span_start + offset);
 	    }
 	}
 

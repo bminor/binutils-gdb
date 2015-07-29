@@ -216,8 +216,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -347,7 +347,7 @@
 	* iq2000/{cpu.c, cpu.h, decode.c, decode.h, model.c, sem-switch.c,
 	sem.c}: Regen'd.
 	* iq2000.c (do_syscall): Support system traps.
-	
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* Makefile.in (stamp-arch): Use $(CGEN_CPU_DIR).

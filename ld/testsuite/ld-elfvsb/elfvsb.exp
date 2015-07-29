@@ -227,6 +227,7 @@ proc visibility_run {visibility} {
     global target_triplet
     global support_protected
     global shared_needs_pic
+    global PLT_CFLAGS
 
     if [ string match $visibility "hidden" ] {
 	set VSBCFLAG "-DHIDDEN_TEST"
@@ -259,8 +260,9 @@ proc visibility_run {visibility} {
 	# functions and variables not being overridable.  Newer versions
 	# of gcc are more likely to do this.
     } else {
-    # Compile the main program.
-    if ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
+    # Compile the main program.  Make sure that PLT is used since PLT
+    # is expected.
+    if ![ld_compile "$CC -g $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
 	unresolved "visibility ($visibility) (non PIC)"
 	unresolved "visibility ($visibility)"
     } else {
@@ -269,9 +271,9 @@ proc visibility_run {visibility} {
 	# although it will be less efficient because the dynamic linker
 	# will need to do more relocation work.  However, note that not
 	# using -fpic will cause some of the tests to return different
-	# results.
-	if { ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	     || ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+	# results.  Make sure that PLT is used since PLT is expected.
+	if { ![ld_compile "$CC -g $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	     || ![ld_compile "$CC -g $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	    unresolved "visibility ($visibility) (non PIC)"
 	} else { if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC)" mainnp.o sh1np.o sh2np.o xcoff

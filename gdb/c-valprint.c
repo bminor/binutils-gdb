@@ -236,6 +236,8 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
 {
   struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
   struct type *elttype = check_typedef (unresolved_elttype);
+  struct gdbarch *arch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
   if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
     {
@@ -276,7 +278,8 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
 	      for (temp_len = 0;
 		   (temp_len < len
 		    && temp_len < options->print_max
-		    && extract_unsigned_integer (valaddr + embedded_offset
+		    && extract_unsigned_integer (valaddr
+						 + embedded_offset * unit_size
 						 + temp_len * eltlen,
 						 eltlen, byte_order) != 0);
 		   ++temp_len)
@@ -288,7 +291,8 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
 	      if (temp_len == options->print_max && temp_len < len)
 		{
 		  ULONGEST val
-		    = extract_unsigned_integer (valaddr + embedded_offset
+		    = extract_unsigned_integer (valaddr
+						+ embedded_offset * unit_size
 						+ temp_len * eltlen,
 						eltlen, byte_order);
 		  if (val != 0)
@@ -299,7 +303,7 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
 	    }
 
 	  LA_PRINT_STRING (stream, unresolved_elttype,
-			   valaddr + embedded_offset, len,
+			   valaddr + embedded_offset * unit_size, len,
 			   NULL, force_ellipses, options);
 	  i = len;
 	}
@@ -342,6 +346,9 @@ c_val_print_ptr (struct type *type, const gdb_byte *valaddr,
 		 const struct value *original_value,
 		 const struct value_print_options *options)
 {
+  struct gdbarch *arch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+
   if (options->format && options->format != 's')
     {
       val_print_scalar_formatted (type, valaddr, embedded_offset,
@@ -363,7 +370,8 @@ c_val_print_ptr (struct type *type, const gdb_byte *valaddr,
     {
       struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
       struct type *elttype = check_typedef (unresolved_elttype);
-      CORE_ADDR addr = unpack_pointer (type, valaddr + embedded_offset);
+      CORE_ADDR addr = unpack_pointer (type,
+				       valaddr + embedded_offset * unit_size);
 
       print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
 			      embedded_offset, addr, stream, recurse, options);
@@ -430,6 +438,9 @@ c_val_print_int (struct type *type, struct type *unresolved_type,
 		 struct ui_file *stream, const struct value *original_value,
 		 const struct value_print_options *options)
 {
+  struct gdbarch *arch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+
   if (options->format || options->output_format)
     {
       struct value_print_options opts = *options;
@@ -441,7 +452,7 @@ c_val_print_int (struct type *type, struct type *unresolved_type,
     }
   else
     {
-      val_print_type_code_int (type, valaddr + embedded_offset,
+      val_print_type_code_int (type, valaddr + embedded_offset * unit_size,
 			       stream);
       /* C and C++ has no single byte int type, char is used
 	 instead.  Since we don't know whether the value is really
@@ -450,7 +461,8 @@ c_val_print_int (struct type *type, struct type *unresolved_type,
       if (c_textual_element_type (unresolved_type, options->format))
 	{
 	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR (unpack_long (type, valaddr + embedded_offset),
+	  LA_PRINT_CHAR (unpack_long (type,
+				      valaddr + embedded_offset * unit_size),
 			 unresolved_type, stream);
 	}
     }

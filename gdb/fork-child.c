@@ -365,7 +365,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
       /* If we get here, it's an error.  */
       save_errno = errno;
-      fprintf_unfiltered (gdb_stderr, "Cannot exec %s", exec_file);
+      fprintf_unfiltered (gdb_stderr, "Cannot exec %s", argv[0]);
       for (i = 1; argv[i] != NULL; i++)
 	fprintf_unfiltered (gdb_stderr, " %s", argv[i]);
       fprintf_unfiltered (gdb_stderr, ".\n");

@@ -737,6 +737,7 @@ _start:
 	vcvtps2qq	zmm6{k7}, [edx+512]{1to8}	 # AVX512DQ
 	vcvtps2qq	zmm6{k7}, [edx-512]{1to8}	 # AVX512DQ Disp8
 	vcvtps2qq	zmm6{k7}, [edx-516]{1to8}	 # AVX512DQ
+	vcvtps2qq	zmm6{k7}, DWORD PTR [edx+508]{1to8}	 # AVX512DQ Disp8
 	vcvtps2uqq	zmm6{k7}, ymm5	 # AVX512DQ
 	vcvtps2uqq	zmm6{k7}{z}, ymm5	 # AVX512DQ
 	vcvtps2uqq	zmm6{k7}, ymm5, {rn-sae}	 # AVX512DQ
@@ -754,6 +755,7 @@ _start:
 	vcvtps2uqq	zmm6{k7}, [edx+512]{1to8}	 # AVX512DQ
 	vcvtps2uqq	zmm6{k7}, [edx-512]{1to8}	 # AVX512DQ Disp8
 	vcvtps2uqq	zmm6{k7}, [edx-516]{1to8}	 # AVX512DQ
+	vcvtps2uqq	zmm6{k7}, DWORD PTR [edx+508]{1to8}	 # AVX512DQ Disp8
 	vcvtqq2pd	zmm6, zmm5	 # AVX512DQ
 	vcvtqq2pd	zmm6{k7}, zmm5	 # AVX512DQ
 	vcvtqq2pd	zmm6{k7}{z}, zmm5	 # AVX512DQ
@@ -1263,6 +1265,7 @@ _start:
 	vcvttps2qq	zmm6{k7}, [edx+512]{1to8}	 # AVX512DQ
 	vcvttps2qq	zmm6{k7}, [edx-512]{1to8}	 # AVX512DQ Disp8
 	vcvttps2qq	zmm6{k7}, [edx-516]{1to8}	 # AVX512DQ
+	vcvttps2qq	zmm6{k7}, DWORD PTR [edx+508]{1to8}	 # AVX512DQ Disp8
 	vcvttps2uqq	zmm6{k7}, ymm5	 # AVX512DQ
 	vcvttps2uqq	zmm6{k7}{z}, ymm5	 # AVX512DQ
 	vcvttps2uqq	zmm6{k7}, ymm5, {sae}	 # AVX512DQ
@@ -1277,6 +1280,7 @@ _start:
 	vcvttps2uqq	zmm6{k7}, [edx+512]{1to8}	 # AVX512DQ
 	vcvttps2uqq	zmm6{k7}, [edx-512]{1to8}	 # AVX512DQ Disp8
 	vcvttps2uqq	zmm6{k7}, [edx-516]{1to8}	 # AVX512DQ
+	vcvttps2uqq	zmm6{k7}, DWORD PTR [edx+508]{1to8}	 # AVX512DQ Disp8
 	vpmovd2m	k5, zmm6	 # AVX512DQ
 	vpmovq2m	k5, zmm6	 # AVX512DQ
 	vpmovm2d	zmm6, k5	 # AVX512DQ

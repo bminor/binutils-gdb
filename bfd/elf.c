@@ -4220,11 +4220,18 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      new_segment = TRUE;
 	    }
 	  else if ((last_hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0
-		   && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0)
+		   && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0
+		   && ((abfd->flags & D_PAGED) == 0
+		       || (((last_hdr->lma + last_size - 1) & -maxpagesize)
+			   != (hdr->lma & -maxpagesize))))
 	    {
-	      /* We don't want to put a loadable section after a
-		 nonloadable section in the same segment.
-		 Consider .tbss sections as loadable for this purpose.  */
+	      /* We don't want to put a loaded section after a
+		 nonloaded (ie. bss style) section in the same segment
+		 as that will force the non-loaded section to be loaded.
+		 Consider .tbss sections as loaded for this purpose.
+		 However, like the writable/non-writable case below,
+		 if they are on the same page then they must be put
+		 in the same segment.  */
 	      new_segment = TRUE;
 	    }
 	  else if ((abfd->flags & D_PAGED) == 0)
@@ -5654,7 +5661,7 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 		  if (d->rela.hdr
 		      && !_bfd_elf_set_reloc_sh_name (abfd,
 						      d->rela.hdr,
-						      name, FALSE))
+						      name, TRUE))
 		    return FALSE;
 
 		  /* Update section size and contents.  */

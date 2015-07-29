@@ -99,6 +99,10 @@ struct value *value_next (struct value *);
 
 extern struct type *value_type (const struct value *);
 
+/* Return the gdbarch associated with the value. */
+
+extern struct gdbarch *get_value_arch (const struct value *value);
+
 /* This is being used to change the type of an existing value, that
    code should instead be creating a new value with the changed type
    (but possibly shared content).  */
@@ -567,8 +571,8 @@ extern int value_contents_eq (const struct value *val1, int offset1,
 			      const struct value *val2, int offset2,
 			      int length);
 
-/* Read LENGTH bytes of memory starting at MEMADDR into BUFFER, which
-   is (or will be copied to) VAL's contents buffer offset by
+/* Read LENGTH addressable memory units starting at MEMADDR into BUFFER,
+   which is (or will be copied to) VAL's contents buffer offset by
    EMBEDDED_OFFSET (that is, to &VAL->contents[EMBEDDED_OFFSET]).
    Marks value contents ranges as unavailable if the corresponding
    memory is likewise unavailable.  STACK indicates whether the memory

@@ -529,5 +529,50 @@ if { [istarget *-*-linux*]
 	    "pr2404.out" \
 	    "-fPIE" \
 	] \
+	[list \
+	    "Run pr18718" \
+	    "" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718" \
+	    "pass.out" \
+	    "-O2 -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIE (1)" \
+	    "-pie" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pie1" \
+	    "pass.out" \
+	    "-O2 -fPIE -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIE (2)" \
+	    "" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pie2" \
+	    "pass.out" \
+	    "-O2 -fPIE -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIC (1)" \
+	    "" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pic1" \
+	    "pass.out" \
+	    "-O2 -fPIC -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIC (2)" \
+	    "-pie" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pic2" \
+	    "pass.out" \
+	    "-O2 -fPIC -I../bfd" \
+	] \
     ]
 }

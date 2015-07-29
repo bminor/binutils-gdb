@@ -1,3 +1,41 @@
+2015-07-28  Robert Suchanek  <robert.suchanek@imgtec.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add m5100 and m5101 entries.
+	* doc/c-mips.texi: Document m5100 and m5101 for -march=.
+
+2015-07-28  Robert Suchanek  <robert.suchanek@imgtec.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add interaptiv entry.
+	* doc/c-mips.text: Document -march=interaptiv.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.c (rl78_abs_sym): New local variable.
+	(md_begin): Initialise the new symbol.
+	(OPIMM): Define the value to be relative to the new symbol and not
+	the absolute section symbol.
+
+2015-07-22  Alan Modra  <amodra@gmail.com>
+
+	PR gas/18687
+	* input-scrub.c (input_scrub_next_buffer): Rearrange and simplify
+	loop.  Don't drop lines at end of file lacking a newline, add a
+	newline instead.  Ensure partial_size is zero whenever
+	partial_where is NULL.  Adjust buffer size for extra char.
+	(input_scrub_push, input_scrub_begin): Adjust buffer size here too.
+
+2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* NEWS: Mention corrected spelling of armv6kz.
+	* config/tc-arm.c (arm_cpus): Replace ARM_ARCH_V6ZK with
+	ARM_ARCH_V6KZ.
+	(arm_archs): Likewise. Also add "armv6kz" and "armv6kzt2".
+	* doc/c-arm.texi: Replace "armv6zk" with "armv6kz".
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
@@ -30,8 +68,8 @@
 
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
-        * config/tc-mips.c (check_fpabi):  Handle
-        VAL_GNU_MIPS_ABI_FP_NAN2008.
+	* config/tc-mips.c (check_fpabi):  Handle
+	VAL_GNU_MIPS_ABI_FP_NAN2008.
 
 2015-07-08  Ciro Santilli  <ciro.santilli@gmail.com>
 
@@ -288,8 +326,8 @@
 	(aarch64_force_relocation): Ditto.
 
 2015-05-28  Catherine Moore  <clm@codesourcery.com>
-            Bernd Schmidt <bernds@codesourcery.com>
-            Paul Brook <paul@codesourcery.com>
+	    Bernd Schmidt <bernds@codesourcery.com>
+	    Paul Brook <paul@codesourcery.com>
 
 	gas/
 	* config/tc-alpha.c (all_cfi_sections): Declare.

@@ -234,11 +234,11 @@ struct value
     } computed;
   } location;
 
-  /* Describes offset of a value within lval of a structure in bytes.
-     If lval == lval_memory, this is an offset to the address.  If
-     lval == lval_register, this is a further offset from
-     location.address within the registers structure.  Note also the
-     member embedded_offset below.  */
+  /* Describes offset of a value within lval of a structure in target
+     addressable memory units.  If lval == lval_memory, this is an offset to
+     the address.  If lval == lval_register, this is a further offset from
+     location.address within the registers structure.  Note also the member
+     embedded_offset below.  */
   int offset;
 
   /* Only used for bitfields; number of bits contained in them.  */
@@ -291,19 +291,19 @@ struct value
 
      When we store the entire object, `enclosing_type' is the run-time
      type -- the complete object -- and `embedded_offset' is the
-     offset of `type' within that larger type, in bytes.  The
-     value_contents() macro takes `embedded_offset' into account, so
-     most GDB code continues to see the `type' portion of the value,
-     just as the inferior would.
+     offset of `type' within that larger type, in target addressable memory
+     units.  The value_contents() macro takes `embedded_offset' into account,
+     so most GDB code continues to see the `type' portion of the value, just
+     as the inferior would.
 
      If `type' is a pointer to an object, then `enclosing_type' is a
      pointer to the object's run-time type, and `pointed_to_offset' is
-     the offset in bytes from the full object to the pointed-to object
-     -- that is, the value `embedded_offset' would have if we followed
-     the pointer and fetched the complete object.  (I don't really see
-     the point.  Why not just determine the run-time type when you
-     indirect, and avoid the special case?  The contents don't matter
-     until you indirect anyway.)
+     the offset in target addressable memory units from the full object
+     to the pointed-to object -- that is, the value `embedded_offset' would
+     have if we followed the pointer and fetched the complete object.
+     (I don't really see the point.  Why not just determine the
+     run-time type when you indirect, and avoid the special case?  The
+     contents don't matter until you indirect anyway.)
 
      If we're not doing anything fancy, `enclosing_type' is equal to
      `type', and `embedded_offset' is zero, so everything works
@@ -339,6 +339,14 @@ struct value
      different string representation and related error strings.  */
   VEC(range_s) *optimized_out;
 };
+
+/* See value.h.  */
+
+struct gdbarch *
+get_value_arch (const struct value *value)
+{
+  return get_type_arch (value_type (value));
+}
 
 int
 value_bits_available (const struct value *value, int offset, int length)
@@ -1083,8 +1091,11 @@ set_value_parent (struct value *value, struct value *parent)
 gdb_byte *
 value_contents_raw (struct value *value)
 {
+  struct gdbarch *arch = get_value_arch (value);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+
   allocate_value_contents (value);
-  return value->contents + value->embedded_offset;
+  return value->contents + value->embedded_offset * unit_size;
 }
 
 gdb_byte *
@@ -1234,7 +1245,7 @@ value_ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
 			bit_length);
 }
 
-/* Copy LENGTH bytes of SRC value's (all) contents
+/* Copy LENGTH target addressable memory units of SRC value's (all) contents
    (value_contents_all) starting at SRC_OFFSET, into DST value's (all)
    contents, starting at DST_OFFSET.  If unavailable contents are
    being copied from SRC, the corresponding DST contents are marked
@@ -1249,8 +1260,9 @@ value_contents_copy_raw (struct value *dst, int dst_offset,
 			 struct value *src, int src_offset, int length)
 {
   range_s *r;
-  int i;
   int src_bit_offset, dst_bit_offset, bit_length;
+  struct gdbarch *arch = get_value_arch (src);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
   /* A lazy DST would make that this copy operation useless, since as
      soon as DST's contents were un-lazied (by a later value_contents
@@ -1267,14 +1279,14 @@ value_contents_copy_raw (struct value *dst, int dst_offset,
 					     TARGET_CHAR_BIT * length));
 
   /* Copy the data.  */
-  memcpy (value_contents_all_raw (dst) + dst_offset,
-	  value_contents_all_raw (src) + src_offset,
-	  length);
+  memcpy (value_contents_all_raw (dst) + dst_offset * unit_size,
+	  value_contents_all_raw (src) + src_offset * unit_size,
+	  length * unit_size);
 
   /* Copy the meta-data, adjusted.  */
-  src_bit_offset = src_offset * TARGET_CHAR_BIT;
-  dst_bit_offset = dst_offset * TARGET_CHAR_BIT;
-  bit_length = length * TARGET_CHAR_BIT;
+  src_bit_offset = src_offset * unit_size * HOST_CHAR_BIT;
+  dst_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
+  bit_length = length * unit_size * HOST_CHAR_BIT;
 
   value_ranges_copy_adjusted (dst, dst_bit_offset,
 			      src, src_bit_offset,
@@ -2271,17 +2283,21 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 			   int bitsize, struct value *newval)
 {
   gdb_byte *addr;
+  struct gdbarch *arch;
+  int unit_size;
 
   switch (var->kind)
     {
     case INTERNALVAR_VALUE:
       addr = value_contents_writeable (var->u.value);
+      arch = get_value_arch (var->u.value);
+      unit_size = gdbarch_addressable_memory_unit_size (arch);
 
       if (bitsize)
 	modify_field (value_type (var->u.value), addr + offset,
 		      value_as_long (newval), bitpos, bitsize);
       else
-	memcpy (addr + offset, value_contents (newval),
+	memcpy (addr + offset * unit_size, value_contents (newval),
 		TYPE_LENGTH (value_type (newval)));
       break;
 
@@ -2992,6 +3008,8 @@ value_primitive_field (struct value *arg1, int offset,
 {
   struct value *v;
   struct type *type;
+  struct gdbarch *arch = get_value_arch (arg1);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
   arg_type = check_typedef (arg_type);
   type = TYPE_FIELD_TYPE (arg_type, fieldno);
@@ -3070,7 +3088,8 @@ value_primitive_field (struct value *arg1, int offset,
   else
     {
       /* Plain old data member */
-      offset += TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
+      offset += (TYPE_FIELD_BITPOS (arg_type, fieldno)
+	         / (HOST_CHAR_BIT * unit_size));
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
@@ -3083,7 +3102,7 @@ value_primitive_field (struct value *arg1, int offset,
 	  v = allocate_value (type);
 	  value_contents_copy_raw (v, value_embedded_offset (v),
 				   arg1, value_embedded_offset (arg1) + offset,
-				   TYPE_LENGTH (type));
+				   type_length_units (type));
 	}
       v->offset = (value_offset (arg1) + offset
 		   + value_embedded_offset (arg1));
@@ -3825,7 +3844,7 @@ value_fetch_lazy (struct value *val)
       if (TYPE_LENGTH (type))
 	read_value_memory (val, 0, value_stack (val),
 			   addr, value_contents_all_raw (val),
-			   TYPE_LENGTH (type));
+			   type_length_units (type));
     }
   else if (VALUE_LVAL (val) == lval_register)
     {
@@ -3884,7 +3903,7 @@ value_fetch_lazy (struct value *val)
       set_value_lazy (val, 0);
       value_contents_copy (val, value_embedded_offset (val),
 			   new_val, value_embedded_offset (new_val),
-			   TYPE_LENGTH (type));
+			   type_length_units (type));
 
       if (frame_debug)
 	{

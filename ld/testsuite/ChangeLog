@@ -1,3 +1,92 @@
+2015-07-28  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/elfv2so.d: Update.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/default.exp (NOPIE_CFLAGS): New.
+	(NOPIE_LDFLAGS): Likewise.
+	* ld-size/size.exp (run_cc_link_tests): Add $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS if needed.
+	(run_ld_link_exec_tests): Add $NOPIE_CFLAGS if needed.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-srec/srec.exp (CC): Save and restore.  Append $PLT_CFLAGS.
+	(CXX): Likewise.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-shared/shared.exp: Pass $PLT_CFLAGS to ld_compile.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/crossref.exp (CC): Save and restore.  Append
+	$PLT_CFLAGS.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp (run_cc_link_tests): Add $PLT_CFLAGS to
+	-fPIC if needed.
+	* ld-x86-64/mpx.exp (run_cc_link_tests): Likewise.
+	* ld-x86-64/x86-64.exp (run_cc_link_tests): Likewise.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfvsb/elfvsb.exp (visibility_run): Pass $PLT_CFLAGS to
+	ld_compile.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfvers/vers.exp (build_vers_lib_no_pic): Pass $PLT_CFLAGS
+	to build_binary.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/default.exp (PLT_CFLAGS): New.
+
+2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18705
+	* ld-aarch64/protected-data.d: New.
+	* ld-aarch64/protected-data.s: New.
+	* ld-aarch64/aarch64-elf.exp: Add new test.
+
+2015-07-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18705
+	* ld-arm/protected-data.d: New.
+	* ld-arm/protected-data.s: New.
+	* ld-arm/arm-elf.exp: Add new test.
+
+2015-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18718
+	* ld-elf/shared.exp: Compile PR ld/18718 tests with -O2.
+
+2015-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/ld-lib.exp (run_host_cmd_yesno): Set errcnt and warncnt
+	to 0.
+
+2015-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18718
+	* ld-elf/pr18718.c: New file.
+	* ld-elf/shared.exp: Run tests for PR ld/18718.
+
+2015-07-25  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/symbolic-func.s,
+	* ld-elf/symbolic-func.r: New test.
+	* ld-elf/elf.exp: Run it.
+
+2015-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp (build_tests): Replace -g with -ggdb3.
+	* ld-elf/zlibbegin.rS: Also expect "GC".
+	* ld-elf/zlibnormal.rS: Likewise.
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/tls-tiny-ld.s: New file.
@@ -12,18 +101,18 @@
 
 2015-07-09  Catherine Moore  <clm@codesourcery.com>
 
-        * ld-mips-elf/attr-gnu-4-08.d: Update expected output.
-        * ld-mips-elf/attr-gnu-4-09.d: New.
-        * ld-mips-elf/attr-gnu-4-19.d: New.
-        * ld-mips-elf/attr-gnu-4-29.d: New.
-        * ld-mips-elf/attr-gnu-4-39.d: New.
-        * ld-mips-elf/attr-gnu-4-49.d: New.
-        * ld-mips-elf/attr-gnu-4-59.d: New.
-        * ld-mips-elf/attr-gnu-4-69.d: New.
-        * ld-mips-elf/attr-gnu-4-79.d: New.
-        * ld-mips-elf/attr-gnu-4-89.d: New.
-        * ld-mips-elf/attr-gnu-4-9.s: New.
-        * ld-mips-elf/mips-elf.exp: Run new tests.
+	* ld-mips-elf/attr-gnu-4-08.d: Update expected output.
+	* ld-mips-elf/attr-gnu-4-09.d: New.
+	* ld-mips-elf/attr-gnu-4-19.d: New.
+	* ld-mips-elf/attr-gnu-4-29.d: New.
+	* ld-mips-elf/attr-gnu-4-39.d: New.
+	* ld-mips-elf/attr-gnu-4-49.d: New.
+	* ld-mips-elf/attr-gnu-4-59.d: New.
+	* ld-mips-elf/attr-gnu-4-69.d: New.
+	* ld-mips-elf/attr-gnu-4-79.d: New.
+	* ld-mips-elf/attr-gnu-4-89.d: New.
+	* ld-mips-elf/attr-gnu-4-9.s: New.
+	* ld-mips-elf/mips-elf.exp: Run new tests.
 
 2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
 

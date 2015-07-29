@@ -210,7 +210,7 @@ names are recognized:
 @code{armv6j},
 @code{armv6k},
 @code{armv6z},
-@code{armv6zk},
+@code{armv6kz},
 @code{armv6-m},
 @code{armv6s-m},
 @code{armv7},

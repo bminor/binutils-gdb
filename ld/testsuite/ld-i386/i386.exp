@@ -310,6 +310,9 @@ run_dump_test "pr17057"
 run_dump_test "pr17935-1"
 run_dump_test "pr17935-2"
 
+# Add $PLT_CFLAGS if PLT is expected.
+global PLT_CFLAGS
+
 # Must be Linux native with the C compiler
 if { [isnative]
      && [istarget "i?86-*-linux*"]
@@ -342,7 +345,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main3.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main3.c } \
 	    {{readelf {-Wr} plt-main3.rd}} \
 	    "libplt-main3.a" \
@@ -350,7 +353,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main4.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main4.c } \
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \
