@@ -1,3 +1,9 @@
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/batch-preserve-term-settings.exp
+	(test_terminal_settings_preserved_after_cli_exit): Use
+	send_quit_command.
+
 2015-07-29  Pedro Alves  <palves@redhat.com>
 	    Don Breazeal  <donb@codesourcery.com>
 
