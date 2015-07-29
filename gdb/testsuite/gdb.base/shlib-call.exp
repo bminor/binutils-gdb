@@ -71,7 +71,7 @@ if ![runto_main] then {
 
 #step -over
 
-gdb_test "next" "g = shr1\\(g\\);" "next to shr1"
+gdb_test "next 2" "g = shr1\\(g\\);" "next to shr1"
 
 #print g
 

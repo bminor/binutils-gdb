@@ -1,5 +1,38 @@
 2015-07-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/call-ar-st.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/call-rt-st.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/call-strs.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/call-strs.exp: Adjust to step over the
+	gdb_unbuffer_output call.
+	* gdb.base/catch-gdb-caused-signals.c: Include
+	"../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/dprintf.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/ending-run.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/run.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/shlib-call.exp: Adjust to step over the
+	gdb_unbuffer_output call.
+	* gdb.base/shmain.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/sizeof.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+	* gdb.base/varargs.c: Include "../lib/unbuffer_output.c".
+	(main): Rename to ...
+	(test): ... this.
+	(main): Reimplement.
+	* gdb.base/varargs.exp: Run to test instead of to main.
+	* gdb.mi/mi-dprintf.c: Include "../lib/unbuffer_output.c".
+	(main): Call gdb_unbuffer_output.
+
+2015-07-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.mi/mi-dprintf.exp (mi_expect_dprintf): New procedure,
 	factore out from mi_continue_dprintf.  For call-style dprintfs,
 	expect dprintf output out of $inferior_spawn_id.

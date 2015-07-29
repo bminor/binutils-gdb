@@ -57,8 +57,7 @@ if ![runto_main] then {
 set prev_timeout $timeout
 set timeout 120
 
-#step
-gdb_test "step" \
+gdb_test "next 2" \
     "strcpy\\(buf, \"test string\"\\);" \
     "step after assignment to s"
 

@@ -48,7 +48,7 @@ if ![runto_main] then {
 # Query GDB for the size of various types
 #
 
-gdb_test "next"
+gdb_test "next 2"
 
 set sizeof_char [get_sizeof "char" 1]
 set sizeof_short [get_sizeof "short" 2]
