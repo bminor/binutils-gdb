@@ -185,7 +185,7 @@ arm_fill_wmmxregset (struct regcache *regcache, void *buf)
 {
   int i;
 
-  if (!(arm_hwcap & HWCAP_IWMMXT))
+  if (regcache->tdesc != tdesc_arm_with_iwmmxt)
     return;
 
   for (i = 0; i < 16; i++)
@@ -202,7 +202,7 @@ arm_store_wmmxregset (struct regcache *regcache, const void *buf)
 {
   int i;
 
-  if (!(arm_hwcap & HWCAP_IWMMXT))
+  if (regcache->tdesc != tdesc_arm_with_iwmmxt)
     return;
 
   for (i = 0; i < 16; i++)
@@ -219,13 +219,13 @@ arm_fill_vfpregset (struct regcache *regcache, void *buf)
 {
   int i, num, base;
 
-  if (!(arm_hwcap & HWCAP_VFP))
-    return;
-
-  if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
+  if (regcache->tdesc == tdesc_arm_with_neon
+      || regcache->tdesc == tdesc_arm_with_vfpv3)
     num = 32;
-  else
+  else if (regcache->tdesc == tdesc_arm_with_vfpv2)
     num = 16;
+  else
+    return;
 
   base = find_regno (regcache->tdesc, "d0");
   for (i = 0; i < num; i++)
@@ -239,13 +239,13 @@ arm_store_vfpregset (struct regcache *regcache, const void *buf)
 {
   int i, num, base;
 
-  if (!(arm_hwcap & HWCAP_VFP))
-    return;
-
-  if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
+  if (regcache->tdesc == tdesc_arm_with_neon
+      || regcache->tdesc == tdesc_arm_with_vfpv3)
     num = 32;
-  else
+  else if (regcache->tdesc == tdesc_arm_with_vfpv2)
     num = 16;
+  else
+    return;
 
   base = find_regno (regcache->tdesc, "d0");
   for (i = 0; i < num; i++)

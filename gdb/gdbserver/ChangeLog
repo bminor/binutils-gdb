@@ -1,5 +1,13 @@
 2015-07-30  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-arm-low.c (arm_fill_wmmxregset): Don't use arm_hwcap.
+	Use regcache->tdesc instead.
+	(arm_store_wmmxregset): Likewise.
+	(arm_fill_vfpregset): Likewise.
+	(arm_store_vfpregset): Likewise.
+
+2015-07-30  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-arm-low.c: Include arch/arm.h.
 	(arm_fill_gregset): Don't use arm_num_regs and arm_regmap.
 	(arm_store_gregset): Likewise.
