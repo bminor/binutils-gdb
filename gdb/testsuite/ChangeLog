@@ -1,5 +1,11 @@
 2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.cp/var-tag.exp (do_global_tests): Revert broken commit
+	4bc4d42859e3b42c79c89295ef39944bdb3e6753 and apply the
+	correct patch.
+
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.arch/ppc64-symtab-cordic.exp: Restrict to ppc64 targets.
 
 2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>

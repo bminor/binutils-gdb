@@ -33,6 +33,7 @@ proc do_global_tests {lang} {
 	set opt_underlying "(: unsigned int )?"
     } else {
 	set opt_underlying ""
+    }
     set ptypefmt "type = (class|enum|union|struct) %s $opt_underlying{.*}"
 
     with_test_prefix $lang {
@@ -65,7 +66,7 @@ proc do_global_tests {lang} {
     # Each of them is in a separate CU as once its CU is expanded,
     # we're no longer using the quick fns API.
     gdb_test "print E2" "= a2"
-    gdb_test "ptype E2" "type = enum E2 {.*}"
+    gdb_test "ptype E2" "type = enum E2 $opt_underlying{.*}"
     gdb_test "print S2" "= {<No data fields>}"
     gdb_test "ptype S2" "type = struct S2 {.*}"
     gdb_test "print U2" "= {.*}"
