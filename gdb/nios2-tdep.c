@@ -935,9 +935,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  if (orig > 0
 	      && (value[rb].offset == 0
 		  || (orig == NIOS2_EA_REGNUM && value[rb].offset == -4))
-	      && ((value[ra].reg == NIOS2_SP_REGNUM
-		   && cache->reg_saved[orig].basereg != NIOS2_SP_REGNUM)
-		  || cache->reg_saved[orig].basereg == -1))
+	      && value[ra].reg == NIOS2_SP_REGNUM)
 	    {
 	      if (pc < current_pc)
 		{
