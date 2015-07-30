@@ -18,6 +18,7 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "arch/arm.h"
 
 /* Don't include elf.h if linux/elf.h got included by gdb_proc_service.h.
    On Bionic elf.h and linux/elf.h have conflicting definitions.  */
@@ -154,10 +155,12 @@ static void
 arm_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
+  uint32_t *regs = buf;
 
-  for (i = 0; i < arm_num_regs; i++)
-    if (arm_regmap[i] != -1)
-      collect_register (regcache, i, ((char *) buf) + arm_regmap[i]);
+  for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
+    collect_register (regcache, i, &regs[i]);
+
+  collect_register (regcache, ARM_PS_REGNUM, &regs[16]);
 }
 
 static void
@@ -165,13 +168,16 @@ arm_store_gregset (struct regcache *regcache, const void *buf)
 {
   int i;
   char zerobuf[8];
+  const uint32_t *regs = buf;
 
   memset (zerobuf, 0, 8);
-  for (i = 0; i < arm_num_regs; i++)
-    if (arm_regmap[i] != -1)
-      supply_register (regcache, i, ((char *) buf) + arm_regmap[i]);
-    else
-      supply_register (regcache, i, zerobuf);
+  for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
+    supply_register (regcache, i, &regs[i]);
+
+  for (; i < ARM_PS_REGNUM; i++)
+    supply_register (regcache, i, zerobuf);
+
+  supply_register (regcache, ARM_PS_REGNUM, &regs[16]);
 }
 
 static void
