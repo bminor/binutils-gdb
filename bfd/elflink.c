@@ -1655,12 +1655,17 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 
   if (! override)
     {
-      bh = &hi->root;
-      if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, shortname, BSF_INDIRECT, bfd_ind_section_ptr,
-	      0, name, FALSE, collect, &bh)))
-	return FALSE;
-      hi = (struct elf_link_hash_entry *) bh;
+      /* Add the default symbol if not performing a relocatable link.  */
+      if (! info->relocatable)
+	{
+	  bh = &hi->root;
+	  if (! (_bfd_generic_link_add_one_symbol
+		 (info, abfd, shortname, BSF_INDIRECT,
+		  bfd_ind_section_ptr,
+		  0, name, FALSE, collect, &bh)))
+	    return FALSE;
+	  hi = (struct elf_link_hash_entry *) bh;
+	}
     }
   else
     {
@@ -4609,9 +4614,10 @@ error_free_dyn:
       old_tab = NULL;
     }
 
-  /* Now that all the symbols from this input file are created, handle
-     .symver foo, foo@BAR such that any relocs against foo become foo@BAR.  */
-  if (nondeflt_vers != NULL)
+  /* Now that all the symbols from this input file are created, if
+     not performing a relocatable link, handle .symver foo, foo@BAR
+     such that any relocs against foo become foo@BAR.  */
+  if (!info->relocatable && nondeflt_vers != NULL)
     {
       bfd_size_type cnt, symidx;
 
