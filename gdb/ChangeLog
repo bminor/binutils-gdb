@@ -1,3 +1,9 @@
+2015-07-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.h (enum gdb_regnum): Move it to ...
+	* arch/arm.h: ... here.  New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add arch/arm.h.
+
 2015-07-30  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* aarch64-tdep.c (decode_b): Rename link argument to is_bl.
