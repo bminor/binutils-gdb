@@ -9406,8 +9406,7 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
 	 associated with SAL.  */
       if (sarch == NULL)
 	sarch = gdbarch;
-      rslt = gdbarch_fast_tracepoint_valid_at (sarch, sal->pc,
-					       NULL, &msg);
+      rslt = gdbarch_fast_tracepoint_valid_at (sarch, sal->pc, &msg);
       old_chain = make_cleanup (xfree, msg);
 
       if (!rslt)

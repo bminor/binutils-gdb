@@ -44,6 +44,7 @@
 #include "gdb_bfd.h"
 #include "filestuff.h"
 #include "rsp-low.h"
+#include "disasm.h"
 
 #include <sys/time.h>
 
@@ -11106,12 +11107,10 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 	 target capabilities at definition time.  */
       if (remote_supports_fast_tracepoints ())
 	{
-	  int isize;
-
-	  if (gdbarch_fast_tracepoint_valid_at (target_gdbarch (),
-						tpaddr, &isize, NULL))
+	  if (gdbarch_fast_tracepoint_valid_at (loc->gdbarch, tpaddr,
+						NULL))
 	    xsnprintf (buf + strlen (buf), BUF_SIZE - strlen (buf), ":F%x",
-		       isize);
+		       gdb_insn_length (loc->gdbarch, tpaddr));
 	  else
 	    /* If it passed validation at definition but fails now,
 	       something is very wrong.  */

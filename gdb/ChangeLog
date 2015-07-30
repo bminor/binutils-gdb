@@ -1,3 +1,19 @@
+2015-07-30  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* arch-utils.c (default_fast_tracepoint_valid_at): Remove unused
+	isize argument.
+	* arch-utils.h (default_fast_tracepoint_valid_at): Likewise.
+	* breakpoint.c (check_fast_tracepoint_sals): Adjust call to
+	gdbarch_fast_tracepoint_valid_at.
+	* gdbarch.sh (fast_tracepoint_valid_at): Remove isize argument.
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Regenerate.
+	* i386-tdep.c (i386_fast_tracepoint_valid_at): Remove isize
+	argument.  Do not set it.
+	* remote.c (remote_download_tracepoint): Adjust call to
+	gdbarch_fast_tracepoint_valid_at.  Call gdb_insn_length to get
+	the instruction length.
+
 2015-07-30  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.h (enum gdb_regnum): Move it to ...
