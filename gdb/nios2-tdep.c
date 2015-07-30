@@ -697,22 +697,29 @@ nios2_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  stw    sp, constant(rx)
 	  mov    sp, rx
 
-     5) A frame pointer save, which can be either a MOV or ADDI.
+     4) A frame pointer save, which can be either a MOV or ADDI.
 
-     6) A further stack pointer adjustment.  This is normally included
-        adjustment in step 4 unless the total adjustment is too large
+     5) A further stack pointer adjustment.  This is normally included
+        adjustment in step 3 unless the total adjustment is too large
 	to be done in one step.
 
      7) A stack overflow check, which can take either of these forms:
 	  bgeu   sp, rx, +8
-	  break  3
+	  trap  3
 	or
 	  bltu   sp, rx, .Lstack_overflow
 	  ...
 	.Lstack_overflow:
-	  break  3
-        If present, this is inserted after the stack pointer adjustments
-	for steps 3, 4, and 6.
+	  trap  3
+	  
+	Older versions of GCC emitted "break 3" instead of "trap 3" here,
+	so we check for both cases.
+
+	Older GCC versions emitted stack overflow checks after the SP
+	adjustments in both steps 3 and 4.  Starting with GCC 6, there is
+	at most one overflow check, which is placed before the first
+	stack adjustment for R2 CDX and after the first stack adjustment
+	otherwise.
 
     The prologue instructions may be combined or interleaved with other
     instructions.
@@ -995,14 +1002,15 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  else if (cond == branch_geu)
 	    {
 	      /* BGEU sp, rx, +8
-		 BREAK 3
+		 TRAP 3  (or BREAK 3)
 		 This instruction sequence is used in stack checking;
 		 we can ignore it.  */
 	      unsigned int next_insn;
 	      const struct nios2_opcode *next_op
 		= nios2_fetch_insn (gdbarch, pc, &next_insn);
 	      if (next_op != NULL
-		  && nios2_match_break (next_insn, op, mach, &uimm))
+		  && (nios2_match_trap (next_insn, op, mach, &uimm)
+		      || nios2_match_break (next_insn, op, mach, &uimm)))
 		pc += next_op->size;
 	      else
 		break;
@@ -1010,13 +1018,14 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  else if (cond == branch_ltu)
 	    {
 	      /* BLTU sp, rx, .Lstackoverflow
-		 If the location branched to holds a BREAK 3 instruction
-		 then this is also stack overflow detection.  */
+		 If the location branched to holds a TRAP or BREAK
+		 instruction then this is also stack overflow detection.  */
 	      unsigned int next_insn;
 	      const struct nios2_opcode *next_op
 		= nios2_fetch_insn (gdbarch, pc + imm, &next_insn);
 	      if (next_op != NULL
-		  && nios2_match_break (next_insn, op, mach, &uimm))
+		  && (nios2_match_trap (next_insn, op, mach, &uimm)
+		      || nios2_match_break (next_insn, op, mach, &uimm)))
 		;
 	      else
 		break;
@@ -1025,11 +1034,13 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	    break;
 	}
 
-      /* All other calls or jumps (including returns) terminate 
+      /* All other calls, jumps, returns, TRAPs, or BREAKs terminate
 	 the prologue.  */
       else if (nios2_match_callr (insn, op, mach, &ra)
 	       || nios2_match_jmpr (insn, op, mach, &ra)
-	       || nios2_match_jmpi (insn, op, mach, &uimm))
+	       || nios2_match_jmpi (insn, op, mach, &uimm)
+	       || nios2_match_trap (insn, op, mach, &uimm)
+	       || nios2_match_break (insn, op, mach, &uimm))
 	break;
     }
 
