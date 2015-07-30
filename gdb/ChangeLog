@@ -1,3 +1,7 @@
+2015-08-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* target.c (target_pre_inferior): Unset attach_flag.
+
 2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbarch.sh (append_name): Fix type in XRESIZEVEC.
