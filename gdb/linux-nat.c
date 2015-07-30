@@ -2000,8 +2000,7 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
    true, the new LWP remains stopped, otherwise it is continued.  */
 
 static int
-linux_handle_extended_wait (struct lwp_info *lp, int status,
-			    int stopping)
+linux_handle_extended_wait (struct lwp_info *lp, int status)
 {
   int pid = ptid_get_lwp (lp->ptid);
   struct target_waitstatus *ourstatus = &lp->waitstatus;
@@ -2071,7 +2070,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	ourstatus->kind = TARGET_WAITKIND_FORKED;
       else if (event == PTRACE_EVENT_VFORK)
 	ourstatus->kind = TARGET_WAITKIND_VFORKED;
-      else
+      else if (event == PTRACE_EVENT_CLONE)
 	{
 	  struct lwp_info *new_lp;
 
@@ -2086,43 +2085,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  new_lp = add_lwp (ptid_build (ptid_get_pid (lp->ptid), new_pid, 0));
 	  new_lp->cloned = 1;
 	  new_lp->stopped = 1;
-
-	  if (WSTOPSIG (status) != SIGSTOP)
-	    {
-	      /* This can happen if someone starts sending signals to
-		 the new thread before it gets a chance to run, which
-		 have a lower number than SIGSTOP (e.g. SIGUSR1).
-		 This is an unlikely case, and harder to handle for
-		 fork / vfork than for clone, so we do not try - but
-		 we handle it for clone events here.  We'll send
-		 the other signal on to the thread below.  */
-
-	      new_lp->signalled = 1;
-	    }
-	  else
-	    {
-	      struct thread_info *tp;
-
-	      /* When we stop for an event in some other thread, and
-		 pull the thread list just as this thread has cloned,
-		 we'll have seen the new thread in the thread_db list
-		 before handling the CLONE event (glibc's
-		 pthread_create adds the new thread to the thread list
-		 before clone'ing, and has the kernel fill in the
-		 thread's tid on the clone call with
-		 CLONE_PARENT_SETTID).  If that happened, and the core
-		 had requested the new thread to stop, we'll have
-		 killed it with SIGSTOP.  But since SIGSTOP is not an
-		 RT signal, it can only be queued once.  We need to be
-		 careful to not resume the LWP if we wanted it to
-		 stop.  In that case, we'll leave the SIGSTOP pending.
-		 It will later be reported as GDB_SIGNAL_0.  */
-	      tp = find_thread_ptid (new_lp->ptid);
-	      if (tp != NULL && tp->stop_requested)
-		new_lp->last_resume_kind = resume_stop;
-	      else
-		status = 0;
-	    }
+	  new_lp->resumed = 1;
 
 	  /* If the thread_db layer is active, let it record the user
 	     level thread id and status, and add the thread to GDB's
@@ -2136,19 +2099,23 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	    }
 
 	  /* Even if we're stopping the thread for some reason
-	     internal to this module, from the user/frontend's
-	     perspective, this new thread is running.  */
+	     internal to this module, from the perspective of infrun
+	     and the user/frontend, this new thread is running until
+	     it next reports a stop.  */
 	  set_running (new_lp->ptid, 1);
-	  if (!stopping)
-	    {
-	      set_executing (new_lp->ptid, 1);
-	      /* thread_db_attach_lwp -> lin_lwp_attach_lwp forced
-		 resume_stop.  */
-	      new_lp->last_resume_kind = resume_continue;
-	    }
+	  set_executing (new_lp->ptid, 1);
 
-	  if (status != 0)
+	  if (WSTOPSIG (status) != SIGSTOP)
 	    {
+	      /* This can happen if someone starts sending signals to
+		 the new thread before it gets a chance to run, which
+		 have a lower number than SIGSTOP (e.g. SIGUSR1).
+		 This is an unlikely case, and harder to handle for
+		 fork / vfork than for clone, so we do not try - but
+		 we handle it for clone events here.  */
+
+	      new_lp->signalled = 1;
+
 	      /* We created NEW_LP so it cannot yet contain STATUS.  */
 	      gdb_assert (new_lp->status == 0);
 
@@ -2162,7 +2129,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	      new_lp->status = status;
 	    }
 
-	  new_lp->resumed = !stopping;
 	  return 1;
 	}
 
@@ -2353,7 +2319,7 @@ wait_lwp (struct lwp_info *lp)
 	fprintf_unfiltered (gdb_stdlog,
 			    "WL: Handling extended status 0x%06x\n",
 			    status);
-      linux_handle_extended_wait (lp, status, 1);
+      linux_handle_extended_wait (lp, status);
       return 0;
     }
 
@@ -3155,7 +3121,7 @@ linux_nat_filter_event (int lwpid, int status)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: Handling extended status 0x%06x\n",
 			    status);
-      if (linux_handle_extended_wait (lp, status, 0))
+      if (linux_handle_extended_wait (lp, status))
 	return NULL;
     }
 
@@ -3673,9 +3639,28 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
 {
   ptid_t *wait_ptid_p = data;
 
-  if (lp->stopped
-      && lp->resumed
-      && !lwp_status_pending_p (lp))
+  if (!lp->stopped)
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "RSRL: NOT resuming LWP %s, not stopped\n",
+			    target_pid_to_str (lp->ptid));
+    }
+  else if (!lp->resumed)
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "RSRL: NOT resuming LWP %s, not resumed\n",
+			    target_pid_to_str (lp->ptid));
+    }
+  else if (lwp_status_pending_p (lp))
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "RSRL: NOT resuming LWP %s, has pending status\n",
+			    target_pid_to_str (lp->ptid));
+    }
+  else
     {
       struct regcache *regcache = get_thread_regcache (lp->ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
