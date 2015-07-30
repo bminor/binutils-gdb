@@ -1,3 +1,13 @@
+2015-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/13571
+	* i386-dis.c (MOD_0FC3): New.
+	(PREFIX_0FC3): Renamed to ...
+	(PREFIX_MOD_0_0FC3): This.
+	(dis386_twobyte): Replace PREFIX_0FC3 with MOD_0FC3.
+	(prefix_table): Replace Ma with Ev on movntiS.
+	(mod_table): Add MOD_0FC3.
+
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
