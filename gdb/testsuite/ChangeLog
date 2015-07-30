@@ -1,5 +1,9 @@
 2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.arch/ppc64-symtab-cordic.exp: Restrict to ppc64 targets.
+
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
 	Reapply:
 	2014-05-21  Mark Wielaard  <mjw@redhat.com>
 
