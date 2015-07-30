@@ -1,3 +1,8 @@
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-waitpid.c (my_waitpid): Only print *status if waitpid
+	returned > 0.
+
 2015-08-06  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* common/agent.c (symbol_list) <required>: Remove.

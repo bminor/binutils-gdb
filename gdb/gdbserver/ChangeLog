@@ -1,3 +1,8 @@
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_write_memory): Rewrite debug output to avoid
+	reading beyond the passed in buffer length.
+
 2015-08-06  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* tracepoint.c (symbol_list) <required>: Remove.
