@@ -1,3 +1,17 @@
+2015-07-30  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (decode_b): Rename link argument to is_bl.
+	Change its type to int *.
+	(decode_br): Rename link argument to is_blr.  Change its type to
+	int *.
+	(decode_cb): Rename op argument to is_cbnz.  Change its type to
+	int *.
+	(decode_tb): Rename op argument to is_tbnz.  Change its type to
+	int *.  Set is_tbnz to either 1 or 0.
+	(aarch64_analyze_prologue): Change type of is_link to int.  Add
+	new variables is_cbnz and is_tbnz.  Adjust call to
+	aarch64_decode_cb and aarch64_decode_tb.
+
 2015-07-29  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mips-linux-nat.c (write_watchpoint_regs): Add NULL as ptrace's 4th
