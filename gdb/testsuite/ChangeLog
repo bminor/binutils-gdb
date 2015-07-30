@@ -1,5 +1,10 @@
 2015-07-30  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (handle_extended_wait): Set the child's last
+	reported status to TARGET_WAITKIND_STOPPED.
+
+2015-07-30  Pedro Alves  <palves@redhat.com>
+
 	PR threads/18600
 	* gdb.threads/fork-plus-threads.exp: Test that "info inferiors"
 	only shows inferior 1.
