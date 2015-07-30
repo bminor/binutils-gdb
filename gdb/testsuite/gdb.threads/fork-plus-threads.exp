@@ -51,12 +51,44 @@ proc do_test { detach_on_fork } {
 	}
     }
 
+    # gdbserver had a bug that resulted in reporting the fork child's
+    # initial stop to gdb, which gdb does not expect, in turn
+    # resulting in a broken session, like:
+    #
+    #  [Thread 31536.31536] #16 stopped.                                <== BAD
+    #  [New Thread 31547.31547]
+    #  [Inferior 10 (process 31536) exited normally]
+    #  [New Thread 31547.31560]
+    #
+    #  [Thread 31547.31547] #18 stopped.                                <== BAD
+    #  Cannot remove breakpoints because program is no longer writable. <== BAD
+    #  Further execution is probably impossible.                        <== BAD
+    #  [Inferior 11 (process 31547) exited normally]
+    #  [Inferior 1 (process 31454) exited normally]
+    #
+    # These variables track whether we see such broken behavior.
+    set saw_cannot_remove_breakpoints 0
+    set saw_thread_stopped 0
+
     set test "inferior 1 exited"
     gdb_test_multiple "" $test {
+	-re "Cannot remove breakpoints" {
+	    set saw_cannot_remove_breakpoints 1
+	    exp_continue
+	}
+	-re "Thread \[^\r\n\]+ stopped\\." {
+	    set saw_thread_stopped 1
+	    exp_continue
+	}
 	-re "Inferior 1 \(\[^\r\n\]+\) exited normally" {
 	    pass $test
 	}
     }
+
+    gdb_assert !$saw_cannot_remove_breakpoints \
+	"no failure to remove breakpoints"
+    gdb_assert !$saw_thread_stopped \
+	"no spurious thread stop"
 
     gdb_test "info threads" "No threads\." \
 	"no threads left"
