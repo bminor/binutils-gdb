@@ -1,3 +1,10 @@
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	Reapply:
+	2014-05-21  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.cp/var-tag.exp (do_global_tests): Handle underlying type.
+
 2015-07-30  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (handle_extended_wait): Set the child's last
