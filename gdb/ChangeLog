@@ -1,3 +1,14 @@
+2015-07-30  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR threads/18600
+	* linux-nat.c (linux_handle_extended_wait): On CLONE event, always
+	mark the new thread as resumed.  Remove STOPPING parameter.
+	(wait_lwp): Adjust call to linux_handle_extended_wait.
+	(linux_nat_filter_event): Adjust call to
+	linux_handle_extended_wait.
+	(resume_stopped_resumed_lwps): Add debug output.
+
 2015-07-30  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* arch-utils.c (default_fast_tracepoint_valid_at): Remove unused

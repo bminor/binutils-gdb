@@ -1,3 +1,10 @@
+2015-07-30  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR threads/18600
+	* gdb.threads/fork-plus-threads.c: New file.
+	* gdb.threads/fork-plus-threads.exp: New file.
+
 2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.base/batch-preserve-term-settings.exp
