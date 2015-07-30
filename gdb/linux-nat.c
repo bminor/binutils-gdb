@@ -2274,6 +2274,20 @@ wait_lwp (struct lwp_info *lp)
       /* Check if the thread has exited.  */
       if (WIFEXITED (status) || WIFSIGNALED (status))
 	{
+	  if (ptid_get_pid (lp->ptid) == ptid_get_lwp (lp->ptid))
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog, "WL: Process %d exited.\n",
+				    ptid_get_pid (lp->ptid));
+
+	      /* This is the leader exiting, it means the whole
+		 process is gone.  Store the status to report to the
+		 core.  Store it in lp->waitstatus, because lp->status
+		 would be ambiguous (W_EXITCODE(0,0) == 0).  */
+	      store_waitstatus (&lp->waitstatus, status);
+	      return 0;
+	    }
+
 	  thread_dead = 1;
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog, "WL: %s exited.\n",

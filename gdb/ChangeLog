@@ -1,4 +1,10 @@
 2015-07-30  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18600
+	* linux-nat.c (wait_lwp): Report to the core when thread group
+	leader exits.
+
+2015-07-30  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR threads/18600
