@@ -1,5 +1,11 @@
 2015-07-30  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-arm-low.c (arm_hwcap): Remove it.
+	(arm_read_description): New local variable arm_hwcap.  Don't
+	set arm_hwcap to zero.
+
+2015-07-30  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-arm-low.c (arm_fill_wmmxregset): Don't use arm_hwcap.
 	Use regcache->tdesc instead.
 	(arm_store_wmmxregset): Likewise.

@@ -117,8 +117,6 @@ struct arch_lwp_info
   CORE_ADDR stopped_data_address;
 };
 
-static unsigned long arm_hwcap;
-
 /* These are in <asm/elf.h> in current kernels.  */
 #define HWCAP_VFP       64
 #define HWCAP_IWMMXT    512
@@ -844,11 +842,11 @@ static const struct target_desc *
 arm_read_description (void)
 {
   int pid = lwpid_of (current_thread);
+  unsigned long arm_hwcap = 0;
 
   /* Query hardware watchpoint/breakpoint capabilities.  */
   arm_linux_init_hwbp_cap (pid);
 
-  arm_hwcap = 0;
   if (arm_get_hwcap (&arm_hwcap) == 0)
     return tdesc_arm;
 
@@ -875,10 +873,8 @@ arm_read_description (void)
       buf = xmalloc (32 * 8 + 4);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
 	  && errno == EIO)
-	{
-	  arm_hwcap = 0;
-	  result = tdesc_arm;
-	}
+	result = tdesc_arm;
+
       free (buf);
 
       return result;
