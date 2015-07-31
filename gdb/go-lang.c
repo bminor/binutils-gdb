@@ -478,7 +478,7 @@ static const struct op_print go_op_print_tab[] =
   {"unsafe.Sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
   {"++", UNOP_POSTINCREMENT, PREC_SUFFIX, 0},
   {"--", UNOP_POSTDECREMENT, PREC_SUFFIX, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_SUFFIX, 0}
 };
 
 enum go_primitive_types {

@@ -98,7 +98,7 @@ struct lwp_info
      Values:
      - TARGET_WAITKIND_SYSCALL_ENTRY
      - TARGET_WAITKIND_SYSCALL_RETURN */
-  int syscall_state;
+  enum target_waitkind syscall_state;
 
   /* The processor core this LWP was last seen on.  */
   int core;

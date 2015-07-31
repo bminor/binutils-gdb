@@ -2402,7 +2402,7 @@ mips_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 
 static int
 mips_can_use_watchpoint (struct target_ops *self,
-			 int type, int cnt, int othertype)
+			 enum bptype type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
 }
@@ -2437,10 +2437,13 @@ calculate_mask (CORE_ADDR addr, int len)
 
 static int
 mips_insert_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  if (mips_set_breakpoint (addr, len, type))
+  /* These enum types are compatible by design.  */
+  enum break_type btype = (enum break_type) type;
+
+  if (mips_set_breakpoint (addr, len, btype))
     return -1;
 
   return 0;
@@ -2450,10 +2453,13 @@ mips_insert_watchpoint (struct target_ops *self,
 
 static int
 mips_remove_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  if (mips_clear_breakpoint (addr, len, type))
+  /* These enum types are compatible by design.  */
+  enum break_type btype = (enum break_type) type;
+
+  if (mips_clear_breakpoint (addr, len, btype))
     return -1;
 
   return 0;

@@ -215,7 +215,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
   struct frame_info *frame;
   int raw_arg = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
-  int print_value;
+  enum print_values print_value;
   int oind = 0;
   int skip_unavailable = 0;
   int i;
@@ -412,7 +412,7 @@ mi_cmd_stack_list_variables (char *command, char **argv, int argc)
   struct frame_info *frame;
   int raw_arg = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
-  int print_value;
+  enum print_values print_value;
   int oind = 0;
   int skip_unavailable = 0;
 

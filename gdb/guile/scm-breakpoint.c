@@ -340,8 +340,8 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
   char *s;
   char *location;
   int type_arg_pos = -1, access_type_arg_pos = -1, internal_arg_pos = -1;
-  int type = bp_breakpoint;
-  int access_type = hw_write;
+  enum bptype type = bp_breakpoint;
+  enum target_hw_bp_type access_type = hw_write;
   int internal = 0;
   SCM result;
   breakpoint_smob *bp_smob;

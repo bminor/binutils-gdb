@@ -859,7 +859,7 @@ static const struct token dot_ops[] =
   { ".GT.", GREATERTHAN, BINOP_END },
   { ".lt.", LESSTHAN, BINOP_END },
   { ".LT.", LESSTHAN, BINOP_END },
-  { NULL, 0, 0 }
+  { NULL, 0, BINOP_END }
 };
 
 struct f77_boolean_val 
@@ -894,7 +894,7 @@ static const struct token f77_keywords[] =
   { "sizeof", SIZEOF, BINOP_END },
   { "real_8", REAL_S8_KEYWORD, BINOP_END },
   { "real", REAL_KEYWORD, BINOP_END },
-  { NULL, 0, 0 }
+  { NULL, 0, BINOP_END }
 }; 
 
 /* Implementation of a dynamically expandable buffer for processing input

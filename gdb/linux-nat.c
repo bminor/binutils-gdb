@@ -4154,7 +4154,7 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
   char filename[64];
 
   if (object != TARGET_OBJECT_MEMORY || !readbuf)
-    return 0;
+    return TARGET_XFER_EOF;
 
   /* Don't bother for one word.  */
   if (len < 3 * sizeof (long))

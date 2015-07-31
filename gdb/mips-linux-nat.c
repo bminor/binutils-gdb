@@ -509,7 +509,8 @@ mips_show_dr (const char *func, CORE_ADDR addr,
 
 static int
 mips_linux_can_use_hw_breakpoint (struct target_ops *self,
-				  int type, int cnt, int ot)
+				  enum bptype type,
+				  int cnt, int ot)
 {
   int i;
   uint32_t wanted_mask, irw_mask;
@@ -643,7 +644,8 @@ mips_linux_new_thread (struct lwp_info *lp)
 
 static int
 mips_linux_insert_watchpoint (struct target_ops *self,
-			      CORE_ADDR addr, int len, int type,
+			      CORE_ADDR addr, int len,
+			      enum target_hw_bp_type type,
 			      struct expression *cond)
 {
   struct pt_watch_regs regs;
@@ -697,7 +699,8 @@ mips_linux_insert_watchpoint (struct target_ops *self,
 
 static int
 mips_linux_remove_watchpoint (struct target_ops *self,
-			      CORE_ADDR addr, int len, int type,
+			      CORE_ADDR addr, int len,
+			      enum target_hw_bp_type type,
 			      struct expression *cond)
 {
   int retval;

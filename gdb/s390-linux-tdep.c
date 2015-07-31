@@ -2979,7 +2979,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct tdesc_arch_data *tdesc_data = NULL;
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  int tdep_abi;
+  enum s390_abi_kind tdep_abi;
   enum s390_vector_abi_kind vector_abi;
   int have_upper = 0;
   int have_linux_v1 = 0;

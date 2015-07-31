@@ -2123,7 +2123,7 @@ new_variable (void)
   var->num_children = -1;
   var->parent = NULL;
   var->children = NULL;
-  var->format = 0;
+  var->format = FORMAT_NATURAL;
   var->root = NULL;
   var->updated = 0;
   var->print_value = NULL;

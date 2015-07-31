@@ -1,3 +1,113 @@
+2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): Use enum
+	type or value instead of integer.
+	(aarch64_linux_insert_watchpoint): Likewise.
+	(aarch64_linux_remove_watchpoint): Likewise.
+	* ada-lang.c (ada_op_print_tab): Likewise.
+	* amd64-linux-tdep.c (amd64_canonicalize_syscall): Likewise.
+	(amd64_linux_syscall_record_common): Likewise.
+	* arch-utils.c (target_byte_order_user): Likewise.
+	(default_byte_order): Likewise.
+	* arm-linux-nat.c (arm_linux_can_use_hw_breakpoint): Likewise.
+	(arm_linux_get_hwbp_type): Likewise.
+	(arm_linux_hw_watchpoint_initialize): Likewise.
+	(arm_linux_insert_watchpoint): Likewise.
+	* arm-linux-tdep.c (arm_canonicalize_syscall): Likewise.
+	(arm_linux_syscall_record): Likewise.
+	* breakpoint.c (update_watchpoint): Likewise.
+	(breakpoint_here_p): Likewise.
+	(bpstat_print): Likewise.
+	(enable_breakpoint_disp): Likewise.
+	* c-lang.c (c_op_print_tab): Likewise.
+	* cli/cli-decode.c (add_info_alias): Likewise.
+	* d-lang.c (d_op_print_tab): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* f-exp.y (dot_ops): Likewise.
+	(f77_keywords): Likewise.
+	* f-lang.c (f_op_print_tab): Likewise.
+	* go-lang.c (go_op_print_tab): Likewise.
+	* guile/scm-breakpoint.c (gdbscm_make_breakpoint): Likewise.
+	* guile/scm-cmd.c (gdbscm_make_command): Likewise.
+	* guile/scm-param.c (gdbscm_make_parameter): Likewise.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer): Likewise.
+	* guile/scm-string.c (struct scm_to_stringn_data): Likewise.
+	(struct scm_from_stringn_data): Likewise.
+	* i386-linux-tdep.c (i386_canonicalize_syscall): Likewise.
+	* ia64-linux-nat.c (ia64_linux_insert_watchpoint): Likewise.
+	(ia64_linux_remove_watchpoint): Likewise.
+	(ia64_linux_can_use_hw_breakpoint): Likewise.
+	* infrun.c (print_stop_event): Likewise.
+	* jv-lang.c (java_op_print_tab): Likewise.
+	* linux-nat.c (linux_proc_xfer_partial): Likewise.
+	* linux-nat.h (struct lwp_info): Likewise.
+	* linux-thread-db.c (enable_thread_event): Likewise.
+	* m2-lang.c (m2_op_print_tab): Likewise.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): Likewise.
+	(mi_cmd_stack_list_variables): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Likewise.
+	* mi/mi-out.c (mi_table_begin): Likewise.
+	(mi_table_header): Likewise.
+	* mips-linux-nat.c (mips_linux_can_use_hw_breakpoint): Likewise.
+	(mips_linux_insert_watchpoint): Likewise.
+	(mips_linux_remove_watchpoint): Likewise.
+	* nat/mips-linux-watch.c (mips_linux_watch_type_to_irw): Likewise.
+	* nat/mips-linux-watch.h (struct mips_watchpoint): Likewise.
+	(mips_linux_watch_type_to_irw): Likewise.
+	* nto-procfs.c (procfs_can_use_hw_breakpoint): Likewise.
+	(procfs_insert_hw_watchpoint): Likewise.
+	(procfs_remove_hw_watchpoint): Likewise.
+	(procfs_hw_watchpoint): Likewise.
+	(procfs_can_use_hw_breakpoint): Likewise.
+	(procfs_remove_hw_watchpoint): Likewise.
+	(procfs_insert_hw_watchpoint): Likewise.
+	* p-lang.c (pascal_op_print_tab): Likewise.
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Likewise.
+	* ppc-linux-tdep.c (ppu2spu_unwind_register): Likewise.
+	* ppc-sysv-tdep.c (get_decimal_float_return_value): Likewise.
+	* procfs.c (procfs_can_use_hw_breakpoint): Likewise.
+	(procfs_insert_watchpoint): Likewise.
+	(procfs_remove_watchpoint): Likewise.
+	* psymtab.c (recursively_search_psymtabs): Likewise.
+	* remote-m32r-sdi.c (m32r_can_use_hw_watchpoint): Likewise.
+	(m32r_insert_watchpoint): Likewise.
+	* remote-mips.c (mips_can_use_watchpoint): Likewise.
+	(mips_insert_watchpoint): Likewise.
+	(mips_remove_watchpoint): Likewise.
+	* remote.c (watchpoint_to_Z_packet): Likewise.
+	(remote_insert_watchpoint): Likewise.
+	(remote_remove_watchpoint): Likewise.
+	(remote_check_watch_resources): Likewise.
+	* s390-linux-nat.c (s390_insert_watchpoint): Likewise.
+	(s390_remove_watchpoint): Likewise.
+	(s390_can_use_hw_breakpoint): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* spu-linux-nat.c (spu_can_use_hw_breakpoint): Likewise.
+	* target.h (struct target_ops): Likewise.
+	* tilegx-tdep.c (tilegx_analyze_prologue): Likewise.
+	* ui-out.c (struct ui_out_hdr): Likewise.
+	(append_header_to_list): Likewise.
+	(get_next_header): Likewise.
+	(verify_field): Likewise.
+	(ui_out_begin): Likewise.
+	(ui_out_field_int): Likewise.
+	(ui_out_field_fmt_int): Likewise.
+	(ui_out_field_skip): Likewise.
+	(ui_out_field_string): Likewise.
+	(ui_out_field_fmt): Likewise.
+	* varobj.c (new_variable): Likewise.
+	* x86-nat.c (x86_insert_watchpoint): Likewise.
+	(x86_remove_watchpoint): Likewise.
+	(x86_can_use_hw_breakpoint): Likewise.
+	* xtensa-tdep.h (struct gdbarch_tdep): Likewise.
+	* inflow.c (enum gdb_has_a_terminal_flag_enum): Add name to
+	previously anonymous enumeration type..
+	* linux-record.h (enum gdb_syscall): Add gdb_sys_no_syscall
+	value.
+	* target-debug.h (target_debug_print_enum_target_hw_bp_type): New.
+	(target_debug_print_enum_bptype): New.
+	* target-delegates.c: Regenerate.
+
 2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.c (nios2_analyze_prologue): Do what the comment

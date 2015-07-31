@@ -1391,7 +1391,7 @@ have_ptrace_hwdebug_interface (void)
 
 static int
 ppc_linux_can_use_hw_breakpoint (struct target_ops *self,
-				 int type, int cnt, int ot)
+				 enum bptype type, int cnt, int ot)
 {
   int total_hw_wp, total_hw_bp;
 

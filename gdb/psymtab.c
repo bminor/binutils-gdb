@@ -1318,7 +1318,7 @@ recursively_search_psymtabs (struct partial_symtab *ps,
   struct partial_symbol **psym;
   struct partial_symbol **bound, **gbound, **sbound;
   int keep_going = 1;
-  int result = PST_SEARCHED_AND_NOT_FOUND;
+  enum psymtab_search_status result = PST_SEARCHED_AND_NOT_FOUND;
   int i;
 
   if (ps->searched_flag != PST_NOT_SEARCHED)

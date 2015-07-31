@@ -13636,7 +13636,7 @@ static const struct op_print ada_op_print_tab[] = {
   {".all", UNOP_IND, PREC_SUFFIX, 1},
   {"'access", UNOP_ADDR, PREC_SUFFIX, 1},
   {"'size", OP_ATR_SIZE, PREC_SUFFIX, 1},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_SUFFIX, 0}
 };
 
 enum ada_primitive_types {

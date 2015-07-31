@@ -957,7 +957,7 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
 	  if (gdbscm_is_exception (initial_value_scm))
 	    gdbscm_throw (initial_value_scm);
 	}
-      pascm_set_param_value_x (param_type, &p_smob->value, enum_list,
+      pascm_set_param_value_x (p_smob->type, &p_smob->value, enum_list,
 			       initial_value_scm,
 			       initial_value_arg_pos, FUNC_NAME);
     }

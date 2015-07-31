@@ -198,7 +198,7 @@ mips_linux_read_watch_registers (long lwpid,
 /* Convert GDB's TYPE to an IRW mask.  */
 
 uint32_t
-mips_linux_watch_type_to_irw (int type)
+mips_linux_watch_type_to_irw (enum target_hw_bp_type type)
 {
   switch (type)
     {

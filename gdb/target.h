@@ -41,6 +41,7 @@ struct dcache_struct;
 struct inferior;
 
 #include "infrun.h" /* For enum exec_direction_kind.  */
+#include "breakpoint.h" /* For enum bptype.  */
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -72,6 +73,8 @@ struct inferior;
 #include "gdb_signals.h"
 #include "btrace.h"
 #include "command.h"
+
+#include "break-common.h" /* For enum target_hw_bp_type.  */
 
 enum strata
   {
@@ -513,7 +516,8 @@ struct target_ops
     int (*to_supports_stopped_by_hw_breakpoint) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
 
-    int (*to_can_use_hw_breakpoint) (struct target_ops *, int, int, int)
+    int (*to_can_use_hw_breakpoint) (struct target_ops *,
+				     enum bptype, int, int)
       TARGET_DEFAULT_RETURN (0);
     int (*to_ranged_break_num_registers) (struct target_ops *)
       TARGET_DEFAULT_RETURN (-1);
@@ -526,11 +530,11 @@ struct target_ops
 
     /* Documentation of what the two routines below are expected to do is
        provided with the corresponding target_* macros.  */
-    int (*to_remove_watchpoint) (struct target_ops *,
-				 CORE_ADDR, int, int, struct expression *)
+    int (*to_remove_watchpoint) (struct target_ops *, CORE_ADDR, int,
+				 enum target_hw_bp_type, struct expression *)
       TARGET_DEFAULT_RETURN (-1);
-    int (*to_insert_watchpoint) (struct target_ops *,
-				 CORE_ADDR, int, int, struct expression *)
+    int (*to_insert_watchpoint) (struct target_ops *, CORE_ADDR, int,
+				 enum target_hw_bp_type, struct expression *)
       TARGET_DEFAULT_RETURN (-1);
 
     int (*to_insert_mask_watchpoint) (struct target_ops *,

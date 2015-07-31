@@ -54,14 +54,16 @@ static procfs_run run;
 static ptid_t do_attach (ptid_t ptid);
 
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
-					 int, int, int);
+					 enum target_hw_bp_type, int, int);
 
 static int procfs_insert_hw_watchpoint (struct target_ops *self,
-					CORE_ADDR addr, int len, int type,
+					CORE_ADDR addr, int len,
+					enum target_hw_bp_type type,
 					struct expression *cond);
 
 static int procfs_remove_hw_watchpoint (struct target_ops *self,
-					CORE_ADDR addr, int len, int type,
+					CORE_ADDR addr, int len,
+					enum target_hw_bp_type type,
 					struct expression *cond);
 
 static int procfs_stopped_by_watchpoint (struct target_ops *ops);
@@ -1494,16 +1496,16 @@ _initialize_procfs (void)
 
 
 static int
-procfs_hw_watchpoint (int addr, int len, int type)
+procfs_hw_watchpoint (int addr, int len, enum target_hw_bp_type type)
 {
   procfs_break brk;
 
   switch (type)
     {
-    case 1:			/* Read.  */
+    case hw_read:
       brk.type = _DEBUG_BREAK_RD;
       break;
-    case 2:			/* Read/Write.  */
+    case hw_access:
       brk.type = _DEBUG_BREAK_RW;
       break;
     default:			/* Modify.  */
@@ -1525,14 +1527,16 @@ procfs_hw_watchpoint (int addr, int len, int type)
 
 static int
 procfs_can_use_hw_breakpoint (struct target_ops *self,
-			      int type, int cnt, int othertype)
+			      enum bptype type,
+			      int cnt, int othertype)
 {
   return 1;
 }
 
 static int
 procfs_remove_hw_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int type,
+			     CORE_ADDR addr, int len,
+			     enum target_hw_bp_type type,
 			     struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, -1, type);
@@ -1540,7 +1544,8 @@ procfs_remove_hw_watchpoint (struct target_ops *self,
 
 static int
 procfs_insert_hw_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int type,
+			     CORE_ADDR addr, int len,
+			     enum target_hw_bp_type type,
 			     struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, len, type);

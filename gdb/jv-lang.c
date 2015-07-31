@@ -1098,7 +1098,7 @@ const struct op_print java_op_print_tab[] =
   {"*", UNOP_IND, PREC_PREFIX, 0},
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_PREFIX, 0}
 };
 
 enum java_primitive_types

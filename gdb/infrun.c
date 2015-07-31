@@ -6486,7 +6486,7 @@ void
 print_stop_event (struct target_waitstatus *ws)
 {
   int bpstat_ret;
-  int source_flag;
+  enum print_what source_flag;
   int do_frame_printing = 1;
   struct thread_info *tp = inferior_thread ();
 

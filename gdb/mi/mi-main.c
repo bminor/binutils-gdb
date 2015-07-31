@@ -2755,8 +2755,8 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
   struct collection_list tracepoint_list, stepping_list;
   struct traceframe_info *tinfo;
   int oind = 0;
-  int var_print_values = PRINT_ALL_VALUES;
-  int comp_print_values = PRINT_ALL_VALUES;
+  enum print_values var_print_values = PRINT_ALL_VALUES;
+  enum print_values comp_print_values = PRINT_ALL_VALUES;
   int registers_format = 'x';
   int memory_contents = 0;
   struct ui_out *uiout = current_uiout;

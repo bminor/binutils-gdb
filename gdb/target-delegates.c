@@ -401,20 +401,20 @@ debug_supports_stopped_by_hw_breakpoint (struct target_ops *self)
 }
 
 static int
-delegate_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int arg3)
+delegate_can_use_hw_breakpoint (struct target_ops *self, enum bptype arg1, int arg2, int arg3)
 {
   self = self->beneath;
   return self->to_can_use_hw_breakpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int arg3)
+tdefault_can_use_hw_breakpoint (struct target_ops *self, enum bptype arg1, int arg2, int arg3)
 {
   return 0;
 }
 
 static int
-debug_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int arg3)
+debug_can_use_hw_breakpoint (struct target_ops *self, enum bptype arg1, int arg2, int arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_can_use_hw_breakpoint (...)\n", debug_target.to_shortname);
@@ -422,7 +422,7 @@ debug_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int ar
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_can_use_hw_breakpoint (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  target_debug_print_enum_bptype (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
@@ -523,20 +523,20 @@ debug_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *arg1, struc
 }
 
 static int
-delegate_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+delegate_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   self = self->beneath;
   return self->to_remove_watchpoint (self, arg1, arg2, arg3, arg4);
 }
 
 static int
-tdefault_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+tdefault_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   return -1;
 }
 
 static int
-debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_remove_watchpoint (...)\n", debug_target.to_shortname);
@@ -548,7 +548,7 @@ debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int 
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_expression_p (arg4);
   fputs_unfiltered (") = ", gdb_stdlog);
@@ -558,20 +558,20 @@ debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int 
 }
 
 static int
-delegate_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+delegate_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   self = self->beneath;
   return self->to_insert_watchpoint (self, arg1, arg2, arg3, arg4);
 }
 
 static int
-tdefault_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+tdefault_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   return -1;
 }
 
 static int
-debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insert_watchpoint (...)\n", debug_target.to_shortname);
@@ -583,7 +583,7 @@ debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int 
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_expression_p (arg4);
   fputs_unfiltered (") = ", gdb_stdlog);

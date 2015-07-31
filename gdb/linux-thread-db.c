@@ -476,7 +476,7 @@ verbose_dlsym (void *handle, const char *name)
 }
 
 static td_err_e
-enable_thread_event (int event, CORE_ADDR *bp)
+enable_thread_event (td_event_e event, CORE_ADDR *bp)
 {
   td_notify_t notify;
   td_err_e err;
