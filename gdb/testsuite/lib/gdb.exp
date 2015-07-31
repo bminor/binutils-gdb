@@ -3706,7 +3706,9 @@ proc gdb_exit { } {
 # it.
 
 proc can_spawn_for_attach { } {
-    # We use TCL's exec to get the inferior's pid.
+    # We use exp_pid to get the inferior's pid, assuming that gives
+    # back the pid of the program.  On remote boards, that would give
+    # us instead the PID of e.g., the ssh client, etc.
     if [is_remote target] then {
 	return 0
     }
@@ -3722,12 +3724,50 @@ proc can_spawn_for_attach { } {
     return 1
 }
 
+# Kill a progress previously started with spawn_wait_for_attach, and
+# reap its wait status.  PROC_SPAWN_ID is the spawn id associated with
+# the process.
+
+proc kill_wait_spawned_process { proc_spawn_id } {
+    set pid [exp_pid -i $proc_spawn_id]
+
+    verbose -log "killing ${pid}"
+    remote_exec build "kill -9 ${pid}"
+
+    verbose -log "closing ${proc_spawn_id}"
+    catch "close -i $proc_spawn_id"
+    verbose -log "waiting for ${proc_spawn_id}"
+
+    # If somehow GDB ends up still attached to the process here, a
+    # blocking wait hangs until gdb is killed (or until gdb / the
+    # ptracer reaps the exit status too, but that won't happen because
+    # something went wrong.)  Passing -nowait makes expect tell Tcl to
+    # wait for the PID in the background.  That's fine because we
+    # don't care about the exit status.  */
+    wait -nowait -i $proc_spawn_id
+}
+
+# Returns the process id corresponding to the given spawn id.
+
+proc spawn_id_get_pid { spawn_id } {
+    set testpid [exp_pid -i $spawn_id]
+
+    if { [istarget "*-*-cygwin*"] } {
+	# testpid is the Cygwin PID, GDB uses the Windows PID, which
+	# might be different due to the way fork/exec works.
+	set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
+    }
+
+    return $testpid
+}
+
 # Start a set of programs running and then wait for a bit, to be sure
-# that they can be attached to.  Return a list of the processes' PIDs.
-# It's a test error to call this when [can_spawn_for_attach] is false.
+# that they can be attached to.  Return a list of processes spawn IDs,
+# one element for each process spawned.  It's a test error to call
+# this when [can_spawn_for_attach] is false.
 
 proc spawn_wait_for_attach { executable_list } {
-    set pid_list {}
+    set spawn_id_list {}
 
     if ![can_spawn_for_attach] {
 	# The caller should have checked can_spawn_for_attach itself
@@ -3736,22 +3776,16 @@ proc spawn_wait_for_attach { executable_list } {
     }
 
     foreach {executable} $executable_list {
-	lappend pid_list [eval exec $executable &]
+	# Note we use Expect's spawn, not Tcl's exec, because with
+	# spawn we control when to wait for/reap the process.  That
+	# allows killing the process by PID without being subject to
+	# pid-reuse races.
+	lappend spawn_id_list [remote_spawn target $executable]
     }
 
     sleep 2
 
-    if { [istarget "*-*-cygwin*"] } {
-	for {set i 0} {$i < [llength $pid_list]} {incr i} {
-	    # testpid is the Cygwin PID, GDB uses the Windows PID,
-	    # which might be different due to the way fork/exec works.
-	    set testpid [lindex $pid_list $i]
-	    set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
-	    set pid_list [lreplace $pid_list $i $i $testpid]
-	}
-    }
-
-    return $pid_list
+    return $spawn_id_list
 }
 
 #

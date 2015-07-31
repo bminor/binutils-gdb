@@ -1,3 +1,41 @@
+2015-07-31  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach-pie-misread.exp: Rename $res to $test_spawn_id.
+	Use spawn_id_get_pid.  Wait for spawn id after eof.  Use
+	kill_wait_spawned_process instead of explicit "kill -9".
+	* gdb.base/attach-pie-noexec.exp: Adjust to spawn_wait_for_attach
+	returning a spawn id instead of a pid.  Use spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.base/attach-twice.exp: Likewise.
+	* gdb.base/attach.exp: Likewise.
+	(do_command_attach_tests): Use gdb_spawn_with_cmdline_opts and
+	gdb_test_multiple.
+	* gdb.base/solib-overlap.exp: Adjust to spawn_wait_for_attach
+	returning a spawn id instead of a pid.  Use spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.base/valgrind-infcall.exp: Likewise.
+	* gdb.multi/multi-attach.exp: Likewise.
+	* gdb.python/py-prompt.exp: Likewise.
+	* gdb.python/py-sync-interp.exp: Likewise.
+	* gdb.server/ext-attach.exp: Likewise.
+	* gdb.threads/attach-into-signal.exp (corefunc): Use
+	spawn_wait_for_attach, spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.threads/attach-many-short-lived-threads.exp: Adjust to
+	spawn_wait_for_attach returning a spawn id instead of a pid.  Use
+	spawn_id_get_pid and kill_wait_spawned_process.
+	* gdb.threads/attach-stopped.exp (corefunc): Use
+	spawn_wait_for_attach, spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.base/break-interp.exp: Rename $res to $test_spawn_id.
+	Use spawn_id_get_pid.  Wait for spawn id after eof.  Use
+	kill_wait_spawned_process instead of explicit "kill -9".
+	* lib/gdb.exp (can_spawn_for_attach): Adjust comment.
+	(kill_wait_spawned_process, spawn_id_get_pid): New procedures.
+	(spawn_wait_for_attach): Use spawn instead of exec to spawn
+	processes.  Don't map cygwin/windows pids here.  Now returns a
+	spawn id list.
+
 2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.cp/var-tag.exp (do_global_tests): Revert broken commit

@@ -44,12 +44,8 @@ proc corefunc { threadtype executable } {
 
 	gdb_test "handle SIGALRM stop print pass" "Yes.*Yes.*Yes.*"
 
-	# Start the program running and then wait for a bit, to be sure
-	# that it can be attached to.
-	# Statistically there is a better chance without giving process a nice.
-
-	set testpid [eval exec $binfile &]
-	exec sleep 2
+	set test_spawn_id [spawn_wait_for_attach $binfile]
+	set testpid [spawn_id_get_pid $test_spawn_id]
 
 	# Run 2 passes of the test.
 	# The C file inferior stops pending its signals if a single one is lost,
@@ -146,16 +142,11 @@ proc corefunc { threadtype executable } {
 	# Exit and detach the process.
 	gdb_exit
 
-	# Make sure we don't leave a process around to confuse the
-	# next test run (and prevent the compile by keeping the text
-	# file busy), in case the "set should_exit" didn't work.
-
 	# Continue the program - some Linux kernels need it before -9 if the
 	# process is stopped.
 	remote_exec build "kill -s CONT ${testpid}"
 
-	remote_exec build "kill -9 ${testpid}"
-
+	kill_wait_spawned_process $test_spawn_id
     }
 }
 
