@@ -1,3 +1,13 @@
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* binutils-all/objcopy.exp: Run new symbol tests.
+	(objcopy_test_symbol_manipulation): New function.
+	* binutils-all/symbols-1.d: New file.
+	* binutils-all/symbols-2.d: New file.
+	* binutils-all/symbols-3.d: New file.
+	* binutils-all/symbols-4.d: New file.
+	* binutils-all/symbols.s: New file.
+
 2015-08-05  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/objcopy.exp (keep_debug_symbols_and_check_links):

@@ -1,3 +1,8 @@
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (is_specified_symbol_predicate): Don't stop at first
+	match.  Non-match rules set found to FALSE.
+
 2015-08-06  Yaakov Selkowitz  <yselkowi@redhat.com>
 
 	* configure: Regenerate.

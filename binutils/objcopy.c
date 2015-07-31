@@ -985,15 +985,15 @@ is_specified_symbol_predicate (void **slot, void *data)
       if (! fnmatch (slot_name, d->name, 0))
 	{
 	  d->found = TRUE;
-	  /* Stop traversal.  */
-	  return 0;
+	  /* Continue traversal, there might be a non-match rule.  */
+	  return 1;
 	}
     }
   else
     {
-      if (fnmatch (slot_name + 1, d->name, 0))
+      if (! fnmatch (slot_name + 1, d->name, 0))
 	{
-	  d->found = TRUE;
+	  d->found = FALSE;
 	  /* Stop traversal.  */
 	  return 0;
 	}
