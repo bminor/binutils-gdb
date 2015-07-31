@@ -1,5 +1,10 @@
 2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* remote-m32r-sdi.c (m32r_remove_watchpoint): Use enum type
+	instead of integer.
+
+2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): Use enum
 	type or value instead of integer.
 	(aarch64_linux_insert_watchpoint): Likewise.
