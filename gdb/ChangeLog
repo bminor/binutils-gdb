@@ -1,3 +1,12 @@
+2015-08-02  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* alpha-mdebug-tdep.c (find_proc_desc): Update call to
+	lookup_symbol.
+	* ft32-tdep.c (ft32_skip_prologue): Likewise.
+	* moxie-tdep.c (moxie_skip_prologue): Likewise.
+	* mt-tdep.c (mt_skip_prologue): Likewise.
+	* xstormy16-tdep.c (xstormy16_skip_prologue): Likewise.
+
 2015-08-01  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-exp.y (write_object_renaming): Replace struct

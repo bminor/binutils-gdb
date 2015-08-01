@@ -241,7 +241,7 @@ moxie_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  plg_end = moxie_analyze_prologue (func_addr, 
 					    func_end, &cache, gdbarch);
 	  /* Found a function.  */
-	  sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL);
+	  sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL).symbol;
 	  /* Don't use line number debug info for assembly source
 	     files.  */
 	  if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
