@@ -3,7 +3,7 @@
 	* elf32-cris.c (cris_elf_relocate_section)
 	(elf_cris_finish_dynamic_symbol, cris_elf_check_relocs)
 	(elf_cris_discard_excess_dso_dynamics): Use SYMBOLIC_BIND, not
-	just h->symbolic, to check if a symbol should be bound
+	just link_info->symbolic, to check if a symbol should be bound
 	symbolically.
 
 2015-07-30  H.J. Lu  <hongjiu.lu@intel.com>
