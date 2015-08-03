@@ -1,5 +1,18 @@
 2015-08-03  Doug Evans  <dje@google.com>
 
+	* Makefile.in (workers/%.worker, build-perf): New rule.
+	(GDB_PERFTEST_MODE): New variable.
+	(check-perf): Use it.
+	(clean): Clean up gdb.perf parallel build subdirs.
+	* lib/build-piece.exp: New file.
+	* lib/gdb.exp (make_gdb_parallel_path): New function
+	(standard_output_file, standard_temp_file): Call it.
+	(GDB_PARALLEL handling): Make outputs,temp,cache directories as subdirs
+	of $GDB_PARALLEL.
+	* lib/cache.exp (gdb_do_cache): Call make_gdb_parallel_path.
+
+2015-08-03  Doug Evans  <dje@google.com>
+
 	* lib/perftest/reporter.py (SUM_FILE_NAME): New global.
 	(LOG_FILE_NAME): New global.
 	(TextReporter.__init__): Initialize self.txt_sum.
