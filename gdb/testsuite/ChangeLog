@@ -1,3 +1,8 @@
+2015-08-19  Kevin Buettner  <kevinb@redhat.com>
+    
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.c: New file.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: New file.
+
 2015-08-18  Doug Evans  <dje@google.com>
 	    Adrian Sendroiu <adrian.sendroiu@freescale.com>
 

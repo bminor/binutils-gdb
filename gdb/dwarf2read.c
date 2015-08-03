@@ -1524,6 +1524,9 @@ static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 static struct attribute *dwarf2_attr_no_follow (struct die_info *,
 						unsigned int);
 
+static const char *dwarf2_string_attr (struct die_info *die, unsigned int name,
+                                       struct dwarf2_cu *cu);
+
 static int dwarf2_flag_true_p (struct die_info *die, unsigned name,
                                struct dwarf2_cu *cu);
 
@@ -5270,13 +5273,8 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
   gdb_assert (cu != NULL);
 
   /* Yeah, we look dwo_name up again, but it simplifies the code.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
-  gdb_assert (attr != NULL);
-  dwo_name = DW_STRING (attr);
-  comp_dir = NULL;
-  attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-  if (attr)
-    comp_dir = DW_STRING (attr);
+  dwo_name = dwarf2_string_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
+  comp_dir = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
   if (this_cu->is_debug_types)
     {
@@ -5938,7 +5936,6 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct dwarf2_per_cu_data *per_cu = cu->per_cu;
-  struct attribute *attr;
   CORE_ADDR baseaddr;
   CORE_ADDR best_lowpc = 0, best_highpc = 0;
   struct partial_symtab *pst;
@@ -5956,18 +5953,14 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   cu->list_in_scope = &file_symbols;
 
   /* Allocate a new partial symbol table structure.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_name, cu);
-  if (attr == NULL || !DW_STRING (attr))
+  filename = dwarf2_string_attr (comp_unit_die, DW_AT_name, cu);
+  if (filename == NULL)
     filename = "";
-  else
-    filename = DW_STRING (attr);
 
   pst = create_partial_symtab (per_cu, filename);
 
   /* This must be done before calling dwarf2_build_include_psymtabs.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-  if (attr != NULL)
-    pst->dirname = DW_STRING (attr);
+  pst->dirname = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -8451,13 +8444,13 @@ dwarf2_compute_name (const char *name,
 	 to be able to reference.  Ideally, we want the user to be able
 	 to reference this entity using either natural or linkage name,
 	 but we haven't started looking at this enhancement yet.  */
-      struct attribute *attr;
+      const char *name;
 
-      attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-      if (attr == NULL)
-	attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
-      if (attr && DW_STRING (attr))
-	return DW_STRING (attr);
+      name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
+      if (name == NULL)
+	name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+      if (name != NULL)
+	return name;
     }
 
   /* These are the only languages we know how to qualify names in.  */
@@ -8710,17 +8703,15 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 
   back_to = make_cleanup (null_cleanup, NULL);
 
-  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-  if (!attr)
-    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+  mangled = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
+  if (mangled == NULL)
+    mangled = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
 
   /* DW_AT_linkage_name is missing in some cases - depend on what GDB
      has computed.  */
-  if (attr && DW_STRING (attr))
+  if (mangled != NULL)
     {
       char *demangled;
-
-      mangled = DW_STRING (attr);
 
       /* Use DMGL_RET_DROP for C++ template functions to suppress their return
 	 type.  It is easier for GDB users to search for such functions as
@@ -9051,24 +9042,14 @@ static void
 find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 			 const char **name, const char **comp_dir)
 {
-  struct attribute *attr;
-
-  *name = NULL;
-  *comp_dir = NULL;
-
   /* Find the filename.  Do not use dwarf2_name here, since the filename
      is not a source language identifier.  */
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr)
-    {
-      *name = DW_STRING (attr);
-    }
+  *name = dwarf2_string_attr (die, DW_AT_name, cu);
+  *comp_dir = dwarf2_string_attr (die, DW_AT_comp_dir, cu);
 
-  attr = dwarf2_attr (die, DW_AT_comp_dir, cu);
-  if (attr)
-    *comp_dir = DW_STRING (attr);
-  else if (producer_is_gcc_lt_4_3 (cu) && *name != NULL
-	   && IS_ABSOLUTE_PATH (*name))
+  if (*comp_dir == NULL
+      && producer_is_gcc_lt_4_3 (cu) && *name != NULL
+      && IS_ABSOLUTE_PATH (*name))
     {
       char *d = ldirname (*name);
 
@@ -11710,17 +11691,17 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       gdb_assert (target_cu->objfile == objfile);
       if (die_is_declaration (target_die, target_cu))
 	{
-	  const char *target_physname = NULL;
-	  struct attribute *target_attr;
+	  const char *target_physname;
 
 	  /* Prefer the mangled name; otherwise compute the demangled one.  */
-	  target_attr = dwarf2_attr (target_die, DW_AT_linkage_name, target_cu);
-	  if (target_attr == NULL)
-	    target_attr = dwarf2_attr (target_die, DW_AT_MIPS_linkage_name,
-				       target_cu);
-	  if (target_attr != NULL && DW_STRING (target_attr) != NULL)
-	    target_physname = DW_STRING (target_attr);
-	  else
+	  target_physname = dwarf2_string_attr (target_die,
+						DW_AT_linkage_name,
+						target_cu);
+	  if (target_physname == NULL)
+	    target_physname = dwarf2_string_attr (target_die,
+						 DW_AT_MIPS_linkage_name,
+						 target_cu);
+	  if (target_physname == NULL)
 	    target_physname = dwarf2_physname (NULL, target_die, target_cu);
 	  if (target_physname == NULL)
 	    complaint (&symfile_complaints,
@@ -14191,10 +14172,8 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
     {
       /* We don't use dwarf2_name here so that we can detect the absence
 	 of a name -> anonymous namespace.  */
-      struct attribute *attr = dwarf2_attr (die, DW_AT_name, cu);
+      name = dwarf2_string_attr (die, DW_AT_name, cu);
 
-      if (attr != NULL)
-	name = DW_STRING (attr);
       if (name != NULL)
 	break;
     }
@@ -17097,6 +17076,33 @@ dwarf2_attr_no_follow (struct die_info *die, unsigned int name)
   return NULL;
 }
 
+/* Return the string associated with a string-typed attribute, or NULL if it
+   is either not found or is of an incorrect type.  */
+
+static const char *
+dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+  const char *str = NULL;
+
+  attr = dwarf2_attr (die, name, cu);
+
+  if (attr != NULL)
+    {
+      if (attr->form == DW_FORM_strp || attr->form == DW_FORM_string
+	  || attr->form == DW_FORM_GNU_strp_alt)
+	str = DW_STRING (attr);
+      else
+        complaint (&symfile_complaints,
+	           _("string type expected for attribute %s for "
+		     "DIE at 0x%x in module %s"),
+		   dwarf_attr_name (name), die->offset.sect_off,
+		   objfile_name (cu->objfile));
+    }
+
+  return str;
+}
+
 /* Return non-zero iff the attribute NAME is defined for the given DIE,
    and holds a non-zero value.  This function should only be used for
    DW_FORM_flag or DW_FORM_flag_present attributes.  */
@@ -19154,16 +19160,17 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (child->tag == DW_TAG_subprogram)
 	{
-	  struct attribute *attr;
+	  const char *linkage_name;
 
-	  attr = dwarf2_attr (child, DW_AT_linkage_name, cu);
-	  if (attr == NULL)
-	    attr = dwarf2_attr (child, DW_AT_MIPS_linkage_name, cu);
-	  if (attr != NULL)
+	  linkage_name = dwarf2_string_attr (child, DW_AT_linkage_name, cu);
+	  if (linkage_name == NULL)
+	    linkage_name = dwarf2_string_attr (child, DW_AT_MIPS_linkage_name,
+	                                       cu);
+	  if (linkage_name != NULL)
 	    {
 	      char *actual_name
 		= language_class_name_from_physname (cu->language_defn,
-						     DW_STRING (attr));
+						     linkage_name);
 	      char *name = NULL;
 
 	      if (actual_name != NULL)
@@ -19211,8 +19218,7 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
       && die->tag != DW_TAG_structure_type && die->tag != DW_TAG_union_type)
     return NULL;
 
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr != NULL && DW_STRING (attr) != NULL)
+  if (dwarf2_string_attr (die, DW_AT_name, cu) != NULL)
     return NULL;
 
   attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
@@ -22083,9 +22089,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
       cu->language_defn = language_def (cu->language);
     }
 
-  attr = dwarf2_attr (comp_unit_die, DW_AT_producer, cu);
-  if (attr)
-    cu->producer = DW_STRING (attr);
+  cu->producer = dwarf2_string_attr (comp_unit_die, DW_AT_producer, cu);
 }
 
 /* Release one cached compilation unit, CU.  We unlink it from the tree

@@ -1,3 +1,12 @@
+2015-08-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_string_attr): New function.
+	(lookup_dwo_unit, process_psymtab_comp_unit_reader)
+	(dwarf2_compute_name, dwarf2_physname, find_file_and_directory)
+	(read_call_site_scope, namespace_name, guess_full_die_structure_name)
+	(anonymous_struct_prefix, prepare_one_comp_unit): Use
+	dwarf2_string_attr in place of dwarf2_attr and DW_STRING.
+
 2015-08-18  Doug Evans  <dje@google.com>
 	    Adrian Sendroiu <adrian.sendroiu@freescale.com>
 
