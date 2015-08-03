@@ -1,5 +1,10 @@
 2015-08-03  Doug Evans  <dje@google.com>
 
+	* gdb.perf/single-step.exp (SINGLE_STEP_COUNT): Change to 1000 from
+	10000.
+
+2015-08-03  Doug Evans  <dje@google.com>
+
 	* Makefile.in (workers/%.worker, build-perf): New rule.
 	(GDB_PERFTEST_MODE): New variable.
 	(check-perf): Use it.
