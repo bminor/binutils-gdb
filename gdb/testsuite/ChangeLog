@@ -18,15 +18,15 @@
 
 2015-08-03  Doug Evans  <dje@google.com>
 
-	* lib/perftest/reporter.py (SUM_FILE_NAME): New global.
+	* gdb.perf/lib/perftest/reporter.py (SUM_FILE_NAME): New global.
 	(LOG_FILE_NAME): New global.
 	(TextReporter.__init__): Initialize self.txt_sum.
 	(TextReporter.report): Add support for multiple data-points.
 	Move report to perftest.sum, put raw data in perftest.log.
 	(TextReporter.start): Open sum and log files.
 	(TextReporter.end): Close sum and log files.
-	* lib/perftest/testresult.py (SingleStatisticTestResult.record): Handle
-	multiple data-points.
+	* gdb.perf/lib/perftest/testresult.py
+	(SingleStatisticTestResult.record): Handle multiple data-points.
 
 2015-07-31  Pedro Alves  <palves@redhat.com>
 
