@@ -43,7 +43,7 @@
 	(ada_tasks_inferior_data_sniffer): Likewise.
 	* ax-gdb.c (gen_static_field): Likewise for the call to
 	lookup_symbol.
-	(gen_maybe_namespace_elt): Deal with struct symbol_in_block from
+	(gen_maybe_namespace_elt): Deal with struct block_symbol from
 	lookup functions.
 	(gen_expr): Likewise.
 	* c-exp.y: Likewise.  Remove uses of block_found.
@@ -54,11 +54,11 @@
 	* compile/compile-c-symbols.c (convert_symbol_sym): Promote the
 	"sym" parameter from struct symbol * to struct block_symbol.
 	Use it to remove uses of block_found.  Deal with struct
-	symbol_in_block from lookup functions.
+	block_symbol from lookup functions.
 	(gcc_convert_symbol): Likewise.  Update the call to
 	convert_symbol_sym.
 	* compile/compile-object-load.c (compile_object_load): Deal with
-	struct symbol_in_block from lookup functions.
+	struct block_symbol from lookup functions.
 	* cp-namespace.c (cp_lookup_nested_symbol_1,
 	cp_lookup_nested_symbol, cp_lookup_bare_symbol,
 	cp_search_static_and_baseclasses,
@@ -66,28 +66,28 @@
 	cp_lookup_symbol_imports_or_template,
 	cp_lookup_symbol_via_all_imports, cp_lookup_symbol_namespace,
 	lookup_namespace_scope, cp_lookup_nonlocal,
-	find_symbol_in_baseclass): Return struct symbol_in_block instead
-	of mere symbols and deal with struct symbol_in_block from lookup
+	find_symbol_in_baseclass): Return struct block_symbol instead of
+	mere symbols and deal with struct block_symbol from lookup
 	functions.
 	* cp-support.c (inspect_type, replace_typedefs,
-	cp_lookup_rtti_type): Deal with struct symbol_in_block from
+	cp_lookup_rtti_type): Deal with struct block_symbol from
 	lookup functions.
 	* cp-support.h (cp_lookup_symbol_nonlocal,
 	cp_lookup_symbol_from_namespace,
 	cp_lookup_symbol_imports_or_template, cp_lookup_nested_symbol):
-	Return struct symbol_in_block instead of mere symbols.
+	Return struct block_symbol instead of mere symbols.
 	* d-exp.y (d_type_from_name, d_module_from_name, push_variable,
 	push_module_name):
-	Deal with struct symbol_in_block from lookup functions.  Remove
+	Deal with struct block_symbol from lookup functions.  Remove
 	uses of block_found.
 	* eval.c (evaluate_subexp_standard): Update call to
 	cp_lookup_symbol_namespace.
-	* f-exp.y: Deal with struct symbol_in_block from lookup
-	functions.  Remove uses of block_found.
+	* f-exp.y: Deal with struct block_symbol from lookup functions.
+	Remove uses of block_found.
 	(yylex): Likewise.
 	* gdbtypes.c (lookup_typename, lookup_struct, lookup_union,
 	lookup_enum, lookup_template_type, check_typedef): Deal with
-	struct symbol_in_block from lookup functions.
+	struct block_symbol from lookup functions.
 	* guile/scm-frame.c (gdbscm_frame_read_var): Likewise.
 	* guile/scm-symbol.c (gdbscm_lookup_symbol): Likewise.
 	(gdbscm_lookup_global_symbol): Likewise.
@@ -100,10 +100,10 @@
 	* jv-lang.c (java_lookup_class, get_java_object_type): Likewise.
 	* language.c (language_bool_type): Likewise.
 	* language.h (struct language_defn): Update
-	la_lookup_symbol_nonlocal to return a struct symbol_in_block
-	rather than a mere symbol.
-	* linespec.c (find_label_symbols): Deal with struct
-	symbol_in_block from lookup functions.
+	la_lookup_symbol_nonlocal to return a struct block_symbol rather
+	than a mere symbol.
+	* linespec.c (find_label_symbols): Deal with struct block_symbol
+	from lookup functions.
 	* m2-exp.y: Likewise.  Remove uses of block_found.
 	(yylex): Likewise.
 	* mi/mi-cmd-stack.c (list_args_or_locals): Likewise.
@@ -114,36 +114,36 @@
 	* parse.c (write_dollar_variable): Likewise.  Remove uses of
 	block_found.
 	* parser-defs.h (struct symtoken): Turn the SYM field into a
-	struct symbol_in_block.
-	* printcmd.c (address_info): Deal with struct symbol_in_block
-	from lookup functions.
+	struct block_symbol.
+	* printcmd.c (address_info): Deal with struct block_symbol from
+	lookup functions.
 	* python/py-frame.c (frapy_read_var): Likewise.
 	* python/py-symbol.c (gdbpy_lookup_symbol,
 	gdbpy_lookup_global_symbol): Likewise.
 	* skip.c (skip_function_command): Likewise.
 	* solib-darwin.c (darwin_lookup_lib_symbol): Return a struct
-	symbol_in_block instead of a mere symbol.
+	block_symbol instead of a mere symbol.
 	* solib-spu.c (spu_lookup_lib_symbol): Likewise.
 	* solib-svr4.c (elf_lookup_lib_symbol): Likewise.
 	* solib.c (solib_global_lookup): Likewise.
 	* solist.h (solib_global_lookup): Likewise.
 	(struct target_so_ops): Update lookup_lib_global_symbol to
-	return a struct symbol_in_block rather than a mere symbol.
-	* source.c (select_source_symtab): Deal with struct
-	symbol_in_block from lookup functions.
+	return a struct block_symbol rather than a mere symbol.
+	* source.c (select_source_symtab): Deal with struct block_symbol
+	from lookup functions.
 	* stack.c (print_frame_args, iterate_over_block_arg_vars):
 	Likewise.
 	* symfile.c (set_initial_language): Likewise.
 	* symtab.c (SYMBOL_LOOKUP_FAILED): Turn into a struct
-	symbol_in_block.
+	block_symbol.
 	(SYMBOL_LOOKUP_FAILED_P): New predicate as a macro.
 	(struct symbol_cache_slot): Turn the FOUND field into a struct
-	symbol_in_block.
+	block_symbol.
 	(block_found): Remove.
-	(eq_symbol_entry): Update to deal with struct symbol_in_block in
+	(eq_symbol_entry): Update to deal with struct block_symbol in
 	cache slots.
-	(symbol_cache_lookup): Return a struct symbol_in_block rather
-	than a mere symbol.
+	(symbol_cache_lookup): Return a struct block_symbol rather than
+	a mere symbol.
 	(symbol_cache_mark_found): Add a BLOCK parameter to fill
 	appropriately the cache slots.  Update callers.
 	(symbol_cache_dump): Update cache slots handling to the type
@@ -156,28 +156,27 @@
 	lookup_symbol_via_quick_fns, basic_lookup_symbol_nonlocal,
 	lookup_symbol_in_static_block, lookup_static_symbol,
 	lookup_global_symbol):
-	Return a struct symbol_in_block rather than a mere symbol.  Deal
-	with struct symbol_in_block from other lookup functions.  Remove
+	Return a struct block_symbol rather than a mere symbol.  Deal
+	with struct block_symbol from other lookup functions.  Remove
 	uses of block_found.
 	(lookup_symbol_in_block): Remove uses of block_found.
 	(struct global_sym_lookup_data): Turn the RESULT field into a
-	struct symbol_in_block.
+	struct block_symbol.
 	(lookup_symbol_global_iterator_cb): Update references to the
 	RESULT field.
-	(search_symbols): Deal with struct symbol_in_block from lookup
+	(search_symbols): Deal with struct block_symbol from lookup
 	functions.
-	* symtab.h (struct symbol_in_block): New structure.
+	* symtab.h (struct block_symbol): New structure.
 	(block_found): Remove.
 	(lookup_symbol_in_language, lookup_symbol,
 	basic_lookup_symbol_nonlocal, lookup_symbol_in_static_block,
-	looku_static_symbol, lookup_global_symbol,
-	lookup_symbol_in_block, lookup_language_this,
-	lookup_global_symbol_from_objfile): Return a struct
-	symbol_in_block rather than just a mere symbol.  Update comments
-	to remove mentions of block_found.
+	lookup_static_symbol, lookup_global_symbol, lookup_language_this,
+	lookup_global_symbol_from_objfile): Return a struct block_symbol
+	rather than just a mere symbol.  Update comments to remove
+	mentions of block_found.
 	* valops.c (find_function_in_inferior,
 	value_struct_elt_for_reference, value_maybe_namespace_elt,
-	value_of_this):  Deal with struct symbol_in_block from lookup
+	value_of_this):  Deal with struct block_symbol from lookup
 	functions.
 	* value.c (value_static_field, value_fn_field): Likewise.
 
