@@ -331,6 +331,39 @@
 
 2015-07-24  Doug Evans  <dje@google.com>
 
+	* gdb.perf/lib/perftest/utils.py: New file.
+	* gdb.perf/gm-hello.cc: New file.
+	* gdb.perf/gm-pervasive-typedef.cc: New file.
+	* gdb.perf/gm-pervasive-typedef.h: New file.
+	* gdb.perf/gm-std.cc: New file.
+	* gdb.perf/gm-std.h: New file.
+	* gdb.perf/gm-use-cerr.cc: New file.
+	* gdb.perf/gm-utils.h: New file.
+	* gdb.perf/gmonster-null-lookup.py: New file.
+	* gdb.perf/gmonster-pervasive-typedef.py: New file.
+	* gdb.perf/gmonster-print-cerr.py: New file.
+	* gdb.perf/gmonster-ptype-string.py: New file.
+	* gdb.perf/gmonster-runto-main.py: New file.
+	* gdb.perf/gmonster-select-file.py: New file.
+	* gdb.perf/gmonster1-null-lookup.exp: New file.
+	* gdb.perf/gmonster1-pervasive-typedef.exp: New file.
+	* gdb.perf/gmonster1-print-cerr.exp: New file.
+	* gdb.perf/gmonster1-ptype-string.exp: New file.
+	* gdb.perf/gmonster1-runto-main.exp: New file.
+	* gdb.perf/gmonster1-select-file.exp: New file.
+	* gdb.perf/gmonster1.cc: New file.
+	* gdb.perf/gmonster1.exp: New file.
+	* gdb.perf/gmonster2-null-lookup.exp: New file.
+	* gdb.perf/gmonster2-pervasive-typedef.exp: New file.
+	* gdb.perf/gmonster2-print-cerr.exp: New file.
+	* gdb.perf/gmonster2-ptype-string.exp: New file.
+	* gdb.perf/gmonster2-runto-main.exp: New file.
+	* gdb.perf/gmonster2-select-file.exp: New file.
+	* gdb.perf/gmonster2.cc: New file.
+	* gdb.perf/gmonster2.exp: New file.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
 	* gdb.perf/README: New file.
 	* lib/perftest.exp (tcl_string_list_to_python_list): New function.
 	* lib/gen-perf-test.exp: New file.
