@@ -923,14 +923,14 @@ arm_linux_hw_breakpoint_initialize (struct gdbarch *gdbarch,
   p->control = arm_hwbp_control_initialize (mask, arm_hwbp_break, 1);
 }
 
-/* Get the ARM hardware breakpoint type from the type value we're
+/* Get the ARM hardware breakpoint type from the TYPE value we're
    given when asked to set a watchpoint.  */
 static arm_hwbp_type 
 arm_linux_get_hwbp_type (enum target_hw_bp_type type)
 {
-  if (rw == hw_read)
+  if (type == hw_read)
     return arm_hwbp_load;
-  else if (rw == hw_write)
+  else if (type == hw_write)
     return arm_hwbp_store;
   else
     return arm_hwbp_access;
@@ -1168,8 +1168,8 @@ arm_linux_insert_watchpoint (struct target_ops *self,
 
 /* Remove a hardware breakpoint.  */
 static int
-arm_linux_remove_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int rw,
+arm_linux_remove_watchpoint (struct target_ops *self, CORE_ADDR addr,
+			     int len, enum target_hw_bp_type rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;

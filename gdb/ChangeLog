@@ -1,3 +1,10 @@
+2015-08-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_get_hwbp_type): Capitalize "type"
+	in comment.  Replace "rw" with "type".
+	(arm_linux_remove_watchpoint): Change type of "rw" to
+	"enum target_hw_bp_type".
+
 2015-08-02  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* alpha-mdebug-tdep.c (find_proc_desc): Update call to
