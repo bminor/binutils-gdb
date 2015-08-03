@@ -1,3 +1,8 @@
+2015-08-03  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Overview): Add --hash-size to the synopsis and
+	fix typo in its entry: @kindex -> @item.
+
 2015-07-28  Robert Suchanek  <robert.suchanek@imgtec.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add m5100 and m5101 entries.
