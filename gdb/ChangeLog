@@ -1,3 +1,35 @@
+2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.h: Include opcode/nios2.h here.
+	(NIOS2_CDX_OPCODE_SIZE): New.
+	(struct gdbarch_tdep): Add OP parameter to syscall_next_pc.
+	* nios2-tdep.c: Don't include opcode/nios2.h here.
+	(nios2_fetch_insn): For R2, try reading 2-byte instruction if
+	4-byte read fails.
+	(nios2_match_add, nios2_match_sub): Add cases for R2 encodings.
+	(nios2_match_addi, nios2_match_orhi): Likewise.
+	(nios2_match_stw, nios2_match_ldw): Likewise.
+	(nios2_match_rdctl): Likewise.
+	(nios2_match_stwm, nios2_match_ldwm): New.
+	(nios2_match_branch): Add cases for R2 encodings.
+	(nios2_match_jmpi, nios2_match_calli): Likewise.
+	(nios2_match_jmpr, nios2_match_callr): Likewise.
+	(nios2_match_break, nios2_match_trap): Likewise.
+	(nios2_in_epilogue_p): Add R2 support.
+	(nios2_analyze_prologue): Update comments.  Recognize R2 CDX
+	prologues.
+	(nios2_breakpoint_from_pc): Handle R2 instructions.
+	(nios2_get_next_pc): Likewise.  Adjust call to
+	tdep->syscall_next_pc.
+	* nios2-linux-tdep.c (nios2_r1_linux_rt_sigreturn_tramp_frame):
+	Renamed from nios2_linux_rt_sigreturn_tramp_frame.  Use
+	instruction field macros instead of literal hex values.
+	(nios2_r2_linux_rt_sigreturn_tramp_frame): New.
+	(nios2_linux_syscall_next_pc): Adjust signature to pass OP.
+	Use size field from OP instead of assuming all instructions
+	are the same size.
+	(nios2_linux_init_abi): Register appropriate unwinder for mach.
+
 2015-08-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* cp-namespace.c (cp_lookup_symbol_via_imports): Fix uninitialized

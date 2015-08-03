@@ -1,3 +1,11 @@
+2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* linux-nios2-low.c (NIOS2_BREAKPOINT): Conditionalize for
+	arch variant.
+	(CDX_BREAKPOINT): Define for R2.
+	(nios2_breakpoint_at): Check for CDX_BREAKPOINT when R2.
+	(the_low_target): Add comments.
+
 2015-07-30  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-arm-low.c (arm_hwcap): Remove it.
