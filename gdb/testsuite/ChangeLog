@@ -1,3 +1,8 @@
+2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/bp-permanent.exp: Report test as unsupported if
+	the target cannot stop at the permanent breakpoint.
+
 2015-08-03  Doug Evans  <dje@google.com>
 
 	* gdb.perf/single-step.exp (SINGLE_STEP_COUNT): Change to 1000 from
