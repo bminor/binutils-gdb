@@ -485,6 +485,7 @@ cp_lookup_symbol_via_imports (const char *scope,
   struct cleanup *searched_cleanup;
 
   sym.symbol = NULL;
+  sym.block = NULL;
 
   /* First, try to find the symbol in the given namespace if requested.  */
   if (search_scope_first)

@@ -1,3 +1,8 @@
+2015-08-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* cp-namespace.c (cp_lookup_symbol_via_imports): Fix uninitialized
+	variable warning with some compilers.
+
 2015-08-03  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-nat.c (arm_linux_get_hwbp_type): Capitalize "type"
