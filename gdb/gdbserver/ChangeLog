@@ -1,5 +1,18 @@
 2015-08-04  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv (case aarch64*-*-linux*): Append arm-with-neon.o
+	to srv_regobj and append arm-core.xml arm-vfpv3.xml and
+	arm-with-neon.xml to srv_xmlfiles.
+	* linux-aarch64-low.c: Include linux-aarch32-low.h.
+	(is_64bit_tdesc): New function.
+	(aarch64_linux_read_description): New function.
+	(aarch64_arch_setup): Call aarch64_linux_read_description.
+	(regs_info): Rename to regs_info_aarch64.
+	(aarch64_regs_info): Return right regs_info.
+	(initialize_low_arch): Call initialize_low_arch_aarch32.
+
+2015-08-04  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv (srv_tgtobj): Add linux-aarch32-low.o.
 	* linux-aarch32-low.c: New file.
 	* linux-aarch32-low.h: New file.
