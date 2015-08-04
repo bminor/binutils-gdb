@@ -1,3 +1,9 @@
+2015-08-04  Ciro Santilli  <ciro.santilli@gmail.com>  (obvious patch)
+
+	* python/py-linetable.c: Fix case of Linetable to LineTable
+	in docstrings and code comments.
+	* python/py-symtab.c: Same.
+
 2015-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infcmd.c (signal_command): Call do_cleanups for args_chain.
