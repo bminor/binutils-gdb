@@ -1,5 +1,12 @@
 2015-08-04  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_supports_z_point_type): Return
+	0 for Z_PACKET_SW_BP if it may be used in multi-arch debugging.
+	* server.c (extended_protocol): Remove "static".
+	* server.h (extended_protocol): Declare it.
+
+2015-08-04  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_get_pc): Get PC register on
 	both aarch64 and aarch32.
 	(aarch64_set_pc): Likewise.

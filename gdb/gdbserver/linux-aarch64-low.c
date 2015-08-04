@@ -364,6 +364,22 @@ aarch64_supports_z_point_type (char z_type)
   switch (z_type)
     {
     case Z_PACKET_SW_BP:
+      {
+	if (!extended_protocol && is_64bit_tdesc ())
+	  {
+	    /* Only enable Z0 packet in non-multi-arch debugging.  If
+	       extended protocol is used, don't enable Z0 packet because
+	       GDBserver may attach to 32-bit process.  */
+	    return 1;
+	  }
+	else
+	  {
+	    /* Disable Z0 packet so that GDBserver doesn't have to handle
+	       different breakpoint instructions (aarch64, arm, thumb etc)
+	       in multi-arch debugging.  */
+	    return 0;
+	  }
+      }
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
