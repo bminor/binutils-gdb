@@ -1,3 +1,18 @@
+2015-08-04  Pedro Alves  <palves@redhat.com>
+
+	* nat/gdb_thread_db.h (td_init_ftype, td_ta_new_ftype)
+	(td_ta_map_lwp2thr_ftype, td_ta_thr_iter_ftype)
+	(td_ta_event_addr_ftype, td_ta_set_event_ftype)
+	(td_ta_clear_event_ftype, td_ta_event_getmsg_ftype)
+	(td_thr_validate_ftype, td_thr_get_info_ftype)
+	(td_thr_event_enable_ftype, td_thr_tls_get_addr_ftype)
+	(td_thr_tlsbase_ftype, td_symbol_list_ftype, td_ta_delete_ftype):
+	New typedefs.
+	* linux-thread-db.c (struct thread_db_info): Use new typedefs.
+	(try_thread_db_load_1): Define TDB_VERBOSE_DLSYM, TDB_DLSYM , CHK
+	local macros and use them instead of verbose_dlsym and dlsym
+	calls.
+
 2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.h: Include opcode/nios2.h here.

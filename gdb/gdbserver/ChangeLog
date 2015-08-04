@@ -1,3 +1,12 @@
+2015-08-04  Pedro Alves  <palves@redhat.com>
+
+	* thread-db.c (struct thread_db): Use new typedefs.
+	(try_thread_db_load_1): Define local TDB_DLSYM macro and use it in
+	CHK calls.
+	(disable_thread_event_reporting): Cast result of dlsym to
+	destination function pointer type.
+	(thread_db_mourn): Use td_ta_delete_ftype.
+
 2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* linux-nios2-low.c (NIOS2_BREAKPOINT): Conditionalize for

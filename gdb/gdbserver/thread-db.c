@@ -67,30 +67,17 @@ struct thread_db
   struct breakpoint *td_create_bp;
 
   /* Addresses of libthread_db functions.  */
-  td_err_e (*td_ta_new_p) (struct ps_prochandle * ps, td_thragent_t **ta);
-  td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
-				    td_event_msg_t *msg);
-  td_err_e (*td_ta_set_event_p) (const td_thragent_t *ta,
-				 td_thr_events_t *event);
-  td_err_e (*td_ta_event_addr_p) (const td_thragent_t *ta,
-				  td_event_e event, td_notify_t *ptr);
-  td_err_e (*td_ta_map_lwp2thr_p) (const td_thragent_t *ta, lwpid_t lwpid,
-				   td_thrhandle_t *th);
-  td_err_e (*td_thr_get_info_p) (const td_thrhandle_t *th,
-				 td_thrinfo_t *infop);
-  td_err_e (*td_thr_event_enable_p) (const td_thrhandle_t *th, int event);
-  td_err_e (*td_ta_thr_iter_p) (const td_thragent_t *ta,
-				td_thr_iter_f *callback, void *cbdata_p,
-				td_thr_state_e state, int ti_pri,
-				sigset_t *ti_sigmask_p,
-				unsigned int ti_user_flags);
-  td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
-				     psaddr_t map_address,
-				     size_t offset, psaddr_t *address);
-  td_err_e (*td_thr_tlsbase_p) (const td_thrhandle_t *th,
-				unsigned long int modid,
-				psaddr_t *base);
-  const char ** (*td_symbol_list_p) (void);
+  td_ta_new_ftype *td_ta_new_p;
+  td_ta_event_getmsg_ftype * td_ta_event_getmsg_p;
+  td_ta_set_event_ftype *td_ta_set_event_p;
+  td_ta_event_addr_ftype *td_ta_event_addr_p;
+  td_ta_map_lwp2thr_ftype *td_ta_map_lwp2thr_p;
+  td_thr_get_info_ftype *td_thr_get_info_p;
+  td_thr_event_enable_ftype *td_thr_event_enable_p;
+  td_ta_thr_iter_ftype *td_ta_thr_iter_p;
+  td_thr_tls_get_addr_ftype *td_thr_tls_get_addr_p;
+  td_thr_tlsbase_ftype *td_thr_tlsbase_p;
+  td_symbol_list_ftype *td_symbol_list_p;
 };
 
 static char *libthread_db_search_path;
@@ -645,7 +632,10 @@ try_thread_db_load_1 (void *handle)
     }								\
   while (0)
 
-  CHK (1, tdb->td_ta_new_p = dlsym (handle, "td_ta_new"));
+#define TDB_DLSYM(tdb, func) \
+  tdb->func ## _p = (func ## _ftype *) dlsym (tdb->handle, #func)
+
+  CHK (1, TDB_DLSYM (tdb, td_ta_new));
 
   /* Attempt to open a connection to the thread library.  */
   err = tdb->td_ta_new_p (&tdb->proc_handle, &tdb->thread_agent);
@@ -658,23 +648,23 @@ try_thread_db_load_1 (void *handle)
       return 0;
     }
 
-  CHK (1, tdb->td_ta_map_lwp2thr_p = dlsym (handle, "td_ta_map_lwp2thr"));
-  CHK (1, tdb->td_thr_get_info_p = dlsym (handle, "td_thr_get_info"));
-  CHK (1, tdb->td_ta_thr_iter_p = dlsym (handle, "td_ta_thr_iter"));
-  CHK (1, tdb->td_symbol_list_p = dlsym (handle, "td_symbol_list"));
+  CHK (1, TDB_DLSYM (tdb, td_ta_map_lwp2thr));
+  CHK (1, TDB_DLSYM (tdb, td_thr_get_info));
+  CHK (1, TDB_DLSYM (tdb, td_ta_thr_iter));
+  CHK (1, TDB_DLSYM (tdb, td_symbol_list));
 
   /* This is required only when thread_db_use_events is on.  */
-  CHK (thread_db_use_events,
-       tdb->td_thr_event_enable_p = dlsym (handle, "td_thr_event_enable"));
+  CHK (thread_db_use_events, TDB_DLSYM (tdb, td_thr_event_enable));
 
   /* These are not essential.  */
-  CHK (0, tdb->td_ta_event_addr_p = dlsym (handle, "td_ta_event_addr"));
-  CHK (0, tdb->td_ta_set_event_p = dlsym (handle, "td_ta_set_event"));
-  CHK (0, tdb->td_ta_event_getmsg_p = dlsym (handle, "td_ta_event_getmsg"));
-  CHK (0, tdb->td_thr_tls_get_addr_p = dlsym (handle, "td_thr_tls_get_addr"));
-  CHK (0, tdb->td_thr_tlsbase_p = dlsym (handle, "td_thr_tlsbase"));
+  CHK (0, TDB_DLSYM (tdb, td_ta_event_addr));
+  CHK (0, TDB_DLSYM (tdb, td_ta_set_event));
+  CHK (0, TDB_DLSYM (tdb, td_ta_event_getmsg));
+  CHK (0, TDB_DLSYM (tdb, td_thr_tls_get_addr));
+  CHK (0, TDB_DLSYM (tdb, td_thr_tlsbase));
 
 #undef CHK
+#undef TDB_DLSYM
 
   return 1;
 }
@@ -914,7 +904,9 @@ disable_thread_event_reporting (struct process_info *proc)
 				       td_thr_events_t *event);
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
-      td_ta_clear_event_p = dlsym (thread_db->handle, "td_ta_clear_event");
+      td_ta_clear_event_p
+	= (td_ta_clear_event_ftype *) dlsym (thread_db->handle,
+					     "td_ta_clear_event");
 #else
       td_ta_clear_event_p = &td_ta_clear_event;
 #endif
@@ -974,10 +966,10 @@ thread_db_mourn (struct process_info *proc)
   struct thread_db *thread_db = proc->priv->thread_db;
   if (thread_db)
     {
-      td_err_e (*td_ta_delete_p) (td_thragent_t *);
+      td_ta_delete_ftype *td_ta_delete_p;
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
-      td_ta_delete_p = dlsym (thread_db->handle, "td_ta_delete");
+      td_ta_delete_p = (td_ta_delete_ftype *) dlsym (thread_db->handle, "td_ta_delete");
 #else
       td_ta_delete_p = &td_ta_delete;
 #endif
