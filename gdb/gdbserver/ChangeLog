@@ -1,3 +1,9 @@
+2015-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-x86-low.c (have_ptrace_getregset): Move it to ...
+	* linux-low.c: ... here.
+	* linux-low.h (have_ptrace_getregset): Declare it.
+
 2015-08-04  Pedro Alves  <palves@redhat.com>
 
 	* thread-db.c (struct thread_db): Use new typedefs.

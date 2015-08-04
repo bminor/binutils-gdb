@@ -1142,9 +1142,6 @@ int have_ptrace_getfpxregs =
 #endif
 ;
 
-/* Does the current host support PTRACE_GETREGSET?  */
-static int have_ptrace_getregset = -1;
-
 /* Get Linux/x86 target description from running target.  */
 
 static const struct target_desc *

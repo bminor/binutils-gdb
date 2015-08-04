@@ -139,6 +139,9 @@ typedef struct
 } Elf64_auxv_t;
 #endif
 
+/* Does the current host support PTRACE_GETREGSET?  */
+int have_ptrace_getregset = -1;
+
 /* LWP accessors.  */
 
 /* See nat/linux-nat.h.  */
