@@ -1,3 +1,9 @@
+2015-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/18767
+	* infcmd.c (attach_command): Move ARGS_CHAIN cleanup after last ARGS
+	use.
+
 2015-08-04  Pedro Alves  <palves@redhat.com>
 
 	* nat/gdb_thread_db.h (td_init_ftype, td_ta_new_ftype)
