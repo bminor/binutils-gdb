@@ -49,6 +49,7 @@
 #include "observer.h"
 #include "maint.h"
 #include "filenames.h"
+#include "frame.h"
 
 /* readline include files.  */
 #include "readline/readline.h"

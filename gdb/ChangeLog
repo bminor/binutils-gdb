@@ -1,5 +1,17 @@
 2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* stack.c (get_frame_language): Moved ...
+	* frame.c (get_frame_language): ... to here.
+	* language.h (get_frame_language): Declaration moved to frame.h.
+	* frame.h: Add language.h include, for language enum.
+	(get_frame_language): Declaration moved from language.h.
+	* language.c: Add frame.h include.
+	* top.c: Add frame.h include.
+	* symtab.h (struct obj_section): Declare.
+	(struct cmd_list_element): Declare.
+
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* language.c (show_language_command): Find selected frame before
 	asking for the language of that frame.
 	(set_language_command): Likewise.

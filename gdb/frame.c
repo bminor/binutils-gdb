@@ -2571,6 +2571,48 @@ frame_unwind_caller_arch (struct frame_info *next_frame)
   return frame_unwind_arch (skip_artificial_frames (next_frame));
 }
 
+/* Gets the language of FRAME.  */
+
+enum language
+get_frame_language (struct frame_info *frame)
+{
+  CORE_ADDR pc = 0;
+  int pc_p = 0;
+
+  gdb_assert (frame!= NULL);
+
+    /* We determine the current frame language by looking up its
+       associated symtab.  To retrieve this symtab, we use the frame
+       PC.  However we cannot use the frame PC as is, because it
+       usually points to the instruction following the "call", which
+       is sometimes the first instruction of another function.  So
+       we rely on get_frame_address_in_block(), it provides us with
+       a PC that is guaranteed to be inside the frame's code
+       block.  */
+
+  TRY
+    {
+      pc = get_frame_address_in_block (frame);
+      pc_p = 1;
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
+
+  if (pc_p)
+    {
+      struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
+
+      if (cust != NULL)
+	return compunit_language (cust);
+    }
+
+  return language_unknown;
+}
+
 /* Stack pointer methods.  */
 
 CORE_ADDR

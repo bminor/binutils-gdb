@@ -43,6 +43,7 @@
 #include "demangle.h"
 #include "symfile.h"
 #include "cp-support.h"
+#include "frame.h"
 
 extern void _initialize_language (void);
 
