@@ -621,7 +621,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	      struct symbol *nsym;
 
 	      nsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym),
-				    b, VAR_DOMAIN, NULL);
+				    b, VAR_DOMAIN, NULL).symbol;
 	      gdb_assert (nsym != NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER
 		  && !SYMBOL_IS_ARGUMENT (nsym))
@@ -2156,7 +2156,7 @@ iterate_over_block_arg_vars (const struct block *b,
 	     are not combined in symbol-reading.  */
 
 	  sym2 = lookup_symbol (SYMBOL_LINKAGE_NAME (sym),
-				b, VAR_DOMAIN, NULL);
+				b, VAR_DOMAIN, NULL).symbol;
 	  (*cb) (SYMBOL_PRINT_NAME (sym), sym2, cb_data);
 	}
     }

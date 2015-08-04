@@ -139,6 +139,9 @@ typedef struct
 } Elf64_auxv_t;
 #endif
 
+/* Does the current host support PTRACE_GETREGSET?  */
+int have_ptrace_getregset = -1;
+
 /* LWP accessors.  */
 
 /* See nat/linux-nat.h.  */
@@ -483,6 +486,8 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 	  child_lwp->status_pending_p = 0;
 	  child_thr = get_lwp_thread (child_lwp);
 	  child_thr->last_resume_kind = resume_stop;
+	  child_thr->last_status.kind = TARGET_WAITKIND_STOPPED;
+
 	  parent_proc = get_thread_process (event_thr);
 	  child_proc->attached = parent_proc->attached;
 	  clone_all_breakpoints (&child_proc->breakpoints,

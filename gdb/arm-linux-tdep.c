@@ -1267,7 +1267,7 @@ arm_canonicalize_syscall (int syscall)
   else if (syscall >= 248 && syscall <= 253)
     return syscall + 4;
 
-  return -1;
+  return gdb_sys_no_syscall;
 }
 
 /* Record all registers but PC register for process-record.  */
@@ -1299,7 +1299,7 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
 
   syscall_gdb = arm_canonicalize_syscall (svc_number);
 
-  if (syscall_gdb < 0)
+  if (syscall_gdb == gdb_sys_no_syscall)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
                            "support syscall number %s\n"),

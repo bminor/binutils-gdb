@@ -44,6 +44,7 @@
 #include "gdb_bfd.h"
 #include "filestuff.h"
 #include "rsp-low.h"
+#include "disasm.h"
 
 #include <sys/time.h>
 
@@ -8705,7 +8706,7 @@ remote_remove_breakpoint (struct target_ops *ops,
   return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
 }
 
-static int
+static enum Z_packet_type
 watchpoint_to_Z_packet (int type)
 {
   switch (type)
@@ -8726,9 +8727,8 @@ watchpoint_to_Z_packet (int type)
 }
 
 static int
-remote_insert_watchpoint (struct target_ops *self,
-			  CORE_ADDR addr, int len, int type,
-			  struct expression *cond)
+remote_insert_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+			  enum target_hw_bp_type type, struct expression *cond)
 {
   struct remote_state *rs = get_remote_state ();
   char *endbuf = rs->buf + get_remote_packet_size ();
@@ -8776,9 +8776,8 @@ remote_watchpoint_addr_within_range (struct target_ops *target, CORE_ADDR addr,
 
 
 static int
-remote_remove_watchpoint (struct target_ops *self,
-			  CORE_ADDR addr, int len, int type,
-			  struct expression *cond)
+remote_remove_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+			  enum target_hw_bp_type type, struct expression *cond)
 {
   struct remote_state *rs = get_remote_state ();
   char *endbuf = rs->buf + get_remote_packet_size ();
@@ -8834,7 +8833,7 @@ remote_region_ok_for_hw_watchpoint (struct target_ops *self,
 
 static int
 remote_check_watch_resources (struct target_ops *self,
-			      int type, int cnt, int ot)
+			      enum bptype type, int cnt, int ot)
 {
   if (type == bp_hardware_breakpoint)
     {
@@ -11106,12 +11105,10 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 	 target capabilities at definition time.  */
       if (remote_supports_fast_tracepoints ())
 	{
-	  int isize;
-
-	  if (gdbarch_fast_tracepoint_valid_at (target_gdbarch (),
-						tpaddr, &isize, NULL))
+	  if (gdbarch_fast_tracepoint_valid_at (loc->gdbarch, tpaddr,
+						NULL))
 	    xsnprintf (buf + strlen (buf), BUF_SIZE - strlen (buf), ":F%x",
-		       isize);
+		       gdb_insn_length (loc->gdbarch, tpaddr));
 	  else
 	    /* If it passed validation at definition but fails now,
 	       something is very wrong.  */

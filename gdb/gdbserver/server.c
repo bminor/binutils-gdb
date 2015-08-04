@@ -49,7 +49,7 @@ ptid_t general_thread;
 
 int server_waiting;
 
-static int extended_protocol;
+int extended_protocol;
 static int response_needed;
 static int exit_requested;
 

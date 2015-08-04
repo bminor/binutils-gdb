@@ -156,13 +156,30 @@ nios2_linux_rt_sigreturn_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
-static struct tramp_frame nios2_linux_rt_sigreturn_tramp_frame =
+/* Trampoline for sigreturn.  This has the form
+     movi r2, __NR_rt_sigreturn
+     trap 0
+   appropriately encoded for R1 or R2.  */
+
+static struct tramp_frame nios2_r1_linux_rt_sigreturn_tramp_frame =
 {
   SIGTRAMP_FRAME,
   4,
   {
-    { 0x00800004 | (139 << 6), -1 },  /* movi r2,__NR_rt_sigreturn */
-    { 0x003b683a, -1 },               /* trap */
+    { MATCH_R1_MOVI | SET_IW_I_B (2) | SET_IW_I_IMM16 (139), -1 },
+    { MATCH_R1_TRAP | SET_IW_R_IMM5 (0), -1},
+    { TRAMP_SENTINEL_INSN }
+  },
+  nios2_linux_rt_sigreturn_init
+};
+
+static struct tramp_frame nios2_r2_linux_rt_sigreturn_tramp_frame =
+{
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { MATCH_R2_MOVI | SET_IW_F2I16_B (2) | SET_IW_F2I16_IMM16 (139), -1 },
+    { MATCH_R2_TRAP | SET_IW_X2L5_IMM5 (0), -1},
     { TRAMP_SENTINEL_INSN }
   },
   nios2_linux_rt_sigreturn_init
@@ -172,7 +189,8 @@ static struct tramp_frame nios2_linux_rt_sigreturn_tramp_frame =
    instruction to be executed.  */
 
 static CORE_ADDR
-nios2_linux_syscall_next_pc (struct frame_info *frame)
+nios2_linux_syscall_next_pc (struct frame_info *frame,
+			     const struct nios2_opcode *op)
 {
   CORE_ADDR pc = get_frame_pc (frame);
   ULONGEST syscall_nr = get_frame_register_unsigned (frame, NIOS2_R2_REGNUM);
@@ -182,7 +200,7 @@ nios2_linux_syscall_next_pc (struct frame_info *frame)
   if (syscall_nr == 139 /* rt_sigreturn */)
     return frame_unwind_caller_pc (frame);
 
-  return pc + NIOS2_OPCODE_SIZE;
+  return pc + op->size;
 }
 
 /* Hook function for gdbarch_register_osabi.  */
@@ -207,8 +225,12 @@ nios2_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, nios2_iterate_over_regset_sections);
   /* Linux signal frame unwinders.  */
-  tramp_frame_prepend_unwinder (gdbarch,
-                                &nios2_linux_rt_sigreturn_tramp_frame);
+  if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_nios2r2)
+    tramp_frame_prepend_unwinder (gdbarch,
+				  &nios2_r2_linux_rt_sigreturn_tramp_frame);
+  else
+    tramp_frame_prepend_unwinder (gdbarch,
+				  &nios2_r1_linux_rt_sigreturn_tramp_frame);
 
   tdep->syscall_next_pc = nios2_linux_syscall_next_pc;
 

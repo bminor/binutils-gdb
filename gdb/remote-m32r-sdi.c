@@ -1424,7 +1424,8 @@ m32r_stop (struct target_ops *self, ptid_t ptid)
 
 static int
 m32r_can_use_hw_watchpoint (struct target_ops *self,
-			    int type, int cnt, int othertype)
+			    enum bptype type,
+			    int cnt, int othertype)
 {
   return sdi_desc != NULL && cnt < max_access_breaks;
 }
@@ -1435,7 +1436,7 @@ m32r_can_use_hw_watchpoint (struct target_ops *self,
 
 static int
 m32r_insert_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
   int i;
@@ -1460,9 +1461,8 @@ m32r_insert_watchpoint (struct target_ops *self,
 }
 
 static int
-m32r_remove_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
-			struct expression *cond)
+m32r_remove_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+			enum target_hw_bp_type type, struct expression *cond)
 {
   int i;
 

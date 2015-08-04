@@ -299,26 +299,26 @@ decode_adrp (CORE_ADDR addr, uint32_t insn, unsigned *rd)
 
    ADDR specifies the address of the opcode.
    INSN specifies the opcode to test.
-   LINK receives the 'link' bit from the decoded instruction.
+   IS_BL receives the 'op' bit from the decoded instruction.
    OFFSET receives the immediate offset from the decoded instruction.
 
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_b (CORE_ADDR addr, uint32_t insn, unsigned *link, int32_t *offset)
+decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl, int32_t *offset)
 {
   /* b  0001 01ii iiii iiii iiii iiii iiii iiii */
   /* bl 1001 01ii iiii iiii iiii iiii iiii iiii */
   if (decode_masked_match (insn, 0x7c000000, 0x14000000))
     {
-      *link = insn >> 31;
+      *is_bl = (insn >> 31) & 0x1;
       *offset = extract_signed_bitfield (insn, 26, 0) << 2;
 
       if (aarch64_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "decode: 0x%s 0x%x %s 0x%s\n",
 			    core_addr_to_string_nz (addr), insn,
-			    *link ? "bl" : "b",
+			    *is_bl ? "bl" : "b",
 			    core_addr_to_string_nz (addr + *offset));
 
       return 1;
@@ -358,27 +358,27 @@ decode_bcond (CORE_ADDR addr, uint32_t insn, unsigned *cond, int32_t *offset)
 
    ADDR specifies the address of the opcode.
    INSN specifies the opcode to test.
-   LINK receives the 'link' bit from the decoded instruction.
+   IS_BLR receives the 'op' bit from the decoded instruction.
    RN receives the 'rn' field from the decoded instruction.
 
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_br (CORE_ADDR addr, uint32_t insn, unsigned *link, unsigned *rn)
+decode_br (CORE_ADDR addr, uint32_t insn, int *is_blr, unsigned *rn)
 {
   /*         8   4   0   6   2   8   4   0 */
   /* blr  110101100011111100000000000rrrrr */
   /* br   110101100001111100000000000rrrrr */
   if (decode_masked_match (insn, 0xffdffc1f, 0xd61f0000))
     {
-      *link = (insn >> 21) & 1;
+      *is_blr = (insn >> 21) & 1;
       *rn = (insn >> 5) & 0x1f;
 
       if (aarch64_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "decode: 0x%s 0x%x %s 0x%x\n",
 			    core_addr_to_string_nz (addr), insn,
-			    *link ? "blr" : "br", *rn);
+			    *is_blr ? "blr" : "br", *rn);
 
       return 1;
     }
@@ -390,16 +390,15 @@ decode_br (CORE_ADDR addr, uint32_t insn, unsigned *link, unsigned *rn)
    ADDR specifies the address of the opcode.
    INSN specifies the opcode to test.
    IS64 receives the 'sf' field from the decoded instruction.
-   OP receives the 'op' field from the decoded instruction.
+   IS_CBNZ receives the 'op' field from the decoded instruction.
    RN receives the 'rn' field from the decoded instruction.
    OFFSET receives the 'imm19' field from the decoded instruction.
 
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_cb (CORE_ADDR addr,
-	   uint32_t insn, int *is64, unsigned *op, unsigned *rn,
-	   int32_t *offset)
+decode_cb (CORE_ADDR addr, uint32_t insn, int *is64, int *is_cbnz,
+	   unsigned *rn, int32_t *offset)
 {
   if (decode_masked_match (insn, 0x7e000000, 0x34000000))
     {
@@ -408,14 +407,14 @@ decode_cb (CORE_ADDR addr,
 
       *rn = (insn >> 0) & 0x1f;
       *is64 = (insn >> 31) & 0x1;
-      *op = (insn >> 24) & 0x1;
+      *is_cbnz = (insn >> 24) & 0x1;
       *offset = extract_signed_bitfield (insn, 19, 5) << 2;
 
       if (aarch64_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "decode: 0x%s 0x%x %s 0x%s\n",
 			    core_addr_to_string_nz (addr), insn,
-			    *op ? "cbnz" : "cbz",
+			    *is_cbnz ? "cbnz" : "cbz",
 			    core_addr_to_string_nz (addr + *offset));
       return 1;
     }
@@ -632,7 +631,7 @@ decode_stur (CORE_ADDR addr, uint32_t insn, int *is64, unsigned *rt,
 
    ADDR specifies the address of the opcode.
    INSN specifies the opcode to test.
-   OP receives the 'op' field from the decoded instruction.
+   IS_TBNZ receives the 'op' field from the decoded instruction.
    BIT receives the bit position field from the decoded instruction.
    RT receives 'rt' field from the decoded instruction.
    IMM receives 'imm' field from the decoded instruction.
@@ -640,9 +639,8 @@ decode_stur (CORE_ADDR addr, uint32_t insn, int *is64, unsigned *rt,
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_tb (CORE_ADDR addr,
-	   uint32_t insn, unsigned *op, unsigned *bit, unsigned *rt,
-	   int32_t *imm)
+decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz, unsigned *bit,
+	   unsigned *rt, int32_t *imm)
 {
   if (decode_masked_match (insn, 0x7e000000, 0x36000000))
     {
@@ -650,7 +648,7 @@ decode_tb (CORE_ADDR addr,
       /* tbnz B011 0111 bbbb biii iiii iiii iiir rrrr */
 
       *rt = (insn >> 0) & 0x1f;
-      *op = insn & (1 << 24);
+      *is_tbnz = (insn >> 24) & 0x1;
       *bit = ((insn >> (31 - 4)) & 0x20) | ((insn >> 19) & 0x1f);
       *imm = extract_signed_bitfield (insn, 14, 5) << 2;
 
@@ -658,7 +656,7 @@ decode_tb (CORE_ADDR addr,
 	fprintf_unfiltered (gdb_stdlog,
 			    "decode: 0x%s 0x%x %s x%u, #%u, 0x%s\n",
 			    core_addr_to_string_nz (addr), insn,
-			    *op ? "tbnz" : "tbz", *rt, *bit,
+			    *is_tbnz ? "tbnz" : "tbz", *rt, *bit,
 			    core_addr_to_string_nz (addr + *imm));
       return 1;
     }
@@ -698,8 +696,9 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       int32_t imm;
       unsigned cond;
       int is64;
-      unsigned is_link;
-      unsigned op;
+      int is_link;
+      int is_cbnz;
+      int is_tbnz;
       unsigned bit;
       int32_t offset;
 
@@ -724,7 +723,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (decode_cb (start, insn, &is64, &op, &rn, &offset))
+      else if (decode_cb (start, insn, &is64, &is_cbnz, &rn, &offset))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
@@ -800,7 +799,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 			 regs[rt2]);
 	  regs[rn] = pv_add_constant (regs[rn], imm);
 	}
-      else if (decode_tb (start, insn, &op, &bit, &rn, &offset))
+      else if (decode_tb (start, insn, &is_tbnz, &bit, &rn, &offset))
 	{
 	  /* Stop analysis on branch.  */
 	  break;

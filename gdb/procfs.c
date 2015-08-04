@@ -143,7 +143,7 @@ static char * procfs_make_note_section (struct target_ops *self,
 					bfd *, int *);
 
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
-					 int, int, int);
+					 enum bptype, int, int);
 
 static void procfs_info_proc (struct target_ops *, const char *,
 			      enum info_proc_what);
@@ -4764,7 +4764,8 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 
 static int
 procfs_can_use_hw_breakpoint (struct target_ops *self,
-			      int type, int cnt, int othertype)
+			      enum bptype type,
+			      int cnt, int othertype)
 {
   /* Due to the way that proc_set_watchpoint() is implemented, host
      and target pointers must be of the same size.  If they are not,
@@ -4828,7 +4829,8 @@ procfs_stopped_data_address (struct target_ops *targ, CORE_ADDR *addr)
 
 static int
 procfs_insert_watchpoint (struct target_ops *self,
-			  CORE_ADDR addr, int len, int type,
+			  CORE_ADDR addr, int len,
+			  enum target_hw_bp_type type,
 			  struct expression *cond)
 {
   if (!target_have_steppable_watchpoint
@@ -4851,7 +4853,8 @@ procfs_insert_watchpoint (struct target_ops *self,
 
 static int
 procfs_remove_watchpoint (struct target_ops *self,
-			  CORE_ADDR addr, int len, int type,
+			  CORE_ADDR addr, int len,
+			  enum target_hw_bp_type type,
 			  struct expression *cond)
 {
   return procfs_set_watchpoint (inferior_ptid, addr, 0, 0, 0);

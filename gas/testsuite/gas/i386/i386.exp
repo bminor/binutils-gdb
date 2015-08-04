@@ -132,6 +132,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "reg"
     run_dump_test "reg-intel"
     run_dump_test "i386"
+    run_dump_test "i386-intel"
     run_dump_test "compat"
     run_dump_test "compat-intel"
     run_dump_test "arch-1"
@@ -454,6 +455,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     set ASFLAGS "$ASFLAGS --64"
 
     run_dump_test "x86_64"
+    run_dump_test "x86_64-intel"
     run_dump_test "x86-64-addr32"
     run_dump_test "x86-64-addr32-intel"
     run_dump_test "x86-64-opcode"

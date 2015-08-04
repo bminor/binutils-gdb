@@ -267,10 +267,11 @@ struct language_defn
        the part of symbol lookup where C looks up static and global
        variables.  */
 
-    struct symbol *(*la_lookup_symbol_nonlocal) (const struct language_defn *,
-						 const char *,
-						 const struct block *,
-						 const domain_enum);
+    struct block_symbol (*la_lookup_symbol_nonlocal)
+      (const struct language_defn *,
+       const char *,
+       const struct block *,
+       const domain_enum);
 
     /* Find the definition of the type with the given name.  */
     struct type *(*la_lookup_transparent_type) (const char *);

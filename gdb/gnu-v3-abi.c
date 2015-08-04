@@ -1063,7 +1063,8 @@ gnuv3_get_typeid_type (struct gdbarch *gdbarch)
   struct symbol *typeinfo;
   struct type *typeinfo_type;
 
-  typeinfo = lookup_symbol ("std::type_info", NULL, STRUCT_DOMAIN, NULL);
+  typeinfo = lookup_symbol ("std::type_info", NULL, STRUCT_DOMAIN,
+			    NULL).symbol;
   if (typeinfo == NULL)
     typeinfo_type = gdbarch_data (gdbarch, std_type_info_gdbarch_data);
   else

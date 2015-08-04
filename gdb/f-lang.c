@@ -143,7 +143,7 @@ static const struct op_print f_op_print_tab[] =
   {".LT.", BINOP_LESS, PREC_ORDER, 0},
   {"**", UNOP_IND, PREC_PREFIX, 0},
   {"@", BINOP_REPEAT, PREC_REPEAT, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_REPEAT, 0}
 };
 
 enum f_primitive_types {

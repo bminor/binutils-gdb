@@ -995,7 +995,7 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
 
   case amd64_sys_arch_prctl:
   case amd64_x32_sys_arch_prctl:
-    return -1;	/* Note */
+    return gdb_sys_no_syscall;	/* Note */
 
   case amd64_sys_adjtimex:
   case amd64_x32_sys_adjtimex:
@@ -1429,7 +1429,7 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
     return gdb_sys_move_pages;
 
   default:
-    return -1;
+    return gdb_sys_no_syscall;
   }
 }
 
@@ -1451,7 +1451,7 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
 {
   int ret;
   ULONGEST syscall_native;
-  enum gdb_syscall syscall_gdb = -1;
+  enum gdb_syscall syscall_gdb = gdb_sys_no_syscall;
 
   regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &syscall_native);
 
@@ -1486,9 +1486,10 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
       break;
     }
 
-  syscall_gdb = amd64_canonicalize_syscall (syscall_native);
+  syscall_gdb
+    = amd64_canonicalize_syscall ((enum amd64_syscall) syscall_native);
 
-  if (syscall_gdb < 0)
+  if (syscall_gdb == gdb_sys_no_syscall)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
                            "support syscall number %s\n"), 

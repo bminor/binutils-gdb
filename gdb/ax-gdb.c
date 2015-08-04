@@ -1556,7 +1556,7 @@ gen_static_field (struct gdbarch *gdbarch,
   else
     {
       const char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
-      struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
+      struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0).symbol;
 
       if (sym)
 	{
@@ -1647,20 +1647,20 @@ gen_maybe_namespace_elt (struct expression *exp,
 			 const struct type *curtype, char *name)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);
-  struct symbol *sym;
+  struct block_symbol sym;
 
   sym = cp_lookup_symbol_namespace (namespace_name, name,
 				    block_for_pc (ax->scope),
 				    VAR_DOMAIN);
 
-  if (sym == NULL)
+  if (sym.symbol == NULL)
     return 0;
 
-  gen_var_ref (exp->gdbarch, ax, value, sym);
+  gen_var_ref (exp->gdbarch, ax, value, sym.symbol);
 
   if (value->optimized_out)
     error (_("`%s' has been optimized out, cannot use"),
-	   SYMBOL_PRINT_NAME (sym));
+	   SYMBOL_PRINT_NAME (sym.symbol));
 
   return 1;
 }
@@ -2194,7 +2194,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	func = block_linkage_function (b);
 	lang = language_def (SYMBOL_LANGUAGE (func));
 
-	sym = lookup_language_this (lang, b);
+	sym = lookup_language_this (lang, b).symbol;
 	if (!sym)
 	  error (_("no `%s' found"), lang->la_name_of_this);
 

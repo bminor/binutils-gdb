@@ -81,7 +81,8 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
 	return -1
     }
 
-    set testpid [spawn_wait_for_attach $binfile]
+    set test_spawn_id [spawn_wait_for_attach $binfile]
+    set testpid [spawn_id_get_pid $test_spawn_id]
 
     remote_exec build "mv -f ${binfile_lib1} ${binfile_lib1}-running"
     remote_exec build "mv -f ${binfile_lib2} ${binfile_lib2}-running"
@@ -92,7 +93,7 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib1} $lib_flags] != ""
 	 || [gdb_compile_shlib ${srcfile_lib} ${binfile_lib2} $lib_flags] != ""} {
 	untested "Could not recompile ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
-	remote_exec build "kill -9 ${testpid}"
+	kill_wait_spawned_process $test_spawn_id
 	return -1
     }
 
@@ -123,5 +124,5 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
 
     sleep 5
 
-    remote_exec build "kill -9 ${testpid}"
+    kill_wait_spawned_process $test_spawn_id
 }}

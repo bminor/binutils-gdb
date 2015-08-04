@@ -1420,7 +1420,7 @@ lookup_typename (const struct language_defn *language,
   struct type *type;
 
   sym = lookup_symbol_in_language (name, block, VAR_DOMAIN,
-				   language->la_language, NULL);
+				   language->la_language, NULL).symbol;
   if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     return SYMBOL_TYPE (sym);
 
@@ -1464,7 +1464,7 @@ lookup_struct (const char *name, const struct block *block)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0).symbol;
 
   if (sym == NULL)
     {
@@ -1487,7 +1487,7 @@ lookup_union (const char *name, const struct block *block)
   struct symbol *sym;
   struct type *t;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0).symbol;
 
   if (sym == NULL)
     error (_("No union type named %s."), name);
@@ -1510,7 +1510,7 @@ lookup_enum (const char *name, const struct block *block)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0).symbol;
   if (sym == NULL)
     {
       error (_("No enum type named %s."), name);
@@ -1539,7 +1539,7 @@ lookup_template_type (char *name, struct type *type,
   strcat (nam, TYPE_NAME (type));
   strcat (nam, " >");	/* FIXME, extra space still introduced in gcc?  */
 
-  sym = lookup_symbol (nam, block, VAR_DOMAIN, 0);
+  sym = lookup_symbol (nam, block, VAR_DOMAIN, 0).symbol;
 
   if (sym == NULL)
     {
@@ -2256,7 +2256,7 @@ check_typedef (struct type *type)
 	      stub_noname_complaint ();
 	      return make_qualified_type (type, instance_flags, NULL);
 	    }
-	  sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0);
+	  sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0).symbol;
 	  if (sym)
 	    TYPE_TARGET_TYPE (type) = SYMBOL_TYPE (sym);
 	  else					/* TYPE_CODE_UNDEF */
@@ -2347,7 +2347,7 @@ check_typedef (struct type *type)
 	  stub_noname_complaint ();
 	  return make_qualified_type (type, instance_flags, NULL);
 	}
-      sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0);
+      sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0).symbol;
       if (sym)
         {
           /* Same as above for opaque types, we can replace the stub

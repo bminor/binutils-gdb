@@ -7983,7 +7983,7 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
       len = VEC_length (compunit_symtab_ptr, result_symtabs);
       cust->includes
 	= obstack_alloc (&dwarf2_per_objfile->objfile->objfile_obstack,
-			 (len + 1) * sizeof (struct symtab *));
+			 (len + 1) * sizeof (struct compunit_symtab *));
       for (ix = 0;
 	   VEC_iterate (compunit_symtab_ptr, result_symtabs, ix,
 			compunit_symtab_iter);

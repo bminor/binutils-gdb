@@ -83,7 +83,7 @@ struct scm_to_stringn_data
   SCM string;
   size_t *lenp;
   const char *charset;
-  int conversion_kind;
+  scm_t_string_failed_conversion_handler conversion_kind;
   char *result;
 };
 
@@ -151,7 +151,7 @@ struct scm_from_stringn_data
   const char *string;
   size_t len;
   const char *charset;
-  int conversion_kind;
+  scm_t_string_failed_conversion_handler conversion_kind;
   SCM result;
 };
 

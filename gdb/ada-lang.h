@@ -79,17 +79,6 @@ struct ada_opname_map
 /* Defined in ada-lang.c */
 extern const struct ada_opname_map ada_opname_table[];
 
-/* A tuple representing one instance of a symbol-lookup operation.  */
-
-struct ada_symbol_info
-{
-  /* The symbol that was found.  */
-  struct symbol *sym;
-
-  /* The block where the symbol was found.  */
-  const struct block *block;
-};
-
 /* Denotes a type of renaming symbol (see ada_parse_renaming).  */
 enum ada_renaming_category
   {
@@ -236,22 +225,23 @@ extern const char *ada_decode (const char*);
 extern enum language ada_update_initial_language (enum language);
 
 extern int ada_lookup_symbol_list (const char *, const struct block *,
-                                   domain_enum, struct ada_symbol_info**);
+                                   domain_enum, struct block_symbol**);
 
 extern char *ada_fold_name (const char *);
 
-extern struct symbol *ada_lookup_symbol (const char *, const struct block *,
-                                         domain_enum, int *);
+extern struct block_symbol ada_lookup_symbol (const char *,
+					      const struct block *,
+					      domain_enum, int *);
 
 extern void ada_lookup_encoded_symbol
   (const char *name, const struct block *block, domain_enum domain,
-   struct ada_symbol_info *symbol_info);
+   struct block_symbol *symbol_info);
 
 extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *);
 
 extern void ada_fill_in_ada_prototype (struct symbol *);
 
-extern int user_select_syms (struct ada_symbol_info *, int, int);
+extern int user_select_syms (struct block_symbol *, int, int);
 
 extern int get_selections (int *, int, int, int, char *);
 

@@ -711,7 +711,8 @@ aarch64_linux_read_description (struct target_ops *ops)
 
 static int
 aarch64_linux_can_use_hw_breakpoint (struct target_ops *self,
-				     int type, int cnt, int othertype)
+				     enum bptype type,
+				     int cnt, int othertype)
 {
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
@@ -807,7 +808,8 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
 
 static int
 aarch64_linux_insert_watchpoint (struct target_ops *self,
-				 CORE_ADDR addr, int len, int type,
+				 CORE_ADDR addr, int len,
+				 enum target_hw_bp_type type,
 				 struct expression *cond)
 {
   int ret;
@@ -839,7 +841,8 @@ aarch64_linux_insert_watchpoint (struct target_ops *self,
 
 static int
 aarch64_linux_remove_watchpoint (struct target_ops *self,
-				 CORE_ADDR addr, int len, int type,
+				 CORE_ADDR addr, int len,
+				 enum target_hw_bp_type type,
 				 struct expression *cond)
 {
   int ret;

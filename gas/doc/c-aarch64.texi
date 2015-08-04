@@ -340,6 +340,10 @@ should only be done if it is really necessary.
 @c YYYYYYYYYYYYYYYYYYYYYYYYYY
 @c ZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+@cindex @code{.xword} directive, AArch64
+@item .xword
+The @code{.xword} directive produces 64 bit values.
+
 @end table
 
 @node AArch64 Opcodes

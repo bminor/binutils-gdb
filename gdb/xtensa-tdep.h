@@ -246,7 +246,7 @@ struct gdbarch_tdep
 	  .spill_location = -1,					\
 	  .spill_size = (spillsz),				\
 	  .unused = 0,						\
-	  .call_abi = 0,					\
+	  .call_abi = CallAbiDefault,				\
 	  .debug_interrupt_level = XCHAL_DEBUGLEVEL,		\
 	  .icache_line_bytes = XCHAL_ICACHE_LINESIZE,		\
 	  .dcache_line_bytes = XCHAL_DCACHE_LINESIZE,		\

@@ -304,7 +304,7 @@ static const struct op_print m2_op_print_tab[] =
   {"MIN", UNOP_MIN, PREC_BUILTIN_FUNCTION, 0},
   {"ODD", UNOP_ODD, PREC_BUILTIN_FUNCTION, 0},
   {"TRUNC", UNOP_TRUNC, PREC_BUILTIN_FUNCTION, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_BUILTIN_FUNCTION, 0}
 };
 
 /* The built-in types of Modula-2.  */

@@ -87,6 +87,7 @@ extern int multi_process;
 extern int report_fork_events;
 extern int report_vfork_events;
 extern int non_stop;
+extern int extended_protocol;
 
 /* True if the "swbreak+" feature is active.  In that case, GDB wants
    us to report whether a trap is explained by a software breakpoint

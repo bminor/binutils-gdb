@@ -1966,7 +1966,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
 		{
 		  CORE_ADDR addr;
-		  int type;
+		  enum target_hw_bp_type type;
 		  struct bp_location *loc, **tmp;
 		  int bitpos = 0, bitsize = 0;
 
@@ -4211,7 +4211,7 @@ breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 	}
     }
 
-  return any_breakpoint_here ? ordinary_breakpoint_here : 0;
+  return any_breakpoint_here ? ordinary_breakpoint_here : no_breakpoint_here;
 }
 
 /* Return true if there's a moribund breakpoint at PC.  */
@@ -4838,7 +4838,7 @@ print_solib_event (int is_catchpoint)
 enum print_stop_action
 bpstat_print (bpstat bs, int kind)
 {
-  int val;
+  enum print_stop_action val;
 
   /* Maybe another breakpoint in the chain caused us to stop.
      (Currently all watchpoints go on the bpstat whether hit or not.
@@ -9406,8 +9406,7 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
 	 associated with SAL.  */
       if (sarch == NULL)
 	sarch = gdbarch;
-      rslt = gdbarch_fast_tracepoint_valid_at (sarch, sal->pc,
-					       NULL, &msg);
+      rslt = gdbarch_fast_tracepoint_valid_at (sarch, sal->pc, &msg);
       old_chain = make_cleanup (xfree, msg);
 
       if (!rslt)
@@ -14574,7 +14573,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
   if (is_watchpoint (bpt))
     {
       /* Initialize it just to avoid a GCC false warning.  */
-      enum enable_state orig_enable_state = 0;
+      enum enable_state orig_enable_state = bp_disabled;
 
       TRY
 	{

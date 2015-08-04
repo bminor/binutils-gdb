@@ -250,7 +250,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      if (msymbol.minsym != NULL)
 		wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
 				      block,
-				      VAR_DOMAIN, &is_this_fld);
+				      VAR_DOMAIN, &is_this_fld).symbol;
 
 	      if (wsym)
 		{

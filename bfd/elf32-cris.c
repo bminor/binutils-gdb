@@ -1093,7 +1093,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 h->elf_link_hash_flags test, though it's there in
 		 other targets.  */
 	      if (info->shared
-		  && ((! info->symbolic && h->dynindx != -1)
+		  && ((!SYMBOLIC_BIND (info, h) && h->dynindx != -1)
 		      || !h->def_regular)
 		  && (input_section->flags & SEC_ALLOC) != 0
 		  && (r_type == R_CRIS_8
@@ -1212,7 +1212,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			    || h->type == STT_FUNC
 			    || h->needs_plt))
 		    || (info->shared
-			&& (info->symbolic || h->dynindx == -1)
+			&& (SYMBOLIC_BIND (info, h) || h->dynindx == -1)
 			&& h->def_regular))
 		  {
 		    /* This wasn't checked above for ! info->shared, but
@@ -1432,7 +1432,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      && ((r_type != R_CRIS_8_PCREL
 		   && r_type != R_CRIS_16_PCREL
 		   && r_type != R_CRIS_32_PCREL)
-		  || (!info->symbolic
+		  || (!SYMBOLIC_BIND (info, h)
 		      || (h != NULL && !h->def_regular))))
 	    {
 	      Elf_Internal_Rela outrel;
@@ -1484,7 +1484,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      /* h->dynindx may be -1 if the symbol was marked to
 		 become local.  */
 	      else if (h != NULL
-		       && ((! info->symbolic && h->dynindx != -1)
+		       && ((!SYMBOLIC_BIND (info, h) && h->dynindx != -1)
 			   || !h->def_regular))
 		{
 		  BFD_ASSERT (h->dynindx != -1);
@@ -2245,7 +2245,7 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
       where = sgot->contents + (h->got.offset &~ (bfd_vma) 1);
       if (! elf_hash_table (info)->dynamic_sections_created
 	  || (info->shared
-	      && (info->symbolic || h->dynindx == -1)
+	      && (SYMBOLIC_BIND (info, h) || h->dynindx == -1)
 	      && h->def_regular))
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_CRIS_RELATIVE);
@@ -3661,7 +3661,7 @@ cris_elf_check_relocs (bfd *abfd,
 	     this shared library) then we can also eliminate the
 	     reloc.  See comment above for more eliminable cases which
 	     we can't identify at this time.  */
-	  if (info->symbolic
+	  if (SYMBOLIC_BIND (info, h)
 	      && h->root.type != bfd_link_hash_defweak
 	      && h->def_regular)
 	    break;
@@ -3953,7 +3953,7 @@ elf_cris_discard_excess_dso_dynamics (struct elf_cris_link_hash_entry *h,
      any relocs.  */
   if (h->root.def_regular
       && (h->root.forced_local
-	  || info->symbolic))
+	  || SYMBOLIC_BIND (info, &h->root)))
     {
       for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
 	{

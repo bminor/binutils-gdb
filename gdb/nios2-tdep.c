@@ -45,9 +45,6 @@
 /* To get entry_point_address.  */
 #include "objfiles.h"
 
-/* Nios II ISA specific encodings and macros.  */
-#include "opcode/nios2.h"
-
 /* Nios II specific header.  */
 #include "nios2-tdep.h"
 
@@ -287,8 +284,16 @@ nios2_fetch_insn (struct gdbarch *gdbarch, CORE_ADDR pc,
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   unsigned int insn;
 
-  if (!safe_read_memory_integer (pc, NIOS2_OPCODE_SIZE,
-				 gdbarch_byte_order (gdbarch), &memword))
+  if (mach == bfd_mach_nios2r2)
+    {
+      if (!safe_read_memory_integer (pc, NIOS2_OPCODE_SIZE,
+				     BFD_ENDIAN_LITTLE, &memword)
+	  && !safe_read_memory_integer (pc, NIOS2_CDX_OPCODE_SIZE,
+					BFD_ENDIAN_LITTLE, &memword))
+	return NULL;
+    }
+  else if (!safe_read_memory_integer (pc, NIOS2_OPCODE_SIZE,
+				      gdbarch_byte_order (gdbarch), &memword))
     return NULL;
 
   insn = (unsigned int) memword;
@@ -305,11 +310,36 @@ static int
 nios2_match_add (uint32_t insn, const struct nios2_opcode *op,
 		 unsigned long mach, int *ra, int *rb, int *rc)
 {
-  if (op->match == MATCH_R1_ADD || op->match == MATCH_R1_MOV)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && (op->match == MATCH_R1_ADD || op->match == MATCH_R1_MOV))
     {
       *ra = GET_IW_R_A (insn);
       *rb = GET_IW_R_B (insn);
       *rc = GET_IW_R_C (insn);
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_ADD || op->match == MATCH_R2_MOV)
+    {
+      *ra = GET_IW_F3X6L5_A (insn);
+      *rb = GET_IW_F3X6L5_B (insn);
+      *rc = GET_IW_F3X6L5_C (insn);
+      return 1;
+    }
+  else if (op->match == MATCH_R2_ADD_N)
+    {
+      *ra = nios2_r2_reg3_mappings[GET_IW_T3X1_A3 (insn)];
+      *rb = nios2_r2_reg3_mappings[GET_IW_T3X1_B3 (insn)];
+      *rc = nios2_r2_reg3_mappings[GET_IW_T3X1_C3 (insn)];
+      return 1;
+    }
+  else if (op->match == MATCH_R2_MOV_N)
+    {
+      *ra = GET_IW_F2_A (insn);
+      *rb = 0;
+      *rc = GET_IW_F2_B (insn);
       return 1;
     }
   return 0;
@@ -322,11 +352,29 @@ static int
 nios2_match_sub (uint32_t insn, const struct nios2_opcode *op,
 		 unsigned long mach, int *ra, int *rb, int *rc)
 {
-  if (op->match == MATCH_R1_SUB)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_SUB)
     {
       *ra = GET_IW_R_A (insn);
       *rb = GET_IW_R_B (insn);
       *rc = GET_IW_R_C (insn);
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_SUB)
+    {
+      *ra = GET_IW_F3X6L5_A (insn);
+      *rb = GET_IW_F3X6L5_B (insn);
+      *rc = GET_IW_F3X6L5_C (insn);
+      return 1;
+    }
+  else if (op->match == MATCH_R2_SUB_N)
+    {
+      *ra = nios2_r2_reg3_mappings[GET_IW_T3X1_A3 (insn)];
+      *rb = nios2_r2_reg3_mappings[GET_IW_T3X1_B3 (insn)];
+      *rc = nios2_r2_reg3_mappings[GET_IW_T3X1_C3 (insn)];
       return 1;
     }
   return 0;
@@ -340,11 +388,47 @@ static int
 nios2_match_addi (uint32_t insn, const struct nios2_opcode *op,
 		  unsigned long mach, int *ra, int *rb, int *imm)
 {
-  if (op->match == MATCH_R1_ADDI)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_ADDI)
     {
       *ra = GET_IW_I_A (insn);
       *rb = GET_IW_I_B (insn);
       *imm = (signed) (GET_IW_I_IMM16 (insn) << 16) >> 16;
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_ADDI)
+    {
+      *ra = GET_IW_F2I16_A (insn);
+      *rb = GET_IW_F2I16_B (insn);
+      *imm = (signed) (GET_IW_F2I16_IMM16 (insn) << 16) >> 16;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_ADDI_N || op->match == MATCH_R2_SUBI_N)
+    {
+      *ra = nios2_r2_reg3_mappings[GET_IW_T2X1I3_A3 (insn)];
+      *rb = nios2_r2_reg3_mappings[GET_IW_T2X1I3_B3 (insn)];
+      *imm = nios2_r2_asi_n_mappings[GET_IW_T2X1I3_IMM3 (insn)];
+      if (op->match == MATCH_R2_SUBI_N)
+	*imm = - (*imm);
+      return 1;
+    }
+  else if (op->match == MATCH_R2_SPADDI_N)
+    {
+      *ra = nios2_r2_reg3_mappings[GET_IW_T1I7_A3 (insn)];
+      *rb = NIOS2_SP_REGNUM;
+      *imm = GET_IW_T1I7_IMM7 (insn) << 2;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_SPINCI_N || op->match == MATCH_R2_SPDECI_N)
+    {
+      *ra = NIOS2_SP_REGNUM;
+      *rb = NIOS2_SP_REGNUM;
+      *imm = GET_IW_X1I7_IMM7 (insn) << 2;
+      if (op->match == MATCH_R2_SPDECI_N)
+	*imm = - (*imm);
       return 1;
     }
   return 0;
@@ -358,11 +442,22 @@ static int
 nios2_match_orhi (uint32_t insn, const struct nios2_opcode *op,
 		  unsigned long mach, int *ra, int *rb, unsigned int *uimm)
 {
-  if (op->match == MATCH_R1_ORHI)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_ORHI)
     {
       *ra = GET_IW_I_A (insn);
       *rb = GET_IW_I_B (insn);
       *uimm = GET_IW_I_IMM16 (insn);
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_ORHI)
+    {
+      *ra = GET_IW_F2I16_A (insn);
+      *rb = GET_IW_F2I16_B (insn);
+      *uimm = GET_IW_F2I16_IMM16 (insn);
       return 1;
     }
   return 0;
@@ -376,11 +471,50 @@ static int
 nios2_match_stw (uint32_t insn, const struct nios2_opcode *op,
 		 unsigned long mach, int *ra, int *rb, int *imm)
 {
-  if (op->match == MATCH_R1_STW || op->match == MATCH_R1_STWIO)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && (op->match == MATCH_R1_STW || op->match == MATCH_R1_STWIO))
     {
       *ra = GET_IW_I_A (insn);
       *rb = GET_IW_I_B (insn);
       *imm = (signed) (GET_IW_I_IMM16 (insn) << 16) >> 16;
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_STW)
+    {
+      *ra = GET_IW_F2I16_A (insn);
+      *rb = GET_IW_F2I16_B (insn);
+      *imm = (signed) (GET_IW_F2I16_IMM16 (insn) << 16) >> 16;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_STWIO)
+    {
+      *ra = GET_IW_F2X4I12_A (insn);
+      *rb = GET_IW_F2X4I12_B (insn);
+      *imm = (signed) (GET_IW_F2X4I12_IMM12 (insn) << 20) >> 20;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_STW_N)
+    {
+      *ra = nios2_r2_reg3_mappings[GET_IW_T2I4_A3 (insn)];
+      *rb = nios2_r2_reg3_mappings[GET_IW_T2I4_B3 (insn)];
+      *imm = GET_IW_T2I4_IMM4 (insn) << 2;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_STWSP_N)
+    {
+      *ra = NIOS2_SP_REGNUM;
+      *rb = GET_IW_F1I5_B (insn);
+      *imm = GET_IW_F1I5_IMM5 (insn) << 2;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_STWZ_N)
+    {
+      *ra = nios2_r2_reg3_mappings[GET_IW_T1X1I6_A3 (insn)];
+      *rb = 0;
+      *imm = GET_IW_T1X1I6_IMM6 (insn) << 2;
       return 1;
     }
   return 0;
@@ -394,11 +528,43 @@ static int
 nios2_match_ldw (uint32_t insn, const struct nios2_opcode *op,
 		 unsigned long mach, int *ra, int *rb, int *imm)
 {
-  if (op->match == MATCH_R1_LDW || op->match == MATCH_R1_LDWIO)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && (op->match == MATCH_R1_LDW || op->match == MATCH_R1_LDWIO))
     {
       *ra = GET_IW_I_A (insn);
       *rb = GET_IW_I_B (insn);
       *imm = (signed) (GET_IW_I_IMM16 (insn) << 16) >> 16;
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_LDW)
+    {
+      *ra = GET_IW_F2I16_A (insn);
+      *rb = GET_IW_F2I16_B (insn);
+      *imm = (signed) (GET_IW_F2I16_IMM16 (insn) << 16) >> 16;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_LDWIO)
+    {
+      *ra = GET_IW_F2X4I12_A (insn);
+      *rb = GET_IW_F2X4I12_B (insn);
+      *imm = (signed) (GET_IW_F2X4I12_IMM12 (insn) << 20) >> 20;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_LDW_N)
+    {
+      *ra = nios2_r2_reg3_mappings[GET_IW_T2I4_A3 (insn)];
+      *rb = nios2_r2_reg3_mappings[GET_IW_T2I4_B3 (insn)];
+      *imm = GET_IW_T2I4_IMM4 (insn) << 2;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_LDWSP_N)
+    {
+      *ra = NIOS2_SP_REGNUM;
+      *rb = GET_IW_F1I5_B (insn);
+      *imm = GET_IW_F1I5_IMM5 (insn) << 2;
       return 1;
     }
   return 0;
@@ -411,15 +577,126 @@ static int
 nios2_match_rdctl (uint32_t insn, const struct nios2_opcode *op,
 		   unsigned long mach, int *ra, int *rc)
 {
-  if (op->match == MATCH_R1_RDCTL)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && (op->match == MATCH_R1_RDCTL))
     {
       *ra = GET_IW_R_IMM5 (insn);
       *rc = GET_IW_R_C (insn);
       return 1;
     }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_RDCTL)
+    {
+      *ra = GET_IW_F3X6L5_IMM5 (insn);
+      *rc = GET_IW_F3X6L5_C (insn);
+      return 1;
+    }
   return 0;
 }
 
+/* Match and disassemble a PUSH.N or STWM instruction.
+   Returns true on success, and fills in the operand pointers.  */
+
+static int
+nios2_match_stwm (uint32_t insn, const struct nios2_opcode *op,
+		  unsigned long mach, unsigned int *reglist,
+		  int *ra, int *imm, int *wb, int *id)
+{
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_PUSH_N)
+    {
+      *reglist = 1 << 31;
+      if (GET_IW_L5I4X1_FP (insn))
+	*reglist |= (1 << 28);
+      if (GET_IW_L5I4X1_CS (insn))
+	{
+	  int val = GET_IW_L5I4X1_REGRANGE (insn);
+	  *reglist |= nios2_r2_reg_range_mappings[val];
+	}
+      *ra = NIOS2_SP_REGNUM;
+      *imm = GET_IW_L5I4X1_IMM4 (insn) << 2;
+      *wb = 1;
+      *id = 0;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_STWM)
+    {
+      unsigned int rawmask = GET_IW_F1X4L17_REGMASK (insn);
+      if (GET_IW_F1X4L17_RS (insn))
+	{
+	  *reglist = ((rawmask << 14) & 0x00ffc000);
+	  if (rawmask & (1 << 10))
+	    *reglist |= (1 << 28);
+	  if (rawmask & (1 << 11))
+	    *reglist |= (1 << 31);
+	}
+      else
+	*reglist = rawmask << 2;
+      *ra = GET_IW_F1X4L17_A (insn);
+      *imm = 0;
+      *wb = GET_IW_F1X4L17_WB (insn);
+      *id = GET_IW_F1X4L17_ID (insn);
+      return 1;
+    }
+  return 0;
+}
+
+/* Match and disassemble a POP.N or LDWM instruction.
+   Returns true on success, and fills in the operand pointers.  */
+
+static int
+nios2_match_ldwm (uint32_t insn, const struct nios2_opcode *op,
+		  unsigned long mach, unsigned int *reglist,
+		  int *ra, int *imm, int *wb, int *id, int *ret)
+{
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_POP_N)
+    {
+      *reglist = 1 << 31;
+      if (GET_IW_L5I4X1_FP (insn))
+	*reglist |= (1 << 28);
+      if (GET_IW_L5I4X1_CS (insn))
+	{
+	  int val = GET_IW_L5I4X1_REGRANGE (insn);
+	  *reglist |= nios2_r2_reg_range_mappings[val];
+	}
+      *ra = NIOS2_SP_REGNUM;
+      *imm = GET_IW_L5I4X1_IMM4 (insn) << 2;
+      *wb = 1;
+      *id = 1;
+      *ret = 1;
+      return 1;
+    }
+  else if (op->match == MATCH_R2_LDWM)
+    {
+      unsigned int rawmask = GET_IW_F1X4L17_REGMASK (insn);
+      if (GET_IW_F1X4L17_RS (insn))
+	{
+	  *reglist = ((rawmask << 14) & 0x00ffc000);
+	  if (rawmask & (1 << 10))
+	    *reglist |= (1 << 28);
+	  if (rawmask & (1 << 11))
+	    *reglist |= (1 << 31);
+	}
+      else
+	*reglist = rawmask << 2;
+      *ra = GET_IW_F1X4L17_A (insn);
+      *imm = 0;
+      *wb = GET_IW_F1X4L17_WB (insn);
+      *id = GET_IW_F1X4L17_ID (insn);
+      *ret = GET_IW_F1X4L17_PC (insn);
+      return 1;
+    }
+  return 0;
+}
 
 /* Match and disassemble a branch instruction, with (potentially)
    2 register operands and one immediate operand.
@@ -440,36 +717,93 @@ nios2_match_branch (uint32_t insn, const struct nios2_opcode *op,
 		    unsigned long mach, int *ra, int *rb, int *imm,
 		    enum branch_condition *cond)
 {
-  switch (op->match)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2)
     {
-    case MATCH_R1_BR:
-      *cond = branch_none;
-      break;
-    case MATCH_R1_BEQ:
-      *cond = branch_eq;
-      break;
-    case MATCH_R1_BNE:
-      *cond = branch_ne;
-      break;
-    case MATCH_R1_BGE:
-      *cond = branch_ge;
-      break;
-    case MATCH_R1_BGEU:
-      *cond = branch_geu;
-      break;
-    case MATCH_R1_BLT:
-      *cond = branch_lt;
-      break;
-    case MATCH_R1_BLTU:
-      *cond = branch_ltu;
-      break;
-    default:
-      return 0;
+      switch (op->match)
+	{
+	case MATCH_R1_BR:
+	  *cond = branch_none;
+	  break;
+	case MATCH_R1_BEQ:
+	  *cond = branch_eq;
+	  break;
+	case MATCH_R1_BNE:
+	  *cond = branch_ne;
+	  break;
+	case MATCH_R1_BGE:
+	  *cond = branch_ge;
+	  break;
+	case MATCH_R1_BGEU:
+	  *cond = branch_geu;
+	  break;
+	case MATCH_R1_BLT:
+	  *cond = branch_lt;
+	  break;
+	case MATCH_R1_BLTU:
+	  *cond = branch_ltu;
+	  break;
+	default:
+	  return 0;
+	}
+      *imm = (signed) (GET_IW_I_IMM16 (insn) << 16) >> 16;
+      *ra = GET_IW_I_A (insn);
+      *rb = GET_IW_I_B (insn);
+      return 1;
     }
-  *imm = (signed) (GET_IW_I_IMM16 (insn) << 16) >> 16;
-  *ra = GET_IW_I_A (insn);
-  *rb = GET_IW_I_B (insn);
-  return 1;
+  else
+    {
+      switch (op->match)
+	{
+	case MATCH_R2_BR_N:
+	  *cond = branch_none;
+	  *ra = NIOS2_Z_REGNUM;
+	  *rb = NIOS2_Z_REGNUM;
+	  *imm = (signed) ((GET_IW_I10_IMM10 (insn) << 1) << 21) >> 21;
+	  return 1;
+	case MATCH_R2_BEQZ_N:
+	  *cond = branch_eq;
+	  *ra = nios2_r2_reg3_mappings[GET_IW_T1I7_A3 (insn)];
+	  *rb = NIOS2_Z_REGNUM;
+	  *imm = (signed) ((GET_IW_T1I7_IMM7 (insn) << 1) << 24) >> 24;
+	  return 1;
+	case MATCH_R2_BNEZ_N:
+	  *cond = branch_ne;
+	  *ra = nios2_r2_reg3_mappings[GET_IW_T1I7_A3 (insn)];
+	  *rb = NIOS2_Z_REGNUM;
+	  *imm = (signed) ((GET_IW_T1I7_IMM7 (insn) << 1) << 24) >> 24;
+	  return 1;
+	case MATCH_R2_BR:
+	  *cond = branch_none;
+	  break;
+	case MATCH_R2_BEQ:
+	  *cond = branch_eq;
+	  break;
+	case MATCH_R2_BNE:
+	  *cond = branch_ne;
+	  break;
+	case MATCH_R2_BGE:
+	  *cond = branch_ge;
+	  break;
+	case MATCH_R2_BGEU:
+	  *cond = branch_geu;
+	  break;
+	case MATCH_R2_BLT:
+	  *cond = branch_lt;
+	  break;
+	case MATCH_R2_BLTU:
+	  *cond = branch_ltu;
+	  break;
+	default:
+	  return 0;
+	}
+      *ra = GET_IW_F2I16_A (insn);
+      *rb = GET_IW_F2I16_B (insn);
+      *imm = (signed) (GET_IW_F2I16_IMM16 (insn) << 16) >> 16;
+      return 1;
+    }
+  return 0;
 }
 
 /* Match and disassemble a direct jump instruction, with an
@@ -480,9 +814,18 @@ static int
 nios2_match_jmpi (uint32_t insn, const struct nios2_opcode *op,
 		  unsigned long mach, unsigned int *uimm)
 {
-  if (op->match == MATCH_R1_JMPI)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_JMPI)
     {
       *uimm = GET_IW_J_IMM26 (insn) << 2;
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_JMPI)
+    {
+      *uimm = GET_IW_L26_IMM26 (insn) << 2;
       return 1;
     }
   return 0;
@@ -496,9 +839,18 @@ static int
 nios2_match_calli (uint32_t insn, const struct nios2_opcode *op,
 		   unsigned long mach, unsigned int *uimm)
 {
-  if (op->match == MATCH_R1_CALL)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_CALL)
     {
       *uimm = GET_IW_J_IMM26 (insn) << 2;
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_CALL)
+    {
+      *uimm = GET_IW_L26_IMM26 (insn) << 2;
       return 1;
     }
   return 0;
@@ -512,23 +864,49 @@ static int
 nios2_match_jmpr (uint32_t insn, const struct nios2_opcode *op,
 		  unsigned long mach, int *ra)
 {
-  switch (op->match)
-    {
-    case MATCH_R1_JMP:
-      *ra = GET_IW_I_A (insn);
-      return 1;
-    case MATCH_R1_RET:
-      *ra = NIOS2_RA_REGNUM;
-      return 1;
-    case MATCH_R1_ERET:
-      *ra = NIOS2_EA_REGNUM;
-      return 1;
-    case MATCH_R1_BRET:
-      *ra = NIOS2_BA_REGNUM;
-      return 1;
-    default:
-      return 0;
-    }
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2)
+    switch (op->match)
+      {
+      case MATCH_R1_JMP:
+	*ra = GET_IW_I_A (insn);
+	return 1;
+      case MATCH_R1_RET:
+	*ra = NIOS2_RA_REGNUM;
+	return 1;
+      case MATCH_R1_ERET:
+	*ra = NIOS2_EA_REGNUM;
+	return 1;
+      case MATCH_R1_BRET:
+	*ra = NIOS2_BA_REGNUM;
+	return 1;
+      default:
+	return 0;
+      }
+  else
+    switch (op->match)
+      {
+      case MATCH_R2_JMP:
+	*ra = GET_IW_F2I16_A (insn);
+	return 1;
+      case MATCH_R2_JMPR_N:
+	*ra = GET_IW_F1X1_A (insn);
+	return 1;
+      case MATCH_R2_RET:
+      case MATCH_R2_RET_N:
+	*ra = NIOS2_RA_REGNUM;
+	return 1;
+      case MATCH_R2_ERET:
+	*ra = NIOS2_EA_REGNUM;
+	return 1;
+      case MATCH_R2_BRET:
+	*ra = NIOS2_BA_REGNUM;
+	return 1;
+      default:
+	return 0;
+      }
+  return 0;
 }
 
 /* Match and disassemble an indirect call instruction, with a register
@@ -538,9 +916,23 @@ static int
 nios2_match_callr (uint32_t insn, const struct nios2_opcode *op,
 		   unsigned long mach, int *ra)
 {
-  if (op->match == MATCH_R1_CALLR)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_CALLR)
     {
       *ra = GET_IW_I_A (insn);
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_CALLR)
+    {
+      *ra = GET_IW_F2I16_A (insn);
+      return 1;
+    }
+  else if (op->match == MATCH_R2_CALLR_N)
+    {
+      *ra = GET_IW_F1X1_A (insn);
       return 1;
     }
   return 0;
@@ -553,9 +945,23 @@ static int
 nios2_match_break (uint32_t insn, const struct nios2_opcode *op,
 		  unsigned long mach, unsigned int *uimm)
 {
-  if (op->match == MATCH_R1_BREAK)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_BREAK)
     {
       *uimm = GET_IW_R_IMM5 (insn);
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_BREAK)
+    {
+      *uimm = GET_IW_F3X6L5_IMM5 (insn);
+      return 1;
+    }
+  else if (op->match == MATCH_R2_BREAK_N)
+    {
+      *uimm = GET_IW_X2L5_IMM5 (insn);
       return 1;
     }
   return 0;
@@ -568,9 +974,23 @@ static int
 nios2_match_trap (uint32_t insn, const struct nios2_opcode *op,
 		  unsigned long mach, unsigned int *uimm)
 {
-  if (op->match == MATCH_R1_TRAP)
+  int is_r2 = (mach == bfd_mach_nios2r2);
+
+  if (!is_r2 && op->match == MATCH_R1_TRAP)
     {
       *uimm = GET_IW_R_IMM5 (insn);
+      return 1;
+    }
+  else if (!is_r2)
+    return 0;
+  else if (op->match == MATCH_R2_TRAP)
+    {
+      *uimm = GET_IW_F3X6L5_IMM5 (insn);
+      return 1;
+    }
+  else if (op->match == MATCH_R2_TRAP_N)
+    {
+      *uimm = GET_IW_X2L5_IMM5 (insn);
       return 1;
     }
   return 0;
@@ -589,6 +1009,7 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
 		     CORE_ADDR start_pc)
 {
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  int is_r2 = (mach == bfd_mach_nios2r2);
   /* Maximum number of possibly-epilogue instructions to check.
      Note that this number should not be too large, else we can
      potentially end up iterating through unmapped memory.  */
@@ -597,6 +1018,7 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
   const struct nios2_opcode *op = NULL;
   unsigned int uimm;
   int imm;
+  int wb, id, ret;
   int ra, rb, rc;
   enum branch_condition cond;
   CORE_ADDR pc;
@@ -605,17 +1027,41 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
   if (current_pc <= start_pc)
     return 0;
 
-  /* Find the previous instruction before current_pc.
-     For the moment we will assume that all instructions are the
-     same size here.  */
-  pc = current_pc - NIOS2_OPCODE_SIZE;
+  /* Find the previous instruction before current_pc.  For R2, it might
+     be either a 16-bit or 32-bit instruction; the only way to know for
+     sure is to scan through from the beginning of the function,
+     disassembling as we go.  */
+  if (is_r2)
+    for (pc = start_pc; ; )
+      {
+	op = nios2_fetch_insn (gdbarch, pc, &insn);
+	if (op == NULL)
+	  return 0;
+	if (pc + op->size < current_pc)
+	  pc += op->size;
+	else
+	  break;
+	/* We can skip over insns to a forward branch target.  Since
+	   the branch offset is relative to the next instruction,
+	   it's correct to do this after incrementing the pc above.  */
+	if (nios2_match_branch (insn, op, mach, &ra, &rb, &imm, &cond)
+	    && imm > 0
+	    && pc + imm < current_pc)
+	  pc += imm;
+      }
+  /* Otherwise just go back to the previous 32-bit insn.  */
+  else
+    pc = current_pc - NIOS2_OPCODE_SIZE;
 
   /* Beginning with the previous instruction we just located, check whether
      we are in a sequence of at least one stack adjustment instruction.
      Possible instructions here include:
 	 ADDI sp, sp, n
 	 ADD sp, sp, rn
-	 LDW sp, n(sp)  */
+	 LDW sp, n(sp)
+	 SPINCI.N n
+	 LDWSP.N sp, n(sp)
+	 LDWM {reglist}, (sp)++, wb */
   for (ninsns = 0; ninsns < max_insns; ninsns++)
     {
       int ok = 0;
@@ -633,6 +1079,9 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
 	ok = (rc == NIOS2_SP_REGNUM);
       else if (nios2_match_ldw (insn, op, mach, &ra, &rb, &imm))
 	ok = (rb == NIOS2_SP_REGNUM);
+      else if (nios2_match_ldwm (insn, op, mach, &uimm, &ra,
+				 &imm, &wb, &ret, &id))
+	ok = (ra == NIOS2_SP_REGNUM && wb && id);
       if (!ok)
 	break;
     }
@@ -648,9 +1097,12 @@ nios2_in_epilogue_p (struct gdbarch *gdbarch,
     return 1;
 
   /* The next instruction following the stack adjustments must be a
-     return, jump, or unconditional branch.  */
+     return, jump, or unconditional branch, or a CDX pop.n or ldwm
+     that does an implicit return.  */
   if (nios2_match_jmpr (insn, op, mach, &ra)
       || nios2_match_jmpi (insn, op, mach, &uimm)
+      || (nios2_match_ldwm (insn, op, mach, &uimm, &ra, &imm, &wb, &id, &ret)
+	  && ret)
       || (nios2_match_branch (insn, op, mach, &ra, &rb, &imm, &cond)
 	  && cond == branch_none))
     return 1;
@@ -684,10 +1136,12 @@ nios2_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  mov	 ra, r8
 
      2) A stack adjustment and save of R4-R7 for varargs functions.
-        This is typically merged with item 3.
+        For R2 CDX this is typically handled with a STWM, otherwise
+	this is typically merged with item 3.
 
-     3) A stack adjustment and save of the callee-saved registers;
-	typically an explicit SP decrement and individual register
+     3) A stack adjustment and save of the callee-saved registers.
+        For R2 CDX these are typically handled with a PUSH.N or STWM,
+	otherwise as an explicit SP decrement and individual register
 	saves.
 
         There may also be a stack switch here in an exception handler
@@ -697,22 +1151,29 @@ nios2_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  stw    sp, constant(rx)
 	  mov    sp, rx
 
-     5) A frame pointer save, which can be either a MOV or ADDI.
+     4) A frame pointer save, which can be either a MOV or ADDI.
 
-     6) A further stack pointer adjustment.  This is normally included
-        adjustment in step 4 unless the total adjustment is too large
+     5) A further stack pointer adjustment.  This is normally included
+        adjustment in step 3 unless the total adjustment is too large
 	to be done in one step.
 
      7) A stack overflow check, which can take either of these forms:
 	  bgeu   sp, rx, +8
-	  break  3
+	  trap  3
 	or
 	  bltu   sp, rx, .Lstack_overflow
 	  ...
 	.Lstack_overflow:
-	  break  3
-        If present, this is inserted after the stack pointer adjustments
-	for steps 3, 4, and 6.
+	  trap  3
+	  
+	Older versions of GCC emitted "break 3" instead of "trap 3" here,
+	so we check for both cases.
+
+	Older GCC versions emitted stack overflow checks after the SP
+	adjustments in both steps 3 and 4.  Starting with GCC 6, there is
+	at most one overflow check, which is placed before the first
+	stack adjustment for R2 CDX and after the first stack adjustment
+	otherwise.
 
     The prologue instructions may be combined or interleaved with other
     instructions.
@@ -737,6 +1198,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
   int regno;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  int is_r2 = (mach == bfd_mach_nios2r2);
 
   /* Does the frame set up the FP register?  */
   int base_reg = 0;
@@ -782,7 +1244,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
       int ra, rb, rc, imm;
       unsigned int uimm;
       unsigned int reglist;
-      int wb, ret;
+      int wb, id, ret;
       enum branch_condition cond;
 
       if (pc == current_pc)
@@ -805,7 +1267,12 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
       pc += op->size;
 
       if (nios2_debug)
-	fprintf_unfiltered (gdb_stdlog, "[%08X]", insn);
+	{
+	  if (op->size == 2)
+	    fprintf_unfiltered (gdb_stdlog, "[%04X]", insn & 0xffff);
+	  else
+	    fprintf_unfiltered (gdb_stdlog, "[%08X]", insn);
+	}
 
       /* The following instructions can appear in the prologue.  */
 
@@ -928,9 +1395,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  if (orig > 0
 	      && (value[rb].offset == 0
 		  || (orig == NIOS2_EA_REGNUM && value[rb].offset == -4))
-	      && ((value[ra].reg == NIOS2_SP_REGNUM
-		   && cache->reg_saved[orig].basereg != NIOS2_SP_REGNUM)
-		  || cache->reg_saved[orig].basereg == -1))
+	      && value[ra].reg == NIOS2_SP_REGNUM)
 	    {
 	      if (pc < current_pc)
 		{
@@ -948,6 +1413,42 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	    /* Non-stack memory writes cannot appear in the prologue.  */
 	    break;
         }
+
+      else if (nios2_match_stwm (insn, op, mach,
+				 &reglist, &ra, &imm, &wb, &id))
+	{
+	  /* PUSH.N {reglist}, adjust
+	     or
+	     STWM {reglist}, --(SP)[, writeback] */
+	  int i;
+	  int off = 0;
+
+	  if (ra != NIOS2_SP_REGNUM || id != 0)
+	    /* This is a non-stack-push memory write and cannot be
+	       part of the prologue.  */
+	    break;
+
+	  for (i = 31; i >= 0; i--)
+	    if (reglist & (1 << i))
+	      {
+		int orig = value[i].reg;
+		
+		off += 4;
+		if (orig > 0 && value[i].offset == 0 && pc < current_pc)
+		  {
+		    cache->reg_saved[orig].basereg
+		      = value[NIOS2_SP_REGNUM].reg;
+		    cache->reg_saved[orig].addr
+		      = value[NIOS2_SP_REGNUM].offset - off;
+		  }
+	      }
+
+	  if (wb)
+	    value[NIOS2_SP_REGNUM].offset -= off;
+	  value[NIOS2_SP_REGNUM].offset -= imm;
+
+	  prologue_end = pc;
+	}
 
       else if (nios2_match_rdctl (insn, op, mach, &ra, &rc))
 	{
@@ -995,14 +1496,15 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  else if (cond == branch_geu)
 	    {
 	      /* BGEU sp, rx, +8
-		 BREAK 3
+		 TRAP 3  (or BREAK 3)
 		 This instruction sequence is used in stack checking;
 		 we can ignore it.  */
 	      unsigned int next_insn;
 	      const struct nios2_opcode *next_op
 		= nios2_fetch_insn (gdbarch, pc, &next_insn);
 	      if (next_op != NULL
-		  && nios2_match_break (next_insn, op, mach, &uimm))
+		  && (nios2_match_trap (next_insn, op, mach, &uimm)
+		      || nios2_match_break (next_insn, op, mach, &uimm)))
 		pc += next_op->size;
 	      else
 		break;
@@ -1010,13 +1512,14 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  else if (cond == branch_ltu)
 	    {
 	      /* BLTU sp, rx, .Lstackoverflow
-		 If the location branched to holds a BREAK 3 instruction
-		 then this is also stack overflow detection.  */
+		 If the location branched to holds a TRAP or BREAK
+		 instruction then this is also stack overflow detection.  */
 	      unsigned int next_insn;
 	      const struct nios2_opcode *next_op
 		= nios2_fetch_insn (gdbarch, pc + imm, &next_insn);
 	      if (next_op != NULL
-		  && nios2_match_break (next_insn, op, mach, &uimm))
+		  && (nios2_match_trap (next_insn, op, mach, &uimm)
+		      || nios2_match_break (next_insn, op, mach, &uimm)))
 		;
 	      else
 		break;
@@ -1025,11 +1528,16 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	    break;
 	}
 
-      /* All other calls or jumps (including returns) terminate 
+      /* All other calls, jumps, returns, TRAPs, or BREAKs terminate
 	 the prologue.  */
       else if (nios2_match_callr (insn, op, mach, &ra)
 	       || nios2_match_jmpr (insn, op, mach, &ra)
-	       || nios2_match_jmpi (insn, op, mach, &uimm))
+	       || nios2_match_jmpi (insn, op, mach, &uimm)
+	       || (nios2_match_ldwm (insn, op, mach, &reglist, &ra,
+				     &imm, &wb, &id, &ret)
+		   && ret)
+	       || nios2_match_trap (insn, op, mach, &uimm)
+	       || nios2_match_break (insn, op, mach, &uimm))
 	break;
     }
 
@@ -1206,16 +1714,45 @@ nios2_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
 
-  /* R1 trap encoding:
-     ((0x1d << 17) | (0x2d << 11) | (0x1f << 6) | (0x3a << 0))
-     0x003b6ffa */
-  static const gdb_byte r1_breakpoint_le[] = {0xfa, 0x6f, 0x3b, 0x0};
-  static const gdb_byte r1_breakpoint_be[] = {0x0, 0x3b, 0x6f, 0xfa};
-  *bp_size = NIOS2_OPCODE_SIZE;
-  if (byte_order_for_code == BFD_ENDIAN_BIG)
-    return r1_breakpoint_be;
+  if (mach == bfd_mach_nios2r2)
+    {
+      /* R2 trap encoding:
+	   ((0x2d << 26) | (0x1f << 21) | (0x1d << 16) | (0x20 << 0))
+	   0xb7fd0020
+	 CDX trap.n encoding:
+	   ((0xd << 12) | (0x1f << 6) | (0x9 << 0))
+	   0xd7c9
+         Note that code is always little-endian on R2.  */
+      static const gdb_byte r2_breakpoint_le[] = {0x20, 0x00, 0xfd, 0xb7};
+      static const gdb_byte cdx_breakpoint_le[] = {0xc9, 0xd7};
+      unsigned int insn;
+      const struct nios2_opcode *op
+	= nios2_fetch_insn (gdbarch, *bp_addr, &insn);
+
+      if (op && op->size == NIOS2_CDX_OPCODE_SIZE)
+	{
+	  *bp_size = NIOS2_CDX_OPCODE_SIZE;
+	  return cdx_breakpoint_le;
+	}
+      else
+	{
+	  *bp_size = NIOS2_OPCODE_SIZE;
+	  return r2_breakpoint_le;
+	}
+    }
   else
-    return r1_breakpoint_le;
+    {
+      /* R1 trap encoding:
+	 ((0x1d << 17) | (0x2d << 11) | (0x1f << 6) | (0x3a << 0))
+	 0x003b6ffa */
+      static const gdb_byte r1_breakpoint_le[] = {0xfa, 0x6f, 0x3b, 0x0};
+      static const gdb_byte r1_breakpoint_be[] = {0x0, 0x3b, 0x6f, 0xfa};
+      *bp_size = NIOS2_OPCODE_SIZE;
+      if (byte_order_for_code == BFD_ENDIAN_BIG)
+	return r1_breakpoint_be;
+      else
+	return r1_breakpoint_le;
+    }
 }
 
 /* Implement the print_insn gdbarch method.  */
@@ -1588,7 +2125,7 @@ nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   int rb;
   int imm;
   unsigned int uimm;
-  int wb, ret;
+  int wb, id, ret;
   enum branch_condition cond;
 
   /* Do something stupid if we can't disassemble the insn at pc.  */
@@ -1645,10 +2182,21 @@ nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	   || nios2_match_callr (insn, op, mach, &ra))
     pc = get_frame_register_unsigned (frame, ra);
 
-  else if (nios2_match_trap (insn, op, mach, &uimm))
+  else if (nios2_match_ldwm (insn, op, mach, &uimm, &ra, &imm, &wb, &id, &ret)
+	   && ret)
+    {
+      /* If ra is in the reglist, we have to use the value saved in the
+	 stack frame rather than the current value.  */
+      if (uimm & (1 << NIOS2_RA_REGNUM))
+	pc = nios2_unwind_pc (gdbarch, frame);
+      else
+	pc = get_frame_register_unsigned (frame, NIOS2_RA_REGNUM);
+    }
+
+  else if (nios2_match_trap (insn, op, mach, &uimm) && uimm == 0)
     {
       if (tdep->syscall_next_pc != NULL)
-	return tdep->syscall_next_pc (frame);
+	return tdep->syscall_next_pc (frame, op);
     }
 
   else

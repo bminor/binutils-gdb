@@ -234,9 +234,41 @@ check/no-matching-tests-found:
 	@echo "No matching tests found."
 	@echo ""
 
+# Utility rule invoked by step 2 of the build-perf rule.
+@GMAKE_TRUE@workers/%.worker:
+@GMAKE_TRUE@	mkdir -p gdb.perf/outputs/$*
+@GMAKE_TRUE@	$(DO_RUNTEST) --status --outdir=gdb.perf/outputs/$* lib/build-piece.exp WORKER=$* GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=build-pieces
+
+# Utility rule to build tests that support it in parallel.
+# The build is broken into 3 steps distinguished by GDB_PERFTEST_SUBMODE:
+# gen-workers, build-pieces, final.
+#
+# GDB_PERFTEST_MODE appears *after* RUNTESTFLAGS here because we don't want
+# anything in RUNTESTFLAGS to override it.
+#
+# We don't delete the outputs directory here as these programs can take
+# awhile to build, and perftest.exp has support for deciding whether to
+# recompile them.  If you want to remove these directories, make clean.
+#
+# The point of step 1 is to construct the set of worker tasks for step 2.
+# All of the information needed by build-piece.exp is contained in the name
+# of the generated .worker file.
+@GMAKE_TRUE@build-perf: $(abs_builddir)/site.exp
+@GMAKE_TRUE@	rm -rf gdb.perf/workers
+@GMAKE_TRUE@	mkdir -p gdb.perf/workers
+@GMAKE_TRUE@	@: Step 1: Generate the build .worker files.
+@GMAKE_TRUE@	$(DO_RUNTEST) --status --directory=gdb.perf --outdir gdb.perf/workers GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=gen-workers
+@GMAKE_TRUE@	@: Step 2: Compile the pieces.  Here is the build parallelism.
+@GMAKE_TRUE@	$(MAKE) $$(cd gdb.perf && echo workers/*/*.worker)
+@GMAKE_TRUE@	@: Step 3: Do the final link.
+@GMAKE_TRUE@	$(DO_RUNTEST) --status --directory=gdb.perf --outdir gdb.perf GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=final
+
+# The default is to both compile and run the tests.
+GDB_PERFTEST_MODE = both
+
 check-perf: all $(abs_builddir)/site.exp
 	@if test ! -d gdb.perf; then mkdir gdb.perf; fi
-	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PERFTEST_MODE=both $(RUNTESTFLAGS)
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PERFTEST_MODE=$(GDB_PERFTEST_MODE) $(RUNTESTFLAGS)
 
 force:;
 
@@ -245,6 +277,7 @@ clean mostlyclean:
 	-rm -f core.* *.tf *.cl tracecommandsscript copy1.txt zzz-gdbscript
 	-rm -f *.dwo *.dwp
 	-rm -rf outputs temp cache
+	-rm -rf gdb.perf/workers gdb.perf/outputs gdb.perf/temp gdb.perf/cache
 	-rm -f read1.so expect-read1
 	if [ x"${ALL_SUBDIRS}" != x ] ; then \
 	    for dir in ${ALL_SUBDIRS}; \

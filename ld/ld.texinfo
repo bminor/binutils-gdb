@@ -973,6 +973,22 @@ modules from standard libraries.  @samp{-u} may be repeated with
 different option arguments to enter additional undefined symbols.  This
 option is equivalent to the @code{EXTERN} linker script command.
 
+If this option is being used to force additional modules to be pulled
+into the link, and if it is an error for the symbol to remain
+undefined, then the option @option{--require-defined} should be used
+instead.
+
+@kindex --require-defined=@var{symbol}
+@cindex symbols, require defined
+@cindex defined symbol
+@item --require-defined=@var{symbol}
+Require that @var{symbol} is defined in the output file.  This option
+is the same as option @option{--undefined} except that if @var{symbol}
+is not defined in the output file then the linker will issue an error
+and exit.  The same effect can be achieved in a linker script by using
+@code{EXTERN}, @code{ASSERT} and @code{DEFINED} together.  This option
+can be used multiple times to require additional symbols.
+
 @kindex -Ur
 @cindex constructors
 @item -Ur
@@ -4970,9 +4986,10 @@ set section addresses based on the memory regions, and will warn about
 regions that become too full.  The linker will not shuffle sections
 around to fit into the available regions.
 
-A linker script may contain at most one use of the @code{MEMORY}
-command.  However, you can define as many blocks of memory within it as
-you wish.  The syntax is:
+A linker script may contain many uses of the @code{MEMORY} command,
+however, all memory blocks defined are treated as if they were
+specified inside a single @code{MEMORY} command.  The syntax for
+@code{MEMORY} is:
 @smallexample
 @group
 MEMORY

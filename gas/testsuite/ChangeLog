@@ -1,3 +1,10 @@
+2015-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/13571
+	* gas/i386/i386.exp: Run i386-intel and x86_64-intel.
+	* gas/i386/i386-intel.d: New file.
+	* gas/i386/x86_64-intel.d: Likewise.
+
 2015-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/struct.d: Allow for extra symbols in the output.

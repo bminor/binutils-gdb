@@ -686,7 +686,8 @@ arm_linux_get_hw_watchpoint_count (void)
    there is not an appropriate resource available, otherwise returns 1.  */
 static int
 arm_linux_can_use_hw_breakpoint (struct target_ops *self,
-				 int type, int cnt, int ot)
+				 enum bptype type,
+				 int cnt, int ot)
 {
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
@@ -922,14 +923,14 @@ arm_linux_hw_breakpoint_initialize (struct gdbarch *gdbarch,
   p->control = arm_hwbp_control_initialize (mask, arm_hwbp_break, 1);
 }
 
-/* Get the ARM hardware breakpoint type from the RW value we're given when
-   asked to set a watchpoint.  */
+/* Get the ARM hardware breakpoint type from the TYPE value we're
+   given when asked to set a watchpoint.  */
 static arm_hwbp_type 
-arm_linux_get_hwbp_type (int rw)
+arm_linux_get_hwbp_type (enum target_hw_bp_type type)
 {
-  if (rw == hw_read)
+  if (type == hw_read)
     return arm_hwbp_load;
-  else if (rw == hw_write)
+  else if (type == hw_write)
     return arm_hwbp_store;
   else
     return arm_hwbp_access;
@@ -938,7 +939,8 @@ arm_linux_get_hwbp_type (int rw)
 /* Initialize the hardware breakpoint structure P for a watchpoint at ADDR
    to LEN.  The type of watchpoint is given in RW.  */
 static void
-arm_linux_hw_watchpoint_initialize (CORE_ADDR addr, int len, int rw,
+arm_linux_hw_watchpoint_initialize (CORE_ADDR addr, int len,
+				    enum target_hw_bp_type type,
 				    struct arm_linux_hw_breakpoint *p)
 {
   const struct arm_linux_hwbp_cap *cap = arm_linux_get_hwbp_cap ();
@@ -951,7 +953,7 @@ arm_linux_hw_watchpoint_initialize (CORE_ADDR addr, int len, int rw,
 
   p->address = (unsigned int) addr;
   p->control = arm_hwbp_control_initialize (mask, 
-					    arm_linux_get_hwbp_type (rw), 1);
+					    arm_linux_get_hwbp_type (type), 1);
 }
 
 /* Are two break-/watch-points equal?  */
@@ -1147,7 +1149,8 @@ arm_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
 /* Insert a Hardware breakpoint.  */
 static int
 arm_linux_insert_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int rw,
+			     CORE_ADDR addr, int len,
+			     enum target_hw_bp_type rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
@@ -1165,8 +1168,8 @@ arm_linux_insert_watchpoint (struct target_ops *self,
 
 /* Remove a hardware breakpoint.  */
 static int
-arm_linux_remove_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int rw,
+arm_linux_remove_watchpoint (struct target_ops *self, CORE_ADDR addr,
+			     int len, enum target_hw_bp_type rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;

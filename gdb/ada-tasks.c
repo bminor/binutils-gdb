@@ -471,23 +471,24 @@ get_tcb_types_info (void)
 
   struct symbol *atcb_sym =
     lookup_symbol_in_language (atcb_name, NULL, STRUCT_DOMAIN,
-			       language_c, NULL);
+			       language_c, NULL).symbol;
   const struct symbol *common_atcb_sym =
     lookup_symbol_in_language (common_atcb_name, NULL, STRUCT_DOMAIN,
-			       language_c, NULL);
+			       language_c, NULL).symbol;
   const struct symbol *private_data_sym =
     lookup_symbol_in_language (private_data_name, NULL, STRUCT_DOMAIN,
-			       language_c, NULL);
+			       language_c, NULL).symbol;
   const struct symbol *entry_call_record_sym =
     lookup_symbol_in_language (entry_call_record_name, NULL, STRUCT_DOMAIN,
-			       language_c, NULL);
+			       language_c, NULL).symbol;
 
   if (atcb_sym == NULL || atcb_sym->type == NULL)
     {
       /* In Ravenscar run-time libs, the  ATCB does not have a dynamic
          size, so the symbol name differs.  */
       atcb_sym = lookup_symbol_in_language (atcb_name_fixed, NULL,
-					    STRUCT_DOMAIN, language_c, NULL);
+					    STRUCT_DOMAIN, language_c,
+					    NULL).symbol;
 
       if (atcb_sym == NULL || atcb_sym->type == NULL)
         error (_("Cannot find Ada_Task_Control_Block type. Aborting"));
@@ -863,7 +864,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 
       /* Try to get pointer type and array length from the symtab.  */
       sym = lookup_symbol_in_language (KNOWN_TASKS_NAME, NULL, VAR_DOMAIN,
-				       language_c, NULL);
+				       language_c, NULL).symbol;
       if (sym != NULL)
 	{
 	  /* Validate.  */
@@ -908,7 +909,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
       data->known_tasks_length = 1;
 
       sym = lookup_symbol_in_language (KNOWN_TASKS_LIST, NULL, VAR_DOMAIN,
-				       language_c, NULL);
+				       language_c, NULL).symbol;
       if (sym != NULL && SYMBOL_VALUE_ADDRESS (sym) != 0)
 	{
 	  /* Validate.  */

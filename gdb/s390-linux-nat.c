@@ -554,7 +554,7 @@ s390_new_thread (struct lwp_info *lp)
 
 static int
 s390_insert_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
@@ -576,7 +576,7 @@ s390_insert_watchpoint (struct target_ops *self,
 
 static int
 s390_remove_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
@@ -605,7 +605,7 @@ s390_remove_watchpoint (struct target_ops *self,
 
 static int
 s390_can_use_hw_breakpoint (struct target_ops *self,
-			    int type, int cnt, int othertype)
+			    enum bptype type, int cnt, int othertype)
 {
   return type == bp_hardware_watchpoint;
 }

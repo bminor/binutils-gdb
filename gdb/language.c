@@ -974,7 +974,7 @@ language_bool_type (const struct language_defn *la,
       struct symbol *sym;
 
       sym = lookup_symbol (ld->arch_info[la->la_language].bool_type_symbol,
-			   NULL, VAR_DOMAIN, NULL);
+			   NULL, VAR_DOMAIN, NULL).symbol;
       if (sym)
 	{
 	  struct type *type = SYMBOL_TYPE (sym);
@@ -1075,10 +1075,9 @@ language_init_primitive_type_symbols (struct language_arch_info *lai,
     }
 
   /* Note: The result of symbol lookup is normally a symbol *and* the block
-     it was found in (returned in global block_found).  Builtin types don't
-     live in blocks.  We *could* give them one, but there is no current need
-     so to keep things simple symbol lookup is extended to allow for
-     BLOCK_FOUND to be NULL.  */
+     it was found in.  Builtin types don't live in blocks.  We *could* give
+     them one, but there is no current need so to keep things simple symbol
+     lookup is extended to allow for BLOCK_FOUND to be NULL.  */
 }
 
 /* See language.h.  */

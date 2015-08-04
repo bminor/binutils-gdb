@@ -251,23 +251,7 @@ proc test_terminal_settings_preserved_after_cli_exit { cmds } {
 	}
     }
 
-    set test "quit gdb"
-    send_gdb "quit\n"
-    gdb_expect {
-	-re "(y or n)" {
-	    send_gdb "y\n"
-	    exp_continue
-	}
-	-re ".*$shell_prompt_re$" {
-	    pass $test
-	}
-	timeout {
-	    fail "$test (timeout)"
-	}
-	eof {
-	    fail "$test (eof)"
-	}
-    }
+    send_quit_command "quit gdb"
 
     set test "terminal settings preserved"
     if $stty_supported {

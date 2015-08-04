@@ -90,7 +90,7 @@ static const struct op_print d_op_print_tab[] =
   {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_PREFIX, 0}
 };
 
 /* Mapping of all D basic data types into the language vector.  */

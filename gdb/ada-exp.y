@@ -868,7 +868,7 @@ write_object_renaming (struct parser_state *par_state,
 {
   char *name;
   enum { SIMPLE_INDEX, LOWER_BOUND, UPPER_BOUND } slice_state;
-  struct ada_symbol_info sym_info;
+  struct block_symbol sym_info;
 
   if (max_depth <= 0)
     error (_("Could not find renamed symbol"));
@@ -878,9 +878,9 @@ write_object_renaming (struct parser_state *par_state,
 
   name = obstack_copy0 (&temp_parse_space, renamed_entity, renamed_entity_len);
   ada_lookup_encoded_symbol (name, orig_left_context, VAR_DOMAIN, &sym_info);
-  if (sym_info.sym == NULL)
+  if (sym_info.symbol == NULL)
     error (_("Could not find renamed variable: %s"), ada_decode (name));
-  else if (SYMBOL_CLASS (sym_info.sym) == LOC_TYPEDEF)
+  else if (SYMBOL_CLASS (sym_info.symbol) == LOC_TYPEDEF)
     /* We have a renaming of an old-style renaming symbol.  Don't
        trust the block information.  */
     sym_info.block = orig_left_context;
@@ -890,13 +890,13 @@ write_object_renaming (struct parser_state *par_state,
     int inner_renamed_entity_len;
     const char *inner_renaming_expr;
 
-    switch (ada_parse_renaming (sym_info.sym, &inner_renamed_entity,
+    switch (ada_parse_renaming (sym_info.symbol, &inner_renamed_entity,
 				&inner_renamed_entity_len,
 				&inner_renaming_expr))
       {
       case ADA_NOT_RENAMING:
 	write_var_from_sym (par_state, orig_left_context, sym_info.block,
-			    sym_info.sym);
+			    sym_info.symbol);
 	break;
       case ADA_OBJECT_RENAMING:
 	write_object_renaming (par_state, sym_info.block,
@@ -939,7 +939,7 @@ write_object_renaming (struct parser_state *par_state,
 	  {
 	    const char *end;
 	    char *index_name;
-	    struct ada_symbol_info index_sym_info;
+	    struct block_symbol index_sym_info;
 
 	    end = strchr (renaming_expr, 'X');
 	    if (end == NULL)
@@ -952,13 +952,13 @@ write_object_renaming (struct parser_state *par_state,
 
 	    ada_lookup_encoded_symbol (index_name, NULL, VAR_DOMAIN,
 				       &index_sym_info);
-	    if (index_sym_info.sym == NULL)
+	    if (index_sym_info.symbol == NULL)
 	      error (_("Could not find %s"), index_name);
-	    else if (SYMBOL_CLASS (index_sym_info.sym) == LOC_TYPEDEF)
+	    else if (SYMBOL_CLASS (index_sym_info.symbol) == LOC_TYPEDEF)
 	      /* Index is an old-style renaming symbol.  */
 	      index_sym_info.block = orig_left_context;
 	    write_var_from_sym (par_state, NULL, index_sym_info.block,
-				index_sym_info.sym);
+				index_sym_info.symbol);
 	  }
 	if (slice_state == SIMPLE_INDEX)
 	  {
@@ -1013,7 +1013,7 @@ static const struct block*
 block_lookup (const struct block *context, const char *raw_name)
 {
   const char *name;
-  struct ada_symbol_info *syms;
+  struct block_symbol *syms;
   int nsyms;
   struct symtab *symtab;
 
@@ -1027,14 +1027,14 @@ block_lookup (const struct block *context, const char *raw_name)
 
   nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
   if (context == NULL
-      && (nsyms == 0 || SYMBOL_CLASS (syms[0].sym) != LOC_BLOCK))
+      && (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK))
     symtab = lookup_symtab (name);
   else
     symtab = NULL;
 
   if (symtab != NULL)
     return BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
-  else if (nsyms == 0 || SYMBOL_CLASS (syms[0].sym) != LOC_BLOCK)
+  else if (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
     {
       if (context == NULL)
 	error (_("No file or function \"%s\"."), raw_name);
@@ -1045,12 +1045,12 @@ block_lookup (const struct block *context, const char *raw_name)
     {
       if (nsyms > 1)
 	warning (_("Function name \"%s\" ambiguous here"), raw_name);
-      return SYMBOL_BLOCK_VALUE (syms[0].sym);
+      return SYMBOL_BLOCK_VALUE (syms[0].symbol);
     }
 }
 
 static struct symbol*
-select_possible_type_sym (struct ada_symbol_info *syms, int nsyms)
+select_possible_type_sym (struct block_symbol *syms, int nsyms)
 {
   int i;
   int preferred_index;
@@ -1058,13 +1058,13 @@ select_possible_type_sym (struct ada_symbol_info *syms, int nsyms)
 	  
   preferred_index = -1; preferred_type = NULL;
   for (i = 0; i < nsyms; i += 1)
-    switch (SYMBOL_CLASS (syms[i].sym))
+    switch (SYMBOL_CLASS (syms[i].symbol))
       {
       case LOC_TYPEDEF:
-	if (ada_prefer_type (SYMBOL_TYPE (syms[i].sym), preferred_type))
+	if (ada_prefer_type (SYMBOL_TYPE (syms[i].symbol), preferred_type))
 	  {
 	    preferred_index = i;
-	    preferred_type = SYMBOL_TYPE (syms[i].sym);
+	    preferred_type = SYMBOL_TYPE (syms[i].symbol);
 	  }
 	break;
       case LOC_REGISTER:
@@ -1079,7 +1079,7 @@ select_possible_type_sym (struct ada_symbol_info *syms, int nsyms)
       }
   if (preferred_type == NULL)
     return NULL;
-  return syms[preferred_index].sym;
+  return syms[preferred_index].symbol;
 }
 
 static struct type*
@@ -1101,7 +1101,7 @@ find_primitive_type (struct parser_state *par_state, char *name)
 	(char *) alloca (strlen (name) + sizeof ("standard__"));
       strcpy (expanded_name, "standard__");
       strcat (expanded_name, name);
-      sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN, NULL);
+      sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN, NULL).symbol;
       if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	type = SYMBOL_TYPE (sym);
     }
@@ -1274,7 +1274,7 @@ write_var_or_type (struct parser_state *par_state,
       while (tail_index > 0)
 	{
 	  int nsyms;
-	  struct ada_symbol_info *syms;
+	  struct block_symbol *syms;
 	  struct symbol *type_sym;
 	  struct symbol *renaming_sym;
 	  const char* renaming;
@@ -1294,10 +1294,10 @@ write_var_or_type (struct parser_state *par_state,
 	  if (nsyms == 1)
 	    {
 	      struct symbol *ren_sym =
-		ada_find_renaming_symbol (syms[0].sym, syms[0].block);
+		ada_find_renaming_symbol (syms[0].symbol, syms[0].block);
 
 	      if (ren_sym != NULL)
-		syms[0].sym = ren_sym;
+		syms[0].symbol = ren_sym;
 	    }
 
 	  type_sym = select_possible_type_sym (syms, nsyms);
@@ -1305,7 +1305,7 @@ write_var_or_type (struct parser_state *par_state,
 	  if (type_sym != NULL)
 	    renaming_sym = type_sym;
 	  else if (nsyms == 1)
-	    renaming_sym = syms[0].sym;
+	    renaming_sym = syms[0].symbol;
 	  else 
 	    renaming_sym = NULL;
 
@@ -1367,7 +1367,7 @@ write_var_or_type (struct parser_state *par_state,
 	  if (nsyms == 1)
 	    {
 	      write_var_from_sym (par_state, block, syms[0].block,
-				  syms[0].sym);
+				  syms[0].symbol);
 	      write_selectors (par_state, encoded_name + tail_index);
 	      return NULL;
 	    }
@@ -1433,13 +1433,14 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
 {
   if (strchr (name.ptr, '.') == NULL)
     {
-      struct ada_symbol_info *syms;
+      struct block_symbol *syms;
       int nsyms = ada_lookup_symbol_list (name.ptr, expression_context_block,
 					  VAR_DOMAIN, &syms);
-      if (nsyms != 1 || SYMBOL_CLASS (syms[0].sym) == LOC_TYPEDEF)
+
+      if (nsyms != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)
 	write_exp_op_with_string (par_state, OP_NAME, name);
       else
-	write_var_from_sym (par_state, NULL, syms[0].block, syms[0].sym);
+	write_var_from_sym (par_state, NULL, syms[0].block, syms[0].symbol);
     }
   else
     if (write_var_or_type (par_state, NULL, name) != NULL)

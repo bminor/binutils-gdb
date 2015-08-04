@@ -8045,8 +8045,8 @@ static const int i386_record_regmap[] =
    string.  */
 
 static int
-i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
-			       CORE_ADDR addr, int *isize, char **msg)
+i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
+			       char **msg)
 {
   int len, jumplen;
   static struct ui_file *gdb_null = NULL;
@@ -8078,8 +8078,6 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 
   /* Check for fit.  */
   len = gdb_print_insn (gdbarch, addr, gdb_null, NULL);
-  if (isize)
-    *isize = len;
 
   if (len < jumplen)
     {

@@ -35,7 +35,10 @@ class SingleStatisticTestResult(TestResult):
         self.results = dict ()
 
     def record(self, parameter, result):
-        self.results[parameter] = result
+        if parameter in self.results:
+            self.results[parameter].append(result)
+        else:
+            self.results[parameter] = [result]
 
     def report(self, reporter, name):
         reporter.start()

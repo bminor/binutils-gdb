@@ -22,6 +22,7 @@
 #include "server.h"
 #include "linux-low.h"
 #include "nat/aarch64-linux-hw-point.h"
+#include "linux-aarch32-low.h"
 #include "elf/common.h"
 
 #include <signal.h>
@@ -68,6 +69,16 @@ struct arch_process_info
      */
   struct aarch64_debug_reg_state debug_reg_state;
 };
+
+/* Return true if the size of register 0 is 8 byte.  */
+
+static int
+is_64bit_tdesc (void)
+{
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+
+  return register_size (regcache->tdesc, 0) == 8;
+}
 
 /* Implementation of linux_target_ops method "cannot_store_register".  */
 
@@ -144,12 +155,24 @@ extern int debug_threads;
 static CORE_ADDR
 aarch64_get_pc (struct regcache *regcache)
 {
-  unsigned long pc;
+  if (register_size (regcache->tdesc, 0) == 8)
+    {
+      unsigned long pc;
 
-  collect_register_by_name (regcache, "pc", &pc);
-  if (debug_threads)
-    debug_printf ("stop pc is %08lx\n", pc);
-  return pc;
+      collect_register_by_name (regcache, "pc", &pc);
+      if (debug_threads)
+	debug_printf ("stop pc is %08lx\n", pc);
+      return pc;
+    }
+  else
+    {
+      unsigned int pc;
+
+      collect_register_by_name (regcache, "pc", &pc);
+      if (debug_threads)
+	debug_printf ("stop pc is %04x\n", pc);
+      return pc;
+    }
 }
 
 /* Implementation of linux_target_ops method "set_pc".  */
@@ -157,8 +180,16 @@ aarch64_get_pc (struct regcache *regcache)
 static void
 aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  unsigned long newpc = pc;
-  supply_register_by_name (regcache, "pc", &newpc);
+  if (register_size (regcache->tdesc, 0) == 8)
+    {
+      unsigned long newpc = pc;
+      supply_register_by_name (regcache, "pc", &newpc);
+    }
+  else
+    {
+      unsigned int newpc = pc;
+      supply_register_by_name (regcache, "pc", &newpc);
+    }
 }
 
 #define aarch64_breakpoint_len 4
@@ -333,6 +364,22 @@ aarch64_supports_z_point_type (char z_type)
   switch (z_type)
     {
     case Z_PACKET_SW_BP:
+      {
+	if (!extended_protocol && is_64bit_tdesc ())
+	  {
+	    /* Only enable Z0 packet in non-multi-arch debugging.  If
+	       extended protocol is used, don't enable Z0 packet because
+	       GDBserver may attach to 32-bit process.  */
+	    return 1;
+	  }
+	else
+	  {
+	    /* Disable Z0 packet so that GDBserver doesn't have to handle
+	       different breakpoint instructions (aarch64, arm, thumb etc)
+	       in multi-arch debugging.  */
+	    return 0;
+	  }
+      }
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
@@ -582,12 +629,32 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
     }
 }
 
+/* Return the right target description according to the ELF file of
+   current thread.  */
+
+static const struct target_desc *
+aarch64_linux_read_description (void)
+{
+  unsigned int machine;
+  int is_elf64;
+  int tid;
+
+  tid = lwpid_of (current_thread);
+
+  is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
+
+  if (is_elf64)
+    return tdesc_aarch64;
+  else
+    return tdesc_arm_with_neon;
+}
+
 /* Implementation of linux_target_ops method "arch_setup".  */
 
 static void
 aarch64_arch_setup (void)
 {
-  current_process ()->tdesc = tdesc_aarch64;
+  current_process ()->tdesc = aarch64_linux_read_description ();
 
   aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
 }
@@ -611,7 +678,7 @@ static struct regsets_info aarch64_regsets_info =
     NULL, /* disabled_regsets */
   };
 
-static struct regs_info regs_info =
+static struct regs_info regs_info_aarch64 =
   {
     NULL, /* regset_bitmap */
     NULL, /* usrregs */
@@ -623,7 +690,10 @@ static struct regs_info regs_info =
 static const struct regs_info *
 aarch64_regs_info (void)
 {
-  return &regs_info;
+  if (is_64bit_tdesc ())
+    return &regs_info_aarch64;
+  else
+    return &regs_info_aarch32;
 }
 
 /* Implementation of linux_target_ops method "supports_tracepoints".  */
@@ -631,7 +701,13 @@ aarch64_regs_info (void)
 static int
 aarch64_supports_tracepoints (void)
 {
-  return 1;
+  if (current_thread == NULL)
+    return 1;
+  else
+    {
+      /* We don't support tracepoints on aarch32 now.  */
+      return is_64bit_tdesc ();
+    }
 }
 
 /* Implementation of linux_target_ops method "supports_range_stepping".  */
@@ -681,6 +757,8 @@ void
 initialize_low_arch (void)
 {
   init_registers_aarch64 ();
+
+  initialize_low_arch_aarch32 ();
 
   initialize_regsets_info (&aarch64_regsets_info);
 }

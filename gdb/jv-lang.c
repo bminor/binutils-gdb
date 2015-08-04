@@ -202,7 +202,8 @@ java_lookup_class (char *name)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol (name, expression_context_block, STRUCT_DOMAIN, NULL);
+  sym = lookup_symbol (name, expression_context_block, STRUCT_DOMAIN,
+		       NULL).symbol;
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
   /* FIXME - should search inferior's symbol table.  */
@@ -590,7 +591,7 @@ get_java_object_type (void)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN, NULL);
+  sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN, NULL).symbol;
   if (sym == NULL)
     error (_("cannot find java.lang.Object"));
   return SYMBOL_TYPE (sym);
@@ -1098,7 +1099,7 @@ const struct op_print java_op_print_tab[] =
   {"*", UNOP_IND, PREC_PREFIX, 0},
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_PREFIX, 0}
 };
 
 enum java_primitive_types

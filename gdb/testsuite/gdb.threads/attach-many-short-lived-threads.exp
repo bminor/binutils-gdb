@@ -36,7 +36,8 @@ proc test {} {
 
     clean_restart ${binfile}
 
-    set testpid [spawn_wait_for_attach $binfile]
+    set test_spawn_id [spawn_wait_for_attach $binfile]
+    set testpid [spawn_id_get_pid $test_spawn_id]
 
     set attempts 10
     for {set attempt 1} { $attempt <= $attempts } { incr attempt } {
@@ -127,8 +128,7 @@ proc test {} {
 	    delete_breakpoints
 	}
     }
-
-    remote_exec target "kill -9 ${testpid}"
+    kill_wait_spawned_process $test_spawn_id
 }
 
 # The test program exits after a while, in case GDB crashes.  Make it

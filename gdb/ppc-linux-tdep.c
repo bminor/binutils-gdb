@@ -1292,7 +1292,7 @@ struct ppu2spu_data
   gdb_byte gprs[128*16];
 };
 
-static int
+static enum register_status
 ppu2spu_unwind_register (void *src, int regnum, gdb_byte *buf)
 {
   struct ppu2spu_data *data = src;

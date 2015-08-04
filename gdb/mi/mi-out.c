@@ -106,8 +106,8 @@ mi_table_begin (struct ui_out *uiout,
 		const char *tblid)
 {
   mi_open (uiout, tblid, ui_out_type_tuple);
-  mi_field_int (uiout, -1, -1, -1, "nr_rows", nr_rows);
-  mi_field_int (uiout, -1, -1, -1, "nr_cols", nr_cols);
+  mi_field_int (uiout, -1, -1, ui_left, "nr_rows", nr_rows);
+  mi_field_int (uiout, -1, -1, ui_left, "nr_cols", nr_cols);
   mi_open (uiout, "hdr", ui_out_type_list);
 }
 
@@ -149,9 +149,9 @@ mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
     return;
 
   mi_open (uiout, NULL, ui_out_type_tuple);
-  mi_field_int (uiout, 0, 0, 0, "width", width);
-  mi_field_int (uiout, 0, 0, 0, "alignment", alignment);
-  mi_field_string (uiout, 0, 0, 0, "col_name", col_name);
+  mi_field_int (uiout, 0, 0, ui_center, "width", width);
+  mi_field_int (uiout, 0, 0, ui_center, "alignment", alignment);
+  mi_field_string (uiout, 0, 0, ui_center, "col_name", col_name);
   mi_field_string (uiout, 0, width, alignment, "colhdr", colhdr);
   mi_close (uiout, ui_out_type_tuple);
 }

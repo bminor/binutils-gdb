@@ -437,7 +437,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	  status = safe_frame_unwind_memory (next_frame, instbuf_start,
 					     instbuf, instbuf_size);
 	  if (status == 0)
-	    memory_error (status, next_addr);
+	    memory_error (TARGET_XFER_E_IO, next_addr);
 	}
 
       reverse_frame_valid = 0;

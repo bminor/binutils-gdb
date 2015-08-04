@@ -802,6 +802,7 @@ enum
   MOD_0FB2,
   MOD_0FB4,
   MOD_0FB5,
+  MOD_0FC3,
   MOD_0FC7_REG_3,
   MOD_0FC7_REG_4,
   MOD_0FC7_REG_5,
@@ -927,7 +928,7 @@ enum
   PREFIX_0FBC,
   PREFIX_0FBD,
   PREFIX_0FC2,
-  PREFIX_0FC3,
+  PREFIX_MOD_0_0FC3,
   PREFIX_MOD_0_0FC7_REG_6,
   PREFIX_MOD_3_0FC7_REG_6,
   PREFIX_MOD_3_0FC7_REG_7,
@@ -2956,7 +2957,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "xaddB",		{ Ebh1, Gb }, 0 },
   { "xaddS",		{ Evh1, Gv }, 0 },
   { PREFIX_TABLE (PREFIX_0FC2) },
-  { PREFIX_TABLE (PREFIX_0FC3) },
+  { MOD_TABLE (MOD_0FC3) },
   { "pinsrw",		{ MX, Edqw, Ib }, PREFIX_OPCODE },
   { "pextrw",		{ Gdq, MS, Ib }, PREFIX_OPCODE },
   { "shufpX",		{ XM, EXx, Ib }, PREFIX_OPCODE },
@@ -4048,9 +4049,9 @@ static const struct dis386 prefix_table[][4] = {
     { "cmpsd",	{ XM, EXq, CMP }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_0FC3 */
+  /* PREFIX_MOD_0_0FC3 */
   {
-    { "movntiS", { Ma, Gv }, PREFIX_OPCODE },
+    { "movntiS", { Ev, Gv }, PREFIX_OPCODE },
   },
 
   /* PREFIX_MOD_0_0FC7_REG_6 */
@@ -11827,8 +11828,12 @@ static const struct dis386 mod_table[][2] = {
     { "lgsS",		{ Gv, Mp }, 0 },
   },
   {
+    /* MOD_0FC3 */
+    { PREFIX_TABLE (PREFIX_MOD_0_0FC3) },
+  },
+  {
     /* MOD_0FC7_REG_3 */
-    { "xrstors",		{ FXSAVE }, 0 },
+    { "xrstors",	{ FXSAVE }, 0 },
   },
   {
     /* MOD_0FC7_REG_4 */

@@ -174,37 +174,19 @@ struct thread_db_info
 
   /* Pointers to the libthread_db functions.  */
 
-  td_err_e (*td_init_p) (void);
-
-  td_err_e (*td_ta_new_p) (struct ps_prochandle * ps,
-				td_thragent_t **ta);
-  td_err_e (*td_ta_map_lwp2thr_p) (const td_thragent_t *ta,
-				   lwpid_t lwpid, td_thrhandle_t *th);
-  td_err_e (*td_ta_thr_iter_p) (const td_thragent_t *ta,
-				td_thr_iter_f *callback, void *cbdata_p,
-				td_thr_state_e state, int ti_pri,
-				sigset_t *ti_sigmask_p,
-				unsigned int ti_user_flags);
-  td_err_e (*td_ta_event_addr_p) (const td_thragent_t *ta,
-				  td_event_e event, td_notify_t *ptr);
-  td_err_e (*td_ta_set_event_p) (const td_thragent_t *ta,
-				 td_thr_events_t *event);
-  td_err_e (*td_ta_clear_event_p) (const td_thragent_t *ta,
-				   td_thr_events_t *event);
-  td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
-				    td_event_msg_t *msg);
-
-  td_err_e (*td_thr_get_info_p) (const td_thrhandle_t *th,
-				 td_thrinfo_t *infop);
-  td_err_e (*td_thr_event_enable_p) (const td_thrhandle_t *th,
-				     int event);
-
-  td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
-				     psaddr_t map_address,
-				     size_t offset, psaddr_t *address);
-  td_err_e (*td_thr_tlsbase_p) (const td_thrhandle_t *th,
-				unsigned long int modid,
-				psaddr_t *base);
+  td_init_ftype *td_init_p;
+  td_ta_new_ftype *td_ta_new_p;
+  td_ta_map_lwp2thr_ftype *td_ta_map_lwp2thr_p;
+  td_ta_thr_iter_ftype *td_ta_thr_iter_p;
+  td_ta_event_addr_ftype *td_ta_event_addr_p;
+  td_ta_set_event_ftype *td_ta_set_event_p;
+  td_ta_clear_event_ftype *td_ta_clear_event_p;
+  td_ta_event_getmsg_ftype * td_ta_event_getmsg_p;
+  td_thr_validate_ftype *td_thr_validate_p;
+  td_thr_get_info_ftype *td_thr_get_info_p;
+  td_thr_event_enable_ftype *td_thr_event_enable_p;
+  td_thr_tls_get_addr_ftype *td_thr_tls_get_addr_p;
+  td_thr_tlsbase_ftype *td_thr_tlsbase_p;
 };
 
 /* List of known processes using thread_db, and the required
@@ -476,7 +458,7 @@ verbose_dlsym (void *handle, const char *name)
 }
 
 static td_err_e
-enable_thread_event (int event, CORE_ADDR *bp)
+enable_thread_event (td_event_e event, CORE_ADDR *bp)
 {
   td_notify_t notify;
   td_err_e err;
@@ -677,9 +659,20 @@ try_thread_db_load_1 (struct thread_db_info *info)
   /* Initialize pointers to the dynamic library functions we will use.
      Essential functions first.  */
 
-  info->td_init_p = verbose_dlsym (info->handle, "td_init");
-  if (info->td_init_p == NULL)
-    return 0;
+#define TDB_VERBOSE_DLSYM(info, func)			\
+  info->func ## _p = (func ## _ftype *) verbose_dlsym (info->handle, #func)
+
+#define TDB_DLSYM(info, func)			\
+  info->func ## _p = (func ## _ftype *) dlsym (info->handle, #func)
+
+#define CHK(a)								\
+  do									\
+    {									\
+      if ((a) == NULL)							\
+	return 0;							\
+  } while (0)
+
+  CHK (TDB_VERBOSE_DLSYM (info, td_init));
 
   err = info->td_init_p ();
   if (err != TD_OK)
@@ -689,9 +682,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
       return 0;
     }
 
-  info->td_ta_new_p = verbose_dlsym (info->handle, "td_ta_new");
-  if (info->td_ta_new_p == NULL)
-    return 0;
+  CHK (TDB_VERBOSE_DLSYM (info, td_ta_new));
 
   /* Initialize the structure that identifies the child process.  */
   info->proc_handle.ptid = inferior_ptid;
@@ -720,27 +711,24 @@ try_thread_db_load_1 (struct thread_db_info *info)
       return 0;
     }
 
-  info->td_ta_map_lwp2thr_p = verbose_dlsym (info->handle,
-					     "td_ta_map_lwp2thr");
-  if (info->td_ta_map_lwp2thr_p == NULL)
-    return 0;
-
-  info->td_ta_thr_iter_p = verbose_dlsym (info->handle, "td_ta_thr_iter");
-  if (info->td_ta_thr_iter_p == NULL)
-    return 0;
-
-  info->td_thr_get_info_p = verbose_dlsym (info->handle, "td_thr_get_info");
-  if (info->td_thr_get_info_p == NULL)
-    return 0;
+  /* These are essential.  */
+  CHK (TDB_VERBOSE_DLSYM (info, td_ta_map_lwp2thr));
+  CHK (TDB_VERBOSE_DLSYM (info, td_ta_thr_iter));
+  CHK (TDB_VERBOSE_DLSYM (info, td_thr_validate));
+  CHK (TDB_VERBOSE_DLSYM (info, td_thr_get_info));
 
   /* These are not essential.  */
-  info->td_ta_event_addr_p = dlsym (info->handle, "td_ta_event_addr");
-  info->td_ta_set_event_p = dlsym (info->handle, "td_ta_set_event");
-  info->td_ta_clear_event_p = dlsym (info->handle, "td_ta_clear_event");
-  info->td_ta_event_getmsg_p = dlsym (info->handle, "td_ta_event_getmsg");
-  info->td_thr_event_enable_p = dlsym (info->handle, "td_thr_event_enable");
-  info->td_thr_tls_get_addr_p = dlsym (info->handle, "td_thr_tls_get_addr");
-  info->td_thr_tlsbase_p = dlsym (info->handle, "td_thr_tlsbase");
+  TDB_DLSYM (info, td_ta_event_addr);
+  TDB_DLSYM (info, td_ta_set_event);
+  TDB_DLSYM (info, td_ta_clear_event);
+  TDB_DLSYM (info, td_ta_event_getmsg);
+  TDB_DLSYM (info, td_thr_event_enable);
+  TDB_DLSYM (info, td_thr_tls_get_addr);
+  TDB_DLSYM (info, td_thr_tlsbase);
+
+#undef TDB_VERBOSE_DLSYM
+#undef TDB_DLSYM
+#undef CHK
 
   /* It's best to avoid td_ta_thr_iter if possible.  That walks data
      structures in the inferior's address space that may be corrupted,

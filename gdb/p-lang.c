@@ -339,7 +339,7 @@ const struct op_print pascal_op_print_tab[] =
   {"^", UNOP_IND, PREC_SUFFIX, 1},
   {"@", UNOP_ADDR, PREC_PREFIX, 0},
   {"sizeof", UNOP_SIZEOF, PREC_PREFIX, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_PREFIX, 0}
 };
 
 enum pascal_primitive_types {

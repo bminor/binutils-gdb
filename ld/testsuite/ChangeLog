@@ -1,3 +1,29 @@
+2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld/ld-lib.exp (run_dump_test): When using the map option, no
+	program is required.
+
+2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld/ld-lib.exp (run_dump_test): Add error_output and
+	warning_output options.
+
+2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-undefined/require-defined-1.d: New file.
+	* ld-undefined/require-defined-2.d: New file.
+	* ld-undefined/require-defined-3.d: New file.
+	* ld-undefined/require-defined-4.d: New file.
+	* ld-undefined/require-defined-5.d: New file.
+	* ld-undefined/require-defined.exp: New file.
+	* ld-undefined/require-defined.s: New file.
+
+2015-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18735
+	* ld-elf/pr18735.d: New file.
+	* ld-elf/pr18735.s: Likewise.
+
 2015-07-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/pr18718.c (bar): Use noclone attribute only for GCC

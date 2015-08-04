@@ -1063,7 +1063,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	CORE_ADDR selector = 0;
 
 	int struct_return = 0;
-	int sub_no_side = 0;
+	enum noside sub_no_side = EVAL_NORMAL;
 
 	struct value *msg_send = NULL;
 	struct value *msg_send_stret = NULL;
@@ -1492,7 +1492,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      function = cp_lookup_symbol_namespace (TYPE_TAG_NAME (type),
 						     name,
 						     get_selected_block (0),
-						     VAR_DOMAIN);
+						     VAR_DOMAIN).symbol;
 	      if (function == NULL)
 		error (_("No symbol \"%s\" in namespace \"%s\"."), 
 		       name, TYPE_TAG_NAME (type));

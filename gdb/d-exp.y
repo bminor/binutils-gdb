@@ -1022,7 +1022,7 @@ d_type_from_name (struct stoken name)
   char *copy = copy_name (name);
 
   sym = lookup_symbol (copy, expression_context_block,
-		       STRUCT_DOMAIN, NULL);
+		       STRUCT_DOMAIN, NULL).symbol;
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
 
@@ -1038,7 +1038,7 @@ d_module_from_name (struct stoken name)
   char *copy = copy_name (name);
 
   sym = lookup_symbol (copy, expression_context_block,
-		       MODULE_DOMAIN, NULL);
+		       MODULE_DOMAIN, NULL).symbol;
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
 
@@ -1053,23 +1053,24 @@ push_variable (struct parser_state *ps, struct stoken name)
 {
   char *copy = copy_name (name);
   struct field_of_this_result is_a_field_of_this;
-  struct symbol *sym;
-  sym = lookup_symbol (copy, expression_context_block, VAR_DOMAIN,
-                       &is_a_field_of_this);
-  if (sym && SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+  struct block_symbol sym
+    = lookup_symbol (copy, expression_context_block, VAR_DOMAIN,
+		     &is_a_field_of_this);
+
+  if (sym.symbol && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
     {
-      if (symbol_read_needs_frame (sym))
+      if (symbol_read_needs_frame (sym.symbol))
         {
           if (innermost_block == 0 ||
-              contained_in (block_found, innermost_block))
-            innermost_block = block_found;
+              contained_in (sym.block, innermost_block))
+            innermost_block = sym.block;
         }
 
       write_exp_elt_opcode (ps, OP_VAR_VALUE);
       /* We want to use the selected frame, not another more inner frame
          which happens to be in the same block.  */
       write_exp_elt_block (ps, NULL);
-      write_exp_elt_sym (ps, sym);
+      write_exp_elt_sym (ps, sym.symbol);
       write_exp_elt_opcode (ps, OP_VAR_VALUE);
       return 1;
     }
@@ -1078,8 +1079,8 @@ push_variable (struct parser_state *ps, struct stoken name)
       /* It hangs off of `this'.  Must not inadvertently convert from a
          method call to data ref.  */
       if (innermost_block == 0 ||
-          contained_in (block_found, innermost_block))
-        innermost_block = block_found;
+          contained_in (sym.block, innermost_block))
+        innermost_block = sym.block;
       write_exp_elt_opcode (ps, OP_THIS);
       write_exp_elt_opcode (ps, OP_THIS);
       write_exp_elt_opcode (ps, STRUCTOP_PTR);
@@ -1180,10 +1181,10 @@ push_module_name (struct parser_state *ps, struct type *module,
 
       copy = copy_name (name);
       sym = lookup_symbol_in_static_block (copy, expression_context_block,
-					   VAR_DOMAIN);
+					   VAR_DOMAIN).symbol;
       if (sym != NULL)
 	sym = lookup_global_symbol (copy, expression_context_block,
-				    VAR_DOMAIN);
+				    VAR_DOMAIN).symbol;
 
       if (sym != NULL)
 	{

@@ -1,3 +1,117 @@
+2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/bp-permanent.exp: Report test as unsupported if
+	the target cannot stop at the permanent breakpoint.
+
+2015-08-03  Doug Evans  <dje@google.com>
+
+	* gdb.perf/single-step.exp (SINGLE_STEP_COUNT): Change to 1000 from
+	10000.
+
+2015-08-03  Doug Evans  <dje@google.com>
+
+	* Makefile.in (workers/%.worker, build-perf): New rule.
+	(GDB_PERFTEST_MODE): New variable.
+	(check-perf): Use it.
+	(clean): Clean up gdb.perf parallel build subdirs.
+	* lib/build-piece.exp: New file.
+	* lib/gdb.exp (make_gdb_parallel_path): New function
+	(standard_output_file, standard_temp_file): Call it.
+	(GDB_PARALLEL handling): Make outputs,temp,cache directories as subdirs
+	of $GDB_PARALLEL.
+	* lib/cache.exp (gdb_do_cache): Call make_gdb_parallel_path.
+
+2015-08-03  Doug Evans  <dje@google.com>
+
+	* gdb.perf/lib/perftest/reporter.py (SUM_FILE_NAME): New global.
+	(LOG_FILE_NAME): New global.
+	(TextReporter.__init__): Initialize self.txt_sum.
+	(TextReporter.report): Add support for multiple data-points.
+	Move report to perftest.sum, put raw data in perftest.log.
+	(TextReporter.start): Open sum and log files.
+	(TextReporter.end): Close sum and log files.
+	* gdb.perf/lib/perftest/testresult.py
+	(SingleStatisticTestResult.record): Handle multiple data-points.
+
+2015-07-31  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach-pie-misread.exp: Rename $res to $test_spawn_id.
+	Use spawn_id_get_pid.  Wait for spawn id after eof.  Use
+	kill_wait_spawned_process instead of explicit "kill -9".
+	* gdb.base/attach-pie-noexec.exp: Adjust to spawn_wait_for_attach
+	returning a spawn id instead of a pid.  Use spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.base/attach-twice.exp: Likewise.
+	* gdb.base/attach.exp: Likewise.
+	(do_command_attach_tests): Use gdb_spawn_with_cmdline_opts and
+	gdb_test_multiple.
+	* gdb.base/solib-overlap.exp: Adjust to spawn_wait_for_attach
+	returning a spawn id instead of a pid.  Use spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.base/valgrind-infcall.exp: Likewise.
+	* gdb.multi/multi-attach.exp: Likewise.
+	* gdb.python/py-prompt.exp: Likewise.
+	* gdb.python/py-sync-interp.exp: Likewise.
+	* gdb.server/ext-attach.exp: Likewise.
+	* gdb.threads/attach-into-signal.exp (corefunc): Use
+	spawn_wait_for_attach, spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.threads/attach-many-short-lived-threads.exp: Adjust to
+	spawn_wait_for_attach returning a spawn id instead of a pid.  Use
+	spawn_id_get_pid and kill_wait_spawned_process.
+	* gdb.threads/attach-stopped.exp (corefunc): Use
+	spawn_wait_for_attach, spawn_id_get_pid and
+	kill_wait_spawned_process.
+	* gdb.base/break-interp.exp: Rename $res to $test_spawn_id.
+	Use spawn_id_get_pid.  Wait for spawn id after eof.  Use
+	kill_wait_spawned_process instead of explicit "kill -9".
+	* lib/gdb.exp (can_spawn_for_attach): Adjust comment.
+	(kill_wait_spawned_process, spawn_id_get_pid): New procedures.
+	(spawn_wait_for_attach): Use spawn instead of exec to spawn
+	processes.  Don't map cygwin/windows pids here.  Now returns a
+	spawn id list.
+
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.cp/var-tag.exp (do_global_tests): Revert broken commit
+	4bc4d42859e3b42c79c89295ef39944bdb3e6753 and apply the
+	correct patch.
+
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.arch/ppc64-symtab-cordic.exp: Restrict to ppc64 targets.
+
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	Reapply:
+	2014-05-21  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.cp/var-tag.exp (do_global_tests): Handle underlying type.
+
+2015-07-30  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (handle_extended_wait): Set the child's last
+	reported status to TARGET_WAITKIND_STOPPED.
+
+2015-07-30  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18600
+	* gdb.threads/fork-plus-threads.exp: Test that "info inferiors"
+	only shows inferior 1.
+
+2015-07-30  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR threads/18600
+	* gdb.threads/fork-plus-threads.c: New file.
+	* gdb.threads/fork-plus-threads.exp: New file.
+
+2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/batch-preserve-term-settings.exp
+	(test_terminal_settings_preserved_after_cli_exit): Use
+	send_quit_command.
+
 2015-07-29  Pedro Alves  <palves@redhat.com>
 	    Don Breazeal  <donb@codesourcery.com>
 
@@ -219,6 +333,39 @@
 	(standard_temp_file): Ditto.
 	(GDB_PARALLEL handling): Make outputs,temp,cache directories as subdirs
 	of $GDB_PARALLEL.
+
+2015-07-24  Doug Evans  <dje@google.com>
+
+	* gdb.perf/lib/perftest/utils.py: New file.
+	* gdb.perf/gm-hello.cc: New file.
+	* gdb.perf/gm-pervasive-typedef.cc: New file.
+	* gdb.perf/gm-pervasive-typedef.h: New file.
+	* gdb.perf/gm-std.cc: New file.
+	* gdb.perf/gm-std.h: New file.
+	* gdb.perf/gm-use-cerr.cc: New file.
+	* gdb.perf/gm-utils.h: New file.
+	* gdb.perf/gmonster-null-lookup.py: New file.
+	* gdb.perf/gmonster-pervasive-typedef.py: New file.
+	* gdb.perf/gmonster-print-cerr.py: New file.
+	* gdb.perf/gmonster-ptype-string.py: New file.
+	* gdb.perf/gmonster-runto-main.py: New file.
+	* gdb.perf/gmonster-select-file.py: New file.
+	* gdb.perf/gmonster1-null-lookup.exp: New file.
+	* gdb.perf/gmonster1-pervasive-typedef.exp: New file.
+	* gdb.perf/gmonster1-print-cerr.exp: New file.
+	* gdb.perf/gmonster1-ptype-string.exp: New file.
+	* gdb.perf/gmonster1-runto-main.exp: New file.
+	* gdb.perf/gmonster1-select-file.exp: New file.
+	* gdb.perf/gmonster1.cc: New file.
+	* gdb.perf/gmonster1.exp: New file.
+	* gdb.perf/gmonster2-null-lookup.exp: New file.
+	* gdb.perf/gmonster2-pervasive-typedef.exp: New file.
+	* gdb.perf/gmonster2-print-cerr.exp: New file.
+	* gdb.perf/gmonster2-ptype-string.exp: New file.
+	* gdb.perf/gmonster2-runto-main.exp: New file.
+	* gdb.perf/gmonster2-select-file.exp: New file.
+	* gdb.perf/gmonster2.cc: New file.
+	* gdb.perf/gmonster2.exp: New file.
 
 2015-07-24  Doug Evans  <dje@google.com>
 

@@ -1,3 +1,441 @@
+2015-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* infcmd.c (signal_command): Call do_cleanups for args_chain.
+
+2015-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/18767
+	* infcmd.c (attach_command): Move ARGS_CHAIN cleanup after last ARGS
+	use.
+
+2015-08-04  Pedro Alves  <palves@redhat.com>
+
+	* nat/gdb_thread_db.h (td_init_ftype, td_ta_new_ftype)
+	(td_ta_map_lwp2thr_ftype, td_ta_thr_iter_ftype)
+	(td_ta_event_addr_ftype, td_ta_set_event_ftype)
+	(td_ta_clear_event_ftype, td_ta_event_getmsg_ftype)
+	(td_thr_validate_ftype, td_thr_get_info_ftype)
+	(td_thr_event_enable_ftype, td_thr_tls_get_addr_ftype)
+	(td_thr_tlsbase_ftype, td_symbol_list_ftype, td_ta_delete_ftype):
+	New typedefs.
+	* linux-thread-db.c (struct thread_db_info): Use new typedefs.
+	(try_thread_db_load_1): Define TDB_VERBOSE_DLSYM, TDB_DLSYM , CHK
+	local macros and use them instead of verbose_dlsym and dlsym
+	calls.
+
+2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.h: Include opcode/nios2.h here.
+	(NIOS2_CDX_OPCODE_SIZE): New.
+	(struct gdbarch_tdep): Add OP parameter to syscall_next_pc.
+	* nios2-tdep.c: Don't include opcode/nios2.h here.
+	(nios2_fetch_insn): For R2, try reading 2-byte instruction if
+	4-byte read fails.
+	(nios2_match_add, nios2_match_sub): Add cases for R2 encodings.
+	(nios2_match_addi, nios2_match_orhi): Likewise.
+	(nios2_match_stw, nios2_match_ldw): Likewise.
+	(nios2_match_rdctl): Likewise.
+	(nios2_match_stwm, nios2_match_ldwm): New.
+	(nios2_match_branch): Add cases for R2 encodings.
+	(nios2_match_jmpi, nios2_match_calli): Likewise.
+	(nios2_match_jmpr, nios2_match_callr): Likewise.
+	(nios2_match_break, nios2_match_trap): Likewise.
+	(nios2_in_epilogue_p): Add R2 support.
+	(nios2_analyze_prologue): Update comments.  Recognize R2 CDX
+	prologues.
+	(nios2_breakpoint_from_pc): Handle R2 instructions.
+	(nios2_get_next_pc): Likewise.  Adjust call to
+	tdep->syscall_next_pc.
+	* nios2-linux-tdep.c (nios2_r1_linux_rt_sigreturn_tramp_frame):
+	Renamed from nios2_linux_rt_sigreturn_tramp_frame.  Use
+	instruction field macros instead of literal hex values.
+	(nios2_r2_linux_rt_sigreturn_tramp_frame): New.
+	(nios2_linux_syscall_next_pc): Adjust signature to pass OP.
+	Use size field from OP instead of assuming all instructions
+	are the same size.
+	(nios2_linux_init_abi): Register appropriate unwinder for mach.
+
+2015-08-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* cp-namespace.c (cp_lookup_symbol_via_imports): Fix uninitialized
+	variable warning with some compilers.
+
+2015-08-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_get_hwbp_type): Capitalize "type"
+	in comment.  Replace "rw" with "type".
+	(arm_linux_remove_watchpoint): Change type of "rw" to
+	"enum target_hw_bp_type".
+
+2015-08-02  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* alpha-mdebug-tdep.c (find_proc_desc): Update call to
+	lookup_symbol.
+	* ft32-tdep.c (ft32_skip_prologue): Likewise.
+	* moxie-tdep.c (moxie_skip_prologue): Likewise.
+	* mt-tdep.c (mt_skip_prologue): Likewise.
+	* xstormy16-tdep.c (xstormy16_skip_prologue): Likewise.
+
+2015-08-01  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-exp.y (write_object_renaming): Replace struct
+	ada_symbol_info with struct block_symbol.  Update field
+	references accordingly.
+	(block_lookup, select_possible_type_sym): Likewise.
+	(find_primitive_type): Likewise.  Also update call to
+	ada_lookup_symbol to extract the symbol itself.
+	(write_var_or_type, write_name_assoc): Likewise.
+	* ada-lang.h (struct ada_symbol_info): Remove.
+	(ada_lookup_symbol_list): Replace struct ada_symbol_info with
+	struct block_symbol.
+	(ada_lookup_encoded_symbol, user_select_syms): Likewise.
+	(ada_lookup_symbol): Return struct block_symbol instead of a
+	mere symbol.
+	* ada-lang.c (defns_collected): Replace struct ada_symbol_info
+	with struct block_symbol.
+	(resolve_subexp, ada_resolve_function, sort_choices,
+	user_select_syms, is_nonfunction, add_defn_to_vec,
+	num_defns_collected, defns_collected,
+	symbols_are_identical_enums, remove_extra_symbols,
+	remove_irrelevant_renamings, add_lookup_symbol_list_worker,
+	ada_lookup_symbol_list, ada_iterate_over_symbols,
+	ada_lookup_encoded_symbol, get_var_value): Likewise.
+	(ada_lookup_symbol): Return a block_symbol instead of a mere
+	symbol.  Replace struct ada_symbol_info with struct
+	block_symbol.
+	(ada_lookup_symbol_nonlocal): Likewise.
+	(standard_lookup): Make block passing explicit through
+	lookup_symbol_in_language.
+	* ada-tasks.c (get_tcb_types_info): Update the calls to
+	lookup_symbol_in_language to extract the mere symbol out of the
+	returned value.
+	(ada_tasks_inferior_data_sniffer): Likewise.
+	* ax-gdb.c (gen_static_field): Likewise for the call to
+	lookup_symbol.
+	(gen_maybe_namespace_elt): Deal with struct block_symbol from
+	lookup functions.
+	(gen_expr): Likewise.
+	* c-exp.y: Likewise.  Remove uses of block_found.
+	(lex_one_token, classify_inner_name, c_print_token): Likewise.
+	(classify_name): Likewise.  Rename the "sym" local variable to
+	"bsym".
+	* c-valprint.c (print_unpacked_pointer): Likewise.
+	* compile/compile-c-symbols.c (convert_symbol_sym): Promote the
+	"sym" parameter from struct symbol * to struct block_symbol.
+	Use it to remove uses of block_found.  Deal with struct
+	block_symbol from lookup functions.
+	(gcc_convert_symbol): Likewise.  Update the call to
+	convert_symbol_sym.
+	* compile/compile-object-load.c (compile_object_load): Deal with
+	struct block_symbol from lookup functions.
+	* cp-namespace.c (cp_lookup_nested_symbol_1,
+	cp_lookup_nested_symbol, cp_lookup_bare_symbol,
+	cp_search_static_and_baseclasses,
+	cp_lookup_symbol_in_namespace, cp_lookup_symbol_via_imports,
+	cp_lookup_symbol_imports_or_template,
+	cp_lookup_symbol_via_all_imports, cp_lookup_symbol_namespace,
+	lookup_namespace_scope, cp_lookup_nonlocal,
+	find_symbol_in_baseclass): Return struct block_symbol instead of
+	mere symbols and deal with struct block_symbol from lookup
+	functions.
+	* cp-support.c (inspect_type, replace_typedefs,
+	cp_lookup_rtti_type): Deal with struct block_symbol from
+	lookup functions.
+	* cp-support.h (cp_lookup_symbol_nonlocal,
+	cp_lookup_symbol_from_namespace,
+	cp_lookup_symbol_imports_or_template, cp_lookup_nested_symbol):
+	Return struct block_symbol instead of mere symbols.
+	* d-exp.y (d_type_from_name, d_module_from_name, push_variable,
+	push_module_name):
+	Deal with struct block_symbol from lookup functions.  Remove
+	uses of block_found.
+	* eval.c (evaluate_subexp_standard): Update call to
+	cp_lookup_symbol_namespace.
+	* f-exp.y: Deal with struct block_symbol from lookup functions.
+	Remove uses of block_found.
+	(yylex): Likewise.
+	* gdbtypes.c (lookup_typename, lookup_struct, lookup_union,
+	lookup_enum, lookup_template_type, check_typedef): Deal with
+	struct block_symbol from lookup functions.
+	* guile/scm-frame.c (gdbscm_frame_read_var): Likewise.
+	* guile/scm-symbol.c (gdbscm_lookup_symbol): Likewise.
+	(gdbscm_lookup_global_symbol): Likewise.
+	* gnu-v3-abi.c (gnuv3_get_typeid_type): Likewise.
+	* go-exp.y: Likewise.  Remove uses of block_found.
+	(package_name_p, classify_packaged_name, classify_name):
+	Likewise.
+	* infrun.c (insert_exception_resume_breakpoint): Likewise.
+	* jv-exp.y (push_variable): Likewise.
+	* jv-lang.c (java_lookup_class, get_java_object_type): Likewise.
+	* language.c (language_bool_type): Likewise.
+	* language.h (struct language_defn): Update
+	la_lookup_symbol_nonlocal to return a struct block_symbol rather
+	than a mere symbol.
+	* linespec.c (find_label_symbols): Deal with struct block_symbol
+	from lookup functions.
+	* m2-exp.y: Likewise.  Remove uses of block_found.
+	(yylex): Likewise.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Likewise.
+	* objc-lang.c (lookup_struct_typedef, find_imps): Likewise.
+	* p-exp.y: Likewise.  Remove uses of block_found.
+	(yylex): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	* parse.c (write_dollar_variable): Likewise.  Remove uses of
+	block_found.
+	* parser-defs.h (struct symtoken): Turn the SYM field into a
+	struct block_symbol.
+	* printcmd.c (address_info): Deal with struct block_symbol from
+	lookup functions.
+	* python/py-frame.c (frapy_read_var): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol,
+	gdbpy_lookup_global_symbol): Likewise.
+	* skip.c (skip_function_command): Likewise.
+	* solib-darwin.c (darwin_lookup_lib_symbol): Return a struct
+	block_symbol instead of a mere symbol.
+	* solib-spu.c (spu_lookup_lib_symbol): Likewise.
+	* solib-svr4.c (elf_lookup_lib_symbol): Likewise.
+	* solib.c (solib_global_lookup): Likewise.
+	* solist.h (solib_global_lookup): Likewise.
+	(struct target_so_ops): Update lookup_lib_global_symbol to
+	return a struct block_symbol rather than a mere symbol.
+	* source.c (select_source_symtab): Deal with struct block_symbol
+	from lookup functions.
+	* stack.c (print_frame_args, iterate_over_block_arg_vars):
+	Likewise.
+	* symfile.c (set_initial_language): Likewise.
+	* symtab.c (SYMBOL_LOOKUP_FAILED): Turn into a struct
+	block_symbol.
+	(SYMBOL_LOOKUP_FAILED_P): New predicate as a macro.
+	(struct symbol_cache_slot): Turn the FOUND field into a struct
+	block_symbol.
+	(block_found): Remove.
+	(eq_symbol_entry): Update to deal with struct block_symbol in
+	cache slots.
+	(symbol_cache_lookup): Return a struct block_symbol rather than
+	a mere symbol.
+	(symbol_cache_mark_found): Add a BLOCK parameter to fill
+	appropriately the cache slots.  Update callers.
+	(symbol_cache_dump): Update cache slots handling to the type
+	change.
+	(lookup_symbol_in_language, lookup_symbol, lookup_language_this,
+	lookup_symbol_aux, lookup_local_symbol,
+	lookup_symbol_in_objfile, lookup_global_symbol_from_objfile,
+	lookup_symbol_in_objfile_symtabs,
+	lookup_symbol_in_objfile_from_linkage_name,
+	lookup_symbol_via_quick_fns, basic_lookup_symbol_nonlocal,
+	lookup_symbol_in_static_block, lookup_static_symbol,
+	lookup_global_symbol):
+	Return a struct block_symbol rather than a mere symbol.  Deal
+	with struct block_symbol from other lookup functions.  Remove
+	uses of block_found.
+	(lookup_symbol_in_block): Remove uses of block_found.
+	(struct global_sym_lookup_data): Turn the RESULT field into a
+	struct block_symbol.
+	(lookup_symbol_global_iterator_cb): Update references to the
+	RESULT field.
+	(search_symbols): Deal with struct block_symbol from lookup
+	functions.
+	* symtab.h (struct block_symbol): New structure.
+	(block_found): Remove.
+	(lookup_symbol_in_language, lookup_symbol,
+	basic_lookup_symbol_nonlocal, lookup_symbol_in_static_block,
+	lookup_static_symbol, lookup_global_symbol, lookup_language_this,
+	lookup_global_symbol_from_objfile): Return a struct block_symbol
+	rather than just a mere symbol.  Update comments to remove
+	mentions of block_found.
+	* valops.c (find_function_in_inferior,
+	value_struct_elt_for_reference, value_maybe_namespace_elt,
+	value_of_this):  Deal with struct block_symbol from lookup
+	functions.
+	* value.c (value_static_field, value_fn_field): Likewise.
+
+2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote-m32r-sdi.c (m32r_remove_watchpoint): Use enum type
+	instead of integer.
+
+2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): Use enum
+	type or value instead of integer.
+	(aarch64_linux_insert_watchpoint): Likewise.
+	(aarch64_linux_remove_watchpoint): Likewise.
+	* ada-lang.c (ada_op_print_tab): Likewise.
+	* amd64-linux-tdep.c (amd64_canonicalize_syscall): Likewise.
+	(amd64_linux_syscall_record_common): Likewise.
+	* arch-utils.c (target_byte_order_user): Likewise.
+	(default_byte_order): Likewise.
+	* arm-linux-nat.c (arm_linux_can_use_hw_breakpoint): Likewise.
+	(arm_linux_get_hwbp_type): Likewise.
+	(arm_linux_hw_watchpoint_initialize): Likewise.
+	(arm_linux_insert_watchpoint): Likewise.
+	* arm-linux-tdep.c (arm_canonicalize_syscall): Likewise.
+	(arm_linux_syscall_record): Likewise.
+	* breakpoint.c (update_watchpoint): Likewise.
+	(breakpoint_here_p): Likewise.
+	(bpstat_print): Likewise.
+	(enable_breakpoint_disp): Likewise.
+	* c-lang.c (c_op_print_tab): Likewise.
+	* cli/cli-decode.c (add_info_alias): Likewise.
+	* d-lang.c (d_op_print_tab): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* f-exp.y (dot_ops): Likewise.
+	(f77_keywords): Likewise.
+	* f-lang.c (f_op_print_tab): Likewise.
+	* go-lang.c (go_op_print_tab): Likewise.
+	* guile/scm-breakpoint.c (gdbscm_make_breakpoint): Likewise.
+	* guile/scm-cmd.c (gdbscm_make_command): Likewise.
+	* guile/scm-param.c (gdbscm_make_parameter): Likewise.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer): Likewise.
+	* guile/scm-string.c (struct scm_to_stringn_data): Likewise.
+	(struct scm_from_stringn_data): Likewise.
+	* i386-linux-tdep.c (i386_canonicalize_syscall): Likewise.
+	* ia64-linux-nat.c (ia64_linux_insert_watchpoint): Likewise.
+	(ia64_linux_remove_watchpoint): Likewise.
+	(ia64_linux_can_use_hw_breakpoint): Likewise.
+	* infrun.c (print_stop_event): Likewise.
+	* jv-lang.c (java_op_print_tab): Likewise.
+	* linux-nat.c (linux_proc_xfer_partial): Likewise.
+	* linux-nat.h (struct lwp_info): Likewise.
+	* linux-thread-db.c (enable_thread_event): Likewise.
+	* m2-lang.c (m2_op_print_tab): Likewise.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): Likewise.
+	(mi_cmd_stack_list_variables): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Likewise.
+	* mi/mi-out.c (mi_table_begin): Likewise.
+	(mi_table_header): Likewise.
+	* mips-linux-nat.c (mips_linux_can_use_hw_breakpoint): Likewise.
+	(mips_linux_insert_watchpoint): Likewise.
+	(mips_linux_remove_watchpoint): Likewise.
+	* nat/mips-linux-watch.c (mips_linux_watch_type_to_irw): Likewise.
+	* nat/mips-linux-watch.h (struct mips_watchpoint): Likewise.
+	(mips_linux_watch_type_to_irw): Likewise.
+	* nto-procfs.c (procfs_can_use_hw_breakpoint): Likewise.
+	(procfs_insert_hw_watchpoint): Likewise.
+	(procfs_remove_hw_watchpoint): Likewise.
+	(procfs_hw_watchpoint): Likewise.
+	(procfs_can_use_hw_breakpoint): Likewise.
+	(procfs_remove_hw_watchpoint): Likewise.
+	(procfs_insert_hw_watchpoint): Likewise.
+	* p-lang.c (pascal_op_print_tab): Likewise.
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Likewise.
+	* ppc-linux-tdep.c (ppu2spu_unwind_register): Likewise.
+	* ppc-sysv-tdep.c (get_decimal_float_return_value): Likewise.
+	* procfs.c (procfs_can_use_hw_breakpoint): Likewise.
+	(procfs_insert_watchpoint): Likewise.
+	(procfs_remove_watchpoint): Likewise.
+	* psymtab.c (recursively_search_psymtabs): Likewise.
+	* remote-m32r-sdi.c (m32r_can_use_hw_watchpoint): Likewise.
+	(m32r_insert_watchpoint): Likewise.
+	* remote-mips.c (mips_can_use_watchpoint): Likewise.
+	(mips_insert_watchpoint): Likewise.
+	(mips_remove_watchpoint): Likewise.
+	* remote.c (watchpoint_to_Z_packet): Likewise.
+	(remote_insert_watchpoint): Likewise.
+	(remote_remove_watchpoint): Likewise.
+	(remote_check_watch_resources): Likewise.
+	* s390-linux-nat.c (s390_insert_watchpoint): Likewise.
+	(s390_remove_watchpoint): Likewise.
+	(s390_can_use_hw_breakpoint): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* spu-linux-nat.c (spu_can_use_hw_breakpoint): Likewise.
+	* target.h (struct target_ops): Likewise.
+	* tilegx-tdep.c (tilegx_analyze_prologue): Likewise.
+	* ui-out.c (struct ui_out_hdr): Likewise.
+	(append_header_to_list): Likewise.
+	(get_next_header): Likewise.
+	(verify_field): Likewise.
+	(ui_out_begin): Likewise.
+	(ui_out_field_int): Likewise.
+	(ui_out_field_fmt_int): Likewise.
+	(ui_out_field_skip): Likewise.
+	(ui_out_field_string): Likewise.
+	(ui_out_field_fmt): Likewise.
+	* varobj.c (new_variable): Likewise.
+	* x86-nat.c (x86_insert_watchpoint): Likewise.
+	(x86_remove_watchpoint): Likewise.
+	(x86_can_use_hw_breakpoint): Likewise.
+	* xtensa-tdep.h (struct gdbarch_tdep): Likewise.
+	* inflow.c (enum gdb_has_a_terminal_flag_enum): Add name to
+	previously anonymous enumeration type..
+	* linux-record.h (enum gdb_syscall): Add gdb_sys_no_syscall
+	value.
+	* target-debug.h (target_debug_print_enum_target_hw_bp_type): New.
+	(target_debug_print_enum_bptype): New.
+	* target-delegates.c: Regenerate.
+
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_analyze_prologue): Do what the comment
+	already says and disallow non-stack memory writes in the prologue.
+
+2015-07-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_analyze_prologue): Update comments to
+	reflect how current GCC emits stack overflow checks.  Match
+	both trap and break instructions for backward compatbility.
+	Disallow other trap and break instructions in the prologue.
+
+2015-07-30  Pedro Alves  <palves@redhat.com>
+
+	PR threads/18600
+	* linux-nat.c (wait_lwp): Report to the core when thread group
+	leader exits.
+
+2015-07-30  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR threads/18600
+	* linux-nat.c (linux_handle_extended_wait): On CLONE event, always
+	mark the new thread as resumed.  Remove STOPPING parameter.
+	(wait_lwp): Adjust call to linux_handle_extended_wait.
+	(linux_nat_filter_event): Adjust call to
+	linux_handle_extended_wait.
+	(resume_stopped_resumed_lwps): Add debug output.
+
+2015-07-30  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* arch-utils.c (default_fast_tracepoint_valid_at): Remove unused
+	isize argument.
+	* arch-utils.h (default_fast_tracepoint_valid_at): Likewise.
+	* breakpoint.c (check_fast_tracepoint_sals): Adjust call to
+	gdbarch_fast_tracepoint_valid_at.
+	* gdbarch.sh (fast_tracepoint_valid_at): Remove isize argument.
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Regenerate.
+	* i386-tdep.c (i386_fast_tracepoint_valid_at): Remove isize
+	argument.  Do not set it.
+	* remote.c (remote_download_tracepoint): Adjust call to
+	gdbarch_fast_tracepoint_valid_at.  Call gdb_insn_length to get
+	the instruction length.
+
+2015-07-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.h (enum gdb_regnum): Move it to ...
+	* arch/arm.h: ... here.  New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add arch/arm.h.
+
+2015-07-30  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (decode_b): Rename link argument to is_bl.
+	Change its type to int *.
+	(decode_br): Rename link argument to is_blr.  Change its type to
+	int *.
+	(decode_cb): Rename op argument to is_cbnz.  Change its type to
+	int *.
+	(decode_tb): Rename op argument to is_tbnz.  Change its type to
+	int *.  Set is_tbnz to either 1 or 0.
+	(aarch64_analyze_prologue): Change type of is_link to int.  Add
+	new variables is_cbnz and is_tbnz.  Adjust call to
+	aarch64_decode_cb and aarch64_decode_tb.
+
+2015-07-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mips-linux-nat.c (write_watchpoint_regs): Add NULL as ptrace's 4th
+	parameter.
+	(mips_linux_new_thread): Likewise.
+	* nat/mips-linux-watch.c (mips_linux_read_watch_registers): Likewise.
+
 2015-07-29  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* top.c: Include "tui/tui.h".

@@ -131,7 +131,7 @@ skip_function_command (char *arg, int from_tty)
     }
   else
     {
-      if (lookup_symbol (arg, NULL, VAR_DOMAIN, NULL) == NULL)
+      if (lookup_symbol (arg, NULL, VAR_DOMAIN, NULL).symbol == NULL)
         {
 	  fprintf_filtered (gdb_stderr,
 			    _("No function found named %s.\n"), arg);
