@@ -1,5 +1,23 @@
 2015-08-04  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv (srv_tgtobj): Add linux-aarch32-low.o.
+	* linux-aarch32-low.c: New file.
+	* linux-aarch32-low.h: New file.
+	* linux-arm-low.c (arm_fill_gregset): Move it to
+	linux-aarch32-low.c.
+	(arm_store_gregset): Likewise.
+	(arm_fill_vfpregset): Call arm_fill_vfpregset_num
+	(arm_store_vfpregset): Call arm_store_vfpregset_num.
+	(arm_arch_setup): Check if PTRACE_GETREGSET works.
+	(regs_info): Rename to regs_info_arm.
+	(arm_regs_info): Return regs_info_aarch32 if
+	have_ptrace_getregset is 1 and target description is
+	arm_with_neon or arm_with_vfpv3.
+	(initialize_low_arch): Don't call init_registers_arm_with_neon.
+	Call initialize_low_arch_aarch32 instead.
+
+2015-08-04  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-x86-low.c (have_ptrace_getregset): Move it to ...
 	* linux-low.c: ... here.
 	* linux-low.h (have_ptrace_getregset): Declare it.

@@ -19,7 +19,9 @@
 #include "server.h"
 #include "linux-low.h"
 #include "arch/arm.h"
+#include "linux-aarch32-low.h"
 
+#include <sys/uio.h>
 /* Don't include elf.h if linux/elf.h got included by gdb_proc_service.h.
    On Bionic elf.h and linux/elf.h have conflicting definitions.  */
 #ifndef ELFMAG0
@@ -40,9 +42,6 @@ extern const struct target_desc *tdesc_arm_with_vfpv2;
 
 void init_registers_arm_with_vfpv3 (void);
 extern const struct target_desc *tdesc_arm_with_vfpv3;
-
-void init_registers_arm_with_neon (void);
-extern const struct target_desc *tdesc_arm_with_neon;
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
@@ -150,35 +149,6 @@ arm_cannot_fetch_register (int regno)
 }
 
 static void
-arm_fill_gregset (struct regcache *regcache, void *buf)
-{
-  int i;
-  uint32_t *regs = buf;
-
-  for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
-    collect_register (regcache, i, &regs[i]);
-
-  collect_register (regcache, ARM_PS_REGNUM, &regs[16]);
-}
-
-static void
-arm_store_gregset (struct regcache *regcache, const void *buf)
-{
-  int i;
-  char zerobuf[8];
-  const uint32_t *regs = buf;
-
-  memset (zerobuf, 0, 8);
-  for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
-    supply_register (regcache, i, &regs[i]);
-
-  for (; i < ARM_PS_REGNUM; i++)
-    supply_register (regcache, i, zerobuf);
-
-  supply_register (regcache, ARM_PS_REGNUM, &regs[16]);
-}
-
-static void
 arm_fill_wmmxregset (struct regcache *regcache, void *buf)
 {
   int i;
@@ -215,7 +185,7 @@ arm_store_wmmxregset (struct regcache *regcache, const void *buf)
 static void
 arm_fill_vfpregset (struct regcache *regcache, void *buf)
 {
-  int i, num, base;
+  int num;
 
   if (regcache->tdesc == tdesc_arm_with_neon
       || regcache->tdesc == tdesc_arm_with_vfpv3)
@@ -225,17 +195,13 @@ arm_fill_vfpregset (struct regcache *regcache, void *buf)
   else
     return;
 
-  base = find_regno (regcache->tdesc, "d0");
-  for (i = 0; i < num; i++)
-    collect_register (regcache, base + i, (char *) buf + i * 8);
-
-  collect_register_by_name (regcache, "fpscr", (char *) buf + 32 * 8);
+  arm_fill_vfpregset_num (regcache, buf, num);
 }
 
 static void
 arm_store_vfpregset (struct regcache *regcache, const void *buf)
 {
-  int i, num, base;
+  int num;
 
   if (regcache->tdesc == tdesc_arm_with_neon
       || regcache->tdesc == tdesc_arm_with_vfpv3)
@@ -245,11 +211,7 @@ arm_store_vfpregset (struct regcache *regcache, const void *buf)
   else
     return;
 
-  base = find_regno (regcache->tdesc, "d0");
-  for (i = 0; i < num; i++)
-    supply_register (regcache, base + i, (char *) buf + i * 8);
-
-  supply_register_by_name (regcache, "fpscr", (char *) buf + 32 * 8);
+  arm_store_vfpregset_num (regcache, buf, num);
 }
 
 extern int debug_threads;
@@ -888,8 +850,23 @@ arm_read_description (void)
 static void
 arm_arch_setup (void)
 {
+  int tid = lwpid_of (current_thread);
+  int gpregs[18];
+  struct iovec iov;
+
   current_process ()->tdesc = arm_read_description ();
+
+  iov.iov_base = gpregs;
+  iov.iov_len = sizeof (gpregs);
+
+  /* Check if PTRACE_GETREGSET works.  */
+  if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov) == 0)
+    have_ptrace_getregset = 1;
+  else
+    have_ptrace_getregset = 0;
 }
+
+/* Register sets without using PTRACE_GETREGSET.  */
 
 static struct regset_info arm_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, 18 * 4,
@@ -917,7 +894,7 @@ static struct usrregs_info arm_usrregs_info =
     arm_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info regs_info_arm =
   {
     NULL, /* regset_bitmap */
     &arm_usrregs_info,
@@ -927,7 +904,13 @@ static struct regs_info regs_info =
 static const struct regs_info *
 arm_regs_info (void)
 {
-  return &regs_info;
+  const struct target_desc *tdesc = current_process ()->tdesc;
+
+  if (have_ptrace_getregset == 1
+      && (tdesc == tdesc_arm_with_neon || tdesc == tdesc_arm_with_vfpv3))
+    return &regs_info_aarch32;
+  else
+    return &regs_info_arm;
 }
 
 struct linux_target_ops the_low_target = {
@@ -975,7 +958,8 @@ initialize_low_arch (void)
   init_registers_arm_with_iwmmxt ();
   init_registers_arm_with_vfpv2 ();
   init_registers_arm_with_vfpv3 ();
-  init_registers_arm_with_neon ();
+
+  initialize_low_arch_aarch32 ();
 
   initialize_regsets_info (&arm_regsets_info);
 }
