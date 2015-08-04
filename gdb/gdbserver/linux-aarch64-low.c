@@ -155,12 +155,24 @@ extern int debug_threads;
 static CORE_ADDR
 aarch64_get_pc (struct regcache *regcache)
 {
-  unsigned long pc;
+  if (register_size (regcache->tdesc, 0) == 8)
+    {
+      unsigned long pc;
 
-  collect_register_by_name (regcache, "pc", &pc);
-  if (debug_threads)
-    debug_printf ("stop pc is %08lx\n", pc);
-  return pc;
+      collect_register_by_name (regcache, "pc", &pc);
+      if (debug_threads)
+	debug_printf ("stop pc is %08lx\n", pc);
+      return pc;
+    }
+  else
+    {
+      unsigned int pc;
+
+      collect_register_by_name (regcache, "pc", &pc);
+      if (debug_threads)
+	debug_printf ("stop pc is %04x\n", pc);
+      return pc;
+    }
 }
 
 /* Implementation of linux_target_ops method "set_pc".  */
@@ -168,8 +180,16 @@ aarch64_get_pc (struct regcache *regcache)
 static void
 aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  unsigned long newpc = pc;
-  supply_register_by_name (regcache, "pc", &newpc);
+  if (register_size (regcache->tdesc, 0) == 8)
+    {
+      unsigned long newpc = pc;
+      supply_register_by_name (regcache, "pc", &newpc);
+    }
+  else
+    {
+      unsigned int newpc = pc;
+      supply_register_by_name (regcache, "pc", &newpc);
+    }
 }
 
 #define aarch64_breakpoint_len 4

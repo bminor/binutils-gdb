@@ -1,5 +1,11 @@
 2015-08-04  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_get_pc): Get PC register on
+	both aarch64 and aarch32.
+	(aarch64_set_pc): Likewise.
+
+2015-08-04  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv (case aarch64*-*-linux*): Append arm-with-neon.o
 	to srv_regobj and append arm-core.xml arm-vfpv3.xml and
 	arm-with-neon.xml to srv_xmlfiles.
