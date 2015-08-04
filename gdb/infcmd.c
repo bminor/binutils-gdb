@@ -2617,9 +2617,6 @@ attach_command (char *args, int from_tty)
      shouldn't refer to attach_target again.  */
   attach_target = NULL;
 
-  /* Done with ARGS.  */
-  do_cleanups (args_chain);
-
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
   target_terminal_init ();
@@ -2684,11 +2681,18 @@ attach_command (char *args, int from_tty)
 	  a->async_exec = async_exec;
 	  add_inferior_continuation (attach_command_continuation, a,
 				     attach_command_continuation_free_args);
+
+	  /* Done with ARGS.  */
+	  do_cleanups (args_chain);
+
 	  return;
 	}
 
       wait_for_inferior ();
     }
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 
   attach_command_post_wait (args, from_tty, async_exec);
 }
