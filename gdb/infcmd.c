@@ -1264,6 +1264,8 @@ signal_command (char *signum_exp, int from_tty)
 	oursig = gdb_signal_from_command (num);
     }
 
+  do_cleanups (args_chain);
+
   /* Look for threads other than the current that this command ends up
      resuming too (due to schedlock off), and warn if they'll get a
      signal delivered.  "signal 0" is used to suppress a previous

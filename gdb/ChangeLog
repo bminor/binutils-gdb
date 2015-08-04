@@ -1,5 +1,9 @@
 2015-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* infcmd.c (signal_command): Call do_cleanups for args_chain.
+
+2015-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR gdb/18767
 	* infcmd.c (attach_command): Move ARGS_CHAIN cleanup after last ARGS
 	use.
