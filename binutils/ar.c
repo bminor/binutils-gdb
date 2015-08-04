@@ -1041,6 +1041,7 @@ extract_file (bfd *abfd)
     {
       non_fatal (_("illegal pathname found in archive member: %s"),
 		 bfd_get_filename (abfd));
+      free (cbuf);
       return;
     }
 
