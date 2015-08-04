@@ -701,7 +701,13 @@ aarch64_regs_info (void)
 static int
 aarch64_supports_tracepoints (void)
 {
-  return 1;
+  if (current_thread == NULL)
+    return 1;
+  else
+    {
+      /* We don't support tracepoints on aarch32 now.  */
+      return is_64bit_tdesc ();
+    }
 }
 
 /* Implementation of linux_target_ops method "supports_range_stepping".  */
