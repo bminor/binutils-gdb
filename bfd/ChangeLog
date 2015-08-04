@@ -1,3 +1,15 @@
+2015-08-04  Yuriy M. Kaminskiy"  <yumkam@gmail.com>
+	    Tyler Hicks  <tyhicks@canonical.com>
+
+	PR binutils/18750
+	* ihex.c (ihex_scan): Fixes incorrect escape sequence in error message
+	and stack overflow when char is signed and \200-\376 was in place of hex
+	digit; also fixes \377 was handled as EOF instead of "incorrect character".
+	(ihex_read_section): Changed for consistency.
+	(ihex_bad_byte): Prevent (now impossible to trigger) stack
+	overflow and incorrect escape sequence handling.
+	* srec.c (srec_bad_byte): Likewise.
+
 2015-08-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section)

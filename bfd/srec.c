@@ -249,7 +249,7 @@ srec_bad_byte (bfd *abfd,
       char buf[40];
 
       if (! ISPRINT (c))
-	sprintf (buf, "\\%03o", (unsigned int) c);
+	sprintf (buf, "\\%03o", (unsigned int) c & 0xff);
       else
 	{
 	  buf[0] = c;

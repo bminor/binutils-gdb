@@ -14467,7 +14467,7 @@ process_mips_specific (FILE * file)
 	      len = sizeof (* eopt);
 	      while (len < option->size)
 		{
-		  char datum = * ((char *) eopt + offset + len);
+		  unsigned char datum = * ((unsigned char *) eopt + offset + len);
 
 		  if (ISPRINT (datum))
 		    printf ("%c", datum);

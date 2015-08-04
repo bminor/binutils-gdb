@@ -1,3 +1,14 @@
+2015-08-04  Yuriy M. Kaminskiy"  <yumkam@gmail.com>
+	    Tyler Hicks  <tyhicks@canonical.com>
+
+	PR binutils/18750
+	* readelf.c (process_mips_specific): Fix incorrect escape
+	sequence handling.
+
+2015-08-04  Nick Clifton  <nickc@redhat.com>
+
+	* ar.c (extract_file): Free cbuf if the path is invalid.
+
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
