@@ -5752,13 +5752,23 @@ bpstat_what (bpstat bs_head)
 	case bp_longjmp:
 	case bp_longjmp_call_dummy:
 	case bp_exception:
-	  this_action = BPSTAT_WHAT_SET_LONGJMP_RESUME;
-	  retval.is_longjmp = bptype != bp_exception;
+	  if (bs->stop)
+	    {
+	      this_action = BPSTAT_WHAT_SET_LONGJMP_RESUME;
+	      retval.is_longjmp = bptype != bp_exception;
+	    }
+	  else
+	    this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 	case bp_longjmp_resume:
 	case bp_exception_resume:
-	  this_action = BPSTAT_WHAT_CLEAR_LONGJMP_RESUME;
-	  retval.is_longjmp = bptype == bp_longjmp_resume;
+	  if (bs->stop)
+	    {
+	      this_action = BPSTAT_WHAT_CLEAR_LONGJMP_RESUME;
+	      retval.is_longjmp = bptype == bp_longjmp_resume;
+	    }
+	  else
+	    this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 	case bp_step_resume:
 	  if (bs->stop)
