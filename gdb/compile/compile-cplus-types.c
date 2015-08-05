@@ -22,6 +22,8 @@
 #include "gdbtypes.h"
 #include "compile-internal.h"
 #include "gdb_assert.h"
+#include "symtab.h"
+#include "source.h"
 
 /* An object that maps a gdb type to a gcc type.  */
 
@@ -159,6 +161,37 @@ convert_array (struct compile_cplus_instance *context, struct type *type)
     }
 }
 
+
+static
+void find_line_and_src_from_type (struct type *type, unsigned short *line,
+				  const char **source)
+{
+  /* pmuldoon: There's got to be a better way of finding the file and
+     source location of a type in source other than finding the symbol
+     (searching the symbol table for the string name).  */
+  struct symtab *s;
+  struct symbol_search *symbols = NULL;
+  char *exact;
+  const char *name = TYPE_NAME (type);
+
+  /* Room for NAME and ^ and $ and trailing null.  This is needed for
+     exact matches to type name.  */
+  exact = calloc (strlen (name) + 3, sizeof (char));
+
+  /* Exact matches only.  */
+  snprintf (exact, strlen (name) + 3, "^%s$", name);
+  search_symbols (exact, TYPES_DOMAIN, 0, NULL, &symbols);
+  xfree (exact);
+  /* pmuldoon: For now we only cope if one symbol for TYPE is
+     found. What to do if class = = minimal symbol?  */
+  gdb_assert (symbols && symbols->symbol && symbols->next == NULL);
+
+  s = symbol_symtab (symbols->symbol);
+  *source = symtab_to_filename_for_display (s);
+  *line = symbols->symbol->line;
+  free_search_symbols (symbols);
+}
+
 /* Convert a struct or union type to its gcc representation.  */
 
 static gcc_type
@@ -168,11 +201,11 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
   gcc_type result;
 
   // FIXME: drop any namespaces and enclosing class names, if any. -lxo
-  const char *name = type->main_type->name;
-
-  // FIXME: how do we get these? -lxo
+  const char *name = TYPE_NAME (type);
   const char *filename = NULL;
   unsigned short line = 0;
+
+  find_line_and_src_from_type (type, &line, &filename);
 
   CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
   // FIXME: push (and, after the call, pop) any other namespaces, if
@@ -185,6 +218,29 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       struct gcc_vbase_array *bases = NULL;
+      int num_base_classes = TYPE_N_BASECLASSES (type);
+
+      if (num_base_classes > 0 )
+	{
+	  bases = xmalloc (sizeof (struct gcc_vbase_array));;
+	  bases->n_elements = num_base_classes;
+	  bases->virtualp = 0;
+	  bases->elements = xcalloc (sizeof (gcc_type), num_base_classes);
+	  for (i = 0; i < num_base_classes; i++)
+	    {
+	      /* pmuldoon: Not sure what to populate in this base
+		 class array.  */
+	      struct type *base_type = TYPE_BASECLASS (type, i);
+	      const char *base_filename = NULL;
+	      unsigned short base_line = 0;
+
+	      find_line_and_src_from_type (base_type, &base_line, &base_filename);
+	      bases->elements[i] = CP_CTX (context)->cp_ops->start_new_class_type
+		(CP_CTX (context), base_type->main_type->name, NULL,
+		 base_filename, base_line);
+	    }
+	}
+
       // FIXME: build base classes array.  -lxo
       result = CP_CTX (context)->cp_ops->start_new_class_type
 	(CP_CTX (context), name, bases, filename, line);
