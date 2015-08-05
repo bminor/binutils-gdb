@@ -1,3 +1,9 @@
+2015-08-05  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_copy_private_bfd_data): Copy the sh_link and
+	sh_info fields of sections whose type has been changed to
+	SHT_NOBITS.
+
 2015-08-04  Yuriy M. Kaminskiy"  <yumkam@gmail.com>
 	    Tyler Hicks  <tyhicks@canonical.com>
 

@@ -1,3 +1,9 @@
+2015-08-05  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objcopy.exp (keep_debug_symbols_and_check_links):
+	New proc.  Checks that debug-info-only binaries retain the
+	sh_link field in stripped sections.
+
 2015-08-04  Nick Clifton  <nickc@redhat.com>
 
 	* lib/utils-lib.exp (run_dump_test): Document DUMPPROG, readelf
