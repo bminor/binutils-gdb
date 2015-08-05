@@ -66,23 +66,6 @@
 
 extern int arm_apcs_32;
 
-/* On GNU/Linux, threads are implemented as pseudo-processes, in which
-   case we may be tracing more than one process at a time.  In that
-   case, inferior_ptid will contain the main process ID and the
-   individual thread (process) ID.  get_thread_id () is used to get
-   the thread id if it's available, and the process id otherwise.  */
-
-static int
-get_thread_id (ptid_t ptid)
-{
-  int tid = ptid_get_lwp (ptid);
-  if (0 == tid)
-    tid = ptid_get_pid (ptid);
-  return tid;
-}
-
-#define GET_THREAD_ID(PTID)	get_thread_id (PTID)
-
 /* Get the whole floating point state of the process and store it
    into regcache.  */
 
@@ -93,7 +76,7 @@ fetch_fpregs (struct regcache *regcache)
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   /* Read the floating point state.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -133,7 +116,7 @@ store_fpregs (const struct regcache *regcache)
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   /* Read the floating point state.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -193,7 +176,7 @@ fetch_regs (struct regcache *regcache)
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -223,7 +206,7 @@ store_regs (const struct regcache *regcache)
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   /* Fetch the general registers.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -277,7 +260,7 @@ fetch_wmmx_regs (struct regcache *regcache)
   int ret, regno, tid;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
@@ -306,7 +289,7 @@ store_wmmx_regs (const struct regcache *regcache)
   int ret, regno, tid;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
@@ -351,7 +334,7 @@ fetch_vfp_regs (struct regcache *regcache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -383,7 +366,7 @@ store_vfp_regs (const struct regcache *regcache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -553,7 +536,7 @@ arm_linux_read_description (struct target_ops *ops)
     {
       elf_gregset_t gpregs;
       struct iovec iov;
-      int tid = GET_THREAD_ID (inferior_ptid);
+      int tid = ptid_get_lwp (inferior_ptid);
 
       iov.iov_base = &gpregs;
       iov.iov_len = sizeof (gpregs);
@@ -636,7 +619,7 @@ arm_linux_get_hwbp_cap (void)
       int tid;
       unsigned int val;
 
-      tid = GET_THREAD_ID (inferior_ptid);
+      tid = ptid_get_lwp (inferior_ptid);
       if (ptrace (PTRACE_GETHBPREGS, tid, 0, &val) < 0)
 	available = 0;
       else

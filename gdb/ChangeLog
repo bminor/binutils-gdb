@@ -1,3 +1,30 @@
+2015-08-05  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (get_thread_id): Remove.
+	(debug_reg_change_callback): Call ptid_get_lwp instead of
+	get_thread_id.
+	(fetch_gregs_from_thread): Likewise.
+	(store_gregs_to_thread): Likewise.
+	(fetch_fpregs_from_thread): Likewise.
+	(store_fpregs_to_thread): Likewise.
+	(aarch64_linux_get_debug_reg_capacity): Likewise.
+	* arm-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Update macro to use ptid_get_lwp.
+	* xtensa-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Update macro to use ptid_get_lwp.
+	* arm-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Remove.
+	(fetch_fpregs): Call ptid_get_lwp instead of GET_THREAD_ID.
+	(store_fpregs, fetch_regs, store_regs): Likewise.
+	(fetch_wmmx_regs, store_wmmx_regs): Likewise.
+	(fetch_vfp_regs, store_vfp_regs): Likewise.
+	(arm_linux_read_description): Likewise.
+	(arm_linux_get_hwbp_cap): Likewise.
+	* xtensa-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Remove.
+	(fetch_gregs, store_gregs): Call ptid_get_lwp instead of
+	GET_THREAD_ID.
+
 2015-08-04  Ciro Santilli  <ciro.santilli@gmail.com>  (obvious patch)
 
 	* python/py-linetable.c: Fix case of Linetable to LineTable

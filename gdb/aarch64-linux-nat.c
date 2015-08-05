@@ -48,22 +48,6 @@
 #define TRAP_HWBKPT 0x0004
 #endif
 
-/* On GNU/Linux, threads are implemented as pseudo-processes, in which
-   case we may be tracing more than one process at a time.  In that
-   case, inferior_ptid will contain the main process ID and the
-   individual thread (process) ID.  get_thread_id () is used to get
-   the thread id if it's available, and the process id otherwise.  */
-
-static int
-get_thread_id (ptid_t ptid)
-{
-  int tid = ptid_get_lwp (ptid);
-
-  if (0 == tid)
-    tid = ptid_get_pid (ptid);
-  return tid;
-}
-
 /* Per-process data.  We don't bind this to a per-inferior registry
    because of targets like x86 GNU/Linux that need to keep track of
    processes that aren't bound to any inferior (e.g., fork children,
@@ -181,7 +165,7 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
 {
   struct aarch64_dr_update_callback_param *param_p
     = (struct aarch64_dr_update_callback_param *) ptr;
-  int pid = get_thread_id (lwp->ptid);
+  int pid = ptid_get_lwp (lwp->ptid);
   int idx = param_p->idx;
   int is_watchpoint = param_p->is_watchpoint;
   struct arch_lwp_info *info = lwp->arch_private;
@@ -266,7 +250,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
 
-  tid = get_thread_id (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -303,7 +287,7 @@ store_gregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
-  tid = get_thread_id (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -347,7 +331,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
 
-  tid = get_thread_id (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   iovec.iov_base = &regs;
 
@@ -394,7 +378,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
-  tid = get_thread_id (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
 
   iovec.iov_base = &regs;
 
