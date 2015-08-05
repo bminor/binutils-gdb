@@ -1,3 +1,10 @@
+2015-08-05  Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+        * breakpoint.c (bpstat_what) <bp_longjmp, bp_longjmp_call_dummy>
+	<bp_exception, bp_longjmp_resume, bp_exception_resume>: Handle the
+	case where BS->STOP is not set.
+
 2015-08-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* nat/gdb_thread_db.h: Add copyright header.
