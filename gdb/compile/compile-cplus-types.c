@@ -218,15 +218,15 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
      table.  This lets recursive types work.  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
-      struct gcc_vbase_array *bases = NULL;
+      struct gcc_vbase_array bases;
       int num_base_classes = TYPE_N_BASECLASSES (type);
 
       if (num_base_classes > 0 )
 	{
-	  bases = xmalloc (sizeof (struct gcc_vbase_array));;
-	  bases->n_elements = num_base_classes;
-	  bases->virtualp = 0;
-	  bases->elements = xcalloc (num_base_classes, sizeof (gcc_type));
+
+	  bases.elements = XNEWVEC (gcc_type, num_base_classes);
+	  bases.n_elements = num_base_classes;
+	  bases.virtualp = 0;
 	  for (i = 0; i < num_base_classes; i++)
 	    {
 	      /* pmuldoon: Not sure what to populate in this base
@@ -235,16 +235,15 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
 	      const char *base_filename = NULL;
 	      unsigned short base_line = 0;
 
-	      find_line_and_src_from_type (base_type, &base_line, &base_filename);
-	      bases->elements[i] = CP_CTX (context)->cp_ops->start_new_class_type
-		(CP_CTX (context), base_type->main_type->name, NULL,
-		 base_filename, base_line);
+	      find_line_and_src_from_type (base_type, &base_line,
+					   &base_filename);
+	      bases.elements[i] = convert_cplus_type (context, base_type);
 	    }
 	}
 
       // FIXME: build base classes array.  -lxo
       result = CP_CTX (context)->cp_ops->start_new_class_type
-	(CP_CTX (context), name, bases, filename, line);
+	(CP_CTX (context), name, &bases, filename, line);
     }
   else
     {
