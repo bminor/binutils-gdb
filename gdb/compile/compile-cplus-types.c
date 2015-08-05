@@ -168,7 +168,8 @@ void find_line_and_src_from_type (struct type *type, unsigned short *line,
 {
   /* pmuldoon: There's got to be a better way of finding the file and
      source location of a type in source other than finding the symbol
-     (searching the symbol table for the string name).  */
+     (searching the symbol table for the string name) from the full
+     symbol table.  */
   struct symtab *s;
   struct symbol_search *symbols = NULL;
   char *exact;
@@ -176,7 +177,7 @@ void find_line_and_src_from_type (struct type *type, unsigned short *line,
 
   /* Room for NAME and ^ and $ and trailing null.  This is needed for
      exact matches to type name.  */
-  exact = calloc (strlen (name) + 3, sizeof (char));
+  exact = xcalloc (strlen (name) + 3, sizeof (char));
 
   /* Exact matches only.  */
   snprintf (exact, strlen (name) + 3, "^%s$", name);
@@ -225,7 +226,7 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
 	  bases = xmalloc (sizeof (struct gcc_vbase_array));;
 	  bases->n_elements = num_base_classes;
 	  bases->virtualp = 0;
-	  bases->elements = xcalloc (sizeof (gcc_type), num_base_classes);
+	  bases->elements = xcalloc (num_base_classes, sizeof (gcc_type));
 	  for (i = 0; i < num_base_classes; i++)
 	    {
 	      /* pmuldoon: Not sure what to populate in this base
