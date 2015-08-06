@@ -1,3 +1,8 @@
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/forking-threads-plus-breakpoint.exp: New file.
+	* gdb.threads/forking-threads-plus-breakpoint.c: New file.
+
 2015-08-05  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/next-while-other-thread-longjmps.c: New file.

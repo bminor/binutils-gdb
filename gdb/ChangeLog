@@ -1,3 +1,8 @@
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* target/waitstatus.h (enum target_stop_reason)
+	<TARGET_STOPPED_BY_SINGLE_STEP>: New value.
+
 2015-08-05  Pedro Alves  <palves@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
