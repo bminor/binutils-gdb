@@ -1,3 +1,8 @@
+2015-08-06  Clem Dickey  <clemd@acm.org>
+
+	PR python/17136
+	* python/lib/gdb/command/type_printers.py (InfoTypePrinter): Fix typo.
+
 2015-08-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* complaints.c (enum complaint_series): Add newlines and remove
