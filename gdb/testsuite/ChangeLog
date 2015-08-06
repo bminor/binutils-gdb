@@ -1,5 +1,20 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/step-over-lands-on-breakpoint.c (wait_threads):
+	Delete function.
+	(main): Add alarm.  Run an infinite loop instead of calling
+	wait_threads.
+	* gdb.threads/step-over-lands-on-breakpoint.exp (do_test): Change
+	comment.
+	* gdb.threads/step-over-trips-on-watchpoint.c (wait_threads):
+	Delete function.
+	(main): Add alarm.  Run an infinite loop instead of calling
+	wait_threads.
+	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): Change
+	comment.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/checkpoint-ns.exp: New file.
 	* gdb.base/checkpoint.exp: Pass explicit "checkpoint.c" to
 	standard_testfile.
