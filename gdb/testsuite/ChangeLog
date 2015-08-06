@@ -1,5 +1,11 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18749
+	* gdb.threads/process-dies-while-handling-bp.c: New file.
+	* gdb.threads/process-dies-while-handling-bp.exp: New file.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/forking-threads-plus-breakpoint.exp: New file.
 	* gdb.threads/forking-threads-plus-breakpoint.c: New file.
 
