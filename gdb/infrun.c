@@ -1468,6 +1468,10 @@ struct displaced_step_inferior_state
   /* The process this displaced step state refers to.  */
   int pid;
 
+  /* True if preparing a displaced step ever failed.  If so, we won't
+     try displaced stepping for this inferior again.  */
+  int failed_before;
+
   /* If this is not null_ptid, this is the thread carrying out a
      displaced single-step in process PID.  This thread's state will
      require fixing up once it has completed its step.  */
@@ -1638,16 +1642,24 @@ show_can_use_displaced_stepping (struct ui_file *file, int from_tty,
 }
 
 /* Return non-zero if displaced stepping can/should be used to step
-   over breakpoints.  */
+   over breakpoints of thread TP.  */
 
 static int
-use_displaced_stepping (struct gdbarch *gdbarch)
+use_displaced_stepping (struct thread_info *tp)
 {
+  struct regcache *regcache = get_thread_regcache (tp->ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct displaced_step_inferior_state *displaced_state;
+
+  displaced_state = get_displaced_stepping_state (ptid_get_pid (tp->ptid));
+
   return (((can_use_displaced_stepping == AUTO_BOOLEAN_AUTO
 	    && target_is_non_stop_p ())
 	   || can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
 	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
-	  && find_record_target () == NULL);
+	  && find_record_target () == NULL
+	  && (displaced_state == NULL
+	      || !displaced_state->failed_before));
 }
 
 /* Clean out any stray displaced stepping state.  */
@@ -1701,7 +1713,7 @@ displaced_step_dump_bytes (struct ui_file *file,
    Returns 1 if preparing was successful -- this thread is going to be
    stepped now; or 0 if displaced stepping this thread got queued.  */
 static int
-displaced_step_prepare (ptid_t ptid)
+displaced_step_prepare_throw (ptid_t ptid)
 {
   struct cleanup *old_cleanups, *ignore_cleanups;
   struct thread_info *tp = find_thread_ptid (ptid);
@@ -1809,6 +1821,50 @@ displaced_step_prepare (ptid_t ptid)
 			paddress (gdbarch, copy));
 
   return 1;
+}
+
+/* Wrapper for displaced_step_prepare_throw that disabled further
+   attempts at displaced stepping if we get a memory error.  */
+
+static int
+displaced_step_prepare (ptid_t ptid)
+{
+  int prepared = -1;
+
+  TRY
+    {
+      prepared = displaced_step_prepare_throw (ptid);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      struct displaced_step_inferior_state *displaced_state;
+
+      if (ex.error != MEMORY_ERROR)
+	throw_exception (ex);
+
+      if (debug_infrun)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "infrun: disabling displaced stepping: %s\n",
+			      ex.message);
+	}
+
+      /* Be verbose if "set displaced-stepping" is "on", silent if
+	 "auto".  */
+      if (can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
+	{
+	  warning (_("disabling displaced stepping: %s\n"),
+		   ex.message);
+	}
+
+      /* Disable further displaced stepping attempts.  */
+      displaced_state
+	= get_displaced_stepping_state (ptid_get_pid (ptid));
+      displaced_state->failed_before = 1;
+    }
+  END_CATCH
+
+  return prepared;
 }
 
 static void
@@ -1941,6 +1997,7 @@ static void keep_going_pass_signal (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static int keep_going_stepped_thread (struct thread_info *tp);
 static int thread_still_needs_step_over (struct thread_info *tp);
+static void stop_all_threads (void);
 
 /* Are there any pending step-over requests?  If so, run all we can
    now and return true.  Otherwise, return false.  */
@@ -1961,8 +2018,6 @@ start_step_over (void)
       struct execution_control_state *ecs = &ecss;
       enum step_over_what step_what;
       int must_be_in_line;
-      struct regcache *regcache = get_thread_regcache (tp->ptid);
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
       next = thread_step_over_chain_next (tp);
 
@@ -1974,7 +2029,7 @@ start_step_over (void)
       step_what = thread_still_needs_step_over (tp);
       must_be_in_line = ((step_what & STEP_OVER_WATCHPOINT)
 			 || ((step_what & STEP_OVER_BREAKPOINT)
-			     && !use_displaced_stepping (gdbarch)));
+			     && !use_displaced_stepping (tp)));
 
       /* We currently stop all threads of all processes to step-over
 	 in-line.  If we need to start a new in-line step-over, let
@@ -2434,15 +2489,15 @@ resume (enum gdb_signal sig)
      We can't use displaced stepping when we are waiting for vfork_done
      event, displaced stepping breaks the vfork child similarly as single
      step software breakpoint.  */
-  if (use_displaced_stepping (gdbarch)
-      && tp->control.trap_expected
+  if (tp->control.trap_expected
+      && use_displaced_stepping (tp)
       && !step_over_info_valid_p ()
       && sig == GDB_SIGNAL_0
       && !current_inferior ()->waiting_for_vfork_done)
     {
-      struct displaced_step_inferior_state *displaced;
+      int prepared = displaced_step_prepare (inferior_ptid);
 
-      if (!displaced_step_prepare (inferior_ptid))
+      if (prepared == 0)
 	{
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -2452,14 +2507,32 @@ resume (enum gdb_signal sig)
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
+      else if (prepared < 0)
+	{
+	  /* Fallback to stepping over the breakpoint in-line.  */
 
-      /* Update pc to reflect the new address from which we will execute
-	 instructions due to displaced stepping.  */
-      pc = regcache_read_pc (get_thread_regcache (inferior_ptid));
+	  if (target_is_non_stop_p ())
+	    stop_all_threads ();
 
-      displaced = get_displaced_stepping_state (ptid_get_pid (inferior_ptid));
-      step = gdbarch_displaced_step_hw_singlestep (gdbarch,
-						   displaced->step_closure);
+	  set_step_over_info (get_regcache_aspace (regcache),
+			      regcache_read_pc (regcache), 0);
+
+	  step = maybe_software_singlestep (gdbarch, pc);
+
+	  insert_breakpoints ();
+	}
+      else if (prepared > 0)
+	{
+	  struct displaced_step_inferior_state *displaced;
+
+	  /* Update pc to reflect the new address from which we will
+	     execute instructions due to displaced stepping.  */
+	  pc = regcache_read_pc (get_thread_regcache (inferior_ptid));
+
+	  displaced = get_displaced_stepping_state (ptid_get_pid (inferior_ptid));
+	  step = gdbarch_displaced_step_hw_singlestep (gdbarch,
+						       displaced->step_closure);
+	}
     }
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */
@@ -2578,8 +2651,8 @@ resume (enum gdb_signal sig)
     }
 
   if (debug_displaced
-      && use_displaced_stepping (gdbarch)
       && tp->control.trap_expected
+      && use_displaced_stepping (tp)
       && !step_over_info_valid_p ())
     {
       struct regcache *resume_regcache = get_thread_regcache (tp->ptid);
@@ -7367,8 +7440,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	 watchpoint.  The instruction copied to the scratch pad would
 	 still trigger the watchpoint.  */
       if (remove_bp
-	  && (remove_wps
-	      || !use_displaced_stepping (get_regcache_arch (regcache))))
+	  && (remove_wps || !use_displaced_stepping (ecs->event_thread)))
 	{
 	  set_step_over_info (get_regcache_aspace (regcache),
 			      regcache_read_pc (regcache), remove_wps);

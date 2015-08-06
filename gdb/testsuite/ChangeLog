@@ -1,5 +1,10 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/valgrind-disp-step.c: New file.
+	* gdb.base/valgrind-disp-step.exp: New file.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/step-over-lands-on-breakpoint.c (wait_threads):
 	Delete function.
 	(main): Add alarm.  Run an infinite loop instead of calling

@@ -1,5 +1,17 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* inferior.h (struct inferior) <displaced_stepping_failed>: New
+	field.
+	* infrun.c (use_displaced_stepping_now_p): New parameter 'inf'.
+	Return false if dispaced stepping failed before.
+	(resume): Pass the current inferior to
+	use_displaced_stepping_now_p.  Wrap displaced_step_prepare in
+	TRY/CATCH.  If we get a MEMORY_ERROR, set the inferior's
+	displaced_stepping_failed flag, and fall back to an in-line
+	step-over.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* darwin-nat.c (darwin_stop): Rename to ...
 	(darwin_interrupt): ... this.
 	(_initialize_darwin_inferior): Adjust.
