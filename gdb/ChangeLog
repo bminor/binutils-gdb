@@ -1,3 +1,12 @@
+2015-08-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* complaints.c (enum complaint_series): Add newlines and remove
+	out of date comment.
+	(struct complaints) <series>: Change type to enum
+	complaint_series and remove out of date comment.
+	(symfile_complaint_hook): Use equivalent enum value
+	ISOLATED_MESSAGE instead of 0.
+
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
 	* nat/linux-waitpid.c (my_waitpid): Only print *status if waitpid
