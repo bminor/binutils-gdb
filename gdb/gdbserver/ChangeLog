@@ -1,5 +1,10 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (move_out_of_jump_pad_callback): Temporarily switch
+	the current thread.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (linux_write_memory): Rewrite debug output to avoid
 	reading beyond the passed in buffer length.
 
