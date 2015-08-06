@@ -1,5 +1,10 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* nat/linux-waitpid.c (my_waitpid): Only print *status if waitpid
+	returned > 0.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* target/waitstatus.h (enum target_stop_reason)
 	<TARGET_STOPPED_BY_SINGLE_STEP>: New value.
 

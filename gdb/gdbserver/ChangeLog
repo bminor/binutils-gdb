@@ -1,5 +1,10 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (linux_write_memory): Rewrite debug output to avoid
+	reading beyond the passed in buffer length.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (handle_extended_wait): Set the fork child's suspend
 	count if stopping and suspending threads.
 	(check_stopped_by_breakpoint): If stopped by trace, set the LWP's
