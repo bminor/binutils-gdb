@@ -73,7 +73,7 @@ static void
 alpha_after_parse (void)
 {
   link_info.relax_pass = 2;
-  if (limit_32bit && !link_info.shared && !link_info.relocatable)
+  if (limit_32bit && !link_info.pic && link_info.type != type_relocatable)
     lang_section_start (".interp",
 			exp_binop ('+',
 				   exp_intop (ALPHA_TEXT_START_32BIT),
@@ -90,7 +90,9 @@ alpha_before_allocation (void)
   gld${EMULATION_NAME}_before_allocation ();
 
   /* Add -relax if -O, not -r, and not explicitly disabled.  */
-  if (link_info.optimize && !link_info.relocatable && ! RELAXATION_DISABLED_BY_USER)
+  if (link_info.optimize
+      && link_info.type != type_relocatable
+      && ! RELAXATION_DISABLED_BY_USER)
     ENABLE_RELAXATION;
 }
 

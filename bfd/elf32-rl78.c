@@ -758,7 +758,7 @@ rl78_elf_relocate_section
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  /* This is a relocatable link.  We don't have to change
              anything, unless the reloc is against a section symbol,
@@ -1310,7 +1310,7 @@ rl78_elf_check_relocs
   asection *splt;
   bfd *dynobj;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -1442,7 +1442,7 @@ rl78_elf_always_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   asection *splt;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1529,7 +1529,7 @@ rl78_elf_relax_plt_section (bfd *dynobj,
   /* Assume nothing changes.  */
   *again = FALSE;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   /* We only relax the .plt section at the moment.  */
@@ -2088,7 +2088,7 @@ rl78_elf_relax_section
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)

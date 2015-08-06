@@ -538,7 +538,7 @@ coff_pe_amd64_relocate_section (bfd *output_bfd,
 				struct internal_syment *syms,
 				asection **sections)
 {
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   return _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,input_section, contents,relocs, syms, sections);

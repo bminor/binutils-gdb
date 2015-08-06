@@ -329,7 +329,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
 
   if (!init[IMAGEBASEOFF].inited)
     {
-      if (link_info.relocatable)
+      if (link_info.type == type_relocatable)
 	init[IMAGEBASEOFF].value = 0;
       else if (init[DLLOFF].value)
 	init[IMAGEBASEOFF].value = BEOS_DLL_IMAGE_BASE;
@@ -338,7 +338,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
     }
 
   /* Don't do any symbol assignments if this is a relocatable link.  */
-  if (link_info.relocatable)
+  if (link_info.type == type_relocatable)
     return;
 
   /* Glue the assignments into the abs section */
@@ -674,7 +674,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
      If they're marked as COMDAT sections, we don't want .text\$foo to
      end up in .text and then have .text disappear because it's marked
      link-once-discard.  */
-  if (link_info.relocatable)
+  if (link_info.type == type_relocatable)
     return NULL;
 
   /* Everything from the '\$' on gets deleted so don't allow '\$' as the
@@ -734,11 +734,11 @@ fragment <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (link_info.type == type_relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.type == type_relocatable) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c

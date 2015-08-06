@@ -693,7 +693,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
   /* If we are building an executable and there is nothing
      to export, we do not build an export table at all.  */
-  if (info->executable && pe_def_file->num_exports == 0
+  if (bfd_link_executable (info) && pe_def_file->num_exports == 0
       && (!pe_dll_export_everything || pe_dll_exclude_all_symbols))
     return;
 
@@ -3369,7 +3369,7 @@ pe_dll_build_sections (bfd *abfd, struct bfd_link_info *info)
   pe_output_file_set_long_section_names (abfd);
   process_def_file_and_drectve (abfd, info);
 
-  if (pe_def_file->num_exports == 0 && !info->shared)
+  if (pe_def_file->num_exports == 0 && !bfd_link_pic (info))
     return;
 
   generate_edata (abfd, info);
@@ -3411,7 +3411,7 @@ pe_dll_fill_sections (bfd *abfd, struct bfd_link_info *info)
 
   fill_edata (abfd, info);
 
-  if (info->shared && !info->pie)
+  if (bfd_link_dll (info))
     pe_data (abfd)->dll = 1;
 
   edata_s->contents = edata_d;

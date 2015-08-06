@@ -107,10 +107,10 @@ spu_after_open (void)
       params.emit_stub_syms |= link_info.emitrelocations;
       spu_elf_setup (&link_info, &params);
 
-      if (link_info.relocatable)
+      if (link_info.type == type_relocatable)
 	lang_add_unique (".text.ia.*");
 
-      if (!link_info.relocatable
+      if (link_info.type != type_relocatable
 	  && link_info.input_bfds != NULL
 	  && !spu_elf_create_sections (&link_info))
 	einfo ("%X%P: can not create note section: %E\n");
@@ -264,7 +264,7 @@ static void
 spu_before_allocation (void)
 {
   if (is_spu_target ()
-      && !link_info.relocatable
+      && link_info.type != type_relocatable
       && !no_overlays)
     {
       int ret;
@@ -318,7 +318,7 @@ spu_before_allocation (void)
     }
 
   if (is_spu_target ()
-      && !link_info.relocatable)
+      && link_info.type != type_relocatable)
     spu_elf_size_sections (link_info.output_bfd, &link_info);
 
   gld${EMULATION_NAME}_before_allocation ();

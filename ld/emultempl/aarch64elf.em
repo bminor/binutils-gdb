@@ -238,7 +238,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
-  if (stub_file != NULL && !link_info.relocatable)
+  if (stub_file != NULL && link_info.type != type_relocatable)
     {
       ret = elf${ELFSIZE}_aarch64_setup_section_lists (link_info.output_bfd,
 						       &link_info);
@@ -273,7 +273,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 static void
 gld${EMULATION_NAME}_finish (void)
 {
-  if (! link_info.relocatable)
+  if (link_info.type != type_relocatable)
     {
       /* Now build the linker stubs.  */
       if (stub_file->the_bfd->sections != NULL)

@@ -190,7 +190,7 @@ symbol_at_end_of (const char *secname, const char *name)
 static void
 lnk960_after_allocation (void)
 {
-  if (!link_info.relocatable)
+  if (link_info.type != type_relocatable)
     {
       symbol_at_end_of (".text", "_etext");
       symbol_at_end_of (".data", "_edata");
@@ -278,11 +278,11 @@ fragment <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (link_info.type == type_relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.type == type_relocatable) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
@@ -299,9 +299,9 @@ fragment <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (link_info.type == type_relocatable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocatable)
+  else if (link_info.type == type_relocatable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

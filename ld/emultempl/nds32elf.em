@@ -70,7 +70,7 @@ nds32_elf_create_output_section_statements (void)
 static void
 nds32_elf_after_parse (void)
 {
-  if (link_info.relocatable)
+  if (link_info.type == type_relocatable)
     DISABLE_RELAXATION;
 
   if (!RELAXATION_ENABLED)
@@ -88,7 +88,7 @@ nds32_elf_after_parse (void)
   else
     update_ex9_table = 0;
 
-  if (link_info.shared)
+  if (link_info.pic)
     {
       target_optimize = target_optimize & (!NDS32_RELAX_JUMP_IFC_ON);
       target_optimize = target_optimize & (!NDS32_RELAX_EX9_ON);
@@ -157,14 +157,14 @@ nds32_elf_after_open (void)
   /* Check object files if the target is dynamic linked executable
      or shared object.  */
   if (elf_hash_table (&link_info)->dynamic_sections_created
-      || link_info.shared || link_info.pie)
+      || link_info.pic)
     {
       for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
 	{
 	  if (!(elf_elfheader (abfd)->e_flags & E_NDS32_HAS_PIC))
 	    {
 	      /* Non-PIC object file is used.  */
-	      if (link_info.shared || link_info.pie)
+	      if (link_info.pic)
 		{
 		  /* For PIE or shared object, all input must be PIC.  */
 		  einfo (_("%B: must use -fpic to compile this file "

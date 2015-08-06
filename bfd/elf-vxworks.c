@@ -64,7 +64,7 @@ elf_vxworks_add_symbol_hook (bfd *abfd,
      give the symbol weak binding to get the desired samantics.
      This transformation will be undone in
      elf_i386_vxworks_link_output_symbol_hook. */
-  if ((info->shared || abfd->flags & DYNAMIC)
+  if ((bfd_link_pic (info) || abfd->flags & DYNAMIC)
       && elf_vxworks_gott_symbol_p (abfd, *namep))
     {
       sym->st_info = ELF_ST_INFO (STB_WEAK, ELF_ST_TYPE (sym->st_info));
@@ -89,7 +89,7 @@ elf_vxworks_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info,
   htab = elf_hash_table (info);
   bed = get_elf_backend_data (dynobj);
 
-  if (!info->shared)
+  if (!bfd_link_pic (info))
     {
       s = bfd_make_section_anyway_with_flags (dynobj,
 					      bed->default_use_rela_p

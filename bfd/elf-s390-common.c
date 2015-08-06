@@ -45,7 +45,7 @@ s390_elf_create_ifunc_sections (bfd *abfd, struct bfd_link_info *info)
 
   flags = bed->dynamic_sec_flags;
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     {
       s = bfd_make_section_with_flags (abfd, ".rela.ifunc",
 				       flags | SEC_READONLY);
@@ -105,7 +105,7 @@ s390_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
          where it is marked with regular reference, but not non-GOT
 	 reference.  It may happen if we didn't see STT_GNU_IFUNC
 	 symbol at the time when checking relocations.  */
-      if (info->shared
+      if (bfd_link_pic (info)
 	  && !h->non_got_ref
 	  && h->ref_regular)
 	for (p = *head; p != NULL; p = p->next)
@@ -151,7 +151,10 @@ keep:
      point to the IPLT slot.  That way the referencing shared lib will
      always get the PLT slot address when resolving the respective
      R_390_GLOB_DAT/R_390_64 relocs on that symbol.  */
-  if (info->executable && !info->shared && h->def_regular && h->ref_dynamic)
+  if (bfd_link_executable (info)
+      && !bfd_link_pic (info)
+      && h->def_regular
+      && h->ref_dynamic)
     {
       h->root.u.def.section = htab->iplt;
       h->root.u.def.value = h->plt.offset;
@@ -161,7 +164,7 @@ keep:
 
   /* We need dynamic relocation for STT_GNU_IFUNC symbol only when
      there is a non-GOT reference in a shared object.  */
-  if (!info->shared || !h->non_got_ref)
+  if (!bfd_link_pic (info) || !h->non_got_ref)
     *head = NULL;
 
   /* Finally, allocate space.  */
@@ -182,9 +185,9 @@ keep:
      avoided if the values in the GOT slots could differ for pointer
      equality reasons.  */
   if (h->got.refcount <= 0
-      || (info->shared
+      || (bfd_link_pic (info)
 	  && (h->dynindx == -1 || h->forced_local))
-      || (info->executable && info->shared)
+      || (bfd_link_executable (info) && bfd_link_pic (info))
       || htab->sgot == NULL)
     {
       /* Use .got.iplt.  */
@@ -194,7 +197,7 @@ keep:
     {
       h->got.offset = htab->sgot->size;
       htab->sgot->size += GOT_ENTRY_SIZE;
-      if (info->shared)
+      if (bfd_link_pic (info))
 	htab->srelgot->size += RELA_ENTRY_SIZE;
     }
 

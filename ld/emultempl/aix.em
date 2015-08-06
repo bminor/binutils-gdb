@@ -532,7 +532,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_MODTYPE:
       if (*optarg == 'S')
 	{
-	  link_info.shared = TRUE;
+	  link_info.type = type_dll;
+	  link_info.pic = TRUE;
 	  ++optarg;
 	}
       if (*optarg == '\0' || optarg[1] == '\0')
@@ -680,7 +681,7 @@ gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry)
 static void
 gld${EMULATION_NAME}_after_open (void)
 {
-  bfd_boolean r;
+  enum output_type t;
   struct set_info *p;
 
   after_open_default ();
@@ -690,11 +691,11 @@ gld${EMULATION_NAME}_after_open (void)
      entries for all references to symbols, even in a final
      executable.  Of course, we only want to do this if we are
      producing an XCOFF output file.  */
-  r = link_info.relocatable;
+  t = link_info.type;
   if (strstr (bfd_get_target (link_info.output_bfd), "xcoff") != NULL)
-    link_info.relocatable = TRUE;
+    link_info.type = type_relocatable;
   ldctor_build_sets ();
-  link_info.relocatable = r;
+  link_info.type = t;
 
   /* For each set, record the size, so that the XCOFF backend can
      output the correct csect length.  */
@@ -953,7 +954,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   /* Executables and shared objects must always have .text, .data
      and .bss output sections, so that the header can refer to them.
      The kernel refuses to load objects that have missing sections.  */
-  if (!link_info.relocatable)
+  if (link_info.type != type_relocatable)
     for (i = 0; i < ARRAY_SIZE (must_keep_sections); i++)
       {
 	asection *sec;
@@ -1410,11 +1411,11 @@ fragment <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (link_info.type == type_relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu		       >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.type == type_relocatable) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr		       >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn		       >> e${EMULATION_NAME}.c
@@ -1431,9 +1432,9 @@ fragment <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (link_info.type == type_relocatable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocatable)
+  else if (link_info.type == type_relocatable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

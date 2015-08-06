@@ -209,7 +209,7 @@ void
 after_parse_default (void)
 {
   if (entry_symbol.name != NULL
-      && (link_info.executable || entry_from_cmdline))
+      && (link_info.type == type_executable || entry_from_cmdline))
     {
       bfd_boolean is_vma = FALSE;
 
@@ -239,14 +239,14 @@ after_allocation_default (void)
 void
 before_allocation_default (void)
 {
-  if (!link_info.relocatable)
+  if (link_info.type != type_relocatable)
     strip_excluded_output_sections ();
 }
 
 void
 finish_default (void)
 {
-  if (!link_info.relocatable)
+  if (link_info.type != type_relocatable)
     _bfd_fix_excluded_sec_syms (link_info.output_bfd, &link_info);
 }
 

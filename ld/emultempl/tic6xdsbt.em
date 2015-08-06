@@ -97,7 +97,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   int layout_changed = 0;
   int ret;
 
-  if (!link_info.relocatable)
+  if (link_info.type != type_relocatable)
     {
       /* Build a sorted list of input text sections, then use that to process
 	 the unwind table index.  */

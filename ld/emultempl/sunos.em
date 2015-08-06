@@ -368,7 +368,7 @@ gld${EMULATION_NAME}_after_open (void)
   after_open_default ();
 
   /* We only need to worry about this when doing a final link.  */
-  if (link_info.relocatable || link_info.shared)
+  if (link_info.type == type_relocatable || link_info.pic)
     return;
 
   /* Get the list of files which appear in ld_need entries in dynamic
@@ -669,7 +669,9 @@ gld${EMULATION_NAME}_before_allocation (void)
   /* The SunOS native linker creates a shared library whenever there
      are any undefined symbols in a link, unless -e is used.  This is
      pretty weird, but we are compatible.  */
-  if (! link_info.shared && ! link_info.relocatable && ! entry_from_cmdline)
+  if (! link_info.pic
+      && link_info.type != type_relocatable
+      && ! entry_from_cmdline)
     {
       struct bfd_link_hash_entry *h;
 
@@ -686,14 +688,15 @@ gld${EMULATION_NAME}_before_allocation (void)
 	      lang_for_each_statement (gld${EMULATION_NAME}_find_assignment);
 	      if (! found_assign)
 		{
-		  link_info.shared = TRUE;
+		  link_info.type = type_dll;
+		  link_info.pic = TRUE;
 		  break;
 		}
 	    }
 	}
     }
 
-  if (link_info.shared)
+  if (link_info.pic)
     {
       lang_output_section_statement_type *os;
 
@@ -710,7 +713,7 @@ gld${EMULATION_NAME}_before_allocation (void)
      one.  We need to create the symbol before calling
      size_dynamic_sections, although we can't set the value until
      afterward.  */
-  if (! link_info.relocatable)
+  if (link_info.type != type_relocatable)
     {
       hdyn = bfd_link_hash_lookup (link_info.hash, "__DYNAMIC", TRUE, FALSE,
 				   FALSE);
@@ -803,7 +806,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   /* We must assign a value to __DYNAMIC.  It should be zero if we are
      not doing a dynamic link, or the start of the .dynamic section if
      we are doing one.  */
-  if (! link_info.relocatable)
+  if (link_info.type != type_relocatable)
     {
       hdyn->type = bfd_link_hash_defined;
       hdyn->u.def.value = 0;
@@ -969,11 +972,11 @@ fragment <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (link_info.type == type_relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'         >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.type == type_relocatable) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
@@ -990,9 +993,9 @@ fragment <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (link_info.type == type_relocatable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocatable)
+  else if (link_info.type == type_relocatable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

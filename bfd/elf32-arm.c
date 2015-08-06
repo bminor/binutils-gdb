@@ -3409,7 +3409,7 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!info->shared)
+  if (!bfd_link_pic (info))
     htab->srelbss = bfd_get_linker_section (dynobj,
 					    RELOC_SECTION (htab, ".bss"));
 
@@ -3418,7 +3418,7 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
       if (!elf_vxworks_create_dynamic_sections (dynobj, info, &htab->srelplt2))
 	return FALSE;
 
-      if (info->shared)
+      if (bfd_link_pic (info))
 	{
 	  htab->plt_header_size = 0;
 	  htab->plt_entry_size
@@ -3452,7 +3452,7 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!htab->root.splt
       || !htab->root.srelplt
       || !htab->sdynbss
-      || (!info->shared && !htab->srelbss))
+      || (!bfd_link_pic (info) && !htab->srelbss))
     abort ();
 
   return TRUE;
@@ -3746,7 +3746,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      /* Thumb to thumb.  */
 	      if (!thumb_only)
 		{
-		  stub_type = (info->shared | globals->pic_veneer)
+		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 		    /* PIC stubs.  */
 		    ? ((globals->use_blx
 			&& (r_type == R_ARM_THM_CALL))
@@ -3768,7 +3768,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		}
 	      else
 		{
-		  stub_type = (info->shared | globals->pic_veneer)
+		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 		    /* PIC stub.  */
 		    ? arm_stub_long_branch_thumb_only_pic
 		    /* non-PIC stub.  */
@@ -3789,7 +3789,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		}
 
 	      stub_type =
-		(info->shared | globals->pic_veneer)
+		(bfd_link_pic (info) | globals->pic_veneer)
 		/* PIC stubs.  */
 		? (r_type == R_ARM_THM_TLS_CALL
 		   /* TLS PIC stubs.  */
@@ -3843,7 +3843,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      || (r_type == R_ARM_JUMP24)
 	      || (r_type == R_ARM_PLT32))
 	    {
-	      stub_type = (info->shared | globals->pic_veneer)
+	      stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 		/* PIC stubs.  */
 		? ((globals->use_blx)
 		   /* V5T and above.  */
@@ -3866,7 +3866,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET))
 	    {
 	      stub_type =
-		(info->shared | globals->pic_veneer)
+		(bfd_link_pic (info) | globals->pic_veneer)
 		/* PIC stubs.  */
 		? (r_type == R_ARM_TLS_CALL
 		   /* TLS PIC Stub.  */
@@ -4097,7 +4097,8 @@ elf32_arm_tls_transition (struct bfd_link_info *info, int r_type,
 {
   int is_local = (h == NULL);
 
-  if (info->shared || (h && h->root.type == bfd_link_hash_undefweak))
+  if (bfd_link_pic (info)
+      || (h && h->root.type == bfd_link_hash_undefweak))
     return r_type;
 
   /* We do not support relaxations for Old TLS models.  */
@@ -5838,7 +5839,8 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 
   free (tmp_name);
 
-  if (link_info->shared || globals->root.is_relocatable_executable
+  if (bfd_link_pic (link_info)
+      || globals->root.is_relocatable_executable
       || globals->pic_veneer)
     size = ARM2THUMB_PIC_GLUE_SIZE;
   else if (globals->use_blx)
@@ -6110,7 +6112,7 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
 {
   /* If we are only performing a partial
      link do not bother adding the glue.  */
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   return arm_make_glue_section (abfd, ARM2THUMB_GLUE_SECTION_NAME)
@@ -6130,7 +6132,7 @@ bfd_elf32_arm_get_bfd_for_interworking (bfd *abfd, struct bfd_link_info *info)
 
   /* If we are only performing a partial link
      do not bother getting a bfd to hold the glue.  */
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   /* Make sure we don't attach the glue sections to a dynamic object.  */
@@ -6182,7 +6184,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
   /* If we are only performing a partial link do not bother
      to construct any glue.  */
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     return TRUE;
 
   /* Here we have a bfd that is to be included on the link.  We have a
@@ -6746,7 +6748,7 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
 
   /* If we are only performing a partial link do not bother
      to construct any glue.  */
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     return TRUE;
 
   /* Skip if this bfd does not correspond to an ELF image.  */
@@ -6932,7 +6934,7 @@ bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
   struct elf32_arm_link_hash_table *globals;
   char *tmp_name;
 
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     return;
 
   /* Skip if this bfd does not correspond to an ELF image.  */
@@ -7220,7 +7222,8 @@ elf32_arm_create_thumb_stub (struct bfd_link_info * info,
       --my_offset;
       myh->root.u.def.value = my_offset;
 
-      if (info->shared || globals->root.is_relocatable_executable
+      if (bfd_link_pic (info)
+	  || globals->root.is_relocatable_executable
 	  || globals->pic_veneer)
 	{
 	  /* For relocatable objects we can't use absolute addresses,
@@ -7671,7 +7674,7 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 		     + root_plt->offset);
 
       ptr = splt->contents + root_plt->offset;
-      if (htab->vxworks_p && info->shared)
+      if (htab->vxworks_p && bfd_link_pic (info))
 	{
 	  unsigned int i;
 	  bfd_vma val;
@@ -8383,7 +8386,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       /* When generating a shared object or relocatable executable, these
 	 relocations are copied into the output file to be resolved at
 	 run time.  */
-      if ((info->shared || globals->root.is_relocatable_executable)
+      if ((bfd_link_pic (info)
+	   || globals->root.is_relocatable_executable)
 	  && (input_section->flags & SEC_ALLOC)
 	  && !(globals->vxworks_p
 	       && strcmp (input_section->output_section->name,
@@ -8409,7 +8413,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    {
 	      char *v = _("shared object");
 
-	      if (info->executable)
+	      if (bfd_link_executable (info))
 		v = _("PIE executable");
 
 	      (*_bfd_error_handler)
@@ -8448,7 +8452,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    memset (&outrel, 0, sizeof outrel);
 	  else if (h != NULL
 		   && h->dynindx != -1
-		   && (!info->shared
+		   && (!bfd_link_pic (info)
 		       || !SYMBOLIC_BIND (info, h)
 		       || !h->def_regular))
 	    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
@@ -9398,7 +9402,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		{
 		  if (dynreloc_st_type == STT_GNU_IFUNC)
 		    outrel.r_info = ELF32_R_INFO (0, R_ARM_IRELATIVE);
-		  else if (info->shared &&
+		  else if (bfd_link_pic (info) &&
 			   (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			    || h->root.type != bfd_link_hash_undefweak))
 		    outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
@@ -9447,7 +9451,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      if (globals->use_rel)
 		bfd_put_32 (output_bfd, dynreloc_value, sgot->contents + off);
 
-	      if (info->shared || dynreloc_st_type == STT_GNU_IFUNC)
+	      if (bfd_link_pic (info) || dynreloc_st_type == STT_GNU_IFUNC)
 		{
 		  Elf_Internal_Rela outrel;
 
@@ -9496,7 +9500,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    /* If we don't know the module number, create a relocation
 	       for it.  */
-	    if (info->shared)
+	    if (bfd_link_pic (info))
 	      {
 		Elf_Internal_Rela outrel;
 
@@ -9546,8 +9550,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    bfd_boolean dyn;
 	    dyn = globals->root.dynamic_sections_created;
-	    if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-		&& (!info->shared
+	    if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+						 bfd_link_pic (info),
+						 h)
+		&& (!bfd_link_pic (info)
 		    || !SYMBOL_REFERENCES_LOCAL (info, h)))
 	      {
 		*unresolved_reloc_p = FALSE;
@@ -9584,7 +9590,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	       now, and emit any relocations.  If both an IE GOT and a
 	       GD GOT are necessary, we emit the GD first.  */
 
-	    if ((info->shared || indx != 0)
+	    if ((bfd_link_pic (info) || indx != 0)
 		&& (h == NULL
 		    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		    || h->root.type != bfd_link_hash_undefweak))
@@ -9600,7 +9606,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		/* We should have relaxed, unless this is an undefined
 		   weak symbol.  */
 		BFD_ASSERT ((h && (h->root.type == bfd_link_hash_undefweak))
-			    || info->shared);
+			    || bfd_link_pic (info));
 		BFD_ASSERT (globals->sgotplt_jump_table_size + offplt + 8
 			    <= globals->root.sgotplt->size);
 
@@ -9875,7 +9881,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       }
 
     case R_ARM_TLS_LE32:
-      if (info->shared && !info->pie)
+      if (bfd_link_pic (info) && !bfd_link_pie (info))
 	{
 	  (*_bfd_error_handler)
 	    (_("%B(%A+0x%lx): R_ARM_TLS_LE32 relocation not permitted in shared object"),
@@ -10596,7 +10602,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	      relocation = (sec->output_section->vma
 			    + sec->output_offset
 			    + sym->st_value);
-	      if (!info->relocatable
+	      if (!bfd_link_relocatable (info)
 		  && (sec->flags & SEC_MERGE)
 		  && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
@@ -10703,7 +10709,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
@@ -12448,7 +12454,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
   const Elf_Internal_Rela *rel, *relend;
   struct elf32_arm_link_hash_table * globals;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   globals = elf32_arm_hash_table (info);
@@ -12546,7 +12552,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	case R_ARM_THM_MOVW_PREL_NC:
 	case R_ARM_THM_MOVT_PREL:
 	  /* Should the interworking branches be here also?  */
-	  if ((info->shared || globals->root.is_relocatable_executable)
+	  if ((bfd_link_pic (info) || globals->root.is_relocatable_executable)
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
 	      if (h == NULL
@@ -12644,7 +12650,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   bfd_boolean may_need_local_target_p;
   unsigned long nsyms;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   BFD_ASSERT (is_arm_elf (abfd));
@@ -12761,7 +12767,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		default: tls_type = GOT_NORMAL; break;
 		}
 
-	      if (!info->executable && (tls_type & GOT_TLS_IE))
+	      if (!bfd_link_executable (info) && (tls_type & GOT_TLS_IE))
 		info->flags |= DF_STATIC_TLS;
 
 	      if (h != NULL)
@@ -12846,7 +12852,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_MOVT_ABS:
 	  case R_ARM_THM_MOVW_ABS_NC:
 	  case R_ARM_THM_MOVT_ABS:
-	    if (info->shared)
+	    if (bfd_link_pic (info))
 	      {
 		(*_bfd_error_handler)
 		  (_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
@@ -12859,7 +12865,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* Fall through.  */
 	  case R_ARM_ABS32:
 	  case R_ARM_ABS32_NOI:
-	    if (h != NULL && info->executable)
+	    if (h != NULL && bfd_link_executable (info))
 	      {
 		h->pointer_equality_needed = 1;
 	      }
@@ -12872,7 +12878,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_THM_MOVT_PREL:
 
 	    /* Should the interworking branches be listed here?  */
-	    if ((info->shared || htab->root.is_relocatable_executable)
+	    if ((bfd_link_pic (info) || htab->root.is_relocatable_executable)
 		&& (sec->flags & SEC_ALLOC) != 0)
 	      {
 		if (h == NULL
@@ -13315,7 +13321,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
      be handled correctly by relocate_section.  Relocatable executables
      can reference data in shared objects directly, so we don't need to
      do anything here.  */
-  if (info->shared || globals->root.is_relocatable_executable)
+  if (bfd_link_pic (info) || globals->root.is_relocatable_executable)
     return TRUE;
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -13397,7 +13403,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	    h->got.refcount = 0;
 	}
 
-      if (info->shared
+      if (bfd_link_pic (info)
 	  || eh->is_iplt
 	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
@@ -13408,7 +13414,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	     location in the .plt.  This is required to make function
 	     pointers compare as equal between the normal executable and
 	     the shared library.  */
-	  if (! info->shared
+	  if (! bfd_link_pic (info)
 	      && !h->def_regular)
 	    {
 	      h->root.u.def.section = htab->root.splt;
@@ -13423,7 +13429,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	  /* VxWorks executables have a second set of relocations for
 	     each PLT entry.  They go in a separate relocation section,
 	     which is processed by the kernel loader.  */
-	  if (htab->vxworks_p && !info->shared)
+	  if (htab->vxworks_p && !bfd_link_pic (info))
 	    {
 	      /* There is a relocation for the initial PLT entry:
 		 an R_ARM_32 relocation for _GLOBAL_OFFSET_TABLE_.  */
@@ -13510,13 +13516,15 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	  dyn = htab->root.dynamic_sections_created;
 
 	  indx = 0;
-	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-	      && (!info->shared
+	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+					       bfd_link_pic (info),
+					       h)
+	      && (!bfd_link_pic (info)
 		  || !SYMBOL_REFERENCES_LOCAL (info, h)))
 	    indx = h->dynindx;
 
 	  if (tls_type != GOT_NORMAL
-	      && (info->shared || indx != 0)
+	      && (bfd_link_pic (info) || indx != 0)
 	      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		  || h->root.type != bfd_link_hash_undefweak))
 	    {
@@ -13550,8 +13558,9 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	       they all resolve dynamically instead.  Reserve room for the
 	       GOT entry's R_ARM_IRELATIVE relocation.  */
 	    elf32_arm_allocate_irelocs (info, htab->root.srelgot, 1);
-	  else if (info->shared && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-				    || h->root.type != bfd_link_hash_undefweak))
+	  else if (bfd_link_pic (info)
+		   && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		       || h->root.type != bfd_link_hash_undefweak))
 	    /* Reserve room for the GOT entry's R_ARM_RELATIVE relocation.  */
 	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	}
@@ -13601,7 +13610,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
      space for pc-relative relocs that have become local due to symbol
      visibility changes.  */
 
-  if (info->shared || htab->root.is_relocatable_executable)
+  if (bfd_link_pic (info) || htab->root.is_relocatable_executable)
     {
       /* Relocs that use pc_count are PC-relative forms, which will appear
 	 on something like ".long foo - ." or "movw REG, foo - .".  We want
@@ -13777,7 +13786,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (info->executable)
+      if (bfd_link_executable (info))
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -13929,13 +13938,13 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 		  && (local_iplt == NULL
 		      || local_iplt->arm.noncall_refcount == 0))
 		elf32_arm_allocate_irelocs (info, srel, 1);
-	      else if (info->shared || output_bfd->flags & DYNAMIC)
+	      else if (bfd_link_pic (info) || output_bfd->flags & DYNAMIC)
 		{
-		  if ((info->shared && !(*local_tls_type & GOT_TLS_GDESC))
+		  if ((bfd_link_pic (info) && !(*local_tls_type & GOT_TLS_GDESC))
 		      || *local_tls_type & GOT_TLS_GD)
 		    elf32_arm_allocate_dynrelocs (info, srel, 1);
 
-		  if (info->shared && *local_tls_type & GOT_TLS_GDESC)
+		  if (bfd_link_pic (info) && *local_tls_type & GOT_TLS_GDESC)
 		    {
 		      elf32_arm_allocate_dynrelocs (info,
 						    htab->root.srelplt, 1);
@@ -13954,7 +13963,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	 for R_ARM_TLS_LDM32 relocations.  */
       htab->tls_ldm_got.offset = htab->root.sgot->size;
       htab->root.sgot->size += 8;
-      if (info->shared)
+      if (bfd_link_pic (info))
 	elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
     }
   else
@@ -14090,7 +14099,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-     if (info->executable)
+     if (bfd_link_executable (info))
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -14158,7 +14167,7 @@ elf32_arm_always_size_sections (bfd *output_bfd,
 {
   asection *tls_sec;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   tls_sec = elf_hash_table (info)->tls_sec;
@@ -14649,7 +14658,9 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 #endif
 	}
 
-      if (htab->vxworks_p && !info->shared && htab->root.splt->size > 0)
+      if (htab->vxworks_p
+	  && !bfd_link_pic (info)
+	  && htab->root.splt->size > 0)
 	{
 	  /* Correct the .rel(a).plt.unloaded relocations.  They will have
 	     incorrect symbol indexes.  */
@@ -15168,7 +15179,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 
       osi.sec_shndx = _bfd_elf_section_from_bfd_section
 	  (output_bfd, osi.sec->output_section);
-      if (info->shared || htab->root.is_relocatable_executable
+      if (bfd_link_pic (info) || htab->root.is_relocatable_executable
 	  || htab->pic_veneer)
 	size = ARM2THUMB_PIC_GLUE_SIZE;
       else if (htab->use_blx)
@@ -15246,7 +15257,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       if (htab->vxworks_p)
 	{
 	  /* VxWorks shared libraries have no PLT header.  */
-	  if (!info->shared)
+	  if (!bfd_link_pic (info))
 	    {
 	      if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
 		return FALSE;

@@ -3264,7 +3264,7 @@ pdp11_aout_link_input_section (struct aout_final_link_info *flaginfo,
   BFD_ASSERT (input_bfd->xvec->header_byteorder
 	      == output_bfd->xvec->header_byteorder);
 
-  relocatable = flaginfo->info->relocatable;
+  relocatable = bfd_link_relocatable (flaginfo->info);
   syms = obj_aout_external_syms (input_bfd);
   strings = obj_aout_external_strings (input_bfd);
   sym_hashes = obj_aout_sym_hashes (input_bfd);
@@ -3474,7 +3474,7 @@ pdp11_aout_link_input_section (struct aout_final_link_info *flaginfo,
 	  /* Now warn if a global symbol is undefined.  We could not
              do this earlier, because check_dynamic_reloc might want
              to skip this reloc.  */
-	  if (hundef && ! flaginfo->info->shared)
+	  if (hundef && ! bfd_link_pic (flaginfo->info))
 	    {
 	      const char *name;
 
@@ -3581,7 +3581,7 @@ aout_link_input_section (struct aout_final_link_info *flaginfo,
 
   /* If we are producing relocatable output, the relocs were
      modified, and we now write them out.  */
-  if (flaginfo->info->relocatable && rel_size > 0)
+  if (bfd_link_relocatable (flaginfo->info) && rel_size > 0)
     {
       if (bfd_seek (flaginfo->output_bfd, *reloff_ptr, SEEK_SET) != 0)
 	return FALSE;
@@ -3682,7 +3682,7 @@ NAME (aout, final_link) (bfd *abfd,
   asection *o;
   bfd_boolean have_link_order_relocs;
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     abfd->flags |= DYNAMIC;
 
   aout_info.info = info;
@@ -3710,7 +3710,7 @@ NAME (aout, final_link) (bfd *abfd,
     {
       size_t sz;
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  if (bfd_get_flavour (sub) == bfd_target_aout_flavour)
 	    {
@@ -3754,7 +3754,7 @@ NAME (aout, final_link) (bfd *abfd,
 	}
     }
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     {
       if (obj_textsec (abfd) != NULL)
 	trsize += (_bfd_count_link_order_relocs (obj_textsec (abfd)

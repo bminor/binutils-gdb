@@ -32,7 +32,7 @@ fragment <<EOF
 static void
 irix_after_open (void)
 {
-  if (link_info.shared && command_line.soname == 0)
+  if (link_info.type == type_dll && command_line.soname == 0)
     command_line.soname
       = (char *) lbasename (bfd_get_filename (link_info.output_bfd));
 

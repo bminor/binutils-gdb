@@ -67,7 +67,7 @@ m68k_elf_after_open (void)
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
   if (command_line.embedded_relocs
-      && (! link_info.relocatable))
+      && (link_info.type != type_relocatable))
     {
       bfd *abfd;
 
@@ -147,7 +147,7 @@ m68k_elf_after_allocation (void)
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
   if (command_line.embedded_relocs
-      && (! link_info.relocatable))
+      && (link_info.type != type_relocatable))
     {
       bfd *abfd;
 

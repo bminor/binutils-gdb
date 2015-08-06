@@ -358,7 +358,7 @@ coff_mcore_relocate_section (bfd * output_bfd,
   /* If we are performing a relocatable link, we don't need to do a
      thing.  The caller will take care of adjusting the reloc
      addresses and symbol indices.  */
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   /* Check if we have the same endianness */

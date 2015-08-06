@@ -246,7 +246,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* A dynamically linked executable has a .interp section, but a
      shared library does not.  */
-  if (info->executable)
+  if (bfd_link_executable (info))
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".interp",
 					      flags | SEC_READONLY);
@@ -418,7 +418,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 be needed, we can discard it later.  We will never need this
 	 section when generating a shared object, since they do not use
 	 copy relocs.  */
-      if (! info->shared)
+      if (! bfd_link_pic (info))
 	{
 	  s = bfd_make_section_anyway_with_flags (abfd,
 						  (bed->rela_plts_and_copies_p
@@ -519,7 +519,7 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
   struct bfd_elf_dynamic_list *d = info->dynamic_list;
 
   /* It may be called more than once on the same H.  */
-  if(h->dynamic || info->relocatable)
+  if(h->dynamic || bfd_link_relocatable (info))
     return;
 
   if ((info->dynamic_data
@@ -623,7 +623,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   /* STV_HIDDEN and STV_INTERNAL symbols must be STB_LOCAL in shared objects
      and executables.  */
-  if (!info->relocatable
+  if (!bfd_link_relocatable (info)
       && h->dynindx != -1
       && (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
 	  || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL))
@@ -631,8 +631,9 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   if ((h->def_dynamic
        || h->ref_dynamic
-       || info->shared
-       || (info->executable && elf_hash_table (info)->is_relocatable_executable))
+       || bfd_link_pic (info)
+       || (bfd_link_executable (info)
+	   && elf_hash_table (info)->is_relocatable_executable))
       && h->dynindx == -1)
     {
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -842,7 +843,8 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 {
   unsigned long dynsymcount = 0;
 
-  if (info->shared || elf_hash_table (info)->is_relocatable_executable)
+  if (bfd_link_pic (info)
+      || elf_hash_table (info)->is_relocatable_executable)
     {
       const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
       asection *p;
@@ -1743,7 +1745,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   if (! override)
     {
       /* Add the default symbol if not performing a relocatable link.  */
-      if (! info->relocatable)
+      if (! bfd_link_relocatable (info))
 	{
 	  bh = &hi->root;
 	  if (! (_bfd_generic_link_add_one_symbol
@@ -1824,7 +1826,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	{
 	  if (! dynamic)
 	    {
-	      if (! info->executable
+	      if (! bfd_link_executable (info)
 		  || hi->def_dynamic
 		  || hi->ref_dynamic)
 		*dynsym = TRUE;
@@ -1896,7 +1898,7 @@ nondefault:
 	    {
 	      if (! dynamic)
 		{
-		  if (! info->executable
+		  if (! bfd_link_executable (info)
 		      || hi->ref_dynamic)
 		    *dynsym = TRUE;
 		}
@@ -2119,7 +2121,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
       /* If we are building an application, we need to create a
 	 version node for this version.  */
-      if (t == NULL && info->executable)
+      if (t == NULL && bfd_link_executable (info))
 	{
 	  struct bfd_elf_version_tree **pp;
 	  int version_index;
@@ -2481,7 +2483,7 @@ bfd_boolean
 _bfd_elf_link_hash_fixup_symbol (struct bfd_link_info *info,
 				 struct elf_link_hash_entry *h)
 {
-  if (info->pie
+  if (bfd_link_pie (info)
       && h->dynindx == -1
       && h->root.type == bfd_link_hash_undefweak)
     return bfd_elf_link_record_dynamic_symbol (info, h);
@@ -2584,7 +2586,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
      visibility.  If the symbol has hidden or internal visibility, we
      will force it local.  */
   if (h->needs_plt
-      && eif->info->shared
+      && bfd_link_pic (eif->info)
       && is_elf_hash_table (eif->info->hash)
       && (SYMBOLIC_BIND (eif->info, h)
 	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
@@ -2856,7 +2858,8 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
 
   /* Identify the cases where name binding rules say that a
      visible symbol resolves locally.  */
-  binding_stays_local_p = info->executable || SYMBOLIC_BIND (info, h);
+  binding_stays_local_p = (bfd_link_executable (info)
+			   || SYMBOLIC_BIND (info, h));
 
   switch (ELF_ST_VISIBILITY (h->other))
     {
@@ -2941,7 +2944,7 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   /* At this point, we know the symbol is defined and dynamic.  In an
      executable it must resolve locally, likewise when building symbolic
      shared libraries.  */
-  if (info->executable || SYMBOLIC_BIND (info, h))
+  if (bfd_link_executable (info) || SYMBOLIC_BIND (info, h))
     return TRUE;
 
   /* Now deal with defined dynamic symbols in shared libraries.  Ones
@@ -3488,11 +3491,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* You can't use -r against a dynamic object.  Also, there's no
 	 hope of using a dynamic object which does not exactly match
 	 the format of the output file.  */
-      if (info->relocatable
+      if (bfd_link_relocatable (info)
 	  || !is_elf_hash_table (htab)
 	  || info->output_bfd->xvec != abfd->xvec)
 	{
-	  if (info->relocatable)
+	  if (bfd_link_relocatable (info))
 	    bfd_set_error (bfd_error_invalid_operation);
 	  else
 	    bfd_set_error (bfd_error_wrong_format);
@@ -3565,7 +3568,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  FALSE, bed->collect, NULL)))
 	    goto error_return;
 
-	  if (info->executable)
+	  if (bfd_link_executable (info))
 	    {
 	      /* Clobber the section size so that the warning does
 		 not get copied into the output file.  */
@@ -3591,7 +3594,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 are no input BFD's of the same format as the output, we can't
 	 make a shared library.  */
       if (!just_syms
-	  && info->shared
+	  && bfd_link_pic (info)
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
@@ -4043,7 +4046,7 @@ error_free_dyn:
 	}
       else if (isym->st_shndx == SHN_COMMON
 	       && ELF_ST_TYPE (isym->st_info) == STT_TLS
-	       && !info->relocatable)
+	       && !bfd_link_relocatable (info))
 	{
 	  asection *tcomm = bfd_get_section_by_name (abfd, ".tcommon");
 
@@ -4339,7 +4342,7 @@ error_free_dyn:
 	      /* If the indirect symbol has been forced local, don't
 		 make the real symbol dynamic.  */
 	      if ((h == hi || !hi->forced_local)
-		  && ((! info->executable && ! info->relocatable)
+		  && (bfd_link_dll (info)
 		      || h->def_dynamic
 		      || h->ref_dynamic))
 		dynsym = TRUE;
@@ -4491,7 +4494,9 @@ error_free_dyn:
 	  elf_merge_st_other (abfd, h, isym, sec, definition, dynamic);
 
 	  /* We don't want to make debug symbol dynamic.  */
-	  if (definition && (sec->flags & SEC_DEBUGGING) && !info->relocatable)
+	  if (definition
+	      && (sec->flags & SEC_DEBUGGING)
+	      && !bfd_link_relocatable (info))
 	    dynsym = FALSE;
 
 	  /* Nor should we make plugin symbols dynamic.  */
@@ -4694,7 +4699,7 @@ error_free_dyn:
   /* Now that all the symbols from this input file are created, if
      not performing a relocatable link, handle .symver foo, foo@BAR
      such that any relocs against foo become foo@BAR.  */
-  if (!info->relocatable && nondeflt_vers != NULL)
+  if (!bfd_link_relocatable (info) && nondeflt_vers != NULL)
     {
       bfd_size_type cnt, symidx;
 
@@ -5696,7 +5701,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   elf_hash_table (info)->init_plt_refcount
     = elf_hash_table (info)->init_plt_offset;
 
-  if (info->relocatable
+  if (bfd_link_relocatable (info)
       && !_bfd_elf_size_group_sections (info))
     return FALSE;
 
@@ -5739,7 +5744,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	}
       if (notesec || info->stacksize > 0)
 	elf_stack_flags (output_bfd) = PF_R | PF_W | exec;
-      if (notesec && exec && info->relocatable
+      if (notesec && exec && bfd_link_relocatable (info)
 	  && notesec->output_section != bfd_abs_section_ptr)
 	notesec->output_section->flags |= SEC_CODE;
     }
@@ -5757,7 +5762,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       bfd_boolean all_defined;
 
       *sinterpptr = bfd_get_linker_section (dynobj, ".interp");
-      BFD_ASSERT (*sinterpptr != NULL || !info->executable);
+      BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info));
 
       if (soname != NULL)
 	{
@@ -5845,7 +5850,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       /* If we are supposed to export all symbols into the dynamic symbol
 	 table (this is not the normal case), then do so.  */
       if (info->export_dynamic
-	  || (info->executable && info->dynamic))
+	  || (bfd_link_executable (info) && info->dynamic))
 	{
 	  elf_link_hash_traverse (elf_hash_table (info),
 				  _bfd_elf_export_symbol,
@@ -5980,7 +5985,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       if (s != NULL && s->linker_has_input)
 	{
 	  /* DT_PREINIT_ARRAY is not allowed in shared library.  */
-	  if (! info->executable)
+	  if (! bfd_link_executable (info))
 	    {
 	      bfd *sub;
 	      asection *o;
@@ -6314,7 +6319,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       if (info->flags_1)
 	{
-	  if (info->executable)
+	  if (bfd_link_executable (info))
 	    info->flags_1 &= ~ (DF_1_INITFIRST
 				| DF_1_NODELETE
 				| DF_1_NOOPEN);
@@ -8993,7 +8998,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      defined, hidden versioned, not referenced by shared library and
      not exported when linking executable.  */
   bfd_boolean local_bind = (h->forced_local
-			    || (flinfo->info->executable
+			    || (bfd_link_executable (flinfo->info)
 				&& !flinfo->info->export_dynamic
 				&& !h->dynamic
 				&& !h->ref_dynamic
@@ -9058,7 +9063,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 
   /* We should also warn if a forced local symbol is referenced from
      shared libraries.  */
-  if (flinfo->info->executable
+  if (bfd_link_executable (flinfo->info)
       && h->forced_local
       && h->ref_dynamic
       && h->def_regular
@@ -9189,7 +9194,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	       but in nonrelocatable files they are virtual
 	       addresses.  */
 	    sym.st_value = h->root.u.def.value + input_sec->output_offset;
-	    if (!flinfo->info->relocatable)
+	    if (!bfd_link_relocatable (flinfo->info))
 	      {
 		sym.st_value += input_sec->output_section->vma;
 		if (h->type == STT_TLS)
@@ -9233,10 +9238,10 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      STT_GNU_IFUNC symbol must go through PLT.  */
   if ((h->type == STT_GNU_IFUNC
        && h->def_regular
-       && !flinfo->info->relocatable)
+       && !bfd_link_relocatable (flinfo->info))
       || ((h->dynindx != -1
 	   || h->forced_local)
-	  && ((flinfo->info->shared
+	  && ((bfd_link_pic (flinfo->info)
 	       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		   || h->root.type != bfd_link_hash_undefweak))
 	      || !h->forced_local)
@@ -9286,7 +9291,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 
   /* If a non-weak symbol with non-default visibility is not defined
      locally, it is a fatal error.  */
-  if (!flinfo->info->relocatable
+  if (!bfd_link_relocatable (flinfo->info)
       && ELF_ST_VISIBILITY (sym.st_other) != STV_DEFAULT
       && ELF_ST_BIND (sym.st_info) != STB_WEAK
       && h->root.type == bfd_link_hash_undefined
@@ -9322,7 +9327,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       */
       if (h->verinfo.verdef == NULL
 	  && !local_bind
-	  && (!flinfo->info->executable
+	  && (!bfd_link_executable (flinfo->info)
 	      || h->ref_dynamic
 	      || !h->def_regular))
 	{
@@ -9410,7 +9415,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      relocatable output or when needed for --emit-relocs.  */
   else if (input_sec == bfd_und_section_ptr
 	   && h->indx != -2
-	   && !flinfo->info->relocatable)
+	   && !bfd_link_relocatable (flinfo->info))
     return TRUE;
   /* Also strip others that we couldn't earlier due to dynamic symbol
      processing.  */
@@ -9711,7 +9716,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	   && (bfd_hash_lookup (flinfo->info->keep_hash, name, FALSE, FALSE)
 	       == NULL))
 	  || (((flinfo->info->discard == discard_sec_merge
-		&& (isec->flags & SEC_MERGE) && !flinfo->info->relocatable)
+		&& (isec->flags & SEC_MERGE)
+		&& !bfd_link_relocatable (flinfo->info))
 	       || flinfo->info->discard == discard_l)
 	      && bfd_is_local_label_name (input_bfd, name)))
 	continue;
@@ -9762,7 +9768,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	 output_section.  Any special sections must be set up to meet
 	 these requirements.  */
       osym.st_value += isec->output_offset;
-      if (!flinfo->info->relocatable)
+      if (!bfd_link_relocatable (flinfo->info))
 	{
 	  osym.st_value += isec->output_section->vma;
 	  if (ELF_ST_TYPE (osym.st_info) == STT_TLS)
@@ -9806,7 +9812,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  continue;
 	}
 
-      if (flinfo->info->relocatable
+      if (bfd_link_relocatable (flinfo->info)
 	  && (o->flags & (SEC_LINKER_CREATED | SEC_GROUP)) == SEC_GROUP)
 	{
 	  /* Deal with the group signature symbol.  */
@@ -10029,7 +10035,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		}
 
 	      if ((s_type == STT_RELC || s_type == STT_SRELC)
-		  && !flinfo->info->relocatable)
+		  && !bfd_link_relocatable (flinfo->info))
 		{
 		  bfd_vma val;
 		  bfd_vma dot = (rel->r_offset
@@ -10119,7 +10125,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	    return FALSE;
 
 	  if (ret == 2
-	      || flinfo->info->relocatable
+	      || bfd_link_relocatable (flinfo->info)
 	      || flinfo->info->emitrelocations)
 	    {
 	      Elf_Internal_Rela *irela;
@@ -10150,7 +10156,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	      rel_hash_list = rel_hash;
 	      rela_hash_list = NULL;
 	      last_offset = o->output_offset;
-	      if (!flinfo->info->relocatable)
+	      if (!bfd_link_relocatable (flinfo->info))
 		last_offset += o->output_section->vma;
 	      for (next_erel = 0; irela < irelaend; irela++, next_erel++)
 		{
@@ -10190,7 +10196,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		  irela->r_offset += o->output_offset;
 
 		  /* Relocs in an executable have to be virtual addresses.  */
-		  if (!flinfo->info->relocatable)
+		  if (!bfd_link_relocatable (flinfo->info))
 		    irela->r_offset += o->output_section->vma;
 
 		  last_offset = irela->r_offset;
@@ -10318,7 +10324,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			    return FALSE;
 
 			  sym.st_value += sec->output_offset;
-			  if (!flinfo->info->relocatable)
+			  if (!bfd_link_relocatable (flinfo->info))
 			    {
 			      sym.st_value += osec->vma;
 			      if (ELF_ST_TYPE (sym.st_info) == STT_TLS)
@@ -10594,7 +10600,7 @@ elf_reloc_link_order (bfd *output_bfd,
      relocatable file, and is a virtual address in an executable
      file.  */
   offset = link_order->offset;
-  if (! info->relocatable)
+  if (! bfd_link_relocatable (info))
     offset += output_section->vma;
 
   for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
@@ -10845,13 +10851,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (! is_elf_hash_table (info->hash))
     return FALSE;
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     abfd->flags |= DYNAMIC;
 
   dynamic = elf_hash_table (info)->dynamic_sections_created;
   dynobj = elf_hash_table (info)->dynobj;
 
-  emit_relocs = (info->relocatable
+  emit_relocs = (bfd_link_relocatable (info)
 		 || info->emitrelocations);
 
   flinfo.info = info;
@@ -10964,7 +10970,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		   to count particular types of relocs.  Of course,
 		   reloc sections themselves can't have relocations.  */
 		reloc_count = 0;
-	      else if (info->relocatable || info->emitrelocations)
+	      else if (emit_relocs)
 		reloc_count = sec->reloc_count;
 	      else if (bed->elf_backend_count_relocs)
 		reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
@@ -11016,8 +11022,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	  o->reloc_count += reloc_count;
 
-	  if (p->type == bfd_indirect_link_order
-	      && (info->relocatable || info->emitrelocations))
+	  if (p->type == bfd_indirect_link_order && emit_relocs)
 	    {
 	      if (esdi->rel.hdr)
 		esdo->rel.count += NUM_SHDR_ENTRIES (esdi->rel.hdr);
@@ -11052,7 +11057,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	o->vma = 0;
     }
 
-  if (! info->relocatable && merged)
+  if (! bfd_link_relocatable (info) && merged)
     elf_link_hash_traverse (elf_hash_table (info),
 			    _bfd_elf_link_sec_merge_syms, abfd);
 
@@ -11168,7 +11173,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      o->target_index = bfd_get_symcount (abfd);
 	      elfsym.st_shndx = i;
-	      if (!info->relocatable)
+	      if (!bfd_link_relocatable (info))
 		elfsym.st_value = o->vma;
 	      if (elf_link_output_symstrtab (&flinfo, NULL, &elfsym, o,
 					     NULL) != 1)
@@ -11410,7 +11415,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       long last_local = 0;
 
       /* Write out the section symbols for the output sections.  */
-      if (info->shared || elf_hash_table (info)->is_relocatable_executable)
+      if (bfd_link_pic (info)
+	  || elf_hash_table (info)->is_relocatable_executable)
 	{
 	  asection *s;
 
@@ -11761,7 +11767,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	goto error_return;
 
       /* Check for DT_TEXTREL (late, in case the backend removes it).  */
-      if (((info->warn_shared_textrel && info->shared)
+      if (((info->warn_shared_textrel && bfd_link_pic (info))
 	   || info->error_textrel)
 	  && (o = bfd_get_linker_section (dynobj, ".dynamic")) != NULL)
 	{
@@ -11828,7 +11834,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     {
       bfd_boolean failed = FALSE;
 
@@ -12571,7 +12577,7 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 	  || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
-	      && (!info->executable
+	      && (!bfd_link_executable (info)
 		  || info->export_dynamic
 		  || (h->dynamic
 		      && d != NULL
@@ -13220,7 +13226,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
     _bfd_elf_end_eh_frame_parsing (info);
 
   if (info->eh_frame_hdr_type
-      && !info->relocatable
+      && !bfd_link_relocatable (info)
       && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
     changed = 1;
 

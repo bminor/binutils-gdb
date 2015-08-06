@@ -524,7 +524,7 @@ visium_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -649,7 +649,7 @@ visium_elf_relocate_section (bfd *output_bfd,
 	  continue;
 	}
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       switch (r_type)

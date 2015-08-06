@@ -318,7 +318,7 @@ linux_add_one_symbol (struct bfd_link_info *info,
 
   insert = FALSE;
 
-  if (! info->relocatable
+  if (! bfd_link_relocatable (info)
       && linux_hash_table (info)->dynobj == NULL
       && strcmp (name, SHARABLE_CONFLICTS) == 0
       && (flags & BSF_CONSTRUCTOR) != 0
