@@ -66,7 +66,7 @@ memory_map_start_memory (struct gdb_xml_parser *parser,
   mem_region_init (r);
   r->lo = *start_p;
   r->hi = r->lo + *length_p;
-  r->attrib.mode = *type_p;
+  r->attrib.mode = (enum mem_access_mode) *type_p;
   r->attrib.blocksize = -1;
 }
 

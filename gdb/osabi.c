@@ -626,12 +626,16 @@ set_osabi (char *args, int from_tty, struct cmd_list_element *c)
       int i;
 
       for (i = 1; i < GDB_OSABI_INVALID; i++)
-	if (strcmp (set_osabi_string, gdbarch_osabi_name (i)) == 0)
-	  {
-	    user_selected_osabi = i;
-	    user_osabi_state = osabi_user;
-	    break;
-	  }
+        {
+	  enum gdb_osabi osabi = (enum gdb_osabi) i;
+
+	  if (strcmp (set_osabi_string, gdbarch_osabi_name (osabi)) == 0)
+	    {
+	      user_selected_osabi = osabi;
+	      user_osabi_state = osabi_user;
+	      break;
+	    }
+	}
       if (i == GDB_OSABI_INVALID)
 	internal_error (__FILE__, __LINE__,
 			_("Invalid OS ABI \"%s\" passed to command handler."),

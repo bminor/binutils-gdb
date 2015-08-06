@@ -9408,7 +9408,7 @@ set_fp_model_sfunc (char *args, int from_tty,
   for (fp_model = ARM_FLOAT_AUTO; fp_model != ARM_FLOAT_LAST; fp_model++)
     if (strcmp (current_fp_model, fp_model_strings[fp_model]) == 0)
       {
-	arm_fp_model = fp_model;
+	arm_fp_model = (enum arm_float_model) fp_model;
 	break;
       }
 
@@ -9445,7 +9445,7 @@ arm_set_abi (char *args, int from_tty,
   for (arm_abi = ARM_ABI_AUTO; arm_abi != ARM_ABI_LAST; arm_abi++)
     if (strcmp (arm_abi_string, arm_abi_strings[arm_abi]) == 0)
       {
-	arm_abi_global = arm_abi;
+	arm_abi_global = (enum arm_abi_kind) arm_abi;
 	break;
       }
 

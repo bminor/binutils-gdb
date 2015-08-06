@@ -2881,7 +2881,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 
   while (op_ptr < op_end)
     {
-      enum dwarf_location_atom op = *op_ptr;
+      enum dwarf_location_atom op = (enum dwarf_location_atom) *op_ptr;
       uint64_t uoffset, reg;
       int64_t offset;
       int i;
@@ -3764,7 +3764,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	 && (all
 	     || (data[0] != DW_OP_piece && data[0] != DW_OP_bit_piece)))
     {
-      enum dwarf_location_atom op = *data++;
+      enum dwarf_location_atom op = (enum dwarf_location_atom) *data++;
       uint64_t ul;
       int64_t l;
       const char *name;

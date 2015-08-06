@@ -1005,8 +1005,9 @@ operator_length_standard (const struct expression *expr, int endpos,
 
     case OP_F90_RANGE:
       oplen = 3;
+      range_type = (enum f90_range_type)
+	longest_to_int (expr->elts[endpos - 2].longconst);
 
-      range_type = longest_to_int (expr->elts[endpos - 2].longconst);
       switch (range_type)
 	{
 	case LOW_BOUND_DEFAULT:

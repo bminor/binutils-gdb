@@ -939,7 +939,7 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
   /* These are all stored in GC space so that we don't have to worry about
      freeing them if we throw an exception.  */
   p_smob->name = name;
-  p_smob->cmd_class = cmd_class;
+  p_smob->cmd_class = (enum command_class) cmd_class;
   p_smob->type = (enum var_types) param_type;
   p_smob->doc = doc;
   p_smob->set_doc = set_doc;

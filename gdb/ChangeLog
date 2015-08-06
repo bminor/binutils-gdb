@@ -1,3 +1,45 @@
+2015-08-06  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* arm-tdep.c (set_fp_model_sfunc): Add cast from integer to enum.
+	(arm_set_abi): Likewise.
+	* ax-general.c (ax_print): Likewise.
+	* c-exp.y (exp : string_exp): Likewise.
+	* compile/compile-loc2c.c (compute_stack_depth_worker): Likewise.
+	(do_compile_dwarf_expr_to_c): Likewise.
+	* cp-name-parser.y (demangler_special : DEMANGLER_SPECIAL start):
+	Likewise.
+	* dwarf2expr.c (execute_stack_op): Likewise.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Likewise.
+	(disassemble_dwarf_expression): Likewise.
+	* dwarf2read.c (dwarf2_add_member_fn): Likewise.
+	(read_array_order): Likewise.
+	(abbrev_table_read_table): Likewise.
+	(read_attribute_value): Likewise.
+	(skip_unknown_opcode): Likewise.
+	(dwarf_decode_macro_bytes): Likewise.
+	(dwarf_decode_macros): Likewise.
+	* eval.c (value_f90_subarray): Likewise.
+	* guile/scm-param.c (gdbscm_make_parameter): Likewise.
+	* i386-linux-tdep.c (i386_canonicalize_syscall): Likewise.
+	* infrun.c (handle_command): Likewise.
+	* memory-map.c (memory_map_start_memory): Likewise.
+	* osabi.c (set_osabi): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+	* ppc-linux-tdep.c (ppc_canonicalize_syscall): Likewise, and use
+	single return point.
+	* python/py-frame.c (gdbpy_frame_stop_reason_string): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol): Likewise.
+	(gdbpy_lookup_global_symbol): Likewise.
+	* record-full.c (record_full_restore): Likewise.
+	* regcache.c (regcache_register_status): Likewise.
+	(regcache_raw_read): Likewise.
+	(regcache_cooked_read): Likewise.
+	* rs6000-tdep.c (powerpc_set_vector_abi): Likewise.
+	* symtab.c (initialize_ordinary_address_classes): Likewise.
+	* target-debug.h (target_debug_print_signals): Likewise.
+	* utils.c (do_restore_current_language): Likewise.
+
 2015-08-06  Clem Dickey  <clemd@acm.org>
 
 	PR python/17136

@@ -192,7 +192,10 @@ target_debug_print_signals (unsigned char *sigs)
 
       for (i = 0; i < GDB_SIGNAL_LAST; i++)
 	if (sigs[i])
-	  fprintf_unfiltered (gdb_stdlog, " %s", gdb_signal_to_name (i));
+	  {
+	    fprintf_unfiltered (gdb_stdlog, " %s",
+				gdb_signal_to_name ((enum gdb_signal) i));
+	  }
     }
   fputs_unfiltered (" }", gdb_stdlog);
 }

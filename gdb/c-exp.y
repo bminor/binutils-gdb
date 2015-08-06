@@ -878,7 +878,7 @@ exp	:	string_exp
 				  if (type != C_STRING
 				      && type != $1.tokens[i].type)
 				    error (_("Undefined string concatenation."));
-				  type = $1.tokens[i].type;
+				  type = (enum c_string_type) $1.tokens[i].type;
 				  break;
 				default:
 				  /* internal error */
