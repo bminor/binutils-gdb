@@ -3153,13 +3153,6 @@ linux_wait_1 (ptid_t ptid,
 			  paddress (event_child->stop_pc),
 			  paddress (event_child->step_range_start),
 			  paddress (event_child->step_range_end));
-	  if (extended_event_reported (&event_child->waitstatus))
-	    {
-	      char *str = target_waitstatus_to_string (ourstatus);
-	      debug_printf ("LWP %ld: extended event with waitstatus %s\n",
-			    lwpid_of (get_lwp_thread (event_child)), str);
-	      xfree (str);
-	    }
 	}
 
       /* We're not reporting this breakpoint to GDB, so apply the
@@ -3190,6 +3183,15 @@ linux_wait_1 (ptid_t ptid,
 
   if (debug_threads)
     {
+      if (extended_event_reported (&event_child->waitstatus))
+	{
+	  char *str;
+
+	  str = target_waitstatus_to_string (&event_child->waitstatus);
+	  debug_printf ("LWP %ld: extended event with waitstatus %s\n",
+			lwpid_of (get_lwp_thread (event_child)), str);
+	  xfree (str);
+	}
       if (current_thread->last_resume_kind == resume_step)
 	{
 	  if (event_child->step_range_start == event_child->step_range_end)

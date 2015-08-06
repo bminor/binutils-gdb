@@ -1,3 +1,9 @@
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_wait_1): Move fork event output out of the
+	!report_to_gdb check.  Pass event_child->waitstatus to
+	target_waitstatus_to_string instead of ourstatus.
+
 2015-08-04  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_supports_tracepoints): Return 0
