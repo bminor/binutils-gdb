@@ -640,6 +640,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
+    void (*to_interrupt) (struct target_ops *, ptid_t)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
 		     const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
@@ -1672,6 +1674,12 @@ extern void target_update_thread_list (void);
    target_stop_and_wait.  */
 
 extern void target_stop (ptid_t ptid);
+
+/* Interrupt the target just like the user typed a ^C on the
+   inferior's controlling terminal.  (For instance, under Unix, this
+   should act like SIGINT).  This function is asynchronous.  */
+
+extern void target_interrupt (ptid_t ptid);
 
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is

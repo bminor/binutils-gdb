@@ -1407,10 +1407,10 @@ m32r_load (struct target_ops *self, const char *args, int from_tty)
 }
 
 static void
-m32r_stop (struct target_ops *self, ptid_t ptid)
+m32r_interrupt (struct target_ops *self, ptid_t ptid)
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "m32r_stop()\n");
+    fprintf_unfiltered (gdb_stdlog, "m32r_interrupt()\n");
 
   send_cmd (SDI_STOP_CPU);
 
@@ -1664,7 +1664,7 @@ init_m32r_ops (void)
   m32r_ops.to_load = m32r_load;
   m32r_ops.to_create_inferior = m32r_create_inferior;
   m32r_ops.to_mourn_inferior = m32r_mourn_inferior;
-  m32r_ops.to_stop = m32r_stop;
+  m32r_ops.to_interrupt = m32r_interrupt;
   m32r_ops.to_log_command = serial_log_command;
   m32r_ops.to_thread_alive = m32r_thread_alive;
   m32r_ops.to_pid_to_str = m32r_pid_to_str;

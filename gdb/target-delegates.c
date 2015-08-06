@@ -1537,6 +1537,30 @@ debug_stop (struct target_ops *self, ptid_t arg1)
 }
 
 static void
+delegate_interrupt (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  self->to_interrupt (self, arg1);
+}
+
+static void
+tdefault_interrupt (struct target_ops *self, ptid_t arg1)
+{
+}
+
+static void
+debug_interrupt (struct target_ops *self, ptid_t arg1)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_interrupt (...)\n", debug_target.to_shortname);
+  debug_target.to_interrupt (&debug_target, arg1);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_interrupt (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
 delegate_rcmd (struct target_ops *self, const char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
@@ -4016,6 +4040,8 @@ install_delegators (struct target_ops *ops)
     ops->to_thread_name = delegate_thread_name;
   if (ops->to_stop == NULL)
     ops->to_stop = delegate_stop;
+  if (ops->to_interrupt == NULL)
+    ops->to_interrupt = delegate_interrupt;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_pid_to_exec_file == NULL)
@@ -4253,6 +4279,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
   ops->to_stop = tdefault_stop;
+  ops->to_interrupt = tdefault_interrupt;
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_log_command = tdefault_log_command;
@@ -4402,6 +4429,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_extra_thread_info = debug_extra_thread_info;
   ops->to_thread_name = debug_thread_name;
   ops->to_stop = debug_stop;
+  ops->to_interrupt = debug_interrupt;
   ops->to_rcmd = debug_rcmd;
   ops->to_pid_to_exec_file = debug_pid_to_exec_file;
   ops->to_log_command = debug_log_command;

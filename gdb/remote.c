@@ -5215,11 +5215,12 @@ async_cleanup_sigint_signal_handler (void *dummy)
    packet.  */
 static void (*ofunc) (int);
 
-/* The command line interface's stop routine.  This function is installed
-   as a signal handler for SIGINT.  The first time a user requests a
-   stop, we call remote_stop to send a break or ^C.  If there is no
+/* The command line interface's interrupt routine.  This function is installed
+   as a signal handler for SIGINT.  The first time a user requests an
+   interrupt, we call remote_interrupt to send a break or ^C.  If there is no
    response from the target (it didn't stop when the user requested it),
    we ask the user if he'd like to detach from the target.  */
+
 static void
 sync_remote_interrupt (int signo)
 {
@@ -5290,12 +5291,12 @@ remote_stop_ns (ptid_t ptid)
     error (_("Stopping %s failed: %s"), target_pid_to_str (ptid), rs->buf);
 }
 
-/* All-stop version of target_stop.  Sends a break or a ^C to stop the
-   remote target.  It is undefined which thread of which process
-   reports the stop.  */
+/* All-stop version of target_interrupt.  Sends a break or a ^C to
+   interrupt the remote target.  It is undefined which thread of which
+   process reports the interrupt.  */
 
 static void
-remote_stop_as (ptid_t ptid)
+remote_interrupt_as (ptid_t ptid)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -5311,9 +5312,7 @@ remote_stop_as (ptid_t ptid)
   send_interrupt_sequence ();
 }
 
-/* This is the generic stop called via the target vector.  When a target
-   interrupt is requested, either by the command line or the GUI, we
-   will eventually end up here.  */
+/* Implement the to_stop function for the remote targets.  */
 
 static void
 remote_stop (struct target_ops *self, ptid_t ptid)
@@ -5324,7 +5323,29 @@ remote_stop (struct target_ops *self, ptid_t ptid)
   if (non_stop)
     remote_stop_ns (ptid);
   else
-    remote_stop_as (ptid);
+    {
+      /* We don't currently have a way to transparently pause the
+	 remote target in all-stop mode.  Interrupt it instead.  */
+      remote_interrupt_as (ptid);
+    }
+}
+
+/* Implement the to_interrupt function for the remote targets.  */
+
+static void
+remote_interrupt (struct target_ops *self, ptid_t ptid)
+{
+  if (remote_debug)
+    fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
+
+  if (non_stop)
+    {
+      /* We don't currently have a way to ^C the remote target in
+	 non-stop mode.  Stop it (with no signal) instead.  */
+      remote_stop_ns (ptid);
+    }
+  else
+    remote_interrupt_as (ptid);
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -12275,6 +12296,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_ops.to_get_ada_task_ptid = remote_get_ada_task_ptid;
   remote_ops.to_stop = remote_stop;
+  remote_ops.to_interrupt = remote_interrupt;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;

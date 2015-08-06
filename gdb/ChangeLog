@@ -1,5 +1,55 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* darwin-nat.c (darwin_stop): Rename to ...
+	(darwin_interrupt): ... this.
+	(_initialize_darwin_inferior): Adjust.
+	* gnu-nat.c (gnu_stop): Delete.
+	(gnu_target): Don't install gnu_stop.
+	* inf-ptrace.c (inf_ptrace_stop): Rename to ...
+	(inf_ptrace_interrupt): ... this.
+	(inf_ptrace_target): Adjust.
+	* infcmd.c (interrupt_target_1): Use target_interrupt instead of
+	target_stop.
+	* linux-nat (linux_nat_stop): Rename to ...
+	(linux_nat_interrupt): ... this.
+	(linux_nat_stop): Reimplement.
+	(linux_nat_add_target): Install linux_nat_interrupt.
+	* nto-procfs.c (nto_interrupt_twice): Rename to ...
+	(nto_handle_sigint_twice): ... this.
+	(nto_interrupt): Rename to ...
+	(nto_handle_sigint): ... this.  Call target_interrupt instead of
+	target_stop.
+	(procfs_wait): Adjust.
+	(procfs_stop): Rename to ...
+	(procfs_interrupt): ... this.
+	(init_procfs_targets): Adjust.
+	* procfs.c (procfs_stop): Rename to ...
+	(procfs_interrupt): ... this.
+	(procfs_target): Adjust.
+	* remote-m32r-sdi.c (m32r_stop): Rename to ...
+	(m32r_interrupt): ... this.
+	(init_m32r_ops): Adjust.
+	* remote-sim.c (gdbsim_stop_inferior): Rename to ...
+	(gdbsim_interrupt_inferior): ... this.
+	(gdbsim_stop): Rename to ...
+	(gdbsim_interrupt): ... this.
+	(gdbsim_cntrl_c): Adjust.
+	(init_gdbsim_ops): Adjust.
+	* remote.c (sync_remote_interrupt): Adjust comments.
+	(remote_stop_as): Rename to ...
+	(remote_interrupt_as): ... this.
+	(remote_stop): Adjust comment.
+	(remote_interrupt): New function.
+	(init_remote_ops): Install remote_interrupt.
+	* target.c (target_interrupt): New function.
+	* target.h (struct target_ops) <to_interrupt>: New field.
+	(target_interrupt): New declaration.
+	* windows-nat.c (windows_stop): Rename to ...
+	(windows_interrupt): ... this.
+	* target-delegates.c: Regenerate.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* signal-while-stepping-over-bp-other-thread.exp: Expect "restart
 	threads" as alternative to "switching back to stepped thread".
 

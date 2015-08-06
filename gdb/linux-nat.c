@@ -4816,10 +4816,16 @@ linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 static void
 linux_nat_stop (struct target_ops *self, ptid_t ptid)
 {
-  if (target_is_non_stop_p ())
+  iterate_over_lwps (ptid, linux_nat_stop_lwp, NULL);
+}
+
+static void
+linux_nat_interrupt (struct target_ops *self, ptid_t ptid)
+{
+  if (non_stop)
     iterate_over_lwps (ptid, linux_nat_stop_lwp, NULL);
   else
-    linux_ops->to_stop (linux_ops, ptid);
+    linux_ops->to_interrupt (linux_ops, ptid);
 }
 
 static void
@@ -5021,8 +5027,8 @@ linux_nat_add_target (struct target_ops *t)
   super_close = t->to_close;
   t->to_close = linux_nat_close;
 
-  /* Methods for non-stop support.  */
   t->to_stop = linux_nat_stop;
+  t->to_interrupt = linux_nat_interrupt;
 
   t->to_supports_multi_process = linux_nat_supports_multi_process;
 
