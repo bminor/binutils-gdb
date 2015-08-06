@@ -1,3 +1,9 @@
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_wait_1): Move fork event output out of the
+	!report_to_gdb check.  Pass event_child->waitstatus to
+	target_waitstatus_to_string instead of ourstatus.
+
 2015-07-14  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (kill_wait_lwp): Don't assert if waitpid fails.
