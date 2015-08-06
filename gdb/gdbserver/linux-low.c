@@ -264,6 +264,7 @@ static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
 static struct lwp_info *add_lwp (ptid_t ptid);
 static int linux_stopped_by_watchpoint (void);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
+static int lwp_is_marked_dead (struct lwp_info *lwp);
 static void proceed_all_lwps (void);
 static int finish_step_over (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
@@ -746,8 +747,9 @@ add_lwp (ptid_t ptid)
 {
   struct lwp_info *lwp;
 
-  lwp = (struct lwp_info *) xmalloc (sizeof (*lwp));
-  memset (lwp, 0, sizeof (*lwp));
+  lwp = (struct lwp_info *) xcalloc (1, sizeof (*lwp));
+
+  lwp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
 
   if (the_low_target.new_thread != NULL)
     the_low_target.new_thread (lwp);
@@ -1388,7 +1390,7 @@ linux_thread_alive (ptid_t ptid)
      exited but we still haven't been able to report it to GDB, we'll
      hold on to the last lwp of the dead process.  */
   if (lwp != NULL)
-    return !lwp->dead;
+    return !lwp_is_marked_dead (lwp);
   else
     return 0;
 }
@@ -2732,20 +2734,6 @@ ignore_event (struct target_waitstatus *ourstatus)
   return null_ptid;
 }
 
-/* Return non-zero if WAITSTATUS reflects an extended linux
-   event.  Otherwise, return zero.  */
-
-static int
-extended_event_reported (const struct target_waitstatus *waitstatus)
-{
-  if (waitstatus == NULL)
-    return 0;
-
-  return (waitstatus->kind == TARGET_WAITKIND_FORKED
-	  || waitstatus->kind == TARGET_WAITKIND_VFORKED
-	  || waitstatus->kind == TARGET_WAITKIND_VFORK_DONE);
-}
-
 /* Wait for process, returns status.  */
 
 static ptid_t
@@ -3113,7 +3101,7 @@ linux_wait_1 (ptid_t ptid,
 		   || (gdb_breakpoint_here (event_child->stop_pc)
 		       && gdb_condition_true_at_breakpoint (event_child->stop_pc)
 		       && gdb_no_commands_at_breakpoint (event_child->stop_pc))
-		   || extended_event_reported (&event_child->waitstatus));
+		   || event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE);
 
   run_breakpoint_commands (event_child->stop_pc);
 
@@ -3165,7 +3153,7 @@ linux_wait_1 (ptid_t ptid,
 
   if (debug_threads)
     {
-      if (extended_event_reported (&event_child->waitstatus))
+      if (event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE)
 	{
 	  char *str;
 
@@ -3253,12 +3241,11 @@ linux_wait_1 (ptid_t ptid,
 	unstop_all_lwps (1, event_child);
     }
 
-  if (extended_event_reported (&event_child->waitstatus))
+  if (event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE)
     {
-      /* If the reported event is a fork, vfork or exec, let GDB know.  */
-      ourstatus->kind = event_child->waitstatus.kind;
-      ourstatus->value = event_child->waitstatus.value;
-
+      /* If the reported event is an exit, fork, vfork or exec, let
+	 GDB know.  */
+      *ourstatus = event_child->waitstatus;
       /* Clear the event lwp's waitstatus since we handled it already.  */
       event_child->waitstatus.kind = TARGET_WAITKIND_IGNORE;
     }
@@ -3466,18 +3453,39 @@ suspend_and_send_sigstop_callback (struct inferior_list_entry *entry,
 static void
 mark_lwp_dead (struct lwp_info *lwp, int wstat)
 {
-  /* It's dead, really.  */
-  lwp->dead = 1;
-
   /* Store the exit status for later.  */
   lwp->status_pending_p = 1;
   lwp->status_pending = wstat;
+
+  /* Store in waitstatus as well, as there's nothing else to process
+     for this event.  */
+  if (WIFEXITED (wstat))
+    {
+      lwp->waitstatus.kind = TARGET_WAITKIND_EXITED;
+      lwp->waitstatus.value.integer = WEXITSTATUS (wstat);
+    }
+  else if (WIFSIGNALED (wstat))
+    {
+      lwp->waitstatus.kind = TARGET_WAITKIND_SIGNALLED;
+      lwp->waitstatus.value.sig = gdb_signal_from_host (WTERMSIG (wstat));
+    }
 
   /* Prevent trying to stop it.  */
   lwp->stopped = 1;
 
   /* No further stops are expected from a dead lwp.  */
   lwp->stop_expected = 0;
+}
+
+/* Return true if LWP has exited already, and has a pending exit event
+   to report to GDB.  */
+
+static int
+lwp_is_marked_dead (struct lwp_info *lwp)
+{
+  return (lwp->status_pending_p
+	  && (WIFEXITED (lwp->status_pending)
+	      || WIFSIGNALED (lwp->status_pending)));
 }
 
 /* Wait for all children to stop for the SIGSTOPs we just queued.  */
@@ -3596,7 +3604,7 @@ lwp_running (struct inferior_list_entry *entry, void *data)
   struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
-  if (lwp->dead)
+  if (lwp_is_marked_dead (lwp))
     return 0;
   if (lwp->stopped)
     return 0;

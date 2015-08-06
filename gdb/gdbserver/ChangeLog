@@ -1,5 +1,19 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (add_lwp): Set waitstatus to TARGET_WAITKIND_IGNORE.
+	(linux_thread_alive): Use lwp_is_marked_dead.
+	(extended_event_reported): Delete.
+	(linux_wait_1): Check if waitstatus is TARGET_WAITKIND_IGNORE
+	instead of extended_event_reported.
+	(mark_lwp_dead): Don't set the 'dead' flag.  Store the waitstatus
+	as well.
+	(lwp_is_marked_dead): New function.
+	(lwp_running): Use lwp_is_marked_dead.
+	* linux-low.h: Delete 'dead' field, and update 'waitstatus's
+	comment.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (linux_wait_1): Move fork event output out of the
 	!report_to_gdb check.  Pass event_child->waitstatus to
 	target_waitstatus_to_string instead of ourstatus.
