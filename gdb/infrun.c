@@ -1711,7 +1711,9 @@ displaced_step_dump_bytes (struct ui_file *file,
    explain how we handle this case instead.
 
    Returns 1 if preparing was successful -- this thread is going to be
-   stepped now; or 0 if displaced stepping this thread got queued.  */
+   stepped now; 0 if displaced stepping this thread got queued; or -1
+   if this instruction can't be displaced stepped.  */
+
 static int
 displaced_step_prepare_throw (ptid_t ptid)
 {
@@ -1795,9 +1797,14 @@ displaced_step_prepare_throw (ptid_t ptid)
 
   closure = gdbarch_displaced_step_copy_insn (gdbarch,
 					      original, copy, regcache);
-
-  /* We don't support the fully-simulated case at present.  */
-  gdb_assert (closure);
+  if (closure == NULL)
+    {
+      /* The architecture doesn't know how or want to displaced step
+	 this instruction or instruction sequence.  Fallback to
+	 stepping over the breakpoint in-line.  */
+      do_cleanups (old_cleanups);
+      return -1;
+    }
 
   /* Save the information we need to fix things up if the step
      succeeds.  */

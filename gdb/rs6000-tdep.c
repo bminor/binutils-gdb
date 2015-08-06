@@ -974,6 +974,61 @@ rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
 #define BXL_INSN 0x4c000000
 #define BP_INSN 0x7C000008
 
+/* Instruction masks used during single-stepping of atomic
+   sequences.  */
+#define LWARX_MASK 0xfc0007fe
+#define LWARX_INSTRUCTION 0x7c000028
+#define LDARX_INSTRUCTION 0x7c0000A8
+#define STWCX_MASK 0xfc0007ff
+#define STWCX_INSTRUCTION 0x7c00012d
+#define STDCX_INSTRUCTION 0x7c0001ad
+
+/* We can't displaced step atomic sequences.  Otherwise this is just
+   like simple_displaced_step_copy_insn.  */
+
+static struct displaced_step_closure *
+ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
+			      CORE_ADDR from, CORE_ADDR to,
+			      struct regcache *regs)
+{
+  size_t len = gdbarch_max_insn_length (gdbarch);
+  gdb_byte *buf = xmalloc (len);
+  struct cleanup *old_chain = make_cleanup (xfree, buf);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int insn;
+
+  read_memory (from, buf, len);
+
+  insn = extract_signed_integer (buf, PPC_INSN_SIZE, byte_order);
+
+  /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
+  if ((insn & LWARX_MASK) == LWARX_INSTRUCTION
+      || (insn & LWARX_MASK) == LDARX_INSTRUCTION)
+    {
+      if (debug_displaced)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "displaced: can't displaced step "
+			      "atomic sequence at %s\n",
+			      paddress (gdbarch, from));
+	}
+      do_cleanups (old_chain);
+      return NULL;
+    }
+
+  write_memory (to, buf, len);
+
+  if (debug_displaced)
+    {
+      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
+                          paddress (gdbarch, from), paddress (gdbarch, to));
+      displaced_step_dump_bytes (gdb_stdlog, buf, len);
+    }
+
+  discard_cleanups (old_chain);
+  return (struct displaced_step_closure *) buf;
+}
+
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
 static void
@@ -983,8 +1038,7 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 			  struct regcache *regs)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  /* Since we use simple_displaced_step_copy_insn, our closure is a
-     copy of the instruction.  */
+  /* Our closure is a copy of the instruction.  */
   ULONGEST insn  = extract_unsigned_integer ((gdb_byte *) closure,
 					      PPC_INSN_SIZE, byte_order);
   ULONGEST opcode = 0;
@@ -1076,14 +1130,6 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
 {
   return 1;
 }
-
-/* Instruction masks used during single-stepping of atomic sequences.  */
-#define LWARX_MASK 0xfc0007fe
-#define LWARX_INSTRUCTION 0x7c000028
-#define LDARX_INSTRUCTION 0x7c0000A8
-#define STWCX_MASK 0xfc0007ff
-#define STWCX_INSTRUCTION 0x7c00012d
-#define STDCX_INSTRUCTION 0x7c0001ad
 
 /* Checks for an atomic sequence of instructions beginning with a LWARX/LDARX
    instruction and ending with a STWCX/STDCX instruction.  If such a sequence
@@ -5923,7 +5969,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Setup displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
-					simple_displaced_step_copy_insn);
+					ppc_displaced_step_copy_insn);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch,
 					    ppc_displaced_step_hw_singlestep);
   set_gdbarch_displaced_step_fixup (gdbarch, ppc_displaced_step_fixup);

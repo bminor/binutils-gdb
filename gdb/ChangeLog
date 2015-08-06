@@ -1,5 +1,21 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (displaced_step_prepare_throw): Return -1 if
+	gdbarch_displaced_step_copy_insn returns NULL.  Update intro
+	comment.
+	* rs6000-tdep.c (LWARX_MASK, LWARX_INSTRUCTION, LDARX_INSTRUCTION)
+	(STWCX_MASK, STWCX_INSTRUCTION, STDCX_INSTRUCTION): Move higher up
+	in file.
+	(ppc_displaced_step_copy_insn): New function.
+	(ppc_displaced_step_fixup): Update comment.
+	(rs6000_gdbarch_init): Install ppc_displaced_step_copy_insn as
+	gdbarch_displaced_step_copy_insn hook.
+	* gdbarch.sh (displaced_step_copy_insn): Document what happens on
+	NULL return.
+	* gdbarch.h: Regenerate.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* inferior.h (struct inferior) <displaced_stepping_failed>: New
 	field.
 	* infrun.c (use_displaced_stepping_now_p): New parameter 'inf'.

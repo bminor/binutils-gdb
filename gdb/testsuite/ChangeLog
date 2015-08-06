@@ -1,5 +1,11 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.arch/ppc64-atomic-inst.exp (do_test): New procedure, move
+	tests here.
+	(top level): Run do_test with and without displaced stepping.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/valgrind-disp-step.c: New file.
 	* gdb.base/valgrind-disp-step.exp: New file.
 
