@@ -22,6 +22,7 @@
 #include "inferiors.h"
 
 struct btrace_target_info;
+struct regcache;
 
 struct thread_info
 {
@@ -30,7 +31,7 @@ struct thread_info
   struct inferior_list_entry entry;
 
   void *target_data;
-  void *regcache_data;
+  struct regcache *regcache_data;
 
   /* The last resume GDB requested on this thread.  */
   enum resume_kind last_resume_kind;

@@ -1,5 +1,20 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (struct regcache): Forward declare.
+	(struct thread_info) <regcache_data>: Now a struct regcache
+	pointer.
+	* inferiors.c (inferior_regcache_data)
+	(set_inferior_regcache_data): Now work with struct regcache
+	pointers.
+	* inferiors.h (struct regcache): Forward declare.
+	(inferior_regcache_data, set_inferior_regcache_data): Now work
+	with struct regcache pointers.
+	* regcache.c (get_thread_regcache, regcache_invalidate_thread)
+	(free_register_cache_thread): Remove struct regcache pointer
+	casts.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* server.c (captured_main): On error, print the exception message
 	to stderr, and if run_once is set, throw a quit.
 

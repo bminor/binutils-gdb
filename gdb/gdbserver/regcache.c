@@ -28,7 +28,7 @@ get_thread_regcache (struct thread_info *thread, int fetch)
 {
   struct regcache *regcache;
 
-  regcache = (struct regcache *) inferior_regcache_data (thread);
+  regcache = inferior_regcache_data (thread);
 
   /* Threads' regcaches are created lazily, because biarch targets add
      the main thread/lwp before seeing it stop for the first time, and
@@ -76,7 +76,7 @@ regcache_invalidate_thread (struct thread_info *thread)
 {
   struct regcache *regcache;
 
-  regcache = (struct regcache *) inferior_regcache_data (thread);
+  regcache = inferior_regcache_data (thread);
 
   if (regcache == NULL)
     return;
@@ -277,8 +277,7 @@ find_register_by_number (const struct target_desc *tdesc, int n)
 static void
 free_register_cache_thread (struct thread_info *thread)
 {
-  struct regcache *regcache
-    = (struct regcache *) inferior_regcache_data (thread);
+  struct regcache *regcache = inferior_regcache_data (thread);
 
   if (regcache != NULL)
     {
