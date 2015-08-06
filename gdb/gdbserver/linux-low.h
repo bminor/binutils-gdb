@@ -261,16 +261,13 @@ struct lwp_info
      event already received in a wait()).  */
   int stopped;
 
-  /* If this flag is set, the lwp is known to be dead already (exit
-     event already received in a wait(), and is cached in
-     status_pending).  */
-  int dead;
-
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
 
-  /* This is used to store extended ptrace event information until
-     it is reported to GDB.  */
+  /* If WAITSTATUS->KIND != TARGET_WAITKIND_IGNORE, the waitstatus for
+     this LWP's last event, to pass to GDB without any further
+     processing.  This is used to store extended ptrace event
+     information or exit status until it can be reported to GDB.  */
   struct target_waitstatus waitstatus;
 
   /* When stopped is set, this is where the lwp last stopped, with
