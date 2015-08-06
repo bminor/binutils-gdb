@@ -5992,7 +5992,7 @@ to the next @var{align} boundary.  The single operand @code{ALIGN}
 doesn't change the value of the location counter---it just does
 arithmetic on it.  The two operand @code{ALIGN} allows an arbitrary
 expression to be aligned upwards (@code{ALIGN(@var{align})} is
-equivalent to @code{ALIGN(., @var{align})}).
+equivalent to @code{ALIGN(ABSOLUTE(.), @var{align})}).
 
 Here is an example which aligns the output @code{.data} section to the
 next @code{0x2000} byte boundary after the preceding section and sets a
