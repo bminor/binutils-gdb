@@ -1539,6 +1539,116 @@ s390_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 /* Displaced stepping.  */
 
+/* Return true if INSN is a non-branch RIL-b or RIL-c format
+   instruction.  */
+
+static int
+is_non_branch_ril (gdb_byte *insn)
+{
+  gdb_byte op1 = insn[0];
+
+  if (op1 == 0xc4)
+    {
+      gdb_byte op2 = insn[1] & 0x0f;
+
+      switch (op2)
+	{
+	case 0x02: /* llhrl */
+	case 0x04: /* lghrl */
+	case 0x05: /* lhrl */
+	case 0x06: /* llghrl */
+	case 0x07: /* sthrl */
+	case 0x08: /* lgrl */
+	case 0x0b: /* stgrl */
+	case 0x0c: /* lgfrl */
+	case 0x0d: /* lrl */
+	case 0x0e: /* llgfrl */
+	case 0x0f: /* strl */
+	  return 1;
+	}
+    }
+  else if (op1 == 0xc6)
+    {
+      gdb_byte op2 = insn[1] & 0x0f;
+
+      switch (op2)
+	{
+	case 0x00: /* exrl */
+	case 0x02: /* pfdrl */
+	case 0x04: /* cghrl */
+	case 0x05: /* chrl */
+	case 0x06: /* clghrl */
+	case 0x07: /* clhrl */
+	case 0x08: /* cgrl */
+	case 0x0a: /* clgrl */
+	case 0x0c: /* cgfrl */
+	case 0x0d: /* crl */
+	case 0x0e: /* clgfrl */
+	case 0x0f: /* clrl */
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
+/* Implementation of gdbarch_displaced_step_copy_insn.  */
+
+static struct displaced_step_closure *
+s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
+			       CORE_ADDR from, CORE_ADDR to,
+			       struct regcache *regs)
+{
+  size_t len = gdbarch_max_insn_length (gdbarch);
+  gdb_byte *buf = xmalloc (len);
+  struct cleanup *old_chain = make_cleanup (xfree, buf);
+
+  read_memory (from, buf, len);
+
+  /* Adjust the displacement field of PC-relative RIL instructions,
+     except branches.  The latter are handled in the fixup hook.  */
+  if (is_non_branch_ril (buf))
+    {
+      LONGEST offset;
+
+      offset = extract_signed_integer (buf + 2, 4, BFD_ENDIAN_BIG);
+      offset = (from - to + offset * 2) / 2;
+
+      /* If the instruction is too far from the jump pad, punt.  This
+	 will usually happen with instructions in shared libraries.
+	 We could probably support these by rewriting them to be
+	 absolute or fully emulating them.  */
+      if (offset < INT32_MIN || offset > INT32_MAX)
+	{
+	  /* Let the core fall back to stepping over the breakpoint
+	     in-line.  */
+	  if (debug_displaced)
+	    {
+	      fprintf_unfiltered (gdb_stdlog,
+				  "displaced: can't displaced step "
+				  "RIL instruction: offset %s out of range\n",
+				  plongest (offset));
+	    }
+	  do_cleanups (old_chain);
+	  return NULL;
+	}
+
+      store_signed_integer (buf + 2, 4, BFD_ENDIAN_BIG, offset);
+    }
+
+  write_memory (to, buf, len);
+
+  if (debug_displaced)
+    {
+      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
+                          paddress (gdbarch, from), paddress (gdbarch, to));
+      displaced_step_dump_bytes (gdb_stdlog, buf, len);
+    }
+
+  discard_cleanups (old_chain);
+  return (struct displaced_step_closure *) buf;
+}
+
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
 static void
@@ -1547,8 +1657,7 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 			   CORE_ADDR from, CORE_ADDR to,
 			   struct regcache *regs)
 {
-  /* Since we use simple_displaced_step_copy_insn, our closure is a
-     copy of the instruction.  */
+  /* Our closure is a copy of the instruction.  */
   gdb_byte *insn = (gdb_byte *) closure;
   static int s390_instrlen[] = { 2, 4, 4, 6 };
   int insnlen = s390_instrlen[insn[0] >> 6];
@@ -3285,7 +3394,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
-					simple_displaced_step_copy_insn);
+					s390_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
   set_gdbarch_displaced_step_free_closure (gdbarch,
 					   simple_displaced_step_free_closure);

@@ -1,5 +1,13 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* s390-linux-tdep.c (is_non_branch_ril)
+	(s390_displaced_step_copy_insn): New functions.
+	(s390_displaced_step_fixup): Update comment.
+	(s390_gdbarch_init): Install s390_displaced_step_copy_insn as
+	gdbarch_displaced_step_copy_insn hook.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (displaced_step_prepare_throw): Return -1 if
 	gdbarch_displaced_step_copy_insn returns NULL.  Update intro
 	comment.
