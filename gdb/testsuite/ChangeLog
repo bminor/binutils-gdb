@@ -1,5 +1,9 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/valgrind-infcall.exp: Issue a "disconnect".
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18749
 	* gdb.threads/process-dies-while-handling-bp.c: New file.
 	* gdb.threads/process-dies-while-handling-bp.exp: New file.

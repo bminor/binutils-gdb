@@ -83,6 +83,11 @@ unset_board_info fileid
 
 clean_restart $testfile
 
+# Make sure we're disconnected, in case we're testing with the
+# native-extended-gdbserver board, where gdb_start/gdb_load spawn
+# gdbserver and connect to it.
+gdb_test "disconnect" ".*"
+
 gdb_test "$vgdbcmd" " in \\.?_start .*" "target remote for vgdb"
 
 gdb_test "monitor v.set gdb_output" "valgrind output will go to gdb.*"
