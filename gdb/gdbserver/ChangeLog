@@ -1,5 +1,10 @@
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
+	* server.c (captured_main): On error, print the exception message
+	to stderr, and if run_once is set, throw a quit.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (move_out_of_jump_pad_callback): Temporarily switch
 	the current thread.
 

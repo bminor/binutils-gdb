@@ -3610,11 +3610,17 @@ captured_main (int argc, char *argv[])
 	}
       CATCH (exception, RETURN_MASK_ERROR)
 	{
+	  fflush (stdout);
+	  fprintf (stderr, "gdbserver: %s\n", exception.message);
+
 	  if (response_needed)
 	    {
 	      write_enn (own_buf);
 	      putpkt (own_buf);
 	    }
+
+	  if (run_once)
+	    throw_quit ("Quit");
 	}
       END_CATCH
     }
