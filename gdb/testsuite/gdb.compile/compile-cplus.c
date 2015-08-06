@@ -122,6 +122,15 @@ class Base2
   int b = 4;
 };
 
+class Base3
+{
+ public:
+  int return_value () {return b;}
+ private:
+  int b = 5;
+};
+
+
 class Multiple : public Base, public Base2
 {
   int pure_virt ()
@@ -129,6 +138,11 @@ class Multiple : public Base, public Base2
     int a = Base::return_value ();
     return a + 42;
   }
+};
+
+class VirtualBase : public virtual Base3
+{
+  int z = 99;
 };
 
 class Foo
@@ -173,6 +187,7 @@ main (void)
   int f = 0;
   Foo foovar;
   Multiple *multivar = new Multiple;
+  VirtualBase vbase;
   static int static_local = 77000;
 
   foovar.public_var = 42;

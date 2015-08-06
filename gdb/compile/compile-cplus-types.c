@@ -226,7 +226,7 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
 
 	  bases.elements = XNEWVEC (gcc_type, num_base_classes);
 	  bases.n_elements = num_base_classes;
-	  bases.virtualp = 0;
+	  bases.virtualp = xcalloc (num_base_classes, sizeof (char));
 	  for (i = 0; i < num_base_classes; i++)
 	    {
 	      /* pmuldoon: Not sure what to populate in this base
@@ -237,6 +237,8 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
 
 	      find_line_and_src_from_type (base_type, &base_line,
 					   &base_filename);
+	      if (BASETYPE_VIA_VIRTUAL (type, i))
+		bases.virtualp[i] = '1';
 	      bases.elements[i] = convert_cplus_type (context, base_type);
 	    }
 	}
