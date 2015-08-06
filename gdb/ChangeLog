@@ -1,5 +1,10 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* signal-while-stepping-over-bp-other-thread.exp: Expect "restart
+	threads" as alternative to "switching back to stepped thread".
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention "maint set/show target-non-stop".
 	* breakpoint.c (update_global_location_list): Check
 	target_is_non_stop_p instead of non_stop.
