@@ -63,7 +63,6 @@ static struct
 {
   const char *name;
   int offset;
-  int required;
 } symbol_list[] = {
   IPA_SYM(helper_thread_id),
   IPA_SYM(cmd_buf),

@@ -1,3 +1,7 @@
+2015-08-06  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* common/agent.c (symbol_list) <required>: Remove.
+
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
 	* target/waitstatus.h (enum target_stop_reason)

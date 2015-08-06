@@ -177,7 +177,6 @@ static struct
 {
   const char *name;
   int offset;
-  int required;
 } symbol_list[] = {
   IPA_SYM(gdb_tp_heap_buffer),
   IPA_SYM(gdb_jump_pad_buffer),

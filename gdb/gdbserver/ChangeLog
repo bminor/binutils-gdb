@@ -1,3 +1,7 @@
+2015-08-06  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* tracepoint.c (symbol_list) <required>: Remove.
+
 2015-08-06  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (handle_extended_wait): Set the fork child's suspend
