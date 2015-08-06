@@ -1,3 +1,9 @@
+2015-08-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* dtrace-probe.c (dtrace_process_dof): Ignore the objfile's DOF
+	data if a DTRACE_DOF_SECT_TYPE_PROVIDER section is found to be
+	smaller than expected.
+
 2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* stack.c (get_frame_language): Moved ...

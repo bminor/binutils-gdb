@@ -519,6 +519,14 @@ dtrace_process_dof (asection *sect, struct objfile *objfile,
 	unsigned int entsize = DOF_UINT (dof, probes_s->dofs_entsize);
 	int num_probes;
 
+	if (DOF_UINT (dof, section->dofs_size)
+	    < sizeof (struct dtrace_dof_provider))
+	  {
+	    /* The section is smaller than expected, so do not use it.
+	       This has been observed on x86-solaris 10.  */
+	    goto invalid_dof_data;
+	  }
+
 	/* Very, unlikely, but could crash gdb if not handled
 	   properly.  */
 	if (entsize == 0)
