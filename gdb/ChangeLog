@@ -328,6 +328,7 @@
 	instead of integer.
 
 2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
 
 	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): Use enum
 	type or value instead of integer.
