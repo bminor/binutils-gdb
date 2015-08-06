@@ -33,7 +33,7 @@ pthread_t threads[NTHREADS];
 
 pthread_barrier_t barrier;
 
-#define NFORKS 1000
+#define NFORKS 10
 
 /* Used to create a conditional breakpoint that always fails.  */
 volatile int zero;
@@ -108,7 +108,7 @@ main (void)
   pthread_t bp_thread;
 
   /* Don't run forever.  */
-  //  alarm (180);
+  alarm (180);
 
   pthread_barrier_init (&barrier, NULL, NTHREADS + 1);
 

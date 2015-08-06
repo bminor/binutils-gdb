@@ -39,7 +39,6 @@ proc do_test { cond_bp_target detach_on_fork } {
 
     set saved_gdbflags $GDBFLAGS
     set GDBFLAGS [concat $GDBFLAGS " -ex \"set non-stop on\""]
-    set GDBFLAGS [concat $GDBFLAGS " -ex \"set sysroot /\""]
     clean_restart $binfile
     set GDBFLAGS $saved_gdbflags
 
@@ -72,7 +71,6 @@ proc do_test { cond_bp_target detach_on_fork } {
 	}
 	-re "Inferior $decimal \(\[^\r\n\]+\) exited normally" {
 	    incr fork_count
-	    exp_continue
 	    if {$fork_count <= 100} {
 		exp_continue
 	    } else {
@@ -107,7 +105,7 @@ proc foreach_with_prefix {var list body} {
 }
 
 foreach_with_prefix cond_bp_target {1 0} {
-    foreach_with_prefix detach_on_fork {"off" "off"} {
+    foreach_with_prefix detach_on_fork {"on" "off"} {
 	do_test $cond_bp_target $detach_on_fork
 
 	# Disable "off" for now.  The test does pass with
