@@ -1,3 +1,7 @@
+2015-08-06  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* configure: Regenerate.
+
 2015-08-05  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi: Document that the --only-keep-debug option

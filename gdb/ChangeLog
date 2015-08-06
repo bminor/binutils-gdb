@@ -1,3 +1,10 @@
+2015-08-06  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* Makefile.in (LIBICONV): Define.
+	(CLIBS): Add LIBICONV.
+	* acinclude.m4: Use config/iconv.m4 instead of custom AM_ICONV.
+	* configure: Regenerate.
+
 2015-08-06  Simon Marchi  <simon.marchi@ericsson.com>
 	    Pedro Alves  <palves@redhat.com>
 
