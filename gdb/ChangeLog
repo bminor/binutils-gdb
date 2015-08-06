@@ -1,5 +1,9 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (linux_nat_always_non_stop_p): Return 1.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* s390-linux-tdep.c (is_non_branch_ril)
 	(s390_displaced_step_copy_insn): New functions.
 	(s390_displaced_step_fixup): Update comment.
