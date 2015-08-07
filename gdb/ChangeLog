@@ -1,5 +1,35 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (struct thread_info) <step_over_prev,
+	step_over_next>: New fields.
+	(thread_step_over_chain_enqueue, thread_step_over_chain_remove)
+	(thread_step_over_chain_next, thread_is_in_step_over_chain): New
+	declarations.
+	* infrun.c (struct displaced_step_request): Delete.
+	(struct displaced_step_inferior_state) <step_request_queue>:
+	Delete field.
+	(displaced_step_prepare): Assert that trap_expected is set.  Use
+	thread_step_over_chain_enqueue.  Split starting a new displaced
+	step to ...
+	(start_step_over): ... this new function.
+	(resume): Assert the thread isn't waiting for a step over already.
+	(proceed): Assert the thread isn't waiting for a step over
+	already.
+	(infrun_thread_stop_requested): Adjust to remove threads from the
+	embedded step-over chain.
+	(handle_inferior_event) <fork/vfork>: Call start_step_over after
+	displaced_step_fixup.
+	(handle_signal_stop): Call start_step_over after
+	displaced_step_fixup.
+	* infrun.h (step_over_queue_head): New declaration.
+	* thread.c (step_over_chain_enqueue, step_over_chain_remove)
+	(thread_step_over_chain_next, thread_is_in_step_over_chain)
+	(thread_step_over_chain_enqueue)
+	(thread_step_over_chain_remove): New functions.
+	(delete_thread_1): Remove thread from the step-over chain.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (thread_still_needs_step_over): Rename to ...
 	(thread_still_needs_step_over_bp): ... this.
 	(enum step_over_what): New.

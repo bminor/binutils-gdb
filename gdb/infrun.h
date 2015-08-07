@@ -189,4 +189,8 @@ extern void signal_catch_update (const unsigned int *);
    systems.  Use of symbolic signal names is strongly encouraged.  */
 enum gdb_signal gdb_signal_from_command (int num);
 
+/* The global queue of threads that need to do a step-over operation
+   to get past e.g., a breakpoint.  */
+extern struct thread_info *step_over_queue_head;
+
 #endif /* INFRUN_H */

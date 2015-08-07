@@ -1221,6 +1221,15 @@ follow_exec (ptid_t ptid, char *execd_pathname)
      matically get reset there in the new process.).  */
 }
 
+/* The queue of threads that need to do a step-over operation to get
+   past e.g., a breakpoint.  What technique is used to step over the
+   breakpoint/watchpoint does not matter -- all threads end up in the
+   same queue, to maintain rough temporal order of execution, in order
+   to avoid starvation, otherwise, we could e.g., find ourselves
+   constantly stepping the same couple threads past their breakpoints
+   over and over, if the single-step finish fast enough.  */
+struct thread_info *step_over_queue_head;
+
 /* Bit flags indicating what the thread needs to step over.  */
 
 enum step_over_what
@@ -1417,12 +1426,6 @@ step_over_info_valid_p (void)
    displaced step operation on it.  See displaced_step_prepare and
    displaced_step_fixup for details.  */
 
-struct displaced_step_request
-{
-  ptid_t ptid;
-  struct displaced_step_request *next;
-};
-
 /* Per-inferior displaced stepping state.  */
 struct displaced_step_inferior_state
 {
@@ -1431,10 +1434,6 @@ struct displaced_step_inferior_state
 
   /* The process this displaced step state refers to.  */
   int pid;
-
-  /* A queue of pending displaced stepping requests.  One entry per
-     thread that needs to do a displaced step.  */
-  struct displaced_step_request *step_request_queue;
 
   /* If this is not null_ptid, this is the thread carrying out a
      displaced single-step in process PID.  This thread's state will
@@ -1667,6 +1666,9 @@ displaced_step_prepare (ptid_t ptid)
      support displaced stepping.  */
   gdb_assert (gdbarch_displaced_step_copy_insn_p (gdbarch));
 
+  /* Nor if the thread isn't meant to step over a breakpoint.  */
+  gdb_assert (tp->control.trap_expected);
+
   /* Disable range stepping while executing in the scratch pad.  We
      want a single-step even if executing the displaced instruction in
      the scratch buffer lands within the stepping range (e.g., a
@@ -1682,28 +1684,13 @@ displaced_step_prepare (ptid_t ptid)
     {
       /* Already waiting for a displaced step to finish.  Defer this
 	 request and place in queue.  */
-      struct displaced_step_request *req, *new_req;
 
       if (debug_displaced)
 	fprintf_unfiltered (gdb_stdlog,
-			    "displaced: defering step of %s\n",
+			    "displaced: deferring step of %s\n",
 			    target_pid_to_str (ptid));
 
-      new_req = xmalloc (sizeof (*new_req));
-      new_req->ptid = ptid;
-      new_req->next = NULL;
-
-      if (displaced->step_request_queue)
-	{
-	  for (req = displaced->step_request_queue;
-	       req && req->next;
-	       req = req->next)
-	    ;
-	  req->next = new_req;
-	}
-      else
-	displaced->step_request_queue = new_req;
-
+      thread_step_over_chain_enqueue (tp);
       return 0;
     }
   else
@@ -1853,24 +1840,45 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
   do_cleanups (old_cleanups);
 
   displaced->step_ptid = null_ptid;
+}
 
-  /* Are there any pending displaced stepping requests?  If so, run
-     one now.  Leave the state object around, since we're likely to
-     need it again soon.  */
-  while (displaced->step_request_queue)
+/* Are there any pending step-over requests?  If so, run all we can
+   now.  */
+
+static void
+start_step_over (void)
+{
+  struct thread_info *tp, *next;
+
+  for (tp = step_over_queue_head; tp != NULL; tp = next)
     {
-      struct displaced_step_request *head;
       ptid_t ptid;
+      struct displaced_step_inferior_state *displaced;
       struct regcache *regcache;
       struct gdbarch *gdbarch;
       CORE_ADDR actual_pc;
       struct address_space *aspace;
+      struct inferior *inf = find_inferior_ptid (tp->ptid);
 
-      head = displaced->step_request_queue;
-      ptid = head->ptid;
-      displaced->step_request_queue = head->next;
-      xfree (head);
+      next = thread_step_over_chain_next (tp);
 
+      displaced = get_displaced_stepping_state (inf->pid);
+
+      /* If this inferior already has a displaced step in process,
+	 don't start a new one.  */
+      if (!ptid_equal (displaced->step_ptid, null_ptid))
+	continue;
+
+      thread_step_over_chain_remove (tp);
+
+      if (step_over_queue_head == NULL)
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: step-over queue now empty\n");
+	}
+
+      ptid = tp->ptid;
       context_switch (ptid);
 
       regcache = get_thread_regcache (ptid);
@@ -1905,7 +1913,6 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
 	    target_resume (ptid, 0, GDB_SIGNAL_0);
 
 	  /* Done, we're stepping a thread.  */
-	  break;
 	}
       else
 	{
@@ -1933,6 +1940,10 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
 	  /* This request was discarded.  See if there's any other
 	     thread waiting for its turn.  */
 	}
+
+      /* A new displaced stepping sequence started.  Maybe we can
+	 start a displaced step on a thread of other process.
+	 Continue looking.  */
     }
 }
 
@@ -1953,10 +1964,6 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
     {
       if (ptid_equal (displaced->step_ptid, old_ptid))
 	displaced->step_ptid = new_ptid;
-
-      for (it = displaced->step_request_queue; it; it = it->next)
-	if (ptid_equal (it->ptid, old_ptid))
-	  it->ptid = new_ptid;
     }
 }
 
@@ -2134,6 +2141,8 @@ resume (enum gdb_signal sig)
   int step;
 
   tp->stepped_breakpoint = 0;
+
+  gdb_assert (!thread_is_in_step_over_chain (tp));
 
   QUIT;
 
@@ -2654,6 +2663,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   /* Fill in with reasonable starting values.  */
   init_thread_stepping_state (tp);
 
+  gdb_assert (!thread_is_in_step_over_chain (tp));
+
   if (addr == (CORE_ADDR) -1)
     {
       if (pc == stop_pc
@@ -2959,35 +2970,17 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 static void
 infrun_thread_stop_requested (ptid_t ptid)
 {
-  struct displaced_step_inferior_state *displaced;
+  struct thread_info *tp;
 
-  /* PTID was requested to stop.  Remove it from the displaced
-     stepping queue, so we don't try to resume it automatically.  */
-
-  for (displaced = displaced_step_inferior_states;
-       displaced;
-       displaced = displaced->next)
-    {
-      struct displaced_step_request *it, **prev_next_p;
-
-      it = displaced->step_request_queue;
-      prev_next_p = &displaced->step_request_queue;
-      while (it)
-	{
-	  if (ptid_match (it->ptid, ptid))
-	    {
-	      *prev_next_p = it->next;
-	      it->next = NULL;
-	      xfree (it);
-	    }
-	  else
-	    {
-	      prev_next_p = &it->next;
-	    }
-
-	  it = *prev_next_p;
-	}
-    }
+  /* PTID was requested to stop.  Remove matching threads from the
+     step-over queue, so we don't try to resume them
+     automatically.  */
+  ALL_NON_EXITED_THREADS (tp)
+    if (ptid_match (tp->ptid, ptid))
+      {
+	if (thread_is_in_step_over_chain (tp))
+	  thread_step_over_chain_remove (tp);
+      }
 
   iterate_over_threads (infrun_thread_stop_requested_callback, &ptid);
 }
@@ -4045,6 +4038,9 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	       that this operation also cleans up the child process for vfork,
 	       because their pages are shared.  */
 	    displaced_step_fixup (ecs->ptid, GDB_SIGNAL_TRAP);
+	    /* Start a new step-over in another thread if there's one
+	       that needs it.  */
+	    start_step_over ();
 
 	    if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
 	      {
@@ -4293,6 +4289,7 @@ handle_signal_stop (struct execution_control_state *ecs)
      the PC, so do it here, before we set stop_pc.)  */
   displaced_step_fixup (ecs->ptid,
 			ecs->event_thread->suspend.stop_signal);
+  start_step_over ();
 
   /* If we either finished a single-step or hit a breakpoint, but
      the user wanted this thread to be stopped, pretend we got a

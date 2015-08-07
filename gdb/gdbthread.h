@@ -283,6 +283,12 @@ struct thread_info
   /* Values that are stored as temporaries on stack while evaluating
      expressions.  */
   value_vec *stack_temporaries;
+
+  /* Step-over chain.  A thread is in the step-over queue if these are
+     non-NULL.  If only a single thread is in the chain, then these
+     fields point to self.  */
+  struct thread_info *step_over_prev;
+  struct thread_info *step_over_next;
 };
 
 /* Create an empty thread list, or empty the existing one.  */
@@ -499,6 +505,23 @@ extern void push_thread_stack_temporary (ptid_t ptid, struct value *v);
 extern struct value *get_last_thread_stack_temporary (ptid_t);
 
 extern int value_in_thread_stack_temporaries (struct value *, ptid_t);
+
+/* Add TP to the end of its inferior's pending step-over chain.  */
+
+extern void thread_step_over_chain_enqueue (struct thread_info *tp);
+
+/* Remove TP from its inferior's pending step-over chain.  */
+
+extern void thread_step_over_chain_remove (struct thread_info *tp);
+
+/* Return the next thread in the step-over chain starting at TP.  NULL
+   if TP is the last entry in the chain.  */
+
+extern struct thread_info *thread_step_over_chain_next (struct thread_info *tp);
+
+/* Return true if TP is in the step-over chain.  */
+
+extern int thread_is_in_step_over_chain (struct thread_info *tp);
 
 extern struct thread_info *thread_list;
 

@@ -307,6 +307,86 @@ add_thread (ptid_t ptid)
   return add_thread_with_info (ptid, NULL);
 }
 
+/* Add TP to the end of the step-over chain LIST_P.  */
+
+static void
+step_over_chain_enqueue (struct thread_info **list_p, struct thread_info *tp)
+{
+  gdb_assert (tp->step_over_next == NULL);
+  gdb_assert (tp->step_over_prev == NULL);
+
+  if (*list_p == NULL)
+    {
+      *list_p = tp;
+      tp->step_over_prev = tp->step_over_next = tp;
+    }
+  else
+    {
+      struct thread_info *head = *list_p;
+      struct thread_info *tail = head->step_over_prev;
+
+      tp->step_over_prev = tail;
+      tp->step_over_next = head;
+      head->step_over_prev = tp;
+      tail->step_over_next = tp;
+    }
+}
+
+/* Remove TP from step-over chain LIST_P.  */
+
+static void
+step_over_chain_remove (struct thread_info **list_p, struct thread_info *tp)
+{
+  gdb_assert (tp->step_over_next != NULL);
+  gdb_assert (tp->step_over_prev != NULL);
+
+  if (*list_p == tp)
+    {
+      if (tp == tp->step_over_next)
+	*list_p = NULL;
+      else
+	*list_p = tp->step_over_next;
+    }
+
+  tp->step_over_prev->step_over_next = tp->step_over_next;
+  tp->step_over_next->step_over_prev = tp->step_over_prev;
+  tp->step_over_prev = tp->step_over_next = NULL;
+}
+
+/* See gdbthread.h.  */
+
+struct thread_info *
+thread_step_over_chain_next (struct thread_info *tp)
+{
+  struct thread_info *next = tp->step_over_next;
+
+  return (next == step_over_queue_head ? NULL : next);
+}
+
+/* See gdbthread.h.  */
+
+int
+thread_is_in_step_over_chain (struct thread_info *tp)
+{
+  return (tp->step_over_next != NULL);
+}
+
+/* See gdbthread.h.  */
+
+void
+thread_step_over_chain_enqueue (struct thread_info *tp)
+{
+  step_over_chain_enqueue (&step_over_queue_head, tp);
+}
+
+/* See gdbthread.h.  */
+
+void
+thread_step_over_chain_remove (struct thread_info *tp)
+{
+  step_over_chain_remove (&step_over_queue_head, tp);
+}
+
 /* Delete thread PTID.  If SILENT, don't notify the observer of this
    exit.  */
 static void
@@ -322,6 +402,10 @@ delete_thread_1 (ptid_t ptid, int silent)
 
   if (!tp)
     return;
+
+  /* Dead threads don't need to step-over.  Remove from queue.  */
+  if (tp->step_over_next != NULL)
+    thread_step_over_chain_remove (tp);
 
   /* If this is the current thread, or there's code out there that
      relies on it existing (refcount > 0) we can't delete yet.  Mark
