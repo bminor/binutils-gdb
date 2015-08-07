@@ -1,3 +1,10 @@
+2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18785
+	* binutils-all/objcopy.exp: Run strip-12.
+	* binutils-all/strip-12.d: New file.
+	* binutils-all/strip-12.s: Likewise.
+
 2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* binutils-all/objcopy.exp: Run new symbol tests.
