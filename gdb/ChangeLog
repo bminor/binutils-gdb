@@ -1,5 +1,14 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (switch_back_to_stepped_thread): Use ecs->ptid instead
+	of inferior_ptid.  If the stepped thread vanished, return 0
+	instead of resuming here.  Use reset_ecs.  Print the prev_pc and
+	the current stop_pc in log message.  Clear trap_expected if the
+	thread advanced.  Don't pass currently_stepping to
+	do_target_resume.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (struct thread_info) <prev_pc>: Extend comment.
 	* infrun.c (struct execution_control_state): Move higher up in the
 	file.

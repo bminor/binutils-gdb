@@ -5717,7 +5717,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
         {
 	  /* Ignore threads of processes we're not resuming.  */
 	  if (!sched_multi
-	      && ptid_get_pid (tp->ptid) != ptid_get_pid (inferior_ptid))
+	      && ptid_get_pid (tp->ptid) != ptid_get_pid (ecs->ptid))
 	    continue;
 
 	  /* When stepping over a breakpoint, we lock all threads
@@ -5781,19 +5781,17 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 				    "stepped thread, it has vanished\n");
 
 	      delete_thread (tp->ptid);
-	      keep_going (ecs);
-	      return 1;
+	      return 0;
 	    }
 
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
 				"infrun: switching back to stepped thread\n");
 
-	  ecs->event_thread = tp;
-	  ecs->ptid = tp->ptid;
-	  context_switch (ecs->ptid);
+	  reset_ecs (ecs, tp);
+	  switch_to_thread (tp->ptid);
 
-	  stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
+	  stop_pc = regcache_read_pc (get_thread_regcache (tp->ptid));
 	  frame = get_current_frame ();
 	  gdbarch = get_frame_arch (frame);
 
@@ -5817,23 +5815,28 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 
 	      if (debug_infrun)
 		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: expected thread advanced also\n");
+				    "infrun: expected thread advanced also "
+				    "(%s -> %s)\n",
+				    paddress (target_gdbarch (), tp->prev_pc),
+				    paddress (target_gdbarch (), stop_pc));
 
 	      /* Clear the info of the previous step-over, as it's no
-		 longer valid.  It's what keep_going would do too, if
-		 we called it.  Must do this before trying to insert
-		 the sss breakpoint, otherwise if we were previously
-		 trying to step over this exact address in another
-		 thread, the breakpoint ends up not installed.  */
+		 longer valid (if the thread was trying to step over a
+		 breakpoint, it has already succeeded).  It's what
+		 keep_going would do too, if we called it.  Do this
+		 before trying to insert the sss breakpoint, otherwise
+		 if we were previously trying to step over this exact
+		 address in another thread, the breakpoint is
+		 skipped.  */
 	      clear_step_over_info ();
+	      tp->control.trap_expected = 0;
 
 	      insert_single_step_breakpoint (get_frame_arch (frame),
 					     get_frame_address_space (frame),
 					     stop_pc);
 
 	      resume_ptid = user_visible_resume_ptid (tp->control.stepping_command);
-	      do_target_resume (resume_ptid,
-				currently_stepping (tp), GDB_SIGNAL_0);
+	      do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
 	      prepare_to_wait (ecs);
 	    }
 	  else
