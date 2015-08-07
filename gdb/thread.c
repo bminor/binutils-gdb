@@ -1279,8 +1279,16 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
     }
 }
 
+/* Data used by the cleanup installed by
+   'make_cleanup_restore_current_thread'.  */
+
 struct current_thread_cleanup
 {
+  /* Next in list of currently installed 'struct
+     current_thread_cleanup' cleanups.  See
+     'current_thread_cleanup_chain' below.  */
+  struct current_thread_cleanup *next;
+
   ptid_t inferior_ptid;
   struct frame_id selected_frame_id;
   int selected_frame_level;
@@ -1288,6 +1296,29 @@ struct current_thread_cleanup
   int inf_id;
   int was_removable;
 };
+
+/* A chain of currently installed 'struct current_thread_cleanup'
+   cleanups.  Restoring the previously selected thread looks up the
+   old thread in the thread list by ptid.  If the thread changes ptid,
+   we need to update the cleanup's thread structure so the look up
+   succeeds.  */
+static struct current_thread_cleanup *current_thread_cleanup_chain;
+
+/* A thread_ptid_changed observer.  Update all currently installed
+   current_thread_cleanup cleanups that want to switch back to
+   OLD_PTID to switch back to NEW_PTID instead.  */
+
+static void
+restore_current_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
+{
+  struct current_thread_cleanup *it;
+
+  for (it = current_thread_cleanup_chain; it != NULL; it = it->next)
+    {
+      if (ptid_equal (it->inferior_ptid, old_ptid))
+	it->inferior_ptid = new_ptid;
+    }
+}
 
 static void
 do_restore_current_thread_cleanup (void *arg)
@@ -1329,6 +1360,8 @@ restore_current_thread_cleanup_dtor (void *arg)
   struct thread_info *tp;
   struct inferior *inf;
 
+  current_thread_cleanup_chain = current_thread_cleanup_chain->next;
+
   tp = find_thread_ptid (old->inferior_ptid);
   if (tp)
     tp->refcount--;
@@ -1361,6 +1394,9 @@ make_cleanup_restore_current_thread (void)
   old->inferior_ptid = inferior_ptid;
   old->inf_id = current_inferior ()->num;
   old->was_removable = current_inferior ()->removable;
+
+  old->next = current_thread_cleanup_chain;
+  current_thread_cleanup_chain = old;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
@@ -1815,4 +1851,6 @@ Show printing of thread events (such as thread start and exit)."), NULL,
          &setprintlist, &showprintlist);
 
   create_internalvar_type_lazy ("_thread", &thread_funcs, NULL);
+
+  observer_attach_thread_ptid_changed (restore_current_thread_ptid_changed);
 }

@@ -1,3 +1,9 @@
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/checkpoint-ns.exp: New file.
+	* gdb.base/checkpoint.exp: Pass explicit "checkpoint.c" to
+	standard_testfile.
+
 2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* lib/gdb.exp (skip_tsx_tests, skip_btrace_pt_tests): New.

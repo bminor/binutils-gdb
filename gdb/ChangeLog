@@ -1,3 +1,21 @@
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event): If we get
+	TARGET_WAITKIND_SIGNALLED or TARGET_WAITKIND_EXITED in non-stop
+	mode, mark all threads of the exiting process as not-executing.
+	(normal_stop): If we get TARGET_WAITKIND_SIGNALLED or
+	TARGET_WAITKIND_EXITED in non-stop mode, finish all threads of the
+	exiting process, if inferior_ptid still points at a process.
+	* thread.c (struct current_thread_cleanup) <next>: New field.
+	(current_thread_cleanup_chain): New global.
+	(restore_current_thread_ptid_changed): New function.
+	(restore_current_thread_cleanup_dtor): Remove the cleanup from the
+	current_thread_cleanup_chain list.
+	(make_cleanup_restore_current_thread): Add the cleanup data to the
+	current_thread_cleanup_chain list.
+	(_initialize_thread): Install restore_current_thread_ptid_changed
+	as thread_ptid_changed observer.
+
 2015-08-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* dtrace-probe.c (dtrace_process_dof): Ignore the objfile's DOF

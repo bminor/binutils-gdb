@@ -3785,14 +3785,31 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 
   /* Mark the non-executing threads accordingly.  In all-stop, all
      threads of all processes are stopped when we get any event
-     reported.  In non-stop mode, only the event thread stops.  If
-     we're handling a process exit in non-stop mode, there's nothing
-     to do, as threads of the dead process are gone, and threads of
-     any other process were left running.  */
+     reported.  In non-stop mode, only the event thread stops.  */
   if (!non_stop)
     set_executing (minus_one_ptid, 0);
-  else if (ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-	   && ecs->ws.kind != TARGET_WAITKIND_EXITED)
+  else if (ecs->ws.kind == TARGET_WAITKIND_SIGNALLED
+	   || ecs->ws.kind == TARGET_WAITKIND_EXITED)
+    {
+      ptid_t pid_ptid;
+
+      /* If we're handling a process exit in non-stop mode, even
+	 though threads haven't been deleted yet, one would think that
+	 there is nothing to do, as threads of the dead process will
+	 be soon deleted, and threads of any other process were left
+	 running.  However, on some targets, threads survive a process
+	 exit event.  E.g., for the "checkpoint" command, when the
+	 current checkpoint/fork exits, linux-fork.c automatically
+	 switches to another fork from within target_mourn_inferior,
+	 by associating the same inferior/thread to another fork.  We
+	 haven't mourned yet at this point, but we must mark any
+	 threads left in the process as not-executing so that
+	 finish_thread_state marks them stopped (in the user's
+	 perspective) if/when we present the stop to the user.  */
+      pid_ptid = pid_to_ptid (ptid_get_pid (ecs->ptid));
+      set_executing (pid_ptid, 0);
+    }
+  else
     set_executing (ecs->ptid, 0);
 
   switch (ecs->ws.kind)
@@ -6554,6 +6571,7 @@ normal_stop (void)
   struct target_waitstatus last;
   ptid_t last_ptid;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  ptid_t pid_ptid;
 
   get_last_target_status (&last_ptid, &last);
 
@@ -6563,9 +6581,21 @@ normal_stop (void)
      here, so do this before any filtered output.  */
   if (!non_stop)
     make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
-  else if (last.kind != TARGET_WAITKIND_SIGNALLED
-	   && last.kind != TARGET_WAITKIND_EXITED
-	   && last.kind != TARGET_WAITKIND_NO_RESUMED)
+  else if (last.kind == TARGET_WAITKIND_SIGNALLED
+	   || last.kind == TARGET_WAITKIND_EXITED)
+    {
+      /* On some targets, we may still have live threads in the
+	 inferior when we get a process exit event.  E.g., for
+	 "checkpoint", when the current checkpoint/fork exits,
+	 linux-fork.c automatically switches to another fork from
+	 within target_mourn_inferior.  */
+      if (!ptid_equal (inferior_ptid, null_ptid))
+	{
+	  pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+	  make_cleanup (finish_thread_state_cleanup, &pid_ptid);
+	}
+    }
+  else if (last.kind != TARGET_WAITKIND_NO_RESUMED)
     make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
 
   /* As we're presenting a stop, and potentially removing breakpoints,
