@@ -3433,8 +3433,14 @@ context_switch (ptid_t ptid)
   switch_to_thread (ptid);
 }
 
+/* If the target can't tell whether we've hit breakpoints
+   (target_supports_stopped_by_sw_breakpoint), and we got a SIGTRAP,
+   check whether that could have been caused by a breakpoint.  If so,
+   adjust the PC, per gdbarch_decr_pc_after_break.  */
+
 static void
-adjust_pc_after_break (struct execution_control_state *ecs)
+adjust_pc_after_break (struct thread_info *thread,
+		       struct target_waitstatus *ws)
 {
   struct regcache *regcache;
   struct gdbarch *gdbarch;
@@ -3462,10 +3468,10 @@ adjust_pc_after_break (struct execution_control_state *ecs)
      target with both of these set in GDB history, and it seems unlikely to be
      correct, so gdbarch_have_nonsteppable_watchpoint is not checked here.  */
 
-  if (ecs->ws.kind != TARGET_WAITKIND_STOPPED)
+  if (ws->kind != TARGET_WAITKIND_STOPPED)
     return;
 
-  if (ecs->ws.value.sig != GDB_SIGNAL_TRAP)
+  if (ws->value.sig != GDB_SIGNAL_TRAP)
     return;
 
   /* In reverse execution, when a breakpoint is hit, the instruction
@@ -3511,7 +3517,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
-  regcache = get_thread_regcache (ecs->ptid);
+  regcache = get_thread_regcache (thread->ptid);
   gdbarch = get_regcache_arch (regcache);
 
   decr_pc = gdbarch_decr_pc_after_break (gdbarch);
@@ -3565,10 +3571,10 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 	 software breakpoint.  In this case (prev_pc == breakpoint_pc),
 	 we also need to back up to the breakpoint address.  */
 
-      if (thread_has_single_step_breakpoints_set (ecs->event_thread)
-	  || !currently_stepping (ecs->event_thread)
-	  || (ecs->event_thread->stepped_breakpoint
-	      && ecs->event_thread->prev_pc == breakpoint_pc))
+      if (thread_has_single_step_breakpoints_set (thread)
+	  || !currently_stepping (thread)
+	  || (thread->stepped_breakpoint
+	      && thread->prev_pc == breakpoint_pc))
 	regcache_write_pc (regcache, breakpoint_pc);
 
       do_cleanups (old_cleanups);
@@ -3749,7 +3755,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
     }
 
   /* Dependent on valid ECS->EVENT_THREAD.  */
-  adjust_pc_after_break (ecs);
+  adjust_pc_after_break (ecs->event_thread, &ecs->ws);
 
   /* Dependent on the current PC value modified by adjust_pc_after_break.  */
   reinit_frame_cache ();
