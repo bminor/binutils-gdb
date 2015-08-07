@@ -19,7 +19,6 @@ patches="
 	binutils-sharable.patch
 	binutils-lto-mixed.patch
 	binutils-pr12639.patch
-	binutils-pr18720a.patch
 	binutils-pr18720b.patch
 	binutils-secondary.patch
 "
