@@ -939,7 +939,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       bfd_boolean *skip,
 		       bfd_boolean *override,
 		       bfd_boolean *type_change_ok,
-		       bfd_boolean *size_change_ok)
+		       bfd_boolean *size_change_ok,
+		       bfd_boolean *matched)
 {
   asection *sec, *oldsec;
   struct elf_link_hash_entry *h;
@@ -950,6 +951,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
   bfd_boolean newweak, oldweak, newfunc, oldfunc;
   const struct elf_backend_data *bed;
+  char *new_version;
 
   *skip = FALSE;
   *override = FALSE;
@@ -968,12 +970,62 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   bed = get_elf_backend_data (abfd);
 
+  /* NEW_VERSION is the symbol version of the new symbol.  */
+  new_version = strrchr (name, ELF_VER_CHR);
+  if (new_version)
+    {
+      if (new_version > name && new_version[-1] != ELF_VER_CHR)
+	h->hidden = 1;
+      new_version += 1;
+      if (new_version[0] == '\0')
+	new_version = NULL;
+    }
+
   /* For merging, we only care about real symbols.  But we need to make
      sure that indirect symbol dynamic flags are updated.  */
   hi = h;
   while (h->root.type == bfd_link_hash_indirect
 	 || h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (!*matched)
+    {
+      if (hi == h || h->root.type == bfd_link_hash_new)
+	*matched = TRUE;
+      else
+	{
+	  /* OLD_HIDDEN is true if the existing symbol is only visibile
+	     to the symbol with the same symbol version.  NEW_HIDDEN is
+	     true if the new symbol is only visibile to the symbol with
+	     the same symbol version.  */
+	  bfd_boolean old_hidden = h->hidden;
+	  bfd_boolean new_hidden = hi->hidden;
+	  if (!old_hidden && !new_hidden)
+	    /* The new symbol matches the existing symbol if both
+	       aren't hidden.  */
+	    *matched = TRUE;
+	  else
+	    {
+	      /* OLD_VERSION is the symbol version of the existing
+		 symbol. */
+	      char *old_version = strrchr (h->root.root.string,
+					   ELF_VER_CHR);
+	      if (old_version)
+		{
+		  old_version += 1;
+		  if (old_version[0] == '\0')
+		    old_version = NULL;
+		}
+
+	      /* The new symbol matches the existing symbol if they
+		 have the same symbol version.  */
+	      *matched = (old_version == new_version
+			  || (old_version != NULL
+			      && new_version != NULL
+			      && strcmp (old_version, new_version) == 0));
+	    }
+	}
+    }
 
   /* OLDBFD and OLDSEC are a BFD and an ASECTION associated with the
      existing symbol.  */
@@ -1047,7 +1099,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	}
       else
 	{
-	  h->dynamic_def = 1;
+	  /* Update the existing symbol only if they match. */
+	  if (*matched)
+	    h->dynamic_def = 1;
 	  hi->dynamic_def = 1;
 	}
     }
@@ -1618,6 +1672,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   char *p;
   size_t len, shortlen;
   asection *tmp_sec;
+  bfd_boolean matched;
 
   /* If this symbol has a version, and it is the default version, we
      create an indirect symbol from the default name to the fully
@@ -1644,10 +1699,11 @@ _bfd_elf_add_default_symbol (bfd *abfd,
      actually going to define an indirect symbol.  */
   type_change_ok = FALSE;
   size_change_ok = FALSE;
+  matched = TRUE;
   tmp_sec = sec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
 			      &hi, poldbfd, NULL, NULL, &skip, &override,
-			      &type_change_ok, &size_change_ok))
+			      &type_change_ok, &size_change_ok, &matched))
     return FALSE;
 
   if (skip)
@@ -1767,7 +1823,7 @@ nondefault:
   tmp_sec = sec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
 			      &hi, poldbfd, NULL, NULL, &skip, &override,
-			      &type_change_ok, &size_change_ok))
+			      &type_change_ok, &size_change_ok, &matched))
     return FALSE;
 
   if (skip)
@@ -1977,26 +2033,14 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
   if (p != NULL && h->verinfo.vertree == NULL)
     {
       struct bfd_elf_version_tree *t;
-      bfd_boolean hidden;
 
-      hidden = TRUE;
-
-      /* There are two consecutive ELF_VER_CHR characters if this is
-	 not a hidden symbol.  */
       ++p;
       if (*p == ELF_VER_CHR)
-	{
-	  hidden = FALSE;
-	  ++p;
-	}
+	++p;
 
       /* If there is no version string, we can just return out.  */
       if (*p == '\0')
-	{
-	  if (hidden)
-	    h->hidden = 1;
-	  return TRUE;
-	}
+	return TRUE;
 
       /* Look for the version.  If we find it, it is no longer weak.  */
       for (t = sinfo->info->version_info; t != NULL; t = t->next)
@@ -2092,9 +2136,6 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	  sinfo->failed = TRUE;
 	  return FALSE;
 	}
-
-      if (hidden)
-	h->hidden = 1;
     }
 
   /* If we don't have a version for this symbol, see if we can find
@@ -3885,6 +3926,7 @@ error_free_dyn:
       bfd_boolean common;
       unsigned int old_alignment;
       bfd *old_bfd;
+      bfd_boolean matched;
 
       override = FALSE;
 
@@ -4019,6 +4061,7 @@ error_free_dyn:
       size_change_ok = FALSE;
       type_change_ok = bed->type_change_ok;
       old_weak = FALSE;
+      matched = FALSE;
       old_alignment = 0;
       old_bfd = NULL;
       new_sec = sec;
@@ -4148,13 +4191,16 @@ error_free_dyn:
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
 				      sym_hash, &old_bfd, &old_weak,
 				      &old_alignment, &skip, &override,
-				      &type_change_ok, &size_change_ok))
+				      &type_change_ok, &size_change_ok,
+				      &matched))
 	    goto error_free_vers;
 
 	  if (skip)
 	    continue;
 
-	  if (override)
+	  /* Override a definition only if the new symbol matches the
+	     existing one.  */
+	  if (override && matched)
 	    definition = FALSE;
 
 	  h = *sym_hash;
@@ -6810,14 +6856,18 @@ _bfd_elf_link_hash_copy_indirect (struct bfd_link_info *info,
   struct elf_link_hash_table *htab;
 
   /* Copy down any references that we may have already seen to the
-     symbol which just became indirect.  */
+     symbol which just became indirect if DIR isn't a hidden versioned
+     symbol.  */
 
-  dir->ref_dynamic |= ind->ref_dynamic;
-  dir->ref_regular |= ind->ref_regular;
-  dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
-  dir->non_got_ref |= ind->non_got_ref;
-  dir->needs_plt |= ind->needs_plt;
-  dir->pointer_equality_needed |= ind->pointer_equality_needed;
+  if (!dir->hidden)
+    {
+      dir->ref_dynamic |= ind->ref_dynamic;
+      dir->ref_regular |= ind->ref_regular;
+      dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
+      dir->non_got_ref |= ind->non_got_ref;
+      dir->needs_plt |= ind->needs_plt;
+      dir->pointer_equality_needed |= ind->pointer_equality_needed;
+    }
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;
@@ -8904,6 +8954,16 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   const struct elf_backend_data *bed;
   long indx;
   int ret;
+  /* A symbol is bound locally if it is forced local or it is locally
+     defined, hidden versioned, not referenced by shared library and
+     not exported when linking executable.  */
+  bfd_boolean local_bind = (h->forced_local
+			    || (flinfo->info->executable
+				&& !flinfo->info->export_dynamic
+				&& !h->dynamic
+				&& !h->ref_dynamic
+				&& h->def_regular
+				&& h->hidden));
 
   if (h->root.type == bfd_link_hash_warning)
     {
@@ -8915,12 +8975,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   /* Decide whether to output this symbol in this pass.  */
   if (eoinfo->localsyms)
     {
-      if (!h->forced_local)
+      if (!local_bind)
 	return TRUE;
     }
   else
     {
-      if (h->forced_local)
+      if (local_bind)
 	return TRUE;
     }
 
@@ -9041,7 +9101,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   sym.st_value = 0;
   sym.st_size = h->size;
   sym.st_other = h->other;
-  if (h->forced_local)
+  if (local_bind)
     {
       sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
       /* Turn off visibility on local symbol.  */
@@ -9223,8 +9283,10 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       /* Since there is no version information in the dynamic string,
 	 if there is no version info in symbol version section, we will
 	 have a run-time problem if not linking executable, referenced
-	 by shared library, or not locally defined.  */
+	 by shared library, not locally defined, or not bound locally.
+      */
       if (h->verinfo.verdef == NULL
+	  && !local_bind
 	  && (!flinfo->info->executable
 	      || h->ref_dynamic
 	      || !h->def_regular))
@@ -9297,7 +9359,9 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 		iversym.vs_vers++;
 	    }
 
-	  if (h->hidden)
+	  /* Turn on VERSYM_HIDDEN only if the hidden vesioned symbol is
+	     defined locally.  */
+	  if (h->hidden && h->def_regular)
 	    iversym.vs_vers |= VERSYM_HIDDEN;
 
 	  eversym = (Elf_External_Versym *) flinfo->symver_sec->contents;

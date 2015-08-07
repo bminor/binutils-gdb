@@ -1,3 +1,12 @@
+2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18720
+	* ld-elf/indirect.exp: Run tests for PR ld/18720.
+	* ld-elf/pr18720.out: New file.
+	* ld-elf/pr18720a.c: Likewise.
+	* ld-elf/pr18720b.c: Likewise.
+	* ld-elf/pr18720c.c: Likewise.
+
 2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld/ld-lib.exp (run_dump_test): When using the map option, no
