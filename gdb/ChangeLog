@@ -1,5 +1,12 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (thread_still_needs_step_over): Rename to ...
+	(thread_still_needs_step_over_bp): ... this.
+	(enum step_over_what): New.
+	(thread_still_needs_step_over): Reimplement.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_wait_as): If not waiting for a stop reply,
 	return TARGET_WAITKIND_NO_RESUMED.  If TARGET_WNOHANG is
 	requested, don't block waiting forever.

@@ -1221,6 +1221,19 @@ follow_exec (ptid_t ptid, char *execd_pathname)
      matically get reset there in the new process.).  */
 }
 
+/* Bit flags indicating what the thread needs to step over.  */
+
+enum step_over_what
+  {
+    /* Step over a breakpoint.  */
+    STEP_OVER_BREAKPOINT = 1,
+
+    /* Step past a non-continuable watchpoint, in order to let the
+       instruction execute so we can evaluate the watchpoint
+       expression.  */
+    STEP_OVER_WATCHPOINT = 2
+  };
+
 /* Info about an instruction that is being stepped over.  */
 
 struct step_over_info
@@ -2506,7 +2519,7 @@ clear_proceed_status (int step)
    meanwhile, we can skip the whole step-over dance.  */
 
 static int
-thread_still_needs_step_over (struct thread_info *tp)
+thread_still_needs_step_over_bp (struct thread_info *tp)
 {
   if (tp->stepping_over_breakpoint)
     {
@@ -2521,6 +2534,26 @@ thread_still_needs_step_over (struct thread_info *tp)
     }
 
   return 0;
+}
+
+/* Check whether thread TP still needs to start a step-over in order
+   to make progress when resumed.  Returns an bitwise or of enum
+   step_over_what bits, indicating what needs to be stepped over.  */
+
+static int
+thread_still_needs_step_over (struct thread_info *tp)
+{
+  struct inferior *inf = find_inferior_ptid (tp->ptid);
+  int what = 0;
+
+  if (thread_still_needs_step_over_bp (tp))
+    what |= STEP_OVER_BREAKPOINT;
+
+  if (tp->stepping_over_watchpoint
+      && !target_have_steppable_watchpoint)
+    what |= STEP_OVER_WATCHPOINT;
+
+  return what;
 }
 
 /* Returns true if scheduler locking applies.  STEP indicates whether
@@ -6281,6 +6314,7 @@ keep_going (struct execution_control_state *ecs)
       struct regcache *regcache = get_current_regcache ();
       int remove_bp;
       int remove_wps;
+      enum step_over_what step_what;
 
       /* Either the trap was not expected, but we are continuing
 	 anyway (if we got a signal, the user asked it be passed to
@@ -6301,10 +6335,11 @@ keep_going (struct execution_control_state *ecs)
 	 instruction, and then re-insert the breakpoint when that step
 	 is finished.  */
 
+      step_what = thread_still_needs_step_over (ecs->event_thread);
+
       remove_bp = (ecs->hit_singlestep_breakpoint
-		   || thread_still_needs_step_over (ecs->event_thread));
-      remove_wps = (ecs->event_thread->stepping_over_watchpoint
-		    && !target_have_steppable_watchpoint);
+		   || (step_what & STEP_OVER_BREAKPOINT));
+      remove_wps = (step_what & STEP_OVER_WATCHPOINT);
 
       /* We can't use displaced stepping if we need to step past a
 	 watchpoint.  The instruction copied to the scratch pad would
