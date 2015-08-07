@@ -1,3 +1,8 @@
+2015-08-07  Amit Pawar <Amit.Pawar@amd.com>
+
+	* i386-gen.c: Remove CpuFMA4 from CPU_ZNVER1_FLAGS.
+	* i386-init.h: Regenerated.
+
 2015-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/13571
