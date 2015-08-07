@@ -232,6 +232,7 @@ new_thread (ptid_t ptid)
   /* Nothing to follow yet.  */
   tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
   tp->state = THREAD_STOPPED;
+  tp->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
 
   return tp;
 }
@@ -850,6 +851,28 @@ thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
   tp->ptid = new_ptid;
 
   observer_notify_thread_ptid_changed (old_ptid, new_ptid);
+}
+
+/* See gdbthread.h.  */
+
+void
+set_resumed (ptid_t ptid, int resumed)
+{
+  struct thread_info *tp;
+  int all = ptid_equal (ptid, minus_one_ptid);
+
+  if (all || ptid_is_pid (ptid))
+    {
+      for (tp = thread_list; tp; tp = tp->next)
+	if (all || ptid_get_pid (tp->ptid) == ptid_get_pid (ptid))
+	  tp->resumed = resumed;
+    }
+  else
+    {
+      tp = find_thread_ptid (ptid);
+      gdb_assert (tp != NULL);
+      tp->resumed = resumed;
+    }
 }
 
 /* Helper for set_running, that marks one thread either running or

@@ -1742,8 +1742,7 @@ extern int target_async_permitted;
 #define target_is_async_p() (current_target.to_is_async_p (&current_target))
 
 /* Enables/disabled async target events.  */
-#define target_async(ENABLE) \
-     (current_target.to_async (&current_target, (ENABLE)))
+extern void target_async (int enable);
 
 #define target_execution_direction() \
   (current_target.to_execution_direction (&current_target))

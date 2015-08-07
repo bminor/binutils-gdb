@@ -1,3 +1,68 @@
+2015-08-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (breakpoints_should_be_inserted_now): If any thread
+	has a pending status, return true.
+	* gdbthread.h: Include target/waitstatus.h.
+	(struct thread_suspend_state) <stop_reason, waitstatus_pending_p,
+	stop_pc>: New fields.
+	(struct thread_info) <resumed>: New field.
+	(set_resumed): Declare.
+	* infrun.c: Include "event-loop.h".
+	(infrun_async_inferior_event_token, infrun_is_async): New globals.
+	(infrun_async): New function.
+	(clear_step_over_info): Add debug output.
+	(displaced_step_in_progress_any_inferior): New function.
+	(displaced_step_fixup): New returns int.
+	(start_step_over): Handle in-line step-overs too.  Assert the
+	thread is marked resumed.
+	(resume_cleanups): Clear the thread's resumed flag.
+	(resume): Set the thread's resumed flag.  Return early if the
+	thread has a pending status.  Allow stepping a breakpoint with no
+	signal.
+	(proceed): Adjust to check 'resumed' instead of 'executing'.
+	(clear_proceed_status_thread): If the thread has a pending status,
+	and that status is a finished step, discard the pending status.
+	(clear_proceed_status): Don't clear step_over_info here.
+	(random_pending_event_thread, do_target_wait): New functions.
+	(prepare_for_detach, wait_for_inferior, fetch_inferior_event): Use
+	do_target_wait.
+	(wait_one): New function.
+	(THREAD_STOPPED_BY): New macro.
+	(thread_stopped_by_watchpoint, thread_stopped_by_sw_breakpoint)
+	(thread_stopped_by_hw_breakpoint): New functions.
+	(switch_to_thread_cleanup, save_waitstatus, stop_all_threads): New
+	functions.
+	(handle_inferior_event): Also call set_resumed(false) on all
+	threads implicitly stopped by the event.
+	(restart_threads, resumed_thread_with_pending_status): New
+	functions.
+	(finish_step_over): If we were doing an in-line step-over before,
+	and no longer are after trying to start a new step-over, restart
+	all threads.  If we have multiple threads with pending events,
+	save the current event and go through the event loop again.
+	(handle_signal_stop): Return early if finish_step_over returns
+	false.
+	<random signal>: If we get a signal while stepping over a
+	breakpoint in-line in non-stop mode, restart all threads.  Clear
+	step_over_info before delivering the signal.
+	(keep_going_stepped_thread): Use internal_error instead of
+	gdb_assert.  Mark the thread as resumed.
+	(keep_going_pass_signal): Assert the thread isn't already resumed.
+	If some other thread is doing an in-line step-over, defer the
+	resume.  If we just started a new in-line step-over, stop all
+	threads.  Don't clear step_over_info.
+	(infrun_async_inferior_event_handler): New function.
+	(_initialize_infrun): Create async event handler with
+	infrun_async_inferior_event_handler as callback.
+	(infrun_async): New declaration.
+	* target.c (target_async): New function.
+	* target.h (target_async): Declare macro and readd as function
+	declaration.
+	* target/waitstatus.h (enum target_stop_reason)
+	<TARGET_STOPPED_BY_SINGLE_STEP>: New value.
+	* thread.c (new_thread): Clear the new waitstatus field.
+	(set_resumed): New function.
+
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (keep_going_stepped_thread): New function, factored out

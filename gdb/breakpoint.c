@@ -468,6 +468,8 @@ breakpoints_should_be_inserted_now (void)
     }
   else if (target_has_execution)
     {
+      struct thread_info *tp;
+
       if (always_inserted_mode)
 	{
 	  /* The user wants breakpoints inserted even if all threads
@@ -477,6 +479,13 @@ breakpoints_should_be_inserted_now (void)
 
       if (threads_are_executing ())
 	return 1;
+
+      /* Don't remove breakpoints yet if, even though all threads are
+	 stopped, we still have events to process.  */
+      ALL_NON_EXITED_THREADS (tp)
+	if (tp->resumed
+	    && tp->suspend.waitstatus_pending_p)
+	  return 1;
     }
   return 0;
 }

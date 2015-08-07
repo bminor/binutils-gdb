@@ -3741,6 +3741,15 @@ maintenance_print_target_stack (char *cmd, int from_tty)
     }
 }
 
+/* See target.h.  */
+
+void
+target_async (int enable)
+{
+  infrun_async (enable);
+  current_target.to_async (&current_target, enable);
+}
+
 /* Controls if targets can report that they can/are async.  This is
    just for maintainers to use when debugging gdb.  */
 int target_async_permitted = 1;
