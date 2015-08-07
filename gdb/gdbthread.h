@@ -206,8 +206,10 @@ struct thread_info
 
   /* Internal stepping state.  */
 
-  /* Record the pc of the thread the last time it stopped.  This is
-     maintained by proceed and keep_going, and used in
+  /* Record the pc of the thread the last time it was resumed.  (It
+     can't be done on stop as the PC may change since the last stop,
+     e.g., "return" command, or "p $pc = 0xf000").  This is maintained
+     by proceed and keep_going, and among other things, it's used in
      adjust_pc_after_break to distinguish a hardware single-step
      SIGTRAP from a breakpoint SIGTRAP.  */
   CORE_ADDR prev_pc;

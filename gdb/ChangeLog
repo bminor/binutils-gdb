@@ -1,5 +1,32 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (struct thread_info) <prev_pc>: Extend comment.
+	* infrun.c (struct execution_control_state): Move higher up in the
+	file.
+	(reset_ecs): New function.
+	(start_step_over): Now returns int.  Rewrite to use
+	keep_going_pass_signal instead of manually starting a displaced step.
+	(resume): Don't call set_running here.  If displaced stepping
+	can't start now, clear trap_expected.
+	(find_thread_needs_step_over): Delete function.
+	(proceed): Set up finish_thread_state_cleanup.  Call set_running.
+	If the current thread needs a step over, push it in the step-over
+	chain.  Don't set insert breakpoints nor call resume directly
+	here.  Instead rewrite to use start_step_over and
+	keep_going_pass_signal.
+	(finish_step_over): New function.
+	(handle_signal_stop): Call finish_step_over instead of
+	start_step_over.
+	(switch_back_to_stepped_thread): If the event thread needs another
+	step-over do that first.  Use start_step_over.
+	(keep_going_pass_signal): New function, factored out from ...
+	(keep_going): ... here.
+	(_initialize_infrun): Comment moved here.
+	* thread.c (set_running_thread): New function.
+	(set_running, finish_thread_state): Use set_running_thread.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (struct thread_info) <step_over_prev,
 	step_over_next>: New fields.
 	(thread_step_over_chain_enqueue, thread_step_over_chain_remove)

@@ -852,44 +852,62 @@ thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
   observer_notify_thread_ptid_changed (old_ptid, new_ptid);
 }
 
+/* Helper for set_running, that marks one thread either running or
+   stopped.  */
+
+static int
+set_running_thread (struct thread_info *tp, int running)
+{
+  int started = 0;
+
+  if (running && tp->state == THREAD_STOPPED)
+    started = 1;
+  tp->state = running ? THREAD_RUNNING : THREAD_STOPPED;
+
+  if (!running)
+    {
+      /* If the thread is now marked stopped, remove it from
+	 the step-over queue, so that we don't try to resume
+	 it until the user wants it to.  */
+      if (tp->step_over_next != NULL)
+	thread_step_over_chain_remove (tp);
+    }
+
+  return started;
+}
+
 void
 set_running (ptid_t ptid, int running)
 {
   struct thread_info *tp;
   int all = ptid_equal (ptid, minus_one_ptid);
+  int any_started = 0;
 
   /* We try not to notify the observer if no thread has actually changed 
      the running state -- merely to reduce the number of messages to 
      frontend.  Frontend is supposed to handle multiple *running just fine.  */
   if (all || ptid_is_pid (ptid))
     {
-      int any_started = 0;
-
       for (tp = thread_list; tp; tp = tp->next)
 	if (all || ptid_get_pid (tp->ptid) == ptid_get_pid (ptid))
 	  {
 	    if (tp->state == THREAD_EXITED)
 	      continue;
-	    if (running && tp->state == THREAD_STOPPED)
+
+	    if (set_running_thread (tp, running))
 	      any_started = 1;
-	    tp->state = running ? THREAD_RUNNING : THREAD_STOPPED;
 	  }
-      if (any_started)
-	observer_notify_target_resumed (ptid);
     }
   else
     {
-      int started = 0;
-
       tp = find_thread_ptid (ptid);
-      gdb_assert (tp);
+      gdb_assert (tp != NULL);
       gdb_assert (tp->state != THREAD_EXITED);
-      if (running && tp->state == THREAD_STOPPED)
- 	started = 1;
-      tp->state = running ? THREAD_RUNNING : THREAD_STOPPED;
-      if (started)
-  	observer_notify_target_resumed (ptid);
+      if (set_running_thread (tp, running))
+	any_started = 1;
     }
+  if (any_started)
+    observer_notify_target_resumed (ptid);
 }
 
 static int
@@ -1008,9 +1026,8 @@ finish_thread_state (ptid_t ptid)
   	    continue;
 	  if (all || ptid_get_pid (ptid) == ptid_get_pid (tp->ptid))
 	    {
-	      if (tp->executing && tp->state == THREAD_STOPPED)
+	      if (set_running_thread (tp, tp->executing))
 		any_started = 1;
-	      tp->state = tp->executing ? THREAD_RUNNING : THREAD_STOPPED;
 	    }
 	}
     }
@@ -1020,9 +1037,8 @@ finish_thread_state (ptid_t ptid)
       gdb_assert (tp);
       if (tp->state != THREAD_EXITED)
 	{
-	  if (tp->executing && tp->state == THREAD_STOPPED)
+	  if (set_running_thread (tp, tp->executing))
 	    any_started = 1;
-	  tp->state = tp->executing ? THREAD_RUNNING : THREAD_STOPPED;
 	}
     }
 

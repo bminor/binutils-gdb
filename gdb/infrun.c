@@ -1842,31 +1842,61 @@ displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
   displaced->step_ptid = null_ptid;
 }
 
-/* Are there any pending step-over requests?  If so, run all we can
-   now.  */
+/* Data to be passed around while handling an event.  This data is
+   discarded between events.  */
+struct execution_control_state
+{
+  ptid_t ptid;
+  /* The thread that got the event, if this was a thread event; NULL
+     otherwise.  */
+  struct thread_info *event_thread;
+
+  struct target_waitstatus ws;
+  int stop_func_filled_in;
+  CORE_ADDR stop_func_start;
+  CORE_ADDR stop_func_end;
+  const char *stop_func_name;
+  int wait_some_more;
+
+  /* True if the event thread hit the single-step breakpoint of
+     another thread.  Thus the event doesn't cause a stop, the thread
+     needs to be single-stepped past the single-step breakpoint before
+     we can switch back to the original stepping thread.  */
+  int hit_singlestep_breakpoint;
+};
+
+/* Clear ECS and set it to point at TP.  */
 
 static void
+reset_ecs (struct execution_control_state *ecs, struct thread_info *tp)
+{
+  memset (ecs, 0, sizeof (*ecs));
+  ecs->event_thread = tp;
+  ecs->ptid = tp->ptid;
+}
+
+static void keep_going_pass_signal (struct execution_control_state *ecs);
+static void prepare_to_wait (struct execution_control_state *ecs);
+static int thread_still_needs_step_over (struct thread_info *tp);
+
+/* Are there any pending step-over requests?  If so, run all we can
+   now and return true.  Otherwise, return false.  */
+
+static int
 start_step_over (void)
 {
   struct thread_info *tp, *next;
 
   for (tp = step_over_queue_head; tp != NULL; tp = next)
     {
-      ptid_t ptid;
-      struct displaced_step_inferior_state *displaced;
-      struct regcache *regcache;
-      struct gdbarch *gdbarch;
-      CORE_ADDR actual_pc;
-      struct address_space *aspace;
-      struct inferior *inf = find_inferior_ptid (tp->ptid);
+      struct execution_control_state ecss;
+      struct execution_control_state *ecs = &ecss;
 
       next = thread_step_over_chain_next (tp);
 
-      displaced = get_displaced_stepping_state (inf->pid);
-
       /* If this inferior already has a displaced step in process,
 	 don't start a new one.  */
-      if (!ptid_equal (displaced->step_ptid, null_ptid))
+      if (displaced_step_in_progress (ptid_get_pid (tp->ptid)))
 	continue;
 
       thread_step_over_chain_remove (tp);
@@ -1878,73 +1908,57 @@ start_step_over (void)
 				"infrun: step-over queue now empty\n");
 	}
 
-      ptid = tp->ptid;
-      context_switch (ptid);
-
-      regcache = get_thread_regcache (ptid);
-      actual_pc = regcache_read_pc (regcache);
-      aspace = get_regcache_aspace (regcache);
-      gdbarch = get_regcache_arch (regcache);
-
-      if (breakpoint_here_p (aspace, actual_pc))
+      if (tp->control.trap_expected || tp->executing)
 	{
-	  if (debug_displaced)
-	    fprintf_unfiltered (gdb_stdlog,
-				"displaced: stepping queued %s now\n",
-				target_pid_to_str (ptid));
-
-	  displaced_step_prepare (ptid);
-
-	  if (debug_displaced)
-	    {
-	      CORE_ADDR actual_pc = regcache_read_pc (regcache);
-	      gdb_byte buf[4];
-
-	      fprintf_unfiltered (gdb_stdlog, "displaced: run %s: ",
-				  paddress (gdbarch, actual_pc));
-	      read_memory (actual_pc, buf, sizeof (buf));
-	      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
-	    }
-
-	  if (gdbarch_displaced_step_hw_singlestep (gdbarch,
-						    displaced->step_closure))
-	    target_resume (ptid, 1, GDB_SIGNAL_0);
-	  else
-	    target_resume (ptid, 0, GDB_SIGNAL_0);
-
-	  /* Done, we're stepping a thread.  */
-	}
-      else
-	{
-	  int step;
-	  struct thread_info *tp = inferior_thread ();
-
-	  /* The breakpoint we were sitting under has since been
-	     removed.  */
-	  tp->control.trap_expected = 0;
-
-	  /* Go back to what we were trying to do.  */
-	  step = currently_stepping (tp);
-
-	  if (step)
-	    step = maybe_software_singlestep (gdbarch, actual_pc);
-
-	  if (debug_displaced)
-	    fprintf_unfiltered (gdb_stdlog,
-				"displaced: breakpoint is gone: %s, step(%d)\n",
-				target_pid_to_str (tp->ptid), step);
-
-	  target_resume (ptid, step, GDB_SIGNAL_0);
-	  tp->suspend.stop_signal = GDB_SIGNAL_0;
-
-	  /* This request was discarded.  See if there's any other
-	     thread waiting for its turn.  */
+	  internal_error (__FILE__, __LINE__,
+			  "[%s] has inconsistent state: "
+			  "trap_expected=%d, executing=%d\n",
+			  target_pid_to_str (tp->ptid),
+			  tp->control.trap_expected,
+			  tp->executing);
 	}
 
-      /* A new displaced stepping sequence started.  Maybe we can
-	 start a displaced step on a thread of other process.
-	 Continue looking.  */
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: resuming [%s] for step-over\n",
+			    target_pid_to_str (tp->ptid));
+
+      /* keep_going_pass_signal skips the step-over if the breakpoint
+	 is no longer inserted.  In all-stop, we want to keep looking
+	 for a thread that needs a step-over instead of resuming TP,
+	 because we wouldn't be able to resume anything else until the
+	 target stops again.  In non-stop, the resume always resumes
+	 only TP, so it's OK to let the thread resume freely.  */
+      if (!non_stop && !thread_still_needs_step_over (tp))
+	continue;
+
+      switch_to_thread (tp->ptid);
+      reset_ecs (ecs, tp);
+      keep_going_pass_signal (ecs);
+
+      if (!ecs->wait_some_more)
+	error (_("Command aborted."));
+
+      if (!non_stop)
+	{
+	  /* On all-stop, shouldn't have resumed unless we needed a
+	     step over.  */
+	  gdb_assert (tp->control.trap_expected
+		      || tp->step_after_step_resume_breakpoint);
+
+	  /* With remote targets (at least), in all-stop, we can't
+	     issue any further remote commands until the program stops
+	     again.  */
+	  return 1;
+	}
+
+      /* Either the thread no longer needed a step-over, or a new
+	 displaced stepping sequence started.  Even in the latter
+	 case, continue looking.  Maybe we can also start another
+	 displaced step on a thread of other process. */
     }
+
+  return 0;
 }
 
 /* Update global variables holding ptids to hold NEW_PTID if they were
@@ -2281,13 +2295,11 @@ resume (enum gdb_signal sig)
 
       if (!displaced_step_prepare (inferior_ptid))
 	{
-	  /* Got placed in displaced stepping queue.  Will be resumed
-	     later when all the currently queued displaced stepping
-	     requests finish.  The thread is not executing at this
-	     point, and the call to set_executing will be made later.
-	     But we need to call set_running here, since from the
-	     user/frontend's point of view, threads were set running.  */
-	  set_running (user_visible_resume_ptid (user_step), 1);
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"Got placed in step-over queue\n");
+
+	  tp->control.trap_expected = 0;
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
@@ -2361,12 +2373,6 @@ resume (enum gdb_signal sig)
      by assuming everything will be resumed, than narrow the set
      by applying increasingly restricting conditions.  */
   resume_ptid = user_visible_resume_ptid (user_step);
-
-  /* Even if RESUME_PTID is a wildcard, and we end up resuming less
-     (e.g., we might need to step over a breakpoint), from the
-     user/frontend's point of view, all threads in RESUME_PTID are now
-     running.  */
-  set_running (resume_ptid, 1);
 
   /* Maybe resume a single thread after all.  */
   if ((step || thread_has_single_step_breakpoints_set (tp))
@@ -2576,48 +2582,6 @@ schedlock_applies (struct thread_info *tp)
 	      && tp->control.stepping_command));
 }
 
-/* Look a thread other than EXCEPT that has previously reported a
-   breakpoint event, and thus needs a step-over in order to make
-   progress.  Returns NULL is none is found.  */
-
-static struct thread_info *
-find_thread_needs_step_over (struct thread_info *except)
-{
-  struct thread_info *tp, *current;
-
-  /* With non-stop mode on, threads are always handled individually.  */
-  gdb_assert (! non_stop);
-
-  current = inferior_thread ();
-
-  /* If scheduler locking applies, we can avoid iterating over all
-     threads.  */
-  if (schedlock_applies (except))
-    {
-      if (except != current
-	  && thread_still_needs_step_over (current))
-	return current;
-
-      return NULL;
-    }
-
-  ALL_NON_EXITED_THREADS (tp)
-    {
-      /* Ignore the EXCEPT thread.  */
-      if (tp == except)
-	continue;
-      /* Ignore threads of processes we're not resuming.  */
-      if (!sched_multi
-	  && ptid_get_pid (tp->ptid) != ptid_get_pid (inferior_ptid))
-	continue;
-
-      if (thread_still_needs_step_over (tp))
-	return tp;
-    }
-
-  return NULL;
-}
-
 /* Basic routine for continuing the program in various fashions.
 
    ADDR is the address to resume at, or -1 for resume where stopped.
@@ -2638,6 +2602,11 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct thread_info *tp;
   CORE_ADDR pc;
   struct address_space *aspace;
+  ptid_t resume_ptid;
+  struct execution_control_state ecss;
+  struct execution_control_state *ecs = &ecss;
+  struct cleanup *old_chain;
+  int started;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
      "set follow-fork-mode" command; otherwise, we'll just proceed
@@ -2700,7 +2669,23 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      (next/step/etc.), we'll want to print stop event output to the MI
      console channel (the stepped-to line, etc.), as if the user
      entered the execution command on a real GDB console.  */
-  inferior_thread ()->control.command_interp = command_interp ();
+  tp->control.command_interp = command_interp ();
+
+  resume_ptid = user_visible_resume_ptid (tp->control.stepping_command);
+
+  /* If an exception is thrown from this point on, make sure to
+     propagate GDB's knowledge of the executing state to the
+     frontend/user running state.  */
+  old_chain = make_cleanup (finish_thread_state_cleanup, &resume_ptid);
+
+  /* Even if RESUME_PTID is a wildcard, and we end up resuming fewer
+     threads (e.g., we might need to set threads stepping over
+     breakpoints first), from the user/frontend's point of view, all
+     threads in RESUME_PTID are now running.  Unless we're calling an
+     inferior function, as in that case we pretend the inferior
+     doesn't run at all.  */
+  if (!tp->control.in_infcall)
+   set_running (resume_ptid, 1);
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
@@ -2708,91 +2693,92 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 			paddress (gdbarch, addr),
 			gdb_signal_to_symbol_string (siggnal));
 
-  if (non_stop)
-    /* In non-stop, each thread is handled individually.  The context
-       must already be set to the right thread here.  */
-    ;
-  else
-    {
-      struct thread_info *step_over;
-
-      /* In a multi-threaded task we may select another thread and
-	 then continue or step.
-
-	 But if the old thread was stopped at a breakpoint, it will
-	 immediately cause another breakpoint stop without any
-	 execution (i.e. it will report a breakpoint hit incorrectly).
-	 So we must step over it first.
-
-	 Look for a thread other than the current (TP) that reported a
-	 breakpoint hit and hasn't been resumed yet since.  */
-      step_over = find_thread_needs_step_over (tp);
-      if (step_over != NULL)
-	{
-	  if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog,
-				"infrun: need to step-over [%s] first\n",
-				target_pid_to_str (step_over->ptid));
-
-	  /* Store the prev_pc for the stepping thread too, needed by
-	     switch_back_to_stepped_thread.  */
-	  tp->prev_pc = regcache_read_pc (get_current_regcache ());
-	  switch_to_thread (step_over->ptid);
-	  tp = step_over;
-	}
-    }
-
-  /* If we need to step over a breakpoint, and we're not using
-     displaced stepping to do so, insert all breakpoints (watchpoints,
-     etc.) but the one we're stepping over, step one instruction, and
-     then re-insert the breakpoint when that step is finished.  */
-  if (tp->stepping_over_breakpoint && !use_displaced_stepping (gdbarch))
-    {
-      struct regcache *regcache = get_current_regcache ();
-
-      set_step_over_info (get_regcache_aspace (regcache),
-			  regcache_read_pc (regcache), 0);
-    }
-  else
-    clear_step_over_info ();
-
-  insert_breakpoints ();
-
-  tp->control.trap_expected = tp->stepping_over_breakpoint;
-
   annotate_starting ();
 
   /* Make sure that output from GDB appears before output from the
      inferior.  */
   gdb_flush (gdb_stdout);
 
-  /* Refresh prev_pc value just prior to resuming.  This used to be
-     done in stop_waiting, however, setting prev_pc there did not handle
-     scenarios such as inferior function calls or returning from
-     a function via the return command.  In those cases, the prev_pc
-     value was not set properly for subsequent commands.  The prev_pc value 
-     is used to initialize the starting line number in the ecs.  With an 
-     invalid value, the gdb next command ends up stopping at the position
-     represented by the next line table entry past our start position.
-     On platforms that generate one line table entry per line, this
-     is not a problem.  However, on the ia64, the compiler generates
-     extraneous line table entries that do not increase the line number.
-     When we issue the gdb next command on the ia64 after an inferior call
-     or a return command, we often end up a few instructions forward, still 
-     within the original line we started.
+  /* In a multi-threaded task we may select another thread and
+     then continue or step.
 
-     An attempt was made to refresh the prev_pc at the same time the
-     execution_control_state is initialized (for instance, just before
-     waiting for an inferior event).  But this approach did not work
-     because of platforms that use ptrace, where the pc register cannot
-     be read unless the inferior is stopped.  At that point, we are not
-     guaranteed the inferior is stopped and so the regcache_read_pc() call
-     can fail.  Setting the prev_pc value here ensures the value is updated
-     correctly when the inferior is stopped.  */
-  tp->prev_pc = regcache_read_pc (get_current_regcache ());
+     But if a thread that we're resuming had stopped at a breakpoint,
+     it will immediately cause another breakpoint stop without any
+     execution (i.e. it will report a breakpoint hit incorrectly).  So
+     we must step over it first.
 
-  /* Resume inferior.  */
-  resume (tp->suspend.stop_signal);
+     Look for threads other than the current (TP) that reported a
+     breakpoint hit and haven't been resumed yet since.  */
+
+  /* If scheduler locking applies, we can avoid iterating over all
+     threads.  */
+  if (!non_stop && !schedlock_applies (tp))
+    {
+      struct thread_info *current = tp;
+
+      ALL_NON_EXITED_THREADS (tp)
+        {
+	  /* Ignore the current thread here.  It's handled
+	     afterwards.  */
+	  if (tp == current)
+	    continue;
+
+	  /* Ignore threads of processes we're not resuming.  */
+	  if (!ptid_match (tp->ptid, resume_ptid))
+	    continue;
+
+	  if (!thread_still_needs_step_over (tp))
+	    continue;
+
+	  gdb_assert (!thread_is_in_step_over_chain (tp));
+
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: need to step-over [%s] first\n",
+				target_pid_to_str (tp->ptid));
+
+	  thread_step_over_chain_enqueue (tp);
+	}
+
+      tp = current;
+    }
+
+  /* Enqueue the current thread last, so that we move all other
+     threads over their breakpoints first.  */
+  if (tp->stepping_over_breakpoint)
+    thread_step_over_chain_enqueue (tp);
+
+  /* If the thread isn't started, we'll still need to set its prev_pc,
+     so that switch_back_to_stepped_thread knows the thread hasn't
+     advanced.  Must do this before resuming any thread, as in
+     all-stop/remote, once we resume we can't send any other packet
+     until the target stops again.  */
+  tp->prev_pc = regcache_read_pc (regcache);
+
+  started = start_step_over ();
+
+  if (step_over_info_valid_p ())
+    {
+      /* Either this thread started a new in-line step over, or some
+	 other thread was already doing one.  In either case, don't
+	 resume anything else until the step-over is finished.  */
+    }
+  else if (started && !non_stop)
+    {
+      /* A new displaced stepping sequence was started.  In all-stop,
+	 we can't talk to the target anymore until it next stops.  */
+    }
+  else if (!tp->executing && !thread_is_in_step_over_chain (tp))
+    {
+      /* The thread wasn't started, and isn't queued, run it now.  */
+      reset_ecs (ecs, tp);
+      switch_to_thread (tp->ptid);
+      keep_going_pass_signal (ecs);
+      if (!ecs->wait_some_more)
+	error ("Command aborted.");
+    }
+
+  discard_cleanups (old_chain);
 
   /* Wait for it to stop (if not standalone)
      and in any case decode why it stopped, and act accordingly.  */
@@ -2860,28 +2846,6 @@ init_wait_for_inferior (void)
 }
 
 
-/* Data to be passed around while handling an event.  This data is
-   discarded between events.  */
-struct execution_control_state
-{
-  ptid_t ptid;
-  /* The thread that got the event, if this was a thread event; NULL
-     otherwise.  */
-  struct thread_info *event_thread;
-
-  struct target_waitstatus ws;
-  int stop_func_filled_in;
-  CORE_ADDR stop_func_start;
-  CORE_ADDR stop_func_end;
-  const char *stop_func_name;
-  int wait_some_more;
-
-  /* True if the event thread hit the single-step breakpoint of
-     another thread.  Thus the event doesn't cause a stop, the thread
-     needs to be single-stepped past the single-step breakpoint before
-     we can switch back to the original stepping thread.  */
-  int hit_singlestep_breakpoint;
-};
 
 static void handle_inferior_event (struct execution_control_state *ecs);
 
@@ -2895,7 +2859,6 @@ static void check_exception_resume (struct execution_control_state *,
 
 static void end_stepping_range (struct execution_control_state *ecs);
 static void stop_waiting (struct execution_control_state *ecs);
-static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
 static void process_event_stop_test (struct execution_control_state *ecs);
 static int switch_back_to_stepped_thread (struct execution_control_state *ecs);
@@ -4271,6 +4234,34 @@ handle_inferior_event (struct execution_control_state *ecs)
   value_free_to_mark (mark);
 }
 
+/* Called when we get an event that may finish an in-line or
+   out-of-line (displaced stepping) step-over started previously.  */
+
+static void
+finish_step_over (struct execution_control_state *ecs)
+{
+  displaced_step_fixup (ecs->ptid,
+			ecs->event_thread->suspend.stop_signal);
+
+  if (step_over_info_valid_p ())
+    {
+      /* If we're stepping over a breakpoint with all threads locked,
+	 then only the thread that was stepped should be reporting
+	 back an event.  */
+      gdb_assert (ecs->event_thread->control.trap_expected);
+
+      if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
+	clear_step_over_info ();
+    }
+
+  if (!non_stop)
+    return;
+
+  /* Start a new step-over in another thread if there's one that
+     needs it.  */
+  start_step_over ();
+}
+
 /* Come here when the program has stopped with a signal.  */
 
 static void
@@ -4287,9 +4278,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   /* Do we need to clean up the state of a thread that has
      completed a displaced single-step?  (Doing so usually affects
      the PC, so do it here, before we set stop_pc.)  */
-  displaced_step_fixup (ecs->ptid,
-			ecs->event_thread->suspend.stop_signal);
-  start_step_over ();
+  finish_step_over (ecs);
 
   /* If we either finished a single-step or hit a breakpoint, but
      the user wanted this thread to be stopped, pretend we got a
@@ -5639,7 +5628,6 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
     {
       struct thread_info *tp;
       struct thread_info *stepping_thread;
-      struct thread_info *step_over;
 
       /* If any thread is blocked on some internal breakpoint, and we
 	 simply need to step over that breakpoint to get it going
@@ -5682,14 +5670,20 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	 return 1;
        }
 
-      /* Otherwise, we no longer expect a trap in the current thread.
-	 Clear the trap_expected flag before switching back -- this is
-	 what keep_going does as well, if we call it.  */
-      ecs->event_thread->control.trap_expected = 0;
-
-      /* Likewise, clear the signal if it should not be passed.  */
-      if (!signal_program[ecs->event_thread->suspend.stop_signal])
-	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
+      /* If this thread needs yet another step-over (e.g., stepping
+	 through a delay slot), do it first before moving on to
+	 another thread.  */
+      if (thread_still_needs_step_over (ecs->event_thread))
+	{
+	  if (debug_infrun)
+	    {
+	      fprintf_unfiltered (gdb_stdlog,
+				  "infrun: thread [%s] still needs step-over\n",
+				  target_pid_to_str (ecs->event_thread->ptid));
+	    }
+	  keep_going (ecs);
+	  return 1;
+	}
 
       /* If scheduler locking applies even if not stepping, there's no
 	 need to walk over threads.  Above we've checked whether the
@@ -5699,12 +5693,26 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
       if (schedlock_applies (ecs->event_thread))
 	return 0;
 
-      /* Look for the stepping/nexting thread, and check if any other
-	 thread other than the stepping thread needs to start a
-	 step-over.  Do all step-overs before actually proceeding with
+      /* Otherwise, we no longer expect a trap in the current thread.
+	 Clear the trap_expected flag before switching back -- this is
+	 what keep_going does as well, if we call it.  */
+      ecs->event_thread->control.trap_expected = 0;
+
+      /* Likewise, clear the signal if it should not be passed.  */
+      if (!signal_program[ecs->event_thread->suspend.stop_signal])
+	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
+
+      /* Do all pending step-overs before actually proceeding with
 	 step/next/etc.  */
+      if (start_step_over ())
+	{
+	  prepare_to_wait (ecs);
+	  return 1;
+	}
+
+      /* Look for the stepping/nexting thread.  */
       stepping_thread = NULL;
-      step_over = NULL;
+
       ALL_NON_EXITED_THREADS (tp)
         {
 	  /* Ignore threads of processes we're not resuming.  */
@@ -5736,37 +5744,6 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 
 	      stepping_thread = tp;
 	    }
-	  else if (thread_still_needs_step_over (tp))
-	    {
-	      step_over = tp;
-
-	      /* At the top we've returned early if the event thread
-		 is stepping.  If some other thread not the event
-		 thread is stepping, then scheduler locking can't be
-		 in effect, and we can resume this thread.  No need to
-		 keep looking for the stepping thread then.  */
-	      break;
-	    }
-	}
-
-      if (step_over != NULL)
-	{
-	  tp = step_over;
-	  if (debug_infrun)
-	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "infrun: need to step-over [%s]\n",
-				  target_pid_to_str (tp->ptid));
-	    }
-
-	  /* Only the stepping thread should have this set.  */
-	  gdb_assert (tp->control.step_range_end == 0);
-
-	  ecs->ptid = tp->ptid;
-	  ecs->event_thread = tp;
-	  switch_to_thread (ecs->ptid);
-	  keep_going (ecs);
-	  return 1;
 	}
 
       if (stepping_thread != NULL)
@@ -5865,7 +5842,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 		fprintf_unfiltered (gdb_stdlog,
 				    "infrun: expected thread still "
 				    "hasn't advanced\n");
-	      keep_going (ecs);
+	      keep_going_pass_signal (ecs);
 	    }
 
 	  return 1;
@@ -6281,24 +6258,32 @@ stop_waiting (struct execution_control_state *ecs)
   ecs->wait_some_more = 0;
 }
 
-/* Called when we should continue running the inferior, because the
-   current event doesn't cause a user visible stop.  This does the
-   resuming part; waiting for the next event is done elsewhere.  */
+/* Like keep_going, but passes the signal to the inferior, even if the
+   signal is set to nopass.  */
 
 static void
-keep_going (struct execution_control_state *ecs)
+keep_going_pass_signal (struct execution_control_state *ecs)
 {
   /* Make sure normal_stop is called if we get a QUIT handled before
      reaching resume.  */
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
 
+  gdb_assert (ptid_equal (ecs->event_thread->ptid, inferior_ptid));
+
   /* Save the pc before execution, to compare with pc after stop.  */
   ecs->event_thread->prev_pc
     = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
-  if (ecs->event_thread->control.trap_expected
-      && ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_TRAP)
+  if (ecs->event_thread->control.trap_expected)
     {
+      struct thread_info *tp = ecs->event_thread;
+
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: %s has trap_expected set, "
+			    "resuming to collect trap\n",
+			    target_pid_to_str (tp->ptid));
+
       /* We haven't yet gotten our trap, and either: intercepted a
 	 non-signal event (e.g., a fork); or took a signal which we
 	 are supposed to pass through to the inferior.  Simply
@@ -6369,25 +6354,27 @@ keep_going (struct execution_control_state *ecs)
 
       ecs->event_thread->control.trap_expected = (remove_bp || remove_wps);
 
-      /* Do not deliver GDB_SIGNAL_TRAP (except when the user
-	 explicitly specifies that such a signal should be delivered
-	 to the target program).  Typically, that would occur when a
-	 user is debugging a target monitor on a simulator: the target
-	 monitor sets a breakpoint; the simulator encounters this
-	 breakpoint and halts the simulation handing control to GDB;
-	 GDB, noting that the stop address doesn't map to any known
-	 breakpoint, returns control back to the simulator; the
-	 simulator then delivers the hardware equivalent of a
-	 GDB_SIGNAL_TRAP to the program being debugged.	 */
-      if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-	  && !signal_program[ecs->event_thread->suspend.stop_signal])
-	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-
       discard_cleanups (old_cleanups);
       resume (ecs->event_thread->suspend.stop_signal);
     }
 
   prepare_to_wait (ecs);
+}
+
+/* Called when we should continue running the inferior, because the
+   current event doesn't cause a user visible stop.  This does the
+   resuming part; waiting for the next event is done elsewhere.  */
+
+static void
+keep_going (struct execution_control_state *ecs)
+{
+  if (ecs->event_thread->control.trap_expected
+      && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
+    ecs->event_thread->control.trap_expected = 0;
+
+  if (!signal_program[ecs->event_thread->suspend.stop_signal])
+    ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
+  keep_going_pass_signal (ecs);
 }
 
 /* This function normally comes after a resume, before
@@ -7790,8 +7777,19 @@ leave it stopped or free to run as needed."),
       signal_catch[i] = 0;
     }
 
-  /* Signals caused by debugger's own actions
-     should not be given to the program afterwards.  */
+  /* Signals caused by debugger's own actions should not be given to
+     the program afterwards.
+
+     Do not deliver GDB_SIGNAL_TRAP by default, except when the user
+     explicitly specifies that it should be delivered to the target
+     program.  Typically, that would occur when a user is debugging a
+     target monitor on a simulator: the target monitor sets a
+     breakpoint; the simulator encounters this breakpoint and halts
+     the simulation handing control to GDB; GDB, noting that the stop
+     address doesn't map to any known breakpoint, returns control back
+     to the simulator; the simulator then delivers the hardware
+     equivalent of a GDB_SIGNAL_TRAP to the program being
+     debugged.  */
   signal_program[GDB_SIGNAL_TRAP] = 0;
   signal_program[GDB_SIGNAL_INT] = 0;
 
