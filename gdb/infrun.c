@@ -7054,7 +7054,7 @@ Are you sure you want to change it? "),
 	    sig_print_header ();
 	    for (; signum < nsigs; signum++)
 	      if (sigs[signum])
-		sig_print_info (signum);
+		sig_print_info ((enum gdb_signal) signum);
 	  }
 
 	break;

@@ -432,7 +432,7 @@ function
 
 demangler_special
 		:	DEMANGLER_SPECIAL start
-			{ $$ = make_empty ($1);
+			{ $$ = make_empty ((enum demangle_component_type) $1);
 			  d_left ($$) = $2;
 			  d_right ($$) = NULL; }
 		|	CONSTRUCTION_VTABLE start CONSTRUCTION_IN start

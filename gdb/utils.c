@@ -429,7 +429,7 @@ make_cleanup_free_so (struct so_list *so)
 static void
 do_restore_current_language (void *p)
 {
-  enum language saved_lang = (uintptr_t) p;
+  enum language saved_lang = (enum language) (uintptr_t) p;
 
   set_language (saved_lang);
 }

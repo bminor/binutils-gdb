@@ -567,14 +567,35 @@ btrace_insn_history (struct ui_out *uiout,
 	}
       else
 	{
+	  char prefix[4];
+
+	  /* We may add a speculation prefix later.  We use the same space
+	     that is used for the pc prefix.  */
+	  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+	    strncpy (prefix, pc_prefix (insn->pc), 3);
+	  else
+	    {
+	      prefix[0] = ' ';
+	      prefix[1] = ' ';
+	      prefix[2] = ' ';
+	    }
+	  prefix[3] = 0;
+
 	  /* Print the instruction index.  */
 	  ui_out_field_uint (uiout, "index", btrace_insn_number (&it));
 	  ui_out_text (uiout, "\t");
 
+	  /* Indicate speculative execution by a leading '?'.  */
+	  if ((insn->flags & BTRACE_INSN_FLAG_SPECULATIVE) != 0)
+	    prefix[0] = '?';
+
+	  /* Print the prefix; we tell gdb_disassembly below to omit it.  */
+	  ui_out_field_fmt (uiout, "prefix", "%s", prefix);
+
 	  /* Disassembly with '/m' flag may not produce the expected result.
 	     See PR gdb/11833.  */
-	  gdb_disassembly (gdbarch, uiout, NULL, flags, 1, insn->pc,
-			   insn->pc + 1);
+	  gdb_disassembly (gdbarch, uiout, NULL, flags | DISASSEMBLY_OMIT_PC,
+			   1, insn->pc, insn->pc + 1);
 	}
     }
 }

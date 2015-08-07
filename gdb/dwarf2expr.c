@@ -654,7 +654,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
   while (op_ptr < op_end)
     {
-      enum dwarf_location_atom op = *op_ptr++;
+      enum dwarf_location_atom op = (enum dwarf_location_atom) *op_ptr++;
       ULONGEST result;
       /* Assume the value is not in stack memory.
 	 Code that knows otherwise sets this to 1.

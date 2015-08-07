@@ -6060,7 +6060,7 @@ powerpc_set_vector_abi (char *args, int from_tty,
     if (strcmp (powerpc_vector_abi_string,
 		powerpc_vector_strings[vector_abi]) == 0)
       {
-	powerpc_vector_abi_global = vector_abi;
+	powerpc_vector_abi_global = (enum powerpc_vector_abi) vector_abi;
 	break;
       }
 

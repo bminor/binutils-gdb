@@ -2562,6 +2562,63 @@ gdb_caching_proc skip_vsx_tests {
     return $skip_vsx_tests
 }
 
+# Run a test on the target to see if it supports TSX hardware.  Return 0 if so,
+# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+
+gdb_caching_proc skip_tsx_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_tsx_tests"
+
+    set src [standard_temp_file tsx[pid].c]
+    set exe [standard_temp_file tsx[pid].x]
+
+    gdb_produce_source $src {
+    int main() {
+        asm volatile ("xbegin .L0");
+        asm volatile ("xend");
+        asm volatile (".L0: nop");
+        return 0;
+    }
+    }
+
+    verbose "$me:  compiling testfile $src" 2
+    set lines [gdb_compile $src $exe executable {nowarnings quiet}]
+    file delete $src
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed." 2
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$exe"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "$me:  TSX hardware not detected."
+            set skip_tsx_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  TSX hardware detected."
+            set skip_tsx_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_tsx_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $exe
+
+    verbose "$me:  returning $skip_tsx_tests" 2
+    return $skip_tsx_tests
+}
+
 # Run a test on the target to see if it supports btrace hardware.  Return 0 if so,
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
@@ -2618,6 +2675,73 @@ gdb_caching_proc skip_btrace_tests {
             set skip_btrace_tests 1
         }
         -re "^record btrace\r\n$gdb_prompt $" {
+            set skip_btrace_tests 0
+        }
+    }
+    gdb_exit
+    remote_file build delete $exe
+
+    verbose "$me:  returning $skip_btrace_tests" 2
+    return $skip_btrace_tests
+}
+
+# Run a test on the target to see if it supports btrace pt hardware.
+# Return 0 if so, 1 if it does not.  Based on 'check_vmx_hw_available'
+# from the GCC testsuite.
+
+gdb_caching_proc skip_btrace_pt_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_btrace_tests"
+    if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+        verbose "$me:  target does not support btrace, returning 1" 2
+        return 1
+    }
+
+    # Set up, compile, and execute a test program.
+    # Include the current process ID in the file names to prevent conflicts
+    # with invocations for multiple testsuites.
+    set src [standard_temp_file btrace[pid].c]
+    set exe [standard_temp_file btrace[pid].x]
+
+    gdb_produce_source $src {
+	int main(void) { return 0; }
+    }
+
+    verbose "$me:  compiling testfile $src" 2
+    set compile_flags {debug nowarnings quiet}
+    set lines [gdb_compile $src $exe executable $compile_flags]
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed, returning 1" 2
+	file delete $src
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $exe
+    if ![runto_main] {
+	file delete $src
+        return 1
+    }
+    file delete $src
+    # In case of an unexpected output, we return 2 as a fail value.
+    set skip_btrace_tests 2
+    gdb_test_multiple "record btrace pt" "check btrace support" {
+        -re "You can't do that when your target is.*\r\n$gdb_prompt $" {
+            set skip_btrace_tests 1
+        }
+        -re "Target does not support branch tracing.*\r\n$gdb_prompt $" {
+            set skip_btrace_tests 1
+        }
+        -re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
+            set skip_btrace_tests 1
+        }
+        -re "^record btrace pt\r\n$gdb_prompt $" {
             set skip_btrace_tests 0
         }
     }

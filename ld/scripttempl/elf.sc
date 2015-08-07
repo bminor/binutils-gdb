@@ -240,7 +240,7 @@ test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
   .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
   {
     *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
-    ${RELOCATING+. = ALIGN (ABSOLUTE (.), . != 0 ? ${ALIGNMENT} : 1);}
+    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }"
 if test "${ENABLE_INITFINI_ARRAY}" = "yes"; then
   SORT_INIT_ARRAY="KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))"
@@ -628,7 +628,7 @@ cat <<EOF
       .bss section disappears because there are no input sections.
       FIXME: Why do we need it? When there is no .bss section, we don't
       pad the .data section.  */
-   ${RELOCATING+. = ALIGN (ABSOLUTE (.), . != 0 ? ${ALIGNMENT} : 1);}
+   ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }
   ${OTHER_BSS_SECTIONS}
   ${LARGE_BSS_AFTER_BSS+${LARGE_BSS}}

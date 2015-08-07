@@ -1,3 +1,29 @@
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (is_specified_symbol_predicate): Don't stop at first
+	match.  Non-match rules set found to FALSE.
+
+2015-08-06  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* configure: Regenerate.
+
+2015-08-05  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi: Document that the --only-keep-debug option
+	to strip and objcopy preserves the section headers of stripped
+	sections.
+
+2015-08-04  Yuriy M. Kaminskiy"  <yumkam@gmail.com>
+	    Tyler Hicks  <tyhicks@canonical.com>
+
+	PR binutils/18750
+	* readelf.c (process_mips_specific): Fix incorrect escape
+	sequence handling.
+
+2015-08-04  Nick Clifton  <nickc@redhat.com>
+
+	* ar.c (extract_file): Free cbuf if the path is invalid.
+
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

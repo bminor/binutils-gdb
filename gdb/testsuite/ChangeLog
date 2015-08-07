@@ -1,3 +1,36 @@
+2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* lib/gdb.exp (skip_tsx_tests, skip_btrace_pt_tests): New.
+	* gdb.btrace/instruction_history.exp: Update.
+	* gdb.btrace/tsx.exp: New.
+	* gdb.btrace/tsx.c: New.
+
+2015-08-06  Pedro Alves <palves@redhat.com>
+
+	* gdb.reverse/step-precsave.exp: Use with_timeout_factor to
+	increase timeout.
+	* gdb.reverse/until-precsave.exp: Bump timeouts.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/valgrind-infcall.exp: Issue a "disconnect".
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18749
+	* gdb.threads/process-dies-while-handling-bp.c: New file.
+	* gdb.threads/process-dies-while-handling-bp.exp: New file.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/forking-threads-plus-breakpoint.exp: New file.
+	* gdb.threads/forking-threads-plus-breakpoint.c: New file.
+
+2015-08-05  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/next-while-other-thread-longjmps.c: New file.
+	* gdb.threads/next-while-other-thread-longjmps.exp: New file.
+
 2015-08-03  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/bp-permanent.exp: Report test as unsupported if

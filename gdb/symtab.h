@@ -38,6 +38,8 @@ struct program_space;
 struct language_defn;
 struct probe;
 struct common_block;
+struct obj_section;
+struct cmd_list_element;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:

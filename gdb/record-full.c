@@ -2421,7 +2421,7 @@ record_full_restore (void)
 	  bfdcore_read (core_bfd, osec, &signal, 
 			sizeof (signal), &bfd_offset);
 	  signal = netorder32 (signal);
-	  rec->u.end.sigval = signal;
+	  rec->u.end.sigval = (enum gdb_signal) signal;
 
 	  /* Get insn count.  */
 	  bfdcore_read (core_bfd, osec, &count, 

@@ -1,3 +1,12 @@
+2015-08-06  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (align_dot_val): Delete.
+	(fold_unary <ALIGN_K, NEXT>): Revert 2015-07-10 change.
+	(is_align_conditional): Revert 2015-07-20 change.
+	(exp_fold_tree_1): Likewise, but keep expanded comment.
+	* scripttempl/elf.sc (.ldata, .bss): Revert 2015-07-20 change.
+	* ld.texinfo (<ALIGN>): Correct description.
+
 2015-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld.texinfo (Options): Document --require-defined option.

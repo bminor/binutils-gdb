@@ -33,6 +33,7 @@ struct inferior_list_entry
 };
 
 struct thread_info;
+struct regcache;
 struct target_desc;
 struct sym_cache;
 struct breakpoint;
@@ -147,7 +148,7 @@ struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
 
 void *inferior_target_data (struct thread_info *);
 void set_inferior_target_data (struct thread_info *, void *);
-void *inferior_regcache_data (struct thread_info *);
-void set_inferior_regcache_data (struct thread_info *, void *);
+struct regcache *inferior_regcache_data (struct thread_info *);
+void set_inferior_regcache_data (struct thread_info *, struct regcache *);
 
 #endif /* INFERIORS_H */

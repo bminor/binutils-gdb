@@ -391,7 +391,7 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 
   for (i = 0; i < x->len;)
     {
-      enum agent_op op = x->buf[i];
+      enum agent_op op = (enum agent_op) x->buf[i];
 
       if (op >= (sizeof (aop_map) / sizeof (aop_map[0]))
 	  || !aop_map[op].name)

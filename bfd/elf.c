@@ -1203,6 +1203,63 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   /* Copy object attributes.  */
   _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
+  /* This is an feature for objcopy --only-keep-debug:  When a section's type
+     is changed to NOBITS, we preserve the sh_link and sh_info fields so that
+     they can be matched up with the original.  */
+  Elf_Internal_Shdr ** iheaders = elf_elfsections (ibfd);
+  Elf_Internal_Shdr ** oheaders = elf_elfsections (obfd);
+
+  if (iheaders != NULL && oheaders != NULL)
+    {
+      unsigned int i;
+
+      for (i = 0; i < elf_numsections (obfd); i++)
+	{
+	  unsigned int j;
+	  Elf_Internal_Shdr * oheader = oheaders[i];
+
+	  if (oheader == NULL
+	      || oheader->sh_type != SHT_NOBITS
+	      || oheader->sh_size == 0
+	      || (oheader->sh_info != 0 && oheader->sh_link != 0))
+	    continue;
+
+	  /* Scan for the matching section in the input bfd.
+	     FIXME: We could use something better than a linear scan here.
+	     Unfortunately we cannot compare names as the output string table
+	     is empty, so instead we check size, address and type.  */
+	  for (j = 0; j < elf_numsections (ibfd); j++)
+	    {
+	      Elf_Internal_Shdr * iheader = iheaders[j];
+	      
+	      if (iheader->sh_type != SHT_NOBITS
+		  && iheader->sh_size == oheader->sh_size
+		  && iheader->sh_addr == oheader->sh_addr
+		  && (iheader->sh_info != oheader->sh_info
+		      || iheader->sh_link != oheader->sh_link))
+		{
+		  /* Note: Strictly speaking these assignments are wrong.
+		     The sh_link and sh_info fields should point to the
+		     relevent sections in the output BFD, which may not be in
+		     the same location as they were in the input BFD.  But the
+		     whole point of this action is to preserve the original
+		     values of the sh_link and sh_info fields, so that they
+		     can be matched up with the section headers in the
+		     original file.  So strictly speaking we may be creating
+		     an invalid ELF file, but it is only for a file that just
+		     contains debug info and only for sections without any
+		     contents.  */
+		  if (oheader->sh_link == 0)
+		    oheader->sh_link = iheader->sh_link;
+		  if (oheader->sh_info == 0)
+		    oheader->sh_info = iheader->sh_info;
+		  break;
+		}
+	    }
+	}
+    }
+
   return TRUE;
 }
 

@@ -1,3 +1,163 @@
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* stack.c (get_frame_language): Moved ...
+	* frame.c (get_frame_language): ... to here.
+	* language.h (get_frame_language): Declaration moved to frame.h.
+	* frame.h: Add language.h include, for language enum.
+	(get_frame_language): Declaration moved from language.h.
+	* language.c: Add frame.h include.
+	* top.c: Add frame.h include.
+	* symtab.h (struct obj_section): Declare.
+	(struct cmd_list_element): Declare.
+
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* language.c (show_language_command): Find selected frame before
+	asking for the language of that frame.
+	(set_language_command): Likewise.
+	* language.h (get_frame_language): Add frame parameter.
+	* stack.c (get_frame_language): Add frame parameter, assert
+	parameter is not NULL, update comment and reindent.
+	* top.c (check_frame_language_change): Pass the selected frame
+	into get_frame_language.
+
+2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_compute_ftrace_bts): Clear insn flags.
+	(pt_btrace_insn_flags): New.
+	(ftrace_add_pt): Call pt_btrace_insn_flags.
+	* btrace.h (btrace_insn_flag): New.
+	(btrace_insn) <flags>: New.
+	* record-btrace.c (btrace_insn_history): Print insn prefix.
+	* NEWS: Announce it.
+
+2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* configure.ac: Check for PERF_ATTR_SIZE_VER5 in linux/perf_event.h
+	* configure: Regenerate.
+
+2015-08-06  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* Makefile.in (LIBICONV): Define.
+	(CLIBS): Add LIBICONV.
+	* acinclude.m4: Use config/iconv.m4 instead of custom AM_ICONV.
+	* configure: Regenerate.
+
+2015-08-06  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* arm-tdep.c (set_fp_model_sfunc): Add cast from integer to enum.
+	(arm_set_abi): Likewise.
+	* ax-general.c (ax_print): Likewise.
+	* c-exp.y (exp : string_exp): Likewise.
+	* compile/compile-loc2c.c (compute_stack_depth_worker): Likewise.
+	(do_compile_dwarf_expr_to_c): Likewise.
+	* cp-name-parser.y (demangler_special : DEMANGLER_SPECIAL start):
+	Likewise.
+	* dwarf2expr.c (execute_stack_op): Likewise.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Likewise.
+	(disassemble_dwarf_expression): Likewise.
+	* dwarf2read.c (dwarf2_add_member_fn): Likewise.
+	(read_array_order): Likewise.
+	(abbrev_table_read_table): Likewise.
+	(read_attribute_value): Likewise.
+	(skip_unknown_opcode): Likewise.
+	(dwarf_decode_macro_bytes): Likewise.
+	(dwarf_decode_macros): Likewise.
+	* eval.c (value_f90_subarray): Likewise.
+	* guile/scm-param.c (gdbscm_make_parameter): Likewise.
+	* i386-linux-tdep.c (i386_canonicalize_syscall): Likewise.
+	* infrun.c (handle_command): Likewise.
+	* memory-map.c (memory_map_start_memory): Likewise.
+	* osabi.c (set_osabi): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+	* ppc-linux-tdep.c (ppc_canonicalize_syscall): Likewise, and use
+	single return point.
+	* python/py-frame.c (gdbpy_frame_stop_reason_string): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol): Likewise.
+	(gdbpy_lookup_global_symbol): Likewise.
+	* record-full.c (record_full_restore): Likewise.
+	* regcache.c (regcache_register_status): Likewise.
+	(regcache_raw_read): Likewise.
+	(regcache_cooked_read): Likewise.
+	* rs6000-tdep.c (powerpc_set_vector_abi): Likewise.
+	* symtab.c (initialize_ordinary_address_classes): Likewise.
+	* target-debug.h (target_debug_print_signals): Likewise.
+	* utils.c (do_restore_current_language): Likewise.
+
+2015-08-06  Clem Dickey  <clemd@acm.org>
+
+	PR python/17136
+	* python/lib/gdb/command/type_printers.py (InfoTypePrinter): Fix typo.
+
+2015-08-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* complaints.c (enum complaint_series): Add newlines and remove
+	out of date comment.
+	(struct complaints) <series>: Change type to enum
+	complaint_series and remove out of date comment.
+	(symfile_complaint_hook): Use equivalent enum value
+	ISOLATED_MESSAGE instead of 0.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-waitpid.c (my_waitpid): Only print *status if waitpid
+	returned > 0.
+
+2015-08-06  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* common/agent.c (symbol_list) <required>: Remove.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* target/waitstatus.h (enum target_stop_reason)
+	<TARGET_STOPPED_BY_SINGLE_STEP>: New value.
+
+2015-08-05  Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (bpstat_what) <bp_longjmp, bp_longjmp_call_dummy>
+	<bp_exception, bp_longjmp_resume, bp_exception_resume>: Handle the
+	case where BS->STOP is not set.
+
+2015-08-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* nat/gdb_thread_db.h: Add copyright header.
+	Protect against multiple inclusion.
+
+2015-08-05  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (get_thread_id): Remove.
+	(debug_reg_change_callback): Call ptid_get_lwp instead of
+	get_thread_id.
+	(fetch_gregs_from_thread): Likewise.
+	(store_gregs_to_thread): Likewise.
+	(fetch_fpregs_from_thread): Likewise.
+	(store_fpregs_to_thread): Likewise.
+	(aarch64_linux_get_debug_reg_capacity): Likewise.
+	* arm-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Update macro to use ptid_get_lwp.
+	* xtensa-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Update macro to use ptid_get_lwp.
+	* arm-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Remove.
+	(fetch_fpregs): Call ptid_get_lwp instead of GET_THREAD_ID.
+	(store_fpregs, fetch_regs, store_regs): Likewise.
+	(fetch_wmmx_regs, store_wmmx_regs): Likewise.
+	(fetch_vfp_regs, store_vfp_regs): Likewise.
+	(arm_linux_read_description): Likewise.
+	(arm_linux_get_hwbp_cap): Likewise.
+	* xtensa-linux-nat.c (get_thread_id): Remove.
+	(GET_THREAD_ID): Remove.
+	(fetch_gregs, store_gregs): Call ptid_get_lwp instead of
+	GET_THREAD_ID.
+
+2015-08-04  Ciro Santilli  <ciro.santilli@gmail.com>  (obvious patch)
+
+	* python/py-linetable.c: Fix case of Linetable to LineTable
+	in docstrings and code comments.
+	* python/py-symtab.c: Same.
+
 2015-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infcmd.c (signal_command): Call do_cleanups for args_chain.
@@ -255,6 +415,7 @@
 	instead of integer.
 
 2015-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
 
 	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): Use enum
 	type or value instead of integer.

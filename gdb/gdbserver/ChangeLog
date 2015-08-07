@@ -1,3 +1,85 @@
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (expr_eval_result): Now an int.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (struct regcache): Forward declare.
+	(struct thread_info) <regcache_data>: Now a struct regcache
+	pointer.
+	* inferiors.c (inferior_regcache_data)
+	(set_inferior_regcache_data): Now work with struct regcache
+	pointers.
+	* inferiors.h (struct regcache): Forward declare.
+	(inferior_regcache_data, set_inferior_regcache_data): Now work
+	with struct regcache pointers.
+	* regcache.c (get_thread_regcache, regcache_invalidate_thread)
+	(free_register_cache_thread): Remove struct regcache pointer
+	casts.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* server.c (captured_main): On error, print the exception message
+	to stderr, and if run_once is set, throw a quit.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (move_out_of_jump_pad_callback): Temporarily switch
+	the current thread.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_write_memory): Rewrite debug output to avoid
+	reading beyond the passed in buffer length.
+
+2015-08-06  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* tracepoint.c (symbol_list) <required>: Remove.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (handle_extended_wait): Set the fork child's suspend
+	count if stopping and suspending threads.
+	(check_stopped_by_breakpoint): If stopped by trace, set the LWP's
+	stop reason to TARGET_STOPPED_BY_SINGLE_STEP.
+	(linux_detach): Complete an ongoing step-over.
+	(lwp_suspended_inc, lwp_suspended_decr): New functions.  Use
+	throughout.
+	(resume_stopped_resumed_lwps): Don't resume a suspended thread.
+	(linux_wait_1): If passing a signal to the inferior after
+	finishing a step-over, unsuspend and re-resume all lwps.  If we
+	see a single-step event but the thread should be continuing, don't
+	pass the trap to gdb.
+	(stuck_in_jump_pad_callback, move_out_of_jump_pad_callback): Use
+	internal_error instead of gdb_assert.
+	(enqueue_pending_signal): New function.
+	(check_ptrace_stopped_lwp_gone): Add debug output.
+	(start_step_over): Use internal_error instead of gdb_assert.
+	(complete_ongoing_step_over): New function.
+	(linux_resume_one_thread): Don't resume a suspended thread.
+	(proceed_one_lwp): If the LWP is stepping over a breakpoint, reset
+	it stepping.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (add_lwp): Set waitstatus to TARGET_WAITKIND_IGNORE.
+	(linux_thread_alive): Use lwp_is_marked_dead.
+	(extended_event_reported): Delete.
+	(linux_wait_1): Check if waitstatus is TARGET_WAITKIND_IGNORE
+	instead of extended_event_reported.
+	(mark_lwp_dead): Don't set the 'dead' flag.  Store the waitstatus
+	as well.
+	(lwp_is_marked_dead): New function.
+	(lwp_running): Use lwp_is_marked_dead.
+	* linux-low.h: Delete 'dead' field, and update 'waitstatus's
+	comment.
+
+2015-08-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_wait_1): Move fork event output out of the
+	!report_to_gdb check.  Pass event_child->waitstatus to
+	target_waitstatus_to_string instead of ourstatus.
+
 2015-08-04  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_supports_tracepoints): Return 0

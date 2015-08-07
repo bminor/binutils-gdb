@@ -6736,8 +6736,13 @@ recorded ``future'' and begin recording a new ``future''.
 Disassembles instructions from the recorded execution log.  By
 default, ten instructions are disassembled.  This can be changed using
 the @code{set record instruction-history-size} command.  Instructions
-are printed in execution order.  There are several ways to specify
-what part of the execution log to disassemble:
+are printed in execution order.
+
+Speculatively executed instructions are prefixed with @samp{?}.  This
+feature is not available for all recording formats.
+
+There are several ways to specify what part of the execution log to
+disassemble:
 
 @table @code
 @item record instruction-history @var{insn}

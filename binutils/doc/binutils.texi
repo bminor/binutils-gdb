@@ -1731,6 +1731,12 @@ Strip a file, removing contents of any sections that would not be
 stripped by @option{--strip-debug} and leaving the debugging sections
 intact.  In ELF files, this preserves all note sections in the output.
 
+Note - the section headers of the stripped sections are preserved,
+including their sizes, but the contents of the section are discarded.
+The section headers are preserved so that other tools can match up the
+debuginfo file with the real executable, even if that executable has
+been relocated to a different address space.
+
 The intention is that this option will be used in conjunction with
 @option{--add-gnu-debuglink} to create a two part executable.  One a
 stripped binary which will occupy less space in RAM and in a
@@ -3074,9 +3080,16 @@ When stripping a file, perhaps with @option{--strip-debug} or
 which would otherwise get stripped.
 
 @item --only-keep-debug
-Strip a file, removing contents of any sections that would not be
+Strip a file, emptying the contents of any sections that would not be
 stripped by @option{--strip-debug} and leaving the debugging sections
-intact.  In ELF files, this preserves all note sections in the output.
+intact.  In ELF files, this preserves all the note sections in the
+output as well.
+
+Note - the section headers of the stripped sections are preserved,
+including their sizes, but the contents of the section are discarded.
+The section headers are preserved so that other tools can match up the
+debuginfo file with the real executable, even if that executable has
+been relocated to a different address space.
 
 The intention is that this option will be used in conjunction with
 @option{--add-gnu-debuglink} to create a two part executable.  One a

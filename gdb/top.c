@@ -49,6 +49,7 @@
 #include "observer.h"
 #include "maint.h"
 #include "filenames.h"
+#include "frame.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -329,10 +330,11 @@ void
 check_frame_language_change (void)
 {
   static int warned = 0;
+  struct frame_info *frame;
 
   /* First make sure that a new frame has been selected, in case the
      command or the hooks changed the program state.  */
-  deprecated_safe_get_selected_frame ();
+  frame = deprecated_safe_get_selected_frame ();
   if (current_language != expected_language)
     {
       if (language_mode == language_mode_auto && info_verbose)
@@ -352,7 +354,7 @@ check_frame_language_change (void)
     {
       enum language flang;
 
-      flang = get_frame_language ();
+      flang = get_frame_language (frame);
       if (!warned
 	  && flang != language_unknown
 	  && flang != current_language->la_language)

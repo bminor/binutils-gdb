@@ -219,7 +219,7 @@ ihex_bad_byte (bfd *abfd, unsigned int lineno, int c, bfd_boolean error)
       char buf[10];
 
       if (! ISPRINT (c))
-	sprintf (buf, "\\%03o", (unsigned int) c);
+	sprintf (buf, "\\%03o", (unsigned int) c & 0xff);
       else
 	{
 	  buf[0] = c;
@@ -276,7 +276,7 @@ ihex_scan (bfd *abfd)
       else
 	{
 	  file_ptr pos;
-	  char hdr[8];
+	  unsigned char hdr[8];
 	  unsigned int i;
 	  unsigned int len;
 	  bfd_vma addr;
@@ -553,7 +553,7 @@ ihex_read_section (bfd *abfd, asection *section, bfd_byte *contents)
   error = FALSE;
   while ((c = ihex_get_byte (abfd, &error)) != EOF)
     {
-      char hdr[8];
+      unsigned char hdr[8];
       unsigned int len;
       unsigned int type;
       unsigned int i;

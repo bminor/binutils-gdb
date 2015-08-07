@@ -2559,51 +2559,6 @@ func_command (char *arg, int from_tty)
   else if (frame != get_selected_frame (NULL))
     select_and_print_frame (frame);
 }
-
-/* Gets the language of the current frame.  */
-
-enum language
-get_frame_language (void)
-{
-  struct frame_info *frame = deprecated_safe_get_selected_frame ();
-
-  if (frame)
-    {
-      CORE_ADDR pc = 0;
-      int pc_p = 0;
-
-      /* We determine the current frame language by looking up its
-         associated symtab.  To retrieve this symtab, we use the frame
-         PC.  However we cannot use the frame PC as is, because it
-         usually points to the instruction following the "call", which
-         is sometimes the first instruction of another function.  So
-         we rely on get_frame_address_in_block(), it provides us with
-         a PC that is guaranteed to be inside the frame's code
-         block.  */
-
-      TRY
-	{
-	  pc = get_frame_address_in_block (frame);
-	  pc_p = 1;
-	}
-      CATCH (ex, RETURN_MASK_ERROR)
-	{
-	  if (ex.error != NOT_AVAILABLE_ERROR)
-	    throw_exception (ex);
-	}
-      END_CATCH
-
-      if (pc_p)
-	{
-	  struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
-
-	  if (cust != NULL)
-	    return compunit_language (cust);
-	}
-    }
-
-  return language_unknown;
-}
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
