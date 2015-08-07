@@ -1744,6 +1744,33 @@ debug_supports_non_stop (struct target_ops *self)
 }
 
 static int
+delegate_always_non_stop_p (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_always_non_stop_p (self);
+}
+
+static int
+tdefault_always_non_stop_p (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
+debug_always_non_stop_p (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_always_non_stop_p (...)\n", debug_target.to_shortname);
+  result = debug_target.to_always_non_stop_p (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_always_non_stop_p (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
 delegate_find_memory_regions (struct target_ops *self, find_memory_region_ftype arg1, void *arg2)
 {
   self = self->beneath;
@@ -4005,6 +4032,8 @@ install_delegators (struct target_ops *ops)
     ops->to_async = delegate_async;
   if (ops->to_supports_non_stop == NULL)
     ops->to_supports_non_stop = delegate_supports_non_stop;
+  if (ops->to_always_non_stop_p == NULL)
+    ops->to_always_non_stop_p = delegate_always_non_stop_p;
   if (ops->to_find_memory_regions == NULL)
     ops->to_find_memory_regions = delegate_find_memory_regions;
   if (ops->to_make_corefile_notes == NULL)
@@ -4232,6 +4261,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_is_async_p = tdefault_is_async_p;
   ops->to_async = tdefault_async;
   ops->to_supports_non_stop = tdefault_supports_non_stop;
+  ops->to_always_non_stop_p = tdefault_always_non_stop_p;
   ops->to_find_memory_regions = dummy_find_memory_regions;
   ops->to_make_corefile_notes = dummy_make_corefile_notes;
   ops->to_get_bookmark = tdefault_get_bookmark;
@@ -4380,6 +4410,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_is_async_p = debug_is_async_p;
   ops->to_async = debug_async;
   ops->to_supports_non_stop = debug_supports_non_stop;
+  ops->to_always_non_stop_p = debug_always_non_stop_p;
   ops->to_find_memory_regions = debug_find_memory_regions;
   ops->to_make_corefile_notes = debug_make_corefile_notes;
   ops->to_get_bookmark = debug_get_bookmark;

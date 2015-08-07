@@ -669,6 +669,10 @@ struct target_ops
        comment on 'to_can_run'.  */
     int (*to_supports_non_stop) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
+    /* Return true if the target operates in non-stop mode even with
+       "set non-stop off".  */
+    int (*to_always_non_stop_p) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (struct target_ops *,
 				   find_memory_region_ftype func, void *data)
@@ -1743,6 +1747,15 @@ extern int target_async_permitted;
 
 /* Enables/disabled async target events.  */
 extern void target_async (int enable);
+
+/* Whether support for controlling the target backends always in
+   non-stop mode is enabled.  */
+extern enum auto_boolean target_non_stop_enabled;
+
+/* Is the target in non-stop mode?  Some targets control the inferior
+   in non-stop mode even with "set non-stop off".  Always true if "set
+   non-stop" is on.  */
+extern int target_is_non_stop_p (void);
 
 #define target_execution_direction() \
   (current_target.to_execution_direction (&current_target))

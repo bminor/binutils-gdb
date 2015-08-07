@@ -2542,7 +2542,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 	 selected thread is stopped, others may still be executing.
 	 Be sure to explicitly stop all threads of the process.  This
 	 should have no effect on already stopped threads.  */
-      if (non_stop)
+      if (target_is_non_stop_p ())
 	target_stop (pid_to_ptid (inferior->pid));
 
       /* Tell the user/frontend where we're stopped.  */
@@ -2644,7 +2644,7 @@ attach_command (char *args, int from_tty)
   init_wait_for_inferior ();
   clear_proceed_status (0);
 
-  if (non_stop)
+  if (target_is_non_stop_p ())
     {
       /* If we find that the current thread isn't stopped, explicitly
 	 do so now, because we're going to install breakpoints and

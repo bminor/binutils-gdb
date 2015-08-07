@@ -1401,13 +1401,13 @@ get_pending_status (struct lwp_info *lp, int *status)
     signo = GDB_SIGNAL_0; /* a pending ptrace event, not a real signal.  */
   else if (lp->status)
     signo = gdb_signal_from_host (WSTOPSIG (lp->status));
-  else if (non_stop && !is_executing (lp->ptid))
+  else if (target_is_non_stop_p () && !is_executing (lp->ptid))
     {
       struct thread_info *tp = find_thread_ptid (lp->ptid);
 
       signo = tp->suspend.stop_signal;
     }
-  else if (!non_stop)
+  else if (!target_is_non_stop_p ())
     {
       struct target_waitstatus last;
       ptid_t last_ptid;
@@ -2938,7 +2938,7 @@ select_event_lwp (ptid_t filter, struct lwp_info **orig_lp, int *status)
      having stepped the thread, wouldn't understand what the trap was
      for, and therefore would report it to the user as a random
      signal.  */
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     {
       event_lp = iterate_over_lwps (filter,
 				    select_singlestep_lwp_callback, NULL);
@@ -3288,7 +3288,7 @@ linux_nat_filter_event (int lwpid, int status)
     {
       enum gdb_signal signo = gdb_signal_from_host (WSTOPSIG (status));
 
-      if (!non_stop)
+      if (!target_is_non_stop_p ())
 	{
 	  /* Only do the below in all-stop, as we currently use SIGSTOP
 	     to implement target_stop (see linux_nat_stop) in
@@ -3554,7 +3554,7 @@ linux_nat_wait_1 (struct target_ops *ops,
   status = lp->status;
   lp->status = 0;
 
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     {
       /* Now stop all other LWP's ...  */
       iterate_over_lwps (minus_one_ptid, stop_callback, NULL);
@@ -3596,7 +3596,7 @@ linux_nat_wait_1 (struct target_ops *ops,
      clears it.  */
   last_resume_kind = lp->last_resume_kind;
 
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     {
       /* In all-stop, from the core's perspective, all LWPs are now
 	 stopped until a new resume action is sent over.  */
@@ -3748,7 +3748,7 @@ linux_nat_wait (struct target_ops *ops,
      specific_process, for example, see linux_nat_wait_1), and
      meanwhile the event became uninteresting.  Don't bother resuming
      LWPs we're not going to wait for if they'd stop immediately.  */
-  if (non_stop)
+  if (target_is_non_stop_p ())
     iterate_over_lwps (minus_one_ptid, resume_stopped_resumed_lwps, &ptid);
 
   event_ptid = linux_nat_wait_1 (ops, ptid, ourstatus, target_options);
@@ -4589,6 +4589,14 @@ linux_nat_supports_non_stop (struct target_ops *self)
   return 1;
 }
 
+/* to_always_non_stop_p implementation.  */
+
+static int
+linux_nat_always_non_stop_p (struct target_ops *self)
+{
+  return 0;
+}
+
 /* True if we want to support multi-process.  To be removed when GDB
    supports multi-exec.  */
 
@@ -4808,7 +4816,7 @@ linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 static void
 linux_nat_stop (struct target_ops *self, ptid_t ptid)
 {
-  if (non_stop)
+  if (target_is_non_stop_p ())
     iterate_over_lwps (ptid, linux_nat_stop_lwp, NULL);
   else
     linux_ops->to_stop (linux_ops, ptid);
@@ -5005,6 +5013,7 @@ linux_nat_add_target (struct target_ops *t)
   t->to_can_async_p = linux_nat_can_async_p;
   t->to_is_async_p = linux_nat_is_async_p;
   t->to_supports_non_stop = linux_nat_supports_non_stop;
+  t->to_always_non_stop_p = linux_nat_always_non_stop_p;
   t->to_async = linux_nat_async;
   t->to_terminal_inferior = linux_nat_terminal_inferior;
   t->to_terminal_ours = linux_nat_terminal_ours;

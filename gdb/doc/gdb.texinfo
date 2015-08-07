@@ -34437,6 +34437,30 @@ asynchronous mode (@pxref{Background Execution}).  Normally the
 default is asynchronous, if it is available; but this can be changed
 to more easily debug problems occurring only in synchronous mode.
 
+@kindex maint set target-non-stop @var{mode} [on|off|auto]
+@kindex maint show target-non-stop
+@item maint set target-non-stop
+@itemx maint show target-non-stop
+
+This controls whether @value{GDBN} targets always operate in non-stop
+mode even if @code{set non-stop} is @code{off} (@pxref{Non-Stop
+Mode}).  The default is @code{auto}, meaning non-stop mode is enabled
+if supported by the target.
+
+@table @code
+@item maint set target-non-stop auto
+This is the default mode.  @value{GDBN} controls the target in
+non-stop mode if the target supports it.
+
+@item maint set target-non-stop on
+@value{GDBN} controls the target in non-stop mode even if the target
+does not indicate support.
+
+@item maint set target-non-stop off
+@value{GDBN} does not control the target in non-stop mode even if the
+target supports it.
+@end table
+
 @kindex maint set per-command
 @kindex maint show per-command
 @item maint set per-command

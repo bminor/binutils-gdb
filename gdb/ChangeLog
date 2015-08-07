@@ -1,3 +1,48 @@
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention "maint set/show target-non-stop".
+	* breakpoint.c (update_global_location_list): Check
+	target_is_non_stop_p instead of non_stop.
+	* infcmd.c (attach_command_post_wait, attach_command): Likewise.
+	* infrun.c (show_can_use_displaced_stepping)
+	(can_use_displaced_stepping_p, start_step_over_inferior):
+	Likewise.
+	(internal_resume_ptid): New function.
+	(resume): Use it.
+	(proceed): Check target_is_non_stop_p instead of non_stop.  If in
+	all-stop mode but the target is always in non-stop mode, start all
+	the other threads that are implicitly resumed too.
+	(for_each_just_stopped_thread, fetch_inferior_event)
+	(adjust_pc_after_break, stop_all_threads): Check
+	target_is_non_stop_p instead of non_stop.
+	(handle_inferior_event): Likewise.  Handle detach-fork in all-stop
+	with the target always in non-stop mode.
+	(handle_signal_stop) <random signal>: Check target_is_non_stop_p
+	instead of non_stop.
+	(switch_back_to_stepped_thread): Check target_is_non_stop_p
+	instead of non_stop.
+	(keep_going_stepped_thread): Use internal_resume_ptid.
+	(stop_waiting): If in all-stop mode, and the target is in non-stop
+	mode, stop all threads.
+	(keep_going_pass): Likewise, when starting a new in-line step-over
+	sequence.
+	* linux-nat.c (get_pending_status, select_event_lwp)
+	(linux_nat_filter_event, linux_nat_wait_1, linux_nat_wait): Check
+	target_is_non_stop_p instead of non_stop.
+	(linux_nat_always_non_stop_p): New function.
+	(linux_nat_stop): Check target_is_non_stop_p instead of non_stop.
+	(linux_nat_add_target): Install linux_nat_always_non_stop_p.
+	* target-delegates.c: Regenerate.
+	* target.c (target_is_non_stop_p): New function.
+	(target_non_stop_enabled, target_non_stop_enabled_1): New globals.
+	(maint_set_target_non_stop_command)
+	(maint_show_target_non_stop_command): New functions.
+	(_initilize_target): Install "maint set/show target-non-stop"
+	commands.
+	* target.h (struct target_ops) <to_always_non_stop_p>: New field.
+	(target_non_stop_enabled): New declaration.
+	(target_is_non_stop_p): New declaration.
+
 2015-08-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (breakpoints_should_be_inserted_now): If any thread

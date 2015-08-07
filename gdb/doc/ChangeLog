@@ -1,3 +1,8 @@
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint set/show
+	target-non-stop".
+
 2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Process Record and Replay): Document prefixing of

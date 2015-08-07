@@ -12330,7 +12330,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
       if (!found_object)
 	{
-	  if (removed && non_stop
+	  if (removed && target_is_non_stop_p ()
 	      && need_moribund_for_location_type (old_loc))
 	    {
 	      /* This location was removed from the target.  In
