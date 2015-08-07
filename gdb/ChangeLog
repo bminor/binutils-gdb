@@ -1,5 +1,10 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (currently_stepping): Extend intro comment.
+	* target.h (target_resume): Extend intro comment.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (switch_back_to_stepped_thread): Use ecs->ptid instead
 	of inferior_ptid.  If the stepped thread vanished, return 0
 	instead of resuming here.  Use reset_ecs.  Print the prev_pc and

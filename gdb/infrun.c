@@ -5854,7 +5854,9 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
   return 0;
 }
 
-/* Is thread TP in the middle of single-stepping?  */
+/* Is thread TP in the middle of (software or hardware)
+   single-stepping?  (Note the result of this function must never be
+   passed directly as target_resume's STEP parameter.)  */
 
 static int
 currently_stepping (struct thread_info *tp)

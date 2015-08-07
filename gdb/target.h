@@ -1292,8 +1292,8 @@ extern void target_detach (const char *, int);
 extern void target_disconnect (const char *, int);
 
 /* Resume execution of the target process PTID (or a group of
-   threads).  STEP says whether to single-step or to run free; SIGGNAL
-   is the signal to be given to the target, or GDB_SIGNAL_0 for no
+   threads).  STEP says whether to hardware single-step or to run free;
+   SIGGNAL is the signal to be given to the target, or GDB_SIGNAL_0 for no
    signal.  The caller may not pass GDB_SIGNAL_DEFAULT.  A specific
    PTID means `step/resume only this process id'.  A wildcard PTID
    (all threads, or all threads of process) means `step/resume
