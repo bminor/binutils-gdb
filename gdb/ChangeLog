@@ -1,3 +1,9 @@
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_wait_as): If not waiting for a stop reply,
+	return TARGET_WAITKIND_NO_RESUMED.  If TARGET_WNOHANG is
+	requested, don't block waiting forever.
+
 2015-08-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (adjust_pc_after_break): Now takes thread_info and

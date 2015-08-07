@@ -6267,6 +6267,14 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
     {
       int ret;
       int is_notif;
+      int forever = ((options & TARGET_WNOHANG) == 0
+		     && wait_forever_enabled_p);
+
+      if (!rs->waiting_for_stop_reply)
+	{
+	  status->kind = TARGET_WAITKIND_NO_RESUMED;
+	  return minus_one_ptid;
+	}
 
       if (!target_is_async_p ())
 	{
@@ -6285,7 +6293,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	 However, before we do that we need to ensure that the caller
 	 knows how to take the target into/out of async mode.  */
       ret = getpkt_or_notif_sane (&rs->buf, &rs->buf_size,
-				  wait_forever_enabled_p, &is_notif);
+				  forever, &is_notif);
 
       if (!target_is_async_p ())
 	signal (SIGINT, ofunc);
@@ -6293,6 +6301,9 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       /* GDB gets a notification.  Return to core as this event is
 	 not interesting.  */
       if (ret != -1 && is_notif)
+	return minus_one_ptid;
+
+      if (ret == -1 && (options & TARGET_WNOHANG) != 0)
 	return minus_one_ptid;
     }
 
