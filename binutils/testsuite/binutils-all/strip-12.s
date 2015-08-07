@@ -1,4 +1,4 @@
-	.bss
+	.section	.bss
 	.space 8
 	.section	.debug_str,"MS",%progbits,1
 	.string	""
