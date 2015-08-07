@@ -1877,6 +1877,7 @@ reset_ecs (struct execution_control_state *ecs, struct thread_info *tp)
 
 static void keep_going_pass_signal (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
+static int keep_going_stepped_thread (struct thread_info *tp);
 static int thread_still_needs_step_over (struct thread_info *tp);
 
 /* Are there any pending step-over requests?  If so, run all we can
@@ -5748,110 +5749,123 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 
       if (stepping_thread != NULL)
 	{
-	  struct frame_info *frame;
-	  struct gdbarch *gdbarch;
-
-	  tp = stepping_thread;
-
-	  /* If the stepping thread exited, then don't try to switch
-	     back and resume it, which could fail in several different
-	     ways depending on the target.  Instead, just keep going.
-
-	     We can find a stepping dead thread in the thread list in
-	     two cases:
-
-	     - The target supports thread exit events, and when the
-	     target tries to delete the thread from the thread list,
-	     inferior_ptid pointed at the exiting thread.  In such
-	     case, calling delete_thread does not really remove the
-	     thread from the list; instead, the thread is left listed,
-	     with 'exited' state.
-
-	     - The target's debug interface does not support thread
-	     exit events, and so we have no idea whatsoever if the
-	     previously stepping thread is still alive.  For that
-	     reason, we need to synchronously query the target
-	     now.  */
-	  if (is_exited (tp->ptid)
-	      || !target_thread_alive (tp->ptid))
-	    {
-	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: not switching back to "
-				    "stepped thread, it has vanished\n");
-
-	      delete_thread (tp->ptid);
-	      return 0;
-	    }
-
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
 				"infrun: switching back to stepped thread\n");
 
-	  reset_ecs (ecs, tp);
-	  switch_to_thread (tp->ptid);
-
-	  stop_pc = regcache_read_pc (get_thread_regcache (tp->ptid));
-	  frame = get_current_frame ();
-	  gdbarch = get_frame_arch (frame);
-
-	  /* If the PC of the thread we were trying to single-step has
-	     changed, then that thread has trapped or been signaled,
-	     but the event has not been reported to GDB yet.  Re-poll
-	     the target looking for this particular thread's event
-	     (i.e. temporarily enable schedlock) by:
-
-	       - setting a break at the current PC
-	       - resuming that particular thread, only (by setting
-		 trap expected)
-
-	     This prevents us continuously moving the single-step
-	     breakpoint forward, one instruction at a time,
-	     overstepping.  */
-
-	  if (stop_pc != tp->prev_pc)
+	  if (keep_going_stepped_thread (stepping_thread))
 	    {
-	      ptid_t resume_ptid;
-
-	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: expected thread advanced also "
-				    "(%s -> %s)\n",
-				    paddress (target_gdbarch (), tp->prev_pc),
-				    paddress (target_gdbarch (), stop_pc));
-
-	      /* Clear the info of the previous step-over, as it's no
-		 longer valid (if the thread was trying to step over a
-		 breakpoint, it has already succeeded).  It's what
-		 keep_going would do too, if we called it.  Do this
-		 before trying to insert the sss breakpoint, otherwise
-		 if we were previously trying to step over this exact
-		 address in another thread, the breakpoint is
-		 skipped.  */
-	      clear_step_over_info ();
-	      tp->control.trap_expected = 0;
-
-	      insert_single_step_breakpoint (get_frame_arch (frame),
-					     get_frame_address_space (frame),
-					     stop_pc);
-
-	      resume_ptid = user_visible_resume_ptid (tp->control.stepping_command);
-	      do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
 	      prepare_to_wait (ecs);
+	      return 1;
 	    }
-	  else
-	    {
-	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: expected thread still "
-				    "hasn't advanced\n");
-	      keep_going_pass_signal (ecs);
-	    }
-
-	  return 1;
 	}
     }
+
   return 0;
+}
+
+/* Set a previously stepped thread back to stepping.  Returns true on
+   success, false if the resume is not possible (e.g., the thread
+   vanished).  */
+
+static int
+keep_going_stepped_thread (struct thread_info *tp)
+{
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
+  struct execution_control_state ecss;
+  struct execution_control_state *ecs = &ecss;
+
+  /* If the stepping thread exited, then don't try to switch back and
+     resume it, which could fail in several different ways depending
+     on the target.  Instead, just keep going.
+
+     We can find a stepping dead thread in the thread list in two
+     cases:
+
+     - The target supports thread exit events, and when the target
+       tries to delete the thread from the thread list, inferior_ptid
+       pointed at the exiting thread.  In such case, calling
+       delete_thread does not really remove the thread from the list;
+       instead, the thread is left listed, with 'exited' state.
+
+     - The target's debug interface does not support thread exit
+       events, and so we have no idea whatsoever if the previously
+       stepping thread is still alive.  For that reason, we need to
+       synchronously query the target now.  */
+
+  if (is_exited (tp->ptid)
+      || !target_thread_alive (tp->ptid))
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: not resuming previously  "
+			    "stepped thread, it has vanished\n");
+
+      delete_thread (tp->ptid);
+      return 0;
+    }
+
+  if (debug_infrun)
+    fprintf_unfiltered (gdb_stdlog,
+			"infrun: resuming previously stepped thread\n");
+
+  reset_ecs (ecs, tp);
+  switch_to_thread (tp->ptid);
+
+  stop_pc = regcache_read_pc (get_thread_regcache (tp->ptid));
+  frame = get_current_frame ();
+  gdbarch = get_frame_arch (frame);
+
+  /* If the PC of the thread we were trying to single-step has
+     changed, then that thread has trapped or been signaled, but the
+     event has not been reported to GDB yet.  Re-poll the target
+     looking for this particular thread's event (i.e. temporarily
+     enable schedlock) by:
+
+     - setting a break at the current PC
+     - resuming that particular thread, only (by setting trap
+     expected)
+
+     This prevents us continuously moving the single-step breakpoint
+     forward, one instruction at a time, overstepping.  */
+
+  if (stop_pc != tp->prev_pc)
+    {
+      ptid_t resume_ptid;
+
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: expected thread advanced also (%s -> %s)\n",
+			    paddress (target_gdbarch (), tp->prev_pc),
+			    paddress (target_gdbarch (), stop_pc));
+
+      /* Clear the info of the previous step-over, as it's no longer
+	 valid (if the thread was trying to step over a breakpoint, it
+	 has already succeeded).  It's what keep_going would do too,
+	 if we called it.  Do this before trying to insert the sss
+	 breakpoint, otherwise if we were previously trying to step
+	 over this exact address in another thread, the breakpoint is
+	 skipped.  */
+      clear_step_over_info ();
+      tp->control.trap_expected = 0;
+
+      insert_single_step_breakpoint (get_frame_arch (frame),
+				     get_frame_address_space (frame),
+				     stop_pc);
+
+      resume_ptid = user_visible_resume_ptid (tp->control.stepping_command);
+      do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
+    }
+  else
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: expected thread still hasn't advanced\n");
+
+      keep_going_pass_signal (ecs);
+    }
+  return 1;
 }
 
 /* Is thread TP in the middle of (software or hardware)

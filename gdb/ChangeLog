@@ -1,5 +1,11 @@
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (keep_going_stepped_thread): New function, factored out
+	from ...
+	(switch_back_to_stepped_thread): ... here.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (currently_stepping): Extend intro comment.
 	* target.h (target_resume): Extend intro comment.
 
