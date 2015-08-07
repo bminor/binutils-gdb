@@ -1,3 +1,35 @@
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/ppc64-atomic-inst.exp (do_test): New procedure, move
+	tests here.
+	(top level): Run do_test with and without displaced stepping.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/valgrind-disp-step.c: New file.
+	* gdb.base/valgrind-disp-step.exp: New file.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-over-lands-on-breakpoint.c (wait_threads):
+	Delete function.
+	(main): Add alarm.  Run an infinite loop instead of calling
+	wait_threads.
+	* gdb.threads/step-over-lands-on-breakpoint.exp (do_test): Change
+	comment.
+	* gdb.threads/step-over-trips-on-watchpoint.c (wait_threads):
+	Delete function.
+	(main): Add alarm.  Run an infinite loop instead of calling
+	wait_threads.
+	* gdb.threads/step-over-trips-on-watchpoint.exp (do_test): Change
+	comment.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/checkpoint-ns.exp: New file.
+	* gdb.base/checkpoint.exp: Pass explicit "checkpoint.c" to
+	standard_testfile.
+
 2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* lib/gdb.exp (skip_tsx_tests, skip_btrace_pt_tests): New.

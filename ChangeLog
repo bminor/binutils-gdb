@@ -1,3 +1,10 @@
+2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-07-28  Ben Elliston  <bje@gnu.org>
+
+	* config.sub, config.guess: Import from upstream.
+
 2015-08-06  Yaakov Selkowitz  <yselkowi@redhat.com>
 
 	* Makefile.def (libiconv): Define bootstrap=true.

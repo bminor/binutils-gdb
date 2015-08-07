@@ -640,6 +640,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
+    void (*to_interrupt) (struct target_ops *, ptid_t)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
 		     const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
@@ -668,6 +670,10 @@ struct target_ops
     /* This method must be implemented in some situations.  See the
        comment on 'to_can_run'.  */
     int (*to_supports_non_stop) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Return true if the target operates in non-stop mode even with
+       "set non-stop off".  */
+    int (*to_always_non_stop_p) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (struct target_ops *,
@@ -1292,8 +1298,8 @@ extern void target_detach (const char *, int);
 extern void target_disconnect (const char *, int);
 
 /* Resume execution of the target process PTID (or a group of
-   threads).  STEP says whether to single-step or to run free; SIGGNAL
-   is the signal to be given to the target, or GDB_SIGNAL_0 for no
+   threads).  STEP says whether to hardware single-step or to run free;
+   SIGGNAL is the signal to be given to the target, or GDB_SIGNAL_0 for no
    signal.  The caller may not pass GDB_SIGNAL_DEFAULT.  A specific
    PTID means `step/resume only this process id'.  A wildcard PTID
    (all threads, or all threads of process) means `step/resume
@@ -1669,6 +1675,12 @@ extern void target_update_thread_list (void);
 
 extern void target_stop (ptid_t ptid);
 
+/* Interrupt the target just like the user typed a ^C on the
+   inferior's controlling terminal.  (For instance, under Unix, this
+   should act like SIGINT).  This function is asynchronous.  */
+
+extern void target_interrupt (ptid_t ptid);
+
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is
    placed in OUTBUF.  */
@@ -1742,8 +1754,16 @@ extern int target_async_permitted;
 #define target_is_async_p() (current_target.to_is_async_p (&current_target))
 
 /* Enables/disabled async target events.  */
-#define target_async(ENABLE) \
-     (current_target.to_async (&current_target, (ENABLE)))
+extern void target_async (int enable);
+
+/* Whether support for controlling the target backends always in
+   non-stop mode is enabled.  */
+extern enum auto_boolean target_non_stop_enabled;
+
+/* Is the target in non-stop mode?  Some targets control the inferior
+   in non-stop mode even with "set non-stop off".  Always true if "set
+   non-stop" is on.  */
+extern int target_is_non_stop_p (void);
 
 #define target_execution_direction() \
   (current_target.to_execution_direction (&current_target))

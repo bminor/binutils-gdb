@@ -1,3 +1,328 @@
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_always_non_stop_p): Return 1.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-tdep.c (is_non_branch_ril)
+	(s390_displaced_step_copy_insn): New functions.
+	(s390_displaced_step_fixup): Update comment.
+	(s390_gdbarch_init): Install s390_displaced_step_copy_insn as
+	gdbarch_displaced_step_copy_insn hook.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (displaced_step_prepare_throw): Return -1 if
+	gdbarch_displaced_step_copy_insn returns NULL.  Update intro
+	comment.
+	* rs6000-tdep.c (LWARX_MASK, LWARX_INSTRUCTION, LDARX_INSTRUCTION)
+	(STWCX_MASK, STWCX_INSTRUCTION, STDCX_INSTRUCTION): Move higher up
+	in file.
+	(ppc_displaced_step_copy_insn): New function.
+	(ppc_displaced_step_fixup): Update comment.
+	(rs6000_gdbarch_init): Install ppc_displaced_step_copy_insn as
+	gdbarch_displaced_step_copy_insn hook.
+	* gdbarch.sh (displaced_step_copy_insn): Document what happens on
+	NULL return.
+	* gdbarch.h: Regenerate.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* inferior.h (struct inferior) <displaced_stepping_failed>: New
+	field.
+	* infrun.c (use_displaced_stepping_now_p): New parameter 'inf'.
+	Return false if dispaced stepping failed before.
+	(resume): Pass the current inferior to
+	use_displaced_stepping_now_p.  Wrap displaced_step_prepare in
+	TRY/CATCH.  If we get a MEMORY_ERROR, set the inferior's
+	displaced_stepping_failed flag, and fall back to an in-line
+	step-over.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_stop): Rename to ...
+	(darwin_interrupt): ... this.
+	(_initialize_darwin_inferior): Adjust.
+	* gnu-nat.c (gnu_stop): Delete.
+	(gnu_target): Don't install gnu_stop.
+	* inf-ptrace.c (inf_ptrace_stop): Rename to ...
+	(inf_ptrace_interrupt): ... this.
+	(inf_ptrace_target): Adjust.
+	* infcmd.c (interrupt_target_1): Use target_interrupt instead of
+	target_stop.
+	* linux-nat (linux_nat_stop): Rename to ...
+	(linux_nat_interrupt): ... this.
+	(linux_nat_stop): Reimplement.
+	(linux_nat_add_target): Install linux_nat_interrupt.
+	* nto-procfs.c (nto_interrupt_twice): Rename to ...
+	(nto_handle_sigint_twice): ... this.
+	(nto_interrupt): Rename to ...
+	(nto_handle_sigint): ... this.  Call target_interrupt instead of
+	target_stop.
+	(procfs_wait): Adjust.
+	(procfs_stop): Rename to ...
+	(procfs_interrupt): ... this.
+	(init_procfs_targets): Adjust.
+	* procfs.c (procfs_stop): Rename to ...
+	(procfs_interrupt): ... this.
+	(procfs_target): Adjust.
+	* remote-m32r-sdi.c (m32r_stop): Rename to ...
+	(m32r_interrupt): ... this.
+	(init_m32r_ops): Adjust.
+	* remote-sim.c (gdbsim_stop_inferior): Rename to ...
+	(gdbsim_interrupt_inferior): ... this.
+	(gdbsim_stop): Rename to ...
+	(gdbsim_interrupt): ... this.
+	(gdbsim_cntrl_c): Adjust.
+	(init_gdbsim_ops): Adjust.
+	* remote.c (sync_remote_interrupt): Adjust comments.
+	(remote_stop_as): Rename to ...
+	(remote_interrupt_as): ... this.
+	(remote_stop): Adjust comment.
+	(remote_interrupt): New function.
+	(init_remote_ops): Install remote_interrupt.
+	* target.c (target_interrupt): New function.
+	* target.h (struct target_ops) <to_interrupt>: New field.
+	(target_interrupt): New declaration.
+	* windows-nat.c (windows_stop): Rename to ...
+	(windows_interrupt): ... this.
+	* target-delegates.c: Regenerate.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* signal-while-stepping-over-bp-other-thread.exp: Expect "restart
+	threads" as alternative to "switching back to stepped thread".
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention "maint set/show target-non-stop".
+	* breakpoint.c (update_global_location_list): Check
+	target_is_non_stop_p instead of non_stop.
+	* infcmd.c (attach_command_post_wait, attach_command): Likewise.
+	* infrun.c (show_can_use_displaced_stepping)
+	(can_use_displaced_stepping_p, start_step_over_inferior):
+	Likewise.
+	(internal_resume_ptid): New function.
+	(resume): Use it.
+	(proceed): Check target_is_non_stop_p instead of non_stop.  If in
+	all-stop mode but the target is always in non-stop mode, start all
+	the other threads that are implicitly resumed too.
+	(for_each_just_stopped_thread, fetch_inferior_event)
+	(adjust_pc_after_break, stop_all_threads): Check
+	target_is_non_stop_p instead of non_stop.
+	(handle_inferior_event): Likewise.  Handle detach-fork in all-stop
+	with the target always in non-stop mode.
+	(handle_signal_stop) <random signal>: Check target_is_non_stop_p
+	instead of non_stop.
+	(switch_back_to_stepped_thread): Check target_is_non_stop_p
+	instead of non_stop.
+	(keep_going_stepped_thread): Use internal_resume_ptid.
+	(stop_waiting): If in all-stop mode, and the target is in non-stop
+	mode, stop all threads.
+	(keep_going_pass): Likewise, when starting a new in-line step-over
+	sequence.
+	* linux-nat.c (get_pending_status, select_event_lwp)
+	(linux_nat_filter_event, linux_nat_wait_1, linux_nat_wait): Check
+	target_is_non_stop_p instead of non_stop.
+	(linux_nat_always_non_stop_p): New function.
+	(linux_nat_stop): Check target_is_non_stop_p instead of non_stop.
+	(linux_nat_add_target): Install linux_nat_always_non_stop_p.
+	* target-delegates.c: Regenerate.
+	* target.c (target_is_non_stop_p): New function.
+	(target_non_stop_enabled, target_non_stop_enabled_1): New globals.
+	(maint_set_target_non_stop_command)
+	(maint_show_target_non_stop_command): New functions.
+	(_initilize_target): Install "maint set/show target-non-stop"
+	commands.
+	* target.h (struct target_ops) <to_always_non_stop_p>: New field.
+	(target_non_stop_enabled): New declaration.
+	(target_is_non_stop_p): New declaration.
+
+2015-08-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (breakpoints_should_be_inserted_now): If any thread
+	has a pending status, return true.
+	* gdbthread.h: Include target/waitstatus.h.
+	(struct thread_suspend_state) <stop_reason, waitstatus_pending_p,
+	stop_pc>: New fields.
+	(struct thread_info) <resumed>: New field.
+	(set_resumed): Declare.
+	* infrun.c: Include "event-loop.h".
+	(infrun_async_inferior_event_token, infrun_is_async): New globals.
+	(infrun_async): New function.
+	(clear_step_over_info): Add debug output.
+	(displaced_step_in_progress_any_inferior): New function.
+	(displaced_step_fixup): New returns int.
+	(start_step_over): Handle in-line step-overs too.  Assert the
+	thread is marked resumed.
+	(resume_cleanups): Clear the thread's resumed flag.
+	(resume): Set the thread's resumed flag.  Return early if the
+	thread has a pending status.  Allow stepping a breakpoint with no
+	signal.
+	(proceed): Adjust to check 'resumed' instead of 'executing'.
+	(clear_proceed_status_thread): If the thread has a pending status,
+	and that status is a finished step, discard the pending status.
+	(clear_proceed_status): Don't clear step_over_info here.
+	(random_pending_event_thread, do_target_wait): New functions.
+	(prepare_for_detach, wait_for_inferior, fetch_inferior_event): Use
+	do_target_wait.
+	(wait_one): New function.
+	(THREAD_STOPPED_BY): New macro.
+	(thread_stopped_by_watchpoint, thread_stopped_by_sw_breakpoint)
+	(thread_stopped_by_hw_breakpoint): New functions.
+	(switch_to_thread_cleanup, save_waitstatus, stop_all_threads): New
+	functions.
+	(handle_inferior_event): Also call set_resumed(false) on all
+	threads implicitly stopped by the event.
+	(restart_threads, resumed_thread_with_pending_status): New
+	functions.
+	(finish_step_over): If we were doing an in-line step-over before,
+	and no longer are after trying to start a new step-over, restart
+	all threads.  If we have multiple threads with pending events,
+	save the current event and go through the event loop again.
+	(handle_signal_stop): Return early if finish_step_over returns
+	false.
+	<random signal>: If we get a signal while stepping over a
+	breakpoint in-line in non-stop mode, restart all threads.  Clear
+	step_over_info before delivering the signal.
+	(keep_going_stepped_thread): Use internal_error instead of
+	gdb_assert.  Mark the thread as resumed.
+	(keep_going_pass_signal): Assert the thread isn't already resumed.
+	If some other thread is doing an in-line step-over, defer the
+	resume.  If we just started a new in-line step-over, stop all
+	threads.  Don't clear step_over_info.
+	(infrun_async_inferior_event_handler): New function.
+	(_initialize_infrun): Create async event handler with
+	infrun_async_inferior_event_handler as callback.
+	(infrun_async): New declaration.
+	* target.c (target_async): New function.
+	* target.h (target_async): Declare macro and readd as function
+	declaration.
+	* target/waitstatus.h (enum target_stop_reason)
+	<TARGET_STOPPED_BY_SINGLE_STEP>: New value.
+	* thread.c (new_thread): Clear the new waitstatus field.
+	(set_resumed): New function.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (keep_going_stepped_thread): New function, factored out
+	from ...
+	(switch_back_to_stepped_thread): ... here.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (currently_stepping): Extend intro comment.
+	* target.h (target_resume): Extend intro comment.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (switch_back_to_stepped_thread): Use ecs->ptid instead
+	of inferior_ptid.  If the stepped thread vanished, return 0
+	instead of resuming here.  Use reset_ecs.  Print the prev_pc and
+	the current stop_pc in log message.  Clear trap_expected if the
+	thread advanced.  Don't pass currently_stepping to
+	do_target_resume.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (struct thread_info) <prev_pc>: Extend comment.
+	* infrun.c (struct execution_control_state): Move higher up in the
+	file.
+	(reset_ecs): New function.
+	(start_step_over): Now returns int.  Rewrite to use
+	keep_going_pass_signal instead of manually starting a displaced step.
+	(resume): Don't call set_running here.  If displaced stepping
+	can't start now, clear trap_expected.
+	(find_thread_needs_step_over): Delete function.
+	(proceed): Set up finish_thread_state_cleanup.  Call set_running.
+	If the current thread needs a step over, push it in the step-over
+	chain.  Don't set insert breakpoints nor call resume directly
+	here.  Instead rewrite to use start_step_over and
+	keep_going_pass_signal.
+	(finish_step_over): New function.
+	(handle_signal_stop): Call finish_step_over instead of
+	start_step_over.
+	(switch_back_to_stepped_thread): If the event thread needs another
+	step-over do that first.  Use start_step_over.
+	(keep_going_pass_signal): New function, factored out from ...
+	(keep_going): ... here.
+	(_initialize_infrun): Comment moved here.
+	* thread.c (set_running_thread): New function.
+	(set_running, finish_thread_state): Use set_running_thread.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (struct thread_info) <step_over_prev,
+	step_over_next>: New fields.
+	(thread_step_over_chain_enqueue, thread_step_over_chain_remove)
+	(thread_step_over_chain_next, thread_is_in_step_over_chain): New
+	declarations.
+	* infrun.c (struct displaced_step_request): Delete.
+	(struct displaced_step_inferior_state) <step_request_queue>:
+	Delete field.
+	(displaced_step_prepare): Assert that trap_expected is set.  Use
+	thread_step_over_chain_enqueue.  Split starting a new displaced
+	step to ...
+	(start_step_over): ... this new function.
+	(resume): Assert the thread isn't waiting for a step over already.
+	(proceed): Assert the thread isn't waiting for a step over
+	already.
+	(infrun_thread_stop_requested): Adjust to remove threads from the
+	embedded step-over chain.
+	(handle_inferior_event) <fork/vfork>: Call start_step_over after
+	displaced_step_fixup.
+	(handle_signal_stop): Call start_step_over after
+	displaced_step_fixup.
+	* infrun.h (step_over_queue_head): New declaration.
+	* thread.c (step_over_chain_enqueue, step_over_chain_remove)
+	(thread_step_over_chain_next, thread_is_in_step_over_chain)
+	(thread_step_over_chain_enqueue)
+	(thread_step_over_chain_remove): New functions.
+	(delete_thread_1): Remove thread from the step-over chain.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (thread_still_needs_step_over): Rename to ...
+	(thread_still_needs_step_over_bp): ... this.
+	(enum step_over_what): New.
+	(thread_still_needs_step_over): Reimplement.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_wait_as): If not waiting for a stop reply,
+	return TARGET_WAITKIND_NO_RESUMED.  If TARGET_WNOHANG is
+	requested, don't block waiting forever.
+
+2015-08-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (adjust_pc_after_break): Now takes thread_info and
+	waitstatus pointers instead of an ecs.  Adjust.
+	(handle_inferior_event): Adjust caller.
+
+2015-08-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event): If we get
+	TARGET_WAITKIND_SIGNALLED or TARGET_WAITKIND_EXITED in non-stop
+	mode, mark all threads of the exiting process as not-executing.
+	(normal_stop): If we get TARGET_WAITKIND_SIGNALLED or
+	TARGET_WAITKIND_EXITED in non-stop mode, finish all threads of the
+	exiting process, if inferior_ptid still points at a process.
+	* thread.c (struct current_thread_cleanup) <next>: New field.
+	(current_thread_cleanup_chain): New global.
+	(restore_current_thread_ptid_changed): New function.
+	(restore_current_thread_cleanup_dtor): Remove the cleanup from the
+	current_thread_cleanup_chain list.
+	(make_cleanup_restore_current_thread): Add the cleanup data to the
+	current_thread_cleanup_chain list.
+	(_initialize_thread): Install restore_current_thread_ptid_changed
+	as thread_ptid_changed observer.
+
+2015-08-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* dtrace-probe.c (dtrace_process_dof): Ignore the objfile's DOF
+	data if a DTRACE_DOF_SECT_TYPE_PROVIDER section is found to be
+	smaller than expected.
+
 2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* stack.c (get_frame_language): Moved ...

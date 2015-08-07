@@ -59,9 +59,9 @@ proc do_test {displaced command} {
 	gdb_test_no_output "set scheduler-locking off"
 
 	# Thread 2 is still stopped at a breakpoint that needs to be
-	# stepped over before proceeding thread 1.  However, right
-	# where the step-over lands there's another breakpoint
-	# installed, which should trap and be reported to the user.
+	# stepped over.  However, right where the step-over lands
+	# there's another breakpoint installed, which should trap and
+	# be reported to the user.
 	gdb_test "$command" "step-over here.*"
     }
 }

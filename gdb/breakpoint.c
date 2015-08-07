@@ -468,6 +468,8 @@ breakpoints_should_be_inserted_now (void)
     }
   else if (target_has_execution)
     {
+      struct thread_info *tp;
+
       if (always_inserted_mode)
 	{
 	  /* The user wants breakpoints inserted even if all threads
@@ -477,6 +479,13 @@ breakpoints_should_be_inserted_now (void)
 
       if (threads_are_executing ())
 	return 1;
+
+      /* Don't remove breakpoints yet if, even though all threads are
+	 stopped, we still have events to process.  */
+      ALL_NON_EXITED_THREADS (tp)
+	if (tp->resumed
+	    && tp->suspend.waitstatus_pending_p)
+	  return 1;
     }
   return 0;
 }
@@ -12321,7 +12330,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
       if (!found_object)
 	{
-	  if (removed && non_stop
+	  if (removed && target_is_non_stop_p ()
 	      && need_moribund_for_location_type (old_loc))
 	    {
 	      /* This location was removed from the target.  In

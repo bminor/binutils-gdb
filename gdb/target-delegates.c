@@ -1537,6 +1537,30 @@ debug_stop (struct target_ops *self, ptid_t arg1)
 }
 
 static void
+delegate_interrupt (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  self->to_interrupt (self, arg1);
+}
+
+static void
+tdefault_interrupt (struct target_ops *self, ptid_t arg1)
+{
+}
+
+static void
+debug_interrupt (struct target_ops *self, ptid_t arg1)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_interrupt (...)\n", debug_target.to_shortname);
+  debug_target.to_interrupt (&debug_target, arg1);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_interrupt (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
 delegate_rcmd (struct target_ops *self, const char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
@@ -1736,6 +1760,33 @@ debug_supports_non_stop (struct target_ops *self)
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_supports_non_stop (...)\n", debug_target.to_shortname);
   result = debug_target.to_supports_non_stop (&debug_target);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_supports_non_stop (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
+delegate_always_non_stop_p (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_always_non_stop_p (self);
+}
+
+static int
+tdefault_always_non_stop_p (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
+debug_always_non_stop_p (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_always_non_stop_p (...)\n", debug_target.to_shortname);
+  result = debug_target.to_always_non_stop_p (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_always_non_stop_p (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
@@ -3989,6 +4040,8 @@ install_delegators (struct target_ops *ops)
     ops->to_thread_name = delegate_thread_name;
   if (ops->to_stop == NULL)
     ops->to_stop = delegate_stop;
+  if (ops->to_interrupt == NULL)
+    ops->to_interrupt = delegate_interrupt;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_pid_to_exec_file == NULL)
@@ -4005,6 +4058,8 @@ install_delegators (struct target_ops *ops)
     ops->to_async = delegate_async;
   if (ops->to_supports_non_stop == NULL)
     ops->to_supports_non_stop = delegate_supports_non_stop;
+  if (ops->to_always_non_stop_p == NULL)
+    ops->to_always_non_stop_p = delegate_always_non_stop_p;
   if (ops->to_find_memory_regions == NULL)
     ops->to_find_memory_regions = delegate_find_memory_regions;
   if (ops->to_make_corefile_notes == NULL)
@@ -4224,6 +4279,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
   ops->to_stop = tdefault_stop;
+  ops->to_interrupt = tdefault_interrupt;
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_log_command = tdefault_log_command;
@@ -4232,6 +4288,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_is_async_p = tdefault_is_async_p;
   ops->to_async = tdefault_async;
   ops->to_supports_non_stop = tdefault_supports_non_stop;
+  ops->to_always_non_stop_p = tdefault_always_non_stop_p;
   ops->to_find_memory_regions = dummy_find_memory_regions;
   ops->to_make_corefile_notes = dummy_make_corefile_notes;
   ops->to_get_bookmark = tdefault_get_bookmark;
@@ -4372,6 +4429,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_extra_thread_info = debug_extra_thread_info;
   ops->to_thread_name = debug_thread_name;
   ops->to_stop = debug_stop;
+  ops->to_interrupt = debug_interrupt;
   ops->to_rcmd = debug_rcmd;
   ops->to_pid_to_exec_file = debug_pid_to_exec_file;
   ops->to_log_command = debug_log_command;
@@ -4380,6 +4438,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_is_async_p = debug_is_async_p;
   ops->to_async = debug_async;
   ops->to_supports_non_stop = debug_supports_non_stop;
+  ops->to_always_non_stop_p = debug_always_non_stop_p;
   ops->to_find_memory_regions = debug_find_memory_regions;
   ops->to_make_corefile_notes = debug_make_corefile_notes;
   ops->to_get_bookmark = debug_get_bookmark;
