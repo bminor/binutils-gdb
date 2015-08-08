@@ -7760,7 +7760,7 @@ static bfd_boolean
 is_double_a_single (bfd_int64_t v)
 {
   int exp = (int)((v >> 52) & 0x7FF);
-  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFF);
+  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFFULL);
 
   return (exp == 0 || exp == 0x7FF
 	  || (exp >= 1023 - 126 && exp <= 1023 + 127))
@@ -7775,7 +7775,7 @@ double_to_single (bfd_int64_t v)
 {
   int sign = (int) ((v >> 63) & 1l);
   int exp = (int) ((v >> 52) & 0x7FF);
-  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFF);
+  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFFULL);
 
   if (exp == 0x7FF)
     exp = 0xFF;

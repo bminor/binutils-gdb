@@ -1,3 +1,8 @@
+2015-08-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* tc-arm.c (double_to_single, is_double_a_single): Append ULL to
+	0xFFFFFFFFFFFFF to avoid errors on 32-bit hosts.
+
 2015-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* doc/c-aarch64.texi (.xword): Document directive.
