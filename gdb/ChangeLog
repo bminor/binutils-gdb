@@ -1,3 +1,9 @@
+2015-08-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* infrun.c (follow_fork, displaced_step_prepare, resume): Remove
+	trailing new-line at end of warning message.
+	(proceed): Add i18n marker to error messages.
+
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_nat_always_non_stop_p): Return 1.
