@@ -1,3 +1,7 @@
+2015-08-10  Robert Suchanek  <robert.suchanek@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add "sigrie".
+
 2015-08-07  Amit Pawar <Amit.Pawar@amd.com>
 
 	* i386-gen.c: Remove CpuFMA4 from CPU_ZNVER1_FLAGS.
