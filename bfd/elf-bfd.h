@@ -108,6 +108,15 @@ struct elf_link_virtual_table_entry
     struct elf_link_hash_entry *parent;
   };
 
+/* ELF symbol version.  */
+enum elf_symbol_version
+  {
+    unknown = 0,
+    unversioned,
+    versioned,
+    versioned_hidden
+  };
+
 /* ELF linker hash table entries.  */
 
 struct elf_link_hash_entry
@@ -178,8 +187,8 @@ struct elf_link_hash_entry
   unsigned int needs_plt : 1;
   /* Symbol appears in a non-ELF input file.  */
   unsigned int non_elf : 1;
-  /* Symbol should be marked as hidden in the version information.  */
-  unsigned int hidden : 1;
+  /* Symbol version information.  */
+  ENUM_BITFIELD (elf_symbol_version) versioned : 2;
   /* Symbol was forced to local scope due to a version script file.  */
   unsigned int forced_local : 1;
   /* Symbol was forced to be dynamic due to a version script file.  */
