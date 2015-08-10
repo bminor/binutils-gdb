@@ -1,3 +1,19 @@
+2015-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_symbol_version): New enum.
+	(elf_link_hash_entry): Replace hidden with versioned.
+	* elflink.c (_bfd_elf_merge_symbol): Don't look for symbol
+	version if the symbol is unversioned.  Initialize versioned.
+	(_bfd_elf_add_default_symbol): Don't look for symbol version
+	if the symbol is unversioned or hidden.  Initialize versioned.
+	(elf_collect_hash_codes): Don't look for symbol version if the
+	symbol is unversioned.
+	(elf_collect_gnu_hash_codes): Likewise.
+	(bfd_elf_gc_mark_dynamic_ref_symbol): Likewise.
+	(_bfd_elf_link_hash_copy_indirect): Check versioned instead of
+	hidden.
+	(elf_link_output_extsym): Likewise.
+
 2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18785
@@ -27,7 +43,7 @@
 	(elf_link_output_extsym): Bind a symbol locally when linking
 	executable if it is locally defined, hidden versioned, not
 	referenced by shared library and not exported.  Turn on
-	VERSYM_HIDDEN only if the hidden vesioned symbol is defined
+	VERSYM_HIDDEN only if the hidden versioned symbol is defined
 	locally.
 
 2015-08-05  Nick Clifton  <nickc@redhat.com>

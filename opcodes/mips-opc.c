@@ -1858,6 +1858,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"shfl.repa.qh",	"X,Y,Z",	0x7b20001f, 0xffe0003f, WR_1|RD_2|RD_3|FP_D,	0,		0,		MX,	0 },
 {"shfl.repb.qh",	"X,Y,Z",	0x7ba0001f, 0xffe0003f, WR_1|RD_2|RD_3|FP_D,	0,		0,		MX,	0 },
 {"shfl.upsl.ob",	"X,Y,Z",	0x78c0001f, 0xffe0003f, WR_1|RD_2|RD_3|FP_D,	0,		SB1,		MX,	0 },
+{"sigrie",		"u",		0x41700000, 0xffff0000,	TRAP,			0,		I37,		0,	0 },
 {"sle",			"d,v,t",	0,    (int) M_SLE,	INSN_MACRO,		0,		I1,		0,	0 },
 {"sle",			"d,v,I",	0,    (int) M_SLE_I,	INSN_MACRO,		0,		I1,		0,	0 },
 {"sle",			"S,T",		0x46a0003e, 0xffe007ff,	RD_1|RD_2|WR_CC|FP_D,	0,		IL2E,		0,	0 },
