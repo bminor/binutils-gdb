@@ -5,7 +5,7 @@
 	* symtab.c (make_file_symbol_completion_list_1): Renamed from
 	make_file_symbol_completion_list and made static.
 	(make_file_symbol_completion_list): New function.
-	
+
 2015-08-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* infrun.c (follow_fork, displaced_step_prepare, resume): Remove
