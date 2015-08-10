@@ -777,6 +777,88 @@ gdb_test_multiple "" "$test" {
 }
 
 #
+# Tests for the location completer
+#
+
+# Turn off pending breakpoint support so that we don't get queried
+# all the time.
+gdb_test_no_output "set breakpoint pending off"
+
+set subsrc [string range $srcfile 0 [expr {[string length $srcfile] - 3}]]
+set test "tab complete break $subsrc"
+send_gdb "break $subsrc\t\t"
+gdb_test_multiple "" $test {
+    -re "break\.c.*break1\.c.*$gdb_prompt " {
+	send_gdb "1\t\n"
+	gdb_test_multiple "" $test {
+	    -re ".*Function \"$srcfile2\" not defined\..*$gdb_prompt " {
+		pass $test
+	    }
+	    -re "$gdb_prompt p$" {
+		fail $test
+	    }
+	}
+    }
+
+    -re "$gdb_prompt p$" {
+	fail $test
+    }
+}
+
+gdb_test "complete break $subsrc" "break\.c.*break1\.c"
+
+set test "tab complete break need"
+send_gdb "break need\t"
+gdb_test_multiple "" $test {
+    -re "break need_malloc " {
+	send_gdb "\n"
+	gdb_test_multiple "" $test {
+	    -re ".*Breakpoint.*at .*/$srcfile, line .*$gdb_prompt " {
+		pass $test
+		gdb_test_no_output "delete breakpoint \$bpnum" \
+		    "delete breakpoint for $test"
+	    }
+	    -re "$gdb_prompt p$" {
+		fail $test
+	    }
+	}
+    }
+    -re "$gdb_prompt p$" {
+	fail $test
+    }
+}
+
+gdb_test "complete break need" "need_malloc"
+
+# gdb/17960
+# Enabling max-completions is necessary to trigger the bug.
+gdb_test_no_output "set max-completions 10"
+set test "tab complete break $srcfile:ma"
+send_gdb "break $srcfile:ma\t"
+gdb_test_multiple "" $test {
+    -re "break $srcfile:main " {
+	send_gdb "\n"
+	gdb_test_multiple "" $test {
+	    -re ".*Breakpoint.*at .*/$srcfile, line .*$gdb_prompt " {
+		pass $test
+		gdb_test_no_output "delete breakpoint \$bpnum" \
+		    "delete breakpoint for $test"
+	    }
+	    -re "$gdb_prompt p$" {
+		fail $test
+	    }
+	}
+    }
+    -re "$gdb_prompt p$" {
+	fail $test
+    }
+}
+
+gdb_test "complete break $srcfile:ma" "break\.c:main"
+
+# End of gdb/17960 testing.
+
+#
 # Completion limiting.
 #
 
