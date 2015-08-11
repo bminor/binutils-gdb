@@ -5802,6 +5802,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
       if (r != bfd_reloc_ok && r != bfd_reloc_continue)
 	{
+	  bfd_reloc_code_real_type real_r_type
+	    = elfNN_aarch64_bfd_reloc_from_type (r_type);
+
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
@@ -5809,6 +5812,16 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		  (info, (h ? &h->root : NULL), name, howto->name, (bfd_vma) 0,
 		   input_bfd, input_section, rel->r_offset))
 		return FALSE;
+	      if (real_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+		  || real_r_type == BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14)
+		{
+		  (*info->callbacks->warning)
+		    (info,
+		     _("Too many GOT entries for -fpic, "
+		       "please recompile with -fPIC"),
+		     name, input_bfd, input_section, rel->r_offset);
+		  return FALSE;
+		}
 	      break;
 
 	    case bfd_reloc_undefined:

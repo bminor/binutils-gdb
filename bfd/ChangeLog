@@ -1,5 +1,10 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Improve warning
+	message for R_AARCH64_LD64_GOTPAGE_LO15/R_AARCH64_LD32_GOTPAGE_LO14.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): New.
 	(aarch64_can_relax_tls): Use the new IS_AARCH64_TLS_RELAX_RELOC.
 
